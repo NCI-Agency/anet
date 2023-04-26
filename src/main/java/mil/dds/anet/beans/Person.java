@@ -30,19 +30,12 @@ public class Person extends AbstractCustomizableAnetBean
   private static final Comparator<Person> COMPARATOR =
       Comparator.comparing(Person::getName).thenComparing(Person::getUuid);
 
-  public static enum Role {
-    ADVISOR, PRINCIPAL
-  }
-
   @GraphQLQuery
   @GraphQLInputField
   private String name;
   @GraphQLQuery
   @GraphQLInputField
   private Status status = Status.ACTIVE;
-  @GraphQLQuery
-  @GraphQLInputField
-  private Role role;
   @GraphQLQuery
   @GraphQLInputField
   private Boolean pendingVerification = false;
@@ -114,15 +107,6 @@ public class Person extends AbstractCustomizableAnetBean
   @Override
   public void setStatus(Status status) {
     this.status = status;
-  }
-
-  @AllowUnverifiedUsers
-  public Role getRole() {
-    return role;
-  }
-
-  public void setRole(Role role) {
-    this.role = role;
   }
 
   @AllowUnverifiedUsers
@@ -347,7 +331,6 @@ public class Person extends AbstractCustomizableAnetBean
     final Person other = (Person) o;
     return super.equals(o) && Objects.equals(uuid, other.getUuid())
         && Objects.equals(other.getName(), name) && Objects.equals(other.getStatus(), status)
-        && Objects.equals(other.getRole(), role)
         && Objects.equals(other.getEmailAddress(), emailAddress)
         && Objects.equals(other.getPhoneNumber(), phoneNumber)
         && Objects.equals(other.getRank(), rank) && Objects.equals(other.getBiography(), biography)
@@ -364,7 +347,7 @@ public class Person extends AbstractCustomizableAnetBean
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), uuid, name, status, role, emailAddress, phoneNumber, rank,
+    return Objects.hash(super.hashCode(), uuid, name, status, emailAddress, phoneNumber, rank,
         biography, domainUsername, openIdSubject, pendingVerification, avatarUuid, code, createdAt,
         updatedAt);
   }

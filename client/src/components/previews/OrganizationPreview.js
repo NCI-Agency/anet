@@ -31,7 +31,6 @@ const GQL_ORGANIZATION_FIELDS = `
     shortName
     longName
     identificationCode
-    type
   }
 `
 const GQL_PERSON_FIELDS = `
@@ -39,7 +38,6 @@ const GQL_PERSON_FIELDS = `
     uuid
     name
     rank
-    role
     avatarUuid
     status
   }
@@ -133,12 +131,6 @@ const OrganizationPreview = ({ className, uuid }) => {
           wrappedComponent={PreviewField}
           dictProps={Settings.fields.organization.longName}
           value={organization.longName}
-        />
-
-        <DictionaryField
-          wrappedComponent={PreviewField}
-          dictProps={Settings.fields.organization.type}
-          value={Organization.humanNameOfType(organization.type)}
         />
 
         {organization?.parentOrg?.uuid && (

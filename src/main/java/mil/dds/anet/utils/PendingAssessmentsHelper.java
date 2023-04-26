@@ -221,7 +221,8 @@ public class PendingAssessmentsHelper {
   }
 
   // Dictionary lookup keys we use
-  public static final String PRINCIPAL_PERSON_ASSESSMENTS = "fields.principal.person.assessments";
+  // FIXME: should only apply to interlocutors, but how do we know that?
+  public static final String INTERLOCUTOR_PERSON_ASSESSMENTS = "fields.regular.person.assessments";
   public static final String TASK_SUB_LEVEL_ASSESSMENTS = "fields.task.subLevel.assessments";
   public static final String TASK_TOP_LEVEL_ASSESSMENTS = "fields.task.topLevel.assessments";
   public static final String ASSESSMENT_RECURRENCE = "recurrence";
@@ -250,7 +251,7 @@ public class PendingAssessmentsHelper {
 
     // Look up periodic assessment definitions for people in the dictionary
     final Set<Recurrence> positionAssessmentRecurrence =
-        getAssessmentRecurrence(recurrenceSet, PRINCIPAL_PERSON_ASSESSMENTS);
+        getAssessmentRecurrence(recurrenceSet, INTERLOCUTOR_PERSON_ASSESSMENTS);
     logger.trace("positionAssessmentRecurrence={}", positionAssessmentRecurrence);
 
     // Look up periodic assessment definitions for all tasks
@@ -427,7 +428,7 @@ public class PendingAssessmentsHelper {
       psq.setHasCounterparts(Boolean.TRUE);
     }
     psq.setType(
-        ImmutableList.of(PositionType.ADMINISTRATOR, PositionType.SUPERUSER, PositionType.ADVISOR));
+        ImmutableList.of(PositionType.ADMINISTRATOR, PositionType.SUPERUSER, PositionType.REGULAR));
     return positionDao.search(psq).getList();
   }
 

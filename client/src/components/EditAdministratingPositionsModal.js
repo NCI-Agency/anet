@@ -38,8 +38,8 @@ const EditAdministratingPositionsModal = ({
     []
 
   const positionsFilters = {
-    allAdvisorPositions: {
-      label: "All advisor positions",
+    allSuperuserPositions: {
+      label: "All superuser positions",
       queryVars: {
         status: Model.STATUS.ACTIVE,
         type: [Position.TYPE.SUPERUSER],
@@ -51,10 +51,7 @@ const EditAdministratingPositionsModal = ({
   return (
     <Formik enableReinitialize onSubmit={onSubmit} initialValues={organization}>
       {({ setFieldValue, values, submitForm, setFieldTouched }) => {
-        const isAdvisorOrg = values.type === Organization.TYPE.ADVISOR_ORG
-        const orgSettings = isAdvisorOrg
-          ? Settings.fields.advisor.org
-          : Settings.fields.principal.org
+        const orgSettings = Settings.fields.regular.org
         return (
           <Modal
             centered

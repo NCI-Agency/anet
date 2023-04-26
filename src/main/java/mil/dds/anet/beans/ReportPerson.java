@@ -15,11 +15,15 @@ public class ReportPerson extends Person {
   @GraphQLQuery
   @GraphQLInputField
   boolean attendee;
+  @GraphQLQuery
+  @GraphQLInputField
+  boolean interlocutor;
 
   public ReportPerson() {
     this.primary = false; // Default
     this.author = false;
     this.attendee = true;
+    this.interlocutor = true;
   }
 
   public boolean isPrimary() {
@@ -46,6 +50,14 @@ public class ReportPerson extends Person {
     this.attendee = attendee;
   }
 
+  public boolean isInterlocutor() {
+    return interlocutor;
+  }
+
+  public void setInterlocutor(boolean interlocutor) {
+    this.interlocutor = interlocutor;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (!(o instanceof ReportPerson)) {
@@ -53,12 +65,13 @@ public class ReportPerson extends Person {
     }
     ReportPerson rp = (ReportPerson) o;
     return super.equals(o) && Objects.equals(rp.isPrimary(), primary)
-        && Objects.equals(rp.isAuthor(), author) && Objects.equals(rp.isAttendee(), attendee);
+        && Objects.equals(rp.isAuthor(), author) && Objects.equals(rp.isAttendee(), attendee)
+        && Objects.equals(rp.isInterlocutor(), interlocutor);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), primary, author, attendee);
+    return Objects.hash(super.hashCode(), primary, author, attendee, interlocutor);
   }
 
 }

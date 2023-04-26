@@ -533,7 +533,7 @@ properties:
   fields:
     type: object
     additionalProperties: false
-    required: [task, attachment, report, person, position, organization, advisor, principal, superuser, administrator]
+    required: [task, attachment, report, person, position, organization, advisor, interlocutor, regular, superuser, administrator]
     properties:
 
       task:
@@ -867,6 +867,54 @@ properties:
       advisor:
         type: object
         additionalProperties: false
+        required: [person, org]
+        properties:
+          person:
+            type: object
+            additionalProperties: false
+            required: [name]
+            properties:
+              name:
+                type: string
+                title: The name of this field
+                description: Used in the UI where an advisor is shown.
+          org:
+            type: object
+            additionalProperties: false
+            required: [name]
+            properties:
+              name:
+                type: string
+                title: The name of this field
+                description: Used in the UI where an advisor organization is shown.
+
+      interlocutor:
+        type: object
+        additionalProperties: false
+        required: [person, org]
+        properties:
+          person:
+            type: object
+            additionalProperties: false
+            required: [name]
+            properties:
+              name:
+                type: string
+                title: The name of this field
+                description: Used in the UI where an interlocutor is shown.
+          org:
+            type: object
+            additionalProperties: false
+            required: [name]
+            properties:
+              name:
+                type: string
+                title: The name of this field
+                description: Used in the UI where an interlocutor organization is shown.
+
+      regular:
+        type: object
+        additionalProperties: false
         required: [person, position, org]
         properties:
 
@@ -878,7 +926,7 @@ properties:
               name:
                 type: string
                 title: The name of this field
-                description: Used in the UI where a person inside an advisor organization is shown.
+                description: Used in the UI where a person inside an organization is shown.
               countries:
                 type: array
                 uniqueItems: true
@@ -886,7 +934,7 @@ properties:
                 items:
                   type: string
                   title: The list of possible countries
-                  description: Used in the UI where a country can be selected for a person inside an advisor organization.
+                  description: Used in the UI where a country can be selected for a person inside an organization.
               showPageOrderedFields:
                 type: array
                 uniqueItems: true
@@ -918,11 +966,11 @@ properties:
               name:
                 type: string
                 title: The name of this field
-                description: Used in the UI where a position inside an advisor organization is shown.
+                description: Used in the UI where a position inside an organization is shown.
               type:
                 type: string
                 title: The permissions type of this field
-                description: Used in the UI for the type/permissions of an advisor position.
+                description: Used in the UI for the type/permissions of a position.
               location:
                 type: object
                 additionalProperties: false
@@ -946,110 +994,11 @@ properties:
               name:
                 type: string
                 title: The name of this field
-                description: Used in the UI where an advisor organization is shown.
+                description: Used in the UI where an organization is shown.
               allOrgName:
                 type: string
-                title: The name used to represent 'all advisor organizations'
-                description: Used in the UI to refer to all advisor organizations collectively.
-              location:
-                type: object
-                additionalProperties: false
-                required: [filter]
-                properties:
-                  filter:
-                    type: array
-                    uniqueItems: true
-                    items:
-                      type: string
-                      enum:
-                        [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, POINT_LOCATION, ADVISOR_LOCATION, PRINCIPAL_LOCATION]
-              administratingPositions:
-                "$ref": "#/$defs/inputField"
-
-      principal:
-        type: object
-        additionalProperties: false
-        required: [person, position, org]
-        properties:
-          person:
-            type: object
-            additionalProperties: false
-            required: [name, countries, numberOfFieldsInLeftColumn, showPageOrderedFields]
-            properties:
-              name:
-                type: string
-                title: The name of this field
-                description: Used in the UI where a person inside a principal organization is shown.
-              countries:
-                type: array
-                uniqueItems: true
-                minItems: 1
-                items:
-                  type: string
-                  title: The list of possible countries
-                  description: Used in the UI where a country can be selected for a person inside a principal organization.
-              showPageOrderedFields:
-                type: array
-                uniqueItems: true
-                minItems: 1
-                items:
-                  type: string
-                  description: Ordered fields to show in Person Page in the Person info section
-              showAsFullWidthFields:
-                type: array
-                uniqueItems: true
-                minItems: 1
-                items:
-                  type: string
-                  title: List of fields spanning over page width
-                  description: Fields from the ordered fields, which should span over 2 columns
-              numberOfFieldsInLeftColumn:
-                type: number
-                description: Used for dividing fields into 2 columns, make sure the columns are balanced
-              assessments:
-                type: object
-                additionalProperties:
-                  "$ref": "#/$defs/assessmentDef"
-
-          position:
-            type: object
-            additionalProperties: false
-            required: [name, type, location]
-            properties:
-              name:
-                type: string
-                title: The name of this field
-                description: Used in the UI where a position inside a principal organization is shown.
-              type:
-                type: string
-                title: The permissions type of this field
-                description: Used in the UI for the type/permissions of a principal position.
-              location:
-                type: object
-                additionalProperties: false
-                required: [filter]
-                properties:
-                  filter:
-                    type: array
-                    uniqueItems: true
-                    items:
-                      type: string
-                      enum:
-                        [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, POINT_LOCATION, ADVISOR_LOCATION, PRINCIPAL_LOCATION]
-
-          org:
-            type: object
-            additionalProperties: false
-            required: [name, allOrgName, location, administratingPositions]
-            properties:
-              name:
-                type: string
-                title: The name of this field
-                description: Used in the UI where a principal organization is shown.
-              allOrgName:
-                type: string
-                title: The name used to represent 'all principal organizations'
-                description: Used in the UI to refer to all principal organizations collectively.
+                title: The name used to represent 'all organizations'
+                description: Used in the UI to refer to all organizations collectively.
               location:
                 type: object
                 additionalProperties: false

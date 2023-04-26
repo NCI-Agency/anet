@@ -24,7 +24,6 @@ const GQL_GET_ORGANIZATION = gql`
       shortName
       longName
       identificationCode
-      type
     }
   }
 `
@@ -92,9 +91,7 @@ const PositionNewConditional = ({
   if (data) {
     const organization = new Organization(data.organization)
     position.organization = organization
-    position.type = organization.isAdvisorOrg()
-      ? Position.TYPE.ADVISOR
-      : Position.TYPE.PRINCIPAL
+    position.type = Position.TYPE.REGULAR
   }
 
   // mutates the object

@@ -34,6 +34,7 @@ const ReportNew = ({ pageDispatchers }) => {
     person.primary = true
     person.author = true
     person.attendee = true
+    person.interlocutor = false
     report.reportPeople.push(person)
   }
   const reportInitialValues = Object.assign(

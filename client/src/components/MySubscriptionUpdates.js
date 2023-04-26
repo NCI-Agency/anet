@@ -41,7 +41,6 @@ const GQL_GET_MY_SUBSCRIPTION_UPDATES = gql`
           ... on Person {
             name
             rank
-            role
             avatarUuid
           }
           ... on Position {
@@ -75,7 +74,6 @@ const GQL_GET_MY_SUBSCRIPTION_UPDATES = gql`
             ... on Person {
               name
               rank
-              role
               avatarUuid
             }
             ... on Position {

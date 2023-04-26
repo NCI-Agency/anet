@@ -20,7 +20,6 @@ const GQL_GET_SELF = gql`
       uuid
       name
       rank
-      role
       status
       emailAddress
       phoneNumber

@@ -54,11 +54,6 @@ const OrganizationTasks = ({ pageDispatchers, queryParams, organization }) => {
   const tasks = paginatedTasks ? paginatedTasks.list : []
   const isAdminUser = currentUser && currentUser.isAdmin()
   const taskShortLabel = Settings.fields.task.shortLabel
-
-  if (!organization.isAdvisorOrg()) {
-    return <div />
-  }
-
   const { pageSize, totalCount } = paginatedTasks
 
   return (

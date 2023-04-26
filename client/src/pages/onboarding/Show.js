@@ -29,7 +29,6 @@ const GQL_GET_SELF = gql`
       uuid
       name
       rank
-      role
       status
       emailAddress
       phoneNumber
@@ -174,7 +173,6 @@ const OnboardingShow = ({ pageDispatchers }) => {
         moment(person.endOfTourDate).format(
           Settings.dateFormats.forms.displayShort.date
         ),
-      role: Person.humanNameOfRole(person.role),
       status: Person.humanNameOfStatus(person.status)
     }
     return person.getNormalFieldsOrdered().reduce((accum, key) => {

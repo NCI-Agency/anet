@@ -61,7 +61,7 @@ export default class Report extends Model {
 
   static CANCELLATION_REASON = {
     CANCELLED_BY_ADVISOR: "CANCELLED_BY_ADVISOR",
-    CANCELLED_BY_PRINCIPAL: "CANCELLED_BY_PRINCIPAL",
+    CANCELLED_BY_INTERLOCUTOR: "CANCELLED_BY_INTERLOCUTOR",
     CANCELLED_DUE_TO_TRANSPORTATION: "CANCELLED_DUE_TO_TRANSPORTATION",
     CANCELLED_DUE_TO_FORCE_PROTECTION: "CANCELLED_DUE_TO_FORCE_PROTECTION",
     CANCELLED_DUE_TO_ROUTES: "CANCELLED_DUE_TO_ROUTES",
@@ -192,7 +192,7 @@ export default class Report extends Model {
               )
         )
         .default([]),
-      principalOrg: yup.object().nullable().default({}),
+      interlocutorOrg: yup.object().nullable().default({}),
       advisorOrg: yup.object().nullable().default({}),
       tasks: yup
         .array()
@@ -303,7 +303,7 @@ export default class Report extends Model {
         (reportPeople, testContext) => {
           const message = Report.checkPrimaryAttendee(
             reportPeople,
-            Person.ROLE.ADVISOR,
+            false,
             Settings.fields.report.reportPeople?.optionalPrimaryAdvisor,
             asWarning
           )
@@ -311,12 +311,12 @@ export default class Report extends Model {
         }
       )
       .test(
-        "primary-principal",
-        "primary principal error",
+        "primary-interlocutor",
+        "primary interlocutor error",
         (reportPeople, testContext) => {
           const message = Report.checkPrimaryAttendee(
             reportPeople,
-            Person.ROLE.PRINCIPAL,
+            true,
             Settings.fields.report.reportPeople?.optionalPrimaryPrincipal,
             asWarning
           )
@@ -325,7 +325,7 @@ export default class Report extends Model {
       )
   }
 
-  static autocompleteQuery = "uuid, intent, authors { uuid, name, rank, role }"
+  static autocompleteQuery = "uuid intent authors { uuid name rank }"
 
   constructor(props) {
     super(Model.fillObject(props, Report.yupSchema))
@@ -412,9 +412,12 @@ export default class Report extends Model {
     return this.intent || "None"
   }
 
-  static checkPrimaryAttendee(reportPeople, role, optional, asWarning) {
-    const primaryAttendee = Report.getPrimaryAttendee(reportPeople, role)
-    const roleName = Person.humanNameOfRole(role)
+  static checkPrimaryAttendee(reportPeople, interlocutor, optional, asWarning) {
+    const primaryAttendee = Report.getPrimaryAttendee(
+      reportPeople,
+      interlocutor
+    )
+    const roleName = interlocutor ? "interlocutor" : "advisor"
     if (!primaryAttendee) {
       if ((optional && asWarning) || (!optional && !asWarning)) {
         return `No primary ${roleName} has been provided for the Engagement`
@@ -455,9 +458,9 @@ export default class Report extends Model {
     }
   }
 
-  static getPrimaryAttendee(reportPeople, role) {
+  static getPrimaryAttendee(reportPeople, interlocutor) {
     return reportPeople?.find(
-      el => el.role === role && el.primary && el.attendee
+      el => el.interlocutor === interlocutor && el.primary && el.attendee
     )
   }
 

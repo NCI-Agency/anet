@@ -69,7 +69,6 @@ const GQL_GET_REPORT = gql`
         uuid
         name
         rank
-        role
         avatarUuid
         position {
           uuid
@@ -88,7 +87,6 @@ const GQL_GET_REPORT = gql`
                   uuid
                   name
                   rank
-                  role
                   avatarUuid
                 }
               }
@@ -106,6 +104,7 @@ const GQL_GET_REPORT = gql`
         primary
         author
         attendee
+        interlocutor
         endOfTourDate
         position {
           uuid
@@ -130,14 +129,12 @@ const GQL_GET_REPORT = gql`
         uuid
         name
         rank
-        role
         avatarUuid
       }
-      primaryPrincipal {
+      primaryInterlocutor {
         uuid
         name
         rank
-        role
         avatarUuid
       }
       tasks {
@@ -172,23 +169,20 @@ const GQL_GET_REPORT = gql`
           uuid
           name
           rank
-          role
           avatarUuid
         }
       }
-      principalOrg {
+      interlocutorOrg {
         uuid
         shortName
         longName
         identificationCode
-        type
       }
       advisorOrg {
         uuid
         shortName
         longName
         identificationCode
-        type
       }
       workflow {
         type
@@ -203,7 +197,6 @@ const GQL_GET_REPORT = gql`
               uuid
               name
               rank
-              role
               avatarUuid
             }
           }
@@ -212,7 +205,6 @@ const GQL_GET_REPORT = gql`
           uuid
           name
           rank
-          role
           avatarUuid
         }
       }
@@ -359,15 +351,15 @@ const CompactReportView = ({ pageDispatchers }) => {
                   className="reportField"
                 />
                 <CompactRow
-                  id="principals"
-                  label="Principals"
-                  content={getAttendeesAndAssessments(Person.ROLE.PRINCIPAL)}
+                  id="interlocutors"
+                  label="Interlocutors"
+                  content={getAttendeesAndAssessments(true)}
                   className="reportField"
                 />
                 <CompactRow
                   id="advisors"
                   label="Advisors"
-                  content={getAttendeesAndAssessments(Person.ROLE.ADVISOR)}
+                  content={getAttendeesAndAssessments(false)}
                   className="reportField"
                 />
                 <CompactRow
@@ -434,10 +426,10 @@ const CompactReportView = ({ pageDispatchers }) => {
     return (
       <>
         Engagement
-        {report.primaryPrincipal && (
+        {report.primaryInterlocutor && (
           <>
             {" of "}
-            <LinkTo modelType="Person" model={report.primaryPrincipal} />
+            <LinkTo modelType="Person" model={report.primaryInterlocutor} />
           </>
         )}{" "}
         by <LinkTo modelType="Person" model={report.primaryAdvisor} />
@@ -498,8 +490,10 @@ const CompactReportView = ({ pageDispatchers }) => {
     )
   }
 
-  function getAttendeesAndAssessments(role) {
-    const attendees = report.attendees.filter(at => at.role === role)
+  function getAttendeesAndAssessments(interlocutor) {
+    const attendees = report.attendees.filter(
+      at => at.interlocutor === interlocutor
+    )
     return optionalFields.assessments.active ? (
       <InstantAssessmentsContainerField
         entityType={Person}

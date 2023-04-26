@@ -3,16 +3,12 @@ package mil.dds.anet.beans.search;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import java.time.Instant;
-import mil.dds.anet.beans.Person.Role;
 
 public class PersonSearchQuery extends SubscribableObjectSearchQuery<PersonSearchSortBy> {
 
   @GraphQLQuery
   @GraphQLInputField
   String orgUuid;
-  @GraphQLQuery
-  @GraphQLInputField
-  Role role;
   @GraphQLQuery
   @GraphQLInputField
   RecurseStrategy orgRecurseStrategy;
@@ -61,14 +57,6 @@ public class PersonSearchQuery extends SubscribableObjectSearchQuery<PersonSearc
 
   public void setOrgUuid(String orgUuid) {
     this.orgUuid = orgUuid;
-  }
-
-  public Role getRole() {
-    return role;
-  }
-
-  public void setRole(Role role) {
-    this.role = role;
   }
 
   public RecurseStrategy getOrgRecurseStrategy() {

@@ -27,7 +27,7 @@ import RichTextEditor from "components/RichTextEditor"
 import { FastField, Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
-import { Location, Organization, Position, Task } from "models"
+import { Location, Organization, Task } from "models"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
@@ -76,18 +76,6 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
       label: "Inactive"
     }
   ]
-  const typeButtons = [
-    {
-      id: "typeAdvisorButton",
-      value: Organization.TYPE.ADVISOR_ORG,
-      label: Settings.fields.advisor.org.name
-    },
-    {
-      id: "typePrincipalButton",
-      value: Organization.TYPE.PRINCIPAL_ORG,
-      label: Settings.fields.principal.org.name
-    }
-  ]
 
   return (
     <Formik
@@ -106,7 +94,6 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
         submitForm
       }) => {
         const isAdmin = currentUser && currentUser.isAdmin()
-        const isAdvisorOrg = values.type === Organization.TYPE.ADVISOR_ORG
         const canAdministrateParentOrg =
           _isEmpty(values.parentOrg) ||
           (currentUser &&
@@ -175,14 +162,9 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
         }
 
         const approversFilters = {
-          allAdvisorPositions: {
-            label: "All advisor positions",
+          allPositions: {
+            label: "All positions",
             queryVars: {
-              type: [
-                Position.TYPE.ADVISOR,
-                Position.TYPE.SUPERUSER,
-                Position.TYPE.ADMINISTRATOR
-              ],
               matchPersonName: true
             }
           }
@@ -217,13 +199,6 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                       dictProps={Settings.fields.organization.longName}
                       name="longName"
                       component={FieldHelper.ReadonlyField}
-                    />
-                    <DictionaryField
-                      wrappedComponent={FastField}
-                      dictProps={Settings.fields.organization.type}
-                      name="type"
-                      component={FieldHelper.ReadonlyField}
-                      humanValue={Organization.humanNameOfType}
                     />
                     <DictionaryField
                       wrappedComponent={FastField}
@@ -296,15 +271,6 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                       dictProps={Settings.fields.organization.longName}
                       name="longName"
                       component={FieldHelper.InputField}
-                    />
-                    <DictionaryField
-                      wrappedComponent={FastField}
-                      dictProps={Settings.fields.organization.type}
-                      name="type"
-                      component={FieldHelper.RadioButtonToggleGroupField}
-                      buttons={typeButtons}
-                      onChange={value => setFieldValue("type", value)}
-                      disabled={!isAdmin}
                     />
                     <DictionaryField
                       wrappedComponent={Field}
@@ -426,77 +392,73 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                 )}
               </Fieldset>
 
-              {isAdvisorOrg && (
-                <div>
-                  <ApprovalsDefinition
-                    fieldName="planningApprovalSteps"
-                    values={values}
-                    title="Engagement planning approval process"
-                    addButtonLabel="Add a Planning Approval Step"
-                    setFieldTouched={setFieldTouched}
-                    setFieldValue={setFieldValue}
-                    approversFilters={approversFilters}
-                  />
-                </div>
-              )}
+              <div>
+                <ApprovalsDefinition
+                  fieldName="planningApprovalSteps"
+                  values={values}
+                  title="Engagement planning approval process"
+                  addButtonLabel="Add a Planning Approval Step"
+                  setFieldTouched={setFieldTouched}
+                  setFieldValue={setFieldValue}
+                  approversFilters={approversFilters}
+                />
+              </div>
 
-              {isAdvisorOrg && (
-                <div>
-                  <ApprovalsDefinition
-                    fieldName="approvalSteps"
-                    values={values}
-                    title="Report publication approval process"
-                    addButtonLabel="Add a Publication Approval Step"
-                    setFieldTouched={setFieldTouched}
-                    setFieldValue={setFieldValue}
-                    approversFilters={approversFilters}
-                  />
+              <div>
+                <ApprovalsDefinition
+                  fieldName="approvalSteps"
+                  values={values}
+                  title="Report publication approval process"
+                  addButtonLabel="Add a Publication Approval Step"
+                  setFieldTouched={setFieldTouched}
+                  setFieldValue={setFieldValue}
+                  approversFilters={approversFilters}
+                />
 
-                  {Organization.isTaskEnabled(values.shortName) && (
-                    <Fieldset
-                      title={Settings.fields.task.longLabel}
-                      className="tasks-selector"
-                    >
-                      {!isAdmin ? (
-                        <NoPaginationTaskTable tasks={values.tasks} />
-                      ) : (
-                        <FastField
-                          name="tasks"
-                          label={Settings.fields.task.shortLabel}
-                          component={FieldHelper.SpecialField}
-                          onChange={value => {
-                            // validation will be done by setFieldValue
-                            setFieldTouched("tasks", true, false) // onBlur doesn't work when selecting an option
-                            setFieldValue("tasks", value)
-                          }}
-                          widget={
-                            <AdvancedMultiSelect
-                              fieldName="tasks"
-                              placeholder={`Search for ${pluralize(
-                                Settings.fields.task.shortLabel
-                              )}...`}
-                              value={values.tasks}
-                              renderSelected={
-                                <NoPaginationTaskTable
-                                  tasks={values.tasks}
-                                  showDelete
-                                />
-                              }
-                              overlayColumns={["Name"]}
-                              overlayRenderRow={TaskOverlayRow}
-                              filterDefs={tasksFilters}
-                              objectType={Task}
-                              queryParams={{ status: Model.STATUS.ACTIVE }}
-                              fields={Task.autocompleteQuery}
-                              addon={TASKS_ICON}
-                            />
-                          }
-                        />
-                      )}
-                    </Fieldset>
-                  )}
-                </div>
-              )}
+                {Organization.isTaskEnabled(values.shortName) && (
+                  <Fieldset
+                    title={Settings.fields.task.longLabel}
+                    className="tasks-selector"
+                  >
+                    {!isAdmin ? (
+                      <NoPaginationTaskTable tasks={values.tasks} />
+                    ) : (
+                      <FastField
+                        name="tasks"
+                        label={Settings.fields.task.shortLabel}
+                        component={FieldHelper.SpecialField}
+                        onChange={value => {
+                          // validation will be done by setFieldValue
+                          setFieldTouched("tasks", true, false) // onBlur doesn't work when selecting an option
+                          setFieldValue("tasks", value)
+                        }}
+                        widget={
+                          <AdvancedMultiSelect
+                            fieldName="tasks"
+                            placeholder={`Search for ${pluralize(
+                              Settings.fields.task.shortLabel
+                            )}...`}
+                            value={values.tasks}
+                            renderSelected={
+                              <NoPaginationTaskTable
+                                tasks={values.tasks}
+                                showDelete
+                              />
+                            }
+                            overlayColumns={["Name"]}
+                            overlayRenderRow={TaskOverlayRow}
+                            filterDefs={tasksFilters}
+                            objectType={Task}
+                            queryParams={{ status: Model.STATUS.ACTIVE }}
+                            fields={Task.autocompleteQuery}
+                            addon={TASKS_ICON}
+                          />
+                        }
+                      />
+                    )}
+                  </Fieldset>
+                )}
+              </div>
               {Settings.fields.organization.customFields && (
                 <Fieldset title="Organization information" id="custom-fields">
                   <CustomFieldsContainer
@@ -586,15 +548,16 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
   }
 
   function getLocationFilters(values) {
-    return Settings?.fields[
-      values.type === Organization.TYPE.ADVISOR_ORG ? "advisor" : "principal"
-    ]?.org?.location?.filter.reduce((accummulator, filter) => {
-      accummulator[filter] = {
-        label: Location.humanNameOfType(filter),
-        queryVars: { type: filter }
-      }
-      return accummulator
-    }, {})
+    return Settings?.fields.regular?.org?.location?.filter.reduce(
+      (accumulator, filter) => {
+        accumulator[filter] = {
+          label: Location.humanNameOfType(filter),
+          queryVars: { type: filter }
+        }
+        return accumulator
+      },
+      {}
+    )
   }
 }
 

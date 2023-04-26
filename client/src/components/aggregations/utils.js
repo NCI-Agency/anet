@@ -219,7 +219,7 @@ export function reportsToEvents(reports) {
       const who =
         (r.primaryAdvisor && new Person(r.primaryAdvisor).toString()) || ""
       const where =
-        (r.principalOrg && r.principalOrg.shortName) ||
+        (r.interlocutorOrg && r.interlocutorOrg.shortName) ||
         (r.location && r.location.name) ||
         ""
       const start = new Date(r.engagementDate)

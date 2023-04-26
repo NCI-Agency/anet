@@ -49,7 +49,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
 
   // Must always retrieve these e.g. for ORDER BY
   public static final String[] minimalFields = {"uuid", "name", "rank", "createdAt"};
-  public static final String[] additionalFields = {"status", "role", "emailAddress", "avatarUuid",
+  public static final String[] additionalFields = {"status", "emailAddress", "avatarUuid",
       "phoneNumber", "biography", "country", "gender", "endOfTourDate", "domainUsername",
       "openIdSubject", "pendingVerification", "code", "updatedAt", "customFields"};
   public static final String[] allFields =
@@ -125,18 +125,17 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   @Override
   public Person insertInternal(Person p) {
     final String sql = "/* personInsert */ INSERT INTO people "
-        + "(uuid, name, status, role, \"emailAddress\", \"phoneNumber\", rank, "
+        + "(uuid, name, status, \"emailAddress\", \"phoneNumber\", rank, "
         + "\"pendingVerification\", gender, country, code, \"endOfTourDate\", biography, "
         + "\"domainUsername\", \"openIdSubject\", \"createdAt\", \"updatedAt\", \"customFields\") "
-        + "VALUES (:uuid, :name, :status, :role, :emailAddress, :phoneNumber, :rank, "
+        + "VALUES (:uuid, :name, :status, :emailAddress, :phoneNumber, :rank, "
         + ":pendingVerification, :gender, :country, :code, :endOfTourDate, :biography, "
         + ":domainUsername, :openIdSubject, :createdAt, :updatedAt, :customFields)";
     getDbHandle().createUpdate(sql).bindBean(p)
         .bind("createdAt", DaoUtils.asLocalDateTime(p.getCreatedAt()))
         .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
         .bind("endOfTourDate", DaoUtils.asLocalDateTime(p.getEndOfTourDate()))
-        .bind("status", DaoUtils.getEnumId(p.getStatus()))
-        .bind("role", DaoUtils.getEnumId(p.getRole())).execute();
+        .bind("status", DaoUtils.getEnumId(p.getStatus())).execute();
     evictFromCache(p);
     return p;
   }
@@ -160,7 +159,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   @Override
   public int updateInternal(Person p) {
     final String sql = "/* personUpdate */ UPDATE people "
-        + "SET name = :name, status = :status, role = :role, gender = :gender, country = :country, "
+        + "SET name = :name, status = :status, gender = :gender, country = :country, "
         + "\"emailAddress\" = :emailAddress, code = :code, "
         + "\"phoneNumber\" = :phoneNumber, rank = :rank, biography = :biography, "
         + "\"pendingVerification\" = :pendingVerification, \"domainUsername\" = :domainUsername, "
@@ -170,8 +169,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     final int nr = getDbHandle().createUpdate(sql).bindBean(p)
         .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
         .bind("endOfTourDate", DaoUtils.asLocalDateTime(p.getEndOfTourDate()))
-        .bind("status", DaoUtils.getEnumId(p.getStatus()))
-        .bind("role", DaoUtils.getEnumId(p.getRole())).execute();
+        .bind("status", DaoUtils.getEnumId(p.getStatus())).execute();
     evictFromCache(p);
     return nr;
   }
@@ -412,18 +410,21 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     updateAvatar(winner);
 
     // For reports where both winner and loser are in the reportPeople:
-    // 1. set winner's isPrimary, isAttendee and is isAuthor flags to the logical OR of both
+    // 1. set winner's isPrimary, isAttendee, isAuthor and isInterlocutor flags to the logical OR of
+    // both
     final String sqlUpd = "WITH dups AS ( SELECT"
         + "  rpw.\"reportUuid\" AS wreportuuid, rpw.\"personUuid\" AS wpersonuuid,"
         + "  rpw.\"isPrimary\" AS wprimary, rpl.\"isPrimary\" AS lprimary,"
         + "  rpw.\"isAttendee\" AS wattendee, rpl.\"isAttendee\" AS lattendee,"
-        + "  rpw.\"isAuthor\" AS wauthor, rpl.\"isAuthor\" AS lauthor"
+        + "  rpw.\"isAuthor\" AS wauthor, rpl.\"isAuthor\" AS lauthor,"
+        + "  rpw.\"isInterlocutor\" AS winterlocutor, rpl.\"isInterlocutor\" AS linterlocutor"
         + "  FROM \"reportPeople\" rpw"
         + "  JOIN \"reportPeople\" rpl ON rpl.\"reportUuid\" = rpw.\"reportUuid\""
         + "  WHERE rpw.\"personUuid\" = :winnerUuid AND rpl.\"personUuid\" = :loserUuid )"
         + " UPDATE \"reportPeople\" SET \"isPrimary\" = (dups.wprimary OR dups.lprimary),"
         + " \"isAttendee\" = (dups.wattendee OR dups.lattendee),"
-        + " \"isAuthor\" = (dups.wauthor OR dups.lauthor) FROM dups"
+        + " \"isAuthor\" = (dups.wauthor OR dups.lauthor),"
+        + " \"isInterlocutor\" = (dups.winterlocutor OR dups.linterlocutor) FROM dups"
         + " WHERE \"reportPeople\".\"reportUuid\" = dups.wreportuuid"
         + " AND \"reportPeople\".\"personUuid\" = dups.wpersonuuid";
     // MS SQL has no real booleans, so bitwise-or the 0/1 values in that case

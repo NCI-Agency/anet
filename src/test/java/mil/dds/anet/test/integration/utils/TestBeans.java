@@ -7,9 +7,7 @@ import java.util.List;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
 import mil.dds.anet.beans.Organization;
-import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.Atmosphere;
 import mil.dds.anet.beans.Report.ReportState;
@@ -24,7 +22,6 @@ public class TestBeans {
     p.setPhoneNumber("+0-00000");
     p.setRank("CIV");
     p.setStatus(Person.Status.ACTIVE);
-    p.setRole(Role.ADVISOR);
     p.setBiography("");
     p.setDomainUsername("test");
     p.setGender("Male");
@@ -39,7 +36,6 @@ public class TestBeans {
     o.setShortName("test_organization");
     o.setLongName("test_organization");
     o.setStatus(Organization.Status.ACTIVE);
-    o.setType(OrganizationType.ADVISOR_ORG);
     return o;
   }
 

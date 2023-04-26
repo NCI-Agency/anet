@@ -68,11 +68,10 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
   ]
 
   const taskedOrganizationsFilters = {
-    allAdvisorOrganizations: {
-      label: "All advisor organizations",
+    allOrganizations: {
+      label: "All organizations",
       queryVars: {
-        status: Model.STATUS.ACTIVE,
-        type: Organization.TYPE.ADVISOR_ORG
+        status: Model.STATUS.ACTIVE
       }
     }
   }
@@ -84,29 +83,19 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
     }
   }
   const positionsFilters = {
-    allAdvisorPositions: {
-      label: "All advisor positions",
+    allPositions: {
+      label: "All positions",
       queryVars: {
         status: Model.STATUS.ACTIVE,
-        type: [
-          Position.TYPE.ADVISOR,
-          Position.TYPE.SUPERUSER,
-          Position.TYPE.ADMINISTRATOR
-        ],
         matchPersonName: true
       }
     }
   }
 
   const approversFilters = {
-    allAdvisorPositions: {
-      label: "All advisor positions",
+    allPositions: {
+      label: "All positions",
       queryVars: {
-        type: [
-          Position.TYPE.ADVISOR,
-          Position.TYPE.SUPERUSER,
-          Position.TYPE.ADMINISTRATOR
-        ],
         matchPersonName: true
       }
     }

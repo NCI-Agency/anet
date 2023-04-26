@@ -290,7 +290,7 @@ const PendingApprovalReports = ({ pageDispatchers, queryParams, style }) => {
   }
 
   function getAdditionalReportParams() {
-    return { advisorOrgUuid: focusedSelection.advisorOrg.uuid }
+    return { orgUuid: focusedSelection.advisorOrg.uuid }
   }
 }
 

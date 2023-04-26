@@ -23,10 +23,6 @@ class ShowOrganization extends Page {
     return browser.$('div[id="profile"]')
   }
 
-  async getType() {
-    return browser.$('div[id="type"]')
-  }
-
   async getLeaders() {
     return browser.$('div[id="fg-Leaders"]')
   }

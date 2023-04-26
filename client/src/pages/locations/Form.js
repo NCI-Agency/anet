@@ -47,8 +47,6 @@ const MIN_CHARS_FOR_DUPLICATES = 3
 
 // Location types to be shown to admins in the new location page.
 const LOCATION_TYPES_ADMIN = [
-  Location.LOCATION_TYPES.ADVISOR_LOCATION,
-  Location.LOCATION_TYPES.PRINCIPAL_LOCATION,
   Location.LOCATION_TYPES.POINT_LOCATION,
   Location.LOCATION_TYPES.GEOGRAPHICAL_AREA,
   Location.LOCATION_TYPES.VIRTUAL_LOCATION
@@ -85,14 +83,9 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
     }
   ]
   const approversFilters = {
-    allAdvisorPositions: {
-      label: "All advisor positions",
+    allPositions: {
+      label: "All positions",
       queryVars: {
-        type: [
-          Position.TYPE.ADVISOR,
-          Position.TYPE.SUPERUSER,
-          Position.TYPE.ADMINISTRATOR
-        ],
         matchPersonName: true
       }
     }

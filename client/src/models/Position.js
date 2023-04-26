@@ -2,15 +2,12 @@ import Model, {
   createCustomFieldsSchema,
   GRAPHQL_NOTES_FIELDS
 } from "components/Model"
-import AFG_ICON from "resources/afg_small.png"
 import POSITIONS_ICON from "resources/positions.png"
-import RS_ICON from "resources/rs_small.png"
 import Settings from "settings"
 import utils from "utils"
 import * as yup from "yup"
 
-export const advisorPosition = Settings.fields.advisor.position
-export const principalPosition = Settings.fields.principal.position
+export const regularPosition = Settings.fields.regular.position
 export const administratorPosition = Settings.fields.administrator.position
 export const superuserPosition = Settings.fields.superuser.position
 
@@ -43,8 +40,7 @@ export default class Position extends Model {
   static relatedObjectType = "positions"
 
   static TYPE = {
-    ADVISOR: "ADVISOR",
-    PRINCIPAL: "PRINCIPAL",
+    REGULAR: "REGULAR",
     SUPERUSER: "SUPERUSER",
     ADMINISTRATOR: "ADMINISTRATOR"
   }
@@ -65,7 +61,7 @@ export default class Position extends Model {
       type: yup
         .string()
         .required()
-        .default(() => Position.TYPE.ADVISOR),
+        .default(() => Position.TYPE.REGULAR),
       code: yup.string().nullable().default(""),
       status: yup
         .string()
@@ -94,14 +90,6 @@ export default class Position extends Model {
         .nullable()
         .default(null)
         .label(Settings.fields.position.location?.label)
-        .when("type", ([type], schema) =>
-          Settings.fields.position.location?.optional ||
-          type === Position.TYPE.PRINCIPAL
-            ? schema
-            : schema.required(
-              `Location is required for ${advisorPosition.name}`
-            )
-        )
     })
 
     // not actually in the database, the database contains the JSON customFields
@@ -109,7 +97,7 @@ export default class Position extends Model {
     .concat(Model.yupSchema)
 
   static autocompleteQuery =
-    "uuid name code type role status location { uuid name } organization { uuid shortName longName identificationCode } person { uuid name rank role avatarUuid }"
+    "uuid name code type role status location { uuid name } organization { uuid shortName longName identificationCode } person { uuid name rank avatarUuid }"
 
   static autocompleteQueryWithNotes = `${this.autocompleteQuery} ${GRAPHQL_NOTES_FIELDS}`
 
@@ -132,7 +120,6 @@ export default class Position extends Model {
       uuid
       name
       rank
-      role
       avatarUuid
     }
     associatedPositions {
@@ -144,7 +131,6 @@ export default class Position extends Model {
         uuid
         name
         rank
-        role
         avatarUuid
       }
       organization {
@@ -161,7 +147,6 @@ export default class Position extends Model {
         uuid
         name
         rank
-        role
         avatarUuid
         previousPositions {
           startTime
@@ -194,10 +179,8 @@ export default class Position extends Model {
   }
 
   static humanNameOfType(type) {
-    if (type === Position.TYPE.PRINCIPAL) {
-      return principalPosition.type
-    } else if (type === Position.TYPE.ADVISOR) {
-      return advisorPosition.type
+    if (type === Position.TYPE.REGULAR) {
+      return regularPosition.type
     } else if (type === Position.TYPE.SUPERUSER) {
       return superuserPosition.type
     } else if (type === Position.TYPE.ADMINISTRATOR) {
@@ -221,12 +204,8 @@ export default class Position extends Model {
     return Position.humanNameOfRole(this.role)
   }
 
-  isAdvisor() {
-    return this.type === Position.TYPE.ADVISOR
-  }
-
-  isPrincipal() {
-    return this.type === Position.TYPE.PRINCIPAL
+  isRegular() {
+    return this.type === Position.TYPE.REGULAR
   }
 
   isActive() {
@@ -243,10 +222,8 @@ export default class Position extends Model {
 
   static convertType(type) {
     switch (type) {
-      case "ADVISOR":
-        return Settings.fields.advisor.position.type
-      case "PRINCIPAL":
-        return Settings.fields.principal.position.type
+      case "REGULAR":
+        return Settings.fields.regular.position.type
       case "SUPERUSER":
         return Settings.fields.superuser.position.type
       case "ADMINISTRATOR":
@@ -256,22 +233,12 @@ export default class Position extends Model {
     }
   }
 
-  static isAdvisor(position) {
-    return position.type === Position.TYPE.ADVISOR
-  }
-
-  static isPrincipal(position) {
-    return position.type === Position.TYPE.PRINCIPAL
+  static isRegular(position) {
+    return position.type === Position.TYPE.REGULAR
   }
 
   iconUrl() {
-    if (this.isAdvisor()) {
-      return RS_ICON
-    } else if (this.isPrincipal()) {
-      return AFG_ICON
-    } else {
-      return POSITIONS_ICON
-    }
+    return POSITIONS_ICON
   }
 
   static FILTERED_CLIENT_SIDE_FIELDS = [

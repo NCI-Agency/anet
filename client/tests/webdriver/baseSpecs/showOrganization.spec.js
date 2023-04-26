@@ -33,13 +33,6 @@ describe("Show organization page", () => {
       // eslint-disable-next-line no-unused-expressions
       expect(await longNameField.isExisting()).to.be.true
 
-      // Organization type should be there
-      const typeField = await ShowOrganization.getType()
-      await typeField.waitForExist()
-      await typeField.waitForDisplayed()
-      // eslint-disable-next-line no-unused-expressions
-      expect(await typeField.isExisting()).to.be.true
-
       // Organization leaders should not be there
       const leaderField = await ShowOrganization.getLeaders()
       // eslint-disable-next-line no-unused-expressions
@@ -77,13 +70,6 @@ describe("Show organization page", () => {
       await longNameField.waitForDisplayed()
       // eslint-disable-next-line no-unused-expressions
       expect(await longNameField.isExisting()).to.be.true
-
-      // Organization type should be there
-      const typeField = await ShowOrganization.getType()
-      await typeField.waitForExist()
-      await typeField.waitForDisplayed()
-      // eslint-disable-next-line no-unused-expressions
-      expect(await typeField.isExisting()).to.be.true
 
       // Organization leaders should be there
       const leaderField = await ShowOrganization.getLeaders()

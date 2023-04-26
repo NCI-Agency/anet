@@ -14,7 +14,6 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionType;
 import mil.dds.anet.beans.lists.AnetBeanList;
@@ -71,7 +70,8 @@ public class PersonResource {
           Status.BAD_REQUEST);
     }
 
-    if (p.getRole().equals(Role.ADVISOR) && !Utils.isEmptyOrNull(p.getEmailAddress())) {
+    // FIXME: Should emailAddress always be required/valid?
+    if (!Utils.isEmptyOrNull(p.getEmailAddress())) {
       validateEmail(p.getEmailAddress());
     }
 
@@ -126,7 +126,8 @@ public class PersonResource {
     final Person existing = dao.getByUuid(p.getUuid());
     assertCanUpdatePerson(user, existing);
 
-    if (p.getRole().equals(Role.ADVISOR) && !Utils.isEmptyOrNull(p.getEmailAddress())) {
+    // FIXME: Should emailAddress always be required/valid?
+    if (!Utils.isEmptyOrNull(p.getEmailAddress())) {
       validateEmail(p.getEmailAddress());
     }
 
@@ -353,34 +354,25 @@ public class PersonResource {
       throw new WebApplicationException("Loser not found", Status.NOT_FOUND);
     }
 
-    final Person winnerForMerge;
-    if (existingWinner.getRole() != loser.getRole()) {
-      // Take all fields from existing winner when roles are different!
-      winnerForMerge = existingWinner;
-      // Make sure we have the winner's current position pre-loaded before merging
-      DaoUtils.getPosition(existingWinner);
-    } else {
-      // Do some additional sanity checks
-      winnerForMerge = winner;
-      final String winnerPositionUuid = DaoUtils.getUuid(winner.getPosition());
-      ResourceUtils.validateHistoryInput(winnerUuid, winner.getPreviousPositions(), true,
-          winnerPositionUuid);
+    // Do some additional sanity checks
+    final String winnerPositionUuid = DaoUtils.getUuid(winner.getPosition());
+    ResourceUtils.validateHistoryInput(winnerUuid, winner.getPreviousPositions(), true,
+        winnerPositionUuid);
 
-      if (AnetObjectEngine.getInstance().getPersonDao().hasHistoryConflict(winnerUuid, loserUuid,
-          winner.getPreviousPositions(), true)) {
-        throw new WebApplicationException(
-            "At least one of the positions in the history is occupied for the specified period.",
-            Status.CONFLICT);
-      }
+    if (AnetObjectEngine.getInstance().getPersonDao().hasHistoryConflict(winnerUuid, loserUuid,
+        winner.getPreviousPositions(), true)) {
+      throw new WebApplicationException(
+          "At least one of the positions in the history is occupied for the specified period.",
+          Status.CONFLICT);
     }
 
-    int numRows = dao.mergePeople(winnerForMerge, loser);
+    int numRows = dao.mergePeople(winner, loser);
     if (numRows == 0) {
       throw new WebApplicationException(
           "Couldn't process merge operation, error occurred while updating merged person relation information.",
           Status.NOT_FOUND);
     }
-    AnetAuditLogger.log("Person {} merged into {} by {}", loser, winnerForMerge, user);
+    AnetAuditLogger.log("Person {} merged into {} by {}", loser, winner, user);
 
     // GraphQL mutations *have* to return something, so we return the number of updated rows
     return numRows;

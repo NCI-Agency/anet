@@ -65,7 +65,6 @@ const GQL_ORGANIZATION_FIELDS = `
     shortName
     longName
     identificationCode
-    type
   }
 `
 const GQL_PERSON_FIELDS = `
@@ -73,7 +72,6 @@ const GQL_PERSON_FIELDS = `
     uuid
     name
     rank
-    role
     avatarUuid
     status
   }
@@ -209,11 +207,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
   const canAdministrateOrg =
     currentUser &&
     currentUser.hasAdministrativePermissionsForOrganization(organization)
-  const isAdvisorOrg = organization.type === Organization.TYPE.ADVISOR_ORG
-  const isPrincipalOrg = organization.type === Organization.TYPE.PRINCIPAL_ORG
-  const orgSettings = isPrincipalOrg
-    ? Settings.fields.principal.org
-    : Settings.fields.advisor.org
+  const orgSettings = Settings.fields.regular.org
   const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
 
   const myOrg =
@@ -240,11 +234,9 @@ const OrganizationShow = ({ pageDispatchers }) => {
             {orgSettings.administratingPositions.label}
           </AnchorNavItem>
         </Nav.Item>
-        {!isPrincipalOrg && (
-          <Nav.Item>
-            <AnchorNavItem to="approvals">Approvals</AnchorNavItem>
-          </Nav.Item>
-        )}
+        <Nav.Item>
+          <AnchorNavItem to="approvals">Approvals</AnchorNavItem>
+        </Nav.Item>
         {organization.isTaskEnabled() && (
           <Nav.Item>
             <AnchorNavItem to="tasks">
@@ -312,13 +304,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
           <div>
             <SubNav subnavElemId="myorg-nav">{isMyOrg && orgSubNav}</SubNav>
 
-            <SubNav subnavElemId="advisor-org-nav">
-              {!isMyOrg && isAdvisorOrg && orgSubNav}
-            </SubNav>
-
-            <SubNav subnavElemId="principal-org-nav">
-              {!isMyOrg && isPrincipalOrg && orgSubNav}
-            </SubNav>
+            <SubNav subnavElemId="all-org-nav">{!isMyOrg && orgSubNav}</SubNav>
 
             {currentUser.isSuperuser() && (
               <div className="float-end">
@@ -364,14 +350,6 @@ const OrganizationShow = ({ pageDispatchers }) => {
                   dictProps={Settings.fields.organization.longName}
                   name="longName"
                   component={FieldHelper.ReadonlyField}
-                />
-
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.organization.type}
-                  name="type"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={Organization.humanNameOfType}
                 />
 
                 {organization.parentOrg && organization.parentOrg.uuid && (
@@ -510,7 +488,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
                 organization={organization}
                 refetch={refetch}
               />
-              {!isPrincipalOrg && <Approvals relatedObject={organization} />}
+              <Approvals relatedObject={organization} />
               {organization.isTaskEnabled() && (
                 <OrganizationTasks
                   organization={organization}

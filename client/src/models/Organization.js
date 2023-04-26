@@ -13,11 +13,6 @@ export default class Organization extends Model {
   static getInstanceName = "organization"
   static relatedObjectType = "organizations"
 
-  static TYPE = {
-    ADVISOR_ORG: "ADVISOR_ORG",
-    PRINCIPAL_ORG: "PRINCIPAL_ORG"
-  }
-
   static APPROVAL_STEP_TYPE = {
     PLANNING_APPROVAL: "PLANNING_APPROVAL",
     REPORT_APPROVAL: "REPORT_APPROVAL"
@@ -45,10 +40,6 @@ export default class Organization extends Model {
         .required()
         .default(() => Model.STATUS.ACTIVE),
       identificationCode: yup.string().nullable().default(""),
-      type: yup
-        .string()
-        .required()
-        .default(() => Organization.TYPE.ADVISOR_ORG),
       location: yup
         .object()
         .nullable()
@@ -110,20 +101,12 @@ export default class Organization extends Model {
     .concat(Organization.customFieldsSchema)
     .concat(Model.yupSchema)
 
-  static autocompleteQuery = "uuid shortName longName identificationCode type"
+  static autocompleteQuery = "uuid shortName longName identificationCode"
 
   static autocompleteQueryWithNotes = `${this.autocompleteQuery} ${GRAPHQL_NOTES_FIELDS}`
 
   static humanNameOfStatus(status) {
     return utils.sentenceCase(status)
-  }
-
-  static humanNameOfType(type) {
-    if (type === Organization.TYPE.PRINCIPAL_ORG) {
-      return Settings.fields.principal.org.name
-    } else {
-      return Settings.fields.advisor.org.name
-    } // TODO do not assume that if not of type TYPE.PRINCIPAL_ORG it is an advisor
   }
 
   static isTaskEnabled(shortName) {
@@ -140,14 +123,6 @@ export default class Organization extends Model {
 
   getAssessmentsConfig() {
     return Organization.assessmentConfig
-  }
-
-  humanNameOfType(type) {
-    return Organization.humanNameOfType(this.type)
-  }
-
-  isAdvisorOrg() {
-    return this.type === Organization.TYPE.ADVISOR_ORG
   }
 
   isTaskEnabled() {
