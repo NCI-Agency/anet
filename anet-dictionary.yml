@@ -302,6 +302,17 @@ fields:
         helpText: Here you can link to a related report
         types:
           - Report
+      relatedObject:
+        type: anet_object
+        label: Related object
+        helpText: Here you can link to a related object
+        types:
+          - Report
+          - Person
+          - Position
+          - Organization
+          - Location
+          - Task 
       additionalEngagementNeeded:
         type: array_of_anet_objects
         label: Additional engagement needed for

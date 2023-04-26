@@ -21,7 +21,6 @@ const RelatedObjectsTable = ({
       <MultiTypeAdvancedSelectComponent
         value={fieldValue}
         isMultiSelect
-        keepSearchText
         onConfirm={(value, objectType) => {
           if (value.length > fieldValue.length) {
             // entity was added at the end, set correct value
