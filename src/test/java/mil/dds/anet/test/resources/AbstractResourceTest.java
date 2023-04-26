@@ -88,7 +88,7 @@ public abstract class AbstractResourceTest {
   private static BatchingUtils batchingUtils;
 
   private static final String PERSON_FIELDS =
-      "{ uuid name domainUsername openIdSubject role emailAddress rank status phoneNumber biography"
+      "{ uuid name domainUsername openIdSubject emailAddress rank status phoneNumber biography"
           + " pendingVerification createdAt updatedAt position { uuid name type status"
           + " organization { uuid shortName parentOrg { uuid shortName } } } }";
 
@@ -210,7 +210,7 @@ public abstract class AbstractResourceTest {
     return findOrPutPersonInDb(Person.builder().withDomainUsername("yoshie").build());
   }
 
-  // Principals in the test database
+  // Interlocutors in the test database
   public static Person getChristopfTopferness() {
     return findOrPutPersonInDb(Person.builder().withName("TOPFERNESS, Christopf").build());
   }
@@ -380,6 +380,7 @@ public abstract class AbstractResourceTest {
   public static ReportPerson personToReportAuthor(Person p) {
     final ReportPerson rp = personToReportPerson(p);
     rp.setAuthor(true);
+    rp.setInterlocutor(false);
     return rp;
   }
 
@@ -390,8 +391,8 @@ public abstract class AbstractResourceTest {
   }
 
   public static ReportPerson personToReportPerson(Person p) {
-    final ReportPerson rp =
-        ReportPerson.builder().withPrimary(false).withAuthor(false).withAttendee(true).build();
+    final ReportPerson rp = ReportPerson.builder().withPrimary(false).withAuthor(false)
+        .withAttendee(true).withInterlocutor(true).build();
     BeanUtils.copyProperties(p, rp);
     return rp;
   }
@@ -407,6 +408,7 @@ public abstract class AbstractResourceTest {
   public static mil.dds.anet.beans.ReportPerson personToReportAuthor(mil.dds.anet.beans.Person p) {
     final mil.dds.anet.beans.ReportPerson rp = personToReportPerson(p);
     rp.setAuthor(true);
+    rp.setInterlocutor(false);
     return rp;
   }
 
@@ -422,6 +424,7 @@ public abstract class AbstractResourceTest {
     rp.setPrimary(false);
     rp.setAuthor(false);
     rp.setAttendee(true);
+    rp.setInterlocutor(true);
     BeanUtils.copyProperties(p, rp);
     return rp;
   }

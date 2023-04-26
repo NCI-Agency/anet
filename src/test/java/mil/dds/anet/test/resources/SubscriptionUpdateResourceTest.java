@@ -169,7 +169,7 @@ public class SubscriptionUpdateResourceTest extends AbstractResourceTest {
     // * to the report itself
     // * to the report's people
     // * to the report's people's positions
-    // * to the report's advisorOrg (and principalOrg, but we're not testing that here)
+    // * to the report's advisorOrg (and interlocutorOrg, but we're not testing that here)
     // * to the report's tasks
     // * to the report's location
     final AnetBeanList_SubscriptionUpdate jackSubscriptionUpdates2 =

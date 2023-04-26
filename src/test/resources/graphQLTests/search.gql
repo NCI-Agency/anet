@@ -15,21 +15,18 @@ reportList (query:{text:"${searchQuery}",pageSize:0}) {
       uuid
       name
       rank
-      role
       avatarUuid
     }
     primaryAdvisor {
       uuid
       name
       rank
-      role
       avatarUuid
     }
-    primaryPrincipal {
+    primaryInterlocutor {
       uuid
       name
       rank
-      role
       avatarUuid
     }
     advisorOrg {
@@ -38,7 +35,7 @@ reportList (query:{text:"${searchQuery}",pageSize:0}) {
       longName
       identificationCode
     }
-    principalOrg {
+    interlocutorOrg {
       uuid
       shortName
       longName
@@ -67,7 +64,6 @@ reportList (query:{text:"${searchQuery}",pageSize:0}) {
             uuid
             name
             rank
-            role
             avatarUuid
           }
         }
@@ -76,7 +72,6 @@ reportList (query:{text:"${searchQuery}",pageSize:0}) {
         uuid
         name
         rank
-        role
         avatarUuid
       }
     }
@@ -90,7 +85,6 @@ personList (query:{text:"${searchQuery}",pageSize:0}) {
     uuid
     name
     rank
-    role
     avatarUuid
     emailAddress
     position {
@@ -134,7 +128,6 @@ positionList (query:{text:"${searchQuery}",pageSize:0}) {
       uuid
       name
       rank
-      role
       avatarUuid
     }
   }
@@ -166,6 +159,5 @@ organizationList (query:{text:"${searchQuery}",pageSize:0}) {
     shortName
     longName
     identificationCode
-    type
   }
 }

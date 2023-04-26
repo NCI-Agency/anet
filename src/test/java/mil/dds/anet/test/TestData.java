@@ -8,7 +8,6 @@ import mil.dds.anet.test.client.CommentInput;
 import mil.dds.anet.test.client.LocationInput;
 import mil.dds.anet.test.client.LocationType;
 import mil.dds.anet.test.client.OrganizationInput;
-import mil.dds.anet.test.client.OrganizationType;
 import mil.dds.anet.test.client.Position;
 import mil.dds.anet.test.client.PositionInput;
 import mil.dds.anet.test.client.PositionRole;
@@ -36,7 +35,7 @@ public class TestData {
     final Position b = new Position();
     b.setName("Test Advisor Position");
     b.setCode("TST-0101");
-    b.setType(PositionType.ADVISOR);
+    b.setType(PositionType.REGULAR);
     b.setRole(PositionRole.MEMBER);
     b.setStatus(Status.ACTIVE);
     return b;
@@ -47,7 +46,7 @@ public class TestData {
     return OrganizationInput.builder().withShortName("TBAE").withLongName("The Best Advisors Ever")
         .withStatus(Status.ACTIVE)
         .withIdentificationCode(generateIdentificationCode ? UUID.randomUUID().toString() : null)
-        .withType(OrganizationType.ADVISOR_ORG).build();
+        .build();
   }
 
   public static CommentInput createCommentInput(String text) {
@@ -61,7 +60,7 @@ public class TestData {
 
   public static PositionInput createPositionInput() {
     return PositionInput.builder().withName("Head of donut operations").withCode("DNT-001")
-        .withType(PositionType.PRINCIPAL).withRole(PositionRole.MEMBER).withStatus(Status.ACTIVE)
+        .withType(PositionType.REGULAR).withRole(PositionRole.MEMBER).withStatus(Status.ACTIVE)
         .build();
   }
 
