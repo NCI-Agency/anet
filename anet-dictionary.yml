@@ -258,7 +258,7 @@ fields:
 
     parentTask:
       label: Parent objective / effort
-      placeholder: Start typing to search for a higher level task
+      placeholder: Start typing to search for a higher level objective / effort
     childrenTasks: Sub efforts
     taskedOrganizations:
       label: Tasked organizations

@@ -87,8 +87,8 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
 
   const tasksFilters = {
     allObjectives: {
-      label: `All ${Settings.fields.task.topLevel.longLabel}`,
-      queryVars: { hasParentTask: false }
+      label: `All ${Settings.fields.task.longLabel}`,
+      queryVars: {}
     }
   }
   const positionsFilters = {
