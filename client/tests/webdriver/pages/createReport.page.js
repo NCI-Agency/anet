@@ -44,12 +44,20 @@ export class CreateReport extends Page {
     return browser.$(`div[id="fg-${id}"]`)
   }
 
+  async getCustomFieldButtonFromText(id, text) {
+    return browser.$(`//div[@id="fg-${id}"]//button[text()="${text}"]`)
+  }
+
   async getEngagementInformationTitle() {
     return browser.$('//span[text()="Engagement information"]')
   }
 
   async getTestReferenceFieldFormGroup() {
     return this.getCustomFieldFormGroup(RELATED_REPORT_ID)
+  }
+
+  async getTestReferenceFieldButton(buttonText) {
+    return this.getCustomFieldButtonFromText(RELATED_REPORT_ID, buttonText)
   }
 
   async getTestReferenceFieldLabel() {
@@ -84,6 +92,13 @@ export class CreateReport extends Page {
     return this.getCustomFieldFormGroup(ADDITIONAL_ENGAGEMENTS_ID)
   }
 
+  async getTestMultiReferenceFieldButton(buttonText) {
+    return this.getCustomFieldButtonFromText(
+      ADDITIONAL_ENGAGEMENTS_ID,
+      buttonText
+    )
+  }
+
   async getTestMultiReferenceFieldLabel() {
     return (await this.getTestMultiReferenceFieldFormGroup()).$(
       `label[for="${ADDITIONAL_ENGAGEMENTS_ID}"]`
@@ -101,6 +116,9 @@ export class CreateReport extends Page {
   }
 
   async getTestMultiReferenceFieldAdvancedSelect() {
+    await (await this.getTestMultiReferenceFieldFormGroup())
+      .$(`div[id="${ADDITIONAL_ENGAGEMENTS_ID}-popover"] tbody`)
+      .waitForExist()
     return (await this.getTestMultiReferenceFieldFormGroup()).$(
       `div[id="${ADDITIONAL_ENGAGEMENTS_ID}-popover"] tbody`
     )

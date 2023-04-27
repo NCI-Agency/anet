@@ -97,9 +97,7 @@ describe("Create report form page", () => {
       // eslint-disable-next-line no-unused-expressions
       expect(
         await (
-          await (
-            await CreateReport.getTestReferenceFieldFormGroup()
-          ).$('//button[text()="Reports"]')
+          await CreateReport.getTestReferenceFieldButton("Reports")
         ).isExisting()
       ).to.be.false
       await (await CreateReport.getTestReferenceFieldLabel()).click()
@@ -176,7 +174,7 @@ describe("Create report form page", () => {
 
       // Check search query does not reset when changing object type
       // Default input type is People
-      await expect(
+      expect(
         await (
           await CreateReport.getTestMultiReferenceField()
         ).getAttribute("placeholder")
@@ -189,7 +187,7 @@ describe("Create report form page", () => {
         CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(1),
         SEARCH_PEOPLE_COMPLETE_1
       )
-      await expect(
+      expect(
         await (
           await CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(
             1
@@ -198,16 +196,14 @@ describe("Create report form page", () => {
       ).to.include(SEARCH_PEOPLE_COMPLETE_1)
       // Change input type to Organizations
       await (
-        await (
-          await CreateReport.getTestMultiReferenceFieldFormGroup()
-        ).$('//button[text()="Organizations"]')
+        await CreateReport.getTestMultiReferenceFieldButton("Organizations")
       ).click()
-      await expect(
+      expect(
         await (
           await CreateReport.getTestMultiReferenceField()
         ).getAttribute("placeholder")
       ).to.equal("Find organizations")
-      await (await CreateReport.getTestMultiReferenceFieldLabel()).click()
+      await (await CreateReport.getTestMultiReferenceField()).click()
       expect(
         await (await CreateReport.getTestMultiReferenceField()).getValue()
       ).to.equal(SEARCH_KEY)
@@ -215,7 +211,7 @@ describe("Create report form page", () => {
         CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(1),
         SEARCH_ORGANIZATION_COMPLETE
       )
-      await expect(
+      expect(
         await (
           await CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(
             1
@@ -224,16 +220,14 @@ describe("Create report form page", () => {
       ).to.include(SEARCH_ORGANIZATION_COMPLETE)
       // Change input type to Positions
       await (
-        await (
-          await CreateReport.getTestMultiReferenceFieldFormGroup()
-        ).$('//button[text()="Positions"]')
+        await CreateReport.getTestMultiReferenceFieldButton("Positions")
       ).click()
-      await expect(
+      expect(
         await (
           await CreateReport.getTestMultiReferenceField()
         ).getAttribute("placeholder")
       ).to.equal("Find positions")
-      await (await CreateReport.getTestMultiReferenceFieldLabel()).click()
+      await (await CreateReport.getTestMultiReferenceField()).click()
       expect(
         await (await CreateReport.getTestMultiReferenceField()).getValue()
       ).to.equal(SEARCH_KEY)
@@ -241,7 +235,7 @@ describe("Create report form page", () => {
         CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(1),
         SEARCH_POSITION_COMPLETE_1
       )
-      await expect(
+      expect(
         await (
           await CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(
             1
@@ -254,14 +248,15 @@ describe("Create report form page", () => {
       expect(
         await (await CreateReport.getTestMultiReferenceField()).getValue()
       ).to.equal(SEARCH_KEY)
-      // Set value to empty
-      await (await CreateReport.getTestMultiReferenceField()).setValue("")
       // Change input type to People
       await (
-        await (
-          await CreateReport.getTestMultiReferenceFieldFormGroup()
-        ).$('//button[text()="People"]')
+        await CreateReport.getTestMultiReferenceFieldButton("People")
       ).click()
+      // Set value to empty
+      await (await CreateReport.getTestMultiReferenceField()).click()
+      await (await CreateReport.getTestMultiReferenceField()).clearValue()
+      // Click outside the overlay
+      await (await CreateReport.getEngagementInformationTitle()).click()
 
       // Default input type is People
       expect(
@@ -269,7 +264,8 @@ describe("Create report form page", () => {
           await CreateReport.getTestMultiReferenceField()
         ).getAttribute("placeholder")
       ).to.equal("Find people")
-      await (await CreateReport.getTestMultiReferenceFieldLabel()).click()
+      await (await CreateReport.getTestMultiReferenceField()).click()
+      await (await CreateReport.getTestMultiReferenceField()).clearValue()
       await (await CreateReport.getTestMultiReferenceField()).setValue(PERSON)
       await CreateReport.waitForAdvancedSelectToChange(
         CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(1),
@@ -322,16 +318,15 @@ describe("Create report form page", () => {
 
       // Change input type to Positions
       await (
-        await (
-          await CreateReport.getTestMultiReferenceFieldFormGroup()
-        ).$('//button[text()="Positions"]')
+        await CreateReport.getTestMultiReferenceFieldButton("Positions")
       ).click()
       expect(
         await (
           await CreateReport.getTestMultiReferenceField()
         ).getAttribute("placeholder")
       ).to.equal("Find positions")
-      await (await CreateReport.getTestMultiReferenceFieldLabel()).click()
+      await (await CreateReport.getTestMultiReferenceField()).click()
+      await (await CreateReport.getTestMultiReferenceField()).clearValue()
       await (await CreateReport.getTestMultiReferenceField()).setValue(POSITION)
       await CreateReport.waitForAdvancedSelectToChange(
         CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(1),
