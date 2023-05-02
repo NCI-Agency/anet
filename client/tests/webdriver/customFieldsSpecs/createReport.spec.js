@@ -265,6 +265,9 @@ describe("Create report form page", () => {
         ).getAttribute("placeholder")
       ).to.equal("Find people")
       await (await CreateReport.getTestMultiReferenceField()).click()
+      // After preserving search query, setValue does not work consistently
+      // input field values are sometimes concatenated
+      // Therefore, clear input field previous value before setting new value.
       await (await CreateReport.getTestMultiReferenceField()).clearValue()
       await (await CreateReport.getTestMultiReferenceField()).setValue(PERSON)
       await CreateReport.waitForAdvancedSelectToChange(
@@ -326,6 +329,9 @@ describe("Create report form page", () => {
         ).getAttribute("placeholder")
       ).to.equal("Find positions")
       await (await CreateReport.getTestMultiReferenceField()).click()
+      // After preserving search query, setValue does not work consistently
+      // input field values are sometimes concatenated
+      // Therefore, clear input field previous value before setting new value.
       await (await CreateReport.getTestMultiReferenceField()).clearValue()
       await (await CreateReport.getTestMultiReferenceField()).setValue(POSITION)
       await CreateReport.waitForAdvancedSelectToChange(
