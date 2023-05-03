@@ -514,8 +514,10 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     sql.append(" AND \"reportPeople\".\"reportUuid\" = reports.uuid");
     sql.append(" %6$s");
     sql.append(" AND reports.\"advisorOrganizationUuid\" = organizations.uuid");
-    sql.append(" AND positions.type = :positionAdvisor");
-    sql.append(" AND reports.state IN ( :reportPublished, :reportPending, :reportDraft )");
+    sql.append(
+        " AND positions.type in ( :positionAdvisor, :positionSuperuser, :positionAdministrator )");
+    sql.append(
+        " AND reports.state IN ( :reportPublished, :reportApproved, :reportPending, :reportDraft )");
     sql.append(" AND reports.\"createdAt\" BETWEEN :startDate and :endDate");
     sql.append(" %11$s");
 
@@ -547,8 +549,10 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     sql.append(" %6$s");
     sql.append(" AND \"reportPeople\".\"reportUuid\" = reports.uuid");
     sql.append(" AND reports.\"advisorOrganizationUuid\" = organizations.uuid");
-    sql.append(" AND positions.type = :positionAdvisor");
-    sql.append(" AND reports.state IN ( :reportPublished, :reportPending, :reportDraft )");
+    sql.append(
+        " AND positions.type in ( :positionAdvisor, :positionSuperuser, :positionAdministrator )");
+    sql.append(
+        " AND reports.state IN ( :reportPublished, :reportApproved, :reportPending, :reportDraft )");
     sql.append(" AND reports.\"engagementDate\" BETWEEN :startDate and :endDate");
     sql.append(" %11$s");
 
@@ -587,8 +591,11 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     DaoUtils.addInstantAsLocalDateTime(sqlArgs, "startDate", start);
     DaoUtils.addInstantAsLocalDateTime(sqlArgs, "endDate", end);
     sqlArgs.put("positionAdvisor", DaoUtils.getEnumId(Position.PositionType.ADVISOR));
+    sqlArgs.put("positionSuperuser", DaoUtils.getEnumId(Position.PositionType.SUPERUSER));
+    sqlArgs.put("positionAdministrator", DaoUtils.getEnumId(Position.PositionType.ADMINISTRATOR));
     sqlArgs.put("reportDraft", DaoUtils.getEnumId(ReportState.DRAFT));
     sqlArgs.put("reportPending", DaoUtils.getEnumId(ReportState.PENDING_APPROVAL));
+    sqlArgs.put("reportApproved", DaoUtils.getEnumId(ReportState.APPROVED));
     sqlArgs.put("reportPublished", DaoUtils.getEnumId(ReportState.PUBLISHED));
 
     return getDbHandle().createQuery(String.format(sql.toString(), fmtArgs)).bindMap(sqlArgs)

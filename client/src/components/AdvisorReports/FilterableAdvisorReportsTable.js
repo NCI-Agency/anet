@@ -79,8 +79,8 @@ const FilterableAdvisorReportsTable = ({ pageDispatchers }) => {
   }
 
   function getWeekColumns() {
-    const dateEnd = moment().startOf("week")
-    const dateStart = moment().startOf("week").subtract(weeksAgo, "weeks")
+    const dateEnd = moment().startOf("week").add(1, "week")
+    const dateStart = moment(dateEnd).subtract(weeksAgo, "weeks")
     let currentDate = dateStart
     const weekColumns = []
     while (currentDate.isBefore(dateEnd)) {
@@ -122,16 +122,12 @@ const FilterableAdvisorReportsTable = ({ pageDispatchers }) => {
     data.forEach(item => {
       const stats = item.stats
       result += item.name
-      weekColumns.forEach((column, index) => {
+      weekColumns.forEach(column => {
         result += columnDelimiter
-
-        if (stats[index]) {
-          result += stats[index].nrReportsSubmitted
-          result += columnDelimiter
-          result += stats[index].nrEngagementsAttended
-        } else {
-          result += "0,0"
-        }
+        const stat = stats.find(s => s?.week === column)
+        result += `${stat?.nrReportsSubmitted ?? 0}${columnDelimiter}${
+          stat?.nrEngagementsAttended ?? 0
+        }`
       })
       result += lineDelimiter
     })
