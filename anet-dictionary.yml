@@ -1577,10 +1577,10 @@ fields:
               validations:
                 - type: required
                   params: [You must provide the answer to advisorOnceReportLinguistLin.questionForNegative]
-        # FIXME: This assessment should be applicable only to advisors
-        personPeriodic:
+        advisorPeriodic:
           label: Monthly assessment of advisor
           recurrence: monthly
+          test: $.subject[?(@property === "user" && @ === true)]
           questions:
             question1:
                 type: special_field
@@ -1588,10 +1588,10 @@ fields:
                 widget: richTextEditor
                 style:
                   height: 70px
-        # FIXME: This assessment should be applicable only to advisors
-        personOndemand:
+        advisorOndemand:
           label: Ondemand assessment of advisor
           recurrence: ondemand
+          test: $.subject[?(@property === "user" && @ === true)]
           questions:
             assessmentDate:
               type: date
@@ -1602,10 +1602,10 @@ fields:
               widget: richTextEditor
               style:
                 height: 70px
-        # FIXME: This assessment should be applicable only to interlocutors
         interlocutorMonthly:
           label: Monthly assessment of interlocutor
           recurrence: monthly
+          test: $.subject[?(@property === "user" && @ !== true)]
           authorizationGroupUuids:
             read: ['c21e7321-7ec5-4837-8805-a302f9575754']
             write: ['39a78d51-c351-452c-9206-4305ec8dd76d']
@@ -1630,10 +1630,10 @@ fields:
               widget: richTextEditor
               style:
                 height: 100px
-        # FIXME: This assessment should be applicable only to interlocutors
         interlocutorQuarterly:
           label: Quarterly assessment of interlocutor
           recurrence: quarterly
+          test: $.subject[?(@property === "user" && @ !== true)]
           questions:
             test1:
               test: $.subject.position.organization[?(@property === "identificationCode" && @ && @.match(/^Z/i))]
@@ -1745,11 +1745,10 @@ fields:
                 yes:
                   label: 👍
                   color: '#0000ff'
-        # FIXME: This assessment should be applicable only to interlocutors
         interlocutorOndemandScreeningAndVetting:
           label: Screening & Vetting of interlocutor from MoD
           recurrence: ondemand
-          test: $.subject.position.organization[?(@property === "shortName" && @.match(/^MoD/i))]
+          test: $[?(@property === "subject" && @.user !== true && @.position && @.position.organization && @.position.organization.shortName && @.position.organization.shortName.match(/^MoD/i))]
           onDemandAssessmentExpirationDays: 180
           authorizationGroupUuids:
             read: ['c21e7321-7ec5-4837-8805-a302f9575754']
@@ -1806,33 +1805,31 @@ fields:
               widget: richTextEditor
               style:
                 height: 70px
-        # FIXME: This assessment should be applicable only to advisors
-        personQuarterlyNoWrite:
+        advisorQuarterlyNoWrite:
           label: Quarterly assessment of advisor, no write
           recurrence: quarterly
-          test: $.subject[?(@property === "noSuchProperty" && @.match(/^willNeverMatch/i))]
+          test: $[?(@property === "subject" && @.user !== true && @.noSuchProperty && @.noSuchProperty.match(/^willNeverMatch/i))]
           authorizationGroupUuids:
             write: []
           questions:
             question1:
               type: number
               label: Test Question 1
-        # FIXME: This assessment should be applicable only to advisors
-        personOnceReportNoWrite:
+        advisorOnceReportNoWrite:
           label: Engagement assessment of advisor, no write
           recurrence: once
           relatedObjectType: report
-          test: $.subject[?(@property === "noSuchProperty" && @.match(/^willNeverMatch/i))]
+          test: $[?(@property === "subject" && @.user !== true && @.noSuchProperty && @.noSuchProperty.match(/^willNeverMatch/i))]
           authorizationGroupUuids:
             write: []
           questions:
             question1:
               type: number
               label: Test Question 1
-        # FIXME: This assessment should be applicable only to advisors
-        personOndemandNoWrite:
+        advisorOndemandNoWrite:
           label: Ondemand assessment of advisor, no write
           recurrence: ondemand
+          test: $.subject[?(@property === "user" && @ === true)]
           authorizationGroupUuids:
             write: []
           questions:
