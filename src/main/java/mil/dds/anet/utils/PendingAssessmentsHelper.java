@@ -2,7 +2,6 @@ package mil.dds.anet.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.collect.ImmutableList;
 import java.lang.invoke.MethodHandles;
 import java.time.DayOfWeek;
 import java.time.Instant;
@@ -14,6 +13,7 @@ import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjuster;
 import java.time.temporal.TemporalAdjusters;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -29,7 +29,6 @@ import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.beans.Note.NoteType;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
-import mil.dds.anet.beans.Position.PositionType;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.search.PositionSearchQuery;
 import mil.dds.anet.beans.search.TaskSearchQuery;
@@ -54,7 +53,7 @@ public class PendingAssessmentsHelper {
 
     private final String recurrence;
 
-    private Recurrence(final String recurrence) {
+    Recurrence(final String recurrence) {
       this.recurrence = recurrence;
     }
 
@@ -103,23 +102,23 @@ public class PendingAssessmentsHelper {
       final int moyLessOne = zonefulReferenceDate.get(ChronoField.MONTH_OF_YEAR) - 1;
 
       switch (recurrence) {
-        case DAILY:
+        case DAILY -> {
           notificationDate = bod;
           assessmentDate = notificationDate.minus(1, ChronoUnit.DAYS);
           reminderDate = null; // no reminders
-          break;
-        case WEEKLY:
+        }
+        case WEEKLY -> {
           notificationDate = bow;
           assessmentDate = notificationDate.minus(1, ChronoUnit.WEEKS);
           reminderDate = notificationDate.plus(3, ChronoUnit.DAYS);
-          break;
-        case BIWEEKLY:
+        }
+        case BIWEEKLY -> {
           notificationDate = bow.minus(
               Math.abs(ChronoUnit.WEEKS.between(biWeeklyReferenceDate, bow)) % 2, ChronoUnit.WEEKS);
           assessmentDate = notificationDate.minus(2, ChronoUnit.WEEKS);
           reminderDate = notificationDate.plus(5, ChronoUnit.DAYS);
-          break;
-        case SEMIMONTHLY: // two per month: [1 - 14] and [15 - end-of-month]
+        }
+        case SEMIMONTHLY -> { // two per month: [1 - 14] and [15 - end-of-month]
           final int daysInFirstPeriod = 14;
           if (zonefulReferenceDate.get(ChronoField.DAY_OF_MONTH) <= daysInFirstPeriod) {
             notificationDate = bom;
@@ -130,38 +129,38 @@ public class PendingAssessmentsHelper {
             assessmentDate = bom;
           }
           reminderDate = notificationDate.plus(5, ChronoUnit.DAYS);
-          break;
-        case MONTHLY:
+        }
+        case MONTHLY -> {
           notificationDate = bom;
           assessmentDate = notificationDate.minus(1, ChronoUnit.MONTHS);
           reminderDate = notificationDate.plus(1, ChronoUnit.WEEKS);
-          break;
-        case QUARTERLY:
+        }
+        case QUARTERLY -> {
           final long monthsInQuarter = 3;
           final long q = moyLessOne / monthsInQuarter;
           notificationDate = boy.plus(q * monthsInQuarter, ChronoUnit.MONTHS);
           assessmentDate = notificationDate.minus(monthsInQuarter, ChronoUnit.MONTHS);
           reminderDate = notificationDate.plus(4, ChronoUnit.WEEKS);
-          break;
-        case SEMIANNUALLY: // two per year: [Jan 1 - Jun 30] and [Jul 1 - Dec 31]
+        }
+        case SEMIANNUALLY -> { // two per year: [Jan 1 - Jun 30] and [Jul 1 - Dec 31]
           final long monthsInHalfYear = 6;
           final long sa = moyLessOne / monthsInHalfYear;
           notificationDate = boy.plus(sa * monthsInHalfYear, ChronoUnit.MONTHS);
           assessmentDate = notificationDate.minus(monthsInHalfYear, ChronoUnit.MONTHS);
           reminderDate = notificationDate.plus(1, ChronoUnit.MONTHS);
-          break;
-        case ANNUALLY:
+        }
+        case ANNUALLY -> {
           notificationDate = boy;
           assessmentDate = notificationDate.minus(1, ChronoUnit.YEARS);
           reminderDate = notificationDate.plus(1, ChronoUnit.MONTHS);
-          break;
-        default:
+        }
+        default -> {
           // Unknown recurrence
           logger.error("Unknown recurrence encountered: {}", recurrence);
           assessmentDate = null;
           notificationDate = null;
           reminderDate = null;
-          break;
+        }
       }
     }
 
@@ -200,29 +199,17 @@ public class PendingAssessmentsHelper {
     }
   }
 
-  public static class ObjectsToAssess {
-    private final Set<Position> positionsToAssess;
-    private final Set<Task> tasksToAssess;
-
-    public ObjectsToAssess(Set<Position> positionsToAssess, Set<Task> tasksToAssess) {
-      this.positionsToAssess =
-          new HashSet<>(positionsToAssess == null ? Collections.emptySet() : positionsToAssess);
-      this.tasksToAssess =
-          new HashSet<>(tasksToAssess == null ? Collections.emptySet() : tasksToAssess);
+  public record ObjectsToAssess(Set<Position> positionsToAssess, Set<Task> tasksToAssess) {
+      public ObjectsToAssess(final Set<Position> positionsToAssess, final Set<Task> tasksToAssess) {
+        this.positionsToAssess =
+            new HashSet<>(positionsToAssess == null ? Collections.emptySet() : positionsToAssess);
+        this.tasksToAssess =
+            new HashSet<>(tasksToAssess == null ? Collections.emptySet() : tasksToAssess);
+      }
     }
-
-    public Set<Position> getPositionsToAssess() {
-      return positionsToAssess;
-    }
-
-    public Set<Task> getTasksToAssess() {
-      return tasksToAssess;
-    }
-  }
 
   // Dictionary lookup keys we use
-  // FIXME: should only apply to interlocutors, but how do we know that?
-  public static final String INTERLOCUTOR_PERSON_ASSESSMENTS = "fields.regular.person.assessments";
+  public static final String PERSON_ASSESSMENTS = "fields.regular.person.assessments";
   public static final String TASK_SUB_LEVEL_ASSESSMENTS = "fields.task.subLevel.assessments";
   public static final String TASK_TOP_LEVEL_ASSESSMENTS = "fields.task.topLevel.assessments";
   public static final String ASSESSMENT_RECURRENCE = "recurrence";
@@ -251,7 +238,7 @@ public class PendingAssessmentsHelper {
 
     // Look up periodic assessment definitions for people in the dictionary
     final Set<Recurrence> positionAssessmentRecurrence =
-        getAssessmentRecurrence(recurrenceSet, INTERLOCUTOR_PERSON_ASSESSMENTS);
+        getAssessmentRecurrence(recurrenceSet, PERSON_ASSESSMENTS);
     logger.trace("positionAssessmentRecurrence={}", positionAssessmentRecurrence);
 
     // Look up periodic assessment definitions for all tasks
@@ -283,13 +270,10 @@ public class PendingAssessmentsHelper {
                       // Now filter out the ones that don't need assessments
                       filterObjectsToAssess(objectsToAssessByPosition, allPositionsToAssess,
                           allTasksToAssess);
-                      if (!sendEmail) {
-                        return CompletableFuture.completedFuture(objectsToAssessByPosition);
-                      }
-                      // Load the people who should receive a notification email
-                      return loadPeopleToBeNotified(context, objectsToAssessByPosition,
-                          allPositionsToAssess, allTasksToAssess).thenCompose(
-                              b4 -> CompletableFuture.completedFuture(objectsToAssessByPosition));
+                      // Load the people who should be included,
+                      // and optionally receive a notification email
+                      return loadPeopleToBeIncluded(context, objectsToAssessByPosition,
+                          allPositionsToAssess, allTasksToAssess, sendEmail);
                     })));
               });
         });
@@ -330,7 +314,7 @@ public class PendingAssessmentsHelper {
     final Map<String, Map<String, Object>> assessmentDefinitions =
         (Map<String, Map<String, Object>>) config.getDictionaryEntry(keyPath);
     if (assessmentDefinitions != null) {
-      assessmentDefinitions.values().stream().forEach(pad -> {
+      assessmentDefinitions.values().forEach(pad -> {
         // TODO: in principle, there can be more than one assessment definition for each recurrence,
         // so we should distinguish them here by key when we add that to the database.
         final Recurrence recurrence =
@@ -357,10 +341,9 @@ public class PendingAssessmentsHelper {
     if (!assessmentRecurrence.isEmpty()) {
       // Look up periodic assessment definitions for each active task
       final List<Task> tasks = getActiveTasks(topLevel);
-      tasks.stream().forEach(t -> {
-        // Add all recurrence definitions for this task
-        taskAssessmentRecurrence.computeIfAbsent(t, task -> new HashSet<>(assessmentRecurrence));
-      });
+      tasks.forEach(t ->
+      // Add all recurrence definitions for this task
+      taskAssessmentRecurrence.computeIfAbsent(t, task -> new HashSet<>(assessmentRecurrence)));
     }
   }
 
@@ -368,11 +351,11 @@ public class PendingAssessmentsHelper {
       final Map<String, Object> context, final Set<Recurrence> positionAssessmentRecurrence,
       final Map<Position, ObjectsToAssess> objectsToAssessByPosition) {
     final Map<Position, Set<Recurrence>> allPositionsToAssess = new HashMap<>();
-    final CompletableFuture<?>[] allFutures = getActiveAdvisorPositions(true).stream()
+    final CompletableFuture<?>[] allFutures = getActivePositions(true).stream()
         .map(p -> getPositionsToAssess(context, p, positionAssessmentRecurrence)
             .thenApply(positionsToAssess -> {
               if (!positionsToAssess.isEmpty()) {
-                positionsToAssess.stream().forEach(pta -> allPositionsToAssess.put(pta,
+                positionsToAssess.forEach(pta -> allPositionsToAssess.put(pta,
                     new HashSet<>(positionAssessmentRecurrence)));
                 objectsToAssessByPosition.put(p, new ObjectsToAssess(positionsToAssess, null));
               }
@@ -387,7 +370,7 @@ public class PendingAssessmentsHelper {
   private CompletableFuture<Map<Task, Set<Recurrence>>> prepareTaskAssessmentMap(
       final Map<String, Object> context, final Map<Task, Set<Recurrence>> taskAssessmentRecurrence,
       final Map<Position, ObjectsToAssess> objectsToAssessByPosition) {
-    final List<Position> activeAdvisors = getActiveAdvisorPositions(false);
+    final List<Position> activeAdvisors = getActivePositions(false);
     final Map<Task, Set<Recurrence>> allTasksToAssess = new HashMap<>();
     final CompletableFuture<?>[] allFutures =
         taskAssessmentRecurrence.entrySet().stream().map(e -> {
@@ -395,20 +378,19 @@ public class PendingAssessmentsHelper {
           final Set<Recurrence> recurrenceSet = e.getValue();
           return taskToAssess.loadResponsiblePositions(context).thenApply(positions -> {
             // Only active advisors can assess
-            final Set<Position> positionsToAssess = positions.stream()
-                .filter(pos -> activeAdvisors.contains(pos)).collect(Collectors.toSet());
+            final Set<Position> positionsToAssess =
+                positions.stream().filter(activeAdvisors::contains).collect(Collectors.toSet());
             if (!positionsToAssess.isEmpty()) {
               allTasksToAssess.put(taskToAssess, recurrenceSet);
-              positionsToAssess.stream().forEach(pta -> {
-                objectsToAssessByPosition.compute(pta, (pos, currentValue) -> {
-                  if (currentValue == null) {
-                    return new ObjectsToAssess(null, Collections.singleton(taskToAssess));
-                  } else {
-                    currentValue.getTasksToAssess().add(taskToAssess);
-                    return currentValue;
-                  }
-                });
-              });
+              positionsToAssess
+                  .forEach(pta -> objectsToAssessByPosition.compute(pta, (pos, currentValue) -> {
+                    if (currentValue == null) {
+                      return new ObjectsToAssess(null, Collections.singleton(taskToAssess));
+                    } else {
+                      currentValue.tasksToAssess().add(taskToAssess);
+                      return currentValue;
+                    }
+                  }));
             }
             return null;
           });
@@ -418,8 +400,8 @@ public class PendingAssessmentsHelper {
         .thenCompose(v -> CompletableFuture.completedFuture(allTasksToAssess));
   }
 
-  private List<Position> getActiveAdvisorPositions(boolean withCounterparts) {
-    // Get all active, filled advisor positions, possibly with counterparts
+  private List<Position> getActivePositions(final boolean withCounterparts) {
+    // Get all active, filled positions, possibly with counterparts
     final PositionSearchQuery psq = new PositionSearchQuery();
     psq.setPageSize(0);
     psq.setStatus(Position.Status.ACTIVE);
@@ -427,8 +409,6 @@ public class PendingAssessmentsHelper {
     if (withCounterparts) {
       psq.setHasCounterparts(Boolean.TRUE);
     }
-    psq.setType(
-        ImmutableList.of(PositionType.ADMINISTRATOR, PositionType.SUPERUSER, PositionType.REGULAR));
     return positionDao.search(psq).getList();
   }
 
@@ -460,13 +440,8 @@ public class PendingAssessmentsHelper {
     // Wait for our futures to complete before returning
     return CompletableFuture.allOf(allFutures).thenCompose(v -> {
       // Remove inactive people
-      for (final Iterator<Position> aptai = allPositionsToAssess.keySet().iterator(); aptai
-          .hasNext();) {
-        final Position p = aptai.next();
-        if (p.getPerson() == null || !Person.Status.ACTIVE.equals(p.getPerson().getStatus())) {
-          aptai.remove();
-        }
-      }
+      allPositionsToAssess.keySet().removeIf(
+          p -> p.getPerson() == null || !Person.Status.ACTIVE.equals(p.getPerson().getStatus()));
       return CompletableFuture.completedFuture(true);
     });
   }
@@ -479,9 +454,9 @@ public class PendingAssessmentsHelper {
       final Set<Recurrence> periods = e.getValue();
       // For positions, the current person holding it gets assessed (otherwise the object itself)
       final AbstractCustomizableAnetBean ota =
-          entryKey instanceof Position ? ((Position) entryKey).getPerson() : entryKey;
+          entryKey instanceof Position pos ? pos.getPerson() : entryKey;
       return ota.loadNotes(context).thenApply(notes -> {
-        final Map<Recurrence, Instant> assessmentsByRecurrence = new HashMap<>();
+        final Map<Recurrence, Instant> assessmentsByRecurrence = new EnumMap<>(Recurrence.class);
         notes.stream().filter(note -> NoteType.ASSESSMENT.equals(note.getType())).forEach(note -> {
           try {
             final JsonNode noteJson = Utils.parseJsonSafe(note.getText());
@@ -503,9 +478,7 @@ public class PendingAssessmentsHelper {
             // Invalid JSON, skip it
           }
         });
-        assessmentsByRecurrence.entrySet().stream().forEach(entry -> {
-          final Recurrence recurrence = entry.getKey();
-          final Instant lastAssessment = entry.getValue();
+        assessmentsByRecurrence.forEach((recurrence, lastAssessment) -> {
           final AssessmentDates assessmentDates = new AssessmentDates(now, recurrence);
           if (assessmentDates.getAssessmentDate() == null
               || !lastAssessment.isBefore(assessmentDates.getAssessmentDate())) {
@@ -519,9 +492,8 @@ public class PendingAssessmentsHelper {
       });
     }).toArray(CompletableFuture<?>[]::new);
     // Wait for our futures to complete before returning
-    return CompletableFuture.allOf(allFutures).thenCompose(v -> {
-      return CompletableFuture.completedFuture(true);
-    });
+    return CompletableFuture.allOf(allFutures)
+        .thenCompose(v -> CompletableFuture.completedFuture(true));
   }
 
   private void filterObjectsToAssess(final Map<Position, ObjectsToAssess> objectsToAssessByPosition,
@@ -531,7 +503,7 @@ public class PendingAssessmentsHelper {
         objectsToAssessByPosition.entrySet().iterator(); otabpi.hasNext();) {
       final Entry<Position, ObjectsToAssess> otabp = otabpi.next();
       final ObjectsToAssess ota = otabp.getValue();
-      final Set<Position> positionsToAssess = ota.getPositionsToAssess();
+      final Set<Position> positionsToAssess = ota.positionsToAssess();
       for (final Iterator<Position> ptai = positionsToAssess.iterator(); ptai.hasNext();) {
         final Position pta = ptai.next();
         if (!allPositionsToAssess.containsKey(pta) || allPositionsToAssess.get(pta).isEmpty()) {
@@ -541,7 +513,7 @@ public class PendingAssessmentsHelper {
         }
       }
 
-      final Set<Task> tasksToAssess = ota.getTasksToAssess();
+      final Set<Task> tasksToAssess = ota.tasksToAssess();
       for (final Iterator<Task> ttai = tasksToAssess.iterator(); ttai.hasNext();) {
         final Task tta = ttai.next();
         if (!allTasksToAssess.containsKey(tta) || allTasksToAssess.get(tta).isEmpty()) {
@@ -559,32 +531,38 @@ public class PendingAssessmentsHelper {
     }
   }
 
-  private CompletableFuture<Boolean> loadPeopleToBeNotified(final Map<String, Object> context,
+  private CompletableFuture<Map<Position, ObjectsToAssess>> loadPeopleToBeIncluded(
+      final Map<String, Object> context,
       final Map<Position, ObjectsToAssess> objectsToAssessByPosition,
       final Map<Position, Set<Recurrence>> allPositionsToAssess,
-      final Map<Task, Set<Recurrence>> allTasksToAssess) {
+      final Map<Task, Set<Recurrence>> allTasksToAssess, final boolean sendEmail) {
+    final Map<Position, ObjectsToAssess> includedObjectsToAssessByPosition = new HashMap<>();
     final CompletableFuture<?>[] allFutures =
         objectsToAssessByPosition.entrySet().stream().map(otabp -> {
           final Position pos = otabp.getKey();
           // Get the person to be notified
           return pos.loadPerson(context).thenApply(advisor -> {
+            if (!Boolean.TRUE.equals(advisor.getUser())) {
+              return CompletableFuture.completedFuture(null);
+            }
             final ObjectsToAssess ota = otabp.getValue();
-            final Set<Position> positionsToAssess = ota.getPositionsToAssess();
-            final Set<Task> tasksToAssess = ota.getTasksToAssess();
+            includedObjectsToAssessByPosition.put(pos, ota);
+            final Set<Position> positionsToAssess = ota.positionsToAssess();
+            final Set<Task> tasksToAssess = ota.tasksToAssess();
             logger.info("advisor {} should do assessments:", advisor);
-            positionsToAssess.stream()
-                .forEach(pta -> logger.info(" - {} for position {} held by person {}",
-                    allPositionsToAssess.get(pta), pta, pta.getPerson()));
-            tasksToAssess.stream()
+            positionsToAssess.forEach(pta -> logger.info(" - {} for position {} held by person {}",
+                allPositionsToAssess.get(pta), pta, pta.getPerson()));
+            tasksToAssess
                 .forEach(tta -> logger.info(" - {} for task {}", allTasksToAssess.get(tta), tta));
-            sendEmail(advisor, positionsToAssess, tasksToAssess);
+            if (sendEmail) {
+              sendEmail(advisor, positionsToAssess, tasksToAssess);
+            }
             return null;
           });
         }).toArray(CompletableFuture<?>[]::new);
     // Wait for our futures to complete before returning
-    return CompletableFuture.allOf(allFutures).thenCompose(v -> {
-      return CompletableFuture.completedFuture(true);
-    });
+    return CompletableFuture.allOf(allFutures)
+        .thenCompose(v -> CompletableFuture.completedFuture(includedObjectsToAssessByPosition));
   }
 
   private void sendEmail(Person advisor, final Set<Position> positionsToAssess,
