@@ -803,7 +803,7 @@ public class ReportResource {
 
     Instant now = Instant.now();
     Instant weekStart = now.atZone(DaoUtils.getServerNativeZoneId()).with(DayOfWeek.MONDAY)
-        .withHour(0).withMinute(0).withSecond(0).withNano(0).toInstant();
+        .withHour(0).withMinute(0).withSecond(0).withNano(0).plusWeeks(1).toInstant();
     Instant startDate =
         weekStart.atZone(DaoUtils.getServerNativeZoneId()).minusWeeks(weeksAgo).toInstant();
     final List<Map<String, Object>> list =

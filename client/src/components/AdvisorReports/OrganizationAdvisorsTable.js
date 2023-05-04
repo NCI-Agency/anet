@@ -1,7 +1,6 @@
 import AdvisorReportsModal from "components/AdvisorReports/AdvisorReportsModal"
 import AdvisorReportsRow from "components/AdvisorReports/AdvisorReportsRow"
 import AdvisorReportsTableHead from "components/AdvisorReports/AdvisorReportsTableHead"
-import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useEffect, useMemo, useRef, useState } from "react"
 import { Table } from "react-bootstrap"
@@ -67,8 +66,8 @@ const OrganizationAdvisorsTable = ({
     <div className="organization-advisors-table">
       <Table striped bordered hover responsive>
         <caption>
-          Shows reports submitted and engagements attended per week by an
-          organization's {pluralize(Settings.fields.advisor.person.name)}
+          Shows reports submitted and engagements attended per week for each{" "}
+          {Settings.fields.advisor.person.name} in the organization
         </caption>
         <AdvisorReportsTableHead
           columnGroups={columnGroups}
