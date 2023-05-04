@@ -237,32 +237,38 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(loc.getUuid()).isNotNull();
 
     // Write a Report
-    final ReportInput rInput =
-        ReportInput.builder().withEngagementDate(Instant.now()).withDuration(120)
-            .withReportPeople(
-                getReportPeopleInput(Lists.newArrayList(principal, personToReportAuthor(author))))
-            .withTasks(Lists.newArrayList(getTaskInput(action))).withLocation(getLocationInput(loc))
-            .withAtmosphere(Atmosphere.POSITIVE).withAtmosphereDetails("Everybody was super nice!")
-            .withIntent("A testing report to test that reporting reports")
-            // set HTML of report text
-            .withReportText(UtilsTest.getCombinedHtmlTestCase().getInput())
-            // set JSON of customFields
-            .withCustomFields(UtilsTest.getCombinedJsonTestCase().getInput())
-            .withNextSteps("This is the next steps on a report")
-            .withKeyOutcomes("These are the key outcomes of this engagement")
-            .withAdvisorOrg(getOrganizationInput(advisorOrg))
-            .withPrincipalOrg(getOrganizationInput(principalOrg)).build();
+    final ReportPerson nonAttendingAuthor = personToReportAuthor(getElizabethElizawell());
+    nonAttendingAuthor.setAttendee(false);
+    final ArrayList<ReportPerson> reportPeople =
+        Lists.newArrayList(principal, personToReportAuthor(author), nonAttendingAuthor);
+    final ReportInput rInput = ReportInput.builder().withEngagementDate(Instant.now())
+        .withDuration(120).withReportPeople(getReportPeopleInput(reportPeople))
+        .withTasks(Lists.newArrayList(getTaskInput(action))).withLocation(getLocationInput(loc))
+        .withAtmosphere(Atmosphere.POSITIVE).withAtmosphereDetails("Everybody was super nice!")
+        .withIntent("A testing report to test that reporting reports")
+        // set HTML of report text
+        .withReportText(UtilsTest.getCombinedHtmlTestCase().getInput())
+        // set JSON of customFields
+        .withCustomFields(UtilsTest.getCombinedJsonTestCase().getInput())
+        .withNextSteps("This is the next steps on a report")
+        .withKeyOutcomes("These are the key outcomes of this engagement")
+        .withAdvisorOrg(getOrganizationInput(advisorOrg))
+        .withPrincipalOrg(getOrganizationInput(principalOrg)).build();
     final Report created = authorMutationExecutor.createReport(FIELDS, rInput);
     assertThat(created).isNotNull();
     assertThat(created.getUuid()).isNotNull();
-    assertThat(created.getState()).isEqualTo(ReportState.DRAFT);
-    assertThat(created.getAdvisorOrg().getUuid()).isEqualTo(advisorOrg.getUuid());
-    assertThat(created.getPrincipalOrg().getUuid()).isEqualTo(principalOrg.getUuid());
+    // Retrieve the report and do some additional checks
+    final Report check = authorQueryExecutor.report(FIELDS, created.getUuid());
+    assertThat(check.getState()).isEqualTo(ReportState.DRAFT);
+    assertThat(check.getAdvisorOrg().getUuid()).isEqualTo(advisorOrg.getUuid());
+    assertThat(check.getPrincipalOrg().getUuid()).isEqualTo(principalOrg.getUuid());
     // check that HTML of report text is sanitized after create
-    assertThat(created.getReportText()).isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
+    assertThat(check.getReportText()).isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
     // check that JSON of customFields is sanitized after create
-    assertThat(created.getCustomFields())
-        .isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
+    assertThat(check.getCustomFields()).isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
+    assertThat(check.getReportPeople()).hasSameSizeAs(reportPeople);
+    assertThat(check.getReportPeople())
+        .allMatch(crp -> reportPeople.stream().anyMatch(rp -> isSameReportPerson(crp, rp)));
 
     // Have another regular user try to submit the report
     try {
@@ -472,6 +478,11 @@ public class ReportResourceTest extends AbstractResourceTest {
         adminQueryExecutor.organization(ORGANIZATION_FIELDS, advisorOrg.getUuid());
     assertThat(updatedOrg).isNotNull();
     assertThat(updatedOrg.getApprovalSteps()).isEmpty();
+  }
+
+  private boolean isSameReportPerson(ReportPerson crp, ReportPerson rp) {
+    return rp.getUuid().equals(crp.getUuid()) && rp.getAuthor().equals(crp.getAuthor())
+        && rp.getPrimary().equals(crp.getPrimary()) && rp.getAttendee().equals(crp.getAttendee());
   }
 
   @Test
