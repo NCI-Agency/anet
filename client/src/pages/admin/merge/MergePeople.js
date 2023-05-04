@@ -128,10 +128,10 @@ const MergePeople = ({ pageDispatchers }) => {
           {areAllSet(person1, person2, !mergedPerson) && (
             <div style={{ padding: "16px 5%" }}>
               <Callout intent="primary">
-                <br />- Required fields are:{" "}
+                <br />- Required fields are:
                 <ul>
                   <li>Name</li>
-                  <li>Role</li>
+                  <li>{Settings.fields.person.user?.label}</li>
                   <li>Status</li>
                   <li>{Settings.fields.person.rank?.label}</li>
                   {!Settings.fields.person.gender?.exclude &&
@@ -141,6 +141,10 @@ const MergePeople = ({ pageDispatchers }) => {
                   {!Settings.fields.person.country?.optional && (
                     <li>{Settings.fields.person.country?.label}</li>
                   )}
+                </ul>
+                If the Merged Person will be an{" "}
+                {Settings.fields.person.user?.label}:
+                <ul>
                   {!Settings.fields.person.emailAddress?.optional && (
                     <li>{Settings.fields.person.emailAddress?.label}</li>
                   )}
@@ -149,6 +153,7 @@ const MergePeople = ({ pageDispatchers }) => {
                       <li>{Settings.fields.person.endOfTourDate?.label}</li>
                   )}
                 </ul>
+                are also required.
               </Callout>
             </div>
           )}
@@ -184,6 +189,17 @@ const MergePeople = ({ pageDispatchers }) => {
                 align={ALIGN_OPTIONS.CENTER}
                 action={getInfoButton("Name is required.")}
                 fieldName="name"
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
+              <DictMergeField
+                dictProps={Settings.fields.person.user}
+                value={utils.formatBoolean(mergedPerson.user, true)}
+                align={ALIGN_OPTIONS.CENTER}
+                action={getInfoButton(
+                  `${Settings.fields.person.user?.label} is required.`
+                )}
+                fieldName="user"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
@@ -291,7 +307,8 @@ const MergePeople = ({ pageDispatchers }) => {
                 value={mergedPerson.emailAddress}
                 align={ALIGN_OPTIONS.CENTER}
                 action={
-                  !Settings.fields.person.emailAddress?.optional
+                  !Settings.fields.person.emailAddress?.optional &&
+                  mergedPerson.user
                     ? getInfoButton(
                       `${Settings.fields.person.emailAddress?.label} is required.`
                     )
@@ -383,7 +400,8 @@ const MergePeople = ({ pageDispatchers }) => {
                 )}
                 align={ALIGN_OPTIONS.CENTER}
                 action={
-                  !Settings.fields.person.endOfTourDate?.optional
+                  !Settings.fields.person.endOfTourDate?.optional &&
+                  mergedPerson.user
                     ? getInfoButton(
                       `${Settings.fields.person.endOfTourDate?.label} is required`
                     )
@@ -612,6 +630,27 @@ const PersonColumn = ({
                 align,
                 mergeState,
                 "name"
+              )
+            }
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
+          />
+          <DictMergeField
+            dictProps={Settings.fields.person.user}
+            fieldName="user"
+            value={utils.formatBoolean(person.user)}
+            align={align}
+            action={
+              actionButtons &&
+              getActionButton(
+                () => {
+                  dispatchMergeActions(
+                    setAMergedField("user", person.user, align)
+                  )
+                },
+                align,
+                mergeState,
+                "domainUsername"
               )
             }
             mergeState={mergeState}

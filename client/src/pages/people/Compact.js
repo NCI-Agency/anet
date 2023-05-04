@@ -54,7 +54,9 @@ const GQL_GET_PERSON = gql`
       pendingVerification
       emailAddress
       phoneNumber
+      user
       domainUsername
+      openIdSubject
       biography
       country
       gender
@@ -388,6 +390,7 @@ const CompactPersonView = ({ pageDispatchers }) => {
     // map fields that have specific human value
     const humanValuesExceptions = {
       biography: <RichTextEditor readOnly value={person.biography} />,
+      user: utils.formatBoolean(person.user),
       emailAddress: emailHumanValue,
       endOfTourDate:
         person.endOfTourDate &&

@@ -71,6 +71,7 @@ const GQL_GET_PERSON = gql`
       updatedAt
       emailAddress
       phoneNumber
+      user
       domainUsername
       openIdSubject
       biography
@@ -440,6 +441,9 @@ const PersonShow = ({ pageDispatchers }) => {
     const mappedNonCustomFields = mapNonCustomFields()
     // map fields that have privileged access check to the condition
     const privilegedAccessedFields = {
+      user: {
+        accessCond: isAdmin
+      },
       domainUsername: {
         accessCond: isAdmin
       },
@@ -500,6 +504,7 @@ const PersonShow = ({ pageDispatchers }) => {
     // map fields that have specific human value
     const humanValuesExceptions = {
       biography: <RichTextEditor readOnly value={person.biography} />,
+      user: utils.formatBoolean(person.user),
       emailAddress: emailHumanValue,
       endOfTourDate:
         person.endOfTourDate &&

@@ -97,7 +97,7 @@ public class ReportResourceTest extends AbstractResourceTest {
   private static final String ORGANIZATION_FIELDS = String.format(
       "{ %1$s approvalSteps { uuid name nextStepUuid relatedObjectUuid } }", _ORGANIZATION_FIELDS);
   private static final String _PERSON_FIELDS =
-      "uuid name status emailAddress phoneNumber rank biography country"
+      "uuid name status user emailAddress phoneNumber rank biography country"
           + " gender endOfTourDate domainUsername openIdSubject pendingVerification createdAt updatedAt";
   private static final String PERSON_FIELDS = String.format("{ %1$s }", _PERSON_FIELDS);
   private static final String REPORT_PEOPLE_FIELDS =
@@ -882,7 +882,7 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     // Create a Person who isn't in a Billet
     final PersonInput authorInput =
-        PersonInput.builder().withName("A New Guy").withStatus(Status.ACTIVE)
+        PersonInput.builder().withName("A New Guy").withUser(true).withStatus(Status.ACTIVE)
             .withDomainUsername("newguy").withEmailAddress("newGuy@example.com").build();
     final Person author = adminMutationExecutor.createPerson(PERSON_FIELDS, authorInput);
     assertThat(author).isNotNull();

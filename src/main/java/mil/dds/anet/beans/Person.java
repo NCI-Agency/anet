@@ -38,6 +38,9 @@ public class Person extends AbstractCustomizableAnetBean
   private Status status = Status.ACTIVE;
   @GraphQLQuery
   @GraphQLInputField
+  private Boolean user = false;
+  @GraphQLQuery
+  @GraphQLInputField
   private Boolean pendingVerification = false;
   @GraphQLQuery
   @GraphQLInputField
@@ -107,6 +110,15 @@ public class Person extends AbstractCustomizableAnetBean
   @Override
   public void setStatus(Status status) {
     this.status = status;
+  }
+
+  @AllowUnverifiedUsers
+  public Boolean getUser() {
+    return user;
+  }
+
+  public void setUser(Boolean user) {
+    this.user = user;
   }
 
   @AllowUnverifiedUsers
@@ -331,6 +343,7 @@ public class Person extends AbstractCustomizableAnetBean
     final Person other = (Person) o;
     return super.equals(o) && Objects.equals(uuid, other.getUuid())
         && Objects.equals(other.getName(), name) && Objects.equals(other.getStatus(), status)
+        && Objects.equals(other.getUser(), user)
         && Objects.equals(other.getEmailAddress(), emailAddress)
         && Objects.equals(other.getPhoneNumber(), phoneNumber)
         && Objects.equals(other.getRank(), rank) && Objects.equals(other.getBiography(), biography)
@@ -347,7 +360,7 @@ public class Person extends AbstractCustomizableAnetBean
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), uuid, name, status, emailAddress, phoneNumber, rank,
+    return Objects.hash(super.hashCode(), uuid, name, status, user, emailAddress, phoneNumber, rank,
         biography, domainUsername, openIdSubject, pendingVerification, avatarUuid, code, createdAt,
         updatedAt);
   }

@@ -27,6 +27,7 @@ const GQL_GET_PERSON = gql`
       pendingVerification
       emailAddress
       phoneNumber
+      user
       domainUsername
       biography
       country
@@ -128,10 +129,16 @@ const PersonPreview = ({ className, uuid }) => {
             />
 
             {isAdmin && (
-              <DictPreviewField
-                dictProps={Settings.fields.person.domainUsername}
-                value={person.domainUsername}
-              />
+              <>
+                <DictPreviewField
+                  dictProps={Settings.fields.person.user}
+                  value={utils.formatBoolean(person.user)}
+                />
+                <DictPreviewField
+                  dictProps={Settings.fields.person.domainUsername}
+                  value={person.domainUsername}
+                />
+              </>
             )}
 
             <DictPreviewField
@@ -275,8 +282,8 @@ const PersonPreview = ({ className, uuid }) => {
     if (Person.isEqual(currentUser, person)) {
       return (
         <em>
-          You are not assigned to a position. Contact your organization's super
-          user to be added.
+          You are not assigned to a position. Contact your organization's
+          superuser to be added.
         </em>
       )
     } else {

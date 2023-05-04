@@ -60,7 +60,7 @@ public class PersonResourceTest extends AbstractResourceTest {
   private static final String _POSITION_FIELDS =
       "uuid name code type role status organization { uuid }";
   private static final String _PERSON_FIELDS =
-      "uuid name status emailAddress phoneNumber rank biography country avatarUuid code"
+      "uuid name status user emailAddress phoneNumber rank biography country avatarUuid code"
           + " gender endOfTourDate domainUsername openIdSubject pendingVerification createdAt updatedAt"
           + " customFields";
   public static final String PERSON_FIELDS_ONLY_HISTORY =
@@ -140,7 +140,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(newPos.getUuid()).isNotNull();
 
     final PersonInput newPerson2Input =
-        PersonInput.builder().withName("Namey McNameface").withStatus(Status.ACTIVE)
+        PersonInput.builder().withName("Namey McNameface").withUser(true).withStatus(Status.ACTIVE)
             .withDomainUsername("testcreateperson").withPosition(getPositionInput(newPos)).build();
     final Person newPerson2 = adminMutationExecutor.createPerson(FIELDS, newPerson2Input);
     assertThat(newPerson2).isNotNull();

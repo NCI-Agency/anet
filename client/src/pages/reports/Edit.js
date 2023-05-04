@@ -48,13 +48,13 @@ const GQL_GET_REPORT = gql`
         uuid
         name
         rank
-        role
         avatarUuid
         status
         author
         primary
         attendee
         interlocutor
+        user
         endOfTourDate
         position {
           uuid

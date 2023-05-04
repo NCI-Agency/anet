@@ -36,7 +36,8 @@ export default class Person extends Model {
     SENSITIVE_CUSTOM_FIELDS_PARENT
   )
 
-  static showPageOrderedFields = Person.initShowPageFieldsOrdered(false)
+  static advisorShowPageOrderedFields = Person.initShowPageFieldsOrdered(true)
+  static regularShowPageOrderedFields = Person.initShowPageFieldsOrdered(false)
 
   static yupSchema = yup
     .object()
@@ -47,8 +48,12 @@ export default class Person extends Model {
       firstName: yup
         .string()
         .nullable()
-        .required(
-          `You must provide the ${Settings.fields.person.firstName?.label}`
+        .when("user", ([user], schema) =>
+          !user
+            ? schema
+            : schema.required(
+              `You must provide the ${Settings.fields.person.firstName?.label}`
+            )
         )
         .default("")
         .label(Settings.fields.person.firstName?.label),
@@ -62,6 +67,10 @@ export default class Person extends Model {
         )
         .default("")
         .label(Settings.fields.person.lastName?.label),
+      user: yup
+        .boolean()
+        .default(false)
+        .label(Settings.fields.person.user?.label),
       domainUsername: yup
         .string()
         .nullable()
@@ -71,15 +80,17 @@ export default class Person extends Model {
         .string()
         .nullable()
         .email()
-        .test(
-          "emailAddress",
-          "emailAddress error",
-          (emailAddress, testContext) => {
-            const r = utils.handleEmailValidation(emailAddress, true)
-            return Settings.fields.person.emailAddress?.optional || r.isValid
-              ? true
-              : testContext.createError({ message: r.message })
-          }
+        .when("user", ([user], schema) =>
+          schema.test(
+            "emailAddress",
+            "emailAddress error",
+            (emailAddress, testContext) => {
+              const r = utils.handleEmailValidation(emailAddress, user)
+              return Settings.fields.person.emailAddress?.optional || r.isValid
+                ? true
+                : testContext.createError({ message: r.message })
+            }
+          )
         )
         .default("")
         .label(Settings.fields.person.emailAddress?.label),
@@ -125,16 +136,19 @@ export default class Person extends Model {
       code: yup.string().nullable().default(""),
       endOfTourDate: yupDate
         .nullable()
-        .when("pendingVerification", ([pendingVerification], schema) =>
-          Settings.fields.person.endOfTourDate?.exclude ||
-          Settings.fields.person.endOfTourDate?.optional ||
-          !Person.isPendingVerification({ pendingVerification })
-            ? schema
-            : schema.test(
-              "end-of-tour-date",
-              `The ${Settings.fields.person.endOfTourDate?.label} date must be in the future`,
-              endOfTourDate => endOfTourDate > Date.now()
-            )
+        .when(
+          ["user", "pendingVerification"],
+          ([user, pendingVerification], schema) =>
+            Settings.fields.person.endOfTourDate?.exclude ||
+            Settings.fields.person.endOfTourDate?.optional ||
+            !user ||
+            !Person.isPendingVerification({ pendingVerification })
+              ? schema
+              : schema.test(
+                "end-of-tour-date",
+                `The ${Settings.fields.person.endOfTourDate?.label} date must be in the future`,
+                endOfTourDate => endOfTourDate > Date.now()
+              )
         )
         .default(null)
         .label(Settings.fields.person.endOfTourDate?.label),
@@ -152,7 +166,7 @@ export default class Person extends Model {
     .concat(Model.yupSchema)
 
   static autocompleteQuery =
-    "uuid name rank status endOfTourDate avatarUuid position { uuid name type role code status organization { uuid shortName longName identificationCode } location { uuid name } }"
+    "uuid name rank status user endOfTourDate avatarUuid position { uuid name type role code status organization { uuid shortName longName identificationCode } location { uuid name } }"
 
   static allFieldsQuery = `
     uuid
@@ -163,6 +177,7 @@ export default class Person extends Model {
     pendingVerification
     emailAddress
     phoneNumber
+    user
     domainUsername
     openIdSubject
     biography
@@ -353,28 +368,34 @@ export default class Person extends Model {
   }
 
   getNumberOfFieldsInLeftColumn() {
-    return Settings.fields.regular.person.numberOfFieldsInLeftColumn
+    return Settings.fields[this.user ? "advisor" : "regular"].person
+      .numberOfFieldsInLeftColumn
   }
 
   getShowPageFieldsOrdered() {
-    return Person.showPageOrderedFields
+    return this.user
+      ? Person.advisorShowPageOrderedFields
+      : Person.regularShowPageOrderedFields
   }
 
   /**
    * @returns Keys of fields which should span over 2 columns
    */
   getFullWidthFields() {
-    return Settings.fields.regular.person.showAsFullWidthFields || []
+    return (
+      Settings.fields[this.user ? "advisor" : "regular"].person
+        .showAsFullWidthFields || []
+    )
   }
 
-  static initShowPageFieldsOrdered() {
+  static initShowPageFieldsOrdered(user) {
     const fieldsArrayFromConfig =
-      Settings.fields.regular.person.showPageOrderedFields
+      Settings.fields[user ? "advisor" : "regular"].person.showPageOrderedFields
 
-    return Person.filterInvalidShowPageFields(fieldsArrayFromConfig || [])
+    return Person.filterInvalidShowPageFields(fieldsArrayFromConfig || [], user)
   }
 
-  static filterInvalidShowPageFields(fieldsArrayFromConfig) {
+  static filterInvalidShowPageFields(fieldsArrayFromConfig, user) {
     return fieldsArrayFromConfig.filter(field => {
       if (
         Settings.fields.person[field] ||
@@ -387,7 +408,9 @@ export default class Person extends Model {
         "WARN",
         "Person.js",
         366,
-        `Wrong field name in dictionary.fields.regular.showPageOrderedFields, field name: ${field}`
+        `Wrong field name in dictionary.fields.${
+          user ? "advisor" : "regular"
+        }.showPageOrderedFields, field name: ${field}`
       )
       return false
     })
