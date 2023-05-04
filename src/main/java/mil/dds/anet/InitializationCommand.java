@@ -116,6 +116,7 @@ public class InitializationCommand extends EnvironmentCommand<AnetConfiguration>
     Person admin = new Person();
     admin.setName(namespace.getString("adminFullName"));
     admin.setDomainUsername(namespace.getString("adminDomainUsername"));
+    admin.setUser(true);
     admin = engine.getPersonDao().insert(admin);
     engine.getPositionDao().setPersonInPosition(admin.getUuid(), adminPos.getUuid());
 

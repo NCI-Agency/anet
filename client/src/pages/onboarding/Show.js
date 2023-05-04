@@ -37,6 +37,7 @@ const GQL_GET_SELF = gql`
       country
       gender
       endOfTourDate
+      user
       domainUsername
       openIdSubject
       code

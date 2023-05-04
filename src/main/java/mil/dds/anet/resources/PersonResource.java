@@ -70,8 +70,7 @@ public class PersonResource {
           Status.BAD_REQUEST);
     }
 
-    // FIXME: Should emailAddress always be required/valid?
-    if (!Utils.isEmptyOrNull(p.getEmailAddress())) {
+    if (Boolean.TRUE.equals(p.getUser()) && !Utils.isEmptyOrNull(p.getEmailAddress())) {
       validateEmail(p.getEmailAddress());
     }
 
@@ -126,8 +125,7 @@ public class PersonResource {
     final Person existing = dao.getByUuid(p.getUuid());
     assertCanUpdatePerson(user, existing);
 
-    // FIXME: Should emailAddress always be required/valid?
-    if (!Utils.isEmptyOrNull(p.getEmailAddress())) {
+    if (Boolean.TRUE.equals(p.getUser()) && !Utils.isEmptyOrNull(p.getEmailAddress())) {
       validateEmail(p.getEmailAddress());
     }
 
@@ -157,12 +155,13 @@ public class PersonResource {
       }
     }
 
-    // If person changed to inactive, clear out the domainUsername and openIdSubject
+    // If person changed to inactive, clear out the user status and domainUsername and openIdSubject
     if (Person.Status.INACTIVE.equals(p.getStatus())
         && !Person.Status.INACTIVE.equals(existing.getStatus())) {
-      AnetAuditLogger.log(
-          "Person {} domainUsername '{}' and openIdSubject '{}' cleared by {} because they are now inactive",
+      AnetAuditLogger.log("Person {} user status set to false, "
+          + "and domainUsername '{}' and openIdSubject '{}' cleared by {} because they are now inactive",
           p, existing.getDomainUsername(), existing.getOpenIdSubject(), user);
+      p.setUser(false);
       p.setDomainUsername(null);
       p.setOpenIdSubject(null);
       dao.updateAuthenticationDetails(p);
@@ -308,7 +307,7 @@ public class PersonResource {
       throw new WebApplicationException("You can only update yourself", Status.FORBIDDEN);
     }
 
-    if (p.getRole().equals(Role.ADVISOR) && !Utils.isEmptyOrNull(p.getEmailAddress())) {
+    if (Boolean.TRUE.equals(p.getUser()) && !Utils.isEmptyOrNull(p.getEmailAddress())) {
       validateEmail(p.getEmailAddress());
     }
 

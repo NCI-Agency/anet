@@ -37,6 +37,7 @@ const GQL_GET_PERSON = gql`
       emailAddress
       phoneNumber
       pendingVerification
+      user
       domainUsername
       openIdSubject
       biography

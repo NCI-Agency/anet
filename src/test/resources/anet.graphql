@@ -577,6 +577,7 @@ type Person {
   rank: String
   status: Status
   updatedAt: Instant
+  user: Boolean
   uuid: String
 }
 
@@ -602,6 +603,7 @@ input PersonInput {
   rank: String
   status: Status
   updatedAt: Instant
+  user: Boolean
   uuid: String
 }
 
@@ -923,6 +925,7 @@ type ReportPerson {
   rank: String
   status: Status
   updatedAt: Instant
+  user: Boolean
   uuid: String
 }
 
@@ -952,6 +955,7 @@ input ReportPersonInput {
   rank: String
   status: Status
   updatedAt: Instant
+  user: Boolean
   uuid: String
 }
 

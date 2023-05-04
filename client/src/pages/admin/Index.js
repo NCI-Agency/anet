@@ -74,8 +74,8 @@ const RECENT_ACTIVITIES = gql`
       uuid
       name
       rank
-      role
       avatarUuid
+      user
       domainUsername
     }
     activity {

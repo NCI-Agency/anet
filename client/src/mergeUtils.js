@@ -11,7 +11,7 @@ import _cloneDeep from "lodash/cloneDeep"
 import _escape from "lodash/escape"
 import _isEmpty from "lodash/isEmpty"
 import _set from "lodash/set"
-import { Location, Person } from "models"
+import { Location } from "models"
 import React, { useCallback, useReducer } from "react"
 import { Button } from "react-bootstrap"
 import { toast } from "react-toastify"
@@ -261,23 +261,17 @@ export function mergedPersonIsValid(mergedPerson) {
   }
   if (
     !Settings.fields.person.emailAddress?.optional &&
+    mergedPerson.user &&
     !mergedPerson.emailAddress
   ) {
-    msg.push(
-      `${
-        Settings.fields.person.emailAddress?.label
-      } for ${Person.humanNameOfRole(Person.ROLE.ADVISOR)} role`
-    )
+    msg.push(Settings.fields.person.emailAddress?.label)
   }
   if (
     !Settings.fields.person.endOfTourDate?.optional &&
+    mergedPerson.user &&
     !mergedPerson.endOfTourDate
   ) {
-    msg.push(
-      `${
-        Settings.fields.person.endOfTourDate?.label
-      } for ${Person.humanNameOfRole(Person.ROLE.ADVISOR)} role`
-    )
+    msg.push(Settings.fields.person.endOfTourDate?.label)
   }
   if (_isEmpty(msg)) {
     return true

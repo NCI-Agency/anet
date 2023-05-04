@@ -230,6 +230,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
             final Person newPerson = new Person();
             logger.trace("creating new user with domainUsername={}, email={} and openIdSubject={}",
                 username, email, openIdSubject);
+            newPerson.setUser(true);
             newPerson.setPendingVerification(true);
             // Copy some data from the authentication token
             newPerson.setOpenIdSubject(openIdSubject);

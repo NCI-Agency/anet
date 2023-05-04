@@ -383,6 +383,8 @@ fields:
     lastName:
       label: Last name
       placeholder: LAST NAME
+    user:
+      label: ANET user
     domainUsername:
       label: Domain username
     openIdSubject:
@@ -640,6 +642,26 @@ fields:
   advisor:
     person:
       name: Advisor
+      # number of fields after Avatar in the left column for advisors (i.e. ANET users)
+      # adjust this number if two columns are not balanced on the Person Page
+      numberOfFieldsInLeftColumn: 6
+      # select and order person fields (including custom fields)
+      showPageOrderedFields:
+        - position
+        - prevPositions
+        - user
+        - domainUsername
+        - openIdSubject
+        - emailAddress
+        - phoneNumber
+        - country
+        - code
+        - rank
+        - gender
+        - endOfTourDate
+        - biography
+      showAsFullWidthFields:
+        - biography
     org:
       name: Advisor Organization
 
@@ -672,10 +694,10 @@ fields:
       showPageOrderedFields:
         - position
         - prevPositions
-        - emailAddress
         - phoneNumber
         - country
         - birthday
+        - emailAddress
         - politicalPosition
         - rank
         - gender

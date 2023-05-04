@@ -41,7 +41,6 @@ import {
   FormGroup,
   FormLabel,
   FormSelect,
-  FormText,
   Row
 } from "react-bootstrap"
 import { useNavigate } from "react-router-dom"
@@ -479,18 +478,50 @@ const PersonForm = ({
                     </FormGroup>
 
                     {isAdmin && (
-                      <DictionaryField
-                        wrappedComponent={FastField}
-                        dictProps={Settings.fields.person.domainUsername}
-                        name="domainUsername"
-                        component={FieldHelper.InputField}
-                        extraColElem={
-                          <span className="text-danger">
-                            Be careful when changing this field; you might lock
-                            someone out or create duplicate accounts.
-                          </span>
-                        }
-                      />
+                      <>
+                        <DictionaryField
+                          wrappedComponent={FastField}
+                          dictProps={Settings.fields.person.user}
+                          name="user"
+                          component={FieldHelper.RadioButtonToggleGroupField}
+                          buttons={[
+                            {
+                              id: "isUser",
+                              value: true,
+                              label: "Yes"
+                            },
+                            {
+                              id: "isNotUser",
+                              value: false,
+                              label: "No"
+                            }
+                          ]}
+                          onChange={value => setFieldValue("user", value)}
+                        >
+                          {values.user && (
+                            <Alert variant="warning">
+                              Creating a user in ANET could result in duplicate
+                              accounts if this person logs in later. If you
+                              notice duplicate accounts you should take action.
+                            </Alert>
+                          )}
+                        </DictionaryField>
+
+                        {values.user && (
+                          <DictionaryField
+                            wrappedComponent={FastField}
+                            dictProps={Settings.fields.person.domainUsername}
+                            name="domainUsername"
+                            component={FieldHelper.InputField}
+                            extraColElem={
+                              <span className="text-danger">
+                                Be careful when changing this field; you might
+                                lock someone out or create duplicate accounts.
+                              </span>
+                            }
+                          />
+                        )}
+                      </>
                     )}
 
                     {disableStatusChange ? (
@@ -511,25 +542,20 @@ const PersonForm = ({
                         onChange={value => setFieldValue("status", value)}
                       >
                         {willAutoKickPosition && (
-                          <FormText>
-                            <span className="text-danger">
-                              Setting this person to inactive will automatically
-                              remove them from the{" "}
-                              <strong>{values.position.name}</strong> position.
-                            </span>
-                          </FormText>
+                          <Alert variant="warning">
+                            Setting this person to inactive will automatically
+                            remove them from the{" "}
+                            <strong>{values.position.name}</strong> position.
+                          </Alert>
                         )}
                         {warnDomainUsername && (
-                          <FormText>
-                            <span className="text-danger">
-                              Setting this person to inactive means the next
-                              person to logon with the user name{" "}
-                              <strong>{values.domainUsername}</strong> will have
-                              to create a new profile. Do you want the next
-                              person to login with this user name to create a
-                              new profile?
-                            </span>
-                          </FormText>
+                          <Alert variant="warning">
+                            Setting this person to inactive means the next
+                            person to logon with the username{" "}
+                            <strong>{values.domainUsername}</strong> will have
+                            to create a new profile. Do you want the next person
+                            to login with this username to create a new profile?
+                          </Alert>
                         )}
                       </DictionaryField>
                     )}

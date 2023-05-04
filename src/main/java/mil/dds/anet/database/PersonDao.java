@@ -49,7 +49,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
 
   // Must always retrieve these e.g. for ORDER BY
   public static final String[] minimalFields = {"uuid", "name", "rank", "createdAt"};
-  public static final String[] additionalFields = {"status", "emailAddress", "avatarUuid",
+  public static final String[] additionalFields = {"status", "user", "emailAddress", "avatarUuid",
       "phoneNumber", "biography", "country", "gender", "endOfTourDate", "domainUsername",
       "openIdSubject", "pendingVerification", "code", "updatedAt", "customFields"};
   public static final String[] allFields =
@@ -125,10 +125,10 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   @Override
   public Person insertInternal(Person p) {
     final String sql = "/* personInsert */ INSERT INTO people "
-        + "(uuid, name, status, \"emailAddress\", \"phoneNumber\", rank, "
+        + "(uuid, name, status, \"user\", \"emailAddress\", \"phoneNumber\", rank, "
         + "\"pendingVerification\", gender, country, code, \"endOfTourDate\", biography, "
         + "\"domainUsername\", \"openIdSubject\", \"createdAt\", \"updatedAt\", \"customFields\") "
-        + "VALUES (:uuid, :name, :status, :emailAddress, :phoneNumber, :rank, "
+        + "VALUES (:uuid, :name, :status, :user, :emailAddress, :phoneNumber, :rank, "
         + ":pendingVerification, :gender, :country, :code, :endOfTourDate, :biography, "
         + ":domainUsername, :openIdSubject, :createdAt, :updatedAt, :customFields)";
     getDbHandle().createUpdate(sql).bindBean(p)
@@ -159,7 +159,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   @Override
   public int updateInternal(Person p) {
     final String sql = "/* personUpdate */ UPDATE people "
-        + "SET name = :name, status = :status, gender = :gender, country = :country, "
+        + "SET name = :name, status = :status, \"user\" = :user, gender = :gender, country = :country, "
         + "\"emailAddress\" = :emailAddress, code = :code, "
         + "\"phoneNumber\" = :phoneNumber, rank = :rank, biography = :biography, "
         + "\"pendingVerification\" = :pendingVerification, \"domainUsername\" = :domainUsername, "
@@ -206,9 +206,9 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
         .createQuery("/* findByDomainUsername */ SELECT " + PERSON_FIELDS + ","
             + PositionDao.POSITION_FIELDS
             + "FROM people LEFT JOIN positions ON people.uuid = positions.\"currentPersonUuid\" "
-            + "WHERE people.\"domainUsername\" = :domainUsername "
+            + "WHERE people.user = :user AND people.\"domainUsername\" = :domainUsername "
             + "AND people.status != :inactiveStatus")
-        .bind("domainUsername", domainUsername)
+        .bind("user", true).bind("domainUsername", domainUsername)
         .bind("inactiveStatus", DaoUtils.getEnumId(Person.Status.INACTIVE)).map(new PersonMapper())
         .list();
   }
@@ -223,9 +223,9 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
         .createQuery("/* findByEmailAddress */ SELECT " + PERSON_FIELDS + ","
             + PositionDao.POSITION_FIELDS
             + "FROM people LEFT JOIN positions ON people.uuid = positions.\"currentPersonUuid\" "
-            + "WHERE people.\"emailAddress\" = :emailAddress "
+            + "WHERE people.user = :user AND people.\"emailAddress\" = :emailAddress "
             + "AND people.status != :inactiveStatus")
-        .bind("emailAddress", emailAddress)
+        .bind("user", true).bind("emailAddress", emailAddress)
         .bind("inactiveStatus", DaoUtils.getEnumId(Person.Status.INACTIVE)).map(new PersonMapper())
         .list();
   }
@@ -243,9 +243,9 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
         .createQuery("/* findByOpenIdSubject */ SELECT " + PERSON_FIELDS + ","
             + PositionDao.POSITION_FIELDS
             + "FROM people LEFT JOIN positions ON people.uuid = positions.\"currentPersonUuid\" "
-            + "WHERE people.\"openIdSubject\" = :openIdSubject "
+            + "WHERE people.user = :user AND people.\"openIdSubject\" = :openIdSubject "
             + "AND people.status != :inactiveStatus")
-        .bind("openIdSubject", openIdSubject)
+        .bind("user", true).bind("openIdSubject", openIdSubject)
         .bind("inactiveStatus", DaoUtils.getEnumId(Person.Status.INACTIVE)).map(new PersonMapper())
         .list();
     // There should at most one match

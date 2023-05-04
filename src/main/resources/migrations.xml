@@ -4624,12 +4624,17 @@
 	</changeSet>
 
 	<changeSet id="drop-advisor-principal-distinction" author="gjvoosten">
+		<!-- add user field to people -->
+		<addColumn tableName="people">
+			<column name="user" type="boolean" defaultValue="false" />
+		</addColumn>
 		<!-- add isInterlocutor field to reportPeople -->
 		<addColumn tableName="reportPeople">
 			<column name="isInterlocutor" type="boolean" defaultValue="true" />
 		</addColumn>
 
-		<!-- update some types and assessment keys, and infer the interlocutor status of attendees -->
+		<!-- update some types and assessment keys, set the user status of people,
+		     and infer the interlocutor status of attendees -->
 		<sql>
 			UPDATE positions SET type = 0
 				WHERE type = 1;
@@ -4639,6 +4644,12 @@
 				WHERE "assessmentKey" LIKE 'fields.principal%';
 			UPDATE notes SET "assessmentKey" = replace("assessmentKey", 'principal', 'interlocutor')
 				WHERE "assessmentKey" LIKE '%principal%';
+			UPDATE "people" SET "user" = true
+				WHERE role = 0
+				AND (
+					("openIdSubject" IS NOT NULL AND "openIdSubject" != '')
+					OR ("domainUsername" IS NOT NULL AND "domainUsername" != '')
+				);
 			UPDATE "reportPeople" SET "isInterlocutor" = false
 				WHERE "personUuid" in (SELECT uuid FROM people WHERE role = 0);
 		</sql>
