@@ -4469,6 +4469,14 @@
 			ON tasks ("shortName")
 			WHERE "parentTaskUuid" IS NULL;
 		</sql>
+	<changeSet>
+	
+	<changeSet id="add-positionRole-to-positions" author="hyesilAnka" >
+		<addColumn tableName="positions" >
+			<column name="positionRole" type="int" defaultValue="0" >
+				<constraints nullable="false"/>
+			</column>
+		</addColumn>
 	</changeSet>
 
 </databaseChangeLog>

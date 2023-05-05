@@ -25,6 +25,10 @@ public class Position extends AbstractCustomizableAnetBean
     ADVISOR, PRINCIPAL, SUPERUSER, ADMINISTRATOR
   }
 
+  public static enum PositionRole {
+    MEMBER, DEPUTY, LEADER
+  }
+
   @GraphQLQuery
   @GraphQLInputField
   String name;
@@ -37,6 +41,9 @@ public class Position extends AbstractCustomizableAnetBean
   @GraphQLQuery
   @GraphQLInputField
   private Status status;
+  @GraphQLQuery
+  @GraphQLInputField
+  private PositionRole positionRole;
   // Lazy Loaded
   // annotated below
   private ForeignObjectHolder<Organization> organization = new ForeignObjectHolder<>();
@@ -84,6 +91,14 @@ public class Position extends AbstractCustomizableAnetBean
   @Override
   public Status getStatus() {
     return status;
+  }
+
+  public PositionRole getPositionRole() {
+    return positionRole;
+  }
+
+  public void setPositionRole(PositionRole positionRole) {
+    this.positionRole = positionRole;
   }
 
   @Override

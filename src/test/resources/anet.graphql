@@ -645,6 +645,7 @@ type Position {
   organization: Organization
   organizationsAdministrated: [Organization]
   person: Person
+  positionRole: PositionRole
   previousPeople: [PersonPositionHistory]
   responsibleTasks(query: TaskSearchQueryInput): [Task]
   status: Status
@@ -665,11 +666,19 @@ input PositionInput {
   organization: OrganizationInput
   organizationsAdministrated: [OrganizationInput]
   person: PersonInput
+  positionRole: PositionRole
   previousPeople: [PersonPositionHistoryInput]
   status: Status
   type: PositionType
   updatedAt: Instant
   uuid: String
+}
+
+""""""
+enum PositionRole {
+  DEPUTY
+  LEADER
+  MEMBER
 }
 
 """"""
