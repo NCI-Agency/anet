@@ -28,6 +28,7 @@ const GQL_GET_POSITION = gql`
       code
       status
       type
+      positionRole
       location {
         uuid
         name

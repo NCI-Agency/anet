@@ -31,6 +31,7 @@ const GQL_GET_POSITION_LIST = gql`
         name
         code
         type
+        positionRole
         status
         organization {
           uuid
@@ -52,6 +53,7 @@ const GQL_GET_POSITION_LIST = gql`
           name
           code
           type
+          positionRole
           status
           organization {
             uuid

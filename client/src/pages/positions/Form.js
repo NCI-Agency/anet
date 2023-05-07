@@ -109,6 +109,25 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
       label: Settings.fields.administrator.position.type
     }
   ])
+  const nonAdminRolesButtons = [
+    {
+      id: "roleMemberButton",
+      value: Position.POSITION_ROLE.MEMBER,
+      label: Settings.fields.member.position.type
+    }
+  ]
+  const adminRolesButtons = nonAdminRolesButtons.concat([
+    {
+      id: "roleDeputyButton",
+      value: Position.POSITION_ROLE.DEPUTY,
+      label: Settings.fields.deputy.position.type
+    },
+    {
+      id: "roleLeaderButton",
+      value: Position.POSITION_ROLE.LEADER,
+      label: Settings.fields.leader.position.type
+    }
+  ])
 
   const CodeFieldWithLabel = DictionaryField(Field)
 
@@ -150,6 +169,9 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
         const permissionsButtons = isAdmin
           ? adminPermissionsButtons
           : nonAdminPermissionsButtons
+        const positionRoleButtons = isAdmin
+          ? adminRolesButtons
+          : nonAdminRolesButtons
         const administratingOrgUuids =
           currentUser.position.organizationsAdministrated.map(org => org.uuid)
         const isSuperuser =
@@ -313,6 +335,14 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
                     onChange={value => setFieldValue("permissions", value)}
                   />
                 )}
+
+                <Field
+                  name="positionRole"
+                  label={positionSettings.positionRole}
+                  component={FieldHelper.RadioButtonToggleGroupField}
+                  buttons={positionRoleButtons}
+                  onChange={value => setFieldValue("positionRole", value)}
+                />
               </Fieldset>
 
               <Fieldset title="Additional information">

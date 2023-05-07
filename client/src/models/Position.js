@@ -14,6 +14,10 @@ export const principalPosition = Settings.fields.principal.position
 export const administratorPosition = Settings.fields.administrator.position
 export const superuserPosition = Settings.fields.superuser.position
 
+export const memberPositionRole = Settings.fields.member.position
+export const deputyPositionRole = Settings.fields.deputy.position
+export const leaderPositionRole = Settings.fields.leader.position
+
 export default class Position extends Model {
   static resourceName = "Position"
   static listName = "positionList"
@@ -25,6 +29,12 @@ export default class Position extends Model {
     PRINCIPAL: "PRINCIPAL",
     SUPERUSER: "SUPERUSER",
     ADMINISTRATOR: "ADMINISTRATOR"
+  }
+
+  static POSITION_ROLE = {
+    MEMBER: "MEMBER",
+    DEPUTY: "DEPUTY",
+    LEADER: "LEADER"
   }
 
   // create yup schema for the customFields, based on the customFields config
@@ -49,6 +59,10 @@ export default class Position extends Model {
         .string()
         .required()
         .default(() => Model.STATUS.ACTIVE),
+      positionRole: yup
+        .string()
+        .required()
+        .default(() => Position.POSITION_ROLE.MEMBER),
       associatedPositions: yup.array().nullable().default([]),
       previousPeople: yup.array().nullable().default([]),
       organization: yup
@@ -86,7 +100,7 @@ export default class Position extends Model {
     .concat(Model.yupSchema)
 
   static autocompleteQuery =
-    "uuid name code type status location { uuid name } organization { uuid shortName} person { uuid name rank role avatar(size: 32) }"
+    "uuid name code type positionRole status location { uuid name } organization { uuid shortName} person { uuid name rank role avatar(size: 32) }"
 
   static autocompleteQueryWithNotes = `${this.autocompleteQuery} ${GRAPHQL_NOTES_FIELDS}`
 
@@ -94,6 +108,7 @@ export default class Position extends Model {
     uuid
     name
     type
+    positionRole
     status
     isSubscribed
     updatedAt
@@ -178,12 +193,26 @@ export default class Position extends Model {
     }
   }
 
+  static humanNameOfPositionRole(positionRole) {
+    if (positionRole === Position.POSITION_ROLE.MEMBER) {
+      return memberPositionRole.type
+    } else if (positionRole === Position.POSITION_ROLE.DEPUTY) {
+      return deputyPositionRole.type
+    } else if (positionRole === Position.POSITION_ROLE.LEADER) {
+      return leaderPositionRole.type
+    }
+  }
+
   constructor(props) {
     super(Model.fillObject(props, Position.yupSchema))
   }
 
   humanNameOfType() {
     return Position.humanNameOfType(this.type)
+  }
+
+  humanNameOfPositionRole() {
+    return Position.humanNameOfPositionRole(this.positionRole)
   }
 
   isAdvisor() {
@@ -216,6 +245,19 @@ export default class Position extends Model {
         return Settings.fields.superuser.position.type
       case "ADMINISTRATOR":
         return Settings.fields.administrator.position.type
+      default:
+        return "Default Case"
+    }
+  }
+
+  static convertPositionRole(positionRole) {
+    switch (positionRole) {
+      case "MEMBER":
+        return Settings.fields.member.position.type
+      case "DEPUTY":
+        return Settings.fields.deputy.position.type
+      case "LEADER":
+        return Settings.fields.leader.position.type
       default:
         return "Default Case"
     }

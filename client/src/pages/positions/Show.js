@@ -215,6 +215,13 @@ const PositionShow = ({ pageDispatchers }) => {
                 />
 
                 <Field
+                  name="positionRole"
+                  component={FieldHelper.ReadonlyField}
+                  label={positionSettings.positionRole}
+                  humanValue={Position.humanNameOfPositionRole}
+                />
+
+                <Field
                   name="status"
                   component={FieldHelper.ReadonlyField}
                   humanValue={Position.humanNameOfStatus}

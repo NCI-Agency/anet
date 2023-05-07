@@ -43,6 +43,7 @@ const GQL_GET_APP_DATA = gql`
         name
         code
         type
+        positionRole
         status
         isApprover
         organization {
