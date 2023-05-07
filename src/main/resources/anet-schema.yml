@@ -777,7 +777,7 @@ properties:
           position:
             type: object
             additionalProperties: false
-            required: [name, type, code]
+            required: [name, type, positionRole, code]
             properties:
               name:
                 type: string
@@ -787,6 +787,10 @@ properties:
                 type: string
                 title: The permissions type of this field
                 description: Used in the UI for the type/permissions of an advisor position.
+              positionRole:
+                type: string
+                title: The position role of this field
+                description: Used in the UI for the role of a advisor position.
               code:
                 "$ref": "#/$defs/inputField"
               location:
@@ -884,7 +888,7 @@ properties:
           position:
             type: object
             additionalProperties: false
-            required: [name, type, code]
+            required: [name, type, positionRole, code]
             properties:
               name:
                 type: string
@@ -894,6 +898,10 @@ properties:
                 type: string
                 title: The permissions type of this field
                 description: Used in the UI for the type/permissions of a principal position.
+              positionRole:
+                type: string
+                title: The position role of this field
+                description: Used in the UI for the role of a principal position.
               code:
                 "$ref": "#/$defs/inputField"
               location:
@@ -980,6 +988,66 @@ properties:
                 type: string
                 title: The permissions type of this field
                 description: Used in the UI for the type/permissions of an administrator position.
+
+      member:
+        type: object
+        additionalProperties: false
+        required: [position]
+        properties:
+
+          position:
+            type: object
+            additionalProperties: false
+            required: [type]
+            properties:
+              name:
+                  type: string
+                  title: The position role name of this field
+                  description: Used in the UI for the type filter of position role.
+              type:
+                type: string
+                title: The position role type of this field
+                description: Used in the UI for the role of a member position.
+
+      deputy:
+        type: object
+        additionalProperties: false
+        required: [position]
+        properties:
+
+          position:
+            type: object
+            additionalProperties: false
+            required: [type]
+            properties:
+              name:
+                  type: string
+                  title: The position role name of this field
+                  description: Used in the UI for the type filter of position role.
+              type:
+                type: string
+                title: The permissions type of this field
+                description: Used in the UI for the role of a deputy position.
+
+      leader:
+        type: object
+        additionalProperties: false
+        required: [position]
+        properties:
+
+          position:
+            type: object
+            additionalProperties: false
+            required: [type]
+            properties:
+              name:
+                  type: string
+                  title: The position role name of this field
+                  description: Used in the UI for the type filter of position role.
+              type:
+                type: string
+                title: The permissions type of this field
+                description: Used in the UI for the role of a leader position.
 
   pinned_ORGs:
     type: array
