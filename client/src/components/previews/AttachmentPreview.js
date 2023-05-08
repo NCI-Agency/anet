@@ -6,6 +6,7 @@ import RichTextEditor from "components/RichTextEditor"
 import { Attachment } from "models"
 import PropTypes from "prop-types"
 import React from "react"
+import pdf from "resources/newPDF.svg"
 import { Col, Row } from "react-bootstrap"
 
 const GQL_GET_ATTACHMENT = gql`
@@ -55,7 +56,7 @@ const AttachmentPreview = ({ className, uuid }) => {
             <Col xs={12} sm={12} className="label-align">
               <img
                 alt="file"
-                src={`data:${attachment.mimeType};base64,${attachment.content}`}
+                src={attachment.mimeType.includes("pdf") ? pdf : `data:${attachment.mimeType};base64,${attachment.content}`}
                 style={{ width: "100%", borderRadius: "5px" }}
               />
             </Col>

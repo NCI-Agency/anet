@@ -8,6 +8,7 @@ import PropTypes from "prop-types"
 import React from "react"
 import { Card } from "react-bootstrap"
 import { toast } from "react-toastify"
+import pdf from "resources/newPDF.svg"
 import "./Attachment.css"
 
 const GQL_DELETE_ATTACHMENT = gql`
@@ -41,9 +42,12 @@ const AttachmentCard = ({
         <div
           className="imagePreview info-show card-image"
           style={{
-            backgroundImage: file.content.includes("data")
-              ? `url(${file.content})`
-              : `url(data:${file.mimeType};base64,${file.content})`
+            backgroundSize: file.mimeType.includes("pdf") ? "50px" : "cover",
+            backgroundImage: file.mimeType.includes("pdf")
+              ? `url(${pdf})`
+              : file.content.includes("data")
+                ? `url(${file.content})`
+                : `url(data:${file.mimeType};base64,${file.content})`
           }}
         >
           <div className="file-info image-info">

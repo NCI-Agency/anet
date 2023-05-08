@@ -677,7 +677,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                   label={Settings.fields.attachment.shortLabel}
                   component={FieldHelper.ReadonlyField}
                   humanValue={
-                    <>
+                    <div className="d-flex">
                       {report.attachments.map((file, index) => (
                         <AttachmentCard
                           key={index}
@@ -686,7 +686,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                           show={false}
                         />
                       ))}
-                    </>
+                    </div>
                   }
                 />
               </Fieldset>

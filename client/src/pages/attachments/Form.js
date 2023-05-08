@@ -18,6 +18,7 @@ import React, { useContext, useState } from "react"
 import { Button, Col } from "react-bootstrap"
 import { useNavigate, useParams } from "react-router-dom"
 import Settings from "settings"
+import pdf from "resources/newPDF.svg"
 
 const GQL_CREATE_ATTACHMENT = gql`
   mutation ($attachment: AttachmentInput!) {
@@ -41,6 +42,7 @@ const GQL_GET_ATTACHMENT = gql`
   query ($uuid: String) {
     attachment(uuid: $uuid) {
       content
+      mimeType
       attachmentRelatedObjects {
         relatedObject {
           ... on AuthorizationGroup {
@@ -85,7 +87,8 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
   const { currentUser } = useContext(AppContext)
   const { data } = API.useApiQuery(GQL_GET_ATTACHMENT, { uuid })
   const [error, setError] = useState(null)
-  const canEdit = currentUser.isAdmin() || (currentUser.uuid === initialValues.author.uuid)
+  const canEdit =
+    currentUser.isAdmin() || currentUser.uuid === initialValues.author.uuid
 
   const classificationButtons = [
     {
@@ -94,14 +97,24 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
       label: Settings.fields.attachment.classification.choices.UNDEFINED.label
     },
     {
-      id: Settings.fields.attachment.classification.choices.NATO_UNCLASSIFIED.label,
-      value: Settings.fields.attachment.classification.choices.NATO_UNCLASSIFIED.value,
-      label: Settings.fields.attachment.classification.choices.NATO_UNCLASSIFIED.label
+      id: Settings.fields.attachment.classification.choices.NATO_UNCLASSIFIED
+        .label,
+      value:
+        Settings.fields.attachment.classification.choices.NATO_UNCLASSIFIED
+          .value,
+      label:
+        Settings.fields.attachment.classification.choices.NATO_UNCLASSIFIED
+          .label
     },
     {
-      id: Settings.fields.attachment.classification.choices.NATO_UNCLASSIFIED_Releasable_to_EU.label,
-      value: Settings.fields.attachment.classification.choices.NATO_UNCLASSIFIED_Releasable_to_EU.value,
-      label: Settings.fields.attachment.classification.choices.NATO_UNCLASSIFIED_Releasable_to_EU.label
+      id: Settings.fields.attachment.classification.choices
+        .NATO_UNCLASSIFIED_Releasable_to_EU.label,
+      value:
+        Settings.fields.attachment.classification.choices
+          .NATO_UNCLASSIFIED_Releasable_to_EU.value,
+      label:
+        Settings.fields.attachment.classification.choices
+          .NATO_UNCLASSIFIED_Releasable_to_EU.label
     }
   ]
   // TODO: This will remove, but now it make submit button not workable
@@ -146,10 +159,16 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
               <Fieldset>
                 <div style={{ display: "flex" }}>
                   <Col xs={12} sm={3} className="label-align">
-                    <img
-                      alt="file"
-                      className="attachmentImage"
-                      src={`data:${attachmentPreview.mimeType};base64,${attachmentPreview.content}`}
+                    <div
+                      className="imagePreview info-show card-image attachmentImage h-100"
+                      style={{
+                        backgroundSize: attachmentPreview.mimeType.includes("pdf") ? "200px" : "cover",
+                        backgroundImage: attachmentPreview.mimeType.includes("pdf")
+                          ? `url(${pdf})`
+                          : attachmentPreview.content.includes("data")
+                            ? `url(${attachmentPreview.content})`
+                            : `url(data:${attachmentPreview.mimeType};base64,${attachmentPreview.content})`
+                      }}
                     />
                   </Col>
                   <Col xs={12} sm={3} lg={10}>
@@ -185,6 +204,10 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
                       humanValue={
                         <LinkTo modelType="Person" model={values.author} />
                       }
+                    />
+                    <Field
+                      name="mimeType"
+                      component={FieldHelper.ReadonlyField}
                     />
                     {canEdit ? (
                       <FastField

@@ -21,6 +21,7 @@ import React, { useContext } from "react"
 import { Button, Col } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
+import pdf from "resources/newPDF.svg"
 
 const GQL_GET_ATTACHMENT = gql`
   query ($uuid: String) {
@@ -89,11 +90,12 @@ const AttachmentShow = ({ pageDispatchers }) => {
   const attachment = new Attachment(data ? data.attachment : {})
   const stateSuccess = routerLocation.state && routerLocation.state.success
   const stateError = routerLocation.state && routerLocation.state.error
-  const canEdit = currentUser.isAdmin() || (currentUser.uuid === attachment.author.uuid)
+  const canEdit =
+    currentUser.isAdmin() || currentUser.uuid === attachment.author.uuid
   return (
     <Formik enableReinitialize initialValues={attachment}>
       {({ values }) => {
-        const action =
+        const action = (
           <>
             <Button className="d-flex p-0 align-items-center">
               <a
@@ -107,7 +109,7 @@ const AttachmentShow = ({ pageDispatchers }) => {
                 Download
               </a>
             </Button>
-            {canEdit &&
+            {canEdit && (
               <LinkTo
                 modelType="Attachment"
                 model={attachment}
@@ -117,8 +119,9 @@ const AttachmentShow = ({ pageDispatchers }) => {
               >
                 Edit
               </LinkTo>
-            }
+            )}
           </>
+        )
 
         return (
           <div>
@@ -131,11 +134,21 @@ const AttachmentShow = ({ pageDispatchers }) => {
               <Fieldset>
                 <div style={{ display: "flex" }}>
                   <Col xs={12} sm={3} className="label-align">
-                    <img
-                      alt="file"
-                      className="attachmentImage"
-                      src={`data:${attachment.mimeType};base64,${attachment.content}`}
-                    />
+                    <div className="img-hover-zoom">
+                      <a href={`/api/attachment/view/${attachment.uuid}`} className="d-flex h-100">
+                        <div
+                          className="imagePreview info-show card-image attachmentImage h-100"
+                          style={{
+                            backgroundSize: attachment.mimeType.includes("pdf") ? "200px" : "cover",
+                            backgroundImage: attachment.mimeType.includes("pdf")
+                              ? `url(${pdf})`
+                              : attachment.content.includes("data")
+                                ? `url(${attachment.content})`
+                                : `url(data:${attachment.mimeType};base64,${attachment.content})`
+                          }}
+                        />
+                      </a>
+                    </div>
                   </Col>
                   <Col xs={12} sm={3} lg={8}>
                     <Field
@@ -155,6 +168,10 @@ const AttachmentShow = ({ pageDispatchers }) => {
                       humanValue={
                         <RichTextEditor readOnly value={values.description} />
                       }
+                    />
+                    <Field
+                      name="mimeType"
+                      component={FieldHelper.ReadonlyField}
                     />
                     <Field
                       name="classification"
