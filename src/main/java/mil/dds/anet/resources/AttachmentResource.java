@@ -125,4 +125,21 @@ public class AttachmentResource {
     response.header("Content-Disposition", "attachment; filename=" + attachment.getFileName());
     return response.build();
   }
+
+  @GET
+  @Timed
+  @Path("/view/{uuid}")
+  public Response previewAttachment(@PathParam("uuid") String uuid) {
+    final Attachment attachment = dao.getByUuid(uuid);
+    if (attachment == null) {
+      throw new WebApplicationException("Attachment not found", Status.NOT_FOUND);
+    }
+    if (attachment.getContent() == null) {
+      throw new WebApplicationException("Invalid attachment", Status.NOT_FOUND);
+    }
+    ResponseBuilder response = Response.ok(attachment.getContent());
+    response.header("Content-Disposition", "inline; filename=" + attachment.getFileName());
+    response.header("Content-Type", attachment.getMimeType());
+    return response.build();
+  }
 }
