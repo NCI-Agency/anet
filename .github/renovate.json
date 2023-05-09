@@ -58,6 +58,7 @@
       "matchPackageNames": [
         "autoprefixer",
         "react-router-dom",
+        "org.liquibase:liquibase-core",
         "com.graphql-java:graphql-java",
         "com.graphql-java:graphql-java-extended-scalars",
         "io.leangen.graphql:spqr"
