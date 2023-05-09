@@ -462,7 +462,7 @@ properties:
   fields:
     type: object
     additionalProperties: false
-    required: [task, report, person, position, organization, advisor, principal, superuser, administrator]
+    required: [task, report, person, position, organization, advisor, principal, superuser, administrator, member, deputy, leader]
     properties:
 
       task:
