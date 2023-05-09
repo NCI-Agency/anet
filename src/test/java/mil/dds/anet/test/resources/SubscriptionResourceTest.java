@@ -24,6 +24,7 @@ import mil.dds.anet.test.client.Organization;
 import mil.dds.anet.test.client.Person;
 import mil.dds.anet.test.client.Position;
 import mil.dds.anet.test.client.PositionInput;
+import mil.dds.anet.test.client.PositionRole;
 import mil.dds.anet.test.client.PositionType;
 import mil.dds.anet.test.client.Report;
 import mil.dds.anet.test.client.ReportInput;
@@ -311,7 +312,8 @@ public class SubscriptionResourceTest extends AbstractResourceTest {
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     // Create position
     final PositionInput positionInput = PositionInput.builder().withStatus(Status.INACTIVE)
-        .withType(PositionType.ADVISOR).withName("Test position for deleting subscribed object")
+        .withType(PositionType.ADVISOR).withPositionRole(PositionRole.MEMBER)
+        .withName("Test position for deleting subscribed object")
         .withOrganization(getOrganizationInput(admin.getPosition().getOrganization())).build();
     final Position position = adminMutationExecutor.createPosition("{ uuid }", positionInput);
 

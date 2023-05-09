@@ -25,6 +25,7 @@ import mil.dds.anet.test.client.PersonPositionHistory;
 import mil.dds.anet.test.client.PersonPositionHistoryInput;
 import mil.dds.anet.test.client.Position;
 import mil.dds.anet.test.client.PositionInput;
+import mil.dds.anet.test.client.PositionRole;
 import mil.dds.anet.test.client.PositionType;
 import mil.dds.anet.test.client.Role;
 import mil.dds.anet.test.client.Status;
@@ -46,9 +47,9 @@ public class PersonMergeTest extends AbstractResourceTest {
     assertThat(loser.getUuid()).isNotNull();
 
     // Create a Position
-    final PositionInput testInput =
-        PositionInput.builder().withName("A Test Position created by mergePeopleTest")
-            .withType(PositionType.ADVISOR).withStatus(Status.ACTIVE).build();
+    final PositionInput testInput = PositionInput.builder()
+        .withName("A Test Position created by mergePeopleTest").withType(PositionType.ADVISOR)
+        .withPositionRole(PositionRole.MEMBER).withStatus(Status.ACTIVE).build();
 
     // Assign to an AO
     final Organization ao = adminMutationExecutor.createOrganization("{ uuid }",
@@ -67,7 +68,7 @@ public class PersonMergeTest extends AbstractResourceTest {
     assertThat(nrUpdated).isEqualTo(1);
 
     final PositionInput testInput1 = PositionInput.builder().withType(PositionType.ADVISOR)
-        .withName("Test Position for person history edit  1")
+        .withPositionRole(PositionRole.MEMBER).withName("Test Position for person history edit  1")
         .withOrganization(getOrganizationInput(ao))
         .withLocation(getLocationInput(getGeneralHospital())).withStatus(Status.ACTIVE).build();
 
@@ -77,7 +78,7 @@ public class PersonMergeTest extends AbstractResourceTest {
     assertThat(createdPos1.getName()).isEqualTo(testInput1.getName());
     final PositionInput posInput1 = PositionInput.builder().withUuid(createdPos1.getUuid()).build();
     final PositionInput testInput2 = PositionInput.builder().withType(PositionType.ADVISOR)
-        .withName("Test Position for person history edit 2")
+        .withPositionRole(PositionRole.MEMBER).withName("Test Position for person history edit 2")
         .withOrganization(getOrganizationInput(ao))
         .withLocation(getLocationInput(getGeneralHospital())).withStatus(Status.ACTIVE).build();
 
@@ -239,7 +240,8 @@ public class PersonMergeTest extends AbstractResourceTest {
     // Create a Position
     final PositionInput testInput =
         PositionInput.builder().withName("A Test Position created by mergeDifferentRolesTest")
-            .withType(PositionType.PRINCIPAL).withStatus(Status.ACTIVE).build();
+            .withType(PositionType.PRINCIPAL).withPositionRole(PositionRole.MEMBER)
+            .withStatus(Status.ACTIVE).build();
 
     // Assign to an AO
     final Organization ao = adminMutationExecutor.createOrganization("{ uuid }",

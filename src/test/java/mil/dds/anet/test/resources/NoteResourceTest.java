@@ -29,6 +29,7 @@ import mil.dds.anet.test.client.NoteType;
 import mil.dds.anet.test.client.Person;
 import mil.dds.anet.test.client.Position;
 import mil.dds.anet.test.client.PositionInput;
+import mil.dds.anet.test.client.PositionRole;
 import mil.dds.anet.test.client.PositionType;
 import mil.dds.anet.test.client.Report;
 import mil.dds.anet.test.client.ReportInput;
@@ -232,6 +233,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     final PositionInput testPositionInput = PositionInput.builder()
         .withName("a test position created by testDeleteDanglingPositionNote")
         .withType(PositionType.ADVISOR).withStatus(Status.INACTIVE)
+        .withPositionRole(PositionRole.MEMBER)
         .withOrganization(getOrganizationInput(admin.getPosition().getOrganization()))
         .withLocation(getLocationInput(getGeneralHospital())).build();
     final Position testPosition =
