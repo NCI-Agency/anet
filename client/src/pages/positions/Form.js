@@ -169,13 +169,14 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
         const permissionsButtons = isAdmin
           ? adminPermissionsButtons
           : nonAdminPermissionsButtons
-        const positionRoleButtons = isAdmin
-          ? adminRolesButtons
-          : nonAdminRolesButtons
         const administratingOrgUuids =
           currentUser.position.organizationsAdministrated.map(org => org.uuid)
         const isSuperuser =
           currentUser && currentUser.isSuperuser() && !currentUser.isAdmin()
+        // Only admin and superuser can assing high role (other than member role) to a position
+        const positionRoleButtons = isAdmin || isSuperuser
+          ? adminRolesButtons
+          : nonAdminRolesButtons
         const isSuperuserWithoutAdministratingOrgs =
           isSuperuser && _isEmpty(administratingOrgUuids)
         // Superusers without organizations administrated cannot create advisor positions
