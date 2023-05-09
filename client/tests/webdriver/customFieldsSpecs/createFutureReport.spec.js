@@ -33,7 +33,7 @@ describe("Create report form page", () => {
         CreateFutureReport.getAttendeesFieldAdvancedSelectFirstItem(),
         PRINCIPAL_VALUE
       )
-      await expect(
+      expect(
         await (
           await CreateFutureReport.getAttendeesFieldAdvancedSelectFirstItem()
         ).getText()
@@ -52,7 +52,7 @@ describe("Create report form page", () => {
         await (await CreateFutureReport.getAttendeesFieldValue()).isExisting()
       ).to.be.true
       /* eslint-enable no-unused-expressions */
-      await expect(
+      expect(
         await (await CreateFutureReport.getAttendeesFieldValueRow(2)).getText()
       ).to.include(PRINCIPAL_VALUE)
 
@@ -63,7 +63,7 @@ describe("Create report form page", () => {
         CreateFutureReport.getTasksFieldAdvancedSelectFirstItem(),
         TASK_VALUE
       )
-      await expect(
+      expect(
         await (
           await CreateFutureReport.getTasksFieldAdvancedSelectFirstItem()
         ).getText()
@@ -81,7 +81,7 @@ describe("Create report form page", () => {
       expect(await (await CreateFutureReport.getTasksFieldValue()).isExisting())
         .to.be.true
       /* eslint-enable no-unused-expressions */
-      await expect(
+      expect(
         await (await CreateFutureReport.getTasksFieldValueRow(1)).getText()
       ).to.include(TASK_VALUE)
     })
@@ -101,9 +101,9 @@ describe("Create report form page", () => {
       // Save report
       await CreateFutureReport.submitForm()
       await CreateFutureReport.waitForAlertToLoad()
-      await expect(
-        await (await CreateFutureReport.getAlert()).getText()
-      ).to.include("The following errors must be fixed")
+      expect(await (await CreateFutureReport.getAlert()).getText()).to.include(
+        "The following errors must be fixed"
+      )
 
       /* eslint-disable no-unused-expressions */
       // Attendee assessments should not be shown in the display
@@ -154,9 +154,9 @@ describe("Create report form page", () => {
       // Save report
       await CreateFutureReport.submitForm()
       await CreateFutureReport.waitForAlertToLoad()
-      await expect(
-        await (await CreateFutureReport.getAlert()).getText()
-      ).to.include("The following errors must be fixed")
+      expect(await (await CreateFutureReport.getAlert()).getText()).to.include(
+        "The following errors must be fixed"
+      )
 
       /* eslint-disable no-unused-expressions */
       // Attendee assessments should be shown in the display
@@ -210,9 +210,7 @@ describe("Create report form page", () => {
       // Save report
       await CreateFutureReport.submitForm()
       await CreateFutureReport.waitForAlertToLoad()
-      await expect(
-        await (await CreateFutureReport.getAlert()).getText()
-      ).to.include(
+      expect(await (await CreateFutureReport.getAlert()).getText()).to.include(
         "You'll need to fill out these required fields before you can submit your final planned engagement"
       )
 
@@ -248,9 +246,9 @@ describe("Create report form page", () => {
       await browser.pause(SHORT_WAIT_MS) // wait for the modal to slide out (transition is 300 ms)
       // Report should be deleted
       await CreateFutureReport.waitForAlertToLoad()
-      await expect(
-        await (await CreateFutureReport.getAlert()).getText()
-      ).to.include("Report deleted")
+      expect(await (await CreateFutureReport.getAlert()).getText()).to.include(
+        "Report deleted"
+      )
     })
   })
 })

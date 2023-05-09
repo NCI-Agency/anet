@@ -51,7 +51,7 @@ describe("For the periodic person assessments", () => {
 
     it("Should display validation error messages on every level", async() => {
       await (await ShowPerson.getSaveAssessmentButton()).click()
-      await expect(await ShowPerson.getValidationErrorMessages()).to.eql(
+      expect(await ShowPerson.getValidationErrorMessages()).to.eql(
         ERROR_MESSAGES
       )
     })
@@ -67,7 +67,7 @@ describe("For the periodic person assessments", () => {
     it("Should show the same assessment details with the details just created", async() => {
       const details = await ShowPerson.getShownAssessmentDetails()
       for (const [index, detail] of details.entries()) {
-        await expect((await prefix(index)) + (await detail.getText())).to.equal(
+        expect((await prefix(index)) + (await detail.getText())).to.equal(
           (await prefix(index)) +
             (VALUE_TO_TEXT_FOR_PERSON[ADVISOR_1_PERSON_CREATE_DETAILS[index]] ||
               ADVISOR_1_PERSON_CREATE_DETAILS[index])
@@ -94,7 +94,7 @@ describe("For the periodic person assessments", () => {
     it("Should show the same assessment details with the details just edited", async() => {
       const details = await ShowPerson.getShownAssessmentDetails()
       for (const [index, detail] of details.entries()) {
-        await expect((await prefix(index)) + (await detail.getText())).to.equal(
+        expect((await prefix(index)) + (await detail.getText())).to.equal(
           (await prefix(index)) +
             (VALUE_TO_TEXT_FOR_PERSON[ADVISOR_1_PERSON_EDIT_DETAILS[index]] ||
               ADVISOR_1_PERSON_EDIT_DETAILS[index])
@@ -117,7 +117,7 @@ describe("For the periodic person assessments", () => {
     })
 
     it("Should not show make assessment button when there is an assessment on that period", async() => {
-      await expect(
+      expect(
         await (await ShowPerson.getAddPeriodicAssessmentButton()).isExisting()
       ).to.equal(false)
     })
@@ -141,7 +141,7 @@ describe("For the periodic person assessments", () => {
     it("Should show the same assessment details with the details just edited", async() => {
       const details = await ShowPerson.getShownAssessmentDetails()
       for (const [index, detail] of details.entries()) {
-        await expect((await prefix(index)) + (await detail.getText())).to.equal(
+        expect((await prefix(index)) + (await detail.getText())).to.equal(
           (await prefix(index)) +
             (VALUE_TO_TEXT_FOR_PERSON[ADMIN_PERSON_EDIT_DETAILS[index]] ||
               ADMIN_PERSON_EDIT_DETAILS[index])

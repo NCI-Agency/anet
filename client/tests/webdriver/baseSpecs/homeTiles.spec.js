@@ -7,8 +7,8 @@ describe("When checking the home page tiles", () => {
     await (await Home.getHomeTilesContainer()).waitForExist()
     await (await Home.getHomeTilesContainer()).waitForDisplayed()
     // Depends on test data
-    await expect(
-      await (await Home.getPendingMyApprovalOfCount()).getText()
-    ).to.eq("2")
+    expect(await (await Home.getPendingMyApprovalOfCount()).getText()).to.eq(
+      "2"
+    )
   })
 })

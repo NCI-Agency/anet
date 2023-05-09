@@ -8,24 +8,24 @@ describe("Anet home page", () => {
     await (await Home.getLogoutButton()).waitForDisplayed()
     await (await Home.getLogoutButton()).click()
     const title = await browser.getTitle()
-    await expect(title).to.equal("ANET Sign Out")
+    expect(title).to.equal("ANET Sign Out")
     await (await Home.getLoginButton()).waitForDisplayed()
     await (await Home.getLoginButton()).click()
     const titleLogin = await browser.getTitle()
-    await expect(titleLogin).to.equal("Sign in to ANET")
+    expect(titleLogin).to.equal("Sign in to ANET")
   })
   it("should have the right title", async() => {
     await Home.open()
     await browser.pause(5000) // Wait until the title is set
     const title = await browser.getTitle()
-    await expect(title).to.equal("Home - ANET")
+    expect(title).to.equal("Home - ANET")
     await Home.logout()
   })
   it("should have the right security marking", async() => {
     await Home.open()
     const securityMarking = await (await Home.getBannerSecurityText()).getText()
     const defaultSecurityMarking = "DEMO USE ONLY Releasable to DEMO MISSION"
-    await expect(securityMarking).to.equal(defaultSecurityMarking)
+    expect(securityMarking).to.equal(defaultSecurityMarking)
     await Home.logout()
   })
 })
@@ -35,7 +35,7 @@ describe("Anet default user login", () => {
     await Home.open()
     const bannerUser = await (await Home.getBannerUser()).getText()
     const defaultUserValue = "ERINSON, Erin"
-    await expect(bannerUser).to.equal(defaultUserValue)
+    expect(bannerUser).to.equal(defaultUserValue)
     await Home.logout()
   })
 })
@@ -45,7 +45,7 @@ describe("Anet superuser login", () => {
     await Home.openAsSuperuser()
     const bannerUser = await (await Home.getBannerUser()).getText()
     const superuserValue = "BECCABON, Rebecca"
-    await expect(bannerUser).to.equal(superuserValue)
+    expect(bannerUser).to.equal(superuserValue)
     await Home.logout()
   })
 })
@@ -55,7 +55,7 @@ describe("Anet admin user login", () => {
     await Home.openAsAdminUser()
     const bannerUser = await (await Home.getBannerUser()).getText()
     const adminUserValue = "DMIN, Arthur"
-    await expect(bannerUser).to.equal(adminUserValue)
+    expect(bannerUser).to.equal(adminUserValue)
     await Home.logout()
   })
 })

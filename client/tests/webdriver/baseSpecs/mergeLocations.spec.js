@@ -33,7 +33,7 @@ describe("Merge locations page", () => {
       "left"
     )
 
-    await expect(
+    expect(
       await (await MergeLocations.getColumnLocationName("left")).getText()
     ).to.eq(EXAMPLE_LOCATIONS.left.name)
 
@@ -50,7 +50,7 @@ describe("Merge locations page", () => {
       "right"
     )
 
-    await expect(
+    expect(
       await (await MergeLocations.getColumnLocationName("right")).getText()
     ).to.eq(EXAMPLE_LOCATIONS.right.name)
   })
@@ -63,7 +63,7 @@ describe("Merge locations page", () => {
       "mid"
     )
 
-    await expect(
+    expect(
       await (await MergeLocations.getColumnLocationName("mid")).getText()
     ).to.eq(EXAMPLE_LOCATIONS.left.name)
   })
@@ -76,7 +76,7 @@ describe("Merge locations page", () => {
       "mid"
     )
 
-    await expect(
+    expect(
       await (await MergeLocations.getColumnLocationName("mid")).getText()
     ).to.eq(EXAMPLE_LOCATIONS.right.name)
   })

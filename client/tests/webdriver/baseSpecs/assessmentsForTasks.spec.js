@@ -45,7 +45,7 @@ describe("For the periodic task assessments", () => {
     it("Should show the same assessment details with the details just created", async() => {
       const details = await ShowTask.getShownAssessmentDetails()
       for (const [index, detail] of details.entries()) {
-        await expect((await prefix(index)) + (await detail.getText())).to.equal(
+        expect((await prefix(index)) + (await detail.getText())).to.equal(
           (await // Only some values are mapped, others are same
           prefix(index)) +
             (VALUE_TO_TEXT_FOR_TASK[ADVISOR_1_TASK_CREATE_DETAILS[index]] ||
@@ -72,7 +72,7 @@ describe("For the periodic task assessments", () => {
     it("Should show the same assessment details with the details just edited", async() => {
       const details = await ShowTask.getShownAssessmentDetails()
       for (const [index, detail] of details.entries()) {
-        await expect((await prefix(index)) + (await detail.getText())).to.equal(
+        expect((await prefix(index)) + (await detail.getText())).to.equal(
           (await // Only some values are mapped, others are same
           prefix(index)) +
             (VALUE_TO_TEXT_FOR_TASK[ADVISOR_1_TASK_EDIT_DETAILS[index]] ||
@@ -94,7 +94,7 @@ describe("For the periodic task assessments", () => {
     })
 
     it("Should not show make assessment button when there is an assessment on that period", async() => {
-      await expect(
+      expect(
         await (await ShowTask.getAddMonthlyAssessmentButton()).isExisting()
       ).to.equal(false)
     })
@@ -118,7 +118,7 @@ describe("For the periodic task assessments", () => {
     it("Should show the same assessment details with the details just edited", async() => {
       const details = await ShowTask.getShownAssessmentDetails()
       for (const [index, detail] of details.entries()) {
-        await expect((await prefix(index)) + (await detail.getText())).to.equal(
+        expect((await prefix(index)) + (await detail.getText())).to.equal(
           (await // Only some values are mapped, others are same
           prefix(index)) +
             (VALUE_TO_TEXT_FOR_TASK[ADMIN_TASK_EDIT_DETAILS[index]] ||
@@ -140,7 +140,7 @@ describe("For the periodic task assessments", () => {
     })
 
     it("Should not show make assessment button when there is an assessment on that period", async() => {
-      await expect(
+      expect(
         await (await ShowTask.getAddMonthlyAssessmentButton()).isExisting()
       ).to.equal(false)
     })
@@ -164,7 +164,7 @@ describe("For the periodic task assessments", () => {
     it("Should show the same assessment details with the details just edited", async() => {
       const details = await ShowTask.getShownAssessmentDetails()
       for (const [index, detail] of details.entries()) {
-        await expect((await prefix(index)) + (await detail.getText())).to.equal(
+        expect((await prefix(index)) + (await detail.getText())).to.equal(
           (await // Only some values are mapped, others are same
           prefix(index)) +
             (VALUE_TO_TEXT_FOR_TASK[ADVISOR_2_TASK_EDIT_DETAILS[index]] ||

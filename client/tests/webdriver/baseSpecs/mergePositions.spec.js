@@ -69,30 +69,30 @@ describe("Merge positions page", () => {
       "left",
       "Name"
     )
-    await expect(
+    expect(
       await (await MergePositions.getColumnContent("left", "Name")).getText()
     ).to.eq(EXAMPLE_POSITIONS.validLeft.fullName)
-    await expect(
+    expect(
       await (
         await MergePositions.getColumnContent("left", "Organization")
       ).getText()
     ).to.eq(EXAMPLE_POSITIONS.validLeft.organization)
-    await expect(
+    expect(
       await (await MergePositions.getColumnContent("left", "Type")).getText()
     ).to.eq(EXAMPLE_POSITIONS.validLeft.type)
-    await expect(
+    expect(
       await (await MergePositions.getColumnContent("left", "Code")).getText()
     ).to.eq(EXAMPLE_POSITIONS.validLeft.code)
-    await expect(
+    expect(
       await (await MergePositions.getColumnContent("left", "Status")).getText()
     ).to.eq(EXAMPLE_POSITIONS.validLeft.status)
-    await expect(
+    expect(
       await (await MergePositions.getColumnContent("left", "Person")).getText()
     ).to.eq(EXAMPLE_POSITIONS.validLeft.person)
-    await expect(await MergePositions.getAssociatedPositions("left")).to.eql(
+    expect(await MergePositions.getAssociatedPositions("left")).to.eql(
       EXAMPLE_POSITIONS.validLeft.associatedPositions
     )
-    await expect(await MergePositions.getPreviousPeople("left")).to.eql(
+    expect(await MergePositions.getPreviousPeople("left")).to.eql(
       EXAMPLE_POSITIONS.validLeft.previousPeople
     )
   })
@@ -134,30 +134,30 @@ describe("Merge positions page", () => {
       "right",
       "Name"
     )
-    await expect(
+    expect(
       await (await MergePositions.getColumnContent("right", "Name")).getText()
     ).to.eq(EXAMPLE_POSITIONS.validRight.fullName)
-    await expect(
+    expect(
       await (
         await MergePositions.getColumnContent("right", "Organization")
       ).getText()
     ).to.eq(EXAMPLE_POSITIONS.validRight.organization)
-    await expect(
+    expect(
       await (await MergePositions.getColumnContent("right", "Type")).getText()
     ).to.eq(EXAMPLE_POSITIONS.validRight.type)
-    await expect(
+    expect(
       await (await MergePositions.getColumnContent("right", "Code")).getText()
     ).to.eq(EXAMPLE_POSITIONS.validRight.code)
-    await expect(
+    expect(
       await (await MergePositions.getColumnContent("right", "Status")).getText()
     ).to.eq(EXAMPLE_POSITIONS.validRight.status)
-    await expect(
+    expect(
       await (await MergePositions.getColumnContent("right", "Person")).getText()
     ).to.eq(EXAMPLE_POSITIONS.validRight.person)
-    await expect(await MergePositions.getAssociatedPositions("right")).to.eql(
+    expect(await MergePositions.getAssociatedPositions("right")).to.eql(
       EXAMPLE_POSITIONS.validRight.associatedPositions
     )
-    await expect(await MergePositions.getPreviousPeople("right")).to.eql(
+    expect(await MergePositions.getPreviousPeople("right")).to.eql(
       EXAMPLE_POSITIONS.validRight.previousPeople
     )
   })
@@ -170,33 +170,33 @@ describe("Merge positions page", () => {
       "mid",
       "Name"
     )
-    await expect(
+    expect(
       await (await MergePositions.getColumnContent("mid", "Name")).getText()
     ).to.eq(EXAMPLE_POSITIONS.validLeft.fullName)
-    await expect(
+    expect(
       await (
         await MergePositions.getColumnContent("mid", "Organization")
       ).getText()
     ).to.eq(EXAMPLE_POSITIONS.validLeft.organization)
-    await expect(
+    expect(
       await (await MergePositions.getColumnContent("mid", "Type")).getText()
     ).to.eq(EXAMPLE_POSITIONS.validLeft.type)
-    await expect(
+    expect(
       await (await MergePositions.getColumnContent("mid", "Code")).getText()
     ).to.eq(EXAMPLE_POSITIONS.validLeft.code)
-    await expect(
+    expect(
       await (await MergePositions.getColumnContent("mid", "Status")).getText()
     ).to.eq(EXAMPLE_POSITIONS.validLeft.status)
-    await expect(
+    expect(
       await (await MergePositions.getColumnContent("mid", "Person")).getText()
     ).to.eq(EXAMPLE_POSITIONS.validLeft.person)
-    await expect(await MergePositions.getAssociatedPositions("mid")).to.eql(
+    expect(await MergePositions.getAssociatedPositions("mid")).to.eql(
       EXAMPLE_POSITIONS.validLeft.associatedPositions
     )
-    await expect(await MergePositions.getPreviousPeople("mid")).to.eql(
+    expect(await MergePositions.getPreviousPeople("mid")).to.eql(
       EXAMPLE_POSITIONS.validLeft.previousPeople
     )
-    await expect(
+    expect(
       await (await MergePositions.getColumnContent("mid", "Location")).getText()
     ).to.eq(EXAMPLE_POSITIONS.validLeft.location)
   })
@@ -209,33 +209,33 @@ describe("Merge positions page", () => {
       "mid",
       "Name"
     )
-    await expect(
+    expect(
       await (await MergePositions.getColumnContent("mid", "Name")).getText()
     ).to.eq(EXAMPLE_POSITIONS.validRight.fullName)
-    await expect(
+    expect(
       await (
         await MergePositions.getColumnContent("mid", "Organization")
       ).getText()
     ).to.eq(EXAMPLE_POSITIONS.validRight.organization)
-    await expect(
+    expect(
       await (await MergePositions.getColumnContent("mid", "Type")).getText()
     ).to.eq(EXAMPLE_POSITIONS.validRight.type)
-    await expect(
+    expect(
       await (await MergePositions.getColumnContent("mid", "Code")).getText()
     ).to.eq(EXAMPLE_POSITIONS.validRight.code)
-    await expect(
+    expect(
       await (await MergePositions.getColumnContent("mid", "Status")).getText()
     ).to.eq(EXAMPLE_POSITIONS.validRight.status)
-    await expect(
+    expect(
       await (await MergePositions.getColumnContent("mid", "Person")).getText()
     ).to.eq(EXAMPLE_POSITIONS.validRight.person)
-    await expect(await MergePositions.getAssociatedPositions("mid")).to.eql(
+    expect(await MergePositions.getAssociatedPositions("mid")).to.eql(
       EXAMPLE_POSITIONS.validRight.associatedPositions
     )
-    await expect(await MergePositions.getPreviousPeople("mid")).to.eql(
+    expect(await MergePositions.getPreviousPeople("mid")).to.eql(
       EXAMPLE_POSITIONS.validRight.previousPeople
     )
-    await expect(
+    expect(
       await (await MergePositions.getColumnContent("mid", "Location")).getText()
     ).to.eq(EXAMPLE_POSITIONS.validRight.location)
   })
@@ -246,7 +246,7 @@ describe("Merge positions page", () => {
       "mid",
       "Name"
     )
-    await expect(
+    expect(
       await (await MergePositions.getColumnContent("mid", "Name")).getText()
     ).to.eq(EXAMPLE_POSITIONS.validLeft.fullName)
 
@@ -256,21 +256,21 @@ describe("Merge positions page", () => {
       "mid",
       "Code"
     )
-    await expect(
+    expect(
       await (await MergePositions.getColumnContent("mid", "Code")).getText()
     ).to.equal(EXAMPLE_POSITIONS.validLeft.code)
 
     await (
       await MergePositions.getSelectButton("left", "Associated Positions")
     ).click()
-    await expect(await MergePositions.getAssociatedPositions("mid")).to.eql(
+    expect(await MergePositions.getAssociatedPositions("mid")).to.eql(
       EXAMPLE_POSITIONS.validLeft.associatedPositions
     )
 
     await (
       await MergePositions.getSelectButton("left", "Previous People")
     ).click()
-    await expect(await MergePositions.getPreviousPeople("mid")).to.eql(
+    expect(await MergePositions.getPreviousPeople("mid")).to.eql(
       EXAMPLE_POSITIONS.validLeft.previousPeople
     )
   })
@@ -286,19 +286,19 @@ describe("Merge positions page", () => {
     await (
       await MergePositions.getEditAssociatedPositionsModal()
     ).waitForDisplayed()
-    await expect(
-      await MergePositions.getAssociatedPositionsInModal("left")
-    ).to.eql(EXAMPLE_POSITIONS.validLeft.associatedPositions)
+    expect(await MergePositions.getAssociatedPositionsInModal("left")).to.eql(
+      EXAMPLE_POSITIONS.validLeft.associatedPositions
+    )
   })
   it("Should display correct values on the right column", async() => {
-    await expect(
-      await MergePositions.getAssociatedPositionsInModal("right")
-    ).to.eql(EXAMPLE_POSITIONS.validRight.associatedPositions)
+    expect(await MergePositions.getAssociatedPositionsInModal("right")).to.eql(
+      EXAMPLE_POSITIONS.validRight.associatedPositions
+    )
   })
   it("Should display left column values on the middle column", async() => {
-    await expect(
-      await MergePositions.getAssociatedPositionsInModal("mid")
-    ).to.eql(await MergePositions.getAssociatedPositionsInModal("left"))
+    expect(await MergePositions.getAssociatedPositionsInModal("mid")).to.eql(
+      await MergePositions.getAssociatedPositionsInModal("left")
+    )
   })
   it("Should be able to remove items from the middle column", async() => {
     const index = 0
@@ -315,15 +315,15 @@ describe("Merge positions page", () => {
     await (
       await MergePositions.getAssociatedPositionActionButton("mid", index)
     ).click()
-    await expect(
-      await MergePositions.getAssociatedPositionsInModal("mid")
-    ).to.eql(afterFirstRemove)
+    expect(await MergePositions.getAssociatedPositionsInModal("mid")).to.eql(
+      afterFirstRemove
+    )
     await (
       await MergePositions.getAssociatedPositionActionButton("mid", index)
     ).click()
-    await expect(
-      await MergePositions.getAssociatedPositionsInModal("mid")
-    ).to.eql(afterSecondRemove)
+    expect(await MergePositions.getAssociatedPositionsInModal("mid")).to.eql(
+      afterSecondRemove
+    )
   })
   it("Should be able to select items from right and left and save", async() => {
     const leftItemIndex = 0
@@ -344,11 +344,11 @@ describe("Merge positions page", () => {
         rightItemIndex
       )
     ).click()
-    await expect(
-      await MergePositions.getAssociatedPositionsInModal("mid")
-    ).to.eql(afterPicked)
+    expect(await MergePositions.getAssociatedPositionsInModal("mid")).to.eql(
+      afterPicked
+    )
     await (await MergePositions.getSaveAssociatedPositionsButton()).click()
-    await expect(await MergePositions.getAssociatedPositions("mid")).to.eql(
+    expect(await MergePositions.getAssociatedPositions("mid")).to.eql(
       afterPicked
     )
   })
@@ -361,7 +361,7 @@ describe("Merge positions page", () => {
       { person: "Unfilled", position: "EF 1.1 Advisor B" },
       { person: "Unfilled", position: "EF 1.1 Advisor D" }
     ]
-    await expect(await MergePositions.getWinnerAssociatedPositions()).to.eql(
+    expect(await MergePositions.getWinnerAssociatedPositions()).to.eql(
       winnerApsAfterMerge
     )
   })
@@ -369,7 +369,7 @@ describe("Merge positions page", () => {
     await (await MergePositions.getShowNotesButton()).click()
     // Wait for offcanvas to open
     await browser.pause(100)
-    await expect(
+    expect(
       await MergePositions.areNotesExist([
         ...EXAMPLE_POSITIONS.validLeft.notes,
         ...EXAMPLE_POSITIONS.validRight.notes
@@ -381,8 +381,8 @@ describe("Merge positions page", () => {
       `/positions/${EXAMPLE_POSITIONS.validRight.posUuid}`
     )
     await (await MergePositions.getErrorTitle()).waitForExist()
-    await expect(
-      await (await MergePositions.getErrorTitle()).getText()
-    ).to.equal(`Position #${EXAMPLE_POSITIONS.validRight.posUuid} not found.`)
+    expect(await (await MergePositions.getErrorTitle()).getText()).to.equal(
+      `Position #${EXAMPLE_POSITIONS.validRight.posUuid} not found.`
+    )
   })
 })

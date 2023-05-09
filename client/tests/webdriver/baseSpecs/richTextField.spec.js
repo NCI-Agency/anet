@@ -56,7 +56,7 @@ describe("When reports have rich text content", () => {
       index,
       content
     } of RICH_TEXT_CONTENT) {
-      await expect(
+      expect(
         await (
           await getRichTextContent(
             await ShowReport.getReportText(),
@@ -76,7 +76,7 @@ describe("When reports have rich text content", () => {
       index,
       content
     } of RICH_TEXT_CONTENT) {
-      await expect(
+      expect(
         await (
           await getRichTextContent(
             await EditReport.getReportText(),

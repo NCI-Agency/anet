@@ -40,7 +40,7 @@ describe("Create new Person form page", () => {
       )
       await errorMessage.waitForExist()
       await errorMessage.waitForDisplayed()
-      await expect(await errorMessage.getText()).to.equal(
+      expect(await errorMessage.getText()).to.equal(
         "You must provide the Gender"
       )
 
@@ -61,7 +61,7 @@ describe("Create new Person form page", () => {
       const alertMessage = await (
         await CreatePerson.getAlertSuccess()
       ).getText()
-      await expect(alertMessage).to.equal("Person saved")
+      expect(alertMessage).to.equal("Person saved")
     })
     it("Should save a principle without first name", async() => {
       await (await CreatePerson.getLastName()).waitForDisplayed()
@@ -85,7 +85,7 @@ describe("Create new Person form page", () => {
       const alertMessage = await (
         await CreatePerson.getAlertSuccess()
       ).getText()
-      await expect(alertMessage).to.equal("Person saved")
+      expect(alertMessage).to.equal("Person saved")
     })
     it("Should not save a principle without a valid email address", async() => {
       await (await CreatePerson.getLastName()).waitForDisplayed()
@@ -111,7 +111,7 @@ describe("Create new Person form page", () => {
       )
       await errorMessage.waitForExist()
       await errorMessage.waitForDisplayed()
-      await expect(await errorMessage.getText()).to.equal(
+      expect(await errorMessage.getText()).to.equal(
         "Email must be a valid email"
       )
 
@@ -124,7 +124,7 @@ describe("Create new Person form page", () => {
       const alertMessage = await (
         await CreatePerson.getAlertSuccess()
       ).getText()
-      await expect(alertMessage).to.equal("Person saved")
+      expect(alertMessage).to.equal("Person saved")
     })
   })
 
@@ -151,7 +151,7 @@ describe("Create new Person form page", () => {
       await (
         await CreatePerson.getModalContent()
       ).waitForDisplayed({ reverse: true })
-      await expect(similar).to.equal("CIV ERINSON, Erin")
+      expect(similar).to.equal("CIV ERINSON, Erin")
     })
     it("Should display a warning message specific for duplicate accounts", async() => {
       // Only admin users can create an advisor user
@@ -163,7 +163,7 @@ describe("Create new Person form page", () => {
       const warningMessage = await browser.$(".alert.alert-warning")
       await warningMessage.waitForExist()
       await warningMessage.waitForDisplayed()
-      await expect(await warningMessage.getText()).to.equal(
+      expect(await warningMessage.getText()).to.equal(
         "Creating a NATO Member in ANET could result in duplicate accounts if this person logs in later. If you notice duplicate accounts, please contact an ANET administrator."
       )
       // Don't logout, next test continues…
@@ -216,7 +216,7 @@ describe("Create new Person form page", () => {
         .$("div.invalid-feedback")
       await errorMessage.waitForExist()
       await errorMessage.waitForDisplayed()
-      await expect(await errorMessage.getText()).to.equal(
+      expect(await errorMessage.getText()).to.equal(
         "You must provide the End of tour"
       )
       // Don't logout, next test continues…
@@ -270,7 +270,7 @@ describe("Create new Person form page", () => {
       const alertMessage = await (
         await CreatePerson.getAlertSuccess()
       ).getText()
-      await expect(alertMessage).to.equal("Person saved")
+      expect(alertMessage).to.equal("Person saved")
       await CreatePerson.logout()
     })
   })

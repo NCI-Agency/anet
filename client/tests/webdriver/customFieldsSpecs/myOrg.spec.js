@@ -27,7 +27,7 @@ describe("My Organization page", () => {
         await MyOrg.getEngagementDateStatistics()
       ).$$(".fc-event-title-container")
       // There is at least one date with events in the calendar
-      await expect(daysWithEvent).to.have.length.above(0)
+      expect(daysWithEvent).to.have.length.above(0)
 
       // Location statistics map is being loaded
       await (await MyOrg.getLocationStatistics()).waitForDisplayed()
@@ -50,7 +50,7 @@ describe("My Organization page", () => {
         }
       }
       // There is at least one bar
-      await expect(countTasksBars).to.be.above(0)
+      expect(countTasksBars).to.be.above(0)
 
       await (await MyOrg.getTrainingEvent()).waitForDisplayed()
       // There are 3 training event options
@@ -62,11 +62,11 @@ describe("My Organization page", () => {
       const trainignEventTotal = await (
         await MyOrg.getTrainingEvent()
       ).$("svg g text")
-      await expect(+(await trainignEventTotal.getText())).to.be.above(0)
+      expect(+(await trainignEventTotal.getText())).to.be.above(0)
 
       await (await MyOrg.getNumberTrained()).waitForDisplayed()
       const numberTrained = await (await MyOrg.getNumberTrained()).$("div em")
-      await expect(await numberTrained.getText()).to.equal("Not specified")
+      expect(await numberTrained.getText()).to.equal("Not specified")
     })
   })
 })

@@ -95,39 +95,39 @@ describe("Merge people of the same role", () => {
       "Name"
     )
 
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("left", "Name")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.name)
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("left", "Role")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.role)
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("left", "Position")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.position)
-    await expect(await MergePeople.getPreviousPositions("left")).to.eql(
+    expect(await MergePeople.getPreviousPositions("left")).to.eql(
       EXAMPLE_PEOPLE.validLeft.previousPositions
     )
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("left", "Status")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.status)
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("left", "Email")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.email)
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("left", "Phone")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.phone)
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("left", "Rank")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.rank)
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("left", "Gender")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.gender)
-    await expect(
+    expect(
       await (
         await MergePeople.getColumnContent("left", "Nationality")
       ).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.nationality)
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("left", "Biography")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.biography)
   })
@@ -159,39 +159,39 @@ describe("Merge people of the same role", () => {
       "Name"
     )
 
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("right", "Name")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validRight.name)
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("right", "Role")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validRight.role)
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("right", "Position")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validRight.position)
-    await expect(await MergePeople.getPreviousPositions("right")).to.eql(
+    expect(await MergePeople.getPreviousPositions("right")).to.eql(
       EXAMPLE_PEOPLE.validRight.previousPositions
     )
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("right", "Status")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validRight.status)
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("right", "Email")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validRight.email)
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("right", "Phone")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validRight.phone)
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("right", "Rank")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validRight.rank)
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("right", "Gender")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validRight.gender)
-    await expect(
+    expect(
       await (
         await MergePeople.getColumnContent("right", "Nationality")
       ).getText()
     ).to.eq(EXAMPLE_PEOPLE.validRight.nationality)
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("left", "Biography")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.biography)
   })
@@ -204,37 +204,37 @@ describe("Merge people of the same role", () => {
       "Name"
     )
 
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Name")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.name)
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Role")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.role)
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Position")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.position)
-    await expect(await MergePeople.getPreviousPositions("mid")).to.eql(
+    expect(await MergePeople.getPreviousPositions("mid")).to.eql(
       EXAMPLE_PEOPLE.validLeft.previousPositions
     )
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Status")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.status)
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Email")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.email)
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Phone")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.phone)
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Rank")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.rank)
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Gender")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.gender)
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Nationality")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.nationality)
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Biography")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.biography)
   })
@@ -247,37 +247,37 @@ describe("Merge people of the same role", () => {
       "Name"
     )
 
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Name")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validRight.name)
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Role")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validRight.role)
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Position")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validRight.position)
-    await expect(await MergePeople.getPreviousPositions("mid")).to.eql(
+    expect(await MergePeople.getPreviousPositions("mid")).to.eql(
       EXAMPLE_PEOPLE.validRight.previousPositions
     )
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Status")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validRight.status)
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Email")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validRight.email)
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Phone")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validRight.phone)
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Rank")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validRight.rank)
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Gender")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validRight.gender)
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Nationality")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validRight.nationality)
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Biography")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validRight.biography)
   })
@@ -288,7 +288,7 @@ describe("Merge people of the same role", () => {
       "mid",
       "Name"
     )
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Name")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.name)
 
@@ -298,7 +298,7 @@ describe("Merge people of the same role", () => {
       "mid",
       "Role"
     )
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Role")).getText()
     ).to.equal(EXAMPLE_PEOPLE.validLeft.role)
 
@@ -308,7 +308,7 @@ describe("Merge people of the same role", () => {
       "mid",
       "Position"
     )
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Position")).getText()
     ).to.equal(EXAMPLE_PEOPLE.validLeft.position)
 
@@ -318,7 +318,7 @@ describe("Merge people of the same role", () => {
       "mid",
       "Status"
     )
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Status")).getText()
     ).to.equal(EXAMPLE_PEOPLE.validLeft.status)
 
@@ -328,7 +328,7 @@ describe("Merge people of the same role", () => {
       "mid",
       "Email"
     )
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Email")).getText()
     ).to.equal(EXAMPLE_PEOPLE.validLeft.email)
 
@@ -338,7 +338,7 @@ describe("Merge people of the same role", () => {
       "mid",
       "Phone"
     )
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Phone")).getText()
     ).to.equal(EXAMPLE_PEOPLE.validLeft.phone)
 
@@ -348,7 +348,7 @@ describe("Merge people of the same role", () => {
       "mid",
       "Email"
     )
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Email")).getText()
     ).to.equal(EXAMPLE_PEOPLE.validLeft.email)
 
@@ -358,7 +358,7 @@ describe("Merge people of the same role", () => {
       "mid",
       "Rank"
     )
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Rank")).getText()
     ).to.equal(EXAMPLE_PEOPLE.validLeft.rank)
 
@@ -368,7 +368,7 @@ describe("Merge people of the same role", () => {
       "mid",
       "Gender"
     )
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Gender")).getText()
     ).to.equal(EXAMPLE_PEOPLE.validLeft.gender)
 
@@ -378,7 +378,7 @@ describe("Merge people of the same role", () => {
       "mid",
       "Nationality"
     )
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Nationality")).getText()
     ).to.equal(EXAMPLE_PEOPLE.validLeft.nationality)
 
@@ -388,14 +388,14 @@ describe("Merge people of the same role", () => {
       "mid",
       "Biography"
     )
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Biography")).getText()
     ).to.equal(EXAMPLE_PEOPLE.validLeft.biography)
 
     await (
       await MergePeople.getSelectButton("left", "Previous Positions")
     ).click()
-    await expect(await MergePeople.getPreviousPositions("mid")).to.eql(
+    expect(await MergePeople.getPreviousPositions("mid")).to.eql(
       EXAMPLE_PEOPLE.validLeft.previousPositions
     )
   })
@@ -407,7 +407,7 @@ describe("Merge people of the same role", () => {
     await (await MergePeople.getShowNotesButton()).click()
     // Wait for offcanvas to open
     await browser.pause(100)
-    await expect(
+    expect(
       await MergePeople.areNotesExist([
         ...EXAMPLE_PEOPLE.validLeft.notes,
         ...EXAMPLE_PEOPLE.validRight.notes
@@ -417,7 +417,7 @@ describe("Merge people of the same role", () => {
   it("Should be able to delete the loser person", async() => {
     await MergePeople.openPage(`/people/${EXAMPLE_PEOPLE.validRight.perUuid}`)
     await (await MergePeople.getErrorTitle()).waitForExist()
-    await expect(await (await MergePeople.getErrorTitle()).getText()).to.equal(
+    expect(await (await MergePeople.getErrorTitle()).getText()).to.equal(
       `User #${EXAMPLE_PEOPLE.validRight.perUuid} not found.`
     )
   })
@@ -425,7 +425,7 @@ describe("Merge people of the same role", () => {
     await MergePeople.openPage(
       `/positions/${EXAMPLE_PEOPLE.validRight.posUuid}`
     )
-    await expect(
+    expect(
       await (await MergePeople.getUnoccupiedPositionPersonMessage()).getText()
     ).to.equal("Chief of Merge People Test 2 is currently empty.")
   })
@@ -490,37 +490,37 @@ describe("Merge people of different roles", () => {
       "mid",
       "Name"
     )
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Name")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.name)
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Role")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.role)
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Position")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.position)
-    await expect(await MergePeople.getPreviousPositions("mid")).to.eql(
+    expect(await MergePeople.getPreviousPositions("mid")).to.eql(
       EXAMPLE_PEOPLE.validLeft.previousPositions
     )
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Status")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.status)
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Email")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.email)
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Phone")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.phone)
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Rank")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.rank)
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Gender")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.gender)
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Nationality")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.nationality)
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Biography")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.biography)
   })
@@ -532,42 +532,42 @@ describe("Merge people of different roles", () => {
       "mid",
       "Name"
     )
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Name")).getText()
     ).to.eq(EXAMPLE_PEOPLE.advisorRight.name)
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Role")).getText()
     ).to.eq(EXAMPLE_PEOPLE.advisorRight.role)
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Position")).getText()
     ).to.eq(EXAMPLE_PEOPLE.advisorRight.position)
-    await expect(await MergePeople.getPreviousPositions("mid")).to.eql(
+    expect(await MergePeople.getPreviousPositions("mid")).to.eql(
       EXAMPLE_PEOPLE.advisorRight.previousPositions
     )
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Status")).getText()
     ).to.eq(EXAMPLE_PEOPLE.advisorRight.status)
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Email")).getText()
     ).to.eq(EXAMPLE_PEOPLE.advisorRight.email)
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Phone")).getText()
     ).to.eq(EXAMPLE_PEOPLE.advisorRight.phone)
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Rank")).getText()
     ).to.eq(EXAMPLE_PEOPLE.advisorRight.rank)
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Gender")).getText()
     ).to.eq(EXAMPLE_PEOPLE.advisorRight.gender)
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Nationality")).getText()
     ).to.eq(EXAMPLE_PEOPLE.advisorRight.nationality)
-    await expect(
+    expect(
       await (await MergePeople.getColumnContent("mid", "Biography")).getText()
     ).to.eq(EXAMPLE_PEOPLE.advisorRight.biography)
   })
   it("Should not display clear field buttons on the middle column", async() => {
-    await expect((await MergePeople.getClearValueButtons()).length).to.eq(0)
+    expect((await MergePeople.getClearValueButtons()).length).to.eq(0)
   })
   it("Should not display edit history button on the middle column", async() => {
     await (
@@ -583,7 +583,7 @@ describe("Merge people of different roles", () => {
     // Wait for offcanvas to open
     await browser.pause(100)
     // As validRight and validLeft merged before, notes should include notes from three people
-    await expect(
+    expect(
       await MergePeople.areNotesExist([
         ...EXAMPLE_PEOPLE.validLeft.notes,
         ...EXAMPLE_PEOPLE.validRight.notes,
@@ -594,7 +594,7 @@ describe("Merge people of different roles", () => {
   it("Should be able to delete the loser person", async() => {
     await MergePeople.openPage(`/people/${EXAMPLE_PEOPLE.validLeft.perUuid}`)
     await (await MergePeople.getErrorTitle()).waitForExist()
-    await expect(await (await MergePeople.getErrorTitle()).getText()).to.equal(
+    expect(await (await MergePeople.getErrorTitle()).getText()).to.equal(
       `User #${EXAMPLE_PEOPLE.validLeft.perUuid} not found.`
     )
   })

@@ -30,10 +30,10 @@ describe("Show print report page", () => {
       await detailedViewButton.click()
       await (await ShowReport.getDefaultReportView()).waitForExist()
       await (await ShowReport.getDefaultReportView()).waitForDisplayed()
-      await expect(
-        await (await ShowReport.getCompactView()).isDisplayed()
-      ).to.equal(false)
-      await expect(
+      expect(await (await ShowReport.getCompactView()).isDisplayed()).to.equal(
+        false
+      )
+      expect(
         await (await ShowReport.getCompactViewButton()).isDisplayed()
       ).to.equal(true)
     })
@@ -52,12 +52,12 @@ describe("Show print report page", () => {
         Array.from(fields).map(async field => await field.getText())
       )
       for (const mustHave of mustHaveFieldTexts) {
-        await expect(fieldTexts).to.contain(mustHave)
+        expect(fieldTexts).to.contain(mustHave)
       }
     })
     it("We should see a title with the correct text", async() => {
       const title = await (await ShowReport.getCompactTitle()).getText()
-      await expect(title).to.equal("Summary / Print")
+      expect(title).to.equal("Summary / Print")
     })
     it("We should see buttons with the correct text", async() => {
       const printButtonText = await (
@@ -66,8 +66,8 @@ describe("Show print report page", () => {
       const detailedViewButtonText = await (
         await ShowReport.getDetailedViewButton()
       ).getText()
-      await expect(printButtonText).to.equal("Print")
-      await expect(detailedViewButtonText).to.equal("Detailed View")
+      expect(printButtonText).to.equal("Print")
+      expect(detailedViewButtonText).to.equal("Detailed View")
     })
     it("Printable report banner should be the same as security banner", async() => {
       const compactBannerText = await (
@@ -77,7 +77,7 @@ describe("Show print report page", () => {
       const bannerSecurityText = await (
         await Home.getBannerSecurityText()
       ).getText()
-      await expect(compactBannerText).to.equal(bannerSecurityText)
+      expect(compactBannerText).to.equal(bannerSecurityText)
     })
     it("Should display all attendees", async() => {
       const displayedPrincipals = await ShowReport.getCompactViewElements(
@@ -87,10 +87,10 @@ describe("Show print report page", () => {
         "advisors"
       )
       for (const principal of PRINCIPALS) {
-        await expect(displayedPrincipals).to.contain(principal)
+        expect(displayedPrincipals).to.contain(principal)
       }
       for (const advisor of ADVISORS) {
-        await expect(displayedAdvisors).to.contain(advisor)
+        expect(displayedAdvisors).to.contain(advisor)
       }
     })
     it("Should display all attendees when assessments are shown", async() => {
@@ -100,20 +100,20 @@ describe("Show print report page", () => {
         true
       )
       for (const principal of PRINCIPALS) {
-        await expect(displayedPrincipals).to.contain(principal)
+        expect(displayedPrincipals).to.contain(principal)
       }
       const displayedAdvisors = await ShowReport.getCompactViewElements(
         "advisors",
         true
       )
       for (const advisor of ADVISORS) {
-        await expect(displayedAdvisors).to.contain(advisor)
+        expect(displayedAdvisors).to.contain(advisor)
       }
     })
     it("Should display all tasks", async() => {
       const displayedTasks = await ShowReport.getCompactViewElements("tasks")
       for (const task of TASKS) {
-        await expect(displayedTasks).to.contain(task)
+        expect(displayedTasks).to.contain(task)
       }
     })
     it("Should display all tasks when assessments are shown", async() => {
@@ -123,7 +123,7 @@ describe("Show print report page", () => {
         true
       )
       for (const task of TASKS) {
-        await expect(displayedTasks).to.contain(task)
+        expect(displayedTasks).to.contain(task)
       }
     })
   })

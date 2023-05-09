@@ -31,21 +31,21 @@ describe("When creating a report without a principal", () => {
     await CreateReport.fillForm(REPORT_FIELDS)
     await browser.pause(500)
     await CreateReport.submitForm()
-    await expect(await (await CreateReport.getAlert()).getText()).to.include(
+    expect(await (await CreateReport.getAlert()).getText()).to.include(
       NO_PRINCIPAL_WARNING
     )
   })
   it("Should warn user about missing primary principal", async() => {
     await (await ShowReport.getSubmitButton()).click()
     await (await ShowReport.getReportModal()).waitForDisplayed()
-    await expect(
-      await (await ShowReport.getModalWarning()).getText()
-    ).to.include(NO_PRINCIPAL_WARNING)
+    expect(await (await ShowReport.getModalWarning()).getText()).to.include(
+      NO_PRINCIPAL_WARNING
+    )
   })
   it("Should submit report without primary principal attendee", async() => {
     await (await ShowReport.getConfirmSubmitButton()).click()
     await browser.pause(1000) // Wait for status text to be updated
-    await expect(await ShowReport.getReportStatusText()).to.equal(
+    expect(await ShowReport.getReportStatusText()).to.equal(
       REPORT_SUBMITTED_STATUS
     )
   })
@@ -58,9 +58,9 @@ describe("When creating a report without a principal", () => {
     await (await ShowReport.getApproveButton()).waitForDisplayed()
     await (await ShowReport.getApproveButton()).click()
     await (await ShowReport.getReportModal()).waitForDisplayed()
-    await expect(
-      await (await ShowReport.getModalWarning()).getText()
-    ).to.include(NO_PRINCIPAL_WARNING)
+    expect(await (await ShowReport.getModalWarning()).getText()).to.include(
+      NO_PRINCIPAL_WARNING
+    )
     await (await ShowReport.getConfirmApproveButton()).click()
     await (await ShowReport.getSuccessfullApprovalToast()).waitForDisplayed()
     await ShowReport.logout()
@@ -73,9 +73,9 @@ describe("When creating a report without a principal", () => {
     await (await ShowReport.getApproveButton()).waitForDisplayed()
     await (await ShowReport.getApproveButton()).click()
     await (await ShowReport.getReportModal()).waitForDisplayed()
-    await expect(
-      await (await ShowReport.getModalWarning()).getText()
-    ).to.include(NO_PRINCIPAL_WARNING)
+    expect(await (await ShowReport.getModalWarning()).getText()).to.include(
+      NO_PRINCIPAL_WARNING
+    )
     await (await ShowReport.getConfirmApproveButton()).click()
     await (await ShowReport.getSuccessfullApprovalToast()).waitForDisplayed()
     await ShowReport.logout()
@@ -88,9 +88,9 @@ describe("When creating a report without a principal", () => {
     await (await ShowReport.getApproveButton()).waitForDisplayed()
     await (await ShowReport.getApproveButton()).click()
     await (await ShowReport.getReportModal()).waitForDisplayed()
-    await expect(
-      await (await ShowReport.getModalWarning()).getText()
-    ).to.include(NO_PRINCIPAL_WARNING)
+    expect(await (await ShowReport.getModalWarning()).getText()).to.include(
+      NO_PRINCIPAL_WARNING
+    )
     await (await ShowReport.getConfirmApproveButton()).click()
     await (await ShowReport.getSuccessfullApprovalToast()).waitForDisplayed()
     await ShowReport.logout(true)
@@ -98,7 +98,7 @@ describe("When creating a report without a principal", () => {
   it("Should complete the approval chain", async() => {
     await MyReports.open("erin")
     await MyReports.selectReport(REPORT_FIELDS.intent, REPORT_STATES.APPROVED)
-    await expect(await ShowReport.getReportStatusText()).to.equal(
+    expect(await ShowReport.getReportStatusText()).to.equal(
       REPORT_APPROVED_STATUS
     )
   })
