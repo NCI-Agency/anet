@@ -38,7 +38,7 @@ describe("Show task page", () => {
       await (await ShowTask.getParentTaskField()).waitForDisplayed()
       // eslint-disable-next-line no-unused-expressions
       expect(await parentTaskField.isExisting()).to.be.true
-      await expect(await (await ShowTask.getParentTask()).getText()).to.equal(
+      expect(await (await ShowTask.getParentTask()).getText()).to.equal(
         "EF 1 » EF 1.2"
       )
     })
@@ -74,7 +74,7 @@ describe("Show task page", () => {
         await (await ShowTask.getChildrenTasksField()).waitForDisplayed()
         // eslint-disable-next-line no-unused-expressions
         expect(await childrenTasksField.isExisting()).to.be.true
-        await expect(
+        expect(
           await (await ShowTask.getFirstItemFromChildrenTasks()).getText()
         ).to.equal("1.1")
       }

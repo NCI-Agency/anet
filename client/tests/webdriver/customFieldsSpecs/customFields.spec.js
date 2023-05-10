@@ -25,13 +25,13 @@ describe("When working with custom fields for different anet objects", () => {
       const toggleFields =
         await CreateReport.getFieldsToggledVisibilityByTrainButton()
       for (const invisField of toggleFields) {
-        await expect(await invisField.isExisting()).to.equal(false)
+        expect(await invisField.isExisting()).to.equal(false)
       }
 
       const notToggleFields =
         await CreateReport.getFieldsNotToggledVisibilityByTrainButton()
       for (const invisField of notToggleFields) {
-        await expect(await invisField.isExisting()).to.equal(false)
+        expect(await invisField.isExisting()).to.equal(false)
       }
     })
 
@@ -54,7 +54,7 @@ describe("When working with custom fields for different anet objects", () => {
       const notToggleFields =
         await CreateReport.getFieldsNotToggledVisibilityByTrainButton()
       for (const stillInvisField of notToggleFields) {
-        await expect(await stillInvisField.isExisting()).to.equal(false)
+        expect(await stillInvisField.isExisting()).to.equal(false)
       }
     })
 
@@ -74,7 +74,7 @@ describe("When working with custom fields for different anet objects", () => {
       await trainButton.click()
       await (await CreateReport.getNumberTrainedFormGroup()).waitForExist()
 
-      await expect(
+      expect(
         await (await CreateReport.getNumberTrainedField()).getValue()
       ).to.equal(VALID_NUMBER_INPUT)
     })
@@ -86,7 +86,7 @@ describe("When working with custom fields for different anet objects", () => {
       ).setValue(INVALID_NUMBER_INPUT)
       await (await CreateReport.getNumberTrainedErrorText()).waitForExist()
       // Actually see the validation warning
-      await expect(
+      expect(
         await (await CreateReport.getNumberTrainedErrorText()).getText()
       ).to.equal("Number trained must be greater than or equal to 1")
       const trainButton = await CreateReport.getEngagementTypesButtonByName(
@@ -101,7 +101,7 @@ describe("When working with custom fields for different anet objects", () => {
       await trainButton.click()
       await (await CreateReport.getNumberTrainedFormGroup()).waitForExist()
 
-      await expect(
+      expect(
         await (await CreateReport.getNumberTrainedField()).getValue()
       ).to.equal(INVALID_NUMBER_INPUT)
     })
@@ -112,13 +112,13 @@ describe("When working with custom fields for different anet objects", () => {
         await CreateReport.getNumberTrainedField()
       ).setValue(INVALID_NUMBER_INPUT)
       await (await CreateReport.getNumberTrainedErrorText()).waitForExist()
-      await expect(
+      expect(
         await (await CreateReport.getNumberTrainedErrorText()).getText()
       ).to.include("Number trained must be greater than or equal to 1")
       await CreateReport.submitForm()
       await CreateReport.waitForAlertToLoad()
 
-      await expect(await (await CreateReport.getAlert()).getText()).to.include(
+      expect(await (await CreateReport.getAlert()).getText()).to.include(
         "Number trained must be greater than or equal to 1"
       )
     })
@@ -138,9 +138,9 @@ describe("When working with custom fields for different anet objects", () => {
       await CreateReport.submitForm()
       await CreateReport.waitForAlertToLoad()
 
-      await expect(
-        await (await CreateReport.getAlert()).getText()
-      ).to.not.include("Number trained must be greater than or equal to 1")
+      expect(await (await CreateReport.getAlert()).getText()).to.not.include(
+        "Number trained must be greater than or equal to 1"
+      )
     })
 
     it("Should show valid visible field after saving", async() => {
@@ -163,7 +163,7 @@ describe("When working with custom fields for different anet objects", () => {
       await CreateReport.submitForm()
       await CreateReport.waitForAlertToLoad()
 
-      await expect(
+      expect(
         await (await CreateReport.getNumberTrainedFieldShowed()).getText()
       ).to.include(VALID_NUMBER_INPUT.toString())
     })
@@ -186,7 +186,7 @@ describe("When working with custom fields for different anet objects", () => {
       await CreateReport.submitForm()
       await CreateReport.waitForAlertToLoad()
 
-      await expect(
+      expect(
         await (await CreateReport.getNumberTrainedFieldShowed()).getText()
       ).to.not.include(VALID_NUMBER_INPUT.toString())
     })
@@ -216,7 +216,7 @@ describe("When working with custom fields for different anet objects", () => {
     it("Should not show default invisible fields", async() => {
       const fields = await CreatePerson.getDefaultInvisibleCustomFields()
       for (const field of fields) {
-        await expect(await field.isExisting()).to.eq(false)
+        expect(await field.isExisting()).to.eq(false)
       }
       // Date field is invisible by default
       await (await CreatePerson.getAddArrayObjectButton()).click()
@@ -251,7 +251,7 @@ describe("When working with custom fields for different anet objects", () => {
       await (await CreatePerson.getGreenButton()).click()
       await (await CreatePerson.getNumberCustomFieldContainer()).waitForExist()
 
-      await expect(
+      expect(
         await (await CreatePerson.getNumberCustomField()).getValue()
       ).be.equal(VALID_NUMBER_INPUT)
     })
@@ -274,7 +274,7 @@ describe("When working with custom fields for different anet objects", () => {
       await (await CreatePerson.getGreenButton()).click()
       await (await CreatePerson.getNumberCustomFieldContainer()).waitForExist()
 
-      await expect(
+      expect(
         await (await CreatePerson.getNumberCustomField()).getValue()
       ).to.equal(INVALID_NUMBER_INPUT)
     })
@@ -285,7 +285,7 @@ describe("When working with custom fields for different anet objects", () => {
         await CreatePerson.getNumberCustomField()
       ).setValue(INVALID_NUMBER_INPUT)
       await (await CreatePerson.getNumberCustomFieldHelpText()).waitForExist()
-      await expect(
+      expect(
         await (await CreatePerson.getNumberCustomFieldHelpText()).getText()
       ).to.include("greater than")
     })

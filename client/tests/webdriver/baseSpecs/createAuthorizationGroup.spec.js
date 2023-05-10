@@ -27,13 +27,13 @@ describe("Create authorization group form page", () => {
       await (
         await CreateAuthorizationGroup.getStatusActiveButton()
       ).waitForDisplayed()
-      await expect(
+      expect(
         await (await CreateAuthorizationGroup.getStatusActiveInput()).getValue()
       ).to.be.equal("ACTIVE")
       await (
         await CreateAuthorizationGroup.getStatusInactiveButton()
       ).waitForDisplayed()
-      await expect(
+      expect(
         await (
           await CreateAuthorizationGroup.getStatusInactiveInput()
         ).getValue()
@@ -48,7 +48,7 @@ describe("Create authorization group form page", () => {
       await CreateAuthorizationGroup.waitForPositionsAdvancedSelectToChange(
         POSITION_COMPLETE
       )
-      await expect(
+      expect(
         await (
           await CreateAuthorizationGroup.getPositionsAdvancedSelectFirstItem()
         ).getText()
@@ -59,7 +59,7 @@ describe("Create authorization group form page", () => {
       // Click outside the positions overlay
       await (await CreateAuthorizationGroup.getName()).click()
       // Advanced select input gets empty, the position is added to a table underneath
-      await expect(
+      expect(
         await (await CreateAuthorizationGroup.getPositionsInput()).getValue()
       ).to.equal("")
       // positions table exists now
@@ -70,7 +70,7 @@ describe("Create authorization group form page", () => {
       const alertMessage = await (
         await CreateAuthorizationGroup.getAlertSuccess()
       ).getText()
-      await expect(alertMessage).to.equal("Authorization Group saved")
+      expect(alertMessage).to.equal("Authorization Group saved")
     })
   })
 })

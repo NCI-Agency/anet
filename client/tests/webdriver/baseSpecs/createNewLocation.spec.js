@@ -41,7 +41,7 @@ describe("When creating a new Location", () => {
     await (
       await CreateNewLocation.getModalContent()
     ).waitForDisplayed({ reverse: true })
-    await expect(similar).to.equal("Kabul Hospital")
+    expect(similar).to.equal("Kabul Hospital")
   })
 
   it("Should not accept invalid latitude-longitude inputs", async() => {
@@ -65,15 +65,15 @@ describe("When creating a new Location", () => {
     await (await CreateNewLocation.getAllFormatsPopover()).click()
     await (await CreateNewLocation.getAllFormatsPopoverLat()).waitForExist()
     await (await CreateNewLocation.getAllFormatsPopoverMGRS()).waitForExist()
-    await expect(
+    expect(
       await (await CreateNewLocation.getAllFormatsPopoverLat()).getText()
     ).to.equal(LOCATION_COORDS.lat)
 
-    await expect(
+    expect(
       await (await CreateNewLocation.getAllFormatsPopoverLng()).getText()
     ).to.equal(LOCATION_COORDS.lng)
 
-    await expect(
+    expect(
       await (await CreateNewLocation.getAllFormatsPopoverMGRS()).getText()
     ).to.equal(LOCATION_COORDS.mgrs)
   })

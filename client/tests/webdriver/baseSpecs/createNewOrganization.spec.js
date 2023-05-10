@@ -28,7 +28,7 @@ describe("When creating an organization", () => {
     await (await CreateOrganization.getLocationInput()).click()
     await (await CreateOrganization.getLocationInput()).setValue(LOCATION)
     await CreateOrganization.waitForLocationAdvancedSelectToChange(LOCATION)
-    await expect(
+    expect(
       await (
         await CreateOrganization.getLocationAdvancedSelectFirstItem()
       ).getText()
@@ -39,19 +39,19 @@ describe("When creating an organization", () => {
     await CreateOrganization.fillOrganizationProfile(PROFILE)
     await CreateOrganization.submitForm()
     await ShowOrganization.waitForAlertSuccessToLoad()
-    await expect(
-      await (await ShowOrganization.getAlertSuccess()).getText()
-    ).to.equal("Organization saved")
+    expect(await (await ShowOrganization.getAlertSuccess()).getText()).to.equal(
+      "Organization saved"
+    )
   })
   it("Should display the newly created organization", async() => {
-    await expect(
-      await (await ShowOrganization.getLongName()).getText()
-    ).to.equal(DESCRIPTION)
-    await expect(
-      await (await ShowOrganization.getLocation()).getText()
-    ).to.include(LOCATION)
-    await expect(
-      await (await ShowOrganization.getProfile()).getText()
-    ).to.include(PROFILE)
+    expect(await (await ShowOrganization.getLongName()).getText()).to.equal(
+      DESCRIPTION
+    )
+    expect(await (await ShowOrganization.getLocation()).getText()).to.include(
+      LOCATION
+    )
+    expect(await (await ShowOrganization.getProfile()).getText()).to.include(
+      PROFILE
+    )
   })
 })

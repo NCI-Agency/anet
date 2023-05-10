@@ -133,7 +133,7 @@ describe("Show person page", () => {
       await (await ShowPerson.getSelectAllButton()).click()
       await (await ShowPerson.getLeftColumnNumber()).setValue(4)
       // Left column contains 2 additional fields name and avatar
-      await expect((await ShowPerson.getLeftTableFields()).length).to.equal(6)
+      expect((await ShowPerson.getLeftTableFields()).length).to.equal(6)
     })
     it("Should return to the show person page when detailed view button clicked", async() => {
       await (await ShowPerson.getDetailedViewButton()).click()

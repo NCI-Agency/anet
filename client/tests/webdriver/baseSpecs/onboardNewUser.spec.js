@@ -23,7 +23,7 @@ describe("Onboard new user login", () => {
     await OnboardPage.waitForWelcomeMessage(welcomeText)
 
     const securityText = await (await OnboardPage.getWelcomeText()).getText()
-    await expect(securityText).to.equal(welcomeText)
+    expect(securityText).to.equal(welcomeText)
   })
 
   it("Should click on create your account", async() => {
@@ -34,19 +34,19 @@ describe("Onboard new user login", () => {
     // Check that these are properly copied from the authentication server
     await (await OnboardPage.getLastName()).waitForDisplayed()
     await (await OnboardPage.getLastName()).waitForExist()
-    await expect(await (await OnboardPage.getLastName()).getValue()).to.equal(
+    expect(await (await OnboardPage.getLastName()).getValue()).to.equal(
       ONBOARD_USER.lastName
     )
     await (await OnboardPage.getFirstName()).waitForDisplayed()
     await (await OnboardPage.getFirstName()).waitForExist()
-    await expect(await (await OnboardPage.getFirstName()).getValue()).to.equal(
+    expect(await (await OnboardPage.getFirstName()).getValue()).to.equal(
       ONBOARD_USER.firstName
     )
     await (await OnboardPage.getEmailAddress()).waitForDisplayed()
     await (await OnboardPage.getEmailAddress()).waitForExist()
-    await expect(
-      await (await OnboardPage.getEmailAddress()).getValue()
-    ).to.equal(ONBOARD_USER.emailAddress)
+    expect(await (await OnboardPage.getEmailAddress()).getValue()).to.equal(
+      ONBOARD_USER.emailAddress
+    )
   })
 
   it("Should not save if endOfTourDate is not in the future", async() => {
@@ -66,7 +66,7 @@ describe("Onboard new user login", () => {
       .$("div.invalid-feedback")
     await errorMessage.waitForExist()
     await errorMessage.waitForDisplayed()
-    await expect(await errorMessage.getText()).to.equal(
+    expect(await errorMessage.getText()).to.equal(
       "The End of tour date must be in the future"
     )
   })

@@ -14,7 +14,7 @@ describe("Home page", () => {
       await (await Home.getMyCounterpartsLink()).waitForDisplayed()
       await (await Home.getMyTasksLink()).waitForDisplayed()
       await browser.pause(1000)
-      await expect(
+      expect(
         await (await Home.getMyCounterpartsNotifications()).getText()
       ).to.equal("1")
       // eslint-disable-next-line no-unused-expressions
@@ -30,9 +30,9 @@ describe("Home page", () => {
       // eslint-disable-next-line no-unused-expressions
       expect(await (await Home.getMyCounterpartsNotifications()).isExisting())
         .to.be.false
-      await expect(
-        await (await Home.getMyTasksNotifications()).getText()
-      ).to.equal("1")
+      expect(await (await Home.getMyTasksNotifications()).getText()).to.equal(
+        "1"
+      )
     })
     it("Should see that Jack has no counterpart and 1 task with pending assessments", async() => {
       await Home.open("/", "jack")
@@ -43,9 +43,9 @@ describe("Home page", () => {
       // eslint-disable-next-line no-unused-expressions
       expect(await (await Home.getMyCounterpartsNotifications()).isExisting())
         .to.be.false
-      await expect(
-        await (await Home.getMyTasksNotifications()).getText()
-      ).to.equal("1")
+      expect(await (await Home.getMyTasksNotifications()).getText()).to.equal(
+        "1"
+      )
     })
     it("Should see that Nick has no counterparts and no tasks with pending assessments", async() => {
       await Home.open("/", "nick")

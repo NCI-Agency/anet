@@ -72,19 +72,19 @@ describe("Create report form page", () => {
     it("Should be able to select an ANET object reference", async() => {
       await (await CreateReport.getTestReferenceFieldLabel()).waitForExist()
       await (await CreateReport.getTestReferenceFieldLabel()).waitForDisplayed()
-      await expect(
+      expect(
         await (await CreateReport.getTestReferenceFieldLabel()).getText()
       ).to.equal("Related report")
       await (await CreateReport.getTestReferenceFieldHelpText()).waitForExist()
       await (
         await CreateReport.getTestReferenceFieldHelpText()
       ).waitForDisplayed()
-      await expect(
+      expect(
         await (await CreateReport.getTestReferenceFieldHelpText()).getText()
       ).to.equal("Here you can link to a related report")
 
       // Only input type is Reports, so there should be no button to select a type
-      await expect(
+      expect(
         await (
           await CreateReport.getTestReferenceField()
         ).getAttribute("placeholder")
@@ -103,7 +103,7 @@ describe("Create report form page", () => {
         CreateReport.getTestReferenceFieldAdvancedSelectFirstItem(),
         REPORT_COMPLETE
       )
-      await expect(
+      expect(
         await (
           await CreateReport.getTestReferenceFieldAdvancedSelectFirstItem()
         ).getText()
@@ -120,7 +120,7 @@ describe("Create report form page", () => {
       expect(
         await (await CreateReport.getTestReferenceFieldValue()).isExisting()
       ).to.be.true
-      await expect(
+      expect(
         await (await CreateReport.getTestReferenceFieldValue()).getText()
       ).to.include(REPORT_VALUE)
 
@@ -152,7 +152,7 @@ describe("Create report form page", () => {
       await (
         await CreateReport.getTestMultiReferenceFieldLabel()
       ).waitForDisplayed()
-      await expect(
+      expect(
         await (await CreateReport.getTestMultiReferenceFieldLabel()).getText()
       ).to.equal("Additional engagement needed for")
       await (
@@ -161,7 +161,7 @@ describe("Create report form page", () => {
       await (
         await CreateReport.getTestMultiReferenceFieldHelpText()
       ).waitForDisplayed()
-      await expect(
+      expect(
         await (
           await CreateReport.getTestMultiReferenceFieldHelpText()
         ).getText()
@@ -170,7 +170,7 @@ describe("Create report form page", () => {
       )
 
       // Default input type is People
-      await expect(
+      expect(
         await (
           await CreateReport.getTestMultiReferenceField()
         ).getAttribute("placeholder")
@@ -181,7 +181,7 @@ describe("Create report form page", () => {
         CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(1),
         PERSON_COMPLETE_1
       )
-      await expect(
+      expect(
         await (
           await CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(
             1
@@ -191,7 +191,7 @@ describe("Create report form page", () => {
       await (
         await CreateReport.getTestMultiReferenceFieldAdvancedSelectItem(1)
       ).click()
-      await expect(
+      expect(
         await (
           await CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(
             2
@@ -214,12 +214,12 @@ describe("Create report form page", () => {
           await CreateReport.getTestMultiReferenceFieldValue()
         ).isExisting()
       ).to.be.true
-      await expect(
+      expect(
         await (
           await CreateReport.getTestMultiReferenceFieldValueRow(1)
         ).getText()
       ).to.include(PERSON_VALUE_1)
-      await expect(
+      expect(
         await (
           await CreateReport.getTestMultiReferenceFieldValueRow(2)
         ).getText()
@@ -231,7 +231,7 @@ describe("Create report form page", () => {
           await CreateReport.getTestMultiReferenceFieldFormGroup()
         ).$('//button[text()="Positions"]')
       ).click()
-      await expect(
+      expect(
         await (
           await CreateReport.getTestMultiReferenceField()
         ).getAttribute("placeholder")
@@ -242,7 +242,7 @@ describe("Create report form page", () => {
         CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(1),
         POSITION_COMPLETE_1
       )
-      await expect(
+      expect(
         await (
           await CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(
             1
@@ -252,7 +252,7 @@ describe("Create report form page", () => {
       await (
         await CreateReport.getTestMultiReferenceFieldAdvancedSelectItem(1)
       ).click()
-      await expect(
+      expect(
         await (
           await CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(
             2
@@ -262,7 +262,7 @@ describe("Create report form page", () => {
       await (
         await CreateReport.getTestMultiReferenceFieldAdvancedSelectItem(2)
       ).click()
-      await expect(
+      expect(
         await (
           await CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(
             3
@@ -285,24 +285,24 @@ describe("Create report form page", () => {
           await CreateReport.getTestMultiReferenceFieldValue()
         ).isExisting()
       ).to.be.true
-      await expect(
+      expect(
         await (
           await CreateReport.getTestMultiReferenceFieldValueRow(3)
         ).getText()
       ).to.include(POSITION_VALUE_1)
-      await expect(
+      expect(
         await (
           await CreateReport.getTestMultiReferenceFieldValueRow(4)
         ).getText()
       ).to.include(POSITION_VALUE_2)
-      await expect(
+      expect(
         await (
           await CreateReport.getTestMultiReferenceFieldValueRow(5)
         ).getText()
       ).to.include(POSITION_VALUE_3)
 
       // Should have 5 values
-      await expect(
+      expect(
         await CreateReport.getTestMultiReferenceFieldValueRows()
       ).to.have.lengthOf(5)
       // Delete one of the selected values
@@ -312,11 +312,11 @@ describe("Create report form page", () => {
         ).$("button")
       ).click()
       // Should have only 4 values left
-      await expect(
+      expect(
         await CreateReport.getTestMultiReferenceFieldValueRows()
       ).to.have.lengthOf(4)
       // 3rd value should have changed
-      await expect(
+      expect(
         await (
           await CreateReport.getTestMultiReferenceFieldValueRow(3)
         ).getText()
@@ -327,14 +327,14 @@ describe("Create report form page", () => {
       // Submit the report
       await CreateReport.submitForm()
       await CreateReport.waitForAlertToLoad()
-      await expect(await (await CreateReport.getAlert()).getText()).to.include(
+      expect(await (await CreateReport.getAlert()).getText()).to.include(
         "The following errors must be fixed"
       )
 
       // Check ANET object reference
       await (await CreateReport.getTestReferenceFieldLabel()).waitForExist()
       await (await CreateReport.getTestReferenceFieldLabel()).waitForDisplayed()
-      await expect(
+      expect(
         await (await CreateReport.getTestReferenceFieldValue()).getText()
       ).to.include(REPORT_VALUE)
 
@@ -345,25 +345,25 @@ describe("Create report form page", () => {
       await (
         await CreateReport.getTestMultiReferenceFieldLabel()
       ).waitForDisplayed()
-      await expect(
+      expect(
         await CreateReport.getTestMultiReferenceFieldValueRows()
       ).to.have.lengthOf(4)
-      await expect(
+      expect(
         await (
           await CreateReport.getTestMultiReferenceFieldValueRow(1)
         ).getText()
       ).to.include(PERSON_VALUE_1)
-      await expect(
+      expect(
         await (
           await CreateReport.getTestMultiReferenceFieldValueRow(2)
         ).getText()
       ).to.include(PERSON_VALUE_2)
-      await expect(
+      expect(
         await (
           await CreateReport.getTestMultiReferenceFieldValueRow(3)
         ).getText()
       ).to.include(POSITION_VALUE_2)
-      await expect(
+      expect(
         await (
           await CreateReport.getTestMultiReferenceFieldValueRow(4)
         ).getText()
@@ -377,13 +377,13 @@ describe("Create report form page", () => {
       await (await CreateReport.getTestReferenceFieldLabel()).waitForExist()
       await (await CreateReport.getTestReferenceFieldLabel()).waitForDisplayed()
       // Default input type is People
-      await expect(
+      expect(
         await (
           await CreateReport.getTestReferenceField()
         ).getAttribute("placeholder")
       ).to.equal("Find reports")
       // Check ANET object reference
-      await expect(
+      expect(
         await (await CreateReport.getTestReferenceFieldValue()).getText()
       ).to.include(REPORT_VALUE)
       // Delete selected value
@@ -402,31 +402,31 @@ describe("Create report form page", () => {
         await CreateReport.getTestMultiReferenceFieldLabel()
       ).scrollIntoView()
       // Default input type is People
-      await expect(
+      expect(
         await (
           await CreateReport.getTestMultiReferenceField()
         ).getAttribute("placeholder")
       ).to.equal("Find people")
       // Check ANET object multi-references
-      await expect(
+      expect(
         await CreateReport.getTestMultiReferenceFieldValueRows()
       ).to.have.lengthOf(4)
-      await expect(
+      expect(
         await (
           await CreateReport.getTestMultiReferenceFieldValueRow(1)
         ).getText()
       ).to.include(PERSON_VALUE_1)
-      await expect(
+      expect(
         await (
           await CreateReport.getTestMultiReferenceFieldValueRow(2)
         ).getText()
       ).to.include(PERSON_VALUE_2)
-      await expect(
+      expect(
         await (
           await CreateReport.getTestMultiReferenceFieldValueRow(3)
         ).getText()
       ).to.include(POSITION_VALUE_2)
-      await expect(
+      expect(
         await (
           await CreateReport.getTestMultiReferenceFieldValueRow(4)
         ).getText()
@@ -445,9 +445,7 @@ describe("Create report form page", () => {
       await CreateReport.submitForm()
       await CreateReport.waitForAlertToLoad()
       const alertMessage = await (await CreateReport.getAlert()).getText()
-      await expect(alertMessage).to.include(
-        "The following errors must be fixed"
-      )
+      expect(alertMessage).to.include("The following errors must be fixed")
 
       // Check ANET object reference
       await (await CreateReport.getTestReferenceFieldLabel()).waitForExist()
@@ -490,7 +488,7 @@ describe("Create report form page", () => {
       await browser.pause(SHORT_WAIT_MS) // wait for the modal to slide out (transition is 300 ms)
       // Report should be deleted
       await CreateReport.waitForAlertToLoad()
-      await expect(await (await CreateReport.getAlert()).getText()).to.include(
+      expect(await (await CreateReport.getAlert()).getText()).to.include(
         "Report deleted"
       )
     })

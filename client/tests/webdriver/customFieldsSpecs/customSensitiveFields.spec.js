@@ -53,7 +53,7 @@ describe("Visibility of custom sensitive information", () => {
     })
     it("Should be able to see birthday field with the correct value if authorized", async() => {
       await (await ShowPerson.getBirthday()).waitForDisplayed()
-      await expect(await (await ShowPerson.getBirthday()).getText()).to.equal(
+      expect(await (await ShowPerson.getBirthday()).getText()).to.equal(
         NON_COUNTERPART_PRINCIPLE.birthday
       )
     })
@@ -69,13 +69,13 @@ describe("Visibility of custom sensitive information", () => {
     })
     it("Should be able to see political position field with the correct value if counterpart", async() => {
       await (await ShowPerson.getPoliticalPosition()).waitForDisplayed()
-      await expect(
+      expect(
         await (await ShowPerson.getPoliticalPosition()).getText()
       ).to.equal(COUNTERPART_PRINCIPLE.politicalPosition)
     })
     it("Should be able to see birthday field with the correct value if counterpart", async() => {
       await (await ShowPerson.getBirthday()).waitForDisplayed()
-      await expect(await (await ShowPerson.getBirthday()).getText()).to.equal(
+      expect(await (await ShowPerson.getBirthday()).getText()).to.equal(
         COUNTERPART_PRINCIPLE.birthday
       )
     })
@@ -107,7 +107,7 @@ describe("Visibility of custom sensitive information", () => {
     })
     it("Should be able to see birthday field with the correct value if authorized", async() => {
       await (await ShowPerson.getBirthday()).waitForDisplayed()
-      await expect(await (await ShowPerson.getBirthday()).getText()).to.equal(
+      expect(await (await ShowPerson.getBirthday()).getText()).to.equal(
         NON_COUNTERPART_PRINCIPLE.birthday
       )
     })
@@ -131,13 +131,13 @@ describe("Visibility of custom sensitive information", () => {
     })
     it("Should be able to see political position field with the correct value", async() => {
       await (await ShowPerson.getPoliticalPosition()).waitForDisplayed()
-      await expect(
+      expect(
         await (await ShowPerson.getPoliticalPosition()).getText()
       ).to.equal(NON_COUNTERPART_PRINCIPLE.politicalPosition)
     })
     it("Should be able to see birthday field with the correct value", async() => {
       await (await ShowPerson.getBirthday()).waitForDisplayed()
-      await expect(await (await ShowPerson.getBirthday()).getText()).to.equal(
+      expect(await (await ShowPerson.getBirthday()).getText()).to.equal(
         NON_COUNTERPART_PRINCIPLE.birthday
       )
     })
@@ -178,7 +178,7 @@ describe("Creating and editing custom sensitive information", () => {
       await (await CreatePerson.getLastName()).click()
       await CreatePerson.submitForm()
       await CreatePerson.waitForAlertSuccessToLoad()
-      await expect(await (await ShowPerson.getBirthday()).getText()).to.equal(
+      expect(await (await ShowPerson.getBirthday()).getText()).to.equal(
         "8 June 1963"
       )
     })
@@ -191,7 +191,7 @@ describe("Creating and editing custom sensitive information", () => {
       await (await CreatePerson.getLastName()).click()
       await CreatePerson.submitForm()
       await CreatePerson.waitForAlertSuccessToLoad()
-      await expect(await (await ShowPerson.getBirthday()).getText()).to.equal(
+      expect(await (await ShowPerson.getBirthday()).getText()).to.equal(
         "1 January 1956"
       )
     })
@@ -223,10 +223,10 @@ describe("Creating and editing custom sensitive information", () => {
       await (await CreatePerson.getMiddleButton()).click()
       await CreatePerson.submitForm()
       await CreatePerson.waitForAlertSuccessToLoad()
-      await expect(await (await ShowPerson.getBirthday()).getText()).to.equal(
+      expect(await (await ShowPerson.getBirthday()).getText()).to.equal(
         "1 January 1956"
       )
-      await expect(
+      expect(
         await (await ShowPerson.getPoliticalPosition()).getText()
       ).to.equal("Middle")
     })
@@ -240,10 +240,10 @@ describe("Creating and editing custom sensitive information", () => {
       await (await CreatePerson.getLeftButton()).click()
       await CreatePerson.submitForm()
       await CreatePerson.waitForAlertSuccessToLoad()
-      await expect(await (await ShowPerson.getBirthday()).getText()).to.equal(
+      expect(await (await ShowPerson.getBirthday()).getText()).to.equal(
         "8 June 1963"
       )
-      await expect(
+      expect(
         await (await ShowPerson.getPoliticalPosition()).getText()
       ).to.equal("Left")
     })

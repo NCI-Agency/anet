@@ -42,7 +42,7 @@ describe("When using advanced search", () => {
       await AdvancedSearch.getAdvancedSearchPopoverTrigger()
     ).waitForDisplayed()
 
-    await expect(
+    expect(
       await (await AdvancedSearch.getAdvancedSearchPopoverTrigger()).getText()
     ).to.equal("Everything filtered on Status: Active")
   })
@@ -54,16 +54,16 @@ describe("When using advanced search", () => {
   it("Should show a list of anet object types on toggle buttons in the popover", async() => {
     const buttons = await AdvancedSearch.getAnetObjectSearchToggleButtons()
     for (const [i, button] of buttons.entries()) {
-      await expect(await button.getText()).to.equal(await getObjectType(i))
+      expect(await button.getText()).to.equal(await getObjectType(i))
     }
   })
   it("Should show the common filter even when no object type selected", async() => {
-    await expect(
+    expect(
       await (await AdvancedSearch.getCommonSearchFilter()).getText()
     ).to.equal(COMMON_FILTER_TEXT)
   })
   it("Should show the additional common filters when no object type selected", async() => {
-    await expect(
+    expect(
       await (await AdvancedSearch.getAddFilterButtonText()).getText()
     ).to.equal(ADD_FILTER_BUTTON_TEXT)
     await (await AdvancedSearch.getAddFilterButton()).click()
@@ -83,7 +83,7 @@ describe("When using advanced search", () => {
     const buttons = await AdvancedSearch.getAnetObjectSearchToggleButtons()
     for (const [i, button] of buttons.entries()) {
       await button.click()
-      await expect(
+      expect(
         await (await AdvancedSearch.getCommonSearchFilter()).isExisting()
       ).to.equal(true)
       if (i === PERSON_INDEX) {
@@ -93,7 +93,7 @@ describe("When using advanced search", () => {
         await (
           await AdvancedSearch.getPendingVerificationFilter()
         ).waitForDisplayed()
-        await expect(
+        expect(
           await (await AdvancedSearch.getPendingVerificationFilter()).getText()
         ).to.equal(PERSON_DEFAULT_FILTER)
       }
@@ -105,7 +105,7 @@ describe("When using advanced search", () => {
       await button.click()
       await (await AdvancedSearch.getAddFilterButtonText()).waitForExist()
       await (await AdvancedSearch.getAddFilterButtonText()).waitForDisplayed()
-      await expect(
+      expect(
         await (await AdvancedSearch.getAddFilterButtonText()).getText()
       ).to.equal(ADD_FILTER_BUTTON_TEXT)
     }

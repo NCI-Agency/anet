@@ -24,22 +24,22 @@ describe("Create position page", () => {
 
       await (await CreatePosition.getTypeAdvisorButton()).click()
 
-      await expect(
+      expect(
         await (await CreatePosition.getPositionNameHelpBlock()).getText()
       ).to.equal("Position name is required")
-      await expect(
+      expect(
         await (await CreatePosition.getOrganizationHelpBlock()).getText()
       ).to.equal("Organization is required")
-      await expect(
+      expect(
         await (await CreatePosition.getLocationHelpBlock()).getText()
       ).to.equal("Location is required for NATO Billet")
 
       await (await CreatePosition.getTypePrincipalButton()).click()
 
-      await expect(
+      expect(
         await (await CreatePosition.getPositionNameHelpBlock()).getText()
       ).to.equal("Position name is required")
-      await expect(
+      expect(
         await (await CreatePosition.getOrganizationHelpBlock()).getText()
       ).to.equal("Organization is required")
     })
@@ -60,7 +60,7 @@ describe("Create position page", () => {
       await (
         await CreatePosition.getModalContent()
       ).waitForDisplayed({ reverse: true })
-      await expect(similar).to.equal("EF 1.1 Advisor for Agriculture")
+      expect(similar).to.equal("EF 1.1 Advisor for Agriculture")
     })
 
     it("Should successfully create an advisor position when required fields are filled", async() => {
@@ -72,7 +72,7 @@ describe("Create position page", () => {
       await (await CreatePosition.getOrganizationInput()).click()
       await (await CreatePosition.getOrganizationInput()).setValue(ADMIN_ORG)
       await CreatePosition.waitForOrgAdvancedSelectToChange(ADMIN_ORG_COMPLETE)
-      await expect(
+      expect(
         await (await CreatePosition.getOrgAdvancedSelectFirstItem()).getText()
       ).to.include(ADMIN_ORG_COMPLETE)
 
@@ -102,7 +102,7 @@ describe("Create position page", () => {
       await CreatePosition.waitForOrgAdvancedSelectToChange(
         PRINCIPAL_ORG_COMPLETE
       )
-      await expect(
+      expect(
         await (await CreatePosition.getOrgAdvancedSelectFirstItem()).getText()
       ).to.include(PRINCIPAL_ORG_COMPLETE)
 
@@ -121,7 +121,7 @@ describe("Create position page", () => {
       await (await CreatePosition.getForm()).waitForDisplayed()
 
       await (await CreatePosition.getTypePrincipalButton()).waitForDisplayed()
-      await expect(
+      expect(
         await (
           await CreatePosition.getTypePrincipalButton()
         ).getAttribute("class")
@@ -130,7 +130,7 @@ describe("Create position page", () => {
       // expect(CreatePosition.getTypeAdvisorButton().getAttribute("class")).to.include(
       //   "active"
       // )
-      await expect(
+      expect(
         await (await CreatePosition.getOrganizationInput()).getValue()
       ).to.equal("")
 
@@ -154,17 +154,17 @@ describe("Create position page", () => {
       await CreatePosition.waitForOrgAdvancedSelectToChange(
         ADVISOR_ORG_COMPLETE
       )
-      await expect(
+      expect(
         await (await CreatePosition.getOrgAdvancedSelectFirstItem()).getText()
       ).to.include(ADVISOR_ORG_COMPLETE)
 
       await (await CreatePosition.getOrgAdvancedSelectFirstItem()).click()
-      await expect(
+      expect(
         await (await CreatePosition.getOrganizationInput()).getValue()
       ).to.equal(ADVISOR_ORG)
 
       await (await CreatePosition.getTypePrincipalButton()).click()
-      await expect(
+      expect(
         await (await CreatePosition.getOrganizationInput()).getValue()
       ).to.equal("")
 
@@ -175,12 +175,12 @@ describe("Create position page", () => {
       await CreatePosition.waitForOrgAdvancedSelectToChange(
         PRINCIPAL_ORG_COMPLETE
       )
-      await expect(
+      expect(
         await (await CreatePosition.getOrgAdvancedSelectFirstItem()).getText()
       ).to.include(PRINCIPAL_ORG_COMPLETE)
 
       await (await CreatePosition.getOrgAdvancedSelectFirstItem()).click()
-      await expect(
+      expect(
         await (await CreatePosition.getOrganizationInput()).getValue()
       ).to.equal(PRINCIPAL_ORG)
       await (await CreatePosition.getCancelButton()).click()

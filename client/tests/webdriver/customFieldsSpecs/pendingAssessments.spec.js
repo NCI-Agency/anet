@@ -273,7 +273,7 @@ describe("In new report page", () => {
             )
             break
           default:
-            await expect.fail("unexpected task")
+            expect.fail("unexpected task")
             break
         }
       }
@@ -313,7 +313,7 @@ describe("In new report page", () => {
             expect(questions).to.have.length(1)
             break
           default:
-            await expect.fail("unexpected attendee")
+            expect.fail("unexpected attendee")
             break
         }
         expect(await questions[0].getAttribute("id")).to.match(/\.question1$/)
@@ -341,7 +341,7 @@ describe("In new report page", () => {
             expect(questions).to.have.length(2)
             break
           default:
-            await expect.fail("unexpected attendee")
+            expect.fail("unexpected attendee")
             break
         }
         expect(
@@ -366,9 +366,9 @@ describe("In new report page", () => {
         await browser.pause(SHORT_WAIT_MS) // wait for the modal to slide out (transition is 300 ms)
         // Report should be deleted
         await CreateReport.waitForAlertToLoad()
-        await expect(
-          await (await CreateReport.getAlert()).getText()
-        ).to.include("Report deleted")
+        expect(await (await CreateReport.getAlert()).getText()).to.include(
+          "Report deleted"
+        )
       }
     })
   })

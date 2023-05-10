@@ -35,7 +35,7 @@ describe("When editing a location", () => {
       await (await EditLocation.getLocationTypeLabel()).waitForExist()
       await (await EditLocation.getLocationTypeLabel()).waitForDisplayed()
 
-      await expect(
+      expect(
         await (await EditLocation.getLocationTypeField()).getValue()
       ).to.equal(LOCATION_TYPE.type)
     })
@@ -44,12 +44,12 @@ describe("When editing a location", () => {
       await (await EditLocation.getLatLngLabel()).waitForExist()
       await (await EditLocation.getLatLngLabel()).waitForDisplayed()
 
-      await expect(
-        await (await EditLocation.getLatInputField()).getValue()
-      ).to.equal(LOCATION_COORDS.lat)
-      await expect(
-        await (await EditLocation.getLngInputField()).getValue()
-      ).to.equal(LOCATION_COORDS.lng)
+      expect(await (await EditLocation.getLatInputField()).getValue()).to.equal(
+        LOCATION_COORDS.lat
+      )
+      expect(await (await EditLocation.getLngInputField()).getValue()).to.equal(
+        LOCATION_COORDS.lng
+      )
     })
 
     it("Should correctly edit and save input fields and display the correct values in both formats in the popover window", async() => {
@@ -58,13 +58,13 @@ describe("When editing a location", () => {
       await (await EditLocation.getAllFormatsPopoverLat()).waitForExist()
       await (await EditLocation.getAllFormatsPopoverMGRS()).waitForExist()
 
-      await expect(
+      expect(
         await (await EditLocation.getAllFormatsPopoverLat()).getText()
       ).to.equal(NEW_COORDS.lat)
-      await expect(
+      expect(
         await (await EditLocation.getAllFormatsPopoverLng()).getText()
       ).to.equal(NEW_COORDS.lng)
-      await expect(
+      expect(
         await (await EditLocation.getAllFormatsPopoverMGRS()).getText()
       ).to.equal(NEW_COORDS.mgrs)
 
@@ -72,10 +72,10 @@ describe("When editing a location", () => {
       await (await ShowLocation.getSuccessMsg()).waitForExist()
       await (await ShowLocation.getSuccessMsg()).waitForDisplayed()
 
-      await expect(await (await ShowLocation.getLatField()).getText()).to.equal(
+      expect(await (await ShowLocation.getLatField()).getText()).to.equal(
         NEW_COORDS.lat
       )
-      await expect(await (await ShowLocation.getLngField()).getText()).to.equal(
+      expect(await (await ShowLocation.getLngField()).getText()).to.equal(
         NEW_COORDS.lng
       )
     })

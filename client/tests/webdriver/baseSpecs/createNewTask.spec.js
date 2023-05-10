@@ -22,19 +22,15 @@ describe("When creating an task", () => {
     await CreateTask.fillTaskDescription(DESCRIPTION)
     await CreateTask.submitForm()
     await ShowTask.waitForAlertSuccessToLoad()
-    await expect(await (await ShowTask.getAlertSuccess()).getText()).to.equal(
+    expect(await (await ShowTask.getAlertSuccess()).getText()).to.equal(
       "Task saved"
     )
   })
 
   it("Should display the newly created task", async() => {
-    await expect(await (await ShowTask.getShortName()).getText()).to.equal(
-      SHORT_NAME
-    )
-    await expect(await (await ShowTask.getLongName()).getText()).to.equal(
-      LONG_NAME
-    )
-    await expect(await (await ShowTask.getDescription()).getText()).to.equal(
+    expect(await (await ShowTask.getShortName()).getText()).to.equal(SHORT_NAME)
+    expect(await (await ShowTask.getLongName()).getText()).to.equal(LONG_NAME)
+    expect(await (await ShowTask.getDescription()).getText()).to.equal(
       DESCRIPTION
     )
   })
