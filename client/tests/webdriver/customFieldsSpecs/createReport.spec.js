@@ -11,6 +11,11 @@ const INVALID_ENGAGEMENT_DURATION_2 = "-1"
 const VALID_ENGAGEMENT_DURATION_1 = "1234"
 const VALID_ENGAGEMENT_DURATION_2 = "0"
 
+const SEARCH_KEY = "LIN"
+const SEARCH_PEOPLE_COMPLETE_1 = "CIV GUIST, Lin"
+const SEARCH_ORGANIZATION_COMPLETE = "LNG - Linguistic"
+const SEARCH_POSITION_COMPLETE_1 = "LNG Advisor A"
+
 const PERSON = "EF 2.1"
 const PERSON_VALUE_1 = "HENDERSON, Henry"
 const PERSON_VALUE_2 = "JACKSON, Jack"
@@ -92,9 +97,7 @@ describe("Create report form page", () => {
       // eslint-disable-next-line no-unused-expressions
       expect(
         await (
-          await (
-            await CreateReport.getTestReferenceFieldFormGroup()
-          ).$('//button[text()="Reports"]')
+          await CreateReport.getTestReferenceFieldButton("Reports")
         ).isExisting()
       ).to.be.false
       await (await CreateReport.getTestReferenceFieldLabel()).click()
@@ -169,6 +172,7 @@ describe("Create report form page", () => {
         "Here you can link to people, positions and organizations that need an additional engagement"
       )
 
+      // Check search query does not reset when changing object type
       // Default input type is People
       expect(
         await (
@@ -176,6 +180,95 @@ describe("Create report form page", () => {
         ).getAttribute("placeholder")
       ).to.equal("Find people")
       await (await CreateReport.getTestMultiReferenceFieldLabel()).click()
+      await (
+        await CreateReport.getTestMultiReferenceField()
+      ).setValue(SEARCH_KEY)
+      await CreateReport.waitForAdvancedSelectToChange(
+        CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(1),
+        SEARCH_PEOPLE_COMPLETE_1
+      )
+      expect(
+        await (
+          await CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(
+            1
+          )
+        ).getText()
+      ).to.include(SEARCH_PEOPLE_COMPLETE_1)
+      // Change input type to Organizations
+      await (
+        await CreateReport.getTestMultiReferenceFieldButton("Organizations")
+      ).click()
+      expect(
+        await (
+          await CreateReport.getTestMultiReferenceField()
+        ).getAttribute("placeholder")
+      ).to.equal("Find organizations")
+      await (await CreateReport.getTestMultiReferenceField()).click()
+      expect(
+        await (await CreateReport.getTestMultiReferenceField()).getValue()
+      ).to.equal(SEARCH_KEY)
+      await CreateReport.waitForAdvancedSelectToChange(
+        CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(1),
+        SEARCH_ORGANIZATION_COMPLETE
+      )
+      expect(
+        await (
+          await CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(
+            1
+          )
+        ).getText()
+      ).to.include(SEARCH_ORGANIZATION_COMPLETE)
+      // Change input type to Positions
+      await (
+        await CreateReport.getTestMultiReferenceFieldButton("Positions")
+      ).click()
+      expect(
+        await (
+          await CreateReport.getTestMultiReferenceField()
+        ).getAttribute("placeholder")
+      ).to.equal("Find positions")
+      await (await CreateReport.getTestMultiReferenceField()).click()
+      expect(
+        await (await CreateReport.getTestMultiReferenceField()).getValue()
+      ).to.equal(SEARCH_KEY)
+      await CreateReport.waitForAdvancedSelectToChange(
+        CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(1),
+        SEARCH_POSITION_COMPLETE_1
+      )
+      expect(
+        await (
+          await CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(
+            1
+          )
+        ).getText()
+      ).to.include(SEARCH_POSITION_COMPLETE_1)
+      // Click outside the overlay
+      await (await CreateReport.getEngagementInformationTitle()).click()
+      // Advanced select input does not get empty
+      expect(
+        await (await CreateReport.getTestMultiReferenceField()).getValue()
+      ).to.equal(SEARCH_KEY)
+      // Change input type to People
+      await (
+        await CreateReport.getTestMultiReferenceFieldButton("People")
+      ).click()
+      // Set value to empty
+      await (await CreateReport.getTestMultiReferenceField()).click()
+      await (await CreateReport.getTestMultiReferenceField()).clearValue()
+      // Click outside the overlay
+      await (await CreateReport.getEngagementInformationTitle()).click()
+
+      // Default input type is People
+      expect(
+        await (
+          await CreateReport.getTestMultiReferenceField()
+        ).getAttribute("placeholder")
+      ).to.equal("Find people")
+      await (await CreateReport.getTestMultiReferenceField()).click()
+      // After preserving search query, setValue does not work consistently
+      // input field values are sometimes concatenated
+      // Therefore, clear input field previous value before setting new value.
+      await (await CreateReport.getTestMultiReferenceField()).clearValue()
       await (await CreateReport.getTestMultiReferenceField()).setValue(PERSON)
       await CreateReport.waitForAdvancedSelectToChange(
         CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(1),
@@ -203,10 +296,11 @@ describe("Create report form page", () => {
       ).click()
       // Click outside the overlay
       await (await CreateReport.getEngagementInformationTitle()).click()
-      // Advanced select input gets empty, the selected element shown below the input
+      // Advanced select input does not get empty, the selected element shown below the input
       // eslint-disable-next-line no-unused-expressions
-      expect(await (await CreateReport.getTestMultiReferenceField()).getValue())
-        .to.be.empty
+      expect(
+        await (await CreateReport.getTestMultiReferenceField()).getValue()
+      ).to.equal(PERSON)
       // Value should exist now
       // eslint-disable-next-line no-unused-expressions
       expect(
@@ -227,16 +321,18 @@ describe("Create report form page", () => {
 
       // Change input type to Positions
       await (
-        await (
-          await CreateReport.getTestMultiReferenceFieldFormGroup()
-        ).$('//button[text()="Positions"]')
+        await CreateReport.getTestMultiReferenceFieldButton("Positions")
       ).click()
       expect(
         await (
           await CreateReport.getTestMultiReferenceField()
         ).getAttribute("placeholder")
       ).to.equal("Find positions")
-      await (await CreateReport.getTestMultiReferenceFieldLabel()).click()
+      await (await CreateReport.getTestMultiReferenceField()).click()
+      // After preserving search query, setValue does not work consistently
+      // input field values are sometimes concatenated
+      // Therefore, clear input field previous value before setting new value.
+      await (await CreateReport.getTestMultiReferenceField()).clearValue()
       await (await CreateReport.getTestMultiReferenceField()).setValue(POSITION)
       await CreateReport.waitForAdvancedSelectToChange(
         CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(1),
@@ -274,10 +370,11 @@ describe("Create report form page", () => {
       ).click()
       // Click outside the overlay
       await (await CreateReport.getEngagementInformationTitle()).click()
-      // Advanced select input gets empty, the selected element shown below the input
+      // Advanced select input does not get empty, the selected element shown below the input
       // eslint-disable-next-line no-unused-expressions
-      expect(await (await CreateReport.getTestMultiReferenceField()).getValue())
-        .to.be.empty
+      expect(
+        await (await CreateReport.getTestMultiReferenceField()).getValue()
+      ).to.equal(POSITION)
       // Value should exist now
       // eslint-disable-next-line no-unused-expressions
       expect(

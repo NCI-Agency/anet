@@ -214,6 +214,7 @@ const MultiTypeAdvancedSelectComponent = ({
         placeholder={searchPlaceholder}
         value={value}
         showEmbedded
+        keepSearchText={entityTypes.length > 1}
         overlayColumns={advancedSelectProps.overlayColumns}
         overlayRenderRow={advancedSelectProps.overlayRenderRow}
         filterDefs={filterDefs}
