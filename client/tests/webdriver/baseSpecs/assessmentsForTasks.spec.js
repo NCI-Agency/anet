@@ -30,20 +30,31 @@ describe("For the periodic task assessments", () => {
     })
 
     it("Should allow advisor to successfully add an assessment", async() => {
-      await (await ShowTask.getMonthlyAssessmentsTable()).waitForExist()
-      await (await ShowTask.getMonthlyAssessmentsTable()).waitForDisplayed()
-      await (await ShowTask.getAddMonthlyAssessmentButton()).click()
+      await (
+        await ShowTask.getAssessmentsTable("subTaskMonthly", "monthly")
+      ).waitForExist()
+      await (
+        await ShowTask.getAssessmentsTable("subTaskMonthly", "monthly")
+      ).waitForDisplayed()
+      await (
+        await ShowTask.getAddAssessmentButton("subTaskMonthly", "monthly")
+      ).click()
       await ShowTask.waitForAssessmentModalForm()
 
       // NOTE: assuming assessment question content here, may change in future
       await ShowTask.fillAssessmentQuestion(ADVISOR_1_TASK_CREATE_DETAILS)
       await ShowTask.saveAssessmentAndWaitForModalClose(
+        "subTaskMonthly",
+        "monthly",
         ADVISOR_1_TASK_CREATE_DETAILS[0]
       )
     })
 
     it("Should show the same assessment details with the details just created", async() => {
-      const details = await ShowTask.getShownAssessmentDetails()
+      const details = await ShowTask.getShownAssessmentDetails(
+        "subTaskMonthly",
+        "monthly"
+      )
       for (const [index, detail] of details.entries()) {
         expect((await prefix(index)) + (await detail.getText())).to.equal(
           (await // Only some values are mapped, others are same
@@ -55,9 +66,15 @@ describe("For the periodic task assessments", () => {
     })
 
     it("Should allow the author of the assessment to successfully edit it", async() => {
-      await (await ShowTask.getEditMonthlyAssessmentButton()).waitForExist()
-      await (await ShowTask.getEditMonthlyAssessmentButton()).waitForDisplayed()
-      await (await ShowTask.getEditMonthlyAssessmentButton()).click()
+      await (
+        await ShowTask.getEditAssessmentButton("subTaskMonthly", "monthly")
+      ).waitForExist()
+      await (
+        await ShowTask.getEditAssessmentButton("subTaskMonthly", "monthly")
+      ).waitForDisplayed()
+      await (
+        await ShowTask.getEditAssessmentButton("subTaskMonthly", "monthly")
+      ).click()
       await ShowTask.waitForAssessmentModalForm()
 
       await ShowTask.fillAssessmentQuestion(
@@ -65,12 +82,17 @@ describe("For the periodic task assessments", () => {
         ADVISOR_1_TASK_CREATE_DETAILS[0]
       )
       await ShowTask.saveAssessmentAndWaitForModalClose(
+        "subTaskMonthly",
+        "monthly",
         ADVISOR_1_TASK_EDIT_DETAILS[0]
       )
     })
 
     it("Should show the same assessment details with the details just edited", async() => {
-      const details = await ShowTask.getShownAssessmentDetails()
+      const details = await ShowTask.getShownAssessmentDetails(
+        "subTaskMonthly",
+        "monthly"
+      )
       for (const [index, detail] of details.entries()) {
         expect((await prefix(index)) + (await detail.getText())).to.equal(
           (await // Only some values are mapped, others are same
@@ -95,14 +117,22 @@ describe("For the periodic task assessments", () => {
 
     it("Should not show make assessment button when there is an assessment on that period", async() => {
       expect(
-        await (await ShowTask.getAddMonthlyAssessmentButton()).isExisting()
+        await (
+          await ShowTask.getAddAssessmentButton("subTaskMonthly", "monthly")
+        ).isExisting()
       ).to.equal(false)
     })
 
     it("Should allow admins to successfully edit existing assessment", async() => {
-      await (await ShowTask.getMonthlyAssessmentsTable()).waitForExist()
-      await (await ShowTask.getMonthlyAssessmentsTable()).waitForDisplayed()
-      await (await ShowTask.getEditMonthlyAssessmentButton()).click()
+      await (
+        await ShowTask.getAssessmentsTable("subTaskMonthly", "monthly")
+      ).waitForExist()
+      await (
+        await ShowTask.getAssessmentsTable("subTaskMonthly", "monthly")
+      ).waitForDisplayed()
+      await (
+        await ShowTask.getEditAssessmentButton("subTaskMonthly", "monthly")
+      ).click()
       await ShowTask.waitForAssessmentModalForm()
 
       // NOTE: assuming assessment question content here, may change in future
@@ -111,12 +141,17 @@ describe("For the periodic task assessments", () => {
         ADVISOR_1_TASK_EDIT_DETAILS[0]
       )
       await ShowTask.saveAssessmentAndWaitForModalClose(
+        "subTaskMonthly",
+        "monthly",
         ADMIN_TASK_EDIT_DETAILS[0]
       )
     })
 
     it("Should show the same assessment details with the details just edited", async() => {
-      const details = await ShowTask.getShownAssessmentDetails()
+      const details = await ShowTask.getShownAssessmentDetails(
+        "subTaskMonthly",
+        "monthly"
+      )
       for (const [index, detail] of details.entries()) {
         expect((await prefix(index)) + (await detail.getText())).to.equal(
           (await // Only some values are mapped, others are same
@@ -141,14 +176,22 @@ describe("For the periodic task assessments", () => {
 
     it("Should not show make assessment button when there is an assessment on that period", async() => {
       expect(
-        await (await ShowTask.getAddMonthlyAssessmentButton()).isExisting()
+        await (
+          await ShowTask.getAddAssessmentButton("subTaskMonthly", "monthly")
+        ).isExisting()
       ).to.equal(false)
     })
 
     it("Should allow the other advisor to successfully edit existing assessment", async() => {
-      await (await ShowTask.getMonthlyAssessmentsTable()).waitForExist()
-      await (await ShowTask.getMonthlyAssessmentsTable()).waitForDisplayed()
-      await (await ShowTask.getEditMonthlyAssessmentButton()).click()
+      await (
+        await ShowTask.getAssessmentsTable("subTaskMonthly", "monthly")
+      ).waitForExist()
+      await (
+        await ShowTask.getAssessmentsTable("subTaskMonthly", "monthly")
+      ).waitForDisplayed()
+      await (
+        await ShowTask.getEditAssessmentButton("subTaskMonthly", "monthly")
+      ).click()
       await ShowTask.waitForAssessmentModalForm()
 
       // NOTE: assuming assessment question content here, may change in future
@@ -157,12 +200,17 @@ describe("For the periodic task assessments", () => {
         ADMIN_TASK_EDIT_DETAILS[0]
       )
       await ShowTask.saveAssessmentAndWaitForModalClose(
+        "subTaskMonthly",
+        "monthly",
         ADVISOR_2_TASK_EDIT_DETAILS[0]
       )
     })
 
     it("Should show the same assessment details with the details just edited", async() => {
-      const details = await ShowTask.getShownAssessmentDetails()
+      const details = await ShowTask.getShownAssessmentDetails(
+        "subTaskMonthly",
+        "monthly"
+      )
       for (const [index, detail] of details.entries()) {
         expect((await prefix(index)) + (await detail.getText())).to.equal(
           (await // Only some values are mapped, others are same
@@ -174,9 +222,12 @@ describe("For the periodic task assessments", () => {
     })
 
     it("Should allow the other advisor to delete the assessment", async() => {
-      await (await ShowTask.getDeleteMonthlyAssessmentButton()).click()
+      await (await ShowTask.getDeleteAssessmentButton()).click()
       await ShowTask.confirmDelete()
-      await ShowTask.waitForDeletedAssessmentToDisappear()
+      await ShowTask.waitForDeletedAssessmentToDisappear(
+        "subTaskMonthly",
+        "monthly"
+      )
       await ShowTask.logout()
     })
   })

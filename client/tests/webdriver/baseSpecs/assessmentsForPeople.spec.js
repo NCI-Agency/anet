@@ -38,10 +38,19 @@ describe("For the periodic person assessments", () => {
     })
 
     it("Should display nested question sets", async() => {
-      await (await ShowPerson.getAssessmentsTable()).waitForExist()
-      await (await ShowPerson.getAssessmentsTable()).waitForDisplayed()
+      await (
+        await ShowPerson.getAssessmentsTable("principalQuarterly", "quarterly")
+      ).waitForExist()
+      await (
+        await ShowPerson.getAssessmentsTable("principalQuarterly", "quarterly")
+      ).waitForDisplayed()
 
-      await (await ShowPerson.getAddPeriodicAssessmentButton()).click()
+      await (
+        await ShowPerson.getAddAssessmentButton(
+          "principalQuarterly",
+          "quarterly"
+        )
+      ).click()
       await ShowPerson.waitForAssessmentModalForm()
       await (await ShowPerson.getTopLevelQuestionSetTitle()).waitForDisplayed()
       await (
@@ -60,12 +69,17 @@ describe("For the periodic person assessments", () => {
       // NOTE: assuming assessment question content here, may change in future
       await ShowPerson.fillAssessmentQuestion(ADVISOR_1_PERSON_CREATE_DETAILS)
       await ShowPerson.saveAssessmentAndWaitForModalClose(
+        "principalQuarterly",
+        "quarterly",
         VALUE_TO_TEXT_FOR_PERSON[ADVISOR_1_PERSON_CREATE_DETAILS[0]]
       )
     })
 
     it("Should show the same assessment details with the details just created", async() => {
-      const details = await ShowPerson.getShownAssessmentDetails()
+      const details = await ShowPerson.getShownAssessmentDetails(
+        "principalQuarterly",
+        "quarterly"
+      )
       for (const [index, detail] of details.entries()) {
         expect((await prefix(index)) + (await detail.getText())).to.equal(
           (await prefix(index)) +
@@ -87,12 +101,17 @@ describe("For the periodic person assessments", () => {
         ADVISOR_1_PERSON_CREATE_DETAILS[1]
       )
       await ShowPerson.saveAssessmentAndWaitForModalClose(
+        "principalQuarterly",
+        "quarterly",
         VALUE_TO_TEXT_FOR_PERSON[ADVISOR_1_PERSON_EDIT_DETAILS[0]]
       )
     })
 
     it("Should show the same assessment details with the details just edited", async() => {
-      const details = await ShowPerson.getShownAssessmentDetails()
+      const details = await ShowPerson.getShownAssessmentDetails(
+        "principalQuarterly",
+        "quarterly"
+      )
       for (const [index, detail] of details.entries()) {
         expect((await prefix(index)) + (await detail.getText())).to.equal(
           (await prefix(index)) +
@@ -118,7 +137,12 @@ describe("For the periodic person assessments", () => {
 
     it("Should not show make assessment button when there is an assessment on that period", async() => {
       expect(
-        await (await ShowPerson.getAddPeriodicAssessmentButton()).isExisting()
+        await (
+          await ShowPerson.getAddAssessmentButton(
+            "principalQuarterly",
+            "quarterly"
+          )
+        ).isExisting()
       ).to.equal(false)
     })
 
@@ -134,12 +158,17 @@ describe("For the periodic person assessments", () => {
         ADVISOR_1_PERSON_EDIT_DETAILS[1]
       )
       await ShowPerson.saveAssessmentAndWaitForModalClose(
+        "principalQuarterly",
+        "quarterly",
         VALUE_TO_TEXT_FOR_PERSON[ADMIN_PERSON_EDIT_DETAILS[0]]
       )
     })
 
     it("Should show the same assessment details with the details just edited", async() => {
-      const details = await ShowPerson.getShownAssessmentDetails()
+      const details = await ShowPerson.getShownAssessmentDetails(
+        "principalQuarterly",
+        "quarterly"
+      )
       for (const [index, detail] of details.entries()) {
         expect((await prefix(index)) + (await detail.getText())).to.equal(
           (await prefix(index)) +
@@ -152,7 +181,10 @@ describe("For the periodic person assessments", () => {
     it("Should allow an admin to delete the assessment", async() => {
       await (await ShowPerson.getDeleteAssessmentButton()).click()
       await ShowPerson.confirmDelete()
-      await ShowPerson.waitForDeletedAssessmentToDisappear()
+      await ShowPerson.waitForDeletedAssessmentToDisappear(
+        "principalQuarterly",
+        "quarterly"
+      )
       await ShowPerson.logout()
     })
   })
