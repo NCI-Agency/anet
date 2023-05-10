@@ -6,6 +6,8 @@ import {
 } from "periodUtils"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
+import "./AssessmentResultsContainer.css"
+import InstantAssessmentResultsTable from "./instant/InstantAssessmentResultsTable"
 import OnDemandAssessment from "./ondemand/OndemandAssessment"
 import PeriodicAssessmentResultsTable from "./periodic/PeriodicAssessmentResultsTable"
 
@@ -26,26 +28,38 @@ const AssessmentResultsContainer = ({
   const entityAssessments = Object.entries(entity.getAssessmentsConfig())
   return (
     <div ref={contRef}>
-      {entityAssessments.map(([assessmentKey, entityAssessment]) =>
-        PERIOD_FACTORIES[entityAssessment.recurrence] ? (
-          <PeriodicAssessmentResultsTable
-            key={assessmentKey}
-            assessmentKey={assessmentKey}
-            style={{ flex: "0 0 100%" }}
-            entity={entity}
-            entityType={entityType}
-            subEntities={subEntities}
-            periodsDetails={{
-              recurrence: entityAssessment.recurrence,
-              numberOfPeriods
-            }}
-            canAddAssessment={canAddPeriodicAssessment}
-            onUpdateAssessment={onUpdateAssessment}
-          />
-        ) : (
-          entityAssessment.recurrence === RECURRENCE_TYPE.ON_DEMAND && (
+      {entityAssessments.map(([assessmentKey, entityAssessment]) => (
+        <React.Fragment key={assessmentKey}>
+          {entityAssessment.recurrence === RECURRENCE_TYPE.ONCE && (
+            <InstantAssessmentResultsTable
+              assessmentKey={assessmentKey}
+              style={{ flex: "0 0 100%" }}
+              entity={entity}
+              entityType={entityType}
+              subEntities={subEntities}
+              periodsDetails={{
+                recurrence: RECURRENCE_TYPE.MONTHLY,
+                numberOfPeriods
+              }}
+            />
+          )}
+          {PERIOD_FACTORIES[entityAssessment.recurrence] && (
+            <PeriodicAssessmentResultsTable
+              assessmentKey={assessmentKey}
+              style={{ flex: "0 0 100%" }}
+              entity={entity}
+              entityType={entityType}
+              subEntities={subEntities}
+              periodsDetails={{
+                recurrence: entityAssessment.recurrence,
+                numberOfPeriods
+              }}
+              canAddAssessment={canAddPeriodicAssessment}
+              onUpdateAssessment={onUpdateAssessment}
+            />
+          )}
+          {entityAssessment.recurrence === RECURRENCE_TYPE.ON_DEMAND && (
             <OnDemandAssessment
-              key={assessmentKey}
               assessmentKey={assessmentKey}
               style={{ flex: "0 0 100%" }}
               entity={entity}
@@ -58,9 +72,9 @@ const AssessmentResultsContainer = ({
               canAddAssessment={canAddOndemandAssessment}
               onUpdateAssessment={onUpdateAssessment}
             />
-          )
-        )
-      )}
+          )}
+        </React.Fragment>
+      ))}
     </div>
   )
 }

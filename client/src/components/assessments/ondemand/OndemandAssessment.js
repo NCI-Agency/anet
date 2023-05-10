@@ -282,10 +282,11 @@ const OnDemandAssessment = ({
     return (
       <div style={{ ...style }}>
         <Fieldset
-          title={`Assessment results - ${
-            assessmentConfig.label || "on demand"
-          }`}
-          id={`entity-assessments-results-${recurrence}`}
+          title={
+            assessmentConfig?.label ||
+            `On-demand assessment results for ${assessmentKey}`
+          }
+          id={`entity-assessments-results-${assessmentKey}-${recurrence}`}
         >
           <PeriodsNavigation
             offset={tableLocation}

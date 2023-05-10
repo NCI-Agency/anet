@@ -13,27 +13,35 @@ import {
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Table } from "react-bootstrap"
-import utils from "utils"
-import { PeriodicAssessmentsRows } from "./PeriodicAssessmentResults"
+import { QuestionSetRow, QuestionsRow } from "./InstantAssessmentQuestions"
 
 /*
- * The PeriodicAssessmentResultsTable component displays the results of periodic assessments made
- * on the entity periodically, as a measurement of the given period of time.
+ * The InstantAssessmentResultsTable component displays the results of instant assessments made
+ * on the entity/subentities when working on them in relation to another type of entity (example:
+ * assessments made on tasks, while filling  report related to the tasks) or assessments made on
+ * the entity/subentity itself.
  */
 
-const EntityPeriodicAssessmentResults = ({
+const EntityInstantAssessmentResults = ({
   assessmentKey,
+  idSuffix,
   entity,
   entityType,
-  periodsConfig,
-  canAddAssessment,
-  onUpdateAssessment
+  periodsConfig
 }) => {
   if (!entity) {
     return null
   }
+  const instantAssessmentConfig =
+    entity.getInstantAssessmentConfig(assessmentKey)
   const modelType = entityType.resourceName
   const { periods } = periodsConfig
+  const dataPerPeriod = []
+  periods.forEach(period =>
+    dataPerPeriod.push(
+      entity.getInstantAssessmentResults(period, assessmentKey)
+    )
+  )
   return (
     <>
       <tr>
@@ -50,35 +58,49 @@ const EntityPeriodicAssessmentResults = ({
           )}
         </td>
       </tr>
-      <PeriodicAssessmentsRows
-        assessmentKey={assessmentKey}
-        entity={entity}
-        entityType={entityType}
-        periodsConfig={periodsConfig}
-        canAddAssessment={canAddAssessment}
-        onUpdateAssessment={onUpdateAssessment}
-      />
+      {Object.entries(instantAssessmentConfig?.questions || {}).map(
+        ([key, config], index) => (
+          <QuestionsRow
+            key={key}
+            idSuffix={`${key}-${idSuffix}`}
+            questionKey={key}
+            questionConfig={config}
+            periods={periods}
+            periodsData={dataPerPeriod}
+            isFirstRow={index === 0}
+          />
+        )
+      )}
+      {Object.entries(instantAssessmentConfig?.questionSets || {}).map(
+        ([questionSet, config]) => (
+          <QuestionSetRow
+            idSuffix={`${idSuffix}-${questionSet}`}
+            key={questionSet}
+            questionSetConfig={config}
+            questionSetKey={questionSet}
+            periods={periods}
+            periodsData={dataPerPeriod}
+          />
+        )
+      )}
     </>
   )
 }
-EntityPeriodicAssessmentResults.propTypes = {
+EntityInstantAssessmentResults.propTypes = {
   assessmentKey: PropTypes.string.isRequired,
+  idSuffix: PropTypes.string.isRequired,
   entity: PropTypes.object.isRequired,
   entityType: PropTypes.func.isRequired,
-  periodsConfig: AssessmentPeriodsConfigPropType.isRequired,
-  onUpdateAssessment: PropTypes.func.isRequired,
-  canAddAssessment: PropTypes.bool
+  periodsConfig: AssessmentPeriodsConfigPropType.isRequired
 }
 
-const PeriodicAssessmentResultsTable = ({
+const InstantAssessmentResultsTable = ({
   assessmentKey,
   entity,
   entityType,
   subEntities,
   style,
-  periodsDetails,
-  canAddAssessment,
-  onUpdateAssessment
+  periodsDetails
 }) => {
   const [offset, setOffset] = useState(0)
   if (!entity) {
@@ -94,14 +116,14 @@ const PeriodicAssessmentResultsTable = ({
   if (_isEmpty(periodsConfig?.periods)) {
     return null
   }
-  const entityPeriodicAssessmentConfig =
+  const entityInstantAssessmentConfig =
     entity.getInstantAssessmentConfig(assessmentKey)
-  const subEntitiesPeriodicAssessmentConfig = subEntities
+  const subEntitiesInstantAssessmentConfig = subEntities
     ?.map(s => s.getInstantAssessmentConfig(assessmentKey))
     .filter(mc => !_isEmpty(mc))
   if (
-    _isEmpty(entityPeriodicAssessmentConfig) &&
-    _isEmpty(subEntitiesPeriodicAssessmentConfig)
+    _isEmpty(entityInstantAssessmentConfig) &&
+    _isEmpty(subEntitiesInstantAssessmentConfig)
   ) {
     return null
   }
@@ -110,10 +132,8 @@ const PeriodicAssessmentResultsTable = ({
       <div style={{ ...style }}>
         <Fieldset
           title={
-            entityPeriodicAssessmentConfig?.label ||
-            `${utils.sentenceCase(
-              recurrence
-            )} assessment results for ${assessmentKey}`
+            entityInstantAssessmentConfig?.label ||
+            `Instant assessment results for ${assessmentKey}`
           }
           id={`entity-assessments-results-${assessmentKey}-${recurrence}`}
         >
@@ -128,24 +148,22 @@ const PeriodicAssessmentResultsTable = ({
             <tbody>
               <>
                 {subEntities?.map(subEntity => (
-                  <EntityPeriodicAssessmentResults
+                  <EntityInstantAssessmentResults
                     key={`subassessment-${assessmentKey}-${subEntity.uuid}`}
                     assessmentKey={assessmentKey}
+                    idSuffix={`subassessment-${assessmentKey}-${subEntity.uuid}`}
                     entity={subEntity}
                     entityType={entityType}
                     periodsConfig={periodsConfig}
-                    canAddAssessment={false}
-                    onUpdateAssessment={onUpdateAssessment}
                   />
                 ))}
               </>
-              <EntityPeriodicAssessmentResults
+              <EntityInstantAssessmentResults
                 assessmentKey={assessmentKey}
+                idSuffix={`assessment-${assessmentKey}-${entity.uuid}`}
                 entity={entity}
                 entityType={entityType}
                 periodsConfig={periodsConfig}
-                canAddAssessment={canAddAssessment}
-                onUpdateAssessment={onUpdateAssessment}
               />
             </tbody>
           </Table>
@@ -154,15 +172,13 @@ const PeriodicAssessmentResultsTable = ({
     </>
   )
 }
-PeriodicAssessmentResultsTable.propTypes = {
+InstantAssessmentResultsTable.propTypes = {
   style: PropTypes.object,
   assessmentKey: PropTypes.string.isRequired,
   entity: PropTypes.object.isRequired,
   entityType: PropTypes.func.isRequired,
   subEntities: PropTypes.array,
-  periodsDetails: PeriodsDetailsPropType.isRequired,
-  onUpdateAssessment: PropTypes.func.isRequired,
-  canAddAssessment: PropTypes.bool
+  periodsDetails: PeriodsDetailsPropType.isRequired
 }
 
-export default PeriodicAssessmentResultsTable
+export default InstantAssessmentResultsTable

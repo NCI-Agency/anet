@@ -64,6 +64,7 @@ fields:
           height: 400px
       assessments:
         topTaskOnceReport:
+          label: Engagement assessment of objective
           recurrence: once
           relatedObjectType: report
           authorizationGroupUuids:
@@ -94,6 +95,7 @@ fields:
               type: number
               label: Instant assessment Question 3
         topTaskSemiannually:
+          label: Semi-annual assessment of objective
           recurrence: semiannually
           test: $.subject[?(@property === "shortName" && @.match(/^EF/i))]
           authorizationGroupUuids:
@@ -125,6 +127,7 @@ fields:
           height: 400px
       assessments:
         subTaskMonthly:
+          label: Monthly assessment of effort
           recurrence: monthly
           questions:
             requiredButFilteredOutQuestion:
@@ -169,6 +172,7 @@ fields:
                 - type: required
                   params: [You must provide the Project status]
         subTaskWeekly:
+          label: Weekly assessment of effort
           recurrence: weekly
           questions:
             issues:
@@ -182,6 +186,7 @@ fields:
                 - type: required
                   params: [You must provide the Top 3 issues]
         subTaskOnceReport:
+          label: Engagement assessment of effort
           recurrence: once
           relatedObjectType: report
           questions:
@@ -230,6 +235,7 @@ fields:
               type: number
               label: Instant assessment Question 3
         subTask11COnceReport:
+          label: Engagement assessment of effort 1.1.C
           recurrence: once
           relatedObjectType: report
           test: $.subject[?(@property === "shortName" && @ === "1.1.C")]
@@ -257,7 +263,7 @@ fields:
 
     parentTask:
       label: Parent objective / effort
-      placeholder: Start typing to search for a higher level task
+      placeholder: Start typing to search for a higher level objective / effort
     childrenTasks: Sub efforts
     taskedOrganizations:
       label: Tasked organizations
@@ -423,6 +429,7 @@ fields:
         - biography
       assessments:
         advisorOnceReportLinguist:
+          label: Engagement assessment of linguist
           recurrence: once
           relatedObjectType: report
           test: $.subject.position.organization[?(@property === "shortName" && @.match(/^LNG/i))]
@@ -760,6 +767,7 @@ fields:
                   style:
                     height: 100px
         advisorOnceReportLinguistLin:
+          label: Engagement assessment of linguist GUIST, Lin
           recurrence: once
           relatedObjectType: report
           test: $.subject[?(@property === "name" && @ === "GUIST, Lin")]
@@ -784,7 +792,8 @@ fields:
               validations:
                 - type: required
                   params: [You must provide the answer to advisorOnceReportLinguistLin.questionForNegative]
-        advisorPeriodic:
+        advisorMonthly:
+          label: Monthly assessment of advisor
           recurrence: monthly
           questions:
             question1:
@@ -794,6 +803,7 @@ fields:
                 style:
                   height: 70px
         advisorOndemand:
+          label: Ondemand assessment of advisor
           recurrence: ondemand
           questions:
             assessmentDate:
@@ -838,6 +848,7 @@ fields:
       countries: [Afghanistan]
       assessments:
         principalMonthly:
+          label: Monthly assessment of principal
           recurrence: monthly
           authorizationGroupUuids:
             read: ['c21e7321-7ec5-4837-8805-a302f9575754']
@@ -864,6 +875,7 @@ fields:
               style:
                 height: 100px
         principalQuarterly:
+          label: Quarterly assessment of principal
           recurrence: quarterly
           questions:
             test1:
@@ -934,6 +946,7 @@ fields:
                         - type: required
                           params: [You must provide Test question 3]
         principalOnceReport:
+          label: Engagement assessment of principal
           recurrence: once
           relatedObjectType: report
           questions:
@@ -975,10 +988,10 @@ fields:
                   label: 👍
                   color: '#0000ff'
         principalOndemandScreeningAndVetting:
+          label: Screening & Vetting of principal from MoD
           recurrence: ondemand
           test: $.subject.position.organization[?(@property === "shortName" && @.match(/^MoD/i))]
           onDemandAssessmentExpirationDays: 108
-          label: "Screening & Vetting"
           authorizationGroupUuids:
             read: ['c21e7321-7ec5-4837-8805-a302f9575754']
             write: ['39a78d51-c351-452c-9206-4305ec8dd76d']
