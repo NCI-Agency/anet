@@ -1,6 +1,12 @@
 package mil.dds.anet.database;
 
 import io.leangen.graphql.annotations.GraphQLRootContext;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.invoke.MethodHandles;
+import java.sql.Blob;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -15,11 +21,25 @@ import mil.dds.anet.database.mappers.AttachmentRelatedObjectMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.views.ForeignKeyFetcher;
+import org.apache.commons.io.IOUtils;
+import org.eclipse.jetty.io.EofException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public class AttachmentDao extends AnetBaseDao<Attachment, AbstractSearchQuery<?>> {
 
+  public static final String[] fields = {"uuid", "authorUuid", "fileName", "mimeType",
+      "description", "classification", "createdAt", "updatedAt"};
+  public static final String[] contentFields = {"uuid", "content"};
   public static final String TABLE_NAME = "attachments";
+  public static final String ATTACHMENT_FIELDS =
+      DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
+  public static final String CONTENT_FIELDS =
+      DaoUtils.buildFieldAliases(TABLE_NAME, contentFields, true);
+
+  private static final Logger logger =
+      LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   @Override
   public Attachment getByUuid(String uuid) {
@@ -27,8 +47,8 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AbstractSearchQuery<?
   }
 
   static class SelfIdBatcher extends IdBatcher<Attachment> {
-    private static final String sql = "/* batch.getAttachmentByUuids */ "
-        + "SELECT * FROM \"attachments\" WHERE uuid IN ( <uuids> )";
+    private static final String sql = "/* batch.getAttachmentByUuids */ SELECT " + ATTACHMENT_FIELDS
+        + " FROM \"attachments\" WHERE uuid IN ( <uuids> )";
 
     public SelfIdBatcher() {
       super(sql, "uuids", new AttachmentMapper());
@@ -42,13 +62,6 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AbstractSearchQuery<?
     return idBatcher.getByIds(uuids);
   }
 
-  @InTransaction
-  @Override
-  public Attachment insert(Attachment obj) {
-    DaoUtils.setInsertFields(obj);
-    return insertInternal(obj);
-  }
-
   @Override
   public Attachment insertInternal(Attachment obj) {
     getDbHandle().createUpdate("/* insertAttachment */ "
@@ -56,19 +69,12 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AbstractSearchQuery<?
         + "\"createdAt\", \"updatedAt\") "
         + "VALUES (:uuid, :authorUuid, :mimeType, :content, :fileName, :description, :classification, :createdAt, :updatedAt)")
         .bindBean(obj).bind("createdAt", DaoUtils.asLocalDateTime(obj.getCreatedAt()))
-        .bind("authorUuid", obj.getAuthorUuid())
-        .bind("classification", DaoUtils.getEnumId(obj.getClassification()))
-        .bind("updatedAt", DaoUtils.asLocalDateTime(obj.getUpdatedAt())).execute();
+        .bind("updatedAt", DaoUtils.asLocalDateTime(obj.getUpdatedAt()))
+        .bind("content", obj.getContentBlob()).bind("authorUuid", obj.getAuthorUuid())
+        .bind("classification", DaoUtils.getEnumId(obj.getClassification())).execute();
     if (obj.getAttachmentRelatedObjects().get(0).getRelatedObjectUuid() != null)
       insertAttachmentRelatedObjects(DaoUtils.getUuid(obj), obj.getAttachmentRelatedObjects());
     return obj;
-  }
-
-  @InTransaction
-  @Override
-  public int update(Attachment obj) {
-    DaoUtils.setUpdateFields(obj);
-    return updateInternal(obj);
   }
 
   @Override
@@ -81,17 +87,9 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AbstractSearchQuery<?
             + "UPDATE \"attachments\" SET \"mimeType\" = :mimeType, " + "\"fileName\" = :fileName, "
             + "\"description\" = :description, " + "\"classification\" = :classification, "
             + "\"updatedAt\" = :updatedAt " + "WHERE uuid = :uuid")
-        .bind("classification", DaoUtils.getEnumId(obj.getClassification())).bindBean(obj)
+        .bindBean(obj).bind("updatedAt", DaoUtils.asLocalDateTime(obj.getUpdatedAt()))
+        .bind("classification", DaoUtils.getEnumId(obj.getClassification()))
         .bind("updatedAt", DaoUtils.asLocalDateTime(obj.getUpdatedAt())).execute();
-  }
-
-  @InTransaction
-  @Override
-  public int delete(String uuid) {
-    final Attachment attachment = getByUuid(uuid);
-    attachment.loadAttachmentRelatedObjects(AnetObjectEngine.getInstance().getContext()).join();
-    DaoUtils.setUpdateFields(attachment);
-    return deleteInternal(uuid);
   }
 
   @Override
@@ -100,6 +98,28 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AbstractSearchQuery<?
     return getDbHandle()
         .createUpdate("/* deleteAttachment */ DELETE FROM attachments where uuid = :uuid")
         .bind("uuid", uuid).execute();
+  }
+
+  @InTransaction
+  public void streamContentBlob(final String uuid, final OutputStream outputStream) {
+    final String sql = "/* getAttachmentContent */ SELECT " + CONTENT_FIELDS
+        + " FROM \"attachments\" WHERE uuid = :uuid";
+    final Attachment attachment =
+        getDbHandle().createQuery(sql).bind("uuid", uuid).map(new AttachmentMapper()).first();
+    final Blob blob = attachment.getContentBlob();
+    if (blob == null) {
+      return;
+    }
+    try (final InputStream inputStream = blob.getBinaryStream()) {
+      IOUtils.copyLarge(inputStream, outputStream);
+      outputStream.flush();
+    } catch (EofException e) {
+      logger.warn("Streaming content of attachment {} was terminated by the client", uuid);
+    } catch (SQLException e) {
+      throw new RuntimeException("Could not read content of attachment " + uuid, e);
+    } catch (IOException e) {
+      throw new RuntimeException("Could not transfer content of attachment " + uuid, e);
+    }
   }
 
   public CompletableFuture<List<Attachment>> getAttachmentsForRelatedObject(
@@ -130,7 +150,8 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AbstractSearchQuery<?
 
   static class AttachmentBatcher extends ForeignKeyBatcher<Attachment> {
     private static final String sql = "/* batch.getAttachmentsForRelatedObject */ "
-        + "SELECT * FROM \"attachmentRelatedObjects\" "
+        + "SELECT \"relatedObjectUuid\", " + ATTACHMENT_FIELDS
+        + " FROM \"attachmentRelatedObjects\" "
         + "INNER JOIN attachments ON \"attachmentRelatedObjects\".\"attachmentUuid\" = attachments.uuid "
         + "WHERE \"attachmentRelatedObjects\".\"relatedObjectUuid\" IN ( <foreignKeys> ) "
         + "ORDER BY attachments.\"fileName\" DESC";

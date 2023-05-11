@@ -10,7 +10,6 @@ const GQL_GET_RELATED_ATTACHMENTS = gql`
     getAttachmentsForRelatedObject(uuid: $uuid) {
       uuid
       fileName
-      content
       mimeType
       classification
       attachmentRelatedObjects {

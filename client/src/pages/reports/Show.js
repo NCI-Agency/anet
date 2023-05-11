@@ -235,7 +235,6 @@ const GQL_GET_REPORT = gql`
         uuid
         fileName
         mimeType
-        content
         description
         classification
       }

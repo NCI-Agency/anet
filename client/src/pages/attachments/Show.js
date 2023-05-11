@@ -29,7 +29,6 @@ const GQL_GET_ATTACHMENT = gql`
       uuid
       fileName
       mimeType
-      content
       classification
       description
       author {
@@ -135,16 +134,19 @@ const AttachmentShow = ({ pageDispatchers }) => {
                 <div style={{ display: "flex" }}>
                   <Col xs={12} sm={3} className="label-align">
                     <div className="img-hover-zoom">
-                      <a href={`/api/attachment/view/${attachment.uuid}`} className="d-flex h-100">
+                      <a
+                        href={`/api/attachment/view/${attachment.uuid}`}
+                        className="d-flex h-100"
+                      >
                         <div
                           className="imagePreview info-show card-image attachmentImage h-100"
                           style={{
-                            backgroundSize: attachment.mimeType.includes("pdf") ? "200px" : "cover",
+                            backgroundSize: attachment.mimeType.includes("pdf")
+                              ? "200px"
+                              : "cover",
                             backgroundImage: attachment.mimeType.includes("pdf")
                               ? `url(${pdf})`
-                              : attachment.content.includes("data")
-                                ? `url(${attachment.content})`
-                                : `url(data:${attachment.mimeType};base64,${attachment.content})`
+                              : `url(/api/attachment/view/${attachment.uuid})`
                           }}
                         />
                       </a>

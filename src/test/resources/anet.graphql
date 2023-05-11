@@ -188,7 +188,6 @@ type Attachment {
   attachmentRelatedObjects: [AttachmentRelatedObject]
   author: Person
   classification: Classification
-  content: Base64String
   createdAt: Instant
   description: String
   fileName: String

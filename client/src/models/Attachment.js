@@ -33,8 +33,7 @@ export default class Attachment extends Model {
     classification: yup.string().default("")
   })
 
-  static autocompleteQuery =
-    "uuid, fileName, description, content, classification, mimeType, attachmentRealtedObjects"
+  static autocompleteQuery = "uuid fileName description classification mimeType"
 
   static _resourceOverride = ["attachments"].join("/")
 
@@ -59,13 +58,6 @@ export default class Attachment extends Model {
   }
 
   toString() {
-    return (
-      this.fileName ||
-      this.description ||
-      this.mimeType ||
-      this.content ||
-      this.classification ||
-      this.attachmentRelatedObjects
-    )
+    return this.fileName || this.description
   }
 }

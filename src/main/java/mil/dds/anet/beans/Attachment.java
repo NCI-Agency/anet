@@ -4,10 +4,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
-import java.util.HashMap;
+import java.sql.Blob;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import javax.sql.rowset.serial.SerialBlob;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.views.AbstractAnetBean;
@@ -24,9 +26,11 @@ public class Attachment extends AbstractAnetBean {
   @GraphQLInputField
   private String mimeType;
 
-  @GraphQLQuery
+  // can not be queried; needs to be streamed through contentBlob always
   @GraphQLInputField
   private byte[] content;
+  // specifically for streaming the content
+  private Blob contentBlob;
 
   @GraphQLQuery
   @GraphQLInputField
@@ -56,11 +60,27 @@ public class Attachment extends AbstractAnetBean {
   }
 
   public byte[] getContent() {
-    return content;
+    try {
+      return contentBlob.getBytes(1L, (int) contentBlob.length());
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public void setContent(byte[] content) {
-    this.content = content;
+    try {
+      setContentBlob(new SerialBlob(content));
+    } catch (final SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public Blob getContentBlob() {
+    return contentBlob;
+  }
+
+  public void setContentBlob(Blob contentBlob) {
+    this.contentBlob = contentBlob;
   }
 
   public String getFileName() {

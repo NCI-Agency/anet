@@ -17,6 +17,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.StreamingOutput;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Attachment;
 import mil.dds.anet.beans.Person;
@@ -36,11 +37,7 @@ public class AttachmentResource {
 
   @GraphQLQuery(name = "attachment")
   public Attachment getByUuid(@GraphQLArgument(name = "uuid") String uuid) {
-    final Attachment a = dao.getByUuid(uuid);
-    if (a == null) {
-      throw new WebApplicationException("Attachment not found", Status.NOT_FOUND);
-    }
-    return a;
+    return getAttachment(uuid);
   }
 
   @GraphQLQuery(name = "getAttachmentsForRelatedObject")
@@ -70,13 +67,8 @@ public class AttachmentResource {
   @GraphQLMutation(name = "updateAttachment")
   public String updateAttachment(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "attachment") Attachment attachment) {
-    final Attachment original = dao.getByUuid(DaoUtils.getUuid(attachment));
-    if (original == null) {
-      throw new WebApplicationException("Attachment not found", Status.NOT_FOUND);
-    }
-
+    final Attachment original = getAttachment(DaoUtils.getUuid(attachment));
     final Person user = DaoUtils.getUserFromContext(context);
-
     final Attachment.Classification originalClassification = original.getClassification();
     if (!AuthUtils.isAdmin(user) && !user.equals(original.getAuthor())) {
       // only admin or owner can change classification
@@ -95,10 +87,7 @@ public class AttachmentResource {
   @GraphQLMutation(name = "deleteAttachment")
   public Integer deleteAttachment(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "uuid") String attachmentUuid) {
-    final Attachment attachment = dao.getByUuid(attachmentUuid);
-    if (attachment == null) {
-      throw new WebApplicationException("Attachment not found", Status.NOT_FOUND);
-    }
+    getAttachment(attachmentUuid);
     final Person user = DaoUtils.getUserFromContext(context);
     final int numRows = dao.delete(attachmentUuid);
     if (numRows == 0) {
@@ -113,33 +102,33 @@ public class AttachmentResource {
   @Path("/download/{uuid}")
   @Produces(MediaType.APPLICATION_OCTET_STREAM)
   public Response downloadAttachment(@PathParam("uuid") String uuid) {
-    final Attachment attachment = dao.getByUuid(uuid);
-    if (attachment == null) {
-      throw new WebApplicationException("Attachment not found", Status.NOT_FOUND);
-    }
-    if (attachment.getContent() == null) {
-      throw new WebApplicationException("Invalid attachment", Status.NOT_FOUND);
-    }
-    ResponseBuilder response =
-        Response.ok(attachment.getContent(), MediaType.APPLICATION_OCTET_STREAM);
-    response.header("Content-Disposition", "attachment; filename=" + attachment.getFileName());
+    final Attachment attachment = getAttachment(uuid);
+    final ResponseBuilder response =
+        Response.ok(streamContentBlob(uuid)).type(MediaType.APPLICATION_OCTET_STREAM)
+            .header("Content-Disposition", "attachment; filename=" + attachment.getFileName());
     return response.build();
   }
 
   @GET
   @Timed
   @Path("/view/{uuid}")
-  public Response previewAttachment(@PathParam("uuid") String uuid) {
+  public Response viewAttachment(@PathParam("uuid") String uuid) {
+    final Attachment attachment = getAttachment(uuid);
+    final ResponseBuilder response =
+        Response.ok(streamContentBlob(uuid)).type(attachment.getMimeType())
+            .header("Content-Disposition", "inline; filename=" + attachment.getFileName());
+    return response.build();
+  }
+
+  private Attachment getAttachment(final String uuid) {
     final Attachment attachment = dao.getByUuid(uuid);
     if (attachment == null) {
       throw new WebApplicationException("Attachment not found", Status.NOT_FOUND);
     }
-    if (attachment.getContent() == null) {
-      throw new WebApplicationException("Invalid attachment", Status.NOT_FOUND);
-    }
-    ResponseBuilder response = Response.ok(attachment.getContent());
-    response.header("Content-Disposition", "inline; filename=" + attachment.getFileName());
-    response.header("Content-Type", attachment.getMimeType());
-    return response.build();
+    return attachment;
+  }
+
+  private StreamingOutput streamContentBlob(final String uuid) {
+    return output -> dao.streamContentBlob(uuid, output);
   }
 }

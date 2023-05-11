@@ -45,9 +45,7 @@ const AttachmentCard = ({
             backgroundSize: file.mimeType.includes("pdf") ? "50px" : "cover",
             backgroundImage: file.mimeType.includes("pdf")
               ? `url(${pdf})`
-              : file.content.includes("data")
-                ? `url(${file.content})`
-                : `url(data:${file.mimeType};base64,${file.content})`
+              : `url(/api/attachment/view/${file.uuid})`
           }}
         >
           <div className="file-info image-info">

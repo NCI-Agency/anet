@@ -10,14 +10,16 @@ public class AttachmentMapper implements RowMapper<Attachment> {
   @Override
   public Attachment map(ResultSet rs, StatementContext ctx) throws SQLException {
     final Attachment a = new Attachment();
-    MapperUtils.setCommonBeanFields(a, rs, null);
-    a.setMimeType(rs.getString("mimeType"));
-    a.setAuthorUuid(rs.getString("authorUuid"));
-    a.setContent(rs.getBytes("content"));
-    a.setFileName(rs.getString("fileName"));
-    a.setDescription(rs.getString("description"));
+    MapperUtils.setCommonBeanFields(a, rs, "attachments");
+    a.setMimeType(MapperUtils.getOptionalString(rs, "attachments_mimeType"));
+    a.setAuthorUuid(MapperUtils.getOptionalString(rs, "attachments_authorUuid"));
+    if (MapperUtils.containsColumnNamed(rs, "attachments_content")) {
+      a.setContentBlob(rs.getBlob("attachments_content"));
+    }
+    a.setFileName(MapperUtils.getOptionalString(rs, "attachments_fileName"));
+    a.setDescription(MapperUtils.getOptionalString(rs, "attachments_description"));
     a.setClassification(
-        MapperUtils.getEnumIdx(rs, "classification", Attachment.Classification.class));
+        MapperUtils.getEnumIdx(rs, "attachments_classification", Attachment.Classification.class));
     return a;
   }
 }

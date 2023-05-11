@@ -3,7 +3,7 @@ import Model from "components/Model"
 import React from "react"
 import { Table } from "react-bootstrap"
 
-const attachmentRelatedObjectsTable = ({ relatedObjects }) => {
+const AttachmentRelatedObjectsTable = ({ relatedObjects }) => {
   return (
     <div id="related_objects">
       {relatedObjects?.length > 0 ? (
@@ -31,8 +31,8 @@ const attachmentRelatedObjectsTable = ({ relatedObjects }) => {
   )
 }
 
-attachmentRelatedObjectsTable.propTypes = {
+AttachmentRelatedObjectsTable.propTypes = {
   relatedObjects: Model.attachmentRelatedObjectsPropType.isRequired
 }
 
-export default attachmentRelatedObjectsTable
+export default AttachmentRelatedObjectsTable

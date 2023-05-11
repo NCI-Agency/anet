@@ -462,7 +462,7 @@ export default class Model {
     description: PropTypes.string,
     mimeType: PropTypes.string,
     classification: PropTypes.string,
-    content: PropTypes.string.url,
+    content: PropTypes.string,
     attachmentRelatedObjects: Model.attachmentRelatedObjectsPropType
   })
 

@@ -145,9 +145,9 @@ const UploadMultipleAttachment = ({
   function save(value, relatedObjectUuid, edit) {
     const attachment = Attachment.filterClientSideFields(value)
     const base64Index =
-      value.content.indexOf(base64Marker) + base64Marker.length
+      value.content?.indexOf(base64Marker) + base64Marker.length
 
-    attachment.content = value.content.substring(base64Index)
+    attachment.content = value.content?.substring(base64Index)
     attachment.attachmentRelatedObjects[0].relatedObjectUuid = relatedObjectUuid
 
     setTimeout(() => {
