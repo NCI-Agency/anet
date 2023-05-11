@@ -1624,39 +1624,39 @@
   resolved "https://registry.yarnpkg.com/@fal-works/esbuild-plugin-global-externals/-/esbuild-plugin-global-externals-2.1.2.tgz#c05ed35ad82df8e6ac616c68b92c2282bd083ba4"
   integrity sha512-cEee/Z+I12mZcFJshKcCqC8tuX5hG3s+d+9nZ3LabqKF1vKdF41B92pJVCBggjAGORAeOzyyDDKrZwIkLffeOQ==
 
-"@fullcalendar/core@6.1.5":
-  version "6.1.5"
-  resolved "https://registry.yarnpkg.com/@fullcalendar/core/-/core-6.1.5.tgz#b2ec855f3144ca995af8e5b783a15002d73870fb"
-  integrity sha512-U3ZJy1JGAgvyXG4iLWvTW4osbkt5Fj9gmbU1B+RyRhiqwXGE0F329sX7kqLTzj3QI1IPzyq6xnJfWUIsAe7+qw==
+"@fullcalendar/core@6.1.7":
+  version "6.1.7"
+  resolved "https://registry.yarnpkg.com/@fullcalendar/core/-/core-6.1.7.tgz#83d8b109fbf0deb1d4c3262ca4b2d70e77a287c4"
+  integrity sha512-Hc63ARSyABlNo10B3NkA0z8ndaDmq5MKpcBB2iQsGQyn8N8cyn/x6V284Je1EwDoKsBlbrZAj+j+efBO+QQf5g==
   dependencies:
     preact "~10.12.1"
 
-"@fullcalendar/daygrid@6.1.5", "@fullcalendar/daygrid@~6.1.5":
-  version "6.1.5"
-  resolved "https://registry.yarnpkg.com/@fullcalendar/daygrid/-/daygrid-6.1.5.tgz#fa5df2ec926a0a2367a91f43981518643d3d63c7"
-  integrity sha512-wXQUNPOyEQ1FEHVdtxP/tLcAAGwY4zeFejujhcznhKC751X8voInF+7kFmI7GDTVgX9cd72Muku3c+gHi8ygEQ==
+"@fullcalendar/daygrid@6.1.7", "@fullcalendar/daygrid@~6.1.7":
+  version "6.1.7"
+  resolved "https://registry.yarnpkg.com/@fullcalendar/daygrid/-/daygrid-6.1.7.tgz#529d5f1989081c5ab9d129fcaf409111b31be976"
+  integrity sha512-IB+QdRcs+TeTlsK8qJFtYZ/2GugmXEFC0C00/n1aLT7GLgFn3ueV1GN0EKvXv9HJ5ai8My65mYbSyQizY/Ishw==
 
-"@fullcalendar/interaction@6.1.5":
-  version "6.1.5"
-  resolved "https://registry.yarnpkg.com/@fullcalendar/interaction/-/interaction-6.1.5.tgz#548bee3f21046f30ad64c2596cbd94689db509f0"
-  integrity sha512-7U+WsysSlgVSkWqyjLnE6dVKUk2I7sGZN0zcadSfvL2e3KzD30BKgz78p6LRayW2Trtyf/7rZEe1k064ELd0+Q==
+"@fullcalendar/interaction@6.1.7":
+  version "6.1.7"
+  resolved "https://registry.yarnpkg.com/@fullcalendar/interaction/-/interaction-6.1.7.tgz#f2d86312371b284b46caae8c74b303e1fc7bdd4c"
+  integrity sha512-C2KHSinc9cFUTcGYxRSIj7cBYNSroce+1d2Wa+HKVHguVv4kQuEvm/oPxJpTLXqFjNLfxyxVac7Zd4U0znjFtg==
 
-"@fullcalendar/list@6.1.5":
-  version "6.1.5"
-  resolved "https://registry.yarnpkg.com/@fullcalendar/list/-/list-6.1.5.tgz#0276d495fbb2b229871ec5fb0547078531eaf756"
-  integrity sha512-Z34h32ZuI0+sU6GdV2WrXnF6Z17VvsagjSBY+8/bMrMHfDoLbT76sGfoI6N0GCAr7aW9N2NgWWz8kuQw9uFAZQ==
+"@fullcalendar/list@6.1.7":
+  version "6.1.7"
+  resolved "https://registry.yarnpkg.com/@fullcalendar/list/-/list-6.1.7.tgz#27d1b11984c9e4fc66da9a71b2429d38c427be94"
+  integrity sha512-Fl6jGKylhrk+g/RCISsv66vzpzjCFhd4r3nUDeHTAAE375OYGlVPKpH67YaKxpMrofj82JLIzS3JEzyQBZo0Cg==
 
-"@fullcalendar/react@6.1.5":
-  version "6.1.5"
-  resolved "https://registry.yarnpkg.com/@fullcalendar/react/-/react-6.1.5.tgz#75f9f705be7297ee0ee700dfab3e6997153b54f3"
-  integrity sha512-OVQJQhtDAwxHbFk84bm5Y6iGLjGDrrBgr3491JbfnqHUjSaO+T1rNHUvtnot0X4/ZdnoxWr2nKqxPxpmCCL/lw==
+"@fullcalendar/react@6.1.7":
+  version "6.1.7"
+  resolved "https://registry.yarnpkg.com/@fullcalendar/react/-/react-6.1.7.tgz#acdfaa84b0b12a9a70b26a6e8d494c14de0d3b44"
+  integrity sha512-Pwe88D4zXwP/XQsYWOa1foroF/OpHSLet5CiE4crnaKvngEtzt3SBDIO01agQOpo+yE1KM/n3yE5ePbdJtVJIQ==
 
-"@fullcalendar/timegrid@6.1.5":
-  version "6.1.5"
-  resolved "https://registry.yarnpkg.com/@fullcalendar/timegrid/-/timegrid-6.1.5.tgz#cf76716e279a383e17d624b36e4befd1d1558368"
-  integrity sha512-phofe7XQ+JbejQB9zGqtZOGmPr/vMkfkK5dwPY4rOjxZOG/wspL3aXoSurmXaVP5CIiRWBvX9QPq0UgVJt0j5A==
+"@fullcalendar/timegrid@6.1.7":
+  version "6.1.7"
+  resolved "https://registry.yarnpkg.com/@fullcalendar/timegrid/-/timegrid-6.1.7.tgz#1c2dac33a7870928359f17a5e142d26f08022f79"
+  integrity sha512-kVgJVswu96LrCozr+GyYzF+LUZjURC4HyDg11tCfrj2wMTsrYKqUxilTGXuD3daD4T7qp3CLCg5GdD6lbYHI7A==
   dependencies:
-    "@fullcalendar/daygrid" "~6.1.5"
+    "@fullcalendar/daygrid" "~6.1.7"
 
 "@googlemaps/js-api-loader@^1.14.3":
   version "1.15.1"
