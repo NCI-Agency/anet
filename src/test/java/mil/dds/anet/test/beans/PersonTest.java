@@ -5,8 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.Base64;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.utils.Utils;
 import org.junit.jupiter.api.Test;
@@ -20,33 +20,32 @@ public class PersonTest {
   @Test
   public void testAvatarResizingNoAvatar() {
     final Person person = new Person();
-    person.setAvatar((String) null);
+    person.setAvatar((byte[]) null);
     assertThat(person.resizeAvatar(32)).isNull();
   }
 
   @Test
   public void testAvatarResizingMalformedData() {
     final Person person = new Person();
-    person.setAvatar("malformedImageData");
+    person.setAvatar("malformedImageData".getBytes(StandardCharsets.UTF_8));
     assertThat(person.resizeAvatar(32)).isNull();
   }
 
   @Test
   public void testAvatarResizing() throws IOException {
     final Person person = new Person();
-    byte[] fileContent = Files.readAllBytes(DEFAULT_AVATAR.toPath());
-    String defaultAvatarData = Base64.getEncoder().encodeToString(fileContent);
+    byte[] defaultAvatarData = Files.readAllBytes(DEFAULT_AVATAR.toPath());
     person.setAvatar(defaultAvatarData);
 
-    BufferedImage imageBinary = Utils.convert(person.getAvatar());
+    BufferedImage imageBinary = Utils.convert(person.getAvatarData());
     assertThat(imageBinary.getWidth()).isNotEqualTo(32);
     assertThat(imageBinary.getHeight()).isNotEqualTo(32);
 
-    String resizedAvatar = person.resizeAvatar(32);
+    byte[] resizedAvatar = person.resizeAvatar(32);
     assertThat(resizedAvatar).isNotNull();
 
     person.setAvatar(resizedAvatar);
-    imageBinary = Utils.convert(person.getAvatar());
+    imageBinary = Utils.convert(person.getAvatarData());
 
     assertThat(imageBinary.getWidth()).isEqualTo(32);
     assertThat(imageBinary.getHeight()).isEqualTo(32);

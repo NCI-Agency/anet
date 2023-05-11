@@ -1,4 +1,5 @@
 import AvatarComponent from "components/AvatarComponent"
+import { AVATAR_DATA_PREAMBLE } from "components/AvatarDisplayComponent"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, Modal } from "react-bootstrap"
@@ -48,7 +49,10 @@ const AvatarEditModal = ({ title, onAvatarUpdate }) => {
   }
 
   function save() {
-    onAvatarUpdate(currentPreview)
+    // Strip preamble, only leaving the base64-encoded data
+    const re = new RegExp(`^${AVATAR_DATA_PREAMBLE}`)
+    const b64 = currentPreview?.replace(re, "") || null
+    onAvatarUpdate(b64)
     close()
   }
 }

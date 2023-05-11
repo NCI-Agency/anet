@@ -7,7 +7,7 @@ plugins {
 	id "com.bmuschko.docker-remote-api" version "9.3.1"
 	id "com.github.node-gradle.node" version "3.5.1"
 	id "com.diffplug.spotless" version "6.18.0"
-	id "com.graphql_java_generator.graphql-gradle-plugin" version "1.18.10"
+	id "com.graphql_java_generator.graphql-gradle-plugin" version "1.18.11"
 	id "org.beryx.runtime" version "1.13.0"
 	id "com.netflix.nebula.ospackage" version "11.2.0"
 }
@@ -140,7 +140,7 @@ dependencies {
 	implementation 'io.leangen.graphql:spqr:0.12.1'
 	// The graphql-java-client-runtime module aggregates all dependencies for the generated code,
 	// including the plugin runtime
-	testImplementation('com.graphql-java-generator:graphql-java-client-runtime:1.18.10') {
+	testImplementation('com.graphql-java-generator:graphql-java-client-runtime:1.18.11') {
 		// We don't actually need any of these (dragged in through org.springframework.boot)
 		exclude group: 'io.netty'
 	}
@@ -685,6 +685,11 @@ generateClientCodeConf {
 			graphQLTypeName: "Instant",
 			javaType: "java.time.Instant",
 			graphQLScalarTypeStaticField: "mil.dds.anet.graphql.DateTimeMapper.GraphQLInstant"
+		],
+		[
+			graphQLTypeName: "Base64String",
+			javaType: "byte[]",
+			graphQLScalarTypeStaticField: "com.graphql_java_generator.customscalars.GraphQLScalarTypeBase64String.GraphQLBase64String"
 		],
 		[
 			graphQLTypeName: "Long",
