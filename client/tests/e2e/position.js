@@ -283,6 +283,8 @@ test.serial("Update permissions while changing positions", async t => {
 
   // Login as arthur (admin).
   await t.context.get("/", "arthur")
+  // Wait until page is loaded
+  await t.context.driver.sleep(mediumWaitMs)
 
   // ***********************************************
   // Removing a Superuser from a position and check if the position is converted to ANET User.
