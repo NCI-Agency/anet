@@ -13,7 +13,7 @@ import ButtonToggleGroup from "components/ButtonToggleGroup"
 import Model from "components/Model"
 import * as Models from "models"
 import PropTypes from "prop-types"
-import React, { useCallback, useMemo, useState } from "react"
+import React, { useCallback, useMemo, useState, useRef } from "react"
 import { Button } from "react-bootstrap"
 import LOCATIONS_ICON from "resources/locations.png"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
@@ -180,9 +180,15 @@ const MultiTypeAdvancedSelectComponent = ({
     typeof advancedSelectProps.filterDefs === "function"
       ? advancedSelectProps.filterDefs(filters[0]?.[entityType])
       : advancedSelectProps.filterDefs
-
+  const searchInput = useRef()
+  console.log(searchInput)
   return (
-    <>
+    <div
+      className="hahahah"
+      ref={ref => {
+        searchInput.current = ref
+      }}
+    >
       {entityTypes.length > 1 && (
         <ButtonToggleGroup
           size="sm"
@@ -214,6 +220,7 @@ const MultiTypeAdvancedSelectComponent = ({
         placeholder={searchPlaceholder}
         value={value}
         showEmbedded
+        focus={searchInput}
         keepSearchText={entityTypes.length > 1}
         overlayColumns={advancedSelectProps.overlayColumns}
         overlayRenderRow={advancedSelectProps.overlayRenderRow}
@@ -226,7 +233,7 @@ const MultiTypeAdvancedSelectComponent = ({
         className={className}
         {...extraSelectProps}
       />
-    </>
+    </div>
   )
 }
 MultiTypeAdvancedSelectComponent.propTypes = {

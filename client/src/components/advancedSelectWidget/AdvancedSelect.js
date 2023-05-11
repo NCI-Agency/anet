@@ -92,6 +92,7 @@ export const propTypes = {
     PropTypes.func,
     PropTypes.object
   ]),
+  focus: PropTypes.object,
   extraAddon: PropTypes.object,
   value: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
   renderSelected: PropTypes.oneOfType([PropTypes.func, PropTypes.object]), // how to render the selected items
@@ -124,6 +125,7 @@ const AdvancedSelect = ({
   selectedValueAsString,
   keepSearchText,
   addon,
+  focus,
   extraAddon,
   value,
   renderSelected,
@@ -140,7 +142,6 @@ const AdvancedSelect = ({
   handleRemoveItem
 }) => {
   const firstFilter = Object.keys(filterDefs)[0]
-
   const latestSelectedValueAsString = useRef(selectedValueAsString)
   const latestQueryParams = useRef(queryParams)
   const [latestFilterDefs, setLatestFilterDefs] = useState(filterDefs)
@@ -420,7 +421,7 @@ const AdvancedSelect = ({
     // Make sure the overlay is being closed when clicking outside of it,
     // but keep it open when clicking on the input field.
     if (!disabled) {
-      const inputFocus = searchInput.current.contains(event && event.target)
+      const inputFocus = focus.current?.contains(event && event.target)
       const openOverlay = nextShowOverlay || inputFocus
       if (openOverlay !== showOverlay) {
         if (openOverlay) {
@@ -440,6 +441,9 @@ const AdvancedSelect = ({
           // and also to make sure the state updates are being batched in there
           setDoReset(true)
         }
+      }
+      if (!inputFocus) {
+        setSearchTerms("")
       }
     }
   }
