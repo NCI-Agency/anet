@@ -3,12 +3,13 @@ import API from "api"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import Model from "components/Model"
-import { Organization } from "models"
+import RichTextEditor from "components/RichTextEditor"
+import { Location, Organization } from "models"
 import OrganizationLaydown from "pages/organizations/Laydown"
 import OrganizationTasks from "pages/organizations/OrganizationTasks"
 import PropTypes from "prop-types"
 import React from "react"
-import { ListGroup, ListGroupItem } from "react-bootstrap"
+import { Badge, ListGroup, ListGroupItem } from "react-bootstrap"
 import Settings from "settings"
 
 const GQL_GET_ORGANIZATION = gql`
@@ -20,6 +21,14 @@ const GQL_GET_ORGANIZATION = gql`
       status
       identificationCode
       type
+      location {
+        uuid
+        name
+        lat
+        lng
+        type
+      }
+      profile
       parentOrg {
         uuid
         shortName
@@ -116,23 +125,13 @@ const OrganizationPreview = ({ className, uuid }) => {
       </div>
       <div className="preview-section">
         <PreviewField
-          label="Status"
-          value={Organization.humanNameOfStatus(organization.status)}
-        />
-
-        <PreviewField
-          label="Type"
-          value={Organization.humanNameOfType(organization.type)}
-        />
-
-        <PreviewField
           label={orgSettings.longName.label}
           value={organization.longName}
         />
 
         <PreviewField
-          label={orgSettings.identificationCode?.label}
-          value={organization.identificationCode}
+          label="Type"
+          value={Organization.humanNameOfType(organization.type)}
         />
 
         {organization?.parentOrg?.uuid && (
@@ -165,6 +164,42 @@ const OrganizationPreview = ({ className, uuid }) => {
             }
           />
         )}
+
+        <PreviewField
+          label="Location"
+          value={
+            organization.location && (
+              <>
+                <LinkTo
+                  modelType="Location"
+                  model={organization.location}
+                />{" "}
+                <Badge>
+                  {Location.humanNameOfType(organization.location.type)}
+                </Badge>
+              </>
+            )
+          }
+        />
+
+        <PreviewField
+          label="Status"
+          value={Organization.humanNameOfStatus(organization.status)}
+        />
+
+        {organization.profile &&
+          <PreviewField
+            label={Settings.fields.organization.profile}
+            value={
+              <RichTextEditor readOnly value={organization.profile} />
+            }
+          />
+        }
+
+        <PreviewField
+          label={orgSettings.identificationCode?.label}
+          value={organization.identificationCode}
+        />
       </div>
 
       <OrganizationLaydown organization={organization} refetch={refetch} />

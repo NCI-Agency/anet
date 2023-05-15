@@ -358,28 +358,16 @@ const OrganizationShow = ({ pageDispatchers }) => {
                 action={action}
               />
               <Fieldset id="info">
-                <Field
-                  name="status"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={Organization.humanNameOfStatus}
-                />
-
-                <Field
-                  name="type"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={Organization.humanNameOfType}
-                />
-
                 <LongNameWithLabel
                   dictProps={orgSettings.longName}
                   name="longName"
                   component={FieldHelper.ReadonlyField}
                 />
 
-                <IdentificationCodeFieldWithLabel
-                  dictProps={orgSettings.identificationCode}
-                  name="identificationCode"
+                <Field
+                  name="type"
                   component={FieldHelper.ReadonlyField}
+                  humanValue={Organization.humanNameOfType}
                 />
 
                 {organization.parentOrg && organization.parentOrg.uuid && (
@@ -427,22 +415,36 @@ const OrganizationShow = ({ pageDispatchers }) => {
                     />
                 )}
 
-                <Field
-                  name="location"
+                <IdentificationCodeFieldWithLabel
+                  dictProps={orgSettings.identificationCode}
+                  name="identificationCode"
                   component={FieldHelper.ReadonlyField}
-                  humanValue={
-                    organization.location && (
-                      <>
-                        <LinkTo
-                          modelType="Location"
-                          model={organization.location}
-                        />{" "}
-                        <Badge>
-                          {Location.humanNameOfType(organization.location.type)}
-                        </Badge>
-                      </>
-                    )
-                  }
+                />
+
+                {organization.location &&
+                  <Field
+                    name="location"
+                    component={FieldHelper.ReadonlyField}
+                    humanValue={
+                      organization.location && (
+                        <>
+                          <LinkTo
+                            modelType="Location"
+                            model={organization.location}
+                          />{" "}
+                          <Badge>
+                            {Location.humanNameOfType(organization.location.type)}
+                          </Badge>
+                        </>
+                      )
+                    }
+                  />
+                }
+
+                <Field
+                  name="status"
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={Organization.humanNameOfStatus}
                 />
 
                 <Field
