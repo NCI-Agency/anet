@@ -167,7 +167,7 @@ const LocationShow = ({ pageDispatchers }) => {
                   humanValue={Location.humanNameOfStatus}
                 />
 
-                {values.description &&
+                {values.description && (
                   <Field
                     name="description"
                     component={FieldHelper.ReadonlyField}
@@ -175,7 +175,7 @@ const LocationShow = ({ pageDispatchers }) => {
                       <RichTextEditor readOnly value={values.description} />
                     }
                   />
-                }
+                )}
               </Fieldset>
 
               <Leaflet markers={[marker]} />

@@ -421,7 +421,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
                   component={FieldHelper.ReadonlyField}
                 />
 
-                {organization.location &&
+                {organization.location && (
                   <Field
                     name="location"
                     component={FieldHelper.ReadonlyField}
@@ -433,13 +433,15 @@ const OrganizationShow = ({ pageDispatchers }) => {
                             model={organization.location}
                           />{" "}
                           <Badge>
-                            {Location.humanNameOfType(organization.location.type)}
+                            {Location.humanNameOfType(
+                              organization.location.type
+                            )}
                           </Badge>
                         </>
                       )
                     }
                   />
-                }
+                )}
 
                 <Field
                   name="status"

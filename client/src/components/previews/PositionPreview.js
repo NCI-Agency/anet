@@ -124,10 +124,7 @@ const PositionPreview = ({ className, uuid }) => {
           value={
             position.location && (
               <>
-                <LinkTo
-                  modelType="Location"
-                  model={position.location}
-                />{" "}
+                <LinkTo modelType="Location" model={position.location} />{" "}
                 <Badge>
                   {Location.humanNameOfType(position.location.type)}
                 </Badge>

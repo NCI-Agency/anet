@@ -170,10 +170,7 @@ const OrganizationPreview = ({ className, uuid }) => {
           value={
             organization.location && (
               <>
-                <LinkTo
-                  modelType="Location"
-                  model={organization.location}
-                />{" "}
+                <LinkTo modelType="Location" model={organization.location} />{" "}
                 <Badge>
                   {Location.humanNameOfType(organization.location.type)}
                 </Badge>
@@ -187,14 +184,12 @@ const OrganizationPreview = ({ className, uuid }) => {
           value={Organization.humanNameOfStatus(organization.status)}
         />
 
-        {organization.profile &&
+        {organization.profile && (
           <PreviewField
             label={Settings.fields.organization.profile}
-            value={
-              <RichTextEditor readOnly value={organization.profile} />
-            }
+            value={<RichTextEditor readOnly value={organization.profile} />}
           />
-        }
+        )}
 
         <PreviewField
           label={orgSettings.identificationCode?.label}

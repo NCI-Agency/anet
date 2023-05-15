@@ -2,8 +2,8 @@ import { gql } from "@apollo/client"
 import API from "api"
 import { PreviewField } from "components/FieldHelper"
 import Leaflet from "components/Leaflet"
-import _escape from "lodash/escape"
 import RichTextEditor from "components/RichTextEditor"
+import _escape from "lodash/escape"
 import { Location } from "models"
 import PropTypes from "prop-types"
 import React from "react"
@@ -70,14 +70,12 @@ const LocationPreview = ({ className, uuid }) => {
           value={Location.humanNameOfStatus(location.status)}
         />
 
-        {location.description &&
+        {location.description && (
           <PreviewField
             label="description"
-            value={
-              <RichTextEditor readOnly value={location.description} />
-            }
+            value={<RichTextEditor readOnly value={location.description} />}
           />
-        }
+        )}
       </div>
 
       <Leaflet markers={[marker]} mapId={`${uuid}`} />

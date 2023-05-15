@@ -220,6 +220,31 @@ const ReportPreview = ({ className, uuid }) => {
 
         <PreviewField
           extraColForValue={true}
+          label="Authors"
+          value={report.authors?.map((a, index) => (
+            <React.Fragment key={a.uuid}>
+              <LinkTo modelType="Person" model={a} />
+              {index !== report.authors.length - 1 ? ", " : ""}
+            </React.Fragment>
+          ))}
+        />
+
+        <PreviewField
+          extraColForValue={true}
+          label={Settings.fields.advisor.org.name}
+          value={<LinkTo modelType="Organization" model={report.advisorOrg} />}
+        />
+
+        <PreviewField
+          extraColForValue={true}
+          label={Settings.fields.principal.org.name}
+          value={
+            <LinkTo modelType="Organization" model={report.principalOrg} />
+          }
+        />
+
+        <PreviewField
+          extraColForValue={true}
           label="Location"
           value={
             report.location && (
@@ -248,31 +273,6 @@ const ReportPreview = ({ className, uuid }) => {
             }
           />
         )}
-
-        <PreviewField
-          extraColForValue={true}
-          label="Authors"
-          value={report.authors?.map((a, index) => (
-            <React.Fragment key={a.uuid}>
-              <LinkTo modelType="Person" model={a} />
-              {index !== report.authors.length - 1 ? ", " : ""}
-            </React.Fragment>
-          ))}
-        />
-
-        <PreviewField
-          extraColForValue={true}
-          label={Settings.fields.advisor.org.name}
-          value={<LinkTo modelType="Organization" model={report.advisorOrg} />}
-        />
-
-        <PreviewField
-          extraColForValue={true}
-          label={Settings.fields.principal.org.name}
-          value={
-            <LinkTo modelType="Organization" model={report.principalOrg} />
-          }
-        />
       </div>
       <h4>
         {report.isFuture()
