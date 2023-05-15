@@ -2,11 +2,11 @@ import { gql } from "@apollo/client"
 import API from "api"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
-import { Position } from "models"
+import { Location, Position } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React from "react"
-import { Table } from "react-bootstrap"
+import { Badge, Table } from "react-bootstrap"
 import Settings from "settings"
 
 const GQL_GET_POSITION = gql`
@@ -60,6 +60,9 @@ const GQL_GET_POSITION = gql`
       location {
         uuid
         name
+        type
+        lat
+        lng
       }
     }
   }
@@ -97,17 +100,10 @@ const PositionPreview = ({ className, uuid }) => {
           label={Settings.fields.position.name}
           value={position.name}
         />
-        <PreviewField
-          label={positionSettings.code.label}
-          value={position.code}
-        />
+
         <PreviewField
           label="Type"
           value={Position.humanNameOfType(position.type)}
-        />
-        <PreviewField
-          label="Status"
-          value={Position.humanNameOfStatus(position.status)}
         />
 
         {position.organization && (
@@ -127,9 +123,27 @@ const PositionPreview = ({ className, uuid }) => {
           label="Location"
           value={
             position.location && (
-              <LinkTo modelType="Location" model={position.location} />
+              <>
+                <LinkTo
+                  modelType="Location"
+                  model={position.location}
+                />{" "}
+                <Badge>
+                  {Location.humanNameOfType(position.location.type)}
+                </Badge>
+              </>
             )
           }
+        />
+
+        <PreviewField
+          label={positionSettings.code.label}
+          value={position.code}
+        />
+
+        <PreviewField
+          label="Status"
+          value={Position.humanNameOfStatus(position.status)}
         />
       </div>
 
