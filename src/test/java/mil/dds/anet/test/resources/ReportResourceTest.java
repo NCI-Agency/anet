@@ -147,7 +147,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     final PositionInput approver1PosInput = PositionInput.builder()
         .withName("Test Approver 1 Position").withOrganization(getOrganizationInput(advisorOrg))
         .withLocation(getLocationInput(getGeneralHospital())).withType(PositionType.SUPERUSER)
-        .withPositionRole(PositionRole.MEMBER).withStatus(Status.ACTIVE).build();
+        .withRole(PositionRole.MEMBER).withStatus(Status.ACTIVE).build();
     Position approver1Pos =
         adminMutationExecutor.createPosition(POSITION_FIELDS, approver1PosInput);
     assertThat(approver1Pos).isNotNull();
@@ -159,7 +159,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     final PositionInput approver2PosInput = PositionInput.builder()
         .withName("Test Approver 2 Position").withOrganization(getOrganizationInput(advisorOrg))
         .withLocation(getLocationInput(getGeneralHospital())).withType(PositionType.SUPERUSER)
-        .withPositionRole(PositionRole.MEMBER).withStatus(Status.ACTIVE).build();
+        .withRole(PositionRole.MEMBER).withStatus(Status.ACTIVE).build();
     final Position approver2Pos =
         adminMutationExecutor.createPosition(POSITION_FIELDS, approver2PosInput);
     assertThat(approver2Pos).isNotNull();
@@ -169,10 +169,10 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(nrUpdated).isEqualTo(1);
 
     // Create a billet for the author
-    final PositionInput authorBilletInput = PositionInput.builder().withName("A report writer")
-        .withType(PositionType.ADVISOR).withPositionRole(PositionRole.MEMBER)
-        .withOrganization(getOrganizationInput(advisorOrg))
-        .withLocation(getLocationInput(getGeneralHospital())).withStatus(Status.ACTIVE).build();
+    final PositionInput authorBilletInput =
+        PositionInput.builder().withName("A report writer").withType(PositionType.ADVISOR)
+            .withRole(PositionRole.MEMBER).withOrganization(getOrganizationInput(advisorOrg))
+            .withLocation(getLocationInput(getGeneralHospital())).withStatus(Status.ACTIVE).build();
     final Position authorBillet =
         adminMutationExecutor.createPosition(POSITION_FIELDS, authorBilletInput);
     assertThat(authorBillet).isNotNull();
@@ -522,7 +522,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     final PositionInput approver1PosInput = PositionInput.builder()
         .withName("Test Approver 1 Position").withOrganization(getOrganizationInput(advisorOrg))
         .withLocation(getLocationInput(getGeneralHospital())).withType(PositionType.SUPERUSER)
-        .withPositionRole(PositionRole.MEMBER).withStatus(Status.ACTIVE).build();
+        .withRole(PositionRole.MEMBER).withStatus(Status.ACTIVE).build();
     Position approver1Pos =
         adminMutationExecutor.createPosition(POSITION_FIELDS, approver1PosInput);
     assertThat(approver1Pos).isNotNull();
@@ -534,7 +534,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     final PositionInput approver2PosInput = PositionInput.builder()
         .withName("Test Approver 2 Position").withOrganization(getOrganizationInput(advisorOrg))
         .withLocation(getLocationInput(getGeneralHospital())).withType(PositionType.SUPERUSER)
-        .withPositionRole(PositionRole.MEMBER).withStatus(Status.ACTIVE).build();
+        .withRole(PositionRole.MEMBER).withStatus(Status.ACTIVE).build();
     final Position approver2Pos =
         adminMutationExecutor.createPosition(POSITION_FIELDS, approver2PosInput);
     assertThat(approver2Pos).isNotNull();
@@ -544,10 +544,10 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(nrUpdated).isEqualTo(1);
 
     // Create a billet for the author
-    final PositionInput authorBilletInput = PositionInput.builder().withName("A report writer")
-        .withType(PositionType.ADVISOR).withPositionRole(PositionRole.MEMBER)
-        .withOrganization(getOrganizationInput(advisorOrg))
-        .withLocation(getLocationInput(getGeneralHospital())).withStatus(Status.ACTIVE).build();
+    final PositionInput authorBilletInput =
+        PositionInput.builder().withName("A report writer").withType(PositionType.ADVISOR)
+            .withRole(PositionRole.MEMBER).withOrganization(getOrganizationInput(advisorOrg))
+            .withLocation(getLocationInput(getGeneralHospital())).withStatus(Status.ACTIVE).build();
     final Position authorBillet =
         adminMutationExecutor.createPosition(POSITION_FIELDS, authorBilletInput);
     assertThat(authorBillet).isNotNull();
@@ -911,7 +911,7 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     // Create billet for Author
     final PositionInput billetInput = PositionInput.builder().withName("EF 1.1 new advisor")
-        .withType(PositionType.ADVISOR).withPositionRole(PositionRole.MEMBER)
+        .withType(PositionType.ADVISOR).withRole(PositionRole.MEMBER)
         .withLocation(getLocationInput(getGeneralHospital())).withStatus(Status.ACTIVE).build();
 
     // Put billet in EF 1.1

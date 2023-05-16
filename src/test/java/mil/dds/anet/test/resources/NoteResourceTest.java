@@ -232,8 +232,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     // Create test position
     final PositionInput testPositionInput = PositionInput.builder()
         .withName("a test position created by testDeleteDanglingPositionNote")
-        .withType(PositionType.ADVISOR).withStatus(Status.INACTIVE)
-        .withPositionRole(PositionRole.MEMBER)
+        .withType(PositionType.ADVISOR).withStatus(Status.INACTIVE).withRole(PositionRole.MEMBER)
         .withOrganization(getOrganizationInput(admin.getPosition().getOrganization()))
         .withLocation(getLocationInput(getGeneralHospital())).build();
     final Position testPosition =

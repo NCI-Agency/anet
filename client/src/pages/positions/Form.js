@@ -112,20 +112,20 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
   const nonAdminRolesButtons = [
     {
       id: "roleMemberButton",
-      value: Position.POSITION_ROLE.MEMBER,
-      label: Settings.fields.member.position.type
+      value: Position.ROLE.MEMBER,
+      label: Settings.fields.position.role.choices.member
     }
   ]
   const adminRolesButtons = nonAdminRolesButtons.concat([
     {
       id: "roleDeputyButton",
-      value: Position.POSITION_ROLE.DEPUTY,
-      label: Settings.fields.deputy.position.type
+      value: Position.ROLE.DEPUTY,
+      label: Settings.fields.position.role.choices.deputy
     },
     {
       id: "roleLeaderButton",
-      value: Position.POSITION_ROLE.LEADER,
-      label: Settings.fields.leader.position.type
+      value: Position.ROLE.LEADER,
+      label: Settings.fields.position.role.choices.leader
     }
   ])
 
@@ -336,12 +336,12 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
                   />
                 )}
 
-                <Field
-                  name="positionRole"
-                  label={positionSettings.positionRole}
+                <FastField
+                  name="role"
+                  label={Settings.fields.position.role.label}
                   component={FieldHelper.RadioButtonToggleGroupField}
                   buttons={positionRoleButtons}
-                  onChange={value => setFieldValue("positionRole", value)}
+                  onChange={value => setFieldValue("role", value)}
                 />
               </Fieldset>
 

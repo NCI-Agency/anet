@@ -14,9 +14,9 @@ export const principalPosition = Settings.fields.principal.position
 export const administratorPosition = Settings.fields.administrator.position
 export const superuserPosition = Settings.fields.superuser.position
 
-export const memberPositionRole = Settings.fields.member.position
-export const deputyPositionRole = Settings.fields.deputy.position
-export const leaderPositionRole = Settings.fields.leader.position
+export const memberPositionRole = Settings.fields.position.role.choices.member
+export const deputyPositionRole = Settings.fields.position.role.choices.deputy
+export const leaderPositionRole = Settings.fields.position.role.choices.leader
 
 export default class Position extends Model {
   static resourceName = "Position"
@@ -31,7 +31,7 @@ export default class Position extends Model {
     ADMINISTRATOR: "ADMINISTRATOR"
   }
 
-  static POSITION_ROLE = {
+  static ROLE = {
     MEMBER: "MEMBER",
     DEPUTY: "DEPUTY",
     LEADER: "LEADER"
@@ -59,10 +59,10 @@ export default class Position extends Model {
         .string()
         .required()
         .default(() => Model.STATUS.ACTIVE),
-      positionRole: yup
+      role: yup
         .string()
         .required()
-        .default(() => Position.POSITION_ROLE.MEMBER),
+        .default(() => Position.ROLE.MEMBER),
       associatedPositions: yup.array().nullable().default([]),
       previousPeople: yup.array().nullable().default([]),
       organization: yup
@@ -100,7 +100,7 @@ export default class Position extends Model {
     .concat(Model.yupSchema)
 
   static autocompleteQuery =
-    "uuid name code type positionRole status location { uuid name } organization { uuid shortName} person { uuid name rank role avatar(size: 32) }"
+    "uuid name code type role status location { uuid name } organization { uuid shortName} person { uuid name rank role avatar(size: 32) }"
 
   static autocompleteQueryWithNotes = `${this.autocompleteQuery} ${GRAPHQL_NOTES_FIELDS}`
 
@@ -108,7 +108,7 @@ export default class Position extends Model {
     uuid
     name
     type
-    positionRole
+    role
     status
     isSubscribed
     updatedAt
@@ -130,6 +130,7 @@ export default class Position extends Model {
       uuid
       name
       type
+      role
       person {
         uuid
         name
@@ -193,13 +194,13 @@ export default class Position extends Model {
     }
   }
 
-  static humanNameOfPositionRole(positionRole) {
-    if (positionRole === Position.POSITION_ROLE.MEMBER) {
-      return memberPositionRole.type
-    } else if (positionRole === Position.POSITION_ROLE.DEPUTY) {
-      return deputyPositionRole.type
-    } else if (positionRole === Position.POSITION_ROLE.LEADER) {
-      return leaderPositionRole.type
+  static humanNameOfRole(role) {
+    if (role === Position.ROLE.MEMBER) {
+      return memberPositionRole
+    } else if (role === Position.ROLE.DEPUTY) {
+      return deputyPositionRole
+    } else if (role === Position.ROLE.LEADER) {
+      return leaderPositionRole
     }
   }
 
@@ -211,8 +212,8 @@ export default class Position extends Model {
     return Position.humanNameOfType(this.type)
   }
 
-  humanNameOfPositionRole() {
-    return Position.humanNameOfPositionRole(this.positionRole)
+  humanNameOfRole() {
+    return Position.humanNameOfRole(this.role)
   }
 
   isAdvisor() {
@@ -250,8 +251,8 @@ export default class Position extends Model {
     }
   }
 
-  static convertPositionRole(positionRole) {
-    switch (positionRole) {
+  static convertRole(role) {
+    switch (role) {
       case "MEMBER":
         return Settings.fields.member.position.type
       case "DEPUTY":

@@ -37,7 +37,7 @@ public class TestData {
     b.setName("Test Advisor Position");
     b.setCode("TST-0101");
     b.setType(PositionType.ADVISOR);
-    b.setPositionRole(PositionRole.MEMBER);
+    b.setRole(PositionRole.MEMBER);
     b.setStatus(Status.ACTIVE);
     return b;
   }
@@ -61,8 +61,8 @@ public class TestData {
 
   public static PositionInput createPositionInput() {
     return PositionInput.builder().withName("Head of donut operations").withCode("DNT-001")
-        .withType(PositionType.PRINCIPAL).withPositionRole(PositionRole.MEMBER)
-        .withStatus(Status.ACTIVE).build();
+        .withType(PositionType.PRINCIPAL).withRole(PositionRole.MEMBER).withStatus(Status.ACTIVE)
+        .build();
   }
 
   public static TaskInput createTaskInput(String shortName, String longName, String category) {

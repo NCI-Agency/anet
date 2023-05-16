@@ -24,6 +24,7 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
         name
         code
         type
+        role
         status
         organization {
           uuid

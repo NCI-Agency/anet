@@ -30,7 +30,7 @@ const GQL_GET_PERSON_LIST = gql`
           uuid
           name
           type
-          positionRole
+          role
           code
           location {
             uuid

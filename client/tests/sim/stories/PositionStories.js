@@ -21,7 +21,7 @@ async function getPosition(user, uuid) {
           uuid
           name
           type
-          positionRole
+          role
           status
           code
           organization {
@@ -585,7 +585,7 @@ const updateAssociatedPosition = async function(user) {
               }
               status
               type
-              positionRole
+              role
               uuid
             }
           }
@@ -670,7 +670,7 @@ const removeAssociatedPosition = async function(user) {
           }
           status
           type
-          positionRole
+          role
           uuid
         }
       }

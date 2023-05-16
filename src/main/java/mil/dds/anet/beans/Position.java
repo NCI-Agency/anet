@@ -43,7 +43,7 @@ public class Position extends AbstractCustomizableAnetBean
   private Status status;
   @GraphQLQuery
   @GraphQLInputField
-  private PositionRole positionRole;
+  private PositionRole role;
   // Lazy Loaded
   // annotated below
   private ForeignObjectHolder<Organization> organization = new ForeignObjectHolder<>();
@@ -93,12 +93,12 @@ public class Position extends AbstractCustomizableAnetBean
     return status;
   }
 
-  public PositionRole getPositionRole() {
-    return positionRole;
+  public PositionRole getRole() {
+    return role;
   }
 
-  public void setPositionRole(PositionRole positionRole) {
-    this.positionRole = positionRole;
+  public void setRole(PositionRole role) {
+    this.role = role;
   }
 
   @Override

@@ -27,7 +27,7 @@ const GQL_GET_POSITION_LIST = gql`
         name
         code
         type
-        positionRole
+        role
         status
         organization {
           uuid

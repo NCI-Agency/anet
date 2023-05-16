@@ -645,9 +645,9 @@ type Position {
   organization: Organization
   organizationsAdministrated: [Organization]
   person: Person
-  positionRole: PositionRole
   previousPeople: [PersonPositionHistory]
   responsibleTasks(query: TaskSearchQueryInput): [Task]
+  role: PositionRole
   status: Status
   type: PositionType
   updatedAt: Instant
@@ -666,8 +666,8 @@ input PositionInput {
   organization: OrganizationInput
   organizationsAdministrated: [OrganizationInput]
   person: PersonInput
-  positionRole: PositionRole
   previousPeople: [PersonPositionHistoryInput]
+  role: PositionRole
   status: Status
   type: PositionType
   updatedAt: Instant

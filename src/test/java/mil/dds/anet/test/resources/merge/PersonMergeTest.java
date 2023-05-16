@@ -49,7 +49,7 @@ public class PersonMergeTest extends AbstractResourceTest {
     // Create a Position
     final PositionInput testInput = PositionInput.builder()
         .withName("A Test Position created by mergePeopleTest").withType(PositionType.ADVISOR)
-        .withPositionRole(PositionRole.MEMBER).withStatus(Status.ACTIVE).build();
+        .withRole(PositionRole.MEMBER).withStatus(Status.ACTIVE).build();
 
     // Assign to an AO
     final Organization ao = adminMutationExecutor.createOrganization("{ uuid }",
@@ -68,7 +68,7 @@ public class PersonMergeTest extends AbstractResourceTest {
     assertThat(nrUpdated).isEqualTo(1);
 
     final PositionInput testInput1 = PositionInput.builder().withType(PositionType.ADVISOR)
-        .withPositionRole(PositionRole.MEMBER).withName("Test Position for person history edit  1")
+        .withRole(PositionRole.MEMBER).withName("Test Position for person history edit  1")
         .withOrganization(getOrganizationInput(ao))
         .withLocation(getLocationInput(getGeneralHospital())).withStatus(Status.ACTIVE).build();
 
@@ -78,7 +78,7 @@ public class PersonMergeTest extends AbstractResourceTest {
     assertThat(createdPos1.getName()).isEqualTo(testInput1.getName());
     final PositionInput posInput1 = PositionInput.builder().withUuid(createdPos1.getUuid()).build();
     final PositionInput testInput2 = PositionInput.builder().withType(PositionType.ADVISOR)
-        .withPositionRole(PositionRole.MEMBER).withName("Test Position for person history edit 2")
+        .withRole(PositionRole.MEMBER).withName("Test Position for person history edit 2")
         .withOrganization(getOrganizationInput(ao))
         .withLocation(getLocationInput(getGeneralHospital())).withStatus(Status.ACTIVE).build();
 
@@ -240,7 +240,7 @@ public class PersonMergeTest extends AbstractResourceTest {
     // Create a Position
     final PositionInput testInput =
         PositionInput.builder().withName("A Test Position created by mergeDifferentRolesTest")
-            .withType(PositionType.PRINCIPAL).withPositionRole(PositionRole.MEMBER)
+            .withType(PositionType.PRINCIPAL).withRole(PositionRole.MEMBER)
             .withStatus(Status.ACTIVE).build();
 
     // Assign to an AO

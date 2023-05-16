@@ -714,6 +714,13 @@ fields:
 
   position:
     name: Position Name
+    role:
+      label: Position Role
+      choices:
+        member: Member of Organization
+        deputy: Deputy of Organization
+        leader: Leader of Organization
+
     customFields:
       multipleButtons:
         type: enumset
@@ -1297,7 +1304,6 @@ fields:
     position:
       name: NATO Billet
       type: ANET User
-      positionRole: Position Role
       code:
         label: CE Post Number
         placeholder: the CE post number for this position
@@ -1558,7 +1564,6 @@ fields:
     position:
       name: Afghan Tashkil
       type: Afghan Partner
-      positionRole: Position Role
       code:
         label: Tashkil
         placeholder: the Afghan taskhil ID for this position
@@ -1591,21 +1596,6 @@ fields:
     position:
       name: Administrator
       type: ANET Administrator
-
-  member:
-    position:
-      name: Member
-      type: Member of Org
-
-  deputy:
-    position:
-      name: Deputy
-      type: Deputy of Org
-
-  leader:
-    position:
-      name: Leader
-      type: Leader of Org
 
 pinned_ORGs: [Key Leader Engagement]
 non_reporting_ORGs: [ANET Administrators]

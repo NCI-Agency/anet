@@ -47,21 +47,19 @@ public class PositionMergeTest extends AbstractResourceTest {
         adminQueryExecutor.organizationList(getListFields(ORGANIZATION_FIELDS), queryOrgs);
     assertThat(orgs.getList().size()).isGreaterThan(0);
 
-    final PositionInput firstPositionInput =
-        PositionInput.builder().withName("MergePositionsTest First Position")
-            .withType(PositionType.PRINCIPAL).withPositionRole(PositionRole.MEMBER)
-            .withOrganization(getOrganizationInput(orgs.getList().get(0))).withStatus(Status.ACTIVE)
-            .withPerson(getPersonInput(testPerson)).build();
+    final PositionInput firstPositionInput = PositionInput.builder()
+        .withName("MergePositionsTest First Position").withType(PositionType.PRINCIPAL)
+        .withRole(PositionRole.MEMBER).withOrganization(getOrganizationInput(orgs.getList().get(0)))
+        .withStatus(Status.ACTIVE).withPerson(getPersonInput(testPerson)).build();
 
     final Position firstPosition = adminMutationExecutor.createPosition(FIELDS, firstPositionInput);
     assertThat(firstPosition).isNotNull();
     assertThat(firstPosition.getUuid()).isNotNull();
 
-    final PositionInput secondPositionInput =
-        PositionInput.builder().withName("MergePositionsTest Second Position")
-            .withType(PositionType.PRINCIPAL).withPositionRole(PositionRole.MEMBER)
-            .withOrganization(getOrganizationInput(orgs.getList().get(0))).withStatus(Status.ACTIVE)
-            .build();
+    final PositionInput secondPositionInput = PositionInput.builder()
+        .withName("MergePositionsTest Second Position").withType(PositionType.PRINCIPAL)
+        .withRole(PositionRole.MEMBER).withOrganization(getOrganizationInput(orgs.getList().get(0)))
+        .withStatus(Status.ACTIVE).build();
 
     final Position secondPosition =
         adminMutationExecutor.createPosition(FIELDS, secondPositionInput);

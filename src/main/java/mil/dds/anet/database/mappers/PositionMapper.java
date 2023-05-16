@@ -31,7 +31,7 @@ public class PositionMapper implements RowMapper<Position> {
     p.setCode(rs.getString("positions_code"));
     p.setType(MapperUtils.getEnumIdx(rs, "positions_type", PositionType.class));
     p.setStatus(MapperUtils.getEnumIdx(rs, "positions_status", Position.Status.class));
-    p.setPositionRole(MapperUtils.getEnumIdx(rs, "positions_positionRole", PositionRole.class));
+    p.setRole(MapperUtils.getEnumIdx(rs, "positions_role", PositionRole.class));
 
     p.setOrganizationUuid(rs.getString("positions_organizationUuid"));
     p.setPersonUuid(rs.getString("positions_currentPersonUuid"));
