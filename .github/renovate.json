@@ -59,6 +59,7 @@
         "autoprefixer",
         "react-router-dom",
         "org.liquibase:liquibase-core",
+        "io.vertx:vertx-json-schema",
         "com.graphql-java:graphql-java",
         "com.graphql-java:graphql-java-extended-scalars",
         "io.leangen.graphql:spqr"
