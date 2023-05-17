@@ -7,7 +7,7 @@ import ShowUploadedAttachments from "./ShowUploadedAttachments"
 
 const GQL_GET_RELATED_ATTACHMENTS = gql`
   query ($uuid: String!) {
-    getAttachmentsForRelatedObject(uuid: $uuid) {
+    relatedObjectAttachments(uuid: $uuid) {
       uuid
       fileName
       contentLength
@@ -22,7 +22,7 @@ const UploadedAttachments = ({ uuid }) => {
     uuid
   })
   const uploadedList = data
-    ? Attachment.fromArray(data.getAttachmentsForRelatedObject)
+    ? Attachment.fromArray(data.relatedObjectAttachments)
     : []
 
   return <ShowUploadedAttachments attachmentList={uploadedList} />

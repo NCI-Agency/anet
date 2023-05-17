@@ -21,9 +21,9 @@ const ShowUploadedAttachments = ({ attachmentList }) => {
   return (
     <React.Fragment>
       {error && <Messages error={error} />}
-      {uploadedList?.map((file, index) => (
+      {uploadedList?.map((attachment, index) => (
         <AttachmentCard
-          file={file}
+          attachment={attachment}
           key={index}
           remove={remove}
           setError={setError}

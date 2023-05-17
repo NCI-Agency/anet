@@ -678,10 +678,10 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                   component={FieldHelper.ReadonlyField}
                   humanValue={
                     <div className="d-flex">
-                      {report.attachments.map((file, index) => (
+                      {report.attachments.map((attachment, index) => (
                         <AttachmentCard
                           key={index}
-                          file={file}
+                          attachment={attachment}
                           index={index}
                           edit={false}
                         />

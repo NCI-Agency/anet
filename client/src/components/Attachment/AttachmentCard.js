@@ -18,7 +18,7 @@ const GQL_DELETE_ATTACHMENT = gql`
 `
 
 const AttachmentCard = ({
-  file,
+  attachment,
   edit,
   remove,
   setError,
@@ -27,12 +27,12 @@ const AttachmentCard = ({
   setUploadedList
 }) => {
   const { backgroundSize, backgroundImage } = utils.getAttachmentIconDetails(
-    file,
+    attachment,
     true
   )
 
   return (
-    <div key={file.uuid} style={{ width: "20%" }}>
+    <div key={attachment.uuid} style={{ width: "20%" }}>
       <Card>
         <div
           className="imagePreview info-show card-image"
@@ -46,7 +46,7 @@ const AttachmentCard = ({
               <LinkTo
                 className="detail-btn"
                 modelType="Attachment"
-                model={file}
+                model={attachment}
               >
                 {" "}
               </LinkTo>
@@ -55,8 +55,10 @@ const AttachmentCard = ({
         </div>
         <Card.Body className="p-1 d-block">
           <Card.Title style={{ fontSize: "15px" }} className="info-line">
-            {file?.fileName?.substring(0, 8)}...
-            <span>{utils.humanReadableFileSize(file?.contentLength)}</span>
+            {attachment?.fileName?.substring(0, 8)}...
+            <span>
+              {utils.humanReadableFileSize(attachment?.contentLength)}
+            </span>
           </Card.Title>
           {edit && (
             <div className="info-line">
@@ -64,16 +66,16 @@ const AttachmentCard = ({
                 <LinkTo
                   modelType="Attachment"
                   edit
-                  model={file}
+                  model={attachment}
                   button="outline-primary"
                 >
                   <Icon icon={IconNames.EDIT} className="icon edit" />
                 </LinkTo>
               </div>
               <ConfirmDestructive
-                onConfirm={() => deleteAttachment(file.uuid)}
+                onConfirm={() => deleteAttachment(attachment.uuid)}
                 objectType="attachment"
-                objectDisplay={"#" + file.uuid}
+                objectDisplay={"#" + attachment.uuid}
                 title="Delete attachment"
                 variant="outline-danger"
                 buttonSize="xs"
@@ -104,7 +106,7 @@ const AttachmentCard = ({
 }
 
 AttachmentCard.propTypes = {
-  file: PropTypes.object,
+  attachment: PropTypes.object,
   edit: PropTypes.bool,
   remove: PropTypes.bool,
   setError: PropTypes.func,

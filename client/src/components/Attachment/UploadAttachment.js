@@ -5,7 +5,7 @@ import API from "api"
 import Messages from "components/Messages"
 import { Attachment } from "models"
 import PropTypes from "prop-types"
-import React, { useEffect, useState } from "react"
+import React, { useState } from "react"
 import { toast } from "react-toastify"
 import Settings from "settings"
 import "./Attachment.css"
@@ -24,49 +24,56 @@ const GQL_UPDATE_ATTACHMENT = gql`
   }
 `
 
-const UploadAttachment = ({
-  edit,
-  type,
-  attachmentFunc,
-  setIsAttachment,
-  setLoadingError,
-  relatedObjectUuid
-}) => {
-  const base64Marker = ";base64,"
+const UploadAttachment = ({ getRelatedObject, edit, saveAttachment }) => {
   const [error, setError] = useState(null)
   const [remove, setRemove] = useState(false)
   const [uploadedList, setUploadedList] = useState([])
-
-  // Trigger attachment submit from report save
-  useEffect(() => {
-    attachmentFunc.current = onSubmit
-  })
+  const relatedObject = getRelatedObject()
 
   const handleUploadFile = file => {
-    setIsAttachment(true)
     setUploadedList(current => [...current, file])
     toast.success("Your document has been uploaded")
   }
 
-  const handleFileEvent = async e => {
+  const AttachmentSave = async e => {
     const file = e.target.files[0]
-    const selectedAttachment = new Attachment()
     const base64 = await convertBase64(file)
+    const base64Marker = ";base64,"
+    const base64Index = base64.indexOf(base64Marker) + base64Marker.length
 
-    // Set initial values for new attachment
-    selectedAttachment.content = base64
-    selectedAttachment.fileName = file.name
-    selectedAttachment.mimeType = base64.split(":").pop().split(";")[0]
-    selectedAttachment.attachmentRelatedObjects[0].relatedObjectType = type
-    selectedAttachment.attachmentRelatedObjects[0].relatedObjectUuid = null
-    selectedAttachment.classification =
-      Settings.fields.attachment.classification.choices.UNDEFINED.value
-
-    save(selectedAttachment).then(response => {
-      selectedAttachment.uuid = response.createAttachment
-      selectedAttachment.contentLength = file.size
-      handleUploadFile(selectedAttachment)
+    const selectedAttachment = new Attachment({
+      content: base64.substring(base64Index),
+      fileName: file.name,
+      mimeType: file.type,
+      attachmentRelatedObjects: [
+        { relatedObjectType: relatedObject.type, relatedObjectUuid: relatedObject.uuid }
+      ],
+      classification:
+        Settings.fields.attachment.classification.choices.UNDEFINED.value
     })
+
+    save(selectedAttachment, relatedObject.uuid, false)
+      .then(response => {
+        selectedAttachment.uuid = response.createAttachment
+        selectedAttachment.contentLength = file.size
+        try {
+          handleUploadFile(selectedAttachment)
+        } catch (error) {
+          toast.error("Attachment upload failed.")
+        }
+      })
+  }
+
+  const handleFileEvent = e => {
+    // Control related object has an uuid or not
+    if (!relatedObject.uuid) {
+      saveAttachment().then(response => {
+        relatedObject.uuid = response
+        AttachmentSave(e)
+      })
+    } else {
+      AttachmentSave(e)
+    }
   }
 
   // Convert file to base64 string
@@ -87,7 +94,7 @@ const UploadAttachment = ({
 
   return (
     <div>
-      {error && <Messages error={error} />}
+      <Messages error={error} />
       {/** **** Select and drop file in here **** **/}
       <section className="FileUploadContainer">
         <div>
@@ -109,10 +116,10 @@ const UploadAttachment = ({
 
       {/** **** Show uploaded files in here **** **/}
       <div style={{ display: "flex", flexWrap: "wrap" }}>
-        {uploadedList.map((file, index) => (
+        {uploadedList.map((attachment, index) => (
           <AttachmentCard
             key={index}
-            file={file}
+            attachment={attachment}
             index={index}
             remove={remove}
             setError={setError}
@@ -122,34 +129,16 @@ const UploadAttachment = ({
           />
         ))}
         {/** For edit report edit page show uploaded attachments **/}
-        {edit && <UploadedAttachments uuid={relatedObjectUuid} />}
+        {edit && <UploadedAttachments uuid={relatedObject.uuid} />}
       </div>
     </div>
   )
 
-  function onSubmit(relatedObjectUuid) {
-    const unsavedAttachment = uploadedList.filter(
-      attach =>
-        !attach.attachmentRelatedObjects[0].relatedObjectUuid &&
-        attach.uuid !== null
+  function save(values, relatedObjectUuid, edit) {
+    const attachment = Attachment.filterClientSideFields(
+      values,
+      edit && "content"
     )
-    if (unsavedAttachment.length > 0) {
-      for (let i = 0; i < unsavedAttachment.length; i++) {
-        save(unsavedAttachment[i], relatedObjectUuid, true).catch(() => {
-          setLoadingError(true)
-        })
-      }
-    }
-  }
-
-  function save(value, relatedObjectUuid, edit) {
-    const attachment = Attachment.filterClientSideFields(value)
-    const base64Index =
-      value.content?.indexOf(base64Marker) + base64Marker.length
-
-    attachment.content = value.content?.substring(base64Index)
-    attachment.attachmentRelatedObjects[0].relatedObjectUuid = relatedObjectUuid
-
     const operation = edit ? GQL_UPDATE_ATTACHMENT : GQL_CREATE_ATTACHMENT
     return API.mutation(operation, { attachment })
   }
@@ -157,11 +146,8 @@ const UploadAttachment = ({
 
 UploadAttachment.propTypes = {
   edit: PropTypes.bool,
-  type: PropTypes.string,
-  setIsAttachment: PropTypes.func,
-  setLoadingError: PropTypes.func,
-  attachmentFunc: PropTypes.object,
-  relatedObjectUuid: PropTypes.string
+  getRelatedObject: PropTypes.func,
+  saveAttachment: PropTypes.func
 }
 
 export default UploadAttachment

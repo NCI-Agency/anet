@@ -45,7 +45,9 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
   const canEdit =
     currentUser.isAdmin() || currentUser.uuid === initialValues.author.uuid
 
-  const classificationButtons = Object.values(Settings.fields.attachment.classification.choices).map(choice => ({
+  const classificationButtons = Object.values(
+    Settings.fields.attachment.classification.choices
+  ).map(choice => ({
     id: choice.label,
     value: choice.value,
     label: choice.label

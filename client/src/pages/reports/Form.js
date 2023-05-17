@@ -175,7 +175,6 @@ const ReportForm = ({
   const [saveError, setSaveError] = useState(null)
   const [autoSavedAt, setAutoSavedAt] = useState(null)
   const [isAttachment, setIsAttachment] = useState(false)
-  const [loadingError, setLoadingError] = useState(false)
   // We need the report tasks/attendees in order to be able to dynamically
   // update the yup schema for the selected tasks/attendees instant assessments
   const [reportTasks, setReportTasks] = useState(initialValues.tasks)
@@ -183,7 +182,6 @@ const ReportForm = ({
   const [showCustomFields, setShowCustomFields] = useState(
     !!Settings.fields.report.customFields
   )
-  const attachmentFunc = useRef(null)
   // some autosave settings
   const defaultTimeout = moment.duration(AUTOSAVE_TIMEOUT, "seconds")
   const autoSaveSettings = useRef({
@@ -435,6 +433,15 @@ const ReportForm = ({
         const isFutureEngagement = Report.isFuture(values.engagementDate)
         const hasAssessments = values.engagementDate && !isFutureEngagement
         const relatedObject = hasAssessments ? values : {}
+
+        const getRelatedObject = val => {
+          const relatedObject = {
+            uuid: val.uuid,
+            type: Report.relatedObjectType
+          }
+          return relatedObject
+        }
+
         return (
           <div className="report-form">
             <NavigationWarning
@@ -918,17 +925,19 @@ const ReportForm = ({
 
                 <FastField
                   name="reportText"
-                  component={FieldHelper.SpecialField}
                   label={Settings.fields.report.reportText}
-                  widget={<RichTextEditor className="reportTextField" />}
+                  component={FieldHelper.SpecialField}
                   onChange={value => {
+                    // prevent initial unnecessary render of RichTextEditor
                     if (!_isEqual(values.reportText, value)) {
                       setFieldValue("reportText", value, true)
                     }
                   }}
                   onHandleBlur={() => {
+                    // validation will be done by setFieldValue
                     setFieldTouched("reportText", true, false)
                   }}
+                  widget={<RichTextEditor className="reportTextField" />}
                 />
 
                 <FastField
@@ -938,13 +947,8 @@ const ReportForm = ({
                   widget={
                     <UploadAttachment
                       edit={edit}
-                      className="attachmentField"
-                      loadingError={loadingError}
-                      type={Report.relatedObjectType}
-                      setIsAttachment={setIsAttachment}
-                      setLoadingError={setLoadingError}
-                      attachmentFunc={attachmentFunc}
-                      relatedObjectUuid={values.uuid ? values.uuid : undefined}
+                      saveAttachment={saveCallback}
+                      getRelatedObject={() => getRelatedObject(values)}
                     />
                   }
                   onHandleBlur={() => {
@@ -954,13 +958,13 @@ const ReportForm = ({
 
                 <div style={{ textAlign: "center" }}>
                   <Button
+                    variant="outline-secondary"
+                    className="center-block toggle-section-button"
                     style={{
                       marginBottom: "1rem"
                     }}
-                    id="toggleSensitiveInfo"
                     onClick={toggleReportText}
-                    variant="outline-secondary"
-                    className="center-block toggle-section-button"
+                    id="toggleSensitiveInfo"
                   >
                     {showSensitiveInfo ? "Hide" : "Add"} sensitive information
                   </Button>
@@ -1232,6 +1236,12 @@ const ReportForm = ({
     setShowSensitiveInfo(!showSensitiveInfo)
   }
 
+  function saveCallback() {
+    return save(autoSaveSettings.current.values, false).then(response => {
+      return response.uuid
+    })
+  }
+
   function autoSave(form) {
     if (!autoSaveActive.current) {
       // We're done auto-saving
@@ -1247,7 +1257,7 @@ const ReportForm = ({
         autoSaveSettings.current.autoSaveTimeout.asMilliseconds()
       )
     } else {
-      save(autoSaveSettings.current.values, false, true)
+      save(autoSaveSettings.current.values, false)
         .then(response => {
           const newValues = _cloneDeep(autoSaveSettings.current.values)
           Object.assign(newValues, response)
@@ -1317,10 +1327,8 @@ const ReportForm = ({
 
   function onSubmit(values, form) {
     form.setSubmitting(true)
-    return save(values, true, false)
-      .then(response => {
-        onSubmitSuccess(response, values, form.resetForm)
-      })
+    return save(values, true)
+      .then(response => onSubmitSuccess(response, values, form.resetForm))
       .catch(error => {
         setSaveError(error)
         form.setSubmitting(false)
@@ -1417,7 +1425,7 @@ const ReportForm = ({
     return assessmentNotes
   }
 
-  function save(values, sendEmail, autoSave) {
+  function save(values, sendEmail) {
     const report = Report.filterClientSideFields(new Report(values))
     if (Report.isFuture(values.engagementDate)) {
       // Empty fields which should not be set for future reports.
@@ -1457,7 +1465,7 @@ const ReportForm = ({
     const variables = { report }
     return _saveReport(edit, variables, sendEmail).then(response => {
       const report = response[operation]
-      attachmentFunc.current(report.uuid)
+      values.uuid = report.uuid
       if (!canWriteAssessments) {
         // Skip updating assessments!
         return report

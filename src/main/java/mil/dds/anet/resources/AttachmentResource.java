@@ -8,6 +8,7 @@ import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -40,12 +41,12 @@ public class AttachmentResource {
     return getAttachment(uuid);
   }
 
-  @GraphQLQuery(name = "getAttachmentsForRelatedObject")
-  public List<Attachment> getAttachmentsForRelatedObject(
+  @GraphQLQuery(name = "relatedObjectAttachments")
+  public List<Attachment> getRelatedObjectAttachments(
       @GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "uuid") String uuid) {
     final List<List<Attachment>> attachments =
-        dao.getAttachmentsOfRelatedObject(Collections.singletonList(uuid));
+        dao.getRelatedObjectAttachments(Collections.singletonList(uuid));
     return attachments.get(0);
   }
 
@@ -69,10 +70,10 @@ public class AttachmentResource {
       @GraphQLArgument(name = "attachment") Attachment attachment) {
     final Attachment original = getAttachment(DaoUtils.getUuid(attachment));
     final Person user = DaoUtils.getUserFromContext(context);
-    final Attachment.Classification originalClassification = original.getClassification();
-    if (!AuthUtils.isAdmin(user) && !user.equals(original.getAuthor())) {
-      // only admin or owner can change classification
-      throw new WebApplicationException("You don't have permission to update classification",
+    if (!AuthUtils.isAdmin(user)
+        && !Objects.equals(original.getAuthorUuid(), DaoUtils.getUuid(user))) {
+      // only admin or owner can update attachment
+      throw new WebApplicationException("You don't have permission to update this attachment",
           Status.FORBIDDEN);
     }
 
@@ -87,8 +88,16 @@ public class AttachmentResource {
   @GraphQLMutation(name = "deleteAttachment")
   public Integer deleteAttachment(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "uuid") String attachmentUuid) {
-    getAttachment(attachmentUuid);
+    final Attachment original = getAttachment(attachmentUuid);
     final Person user = DaoUtils.getUserFromContext(context);
+
+    if (!AuthUtils.isAdmin(user)
+        && !Objects.equals(original.getAuthorUuid(), DaoUtils.getUuid(user))) {
+      // only admin or owner can update attachment
+      throw new WebApplicationException("You don't have permission to delete this attachment",
+          Status.FORBIDDEN);
+    }
+
     final int numRows = dao.delete(attachmentUuid);
     if (numRows == 0) {
       throw new WebApplicationException("Couldn't process attachment delete", Status.NOT_FOUND);

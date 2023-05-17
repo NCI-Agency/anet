@@ -23,6 +23,9 @@ import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.io.EofException;
+import org.jdbi.v3.sqlobject.customizer.Bind;
+import org.jdbi.v3.sqlobject.customizer.BindBean;
+import org.jdbi.v3.sqlobject.statement.SqlBatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
@@ -131,7 +134,7 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AbstractSearchQuery<?
         .thenApply(attachments -> attachments.stream().collect(Collectors.toList()));
   }
 
-  public List<List<Attachment>> getAttachmentsOfRelatedObject(List<String> foreignKeys) {
+  public List<List<Attachment>> getRelatedObjectAttachments(List<String> foreignKeys) {
     final ForeignKeyBatcher<Attachment> attachmentsBatcher =
         AnetObjectEngine.getInstance().getInjector().getInstance(AttachmentBatcher.class);
     return attachmentsBatcher.getByForeignKeys(foreignKeys);
@@ -179,14 +182,18 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AbstractSearchQuery<?
     }
   }
 
+  public interface AttachmentBatch {
+    @SqlBatch("INSERT INTO \"attachmentRelatedObjects\""
+        + " (\"attachmentUuid\", \"relatedObjectType\", \"relatedObjectUuid\")"
+        + "VALUES (:attachmentUuid, :relatedObjectType, :relatedObjectUuid)")
+    void insertAttachmentRelatedObjects(@Bind("attachmentUuid") String attachmentUuid,
+        @BindBean List<AttachmentRelatedObject> attachmentRelatedObjects);
+  }
+
   private void insertAttachmentRelatedObjects(String uuid,
       List<AttachmentRelatedObject> attachmentRelatedObjects) {
-    for (final AttachmentRelatedObject aro : attachmentRelatedObjects) {
-      getDbHandle().createUpdate("/* insertAttachmentRelatedObject */ "
-          + "INSERT INTO \"attachmentRelatedObjects\" (\"attachmentUuid\", \"relatedObjectType\", \"relatedObjectUuid\")"
-          + "VALUES (:attachmentUuid, :relatedObjectType, :relatedObjectUuid)").bindBean(aro)
-          .bind("attachmentUuid", uuid).execute();
-    }
+    final AttachmentBatch ab = getDbHandle().attach(AttachmentBatch.class);
+    ab.insertAttachmentRelatedObjects(uuid, attachmentRelatedObjects);
   }
 
   private void deleteAttachmentRelatedObjects(String uuid) {

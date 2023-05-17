@@ -773,7 +773,6 @@ type Query {
   attachment(uuid: String): Attachment
   authorizationGroup(uuid: String): AuthorizationGroup
   authorizationGroupList(query: AuthorizationGroupSearchQueryInput): AnetBeanList_AuthorizationGroup
-  getAttachmentsForRelatedObject(uuid: String): [Attachment]
   location(uuid: String): Location
   locationList(query: LocationSearchQueryInput): AnetBeanList_Location
   me: Person
@@ -788,6 +787,7 @@ type Query {
   positionList(query: PositionSearchQueryInput): AnetBeanList_Position
   projectVersion: String
   recentActivities: RecentActivities
+  relatedObjectAttachments(uuid: String): [Attachment]
   report(uuid: String): Report
   reportList(query: ReportSearchQueryInput): AnetBeanList_Report
   rollupGraph(advisorOrganizationUuid: String, endDate: Instant, orgType: OrganizationType, principalOrganizationUuid: String, startDate: Instant): [RollupGraph]
