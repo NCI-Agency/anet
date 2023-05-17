@@ -45,33 +45,11 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
   const canEdit =
     currentUser.isAdmin() || currentUser.uuid === initialValues.author.uuid
 
-  const classificationButtons = [
-    {
-      id: Settings.fields.attachment.classification.choices.UNDEFINED.label,
-      value: Settings.fields.attachment.classification.choices.UNDEFINED.value,
-      label: Settings.fields.attachment.classification.choices.UNDEFINED.label
-    },
-    {
-      id: Settings.fields.attachment.classification.choices.NATO_UNCLASSIFIED
-        .label,
-      value:
-        Settings.fields.attachment.classification.choices.NATO_UNCLASSIFIED
-          .value,
-      label:
-        Settings.fields.attachment.classification.choices.NATO_UNCLASSIFIED
-          .label
-    },
-    {
-      id: Settings.fields.attachment.classification.choices
-        .NATO_UNCLASSIFIED_Releasable_to_EU.label,
-      value:
-        Settings.fields.attachment.classification.choices
-          .NATO_UNCLASSIFIED_Releasable_to_EU.value,
-      label:
-        Settings.fields.attachment.classification.choices
-          .NATO_UNCLASSIFIED_Releasable_to_EU.label
-    }
-  ]
+  const classificationButtons = Object.values(Settings.fields.attachment.classification.choices).map(choice => ({
+    id: choice.label,
+    value: choice.value,
+    label: choice.label
+  }))
 
   return (
     <Formik

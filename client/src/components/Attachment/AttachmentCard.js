@@ -95,7 +95,7 @@ const AttachmentCard = ({
         if (!remove) {
           setRemove(true)
         }
-        toast.error("Your attachment has been successfully deleted")
+        toast.success("Your attachment has been successfully deleted")
       })
       .catch(error => {
         setError(error)

@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react"
 import "./Attachment.css"
 import AttachmentCard from "./AttachmentCard"
 
-const ShowUplaodedAttachments = ({ attachmentList }) => {
+const ShowUploadedAttachments = ({ attachmentList }) => {
   const [uploadedList, setUploadedList] = useState([])
   const [error, setError] = useState(null)
   const [remove, setRemove] = useState(false)
@@ -36,8 +36,8 @@ const ShowUplaodedAttachments = ({ attachmentList }) => {
   )
 }
 
-ShowUplaodedAttachments.propTypes = {
+ShowUploadedAttachments.propTypes = {
   attachmentList: PropTypes.array
 }
 
-export default ShowUplaodedAttachments
+export default ShowUploadedAttachments

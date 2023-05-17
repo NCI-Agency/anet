@@ -12,7 +12,7 @@ import {
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
 import InstantAssessmentsContainerField from "components/assessments/instant/InstantAssessmentsContainerField"
-import UploadMultipleAttachment from "components/Attachment/UploadMultipleAttachment"
+import UploadAttachment from "components/Attachment/UploadAttachment"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import CustomDateInput from "components/CustomDateInput"
 import {
@@ -936,7 +936,7 @@ const ReportForm = ({
                   component={FieldHelper.SpecialField}
                   label={Settings.fields.attachment.shortLabel}
                   widget={
-                    <UploadMultipleAttachment
+                    <UploadAttachment
                       edit={edit}
                       className="attachmentField"
                       loadingError={loadingError}

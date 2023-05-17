@@ -24,7 +24,7 @@ const GQL_UPDATE_ATTACHMENT = gql`
   }
 `
 
-const UploadMultipleAttachment = ({
+const UploadAttachment = ({
   edit,
   type,
   attachmentFunc,
@@ -135,9 +135,8 @@ const UploadMultipleAttachment = ({
     )
     if (unsavedAttachment.length > 0) {
       for (let i = 0; i < unsavedAttachment.length; i++) {
-        save(unsavedAttachment[i], relatedObjectUuid, true).catch(error => {
+        save(unsavedAttachment[i], relatedObjectUuid, true).catch(() => {
           setLoadingError(true)
-          console.error("error :", error)
         })
       }
     }
@@ -151,16 +150,12 @@ const UploadMultipleAttachment = ({
     attachment.content = value.content?.substring(base64Index)
     attachment.attachmentRelatedObjects[0].relatedObjectUuid = relatedObjectUuid
 
-    setTimeout(() => {
-      console.log("loading time")
-    }, 100)
-
     const operation = edit ? GQL_UPDATE_ATTACHMENT : GQL_CREATE_ATTACHMENT
     return API.mutation(operation, { attachment })
   }
 }
 
-UploadMultipleAttachment.propTypes = {
+UploadAttachment.propTypes = {
   edit: PropTypes.bool,
   type: PropTypes.string,
   setIsAttachment: PropTypes.func,
@@ -169,4 +164,4 @@ UploadMultipleAttachment.propTypes = {
   relatedObjectUuid: PropTypes.string
 }
 
-export default UploadMultipleAttachment
+export default UploadAttachment

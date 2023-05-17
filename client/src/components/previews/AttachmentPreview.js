@@ -18,10 +18,6 @@ const GQL_GET_ATTACHMENT = gql`
       mimeType
       classification
       description
-      attachmentRelatedObjects {
-        relatedObjectType
-        relatedObjectUuid
-      }
       author {
         uuid
         name

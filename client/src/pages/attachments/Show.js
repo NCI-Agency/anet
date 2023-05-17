@@ -50,8 +50,12 @@ const GQL_GET_ATTACHMENT = gql`
           }
           ... on Person {
             name
+            role
+            rank
+            avatar(size: 32)
           }
           ... on Position {
+            type
             name
           }
           ... on Report {

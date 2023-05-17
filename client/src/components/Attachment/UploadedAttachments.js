@@ -3,7 +3,7 @@ import API from "api"
 import { Attachment } from "models"
 import PropTypes from "prop-types"
 import React from "react"
-import ShowUplaodedAttachments from "./ShowUploadedAttachments"
+import ShowUploadedAttachments from "./ShowUploadedAttachments"
 
 const GQL_GET_RELATED_ATTACHMENTS = gql`
   query ($uuid: String!) {
@@ -13,10 +13,6 @@ const GQL_GET_RELATED_ATTACHMENTS = gql`
       contentLength
       mimeType
       classification
-      attachmentRelatedObjects {
-        relatedObjectType
-        relatedObjectUuid
-      }
     }
   }
 `
@@ -29,11 +25,7 @@ const UploadedAttachments = ({ uuid }) => {
     ? Attachment.fromArray(data.getAttachmentsForRelatedObject)
     : []
 
-  return (
-    <>
-      <ShowUplaodedAttachments attachmentList={uploadedList} />
-    </>
-  )
+  return <ShowUploadedAttachments attachmentList={uploadedList} />
 }
 
 UploadedAttachments.propTypes = {
