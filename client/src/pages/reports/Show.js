@@ -234,6 +234,7 @@ const GQL_GET_REPORT = gql`
       attachments {
         uuid
         fileName
+        contentLength
         mimeType
         description
         classification
@@ -682,7 +683,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                           key={index}
                           file={file}
                           index={index}
-                          show={false}
+                          edit={false}
                         />
                       ))}
                     </div>

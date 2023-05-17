@@ -30,7 +30,7 @@ import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 public class AttachmentDao extends AnetBaseDao<Attachment, AbstractSearchQuery<?>> {
 
   public static final String[] fields = {"uuid", "authorUuid", "fileName", "mimeType",
-      "description", "classification", "createdAt", "updatedAt"};
+      "contentLength", "description", "classification", "createdAt", "updatedAt"};
   public static final String[] contentFields = {"uuid", "content"};
   public static final String TABLE_NAME = "attachments";
   public static final String ATTACHMENT_FIELDS =
@@ -64,10 +64,12 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AbstractSearchQuery<?
 
   @Override
   public Attachment insertInternal(Attachment obj) {
-    getDbHandle().createUpdate("/* insertAttachment */ "
-        + "INSERT INTO \"attachments\" (uuid, \"authorUuid\", \"mimeType\", \"content\", \"fileName\", \"description\", \"classification\", "
-        + "\"createdAt\", \"updatedAt\") "
-        + "VALUES (:uuid, :authorUuid, :mimeType, :content, :fileName, :description, :classification, :createdAt, :updatedAt)")
+    getDbHandle()
+        .createUpdate("/* insertAttachment */ "
+            + "INSERT INTO \"attachments\" (uuid, \"authorUuid\", \"mimeType\", \"content\","
+            + "\"contentLength\", \"fileName\", \"description\", \"classification\", "
+            + "\"createdAt\", \"updatedAt\") " + "VALUES (:uuid, :authorUuid, :mimeType, :content, "
+            + ":contentLength, :fileName, :description, :classification, :createdAt, :updatedAt)")
         .bindBean(obj).bind("createdAt", DaoUtils.asLocalDateTime(obj.getCreatedAt()))
         .bind("updatedAt", DaoUtils.asLocalDateTime(obj.getUpdatedAt()))
         .bind("content", obj.getContentBlob()).bind("authorUuid", obj.getAuthorUuid())

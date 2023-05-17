@@ -4482,6 +4482,7 @@
 			<column name="fileName" type="${long_text_type}" />
 			<column name="mimeType" type="${long_text_type}" />
 			<column name="content" type="oid" />
+			<column name="contentLength" type="bigint" />
 			<column name="description" type="${long_text_type}" />
 			<column name="classification" type="int" />
 			<column name="createdAt" type="datetime" />

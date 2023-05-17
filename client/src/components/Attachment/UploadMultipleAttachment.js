@@ -64,6 +64,7 @@ const UploadMultipleAttachment = ({
 
     save(selectedAttachment).then(response => {
       selectedAttachment.uuid = response.createAttachment
+      selectedAttachment.contentLength = file.size
       handleUploadFile(selectedAttachment)
     })
   }

@@ -19,22 +19,13 @@ const GQL_DELETE_ATTACHMENT = gql`
 
 const AttachmentCard = ({
   file,
-  show,
+  edit,
   remove,
   setError,
   setRemove,
   uploadedList,
   setUploadedList
 }) => {
-  const returnFileSize = number => {
-    if (number < 1024) {
-      return `${number} bytes`
-    } else if (number >= 1024 && number < 1048576) {
-      return `${(number / 1024).toFixed(1)} KB`
-    } else if (number >= 1048576) {
-      return `${(number / 1048576).toFixed(1)} MB`
-    }
-  }
   const { backgroundSize, backgroundImage } = utils.getAttachmentIconDetails(
     file,
     true
@@ -62,33 +53,35 @@ const AttachmentCard = ({
             </div>
           </div>
         </div>
-        <Card.Body className={`p-1 ${!show ? "d-none" : "d-block"}`}>
+        <Card.Body className="p-1 d-block">
           <Card.Title style={{ fontSize: "15px" }} className="info-line">
             {file?.fileName?.substring(0, 8)}...
-            <span>{returnFileSize(file?.content?.length)}</span>
+            <span>{utils.humanReadableFileSize(file?.contentLength)}</span>
           </Card.Title>
-          <div className="info-line">
-            <div>
-              <LinkTo
-                modelType="Attachment"
-                edit
-                model={file}
-                button="outline-primary"
+          {edit && (
+            <div className="info-line">
+              <div>
+                <LinkTo
+                  modelType="Attachment"
+                  edit
+                  model={file}
+                  button="outline-primary"
+                >
+                  <Icon icon={IconNames.EDIT} className="icon edit" />
+                </LinkTo>
+              </div>
+              <ConfirmDestructive
+                onConfirm={() => deleteAttachment(file.uuid)}
+                objectType="attachment"
+                objectDisplay={"#" + file.uuid}
+                title="Delete attachment"
+                variant="outline-danger"
+                buttonSize="xs"
               >
-                <Icon icon={IconNames.EDIT} className="icon edit" />
-              </LinkTo>
+                <Icon icon={IconNames.TRASH} />
+              </ConfirmDestructive>
             </div>
-            <ConfirmDestructive
-              onConfirm={() => deleteAttachment(file.uuid)}
-              objectType="attachment"
-              objectDisplay={"#" + file.uuid}
-              title="Delete attachment"
-              variant="outline-danger"
-              buttonSize="xs"
-            >
-              <Icon icon={IconNames.TRASH} />
-            </ConfirmDestructive>
-          </div>
+          )}
         </Card.Body>
       </Card>
     </div>
@@ -112,7 +105,7 @@ const AttachmentCard = ({
 
 AttachmentCard.propTypes = {
   file: PropTypes.object,
-  show: PropTypes.bool,
+  edit: PropTypes.bool,
   remove: PropTypes.bool,
   setError: PropTypes.func,
   setRemove: PropTypes.func,
@@ -121,7 +114,7 @@ AttachmentCard.propTypes = {
 }
 
 AttachmentCard.defaultProps = {
-  show: true,
+  edit: true,
   remove: undefined
 }
 

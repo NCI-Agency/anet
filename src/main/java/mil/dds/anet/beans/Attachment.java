@@ -32,6 +32,10 @@ public class Attachment extends AbstractAnetBean {
   // specifically for streaming the content
   private Blob contentBlob;
 
+  // can only be queried
+  @GraphQLQuery
+  private Long contentLength;
+
   @GraphQLQuery
   @GraphQLInputField
   private String fileName;
@@ -60,8 +64,11 @@ public class Attachment extends AbstractAnetBean {
   }
 
   public byte[] getContent() {
+    if (contentLength == null) {
+      return null;
+    }
     try {
-      return contentBlob.getBytes(1L, (int) contentBlob.length());
+      return contentBlob.getBytes(1L, contentLength.intValue());
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
@@ -70,6 +77,7 @@ public class Attachment extends AbstractAnetBean {
   public void setContent(byte[] content) {
     try {
       setContentBlob(new SerialBlob(content));
+      setContentLength((long) content.length);
     } catch (final SQLException e) {
       throw new RuntimeException(e);
     }
@@ -81,6 +89,14 @@ public class Attachment extends AbstractAnetBean {
 
   public void setContentBlob(Blob contentBlob) {
     this.contentBlob = contentBlob;
+  }
+
+  public Long getContentLength() {
+    return contentLength;
+  }
+
+  public void setContentLength(Long contentLength) {
+    this.contentLength = contentLength;
   }
 
   public String getFileName() {

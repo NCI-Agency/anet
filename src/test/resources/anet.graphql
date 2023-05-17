@@ -188,6 +188,7 @@ type Attachment {
   attachmentRelatedObjects: [AttachmentRelatedObject]
   author: Person
   classification: Classification
+  contentLength: Long
   createdAt: Instant
   description: String
   fileName: String

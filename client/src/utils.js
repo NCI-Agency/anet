@@ -296,6 +296,16 @@ export default {
     return path.split(".").reduce((value, el) => value[el], obj)
   },
 
+  humanReadableFileSize: function(number) {
+    if (number < 1024) {
+      return `${number} bytes`
+    } else if (number >= 1024 && number < 1048576) {
+      return `${(number / 1024).toFixed(1)} KB`
+    } else if (number >= 1048576) {
+      return `${(number / 1048576).toFixed(1)} MB`
+    }
+  },
+
   getAttachmentIconDetails: function(attachment, small) {
     let backgroundSize
     let backgroundImage

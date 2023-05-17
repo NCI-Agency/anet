@@ -21,6 +21,7 @@ export default class Attachment extends Model {
     description: yup.string().default(""),
     mimeType: yup.string().default(""),
     content: yup.string().url().default(""),
+    contentLength: yup.number().nullable().default(null),
     attachmentRelatedObjects: yup
       .array()
       .nullable()
@@ -55,6 +56,20 @@ export default class Attachment extends Model {
 
   humanNameOfStatus() {
     return Attachment.humanNameOfStatus(this.status)
+  }
+
+  static FILTERED_CLIENT_SIDE_FIELDS = ["contentLength"]
+
+  static filterClientSideFields(obj, ...additionalFields) {
+    return Model.filterClientSideFields(
+      obj,
+      ...Attachment.FILTERED_CLIENT_SIDE_FIELDS,
+      ...additionalFields
+    )
+  }
+
+  filterClientSideFields(...additionalFields) {
+    return Attachment.filterClientSideFields(this, ...additionalFields)
   }
 
   toString() {

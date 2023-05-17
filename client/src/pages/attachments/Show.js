@@ -28,6 +28,7 @@ const GQL_GET_ATTACHMENT = gql`
     attachment(uuid: $uuid) {
       uuid
       fileName
+      contentLength
       mimeType
       classification
       description
@@ -154,6 +155,13 @@ const AttachmentShow = ({ pageDispatchers }) => {
                     <Field
                       name="fileName"
                       component={FieldHelper.ReadonlyField}
+                    />
+                    <Field
+                      name="contentLength"
+                      component={FieldHelper.ReadonlyField}
+                      humanValue={utils.humanReadableFileSize(
+                        attachment.contentLength
+                      )}
                     />
                     <Field
                       name="owner"
