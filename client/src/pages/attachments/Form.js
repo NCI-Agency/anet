@@ -17,8 +17,8 @@ import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
 import { Button, Col } from "react-bootstrap"
 import { useNavigate } from "react-router-dom"
-import pdf from "resources/newPDF.svg"
 import Settings from "settings"
+import utils from "utils"
 
 const GQL_CREATE_ATTACHMENT = gql`
   mutation ($attachment: AttachmentInput!) {
@@ -91,6 +91,8 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
         resetForm,
         submitForm
       }) => {
+        const { backgroundSize, backgroundImage } =
+          utils.getAttachmentIconDetails(values)
         const action = (
           <div>
             <Button
@@ -115,12 +117,8 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
                     <div
                       className="imagePreview info-show card-image attachmentImage h-100"
                       style={{
-                        backgroundSize: values.mimeType.includes("pdf")
-                          ? "200px"
-                          : "cover",
-                        backgroundImage: values.mimeType.includes("pdf")
-                          ? `url(${pdf})`
-                          : `url(/api/attachment/view/${values.uuid})`
+                        backgroundSize,
+                        backgroundImage: `url(${backgroundImage})`
                       }}
                     />
                   </Col>

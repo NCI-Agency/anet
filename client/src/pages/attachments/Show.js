@@ -21,7 +21,7 @@ import React, { useContext } from "react"
 import { Button, Col } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
-import pdf from "resources/newPDF.svg"
+import utils from "utils"
 
 const GQL_GET_ATTACHMENT = gql`
   query ($uuid: String) {
@@ -91,6 +91,8 @@ const AttachmentShow = ({ pageDispatchers }) => {
   const stateError = routerLocation.state && routerLocation.state.error
   const canEdit =
     currentUser.isAdmin() || currentUser.uuid === attachment.author.uuid
+  const { backgroundSize, backgroundImage } =
+    utils.getAttachmentIconDetails(attachment)
   return (
     <Formik enableReinitialize initialValues={attachment}>
       {({ values }) => {
@@ -141,12 +143,8 @@ const AttachmentShow = ({ pageDispatchers }) => {
                         <div
                           className="imagePreview info-show card-image attachmentImage h-100"
                           style={{
-                            backgroundSize: attachment.mimeType.includes("pdf")
-                              ? "200px"
-                              : "cover",
-                            backgroundImage: attachment.mimeType.includes("pdf")
-                              ? `url(${pdf})`
-                              : `url(/api/attachment/view/${attachment.uuid})`
+                            backgroundSize,
+                            backgroundImage: `url(${backgroundImage})`
                           }}
                         />
                       </a>

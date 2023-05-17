@@ -7,7 +7,7 @@ import { Attachment } from "models"
 import PropTypes from "prop-types"
 import React from "react"
 import { Col, Row } from "react-bootstrap"
-import pdf from "resources/newPDF.svg"
+import utils from "utils"
 
 const GQL_GET_ATTACHMENT = gql`
   query ($uuid: String) {
@@ -43,6 +43,7 @@ const AttachmentPreview = ({ className, uuid }) => {
   }
 
   const attachment = new Attachment(data.attachment ? data.attachment : {})
+  const { backgroundImage } = utils.getAttachmentIconDetails(attachment)
 
   return (
     <div className={`${className} preview-content-scroll`}>
@@ -55,11 +56,7 @@ const AttachmentPreview = ({ className, uuid }) => {
             <Col xs={12} sm={12} className="label-align">
               <img
                 alt={attachment.fileName}
-                src={
-                  attachment.mimeType.includes("pdf")
-                    ? pdf
-                    : `/api/attachment/view/${attachment.uuid}`
-                }
+                src={backgroundImage}
                 style={{ width: "100%", borderRadius: "5px" }}
               />
             </Col>

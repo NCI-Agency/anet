@@ -8,7 +8,7 @@ import PropTypes from "prop-types"
 import React from "react"
 import { Card } from "react-bootstrap"
 import { toast } from "react-toastify"
-import pdf from "resources/newPDF.svg"
+import utils from "utils"
 import "./Attachment.css"
 
 const GQL_DELETE_ATTACHMENT = gql`
@@ -35,6 +35,10 @@ const AttachmentCard = ({
       return `${(number / 1048576).toFixed(1)} MB`
     }
   }
+  const { backgroundSize, backgroundImage } = utils.getAttachmentIconDetails(
+    file,
+    true
+  )
 
   return (
     <div key={file.uuid} style={{ width: "20%" }}>
@@ -42,10 +46,8 @@ const AttachmentCard = ({
         <div
           className="imagePreview info-show card-image"
           style={{
-            backgroundSize: file.mimeType.includes("pdf") ? "50px" : "cover",
-            backgroundImage: file.mimeType.includes("pdf")
-              ? `url(${pdf})`
-              : `url(/api/attachment/view/${file.uuid})`
+            backgroundSize,
+            backgroundImage: `url(${backgroundImage})`
           }}
         >
           <div className="file-info image-info">

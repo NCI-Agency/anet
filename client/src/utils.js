@@ -8,6 +8,8 @@ import pluralize from "pluralize"
 import decodeQuery from "querystring/decode"
 import encodeQuery from "querystring/encode"
 import React, { useCallback, useEffect } from "react"
+import binary from "resources/file-binary.svg"
+import pdf from "resources/newPDF.svg"
 import Settings from "settings"
 import { titleCase } from "title-case"
 
@@ -292,6 +294,22 @@ export default {
 
   readNestedObjectWithStringPath: function(obj, path) {
     return path.split(".").reduce((value, el) => value[el], obj)
+  },
+
+  getAttachmentIconDetails: function(attachment, small) {
+    let backgroundSize
+    let backgroundImage
+    if (attachment.mimeType.includes("pdf")) {
+      backgroundSize = small ? "50px" : "200px"
+      backgroundImage = pdf
+    } else if (attachment.mimeType.startsWith("image/")) {
+      backgroundSize = "cover"
+      backgroundImage = `/api/attachment/view/${attachment.uuid}`
+    } else {
+      backgroundSize = small ? "50px" : "200px"
+      backgroundImage = binary
+    }
+    return { backgroundSize, backgroundImage }
   }
 }
 
