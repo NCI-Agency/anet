@@ -2,20 +2,19 @@ package mil.dds.anet.config;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.collect.ImmutableMap;
+import com.networknt.schema.JsonSchema;
+import com.networknt.schema.JsonSchemaException;
+import com.networknt.schema.JsonSchemaFactory;
+import com.networknt.schema.SpecVersion;
+import com.networknt.schema.ValidationMessage;
 import io.dropwizard.Configuration;
 import io.dropwizard.bundles.assets.AssetsBundleConfiguration;
 import io.dropwizard.bundles.assets.AssetsConfiguration;
 import io.dropwizard.db.DataSourceFactory;
-import io.vertx.core.json.JsonObject;
-import io.vertx.json.schema.Draft;
-import io.vertx.json.schema.JsonSchema;
-import io.vertx.json.schema.JsonSchemaOptions;
-import io.vertx.json.schema.OutputUnit;
-import io.vertx.json.schema.SchemaException;
-import io.vertx.json.schema.Validator;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -24,6 +23,7 @@ import java.lang.invoke.MethodHandles;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
@@ -232,37 +232,25 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
         logger.error("ANET schema [anet-schema.yml] not found");
         throw new IOException("ANET schema [anet-schema.yml] not found");
       } else {
-        final JsonSchema schema = JsonSchema.of(convertYamlToJson(inputStream));
-        final OutputUnit validationResult = Validator
-            .create(schema, new JsonSchemaOptions().setDraft(Draft.DRAFT201909).setBaseUri(
-                "https://raw.githubusercontent.com/NCI-Agency/anet/main/src/main/resources/anet-schema.yml"))
-            .validate(dictionaryMap);
-        if (!validationResult.getValid()) {
-          logErrors(validationResult);
+        final JsonSchemaFactory factory = JsonSchemaFactory
+            .builder(JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V201909))
+            .objectMapper(yamlMapper).build();
+        final JsonSchema schema = factory.getSchema(inputStream);
+        final JsonNode anetDictionary = jsonMapper.valueToTree(dictionaryMap);
+        final Set<ValidationMessage> errors = schema.validate(anetDictionary);
+        if (!errors.isEmpty()) {
+          for (ValidationMessage error : errors) {
+            logger.error("Dictionary error: {}", error.getMessage());
+          }
           throw new IllegalArgumentException("Invalid dictionary in the configuration");
         }
         logger.info("dictionary: {}", yamlMapper.writeValueAsString(dictionaryMap));
         return true;
       }
-    } catch (final SchemaException e) {
+    } catch (final JsonSchemaException e) {
       logger.error("Malformed ANET schema", e);
     }
     return false;
-  }
-
-  private JsonObject convertYamlToJson(final InputStream yaml) throws IOException {
-    return new JsonObject(jsonMapper.writeValueAsString(yamlMapper.readValue(yaml, Object.class)));
-  }
-
-  private void logErrors(final OutputUnit validationResult) {
-    if (!Utils.isEmptyOrNull(validationResult.getError())) {
-      logger.error("Dictionary error: {} (location: {})", validationResult.getError(),
-          validationResult.getInstanceLocation());
-    }
-    if (validationResult.getErrors() != null) {
-      // Recurse down through the errors
-      validationResult.getErrors().forEach(e -> logErrors(e));
-    }
   }
 
   @SuppressWarnings("unchecked")

@@ -116,13 +116,8 @@ dependencies {
 
 	// Used for converting GraphQL request output to XML:
 	implementation 'com.github.javadev:underscore-lodash:1.26'
-	// For JSON schema validation
-	implementation('io.vertx:vertx-json-schema:4.4.1') {
-		// We don't actually need most of these (dragged in through vertx-core)
-		exclude group: 'io.netty'
-	}
-	// But we do need io.netty.buffer.ByteBufOutputStream, so explicitly include that here
-	implementation 'io.netty:netty-buffer:4.1.92.Final'
+	// For JSON schema validation, supports detailed error reporting
+	implementation 'com.networknt:json-schema-validator:1.0.81'
 
 	// used for writing Excel documents
 	implementation 'org.apache.poi:poi:5.2.3'
