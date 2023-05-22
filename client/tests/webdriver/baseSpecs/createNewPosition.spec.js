@@ -80,22 +80,22 @@ describe("Create position page", () => {
 
       // First select member role
       await (await CreatePosition.getRoleMemberButton()).click()
-      // Ensure role member input is selected
+      // Ensure role-member-input is selected
       expect(
         await (await CreatePosition.getRoleMemberInput()).isSelected()
       ).to.equal(true)
 
       // Will create position with deputy role
       await (await CreatePosition.getRoleDeputyButton()).click()
-      // Ensure role deputy input is selected
+      // Ensure role-deputy-input is selected
       expect(
         await (await CreatePosition.getRoleDeputyInput()).isSelected()
       ).to.equal(true)
-      // Ensure role member input is not selected
+      // Ensure role-member-input is not selected
       expect(
         await (await CreatePosition.getRoleMemberInput()).isSelected()
       ).to.equal(false)
-      // Ensure role leader input is not selected
+      // Ensure role-leader-input is not selected
       expect(
         await (await CreatePosition.getRoleLeaderInput()).isSelected()
       ).to.equal(false)
@@ -132,22 +132,22 @@ describe("Create position page", () => {
 
       // First select deputy role
       await (await CreatePosition.getRoleDeputyButton()).click()
-      // Ensure role member input is selected
+      // Ensure role-deputy-input is selected
       expect(
         await (await CreatePosition.getRoleDeputyInput()).isSelected()
       ).to.equal(true)
 
       // Will create position with leader role
       await (await CreatePosition.getRoleLeaderButton()).click()
-      // Ensure role leader input is selected
+      // Ensure role-leader-input is selected
       expect(
         await (await CreatePosition.getRoleLeaderInput()).isSelected()
       ).to.equal(true)
-      // Ensure role member input is not selected
+      // Ensure role-member-input is not selected
       expect(
         await (await CreatePosition.getRoleMemberInput()).isSelected()
       ).to.equal(false)
-      // Ensure role deputy input is not selected
+      // Ensure role-deputy-input is not selected
       expect(
         await (await CreatePosition.getRoleDeputyInput()).isSelected()
       ).to.equal(false)
