@@ -302,6 +302,7 @@ public class Person extends AbstractCustomizableAnetBean
     }
   }
 
+  @JsonIgnore
   public byte[] getAvatarData() {
     return avatar == null ? null : avatar.orElse(null);
   }
