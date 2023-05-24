@@ -31,6 +31,7 @@ import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.search.AbstractSearchQueryBuilder.Comparison;
+import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 
 public abstract class AbstractReportSearcher extends AbstractSearcher<Report, ReportSearchQuery>
@@ -297,10 +298,10 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
       qb.addSqlArg("userUuid", DaoUtils.getUuid(query.getUser()));
     }
 
-    if (!query.isSystemSearch()) {
+    if (!query.isSystemSearch() && !AuthUtils.isAdmin(query.getUser())) {
       // Apply a filter to restrict access to other's draft, rejected or approved reports.
       // When the search is performed by the system (for instance by a worker, systemSearch = true)
-      // do not apply this filter.
+      // or an admin, do not apply this filter.
       if (query.getUser() == null) {
         qb.addWhereClause("reports.state != :draftState");
         qb.addWhereClause("reports.state != :rejectedState");
