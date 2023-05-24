@@ -374,10 +374,11 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
   // Authors and approvers can always read assessments
   const canReadAssessments = isAuthor || canApprove
 
-  // Only an author can submit when report is in draft or rejected AND author has a position
+  // Only an admin or an author can submit when report is in draft or rejected AND author has an active position
   const hasActivePosition = currentUser.hasActivePosition()
   const canSubmit =
-    isAuthor && hasActivePosition && (report.isDraft() || report.isRejected())
+    (isAdmin || (isAuthor && hasActivePosition)) &&
+    (report.isDraft() || report.isRejected())
 
   const hasAssignedPosition = currentUser.hasAssignedPosition()
 
