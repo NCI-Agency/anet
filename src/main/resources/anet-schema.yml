@@ -52,6 +52,7 @@ $defs:
           type: object
           title: Optional styling for the bootstrap component class
           description: Used for styling this field.
+          additionalProperties: true
 
 # definition for fields that present a choice to be selected from
   choiceField:
