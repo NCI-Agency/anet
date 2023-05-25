@@ -932,7 +932,8 @@ INSERT INTO notes (uuid, "authorUuid", type, text, "createdAt", "updatedAt")
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
 	SELECT :noteUuid, 'reports', r.uuid
 	FROM reports r
-	WHERE SUBSTRING(r.uuid, 1, 1) IN ('0', '2', '4', '6', '8', 'a', 'c', 'e');
+	WHERE SUBSTRING(r.uuid, 1, 1) IN ('0', '2', '4', '6', '8', 'a', 'c', 'e')
+	AND r.state != 0;
 
 SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
 INSERT INTO notes (uuid, "authorUuid", type, text, "createdAt", "updatedAt")
@@ -942,7 +943,8 @@ INSERT INTO notes (uuid, "authorUuid", type, text, "createdAt", "updatedAt")
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
 	SELECT :noteUuid, 'reports', r.uuid
 	FROM reports r
-	WHERE SUBSTRING(r.uuid, 1, 1) IN ('0', '3', '6', '9', 'c', 'f');
+	WHERE SUBSTRING(r.uuid, 1, 1) IN ('0', '3', '6', '9', 'c', 'f')
+	AND r.state != 0;
 
 SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
 INSERT INTO notes (uuid, "authorUuid", type, text, "createdAt", "updatedAt")
@@ -952,7 +954,8 @@ INSERT INTO notes (uuid, "authorUuid", type, text, "createdAt", "updatedAt")
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
 	SELECT :noteUuid, 'reports', r.uuid
 	FROM reports r
-	WHERE SUBSTRING(r.uuid, 1, 1) IN ('1', '3', '5', '7', '9', 'b', 'd', 'f');
+	WHERE SUBSTRING(r.uuid, 1, 1) IN ('1', '3', '5', '7', '9', 'b', 'd', 'f')
+	AND r.state != 0;
 
 SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
 INSERT INTO notes (uuid, "authorUuid", type, text, "createdAt", "updatedAt")
@@ -962,7 +965,8 @@ INSERT INTO notes (uuid, "authorUuid", type, text, "createdAt", "updatedAt")
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
 	SELECT :noteUuid, 'reports', r.uuid
 	FROM reports r
-	WHERE SUBSTRING(r.uuid, 1, 1) IN ('1', '4', '7', 'a', 'd');
+	WHERE SUBSTRING(r.uuid, 1, 1) IN ('1', '4', '7', 'a', 'd')
+	AND r.state != 0;
 
 -- Insert report with created at and updated at date for two days before current timestamp
 SELECT ('''' || uuid_generate_v4() || '''') AS reportuuid \gset
@@ -1085,7 +1089,8 @@ INSERT INTO notes (uuid, "authorUuid", type, text, "createdAt", "updatedAt")
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
 	SELECT :noteUuid, 'reports', r.uuid
 	FROM reports r
-	WHERE r.atmosphere = 0;
+	WHERE r.atmosphere = 0
+	AND r.state != 0;
 
 SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
 INSERT INTO notes (uuid, "authorUuid", type, text, "createdAt", "updatedAt")
