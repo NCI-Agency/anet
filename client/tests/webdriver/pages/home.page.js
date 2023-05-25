@@ -48,14 +48,6 @@ class Home extends Page {
     return browser.$("fieldset.home-tile-row")
   }
 
-  async getPendingMyApprovalOfCount() {
-    return (
-      await browser.$(
-        '//button[contains(text(), "Reports pending my approval")]'
-      )
-    ).$("h1")
-  }
-
   async getSubmitSearch() {
     return browser.$("#topbar #searchBarSubmit")
   }
@@ -84,8 +76,28 @@ class Home extends Page {
     return (await this.getMyTasksLink()).$("span.badge")
   }
 
+  async getAllDraftReports() {
+    return browser.$('//button[contains(text(), "All draft reports")]')
+  }
+
+  async getAllDraftReportsCount() {
+    return (await this.getAllDraftReports()).$("h1")
+  }
+
+  async getMyDraftReports() {
+    return browser.$('//button[contains(text(), "My draft reports")]')
+  }
+
+  async getMyDraftReportsCount() {
+    return (await this.getMyDraftReports()).$("h1")
+  }
+
   async getReportsPendingMyApproval() {
     return browser.$('//button[text()="Reports pending my approval"]')
+  }
+
+  async getReportsPendingMyApprovalCount() {
+    return (await this.getReportsPendingMyApproval()).$("h1")
   }
 
   async waitForSecurityBannerValue(value) {
