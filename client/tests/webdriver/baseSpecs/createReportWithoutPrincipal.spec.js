@@ -21,8 +21,6 @@ const REPORT_FIELDS = {
 
 const NO_PRINCIPAL_WARNING =
   "No primary Afghan Partner has been provided for the Engagement"
-const REPORT_SUBMITTED_STATUS = "This report is PENDING approvals."
-const REPORT_APPROVED_STATUS = "This report is APPROVED."
 
 describe("When creating a report without a principal", () => {
   it("Should save draft report without primary principal attendee", async() => {
@@ -46,7 +44,7 @@ describe("When creating a report without a principal", () => {
     await (await ShowReport.getConfirmSubmitButton()).click()
     await browser.pause(1000) // Wait for status text to be updated
     expect(await ShowReport.getReportStatusText()).to.equal(
-      REPORT_SUBMITTED_STATUS
+      ShowReport.REPORT_IS_PENDING_APPROVALS
     )
   })
   it("Should show missing principal warning to initial approver", async() => {
@@ -99,7 +97,7 @@ describe("When creating a report without a principal", () => {
     await MyReports.open("erin")
     await MyReports.selectReport(REPORT_FIELDS.intent, REPORT_STATES.APPROVED)
     expect(await ShowReport.getReportStatusText()).to.equal(
-      REPORT_APPROVED_STATUS
+      ShowReport.REPORT_IS_APPROVED
     )
   })
 })
