@@ -256,7 +256,9 @@ describe("Create report form page", () => {
       // After preserving search query, setValue does not work consistently
       // input field values are sometimes concatenated
       // Therefore, clear input field previous value before setting new value.
-      await CreateReport.deleteInput(await CreateReport.getTestMultiReferenceField())
+      await CreateReport.deleteInput(
+        await CreateReport.getTestMultiReferenceField()
+      )
       // Click outside the overlay
       await (await CreateReport.getEngagementInformationTitle()).click()
 
@@ -270,7 +272,9 @@ describe("Create report form page", () => {
       // After preserving search query, setValue does not work consistently
       // input field values are sometimes concatenated
       // Therefore, clear input field previous value before setting new value.
-      await CreateReport.deleteInput(await CreateReport.getTestMultiReferenceField())
+      await CreateReport.deleteInput(
+        await CreateReport.getTestMultiReferenceField()
+      )
       await (await CreateReport.getTestMultiReferenceField()).setValue(PERSON)
       await CreateReport.waitForAdvancedSelectToChange(
         CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(1),
@@ -334,7 +338,9 @@ describe("Create report form page", () => {
       // After preserving search query, setValue does not work consistently
       // input field values are sometimes concatenated
       // Therefore, clear input field previous value before setting new value.
-      await CreateReport.deleteInput(await CreateReport.getTestMultiReferenceField())
+      await CreateReport.deleteInput(
+        await CreateReport.getTestMultiReferenceField()
+      )
       await (await CreateReport.getTestMultiReferenceField()).setValue(POSITION)
       await CreateReport.waitForAdvancedSelectToChange(
         CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(1),
