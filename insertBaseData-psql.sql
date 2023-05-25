@@ -385,7 +385,6 @@ INSERT INTO approvers ("approvalStepUuid", "positionUuid")
 	VALUES ((SELECT uuid from "approvalSteps" WHERE name='EF 1.1 Approvers'), (SELECT uuid from positions where name = 'EF 1.1 Superuser'));
 
 -- Create the EF 2.2 approval process
--- DECLARE :approvalStepUuid varchar(36);
 SELECT ('''' || uuid_generate_v4() || '''') AS "approvalStepUuid" \gset
 INSERT INTO "approvalSteps" (uuid, name, "relatedObjectUuid", type)
 	VALUES (:approvalStepUuid, 'EF 2.2 Secondary Reviewers', (SELECT uuid from organizations where "shortName"='EF 2.2'), 1);
@@ -630,8 +629,7 @@ UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "email
 UPDATE positions SET "locationUuid" = (SELECT uuid from LOCATIONS where name = 'Kabul Police Academy') WHERE name = 'Chief of Police';
 UPDATE positions SET "locationUuid" = (SELECT uuid from LOCATIONS where name = 'MoD Headquarters Kabul') WHERE name = 'Cost Adder - MoD';
 
---Write a couple reports!
--- DECLARE :reportuuid varchar(36);
+-- Write a couple of reports!
 
 SELECT ('''' || N'9bb1861c-1f55-4a1b-bd3d-3c1f56d739b5' || '''') AS reportuuid \gset
 INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "nextSteps", state, "engagementDate", atmosphere, "advisorOrganizationUuid", "principalOrganizationUuid")
@@ -868,6 +866,20 @@ INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor")
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor")
 	VALUES ((SELECT uuid FROM people where "emailAddress"='hunter+jack@example.com'), :reportuuid, FALSE, FALSE);
 
+-- Erin's Draft report
+SELECT ('''530b735e-1134-4daa-9e87-4491c888a4f7''') AS reportuuid \gset
+INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "nextSteps", "keyOutcomes", state, "engagementDate", atmosphere, "advisorOrganizationUuid", "principalOrganizationUuid", "customFields")
+	VALUES (:reportuuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'Erin''s Draft report, ready for submission',
+	'This is just a draft.', 'This is just a draft.', 'This is just a draft.', 0, '2023-05-25', 0,
+	(SELECT uuid FROM organizations where "shortName" = 'EF 2.2'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'),
+	'{"invisibleCustomFields":["formCustomFields.trainingEvent","formCustomFields.numberTrained","formCustomFields.levelTrained","formCustomFields.trainingDate","formCustomFields.systemProcess","formCustomFields.echelons","formCustomFields.itemsAgreed","formCustomFields.assetsUsed"],"multipleButtons":[],"additionalEngagementNeeded":[],"relatedObject":null,"relatedReport":null}');
+INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary")
+	VALUES ((SELECT uuid FROM people where "emailAddress"='hunter+christopf@example.com'), :reportuuid, TRUE);
+INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor")
+	VALUES ((SELECT uuid FROM people where "emailAddress"='hunter+erin@example.com'), :reportuuid, TRUE, TRUE);
+INSERT INTO "reportTasks" ("taskUuid", "reportUuid")
+	VALUES ((SELECT uuid from tasks where "shortName" = '2.A'), :reportuuid);
+
 -- Release all of the reports right now, so they show up in the rollup.
 UPDATE reports SET "releasedAt" = reports."createdAt" WHERE state = 2 OR state = 4;
 
@@ -919,8 +931,6 @@ INSERT INTO PEOPLE (uuid, name, status, role, "createdAt", "updatedAt")
 	SELECT uuid_generate_v4(), 'ANET Importer', 1, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
 	WHERE NOT EXISTS (SELECT uuid FROM people WHERE name = 'ANET Importer' AND role = 0);
 
--- DECLARE :authorUuid varchar(36);
--- DECLARE :noteUuid varchar(36);
 SELECT ('''' || uuid || '''') AS "authorUuid" FROM people WHERE name = 'ANET Importer' AND role = 0 \gset
 
 -- Tag some reports
