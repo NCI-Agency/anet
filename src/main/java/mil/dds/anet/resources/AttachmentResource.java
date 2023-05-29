@@ -5,11 +5,20 @@ import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
+import jakarta.mail.internet.ContentDisposition;
+import jakarta.mail.internet.ParameterList;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -26,6 +35,7 @@ import mil.dds.anet.database.AttachmentDao;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 
 @Path("/api/attachment")
 public class AttachmentResource {
@@ -63,6 +73,43 @@ public class AttachmentResource {
     attachment = dao.insert(attachment);
     AnetAuditLogger.log("Attachment {} created by {}", DaoUtils.getUuid(attachment), user);
     return DaoUtils.getUuid(attachment);
+  }
+
+  @POST
+  @Timed
+  @Path("/uploadAttachmentContent/{uuid}")
+  @Consumes(MediaType.MULTIPART_FORM_DATA)
+  public Response uploadAttachmentContent(@FormDataParam("file") InputStream attachmentContent,
+      @PathParam("uuid") String uuid) {
+    final byte[] content = saveContent(uuid, attachmentContent);
+    if (content == null) {
+      return Response.serverError().build();
+    } else
+      return Response.ok().build();
+  }
+
+  // save created attachment's content to database
+  private byte[] saveContent(String uuid, InputStream uploadedInputStream) {
+    byte[] byteArray;
+    try {
+
+      ByteArrayOutputStream baOStream = new ByteArrayOutputStream();
+      int read = 0;
+      byte[] bytes = new byte[1024];
+      while ((read = uploadedInputStream.read(bytes)) != -1) {
+        baOStream.write(bytes, 0, read);
+      }
+      byteArray = baOStream.toByteArray();
+      baOStream.close();
+
+      dao.saveContentBlob(uuid, byteArray);
+
+    } catch (IOException e) {
+      throw new RuntimeException("Could not transfer content of attachment " + uuid, e);
+    } catch (SQLException e) {
+      throw new RuntimeException("Could not save the content of attachment " + uuid, e);
+    }
+    return byteArray;
   }
 
   @GraphQLMutation(name = "updateAttachment")
@@ -114,7 +161,7 @@ public class AttachmentResource {
     final Attachment attachment = getAttachment(uuid);
     final ResponseBuilder response =
         Response.ok(streamContentBlob(uuid)).type(MediaType.APPLICATION_OCTET_STREAM)
-            .header("Content-Disposition", "attachment; filename=" + attachment.getFileName());
+            .header("Content-Disposition", getContentDisposition("attachment", attachment));
     return response.build();
   }
 
@@ -125,7 +172,7 @@ public class AttachmentResource {
     final Attachment attachment = getAttachment(uuid);
     final ResponseBuilder response =
         Response.ok(streamContentBlob(uuid)).type(attachment.getMimeType())
-            .header("Content-Disposition", "inline; filename=" + attachment.getFileName());
+            .header("Content-Disposition", getContentDisposition("inline", attachment));
     return response.build();
   }
 
@@ -139,5 +186,11 @@ public class AttachmentResource {
 
   private StreamingOutput streamContentBlob(final String uuid) {
     return output -> dao.streamContentBlob(uuid, output);
+  }
+
+  private static String getContentDisposition(String disposition, Attachment attachment) {
+    final ParameterList parameterList = new ParameterList();
+    parameterList.set("filename", attachment.getFileName(), StandardCharsets.UTF_8.toString());
+    return new ContentDisposition(disposition, parameterList).toString();
   }
 }

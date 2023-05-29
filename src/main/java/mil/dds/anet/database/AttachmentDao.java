@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+import javax.sql.rowset.serial.SerialBlob;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Attachment;
 import mil.dds.anet.beans.AttachmentRelatedObject;
@@ -69,13 +70,13 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AbstractSearchQuery<?
   public Attachment insertInternal(Attachment obj) {
     getDbHandle()
         .createUpdate("/* insertAttachment */ "
-            + "INSERT INTO \"attachments\" (uuid, \"authorUuid\", \"mimeType\", \"content\","
+            + "INSERT INTO \"attachments\" (uuid, \"authorUuid\", \"mimeType\","
             + "\"contentLength\", \"fileName\", \"description\", \"classification\", "
-            + "\"createdAt\", \"updatedAt\") " + "VALUES (:uuid, :authorUuid, :mimeType, :content, "
+            + "\"createdAt\", \"updatedAt\") " + "VALUES (:uuid, :authorUuid, :mimeType, "
             + ":contentLength, :fileName, :description, :classification, :createdAt, :updatedAt)")
         .bindBean(obj).bind("createdAt", DaoUtils.asLocalDateTime(obj.getCreatedAt()))
         .bind("updatedAt", DaoUtils.asLocalDateTime(obj.getUpdatedAt()))
-        .bind("content", obj.getContentBlob()).bind("authorUuid", obj.getAuthorUuid())
+        .bind("authorUuid", obj.getAuthorUuid())
         .bind("classification", DaoUtils.getEnumId(obj.getClassification())).execute();
     if (obj.getAttachmentRelatedObjects().get(0).getRelatedObjectUuid() != null)
       insertAttachmentRelatedObjects(DaoUtils.getUuid(obj), obj.getAttachmentRelatedObjects());
@@ -125,6 +126,14 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AbstractSearchQuery<?
     } catch (IOException e) {
       throw new RuntimeException("Could not transfer content of attachment " + uuid, e);
     }
+  }
+
+  @InTransaction
+  public void saveContentBlob(String uuid, byte[] content) throws SQLException {
+    final String sql = ("/* insertAttachment */ "
+        + "UPDATE \"attachments\" SET  \"content\" = :content WHERE uuid = :uuid");
+    getDbHandle().createUpdate(sql).bind("uuid", uuid).bind("content", new SerialBlob(content))
+        .execute();
   }
 
   public CompletableFuture<List<Attachment>> getAttachmentsForRelatedObject(

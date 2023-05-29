@@ -17,6 +17,7 @@ import io.dropwizard.cli.ServerCommand;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.db.DataSourceFactory;
+import io.dropwizard.forms.MultiPartBundle;
 import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
@@ -142,6 +143,9 @@ public class AnetApplication extends Application<AnetConfiguration> {
         return configuration.getViews();
       }
     });
+
+    // Add Multipart for stream attachment content
+    bootstrap.addBundle(new MultiPartBundle());
 
     // Add Dropwizard-Keycloak
     bootstrap.addBundle(new KeycloakBundle<AnetConfiguration>() {
