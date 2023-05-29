@@ -9,6 +9,7 @@ import React, { useState } from "react"
 import { toast } from "react-toastify"
 import Settings from "settings"
 import "./Attachment.css"
+import axios from "axios"
 import AttachmentCard from "./AttachmentCard"
 import UploadedAttachments from "./UploadedAttachments"
 
@@ -57,6 +58,10 @@ const UploadAttachment = ({ getRelatedObject, edit, saveAttachment }) => {
         selectedAttachment.uuid = response.createAttachment
         selectedAttachment.contentLength = file.size
         try {
+          const formData = new FormData()
+          formData.append("file", file)
+          axios
+            .post(`/api/attachment/uploadAttachmentContent/${selectedAttachment.uuid}`, formData)
           handleUploadFile(selectedAttachment)
         } catch (error) {
           toast.error("Attachment upload failed.")
