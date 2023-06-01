@@ -3,7 +3,7 @@ import API from "api"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import Model from "components/Model"
-import { Organization } from "models"
+import { Organization, Position } from "models"
 import OrganizationLaydown from "pages/organizations/Laydown"
 import OrganizationTasks from "pages/organizations/OrganizationTasks"
 import PropTypes from "prop-types"
@@ -130,6 +130,27 @@ const OrganizationPreview = ({ className, uuid }) => {
           label="Type"
           value={Organization.humanNameOfType(organization.type)}
         />
+
+        {organization.positions &&
+          organization.positions.some(pos => pos.role === Position.ROLE.LEADER) && (
+            <PreviewField
+              label="Leaders"
+              value={
+                <ListGroup>
+                  {organization.positions.map(pos => (pos.role === Position.ROLE.LEADER) && (
+                    <ListGroupItem key={pos.uuid}>
+                      <LinkTo
+                        modelType="Position"
+                        model={pos}
+                      >
+                        {pos.name}
+                      </LinkTo>
+                    </ListGroupItem>
+                  ))}
+                </ListGroup>
+              }
+            />
+        )}
 
         <PreviewField
           label={orgSettings.longName.label}
