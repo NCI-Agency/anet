@@ -677,7 +677,15 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                   label={Settings.fields.attachment.shortLabel}
                   component={FieldHelper.ReadonlyField}
                   humanValue={
-                    <div className="d-flex">
+                    <div
+                      id="attachmentCardList"
+                      style={{
+                        display:
+                          report.attachments.length > 1
+                            ? "-webkit-box"
+                            : "block"
+                      }}
+                    >
                       {report.attachments.map((attachment, index) => (
                         <AttachmentCard
                           key={index}

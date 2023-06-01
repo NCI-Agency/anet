@@ -32,7 +32,7 @@ const AttachmentCard = ({
   )
 
   return (
-    <div key={attachment.uuid} style={{ width: "20%" }}>
+    <div id="attachmentCard" key={attachment.uuid} style={{ width: "20%" }}>
       <Card>
         <div
           className="imagePreview info-show card-image"

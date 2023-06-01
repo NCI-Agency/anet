@@ -2,6 +2,8 @@
 TRUNCATE TABLE "adminSettings" CASCADE;
 TRUNCATE TABLE "approvalSteps" CASCADE;
 TRUNCATE TABLE "approvers" CASCADE;
+TRUNCATE TABLE "attachments" CASCADE;
+TRUNCATE TABLE "attachmentRelatedObjects" CASCADE;
 TRUNCATE TABLE "authorizationGroupPositions" CASCADE;
 TRUNCATE TABLE "authorizationGroups" CASCADE;
 TRUNCATE TABLE "comments" CASCADE;
@@ -1137,6 +1139,52 @@ INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjec
   FROM people p
   WHERE p.name = 'ROGWELL, Roger';
 
+-- Add attachments
+SELECT ('''' || uuid || '''') AS "authorUuid" FROM people WHERE name = 'DMIN, Arthur' \gset
+INSERT INTO attachments (uuid, "authorUuid", "fileName", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt")
+	VALUES (uuid_generate_v4(), :authorUuid, 'myAttachment', 'image/jpeg', null, 1000, 'We can add attachment for report', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO attachments (uuid, "authorUuid", "fileName", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt")
+	VALUES (uuid_generate_v4(), :authorUuid, 'myAttachment', 'image/jpeg', null, 1000, 'We can add attachment for report', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO attachments (uuid, "authorUuid", "fileName", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt")
+	VALUES (uuid_generate_v4(), :authorUuid, 'myAttachment', 'image/jpeg', null, 1000, 'We can add attachment for report', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO attachments (uuid, "authorUuid", "fileName", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt")
+	VALUES (uuid_generate_v4(), :authorUuid, 'myAttachment', 'image/jpeg', null, 1000, 'We can add attachment for report', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO attachments (uuid, "authorUuid", "fileName", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt")
+	VALUES (uuid_generate_v4(), :authorUuid, 'myAttachment', 'image/jpeg', null, 1000, 'We can add attachment for report', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO attachments (uuid, "authorUuid", "fileName", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt")
+	VALUES (uuid_generate_v4(), :authorUuid, 'myAttachment', 'image/jpeg', null, 1000, 'We can add attachment for report', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO attachments (uuid, "authorUuid", "fileName", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt")
+	VALUES (uuid_generate_v4(), :authorUuid, 'myAttachment', 'image/jpeg', null, 1000, 'We can add attachment for report', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO attachments (uuid, "authorUuid", "fileName", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt")
+	VALUES (uuid_generate_v4(), :authorUuid, 'myAttachment', 'image/jpeg', null, 1000, 'We can add attachment for report', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO attachments (uuid, "authorUuid", "fileName", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt")
+	VALUES (uuid_generate_v4(), :authorUuid, 'myAttachment', 'image/jpeg', null, 1000, 'We can add attachment for report', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO attachments (uuid, "authorUuid", "fileName", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt")
+	VALUES (uuid_generate_v4(), :authorUuid, 'myAttachment', 'image/jpeg', null, 1000, 'We can add attachment for report', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO attachments (uuid, "authorUuid", "fileName", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt")
+	VALUES (uuid_generate_v4(), :authorUuid, 'myAttachment', 'image/jpeg', null, 1000, 'We can add attachment for report', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO attachments (uuid, "authorUuid", "fileName", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt")
+	VALUES (uuid_generate_v4(), :authorUuid, 'myAttachment', 'image/jpeg', null, 1000, 'We can add attachment for report', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO attachments (uuid, "authorUuid", "fileName", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt")
+	VALUES (uuid_generate_v4(), :authorUuid, 'myAttachment', 'image/jpeg', null, 1000, 'We can add attachment for report', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+-- Add attachments for reports
+SELECT ('''' || uuid || '''') AS "authorUuid" FROM people WHERE name = 'DMIN, Arthur' \gset
+SELECT ('''' || uuid_generate_v4() || '''') AS "attachmentUuid" \gset
+INSERT INTO attachments (uuid, "authorUuid", "fileName", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt")
+	VALUES (:attachmentUuid, :authorUuid, 'myNewAttachment', 'image/jpeg', null, 1000, 'We can add attachment for report', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "relatedObjectUuid")
+  SELECT :attachmentUuid, 'reports', r.uuid
+  FROM reports r
+  WHERE r.intent = 'Test report with rich text';
+SELECT ('''' || uuid_generate_v4() || '''') AS "attachmentUuid" \gset
+INSERT INTO attachments (uuid, "authorUuid", "fileName", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt")
+	VALUES ('f076406f-1a9b-4fc9-8ab2-cd2a138ec26d', :authorUuid, 'myNewSecondAttachment', 'image/jpeg', null, 1000, 'We can add multiple attachment for report', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "relatedObjectUuid")
+  SELECT 'f076406f-1a9b-4fc9-8ab2-cd2a138ec26d', 'reports', r.uuid
+  FROM reports r
+  WHERE r.intent = 'A test report from Arthur';
+
 -- Update the full-text indexes
 REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_fts_authorizationGroups";
 REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_fts_locations";
@@ -1190,3 +1238,7 @@ UPDATE notes SET
     "createdAt"=date_trunc('milliseconds', "createdAt"),
     "updatedAt"=date_trunc('milliseconds', "updatedAt")
   ;
+UPDATE attachments SET
+		"createdAt"=date_trunc('milliseconds', "createdAt"),
+		"updatedAt"=date_trunc('milliseconds', "updatedAt")
+	;

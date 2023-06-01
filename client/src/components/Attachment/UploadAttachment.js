@@ -2,6 +2,7 @@ import { gql } from "@apollo/client"
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import API from "api"
+import axios from "axios"
 import Messages from "components/Messages"
 import { Attachment } from "models"
 import PropTypes from "prop-types"
@@ -9,7 +10,6 @@ import React, { useState } from "react"
 import { toast } from "react-toastify"
 import Settings from "settings"
 import "./Attachment.css"
-import axios from "axios"
 import AttachmentCard from "./AttachmentCard"
 import UploadedAttachments from "./UploadedAttachments"
 
@@ -47,26 +47,30 @@ const UploadAttachment = ({ getRelatedObject, edit, saveAttachment }) => {
       fileName: file.name,
       mimeType: file.type,
       attachmentRelatedObjects: [
-        { relatedObjectType: relatedObject.type, relatedObjectUuid: relatedObject.uuid }
+        {
+          relatedObjectType: relatedObject.type,
+          relatedObjectUuid: relatedObject.uuid
+        }
       ],
       classification:
         Settings.fields.attachment.classification.choices.UNDEFINED.value
     })
 
-    save(selectedAttachment, relatedObject.uuid, false)
-      .then(response => {
-        selectedAttachment.uuid = response.createAttachment
-        selectedAttachment.contentLength = file.size
-        try {
-          const formData = new FormData()
-          formData.append("file", file)
-          axios
-            .post(`/api/attachment/uploadAttachmentContent/${selectedAttachment.uuid}`, formData)
-          handleUploadFile(selectedAttachment)
-        } catch (error) {
-          toast.error("Attachment upload failed.")
-        }
-      })
+    save(selectedAttachment, relatedObject.uuid, false).then(response => {
+      selectedAttachment.uuid = response.createAttachment
+      selectedAttachment.contentLength = file.size
+      try {
+        const formData = new FormData()
+        formData.append("file", file)
+        axios.post(
+          `/api/attachment/uploadAttachmentContent/${selectedAttachment.uuid}`,
+          formData
+        )
+        handleUploadFile(selectedAttachment)
+      } catch (error) {
+        toast.error("Attachment upload failed.")
+      }
+    })
   }
 
   const handleFileEvent = e => {
