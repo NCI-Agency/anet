@@ -26,7 +26,7 @@ import ReportCollection from "components/ReportCollection"
 import RichTextEditor from "components/RichTextEditor"
 import SubNav from "components/SubNav"
 import { Field, Form, Formik } from "formik"
-import { Location, Organization, Report } from "models"
+import { Location, Organization, Report, Position } from "models"
 import { orgTour } from "pages/HopscotchTour"
 import pluralize from "pluralize"
 import React, { useContext, useState } from "react"
@@ -363,6 +363,29 @@ const OrganizationShow = ({ pageDispatchers }) => {
                   component={FieldHelper.ReadonlyField}
                   humanValue={Organization.humanNameOfType}
                 />
+
+                {organization.positions &&
+                  organization.positions.some(pos => pos.role === Position.ROLE.LEADER) && (
+                    <Field
+                      name="leaders"
+                      component={FieldHelper.ReadonlyField}
+                      label="Leaders"
+                      humanValue={
+                        <ListGroup>
+                          {organization.positions.map(pos => (pos.role === Position.ROLE.LEADER) && (
+                            <ListGroupItem key={pos.uuid}>
+                              <LinkTo
+                                modelType="Position"
+                                model={pos}
+                              >
+                                {pos.name}
+                              </LinkTo>
+                            </ListGroupItem>
+                          ))}
+                        </ListGroup>
+                      }
+                    />
+                )}
 
                 <LongNameWithLabel
                   dictProps={orgSettings.longName}
