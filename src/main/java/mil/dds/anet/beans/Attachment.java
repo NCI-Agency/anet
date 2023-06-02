@@ -19,7 +19,6 @@ public class Attachment extends AbstractAnetBean {
 
   public static enum Classification {
     UNDEFINED, NATO_UNCLASSIFIED, NATO_UNCLASSIFIED_Releasable_to_EU
-
   }
 
   @GraphQLQuery

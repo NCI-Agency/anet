@@ -139,7 +139,7 @@ const AttachmentShow = ({ pageDispatchers }) => {
               />
               <Fieldset>
                 <div style={{ display: "flex" }}>
-                  <Col xs={12} sm={3} className="label-align">
+                  <Col id="attachmentImage" xs={12} sm={3} className="label-align">
                     <div className="img-hover-zoom">
                       <a
                         href={`/api/attachment/view/${attachment.uuid}`}
@@ -155,7 +155,7 @@ const AttachmentShow = ({ pageDispatchers }) => {
                       </a>
                     </div>
                   </Col>
-                  <Col xs={12} sm={3} lg={8}>
+                  <Col id="attachmentDetails" xs={12} sm={3} lg={8}>
                     <Field
                       name="fileName"
                       component={FieldHelper.ReadonlyField}

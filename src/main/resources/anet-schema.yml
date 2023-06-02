@@ -529,6 +529,11 @@ properties:
         additionalProperties: false
         required: [shortLabel, shortName, description, classification]
         properties:
+          disabled:
+            type: boolean
+            default: false
+            title: Whether users can upload attachments
+            description: Used for restricting uploading functionality for all users
           shortLabel:
             type: string
             title: The short label for this field
@@ -541,6 +546,10 @@ properties:
             description: Used in the UI where a attachment's description is shown.
           classification:
             "$ref": "#/$defs/customField"
+          mimeTypes:
+            type: array
+            uniqueItems: true
+            minItems: 1
 
       report:
         type: object

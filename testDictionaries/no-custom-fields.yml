@@ -273,6 +273,7 @@ fields:
       placeholder: Search for a position...
 
   attachment:
+    disabled: false
     shortLabel: Attachment
     shortName:
       label: Attachment Name
@@ -291,6 +292,12 @@ fields:
         NATO_UNCLASSIFIED_Releasable_to_EU:
           value: NATO_UNCLASSIFIED_Releasable_to_EU
           label: NATO UNCLASSIFIED Releasable to EU
+    mimeTypes:
+      - application/pdf
+      - image/jpeg
+      - image/jpg
+      - image/png
+      - text/plain
 
   report:
     attachments:

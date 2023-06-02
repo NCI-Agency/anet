@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -69,10 +70,14 @@ public class AttachmentResource {
       throw new WebApplicationException("Classification cannot be set", Status.FORBIDDEN);
     }
     final Person user = DaoUtils.getUserFromContext(context);
-    attachment.setAuthorUuid(DaoUtils.getUuid(user));
-    attachment = dao.insert(attachment);
-    AnetAuditLogger.log("Attachment {} created by {}", DaoUtils.getUuid(attachment), user);
-    return DaoUtils.getUuid(attachment);
+
+    if (hasUploadPermission(user, attachment.getMimeType())) {
+      attachment.setAuthorUuid(DaoUtils.getUuid(user));
+      attachment = dao.insert(attachment);
+      AnetAuditLogger.log("Attachment {} created by {}", DaoUtils.getUuid(attachment), user);
+      return DaoUtils.getUuid(attachment);
+    }
+    return null;
   }
 
   @POST
@@ -192,5 +197,26 @@ public class AttachmentResource {
     final ParameterList parameterList = new ParameterList();
     parameterList.set("filename", attachment.getFileName(), StandardCharsets.UTF_8.toString());
     return new ContentDisposition(disposition, parameterList).toString();
+  }
+
+  private boolean hasUploadPermission(final Person user, final String mimeType) {
+    final String keyPath = "fields.attachment";
+    final Map<String, Object> uploadPermission =
+        (Map<String, Object>) AnetObjectEngine.getConfiguration().getDictionaryEntry(keyPath);
+    final Boolean userPermission = (Boolean) uploadPermission.get("disabled");
+
+    if (userPermission && !AuthUtils.isAdmin(user)) {
+      throw new WebApplicationException("You don't have permission to upload attachment",
+          Response.Status.FORBIDDEN);
+    }
+
+    final List<String> allowedMimetypes = ((List<String>) uploadPermission.get("mimeType")).stream()
+        .map(String::toString).collect(Collectors.toList());
+    if (!allowedMimetypes.contains(mimeType)) {
+      throw new WebApplicationException("File extension is not allowed",
+          Response.Status.NOT_ACCEPTABLE);
+    }
+
+    return true;
   }
 }

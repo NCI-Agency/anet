@@ -6,6 +6,10 @@ import static org.assertj.core.api.Assertions.fail;
 import com.graphql_java_generator.exception.GraphQLRequestExecutionException;
 import com.graphql_java_generator.exception.GraphQLRequestPreparationException;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.test.client.Attachment;
 import mil.dds.anet.test.client.AttachmentInput;
@@ -42,16 +46,39 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     // Attach attachment to test report
     final AttachmentRelatedObjectInput testAroInput =
         createAttachmentRelatedObject(ReportDao.TABLE_NAME, testReport.getUuid());
-    // Fail attachment create with wrong classification
+
     final AttachmentInput failedAttachmentInput =
         AttachmentInput.builder().withFileName("testAttachment.jpg")
             .withDescription("a test attachment created by testCreateAttachment")
-            .withClassification(Classification.NATO_UNCLASSIFIED)
+            .withClassification(Classification.UNDEFINED)
             .withAttachmentRelatedObjects(Collections.singletonList(testAroInput)).build();
+
+    // Fail attachment create with a mimetype that is not allowed
     failAttachmentCreate(adminMutationExecutor, failedAttachmentInput);
-    // Succeed attachment create with right classification
+
+    final String keyPath = "fields.attachment";
+    final Map<String, Object> uploadPermission =
+        (Map<String, Object>) AnetObjectEngine.getConfiguration().getDictionaryEntry(keyPath);
+    final Boolean userPermission = (Boolean) uploadPermission.get("disabled");
+    final List<String> allowedMimetypes = ((List<String>) uploadPermission.get("mimeType")).stream()
+        .map(String::toString).collect(Collectors.toList());
+    final String mimeType = allowedMimetypes.get(0);
+    failedAttachmentInput.setMimeType(mimeType);
+
+    // Fail attachment create with wrong classification
+    failedAttachmentInput.setClassification(Classification.NATO_UNCLASSIFIED);
+    failAttachmentCreate(adminMutationExecutor, failedAttachmentInput);
+
+    if (userPermission) {
+      // Fail attachment create with any user other than admin
+      final MutationExecutor erinMutationExecutor =
+          getMutationExecutor(getRegularUser().getDomainUsername());
+      failAttachmentCreate(erinMutationExecutor, failedAttachmentInput);
+    }
+
+    // Succeed attachment create with right classification and mimetype
     final AttachmentInput testAttachmentInput =
-        AttachmentInput.builder().withFileName("testCreateAttachment.jpg")
+        AttachmentInput.builder().withFileName("testCreateAttachment.jpg").withMimeType(mimeType)
             .withDescription("a test attachment created by testCreateAttachment")
             .withClassification(Classification.UNDEFINED)
             .withAttachmentRelatedObjects(Collections.singletonList(testAroInput)).build();
@@ -83,10 +110,17 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     assertThat(testReport.getUuid()).isNotNull();
 
     // Attach attachment to test report
+    final String keyPath = "fields.attachment";
+    final Map<String, Object> uploadPermission =
+        (Map<String, Object>) AnetObjectEngine.getConfiguration().getDictionaryEntry(keyPath);
+    final List<String> allowedMimetypes = ((List<String>) uploadPermission.get("mimeType")).stream()
+        .map(String::toString).collect(Collectors.toList());
+    final String mimeType = allowedMimetypes.get(0);
+
     final AttachmentRelatedObjectInput testAroInput =
         createAttachmentRelatedObject(ReportDao.TABLE_NAME, testReport.getUuid());
     final AttachmentInput testAttachmentInput =
-        AttachmentInput.builder().withFileName("testDeleteAttachment.jpg")
+        AttachmentInput.builder().withFileName("testDeleteAttachment.jpg").withMimeType(mimeType)
             .withDescription("a test attachment created by testDeleteAttachment")
             .withClassification(Classification.UNDEFINED)
             .withAttachmentRelatedObjects(Collections.singletonList(testAroInput)).build();
@@ -129,10 +163,17 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     assertThat(testReport.getUuid()).isNotNull();
 
     // Attach attachment to test report
+    final String keyPath = "fields.attachment";
+    final Map<String, Object> uploadPermission =
+        (Map<String, Object>) AnetObjectEngine.getConfiguration().getDictionaryEntry(keyPath);
+    final List<String> allowedMimetypes = ((List<String>) uploadPermission.get("mimeType")).stream()
+        .map(String::toString).collect(Collectors.toList());
+    final String mimeType = allowedMimetypes.get(0);
+
     final AttachmentRelatedObjectInput testAroInput =
         createAttachmentRelatedObject(ReportDao.TABLE_NAME, testReport.getUuid());
     final AttachmentInput testAttachmentInput =
-        AttachmentInput.builder().withFileName("testUpdateAttachment.jpg")
+        AttachmentInput.builder().withFileName("testUpdateAttachment.jpg").withMimeType(mimeType)
             .withDescription("a test attachment created by testUpdateAttachment")
             .withClassification(Classification.UNDEFINED)
             .withAttachmentRelatedObjects(Collections.singletonList(testAroInput)).build();
