@@ -56,6 +56,7 @@ const GQL_GET_REPORT_LIST = gql`
       list {
         uuid
         state
+        cancelledReason
         advisorOrg {
           ascendantOrgs(query: { pageNum: 0, pageSize: 0 }) {
             uuid
@@ -361,7 +362,7 @@ const RollupShow = ({ pageDispatchers, searchQuery, setSearchQuery }) => {
       renderer: renderReportMap
     }
   ]
-  const INITIAL_LAYOUT = VISUALIZATIONS[0].id
+  const INITIAL_LAYOUT = [VISUALIZATIONS[0].id, VISUALIZATIONS[1].id]
   const DESCRIPTION = "Number of reports released per organization."
   const flexStyle = {
     display: "flex",

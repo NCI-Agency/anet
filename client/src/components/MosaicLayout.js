@@ -25,6 +25,35 @@ import "./MosaicLayout.css"
 
 const MosaicLayout = ({ visualizations, initialNode, description, style }) => {
   const [currentNode, setCurrentNode] = useState(initialNode)
+  const viz = visualizations.filter(viz => currentNode.includes(viz.id))
+
+  const WINDOW_TITLE = {}
+  viz.forEach((item, index) => {
+    WINDOW_TITLE[String.fromCharCode(97 + index)] = item
+  })
+  console.log(WINDOW_TITLE)
+
+  const renderMosaicTile = (id, path) => {
+    const tile = WINDOW_TITLE[id]
+    console.log(tile)
+    console.log(path)
+    if (tile) {
+      const { title } = tile
+      return (
+        <MosaicWindow key={id} title={title} path={path}>
+          {tile.renderer(id)}
+        </MosaicWindow>
+      )
+    }
+    return null
+  }
+
+  const renderMosaicTiles = (path) => {
+    return Object.keys(WINDOW_TITLE).map((id, index) => {
+      return renderMosaicTile(id, path)
+    })
+  }
+
   return (
     <div className="mosaic-box" style={style}>
       <div className="mosaic-container">
@@ -33,14 +62,7 @@ const MosaicLayout = ({ visualizations, initialNode, description, style }) => {
           blueprintNamespace="bp4"
           value={currentNode}
           onChange={updateCurrentNode}
-          renderTile={(id, path) => {
-            const viz = visualizations.find(viz => viz.id === id)
-            return (
-              <MosaicWindow title={viz.title} path={path}>
-                {viz.renderer(id)}
-              </MosaicWindow>
-            )
-          }}
+          renderTile={(path) => renderMosaicTiles(path)}
         />
       </div>
     </div>
@@ -143,7 +165,7 @@ MosaicLayout.propTypes = {
       renderer: PropTypes.func.isRequired
     })
   ).isRequired,
-  initialNode: PropTypes.oneOfType([PropTypes.object, PropTypes.string]), // FIXME: actually MosaicNode
+  initialNode: PropTypes.oneOfType([PropTypes.array, PropTypes.object, PropTypes.string]), // FIXME: actually MosaicNode
   description: PropTypes.string,
   style: PropTypes.object
 }
