@@ -10,6 +10,7 @@ import * as d3 from "d3"
 import _xor from "lodash/xor"
 import ms from "milsymbol"
 import { Organization, Position } from "models"
+import { PositionRole } from "models/Position"
 import PropTypes from "prop-types"
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { connect } from "react-redux"
@@ -30,6 +31,7 @@ const GQL_GET_CHART_DATA = gql`
       positions {
         name
         uuid
+        role
         person {
           rank
           name
@@ -54,6 +56,7 @@ const GQL_GET_CHART_DATA = gql`
         positions {
           name
           uuid
+          role
           person {
             rank
             name
@@ -69,13 +72,32 @@ const transitionDuration = 200
 
 const ranks = Settings.fields.person.ranks.map(rank => rank.value)
 
-const sortPositions = (positions, truncateLimit) => {
-  const allResults = [...positions].sort((p1, p2) =>
-    ranks.indexOf(p1.person?.rank) > ranks.indexOf(p2.person?.rank) ? -1 : 1
-  )
+const leaderCountMap = {}
+
+const sortPositions = (uuid, positions, truncateLimit) => {
+  const allResults = [...positions]
+    .sort((p1, p2) => {
+      if (p1.role === p2.role) {
+        return ranks.indexOf(p1.person?.rank) > ranks.indexOf(p2.person?.rank)
+          ? -1
+          : 1
+      }
+      return Object.keys(PositionRole).indexOf(p1.role) >
+        Object.keys(PositionRole).indexOf(p2.role)
+        ? -1
+        : 1
+    })
+    .map(pos => ({ ...pos, orgUuid: uuid }))
   return truncateLimit !== undefined && truncateLimit < allResults.length
     ? allResults.slice(0, truncateLimit)
     : allResults
+}
+
+const updateLeaderCount = (uuid, positions) => {
+  const count = positions.filter(
+    pos => pos.role === PositionRole.LEADER.toString()
+  ).length
+  leaderCountMap[uuid] = count > 0 ? count : 1
 }
 
 // TODO: enable once innerhtml in svg is polyfilled
@@ -128,7 +150,7 @@ const OrganizationalChart = ({
     if (!data || !root) {
       return
     }
-    const nodeSize = [200, 100 + 11 * personnelDepth]
+    const nodeSize = [200, 100 + 22 * personnelDepth]
 
     const calculateBounds = rootArg => {
       const boundingBox = rootArg.descendants().reduce(
@@ -254,7 +276,7 @@ const OrganizationalChart = ({
       .append("g")
       .on("click", (event, d) => navigate(Organization.pathFor(d.data)))
       .each(function(d) {
-        const positions = sortPositions(d.data.positions)
+        const positions = sortPositions(d.data.uuid, d.data.positions)
         const unitcode = Settings.fields.person.ranks.find(
           element => element.value === positions?.[0]?.person?.rank
         )?.app6Modifier
@@ -294,8 +316,18 @@ const OrganizationalChart = ({
           : d.data.longName
       )
 
+    // Highlight all leaders
     const headG = nodeSelect.selectAll("g.head").data(
-      d => sortPositions(d.data.positions, Math.min(1, personnelDepth)) || [],
+      d => {
+        updateLeaderCount(d.data.uuid, d.data.positions)
+        return (
+          sortPositions(
+            d.data.uuid,
+            d.data.positions,
+            Math.min(leaderCountMap[d.data.uuid], personnelDepth)
+          ) || []
+        )
+      },
       d => d.uuid
     )
 
@@ -303,7 +335,7 @@ const OrganizationalChart = ({
       .enter()
       .append("g")
       .attr("class", "head")
-      .attr("transform", "translate(-63, 65)")
+      .attr("transform", (d, i) => `translate(-63, ${65 + i * 26})`)
       .on("click", (event, d) => navigate(Position.pathFor(d)))
 
     headG.exit().remove()
@@ -345,7 +377,10 @@ const OrganizationalChart = ({
       )
 
     const positionsG = nodeSelect.selectAll("g.position").data(
-      d => sortPositions(d.data.positions, personnelDepth).slice(1),
+      d =>
+        sortPositions(d.data.uuid, d.data.positions, personnelDepth).slice(
+          leaderCountMap[d.data.uuid]
+        ),
       d => d.uuid
     )
 
@@ -355,7 +390,11 @@ const OrganizationalChart = ({
       .enter()
       .append("g")
       .attr("class", "position")
-      .attr("transform", (d, i) => `translate(-63,${87 + i * 11})`)
+      .attr(
+        "transform",
+        (d, i) =>
+          `translate(-63,${87 + (leaderCountMap[d.orgUuid] - 1) * 26 + i * 11})`
+      )
       .on("click", (event, d) => navigate(Position.pathFor(d)))
 
     positionsGA
