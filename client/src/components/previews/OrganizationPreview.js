@@ -3,7 +3,8 @@ import API from "api"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import Model from "components/Model"
-import { Organization, Position } from "models"
+import { Organization } from "models"
+import { PositionRole } from "models/Position"
 import OrganizationLaydown from "pages/organizations/Laydown"
 import OrganizationTasks from "pages/organizations/OrganizationTasks"
 import PropTypes from "prop-types"
@@ -110,6 +111,31 @@ const OrganizationPreview = ({ className, uuid }) => {
     data.organization ? data.organization : {}
   )
 
+  function showLeadingPositions(positions, role, label) {
+    return (
+      positions &&
+      positions.some(pos => pos.role === role) && (
+        <PreviewField
+          label={label}
+          value={
+            <ListGroup>
+              {positions.map(
+                pos =>
+                  pos.role === role && (
+                    <ListGroupItem key={pos.uuid}>
+                      <LinkTo modelType="Position" model={pos}>
+                        {pos.name}
+                      </LinkTo>
+                    </ListGroupItem>
+                  )
+              )}
+            </ListGroup>
+          }
+        />
+      )
+    )
+  }
+
   const isPrincipalOrg = organization.type === Organization.TYPE.PRINCIPAL_ORG
   const orgSettings = isPrincipalOrg
     ? Settings.fields.principal.org
@@ -131,25 +157,16 @@ const OrganizationPreview = ({ className, uuid }) => {
           value={Organization.humanNameOfType(organization.type)}
         />
 
-        {organization.positions &&
-          organization.positions.some(pos => pos.role === Position.ROLE.LEADER) && (
-            <PreviewField
-              label="Leaders"
-              value={
-                <ListGroup>
-                  {organization.positions.map(pos => (pos.role === Position.ROLE.LEADER) && (
-                    <ListGroupItem key={pos.uuid}>
-                      <LinkTo
-                        modelType="Position"
-                        model={pos}
-                      >
-                        {pos.name}
-                      </LinkTo>
-                    </ListGroupItem>
-                  ))}
-                </ListGroup>
-              }
-            />
+        {showLeadingPositions(
+          organization.positions,
+          PositionRole.LEADER.toString(),
+          "Leaders"
+        )}
+
+        {showLeadingPositions(
+          organization.positions,
+          PositionRole.DEPUTY.toString(),
+          "Deputies"
         )}
 
         <PreviewField
