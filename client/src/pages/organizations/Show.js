@@ -26,7 +26,8 @@ import ReportCollection from "components/ReportCollection"
 import RichTextEditor from "components/RichTextEditor"
 import SubNav from "components/SubNav"
 import { Field, Form, Formik } from "formik"
-import { Location, Organization, Report, Position } from "models"
+import { Location, Organization, Report } from "models"
+import { PositionRole } from "models/Position"
 import { orgTour } from "pages/HopscotchTour"
 import pluralize from "pluralize"
 import React, { useContext, useState } from "react"
@@ -261,6 +262,33 @@ const OrganizationShow = ({ pageDispatchers }) => {
     reportQueryParams.orgRecurseStrategy = RECURSE_STRATEGY.CHILDREN
   }
 
+  function showLeadingPositions(positions, role, label) {
+    return (
+      positions &&
+      positions.some(pos => pos.role === role) && (
+        <Field
+          name={label}
+          component={FieldHelper.ReadonlyField}
+          label={label}
+          humanValue={
+            <ListGroup>
+              {positions.map(
+                pos =>
+                  pos.role === role && (
+                    <ListGroupItem key={pos.uuid}>
+                      <LinkTo modelType="Position" model={pos}>
+                        {pos.name}
+                      </LinkTo>
+                    </ListGroupItem>
+                  )
+              )}
+            </ListGroup>
+          }
+        />
+      )
+    )
+  }
+
   return (
     <Formik enableReinitialize initialValues={organization}>
       {({ values }) => {
@@ -364,27 +392,16 @@ const OrganizationShow = ({ pageDispatchers }) => {
                   humanValue={Organization.humanNameOfType}
                 />
 
-                {organization.positions &&
-                  organization.positions.some(pos => pos.role === Position.ROLE.LEADER) && (
-                    <Field
-                      name="leaders"
-                      component={FieldHelper.ReadonlyField}
-                      label="Leaders"
-                      humanValue={
-                        <ListGroup>
-                          {organization.positions.map(pos => (pos.role === Position.ROLE.LEADER) && (
-                            <ListGroupItem key={pos.uuid}>
-                              <LinkTo
-                                modelType="Position"
-                                model={pos}
-                              >
-                                {pos.name}
-                              </LinkTo>
-                            </ListGroupItem>
-                          ))}
-                        </ListGroup>
-                      }
-                    />
+                {showLeadingPositions(
+                  organization.positions,
+                  PositionRole.LEADER.toString(),
+                  "Leaders"
+                )}
+
+                {showLeadingPositions(
+                  organization.positions,
+                  PositionRole.DEPUTY.toString(),
+                  "Deputies"
                 )}
 
                 <LongNameWithLabel
