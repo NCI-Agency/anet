@@ -717,9 +717,9 @@ fields:
     role:
       label: Position Role
       choices:
-        member: Member of Organization
-        deputy: Deputy of Organization
-        leader: Leader of Organization
+        member: Member
+        deputy: Deputy
+        leader: Leader
 
     customFields:
       multipleButtons:

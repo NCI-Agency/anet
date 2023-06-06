@@ -24,6 +24,7 @@ import { FastField, Field, Form, Formik } from "formik"
 import DictionaryField from "HOC/DictionaryField"
 import _isEmpty from "lodash/isEmpty"
 import { Location, Organization, Position } from "models"
+import { PositionRole } from "models/Position"
 import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
 import { Button, Form as FormBS } from "react-bootstrap"
@@ -112,20 +113,20 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
   const nonAdminRolesButtons = [
     {
       id: "roleMemberButton",
-      value: Position.ROLE.MEMBER,
-      label: Settings.fields.position.role.choices.member
+      value: PositionRole.MEMBER.toString(),
+      label: PositionRole.MEMBER.humanNameOfRole()
     }
   ]
   const adminRolesButtons = nonAdminRolesButtons.concat([
     {
       id: "roleDeputyButton",
-      value: Position.ROLE.DEPUTY,
-      label: Settings.fields.position.role.choices.deputy
+      value: PositionRole.DEPUTY.toString(),
+      label: PositionRole.DEPUTY.humanNameOfRole()
     },
     {
       id: "roleLeaderButton",
-      value: Position.ROLE.LEADER,
-      label: Settings.fields.position.role.choices.leader
+      value: PositionRole.LEADER.toString(),
+      label: PositionRole.LEADER.humanNameOfRole()
     }
   ])
 
@@ -173,7 +174,7 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
           currentUser.position.organizationsAdministrated.map(org => org.uuid)
         const isSuperuser =
           currentUser && currentUser.isSuperuser() && !currentUser.isAdmin()
-        // Only admin and superuser can assing high role (other than member role) to a position
+        // Only admin and superuser can assign high role (other than member role) to a position
         const positionRoleButtons =
           isAdmin || isSuperuser ? adminRolesButtons : nonAdminRolesButtons
         const isSuperuserWithoutAdministratingOrgs =

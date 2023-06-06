@@ -14,9 +14,27 @@ export const principalPosition = Settings.fields.principal.position
 export const administratorPosition = Settings.fields.administrator.position
 export const superuserPosition = Settings.fields.superuser.position
 
-export const memberPositionRole = Settings.fields.position.role.choices.member
-export const deputyPositionRole = Settings.fields.position.role.choices.deputy
-export const leaderPositionRole = Settings.fields.position.role.choices.leader
+export class PositionRole {
+  // Static enumerations
+  static MEMBER = new PositionRole("MEMBER", "member")
+  static DEPUTY = new PositionRole("DEPUTY", "deputy")
+  static LEADER = new PositionRole("LEADER", "leader")
+  #value
+  #humanReadable
+
+  constructor(value, dictionaryKey) {
+    this.#value = value
+    this.#humanReadable = Settings.fields.position.role.choices[dictionaryKey]
+  }
+
+  toString() {
+    return this.#value
+  }
+
+  humanNameOfRole() {
+    return this.#humanReadable
+  }
+}
 
 export default class Position extends Model {
   static resourceName = "Position"
@@ -29,12 +47,6 @@ export default class Position extends Model {
     PRINCIPAL: "PRINCIPAL",
     SUPERUSER: "SUPERUSER",
     ADMINISTRATOR: "ADMINISTRATOR"
-  }
-
-  static ROLE = {
-    MEMBER: "MEMBER",
-    DEPUTY: "DEPUTY",
-    LEADER: "LEADER"
   }
 
   // create yup schema for the customFields, based on the customFields config
@@ -62,7 +74,7 @@ export default class Position extends Model {
       role: yup
         .string()
         .required()
-        .default(() => Position.ROLE.MEMBER),
+        .default(() => PositionRole.MEMBER.toString()),
       associatedPositions: yup.array().nullable().default([]),
       previousPeople: yup.array().nullable().default([]),
       organization: yup
@@ -195,13 +207,7 @@ export default class Position extends Model {
   }
 
   static humanNameOfRole(role) {
-    if (role === Position.ROLE.MEMBER) {
-      return memberPositionRole
-    } else if (role === Position.ROLE.DEPUTY) {
-      return deputyPositionRole
-    } else if (role === Position.ROLE.LEADER) {
-      return leaderPositionRole
-    }
+    return PositionRole[role]?.humanNameOfRole()
   }
 
   constructor(props) {
@@ -246,19 +252,6 @@ export default class Position extends Model {
         return Settings.fields.superuser.position.type
       case "ADMINISTRATOR":
         return Settings.fields.administrator.position.type
-      default:
-        return "Default Case"
-    }
-  }
-
-  static convertRole(role) {
-    switch (role) {
-      case "MEMBER":
-        return Settings.fields.member.position.type
-      case "DEPUTY":
-        return Settings.fields.deputy.position.type
-      case "LEADER":
-        return Settings.fields.leader.position.type
       default:
         return "Default Case"
     }
