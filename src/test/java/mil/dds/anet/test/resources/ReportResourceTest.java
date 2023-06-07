@@ -2198,4 +2198,68 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(nrDeleted).isEqualTo(1);
   }
 
+  @Test
+  void testAdminFindsAllDrafts()
+      throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
+    final ReportSearchQueryInput draftsQuery = ReportSearchQueryInput.builder()
+        .withState(List.of(ReportState.DRAFT)).withPageSize(0).build();
+
+    // Normal users should find only their own drafts
+    final QueryExecutor erinQueryExecutor = getQueryExecutor("erin");
+    AnetBeanList_Report erinsDraftReports =
+        erinQueryExecutor.reportList(getListFields(FIELDS), draftsQuery);
+    assertThat(erinsDraftReports.getTotalCount()).isOne();
+    final Report erinsDraftReport = erinsDraftReports.getList().get(0);
+
+    // Erin's superuser should not be able to find it
+    final QueryExecutor rebeccaMutationExecutor = getQueryExecutor("rebecca");
+    AnetBeanList_Report rebeccaDraftReports =
+        rebeccaMutationExecutor.reportList(getListFields(FIELDS), draftsQuery);
+    assertThat(rebeccaDraftReports.getTotalCount()).isZero();
+
+    // Admin should find all drafts
+    AnetBeanList_Report allDraftReports =
+        adminQueryExecutor.reportList(getListFields(FIELDS), draftsQuery);
+    assertThat(allDraftReports.getTotalCount()).isGreaterThan(1);
+    // List should include Erin's draft
+    assertThat(allDraftReports.getList())
+        .anyMatch(report -> report.getUuid().equals(erinsDraftReport.getUuid()));
+    // List should include other draft
+    assertThat(allDraftReports.getList())
+        .anyMatch(report -> !report.getUuid().equals(erinsDraftReport.getUuid()));
+  }
+
+  void testAdminCanSubmit()
+      throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
+    // Erin's Draft report, ready for submission
+    final String uuid = "530b735e-1134-4daa-9e87-4491c888a4f7";
+    final Report report = adminQueryExecutor.report(FIELDS, uuid);
+    assertThat(report.getState()).isEqualTo(ReportState.DRAFT);
+
+    // Erin's superuser should not be able to submit it
+    final MutationExecutor rebeccaMutationExecutor = getMutationExecutor("rebecca");
+    try {
+      rebeccaMutationExecutor.submitReport("", uuid);
+      fail("Expected ForbiddenException");
+    } catch (ForbiddenException expectedException) {
+    }
+
+    // Admin should be able to submit it
+    try {
+      adminMutationExecutor.submitReport("", uuid);
+    } catch (ForbiddenException expectedException) {
+      fail("Unexpected ForbiddenException");
+    }
+    final Report submittedReport = adminQueryExecutor.report(FIELDS, uuid);
+    assertThat(submittedReport.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
+
+    // Erin should be able to edit it again
+    final MutationExecutor erinMutationExecutor = getMutationExecutor("erin");
+    final Report updatedReport =
+        erinMutationExecutor.updateReport(FIELDS, getReportInput(report), false);
+
+    // It should be back to Draft
+    assertThat(updatedReport.getState()).isEqualTo(ReportState.DRAFT);
+  }
+
 }

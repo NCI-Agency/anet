@@ -63,8 +63,9 @@ describe("When creating a Report with conflicts", () => {
     await CreateReport.submitForm()
     await ShowReport.waitForShowReportToLoad()
 
-    const text = "This is a DRAFT planned engagement and hasn't been submitted."
-    expect(await ShowReport.getReportStatusText()).to.equal(text)
+    expect(await ShowReport.getReportStatusText()).to.equal(
+      ShowReport.REPORT_IS_PLANNED_DRAFT
+    )
     expect(await ShowReport.getIntent()).to.equal(report01.intent)
 
     firstReportUUID = await ShowReport.getUuid()
@@ -112,8 +113,9 @@ describe("When creating a Report with conflicts", () => {
     await CreateReport.submitForm()
     await ShowReport.waitForShowReportToLoad()
 
-    const text = "This is a DRAFT planned engagement and hasn't been submitted."
-    expect(await ShowReport.getReportStatusText()).to.equal(text)
+    expect(await ShowReport.getReportStatusText()).to.equal(
+      ShowReport.REPORT_IS_PLANNED_DRAFT
+    )
     expect(await ShowReport.getIntent()).to.equal(report02.intent)
 
     secondReportUUID = await ShowReport.getUuid()
@@ -125,11 +127,9 @@ describe("When creating a Report with conflicts", () => {
     await ShowReport.waitForShowReportToLoad()
 
     expect((await ShowReport.getUuid()).length).to.equal(36)
-
-    const statusText =
-      "This is a DRAFT planned engagement and hasn't been submitted."
-    expect(await ShowReport.getReportStatusText()).to.equal(statusText)
-
+    expect(await ShowReport.getReportStatusText()).to.equal(
+      ShowReport.REPORT_IS_PLANNED_DRAFT
+    )
     expect(await ShowReport.getIntent()).to.equal(report01.intent)
     expect(await ShowReport.getEngagementDate()).to.equal(
       report01.engagementDate.format("dddd, D MMMM YYYY @ HH:mm")
@@ -170,11 +170,9 @@ describe("When creating a Report with conflicts", () => {
     await ShowReport.waitForShowReportToLoad()
 
     expect((await ShowReport.getUuid()).length).to.equal(36)
-
-    const statusText =
-      "This is a DRAFT planned engagement and hasn't been submitted."
-    expect(await ShowReport.getReportStatusText()).to.equal(statusText)
-
+    expect(await ShowReport.getReportStatusText()).to.equal(
+      ShowReport.REPORT_IS_PLANNED_DRAFT
+    )
     expect(await ShowReport.getIntent()).to.equal(report02.intent)
     expect(await ShowReport.getEngagementDate()).to.equal(
       report02.engagementDate.format("dddd, D MMMM YYYY @ HH:mm")

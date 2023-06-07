@@ -3,6 +3,13 @@ import Page from "../page"
 const PAGE_URL = "/reports/:uuid"
 
 class ShowReport extends Page {
+  REPORT_IS_DRAFT = "This is a DRAFT report and hasn't been submitted."
+  REPORT_IS_PLANNED_DRAFT =
+    "This is a DRAFT planned engagement and hasn't been submitted."
+
+  REPORT_IS_PENDING_APPROVALS = "This report is PENDING approvals."
+  REPORT_IS_APPROVED = "This report is APPROVED."
+
   async getEditReportButton() {
     return browser.$("//a[text()='Edit']")
   }
@@ -113,6 +120,10 @@ class ShowReport extends Page {
     return browser.$('//button[text()="Submit report"]')
   }
 
+  async getPreviewAndSubmitButton() {
+    return browser.$("#formBottomSubmit")
+  }
+
   async getReportModal() {
     return browser.$(".modal-dialog")
   }
@@ -160,6 +171,14 @@ class ShowReport extends Page {
 
   async open(uuid) {
     await super.open(PAGE_URL.replace(":uuid", uuid))
+  }
+
+  async openAsSuperuser(uuid) {
+    await super.openAsSuperuser(PAGE_URL.replace(":uuid", uuid))
+  }
+
+  async openAsAdminUser(uuid) {
+    await super.openAsAdminUser(PAGE_URL.replace(":uuid", uuid))
   }
 
   async waitForShowReportToLoad() {

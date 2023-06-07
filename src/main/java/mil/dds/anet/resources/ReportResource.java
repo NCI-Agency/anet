@@ -362,11 +362,9 @@ public class ReportResource {
         r, r.getAdvisorOrg(), r.getPrimaryAdvisor());
 
     final boolean isAuthor = r.isAuthor(user);
-    if (!isAuthor && !AuthUtils.canAdministrateOrg(user, r.getAdvisorOrgUuid(), true)
-        && !AuthUtils.isAdmin(user)) {
+    if (!isAuthor && !AuthUtils.isAdmin(user)) {
       throw new WebApplicationException(
-          "Cannot submit report unless you are a report's author, his/her superuser or an admin",
-          Status.FORBIDDEN);
+          "Cannot submit report unless you are a report's author, or an admin", Status.FORBIDDEN);
     }
 
     if (r.getState() != ReportState.DRAFT && r.getState() != ReportState.REJECTED) {

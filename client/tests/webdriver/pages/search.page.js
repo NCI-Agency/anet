@@ -9,6 +9,10 @@ class Search extends Page {
     return browser.$("div#tasks #tasks-search-results")
   }
 
+  async getFoundReportTable() {
+    return browser.$("div#reports .report-collection")
+  }
+
   async linkOfPersonFound(name) {
     return (await this.getFoundPeopleTable()).$(
       `//tbody/tr//a[contains(text(), "${name}")]`
@@ -21,14 +25,24 @@ class Search extends Page {
     )
   }
 
-  async selectReport(linkText) {
-    const tableTab = await browser.$(
-      ".report-collection div header div button[value='table']"
-    )
+  async getReportTableButton() {
+    return browser.$(".report-collection div header div button[value='table']")
+  }
+
+  async linkOfReportFound(linkText) {
+    return browser.$(`*=${linkText}`)
+  }
+
+  async selectReportTable() {
+    const tableTab = await this.getReportTableButton()
     await tableTab.waitForExist()
     await tableTab.waitForDisplayed()
     await tableTab.click()
-    const reportLink = await browser.$(`*=${linkText}`)
+  }
+
+  async selectReport(linkText) {
+    await this.selectReportTable()
+    const reportLink = await this.linkOfReportFound(linkText)
     await reportLink.waitForExist()
     await reportLink.waitForDisplayed()
     await reportLink.click()
