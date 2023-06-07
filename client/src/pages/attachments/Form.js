@@ -95,7 +95,7 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
                 <div style={{ display: "flex" }}>
                   <Col xs={12} sm={3} className="label-align">
                     <div
-                      className="imagePreview info-show card-image attachmentImage h-100"
+                      className="image-preview info-show card-image attachment-image h-100"
                       style={{
                         backgroundSize,
                         backgroundImage: `url(${backgroundImage})`

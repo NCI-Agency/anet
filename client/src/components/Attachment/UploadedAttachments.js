@@ -29,7 +29,7 @@ const UploadedAttachments = ({ uuid }) => {
 }
 
 UploadedAttachments.propTypes = {
-  uuid: PropTypes.string
+  uuid: PropTypes.string.isRequired
 }
 
 export default UploadedAttachments

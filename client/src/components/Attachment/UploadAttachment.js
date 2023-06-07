@@ -25,7 +25,7 @@ const GQL_UPDATE_ATTACHMENT = gql`
   }
 `
 
-const UploadAttachment = ({ getRelatedObject, edit, saveAttachment }) => {
+const UploadAttachment = ({ getRelatedObject, edit, saveRelatedObject }) => {
   const [error, setError] = useState(null)
   const [remove, setRemove] = useState(false)
   const [uploadedList, setUploadedList] = useState([])
@@ -33,19 +33,15 @@ const UploadAttachment = ({ getRelatedObject, edit, saveAttachment }) => {
 
   const handleUploadFile = file => {
     setUploadedList(current => [...current, file])
-    toast.success("Your document has been uploaded")
+    toast.success("Your attachment has been uploaded")
   }
 
-  const AttachmentSave = async e => {
+  const attachmentSave = async e => {
     const file = e.target.files[0]
-    const base64 = await convertBase64(file)
-    const base64Marker = ";base64,"
-    const base64Index = base64.indexOf(base64Marker) + base64Marker.length
-
     const selectedAttachment = new Attachment({
-      content: base64.substring(base64Index),
       fileName: file.name,
       mimeType: file.type,
+      contentLength: file.size,
       attachmentRelatedObjects: [
         {
           relatedObjectType: relatedObject.type,
@@ -56,69 +52,50 @@ const UploadAttachment = ({ getRelatedObject, edit, saveAttachment }) => {
         Settings.fields.attachment.classification.choices.UNDEFINED.value
     })
 
-    save(selectedAttachment, relatedObject.uuid, false).then(response => {
-      selectedAttachment.uuid = response.createAttachment
-      selectedAttachment.contentLength = file.size
-      try {
-        const formData = new FormData()
-        formData.append("file", file)
-        axios.post(
-          `/api/attachment/uploadAttachmentContent/${selectedAttachment.uuid}`,
-          formData
-        )
-        handleUploadFile(selectedAttachment)
-      } catch (error) {
-        toast.error("Attachment upload failed.")
-      }
-    })
+    return save(selectedAttachment, relatedObject.uuid, false)
+      .then(response => {
+        selectedAttachment.uuid = response.createAttachment
+        return axios
+          .postForm(
+            `/api/attachment/uploadAttachmentContent/${selectedAttachment.uuid}`,
+            { file }
+          )
+          .then(() => handleUploadFile(selectedAttachment))
+          .catch(() => toast.error("Attachment content upload failed"))
+      })
+      .catch(error => toast.error(`Attachment upload failed: ${error.message}`))
   }
 
-  const handleFileEvent = e => {
+  const handleFileEvent = async e => {
     // Control related object has an uuid or not
     if (!relatedObject.uuid) {
-      saveAttachment().then(response => {
+      saveRelatedObject().then(async response => {
         relatedObject.uuid = response
-        AttachmentSave(e)
+        await attachmentSave(e)
       })
     } else {
-      AttachmentSave(e)
+      await attachmentSave(e)
     }
-  }
-
-  // Convert file to base64 string
-  const convertBase64 = file => {
-    return new Promise((resolve, reject) => {
-      const fileReader = new FileReader()
-      fileReader.readAsDataURL(file)
-
-      fileReader.onload = () => {
-        resolve(fileReader.result)
-      }
-
-      fileReader.onerror = error => {
-        reject(error)
-      }
-    })
   }
 
   return (
     <div>
       <Messages error={error} />
       {/** **** Select and drop file in here **** **/}
-      <section className="FileUploadContainer">
+      <section className="file-upload-container">
         <div>
-          <p className="DragDropText">
-            <Icon className="uploadIcon" size={30} icon={IconNames.EXPORT} />
+          <p className="drag-drop-text">
+            <Icon className="icon" size={30} icon={IconNames.EXPORT} />
             <span style={{ marginTop: "5px" }}>
               <b>Choose a file</b> or Drag it here
             </span>
           </p>
         </div>
         <input
-          className="FormField"
+          className="form-field"
           id="fileUpload"
           type="file"
-          accept="image/*, .pdf"
+          accept={Settings.fields.attachment.mimeTypes}
           onChange={handleFileEvent}
         />
       </section>
@@ -144,10 +121,7 @@ const UploadAttachment = ({ getRelatedObject, edit, saveAttachment }) => {
   )
 
   function save(values, relatedObjectUuid, edit) {
-    const attachment = Attachment.filterClientSideFields(
-      values,
-      edit && "content"
-    )
+    const attachment = Attachment.filterClientSideFields(values)
     const operation = edit ? GQL_UPDATE_ATTACHMENT : GQL_CREATE_ATTACHMENT
     return API.mutation(operation, { attachment })
   }
@@ -155,8 +129,8 @@ const UploadAttachment = ({ getRelatedObject, edit, saveAttachment }) => {
 
 UploadAttachment.propTypes = {
   edit: PropTypes.bool,
-  getRelatedObject: PropTypes.func,
-  saveAttachment: PropTypes.func
+  getRelatedObject: PropTypes.func.isRequired,
+  saveRelatedObject: PropTypes.func.isRequired
 }
 
 export default UploadAttachment

@@ -37,7 +37,9 @@ class ShowAttachment extends Page {
   }
 
   async getEditDescription() {
-    return browser.$(".description > div:last-child > div > p > span > span > span")
+    return browser.$(
+      ".description > div:last-child > div > p > span > span > span"
+    )
   }
 
   async getMimetype() {

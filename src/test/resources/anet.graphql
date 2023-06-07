@@ -202,7 +202,7 @@ input AttachmentInput {
   attachmentRelatedObjects: [AttachmentRelatedObjectInput]
   author: PersonInput
   classification: Classification
-  content: Base64String
+  contentLength: Long
   createdAt: Instant
   description: String
   fileName: String

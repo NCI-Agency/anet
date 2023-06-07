@@ -174,7 +174,6 @@ const ReportForm = ({
   const [showSensitiveInfo, setShowSensitiveInfo] = useState(ssi)
   const [saveError, setSaveError] = useState(null)
   const [autoSavedAt, setAutoSavedAt] = useState(null)
-  const [isAttachment, setIsAttachment] = useState(false)
   // We need the report tasks/attendees in order to be able to dynamically
   // update the yup schema for the selected tasks/attendees instant assessments
   const [reportTasks, setReportTasks] = useState(initialValues.tasks)
@@ -307,10 +306,6 @@ const ReportForm = ({
             autoSaveSettings.current.autoSaveTimeout.asMilliseconds()
           )
         }
-        if (isAttachment) {
-          autoSaveSettings.current.dirty = true
-          autoSave({ setFieldValue, setFieldTouched, resetForm })
-        }
 
         if (!validateFieldDebounced) {
           validateFieldDebounced = _debounce(validateField, 400)
@@ -434,21 +429,14 @@ const ReportForm = ({
         const hasAssessments = values.engagementDate && !isFutureEngagement
         const relatedObject = hasAssessments ? values : {}
 
-        const getRelatedObject = val => {
-          const relatedObject = {
-            uuid: val.uuid,
-            type: Report.relatedObjectType
-          }
-          return relatedObject
-        }
+        const getRelatedObject = val => ({
+          uuid: val.uuid,
+          type: Report.relatedObjectType
+        })
 
         return (
           <div className="report-form">
-            <NavigationWarning
-              isBlocking={
-                (dirty && !isSubmitting) || (isAttachment && !isSubmitting)
-              }
-            />
+            <NavigationWarning isBlocking={dirty && !isSubmitting} />
             <Messages error={saveError} />
 
             {showAssignedPositionWarning && (
@@ -947,7 +935,7 @@ const ReportForm = ({
                   widget={
                     <UploadAttachment
                       edit={edit}
-                      saveAttachment={saveCallback}
+                      saveRelatedObject={saveCallback}
                       getRelatedObject={() => getRelatedObject(values)}
                     />
                   }
@@ -1237,9 +1225,9 @@ const ReportForm = ({
   }
 
   function saveCallback() {
-    return save(autoSaveSettings.current.values, false).then(response => {
-      return response.uuid
-    })
+    return save(autoSaveSettings.current.values, false)
+      .then(response => response.uuid)
+      .catch(error => toast.error(`Report autosaving failed: ${error.message}`))
   }
 
   function autoSave(form) {
@@ -1278,7 +1266,6 @@ const ReportForm = ({
           toast.success(
             `Your ${getReportType(newValues)} has been automatically saved`
           )
-          setIsAttachment(false)
           autoSaveSettings.current.dirty = false
           // And re-schedule the auto-save timer
           autoSaveSettings.current.timeoutId = window.setTimeout(
@@ -1465,7 +1452,6 @@ const ReportForm = ({
     const variables = { report }
     return _saveReport(edit, variables, sendEmail).then(response => {
       const report = response[operation]
-      values.uuid = report.uuid
       if (!canWriteAssessments) {
         // Skip updating assessments!
         return report

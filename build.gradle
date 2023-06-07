@@ -85,7 +85,8 @@ dependencies {
 	implementation "io.dropwizard:dropwizard-auth:${dropwizardVersion}"
 	implementation "io.dropwizard:dropwizard-views-freemarker:${dropwizardVersion}"
 	implementation 'io.dropwizard-bundles:dropwizard-configurable-assets-bundle:1.3.5'
-    implementation "io.dropwizard:dropwizard-forms:${dropwizardVersion}"
+	implementation "io.dropwizard:dropwizard-forms:${dropwizardVersion}"
+	implementation "org.jdbi:jdbi3-postgres:3.37.1"
 
 	implementation 'ru.vyarus.guicey:guicey-jdbi3:5.9.0'
 	implementation 'com.google.guava:guava:31.1-jre' // Pick the non-Android version of Guice

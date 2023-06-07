@@ -71,6 +71,7 @@ import mil.dds.anet.views.ViewResponseFilter;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.jdbi.v3.postgres.PostgresPlugin;
 import org.keycloak.KeycloakSecurityContext;
 import org.keycloak.representations.AccessToken;
 import org.slf4j.Logger;
@@ -286,10 +287,13 @@ public class AnetApplication extends Application<AnetConfiguration> {
     });
 
     // Add Dropwizard-Guicey
-    bootstrap.addBundle(GuiceBundle.builder()
-        .bundles(
-            JdbiBundle.<AnetConfiguration>forDatabase((conf, env) -> conf.getDataSourceFactory()))
-        .build());
+    bootstrap
+        .addBundle(GuiceBundle.builder()
+            .bundles(JdbiBundle
+                .<AnetConfiguration>forDatabase((conf, env) -> conf.getDataSourceFactory())
+                // For supporting PostgreSQL large objects
+                .withPlugins(new PostgresPlugin()))
+            .build());
 
     metricRegistry = bootstrap.getMetricRegistry();
   }

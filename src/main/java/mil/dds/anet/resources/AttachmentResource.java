@@ -1,17 +1,15 @@
 package mil.dds.anet.resources;
 
 import com.codahale.metrics.annotation.Timed;
+import io.dropwizard.auth.Auth;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import jakarta.mail.internet.ContentDisposition;
 import jakarta.mail.internet.ParameterList;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -84,37 +82,10 @@ public class AttachmentResource {
   @Timed
   @Path("/uploadAttachmentContent/{uuid}")
   @Consumes(MediaType.MULTIPART_FORM_DATA)
-  public Response uploadAttachmentContent(@FormDataParam("file") InputStream attachmentContent,
-      @PathParam("uuid") String uuid) {
-    final byte[] content = saveContent(uuid, attachmentContent);
-    if (content == null) {
-      return Response.serverError().build();
-    } else
-      return Response.ok().build();
-  }
-
-  // save created attachment's content to database
-  private byte[] saveContent(String uuid, InputStream uploadedInputStream) {
-    byte[] byteArray;
-    try {
-
-      ByteArrayOutputStream baOStream = new ByteArrayOutputStream();
-      int read = 0;
-      byte[] bytes = new byte[1024];
-      while ((read = uploadedInputStream.read(bytes)) != -1) {
-        baOStream.write(bytes, 0, read);
-      }
-      byteArray = baOStream.toByteArray();
-      baOStream.close();
-
-      dao.saveContentBlob(uuid, byteArray);
-
-    } catch (IOException e) {
-      throw new RuntimeException("Could not transfer content of attachment " + uuid, e);
-    } catch (SQLException e) {
-      throw new RuntimeException("Could not save the content of attachment " + uuid, e);
-    }
-    return byteArray;
+  public Response uploadAttachmentContent(final @Auth Person user, @PathParam("uuid") String uuid,
+      @FormDataParam("file") InputStream attachmentContent) {
+    dao.saveContentBlob(uuid, attachmentContent);
+    return Response.ok().build();
   }
 
   @GraphQLMutation(name = "updateAttachment")
@@ -162,7 +133,7 @@ public class AttachmentResource {
   @Timed
   @Path("/download/{uuid}")
   @Produces(MediaType.APPLICATION_OCTET_STREAM)
-  public Response downloadAttachment(@PathParam("uuid") String uuid) {
+  public Response downloadAttachment(final @Auth Person user, @PathParam("uuid") String uuid) {
     final Attachment attachment = getAttachment(uuid);
     final ResponseBuilder response =
         Response.ok(streamContentBlob(uuid)).type(MediaType.APPLICATION_OCTET_STREAM)
@@ -173,7 +144,7 @@ public class AttachmentResource {
   @GET
   @Timed
   @Path("/view/{uuid}")
-  public Response viewAttachment(@PathParam("uuid") String uuid) {
+  public Response viewAttachment(final @Auth Person user, @PathParam("uuid") String uuid) {
     final Attachment attachment = getAttachment(uuid);
     final ResponseBuilder response =
         Response.ok(streamContentBlob(uuid)).type(attachment.getMimeType())

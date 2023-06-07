@@ -681,9 +681,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                       id="attachmentCardList"
                       style={{
                         display:
-                          report.attachments.length > 1
-                            ? "-webkit-box"
-                            : "block"
+                          report.attachments.length > 1 ? "flex" : "block"
                       }}
                     >
                       {report.attachments.map((attachment, index) => (

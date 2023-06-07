@@ -35,7 +35,7 @@ const AttachmentCard = ({
     <div id="attachmentCard" key={attachment.uuid} style={{ width: "20%" }}>
       <Card>
         <div
-          className="imagePreview info-show card-image"
+          className="image-preview info-show card-image"
           style={{
             backgroundSize,
             backgroundImage: `url(${backgroundImage})`
@@ -55,7 +55,7 @@ const AttachmentCard = ({
         </div>
         <Card.Body className="p-1 d-block">
           <Card.Title style={{ fontSize: "15px" }} className="info-line">
-            {attachment?.fileName?.substring(0, 8)}...
+            {utils.ellipsize(attachment?.fileName, 8)}
             <span>
               {utils.humanReadableFileSize(attachment?.contentLength)}
             </span>

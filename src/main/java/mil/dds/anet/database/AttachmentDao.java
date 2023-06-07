@@ -5,14 +5,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.invoke.MethodHandles;
-import java.sql.Blob;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-import javax.sql.rowset.serial.SerialBlob;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Attachment;
 import mil.dds.anet.beans.AttachmentRelatedObject;
@@ -27,6 +24,8 @@ import org.eclipse.jetty.io.EofException;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
 import org.jdbi.v3.sqlobject.statement.SqlBatch;
+import org.jdbi.v3.sqlobject.statement.SqlQuery;
+import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
@@ -35,12 +34,9 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AbstractSearchQuery<?
 
   public static final String[] fields = {"uuid", "authorUuid", "fileName", "mimeType",
       "contentLength", "description", "classification", "createdAt", "updatedAt"};
-  public static final String[] contentFields = {"uuid", "content"};
   public static final String TABLE_NAME = "attachments";
   public static final String ATTACHMENT_FIELDS =
       DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
-  public static final String CONTENT_FIELDS =
-      DaoUtils.buildFieldAliases(TABLE_NAME, contentFields, true);
 
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -106,34 +102,30 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AbstractSearchQuery<?
         .bind("uuid", uuid).execute();
   }
 
+  public interface AttachmentContent {
+    @SqlUpdate("UPDATE attachments SET content = :content WHERE uuid = :uuid")
+    void updateContent(@Bind("uuid") String uuid, @Bind("content") InputStream content);
+
+    @SqlQuery("SELECT content FROM attachments WHERE uuid = :uuid")
+    InputStream readContent(@Bind("uuid") String uuid);
+  }
+
   @InTransaction
   public void streamContentBlob(final String uuid, final OutputStream outputStream) {
-    final String sql = "/* getAttachmentContent */ SELECT " + CONTENT_FIELDS
-        + " FROM \"attachments\" WHERE uuid = :uuid";
-    final Attachment attachment =
-        getDbHandle().createQuery(sql).bind("uuid", uuid).map(new AttachmentMapper()).first();
-    final Blob blob = attachment.getContentBlob();
-    if (blob == null) {
-      return;
-    }
-    try (final InputStream inputStream = blob.getBinaryStream()) {
+    try (final InputStream inputStream =
+        getDbHandle().attach(AttachmentContent.class).readContent(uuid)) {
       IOUtils.copyLarge(inputStream, outputStream);
       outputStream.flush();
     } catch (EofException e) {
       logger.warn("Streaming content of attachment {} was terminated by the client", uuid);
-    } catch (SQLException e) {
-      throw new RuntimeException("Could not read content of attachment " + uuid, e);
     } catch (IOException e) {
       throw new RuntimeException("Could not transfer content of attachment " + uuid, e);
     }
   }
 
   @InTransaction
-  public void saveContentBlob(String uuid, byte[] content) throws SQLException {
-    final String sql = ("/* insertAttachment */ "
-        + "UPDATE \"attachments\" SET  \"content\" = :content WHERE uuid = :uuid");
-    getDbHandle().createUpdate(sql).bind("uuid", uuid).bind("content", new SerialBlob(content))
-        .execute();
+  public void saveContentBlob(final String uuid, final InputStream inputStream) {
+    getDbHandle().attach(AttachmentContent.class).updateContent(uuid, inputStream);
   }
 
   public CompletableFuture<List<Attachment>> getAttachmentsForRelatedObject(

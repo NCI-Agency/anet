@@ -42,7 +42,7 @@ describe("Show report page", () => {
       await (await ShowReport.getCard()).waitForExist()
       await (await ShowReport.getCard()).waitForDisplayed()
       expect(await await ShowReport.getFileData()).to.be.equal(
-        "myNewSec...\n1000 bytes"
+        "myNewSe…\n1000 bytes"
       )
     })
     it("We can go to the show page of Attachment", async() => {

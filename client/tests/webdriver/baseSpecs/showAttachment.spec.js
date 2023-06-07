@@ -16,8 +16,12 @@ describe("Show attachment page", () => {
   describe("When on the show page of a attachment", () => {
     it("We should see attachment's Download action button", async() => {
       await (await ShowAttachment.getDownloadAttachmentButton()).waitForExist()
-      await (await ShowAttachment.getDownloadAttachmentButton()).waitForDisplayed()
-      if (await (await ShowAttachment.getDownloadAttachmentButton()).isClickable()) {
+      await (
+        await ShowAttachment.getDownloadAttachmentButton()
+      ).waitForDisplayed()
+      if (
+        await (await ShowAttachment.getDownloadAttachmentButton()).isClickable()
+      ) {
         await (await ShowAttachment.getDownloadAttachmentButton()).click()
       }
     })
@@ -28,54 +32,42 @@ describe("Show attachment page", () => {
     it("We should see details of attachment", async() => {
       await (await ShowAttachment.getFilename()).waitForExist()
       await (await ShowAttachment.getFilename()).waitForDisplayed()
-      expect(
-        await (
-          await ShowAttachment.getFilename()
-        ).getText()
-      ).to.equal(ATTACHMENT_NAME)
+      expect(await (await ShowAttachment.getFilename()).getText()).to.equal(
+        ATTACHMENT_NAME
+      )
 
       await (await ShowAttachment.getContentLength()).waitForExist()
       await (await ShowAttachment.getContentLength()).waitForDisplayed()
 
       await (await ShowAttachment.getOwner()).waitForExist()
       await (await ShowAttachment.getOwner()).waitForDisplayed()
-      expect(
-        await (
-          await ShowAttachment.getOwner()
-        ).getText()
-      ).to.equal(ATTACHMENT_OWNER)
+      expect(await (await ShowAttachment.getOwner()).getText()).to.equal(
+        ATTACHMENT_OWNER
+      )
 
       await (await ShowAttachment.getDescription()).waitForExist()
       await (await ShowAttachment.getDescription()).waitForDisplayed()
-      expect(
-        await (
-          await ShowAttachment.getDescription()
-        ).getText()
-      ).to.equal(ATTACHMENT_DESCRIPTION)
+      expect(await (await ShowAttachment.getDescription()).getText()).to.equal(
+        ATTACHMENT_DESCRIPTION
+      )
 
       await (await ShowAttachment.getMimetype()).waitForExist()
       await (await ShowAttachment.getMimetype()).waitForDisplayed()
-      expect(
-        await (
-          await ShowAttachment.getMimetype()
-        ).getText()
-      ).to.equal(ATTACHMENT_MIMETYPE)
+      expect(await (await ShowAttachment.getMimetype()).getText()).to.equal(
+        ATTACHMENT_MIMETYPE
+      )
 
       await (await ShowAttachment.getClassification()).waitForExist()
       await (await ShowAttachment.getClassification()).waitForDisplayed()
       expect(
-        await (
-          await ShowAttachment.getClassification()
-        ).getText()
+        await (await ShowAttachment.getClassification()).getText()
       ).to.equal(ATTACHMENT_CLASSIFICATION)
 
       await (await ShowAttachment.getUsedin()).waitForExist()
       await (await ShowAttachment.getUsedin()).waitForDisplayed()
-      expect(
-        await (
-          await ShowAttachment.getUsedin()
-        ).getText()
-      ).to.equal(ATTACHMENT_USED_IN)
+      expect(await (await ShowAttachment.getUsedin()).getText()).to.equal(
+        ATTACHMENT_USED_IN
+      )
     })
   })
 })
@@ -88,26 +80,20 @@ describe("Edit attachment page", () => {
     it("We should see the input areas for details of attachment", async() => {
       await (await ShowAttachment.getFilename()).waitForExist()
       await (await ShowAttachment.getFilename()).waitForDisplayed()
-      expect(
-        await (
-          await ShowAttachment.getFilename()
-        ).getValue()
-      ).to.equal(ATTACHMENT_NAME)
+      expect(await (await ShowAttachment.getFilename()).getValue()).to.equal(
+        ATTACHMENT_NAME
+      )
 
       await (await ShowAttachment.getEditOwner()).waitForExist()
       await (await ShowAttachment.getEditOwner()).waitForDisplayed()
-      expect(
-        await (
-          await ShowAttachment.getEditOwner()
-        ).getText()
-      ).to.equal(`CIV ${ATTACHMENT_OWNER}`)
+      expect(await (await ShowAttachment.getEditOwner()).getText()).to.equal(
+        `CIV ${ATTACHMENT_OWNER}`
+      )
 
       await (await ShowAttachment.getEditDescription()).waitForExist()
       await (await ShowAttachment.getEditDescription()).waitForDisplayed()
       expect(
-        await (
-          await ShowAttachment.getEditDescription()
-        ).getText()
+        await (await ShowAttachment.getEditDescription()).getText()
       ).to.equal(ATTACHMENT_DESCRIPTION)
     })
   })
