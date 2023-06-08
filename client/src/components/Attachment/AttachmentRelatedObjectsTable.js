@@ -6,7 +6,9 @@ import { Table } from "react-bootstrap"
 const AttachmentRelatedObjectsTable = ({ relatedObjects }) => {
   return (
     <div id="related_objects">
-      {relatedObjects?.length > 0 ? (
+      {!relatedObjects?.length ? (
+        <em>No linked objects</em>
+      ) : (
         <Table striped hover responsive className="related_objects_table">
           <tbody>
             {relatedObjects.map(attachRelObj => (
@@ -24,8 +26,6 @@ const AttachmentRelatedObjectsTable = ({ relatedObjects }) => {
             ))}
           </tbody>
         </Table>
-      ) : (
-        <em>No linked objects</em>
       )}
     </div>
   )

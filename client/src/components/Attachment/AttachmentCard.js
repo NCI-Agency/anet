@@ -73,7 +73,7 @@ const AttachmentCard = ({
                 </LinkTo>
               </div>
               <ConfirmDestructive
-                onConfirm={() => deleteAttachment(attachment.uuid)}
+                onConfirm={() => deleteAttachment(attachment)}
                 objectType="attachment"
                 objectDisplay={"#" + attachment.uuid}
                 title="Delete attachment"
@@ -89,15 +89,19 @@ const AttachmentCard = ({
     </div>
   )
 
-  function deleteAttachment(uuid) {
-    const newAttachments = uploadedList.filter(item => item.uuid !== uuid)
-    API.mutation(GQL_DELETE_ATTACHMENT, { uuid })
+  function deleteAttachment(attachment) {
+    const newAttachments = uploadedList.filter(
+      item => item.uuid !== attachment.uuid
+    )
+    API.mutation(GQL_DELETE_ATTACHMENT, { uuid: attachment.uuid })
       .then(data => {
         setUploadedList(newAttachments)
         if (!remove) {
           setRemove(true)
         }
-        toast.success("Your attachment has been successfully deleted")
+        toast.success(
+          `Your attachment ${attachment.fileName} has been successfully deleted`
+        )
       })
       .catch(error => {
         setError(error)

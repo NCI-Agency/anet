@@ -31,9 +31,9 @@ const UploadAttachment = ({ getRelatedObject, edit, saveRelatedObject }) => {
   const [uploadedList, setUploadedList] = useState([])
   const relatedObject = getRelatedObject()
 
-  const handleUploadFile = file => {
-    setUploadedList(current => [...current, file])
-    toast.success("Your attachment has been uploaded")
+  const handleUploadAttachment = attachment => {
+    setUploadedList(current => [...current, attachment])
+    toast.success(`Your attachment ${attachment.fileName} has been uploaded`)
   }
 
   const attachmentSave = async e => {
@@ -56,8 +56,8 @@ const UploadAttachment = ({ getRelatedObject, edit, saveRelatedObject }) => {
       .then(response => {
         selectedAttachment.uuid = response.createAttachment
         const [authHeaderName, authHeaderValue] = API._getAuthHeader()
-        const toastId = "uploadProgress"
-        toast.info("Upload in progress", {
+        const toastId = `uploadProgress.${selectedAttachment.uuid}`
+        toast.info(`Upload of ${selectedAttachment.fileName} in progress`, {
           toastId,
           autoClose: false,
           closeOnClick: false,
@@ -72,7 +72,7 @@ const UploadAttachment = ({ getRelatedObject, edit, saveRelatedObject }) => {
               onUploadProgress: progressEvent => {
                 if (progressEvent.progress === 1) {
                   toast.update(toastId, {
-                    render: "Processing uploaded attachment"
+                    render: `Processing uploaded attachment ${selectedAttachment.fileName}`
                   })
                 } else {
                   toast.update(toastId, {
@@ -84,14 +84,20 @@ const UploadAttachment = ({ getRelatedObject, edit, saveRelatedObject }) => {
           )
           .then(() => {
             toast.done(toastId)
-            handleUploadFile(selectedAttachment)
+            handleUploadAttachment(selectedAttachment)
           })
           .catch(() => {
             toast.dismiss(toastId)
-            toast.error("Attachment content upload failed")
+            toast.error(
+              `Attachment content upload failed for ${selectedAttachment.fileName}`
+            )
           })
       })
-      .catch(error => toast.error(`Attachment upload failed: ${error.message}`))
+      .catch(error =>
+        toast.error(
+          `Attachment upload for ${selectedAttachment.fileName} failed: ${error.message}`
+        )
+      )
   }
 
   const handleFileEvent = async e => {
