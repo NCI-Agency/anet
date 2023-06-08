@@ -8,6 +8,7 @@ import pluralize from "pluralize"
 import decodeQuery from "querystring/decode"
 import encodeQuery from "querystring/encode"
 import React, { useCallback, useEffect } from "react"
+import absent from "resources/icons/absent.svg"
 import binary from "resources/icons/binary.svg"
 import pdf from "resources/icons/pdf.svg"
 import Settings from "settings"
@@ -307,19 +308,20 @@ export default {
   },
 
   getAttachmentIconDetails: function(attachment, small) {
-    let backgroundSize
+    let backgroundSize = small ? "50px" : "200px"
     let backgroundImage
-    if (attachment.mimeType.includes("pdf")) {
-      backgroundSize = small ? "50px" : "200px"
+    const contentMissing = attachment.contentLength < 0
+    if (contentMissing) {
+      backgroundImage = absent
+    } else if (attachment.mimeType.includes("pdf")) {
       backgroundImage = pdf
     } else if (attachment.mimeType.startsWith("image/")) {
       backgroundSize = "cover"
       backgroundImage = `/api/attachment/view/${attachment.uuid}`
     } else {
-      backgroundSize = small ? "50px" : "200px"
       backgroundImage = binary
     }
-    return { backgroundSize, backgroundImage }
+    return { backgroundSize, backgroundImage, contentMissing }
   }
 }
 

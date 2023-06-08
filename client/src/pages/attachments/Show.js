@@ -1,6 +1,7 @@
 import { gql } from "@apollo/client"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
+import classNames from "classnames"
 import AppContext from "components/AppContext"
 import "components/Attachment/Attachment.css"
 import AttachmentRelatedObjectsTable from "components/Attachment/AttachmentRelatedObjectsTable"
@@ -17,6 +18,7 @@ import {
 import RichTextEditor from "components/RichTextEditor"
 import { Field, Form, Formik } from "formik"
 import { Attachment } from "models"
+import PropTypes from "prop-types"
 import React, { useContext } from "react"
 import { Button, Col } from "react-bootstrap"
 import { connect } from "react-redux"
@@ -72,6 +74,44 @@ const GQL_GET_ATTACHMENT = gql`
   }
 `
 
+const AttachmentImage = ({
+  uuid,
+  backgroundSize,
+  backgroundImage,
+  contentMissing
+}) => {
+  const image = (
+    <div
+      className="image-preview info-show card-image attachment-image h-100"
+      style={{
+        backgroundSize,
+        backgroundImage: `url(${backgroundImage})`
+      }}
+    />
+  )
+  return (
+    <div
+      className={classNames("img-preview", {
+        "img-hover-zoom": !contentMissing
+      })}
+    >
+      {contentMissing ? (
+        <>{image}</>
+      ) : (
+        <a href={`/api/attachment/view/${uuid}`} className="d-flex h-100">
+          {image}
+        </a>
+      )}
+    </div>
+  )
+}
+AttachmentImage.propTypes = {
+  uuid: PropTypes.string.isRequired,
+  backgroundSize: PropTypes.string.isRequired,
+  backgroundImage: PropTypes.string.isRequired,
+  contentMissing: PropTypes.bool.isRequired
+}
+
 const AttachmentShow = ({ pageDispatchers }) => {
   const { currentUser } = useContext(AppContext)
   const { uuid } = useParams()
@@ -96,14 +136,17 @@ const AttachmentShow = ({ pageDispatchers }) => {
   const stateError = routerLocation.state && routerLocation.state.error
   const canEdit =
     currentUser.isAdmin() || currentUser.uuid === attachment.author.uuid
-  const { backgroundSize, backgroundImage } =
+  const { backgroundSize, backgroundImage, contentMissing } =
     utils.getAttachmentIconDetails(attachment)
   return (
     <Formik enableReinitialize initialValues={attachment}>
       {({ values }) => {
         const action = (
           <>
-            <Button className="d-flex p-0 align-items-center">
+            <Button
+              className="d-flex p-0 align-items-center"
+              disabled={contentMissing}
+            >
               <a
                 href={`/api/attachment/download/${attachment.uuid}`}
                 style={{
@@ -112,7 +155,7 @@ const AttachmentShow = ({ pageDispatchers }) => {
                   textDecoration: "none"
                 }}
               >
-                Download
+                {contentMissing ? "Attachment has no content" : "Download"}
               </a>
             </Button>
             {canEdit && (
@@ -145,20 +188,12 @@ const AttachmentShow = ({ pageDispatchers }) => {
                     sm={3}
                     className="label-align"
                   >
-                    <div className="img-hover-zoom">
-                      <a
-                        href={`/api/attachment/view/${attachment.uuid}`}
-                        className="d-flex h-100"
-                      >
-                        <div
-                          className="image-preview info-show card-image attachment-image h-100"
-                          style={{
-                            backgroundSize,
-                            backgroundImage: `url(${backgroundImage})`
-                          }}
-                        />
-                      </a>
-                    </div>
+                    <AttachmentImage
+                      uuid={attachment.uuid}
+                      contentMissing={contentMissing}
+                      backgroundSize={backgroundSize}
+                      backgroundImage={backgroundImage}
+                    />
                   </Col>
                   <Col id="attachmentDetails" xs={12} sm={3} lg={8}>
                     <Field
