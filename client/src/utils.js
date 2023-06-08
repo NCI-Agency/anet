@@ -8,9 +8,11 @@ import pluralize from "pluralize"
 import decodeQuery from "querystring/decode"
 import encodeQuery from "querystring/encode"
 import React, { useCallback, useEffect } from "react"
-import absent from "resources/icons/absent.svg"
-import binary from "resources/icons/binary.svg"
-import pdf from "resources/icons/pdf.svg"
+import absentIcon from "resources/icons/absent.svg"
+import binaryIcon from "resources/icons/binary.svg"
+import pdfIcon from "resources/icons/pdf.svg"
+import textIcon from "resources/icons/text.svg"
+import videoIcon from "resources/icons/video.svg"
 import Settings from "settings"
 import { titleCase } from "title-case"
 
@@ -309,17 +311,19 @@ export default {
 
   getAttachmentIconDetails: function(attachment, small) {
     let backgroundSize = small ? "50px" : "200px"
-    let backgroundImage
+    let backgroundImage = binaryIcon
     const contentMissing = attachment.contentLength < 0
     if (contentMissing) {
-      backgroundImage = absent
-    } else if (attachment.mimeType.includes("pdf")) {
-      backgroundImage = pdf
+      backgroundImage = absentIcon
+    } else if (attachment.mimeType === "application/pdf") {
+      backgroundImage = pdfIcon
+    } else if (attachment.mimeType.startsWith("text/")) {
+      backgroundImage = textIcon
+    } else if (attachment.mimeType.startsWith("video/")) {
+      backgroundImage = videoIcon
     } else if (attachment.mimeType.startsWith("image/")) {
       backgroundSize = "cover"
       backgroundImage = `/api/attachment/view/${attachment.uuid}`
-    } else {
-      backgroundImage = binary
     }
     return { backgroundSize, backgroundImage, contentMissing }
   }
