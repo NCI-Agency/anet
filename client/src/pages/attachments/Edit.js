@@ -49,7 +49,10 @@ const AttachmentEdit = ({ pageDispatchers }) => {
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
-  usePageTitle(data?.attachment?.uuid && `Edit | ${data.attachment.uuid}`)
+  usePageTitle(
+    data?.attachment &&
+      `Edit ${data.attachment.fileName || data.attachment.uuid}`
+  )
   if (done) {
     return result
   }

@@ -126,7 +126,7 @@ const AttachmentShow = ({ pageDispatchers }) => {
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
-  usePageTitle(data?.attachment?.name)
+  usePageTitle(data?.attachment?.fileName || data?.attachment?.uuid)
   if (done) {
     return result
   }
