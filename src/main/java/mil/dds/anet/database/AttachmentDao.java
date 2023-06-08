@@ -33,10 +33,12 @@ import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 public class AttachmentDao extends AnetBaseDao<Attachment, AbstractSearchQuery<?>> {
 
   public static final String[] fields = {"uuid", "authorUuid", "fileName", "mimeType",
-      "contentLength", "description", "classification", "createdAt", "updatedAt"};
+      "description", "classification", "createdAt", "updatedAt"};
   public static final String TABLE_NAME = "attachments";
   public static final String ATTACHMENT_FIELDS =
-      DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
+      DaoUtils.buildFieldAliases(TABLE_NAME, fields, true) + String.format(
+          ", CASE WHEN \"%1$s\".\"%2$s\" IS NULL THEN -1 ELSE \"%1$s\".\"%3$s\" END AS \"%1$s_%3$s\"",
+          TABLE_NAME, "content", "contentLength");
 
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
