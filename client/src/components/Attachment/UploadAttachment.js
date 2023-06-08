@@ -56,16 +56,40 @@ const UploadAttachment = ({ getRelatedObject, edit, saveRelatedObject }) => {
       .then(response => {
         selectedAttachment.uuid = response.createAttachment
         const [authHeaderName, authHeaderValue] = API._getAuthHeader()
+        const toastId = "uploadProgress"
+        toast.info("Upload in progress", {
+          toastId,
+          autoClose: false,
+          closeOnClick: false,
+          pauseOnHover: false
+        })
         return axios
           .postForm(
             `/api/attachment/uploadAttachmentContent/${selectedAttachment.uuid}`,
             { file },
             {
-              headers: { [authHeaderName]: authHeaderValue }
+              headers: { [authHeaderName]: authHeaderValue },
+              onUploadProgress: progressEvent => {
+                if (progressEvent.progress === 1) {
+                  toast.update(toastId, {
+                    render: "Processing uploaded attachment"
+                  })
+                } else {
+                  toast.update(toastId, {
+                    progress: progressEvent.progress
+                  })
+                }
+              }
             }
           )
-          .then(() => handleUploadFile(selectedAttachment))
-          .catch(() => toast.error("Attachment content upload failed"))
+          .then(() => {
+            toast.done(toastId)
+            handleUploadFile(selectedAttachment)
+          })
+          .catch(() => {
+            toast.dismiss(toastId)
+            toast.error("Attachment content upload failed")
+          })
       })
       .catch(error => toast.error(`Attachment upload failed: ${error.message}`))
   }
