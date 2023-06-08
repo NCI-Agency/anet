@@ -55,10 +55,14 @@ const UploadAttachment = ({ getRelatedObject, edit, saveRelatedObject }) => {
     return save(selectedAttachment, relatedObject.uuid, false)
       .then(response => {
         selectedAttachment.uuid = response.createAttachment
+        const [authHeaderName, authHeaderValue] = API._getAuthHeader()
         return axios
           .postForm(
             `/api/attachment/uploadAttachmentContent/${selectedAttachment.uuid}`,
-            { file }
+            { file },
+            {
+              headers: { [authHeaderName]: authHeaderValue }
+            }
           )
           .then(() => handleUploadFile(selectedAttachment))
           .catch(() => toast.error("Attachment content upload failed"))
