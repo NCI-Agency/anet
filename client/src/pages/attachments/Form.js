@@ -50,7 +50,9 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
     value: key,
     label: classifications[key]
   }))
-
+  const [relatedObjects, setRelatedObjects] = useState(
+    initialValues.attachmentRelatedObjects || []
+  )
   return (
     <Formik
       enableReinitialize
@@ -93,7 +95,7 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
                 <div style={{ display: "flex" }}>
                   <Col xs={12} sm={3} className="label-align">
                     <div
-                      className="image-preview info-show card-image attachment-image h-100"
+                      className="image-preview info-show card-image attachment-image"
                       style={{
                         backgroundSize,
                         backgroundImage: `url(${backgroundImage})`
@@ -109,24 +111,6 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
                       label={Settings.fields.attachment.shortName.label}
                       component={FieldHelper.InputField}
                     />
-
-                    <FastField
-                      name="description"
-                      label={Settings.fields.attachment.description}
-                      component={FieldHelper.SpecialField}
-                      onChange={value => {
-                        // prevent initial unnecessary render of RichTextEditor
-                        if (!_isEqual(values.description, value)) {
-                          setFieldValue("description", value, true)
-                        }
-                      }}
-                      onHandleBlur={() => {
-                        // validation will be done by setFieldValue
-                        setFieldTouched("description", true, false)
-                      }}
-                      widget={<RichTextEditor className="description" />}
-                    />
-
                     <Field
                       name="owner"
                       component={FieldHelper.ReadonlyField}
@@ -158,11 +142,28 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
                         component={FieldHelper.ReadonlyField}
                         humanValue={
                           <AttachmentRelatedObjectsTable
+                            setRelatedObjects={setRelatedObjects}
                             relatedObjects={values.attachmentRelatedObjects}
                           />
                         }
                       />
                     )}
+                    <FastField
+                      name="description"
+                      label={Settings.fields.attachment.description}
+                      component={FieldHelper.SpecialField}
+                      onChange={value => {
+                        // prevent initial unnecessary render of RichTextEditor
+                        if (!_isEqual(values.description, value)) {
+                          setFieldValue("description", value, true)
+                        }
+                      }}
+                      onHandleBlur={() => {
+                        // validation will be done by setFieldValue
+                        setFieldTouched("description", true, false)
+                      }}
+                      widget={<RichTextEditor className="description" />}
+                    />
                   </Col>
                 </div>
               </Fieldset>
@@ -247,7 +248,12 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
 
   function save(values, form) {
     const attachment = Attachment.filterClientSideFields(values, "content")
+    const updatedRelatedObjects = relatedObjects.map(attach => ({
+      relatedObjectType: attach.relatedObjectType,
+      relatedObjectUuid: attach.relatedObjectUuid
+    }))
     attachment.classification = values.classification
+    attachment.attachmentRelatedObjects = updatedRelatedObjects
     return API.mutation(edit ? GQL_UPDATE_ATTACHMENT : GQL_CREATE_ATTACHMENT, {
       attachment
     })

@@ -6,7 +6,7 @@ import axios from "axios"
 import Messages from "components/Messages"
 import { Attachment } from "models"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { toast } from "react-toastify"
 import Settings from "settings"
 import "./Attachment.css"
@@ -25,13 +25,43 @@ const GQL_UPDATE_ATTACHMENT = gql`
   }
 `
 
-const UploadAttachment = ({ getRelatedObject, edit, saveRelatedObject }) => {
+const UploadAttachment = ({
+  edit,
+  saveRelatedObject,
+  relatedObjectType,
+  relatedObjectUuid
+}) => {
   const [error, setError] = useState(null)
   const [remove, setRemove] = useState(false)
   const [uploadedList, setUploadedList] = useState([])
-  const relatedObject = getRelatedObject()
+  const relatedObjectUuidRef = useRef(relatedObjectUuid)
 
-  const attachmentSave = async e => {
+  useEffect(() => {
+    if (relatedObjectUuid !== relatedObjectUuidRef.current) {
+      relatedObjectUuidRef.current = relatedObjectUuid
+    }
+  }, [relatedObjectUuidRef, relatedObjectUuid])
+
+  useEffect(() => {
+    // In the edit mode the base page entity (report, location, etc.) always has an uuid
+    // So when uploading new attachment it is always inserted related tables, (ie. see attachmentSave)
+    if (edit) {
+      return
+    }
+    // if base entity is not created, the attachment can not be associated
+    if (!relatedObjectUuid) {
+      return
+    }
+    // Update only object not associated with the base entity, as in report
+    const updateList = uploadedList.filter(
+      list => !list.attachmentRelatedObjects[0].relatedObjectUuid
+    )
+    for (let i = 0; i < updateList.length; i++) {
+      save(updateList[i], relatedObjectUuid, true)
+    }
+  }, [edit, relatedObjectUuid, uploadedList])
+
+  const attachmentSave = async(e, relatedUuid) => {
     const file = e.target.files[0]
     const selectedAttachment = new Attachment({
       fileName: file.name,
@@ -39,12 +69,12 @@ const UploadAttachment = ({ getRelatedObject, edit, saveRelatedObject }) => {
       contentLength: file.size,
       attachmentRelatedObjects: [
         {
-          relatedObjectType: relatedObject.type,
-          relatedObjectUuid: relatedObject.uuid
+          relatedObjectType: relatedObjectType,
+          relatedObjectUuid: relatedUuid
         }
       ]
     })
-    return save(selectedAttachment, relatedObject.uuid, false)
+    return save(selectedAttachment, relatedUuid, false)
       .then(response => {
         selectedAttachment.uuid = response.createAttachment
         const [authHeaderName, authHeaderValue] = API._getAuthHeader()
@@ -84,31 +114,36 @@ const UploadAttachment = ({ getRelatedObject, edit, saveRelatedObject }) => {
           .catch(error => {
             toast.dismiss(toastId)
             selectedAttachment.contentLength = -1
+            selectedAttachment.attachmentRelatedObjects[0].relatedObjectUuid = null
             setUploadedList(current => [...current, selectedAttachment])
             toast.error(
               `Attachment content upload failed for ${
                 selectedAttachment.fileName
-              }: ${error.response?.data?.error || error.message}`
+              }: ${error.response?.data?.error || error.message}`,
+              {
+                autoClose: false,
+                closeOnClick: true
+              }
             )
           })
       })
       .catch(error =>
         toast.error(
-          `Attachment upload for ${selectedAttachment.fileName} failed: ${error.message}`
+          `Attachment upload for ${selectedAttachment.fileName} failed: ${error.message}`,
+          {
+            autoClose: false,
+            closeOnClick: true
+          }
         )
       )
   }
 
   const handleFileEvent = async e => {
-    // Control related object has an uuid or not
-    if (!relatedObject.uuid) {
-      saveRelatedObject().then(async response => {
-        relatedObject.uuid = response
-        await attachmentSave(e)
-      })
-    } else {
-      await attachmentSave(e)
+    // No need to save again if base entity has been created
+    if (saveRelatedObject && !relatedObjectUuidRef.current) {
+      relatedObjectUuidRef.current = await saveRelatedObject()
     }
+    await attachmentSave(e, relatedObjectUuidRef.current)
   }
 
   return (
@@ -148,7 +183,7 @@ const UploadAttachment = ({ getRelatedObject, edit, saveRelatedObject }) => {
           />
         ))}
         {/** When on an edit page, show uploaded attachments **/}
-        {edit && <UploadedAttachments uuid={relatedObject.uuid} />}
+        {edit && <UploadedAttachments uuid={relatedObjectUuid} />}
       </div>
     </div>
   )
@@ -156,14 +191,16 @@ const UploadAttachment = ({ getRelatedObject, edit, saveRelatedObject }) => {
   function save(values, relatedObjectUuid, edit) {
     const attachment = Attachment.filterClientSideFields(values)
     const operation = edit ? GQL_UPDATE_ATTACHMENT : GQL_CREATE_ATTACHMENT
+    attachment.attachmentRelatedObjects[0].relatedObjectUuid = relatedObjectUuid
     return API.mutation(operation, { attachment })
   }
 }
 
 UploadAttachment.propTypes = {
   edit: PropTypes.bool,
-  getRelatedObject: PropTypes.func.isRequired,
-  saveRelatedObject: PropTypes.func.isRequired
+  saveRelatedObject: PropTypes.func,
+  relatedObjectType: PropTypes.string,
+  relatedObjectUuid: PropTypes.string
 }
 
 export default UploadAttachment

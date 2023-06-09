@@ -4,6 +4,7 @@ import { IconNames } from "@blueprintjs/icons"
 import API from "api"
 import AppContext from "components/AppContext"
 import ApprovalsDefinition from "components/approvals/ApprovalsDefinition"
+import UploadAttachment from "components/Attachment/UploadAttachment"
 import {
   CustomFieldsContainer,
   customFieldsJSONString
@@ -18,7 +19,7 @@ import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
 import RichTextEditor from "components/RichTextEditor"
 import SimilarObjectsModal from "components/SimilarObjectsModal"
-import { FastField, Form, Formik } from "formik"
+import { FastField, Field, Form, Formik } from "formik"
 import { convertLatLngToMGRS, parseCoordinate } from "geoUtils"
 import _escape from "lodash/escape"
 import _isEqual from "lodash/isEqual"
@@ -155,6 +156,7 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
           lng: values.lng,
           displayedCoordinate: values.displayedCoordinate
         }
+
         return (
           <div>
             <NavigationWarning isBlocking={dirty && !isSubmitting} />
@@ -239,6 +241,22 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
                   isSubmitting={isSubmitting}
                   setFieldValue={setFieldValue}
                   setFieldTouched={setFieldTouched}
+                />
+
+                <Field
+                  name="uploadAttachments"
+                  component={FieldHelper.SpecialField}
+                  label={Settings.fields.attachment.shortLabel}
+                  widget={
+                    <UploadAttachment
+                      edit={edit}
+                      relatedObjectType={Location.relatedObjectType}
+                      relatedObjectUuid={values.uuid}
+                    />
+                  }
+                  onHandleBlur={() => {
+                    setFieldTouched("uploadAttachments", true, false)
+                  }}
                 />
               </Fieldset>
 
@@ -365,15 +383,18 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
         ? response[operation].uuid
         : initialValues.uuid
     })
+    values.uuid = location.uuid
     // reset the form to latest values
     // to avoid unsaved changes prompt if it somehow becomes dirty
     form.resetForm({ values, isSubmitting: true })
-    if (!edit) {
-      navigate(Location.pathForEdit(location), { replace: true })
-    }
-    navigate(Location.pathFor(location), {
-      state: { success: "Location saved" }
-    })
+    setTimeout(() => {
+      if (!edit) {
+        navigate(Location.pathForEdit(location), { replace: true })
+      }
+      navigate(Location.pathFor(location), {
+        state: { success: "Location saved" }
+      })
+    }, 100)
   }
 
   function save(values) {

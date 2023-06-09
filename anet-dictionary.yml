@@ -314,9 +314,9 @@ fields:
     disabled: false
     shortLabel: Attachment
     shortName:
-      label: Attachment Name
+      label: File Name
       placeholder: Enter an attachment name, example....
-    description: Attachment description
+    description: Description
     classification:
       type: enum
       label: Security Marking
@@ -328,7 +328,6 @@ fields:
     mimeTypes:
       - application/pdf
       - image/jpeg
-      - image/jpg
       - image/png
       - image/webp
       - text/plain
