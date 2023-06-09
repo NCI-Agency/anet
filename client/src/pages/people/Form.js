@@ -3,6 +3,7 @@ import { Icon, IconSize, Intent } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import API from "api"
 import AppContext from "components/AppContext"
+import UploadAttachment from "components/Attachment/UploadAttachment"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 import AvatarEditModal from "components/AvatarEditModal"
 import CustomDateInput from "components/CustomDateInput"
@@ -513,6 +514,21 @@ const PersonForm = ({
                         )}
                       </Field>
                     )}
+                    <Field
+                      name="uploadAttachments"
+                      component={FieldHelper.SpecialField}
+                      label={Settings.fields.attachment.shortLabel}
+                      widget={
+                        <UploadAttachment
+                          edit={edit}
+                          relatedObjectType={Person.relatedObjectType}
+                          relatedObjectUuid={values.uuid}
+                        />
+                      }
+                      onHandleBlur={() => {
+                        setFieldTouched("uploadAttachments", true, false)
+                      }}
+                    />
                   </Col>
                 </Row>
               </Fieldset>
@@ -731,15 +747,18 @@ const PersonForm = ({
           ? response[operation].uuid
           : initialValues.uuid
       })
+      values.uuid = person.uuid
       if (Person.isEqual(currentUser, values)) {
         loadAppData()
       }
-      if (!edit) {
-        navigate(Person.pathForEdit(person), { replace: true })
-      }
-      navigate(Person.pathFor(person), {
-        state: { success: "Person saved" }
-      })
+      setTimeout(() => {
+        if (!edit) {
+          navigate(Person.pathForEdit(person), { replace: true })
+        }
+        navigate(Person.pathFor(person), {
+          state: { success: "Person saved" }
+        })
+      }, 100)
     }
   }
 

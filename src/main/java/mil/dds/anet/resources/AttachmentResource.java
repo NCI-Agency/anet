@@ -79,6 +79,7 @@ public class AttachmentResource {
 
     }
     assertAllowedMimeType(attachment.getMimeType());
+    assertAllowedClassification(attachment.getClassification());
 
     if (attachment.getClassification() != null) {
       // if the classification is set, control if the classification is valid
@@ -229,7 +230,7 @@ public class AttachmentResource {
 
   private void assertAllowedClassification(final String classificationKey) {
     final Map<String, String> allowedClassifications = getAllowedClassifications();
-    if (!allowedClassifications.containsKey(classificationKey)) {
+    if (!allowedClassifications.containsKey(classificationKey) && classificationKey != null) {
       throw new WebApplicationException("Classification is not allowed", Status.BAD_REQUEST);
     }
   }

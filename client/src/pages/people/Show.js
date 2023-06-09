@@ -6,6 +6,7 @@ import API from "api"
 import AppContext from "components/AppContext"
 import AssessmentResultsContainer from "components/assessments/AssessmentResultsContainer"
 import AssignPositionModal from "components/AssignPositionModal"
+import AttachmentCard from "components/Attachment/AttachmentCard"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 import { mapReadonlyCustomFieldsToComps } from "components/CustomFields"
 import EditAssociatedPositionsModal from "components/EditAssociatedPositionsModal"
@@ -112,6 +113,14 @@ const GQL_GET_PERSON = gql`
           uuid
           name
         }
+      }
+      attachments {
+        uuid
+        fileName
+        contentLength
+        mimeType
+        classification
+        description
       }
       customFields
       ${GRAPHQL_CUSTOM_SENSITIVE_INFORMATION_FIELDS}
@@ -316,7 +325,32 @@ const PersonShow = ({ pageDispatchers }) => {
                     <Col md={6}>{rightColumn}</Col>
                   </Row>
                   <Row>
-                    <Col md={12}>{fullWidthFields}</Col>
+                    <Col md={12}>
+                      {fullWidthFields}
+                      <Field
+                        name="attachments"
+                        label={Settings.fields.attachment.shortLabel}
+                        component={FieldHelper.ReadonlyField}
+                        humanValue={
+                          <div
+                            id="attachmentCardList"
+                            style={{
+                              display:
+                                person.attachments.length > 1 ? "flex" : "block"
+                            }}
+                          >
+                            {person.attachments.map((attachment, index) => (
+                              <AttachmentCard
+                                key={index}
+                                attachment={attachment}
+                                index={index}
+                                edit={false}
+                              />
+                            ))}
+                          </div>
+                        }
+                      />
+                    </Col>
                   </Row>
                 </Container>
               </Fieldset>
