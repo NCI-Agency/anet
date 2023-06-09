@@ -12,6 +12,10 @@ class ShowAttachment extends Page {
     return browser.$("//a[text()='Download']")
   }
 
+  async getNoContentButton() {
+    return browser.$("//a[text()='Attachment has no content']")
+  }
+
   async getImage() {
     return browser.$("#attachmentImage")
   }

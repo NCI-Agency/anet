@@ -527,11 +527,10 @@ properties:
       attachment:
         type: object
         additionalProperties: false
-        required: [shortLabel, shortName, description, classification]
+        required: [disabled, shortLabel, shortName, description, classification]
         properties:
           disabled:
             type: boolean
-            default: false
             title: Whether users can upload attachments
             description: Used for restricting uploading functionality for all users
           shortLabel:

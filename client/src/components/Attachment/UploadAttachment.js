@@ -31,9 +31,9 @@ const UploadAttachment = ({ getRelatedObject, edit, saveRelatedObject }) => {
   const [uploadedList, setUploadedList] = useState([])
   const relatedObject = getRelatedObject()
 
-  const handleUploadAttachment = attachment => {
-    setUploadedList(current => [...current, attachment])
-    toast.success(`Your attachment ${attachment.fileName} has been uploaded`)
+  const handleUploadAttachment = file => {
+    setUploadedList(current => [...current, file])
+    toast.success("Your document has been uploaded")
   }
 
   const attachmentSave = async e => {

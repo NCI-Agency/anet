@@ -301,7 +301,7 @@ fields:
 
   report:
     attachments:
-      label: Attachment
+      label: Attachments
     canUnpublishReports: true
     intent: Engagement purpose
     atmosphere: Atmospherics

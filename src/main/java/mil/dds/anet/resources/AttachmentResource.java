@@ -171,20 +171,18 @@ public class AttachmentResource {
   }
 
   private boolean hasUploadPermission(final Person user, final String mimeType) {
-    final String keyPath = "fields.attachment";
-    final Map<String, Object> uploadPermission =
-        (Map<String, Object>) AnetObjectEngine.getConfiguration().getDictionaryEntry(keyPath);
-    final Boolean userPermission = (Boolean) uploadPermission.get("disabled");
+    final Map<String, Object> attachmentSettings = (Map<String, Object>) AnetObjectEngine
+        .getConfiguration().getDictionaryEntry("fields.attachment");
+    final Boolean userUploadDisabled = (Boolean) attachmentSettings.get("disabled");
 
-    if (userPermission && !AuthUtils.isAdmin(user)) {
-      throw new WebApplicationException("You don't have permission to upload attachment",
+    if (Boolean.TRUE.equals(userUploadDisabled) && !AuthUtils.isAdmin(user)) {
+      throw new WebApplicationException("You don't have permission to upload attachments",
           Response.Status.FORBIDDEN);
     }
 
-    final List<String> allowedMimetypes = ((List<String>) uploadPermission.get("mimeType")).stream()
-        .map(String::toString).collect(Collectors.toList());
-    if (!allowedMimetypes.contains(mimeType)) {
-      throw new WebApplicationException("File extension is not allowed",
+    final var allowedMimeTypes = (List<String>) attachmentSettings.get("mimeTypes");
+    if (!allowedMimeTypes.contains(mimeType)) {
+      throw new WebApplicationException(String.format("Files of type %s are not allowed", mimeType),
           Response.Status.NOT_ACCEPTABLE);
     }
 

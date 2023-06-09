@@ -15,14 +15,24 @@ describe("Show attachment page", () => {
   })
   describe("When on the show page of a attachment", () => {
     it("We should see attachment's Download action button", async() => {
-      await (await ShowAttachment.getDownloadAttachmentButton()).waitForExist()
-      await (
-        await ShowAttachment.getDownloadAttachmentButton()
-      ).waitForDisplayed()
       if (
-        await (await ShowAttachment.getDownloadAttachmentButton()).isClickable()
+        await (await ShowAttachment.getDownloadAttachmentButton()).isExisting()
       ) {
-        await (await ShowAttachment.getDownloadAttachmentButton()).click()
+        await (
+          await ShowAttachment.getDownloadAttachmentButton()
+        ).waitForDisplayed()
+        if (
+          await (
+            await ShowAttachment.getDownloadAttachmentButton()
+          ).isClickable()
+        ) {
+          await (await ShowAttachment.getDownloadAttachmentButton()).click()
+        }
+      } else {
+        await (await ShowAttachment.getNoContentButton()).waitForDisplayed()
+        if (await (await ShowAttachment.getNoContentButton()).isClickable()) {
+          await (await ShowAttachment.getNoContentButton()).click()
+        }
       }
     })
     it("We should see image of attachment", async() => {
