@@ -101,11 +101,16 @@ const UploadAttachment = ({ getRelatedObject, edit, saveRelatedObject }) => {
 
   const handleFileEvent = async e => {
     // Control related object has an uuid or not
-    if (!relatedObject.uuid) {
+    if (!relatedObject.uuid && relatedObject.type === "reports") {
       saveRelatedObject().then(async response => {
         relatedObject.uuid = response
         await attachmentSave(e)
       })
+    } else if (!relatedObject.uuid && relatedObject.type !== "reports") {
+      relatedObject.uuid = saveRelatedObject()
+      console.log(relatedObject)
+      edit = true
+      await attachmentSave(e)
     } else {
       await attachmentSave(e)
     }
