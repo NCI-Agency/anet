@@ -71,6 +71,10 @@ const AttachmentPreview = ({ className, uuid }) => {
             />
             <PreviewField label="Mime type" value={attachment.mimeType} />
             <PreviewField
+              label="Content length"
+              value={utils.humanReadableFileSize(attachment.contentLength)}
+            />
+            <PreviewField
               label={Settings.fields.attachment.classification.label}
               value={Attachment.humanNameOfStatus(
                 attachment.classification

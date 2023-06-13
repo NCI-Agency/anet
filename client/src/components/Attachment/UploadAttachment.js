@@ -6,7 +6,7 @@ import axios from "axios"
 import Messages from "components/Messages"
 import { Attachment } from "models"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { toast } from "react-toastify"
 import Settings from "settings"
 import utils from "utils"
@@ -99,13 +99,21 @@ const UploadAttachment = ({
             toast.error(
               `Attachment content upload failed for ${
                 selectedAttachment.fileName
-              }: ${error.response?.data?.error || error.message}`
+              }: ${error.response?.data?.error || error.message}`,
+              {
+                autoClose: false,
+                closeOnClick: true
+              }
             )
           })
       })
       .catch(error =>
         toast.error(
-          `Attachment upload for ${selectedAttachment.fileName} failed: ${error.message}`
+          `Attachment upload for ${selectedAttachment.fileName} failed: ${error.message}`,
+          {
+            autoClose: false,
+            closeOnClick: true
+          }
         )
       )
   }
@@ -123,6 +131,7 @@ const UploadAttachment = ({
           )
         )
     }
+    await attachmentSave(e)
   }
 
   return (
@@ -170,6 +179,7 @@ const UploadAttachment = ({
   function save(values, edit) {
     const attachment = Attachment.filterClientSideFields(values)
     const operation = edit ? GQL_UPDATE_ATTACHMENT : GQL_CREATE_ATTACHMENT
+    attachment.attachmentRelatedObjects[0].relatedObjectUuid = relatedObjectUuid
     return API.mutation(operation, { attachment })
   }
 }
