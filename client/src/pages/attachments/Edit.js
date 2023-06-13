@@ -23,8 +23,35 @@ const GQL_GET_ATTACHMENT = gql`
       classification
       description
       attachmentRelatedObjects {
-        relatedObjectType
+        relatedObject {
+          ... on AuthorizationGroup {
+            name
+          }
+          ... on Location {
+            name
+          }
+          ... on Organization {
+            shortName
+          }
+          ... on Person {
+            name
+            rank
+            role
+            avatar(size: 32)
+          }
+          ... on Position {
+            type
+            name
+          }
+          ... on Report {
+            intent
+          }
+          ... on Task {
+            shortName
+          }
+        }
         relatedObjectUuid
+        relatedObjectType
       }
       author {
         uuid

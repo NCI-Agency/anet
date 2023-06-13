@@ -22,5 +22,21 @@ class ShowLocation extends Page {
   async getLngField() {
     return browser.$('div[name="location"] span:nth-child(3)')
   }
+
+  async getAttachments() {
+    return browser.$("#attachments")
+  }
+
+  async getCard() {
+    return browser.$(".card")
+  }
+
+  async getFileData() {
+    return (await browser.$(".info-line")).getText()
+  }
+
+  async getImageClick() {
+    return browser.$(".imagePreview")
+  }
 }
 export default new ShowLocation()

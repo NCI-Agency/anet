@@ -48,9 +48,8 @@ describe("Show report page", () => {
     it("We can go to the show page of Attachment", async() => {
       if (await (await ShowReport.getImageClick()).isClickable()) {
         await (await ShowReport.getImageClick()).click()
-        const currentURL = await browser.getUrl()
-        expect(await currentURL).to.be.equal(
-          "http://localhost:8180/attachments/f076406f-1a9b-4fc9-8ab2-cd2a138ec26d"
+        await expect(browser).toHaveUrlContaining(
+          "/attachments/f076406f-1a9b-4fc9-8ab2-cd2a138ec26d"
         )
       }
     })

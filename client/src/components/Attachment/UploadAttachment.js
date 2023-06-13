@@ -6,7 +6,7 @@ import axios from "axios"
 import Messages from "components/Messages"
 import { Attachment } from "models"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { toast } from "react-toastify"
 import Settings from "settings"
 import "./Attachment.css"
@@ -25,11 +25,32 @@ const GQL_UPDATE_ATTACHMENT = gql`
   }
 `
 
-const UploadAttachment = ({ getRelatedObject, edit, saveRelatedObject }) => {
+const UploadAttachment = ({
+  getRelatedObject,
+  edit,
+  saveRelatedObject,
+  childFunctionTrigger
+}) => {
   const [error, setError] = useState(null)
   const [remove, setRemove] = useState(false)
   const [uploadedList, setUploadedList] = useState([])
   const relatedObject = getRelatedObject()
+  const uploadedListRef = useRef(uploadedList)
+
+  useEffect(() => {
+    if (uploadedListRef.current !== uploadedList) {
+      uploadedListRef.current = uploadedList
+    } else {
+      if (uploadedList.length > 0) {
+        const relatedObject = saveRelatedObject()
+        if (relatedObject) {
+          for (let i = 0; i < uploadedList.length; i++) {
+            save(uploadedList[i], relatedObject, true)
+          }
+        }
+      }
+    }
+  }, [childFunctionTrigger, saveRelatedObject, uploadedList])
 
   const attachmentSave = async e => {
     const file = e.target.files[0]
@@ -88,32 +109,38 @@ const UploadAttachment = ({ getRelatedObject, edit, saveRelatedObject }) => {
             toast.error(
               `Attachment content upload failed for ${
                 selectedAttachment.fileName
-              }: ${error.response?.data?.error || error.message}`
+              }: ${error.response?.data?.error || error.message}`,
+              {
+                autoClose: false,
+                closeOnClick: true
+              }
             )
           })
       })
       .catch(error =>
         toast.error(
-          `Attachment upload for ${selectedAttachment.fileName} failed: ${error.message}`
+          `Attachment upload for ${selectedAttachment.fileName} failed: ${error.message}`,
+          {
+            autoClose: false,
+            closeOnClick: true
+          }
         )
       )
   }
 
   const handleFileEvent = async e => {
     // Control related object has an uuid or not
-    if (!relatedObject.uuid && relatedObject.type === "reports") {
-      saveRelatedObject().then(async response => {
-        relatedObject.uuid = response
-        await attachmentSave(e)
-      })
-    } else if (!relatedObject.uuid && relatedObject.type !== "reports") {
-      relatedObject.uuid = saveRelatedObject()
-      console.log(relatedObject)
-      edit = true
-      await attachmentSave(e)
-    } else {
-      await attachmentSave(e)
+    if (!relatedObject.uuid) {
+      try {
+        relatedObject.uuid = await saveRelatedObject()
+      } catch (error) {
+        toast.error(`Attachment content upload failed: ${error.message}`, {
+          autoClose: false,
+          closeOnClick: true
+        })
+      }
     }
+    await attachmentSave(e)
   }
 
   return (
@@ -161,12 +188,14 @@ const UploadAttachment = ({ getRelatedObject, edit, saveRelatedObject }) => {
   function save(values, relatedObjectUuid, edit) {
     const attachment = Attachment.filterClientSideFields(values)
     const operation = edit ? GQL_UPDATE_ATTACHMENT : GQL_CREATE_ATTACHMENT
+    attachment.attachmentRelatedObjects[0].relatedObjectUuid = relatedObjectUuid
     return API.mutation(operation, { attachment })
   }
 }
 
 UploadAttachment.propTypes = {
   edit: PropTypes.bool,
+  childFunctionTrigger: PropTypes.bool,
   getRelatedObject: PropTypes.func.isRequired,
   saveRelatedObject: PropTypes.func.isRequired
 }

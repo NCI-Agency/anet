@@ -4,6 +4,7 @@ import { IconNames } from "@blueprintjs/icons"
 import API from "api"
 import AppContext from "components/AppContext"
 import ApprovalsDefinition from "components/approvals/ApprovalsDefinition"
+import UploadAttachment from "components/Attachment/UploadAttachment"
 import {
   CustomFieldsContainer,
   customFieldsJSONString
@@ -60,6 +61,8 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
   const { currentUser } = useContext(AppContext)
   const navigate = useNavigate()
   const [error, setError] = useState(null)
+  const [childFunctionTrigger, setChildFunctionTrigger] = useState(false)
+  const [relatedObjectUuid, setRelatedObjectUuid] = useState()
   const [showSimilarLocations, setShowSimilarLocations] = useState(false)
   const canEditName =
     (!edit && currentUser.isSuperuser()) || (edit && currentUser.isAdmin())
@@ -155,6 +158,11 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
           lng: values.lng,
           displayedCoordinate: values.displayedCoordinate
         }
+        const getRelatedObject = val => ({
+          uuid: val.uuid,
+          type: Location.relatedObjectType
+        })
+
         return (
           <div>
             <NavigationWarning isBlocking={dirty && !isSubmitting} />
@@ -239,6 +247,25 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
                   isSubmitting={isSubmitting}
                   setFieldValue={setFieldValue}
                   setFieldTouched={setFieldTouched}
+                />
+
+                <FastField
+                  name="uploadAttachments"
+                  component={FieldHelper.SpecialField}
+                  label={Settings.fields.attachment.shortLabel}
+                  widget={
+                    <UploadAttachment
+                      edit={edit}
+                      childFunctionTrigger={childFunctionTrigger}
+                      saveRelatedObject={() =>
+                        takeRelatedUuid(relatedObjectUuid)
+                      }
+                      getRelatedObject={() => getRelatedObject(values)}
+                    />
+                  }
+                  onHandleBlur={() => {
+                    setFieldTouched("uploadAttachments", true, false)
+                  }}
                 />
               </Fieldset>
 
@@ -350,6 +377,10 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
     navigate(-1)
   }
 
+  function takeRelatedUuid(relatedUuid) {
+    return relatedUuid
+  }
+
   function onSubmit(values, form) {
     return save(values)
       .then(response => onSubmitSuccess(response, values, form))
@@ -367,20 +398,24 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
         ? response[operation].uuid
         : initialValues.uuid
     })
+    setRelatedObjectUuid(location.uuid)
     // reset the form to latest values
     // to avoid unsaved changes prompt if it somehow becomes dirty
     form.resetForm({ values, isSubmitting: true })
-    if (!edit) {
-      navigate(Location.pathForEdit(location), { replace: true })
-    }
-    navigate(Location.pathFor(location), {
-      state: { success: "Location saved" }
-    })
+    setTimeout(() => {
+      if (!edit) {
+        navigate(Location.pathForEdit(location), { replace: true })
+      }
+      navigate(Location.pathFor(location), {
+        state: { success: "Location saved" }
+      })
+    }, 100)
   }
 
   function save(values) {
     const location = new Location(values).filterClientSideFields("customFields")
     location.customFields = customFieldsJSONString(values)
+    setChildFunctionTrigger(true)
     return API.mutation(edit ? GQL_UPDATE_LOCATION : GQL_CREATE_LOCATION, {
       location
     })
