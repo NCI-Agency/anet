@@ -1142,7 +1142,7 @@ INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjec
 -- Add attachments for reports
 SELECT ('''' || uuid || '''') AS "authorUuid" FROM people WHERE name = 'DMIN, Arthur' \gset
 INSERT INTO attachments (uuid, "authorUuid", "fileName", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt")
-	VALUES ('f076406f-1a9b-4fc9-8ab2-cd2a138ec26d', :authorUuid, 'myNewSecondAttachment', 'image/jpeg', null, 1000, 'We can add multiple attachment for report', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES ('f076406f-1a9b-4fc9-8ab2-cd2a138ec26d', :authorUuid, 'test_attachment.png', 'image/png', lo_import('/var/tmp/default_avatar.png'), 12316, 'We can add multiple attachment for report', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT 'f076406f-1a9b-4fc9-8ab2-cd2a138ec26d', 'reports', r.uuid
   FROM reports r

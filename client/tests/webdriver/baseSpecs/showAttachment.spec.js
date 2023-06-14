@@ -1,13 +1,15 @@
+import fs from "fs"
 import { expect } from "chai"
 import ShowAttachment from "../pages/attachment/showAttachment.page"
 
 const ATTACHMENT_UUID = "f076406f-1a9b-4fc9-8ab2-cd2a138ec26d"
-const ATTACHMENT_NAME = "myNewSecondAttachment"
+const ATTACHMENT_NAME = "test_attachment.png"
 const ATTACHMENT_OWNER = "DMIN, Arthur"
 const ATTACHMENT_CLASSIFICATION = "UNDEFINED"
 const ATTACHMENT_DESCRIPTION = "We can add multiple attachment for report"
-const ATTACHMENT_MIMETYPE = "image/jpeg"
+const ATTACHMENT_MIMETYPE = "image/png"
 const ATTACHMENT_USED_IN = "A test report from Arthur"
+const ATTACHMENT_SIZE = 12316
 
 describe("Show attachment page", () => {
   beforeEach("Open the show attachment page", async() => {
@@ -15,25 +17,22 @@ describe("Show attachment page", () => {
   })
   describe("When on the show page of a attachment", () => {
     it("We should see attachment's Download action button", async() => {
-      if (
-        await (await ShowAttachment.getDownloadAttachmentButton()).isExisting()
-      ) {
-        await (
-          await ShowAttachment.getDownloadAttachmentButton()
-        ).waitForDisplayed()
-        if (
-          await (
-            await ShowAttachment.getDownloadAttachmentButton()
-          ).isClickable()
-        ) {
-          await (await ShowAttachment.getDownloadAttachmentButton()).click()
-        }
-      } else {
-        await (await ShowAttachment.getNoContentButton()).waitForDisplayed()
-        if (await (await ShowAttachment.getNoContentButton()).isClickable()) {
-          await (await ShowAttachment.getNoContentButton()).click()
-        }
-      }
+      const downloadButton = await ShowAttachment.getDownloadAttachmentButton()
+      await downloadButton.waitForExist()
+      await downloadButton.waitForDisplayed()
+      // eslint-disable-next-line no-unused-expressions
+      expect(await downloadButton.isExisting()).to.be.true
+      // eslint-disable-next-line no-unused-expressions
+      expect(await downloadButton.isClickable()).to.be.true
+      await downloadButton.click()
+      await browser.pause(1000)
+      // file should be downloaded by now
+      const stats = fs.statSync(ATTACHMENT_NAME)
+      // eslint-disable-next-line no-unused-expressions
+      expect(stats.isFile()).to.be.true
+      expect(stats.size).to.equal(ATTACHMENT_SIZE)
+      // clean up
+      fs.rmSync(ATTACHMENT_NAME)
     })
     it("We should see image of attachment", async() => {
       await (await ShowAttachment.getImage()).waitForExist()

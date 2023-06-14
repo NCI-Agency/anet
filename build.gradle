@@ -396,16 +396,23 @@ task pushPsqlBaseData(type: DockerCopyFileToContainer) {
 	hostPath = "${projectDir}/insertBaseData-psql.sql"
 	remotePath = psqlPushDataPath
 }
-
 pushPsqlBaseData.mustRunAfter('dockerStartDB')
 
-task dbLoad(dependsOn: pushPsqlBaseData, type: DockerExecContainer) {
+task pushPsqlImageData(type: DockerCopyFileToContainer) {
+	group = "database runtime"
+	description = "Push SQL base data to PostgreSQL"
+	containerId = dbContainerName
+	hostPath = "${projectDir}/src/test/resources/assets/default_avatar.png"
+	remotePath = psqlPushDataPath
+}
+pushPsqlImageData.mustRunAfter('dockerStartDB')
+
+task dbLoad(dependsOn: [pushPsqlBaseData, pushPsqlImageData], type: DockerExecContainer) {
 	group = "database runtime"
 	description = "Runs the ANET database load command for PostgreSQL; loads demo data."
 	containerId = dbContainerName
 	commands = [ ["psql", "-U", run.environment["ANET_DB_USERNAME"], "-d", run.environment["ANET_DB_NAME"], "-f", "${psqlPushDataPath}/insertBaseData-psql.sql"] as String[] ]
 }
-
 dbLoad.mustRunAfter('dbMigrate')
 
 task deleteDbDump(type: DockerExecContainer) {
