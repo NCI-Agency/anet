@@ -148,7 +148,7 @@ const UploadAttachment = ({ getRelatedObject, edit, saveRelatedObject }) => {
             setUploadedList={setUploadedList}
           />
         ))}
-        {/** For edit report edit page show uploaded attachments **/}
+        {/** When on an edit page, show uploaded attachments **/}
         {edit && <UploadedAttachments uuid={relatedObject.uuid} />}
       </div>
     </div>
