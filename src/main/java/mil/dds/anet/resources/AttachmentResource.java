@@ -8,7 +8,9 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import jakarta.mail.internet.ContentDisposition;
 import jakarta.mail.internet.ParameterList;
+import java.io.IOException;
 import java.io.InputStream;
+import java.lang.invoke.MethodHandles;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
@@ -33,10 +35,17 @@ import mil.dds.anet.database.AttachmentDao;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
+import org.apache.tika.Tika;
+import org.apache.tika.io.TikaInputStream;
 import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Path("/api/attachment")
 public class AttachmentResource {
+
+  private static final Logger logger =
+      LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private final AttachmentDao dao;
 
@@ -82,8 +91,30 @@ public class AttachmentResource {
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   public Response uploadAttachmentContent(final @Auth Person user, @PathParam("uuid") String uuid,
       @FormDataParam("file") InputStream attachmentContent) {
-    dao.saveContentBlob(uuid, attachmentContent);
-    return Response.noContent().build();
+    final Attachment attachment = getAttachment(uuid);
+    dao.saveContentBlob(uuid, checkMimeType(attachment, attachmentContent));
+    return Response.ok().build();
+  }
+
+  private InputStream checkMimeType(final Attachment attachment,
+      final InputStream attachmentContent) {
+    final TikaInputStream tikaInputStream = TikaInputStream.get(attachmentContent);
+    final String detectedMimeType;
+    try {
+      detectedMimeType = new Tika().detect(tikaInputStream, attachment.getFileName());
+    } catch (IOException e) {
+      return attachmentContent;
+    }
+    if (!detectedMimeType.equals(attachment.getMimeType())) {
+      logger.error(
+          "Attachment content upload rejected for attachment {} (\"{}\"): "
+              + "stated mimeType \"{}\" differs from detected mimeType \"{}\"",
+          attachment.getUuid(), attachment.getFileName(), attachment.getMimeType(),
+          detectedMimeType);
+      throw new WebApplicationException("Attachment content does not match the MIME type",
+          Status.BAD_REQUEST);
+    }
+    return tikaInputStream;
   }
 
   @GraphQLMutation(name = "updateAttachment")

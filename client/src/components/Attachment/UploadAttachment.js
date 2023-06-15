@@ -31,11 +31,6 @@ const UploadAttachment = ({ getRelatedObject, edit, saveRelatedObject }) => {
   const [uploadedList, setUploadedList] = useState([])
   const relatedObject = getRelatedObject()
 
-  const handleUploadAttachment = file => {
-    setUploadedList(current => [...current, file])
-    toast.success("Your document has been uploaded")
-  }
-
   const attachmentSave = async e => {
     const file = e.target.files[0]
     const selectedAttachment = new Attachment({
@@ -84,12 +79,19 @@ const UploadAttachment = ({ getRelatedObject, edit, saveRelatedObject }) => {
           )
           .then(() => {
             toast.done(toastId)
-            handleUploadAttachment(selectedAttachment)
+            setUploadedList(current => [...current, selectedAttachment])
+            toast.success(
+              `Your attachment ${selectedAttachment.fileName} has been uploaded`
+            )
           })
-          .catch(() => {
+          .catch(error => {
             toast.dismiss(toastId)
+            selectedAttachment.contentLength = -1
+            setUploadedList(current => [...current, selectedAttachment])
             toast.error(
-              `Attachment content upload failed for ${selectedAttachment.fileName}`
+              `Attachment content upload failed for ${
+                selectedAttachment.fileName
+              }: ${error.response?.data?.error || error.message}`
             )
           })
       })
