@@ -14,7 +14,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -59,23 +58,22 @@ public class AttachmentResource {
     return attachments.get(0);
   }
 
-  // @Consumes(MediaType.MULTIPART_FORM_DATA)
   @GraphQLMutation(name = "createAttachment")
   public String createAttachment(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "attachment") Attachment attachment) {
-    if (DaoUtils.getEnumId(attachment.getClassification()) != 0) {
-      // classification is not "undefined"
-      throw new WebApplicationException("Classification cannot be set", Status.FORBIDDEN);
-    }
     final Person user = DaoUtils.getUserFromContext(context);
+    if (!hasAttachmentPermission(user, null)) {
+      throw new WebApplicationException("You don't have permission to upload attachments",
+          Status.FORBIDDEN);
 
-    if (hasUploadPermission(user, attachment.getMimeType())) {
-      attachment.setAuthorUuid(DaoUtils.getUuid(user));
-      attachment = dao.insert(attachment);
-      AnetAuditLogger.log("Attachment {} created by {}", DaoUtils.getUuid(attachment), user);
-      return DaoUtils.getUuid(attachment);
     }
-    return null;
+    assertAllowedMimeType(attachment.getMimeType());
+    assertAllowedClassification(attachment.getClassification());
+
+    attachment.setAuthorUuid(DaoUtils.getUuid(user));
+    attachment = dao.insert(attachment);
+    AnetAuditLogger.log("Attachment {} created by {}", DaoUtils.getUuid(attachment), user);
+    return DaoUtils.getUuid(attachment);
   }
 
   @POST
@@ -91,14 +89,14 @@ public class AttachmentResource {
   @GraphQLMutation(name = "updateAttachment")
   public String updateAttachment(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "attachment") Attachment attachment) {
-    final Attachment original = getAttachment(DaoUtils.getUuid(attachment));
+    final Attachment existing = getAttachment(DaoUtils.getUuid(attachment));
     final Person user = DaoUtils.getUserFromContext(context);
-    if (!AuthUtils.isAdmin(user)
-        && !Objects.equals(original.getAuthorUuid(), DaoUtils.getUuid(user))) {
-      // only admin or owner can update attachment
+    if (!hasAttachmentPermission(user, existing)) {
       throw new WebApplicationException("You don't have permission to update this attachment",
           Status.FORBIDDEN);
+
     }
+    assertAllowedMimeType(attachment.getMimeType());
 
     final int numRows = dao.update(attachment);
     if (numRows == 0) {
@@ -111,12 +109,9 @@ public class AttachmentResource {
   @GraphQLMutation(name = "deleteAttachment")
   public Integer deleteAttachment(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "uuid") String attachmentUuid) {
-    final Attachment original = getAttachment(attachmentUuid);
+    final Attachment existing = getAttachment(attachmentUuid);
     final Person user = DaoUtils.getUserFromContext(context);
-
-    if (!AuthUtils.isAdmin(user)
-        && !Objects.equals(original.getAuthorUuid(), DaoUtils.getUuid(user))) {
-      // only admin or owner can update attachment
+    if (!hasAttachmentPermission(user, existing)) {
       throw new WebApplicationException("You don't have permission to delete this attachment",
           Status.FORBIDDEN);
     }
@@ -170,22 +165,37 @@ public class AttachmentResource {
     return new ContentDisposition(disposition, parameterList).toString();
   }
 
-  private boolean hasUploadPermission(final Person user, final String mimeType) {
-    final Map<String, Object> attachmentSettings = (Map<String, Object>) AnetObjectEngine
-        .getConfiguration().getDictionaryEntry("fields.attachment");
+  private boolean hasAttachmentPermission(final Person user, final Attachment existingAttachment) {
+    final Map<String, Object> attachmentSettings = getAttachmentSettings();
     final Boolean userUploadDisabled = (Boolean) attachmentSettings.get("disabled");
 
     if (Boolean.TRUE.equals(userUploadDisabled) && !AuthUtils.isAdmin(user)) {
-      throw new WebApplicationException("You don't have permission to upload attachments",
-          Response.Status.FORBIDDEN);
+      return false;
     }
 
+    // only admin or owner can update attachment
+    return existingAttachment == null || AuthUtils.isAdmin(user)
+        || Objects.equals(existingAttachment.getAuthorUuid(), DaoUtils.getUuid(user));
+  }
+
+  private void assertAllowedMimeType(final String mimeType) {
+    final Map<String, Object> attachmentSettings = getAttachmentSettings();
     final var allowedMimeTypes = (List<String>) attachmentSettings.get("mimeTypes");
     if (!allowedMimeTypes.contains(mimeType)) {
-      throw new WebApplicationException(String.format("Files of type %s are not allowed", mimeType),
-          Response.Status.NOT_ACCEPTABLE);
+      throw new WebApplicationException(
+          String.format("Files of type \"%s\" are not allowed", mimeType), Status.NOT_ACCEPTABLE);
     }
+  }
 
-    return true;
+  private void assertAllowedClassification(Attachment.Classification classification) {
+    if (DaoUtils.getEnumId(classification) != 0) {
+      // classification is not "undefined"
+      throw new WebApplicationException("Classification cannot be set", Status.FORBIDDEN);
+    }
+  }
+
+  private Map<String, Object> getAttachmentSettings() {
+    return (Map<String, Object>) AnetObjectEngine.getConfiguration()
+        .getDictionaryEntry("fields.attachment");
   }
 }
