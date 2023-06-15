@@ -27,7 +27,7 @@ boolean isTestEnv = project.hasProperty("testEnv")
 String dropwizardVersion = "2.1.6"
 String logbackVersion = "1.3.5"
 String log4jVersion = "2.20.0"
-String keycloakVersion = "21.0.2"
+String keycloakVersion = "21.1.1"
 String psqlPushDataPath = "/var/tmp"
 String keycloakContainerPath = "/opt/keycloak"
 String keycloakPushDataPath = "${keycloakContainerPath}/data"
@@ -113,6 +113,7 @@ dependencies {
 	implementation 'de.ahus1.keycloak.dropwizard:keycloak-dropwizard:1.2.0'
 	implementation "org.keycloak:keycloak-jetty94-adapter:${keycloakVersion}"
 	implementation "org.keycloak:keycloak-jaxrs-oauth-client:${keycloakVersion}"
+	implementation "org.keycloak:keycloak-policy-enforcer:${keycloakVersion}"
 
 	// Used for converting GraphQL request output to XML:
 	implementation 'com.github.javadev:underscore-lodash:1.26'
