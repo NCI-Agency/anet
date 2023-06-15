@@ -113,6 +113,7 @@ dependencies {
 	implementation 'de.ahus1.keycloak.dropwizard:keycloak-dropwizard:1.2.0'
 	implementation "org.keycloak:keycloak-jetty94-adapter:${keycloakVersion}"
 	implementation "org.keycloak:keycloak-jaxrs-oauth-client:${keycloakVersion}"
+	implementation "org.keycloak:keycloak-policy-enforcer:${keycloakVersion}"
 
 	// Used for converting GraphQL request output to XML:
 	implementation 'com.github.javadev:underscore-lodash:1.26'
