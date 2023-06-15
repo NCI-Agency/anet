@@ -6,4 +6,4 @@ import Settings from "settings"
 const { realm, url, clientId } = Settings.keycloakConfiguration
 export const initOptions = { realm, url, clientId, onLoad: "login-required" }
 
-export const keycloak = Keycloak(initOptions)
+export const keycloak = new Keycloak(initOptions)
