@@ -85,7 +85,7 @@ public class AttachmentResource {
   public Response uploadAttachmentContent(final @Auth Person user, @PathParam("uuid") String uuid,
       @FormDataParam("file") InputStream attachmentContent) {
     dao.saveContentBlob(uuid, attachmentContent);
-    return Response.ok().build();
+    return Response.noContent().build();
   }
 
   @GraphQLMutation(name = "updateAttachment")
