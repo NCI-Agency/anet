@@ -50,6 +50,7 @@ const GQL_GET_TASK = gql`
         name
         code
         type
+        role
         status
         location {
           uuid

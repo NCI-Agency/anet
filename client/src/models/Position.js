@@ -14,6 +14,28 @@ export const principalPosition = Settings.fields.principal.position
 export const administratorPosition = Settings.fields.administrator.position
 export const superuserPosition = Settings.fields.superuser.position
 
+export class PositionRole {
+  // Static enumerations
+  static MEMBER = new PositionRole("MEMBER", "member")
+  static DEPUTY = new PositionRole("DEPUTY", "deputy")
+  static LEADER = new PositionRole("LEADER", "leader")
+  #value
+  #humanReadable
+
+  constructor(value, dictionaryKey) {
+    this.#value = value
+    this.#humanReadable = Settings.fields.position.role.choices[dictionaryKey]
+  }
+
+  toString() {
+    return this.#value
+  }
+
+  humanNameOfRole() {
+    return this.#humanReadable
+  }
+}
+
 export default class Position extends Model {
   static resourceName = "Position"
   static listName = "positionList"
@@ -49,6 +71,10 @@ export default class Position extends Model {
         .string()
         .required()
         .default(() => Model.STATUS.ACTIVE),
+      role: yup
+        .string()
+        .required()
+        .default(() => PositionRole.MEMBER.toString()),
       associatedPositions: yup.array().nullable().default([]),
       previousPeople: yup.array().nullable().default([]),
       organization: yup
@@ -86,7 +112,7 @@ export default class Position extends Model {
     .concat(Model.yupSchema)
 
   static autocompleteQuery =
-    "uuid name code type status location { uuid name } organization { uuid shortName} person { uuid name rank role avatar(size: 32) }"
+    "uuid name code type role status location { uuid name } organization { uuid shortName} person { uuid name rank role avatar(size: 32) }"
 
   static autocompleteQueryWithNotes = `${this.autocompleteQuery} ${GRAPHQL_NOTES_FIELDS}`
 
@@ -94,6 +120,7 @@ export default class Position extends Model {
     uuid
     name
     type
+    role
     status
     isSubscribed
     updatedAt
@@ -115,6 +142,7 @@ export default class Position extends Model {
       uuid
       name
       type
+      role
       person {
         uuid
         name
@@ -178,12 +206,20 @@ export default class Position extends Model {
     }
   }
 
+  static humanNameOfRole(role) {
+    return PositionRole[role]?.humanNameOfRole()
+  }
+
   constructor(props) {
     super(Model.fillObject(props, Position.yupSchema))
   }
 
   humanNameOfType() {
     return Position.humanNameOfType(this.type)
+  }
+
+  humanNameOfRole() {
+    return Position.humanNameOfRole(this.role)
   }
 
   isAdvisor() {

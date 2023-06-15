@@ -39,7 +39,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
           + " customFields tasks { uuid } parentOrg { uuid }"
           + " approvalSteps { uuid name approvers { uuid } } }";
   private static final String POSITION_FIELDS =
-      "{ uuid name code type status organization { uuid } location { uuid } }";
+      "{ uuid name code type role status organization { uuid } location { uuid } }";
 
   @Test
   public void createAO()

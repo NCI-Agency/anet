@@ -3,6 +3,7 @@ package mil.dds.anet.database.mappers;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import mil.dds.anet.beans.Position;
+import mil.dds.anet.beans.Position.PositionRole;
 import mil.dds.anet.beans.Position.PositionType;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
@@ -30,6 +31,7 @@ public class PositionMapper implements RowMapper<Position> {
     p.setCode(rs.getString("positions_code"));
     p.setType(MapperUtils.getEnumIdx(rs, "positions_type", PositionType.class));
     p.setStatus(MapperUtils.getEnumIdx(rs, "positions_status", Position.Status.class));
+    p.setRole(MapperUtils.getEnumIdx(rs, "positions_role", PositionRole.class));
 
     p.setOrganizationUuid(rs.getString("positions_organizationUuid"));
     p.setPersonUuid(rs.getString("positions_currentPersonUuid"));

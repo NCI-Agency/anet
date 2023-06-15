@@ -701,6 +701,12 @@ properties:
             type: string
             title: The label for a position's name
             description: Used in the UI where a position's name is shown.
+          role:
+            type: object
+            title: The label for a position's role
+            description: Used in the UI where a position's roles are displayed as choices
+            properties:
+               "$ref": "#/$defs/choiceField"
           customFields:
             type: object
             additionalProperties:

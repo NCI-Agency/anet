@@ -38,6 +38,7 @@ const GQL_GET_ORGANIZATION = gql`
         code
         status
         type
+        role
         person {
           uuid
           name
@@ -50,6 +51,7 @@ const GQL_GET_ORGANIZATION = gql`
           uuid
           name
           type
+          role
           code
           status
           person {
@@ -67,6 +69,7 @@ const GQL_GET_ORGANIZATION = gql`
         name
         code
         type
+        role
         status
         location {
           uuid

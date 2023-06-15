@@ -43,6 +43,7 @@ const GQL_GET_APP_DATA = gql`
         name
         code
         type
+        role
         status
         isApprover
         organization {
@@ -61,6 +62,7 @@ const GQL_GET_APP_DATA = gql`
           name
           code
           type
+          role
           status
           organization {
             uuid
@@ -79,6 +81,7 @@ const GQL_GET_APP_DATA = gql`
               uuid
               name
               type
+              role
               code
               status
               organization {

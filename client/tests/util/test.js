@@ -399,14 +399,18 @@ test.beforeEach(t => {
         "#supportedPositions table tbody tr"
       )
       for (const $row of $supportedPositionsRows) {
-        const [$billetCell, $advisorCell] = await $row.findElements(
-          By.css("td")
-        )
+        const [$billetCell, $posRoleCell, $advisorCell] =
+          await $row.findElements(By.css("td"))
         await t.context.driver.wait(
           until.elementIsVisible($billetCell),
           mediumWaitMs
         )
         await $billetCell.getText()
+        await t.context.driver.wait(
+          until.elementIsVisible($posRoleCell),
+          mediumWaitMs
+        )
+        await $posRoleCell.getText()
         await t.context.driver.wait(
           until.elementIsVisible($advisorCell),
           mediumWaitMs

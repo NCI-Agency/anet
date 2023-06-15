@@ -147,6 +147,7 @@ const OrganizationLaydown = ({ organization, refetch }) => {
 
   function renderPositionTable(positions) {
     let posNameHeader, posPersonHeader, otherNameHeader, otherPersonHeader
+    const posRoleHeader = Settings.fields.position.role.label
     if (organization.isAdvisorOrg()) {
       posNameHeader = Settings.fields.advisor.position.name
       posPersonHeader = Settings.fields.advisor.person.name
@@ -163,8 +164,10 @@ const OrganizationLaydown = ({ organization, refetch }) => {
         <thead>
           <tr>
             <th>{posNameHeader}</th>
+            <th>{posRoleHeader}</th>
             <th>{posPersonHeader}</th>
             <th>{otherPersonHeader}</th>
+            <th>{posRoleHeader}</th>
             <th>{otherNameHeader}</th>
           </tr>
         </thead>
@@ -183,7 +186,12 @@ const OrganizationLaydown = ({ organization, refetch }) => {
 
   function renderPositionRow(position, other, otherIndex) {
     let key = position.uuid
-    let otherPersonCol, otherNameCol, positionPersonCol, positionNameCol
+    let otherPersonCol,
+      otherPosRoleCol,
+      otherNameCol,
+      positionPersonCol,
+      positionRoleCol,
+      positionNameCol
     if (position.status === Model.STATUS.INACTIVE && !showInactivePositions) {
       return
     }
@@ -197,7 +205,7 @@ const OrganizationLaydown = ({ organization, refetch }) => {
           </LinkTo>
         </td>
       )
-
+      otherPosRoleCol = <td>{Position.humanNameOfRole(other.role)}</td>
       otherPersonCol = other.person ? (
         <td>
           <LinkTo modelType="Person" model={other.person}>
@@ -217,6 +225,7 @@ const OrganizationLaydown = ({ organization, refetch }) => {
           </LinkTo>
         </td>
       )
+      positionRoleCol = <td>{Position.humanNameOfRole(position.role)}</td>
       positionPersonCol = position?.person?.uuid ? (
         <td>
           <LinkTo modelType="Person" model={position.person}>
@@ -229,15 +238,19 @@ const OrganizationLaydown = ({ organization, refetch }) => {
     }
 
     otherPersonCol = otherPersonCol || <td />
+    otherPosRoleCol = otherPosRoleCol || <td />
     otherNameCol = otherNameCol || <td />
     positionPersonCol = positionPersonCol || <td />
+    positionRoleCol = positionRoleCol || <td />
     positionNameCol = positionNameCol || <td />
 
     return (
       <tr key={key}>
         {positionNameCol}
+        {positionRoleCol}
         {positionPersonCol}
         {otherPersonCol}
+        {otherPosRoleCol}
         {otherNameCol}
       </tr>
     )

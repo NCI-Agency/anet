@@ -108,6 +108,7 @@ const GQL_GET_PERSON_LIST = gql`
           uuid
           name
           type
+          role
           code
           location {
             uuid
@@ -133,6 +134,7 @@ const GQL_GET_POSITION_LIST = gql`
         name
         code
         type
+        role
         status
         location {
           uuid

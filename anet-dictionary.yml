@@ -720,6 +720,13 @@ fields:
 
   position:
     name: Position Name
+    role:
+      label: Position Role
+      choices:
+        member: Member
+        deputy: Deputy
+        leader: Leader
+
     customFields:
       multipleButtons:
         type: enumset

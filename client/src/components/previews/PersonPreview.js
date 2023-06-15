@@ -37,6 +37,7 @@ const GQL_GET_PERSON = gql`
         uuid
         name
         type
+        role
         organization {
           uuid
           shortName
@@ -46,6 +47,7 @@ const GQL_GET_PERSON = gql`
           uuid
           name
           type
+          role
           person {
             uuid
             name

@@ -110,6 +110,7 @@ const GQL_GET_REPORT = gql`
           uuid
           name
           type
+          role
           code
           status
           organization {

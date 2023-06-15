@@ -37,6 +37,7 @@ const GQL_GET_PERSON = gql`
         uuid
         name
         type
+        role
       }
     }
   }

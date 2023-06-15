@@ -33,8 +33,9 @@ import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSearchQuery> {
 
-  public static final String[] fields = {"uuid", "name", "code", "createdAt", "updatedAt",
-      "organizationUuid", "currentPersonUuid", "type", "status", "locationUuid", "customFields"};
+  public static final String[] fields =
+      {"uuid", "name", "code", "createdAt", "updatedAt", "organizationUuid", "currentPersonUuid",
+          "type", "status", "locationUuid", "customFields", "role"};
   public static final String TABLE_NAME = "positions";
   public static final String POSITION_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
   public static final String DUPLICATE_POSITION_CODE =
@@ -52,12 +53,13 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
       getDbHandle()
           .createUpdate("/* positionInsert */ INSERT INTO positions (uuid, name, code, type, "
               + "status, \"organizationUuid\", \"locationUuid\", \"createdAt\", \"updatedAt\", "
-              + "\"customFields\") VALUES (:uuid, :name, :code, :type, :status, :organizationUuid, "
-              + ":locationUuid, :createdAt, :updatedAt, :customFields)")
+              + "\"customFields\", \"role\") VALUES (:uuid, :name, :code, :type, :status, :organizationUuid, "
+              + ":locationUuid, :createdAt, :updatedAt, :customFields, :role)")
           .bindBean(p).bind("createdAt", DaoUtils.asLocalDateTime(p.getCreatedAt()))
           .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
           .bind("type", DaoUtils.getEnumId(p.getType()))
-          .bind("status", DaoUtils.getEnumId(p.getStatus())).execute();
+          .bind("status", DaoUtils.getEnumId(p.getStatus()))
+          .bind("role", DaoUtils.getEnumId(p.getRole())).execute();
       // Specifically don't set currentPersonUuid here because we'll handle that later in
       // setPersonInPosition();
     } catch (UnableToExecuteStatementException e) {
@@ -153,10 +155,11 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
           .createUpdate("/* positionUpdate */ UPDATE positions SET name = :name, code = :code, "
               + "\"organizationUuid\" = :organizationUuid, type = :type, status = :status, "
               + "\"locationUuid\" = :locationUuid, \"updatedAt\" = :updatedAt, "
-              + "\"customFields\" = :customFields WHERE uuid = :uuid")
+              + "\"customFields\" = :customFields, \"role\" = :role WHERE uuid = :uuid")
           .bindBean(p).bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
           .bind("type", DaoUtils.getEnumId(p.getType()))
-          .bind("status", DaoUtils.getEnumId(p.getStatus())).execute();
+          .bind("status", DaoUtils.getEnumId(p.getStatus()))
+          .bind("role", DaoUtils.getEnumId(p.getRole())).execute();
       // Evict the person holding this position from the domain users cache, as their position has
       // changed
       AnetObjectEngine.getInstance().getPersonDao()

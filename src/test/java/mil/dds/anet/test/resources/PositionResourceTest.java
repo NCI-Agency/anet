@@ -30,6 +30,7 @@ import mil.dds.anet.test.client.PersonPositionHistory;
 import mil.dds.anet.test.client.PersonPositionHistoryInput;
 import mil.dds.anet.test.client.Position;
 import mil.dds.anet.test.client.PositionInput;
+import mil.dds.anet.test.client.PositionRole;
 import mil.dds.anet.test.client.PositionSearchQueryInput;
 import mil.dds.anet.test.client.PositionSearchSortBy;
 import mil.dds.anet.test.client.PositionType;
@@ -46,7 +47,7 @@ import org.junit.jupiter.api.Test;
 public class PositionResourceTest extends AbstractResourceTest {
   private static final String _ORGANIZATION_FIELDS = "uuid shortName";
   private static final String _PERSON_FIELDS = "uuid name role";
-  private static final String _POSITION_FIELDS = "uuid name code type status customFields";
+  private static final String _POSITION_FIELDS = "uuid name code type role status customFields";
   public static final String ORGANIZATION_FIELDS =
       String.format("{ %1$s positions { %2$s organization { uuid } location { uuid } } }",
           _ORGANIZATION_FIELDS, _POSITION_FIELDS);
@@ -72,10 +73,11 @@ public class PositionResourceTest extends AbstractResourceTest {
     // Create Position assigned to an AO
     final Organization ao = adminMutationExecutor.createOrganization(ORGANIZATION_FIELDS,
         TestData.createAdvisorOrganizationInput(true));
-    final PositionInput testInput = PositionInput.builder()
-        .withName("A Test Position created by PositionResourceTest").withType(PositionType.ADVISOR)
-        .withStatus(Status.ACTIVE).withOrganization(getOrganizationInput(ao))
-        .withLocation(getLocationInput(getGeneralHospital())).build();
+    final PositionInput testInput =
+        PositionInput.builder().withName("A Test Position created by PositionResourceTest")
+            .withType(PositionType.ADVISOR).withRole(PositionRole.MEMBER).withStatus(Status.ACTIVE)
+            .withOrganization(getOrganizationInput(ao))
+            .withLocation(getLocationInput(getGeneralHospital())).build();
 
     Position created = adminMutationExecutor.createPosition(FIELDS, testInput);
     assertThat(created).isNotNull();
@@ -167,7 +169,7 @@ public class PositionResourceTest extends AbstractResourceTest {
 
     final PositionInput prinPosInput =
         PositionInput.builder().withName("A Principal Position created by PositionResourceTest")
-            .withType(PositionType.PRINCIPAL)
+            .withType(PositionType.PRINCIPAL).withRole(PositionRole.MEMBER)
             .withOrganization(getOrganizationInput(orgs.getList().get(0))).withStatus(Status.ACTIVE)
             .build();
 
@@ -474,8 +476,8 @@ public class PositionResourceTest extends AbstractResourceTest {
     final String positionCode = UUID.randomUUID().toString();
     final PositionInput newbPositionInput = PositionInput.builder()
         .withName("PositionTest Position for Newb").withType(PositionType.PRINCIPAL)
-        .withOrganization(getOrganizationInput(orgs.getList().get(0))).withStatus(Status.ACTIVE)
-        .withPerson(getPersonInput(newb)).withCode(positionCode).build();
+        .withRole(PositionRole.MEMBER).withOrganization(getOrganizationInput(orgs.getList().get(0)))
+        .withStatus(Status.ACTIVE).withPerson(getPersonInput(newb)).withCode(positionCode).build();
 
     final Position newbPosition = adminMutationExecutor.createPosition(FIELDS, newbPositionInput);
     assertThat(newbPosition).isNotNull();
@@ -526,11 +528,11 @@ public class PositionResourceTest extends AbstractResourceTest {
     }
 
     // Create a new position and move prin2 there on CREATE.
-    final PositionInput pos2Input =
-        PositionInput.builder().withName("Created by PositionTest").withType(PositionType.PRINCIPAL)
-            .withOrganization(getOrganizationInput(orgs.getList().get(0)))
-            .withLocation(getLocationInput(getGeneralHospital())).withStatus(Status.ACTIVE)
-            .withPerson(getPersonInput(prin2)).build();
+    final PositionInput pos2Input = PositionInput.builder().withName("Created by PositionTest")
+        .withType(PositionType.PRINCIPAL).withRole(PositionRole.MEMBER)
+        .withOrganization(getOrganizationInput(orgs.getList().get(0)))
+        .withLocation(getLocationInput(getGeneralHospital())).withStatus(Status.ACTIVE)
+        .withPerson(getPersonInput(prin2)).build();
 
     final Position pos2 = adminMutationExecutor.createPosition(FIELDS, pos2Input);
     assertThat(pos2).isNotNull();
@@ -553,8 +555,8 @@ public class PositionResourceTest extends AbstractResourceTest {
     // Try to create another position with the same code
     final PositionInput dupCodePositionInput = PositionInput.builder()
         .withName("PositionTest Position for duplicate code").withType(PositionType.PRINCIPAL)
-        .withOrganization(getOrganizationInput(orgs.getList().get(0))).withStatus(Status.ACTIVE)
-        .withCode(positionCode).build();
+        .withRole(PositionRole.MEMBER).withOrganization(getOrganizationInput(orgs.getList().get(0)))
+        .withStatus(Status.ACTIVE).withCode(positionCode).build();
     try {
       adminMutationExecutor.createPosition(FIELDS, dupCodePositionInput);
       fail("Expected ClientErrorException");
@@ -615,7 +617,7 @@ public class PositionResourceTest extends AbstractResourceTest {
         TestData.createAdvisorOrganizationInput(true));
     final PositionInput newPositionInput =
         PositionInput.builder().withName("A Test Position not related to the user's organization")
-            .withType(PositionType.ADVISOR).withStatus(Status.ACTIVE)
+            .withType(PositionType.ADVISOR).withRole(PositionRole.MEMBER).withStatus(Status.ACTIVE)
             .withOrganization(getOrganizationInput(ao))
             .withLocation(getLocationInput(getGeneralHospital())).build();
     final Position newPosition = adminMutationExecutor.createPosition(FIELDS, newPositionInput);
@@ -657,10 +659,11 @@ public class PositionResourceTest extends AbstractResourceTest {
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     final Organization ao = adminMutationExecutor.createOrganization(ORGANIZATION_FIELDS,
         TestData.createAdvisorOrganizationInput(true));
-    final PositionInput testInput1 = PositionInput.builder()
-        .withName("A Test Position for edittting history").withType(PositionType.ADVISOR)
-        .withStatus(Status.ACTIVE).withOrganization(getOrganizationInput(ao))
-        .withLocation(getLocationInput(getGeneralHospital())).build();
+    final PositionInput testInput1 =
+        PositionInput.builder().withName("A Test Position for edittting history")
+            .withType(PositionType.ADVISOR).withRole(PositionRole.MEMBER).withStatus(Status.ACTIVE)
+            .withOrganization(getOrganizationInput(ao))
+            .withLocation(getLocationInput(getGeneralHospital())).build();
 
     final Position createdPos = adminMutationExecutor.createPosition(FIELDS, testInput1);
     assertThat(createdPos).isNotNull();

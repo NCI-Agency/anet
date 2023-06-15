@@ -4470,5 +4470,13 @@
 			WHERE "parentTaskUuid" IS NULL;
 		</sql>
 	</changeSet>
+	
+	<changeSet id="add-role-to-positions" author="hyesilAnka" >
+		<addColumn tableName="positions" >
+			<column name="role" type="int" defaultValue="0" >
+				<constraints nullable="false"/>
+			</column>
+		</addColumn>
+	</changeSet>
 
 </databaseChangeLog>

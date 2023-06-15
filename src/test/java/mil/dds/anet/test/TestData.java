@@ -11,6 +11,7 @@ import mil.dds.anet.test.client.OrganizationInput;
 import mil.dds.anet.test.client.OrganizationType;
 import mil.dds.anet.test.client.Position;
 import mil.dds.anet.test.client.PositionInput;
+import mil.dds.anet.test.client.PositionRole;
 import mil.dds.anet.test.client.PositionType;
 import mil.dds.anet.test.client.Status;
 import mil.dds.anet.test.client.TaskInput;
@@ -36,6 +37,7 @@ public class TestData {
     b.setName("Test Advisor Position");
     b.setCode("TST-0101");
     b.setType(PositionType.ADVISOR);
+    b.setRole(PositionRole.MEMBER);
     b.setStatus(Status.ACTIVE);
     return b;
   }
@@ -59,7 +61,8 @@ public class TestData {
 
   public static PositionInput createPositionInput() {
     return PositionInput.builder().withName("Head of donut operations").withCode("DNT-001")
-        .withType(PositionType.PRINCIPAL).withStatus(Status.ACTIVE).build();
+        .withType(PositionType.PRINCIPAL).withRole(PositionRole.MEMBER).withStatus(Status.ACTIVE)
+        .build();
   }
 
   public static TaskInput createTaskInput(String shortName, String longName, String category) {

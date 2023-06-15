@@ -15,6 +15,7 @@ const GQL_GET_POSITION = gql`
       uuid
       name
       type
+      role
       status
       code
       organization {
@@ -34,6 +35,7 @@ const GQL_GET_POSITION = gql`
         uuid
         name
         type
+        role
         person {
           uuid
           name
@@ -104,6 +106,10 @@ const PositionPreview = ({ className, uuid }) => {
         <PreviewField
           label="Type"
           value={Position.humanNameOfType(position.type)}
+        />
+        <PreviewField
+          label={Settings.fields.position.role.label}
+          value={Position.humanNameOfRole(position.role)}
         />
         <PreviewField
           label="Status"

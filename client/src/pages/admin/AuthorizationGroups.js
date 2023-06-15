@@ -23,6 +23,7 @@ const GQL_GET_AUTHORIZATION_GROUP_LIST = gql`
           uuid
           name
           type
+          role
         }
         status
       }

@@ -40,6 +40,30 @@ class CreatePosition extends Page {
     return browser.$('label[for="type_PRINCIPAL"]')
   }
 
+  async getRoleMemberButton() {
+    return browser.$('label[for="role_MEMBER"]')
+  }
+
+  async getRoleMemberInput() {
+    return browser.$('input[id="role_MEMBER"]')
+  }
+
+  async getRoleDeputyButton() {
+    return browser.$('label[for="role_DEPUTY"]')
+  }
+
+  async getRoleDeputyInput() {
+    return browser.$('input[id="role_DEPUTY"]')
+  }
+
+  async getRoleLeaderButton() {
+    return browser.$('label[for="role_LEADER"]')
+  }
+
+  async getRoleLeaderInput() {
+    return browser.$('input[id="role_LEADER"]')
+  }
+
   async getOrganizationInput() {
     return browser.$("#organization")
   }

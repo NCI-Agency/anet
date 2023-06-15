@@ -24,6 +24,7 @@ import { FastField, Field, Form, Formik } from "formik"
 import DictionaryField from "HOC/DictionaryField"
 import _isEmpty from "lodash/isEmpty"
 import { Location, Organization, Position } from "models"
+import { PositionRole } from "models/Position"
 import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
 import { Button, Form as FormBS } from "react-bootstrap"
@@ -109,6 +110,25 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
       label: Settings.fields.administrator.position.type
     }
   ])
+  const nonAdminRolesButtons = [
+    {
+      id: "roleMemberButton",
+      value: PositionRole.MEMBER.toString(),
+      label: PositionRole.MEMBER.humanNameOfRole()
+    }
+  ]
+  const adminRolesButtons = nonAdminRolesButtons.concat([
+    {
+      id: "roleDeputyButton",
+      value: PositionRole.DEPUTY.toString(),
+      label: PositionRole.DEPUTY.humanNameOfRole()
+    },
+    {
+      id: "roleLeaderButton",
+      value: PositionRole.LEADER.toString(),
+      label: PositionRole.LEADER.humanNameOfRole()
+    }
+  ])
 
   const CodeFieldWithLabel = DictionaryField(Field)
 
@@ -154,6 +174,9 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
           currentUser.position.organizationsAdministrated.map(org => org.uuid)
         const isSuperuser =
           currentUser && currentUser.isSuperuser() && !currentUser.isAdmin()
+        // Only admin and superuser can assign high role (other than member role) to a position
+        const positionRoleButtons =
+          isAdmin || isSuperuser ? adminRolesButtons : nonAdminRolesButtons
         const isSuperuserWithoutAdministratingOrgs =
           isSuperuser && _isEmpty(administratingOrgUuids)
         // Superusers without organizations administrated cannot create advisor positions
@@ -313,6 +336,14 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
                     onChange={value => setFieldValue("permissions", value)}
                   />
                 )}
+
+                <FastField
+                  name="role"
+                  label={Settings.fields.position.role.label}
+                  component={FieldHelper.RadioButtonToggleGroupField}
+                  buttons={positionRoleButtons}
+                  onChange={value => setFieldValue("role", value)}
+                />
               </Fieldset>
 
               <Fieldset title="Additional information">
