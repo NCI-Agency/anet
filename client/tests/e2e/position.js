@@ -21,6 +21,7 @@ test.serial("Move someone in and out of a position", async t => {
   await t.context.pageHelpers.clickMyOrgLink()
 
   const positionName = "EF 2.2 Advisor C"
+  const positionRole = "Member"
   const person = "REINTON, Reina"
   const rank = "CIV"
   const personName = rank + " " + person
@@ -67,11 +68,18 @@ test.serial("Move someone in and out of a position", async t => {
   const $vacantPositionRows = await $$("#vacantPositions table tbody tr")
   let $positionToFillCell
   for (const $row of $vacantPositionRows) {
-    const [$billetCell, $advisorCell] = await $row.findElements(By.css("td"))
+    const [$billetCell, $posRoleCell, $advisorCell] = await $row.findElements(
+      By.css("td")
+    )
     const billetText = await $billetCell.getText()
+    const roleText = await $posRoleCell.getText()
     const advisorText = await $advisorCell.getText()
 
-    if (billetText === positionName && advisorText === "Unfilled") {
+    if (
+      billetText === positionName &&
+      advisorText === "Unfilled" &&
+      roleText === positionRole
+    ) {
       $positionToFillCell = $billetCell
       break
     }
@@ -161,11 +169,18 @@ test.serial("Move someone in and out of a position", async t => {
   const $supportedPositionsRows = await $$("#supportedPositions table tbody tr")
   let foundCorrectRow = false
   for (const $row of $supportedPositionsRows) {
-    const [$billetCell, $advisorCell] = await $row.findElements(By.css("td"))
+    const [$billetCell, $posRoleCell, $advisorCell] = await $row.findElements(
+      By.css("td")
+    )
     const billetText = await $billetCell.getText()
+    const roleText = await $posRoleCell.getText()
     const advisorText = await $advisorCell.getText()
 
-    if (billetText === positionName && advisorText === personName) {
+    if (
+      billetText === positionName &&
+      advisorText === personName &&
+      roleText === positionRole
+    ) {
       foundCorrectRow = true
       break
     }
