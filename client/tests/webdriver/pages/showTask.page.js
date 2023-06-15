@@ -29,38 +29,36 @@ class ShowTask extends Page {
     return browser.$("#subEfforts > .list-group .list-group-item:first-child")
   }
 
-  async getAssessmentResultsMonthly() {
-    return browser.$("#entity-assessments-results-monthly")
-  }
-
-  async getAssessmentResultsWeekly() {
-    return browser.$("#entity-assessments-results-weekly")
+  async getAssessmentResults(assessmentKey, recurrence) {
+    return browser.$(
+      `#entity-assessments-results-${assessmentKey}-${recurrence}`
+    )
   }
 
   async getDescription() {
     return browser.$('div[id="description"')
   }
 
-  async getMonthlyAssessmentsTable() {
-    return (await this.getAssessmentResultsMonthly()).$(
+  async getAssessmentsTable(assessmentKey, recurrence) {
+    return (await this.getAssessmentResults(assessmentKey, recurrence)).$(
       "table.assessments-table"
     )
   }
 
-  async getAddMonthlyAssessmentButton() {
+  async getAddAssessmentButton(assessmentKey, recurrence) {
     // get the add assessment button for first period on the table
-    return (await this.getMonthlyAssessmentsTable()).$(
+    return (await this.getAssessmentsTable(assessmentKey, recurrence)).$(
       "tbody > tr > td:first-child > button"
     )
   }
 
-  async getEditMonthlyAssessmentButton() {
-    return (await this.getMonthlyAssessmentsTable()).$(
+  async getEditAssessmentButton(assessmentKey, recurrence) {
+    return (await this.getAssessmentsTable(assessmentKey, recurrence)).$(
       'div.card button[title="Edit assessment"]'
     )
   }
 
-  async getDeleteMonthlyAssessmentButton() {
+  async getDeleteAssessmentButton() {
     return browser.$("div.card button.btn.btn-outline-danger.btn-xs")
   }
 
@@ -76,14 +74,14 @@ class ShowTask extends Page {
     return (await this.getAssessmentModalForm()).$('//button[text()="Save"]')
   }
 
-  async getShownAssessmentPanel() {
-    return (await this.getMonthlyAssessmentsTable()).$(
+  async getShownAssessmentPanel(assessmentKey, recurrence) {
+    return (await this.getAssessmentsTable(assessmentKey, recurrence)).$(
       "tbody tr:last-child td:first-child .card"
     )
   }
 
-  async getShownAssessmentDetails() {
-    return (await this.getShownAssessmentPanel()).$$(
+  async getShownAssessmentDetails(assessmentKey, recurrence) {
+    return (await this.getShownAssessmentPanel(assessmentKey, recurrence)).$$(
       "div.card-body .form-control-plaintext"
     )
   }
@@ -123,7 +121,11 @@ class ShowTask extends Page {
     await browser.pause(300)
   }
 
-  async saveAssessmentAndWaitForModalClose(detail0ToWaitFor) {
+  async saveAssessmentAndWaitForModalClose(
+    assessmentKey,
+    recurrence,
+    detail0ToWaitFor
+  ) {
     await (await this.getSaveAssessmentButton()).click()
     await browser.pause(300) // wait for modal animation to finish
 
@@ -137,8 +139,9 @@ class ShowTask extends Page {
     await browser.waitUntil(
       async() => {
         return (
-          (await (await this.getShownAssessmentDetails())[0].getText()) ===
-          detail0ToWaitFor
+          (await (
+            await this.getShownAssessmentDetails(assessmentKey, recurrence)
+          )[0].getText()) === detail0ToWaitFor
         )
       },
       {
@@ -155,10 +158,10 @@ class ShowTask extends Page {
     await (await this.getDeleteConfirmButton()).click()
   }
 
-  async waitForDeletedAssessmentToDisappear() {
+  async waitForDeletedAssessmentToDisappear(assessmentKey, recurrence) {
     await browser.pause(500)
     await (
-      await this.getShownAssessmentPanel()
+      await this.getShownAssessmentPanel(assessmentKey, recurrence)
     ).waitForExist({
       reverse: true,
       timeout: 20000

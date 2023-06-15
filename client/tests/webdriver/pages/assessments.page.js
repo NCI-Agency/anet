@@ -1,12 +1,14 @@
 import Page from "./page"
 
 class AssessmentsSection extends Page {
-  async getAssessmentsSection(recurrence) {
-    return browser.$(`#entity-assessments-results-${recurrence}`)
+  async getAssessmentsSection(assessmentKey, recurrence) {
+    return browser.$(
+      `#entity-assessments-results-${assessmentKey}-${recurrence}`
+    )
   }
 
-  async getNewAssessmentButton(recurrence) {
-    return (await this.getAssessmentsSection(recurrence)).$(
+  async getNewAssessmentButton(assessmentKey, recurrence) {
+    return (await this.getAssessmentsSection(assessmentKey, recurrence)).$(
       "table.assessments-table tr button"
     )
   }

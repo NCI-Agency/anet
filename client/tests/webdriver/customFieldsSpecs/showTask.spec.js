@@ -16,19 +16,14 @@ describe("Show task page", () => {
 
   describe("When on the show page of a task with assessments", () => {
     it("We should see a table of assessments related to the current task", async() => {
-      await (await ShowTask.getAssessmentResultsMonthly()).waitForDisplayed()
+      await (
+        await ShowTask.getAssessmentResults("subTaskOnceReport", "monthly")
+      ).waitForDisplayed()
       const question1AssessmentMonthly = await (
-        await ShowTask.getAssessmentResultsMonthly()
+        await ShowTask.getAssessmentResults("subTaskOnceReport", "monthly")
       ).$("[id*=question1-assessment]")
       // eslint-disable-next-line no-unused-expressions
       expect(await question1AssessmentMonthly.isExisting()).to.be.true
-
-      await (await ShowTask.getAssessmentResultsWeekly()).waitForDisplayed()
-      const question1AssessmentWeekly = await (
-        await ShowTask.getAssessmentResultsWeekly()
-      ).$("[id*=question1-assessment]")
-      // eslint-disable-next-line no-unused-expressions
-      expect(await question1AssessmentWeekly.isExisting()).to.be.true
     })
   })
 

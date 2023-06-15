@@ -25,10 +25,16 @@ describe("In my counterparts page", () => {
     })
     it("Should be able to add a quarterly assessment with 4 questions for the counterpart", async() => {
       await (
-        await AssessmentsSection.getAssessmentsSection("quarterly")
+        await AssessmentsSection.getAssessmentsSection(
+          "principalQuarterly",
+          "quarterly"
+        )
       ).waitForDisplayed()
       const newAssessmentButton =
-        await AssessmentsSection.getNewAssessmentButton("quarterly")
+        await AssessmentsSection.getNewAssessmentButton(
+          "principalQuarterly",
+          "quarterly"
+        )
       await newAssessmentButton.waitForDisplayed()
       await newAssessmentButton.click()
       await browser.pause(SHORT_WAIT_MS) // wait for the modal to slide in (transition is 300 ms)
@@ -88,10 +94,16 @@ describe("In my counterparts page", () => {
     })
     it("Should be able to add a quarterly assessment with 1 question for the counterpart", async() => {
       await (
-        await AssessmentsSection.getAssessmentsSection("quarterly")
+        await AssessmentsSection.getAssessmentsSection(
+          "principalQuarterly",
+          "quarterly"
+        )
       ).waitForDisplayed()
       const newAssessmentButton =
-        await AssessmentsSection.getNewAssessmentButton("quarterly")
+        await AssessmentsSection.getNewAssessmentButton(
+          "principalQuarterly",
+          "quarterly"
+        )
       await newAssessmentButton.waitForDisplayed()
       await newAssessmentButton.click()
       await browser.pause(SHORT_WAIT_MS) // wait for the modal to slide in (transition is 300 ms)
@@ -160,10 +172,16 @@ describe("In my tasks page", () => {
     })
     it("Should be able to add a monthly assessment with 2 questions for the task", async() => {
       await (
-        await AssessmentsSection.getAssessmentsSection("monthly")
+        await AssessmentsSection.getAssessmentsSection(
+          "subTaskMonthly",
+          "monthly"
+        )
       ).waitForDisplayed()
       const newAssessmentButton =
-        await AssessmentsSection.getNewAssessmentButton("monthly")
+        await AssessmentsSection.getNewAssessmentButton(
+          "subTaskMonthly",
+          "monthly"
+        )
       await newAssessmentButton.waitForDisplayed()
       await newAssessmentButton.click()
       await browser.pause(SHORT_WAIT_MS) // wait for the modal to slide in (transition is 300 ms)
@@ -192,10 +210,16 @@ describe("In my tasks page", () => {
     })
     it("Should be able to add a weekly assessment with 1 question for the task", async() => {
       await (
-        await AssessmentsSection.getAssessmentsSection("weekly")
+        await AssessmentsSection.getAssessmentsSection(
+          "subTaskWeekly",
+          "weekly"
+        )
       ).waitForDisplayed()
       const newAssessmentButton =
-        await AssessmentsSection.getNewAssessmentButton("weekly")
+        await AssessmentsSection.getNewAssessmentButton(
+          "subTaskWeekly",
+          "weekly"
+        )
       await newAssessmentButton.waitForDisplayed()
       await newAssessmentButton.click()
       await browser.pause(SHORT_WAIT_MS) // wait for the modal to slide in (transition is 300 ms)
