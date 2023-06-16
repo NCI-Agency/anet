@@ -108,6 +108,7 @@ export const GQL_UPDATE_NOTE = gql`
 `
 
 export const MODEL_TO_OBJECT_TYPE = {
+  Attachment: "attachments",
   AuthorizationGroup: "authorizationGroups",
   Location: "locations",
   Organization: "organizations",
@@ -443,6 +444,17 @@ export default class Model {
     }),
     noteRelatedObjects: Model.noteRelatedObjectsPropType
   })
+
+  static attachmentRelatedObjectType = PropTypes.shape({
+    attachmentUuid: PropTypes.string,
+    relatedObjectType: PropTypes.string.isRequired,
+    relatedObjectUuid: PropTypes.string.isRequired,
+    relatedObject: PropTypes.object
+  })
+
+  static attachmentRelatedObjectsPropType = PropTypes.arrayOf(
+    Model.attachmentRelatedObjectType
+  )
 
   static resourceName = null
   static displayName(appSettings) {

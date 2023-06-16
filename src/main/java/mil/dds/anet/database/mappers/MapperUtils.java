@@ -62,6 +62,15 @@ public class MapperUtils {
     return rs.wasNull() ? null : value;
   }
 
+  public static Long getOptionalLong(final ResultSet rs, final String columnName)
+      throws SQLException {
+    if (!containsColumnNamed(rs, columnName)) {
+      return null;
+    }
+    final long value = rs.getLong(columnName);
+    return rs.wasNull() ? null : value;
+  }
+
   public static Double getOptionalDouble(final ResultSet rs, final String columnName)
       throws SQLException {
     if (!containsColumnNamed(rs, columnName)) {

@@ -17,6 +17,7 @@ import io.dropwizard.cli.ServerCommand;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.db.DataSourceFactory;
+import io.dropwizard.forms.MultiPartBundle;
 import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
@@ -39,6 +40,7 @@ import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.StatementLogger;
 import mil.dds.anet.resources.AdminResource;
 import mil.dds.anet.resources.ApprovalStepResource;
+import mil.dds.anet.resources.AttachmentResource;
 import mil.dds.anet.resources.AuthorizationGroupResource;
 import mil.dds.anet.resources.GraphQlResource;
 import mil.dds.anet.resources.HomeResource;
@@ -69,6 +71,7 @@ import mil.dds.anet.views.ViewResponseFilter;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.jdbi.v3.postgres.PostgresPlugin;
 import org.keycloak.KeycloakSecurityContext;
 import org.keycloak.representations.AccessToken;
 import org.slf4j.Logger;
@@ -141,6 +144,9 @@ public class AnetApplication extends Application<AnetConfiguration> {
         return configuration.getViews();
       }
     });
+
+    // Add Multipart for stream attachment content
+    bootstrap.addBundle(new MultiPartBundle());
 
     // Add Dropwizard-Keycloak
     bootstrap.addBundle(new KeycloakBundle<AnetConfiguration>() {
@@ -281,10 +287,13 @@ public class AnetApplication extends Application<AnetConfiguration> {
     });
 
     // Add Dropwizard-Guicey
-    bootstrap.addBundle(GuiceBundle.builder()
-        .bundles(
-            JdbiBundle.<AnetConfiguration>forDatabase((conf, env) -> conf.getDataSourceFactory()))
-        .build());
+    bootstrap
+        .addBundle(GuiceBundle.builder()
+            .bundles(JdbiBundle
+                .<AnetConfiguration>forDatabase((conf, env) -> conf.getDataSourceFactory())
+                // For supporting PostgreSQL large objects
+                .withPlugins(new PostgresPlugin()))
+            .build());
 
     metricRegistry = bootstrap.getMetricRegistry();
   }
@@ -386,12 +395,13 @@ public class AnetApplication extends Application<AnetConfiguration> {
     final SubscriptionResource subscriptionResource = new SubscriptionResource(engine);
     final SubscriptionUpdateResource subscriptionUpdateResource =
         new SubscriptionUpdateResource(engine);
+    final AttachmentResource attachmentResource = new AttachmentResource(engine);
     final GraphQlResource graphQlResource = injector.getInstance(GraphQlResource.class);
     graphQlResource.initialise(engine, configuration,
         ImmutableList.of(reportResource, personResource, positionResource, locationResource,
             orgResource, taskResource, adminResource, savedSearchResource,
             authorizationGroupResource, noteResource, approvalStepResource, subscriptionResource,
-            subscriptionUpdateResource),
+            subscriptionUpdateResource, attachmentResource),
         metricRegistry);
 
     // Register all of the HTTP Resources
@@ -399,6 +409,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
     environment.jersey().register(adminResource);
     environment.jersey().register(homeResource);
     environment.jersey().register(graphQlResource);
+    environment.jersey().register(attachmentResource);
     environment.jersey().register(new RequestLoggingFilter(engine));
     environment.jersey().register(ViewRequestFilter.class);
     environment.jersey().register(ViewResponseFilter.class);

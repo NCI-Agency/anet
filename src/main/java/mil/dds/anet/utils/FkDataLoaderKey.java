@@ -3,6 +3,8 @@ package mil.dds.anet.utils;
 // Foreign key batching data loaders
 public enum FkDataLoaderKey {
   APPROVAL_STEP_APPROVERS, // approvalStep.approvers
+  ATTACHMENT_ATTACHMENT_RELATED_OBJECTS, // attachment.attachmentRelatedObjects
+  ATTACHMENT_RELATED_OBJECT_ATTACHMENTS, // attachmentRelatedObject.attachments
   AUTHORIZATION_GROUP_POSITIONS, // authorizationGroup.positions
   NOTE_NOTE_RELATED_OBJECTS, // note.noteRelatedObjects
   NOTE_RELATED_OBJECT_NOTES, // noteRelatedObject.notes

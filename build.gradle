@@ -85,6 +85,8 @@ dependencies {
 	implementation "io.dropwizard:dropwizard-auth:${dropwizardVersion}"
 	implementation "io.dropwizard:dropwizard-views-freemarker:${dropwizardVersion}"
 	implementation 'io.dropwizard-bundles:dropwizard-configurable-assets-bundle:1.3.5'
+	implementation "io.dropwizard:dropwizard-forms:${dropwizardVersion}"
+	implementation "org.jdbi:jdbi3-postgres:3.37.1"
 
 	implementation 'ru.vyarus.guicey:guicey-jdbi3:5.9.0'
 	implementation 'com.google.guava:guava:31.1-jre' // Pick the non-Android version of Guice
@@ -123,6 +125,8 @@ dependencies {
 	// used for writing Excel documents
 	implementation 'org.apache.poi:poi:5.2.3'
 	implementation 'org.apache.poi:poi-ooxml:5.2.3'
+	// For inferring MIME types of attachments
+	implementation 'org.apache.tika:tika-core:2.8.0'
 
 	// For parsing HTML to check for 'empty' input
 	implementation 'org.jsoup:jsoup:1.16.1'
@@ -395,16 +399,23 @@ task pushPsqlBaseData(type: DockerCopyFileToContainer) {
 	hostPath = "${projectDir}/insertBaseData-psql.sql"
 	remotePath = psqlPushDataPath
 }
-
 pushPsqlBaseData.mustRunAfter('dockerStartDB')
 
-task dbLoad(dependsOn: pushPsqlBaseData, type: DockerExecContainer) {
+task pushPsqlImageData(type: DockerCopyFileToContainer) {
+	group = "database runtime"
+	description = "Push SQL base data to PostgreSQL"
+	containerId = dbContainerName
+	hostPath = "${projectDir}/src/test/resources/assets/default_avatar.png"
+	remotePath = psqlPushDataPath
+}
+pushPsqlImageData.mustRunAfter('dockerStartDB')
+
+task dbLoad(dependsOn: [pushPsqlBaseData, pushPsqlImageData], type: DockerExecContainer) {
 	group = "database runtime"
 	description = "Runs the ANET database load command for PostgreSQL; loads demo data."
 	containerId = dbContainerName
 	commands = [ ["psql", "-U", run.environment["ANET_DB_USERNAME"], "-d", run.environment["ANET_DB_NAME"], "-f", "${psqlPushDataPath}/insertBaseData-psql.sql"] as String[] ]
 }
-
 dbLoad.mustRunAfter('dbMigrate')
 
 task deleteDbDump(type: DockerExecContainer) {

@@ -288,7 +288,36 @@ fields:
             label: Red
             color: '#ff8279'
 
+  attachment:
+    disabled: false
+    shortLabel: Attachment
+    shortName:
+      label: Attachment Name
+      placeholder: Enter an attachment name, example....
+    description: Attachment description
+    classification:
+      type: enum
+      label: UNDEFINED / NATO_UNCLASSIFIED / NATO_UNCLASSIFIED_Releasable_to_EU
+      choices:
+        UNDEFINED:
+          value: UNDEFINED
+          label: undefined
+        NATO_UNCLASSIFIED:
+          value: NATO_UNCLASSIFIED
+          label: NATO UNCLASSIFIED
+        NATO_UNCLASSIFIED_Releasable_to_EU:
+          value: NATO_UNCLASSIFIED_Releasable_to_EU
+          label: NATO UNCLASSIFIED Releasable to EU
+    mimeTypes:
+      - application/pdf
+      - image/jpeg
+      - image/jpg
+      - image/png
+      - text/plain
+
   report:
+    attachments:
+      label: Attachments
     canUnpublishReports: true
     intent: Engagement purpose
     atmosphere: Atmospherics

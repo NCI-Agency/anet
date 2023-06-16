@@ -184,6 +184,49 @@ enum Atmosphere {
 }
 
 """"""
+type Attachment {
+  attachmentRelatedObjects: [AttachmentRelatedObject]
+  author: Person
+  classification: Classification
+  contentLength: Long
+  createdAt: Instant
+  description: String
+  fileName: String
+  mimeType: String
+  updatedAt: Instant
+  uuid: String
+}
+
+""""""
+input AttachmentInput {
+  attachmentRelatedObjects: [AttachmentRelatedObjectInput]
+  author: PersonInput
+  classification: Classification
+  contentLength: Long
+  createdAt: Instant
+  description: String
+  fileName: String
+  mimeType: String
+  updatedAt: Instant
+  uuid: String
+}
+
+""""""
+type AttachmentRelatedObject {
+  attachmentUuid: String
+  relatedObject: RelatableObject
+  relatedObjectType: String
+  relatedObjectUuid: String
+}
+
+""""""
+input AttachmentRelatedObjectInput {
+  attachmentUuid: String
+  relatedObjectType: String
+  relatedObjectUuid: String
+}
+
+""""""
 type AuthorizationGroup {
   createdAt: Instant
   description: String
@@ -226,6 +269,13 @@ enum AuthorizationGroupSearchSortBy {
 
 """Base64-encoded binary"""
 scalar Base64String
+
+""""""
+enum Classification {
+  NATO_UNCLASSIFIED
+  NATO_UNCLASSIFIED_Releasable_to_EU
+  UNDEFINED
+}
 
 """"""
 type Comment {
@@ -282,6 +332,7 @@ scalar Instant
 """"""
 type Location {
   approvalSteps: [ApprovalStep]
+  attachments: [Attachment]
   createdAt: Instant
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformation]
@@ -353,6 +404,7 @@ type Mutation {
   addComment(comment: CommentInput, uuid: String): Comment
   approveReport(comment: CommentInput, uuid: String): Int!
   clearCache: String
+  createAttachment(attachment: AttachmentInput): String
   createAuthorizationGroup(authorizationGroup: AuthorizationGroupInput): AuthorizationGroup
   createLocation(location: LocationInput): Location
   createNote(note: NoteInput): Note
@@ -363,6 +415,7 @@ type Mutation {
   createSavedSearch(savedSearch: SavedSearchInput): SavedSearch
   createSubscription(subscription: SubscriptionInput): Subscription
   createTask(task: TaskInput): Task
+  deleteAttachment(uuid: String): Int
   deleteNote(uuid: String): Int
   deleteObjectSubscription(uuid: String): Int
   deletePersonFromPosition(uuid: String): Int
@@ -383,6 +436,7 @@ type Mutation {
   submitReport(uuid: String): Int!
   unpublishReport(uuid: String): Int
   updateAssociatedPosition(position: PositionInput): Int
+  updateAttachment(attachment: AttachmentInput): String
   updateAuthorizationGroup(authorizationGroup: AuthorizationGroupInput): Int
   updateLocation(location: LocationInput): Int
   updateNote(note: NoteInput): Note
@@ -448,6 +502,7 @@ type Organization {
   administratingPositions: [Position]
   approvalSteps: [ApprovalStep]
   ascendantOrgs(query: OrganizationSearchQueryInput): [Organization]
+  attachments: [Attachment]
   childrenOrgs(query: OrganizationSearchQueryInput): [Organization]
   createdAt: Instant
   customFields: String
@@ -524,6 +579,7 @@ enum OrganizationType {
 
 """"""
 type Person {
+  attachments: [Attachment]
   attendedReports(query: ReportSearchQueryInput): AnetBeanList_Report
   authoredReports(query: ReportSearchQueryInput): AnetBeanList_Report
   avatar(size: Int = 256): Base64String
@@ -632,6 +688,7 @@ enum PersonSearchSortBy {
 """"""
 type Position {
   associatedPositions: [Position]
+  attachments: [Attachment]
   authorizationGroups: [AuthorizationGroup]
   code: String
   createdAt: Instant
@@ -722,6 +779,7 @@ type Query {
   adminSettings: [AdminSetting]
   advisorReportInsights(orgUuid: String = "-1", weeksAgo: Int = 3): [AdvisorReportsEntry]
   approvalStepInUse(uuid: String): Boolean!
+  attachment(uuid: String): Attachment
   authorizationGroup(uuid: String): AuthorizationGroup
   authorizationGroupList(query: AuthorizationGroupSearchQueryInput): AnetBeanList_AuthorizationGroup
   location(uuid: String): Location
@@ -738,6 +796,7 @@ type Query {
   positionList(query: PositionSearchQueryInput): AnetBeanList_Position
   projectVersion: String
   recentActivities: RecentActivities
+  relatedObjectAttachments(uuid: String): [Attachment]
   report(uuid: String): Report
   reportList(query: ReportSearchQueryInput): AnetBeanList_Report
   rollupGraph(advisorOrganizationUuid: String, endDate: Instant, orgType: OrganizationType, principalOrganizationUuid: String, startDate: Instant): [RollupGraph]
@@ -775,6 +834,7 @@ type Report {
   approvalStep: ApprovalStep
   atmosphere: Atmosphere
   atmosphereDetails: String
+  attachments: [Attachment]
   attendees: [ReportPerson]
   authorizationGroups: [AuthorizationGroup]
   authors: [ReportPerson]
@@ -865,6 +925,7 @@ input ReportInput {
 
 """"""
 type ReportPerson {
+  attachments: [Attachment]
   attendedReports(query: ReportSearchQueryInput): AnetBeanList_Report
   attendee: Boolean!
   author: Boolean!
@@ -1135,6 +1196,7 @@ enum SubscriptionUpdateSearchSortBy {
 type Task {
   approvalSteps: [ApprovalStep]
   ascendantTasks(query: TaskSearchQueryInput): [Task]
+  attachments: [Attachment]
   category: String
   childrenTasks(query: TaskSearchQueryInput): [Task]
   createdAt: Instant

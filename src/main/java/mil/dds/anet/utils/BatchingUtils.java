@@ -8,6 +8,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalStep;
+import mil.dds.anet.beans.Attachment;
+import mil.dds.anet.beans.AttachmentRelatedObject;
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Comment;
 import mil.dds.anet.beans.CustomSensitiveInformation;
@@ -89,6 +91,24 @@ public final class BatchingUtils {
           public CompletionStage<List<List<Position>>> load(List<String> foreignKeys) {
             return CompletableFuture.supplyAsync(
                 () -> engine.getApprovalStepDao().getApprovers(foreignKeys), dispatcherService);
+          }
+        }, dataLoaderOptions));
+    dataLoaderRegistry.register(FkDataLoaderKey.ATTACHMENT_ATTACHMENT_RELATED_OBJECTS.toString(),
+        new DataLoader<>(new BatchLoader<String, List<AttachmentRelatedObject>>() {
+          @Override
+          public CompletionStage<List<List<AttachmentRelatedObject>>> load(
+              List<String> foreignKeys) {
+            return CompletableFuture.supplyAsync(
+                () -> engine.getAttachmentDao().getAttachmentRelatedObjects(foreignKeys),
+                dispatcherService);
+          }
+        }, dataLoaderOptions));
+    dataLoaderRegistry.register(FkDataLoaderKey.ATTACHMENT_RELATED_OBJECT_ATTACHMENTS.toString(),
+        new DataLoader<>(new BatchLoader<String, List<Attachment>>() {
+          @Override
+          public CompletionStage<List<List<Attachment>>> load(List<String> foreignKeys) {
+            return CompletableFuture.supplyAsync(
+                () -> engine.getAttachmentDao().getAttachments(foreignKeys), dispatcherService);
           }
         }, dataLoaderOptions));
     dataLoaderRegistry.register(IdDataLoaderKey.AUTHORIZATION_GROUPS.toString(),

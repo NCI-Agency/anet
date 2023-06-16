@@ -8,6 +8,11 @@ import pluralize from "pluralize"
 import decodeQuery from "querystring/decode"
 import encodeQuery from "querystring/encode"
 import React, { useCallback, useEffect } from "react"
+import absentIcon from "resources/icons/absent.svg"
+import binaryIcon from "resources/icons/binary.svg"
+import pdfIcon from "resources/icons/pdf.svg"
+import textIcon from "resources/icons/text.svg"
+import videoIcon from "resources/icons/video.svg"
 import Settings from "settings"
 import { titleCase } from "title-case"
 
@@ -292,6 +297,35 @@ export default {
 
   readNestedObjectWithStringPath: function(obj, path) {
     return path.split(".").reduce((value, el) => value[el], obj)
+  },
+
+  humanReadableFileSize: function(number) {
+    if (number < 1024) {
+      return `${number} bytes`
+    } else if (number >= 1024 && number < 1048576) {
+      return `${(number / 1024).toFixed(1)} KB`
+    } else if (number >= 1048576) {
+      return `${(number / 1048576).toFixed(1)} MB`
+    }
+  },
+
+  getAttachmentIconDetails: function(attachment, small) {
+    let backgroundSize = small ? "50px" : "200px"
+    let backgroundImage = binaryIcon
+    const contentMissing = attachment.contentLength < 0
+    if (contentMissing) {
+      backgroundImage = absentIcon
+    } else if (attachment.mimeType === "application/pdf") {
+      backgroundImage = pdfIcon
+    } else if (attachment.mimeType.startsWith("text/")) {
+      backgroundImage = textIcon
+    } else if (attachment.mimeType.startsWith("video/")) {
+      backgroundImage = videoIcon
+    } else if (attachment.mimeType.startsWith("image/")) {
+      backgroundSize = "cover"
+      backgroundImage = `/api/attachment/view/${attachment.uuid}`
+    }
+    return { backgroundSize, backgroundImage, contentMissing }
   }
 }
 

@@ -524,11 +524,47 @@ properties:
             additionalProperties:
               "$ref": "#/$defs/customField"
 
+      attachment:
+        type: object
+        additionalProperties: false
+        required: [disabled, shortLabel, shortName, description, classification]
+        properties:
+          disabled:
+            type: boolean
+            title: Whether users can upload attachments
+            description: Used for restricting uploading functionality for all users
+          shortLabel:
+            type: string
+            title: The short label for this field
+            description: Used in the UI where a short label for attachments is shown.
+          shortName:
+            "$ref": "#/$defs/inputField"
+          description:
+            type: string
+            title: The label for a attachment's description
+            description: Used in the UI where a attachment's description is shown.
+          classification:
+            "$ref": "#/$defs/customField"
+          mimeTypes:
+            type: array
+            uniqueItems: true
+            minItems: 1
+
       report:
         type: object
         additionalProperties: false
         required: [intent, atmosphere, atmosphereDetails, cancelled, nextSteps, reportText]
         properties:
+          attachments:
+            type: object
+            additionalProperties: false
+            required: [label]
+            properties:
+              label:
+                type: string
+                title: The label of the attachments
+            title: Whether reports have attachments
+            description: Used for attachments in reports
           canUnpublishReports:
             type: boolean
             default: false

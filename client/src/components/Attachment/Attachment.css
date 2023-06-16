@@ -1,0 +1,110 @@
+/******** FILE UPLOAD AREA ********/
+.file-upload-container {
+  margin: 10px 0;
+  display: flex;
+  position: relative;
+  padding: 35px 20px;
+  border-radius: 6px;
+  align-items: center;
+  flex-direction: column;
+  background-color: #f2f2f2;
+  border: 2px dotted lightgray;
+}
+
+.file-upload-container:hover {
+  background-color: #dddbdb;
+}
+
+.form-field {
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: 0;
+  width: 100%;
+  border: none;
+  display: block;
+  cursor: pointer;
+  font-size: 18px;
+  position: absolute;
+  text-transform: none;
+}
+
+.drag-drop-text {
+  display: flex;
+  margin-top: 0;
+  text-align: center;
+  align-items: center;
+  flex-direction: column;
+  letter-spacing: 2.2px;
+}
+
+.drag-drop-text > img {
+  margin-bottom: 10px;
+  width: fit-content;
+}
+
+.image-preview {
+  width: 100%;
+  height: 100%;
+  border-radius: 6px;
+}
+
+.file-info {
+  display: none;
+}
+.info-show:hover .file-info {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff73;
+  justify-content: space-between;
+}
+.info-line {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+.file-info > .bp4-popover2-target {
+  height: 100%;
+  width: 100%;
+}
+.detail-btn {
+  display: grid;
+  width: 100%;
+  height: 120px;
+  place-content: center;
+}
+.icon:hover {
+  cursor: pointer;
+}
+.edit:hover {
+  color: blue;
+}
+.delete:hover {
+  color: #cd2222;
+}
+
+/******** ATTACHMENT CARD ********/
+.card-image {
+  width: 100%;
+  height: 120px;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-radius: 0.10rem 0.10rem 0 0;
+}
+
+/******** ATTACHMENT SHOW PAGE ********/
+.img-preview {
+  height: 100%;
+  overflow: hidden;
+}
+.attachment-image {
+  width: 100%;
+  border-radius: 5px;
+  transition: transform .5s ease;
+}
+.img-hover-zoom:hover .attachment-image {
+  cursor: zoom-in;
+  transform: scale(1.5);
+}

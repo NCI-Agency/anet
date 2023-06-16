@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.Attachment;
 import mil.dds.anet.beans.CustomSensitiveInformation;
 import mil.dds.anet.beans.Note;
 import mil.dds.anet.utils.Utils;
@@ -30,6 +31,8 @@ public abstract class AbstractCustomizableAnetBean extends AbstractAnetBean {
   private List<CustomSensitiveInformation> customSensitiveInformation;
   // annotated below
   private Boolean isSubscribed;
+  // annotated below
+  private List<Attachment> attachments;
 
   public String getCustomFields() {
     return customFields;
@@ -47,6 +50,19 @@ public abstract class AbstractCustomizableAnetBean extends AbstractAnetBean {
     return AnetObjectEngine.getInstance().getNoteDao().getNotesForRelatedObject(context, uuid)
         .thenApply(o -> {
           notes = o;
+          return o;
+        });
+  }
+
+  @GraphQLQuery(name = "attachments")
+  public CompletableFuture<List<Attachment>> loadAttachments(
+      @GraphQLRootContext Map<String, Object> context) {
+    if (attachments != null) {
+      return CompletableFuture.completedFuture(attachments);
+    }
+    return AnetObjectEngine.getInstance().getAttachmentDao()
+        .getAttachmentsForRelatedObject(context, uuid).thenApply(o -> {
+          attachments = o;
           return o;
         });
   }

@@ -12,6 +12,7 @@ import {
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
 import InstantAssessmentsContainerField from "components/assessments/instant/InstantAssessmentsContainerField"
+import UploadAttachment from "components/Attachment/UploadAttachment"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import CustomDateInput from "components/CustomDateInput"
 import {
@@ -427,6 +428,11 @@ const ReportForm = ({
         const isFutureEngagement = Report.isFuture(values.engagementDate)
         const hasAssessments = values.engagementDate && !isFutureEngagement
         const relatedObject = hasAssessments ? values : {}
+
+        const getRelatedObject = val => ({
+          uuid: val.uuid,
+          type: Report.relatedObjectType
+        })
 
         return (
           <div className="report-form">
@@ -922,6 +928,22 @@ const ReportForm = ({
                   widget={<RichTextEditor className="reportTextField" />}
                 />
 
+                <FastField
+                  name="uploadAttachments"
+                  component={FieldHelper.SpecialField}
+                  label={Settings.fields.attachment.shortLabel}
+                  widget={
+                    <UploadAttachment
+                      edit={edit}
+                      saveRelatedObject={saveCallback}
+                      getRelatedObject={() => getRelatedObject(values)}
+                    />
+                  }
+                  onHandleBlur={() => {
+                    setFieldTouched("uploadAttachments", true, false)
+                  }}
+                />
+
                 <div style={{ textAlign: "center" }}>
                   <Button
                     variant="outline-secondary"
@@ -1202,6 +1224,12 @@ const ReportForm = ({
     setShowSensitiveInfo(!showSensitiveInfo)
   }
 
+  function saveCallback() {
+    return save(autoSaveSettings.current.values, false)
+      .then(response => response.uuid)
+      .catch(error => toast.error(`Report autosaving failed: ${error.message}`))
+  }
+
   function autoSave(form) {
     if (!autoSaveActive.current) {
       // We're done auto-saving
@@ -1238,6 +1266,7 @@ const ReportForm = ({
           toast.success(
             `Your ${getReportType(newValues)} has been automatically saved`
           )
+          autoSaveSettings.current.dirty = false
           // And re-schedule the auto-save timer
           autoSaveSettings.current.timeoutId = window.setTimeout(
             autosaveHandler,

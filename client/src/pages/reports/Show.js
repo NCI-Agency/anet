@@ -8,6 +8,7 @@ import {
 import API from "api"
 import AppContext from "components/AppContext"
 import InstantAssessmentsContainerField from "components/assessments/instant/InstantAssessmentsContainerField"
+import AttachmentCard from "components/Attachment/AttachmentCard"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
@@ -230,6 +231,14 @@ const GQL_GET_REPORT = gql`
         uuid
         name
         description
+      }
+      attachments {
+        uuid
+        fileName
+        contentLength
+        mimeType
+        description
+        classification
       }
       customFields
       ${GRAPHQL_NOTES_FIELDS}
@@ -661,6 +670,30 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                       modelType="Organization"
                       model={report.principalOrg}
                     />
+                  }
+                />
+
+                <Field
+                  name="attachments"
+                  label={Settings.fields.attachment.shortLabel}
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={
+                    <div
+                      id="attachmentCardList"
+                      style={{
+                        display:
+                          report.attachments.length > 1 ? "flex" : "block"
+                      }}
+                    >
+                      {report.attachments.map((attachment, index) => (
+                        <AttachmentCard
+                          key={index}
+                          attachment={attachment}
+                          index={index}
+                          edit={false}
+                        />
+                      ))}
+                    </div>
                   }
                 />
               </Fieldset>

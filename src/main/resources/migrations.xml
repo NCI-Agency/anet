@@ -4479,4 +4479,52 @@
 		</addColumn>
 	</changeSet>
 
+	<changeSet id="add-attachments-table" author="cigdemers">
+		<createTable tableName="attachments">
+			<column name="uuid" type="${uuid_type}">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="authorUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="fileName" type="${long_text_type}" />
+			<column name="mimeType" type="${long_text_type}" />
+			<column name="content" type="oid" />
+			<column name="contentLength" type="bigint" />
+			<column name="description" type="${long_text_type}" />
+			<column name="classification" type="int" />
+			<column name="createdAt" type="datetime" />
+			<column name="updatedAt" type="datetime" />
+		</createTable>
+
+		<createIndex
+			indexName="IDX_attachments_authorUuid" tableName="attachments">
+			<column name="authorUuid"/>
+		</createIndex>
+
+		<addForeignKeyConstraint
+			baseTableName="attachments" constraintName="FK_attachments_author" baseColumnNames="authorUuid"
+			referencedTableName="people" referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION" />
+
+		<createTable tableName="attachmentRelatedObjects">
+			<column name="attachmentUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<!-- The next two columns combined act as a generic foreign key reference to a (table name, uuid)-tuple -->
+			<column name="relatedObjectType" type="varchar(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="relatedObjectUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<addForeignKeyConstraint
+			baseTableName="attachmentRelatedObjects" constraintName="FK_attachmentRelatedObjects_attachment" baseColumnNames="attachmentUuid"
+			referencedTableName="attachments" referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION" />
+
+	</changeSet>
+
 </databaseChangeLog>
