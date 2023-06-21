@@ -4527,4 +4527,38 @@
 
 	</changeSet>
 
+	<changeSet id="add-people-avatar-as-attachment" author="cigdemers">
+		<sql>
+			INSERT INTO attachments (uuid, "authorUuid", "fileName", "mimeType", content, description, classification,
+			                         "createdAt", "updatedAt")
+				SELECT uuid_generate_v4(), uuid, 'imported-avatar.png', 'image/png', lo_from_bytea(0, avatar),
+				       'imported avatar', '0', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+				FROM people
+				WHERE avatar IS NOT NULL;
+			UPDATE people
+				SET avatar = null;
+			INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "relatedObjectUuid")
+				SELECT uuid, 'people', attachments."authorUuid"
+				FROM attachments
+				WHERE attachments."fileName" = 'imported-avatar.png';
+		</sql>
+		<dropColumn tableName="people" columnName="avatar" />
+		<addColumn tableName="people">
+			<column name="avatarUuid" type="${uuid_type}" />
+		</addColumn>
+		<addForeignKeyConstraint baseTableName="people" baseColumnNames="avatarUuid" constraintName="FK_people_attachment"
+								 referencedTableName="attachments" referencedColumnNames="uuid"
+								 onDelete="NO ACTION" onUpdate="NO ACTION" />
+		<sql>
+			UPDATE people
+				SET "avatarUuid" =
+				    (SELECT uuid
+				     FROM attachments
+				     WHERE people.uuid = attachments."authorUuid" AND attachments."fileName" = 'imported-avatar.png');
+		</sql>
+
+	</changeSet>
+
+
+
 </databaseChangeLog>
