@@ -324,7 +324,6 @@ INSERT INTO "organizationAdministrativePositions" ("organizationUuid", "position
   ((SELECT uuid FROM organizations WHERE "shortName" = 'EF 2.2'), (SELECT uuid FROM positions WHERE name = 'EF 2.2 Superuser')),
   ((SELECT uuid FROM organizations WHERE "shortName" = 'EF 2.2'), (SELECT uuid FROM positions WHERE name = 'EF 2.2 Final Reviewer'));
 
-
 -- Create the EF 1.1 approval process
 INSERT INTO "approvalSteps" (uuid, "relatedObjectUuid", name, type) VALUES
   (uuid_generate_v4(), (SELECT uuid from organizations where "shortName"='EF 1.1'), 'EF 1.1 Approvers', 1);

@@ -679,9 +679,9 @@ public class TaskApprovalTest extends AbstractResourceTest {
     if (reportAdvisor == null) {
       reportAdvisor = getPersonFromDb("REINTON, Reina");
     }
-    final ReportPerson advisor = personToPrimaryReportPerson(reportAdvisor);
+    final ReportPerson advisor = personToPrimaryReportPerson(reportAdvisor, false);
     final ReportPerson interlocutor =
-        personToPrimaryReportPerson(getPersonFromDb("STEVESON, Steve"));
+        personToPrimaryReportPerson(getPersonFromDb("STEVESON, Steve"), true);
     final String testText = String.format("Test report for task approval workflow — %1$s", text);
     final ReportInput reportInput = ReportInput.builder()
         .withEngagementDate(Instant.now().plus(isPlanned ? 14 : -14, ChronoUnit.DAYS))

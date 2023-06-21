@@ -257,42 +257,6 @@ public class PersonMergeTest extends AbstractResourceTest {
   }
 
   @Test
-  public void testMergeDifferentRoles()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    PersonInput interlocutorInput =
-        PersonInput.builder().withName("Interlocutor for Merging").build();
-    Person interlocutor = adminMutationExecutor.createPerson(FIELDS, interlocutorInput);
-    assertThat(interlocutor).isNotNull();
-    assertThat(interlocutor.getUuid()).isNotNull();
-
-    // Create a Position
-    final PositionInput testInput =
-        PositionInput.builder().withName("A Test Position created by mergeDifferentRolesTest")
-            .withType(PositionType.REGULAR).withRole(PositionRole.MEMBER).withStatus(Status.ACTIVE)
-            .build();
-
-    // Assign to an AO
-    final Organization ao = adminMutationExecutor.createOrganization("{ uuid }",
-        TestData.createAdvisorOrganizationInput(true));
-    testInput.setOrganization(getOrganizationInput(ao));
-    testInput.setLocation(getLocationInput(getGeneralHospital()));
-
-    final Position created = adminMutationExecutor.createPosition(POSITION_FIELDS, testInput);
-    assertThat(created).isNotNull();
-    assertThat(created.getUuid()).isNotNull();
-    assertThat(created.getName()).isEqualTo(testInput.getName());
-
-    // Assign the loser into the position
-    Integer nrUpdated = adminMutationExecutor.putPersonInPosition("", getPersonInput(interlocutor),
-        created.getUuid());
-    assertThat(nrUpdated).isEqualTo(1);
-
-    nrUpdated =
-        adminMutationExecutor.mergePeople("", interlocutor.getUuid(), getPersonInput(admin));
-    assertThat(nrUpdated).isEqualTo(1);
-  }
-
-  @Test
   public void testMergeOccupiedPosition()
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     try {

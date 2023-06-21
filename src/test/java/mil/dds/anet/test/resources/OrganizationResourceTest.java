@@ -423,9 +423,6 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     createdChildOrg.setShortName("Updated Child Organization");
     succeedUpdateOrganization(superuserMutationExecutor, getOrganizationInput(createdChildOrg));
 
-    // FIXME: Test was: Superusers cannot change the type of the organization
-    failUpdateOrganization(superuserMutationExecutor, getOrganizationInput(createdChildOrg));
-
     // Superusers cannot update their own organizations if they're not responsible
     final Organization superuserOrg =
         adminQueryExecutor.organization(FIELDS, superuserPosition.getOrganization().getUuid());
@@ -507,11 +504,6 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     // Now they can assign the new parent
     createdChildOrg.setParentOrg(createdNewParentOrg);
     succeedUpdateOrganization(superuserMutationExecutor, getOrganizationInput(createdChildOrg));
-
-    // FIXME: Test was: Test for changing the parent to a different type of organization
-    succeedUpdateOrganization(adminMutationExecutor, getOrganizationInput(createdParentOrg));
-    createdChildOrg.setParentOrg(createdParentOrg);
-    failUpdateOrganization(superuserMutationExecutor, getOrganizationInput(createdChildOrg));
   }
 
   @Test
