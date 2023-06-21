@@ -1109,7 +1109,7 @@ public class NoteResourceTest extends AbstractResourceTest {
 
     // Create a test report
     final Person interlocutorPerson = getSteveSteveson();
-    final ReportPerson interlocutor = personToPrimaryReportPerson(interlocutorPerson);
+    final ReportPerson interlocutor = personToPrimaryReportPerson(interlocutorPerson, true);
     final TaskInput taskInput = TaskInput.builder().withUuid(taskUuid).build();
     final ReportInput reportInput =
         ReportInput.builder().withEngagementDate(Instant.now()).withIntent(testName)
@@ -1270,7 +1270,7 @@ public class NoteResourceTest extends AbstractResourceTest {
 
     // Create a test report
     final Person interlocutorPerson = getSteveSteveson();
-    final ReportPerson interlocutor = personToPrimaryReportPerson(interlocutorPerson);
+    final ReportPerson interlocutor = personToPrimaryReportPerson(interlocutorPerson, true);
     final TaskInput taskInput = TaskInput.builder().withUuid(taskUuid).build();
     final ReportInput reportInput =
         ReportInput.builder().withEngagementDate(Instant.now()).withIntent(testName)
@@ -1323,7 +1323,7 @@ public class NoteResourceTest extends AbstractResourceTest {
 
     // Create a test report
     final Person interlocutorPerson = getSteveSteveson();
-    final ReportPerson interlocutor = personToPrimaryReportPerson(interlocutorPerson);
+    final ReportPerson interlocutor = personToPrimaryReportPerson(interlocutorPerson, true);
     final TaskInput taskInput = TaskInput.builder().withUuid(taskUuid).build();
     final ReportInput reportInput =
         ReportInput.builder().withEngagementDate(Instant.now()).withIntent(testName)
@@ -1377,7 +1377,7 @@ public class NoteResourceTest extends AbstractResourceTest {
 
     // Create a test report
     final Person interlocutorPerson = getSteveSteveson();
-    final ReportPerson interlocutor = personToPrimaryReportPerson(interlocutorPerson);
+    final ReportPerson interlocutor = personToPrimaryReportPerson(interlocutorPerson, true);
     final TaskInput taskInput = TaskInput.builder().withUuid(taskUuid).build();
     final ReportInput reportInput =
         ReportInput.builder().withEngagementDate(Instant.now()).withIntent(testName)
@@ -1586,7 +1586,7 @@ public class NoteResourceTest extends AbstractResourceTest {
 
     // Create a test report
     final Person interlocutorPerson = getSteveSteveson();
-    final ReportPerson interlocutor = personToPrimaryReportPerson(interlocutorPerson);
+    final ReportPerson interlocutor = personToPrimaryReportPerson(interlocutorPerson, true);
     final TaskInput taskInput = TaskInput.builder().withUuid(taskUuid).build();
     final ReportInput reportInput =
         ReportInput.builder().withEngagementDate(Instant.now()).withIntent(testName)
@@ -1650,7 +1650,7 @@ public class NoteResourceTest extends AbstractResourceTest {
 
     // Create a test report
     final Person interlocutorPerson = getSteveSteveson();
-    final ReportPerson interlocutor = personToPrimaryReportPerson(interlocutorPerson);
+    final ReportPerson interlocutor = personToPrimaryReportPerson(interlocutorPerson, true);
     final TaskInput taskInput = TaskInput.builder().withUuid(taskUuid).build();
     final ReportInput reportInput =
         ReportInput.builder().withEngagementDate(Instant.now()).withIntent(testName)

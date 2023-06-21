@@ -155,7 +155,7 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
     final Person author = getRegularUserBean();
     final MutationExecutor authorMutationExecutor = getMutationExecutor(author.getDomainUsername());
     final ReportPerson advisor = personToPrimaryReportAuthor(author);
-    final ReportPerson interlocutor = personToPrimaryReportPerson(getSteveStevesonBean());
+    final ReportPerson interlocutor = personToPrimaryReportPerson(getSteveStevesonBean(), true);
     final Report draftReport = reportDao.insert(TestBeans.getTestReport("testGH3304",
         getFutureDate(), null, Lists.newArrayList(advisor, interlocutor)));
 

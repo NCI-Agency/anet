@@ -238,8 +238,9 @@ public class SubscriptionUpdateResourceTest extends AbstractResourceTest {
           .withCancelledReason(ReportCancelledReason.CANCELLED_BY_ADVISOR)
           .withReportPeople(
               getReportPeopleInput(Lists.newArrayList(personToPrimaryReportAuthor(getJackJackson()),
-                  personToReportPerson(getPerson(getSubscribedObjectUuid(PersonDao.TABLE_NAME))),
-                  personToPrimaryReportPerson(getChristopfTopferness()))))
+                  personToReportPerson(getPerson(getSubscribedObjectUuid(PersonDao.TABLE_NAME)),
+                      false),
+                  personToPrimaryReportPerson(getChristopfTopferness(), true))))
           .withAdvisorOrg(getOrganizationInput(
               getOrganization(getSubscribedObjectUuid(OrganizationDao.TABLE_NAME))))
           .withTasks(Lists
