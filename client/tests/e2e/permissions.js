@@ -2,17 +2,10 @@ const uuidv4 = require("uuid").v4
 const test = require("../util/test")
 
 test.serial("checking superuser permissions", async t => {
-  t.plan(26)
+  t.plan(25)
 
-  const {
-    pageHelpers,
-    $,
-    By,
-    driver,
-    assertElementDisabled,
-    assertElementNotPresent,
-    shortWaitMs
-  } = t.context
+  const { pageHelpers, $, By, driver, assertElementNotPresent, shortWaitMs } =
+    t.context
 
   await t.context.get("/", "rebecca")
 
@@ -20,16 +13,11 @@ test.serial("checking superuser permissions", async t => {
   await $createButton.click()
   const $createPersonButton = await $("#new-person")
   await $createPersonButton.click()
-  await assertElementDisabled(
+  await assertElementNotPresent(
     t,
-    "#role_ADVISOR",
-    "Advisor button should be disabled for superusers"
-  )
-  const $tooltip = await $("#role_ADVISOR_tooltip")
-  t.regex(
-    await $tooltip.getAttribute("title"),
-    /^Superusers cannot create .*$/,
-    "Expected tooltip for superusers"
+    "#fg-user",
+    "Rebecca should not be able to create new users",
+    shortWaitMs
   )
 
   // Cancel Create Person
@@ -96,14 +84,14 @@ test.serial("checking superuser permissions", async t => {
     shortWaitMs
   )
 
-  const $principalOrgLink = await getFromSearchResults(
+  const $nonAdministratingOrgLink = await getFromSearchResults(
     t,
     "MoD",
     "MoD | Ministry of Defense",
     "organizations"
   )
-  await $principalOrgLink.click()
-  await validateNoSuperuserPermissions(t)
+  await $nonAdministratingOrgLink.click()
+  await validateSuperuserNonAdministratingOrgPermissions(t)
 
   const $locationLink = await getFromSearchResults(
     t,
@@ -250,16 +238,9 @@ validateUserCannotEditOtherUser(
 )
 
 test.serial("checking admin permissions", async t => {
-  t.plan(14)
+  t.plan(10)
 
-  const {
-    $,
-    By,
-    driver,
-    assertElementEnabled,
-    assertElementNotPresent,
-    shortWaitMs
-  } = t.context
+  const { $, By, driver, until, shortWaitMs } = t.context
 
   await t.context.get("/", "arthur")
 
@@ -267,17 +248,12 @@ test.serial("checking admin permissions", async t => {
   await $createButton.click()
   const $createPersonButton = await $("#new-person")
   await $createPersonButton.click()
-  await assertElementEnabled(
-    t,
-    "#role_ADVISOR",
-    "Advisor button should be enabled for admins"
-  )
-  await assertElementNotPresent(
-    t,
-    "#role_ADVISOR_tooltip",
-    "Unexpected tooltip for admins",
-    shortWaitMs
-  )
+  const $userInput = await $("#fg-user")
+  await driver.wait(until.elementIsVisible($userInput), shortWaitMs)
+  const $userButton = await $('label[for="user_true"]')
+  await $userButton.click()
+  const $domainUsernameInput = await $("#domainUsername")
+  await driver.wait(until.elementIsVisible($domainUsernameInput), shortWaitMs)
 
   // Cancel Create Person
   const $cancelButton = await driver.findElement(
@@ -303,14 +279,14 @@ test.serial("checking admin permissions", async t => {
   // User is admin, and can therefore edit (its own) admin position type
   await editAndSavePositionFromCurrentUserPage(t, true)
 
-  const $principalOrgLink = await getFromSearchResults(
+  const $orgLink = await getFromSearchResults(
     t,
     "MoD",
     "MoD | Ministry of Defense",
     "organizations"
   )
-  await $principalOrgLink.click()
-  await validateAdminPrincipalOrgPermissions(t)
+  await $orgLink.click()
+  await validateAdminOrgPermissions(t)
 
   const $locationLink = await getFromSearchResults(
     t,
@@ -522,49 +498,37 @@ async function validationEditPositionOnCurrentPage(t, validateTrue) {
   }
 }
 
-async function validateNoSuperuserPermissions(t) {
+async function validateSuperuserNonAdministratingOrgPermissions(t) {
   const { assertElementNotPresent, shortWaitMs } = t.context
 
   await assertElementNotPresent(
     t,
     "#editButton",
-    "This superuser should not be able to edit this organization",
+    "Superusers should not be able to edit non-administrating organizations",
     shortWaitMs
   )
 }
 
-async function validateAdminPrincipalOrgPermissions(t) {
+async function validateAdminOrgPermissions(t) {
   const { $, assertElementEnabled } = t.context
 
-  const $editPrincipalOrgButton = await $("#editButton")
-  await t.context.driver.wait(
-    t.context.until.elementIsVisible($editPrincipalOrgButton)
-  )
-  await $editPrincipalOrgButton.click()
-  await assertElementEnabled(
-    t,
-    'label[for="type_ADVISOR_ORG"]',
-    "Field advisorOrgButton of a principal organization should be enabled for admins"
-  )
-  await assertElementEnabled(
-    t,
-    'label[for="type_PRINCIPAL_ORG"]',
-    "Field principalOrgButton of a principal organization should be enabled for admins"
-  )
+  const $editOrgButton = await $("#editButton")
+  await t.context.driver.wait(t.context.until.elementIsVisible($editOrgButton))
+  await $editOrgButton.click()
   await assertElementEnabled(
     t,
     "#parentOrg",
-    "Field parentOrganization of a principal organization should be enabled for admins"
+    "Field parentOrganization of an organization should be enabled for admins"
   )
   await assertElementEnabled(
     t,
     "#shortName",
-    "Field shortName of a principal organization should be enabled for admins"
+    "Field shortName of an organization should be enabled for admins"
   )
   await assertElementEnabled(
     t,
     "#longName",
-    "Field longName of a principal organization should be enabled for admins"
+    "Field longName of an organization should be enabled for admins"
   )
 }
 

@@ -67,29 +67,29 @@ test.serial("Draft and submit a report", async t => {
   )
 
   const [
-    $principalControls1,
-    /* eslint-disable no-unused-vars */ $principalConflictBtn /* eslint-enable no-unused-vars */,
-    $principalName1,
-    $principalPosition1,
-    /* eslint-disable no-unused-vars */ $principalLocation1 /* eslint-enable no-unused-vars */,
-    $principalOrg1
-  ] = await $$(".principalAttendeesTable tbody tr:nth-child(2) td")
+    $interlocutorControls1,
+    /* eslint-disable no-unused-vars */ $interlocutorConflictBtn /* eslint-enable no-unused-vars */,
+    $interlocutorName1,
+    $interlocutorPosition1,
+    /* eslint-disable no-unused-vars */ $interlocutorLocation1 /* eslint-enable no-unused-vars */,
+    $interlocutorOrg1
+  ] = await $$(".interlocutorAttendeesTable tbody tr:nth-child(2) td")
 
-  const $principalPrimaryInput1 = await $principalControls1.findElement(
-    By.css("[name = 'primaryAttendeePRINCIPAL']")
+  const $interlocutorPrimaryInput1 = await $interlocutorControls1.findElement(
+    By.css("[name = 'primaryAttendeeINTERLOCUTOR']")
   )
   t.true(
-    await $principalPrimaryInput1.isSelected(),
-    "Principal primary attendee checkbox should be checked"
+    await $interlocutorPrimaryInput1.isSelected(),
+    "Interlocutor primary attendee checkbox should be checked"
   )
 
-  await assertElementText(t, $principalName1, "CIV TOPFERNESS, Christopf")
+  await assertElementText(t, $interlocutorName1, "CIV TOPFERNESS, Christopf")
   await assertElementText(
     t,
-    $principalPosition1,
+    $interlocutorPosition1,
     "Planning Captain, MOD-FO-00004"
   )
-  await assertElementText(t, $principalOrg1, "MoD | Ministry of Defense")
+  await assertElementText(t, $interlocutorOrg1, "MoD | Ministry of Defense")
 
   const $attendeesAdvancedSelect2 =
     await pageHelpers.chooseAdvancedSelectOption(
@@ -105,32 +105,32 @@ test.serial("Draft and submit a report", async t => {
   )
 
   const [
-    $principalControls2,
-    /* eslint-disable no-unused-vars */ $principalAuthorConflictBtn /* eslint-enable no-unused-vars */,
-    $principalName2,
+    $interlocutorControls2,
+    /* eslint-disable no-unused-vars */ $interlocutorAuthorConflictBtn /* eslint-enable no-unused-vars */,
+    $interlocutorName2,
     /* eslint-disable no-unused-vars */
-    $principalPosition2,
-    $principalLocation2,
-    $principalOrg2 /* eslint-enable no-unused-vars */
-  ] = await $$(".principalAttendeesTable tbody tr:last-child td")
+    $interlocutorPosition2,
+    $interlocutorLocation2,
+    $interlocutorOrg2 /* eslint-enable no-unused-vars */
+  ] = await $$(".interlocutorAttendeesTable tbody tr:last-child td")
 
-  await assertElementText(t, $principalName2, "LtCol STEVESON, Steve")
-  const $principalPrimaryInput2 = await $principalControls2.findElement(
-    By.css("[name = 'primaryAttendeePRINCIPAL']")
+  await assertElementText(t, $interlocutorName2, "LtCol STEVESON, Steve")
+  const $interlocutorPrimaryInput2 = await $interlocutorControls2.findElement(
+    By.css("[name = 'primaryAttendeeINTERLOCUTOR']")
   )
   t.false(
-    await $principalPrimaryInput2.isSelected(),
-    "Second principal primary attendee checkbox should not be checked"
+    await $interlocutorPrimaryInput2.isSelected(),
+    "Second interlocutor primary attendee checkbox should not be checked"
   )
 
-  await $principalPrimaryInput2.click()
+  await $interlocutorPrimaryInput2.click()
   t.true(
-    await $principalPrimaryInput2.isSelected(),
-    "Second principal primary attendee checkbox should now be checked"
+    await $interlocutorPrimaryInput2.isSelected(),
+    "Second interlocutor primary attendee checkbox should now be checked"
   )
   t.false(
-    await $principalPrimaryInput1.isSelected(),
-    "First principal primary attendee checkbox should no longer be checked"
+    await $interlocutorPrimaryInput1.isSelected(),
+    "First interlocutor primary attendee checkbox should no longer be checked"
   )
 
   const $tasksAdvancedSelect = await pageHelpers.chooseAdvancedSelectOption(
@@ -612,11 +612,13 @@ test.serial("Verify that validations work", async t => {
     "Advisor attendees table starts with 1 body rows"
   )
 
-  let $principalAttendeesRows = await $$(".principalAttendeesTable tbody tr")
+  let $interlocutorAttendeesRows = await $$(
+    ".interlocutorAttendeesTable tbody tr"
+  )
   t.is(
-    $principalAttendeesRows.length,
+    $interlocutorAttendeesRows.length,
     1,
-    "Principal attendees table starts with 1 body rows"
+    "Interlocutor attendees table starts with 1 body rows"
   )
 
   const [
@@ -649,10 +651,10 @@ test.serial("Verify that validations work", async t => {
   }
 
   $advisorAttendeesRows = await $$(".advisorAttendeesTable tbody tr")
-  $principalAttendeesRows = await $$(".principalAttendeesTable tbody tr")
+  $interlocutorAttendeesRows = await $$(".interlocutorAttendeesTable tbody tr")
   t.is(
-    $advisorAttendeesRows.length + $principalAttendeesRows.length,
-    // should match the number of shortcut buttons plus the initial advisor and principal
+    $advisorAttendeesRows.length + $interlocutorAttendeesRows.length,
+    // should match the number of shortcut buttons plus the initial advisor and interlocutor
     nrAttendees + 2,
     "Clicking the shortcut buttons adds rows to the table"
   )
