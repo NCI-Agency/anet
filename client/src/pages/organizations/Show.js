@@ -3,6 +3,7 @@ import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
 import AppContext from "components/AppContext"
 import Approvals from "components/approvals/Approvals"
+import AssessmentResultsContainer from "components/assessments/AssessmentResultsContainer"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -166,7 +167,7 @@ const GQL_GET_ORGANIZATION = gql`
 `
 
 const OrganizationShow = ({ pageDispatchers }) => {
-  const { currentUser } = useContext(AppContext)
+  const { currentUser, loadAppData } = useContext(AppContext)
   const routerLocation = useLocation()
   const stateSuccess = routerLocation.state && routerLocation.state.success
   const [stateError, setStateError] = useState(
@@ -526,6 +527,16 @@ const OrganizationShow = ({ pageDispatchers }) => {
                 </Fieldset>
               )}
             </Form>
+            <AssessmentResultsContainer
+              entity={organization}
+              entityType={Organization}
+              canAddPeriodicAssessment={canAdministrateOrg}
+              canAddOndemandAssessment={canAdministrateOrg}
+              onUpdateAssessment={() => {
+                loadAppData()
+                refetch()
+              }}
+            />
           </div>
         )
       }}
