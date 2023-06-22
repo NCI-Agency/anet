@@ -13,6 +13,7 @@ const GQL_GET_RELATED_ATTACHMENTS = gql`
       contentLength
       mimeType
       classification
+      description
     }
   }
 `

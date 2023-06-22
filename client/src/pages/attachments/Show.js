@@ -35,9 +35,11 @@ const GQL_GET_ATTACHMENT = gql`
       classification
       description
       author {
-        name
         uuid
-        avatar
+        name
+        rank
+        role
+        avatar(size: 32)
       }
       attachmentRelatedObjects {
         relatedObject {
@@ -52,8 +54,8 @@ const GQL_GET_ATTACHMENT = gql`
           }
           ... on Person {
             name
-            role
             rank
+            role
             avatar(size: 32)
           }
           ... on Position {

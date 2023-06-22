@@ -21,7 +21,9 @@ const GQL_GET_ATTACHMENT = gql`
       author {
         uuid
         name
-        avatar
+        rank
+        role
+        avatar(size: 32)
       }
     }
   }

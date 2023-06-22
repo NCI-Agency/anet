@@ -237,8 +237,8 @@ const GQL_GET_REPORT = gql`
         fileName
         contentLength
         mimeType
-        description
         classification
+        description
       }
       customFields
       ${GRAPHQL_NOTES_FIELDS}
