@@ -29,10 +29,6 @@ class ShowAttachment extends Page {
   }
 
   async getOwner() {
-    return browser.$("//a[text()='DMIN, Arthur']")
-  }
-
-  async getEditOwner() {
     return browser.$("//a[text()='CIV DMIN, Arthur']")
   }
 

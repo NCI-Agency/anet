@@ -4,7 +4,7 @@ import ShowAttachment from "../pages/attachment/showAttachment.page"
 
 const ATTACHMENT_UUID = "f076406f-1a9b-4fc9-8ab2-cd2a138ec26d"
 const ATTACHMENT_NAME = "test_attachment.png"
-const ATTACHMENT_OWNER = "DMIN, Arthur"
+const ATTACHMENT_OWNER = "CIV DMIN, Arthur"
 const ATTACHMENT_CLASSIFICATION = "UNDEFINED"
 const ATTACHMENT_DESCRIPTION = "We can add multiple attachment for report"
 const ATTACHMENT_MIMETYPE = "image/png"
@@ -93,10 +93,10 @@ describe("Edit attachment page", () => {
         ATTACHMENT_NAME
       )
 
-      await (await ShowAttachment.getEditOwner()).waitForExist()
-      await (await ShowAttachment.getEditOwner()).waitForDisplayed()
-      expect(await (await ShowAttachment.getEditOwner()).getText()).to.equal(
-        `CIV ${ATTACHMENT_OWNER}`
+      await (await ShowAttachment.getOwner()).waitForExist()
+      await (await ShowAttachment.getOwner()).waitForDisplayed()
+      expect(await (await ShowAttachment.getOwner()).getText()).to.equal(
+        ATTACHMENT_OWNER
       )
 
       await (await ShowAttachment.getEditDescription()).waitForExist()
