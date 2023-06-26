@@ -54,7 +54,7 @@
     "chai": "4.3.7",
     "chalk": "4.1.2",
     "chromatic": "6.19.5",
-    "chromedriver": "113.0.0",
+    "chromedriver": "114.0.2",
     "circular-dependency-plugin": "5.2.2",
     "clean-webpack-plugin": "4.0.0",
     "colors": "1.4.0",
