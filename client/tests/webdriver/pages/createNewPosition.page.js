@@ -32,14 +32,6 @@ class CreatePosition extends Page {
     return browser.$("#fg-name div.invalid-feedback")
   }
 
-  async getTypeAdvisorButton() {
-    return browser.$('label[for="type_ADVISOR"]')
-  }
-
-  async getTypePrincipalButton() {
-    return browser.$('label[for="type_PRINCIPAL"]')
-  }
-
   async getRoleMemberButton() {
     return browser.$('label[for="role_MEMBER"]')
   }
@@ -82,10 +74,6 @@ class CreatePosition extends Page {
     return browser.$("#location")
   }
 
-  async getLocationHelpBlock() {
-    return browser.$("#fg-location div.invalid-feedback")
-  }
-
   async getLocAdvancedSelectFirstItem() {
     return browser.$(
       "#location-popover tbody tr:first-child td:nth-child(2) span"
@@ -94,10 +82,6 @@ class CreatePosition extends Page {
 
   async getAlertSuccess() {
     return browser.$(".alert-success")
-  }
-
-  async getCancelButton() {
-    return (await browser.$("div.submit-buttons")).$("button=Cancel")
   }
 
   async getSubmitButton() {

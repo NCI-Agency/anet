@@ -6,12 +6,12 @@ import ShowPerson from "../pages/showPerson.page"
 
 const DEFAULT_USERNAME = "jack"
 
-const NON_COUNTERPART_PRINCIPLE = {
+const NON_COUNTERPART_INTERLOCUTOR = {
   name: "Steve",
   birthday: "9 September 1999",
   politicalPosition: "Left"
 }
-const COUNTERPART_PRINCIPLE = {
+const COUNTERPART_INTERLOCUTOR = {
   name: "Roger",
   birthday: "1 January 2001",
   politicalPosition: "Right"
@@ -20,27 +20,31 @@ const COUNTERPART_PRINCIPLE = {
 const NEW_PERSON_FIELDS_1 = {
   lastname: "sensitivePerson1",
   rank: "CIV",
-  gender: "FEMALE"
+  gender: "FEMALE",
+  country: "Turkey"
 }
 
 const NEW_PERSON_FIELDS_2 = {
   lastname: "sensitivePerson2",
   rank: "CIV",
-  gender: "MALE"
+  gender: "MALE",
+  country: "Turkey"
 }
 
 describe("Visibility of custom sensitive information", () => {
   describe("Users", () => {
-    it("Should be able to find the non counterpart principal with sensitive information", async() => {
+    it("Should be able to find the non counterpart interlocutor with sensitive information", async() => {
       await Home.open("/", DEFAULT_USERNAME)
-      await (await Home.getSearchBar()).setValue(NON_COUNTERPART_PRINCIPLE.name)
+      await (
+        await Home.getSearchBar()
+      ).setValue(NON_COUNTERPART_INTERLOCUTOR.name)
       await (await Home.getSubmitSearch()).click()
       await (
         await Search.getFoundPeopleTable()
       ).waitForExist({ timeout: 20000 })
       await (await Search.getFoundPeopleTable()).waitForDisplayed()
       await (
-        await Search.linkOfPersonFound(NON_COUNTERPART_PRINCIPLE.name)
+        await Search.linkOfPersonFound(NON_COUNTERPART_INTERLOCUTOR.name)
       ).click()
     })
     it("Should not be able to see political position field if not authorized", async() => {
@@ -54,29 +58,31 @@ describe("Visibility of custom sensitive information", () => {
     it("Should be able to see birthday field with the correct value if authorized", async() => {
       await (await ShowPerson.getBirthday()).waitForDisplayed()
       expect(await (await ShowPerson.getBirthday()).getText()).to.equal(
-        NON_COUNTERPART_PRINCIPLE.birthday
+        NON_COUNTERPART_INTERLOCUTOR.birthday
       )
     })
-    it("Should be able to find the counterpart principal with sensitive information", async() => {
+    it("Should be able to find the counterpart interlocutor with sensitive information", async() => {
       await Home.open("/", DEFAULT_USERNAME)
-      await (await Home.getSearchBar()).setValue(COUNTERPART_PRINCIPLE.name)
+      await (await Home.getSearchBar()).setValue(COUNTERPART_INTERLOCUTOR.name)
       await (await Home.getSubmitSearch()).click()
       await (
         await Search.getFoundPeopleTable()
       ).waitForExist({ timeout: 20000 })
       await (await Search.getFoundPeopleTable()).waitForDisplayed()
-      await (await Search.linkOfPersonFound(COUNTERPART_PRINCIPLE.name)).click()
+      await (
+        await Search.linkOfPersonFound(COUNTERPART_INTERLOCUTOR.name)
+      ).click()
     })
     it("Should be able to see political position field with the correct value if counterpart", async() => {
       await (await ShowPerson.getPoliticalPosition()).waitForDisplayed()
       expect(
         await (await ShowPerson.getPoliticalPosition()).getText()
-      ).to.equal(COUNTERPART_PRINCIPLE.politicalPosition)
+      ).to.equal(COUNTERPART_INTERLOCUTOR.politicalPosition)
     })
     it("Should be able to see birthday field with the correct value if counterpart", async() => {
       await (await ShowPerson.getBirthday()).waitForDisplayed()
       expect(await (await ShowPerson.getBirthday()).getText()).to.equal(
-        COUNTERPART_PRINCIPLE.birthday
+        COUNTERPART_INTERLOCUTOR.birthday
       )
     })
     it("Should logout", async() => {
@@ -85,16 +91,18 @@ describe("Visibility of custom sensitive information", () => {
   })
 
   describe("Superusers", () => {
-    it("Should be able to find the principal with sensitive information", async() => {
+    it("Should be able to find the interlocutor with sensitive information", async() => {
       await Home.openAsSuperuser()
-      await (await Home.getSearchBar()).setValue(NON_COUNTERPART_PRINCIPLE.name)
+      await (
+        await Home.getSearchBar()
+      ).setValue(NON_COUNTERPART_INTERLOCUTOR.name)
       await (await Home.getSubmitSearch()).click()
       await (
         await Search.getFoundPeopleTable()
       ).waitForExist({ timeout: 20000 })
       await (await Search.getFoundPeopleTable()).waitForDisplayed()
       await (
-        await Search.linkOfPersonFound(NON_COUNTERPART_PRINCIPLE.name)
+        await Search.linkOfPersonFound(NON_COUNTERPART_INTERLOCUTOR.name)
       ).click()
     })
     it("Should not be able to see political position field if not authorized", async() => {
@@ -108,7 +116,7 @@ describe("Visibility of custom sensitive information", () => {
     it("Should be able to see birthday field with the correct value if authorized", async() => {
       await (await ShowPerson.getBirthday()).waitForDisplayed()
       expect(await (await ShowPerson.getBirthday()).getText()).to.equal(
-        NON_COUNTERPART_PRINCIPLE.birthday
+        NON_COUNTERPART_INTERLOCUTOR.birthday
       )
     })
     it("Should logout", async() => {
@@ -117,28 +125,30 @@ describe("Visibility of custom sensitive information", () => {
   })
 
   describe("Admins", () => {
-    it("Should be able to find the principal with sensitive information", async() => {
+    it("Should be able to find the interlocutor with sensitive information", async() => {
       await Home.openAsAdminUser()
-      await (await Home.getSearchBar()).setValue(NON_COUNTERPART_PRINCIPLE.name)
+      await (
+        await Home.getSearchBar()
+      ).setValue(NON_COUNTERPART_INTERLOCUTOR.name)
       await (await Home.getSubmitSearch()).click()
       await (
         await Search.getFoundPeopleTable()
       ).waitForExist({ timeout: 20000 })
       await (await Search.getFoundPeopleTable()).waitForDisplayed()
       await (
-        await Search.linkOfPersonFound(NON_COUNTERPART_PRINCIPLE.name)
+        await Search.linkOfPersonFound(NON_COUNTERPART_INTERLOCUTOR.name)
       ).click()
     })
     it("Should be able to see political position field with the correct value", async() => {
       await (await ShowPerson.getPoliticalPosition()).waitForDisplayed()
       expect(
         await (await ShowPerson.getPoliticalPosition()).getText()
-      ).to.equal(NON_COUNTERPART_PRINCIPLE.politicalPosition)
+      ).to.equal(NON_COUNTERPART_INTERLOCUTOR.politicalPosition)
     })
     it("Should be able to see birthday field with the correct value", async() => {
       await (await ShowPerson.getBirthday()).waitForDisplayed()
       expect(await (await ShowPerson.getBirthday()).getText()).to.equal(
-        NON_COUNTERPART_PRINCIPLE.birthday
+        NON_COUNTERPART_INTERLOCUTOR.birthday
       )
     })
     it("Should logout", async() => {
@@ -163,6 +173,9 @@ describe("Creating and editing custom sensitive information", () => {
       await (
         await CreatePerson.getGender()
       ).selectByAttribute("value", NEW_PERSON_FIELDS_1.gender)
+      await (
+        await CreatePerson.getCountry()
+      ).selectByAttribute("value", NEW_PERSON_FIELDS_1.country)
     })
     it("Should not be able to edit sensitive fields if not authorized", async() => {
       await (
@@ -211,10 +224,13 @@ describe("Creating and editing custom sensitive information", () => {
       ).setValue(NEW_PERSON_FIELDS_2.lastname)
       await (
         await CreatePerson.getRank()
-      ).selectByAttribute("value", NEW_PERSON_FIELDS_1.rank)
+      ).selectByAttribute("value", NEW_PERSON_FIELDS_2.rank)
       await (
         await CreatePerson.getGender()
       ).selectByAttribute("value", NEW_PERSON_FIELDS_2.gender)
+      await (
+        await CreatePerson.getCountry()
+      ).selectByAttribute("value", NEW_PERSON_FIELDS_2.country)
     })
     it("Should be able to create a new person with sensitive information", async() => {
       await CreatePerson.deleteInput(CreatePerson.getBirthday())
