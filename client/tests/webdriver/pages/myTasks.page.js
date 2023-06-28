@@ -28,11 +28,15 @@ class MyTasks extends Page {
   }
 
   async getMyPendingTasksContent() {
-    return (await browser.$("#my-tasks-with-pending-assessments")).$("tbody")
+    return (await this.getMyPendingTasks()).$("fieldset")
+  }
+
+  async getMyPendingTasksBody() {
+    return (await this.getMyPendingTasksContent()).$("tbody")
   }
 
   async getMyPendingTask(name) {
-    return (await this.getMyPendingTasksContent()).$(
+    return (await this.getMyPendingTasksBody()).$(
       `//a[contains(text(), "${name}")]`
     )
   }

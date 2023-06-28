@@ -28,13 +28,15 @@ class MyTasks extends Page {
   }
 
   async getMyPendingCounterpartsContent() {
-    return (await browser.$("#my-counterparts-with-pending-assessments")).$(
-      "tbody"
-    )
+    return (await this.getMyPendingCounterparts()).$("fieldset")
+  }
+
+  async getMyPendingCounterpartsBody() {
+    return (await this.getMyPendingCounterpartsContent()).$("tbody")
   }
 
   async getMyPendingCounterpart(name) {
-    return (await this.getMyPendingCounterpartsContent()).$(
+    return (await this.getMyPendingCounterpartsBody()).$(
       `//a[text()="${name}"]`
     )
   }

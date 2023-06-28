@@ -14,16 +14,16 @@ describe("In my counterparts page", () => {
       await MyCounterparts.open()
       await (await MyCounterparts.getMyPendingCounterparts()).waitForDisplayed()
       const myPendingCounterpartsItems = await (
-        await MyCounterparts.getMyPendingCounterpartsContent()
+        await MyCounterparts.getMyPendingCounterpartsBody()
       ).$$("tr")
       expect(myPendingCounterpartsItems).to.have.length(1)
+    })
+    it("Should be able to add a quarterly assessment with 4 questions for the counterpart", async() => {
       await (
         await MyCounterparts.getMyPendingCounterpart(
           "CIV TOPFERNESS, Christopf"
         )
       ).click()
-    })
-    it("Should be able to add a quarterly assessment with 4 questions for the counterpart", async() => {
       await (
         await AssessmentsSection.getAssessmentsSection(
           "principalQuarterly",
@@ -79,20 +79,17 @@ describe("In my counterparts page", () => {
   })
 
   describe("When Jack is checking the contents of the page", () => {
-    it("Should see no counterparts in the table of pending my counterparts that has pending assessments", async() => {
+    it("Should see an empty table of my counterparts that have pending assessments", async() => {
       await MyCounterparts.openAs("jack")
       await (await MyCounterparts.getMyPendingCounterparts()).waitForDisplayed()
-      // eslint-disable-next-line no-unused-expressions
       expect(
-        await (
-          await MyCounterparts.getMyPendingCounterpartsContent()
-        ).isExisting()
-      ).to.be.false
+        await (await MyCounterparts.getMyPendingCounterpartsContent()).getText()
+      ).to.equal("No positions found")
+    })
+    it("Should be able to add a quarterly assessment with 1 question for the counterpart", async() => {
       await (
         await MyCounterparts.getMyCounterpart("Maj ROGWELL, Roger")
       ).click()
-    })
-    it("Should be able to add a quarterly assessment with 1 question for the counterpart", async() => {
       await (
         await AssessmentsSection.getAssessmentsSection(
           "principalQuarterly",
@@ -153,9 +150,9 @@ describe("In my tasks page", () => {
     it("Should see an empty table of my tasks that have pending assessments", async() => {
       await MyTasks.open()
       await (await MyTasks.getMyPendingTasks()).waitForDisplayed()
-      // eslint-disable-next-line no-unused-expressions
-      expect(await (await MyTasks.getMyPendingTasksContent()).isExisting()).to
-        .be.false
+      expect(
+        await (await MyTasks.getMyPendingTasksContent()).getText()
+      ).to.equal("No tasks found")
       await MyTasks.logout()
     })
   })
@@ -165,12 +162,12 @@ describe("In my tasks page", () => {
       await MyTasks.openAs("jack")
       await (await MyTasks.getMyPendingTasks()).waitForDisplayed()
       const myPendingTasks = await (
-        await MyTasks.getMyPendingTasksContent()
+        await MyTasks.getMyPendingTasksBody()
       ).$$("tr")
       expect(myPendingTasks).to.have.length(1)
-      await (await MyTasks.getMyPendingTask("2.B")).click()
     })
     it("Should be able to add a monthly assessment with 2 questions for the task", async() => {
+      await (await MyTasks.getMyPendingTask("2.B")).click()
       await (
         await AssessmentsSection.getAssessmentsSection(
           "subTaskMonthly",
