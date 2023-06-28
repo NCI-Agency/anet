@@ -1,4 +1,5 @@
 import Model from "components/Model"
+import _isEmpty from "lodash/isEmpty"
 import {
   PERIOD_FACTORIES,
   RECURRENCE_TYPE,
@@ -28,9 +29,23 @@ const AssessmentResultsContainer = ({
   const entityAssessments = Object.entries(entity.getAssessmentsConfig())
   return (
     <div ref={contRef}>
-      {entityAssessments.map(([assessmentKey, entityAssessment]) => (
-        <React.Fragment key={assessmentKey}>
-          {entityAssessment.recurrence === RECURRENCE_TYPE.ONCE && (
+      {entityAssessments.map(([assessmentKey, entityAssessment]) => {
+        if (
+          PERIOD_FACTORIES[entityAssessment.recurrence] ||
+          entityAssessment.recurrence === RECURRENCE_TYPE.ON_DEMAND
+        ) {
+          // can only filter periodic and ondemand assessments
+          // (we lack sufficient context for filtering instant ['once'] assessments)
+          if (
+            _isEmpty(Model.filterAssessmentConfig(entityAssessment, entity))
+          ) {
+            // assessment does not apply
+            return null
+          }
+        }
+        let resultsTable
+        if (entityAssessment.recurrence === RECURRENCE_TYPE.ONCE) {
+          resultsTable = (
             <InstantAssessmentResultsTable
               assessmentKey={assessmentKey}
               style={{ flex: "0 0 100%" }}
@@ -42,8 +57,9 @@ const AssessmentResultsContainer = ({
                 numberOfPeriods
               }}
             />
-          )}
-          {PERIOD_FACTORIES[entityAssessment.recurrence] && (
+          )
+        } else if (PERIOD_FACTORIES[entityAssessment.recurrence]) {
+          resultsTable = (
             <PeriodicAssessmentResultsTable
               assessmentKey={assessmentKey}
               style={{ flex: "0 0 100%" }}
@@ -57,8 +73,9 @@ const AssessmentResultsContainer = ({
               canAddAssessment={canAddPeriodicAssessment}
               onUpdateAssessment={onUpdateAssessment}
             />
-          )}
-          {entityAssessment.recurrence === RECURRENCE_TYPE.ON_DEMAND && (
+          )
+        } else if (entityAssessment.recurrence === RECURRENCE_TYPE.ON_DEMAND) {
+          resultsTable = (
             <OnDemandAssessment
               assessmentKey={assessmentKey}
               style={{ flex: "0 0 100%" }}
@@ -72,9 +89,12 @@ const AssessmentResultsContainer = ({
               canAddAssessment={canAddOndemandAssessment}
               onUpdateAssessment={onUpdateAssessment}
             />
-          )}
-        </React.Fragment>
-      ))}
+          )
+        }
+        return (
+          <React.Fragment key={assessmentKey}>{resultsTable}</React.Fragment>
+        )
+      })}
     </div>
   )
 }

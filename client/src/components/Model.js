@@ -778,19 +778,22 @@ export default class Model {
       return false
     }
     // "for loop" to break early
-    for (let i = 0; i < periodicAssessments.length; i++) {
-      // offset 1 so that the period is the previous (not current) period
-      const prevPeriod = PERIOD_FACTORIES[periodicAssessments[i][1].recurrence](
-        moment(),
-        1
-      )
-      const prevPeriodAssessments = entity.getPeriodAssessments(
-        periodicAssessments[i][0],
-        prevPeriod
-      )
-      // if there is no assessment in the last period, we have pending assessment
-      if (prevPeriodAssessments.length === 0) {
-        return true
+    for (const [paKey, paDefinition] of periodicAssessments) {
+      if (!_isEmpty(Model.filterAssessmentConfig(paDefinition, entity))) {
+        // periodic assessment applies;
+        // check with offset 1 so that the period is the previous (not current) period
+        const prevPeriod = PERIOD_FACTORIES[paDefinition.recurrence](
+          moment(),
+          1
+        )
+        const prevPeriodAssessments = entity.getPeriodAssessments(
+          paKey,
+          prevPeriod
+        )
+        // if there is no assessment in the last period, we have pending assessment
+        if (prevPeriodAssessments.length === 0) {
+          return true
+        }
       }
     }
     // if we didn't early return, there is no pending assessment

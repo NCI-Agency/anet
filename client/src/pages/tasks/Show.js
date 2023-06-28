@@ -184,7 +184,10 @@ const TaskShow = ({ pageDispatchers }) => {
 
   Model.populateEntitiesNotesCustomFields(task.descendantTasks)
 
-  const subTasks = task.descendantTasks?.map(task => new Task(task))
+  // Top-level tasks and sub-tasks have different assessment definitions!
+  const subTasks = _isEmpty(task.parentTask)
+    ? []
+    : task.descendantTasks?.map(task => new Task(task))
 
   const fieldSettings = task.fieldSettings()
   const ShortNameField = DictionaryField(Field)

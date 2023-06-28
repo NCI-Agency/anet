@@ -14,19 +14,11 @@ export const GRAPHQL_NOTIFICATIONS_NOTE_FIELDS = `
   }
 `
 
-export const getNotifications = position => {
-  const counterpartsWithPendingAssessments =
-    getCounterpartsWithPendingAssessments(position)
-
-  const tasksWithPendingAssessments = getTasksWithPendingAssessments(position)
-
-  const notifications = {
-    counterpartsWithPendingAssessments,
-    tasksWithPendingAssessments
-  }
-
-  return notifications
-}
+export const getNotifications = position => ({
+  counterpartsWithPendingAssessments:
+    getCounterpartsWithPendingAssessments(position),
+  tasksWithPendingAssessments: getTasksWithPendingAssessments(position)
+})
 
 export const getTasksWithPendingAssessments = position => {
   if (position?.responsibleTasks?.length) {
