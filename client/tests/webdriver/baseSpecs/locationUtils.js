@@ -15,6 +15,6 @@ export const SIMILAR_LOCATION = {
 }
 export const LOCATION_TYPE = {
   index: 1,
-  type: "ADVISOR_LOCATION"
+  type: "POINT_LOCATION"
 }
 export const DESCRIPTION = "Location Description"

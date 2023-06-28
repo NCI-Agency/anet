@@ -21,8 +21,7 @@ describe("When creating an organization", () => {
     ).waitForDisplayed()
   })
 
-  it("Should successfully create an advisor organization with location and profile", async() => {
-    await (await CreateOrganization.getTypeAdvisorButton()).click()
+  it("Should successfully create an organization with location and profile", async() => {
     await (await CreateOrganization.getShortNameInput()).setValue(SHORT_NAME)
     await (await CreateOrganization.getLongNameInput()).setValue(DESCRIPTION)
     await (await CreateOrganization.getLocationInput()).click()

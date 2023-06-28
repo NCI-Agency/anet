@@ -73,7 +73,7 @@ class MergePositions extends Page {
 
   async getWinnerAssociatedPositions() {
     const associatedPositionRows = await browser.$$(
-      "#assigned-principal tbody tr"
+      "#assigned-counterpart tbody tr"
     )
     return await associatedPositionRows.map(async elem => {
       return {

@@ -65,6 +65,18 @@ class MergePeople extends Page {
     )
   }
 
+  async getActivateFieldButtons() {
+    return browser.$$(
+      "//div[@id=\"mid-merge-per-col\"]//button[contains(@class, 'activate-field-button')]"
+    )
+  }
+
+  async getInfoButtons() {
+    return browser.$$(
+      "//div[@id=\"mid-merge-per-col\"]//button[contains(@class, 'btn-default')]"
+    )
+  }
+
   async getEditHistoryButton() {
     return browser.$('//button[text()="Edit History Manually"]')
   }
@@ -80,6 +92,10 @@ class MergePeople extends Page {
     )
     const button = await (await buttonDiv.$("..")).$("..")
     return button.$("small > button")
+  }
+
+  async getAllSelectButtons(side) {
+    return browser.$$(`//div[@id="${side}-merge-per-col"]//small/button`)
   }
 
   async getColumnContent(side, text) {

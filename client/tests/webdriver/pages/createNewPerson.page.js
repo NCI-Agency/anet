@@ -47,12 +47,12 @@ export class CreatePerson extends Page {
     )
   }
 
-  async getRolePrincipalButton() {
-    return browser.$('label[for="role_PRINCIPAL"]')
+  async getUserTrueButton() {
+    return browser.$('label[for="user_true"]')
   }
 
-  async getRoleAdvisorButton() {
-    return browser.$('label[for="role_ADVISOR"]')
+  async getUserFalseButton() {
+    return browser.$('label[for="user_false"]')
   }
 
   async getEmailAddress() {

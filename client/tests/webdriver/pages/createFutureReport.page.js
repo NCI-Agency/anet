@@ -30,7 +30,7 @@ class CreateFutureReport extends CreateReport {
 
   async getAttendeesFieldValue() {
     return (await this.getAttendeesFieldFormGroup()).$(
-      `div[id="${attId}Container"] .principalAttendeesTable`
+      `div[id="${attId}Container"] .interlocutorAttendeesTable`
     )
   }
 
