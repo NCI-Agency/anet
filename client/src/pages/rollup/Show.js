@@ -361,7 +361,11 @@ const RollupShow = ({ pageDispatchers, searchQuery, setSearchQuery }) => {
       renderer: renderReportMap
     }
   ]
-  const INITIAL_LAYOUT = VISUALIZATIONS[0].id
+  const INITIAL_LAYOUT = {
+    direction: "row",
+    first: VISUALIZATIONS[0].id,
+    second: VISUALIZATIONS[1].id
+  }
   const DESCRIPTION = "Number of reports released per organization."
   const flexStyle = {
     display: "flex",
@@ -561,7 +565,7 @@ const RollupShow = ({ pageDispatchers, searchQuery, setSearchQuery }) => {
 
   function setRollupDefaultSearchQuery() {
     const queryParams = {
-      state: [Report.STATE.PUBLISHED],
+      state: [Report.STATE.PUBLISHED, Report.STATE.CANCELLED],
       releasedAtStart: moment().startOf("day"),
       releasedAtEnd: moment().endOf("day")
     }
