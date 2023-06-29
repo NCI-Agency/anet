@@ -117,7 +117,7 @@
     "@blueprintjs/core": "4.17.8",
     "@blueprintjs/datetime": "4.4.27",
     "@blueprintjs/popover2": "1.13.12",
-    "@emotion/react": "11.11.0",
+    "@emotion/react": "11.11.1",
     "@emotion/styled": "11.11.0",
     "@fullcalendar/core": "6.1.7",
     "@fullcalendar/daygrid": "6.1.7",
