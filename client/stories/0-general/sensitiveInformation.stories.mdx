@@ -17,6 +17,35 @@ allowed to select these authorization groups themselves. For the custom sensitiv
 fields, the authorization groups that have access are defined in the ANET configuration, by the
 application administrator.
 
+Note that there is a difference between this key being absent from the dictionary, and defining an
+empty list for this key. The absence of the key means anyone can access this information, and an
+empty list (`authorizationGroupUuids: []`) means nobody can access this information.
+
+Examples:
+
+```
+fields:
+  person:
+    customSensitiveInformation:
+      example1:
+        # only authorization groups 39a78d51-c351-452c-9206-4305ec8dd76d and
+        # c21e7321-7ec5-4837-8805-a302f9575754 can access this field:
+        authorizationGroupUuids: ['39a78d51-c351-452c-9206-4305ec8dd76d', 'c21e7321-7ec5-4837-8805-a302f9575754']
+        type: date
+        …
+
+      example2:
+        # nobody can access this field, because the list is empty:
+        authorizationGroupUuids: []
+        type: date
+        …
+
+      example3:
+        # anyone can access this field, because `authorizationGroupUuids` is not defined
+        type: date
+        …
+```
+
 In addition to people in the authorization groups, sensitive information in engagement reports is
 also accessible to the report's author(s). And sensitive information for people or positions is also
 accessible to those people's or position's counterparts.

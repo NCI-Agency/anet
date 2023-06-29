@@ -8,7 +8,6 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -150,36 +149,59 @@ public class DaoUtils {
     }
     final List<AuthorizationGroup> authorizationGroups =
         position.loadAuthorizationGroups(AnetObjectEngine.getInstance().getContext()).join();
-    return authorizationGroups.stream().map(ag -> ag.getUuid()).collect(Collectors.toSet());
+    return authorizationGroups.stream().map(AbstractAnetBean::getUuid).collect(Collectors.toSet());
   }
 
   public static boolean isUserInAuthorizationGroup(final Set<String> userAuthorizationGroupUuids,
       final Note note, final boolean forReading) {
+    return forReading ? isUserInReadAuthorizationGroup(userAuthorizationGroupUuids, note)
+        : isUserInWriteAuthorizationGroup(userAuthorizationGroupUuids, note);
+  }
+
+  public static boolean isUserInReadAuthorizationGroup(
+      final Set<String> userAuthorizationGroupUuids, final Note note) {
     // Check against the dictionary whether the user is authorized
-    final String authGroupKeyFmt = "%1$s.authorizationGroupUuids.%2$s";
-    final List<String> authorizationGroupUuids = new ArrayList<>();
-    @SuppressWarnings("unchecked")
-    final List<String> writeAuthorizationGroupUuids =
-        (List<String>) AnetObjectEngine.getConfiguration()
-            .getDictionaryEntry(String.format(authGroupKeyFmt, note.getAssessmentKey(), "write"));
+    final List<String> readAuthorizationGroupUuids =
+        getAuthorizationGroupUuids(note.getAssessmentKey(), "read");
+    if (readAuthorizationGroupUuids == null) {
+      // Not defined in dictionary: anyone can read!
+      return true;
+    }
+
     // Note: write access implies read access!
+    final List<String> writeAuthorizationGroupUuids =
+        getAuthorizationGroupUuids(note.getAssessmentKey(), "write");
     if (writeAuthorizationGroupUuids != null) {
-      authorizationGroupUuids.addAll(writeAuthorizationGroupUuids);
+      readAuthorizationGroupUuids.addAll(writeAuthorizationGroupUuids);
     }
-    if (forReading) {
-      @SuppressWarnings("unchecked")
-      final List<String> readAuthorizationGroupUuids =
-          (List<String>) AnetObjectEngine.getConfiguration()
-              .getDictionaryEntry(String.format(authGroupKeyFmt, note.getAssessmentKey(), "read"));
-      if (readAuthorizationGroupUuids != null) {
-        authorizationGroupUuids.addAll(readAuthorizationGroupUuids);
-      }
+
+    // Check defined uuids against the user
+    return DaoUtils.isInAuthorizationGroup(userAuthorizationGroupUuids,
+        readAuthorizationGroupUuids);
+  }
+
+  public static boolean isUserInWriteAuthorizationGroup(
+      final Set<String> userAuthorizationGroupUuids, final Note note) {
+    // Check against the dictionary whether the user is authorized
+    final List<String> writeAuthorizationGroupUuids =
+        getAuthorizationGroupUuids(note.getAssessmentKey(), "write");
+    if (writeAuthorizationGroupUuids == null) {
+      // Not defined in dictionary: anyone can write!
+      return true;
     }
-    if (authorizationGroupUuids.isEmpty()) {
-      // No authorization groups defined for this assessment: read is allowed, write is denied
-      return forReading;
-    }
-    return DaoUtils.isInAuthorizationGroup(userAuthorizationGroupUuids, authorizationGroupUuids);
+
+    // Check defined uuids against the user
+    return DaoUtils.isInAuthorizationGroup(userAuthorizationGroupUuids,
+        writeAuthorizationGroupUuids);
+  }
+
+  @SuppressWarnings("unchecked")
+  private static List<String> getAuthorizationGroupUuids(final String assessmentKey,
+      final String accessType) {
+    final String keyPath =
+        String.format("%1$s.authorizationGroupUuids.%2$s", assessmentKey, accessType);
+    return (List<String>) AnetObjectEngine.getConfiguration().getDictionaryEntry(keyPath);
+
   }
 
   public static boolean isInAuthorizationGroup(final Set<String> userAuthorizationGroupUuids,

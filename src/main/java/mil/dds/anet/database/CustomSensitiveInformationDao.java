@@ -239,23 +239,21 @@ public class CustomSensitiveInformationDao
     // Check against the dictionary whether the user is authorized
     final List<String> authorizationGroupUuids =
         getAuthorizationGroupUuids(csi.getRelatedObjectType(), csi.getCustomFieldName());
-    if (Utils.isEmptyOrNull(authorizationGroupUuids)) {
-      // No authorization groups defined for this field
-      return false;
+    if (authorizationGroupUuids == null) {
+      // Not defined in dictionary: anyone can access!
+      return true;
     }
 
     // Check against authorization groups
     return DaoUtils.isInAuthorizationGroup(userAuthorizationGroupUuids, authorizationGroupUuids);
   }
 
+  @SuppressWarnings("unchecked")
   private List<String> getAuthorizationGroupUuids(final String tableName, final String fieldName) {
     final String keyPath =
         String.format("fields.%1$s.customSensitiveInformation.%2$s.authorizationGroupUuids",
             getObjectType(tableName), fieldName);
-    @SuppressWarnings("unchecked")
-    final List<String> authorizationGroupUuids =
-        (List<String>) AnetObjectEngine.getConfiguration().getDictionaryEntry(keyPath);
-    return authorizationGroupUuids;
+    return (List<String>) AnetObjectEngine.getConfiguration().getDictionaryEntry(keyPath);
   }
 
   private String getObjectType(final String tableName) {

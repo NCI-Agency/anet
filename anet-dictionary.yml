@@ -113,6 +113,27 @@ fields:
               validations:
                 - type: required
                   params: [You must provide the Top 3 issues]
+        topTaskSemiannuallyNoWrite:
+          label: Semi-annual assessment of objective, no write
+          recurrence: semiannually
+          test: $.subject[?(@property === "noSuchProperty" && @.match(/^willNeverMatch/i))]
+          authorizationGroupUuids:
+            write: []
+          questions:
+            question1:
+              type: number
+              label: Test Question 1
+        topTaskOnceReportNoWrite:
+          label: Engagement assessment of objective, no write
+          recurrence: once
+          relatedObjectType: report
+          test: $.subject[?(@property === "noSuchProperty" && @.match(/^willNeverMatch/i))]
+          authorizationGroupUuids:
+            write: []
+          questions:
+            question1:
+              type: number
+              label: Test Question 1
 
     subLevel:
       shortLabel: Effort
@@ -1340,6 +1361,39 @@ fields:
               widget: richTextEditor
               style:
                 height: 70px
+        advisorQuarterlyNoWrite:
+          label: Quarterly assessment of advisor, no write
+          recurrence: quarterly
+          test: $.subject[?(@property === "noSuchProperty" && @.match(/^willNeverMatch/i))]
+          authorizationGroupUuids:
+            write: []
+          questions:
+            question1:
+              type: number
+              label: Test Question 1
+        advisorOnceReportNoWrite:
+          label: Engagement assessment of advisor, no write
+          recurrence: once
+          relatedObjectType: report
+          test: $.subject[?(@property === "noSuchProperty" && @.match(/^willNeverMatch/i))]
+          authorizationGroupUuids:
+            write: []
+          questions:
+            question1:
+              type: number
+              label: Test Question 1
+        advisorOndemandNoWrite:
+          label: Ondemand assessment of advisor, no write
+          recurrence: ondemand
+          authorizationGroupUuids:
+            write: []
+          questions:
+            assessmentDate:
+              type: date
+              label: Assessment date
+            question1:
+              type: number
+              label: Test Question 1
     position:
       name: NATO Billet
       type: ANET User

@@ -50,19 +50,80 @@ distinguished by the assessmentKey, which is defined in the dictionary and recor
 Using this key, the type of assessment and its corresponding (optional) authorization groups can be
 looked up in the dictionary, and checked against the note. We distinguish groups with read
 permission and write permission (which includes create, update and delete, as well as read).
-Example:
+
+Note that there is a difference between this key being absent from the dictionary, and defining an
+empty list for this key. No key for `read` means anyone can read this information, and an empty list
+(`read: []`) means nobody can read this information (except for those with write access). The
+absence of the `write` key means anyone can write this information, and an empty list  (`write: []`)
+means nobody can write this information.
+
+Examples:
 
 ```
 fields:
   person:
     advisor:
       assessments:
-        advisorOnceReportLinguist:
+        example1:
           recurrence: once
           relatedObjectType: report
           authorizationGroupUuids:
+            # authorization group c21e7321-7ec5-4837-8805-a302f9575754 can read, and
+            # 39a78d51-c351-452c-9206-4305ec8dd76d can also read (because they have write access):
             read: ['c21e7321-7ec5-4837-8805-a302f9575754']
+            # only authorization group 39a78d51-c351-452c-9206-4305ec8dd76d can write:
             write: ['39a78d51-c351-452c-9206-4305ec8dd76d']
+          questions:
+            …
+          questionSets:
+            …
+
+        example2:
+          recurrence: once
+          relatedObjectType: report
+          authorizationGroupUuids:
+            # only authorization group 39a78d51-c351-452c-9206-4305ec8dd76d can read (because they
+            # have write access):
+            read: []
+            # only authorization group 39a78d51-c351-452c-9206-4305ec8dd76d can write:
+            write: ['39a78d51-c351-452c-9206-4305ec8dd76d']
+          questions:
+            …
+          questionSets:
+            …
+
+        example3:
+          recurrence: once
+          relatedObjectType: report
+          authorizationGroupUuids:
+            # anyone can read, because the `read` key is not defined;
+            # only authorization group 39a78d51-c351-452c-9206-4305ec8dd76d can write:
+            write: ['39a78d51-c351-452c-9206-4305ec8dd76d']
+          questions:
+            …
+          questionSets:
+            …
+
+        example4:
+          recurrence: once
+          relatedObjectType: report
+          authorizationGroupUuids:
+            # anyone can read, because the `read` key is not defined;
+            # nobody can write, because the list is empty:
+            write: []
+          questions:
+            …
+          questionSets:
+            …
+
+        example5:
+          recurrence: once
+          relatedObjectType: report
+          authorizationGroupUuids:
+            # only authorization group c21e7321-7ec5-4837-8805-a302f9575754 can read:
+            read: ['c21e7321-7ec5-4837-8805-a302f9575754']
+            # anyone can write, because the `write` key is not defined; although you probably never
+            # want to configure it like this!
           questions:
             …
           questionSets:

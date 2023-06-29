@@ -388,6 +388,15 @@ public class NoteResourceTest extends AbstractResourceTest {
   }
 
   @Test
+  void testInstantPersonAssessmentsEmptyWriteAuthGroups()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    // Instant ('once') ASSESSMENT note tests for person through the NoteResource methods, with
+    // empty write authorization groups defined in the dictionary
+    testInstantAssessmentsEmptyWriteAuthGroups("testInstantPersonAssessmentsNoAuthGroups",
+        "fields.advisor.person.assessments.advisorOnceReportNoWrite", true, TEST_SUBTASK_UUID);
+  }
+
+  @Test
   public void testInstantPersonAssessmentsNoAuthGroups()
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     // Instant ('once') ASSESSMENT note tests for person through the NoteResource methods, with no
@@ -403,6 +412,16 @@ public class NoteResourceTest extends AbstractResourceTest {
     // ReportResource::updateReportAssessments
     testInstantAssessmentsViaReport("testInstantPersonAssessmentsViaReport",
         "fields.advisor.person.assessments.advisorOnceReportLinguist", true, TEST_SUBTASK_UUID);
+  }
+
+  @Test
+  void testInstantPersonAssessmentsViaReportEmptyWriteAuthGroups()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    // Instant ('once') ASSESSMENT note tests for person through
+    // ReportResource::updateReportAssessments, with empty write authorization groups defined in the
+    // dictionary
+    testInstantAssessmentsViaReportEmptyWriteAuthGroups("testInstantPersonAssessmentsNoAuthGroups",
+        "fields.advisor.person.assessments.advisorOnceReportNoWrite", true, TEST_SUBTASK_UUID);
   }
 
   @Test
@@ -424,6 +443,15 @@ public class NoteResourceTest extends AbstractResourceTest {
   }
 
   @Test
+  void testInstantTaskAssessmentsEmptyWriteAuthGroups()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    // Instant ('once') ASSESSMENT note tests for task through the NoteResource methods, with empty
+    // write authorization groups defined in the dictionary
+    testInstantAssessmentsEmptyWriteAuthGroups("testInstantTaskAssessmentsNoAuthGroups",
+        "fields.task.topLevel.assessments.topTaskOnceReportNoWrite", false, TEST_SUBTASK_UUID);
+  }
+
+  @Test
   public void testInstantTaskAssessmentsNoAuthGroups()
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     // Instant ('once') ASSESSMENT note tests for task through the NoteResource methods, with no
@@ -439,6 +467,17 @@ public class NoteResourceTest extends AbstractResourceTest {
     // ReportResource::updateReportAssessments
     testInstantAssessmentsViaReport("testInstantTaskAssessmentsViaReport",
         "fields.task.topLevel.assessments.topTaskOnceReport", false, TEST_TOPTASK_UUID);
+  }
+
+  @Test
+  void testInstantTaskAssessmentsViaReportEmptyWriteAuthGroups()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    // Instant ('once') ASSESSMENT note tests for task through
+    // ReportResource::updateReportAssessments, with empty write authorization groups defined in the
+    // dictionary
+    testInstantAssessmentsViaReportEmptyWriteAuthGroups(
+        "testInstantTaskAssessmentsViaReportNoAuthGroups",
+        "fields.task.topLevel.assessments.topTaskOnceReportNoWrite", false, TEST_SUBTASK_UUID);
   }
 
   @Test
@@ -550,13 +589,14 @@ public class NoteResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void testOndemandAssessmentsNoAuthGroups()
+  void testOndemandAssessmentsEmptyWriteAuthGroups()
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    // On-demand ASSESSMENT note tests, with no authorization groups defined in the dictionary
-    final String assessmentKey = "fields.advisor.person.assessments.advisorOndemand";
+    // On-demand ASSESSMENT note tests, with empty write authorization groups defined in the
+    // dictionary
+    final String assessmentKey = "fields.advisor.person.assessments.advisorOndemandNoWrite";
     final String recurrence = "ondemand";
 
-    // - F: create for a person with no write auth.groups defined in the dictionary
+    // - F: create for a person with empty write auth.groups defined in the dictionary
     final Person principalPerson = getSteveSteveson();
     final String principalPersonUuid = principalPerson.getUuid();
     final NoteRelatedObjectInput testPrincipalNroInput =
@@ -575,17 +615,50 @@ public class NoteResourceTest extends AbstractResourceTest {
     final Person jackPerson = jackQueryExecutor.person(PERSON_FIELDS, principalPersonUuid);
     assertNotes(jackPerson.getNotes(), testNoteInputs, assessmentKey, 1);
 
-    // - F: update it with no write auth.groups defined in the dictionary
+    // - F: update it with empty write auth.groups defined in the dictionary
     final NoteInput updatedNoteInputJack = getNoteInput(createdNoteAdmin);
     updatedNoteInputJack.setText(createAssessmentText("updated by jack", recurrence));
     failNoteUpdate(jackMutationExecutor, updatedNoteInputJack);
 
-    // - F: delete it with no write auth.groups defined in the dictionary
+    // - F: delete it with empty write auth.groups defined in the dictionary
     failNoteDelete(jackMutationExecutor, createdNoteAdmin);
 
     // - S: delete it as admin
     succeedNoteDelete(adminMutationExecutor, createdNoteAdmin);
     testNoteInputs.remove(testNoteInputAdmin);
+    assertNotes(adminQueryExecutor.person(PERSON_FIELDS, principalPersonUuid).getNotes(),
+        testNoteInputs, assessmentKey, 1);
+  }
+
+  @Test
+  void testOndemandAssessmentsNoAuthGroups()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    // On-demand ASSESSMENT note tests, with no authorization groups defined in the dictionary
+    final String assessmentKey = "fields.advisor.person.assessments.advisorOndemand";
+    final String recurrence = "ondemand";
+
+    // - S: create for a person with no auth.groups defined in the dictionary
+    final Person principalPerson = getSteveSteveson();
+    final String principalPersonUuid = principalPerson.getUuid();
+    final NoteRelatedObjectInput testPrincipalNroInput =
+        createNoteRelatedObject(PersonDao.TABLE_NAME, principalPersonUuid);
+    final NoteInput testNoteInputJack =
+        createAssessment(assessmentKey, "jack", recurrence, testPrincipalNroInput);
+    final List<NoteInput> testNoteInputs = Lists.newArrayList(testNoteInputJack);
+    final Note createdNoteJack = succeedNoteCreate(jackMutationExecutor, testNoteInputJack);
+
+    // - S: read it with no auth.groups defined in the dictionary
+    final Person jackPerson = jackQueryExecutor.person(PERSON_FIELDS, principalPersonUuid);
+    assertNotes(jackPerson.getNotes(), testNoteInputs, assessmentKey, 1);
+
+    // - S: update it with no auth.groups defined in the dictionary
+    final NoteInput updatedNoteInputJack = getNoteInput(createdNoteJack);
+    updatedNoteInputJack.setText(createAssessmentText("updated by jack", recurrence));
+    succeedNoteUpdate(jackMutationExecutor, updatedNoteInputJack);
+
+    // - S: delete it with no auth.groups defined in the dictionary
+    succeedNoteDelete(jackMutationExecutor, createdNoteJack);
+    testNoteInputs.remove(testNoteInputJack);
     assertNotes(adminQueryExecutor.person(PERSON_FIELDS, principalPersonUuid).getNotes(),
         testNoteInputs, assessmentKey, 1);
   }
@@ -705,16 +778,18 @@ public class NoteResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void testPeriodicPersonAssessmentsNoAuthGroups()
+  void testPeriodicPersonAssessmentsEmptyWriteAuthGroups()
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    // Periodic ASSESSMENT note tests for person, with no authorization groups defined in the
+    // Periodic ASSESSMENT note tests for person, with empty write authorization groups defined in
+    // the
     // dictionary
-    final String assessmentKey = "fields.principal.person.assessments.principalQuarterly";
+    final String assessmentKey = "fields.advisor.person.assessments.advisorQuarterlyNoWrite";
     final String recurrence = "quarterly";
     final MutationExecutor personCounterpartMutationExecutor =
         getMutationExecutor(getRegularUser().getDomainUsername());
 
-    // - F: create for a person as someone without counterpart and no write auth.groups defined in
+    // - F: create for a person as someone without counterpart and empty write auth.groups defined
+    // in
     // the dictionary
     final NoteRelatedObjectInput testPersonNroInput =
         createNoteRelatedObject(PersonDao.TABLE_NAME, TEST_COUNTERPART_PERSON_UUID);
@@ -724,7 +799,8 @@ public class NoteResourceTest extends AbstractResourceTest {
         getMutationExecutor(getAndrewAnderson().getDomainUsername());
     failNoteCreate(andrewMutationExecutor, testNoteInputFail);
 
-    // - S: create for a person as someone with counterpart and no write auth.groups defined in the
+    // - S: create for a person as someone with counterpart and empty write auth.groups defined in
+    // the
     // dictionary
     final NoteInput testNoteInput =
         createAssessment(assessmentKey, "erin", recurrence, testPersonNroInput);
@@ -738,26 +814,70 @@ public class NoteResourceTest extends AbstractResourceTest {
         andrewQueryExecutor.person(PERSON_FIELDS, TEST_COUNTERPART_PERSON_UUID);
     assertNotes(andrewPerson.getNotes(), testNoteInputs, assessmentKey, 1);
 
-    // - F: update it as someone without counterpart and with no write auth.groups defined in the
+    // - F: update it as someone without counterpart and with empty write auth.groups defined in the
     // dictionary
     final NoteInput updatedNoteInputAndrew = getNoteInput(createdNote);
     updatedNoteInputAndrew.setText(createAssessmentText("updated by andrew", recurrence));
     failNoteUpdate(andrewMutationExecutor, updatedNoteInputAndrew);
 
-    // - S: update it as someone with counterpart and with no write auth.groups defined in the
+    // - S: update it as someone with counterpart and with empty write auth.groups defined in the
     // dictionary
     final NoteInput updatedNoteInput = getNoteInput(createdNote);
     updatedNoteInput.setText(createAssessmentText("updated by erin", recurrence));
     final List<NoteInput> updatedNotesInput = Lists.newArrayList(updatedNoteInput);
     final Note updatedNote = succeedNoteUpdate(personCounterpartMutationExecutor, updatedNoteInput);
 
-    // - F: delete it as someone without counterpart and with no write auth.groups defined in the
+    // - F: delete it as someone without counterpart and with empty write auth.groups defined in the
     // dictionary
     failNoteDelete(andrewMutationExecutor, createdNote);
 
-    // - S: delete it as someone with counterpart and with no write auth.groups defined in the
+    // - S: delete it as someone with counterpart and with empty write auth.groups defined in the
     // dictionary
     succeedNoteDelete(personCounterpartMutationExecutor, updatedNote);
+    assertThat(updatedNotesInput.remove(updatedNoteInput)).isTrue();
+    assertNotes(andrewQueryExecutor.person(PERSON_FIELDS, TEST_COUNTERPART_PERSON_UUID).getNotes(),
+        updatedNotesInput, assessmentKey, 1);
+  }
+
+  @Test
+  void testPeriodicPersonAssessmentsNoAuthGroups()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    // Periodic ASSESSMENT note tests for person, with no authorization groups defined in the
+    // dictionary
+    final String assessmentKey = "fields.principal.person.assessments.principalQuarterly";
+    final String recurrence = "quarterly";
+    final MutationExecutor personCounterpartMutationExecutor =
+        getMutationExecutor(getRegularUser().getDomainUsername());
+
+    // - S: create for a person as someone without counterpart and no auth.groups defined in
+    // the dictionary
+    final NoteRelatedObjectInput testPersonNroInput =
+        createNoteRelatedObject(PersonDao.TABLE_NAME, TEST_COUNTERPART_PERSON_UUID);
+    final NoteInput testNoteInput =
+        createAssessment(assessmentKey, "andrew", recurrence, testPersonNroInput);
+    final MutationExecutor andrewMutationExecutor =
+        getMutationExecutor(getAndrewAnderson().getDomainUsername());
+    final List<NoteInput> testNoteInputs = Lists.newArrayList(testNoteInput);
+    final Note createdNote = succeedNoteCreate(personCounterpartMutationExecutor, testNoteInput);
+
+    // - S: read it with no auth.groups defined in the dictionary
+    final QueryExecutor andrewQueryExecutor =
+        getQueryExecutor(getAndrewAnderson().getDomainUsername());
+    final Person andrewPerson =
+        andrewQueryExecutor.person(PERSON_FIELDS, TEST_COUNTERPART_PERSON_UUID);
+    assertNotes(andrewPerson.getNotes(), testNoteInputs, assessmentKey, 1);
+
+    // - S: update it as someone without counterpart and with no auth.groups defined in the
+    // dictionary
+    final NoteInput updatedNoteInput = getNoteInput(createdNote);
+    updatedNoteInput.setText(createAssessmentText("updated by andrew", recurrence));
+    succeedNoteUpdate(andrewMutationExecutor, updatedNoteInput);
+    final List<NoteInput> updatedNotesInput = Lists.newArrayList(updatedNoteInput);
+    final Note updatedNote = succeedNoteUpdate(personCounterpartMutationExecutor, updatedNoteInput);
+
+    // - S: delete it as someone without counterpart and with no auth.groups defined in the
+    // dictionary
+    succeedNoteDelete(andrewMutationExecutor, updatedNote);
     assertThat(updatedNotesInput.remove(updatedNoteInput)).isTrue();
     assertNotes(andrewQueryExecutor.person(PERSON_FIELDS, TEST_COUNTERPART_PERSON_UUID).getNotes(),
         updatedNotesInput, assessmentKey, 1);
@@ -876,17 +996,18 @@ public class NoteResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void testPeriodicTaskAssessmentsNoAuthGroups()
+  void testPeriodicTaskAssessmentsEmptyWriteAuthGroups()
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    // Periodic ASSESSMENT note tests for task, with no authorization groups defined in the
+    // Periodic ASSESSMENT note tests for task, with empty write authorization groups defined in the
     // dictionary
-    final String assessmentKey = "fields.task.subLevel.assessments.subTaskMonthly";
-    final String recurrence = "monthly";
+    final String assessmentKey = "fields.task.topLevel.assessments.topTaskSemiannuallyNoWrite";
+    final String recurrence = "semiannually";
     final Person taskResponsible = getAndrewAnderson();
     final MutationExecutor taskResponsibleMutationExecutor =
         getMutationExecutor(taskResponsible.getDomainUsername());
 
-    // - F: create for a task as someone without task permission and no write auth.groups defined in
+    // - F: create for a task as someone without task permission and empty write auth.groups defined
+    // in
     // the dictionary
     final NoteRelatedObjectInput testTaskNroInput =
         createNoteRelatedObject(TaskDao.TABLE_NAME, TEST_RESPONSIBLE_TASK_UUID);
@@ -896,7 +1017,7 @@ public class NoteResourceTest extends AbstractResourceTest {
         getMutationExecutor(getRegularUser().getDomainUsername());
     failNoteCreate(erinMutationExecutor, testNoteInputFail);
 
-    // - S: create for a task as someone with task permission and no write auth.groups defined in
+    // - S: create for a task as someone with task permission and empty write auth.groups defined in
     // the dictionary
     final NoteInput testNoteInput =
         createAssessment(assessmentKey, "andrew", recurrence, testTaskNroInput);
@@ -908,26 +1029,71 @@ public class NoteResourceTest extends AbstractResourceTest {
     final Task erinTask = erinQueryExecutor.task(TASK_FIELDS, TEST_RESPONSIBLE_TASK_UUID);
     assertNotes(erinTask.getNotes(), testNoteInputs, assessmentKey, 1);
 
-    // - F: update it as someone without task permission and with no write auth.groups defined in
+    // - F: update it as someone without task permission and with empty write auth.groups defined in
     // the dictionary
     final NoteInput updatedNoteInputErin = getNoteInput(createdNote);
     updatedNoteInputErin.setText(createAssessmentText("updated by erin", recurrence));
     failNoteUpdate(erinMutationExecutor, updatedNoteInputErin);
 
-    // - S: update it as someone with task permission and with no write auth.groups defined in the
+    // - S: update it as someone with task permission and with empty write auth.groups defined in
+    // the
     // dictionary
     final NoteInput updatedNoteInput = getNoteInput(createdNote);
     updatedNoteInput.setText(createAssessmentText("updated by andrew", recurrence));
     final List<NoteInput> updatedNotesInput = Lists.newArrayList(updatedNoteInput);
     final Note updatedNote = succeedNoteUpdate(taskResponsibleMutationExecutor, updatedNoteInput);
 
-    // - F: delete it as someone without task permission and with no write auth.groups defined in
+    // - F: delete it as someone without task permission and with empty write auth.groups defined in
     // the dictionary
     failNoteDelete(erinMutationExecutor, createdNote);
 
-    // - S: delete it as someone with task permission and with no write auth.groups defined in the
+    // - S: delete it as someone with task permission and with empty write auth.groups defined in
+    // the
     // dictionary
     succeedNoteDelete(taskResponsibleMutationExecutor, updatedNote);
+    assertThat(updatedNotesInput.remove(updatedNoteInput)).isTrue();
+    assertNotes(erinQueryExecutor.task(TASK_FIELDS, TEST_RESPONSIBLE_TASK_UUID).getNotes(),
+        updatedNotesInput, assessmentKey, 1);
+  }
+
+  @Test
+  void testPeriodicTaskAssessmentsNoAuthGroups()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    // Periodic ASSESSMENT note tests for task, with no authorization groups defined in the
+    // dictionary
+    final String assessmentKey = "fields.task.subLevel.assessments.subTaskMonthly";
+    final String recurrence = "monthly";
+    final Person taskResponsible = getAndrewAnderson();
+    final MutationExecutor taskResponsibleMutationExecutor =
+        getMutationExecutor(taskResponsible.getDomainUsername());
+
+    // - S: create for a task as someone without task permission and no auth.groups defined in
+    // the dictionary
+    final NoteRelatedObjectInput testTaskNroInput =
+        createNoteRelatedObject(TaskDao.TABLE_NAME, TEST_RESPONSIBLE_TASK_UUID);
+    final NoteInput testNoteInput =
+        createAssessment(assessmentKey, "erin", recurrence, testTaskNroInput);
+    final MutationExecutor erinMutationExecutor =
+        getMutationExecutor(getRegularUser().getDomainUsername());
+    final List<NoteInput> testNoteInputs = Lists.newArrayList(testNoteInput);
+    final Note createdNote = succeedNoteCreate(erinMutationExecutor, testNoteInput);
+
+    // - S: read it with no auth.groups defined in the dictionary
+    final QueryExecutor erinQueryExecutor = getQueryExecutor(getRegularUser().getDomainUsername());
+    final Task erinTask = erinQueryExecutor.task(TASK_FIELDS, TEST_RESPONSIBLE_TASK_UUID);
+    assertNotes(erinTask.getNotes(), testNoteInputs, assessmentKey, 1);
+
+    // - S: update it as someone without task permission and with no auth.groups defined in
+    // the dictionary
+    final NoteInput updatedNoteInput = getNoteInput(createdNote);
+    updatedNoteInput.setText(createAssessmentText("updated by erin", recurrence));
+    succeedNoteUpdate(erinMutationExecutor, updatedNoteInput);
+    final List<NoteInput> updatedNotesInput = Lists.newArrayList(updatedNoteInput);
+    final Note updatedNote = succeedNoteUpdate(erinMutationExecutor, updatedNoteInput);
+
+    // - S: delete it as someone without task permission and with no auth.groups defined in
+    // the dictionary
+    succeedNoteDelete(erinMutationExecutor, createdNote);
     assertThat(updatedNotesInput.remove(updatedNoteInput)).isTrue();
     assertNotes(erinQueryExecutor.task(TASK_FIELDS, TEST_RESPONSIBLE_TASK_UUID).getNotes(),
         updatedNotesInput, assessmentKey, 1);
@@ -1096,6 +1262,59 @@ public class NoteResourceTest extends AbstractResourceTest {
     reportAuthorMutationExecutor.deleteReport("", reportUuid);
   }
 
+  private void testInstantAssessmentsEmptyWriteAuthGroups(final String testName,
+      final String assessmentKey, final boolean forPerson, final String taskUuid)
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    final String recurrence = "once";
+    final Person reportAuthor = getNickNicholson();
+    final MutationExecutor reportAuthorMutationExecutor =
+        getMutationExecutor(reportAuthor.getDomainUsername());
+
+    // Create a test report
+    final Person principalPerson = getSteveSteveson();
+    final ReportPerson principal = personToPrimaryReportPerson(principalPerson);
+    final TaskInput taskInput = TaskInput.builder().withUuid(taskUuid).build();
+    final ReportInput reportInput = ReportInput.builder().withEngagementDate(Instant.now())
+        .withIntent(testName)
+        .withReportPeople(
+            getReportPeopleInput(Lists.newArrayList(principal, personToReportAuthor(reportAuthor))))
+        .withTasks(Lists.newArrayList(taskInput)).build();
+    final Report createdReport =
+        reportAuthorMutationExecutor.createReport(REPORT_FIELDS, reportInput);
+
+    // - S: create as author for a report and a person
+    final NoteRelatedObjectInput testReportNroInput =
+        createNoteRelatedObject(ReportDao.TABLE_NAME, createdReport.getUuid());
+    final NoteRelatedObjectInput testPrincipalNroInput =
+        createNoteRelatedObject(PersonDao.TABLE_NAME, principalPerson.getUuid());
+    final NoteRelatedObjectInput testTaskNroInput =
+        createNoteRelatedObject(TaskDao.TABLE_NAME, taskUuid);
+    final NoteInput testNoteInputAuthor = createAssessment(assessmentKey, "author", recurrence,
+        testReportNroInput, forPerson ? testPrincipalNroInput : testTaskNroInput);
+    final List<NoteInput> testNoteInputs = Lists.newArrayList(testNoteInputAuthor);
+    final Note createdNoteAuthor =
+        succeedNoteCreate(reportAuthorMutationExecutor, testNoteInputAuthor);
+    assertNotes(jackQueryExecutor.report(REPORT_FIELDS, createdReport.getUuid()).getNotes(),
+        testNoteInputs, assessmentKey, 2);
+
+    // - F: update it as someone else with empty write auth.groups defined in the dictionary
+    final NoteInput updatedNoteInputJack = getNoteInput(createdNoteAuthor);
+    updatedNoteInputJack.setText(createAssessmentText("updated by jack", recurrence));
+    failNoteUpdate(jackMutationExecutor, updatedNoteInputJack);
+
+    // - F: delete it as someone else with empty write auth.groups defined in the dictionary
+    failNoteDelete(jackMutationExecutor, createdNoteAuthor);
+
+    // - S: delete it as author
+    succeedNoteDelete(reportAuthorMutationExecutor, createdNoteAuthor);
+    testNoteInputs.remove(testNoteInputAuthor);
+    assertNotes(jackQueryExecutor.report(REPORT_FIELDS, createdReport.getUuid()).getNotes(),
+        testNoteInputs, assessmentKey, 2);
+
+    // Delete the test report
+    reportAuthorMutationExecutor.deleteReport("", createdReport.getUuid());
+  }
+
   private void testInstantAssessmentsNoAuthGroups(final String testName, final String assessmentKey,
       final boolean forPerson, final String taskUuid)
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
@@ -1131,19 +1350,13 @@ public class NoteResourceTest extends AbstractResourceTest {
     assertNotes(jackQueryExecutor.report(REPORT_FIELDS, createdReport.getUuid()).getNotes(),
         testNoteInputs, assessmentKey, 2);
 
-    // - F: update it as someone else with no write auth.groups defined in the dictionary
+    // - S: update it as someone else with no auth.groups defined in the dictionary
     final NoteInput updatedNoteInputJack = getNoteInput(createdNoteAuthor);
     updatedNoteInputJack.setText(createAssessmentText("updated by jack", recurrence));
-    failNoteUpdate(jackMutationExecutor, updatedNoteInputJack);
+    succeedNoteUpdate(jackMutationExecutor, updatedNoteInputJack);
 
-    // - F: delete it as someone else with no write auth.groups defined in the dictionary
-    failNoteDelete(jackMutationExecutor, createdNoteAuthor);
-
-    // - S: delete it as author
-    succeedNoteDelete(reportAuthorMutationExecutor, createdNoteAuthor);
-    testNoteInputs.remove(testNoteInputAuthor);
-    assertNotes(jackQueryExecutor.report(REPORT_FIELDS, createdReport.getUuid()).getNotes(),
-        testNoteInputs, assessmentKey, 2);
+    // - S: delete it as someone else with no auth.groups defined in the dictionary
+    succeedNoteDelete(jackMutationExecutor, createdNoteAuthor);
 
     // Delete the test report
     reportAuthorMutationExecutor.deleteReport("", createdReport.getUuid());
@@ -1363,7 +1576,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     assertThat(reportAuthorMutationExecutor.deleteReport("", reportUuid)).isOne();
   }
 
-  private void testInstantAssessmentsViaReportNoAuthGroups(final String testName,
+  private void testInstantAssessmentsViaReportEmptyWriteAuthGroups(final String testName,
       final String assessmentKey, final boolean forPerson, final String taskUuid)
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     final String recurrence = "once";
@@ -1403,17 +1616,78 @@ public class NoteResourceTest extends AbstractResourceTest {
     final Report jackReport = jackQueryExecutor.report(REPORT_FIELDS, reportUuid);
     assertNotes(jackReport.getNotes(), testNoteInputs, assessmentKey, 2);
 
-    // - F: update it as someone else with no write auth.groups defined in the dictionary
+    // - F: update it as someone else with empty write auth.groups defined in the dictionary
     final List<NoteInput> updatedNotesInput = getNotesInput(jackReport.getNotes());
     final NoteInput updatedNoteInputJack = updatedNotesInput.get(0);
     updatedNoteInputJack.setText(createAssessmentText("updated by jack", recurrence));
     failUpdateReportAssessments(jackMutationExecutor, reportUuid,
         Iterables.toArray(updatedNotesInput, NoteInput.class));
 
-    // - F: delete it as someone else with no write auth.groups defined in the dictionary
+    // - F: delete it as someone else with empty write auth.groups defined in the dictionary
     failUpdateReportAssessments(jackMutationExecutor, reportUuid);
 
     // - S: delete it as author
+    succeedUpdateReportAssessments(reportAuthorMutationExecutor, reportUuid);
+    testNoteInputs.remove(testNoteInputAuthor);
+    assertNotes(jackQueryExecutor.report(REPORT_FIELDS, reportUuid).getNotes(), testNoteInputs,
+        assessmentKey, 2);
+
+    // Get the test report
+    final Report report = reportAuthorQueryExecutor.report(REPORT_FIELDS, reportUuid);
+    // Update it as author so it goes back to draft
+    reportAuthorMutationExecutor.updateReport(REPORT_FIELDS, getReportInput(report), false);
+    // Then delete it
+    assertThat(reportAuthorMutationExecutor.deleteReport("", reportUuid)).isOne();
+  }
+
+  private void testInstantAssessmentsViaReportNoAuthGroups(final String testName,
+      final String assessmentKey, final boolean forPerson, final String taskUuid)
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    final String recurrence = "once";
+    final Person reportAuthor = getNickNicholson();
+    final QueryExecutor reportAuthorQueryExecutor =
+        getQueryExecutor(reportAuthor.getDomainUsername());
+    final MutationExecutor reportAuthorMutationExecutor =
+        getMutationExecutor(reportAuthor.getDomainUsername());
+
+    // Create a test report
+    final Person principalPerson = getSteveSteveson();
+    final ReportPerson principal = personToPrimaryReportPerson(principalPerson);
+    final TaskInput taskInput = TaskInput.builder().withUuid(taskUuid).build();
+    final ReportInput reportInput =
+        ReportInput.builder().withEngagementDate(Instant.now()).withIntent(testName)
+            .withReportPeople(getReportPeopleInput(
+                Lists.newArrayList(principal, personToPrimaryReportAuthor(reportAuthor))))
+            .withTasks(Lists.newArrayList(taskInput)).build();
+    final Report createdReport =
+        reportAuthorMutationExecutor.createReport(REPORT_FIELDS, reportInput);
+    final String reportUuid = createdReport.getUuid();
+    assertThat(reportAuthorMutationExecutor.submitReport("", reportUuid)).isOne();
+
+    // - S: create as author for a report and a person
+    final NoteRelatedObjectInput testReportNroInput =
+        createNoteRelatedObject(ReportDao.TABLE_NAME, reportUuid);
+    final NoteRelatedObjectInput testPrincipalNroInput =
+        createNoteRelatedObject(PersonDao.TABLE_NAME, principalPerson.getUuid());
+    final NoteRelatedObjectInput testTaskNroInput =
+        createNoteRelatedObject(TaskDao.TABLE_NAME, taskUuid);
+    final NoteInput testNoteInputAuthor = createAssessment(assessmentKey, "author", recurrence,
+        testReportNroInput, forPerson ? testPrincipalNroInput : testTaskNroInput);
+    final List<NoteInput> testNoteInputs = Lists.newArrayList(testNoteInputAuthor);
+    succeedUpdateReportAssessments(reportAuthorMutationExecutor, reportUuid, testNoteInputAuthor);
+
+    // - S: read it as someone else with no auth.groups defined in the dictionary
+    final Report jackReport = jackQueryExecutor.report(REPORT_FIELDS, reportUuid);
+    assertNotes(jackReport.getNotes(), testNoteInputs, assessmentKey, 2);
+
+    // - S: update it as someone else with no auth.groups defined in the dictionary
+    final List<NoteInput> updatedNotesInput = getNotesInput(jackReport.getNotes());
+    final NoteInput updatedNoteInputJack = updatedNotesInput.get(0);
+    updatedNoteInputJack.setText(createAssessmentText("updated by jack", recurrence));
+    succeedUpdateReportAssessments(jackMutationExecutor, reportUuid,
+        Iterables.toArray(updatedNotesInput, NoteInput.class));
+
+    // - S: delete it as someone else with no auth.groups defined in the dictionary
     succeedUpdateReportAssessments(reportAuthorMutationExecutor, reportUuid);
     testNoteInputs.remove(testNoteInputAuthor);
     assertNotes(jackQueryExecutor.report(REPORT_FIELDS, reportUuid).getNotes(), testNoteInputs,
