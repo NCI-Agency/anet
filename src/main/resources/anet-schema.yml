@@ -259,17 +259,15 @@ $defs:
         additionalProperties: false
         properties:
           read:
-            title: The list of authorization group uuid's that have read access to this assessment
+            title: The list of authorization group uuid's that have read access to this assessment. If not specified, anyone can read! An empty array denies everyone access (except those who can write).
             type: array
             uniqueItems: true
-            minItems: 1
             items:
               type: string
           write:
-            title: The list of authorization group uuid's that have write (i.e. create/update/delete) access to this assessment
+            title: The list of authorization group uuid's that have write (i.e. create/update/delete) access to this assessment. If not specified, anyone can write! An empty array denies everyone access.
             type: array
             uniqueItems: true
-            minItems: 1
             items:
               type: string
       questions:
@@ -307,10 +305,9 @@ $defs:
         authorizationGroupUuids:
           type: array
           uniqueItems: true
-          minItems: 1
           items:
             type: string
-            description: The list of authorizationGroup uuid's that have access to this custom sensitive information
+            description: The list of authorization group uuid's that have access to this custom sensitive information. If not specified, anyone has access! An empty array denies everyone access.
 
 #########################################################
 ### schema root
