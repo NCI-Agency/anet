@@ -504,6 +504,13 @@ task dockerCreateDB(dependsOn: dockerPullDB, type: DockerCreateContainer) {
 	hostConfig.portBindings = ["${run.environment["ANET_DB_EXPOSED_PORT"]}:${run.environment["ANET_DB_PORT"]}"]
 }
 
+task dockerCreateAdditionalDB(dependsOn: dockerPullDB, type: DockerExecContainer) {
+	group = "database runtime"
+	description = "Create PostgreSQL database" + run.environment["ANET_DB_NAME"]
+	containerId = dbContainerName
+	commands = [["createdb", "-U", run.environment["ANET_DB_USERNAME"], run.environment["ANET_DB_NAME"]] as String[]]
+}
+
 // need to make this invoke dockerCreateDB if there is no ${dbContainerName} and possibly get newer image if available
 task dockerStartDB(type: DockerStartContainer) {
 	group = "database container"
