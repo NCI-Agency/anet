@@ -5,8 +5,8 @@ import { useResponsiveNumberOfPeriods } from "periodUtils"
 import React, { useState } from "react"
 import vettingAndScreeningDoc from "./vettingAndScreening.stories.mdx"
 
-const assessmentSubkey = "principalOndemandScreeningAndVetting"
-const assessmentKey = `fields.principal.person.assessments.${assessmentSubkey}`
+const assessmentSubkey = "interlocutorOndemandScreeningAndVetting"
+const assessmentKey = `fields.regular.person.assessments.${assessmentSubkey}`
 
 const personData = {
   avatar: null,
@@ -17,9 +17,9 @@ const personData = {
   emailAddress: "",
   name: "Testperson, Person",
   rank: "CIV",
-  role: "PRINCIPAL",
+  user: false,
   position: {
-    type: "PRINCIPAL",
+    type: "REGULAR",
     name: "Director of Tests",
     organization: {
       identificationCode: "Z12345",
@@ -48,8 +48,7 @@ const personData = {
       author: {
         uuid: "6fc24fab-f869-49de-bfb9-3f0eb3a36488",
         name: "DMIN, Arthur",
-        rank: "CIV",
-        role: "ADVISOR"
+        rank: "CIV"
       },
       noteRelatedObjects: [
         {
@@ -57,7 +56,6 @@ const personData = {
           relatedObjectType: "people",
           relatedObjectUuid: "b7072fc0-427d-4c4e-b979-7d4e3d5a6d36",
           relatedObject: {
-            role: "PRINCIPAL",
             rank: "CIV",
             name: "KYLESON, Kyle",
             avatar: null
@@ -82,8 +80,7 @@ const personData = {
       author: {
         uuid: "6fc24fab-f869-49de-bfb9-3f0eb3a36488",
         name: "DMIN, Arthur",
-        rank: "CIV",
-        role: "ADVISOR"
+        rank: "CIV"
       },
       noteRelatedObjects: [
         {
@@ -91,7 +88,6 @@ const personData = {
           relatedObjectType: "people",
           relatedObjectUuid: "b7072fc0-427d-4c4e-b979-7d4e3d5a6d36",
           relatedObject: {
-            role: "PRINCIPAL",
             rank: "CIV",
             name: "KYLESON, Kyle",
             avatar: null
@@ -116,8 +112,7 @@ const personData = {
       author: {
         uuid: "6fc24fab-f869-49de-bfb9-3f0eb3a36488",
         name: "DMIN, Arthur",
-        rank: "CIV",
-        role: "ADVISOR"
+        rank: "CIV"
       },
       noteRelatedObjects: [
         {
@@ -125,7 +120,6 @@ const personData = {
           relatedObjectType: "people",
           relatedObjectUuid: "b7072fc0-427d-4c4e-b979-7d4e3d5a6d36",
           relatedObject: {
-            role: "PRINCIPAL",
             rank: "CIV",
             name: "KYLESON, Kyle",
             avatar: null
@@ -150,8 +144,7 @@ const personData = {
       author: {
         uuid: "6fc24fab-f869-49de-bfb9-3f0eb3a36488",
         name: "DMIN, Arthur",
-        rank: "CIV",
-        role: "ADVISOR"
+        rank: "CIV"
       },
       noteRelatedObjects: [
         {
@@ -159,7 +152,6 @@ const personData = {
           relatedObjectType: "people",
           relatedObjectUuid: "b7072fc0-427d-4c4e-b979-7d4e3d5a6d36",
           relatedObject: {
-            role: "PRINCIPAL",
             rank: "CIV",
             name: "KYLESON, Kyle",
             avatar: null
