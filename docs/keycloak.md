@@ -3,7 +3,17 @@ This document describes how to configure Keycloak, for [development](#dev), [pro
 On development, Keycloak runs in a Docker container, see [build.gradle](../build.gradle) for the available commands. For production, the directory [scripts](../scripts/) contains some convenient scripts for starting Keycloak.
 
 ## <a name="dev"></a>Setting up Keycloak for development
-The Keycloak container for development has the following set-up (as loaded upon creation of the Keycloak Docker container by loading [ANET-Realm-export.json](../ANET-Realm-export.json)):
+The Keycloak container for development has the following set-up (as loaded upon creation of the Keycloak Docker container by loading [ANET-Realm-export.json](../keycloak/import/ANET-realm.json)):
+
+To access the container
+
+### Access Keycloak container
+
+|          |                        |
+|----------|------------------------|
+| URL      | http://localhost:9080/ |
+| username | `admin`                |
+| password | `admin`                |
 
 ### Realm definition
 ![Realm definition](images/keycloak-dev-realm.png)
