@@ -32,6 +32,9 @@ const GQL_GET_CHART_DATA = gql`
         name
         uuid
         role
+        organization {
+          uuid
+        }
         person {
           rank
           name
@@ -57,6 +60,9 @@ const GQL_GET_CHART_DATA = gql`
           name
           uuid
           role
+          organization {
+            uuid
+          }
           person {
             rank
             name
@@ -70,39 +76,35 @@ const GQL_GET_CHART_DATA = gql`
 `
 const transitionDuration = 200
 
+const roles = Object.keys(PositionRole)
 const ranks = Settings.fields.person.ranks.map(rank => rank.value)
 
-const leaderCountMap = {}
+const sortPositions = (positions, truncateLimit) => {
+  const allResults = positions?.sort(
+    (p1, p2) =>
+      // highest position role first
+      roles.indexOf(p2.role) - roles.indexOf(p1.role) ||
+      // when these are equal, highest ranking person first
+      ranks.indexOf(p2.person?.rank) - ranks.indexOf(p1.person?.rank) ||
+      // when these are also equal, sort alphabetically on person name
+      p1.person?.name?.localeCompare(p2.person?.name) ||
+      // else sort by position name
+      p1.name?.localeCompare(p2.name) ||
+      // last resort: sort by position uuid
+      p1.uuid.localeCompare(p2.uuid)
+  )
 
-const sortPositions = (uuid, positions, truncateLimit) => {
-  const allResults = [...positions]
-    .sort((p1, p2) => {
-      if (p1.role === p2.role) {
-        return ranks.indexOf(p1.person?.rank) > ranks.indexOf(p2.person?.rank)
-          ? -1
-          : 1
-      }
-      return Object.keys(PositionRole).indexOf(p1.role) >
-        Object.keys(PositionRole).indexOf(p2.role)
-        ? -1
-        : 1
-    })
-    .map(pos => ({ ...pos, orgUuid: uuid }))
-  return truncateLimit !== undefined && truncateLimit < allResults.length
-    ? allResults.slice(0, truncateLimit)
-    : allResults
-}
-
-const updateLeaderCount = (uuid, positions) => {
-  const count = positions.filter(
-    pos => pos.role === PositionRole.LEADER.toString()
-  ).length
-  leaderCountMap[uuid] = count > 0 ? count : 1
+  return allResults.slice(0, truncateLimit)
 }
 
 // TODO: enable once innerhtml in svg is polyfilled
 // const EXPAND_ICON = renderBlueprintIconAsSvg(IconNames.DIAGRAM_TREE)
 // const COLLAPSE_ICON = renderBlueprintIconAsSvg(IconNames.CROSS)
+
+const isLeader = position => position.role === PositionRole.LEADER.toString()
+
+const getRoleValue = (position, leaderValue, nonLeaderValue) =>
+  isLeader(position) ? leaderValue : nonLeaderValue
 
 const OrganizationalChart = ({
   pageDispatchers,
@@ -150,7 +152,7 @@ const OrganizationalChart = ({
     if (!data || !root) {
       return
     }
-    const nodeSize = [200, 100 + 22 * personnelDepth]
+    const nodeSize = [200, 80 + 26 * personnelDepth]
 
     const calculateBounds = rootArg => {
       const boundingBox = rootArg.descendants().reduce(
@@ -276,7 +278,7 @@ const OrganizationalChart = ({
       .append("g")
       .on("click", (event, d) => navigate(Organization.pathFor(d.data)))
       .each(function(d) {
-        const positions = sortPositions(d.data.uuid, d.data.positions)
+        const positions = sortPositions(d.data.positions)
         const unitcode = Settings.fields.person.ranks.find(
           element => element.value === positions?.[0]?.person?.rank
         )?.app6Modifier
@@ -298,11 +300,7 @@ const OrganizationalChart = ({
       .attr("font-weight", "bold")
       .attr("dy", 22)
       .attr("x", 38)
-      .text(d =>
-        d.data.shortName?.length > 12
-          ? d.data.shortName.substring(0, 10) + ".."
-          : d.data.shortName
-      )
+      .text(d => utils.ellipsize(d.data.shortName, 12))
 
     iconNodeG
       .append("text")
@@ -310,24 +308,11 @@ const OrganizationalChart = ({
       .attr("font-family", "monospace")
       .attr("dy", 45)
       .attr("x", -40)
-      .text(d =>
-        d.data.longName?.length > 21
-          ? d.data.longName.substring(0, 18) + ".."
-          : d.data.longName
-      )
+      .text(d => utils.ellipsize(d.data.longName, 21))
 
     // Highlight all leaders
     const headG = nodeSelect.selectAll("g.head").data(
-      d => {
-        updateLeaderCount(d.data.uuid, d.data.positions)
-        return (
-          sortPositions(
-            d.data.uuid,
-            d.data.positions,
-            Math.min(leaderCountMap[d.data.uuid], personnelDepth)
-          ) || []
-        )
-      },
+      d => sortPositions(d.data.positions, personnelDepth),
       d => d.uuid
     )
 
@@ -335,87 +320,42 @@ const OrganizationalChart = ({
       .enter()
       .append("g")
       .attr("class", "head")
-      .attr("transform", (d, i) => `translate(-63, ${65 + i * 26})`)
+      .attr("transform", (d, i) => `translate(-63, ${50 + i * 26})`)
       .on("click", (event, d) => navigate(Position.pathFor(d)))
 
     headG.exit().remove()
 
     headGenter
       .append("image")
-      .attr("width", 26)
-      .attr("height", 26)
-      .attr("y", -15)
+      .attr("width", d => getRoleValue(d, 26, 13))
+      .attr("height", d => getRoleValue(d, 26, 13))
+      .attr("y", d => getRoleValue(d, -15, -10))
       .attr("href", d => d.person && (d.person.avatar || DEFAULT_AVATAR))
 
     headGenter
       .append("text")
-      .attr("x", 26)
+      .attr("x", d => getRoleValue(d, 26, 18))
       .attr("y", -4)
-      .attr("font-size", "11px")
+      .attr("font-size", d => getRoleValue(d, "11px", "9px"))
       .attr("font-family", "monospace")
-      .attr("font-weight", "bold")
+      .attr("font-weight", d => getRoleValue(d, "bold", ""))
       .style("text-anchor", "start")
-      .text((position, i) => {
-        const name = `${position.person ? position.person.rank : ""} ${
-          position.person ? position.person.name : "unfilled"
-        }`
-        return name.length > 23 ? name.substring(0, 21) + ".." : name
-      })
-
-    headGenter
-      .append("text")
-      .attr("x", 26)
-      .attr("y", 6)
-      .attr("font-size", "11px")
-      .attr("font-family", "monospace")
-      .attr("font-weight", "bold")
-      .style("text-anchor", "start")
-      .text((position, i) =>
-        position.name.length > 23
-          ? position.name.substring(0, 21) + ".."
-          : position.name
-      )
-
-    const positionsG = nodeSelect.selectAll("g.position").data(
-      d =>
-        sortPositions(d.data.uuid, d.data.positions, personnelDepth).slice(
-          leaderCountMap[d.data.uuid]
-        ),
-      d => d.uuid
-    )
-
-    positionsG.exit().remove()
-
-    const positionsGA = positionsG
-      .enter()
-      .append("g")
-      .attr("class", "position")
-      .attr(
-        "transform",
-        (d, i) =>
-          `translate(-63,${87 + (leaderCountMap[d.orgUuid] - 1) * 26 + i * 11})`
-      )
-      .on("click", (event, d) => navigate(Position.pathFor(d)))
-
-    positionsGA
-      .append("image")
-      .attr("width", 13)
-      .attr("height", 13)
-      .attr("y", -10)
-      .attr("href", d => d.person && (d.person.avatar || DEFAULT_AVATAR))
-
-    positionsGA
-      .append("text")
-      .attr("x", 18)
-      .attr("font-size", "9px")
-      .attr("font-family", "monospace")
-      .style("text-anchor", "start")
-      .text((d, i) => {
+      .text(d => {
         const result = `${d.person ? d.person.rank : ""} ${
           d.person ? d.person.name : "unfilled"
-        } ${d.name}`
-        return utils.ellipsize(result, 31)
+        }`
+        return utils.ellipsize(result, getRoleValue(d, 23, 31))
       })
+
+    headGenter
+      .append("text")
+      .attr("x", d => getRoleValue(d, 26, 18))
+      .attr("y", 6)
+      .attr("font-size", d => getRoleValue(d, "11px", "9px"))
+      .attr("font-family", "monospace")
+      .attr("font-weight", d => getRoleValue(d, "bold", ""))
+      .style("text-anchor", "start")
+      .text(d => utils.ellipsize(d.name, getRoleValue(d, 23, 31)))
   }, [data, expanded, navigate, personnelDepth, root, link, node])
 
   if (done) {
