@@ -32,6 +32,11 @@ public class AttachmentResourceTest extends AbstractResourceTest {
   @Test
   public void testCreateAttachment()
       throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
+    final Map<String, Object> attachmentSettings = (Map<String, Object>) AnetObjectEngine
+        .getConfiguration().getDictionaryEntry("fields.attachment");
+    final Boolean attachmentDisabled = (Boolean) attachmentSettings.get("featureDisabled");
+
+
     final ReportInput testReportInput =
         ReportInput.builder().withIntent("a test report created by testCreateAttachment")
             .withReportPeople(
@@ -53,8 +58,6 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     // Fail attachment create with a mimetype that is not allowed
     failAttachmentCreate(adminMutationExecutor, failedAttachmentInput);
 
-    final Map<String, Object> attachmentSettings = (Map<String, Object>) AnetObjectEngine
-        .getConfiguration().getDictionaryEntry("fields.attachment");
     final var allowedMimeTypes = (List<String>) attachmentSettings.get("mimeTypes");
     final Boolean userUploadDisabled = (Boolean) attachmentSettings.get("disabled");
     final String mimeType = allowedMimeTypes.get(0);
@@ -88,11 +91,17 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     assertThat(reportAttachment.getClassification())
         .isEqualTo(testAttachmentInput.getClassification());
     assertThat(reportAttachment.getFileName()).isEqualTo(testAttachmentInput.getFileName());
+
   }
 
   @Test
   public void testDeleteAttachment()
       throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
+    final Map<String, Object> attachmentSettings = (Map<String, Object>) AnetObjectEngine
+        .getConfiguration().getDictionaryEntry("fields.attachment");
+    final Boolean attachmentDisabled = (Boolean) attachmentSettings.get("featureDisabled");
+
+
     // create test report
     final ReportInput testReportInput =
         ReportInput.builder().withIntent("a test report created by testDeleteAttachment")
@@ -104,8 +113,6 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     assertThat(testReport.getUuid()).isNotNull();
 
     // Attach attachment to test report
-    final Map<String, Object> attachmentSettings = (Map<String, Object>) AnetObjectEngine
-        .getConfiguration().getDictionaryEntry("fields.attachment");
     final var allowedMimeTypes = (List<String>) attachmentSettings.get("mimeTypes");
     final String mimeType = allowedMimeTypes.get(0);
 
@@ -138,11 +145,16 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     final Report deletedAttachmentReport =
         adminQueryExecutor.report(REPORT_FIELDS, updatedReport.getUuid());
     assertThat(deletedAttachmentReport.getAttachments()).isEmpty();
+
   }
 
   @Test
   public void testUpdateAttachment()
       throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
+    final Map<String, Object> attachmentSettings = (Map<String, Object>) AnetObjectEngine
+        .getConfiguration().getDictionaryEntry("fields.attachment");
+    final Boolean attachmentDisabled = (Boolean) attachmentSettings.get("featureDisabled");
+
     // create test report
     final ReportInput testReportInput =
         ReportInput.builder().withIntent("a test report created by testUpdateAttachment")
@@ -154,8 +166,6 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     assertThat(testReport.getUuid()).isNotNull();
 
     // Attach attachment to test report
-    final Map<String, Object> attachmentSettings = (Map<String, Object>) AnetObjectEngine
-        .getConfiguration().getDictionaryEntry("fields.attachment");
     final var allowedMimeTypes = (List<String>) attachmentSettings.get("mimeTypes");
     final String mimeType = allowedMimeTypes.get(0);
     final Map<String, String> allowedClassifications = (Map<String, String>) AnetObjectEngine
@@ -211,6 +221,7 @@ public class AttachmentResourceTest extends AbstractResourceTest {
         updatedClassificationReport.getAttachments().get(0);
     assertThat(updatedFilenameAttachment.getFileName())
         .isEqualTo(updatedClassificationAttachment.getFileName());
+
   }
 
   private AttachmentRelatedObjectInput createAttachmentRelatedObject(final String tableName,

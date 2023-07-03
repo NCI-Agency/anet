@@ -524,8 +524,12 @@ properties:
       attachment:
         type: object
         additionalProperties: false
-        required: [disabled, shortLabel, shortName, description, classification]
+        required: [featureDisabled, disabled, shortLabel, shortName, description, classification]
         properties:
+          featureDisabled:
+            type: boolean
+            title: Whether attachments are enabled
+            description: Used to enable/disable attachments
           disabled:
             type: boolean
             title: Whether users can upload attachments

@@ -70,6 +70,8 @@ public class AttachmentResource {
   @GraphQLMutation(name = "createAttachment")
   public String createAttachment(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "attachment") Attachment attachment) {
+    assertAttachmentEnabled();
+
     final Person user = DaoUtils.getUserFromContext(context);
     if (!hasAttachmentPermission(user, null)) {
       throw new WebApplicationException("You don't have permission to upload attachments",
@@ -95,6 +97,8 @@ public class AttachmentResource {
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   public Response uploadAttachmentContent(final @Auth Person user, @PathParam("uuid") String uuid,
       @FormDataParam("file") InputStream attachmentContent) {
+    assertAttachmentEnabled();
+
     final Attachment attachment = getAttachment(uuid);
     dao.saveContentBlob(uuid, checkMimeType(attachment, attachmentContent));
     return Response.ok().build();
@@ -228,6 +232,15 @@ public class AttachmentResource {
         .getConfiguration().getDictionaryEntry("fields.attachment.classification.choices");
     if (!allowedClassification.containsKey(classificationKey)) {
       throw new WebApplicationException("Classification is not allowed", Status.BAD_REQUEST);
+    }
+  }
+
+  private void assertAttachmentEnabled() {
+    final Map<String, Object> attachmentSettings = getAttachmentSettings();
+    final Boolean attachmentDisabled = (Boolean) attachmentSettings.get("featureDisabled");
+
+    if (attachmentDisabled) {
+      throw new WebApplicationException("Attachment feature is disabled", Status.FORBIDDEN);
     }
   }
 
