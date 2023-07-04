@@ -673,29 +673,31 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                   }
                 />
 
-                <Field
-                  name="attachments"
-                  label={Settings.fields.attachment.shortLabel}
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={
-                    <div
-                      id="attachmentCardList"
-                      style={{
-                        display:
-                          report.attachments.length > 1 ? "flex" : "block"
-                      }}
-                    >
-                      {report.attachments.map((attachment, index) => (
-                        <AttachmentCard
-                          key={index}
-                          attachment={attachment}
-                          index={index}
-                          edit={false}
-                        />
-                      ))}
-                    </div>
-                  }
-                />
+                {!Settings.fields.attachment.featureDisabled && (
+                  <Field
+                    name="attachments"
+                    label={Settings.fields.attachment.shortLabel}
+                    component={FieldHelper.ReadonlyField}
+                    humanValue={
+                      <div
+                        id="attachmentCardList"
+                        style={{
+                          display:
+                            report.attachments.length > 1 ? "flex" : "block"
+                        }}
+                      >
+                        {report.attachments.map((attachment, index) => (
+                          <AttachmentCard
+                            key={index}
+                            attachment={attachment}
+                            index={index}
+                            edit={false}
+                          />
+                        ))}
+                      </div>
+                    }
+                  />
+                )}
               </Fieldset>
               <Fieldset
                 title={
