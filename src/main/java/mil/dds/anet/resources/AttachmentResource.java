@@ -77,7 +77,11 @@ public class AttachmentResource {
 
     }
     assertAllowedMimeType(attachment.getMimeType());
-    assertAllowedClassification(attachment.getClassification());
+
+    if (attachment.getClassification() != null) {
+      // if the classification is set, control if the classification is valid
+      assertAllowedClassification(attachment.getClassification());
+    }
 
     attachment.setAuthorUuid(DaoUtils.getUuid(user));
     attachment = dao.insert(attachment);
@@ -128,6 +132,7 @@ public class AttachmentResource {
 
     }
     assertAllowedMimeType(attachment.getMimeType());
+    assertAllowedClassification(attachment.getClassification());
 
     final int numRows = dao.update(attachment);
     if (numRows == 0) {
@@ -218,10 +223,11 @@ public class AttachmentResource {
     }
   }
 
-  private void assertAllowedClassification(Attachment.Classification classification) {
-    if (DaoUtils.getEnumId(classification) != 0) {
-      // classification is not "undefined"
-      throw new WebApplicationException("Classification cannot be set", Status.FORBIDDEN);
+  private void assertAllowedClassification(final String classification) {
+    final Map<String, String> allowedClassification = (Map<String, String>) AnetObjectEngine
+        .getConfiguration().getDictionaryEntry("fields.attachment.classification.choices");
+    if (!allowedClassification.values().contains(classification)) {
+      throw new WebApplicationException("Classification is not allowed", Status.BAD_REQUEST);
     }
   }
 

@@ -187,7 +187,7 @@ enum Atmosphere {
 type Attachment {
   attachmentRelatedObjects: [AttachmentRelatedObject]
   author: Person
-  classification: Classification
+  classification: String
   contentLength: Long
   createdAt: Instant
   description: String
@@ -201,7 +201,7 @@ type Attachment {
 input AttachmentInput {
   attachmentRelatedObjects: [AttachmentRelatedObjectInput]
   author: PersonInput
-  classification: Classification
+  classification: String
   contentLength: Long
   createdAt: Instant
   description: String
@@ -269,13 +269,6 @@ enum AuthorizationGroupSearchSortBy {
 
 """Base64-encoded binary"""
 scalar Base64String
-
-""""""
-enum Classification {
-  NATO_UNCLASSIFIED
-  NATO_UNCLASSIFIED_Releasable_to_EU
-  UNDEFINED
-}
 
 """"""
 type Comment {

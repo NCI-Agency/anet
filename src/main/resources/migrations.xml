@@ -4492,7 +4492,7 @@
 			<column name="content" type="oid" />
 			<column name="contentLength" type="bigint" />
 			<column name="description" type="${long_text_type}" />
-			<column name="classification" type="int" />
+			<column name="classification" type="${long_text_type}" />
 			<column name="createdAt" type="datetime" />
 			<column name="updatedAt" type="datetime" />
 		</createTable>

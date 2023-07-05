@@ -16,8 +16,7 @@ public class AttachmentMapper implements RowMapper<Attachment> {
     a.setContentLength(MapperUtils.getOptionalLong(rs, "attachments_contentLength"));
     a.setFileName(MapperUtils.getOptionalString(rs, "attachments_fileName"));
     a.setDescription(MapperUtils.getOptionalString(rs, "attachments_description"));
-    a.setClassification(
-        MapperUtils.getEnumIdx(rs, "attachments_classification", Attachment.Classification.class));
+    a.setClassification(MapperUtils.getOptionalString(rs, "attachments_classification"));
     return a;
   }
 }
