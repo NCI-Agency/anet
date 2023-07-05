@@ -44,15 +44,15 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
   const [error, setError] = useState(null)
   const canEdit =
     currentUser.isAdmin() || currentUser.uuid === initialValues.author.uuid
-
-  const classificationButtons = Object.values(
-    Settings.fields.attachment.classification.choices
-  ).map(choice => ({
-    id: choice.label,
-    value: choice.value,
-    label: choice.label
+  const classifications = Settings.fields.attachment.classification.choices
+  const classificationChoices = Object.keys(classifications).map(
+    key => classifications[key]
+  )
+  const classificationButtons = classificationChoices.map(choice => ({
+    id: choice,
+    value: choice,
+    label: choice
   }))
-
   return (
     <Formik
       enableReinitialize

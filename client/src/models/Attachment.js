@@ -30,7 +30,7 @@ export default class Attachment extends Model {
           relatedObjectUuid: yup.string().default(null)
         }
       ]),
-    classification: yup.string().default("")
+    classification: yup.string().default(null)
   })
 
   static autocompleteQuery = "uuid fileName description classification mimeType"
