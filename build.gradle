@@ -20,8 +20,10 @@ apply plugin: 'jacoco'
 apply plugin: 'checkstyle'
 apply plugin: 'project-report' // adds dependencyReport and htmlDependencyReport tasks
 
-sourceCompatibility = 17
-targetCompatibility = 17
+java {
+  sourceCompatibility = 17
+  targetCompatibility = 17
+}
 
 boolean isTestEnv = project.hasProperty("testEnv")
 String dropwizardVersion = "2.1.6"
@@ -238,10 +240,12 @@ projectBranch = projectBranch.text.trim();
 
 project.group = "ncia"
 
-mainClassName = "mil.dds.anet.AnetApplication"
-String anetConfig = "anet.yml"
+application {
+  mainClass = "mil.dds.anet.AnetApplication"
+  applicationDefaultJvmArgs = ["-Djava.library.path=MY_APP_HOME/lib"]
+}
 
-applicationDefaultJvmArgs = ["-Djava.library.path=MY_APP_HOME/lib"]
+String anetConfig = "anet.yml"
 
 String dbLoc = run.environment['ANET_DB_SERVER']
 if (run.environment['ANET_DB_EXPOSED_PORT']) {
@@ -268,7 +272,7 @@ run.args = ["server", anetConfig]
 task checkConfig(dependsOn: 'compileJava', type: JavaExec) {
 	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
-	mainClass = mainClassName
+	mainClass = application.mainClass
 	args = ["check", anetConfig]
 }
 
@@ -290,7 +294,7 @@ task dbWait(dependsOn: 'compileJava', type: JavaExec) {
 	description = "Wait for the ANET database to become available."
 	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
-	mainClass = mainClassName
+	mainClass = application.mainClass
 	args = ["waitForDB", anetConfig]
 }
 dbWait.mustRunAfter('dockerStartDB')
@@ -311,7 +315,7 @@ task dbInit(dependsOn: 'compileJava', type: JavaExec) {
 	description = "Runs the ANET database initialization command."
 	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
-	mainClass = mainClassName
+	mainClass = application.mainClass
 	def cmdline = ["init"]
 	if (project.hasProperty("args")) {
 		cmdline.add(project.args)
@@ -332,7 +336,7 @@ task dbStatus(dependsOn: 'compileJava', type: JavaExec) {
 	description = "Runs the ANET database status (Liquibase) command."
 	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
-	mainClass = mainClassName
+	mainClass = application.mainClass
 	args = ["db", "status", anetConfig]
 }
 
@@ -341,7 +345,7 @@ task dbPrep(dependsOn: 'compileJava', type: JavaExec) {
 	description = "Runs the ANET database preparation command."
 	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
-	mainClass = mainClassName
+	mainClass = application.mainClass
 	args = ["dbScript", "-S", "prepare-psql.sql", anetConfig]
 }
 dbPrep.mustRunAfter('dbWait')
@@ -351,7 +355,7 @@ task dbMigrate(dependsOn: dbPrep, type: JavaExec) {
 	description = "Runs the ANET database migration (Liquibase) command."
 	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
-	mainClass = mainClassName
+	mainClass = application.mainClass
 	args = ["db", "migrate", anetConfig]
 	if (project.hasProperty("dry-run")) {
 		args += "--dry-run"
@@ -364,7 +368,7 @@ task dbTest(dependsOn: 'compileJava', type: JavaExec) {
 	description = "Runs the ANET database migration test (Liquibase) command."
 	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
-	mainClass = mainClassName
+	mainClass = application.mainClass
 	args = ["db", "test", anetConfig]
 }
 dbTest.mustRunAfter('dbWait')
@@ -374,7 +378,7 @@ task dbRollback(dependsOn: 'compileJava', type: JavaExec) {
 	description = "Runs the ANET database migration rollback (Liquibase) command."
 	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
-	mainClass = mainClassName
+	mainClass = application.mainClass
 	args = ["db", "rollback", anetConfig, "--count", "1"]
 	if (project.hasProperty("dry-run")) {
 		args += "--dry-run"
@@ -387,7 +391,7 @@ task dbDrop(dependsOn: 'compileJava', type: JavaExec) {
 	description = "Runs the ANET database drop-all (Liquibase) command."
 	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
-	mainClass = mainClassName
+	mainClass = application.mainClass
 	args = ["db", "drop-all", "--confirm-delete-everything", anetConfig]
 }
 dbDrop.mustRunAfter('dbWait')
@@ -627,7 +631,7 @@ task dbMaintenance(dependsOn: 'compileJava', type: JavaExec) {
 	description = "Runs the ANET database maintenance command."
 	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
-	mainClass = mainClassName
+	mainClass = application.mainClass
 	def cmdline = ["maintenance"]
 	if (project.hasProperty("args")) {
 		cmdline.addAll(project.args.split("\\s+"))
