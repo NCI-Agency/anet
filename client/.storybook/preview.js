@@ -1,4 +1,5 @@
 import "bootstrap/dist/css/bootstrap.css"
+import ResponsiveLayoutContext from "components/ResponsiveLayoutContext"
 import "index.css"
 import React from "react"
 import { MemoryRouter } from "react-router"
@@ -15,5 +16,17 @@ export const parameters = {
 }
 
 export const decorators = [
-  story => <MemoryRouter initialEntries={["/"]}>{story()}</MemoryRouter>
+  story => (
+    <MemoryRouter initialEntries={["/"]}>
+      <ResponsiveLayoutContext.Provider
+        value={{
+          showFloatingMenu: false,
+          topbarOffset: 0,
+          securityBannerOffset: 0
+        }}
+      >
+        {story()}
+      </ResponsiveLayoutContext.Provider>
+    </MemoryRouter>
+  )
 ]
