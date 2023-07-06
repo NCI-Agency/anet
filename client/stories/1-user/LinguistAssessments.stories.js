@@ -1,10 +1,10 @@
+import InstantAssessmentResultsTable from "components/assessments/instant/InstantAssessmentResultsTable"
 import InstantAssessmentsContainerField from "components/assessments/instant/InstantAssessmentsContainerField"
-import PeriodicAssessmentResultsTable from "components/assessments/periodic/PeriodicAssessmentResultsTable"
 import Fieldset from "components/Fieldset"
 import { Form, Formik } from "formik"
-import { Person } from "models"
+import { Person, Report } from "models"
 import moment from "moment"
-import { useResponsiveNumberOfPeriods } from "periodUtils"
+import { RECURRENCE_TYPE, useResponsiveNumberOfPeriods } from "periodUtils"
 import React, { useState } from "react"
 import { v4 as uuidv4 } from "uuid"
 import linguistAssessmentsDoc from "./linguistAssessments.stories.mdx"
@@ -154,7 +154,7 @@ export const LinguistAssessmentForm = () => {
               entityType={Person}
               entities={[translatorPerson]}
               relatedObject={values}
-              parentFieldName="attendeesAssessments"
+              parentFieldName={Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD}
               formikProps={{
                 setFieldTouched,
                 setFieldValue,
@@ -176,17 +176,14 @@ export const LinguistAssessmentResults = () => {
   const contRef = useResponsiveNumberOfPeriods(setNumberOfPeriods)
   return (
     <div ref={contRef}>
-      <PeriodicAssessmentResultsTable
-        assessmentKey="advisorOnceReportLinguist"
+      <InstantAssessmentResultsTable
+        assessmentKey={assessmentSubkey}
         style={{ flex: "0 0 100%" }}
         entity={translatorPerson}
         entityType={Person}
         periodsDetails={{
-          recurrence: "quarterly",
+          recurrence: RECURRENCE_TYPE.MONTHLY,
           numberOfPeriods
-        }}
-        onUpdateAssessment={() => {
-          console.log("Assessment updated")
         }}
       />
     </div>
