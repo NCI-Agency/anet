@@ -26,10 +26,12 @@ import ReportCollection from "components/ReportCollection"
 import RichTextEditor from "components/RichTextEditor"
 import SubNav from "components/SubNav"
 import { Field, Form, Formik } from "formik"
+import _isEmpty from "lodash/isEmpty"
 import { Location, Organization, Report } from "models"
 import { PositionRole } from "models/Position"
 import { orgTour } from "pages/HopscotchTour"
 import pluralize from "pluralize"
+import { getPositionsForRole } from "positionUtil"
 import React, { useContext, useState } from "react"
 import {
   Badge,
@@ -262,33 +264,6 @@ const OrganizationShow = ({ pageDispatchers }) => {
     reportQueryParams.orgRecurseStrategy = RECURSE_STRATEGY.CHILDREN
   }
 
-  function showLeadingPositions(positions, role, label) {
-    return (
-      positions &&
-      positions.some(pos => pos.role === role) && (
-        <Field
-          name={label}
-          component={FieldHelper.ReadonlyField}
-          label={label}
-          humanValue={
-            <ListGroup>
-              {positions.map(
-                pos =>
-                  pos.role === role && (
-                    <ListGroupItem key={pos.uuid}>
-                      <LinkTo modelType="Position" model={pos}>
-                        {pos.name}
-                      </LinkTo>
-                    </ListGroupItem>
-                  )
-              )}
-            </ListGroup>
-          }
-        />
-      )
-    )
-  }
-
   return (
     <Formik enableReinitialize initialValues={organization}>
       {({ values }) => {
@@ -392,16 +367,20 @@ const OrganizationShow = ({ pageDispatchers }) => {
                   humanValue={Organization.humanNameOfType}
                 />
 
-                {showLeadingPositions(
+                {renderLeadingPositions(
                   organization.positions,
                   PositionRole.LEADER.toString(),
-                  "Leaders"
+                  pluralize(
+                    utils.titleCase(PositionRole.LEADER.humanNameOfRole())
+                  )
                 )}
 
-                {showLeadingPositions(
+                {renderLeadingPositions(
                   organization.positions,
                   PositionRole.DEPUTY.toString(),
-                  "Deputies"
+                  pluralize(
+                    utils.titleCase(PositionRole.DEPUTY.humanNameOfRole())
+                  )
                 )}
 
                 <LongNameWithLabel
@@ -552,6 +531,20 @@ const OrganizationShow = ({ pageDispatchers }) => {
       }}
     </Formik>
   )
+
+  function renderLeadingPositions(positions, role, label) {
+    const positionList = getPositionsForRole(positions, role)
+    if (!_isEmpty(positionList)) {
+      return (
+        <Field
+          name={label}
+          component={FieldHelper.ReadonlyField}
+          label={label}
+          humanValue={positionList}
+        />
+      )
+    }
+  }
 }
 
 OrganizationShow.propTypes = {

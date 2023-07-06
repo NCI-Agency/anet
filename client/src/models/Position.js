@@ -24,7 +24,7 @@ export class PositionRole {
 
   constructor(value, dictionaryKey) {
     this.#value = value
-    this.#humanReadable = Settings.fields.position.role.choices[dictionaryKey]
+    this.#humanReadable = Settings.fields.position.role.types[dictionaryKey]
   }
 
   toString() {

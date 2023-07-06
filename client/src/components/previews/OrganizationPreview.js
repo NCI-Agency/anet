@@ -3,14 +3,18 @@ import API from "api"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import Model from "components/Model"
+import _isEmpty from "lodash/isEmpty"
 import { Organization } from "models"
 import { PositionRole } from "models/Position"
 import OrganizationLaydown from "pages/organizations/Laydown"
 import OrganizationTasks from "pages/organizations/OrganizationTasks"
+import pluralize from "pluralize"
+import { getPositionsForRole } from "positionUtil"
 import PropTypes from "prop-types"
 import React from "react"
 import { ListGroup, ListGroupItem } from "react-bootstrap"
 import Settings from "settings"
+import utils from "utils"
 
 const GQL_LOCATION_FIELDS = `
   fragment locationFields on Location {
@@ -111,31 +115,6 @@ const OrganizationPreview = ({ className, uuid }) => {
     data.organization ? data.organization : {}
   )
 
-  function showLeadingPositions(positions, role, label) {
-    return (
-      positions &&
-      positions.some(pos => pos.role === role) && (
-        <PreviewField
-          label={label}
-          value={
-            <ListGroup>
-              {positions.map(
-                pos =>
-                  pos.role === role && (
-                    <ListGroupItem key={pos.uuid}>
-                      <LinkTo modelType="Position" model={pos}>
-                        {pos.name}
-                      </LinkTo>
-                    </ListGroupItem>
-                  )
-              )}
-            </ListGroup>
-          }
-        />
-      )
-    )
-  }
-
   const isPrincipalOrg = organization.type === Organization.TYPE.PRINCIPAL_ORG
   const orgSettings = isPrincipalOrg
     ? Settings.fields.principal.org
@@ -157,16 +136,16 @@ const OrganizationPreview = ({ className, uuid }) => {
           value={Organization.humanNameOfType(organization.type)}
         />
 
-        {showLeadingPositions(
+        {renderLeadingPositions(
           organization.positions,
           PositionRole.LEADER.toString(),
-          "Leaders"
+          pluralize(utils.titleCase(PositionRole.LEADER.humanNameOfRole()))
         )}
 
-        {showLeadingPositions(
+        {renderLeadingPositions(
           organization.positions,
           PositionRole.DEPUTY.toString(),
-          "Deputies"
+          pluralize(utils.titleCase(PositionRole.DEPUTY.humanNameOfRole()))
         )}
 
         <PreviewField
@@ -224,6 +203,13 @@ const OrganizationPreview = ({ className, uuid }) => {
       )}
     </div>
   )
+
+  function renderLeadingPositions(positions, role, label) {
+    const positionList = getPositionsForRole(positions, role)
+    if (!_isEmpty(positionList)) {
+      return <PreviewField label={label} value={positionList} />
+    }
+  }
 }
 
 OrganizationPreview.propTypes = {

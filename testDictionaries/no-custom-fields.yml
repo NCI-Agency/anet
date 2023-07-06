@@ -442,7 +442,7 @@ fields:
     name: Position Name
     role:
       label: Position Role
-      choices:
+      types:
         member: Member
         deputy: Deputy
         leader: Leader
