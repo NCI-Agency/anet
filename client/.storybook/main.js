@@ -27,7 +27,7 @@ export default {
     options: {}
   },
   docs: {
-    autodocs: true
+    autodocs: false
   },
   webpackFinal: async(config, { configType }) => {
     // `configType` has a value of 'DEVELOPMENT' or 'PRODUCTION'
