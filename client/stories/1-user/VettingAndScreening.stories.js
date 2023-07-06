@@ -1,10 +1,8 @@
-import AppContext from "components/AppContext"
 import OnDemandAssessment from "components/assessments/ondemand/OndemandAssessment"
 import { Person } from "models"
 import moment from "moment"
 import { useResponsiveNumberOfPeriods } from "periodUtils"
 import React, { useState } from "react"
-import { admin } from "../utils"
 import vettingAndScreeningDoc from "./vettingAndScreening.stories.mdx"
 
 const assessmentSubkey = "principalOndemandScreeningAndVetting"
@@ -188,27 +186,21 @@ export const VettingAndScreening = () => {
   const contRef = useResponsiveNumberOfPeriods(setNumberOfPeriods)
   return (
     <div ref={contRef}>
-      <AppContext.Provider
-        value={{
-          currentUser: admin
+      <OnDemandAssessment
+        key="ondemand"
+        assessmentKey={assessmentSubkey}
+        style={{ flex: "0 0 100%" }}
+        entity={person}
+        entityType={Person}
+        periodsDetails={{
+          recurrence: "ondemand",
+          numberOfPeriods
         }}
-      >
-        <OnDemandAssessment
-          key="ondemand"
-          assessmentKey={assessmentSubkey}
-          style={{ flex: "0 0 100%" }}
-          entity={person}
-          entityType={Person}
-          periodsDetails={{
-            recurrence: "ondemand",
-            numberOfPeriods
-          }}
-          canAddAssessment
-          onUpdateAssessment={() => {
-            console.log("Assessment updated")
-          }}
-        />
-      </AppContext.Provider>
+        canAddAssessment
+        onUpdateAssessment={() => {
+          console.log("Assessment updated")
+        }}
+      />
     </div>
   )
 }
