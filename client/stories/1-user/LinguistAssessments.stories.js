@@ -1,4 +1,3 @@
-import AppContext from "components/AppContext"
 import InstantAssessmentsContainerField from "components/assessments/instant/InstantAssessmentsContainerField"
 import PeriodicAssessmentResultsTable from "components/assessments/periodic/PeriodicAssessmentResultsTable"
 import Fieldset from "components/Fieldset"
@@ -8,7 +7,6 @@ import moment from "moment"
 import { useResponsiveNumberOfPeriods } from "periodUtils"
 import React, { useState } from "react"
 import { v4 as uuidv4 } from "uuid"
-import { admin } from "../utils"
 import linguistAssessmentsDoc from "./linguistAssessments.stories.mdx"
 
 const assessmentSubkey = "advisorOnceReportLinguist"
@@ -145,37 +143,31 @@ export default {
 
 export const LinguistAssessmentForm = () => {
   return (
-    <AppContext.Provider
-      value={{
-        currentUser: admin
-      }}
-    >
-      <Formik initialValues={{}} setFieldValue>
-        {({ setFieldValue, setFieldTouched, validateForm, values }) => (
-          <Form className="form-horizontal" method="post">
-            <Fieldset
-              title="Attendees engagement assessments"
-              id="attendees-engagement-assessments"
-            >
-              <InstantAssessmentsContainerField
-                entityType={Person}
-                entities={[translatorPerson]}
-                relatedObject={values}
-                parentFieldName="attendeesAssessments"
-                formikProps={{
-                  setFieldTouched,
-                  setFieldValue,
-                  validateForm,
-                  values
-                }}
-                canRead
-                canWrite
-              />
-            </Fieldset>
-          </Form>
-        )}
-      </Formik>
-    </AppContext.Provider>
+    <Formik initialValues={{}} setFieldValue>
+      {({ setFieldValue, setFieldTouched, validateForm, values }) => (
+        <Form className="form-horizontal" method="post">
+          <Fieldset
+            title="Attendees engagement assessments"
+            id="attendees-engagement-assessments"
+          >
+            <InstantAssessmentsContainerField
+              entityType={Person}
+              entities={[translatorPerson]}
+              relatedObject={values}
+              parentFieldName="attendeesAssessments"
+              formikProps={{
+                setFieldTouched,
+                setFieldValue,
+                validateForm,
+                values
+              }}
+              canRead
+              canWrite
+            />
+          </Fieldset>
+        </Form>
+      )}
+    </Formik>
   )
 }
 
@@ -184,25 +176,19 @@ export const LinguistAssessmentResults = () => {
   const contRef = useResponsiveNumberOfPeriods(setNumberOfPeriods)
   return (
     <div ref={contRef}>
-      <AppContext.Provider
-        value={{
-          currentUser: admin
+      <PeriodicAssessmentResultsTable
+        assessmentKey="advisorOnceReportLinguist"
+        style={{ flex: "0 0 100%" }}
+        entity={translatorPerson}
+        entityType={Person}
+        periodsDetails={{
+          recurrence: "quarterly",
+          numberOfPeriods
         }}
-      >
-        <PeriodicAssessmentResultsTable
-          assessmentKey="advisorOnceReportLinguist"
-          style={{ flex: "0 0 100%" }}
-          entity={translatorPerson}
-          entityType={Person}
-          periodsDetails={{
-            recurrence: "quarterly",
-            numberOfPeriods
-          }}
-          onUpdateAssessment={() => {
-            console.log("Assessment updated")
-          }}
-        />
-      </AppContext.Provider>
+        onUpdateAssessment={() => {
+          console.log("Assessment updated")
+        }}
+      />
     </div>
   )
 }
