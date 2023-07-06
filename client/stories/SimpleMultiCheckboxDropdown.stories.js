@@ -1,5 +1,5 @@
+import SimpleMultiCheckboxDropdown from "components/SimpleMultiCheckboxDropdown"
 import React, { useState } from "react"
-import SimpleMultiCheckboxDropdown from "../src/components/SimpleMultiCheckboxDropdown"
 import "./SimpleMultiCheckboxDropdown.css"
 
 // Generally will be called from a wrapper component

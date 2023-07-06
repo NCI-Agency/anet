@@ -1,5 +1,5 @@
+import RichTextEditor from "components/RichTextEditor"
 import React from "react"
-import RichTextEditor from "../src/components/RichTextEditor"
 
 export default {
   title: "ANET Components/RichTextEditor",

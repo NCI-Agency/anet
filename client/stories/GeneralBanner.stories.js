@@ -1,5 +1,5 @@
+import GeneralBanner from "components/GeneralBanner"
 import React from "react"
-import GeneralBanner from "../src/components/GeneralBanner"
 
 export default {
   title: "ANET Components/GeneralBanner",
