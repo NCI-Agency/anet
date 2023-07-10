@@ -223,10 +223,10 @@ public class AttachmentResource {
     }
   }
 
-  private void assertAllowedClassification(final String classification) {
+  private void assertAllowedClassification(final String classificationKey) {
     final Map<String, String> allowedClassification = (Map<String, String>) AnetObjectEngine
         .getConfiguration().getDictionaryEntry("fields.attachment.classification.choices");
-    if (!allowedClassification.values().contains(classification)) {
+    if (!allowedClassification.containsKey(classificationKey)) {
       throw new WebApplicationException("Classification is not allowed", Status.BAD_REQUEST);
     }
   }

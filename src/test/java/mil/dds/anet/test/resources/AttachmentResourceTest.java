@@ -158,6 +158,10 @@ public class AttachmentResourceTest extends AbstractResourceTest {
         .getConfiguration().getDictionaryEntry("fields.attachment");
     final var allowedMimeTypes = (List<String>) attachmentSettings.get("mimeTypes");
     final String mimeType = allowedMimeTypes.get(0);
+    final Map<String, String> allowedClassifications = (Map<String, String>) AnetObjectEngine
+        .getConfiguration().getDictionaryEntry("fields.attachment.classification.choices");
+    final Map.Entry<String, String> entry = allowedClassifications.entrySet().iterator().next();
+    final String classification = entry.getKey();
 
     final AttachmentRelatedObjectInput testAroInput =
         createAttachmentRelatedObject(ReportDao.TABLE_NAME, testReport.getUuid());
@@ -178,7 +182,7 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     failAttachmentUpdate(adminMutationExecutor, getInput(reportAttachment, AttachmentInput.class));
 
     // F - update attachment classification as someone else
-    reportAttachment.setClassification("NATO UNCLASSIFIED");
+    reportAttachment.setClassification(classification);
     final MutationExecutor erinMutationExecutor =
         getMutationExecutor(getRegularUser().getDomainUsername());
     failAttachmentUpdate(erinMutationExecutor, getInput(reportAttachment, AttachmentInput.class));

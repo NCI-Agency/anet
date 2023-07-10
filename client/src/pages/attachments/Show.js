@@ -23,6 +23,7 @@ import React, { useContext } from "react"
 import { Button, Col } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
+import Settings from "settings"
 import utils from "utils"
 
 const GQL_GET_ATTACHMENT = gql`
@@ -173,7 +174,8 @@ const AttachmentShow = ({ pageDispatchers }) => {
             )}
           </>
         )
-
+        const classifications =
+          Settings.fields.attachment.classification.choices
         return (
           <div>
             <Messages success={stateSuccess} error={stateError} />
@@ -230,9 +232,7 @@ const AttachmentShow = ({ pageDispatchers }) => {
                     <Field
                       name="classification"
                       component={FieldHelper.ReadonlyField}
-                      humanValue={Attachment.humanNameOfStatus(
-                        attachment.classification
-                      ).toUpperCase()}
+                      humanValue={classifications[attachment.classification]}
                     />
                     <Field
                       name="used in"
