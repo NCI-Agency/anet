@@ -60,7 +60,12 @@ const SVGCanvas = ({ width, height, exportTitle, zoomFn, children }) => {
           </Button>
         </div>
       )}
-      <svg width={width} height={height} ref={svgRef}>
+      <svg
+        width={width}
+        height={height}
+        ref={svgRef}
+        xmlns="http://www.w3.org/2000/svg"
+      >
         {children}
       </svg>
     </div>
