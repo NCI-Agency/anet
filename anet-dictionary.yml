@@ -318,17 +318,12 @@ fields:
     description: Attachment description
     classification:
       type: enum
-      label: UNDEFINED / NATO_UNCLASSIFIED / NATO_UNCLASSIFIED_Releasable_to_EU
+      label: Security Marking
       choices:
-        UNDEFINED:
-          value: UNDEFINED
-          label: undefined
-        NATO_UNCLASSIFIED:
-          value: NATO_UNCLASSIFIED
-          label: NATO UNCLASSIFIED
-        NATO_UNCLASSIFIED_Releasable_to_EU:
-          value: NATO_UNCLASSIFIED_Releasable_to_EU
-          label: NATO UNCLASSIFIED Releasable to EU
+        undefined: Undefined
+        public: Public
+        NU: NATO UNCLASSIFIED
+        NU_rel_EU: NATO UNCLASSIFIED Releasable to EU
     mimeTypes:
       - application/pdf
       - image/jpeg

@@ -14,10 +14,6 @@ import mil.dds.anet.views.UuidFetcher;
 
 public class Attachment extends AbstractAnetBean {
 
-  public static enum Classification {
-    UNDEFINED, NATO_UNCLASSIFIED, NATO_UNCLASSIFIED_Releasable_to_EU
-  }
-
   @GraphQLQuery
   @GraphQLInputField
   private String mimeType;
@@ -37,7 +33,7 @@ public class Attachment extends AbstractAnetBean {
   // annotated below
   @GraphQLQuery
   @GraphQLInputField
-  private Classification classification;
+  private String classification;
 
   // annotated below
   private ForeignObjectHolder<Person> author = new ForeignObjectHolder<>();
@@ -77,11 +73,11 @@ public class Attachment extends AbstractAnetBean {
     this.description = description;
   }
 
-  public void setClassification(Classification classification) {
+  public void setClassification(String classification) {
     this.classification = classification;
   }
 
-  public Classification getClassification() {
+  public String getClassification() {
     return classification;
   }
 

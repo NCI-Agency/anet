@@ -8,13 +8,11 @@ import com.graphql_java_generator.exception.GraphQLRequestPreparationException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.test.client.Attachment;
 import mil.dds.anet.test.client.AttachmentInput;
 import mil.dds.anet.test.client.AttachmentRelatedObjectInput;
-import mil.dds.anet.test.client.Classification;
 import mil.dds.anet.test.client.Report;
 import mil.dds.anet.test.client.ReportInput;
 import mil.dds.anet.test.client.util.MutationExecutor;
@@ -50,7 +48,6 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     final AttachmentInput failedAttachmentInput =
         AttachmentInput.builder().withFileName("testAttachment.jpg")
             .withDescription("a test attachment created by testCreateAttachment")
-            .withClassification(Classification.UNDEFINED)
             .withAttachmentRelatedObjects(Collections.singletonList(testAroInput)).build();
 
     // Fail attachment create with a mimetype that is not allowed
@@ -64,7 +61,7 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     failedAttachmentInput.setMimeType(mimeType);
 
     // Fail attachment create with wrong classification
-    failedAttachmentInput.setClassification(Classification.NATO_UNCLASSIFIED);
+    failedAttachmentInput.setClassification("NATO_UNCLASSIFIED");
     failAttachmentCreate(adminMutationExecutor, failedAttachmentInput);
 
     if (userUploadDisabled) {
@@ -78,7 +75,6 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     final AttachmentInput testAttachmentInput =
         AttachmentInput.builder().withFileName("testCreateAttachment.jpg").withMimeType(mimeType)
             .withDescription("a test attachment created by testCreateAttachment")
-            .withClassification(Classification.UNDEFINED)
             .withAttachmentRelatedObjects(Collections.singletonList(testAroInput)).build();
     final String createdAttachmentUuid =
         succeedAttachmentCreate(adminMutationExecutor, testAttachmentInput);
@@ -118,7 +114,6 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     final AttachmentInput testAttachmentInput =
         AttachmentInput.builder().withFileName("testDeleteAttachment.jpg").withMimeType(mimeType)
             .withDescription("a test attachment created by testDeleteAttachment")
-            .withClassification(Classification.UNDEFINED)
             .withAttachmentRelatedObjects(Collections.singletonList(testAroInput)).build();
     final String createdAttachmentUuid =
         succeedAttachmentCreate(adminMutationExecutor, testAttachmentInput);
@@ -163,13 +158,16 @@ public class AttachmentResourceTest extends AbstractResourceTest {
         .getConfiguration().getDictionaryEntry("fields.attachment");
     final var allowedMimeTypes = (List<String>) attachmentSettings.get("mimeTypes");
     final String mimeType = allowedMimeTypes.get(0);
+    final Map<String, String> allowedClassifications = (Map<String, String>) AnetObjectEngine
+        .getConfiguration().getDictionaryEntry("fields.attachment.classification.choices");
+    final Map.Entry<String, String> entry = allowedClassifications.entrySet().iterator().next();
+    final String classification = entry.getKey();
 
     final AttachmentRelatedObjectInput testAroInput =
         createAttachmentRelatedObject(ReportDao.TABLE_NAME, testReport.getUuid());
     final AttachmentInput testAttachmentInput =
         AttachmentInput.builder().withFileName("testUpdateAttachment.jpg").withMimeType(mimeType)
             .withDescription("a test attachment created by testUpdateAttachment")
-            .withClassification(Classification.UNDEFINED)
             .withAttachmentRelatedObjects(Collections.singletonList(testAroInput)).build();
     final String createdAttachmentUuid =
         succeedAttachmentCreate(adminMutationExecutor, testAttachmentInput);
@@ -178,9 +176,13 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     final Report updatedReport = adminQueryExecutor.report(REPORT_FIELDS, testReport.getUuid());
     assertThat(updatedReport.getAttachments()).hasSize(1);
     final Attachment reportAttachment = updatedReport.getAttachments().get(0);
-    reportAttachment.setClassification(Classification.NATO_UNCLASSIFIED);
+
+    // F - update with a classification that is not allowed
+    reportAttachment.setClassification("test_classification");
+    failAttachmentUpdate(adminMutationExecutor, getInput(reportAttachment, AttachmentInput.class));
 
     // F - update attachment classification as someone else
+    reportAttachment.setClassification(classification);
     final MutationExecutor erinMutationExecutor =
         getMutationExecutor(getRegularUser().getDomainUsername());
     failAttachmentUpdate(erinMutationExecutor, getInput(reportAttachment, AttachmentInput.class));

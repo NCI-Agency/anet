@@ -74,8 +74,7 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AbstractSearchQuery<?
             + ":contentLength, :fileName, :description, :classification, :createdAt, :updatedAt)")
         .bindBean(obj).bind("createdAt", DaoUtils.asLocalDateTime(obj.getCreatedAt()))
         .bind("updatedAt", DaoUtils.asLocalDateTime(obj.getUpdatedAt()))
-        .bind("authorUuid", obj.getAuthorUuid())
-        .bind("classification", DaoUtils.getEnumId(obj.getClassification())).execute();
+        .bind("authorUuid", obj.getAuthorUuid()).execute();
     if (obj.getAttachmentRelatedObjects().get(0).getRelatedObjectUuid() != null)
       insertAttachmentRelatedObjects(DaoUtils.getUuid(obj), obj.getAttachmentRelatedObjects());
     return obj;
@@ -92,7 +91,6 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AbstractSearchQuery<?
             + "\"description\" = :description, " + "\"classification\" = :classification, "
             + "\"updatedAt\" = :updatedAt " + "WHERE uuid = :uuid")
         .bindBean(obj).bind("updatedAt", DaoUtils.asLocalDateTime(obj.getUpdatedAt()))
-        .bind("classification", DaoUtils.getEnumId(obj.getClassification()))
         .bind("updatedAt", DaoUtils.asLocalDateTime(obj.getUpdatedAt())).execute();
   }
 

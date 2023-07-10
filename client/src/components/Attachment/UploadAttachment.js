@@ -42,11 +42,8 @@ const UploadAttachment = ({ getRelatedObject, edit, saveRelatedObject }) => {
           relatedObjectType: relatedObject.type,
           relatedObjectUuid: relatedObject.uuid
         }
-      ],
-      classification:
-        Settings.fields.attachment.classification.choices.UNDEFINED.value
+      ]
     })
-
     return save(selectedAttachment, relatedObject.uuid, false)
       .then(response => {
         selectedAttachment.uuid = response.createAttachment
