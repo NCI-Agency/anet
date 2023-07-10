@@ -1,5 +1,6 @@
 import { gql } from "@apollo/client"
 import API from "api"
+import { AVATAR_DATA_PREAMBLE } from "components/AvatarDisplayComponent"
 import SVGCanvas from "components/graphs/SVGCanvas"
 import {
   mapPageDispatchersToProps,
@@ -15,9 +16,9 @@ import PropTypes from "prop-types"
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { connect } from "react-redux"
 import { useNavigate } from "react-router-dom"
-import DEFAULT_AVATAR from "resources/default_avatar.svg"
-import COLLAPSE_ICON from "resources/organizations.png"
-import EXPAND_ICON from "resources/plus.png"
+import DEFAULT_AVATAR from "resources/default_avatar.svg?inline"
+import COLLAPSE_ICON from "resources/organizations.png?inline"
+import EXPAND_ICON from "resources/plus.png?inline"
 import Settings from "settings"
 import utils from "utils"
 
@@ -330,7 +331,11 @@ const OrganizationalChart = ({
       .attr("width", d => getRoleValue(d, 26, 13))
       .attr("height", d => getRoleValue(d, 26, 13))
       .attr("y", d => getRoleValue(d, -15, -10))
-      .attr("href", d => d.person && (d.person.avatar || DEFAULT_AVATAR))
+      .attr("href", d =>
+        d?.person?.avatar
+          ? `${AVATAR_DATA_PREAMBLE}${d.person.avatar}`
+          : DEFAULT_AVATAR
+      )
 
     headGenter
       .append("text")
