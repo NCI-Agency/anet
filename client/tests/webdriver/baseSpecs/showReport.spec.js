@@ -35,19 +35,15 @@ describe("Show report page", () => {
     it("We should see a container for Attachment List", async() => {
       // Attachment container
       await (await ShowReport.getAttachments()).waitForExist()
-      if (await (await ShowReport.getAttachments()).isExisting()) {
-        await (await ShowReport.getAttachments()).waitForDisplayed()
-      }
+      await (await ShowReport.getAttachments()).waitForDisplayed()
     })
     it("We should see a card of Attachment", async() => {
       // Attachment card list
       await (await ShowReport.getCard()).waitForExist()
-      if (await (await ShowReport.getCard()).isExisting()) {
-        await (await ShowReport.getCard()).waitForDisplayed()
-        expect(await await ShowReport.getFileData()).to.be.equal(
-          "test_at…\n12.0 KB"
-        )
-      }
+      await (await ShowReport.getCard()).waitForDisplayed()
+      expect(await await ShowReport.getFileData()).to.be.equal(
+        "test_at…\n12.0 KB"
+      )
     })
     it("We can go to the show page of Attachment", async() => {
       if (await (await ShowReport.getImageClick()).isClickable()) {
