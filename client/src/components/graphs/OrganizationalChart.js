@@ -1,5 +1,6 @@
 import { gql } from "@apollo/client"
 import API from "api"
+import { AVATAR_DATA_PREAMBLE } from "components/AvatarDisplayComponent"
 import SVGCanvas from "components/graphs/SVGCanvas"
 import {
   mapPageDispatchersToProps,
@@ -10,13 +11,14 @@ import * as d3 from "d3"
 import _xor from "lodash/xor"
 import ms from "milsymbol"
 import { Organization, Position } from "models"
+import { PositionRole } from "models/Position"
 import PropTypes from "prop-types"
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { connect } from "react-redux"
 import { useNavigate } from "react-router-dom"
-import DEFAULT_AVATAR from "resources/default_avatar.svg"
-import COLLAPSE_ICON from "resources/organizations.png"
-import EXPAND_ICON from "resources/plus.png"
+import DEFAULT_AVATAR from "resources/default_avatar.svg?inline"
+import COLLAPSE_ICON from "resources/organizations.png?inline"
+import EXPAND_ICON from "resources/plus.png?inline"
 import Settings from "settings"
 import utils from "utils"
 
@@ -30,6 +32,10 @@ const GQL_GET_CHART_DATA = gql`
       positions {
         name
         uuid
+        role
+        organization {
+          uuid
+        }
         person {
           rank
           name
@@ -54,6 +60,10 @@ const GQL_GET_CHART_DATA = gql`
         positions {
           name
           uuid
+          role
+          organization {
+            uuid
+          }
           person {
             rank
             name
@@ -67,20 +77,35 @@ const GQL_GET_CHART_DATA = gql`
 `
 const transitionDuration = 200
 
+const roles = Object.keys(PositionRole)
 const ranks = Settings.fields.person.ranks.map(rank => rank.value)
 
 const sortPositions = (positions, truncateLimit) => {
-  const allResults = [...positions].sort((p1, p2) =>
-    ranks.indexOf(p1.person?.rank) > ranks.indexOf(p2.person?.rank) ? -1 : 1
+  const allResults = positions?.sort(
+    (p1, p2) =>
+      // highest position role first
+      roles.indexOf(p2.role) - roles.indexOf(p1.role) ||
+      // when these are equal, highest ranking person first
+      ranks.indexOf(p2.person?.rank) - ranks.indexOf(p1.person?.rank) ||
+      // when these are also equal, sort alphabetically on person name
+      p1.person?.name?.localeCompare(p2.person?.name) ||
+      // else sort by position name
+      p1.name?.localeCompare(p2.name) ||
+      // last resort: sort by position uuid
+      p1.uuid.localeCompare(p2.uuid)
   )
-  return truncateLimit !== undefined && truncateLimit < allResults.length
-    ? allResults.slice(0, truncateLimit)
-    : allResults
+
+  return allResults.slice(0, truncateLimit)
 }
 
 // TODO: enable once innerhtml in svg is polyfilled
 // const EXPAND_ICON = renderBlueprintIconAsSvg(IconNames.DIAGRAM_TREE)
 // const COLLAPSE_ICON = renderBlueprintIconAsSvg(IconNames.CROSS)
+
+const isLeader = position => position.role === PositionRole.LEADER.toString()
+
+const getRoleValue = (position, leaderValue, nonLeaderValue) =>
+  isLeader(position) ? leaderValue : nonLeaderValue
 
 const OrganizationalChart = ({
   pageDispatchers,
@@ -128,7 +153,7 @@ const OrganizationalChart = ({
     if (!data || !root) {
       return
     }
-    const nodeSize = [200, 100 + 11 * personnelDepth]
+    const nodeSize = [200, 80 + 26 * personnelDepth]
 
     const calculateBounds = rootArg => {
       const boundingBox = rootArg.descendants().reduce(
@@ -276,11 +301,7 @@ const OrganizationalChart = ({
       .attr("font-weight", "bold")
       .attr("dy", 22)
       .attr("x", 38)
-      .text(d =>
-        d.data.shortName?.length > 12
-          ? d.data.shortName.substring(0, 10) + ".."
-          : d.data.shortName
-      )
+      .text(d => utils.ellipsize(d.data.shortName, 12))
 
     iconNodeG
       .append("text")
@@ -288,14 +309,11 @@ const OrganizationalChart = ({
       .attr("font-family", "monospace")
       .attr("dy", 45)
       .attr("x", -40)
-      .text(d =>
-        d.data.longName?.length > 21
-          ? d.data.longName.substring(0, 18) + ".."
-          : d.data.longName
-      )
+      .text(d => utils.ellipsize(d.data.longName, 21))
 
+    // Highlight all leaders
     const headG = nodeSelect.selectAll("g.head").data(
-      d => sortPositions(d.data.positions, Math.min(1, personnelDepth)) || [],
+      d => sortPositions(d.data.positions, personnelDepth),
       d => d.uuid
     )
 
@@ -303,80 +321,46 @@ const OrganizationalChart = ({
       .enter()
       .append("g")
       .attr("class", "head")
-      .attr("transform", "translate(-63, 65)")
+      .attr("transform", (d, i) => `translate(-63, ${50 + i * 26})`)
       .on("click", (event, d) => navigate(Position.pathFor(d)))
 
     headG.exit().remove()
 
     headGenter
       .append("image")
-      .attr("width", 26)
-      .attr("height", 26)
-      .attr("y", -15)
-      .attr("href", d => d.person && (d.person.avatar || DEFAULT_AVATAR))
-
-    headGenter
-      .append("text")
-      .attr("x", 26)
-      .attr("y", -4)
-      .attr("font-size", "11px")
-      .attr("font-family", "monospace")
-      .attr("font-weight", "bold")
-      .style("text-anchor", "start")
-      .text((position, i) => {
-        const name = `${position.person ? position.person.rank : ""} ${
-          position.person ? position.person.name : "unfilled"
-        }`
-        return name.length > 23 ? name.substring(0, 21) + ".." : name
-      })
-
-    headGenter
-      .append("text")
-      .attr("x", 26)
-      .attr("y", 6)
-      .attr("font-size", "11px")
-      .attr("font-family", "monospace")
-      .attr("font-weight", "bold")
-      .style("text-anchor", "start")
-      .text((position, i) =>
-        position.name.length > 23
-          ? position.name.substring(0, 21) + ".."
-          : position.name
+      .attr("width", d => getRoleValue(d, 26, 13))
+      .attr("height", d => getRoleValue(d, 26, 13))
+      .attr("y", d => getRoleValue(d, -15, -10))
+      .attr("href", d =>
+        d?.person?.avatar
+          ? `${AVATAR_DATA_PREAMBLE}${d.person.avatar}`
+          : DEFAULT_AVATAR
       )
 
-    const positionsG = nodeSelect.selectAll("g.position").data(
-      d => sortPositions(d.data.positions, personnelDepth).slice(1),
-      d => d.uuid
-    )
-
-    positionsG.exit().remove()
-
-    const positionsGA = positionsG
-      .enter()
-      .append("g")
-      .attr("class", "position")
-      .attr("transform", (d, i) => `translate(-63,${87 + i * 11})`)
-      .on("click", (event, d) => navigate(Position.pathFor(d)))
-
-    positionsGA
-      .append("image")
-      .attr("width", 13)
-      .attr("height", 13)
-      .attr("y", -10)
-      .attr("href", d => d.person && (d.person.avatar || DEFAULT_AVATAR))
-
-    positionsGA
+    headGenter
       .append("text")
-      .attr("x", 18)
-      .attr("font-size", "9px")
+      .attr("x", d => getRoleValue(d, 26, 18))
+      .attr("y", -4)
+      .attr("font-size", d => getRoleValue(d, "11px", "9px"))
       .attr("font-family", "monospace")
+      .attr("font-weight", d => getRoleValue(d, "bold", ""))
       .style("text-anchor", "start")
-      .text((d, i) => {
+      .text(d => {
         const result = `${d.person ? d.person.rank : ""} ${
           d.person ? d.person.name : "unfilled"
-        } ${d.name}`
-        return utils.ellipsize(result, 31)
+        }`
+        return utils.ellipsize(result, getRoleValue(d, 23, 31))
       })
+
+    headGenter
+      .append("text")
+      .attr("x", d => getRoleValue(d, 26, 18))
+      .attr("y", 6)
+      .attr("font-size", d => getRoleValue(d, "11px", "9px"))
+      .attr("font-family", "monospace")
+      .attr("font-weight", d => getRoleValue(d, "bold", ""))
+      .style("text-anchor", "start")
+      .text(d => utils.ellipsize(d.name, getRoleValue(d, 23, 31)))
   }, [data, expanded, navigate, personnelDepth, root, link, node])
 
   if (done) {

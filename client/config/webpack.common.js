@@ -75,8 +75,16 @@ const commonConfig = {
         ]
       },
       {
-        test: /\.(ico|jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2)(\?.*)?$/,
-        type: "asset/resource"
+        test: /\.(ico|jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2)$/,
+        oneOf: [
+          {
+            resourceQuery: /inline/, // e.g. default_avatar.svg?inline
+            type: "asset/inline"
+          },
+          {
+            type: "asset/resource"
+          }
+        ]
       }
     ]
   }
