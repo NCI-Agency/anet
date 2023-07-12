@@ -228,9 +228,8 @@ public class AttachmentResource {
   }
 
   private void assertAllowedClassification(final String classificationKey) {
-    final Map<String, String> allowedClassification = (Map<String, String>) AnetObjectEngine
-        .getConfiguration().getDictionaryEntry("fields.attachment.classification.choices");
-    if (!allowedClassification.containsKey(classificationKey)) {
+    final Map<String, String> allowedClassifications = getAllowedClassifications();
+    if (!allowedClassifications.containsKey(classificationKey)) {
       throw new WebApplicationException("Classification is not allowed", Status.BAD_REQUEST);
     }
   }
@@ -244,8 +243,15 @@ public class AttachmentResource {
     }
   }
 
-  private Map<String, Object> getAttachmentSettings() {
+  public static Map<String, Object> getAttachmentSettings() {
     return (Map<String, Object>) AnetObjectEngine.getConfiguration()
         .getDictionaryEntry("fields.attachment");
+  }
+
+  public static Map<String, String> getAllowedClassifications() {
+    final Map<String, Object> attachmentSettings = getAttachmentSettings();
+    final Map<String, Object> classification =
+        (Map<String, Object>) attachmentSettings.get("classification");
+    return (Map<String, String>) classification.get("choices");
   }
 }
