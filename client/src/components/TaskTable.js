@@ -28,7 +28,7 @@ const GQL_GET_TASK_LIST = gql`
           uuid
           shortName
         }
-        ascendantTasks(query: { pageNum: 0, pageSize: 0 }) {
+        ascendantTasks {
           uuid
           shortName
           parentTask {

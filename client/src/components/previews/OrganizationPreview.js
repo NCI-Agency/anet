@@ -26,7 +26,7 @@ const GQL_GET_ORGANIZATION = gql`
         longName
         identificationCode
       }
-      childrenOrgs(query: { pageNum: 0, pageSize: 0, status: ACTIVE }) {
+      childrenOrgs(query: { status: ACTIVE }) {
         uuid
         shortName
         longName

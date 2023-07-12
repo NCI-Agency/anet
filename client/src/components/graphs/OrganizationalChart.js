@@ -43,15 +43,15 @@ const GQL_GET_CHART_DATA = gql`
           avatar(size: 32)
         }
       }
-      childrenOrgs(query: { pageNum: 0, pageSize: 0, status: ACTIVE }) {
+      childrenOrgs(query: { status: ACTIVE }) {
         uuid
       }
-      descendantOrgs(query: { pageNum: 0, pageSize: 0, status: ACTIVE }) {
+      descendantOrgs(query: { status: ACTIVE }) {
         uuid
         shortName
         longName
         type
-        childrenOrgs(query: { pageNum: 0, pageSize: 0, status: ACTIVE }) {
+        childrenOrgs(query: { status: ACTIVE }) {
           uuid
         }
         parentOrg {

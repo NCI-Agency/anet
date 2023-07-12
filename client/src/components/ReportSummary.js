@@ -69,7 +69,7 @@ const GQL_GET_REPORT_LIST = gql`
             uuid
             shortName
           }
-          ascendantTasks(query: { pageNum: 0, pageSize: 0 }) {
+          ascendantTasks {
             uuid
             shortName
             parentTask {

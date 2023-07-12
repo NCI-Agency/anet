@@ -57,7 +57,7 @@ const GQL_GET_REPORT_LIST = gql`
         uuid
         state
         advisorOrg {
-          ascendantOrgs(query: { pageNum: 0, pageSize: 0 }) {
+          ascendantOrgs {
             uuid
             shortName
             type
@@ -67,7 +67,7 @@ const GQL_GET_REPORT_LIST = gql`
           type
         }
         principalOrg {
-          ascendantOrgs(query: { pageNum: 0, pageSize: 0 }) {
+          ascendantOrgs {
             uuid
             shortName
             type
