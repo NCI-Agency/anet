@@ -310,6 +310,7 @@ fields:
             color: '#ff8279'
 
   attachment:
+    featureDisabled: false
     disabled: false
     shortLabel: Attachment
     shortName:

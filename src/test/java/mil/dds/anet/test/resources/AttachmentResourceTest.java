@@ -8,8 +8,8 @@ import com.graphql_java_generator.exception.GraphQLRequestPreparationException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.database.ReportDao;
+import mil.dds.anet.resources.AttachmentResource;
 import mil.dds.anet.test.client.Attachment;
 import mil.dds.anet.test.client.AttachmentInput;
 import mil.dds.anet.test.client.AttachmentRelatedObjectInput;
@@ -32,6 +32,8 @@ public class AttachmentResourceTest extends AbstractResourceTest {
   @Test
   public void testCreateAttachment()
       throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
+    final Map<String, Object> attachmentSettings = AttachmentResource.getAttachmentSettings();
+
     final ReportInput testReportInput =
         ReportInput.builder().withIntent("a test report created by testCreateAttachment")
             .withReportPeople(
@@ -53,8 +55,6 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     // Fail attachment create with a mimetype that is not allowed
     failAttachmentCreate(adminMutationExecutor, failedAttachmentInput);
 
-    final Map<String, Object> attachmentSettings = (Map<String, Object>) AnetObjectEngine
-        .getConfiguration().getDictionaryEntry("fields.attachment");
     final var allowedMimeTypes = (List<String>) attachmentSettings.get("mimeTypes");
     final Boolean userUploadDisabled = (Boolean) attachmentSettings.get("disabled");
     final String mimeType = allowedMimeTypes.get(0);
@@ -93,6 +93,8 @@ public class AttachmentResourceTest extends AbstractResourceTest {
   @Test
   public void testDeleteAttachment()
       throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
+    final Map<String, Object> attachmentSettings = AttachmentResource.getAttachmentSettings();
+
     // create test report
     final ReportInput testReportInput =
         ReportInput.builder().withIntent("a test report created by testDeleteAttachment")
@@ -104,8 +106,6 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     assertThat(testReport.getUuid()).isNotNull();
 
     // Attach attachment to test report
-    final Map<String, Object> attachmentSettings = (Map<String, Object>) AnetObjectEngine
-        .getConfiguration().getDictionaryEntry("fields.attachment");
     final var allowedMimeTypes = (List<String>) attachmentSettings.get("mimeTypes");
     final String mimeType = allowedMimeTypes.get(0);
 
@@ -143,6 +143,8 @@ public class AttachmentResourceTest extends AbstractResourceTest {
   @Test
   public void testUpdateAttachment()
       throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
+    final Map<String, Object> attachmentSettings = AttachmentResource.getAttachmentSettings();
+
     // create test report
     final ReportInput testReportInput =
         ReportInput.builder().withIntent("a test report created by testUpdateAttachment")
@@ -154,14 +156,11 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     assertThat(testReport.getUuid()).isNotNull();
 
     // Attach attachment to test report
-    final Map<String, Object> attachmentSettings = (Map<String, Object>) AnetObjectEngine
-        .getConfiguration().getDictionaryEntry("fields.attachment");
     final var allowedMimeTypes = (List<String>) attachmentSettings.get("mimeTypes");
     final String mimeType = allowedMimeTypes.get(0);
-    final Map<String, String> allowedClassifications = (Map<String, String>) AnetObjectEngine
-        .getConfiguration().getDictionaryEntry("fields.attachment.classification.choices");
-    final Map.Entry<String, String> entry = allowedClassifications.entrySet().iterator().next();
-    final String classification = entry.getKey();
+    final Map<String, String> allowedClassifications =
+        AttachmentResource.getAllowedClassifications();
+    var firstClassification = allowedClassifications.entrySet().iterator().next().getKey();
 
     final AttachmentRelatedObjectInput testAroInput =
         createAttachmentRelatedObject(ReportDao.TABLE_NAME, testReport.getUuid());
@@ -182,7 +181,7 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     failAttachmentUpdate(adminMutationExecutor, getInput(reportAttachment, AttachmentInput.class));
 
     // F - update attachment classification as someone else
-    reportAttachment.setClassification(classification);
+    reportAttachment.setClassification(firstClassification);
     final MutationExecutor erinMutationExecutor =
         getMutationExecutor(getRegularUser().getDomainUsername());
     failAttachmentUpdate(erinMutationExecutor, getInput(reportAttachment, AttachmentInput.class));

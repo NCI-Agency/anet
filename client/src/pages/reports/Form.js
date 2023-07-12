@@ -928,21 +928,23 @@ const ReportForm = ({
                   widget={<RichTextEditor className="reportTextField" />}
                 />
 
-                <FastField
-                  name="uploadAttachments"
-                  component={FieldHelper.SpecialField}
-                  label={Settings.fields.attachment.shortLabel}
-                  widget={
-                    <UploadAttachment
-                      edit={edit}
-                      saveRelatedObject={saveCallback}
-                      getRelatedObject={() => getRelatedObject(values)}
-                    />
-                  }
-                  onHandleBlur={() => {
-                    setFieldTouched("uploadAttachments", true, false)
-                  }}
-                />
+                {!Settings.fields.attachment.featureDisabled && (
+                  <FastField
+                    name="uploadAttachments"
+                    component={FieldHelper.SpecialField}
+                    label={Settings.fields.attachment.shortLabel}
+                    widget={
+                      <UploadAttachment
+                        edit={edit}
+                        saveRelatedObject={saveCallback}
+                        getRelatedObject={() => getRelatedObject(values)}
+                      />
+                    }
+                    onHandleBlur={() => {
+                      setFieldTouched("uploadAttachments", true, false)
+                    }}
+                  />
+                )}
 
                 <div style={{ textAlign: "center" }}>
                   <Button

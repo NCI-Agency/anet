@@ -294,6 +294,7 @@ fields:
       placeholder: Search for a position...
 
   attachment:
+    featureDisabled: false
     disabled: false
     shortLabel: Attachment
     shortName:
