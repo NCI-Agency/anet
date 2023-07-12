@@ -9,6 +9,7 @@ import PropTypes from "prop-types"
 import React, { useContext } from "react"
 import { Link } from "react-router-dom"
 
+const HOVER_OPEN_DELAY = process.env.ANET_TEST_MODE === "true" ? 60000 : 500
 const TOP_LEVEL = 0
 const LinkToContext = React.createContext({ level: TOP_LEVEL })
 
@@ -79,7 +80,7 @@ const LinkTo = ({
           }
           popoverClassName="bp4-dark"
           hoverCloseDelay={400}
-          hoverOpenDelay={500}
+          hoverOpenDelay={HOVER_OPEN_DELAY}
           portalClassName="linkto-model-preview-portal"
           interactionKind={PopoverInteractionKind.HOVER}
           boundary="viewport"
@@ -125,7 +126,7 @@ const LinkTo = ({
           }
           popoverClassName="bp4-dark"
           hoverCloseDelay={400}
-          hoverOpenDelay={500}
+          hoverOpenDelay={HOVER_OPEN_DELAY}
           portalClassName="linkto-model-preview-portal"
           interactionKind={PopoverInteractionKind.HOVER}
           boundary="viewport"
