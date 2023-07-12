@@ -3,31 +3,31 @@ import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
 import AppContext from "components/AppContext"
 import Fieldset from "components/Fieldset"
-import Model from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
   useBoilerplate,
   usePageTitle
 } from "components/Page"
-import { Person, Position } from "models"
+import { Person } from "models"
 import PropTypes from "prop-types"
 import React, { useContext } from "react"
 import { connect } from "react-redux"
 import TOUR_SCREENSHOT from "resources/tour-screenshot.png"
 import Settings from "settings"
 
-const GQL_GET_POSITION_LIST = gql`
-  query ($positionQuery: PositionSearchQueryInput) {
-    positionList(query: $positionQuery) {
-      list {
-        uuid
-        person {
+const GQL_GET_ORGANIZATION = gql`
+  query ($uuid: String) {
+    organization(uuid: $uuid) {
+      ascendantOrgs(query: { status: ACTIVE }) {
+        administratingPositions {
           uuid
-          rank
-          role
-          name
-          emailAddress
+          person {
+            uuid
+            name
+            rank
+            emailAddress
+          }
         }
       }
     }
@@ -37,6 +37,15 @@ const GQL_GET_POSITION_LIST = gql`
 const screenshotCss = {
   width: "100%",
   boxShadow: "0px 0px 10px #aaa"
+}
+
+function getAllSuperusers(organization) {
+  return Object.values(
+    organization.ascendantOrgs?.reduce((acc, o) => {
+      o.administratingPositions.forEach(p => (acc[p.uuid] = p))
+      return acc
+    }, {}) || {}
+  )
 }
 
 const Help = ({ pageDispatchers }) => {
@@ -76,14 +85,8 @@ const HelpFetchSuperusers = ({
   pageDispatchers
 }) => {
   // Retrieve superusers
-  const positionQuery = {
-    pageSize: 0, // retrieve all these positions
-    type: [Position.TYPE.SUPERUSER, Position.TYPE.ADMINISTRATOR],
-    status: Model.STATUS.ACTIVE,
-    organizationUuid: orgUuid
-  }
-  const queryResult = API.useApiQuery(GQL_GET_POSITION_LIST, {
-    positionQuery
+  const queryResult = API.useApiQuery(GQL_GET_ORGANIZATION, {
+    uuid: orgUuid
   })
   return (
     <HelpConditional
@@ -129,10 +132,9 @@ const HelpConditional = ({
 
   let superusers = []
   if (data) {
-    const filledPositions = data.positionList.list.filter(
-      position => position && position.person
-    )
-    superusers = filledPositions.map(position => position.person)
+    superusers = getAllSuperusers(data.organization)
+      .filter(p => p.person)
+      .map(p => p.person)
   }
 
   return (
@@ -160,7 +162,7 @@ const HelpConditional = ({
         <p>Your superusers:</p>
         <ul>
           {superusers.map(user => (
-            <li key={user.emailAddress}>
+            <li key={user.uuid}>
               <a href={`mailto:${user.emailAddress}`}>
                 {user.rank} {user.name} - {user.emailAddress}
               </a>
