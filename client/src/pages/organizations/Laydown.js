@@ -14,6 +14,24 @@ import { Element } from "react-scroll"
 import Settings from "settings"
 import utils from "utils"
 
+function getAllAdministratingPositions(organization) {
+  return Object.values(
+    organization.ascendantOrgs?.reduce((acc, o) => {
+      const org = Object.without(o, "administratingPositions")
+      o.administratingPositions.forEach(p => {
+        const found = acc[p.uuid]
+        if (found) {
+          found.organizationsAdministrated.push(org)
+        } else {
+          p.organizationsAdministrated = [org]
+          acc[p.uuid] = p
+        }
+      })
+      return acc
+    }, {}) || {}
+  )
+}
+
 const OrganizationLaydown = ({ organization, refetch }) => {
   const { currentUser } = useContext(AppContext)
   const [showInactivePositions, setShowInactivePositions] = useState(false)
@@ -37,6 +55,7 @@ const OrganizationLaydown = ({ organization, refetch }) => {
   const supportedPositions = organization.positions.filter(
     position => positionsNeedingAttention.indexOf(position) === -1
   )
+  const allAdministratingPositions = getAllAdministratingPositions(organization)
   const canCreatePositions =
     canAdministrateOrg || (isSuperuser && isPrincipalOrg)
 
@@ -132,8 +151,9 @@ const OrganizationLaydown = ({ organization, refetch }) => {
         }
       >
         <PositionTable
-          positions={organization.administratingPositions}
           id="superuser-table"
+          positions={allAdministratingPositions}
+          showOrganizationsAdministrated
         />
         <EditAdministratingPositionsModal
           organization={organization}

@@ -31,6 +31,11 @@ const EditAdministratingPositionsModal = ({
   onSuccess
 }) => {
   const [error, setError] = useState(null)
+  organization.administratingPositions =
+    (organization.administratingPositions ||
+      organization.ascendantOrgs?.find(o => o.uuid === organization.uuid)
+        ?.administratingPositions) ??
+    []
 
   const AdministratingPositionsMultiSelect = DictionaryField(FastField)
   const positionsFilters = {

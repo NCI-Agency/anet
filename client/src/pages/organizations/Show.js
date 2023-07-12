@@ -47,92 +47,86 @@ import DictionaryField from "../../HOC/DictionaryField"
 import OrganizationLaydown from "./Laydown"
 import OrganizationTasks from "./OrganizationTasks"
 
+const GQL_LOCATION_FIELDS = `
+  fragment locationFields on Location {
+    uuid
+    name
+    type
+  }
+`
+const GQL_ORGANIZATION_FIELDS = `
+  fragment organizationFields on Organization {
+    uuid
+    shortName
+    longName
+    identificationCode
+    type
+  }
+`
+const GQL_PERSON_FIELDS = `
+  fragment personFields on Person {
+    uuid
+    name
+    status
+    rank
+    role
+    avatar(size: 32)
+  }
+`
+const GQL_POSITION_FIELDS = `
+  fragment positionFields on Position {
+    uuid
+    name
+    code
+    status
+    type
+    role
+  }
+`
 const GQL_GET_ORGANIZATION = gql`
-  query($uuid: String) {
+  query ($uuid: String) {
     organization(uuid: $uuid) {
-      uuid
-      shortName
-      longName
+      ...organizationFields
       status
       isSubscribed
+      profile
       updatedAt
-      identificationCode
-      type
       location {
-        uuid
-        name
+        ...locationFields
         lat
         lng
-        type
       }
-      profile
       parentOrg {
-        uuid
-        shortName
-        longName
-        identificationCode
-        type
+        ...organizationFields
       }
       childrenOrgs(query: { status: ACTIVE }) {
-        uuid
-        shortName
-        longName
-        identificationCode
-        type
+        ...organizationFields
       }
-      positions {
-        uuid
-        name
-        code
-        status
-        type
-        role
-        person {
-          uuid
-          name
-          status
-          rank
-          role
-          avatar(size: 32)
-        }
-        associatedPositions {
-          uuid
-          name
-          type
-          role
-          code
-          status
+      ascendantOrgs(query: { status: ACTIVE }) {
+        ...organizationFields
+        administratingPositions {
+          ...positionFields
+          location {
+            ...locationFields
+          }
+          organization {
+            ...organizationFields
+          }
           person {
-            uuid
-            name
-            status
-            rank
-            role
-            avatar(size: 32)
+            ...personFields
           }
         }
       }
-      administratingPositions {
-        uuid
-        name
-        code
-        type
-        role
-        status
-        location {
-          uuid
-          name
-        }
-        organization {
-          uuid
-          shortName
-        }
+      positions {
+        ...positionFields
         person {
-          uuid
-          name
-          rank
-          role
-          avatar(size: 32)
+          ...personFields
+        }
+        associatedPositions {
+          ...positionFields
+          person {
+          ...personFields
+          }
         }
       }
       planningApprovalSteps {
@@ -142,11 +136,7 @@ const GQL_GET_ORGANIZATION = gql`
           uuid
           name
           person {
-            uuid
-            name
-            rank
-            role
-            avatar(size: 32)
+            ...personFields
           }
         }
       }
@@ -157,11 +147,7 @@ const GQL_GET_ORGANIZATION = gql`
           uuid
           name
           person {
-            uuid
-            name
-            rank
-            role
-            avatar(size: 32)
+            ...personFields
           }
         }
       }
@@ -169,6 +155,11 @@ const GQL_GET_ORGANIZATION = gql`
       ${GRAPHQL_NOTES_FIELDS}
     }
   }
+
+  ${GQL_LOCATION_FIELDS}
+  ${GQL_ORGANIZATION_FIELDS}
+  ${GQL_PERSON_FIELDS}
+  ${GQL_POSITION_FIELDS}
 `
 
 const OrganizationShow = ({ pageDispatchers }) => {
