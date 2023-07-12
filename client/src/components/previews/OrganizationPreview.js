@@ -11,84 +11,87 @@ import React from "react"
 import { ListGroup, ListGroupItem } from "react-bootstrap"
 import Settings from "settings"
 
+const GQL_LOCATION_FIELDS = `
+  fragment locationFields on Location {
+    uuid
+    name
+    type
+  }
+`
+const GQL_ORGANIZATION_FIELDS = `
+  fragment organizationFields on Organization {
+    uuid
+    shortName
+    longName
+    identificationCode
+    type
+  }
+`
+const GQL_PERSON_FIELDS = `
+  fragment personFields on Person {
+    uuid
+    name
+    status
+    rank
+    role
+    avatar(size: 32)
+  }
+`
+const GQL_POSITION_FIELDS = `
+  fragment positionFields on Position {
+    uuid
+    name
+    code
+    status
+    type
+    role
+  }
+`
 const GQL_GET_ORGANIZATION = gql`
   query ($uuid: String) {
     organization(uuid: $uuid) {
-      uuid
-      shortName
-      longName
+      ...organizationFields
       status
-      identificationCode
-      type
       parentOrg {
-        uuid
-        shortName
-        longName
-        identificationCode
+        ...organizationFields
       }
       childrenOrgs(query: { status: ACTIVE }) {
-        uuid
-        shortName
-        longName
-        identificationCode
+        ...organizationFields
       }
-      positions {
-        uuid
-        name
-        code
-        status
-        type
-        role
-        person {
-          uuid
-          name
-          status
-          rank
-          role
-          avatar(size: 32)
-        }
-        associatedPositions {
-          uuid
-          name
-          type
-          role
-          code
-          status
+      ascendantOrgs(query: { status: ACTIVE }) {
+        ...organizationFields
+        administratingPositions {
+          ...positionFields
+          location {
+            ...locationFields
+          }
+          organization {
+            ...organizationFields
+          }
           person {
-            uuid
-            name
-            status
-            rank
-            role
-            avatar(size: 32)
+            ...personFields
           }
         }
       }
-      administratingPositions {
-        uuid
-        name
-        code
-        type
-        role
-        status
-        location {
-          uuid
-          name
-        }
-        organization {
-          uuid
-          shortName
-        }
+      positions {
+        ...positionFields
         person {
-          uuid
-          name
-          rank
-          role
-          avatar(size: 32)
+          ...personFields
+        }
+        associatedPositions {
+          ...positionFields
+          person {
+            ...personFields
+          }
         }
       }
     }
   }
+
+  ${GQL_LOCATION_FIELDS}
+  ${GQL_ORGANIZATION_FIELDS}
+  ${GQL_PERSON_FIELDS}
+  ${GQL_POSITION_FIELDS}
 `
 
 const OrganizationPreview = ({ className, uuid }) => {

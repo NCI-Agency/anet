@@ -158,7 +158,13 @@ export default class Organization extends Model {
       }`
   }
 
-  static FILTERED_CLIENT_SIDE_FIELDS = ["childrenOrgs", "positions", "tasks"]
+  static FILTERED_CLIENT_SIDE_FIELDS = [
+    "childrenOrgs",
+    "ascendantOrgs",
+    "descendantOrgs",
+    "positions",
+    "tasks"
+  ]
 
   static filterClientSideFields(obj, ...additionalFields) {
     return Model.filterClientSideFields(

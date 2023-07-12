@@ -109,6 +109,7 @@ const BasePositionTable = ({
   showDelete,
   onDelete,
   positions,
+  showOrganizationsAdministrated,
   pageSize,
   pageNum,
   totalCount,
@@ -134,6 +135,7 @@ const BasePositionTable = ({
               <th>Name</th>
               <th>Location</th>
               <th>Organization</th>
+              {showOrganizationsAdministrated && <th>Superuser of</th>}
               <th>Current Occupant</th>
               <th>Status</th>
               <th />
@@ -162,6 +164,16 @@ const BasePositionTable = ({
                       />
                     )}
                   </td>
+                  {showOrganizationsAdministrated && (
+                    <td>
+                      {pos.organizationsAdministrated?.map((o, i) => (
+                        <React.Fragment key={o.uuid}>
+                          {i > 0 && ", "}
+                          <LinkTo modelType="Organization" model={o} />
+                        </React.Fragment>
+                      ))}
+                    </td>
+                  )}
                   <td>
                     {pos.person && (
                       <LinkTo modelType="Person" model={pos.person} />
@@ -192,6 +204,7 @@ BasePositionTable.propTypes = {
   onDelete: PropTypes.func,
   // list of positions:
   positions: PropTypes.array.isRequired,
+  showOrganizationsAdministrated: PropTypes.bool,
   // fill these when pagination wanted:
   totalCount: PropTypes.number,
   pageNum: PropTypes.number,
