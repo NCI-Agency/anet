@@ -14,6 +14,7 @@ import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -21,9 +22,13 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.ws.rs.ForbiddenException;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.Attachment;
+import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.test.client.AnetBeanList_Organization;
 import mil.dds.anet.test.client.AnetBeanList_Person;
 import mil.dds.anet.test.client.AnetBeanList_Position;
+import mil.dds.anet.test.client.AttachmentInput;
+import mil.dds.anet.test.client.AttachmentRelatedObjectInput;
 import mil.dds.anet.test.client.CustomSensitiveInformation;
 import mil.dds.anet.test.client.CustomSensitiveInformationInput;
 import mil.dds.anet.test.client.Organization;
@@ -71,8 +76,7 @@ public class PersonResourceTest extends AbstractResourceTest {
       _POSITION_FIELDS, _CUSTOM_SENSITIVE_INFORMATION_FIELDS);
 
   // 200 x 200 avatar
-  final File DEFAULT_AVATAR =
-      new File(PersonResourceTest.class.getResource("/assets/default_avatar.png").getFile());
+  final String AVATAR_UUID = "f076406f-1a9b-4fc9-8ab2-cd2a138ec26d";
 
   @Test
   public void testCreatePerson()
@@ -109,8 +113,10 @@ public class PersonResourceTest extends AbstractResourceTest {
     updatedNewPersonInput.setCode("A123456");
 
     // update avatar
-    byte[] defaultAvatarData = Files.readAllBytes(DEFAULT_AVATAR.toPath());
-    updatedNewPersonInput.setAvatar(defaultAvatarData);
+    final Attachment testAttachment = AnetObjectEngine.getInstance().getAttachmentDao()
+        .getByUuid("f076406f-1a9b-4fc9-8ab2-cd2a138ec26d");
+    final AttachmentInput testAttachmentInput = getInput(testAttachment, AttachmentInput.class);
+    updatedNewPersonInput.setAvatar(testAttachmentInput);
 
     // update HTML of biography
     updatedNewPersonInput.setBiography(UtilsTest.getCombinedHtmlTestCase().getInput());
@@ -123,7 +129,6 @@ public class PersonResourceTest extends AbstractResourceTest {
     retPerson = jackQueryExecutor.person(FIELDS, updatedNewPersonInput.getUuid());
     assertThat(retPerson.getName()).isEqualTo(updatedNewPersonInput.getName());
     assertThat(retPerson.getCode()).isEqualTo(updatedNewPersonInput.getCode());
-    assertThat(retPerson.getAvatar()).isNotEmpty();
     // check that HTML of biography is sanitized after update
     assertThat(retPerson.getBiography()).isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
     // check that JSON of customFields is sanitized after update

@@ -45,8 +45,8 @@ public class PersonMapper implements RowMapper<Person> {
     a.setOpenIdSubject(MapperUtils.getOptionalString(rs, "people_openIdSubject"));
     a.setPendingVerification(MapperUtils.getOptionalBoolean(rs, "people_pendingVerification"));
     // Treat "avatar" special so it only gets loaded & set when explicitly requested
-    if (MapperUtils.containsColumnNamed(rs, "people_avatar")) {
-      a.setAvatar(rs.getBytes("people_avatar"));
+    if (MapperUtils.containsColumnNamed(rs, "people_avatarUuid")) {
+      a.setAvatarUuid(MapperUtils.getOptionalString(rs, "people_avatarUuid"));
     }
 
     return a;

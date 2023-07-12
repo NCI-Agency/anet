@@ -53,7 +53,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
       "biography", "country", "gender", "endOfTourDate", "domainUsername", "openIdSubject",
       "pendingVerification", "code", "updatedAt", "customFields"};
   // "avatar" has its own batcher
-  public static final String[] avatarFields = {"uuid", "avatar"};
+  public static final String[] avatarFields = {"uuid", "avatarUuid"};
   public static final String[] allFields =
       ObjectArrays.concat(minimalFields, additionalFields, String.class);
   public static final String TABLE_NAME = "people";
@@ -145,7 +145,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   public Person insertInternal(Person p) {
     final String sql = "/* personInsert */ INSERT INTO people "
         + "(uuid, name, status, role, \"emailAddress\", \"phoneNumber\", rank, "
-        + "\"pendingVerification\", gender, country, avatar, code, \"endOfTourDate\", biography, "
+        + "\"pendingVerification\", gender, country, \"avatarUuid\", code, \"endOfTourDate\", biography, "
         + "\"domainUsername\", \"openIdSubject\", \"createdAt\", \"updatedAt\", \"customFields\") "
         + "VALUES (:uuid, :name, :status, :role, :emailAddress, :phoneNumber, :rank, "
         + ":pendingVerification, :gender, :country, :avatar, :code, :endOfTourDate, :biography, "
@@ -153,7 +153,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     getDbHandle().createUpdate(sql).bindBean(p)
         .bind("createdAt", DaoUtils.asLocalDateTime(p.getCreatedAt()))
         .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
-        .bind("avatar", p.getAvatarData())
+        .bind("avatarUuid", p.getAvatarUuid())
         .bind("endOfTourDate", DaoUtils.asLocalDateTime(p.getEndOfTourDate()))
         .bind("status", DaoUtils.getEnumId(p.getStatus()))
         .bind("role", DaoUtils.getEnumId(p.getRole())).execute();
@@ -181,7 +181,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   public int updateInternal(Person p) {
     final String sql = "/* personUpdate */ UPDATE people "
         + "SET name = :name, status = :status, role = :role, gender = :gender, country = :country, "
-        + "\"emailAddress\" = :emailAddress, \"avatar\" = :avatar, code = :code, "
+        + "\"emailAddress\" = :emailAddress, \"avatarUuid\" = :avatarUuid, code = :code, "
         + "\"phoneNumber\" = :phoneNumber, rank = :rank, biography = :biography, "
         + "\"pendingVerification\" = :pendingVerification, \"domainUsername\" = :domainUsername, "
         + "\"updatedAt\" = :updatedAt, \"customFields\" = :customFields, \"endOfTourDate\" = :endOfTourDate "
@@ -189,7 +189,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
 
     final int nr = getDbHandle().createUpdate(sql).bindBean(p)
         .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
-        .bind("avatar", p.getAvatarData())
+        .bind("avatarUuid", p.getAvatarUuid())
         .bind("endOfTourDate", DaoUtils.asLocalDateTime(p.getEndOfTourDate()))
         .bind("status", DaoUtils.getEnumId(p.getStatus()))
         .bind("role", DaoUtils.getEnumId(p.getRole())).execute();

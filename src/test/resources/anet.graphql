@@ -267,9 +267,6 @@ enum AuthorizationGroupSearchSortBy {
   RECENT
 }
 
-"""Base64-encoded binary"""
-scalar Base64String
-
 """"""
 type Comment {
   author: Person
@@ -575,7 +572,7 @@ type Person {
   attachments: [Attachment]
   attendedReports(query: ReportSearchQueryInput): AnetBeanList_Report
   authoredReports(query: ReportSearchQueryInput): AnetBeanList_Report
-  avatar(size: Int = 256): Base64String
+  avatar: Attachment
   biography: String
   code: String
   country: String
@@ -603,7 +600,7 @@ type Person {
 
 """"""
 input PersonInput {
-  avatar: Base64String
+  avatar: AttachmentInput
   biography: String
   code: String
   country: String
@@ -923,7 +920,7 @@ type ReportPerson {
   attendee: Boolean!
   author: Boolean!
   authoredReports(query: ReportSearchQueryInput): AnetBeanList_Report
-  avatar(size: Int = 256): Base64String
+  avatar: Attachment
   biography: String
   code: String
   country: String
@@ -954,7 +951,7 @@ type ReportPerson {
 input ReportPersonInput {
   attendee: Boolean!
   author: Boolean!
-  avatar: Base64String
+  avatar: AttachmentInput
   biography: String
   code: String
   country: String

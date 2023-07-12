@@ -81,7 +81,7 @@ public class Person extends AbstractCustomizableAnetBean
   // annotated below
   private List<PersonPositionHistory> previousPositions;
   // annotated below
-  private Optional<byte[]> avatar;
+  private ForeignObjectHolder<Attachment> avatar = new ForeignObjectHolder<>();
   @GraphQLQuery
   @GraphQLInputField
   private String code;
@@ -249,6 +249,25 @@ public class Person extends AbstractCustomizableAnetBean
     this.previousPositions = previousPositions;
   }
 
+  @JsonIgnore
+  public void setAvatarUuid(String avatarUuid) {
+    this.avatar = new ForeignObjectHolder<>(avatarUuid);
+  }
+
+  @JsonIgnore
+  public String getAvatarUuid() {
+    return avatar.getForeignUuid();
+  }
+
+  @GraphQLInputField(name = "avatar")
+  public void setAvatar(Attachment avatar) {
+    this.avatar = new ForeignObjectHolder<>(avatar);
+  }
+
+  public Attachment getAvatar() {
+    return avatar.getForeignObject();
+  }
+
   // TODO: batch load? (used in admin/MergePeople.js)
   @GraphQLQuery(name = "authoredReports")
   public CompletableFuture<AnetBeanList<Report>> loadAuthoredReports(
@@ -275,36 +294,17 @@ public class Person extends AbstractCustomizableAnetBean
     return AnetObjectEngine.getInstance().getReportDao().search(context, query);
   }
 
-  @GraphQLInputField
-  public void setAvatar(byte[] avatar) {
-    this.avatar = Optional.ofNullable(avatar);
-  }
-
   @GraphQLQuery(name = "avatar")
-  public CompletableFuture<byte[]> loadAvatar(@GraphQLRootContext Map<String, Object> context,
-      @GraphQLArgument(name = "size", defaultValue = "256") int size) {
+  public CompletableFuture<Attachment> loadAvatar(@GraphQLRootContext Map<String, Object> context) {
     if (avatar != null) {
-      return CompletableFuture.completedFuture(resizeAvatar(size));
+      return CompletableFuture.completedFuture(avatar.getForeignObject());
     }
-    return new UuidFetcher<Person>().load(context, IdDataLoaderKey.PEOPLE_AVATARS, uuid)
-        .thenApply(o -> {
+    return new UuidFetcher<Attachment>()
+        .load(context, IdDataLoaderKey.PEOPLE_AVATARS, avatar.getForeignUuid()).thenApply(o -> {
           // Careful, `o` might be null
-          avatar = Optional.ofNullable(o == null ? null : o.getAvatarData());
-          return resizeAvatar(size);
+          avatar.setForeignObject(o);
+          return o;
         });
-  }
-
-  public byte[] resizeAvatar(int size) {
-    try {
-      return Utils.resizeImage(getAvatarData(), size, size, AVATAR_TYPE);
-    } catch (Exception e) {
-      return null;
-    }
-  }
-
-  @JsonIgnore
-  public byte[] getAvatarData() {
-    return avatar == null ? null : avatar.orElse(null);
   }
 
   public String getCode() {
@@ -349,7 +349,6 @@ public class Person extends AbstractCustomizableAnetBean
         && Objects.equals(other.getDomainUsername(), domainUsername)
         && Objects.equals(other.getOpenIdSubject(), openIdSubject)
         && Objects.equals(other.getPendingVerification(), pendingVerification)
-        && Objects.equals(other.getAvatarData(), getAvatarData())
         && Objects.equals(other.getCode(), code)
         && (createdAt != null ? createdAt.equals(other.getCreatedAt())
             : (other.getCreatedAt() == null && updatedAt != null)
@@ -360,8 +359,7 @@ public class Person extends AbstractCustomizableAnetBean
   @Override
   public int hashCode() {
     return Objects.hash(super.hashCode(), uuid, name, status, role, emailAddress, phoneNumber, rank,
-        biography, domainUsername, openIdSubject, pendingVerification, avatar, code, createdAt,
-        updatedAt);
+        biography, domainUsername, openIdSubject, pendingVerification, code, createdAt, updatedAt);
   }
 
   @Override
