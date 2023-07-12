@@ -117,7 +117,7 @@ const UploadAttachment = ({
             selectedAttachment.attachmentRelatedObjects[0].relatedObjectUuid = null
             setUploadedList(current => [...current, selectedAttachment])
             toast.error(
-              `Attachment content upload failed for ${
+              `Attachment content upload faileds for ${
                 selectedAttachment.fileName
               }: ${error.response?.data?.error || error.message}`,
               {
