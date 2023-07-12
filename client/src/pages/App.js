@@ -109,7 +109,7 @@ const GQL_GET_APP_DATA = gql`
             uuid
             shortName
           }
-          ascendantTasks(query: { pageNum: 0, pageSize: 0 }) {
+          ascendantTasks {
             uuid
             shortName
             parentTask {

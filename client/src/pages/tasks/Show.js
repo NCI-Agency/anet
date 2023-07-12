@@ -61,7 +61,7 @@ const GQL_GET_TASK = gql`
           uuid
         }
       }
-      ascendantTasks(query: { pageNum: 0, pageSize: 0 }) {
+      ascendantTasks {
         uuid
         shortName
         parentTask {
@@ -72,14 +72,14 @@ const GQL_GET_TASK = gql`
         uuid
         shortName
       }
-      descendantTasks(query: { pageNum: 0, pageSize: 0 }) {
+      descendantTasks {
         uuid
         shortName
         parentTask {
           uuid
           shortName
         }
-        ascendantTasks(query: { pageNum: 0, pageSize: 0 }) {
+        ascendantTasks {
           uuid
           shortName
           parentTask {
