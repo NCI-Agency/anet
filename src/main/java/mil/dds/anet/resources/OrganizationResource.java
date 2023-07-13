@@ -59,7 +59,7 @@ public class OrganizationResource {
     final Person user = DaoUtils.getUserFromContext(context);
     // Check if user is authorized to create a sub organization
     if (!AuthUtils.isAdmin(user)) {
-      AuthUtils.assertCanAdministrateOrg(user, org.getParentOrgUuid(), false);
+      AuthUtils.assertCanAdministrateOrg(user, org.getParentOrgUuid());
     }
     final Organization created;
     try {
@@ -109,7 +109,7 @@ public class OrganizationResource {
 
     final Person user = DaoUtils.getUserFromContext(context);
     // Verify correct Organization
-    AuthUtils.assertCanAdministrateOrg(user, DaoUtils.getUuid(org), false);
+    AuthUtils.assertCanAdministrateOrg(user, DaoUtils.getUuid(org));
 
     // Load the existing organization, so we can check for differences.
     final Organization existing = dao.getByUuid(org.getUuid());
@@ -132,10 +132,10 @@ public class OrganizationResource {
                 "You cannot assign a different type of organization as the parent",
                 Status.FORBIDDEN);
           }
-          AuthUtils.assertCanAdministrateOrg(user, org.getParentOrgUuid(), false);
+          AuthUtils.assertCanAdministrateOrg(user, org.getParentOrgUuid());
         }
         if (existing.getParentOrgUuid() != null) {
-          AuthUtils.assertCanAdministrateOrg(user, existing.getParentOrgUuid(), false);
+          AuthUtils.assertCanAdministrateOrg(user, existing.getParentOrgUuid());
         }
       }
       // User is not authorized to change the organization type

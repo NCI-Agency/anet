@@ -507,6 +507,12 @@ INSERT INTO organizations (uuid, "shortName", "longName", type, "parentOrgUuid",
 	VALUES (uuid_generate_v4(), 'MOD-F', 'Ministry of Defense Finances', 1,
 	(SELECT uuid from organizations where "shortName" = 'MoD'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
+-- Assign responsible positions for organizations
+INSERT INTO "organizationAdministrativePositions" ("organizationUuid", "positionUuid") VALUES
+  ((SELECT uuid FROM organizations WHERE "shortName" = 'MoD'), (SELECT uuid FROM positions WHERE name = 'EF 1.1 Superuser')),
+  ((SELECT uuid FROM organizations WHERE "shortName" = 'MoD'), (SELECT uuid FROM positions WHERE name = 'EF 2.1 Superuser')),
+  ((SELECT uuid FROM organizations WHERE "shortName" = 'MoI'), (SELECT uuid FROM positions WHERE name = 'EF 2.2 Final Reviewer'));
+
 -- Create principal positions
 INSERT INTO positions (uuid, name, code, type, role, status, "currentPersonUuid", "organizationUuid", "createdAt", "updatedAt")
 	VALUES (N'879121d2-d265-4d26-8a2b-bd073caa474e', 'Minister of Defense', 'MOD-FO-00001', 1, 2, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
