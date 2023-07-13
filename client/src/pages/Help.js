@@ -185,16 +185,6 @@ const HelpConditional = ({
           Technical issues may be able to be resolved by the ANET
           administrators: <a href={`mailto:${email}`}>{email}</a>
         </p>
-
-        {currentUser.isAdmin() && (
-          <div>
-            <h4>Advanced troubleshooting</h4>
-            <p>
-              Admins, you can also consult the{" "}
-              <a href="/assets/client/changelog.html">changelog</a>.
-            </p>
-          </div>
-        )}
       </Fieldset>
     </div>
   )
