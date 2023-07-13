@@ -508,34 +508,34 @@ INSERT INTO organizations (uuid, "shortName", "longName", type, "parentOrgUuid",
 	(SELECT uuid from organizations where "shortName" = 'MoD'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Create principal positions
-INSERT INTO positions (uuid, name, code, type, status, "currentPersonUuid", "organizationUuid", "createdAt", "updatedAt")
-	VALUES (N'879121d2-d265-4d26-8a2b-bd073caa474e', 'Minister of Defense', 'MOD-FO-00001', 1, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO positions (uuid, name, code, type, status, "currentPersonUuid", "organizationUuid", "createdAt", "updatedAt")
-	VALUES (N'1a45ccd6-40e3-4c51-baf5-15e7e9b8f03d', 'Chief of Staff - MoD', 'MOD-FO-00002', 1, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO positions (uuid, name, code, type, status, "currentPersonUuid", "organizationUuid", "createdAt", "updatedAt")
-	VALUES (N'4be6baa5-c611-4c70-a2a8-c01bf9b7d2bc', 'Executive Assistant to the MoD', 'MOD-FO-00003', 1, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO positions (uuid, name, code, type, status, "currentPersonUuid", "organizationUuid", "createdAt", "updatedAt")
-	VALUES (N'a9ab507e-cda9-469b-8d9e-b47445852af4', 'Planning Captain', 'MOD-FO-00004', 1, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO positions (uuid, name, code, type, status, "currentPersonUuid", "organizationUuid", "createdAt", "updatedAt")
-	VALUES (N'61371573-eefc-4b85-81a0-27d6c0b78c58', 'Director of Budgeting - MoD', 'MOD-Bud-00001', 1, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO positions (uuid, name, code, type, status, "currentPersonUuid", "organizationUuid", "createdAt", "updatedAt")
-	VALUES (N'c2e3fdff-2b36-4ef9-9790-afbca0c53f57', 'Writer of Expenses - MoD', 'MOD-Bud-00002', 1, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO positions (uuid, name, code, type, status, "currentPersonUuid", "organizationUuid", "createdAt", "updatedAt")
-	VALUES (N'c065c2b6-a04a-4ead-a3a2-5aabf921446d', 'Cost Adder - MoD', 'MOD-Bud-00003', 1, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO positions (uuid, name, code, type, status, "currentPersonUuid", "organizationUuid", "createdAt", "updatedAt")
-	VALUES (N'731ee4f9-f21b-4166-b03d-d7ba5e7f735c', 'Chief of Police', 'MOI-Pol-HQ-00001', 1, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Interior'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO positions (uuid, name, code, type, status, "currentPersonUuid", "organizationUuid", "createdAt", "updatedAt")
-	VALUES (N'18f42d92-ada7-11eb-8529-0242ac130003', 'Chief of Tests', 'MOI-TST-HQ-00001', 1, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Interior'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO positions (uuid, name, code, type, status, "currentPersonUuid", "organizationUuid", "createdAt", "updatedAt")
-	VALUES (N'338e4d54-ada7-11eb-8529-0242ac130003', 'Director of Tests', 'MOD-TST-HQ-00001', 1, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO positions (uuid, name, code, type, status, "currentPersonUuid", "organizationUuid", "createdAt", "updatedAt")
-	VALUES (N'25fe500c-3503-4ba8-a9a4-09b29b50c1f1', 'Merge One', 'MOD-M1-HQ-00001', 1, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO positions (uuid, name, code, type, status, "currentPersonUuid", "organizationUuid", "createdAt", "updatedAt")
-	VALUES (N'e87f0f60-ad13-4c1c-96f7-672c595b81c7', 'Merge Two', 'MOD-M2-HQ-00001', 1, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO positions (uuid, name, code, type, status, "currentPersonUuid", "organizationUuid", "createdAt", "updatedAt")
-	VALUES (N'885dd6bf-4647-4ef7-9bc4-4dd2826064bb', 'Chief of Merge People Test 1', 'MOI-MPT1-HQ-00001', 1, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Interior'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO positions (uuid, name, code, type, status, "currentPersonUuid", "organizationUuid", "createdAt", "updatedAt")
-	VALUES (N'4dc40a27-19ae-4e03-a4f3-55b2c768725f', 'Chief of Merge People Test 2', 'MOI-MPT2-HQ-00001', 1, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Interior'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO positions (uuid, name, code, type, role, status, "currentPersonUuid", "organizationUuid", "createdAt", "updatedAt")
+	VALUES (N'879121d2-d265-4d26-8a2b-bd073caa474e', 'Minister of Defense', 'MOD-FO-00001', 1, 2, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO positions (uuid, name, code, type, role, status, "currentPersonUuid", "organizationUuid", "createdAt", "updatedAt")
+	VALUES (N'1a45ccd6-40e3-4c51-baf5-15e7e9b8f03d', 'Chief of Staff - MoD', 'MOD-FO-00002', 1, 2, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO positions (uuid, name, code, type, role, status, "currentPersonUuid", "organizationUuid", "createdAt", "updatedAt")
+	VALUES (N'4be6baa5-c611-4c70-a2a8-c01bf9b7d2bc', 'Executive Assistant to the MoD', 'MOD-FO-00003', 1, 1, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO positions (uuid, name, code, type, role, status, "currentPersonUuid", "organizationUuid", "createdAt", "updatedAt")
+	VALUES (N'a9ab507e-cda9-469b-8d9e-b47445852af4', 'Planning Captain', 'MOD-FO-00004', 1, 1, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO positions (uuid, name, code, type, role, status, "currentPersonUuid", "organizationUuid", "createdAt", "updatedAt")
+	VALUES (N'61371573-eefc-4b85-81a0-27d6c0b78c58', 'Director of Budgeting - MoD', 'MOD-Bud-00001', 1, 1, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO positions (uuid, name, code, type, role, status, "currentPersonUuid", "organizationUuid", "createdAt", "updatedAt")
+	VALUES (N'c2e3fdff-2b36-4ef9-9790-afbca0c53f57', 'Writer of Expenses - MoD', 'MOD-Bud-00002', 1, 0, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO positions (uuid, name, code, type, role, status, "currentPersonUuid", "organizationUuid", "createdAt", "updatedAt")
+	VALUES (N'c065c2b6-a04a-4ead-a3a2-5aabf921446d', 'Cost Adder - MoD', 'MOD-Bud-00003', 1, 0, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO positions (uuid, name, code, type, role, status, "currentPersonUuid", "organizationUuid", "createdAt", "updatedAt")
+	VALUES (N'731ee4f9-f21b-4166-b03d-d7ba5e7f735c', 'Chief of Police', 'MOI-Pol-HQ-00001', 1, 2, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Interior'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO positions (uuid, name, code, type, role, status, "currentPersonUuid", "organizationUuid", "createdAt", "updatedAt")
+	VALUES (N'18f42d92-ada7-11eb-8529-0242ac130003', 'Chief of Tests', 'MOI-TST-HQ-00001', 1, 1, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Interior'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO positions (uuid, name, code, type, role, status, "currentPersonUuid", "organizationUuid", "createdAt", "updatedAt")
+	VALUES (N'338e4d54-ada7-11eb-8529-0242ac130003', 'Director of Tests', 'MOD-TST-HQ-00001', 1, 1, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO positions (uuid, name, code, type, role, status, "currentPersonUuid", "organizationUuid", "createdAt", "updatedAt")
+	VALUES (N'25fe500c-3503-4ba8-a9a4-09b29b50c1f1', 'Merge One', 'MOD-M1-HQ-00001', 1, 1, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO positions (uuid, name, code, type, role, status, "currentPersonUuid", "organizationUuid", "createdAt", "updatedAt")
+	VALUES (N'e87f0f60-ad13-4c1c-96f7-672c595b81c7', 'Merge Two', 'MOD-M2-HQ-00001', 1, 2, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO positions (uuid, name, code, type, role, status, "currentPersonUuid", "organizationUuid", "createdAt", "updatedAt")
+	VALUES (N'885dd6bf-4647-4ef7-9bc4-4dd2826064bb', 'Chief of Merge People Test 1', 'MOI-MPT1-HQ-00001', 1, 1, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Interior'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO positions (uuid, name, code, type, role, status, "currentPersonUuid", "organizationUuid", "createdAt", "updatedAt")
+	VALUES (N'4dc40a27-19ae-4e03-a4f3-55b2c768725f', 'Chief of Merge People Test 2', 'MOI-MPT2-HQ-00001', 1, 1, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Interior'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Put Steve into a Tashkil and associate with the EF 1.1 Advisor A Billet
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt")

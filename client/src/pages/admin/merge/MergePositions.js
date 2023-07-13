@@ -380,7 +380,16 @@ const MergePositions = ({ pageDispatchers }) => {
           style={{ width: "98%", margin: "16px 1%" }}
           variant="primary"
           onClick={mergePositions}
-          disabled={!areAllSet(position1, position2, mergedPosition?.name)}
+          disabled={
+            !areAllSet(
+              position1,
+              position2,
+              mergedPosition?.name,
+              mergedPosition?.type,
+              mergedPosition?.role,
+              mergedPosition?.status
+            )
+          }
         >
           Merge Positions
         </Button>
