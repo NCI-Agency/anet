@@ -108,6 +108,7 @@ dependencies {
 	implementation 'commons-beanutils:commons-beanutils:1.9.4'
 
 	implementation 'org.simplejavamail:simple-java-mail:8.1.1'
+	implementation 'org.eclipse.angus:jakarta.mail:2.0.2'
 	implementation "ch.qos.logback:logback-classic:${logbackVersion}"
 	implementation "ch.qos.logback:logback-core:${logbackVersion}"
 	implementation "ch.qos.logback:logback-access:${logbackVersion}"
