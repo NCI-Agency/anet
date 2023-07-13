@@ -139,7 +139,7 @@ const RichTextEditor = ({
     <div className={className}>
       <Slate
         editor={editor}
-        value={slateValue}
+        initialValue={slateValue}
         onChange={newValue => {
           setSlateValue(newValue)
           serializeDebounced(editor, onChange)
