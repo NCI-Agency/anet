@@ -171,6 +171,15 @@ const MergePositions = ({ pageDispatchers }) => {
                 dispatchMergeActions={dispatchMergeActions}
               />
               <PositionField
+                label={Settings.fields.position.role.label}
+                value={Position.humanNameOfRole(mergedPosition.role)}
+                align={ALIGN_OPTIONS.CENTER}
+                action={getInfoButton("Role is required.")}
+                fieldName="role"
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
+              <PositionField
                 label="Code"
                 value={mergedPosition.code}
                 align={ALIGN_OPTIONS.CENTER}
@@ -371,7 +380,16 @@ const MergePositions = ({ pageDispatchers }) => {
           style={{ width: "98%", margin: "16px 1%" }}
           variant="primary"
           onClick={mergePositions}
-          disabled={!areAllSet(position1, position2, mergedPosition?.name)}
+          disabled={
+            !areAllSet(
+              position1,
+              position2,
+              mergedPosition?.name,
+              mergedPosition?.type,
+              mergedPosition?.role,
+              mergedPosition?.status
+            )
+          }
         >
           Merge Positions
         </Button>
@@ -518,6 +536,23 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
             fieldName="type"
             value={position.type}
             align={align}
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
+          />
+          <PositionField
+            label={Settings.fields.position.role.label}
+            fieldName="role"
+            value={position.humanNameOfRole()}
+            align={align}
+            action={getActionButton(
+              () =>
+                dispatchMergeActions(
+                  setAMergedField("role", position.role, align)
+                ),
+              align,
+              mergeState,
+              "role"
+            )}
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
           />
