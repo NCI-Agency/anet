@@ -2,7 +2,7 @@ const uuidv4 = require("uuid").v4
 const test = require("../util/test")
 
 test.serial("checking superuser permissions", async t => {
-  t.plan(13)
+  t.plan(15)
 
   const {
     pageHelpers,
@@ -47,7 +47,11 @@ test.serial("checking superuser permissions", async t => {
   await pageHelpers.clickMenuLinksButton()
   await pageHelpers.clickMyOrgLink()
 
-  const $rebeccaLink = await findSuperuserLink(t, "CTR BECCABON, Rebecca")
+  const $rebeccaLink = await findSuperuserLink(
+    t,
+    "CTR BECCABON, Rebecca",
+    "EF 2.2"
+  )
 
   await $rebeccaLink.click()
   await t.context.driver.wait(t.context.until.stalenessOf($rebeccaLink))
@@ -63,7 +67,7 @@ test.serial("checking superuser permissions", async t => {
   await t.context.get("/", "rebecca")
   await pageHelpers.clickMenuLinksButton()
   await pageHelpers.clickMyOrgLink()
-  const $jacobLink = await findSuperuserLink(t, "CIV JACOBSON, Jacob")
+  const $jacobLink = await findSuperuserLink(t, "CIV JACOBSON, Jacob", "EF 2.2")
   await $jacobLink.click()
   await t.context.driver.wait(t.context.until.stalenessOf($jacobLink))
 
@@ -128,6 +132,25 @@ test.serial("checking superuser permissions", async t => {
     t.context.until.elementIsVisible($editPositionButton)
   )
   t.pass('Jacob should be able to edit his own organization ("EF 2.2")')
+
+  await t.context.logout()
+
+  await t.context.get("/", "andrew")
+  const $ef11Link = await getFromSearchResults(
+    t,
+    "EF 1.1",
+    "EF 1.1",
+    "organizations"
+  )
+  await $ef11Link.click()
+  // Check that Andrew is (also) superuser of EF 1.1
+  await findSuperuserLink(t, "CIV ANDERSON, Andrew", "EF 1")
+  await pageHelpers.clickPersonNameFromSupportedPositionsFieldset(
+    "Capt ELIZAWELL, Elizabeth"
+  )
+  await t.context.driver.sleep(shortWaitMs) // wait for transition
+
+  await validateUserCanEditUserForCurrentPage(t)
 })
 
 validateUserCannotEditOtherUser(
@@ -332,26 +355,46 @@ function validateUserCannotEditOtherUser(
   })
 }
 
-async function findSuperuserLink(t, desiredSuperuserName) {
-  const $superuserLinks = await t.context.$$(
-    "[id=superuser-table] tbody tr td:nth-child(4) span a"
-  )
-  let $foundLink
-  for (const $superuserLink of $superuserLinks) {
+async function findSuperuserLink(
+  t,
+  desiredSuperuserName,
+  desiredOrganizationsAdministrated
+) {
+  const $superuserRows = await t.context.$$("[id=superuser-table] tbody tr")
+  let $foundSuperuser
+  let $foundOrganizationsAdministrated
+  for (const $superuserRow of $superuserRows) {
+    const $superuserLink = await $superuserRow.findElement(
+      t.context.By.css("td:nth-child(5) span a")
+    )
     const superuserName = await $superuserLink.getText()
     if (superuserName === desiredSuperuserName) {
-      $foundLink = $superuserLink
+      $foundSuperuser = $superuserLink
+      const organizationsAdministratedElem = await $superuserRow.findElement(
+        t.context.By.css("td:nth-child(4)")
+      )
+      const organizationsAdministrated =
+        await organizationsAdministratedElem.getText()
+      if (organizationsAdministrated === desiredOrganizationsAdministrated) {
+        $foundOrganizationsAdministrated = organizationsAdministrated
+      }
       break
     }
   }
 
-  if (!$foundLink) {
+  if (!$foundSuperuser) {
     t.fail(
       `Could not find superuser '${desiredSuperuserName}'. The data does not match what this test expects.`
     )
   }
 
-  return $foundLink
+  if (!$foundOrganizationsAdministrated) {
+    t.fail(
+      `Organizations administrated by '${desiredSuperuserName}' do not match what this test expects.`
+    )
+  }
+
+  return $foundSuperuser
 }
 
 async function validateUserCanEditUserForCurrentPage(t) {
