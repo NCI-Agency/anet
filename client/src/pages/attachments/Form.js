@@ -232,7 +232,7 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
   }
 
   function onSubmit(values, form) {
-    return save(values, form)
+    return save(values, relatedObjects)
       .then(response => onSubmitSuccess(response, values, form))
       .catch(error => {
         setError(error)
@@ -259,14 +259,14 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
     })
   }
 
-  function save(values, form) {
-    const attachment = Attachment.filterClientSideFields(values, "content")
-    const updatedRelatedObjects = relatedObjects.map(attach => ({
-      relatedObjectType: attach.relatedObjectType,
-      relatedObjectUuid: attach.relatedObjectUuid
-    }))
-    attachment.classification = values.classification
-    attachment.attachmentRelatedObjects = updatedRelatedObjects
+  function save(values, attachmentRelatedObjects) {
+    const attachment = Attachment.filterClientSideFields(values)
+    attachment.attachmentRelatedObjects = attachmentRelatedObjects.map(
+      ({ relatedObjectType, relatedObjectUuid }) => ({
+        relatedObjectType,
+        relatedObjectUuid
+      })
+    )
     return API.mutation(edit ? GQL_UPDATE_ATTACHMENT : GQL_CREATE_ATTACHMENT, {
       attachment
     })

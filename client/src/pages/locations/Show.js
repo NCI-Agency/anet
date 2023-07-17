@@ -22,7 +22,6 @@ import {
 } from "components/Page"
 import RelatedObjectNotes from "components/RelatedObjectNotes"
 import ReportCollection from "components/ReportCollection"
-import RichTextEditor from "components/RichTextEditor"
 import { Field, Form, Formik } from "formik"
 import { convertLatLngToMGRS } from "geoUtils"
 import _escape from "lodash/escape"

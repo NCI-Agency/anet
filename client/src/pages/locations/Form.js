@@ -14,15 +14,12 @@ import Fieldset from "components/Fieldset"
 import GeoLocation from "components/GeoLocation"
 import Leaflet from "components/Leaflet"
 import Messages from "components/Messages"
-import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
-import RichTextEditor from "components/RichTextEditor"
 import SimilarObjectsModal from "components/SimilarObjectsModal"
-import { FastField, Form, Formik } from "formik"
+import { FastField, Field, Form, Formik } from "formik"
 import { convertLatLngToMGRS, parseCoordinate } from "geoUtils"
 import _escape from "lodash/escape"
-import _isEqual from "lodash/isEqual"
 import { Location, Position } from "models"
 import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
@@ -61,23 +58,9 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
   const { currentUser } = useContext(AppContext)
   const navigate = useNavigate()
   const [error, setError] = useState(null)
-  const [childFunctionTrigger, setChildFunctionTrigger] = useState(false)
-  const [relatedObjectUuid, setRelatedObjectUuid] = useState()
   const [showSimilarLocations, setShowSimilarLocations] = useState(false)
   const canEditName =
     (!edit && currentUser.isSuperuser()) || (edit && currentUser.isAdmin())
-  const statusButtons = [
-    {
-      id: "statusActiveButton",
-      value: Model.STATUS.ACTIVE,
-      label: "Active"
-    },
-    {
-      id: "statusInactiveButton",
-      value: Model.STATUS.INACTIVE,
-      label: "Inactive"
-    }
-  ]
 
   const approversFilters = {
     allAdvisorPositions: {
@@ -158,10 +141,6 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
           lng: values.lng,
           displayedCoordinate: values.displayedCoordinate
         }
-        const getRelatedObject = val => ({
-          uuid: val.uuid,
-          type: Location.relatedObjectType
-        })
 
         return (
           <div>
@@ -226,23 +205,23 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
                   setFieldTouched={setFieldTouched}
                 />
 
-                <FastField
-                  name="uploadAttachments"
-                  component={FieldHelper.SpecialField}
-                  label={Settings.fields.attachment.shortLabel}
-                  widget={
-                    <UploadAttachment
-                      edit={edit}
-                      childFunctionTrigger={childFunctionTrigger}
-                      saveRelatedObject={() =>
-                        takeRelatedUuid(relatedObjectUuid)}
-                      getRelatedObject={() => getRelatedObject(values)}
-                    />
-                  }
-                  onHandleBlur={() => {
-                    setFieldTouched("uploadAttachments", true, false)
-                  }}
-                />
+                {edit && (
+                  <Field
+                    name="uploadAttachments"
+                    component={FieldHelper.SpecialField}
+                    label={Settings.fields.attachment.shortLabel}
+                    widget={
+                      <UploadAttachment
+                        edit={edit}
+                        relatedObjectType={Location.relatedObjectType}
+                        relatedObjectUuid={values.uuid}
+                      />
+                    }
+                    onHandleBlur={() => {
+                      setFieldTouched("uploadAttachments", true, false)
+                    }}
+                  />
+                )}
               </Fieldset>
 
               <h3>Drag the marker below to set the location</h3>
@@ -351,10 +330,6 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
     navigate(-1)
   }
 
-  function takeRelatedUuid(relatedUuid) {
-    return relatedUuid
-  }
-
   function onSubmit(values, form) {
     return save(values)
       .then(response => onSubmitSuccess(response, values, form))
@@ -372,24 +347,20 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
         ? response[operation].uuid
         : initialValues.uuid
     })
-    setRelatedObjectUuid(location.uuid)
     // reset the form to latest values
     // to avoid unsaved changes prompt if it somehow becomes dirty
     form.resetForm({ values, isSubmitting: true })
-    setTimeout(() => {
-      if (!edit) {
-        navigate(Location.pathForEdit(location), { replace: true })
-      }
-      navigate(Location.pathFor(location), {
-        state: { success: "Location saved" }
-      })
-    }, 100)
+    if (!edit) {
+      navigate(Location.pathForEdit(location), { replace: true })
+    }
+    navigate(Location.pathFor(location), {
+      state: { success: "Location saved" }
+    })
   }
 
   function save(values) {
     const location = new Location(values).filterClientSideFields("customFields")
     location.customFields = customFieldsJSONString(values)
-    setChildFunctionTrigger(true)
     return API.mutation(edit ? GQL_UPDATE_LOCATION : GQL_CREATE_LOCATION, {
       location
     })
