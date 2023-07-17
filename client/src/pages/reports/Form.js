@@ -174,6 +174,7 @@ const ReportForm = ({
   const [showSensitiveInfo, setShowSensitiveInfo] = useState(ssi)
   const [saveError, setSaveError] = useState(null)
   const [autoSavedAt, setAutoSavedAt] = useState(null)
+  const [relatedObjectUuid, setRelatedObjectUuid] = useState()
   // We need the report tasks/attendees in order to be able to dynamically
   // update the yup schema for the selected tasks/attendees instant assessments
   const [reportTasks, setReportTasks] = useState(initialValues.tasks)
@@ -428,11 +429,6 @@ const ReportForm = ({
         const isFutureEngagement = Report.isFuture(values.engagementDate)
         const hasAssessments = values.engagementDate && !isFutureEngagement
         const relatedObject = hasAssessments ? values : {}
-
-        const getRelatedObject = val => ({
-          uuid: val.uuid,
-          type: Report.relatedObjectType
-        })
 
         return (
           <div className="report-form">
@@ -929,7 +925,7 @@ const ReportForm = ({
                 />
 
                 {!Settings.fields.attachment.featureDisabled && (
-                  <FastField
+                  <Field
                     name="uploadAttachments"
                     component={FieldHelper.SpecialField}
                     label={Settings.fields.attachment.shortLabel}
@@ -937,7 +933,8 @@ const ReportForm = ({
                       <UploadAttachment
                         edit={edit}
                         saveRelatedObject={saveCallback}
-                        getRelatedObject={() => getRelatedObject(values)}
+                        relatedObjectType={Report.relatedObjectType}
+                        relatedObjectUuid={values.uuid}
                       />
                     }
                     onHandleBlur={() => {
@@ -1228,7 +1225,10 @@ const ReportForm = ({
 
   function saveCallback() {
     return save(autoSaveSettings.current.values, false)
-      .then(response => response.uuid)
+      .then(response => {
+        autoSaveSettings.current.values = response
+        return response.uuid
+      })
       .catch(error => toast.error(`Report autosaving failed: ${error.message}`))
   }
 
@@ -1454,6 +1454,7 @@ const ReportForm = ({
     const variables = { report }
     return _saveReport(edit, variables, sendEmail).then(response => {
       const report = response[operation]
+      setRelatedObjectUuid(report.uuid)
       if (!canWriteAssessments) {
         // Skip updating assessments!
         return report
