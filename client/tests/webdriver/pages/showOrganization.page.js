@@ -17,6 +17,34 @@ class ShowOrganization extends Page {
     return browser.$('div[id="profile"')
   }
 
+  async getType() {
+    return browser.$('div[id="type"')
+  }
+
+  async getLeaders() {
+    return browser.$('div[id="fg-Leaders"')
+  }
+
+  async getLeaderPosition() {
+    return browser.$("div#Leaders span")
+  }
+
+  async getLeaderPositionPerson() {
+    return browser.$("div#Leaders span:nth-child(2)")
+  }
+
+  async getDeputies() {
+    return browser.$('div[id="fg-Deputies"')
+  }
+
+  async getDeputyPosition() {
+    return browser.$("div#Deputies span")
+  }
+
+  async getDeputyPositionPerson() {
+    return browser.$("div#Deputies span:nth-child(2)")
+  }
+
   async waitForAlertSuccessToLoad() {
     if (!(await (await this.getAlertSuccess()).isDisplayed())) {
       await (await this.getAlertSuccess()).waitForExist()
