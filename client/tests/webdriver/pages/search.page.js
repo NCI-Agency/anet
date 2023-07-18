@@ -9,6 +9,10 @@ class Search extends Page {
     return browser.$("div#tasks #tasks-search-results")
   }
 
+  async getFoundOrganizationTable() {
+    return browser.$("div#organizations #organizations-search-results")
+  }
+
   async getFoundReportTable() {
     return browser.$("div#reports .report-collection")
   }
@@ -21,6 +25,12 @@ class Search extends Page {
 
   async linkOfTaskFound(name) {
     return (await this.getFoundTaskTable()).$(
+      `//tbody/tr//a[contains(text(), "${name}")]`
+    )
+  }
+
+  async linkOfOrganizationFound(name) {
+    return (await this.getFoundOrganizationTable()).$(
       `//tbody/tr//a[contains(text(), "${name}")]`
     )
   }

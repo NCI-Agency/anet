@@ -9,6 +9,13 @@ export function getPositionsForRole(positions, role) {
     .map(pos => (
       <ListGroupItem key={pos.uuid}>
         <LinkTo modelType="Position" model={pos} />
+        {(pos.person && (
+          <LinkTo
+            modelType="Person"
+            model={pos.person}
+            style={{ marginLeft: 5 }}
+          />
+        )) || <span className="ms-1 text-danger">— Unfilled</span>}
       </ListGroupItem>
     ))
   if (!_isEmpty(positionList)) {
