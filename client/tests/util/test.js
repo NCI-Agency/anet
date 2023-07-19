@@ -6,7 +6,6 @@ const { By, until, Key } = webdriver
 const moment = require("moment")
 const _includes = require("lodash/includes")
 const _isRegExp = require("lodash/isRegExp")
-const chalk = require("chalk")
 
 let capabilities
 const testEnv =
@@ -26,20 +25,18 @@ if (testEnv === "local") {
 webdriver.promise.USE_PROMISE_MANAGER = false
 
 console.log(
-  chalk.bold.cyan(
-    `These tests assume that you have recently run ${path.resolve(
-      __dirname,
-      "..",
-      "..",
-      "..",
-      "insertBaseData-psql.sql"
-    )} on your database instance`
-  )
+  `These tests assume that you have recently run ${path.resolve(
+    __dirname,
+    "..",
+    "..",
+    "..",
+    "insertBaseData-psql.sql"
+  )} on your database instance`
 )
 
 function debugLog(...args) {
   if (process.env.DEBUG_LOG === "true") {
-    console.log(chalk.grey("[DEBUG]"), ...args)
+    console.debug("[DEBUG]", ...args)
   }
 }
 
@@ -185,7 +182,7 @@ test.beforeEach(t => {
 
   // For debugging purposes.
   t.context.waitForever = async() => {
-    console.log(chalk.red("Waiting forever so you can debug..."))
+    console.log("Waiting forever so you can debug...")
     await t.context.driver.wait(() => {})
   }
 
