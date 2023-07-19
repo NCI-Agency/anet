@@ -1,9 +1,13 @@
 import PropTypes from "prop-types"
 import React from "react"
 import Avatar from "react-avatar-edit"
+import Settings from "settings"
 
 // More info about this component: https://github.com/kirill3333/react-avatar
 const AvatarComponent = ({ onChangePreview }) => {
+  const imageTypes = Settings.fields.attachment.mimeTypes.filter(mimeType =>
+    mimeType.startsWith("image/")
+  )
   return (
     <span style={{ margin: "0 auto", display: "table", overflow: "scroll" }}>
       <Avatar
@@ -12,7 +16,8 @@ const AvatarComponent = ({ onChangePreview }) => {
         closeIconColor="white"
         backgroundColor="white"
         width="512"
-        imageWidth="512" // image
+        imageWidth="512"
+        mimeTypes={imageTypes}
       />
     </span>
   )
