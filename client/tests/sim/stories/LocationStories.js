@@ -12,11 +12,11 @@ async function populateLocation(location, user) {
         : fuzzy.withProbability(0.75)
           ? Location.LOCATION_TYPES.PRINCIPAL_LOCATION
           : Location.LOCATION_TYPES.ADVISOR_LOCATION,
-    name: () => faker.address.city(),
+    name: () => faker.location.city(),
     lat: () =>
-      parseFloat(faker.address.latitude(38.4862816432, 29.318572496, 10)),
+      parseFloat(faker.location.latitude(38.4862816432, 29.318572496, 10)),
     lng: () =>
-      parseFloat(faker.address.longitude(75.1580277851, 60.5284298033, 10))
+      parseFloat(faker.location.longitude(75.1580277851, 60.5284298033, 10))
   }
   populate(location, template)
     .status.always()

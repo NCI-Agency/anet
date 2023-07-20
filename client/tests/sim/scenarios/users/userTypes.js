@@ -28,7 +28,7 @@ async function getRandomUser(user, variables) {
   }
   let person
   for (let i = 0; i < Math.max(totalCount, 10); i++) {
-    positionsQuery.pageNum = faker.datatype.number({ max: totalCount - 1 })
+    positionsQuery.pageNum = faker.number.int({ max: totalCount - 1 })
     const positions = (
       await runGQL(specialUser, {
         query: `

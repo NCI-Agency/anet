@@ -91,7 +91,7 @@ async function listOrganizations(user) {
   ).data.organizationList.totalCount
   let organizations = null
   if (totalCount > 0) {
-    const random = faker.datatype.number({ max: totalCount - 1 })
+    const random = faker.number.int({ max: totalCount - 1 })
     organizations = (
       await runGQL(user, {
         query: `
@@ -121,7 +121,7 @@ async function listOrganizations(user) {
 /**
  * Creates a template to fill a position with random data
  *
- * @param {{uuid,*}} organizations The list of organizations to choose from
+ * @param organizations The list of organizations to choose from
  */
 function randomPositionTemplate(organizations) {
   // ensure organization type and position type are in line
@@ -149,7 +149,7 @@ function randomPositionTemplate(organizations) {
         organizations.filter(o => o.type === orgType)
       )
     },
-    name: () => faker.name.jobTitle(),
+    name: () => faker.person.jobTitle(),
     location: identity,
     code: identity,
     associatedPositions: identity
@@ -208,7 +208,7 @@ const _createPosition = async function(user) {
         : Location.LOCATION_TYPES.PRINCIPAL_LOCATION
   })
   const template = {
-    name: () => faker.name.jobTitle(),
+    name: () => faker.person.jobTitle(),
     code: () => faker.lorem.slug(),
     type: () => getPositionType(organization.type),
     status: () =>
@@ -473,7 +473,7 @@ const putPersonInPosition = async function(user) {
     console.debug("No positions to fill available")
     return "(nop)"
   } else if (!person) {
-    console.debug("No person available to fullfill the position")
+    console.debug("No person available to fulfill the position")
     return "(nop)"
   } else {
     console.debug(
@@ -789,7 +789,7 @@ async function getRandomPosition(user, variables) {
   ).data.positionList.totalCount
   let positions = null
   if (totalCount > 0) {
-    positionsQuery.pageNum = faker.datatype.number({ max: totalCount - 1 })
+    positionsQuery.pageNum = faker.number.int({ max: totalCount - 1 })
     positions = (
       await runGQL(user, {
         query: `
