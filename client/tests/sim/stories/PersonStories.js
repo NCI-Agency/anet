@@ -78,9 +78,16 @@ function randomPerson(role, status) {
     if (domainName.startsWith("*")) {
       domainName = faker.internet.domainWord() + domainName.slice(1)
     }
-    email = faker.internet.email(name.firstName, name.lastName, domainName)
+    email = faker.internet.email({
+      firstName: name.firstName,
+      lastName: name.lastName,
+      provider: domainName
+    })
   } else if (fuzzy.withProbability(0.25)) {
-    email = faker.internet.email(name.firstName, name.lastName)
+    email = faker.internet.email({
+      firstName: name.firstName,
+      lastName: name.lastName
+    })
   }
 
   return {
@@ -113,7 +120,10 @@ function modifiedPerson() {
     position: identity,
     emailAddress: (value, instance) => {
       const name = Person.parseFullName(instance.name)
-      return faker.internet.email(name.firstName, name.lastName)
+      return faker.internet.email({
+        firstName: name.firstName,
+        lastName: name.lastName
+      })
     }
   }
 }
@@ -167,7 +177,7 @@ const updatePerson = async function(user) {
   if (totalCount === 0) {
     return null
   }
-  const random = faker.datatype.number({ max: totalCount - 1 })
+  const random = faker.number.int({ max: totalCount - 1 })
   const people = (
     await runGQL(user, {
       query: `
@@ -254,7 +264,7 @@ const _deletePerson = async function(user) {
   }
   let person0
   for (let i = 0; i < Math.max(totalCount, 10); i++) {
-    const random = faker.datatype.number({ max: totalCount - 1 })
+    const random = faker.number.int({ max: totalCount - 1 })
     const people = (
       await runGQL(user, {
         query: `

@@ -18,7 +18,7 @@ const services = [
   "Support Service",
   "Logistics & Transport Service",
   "Marketing & Communication Service",
-  "Compliciance Service",
+  "Compliance Service",
   "Human Resources Service",
   "Legal Service",
   "Commissioning Service",
@@ -163,7 +163,7 @@ const dryRun = false
 async function gqlCreateOrganization(user, org) {
   if (dryRun) {
     return {
-      uuid: faker.datatype.uuid()
+      uuid: faker.string.uuid()
     }
   } else {
     return (
@@ -204,7 +204,7 @@ const createOrganization = async function(user, parentOrg, path) {
   }
 
   return {
-    uuid: faker.datatype.uuid()
+    uuid: faker.string.uuid()
   }
 
   // return (await runGQL(user,
