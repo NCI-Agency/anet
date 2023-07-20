@@ -6,23 +6,23 @@ class ShowOrganization extends Page {
   }
 
   async getLongName() {
-    return browser.$('div[id="longName"')
+    return browser.$('div[id="longName"]')
   }
 
   async getLocation() {
-    return browser.$('div[id="location"')
+    return browser.$('div[id="location"]')
   }
 
   async getProfile() {
-    return browser.$('div[id="profile"')
+    return browser.$('div[id="profile"]')
   }
 
   async getType() {
-    return browser.$('div[id="type"')
+    return browser.$('div[id="type"]')
   }
 
   async getLeaders() {
-    return browser.$('div[id="fg-Leaders"')
+    return browser.$('div[id="fg-Leaders"]')
   }
 
   async getLeaderPosition() {
@@ -34,7 +34,7 @@ class ShowOrganization extends Page {
   }
 
   async getDeputies() {
-    return browser.$('div[id="fg-Deputies"')
+    return browser.$('div[id="fg-Deputies"]')
   }
 
   async getDeputyPosition() {

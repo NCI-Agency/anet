@@ -2,15 +2,15 @@ import Page from "./page"
 
 class ShowTask extends Page {
   async getShortName() {
-    return browser.$('div[id="shortName"')
+    return browser.$('div[id="shortName"]')
   }
 
   async getLongName() {
-    return browser.$('div[id="longName"')
+    return browser.$('div[id="longName"]')
   }
 
   async getParentTask() {
-    return browser.$('div[id="parentTask"')
+    return browser.$('div[id="parentTask"]')
   }
 
   async getParentTaskField() {
@@ -18,7 +18,7 @@ class ShowTask extends Page {
   }
 
   async getChildrenTasks() {
-    return browser.$('div[id="subEfforts"')
+    return browser.$('div[id="subEfforts"]')
   }
 
   async getChildrenTasksField() {
@@ -36,7 +36,7 @@ class ShowTask extends Page {
   }
 
   async getDescription() {
-    return browser.$('div[id="description"')
+    return browser.$('div[id="description"]')
   }
 
   async getAssessmentsTable(assessmentKey, recurrence) {
