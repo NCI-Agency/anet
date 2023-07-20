@@ -1,4 +1,4 @@
-import { faker } from "@faker-js/faker"
+import { allFakers, allLocales, faker } from "@faker-js/faker"
 import Model from "components/Model"
 import { countries } from "countries-list"
 import { getAlpha2Code } from "i18n-iso-countries"
@@ -8,7 +8,7 @@ import { fuzzy, identity, populate, runGQL } from "../simutils"
 import afghanFirstNames from "./afghanFirstNames"
 import afghanSurnames from "./afghanSurnames"
 
-const availableLocales = Object.keys(faker.locales)
+const availableLocales = Object.keys(allLocales)
 const availableRanks = Settings.fields.person.ranks.map(r => r.value)
 
 function principalName(_gender) {
@@ -23,14 +23,12 @@ function principalName(_gender) {
 }
 
 function advisorName(gender, locale) {
-  const oldLocale = faker.locale
-  faker.locale = locale
+  const localeFaker = allFakers[locale]
   const genderInt = gender === "MALE" ? 0 : 1
   const name = {
-    firstName: faker.name.firstName(genderInt),
-    lastName: faker.name.lastName(genderInt)
+    firstName: localeFaker.person.firstName(genderInt),
+    lastName: localeFaker.person.lastName(genderInt)
   }
-  faker.locale = oldLocale
   return name
 }
 
