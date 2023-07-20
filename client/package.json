@@ -193,6 +193,7 @@
     "start": "export SERVER_URL=${SERVER_URL:-'http://localhost:8080'} DEV_PORT=${DEV_PORT:-3000} ; NODE_ENV=development webpack serve --config config/webpack.client.dev.js",
     "lint": "NODE_ENV=development eslint '.??*.js' '.storybook/*.js' '**/*.js'",
     "lint:fix": "yarn run lint --fix",
+    "prettier:check": "NODE_ENV=development prettier-eslint --list-different '.??*.js' '.storybook/*.js' '**/*.js'",
     "prettier:format": "NODE_ENV=development prettier-eslint --write '.??*.js' '.storybook/*.js' '**/*.js'",
     "test": "echo 'Run \"test-all\" to execute all client-side tests, or pick a specific test target: \"test-jest\", \"test-wdio\", \"test-wdio-ie\", \"test-e2e\".' ; exit 1",
     "test-all": "yarn run test-jest && yarn run test-wdio && yarn run test-wdio-ie && yarn run test-e2e",

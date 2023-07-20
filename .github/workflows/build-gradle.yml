@@ -25,6 +25,7 @@ jobs:
         fetch-depth: 0
     - uses: ./.github/actions/build-cache
     - run: ./gradlew check -x test
+    - run: ./gradlew prettierCheck
     - run: ./gradlew yarn_run_lint
     - run: ./gradlew jar
 
