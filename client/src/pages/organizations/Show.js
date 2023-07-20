@@ -26,9 +26,12 @@ import ReportCollection from "components/ReportCollection"
 import RichTextEditor from "components/RichTextEditor"
 import SubNav from "components/SubNav"
 import { Field, Form, Formik } from "formik"
+import _isEmpty from "lodash/isEmpty"
 import { Location, Organization, Report } from "models"
+import { PositionRole } from "models/Position"
 import { orgTour } from "pages/HopscotchTour"
 import pluralize from "pluralize"
+import { getPositionsForRole } from "positionUtil"
 import React, { useContext, useState } from "react"
 import {
   Badge,
@@ -364,6 +367,22 @@ const OrganizationShow = ({ pageDispatchers }) => {
                   humanValue={Organization.humanNameOfType}
                 />
 
+                {renderLeadingPositions(
+                  organization.positions,
+                  PositionRole.LEADER.toString(),
+                  pluralize(
+                    utils.titleCase(PositionRole.LEADER.humanNameOfRole())
+                  )
+                )}
+
+                {renderLeadingPositions(
+                  organization.positions,
+                  PositionRole.DEPUTY.toString(),
+                  pluralize(
+                    utils.titleCase(PositionRole.DEPUTY.humanNameOfRole())
+                  )
+                )}
+
                 <LongNameWithLabel
                   dictProps={orgSettings.longName}
                   name="longName"
@@ -512,6 +531,20 @@ const OrganizationShow = ({ pageDispatchers }) => {
       }}
     </Formik>
   )
+
+  function renderLeadingPositions(positions, role, label) {
+    const positionList = getPositionsForRole(positions, role)
+    if (!_isEmpty(positionList)) {
+      return (
+        <Field
+          name={label}
+          component={FieldHelper.ReadonlyField}
+          label={label}
+          humanValue={positionList}
+        />
+      )
+    }
+  }
 }
 
 OrganizationShow.propTypes = {

@@ -3,13 +3,18 @@ import API from "api"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import Model from "components/Model"
+import _isEmpty from "lodash/isEmpty"
 import { Organization } from "models"
+import { PositionRole } from "models/Position"
 import OrganizationLaydown from "pages/organizations/Laydown"
 import OrganizationTasks from "pages/organizations/OrganizationTasks"
+import pluralize from "pluralize"
+import { getPositionsForRole } from "positionUtil"
 import PropTypes from "prop-types"
 import React from "react"
 import { ListGroup, ListGroupItem } from "react-bootstrap"
 import Settings from "settings"
+import utils from "utils"
 
 const GQL_LOCATION_FIELDS = `
   fragment locationFields on Location {
@@ -131,6 +136,18 @@ const OrganizationPreview = ({ className, uuid }) => {
           value={Organization.humanNameOfType(organization.type)}
         />
 
+        {renderLeadingPositions(
+          organization.positions,
+          PositionRole.LEADER.toString(),
+          pluralize(utils.titleCase(PositionRole.LEADER.humanNameOfRole()))
+        )}
+
+        {renderLeadingPositions(
+          organization.positions,
+          PositionRole.DEPUTY.toString(),
+          pluralize(utils.titleCase(PositionRole.DEPUTY.humanNameOfRole()))
+        )}
+
         <PreviewField
           label={orgSettings.longName.label}
           value={organization.longName}
@@ -186,6 +203,13 @@ const OrganizationPreview = ({ className, uuid }) => {
       )}
     </div>
   )
+
+  function renderLeadingPositions(positions, role, label) {
+    const positionList = getPositionsForRole(positions, role)
+    if (!_isEmpty(positionList)) {
+      return <PreviewField label={label} value={positionList} />
+    }
+  }
 }
 
 OrganizationPreview.propTypes = {
