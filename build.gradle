@@ -790,6 +790,10 @@ node {
 	download = true
 }
 
+task prettierCheck(type: YarnTask) {
+	args = ["run", "prettier:check"]
+}
+
 task distRpm(dependsOn: "jpackageImage", type: Rpm) {
 	release = '0'
 	prefix '/opt' // Relocations: /opt
