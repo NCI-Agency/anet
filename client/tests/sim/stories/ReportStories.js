@@ -44,7 +44,7 @@ async function populateReport(report, user, args) {
   })
   async function getAttendees() {
     const reportPeople = []
-    const nbOfAdvisors = faker.datatype.number({ min: 1, max: 5 })
+    const nbOfAdvisors = faker.number.int({ min: 1, max: 5 })
     let primary = true
     for (let i = 0; i < nbOfAdvisors; i++) {
       const advisor = await getRandomPerson(
@@ -63,7 +63,7 @@ async function populateReport(report, user, args) {
       }
     }
 
-    const nbOfPrincipals = faker.datatype.number({ min: 1, max: 5 })
+    const nbOfPrincipals = faker.number.int({ min: 1, max: 5 })
     primary = true
     for (let i = 0; i < nbOfPrincipals; i++) {
       const principal = await getRandomPerson(
@@ -94,7 +94,7 @@ async function populateReport(report, user, args) {
   const reportPeople = await getAttendees()
   async function getTasks() {
     const reportTasks = []
-    const nbOfTasks = faker.datatype.number({ min: 1, max: 3 })
+    const nbOfTasks = faker.number.int({ min: 1, max: 3 })
 
     for (let i = 0; i < nbOfTasks; i++) {
       reportTasks.push(
@@ -105,7 +105,7 @@ async function populateReport(report, user, args) {
     return [..._uniqWith(reportTasks, _isEqual)]
   }
   const tasks = await getTasks()
-  const engagementDate = faker.date.recent(365)
+  const engagementDate = faker.date.recent({ days: 365 })
   const state = fuzzy.withProbability(0.05)
     ? Report.STATE.CANCELLED
     : (args && args.state) || Report.STATE.DRAFT
@@ -124,7 +124,7 @@ async function populateReport(report, user, args) {
   const template = {
     intent: () => faker.lorem.paragraph(),
     engagementDate: engagementDate.toISOString(),
-    duration: () => faker.datatype.number({ min: 1, max: 480 }),
+    duration: () => faker.number.int({ min: 1, max: 480 }),
     cancelledReason,
     atmosphere: () =>
       faker.helpers.arrayElement(["POSITIVE", "NEUTRAL", "NEGATIVE"]),
@@ -207,7 +207,7 @@ const updateDraftReport = async function(user) {
   if (totalCount === 0) {
     return null
   }
-  const random = faker.datatype.number({ max: totalCount - 1 })
+  const random = faker.number.int({ max: totalCount - 1 })
   const reports = (
     await runGQL(user, {
       query: `
@@ -278,7 +278,7 @@ const submitDraftReport = async function(user) {
   if (totalCount === 0) {
     return null
   }
-  const random = faker.datatype.number({ max: totalCount - 1 })
+  const random = faker.number.int({ max: totalCount - 1 })
   const reports = (
     await runGQL(user, {
       query: `
@@ -331,7 +331,7 @@ const approveReport = async function(user) {
   if (totalCount === 0) {
     return null
   }
-  const random = faker.datatype.number({ max: totalCount - 1 })
+  const random = faker.number.int({ max: totalCount - 1 })
   const reports = (
     await runGQL(user, {
       query: `

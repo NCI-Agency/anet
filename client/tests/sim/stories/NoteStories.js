@@ -56,7 +56,7 @@ export async function getRandomObject(
   }
   let attempt = 0
   while (attempt < 10) {
-    objectQuery.pageNum = faker.datatype.number({ max: totalCount - 1 })
+    objectQuery.pageNum = faker.number.int({ max: totalCount - 1 })
     const list = (
       await runGQL(user, {
         query: `

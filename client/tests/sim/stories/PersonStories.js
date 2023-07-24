@@ -1,4 +1,4 @@
-import { faker } from "@faker-js/faker"
+import { allFakers, allLocales, faker } from "@faker-js/faker"
 import Model from "components/Model"
 import { countries } from "countries-list"
 import { getAlpha2Code } from "i18n-iso-countries"
@@ -8,7 +8,7 @@ import { fuzzy, identity, populate, runGQL } from "../simutils"
 import afghanFirstNames from "./afghanFirstNames"
 import afghanSurnames from "./afghanSurnames"
 
-const availableLocales = Object.keys(faker.locales)
+const availableLocales = Object.keys(allLocales)
 const availableRanks = Settings.fields.person.ranks.map(r => r.value)
 
 function principalName(_gender) {
@@ -23,14 +23,12 @@ function principalName(_gender) {
 }
 
 function advisorName(gender, locale) {
-  const oldLocale = faker.locale
-  faker.locale = locale
+  const localeFaker = allFakers[locale]
   const genderInt = gender === "MALE" ? 0 : 1
   const name = {
-    firstName: faker.name.firstName(genderInt),
-    lastName: faker.name.lastName(genderInt)
+    firstName: localeFaker.person.firstName(genderInt),
+    lastName: localeFaker.person.lastName(genderInt)
   }
-  faker.locale = oldLocale
   return name
 }
 
@@ -80,9 +78,16 @@ function randomPerson(role, status) {
     if (domainName.startsWith("*")) {
       domainName = faker.internet.domainWord() + domainName.slice(1)
     }
-    email = faker.internet.email(name.firstName, name.lastName, domainName)
+    email = faker.internet.email({
+      firstName: name.firstName,
+      lastName: name.lastName,
+      provider: domainName
+    })
   } else if (fuzzy.withProbability(0.25)) {
-    email = faker.internet.email(name.firstName, name.lastName)
+    email = faker.internet.email({
+      firstName: name.firstName,
+      lastName: name.lastName
+    })
   }
 
   return {
@@ -115,7 +120,10 @@ function modifiedPerson() {
     position: identity,
     emailAddress: (value, instance) => {
       const name = Person.parseFullName(instance.name)
-      return faker.internet.email(name.firstName, name.lastName)
+      return faker.internet.email({
+        firstName: name.firstName,
+        lastName: name.lastName
+      })
     }
   }
 }
@@ -169,7 +177,7 @@ const updatePerson = async function(user) {
   if (totalCount === 0) {
     return null
   }
-  const random = faker.datatype.number({ max: totalCount - 1 })
+  const random = faker.number.int({ max: totalCount - 1 })
   const people = (
     await runGQL(user, {
       query: `
@@ -256,7 +264,7 @@ const _deletePerson = async function(user) {
   }
   let person0
   for (let i = 0; i < Math.max(totalCount, 10); i++) {
-    const random = faker.datatype.number({ max: totalCount - 1 })
+    const random = faker.number.int({ max: totalCount - 1 })
     const people = (
       await runGQL(user, {
         query: `
