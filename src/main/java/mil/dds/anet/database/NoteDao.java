@@ -22,6 +22,7 @@ import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Note;
 import mil.dds.anet.beans.Note.NoteType;
 import mil.dds.anet.beans.NoteRelatedObject;
+import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Report;
@@ -435,6 +436,7 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
         final NoteRelatedObject nro = noteRelatedObjects.get(0);
         Set<String> responsibleTasksUuids = null;
         Set<String> associatedPositionsUuids = null;
+        Set<String> administratedPositionsUuids = null;
         if (checkTask(nro)) {
           if (hasTaskAssessmentPermission(responsibleTasksUuids, user, nro)) {
             return true;
@@ -447,8 +449,18 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
             // This position is among the associated positions of the user
             return true;
           }
+        } else if (checkOrganization(nro)) {
+          administratedPositionsUuids =
+              lazyLoadOrganizationAdministrated(administratedPositionsUuids, user);
+          final Position position = engine.getPositionDao()
+              .getCurrentPositionForPerson(engine.getContext(), nro.getRelatedObjectUuid()).join();
+          if (administratedPositionsUuids.contains(DaoUtils.getUuid(position))) {
+            // This position is among the administrative positions of the organization
+            return true;
+          }
         } else {
-          throw new IllegalArgumentException("Periodic assessment must link to person or task");
+          throw new IllegalArgumentException(
+              "Periodic assessment must link to person, organization or task");
         }
         break;
     }
@@ -472,6 +484,10 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
 
   private boolean checkTask(NoteRelatedObject nro) {
     return TaskDao.TABLE_NAME.equals(nro.getRelatedObjectType());
+  }
+
+  private boolean checkOrganization(NoteRelatedObject nro) {
+    return OrganizationDao.TABLE_NAME.equals(nro.getRelatedObjectType());
   }
 
   private void checkAssessmentRecurrence(final Note note, final String recurrenceString) {
@@ -532,6 +548,22 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
     final List<Position> associatedPositions =
         position.loadAssociatedPositions(AnetObjectEngine.getInstance().getContext()).join();
     return associatedPositions.stream().map(ap -> ap.getUuid()).collect(Collectors.toSet());
+  }
+
+  private Set<String> lazyLoadOrganizationAdministrated(
+      final Set<String> administratedPositionsUuids, final Person user) {
+    if (administratedPositionsUuids != null) {
+      // Already loaded
+      return administratedPositionsUuids;
+    }
+    final Position position = DaoUtils.getPosition(user);
+    if (position == null) {
+      return Collections.emptySet();
+    }
+    // Load
+    final List<Organization> organizationAdministrated =
+        position.loadOrganizationsAdministrated(AnetObjectEngine.getInstance().getContext()).join();
+    return organizationAdministrated.stream().map(ap -> ap.getUuid()).collect(Collectors.toSet());
   }
 
   private void updateSubscriptions(int numRows, Note obj) {
