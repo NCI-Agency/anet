@@ -313,6 +313,7 @@ fields:
       - image/jpeg
       - image/jpg
       - image/png
+      - image/webp
       - text/plain
 
   report:
