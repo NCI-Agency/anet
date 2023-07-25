@@ -174,7 +174,7 @@ const ReportForm = ({
   const [showSensitiveInfo, setShowSensitiveInfo] = useState(ssi)
   const [saveError, setSaveError] = useState(null)
   const [autoSavedAt, setAutoSavedAt] = useState(null)
-  const [relatedObjectUuid, setRelatedObjectUuid] = useState()
+  const [attachmentAdd, setAttachmentAdd] = useState(false)
   // We need the report tasks/attendees in order to be able to dynamically
   // update the yup schema for the selected tasks/attendees instant assessments
   const [reportTasks, setReportTasks] = useState(initialValues.tasks)
@@ -306,6 +306,11 @@ const ReportForm = ({
             autosaveHandler,
             autoSaveSettings.current.autoSaveTimeout.asMilliseconds()
           )
+        }
+
+        if (attachmentAdd) {
+          autoSaveSettings.current.dirty = true
+          autoSave({ setFieldValue, setFieldTouched, resetForm })
         }
 
         if (!validateFieldDebounced) {
@@ -927,7 +932,7 @@ const ReportForm = ({
                     widget={
                       <UploadAttachment
                         edit={edit}
-                        saveRelatedObject={saveCallback}
+                        autoSaveTrigger={autoSaveTrigger}
                         relatedObjectType={Report.relatedObjectType}
                         relatedObjectUuid={values.uuid}
                       />
@@ -1217,13 +1222,8 @@ const ReportForm = ({
     setShowSensitiveInfo(!showSensitiveInfo)
   }
 
-  function saveCallback() {
-    return save(autoSaveSettings.current.values, false)
-      .then(response => {
-        autoSaveSettings.current.values = response
-        return response.uuid
-      })
-      .catch(error => toast.error(`Report autosaving failed: ${error.message}`))
+  function autoSaveTrigger() {
+    setAttachmentAdd(true)
   }
 
   function autoSave(form) {
@@ -1262,6 +1262,7 @@ const ReportForm = ({
           toast.success(
             `Your ${getReportType(newValues)} has been automatically saved`
           )
+          setAttachmentAdd(false)
           autoSaveSettings.current.dirty = false
           // And re-schedule the auto-save timer
           autoSaveSettings.current.timeoutId = window.setTimeout(
@@ -1448,7 +1449,7 @@ const ReportForm = ({
     const variables = { report }
     return _saveReport(edit, variables, sendEmail).then(response => {
       const report = response[operation]
-      setRelatedObjectUuid(report.uuid)
+      values.uuid = report.uuid
       if (!canWriteAssessments) {
         // Skip updating assessments!
         return report

@@ -6,7 +6,7 @@ import axios from "axios"
 import Messages from "components/Messages"
 import { Attachment } from "models"
 import PropTypes from "prop-types"
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { toast } from "react-toastify"
 import Settings from "settings"
 import "./Attachment.css"
@@ -27,20 +27,13 @@ const GQL_UPDATE_ATTACHMENT = gql`
 
 const UploadAttachment = ({
   edit,
-  saveRelatedObject,
+  autoSaveTrigger,
   relatedObjectType,
   relatedObjectUuid
 }) => {
   const [error, setError] = useState(null)
   const [remove, setRemove] = useState(false)
   const [uploadedList, setUploadedList] = useState([])
-  const relatedObjectUuidRef = useRef(relatedObjectUuid)
-
-  useEffect(() => {
-    if (relatedObjectUuid !== relatedObjectUuidRef.current) {
-      relatedObjectUuidRef.current = relatedObjectUuid
-    }
-  }, [relatedObjectUuidRef, relatedObjectUuid])
 
   useEffect(() => {
     // In the edit mode the base page entity (report, location, etc.) always has an uuid
@@ -63,13 +56,16 @@ const UploadAttachment = ({
 
   const attachmentSave = async(e, relatedUuid) => {
     const file = e.target.files[0]
+    if (!file) {
+      return
+    }
     const selectedAttachment = new Attachment({
       fileName: file.name,
       mimeType: file.type,
       contentLength: file.size,
       attachmentRelatedObjects: [
         {
-          relatedObjectType: relatedObjectType,
+          relatedObjectType,
           relatedObjectUuid: relatedUuid
         }
       ]
@@ -114,7 +110,8 @@ const UploadAttachment = ({
           .catch(error => {
             toast.dismiss(toastId)
             selectedAttachment.contentLength = -1
-            selectedAttachment.attachmentRelatedObjects[0].relatedObjectUuid = null
+            selectedAttachment.attachmentRelatedObjects[0].relatedObjectUuid =
+              null
             setUploadedList(current => [...current, selectedAttachment])
             toast.error(
               `Attachment content upload failed for ${
@@ -140,10 +137,20 @@ const UploadAttachment = ({
 
   const handleFileEvent = async e => {
     // No need to save again if base entity has been created
-    if (saveRelatedObject && !relatedObjectUuidRef.current) {
-      relatedObjectUuidRef.current = await saveRelatedObject()
+    if (autoSaveTrigger && !relatedObjectUuid) {
+      relatedObjectUuid = await autoSaveTrigger()
     }
-    await attachmentSave(e, relatedObjectUuidRef.current)
+    await attachmentSave(e, relatedObjectUuid).catch(error => {
+      toast.error(
+        `Attachment content upload failed for ${e.fileName}: ${
+          error.response?.data?.error || error.message
+        }`,
+        {
+          autoClose: false,
+          closeOnClick: true
+        }
+      )
+    })
   }
 
   return (
@@ -198,7 +205,7 @@ const UploadAttachment = ({
 
 UploadAttachment.propTypes = {
   edit: PropTypes.bool,
-  saveRelatedObject: PropTypes.func,
+  autoSaveTrigger: PropTypes.func,
   relatedObjectType: PropTypes.string,
   relatedObjectUuid: PropTypes.string
 }

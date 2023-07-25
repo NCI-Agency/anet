@@ -1154,15 +1154,6 @@ INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "
   FROM reports r
   WHERE r.intent = 'A test report from Arthur';
 
--- Add attachments for locations
-SELECT ('''' || uuid || '''') AS "authorUuid" FROM people WHERE name = 'DMIN, Arthur' \gset
-INSERT INTO attachments (uuid, "authorUuid", "fileName", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt")
-	VALUES ('f7cd5b02-ef73-4ee8-814b-c5a7a916685d', :authorUuid, 'attachLocation', 'image/jpeg', null, 1000, 'We can add attachment for Locations', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "relatedObjectUuid")
-  SELECT 'f7cd5b02-ef73-4ee8-814b-c5a7a916685d', 'locations', loc.uuid
-  FROM locations loc
-  WHERE loc.name = 'Antarctica';
-
 -- Update the full-text indexes
 REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_fts_authorizationGroups";
 REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_fts_locations";

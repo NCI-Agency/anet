@@ -311,6 +311,7 @@ fields:
     mimeTypes:
       - application/pdf
       - image/jpeg
+      - image/jpg
       - image/png
       - image/webp
       - text/plain

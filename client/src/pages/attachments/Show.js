@@ -85,7 +85,7 @@ const AttachmentImage = ({
 }) => {
   const image = (
     <div
-      className="image-preview info-show card-image attachment-image"
+      className="image-preview info-show card-image attachment-image h-100"
       style={{
         backgroundSize,
         backgroundImage: `url(${backgroundImage})`
@@ -205,6 +205,13 @@ const AttachmentShow = ({ pageDispatchers }) => {
                       component={FieldHelper.ReadonlyField}
                     />
                     <Field
+                      name="contentLength"
+                      component={FieldHelper.ReadonlyField}
+                      humanValue={utils.humanReadableFileSize(
+                        attachment.contentLength
+                      )}
+                    />
+                    <Field
                       name="owner"
                       component={FieldHelper.ReadonlyField}
                       humanValue={
@@ -212,15 +219,15 @@ const AttachmentShow = ({ pageDispatchers }) => {
                       }
                     />
                     <Field
-                      name="mimeType"
+                      name="description"
                       component={FieldHelper.ReadonlyField}
+                      humanValue={
+                        <RichTextEditor readOnly value={values.description} />
+                      }
                     />
                     <Field
-                      name="contentLength"
+                      name="mimeType"
                       component={FieldHelper.ReadonlyField}
-                      humanValue={utils.humanReadableFileSize(
-                        attachment.contentLength
-                      )}
                     />
                     <Field
                       name="classification"
@@ -234,13 +241,6 @@ const AttachmentShow = ({ pageDispatchers }) => {
                         <AttachmentRelatedObjectsTable
                           relatedObjects={values.attachmentRelatedObjects}
                         />
-                      }
-                    />
-                    <Field
-                      name="description"
-                      component={FieldHelper.ReadonlyField}
-                      humanValue={
-                        <RichTextEditor readOnly value={values.description} />
                       }
                     />
                   </Col>

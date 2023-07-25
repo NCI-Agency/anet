@@ -79,8 +79,11 @@ public class AttachmentResource {
 
     }
     assertAllowedMimeType(attachment.getMimeType());
-    assertAllowedClassification(attachment.getClassification());
 
+    if (attachment.getClassification() != null) {
+      // if the classification is set, control if the classification is valid
+      assertAllowedClassification(attachment.getClassification());
+    }
 
     attachment.setAuthorUuid(DaoUtils.getUuid(user));
     attachment = dao.insert(attachment);
@@ -226,7 +229,7 @@ public class AttachmentResource {
 
   private void assertAllowedClassification(final String classificationKey) {
     final Map<String, String> allowedClassifications = getAllowedClassifications();
-    if (!allowedClassifications.containsKey(classificationKey) && classificationKey != null) {
+    if (!allowedClassifications.containsKey(classificationKey)) {
       throw new WebApplicationException("Classification is not allowed", Status.BAD_REQUEST);
     }
   }
