@@ -87,7 +87,7 @@ public abstract class AbstractPositionSearcher
             "organizations", "\"parentOrgUuid\"", "orgUuid", query.getOrganizationUuid(),
             RecurseStrategy.CHILDREN.equals(query.getOrgRecurseStrategy()));
       } else {
-        qb.addStringEqualsClause("orgUuid", "positions.\"organizationUuid\"",
+        qb.addInListClause("orgUuid", "positions.\"organizationUuid\"",
             query.getOrganizationUuid());
       }
     }

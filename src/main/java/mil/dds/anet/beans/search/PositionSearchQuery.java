@@ -14,7 +14,7 @@ public class PositionSearchQuery extends SubscribableObjectSearchQuery<PositionS
   Boolean matchPersonName;
   @GraphQLQuery
   @GraphQLInputField
-  String organizationUuid;
+  List<String> organizationUuid;
   @GraphQLQuery
   @GraphQLInputField
   RecurseStrategy orgRecurseStrategy;
@@ -50,11 +50,11 @@ public class PositionSearchQuery extends SubscribableObjectSearchQuery<PositionS
     this.matchPersonName = matchPersonName;
   }
 
-  public String getOrganizationUuid() {
+  public List<String> getOrganizationUuid() {
     return organizationUuid;
   }
 
-  public void setOrganizationUuid(String orgUuid) {
+  public void setOrganizationUuid(List<String> orgUuid) {
     this.organizationUuid = orgUuid;
   }
 
@@ -143,6 +143,9 @@ public class PositionSearchQuery extends SubscribableObjectSearchQuery<PositionS
     final PositionSearchQuery clone = (PositionSearchQuery) super.clone();
     if (type != null) {
       clone.setType(new ArrayList<>(type));
+    }
+    if (organizationUuid != null) {
+      clone.setOrganizationUuid(new ArrayList<>(organizationUuid));
     }
     return clone;
   }
