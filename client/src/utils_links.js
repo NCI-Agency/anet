@@ -24,7 +24,8 @@ const ENTITY_TYPE_TO_RELATED_OBJECT_TYPE = flip(
 )
 
 export function getEntityInfoFromUrl(url) {
-  const urnMatch = url.match(/^urn:anet:([^:]*):(.*)$/)
+  const urnMatch =
+    url.match(/^urn:anet:([^:]*):(.*)$/) || url.match(/^\/([^.]*)\/(.*)$/)
   const entityType = RELATED_OBJECT_TYPE_TO_ENTITY_TYPE[urnMatch?.[1]]
   const entityUuid = urnMatch?.[2]
   if (entityType && UUID_REGEX.test(entityUuid)) {
