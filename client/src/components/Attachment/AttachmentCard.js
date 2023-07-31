@@ -20,9 +20,10 @@ const GQL_DELETE_ATTACHMENT = gql`
 const AttachmentCard = ({
   attachment,
   edit,
-  remove,
+  removeable,
+  erase,
   setError,
-  setRemove,
+  setErase,
   uploadedList,
   setUploadedList
 }) => {
@@ -75,7 +76,9 @@ const AttachmentCard = ({
               <ConfirmDestructive
                 onConfirm={() => deleteAttachment(attachment)}
                 objectType="attachment"
+                removeable={removeable}
                 objectDisplay={"#" + attachment.uuid}
+                objectOwner={attachment.author?.uuid}
                 title="Delete attachment"
                 variant="outline-danger"
                 buttonSize="xs"
@@ -96,8 +99,8 @@ const AttachmentCard = ({
     API.mutation(GQL_DELETE_ATTACHMENT, { uuid: attachment.uuid })
       .then(data => {
         setUploadedList(newAttachments)
-        if (!remove) {
-          setRemove(true)
+        if (!erase) {
+          setErase(true)
         }
         toast.success(
           `Your attachment ${attachment.fileName} has been successfully deleted`
@@ -112,16 +115,17 @@ const AttachmentCard = ({
 AttachmentCard.propTypes = {
   attachment: PropTypes.object,
   edit: PropTypes.bool,
-  remove: PropTypes.bool,
+  removeable: PropTypes.bool,
+  erase: PropTypes.bool,
   setError: PropTypes.func,
-  setRemove: PropTypes.func,
+  setErase: PropTypes.func,
   uploadedList: PropTypes.array,
   setUploadedList: PropTypes.func
 }
 
 AttachmentCard.defaultProps = {
   edit: true,
-  remove: undefined
+  erase: undefined
 }
 
 export default AttachmentCard

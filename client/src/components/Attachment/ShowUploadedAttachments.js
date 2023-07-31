@@ -4,19 +4,19 @@ import React, { useEffect, useState } from "react"
 import "./Attachment.css"
 import AttachmentCard from "./AttachmentCard"
 
-const ShowUploadedAttachments = ({ attachmentList }) => {
+const ShowUploadedAttachments = ({ attachmentList, removeable }) => {
   const [uploadedList, setUploadedList] = useState([])
   const [error, setError] = useState(null)
-  const [remove, setRemove] = useState(false)
+  const [erase, setErase] = useState(false)
 
   useEffect(() => {
     if (attachmentList.length > 0) {
       setUploadedList(attachmentList)
     }
-    if (remove) {
+    if (erase) {
       setUploadedList(uploadedList)
     }
-  }, [attachmentList, uploadedList, remove])
+  }, [attachmentList, uploadedList, erase])
 
   return (
     <>
@@ -25,9 +25,10 @@ const ShowUploadedAttachments = ({ attachmentList }) => {
         <AttachmentCard
           attachment={attachment}
           key={index}
-          remove={remove}
+          erase={erase}
+          removeable={removeable}
           setError={setError}
-          setRemove={setRemove}
+          setErase={setErase}
           uploadedList={uploadedList}
           setUploadedList={setUploadedList}
         />
@@ -37,7 +38,8 @@ const ShowUploadedAttachments = ({ attachmentList }) => {
 }
 
 ShowUploadedAttachments.propTypes = {
-  attachmentList: PropTypes.array
+  attachmentList: PropTypes.array,
+  removeable: PropTypes.bool
 }
 
 export default ShowUploadedAttachments

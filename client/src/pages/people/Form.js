@@ -69,6 +69,8 @@ const PersonForm = ({
   const navigate = useNavigate()
   const confirmHasReplacementButton = useRef(null)
   const [error, setError] = useState(null)
+  const removeFunc = true
+
   const [currentAvatar, setCurrentAvatar] = useState(initialValues.avatar)
   const [showWrongPersonModal, setShowWrongPersonModal] = useState(false)
   const [wrongPersonOptionValue, setWrongPersonOptionValue] = useState(null)
@@ -521,6 +523,7 @@ const PersonForm = ({
                       widget={
                         <UploadAttachment
                           edit={edit}
+                          removeable={removeFunc}
                           relatedObjectType={Person.relatedObjectType}
                           relatedObjectUuid={values.uuid}
                         />

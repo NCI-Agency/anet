@@ -3,10 +3,12 @@ import PropTypes from "prop-types"
 import React from "react"
 
 const ConfirmDestructive = ({
+  removeable,
   onConfirm,
   operation,
   objectType,
   objectDisplay,
+  objectOwner,
   variant,
   buttonLabel,
   buttonSize,
@@ -25,6 +27,8 @@ const ConfirmDestructive = ({
       onConfirm={onConfirm}
       title={title}
       body={body}
+      removeable={removeable}
+      objectOwner={objectOwner}
       confirmText={confirmText}
       cancelText={cancelText}
       variant={variant}
@@ -39,10 +43,12 @@ const ConfirmDestructive = ({
   )
 }
 ConfirmDestructive.propTypes = {
+  removeable: PropTypes.bool,
   onConfirm: PropTypes.func.isRequired,
   operation: PropTypes.string.isRequired,
   objectType: PropTypes.string.isRequired,
   objectDisplay: PropTypes.string.isRequired,
+  objectOwner: PropTypes.string,
   variant: PropTypes.string,
   buttonLabel: PropTypes.string,
   buttonSize: PropTypes.string,

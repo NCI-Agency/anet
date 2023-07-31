@@ -1,6 +1,11 @@
 import Page from "./page"
 
+const PAGE_URL = "/people/:uuid"
 class ShowPerson extends Page {
+  async open(uuid) {
+    await super.open(PAGE_URL.replace(":uuid", uuid))
+  }
+
   async getEditButton() {
     return browser.$("div a.edit-person")
   }
@@ -57,6 +62,22 @@ class ShowPerson extends Page {
 
   async getLeftTableFields() {
     return (await this.getCompactView()).$$(".left-table > tr")
+  }
+
+  async getAttachments() {
+    return browser.$("#attachments")
+  }
+
+  async getCard() {
+    return browser.$(".card")
+  }
+
+  async getFileData() {
+    return (await browser.$(".info-line")).getText()
+  }
+
+  async getImageClick() {
+    return browser.$(".imagePreview")
   }
 
   async getAssessmentsTable(assessmentKey, recurrence) {

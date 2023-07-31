@@ -1,9 +1,12 @@
+import AppContext from "components/AppContext"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useContext, useState } from "react"
 import { Button, Col, Modal } from "react-bootstrap"
 import "./TriggerableConfirm.css"
 
 const TriggerableConfirm = ({
+  removeable,
+  objectOwner,
   onConfirm,
   onCancel,
   title,
@@ -22,6 +25,8 @@ const TriggerableConfirm = ({
   children
 }) => {
   const [show, setShow] = useState(showDialog)
+  const { currentUser } = useContext(AppContext)
+
   const handleClose = () => {
     setShow(false)
     if (typeof onCancel === "function") {
@@ -29,6 +34,31 @@ const TriggerableConfirm = ({
     }
   }
   const handleShow = () => setShow(true)
+
+  const handleConfirmAndClose = () => {
+    onConfirm()
+    handleClose()
+  }
+
+  const deleteButton = (
+    <Button
+      className="float-end"
+      variant="danger"
+      onClick={handleConfirmAndClose}
+    >
+      {confirmText}
+    </Button>
+  )
+
+  const removeButton = (
+    <Button
+      className="float-end me-2"
+      variant="danger"
+      onClick={handleConfirmAndClose}
+    >
+      Remove from Person
+    </Button>
+  )
 
   return (
     <>
@@ -72,16 +102,29 @@ const TriggerableConfirm = ({
             </Button>
           </Col>
           <Col>
-            <Button
-              className="float-end"
-              variant="danger"
-              onClick={() => {
-                onConfirm()
-                handleClose()
-              }}
-            >
-              {confirmText}
-            </Button>
+            {removeable ? (
+              <>
+                {currentUser.isAdmin() ? (
+                  <>
+                    {deleteButton}
+                    {removeButton}
+                  </>
+                ) : (
+                  <>
+                    {currentUser.isSuperuser() ? (
+                      <>
+                        {objectOwner === currentUser.uuid && deleteButton}
+                        {removeButton}
+                      </>
+                    ) : (
+                      deleteButton
+                    )}
+                  </>
+                )}
+              </>
+            ) : (
+              deleteButton
+            )}
           </Col>
         </Modal.Footer>
       </Modal>
@@ -89,6 +132,8 @@ const TriggerableConfirm = ({
   )
 }
 TriggerableConfirm.propTypes = {
+  removeable: PropTypes.bool,
+  objectOwner: PropTypes.string,
   onConfirm: PropTypes.func.isRequired,
   onCancel: PropTypes.func,
   title: PropTypes.string,
