@@ -163,13 +163,18 @@ const PersonForm = ({
           // Assign default country if there's only one
           values.country = countries[0]
         }
-        // admins can edit all persons, new users can be edited by superusers or themselves
+        // admins can edit all persons,
+        // superusers for their organization hierarchy or position-less people,
+        // and the user themselves when onboarding
         const canEditName =
           isAdmin ||
-          ((isPendingVerification || !edit) &&
-            currentUser &&
-            (currentUser.isSuperuser() || isSelf))
-        // admins and superusers with edit permissions can change status to INACTIVE, only admins can change back to ACTIVE (but nobody can change status of self!)
+          currentUser?.hasAdministrativePermissionsForOrganization(
+            values?.position?.organization
+          ) ||
+          (!values?.position?.uuid && currentUser?.isSuperuser()) ||
+          ((isPendingVerification || !edit) && isSelf)
+        // admins and superusers with edit permissions can change status to INACTIVE,
+        // only admins can change back to ACTIVE (but nobody can change status of self!)
         const disableStatusChange =
           (initialValues.status === Model.STATUS.INACTIVE && !isAdmin) || isSelf
         const fullName = Person.fullName(Person.parseFullName(values.name))

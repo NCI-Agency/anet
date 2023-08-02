@@ -22,7 +22,6 @@ import { jumpToTop } from "components/Page"
 import SimilarObjectsModal from "components/SimilarObjectsModal"
 import { FastField, Field, Form, Formik } from "formik"
 import DictionaryField from "HOC/DictionaryField"
-import _isEmpty from "lodash/isEmpty"
 import { Location, Organization, Position } from "models"
 import { PositionRole } from "models/Position"
 import PropTypes from "prop-types"
@@ -66,20 +65,7 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
       label: "Inactive"
     }
   ]
-  const advisorDisabledTypeButtons = [
-    {
-      id: "typeAdvisorButton",
-      value: Position.TYPE.ADVISOR,
-      label: Settings.fields.advisor.position.name,
-      disabled: true
-    },
-    {
-      id: "typePrincipalButton",
-      value: Position.TYPE.PRINCIPAL,
-      label: Settings.fields.principal.position.name
-    }
-  ]
-  const regularTypeButtons = [
+  const typeButtons = [
     {
       id: "typeAdvisorButton",
       value: Position.TYPE.ADVISOR,
@@ -177,27 +163,13 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
         // Only admin and superuser can assign high role (other than member role) to a position
         const positionRoleButtons =
           isAdmin || isSuperuser ? adminRolesButtons : nonAdminRolesButtons
-        const isSuperuserWithoutAdministratingOrgs =
-          isSuperuser && _isEmpty(administratingOrgUuids)
-        // Superusers without organizations administrated cannot create advisor positions
-        const typeButtons = isSuperuserWithoutAdministratingOrgs
-          ? advisorDisabledTypeButtons
-          : regularTypeButtons
-        if (
-          isSuperuserWithoutAdministratingOrgs &&
-          values.type !== Position.TYPE.PRINCIPAL
-        ) {
-          setFieldValue("type", Position.TYPE.PRINCIPAL)
-        }
         const orgSearchQuery = { status: Model.STATUS.ACTIVE }
-        if (isPrincipal) {
-          orgSearchQuery.type = Organization.TYPE.PRINCIPAL_ORG
-        } else {
-          orgSearchQuery.type = Organization.TYPE.ADVISOR_ORG
-          if (isSuperuser) {
-            orgSearchQuery.parentOrgUuid = [...administratingOrgUuids]
-            orgSearchQuery.orgRecurseStrategy = RECURSE_STRATEGY.CHILDREN
-          }
+        orgSearchQuery.type = isPrincipal
+          ? Organization.TYPE.PRINCIPAL_ORG
+          : Organization.TYPE.ADVISOR_ORG
+        if (isSuperuser) {
+          orgSearchQuery.parentOrgUuid = [...administratingOrgUuids]
+          orgSearchQuery.orgRecurseStrategy = RECURSE_STRATEGY.CHILDREN
         }
         // Reset the organization property when changing the organization type
         if (

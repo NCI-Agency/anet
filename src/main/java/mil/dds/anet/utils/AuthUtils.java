@@ -7,7 +7,6 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Organization;
-import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionType;
@@ -30,8 +29,7 @@ public class AuthUtils {
     throw new WebApplicationException(UNAUTH_MESSAGE, Status.FORBIDDEN);
   }
 
-  public static boolean canAdministrateOrg(final Person user, final String organizationUuid,
-      boolean allowPrincipalOrgs) {
+  public static boolean canAdministrateOrg(final Person user, final String organizationUuid) {
     if (organizationUuid == null) {
       logger.error("Organization {} is null or has a null UUID in canAdministrateOrg check for {}",
           organizationUuid, user);
@@ -49,13 +47,6 @@ public class AuthUtils {
     logger.debug("Position for user {} is {}", user, position);
     if (position.getType() != PositionType.SUPERUSER) {
       return false;
-    }
-
-    // Given that we know it's a superuser position, does it actually match this organization?
-    Organization loadedOrg =
-        AnetObjectEngine.getInstance().getOrganizationDao().getByUuid(organizationUuid);
-    if (loadedOrg.getType() == OrganizationType.PRINCIPAL_ORG && allowPrincipalOrgs) {
-      return true;
     }
 
     // Check the responsible organizations.
@@ -78,11 +69,10 @@ public class AuthUtils {
     return false;
   }
 
-  public static void assertCanAdministrateOrg(Person user, String organizationUuid,
-      boolean allowPrincipalOrgs) {
+  public static void assertCanAdministrateOrg(Person user, String organizationUuid) {
     // log injection possibility here?
     logger.debug("Asserting canAdministrateOrg status for {} in {}", user, organizationUuid);
-    if (canAdministrateOrg(user, organizationUuid, allowPrincipalOrgs)) {
+    if (canAdministrateOrg(user, organizationUuid)) {
       return;
     }
     throw new WebApplicationException(UNAUTH_MESSAGE, Status.FORBIDDEN);

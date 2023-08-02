@@ -196,14 +196,17 @@ const AssignPositionModal = ({ person, showModal, onCancel, onSuccess }) => {
       positionSearchQuery.type.push(Position.TYPE.SUPERUSER)
     } else if (currentUser.isSuperuser()) {
       // Only superusers can put people in superuser billets
-      // And they are limited to their organization.
       positionSearchQuery.type.push(Position.TYPE.SUPERUSER)
-      positionSearchQuery.organizationUuid =
-        currentUser.position.organization.uuid
-      positionSearchQuery.orgRecurseStrategy = RECURSE_STRATEGY.CHILDREN
     }
   } else if (person.role === Person.ROLE.PRINCIPAL) {
     positionSearchQuery.type = [Position.TYPE.PRINCIPAL]
+  }
+  if (currentUser.isSuperuser()) {
+    // Superusers are limited to their organizations
+    const administratingOrgUuids =
+      currentUser.position.organizationsAdministrated.map(org => org.uuid)
+    positionSearchQuery.organizationUuid = [...administratingOrgUuids]
+    positionSearchQuery.orgRecurseStrategy = RECURSE_STRATEGY.CHILDREN
   }
   const positionsFilters = {
     allAdvisorPositions: {

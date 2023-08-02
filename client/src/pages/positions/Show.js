@@ -109,13 +109,10 @@ const PositionShow = ({ pageDispatchers }) => {
     : Settings.fields.advisor.position
 
   const canEdit =
-    // Superusers can edit any Principal
-    (currentUser.isSuperuser() && isPrincipal) ||
     // Admins can edit anybody
     currentUser.isAdmin() ||
     // Superusers can edit positions if they have administrative permissions for the organization of the position
-    (position.organization &&
-      position.organization.uuid &&
+    (position?.organization?.uuid &&
       currentUser.hasAdministrativePermissionsForOrganization(
         position.organization
       ))

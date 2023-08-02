@@ -96,10 +96,6 @@ public class PersonResource {
       return true;
     }
     if (editorPos.getType() == PositionType.SUPERUSER) {
-      // Superusers can edit any principal
-      if (subject.getRole().equals(Role.PRINCIPAL)) {
-        return true;
-      }
       // Ensure that the editor is the superuser for the subject's organization.
       final Position subjectPos =
           create
@@ -110,7 +106,7 @@ public class PersonResource {
         // Superusers can edit position-less people.
         return true;
       }
-      return AuthUtils.canAdministrateOrg(editor, subjectPos.getOrganizationUuid(), true);
+      return AuthUtils.canAdministrateOrg(editor, subjectPos.getOrganizationUuid());
     }
     return false;
   }

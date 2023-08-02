@@ -186,16 +186,9 @@ const PersonShow = ({ pageDispatchers }) => {
       currentUser.hasAdministrativePermissionsForOrganization(
         position.organization
       )) ||
-    (!hasPosition && currentUser.isSuperuser()) ||
-    (person.role === Person.ROLE.PRINCIPAL && currentUser.isSuperuser())
-  const canChangePosition =
-    isAdmin ||
-    (!hasPosition && currentUser.isSuperuser()) ||
-    (hasPosition &&
-      currentUser.hasAdministrativePermissionsForOrganization(
-        position.organization
-      )) ||
-    (person.role === Person.ROLE.PRINCIPAL && currentUser.isSuperuser())
+    (!hasPosition && currentUser.isSuperuser())
+  // When the person is not in a position, any superuser can assign them.
+  const canAssignPosition = currentUser.isSuperuser()
   const canAddPeriodicAssessment =
     Position.isAdvisor(position) ||
     (Position.isPrincipal(position) &&
@@ -327,7 +320,7 @@ const PersonShow = ({ pageDispatchers }) => {
                   </Row>
                 </Container>
               </Fieldset>
-              {canChangePosition && (
+              {canEdit && (
                 <AssignPositionModal
                   showModal={showAssignPositionModal}
                   person={person}
@@ -340,7 +333,7 @@ const PersonShow = ({ pageDispatchers }) => {
                 <Fieldset
                   title={`Assigned ${assignedRole}`}
                   action={
-                    canChangePosition && (
+                    canEdit && (
                       <Button
                         onClick={() => setShowAssociatedPositionsModal(true)}
                         variant="outline-secondary"
@@ -351,7 +344,7 @@ const PersonShow = ({ pageDispatchers }) => {
                   }
                 >
                   {renderCounterparts(position)}
-                  {canChangePosition && (
+                  {canEdit && (
                     <EditAssociatedPositionsModal
                       position={position}
                       showModal={showAssociatedPositionsModal}
@@ -534,7 +527,7 @@ const PersonShow = ({ pageDispatchers }) => {
 
   function getPositionActions() {
     const editPositionButton =
-      hasPosition && canChangePosition ? (
+      hasPosition && canEdit ? (
         <OverlayTrigger
           key="edit-position-overlay"
           placement="top"
@@ -556,7 +549,7 @@ const PersonShow = ({ pageDispatchers }) => {
       ) : null
 
     const changePositionButton =
-      hasPosition && canChangePosition ? (
+      hasPosition && canEdit ? (
         <OverlayTrigger
           key="change-position-overlay"
           placement="top"
@@ -572,9 +565,6 @@ const PersonShow = ({ pageDispatchers }) => {
           </Button>
         </OverlayTrigger>
       ) : null
-
-    // when the person is not in a position, any superuser can assign them.
-    const canAssignPosition = currentUser.isSuperuser()
 
     const assignPositionButton =
       !hasPosition && canAssignPosition ? (
