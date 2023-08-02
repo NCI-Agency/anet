@@ -440,9 +440,11 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
       throw new IllegalArgumentException(
           "On-demand assessment must have exactly one related object");
     }
-    final NoteRelatedObject nroPerson = noteRelatedObjects.get(0);
-    if (!checkPerson(nroPerson)) {
-      throw new IllegalArgumentException("On-demand assessment must link to a person");
+    final NoteRelatedObject nro = noteRelatedObjects.get(0);
+    boolean checkAssessmentEntity = checkPerson(nro) || checkOrganization(nro);
+    if (!checkAssessmentEntity) {
+      throw new IllegalArgumentException(
+          "On-demand assessment must link to a person or organization");
     }
   }
 

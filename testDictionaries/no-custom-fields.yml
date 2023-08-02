@@ -510,6 +510,19 @@ fields:
             widget: richTextEditor
             style:
               height: 15px
+      organizationOndemand:
+        label: Ondemand assessment of organization
+        recurrence: ondemand
+        questions:
+          assessmentDate:
+            type: date
+            label: Assessment date
+          question1:
+            type: special_field
+            label: General remarks
+            widget: richTextEditor
+            style:
+              height: 70px
 
   advisor:
 
