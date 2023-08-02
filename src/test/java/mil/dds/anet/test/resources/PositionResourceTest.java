@@ -353,7 +353,7 @@ public class PositionResourceTest extends AbstractResourceTest {
 
     query.setText("Advisor");
     query.setType(null);
-    query.setOrganizationUuid(ef1.getUuid());
+    query.setOrganizationUuid(List.of(ef1.getUuid()));
     searchResults = jackQueryExecutor.positionList(getListFields(FIELDS), query).getList();
     assertThat(searchResults.stream().filter(p -> p.getOrganization().getUuid() == ef1.getUuid())
         .collect(Collectors.toList())).hasSameElementsAs(searchResults);
@@ -432,7 +432,8 @@ public class PositionResourceTest extends AbstractResourceTest {
     // Search EF 1 and below
     final PositionSearchQueryInput query =
         PositionSearchQueryInput.builder().withHasPendingAssessments(true)
-            .withOrganizationUuid(getAndrewAnderson().getPosition().getOrganization().getUuid())
+            .withOrganizationUuid(
+                List.of(getAndrewAnderson().getPosition().getOrganization().getUuid()))
             .withOrgRecurseStrategy(RecurseStrategy.CHILDREN).build();
     final TaskSearchQueryInput responsibleTasksQuery =
         TaskSearchQueryInput.builder().withStatus(Status.ACTIVE).build();

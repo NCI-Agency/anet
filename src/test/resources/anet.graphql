@@ -741,7 +741,7 @@ input PositionSearchQueryInput {
   locationUuid: String
   matchPersonName: Boolean
   orgRecurseStrategy: RecurseStrategy
-  organizationUuid: String
+  organizationUuid: [String]
   pageNum: Int
   pageSize: Int
   sortBy: PositionSearchSortBy

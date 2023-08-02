@@ -413,7 +413,7 @@ public class PersonResourceTest extends AbstractResourceTest {
 
     // advisor with position in own organization
     final PositionSearchQueryInput query = PositionSearchQueryInput.builder()
-        .withOrganizationUuid(organization.getUuid()).withIsFilled(false).build();
+        .withOrganizationUuid(List.of(organization.getUuid())).withIsFilled(false).build();
     final AnetBeanList_Position searchObjects =
         userQueryExecutor.positionList(getListFields(POSITION_FIELDS), query);
     assertThat(searchObjects).isNotNull();
