@@ -452,6 +452,77 @@ fields:
     shortName: Name
     parentOrg: Parent Organization
     profile: Profile
+    assessments:
+      organizationAnnually:
+        label: Interaction Plan
+        recurrence: annually
+        questions:         
+          question1:
+            type: enum
+            label: Priority
+            choices:
+              t1:
+                label: T1 # Critical
+                color: '#f50525' # Red
+              t2:
+                label: T2 # Vital
+                color: '#f59d05' # Orange
+              t3:
+                label: T3  # Highly Desirable
+                color: '#f5e505' # Yellow
+              t4:
+                label: T4 #  Desirable
+                color: '#07b50a' # Green
+              t5:
+                label: T5 # Dormant
+                color: '#939692' # Gray
+          question2:
+            type: enum
+            label: Interaction
+            choices:
+              noStatement:
+                label: No statement
+                color: '#5b5b5b' # Black
+              dormant:
+                label: Dormant
+                color: '#999999' # Gray
+              initiate:
+                label: Initiate
+                color: '#f50525' # Red
+              develop:
+                label: Develop
+                color: '#f59d05' # Orange
+              improve:
+                label: Improve
+                color: '#f5e505' # Yellow
+              maintain:
+                label: Maintain
+                color: '#07b50a' # Green
+          question3:
+            type: special_field
+            label: Plan
+            widget: richTextEditor
+            style:
+              height: 15px
+          question4:
+            type: special_field
+            label: Exercises
+            widget: richTextEditor
+            style:
+              height: 15px
+      organizationOndemand:
+        label: Ondemand assessment of organization
+        recurrence: ondemand
+        questions:
+          assessmentDate:
+            type: date
+            label: Assessment date
+          question1:
+            type: special_field
+            label: General remarks
+            widget: richTextEditor
+            style:
+              height: 70px
 
   advisor:
 

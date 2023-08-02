@@ -766,6 +766,10 @@ properties:
             type: string
             title: The label for an organization's profile
             description: Used in the UI where an organization's profile is shown
+          assessments:
+            type: object
+            additionalProperties:
+              "$ref": "#/$defs/assessmentDef"
           customFields:
             type: object
             additionalProperties:

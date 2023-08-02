@@ -23,6 +23,9 @@ export default class Organization extends Model {
     REPORT_APPROVAL: "REPORT_APPROVAL"
   }
 
+  static assessmentDictionaryPath = "fields.organization.assessments"
+  static assessmentConfig = Settings.fields.organization.assessments
+
   // create yup schema for the customFields, based on the customFields config
   static customFieldsSchema = createCustomFieldsSchema(
     Settings.fields.organization.customFields
@@ -126,6 +129,14 @@ export default class Organization extends Model {
 
   constructor(props) {
     super(Model.fillObject(props, Organization.yupSchema))
+  }
+
+  getAssessmentDictionaryPath() {
+    return Organization.assessmentDictionaryPath
+  }
+
+  getAssessmentsConfig() {
+    return Organization.assessmentConfig
   }
 
   humanNameOfType(type) {
