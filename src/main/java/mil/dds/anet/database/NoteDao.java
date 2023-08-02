@@ -36,6 +36,7 @@ import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.utils.Utils;
+import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +46,7 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
 
   public static final String TABLE_NAME = "notes";
 
-  public static enum UpdateType {
+  public enum UpdateType {
     CREATE, READ, UPDATE, DELETE
   }
 
@@ -58,11 +59,11 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
   }
 
   static class SelfIdBatcher extends IdBatcher<Note> {
-    private static final String sql =
+    private static final String SQL =
         "/* batch.getNotesByUuids */ SELECT * FROM notes WHERE uuid IN ( <uuids> )";
 
     public SelfIdBatcher() {
-      super(sql, "uuids", new NoteMapper());
+      super(SQL, "uuids", new NoteMapper());
     }
   }
 
@@ -152,7 +153,7 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
             : position.loadAuthorizationGroups(context);
     return authorizationGroupsFuture.thenCompose(authorizationGroups -> {
       final Set<String> authorizationGroupUuids =
-          authorizationGroups.stream().map(ag -> ag.getUuid()).collect(Collectors.toSet());
+          authorizationGroups.stream().map(AbstractAnetBean::getUuid).collect(Collectors.toSet());
       return new ForeignKeyFetcher<Note>()
           .load(context, FkDataLoaderKey.NOTE_RELATED_OBJECT_NOTES, relatedObjectUuid)
           .thenApply(notes -> notes.stream().filter(note -> {
@@ -163,19 +164,19 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
               // something wrong with the note, just filter it out
               return false;
             }
-          }).collect(Collectors.toList()));
+          }).toList());
     });
   }
 
   static class NotesBatcher extends ForeignKeyBatcher<Note> {
-    private static final String sql =
+    private static final String SQL =
         "/* batch.getNotesForRelatedObject */ SELECT * FROM \"noteRelatedObjects\" "
             + "INNER JOIN notes ON \"noteRelatedObjects\".\"noteUuid\" = notes.uuid "
             + "WHERE \"noteRelatedObjects\".\"relatedObjectUuid\" IN ( <foreignKeys> ) "
             + "ORDER BY notes.\"updatedAt\" DESC";
 
     public NotesBatcher() {
-      super(sql, "foreignKeys", new NoteMapper(), "relatedObjectUuid");
+      super(SQL, "foreignKeys", new NoteMapper(), "relatedObjectUuid");
     }
   }
 
@@ -186,12 +187,12 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
   }
 
   static class NoteRelatedObjectsBatcher extends ForeignKeyBatcher<NoteRelatedObject> {
-    private static final String sql =
+    private static final String SQL =
         "/* batch.getNoteRelatedObjects */ SELECT * FROM \"noteRelatedObjects\" "
             + "WHERE \"noteUuid\" IN ( <foreignKeys> ) ORDER BY \"relatedObjectType\", \"relatedObjectUuid\" ASC";
 
     public NoteRelatedObjectsBatcher() {
-      super(sql, "foreignKeys", new NoteRelatedObjectMapper(), "noteUuid");
+      super(SQL, "foreignKeys", new NoteRelatedObjectMapper(), "noteUuid");
     }
   }
 
@@ -292,35 +293,28 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
       return true;
     }
 
-    switch (note.getType()) {
-      case FREE_TEXT:
+    return switch (note.getType()) {
+      case FREE_TEXT ->
         // case DIAGRAM: — can be added here
-        return hasFreeTextPermission(user, authorUuid, updateType);
-      case ASSESSMENT:
-        return hasAssessmentPermission(user, authorizationGroupUuids, note, updateType);
-      default:
-        throw new IllegalArgumentException("Unsupport type of note");
-    }
+        hasFreeTextPermission(user, authorUuid, updateType);
+      case ASSESSMENT -> hasAssessmentPermission(user, authorizationGroupUuids, note, updateType);
+      default -> throw new IllegalArgumentException("Unsupported type of note");
+    };
   }
 
   private boolean hasFreeTextPermission(final Person user, final String authorUuid,
       final UpdateType updateType) {
-    switch (updateType) {
-      case CREATE:
-      case READ:
-        return true;
-      case UPDATE:
-      case DELETE:
-        return Objects.equals(authorUuid, DaoUtils.getUuid(user));
-    }
-    return false;
+    return switch (updateType) {
+      case CREATE, READ -> true;
+      case UPDATE, DELETE -> Objects.equals(authorUuid, DaoUtils.getUuid(user));
+    };
   }
 
   @Deprecated
   private boolean hasChangeRecordPermission(final Person user, final Note note,
       final UpdateType updateType) {
     switch (updateType) {
-      case CREATE:
+      case CREATE -> {
         // Check that note refers only to one relatedObject
         final List<NoteRelatedObject> noteRelatedObjects = note.getNoteRelatedObjects();
         if (noteRelatedObjects == null || noteRelatedObjects.size() != 1) {
@@ -330,22 +324,55 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
         if (!checkTask(nro)) {
           throw new IllegalArgumentException("Change record must link to a task");
         }
-        Set<String> responsibleTasksUuids = null;
-        if (hasTaskAssessmentPermission(responsibleTasksUuids, user, nro)) {
-          return true;
-        }
-        return false;
-      case READ:
+        return hasTaskAssessmentPermission(user, nro);
+      }
+      case READ -> {
         return true;
-      case UPDATE:
-      case DELETE:
+      }
+      case UPDATE, DELETE -> {
         return false;
+      }
     }
     return false;
   }
 
   private boolean hasAssessmentPermission(final Person user,
       final Set<String> authorizationGroupUuids, final Note note, final UpdateType updateType) {
+    final String recurrenceString = checkAssessmentPreconditions(note);
+
+    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
+    final List<NoteRelatedObject> noteRelatedObjects =
+        note.loadNoteRelatedObjects(engine.getContext()).join();
+    if (Utils.isEmptyOrNull(noteRelatedObjects)) {
+      throw new IllegalArgumentException("Assessment must have related objects");
+    }
+    switch (recurrenceString) {
+      case "once" -> {
+        // Instant assessment:
+        if (checkInstantAssessment(user, noteRelatedObjects, engine)) {
+          return true;
+        }
+        // else check authorization groups (below)
+      }
+      case "ondemand" -> {
+        // On-demand assessment:
+        checkOndemandAssessment(noteRelatedObjects);
+        // now check authorization groups (below)
+      }
+      default -> {
+        // Periodic assessment:
+        if (checkPeriodicAssessment(user, noteRelatedObjects, engine)) {
+          return true;
+        }
+        // else check authorization groups (below)
+      }
+    }
+
+    return DaoUtils.isUserInAuthorizationGroup(authorizationGroupUuids, note,
+        updateType == UpdateType.READ);
+  }
+
+  private String checkAssessmentPreconditions(Note note) {
     if (Utils.isEmptyOrNull(note.getAssessmentKey())) {
       throw new IllegalArgumentException("Assessment key must be specified");
     }
@@ -363,110 +390,89 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
     }
     // Check that note's __recurrence is identical to definition
     checkAssessmentRecurrence(note, recurrenceString);
+    return recurrenceString;
+  }
 
-    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
-    final List<NoteRelatedObject> noteRelatedObjects =
-        note.loadNoteRelatedObjects(engine.getContext()).join();
-    if (Utils.isEmptyOrNull(noteRelatedObjects)) {
-      throw new IllegalArgumentException("Assessment must have related objects");
+  private boolean checkInstantAssessment(Person user, List<NoteRelatedObject> noteRelatedObjects,
+      AnetObjectEngine engine) {
+    if (noteRelatedObjects.size() != 2) {
+      throw new IllegalArgumentException("Instant assessment must have two related objects");
     }
-    switch (recurrenceString) {
-      case "once":
-        // Instant assessment:
-        if (noteRelatedObjects.size() != 2) {
-          throw new IllegalArgumentException("Instant assessment must have two related objects");
-        }
-        // Check that note refers to a report and an attendee or task
-        final NoteRelatedObject nroReport;
-        final NoteRelatedObject nroPersonOrTask;
-        if (checkReport(noteRelatedObjects.get(0))) {
-          nroReport = noteRelatedObjects.get(0);
-          nroPersonOrTask = noteRelatedObjects.get(1);
-        } else {
-          nroReport = noteRelatedObjects.get(1);
-          nroPersonOrTask = noteRelatedObjects.get(0);
-        }
-        if (!checkReportPersonOrTask(nroReport, nroPersonOrTask)) {
-          throw new IllegalArgumentException(
-              "Instant assessment must link to report and person or task");
-        }
-        final Report report = engine.getReportDao().getByUuid(nroReport.getRelatedObjectUuid());
-        if (report == null) {
-          throw new IllegalArgumentException("Report not found");
-        }
-        // TODO: What about e.g. CANCELLED or PUBLISHED reports?
-        final List<ReportPerson> authors = report.loadAuthors(engine.getContext()).join();
-        if (authors.stream().anyMatch(a -> Objects.equals(a.getUuid(), DaoUtils.getUuid(user)))) {
-          // User is an author of this report
-          return true;
-        }
-        final List<String> approverPositions = report.loadApprovalStep(engine.getContext())
+    // Check that note refers to a report and an attendee or task
+    final NoteRelatedObject nroReport;
+    final NoteRelatedObject nroPersonOrTask;
+    if (checkReport(noteRelatedObjects.get(0))) {
+      nroReport = noteRelatedObjects.get(0);
+      nroPersonOrTask = noteRelatedObjects.get(1);
+    } else {
+      nroReport = noteRelatedObjects.get(1);
+      nroPersonOrTask = noteRelatedObjects.get(0);
+    }
+    if (!checkReportPersonOrTask(nroReport, nroPersonOrTask)) {
+      throw new IllegalArgumentException(
+          "Instant assessment must link to report and person or task");
+    }
+    final Report report = engine.getReportDao().getByUuid(nroReport.getRelatedObjectUuid());
+    if (report == null) {
+      throw new IllegalArgumentException("Report not found");
+    }
+    // TODO: What about e.g. CANCELLED or PUBLISHED reports?
+    final List<ReportPerson> authors = report.loadAuthors(engine.getContext()).join();
+    if (authors.stream().anyMatch(a -> Objects.equals(a.getUuid(), DaoUtils.getUuid(user)))) {
+      // User is an author of this report
+      return true;
+    }
+    final List<String> approverPositions =
+        report.loadApprovalStep(engine.getContext())
             .thenCompose(approvalStep -> approvalStep == null
                 ? CompletableFuture.completedFuture(Collections.<String>emptyList())
                 : approvalStep.loadApprovers(engine.getContext())
-                    .thenCompose(approvers -> CompletableFuture.completedFuture(
-                        approvers.stream().map(Position::getUuid).collect(Collectors.toList()))))
+                    .thenCompose(approvers -> CompletableFuture
+                        .completedFuture(approvers.stream().map(Position::getUuid).toList())))
             .join();
-        if (approverPositions.contains(DaoUtils.getUuid(user.getPosition()))) {
-          // User is an approver
-          return true;
-        }
-        // check authorization groups (below)
-        break;
-      case "ondemand":
-        // On-demand assessment:
-        // Check that note refers only to one relatedObject
-        if (noteRelatedObjects.size() != 1) {
-          throw new IllegalArgumentException(
-              "On-demand assessment must have exactly one related object");
-        }
-        final NoteRelatedObject nroPerson = noteRelatedObjects.get(0);
-        if (!checkPerson(nroPerson)) {
-          throw new IllegalArgumentException("On-demand assessment must link to a person");
-        }
-        // check authorization groups (below)
-        break;
-      default:
-        // Periodic assessment:
-        // Check that note refers only to one relatedObject
-        if (noteRelatedObjects.size() != 1) {
-          throw new IllegalArgumentException(
-              "Periodic assessment must have exactly one related object");
-        }
-        final NoteRelatedObject nro = noteRelatedObjects.get(0);
-        Set<String> responsibleTasksUuids = null;
-        Set<String> associatedPositionsUuids = null;
-        Set<String> administratedPositionsUuids = null;
-        if (checkTask(nro)) {
-          if (hasTaskAssessmentPermission(responsibleTasksUuids, user, nro)) {
-            return true;
-          }
-        } else if (checkPerson(nro)) {
-          associatedPositionsUuids = lazyLoadAssociatedPositions(associatedPositionsUuids, user);
-          final Position position = engine.getPositionDao()
-              .getCurrentPositionForPerson(engine.getContext(), nro.getRelatedObjectUuid()).join();
-          if (associatedPositionsUuids.contains(DaoUtils.getUuid(position))) {
-            // This position is among the associated positions of the user
-            return true;
-          }
-        } else if (checkOrganization(nro)) {
-          administratedPositionsUuids =
-              lazyLoadOrganizationAdministrated(administratedPositionsUuids, user);
-          final Position position = engine.getPositionDao()
-              .getCurrentPositionForPerson(engine.getContext(), nro.getRelatedObjectUuid()).join();
-          if (administratedPositionsUuids.contains(DaoUtils.getUuid(position))) {
-            // This position is among the administrative positions of the organization
-            return true;
-          }
-        } else {
-          throw new IllegalArgumentException(
-              "Periodic assessment must link to person, organization or task");
-        }
-        break;
-    }
+    // Allowed if user is an approver
+    return approverPositions.contains(DaoUtils.getUuid(user.getPosition()));
+  }
 
-    return DaoUtils.isUserInAuthorizationGroup(authorizationGroupUuids, note,
-        updateType == UpdateType.READ);
+  private void checkOndemandAssessment(List<NoteRelatedObject> noteRelatedObjects) {
+    // Check that note refers only to one relatedObject
+    if (noteRelatedObjects.size() != 1) {
+      throw new IllegalArgumentException(
+          "On-demand assessment must have exactly one related object");
+    }
+    final NoteRelatedObject nroPerson = noteRelatedObjects.get(0);
+    if (!checkPerson(nroPerson)) {
+      throw new IllegalArgumentException("On-demand assessment must link to a person");
+    }
+  }
+
+  private boolean checkPeriodicAssessment(Person user, List<NoteRelatedObject> noteRelatedObjects,
+      AnetObjectEngine engine) {
+    // Check that note refers only to one relatedObject
+    if (noteRelatedObjects.size() != 1) {
+      throw new IllegalArgumentException(
+          "Periodic assessment must have exactly one related object");
+    }
+    final NoteRelatedObject nro = noteRelatedObjects.get(0);
+    if (checkTask(nro)) {
+      // Allowed if this task is among the responsible tasks of the user
+      return hasTaskAssessmentPermission(user, nro);
+    } else if (checkPerson(nro)) {
+      final var associatedPositionsUuids = loadAssociatedPositions(user);
+      final Position position = engine.getPositionDao()
+          .getCurrentPositionForPerson(engine.getContext(), nro.getRelatedObjectUuid()).join();
+      // Allowed if this position is among the associated positions of the user
+      return associatedPositionsUuids.contains(DaoUtils.getUuid(position));
+    } else if (checkOrganization(nro)) {
+      final var administratedPositionsUuids = loadOrganizationAdministrated(user);
+      final Position position = engine.getPositionDao()
+          .getCurrentPositionForPerson(engine.getContext(), nro.getRelatedObjectUuid()).join();
+      // Allowed if this position is among the administrative positions of the organization
+      return administratedPositionsUuids.contains(DaoUtils.getUuid(position));
+    } else {
+      throw new IllegalArgumentException(
+          "Periodic assessment must link to person, organization or task");
+    }
   }
 
   private boolean checkReportPersonOrTask(NoteRelatedObject nroReport,
@@ -506,64 +512,43 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
     }
   }
 
-  private boolean hasTaskAssessmentPermission(Set<String> responsibleTasksUuids, final Person user,
-      final NoteRelatedObject nro) {
-    responsibleTasksUuids = lazyLoadResponsibleTasks(responsibleTasksUuids, user);
-    if (responsibleTasksUuids.contains(nro.getRelatedObjectUuid())) {
-      // This task is among the user's responsible tasks
-      return true;
-    }
-    return false;
+  private boolean hasTaskAssessmentPermission(final Person user, final NoteRelatedObject nro) {
+    final var responsibleTasksUuids = loadResponsibleTasks(user);
+    // Allowed if this task is among the user's responsible tasks
+    return responsibleTasksUuids.contains(nro.getRelatedObjectUuid());
   }
 
-  private Set<String> lazyLoadResponsibleTasks(final Set<String> responsibleTasksUuids,
-      final Person user) {
-    if (responsibleTasksUuids != null) {
-      // Already loaded
-      return responsibleTasksUuids;
-    }
+  private Set<String> loadResponsibleTasks(final Person user) {
     final Position position = DaoUtils.getPosition(user);
     if (position == null) {
       return Collections.emptySet();
     }
-    // Load
     final TaskSearchQuery tsq = new TaskSearchQuery();
     tsq.setStatus(Task.Status.ACTIVE);
     final List<Task> responsibleTasks =
         position.loadResponsibleTasks(AnetObjectEngine.getInstance().getContext(), tsq).join();
-    return responsibleTasks.stream().map(rp -> rp.getUuid()).collect(Collectors.toSet());
+    return responsibleTasks.stream().map(AbstractAnetBean::getUuid).collect(Collectors.toSet());
   }
 
-  private Set<String> lazyLoadAssociatedPositions(final Set<String> associatedPositionsUuids,
-      final Person user) {
-    if (associatedPositionsUuids != null) {
-      // Already loaded
-      return associatedPositionsUuids;
-    }
+  private Set<String> loadAssociatedPositions(final Person user) {
     final Position position = DaoUtils.getPosition(user);
     if (position == null) {
       return Collections.emptySet();
     }
-    // Load
     final List<Position> associatedPositions =
         position.loadAssociatedPositions(AnetObjectEngine.getInstance().getContext()).join();
-    return associatedPositions.stream().map(ap -> ap.getUuid()).collect(Collectors.toSet());
+    return associatedPositions.stream().map(AbstractAnetBean::getUuid).collect(Collectors.toSet());
   }
 
-  private Set<String> lazyLoadOrganizationAdministrated(
-      final Set<String> administratedPositionsUuids, final Person user) {
-    if (administratedPositionsUuids != null) {
-      // Already loaded
-      return administratedPositionsUuids;
-    }
+  private Set<String> loadOrganizationAdministrated(final Person user) {
     final Position position = DaoUtils.getPosition(user);
     if (position == null) {
       return Collections.emptySet();
     }
-    // Load
     final List<Organization> organizationAdministrated =
         position.loadOrganizationsAdministrated(AnetObjectEngine.getInstance().getContext()).join();
-    return organizationAdministrated.stream().map(ap -> ap.getUuid()).collect(Collectors.toSet());
+    return organizationAdministrated.stream().map(AbstractAnetBean::getUuid)
+        .collect(Collectors.toSet());
   }
 
   private void updateSubscriptions(int numRows, Note obj) {
