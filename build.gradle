@@ -4,12 +4,12 @@ import com.bmuschko.gradle.docker.tasks.image.*
 plugins {
 	id "org.kordamp.gradle.markdown" version "2.2.0"
 	// https://github.com/bmuschko/gradle-docker-plugin
-	id "com.bmuschko.docker-remote-api" version "9.3.1"
+	id "com.bmuschko.docker-remote-api" version "9.3.2"
 	id "com.github.node-gradle.node" version "5.0.0"
-	id "com.diffplug.spotless" version "6.18.0"
+	id "com.diffplug.spotless" version "6.20.0"
 	id "com.graphql_java_generator.graphql-gradle-plugin" version "1.18.11"
 	id "org.beryx.runtime" version "1.13.0"
-	id "com.netflix.nebula.rpm" version "11.3.0"
+	id "com.netflix.nebula.rpm" version "11.4.0"
 }
 
 apply plugin: 'java'
