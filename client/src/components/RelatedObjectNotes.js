@@ -19,8 +19,7 @@ import { Person } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
-import { Button, Card, Col, Offcanvas, Row } from "react-bootstrap"
-import NotificationBadge from "react-notification-badge"
+import { Badge, Button, Card, Col, Offcanvas, Row } from "react-bootstrap"
 import Settings from "settings"
 import utils from "utils"
 import "./BlueprintOverrides.css"
@@ -41,6 +40,41 @@ export const EXCLUDED_ASSESSMENT_FIELDS = [
 ]
 
 const EXCLUDED_NOTE_TYPES = [NOTE_TYPE.ASSESSMENT]
+
+const NotificationBadge = ({ pill, bg, text, children }) => (
+  <div style={{ position: "relative", width: "100%", height: "100%" }}>
+    <Badge
+      pill={pill}
+      bg={bg}
+      text={text}
+      style={{
+        display: "inline-block",
+        position: "absolute",
+        top: "-2px",
+        right: "-2px",
+        textAlign: "center",
+        whiteSpace: "nowrap",
+        padding: "3px 7px",
+        fontSize: "8px",
+        marginRight: "-8px",
+        marginTop: "-2px"
+      }}
+    >
+      {children}
+    </Badge>
+  </div>
+)
+NotificationBadge.propTypes = {
+  pill: PropTypes.bool,
+  bg: PropTypes.string,
+  text: PropTypes.string,
+  children: PropTypes.node
+}
+NotificationBadge.defaultProps = {
+  pill: true,
+  bg: "danger",
+  text: "light"
+}
 
 const RelatedObjectNotes = ({
   notesElemId,
@@ -63,7 +97,8 @@ const RelatedObjectNotes = ({
 
   const noNotes = _isEmpty(notesFiltered)
   const nrNotes = noNotes ? 0 : notesFiltered.length
-  const badgeLabel = nrNotes > 10 ? "10+" : null
+  const maxNotes = 10
+  const badgeLabel = nrNotes > maxNotes ? `${maxNotes}+` : nrNotes
 
   const handleClose = () => setShow(false)
   const handleShow = () => setShow(true)
@@ -71,12 +106,7 @@ const RelatedObjectNotes = ({
   return (
     <>
       <Button onClick={handleShow} title="Show notes">
-        <NotificationBadge
-          count={nrNotes}
-          label={badgeLabel}
-          style={{ fontSize: "8px", marginRight: "-8px", marginTop: "-2px" }}
-          effect={["none", "none"]}
-        />
+        {!noNotes && <NotificationBadge>{badgeLabel}</NotificationBadge>}
         <Icon icon={IconNames.COMMENT} />
       </Button>
 
