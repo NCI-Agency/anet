@@ -138,7 +138,7 @@
     "escape-html": "1.0.3",
     "file-saver": "2.0.5",
     "formik": "2.4.3",
-    "graphiql": "2.4.7",
+    "graphiql": "3.0.5",
     "graphql": "16.7.1",
     "hopscotch": "0.3.1",
     "jsonpath-plus": "7.2.0",
