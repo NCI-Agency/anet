@@ -61,7 +61,7 @@
     "config": "3.3.9",
     "copy-webpack-plugin": "11.0.0",
     "countries-list": "2.6.1",
-    "cross-fetch": "3.1.8",
+    "cross-fetch": "4.0.0",
     "cross-spawn": "7.0.3",
     "css-loader": "6.8.1",
     "dotenv": "16.3.1",
