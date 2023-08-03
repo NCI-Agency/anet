@@ -273,6 +273,7 @@ function EditHistory({
                                       )
                                       setFinalHistory(
                                         sortHistory(
+                                          historyEntityType,
                                           values.history.map((item, index) =>
                                             index === idx
                                               ? {
@@ -379,6 +380,7 @@ function EditHistory({
               function addItem(item) {
                 setValues({
                   history: sortHistory(
+                    historyEntityType,
                     [{ ...item, uuid: uuidv4() }, ...values.history],
                     hasCurrent
                   )
@@ -678,13 +680,22 @@ function getSingleSelectParameters(historyEntityType, parentEntityType) {
   }
 }
 
-function sortHistory(history, hasCurrent) {
+function compareHistory(entity, a, b) {
+  return (
+    a.startTime - b.startTime ||
+    a.endTime - b.endTime ||
+    a[entity]?.uuid?.localeCompare(b[entity]?.uuid) ||
+    a.uuid?.localeCompare(b.uuid)
+  )
+}
+
+function sortHistory(historyEntityType, history, hasCurrent) {
   if (!hasCurrent) {
-    return history.sort((a, b) => a.startTime - b.startTime)
+    return history.sort((a, b) => compareHistory(historyEntityType, a, b))
   }
   const historyWithoutCurrent = history.slice(0, history.length - 1)
-  const sortedWithoutCurrent = historyWithoutCurrent.sort(
-    (a, b) => a.startTime - b.startTime
+  const sortedWithoutCurrent = historyWithoutCurrent.sort((a, b) =>
+    compareHistory(historyEntityType, a, b)
   )
   return [...sortedWithoutCurrent, history[history.length - 1]]
 }
