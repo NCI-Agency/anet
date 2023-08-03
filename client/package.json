@@ -102,7 +102,7 @@
     "selenium-webdriver": "4.11.1",
     "storybook": "7.2.0",
     "style-loader": "3.3.3",
-    "thread-loader": "3.0.4",
+    "thread-loader": "4.0.2",
     "ts-node": "10.9.1",
     "wdio-chromedriver-service": "8.1.1",
     "webdriverio": "8.14.2",
