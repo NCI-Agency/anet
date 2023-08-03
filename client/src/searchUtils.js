@@ -11,7 +11,7 @@ export const deserializeSearchFilter = (queryKey, query, key) => {
   if (query[queryKey]) {
     const toQueryValue = { [queryKey]: query[queryKey] }
     return {
-      key: key,
+      key,
       value: {
         value: query[queryKey],
         toQuery: toQueryValue

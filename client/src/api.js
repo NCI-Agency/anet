@@ -64,9 +64,7 @@ const API = {
    */
   logOnServer(severity, url, lineNr, message) {
     // Can't use client here as we need to send to a different endpoint
-    API._fetch(LOGGING_ENDPOINT, [
-      { severity: severity, url: url, lineNr: lineNr, message: message }
-    ])
+    API._fetch(LOGGING_ENDPOINT, [{ severity, url, lineNr, message }])
   },
 
   _handleSuccess(response) {

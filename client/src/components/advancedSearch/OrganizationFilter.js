@@ -102,7 +102,7 @@ export const deserialize = ({ queryKey }, query, key) => {
     }).then(data => {
       if (data.organization) {
         return {
-          key: key,
+          key,
           value: {
             value: data.organization,
             toQuery: { ...query }

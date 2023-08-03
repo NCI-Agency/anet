@@ -95,9 +95,9 @@ const Leaflet = ({
 }) => {
   const mapId = "map-" + (initialMapId || "default")
   const style = Object.assign({}, css, {
-    width: width,
-    height: height,
-    marginBottom: marginBottom
+    width,
+    height,
+    marginBottom
   })
 
   const latestWidth = useRef(width)
@@ -118,7 +118,7 @@ const Leaflet = ({
           ? [m.lat, m.lng]
           : map.getCenter()
         const marker = new Marker(latLng, {
-          icon: icon,
+          icon,
           draggable: m.draggable || false,
           autoPan: m.autoPan || false,
           id: m.id

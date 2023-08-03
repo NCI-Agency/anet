@@ -170,8 +170,8 @@ export const getPeriodsConfig = (
     periods.push(periodDetails)
   }
   return {
-    recurrence: recurrence,
-    periods: periods
+    recurrence,
+    periods
   }
 }
 

@@ -15,7 +15,7 @@ const getRandomPerson = async function(user, hasPosition, type, role) {
       {
         status: Model.STATUS.ACTIVE,
         isFilled: true,
-        type: type
+        type
       },
       "uuid type person { uuid name role }"
     )
@@ -251,7 +251,7 @@ const updateDraftReport = async function(user) {
       await runGQL(user, {
         query:
           "mutation($report: ReportInput!) { updateReport(report: $report) { uuid } }",
-        variables: { report: report }
+        variables: { report }
       })
     ).data.updateReport
   }

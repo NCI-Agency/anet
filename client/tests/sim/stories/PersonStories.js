@@ -237,7 +237,7 @@ const updatePerson = async function(user) {
     await runGQL(user, {
       query:
         "mutation($person: PersonInput!) { updatePerson(person: $person) }",
-      variables: { person: person }
+      variables: { person }
     })
   ).data.updatePerson
 }
@@ -323,7 +323,7 @@ const _deletePerson = async function(user) {
       await runGQL(user, {
         query:
           "mutation($person: PersonInput!) { updatePerson(person: $person) }",
-        variables: { person: person }
+        variables: { person }
       })
     ).data.updatePerson
   } else {

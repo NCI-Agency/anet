@@ -115,7 +115,7 @@ export const deserialize = ({ queryKey }, query, key) => {
     }).then(data => {
       if (data.task) {
         return {
-          key: key,
+          key,
           value: {
             value: data.task,
             toQuery: { ...query }

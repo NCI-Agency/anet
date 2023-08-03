@@ -238,7 +238,7 @@ const _createPosition = async function(user) {
       }
     `,
       variables: {
-        position: position
+        position
       }
     })
   ).data.createPosition
@@ -344,7 +344,7 @@ const _deactivatePosition = async function(user) {
         }
       `,
         variables: {
-          position: position
+          position
         }
       })
     ).data.updatePosition
@@ -418,7 +418,7 @@ const updatePosition = async function(user) {
         }
       `,
         variables: {
-          position: position
+          position
         }
       })
     ).data.updatePosition
@@ -458,7 +458,7 @@ const putPersonInPosition = async function(user) {
         peopleQuery: {
           pageNum: 0,
           pageSize: 0,
-          role: role
+          role
         }
       }
     })
@@ -678,7 +678,7 @@ const removeAssociatedPosition = async function(user) {
   `
   const positions = (
     await runGQL(user, {
-      query: query,
+      query,
       variables: {
         positionsQuery: {
           pageNum: 0,
@@ -718,7 +718,7 @@ const removeAssociatedPosition = async function(user) {
         }
       `,
         variables: {
-          position: position
+          position
         }
       })
     ).data.updateAssociatedPosition

@@ -133,7 +133,7 @@ async function runStories(scenario, cycle, runningTime) {
   const storyRuns = scenario.stories.map(story => {
     const period = cycle * (1 / story.frequency) * 1000
     return {
-      period: period,
+      period,
       // Percent-Point Function to be to compute next execution time based on a gaussian distribution with
       // a certain mean period and standard deviation on the period
       ppf: normalPPF(period, period / 2),
@@ -150,7 +150,7 @@ async function runStories(scenario, cycle, runningTime) {
         sumVar: 0
       },
       // the story to run
-      story: story
+      story
     }
   })
   const t0 = Date.now()

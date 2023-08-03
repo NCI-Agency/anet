@@ -56,7 +56,7 @@ const PaginatedTasks = ({ queryParams, pageDispatchers, ...otherProps }) => {
   const [pageNum, setPageNum] = useState(0)
   const taskQuery = Object.assign({}, queryParams, { pageNum })
   const { loading, error, data } = API.useApiQuery(GQL_GET_TASK_LIST, {
-    taskQuery: taskQuery
+    taskQuery
   })
   const { done, result } = useBoilerplate({
     loading,

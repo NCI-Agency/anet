@@ -62,7 +62,7 @@ async function getRandomUser(user, variables) {
   return {
     name: person.domainUsername,
     password: person.domainUsername,
-    person: person
+    person
   }
 }
 

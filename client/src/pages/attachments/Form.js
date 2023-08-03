@@ -250,7 +250,7 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
     const attachment = Attachment.filterClientSideFields(values, "content")
     attachment.classification = values.classification
     return API.mutation(edit ? GQL_UPDATE_ATTACHMENT : GQL_CREATE_ATTACHMENT, {
-      attachment: attachment
+      attachment
     })
   }
 }

@@ -138,7 +138,7 @@ class ShowPerson extends Page {
     for (const field of fields) {
       await (
         await (await this.getCompactView()).$(`//th[text()="${field}"]`)
-      ).waitForDisplayed({ reverse: reverse })
+      ).waitForDisplayed({ reverse })
     }
   }
 
