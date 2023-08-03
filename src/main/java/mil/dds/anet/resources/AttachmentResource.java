@@ -101,7 +101,7 @@ public class AttachmentResource {
 
     final Attachment attachment = getAttachment(uuid);
     dao.saveContentBlob(uuid, checkMimeType(attachment, attachmentContent));
-    return Response.ok().build();
+    return Response.noContent().build();
   }
 
   private InputStream checkMimeType(final Attachment attachment,
