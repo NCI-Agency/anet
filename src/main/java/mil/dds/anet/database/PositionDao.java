@@ -1,5 +1,7 @@
 package mil.dds.anet.database;
 
+import static org.jdbi.v3.core.statement.EmptyHandling.NULL_KEYWORD;
+
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -513,7 +515,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
               + " WHERE (\"positionUuid_a\" IN (<winnerExApUuids>)"
               + " OR \"positionUuid_b\" IN (<winnerExApUuids>))"
               + " AND (\"positionUuid_a\" = :loserUuid OR \"positionUuid_b\" = :loserUuid)")
-          .bind("deleted", true).bindList("winnerExApUuids", existingApUuids)
+          .bind("deleted", true).bindList(NULL_KEYWORD, "winnerExApUuids", existingApUuids)
           .bind("loserUuid", loserUuid).execute();
     }
     // transfer loser's relations to winners
@@ -549,7 +551,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
               + " AND \"positionUuid_a\" NOT IN (<winnerList>)"
               + " AND \"positionUuid_b\" NOT IN (<winnerList>)")
           .bind("deleted", true).bind("winnerUuid", winnerUuid)
-          .bindList("winnerList", winnerApUuids)
+          .bindList(NULL_KEYWORD, "winnerList", winnerApUuids)
           .bind("updatedAt", DaoUtils.asLocalDateTime(Instant.now())).execute();
     }
 

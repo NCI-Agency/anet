@@ -1,5 +1,7 @@
 package mil.dds.anet.database;
 
+import static org.jdbi.v3.core.statement.EmptyHandling.NULL_KEYWORD;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +36,7 @@ public class IdBatcher<T extends AbstractAnetBean> {
   @InTransaction
   public List<T> getByIds(List<String> uuids) {
     final List<String> args = uuids.isEmpty() ? defaultIfEmpty : uuids;
-    return getDbHandle().createQuery(sql).bindList(paramName, args).map(mapper)
+    return getDbHandle().createQuery(sql).bindList(NULL_KEYWORD, paramName, args).map(mapper)
         .withStream(result -> {
           final Map<String, T> map = result.collect(Collectors.toMap(obj -> obj.getUuid(), // key
               obj -> obj)); // value
