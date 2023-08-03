@@ -318,8 +318,7 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
                     name="plannedCompletion"
                     component={FieldHelper.SpecialField}
                     onChange={value =>
-                      setFieldValue("plannedCompletion", value)
-                    }
+                      setFieldValue("plannedCompletion", value)}
                     onBlur={() => setFieldTouched("plannedCompletion")}
                     widget={<CustomDateInput id="plannedCompletion" />}
                     disabled={disabled}
@@ -332,8 +331,7 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
                     name="projectedCompletion"
                     component={FieldHelper.SpecialField}
                     onChange={value =>
-                      setFieldValue("projectedCompletion", value)
-                    }
+                      setFieldValue("projectedCompletion", value)}
                     onBlur={() => setFieldTouched("projectedCompletion")}
                     widget={<CustomDateInput id="projectedCompletion" />}
                     disabled={disabled}

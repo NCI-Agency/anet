@@ -246,8 +246,7 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
               <Leaflet
                 markers={[marker]}
                 onMapClick={(event, map) =>
-                  updateCoordinateFields(map.wrapLatLng(event.latlng))
-                }
+                  updateCoordinateFields(map.wrapLatLng(event.latlng))}
               />
 
               <ApprovalsDefinition
@@ -290,8 +289,7 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
                   onCancel={() => {
                     setShowSimilarLocations(false)
                   }}
-                >
-                </SimilarObjectsModal>
+                />
               )}
 
               <div className="submit-buttons">

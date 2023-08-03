@@ -87,7 +87,7 @@ export const deserialize = ({ queryKey, objectType, fields }, query, key) => {
           [queryKey]: query[queryKey]
         }
         return {
-          key: key,
+          key,
           value: {
             ...data[getInstanceName],
             toQuery: toQueryValue

@@ -178,8 +178,8 @@ const AdvancedSearch = ({
                     captureDismiss
                     interactionKind={Popover2InteractionKind.CLICK}
                     usePortal={false}
-                    autoFocus={true}
-                    enforceFocus={true}
+                    autoFocus
+                    enforceFocus
                     placement="right"
                     modifiers={{
                       preventOverflow: {

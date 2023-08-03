@@ -229,8 +229,7 @@ const MergePositions = ({ pageDispatchers }) => {
                             mergedAssociatedPositions,
                             null
                           )
-                        )
-                      }
+                        )}
                       initialMergedAssociatedPositions={
                         mergedPosition.associatedPositions
                       }
@@ -268,8 +267,7 @@ const MergePositions = ({ pageDispatchers }) => {
                       setHistory={history =>
                         dispatchMergeActions(
                           setAMergedField("previousPeople", history, null)
-                        )
-                      }
+                        )}
                     />
                   </>
                 }

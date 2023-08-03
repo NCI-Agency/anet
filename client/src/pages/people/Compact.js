@@ -290,25 +290,16 @@ const CompactPersonView = ({ pageDispatchers }) => {
               sensitiveInformation={containsSensitiveInformation}
             />
             <CompactFooterContent object={person} />
-            <CompactTable
-              children={
+            <CompactTable>
+              {(_isEmpty(rightColumn) && (
+                <FullColumn className="full-table">{leftColumn}</FullColumn>
+              )) || (
                 <>
-                  {(_isEmpty(rightColumn) && (
-                    <FullColumn className="full-table">{leftColumn}</FullColumn>
-                  )) || (
-                    <>
-                      <HalfColumn className="left-table">
-                        {leftColumn}
-                      </HalfColumn>
-                      <HalfColumn className="right-table">
-                        {rightColumn}
-                      </HalfColumn>
-                    </>
-                  )}
-                  <FullColumn>{twoColumnFields}</FullColumn>
+                  <HalfColumn className="left-table">{leftColumn}</HalfColumn>
+                  <HalfColumn className="right-table">{rightColumn}</HalfColumn>
                 </>
-              }
-            >
+              )}
+              <FullColumn>{twoColumnFields}</FullColumn>
             </CompactTable>
           </CompactView>
         </>
@@ -420,7 +411,7 @@ const CompactPersonView = ({ pageDispatchers }) => {
           humanValue={humanValuesExceptions[key]}
           className={classNameExceptions[key]}
           id={idExceptions[key]}
-          isCompact={true}
+          isCompact
         />
       )
 
@@ -547,8 +538,7 @@ const CompactPersonViewHeader = ({
         <Dropdown.Item
           key={preset.name}
           onClick={() =>
-            onPresetSelect(preset.fields, optionalFields, setOptionalFields)
-          }
+            onPresetSelect(preset.fields, optionalFields, setOptionalFields)}
           style={{ minWidth: "185px" }}
         >
           {preset.label}

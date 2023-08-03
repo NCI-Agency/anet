@@ -219,7 +219,7 @@ export const deserialize = ({ queryKey }, query, key) => {
 
   if (Object.keys(filterValue).length) {
     return {
-      key: key,
+      key,
       value: {
         ...filterValue,
         toQuery: toQueryValue

@@ -262,7 +262,7 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
                 </tbody>
               </Table>
             )}
-            {<Messages error={error} />}
+            <Messages error={error} />
           </Container>
         )}
       </Modal.Body>

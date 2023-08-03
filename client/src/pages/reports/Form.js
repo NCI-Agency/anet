@@ -485,8 +485,7 @@ const ReportForm = ({
                       "intentCharsLeft",
                       Settings.maxTextFieldLength,
                       event
-                    )
-                  }
+                    )}
                   extraColElem={
                     <>
                       <span id="intentCharsLeft">
@@ -605,8 +604,7 @@ const ReportForm = ({
                             "cancelledReason",
                             cancelledReasonOptions[0].value,
                             true
-                          )
-                        }
+                          )}
                       />
                     }
                   />
@@ -704,8 +702,7 @@ const ReportForm = ({
                             })
                           }
                           onChange={value =>
-                            setFieldValue("reportPeople", value, true)
-                          }
+                            setFieldValue("reportPeople", value, true)}
                           showDelete
                         />
                       }
@@ -861,8 +858,7 @@ const ReportForm = ({
                           "keyOutcomesCharsLeft",
                           Settings.maxTextFieldLength,
                           event
-                        )
-                      }
+                        )}
                       extraColElem={
                         <>
                           <span id="keyOutcomesCharsLeft">
@@ -896,8 +892,7 @@ const ReportForm = ({
                           Settings.fields.report.nextSteps
                         ),
                         event
-                      )
-                    }
+                      )}
                     extraColElem={
                       <>
                         <span id="nextStepsCharsLeft">
@@ -1141,8 +1136,7 @@ const ReportForm = ({
                     id="formBottomSubmit"
                     variant="primary"
                     onClick={() =>
-                      onSubmit(values, { resetForm, setSubmitting })
-                    }
+                      onSubmit(values, { resetForm, setSubmitting })}
                     disabled={isSubmitting}
                   >
                     {submitText}
@@ -1275,7 +1269,7 @@ const ReportForm = ({
             autoSaveSettings.current.autoSaveTimeout.asMilliseconds()
           )
         })
-        /* eslint-disable node/handle-callback-err */
+        /* eslint-disable n/handle-callback-err */
         .catch(error => {
           // Show an error message
           autoSaveSettings.current.autoSaveTimeout.add(
@@ -1292,7 +1286,7 @@ const ReportForm = ({
             autoSaveSettings.current.autoSaveTimeout.asMilliseconds()
           )
         })
-      /* eslint-enable node/handle-callback-err */
+      /* eslint-enable n/handle-callback-err */
     }
   }
 

@@ -129,9 +129,9 @@ const MySavedSearches = ({ setSearchQuery, pageDispatchers }) => {
   function deserializeCallback(objectType, filters, text) {
     // We update the Redux state
     setSearchQuery({
-      objectType: objectType,
-      filters: filters,
-      text: text
+      objectType,
+      filters,
+      text
     })
     navigate("/search")
   }

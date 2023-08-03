@@ -66,7 +66,7 @@ const ResponsiveLayout = ({ pageProps, sidebarData, children }) => {
   return (
     <ResponsiveLayoutContext.Provider
       value={{
-        showFloatingMenu: showFloatingMenu,
+        showFloatingMenu,
         topbarOffset: topbarHeight,
         securityBannerOffset: securityBannerBottom
       }}

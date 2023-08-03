@@ -766,22 +766,19 @@ const Search = ({
             <Dropdown.Menu className="super-colors">
               <Dropdown.Item
                 onClick={() =>
-                  exportResults(searchQueryParams, queryTypes, "xlsx", setError)
-                }
+                  exportResults(searchQueryParams, queryTypes, "xlsx", setError)}
               >
                 Excel (xlsx)
               </Dropdown.Item>
               <Dropdown.Item
                 onClick={() =>
-                  exportResults(searchQueryParams, queryTypes, "kml", setError)
-                }
+                  exportResults(searchQueryParams, queryTypes, "kml", setError)}
               >
                 Google Earth (kml)
               </Dropdown.Item>
               <Dropdown.Item
                 onClick={() =>
-                  exportResults(searchQueryParams, queryTypes, "nvg", setError)
-                }
+                  exportResults(searchQueryParams, queryTypes, "nvg", setError)}
               >
                 NATO Vector Graphics (nvg)
               </Dropdown.Item>

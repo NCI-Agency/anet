@@ -135,7 +135,7 @@ const ReportCollection = ({
                   queryParams={queryParams}
                   setTotalCount={setTotalCount}
                   periodsDetails={{
-                    recurrence: recurrence,
+                    recurrence,
                     numberOfPeriods
                   }}
                 />

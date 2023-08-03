@@ -175,8 +175,7 @@ const Navigation = ({
                 : "dropdown-toggle"
             }
             style={{ marginLeft: "0.255em" }}
-          >
-          </span>
+          />
         </Nav.Link>
       </Nav.Item>
 

@@ -364,8 +364,7 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
                   onCancel={() => {
                     setShowSimilarPositions(false)
                   }}
-                >
-                </SimilarObjectsModal>
+                />
               )}
               <div className="submit-buttons">
                 <div>

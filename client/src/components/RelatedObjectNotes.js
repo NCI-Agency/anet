@@ -106,8 +106,7 @@ const RelatedObjectNotes = ({
               variant="primary"
               style={{ margin: "5px" }}
               onClick={() =>
-                showRelatedObjectNoteModal("new", NOTE_TYPE.FREE_TEXT)
-              }
+                showRelatedObjectNoteModal("new", NOTE_TYPE.FREE_TEXT)}
             >
               Post a new note
             </Button>
@@ -171,8 +170,7 @@ const RelatedObjectNotes = ({
                             <Button
                               title="Edit note"
                               onClick={() =>
-                                showRelatedObjectNoteModal(note.uuid)
-                              }
+                                showRelatedObjectNoteModal(note.uuid)}
                               size="xs"
                               variant="outline-secondary"
                             >

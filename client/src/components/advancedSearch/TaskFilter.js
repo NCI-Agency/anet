@@ -76,8 +76,7 @@ const TaskFilter = ({
       objectType={Task}
       valueKey={valueKey}
       valueFunc={(v, k) =>
-        getBreadcrumbTrailAsText(v, v?.ascendantTasks, parentKey, k)
-      }
+        getBreadcrumbTrailAsText(v, v?.ascendantTasks, parentKey, k)}
       fields={Task.autocompleteQuery}
       placeholder="Filter by task..."
       addon={TASKS_ICON}
@@ -115,7 +114,7 @@ export const deserialize = ({ queryKey }, query, key) => {
     }).then(data => {
       if (data.task) {
         return {
-          key: key,
+          key,
           value: {
             value: data.task,
             toQuery: { ...query }

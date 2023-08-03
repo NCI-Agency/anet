@@ -22,7 +22,7 @@ const wildcardDomains = domainNames.filter(domain => domain[0] === WILDCARD)
 
 // Support null input like change-case v3 did…
 const wrappedChangeCase = {
-  titleCase: titleCase
+  titleCase
 }
 Object.keys(changeCase)
   .filter(c => c.endsWith("Case"))

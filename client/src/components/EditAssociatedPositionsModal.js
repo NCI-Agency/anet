@@ -124,8 +124,7 @@ const EditAssociatedPositionsModal = ({
                       label="Associated positions"
                       component={FieldHelper.SpecialField}
                       onChange={value =>
-                        setFieldValue("associatedPositions", value)
-                      }
+                        setFieldValue("associatedPositions", value)}
                       vertical
                       widget={
                         <AdvancedMultiSelect

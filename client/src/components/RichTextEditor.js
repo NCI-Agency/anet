@@ -181,8 +181,7 @@ const RichTextEditor = ({
                 setShowExternalLinksModal,
                 handleFullSizeMode,
                 disableFullSize
-              )
-            }
+              )}
             className={classNames("editable", {
               "editable-fullsize": showFullSize
             })}
@@ -395,10 +394,13 @@ const Element = ({ attributes, children, element }) => {
               type={element.entityType}
               uuid={element.entityUuid}
               displayCallback={displayCallback}
-              children={reducedChildren}
-            />
+            >
+              {reducedChildren}
+            </LinkAnetEntity>
           ) : (
-            <LinkExternalHref url={element.url} children={reducedChildren} />
+            <LinkExternalHref url={element.url}>
+              {reducedChildren}
+            </LinkExternalHref>
           )}
           {children}
         </span>

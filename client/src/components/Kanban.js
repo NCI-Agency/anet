@@ -112,8 +112,7 @@ const Column = ({ name, tasks }) => {
                 ? IconNames.SYMBOL_TRIANGLE_UP
                 : IconNames.SYMBOL_TRIANGLE_DOWN
             }
-          >
-          </Icon>
+          />
         </Button>
         <br />
         {open && tasks.map(task => <CardView task={task} key={task.uuid} />)}

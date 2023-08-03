@@ -42,7 +42,7 @@ export const countPerDateAggregation = (fieldName, fieldConfig, data) => {
     counter[value] = ++counter[value] || 1
     return counter
   }, {})
-  return { values: values }
+  return { values }
 }
 
 // TODO: maybe use a library for a list of colors
@@ -102,7 +102,7 @@ export const countPerValueAggregation = (fieldName, fieldConfig, data) => {
       })
   )
   legend.null = { label: "Unspecified", color: "#bbbbbb" }
-  return { values: counters, entitiesCount: data.length, legend: legend }
+  return { values: counters, entitiesCount: data.length, legend }
 }
 
 const arrayOfNumbers = arr =>
@@ -183,7 +183,7 @@ export const countPerLevelAggregation = (fieldName, fieldConfig, data) => {
     return res
   }, {})
   legend.null = { label: "Unspecified", color: "#bbbbbb" }
-  return { values: counters, entitiesCount: data.length, legend: legend }
+  return { values: counters, entitiesCount: data.length, legend }
 }
 
 export const likertScaleAndPieAggregation = (fieldName, fieldConfig, data) => {
@@ -199,7 +199,9 @@ export const richTextAggregation = (fieldName, fieldConfig, data) => {
   return {
     values: data
       .map(item => Object.get(item, fieldName))
-      .map(htmlString => <RichTextEditor readOnly value={htmlString} />)
+      .map(htmlString => (
+        <RichTextEditor key={fieldName} readOnly value={htmlString} />
+      ))
   }
 }
 

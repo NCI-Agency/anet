@@ -70,7 +70,7 @@ const MySubscriptions = ({
   const [saveError, setSaveError] = useState(null)
   const [pageNum, setPageNum] = useState(0)
   const subscriptionsQuery = {
-    pageNum: pageNum,
+    pageNum,
     pageSize: 10
   }
   const { loading, error, data, refetch } = API.useApiQuery(
@@ -170,7 +170,7 @@ const MySubscriptions = ({
                           subscribedObjectUuid={
                             subscription.subscribedObjectUuid
                           }
-                          isSubscribed={true}
+                          isSubscribed
                           updatedAt={null}
                           refetch={() => {
                             refetch()

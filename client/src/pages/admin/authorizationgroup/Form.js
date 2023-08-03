@@ -109,8 +109,7 @@ const AuthorizationGroupForm = ({ edit, title, initialValues }) => {
                       "descriptionCharsLeft",
                       Settings.maxTextFieldLength,
                       event
-                    )
-                  }
+                    )}
                   extraColElem={
                     <>
                       <span id="descriptionCharsLeft">

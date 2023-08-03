@@ -36,6 +36,6 @@ module.exports = {
   testSrc: resolveApp("tests"),
   appNodeModules: resolveApp("node_modules"),
   ownNodeModules: resolveApp("node_modules"),
-  nodePaths: nodePaths,
+  nodePaths,
   platforms: resolveApp("platform")
 }

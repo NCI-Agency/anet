@@ -148,7 +148,7 @@ function createExternalLinkNode(url, text) {
   return {
     type: EXTERNAL_LINK,
     url,
-    children: [{ text: text }]
+    children: [{ text }]
   }
 }
 

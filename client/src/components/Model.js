@@ -549,7 +549,7 @@ export default class Model {
       }
     `,
       {
-        uuid: uuid
+        uuid
       }
     ).then(data => new this(data[this.getInstanceName]))
   }
@@ -650,7 +650,7 @@ export default class Model {
       assessmentConfig = Model.filterAssessmentConfig(assessmentConfig, this)
     }
     return {
-      assessmentConfig: assessmentConfig,
+      assessmentConfig,
       assessmentYupSchema:
         assessmentConfig && createAssessmentSchema(assessmentConfig)
     }
@@ -664,7 +664,7 @@ export default class Model {
         )
       })
       .sort((a, b) => b.createdAt - a.createdAt) // desc sorted
-      .map(note => ({ note: note, assessment: utils.parseJsonSafe(note.text) }))
+      .map(note => ({ note, assessment: utils.parseJsonSafe(note.text) }))
       .filter(
         obj =>
           obj.note.assessmentKey ===
@@ -728,7 +728,7 @@ export default class Model {
       })
     })
     return {
-      assessmentsConfig: assessmentsConfig,
+      assessmentsConfig,
       assessmentsSchema: yup.object().shape({
         [assessmentsParentField]: yup
           .object()

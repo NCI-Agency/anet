@@ -99,7 +99,7 @@ const MySubscriptionUpdates = ({
   const [saveError, setSaveError] = useState(null)
   const [pageNum, setPageNum] = useState(0)
   const subscriptionUpdatesQuery = {
-    pageNum: pageNum,
+    pageNum,
     pageSize: 10
   }
   const { loading, error, data, refetch } = API.useApiQuery(
@@ -225,24 +225,22 @@ const MySubscriptionUpdates = ({
                   return (
                     <tr key={key}>
                       <td>
-                        {
-                          <SubscriptionIcon
-                            subscribedObjectType={
-                              subscription.subscribedObjectType
-                            }
-                            subscribedObjectUuid={
-                              subscription.subscribedObjectUuid
-                            }
-                            isSubscribed={true}
-                            updatedAt={null}
-                            refetch={() => {
-                              refetch()
-                              typeof refetchCallback === "function" &&
-                                refetchCallback()
-                            }}
-                            setError={error => setSaveError(error)}
-                          />
-                        }
+                        <SubscriptionIcon
+                          subscribedObjectType={
+                            subscription.subscribedObjectType
+                          }
+                          subscribedObjectUuid={
+                            subscription.subscribedObjectUuid
+                          }
+                          isSubscribed
+                          updatedAt={null}
+                          refetch={() => {
+                            refetch()
+                            typeof refetchCallback === "function" &&
+                              refetchCallback()
+                          }}
+                          setError={error => setSaveError(error)}
+                        />
                       </td>
                       <td>{linkToSubscription}</td>
                       <td>{moment(subscriptionUpdate.createdAt).fromNow()}</td>

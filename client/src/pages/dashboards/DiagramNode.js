@@ -47,7 +47,7 @@ export class DiagramPortModel extends PortModel {
     super({
       type: "anet",
       name: alignment,
-      alignment: alignment
+      alignment
     })
   }
 

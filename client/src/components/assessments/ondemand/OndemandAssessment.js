@@ -105,7 +105,7 @@ const OnDemandAssessment = ({
       const assessmentFieldsObject = utils.parseJsonSafe(note.text)
 
       cards.push(
-        <React.Fragment>
+        <>
           <ValidationBar
             assessmentExpirationDays={
               assessmentConfig?.onDemandAssessmentExpirationDays
@@ -211,7 +211,7 @@ const OnDemandAssessment = ({
               </div>
             </Card.Body>
           </Card>
-        </React.Fragment>
+        </>
       )
     })
     return cards

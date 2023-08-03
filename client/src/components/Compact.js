@@ -291,15 +291,13 @@ const CompactTable = ({ className, children }) => {
           <EmptySpaceTdS colSpan="2" />
         </tr>
       </thead>
-      {
-        <tbody>
-          <tr>
-            <td>
-              <InnerTable>{children}</InnerTable>
-            </td>
-          </tr>
-        </tbody>
-      }
+      <tbody>
+        <tr>
+          <td>
+            <InnerTable>{children}</InnerTable>
+          </td>
+        </tr>
+      </tbody>
       <tfoot>
         <tr>
           <EmptySpaceTdS colSpan="2" />

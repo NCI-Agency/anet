@@ -30,8 +30,7 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
                 <TableBody
                   reportPeople={report.reportPeople}
                   filterCb={person =>
-                    person.role === Person.ROLE.ADVISOR && person.attendee
-                  }
+                    person.role === Person.ROLE.ADVISOR && person.attendee}
                   handleAttendeeRow={renderAttendeeRow}
                   showDelete={showDelete}
                 />
@@ -46,8 +45,7 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
                 <TableBody
                   reportPeople={report.reportPeople}
                   filterCb={person =>
-                    person.role === Person.ROLE.PRINCIPAL && person.attendee
-                  }
+                    person.role === Person.ROLE.PRINCIPAL && person.attendee}
                   handleAttendeeRow={renderAttendeeRow}
                   enableDivider
                   showDelete={showDelete}

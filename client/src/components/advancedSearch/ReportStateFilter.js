@@ -137,7 +137,7 @@ export const deserialize = (props, query, key) => {
       value.cancelledReason = query.cancelledReason
     }
     return {
-      key: key,
+      key,
       value: {
         ...value,
         toQuery: value

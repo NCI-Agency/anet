@@ -169,10 +169,10 @@ const ReportPreview = ({ className, uuid }) => {
       <h4>Report {uuid}</h4>
       <div className="preview-section">
         <PreviewField
-          extraColForValue={true}
+          extraColForValue
           label="Summary"
           value={
-            <div id={"intent"} className="form-control-static">
+            <div id="intent" className="form-control-static">
               <p>
                 <strong>{Settings.fields.report.intent}:</strong>{" "}
                 {report.intent}
@@ -196,10 +196,10 @@ const ReportPreview = ({ className, uuid }) => {
         />
 
         <PreviewField
-          extraColForValue={true}
+          extraColForValue
           label="Engagement date"
           value={
-            <React.Fragment>
+            <>
               <>
                 {report.engagementDate &&
                   moment(report.engagementDate).format(
@@ -207,20 +207,20 @@ const ReportPreview = ({ className, uuid }) => {
                   )}
                 <PlanningConflictForReport report={report} largeIcon />
               </>
-            </React.Fragment>
+            </>
           }
         />
 
         {Settings.engagementsIncludeTimeAndDuration && report.duration && (
           <PreviewField
-            extraColForValue={true}
+            extraColForValue
             label="Duration (minutes)"
             value={report.duration}
           />
         )}
 
         <PreviewField
-          extraColForValue={true}
+          extraColForValue
           label="Location"
           value={
             report.location && (
@@ -231,7 +231,7 @@ const ReportPreview = ({ className, uuid }) => {
 
         {report.cancelled && (
           <PreviewField
-            extraColForValue={true}
+            extraColForValue
             label="Cancelled Reason"
             value={utils.sentenceCase(report.cancelledReason)}
           />
@@ -239,19 +239,19 @@ const ReportPreview = ({ className, uuid }) => {
 
         {!report.cancelled && (
           <PreviewField
-            extraColForValue={true}
+            extraColForValue
             label={Settings.fields.report.atmosphere}
             value={
-              <React.Fragment>
+              <>
                 {utils.sentenceCase(report.atmosphere)}
                 {report.atmosphereDetails && ` – ${report.atmosphereDetails}`}
-              </React.Fragment>
+              </>
             }
           />
         )}
 
         <PreviewField
-          extraColForValue={true}
+          extraColForValue
           label="Authors"
           value={report.authors?.map((a, index) => (
             <React.Fragment key={a.uuid}>
@@ -262,13 +262,13 @@ const ReportPreview = ({ className, uuid }) => {
         />
 
         <PreviewField
-          extraColForValue={true}
+          extraColForValue
           label={Settings.fields.advisor.org.name}
           value={<LinkTo modelType="Organization" model={report.advisorOrg} />}
         />
 
         <PreviewField
-          extraColForValue={true}
+          extraColForValue
           label={Settings.fields.principal.org.name}
           value={
             <LinkTo modelType="Organization" model={report.principalOrg} />
@@ -284,12 +284,12 @@ const ReportPreview = ({ className, uuid }) => {
         <ReportPeople report={report} disabled />
       </div>
       {report.reportText && (
-        <React.Fragment>
+        <>
           <h4>{Settings.fields.report.reportText}</h4>
           <div className="preview-section">
             <RichTextEditor readOnly value={report.reportText} />
           </div>
-        </React.Fragment>
+        </>
       )}
       <h4>{Settings.fields.task.subLevel.longLabel}</h4>
       <div className="preview-section">

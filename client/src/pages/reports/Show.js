@@ -851,8 +851,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                   <Button
                     variant="primary"
                     onClick={() =>
-                      submitComment(values.newComment, setFieldValue)
-                    }
+                      submitComment(values.newComment, setFieldValue)}
                   >
                     Save comment
                   </Button>
@@ -1189,9 +1188,9 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
   function deserializeCallback(message, objectType, filters, text) {
     // We update the Redux state
     setSearchQuery({
-      objectType: objectType,
-      filters: filters,
-      text: text
+      objectType,
+      filters,
+      text
     })
     toast.success(message, { toastId: "success-message" })
     navigate("/search")
