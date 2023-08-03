@@ -1,5 +1,7 @@
 package mil.dds.anet.database;
 
+import static org.jdbi.v3.core.statement.EmptyHandling.NULL_KEYWORD;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -48,7 +50,7 @@ public class ForeignKeyBatcher<T extends AbstractAnetBean> {
   @InTransaction
   public List<List<T>> getByForeignKeys(List<String> foreignKeys) {
     final List<String> args = foreignKeys.isEmpty() ? defaultIfEmpty : foreignKeys;
-    final Query query = getDbHandle().createQuery(sql).bindList(paramName, args);
+    final Query query = getDbHandle().createQuery(sql).bindList(NULL_KEYWORD, paramName, args);
     if (additionalParams != null && !additionalParams.isEmpty()) {
       query.bindMap(additionalParams);
     }

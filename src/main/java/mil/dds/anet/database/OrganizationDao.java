@@ -1,5 +1,7 @@
 package mil.dds.anet.database;
 
+import static org.jdbi.v3.sqlobject.customizer.BindList.EmptyHandling.NULL_STRING;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -130,7 +132,8 @@ public class OrganizationDao
         + ", \"updatedAt\" AS \"organizations_updatedAt\""
         + ", \"locationUuid\" AS \"organizations_locationUuid\""
         + " FROM organizations WHERE \"shortName\" IN ( <shortNames> )")
-    public List<Organization> getOrgsByShortNames(@BindList("shortNames") List<String> shortNames);
+    public List<Organization> getOrgsByShortNames(
+        @BindList(value = "shortNames", onEmpty = NULL_STRING) List<String> shortNames);
   }
 
   @InTransaction

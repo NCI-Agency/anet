@@ -1,5 +1,7 @@
 package mil.dds.anet.database;
 
+import static org.jdbi.v3.core.statement.EmptyHandling.NULL_KEYWORD;
+
 import java.time.Instant;
 import java.util.List;
 import javax.inject.Inject;
@@ -38,7 +40,7 @@ public class EmailDao {
       getDbHandle()
           .createUpdate(
               "/* PendingEmailDelete*/ DELETE FROM \"pendingEmails\" WHERE id IN ( <emailIds> )")
-          .bindList("emailIds", processedEmails).execute();
+          .bindList(NULL_KEYWORD, "emailIds", processedEmails).execute();
     }
   }
 

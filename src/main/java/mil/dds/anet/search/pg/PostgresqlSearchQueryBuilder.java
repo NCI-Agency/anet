@@ -1,5 +1,7 @@
 package mil.dds.anet.search.pg;
 
+import static org.jdbi.v3.core.statement.EmptyHandling.NULL_KEYWORD;
+
 import com.google.common.base.Joiner;
 import java.util.List;
 import java.util.Map;
@@ -76,7 +78,7 @@ public class PostgresqlSearchQueryBuilder<B, T extends AbstractSearchQuery<?>>
       q.bind("offset", query.getPageSize() * query.getPageNum()).bind("limit", query.getPageSize());
     }
     for (final Map.Entry<String, List<?>> listArg : listArgs.entrySet()) {
-      q.bindList(listArg.getKey(), listArg.getValue());
+      q.bindList(NULL_KEYWORD, listArg.getKey(), listArg.getValue());
     }
     return q;
   }

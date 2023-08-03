@@ -1,5 +1,7 @@
 package mil.dds.anet.database;
 
+import static org.jdbi.v3.core.statement.EmptyHandling.NULL_KEYWORD;
+
 import com.google.common.collect.ObjectArrays;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.lang.invoke.MethodHandles;
@@ -642,7 +644,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
 
     final Query q = getDbHandle().createQuery(sql.toString()).bindMap(sqlArgs);
     for (final Map.Entry<String, List<?>> listArg : listArgs.entrySet()) {
-      q.bindList(listArg.getKey(), listArg.getValue());
+      q.bindList(NULL_KEYWORD, listArg.getKey(), listArg.getValue());
     }
     return q.map(new MapMapper(false)).list();
   }
