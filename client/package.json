@@ -69,6 +69,7 @@
     "eslint": "8.46.0",
     "eslint-config-react-app": "7.0.1",
     "eslint-config-standard": "17.1.0",
+    "eslint-config-standard-jsx": "11.0.0",
     "eslint-config-standard-react": "13.0.0",
     "eslint-plugin-chai-expect": "3.0.0",
     "eslint-plugin-flowtype": "8.0.3",

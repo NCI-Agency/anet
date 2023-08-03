@@ -9,6 +9,7 @@ module.exports = {
     "plugin:chai-expect/recommended",
     "react-app",
     "standard",
+    "standard-jsx",
     "standard-react"
   ],
   globals: {
