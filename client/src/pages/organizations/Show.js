@@ -498,8 +498,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
                         value="toggle-filter"
                         size="sm"
                         onClick={() =>
-                          setFilterPendingApproval(!filterPendingApproval)
-                        }
+                          setFilterPendingApproval(!filterPendingApproval)}
                         variant="outline-secondary"
                       >
                         {filterPendingApproval
@@ -511,8 +510,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
                         label="include reports from sub-orgs"
                         checked={includeChildrenOrgs}
                         onChange={() =>
-                          setIncludeChildrenOrgs(!includeChildrenOrgs)
-                        }
+                          setIncludeChildrenOrgs(!includeChildrenOrgs)}
                       />
                     </>
                   }

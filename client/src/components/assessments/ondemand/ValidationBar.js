@@ -79,13 +79,13 @@ const ValidationBar = ({
     )
   } else {
     return (
-      <React.Fragment>
+      <>
         {index === sortedOnDemandNotes.length - 1 ? (
           <div className="ondemand-green-validation-text">Valid</div>
         ) : (
           <div className="ondemand-grey-validation-text">No longer valid</div>
         )}
-      </React.Fragment>
+      </>
     )
   }
 }

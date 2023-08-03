@@ -199,7 +199,9 @@ export const richTextAggregation = (fieldName, fieldConfig, data) => {
   return {
     values: data
       .map(item => Object.get(item, fieldName))
-      .map(htmlString => <RichTextEditor readOnly value={htmlString} />)
+      .map(htmlString => (
+        <RichTextEditor key={fieldName} readOnly value={htmlString} />
+      ))
   }
 }
 

@@ -206,8 +206,7 @@ function EditHistory({
                             }
                             filterDefs={singleSelectParameters.filterDefs}
                             onChange={value =>
-                              singleSelectParameters.onChange(value, addItem)
-                            }
+                              singleSelectParameters.onChange(value, addItem)}
                             objectType={singleSelectParameters.objectType}
                             valueKey="name"
                             fields={singleSelectParameters.fields}
@@ -306,8 +305,7 @@ function EditHistory({
                                         setFieldValue(
                                           endTimeFieldName,
                                           value?.valueOf()
-                                        )
-                                      }
+                                        )}
                                       component={FieldHelper.SpecialField}
                                       widget={
                                         <CustomDateInput

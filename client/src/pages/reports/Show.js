@@ -851,8 +851,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                   <Button
                     variant="primary"
                     onClick={() =>
-                      submitComment(values.newComment, setFieldValue)
-                    }
+                      submitComment(values.newComment, setFieldValue)}
                   >
                     Save comment
                   </Button>

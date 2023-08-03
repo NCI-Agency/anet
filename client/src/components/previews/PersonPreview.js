@@ -191,7 +191,7 @@ const PersonPreview = ({ className, uuid }) => {
       <div className="preview-section">
         <div
           title="Current Position"
-          id={"current-position"}
+          id="current-position"
           className={!position || !position.uuid ? "warning" : undefined}
         >
           {hasPosition

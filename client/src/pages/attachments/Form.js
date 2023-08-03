@@ -144,8 +144,7 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
                         component={FieldHelper.RadioButtonToggleGroupField}
                         buttons={classificationButtons}
                         onChange={value =>
-                          setFieldValue("classification", value)
-                        }
+                          setFieldValue("classification", value)}
                       />
                     ) : (
                       <Field
@@ -179,7 +178,7 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
                   objectType="attachment"
                   objectDisplay={values.uuid}
                   variant="danger"
-                  buttonLabel={"Delete this Attachment"}
+                  buttonLabel="Delete this Attachment"
                   buttonDisabled={isSubmitting}
                 />
                 <div>

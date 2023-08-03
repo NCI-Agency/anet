@@ -307,103 +307,94 @@ const CompactReportView = ({ pageDispatchers }) => {
             backgroundText={backgroundText}
           >
             <CompactHeaderContent />
-            <CompactTable
-              children={
-                <>
-                  <FullColumn>
-                    <CompactTitle
-                      label={getReportTitle()}
-                      className="reportField"
-                    />
-                    <CompactSubTitle
-                      label={getReportSubTitle()}
-                      className="reportField"
-                    />
-                    <CompactRow
-                      label="purpose"
-                      content={report.intent}
-                      className="reportField"
-                    />
-                    <CompactRow
-                      label={
-                        Settings.fields.report.keyOutcomes || "key outcomes"
-                      }
-                      content={report.keyOutcomes}
-                      className="reportField"
-                    />
-                    {!report.cancelled ? (
-                      <CompactRow
-                        label={Settings.fields.report.atmosphere}
-                        content={
-                          <>
-                            {utils.sentenceCase(report.atmosphere)}
-                            {report.atmosphereDetails &&
-                              ` – ${report.atmosphereDetails}`}
-                          </>
-                        }
-                        className="reportField"
-                      />
-                    ) : null}
-                    <CompactRow
-                      label={Settings.fields.report.nextSteps.label}
-                      content={report.nextSteps}
-                      className="reportField"
-                    />
-                    <CompactRow
-                      id="principals"
-                      label="principals"
-                      content={getAttendeesAndAssessments(
-                        Person.ROLE.PRINCIPAL
-                      )}
-                      className="reportField"
-                    />
-                    <CompactRow
-                      id="advisors"
-                      label="advisors"
-                      content={getAttendeesAndAssessments(Person.ROLE.ADVISOR)}
-                      className="reportField"
-                    />
-                    <CompactRow
-                      id="tasks"
-                      label={Settings.fields.task.subLevel.longLabel}
-                      content={getTasksAndAssessments()}
-                      className="reportField"
-                    />
-                    {report.cancelled ? (
-                      <CompactRow
-                        label="cancelled reason"
-                        content={utils.sentenceCase(report.cancelledReason)}
-                        className="reportField"
-                      />
-                    ) : null}
-                    {optionalFields.workflow.active && report.showWorkflow() ? (
-                      <CompactRowReportWorkflow
-                        workflow={report.workflow}
-                        className="reportField"
-                        isCompact
-                      />
-                    ) : null}
-                    {report.reportText ? (
-                      <CompactRow
-                        label={Settings.fields.report.reportText}
-                        content={
-                          <RichTextEditor readOnly value={report.reportText} />
-                        }
-                        className="reportField"
-                      />
-                    ) : null}
-                    {Settings.fields.report.customFields ? (
-                      <ReadonlyCustomFields
-                        fieldsConfig={Settings.fields.report.customFields}
-                        values={report}
-                        vertical
-                        isCompact
-                      />
-                    ) : null}
-                  </FullColumn>
-                </>
-              }
-            >
+            <CompactTable>
+              <FullColumn>
+                <CompactTitle
+                  label={getReportTitle()}
+                  className="reportField"
+                />
+                <CompactSubTitle
+                  label={getReportSubTitle()}
+                  className="reportField"
+                />
+                <CompactRow
+                  label="purpose"
+                  content={report.intent}
+                  className="reportField"
+                />
+                <CompactRow
+                  label={Settings.fields.report.keyOutcomes || "key outcomes"}
+                  content={report.keyOutcomes}
+                  className="reportField"
+                />
+                {!report.cancelled ? (
+                  <CompactRow
+                    label={Settings.fields.report.atmosphere}
+                    content={
+                      <>
+                        {utils.sentenceCase(report.atmosphere)}
+                        {report.atmosphereDetails &&
+                          ` – ${report.atmosphereDetails}`}
+                      </>
+                    }
+                    className="reportField"
+                  />
+                ) : null}
+                <CompactRow
+                  label={Settings.fields.report.nextSteps.label}
+                  content={report.nextSteps}
+                  className="reportField"
+                />
+                <CompactRow
+                  id="principals"
+                  label="principals"
+                  content={getAttendeesAndAssessments(Person.ROLE.PRINCIPAL)}
+                  className="reportField"
+                />
+                <CompactRow
+                  id="advisors"
+                  label="advisors"
+                  content={getAttendeesAndAssessments(Person.ROLE.ADVISOR)}
+                  className="reportField"
+                />
+                <CompactRow
+                  id="tasks"
+                  label={Settings.fields.task.subLevel.longLabel}
+                  content={getTasksAndAssessments()}
+                  className="reportField"
+                />
+                {report.cancelled ? (
+                  <CompactRow
+                    label="cancelled reason"
+                    content={utils.sentenceCase(report.cancelledReason)}
+                    className="reportField"
+                  />
+                ) : null}
+                {optionalFields.workflow.active && report.showWorkflow() ? (
+                  <CompactRowReportWorkflow
+                    workflow={report.workflow}
+                    className="reportField"
+                    isCompact
+                  />
+                ) : null}
+                {report.reportText ? (
+                  <CompactRow
+                    label={Settings.fields.report.reportText}
+                    content={
+                      <RichTextEditor readOnly value={report.reportText} />
+                    }
+                    className="reportField"
+                  />
+                ) : null}
+                {Settings.fields.report.customFields ? (
+                  <ReadonlyCustomFields
+                    fieldsConfig={Settings.fields.report.customFields}
+                    values={report}
+                    vertical
+                    isCompact
+                  />
+                ) : null}
+              </FullColumn>
             </CompactTable>
             <CompactFooterContent object={report} />
           </CompactView>

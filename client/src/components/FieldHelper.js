@@ -210,12 +210,13 @@ export const InputField = ({
       form={form}
       label={label}
       widgetElem={widgetElem}
-      children={children}
       extraColElem={extraColElem}
       addon={addon}
       vertical={vertical}
       extraAddon={extraAddon}
-    />
+    >
+      {children}
+    </Field>
   )
 }
 InputField.propTypes = {
@@ -250,12 +251,9 @@ export const InputFieldNoLabel = ({
     [field, otherProps, validationState]
   )
   return (
-    <FieldNoLabel
-      field={field}
-      form={form}
-      widgetElem={widgetElem}
-      children={children}
-    />
+    <FieldNoLabel field={field} form={form} widgetElem={widgetElem}>
+      {children}
+    </FieldNoLabel>
   )
 }
 InputFieldNoLabel.propTypes = {
@@ -293,14 +291,15 @@ export const ReadonlyField = ({
       form={form}
       label={label}
       widgetElem={widgetElem}
-      children={children}
       extraColElem={extraColElem}
       labelColumnWidth={labelColumnWidth}
       addon={addon}
       vertical={vertical}
       isCompact={isCompact}
       className={className}
-    />
+    >
+      {children}
+    </Field>
   )
 }
 ReadonlyField.propTypes = {
@@ -344,12 +343,13 @@ export const SpecialField = ({
       form={form}
       label={label}
       widgetElem={widgetElem}
-      children={children}
       extraColElem={extraColElem}
       addon={addon}
       vertical={vertical}
       isCompact={isCompact}
-    />
+    >
+      {children}
+    </Field>
   )
 }
 SpecialField.propTypes = {
@@ -491,11 +491,12 @@ const ButtonToggleGroupField = ({
       form={form}
       label={label}
       widgetElem={widgetElem}
-      children={children}
       extraColElem={extraColElem}
       addon={addon}
       vertical={vertical}
-    />
+    >
+      {children}
+    </Field>
   )
 }
 ButtonToggleGroupField.propTypes = {
@@ -663,7 +664,7 @@ FieldShortcuts.propTypes = {
 export const PreviewField = ({ label, value, extraColForValue }) => {
   if (extraColForValue) {
     return (
-      <React.Fragment>
+      <>
         <Row>
           <Col xs={3}>
             <div className="preview-field-label">{label}</div>
@@ -672,14 +673,14 @@ export const PreviewField = ({ label, value, extraColForValue }) => {
             <div className="preview-field-value">{value}</div>
           </Col>
         </Row>
-      </React.Fragment>
+      </>
     )
   } else {
     return (
-      <React.Fragment>
+      <>
         <div className="preview-field-label">{label}</div>
         <div className="preview-field-value">{value}</div>
-      </React.Fragment>
+      </>
     )
   }
 }

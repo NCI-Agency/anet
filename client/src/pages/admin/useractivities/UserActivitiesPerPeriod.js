@@ -269,8 +269,7 @@ const UserActivitiesPerPeriod = ({
                     className="me-1"
                     defaultValue={searchType}
                     onChange={e =>
-                      changeSearchType(e.target.value || DEFAULT_SEARCH_TYPE)
-                    }
+                      changeSearchType(e.target.value || DEFAULT_SEARCH_TYPE)}
                   >
                     {Object.values(SEARCH_TYPES).map(st => (
                       <option key={st} value={st}>
@@ -292,8 +291,7 @@ const UserActivitiesPerPeriod = ({
                   onChange={e =>
                     changePageSize(
                       parseInt(e.target.value, 10) || DEFAULT_PAGESIZE
-                    )
-                  }
+                    )}
                 >
                   {PAGESIZES.map(size => (
                     <option key={size} value={size}>

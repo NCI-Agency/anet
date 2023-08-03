@@ -136,16 +136,14 @@ const MergePeople = ({ pageDispatchers }) => {
             <div style={{ padding: "16px 5%" }}>
               <Callout intent="primary">
                 <br />- Required fields are:{" "}
-                {
-                  <ul>
-                    <li>Name</li>
-                    <li>Role</li>
-                    <li>Status</li>
-                    <li>{Settings.fields.person.rank}</li>
-                    <li>{Settings.fields.person.gender}</li>
-                    <li>{Settings.fields.person.country}</li>
-                  </ul>
-                }
+                <ul>
+                  <li>Name</li>
+                  <li>Role</li>
+                  <li>Status</li>
+                  <li>{Settings.fields.person.rank}</li>
+                  <li>{Settings.fields.person.gender}</li>
+                  <li>{Settings.fields.person.country}</li>
+                </ul>
                 If the Merged Person will be an {Person.ROLE.ADVISOR}:
                 <ul>
                   <li>{Settings.fields.person.emailAddress.label}</li>
@@ -273,8 +271,7 @@ const MergePeople = ({ pageDispatchers }) => {
                       setHistory={history =>
                         dispatchMergeActions(
                           setAMergedField("previousPositions", history, null)
-                        )
-                      }
+                        )}
                     />
                   </>
                 }

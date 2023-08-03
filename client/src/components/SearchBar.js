@@ -30,7 +30,7 @@ export const SearchPopover = ({
       interactionKind={Popover2InteractionKind.CLICK}
       placement="bottom-start"
       usePortal={false}
-      autoFocus={true}
+      autoFocus
       enforceFocus={false}
       className="search-popover-target"
       modifiers={{

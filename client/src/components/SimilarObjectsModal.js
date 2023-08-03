@@ -22,7 +22,7 @@ const SimilarObjectsModal = ({ objectType, userInput, onCancel }) => {
 
   const TableComponent = TABLE_COMPONENTS[objectType]
   return !TableComponent ? null : (
-    <Modal centered show={true} onHide={onCancel}>
+    <Modal centered show onHide={onCancel}>
       <Modal.Header closeButton>
         <Modal.Title>Possible Duplicates</Modal.Title>
       </Modal.Header>

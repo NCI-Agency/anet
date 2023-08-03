@@ -417,8 +417,7 @@ const AllFormatsInfo = ({
                   <Button
                     name="location"
                     onClick={() =>
-                      setLocationFormat(Location.LOCATION_FORMATS.LAT_LON)
-                    }
+                      setLocationFormat(Location.LOCATION_FORMATS.LAT_LON)}
                     variant="outline-secondary"
                   >
                     {
@@ -437,8 +436,7 @@ const AllFormatsInfo = ({
                   <Button
                     name="location"
                     onClick={() =>
-                      setLocationFormat(Location.LOCATION_FORMATS.MGRS)
-                    }
+                      setLocationFormat(Location.LOCATION_FORMATS.MGRS)}
                     variant="outline-secondary"
                   >
                     {

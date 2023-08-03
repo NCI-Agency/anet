@@ -386,8 +386,7 @@ const LocationColumn = ({
           fields={Location.allFieldsQuery}
           addon={LOCATIONS_ICON}
           vertical
-        >
-        </AdvancedSingleSelect>
+        />
       </FormGroup>
       {areAllSet(location) && (
         <fieldset>

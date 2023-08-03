@@ -309,8 +309,7 @@ const PersonForm = ({
                               showModal={showWrongPersonModal}
                               onCancel={() => hideWrongPersonModal(null)}
                               onSuccess={optionValue =>
-                                hideWrongPersonModal(optionValue)
-                              }
+                                hideWrongPersonModal(optionValue)}
                             >
                               {(isSelf && (
                                 <div>
@@ -652,8 +651,7 @@ const PersonForm = ({
                   onCancel={() => {
                     setShowSimilarPeople(false)
                   }}
-                >
-                </SimilarObjectsModal>
+                />
               )}
 
               <div className="submit-buttons">

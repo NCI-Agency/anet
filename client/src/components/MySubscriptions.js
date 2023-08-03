@@ -170,7 +170,7 @@ const MySubscriptions = ({
                           subscribedObjectUuid={
                             subscription.subscribedObjectUuid
                           }
-                          isSubscribed={true}
+                          isSubscribed
                           updatedAt={null}
                           refetch={() => {
                             refetch()

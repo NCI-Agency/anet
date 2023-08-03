@@ -385,8 +385,7 @@ const PositionShow = ({ pageDispatchers }) => {
                     currentUser.isAdmin() && (
                       <Button
                         onClick={() =>
-                          setShowOrganizationsAdministratedModal(true)
-                        }
+                          setShowOrganizationsAdministratedModal(true)}
                         variant="outline-secondary"
                       >
                         Edit{" "}

@@ -170,8 +170,7 @@ const AdminIndex = ({ pageDispatchers }) => {
                             )}
                           </FormSelect>
                         }
-                      >
-                      </Field>
+                      />
                     )
                   }
                   return (
