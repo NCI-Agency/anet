@@ -99,15 +99,6 @@ module.exports = {
     entry: {
       anet: [require.resolve("./polyfills"), "./src/index-auth.js"]
     },
-    // A strange workaround for a strange compile-time bug:   Error in
-    // ./~/xmlhttprequest/lib/XMLHttpRequest.js   Module not found: 'child_process'
-    // in ./node_modules/xmlhttprequest/lib This fix suggested in:
-    // https://github.com/webpack/webpack-dev-server/issues/66#issuecomment-61577531
-    externals: [
-      {
-        xmlhttprequest: "{XMLHttpRequest:XMLHttpRequest}"
-      }
-    ],
     output: {
       path: paths.appBuild
     },
