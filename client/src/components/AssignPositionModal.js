@@ -201,7 +201,7 @@ const AssignPositionModal = ({ person, showModal, onCancel, onSuccess }) => {
   } else if (person.role === Person.ROLE.PRINCIPAL) {
     positionSearchQuery.type = [Position.TYPE.PRINCIPAL]
   }
-  if (currentUser.isSuperuser()) {
+  if (currentUser.isSuperuser() && !currentUser.isAdmin()) {
     // Superusers are limited to their organizations
     const administratingOrgUuids =
       currentUser.position.organizationsAdministrated.map(org => org.uuid)
