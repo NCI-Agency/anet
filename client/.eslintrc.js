@@ -20,7 +20,7 @@ module.exports = {
     "flowtype",
     "import",
     "jsx-a11y",
-    "node",
+    "n",
     "promise",
     "react",
     "react-hooks"

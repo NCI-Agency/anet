@@ -1275,7 +1275,7 @@ const ReportForm = ({
             autoSaveSettings.current.autoSaveTimeout.asMilliseconds()
           )
         })
-        /* eslint-disable node/handle-callback-err */
+        /* eslint-disable n/handle-callback-err */
         .catch(error => {
           // Show an error message
           autoSaveSettings.current.autoSaveTimeout.add(
@@ -1292,7 +1292,7 @@ const ReportForm = ({
             autoSaveSettings.current.autoSaveTimeout.asMilliseconds()
           )
         })
-      /* eslint-enable node/handle-callback-err */
+      /* eslint-enable n/handle-callback-err */
     }
   }
 
