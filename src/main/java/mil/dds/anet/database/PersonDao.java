@@ -552,13 +552,13 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
         final Instant endTime = pph.getEndTime();
         if (endTime == null) {
           q = getDbHandle().createQuery("SELECT COUNT(*) AS count FROM \"peoplePositions\"  WHERE ("
-              + " \"endedAt\" IS NULL OR (\"endedAt\" IS NOT NULL AND \"endedAt\" >= :startTime)"
+              + " \"endedAt\" IS NULL OR (\"endedAt\" IS NOT NULL AND \"endedAt\" > :startTime)"
               + ") AND " + personPositionClause);
         } else {
           q = getDbHandle().createQuery("SELECT COUNT(*) AS count FROM \"peoplePositions\" WHERE ("
-              + "(\"endedAt\" IS NULL AND \"createdAt\" <= :endTime)"
+              + "(\"endedAt\" IS NULL AND \"createdAt\" < :endTime)"
               + " OR (\"endedAt\" IS NOT NULL AND"
-              + " \"createdAt\" <= :endTime AND \"endedAt\" >= :startTime)) AND "
+              + " \"createdAt\" < :endTime AND \"endedAt\" > :startTime)) AND "
               + personPositionClause).bind("endTime", DaoUtils.asLocalDateTime(endTime));
         }
         final String histUuid = checkPerson ? pph.getPositionUuid() : pph.getPersonUuid();
