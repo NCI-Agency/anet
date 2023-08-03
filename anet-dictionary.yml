@@ -365,7 +365,7 @@ fields:
           - Position
           - Organization
           - Location
-          - Task 
+          - Task
       additionalEngagementNeeded:
         type: array_of_anet_objects
         label: Additional engagement needed for
@@ -861,7 +861,7 @@ fields:
       organizationAnnually:
         label: Interaction Plan
         recurrence: annually
-        questions:         
+        questions:
           question1:
             type: enum
             label: Priority

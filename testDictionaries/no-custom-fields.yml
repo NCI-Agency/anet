@@ -456,7 +456,7 @@ fields:
       organizationAnnually:
         label: Interaction Plan
         recurrence: annually
-        questions:         
+        questions:
           question1:
             type: enum
             label: Priority
