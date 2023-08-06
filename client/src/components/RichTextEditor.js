@@ -222,7 +222,8 @@ const withHtml = editor => {
 
   editor.isInline = element =>
     element.type === "link" ? true : isInline(element)
-  editor.isVoid = element => (element.type === "image" ? true : isVoid(element))
+  editor.isVoid = element =>
+    element.type === "image" || element.type === "link" ? true : isVoid(element)
 
   editor.insertData = data => {
     const html = data?.getData("text/html")
@@ -246,7 +247,7 @@ const withHtml = editor => {
 const withAnetLink = editor => {
   const { isVoid, isInline } = editor
   editor.isVoid = element =>
-    element.type === ANET_LINK ? true : isVoid(element)
+    LINK_TYPES.includes(element.type) ? true : isVoid(element)
   editor.isInline = element =>
     LINK_TYPES.includes(element.type) ? true : isInline(element)
   return editor
@@ -385,13 +386,27 @@ const displayCallback = modelInstance => {
   }
 }
 
-const getExternalLink = (element, children, attributes) => {
+const getExternalLink = (element, children, attributes, selected, focused) => {
+  const reducedChildren = element.children.reduce(
+    (acc, child) => acc + child.text,
+    ""
+  )
   return (
-    <LinkExternalHref
-      url={element.url}
-      children={children}
-      attributes={attributes}
-    />
+    <span
+      {...attributes}
+      style={{
+        padding: "1px",
+        verticalAlign: "baseline",
+        display: "inline-block",
+        borderRadius: "4px",
+        boxShadow: selected && focused ? "0 0 0 2px #B4D5FF" : "none"
+      }}
+    >
+      <LinkExternalHref url={element.url} attributes={attributes}>
+        {reducedChildren}
+      </LinkExternalHref>
+      {children}
+    </span>
   )
 }
 
@@ -437,16 +452,16 @@ const Element = ({ attributes, children, element }) => {
       return <blockquote {...attributes}>{children}</blockquote>
     case "link": {
       const entityInfo = getEntityInfoFromUrl(element.url)
-      if (entityInfo.type === EXTERNAL_LINK) {
-        return getExternalLink(element, children, attributes)
-      } else {
+      if (entityInfo.type === ANET_LINK) {
         return getAnetLink(entityInfo, children, attributes, selected, focused)
+      } else {
+        return getExternalLink(element, children, attributes, selected, focused)
       }
     }
     case ANET_LINK:
       return getAnetLink(element, children, attributes, selected, focused)
     case EXTERNAL_LINK:
-      return getExternalLink(element, children, attributes)
+      return getExternalLink(element, children, attributes, selected, focused)
     default:
       return <p {...attributes}>{children}</p>
   }

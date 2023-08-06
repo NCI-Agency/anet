@@ -11,7 +11,7 @@ const LinkExternalHref = ({ url, children, attributes }) => {
         icon={IconNames.SHARE}
         intent={Intent.PRIMARY}
         size={IconSize.STANDARD * 0.75}
-        style={{ marginLeft: 2, paddingBottom: "5px" }}
+        style={{ marginLeft: "2px", paddingBottom: "5px" }}
       />
     </a>
   )
