@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -23,6 +24,8 @@ import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotFoundException;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.database.ReportDao;
+import mil.dds.anet.resources.AttachmentResource;
 import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.client.AdvisorReportsEntry;
 import mil.dds.anet.test.client.AnetBeanList_Location;
@@ -34,6 +37,9 @@ import mil.dds.anet.test.client.ApprovalStep;
 import mil.dds.anet.test.client.ApprovalStepInput;
 import mil.dds.anet.test.client.ApprovalStepType;
 import mil.dds.anet.test.client.Atmosphere;
+import mil.dds.anet.test.client.Attachment;
+import mil.dds.anet.test.client.AttachmentInput;
+import mil.dds.anet.test.client.AttachmentRelatedObjectInput;
 import mil.dds.anet.test.client.Comment;
 import mil.dds.anet.test.client.Location;
 import mil.dds.anet.test.client.LocationSearchQueryInput;
@@ -108,9 +114,10 @@ public class ReportResourceTest extends AbstractResourceTest {
           + " reportPeople %3$s tasks %4$s approvalStep { uuid relatedObjectUuid } location %5$s"
           + " comments %6$s notes %7$s authorizationGroups { uuid name }"
           + " workflow { step { uuid relatedObjectUuid approvers { uuid person { uuid } } }"
-          + " person { uuid } type createdAt } reportSensitiveInformation { uuid text } }",
+          + " person { uuid } type createdAt } reportSensitiveInformation { uuid text } "
+          + " attachments %8$s }",
       REPORT_FIELDS, ORGANIZATION_FIELDS, REPORT_PEOPLE_FIELDS, TASK_FIELDS, LOCATION_FIELDS,
-      COMMENT_FIELDS, NoteResourceTest.NOTE_FIELDS);
+      COMMENT_FIELDS, NoteResourceTest.NOTE_FIELDS, AttachmentResourceTest.ATTACHMENT_FIELDS);
 
   @Test
   public void createReport()
@@ -1412,8 +1419,9 @@ public class ReportResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void reportDeleteTest()
+  void reportDeleteTest()
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    final Map<String, Object> attachmentSettings = AttachmentResource.getAttachmentSettings();
     final Person elizabeth = getElizabethElizawell();
     final MutationExecutor elizabethMutationExecutor =
         getMutationExecutor(elizabeth.getDomainUsername());
@@ -1434,6 +1442,26 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(r).isNotNull();
     assertThat(r.getUuid()).isNotNull();
 
+    // Attach attachment to test report
+    final var allowedMimeTypes = (List<String>) attachmentSettings.get("mimeTypes");
+    final String mimeType = allowedMimeTypes.get(0);
+
+    final AttachmentRelatedObjectInput testAroInput = AttachmentRelatedObjectInput.builder()
+        .withRelatedObjectType(ReportDao.TABLE_NAME).withRelatedObjectUuid(r.getUuid()).build();
+    final AttachmentInput testAttachmentInput =
+        AttachmentInput.builder().withFileName("testDeleteAttachment.jpg").withMimeType(mimeType)
+            .withDescription("a test attachment created by testDeleteAttachment")
+            .withAttachmentRelatedObjects(Collections.singletonList(testAroInput)).build();
+    final String createdAttachmentUuid =
+        adminMutationExecutor.createAttachment("", testAttachmentInput);
+    assertThat(createdAttachmentUuid).isNotNull();
+
+    final Report updatedReport = adminQueryExecutor.report(FIELDS, r.getUuid());
+    assertThat(updatedReport.getAttachments()).hasSize(1);
+    final Attachment reportAttachment = updatedReport.getAttachments().get(0);
+    assertThat(reportAttachment.getUuid()).isEqualTo(createdAttachmentUuid);
+    assertThat(reportAttachment.getAttachmentRelatedObjects()).hasSize(1);
+
     // Try to delete by jack, this should fail.
     try {
       jackMutationExecutor.deleteReport("", r.getUuid());
@@ -1448,6 +1476,14 @@ public class ReportResourceTest extends AbstractResourceTest {
     // Assert the report is gone.
     try {
       getQueryExecutor("elizabeth").report(FIELDS, r.getUuid());
+      fail("Expected NotFoundException");
+    } catch (NotFoundException expectedException) {
+    }
+
+    // Assert that the attachment is gone
+    try {
+      adminQueryExecutor.attachment(AttachmentResourceTest.ATTACHMENT_FIELDS,
+          reportAttachment.getUuid());
       fail("Expected NotFoundException");
     } catch (NotFoundException expectedException) {
     }
