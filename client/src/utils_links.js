@@ -7,7 +7,7 @@ export const LINK_TYPES = [ANET_LINK, EXTERNAL_LINK]
 const UUID_REGEX =
   /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i
 
-const RELATED_OBJECT_TYPE_TO_ENTITY_TYPE = {
+export const RELATED_OBJECT_TYPE_TO_ENTITY_TYPE = {
   [Models.Report.relatedObjectType]: Models.Report.resourceName,
   [Models.Person.relatedObjectType]: Models.Person.resourceName,
   [Models.Organization.relatedObjectType]: Models.Organization.resourceName,

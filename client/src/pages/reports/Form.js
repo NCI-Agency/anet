@@ -299,8 +299,7 @@ const ReportForm = ({
         Object.assign(autoSaveSettings.current, { dirty, values, touched })
         if (autoSaveActive.current && !autoSaveSettings.current.timeoutId) {
           // Schedule the auto-save timer
-          const autosaveHandler = () =>
-            autoSave({ setFieldValue, setFieldTouched, resetForm })
+          const autosaveHandler = () => autoSave(resetForm, setFieldTouched)
           autoSaveSettings.current.timeoutId = window.setTimeout(
             autosaveHandler,
             autoSaveSettings.current.autoSaveTimeout.asMilliseconds()
@@ -428,11 +427,6 @@ const ReportForm = ({
         const isFutureEngagement = Report.isFuture(values.engagementDate)
         const hasAssessments = values.engagementDate && !isFutureEngagement
         const relatedObject = hasAssessments ? values : {}
-
-        const getRelatedObject = val => ({
-          uuid: val.uuid,
-          type: Report.relatedObjectType
-        })
 
         return (
           <div className="report-form">
@@ -924,15 +918,22 @@ const ReportForm = ({
                 />
 
                 {!Settings.fields.attachment.featureDisabled && (
-                  <FastField
+                  <Field
                     name="uploadAttachments"
                     component={FieldHelper.SpecialField}
                     label={Settings.fields.attachment.shortLabel}
                     widget={
                       <UploadAttachment
                         edit={edit}
-                        saveRelatedObject={saveCallback}
-                        getRelatedObject={() => getRelatedObject(values)}
+                        relatedObjectType={Report.relatedObjectType}
+                        relatedObjectUuid={values.uuid}
+                        saveRelatedObject={() =>
+                          saveReportForm(
+                            values,
+                            touched,
+                            resetForm,
+                            setFieldTouched
+                          )}
                       />
                     }
                     onHandleBlur={() => {
@@ -1220,19 +1221,35 @@ const ReportForm = ({
     setShowSensitiveInfo(!showSensitiveInfo)
   }
 
-  function saveCallback() {
-    return save(autoSaveSettings.current.values, false)
-      .then(response => response.uuid)
-      .catch(error => toast.error(`Report autosaving failed: ${error.message}`))
+  function saveReportForm(values, touched, resetForm, setFieldTouched) {
+    return save(values, false).then(response => {
+      const newValues = _cloneDeep(values)
+      Object.assign(newValues, response)
+      if (newValues.reportSensitiveInformation === null) {
+        // object must exist for Collapse children
+        newValues.reportSensitiveInformation = { uuid: null, text: null }
+      }
+      // After successful save of the form, reset the form with the new values in order to make
+      // sure the dirty prop is also reset (otherwise we would get a blocking navigation warning).
+      // First save original 'touched' state
+      const origTouched = _cloneDeep(touched)
+      // Then reset form with new values
+      resetForm({ values: newValues })
+      // And restore original 'touched' state, so we keep messages
+      Object.entries(origTouched).forEach(([field, value]) =>
+        setFieldTouched(field, value)
+      )
+      return newValues
+    })
   }
 
-  function autoSave(form) {
+  function autoSave(resetForm, setFieldTouched) {
     if (!autoSaveActive.current) {
       // We're done auto-saving
       return
     }
 
-    const autosaveHandler = () => autoSave(form)
+    const autosaveHandler = () => autoSave(resetForm, setFieldTouched)
     // Only auto-save if the report has changed
     if (!autoSaveSettings.current.dirty) {
       // Just re-schedule the auto-save timer
@@ -1241,26 +1258,17 @@ const ReportForm = ({
         autoSaveSettings.current.autoSaveTimeout.asMilliseconds()
       )
     } else {
-      save(autoSaveSettings.current.values, false)
+      saveReportForm(
+        autoSaveSettings.current.values,
+        autoSaveSettings.current.touched,
+        resetForm,
+        setFieldTouched
+      )
         .then(response => {
-          const newValues = _cloneDeep(autoSaveSettings.current.values)
-          Object.assign(newValues, response)
-          if (newValues.reportSensitiveInformation === null) {
-            // object must exist for Collapse children
-            newValues.reportSensitiveInformation = { uuid: null, text: null }
-          }
-          // After successful autosave, reset the form with the new values in order to make sure the dirty
-          // prop is also reset (otherwise we would get a blocking navigation warning)
-          const touched = _cloneDeep(autoSaveSettings.current.touched) // save previous touched
-          form.resetForm({ values: newValues })
-          Object.entries(touched).forEach(([field, value]) =>
-            // re-set touched so we keep messages
-            form.setFieldTouched(field, value)
-          )
           autoSaveSettings.current.autoSaveTimeout = defaultTimeout.clone() // reset to default
           setAutoSavedAt(moment())
           toast.success(
-            `Your ${getReportType(newValues)} has been automatically saved`
+            `Your ${getReportType(response)} has been automatically saved`
           )
           autoSaveSettings.current.dirty = false
           // And re-schedule the auto-save timer
@@ -1269,8 +1277,7 @@ const ReportForm = ({
             autoSaveSettings.current.autoSaveTimeout.asMilliseconds()
           )
         })
-        /* eslint-disable n/handle-callback-err */
-        .catch(error => {
+        .catch(() => {
           // Show an error message
           autoSaveSettings.current.autoSaveTimeout.add(
             autoSaveSettings.current.autoSaveTimeout
@@ -1286,7 +1293,6 @@ const ReportForm = ({
             autoSaveSettings.current.autoSaveTimeout.asMilliseconds()
           )
         })
-      /* eslint-enable n/handle-callback-err */
     }
   }
 
