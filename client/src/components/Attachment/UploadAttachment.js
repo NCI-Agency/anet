@@ -37,7 +37,11 @@ const UploadAttachment = ({
   const [uploadedList, setUploadedList] = useState([])
 
   const attachmentSave = async(e, uuid) => {
-    const file = e.target.files[0]
+    const file = e.target?.files?.[0]
+    if (!file) {
+      // No file was selected, just return
+      return
+    }
     const selectedAttachment = new Attachment({
       fileName: file.name,
       mimeType: file.type,
