@@ -1348,7 +1348,7 @@ const ReportForm = ({
     entityType,
     entities,
     values,
-    asessmentsFieldName,
+    assessmentsFieldName,
     assessmentsUuidsFieldName,
     reportUuid
   ) {
@@ -1356,7 +1356,7 @@ const ReportForm = ({
     const valuesCopy = _cloneDeep(values)
     const assessmentNotes = []
     const entitiesAssessments = Object.entries(
-      valuesCopy[asessmentsFieldName]
+      valuesCopy[assessmentsFieldName]
     ).filter(([entityUuid, instantAssessments]) => {
       Object.entries(instantAssessments).forEach(([ak, assessmentValues]) => {
         if (isEmptyAssessment(assessmentValues)) {
@@ -1394,7 +1394,7 @@ const ReportForm = ({
           text: customFieldsJSONString(
             valuesCopy,
             true,
-            `${asessmentsFieldName}.${entityUuid}.${ak}`
+            `${assessmentsFieldName}.${entityUuid}.${ak}`
           )
         }
         const initialAssessmentUuid =
