@@ -83,6 +83,7 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     final Report updatedReport = adminQueryExecutor.report(REPORT_FIELDS, testReport.getUuid());
     assertThat(updatedReport.getAttachments()).hasSize(1);
     final Attachment reportAttachment = updatedReport.getAttachments().get(0);
+    assertThat(reportAttachment.getUuid()).isEqualTo(createdAttachmentUuid);
     assertThat(reportAttachment.getAttachmentRelatedObjects()).hasSize(1);
     assertThat(reportAttachment.getDescription()).isEqualTo(testAttachmentInput.getDescription());
     assertThat(reportAttachment.getClassification())
@@ -122,13 +123,14 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     final Report updatedReport = adminQueryExecutor.report(REPORT_FIELDS, testReport.getUuid());
     assertThat(updatedReport.getAttachments()).hasSize(1);
     final Attachment reportAttachment = updatedReport.getAttachments().get(0);
+    assertThat(reportAttachment.getUuid()).isEqualTo(createdAttachmentUuid);
     assertThat(reportAttachment.getAttachmentRelatedObjects()).hasSize(1);
     assertThat(reportAttachment.getDescription()).isEqualTo(testAttachmentInput.getDescription());
     assertThat(reportAttachment.getClassification())
         .isEqualTo(testAttachmentInput.getClassification());
     assertThat(reportAttachment.getFileName()).isEqualTo(testAttachmentInput.getFileName());
 
-    // F - delete attachment classification as someone else
+    // F - delete attachment as someone else
     final MutationExecutor erinMutationExecutor =
         getMutationExecutor(getRegularUser().getDomainUsername());
     failAttachmentDelete(erinMutationExecutor, reportAttachment.getUuid());
@@ -221,8 +223,7 @@ public class AttachmentResourceTest extends AbstractResourceTest {
   private String succeedAttachmentCreate(final MutationExecutor mutationExecutor,
       final AttachmentInput attachmentInput)
       throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
-    final String createdAttachmentUuid =
-        mutationExecutor.createAttachment(attachmentInput.getUuid(), attachmentInput);
+    final String createdAttachmentUuid = mutationExecutor.createAttachment("", attachmentInput);
     assertThat(createdAttachmentUuid).isNotNull();
     return createdAttachmentUuid;
   }
@@ -230,7 +231,7 @@ public class AttachmentResourceTest extends AbstractResourceTest {
   private void failAttachmentCreate(final MutationExecutor mutationExecutor,
       final AttachmentInput attachmentInput) {
     try {
-      mutationExecutor.createAttachment(attachmentInput.getUuid(), attachmentInput);
+      mutationExecutor.createAttachment("", attachmentInput);
       fail("Expected exception creating attachment");
     } catch (Exception expected) {
       // OK
