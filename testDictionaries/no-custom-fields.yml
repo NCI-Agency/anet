@@ -305,7 +305,8 @@ fields:
       type: enum
       label: Security Marking
       choices:
-        undefined: undefined
+        undefined: Undefined
+        public: Public
         NU: NATO UNCLASSIFIED
         NU_rel_EU: NATO UNCLASSIFIED Releasable to EU
     mimeTypes:
