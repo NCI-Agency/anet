@@ -204,6 +204,16 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                 {!canAdministrateOrg ? (
                   <>
                     <FastField
+                      name="shortName"
+                      component={FieldHelper.ReadonlyField}
+                      label={Settings.fields.organization.shortName}
+                    />
+                    <LongNameWithLabel
+                      dictProps={orgSettings.longName}
+                      name="longName"
+                      component={FieldHelper.ReadonlyField}
+                    />
+                    <FastField
                       name="type"
                       component={FieldHelper.ReadonlyField}
                       humanValue={Organization.humanNameOfType}
@@ -227,21 +237,6 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                         )
                       }
                     />
-                    <FastField
-                      name="shortName"
-                      component={FieldHelper.ReadonlyField}
-                      label={Settings.fields.organization.shortName}
-                    />
-                    <LongNameWithLabel
-                      dictProps={orgSettings.longName}
-                      name="longName"
-                      component={FieldHelper.ReadonlyField}
-                    />
-                    <FastField
-                      name="status"
-                      component={FieldHelper.ReadonlyField}
-                      humanValue={Organization.humanNameOfStatus}
-                    />
                     <IdentificationCodeFieldWithLabel
                       dictProps={orgSettings.identificationCode}
                       name="identificationCode"
@@ -264,9 +259,33 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                         )
                       }
                     />
+                    <FastField
+                      name="status"
+                      component={FieldHelper.ReadonlyField}
+                      humanValue={Organization.humanNameOfStatus}
+                    />
+                    <FastField
+                      name="profile"
+                      component={FieldHelper.ReadonlyField}
+                      label={Settings.fields.organization.profile}
+                      humanValue={
+                        <RichTextEditor readOnly className="profile" />
+                      }
+                    />
                   </>
                 ) : (
                   <>
+                    <FastField
+                      name="shortName"
+                      component={FieldHelper.InputField}
+                      label={Settings.fields.organization.shortName}
+                      placeholder="e.g. EF1.1"
+                    />
+                    <LongNameWithLabel
+                      dictProps={orgSettings.longName}
+                      name="longName"
+                      component={FieldHelper.InputField}
+                    />
                     <FastField
                       name="type"
                       component={FieldHelper.RadioButtonToggleGroupField}
@@ -301,27 +320,40 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                         />
                       }
                     />
-                    <FastField
-                      name="shortName"
+                    <IdentificationCodeFieldWithLabel
+                      dictProps={orgSettings.identificationCode}
+                      name="identificationCode"
                       component={FieldHelper.InputField}
-                      label={Settings.fields.organization.shortName}
-                      placeholder="e.g. EF1.1"
                     />
-                    <LongNameWithLabel
-                      dictProps={orgSettings.longName}
-                      name="longName"
-                      component={FieldHelper.InputField}
+                    <Field
+                      name="location"
+                      label="Location"
+                      component={FieldHelper.SpecialField}
+                      onChange={value => {
+                        // validation will be done by setFieldValue
+                        setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
+                        setFieldValue("location", value)
+                      }}
+                      widget={
+                        <AdvancedSingleSelect
+                          fieldName="location"
+                          placeholder="Search for the location where this Organization will operate from..."
+                          value={values.location}
+                          overlayColumns={["Name"]}
+                          overlayRenderRow={LocationOverlayRow}
+                          filterDefs={getLocationFilters(values)}
+                          objectType={Location}
+                          fields={Location.autocompleteQuery}
+                          valueKey="name"
+                          addon={LOCATIONS_ICON}
+                        />
+                      }
                     />
                     <FastField
                       name="status"
                       component={FieldHelper.RadioButtonToggleGroupField}
                       buttons={statusButtons}
                       onChange={value => setFieldValue("status", value)}
-                    />
-                    <IdentificationCodeFieldWithLabel
-                      dictProps={orgSettings.identificationCode}
-                      name="identificationCode"
-                      component={FieldHelper.InputField}
                     />
                     <FastField
                       name="profile"
@@ -342,35 +374,6 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                   </>
                 )}
               </Fieldset>
-
-              {isAdmin && (
-                <Fieldset title="Additional information">
-                  <Field
-                    name="location"
-                    label="Location"
-                    component={FieldHelper.SpecialField}
-                    onChange={value => {
-                      // validation will be done by setFieldValue
-                      setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
-                      setFieldValue("location", value)
-                    }}
-                    widget={
-                      <AdvancedSingleSelect
-                        fieldName="location"
-                        placeholder="Search for the location where this Organization will operate from..."
-                        value={values.location}
-                        overlayColumns={["Name"]}
-                        overlayRenderRow={LocationOverlayRow}
-                        filterDefs={getLocationFilters(values)}
-                        objectType={Location}
-                        fields={Location.autocompleteQuery}
-                        valueKey="name"
-                        addon={LOCATIONS_ICON}
-                      />
-                    }
-                  />
-                </Fieldset>
-              )}
 
               {isAdvisorOrg && (
                 <div>

@@ -55,8 +55,6 @@ const LocationPreview = ({ className, uuid }) => {
         <h4>{`Location ${location.name}`}</h4>
       </div>
       <div className="preview-section">
-        <PreviewField label="Name" value={location.name} />
-
         <PreviewField
           label="Type"
           value={Location.humanNameOfType(location.type)}

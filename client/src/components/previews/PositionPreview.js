@@ -98,11 +98,6 @@ const PositionPreview = ({ className, uuid }) => {
       </div>
       <div className="preview-section">
         <PreviewField
-          label={Settings.fields.position.name}
-          value={position.name}
-        />
-
-        <PreviewField
           label="Type"
           value={Position.humanNameOfType(position.type)}
         />

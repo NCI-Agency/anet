@@ -149,12 +149,6 @@ const LocationShow = ({ pageDispatchers }) => {
                   humanValue={Location.humanNameOfType(location.type)}
                 />
 
-                <Field
-                  name="status"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={Location.humanNameOfStatus}
-                />
-
                 <GeoLocation
                   coordinates={{
                     lat: location.lat,
@@ -165,6 +159,12 @@ const LocationShow = ({ pageDispatchers }) => {
                     )
                   }}
                   displayType={GEO_LOCATION_DISPLAY_TYPE.FORM_FIELD}
+                />
+
+                <Field
+                  name="status"
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={Location.humanNameOfStatus}
                 />
 
                 {values.description && (

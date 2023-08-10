@@ -5,6 +5,7 @@ import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import Model from "components/Model"
 import PositionTable from "components/PositionTable"
+import RichTextEditor from "components/RichTextEditor"
 import { Task } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
@@ -18,6 +19,7 @@ const GQL_GET_TASK = gql`
       uuid
       shortName
       longName
+      description
       status
       plannedCompletion
       projectedCompletion
@@ -130,16 +132,8 @@ const TaskPreview = ({ className, uuid }) => {
       </div>
       <div className="preview-section">
         <PreviewField
-          label={fieldSettings.shortName.label}
-          value={task.shortName}
-        />
-        <PreviewField
           label={fieldSettings.longName.label}
           value={task.longName}
-        />
-        <PreviewField
-          label="Status"
-          value={Task.humanNameOfStatus(task.status)}
         />
         <PreviewField
           label={Settings.fields.task.taskedOrganizations.label}
@@ -200,6 +194,30 @@ const TaskPreview = ({ className, uuid }) => {
                 Settings.dateFormats.forms.displayShort.date
               )
             }
+          />
+        )}
+
+        {Settings.fields.task.projectedCompletion && (
+          <PreviewField
+            label={Settings.fields.task.projectedCompletion.label}
+            value={
+              task.projectedCompletion &&
+              moment(task.projectedCompletion).format(
+                Settings.dateFormats.forms.displayShort.date
+              )
+            }
+          />
+        )}
+
+        <PreviewField
+          label="Status"
+          value={Task.humanNameOfStatus(task.status)}
+        />
+
+        {task.description && (
+          <PreviewField
+            label={Settings.fields.task.description}
+            value={<RichTextEditor readOnly value={task.description} />}
           />
         )}
       </div>

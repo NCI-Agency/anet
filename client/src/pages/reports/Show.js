@@ -604,40 +604,6 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                 )}
 
                 <Field
-                  name="location"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={
-                    report.location && (
-                      <LinkTo modelType="Location" model={report.location} />
-                    )
-                  }
-                />
-
-                {report.cancelled && (
-                  <Field
-                    name="cancelledReason"
-                    label="Cancelled Reason"
-                    component={FieldHelper.ReadonlyField}
-                    humanValue={utils.sentenceCase(report.cancelledReason)}
-                  />
-                )}
-
-                {!report.cancelled && (
-                  <Field
-                    name="atmosphere"
-                    label={Settings.fields.report.atmosphere}
-                    component={FieldHelper.ReadonlyField}
-                    humanValue={
-                      <>
-                        {utils.sentenceCase(report.atmosphere)}
-                        {report.atmosphereDetails &&
-                          ` – ${report.atmosphereDetails}`}
-                      </>
-                    }
-                  />
-                )}
-
-                <Field
                   name="authors"
                   component={FieldHelper.ReadonlyField}
                   humanValue={report.authors?.map(a => (
@@ -671,6 +637,40 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                     />
                   }
                 />
+
+                <Field
+                  name="location"
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={
+                    report.location && (
+                      <LinkTo modelType="Location" model={report.location} />
+                    )
+                  }
+                />
+
+                {report.cancelled && (
+                  <Field
+                    name="cancelledReason"
+                    label="Cancelled Reason"
+                    component={FieldHelper.ReadonlyField}
+                    humanValue={utils.sentenceCase(report.cancelledReason)}
+                  />
+                )}
+
+                {!report.cancelled && (
+                  <Field
+                    name="atmosphere"
+                    label={Settings.fields.report.atmosphere}
+                    component={FieldHelper.ReadonlyField}
+                    humanValue={
+                      <>
+                        {utils.sentenceCase(report.atmosphere)}
+                        {report.atmosphereDetails &&
+                          ` – ${report.atmosphereDetails}`}
+                      </>
+                    }
+                  />
+                )}
 
                 {!Settings.fields.attachment.featureDisabled && (
                   <Field

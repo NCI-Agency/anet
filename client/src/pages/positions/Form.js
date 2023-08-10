@@ -250,23 +250,14 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
                   />
                 )}
 
-                <FastField
-                  name="status"
-                  component={FieldHelper.RadioButtonToggleGroupField}
-                  buttons={statusButtons}
-                  onChange={value => setFieldValue("status", value)}
-                >
-                  {willAutoKickPerson && (
-                    <FormBS.Text>
-                      <span className="text-danger">
-                        Setting this position to inactive will automatically
-                        remove{" "}
-                        <LinkTo modelType="Person" model={values.person} /> from
-                        this position.
-                      </span>
-                    </FormBS.Text>
-                  )}
-                </FastField>
+                {!isPrincipal && (
+                  <FastField
+                    name="permissions"
+                    component={FieldHelper.RadioButtonToggleGroupField}
+                    buttons={permissionsButtons}
+                    onChange={value => setFieldValue("permissions", value)}
+                  />
+                )}
 
                 <Field
                   name="organization"
@@ -294,31 +285,6 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
                   }
                 />
 
-                <CodeFieldWithLabel
-                  dictProps={positionSettings.code}
-                  name="code"
-                  component={FieldHelper.InputField}
-                />
-
-                {!isPrincipal && (
-                  <FastField
-                    name="permissions"
-                    component={FieldHelper.RadioButtonToggleGroupField}
-                    buttons={permissionsButtons}
-                    onChange={value => setFieldValue("permissions", value)}
-                  />
-                )}
-
-                <FastField
-                  name="role"
-                  label={Settings.fields.position.role.label}
-                  component={FieldHelper.RadioButtonToggleGroupField}
-                  buttons={positionRoleButtons}
-                  onChange={value => setFieldValue("role", value)}
-                />
-              </Fieldset>
-
-              <Fieldset title="Additional information">
                 <Field
                   name="location"
                   label="Location"
@@ -343,7 +309,40 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
                     />
                   }
                 />
+
+                <CodeFieldWithLabel
+                  dictProps={positionSettings.code}
+                  name="code"
+                  component={FieldHelper.InputField}
+                />
+
+                <FastField
+                  name="status"
+                  component={FieldHelper.RadioButtonToggleGroupField}
+                  buttons={statusButtons}
+                  onChange={value => setFieldValue("status", value)}
+                >
+                  {willAutoKickPerson && (
+                    <FormBS.Text>
+                      <span className="text-danger">
+                        Setting this position to inactive will automatically
+                        remove{" "}
+                        <LinkTo modelType="Person" model={values.person} /> from
+                        this position.
+                      </span>
+                    </FormBS.Text>
+                  )}
+                </FastField>
+
+                <FastField
+                  name="role"
+                  label={Settings.fields.position.role.label}
+                  component={FieldHelper.RadioButtonToggleGroupField}
+                  buttons={positionRoleButtons}
+                  onChange={value => setFieldValue("role", value)}
+                />
               </Fieldset>
+
               {Settings.fields.position.customFields && (
                 <Fieldset title="Position information" id="custom-fields">
                   <CustomFieldsContainer

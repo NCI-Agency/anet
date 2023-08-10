@@ -58,6 +58,12 @@ const GQL_GET_ORGANIZATION = gql`
     organization(uuid: $uuid) {
       ...organizationFields
       status
+      profile
+      location {
+        ...locationFields
+        lat
+        lng
+      }
       parentOrg {
         ...organizationFields
       }

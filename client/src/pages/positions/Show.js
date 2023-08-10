@@ -194,21 +194,9 @@ const PositionShow = ({ pageDispatchers }) => {
               />
               <Fieldset>
                 <Field
-                  name="name"
-                  component={FieldHelper.ReadonlyField}
-                  label={Settings.fields.position.name}
-                />
-
-                <Field
                   name="type"
                   component={FieldHelper.ReadonlyField}
                   humanValue={Position.humanNameOfType}
-                />
-
-                <Field
-                  name="status"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={Position.humanNameOfStatus}
                 />
 
                 {position.organization && (
@@ -230,12 +218,6 @@ const PositionShow = ({ pageDispatchers }) => {
                   />
                 )}
 
-                <CodeFieldWithLabel
-                  dictProps={positionSettings.code}
-                  name="code"
-                  component={FieldHelper.ReadonlyField}
-                />
-
                 <Field
                   name="location"
                   component={FieldHelper.ReadonlyField}
@@ -252,6 +234,25 @@ const PositionShow = ({ pageDispatchers }) => {
                       </>
                     )
                   }
+                />
+
+                <CodeFieldWithLabel
+                  dictProps={positionSettings.code}
+                  name="code"
+                  component={FieldHelper.ReadonlyField}
+                />
+
+                <Field
+                  name="status"
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={Position.humanNameOfStatus}
+                />
+
+                <Field
+                  name="role"
+                  label={Settings.fields.position.role.label}
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={Position.humanNameOfRole}
                 />
               </Fieldset>
 

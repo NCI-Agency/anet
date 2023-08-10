@@ -210,6 +210,21 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
                   }
                 />
 
+                <GeoLocation
+                  editable
+                  coordinates={coordinates}
+                  isSubmitting={isSubmitting}
+                  setFieldValue={setFieldValue}
+                  setFieldTouched={setFieldTouched}
+                />
+
+                <FastField
+                  name="status"
+                  component={FieldHelper.RadioButtonToggleGroupField}
+                  buttons={statusButtons}
+                  onChange={value => setFieldValue("status", value)}
+                />
+
                 <FastField
                   name="description"
                   component={FieldHelper.SpecialField}
@@ -224,21 +239,6 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
                     setFieldTouched("description", true, false)
                   }}
                   widget={<RichTextEditor className="description" />}
-                />
-
-                <FastField
-                  name="status"
-                  component={FieldHelper.RadioButtonToggleGroupField}
-                  buttons={statusButtons}
-                  onChange={value => setFieldValue("status", value)}
-                />
-
-                <GeoLocation
-                  editable
-                  coordinates={coordinates}
-                  isSubmitting={isSubmitting}
-                  setFieldValue={setFieldValue}
-                  setFieldTouched={setFieldTouched}
                 />
               </Fieldset>
 
