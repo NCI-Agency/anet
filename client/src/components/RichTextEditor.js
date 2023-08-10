@@ -70,6 +70,20 @@ function scrollSelectionIntoView(editor, domRange) {
   }
 }
 
+const ELEMENT_TAGS = {
+  A: el => getEntityInfoFromUrl(el.getAttribute("href")),
+  BLOCKQUOTE: () => ({ type: "block-quote" }),
+  CITE: () => ({ type: "block-quote" }),
+  H1: () => ({ type: "heading-one" }),
+  H2: () => ({ type: "heading-two" }),
+  H3: () => ({ type: "heading-three" }),
+  P: () => ({ type: "paragraph" }),
+  LI: () => ({ type: "list-item" }),
+  OL: () => ({ type: "numbered-list" }),
+  UL: () => ({ type: "bulleted-list" }),
+  IMG: el => ({ type: "image", url: el.getAttribute("src") })
+}
+
 const RichTextEditor = ({
   value,
   onChange,
@@ -204,7 +218,15 @@ RichTextEditor.propTypes = {
 }
 
 const withHtml = editor => {
-  const { insertData } = editor
+  const { insertData, isInline, isVoid } = editor
+
+  editor.isInline = element =>
+    LINK_TYPES.includes(element.type) || isInline(element)
+  editor.isVoid = element =>
+    LINK_TYPES.includes(element.type) ||
+    element.type === "image" ||
+    isVoid(element)
+
   editor.insertData = data => {
     const html = data?.getData("text/html")
     if (html) {
@@ -216,7 +238,7 @@ const withHtml = editor => {
         "text/html"
       )
       const nodes = deserialize(parsed.body)
-      Transforms.insertNodes(editor, nodes)
+      Transforms.insertFragment(editor, nodes)
     } else {
       insertData(data)
     }
@@ -250,9 +272,7 @@ const serialize = node => {
     }
     return string
   }
-  const children = LINK_TYPES.includes(node.type)
-    ? node.children.reduce((acc, child) => acc + child.text, "")
-    : node.children.map(n => serialize(n)).join("")
+  const children = node.children.map(n => serialize(n)).join("")
   switch (node.type) {
     case "heading-one":
       return `<h1>${children}</h1>`
@@ -284,61 +304,68 @@ const serializeDebounced = debounce((node, onChange) => {
   return serialized
 }, 100)
 
-const deserialize = element => {
-  let children = Array.from(element.childNodes).map(deserialize)
-  // Body must have at least one children node for user to be able to edit the text in it
-  // Every other node must have a non-empty array of children
-  if (element.nodeName !== "#text" && _isEmpty(children)) {
+const deserialize = (el, markAttributes = {}) => {
+  if (el.nodeType === Node.TEXT_NODE) {
+    return el.parentNode?.nodeName === "BODY"
+      ? jsx("element", { type: "paragraph" }, el.textContent)
+      : jsx("text", markAttributes, el.textContent)
+  } else if (el.nodeType !== Node.ELEMENT_NODE) {
+    return null
+  }
+
+  const nodeAttributes = { ...markAttributes }
+
+  // define attributes for text nodes
+  switch (el.nodeName) {
+    case "STRONG":
+    case "B":
+      nodeAttributes.bold = true
+      break
+    case "EM":
+    case "I":
+      nodeAttributes.italic = true
+      break
+    case "STRIKE":
+      nodeAttributes.strikethrough = true
+      break
+    case "U":
+      nodeAttributes.underline = true
+      break
+    default:
+      break
+  }
+
+  let children = Array.from(el.childNodes)
+    .map(node => deserialize(node, nodeAttributes))
+    .flat()
+
+  if (el.nodeName !== "#text" && _isEmpty(children)) {
     children =
-      element.nodeName === "BODY"
+      el.nodeName === "BODY"
         ? jsx("element", { type: "paragraph" }, [{ text: "" }])
         : [{ text: "" }]
   }
 
-  switch (element.nodeName) {
+  if (children.length === 0) {
+    children.push(jsx("text", nodeAttributes, ""))
+  }
+
+  if (ELEMENT_TAGS[el.nodeName]) {
+    const attrs = ELEMENT_TAGS[el.nodeName](el)
+    if (attrs.type === ANET_LINK) {
+      attrs.url = getUrlFromEntityInfo(attrs)
+      children = [{ text: "" }]
+    }
+    return jsx("element", attrs, children)
+  }
+
+  switch (el.nodeName) {
     case "BODY":
       return jsx("fragment", {}, children)
-    case "H1":
-      return jsx("element", { type: "heading-one" }, children)
-    case "H2":
-      return jsx("element", { type: "heading-two" }, children)
-    case "H3":
-      return jsx("element", { type: "heading-three" }, children)
-    case "P":
-      return element.parentNode.nodeName === "LI"
-        ? jsx("fragment", {}, children)
-        : jsx("element", { type: "paragraph" }, children)
-    case "OL":
-      return jsx("element", { type: "numbered-list" }, children)
-    case "UL":
-      return jsx("element", { type: "bulleted-list" }, children)
-    case "LI":
-      return jsx("element", { type: "list-item" }, children)
-    case "BLOCKQUOTE":
-    case "CITE":
-      return jsx("element", { type: "block-quote" }, children)
-    case "A":
-      return jsx(
-        "element",
-        getEntityInfoFromUrl(element.getAttribute("href")),
-        children
-      )
-    case "STRONG":
-    case "B":
-      return jsx("text", { bold: true }, children)
-    case "EM":
-    case "I":
-      return jsx("text", { italic: true }, children)
-    case "U":
-      return jsx("text", { underline: true }, children)
-    case "STRIKE":
-      return jsx("text", { strikethrough: true }, children)
+    case "BR":
+      return "\n"
     default:
-      // Text cannot be the direct child of BODY.
-      // If the value is plain text without any html tags, it should be wrapped in a "<p></p>" tag
-      return element.parentNode.nodeName === "BODY"
-        ? jsx("element", { type: "paragraph" }, element.textContent)
-        : element.textContent
+      return children
   }
 }
 
@@ -352,6 +379,43 @@ const displayCallback = modelInstance => {
   } else {
     return modelInstance.toString()
   }
+}
+
+const getLink = (element, children, attributes, selected, focused) => {
+  const reducedChildren = element.children.reduce(
+    (acc, child) => acc + child.text,
+    ""
+  )
+  const linkElement =
+    element.type === ANET_LINK ? (
+      <LinkAnetEntity
+        type={element.entityType}
+        uuid={element.entityUuid}
+        displayCallback={displayCallback}
+      >
+        {reducedChildren}
+      </LinkAnetEntity>
+    ) : (
+      <LinkExternalHref url={element.url} attributes={attributes}>
+        {reducedChildren}
+      </LinkExternalHref>
+    )
+
+  return (
+    <span
+      {...attributes}
+      style={{
+        padding: "1px",
+        verticalAlign: "baseline",
+        display: "inline-block",
+        borderRadius: "4px",
+        boxShadow: selected && focused ? "0 0 0 2px #B4D5FF" : "none"
+      }}
+    >
+      {linkElement}
+      {children}
+    </span>
+  )
 }
 
 const Element = ({ attributes, children, element }) => {
@@ -373,39 +437,8 @@ const Element = ({ attributes, children, element }) => {
     case "block-quote":
       return <blockquote {...attributes}>{children}</blockquote>
     case ANET_LINK:
-    case EXTERNAL_LINK: {
-      const reducedChildren = element.children.reduce(
-        (acc, child) => acc + child.text,
-        ""
-      )
-      return (
-        <span
-          {...attributes}
-          style={{
-            padding: "1px",
-            verticalAlign: "baseline",
-            display: "inline-block",
-            borderRadius: "4px",
-            boxShadow: selected && focused ? "0 0 0 2px #B4D5FF" : "none"
-          }}
-        >
-          {element.type === ANET_LINK ? (
-            <LinkAnetEntity
-              type={element.entityType}
-              uuid={element.entityUuid}
-              displayCallback={displayCallback}
-            >
-              {reducedChildren}
-            </LinkAnetEntity>
-          ) : (
-            <LinkExternalHref url={element.url}>
-              {reducedChildren}
-            </LinkExternalHref>
-          )}
-          {children}
-        </span>
-      )
-    }
+    case EXTERNAL_LINK:
+      return getLink(element, children, attributes, selected, focused)
     default:
       return <p {...attributes}>{children}</p>
   }

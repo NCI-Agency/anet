@@ -24,9 +24,24 @@ const ENTITY_TYPE_TO_RELATED_OBJECT_TYPE = flip(
 )
 
 export function getEntityInfoFromUrl(url) {
-  const urnMatch = url.match(/^urn:anet:([^:]*):(.*)$/)
-  const entityType = RELATED_OBJECT_TYPE_TO_ENTITY_TYPE[urnMatch?.[1]]
-  const entityUuid = urnMatch?.[2]
+  const urlObject = new URL(url, window.location.href)
+  if (urlObject.protocol === "urn:") {
+    return getEntityFromUrlPattern(
+      url,
+      urlObject.pathname,
+      /^anet:([^:]*):(.*)$/
+    )
+  }
+  if (urlObject.host === window.location.host) {
+    return getEntityFromUrlPattern(url, urlObject.pathname, /^\/([^/]*)\/(.*)$/)
+  }
+  return { type: EXTERNAL_LINK, url }
+}
+
+function getEntityFromUrlPattern(url, urlPath, entityPattern) {
+  const entityMatch = urlPath.match(entityPattern)
+  const entityType = RELATED_OBJECT_TYPE_TO_ENTITY_TYPE[entityMatch?.[1]]
+  const entityUuid = entityMatch?.[2]
   if (entityType && UUID_REGEX.test(entityUuid)) {
     return { type: ANET_LINK, entityType, entityUuid }
   } else {
