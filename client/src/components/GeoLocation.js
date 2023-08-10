@@ -74,15 +74,13 @@ export const BaseGeoLocation = ({
 
     if (displayType === GEO_LOCATION_DISPLAY_TYPE.FORM_FIELD) {
       return (
-        <>
-          <Field
-            name="location"
-            label={label}
-            component={FieldHelper.ReadonlyField}
-            humanValue={humanValue}
-            style={{ paddingTop: "2px" }}
-          />
-        </>
+        <Field
+          name="location"
+          label={label}
+          component={FieldHelper.ReadonlyField}
+          humanValue={humanValue}
+          style={{ paddingTop: "2px" }}
+        />
       )
     }
 
@@ -90,15 +88,17 @@ export const BaseGeoLocation = ({
   }
 
   return (
-    <CoordinatesFormField
-      coordinates={coordinates}
-      editable
-      setFieldValue={setFieldValue}
-      setFieldTouched={setFieldTouched}
-      isSubmitting={isSubmitting}
-      locationFormat={locationFormat}
-      setLocationFormat={setLocationFormat}
-    />
+    <div id="fg-location">
+      <CoordinatesFormField
+        coordinates={coordinates}
+        editable
+        setFieldValue={setFieldValue}
+        setFieldTouched={setFieldTouched}
+        isSubmitting={isSubmitting}
+        locationFormat={locationFormat}
+        setLocationFormat={setLocationFormat}
+      />
+    </div>
   )
 }
 
@@ -162,7 +162,7 @@ const MGRSFormField = ({
   }
 
   return (
-    <Row style={{ marginBottom: 0 }}>
+    <Row style={{ marginBottom: "1rem" }}>
       <Col sm={2} as={Form.Label} htmlFor="displayedCoordinate">
         {Location.LOCATION_FORMAT_LABELS[locationFormat]}
       </Col>
@@ -249,7 +249,7 @@ const LatLonFormField = ({
     )
   }
   return (
-    <Row>
+    <Row style={{ marginBottom: "1rem" }}>
       <Col sm={2} as={Form.Label} htmlFor="lat">
         {Location.LOCATION_FORMAT_LABELS[locationFormat]}
       </Col>
