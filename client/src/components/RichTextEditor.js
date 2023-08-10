@@ -33,7 +33,6 @@ import {
   ANET_LINK,
   EXTERNAL_LINK,
   getEntityInfoFromUrl,
-  getUrlFromEntityInfo,
   LINK_TYPES
 } from "utils_links"
 
@@ -291,7 +290,7 @@ const serialize = node => {
     case "link":
     case ANET_LINK:
     case EXTERNAL_LINK:
-      return `<a href="${getUrlFromEntityInfo(node)}">${children}</a>`
+      return `<a href="${node.url}">${children}</a>`
     default:
       return children
   }
@@ -353,7 +352,7 @@ const deserialize = (el, markAttributes = {}) => {
     const attrs = ELEMENT_TAGS[el.nodeName](el)
     const entityInfo = getEntityInfoFromUrl(attrs.url)
     if (entityInfo.type === ANET_LINK) {
-      attrs.url = getUrlFromEntityInfo(entityInfo)
+      attrs.url = entityInfo.url
       children = [{ text: "" }]
     }
     return jsx("element", attrs, children)
@@ -386,47 +385,37 @@ const displayCallback = modelInstance => {
   }
 }
 
-const getExternalLink = (element, children, attributes, selected, focused) => {
+const getLink = (element, children, attributes, selected, focused) => {
   const reducedChildren = element.children.reduce(
     (acc, child) => acc + child.text,
     ""
   )
-  return (
-    <span
-      {...attributes}
-      style={{
-        padding: "1px",
-        verticalAlign: "baseline",
-        display: "inline-block",
-        borderRadius: "4px",
-        boxShadow: selected && focused ? "0 0 0 2px #B4D5FF" : "none"
-      }}
-    >
-      <LinkExternalHref url={element.url} attributes={attributes}>
-        {reducedChildren}
-      </LinkExternalHref>
-      {children}
-    </span>
-  )
-}
-
-const getAnetLink = (element, children, attributes, selected, focused) => {
-  return (
-    <span
-      {...attributes}
-      style={{
-        padding: "1px",
-        verticalAlign: "baseline",
-        display: "inline-block",
-        borderRadius: "4px",
-        boxShadow: selected && focused ? "0 0 0 2px #B4D5FF" : "none"
-      }}
-    >
+  const entityInfo = getEntityInfoFromUrl(element.url)
+  const linkElement =
+    entityInfo.type === ANET_LINK ? (
       <LinkAnetEntity
-        type={element.entityType}
-        uuid={element.entityUuid}
+        type={entityInfo.entityType}
+        uuid={entityInfo.entityUuid}
         displayCallback={displayCallback}
       />
+    ) : (
+      <LinkExternalHref url={entityInfo.url} attributes={attributes}>
+        {reducedChildren}
+      </LinkExternalHref>
+    )
+
+  return (
+    <span
+      {...attributes}
+      style={{
+        padding: "1px",
+        verticalAlign: "baseline",
+        display: "inline-block",
+        borderRadius: "4px",
+        boxShadow: selected && focused ? "0 0 0 2px #B4D5FF" : "none"
+      }}
+    >
+      {linkElement}
       {children}
     </span>
   )
@@ -450,18 +439,10 @@ const Element = ({ attributes, children, element }) => {
       return <li {...attributes}>{children}</li>
     case "block-quote":
       return <blockquote {...attributes}>{children}</blockquote>
-    case "link": {
-      const entityInfo = getEntityInfoFromUrl(element.url)
-      if (entityInfo.type === ANET_LINK) {
-        return getAnetLink(entityInfo, children, attributes, selected, focused)
-      } else {
-        return getExternalLink(element, children, attributes, selected, focused)
-      }
-    }
+    case "link":
     case ANET_LINK:
-      return getAnetLink(element, children, attributes, selected, focused)
     case EXTERNAL_LINK:
-      return getExternalLink(element, children, attributes, selected, focused)
+      return getLink(element, children, attributes, selected, focused)
     default:
       return <p {...attributes}>{children}</p>
   }

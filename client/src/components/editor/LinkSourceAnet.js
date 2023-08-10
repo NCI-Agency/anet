@@ -6,7 +6,12 @@ import React, { useCallback } from "react"
 import { Button, Form as FormBS, Modal } from "react-bootstrap"
 import { Transforms } from "slate"
 import { ReactEditor } from "slate-react"
-import { ANET_LINK, EXTERNAL_LINK, getEntityInfoFromUrl } from "utils_links"
+import {
+  ANET_LINK,
+  createEntityUrl,
+  EXTERNAL_LINK,
+  getEntityInfoFromUrl
+} from "utils_links"
 import * as yup from "yup"
 
 const LinkSourceAnet = ({
@@ -140,6 +145,7 @@ function createAnetLinkNode(entityType, entityUuid) {
     type: ANET_LINK,
     entityType,
     entityUuid,
+    url: createEntityUrl(entityType, entityUuid),
     children: [{ text: "" }]
   }
 }
