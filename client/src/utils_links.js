@@ -43,12 +43,7 @@ function getEntityFromUrlPattern(url, urlPath, entityPattern) {
   const entityType = RELATED_OBJECT_TYPE_TO_ENTITY_TYPE[entityMatch?.[1]]
   const entityUuid = entityMatch?.[2]
   if (entityType && UUID_REGEX.test(entityUuid)) {
-    return {
-      type: ANET_LINK,
-      entityType,
-      entityUuid,
-      url: createEntityUrl(entityType, entityUuid)
-    }
+    return { type: ANET_LINK, entityType, entityUuid }
   } else {
     return { type: EXTERNAL_LINK, url }
   }
@@ -60,8 +55,4 @@ export function getUrlFromEntityInfo(node) {
     url ||
     `urn:anet:${ENTITY_TYPE_TO_RELATED_OBJECT_TYPE[entityType]}:${entityUuid}`
   )
-}
-
-export function createEntityUrl(entityType, entityUuid) {
-  return `urn:anet:${ENTITY_TYPE_TO_RELATED_OBJECT_TYPE[entityType]}:${entityUuid}`
 }

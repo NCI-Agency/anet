@@ -33,6 +33,7 @@ import {
   ANET_LINK,
   EXTERNAL_LINK,
   getEntityInfoFromUrl,
+  getUrlFromEntityInfo,
   LINK_TYPES
 } from "utils_links"
 
@@ -70,7 +71,7 @@ function scrollSelectionIntoView(editor, domRange) {
 }
 
 const ELEMENT_TAGS = {
-  A: el => ({ type: "link", url: el.getAttribute("href") }),
+  A: el => getEntityInfoFromUrl(el.getAttribute("href")),
   BLOCKQUOTE: () => ({ type: "block-quote" }),
   CITE: () => ({ type: "block-quote" }),
   H1: () => ({ type: "heading-one" }),
@@ -220,9 +221,11 @@ const withHtml = editor => {
   const { insertData, isInline, isVoid } = editor
 
   editor.isInline = element =>
-    element.type === "link" ? true : isInline(element)
+    LINK_TYPES.includes(element.type) || isInline(element)
   editor.isVoid = element =>
-    element.type === "image" || element.type === "link" ? true : isVoid(element)
+    LINK_TYPES.includes(element.type) ||
+    element.type === "image" ||
+    isVoid(element)
 
   editor.insertData = data => {
     const html = data?.getData("text/html")
@@ -287,10 +290,9 @@ const serialize = node => {
       return `<li>${children}</li>`
     case "block-quote":
       return `<blockquote>${children}</blockquote>`
-    case "link":
     case ANET_LINK:
     case EXTERNAL_LINK:
-      return `<a href="${node.url}">${children}</a>`
+      return `<a href="${getUrlFromEntityInfo(node)}">${children}</a>`
     default:
       return children
   }
@@ -348,18 +350,12 @@ const deserialize = (el, markAttributes = {}) => {
     children.push(jsx("text", nodeAttributes, ""))
   }
 
-  if (el.nodeName === "A") {
-    const attrs = ELEMENT_TAGS[el.nodeName](el)
-    const entityInfo = getEntityInfoFromUrl(attrs.url)
-    if (entityInfo.type === ANET_LINK) {
-      attrs.url = entityInfo.url
-      children = [{ text: "" }]
-    }
-    return jsx("element", attrs, children)
-  }
-
   if (ELEMENT_TAGS[el.nodeName]) {
     const attrs = ELEMENT_TAGS[el.nodeName](el)
+    if (attrs.type === ANET_LINK) {
+      attrs.url = getUrlFromEntityInfo(attrs)
+      children = [{ text: "" }]
+    }
     return jsx("element", attrs, children)
   }
 
@@ -390,16 +386,17 @@ const getLink = (element, children, attributes, selected, focused) => {
     (acc, child) => acc + child.text,
     ""
   )
-  const entityInfo = getEntityInfoFromUrl(element.url)
   const linkElement =
-    entityInfo.type === ANET_LINK ? (
+    element.type === ANET_LINK ? (
       <LinkAnetEntity
-        type={entityInfo.entityType}
-        uuid={entityInfo.entityUuid}
+        type={element.entityType}
+        uuid={element.entityUuid}
         displayCallback={displayCallback}
-      />
+      >
+        {reducedChildren}
+      </LinkAnetEntity>
     ) : (
-      <LinkExternalHref url={entityInfo.url} attributes={attributes}>
+      <LinkExternalHref url={element.url} attributes={attributes}>
         {reducedChildren}
       </LinkExternalHref>
     )
@@ -439,7 +436,6 @@ const Element = ({ attributes, children, element }) => {
       return <li {...attributes}>{children}</li>
     case "block-quote":
       return <blockquote {...attributes}>{children}</blockquote>
-    case "link":
     case ANET_LINK:
     case EXTERNAL_LINK:
       return getLink(element, children, attributes, selected, focused)
