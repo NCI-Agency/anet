@@ -3,8 +3,9 @@ import API from "api"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import Model from "components/Model"
+import RichTextEditor from "components/RichTextEditor"
 import _isEmpty from "lodash/isEmpty"
-import { Organization } from "models"
+import { Location, Organization } from "models"
 import { PositionRole } from "models/Position"
 import OrganizationLaydown from "pages/organizations/Laydown"
 import OrganizationTasks from "pages/organizations/OrganizationTasks"
@@ -12,7 +13,7 @@ import pluralize from "pluralize"
 import { getPositionsForRole } from "positionUtil"
 import PropTypes from "prop-types"
 import React from "react"
-import { ListGroup, ListGroupItem } from "react-bootstrap"
+import { Badge, ListGroup, ListGroupItem } from "react-bootstrap"
 import Settings from "settings"
 import utils from "utils"
 
@@ -127,35 +128,13 @@ const OrganizationPreview = ({ className, uuid }) => {
       </div>
       <div className="preview-section">
         <PreviewField
-          label="Status"
-          value={Organization.humanNameOfStatus(organization.status)}
-        />
-
-        <PreviewField
-          label="Type"
-          value={Organization.humanNameOfType(organization.type)}
-        />
-
-        {renderLeadingPositions(
-          organization.positions,
-          PositionRole.LEADER.toString(),
-          pluralize(utils.titleCase(PositionRole.LEADER.humanNameOfRole()))
-        )}
-
-        {renderLeadingPositions(
-          organization.positions,
-          PositionRole.DEPUTY.toString(),
-          pluralize(utils.titleCase(PositionRole.DEPUTY.humanNameOfRole()))
-        )}
-
-        <PreviewField
           label={orgSettings.longName.label}
           value={organization.longName}
         />
 
         <PreviewField
-          label={orgSettings.identificationCode?.label}
-          value={organization.identificationCode}
+          label="Type"
+          value={Organization.humanNameOfType(organization.type)}
         />
 
         {organization?.parentOrg?.uuid && (
@@ -186,6 +165,49 @@ const OrganizationPreview = ({ className, uuid }) => {
                 ))}
               </ListGroup>
             }
+          />
+        )}
+
+        {renderLeadingPositions(
+          organization.positions,
+          PositionRole.LEADER.toString(),
+          pluralize(utils.titleCase(PositionRole.LEADER.humanNameOfRole()))
+        )}
+
+        {renderLeadingPositions(
+          organization.positions,
+          PositionRole.DEPUTY.toString(),
+          pluralize(utils.titleCase(PositionRole.DEPUTY.humanNameOfRole()))
+        )}
+
+        <PreviewField
+          label={orgSettings.identificationCode?.label}
+          value={organization.identificationCode}
+        />
+
+        <PreviewField
+          label="Location"
+          value={
+            organization.location && (
+              <>
+                <LinkTo modelType="Location" model={organization.location} />{" "}
+                <Badge>
+                  {Location.humanNameOfType(organization.location.type)}
+                </Badge>
+              </>
+            )
+          }
+        />
+
+        <PreviewField
+          label="Status"
+          value={Organization.humanNameOfStatus(organization.status)}
+        />
+
+        {organization.profile && (
+          <PreviewField
+            label={Settings.fields.organization.profile}
+            value={<RichTextEditor readOnly value={organization.profile} />}
           />
         )}
       </div>

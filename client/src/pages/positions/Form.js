@@ -210,6 +210,31 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
               <Fieldset>
+                <Field
+                  name="name"
+                  component={FieldHelper.InputField}
+                  label={Settings.fields.position.name}
+                  placeholder="Name/Description of Position"
+                  extraColElem={
+                    !edit && values.name.length >= MIN_CHARS_FOR_DUPLICATES ? (
+                      <>
+                        <Button
+                          onClick={() => setShowSimilarPositions(true)}
+                          variant="outline-secondary"
+                        >
+                          <Icon
+                            icon={IconNames.WARNING_SIGN}
+                            intent={Intent.WARNING}
+                            size={IconSize.STANDARD}
+                            style={{ margin: "0 6px" }}
+                          />
+                          Possible Duplicates
+                        </Button>
+                      </>
+                    ) : undefined
+                  }
+                />
+
                 {edit ? (
                   <FastField
                     name="type"
@@ -273,31 +298,6 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
                   dictProps={positionSettings.code}
                   name="code"
                   component={FieldHelper.InputField}
-                />
-
-                <Field
-                  name="name"
-                  component={FieldHelper.InputField}
-                  label={Settings.fields.position.name}
-                  placeholder="Name/Description of Position"
-                  extraColElem={
-                    !edit && values.name.length >= MIN_CHARS_FOR_DUPLICATES ? (
-                      <>
-                        <Button
-                          onClick={() => setShowSimilarPositions(true)}
-                          variant="outline-secondary"
-                        >
-                          <Icon
-                            icon={IconNames.WARNING_SIGN}
-                            intent={Intent.WARNING}
-                            size={IconSize.STANDARD}
-                            style={{ margin: "0 6px" }}
-                          />
-                          Possible Duplicates
-                        </Button>
-                      </>
-                    ) : undefined
-                  }
                 />
 
                 {!isPrincipal && (

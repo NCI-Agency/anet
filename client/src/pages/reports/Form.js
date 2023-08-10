@@ -921,7 +921,7 @@ const ReportForm = ({
                   <Field
                     name="uploadAttachments"
                     component={FieldHelper.SpecialField}
-                    label={Settings.fields.attachment.shortLabel}
+                    label={Settings.fields.report.attachments.label}
                     widget={
                       <UploadAttachment
                         edit={edit}

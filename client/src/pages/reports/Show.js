@@ -121,7 +121,6 @@ const GQL_GET_REPORT = gql`
           uuid
           name
           type
-          role
           code
           status
           organization {
@@ -676,7 +675,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                 {!Settings.fields.attachment.featureDisabled && (
                   <Field
                     name="attachments"
-                    label={Settings.fields.attachment.shortLabel}
+                    label={Settings.fields.report.attachments.label}
                     component={FieldHelper.ReadonlyField}
                     humanValue={
                       <div

@@ -1,7 +1,10 @@
 import { gql } from "@apollo/client"
 import API from "api"
 import { PreviewField } from "components/FieldHelper"
+import GeoLocation from "components/GeoLocation"
 import Leaflet from "components/Leaflet"
+import RichTextEditor from "components/RichTextEditor"
+import { convertLatLngToMGRS } from "geoUtils"
 import _escape from "lodash/escape"
 import { Location } from "models"
 import PropTypes from "prop-types"
@@ -16,6 +19,7 @@ const GQL_GET_LOCATION = gql`
       lng
       status
       type
+      description
     }
   }
 `
@@ -54,14 +58,37 @@ const LocationPreview = ({ className, uuid }) => {
         <PreviewField label="Name" value={location.name} />
 
         <PreviewField
+          label="Type"
+          value={Location.humanNameOfType(location.type)}
+        />
+
+        <PreviewField
+          label="Latitude, Longitude"
+          value={
+            <GeoLocation
+              coordinates={{
+                lat: location.lat,
+                lng: location.lng,
+                displayedCoordinate: convertLatLngToMGRS(
+                  location.lat,
+                  location.lng
+                )
+              }}
+            />
+          }
+        />
+
+        <PreviewField
           label="Status"
           value={Location.humanNameOfStatus(location.status)}
         />
 
-        <PreviewField
-          label="Type"
-          value={Location.humanNameOfType(location.type)}
-        />
+        {location.description && (
+          <PreviewField
+            label="Description"
+            value={<RichTextEditor readOnly value={location.description} />}
+          />
+        )}
       </div>
 
       <Leaflet markers={[marker]} mapId={`${uuid}`} />

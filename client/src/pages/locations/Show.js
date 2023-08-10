@@ -144,23 +144,15 @@ const LocationShow = ({ pageDispatchers }) => {
                 <Field name="name" component={FieldHelper.ReadonlyField} />
 
                 <Field
-                  name="description"
+                  name="type"
                   component={FieldHelper.ReadonlyField}
-                  humanValue={
-                    <RichTextEditor readOnly value={values.description} />
-                  }
+                  humanValue={Location.humanNameOfType(location.type)}
                 />
 
                 <Field
                   name="status"
                   component={FieldHelper.ReadonlyField}
                   humanValue={Location.humanNameOfStatus}
-                />
-
-                <Field
-                  name="type"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={Location.humanNameOfType(location.type)}
                 />
 
                 <GeoLocation
@@ -174,6 +166,16 @@ const LocationShow = ({ pageDispatchers }) => {
                   }}
                   displayType={GEO_LOCATION_DISPLAY_TYPE.FORM_FIELD}
                 />
+
+                {values.description && (
+                  <Field
+                    name="description"
+                    component={FieldHelper.ReadonlyField}
+                    humanValue={
+                      <RichTextEditor readOnly value={values.description} />
+                    }
+                  />
+                )}
               </Fieldset>
 
               <Leaflet markers={[marker]} />
