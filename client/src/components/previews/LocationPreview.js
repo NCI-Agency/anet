@@ -37,6 +37,7 @@ const LocationPreview = ({ className, uuid }) => {
   }
 
   const location = new Location(data.location ? data.location : {})
+  const label = Location.LOCATION_FORMAT_LABELS[Location.locationFormat]
 
   const marker = {
     id: location.uuid || 0,
@@ -61,7 +62,7 @@ const LocationPreview = ({ className, uuid }) => {
         />
 
         <PreviewField
-          label="Latitude, Longitude"
+          label={label}
           value={
             <GeoLocation
               coordinates={{

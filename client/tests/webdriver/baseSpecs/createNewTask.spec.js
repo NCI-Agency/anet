@@ -28,7 +28,9 @@ describe("When creating an task", () => {
   })
 
   it("Should display the newly created task", async() => {
-    expect(await (await ShowTask.getShortName()).getText()).to.equal(SHORT_NAME)
+    expect(await (await ShowTask.getShortName()).getText()).to.equal(
+      `Objective ${SHORT_NAME}`
+    )
     expect(await (await ShowTask.getLongName()).getText()).to.equal(LONG_NAME)
     expect(await (await ShowTask.getDescription()).getText()).to.equal(
       DESCRIPTION
