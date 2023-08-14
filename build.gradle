@@ -96,7 +96,7 @@ dependencies {
 
 	// Supported database is PostgreSQL:
 	implementation 'org.postgresql:postgresql:42.6.0'
-	implementation 'org.liquibase:liquibase-core:4.20.0'
+	implementation 'org.liquibase:liquibase-core:4.23.1'
 
 	// For caching domain users (used in every request in the AuthenticationFilter)
 	implementation('org.ehcache:ehcache:3.10.8') {
