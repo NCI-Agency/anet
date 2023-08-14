@@ -51,7 +51,7 @@ test.serial("Move someone in and out of a position", async t => {
   )
   await $removePersonButton.click()
   await t.context.driver.wait(
-    until.stalenessOf($removePersonButton),
+    t.context.untilStalenessOf($removePersonButton),
     mediumWaitMs
   )
   await t.context.driver.sleep(mediumWaitMs) // wait (a bit longer) for dialog to disappear
@@ -126,7 +126,10 @@ test.serial("Move someone in and out of a position", async t => {
   )
   const $saveButton = await $("button.save-button")
   await $saveButton.click()
-  await t.context.driver.wait(until.stalenessOf($saveButton), mediumWaitMs)
+  await t.context.driver.wait(
+    t.context.untilStalenessOf($saveButton),
+    mediumWaitMs
+  )
   await t.context.driver.sleep(shortWaitMs) // wait for dialog to disappear
 
   await assertElementText(t, await $("h4.assigned-person-name"), personName)
@@ -341,7 +344,7 @@ test.serial("Update permissions while changing positions", async t => {
   await $removePersonButton.click()
   // Wait for button to be removed from the DOM.
   await t.context.driver.wait(
-    until.stalenessOf($removePersonButton),
+    t.context.untilStalenessOf($removePersonButton),
     mediumWaitMs
   )
   // Wait for transition.
@@ -355,7 +358,10 @@ test.serial("Update permissions while changing positions", async t => {
   // Click on the "Save" button.
   await $saveButton.click()
   // Wait until "Save" button is removed from the DOM.
-  await t.context.driver.wait(until.stalenessOf($saveButton), mediumWaitMs)
+  await t.context.driver.wait(
+    t.context.untilStalenessOf($saveButton),
+    mediumWaitMs
+  )
   // Wait (a bit longer) for dialog to disappear
   await t.context.driver.sleep(mediumWaitMs)
   // Go back to organization page.
@@ -408,7 +414,7 @@ test.serial("Update permissions while changing positions", async t => {
   await $removePersonButton.click()
   // Wait for button to be removed from the DOM.
   await t.context.driver.wait(
-    until.stalenessOf($removePersonButton),
+    t.context.untilStalenessOf($removePersonButton),
     mediumWaitMs
   )
   // Wait for transition.
