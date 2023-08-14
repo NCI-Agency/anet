@@ -54,7 +54,7 @@ test.serial("checking superuser permissions", async t => {
   )
 
   await $rebeccaLink.click()
-  await t.context.driver.wait(t.context.until.stalenessOf($rebeccaLink))
+  await t.context.driver.wait(t.context.untilStalenessOf($rebeccaLink))
 
   await validateUserCanEditUserForCurrentPage(t, true)
 
@@ -69,7 +69,7 @@ test.serial("checking superuser permissions", async t => {
   await pageHelpers.clickMyOrgLink()
   const $jacobLink = await findSuperuserLink(t, "CIV JACOBSON, Jacob", "EF 2.2")
   await $jacobLink.click()
-  await t.context.driver.wait(t.context.until.stalenessOf($jacobLink))
+  await t.context.driver.wait(t.context.untilStalenessOf($jacobLink))
 
   await validateUserCanEditUserForCurrentPage(t, true)
 
@@ -87,7 +87,7 @@ test.serial("checking superuser permissions", async t => {
   )
   await $otherAdvisorOrgPositionLink.click()
   await t.context.driver.wait(
-    t.context.until.stalenessOf($otherAdvisorOrgPositionLink)
+    t.context.untilStalenessOf($otherAdvisorOrgPositionLink)
   )
   await assertElementNotPresent(
     t,
@@ -124,7 +124,7 @@ test.serial("checking superuser permissions", async t => {
     "positions"
   )
   await $ownOrgPositionLink.click()
-  await t.context.driver.wait(t.context.until.stalenessOf($ownOrgPositionLink))
+  await t.context.driver.wait(t.context.untilStalenessOf($ownOrgPositionLink))
 
   const $editPositionButton = await $(".edit-position")
   await t.context.driver.wait(
@@ -170,7 +170,7 @@ test.serial("checking superuser permissions", async t => {
   )
   await $otherPrincipalOrgPositionLink.click()
   await t.context.driver.wait(
-    t.context.until.stalenessOf($otherPrincipalOrgPositionLink)
+    t.context.untilStalenessOf($otherPrincipalOrgPositionLink)
   )
   await assertElementNotPresent(
     t,
@@ -327,7 +327,7 @@ test.serial("admins can edit superusers and their positions", async t => {
     "people"
   )
   await $rebeccaPersonLink.click()
-  await t.context.driver.wait(t.context.until.stalenessOf($rebeccaPersonLink))
+  await t.context.driver.wait(t.context.untilStalenessOf($rebeccaPersonLink))
   await validateUserCanEditUserForCurrentPage(t, true)
 
   // User is admin, and can therefore edit a superuser position type

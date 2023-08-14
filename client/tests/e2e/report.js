@@ -209,7 +209,7 @@ test.serial("Draft and submit a report", async t => {
   const $submitReportButton = await $("#submitReportButton")
   await $submitReportButton.click()
   await t.context.driver.wait(
-    until.stalenessOf($submitReportButton),
+    t.context.untilStalenessOf($submitReportButton),
     mediumWaitMs
   )
   await assertElementNotPresent(
@@ -278,7 +278,10 @@ test.serial("Publish report chain", async t => {
     mediumWaitMs
   )
   await $approvedReports.click()
-  await t.context.driver.wait(until.stalenessOf($approvedReports), mediumWaitMs)
+  await t.context.driver.wait(
+    t.context.untilStalenessOf($approvedReports),
+    mediumWaitMs
+  )
 
   const $reportsApprovedSummaryTab = await $(
     ".report-collection button[value='summary']"
@@ -298,7 +301,7 @@ test.serial("Publish report chain", async t => {
   const $arthurPublishButton = await $(".publish-button")
   await $arthurPublishButton.click()
   await t.context.driver.wait(
-    until.stalenessOf($arthurPublishButton),
+    t.context.untilStalenessOf($arthurPublishButton),
     mediumWaitMs
   )
 
@@ -366,7 +369,10 @@ async function approveReport(t, user) {
     mediumWaitMs
   )
   await $reportsPending.click()
-  await t.context.driver.wait(until.stalenessOf($reportsPending), mediumWaitMs)
+  await t.context.driver.wait(
+    t.context.untilStalenessOf($reportsPending),
+    mediumWaitMs
+  )
 
   const $reportsPendingSummaryTab = await $(
     ".report-collection button[value='summary']"
@@ -392,7 +398,10 @@ async function approveReport(t, user) {
     mediumWaitMs
   )
   await $ApproveButton.click()
-  await t.context.driver.wait(until.stalenessOf($ApproveButton), mediumWaitMs)
+  await t.context.driver.wait(
+    t.context.untilStalenessOf($ApproveButton),
+    mediumWaitMs
+  )
 
   await t.context.logout()
 }

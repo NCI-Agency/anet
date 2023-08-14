@@ -2,7 +2,7 @@ const path = require("path")
 const { URL } = require("url")
 const test = require("ava")
 const webdriver = require("selenium-webdriver")
-const { By, until, Key } = webdriver
+const { By, until, Key, error } = webdriver
 const moment = require("moment")
 const _includes = require("lodash/includes")
 const _isRegExp = require("lodash/isRegExp")
@@ -120,6 +120,31 @@ test.beforeEach(t => {
   t.context.mediumWaitMs = mediumWaitMs
   t.context.longWaitMs = longWaitMs
   t.context.Key = Key
+
+  // Work-around for bug in chromedriver; basically a copy of Selenium's until.stalenessOf(elem),
+  // but with an extra check for NoSuchElementError
+  t.context.untilStalenessOf = element => {
+    return new webdriver.Condition("element to become stale", function() {
+      return element.getTagName().then(
+        function() {
+          return false
+        },
+        function(e) {
+          if (e instanceof error.StaleElementReferenceError) {
+            return true
+          }
+          if (e instanceof error.NoSuchElementError) {
+            // https://bugs.chromium.org/p/chromedriver/issues/detail?id=4440
+            console.warn(
+              "Got NoSuchElementError, treating it like StaleElementReferenceError"
+            )
+            return true
+          }
+          throw e
+        }
+      )
+    })
+  }
 
   // This method is a helper so we don't have to keep repeating the hostname.
   // Passing the authentication through the querystring is a hack so we can
@@ -421,7 +446,7 @@ test.beforeEach(t => {
           )
           await $advisorLink.click()
           await t.context.driver.wait(
-            until.stalenessOf($advisorLink),
+            t.context.untilStalenessOf($advisorLink),
             mediumWaitMs
           )
           return
