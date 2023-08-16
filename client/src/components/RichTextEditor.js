@@ -291,6 +291,9 @@ const serialize = node => {
     case "block-quote":
       return `<blockquote>${children}</blockquote>`
     case ANET_LINK:
+      return `<a href="${getUrlFromEntityInfo(node)}">${node.entityType}:${
+        node.entityUuid
+      }</a>`
     case EXTERNAL_LINK:
       return `<a href="${getUrlFromEntityInfo(node)}">${children}</a>`
     default:
