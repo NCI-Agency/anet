@@ -10,6 +10,7 @@ module.exports = {
     "^.+\\.css$": "<rootDir>/config/jest/CSSStub.js"
   },
   setupFiles: ["<rootDir>/config/polyfills.js"],
+  setupFilesAfterEnv: ["<rootDir>/jest-setup.js"],
   testPathIgnorePatterns: ["<rootDir>/(build|docs|node_modules)/"],
   testEnvironment: "jsdom"
 }
