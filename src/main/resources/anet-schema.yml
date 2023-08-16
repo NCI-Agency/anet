@@ -740,10 +740,29 @@ properties:
             description: Used in the UI where a position's name is shown.
           role:
             type: object
+            additionalProperties: false
+            required: [types]
             title: The label for a position's role
             description: Used in the UI where a position's roles are displayed as choices
             properties:
-               "$ref": "#/$defs/choiceField"
+              label:
+                type: string
+                description: UI label of position-role
+              types:
+                type: object
+                description: Enumeration of position role types
+                required: [member, deputy, leader]
+                additionalProperties: false
+                properties:
+                  member:
+                    type: string
+                    description: UI label of member position
+                  deputy:
+                    type: string
+                    description: UI label of deputy position
+                  leader:
+                    type: string
+                    description: UI label of leader position
           customFields:
             type: object
             additionalProperties:
