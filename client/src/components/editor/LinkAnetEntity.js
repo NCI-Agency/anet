@@ -6,14 +6,29 @@ import React, { useEffect, useState } from "react"
 
 const LinkAnetEntity = ({ type, uuid, displayCallback, children }) => {
   const [entity, setEntity] = useState()
+  const [whenNotFound, setWhenNotFound] = useState(null)
 
   useEffect(() => {
     let mounted = true
     const modelClass = Models[type]
-    modelClass &&
-      modelClass
-        .fetchByUuid(uuid, GRAPHQL_ENTITY_FIELDS)
-        .then(data => mounted && setEntity(data))
+    modelClass
+      ?.fetchByUuid(uuid, GRAPHQL_ENTITY_FIELDS)
+      .then(data => {
+        if (mounted) {
+          setEntity(data)
+          setWhenNotFound(null)
+        }
+      })
+      .catch(() => {
+        if (mounted) {
+          setEntity({ uuid })
+          setWhenNotFound(
+            <em>
+              [{type} with uuid {uuid} not found]
+            </em>
+          )
+        }
+      })
     return () => {
       mounted = false
     }
@@ -21,7 +36,7 @@ const LinkAnetEntity = ({ type, uuid, displayCallback, children }) => {
 
   return (
     <LinkTo modelType={type} model={entity} displayCallback={displayCallback}>
-      {children}
+      {whenNotFound || children}
     </LinkTo>
   )
 }
