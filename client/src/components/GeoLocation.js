@@ -242,9 +242,9 @@ const LatLonFormField = ({
   if (!editable) {
     return (
       <div>
-        <span>{lat || lat === 0 ? lat : "?"}</span>
+        <span>{utils.isNumeric(lat) ? lat : "?"}</span>
         <span>,&nbsp;</span>
-        <span>{lng || lng === 0 ? lng : "?"}</span>
+        <span>{utils.isNumeric(lng) ? lng : "?"}</span>
       </div>
     )
   }
@@ -279,7 +279,7 @@ const LatLonFormField = ({
           <CoordinateActionButtons
             coordinates={coordinates}
             isSubmitting={isSubmitting}
-            disabled={!lat && lat !== 0 && !lng && lng !== 0}
+            disabled={!utils.isNumeric(lat) && !utils.isNumeric(lng)}
             onClear={() => {
               // setting second param to false prevents validation since lat, lng can be null together
               setFieldTouched("lat", false, false)
@@ -391,7 +391,7 @@ const AllFormatsInfo = ({
   inForm
 }) => {
   const { lat, lng } = coordinates
-  if (!inForm && ((!lat && lat !== 0) || (!lng && lng !== 0))) {
+  if (!inForm && (!utils.isNumeric(lat) || !utils.isNumeric(lng))) {
     return null
   }
   return (

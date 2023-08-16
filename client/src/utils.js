@@ -189,7 +189,7 @@ export default {
   },
 
   isNumeric: function(value) {
-    return typeof value === "number"
+    return typeof value === "number" && !isNaN(value)
   },
 
   pushHash: function(hash) {

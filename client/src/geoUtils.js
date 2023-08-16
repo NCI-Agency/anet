@@ -1,8 +1,9 @@
 import { forward, toPoint } from "mgrs"
+import utils from "utils"
 
 export function parseCoordinate(latLng, validate = "") {
   const value = parseFloat(latLng)
-  if (!value && value !== 0) {
+  if (!utils.isNumeric(value)) {
     return null
   }
 
@@ -41,7 +42,7 @@ export function convertLatLngToMGRS(lat, lng) {
 
   let mgrs = ""
   try {
-    if ((parsedLat || parsedLat === 0) && (parsedLng || parsedLng === 0)) {
+    if (utils.isNumeric(parsedLat) && utils.isNumeric(parsedLng)) {
       mgrs = forward([parsedLng, parsedLat])
     }
   } catch (e) {
