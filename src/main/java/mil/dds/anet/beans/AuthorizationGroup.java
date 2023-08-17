@@ -20,7 +20,7 @@ public class AuthorizationGroup extends AbstractAnetBean implements RelatableObj
   @GraphQLInputField
   private String description;
   // annotated below
-  private List<Position> positions;
+  private List<GenericRelatedObject> authorizationGroupRelatedObjects;
   @GraphQLQuery
   @GraphQLInputField
   private Status status;
@@ -41,26 +41,26 @@ public class AuthorizationGroup extends AbstractAnetBean implements RelatableObj
     this.description = Utils.trimStringReturnNull(description);
   }
 
-  @GraphQLQuery(name = "positions")
-  public CompletableFuture<List<Position>> loadPositions(
+  @GraphQLQuery(name = "authorizationGroupRelatedObjects")
+  public CompletableFuture<List<GenericRelatedObject>> loadAuthorizationGroupRelatedObjects(
       @GraphQLRootContext Map<String, Object> context) {
-    if (positions != null) {
-      return CompletableFuture.completedFuture(positions);
+    if (authorizationGroupRelatedObjects != null) {
+      return CompletableFuture.completedFuture(authorizationGroupRelatedObjects);
     }
     return AnetObjectEngine.getInstance().getAuthorizationGroupDao()
-        .getPositionsForAuthorizationGroup(context, uuid).thenApply(o -> {
-          positions = o;
+        .getRelatedObjects(context, this).thenApply(o -> {
+          authorizationGroupRelatedObjects = o;
           return o;
         });
   }
 
-  public List<Position> getPositions() {
-    return positions;
+  @GraphQLInputField(name = "authorizationGroupRelatedObjects")
+  public void setAuthorizationGroupRelatedObjects(List<GenericRelatedObject> relatedObjects) {
+    this.authorizationGroupRelatedObjects = relatedObjects;
   }
 
-  @GraphQLInputField(name = "positions")
-  public void setPositions(List<Position> positions) {
-    this.positions = positions;
+  public List<GenericRelatedObject> getAuthorizationGroupRelatedObjects() {
+    return authorizationGroupRelatedObjects;
   }
 
   @Override
@@ -75,18 +75,18 @@ public class AuthorizationGroup extends AbstractAnetBean implements RelatableObj
 
   @Override
   public boolean equals(Object o) {
-    if (!(o instanceof AuthorizationGroup)) {
+    if (!(o instanceof AuthorizationGroup a)) {
       return false;
     }
-    AuthorizationGroup a = (AuthorizationGroup) o;
     return Objects.equals(a.getUuid(), uuid) && Objects.equals(a.getName(), name)
         && Objects.equals(a.getDescription(), description)
-        && Objects.equals(a.getPositions(), positions) && Objects.equals(a.getStatus(), status);
+        && Objects.equals(a.getAuthorizationGroupRelatedObjects(), authorizationGroupRelatedObjects)
+        && Objects.equals(a.getStatus(), status);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, name, description, positions, status);
+    return Objects.hash(uuid, name, description, authorizationGroupRelatedObjects, status);
   }
 
   @Override

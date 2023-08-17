@@ -7,6 +7,7 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.time.Instant;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import javax.ws.rs.WebApplicationException;
 import mil.dds.anet.utils.IdDataLoaderKey;
@@ -99,5 +100,21 @@ public class GenericRelatedObject extends AbstractAnetBean {
           relatedObject = (RelatableObject) o;
           return relatedObject;
         });
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o)
+      return true;
+    if (!(o instanceof GenericRelatedObject that))
+      return false;
+    return Objects.equals(objectUuid, that.objectUuid)
+        && Objects.equals(relatedObjectType, that.relatedObjectType)
+        && Objects.equals(relatedObjectUuid, that.relatedObjectUuid);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(objectUuid, relatedObjectType, relatedObjectUuid);
   }
 }

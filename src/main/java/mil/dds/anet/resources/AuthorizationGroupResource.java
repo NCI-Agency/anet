@@ -4,15 +4,12 @@ import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AuthorizationGroupSearchQuery;
 import mil.dds.anet.database.AuthorizationGroupDao;
@@ -22,11 +19,9 @@ import mil.dds.anet.utils.DaoUtils;
 
 public class AuthorizationGroupResource {
 
-  private final AnetObjectEngine engine;
   private final AuthorizationGroupDao dao;
 
   public AuthorizationGroupResource(AnetObjectEngine engine) {
-    this.engine = engine;
     this.dao = engine.getAuthorizationGroupDao();
   }
 
@@ -52,7 +47,7 @@ public class AuthorizationGroupResource {
       @GraphQLArgument(name = "authorizationGroup") AuthorizationGroup t) {
     final Person user = DaoUtils.getUserFromContext(context);
     AuthUtils.assertAdministrator(user);
-    if (t.getName() == null || t.getName().trim().length() == 0) {
+    if (t.getName() == null || t.getName().trim().isEmpty()) {
       throw new WebApplicationException("Authorization group name must not be empty",
           Status.BAD_REQUEST);
     }
@@ -70,23 +65,6 @@ public class AuthorizationGroupResource {
     if (numRows == 0) {
       throw new WebApplicationException("Couldn't process authorization group update",
           Status.NOT_FOUND);
-    }
-    // Update positions:
-    if (t.getPositions() != null) {
-      final List<Position> existingPositions =
-          dao.getPositionsForAuthorizationGroup(engine.getContext(), t.getUuid()).join();
-      for (final Position p : t.getPositions()) {
-        Optional<Position> existingPosition =
-            existingPositions.stream().filter(el -> el.getUuid().equals(p.getUuid())).findFirst();
-        if (existingPosition.isPresent()) {
-          existingPositions.remove(existingPosition.get());
-        } else {
-          dao.addPositionToAuthorizationGroup(p, t);
-        }
-      }
-      for (final Position p : existingPositions) {
-        dao.removePositionFromAuthorizationGroup(p, t);
-      }
     }
     AnetAuditLogger.log("AuthorizationGroup {} updated by {}", t, user);
     // GraphQL mutations *have* to return something, so we return the number of updated rows

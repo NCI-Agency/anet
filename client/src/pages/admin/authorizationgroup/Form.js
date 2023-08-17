@@ -1,21 +1,19 @@
 import { gql } from "@apollo/client"
 import API from "api"
-import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
-import { PositionOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
+import { ENTITY_TYPES } from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
 import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
-import PositionTable from "components/PositionTable"
+import { RelatedObjectsTableInput } from "components/RelatedObjectsTable"
 import { Field, Form, Formik } from "formik"
-import { AuthorizationGroup, Position } from "models"
+import { AuthorizationGroup } from "models"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button } from "react-bootstrap"
 import { useNavigate } from "react-router-dom"
-import POSITIONS_ICON from "resources/positions.png"
 import Settings from "settings"
 
 const GQL_CREATE_AUTHORIZATION_GROUP = gql`
@@ -34,6 +32,9 @@ const GQL_UPDATE_AUTHORIZATION_GROUP = gql`
 const AuthorizationGroupForm = ({ edit, title, initialValues }) => {
   const navigate = useNavigate()
   const [error, setError] = useState(null)
+  const [relatedObjects, setRelatedObjects] = useState(
+    initialValues.authorizationGroupRelatedObjects || []
+  )
   const statusButtons = [
     {
       id: "statusActiveButton",
@@ -54,30 +55,7 @@ const AuthorizationGroupForm = ({ edit, title, initialValues }) => {
       validationSchema={AuthorizationGroup.yupSchema}
       initialValues={initialValues}
     >
-      {({
-        handleSubmit,
-        isSubmitting,
-        dirty,
-        errors,
-        setFieldValue,
-        setFieldTouched,
-        values,
-        submitForm
-      }) => {
-        const positionsFilters = {
-          allAdvisorPositions: {
-            label: "All advisor positions",
-            queryVars: {
-              status: Model.STATUS.ACTIVE,
-              type: [
-                Position.TYPE.ADVISOR,
-                Position.TYPE.SUPERUSER,
-                Position.TYPE.ADMINISTRATOR
-              ],
-              matchPersonName: true
-            }
-          }
-        }
+      {({ isSubmitting, dirty, setFieldValue, submitForm }) => {
         const action = (
           <div>
             <Button
@@ -129,35 +107,21 @@ const AuthorizationGroupForm = ({ edit, title, initialValues }) => {
                 />
 
                 <Field
-                  name="positions"
-                  label="Positions"
+                  name="relatedObjects"
+                  label="Members"
                   component={FieldHelper.SpecialField}
-                  onChange={value => {
-                    // validation will be done by setFieldValue
-                    setFieldTouched("positions", true, false) // onBlur doesn't work when selecting an option
-                    setFieldValue("positions", value)
-                  }}
                   widget={
-                    <AdvancedMultiSelect
-                      fieldName="positions"
-                      placeholder="Search for a position..."
-                      value={values.positions}
-                      renderSelected={
-                        <PositionTable
-                          positions={values.positions}
-                          showDelete
-                        />
-                      }
-                      overlayColumns={[
-                        "Position",
-                        "Organization",
-                        "Current Occupant"
+                    <RelatedObjectsTableInput
+                      title="Member"
+                      relatedObjects={relatedObjects}
+                      objectType={ENTITY_TYPES.POSITIONS}
+                      entityTypes={[
+                        ENTITY_TYPES.POSITIONS,
+                        ENTITY_TYPES.ORGANIZATIONS,
+                        ENTITY_TYPES.PEOPLE
                       ]}
-                      overlayRenderRow={PositionOverlayRow}
-                      filterDefs={positionsFilters}
-                      objectType={Position}
-                      fields={Position.autocompleteQuery}
-                      addon={POSITIONS_ICON}
+                      setRelatedObjects={setRelatedObjects}
+                      showDelete
                     />
                   }
                 />
@@ -229,8 +193,8 @@ const AuthorizationGroupForm = ({ edit, title, initialValues }) => {
 
   function save(values, form) {
     const authorizationGroup = AuthorizationGroup.filterClientSideFields(values)
-    authorizationGroup.positions = values.positions.map(pos =>
-      Position.filterClientSideFields(pos, "previousPeople", "customFields")
+    authorizationGroup.authorizationGroupRelatedObjects = relatedObjects.map(
+      ro => Object.without(ro, "relatedObject")
     )
     return API.mutation(
       edit ? GQL_UPDATE_AUTHORIZATION_GROUP : GQL_CREATE_AUTHORIZATION_GROUP,

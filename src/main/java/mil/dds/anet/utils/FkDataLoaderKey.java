@@ -5,14 +5,14 @@ public enum FkDataLoaderKey {
   APPROVAL_STEP_APPROVERS, // approvalStep.approvers
   ATTACHMENT_ATTACHMENT_RELATED_OBJECTS, // attachment.attachmentRelatedObjects
   ATTACHMENT_RELATED_OBJECT_ATTACHMENTS, // attachmentRelatedObject.attachments
-  AUTHORIZATION_GROUP_POSITIONS, // authorizationGroup.positions
+  AUTHORIZATION_GROUP_AUTHORIZATION_GROUP_RELATED_OBJECTS, // authorizationGroup.authorizationGroupRelatedObjects
   NOTE_NOTE_RELATED_OBJECTS, // note.noteRelatedObjects
   NOTE_RELATED_OBJECT_NOTES, // noteRelatedObject.notes
   ORGANIZATION_ADMINISTRATIVE_POSITIONS, // organization.responsiblePositions
   PERSON_ORGANIZATIONS, // person.organizations
   PERSON_PERSON_POSITION_HISTORY, // person.personPositionHistory
   POSITION_ASSOCIATED_POSITIONS, // position.associatedPositions
-  POSITION_AUTHORIZATION_GROUPS, // position.authorizatonGroups
+  POSITION_AUTHORIZATION_GROUPS, // position.authorizationGroups
   POSITION_CURRENT_POSITION_FOR_PERSON, // position.currentPositionForPerson
   POSITION_PERSON_POSITION_HISTORY, // position.personPositionHistory
   RELATED_OBJECT_APPROVAL_STEPS, // <relatedObject, e.g. organization or task>.approvalSteps

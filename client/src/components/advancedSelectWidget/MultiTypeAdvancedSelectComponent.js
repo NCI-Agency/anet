@@ -125,7 +125,7 @@ const widgetPropsTask = {
   addon: TASKS_ICON
 }
 
-const ENTITY_TYPES = {
+export const ENTITY_TYPES = {
   REPORTS: Models.Report.resourceName,
   PEOPLE: Models.Person.resourceName,
   ORGANIZATIONS: Models.Organization.resourceName,

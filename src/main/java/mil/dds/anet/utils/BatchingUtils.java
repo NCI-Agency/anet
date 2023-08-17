@@ -102,11 +102,12 @@ public final class BatchingUtils {
             (BatchLoader<String, AuthorizationGroup>) keys -> CompletableFuture.supplyAsync(
                 () -> engine.getAuthorizationGroupDao().getByIds(keys), dispatcherService),
             dataLoaderOptions));
-    dataLoaderRegistry.register(FkDataLoaderKey.AUTHORIZATION_GROUP_POSITIONS.toString(),
+    dataLoaderRegistry.register(
+        FkDataLoaderKey.AUTHORIZATION_GROUP_AUTHORIZATION_GROUP_RELATED_OBJECTS.toString(),
         DataLoaderFactory.newDataLoader(
-            (BatchLoader<String, List<Position>>) foreignKeys -> CompletableFuture.supplyAsync(
-                () -> engine.getAuthorizationGroupDao().getPositions(foreignKeys),
-                dispatcherService),
+            (BatchLoader<String, List<GenericRelatedObject>>) foreignKeys -> CompletableFuture
+                .supplyAsync(() -> engine.getAuthorizationGroupDao()
+                    .getAuthorizationGroupRelatedObjects(foreignKeys), dispatcherService),
             dataLoaderOptions));
     dataLoaderRegistry.register(IdDataLoaderKey.COMMENTS.toString(),
         DataLoaderFactory.newDataLoader(

@@ -215,10 +215,10 @@ input AttachmentInput {
 
 """"""
 type AuthorizationGroup {
+  authorizationGroupRelatedObjects: [GenericRelatedObject]
   createdAt: Instant
   description: String
   name: String
-  positions: [Position]
   status: Status
   updatedAt: Instant
   uuid: String
@@ -226,10 +226,10 @@ type AuthorizationGroup {
 
 """"""
 input AuthorizationGroupInput {
+  authorizationGroupRelatedObjects: [GenericRelatedObjectInput]
   createdAt: Instant
   description: String
   name: String
-  positions: [PositionInput]
   status: Status
   updatedAt: Instant
   uuid: String
