@@ -185,7 +185,7 @@ enum Atmosphere {
 
 """"""
 type Attachment {
-  attachmentRelatedObjects: [AttachmentRelatedObject]
+  attachmentRelatedObjects: [GenericRelatedObject]
   author: Person
   caption: String
   classification: String
@@ -200,7 +200,7 @@ type Attachment {
 
 """"""
 input AttachmentInput {
-  attachmentRelatedObjects: [AttachmentRelatedObjectInput]
+  attachmentRelatedObjects: [GenericRelatedObjectInput]
   author: PersonInput
   caption: String
   classification: String
@@ -211,21 +211,6 @@ input AttachmentInput {
   mimeType: String
   updatedAt: Instant
   uuid: String
-}
-
-""""""
-type AttachmentRelatedObject {
-  attachmentUuid: String
-  relatedObject: RelatableObject
-  relatedObjectType: String
-  relatedObjectUuid: String
-}
-
-""""""
-input AttachmentRelatedObjectInput {
-  attachmentUuid: String
-  relatedObjectType: String
-  relatedObjectUuid: String
 }
 
 """"""
@@ -320,6 +305,21 @@ enum EngagementStatus {
   CANCELLED
   FUTURE
   HAPPENED
+}
+
+""""""
+type GenericRelatedObject {
+  objectUuid: String
+  relatedObject: RelatableObject
+  relatedObjectType: String
+  relatedObjectUuid: String
+}
+
+""""""
+input GenericRelatedObjectInput {
+  objectUuid: String
+  relatedObjectType: String
+  relatedObjectUuid: String
 }
 
 scalar Instant
@@ -450,7 +450,7 @@ type Note {
   assessmentKey: String
   author: Person
   createdAt: Instant
-  noteRelatedObjects: [NoteRelatedObject]
+  noteRelatedObjects: [GenericRelatedObject]
   text: String
   type: NoteType
   updatedAt: Instant
@@ -462,26 +462,11 @@ input NoteInput {
   assessmentKey: String
   author: PersonInput
   createdAt: Instant
-  noteRelatedObjects: [NoteRelatedObjectInput]
+  noteRelatedObjects: [GenericRelatedObjectInput]
   text: String
   type: NoteType
   updatedAt: Instant
   uuid: String
-}
-
-""""""
-type NoteRelatedObject {
-  noteUuid: String
-  relatedObject: RelatableObject
-  relatedObjectType: String
-  relatedObjectUuid: String
-}
-
-""""""
-input NoteRelatedObjectInput {
-  noteUuid: String
-  relatedObjectType: String
-  relatedObjectUuid: String
 }
 
 """"""

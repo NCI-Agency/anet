@@ -33,9 +33,9 @@ import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Comment;
+import mil.dds.anet.beans.GenericRelatedObject;
 import mil.dds.anet.beans.Note;
 import mil.dds.anet.beans.Note.NoteType;
-import mil.dds.anet.beans.NoteRelatedObject;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
@@ -923,13 +923,13 @@ public class ReportResource {
       if (assessment.getType() != NoteType.ASSESSMENT) {
         throw new WebApplicationException("Note must be of assessment type", Status.FORBIDDEN);
       }
-      final List<NoteRelatedObject> noteRelatedObjects = assessment.getNoteRelatedObjects();
+      final List<GenericRelatedObject> noteRelatedObjects = assessment.getNoteRelatedObjects();
       if (noteRelatedObjects == null || noteRelatedObjects.size() != 2) {
         throw new WebApplicationException("Note must have two related objects", Status.FORBIDDEN);
       }
       // Check that note refers to this report and an attendee or task
-      final NoteRelatedObject nroReport;
-      final NoteRelatedObject nroPersonOrTask;
+      final GenericRelatedObject nroReport;
+      final GenericRelatedObject nroPersonOrTask;
       if (ReportDao.TABLE_NAME.equals(noteRelatedObjects.get(0).getRelatedObjectType())) {
         nroReport = noteRelatedObjects.get(0);
         nroPersonOrTask = noteRelatedObjects.get(1);
@@ -984,8 +984,8 @@ public class ReportResource {
     return assessments.size();
   }
 
-  private boolean checkReportPersonOrTask(Report r, NoteRelatedObject nroReport,
-      NoteRelatedObject nroPersonOrTask) {
+  private boolean checkReportPersonOrTask(Report r, GenericRelatedObject nroReport,
+      GenericRelatedObject nroPersonOrTask) {
     // Check report
     if (!ReportDao.TABLE_NAME.equals(nroReport.getRelatedObjectType())) {
       return false;
@@ -1009,7 +1009,7 @@ public class ReportResource {
   }
 
   private boolean checkRelatedObject(final List<? extends AbstractCustomizableAnetBean> beans,
-      NoteRelatedObject nro) {
+      GenericRelatedObject nro) {
     if (beans == null) {
       return false;
     }

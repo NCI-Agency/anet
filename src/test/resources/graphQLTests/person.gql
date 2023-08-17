@@ -67,7 +67,7 @@ person(uuid:"${personUuid}") {
       role
     }
     noteRelatedObjects {
-      noteUuid
+      objectUuid
       relatedObjectType
       relatedObjectUuid
       relatedObject {

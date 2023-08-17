@@ -15,10 +15,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Attachment;
-import mil.dds.anet.beans.AttachmentRelatedObject;
+import mil.dds.anet.beans.GenericRelatedObject;
 import mil.dds.anet.beans.search.AbstractSearchQuery;
 import mil.dds.anet.database.mappers.AttachmentMapper;
-import mil.dds.anet.database.mappers.AttachmentRelatedObjectMapper;
+import mil.dds.anet.database.mappers.GenericRelatedObjectMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.views.ForeignKeyFetcher;
@@ -144,16 +144,15 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AbstractSearchQuery<?
     return attachmentsBatcher.getByForeignKeys(foreignKeys);
   }
 
-  public List<List<AttachmentRelatedObject>> getAttachmentRelatedObjects(List<String> foreignKeys) {
-    final ForeignKeyBatcher<AttachmentRelatedObject> attachmentRelatedObjectsBatcher =
-        AnetObjectEngine.getInstance().getInjector()
-            .getInstance(AttachmentRelatedObjectsBatcher.class);
+  public List<List<GenericRelatedObject>> getAttachmentRelatedObjects(List<String> foreignKeys) {
+    final ForeignKeyBatcher<GenericRelatedObject> attachmentRelatedObjectsBatcher = AnetObjectEngine
+        .getInstance().getInjector().getInstance(AttachmentRelatedObjectsBatcher.class);
     return attachmentRelatedObjectsBatcher.getByForeignKeys(foreignKeys);
   }
 
-  public CompletableFuture<List<AttachmentRelatedObject>> getRelatedObjects(
+  public CompletableFuture<List<GenericRelatedObject>> getRelatedObjects(
       @GraphQLRootContext Map<String, Object> context, Attachment attachment) {
-    return new ForeignKeyFetcher<AttachmentRelatedObject>().load(context,
+    return new ForeignKeyFetcher<GenericRelatedObject>().load(context,
         FkDataLoaderKey.ATTACHMENT_ATTACHMENT_RELATED_OBJECTS, attachment.getUuid());
   }
 
@@ -176,13 +175,13 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AbstractSearchQuery<?
     return attachmentBatcher.getByForeignKeys(foreignKeys);
   }
 
-  static class AttachmentRelatedObjectsBatcher extends ForeignKeyBatcher<AttachmentRelatedObject> {
+  static class AttachmentRelatedObjectsBatcher extends ForeignKeyBatcher<GenericRelatedObject> {
     private static final String sql =
         "/* batch.getAttachmentRelatedObjects */ SELECT * FROM \"attachmentRelatedObjects\" "
             + "WHERE \"attachmentUuid\" IN ( <foreignKeys> ) ORDER BY \"relatedObjectType\", \"relatedObjectUuid\" ASC";
 
     public AttachmentRelatedObjectsBatcher() {
-      super(sql, "foreignKeys", new AttachmentRelatedObjectMapper(), "attachmentUuid");
+      super(sql, "foreignKeys", new GenericRelatedObjectMapper("attachmentUuid"), "attachmentUuid");
     }
   }
 
@@ -191,11 +190,11 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AbstractSearchQuery<?
         + " (\"attachmentUuid\", \"relatedObjectType\", \"relatedObjectUuid\")"
         + "VALUES (:attachmentUuid, :relatedObjectType, :relatedObjectUuid)")
     void insertAttachmentRelatedObjects(@Bind("attachmentUuid") String attachmentUuid,
-        @BindBean List<AttachmentRelatedObject> attachmentRelatedObjects);
+        @BindBean List<GenericRelatedObject> attachmentRelatedObjects);
   }
 
   private void insertAttachmentRelatedObjects(String uuid,
-      List<AttachmentRelatedObject> attachmentRelatedObjects) {
+      List<GenericRelatedObject> attachmentRelatedObjects) {
     final AttachmentBatch ab = getDbHandle().attach(AttachmentBatch.class);
     ab.insertAttachmentRelatedObjects(uuid, attachmentRelatedObjects);
   }

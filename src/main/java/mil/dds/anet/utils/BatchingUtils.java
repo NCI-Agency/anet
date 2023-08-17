@@ -8,13 +8,12 @@ import java.util.concurrent.Executors;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Attachment;
-import mil.dds.anet.beans.AttachmentRelatedObject;
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Comment;
 import mil.dds.anet.beans.CustomSensitiveInformation;
+import mil.dds.anet.beans.GenericRelatedObject;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Note;
-import mil.dds.anet.beans.NoteRelatedObject;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.PersonPositionHistory;
@@ -88,7 +87,7 @@ public final class BatchingUtils {
             dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.ATTACHMENT_ATTACHMENT_RELATED_OBJECTS.toString(),
         DataLoaderFactory.newDataLoader(
-            (BatchLoader<String, List<AttachmentRelatedObject>>) foreignKeys -> CompletableFuture
+            (BatchLoader<String, List<GenericRelatedObject>>) foreignKeys -> CompletableFuture
                 .supplyAsync(
                     () -> engine.getAttachmentDao().getAttachmentRelatedObjects(foreignKeys),
                     dispatcherService),
@@ -121,7 +120,7 @@ public final class BatchingUtils {
             dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.NOTE_NOTE_RELATED_OBJECTS.toString(),
         DataLoaderFactory.newDataLoader(
-            (BatchLoader<String, List<NoteRelatedObject>>) foreignKeys -> CompletableFuture
+            (BatchLoader<String, List<GenericRelatedObject>>) foreignKeys -> CompletableFuture
                 .supplyAsync(() -> engine.getNoteDao().getNoteRelatedObjects(foreignKeys),
                     dispatcherService),
             dataLoaderOptions));

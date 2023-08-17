@@ -41,7 +41,7 @@ export const GRAPHQL_NOTE_FIELDS = /* GraphQL */ `
     role
   }
   noteRelatedObjects {
-    noteUuid
+    objectUuid
     relatedObjectType
     relatedObjectUuid
     relatedObject {
@@ -422,7 +422,7 @@ export default class Model {
   }
 
   static relatedObjectPropType = PropTypes.shape({
-    noteUuid: PropTypes.string,
+    objectUuid: PropTypes.string,
     relatedObjectType: PropTypes.string.isRequired,
     relatedObjectUuid: PropTypes.string.isRequired,
     relatedObject: PropTypes.object
@@ -448,7 +448,7 @@ export default class Model {
   })
 
   static attachmentRelatedObjectType = PropTypes.shape({
-    attachmentUuid: PropTypes.string,
+    objectUuid: PropTypes.string,
     relatedObjectType: PropTypes.string.isRequired,
     relatedObjectUuid: PropTypes.string.isRequired,
     relatedObject: PropTypes.object

@@ -19,9 +19,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AuthorizationGroup;
+import mil.dds.anet.beans.GenericRelatedObject;
 import mil.dds.anet.beans.Note;
 import mil.dds.anet.beans.Note.NoteType;
-import mil.dds.anet.beans.NoteRelatedObject;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
@@ -30,8 +30,8 @@ import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.search.AbstractSearchQuery;
 import mil.dds.anet.beans.search.TaskSearchQuery;
+import mil.dds.anet.database.mappers.GenericRelatedObjectMapper;
 import mil.dds.anet.database.mappers.NoteMapper;
-import mil.dds.anet.database.mappers.NoteRelatedObjectMapper;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
@@ -186,30 +186,31 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
     return notesBatcher.getByForeignKeys(foreignKeys);
   }
 
-  static class NoteRelatedObjectsBatcher extends ForeignKeyBatcher<NoteRelatedObject> {
+  static class NoteRelatedObjectsBatcher extends ForeignKeyBatcher<GenericRelatedObject> {
     private static final String SQL =
         "/* batch.getNoteRelatedObjects */ SELECT * FROM \"noteRelatedObjects\" "
             + "WHERE \"noteUuid\" IN ( <foreignKeys> ) ORDER BY \"relatedObjectType\", \"relatedObjectUuid\" ASC";
 
     public NoteRelatedObjectsBatcher() {
-      super(SQL, "foreignKeys", new NoteRelatedObjectMapper(), "noteUuid");
+      super(SQL, "foreignKeys", new GenericRelatedObjectMapper("noteUuid"), "noteUuid");
     }
   }
 
-  public List<List<NoteRelatedObject>> getNoteRelatedObjects(List<String> foreignKeys) {
-    final ForeignKeyBatcher<NoteRelatedObject> noteRelatedObjectsBatcher =
+  public List<List<GenericRelatedObject>> getNoteRelatedObjects(List<String> foreignKeys) {
+    final ForeignKeyBatcher<GenericRelatedObject> noteRelatedObjectsBatcher =
         AnetObjectEngine.getInstance().getInjector().getInstance(NoteRelatedObjectsBatcher.class);
     return noteRelatedObjectsBatcher.getByForeignKeys(foreignKeys);
   }
 
-  public CompletableFuture<List<NoteRelatedObject>> getRelatedObjects(Map<String, Object> context,
-      Note note) {
-    return new ForeignKeyFetcher<NoteRelatedObject>().load(context,
+  public CompletableFuture<List<GenericRelatedObject>> getRelatedObjects(
+      Map<String, Object> context, Note note) {
+    return new ForeignKeyFetcher<GenericRelatedObject>().load(context,
         FkDataLoaderKey.NOTE_NOTE_RELATED_OBJECTS, note.getUuid());
   }
 
-  private void insertNoteRelatedObjects(String uuid, List<NoteRelatedObject> noteRelatedObjects) {
-    for (final NoteRelatedObject nro : noteRelatedObjects) {
+  private void insertNoteRelatedObjects(String uuid,
+      List<GenericRelatedObject> noteRelatedObjects) {
+    for (final GenericRelatedObject nro : noteRelatedObjects) {
       getDbHandle().createUpdate(
           "/* insertNoteRelatedObject */ INSERT INTO \"noteRelatedObjects\" (\"noteUuid\", \"relatedObjectType\", \"relatedObjectUuid\") "
               + "VALUES (:noteUuid, :relatedObjectType, :relatedObjectUuid)")
@@ -316,11 +317,11 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
     switch (updateType) {
       case CREATE -> {
         // Check that note refers only to one relatedObject
-        final List<NoteRelatedObject> noteRelatedObjects = note.getNoteRelatedObjects();
+        final List<GenericRelatedObject> noteRelatedObjects = note.getNoteRelatedObjects();
         if (noteRelatedObjects == null || noteRelatedObjects.size() != 1) {
           throw new IllegalArgumentException("Change record must have exactly one related object");
         }
-        final NoteRelatedObject nro = noteRelatedObjects.get(0);
+        final GenericRelatedObject nro = noteRelatedObjects.get(0);
         if (!checkTask(nro)) {
           throw new IllegalArgumentException("Change record must link to a task");
         }
@@ -341,7 +342,7 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
     final String recurrenceString = checkAssessmentPreconditions(note);
 
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
-    final List<NoteRelatedObject> noteRelatedObjects =
+    final List<GenericRelatedObject> noteRelatedObjects =
         note.loadNoteRelatedObjects(engine.getContext()).join();
     if (Utils.isEmptyOrNull(noteRelatedObjects)) {
       throw new IllegalArgumentException("Assessment must have related objects");
@@ -393,14 +394,14 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
     return recurrenceString;
   }
 
-  private boolean checkInstantAssessment(Person user, List<NoteRelatedObject> noteRelatedObjects,
+  private boolean checkInstantAssessment(Person user, List<GenericRelatedObject> noteRelatedObjects,
       AnetObjectEngine engine) {
     if (noteRelatedObjects.size() != 2) {
       throw new IllegalArgumentException("Instant assessment must have two related objects");
     }
     // Check that note refers to a report and an attendee or task
-    final NoteRelatedObject nroReport;
-    final NoteRelatedObject nroPersonOrTask;
+    final GenericRelatedObject nroReport;
+    final GenericRelatedObject nroPersonOrTask;
     if (checkReport(noteRelatedObjects.get(0))) {
       nroReport = noteRelatedObjects.get(0);
       nroPersonOrTask = noteRelatedObjects.get(1);
@@ -434,13 +435,13 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
     return approverPositions.contains(DaoUtils.getUuid(user.getPosition()));
   }
 
-  private void checkOndemandAssessment(List<NoteRelatedObject> noteRelatedObjects) {
+  private void checkOndemandAssessment(List<GenericRelatedObject> noteRelatedObjects) {
     // Check that note refers only to one relatedObject
     if (noteRelatedObjects.size() != 1) {
       throw new IllegalArgumentException(
           "On-demand assessment must have exactly one related object");
     }
-    final NoteRelatedObject nro = noteRelatedObjects.get(0);
+    final GenericRelatedObject nro = noteRelatedObjects.get(0);
     boolean checkAssessmentEntity = checkPerson(nro) || checkOrganization(nro);
     if (!checkAssessmentEntity) {
       throw new IllegalArgumentException(
@@ -448,14 +449,14 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
     }
   }
 
-  private boolean checkPeriodicAssessment(Person user, List<NoteRelatedObject> noteRelatedObjects,
-      AnetObjectEngine engine) {
+  private boolean checkPeriodicAssessment(Person user,
+      List<GenericRelatedObject> noteRelatedObjects, AnetObjectEngine engine) {
     // Check that note refers only to one relatedObject
     if (noteRelatedObjects.size() != 1) {
       throw new IllegalArgumentException(
           "Periodic assessment must have exactly one related object");
     }
-    final NoteRelatedObject nro = noteRelatedObjects.get(0);
+    final GenericRelatedObject nro = noteRelatedObjects.get(0);
     if (checkTask(nro)) {
       // Allowed if this task is among the responsible tasks of the user
       return hasTaskAssessmentPermission(user, nro);
@@ -477,24 +478,24 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
     }
   }
 
-  private boolean checkReportPersonOrTask(NoteRelatedObject nroReport,
-      NoteRelatedObject nroPersonOrTask) {
+  private boolean checkReportPersonOrTask(GenericRelatedObject nroReport,
+      GenericRelatedObject nroPersonOrTask) {
     return checkReport(nroReport) && (checkPerson(nroPersonOrTask) || checkTask(nroPersonOrTask));
   }
 
-  private boolean checkReport(NoteRelatedObject nro) {
+  private boolean checkReport(GenericRelatedObject nro) {
     return ReportDao.TABLE_NAME.equals(nro.getRelatedObjectType());
   }
 
-  private boolean checkPerson(NoteRelatedObject nro) {
+  private boolean checkPerson(GenericRelatedObject nro) {
     return PersonDao.TABLE_NAME.equals(nro.getRelatedObjectType());
   }
 
-  private boolean checkTask(NoteRelatedObject nro) {
+  private boolean checkTask(GenericRelatedObject nro) {
     return TaskDao.TABLE_NAME.equals(nro.getRelatedObjectType());
   }
 
-  private boolean checkOrganization(NoteRelatedObject nro) {
+  private boolean checkOrganization(GenericRelatedObject nro) {
     return OrganizationDao.TABLE_NAME.equals(nro.getRelatedObjectType());
   }
 
@@ -514,7 +515,7 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
     }
   }
 
-  private boolean hasTaskAssessmentPermission(final Person user, final NoteRelatedObject nro) {
+  private boolean hasTaskAssessmentPermission(final Person user, final GenericRelatedObject nro) {
     final var responsibleTasksUuids = loadResponsibleTasks(user);
     // Allowed if this task is among the user's responsible tasks
     return responsibleTasksUuids.contains(nro.getRelatedObjectUuid());
@@ -566,10 +567,10 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
   private List<SubscriptionUpdateGroup> getSubscriptionUpdates(Note obj) {
     final String paramTpl = "noteRelatedObject%1$d";
     final List<SubscriptionUpdateGroup> updates = new ArrayList<>();
-    final ListIterator<NoteRelatedObject> iter = obj.getNoteRelatedObjects().listIterator();
+    final ListIterator<GenericRelatedObject> iter = obj.getNoteRelatedObjects().listIterator();
     while (iter.hasNext()) {
       final String param = String.format(paramTpl, iter.nextIndex());
-      final NoteRelatedObject nro = iter.next();
+      final GenericRelatedObject nro = iter.next();
       final SubscriptionUpdateStatement stmt =
           AnetSubscribableObjectDao.getCommonSubscriptionUpdateStatement(true,
               nro.getRelatedObjectUuid(), nro.getRelatedObjectType(), param);

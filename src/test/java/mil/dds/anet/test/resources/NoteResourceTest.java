@@ -22,9 +22,9 @@ import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.TaskDao;
 import mil.dds.anet.test.client.AnetBeanList_Task;
+import mil.dds.anet.test.client.GenericRelatedObjectInput;
 import mil.dds.anet.test.client.Note;
 import mil.dds.anet.test.client.NoteInput;
-import mil.dds.anet.test.client.NoteRelatedObjectInput;
 import mil.dds.anet.test.client.NoteType;
 import mil.dds.anet.test.client.Person;
 import mil.dds.anet.test.client.Position;
@@ -52,7 +52,7 @@ import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 public class NoteResourceTest extends AbstractResourceTest {
 
   protected static final String NOTE_FIELDS = "{ uuid type assessmentKey text author { uuid }"
-      + " noteRelatedObjects { noteUuid relatedObjectType relatedObjectUuid } }";
+      + " noteRelatedObjects { objectUuid relatedObjectType relatedObjectUuid } }";
   private static final String _NOTES_FIELDS = String.format("notes %1$s", NOTE_FIELDS);
   private static final String PERSON_FIELDS = String.format("{ uuid name %1$s }", _NOTES_FIELDS);
   private static final String POSITION_FIELDS = String.format(
@@ -101,7 +101,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     assertThat(createdReport.getNotes()).isEmpty();
 
     // Attach note to test report
-    final NoteRelatedObjectInput testNroInput =
+    final GenericRelatedObjectInput testNroInput =
         createNoteRelatedObject(ReportDao.TABLE_NAME, testReport.getUuid());
     final NoteInput testNoteInput = NoteInput.builder().withType(NoteType.FREE_TEXT)
         .withText("a report test note created by testDeleteDanglingReportNote")
@@ -151,9 +151,9 @@ public class NoteResourceTest extends AbstractResourceTest {
     assertThat(tasks.getList()).isNotEmpty();
     final Task task = tasks.getList().get(0);
 
-    final NoteRelatedObjectInput testNroReportInput =
+    final GenericRelatedObjectInput testNroReportInput =
         createNoteRelatedObject(ReportDao.TABLE_NAME, testReport.getUuid());
-    final NoteRelatedObjectInput testNroTaskInput =
+    final GenericRelatedObjectInput testNroTaskInput =
         createNoteRelatedObject(TaskDao.TABLE_NAME, task.getUuid());
     final NoteInput testNoteInput = createAssessment("testDeleteDanglingReportTaskAssessment",
         "a report test task assessment created by testDeleteDanglingReportTaskAssessment", "once",
@@ -199,9 +199,9 @@ public class NoteResourceTest extends AbstractResourceTest {
     // Attach attendee assessment to test report
     final Person attendee = getRogerRogwell();
 
-    final NoteRelatedObjectInput testNroReportInput =
+    final GenericRelatedObjectInput testNroReportInput =
         createNoteRelatedObject(ReportDao.TABLE_NAME, testReport.getUuid());
-    final NoteRelatedObjectInput testNroTaskInput =
+    final GenericRelatedObjectInput testNroTaskInput =
         createNoteRelatedObject(PersonDao.TABLE_NAME, attendee.getUuid());
     final NoteInput testNoteInput = createAssessment("testDeleteDanglingReportAttendeeAssessment",
         "a report test attendee assessment created by testDeleteDanglingReportAttendeeAssessment",
@@ -246,7 +246,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     assertThat(createdPosition.getNotes()).isEmpty();
 
     // Attach note to test position
-    final NoteRelatedObjectInput testNroInput =
+    final GenericRelatedObjectInput testNroInput =
         createNoteRelatedObject(PositionDao.TABLE_NAME, testPosition.getUuid());
     final NoteInput testNoteInput = NoteInput.builder().withType(NoteType.FREE_TEXT)
         .withText("a position test note created by testDeleteDanglingPositionNote")
@@ -307,7 +307,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     failNoteCreate(jackMutationExecutor, freeTextNoteInput);
 
     // - S: create with self
-    final NoteRelatedObjectInput testPrincipalNroInput =
+    final GenericRelatedObjectInput testPrincipalNroInput =
         createNoteRelatedObject(PersonDao.TABLE_NAME, principalPersonUuid);
     freeTextNoteInput.setNoteRelatedObjects(Collections.singletonList(testPrincipalNroInput));
 
@@ -503,13 +503,13 @@ public class NoteResourceTest extends AbstractResourceTest {
     failNoteCreate(jackMutationExecutor, testNoteInputFail);
 
     // - F: create for a report
-    final NoteRelatedObjectInput testReportNroInput =
+    final GenericRelatedObjectInput testReportNroInput =
         createNoteRelatedObject(ReportDao.TABLE_NAME, TEST_REPORT_UUID);
     testNoteInputFail = createAssessment(assessmentKey, "test", recurrence, testReportNroInput);
     failNoteCreate(jackMutationExecutor, testNoteInputFail);
 
     // - F: create for a task
-    final NoteRelatedObjectInput testTaskNroInput =
+    final GenericRelatedObjectInput testTaskNroInput =
         createNoteRelatedObject(TaskDao.TABLE_NAME, TEST_SUBTASK_UUID);
     testNoteInputFail = createAssessment(assessmentKey, "test", recurrence, testTaskNroInput);
     failNoteCreate(jackMutationExecutor, testNoteInputFail);
@@ -517,7 +517,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     // - F: create for a report and a person
     final Person principalPerson = getSteveSteveson();
     final String principalPersonUuid = principalPerson.getUuid();
-    final NoteRelatedObjectInput testPrincipalNroInput =
+    final GenericRelatedObjectInput testPrincipalNroInput =
         createNoteRelatedObject(PersonDao.TABLE_NAME, principalPersonUuid);
     testNoteInputFail = createAssessment(assessmentKey, "test", recurrence, testReportNroInput,
         testPrincipalNroInput);
@@ -599,7 +599,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     // - F: create for a person with empty write auth.groups defined in the dictionary
     final Person principalPerson = getSteveSteveson();
     final String principalPersonUuid = principalPerson.getUuid();
-    final NoteRelatedObjectInput testPrincipalNroInput =
+    final GenericRelatedObjectInput testPrincipalNroInput =
         createNoteRelatedObject(PersonDao.TABLE_NAME, principalPersonUuid);
     final NoteInput testNoteInputJack =
         createAssessment(assessmentKey, "jack", recurrence, testPrincipalNroInput);
@@ -640,7 +640,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     // - S: create for a person with no auth.groups defined in the dictionary
     final Person principalPerson = getSteveSteveson();
     final String principalPersonUuid = principalPerson.getUuid();
-    final NoteRelatedObjectInput testPrincipalNroInput =
+    final GenericRelatedObjectInput testPrincipalNroInput =
         createNoteRelatedObject(PersonDao.TABLE_NAME, principalPersonUuid);
     final NoteInput testNoteInputJack =
         createAssessment(assessmentKey, "jack", recurrence, testPrincipalNroInput);
@@ -677,13 +677,13 @@ public class NoteResourceTest extends AbstractResourceTest {
     failNoteCreate(personCounterpartMutationExecutor, testNoteInputFail);
 
     // - F: create for a report
-    final NoteRelatedObjectInput testReportNroInput =
+    final GenericRelatedObjectInput testReportNroInput =
         createNoteRelatedObject(ReportDao.TABLE_NAME, TEST_REPORT_UUID);
     testNoteInputFail = createAssessment(assessmentKey, "test", recurrence, testReportNroInput);
     failNoteCreate(personCounterpartMutationExecutor, testNoteInputFail);
 
     // - F: create for a report and a person
-    final NoteRelatedObjectInput testPrincipalNroInput =
+    final GenericRelatedObjectInput testPrincipalNroInput =
         createNoteRelatedObject(PersonDao.TABLE_NAME, TEST_COUNTERPART_PERSON_UUID);
     testNoteInputFail = createAssessment(assessmentKey, "test", recurrence, testReportNroInput,
         testPrincipalNroInput);
@@ -791,7 +791,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     // - F: create for a person as someone without counterpart and empty write auth.groups defined
     // in
     // the dictionary
-    final NoteRelatedObjectInput testPersonNroInput =
+    final GenericRelatedObjectInput testPersonNroInput =
         createNoteRelatedObject(PersonDao.TABLE_NAME, TEST_COUNTERPART_PERSON_UUID);
     final NoteInput testNoteInputFail =
         createAssessment(assessmentKey, "andrew", recurrence, testPersonNroInput);
@@ -851,7 +851,7 @@ public class NoteResourceTest extends AbstractResourceTest {
 
     // - S: create for a person as someone without counterpart and no auth.groups defined in
     // the dictionary
-    final NoteRelatedObjectInput testPersonNroInput =
+    final GenericRelatedObjectInput testPersonNroInput =
         createNoteRelatedObject(PersonDao.TABLE_NAME, TEST_COUNTERPART_PERSON_UUID);
     final NoteInput testNoteInput =
         createAssessment(assessmentKey, "andrew", recurrence, testPersonNroInput);
@@ -898,13 +898,13 @@ public class NoteResourceTest extends AbstractResourceTest {
     failNoteCreate(taskResponsibleMutationExecutor, testNoteInputFail);
 
     // - F: create for a report
-    final NoteRelatedObjectInput testReportNroInput =
+    final GenericRelatedObjectInput testReportNroInput =
         createNoteRelatedObject(ReportDao.TABLE_NAME, TEST_REPORT_UUID);
     testNoteInputFail = createAssessment(assessmentKey, "test", recurrence, testReportNroInput);
     failNoteCreate(taskResponsibleMutationExecutor, testNoteInputFail);
 
     // - F: create for a report and a task
-    final NoteRelatedObjectInput testTaskNroInput =
+    final GenericRelatedObjectInput testTaskNroInput =
         createNoteRelatedObject(TaskDao.TABLE_NAME, TEST_RESPONSIBLE_TASK_UUID);
     testNoteInputFail =
         createAssessment(assessmentKey, "test", recurrence, testReportNroInput, testTaskNroInput);
@@ -1009,7 +1009,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     // - F: create for a task as someone without task permission and empty write auth.groups defined
     // in
     // the dictionary
-    final NoteRelatedObjectInput testTaskNroInput =
+    final GenericRelatedObjectInput testTaskNroInput =
         createNoteRelatedObject(TaskDao.TABLE_NAME, TEST_RESPONSIBLE_TASK_UUID);
     final NoteInput testNoteInputFail =
         createAssessment(assessmentKey, "erin", recurrence, testTaskNroInput);
@@ -1069,7 +1069,7 @@ public class NoteResourceTest extends AbstractResourceTest {
 
     // - S: create for a task as someone without task permission and no auth.groups defined in
     // the dictionary
-    final NoteRelatedObjectInput testTaskNroInput =
+    final GenericRelatedObjectInput testTaskNroInput =
         createNoteRelatedObject(TaskDao.TABLE_NAME, TEST_RESPONSIBLE_TASK_UUID);
     final NoteInput testNoteInput =
         createAssessment(assessmentKey, "erin", recurrence, testTaskNroInput);
@@ -1127,19 +1127,19 @@ public class NoteResourceTest extends AbstractResourceTest {
     failNoteCreate(reportAuthorMutationExecutor, testNoteInputFail);
 
     // - F: create for a report
-    final NoteRelatedObjectInput testReportNroInput =
+    final GenericRelatedObjectInput testReportNroInput =
         createNoteRelatedObject(ReportDao.TABLE_NAME, reportUuid);
     testNoteInputFail = createAssessment(assessmentKey, "test", recurrence, testReportNroInput);
     failNoteCreate(reportAuthorMutationExecutor, testNoteInputFail);
 
     // - F: create for a person
-    final NoteRelatedObjectInput testAdvisorNroInput =
+    final GenericRelatedObjectInput testAdvisorNroInput =
         createNoteRelatedObject(PersonDao.TABLE_NAME, reportAuthor.getUuid());
     testNoteInputFail = createAssessment(assessmentKey, "test", recurrence, testAdvisorNroInput);
     failNoteCreate(reportAuthorMutationExecutor, testNoteInputFail);
 
     // - F: create for a task
-    final NoteRelatedObjectInput testTaskNroInput =
+    final GenericRelatedObjectInput testTaskNroInput =
         createNoteRelatedObject(TaskDao.TABLE_NAME, taskUuid);
     testNoteInputFail = createAssessment(assessmentKey, "test", recurrence, testTaskNroInput);
     failNoteCreate(reportAuthorMutationExecutor, testNoteInputFail);
@@ -1167,7 +1167,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     failNoteCreate(erinMutationExecutor, testNoteInputFail);
 
     // - F: create for a non-existing report and a person/task
-    final NoteRelatedObjectInput testInvalidReportNroInput =
+    final GenericRelatedObjectInput testInvalidReportNroInput =
         createNoteRelatedObject(ReportDao.TABLE_NAME, "non-existing");
     testNoteInputFail = createAssessment(assessmentKey, "test", recurrence,
         testInvalidReportNroInput, forPerson ? testAdvisorNroInput : testTaskNroInput);
@@ -1283,11 +1283,11 @@ public class NoteResourceTest extends AbstractResourceTest {
         reportAuthorMutationExecutor.createReport(REPORT_FIELDS, reportInput);
 
     // - S: create as author for a report and a person
-    final NoteRelatedObjectInput testReportNroInput =
+    final GenericRelatedObjectInput testReportNroInput =
         createNoteRelatedObject(ReportDao.TABLE_NAME, createdReport.getUuid());
-    final NoteRelatedObjectInput testPrincipalNroInput =
+    final GenericRelatedObjectInput testPrincipalNroInput =
         createNoteRelatedObject(PersonDao.TABLE_NAME, principalPerson.getUuid());
-    final NoteRelatedObjectInput testTaskNroInput =
+    final GenericRelatedObjectInput testTaskNroInput =
         createNoteRelatedObject(TaskDao.TABLE_NAME, taskUuid);
     final NoteInput testNoteInputAuthor = createAssessment(assessmentKey, "author", recurrence,
         testReportNroInput, forPerson ? testPrincipalNroInput : testTaskNroInput);
@@ -1336,11 +1336,11 @@ public class NoteResourceTest extends AbstractResourceTest {
         reportAuthorMutationExecutor.createReport(REPORT_FIELDS, reportInput);
 
     // - S: create as author for a report and a person
-    final NoteRelatedObjectInput testReportNroInput =
+    final GenericRelatedObjectInput testReportNroInput =
         createNoteRelatedObject(ReportDao.TABLE_NAME, createdReport.getUuid());
-    final NoteRelatedObjectInput testPrincipalNroInput =
+    final GenericRelatedObjectInput testPrincipalNroInput =
         createNoteRelatedObject(PersonDao.TABLE_NAME, principalPerson.getUuid());
-    final NoteRelatedObjectInput testTaskNroInput =
+    final GenericRelatedObjectInput testTaskNroInput =
         createNoteRelatedObject(TaskDao.TABLE_NAME, taskUuid);
     final NoteInput testNoteInputAuthor = createAssessment(assessmentKey, "author", recurrence,
         testReportNroInput, forPerson ? testPrincipalNroInput : testTaskNroInput);
@@ -1396,7 +1396,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     failUpdateReportAssessments(reportAuthorMutationExecutor, reportUuid, testNoteInputFail);
 
     // - F: create for a report
-    final NoteRelatedObjectInput testReportNroInput =
+    final GenericRelatedObjectInput testReportNroInput =
         createNoteRelatedObject(ReportDao.TABLE_NAME, reportUuid);
     testNoteInputFail = createAssessment(assessmentKey, "test", recurrence, testReportNroInput);
     failUpdateReportAssessments(reportAuthorMutationExecutor, reportUuid, testNoteInputFail);
@@ -1407,13 +1407,13 @@ public class NoteResourceTest extends AbstractResourceTest {
     failUpdateReportAssessments(reportAuthorMutationExecutor, reportUuid, testNoteInputFail);
 
     // - F: create for a person
-    final NoteRelatedObjectInput testAdvisorNroInput =
+    final GenericRelatedObjectInput testAdvisorNroInput =
         createNoteRelatedObject(PersonDao.TABLE_NAME, reportAuthor.getUuid());
     testNoteInputFail = createAssessment(assessmentKey, "test", recurrence, testAdvisorNroInput);
     failUpdateReportAssessments(reportAuthorMutationExecutor, reportUuid, testNoteInputFail);
 
     // - F: create for a task
-    final NoteRelatedObjectInput testTaskNroInput =
+    final GenericRelatedObjectInput testTaskNroInput =
         createNoteRelatedObject(TaskDao.TABLE_NAME, taskUuid);
     testNoteInputFail = createAssessment(assessmentKey, "test", recurrence, testTaskNroInput);
     failUpdateReportAssessments(reportAuthorMutationExecutor, reportUuid, testNoteInputFail);
@@ -1441,7 +1441,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     failUpdateReportAssessments(erinMutationExecutor, reportUuid, testNoteInputFail);
 
     // - F: create for a non-existing report and a person/task
-    final NoteRelatedObjectInput testInvalidReportNroInput =
+    final GenericRelatedObjectInput testInvalidReportNroInput =
         createNoteRelatedObject(ReportDao.TABLE_NAME, "non-existing");
     testNoteInputFail = createAssessment(assessmentKey, "test", recurrence,
         testInvalidReportNroInput, forPerson ? testAdvisorNroInput : testTaskNroInput);
@@ -1601,11 +1601,11 @@ public class NoteResourceTest extends AbstractResourceTest {
     assertThat(reportAuthorMutationExecutor.submitReport("", reportUuid)).isOne();
 
     // - S: create as author for a report and a person
-    final NoteRelatedObjectInput testReportNroInput =
+    final GenericRelatedObjectInput testReportNroInput =
         createNoteRelatedObject(ReportDao.TABLE_NAME, reportUuid);
-    final NoteRelatedObjectInput testPrincipalNroInput =
+    final GenericRelatedObjectInput testPrincipalNroInput =
         createNoteRelatedObject(PersonDao.TABLE_NAME, principalPerson.getUuid());
-    final NoteRelatedObjectInput testTaskNroInput =
+    final GenericRelatedObjectInput testTaskNroInput =
         createNoteRelatedObject(TaskDao.TABLE_NAME, taskUuid);
     final NoteInput testNoteInputAuthor = createAssessment(assessmentKey, "author", recurrence,
         testReportNroInput, forPerson ? testPrincipalNroInput : testTaskNroInput);
@@ -1665,11 +1665,11 @@ public class NoteResourceTest extends AbstractResourceTest {
     assertThat(reportAuthorMutationExecutor.submitReport("", reportUuid)).isOne();
 
     // - S: create as author for a report and a person
-    final NoteRelatedObjectInput testReportNroInput =
+    final GenericRelatedObjectInput testReportNroInput =
         createNoteRelatedObject(ReportDao.TABLE_NAME, reportUuid);
-    final NoteRelatedObjectInput testPrincipalNroInput =
+    final GenericRelatedObjectInput testPrincipalNroInput =
         createNoteRelatedObject(PersonDao.TABLE_NAME, principalPerson.getUuid());
-    final NoteRelatedObjectInput testTaskNroInput =
+    final GenericRelatedObjectInput testTaskNroInput =
         createNoteRelatedObject(TaskDao.TABLE_NAME, taskUuid);
     final NoteInput testNoteInputAuthor = createAssessment(assessmentKey, "author", recurrence,
         testReportNroInput, forPerson ? testPrincipalNroInput : testTaskNroInput);
@@ -1702,7 +1702,7 @@ public class NoteResourceTest extends AbstractResourceTest {
   }
 
   private NoteInput createAssessment(final String assessmentKey, final String text,
-      final String recurrence, NoteRelatedObjectInput... noteRelatedObjects) {
+      final String recurrence, GenericRelatedObjectInput... noteRelatedObjects) {
     return NoteInput.builder().withType(NoteType.ASSESSMENT).withAssessmentKey(assessmentKey)
         .withText(createAssessmentText(text, recurrence))
         .withNoteRelatedObjects(Lists.newArrayList(noteRelatedObjects)).build();
@@ -1712,9 +1712,9 @@ public class NoteResourceTest extends AbstractResourceTest {
     return String.format("{\"text\":\"%s\",\"%s\":\"%s\"}", text, NOTE_RECURRENCE, recurrence);
   }
 
-  private NoteRelatedObjectInput createNoteRelatedObject(final String tableName,
+  private GenericRelatedObjectInput createNoteRelatedObject(final String tableName,
       final String uuid) {
-    return NoteRelatedObjectInput.builder().withRelatedObjectType(tableName)
+    return GenericRelatedObjectInput.builder().withRelatedObjectType(tableName)
         .withRelatedObjectUuid(uuid).build();
   }
 

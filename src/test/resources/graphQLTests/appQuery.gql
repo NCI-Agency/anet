@@ -69,7 +69,7 @@ me {
         customFields
         notes {
           noteRelatedObjects {
-            noteUuid
+            objectUuid
           }
           createdAt
           type
@@ -99,7 +99,7 @@ me {
       customFields
       notes {
         noteRelatedObjects {
-          noteUuid
+          objectUuid
         }
         createdAt
         type

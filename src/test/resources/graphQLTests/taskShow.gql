@@ -48,7 +48,7 @@ task(uuid: "${taskUuid}") {
         role
       }
       noteRelatedObjects {
-        noteUuid
+        objectUuid
         relatedObjectType
         relatedObjectUuid
         relatedObject {
@@ -153,7 +153,7 @@ task(uuid: "${taskUuid}") {
       role
     }
     noteRelatedObjects {
-      noteUuid
+      objectUuid
       relatedObjectType
       relatedObjectUuid
       relatedObject {
