@@ -4533,4 +4533,41 @@
 		</addColumn>
 	</changeSet>
 
+	<changeSet id="add-authorizationGroupRelatedObjects" author="gjvoosten">
+		<createTable tableName="authorizationGroupRelatedObjects">
+			<column name="authorizationGroupUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<!-- The next two columns combined act as a generic foreign key reference to a (table name, uuid)-tuple -->
+			<column name="relatedObjectType" type="varchar(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="relatedObjectUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<addForeignKeyConstraint
+				baseTableName="authorizationGroupRelatedObjects"
+				constraintName="FK_authorizationGroupRelatedObjects_authorizationGroup"
+				baseColumnNames="authorizationGroupUuid"
+				referencedTableName="authorizationGroups"
+				referencedColumnNames="uuid"
+				onDelete="NO ACTION" onUpdate="NO ACTION" />
+
+		<!-- Migrate existing authorizationGroupPositions -->
+		<sql>
+			INSERT INTO "authorizationGroupRelatedObjects" ("authorizationGroupUuid", "relatedObjectType", "relatedObjectUuid")
+			SELECT
+				agp."authorizationGroupUuid",
+				'positions',
+				agp."positionUuid"
+			FROM
+				"authorizationGroupPositions" agp;
+		</sql>
+
+		<!-- Now drop authorizationGroupPositions -->
+		<dropTable tableName="authorizationGroupPositions" />
+	</changeSet>
+
 </databaseChangeLog>

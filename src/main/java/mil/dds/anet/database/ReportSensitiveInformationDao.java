@@ -156,10 +156,14 @@ public class ReportSensitiveInformationDao
     final Query query = getDbHandle()
         .createQuery("/* checkReportAuthorization */ SELECT COUNT(*) AS count"
             + " FROM \"reportAuthorizationGroups\" rag"
-            + " LEFT JOIN \"authorizationGroupPositions\" agp ON agp.\"authorizationGroupUuid\" = rag.\"authorizationGroupUuid\" "
-            + " LEFT JOIN positions p ON p.uuid = agp.\"positionUuid\" WHERE rag.\"reportUuid\" = :reportUuid"
+            + " LEFT JOIN \"authorizationGroupRelatedObjects\" agro"
+            + " ON agro.\"authorizationGroupUuid\" = rag.\"authorizationGroupUuid\""
+            + " LEFT JOIN positions p ON p.uuid = agro.\"relatedObjectUuid\""
+            + " WHERE rag.\"reportUuid\" = :reportUuid"
+            + " AND agro.\"relatedObjectType\" = :relatedObjectTypePosition"
             + " AND p.\"currentPersonUuid\" = :userUuid")
-        .bind("reportUuid", reportUuid).bind("userUuid", userUuid);
+        .bind("reportUuid", reportUuid).bind("relatedObjectTypePosition", PositionDao.TABLE_NAME)
+        .bind("userUuid", userUuid);
     final Optional<Map<String, Object>> result = query.map(new MapMapper(false)).findFirst();
     return result.isPresent() && ((Number) result.get().get("count")).intValue() > 0;
   }
