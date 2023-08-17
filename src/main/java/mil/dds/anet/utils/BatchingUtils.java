@@ -3,7 +3,6 @@ package mil.dds.anet.utils;
 import com.codahale.metrics.MetricRegistry;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import mil.dds.anet.AnetObjectEngine;
@@ -32,7 +31,7 @@ import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.dataloader.BatchLoader;
-import org.dataloader.DataLoader;
+import org.dataloader.DataLoaderFactory;
 import org.dataloader.DataLoaderOptions;
 import org.dataloader.DataLoaderRegistry;
 import org.dataloader.stats.SimpleStatisticsCollector;
@@ -49,10 +48,9 @@ public final class BatchingUtils {
     // Give each registry its own thread pool
     dispatcherService = Executors.newFixedThreadPool(3);
     dataLoaderRegistry = new DataLoaderRegistry();
-    dataLoaderOptions =
-        DataLoaderOptions.newOptions().setStatisticsCollector(() -> new SimpleStatisticsCollector())
-            .setBatchingEnabled(batchingEnabled).setCachingEnabled(cachingEnabled)
-            .setMaxBatchSize(maxBatchSize);
+    dataLoaderOptions = DataLoaderOptions.newOptions()
+        .setStatisticsCollector(SimpleStatisticsCollector::new).setBatchingEnabled(batchingEnabled)
+        .setCachingEnabled(cachingEnabled).setMaxBatchSize(maxBatchSize);
     registerDataLoaders(engine);
   }
 
@@ -70,6 +68,7 @@ public final class BatchingUtils {
   }
 
   @Override
+  @Deprecated(since = "9")
   @SuppressWarnings("checkstyle:NoFinalizer")
   protected void finalize() throws Throwable {
     shutdown();
@@ -78,319 +77,211 @@ public final class BatchingUtils {
 
   private void registerDataLoaders(AnetObjectEngine engine) {
     dataLoaderRegistry.register(IdDataLoaderKey.APPROVAL_STEPS.toString(),
-        new DataLoader<>(new BatchLoader<String, ApprovalStep>() {
-          @Override
-          public CompletionStage<List<ApprovalStep>> load(List<String> keys) {
-            return CompletableFuture.supplyAsync(() -> engine.getApprovalStepDao().getByIds(keys),
-                dispatcherService);
-          }
-        }, dataLoaderOptions));
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, ApprovalStep>) keys -> CompletableFuture
+                .supplyAsync(() -> engine.getApprovalStepDao().getByIds(keys), dispatcherService),
+            dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.APPROVAL_STEP_APPROVERS.toString(),
-        new DataLoader<>(new BatchLoader<String, List<Position>>() {
-          @Override
-          public CompletionStage<List<List<Position>>> load(List<String> foreignKeys) {
-            return CompletableFuture.supplyAsync(
-                () -> engine.getApprovalStepDao().getApprovers(foreignKeys), dispatcherService);
-          }
-        }, dataLoaderOptions));
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, List<Position>>) foreignKeys -> CompletableFuture.supplyAsync(
+                () -> engine.getApprovalStepDao().getApprovers(foreignKeys), dispatcherService),
+            dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.ATTACHMENT_ATTACHMENT_RELATED_OBJECTS.toString(),
-        new DataLoader<>(new BatchLoader<String, List<AttachmentRelatedObject>>() {
-          @Override
-          public CompletionStage<List<List<AttachmentRelatedObject>>> load(
-              List<String> foreignKeys) {
-            return CompletableFuture.supplyAsync(
-                () -> engine.getAttachmentDao().getAttachmentRelatedObjects(foreignKeys),
-                dispatcherService);
-          }
-        }, dataLoaderOptions));
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, List<AttachmentRelatedObject>>) foreignKeys -> CompletableFuture
+                .supplyAsync(
+                    () -> engine.getAttachmentDao().getAttachmentRelatedObjects(foreignKeys),
+                    dispatcherService),
+            dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.ATTACHMENT_RELATED_OBJECT_ATTACHMENTS.toString(),
-        new DataLoader<>(new BatchLoader<String, List<Attachment>>() {
-          @Override
-          public CompletionStage<List<List<Attachment>>> load(List<String> foreignKeys) {
-            return CompletableFuture.supplyAsync(
-                () -> engine.getAttachmentDao().getAttachments(foreignKeys), dispatcherService);
-          }
-        }, dataLoaderOptions));
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, List<Attachment>>) foreignKeys -> CompletableFuture.supplyAsync(
+                () -> engine.getAttachmentDao().getAttachments(foreignKeys), dispatcherService),
+            dataLoaderOptions));
     dataLoaderRegistry.register(IdDataLoaderKey.AUTHORIZATION_GROUPS.toString(),
-        new DataLoader<>(new BatchLoader<String, AuthorizationGroup>() {
-          @Override
-          public CompletionStage<List<AuthorizationGroup>> load(List<String> keys) {
-            return CompletableFuture.supplyAsync(
-                () -> engine.getAuthorizationGroupDao().getByIds(keys), dispatcherService);
-          }
-        }, dataLoaderOptions));
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, AuthorizationGroup>) keys -> CompletableFuture.supplyAsync(
+                () -> engine.getAuthorizationGroupDao().getByIds(keys), dispatcherService),
+            dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.AUTHORIZATION_GROUP_POSITIONS.toString(),
-        new DataLoader<>(new BatchLoader<String, List<Position>>() {
-          @Override
-          public CompletionStage<List<List<Position>>> load(List<String> foreignKeys) {
-            return CompletableFuture.supplyAsync(
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, List<Position>>) foreignKeys -> CompletableFuture.supplyAsync(
                 () -> engine.getAuthorizationGroupDao().getPositions(foreignKeys),
-                dispatcherService);
-          }
-        }, dataLoaderOptions));
+                dispatcherService),
+            dataLoaderOptions));
     dataLoaderRegistry.register(IdDataLoaderKey.COMMENTS.toString(),
-        new DataLoader<>(new BatchLoader<String, Comment>() {
-          @Override
-          public CompletionStage<List<Comment>> load(List<String> keys) {
-            return CompletableFuture.supplyAsync(() -> engine.getCommentDao().getByIds(keys),
-                dispatcherService);
-          }
-        }, dataLoaderOptions));
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, Comment>) keys -> CompletableFuture
+                .supplyAsync(() -> engine.getCommentDao().getByIds(keys), dispatcherService),
+            dataLoaderOptions));
     dataLoaderRegistry.register(IdDataLoaderKey.LOCATIONS.toString(),
-        new DataLoader<>(new BatchLoader<String, Location>() {
-          @Override
-          public CompletionStage<List<Location>> load(List<String> keys) {
-            return CompletableFuture.supplyAsync(() -> engine.getLocationDao().getByIds(keys),
-                dispatcherService);
-          }
-        }, dataLoaderOptions));
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, Location>) keys -> CompletableFuture
+                .supplyAsync(() -> engine.getLocationDao().getByIds(keys), dispatcherService),
+            dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.NOTE_NOTE_RELATED_OBJECTS.toString(),
-        new DataLoader<>(new BatchLoader<String, List<NoteRelatedObject>>() {
-          @Override
-          public CompletionStage<List<List<NoteRelatedObject>>> load(List<String> foreignKeys) {
-            return CompletableFuture.supplyAsync(
-                () -> engine.getNoteDao().getNoteRelatedObjects(foreignKeys), dispatcherService);
-          }
-        }, dataLoaderOptions));
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, List<NoteRelatedObject>>) foreignKeys -> CompletableFuture
+                .supplyAsync(() -> engine.getNoteDao().getNoteRelatedObjects(foreignKeys),
+                    dispatcherService),
+            dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.NOTE_RELATED_OBJECT_NOTES.toString(),
-        new DataLoader<>(new BatchLoader<String, List<Note>>() {
-          @Override
-          public CompletionStage<List<List<Note>>> load(List<String> foreignKeys) {
-            return CompletableFuture.supplyAsync(() -> engine.getNoteDao().getNotes(foreignKeys),
-                dispatcherService);
-          }
-        }, dataLoaderOptions));
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, List<Note>>) foreignKeys -> CompletableFuture
+                .supplyAsync(() -> engine.getNoteDao().getNotes(foreignKeys), dispatcherService),
+            dataLoaderOptions));
     dataLoaderRegistry.register(IdDataLoaderKey.ORGANIZATIONS.toString(),
-        new DataLoader<>(new BatchLoader<String, Organization>() {
-          @Override
-          public CompletionStage<List<Organization>> load(List<String> keys) {
-            return CompletableFuture.supplyAsync(() -> engine.getOrganizationDao().getByIds(keys),
-                dispatcherService);
-          }
-        }, dataLoaderOptions));
-    dataLoaderRegistry.register(SqDataLoaderKey.ORGANIZATIONS_SEARCH.toString(), new DataLoader<>(
-        new BatchLoader<ImmutablePair<String, OrganizationSearchQuery>, List<Organization>>() {
-          @Override
-          public CompletionStage<List<List<Organization>>> load(
-              List<ImmutablePair<String, OrganizationSearchQuery>> foreignKeys) {
-            return CompletableFuture.supplyAsync(
-                () -> engine.getOrganizationDao().getOrganizationsBySearch(foreignKeys),
-                dispatcherService);
-          }
-        }, dataLoaderOptions));
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, Organization>) keys -> CompletableFuture
+                .supplyAsync(() -> engine.getOrganizationDao().getByIds(keys), dispatcherService),
+            dataLoaderOptions));
+    dataLoaderRegistry.register(SqDataLoaderKey.ORGANIZATIONS_SEARCH.toString(),
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<ImmutablePair<String, OrganizationSearchQuery>, List<Organization>>) foreignKeys -> CompletableFuture
+                .supplyAsync(
+                    () -> engine.getOrganizationDao().getOrganizationsBySearch(foreignKeys),
+                    dispatcherService),
+            dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.ORGANIZATION_ADMINISTRATIVE_POSITIONS.toString(),
-        new DataLoader<>(new BatchLoader<String, List<Position>>() {
-          @Override
-          public CompletionStage<List<List<Position>>> load(List<String> foreignKeys) {
-            return CompletableFuture.supplyAsync(
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, List<Position>>) foreignKeys -> CompletableFuture.supplyAsync(
                 () -> engine.getOrganizationDao().getAdministratingPositions(foreignKeys),
-                dispatcherService);
-          }
-        }, dataLoaderOptions));
+                dispatcherService),
+            dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.RELATED_OBJECT_APPROVAL_STEPS.toString(),
-        new DataLoader<>(new BatchLoader<String, List<ApprovalStep>>() {
-          @Override
-          public CompletionStage<List<List<ApprovalStep>>> load(List<String> foreignKeys) {
-            return CompletableFuture.supplyAsync(
-                () -> engine.getApprovalStepDao().getApprovalSteps(foreignKeys), dispatcherService);
-          }
-        }, dataLoaderOptions));
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, List<ApprovalStep>>) foreignKeys -> CompletableFuture.supplyAsync(
+                () -> engine.getApprovalStepDao().getApprovalSteps(foreignKeys), dispatcherService),
+            dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.RELATED_OBJECT_PLANNING_APPROVAL_STEPS.toString(),
-        new DataLoader<>(new BatchLoader<String, List<ApprovalStep>>() {
-          @Override
-          public CompletionStage<List<List<ApprovalStep>>> load(List<String> foreignKeys) {
-            return CompletableFuture.supplyAsync(
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, List<ApprovalStep>>) foreignKeys -> CompletableFuture.supplyAsync(
                 () -> engine.getApprovalStepDao().getPlanningApprovalSteps(foreignKeys),
-                dispatcherService);
-          }
-        }, dataLoaderOptions));
+                dispatcherService),
+            dataLoaderOptions));
     dataLoaderRegistry.register(
         FkDataLoaderKey.RELATED_OBJECT_CUSTOM_SENSITIVE_INFORMATION.toString(),
-        new DataLoader<>(new BatchLoader<String, List<CustomSensitiveInformation>>() {
-          @Override
-          public CompletionStage<List<List<CustomSensitiveInformation>>> load(
-              List<String> foreignKeys) {
-            return CompletableFuture.supplyAsync(() -> engine.getCustomSensitiveInformationDao()
-                .getCustomSensitiveInformation(foreignKeys), dispatcherService);
-          }
-        }, dataLoaderOptions));
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, List<CustomSensitiveInformation>>) foreignKeys -> CompletableFuture
+                .supplyAsync(() -> engine.getCustomSensitiveInformationDao()
+                    .getCustomSensitiveInformation(foreignKeys), dispatcherService),
+            dataLoaderOptions));
     dataLoaderRegistry.register(IdDataLoaderKey.PEOPLE.toString(),
-        new DataLoader<>(new BatchLoader<String, Person>() {
-          @Override
-          public CompletionStage<List<Person>> load(List<String> keys) {
-            return CompletableFuture.supplyAsync(() -> engine.getPersonDao().getByIds(keys),
-                dispatcherService);
-          }
-        }, dataLoaderOptions));
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, Person>) keys -> CompletableFuture
+                .supplyAsync(() -> engine.getPersonDao().getByIds(keys), dispatcherService),
+            dataLoaderOptions));
     dataLoaderRegistry.register(IdDataLoaderKey.PEOPLE_AVATARS.toString(),
-        new DataLoader<>(new BatchLoader<String, Person>() {
-          @Override
-          public CompletionStage<List<Person>> load(List<String> keys) {
-            return CompletableFuture.supplyAsync(() -> engine.getPersonDao().getAvatars(keys),
-                dispatcherService);
-          }
-        }, dataLoaderOptions));
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, Person>) keys -> CompletableFuture
+                .supplyAsync(() -> engine.getPersonDao().getAvatars(keys), dispatcherService),
+            dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.PERSON_ORGANIZATIONS.toString(),
-        new DataLoader<>(new BatchLoader<String, List<Organization>>() {
-          @Override
-          public CompletionStage<List<List<Organization>>> load(List<String> foreignKeys) {
-            return CompletableFuture.supplyAsync(
-                () -> engine.getOrganizationDao().getOrganizations(foreignKeys), dispatcherService);
-          }
-        }, dataLoaderOptions));
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, List<Organization>>) foreignKeys -> CompletableFuture.supplyAsync(
+                () -> engine.getOrganizationDao().getOrganizations(foreignKeys), dispatcherService),
+            dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.PERSON_PERSON_POSITION_HISTORY.toString(),
-        new DataLoader<>(new BatchLoader<String, List<PersonPositionHistory>>() {
-          @Override
-          public CompletionStage<List<List<PersonPositionHistory>>> load(List<String> foreignKeys) {
-            return CompletableFuture.supplyAsync(
-                () -> engine.getPersonDao().getPersonPositionHistory(foreignKeys),
-                dispatcherService);
-          }
-        }, dataLoaderOptions));
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, List<PersonPositionHistory>>) foreignKeys -> CompletableFuture
+                .supplyAsync(() -> engine.getPersonDao().getPersonPositionHistory(foreignKeys),
+                    dispatcherService),
+            dataLoaderOptions));
     dataLoaderRegistry.register(IdDataLoaderKey.POSITIONS.toString(),
-        new DataLoader<>(new BatchLoader<String, Position>() {
-          @Override
-          public CompletionStage<List<Position>> load(List<String> keys) {
-            return CompletableFuture.supplyAsync(() -> engine.getPositionDao().getByIds(keys),
-                dispatcherService);
-          }
-        }, dataLoaderOptions));
-    dataLoaderRegistry.register(SqDataLoaderKey.POSITIONS_SEARCH.toString(), new DataLoader<>(
-        new BatchLoader<ImmutablePair<String, PositionSearchQuery>, List<Position>>() {
-          @Override
-          public CompletionStage<List<List<Position>>> load(
-              List<ImmutablePair<String, PositionSearchQuery>> foreignKeys) {
-            return CompletableFuture.supplyAsync(
-                () -> engine.getPositionDao().getPositionsBySearch(foreignKeys), dispatcherService);
-          }
-        }, dataLoaderOptions));
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, Position>) keys -> CompletableFuture
+                .supplyAsync(() -> engine.getPositionDao().getByIds(keys), dispatcherService),
+            dataLoaderOptions));
+    dataLoaderRegistry.register(SqDataLoaderKey.POSITIONS_SEARCH.toString(),
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<ImmutablePair<String, PositionSearchQuery>, List<Position>>) foreignKeys -> CompletableFuture
+                .supplyAsync(() -> engine.getPositionDao().getPositionsBySearch(foreignKeys),
+                    dispatcherService),
+            dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.POSITION_ASSOCIATED_POSITIONS.toString(),
-        new DataLoader<>(new BatchLoader<String, List<Position>>() {
-          @Override
-          public CompletionStage<List<List<Position>>> load(List<String> foreignKeys) {
-            return CompletableFuture.supplyAsync(
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, List<Position>>) foreignKeys -> CompletableFuture.supplyAsync(
                 () -> engine.getPositionDao().getAssociatedPositionsForPosition(foreignKeys),
-                dispatcherService);
-          }
-        }, dataLoaderOptions));
-    dataLoaderRegistry.register(FkDataLoaderKey.POSITION_AUTHORIZATION_GROUPS.toString(),
-        new DataLoader<>(new BatchLoader<String, List<AuthorizationGroup>>() {
-          @Override
-          public CompletionStage<List<List<AuthorizationGroup>>> load(List<String> foreignKeys) {
-            return CompletableFuture.supplyAsync(
-                () -> engine.getAuthorizationGroupDao().getAuthorizationGroups(foreignKeys),
-                dispatcherService);
-          }
-        }, dataLoaderOptions));
+                dispatcherService),
+            dataLoaderOptions));
+    dataLoaderRegistry
+        .register(FkDataLoaderKey.POSITION_AUTHORIZATION_GROUPS.toString(),
+            DataLoaderFactory
+                .newDataLoader(
+                    (BatchLoader<String, List<AuthorizationGroup>>) foreignKeys -> CompletableFuture
+                        .supplyAsync(() -> engine.getAuthorizationGroupDao()
+                            .getAuthorizationGroups(foreignKeys), dispatcherService),
+                    dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.POSITION_CURRENT_POSITION_FOR_PERSON.toString(),
-        new DataLoader<>(new BatchLoader<String, List<Position>>() {
-          @Override
-          public CompletionStage<List<List<Position>>> load(List<String> foreignKeys) {
-            return CompletableFuture.supplyAsync(
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, List<Position>>) foreignKeys -> CompletableFuture.supplyAsync(
                 () -> engine.getPositionDao().getCurrentPersonForPosition(foreignKeys),
-                dispatcherService);
-          }
-        }, dataLoaderOptions));
+                dispatcherService),
+            dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.POSITION_PERSON_POSITION_HISTORY.toString(),
-        new DataLoader<>(new BatchLoader<String, List<PersonPositionHistory>>() {
-          @Override
-          public CompletionStage<List<List<PersonPositionHistory>>> load(List<String> foreignKeys) {
-            return CompletableFuture.supplyAsync(
-                () -> engine.getPositionDao().getPersonPositionHistory(foreignKeys),
-                dispatcherService);
-          }
-        }, dataLoaderOptions));
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, List<PersonPositionHistory>>) foreignKeys -> CompletableFuture
+                .supplyAsync(() -> engine.getPositionDao().getPersonPositionHistory(foreignKeys),
+                    dispatcherService),
+            dataLoaderOptions));
     dataLoaderRegistry.register(IdDataLoaderKey.REPORTS.toString(),
-        new DataLoader<>(new BatchLoader<String, Report>() {
-          @Override
-          public CompletionStage<List<Report>> load(List<String> keys) {
-            return CompletableFuture.supplyAsync(() -> engine.getReportDao().getByIds(keys),
-                dispatcherService);
-          }
-        }, dataLoaderOptions));
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, Report>) keys -> CompletableFuture
+                .supplyAsync(() -> engine.getReportDao().getByIds(keys), dispatcherService),
+            dataLoaderOptions));
     dataLoaderRegistry.register(SqDataLoaderKey.REPORTS_SEARCH.toString(),
-        new DataLoader<>(new BatchLoader<ImmutablePair<String, ReportSearchQuery>, List<Report>>() {
-          @Override
-          public CompletionStage<List<List<Report>>> load(
-              List<ImmutablePair<String, ReportSearchQuery>> foreignKeys) {
-            return CompletableFuture.supplyAsync(
-                () -> engine.getReportDao().getReportsBySearch(foreignKeys), dispatcherService);
-          }
-        }, dataLoaderOptions));
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<ImmutablePair<String, ReportSearchQuery>, List<Report>>) foreignKeys -> CompletableFuture
+                .supplyAsync(() -> engine.getReportDao().getReportsBySearch(foreignKeys),
+                    dispatcherService),
+            dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.REPORT_REPORT_ACTIONS.toString(),
-        new DataLoader<>(new BatchLoader<String, List<ReportAction>>() {
-          @Override
-          public CompletionStage<List<List<ReportAction>>> load(List<String> foreignKeys) {
-            return CompletableFuture.supplyAsync(
-                () -> engine.getReportActionDao().getReportActions(foreignKeys), dispatcherService);
-          }
-        }, dataLoaderOptions));
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, List<ReportAction>>) foreignKeys -> CompletableFuture.supplyAsync(
+                () -> engine.getReportActionDao().getReportActions(foreignKeys), dispatcherService),
+            dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.REPORT_PEOPLE.toString(),
-        new DataLoader<>(new BatchLoader<String, List<ReportPerson>>() {
-          @Override
-          public CompletionStage<List<List<ReportPerson>>> load(List<String> foreignKeys) {
-            return CompletableFuture.supplyAsync(
-                () -> engine.getReportDao().getReportPeople(foreignKeys), dispatcherService);
-          }
-        }, dataLoaderOptions));
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, List<ReportPerson>>) foreignKeys -> CompletableFuture.supplyAsync(
+                () -> engine.getReportDao().getReportPeople(foreignKeys), dispatcherService),
+            dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.REPORT_REPORT_SENSITIVE_INFORMATION.toString(),
-        new DataLoader<>(new BatchLoader<String, List<ReportSensitiveInformation>>() {
-          @Override
-          public CompletionStage<List<List<ReportSensitiveInformation>>> load(
-              List<String> foreignKeys) {
-            return CompletableFuture.supplyAsync(() -> engine.getReportSensitiveInformationDao()
-                .getReportSensitiveInformation(foreignKeys), dispatcherService);
-          }
-        }, dataLoaderOptions));
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, List<ReportSensitiveInformation>>) foreignKeys -> CompletableFuture
+                .supplyAsync(() -> engine.getReportSensitiveInformationDao()
+                    .getReportSensitiveInformation(foreignKeys), dispatcherService),
+            dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.REPORT_TASKS.toString(),
-        new DataLoader<>(new BatchLoader<String, List<Task>>() {
-          @Override
-          public CompletionStage<List<List<Task>>> load(List<String> foreignKeys) {
-            return CompletableFuture.supplyAsync(() -> engine.getReportDao().getTasks(foreignKeys),
-                dispatcherService);
-          }
-        }, dataLoaderOptions));
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, List<Task>>) foreignKeys -> CompletableFuture
+                .supplyAsync(() -> engine.getReportDao().getTasks(foreignKeys), dispatcherService),
+            dataLoaderOptions));
     dataLoaderRegistry.register(IdDataLoaderKey.SUBSCRIPTIONS.toString(),
-        new DataLoader<>(new BatchLoader<String, Subscription>() {
-          @Override
-          public CompletionStage<List<Subscription>> load(List<String> keys) {
-            return CompletableFuture.supplyAsync(() -> engine.getSubscriptionDao().getByIds(keys),
-                dispatcherService);
-          }
-        }, dataLoaderOptions));
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, Subscription>) keys -> CompletableFuture
+                .supplyAsync(() -> engine.getSubscriptionDao().getByIds(keys), dispatcherService),
+            dataLoaderOptions));
     dataLoaderRegistry.register(IdDataLoaderKey.TASKS.toString(),
-        new DataLoader<>(new BatchLoader<String, Task>() {
-          @Override
-          public CompletionStage<List<Task>> load(List<String> keys) {
-            return CompletableFuture.supplyAsync(() -> engine.getTaskDao().getByIds(keys),
-                dispatcherService);
-          }
-        }, dataLoaderOptions));
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, Task>) keys -> CompletableFuture
+                .supplyAsync(() -> engine.getTaskDao().getByIds(keys), dispatcherService),
+            dataLoaderOptions));
     dataLoaderRegistry.register(SqDataLoaderKey.TASKS_SEARCH.toString(),
-        new DataLoader<>(new BatchLoader<ImmutablePair<String, TaskSearchQuery>, List<Task>>() {
-          @Override
-          public CompletionStage<List<List<Task>>> load(
-              List<ImmutablePair<String, TaskSearchQuery>> foreignKeys) {
-            return CompletableFuture.supplyAsync(
-                () -> engine.getTaskDao().getTasksBySearch(foreignKeys), dispatcherService);
-          }
-        }, dataLoaderOptions));
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<ImmutablePair<String, TaskSearchQuery>, List<Task>>) foreignKeys -> CompletableFuture
+                .supplyAsync(() -> engine.getTaskDao().getTasksBySearch(foreignKeys),
+                    dispatcherService),
+            dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.TASK_RESPONSIBLE_POSITIONS.toString(),
-        new DataLoader<>(new BatchLoader<String, List<Position>>() {
-          @Override
-          public CompletionStage<List<List<Position>>> load(List<String> foreignKeys) {
-            return CompletableFuture.supplyAsync(
-                () -> engine.getTaskDao().getResponsiblePositions(foreignKeys), dispatcherService);
-          }
-        }, dataLoaderOptions));
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, List<Position>>) foreignKeys -> CompletableFuture.supplyAsync(
+                () -> engine.getTaskDao().getResponsiblePositions(foreignKeys), dispatcherService),
+            dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.TASK_TASKED_ORGANIZATIONS.toString(),
-        new DataLoader<>(new BatchLoader<String, List<Organization>>() {
-          @Override
-          public CompletionStage<List<List<Organization>>> load(List<String> foreignKeys) {
-            return CompletableFuture.supplyAsync(
-                () -> engine.getTaskDao().getTaskedOrganizations(foreignKeys), dispatcherService);
-          }
-        }, dataLoaderOptions));
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, List<Organization>>) foreignKeys -> CompletableFuture.supplyAsync(
+                () -> engine.getTaskDao().getTaskedOrganizations(foreignKeys), dispatcherService),
+            dataLoaderOptions));
   }
 
   public void updateStats(MetricRegistry metricRegistry, DataLoaderRegistry dataLoaderRegistry) {
