@@ -74,15 +74,13 @@ export const BaseGeoLocation = ({
 
     if (displayType === GEO_LOCATION_DISPLAY_TYPE.FORM_FIELD) {
       return (
-        <>
-          <Field
-            name="location"
-            label={label}
-            component={FieldHelper.ReadonlyField}
-            humanValue={humanValue}
-            style={{ paddingTop: "2px" }}
-          />
-        </>
+        <Field
+          name="location"
+          label={label}
+          component={FieldHelper.ReadonlyField}
+          humanValue={humanValue}
+          style={{ paddingTop: "2px" }}
+        />
       )
     }
 
@@ -90,15 +88,17 @@ export const BaseGeoLocation = ({
   }
 
   return (
-    <CoordinatesFormField
-      coordinates={coordinates}
-      editable
-      setFieldValue={setFieldValue}
-      setFieldTouched={setFieldTouched}
-      isSubmitting={isSubmitting}
-      locationFormat={locationFormat}
-      setLocationFormat={setLocationFormat}
-    />
+    <div id="fg-location">
+      <CoordinatesFormField
+        coordinates={coordinates}
+        editable
+        setFieldValue={setFieldValue}
+        setFieldTouched={setFieldTouched}
+        isSubmitting={isSubmitting}
+        locationFormat={locationFormat}
+        setLocationFormat={setLocationFormat}
+      />
+    </div>
   )
 }
 
@@ -162,7 +162,7 @@ const MGRSFormField = ({
   }
 
   return (
-    <Row style={{ marginBottom: 0 }}>
+    <Row style={{ marginBottom: "1rem" }}>
       <Col sm={2} as={Form.Label} htmlFor="displayedCoordinate">
         {Location.LOCATION_FORMAT_LABELS[locationFormat]}
       </Col>
@@ -242,14 +242,14 @@ const LatLonFormField = ({
   if (!editable) {
     return (
       <div>
-        <span>{lat || lat === 0 ? lat : "?"}</span>
+        <span>{utils.isNumeric(lat) ? lat : "?"}</span>
         <span>,&nbsp;</span>
-        <span>{lng || lng === 0 ? lng : "?"}</span>
+        <span>{utils.isNumeric(lng) ? lng : "?"}</span>
       </div>
     )
   }
   return (
-    <Row>
+    <Row style={{ marginBottom: "1rem" }}>
       <Col sm={2} as={Form.Label} htmlFor="lat">
         {Location.LOCATION_FORMAT_LABELS[locationFormat]}
       </Col>
@@ -279,7 +279,7 @@ const LatLonFormField = ({
           <CoordinateActionButtons
             coordinates={coordinates}
             isSubmitting={isSubmitting}
-            disabled={!lat && lat !== 0 && !lng && lng !== 0}
+            disabled={!utils.isNumeric(lat) && !utils.isNumeric(lng)}
             onClear={() => {
               // setting second param to false prevents validation since lat, lng can be null together
               setFieldTouched("lat", false, false)
@@ -391,7 +391,7 @@ const AllFormatsInfo = ({
   inForm
 }) => {
   const { lat, lng } = coordinates
-  if (!inForm && ((!lat && lat !== 0) || (!lng && lng !== 0))) {
+  if (!inForm && (!utils.isNumeric(lat) || !utils.isNumeric(lng))) {
     return null
   }
   return (

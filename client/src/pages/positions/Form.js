@@ -210,6 +210,31 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
               <Fieldset>
+                <Field
+                  name="name"
+                  component={FieldHelper.InputField}
+                  label={Settings.fields.position.name}
+                  placeholder="Name/Description of Position"
+                  extraColElem={
+                    !edit && values.name.length >= MIN_CHARS_FOR_DUPLICATES ? (
+                      <>
+                        <Button
+                          onClick={() => setShowSimilarPositions(true)}
+                          variant="outline-secondary"
+                        >
+                          <Icon
+                            icon={IconNames.WARNING_SIGN}
+                            intent={Intent.WARNING}
+                            size={IconSize.STANDARD}
+                            style={{ margin: "0 6px" }}
+                          />
+                          Possible Duplicates
+                        </Button>
+                      </>
+                    ) : undefined
+                  }
+                />
+
                 {edit ? (
                   <FastField
                     name="type"
@@ -225,23 +250,14 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
                   />
                 )}
 
-                <FastField
-                  name="status"
-                  component={FieldHelper.RadioButtonToggleGroupField}
-                  buttons={statusButtons}
-                  onChange={value => setFieldValue("status", value)}
-                >
-                  {willAutoKickPerson && (
-                    <FormBS.Text>
-                      <span className="text-danger">
-                        Setting this position to inactive will automatically
-                        remove{" "}
-                        <LinkTo modelType="Person" model={values.person} /> from
-                        this position.
-                      </span>
-                    </FormBS.Text>
-                  )}
-                </FastField>
+                {!isPrincipal && (
+                  <FastField
+                    name="permissions"
+                    component={FieldHelper.RadioButtonToggleGroupField}
+                    buttons={permissionsButtons}
+                    onChange={value => setFieldValue("permissions", value)}
+                  />
+                )}
 
                 <Field
                   name="organization"
@@ -269,56 +285,6 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
                   }
                 />
 
-                <CodeFieldWithLabel
-                  dictProps={positionSettings.code}
-                  name="code"
-                  component={FieldHelper.InputField}
-                />
-
-                <Field
-                  name="name"
-                  component={FieldHelper.InputField}
-                  label={Settings.fields.position.name}
-                  placeholder="Name/Description of Position"
-                  extraColElem={
-                    !edit && values.name.length >= MIN_CHARS_FOR_DUPLICATES ? (
-                      <>
-                        <Button
-                          onClick={() => setShowSimilarPositions(true)}
-                          variant="outline-secondary"
-                        >
-                          <Icon
-                            icon={IconNames.WARNING_SIGN}
-                            intent={Intent.WARNING}
-                            size={IconSize.STANDARD}
-                            style={{ margin: "0 6px" }}
-                          />
-                          Possible Duplicates
-                        </Button>
-                      </>
-                    ) : undefined
-                  }
-                />
-
-                {!isPrincipal && (
-                  <FastField
-                    name="permissions"
-                    component={FieldHelper.RadioButtonToggleGroupField}
-                    buttons={permissionsButtons}
-                    onChange={value => setFieldValue("permissions", value)}
-                  />
-                )}
-
-                <FastField
-                  name="role"
-                  label={Settings.fields.position.role.label}
-                  component={FieldHelper.RadioButtonToggleGroupField}
-                  buttons={positionRoleButtons}
-                  onChange={value => setFieldValue("role", value)}
-                />
-              </Fieldset>
-
-              <Fieldset title="Additional information">
                 <Field
                   name="location"
                   label="Location"
@@ -343,7 +309,40 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
                     />
                   }
                 />
+
+                <CodeFieldWithLabel
+                  dictProps={positionSettings.code}
+                  name="code"
+                  component={FieldHelper.InputField}
+                />
+
+                <FastField
+                  name="status"
+                  component={FieldHelper.RadioButtonToggleGroupField}
+                  buttons={statusButtons}
+                  onChange={value => setFieldValue("status", value)}
+                >
+                  {willAutoKickPerson && (
+                    <FormBS.Text>
+                      <span className="text-danger">
+                        Setting this position to inactive will automatically
+                        remove{" "}
+                        <LinkTo modelType="Person" model={values.person} /> from
+                        this position.
+                      </span>
+                    </FormBS.Text>
+                  )}
+                </FastField>
+
+                <FastField
+                  name="role"
+                  label={Settings.fields.position.role.label}
+                  component={FieldHelper.RadioButtonToggleGroupField}
+                  buttons={positionRoleButtons}
+                  onChange={value => setFieldValue("role", value)}
+                />
               </Fieldset>
+
               {Settings.fields.position.customFields && (
                 <Fieldset title="Position information" id="custom-fields">
                   <CustomFieldsContainer

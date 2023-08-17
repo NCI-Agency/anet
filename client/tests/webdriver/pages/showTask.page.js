@@ -2,7 +2,7 @@ import Page from "./page"
 
 class ShowTask extends Page {
   async getShortName() {
-    return browser.$('div[id="shortName"]')
+    return browser.$(".title-text")
   }
 
   async getLongName() {

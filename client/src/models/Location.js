@@ -64,8 +64,8 @@ export default class Location extends Model {
         .max(90, "Latitude must be a number between -90 and +90")
         .test("lat", "Please enter latitude", function(lat) {
           const { lng } = this.parent
-          if (lng || lng === 0) {
-            return !!lat || lat === 0
+          if (utils.isNumeric(lng)) {
+            return utils.isNumeric(lat)
           }
           return true
         })
@@ -77,8 +77,8 @@ export default class Location extends Model {
         .max(180, "Longitude must be a number between -180 and +180")
         .test("lng", "Please enter longitude", function(lng) {
           const { lat } = this.parent
-          if (lat || lat === 0) {
-            return !!lng || lng === 0
+          if (utils.isNumeric(lat)) {
+            return utils.isNumeric(lng)
           }
           return true
         })
@@ -204,9 +204,7 @@ export default class Location extends Model {
 
   static hasCoordinates(location) {
     return (
-      location &&
-      typeof location.lat === "number" &&
-      typeof location.lng === "number"
+      location && utils.isNumeric(location.lat) && utils.isNumeric(location.lng)
     )
   }
 
@@ -231,7 +229,7 @@ export default class Location extends Model {
   }
 
   toString() {
-    if (this.lat && this.lng) {
+    if (utils.isNumeric(this.lat) && utils.isNumeric(this.lng)) {
       const coordinate =
         Settings?.fields?.location?.format === "MGRS"
           ? convertLatLngToMGRS(this.lat, this.lng)

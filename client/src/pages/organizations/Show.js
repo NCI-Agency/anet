@@ -356,44 +356,16 @@ const OrganizationShow = ({ pageDispatchers }) => {
                 action={action}
               />
               <Fieldset id="info">
-                <Field
-                  name="status"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={Organization.humanNameOfStatus}
-                />
-
-                <Field
-                  name="type"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={Organization.humanNameOfType}
-                />
-
-                {renderLeadingPositions(
-                  organization.positions,
-                  PositionRole.LEADER.toString(),
-                  pluralize(
-                    utils.titleCase(PositionRole.LEADER.humanNameOfRole())
-                  )
-                )}
-
-                {renderLeadingPositions(
-                  organization.positions,
-                  PositionRole.DEPUTY.toString(),
-                  pluralize(
-                    utils.titleCase(PositionRole.DEPUTY.humanNameOfRole())
-                  )
-                )}
-
                 <LongNameWithLabel
                   dictProps={orgSettings.longName}
                   name="longName"
                   component={FieldHelper.ReadonlyField}
                 />
 
-                <IdentificationCodeFieldWithLabel
-                  dictProps={orgSettings.identificationCode}
-                  name="identificationCode"
+                <Field
+                  name="type"
                   component={FieldHelper.ReadonlyField}
+                  humanValue={Organization.humanNameOfType}
                 />
 
                 {organization.parentOrg && organization.parentOrg.uuid && (
@@ -441,22 +413,54 @@ const OrganizationShow = ({ pageDispatchers }) => {
                     />
                 )}
 
-                <Field
-                  name="location"
+                {renderLeadingPositions(
+                  organization.positions,
+                  PositionRole.LEADER.toString(),
+                  pluralize(
+                    utils.titleCase(PositionRole.LEADER.humanNameOfRole())
+                  )
+                )}
+
+                {renderLeadingPositions(
+                  organization.positions,
+                  PositionRole.DEPUTY.toString(),
+                  pluralize(
+                    utils.titleCase(PositionRole.DEPUTY.humanNameOfRole())
+                  )
+                )}
+
+                <IdentificationCodeFieldWithLabel
+                  dictProps={orgSettings.identificationCode}
+                  name="identificationCode"
                   component={FieldHelper.ReadonlyField}
-                  humanValue={
-                    organization.location && (
-                      <>
-                        <LinkTo
-                          modelType="Location"
-                          model={organization.location}
-                        />{" "}
-                        <Badge>
-                          {Location.humanNameOfType(organization.location.type)}
-                        </Badge>
-                      </>
-                    )
-                  }
+                />
+
+                {organization.location && (
+                  <Field
+                    name="location"
+                    component={FieldHelper.ReadonlyField}
+                    humanValue={
+                      organization.location && (
+                        <>
+                          <LinkTo
+                            modelType="Location"
+                            model={organization.location}
+                          />{" "}
+                          <Badge>
+                            {Location.humanNameOfType(
+                              organization.location.type
+                            )}
+                          </Badge>
+                        </>
+                      )
+                    }
+                  />
+                )}
+
+                <Field
+                  name="status"
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={Organization.humanNameOfStatus}
                 />
 
                 <Field

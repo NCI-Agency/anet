@@ -190,7 +190,6 @@ const TaskShow = ({ pageDispatchers }) => {
     : task.descendantTasks?.map(task => new Task(task))
 
   const fieldSettings = task.fieldSettings()
-  const ShortNameField = DictionaryField(Field)
   const LongNameField = DictionaryField(Field)
   const TaskParentTask = DictionaryField(Field)
   const PlannedCompletionField = DictionaryField(Field)
@@ -269,31 +268,10 @@ const TaskShow = ({ pageDispatchers }) => {
                 }}
               >
                 <Fieldset style={{ flex: "1 1 0" }}>
-                  <ShortNameField
-                    dictProps={fieldSettings.shortName}
-                    name="shortName"
-                    component={FieldHelper.ReadonlyField}
-                  />
-                  {/* Override as and style from dictProps */}
                   <LongNameField
                     dictProps={fieldSettings.longName}
-                    as="div"
-                    style={{}}
                     name="longName"
                     component={FieldHelper.ReadonlyField}
-                  />
-                  <Field
-                    name="description"
-                    component={FieldHelper.ReadonlyField}
-                    label={Settings.fields.task.description}
-                    humanValue={
-                      <RichTextEditor readOnly value={values.description} />
-                    }
-                  />
-                  <Field
-                    name="status"
-                    component={FieldHelper.ReadonlyField}
-                    humanValue={Task.humanNameOfStatus}
                   />
                   <Field
                     name="taskedOrganizations"
@@ -377,21 +355,22 @@ const TaskShow = ({ pageDispatchers }) => {
                       }
                     />
                   )}
+                  <Field
+                    name="status"
+                    component={FieldHelper.ReadonlyField}
+                    humanValue={Task.humanNameOfStatus}
+                  />
+                  <Field
+                    name="description"
+                    component={FieldHelper.ReadonlyField}
+                    label={Settings.fields.task.description}
+                    humanValue={
+                      <RichTextEditor readOnly value={values.description} />
+                    }
+                  />
                 </Fieldset>
               </div>
             </Form>
-
-            <AssessmentResultsContainer
-              entity={task}
-              entityType={Task}
-              subEntities={subTasks}
-              canAddPeriodicAssessment={canAddPeriodicAssessment}
-              canAddOndemandAssessment={canAddOndemandAssessment}
-              onUpdateAssessment={() => {
-                loadAppData()
-                refetch()
-              }}
-            />
 
             <Fieldset title="Responsible positions">
               <PositionTable positions={task.responsiblePositions} />
@@ -411,6 +390,7 @@ const TaskShow = ({ pageDispatchers }) => {
                 mapId="reports"
               />
             </Fieldset>
+
             {Settings.fields.task.customFields && (
               <Fieldset
                 title={`${fieldSettings.shortLabel} information`}
@@ -422,6 +402,18 @@ const TaskShow = ({ pageDispatchers }) => {
                 />
               </Fieldset>
             )}
+
+            <AssessmentResultsContainer
+              entity={task}
+              entityType={Task}
+              subEntities={subTasks}
+              canAddPeriodicAssessment={canAddPeriodicAssessment}
+              canAddOndemandAssessment={canAddOndemandAssessment}
+              onUpdateAssessment={() => {
+                loadAppData()
+                refetch()
+              }}
+            />
           </div>
         )
       }}

@@ -187,29 +187,6 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
                 />
 
                 <FastField
-                  name="description"
-                  component={FieldHelper.SpecialField}
-                  onChange={value => {
-                    // prevent initial unnecessary render of RichTextEditor
-                    if (!_isEqual(values.description, value)) {
-                      setFieldValue("description", value, true)
-                    }
-                  }}
-                  onHandleBlur={() => {
-                    // validation will be done by setFieldValue
-                    setFieldTouched("description", true, false)
-                  }}
-                  widget={<RichTextEditor className="description" />}
-                />
-
-                <FastField
-                  name="status"
-                  component={FieldHelper.RadioButtonToggleGroupField}
-                  buttons={statusButtons}
-                  onChange={value => setFieldValue("status", value)}
-                />
-
-                <FastField
                   name="type"
                   component={FieldHelper.SpecialField}
                   disabled={!canEditName}
@@ -239,6 +216,29 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
                   isSubmitting={isSubmitting}
                   setFieldValue={setFieldValue}
                   setFieldTouched={setFieldTouched}
+                />
+
+                <FastField
+                  name="status"
+                  component={FieldHelper.RadioButtonToggleGroupField}
+                  buttons={statusButtons}
+                  onChange={value => setFieldValue("status", value)}
+                />
+
+                <FastField
+                  name="description"
+                  component={FieldHelper.SpecialField}
+                  onChange={value => {
+                    // prevent initial unnecessary render of RichTextEditor
+                    if (!_isEqual(values.description, value)) {
+                      setFieldValue("description", value, true)
+                    }
+                  }}
+                  onHandleBlur={() => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("description", true, false)
+                  }}
+                  widget={<RichTextEditor className="description" />}
                 />
               </Fieldset>
 

@@ -183,38 +183,6 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
                   component={FieldHelper.InputField}
                 />
 
-                <FastField
-                  name="description"
-                  label={fieldSettings.description}
-                  component={FieldHelper.SpecialField}
-                  onChange={value => {
-                    // prevent initial unnecessary render of RichTextEditor
-                    if (!_isEqual(values.description, value)) {
-                      setFieldValue("description", value, true)
-                    }
-                  }}
-                  onHandleBlur={() => {
-                    // validation will be done by setFieldValue
-                    setFieldTouched("description", true, false)
-                  }}
-                  widget={<RichTextEditor className="description" />}
-                />
-
-                {disabled ? (
-                  <FastField
-                    name="status"
-                    component={FieldHelper.ReadonlyField}
-                    humanValue={Position.humanNameOfStatus}
-                  />
-                ) : (
-                  <FastField
-                    name="status"
-                    component={FieldHelper.RadioButtonToggleGroupField}
-                    buttons={statusButtons}
-                    onChange={value => setFieldValue("status", value)}
-                  />
-                )}
-
                 <TaskedOrganizationsMultiSelect
                   name="taskedOrganizations"
                   component={FieldHelper.SpecialField}
@@ -240,42 +208,6 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
                       objectType={Organization}
                       fields={Organization.autocompleteQuery}
                       addon={ORGANIZATIONS_ICON}
-                    />
-                  }
-                />
-
-                <ResponsiblePositionsMultiSelect
-                  name="responsiblePositions"
-                  component={FieldHelper.SpecialField}
-                  dictProps={Settings.fields.task.responsiblePositions}
-                  onChange={value => {
-                    // validation will be done by setFieldValue
-                    value = value.map(position =>
-                      Position.filterClientSideFields(position)
-                    )
-                    setFieldTouched("responsiblePositions", true, false) // onBlur doesn't work when selecting an option
-                    setFieldValue("responsiblePositions", value)
-                  }}
-                  widget={
-                    <AdvancedMultiSelect
-                      fieldName="responsiblePositions"
-                      value={values.responsiblePositions}
-                      renderSelected={
-                        <PositionTable
-                          positions={values.responsiblePositions}
-                          showDelete
-                        />
-                      }
-                      overlayColumns={[
-                        "Position",
-                        "Organization",
-                        "Current Occupant"
-                      ]}
-                      overlayRenderRow={PositionOverlayRow}
-                      filterDefs={positionsFilters}
-                      objectType={Position}
-                      fields={Position.autocompleteQuery}
-                      addon={POSITIONS_ICON}
                     />
                   }
                 />
@@ -337,6 +269,76 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
                     disabled={disabled}
                   />
                 )}
+
+                {disabled ? (
+                  <FastField
+                    name="status"
+                    component={FieldHelper.ReadonlyField}
+                    humanValue={Position.humanNameOfStatus}
+                  />
+                ) : (
+                  <FastField
+                    name="status"
+                    component={FieldHelper.RadioButtonToggleGroupField}
+                    buttons={statusButtons}
+                    onChange={value => setFieldValue("status", value)}
+                  />
+                )}
+
+                <FastField
+                  name="description"
+                  label={fieldSettings.description}
+                  component={FieldHelper.SpecialField}
+                  onChange={value => {
+                    // prevent initial unnecessary render of RichTextEditor
+                    if (!_isEqual(values.description, value)) {
+                      setFieldValue("description", value, true)
+                    }
+                  }}
+                  onHandleBlur={() => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("description", true, false)
+                  }}
+                  widget={<RichTextEditor className="description" />}
+                />
+              </Fieldset>
+
+              <Fieldset title="Responsible positions">
+                <ResponsiblePositionsMultiSelect
+                  name="responsiblePositions"
+                  component={FieldHelper.SpecialField}
+                  dictProps={Settings.fields.task.responsiblePositions}
+                  onChange={value => {
+                    // validation will be done by setFieldValue
+                    value = value.map(position =>
+                      Position.filterClientSideFields(position)
+                    )
+                    setFieldTouched("responsiblePositions", true, false) // onBlur doesn't work when selecting an option
+                    setFieldValue("responsiblePositions", value)
+                  }}
+                  widget={
+                    <AdvancedMultiSelect
+                      fieldName="responsiblePositions"
+                      value={values.responsiblePositions}
+                      renderSelected={
+                        <PositionTable
+                          positions={values.responsiblePositions}
+                          showDelete
+                        />
+                      }
+                      overlayColumns={[
+                        "Position",
+                        "Organization",
+                        "Current Occupant"
+                      ]}
+                      overlayRenderRow={PositionOverlayRow}
+                      filterDefs={positionsFilters}
+                      objectType={Position}
+                      fields={Position.autocompleteQuery}
+                      addon={POSITIONS_ICON}
+                    />
+                  }
+                />
               </Fieldset>
 
               {Settings.fields.task.customFields && !disabled && (

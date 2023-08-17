@@ -46,9 +46,6 @@ fields:
     longName:
       label: Objective / Effort long name
       placeholder: Enter an objective / effort long name, example ....
-      asA: textarea
-      style:
-        height: 400px
     description: Objective / Effort description
     topLevel:
       shortLabel: Objective
@@ -59,9 +56,6 @@ fields:
       longName:
         label: Long Name of this Objective
         placeholder: Enter a long name for this Objective, example ....
-        asA: textarea
-        style:
-          height: 400px
       assessments:
         topTaskOnceReport:
           label: Engagement assessment of objective
@@ -143,9 +137,6 @@ fields:
       longName:
         label: Effort Long Name
         placeholder: Enter an effort Long Name, example ....
-        asA: textarea
-        style:
-          height: 400px
       assessments:
         subTaskMonthly:
           label: Monthly assessment of effort
@@ -305,7 +296,8 @@ fields:
       type: enum
       label: Security Marking
       choices:
-        undefined: undefined
+        undefined: Undefined
+        public: Public
         NU: NATO UNCLASSIFIED
         NU_rel_EU: NATO UNCLASSIFIED Releasable to EU
     mimeTypes:
