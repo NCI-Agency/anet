@@ -190,8 +190,8 @@
     "yup": "1.2.0"
   },
   "scripts": {
-    "build": "NODE_ENV=production webpack --config config/webpack.client.prod.js",
-    "start": "export SERVER_URL=${SERVER_URL:-'http://localhost:8080'} DEV_PORT=${DEV_PORT:-3000} ; NODE_ENV=development webpack serve --config config/webpack.client.dev.js",
+    "build": "NODE_ENV=production webpack --config .webpack/webpack.client.prod.js",
+    "start": "export SERVER_URL=${SERVER_URL:-'http://localhost:8080'} DEV_PORT=${DEV_PORT:-3000} ; NODE_ENV=development webpack serve --config .webpack/webpack.client.dev.js",
     "lint": "NODE_ENV=development eslint '.??*.js' '.storybook/*.js' '**/*.js'",
     "lint:fix": "yarn run lint --fix",
     "prettier:check": "NODE_ENV=development prettier-eslint --list-different '.??*.js' '.storybook/*.js' '**/*.js'",

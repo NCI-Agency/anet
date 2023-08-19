@@ -1,7 +1,7 @@
 const merge = require("webpack-merge")
 const webpack = require("webpack")
 const common = require("./webpack.common.js")
-const paths = require("./paths")
+const paths = require("../config/paths")
 
 module.exports = merge.merge(common.simConfig, {
   devtool: "eval-source-map",

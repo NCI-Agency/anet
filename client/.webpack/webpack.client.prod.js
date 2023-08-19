@@ -4,7 +4,7 @@ const TerserPlugin = require("terser-webpack-plugin")
 const HtmlWebpackPlugin = require("html-webpack-plugin")
 const webpack = require("webpack")
 const { CleanWebpackPlugin } = require("clean-webpack-plugin")
-const paths = require("./paths")
+const paths = require("../config/paths")
 const common = require("./webpack.common.js")
 
 const clientConfig = merge.merge(common.clientConfig, {

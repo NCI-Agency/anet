@@ -1,12 +1,16 @@
+const path = require("path")
 const merge = require("webpack-merge")
 const CircularDependencyPlugin = require("circular-dependency-plugin")
 const ContextReplacementPlugin = require("webpack/lib/ContextReplacementPlugin")
 const CopyWebpackPlugin = require("copy-webpack-plugin")
 const ESLintPlugin = require("eslint-webpack-plugin")
 const webpack = require("webpack")
-const paths = require("./paths")
+const paths = require("../config/paths")
+
+const projectRootDir = path.resolve(__dirname, '..')
 
 const commonConfig = {
+  context: projectRootDir,
   module: {
     rules: [
       {
@@ -97,7 +101,7 @@ module.exports = {
       alias: { vm: "vm-browserify" }
     },
     entry: {
-      anet: [require.resolve("./polyfills"), "./src/index-auth.js"]
+      anet: [require.resolve("../config/polyfills"), "./src/index-auth.js"]
     },
     output: {
       path: paths.appBuild
@@ -148,7 +152,7 @@ module.exports = {
       __dirname: true
     },
     entry: {
-      anet: [require.resolve("./polyfills_node"), "./tests/sim/Simulator.js"]
+      anet: [require.resolve("../config/polyfills_node"), "../tests/sim/Simulator.js"]
     }
   })
 }
