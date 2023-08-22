@@ -102,12 +102,21 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
                   </Col>
                   <Col xs={12} sm={3} lg={10}>
                     <FastField
-                      name="fileName"
+                      name="caption"
                       placeholder={
                         Settings.fields.attachment.shortName.placeholder
                       }
                       label={Settings.fields.attachment.shortName.label}
                       component={FieldHelper.InputField}
+                    />
+
+                    <FastField
+                      name="fileName"
+                      placeholder={
+                        Settings.fields.attachment.shortName.placeholder
+                      }
+                      label={Settings.fields.attachment.shortName.label}
+                      component={FieldHelper.ReadonlyField}
                     />
 
                     <FastField

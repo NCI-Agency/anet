@@ -18,6 +18,7 @@ export default class Attachment extends Model {
   static yupSchema = yup.object().shape({
     uuid: yup.string().nullable().default(null),
     fileName: yup.string().required().default(""),
+    caption: yup.string().required().default(""),
     description: yup.string().default(""),
     mimeType: yup.string().default(""),
     contentLength: yup.number().nullable().default(null),
@@ -33,7 +34,8 @@ export default class Attachment extends Model {
     classification: yup.string().default(null)
   })
 
-  static autocompleteQuery = "uuid fileName description classification mimeType"
+  static autocompleteQuery =
+    "uuid fileName caption description classification mimeType"
 
   static _resourceOverride = ["attachments"].join("/")
 

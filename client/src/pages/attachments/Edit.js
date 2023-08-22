@@ -18,6 +18,7 @@ const GQL_GET_ATTACHMENT = gql`
     attachment(uuid: $uuid) {
       uuid
       fileName
+      caption
       contentLength
       mimeType
       classification
