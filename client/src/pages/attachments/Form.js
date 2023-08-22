@@ -104,9 +104,9 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
                     <FastField
                       name="caption"
                       placeholder={
-                        Settings.fields.attachment.shortName.placeholder
+                        Settings.fields.attachment.caption.placeholder
                       }
-                      label={Settings.fields.attachment.shortName.label}
+                      label={Settings.fields.attachment.caption.label}
                       component={FieldHelper.InputField}
                     />
 

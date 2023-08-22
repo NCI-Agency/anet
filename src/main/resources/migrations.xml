@@ -4526,5 +4526,12 @@
 			onDelete="NO ACTION" onUpdate="NO ACTION" />
 
 	</changeSet>
+	<changeSet id="add-caption-column-to-attachments" author="mesut-simsoft" >
+		<addColumn tableName="attachments" >
+			<column name="caption" type="varchar(255)" defaultValue=" " >
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+	</changeSet>
 
 </databaseChangeLog>

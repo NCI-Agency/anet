@@ -524,7 +524,7 @@ properties:
       attachment:
         type: object
         additionalProperties: false
-        required: [featureDisabled, disabled, shortLabel, shortName, description, classification]
+        required: [featureDisabled, disabled, shortLabel, shortName, caption, description, classification]
         properties:
           featureDisabled:
             type: boolean
@@ -539,6 +539,8 @@ properties:
             title: The short label for this field
             description: Used in the UI where a short label for attachments is shown.
           shortName:
+            "$ref": "#/$defs/inputField"
+          caption:
             "$ref": "#/$defs/inputField"
           description:
             type: string

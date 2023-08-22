@@ -17,6 +17,7 @@ public class AttachmentMapper implements RowMapper<Attachment> {
     a.setFileName(MapperUtils.getOptionalString(rs, "attachments_fileName"));
     a.setDescription(MapperUtils.getOptionalString(rs, "attachments_description"));
     a.setClassification(MapperUtils.getOptionalString(rs, "attachments_classification"));
+    a.setCaption(MapperUtils.getOptionalString(rs, "attachments_caption"));
     return a;
   }
 }

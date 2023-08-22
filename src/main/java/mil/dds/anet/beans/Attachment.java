@@ -35,6 +35,11 @@ public class Attachment extends AbstractAnetBean {
   @GraphQLInputField
   private String classification;
 
+
+  @GraphQLQuery
+  @GraphQLInputField
+  private String caption;
+
   // annotated below
   private ForeignObjectHolder<Person> author = new ForeignObjectHolder<>();
 
@@ -110,6 +115,15 @@ public class Attachment extends AbstractAnetBean {
 
   public Person getAuthor() {
     return author.getForeignObject();
+  }
+
+
+  public String getCaption() {
+    return caption;
+  }
+
+  public void setCaption(String caption) {
+    this.caption = caption;
   }
 
   @GraphQLQuery(name = "attachmentRelatedObjects")

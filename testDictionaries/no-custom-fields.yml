@@ -291,6 +291,9 @@ fields:
     shortName:
       label: Attachment Name
       placeholder: Enter an attachment name, example....
+    caption:
+      label: Caption
+      placeholder: Enter an caption, example....
     description: Attachment description
     classification:
       type: enum

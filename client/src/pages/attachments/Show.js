@@ -31,6 +31,7 @@ const GQL_GET_ATTACHMENT = gql`
     attachment(uuid: $uuid) {
       uuid
       fileName
+      caption
       contentLength
       mimeType
       classification
@@ -200,6 +201,10 @@ const AttachmentShow = ({ pageDispatchers }) => {
                     />
                   </Col>
                   <Col id="attachmentDetails" xs={12} sm={3} lg={8}>
+                    <Field
+                      name="caption"
+                      component={FieldHelper.ReadonlyField}
+                    />
                     <Field
                       name="fileName"
                       component={FieldHelper.ReadonlyField}

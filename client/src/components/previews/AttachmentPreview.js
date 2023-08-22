@@ -14,6 +14,7 @@ const GQL_GET_ATTACHMENT = gql`
     attachment(uuid: $uuid) {
       uuid
       fileName
+      caption
       contentLength
       mimeType
       classification
@@ -47,7 +48,7 @@ const AttachmentPreview = ({ className, uuid }) => {
   return (
     <div className={`${className} preview-content-scroll`}>
       <div className="preview-sticky-title">
-        <h4>{`Attachment ${attachment.fileName}`}</h4>
+        <h4>{`Attachment ${attachment.caption}`}</h4>
       </div>
       <div className="preview-section">
         <Row>
@@ -59,7 +60,7 @@ const AttachmentPreview = ({ className, uuid }) => {
                 style={{ width: "100%", borderRadius: "5px" }}
               />
             </Col>
-            <PreviewField label="File name" value={attachment.fileName} />
+            <PreviewField label="Caption" value={attachment.caption} />
             <PreviewField
               label="Owner"
               value={<LinkTo modelType="Person" model={attachment.author} />}
