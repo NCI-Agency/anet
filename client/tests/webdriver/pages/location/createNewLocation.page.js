@@ -15,6 +15,10 @@ class CreateNewLocation extends Page {
     return browser.$('//div[contains(text(),"name is a required field")]')
   }
 
+  async getDescriptionInput() {
+    return browser.$("#fg-description .editable")
+  }
+
   async getNameField() {
     return (await this.getForm()).$("input#name")
   }
@@ -111,6 +115,12 @@ class CreateNewLocation extends Page {
   async waitForPageToLoad() {
     await (await this.getForm()).waitForExist()
     await (await this.getForm()).waitForDisplayed()
+  }
+
+  async fillLocationDescription(description) {
+    await (await this.getDescriptionInput()).click()
+    await browser.keys(description)
+    await browser.pause(300)
   }
 }
 

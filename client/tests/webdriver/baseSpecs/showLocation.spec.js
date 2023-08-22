@@ -8,7 +8,7 @@ describe("Show location page", () => {
     await ShowLocation.open(LOCATION_UUID)
   })
 
-  describe("WHen on the show page of a location with attachment(s)", () => {
+  describe("When on the show page of a location with attachment(s)", () => {
     it("We should see a container for Attachment List", async() => {
       // Attachment container
       await (await ShowLocation.getAttachments()).waitForExist()

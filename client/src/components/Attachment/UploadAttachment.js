@@ -6,7 +6,7 @@ import axios from "axios"
 import Messages from "components/Messages"
 import { Attachment } from "models"
 import PropTypes from "prop-types"
-import React, { useEffect, useState } from "react"
+import React, { useState } from "react"
 import { toast } from "react-toastify"
 import Settings from "settings"
 import utils from "utils"
@@ -36,29 +36,6 @@ const UploadAttachment = ({
   const [remove, setRemove] = useState(false)
   const [uploadedList, setUploadedList] = useState([])
 
-  useEffect(() => {
-    // In the edit mode the base page entity (report, location, etc.) always has an uuid
-    // So when uploading new attachment it is always inserted related tables, (ie. see attachmentSave)
-    if (edit) {
-      return
-    }
-    // if base entity is not created, the attachment can not be associated
-    if (!relatedObjectUuid) {
-      return
-    }
-    // Update only object not associated with the base entity, as in report
-    const updateList = uploadedList.filter(
-      list => list.attachmentRelatedObjects.length === 0
-    )
-    for (let i = 0; i < updateList.length; i++) {
-      save(updateList[i], relatedObjectUuid, true).catch(error =>
-        toast.error(
-          `Attachment upload for ${updateList[i].fileName} failed: ${error.message}`
-        )
-      )
-    }
-  }, [edit, relatedObjectUuid, uploadedList])
-
   const attachmentSave = async(e, uuid) => {
     const file = e.target?.files?.[0]
     if (!file) {
@@ -77,7 +54,7 @@ const UploadAttachment = ({
         }
       ]
     })
-    return save(selectedAttachment, uuid, false)
+    return save(selectedAttachment, false)
       .then(response => {
         selectedAttachment.uuid = response.createAttachment
         const [authHeaderName, authHeaderValue] = API._getAuthHeader()
@@ -187,10 +164,9 @@ const UploadAttachment = ({
     </div>
   )
 
-  function save(values, relatedObjectUuid, edit) {
+  function save(values, edit) {
     const attachment = Attachment.filterClientSideFields(values)
     const operation = edit ? GQL_UPDATE_ATTACHMENT : GQL_CREATE_ATTACHMENT
-    attachment.attachmentRelatedObjects[0].relatedObjectUuid = relatedObjectUuid
     return API.mutation(operation, { attachment })
   }
 }

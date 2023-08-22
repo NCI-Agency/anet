@@ -14,12 +14,15 @@ import Fieldset from "components/Fieldset"
 import GeoLocation from "components/GeoLocation"
 import Leaflet from "components/Leaflet"
 import Messages from "components/Messages"
+import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
+import RichTextEditor from "components/RichTextEditor"
 import SimilarObjectsModal from "components/SimilarObjectsModal"
 import { FastField, Field, Form, Formik } from "formik"
 import { convertLatLngToMGRS, parseCoordinate } from "geoUtils"
 import _escape from "lodash/escape"
+import _isEqual from "lodash/isEqual"
 import { Location, Position } from "models"
 import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
@@ -62,6 +65,18 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
   const canEditName =
     (!edit && currentUser.isSuperuser()) || (edit && currentUser.isAdmin())
 
+  const statusButtons = [
+    {
+      id: "statusActiveButton",
+      value: Model.STATUS.ACTIVE,
+      label: "Active"
+    },
+    {
+      id: "statusInactiveButton",
+      value: Model.STATUS.INACTIVE,
+      label: "Inactive"
+    }
+  ]
   const approversFilters = {
     allAdvisorPositions: {
       label: "All advisor positions",
@@ -203,6 +218,29 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
                   isSubmitting={isSubmitting}
                   setFieldValue={setFieldValue}
                   setFieldTouched={setFieldTouched}
+                />
+
+                <FastField
+                  name="status"
+                  component={FieldHelper.RadioButtonToggleGroupField}
+                  buttons={statusButtons}
+                  onChange={value => setFieldValue("status", value)}
+                />
+
+                <FastField
+                  name="description"
+                  component={FieldHelper.SpecialField}
+                  onChange={value => {
+                    // prevent initial unnecessary render of RichTextEditor
+                    if (!_isEqual(values.description, value)) {
+                      setFieldValue("description", value, true)
+                    }
+                  }}
+                  onHandleBlur={() => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("description", true, false)
+                  }}
+                  widget={<RichTextEditor className="description" />}
                 />
 
                 {edit && (
