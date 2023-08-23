@@ -27,8 +27,8 @@ export default class Attachment extends Model {
       .nullable()
       .default([
         {
-          relatedObjectType: yup.string().default(null),
-          relatedObjectUuid: yup.string().default(null)
+          relatedObjectType: yup.string().nullable().default(null),
+          relatedObjectUuid: yup.string().nullable().default(null)
         }
       ]),
     classification: yup.string().nullable().default(null)
