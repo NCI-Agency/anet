@@ -404,6 +404,10 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     // Delete orphan notes
     noteDao.deleteOrphanNotes();
 
+    final AttachmentDao attachmentDao = instance.getAttachmentDao();
+    // Delete attachments
+    attachmentDao.deleteAttachments(TABLE_NAME, reportUuid);
+
     // Delete report
     // GraphQL mutations *have* to return something, so we return the number of deleted report rows
     return getDbHandle()
