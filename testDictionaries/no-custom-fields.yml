@@ -288,9 +288,7 @@ fields:
     featureDisabled: false
     disabled: false
     shortLabel: Attachment
-    shortName:
-      label: Attachment Name
-      placeholder: Enter an attachment name, example....
+    fileName: Filename
     caption:
       label: Caption
       placeholder: Enter a caption, example....
