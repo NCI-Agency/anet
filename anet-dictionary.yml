@@ -307,7 +307,7 @@ fields:
     caption:
       label: Caption
       placeholder: Enter a caption, example....
-    description: Attachment description
+    description: Description
     classification:
       type: enum
       label: Security Marking

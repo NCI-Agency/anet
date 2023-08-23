@@ -182,7 +182,7 @@ const AttachmentShow = ({ pageDispatchers }) => {
             <Messages success={stateSuccess} error={stateError} />
             <Form className="form-horizontal" method="post">
               <Fieldset
-                title={`Attachment #${attachment.uuid}`}
+                title={`Attachment ${attachment.caption}`}
                 action={action}
               />
               <Fieldset>
@@ -202,11 +202,8 @@ const AttachmentShow = ({ pageDispatchers }) => {
                   </Col>
                   <Col id="attachmentDetails" xs={12} sm={3} lg={8}>
                     <Field
-                      name="caption"
-                      component={FieldHelper.ReadonlyField}
-                    />
-                    <Field
                       name="fileName"
+                      label={Settings.fields.attachment.fileName}
                       component={FieldHelper.ReadonlyField}
                     />
                     <Field
@@ -225,6 +222,7 @@ const AttachmentShow = ({ pageDispatchers }) => {
                     />
                     <Field
                       name="description"
+                      label={Settings.fields.attachment.description}
                       component={FieldHelper.ReadonlyField}
                       humanValue={
                         <RichTextEditor readOnly value={values.description} />
@@ -236,6 +234,7 @@ const AttachmentShow = ({ pageDispatchers }) => {
                     />
                     <Field
                       name="classification"
+                      label={Settings.fields.attachment.classification.label}
                       component={FieldHelper.ReadonlyField}
                       humanValue={classifications[attachment.classification]}
                     />

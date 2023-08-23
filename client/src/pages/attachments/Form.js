@@ -103,10 +103,10 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
                   <Col xs={12} sm={3} lg={10}>
                     <FastField
                       name="caption"
+                      label={Settings.fields.attachment.caption.label}
                       placeholder={
                         Settings.fields.attachment.caption.placeholder
                       }
-                      label={Settings.fields.attachment.caption.label}
                       component={FieldHelper.InputField}
                     />
 
@@ -147,6 +147,7 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
                     {canEdit ? (
                       <FastField
                         name="classification"
+                        label={Settings.fields.attachment.classification.label}
                         component={FieldHelper.RadioButtonToggleGroupField}
                         buttons={classificationButtons}
                         onChange={value =>
@@ -155,6 +156,7 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
                     ) : (
                       <Field
                         name="classification"
+                        label={Settings.fields.attachment.classification.label}
                         component={FieldHelper.ReadonlyField}
                       />
                     )}

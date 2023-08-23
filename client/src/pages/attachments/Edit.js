@@ -65,7 +65,7 @@ const AttachmentEdit = ({ pageDispatchers }) => {
       <AttachmentForm
         edit
         initialValues={attachment}
-        title={`Attachment #${attachment.uuid}`}
+        title={`Attachment ${attachment.caption}`}
       />
     </div>
   )

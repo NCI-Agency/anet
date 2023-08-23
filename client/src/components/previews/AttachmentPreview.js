@@ -7,6 +7,7 @@ import { Attachment } from "models"
 import PropTypes from "prop-types"
 import React from "react"
 import { Col, Row } from "react-bootstrap"
+import Settings from "settings"
 import utils from "utils"
 
 const GQL_GET_ATTACHMENT = gql`
@@ -60,14 +61,17 @@ const AttachmentPreview = ({ className, uuid }) => {
                 style={{ width: "100%", borderRadius: "5px" }}
               />
             </Col>
-            <PreviewField label="Caption" value={attachment.caption} />
+            <PreviewField
+              label={Settings.fields.attachment.fileName}
+              value={attachment.fileName}
+            />
             <PreviewField
               label="Owner"
               value={<LinkTo modelType="Person" model={attachment.author} />}
             />
             <PreviewField label="Mime type" value={attachment.mimeType} />
             <PreviewField
-              label="Classification"
+              label={Settings.fields.attachment.classification.label}
               value={Attachment.humanNameOfStatus(
                 attachment.classification
               ).toUpperCase()}
@@ -75,7 +79,9 @@ const AttachmentPreview = ({ className, uuid }) => {
           </Col>
         </Row>
 
-        <div className="preview-field-label">Description</div>
+        <div className="preview-field-label">
+          {Settings.fields.attachment.description}
+        </div>
         <div className="preview-field-value">
           <RichTextEditor readOnly value={attachment.description} />
         </div>
