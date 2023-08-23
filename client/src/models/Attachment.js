@@ -1,5 +1,4 @@
 import Model from "components/Model"
-import Settings from "settings"
 import utils from "utils"
 import * as yup from "yup"
 
@@ -8,10 +7,6 @@ export default class Attachment extends Model {
   static listName = "attachmentList"
   static getInstanceName = "attachment"
   static relatedObjectType = "attachments"
-
-  static displayName() {
-    return Settings.fields.attachment.shortLabel
-  }
 
   static schema = {}
 

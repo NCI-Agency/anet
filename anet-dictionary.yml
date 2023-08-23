@@ -303,7 +303,6 @@ fields:
   attachment:
     featureDisabled: false
     disabled: false
-    shortLabel: Attachment
     fileName: Filename
     caption:
       label: Caption
