@@ -372,6 +372,18 @@ const TaskShow = ({ pageDispatchers }) => {
               </div>
             </Form>
 
+            {Settings.fields.task.customFields && (
+              <Fieldset
+                title={`${fieldSettings.shortLabel} information`}
+                id="custom-fields"
+              >
+                <ReadonlyCustomFields
+                  fieldsConfig={Settings.fields.task.customFields}
+                  values={values}
+                />
+              </Fieldset>
+            )}
+
             <Fieldset title="Responsible positions">
               <PositionTable positions={task.responsiblePositions} />
             </Fieldset>
@@ -390,18 +402,6 @@ const TaskShow = ({ pageDispatchers }) => {
                 mapId="reports"
               />
             </Fieldset>
-
-            {Settings.fields.task.customFields && (
-              <Fieldset
-                title={`${fieldSettings.shortLabel} information`}
-                id="custom-fields"
-              >
-                <ReadonlyCustomFields
-                  fieldsConfig={Settings.fields.task.customFields}
-                  values={values}
-                />
-              </Fieldset>
-            )}
 
             <AssessmentResultsContainer
               entity={task}

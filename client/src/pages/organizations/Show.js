@@ -473,6 +473,15 @@ const OrganizationShow = ({ pageDispatchers }) => {
                 />
               </Fieldset>
 
+              {Settings.fields.organization.customFields && (
+                <Fieldset title="Organization information" id="custom-fields">
+                  <ReadonlyCustomFields
+                    fieldsConfig={Settings.fields.organization.customFields}
+                    values={values}
+                  />
+                </Fieldset>
+              )}
+
               <OrganizationLaydown
                 organization={organization}
                 refetch={refetch}
@@ -520,14 +529,6 @@ const OrganizationShow = ({ pageDispatchers }) => {
                   }
                 />
               </Fieldset>
-              {Settings.fields.organization.customFields && (
-                <Fieldset title="Organization information" id="custom-fields">
-                  <ReadonlyCustomFields
-                    fieldsConfig={Settings.fields.organization.customFields}
-                    values={values}
-                  />
-                </Fieldset>
-              )}
             </Form>
             <AssessmentResultsContainer
               entity={organization}
