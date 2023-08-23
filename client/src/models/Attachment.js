@@ -31,7 +31,7 @@ export default class Attachment extends Model {
           relatedObjectUuid: yup.string().default(null)
         }
       ]),
-    classification: yup.string().default(null)
+    classification: yup.string().nullable().default(null)
   })
 
   static autocompleteQuery =
