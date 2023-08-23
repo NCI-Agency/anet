@@ -112,64 +112,35 @@ class ShowOrganization extends Page {
   }
 
   async fillAssessmentQuestion(valuesArr, prevTextToClear) {
-    // NOTE: assuming assessment content, 4 questions
-    // first focus on the text editor input
-    await (
-      await (
-        await this.getAssessmentModalForm()
-      ).$(
-        "div[id='fg-entityAssessment.question3'] .editor-container > .editable"
-      )
-    ).click()
-    // Wait for the editor to be focused
-    await browser.pause(300)
-    if (prevTextToClear && prevTextToClear[0]) {
-      await this.deleteText(prevTextToClear[0])
-      // Wait for the previous value to be deleted
-      await browser.pause(300)
-    }
-    await browser.keys(valuesArr[2])
-
-    // focus on the second text editor input
-    await (
-      await (
-        await this.getAssessmentModalForm()
-      ).$(
-        "div[id='fg-entityAssessment.question4'] .editor-container > .editable"
-      )
-    ).click()
-    // Wait for the editor to be focused
-    await browser.pause(300)
-    if (prevTextToClear && prevTextToClear[1]) {
-      await this.deleteText(prevTextToClear[1])
-      // Wait for the previous value to be deleted
-      await browser.pause(300)
-    }
-    await browser.keys(valuesArr[3])
+    // NOTE: assuming assessment content, 4 questions; process them in order
 
     // Select first button group
-    const buttonPriority = await (
-      await this.getAssessmentModalForm()
-    ).$(
+    await this.clickButton(
+      await this.getAssessmentModalForm(),
       `div[id='fg-entityAssessment.question1'] label[for="entityAssessment.question1_${valuesArr[0]}"]`
     )
-    // wait for a bit, clicks and do double click, sometimes it does not go through
-    await browser.pause(300)
-    await buttonPriority.click({ x: 10, y: 10 })
-    await buttonPriority.click({ x: 10, y: 10 })
-    await browser.pause(300)
 
     // Select second button group
-    const buttonInteraction = await (
-      await this.getAssessmentModalForm()
-    ).$(
+    await this.clickButton(
+      await this.getAssessmentModalForm(),
       `div[id='fg-entityAssessment.question2'] label[for="entityAssessment.question2_${valuesArr[1]}"]`
     )
-    // wait for a bit, clicks and do double click, sometimes it does not go through
-    await browser.pause(300)
-    await buttonInteraction.click({ x: 10, y: 10 })
-    await buttonInteraction.click({ x: 10, y: 10 })
-    await browser.pause(300)
+
+    // Select first text editor input
+    await this.fillRichTextInput(
+      await this.getAssessmentModalForm(),
+      "div[id='fg-entityAssessment.question3'] .editor-container > .editable",
+      valuesArr[2],
+      prevTextToClear?.[0]
+    )
+
+    // Select second text editor input
+    await this.fillRichTextInput(
+      await this.getAssessmentModalForm(),
+      "div[id='fg-entityAssessment.question4'] .editor-container > .editable",
+      valuesArr[3],
+      prevTextToClear?.[1]
+    )
   }
 
   async saveAssessmentAndWaitForModalClose(
@@ -177,28 +148,12 @@ class ShowOrganization extends Page {
     recurrence,
     detail0ToWaitFor
   ) {
-    await (await this.getSaveAssessmentButton()).click()
-    await browser.pause(300) // wait for modal animation to finish
-
-    await (
-      await this.getAssessmentModalForm()
-    ).waitForExist({
-      reverse: true,
-      timeout: 20000
-    })
-    // wait until details to change, can take some time to update show page
-    await browser.waitUntil(
-      async() => {
-        return (
-          (await (
-            await this.getShownAssessmentDetails(assessmentKey, recurrence)
-          )[0].getText()) === detail0ToWaitFor
-        )
-      },
-      {
-        timeout: 5000,
-        timeoutMsg: "Expected change after save"
-      }
+    return super.saveAssessmentAndWaitForModalClose(
+      await this.getSaveAssessmentButton(),
+      () => this.getAssessmentModalForm(),
+      () => this.getShownAssessmentDetails(assessmentKey, recurrence),
+      0,
+      detail0ToWaitFor
     )
   }
 

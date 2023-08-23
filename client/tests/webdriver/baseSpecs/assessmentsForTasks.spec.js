@@ -51,18 +51,11 @@ describe("For the periodic task assessments", () => {
     })
 
     it("Should show the same assessment details with the details just created", async() => {
-      const details = await ShowTask.getShownAssessmentDetails(
+      await assertAssessmentDetails(
         "subTaskMonthly",
-        "monthly"
+        "monthly",
+        ADVISOR_1_TASK_CREATE_DETAILS
       )
-      for (const [index, detail] of details.entries()) {
-        expect((await prefix(index)) + (await detail.getText())).to.equal(
-          (await // Only some values are mapped, others are same
-          prefix(index)) +
-            (VALUE_TO_TEXT_FOR_TASK[ADVISOR_1_TASK_CREATE_DETAILS[index]] ||
-              ADVISOR_1_TASK_CREATE_DETAILS[index])
-        )
-      }
     })
 
     it("Should allow the author of the assessment to successfully edit it", async() => {
@@ -89,18 +82,11 @@ describe("For the periodic task assessments", () => {
     })
 
     it("Should show the same assessment details with the details just edited", async() => {
-      const details = await ShowTask.getShownAssessmentDetails(
+      await assertAssessmentDetails(
         "subTaskMonthly",
-        "monthly"
+        "monthly",
+        ADVISOR_1_TASK_EDIT_DETAILS
       )
-      for (const [index, detail] of details.entries()) {
-        expect((await prefix(index)) + (await detail.getText())).to.equal(
-          (await // Only some values are mapped, others are same
-          prefix(index)) +
-            (VALUE_TO_TEXT_FOR_TASK[ADVISOR_1_TASK_EDIT_DETAILS[index]] ||
-              ADVISOR_1_TASK_EDIT_DETAILS[index])
-        )
-      }
       await ShowTask.logout()
     })
   })
@@ -148,18 +134,11 @@ describe("For the periodic task assessments", () => {
     })
 
     it("Should show the same assessment details with the details just edited", async() => {
-      const details = await ShowTask.getShownAssessmentDetails(
+      await assertAssessmentDetails(
         "subTaskMonthly",
-        "monthly"
+        "monthly",
+        ADMIN_TASK_EDIT_DETAILS
       )
-      for (const [index, detail] of details.entries()) {
-        expect((await prefix(index)) + (await detail.getText())).to.equal(
-          (await // Only some values are mapped, others are same
-          prefix(index)) +
-            (VALUE_TO_TEXT_FOR_TASK[ADMIN_TASK_EDIT_DETAILS[index]] ||
-              ADMIN_TASK_EDIT_DETAILS[index])
-        )
-      }
       await ShowTask.logout()
     })
   })
@@ -207,18 +186,11 @@ describe("For the periodic task assessments", () => {
     })
 
     it("Should show the same assessment details with the details just edited", async() => {
-      const details = await ShowTask.getShownAssessmentDetails(
+      await assertAssessmentDetails(
         "subTaskMonthly",
-        "monthly"
+        "monthly",
+        ADVISOR_2_TASK_EDIT_DETAILS
       )
-      for (const [index, detail] of details.entries()) {
-        expect((await prefix(index)) + (await detail.getText())).to.equal(
-          (await // Only some values are mapped, others are same
-          prefix(index)) +
-            (VALUE_TO_TEXT_FOR_TASK[ADVISOR_2_TASK_EDIT_DETAILS[index]] ||
-              ADVISOR_2_TASK_EDIT_DETAILS[index])
-        )
-      }
     })
 
     it("Should allow the other advisor to delete the assessment", async() => {
@@ -233,5 +205,23 @@ describe("For the periodic task assessments", () => {
   })
 })
 
-// use indexed prefix to see which one fails if any fails
-const prefix = async index => `${index}-) `
+const assertAssessmentDetails = async(
+  assessmentKey,
+  recurrence,
+  assessmentDetails
+) => {
+  const details = await ShowTask.getShownAssessmentDetails(
+    assessmentKey,
+    recurrence
+  )
+  for (const [index, detail] of await (await details).entries()) {
+    const pre = `${index}-) `
+    const det = await (await detail).getText()
+    expect(`${pre}${det}`).to.equal(
+      `${pre}${
+        VALUE_TO_TEXT_FOR_TASK[assessmentDetails[index]] ||
+        assessmentDetails[index]
+      }`
+    )
+  }
+}

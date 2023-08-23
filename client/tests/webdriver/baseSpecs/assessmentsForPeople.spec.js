@@ -76,17 +76,11 @@ describe("For the periodic person assessments", () => {
     })
 
     it("Should show the same assessment details with the details just created", async() => {
-      const details = await ShowPerson.getShownAssessmentDetails(
+      await assertAssessmentDetails(
         "principalQuarterly",
-        "quarterly"
+        "quarterly",
+        ADVISOR_1_PERSON_CREATE_DETAILS
       )
-      for (const [index, detail] of details.entries()) {
-        expect((await prefix(index)) + (await detail.getText())).to.equal(
-          (await prefix(index)) +
-            (VALUE_TO_TEXT_FOR_PERSON[ADVISOR_1_PERSON_CREATE_DETAILS[index]] ||
-              ADVISOR_1_PERSON_CREATE_DETAILS[index])
-        )
-      }
     })
 
     it("Should allow the author of the assessment to successfully edit it", async() => {
@@ -108,17 +102,11 @@ describe("For the periodic person assessments", () => {
     })
 
     it("Should show the same assessment details with the details just edited", async() => {
-      const details = await ShowPerson.getShownAssessmentDetails(
+      await assertAssessmentDetails(
         "principalQuarterly",
-        "quarterly"
+        "quarterly",
+        ADVISOR_1_PERSON_EDIT_DETAILS
       )
-      for (const [index, detail] of details.entries()) {
-        expect((await prefix(index)) + (await detail.getText())).to.equal(
-          (await prefix(index)) +
-            (VALUE_TO_TEXT_FOR_PERSON[ADVISOR_1_PERSON_EDIT_DETAILS[index]] ||
-              ADVISOR_1_PERSON_EDIT_DETAILS[index])
-        )
-      }
       await ShowPerson.logout()
     })
   })
@@ -165,17 +153,11 @@ describe("For the periodic person assessments", () => {
     })
 
     it("Should show the same assessment details with the details just edited", async() => {
-      const details = await ShowPerson.getShownAssessmentDetails(
+      await assertAssessmentDetails(
         "principalQuarterly",
-        "quarterly"
+        "quarterly",
+        ADMIN_PERSON_EDIT_DETAILS
       )
-      for (const [index, detail] of details.entries()) {
-        expect((await prefix(index)) + (await detail.getText())).to.equal(
-          (await prefix(index)) +
-            (VALUE_TO_TEXT_FOR_PERSON[ADMIN_PERSON_EDIT_DETAILS[index]] ||
-              ADMIN_PERSON_EDIT_DETAILS[index])
-        )
-      }
     })
 
     it("Should allow an admin to delete the assessment", async() => {
@@ -190,5 +172,23 @@ describe("For the periodic person assessments", () => {
   })
 })
 
-// use indexed prefix to see which one fails if any fails
-const prefix = async index => `${index}-) `
+const assertAssessmentDetails = async(
+  assessmentKey,
+  recurrence,
+  assessmentDetails
+) => {
+  const details = await ShowPerson.getShownAssessmentDetails(
+    assessmentKey,
+    recurrence
+  )
+  for (const [index, detail] of await (await details).entries()) {
+    const pre = `${index}-) `
+    const det = await (await detail).getText()
+    expect(`${pre}${det}`).to.equal(
+      `${pre}${
+        VALUE_TO_TEXT_FOR_PERSON[assessmentDetails[index]] ||
+        assessmentDetails[index]
+      }`
+    )
+  }
+}

@@ -40,7 +40,7 @@ const VALUE_TO_TEXT_FOR_INTERACTION = {
   maintain: "Maintain"
 }
 
-describe("For the annualy organization assessments", () => {
+describe("For the annual organization assessments", () => {
   describe("As a superuser assigned to the organization", () => {
     it("Should first search, find and open the organization's page", async() => {
       await Home.openAsSuperuser()
@@ -88,22 +88,11 @@ describe("For the annualy organization assessments", () => {
     })
 
     it("Should show the same assessment details with the details just created", async() => {
-      const details = await ShowOrganization.getShownAssessmentDetails(
+      await assertAssessmentDetails(
         "organizationAnnually",
-        "annually"
+        "annually",
+        SUPERUSER_ASSESSMENT_CREATE_DETAILS
       )
-      for (const [index, detail] of details.entries()) {
-        expect((await prefix(index)) + (await detail.getText())).to.equal(
-          (await prefix(index)) +
-            (VALUE_TO_TEXT_FOR_PRIORITY[
-              SUPERUSER_ASSESSMENT_CREATE_DETAILS[index]
-            ] ||
-              VALUE_TO_TEXT_FOR_INTERACTION[
-                SUPERUSER_ASSESSMENT_CREATE_DETAILS[index]
-              ] ||
-              SUPERUSER_ASSESSMENT_CREATE_DETAILS[index])
-        )
-      }
     })
 
     it("Should allow the author of the assessment to successfully edit it", async() => {
@@ -130,22 +119,11 @@ describe("For the annualy organization assessments", () => {
     })
 
     it("Should show the same assessment details with the details just edited", async() => {
-      const details = await ShowOrganization.getShownAssessmentDetails(
+      await assertAssessmentDetails(
         "organizationAnnually",
-        "annually"
+        "annually",
+        SUPERUSER_ASSESSMENT_EDIT_DETAILS
       )
-      for (const [index, detail] of details.entries()) {
-        expect((await prefix(index)) + (await detail.getText())).to.equal(
-          (await prefix(index)) +
-            (VALUE_TO_TEXT_FOR_PRIORITY[
-              SUPERUSER_ASSESSMENT_EDIT_DETAILS[index]
-            ] ||
-              VALUE_TO_TEXT_FOR_INTERACTION[
-                SUPERUSER_ASSESSMENT_EDIT_DETAILS[index]
-              ] ||
-              SUPERUSER_ASSESSMENT_EDIT_DETAILS[index])
-        )
-      }
       await ShowOrganization.logout()
     })
   })
@@ -199,20 +177,11 @@ describe("For the annualy organization assessments", () => {
     })
 
     it("Should show the same assessment details with the details just edited", async() => {
-      const details = await ShowOrganization.getShownAssessmentDetails(
+      await assertAssessmentDetails(
         "organizationAnnually",
-        "annually"
+        "annually",
+        ADMIN_ASSESSMENT_EDIT_DETAILS
       )
-      for (const [index, detail] of details.entries()) {
-        expect((await prefix(index)) + (await detail.getText())).to.equal(
-          (await prefix(index)) +
-            (VALUE_TO_TEXT_FOR_PRIORITY[ADMIN_ASSESSMENT_EDIT_DETAILS[index]] ||
-              VALUE_TO_TEXT_FOR_INTERACTION[
-                ADMIN_ASSESSMENT_EDIT_DETAILS[index]
-              ] ||
-              ADMIN_ASSESSMENT_EDIT_DETAILS[index])
-        )
-      }
     })
 
     it("Should allow an admin to delete the assessment", async() => {
@@ -227,5 +196,25 @@ describe("For the annualy organization assessments", () => {
   })
 })
 
-// use indexed prefix to see which one fails if any fails
-const prefix = async index => `${index}-) `
+// @assertionMethod
+const assertAssessmentDetails = async(
+  assessmentKey,
+  recurrence,
+  assessmentDetails
+) => {
+  const details = await ShowOrganization.getShownAssessmentDetails(
+    assessmentKey,
+    recurrence
+  )
+  for (const [index, detail] of await (await details).entries()) {
+    const pre = `${index}-) `
+    const det = await (await detail).getText()
+    expect(`${pre}${det}`).to.equal(
+      `${pre}${
+        VALUE_TO_TEXT_FOR_PRIORITY[assessmentDetails[index]] ||
+        VALUE_TO_TEXT_FOR_INTERACTION[assessmentDetails[index]] ||
+        assessmentDetails[index]
+      }`
+    )
+  }
+}
