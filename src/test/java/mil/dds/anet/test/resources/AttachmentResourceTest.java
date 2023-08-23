@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 public class AttachmentResourceTest extends AbstractResourceTest {
 
   protected static final String ATTACHMENT_FIELDS =
-      "{ uuid mimeType fileName description classification author"
+      "{ uuid mimeType fileName description classification caption author"
           + " attachmentRelatedObjects { attachmentUuid relatedObjectType relatedObjectUuid } }";
   private static final String _ATTACHMENTS_FIELDS =
       String.format("attachments %1$s", ATTACHMENT_FIELDS);
@@ -75,6 +75,7 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     final AttachmentInput testAttachmentInput =
         AttachmentInput.builder().withFileName("testCreateAttachment.jpg").withMimeType(mimeType)
             .withDescription("a test attachment created by testCreateAttachment")
+            .withCaption("testCaption")
             .withAttachmentRelatedObjects(Collections.singletonList(testAroInput)).build();
     final String createdAttachmentUuid =
         succeedAttachmentCreate(adminMutationExecutor, testAttachmentInput);
@@ -89,6 +90,7 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     assertThat(reportAttachment.getClassification())
         .isEqualTo(testAttachmentInput.getClassification());
     assertThat(reportAttachment.getFileName()).isEqualTo(testAttachmentInput.getFileName());
+    assertThat(reportAttachment.getCaption()).isEqualTo(testAttachmentInput.getCaption());
   }
 
   @Test
@@ -115,6 +117,7 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     final AttachmentInput testAttachmentInput =
         AttachmentInput.builder().withFileName("testDeleteAttachment.jpg").withMimeType(mimeType)
             .withDescription("a test attachment created by testDeleteAttachment")
+            .withCaption("testCaption")
             .withAttachmentRelatedObjects(Collections.singletonList(testAroInput)).build();
     final String createdAttachmentUuid =
         succeedAttachmentCreate(adminMutationExecutor, testAttachmentInput);
@@ -129,6 +132,7 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     assertThat(reportAttachment.getClassification())
         .isEqualTo(testAttachmentInput.getClassification());
     assertThat(reportAttachment.getFileName()).isEqualTo(testAttachmentInput.getFileName());
+    assertThat(reportAttachment.getCaption()).isEqualTo(testAttachmentInput.getCaption());
 
     // F - delete attachment as someone else
     final MutationExecutor erinMutationExecutor =
@@ -169,6 +173,7 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     final AttachmentInput testAttachmentInput =
         AttachmentInput.builder().withFileName("testUpdateAttachment.jpg").withMimeType(mimeType)
             .withDescription("a test attachment created by testUpdateAttachment")
+            .withCaption("testCaption")
             .withAttachmentRelatedObjects(Collections.singletonList(testAroInput)).build();
     final String createdAttachmentUuid =
         succeedAttachmentCreate(adminMutationExecutor, testAttachmentInput);

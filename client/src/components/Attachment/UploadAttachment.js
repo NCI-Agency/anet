@@ -45,7 +45,7 @@ const UploadAttachment = ({
     const selectedAttachment = new Attachment({
       fileName: file.name,
       mimeType: file.type,
-      caption: file.name.split(".")[0],
+      caption: file.name.substr(0, file.name.lastIndexOf(".")),
       contentLength: file.size,
       attachmentRelatedObjects: [
         {

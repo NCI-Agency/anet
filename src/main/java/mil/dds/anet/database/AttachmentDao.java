@@ -73,7 +73,7 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AbstractSearchQuery<?
     getDbHandle().createUpdate("/* insertAttachment */ "
         + "INSERT INTO \"attachments\" (uuid, \"authorUuid\", \"mimeType\","
         + "\"contentLength\", \"fileName\", \"description\", \"classification\",\"caption\", "
-        + "\"createdAt\", \"updatedAt\") " + "VALUES (:uuid, :authorUuid, :mimeType, "
+        + "\"createdAt\", \"updatedAt\") VALUES (:uuid, :authorUuid, :mimeType, "
         + ":contentLength, :fileName, :description, :classification,:caption,:createdAt, :updatedAt)")
         .bindBean(obj).bind("createdAt", DaoUtils.asLocalDateTime(obj.getCreatedAt()))
         .bind("updatedAt", DaoUtils.asLocalDateTime(obj.getUpdatedAt()))
@@ -90,9 +90,9 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AbstractSearchQuery<?
 
     return getDbHandle()
         .createUpdate("/* updateAttachment */ "
-            + "UPDATE \"attachments\" SET \"mimeType\" = :mimeType, " + "\"fileName\" = :fileName, "
-            + "\"description\" = :description, " + "\"classification\" = :classification, "
-            + "\"caption\" = :caption, " + "\"updatedAt\" = :updatedAt " + "WHERE uuid = :uuid")
+            + "UPDATE \"attachments\" SET \"mimeType\" = :mimeType, \"fileName\" = :fileName, "
+            + "\"description\" = :description, \"classification\" = :classification, "
+            + "\"caption\" = :caption, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
         .bindBean(obj).bind("updatedAt", DaoUtils.asLocalDateTime(obj.getUpdatedAt()))
         .bind("updatedAt", DaoUtils.asLocalDateTime(obj.getUpdatedAt())).execute();
   }

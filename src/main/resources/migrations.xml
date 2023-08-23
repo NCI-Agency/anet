@@ -4528,9 +4528,7 @@
 	</changeSet>
 	<changeSet id="add-caption-column-to-attachments" author="mesut-simsoft" >
 		<addColumn tableName="attachments" >
-			<column name="caption" type="varchar(255)" defaultValue=" " >
-				<constraints nullable="false" />
-			</column>
+			<column name="caption" type="varchar(255)" />
 		</addColumn>
 	</changeSet>
 
