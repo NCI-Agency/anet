@@ -191,13 +191,7 @@ const LocationShow = ({ pageDispatchers }) => {
                   label={Settings.fields.attachment.shortLabel}
                   component={FieldHelper.ReadonlyField}
                   humanValue={
-                    <div
-                      id="attachmentCardList"
-                      style={{
-                        display:
-                          location.attachments.length > 1 ? "flex" : "block"
-                      }}
-                    >
+                    <div className="attachmentCardList">
                       {location.attachments.map((attachment, index) => (
                         <AttachmentCard
                           key={index}

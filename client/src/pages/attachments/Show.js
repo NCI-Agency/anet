@@ -188,13 +188,8 @@ const AttachmentShow = ({ pageDispatchers }) => {
                 action={action}
               />
               <Fieldset>
-                <div style={{ display: "flex" }}>
-                  <Col
-                    id="attachmentImage"
-                    xs={12}
-                    sm={3}
-                    className="label-align"
-                  >
+                <div className="attachmentShow" style={{ display: "flex" }}>
+                  <Col xs={12} sm={3} className="attachmentImage label-align">
                     <AttachmentImage
                       uuid={attachment.uuid}
                       contentMissing={contentMissing}
@@ -202,7 +197,7 @@ const AttachmentShow = ({ pageDispatchers }) => {
                       backgroundImage={backgroundImage}
                     />
                   </Col>
-                  <Col id="attachmentDetails" xs={12} sm={3} lg={8}>
+                  <Col className="attachmentDetails" xs={12} sm={3} lg={8}>
                     <Field
                       name="fileName"
                       label={Settings.fields.attachment.fileName}

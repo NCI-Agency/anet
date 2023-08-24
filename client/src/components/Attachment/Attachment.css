@@ -94,6 +94,22 @@
   border-radius: 0.10rem 0.10rem 0 0;
 }
 
+.attachmentCardList {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
+.attachmentCard {
+  flex: 0 0 calc(20%);
+  margin: 0 0 10px;
+  box-sizing: border-box;
+}
+
+.attachmentCard .card {
+  max-height: 155px;
+}
+
 /******** ATTACHMENT SHOW PAGE ********/
 .img-preview {
   border-radius: 5px;
@@ -110,4 +126,59 @@
 .img-hover-zoom:hover .attachment-image {
   cursor: zoom-in;
   transform: scale(1.5);
+}
+
+/* For tablets and phone devices */
+@media (max-width: 768px) {
+  .attachmentCard {
+    flex: 0 0 calc(100%);
+    margin-top: 5px;
+  }
+
+  .image-preview {
+    background-size: cover;
+    background-repeat: no-repeat;
+    height: 200px; /* Ayarlamaları gerektiğiniz yükseklik */
+  }
+
+  .info-line {
+    font-size: 12px;
+  }
+
+  .attachmentShow {
+    flex-direction: column;
+  }
+  .attachmentImage, .attachmentDetails {
+    width: 100%;
+  }
+  .attachmentDetails {
+    margin-top: 10px;
+  }
+}
+/* For bigger devices than tablets */
+@media (min-width: 769px) and (max-width: 1260px) {
+  .attachmentCard {
+    flex: 0 0 calc(50%);
+    max-height: 155px;
+  }
+
+  .image-preview {
+    background-size: cover;
+    background-repeat: no-repeat;
+    height: 200px;
+  }
+
+  .info-line {
+    font-size: 14px;
+  }
+
+  .attachmentShow {
+    flex-direction: column;
+  }
+  .attachmentImage, .attachmentDetails {
+    width: 100%;
+  }
+  .attachmentDetails {
+    margin-top: 10px;
+  }
 }

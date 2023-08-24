@@ -17,7 +17,7 @@ class ShowAttachment extends Page {
   }
 
   async getImage() {
-    return browser.$("#attachmentImage")
+    return browser.$(".attachmentImage")
   }
 
   async getFilename() {
