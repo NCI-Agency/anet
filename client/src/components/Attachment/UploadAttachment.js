@@ -20,6 +20,7 @@ const GQL_CREATE_ATTACHMENT = gql`
     createAttachment(attachment: $attachment)
   }
 `
+
 const GQL_UPDATE_ATTACHMENT = gql`
   mutation ($attachment: AttachmentInput!) {
     updateAttachment(attachment: $attachment)
@@ -123,6 +124,7 @@ const UploadAttachment = ({
         )
     }
   }
+
   return (
     <div>
       <Messages error={error} />
@@ -144,6 +146,7 @@ const UploadAttachment = ({
           onChange={handleFileEvent}
         />
       </section>
+
       {/** **** Show uploaded files in here **** **/}
       <div style={{ display: "flex", flexWrap: "wrap" }}>
         {uploadedList.map((attachment, index) => (

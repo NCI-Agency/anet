@@ -19,7 +19,7 @@ describe("Show location page", () => {
       await (await ShowLocation.getCard()).waitForExist()
       await (await ShowLocation.getCard()).waitForDisplayed()
       expect(await await ShowLocation.getFileData()).to.be.equal(
-        "attachL…\n-1 bytes"
+        "attachL…\n12.0 KB"
       )
     })
     it("We can go to the show page of Attachment", async() => {

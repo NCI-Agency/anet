@@ -1156,8 +1156,8 @@ INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "
 
 -- Add attachments for locations
 SELECT ('''' || uuid || '''') AS "authorUuid" FROM people WHERE name = 'DMIN, Arthur' \gset
-INSERT INTO attachments (uuid, "authorUuid", "fileName", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt")
-	VALUES ('f7cd5b02-ef73-4ee8-814b-c5a7a916685d', :authorUuid, 'attachLocation', 'image/jpeg', null, 1000, 'We can add attachment for Locations', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO attachments (uuid, "authorUuid", "fileName", "caption", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt")
+	VALUES ('f7cd5b02-ef73-4ee8-814b-c5a7a916685d', :authorUuid, 'attachLocation.png', 'attachLocation', 'image/png', lo_import('/var/tmp/default_avatar.png'), 12316, 'We can add attachments to a location', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT 'f7cd5b02-ef73-4ee8-814b-c5a7a916685d', 'locations', loc.uuid
   FROM locations loc

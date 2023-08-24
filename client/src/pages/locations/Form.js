@@ -64,7 +64,6 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
   const [showSimilarLocations, setShowSimilarLocations] = useState(false)
   const canEditName =
     (!edit && currentUser.isSuperuser()) || (edit && currentUser.isAdmin())
-
   const statusButtons = [
     {
       id: "statusActiveButton",

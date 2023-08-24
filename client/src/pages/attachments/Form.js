@@ -45,14 +45,11 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
   const canEdit =
     currentUser.isAdmin() || currentUser.uuid === initialValues.author.uuid
   const classifications = Settings.fields.attachment.classification.choices
-
   const classificationButtons = Object.keys(classifications).map(key => ({
     value: key,
     label: classifications[key]
   }))
-  const [relatedObjects, setRelatedObjects] = useState(
-    initialValues.attachmentRelatedObjects || []
-  )
+
   return (
     <Formik
       enableReinitialize
@@ -154,7 +151,6 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
                         component={FieldHelper.ReadonlyField}
                         humanValue={
                           <AttachmentRelatedObjectsTable
-                            setRelatedObjects={setRelatedObjects}
                             relatedObjects={values.attachmentRelatedObjects}
                           />
                         }
@@ -232,7 +228,7 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
   }
 
   function onSubmit(values, form) {
-    return save(values, relatedObjects)
+    return save(values)
       .then(response => onSubmitSuccess(response, values, form))
       .catch(error => {
         setError(error)
@@ -259,9 +255,9 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
     })
   }
 
-  function save(values, attachmentRelatedObjects) {
+  function save(values) {
     const attachment = Attachment.filterClientSideFields(values)
-    attachment.attachmentRelatedObjects = attachmentRelatedObjects.map(
+    attachment.attachmentRelatedObjects = values.attachmentRelatedObjects.map(
       ({ relatedObjectType, relatedObjectUuid }) => ({
         relatedObjectType,
         relatedObjectUuid
