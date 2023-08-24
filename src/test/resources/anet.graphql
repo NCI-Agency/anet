@@ -187,6 +187,7 @@ enum Atmosphere {
 type Attachment {
   attachmentRelatedObjects: [AttachmentRelatedObject]
   author: Person
+  caption: String
   classification: String
   contentLength: Long
   createdAt: Instant
@@ -201,6 +202,7 @@ type Attachment {
 input AttachmentInput {
   attachmentRelatedObjects: [AttachmentRelatedObjectInput]
   author: PersonInput
+  caption: String
   classification: String
   contentLength: Long
   createdAt: Instant

@@ -24,6 +24,10 @@ class ShowAttachment extends Page {
     return browser.$("#fileName")
   }
 
+  async getCaption() {
+    return browser.$("#caption")
+  }
+
   async getContentLength() {
     return browser.$("#contentLength")
   }

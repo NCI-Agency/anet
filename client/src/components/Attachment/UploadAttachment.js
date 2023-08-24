@@ -9,6 +9,7 @@ import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { toast } from "react-toastify"
 import Settings from "settings"
+import utils from "utils"
 import { RELATED_OBJECT_TYPE_TO_ENTITY_TYPE } from "utils_links"
 import "./Attachment.css"
 import AttachmentCard from "./AttachmentCard"
@@ -45,6 +46,7 @@ const UploadAttachment = ({
     const selectedAttachment = new Attachment({
       fileName: file.name,
       mimeType: file.type,
+      caption: utils.stripExtension(file.name),
       contentLength: file.size,
       attachmentRelatedObjects: [
         {

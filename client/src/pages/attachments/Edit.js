@@ -18,6 +18,7 @@ const GQL_GET_ATTACHMENT = gql`
     attachment(uuid: $uuid) {
       uuid
       fileName
+      caption
       contentLength
       mimeType
       classification
@@ -64,7 +65,7 @@ const AttachmentEdit = ({ pageDispatchers }) => {
       <AttachmentForm
         edit
         initialValues={attachment}
-        title={`Attachment #${attachment.uuid}`}
+        title={`Attachment ${attachment.caption}`}
       />
     </div>
   )

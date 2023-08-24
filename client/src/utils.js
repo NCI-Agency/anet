@@ -326,6 +326,10 @@ export default {
       backgroundImage = `/api/attachment/view/${attachment.uuid}`
     }
     return { backgroundSize, backgroundImage, contentMissing }
+  },
+  stripExtension: function(fileName) {
+    const index = fileName.lastIndexOf(".")
+    return index === -1 ? fileName : fileName.substring(0, index)
   }
 }
 

@@ -303,11 +303,11 @@ fields:
   attachment:
     featureDisabled: false
     disabled: false
-    shortLabel: Attachment
-    shortName:
-      label: Attachment Name
-      placeholder: Enter an attachment name, example....
-    description: Attachment description
+    fileName: Filename
+    caption:
+      label: Caption
+      placeholder: Enter a caption, example....
+    description: Description
     classification:
       type: enum
       label: Security Marking

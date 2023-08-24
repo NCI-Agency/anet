@@ -524,7 +524,7 @@ properties:
       attachment:
         type: object
         additionalProperties: false
-        required: [featureDisabled, disabled, shortLabel, shortName, description, classification]
+        required: [featureDisabled, disabled, fileName, caption, description, classification]
         properties:
           featureDisabled:
             type: boolean
@@ -534,16 +534,16 @@ properties:
             type: boolean
             title: Whether users can upload attachments
             description: Used for restricting uploading functionality for all users
-          shortLabel:
+          fileName:
             type: string
-            title: The short label for this field
-            description: Used in the UI where a short label for attachments is shown.
-          shortName:
+            title: The label for the filename of an attachment
+            description: Used in the UI where an attachment's filename is shown.
+          caption:
             "$ref": "#/$defs/inputField"
           description:
             type: string
             title: The label for a attachment's description
-            description: Used in the UI where a attachment's description is shown.
+            description: Used in the UI where an attachment's description is shown.
           classification:
             "$ref": "#/$defs/customField"
           mimeTypes:

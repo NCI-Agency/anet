@@ -37,7 +37,7 @@ import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 public class AttachmentDao extends AnetBaseDao<Attachment, AbstractSearchQuery<?>> {
 
   public static final String[] fields = {"uuid", "authorUuid", "fileName", "mimeType",
-      "description", "classification", "createdAt", "updatedAt"};
+      "description", "classification", "caption", "createdAt", "updatedAt"};
   public static final String TABLE_NAME = "attachments";
   public static final String ATTACHMENT_FIELDS =
       DaoUtils.buildFieldAliases(TABLE_NAME, fields, true) + String.format(
@@ -70,12 +70,11 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AbstractSearchQuery<?
 
   @Override
   public Attachment insertInternal(Attachment obj) {
-    getDbHandle()
-        .createUpdate("/* insertAttachment */ "
-            + "INSERT INTO \"attachments\" (uuid, \"authorUuid\", \"mimeType\","
-            + "\"contentLength\", \"fileName\", \"description\", \"classification\", "
-            + "\"createdAt\", \"updatedAt\") " + "VALUES (:uuid, :authorUuid, :mimeType, "
-            + ":contentLength, :fileName, :description, :classification, :createdAt, :updatedAt)")
+    getDbHandle().createUpdate("/* insertAttachment */ "
+        + "INSERT INTO \"attachments\" (uuid, \"authorUuid\", \"mimeType\","
+        + "\"contentLength\", \"fileName\", \"description\", \"classification\",\"caption\", "
+        + "\"createdAt\", \"updatedAt\") VALUES (:uuid, :authorUuid, :mimeType, "
+        + ":contentLength, :fileName, :description, :classification,:caption,:createdAt, :updatedAt)")
         .bindBean(obj).bind("createdAt", DaoUtils.asLocalDateTime(obj.getCreatedAt()))
         .bind("updatedAt", DaoUtils.asLocalDateTime(obj.getUpdatedAt()))
         .bind("authorUuid", obj.getAuthorUuid()).execute();
@@ -91,9 +90,9 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AbstractSearchQuery<?
 
     return getDbHandle()
         .createUpdate("/* updateAttachment */ "
-            + "UPDATE \"attachments\" SET \"mimeType\" = :mimeType, " + "\"fileName\" = :fileName, "
-            + "\"description\" = :description, " + "\"classification\" = :classification, "
-            + "\"updatedAt\" = :updatedAt " + "WHERE uuid = :uuid")
+            + "UPDATE \"attachments\" SET \"mimeType\" = :mimeType, \"fileName\" = :fileName, "
+            + "\"description\" = :description, \"classification\" = :classification, "
+            + "\"caption\" = :caption, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
         .bindBean(obj).bind("updatedAt", DaoUtils.asLocalDateTime(obj.getUpdatedAt()))
         .bind("updatedAt", DaoUtils.asLocalDateTime(obj.getUpdatedAt())).execute();
   }

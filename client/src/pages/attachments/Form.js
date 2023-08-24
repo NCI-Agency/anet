@@ -102,12 +102,18 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
                   </Col>
                   <Col xs={12} sm={3} lg={10}>
                     <FastField
-                      name="fileName"
+                      name="caption"
+                      label={Settings.fields.attachment.caption.label}
                       placeholder={
-                        Settings.fields.attachment.shortName.placeholder
+                        Settings.fields.attachment.caption.placeholder
                       }
-                      label={Settings.fields.attachment.shortName.label}
                       component={FieldHelper.InputField}
+                    />
+
+                    <FastField
+                      name="fileName"
+                      label={Settings.fields.attachment.fileName}
+                      component={FieldHelper.ReadonlyField}
                     />
 
                     <FastField
@@ -141,6 +147,7 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
                     {canEdit ? (
                       <FastField
                         name="classification"
+                        label={Settings.fields.attachment.classification.label}
                         component={FieldHelper.RadioButtonToggleGroupField}
                         buttons={classificationButtons}
                         onChange={value =>
@@ -149,6 +156,7 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
                     ) : (
                       <Field
                         name="classification"
+                        label={Settings.fields.attachment.classification.label}
                         component={FieldHelper.ReadonlyField}
                       />
                     )}

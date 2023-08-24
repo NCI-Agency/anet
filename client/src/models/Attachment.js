@@ -1,5 +1,4 @@
 import Model from "components/Model"
-import Settings from "settings"
 import utils from "utils"
 import * as yup from "yup"
 
@@ -9,15 +8,12 @@ export default class Attachment extends Model {
   static getInstanceName = "attachment"
   static relatedObjectType = "attachments"
 
-  static displayName() {
-    return Settings.fields.attachment.shortLabel
-  }
-
   static schema = {}
 
   static yupSchema = yup.object().shape({
     uuid: yup.string().nullable().default(null),
     fileName: yup.string().required().default(""),
+    caption: yup.string().required().default(""),
     description: yup.string().default(""),
     mimeType: yup.string().default(""),
     contentLength: yup.number().nullable().default(null),
@@ -26,14 +22,15 @@ export default class Attachment extends Model {
       .nullable()
       .default([
         {
-          relatedObjectType: yup.string().default(null),
-          relatedObjectUuid: yup.string().default(null)
+          relatedObjectType: yup.string().nullable().default(null),
+          relatedObjectUuid: yup.string().nullable().default(null)
         }
       ]),
-    classification: yup.string().default(null)
+    classification: yup.string().nullable().default(null)
   })
 
-  static autocompleteQuery = "uuid fileName description classification mimeType"
+  static autocompleteQuery =
+    "uuid fileName caption description classification mimeType"
 
   static _resourceOverride = ["attachments"].join("/")
 

@@ -4,9 +4,10 @@ import ShowAttachment from "../pages/attachment/showAttachment.page"
 
 const ATTACHMENT_UUID = "f076406f-1a9b-4fc9-8ab2-cd2a138ec26d"
 const ATTACHMENT_NAME = "test_attachment.png"
+const ATTACHMENT_CAPTION = "test_attachment"
 const ATTACHMENT_OWNER = "CIV DMIN, Arthur"
-const ATTACHMENT_CLASSIFICATION = "NULL"
-const ATTACHMENT_DESCRIPTION = "We can add multiple attachment for report"
+const ATTACHMENT_CLASSIFICATION = ""
+const ATTACHMENT_DESCRIPTION = "We can add attachments to a report"
 const ATTACHMENT_MIMETYPE = "image/png"
 const ATTACHMENT_USED_IN = "A test report from Arthur"
 const ATTACHMENT_SIZE = 12316
@@ -89,8 +90,14 @@ describe("Edit attachment page", () => {
     it("We should see the input areas for details of attachment", async() => {
       await (await ShowAttachment.getFilename()).waitForExist()
       await (await ShowAttachment.getFilename()).waitForDisplayed()
-      expect(await (await ShowAttachment.getFilename()).getValue()).to.equal(
+      expect(await (await ShowAttachment.getFilename()).getText()).to.equal(
         ATTACHMENT_NAME
+      )
+
+      await (await ShowAttachment.getCaption()).waitForExist()
+      await (await ShowAttachment.getCaption()).waitForDisplayed()
+      expect(await (await ShowAttachment.getCaption()).getValue()).to.equal(
+        ATTACHMENT_CAPTION
       )
 
       await (await ShowAttachment.getOwner()).waitForExist()
