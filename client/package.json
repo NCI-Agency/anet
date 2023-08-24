@@ -114,7 +114,7 @@
     "xhr2": "0.2.1"
   },
   "dependencies": {
-    "@apollo/client": "3.7.17",
+    "@apollo/client": "3.8.1",
     "@blueprintjs/core": "4.20.2",
     "@blueprintjs/datetime": "4.4.37",
     "@blueprintjs/popover2": "1.14.11",
@@ -132,7 +132,7 @@
     "change-case": "4.1.2",
     "classnames": "2.3.2",
     "closest": "0.0.1",
-    "core-js": "3.32.0",
+    "core-js": "3.32.1",
     "d3": "7.8.5",
     "dagre": "0.8.5",
     "email-addresses": "5.0.0",
@@ -140,7 +140,7 @@
     "file-saver": "2.0.5",
     "formik": "2.4.3",
     "graphiql": "3.0.5",
-    "graphql": "16.7.1",
+    "graphql": "16.8.0",
     "hopscotch": "0.3.1",
     "jsonpath-plus": "7.2.0",
     "keycloak-js": "22.0.1",
