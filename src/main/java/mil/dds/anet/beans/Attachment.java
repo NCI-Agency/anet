@@ -35,7 +35,6 @@ public class Attachment extends AbstractAnetBean {
   @GraphQLInputField
   private String classification;
 
-
   @GraphQLQuery
   @GraphQLInputField
   private String caption;
@@ -116,7 +115,6 @@ public class Attachment extends AbstractAnetBean {
   public Person getAuthor() {
     return author.getForeignObject();
   }
-
 
   public String getCaption() {
     return caption;
