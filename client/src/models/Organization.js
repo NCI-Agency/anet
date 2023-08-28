@@ -159,14 +159,18 @@ export default class Organization extends Model {
     return this.shortName || this.longName || this.identificationCode
   }
 
-  static toIdentificationCodeString(organization) {
-    return organization.type === Organization.TYPE.PRINCIPAL_ORG
-      ? `${organization.shortName} \\ ${
-        Settings.fields.principal.org.identificationCode?.label
-      }: ${organization.identificationCode || "Not specified"}`
-      : `${organization.shortName} ${organization.longName} ${
-        organization.identificationCode || ""
-      }`
+  toIdentificationCodeString() {
+    return Organization.toIdentificationCodeString(
+      this.shortName,
+      this.longName,
+      this.identificationCode
+    )
+  }
+
+  static toIdentificationCodeString(shortName, longName, identificationCode) {
+    return `${shortName} ${longName && `| ${longName}`} ${
+      identificationCode ? `| ${identificationCode}` : ""
+    }`
   }
 
   static FILTERED_CLIENT_SIDE_FIELDS = [

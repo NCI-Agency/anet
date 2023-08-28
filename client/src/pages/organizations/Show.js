@@ -380,7 +380,9 @@ const OrganizationShow = ({ pageDispatchers }) => {
                           model={organization.parentOrg}
                         >
                           {Organization.toIdentificationCodeString(
-                            organization.parentOrg
+                            organization.shortName,
+                            organization.longName,
+                            organization.identificationCode
                           )}
                         </LinkTo>
                       )
@@ -403,7 +405,9 @@ const OrganizationShow = ({ pageDispatchers }) => {
                                 model={organization}
                               >
                                 {Organization.toIdentificationCodeString(
-                                  organization
+                                  organization.shortName,
+                                  organization.longName,
+                                  organization.identificationCode
                                 )}
                               </LinkTo>
                             </ListGroupItem>

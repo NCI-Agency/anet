@@ -148,9 +148,11 @@ const OrganizationPreview = ({ className, uuid }) => {
             label={Settings.fields.organization.parentOrg}
             value={
               <LinkTo modelType="Organization" model={organization.parentOrg}>
-                {organization.parentOrg.shortName}{" "}
-                {organization.parentOrg.longName}{" "}
-                {organization.parentOrg.identificationCode}
+                {Organization.toIdentificationCodeString(
+                  organization.parentOrg?.shortName,
+                  organization.parentOrg?.longName,
+                  organization.parentOrg?.identificationCode
+                )}
               </LinkTo>
             }
           />
@@ -164,8 +166,11 @@ const OrganizationPreview = ({ className, uuid }) => {
                 {organization.childrenOrgs.map(organization => (
                   <ListGroupItem key={organization.uuid}>
                     <LinkTo modelType="Organization" model={organization}>
-                      {organization.shortName} {organization.longName}{" "}
-                      {organization.identificationCode}
+                      {Organization.toIdentificationCodeString(
+                        organization.shortName,
+                        organization.longName,
+                        organization.identificationCode
+                      )}
                     </LinkTo>
                   </ListGroupItem>
                 ))}

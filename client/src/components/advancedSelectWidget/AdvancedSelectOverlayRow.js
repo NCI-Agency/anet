@@ -6,6 +6,7 @@ import PropTypes from "prop-types"
 import React from "react"
 import { Badge } from "react-bootstrap"
 import Settings from "settings"
+import Organization from "../../models/Organization"
 
 const cursorStyle = {
   cursor: "pointer"
@@ -66,7 +67,11 @@ export const OrganizationOverlayRow = item => (
     <td className="orgShortName">
       <span>
         <AsLink modelType="Organization" model={item}>
-          {` - ${item.longName} ${item.identificationCode}`}
+          {Organization.toIdentificationCodeString(
+            "",
+            item.longName,
+            item.identificationCode
+          )}
         </AsLink>
       </span>
     </td>
