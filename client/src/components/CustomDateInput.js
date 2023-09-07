@@ -75,7 +75,7 @@ const CustomDateInput = ({
       placeholder={inputFormat}
       maxDate={maxDate}
       minDate={moment().subtract(100, "years").startOf("year").toDate()}
-      canClearSelection={false}
+      canClearSelection
       showActionsBar
       closeOnSelection={!withTime}
       timePickerProps={timePickerProps}
@@ -95,7 +95,8 @@ CustomDateInput.propTypes = {
   value: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.number,
-    PropTypes.instanceOf(Date)
+    PropTypes.instanceOf(Date),
+    PropTypes.oneOf([null])
   ]),
   onChange: PropTypes.func,
   onBlur: PropTypes.func
