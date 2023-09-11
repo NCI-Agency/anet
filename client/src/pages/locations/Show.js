@@ -178,7 +178,6 @@ const LocationShow = ({ pageDispatchers }) => {
                 )}
               </Fieldset>
 
-              <Leaflet markers={[marker]} />
               {Settings.fields.location.customFields && (
                 <Fieldset title="Location information" id="custom-fields">
                   <ReadonlyCustomFields
@@ -187,6 +186,8 @@ const LocationShow = ({ pageDispatchers }) => {
                   />
                 </Fieldset>
               )}
+
+              <Leaflet markers={[marker]} />
             </Form>
 
             <Approvals relatedObject={location} />
