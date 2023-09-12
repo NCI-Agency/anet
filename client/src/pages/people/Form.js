@@ -590,7 +590,9 @@ const PersonForm = ({
                   value={values.endOfTourDate}
                   onChange={value => setFieldValue("endOfTourDate", value)}
                   onBlur={() => setFieldTouched("endOfTourDate")}
-                  widget={<CustomDateInput id="endOfTourDate" />}
+                  widget={
+                    <CustomDateInput id="endOfTourDate" canClearSelection />
+                  }
                 >
                   {isAdvisor && endOfTourDateInPast && (
                     <Alert variant="warning">

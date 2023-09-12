@@ -181,7 +181,6 @@ describe("Create new Person form page", () => {
       await (
         await CreatePerson.getEmailAddress()
       ).setValue(VALID_PERSON_ADVISOR.emailAddress)
-      await (await CreatePerson.getLastName()).click()
       await (
         await CreatePerson.getRank()
       ).selectByAttribute(
@@ -203,6 +202,11 @@ describe("Create new Person form page", () => {
       // This makes sure the help-block is displayed after form submit
       await (await CreatePerson.getEndOfTourDate()).setValue("")
       await (await CreatePerson.getLastName()).click()
+      const errorMessage = await browser.$(
+        "input#emailAddress + div.invalid-feedback"
+      )
+      // element should *not* be visible!
+      await errorMessage.waitForDisplayed({ timeout: 1000, reverse: true })
       // Don't logout, next test continues…
     })
 
