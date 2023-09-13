@@ -33,7 +33,8 @@ const CustomDateInput = ({
   withTime,
   value,
   onChange,
-  onBlur
+  onBlur,
+  canClearSelection
 }) => {
   const inputRef = useRef()
   const rightElement = showIcon && CalendarIcon(inputRef.current)
@@ -75,7 +76,7 @@ const CustomDateInput = ({
       placeholder={inputFormat}
       maxDate={maxDate}
       minDate={moment().subtract(100, "years").startOf("year").toDate()}
-      canClearSelection={false}
+      canClearSelection={canClearSelection}
       showActionsBar
       closeOnSelection={!withTime}
       timePickerProps={timePickerProps}
@@ -98,14 +99,16 @@ CustomDateInput.propTypes = {
     PropTypes.instanceOf(Date)
   ]),
   onChange: PropTypes.func,
-  onBlur: PropTypes.func
+  onBlur: PropTypes.func,
+  canClearSelection: PropTypes.bool
 }
 CustomDateInput.defaultProps = {
   disabled: false,
   showIcon: true,
   maxDate: moment().add(20, "years").endOf("year").toDate(),
   placement: "auto",
-  withTime: false
+  withTime: false,
+  canClearSelection: false
 }
 
 export default CustomDateInput

@@ -168,7 +168,7 @@ describe("Create new Person form page", () => {
       )
       // Don't logout, next test continues…
     })
-    it("Should not save if endOfTourDate is not filled in", async() => {
+    it("Should save even if endOfTourDate is not filled in", async() => {
       // Continue on the same page to prevent "Are you sure you wish to navigate away from the page" warning
       await (
         await CreatePerson.getLastName()
@@ -181,12 +181,6 @@ describe("Create new Person form page", () => {
       await (
         await CreatePerson.getEmailAddress()
       ).setValue(VALID_PERSON_ADVISOR.emailAddress)
-      await (await CreatePerson.getLastName()).click()
-      let errorMessage = await browser.$(
-        "input#emailAddress + div.invalid-feedback"
-      )
-      // element should *not* be visible!
-      await errorMessage.waitForDisplayed({ timeout: 1000, reverse: true })
       await (
         await CreatePerson.getRank()
       ).selectByAttribute(
@@ -205,20 +199,13 @@ describe("Create new Person form page", () => {
         "value",
         await CreatePerson.getRandomOption(await CreatePerson.getCountry())
       )
-      // This makes sure the help-block is displayed after form submit
       await (await CreatePerson.getEndOfTourDate()).setValue("")
       await (await CreatePerson.getLastName()).click()
-      errorMessage = await (await CreatePerson.getEndOfTourDate())
-        .$("..")
-        .$("..")
-        .$("..")
-        .$("..")
-        .$("div.invalid-feedback")
-      await errorMessage.waitForExist()
-      await errorMessage.waitForDisplayed()
-      expect(await errorMessage.getText()).to.equal(
-        "You must provide the End of tour"
+      const errorMessage = await browser.$(
+        "input#emailAddress + div.invalid-feedback"
       )
+      // element should *not* be visible!
+      await errorMessage.waitForDisplayed({ timeout: 1000, reverse: true })
       // Don't logout, next test continues…
     })
 

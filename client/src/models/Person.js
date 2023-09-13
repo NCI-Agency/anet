@@ -140,9 +140,7 @@ export default class Person extends Model {
             if (Person.isPrincipal({ role })) {
               return schema
             } else {
-              schema = schema.required(
-                `You must provide the ${Settings.fields.person.endOfTourDate}`
-              )
+              // endOfTourDate is not required but if there is, it must be greater than today
               if (Person.isPendingVerification({ pendingVerification })) {
                 schema = schema.test(
                   "end-of-tour-date",
