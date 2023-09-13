@@ -118,6 +118,20 @@ const PersonForm = ({
       label: Settings.fields.principal.person.name
     }
   ]
+  const genderOptions = [
+    {
+      label: "Not Specified",
+      value: "NOT SPECIFIED"
+    },
+    {
+      label: "Male",
+      value: "MALE"
+    },
+    {
+      label: "Female",
+      value: "FEMALE"
+    }
+  ]
 
   return (
     <Formik
@@ -556,9 +570,14 @@ const PersonForm = ({
                   component={FieldHelper.SpecialField}
                   widget={
                     <FormSelect>
-                      <option />
-                      <option value="MALE">Male</option>
-                      <option value="FEMALE">Female</option>
+                      {genderOptions.map(genderOption => (
+                        <option
+                          key={genderOption.value}
+                          value={genderOption.value}
+                        >
+                          {genderOption.label}
+                        </option>
+                      ))}
                     </FormSelect>
                   }
                 />
