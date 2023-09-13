@@ -199,7 +199,6 @@ describe("Create new Person form page", () => {
         "value",
         await CreatePerson.getRandomOption(await CreatePerson.getCountry())
       )
-      // This makes sure the help-block is displayed after form submit
       await (await CreatePerson.getEndOfTourDate()).setValue("")
       await (await CreatePerson.getLastName()).click()
       const errorMessage = await browser.$(
