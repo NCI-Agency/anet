@@ -570,6 +570,7 @@ const PersonForm = ({
                   component={FieldHelper.SpecialField}
                   widget={
                     <FormSelect>
+                      <option />
                       {genderOptions.map(genderOption => (
                         <option
                           key={genderOption.value}
