@@ -3,7 +3,7 @@ name: Build cache for ANET
 runs:
   using: "composite"
   steps:
-  - uses: actions/checkout@v3
+  - uses: actions/checkout@v4
     with:
       fetch-depth: 0
   - name: Setup kernel for a.o. Storybook, increase number of file watches

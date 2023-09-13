@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
     - uses: ./.github/actions/build-cache
@@ -42,7 +42,7 @@ jobs:
       ANET_DICTIONARY_NAME: ${{ matrix.dictionary }}
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
     - uses: ./.github/actions/build-cache
@@ -70,7 +70,7 @@ jobs:
       CLIENT_TESTS: ${{ matrix.client-tests }}
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
     - uses: ./.github/actions/build-cache
@@ -104,7 +104,7 @@ jobs:
       ANET_DICTIONARY_NAME: anet-dictionary.yml
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
     - uses: ./.github/actions/build-cache
