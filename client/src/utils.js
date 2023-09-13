@@ -61,7 +61,7 @@ const fnRequiredWhenNot = (
 }
 
 const ellipsize = (value, maxLength) =>
-  value.length > maxLength
+  value?.length > maxLength
     ? value.substring(0, maxLength - 1) + "\u2026"
     : value
 

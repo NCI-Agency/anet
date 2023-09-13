@@ -132,6 +132,65 @@ class Page {
     return options[index].getValue()
   }
 
+  async saveAssessmentAndWaitForModalClose(
+    saveButton,
+    getModalForm,
+    getAssessmentDetails,
+    detailIndex,
+    detailToWaitFor
+  ) {
+    await saveButton.click()
+    await browser.pause(300) // wait for modal animation to finish
+
+    await (
+      await getModalForm()
+    ).waitForExist({
+      reverse: true,
+      timeout: 20000
+    })
+    // wait until details to change, can take some time to update show page
+    await browser.waitUntil(
+      async() => {
+        return (
+          (await (await getAssessmentDetails())[detailIndex].getText()) ===
+          detailToWaitFor
+        )
+      },
+      {
+        timeout: 5000,
+        timeoutMsg: "Expected change after save"
+      }
+    )
+  }
+
+  async clickButton(buttonContainer, buttonSelector) {
+    const button = await buttonContainer.$(buttonSelector)
+    // wait for a bit and click twice, sometimes it does not go through
+    await browser.pause(300)
+    await button.click({ x: 10, y: 10 })
+    await button.click({ x: 10, y: 10 })
+    await browser.pause(300)
+  }
+
+  async fillRichTextInput(
+    editorContainer,
+    editorSelector,
+    editorValue,
+    oldValue
+  ) {
+    await (await editorContainer.$(editorSelector)).click()
+    // Wait for the editor to be focused
+    await browser.pause(300)
+    if (oldValue) {
+      await this.deleteText(oldValue)
+      // Wait for the previous value to be deleted
+      await browser.pause(300)
+    }
+    await browser.keys(editorValue)
+    // Wait for rich-text editor to update content
+    await browser.pause(300)
+  }
+
   async deleteText(text = "") {
     // Clumsy way to clear text…
     await browser.keys(["End"].concat(Array(text.length).fill("Backspace")))

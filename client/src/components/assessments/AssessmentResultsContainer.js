@@ -26,7 +26,7 @@ const AssessmentResultsContainer = ({
   if (!entity) {
     return null
   }
-  const entityAssessments = Object.entries(entity.getAssessmentsConfig())
+  const entityAssessments = Object.entries(entity.getAssessmentsConfig() ?? {})
   return (
     <div ref={contRef}>
       {entityAssessments.map(([assessmentKey, entityAssessment]) => {
