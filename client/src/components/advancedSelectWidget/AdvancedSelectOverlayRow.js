@@ -1,12 +1,11 @@
 import { BreadcrumbTrail } from "components/BreadcrumbTrail"
 import LinkTo from "components/LinkTo"
-import { Location, Task } from "models"
+import { Location, Organization, Task } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React from "react"
 import { Badge } from "react-bootstrap"
 import Settings from "settings"
-import Organization from "../../models/Organization"
 
 const cursorStyle = {
   cursor: "pointer"

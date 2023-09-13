@@ -149,9 +149,9 @@ const OrganizationPreview = ({ className, uuid }) => {
             value={
               <LinkTo modelType="Organization" model={organization.parentOrg}>
                 {Organization.toIdentificationCodeString(
-                  organization.parentOrg?.shortName,
-                  organization.parentOrg?.longName,
-                  organization.parentOrg?.identificationCode
+                  organization.parentOrg.shortName,
+                  organization.parentOrg.longName,
+                  organization.parentOrg.identificationCode
                 )}
               </LinkTo>
             }
