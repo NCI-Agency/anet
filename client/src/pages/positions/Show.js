@@ -256,6 +256,15 @@ const PositionShow = ({ pageDispatchers }) => {
                 />
               </Fieldset>
 
+              {Settings.fields.position.customFields && (
+                <Fieldset title="Position information" id="custom-fields">
+                  <ReadonlyCustomFields
+                    fieldsConfig={Settings.fields.position.customFields}
+                    values={values}
+                  />
+                </Fieldset>
+              )}
+
               <Fieldset
                 title="Current assigned person"
                 id="assigned-advisor"
@@ -398,14 +407,6 @@ const PositionShow = ({ pageDispatchers }) => {
                     showModal={showOrganizationsAdministratedModal}
                     onCancel={() => hideOrganizationsAdministratedModal(false)}
                     onSuccess={() => hideOrganizationsAdministratedModal(true)}
-                  />
-                </Fieldset>
-              )}
-              {Settings.fields.position.customFields && (
-                <Fieldset title="Position information" id="custom-fields">
-                  <ReadonlyCustomFields
-                    fieldsConfig={Settings.fields.position.customFields}
-                    values={values}
                   />
                 </Fieldset>
               )}
