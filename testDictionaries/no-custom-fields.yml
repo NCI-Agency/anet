@@ -286,7 +286,7 @@ fields:
 
   attachment:
     featureDisabled: false
-    disabled: false
+    restrictToAdmins: false
     fileName: Filename
     caption:
       label: Caption

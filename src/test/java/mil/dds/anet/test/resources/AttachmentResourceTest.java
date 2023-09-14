@@ -56,7 +56,7 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     failAttachmentCreate(adminMutationExecutor, failedAttachmentInput);
 
     final var allowedMimeTypes = (List<String>) attachmentSettings.get("mimeTypes");
-    final Boolean userUploadDisabled = (Boolean) attachmentSettings.get("disabled");
+    final Boolean userUploadDisabled = (Boolean) attachmentSettings.get("restrictToAdmins");
     final String mimeType = allowedMimeTypes.get(0);
     failedAttachmentInput.setMimeType(mimeType);
 

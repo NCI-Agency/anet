@@ -203,7 +203,7 @@ public class AttachmentResource {
 
   private boolean hasAttachmentPermission(final Person user, final Attachment existingAttachment) {
     final Map<String, Object> attachmentSettings = getAttachmentSettings();
-    final Boolean userUploadDisabled = (Boolean) attachmentSettings.get("disabled");
+    final Boolean userUploadDisabled = (Boolean) attachmentSettings.get("restrictToAdmins");
 
     if (Boolean.TRUE.equals(userUploadDisabled) && !AuthUtils.isAdmin(user)) {
       return false;
