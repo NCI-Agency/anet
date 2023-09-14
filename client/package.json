@@ -60,7 +60,7 @@
     "colors": "1.4.0",
     "config": "3.3.9",
     "copy-webpack-plugin": "11.0.0",
-    "countries-list": "2.6.1",
+    "countries-list": "3.0.1",
     "cross-fetch": "4.0.0",
     "cross-spawn": "7.0.3",
     "css-loader": "6.8.1",

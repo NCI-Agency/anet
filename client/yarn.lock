@@ -7139,10 +7139,10 @@ cosmiconfig@^8.1.0, cosmiconfig@^8.1.3, cosmiconfig@^8.2.0:
     parse-json "^5.0.0"
     path-type "^4.0.0"
 
-countries-list@2.6.1:
-  version "2.6.1"
-  resolved "https://registry.yarnpkg.com/countries-list/-/countries-list-2.6.1.tgz#d479757ac873b1e596ccea0a925962d20396c0cb"
-  integrity sha512-jXM1Nv3U56dPQ1DsUSsEaGmLHburo4fnB7m+1yhWDUVvx5gXCd1ok/y3gXCjXzhqyawG+igcPYcAl4qjkvopaQ==
+countries-list@3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/countries-list/-/countries-list-3.0.1.tgz#1aa25be6611c56e39b458a25ba22d2b6ff0623e4"
+  integrity sha512-SKsTld6jDTHVGGEg6/1FEQXMJ7EeAFWFq2u+flrvdIeb19BYtNwnqvfaCvutQv3Yb9B44Wfhly4WXNBePIaCuA==
 
 crc-32@^1.2.0:
   version "1.2.2"
