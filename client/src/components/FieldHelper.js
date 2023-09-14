@@ -334,7 +334,7 @@ export const SpecialField = ({
     className = classNames(className, "is-invalid")
   }
   const widgetElem = useMemo(
-    () => React.cloneElement(widget, { className, ...field, ...otherProps }),
+    () => React.cloneElement(widget, { ...field, ...otherProps, className }),
     [className, field, otherProps, widget]
   )
   return (

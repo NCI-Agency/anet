@@ -298,6 +298,7 @@ describe("When working with custom fields for different anet objects", () => {
       ).waitForExist({
         reverse: true
       })
+      await browser.pause(500) // wait for the rendering of custom fields
       await CreatePerson.submitForm()
       await CreatePerson.waitForAlertSuccessToLoad()
     })
