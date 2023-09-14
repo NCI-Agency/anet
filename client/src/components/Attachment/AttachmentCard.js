@@ -32,7 +32,7 @@ const AttachmentCard = ({
   )
 
   return (
-    <div className="attachmentCard" key={attachment.uuid}>
+    <div className="attachment-card" key={attachment.uuid}>
       <Card>
         <div
           className="image-preview info-show card-image"

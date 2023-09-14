@@ -97,7 +97,7 @@ const AttachmentImage = ({
   )
   return (
     <div
-      className={classNames("img-preview", {
+      className={classNames("img-container", {
         "img-hover-zoom": !contentMissing
       })}
     >
@@ -188,8 +188,8 @@ const AttachmentShow = ({ pageDispatchers }) => {
                 action={action}
               />
               <Fieldset>
-                <div className="attachmentShow" style={{ display: "flex" }}>
-                  <Col xs={12} sm={3} className="attachmentImage label-align">
+                <div className="attachment-show" style={{ display: "flex" }}>
+                  <Col xs={12} sm={3} className="attachment-column label-align">
                     <AttachmentImage
                       uuid={attachment.uuid}
                       contentMissing={contentMissing}
@@ -197,7 +197,7 @@ const AttachmentShow = ({ pageDispatchers }) => {
                       backgroundImage={backgroundImage}
                     />
                   </Col>
-                  <Col className="attachmentDetails" xs={12} sm={3} lg={8}>
+                  <Col className="attachment-details" xs={12} sm={3} lg={8}>
                     <Field
                       name="fileName"
                       label={Settings.fields.attachment.fileName}

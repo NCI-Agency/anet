@@ -681,7 +681,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                     label={Settings.fields.report.attachments.label}
                     component={FieldHelper.ReadonlyField}
                     humanValue={
-                      <div className="attachmentCardList">
+                      <div className="attachment-card-list">
                         {report.attachments.map((attachment, index) => (
                           <AttachmentCard
                             key={index}

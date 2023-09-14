@@ -89,8 +89,8 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
               <Fieldset>
-                <div className="attachmentShow" style={{ display: "flex" }}>
-                  <Col xs={12} sm={3} className="attachmentImage label-align">
+                <div className="attachment-show" style={{ display: "flex" }}>
+                  <Col xs={12} sm={3} className="attachment-column label-align">
                     <div
                       className="image-preview info-show card-image attachment-image"
                       style={{
@@ -99,7 +99,7 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
                       }}
                     />
                   </Col>
-                  <Col className="attachmentDetails" xs={12} sm={3} lg={10}>
+                  <Col className="attachment-details" xs={12} sm={3} lg={10}>
                     <FastField
                       name="caption"
                       label={Settings.fields.attachment.caption.label}
