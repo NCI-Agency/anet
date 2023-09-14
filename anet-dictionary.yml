@@ -324,8 +324,6 @@ fields:
       - text/plain
 
   report:
-    attachments:
-      label: Attachments
     canUnpublishReports: true
     intent: Engagement purpose
     atmosphere: Atmospherics

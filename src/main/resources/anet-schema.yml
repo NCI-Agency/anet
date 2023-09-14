@@ -556,16 +556,6 @@ properties:
         additionalProperties: false
         required: [intent, atmosphere, atmosphereDetails, cancelled, nextSteps, reportText]
         properties:
-          attachments:
-            type: object
-            additionalProperties: false
-            required: [label]
-            properties:
-              label:
-                type: string
-                title: The label of the attachments
-            title: Whether reports have attachments
-            description: Used for attachments in reports
           canUnpublishReports:
             type: boolean
             default: false

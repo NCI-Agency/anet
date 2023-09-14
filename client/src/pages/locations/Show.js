@@ -188,7 +188,7 @@ const LocationShow = ({ pageDispatchers }) => {
 
                 <Field
                   name="attachments"
-                  label={Settings.fields.attachment.shortLabel}
+                  label="Attachments"
                   component={FieldHelper.ReadonlyField}
                   humanValue={
                     <div className="attachment-card-list">

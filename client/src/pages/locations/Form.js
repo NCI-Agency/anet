@@ -245,8 +245,8 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
                 {edit && (
                   <Field
                     name="uploadAttachments"
+                    label="Attachments"
                     component={FieldHelper.SpecialField}
-                    label={Settings.fields.attachment.shortLabel}
                     widget={
                       <UploadAttachment
                         edit={edit}

@@ -678,7 +678,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                 {!Settings.fields.attachment.featureDisabled && (
                   <Field
                     name="attachments"
-                    label={Settings.fields.report.attachments.label}
+                    label="Attachments"
                     component={FieldHelper.ReadonlyField}
                     humanValue={
                       <div className="attachment-card-list">
