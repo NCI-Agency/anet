@@ -1,6 +1,6 @@
 import { BreadcrumbTrail } from "components/BreadcrumbTrail"
 import LinkTo from "components/LinkTo"
-import { Location, Organization, Task } from "models"
+import { Location, Task } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React from "react"
@@ -65,13 +65,7 @@ export const OrganizationOverlayRow = item => (
   <React.Fragment key={item.uuid}>
     <td className="orgShortName">
       <span>
-        <AsLink modelType="Organization" model={item}>
-          {Organization.toIdentificationCodeString(
-            "",
-            item.longName,
-            item.identificationCode
-          )}
-        </AsLink>
+        <AsLink modelType="Organization" model={item} />
       </span>
     </td>
   </React.Fragment>

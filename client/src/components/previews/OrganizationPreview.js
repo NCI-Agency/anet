@@ -147,13 +147,7 @@ const OrganizationPreview = ({ className, uuid }) => {
           <PreviewField
             label={Settings.fields.organization.parentOrg}
             value={
-              <LinkTo modelType="Organization" model={organization.parentOrg}>
-                {Organization.toIdentificationCodeString(
-                  organization.parentOrg.shortName,
-                  organization.parentOrg.longName,
-                  organization.parentOrg.identificationCode
-                )}
-              </LinkTo>
+              <LinkTo modelType="Organization" model={organization.parentOrg} />
             }
           />
         )}
@@ -163,15 +157,9 @@ const OrganizationPreview = ({ className, uuid }) => {
             label="Sub organizations"
             value={
               <ListGroup>
-                {organization.childrenOrgs.map(organization => (
-                  <ListGroupItem key={organization.uuid}>
-                    <LinkTo modelType="Organization" model={organization}>
-                      {Organization.toIdentificationCodeString(
-                        organization.shortName,
-                        organization.longName,
-                        organization.identificationCode
-                      )}
-                    </LinkTo>
+                {organization.childrenOrgs.map(childOrg => (
+                  <ListGroupItem key={childOrg.uuid}>
+                    <LinkTo modelType="Organization" model={childOrg} />
                   </ListGroupItem>
                 ))}
               </ListGroup>

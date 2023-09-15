@@ -156,11 +156,9 @@ export default class Organization extends Model {
   }
 
   toString() {
-    return this.shortName || this.longName || this.identificationCode
-  }
-
-  static toIdentificationCodeString(shortName, longName, identificationCode) {
-    return [shortName, longName, identificationCode].filter(Boolean).join(" | ")
+    return [this.shortName, this.longName, this.identificationCode]
+      .filter(Boolean)
+      .join(" | ")
   }
 
   static FILTERED_CLIENT_SIDE_FIELDS = [

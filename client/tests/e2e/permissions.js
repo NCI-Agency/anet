@@ -99,7 +99,7 @@ test.serial("checking superuser permissions", async t => {
   const $principalOrgLink = await getFromSearchResults(
     t,
     "MoD",
-    "MoD",
+    "MoD | Ministry of Defense | Z12345",
     "organizations"
   )
   await $principalOrgLink.click()
@@ -143,7 +143,11 @@ test.serial("checking superuser permissions", async t => {
   )
   await $ef11Link.click()
   // Check that Andrew is (also) superuser of EF 1.1
-  await findSuperuserLink(t, "CIV ANDERSON, Andrew", "EF 1")
+  await findSuperuserLink(
+    t,
+    "CIV ANDERSON, Andrew",
+    "EF 1 | Planning Programming, Budgeting and Execution"
+  )
   await pageHelpers.clickPersonNameFromSupportedPositionsFieldset(
     "Capt ELIZAWELL, Elizabeth"
   )
@@ -152,10 +156,19 @@ test.serial("checking superuser permissions", async t => {
   await t.context.logout()
 
   await t.context.get("/", "bob")
-  const $modLink = await getFromSearchResults(t, "MoD", "MoD", "organizations")
+  const $modLink = await getFromSearchResults(
+    t,
+    "MoD",
+    "MoD | Ministry of Defense | Z12345",
+    "organizations"
+  )
   await $modLink.click()
   // Check that Bob is (also) superuser of MoD
-  await findSuperuserLink(t, "CIV BOBTOWN, Bob", "MoD")
+  await findSuperuserLink(
+    t,
+    "CIV BOBTOWN, Bob",
+    "MoD | Ministry of Defense | Z12345"
+  )
   await pageHelpers.clickPersonNameFromSupportedPositionsFieldset(
     "CIV KYLESON, Kyle"
   )
@@ -297,7 +310,7 @@ test.serial("checking admin permissions", async t => {
   const $principalOrgLink = await getFromSearchResults(
     t,
     "MoD",
-    "MoD",
+    "MoD | Ministry of Defense | Z12345",
     "organizations"
   )
   await $principalOrgLink.click()

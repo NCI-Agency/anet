@@ -227,13 +227,7 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                           <LinkTo
                             modelType="Organization"
                             model={values.parentOrg}
-                          >
-                            {Organization.toIdentificationCodeString(
-                              values.parentOrg.shortName,
-                              values.parentOrg.longName,
-                              values.parentOrg.identificationCode
-                            )}
-                          </LinkTo>
+                          />
                         )
                       }
                     />
