@@ -1,11 +1,12 @@
 import {
   ApolloClient,
   ApolloLink,
-  concat,
+  from,
   HttpLink,
   InMemoryCache,
   useQuery
 } from "@apollo/client"
+import { RetryLink } from "@apollo/client/link/retry"
 import { keycloak } from "keycloak"
 import _isEmpty from "lodash/isEmpty"
 
@@ -27,6 +28,12 @@ const authMiddleware = new ApolloLink((operation, forward) => {
 
 const httpLink = new HttpLink({
   uri: GRAPHQL_ENDPOINT
+})
+
+const retryLink = new RetryLink({
+  attempts: {
+    retryIf: error => error?.statusCode === 503
+  }
 })
 
 const API = {
@@ -135,7 +142,7 @@ const API = {
   },
 
   client: new ApolloClient({
-    link: concat(authMiddleware, httpLink),
+    link: from([authMiddleware, retryLink, httpLink]),
     cache: new InMemoryCache({
       addTypename: false,
       dataIdFromObject: object => object.uuid || null
