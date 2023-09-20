@@ -12,6 +12,8 @@ mySubscriptionUpdates(query: {pageSize:0}) {
       }
       ... on Organization {
         shortName
+        longName
+        identificationCode
       }
       ... on Person {
         role
@@ -43,6 +45,8 @@ mySubscriptionUpdates(query: {pageSize:0}) {
         }
         ... on Organization {
           shortName
+          longName
+          identificationCode
         }
         ... on Person {
           role

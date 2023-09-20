@@ -49,10 +49,14 @@ const GQL_GET_REPORT_LIST = gql`
         advisorOrg {
           uuid
           shortName
+          longName
+          identificationCode
         }
         principalOrg {
           uuid
           shortName
+          longName
+          identificationCode
         }
         location {
           uuid

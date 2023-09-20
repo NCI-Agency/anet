@@ -18,6 +18,8 @@ me {
     organization {
       uuid
       shortName
+      longName
+      identificationCode
       descendantOrgs {
         uuid
       }
@@ -35,6 +37,8 @@ me {
       organization {
         uuid
         shortName
+        longName
+        identificationCode
       }
       location {
         uuid
@@ -54,6 +58,7 @@ me {
           organization {
             uuid
             shortName
+            longName
             identificationCode
           }
           location {
@@ -126,6 +131,8 @@ topLevelAdvisorOrgs: organizationList(
   list {
     uuid
     shortName
+    longName
+    identificationCode
   }
 }
 
@@ -140,5 +147,7 @@ topLevelPrincipalOrgs: organizationList(
   list {
     uuid
     shortName
+    longName
+    identificationCode
   }
 }

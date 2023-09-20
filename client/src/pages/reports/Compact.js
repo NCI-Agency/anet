@@ -116,6 +116,7 @@ const GQL_GET_REPORT = gql`
           organization {
             uuid
             shortName
+            longName
             identificationCode
           }
           location {
@@ -154,6 +155,8 @@ const GQL_GET_REPORT = gql`
         taskedOrganizations {
           uuid
           shortName
+          longName
+          identificationCode
         }
         customFields
       }

@@ -53,6 +53,8 @@ const GQL_GET_ATTACHMENT = gql`
           }
           ... on Organization {
             shortName
+            longName
+            identificationCode
           }
           ... on Person {
             name

@@ -33,10 +33,14 @@ reportList(query: {releasedAtStart: -259200000, pageSize: 3, sortBy: RELEASED_AT
     advisorOrg {
       uuid
       shortName
+      longName
+      identificationCode
     }
     principalOrg {
       uuid
       shortName
+      longName
+      identificationCode
     }
     location {
       uuid

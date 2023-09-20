@@ -44,6 +44,8 @@ const GQL_GET_PERSON_LIST = gql`
           organization {
             uuid
             shortName
+            longName
+            identificationCode
           }
         }
       }
@@ -70,6 +72,8 @@ const GQL_GET_POSITION_LIST = gql`
         organization {
           uuid
           shortName
+          longName
+          identificationCode
         }
         person {
           uuid
@@ -95,6 +99,8 @@ const GQL_GET_TASK_LIST = gql`
         taskedOrganizations {
           uuid
           shortName
+          longName
+          identificationCode
         }
         parentTask {
           uuid
@@ -160,6 +166,8 @@ const GQL_GET_REPORT_LIST = gql`
             organization {
               uuid
               shortName
+              longName
+              identificationCode
             }
           }
         }
@@ -172,10 +180,14 @@ const GQL_GET_REPORT_LIST = gql`
         advisorOrg {
           uuid
           shortName
+          longName
+          identificationCode
         }
         principalOrg {
           uuid
           shortName
+          longName
+          identificationCode
         }
         location {
           uuid

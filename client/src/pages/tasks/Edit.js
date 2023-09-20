@@ -61,6 +61,8 @@ const GQL_GET_TASK = gql`
         organization {
           uuid
           shortName
+          longName
+          identificationCode
         }
         person {
           uuid

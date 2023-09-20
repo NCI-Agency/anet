@@ -25,6 +25,8 @@ const GQL_GET_ORGANIZATION_LIST = gql`
       list {
         uuid
         shortName
+        longName
+        identificationCode
       }
     }
   }

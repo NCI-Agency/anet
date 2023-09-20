@@ -2,10 +2,10 @@ organization(uuid:"${orgUuid}") {
   uuid
   shortName
   longName
+  identificationCode
   status
   isSubscribed
   updatedAt
-  identificationCode
   type
   parentOrg {
     uuid
@@ -105,6 +105,8 @@ organization(uuid:"${orgUuid}") {
         }
         ... on Organization {
           shortName
+          longName
+          identificationCode
         }
         ... on Person {
           role

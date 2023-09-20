@@ -33,6 +33,8 @@ position(uuid:"${positionUuid}") {
     organization {
       uuid
       shortName
+      longName
+      identificationCode
     }
   }
   previousPeople {
@@ -76,6 +78,8 @@ position(uuid:"${positionUuid}") {
         }
         ... on Organization {
           shortName
+          longName
+          identificationCode
         }
         ... on Person {
           role

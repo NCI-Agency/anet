@@ -36,6 +36,8 @@ const GQL_GET_POSITION_LIST = gql`
         organization {
           uuid
           shortName
+          longName
+          identificationCode
         }
         location {
           uuid
@@ -58,6 +60,8 @@ const GQL_GET_POSITION_LIST = gql`
           organization {
             uuid
             shortName
+            longName
+            identificationCode
           }
           location {
             uuid

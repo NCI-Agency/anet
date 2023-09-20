@@ -45,6 +45,8 @@ const GQL_GET_POSITION = gql`
         organization {
           uuid
           shortName
+          longName
+          identificationCode
         }
       }
       previousPeople {

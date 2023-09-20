@@ -28,6 +28,7 @@ const GQL_GET_CHART_DATA = gql`
       uuid
       shortName
       longName
+      identificationCode
       type
       positions {
         name
@@ -50,6 +51,7 @@ const GQL_GET_CHART_DATA = gql`
         uuid
         shortName
         longName
+        identificationCode
         type
         childrenOrgs(query: { status: ACTIVE }) {
           uuid

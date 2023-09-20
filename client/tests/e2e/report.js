@@ -89,7 +89,11 @@ test.serial("Draft and submit a report", async t => {
     $principalPosition1,
     "Planning Captain, MOD-FO-00004"
   )
-  await assertElementText(t, $principalOrg1, "MoD | Z12345")
+  await assertElementText(
+    t,
+    $principalOrg1,
+    "MoD | Ministry of Defense | Z12345"
+  )
 
   const $attendeesAdvancedSelect2 =
     await pageHelpers.chooseAdvancedSelectOption(

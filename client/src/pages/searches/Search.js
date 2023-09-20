@@ -117,6 +117,8 @@ const GQL_GET_PERSON_LIST = gql`
           organization {
             uuid
             shortName
+            longName
+            identificationCode
           }
         }
       }
@@ -143,6 +145,8 @@ const GQL_GET_POSITION_LIST = gql`
         organization {
           uuid
           shortName
+          longName
+          identificationCode
         }
         person {
           uuid

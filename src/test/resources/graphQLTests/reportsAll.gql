@@ -32,10 +32,14 @@ reportList(query:{pageSize:100}) {
     advisorOrg {
       uuid
       shortName
+      longName
+      identificationCode
     }
     principalOrg {
       uuid
       shortName
+      longName
+      identificationCode
     }
     location {
       uuid

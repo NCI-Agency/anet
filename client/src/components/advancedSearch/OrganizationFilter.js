@@ -13,6 +13,8 @@ const GQL_GET_ORGANIZATION = gql`
     organization(uuid: $uuid) {
       uuid
       shortName
+      longName
+      identificationCode
     }
   }
 `

@@ -32,6 +32,8 @@ const GQL_GET_REPORT_LIST_BY_ORG = gql`
         advisorOrg {
           uuid
           shortName
+          longName
+          identificationCode
         }
       }
     }
