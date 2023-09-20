@@ -48,6 +48,7 @@ import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.BatchingUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dataloader.DataLoaderRegistry;
+import org.jdbi.v3.core.ConnectionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
@@ -222,21 +223,23 @@ public class GraphQlResource {
       Map<String, Object> variables, String output) {
     final ExecutionResult executionResult = dispatchRequest(user, operationName, query, variables);
     final Map<String, Object> result = executionResult.toSpecification();
-    if (executionResult.getErrors().size() > 0) {
-      WebApplicationException actual = null;
-      for (GraphQLError error : executionResult.getErrors()) {
-        if (error instanceof ExceptionWhileDataFetching) {
-          ExceptionWhileDataFetching exception = (ExceptionWhileDataFetching) error;
-          if (exception.getException() instanceof WebApplicationException) {
-            actual = (WebApplicationException) exception.getException();
+    if (!executionResult.getErrors().isEmpty()) {
+      Status status = Status.INTERNAL_SERVER_ERROR;
+      for (final GraphQLError error : executionResult.getErrors()) {
+        if (error instanceof ExceptionWhileDataFetching exception) {
+          if (exception.getException() instanceof WebApplicationException actual) {
+            status = Status.fromStatusCode(actual.getResponse().getStatus());
+            break;
+          } else if (exception.getException() instanceof ConnectionException) {
+            status = Status.SERVICE_UNAVAILABLE;
             break;
           }
         }
       }
 
-      Status status = (actual != null) ? Status.fromStatusCode(actual.getResponse().getStatus())
-          : Status.INTERNAL_SERVER_ERROR;
       logger.warn("Errors: {}", executionResult.getErrors());
+      // Remove any data so this gets properly handled as an error
+      result.remove("data");
       return Response.status(status).entity(result).build();
     }
 
