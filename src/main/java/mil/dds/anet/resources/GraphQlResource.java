@@ -7,6 +7,7 @@ import graphql.ExecutionInput;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.GraphQLError;
+import graphql.execution.SimpleDataFetcherExceptionHandler;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.visibility.NoIntrospectionGraphqlFieldVisibility;
 import io.dropwizard.auth.Auth;
@@ -248,6 +249,17 @@ public class GraphQlResource {
     return transformer.apply(result).build();
   }
 
+  static class CustomDataFetcherExceptionHandler extends SimpleDataFetcherExceptionHandler {
+    @Override
+    protected void logException(ExceptionWhileDataFetching error, Throwable exception) {
+      // Don't log ConnectionException as it may cause excessive logging; in any case it is already
+      // shown above in the warn message
+      if (!(exception instanceof ConnectionException)) {
+        super.logException(error, exception);
+      }
+    }
+  }
+
   private ExecutionResult dispatchRequest(Person user, String operationName, String query,
       Map<String, Object> variables) {
     final BatchingUtils batchingUtils = new BatchingUtils(engine, true, true);
@@ -261,6 +273,8 @@ public class GraphQlResource {
 
     final GraphQL graphql = GraphQL
         .newGraphQL(AuthUtils.isAdmin(user) ? graphqlSchema : graphqlSchemaWithoutIntrospection)
+        // custom error handler to reduce logging
+        .defaultDataFetcherExceptionHandler(new CustomDataFetcherExceptionHandler())
         // Prevent adding .instrumentation(new DataLoaderDispatcherInstrumentation())
         // — use our own dispatcher instead
         .doNotAddDefaultInstrumentations().build();
