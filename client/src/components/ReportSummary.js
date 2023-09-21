@@ -277,7 +277,8 @@ const ReportSummaryRow = ({ report }) => {
               <LinkTo modelType="Person" model={report.primaryPrincipal} />
               <span>
                 {" "}
-                <LinkTo modelType="Organization" model={report.principalOrg} />
+                (<LinkTo modelType="Organization" model={report.principalOrg} />
+                )
               </span>
             </>
           )}

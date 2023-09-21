@@ -108,11 +108,7 @@ const PositionPreview = ({ className, uuid }) => {
           <PreviewField
             label="Organization"
             value={
-              <LinkTo modelType="Organization" model={position.organization}>
-                {position.organization.shortName}{" "}
-                {position.organization.longName}{" "}
-                {position.organization.identificationCode}
-              </LinkTo>
+              <LinkTo modelType="Organization" model={position.organization} />
             }
           />
         )}

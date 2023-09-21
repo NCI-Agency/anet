@@ -9,7 +9,6 @@ const OrganizationsAdministrated = ({ organizations }) => {
       <thead>
         <tr>
           <th>Name</th>
-          <th>UIC</th>
         </tr>
       </thead>
       <tbody>
@@ -18,7 +17,6 @@ const OrganizationsAdministrated = ({ organizations }) => {
             <td>
               <LinkTo modelType="Organization" model={org} />
             </td>
-            <td>{org.identificationCode}</td>
           </tr>
         ))}
       </tbody>

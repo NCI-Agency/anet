@@ -267,8 +267,6 @@ const Organizations = ({
           <thead>
             <tr>
               <th>Name</th>
-              <th>Description</th>
-              <th>Code</th>
               <th>Type</th>
             </tr>
           </thead>
@@ -278,8 +276,6 @@ const Organizations = ({
                 <td>
                   <LinkTo modelType="Organization" model={org} />
                 </td>
-                <td>{org.longName}</td>
-                <td>{org.identificationCode}</td>
                 <td>{org.humanNameOfType()}</td>
               </tr>
             ))}
