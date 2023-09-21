@@ -25,6 +25,8 @@ const GQL_GET_REPORT_LIST = gql`
         principalOrg {
           uuid
           shortName
+          longName
+          identificationCode
         }
         engagementDate
         duration

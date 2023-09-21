@@ -378,11 +378,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
                         <LinkTo
                           modelType="Organization"
                           model={organization.parentOrg}
-                        >
-                          {Organization.toIdentificationCodeString(
-                            organization.parentOrg
-                          )}
-                        </LinkTo>
+                        />
                       )
                     }
                   />
@@ -396,16 +392,12 @@ const OrganizationShow = ({ pageDispatchers }) => {
                       label="Sub organizations"
                       humanValue={
                         <ListGroup>
-                          {organization.childrenOrgs.map(organization => (
-                            <ListGroupItem key={organization.uuid}>
+                          {organization.childrenOrgs.map(childOrg => (
+                            <ListGroupItem key={childOrg.uuid}>
                               <LinkTo
                                 modelType="Organization"
-                                model={organization}
-                              >
-                                {Organization.toIdentificationCodeString(
-                                  organization
-                                )}
-                              </LinkTo>
+                                model={childOrg}
+                              />
                             </ListGroupItem>
                           ))}
                         </ListGroup>

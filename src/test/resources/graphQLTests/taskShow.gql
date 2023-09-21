@@ -60,6 +60,8 @@ task(uuid: "${taskUuid}") {
           }
           ... on Organization {
             shortName
+            longName
+            identificationCode
           }
           ... on Person {
             role
@@ -93,6 +95,8 @@ task(uuid: "${taskUuid}") {
     organization {
       uuid
       shortName
+      longName
+      identificationCode
     }
     person {
       uuid
@@ -161,6 +165,8 @@ task(uuid: "${taskUuid}") {
         }
         ... on Organization {
           shortName
+          longName
+          identificationCode
         }
         ... on Person {
           role

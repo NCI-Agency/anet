@@ -53,6 +53,8 @@ export const GRAPHQL_NOTE_FIELDS = /* GraphQL */ `
       }
       ... on Organization {
         shortName
+        longName
+        identificationCode
       }
       ... on Person {
         role

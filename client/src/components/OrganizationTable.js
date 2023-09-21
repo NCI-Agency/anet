@@ -14,7 +14,6 @@ import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Table } from "react-bootstrap"
 import { connect } from "react-redux"
-import Settings from "settings"
 
 const GQL_GET_ORGANIZATION_LIST = gql`
   query ($organizationQuery: OrganizationSearchQueryInput) {
@@ -25,6 +24,8 @@ const GQL_GET_ORGANIZATION_LIST = gql`
       list {
         uuid
         shortName
+        longName
+        identificationCode
       }
     }
   }
@@ -113,38 +114,25 @@ const BaseOrganizationTable = ({
           <thead>
             <tr>
               <th>Name</th>
-              {Settings.fields.advisor.org.identificationCode && (
-                <th>{Settings.fields.advisor.org.identificationCode.label}</th>
-              )}
-              <th />
+              {showDelete && <th />}
             </tr>
           </thead>
           <tbody>
-            {Organization.map(organizations, org => {
-              const nameComponents = []
-              org.shortName && nameComponents.push(org.shortName)
-              org.longName && nameComponents.push(org.longName)
-              return (
-                <tr key={org.uuid}>
-                  <td>
-                    <LinkTo modelType="Organization" model={org}>
-                      {nameComponents.join(" - ")}
-                    </LinkTo>
+            {Organization.map(organizations, org => (
+              <tr key={org.uuid}>
+                <td>
+                  <LinkTo modelType="Organization" model={org} />
+                </td>
+                {showDelete && (
+                  <td id={"organizationDelete_" + org.uuid}>
+                    <RemoveButton
+                      title="Remove organization"
+                      onClick={() => onDelete(org)}
+                    />
                   </td>
-                  {Settings.fields.advisor.org.identificationCode && (
-                    <td>{org.identificationCode}</td>
-                  )}
-                  {showDelete && (
-                    <td id={"organizationDelete_" + org.uuid}>
-                      <RemoveButton
-                        title="Remove organization"
-                        onClick={() => onDelete(org)}
-                      />
-                    </td>
-                  )}
-                </tr>
-              )
-            })}
+                )}
+              </tr>
+            ))}
           </tbody>
         </Table>
       </UltimatePaginationTopDown>

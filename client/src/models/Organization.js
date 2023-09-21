@@ -106,8 +106,7 @@ export default class Organization extends Model {
     .concat(Organization.customFieldsSchema)
     .concat(Model.yupSchema)
 
-  static autocompleteQuery =
-    "uuid, shortName, longName, identificationCode, type"
+  static autocompleteQuery = "uuid shortName longName identificationCode type"
 
   static autocompleteQueryWithNotes = `${this.autocompleteQuery} ${GRAPHQL_NOTES_FIELDS}`
 
@@ -156,17 +155,9 @@ export default class Organization extends Model {
   }
 
   toString() {
-    return this.shortName || this.longName || this.identificationCode
-  }
-
-  static toIdentificationCodeString(organization) {
-    return organization.type === Organization.TYPE.PRINCIPAL_ORG
-      ? `${organization.shortName} \\ ${
-        Settings.fields.principal.org.identificationCode?.label
-      }: ${organization.identificationCode || "Not specified"}`
-      : `${organization.shortName} ${organization.longName} ${
-        organization.identificationCode || ""
-      }`
+    return [this.shortName, this.longName, this.identificationCode]
+      .filter(Boolean)
+      .join(" | ")
   }
 
   static FILTERED_CLIENT_SIDE_FIELDS = [

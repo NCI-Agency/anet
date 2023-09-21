@@ -26,8 +26,8 @@ const GQL_GET_ORGANIZATION = gql`
       uuid
       shortName
       longName
-      status
       identificationCode
+      status
       type
       location {
         uuid
@@ -72,6 +72,8 @@ const GQL_GET_ORGANIZATION = gql`
         organization {
           uuid
           shortName
+          longName
+          identificationCode
         }
         person {
           uuid

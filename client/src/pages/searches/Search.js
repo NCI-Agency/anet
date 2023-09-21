@@ -117,6 +117,8 @@ const GQL_GET_PERSON_LIST = gql`
           organization {
             uuid
             shortName
+            longName
+            identificationCode
           }
         }
       }
@@ -143,6 +145,8 @@ const GQL_GET_POSITION_LIST = gql`
         organization {
           uuid
           shortName
+          longName
+          identificationCode
         }
         person {
           uuid
@@ -263,8 +267,6 @@ const Organizations = ({
           <thead>
             <tr>
               <th>Name</th>
-              <th>Description</th>
-              <th>Code</th>
               <th>Type</th>
             </tr>
           </thead>
@@ -274,8 +276,6 @@ const Organizations = ({
                 <td>
                   <LinkTo modelType="Organization" model={org} />
                 </td>
-                <td>{org.longName}</td>
-                <td>{org.identificationCode}</td>
                 <td>{org.humanNameOfType()}</td>
               </tr>
             ))}

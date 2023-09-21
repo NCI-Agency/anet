@@ -208,11 +208,7 @@ const PositionShow = ({ pageDispatchers }) => {
                         <LinkTo
                           modelType="Organization"
                           model={position.organization}
-                        >
-                          {position.organization.shortName}{" "}
-                          {position.organization.longName}{" "}
-                          {position.organization.identificationCode}
-                        </LinkTo>
+                        />
                       )
                     }
                   />

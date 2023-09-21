@@ -41,6 +41,7 @@ const GQL_GET_PERSON = gql`
         organization {
           uuid
           shortName
+          longName
           identificationCode
         }
         associatedPositions {
@@ -58,6 +59,8 @@ const GQL_GET_PERSON = gql`
           organization {
             uuid
             shortName
+            longName
+            identificationCode
           }
         }
       }

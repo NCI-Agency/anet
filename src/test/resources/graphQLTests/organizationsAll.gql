@@ -4,6 +4,7 @@ organizationList(query: {pageSize: 0}) {
     uuid
     shortName
     longName
+    identificationCode
     children: childrenOrgs {
       uuid
     }

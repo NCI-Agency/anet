@@ -65,9 +65,7 @@ export const OrganizationOverlayRow = item => (
   <React.Fragment key={item.uuid}>
     <td className="orgShortName">
       <span>
-        <AsLink modelType="Organization" model={item}>
-          {` - ${item.longName} ${item.identificationCode}`}
-        </AsLink>
+        <AsLink modelType="Organization" model={item} />
       </span>
     </td>
   </React.Fragment>

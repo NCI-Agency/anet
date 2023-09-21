@@ -6,7 +6,7 @@ const EXAMPLE_POSITIONS = {
   validLeft: {
     search: "merge one",
     fullName: "Merge One",
-    organization: "MoD",
+    organization: "MoD | Ministry of Defense | Z12345",
     type: "PRINCIPAL",
     role: "Deputy",
     code: "MOD-M1-HQ-00001",
@@ -28,7 +28,7 @@ const EXAMPLE_POSITIONS = {
   validRight: {
     search: "merge two",
     fullName: "Merge Two",
-    organization: "MoD",
+    organization: "MoD | Ministry of Defense | Z12345",
     type: "PRINCIPAL",
     role: "Leader",
     code: "MOD-M2-HQ-00001",

@@ -6,6 +6,8 @@ taskList(query: {pageSize: ${maxResults}, status: ACTIVE, inMyReports: true, sor
     taskedOrganizations {
       uuid
       shortName
+      longName
+      identificationCode
     }
     customFields
   }

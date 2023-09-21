@@ -172,7 +172,7 @@ export default class Person extends Model {
     .concat(Model.yupSchema)
 
   static autocompleteQuery =
-    "uuid name rank role status endOfTourDate avatar(size: 32) position { uuid name type role code status organization { uuid shortName identificationCode } location { uuid name } }"
+    "uuid name rank role status endOfTourDate avatar(size: 32) position { uuid name type role code status organization { uuid shortName longName identificationCode } location { uuid name } }"
 
   static allFieldsQuery = `
     uuid
@@ -199,6 +199,7 @@ export default class Person extends Model {
       organization {
         uuid
         shortName
+        longName
         identificationCode
       }
       associatedPositions {
@@ -216,6 +217,8 @@ export default class Person extends Model {
         organization {
           uuid
           shortName
+          longName
+          identificationCode
         }
       }
     }

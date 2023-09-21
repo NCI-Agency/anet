@@ -38,6 +38,8 @@ const GQL_GET_MY_SUBSCRIPTIONS = gql`
           }
           ... on Organization {
             shortName
+            longName
+            identificationCode
           }
           ... on Person {
             role

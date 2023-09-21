@@ -32,10 +32,14 @@ reportList (query:{text:"${searchQuery}",pageSize:0}) {
     advisorOrg {
       uuid
       shortName
+      longName
+      identificationCode
     }
     principalOrg {
       uuid
       shortName
+      longName
+      identificationCode
     }
     location {
       uuid
@@ -78,34 +82,85 @@ reportList (query:{text:"${searchQuery}",pageSize:0}) {
 personList (query:{text:"${searchQuery}",pageSize:0}) {
   totalCount
   list {
-    uuid, name, rank, role, emailAddress, avatar(size: 32), position { uuid, name, type, code, location { uuid, name }, organization { uuid, shortName} }
+    uuid
+    name
+    rank
+    role
+    emailAddress
+    avatar(size: 32)
+    position {
+      uuid
+      name
+      type
+      code
+      location {
+        uuid
+        name
+      }
+      organization {
+        uuid
+        shortName
+        longName
+        identificationCode
+      }
+    }
   }
 }
 
 positionList (query:{text:"${searchQuery}",pageSize:0}) {
   totalCount
   list {
-    uuid , name, code, type, status, location { uuid, name }, organization { uuid, shortName}, person { uuid, name, rank, role, avatar(size: 32) }
+    uuid 
+    name
+    code
+    type
+    status
+    location {
+      uuid
+      name
+    }
+    organization {
+      uuid
+      shortName
+      longName
+      identificationCode
+    }
+    person {
+      uuid
+      name
+      rank
+      role
+      avatar(size: 32)
+    }
   }
 }
 
 taskList (query:{text:"${searchQuery}",pageSize:0}) {
   totalCount
   list {
-    uuid, shortName, longName
+    uuid
+    shortName
+    longName
   }
 }
 
 locationList (query:{text:"${searchQuery}",pageSize:0}) {
   totalCount
   list {
-    uuid, name, lat, lng
+    uuid
+    name
+    lat
+    lng
   }
 }
 
 organizationList (query:{text:"${searchQuery}",pageSize:0}) {
   totalCount
   list {
-    uuid, shortName, longName, identificationCode, type
+    uuid
+    shortName
+    longName
+    identificationCode
+    type
   }
 }

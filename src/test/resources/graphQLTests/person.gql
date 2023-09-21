@@ -23,6 +23,8 @@ person(uuid:"${personUuid}") {
     organization {
       uuid
       shortName
+      longName
+      identificationCode
     }
     associatedPositions {
       uuid
@@ -38,6 +40,8 @@ person(uuid:"${personUuid}") {
       organization {
         uuid
         shortName
+        longName
+        identificationCode
       }
     }
   }
@@ -75,6 +79,8 @@ person(uuid:"${personUuid}") {
         }
         ... on Organization {
           shortName
+          longName
+          identificationCode
         }
         ... on Person {
           role

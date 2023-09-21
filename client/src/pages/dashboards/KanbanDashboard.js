@@ -29,6 +29,8 @@ const GQL_GET_TASK_LIST = gql`
         taskedOrganizations {
           uuid
           shortName
+          longName
+          identificationCode
         }
         parentTask {
           uuid

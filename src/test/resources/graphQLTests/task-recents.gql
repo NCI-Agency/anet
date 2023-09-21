@@ -6,6 +6,8 @@ taskList(query: {status: ACTIVE, inMyReports: true, sortBy: RECENT, sortOrder: D
     taskedOrganizations {
       uuid
       shortName
+      longName
+      identificationCode
     }
     customFields
   }

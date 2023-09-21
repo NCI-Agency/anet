@@ -39,6 +39,8 @@ const GQL_GET_PERSON_LIST = gql`
           organization {
             uuid
             shortName
+            longName
+            identificationCode
           }
         }
       }

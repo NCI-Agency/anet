@@ -49,6 +49,8 @@ const GQL_GET_APP_DATA = gql`
         organization {
           uuid
           shortName
+          longName
+          identificationCode
           descendantOrgs {
             uuid
           }
@@ -67,6 +69,8 @@ const GQL_GET_APP_DATA = gql`
           organization {
             uuid
             shortName
+            longName
+            identificationCode
           }
           location {
             uuid
@@ -87,6 +91,7 @@ const GQL_GET_APP_DATA = gql`
               organization {
                 uuid
                 shortName
+                longName
                 identificationCode
               }
               location {
@@ -149,6 +154,8 @@ const GQL_GET_APP_DATA = gql`
       list {
         uuid
         shortName
+        longName
+        identificationCode
       }
     }
 
@@ -163,6 +170,8 @@ const GQL_GET_APP_DATA = gql`
       list {
         uuid
         shortName
+        longName
+        identificationCode
       }
     }
   }

@@ -13,6 +13,8 @@ taskList(query: {pageSize: 0}) {
       organization {
         uuid
         shortName
+        longName
+        identificationCode
       }
       person {
         uuid

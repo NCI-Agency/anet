@@ -22,6 +22,8 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
         organization {
           uuid
           shortName
+          longName
+          identificationCode
         }
         person {
           uuid

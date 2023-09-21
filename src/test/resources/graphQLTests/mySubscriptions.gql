@@ -14,6 +14,8 @@ mySubscriptions(query: {pageSize:0}) {
       }
       ... on Organization {
         shortName
+        longName
+        identificationCode
       }
       ... on Person {
         role

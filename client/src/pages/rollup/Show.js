@@ -57,24 +57,32 @@ const GQL_GET_REPORT_LIST = gql`
         uuid
         state
         advisorOrg {
+          uuid
+          shortName
+          longName
+          identificationCode
+          type
           ascendantOrgs {
             uuid
             shortName
+            longName
+            identificationCode
             type
           }
-          uuid
-          shortName
-          type
         }
         principalOrg {
+          uuid
+          shortName
+          longName
+          identificationCode
+          type
           ascendantOrgs {
             uuid
             shortName
+            longName
+            identificationCode
             type
           }
-          uuid
-          shortName
-          type
         }
       }
     }

@@ -77,6 +77,8 @@ const GQL_GET_REPORT = gql`
         taskedOrganizations {
           uuid
           shortName
+          longName
+          identificationCode
         }
         customFields
       }

@@ -35,6 +35,8 @@ const GQL_GET_MY_SUBSCRIPTION_UPDATES = gql`
           }
           ... on Organization {
             shortName
+            longName
+            identificationCode
           }
           ... on Person {
             role
@@ -66,6 +68,8 @@ const GQL_GET_MY_SUBSCRIPTION_UPDATES = gql`
             }
             ... on Organization {
               shortName
+              longName
+              identificationCode
             }
             ... on Person {
               role

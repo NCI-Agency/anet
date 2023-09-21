@@ -66,6 +66,8 @@ report(uuid:"${reportUuid}") {
       organization {
         uuid
         shortName
+        longName
+        identificationCode
       }
       location {
         uuid
@@ -86,6 +88,8 @@ report(uuid:"${reportUuid}") {
     taskedOrganizations {
       uuid
       shortName
+      longName
+      identificationCode
     }
   }
   comments {
@@ -184,6 +188,8 @@ report(uuid:"${reportUuid}") {
         }
         ... on Organization {
           shortName
+          longName
+          identificationCode
         }
         ... on Person {
           role

@@ -2,11 +2,11 @@ import { expect } from "chai"
 import CreatePosition from "../pages/createNewPosition.page"
 
 const ADMIN_ORG = "ANET Admin"
-const ADMIN_ORG_COMPLETE = "ANET Administrators -"
+const ADMIN_ORG_COMPLETE = "ANET Administrators"
 const ADVISOR_ORG = "EF 2.2"
-const ADVISOR_ORG_COMPLETE = "EF 2.2 -"
+const ADVISOR_ORG_COMPLETE = "EF 2.2"
 const PRINCIPAL_ORG = "MoI"
-const PRINCIPAL_ORG_COMPLETE = "MoI - Ministry of Interior P12345"
+const PRINCIPAL_ORG_COMPLETE = "MoI | Ministry of Interior | P12345"
 const SIMILAR_ADVISOR_POSITION_NAME = "EF 1.1 Advisor for Agriculture"
 
 describe("Create position page", () => {

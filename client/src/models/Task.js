@@ -140,7 +140,7 @@ export default class Task extends Model {
   static autocompleteQuery =
     "uuid shortName longName parentTask { uuid shortName }" +
     " ascendantTasks { uuid shortName parentTask { uuid } }" +
-    " taskedOrganizations { uuid shortName } customFields"
+    " taskedOrganizations { uuid shortName longName identificationCode } customFields"
 
   static autocompleteQueryWithNotes = `${this.autocompleteQuery} ${GRAPHQL_NOTES_FIELDS}`
 

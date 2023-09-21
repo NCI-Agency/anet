@@ -21,6 +21,8 @@ personList(query: {pageSize: 6, status: ACTIVE, inMyReports: true, sortBy: RECEN
       organization {
         uuid
         shortName
+        longName
+        identificationCode
       }
       location {
         uuid
@@ -38,6 +40,8 @@ taskList(query: {pageSize: 6, status: ACTIVE, inMyReports: true, sortBy: RECENT,
     taskedOrganizations {
       uuid
       shortName
+      longName
+      identificationCode
     }
     customFields
   }

@@ -50,10 +50,14 @@ const GQL_GET_REPORT_LIST = gql`
         advisorOrg {
           uuid
           shortName
+          longName
+          identificationCode
         }
         principalOrg {
           uuid
           shortName
+          longName
+          identificationCode
         }
         location {
           uuid
@@ -273,7 +277,8 @@ const ReportSummaryRow = ({ report }) => {
               <LinkTo modelType="Person" model={report.primaryPrincipal} />
               <span>
                 {" "}
-                <LinkTo modelType="Organization" model={report.principalOrg} />
+                (<LinkTo modelType="Organization" model={report.principalOrg} />
+                )
               </span>
             </>
           )}
