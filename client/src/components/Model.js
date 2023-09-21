@@ -615,9 +615,7 @@ export default class Model {
       // No groups defined means: anybody has read access, nobody has write access
       return forReading
     }
-    const userAuthorizationGroupUuids = (
-      user?.position?.authorizationGroups || []
-    ).map(ag => ag.uuid)
+    const userAuthorizationGroupUuids = user?.authorizationGroupUuids ?? []
     return !!authorizationGroupUuids?.some(ag =>
       userAuthorizationGroupUuids.includes(ag)
     )
@@ -963,8 +961,7 @@ export default class Model {
       return true
     }
     // Else user has to be in the authorizationGroups
-    const userAuthGroupUuids =
-      user?.position?.authorizationGroups.map(ag => ag.uuid) || []
+    const userAuthGroupUuids = user?.authorizationGroupUuids ?? []
     const fieldAuthGroupUuids =
       customSensitiveInformationField?.authorizationGroupUuids || []
     return fieldAuthGroupUuids.some(uuid => userAuthGroupUuids.includes(uuid))

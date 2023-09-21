@@ -148,24 +148,6 @@ public final class BatchingUtils {
                 () -> engine.getOrganizationDao().getAdministratingPositions(foreignKeys),
                 dispatcherService),
             dataLoaderOptions));
-    dataLoaderRegistry.register(FkDataLoaderKey.RELATED_OBJECT_APPROVAL_STEPS.toString(),
-        DataLoaderFactory.newDataLoader(
-            (BatchLoader<String, List<ApprovalStep>>) foreignKeys -> CompletableFuture.supplyAsync(
-                () -> engine.getApprovalStepDao().getApprovalSteps(foreignKeys), dispatcherService),
-            dataLoaderOptions));
-    dataLoaderRegistry.register(FkDataLoaderKey.RELATED_OBJECT_PLANNING_APPROVAL_STEPS.toString(),
-        DataLoaderFactory.newDataLoader(
-            (BatchLoader<String, List<ApprovalStep>>) foreignKeys -> CompletableFuture.supplyAsync(
-                () -> engine.getApprovalStepDao().getPlanningApprovalSteps(foreignKeys),
-                dispatcherService),
-            dataLoaderOptions));
-    dataLoaderRegistry.register(
-        FkDataLoaderKey.RELATED_OBJECT_CUSTOM_SENSITIVE_INFORMATION.toString(),
-        DataLoaderFactory.newDataLoader(
-            (BatchLoader<String, List<CustomSensitiveInformation>>) foreignKeys -> CompletableFuture
-                .supplyAsync(() -> engine.getCustomSensitiveInformationDao()
-                    .getCustomSensitiveInformation(foreignKeys), dispatcherService),
-            dataLoaderOptions));
     dataLoaderRegistry.register(IdDataLoaderKey.PEOPLE.toString(),
         DataLoaderFactory.newDataLoader(
             (BatchLoader<String, Person>) keys -> CompletableFuture
@@ -204,14 +186,6 @@ public final class BatchingUtils {
                 () -> engine.getPositionDao().getAssociatedPositionsForPosition(foreignKeys),
                 dispatcherService),
             dataLoaderOptions));
-    dataLoaderRegistry
-        .register(FkDataLoaderKey.POSITION_AUTHORIZATION_GROUPS.toString(),
-            DataLoaderFactory
-                .newDataLoader(
-                    (BatchLoader<String, List<AuthorizationGroup>>) foreignKeys -> CompletableFuture
-                        .supplyAsync(() -> engine.getAuthorizationGroupDao()
-                            .getAuthorizationGroups(foreignKeys), dispatcherService),
-                    dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.POSITION_CURRENT_POSITION_FOR_PERSON.toString(),
         DataLoaderFactory.newDataLoader(
             (BatchLoader<String, List<Position>>) foreignKeys -> CompletableFuture.supplyAsync(
@@ -223,6 +197,24 @@ public final class BatchingUtils {
             (BatchLoader<String, List<PersonPositionHistory>>) foreignKeys -> CompletableFuture
                 .supplyAsync(() -> engine.getPositionDao().getPersonPositionHistory(foreignKeys),
                     dispatcherService),
+            dataLoaderOptions));
+    dataLoaderRegistry.register(FkDataLoaderKey.RELATED_OBJECT_APPROVAL_STEPS.toString(),
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, List<ApprovalStep>>) foreignKeys -> CompletableFuture.supplyAsync(
+                () -> engine.getApprovalStepDao().getApprovalSteps(foreignKeys), dispatcherService),
+            dataLoaderOptions));
+    dataLoaderRegistry.register(
+        FkDataLoaderKey.RELATED_OBJECT_CUSTOM_SENSITIVE_INFORMATION.toString(),
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, List<CustomSensitiveInformation>>) foreignKeys -> CompletableFuture
+                .supplyAsync(() -> engine.getCustomSensitiveInformationDao()
+                    .getCustomSensitiveInformation(foreignKeys), dispatcherService),
+            dataLoaderOptions));
+    dataLoaderRegistry.register(FkDataLoaderKey.RELATED_OBJECT_PLANNING_APPROVAL_STEPS.toString(),
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, List<ApprovalStep>>) foreignKeys -> CompletableFuture.supplyAsync(
+                () -> engine.getApprovalStepDao().getPlanningApprovalSteps(foreignKeys),
+                dispatcherService),
             dataLoaderOptions));
     dataLoaderRegistry.register(IdDataLoaderKey.REPORTS.toString(),
         DataLoaderFactory.newDataLoader(

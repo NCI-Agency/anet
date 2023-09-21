@@ -18,7 +18,6 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.GenericRelatedObject;
 import mil.dds.anet.beans.Note;
 import mil.dds.anet.beans.Note.NoteType;
@@ -146,26 +145,18 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
   public CompletableFuture<List<Note>> getNotesForRelatedObject(
       @GraphQLRootContext Map<String, Object> context, String relatedObjectUuid) {
     final Person user = DaoUtils.getUserFromContext(context);
-    final Position position = DaoUtils.getPosition(user);
-    final CompletableFuture<List<AuthorizationGroup>> authorizationGroupsFuture =
-        (user == null || position == null)
-            ? CompletableFuture.completedFuture(Collections.emptyList())
-            : position.loadAuthorizationGroups(context);
-    return authorizationGroupsFuture.thenCompose(authorizationGroups -> {
-      final Set<String> authorizationGroupUuids =
-          authorizationGroups.stream().map(AbstractAnetBean::getUuid).collect(Collectors.toSet());
-      return new ForeignKeyFetcher<Note>()
-          .load(context, FkDataLoaderKey.NOTE_RELATED_OBJECT_NOTES, relatedObjectUuid)
-          .thenApply(notes -> notes.stream().filter(note -> {
-            try {
-              return hasNotePermission(user, authorizationGroupUuids, note, note.getAuthorUuid(),
-                  UpdateType.READ);
-            } catch (Exception e) {
-              // something wrong with the note, just filter it out
-              return false;
-            }
-          }).toList());
-    });
+    final Set<String> authorizationGroupUuids = DaoUtils.getAuthorizationGroupUuids(user);
+    return new ForeignKeyFetcher<Note>()
+        .load(context, FkDataLoaderKey.NOTE_RELATED_OBJECT_NOTES, relatedObjectUuid)
+        .thenApply(notes -> notes.stream().filter(note -> {
+          try {
+            return hasNotePermission(user, authorizationGroupUuids, note, note.getAuthorUuid(),
+                UpdateType.READ);
+          } catch (Exception e) {
+            // something wrong with the note, just filter it out
+            return false;
+          }
+        }).toList());
   }
 
   static class NotesBatcher extends ForeignKeyBatcher<Note> {

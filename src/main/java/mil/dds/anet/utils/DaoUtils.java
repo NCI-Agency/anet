@@ -15,9 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.CustomSensitiveInformation;
 import mil.dds.anet.beans.Note;
 import mil.dds.anet.beans.Person;
@@ -143,13 +141,10 @@ public class DaoUtils {
   }
 
   public static Set<String> getAuthorizationGroupUuids(final Person user) {
-    final Position position = getPosition(user);
-    if (user == null || position == null) {
+    if (user == null) {
       return Collections.emptySet();
     }
-    final List<AuthorizationGroup> authorizationGroups =
-        position.loadAuthorizationGroups(AnetObjectEngine.getInstance().getContext()).join();
-    return authorizationGroups.stream().map(AbstractAnetBean::getUuid).collect(Collectors.toSet());
+    return user.loadAuthorizationGroupUuids();
   }
 
   public static boolean isUserInAuthorizationGroup(final Set<String> userAuthorizationGroupUuids,
@@ -201,7 +196,6 @@ public class DaoUtils {
     final String keyPath =
         String.format("%1$s.authorizationGroupUuids.%2$s", assessmentKey, accessType);
     return (List<String>) AnetObjectEngine.getConfiguration().getDictionaryEntry(keyPath);
-
   }
 
   public static boolean isInAuthorizationGroup(final Set<String> userAuthorizationGroupUuids,

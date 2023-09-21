@@ -562,6 +562,7 @@ type Person {
   attachments: [Attachment]
   attendedReports(query: ReportSearchQueryInput): AnetBeanList_Report
   authoredReports(query: ReportSearchQueryInput): AnetBeanList_Report
+  authorizationGroupUuids: [String]
   avatar(size: Int = 256): Base64String
   biography: String
   code: String
@@ -669,7 +670,6 @@ enum PersonSearchSortBy {
 type Position {
   associatedPositions: [Position]
   attachments: [Attachment]
-  authorizationGroups: [AuthorizationGroup]
   code: String
   createdAt: Instant
   customFields: String
@@ -910,6 +910,7 @@ type ReportPerson {
   attendee: Boolean!
   author: Boolean!
   authoredReports(query: ReportSearchQueryInput): AnetBeanList_Report
+  authorizationGroupUuids: [String]
   avatar(size: Int = 256): Base64String
   biography: String
   code: String

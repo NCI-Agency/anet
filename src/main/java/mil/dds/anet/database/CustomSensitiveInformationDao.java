@@ -3,14 +3,11 @@ package mil.dds.anet.database;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.CustomSensitiveInformation;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
@@ -86,21 +83,13 @@ public class CustomSensitiveInformationDao
   public CompletableFuture<List<CustomSensitiveInformation>> getCustomSensitiveInformationForRelatedObject(
       @GraphQLRootContext Map<String, Object> context, String relatedObjectUuid) {
     final Person user = DaoUtils.getUserFromContext(context);
-    final Position position = DaoUtils.getPosition(user);
-    final CompletableFuture<List<AuthorizationGroup>> authorizationGroupsFuture =
-        (user == null || position == null)
-            ? CompletableFuture.completedFuture(Collections.emptyList())
-            : position.loadAuthorizationGroups(context);
-    return authorizationGroupsFuture.thenCompose(authorizationGroups -> {
-      final Set<String> authorizationGroupUuids =
-          authorizationGroups.stream().map(ag -> ag.getUuid()).collect(Collectors.toSet());
-      return new ForeignKeyFetcher<CustomSensitiveInformation>()
-          .load(context, FkDataLoaderKey.RELATED_OBJECT_CUSTOM_SENSITIVE_INFORMATION,
-              relatedObjectUuid)
-          .thenApply(csiList -> csiList.stream().filter(
-              csi -> hasCustomSensitiveInformationAuthorization(user, authorizationGroupUuids, csi))
-              .collect(Collectors.toList()));
-    });
+    final Set<String> authorizationGroupUuids = DaoUtils.getAuthorizationGroupUuids(user);
+    return new ForeignKeyFetcher<CustomSensitiveInformation>()
+        .load(context, FkDataLoaderKey.RELATED_OBJECT_CUSTOM_SENSITIVE_INFORMATION,
+            relatedObjectUuid)
+        .thenApply(csiList -> csiList.stream().filter(
+            csi -> hasCustomSensitiveInformationAuthorization(user, authorizationGroupUuids, csi))
+            .toList());
   }
 
   static class SensitiveInformationBatcher extends ForeignKeyBatcher<CustomSensitiveInformation> {

@@ -38,6 +38,7 @@ const GQL_GET_APP_DATA = gql`
       pendingVerification
       avatar(size: 32)
       code
+      authorizationGroupUuids
       position {
         uuid
         name
@@ -128,12 +129,6 @@ const GQL_GET_APP_DATA = gql`
           descendantOrgs {
             uuid
           }
-        }
-        authorizationGroups {
-          uuid
-          name
-          description
-          status
         }
       }
     }

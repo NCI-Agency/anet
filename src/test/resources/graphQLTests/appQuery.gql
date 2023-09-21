@@ -8,6 +8,7 @@ me {
   pendingVerification
   avatar(size: 32)
   code
+  authorizationGroupUuids
   position {
     uuid
     name
@@ -105,12 +106,6 @@ me {
         type
         text
       }
-    }
-    authorizationGroups {
-      uuid
-      name
-      description
-      status
     }
   }
 }

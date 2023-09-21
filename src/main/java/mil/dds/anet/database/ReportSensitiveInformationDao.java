@@ -3,7 +3,7 @@ package mil.dds.anet.database;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
@@ -15,9 +15,8 @@ import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.utils.Utils;
+import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.ForeignKeyFetcher;
-import org.jdbi.v3.core.mapper.MapMapper;
-import org.jdbi.v3.core.statement.Query;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public class ReportSensitiveInformationDao
@@ -153,19 +152,12 @@ public class ReportSensitiveInformationDao
     }
 
     // Check authorization groups
-    final Query query = getDbHandle()
-        .createQuery("/* checkReportAuthorization */ SELECT COUNT(*) AS count"
-            + " FROM \"reportAuthorizationGroups\" rag"
-            + " LEFT JOIN \"authorizationGroupRelatedObjects\" agro"
-            + " ON agro.\"authorizationGroupUuid\" = rag.\"authorizationGroupUuid\""
-            + " LEFT JOIN positions p ON p.uuid = agro.\"relatedObjectUuid\""
-            + " WHERE rag.\"reportUuid\" = :reportUuid"
-            + " AND agro.\"relatedObjectType\" = :relatedObjectTypePosition"
-            + " AND p.\"currentPersonUuid\" = :userUuid")
-        .bind("reportUuid", reportUuid).bind("relatedObjectTypePosition", PositionDao.TABLE_NAME)
-        .bind("userUuid", userUuid);
-    final Optional<Map<String, Object>> result = query.map(new MapMapper(false)).findFirst();
-    return result.isPresent() && ((Number) result.get().get("count")).intValue() > 0;
+    final ReportDao reportDao = AnetObjectEngine.getInstance().getReportDao();
+    final List<String> authorizationGroupUuids =
+        reportDao.getAuthorizationGroupsForReport(reportUuid).stream()
+            .map(AbstractAnetBean::getUuid).toList();
+    final Set<String> userAuthorizationGroupUuids = DaoUtils.getAuthorizationGroupUuids(user);
+    return DaoUtils.isInAuthorizationGroup(userAuthorizationGroupUuids, authorizationGroupUuids);
   }
 
 }

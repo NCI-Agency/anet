@@ -3,11 +3,13 @@ package mil.dds.anet.database;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.GenericRelatedObject;
 import mil.dds.anet.beans.Position;
+import mil.dds.anet.beans.WithStatus.Status;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AuthorizationGroupSearchQuery;
 import mil.dds.anet.database.mappers.AuthorizationGroupMapper;
@@ -172,33 +174,34 @@ public class AuthorizationGroupDao
         .runSearch(query);
   }
 
-  static class AuthorizationGroupsBatcher extends ForeignKeyBatcher<AuthorizationGroup> {
-    private static final String sql = "/* batch.getAuthorizationGroupsByPosition */ SELECT "
-        + AUTHORIZATION_GROUP_FIELDS
-        + ", \"authorizationGroupRelatedObjects\".\"relatedObjectUuid\" FROM \"authorizationGroupRelatedObjects\""
-        + " INNER JOIN \"authorizationGroups\" ON \"authorizationGroups\".uuid"
-        + " = \"authorizationGroupRelatedObjects\".\"authorizationGroupUuid\""
-        + " WHERE \"authorizationGroupRelatedObjects\".\"relatedObjectType\" = '"
-        + PositionDao.TABLE_NAME + "'"
-        + " AND \"authorizationGroupRelatedObjects\".\"relatedObjectUuid\" IN ( <foreignKeys> )"
-        + " ORDER BY \"authorizationGroupRelatedObjects\".\"relatedObjectUuid\","
-        + " \"authorizationGroups\".name, \"authorizationGroups\".uuid";
-
-    public AuthorizationGroupsBatcher() {
-      super(sql, "foreignKeys", new AuthorizationGroupMapper(), "relatedObjectUuid");
-    }
-  }
-
-  public List<List<AuthorizationGroup>> getAuthorizationGroups(List<String> foreignKeys) {
-    final ForeignKeyBatcher<AuthorizationGroup> authorizationGroupsBatcher =
-        AnetObjectEngine.getInstance().getInjector().getInstance(AuthorizationGroupsBatcher.class);
-    return authorizationGroupsBatcher.getByForeignKeys(foreignKeys);
-  }
-
-  public CompletableFuture<List<AuthorizationGroup>> getAuthorizationGroupsForPosition(
-      Map<String, Object> context, String positionUuid) {
-    return new ForeignKeyFetcher<AuthorizationGroup>().load(context,
-        FkDataLoaderKey.POSITION_AUTHORIZATION_GROUPS, positionUuid);
+  @InTransaction
+  public Set<String> getAuthorizationGroupUuidsForPerson(String personUuid) {
+    final StringBuilder sql = new StringBuilder(
+        "SELECT DISTINCT \"authorizationGroupUuid\" FROM \"authorizationGroupRelatedObjects\""
+            + ", \"authorizationGroups\", positions, parent_orgs");
+    // Only active groups
+    sql.append(" WHERE \"authorizationGroups\".status = :status");
+    // Check for person
+    sql.append(" AND ( (\"relatedObjectType\" = '" + PersonDao.TABLE_NAME
+        + "' AND \"relatedObjectUuid\" = :personUuid)");
+    // Else
+    sql.append(" OR (positions.\"currentPersonUuid\" = :personUuid AND (");
+    // Check for position
+    sql.append(" (\"relatedObjectType\" = '" + PositionDao.TABLE_NAME
+        + "' AND \"relatedObjectUuid\" = positions.uuid)");
+    // Recursively check for user's organization (and transitive parents thereof)
+    sql.insert(0,
+        "WITH RECURSIVE parent_orgs(uuid, parent_uuid) AS"
+            + " (SELECT uuid, uuid as parent_uuid FROM organizations"
+            + " UNION ALL SELECT pt.uuid, bt.\"parentOrgUuid\" FROM organizations bt"
+            + " INNER JOIN parent_orgs pt ON bt.uuid = pt.parent_uuid) ");
+    sql.append(" OR (\"relatedObjectType\" = '" + OrganizationDao.TABLE_NAME
+        + "' AND \"relatedObjectUuid\" = parent_orgs.parent_uuid"
+        + " AND positions.\"organizationUuid\" = parent_orgs.uuid)");
+    sql.append(" )) )");
+    sql.insert(0, "/* batch.getAuthorizationGroupsByPerson */ ");
+    return getDbHandle().createQuery(sql).bind("status", DaoUtils.getEnumId(Status.ACTIVE))
+        .bind("personUuid", personUuid).mapTo(String.class).set();
   }
 
 }
