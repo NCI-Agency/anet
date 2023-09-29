@@ -85,12 +85,7 @@ const PeriodicAssessmentResultsTable = ({
     return null
   }
   const { recurrence, numberOfPeriods } = periodsDetails
-  const periodsConfig = getPeriodsConfig(
-    recurrence,
-    numberOfPeriods,
-    offset,
-    true
-  )
+  const periodsConfig = getPeriodsConfig(recurrence, numberOfPeriods, offset)
   if (_isEmpty(periodsConfig?.periods)) {
     return null
   }
