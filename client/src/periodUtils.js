@@ -153,14 +153,21 @@ export const PERIOD_FACTORIES = {
   })
 }
 
-export const getPeriodsConfig = (recurrence, numberOfPeriods, offset) => {
+export const getPeriodsConfig = (
+  recurrence,
+  numberOfPeriods,
+  offset,
+  forAssessments = false
+) => {
   const now = moment()
   const periods = []
   for (let i = numberOfPeriods - 1; i >= 0; i--) {
     const periodDetails = PERIOD_FACTORIES[recurrence](now, offset + i)
 
-    // always allow assessments for all periods
-    periodDetails.allowNewAssessments = true
+    if (forAssessments) {
+      // allow new assessments
+      periodDetails.allowNewAssessments = true
+    }
 
     periods.push(periodDetails)
   }

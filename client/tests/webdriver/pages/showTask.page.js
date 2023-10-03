@@ -76,7 +76,7 @@ class ShowTask extends Page {
 
   async getShownAssessmentPanel(assessmentKey, recurrence) {
     return (await this.getAssessmentsTable(assessmentKey, recurrence)).$(
-      "tbody tr:last-child td:first-child .card"
+      "tbody tr:nth-child(2) td:first-child .card"
     )
   }
 

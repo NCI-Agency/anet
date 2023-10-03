@@ -107,7 +107,12 @@ const InstantAssessmentResultsTable = ({
     return null
   }
   const { recurrence, numberOfPeriods } = periodsDetails
-  const periodsConfig = getPeriodsConfig(recurrence, numberOfPeriods, offset)
+  const periodsConfig = getPeriodsConfig(
+    recurrence,
+    numberOfPeriods,
+    offset,
+    true
+  )
   if (_isEmpty(periodsConfig?.periods)) {
     return null
   }
