@@ -286,7 +286,7 @@ fields:
 
   attachment:
     featureDisabled: false
-    disabled: false
+    restrictToAdmins: false
     fileName: Filename
     caption:
       label: Caption
@@ -303,14 +303,11 @@ fields:
     mimeTypes:
       - application/pdf
       - image/jpeg
-      - image/jpg
       - image/png
       - image/webp
       - text/plain
 
   report:
-    attachments:
-      label: Attachments
     canUnpublishReports: true
     intent: Engagement purpose
     atmosphere: Atmospherics

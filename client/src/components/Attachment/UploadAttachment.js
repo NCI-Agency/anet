@@ -178,7 +178,7 @@ UploadAttachment.propTypes = {
   edit: PropTypes.bool,
   relatedObjectType: PropTypes.string.isRequired,
   relatedObjectUuid: PropTypes.string,
-  saveRelatedObject: PropTypes.func.isRequired
+  saveRelatedObject: PropTypes.func
 }
 
 export default UploadAttachment

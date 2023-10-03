@@ -3,6 +3,7 @@ import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
 import AppContext from "components/AppContext"
 import Approvals from "components/approvals/Approvals"
+import AttachmentCard from "components/Attachment/AttachmentCard"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -35,6 +36,14 @@ import utils from "utils"
 const GQL_GET_LOCATION = gql`
   query($uuid: String!) {
     location(uuid: $uuid) {
+      attachments {
+        uuid
+        fileName
+        contentLength
+        mimeType
+        description
+        classification
+      }
       ${Location.allFieldsQuery}
     }
   }
@@ -176,6 +185,24 @@ const LocationShow = ({ pageDispatchers }) => {
                     }
                   />
                 )}
+
+                <Field
+                  name="attachments"
+                  label="Attachments"
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={
+                    <div className="attachment-card-list">
+                      {location.attachments.map((attachment, index) => (
+                        <AttachmentCard
+                          key={index}
+                          attachment={attachment}
+                          index={index}
+                          edit={false}
+                        />
+                      ))}
+                    </div>
+                  }
+                />
               </Fieldset>
 
               {Settings.fields.location.customFields && (

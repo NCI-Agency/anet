@@ -88,7 +88,7 @@ const AttachmentImage = ({
 }) => {
   const image = (
     <div
-      className="image-preview info-show card-image attachment-image h-100"
+      className="image-preview info-show card-image attachment-image"
       style={{
         backgroundSize,
         backgroundImage: `url(${backgroundImage})`
@@ -97,7 +97,7 @@ const AttachmentImage = ({
   )
   return (
     <div
-      className={classNames("img-preview", {
+      className={classNames("img-container", {
         "img-hover-zoom": !contentMissing
       })}
     >
@@ -188,13 +188,8 @@ const AttachmentShow = ({ pageDispatchers }) => {
                 action={action}
               />
               <Fieldset>
-                <div style={{ display: "flex" }}>
-                  <Col
-                    id="attachmentImage"
-                    xs={12}
-                    sm={3}
-                    className="label-align"
-                  >
+                <div className="attachment-show" style={{ display: "flex" }}>
+                  <Col xs={12} sm={3} className="attachment-column label-align">
                     <AttachmentImage
                       uuid={attachment.uuid}
                       contentMissing={contentMissing}
@@ -202,18 +197,11 @@ const AttachmentShow = ({ pageDispatchers }) => {
                       backgroundImage={backgroundImage}
                     />
                   </Col>
-                  <Col id="attachmentDetails" xs={12} sm={3} lg={8}>
+                  <Col className="attachment-details" xs={12} sm={3} lg={8}>
                     <Field
                       name="fileName"
                       label={Settings.fields.attachment.fileName}
                       component={FieldHelper.ReadonlyField}
-                    />
-                    <Field
-                      name="contentLength"
-                      component={FieldHelper.ReadonlyField}
-                      humanValue={utils.humanReadableFileSize(
-                        attachment.contentLength
-                      )}
                     />
                     <Field
                       name="owner"
@@ -223,16 +211,15 @@ const AttachmentShow = ({ pageDispatchers }) => {
                       }
                     />
                     <Field
-                      name="description"
-                      label={Settings.fields.attachment.description}
-                      component={FieldHelper.ReadonlyField}
-                      humanValue={
-                        <RichTextEditor readOnly value={values.description} />
-                      }
-                    />
-                    <Field
                       name="mimeType"
                       component={FieldHelper.ReadonlyField}
+                    />
+                    <Field
+                      name="contentLength"
+                      component={FieldHelper.ReadonlyField}
+                      humanValue={utils.humanReadableFileSize(
+                        attachment.contentLength
+                      )}
                     />
                     <Field
                       name="classification"
@@ -247,6 +234,14 @@ const AttachmentShow = ({ pageDispatchers }) => {
                         <AttachmentRelatedObjectsTable
                           relatedObjects={values.attachmentRelatedObjects}
                         />
+                      }
+                    />
+                    <Field
+                      name="description"
+                      label={Settings.fields.attachment.description}
+                      component={FieldHelper.ReadonlyField}
+                      humanValue={
+                        <RichTextEditor readOnly value={values.description} />
                       }
                     />
                   </Col>

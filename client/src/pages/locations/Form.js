@@ -4,6 +4,7 @@ import { IconNames } from "@blueprintjs/icons"
 import API from "api"
 import AppContext from "components/AppContext"
 import ApprovalsDefinition from "components/approvals/ApprovalsDefinition"
+import UploadAttachment from "components/Attachment/UploadAttachment"
 import {
   CustomFieldsContainer,
   customFieldsJSONString
@@ -18,7 +19,7 @@ import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
 import RichTextEditor from "components/RichTextEditor"
 import SimilarObjectsModal from "components/SimilarObjectsModal"
-import { FastField, Form, Formik } from "formik"
+import { FastField, Field, Form, Formik } from "formik"
 import { convertLatLngToMGRS, parseCoordinate } from "geoUtils"
 import _escape from "lodash/escape"
 import _isEqual from "lodash/isEqual"
@@ -75,7 +76,6 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
       label: "Inactive"
     }
   ]
-
   const approversFilters = {
     allAdvisorPositions: {
       label: "All advisor positions",
@@ -155,6 +155,7 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
           lng: values.lng,
           displayedCoordinate: values.displayedCoordinate
         }
+
         return (
           <div>
             <NavigationWarning isBlocking={dirty && !isSubmitting} />
@@ -240,6 +241,24 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
                   }}
                   widget={<RichTextEditor className="description" />}
                 />
+
+                {edit && (
+                  <Field
+                    name="uploadAttachments"
+                    label="Attachments"
+                    component={FieldHelper.SpecialField}
+                    widget={
+                      <UploadAttachment
+                        edit={edit}
+                        relatedObjectType={Location.relatedObjectType}
+                        relatedObjectUuid={values.uuid}
+                      />
+                    }
+                    onHandleBlur={() => {
+                      setFieldTouched("uploadAttachments", true, false)
+                    }}
+                  />
+                )}
               </Fieldset>
 
               <h3>Drag the marker below to set the location</h3>

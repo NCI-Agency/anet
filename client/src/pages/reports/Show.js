@@ -678,16 +678,10 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                 {!Settings.fields.attachment.featureDisabled && (
                   <Field
                     name="attachments"
-                    label={Settings.fields.report.attachments.label}
+                    label="Attachments"
                     component={FieldHelper.ReadonlyField}
                     humanValue={
-                      <div
-                        id="attachmentCardList"
-                        style={{
-                          display:
-                            report.attachments.length > 1 ? "flex" : "block"
-                        }}
-                      >
+                      <div className="attachment-card-list">
                         {report.attachments.map((attachment, index) => (
                           <AttachmentCard
                             key={index}

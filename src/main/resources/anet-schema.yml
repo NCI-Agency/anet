@@ -524,16 +524,16 @@ properties:
       attachment:
         type: object
         additionalProperties: false
-        required: [featureDisabled, disabled, fileName, caption, description, classification]
+        required: [featureDisabled, restrictToAdmins, fileName, caption, description, classification]
         properties:
           featureDisabled:
             type: boolean
             title: Whether attachments are enabled
             description: Used to enable/disable attachments
-          disabled:
+          restrictToAdmins:
             type: boolean
-            title: Whether users can upload attachments
-            description: Used for restricting uploading functionality for all users
+            title: Whether the attachment functionality is restricted to admins
+            description: Used for restricting attachment functionality to admins
           fileName:
             type: string
             title: The label for the filename of an attachment
@@ -556,16 +556,6 @@ properties:
         additionalProperties: false
         required: [intent, atmosphere, atmosphereDetails, cancelled, nextSteps, reportText]
         properties:
-          attachments:
-            type: object
-            additionalProperties: false
-            required: [label]
-            properties:
-              label:
-                type: string
-                title: The label of the attachments
-            title: Whether reports have attachments
-            description: Used for attachments in reports
           canUnpublishReports:
             type: boolean
             default: false

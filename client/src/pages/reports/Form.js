@@ -920,8 +920,8 @@ const ReportForm = ({
                 {!Settings.fields.attachment.featureDisabled && (
                   <Field
                     name="uploadAttachments"
+                    label="Attachments"
                     component={FieldHelper.SpecialField}
-                    label={Settings.fields.report.attachments.label}
                     widget={
                       <UploadAttachment
                         edit={edit}

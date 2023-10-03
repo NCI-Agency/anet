@@ -45,7 +45,6 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
   const canEdit =
     currentUser.isAdmin() || currentUser.uuid === initialValues.author.uuid
   const classifications = Settings.fields.attachment.classification.choices
-
   const classificationButtons = Object.keys(classifications).map(key => ({
     value: key,
     label: classifications[key]
@@ -90,17 +89,17 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
               <Fieldset>
-                <div style={{ display: "flex" }}>
-                  <Col xs={12} sm={3} className="label-align">
+                <div className="attachment-show" style={{ display: "flex" }}>
+                  <Col xs={12} sm={3} className="attachment-column label-align">
                     <div
-                      className="image-preview info-show card-image attachment-image h-100"
+                      className="image-preview info-show card-image attachment-image"
                       style={{
                         backgroundSize,
                         backgroundImage: `url(${backgroundImage})`
                       }}
                     />
                   </Col>
-                  <Col xs={12} sm={3} lg={10}>
+                  <Col className="attachment-details" xs={12} sm={3} lg={10}>
                     <FastField
                       name="caption"
                       label={Settings.fields.attachment.caption.label}
@@ -115,6 +114,48 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
                       label={Settings.fields.attachment.fileName}
                       component={FieldHelper.ReadonlyField}
                     />
+
+                    <Field
+                      name="owner"
+                      component={FieldHelper.ReadonlyField}
+                      humanValue={
+                        <LinkTo modelType="Person" model={values.author} />
+                      }
+                    />
+
+                    <Field
+                      name="mimeType"
+                      component={FieldHelper.ReadonlyField}
+                    />
+
+                    {canEdit ? (
+                      <FastField
+                        name="classification"
+                        label={Settings.fields.attachment.classification.label}
+                        component={FieldHelper.RadioButtonToggleGroupField}
+                        buttons={classificationButtons}
+                        onChange={value =>
+                          setFieldValue("classification", value)}
+                      />
+                    ) : (
+                      <Field
+                        name="classification"
+                        label={Settings.fields.attachment.classification.label}
+                        component={FieldHelper.ReadonlyField}
+                      />
+                    )}
+
+                    {edit && (
+                      <Field
+                        name="used in"
+                        component={FieldHelper.ReadonlyField}
+                        humanValue={
+                          <AttachmentRelatedObjectsTable
+                            relatedObjects={values.attachmentRelatedObjects}
+                          />
+                        }
+                      />
+                    )}
 
                     <FastField
                       name="description"
@@ -132,45 +173,6 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
                       }}
                       widget={<RichTextEditor className="description" />}
                     />
-
-                    <Field
-                      name="owner"
-                      component={FieldHelper.ReadonlyField}
-                      humanValue={
-                        <LinkTo modelType="Person" model={values.author} />
-                      }
-                    />
-                    <Field
-                      name="mimeType"
-                      component={FieldHelper.ReadonlyField}
-                    />
-                    {canEdit ? (
-                      <FastField
-                        name="classification"
-                        label={Settings.fields.attachment.classification.label}
-                        component={FieldHelper.RadioButtonToggleGroupField}
-                        buttons={classificationButtons}
-                        onChange={value =>
-                          setFieldValue("classification", value)}
-                      />
-                    ) : (
-                      <Field
-                        name="classification"
-                        label={Settings.fields.attachment.classification.label}
-                        component={FieldHelper.ReadonlyField}
-                      />
-                    )}
-                    {edit && (
-                      <Field
-                        name="used in"
-                        component={FieldHelper.ReadonlyField}
-                        humanValue={
-                          <AttachmentRelatedObjectsTable
-                            relatedObjects={values.attachmentRelatedObjects}
-                          />
-                        }
-                      />
-                    )}
                   </Col>
                 </div>
               </Fieldset>
@@ -226,7 +228,7 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
   }
 
   function onSubmit(values, form) {
-    return save(values, form)
+    return save(values)
       .then(response => onSubmitSuccess(response, values, form))
       .catch(error => {
         setError(error)
@@ -253,9 +255,14 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
     })
   }
 
-  function save(values, form) {
-    const attachment = Attachment.filterClientSideFields(values, "content")
-    attachment.classification = values.classification
+  function save(values) {
+    const attachment = Attachment.filterClientSideFields(values)
+    attachment.attachmentRelatedObjects = values.attachmentRelatedObjects.map(
+      ({ relatedObjectType, relatedObjectUuid }) => ({
+        relatedObjectType,
+        relatedObjectUuid
+      })
+    )
     return API.mutation(edit ? GQL_UPDATE_ATTACHMENT : GQL_CREATE_ATTACHMENT, {
       attachment
     })
