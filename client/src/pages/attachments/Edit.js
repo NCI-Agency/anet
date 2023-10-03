@@ -33,11 +33,13 @@ const GQL_GET_ATTACHMENT = gql`
           }
           ... on Organization {
             shortName
+            longName
+            identificationCode
           }
           ... on Person {
-            name
-            rank
             role
+            rank
+            name
             avatar(size: 32)
           }
           ... on Position {
@@ -49,6 +51,7 @@ const GQL_GET_ATTACHMENT = gql`
           }
           ... on Task {
             shortName
+            longName
           }
         }
         relatedObjectUuid
