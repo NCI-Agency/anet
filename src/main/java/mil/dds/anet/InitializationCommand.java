@@ -105,6 +105,7 @@ public class InitializationCommand extends EnvironmentCommand<AnetConfiguration>
     adminPos.setOrganizationUuid(adminOrg.getUuid());
     adminPos.setName(namespace.getString("adminPosName"));
     adminPos.setStatus(Position.Status.ACTIVE);
+    adminPos.setRole(Position.PositionRole.MEMBER);
     adminPos = engine.getPositionDao().insert(adminPos);
 
     // Create admin user
