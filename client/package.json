@@ -54,7 +54,7 @@
     "browserstack-local": "1.5.4",
     "chai": "4.3.8",
     "chromatic": "7.2.0",
-    "chromedriver": "116.0.0",
+    "chromedriver": "117.0.3",
     "circular-dependency-plugin": "5.2.2",
     "clean-webpack-plugin": "4.0.0",
     "colors": "1.4.0",
