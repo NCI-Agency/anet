@@ -9,6 +9,7 @@ import {
 import { RetryLink } from "@apollo/client/link/retry"
 import { keycloak } from "keycloak"
 import _isEmpty from "lodash/isEmpty"
+import { toast } from "react-toastify"
 
 const GRAPHQL_ENDPOINT = "/graphql"
 const LOGGING_ENDPOINT = "/api/logging/log"
@@ -103,7 +104,17 @@ const API = {
         error = response.networkError.result.errors[0].message
       } else if (result.status === 500) {
         error =
-          "An Error occured! Please contact the administrator and let them know what you were doing to get this error"
+          "An error occurred! Please contact the administrator and let them know what you were doing to get this error"
+      }
+      // In case of 503's, show a toast warning
+      if (result.status === 503) {
+        toast.warning(
+          "Some requests could not be completed due to temporary service unavailability.",
+          {
+            toastId: "503-message",
+            autoClose: false
+          }
+        )
       }
     }
     // Try to pick the most specific message
