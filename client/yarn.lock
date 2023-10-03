@@ -12179,10 +12179,10 @@ methods@~1.1.2:
   resolved "https://registry.yarnpkg.com/methods/-/methods-1.1.2.tgz#5529a4d67654134edcc5266656835b0f851afcee"
   integrity sha512-iclAHeNqNm68zFtnZ0e+1L2yUIdvzNoauKU4WBA3VvH/vPFieF7qfRlwUZU+DA9P9bPXIS90ulxoUoCH23sV2w==
 
-mgrs@1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/mgrs/-/mgrs-1.0.0.tgz#fb91588e78c90025672395cb40b25f7cd6ad1829"
-  integrity sha512-awNbTOqCxK1DBGjalK3xqWIstBZgN6fxsMSiXLs9/spqWkF2pAhb2rrYCFSsr1/tT7PhcDGjZndG8SWYn0byYA==
+mgrs@2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/mgrs/-/mgrs-2.0.0.tgz#7f2fecba44659789026f67f3cf9db7a26ba1ef58"
+  integrity sha512-dZcHEp/5onp3XN9A/ZSTVB46uhvZPaoepJa1col3K+ZnkrSeY++4AXXHUEplev5pk7BYYorXaZluHHn0GsZK1Q==
 
 micromatch@^4.0.2, micromatch@^4.0.4, micromatch@^4.0.5:
   version "4.0.5"
