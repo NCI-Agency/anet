@@ -9,5 +9,7 @@ module.exports = {
   setupFiles: ["<rootDir>/config/polyfills.js"],
   setupFilesAfterEnv: ["<rootDir>/jest-setup.js"],
   testEnvironment: "jsdom",
-  transformIgnorePatterns: ["<rootDir>/node_modules/(?!(jsonpath-plus)/)"]
+  transformIgnorePatterns: [
+    "<rootDir>/node_modules/(?!(jsonpath-plus|title-case)/)"
+  ]
 }
