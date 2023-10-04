@@ -9,13 +9,4 @@
  * in the user guide at https://docs.gradle.org/2.10/userguide/multi_project_builds.html
  */
 
-pluginManagement {
-  repositories {
-    mavenCentral()
-    gradlePluginPortal()
-    // for com.overzealous:remark:1.1.0, used by org.kordamp.gradle:markdown-gradle-plugin:2.2.0
-    jcenter()
-  }
-}
-
 rootProject.name = 'anet'
