@@ -1,4 +1,9 @@
 module.exports = {
+  env: {
+    test: {
+      plugins: ["@babel/plugin-transform-modules-commonjs"]
+    }
+  },
   presets: ["react-app"],
   plugins: [
     [
