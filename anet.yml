@@ -131,6 +131,9 @@ anetDictionaryName: ${ANET_DICTIONARY_NAME}
 logging:
   level: INFO
   loggers:
+    "com.google.inject.internal.ProxyFactory": ERROR
+    "io.dropwizard.assets.AssetsBundle": TRACE
+    "io.dropwizard.assets.*": TRACE
     "io.dropwizard.jersey.jackson.JsonProcessingExceptionMapper": TRACE
     "mil.dds.anet.resources.LoggingResource":
       level: TRACE
@@ -149,8 +152,6 @@ logging:
           archivedLogFilenamePattern: ./logs/dbLog-%d.log.zip
           archivedFileCount: 2
           logFormat: '%d{yyyy-MM-dd HH:mm:ss.SSS,UTC}\t%p\t%m%n'
-    "io.dropwizard.assets.AssetsBundle": TRACE
-    "io.dropwizard.assets.*": TRACE
     "mil.dds.anet": DEBUG
     "mil.dds.anet.utils.AnetAuditLogger":
       level: INFO
