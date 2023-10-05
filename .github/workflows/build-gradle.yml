@@ -29,6 +29,47 @@ jobs:
     - run: ./gradlew yarn_run_lint
     - run: ./gradlew jar
 
+  test-init:
+    needs: build
+    name: Test ANET init
+    runs-on: ubuntu-latest
+
+    env:
+      ANET_ADMIN_ORG_NAME: "ACME Administrators Inc."
+      ANET_ADMIN_POS_NAME: "The ANET admin"
+      ANET_ADMIN_FULL_NAME: "DOE, John"
+      ANET_ADMIN_DOMAIN_USERNAME: "johndoe"
+      ANET_CONFIG: "anet-test.yml"
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/build-cache
+      - run: ./gradlew -PtestEnv dockerCreateDB dockerStartDB
+      - run: |
+          echo "testMode: true" |
+          cat - anet.yml > ${ANET_CONFIG}
+      - run: ./gradlew -PtestEnv dbWait
+      # This step should fail:
+      - name: Run ANET init on empty database
+        id: init-on-empty-db
+        run: ./gradlew -PtestEnv dbInit
+        continue-on-error: true
+      - run: exit 1
+        if: ${{ steps.init-on-empty-db.outcome != 'failure' }}
+      # This step should succeed:
+      - name: Run ANET init on clean database
+        id: init-on-clean-db
+        run: ./gradlew -PtestEnv dbMigrate dbInit
+      # This step should fail:
+      - name: Run ANET init on filled database
+        id: init-on-filled-db
+        run: ./gradlew -PtestEnv dbInit
+        continue-on-error: true
+      - run: exit 1
+        if: ${{ steps.init-on-filled-db.outcome != 'failure' }}
+
   test-server:
     needs: build
     name: Server tests; ${{ matrix.dictionary }}
