@@ -15,7 +15,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-import javax.ws.rs.WebApplicationException;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.utils.DaoUtils;
@@ -682,24 +681,9 @@ public class Report extends AbstractCustomizableAnetBean
 
   private CompletableFuture<List<ApprovalStep>> getDefaultOrganizationWorkflow(
       Map<String, Object> context, AnetObjectEngine engine, String defaultOrgUuid) {
-    return isFutureEngagement() ? getDefaultPlanningWorkflow(context, engine, defaultOrgUuid)
-        : getDefaultWorkflow(context, engine, defaultOrgUuid);
-  }
-
-  private CompletableFuture<List<ApprovalStep>> getDefaultPlanningWorkflow(
-      Map<String, Object> context, AnetObjectEngine engine, String defaultOrgUuid) {
-    if (defaultOrgUuid == null) {
-      throw new WebApplicationException("Missing the DEFAULT_APPROVAL_ORGANIZATION admin setting");
-    }
-    return getPlanningWorkflowForRelatedObject(context, engine, defaultOrgUuid);
-  }
-
-  private CompletableFuture<List<ApprovalStep>> getDefaultWorkflow(Map<String, Object> context,
-      AnetObjectEngine engine, String defaultOrgUuid) {
-    if (defaultOrgUuid == null) {
-      throw new WebApplicationException("Missing the DEFAULT_APPROVAL_ORGANIZATION admin setting");
-    }
-    return getWorkflowForRelatedObject(context, engine, defaultOrgUuid);
+    return isFutureEngagement()
+        ? getPlanningWorkflowForRelatedObject(context, engine, defaultOrgUuid)
+        : getWorkflowForRelatedObject(context, engine, defaultOrgUuid);
   }
 
   private CompletableFuture<List<ApprovalStep>> getTaskWorkflow(Map<String, Object> context,
@@ -723,7 +707,7 @@ public class Report extends AbstractCustomizableAnetBean
       AnetObjectEngine engine, String locationUuid) {
     return isFutureEngagement() ? getPlanningWorkflowForRelatedObject(context, engine, locationUuid)
         : getWorkflowForRelatedObject(context, engine, locationUuid);
-  };
+  }
 
   @GraphQLQuery(name = "reportSensitiveInformation")
   public CompletableFuture<ReportSensitiveInformation> loadReportSensitiveInformation(
