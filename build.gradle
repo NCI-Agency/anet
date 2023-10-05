@@ -63,6 +63,7 @@ run.environment("ANET_SMTP_SSLTRUST", run.environment["ANET_SMTP_SSLTRUST"] ?: r
 run.environment("ANET_SMTP_HTTP_PORT", run.environment["ANET_SMTP_HTTP_PORT"] ?: isTestEnv ? 1180 : 1080)
 run.environment("ANET_DICTIONARY_NAME", run.environment["ANET_DICTIONARY_NAME"] ?: "anet-dictionary.yml")
 
+String anetConfig = run.environment["ANET_CONFIG"] ?: "anet.yml"
 String adminOrgName = run.environment["ANET_ADMIN_ORG_NAME"] ?: "ANET Administrators"
 String adminPosName = run.environment["ANET_ADMIN_POS_NAME"] ?: "ANET Administrator"
 String adminFullName = run.environment["ANET_ADMIN_FULL_NAME"] ?: "DMIN, Arthur"
@@ -246,8 +247,6 @@ application {
   applicationDefaultJvmArgs = ["-Djava.library.path=MY_APP_HOME/lib"]
 }
 
-String anetConfig = "anet.yml"
-
 String dbLoc = run.environment['ANET_DB_SERVER']
 if (run.environment['ANET_DB_EXPOSED_PORT']) {
 	dbLoc = dbLoc + ":" + run.environment['ANET_DB_EXPOSED_PORT'].toString()
@@ -307,6 +306,7 @@ dbWait.mustRunAfter('dockerStartDB')
 //       ANET_ADMIN_POS_NAME="The ANET admin" \
 //       ANET_ADMIN_FULL_NAME="DOE, John" \
 //       ANET_ADMIN_DOMAIN_USERNAME="johndoe" \
+//       ANET_CONFIG="anet.yml" \
 //       ./gradlew dbInit
 // To see all options, run:
 //   ./gradlew dbInit -Pargs="--help"
@@ -325,10 +325,10 @@ task dbInit(dependsOn: 'compileJava', type: JavaExec) {
 			"--adminOrgName", adminOrgName,
 			"--adminPosName", adminPosName,
 			"--adminFullName", adminFullName,
-			"--adminDomainUsername", adminDomainUsername
+			"--adminDomainUsername", adminDomainUsername,
+                        anetConfig
 		])
 	}
-	cmdline << anetConfig
 	args cmdline
 }
 
