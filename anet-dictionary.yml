@@ -1626,7 +1626,7 @@ fields:
           label: Screening & Vetting of principal from MoD
           recurrence: ondemand
           test: $.subject.position.organization[?(@property === "shortName" && @.match(/^MoD/i))]
-          onDemandAssessmentExpirationDays: 108
+          onDemandAssessmentExpirationDays: 180
           authorizationGroupUuids:
             read: ['c21e7321-7ec5-4837-8805-a302f9575754']
             write: ['39a78d51-c351-452c-9206-4305ec8dd76d']
