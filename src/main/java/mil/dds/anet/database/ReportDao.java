@@ -830,6 +830,20 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
       approval.setPlanned(true); // so the FutureEngagementWorker can find this
       engine.getReportActionDao().insert(approval);
       r.setState(ReportState.APPROVED);
+    } else if (Utils.isEmptyOrNull(steps)) {
+      // Approval workflow has not been defined!
+      final String msg;
+      final String defaultOrgUuid = engine.getDefaultOrgUuid();
+      if (Utils.isEmptyOrNull(defaultOrgUuid)) {
+        msg = "The default approval organization is undefined";
+      } else {
+        final Organization defaultOrg = engine.getOrganizationDao().getByUuid(defaultOrgUuid);
+        msg = defaultOrg == null
+            ? "The default approval organization with uuid '" + defaultOrgUuid + "' does not exist"
+            : "The default approval organization " + defaultOrg
+                + " is missing an approval workflow";
+      }
+      throw new WebApplicationException(msg + "; please contact your administrator!");
     } else {
       // Push the report into the first step of this workflow
       r.setApprovalStep(steps.get(0));
