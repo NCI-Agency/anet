@@ -7,6 +7,7 @@ import graphql.ExecutionInput;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.GraphQLError;
+import graphql.execution.SimpleDataFetcherExceptionHandler;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.visibility.NoIntrospectionGraphqlFieldVisibility;
 import io.dropwizard.auth.Auth;
@@ -48,6 +49,7 @@ import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.BatchingUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dataloader.DataLoaderRegistry;
+import org.jdbi.v3.core.ConnectionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
@@ -222,27 +224,40 @@ public class GraphQlResource {
       Map<String, Object> variables, String output) {
     final ExecutionResult executionResult = dispatchRequest(user, operationName, query, variables);
     final Map<String, Object> result = executionResult.toSpecification();
-    if (executionResult.getErrors().size() > 0) {
-      WebApplicationException actual = null;
-      for (GraphQLError error : executionResult.getErrors()) {
-        if (error instanceof ExceptionWhileDataFetching) {
-          ExceptionWhileDataFetching exception = (ExceptionWhileDataFetching) error;
-          if (exception.getException() instanceof WebApplicationException) {
-            actual = (WebApplicationException) exception.getException();
+    if (!executionResult.getErrors().isEmpty()) {
+      Status status = Status.INTERNAL_SERVER_ERROR;
+      for (final GraphQLError error : executionResult.getErrors()) {
+        if (error instanceof ExceptionWhileDataFetching exception) {
+          if (exception.getException() instanceof WebApplicationException actual) {
+            status = Status.fromStatusCode(actual.getResponse().getStatus());
+            break;
+          } else if (exception.getException() instanceof ConnectionException) {
+            status = Status.SERVICE_UNAVAILABLE;
             break;
           }
         }
       }
 
-      Status status = (actual != null) ? Status.fromStatusCode(actual.getResponse().getStatus())
-          : Status.INTERNAL_SERVER_ERROR;
       logger.warn("Errors: {}", executionResult.getErrors());
+      // Remove any data so this gets properly handled as an error
+      result.remove("data");
       return Response.status(status).entity(result).build();
     }
 
     ResourceTransformer transformer = StringUtils.isEmpty(output) ? GraphQlResource.jsonTransformer
         : resourceTransformers.stream().filter(t -> t.outputType.equals(output)).findFirst().get();
     return transformer.apply(result).build();
+  }
+
+  static class CustomDataFetcherExceptionHandler extends SimpleDataFetcherExceptionHandler {
+    @Override
+    protected void logException(ExceptionWhileDataFetching error, Throwable exception) {
+      // Don't log ConnectionException as it may cause excessive logging; in any case it is already
+      // shown above in the warn message
+      if (!(exception instanceof ConnectionException)) {
+        super.logException(error, exception);
+      }
+    }
   }
 
   private ExecutionResult dispatchRequest(Person user, String operationName, String query,
@@ -258,6 +273,8 @@ public class GraphQlResource {
 
     final GraphQL graphql = GraphQL
         .newGraphQL(AuthUtils.isAdmin(user) ? graphqlSchema : graphqlSchemaWithoutIntrospection)
+        // custom error handler to reduce logging
+        .defaultDataFetcherExceptionHandler(new CustomDataFetcherExceptionHandler())
         // Prevent adding .instrumentation(new DataLoaderDispatcherInstrumentation())
         // — use our own dispatcher instead
         .doNotAddDefaultInstrumentations().build();

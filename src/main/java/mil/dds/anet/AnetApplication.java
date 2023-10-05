@@ -324,6 +324,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
     // We no longer use @RolesAllowed to do authorization
     // environment.jersey().register(RolesAllowedDynamicFeature.class);
     environment.jersey().register(new WebExceptionMapper());
+    environment.jersey().register(new ConnectionExceptionMapper());
 
     if (configuration.isTestMode()) {
       logger.info("AnetApplication is in testMode, skipping scheduled workers");

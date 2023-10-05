@@ -24,7 +24,7 @@ redirectToHttps: false
 
 # Execution time limit for GraphQL requests in milliseconds
 # If you comment it out, there is *no* limit!
-graphQlRequestTimeoutMs: 5000
+graphQlRequestTimeoutMs: 15000
 
 assets:
   cacheControlHeader: max-age=259200, public
@@ -81,6 +81,11 @@ database:
   properties:
     date_string_format: ${ANET_DB_DATE_STRING_FORMAT}
     date_class: ${ANET_DB_DATE_CLASS}
+  # You can tweak the database connection pool settings for your deployment environment:
+  initialSize: 10
+  minSize: 10
+  maxSize: 80
+  maxWaitForConnection: 5 seconds
 
 
 # Configuration for the web servers HTTP connectors.
