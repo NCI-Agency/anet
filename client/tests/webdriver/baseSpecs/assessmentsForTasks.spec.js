@@ -87,6 +87,21 @@ describe("For the periodic task assessments", () => {
         "monthly",
         ADVISOR_1_TASK_EDIT_DETAILS
       )
+    })
+
+    it("Should allow seeing add button for the assessments in the future", async() => {
+      await (
+        await ShowTask.getNextPeriodButton("subTaskMonthly", "monthly")
+      ).waitForExist()
+
+      await (
+        await ShowTask.getNextPeriodButton("subTaskMonthly", "monthly")
+      ).click()
+
+      await (
+        await ShowTask.getFutureAddAssessmentButton("subTaskMonthly", "monthly")
+      ).waitForExist()
+
       await ShowTask.logout()
     })
   })

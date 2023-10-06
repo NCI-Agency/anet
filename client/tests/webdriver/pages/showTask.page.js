@@ -52,6 +52,18 @@ class ShowTask extends Page {
     )
   }
 
+  async getNextPeriodButton(assessmentKey, recurrence) {
+    return (await this.getAssessmentResults(assessmentKey, recurrence)).$(
+      "button:last-child"
+    )
+  }
+
+  async getFutureAddAssessmentButton(assessmentKey, recurrence) {
+    return (await this.getAssessmentsTable(assessmentKey, recurrence)).$(
+      "tbody tr:last-child td:last-child"
+    )
+  }
+
   async getEditAssessmentButton(assessmentKey, recurrence) {
     return (await this.getAssessmentsTable(assessmentKey, recurrence)).$(
       'div.card button[title="Edit assessment"]'
