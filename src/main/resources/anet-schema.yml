@@ -238,6 +238,11 @@ $defs:
         type: string
         enum: [once, daily, weekly, biweekly, semimonthly, monthly, quarterly, semiannually, annually, ondemand]
         default: once
+      allowFutureAssesments:
+        type: boolean
+        default: false
+        title: allow assesments to be in the future
+        description: allow assesment dates to be in the future in order to be able to plan future.
       relatedObjectType:
         title: object type context in which the assessment will be made
         type: string
