@@ -40,6 +40,16 @@ public class OrganizationResource {
     this.engine = engine;
   }
 
+  public static boolean hasPermission(final Person user, final String organizationUuid) {
+    return AuthUtils.isAdmin(user) || AuthUtils.canAdministrateOrg(user, organizationUuid);
+  }
+
+  public static void assertPermission(final Person user, final String organizationUuid) {
+    if (!hasPermission(user, organizationUuid)) {
+      throw new WebApplicationException(AuthUtils.UNAUTH_MESSAGE, Status.FORBIDDEN);
+    }
+  }
+
   @GraphQLQuery(name = "organization")
   public Organization getByUuid(@GraphQLArgument(name = "uuid") String uuid) {
     Organization org = dao.getByUuid(uuid);
@@ -58,9 +68,7 @@ public class OrganizationResource {
 
     final Person user = DaoUtils.getUserFromContext(context);
     // Check if user is authorized to create a sub organization
-    if (!AuthUtils.isAdmin(user)) {
-      AuthUtils.assertCanAdministrateOrg(user, org.getParentOrgUuid());
-    }
+    assertPermission(user, org.getParentOrgUuid());
     final Organization created;
     try {
       created = dao.insert(org);
@@ -109,7 +117,7 @@ public class OrganizationResource {
 
     final Person user = DaoUtils.getUserFromContext(context);
     // Verify correct Organization
-    AuthUtils.assertCanAdministrateOrg(user, DaoUtils.getUuid(org));
+    assertPermission(user, DaoUtils.getUuid(org));
 
     // Load the existing organization, so we can check for differences.
     final Organization existing = dao.getByUuid(org.getUuid());
@@ -132,10 +140,10 @@ public class OrganizationResource {
                 "You cannot assign a different type of organization as the parent",
                 Status.FORBIDDEN);
           }
-          AuthUtils.assertCanAdministrateOrg(user, org.getParentOrgUuid());
+          assertPermission(user, org.getParentOrgUuid());
         }
         if (existing.getParentOrgUuid() != null) {
-          AuthUtils.assertCanAdministrateOrg(user, existing.getParentOrgUuid());
+          assertPermission(user, existing.getParentOrgUuid());
         }
       }
       // User is not authorized to change the organization type

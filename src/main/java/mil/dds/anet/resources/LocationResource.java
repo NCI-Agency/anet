@@ -30,6 +30,16 @@ public class LocationResource {
     this.dao = engine.getLocationDao();
   }
 
+  public static boolean hasPermission(final Person user, final String locationUuid) {
+    return AuthUtils.isSuperuser(user);
+  }
+
+  public static void assertPermission(final Person user, final String locationUuid) {
+    if (!hasPermission(user, locationUuid)) {
+      throw new WebApplicationException(AuthUtils.UNAUTH_MESSAGE, Status.FORBIDDEN);
+    }
+  }
+
   @GraphQLQuery(name = "location")
   public Location getByUuid(@GraphQLArgument(name = "uuid") String uuid) {
     Location loc = dao.getByUuid(uuid);
@@ -53,7 +63,7 @@ public class LocationResource {
     l.setDescription(
         Utils.isEmptyHtml(l.getDescription()) ? null : Utils.sanitizeHtml(l.getDescription()));
     final Person user = DaoUtils.getUserFromContext(context);
-    AuthUtils.assertSuperuser(user);
+    assertPermission(user, DaoUtils.getUuid(l));
     if (l.getName() == null || l.getName().trim().length() == 0) {
       throw new WebApplicationException("Location name must not be empty", Status.BAD_REQUEST);
     }
@@ -89,7 +99,7 @@ public class LocationResource {
     l.setDescription(
         Utils.isEmptyHtml(l.getDescription()) ? null : Utils.sanitizeHtml(l.getDescription()));
     final Person user = DaoUtils.getUserFromContext(context);
-    AuthUtils.assertSuperuser(user);
+    assertPermission(user, DaoUtils.getUuid(l));
     final int numRows = dao.update(l);
     if (numRows == 0) {
       throw new WebApplicationException("Couldn't process location update", Status.NOT_FOUND);

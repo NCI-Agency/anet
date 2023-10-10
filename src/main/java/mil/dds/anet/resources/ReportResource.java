@@ -86,6 +86,30 @@ public class ReportResource {
     this.config = config;
   }
 
+  public static boolean hasPermission(final Person user, final String reportUuid) {
+    final AnetObjectEngine anetObjectEngine = AnetObjectEngine.getInstance();
+    final ReportDao reportDao = anetObjectEngine.getReportDao();
+    final Report report = reportDao.getByUuid(reportUuid);
+    if (report == null) {
+      return false;
+    }
+
+    boolean isAuthor = report.isAuthor(user);
+    return switch (report.getState()) {
+      case DRAFT, REJECTED, APPROVED, CANCELLED ->
+        // Must be an author
+        isAuthor;
+      case PENDING_APPROVAL ->
+        // Must be an author or an approver
+        isAuthor || anetObjectEngine.canUserApproveStep(anetObjectEngine.getContext(),
+            user.getUuid(), report.getApprovalStepUuid(), report.getAdvisorOrgUuid()).join();
+      case PUBLISHED ->
+        // Published reports are immutable
+        false;
+      default -> false;
+    };
+  }
+
   @GraphQLQuery(name = "report")
   public Report getByUuid(@GraphQLArgument(name = "uuid") String uuid) {
     final Report r = dao.getByUuid(uuid);
