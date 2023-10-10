@@ -30,7 +30,6 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
   @Override
   protected void buildQuery(TaskSearchQuery query) {
     qb.addSelectClause(TaskDao.TASK_FIELDS);
-    qb.addTotalCount();
     qb.addFromClause("tasks");
 
     if (hasTextQuery(query)) {

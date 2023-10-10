@@ -58,7 +58,6 @@ public abstract class AbstractPositionSearcher
   @Override
   protected void buildQuery(PositionSearchQuery query) {
     qb.addSelectClause(PositionDao.POSITION_FIELDS);
-    qb.addTotalCount();
     qb.addFromClause("positions");
 
     if (query.getMatchPersonName()) {

@@ -33,7 +33,6 @@ public abstract class AbstractSubscriptionSearcher extends
 
   protected void buildQuery(SubscriptionSearchQuery query, Person user) {
     qb.addSelectClause(SubscriptionDao.SUBSCRIPTION_FIELDS);
-    qb.addTotalCount();
     qb.addFromClause("subscriptions");
     final Position position = DaoUtils.getPosition(user);
     qb.addStringEqualsClause("positionUuid", "subscriptions.\"subscriberUuid\"",

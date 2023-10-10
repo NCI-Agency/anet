@@ -35,7 +35,6 @@ public abstract class AbstractSubscriptionUpdateSearcher
 
   protected void buildQuery(SubscriptionUpdateSearchQuery query, Person user) {
     qb.addSelectClause(SubscriptionUpdateDao.SUBSCRIPTION_UPDATE_FIELDS);
-    qb.addTotalCount();
     qb.addFromClause("\"subscriptionUpdates\"");
     final Position position = DaoUtils.getPosition(user);
     qb.addWhereClause(

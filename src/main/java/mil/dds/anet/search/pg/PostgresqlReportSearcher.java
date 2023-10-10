@@ -34,7 +34,6 @@ public class PostgresqlReportSearcher extends AbstractReportSearcher {
   @Override
   protected void buildQuery(Set<String> subFields, ReportSearchQuery query) {
     qb.addSelectClause(getTableFields(subFields));
-    qb.addTotalCount();
     qb.addFromClause("reports");
     super.buildQuery(subFields, query);
   }

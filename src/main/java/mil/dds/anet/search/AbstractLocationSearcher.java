@@ -27,7 +27,6 @@ public abstract class AbstractLocationSearcher
   @Override
   protected void buildQuery(LocationSearchQuery query) {
     qb.addSelectClause(LocationDao.LOCATION_FIELDS);
-    qb.addTotalCount();
     qb.addFromClause("locations");
     qb.addEnumEqualsClause("status", "locations.status", query.getStatus());
     qb.addLikeClause("type", "locations.type", DaoUtils.getEnumString(query.getType()));

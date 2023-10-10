@@ -94,10 +94,6 @@ public abstract class AbstractSearchQueryBuilder<B, T extends AbstractSearchQuer
     selectClauses.add(clause);
   }
 
-  public void addTotalCount() {
-    addSelectClause("COUNT(*) OVER() AS \"totalCount\"");
-  }
-
   public void addFromClause(String clause) {
     fromClauses.add(clause);
   }
@@ -297,6 +293,8 @@ public abstract class AbstractSearchQueryBuilder<B, T extends AbstractSearchQuer
     addAdditionalFromClauses();
     addWhereClauses();
     addGroupByClauses();
+    sql.insert(0, "SELECT *, COUNT(*) OVER() AS \"totalCount\" FROM (");
+    sql.append(") AS results");
     addOrderByClauses();
     return sql.toString();
   }
@@ -315,7 +313,7 @@ public abstract class AbstractSearchQueryBuilder<B, T extends AbstractSearchQuer
 
   protected void addSelectClauses() {
     if (!selectClauses.isEmpty()) {
-      sql.append(" SELECT ");
+      sql.append(" SELECT DISTINCT ");
       sql.append(Joiner.on(", ").join(selectClauses));
     }
   }
@@ -350,8 +348,7 @@ public abstract class AbstractSearchQueryBuilder<B, T extends AbstractSearchQuer
 
   protected void addOrderByClauses() {
     if (!orderByClauses.isEmpty()) {
-      sql.insert(0, "SELECT * FROM (");
-      sql.append(") AS results ORDER BY ");
+      sql.append(" ORDER BY ");
       sql.append(Joiner.on(", ").join(orderByClauses));
     }
   }

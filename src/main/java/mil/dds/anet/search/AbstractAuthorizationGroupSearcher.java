@@ -29,7 +29,6 @@ public abstract class AbstractAuthorizationGroupSearcher
   @Override
   protected void buildQuery(AuthorizationGroupSearchQuery query) {
     qb.addSelectClause(AuthorizationGroupDao.AUTHORIZATION_GROUP_FIELDS);
-    qb.addTotalCount();
     qb.addFromClause("\"authorizationGroups\"");
 
     if (hasTextQuery(query)) {
