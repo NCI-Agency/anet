@@ -108,22 +108,6 @@ class ShowReport extends Page {
     return (await browser.$("div[name='duration']")).getText()
   }
 
-  async getAttachments() {
-    return browser.$("#attachments")
-  }
-
-  async getCard() {
-    return browser.$(".card")
-  }
-
-  async getFileData() {
-    return (await browser.$(".info-line")).getText()
-  }
-
-  async getImageClick() {
-    return browser.$(".imagePreview")
-  }
-
   async getCurrentUrl() {
     return browser.getCurrentUrl()
   }
