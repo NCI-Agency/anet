@@ -23,10 +23,13 @@ import java.util.stream.Collectors;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotFoundException;
+import javax.ws.rs.WebApplicationException;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.database.AdminDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.resources.AttachmentResource;
 import mil.dds.anet.test.TestData;
+import mil.dds.anet.test.client.AdminSettingInput;
 import mil.dds.anet.test.client.AdvisorReportsEntry;
 import mil.dds.anet.test.client.AnetBeanList_Location;
 import mil.dds.anet.test.client.AnetBeanList_Organization;
@@ -890,6 +893,23 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(r).isNotNull();
     assertThat(r.getUuid()).isNotNull();
 
+    // Test the situation where no default workflow has been defined
+    final String defaultOrgUuid = AnetObjectEngine.getInstance().getDefaultOrgUuid();
+    final String defaultOrgSetting = AdminDao.AdminSettingKeys.DEFAULT_APPROVAL_ORGANIZATION.name();
+
+    // Clear the defaultOrgUuid
+    failSubmit(r, defaultOrgSetting, null);
+
+    // Set the defaultOrgUuid to an empty string
+    failSubmit(r, defaultOrgSetting, "");
+
+    // Set the defaultOrgUuid to a non-existing org
+    failSubmit(r, defaultOrgSetting, mil.dds.anet.beans.Organization.DUMMY_ORG_UUID);
+
+    // Set the defaultOrgUuid back to the correct value
+    final int numSettings = adminMutationExecutor.saveAdminSettings("", List.of(
+        AdminSettingInput.builder().withKey(defaultOrgSetting).withValue(defaultOrgUuid).build()));
+    assertThat(numSettings).isOne();
     // Submit the report (by admin who can do that, as author doesn't have a position)
     int numRows = adminMutationExecutor.submitReport("", r.getUuid());
     assertThat(numRows).isOne();
@@ -900,7 +920,6 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(returned.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
 
     // Find the default ApprovalSteps
-    final String defaultOrgUuid = AnetObjectEngine.getInstance().getDefaultOrgUuid();
     assertThat(defaultOrgUuid).isNotNull();
     final Organization orgWithSteps =
         jackQueryExecutor.organization(ORGANIZATION_FIELDS, defaultOrgUuid);
@@ -968,6 +987,21 @@ public class ReportResourceTest extends AbstractResourceTest {
         .isNotEqualTo(returned.getApprovalStep().getUuid());
     assertThat(returned2.getApprovalStep()).isNotNull();
     assertThat(returned2.getApprovalStep().getRelatedObjectUuid()).isEqualTo(ef11.getUuid());
+  }
+
+  private static void failSubmit(final Report r, final String defaultOrgSetting,
+      final String defaultOrgValue)
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    final int numSettings = adminMutationExecutor.saveAdminSettings("", List.of(
+        AdminSettingInput.builder().withKey(defaultOrgSetting).withValue(defaultOrgValue).build()));
+    assertThat(numSettings).isOne();
+    // Submit the report: should fail
+    try {
+      adminMutationExecutor.submitReport("", r.getUuid());
+      fail("Expected WebApplicationException");
+    } catch (WebApplicationException expected) {
+      // OK
+    }
   }
 
   @Test
