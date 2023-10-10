@@ -26,7 +26,7 @@ import RichTextEditor from "components/RichTextEditor"
 import { Field, Form, Formik } from "formik"
 import { convertLatLngToMGRS } from "geoUtils"
 import _escape from "lodash/escape"
-import { Location } from "models"
+import { Attachment, Location } from "models"
 import React, { useContext, useState } from "react"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
@@ -36,15 +36,10 @@ import utils from "utils"
 const GQL_GET_LOCATION = gql`
   query($uuid: String!) {
     location(uuid: $uuid) {
-      attachments {
-        uuid
-        fileName
-        contentLength
-        mimeType
-        description
-        classification
-      }
       ${Location.allFieldsQuery}
+      attachments {
+        ${Attachment.basicFieldsQuery}
+      }
     }
   }
 `

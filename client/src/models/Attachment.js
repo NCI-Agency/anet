@@ -29,8 +29,10 @@ export default class Attachment extends Model {
     classification: yup.string().nullable().default(null)
   })
 
-  static autocompleteQuery =
-    "uuid fileName caption description classification mimeType"
+  static basicFieldsQuery =
+    "uuid fileName caption description classification mimeType contentLength"
+
+  static autocompleteQuery = Location.basicFieldsQuery
 
   static _resourceOverride = ["attachments"].join("/")
 
