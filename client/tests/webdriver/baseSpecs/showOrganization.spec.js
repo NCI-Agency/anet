@@ -3,6 +3,7 @@ import Home from "../pages/home.page"
 import Search from "../pages/search.page"
 import ShowOrganization from "../pages/showOrganization.page"
 
+const ORGANIZATION_UUID = "ccbee4bb-08b8-42df-8cb5-65e8172f657b" // EF 2.2
 const ORGANIZATION_EF2_SEARCH_STRING = "EF 2"
 const ORGANIZATION_EF22_SEARCH_STRING = "EF 2.2"
 const LEADER_POSITION_TEXT = "EF 2.2 Final Reviewer"
@@ -48,8 +49,12 @@ describe("Show organization page", () => {
       const deputyField = await ShowOrganization.getDeputies()
       // eslint-disable-next-line no-unused-expressions
       expect(await deputyField.isExisting()).to.be.false
+
+      // Log out
+      await ShowOrganization.logout()
     })
   })
+
   describe("As an admin", () => {
     it("Should first search, find and open the organization page", async() => {
       await Home.openAsAdminUser()
@@ -105,6 +110,30 @@ describe("Show organization page", () => {
       expect(
         await (await ShowOrganization.getDeputyPositionPerson()).getText()
       ).to.equal(DEPUTY_PERSON_TEXT)
+
+      // Log out
+      await ShowOrganization.logout()
+    })
+  })
+
+  describe("When on the show page of an organization with attachment(s)", () => {
+    it("We should see a container for Attachment List", async() => {
+      await ShowOrganization.open(ORGANIZATION_UUID)
+      await (await ShowOrganization.getAttachments()).waitForExist()
+      await (await ShowOrganization.getAttachments()).waitForDisplayed()
+    })
+    it("We should see a card of Attachment", async() => {
+      await (await ShowOrganization.getCard()).waitForExist()
+      await (await ShowOrganization.getCard()).waitForDisplayed()
+      expect(await ShowOrganization.getFileData()).to.be.equal(
+        "attachO…\n12.0 KB"
+      )
+    })
+    it("We can go to the show page of Attachment", async() => {
+      await (await ShowOrganization.getImageClick()).click()
+      await expect(await browser.getUrl()).to.include(
+        "/attachments/9ac41246-25ac-457c-b7d6-946c5f625f1f"
+      )
     })
   })
 })

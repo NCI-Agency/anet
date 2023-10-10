@@ -1,6 +1,12 @@
 import Page from "./page"
 
+const PAGE_URL = "/organizations/:uuid"
+
 class ShowOrganization extends Page {
+  async open(uuid) {
+    await super.open(PAGE_URL.replace(":uuid", uuid))
+  }
+
   async getAlertSuccess() {
     return browser.$(".alert-success")
   }
