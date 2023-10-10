@@ -1155,13 +1155,20 @@ INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "
   WHERE r.intent = 'A test report from Arthur';
 
 -- Add attachments for locations
-SELECT ('''' || uuid || '''') AS "authorUuid" FROM people WHERE name = 'DMIN, Arthur' \gset
 INSERT INTO attachments (uuid, "authorUuid", "fileName", "caption", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt")
 	VALUES ('f7cd5b02-ef73-4ee8-814b-c5a7a916685d', :authorUuid, 'attachLocation.png', 'attachLocation', 'image/png', lo_import('/var/tmp/default_avatar.png'), 12316, 'We can add attachments to a location', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT 'f7cd5b02-ef73-4ee8-814b-c5a7a916685d', 'locations', loc.uuid
   FROM locations loc
   WHERE loc.name = 'Antarctica';
+
+-- Add attachments for organizations
+INSERT INTO attachments (uuid, "authorUuid", "fileName", "caption", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt")
+	VALUES ('9ac41246-25ac-457c-b7d6-946c5f625f1f', :authorUuid, 'attachOrganization.png', 'attachOrganization', 'image/png', lo_import('/var/tmp/default_avatar.png'), 12316, 'We can add attachments to an organization', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "relatedObjectUuid")
+  SELECT '9ac41246-25ac-457c-b7d6-946c5f625f1f', 'organizations', org.uuid
+  FROM organizations org
+  WHERE org."shortName" = 'EF 2.2';
 
 -- Update the full-text indexes
 REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_fts_authorizationGroups";
