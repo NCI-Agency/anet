@@ -21,6 +21,7 @@ import mil.dds.anet.database.mappers.AttachmentMapper;
 import mil.dds.anet.database.mappers.GenericRelatedObjectMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
+import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.io.EofException;
@@ -78,8 +79,7 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AbstractSearchQuery<?
         .bindBean(obj).bind("createdAt", DaoUtils.asLocalDateTime(obj.getCreatedAt()))
         .bind("updatedAt", DaoUtils.asLocalDateTime(obj.getUpdatedAt()))
         .bind("authorUuid", obj.getAuthorUuid()).execute();
-    if (obj.getAttachmentRelatedObjects().get(0).getRelatedObjectUuid() != null)
-      insertAttachmentRelatedObjects(DaoUtils.getUuid(obj), obj.getAttachmentRelatedObjects());
+    insertAttachmentRelatedObjects(DaoUtils.getUuid(obj), obj.getAttachmentRelatedObjects());
     return obj;
   }
 
@@ -195,8 +195,10 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AbstractSearchQuery<?
 
   private void insertAttachmentRelatedObjects(String uuid,
       List<GenericRelatedObject> attachmentRelatedObjects) {
-    final AttachmentBatch ab = getDbHandle().attach(AttachmentBatch.class);
-    ab.insertAttachmentRelatedObjects(uuid, attachmentRelatedObjects);
+    if (!Utils.isEmptyOrNull(attachmentRelatedObjects)) {
+      final AttachmentBatch ab = getDbHandle().attach(AttachmentBatch.class);
+      ab.insertAttachmentRelatedObjects(uuid, attachmentRelatedObjects);
+    }
   }
 
   private void deleteAttachmentRelatedObjects(String attachmentUuid) {
