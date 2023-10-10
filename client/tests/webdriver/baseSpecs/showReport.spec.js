@@ -41,17 +41,13 @@ describe("Show report page", () => {
       // Attachment card list
       await (await ShowReport.getCard()).waitForExist()
       await (await ShowReport.getCard()).waitForDisplayed()
-      expect(await await ShowReport.getFileData()).to.be.equal(
-        "test_at…\n12.0 KB"
-      )
+      expect(await ShowReport.getFileData()).to.be.equal("test_at…\n12.0 KB")
     })
     it("We can go to the show page of Attachment", async() => {
-      if (await (await ShowReport.getImageClick()).isClickable()) {
-        await (await ShowReport.getImageClick()).click()
-        await expect(browser).toHaveUrlContaining(
-          "/attachments/f076406f-1a9b-4fc9-8ab2-cd2a138ec26d"
-        )
-      }
+      await (await ShowReport.getImageClick()).click()
+      await expect(await browser.getUrl()).to.include(
+        "/attachments/f076406f-1a9b-4fc9-8ab2-cd2a138ec26d"
+      )
     })
   })
 })

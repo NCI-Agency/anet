@@ -27,6 +27,22 @@ class Page {
     return browser.$("#topbar .logo")
   }
 
+  async getAttachments() {
+    return browser.$("#attachments")
+  }
+
+  async getCard() {
+    return browser.$(".card")
+  }
+
+  async getFileData() {
+    return (await browser.$(".info-line")).getText()
+  }
+
+  async getImageClick() {
+    return browser.$(".image-preview")
+  }
+
   async loginFormSubmit() {
     await (await this.getLoginFormSubmitButton()).click()
   }
