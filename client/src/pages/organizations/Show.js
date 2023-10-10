@@ -4,6 +4,7 @@ import API from "api"
 import AppContext from "components/AppContext"
 import Approvals from "components/approvals/Approvals"
 import AssessmentResultsContainer from "components/assessments/AssessmentResultsContainer"
+import AttachmentCard from "components/Attachment/AttachmentCard"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -27,8 +28,9 @@ import ReportCollection from "components/ReportCollection"
 import RichTextEditor from "components/RichTextEditor"
 import SubNav from "components/SubNav"
 import { Field, Form, Formik } from "formik"
+import DictionaryField from "HOC/DictionaryField"
 import _isEmpty from "lodash/isEmpty"
-import { Location, Organization, Report } from "models"
+import { Attachment, Location, Organization, Report } from "models"
 import { PositionRole } from "models/Position"
 import { orgTour } from "pages/HopscotchTour"
 import pluralize from "pluralize"
@@ -47,7 +49,6 @@ import { useLocation, useParams } from "react-router-dom"
 import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
 import utils from "utils"
-import DictionaryField from "../../HOC/DictionaryField"
 import OrganizationLaydown from "./Laydown"
 import OrganizationTasks from "./OrganizationTasks"
 
@@ -154,6 +155,9 @@ const GQL_GET_ORGANIZATION = gql`
             ...personFields
           }
         }
+      }
+      attachments {
+        ${Attachment.basicFieldsQuery}
       }
       customFields
       ${GRAPHQL_NOTES_FIELDS}
@@ -461,6 +465,24 @@ const OrganizationShow = ({ pageDispatchers }) => {
                   label={Settings.fields.organization.profile}
                   humanValue={
                     <RichTextEditor readOnly value={organization.profile} />
+                  }
+                />
+
+                <Field
+                  name="attachments"
+                  label="Attachments"
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={
+                    <div className="attachment-card-list">
+                      {organization.attachments.map((attachment, index) => (
+                        <AttachmentCard
+                          key={index}
+                          attachment={attachment}
+                          index={index}
+                          edit={false}
+                        />
+                      ))}
+                    </div>
                   }
                 />
               </Fieldset>

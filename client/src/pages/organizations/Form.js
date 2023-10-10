@@ -9,6 +9,7 @@ import {
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
 import ApprovalsDefinition from "components/approvals/ApprovalsDefinition"
+import UploadAttachment from "components/Attachment/UploadAttachment"
 import {
   CustomFieldsContainer,
   customFieldsJSONString
@@ -23,6 +24,7 @@ import NoPaginationTaskTable from "components/NoPaginationTaskTable"
 import { jumpToTop } from "components/Page"
 import RichTextEditor from "components/RichTextEditor"
 import { FastField, Field, Form, Formik } from "formik"
+import DictionaryField from "HOC/DictionaryField"
 import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
 import { Location, Organization, Position, Task } from "models"
@@ -37,7 +39,6 @@ import TASKS_ICON from "resources/tasks.png"
 import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
 import utils from "utils"
-import DictionaryField from "../../HOC/DictionaryField"
 
 const GQL_CREATE_ORGANIZATION = gql`
   mutation ($organization: OrganizationInput!) {
@@ -366,6 +367,24 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                       widget={<RichTextEditor className="profile" />}
                     />
                   </>
+                )}
+
+                {edit && (
+                  <Field
+                    name="uploadAttachments"
+                    label="Attachments"
+                    component={FieldHelper.SpecialField}
+                    widget={
+                      <UploadAttachment
+                        edit={edit}
+                        relatedObjectType={Organization.relatedObjectType}
+                        relatedObjectUuid={values.uuid}
+                      />
+                    }
+                    onHandleBlur={() => {
+                      setFieldTouched("uploadAttachments", true, false)
+                    }}
+                  />
                 )}
               </Fieldset>
 
