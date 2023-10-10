@@ -16,13 +16,7 @@ import AttachmentForm from "./Form"
 const GQL_GET_ATTACHMENT = gql`
   query ($uuid: String) {
     attachment(uuid: $uuid) {
-      uuid
-      fileName
-      caption
-      contentLength
-      mimeType
-      classification
-      description
+      ${Attachment.basicFieldsQuery}
       attachmentRelatedObjects {
         relatedObject {
           ... on AuthorizationGroup {

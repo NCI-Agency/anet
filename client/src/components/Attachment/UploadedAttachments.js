@@ -8,12 +8,7 @@ import ShowUploadedAttachments from "./ShowUploadedAttachments"
 const GQL_GET_RELATED_ATTACHMENTS = gql`
   query ($uuid: String!) {
     relatedObjectAttachments(uuid: $uuid) {
-      uuid
-      fileName
-      contentLength
-      mimeType
-      classification
-      description
+      ${Attachment.basicFieldsQuery}
     }
   }
 `

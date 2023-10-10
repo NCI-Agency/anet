@@ -38,7 +38,7 @@ import { Field, Form, Formik } from "formik"
 import _concat from "lodash/concat"
 import _isEmpty from "lodash/isEmpty"
 import _upperFirst from "lodash/upperFirst"
-import { Comment, Person, Position, Report, Task } from "models"
+import { Attachment, Comment, Person, Position, Report, Task } from "models"
 import moment from "moment"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
@@ -235,12 +235,7 @@ const GQL_GET_REPORT = gql`
         description
       }
       attachments {
-        uuid
-        fileName
-        contentLength
-        mimeType
-        classification
-        description
+        ${Attachment.basicFieldsQuery}
       }
       customFields
       ${GRAPHQL_NOTES_FIELDS}
