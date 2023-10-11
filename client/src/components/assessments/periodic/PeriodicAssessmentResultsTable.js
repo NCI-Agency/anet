@@ -84,18 +84,19 @@ const PeriodicAssessmentResultsTable = ({
   if (!entity) {
     return null
   }
+  const entityPeriodicAssessmentConfig =
+    entity.getInstantAssessmentConfig(assessmentKey)
   const { recurrence, numberOfPeriods } = periodsDetails
   const periodsConfig = getPeriodsConfig(
     recurrence,
     numberOfPeriods,
     offset,
-    true
+    true,
+    entityPeriodicAssessmentConfig?.allowFutureAssessments
   )
   if (_isEmpty(periodsConfig?.periods)) {
     return null
   }
-  const entityPeriodicAssessmentConfig =
-    entity.getInstantAssessmentConfig(assessmentKey)
   const subEntitiesPeriodicAssessmentConfig = subEntities
     ?.map(s => s.getInstantAssessmentConfig(assessmentKey))
     .filter(mc => !_isEmpty(mc))
