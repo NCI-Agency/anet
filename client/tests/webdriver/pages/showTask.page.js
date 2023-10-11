@@ -60,7 +60,7 @@ class ShowTask extends Page {
 
   async getFutureAddAssessmentButton(assessmentKey, recurrence) {
     return (await this.getAssessmentsTable(assessmentKey, recurrence)).$(
-      "tbody tr:last-child td:last-child"
+      "tbody tr:last-child td:last-child button"
     )
   }
 
