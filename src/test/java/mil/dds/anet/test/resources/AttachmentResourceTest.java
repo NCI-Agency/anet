@@ -12,7 +12,7 @@ import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.resources.AttachmentResource;
 import mil.dds.anet.test.client.Attachment;
 import mil.dds.anet.test.client.AttachmentInput;
-import mil.dds.anet.test.client.AttachmentRelatedObjectInput;
+import mil.dds.anet.test.client.GenericRelatedObjectInput;
 import mil.dds.anet.test.client.Report;
 import mil.dds.anet.test.client.ReportInput;
 import mil.dds.anet.test.client.util.MutationExecutor;
@@ -22,7 +22,7 @@ public class AttachmentResourceTest extends AbstractResourceTest {
 
   protected static final String ATTACHMENT_FIELDS =
       "{ uuid mimeType fileName description classification caption author"
-          + " attachmentRelatedObjects { attachmentUuid relatedObjectType relatedObjectUuid } }";
+          + " attachmentRelatedObjects { objectUuid relatedObjectType relatedObjectUuid } }";
   private static final String _ATTACHMENTS_FIELDS =
       String.format("attachments %1$s", ATTACHMENT_FIELDS);
   private static final String REPORT_FIELDS =
@@ -44,7 +44,7 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     assertThat(testReport.getUuid()).isNotNull();
 
     // Attach attachment to test report
-    final AttachmentRelatedObjectInput testAroInput =
+    final GenericRelatedObjectInput testAroInput =
         createAttachmentRelatedObject(ReportDao.TABLE_NAME, testReport.getUuid());
 
     final AttachmentInput failedAttachmentInput =
@@ -112,7 +112,7 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     final var allowedMimeTypes = (List<String>) attachmentSettings.get("mimeTypes");
     final String mimeType = allowedMimeTypes.get(0);
 
-    final AttachmentRelatedObjectInput testAroInput =
+    final GenericRelatedObjectInput testAroInput =
         createAttachmentRelatedObject(ReportDao.TABLE_NAME, testReport.getUuid());
     final AttachmentInput testAttachmentInput =
         AttachmentInput.builder().withFileName("testDeleteAttachment.jpg").withMimeType(mimeType)
@@ -168,7 +168,7 @@ public class AttachmentResourceTest extends AbstractResourceTest {
         AttachmentResource.getAllowedClassifications();
     var firstClassification = allowedClassifications.entrySet().iterator().next().getKey();
 
-    final AttachmentRelatedObjectInput testAroInput =
+    final GenericRelatedObjectInput testAroInput =
         createAttachmentRelatedObject(ReportDao.TABLE_NAME, testReport.getUuid());
     final AttachmentInput testAttachmentInput =
         AttachmentInput.builder().withFileName("testUpdateAttachment.jpg").withMimeType(mimeType)
@@ -219,9 +219,9 @@ public class AttachmentResourceTest extends AbstractResourceTest {
         .isEqualTo(updatedClassificationAttachment.getFileName());
   }
 
-  private AttachmentRelatedObjectInput createAttachmentRelatedObject(final String tableName,
+  private GenericRelatedObjectInput createAttachmentRelatedObject(final String tableName,
       final String uuid) {
-    return AttachmentRelatedObjectInput.builder().withRelatedObjectType(tableName)
+    return GenericRelatedObjectInput.builder().withRelatedObjectType(tableName)
         .withRelatedObjectUuid(uuid).build();
   }
 

@@ -93,7 +93,7 @@ organization(uuid:"${orgUuid}") {
       role
     }
     noteRelatedObjects {
-      noteUuid
+      objectUuid
       relatedObjectType
       relatedObjectUuid
       relatedObject {

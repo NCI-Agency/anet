@@ -519,7 +519,11 @@ export default class Person extends Model {
     return config || {}
   }
 
-  static FILTERED_CLIENT_SIDE_FIELDS = ["firstName", "lastName"]
+  static FILTERED_CLIENT_SIDE_FIELDS = [
+    "firstName",
+    "lastName",
+    "authorizationGroupUuids"
+  ]
 
   static filterClientSideFields(obj, ...additionalFields) {
     return Model.filterClientSideFields(

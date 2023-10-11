@@ -12,7 +12,7 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
-import PositionTable from "components/PositionTable"
+import { RelatedObjectsTable } from "components/RelatedObjectsTable"
 import ReportCollection, {
   FORMAT_CALENDAR,
   FORMAT_MAP,
@@ -32,28 +32,31 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
       uuid
       name
       description
-      positions {
-        uuid
-        name
-        code
-        type
-        role
-        status
-        organization {
-          uuid
-          shortName
-          longName
-          identificationCode
-        }
-        person {
-          uuid
-          name
-          rank
-          role
-          avatar(size: 32)
+      status
+      authorizationGroupRelatedObjects {
+        relatedObjectType
+        relatedObjectUuid
+        relatedObject {
+          ... on Organization {
+            uuid
+            shortName
+            longName
+            identificationCode
+          }
+          ... on Person {
+            uuid
+            role
+            rank
+            name
+            avatar(size: 32)
+          }
+          ... on Position {
+            uuid
+            type
+            name
+          }
         }
       }
-      status
     }
   }
 `
@@ -83,8 +86,8 @@ const AuthorizationGroupShow = ({ pageDispatchers }) => {
   const authorizationGroup = new AuthorizationGroup(
     data ? data.authorizationGroup : {}
   )
-  const stateSuccess = routerLocation.state && routerLocation.state.success
-  const stateError = routerLocation.state && routerLocation.state.error
+  const stateSuccess = routerLocation.state?.success
+  const stateError = routerLocation.state?.error
   const canEdit = currentUser.isSuperuser()
 
   return (
@@ -112,18 +115,21 @@ const AuthorizationGroupShow = ({ pageDispatchers }) => {
                 <Field name="name" component={FieldHelper.ReadonlyField} />
 
                 <Field
+                  name="description"
+                  component={FieldHelper.ReadonlyField}
+                />
+
+                <Field
                   name="status"
                   component={FieldHelper.ReadonlyField}
                   humanValue={AuthorizationGroup.humanNameOfStatus}
                 />
               </Fieldset>
 
-              <Fieldset title="Positions">
-                <PositionTable
-                  queryParams={{
-                    pageSize: 10,
-                    authorizationGroupUuid: uuid
-                  }}
+              <Fieldset title="Members">
+                <RelatedObjectsTable
+                  title="Member"
+                  relatedObjects={values.authorizationGroupRelatedObjects}
                 />
               </Fieldset>
 

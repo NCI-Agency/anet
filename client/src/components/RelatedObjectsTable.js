@@ -1,54 +1,28 @@
-import MultiTypeAdvancedSelectComponent from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
+import MultiTypeAdvancedSelectComponent, {
+  ENTITY_TYPES
+} from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
 import LinkTo from "components/LinkTo"
 import Model, { MODEL_TO_OBJECT_TYPE } from "components/Model"
 import RemoveButton from "components/RemoveButton"
+import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React from "react"
 import { Table } from "react-bootstrap"
 
-const RelatedObjectsTable = ({
+export const RelatedObjectsTable = ({
+  title,
   currentObject,
   relatedObjects,
   setRelatedObjects,
   showDelete
 }) => {
-  const fieldValue = relatedObjects.map(nro => ({
-    uuid: nro.relatedObjectUuid
-  }))
-
   return (
-    <div id="related_objects">
-      <MultiTypeAdvancedSelectComponent
-        value={fieldValue}
-        isMultiSelect
-        onConfirm={(value, objectType) => {
-          if (value.length > fieldValue.length) {
-            // entity was added at the end, set correct value
-            const addedEntity = value.pop()
-            const newRelatedObject = {
-              relatedObjectType: MODEL_TO_OBJECT_TYPE[objectType],
-              relatedObjectUuid: addedEntity.uuid,
-              relatedObject: addedEntity
-            }
-            setRelatedObjects([...relatedObjects, newRelatedObject])
-          } else {
-            // entity was deleted, find which one, but always keep current object
-            const valueUuids = value.map(v => v.uuid)
-            const newRelatedObjects = relatedObjects.filter(
-              ro =>
-                (currentObject?.relatedObjectType === ro.relatedObjectType &&
-                  currentObject?.relatedObjectUuid === ro.relatedObjectUuid) ||
-                valueUuids.includes(ro.relatedObjectUuid)
-            )
-            setRelatedObjects(newRelatedObjects)
-          }
-        }}
-      />
+    <>
       {relatedObjects.length > 0 ? (
         <Table striped hover responsive className="related_objects_table">
           <thead>
             <tr>
-              <th>Linked Object</th>
+              <th>{title}</th>
               {showDelete && <th />}
             </tr>
           </thead>
@@ -87,13 +61,14 @@ const RelatedObjectsTable = ({
           </tbody>
         </Table>
       ) : (
-        <em>No linked objects</em>
+        <em>No {pluralize(title)}</em>
       )}
-    </div>
+    </>
   )
 }
 
 RelatedObjectsTable.propTypes = {
+  title: PropTypes.string,
   currentObject: Model.relatedObjectPropType,
   relatedObjects: Model.noteRelatedObjectsPropType.isRequired,
   setRelatedObjects: PropTypes.func.isRequired,
@@ -101,7 +76,76 @@ RelatedObjectsTable.propTypes = {
 }
 
 RelatedObjectsTable.defaultProps = {
+  title: "Linked Object",
+  setRelatedObjects: () => {},
   showDelete: false
 }
 
-export default RelatedObjectsTable
+export const RelatedObjectsTableInput = ({
+  title,
+  currentObject,
+  relatedObjects,
+  objectType,
+  entityTypes,
+  setRelatedObjects,
+  showDelete
+}) => {
+  const fieldValue = relatedObjects.map(nro => ({
+    uuid: nro.relatedObjectUuid
+  }))
+
+  return (
+    <div id="related_objects">
+      <MultiTypeAdvancedSelectComponent
+        value={fieldValue}
+        objectType={objectType}
+        entityTypes={entityTypes}
+        isMultiSelect
+        onConfirm={(value, objectType) => {
+          if (value.length > fieldValue.length) {
+            // entity was added at the end, set correct value
+            const addedEntity = value.pop()
+            const newRelatedObject = {
+              relatedObjectType: MODEL_TO_OBJECT_TYPE[objectType],
+              relatedObjectUuid: addedEntity.uuid,
+              relatedObject: addedEntity
+            }
+            setRelatedObjects([...relatedObjects, newRelatedObject])
+          } else {
+            // entity was deleted, find which one, but always keep current object
+            const valueUuids = value.map(v => v.uuid)
+            const newRelatedObjects = relatedObjects.filter(
+              ro =>
+                (currentObject?.relatedObjectType === ro.relatedObjectType &&
+                  currentObject?.relatedObjectUuid === ro.relatedObjectUuid) ||
+                valueUuids.includes(ro.relatedObjectUuid)
+            )
+            setRelatedObjects(newRelatedObjects)
+          }
+        }}
+      />
+      <RelatedObjectsTable
+        title={title}
+        currentObject={currentObject}
+        relatedObjects={relatedObjects}
+        setRelatedObjects={setRelatedObjects}
+        showDelete={showDelete}
+      />
+    </div>
+  )
+}
+
+RelatedObjectsTableInput.propTypes = {
+  title: PropTypes.string,
+  currentObject: Model.relatedObjectPropType,
+  relatedObjects: Model.noteRelatedObjectsPropType.isRequired,
+  objectType: PropTypes.string,
+  entityTypes: PropTypes.arrayOf(PropTypes.string).isRequired,
+  setRelatedObjects: PropTypes.func.isRequired,
+  showDelete: PropTypes.bool
+}
+
+RelatedObjectsTableInput.defaultProps = {
+  entityTypes: Object.values(ENTITY_TYPES),
+  showDelete: false
+}

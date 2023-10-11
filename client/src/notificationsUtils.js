@@ -5,7 +5,7 @@ export const GRAPHQL_NOTIFICATIONS_NOTE_FIELDS = `
   customFields
   notes {
     noteRelatedObjects {
-      noteUuid
+      objectUuid
     }
     createdAt
     type

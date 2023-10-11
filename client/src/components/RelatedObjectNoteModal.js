@@ -7,7 +7,7 @@ import Model, {
   GQL_UPDATE_NOTE,
   NOTE_TYPE
 } from "components/Model"
-import RelatedObjectsTable from "components/RelatedObjectsTable"
+import { RelatedObjectsTableInput } from "components/RelatedObjectsTable"
 import RichTextEditor from "components/RichTextEditor"
 import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
@@ -101,7 +101,7 @@ const RelatedObjectNoteModal = ({
                     widget={<RichTextEditor disableFullSize />}
                     vertical
                   />
-                  <RelatedObjectsTable
+                  <RelatedObjectsTableInput
                     relatedObjects={relatedObjects}
                     currentObject={edit ? undefined : currentObject}
                     setRelatedObjects={setRelatedObjects}

@@ -22,10 +22,10 @@ export default class AuthorizationGroup extends Model {
       .string()
       .required()
       .default(() => Model.STATUS.ACTIVE),
-    positions: yup.array().nullable().default([])
+    authorizationGroupRelatedObjects: yup.array().nullable().default([])
   })
 
-  static autocompleteQuery = "uuid, name, description"
+  static autocompleteQuery = "uuid name description"
 
   static _resourceOverride = [
     "admin",

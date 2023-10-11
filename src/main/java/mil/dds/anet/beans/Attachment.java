@@ -43,7 +43,7 @@ public class Attachment extends AbstractAnetBean {
   private ForeignObjectHolder<Person> author = new ForeignObjectHolder<>();
 
   // annotated below
-  private List<AttachmentRelatedObject> attachmentRelatedObjects;
+  private List<GenericRelatedObject> attachmentRelatedObjects;
 
   public String getMimeType() {
     return mimeType;
@@ -125,7 +125,7 @@ public class Attachment extends AbstractAnetBean {
   }
 
   @GraphQLQuery(name = "attachmentRelatedObjects")
-  public CompletableFuture<List<AttachmentRelatedObject>> loadAttachmentRelatedObjects(
+  public CompletableFuture<List<GenericRelatedObject>> loadAttachmentRelatedObjects(
       @GraphQLRootContext Map<String, Object> context) {
     if (attachmentRelatedObjects != null) {
       return CompletableFuture.completedFuture(attachmentRelatedObjects);
@@ -137,12 +137,12 @@ public class Attachment extends AbstractAnetBean {
         });
   }
 
-  public List<AttachmentRelatedObject> getAttachmentRelatedObjects() {
+  public List<GenericRelatedObject> getAttachmentRelatedObjects() {
     return attachmentRelatedObjects;
   }
 
   @GraphQLInputField(name = "attachmentRelatedObjects")
-  public void setAttachmentRelatedObjects(List<AttachmentRelatedObject> attachmentRelatedObjects) {
+  public void setAttachmentRelatedObjects(List<GenericRelatedObject> attachmentRelatedObjects) {
     this.attachmentRelatedObjects = attachmentRelatedObjects;
   }
 

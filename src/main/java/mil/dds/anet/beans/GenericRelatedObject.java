@@ -7,25 +7,24 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.time.Instant;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import javax.ws.rs.WebApplicationException;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
-public class AttachmentRelatedObject extends AbstractAnetBean {
+public class GenericRelatedObject extends AbstractAnetBean {
+
   @GraphQLQuery
   @GraphQLInputField
-  private String attachmentUuid;
-
+  private String objectUuid;
   @GraphQLQuery
   @GraphQLInputField
   private String relatedObjectType;
-
   @GraphQLQuery
   @GraphQLInputField
   private String relatedObjectUuid;
-
   // annotated below
   private RelatableObject relatedObject;
 
@@ -33,7 +32,7 @@ public class AttachmentRelatedObject extends AbstractAnetBean {
   @JsonIgnore
   @GraphQLIgnore
   public String getUuid() {
-    throw new WebApplicationException("no UUID field on AttachmentRelatedObject");
+    throw new WebApplicationException("no UUID field on GenericRelatedObject");
   }
 
   @Override
@@ -45,7 +44,7 @@ public class AttachmentRelatedObject extends AbstractAnetBean {
   @JsonIgnore
   @GraphQLIgnore
   public Instant getCreatedAt() {
-    throw new WebApplicationException("no createdAt field on AttachmentRelatedObject");
+    throw new WebApplicationException("no createdAt field on GenericRelatedObject");
   }
 
   @Override
@@ -57,7 +56,7 @@ public class AttachmentRelatedObject extends AbstractAnetBean {
   @JsonIgnore
   @GraphQLIgnore
   public Instant getUpdatedAt() {
-    throw new WebApplicationException("no updatedAt field on AttachmentRelatedObject");
+    throw new WebApplicationException("no updatedAt field on GenericRelatedObject");
   }
 
   @Override
@@ -65,12 +64,12 @@ public class AttachmentRelatedObject extends AbstractAnetBean {
     // just ignore
   }
 
-  public String getAttachmentUuid() {
-    return attachmentUuid;
+  public String getObjectUuid() {
+    return objectUuid;
   }
 
-  public void setAttachmentUuid(String attachmentUuid) {
-    this.attachmentUuid = attachmentUuid;
+  public void setObjectUuid(String objectUuid) {
+    this.objectUuid = objectUuid;
   }
 
   public String getRelatedObjectType() {
@@ -95,7 +94,7 @@ public class AttachmentRelatedObject extends AbstractAnetBean {
     if (relatedObject != null) {
       return CompletableFuture.completedFuture(relatedObject);
     }
-    return new UuidFetcher<AbstractAnetBean>()
+    return new UuidFetcher<>()
         .load(context, IdDataLoaderKey.valueOfTableName(relatedObjectType), relatedObjectUuid)
         .thenApply(o -> {
           relatedObject = (RelatableObject) o;
@@ -103,4 +102,19 @@ public class AttachmentRelatedObject extends AbstractAnetBean {
         });
   }
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o)
+      return true;
+    if (!(o instanceof GenericRelatedObject that))
+      return false;
+    return Objects.equals(objectUuid, that.objectUuid)
+        && Objects.equals(relatedObjectType, that.relatedObjectType)
+        && Objects.equals(relatedObjectUuid, that.relatedObjectUuid);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(objectUuid, relatedObjectType, relatedObjectUuid);
+  }
 }

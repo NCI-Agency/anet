@@ -16,7 +16,7 @@ describe("Create authorization group form page", () => {
   })
 
   describe("When creating an authorization group", () => {
-    it("Should save an authorization group with only a name", async() => {
+    it("Should save an authorization group with only a name and description", async() => {
       await (await CreateAuthorizationGroup.getName()).waitForDisplayed()
       await (
         await CreateAuthorizationGroup.getName()
@@ -40,31 +40,35 @@ describe("Create authorization group form page", () => {
       ).to.not.equal("ACTIVE")
       await (await CreateAuthorizationGroup.getStatusInactiveButton()).click()
       // eslint-disable-next-line no-unused-expressions
-      expect(await $(".positions_table").isExisting()).to.be.false
-      await (await CreateAuthorizationGroup.getPositionsInput()).click()
+      expect(await $(".related_objects_table").isExisting()).to.be.false
+      await (await CreateAuthorizationGroup.getRelatedObjectsInput()).click()
       await (
-        await CreateAuthorizationGroup.getPositionsInput()
+        await CreateAuthorizationGroup.getRelatedObjectsInput()
       ).setValue(POSITION)
-      await CreateAuthorizationGroup.waitForPositionsAdvancedSelectToChange(
+      await CreateAuthorizationGroup.waitForRelatedObjectsAdvancedSelectToChange(
         POSITION_COMPLETE
       )
       expect(
         await (
-          await CreateAuthorizationGroup.getPositionsAdvancedSelectFirstItem()
+          await CreateAuthorizationGroup.getRelatedObjectsAdvancedSelectFirstItem()
         ).getText()
       ).to.include(POSITION_COMPLETE)
       await (
-        await CreateAuthorizationGroup.getPositionsAdvancedSelectFirstItem()
+        await CreateAuthorizationGroup.getRelatedObjectsAdvancedSelectFirstItem()
       ).click()
-      // Click outside the positions overlay
+      // Click outside the overlay
       await (await CreateAuthorizationGroup.getName()).click()
-      // Advanced select input gets empty, the position is added to a table underneath
+      // Advanced select input does not get empty
       expect(
-        await (await CreateAuthorizationGroup.getPositionsInput()).getValue()
-      ).to.equal("")
-      // positions table exists now
+        await (
+          await CreateAuthorizationGroup.getRelatedObjectsInput()
+        ).getValue()
+      ).to.equal(POSITION)
+      // The position is added to a table underneath, so relatedObjects table exists now
       // eslint-disable-next-line no-unused-expressions
-      expect(await $(".positions_table").isExisting()).to.be.true
+      expect(await $(".related_objects_table").isExisting()).to.be.true
+      // FIXME: assert that the position is added to the relatedObjects table
+      // FIXME: add tests for adding people and organizations
       await CreateAuthorizationGroup.submitForm()
       await CreateAuthorizationGroup.waitForAlertSuccessToLoad()
       const alertMessage = await (

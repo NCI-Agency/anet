@@ -1,7 +1,7 @@
 import { gql } from "@apollo/client"
 import API from "api"
 import { PreviewField } from "components/FieldHelper"
-import PositionTable from "components/PositionTable"
+import { RelatedObjectsTable } from "components/RelatedObjectsTable"
 import { AuthorizationGroup } from "models"
 import PropTypes from "prop-types"
 import React from "react"
@@ -12,28 +12,31 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
       uuid
       name
       description
-      positions {
-        uuid
-        name
-        code
-        type
-        role
-        status
-        organization {
-          uuid
-          shortName
-          longName
-          identificationCode
-        }
-        person {
-          uuid
-          name
-          rank
-          role
-          avatar(size: 32)
+      status
+      authorizationGroupRelatedObjects {
+        relatedObjectType
+        relatedObjectUuid
+        relatedObject {
+          ... on Organization {
+            uuid
+            shortName
+            longName
+            identificationCode
+          }
+          ... on Person {
+            uuid
+            role
+            rank
+            name
+            avatar(size: 32)
+          }
+          ... on Position {
+            uuid
+            type
+            name
+          }
         }
       }
-      status
     }
   }
 `
@@ -61,6 +64,11 @@ const AuthorizationGroupPreview = ({ className, uuid }) => {
         <PreviewField label="Name" value={authorizationGroup.name} />
 
         <PreviewField
+          label="Description"
+          value={authorizationGroup.description}
+        />
+
+        <PreviewField
           label="Status"
           value={AuthorizationGroup.humanNameOfStatus(
             authorizationGroup.status
@@ -68,7 +76,10 @@ const AuthorizationGroupPreview = ({ className, uuid }) => {
         />
 
         <div className="preview-section">
-          <PositionTable positions={authorizationGroup.positions} />
+          <RelatedObjectsTable
+            title="Member"
+            relatedObjects={authorizationGroup.authorizationGroupRelatedObjects}
+          />
         </div>
       </div>
     </div>

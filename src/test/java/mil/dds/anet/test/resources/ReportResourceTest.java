@@ -42,8 +42,8 @@ import mil.dds.anet.test.client.ApprovalStepType;
 import mil.dds.anet.test.client.Atmosphere;
 import mil.dds.anet.test.client.Attachment;
 import mil.dds.anet.test.client.AttachmentInput;
-import mil.dds.anet.test.client.AttachmentRelatedObjectInput;
 import mil.dds.anet.test.client.Comment;
+import mil.dds.anet.test.client.GenericRelatedObjectInput;
 import mil.dds.anet.test.client.Location;
 import mil.dds.anet.test.client.LocationSearchQueryInput;
 import mil.dds.anet.test.client.LocationSearchSortBy;
@@ -1480,7 +1480,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     final var allowedMimeTypes = (List<String>) attachmentSettings.get("mimeTypes");
     final String mimeType = allowedMimeTypes.get(0);
 
-    final AttachmentRelatedObjectInput testAroInput = AttachmentRelatedObjectInput.builder()
+    final GenericRelatedObjectInput testAroInput = GenericRelatedObjectInput.builder()
         .withRelatedObjectType(ReportDao.TABLE_NAME).withRelatedObjectUuid(r.getUuid()).build();
     final AttachmentInput testAttachmentInput =
         AttachmentInput.builder().withFileName("testDeleteAttachment.jpg").withMimeType(mimeType)

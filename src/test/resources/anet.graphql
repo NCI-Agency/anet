@@ -185,7 +185,7 @@ enum Atmosphere {
 
 """"""
 type Attachment {
-  attachmentRelatedObjects: [AttachmentRelatedObject]
+  attachmentRelatedObjects: [GenericRelatedObject]
   author: Person
   caption: String
   classification: String
@@ -200,7 +200,7 @@ type Attachment {
 
 """"""
 input AttachmentInput {
-  attachmentRelatedObjects: [AttachmentRelatedObjectInput]
+  attachmentRelatedObjects: [GenericRelatedObjectInput]
   author: PersonInput
   caption: String
   classification: String
@@ -214,26 +214,11 @@ input AttachmentInput {
 }
 
 """"""
-type AttachmentRelatedObject {
-  attachmentUuid: String
-  relatedObject: RelatableObject
-  relatedObjectType: String
-  relatedObjectUuid: String
-}
-
-""""""
-input AttachmentRelatedObjectInput {
-  attachmentUuid: String
-  relatedObjectType: String
-  relatedObjectUuid: String
-}
-
-""""""
 type AuthorizationGroup {
+  authorizationGroupRelatedObjects: [GenericRelatedObject]
   createdAt: Instant
   description: String
   name: String
-  positions: [Position]
   status: Status
   updatedAt: Instant
   uuid: String
@@ -241,10 +226,10 @@ type AuthorizationGroup {
 
 """"""
 input AuthorizationGroupInput {
+  authorizationGroupRelatedObjects: [GenericRelatedObjectInput]
   createdAt: Instant
   description: String
   name: String
-  positions: [PositionInput]
   status: Status
   updatedAt: Instant
   uuid: String
@@ -320,6 +305,21 @@ enum EngagementStatus {
   CANCELLED
   FUTURE
   HAPPENED
+}
+
+""""""
+type GenericRelatedObject {
+  objectUuid: String
+  relatedObject: RelatableObject
+  relatedObjectType: String
+  relatedObjectUuid: String
+}
+
+""""""
+input GenericRelatedObjectInput {
+  objectUuid: String
+  relatedObjectType: String
+  relatedObjectUuid: String
 }
 
 scalar Instant
@@ -450,7 +450,7 @@ type Note {
   assessmentKey: String
   author: Person
   createdAt: Instant
-  noteRelatedObjects: [NoteRelatedObject]
+  noteRelatedObjects: [GenericRelatedObject]
   text: String
   type: NoteType
   updatedAt: Instant
@@ -462,26 +462,11 @@ input NoteInput {
   assessmentKey: String
   author: PersonInput
   createdAt: Instant
-  noteRelatedObjects: [NoteRelatedObjectInput]
+  noteRelatedObjects: [GenericRelatedObjectInput]
   text: String
   type: NoteType
   updatedAt: Instant
   uuid: String
-}
-
-""""""
-type NoteRelatedObject {
-  noteUuid: String
-  relatedObject: RelatableObject
-  relatedObjectType: String
-  relatedObjectUuid: String
-}
-
-""""""
-input NoteRelatedObjectInput {
-  noteUuid: String
-  relatedObjectType: String
-  relatedObjectUuid: String
 }
 
 """"""
@@ -577,6 +562,7 @@ type Person {
   attachments: [Attachment]
   attendedReports(query: ReportSearchQueryInput): AnetBeanList_Report
   authoredReports(query: ReportSearchQueryInput): AnetBeanList_Report
+  authorizationGroupUuids: [String]
   avatar(size: Int = 256): Base64String
   biography: String
   code: String
@@ -684,7 +670,6 @@ enum PersonSearchSortBy {
 type Position {
   associatedPositions: [Position]
   attachments: [Attachment]
-  authorizationGroups: [AuthorizationGroup]
   code: String
   createdAt: Instant
   customFields: String
@@ -925,6 +910,7 @@ type ReportPerson {
   attendee: Boolean!
   author: Boolean!
   authoredReports(query: ReportSearchQueryInput): AnetBeanList_Report
+  authorizationGroupUuids: [String]
   avatar(size: Int = 256): Base64String
   biography: String
   code: String

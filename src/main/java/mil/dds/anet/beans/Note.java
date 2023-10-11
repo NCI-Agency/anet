@@ -37,7 +37,7 @@ public class Note extends AbstractAnetBean {
   // annotated below
   private ForeignObjectHolder<Person> author = new ForeignObjectHolder<>();
   // annotated below
-  private List<NoteRelatedObject> noteRelatedObjects;
+  private List<GenericRelatedObject> noteRelatedObjects;
 
   public NoteType getType() {
     return type;
@@ -95,7 +95,7 @@ public class Note extends AbstractAnetBean {
   }
 
   @GraphQLQuery(name = "noteRelatedObjects")
-  public CompletableFuture<List<NoteRelatedObject>> loadNoteRelatedObjects(
+  public CompletableFuture<List<GenericRelatedObject>> loadNoteRelatedObjects(
       @GraphQLRootContext Map<String, Object> context) {
     if (noteRelatedObjects != null) {
       return CompletableFuture.completedFuture(noteRelatedObjects);
@@ -108,11 +108,11 @@ public class Note extends AbstractAnetBean {
   }
 
   @GraphQLInputField(name = "noteRelatedObjects")
-  public void setNoteRelatedObjects(List<NoteRelatedObject> relatedObjects) {
+  public void setNoteRelatedObjects(List<GenericRelatedObject> relatedObjects) {
     this.noteRelatedObjects = relatedObjects;
   }
 
-  public List<NoteRelatedObject> getNoteRelatedObjects() {
+  public List<GenericRelatedObject> getNoteRelatedObjects() {
     return noteRelatedObjects;
   }
 

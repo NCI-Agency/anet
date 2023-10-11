@@ -8,6 +8,7 @@ me {
   pendingVerification
   avatar(size: 32)
   code
+  authorizationGroupUuids
   position {
     uuid
     name
@@ -69,7 +70,7 @@ me {
         customFields
         notes {
           noteRelatedObjects {
-            noteUuid
+            objectUuid
           }
           createdAt
           type
@@ -99,18 +100,12 @@ me {
       customFields
       notes {
         noteRelatedObjects {
-          noteUuid
+          objectUuid
         }
         createdAt
         type
         text
       }
-    }
-    authorizationGroups {
-      uuid
-      name
-      description
-      status
     }
   }
 }

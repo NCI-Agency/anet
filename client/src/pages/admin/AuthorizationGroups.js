@@ -19,13 +19,29 @@ const GQL_GET_AUTHORIZATION_GROUP_LIST = gql`
         uuid
         name
         description
-        positions {
-          uuid
-          name
-          type
-          role
-        }
         status
+        authorizationGroupRelatedObjects {
+          relatedObjectType
+          relatedObjectUuid
+          relatedObject {
+            ... on Organization {
+              uuid
+              shortName
+            }
+            ... on Person {
+              uuid
+              role
+              rank
+              name
+              avatar(size: 32)
+            }
+            ... on Position {
+              uuid
+              type
+              name
+            }
+          }
+        }
       }
     }
   }

@@ -176,7 +176,7 @@ report(uuid:"${reportUuid}") {
       role
     }
     noteRelatedObjects {
-      noteUuid
+      objectUuid
       relatedObjectType
       relatedObjectUuid
       relatedObject {

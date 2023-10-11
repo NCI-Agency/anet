@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.lists.AnetBeanList;
@@ -80,6 +81,8 @@ public class Person extends AbstractCustomizableAnetBean
   private Position position;
   // annotated below
   private List<PersonPositionHistory> previousPositions;
+  // annotated below
+  private Set<String> authorizationGroupUuids;
   // annotated below
   private Optional<byte[]> avatar;
   @GraphQLQuery
@@ -273,6 +276,15 @@ public class Person extends AbstractCustomizableAnetBean
     query.setAttendeeUuid(uuid);
     query.setUser(DaoUtils.getUserFromContext(context));
     return AnetObjectEngine.getInstance().getReportDao().search(context, query);
+  }
+
+  @GraphQLQuery(name = "authorizationGroupUuids")
+  public Set<String> loadAuthorizationGroupUuids() {
+    if (authorizationGroupUuids == null) {
+      authorizationGroupUuids = AnetObjectEngine.getInstance().getAuthorizationGroupDao()
+          .getAuthorizationGroupUuidsForPerson(uuid);
+    }
+    return authorizationGroupUuids;
   }
 
   @GraphQLInputField

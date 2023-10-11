@@ -105,9 +105,11 @@ public abstract class AbstractPositionSearcher
 
     if (query.getAuthorizationGroupUuid() != null) {
       // Search for positions related to a given authorization group
-      qb.addWhereClause(
-          "positions.uuid IN (SELECT ap.\"positionUuid\" FROM \"authorizationGroupPositions\" ap"
-              + " WHERE ap.\"authorizationGroupUuid\" = :authorizationGroupUuid)");
+      qb.addWhereClause("positions.uuid IN"
+          + " (SELECT agro.\"relatedObjectUuid\" FROM \"authorizationGroupRelatedObjects\" agro"
+          + " WHERE agro.\"relatedObjectType\" = :relatedObjectTypePosition"
+          + " AND agro.\"authorizationGroupUuid\" = :authorizationGroupUuid)");
+      qb.addSqlArg("relatedObjectTypePosition", PositionDao.TABLE_NAME);
       qb.addSqlArg("authorizationGroupUuid", query.getAuthorizationGroupUuid());
     }
 

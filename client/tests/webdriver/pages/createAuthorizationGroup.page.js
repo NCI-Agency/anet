@@ -37,13 +37,13 @@ class CreateAuthorizationGroup extends Page {
     return browser.$('label[for="status_INACTIVE"]')
   }
 
-  async getPositionsInput() {
-    return browser.$("#positions")
+  async getRelatedObjectsInput() {
+    return browser.$("#relatedObjects")
   }
 
-  async getPositionsAdvancedSelectFirstItem() {
+  async getRelatedObjectsAdvancedSelectFirstItem() {
     return browser.$(
-      "#positions-popover tbody tr:first-child td:nth-child(2) span"
+      "#entitySelect-popover tbody tr:first-child td:nth-child(2) span"
     )
   }
 
@@ -56,20 +56,20 @@ class CreateAuthorizationGroup extends Page {
     await super.openAsAdminUser(PAGE_URL)
   }
 
-  async waitForPositionsAdvancedSelectToChange(value) {
-    await (await this.getPositionsAdvancedSelectFirstItem()).waitForExist()
+  async waitForRelatedObjectsAdvancedSelectToChange(value) {
+    await (await this.getRelatedObjectsAdvancedSelectFirstItem()).waitForExist()
     return browser.waitUntil(
       async() => {
         return (
           (await (
-            await this.getPositionsAdvancedSelectFirstItem()
+            await this.getRelatedObjectsAdvancedSelectFirstItem()
           ).getText()) === value
         )
       },
       {
         timeout: 5000,
         timeoutMsg:
-          'Expected positions advanced select input to contain "' +
+          'Expected relatedObjects advanced select input to contain "' +
           value +
           '" after 5s'
       }

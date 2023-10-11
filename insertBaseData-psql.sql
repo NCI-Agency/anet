@@ -4,7 +4,7 @@ TRUNCATE TABLE "approvalSteps" CASCADE;
 TRUNCATE TABLE "approvers" CASCADE;
 TRUNCATE TABLE "attachments" CASCADE;
 TRUNCATE TABLE "attachmentRelatedObjects" CASCADE;
-TRUNCATE TABLE "authorizationGroupPositions" CASCADE;
+TRUNCATE TABLE "authorizationGroupRelatedObjects" CASCADE;
 TRUNCATE TABLE "authorizationGroups" CASCADE;
 TRUNCATE TABLE "comments" CASCADE;
 TRUNCATE TABLE "customSensitiveInformation" CASCADE;
@@ -975,41 +975,47 @@ INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor")
 
 -- Authorization groups
 INSERT INTO "authorizationGroups" (uuid, name, description, status, "createdAt", "updatedAt")
-	VALUES ('1050c9e3-e679-4c60-8bdc-5139fbc1c10b', 'EF 1.1 positions', 'All positions related to EF 1.1', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES ('1050c9e3-e679-4c60-8bdc-5139fbc1c10b', 'EF 1.1', 'The complete EF 1.1 organisation', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "authorizationGroups" (uuid, name, description, status, "createdAt", "updatedAt")
-	VALUES ('39a78d51-c351-452c-9206-4305ec8dd76d', 'EF 2.1 positions', 'All positions related to EF 2.1', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES ('39a78d51-c351-452c-9206-4305ec8dd76d', 'EF 2.1', 'The complete EF 2.1 organisation', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "authorizationGroups" (uuid, name, description, status, "createdAt", "updatedAt")
-	VALUES ('c21e7321-7ec5-4837-8805-a302f9575754', 'EF 2.2 positions', 'All positions related to EF 2.2', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES ('c21e7321-7ec5-4837-8805-a302f9575754', 'EF 2.2', 'The complete EF 2.2 organisation', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "authorizationGroups" (uuid, name, description, status, "createdAt", "updatedAt")
 	VALUES ('90a5196d-acf3-4a81-8ff9-3a8c7acabdf3', 'Inactive positions', 'Inactive positions', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
--- Authorization group positions
-INSERT INTO "authorizationGroupPositions" ("authorizationGroupUuid", "positionUuid")
-  SELECT '1050c9e3-e679-4c60-8bdc-5139fbc1c10b', p.uuid
+-- Authorization group members
+INSERT INTO "authorizationGroupRelatedObjects" ("authorizationGroupUuid", "relatedObjectType", "relatedObjectUuid")
+  SELECT '1050c9e3-e679-4c60-8bdc-5139fbc1c10b', 'organizations', o.uuid
+  FROM organizations o
+  WHERE o."shortName" = 'EF 1.1';
+INSERT INTO "authorizationGroupRelatedObjects" ("authorizationGroupUuid", "relatedObjectType", "relatedObjectUuid")
+  SELECT '39a78d51-c351-452c-9206-4305ec8dd76d', 'organizations', o.uuid
+  FROM organizations o
+  WHERE o."shortName" = 'EF 2.1';
+INSERT INTO "authorizationGroupRelatedObjects" ("authorizationGroupUuid", "relatedObjectType", "relatedObjectUuid")
+  SELECT 'c21e7321-7ec5-4837-8805-a302f9575754', 'organizations', o.uuid
+  FROM organizations o
+  WHERE o."shortName" = 'EF 2.2';
+INSERT INTO "authorizationGroupRelatedObjects" ("authorizationGroupUuid", "relatedObjectType", "relatedObjectUuid")
+  SELECT '90a5196d-acf3-4a81-8ff9-3a8c7acabdf3', 'positions', p.uuid
   FROM positions p
-  WHERE p.name LIKE 'EF 1.1%';
-INSERT INTO "authorizationGroupPositions" ("authorizationGroupUuid", "positionUuid")
-  SELECT '39a78d51-c351-452c-9206-4305ec8dd76d', p.uuid
-  FROM positions p
-  WHERE p.name LIKE 'EF 2.1%';
-INSERT INTO "authorizationGroupPositions" ("authorizationGroupUuid", "positionUuid")
-  SELECT 'c21e7321-7ec5-4837-8805-a302f9575754', p.uuid
-  FROM positions p
-  WHERE p.name LIKE 'EF 2.2%';
+  WHERE p.status = 1;
 
 -- Report authorization groups
 INSERT INTO "reportAuthorizationGroups" ("reportUuid", "authorizationGroupUuid")
-  SELECT DISTINCT rp."reportUuid", agp."authorizationGroupUuid"
+  SELECT DISTINCT rp."reportUuid", agro."authorizationGroupUuid"
   FROM "reportPeople" rp
   JOIN people p ON p.uuid = rp."personUuid" AND rp."isPrimary"= TRUE
-  JOIN "peoplePositions" pp on pp."personUuid" = p.uuid,
-  "authorizationGroupPositions" agp
-  WHERE pp."positionUuid" = agp."positionUuid"
+  JOIN "peoplePositions" pp on pp."personUuid" = p.uuid
+  JOIN positions pos on pp."positionUuid" = pos.uuid,
+  "authorizationGroupRelatedObjects" agro
+  WHERE agro."relatedObjectType" = 'organizations'
+  AND pos."organizationUuid" = agro."relatedObjectUuid"
   AND NOT EXISTS (
     SELECT *
     FROM "reportAuthorizationGroups" rap
     WHERE rap."reportUuid" = rp."reportUuid"
-    AND rap."authorizationGroupUuid" = agp."authorizationGroupUuid"
+    AND rap."authorizationGroupUuid" = agro."authorizationGroupUuid"
   );
 
 -- Create "customSensitiveInformation" for some principals

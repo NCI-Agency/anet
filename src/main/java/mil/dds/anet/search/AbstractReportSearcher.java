@@ -292,9 +292,11 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
       qb.addFromClause(
           "LEFT JOIN \"reportAuthorizationGroups\" ra ON ra.\"reportUuid\" = reports.uuid"
               + " LEFT JOIN \"authorizationGroups\" ag ON ag.uuid = ra.\"authorizationGroupUuid\""
-              + " LEFT JOIN \"authorizationGroupPositions\" agp ON agp.\"authorizationGroupUuid\" = ag.uuid"
-              + " LEFT JOIN positions pos ON pos.uuid = agp.\"positionUuid\"");
+              + " LEFT JOIN \"authorizationGroupRelatedObjects\" agro ON agro.\"authorizationGroupUuid\" = ag.uuid"
+              + " LEFT JOIN positions pos ON pos.uuid = agro.\"relatedObjectUuid\"");
+      qb.addWhereClause("agro.\"relatedObjectType\" = :relatedObjectTypePosition");
       qb.addWhereClause("pos.\"currentPersonUuid\" = :userUuid");
+      qb.addSqlArg("relatedObjectTypePosition", PositionDao.TABLE_NAME);
       qb.addSqlArg("userUuid", DaoUtils.getUuid(query.getUser()));
     }
 
