@@ -89,7 +89,7 @@ describe("For the periodic task assessments", () => {
       )
     })
 
-    it("Should allow seeing add button for the assessments in the future", async() => {
+    it("Should see an add button for subTaskMonthly assessments in the future", async() => {
       await (
         await ShowTask.getNextPeriodButton("subTaskMonthly", "monthly")
       ).waitForExist()
@@ -101,6 +101,22 @@ describe("For the periodic task assessments", () => {
       await (
         await ShowTask.getFutureAddAssessmentButton("subTaskMonthly", "monthly")
       ).waitForExist()
+    })
+
+    it("Should not see an add button for subTaskWeekly assessments in the future", async() => {
+      await (
+        await ShowTask.getNextPeriodButton("subTaskWeekly", "weekly")
+      ).waitForExist()
+
+      await (
+        await ShowTask.getNextPeriodButton("subTaskWeekly", "weekly")
+      ).click()
+
+      expect(
+        await (
+          await ShowTask.getFutureAddAssessmentButton("subTaskWeekly", "weekly")
+        ).isExisting()
+      ).to.equal(false)
 
       await ShowTask.logout()
     })
