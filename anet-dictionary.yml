@@ -61,7 +61,6 @@ fields:
         topTaskOnceReport:
           label: Engagement assessment of objective
           recurrence: once
-          allowFutureAssesments: true
           relatedObjectType: report
           authorizationGroupUuids:
             read: ['c21e7321-7ec5-4837-8805-a302f9575754']
@@ -143,6 +142,7 @@ fields:
         subTaskMonthly:
           label: Monthly assessment of effort
           recurrence: monthly
+          allowFutureAssessments: true
           questions:
             requiredButFilteredOutQuestion:
               test: $.subject[?(@property === "noSuchProperty" && @.match(/^willNeverMatch/i))]

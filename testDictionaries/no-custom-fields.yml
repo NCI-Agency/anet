@@ -141,6 +141,7 @@ fields:
         subTaskMonthly:
           label: Monthly assessment of effort
           recurrence: monthly
+          allowFutureAssessments: true
           questions:
             requiredButFilteredOutQuestion:
               test: $.subject[?(@property === "noSuchProperty" && @.match(/^willNeverMatch/i))]
