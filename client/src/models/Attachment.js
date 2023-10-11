@@ -32,7 +32,7 @@ export default class Attachment extends Model {
   static basicFieldsQuery =
     "uuid fileName caption description classification mimeType contentLength"
 
-  static autocompleteQuery = Location.basicFieldsQuery
+  static autocompleteQuery = Attachment.basicFieldsQuery
 
   static _resourceOverride = ["attachments"].join("/")
 
