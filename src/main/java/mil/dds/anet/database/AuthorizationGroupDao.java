@@ -176,30 +176,37 @@ public class AuthorizationGroupDao
 
   @InTransaction
   public Set<String> getAuthorizationGroupUuidsForPerson(String personUuid) {
-    final StringBuilder sql = new StringBuilder(
-        "SELECT DISTINCT \"authorizationGroupUuid\" FROM \"authorizationGroupRelatedObjects\""
-            + ", \"authorizationGroups\", positions, parent_orgs");
-    // Only active groups
-    sql.append(" WHERE \"authorizationGroups\".status = :status");
+    final String mainSelectClause = "SELECT ag.uuid FROM \"authorizationGroups\" ag"
+        + " INNER JOIN \"authorizationGroupRelatedObjects\" agro"
+        + " ON ag.uuid = agro.\"authorizationGroupUuid\"";
+    final String mainWhereClause = " WHERE ag.status = :status"; // only active groups
+    final String positionClause = " AND positions.\"currentPersonUuid\" = :personUuid";
+
+    // Now build the query using UNION ALL, so it can be optimized
+    final StringBuilder sql = new StringBuilder("/* batch.getAuthorizationGroupsByPerson */");
+    sql.append(" WITH RECURSIVE parent_orgs(uuid, parent_uuid) AS"
+        + " (SELECT uuid, uuid as parent_uuid FROM organizations"
+        + " UNION ALL SELECT pt.uuid, bt.\"parentOrgUuid\" FROM organizations bt"
+        + " INNER JOIN parent_orgs pt ON bt.uuid = pt.parent_uuid) ");
+
     // Check for person
-    sql.append(" AND ( (\"relatedObjectType\" = '" + PersonDao.TABLE_NAME
-        + "' AND \"relatedObjectUuid\" = :personUuid)");
-    // Else
-    sql.append(" OR (positions.\"currentPersonUuid\" = :personUuid AND (");
+    sql.append(mainSelectClause);
+    sql.append(mainWhereClause + " AND \"relatedObjectType\" = '" + PersonDao.TABLE_NAME
+        + "' AND \"relatedObjectUuid\" = :personUuid");
+
     // Check for position
-    sql.append(" (\"relatedObjectType\" = '" + PositionDao.TABLE_NAME
-        + "' AND \"relatedObjectUuid\" = positions.uuid)");
+    sql.append(" UNION ALL ");
+    sql.append(mainSelectClause + ", positions");
+    sql.append(mainWhereClause + positionClause + " AND agro.\"relatedObjectType\" = '"
+        + PositionDao.TABLE_NAME + "' AND agro.\"relatedObjectUuid\" = positions.uuid");
+
     // Recursively check for user's organization (and transitive parents thereof)
-    sql.insert(0,
-        "WITH RECURSIVE parent_orgs(uuid, parent_uuid) AS"
-            + " (SELECT uuid, uuid as parent_uuid FROM organizations"
-            + " UNION ALL SELECT pt.uuid, bt.\"parentOrgUuid\" FROM organizations bt"
-            + " INNER JOIN parent_orgs pt ON bt.uuid = pt.parent_uuid) ");
-    sql.append(" OR (\"relatedObjectType\" = '" + OrganizationDao.TABLE_NAME
-        + "' AND \"relatedObjectUuid\" = parent_orgs.parent_uuid"
-        + " AND positions.\"organizationUuid\" = parent_orgs.uuid)");
-    sql.append(" )) )");
-    sql.insert(0, "/* batch.getAuthorizationGroupsByPerson */ ");
+    sql.append(" UNION ALL ");
+    sql.append(mainSelectClause + ", positions, parent_orgs");
+    sql.append(mainWhereClause + positionClause + " AND agro.\"relatedObjectType\" = '"
+        + OrganizationDao.TABLE_NAME + "' AND agro.\"relatedObjectUuid\" = parent_orgs.parent_uuid"
+        + " AND positions.\"organizationUuid\" = parent_orgs.uuid");
+
     return getDbHandle().createQuery(sql).bind("status", DaoUtils.getEnumId(Status.ACTIVE))
         .bind("personUuid", personUuid).mapTo(String.class).set();
   }
