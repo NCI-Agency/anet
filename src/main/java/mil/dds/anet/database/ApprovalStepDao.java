@@ -177,7 +177,7 @@ public class ApprovalStepDao extends AnetBaseDao<ApprovalStep, AbstractSearchQue
     // ensure there is nothing currently on this step
     if (isStepInUse(uuid)) {
       throw new WebApplicationException("Reports are currently pending at this step",
-          Status.NOT_ACCEPTABLE);
+          Status.BAD_REQUEST);
     }
 
     // fix up the linked list.

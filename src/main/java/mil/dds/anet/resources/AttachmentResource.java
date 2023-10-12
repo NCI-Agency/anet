@@ -219,7 +219,7 @@ public class AttachmentResource {
     final var allowedMimeTypes = (List<String>) attachmentSettings.get("mimeTypes");
     if (!allowedMimeTypes.contains(mimeType)) {
       throw new WebApplicationException(
-          String.format("Files of type \"%s\" are not allowed", mimeType), Status.NOT_ACCEPTABLE);
+          String.format("Files of type \"%s\" are not allowed", mimeType), Status.BAD_REQUEST);
     }
   }
 
