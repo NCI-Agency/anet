@@ -726,7 +726,11 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                         authorizationGroups={values.authorizationGroups}
                       />
                     </div>
-                  )) || <h5>No groups are authorized!</h5>}
+                  )) || (
+                    <h5 className="alert alert-warning">
+                      No groups are authorized!
+                    </h5>
+                  )}
                 </Fieldset>
               )}
               {showCustomFields && (
