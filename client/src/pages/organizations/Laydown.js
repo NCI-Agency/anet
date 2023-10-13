@@ -1,4 +1,3 @@
-import AppContext from "components/AppContext"
 import EditAdministratingPositionsModal from "components/EditAdministratingPositionsModal"
 import Fieldset from "components/Fieldset"
 import OrganizationalChart from "components/graphs/OrganizationalChart"
@@ -7,7 +6,7 @@ import Model from "components/Model"
 import PositionTable from "components/PositionTable"
 import { Organization, Person, Position } from "models"
 import PropTypes from "prop-types"
-import React, { useContext, useState } from "react"
+import React, { useState } from "react"
 import { Button, Table } from "react-bootstrap"
 import ContainerDimensions from "react-container-dimensions"
 import { Element } from "react-scroll"
@@ -33,16 +32,11 @@ function getAllAdministratingPositions(organization) {
 }
 
 const OrganizationLaydown = ({ organization, refetch }) => {
-  const { currentUser } = useContext(AppContext)
   const [showInactivePositions, setShowInactivePositions] = useState(false)
   const [
     showAdministratingPositionsModal,
     setShowAdministratingPositionsModal
   ] = useState(false)
-  const isAdmin = currentUser && currentUser.isAdmin()
-  const canAdministrateOrg =
-    currentUser &&
-    currentUser.hasAdministrativePermissionsForOrganization(organization)
   const isPrincipalOrg = organization.type === Organization.TYPE.PRINCIPAL_ORG
   const numInactivePos = organization.positions.filter(
     p => p.status === Model.STATUS.INACTIVE
@@ -88,25 +82,7 @@ const OrganizationLaydown = ({ organization, refetch }) => {
         </div>
       </Element>
 
-      <Fieldset
-        id="supportedPositions"
-        title="Supported positions"
-        action={
-          <div>
-            {canAdministrateOrg && (
-              <LinkTo
-                modelType="Position"
-                model={Position.pathForNew({
-                  organizationUuid: organization.uuid
-                })}
-                button
-              >
-                Create position
-              </LinkTo>
-            )}
-          </div>
-        }
-      >
+      <Fieldset id="supportedPositions" title="Supported positions">
         {renderPositionTable(supportedPositions)}
         {supportedPositions.length === 0 && (
           <em>There are no occupied positions</em>
@@ -136,16 +112,6 @@ const OrganizationLaydown = ({ organization, refetch }) => {
       <Fieldset
         id="administratingPositions"
         title={utils.sentenceCase(orgSettings.administratingPositions.label)}
-        action={
-          isAdmin && (
-            <Button
-              onClick={() => setShowAdministratingPositionsModal(true)}
-              variant="outline-secondary"
-            >
-              Edit {utils.noCase(orgSettings.administratingPositions.label)}
-            </Button>
-          )
-        }
       >
         <PositionTable
           id="superuser-table"
