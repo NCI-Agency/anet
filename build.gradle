@@ -28,7 +28,7 @@ java {
 boolean isTestEnv = project.hasProperty("testEnv")
 String dropwizardVersion = "2.1.8"
 String logbackVersion = "1.3.5"
-String log4jVersion = "2.20.0"
+String log4jVersion = "2.21.0"
 String keycloakVersion = "22.0.4"
 String psqlPushDataPath = "/var/tmp"
 String keycloakContainerPath = "/opt/keycloak"
@@ -140,7 +140,7 @@ dependencies {
 
 	// GraphQL dependencies
 	implementation 'com.graphql-java:graphql-java:20.2'
-	implementation 'com.graphql-java:java-dataloader:3.2.0'
+	implementation 'com.graphql-java:java-dataloader:3.2.1'
 	implementation 'io.leangen.graphql:spqr:0.12.1'
 	// The graphql-java-client-runtime module aggregates all dependencies for the generated code,
 	// including the plugin runtime
@@ -186,7 +186,7 @@ test {
 }
 
 jacoco {
-	toolVersion = "0.8.10"
+	toolVersion = "0.8.11"
 }
 
 jacocoTestReport {
