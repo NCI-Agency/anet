@@ -1487,7 +1487,7 @@ public class ReportResourceTest extends AbstractResourceTest {
             .withDescription("a test attachment created by testDeleteAttachment")
             .withAttachmentRelatedObjects(Collections.singletonList(testAroInput)).build();
     final String createdAttachmentUuid =
-        adminMutationExecutor.createAttachment("", testAttachmentInput);
+        elizabethMutationExecutor.createAttachment("", testAttachmentInput);
     assertThat(createdAttachmentUuid).isNotNull();
 
     final Report updatedReport = adminQueryExecutor.report(FIELDS, r.getUuid());
