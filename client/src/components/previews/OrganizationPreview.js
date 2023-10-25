@@ -211,7 +211,11 @@ const OrganizationPreview = ({ className, uuid }) => {
         )}
       </div>
 
-      <OrganizationLaydown organization={organization} refetch={refetch} />
+      <OrganizationLaydown
+        organization={organization}
+        refetch={refetch}
+        readOnly
+      />
       {organization.isTaskEnabled() && (
         <OrganizationTasks
           organization={organization}
