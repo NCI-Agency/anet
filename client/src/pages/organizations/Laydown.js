@@ -32,7 +32,7 @@ function getAllAdministratingPositions(organization) {
   )
 }
 
-const OrganizationLaydown = ({ organization, refetch }) => {
+const OrganizationLaydown = ({ organization, refetch, readOnly }) => {
   const { currentUser } = useContext(AppContext)
   const [showInactivePositions, setShowInactivePositions] = useState(false)
   const [
@@ -41,6 +41,7 @@ const OrganizationLaydown = ({ organization, refetch }) => {
   ] = useState(false)
   const isAdmin = currentUser && currentUser.isAdmin()
   const canAdministrateOrg =
+    !readOnly &&
     currentUser &&
     currentUser.hasAdministrativePermissionsForOrganization(organization)
   const isPrincipalOrg = organization.type === Organization.TYPE.PRINCIPAL_ORG
@@ -78,7 +79,9 @@ const OrganizationLaydown = ({ organization, refetch }) => {
               {({ width, height }) => (
                 <OrganizationalChart
                   org={organization}
-                  exportTitle={`Organization diagram for ${organization}`}
+                  exportTitle={
+                    readOnly ? null : `Organization diagram for ${organization}`
+                  }
                   width={width}
                   height={height}
                 />
@@ -137,6 +140,7 @@ const OrganizationLaydown = ({ organization, refetch }) => {
         id="administratingPositions"
         title={utils.sentenceCase(orgSettings.administratingPositions.label)}
         action={
+          !readOnly &&
           isAdmin && (
             <Button
               onClick={() => setShowAdministratingPositionsModal(true)}
@@ -305,7 +309,8 @@ const OrganizationLaydown = ({ organization, refetch }) => {
 
 OrganizationLaydown.propTypes = {
   organization: PropTypes.instanceOf(Organization).isRequired,
-  refetch: PropTypes.func.isRequired
+  refetch: PropTypes.func.isRequired,
+  readOnly: PropTypes.bool
 }
 
 export default OrganizationLaydown
