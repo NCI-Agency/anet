@@ -140,7 +140,7 @@ const BasePositionTable = ({
               {showOrganizationsAdministrated && <th>Superuser of</th>}
               <th>Current Occupant</th>
               <th>Status</th>
-              <th />
+              {showDelete && <th />}
             </tr>
           </thead>
           <tbody>

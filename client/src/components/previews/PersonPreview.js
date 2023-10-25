@@ -237,11 +237,11 @@ const PersonPreview = ({ className, uuid }) => {
       position.type === Position.TYPE.PRINCIPAL ? "Is advised by" : "Advises"
     return (
       <Form.Group controlId="counterparts">
-        <Col sm={1} as={Form.Text}>
-          {assocTitle}
+        <Col sm={4}>
+          <Form.Label>{assocTitle}</Form.Label>
         </Col>
-        <Col sm={9}>
-          <Table>
+        <Col sm={12}>
+          <Table striped hover responsive>
             <thead>
               <tr>
                 <th>Name</th>

@@ -10,7 +10,7 @@ function PreviousPositions({ history: previousPositions, action }) {
   return _isEmpty(previousPositions) ? (
     <em>No positions found</em>
   ) : (
-    <Table id="previous-positions">
+    <Table id="previous-positions" striped hover responsive>
       <thead>
         <tr>
           <th>Position</th>

@@ -28,7 +28,7 @@ const NoPaginationTaskTable = ({
               <th>Name</th>
               {showOrganization && <th>Tasked organizations</th>}
               {showDescription && <th>Description</th>}
-              <th />
+              {showDelete && <th />}
             </tr>
           </thead>
           <tbody>

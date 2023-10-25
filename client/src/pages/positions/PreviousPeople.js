@@ -7,7 +7,7 @@ import Settings from "settings"
 
 function PreviousPeople({ history: previousPeople, action }) {
   return (
-    <Table>
+    <Table striped hover responsive>
       <thead>
         <tr>
           <th>Name</th>

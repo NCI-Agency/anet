@@ -14,7 +14,7 @@ function ApprovalSteps({ approvalSteps }) {
     return (
       <div key={idx}>
         <h5>{step.name}</h5>
-        <Table>
+        <Table striped hover responsive>
           <thead>
             <tr>
               <th>Person</th>

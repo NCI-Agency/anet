@@ -10,7 +10,7 @@ const ACTION_SIDES = {
 
 const AssociatedPositions = ({ associatedPositions, action, actionSide }) => {
   return (
-    <Table>
+    <Table striped hover responsive>
       <thead>
         <tr>
           {action && actionSide === ACTION_SIDES.LEFT && <th>Action</th>}

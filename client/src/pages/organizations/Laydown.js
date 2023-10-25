@@ -177,7 +177,7 @@ const OrganizationLaydown = ({ organization, refetch }) => {
       posPersonHeader = Settings.fields.principal.person.name
     }
     return (
-      <Table responsive>
+      <Table striped hover responsive>
         <thead>
           <tr>
             <th>{posNameHeader}</th>

@@ -626,11 +626,11 @@ const PersonShow = ({ pageDispatchers }) => {
       position.type === Position.TYPE.PRINCIPAL ? "Is advised by" : "Advises"
     return (
       <FormGroup controlId="counterparts">
-        <Col sm={2} as={FormLabel}>
-          {assocTitle}
+        <Col sm={4}>
+          <FormLabel>{assocTitle}</FormLabel>
         </Col>
-        <Col sm={10}>
-          <Table>
+        <Col sm={12}>
+          <Table striped hover responsive>
             <thead>
               <tr>
                 <th>Name</th>

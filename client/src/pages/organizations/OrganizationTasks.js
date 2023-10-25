@@ -91,7 +91,7 @@ const OrganizationTasks = ({ pageDispatchers, queryParams, organization }) => {
         totalCount={totalCount}
         goToPage={setPageNum}
       >
-        <Table>
+        <Table striped hover responsive>
           <thead>
             <tr>
               <th>Name</th>
