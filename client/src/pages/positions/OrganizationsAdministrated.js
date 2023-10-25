@@ -5,7 +5,7 @@ import { Table } from "react-bootstrap"
 
 const OrganizationsAdministrated = ({ organizations }) => {
   return (
-    <Table>
+    <Table striped hover responsive>
       <thead>
         <tr>
           <th>Name</th>

@@ -163,7 +163,7 @@ const PositionPreview = ({ className, uuid }) => {
 
       <h4>{`Assigned ${assignedRole}`}</h4>
       <div className="preview-section">
-        <Table>
+        <Table striped hover responsive>
           <thead>
             <tr>
               <th>Name</th>
@@ -186,7 +186,7 @@ const PositionPreview = ({ className, uuid }) => {
 
       <h4>Previous position holders</h4>
       <div className="preview-section">
-        <Table>
+        <Table striped hover responsive>
           <thead>
             <tr>
               <th>Name</th>

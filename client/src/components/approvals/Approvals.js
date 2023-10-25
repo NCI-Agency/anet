@@ -25,7 +25,7 @@ const Approvals = ({ restrictedApprovalLabel, relatedObject }) => {
                 readOnly
               />
             )}
-            <Table>
+            <Table striped hover responsive>
               <thead>
                 <tr>
                   <th>Name</th>
@@ -73,7 +73,7 @@ const Approvals = ({ restrictedApprovalLabel, relatedObject }) => {
                 readOnly
               />
             )}
-            <Table>
+            <Table striped hover responsive>
               <thead>
                 <tr>
                   <th>Name</th>
