@@ -20,10 +20,10 @@
     "@jridgewell/gen-mapping" "^0.3.0"
     "@jridgewell/trace-mapping" "^0.3.9"
 
-"@apollo/client@3.8.4":
-  version "3.8.4"
-  resolved "https://registry.yarnpkg.com/@apollo/client/-/client-3.8.4.tgz#b6d67251422ee8bb05e240ffa65fe8fbd336cd66"
-  integrity sha512-QFXE4ylSHUa6LgYoOGsPysJCm4YJOOM1NwHyF6msZdZXIerqUVpLvxQOdQEXgS0RWvYiBMC1wGOWKzJKSWBdAg==
+"@apollo/client@3.8.6":
+  version "3.8.6"
+  resolved "https://registry.yarnpkg.com/@apollo/client/-/client-3.8.6.tgz#d90f2a9b0147d8fc96c7a867588b5b2165cc4085"
+  integrity sha512-FnHg3vhQP8tQzgBs6oTJCFFIbovelDGYujj6MK7CJneiHf62TJstCIO0Ot4A1h7XrgFEtgl8a/OgajQWqrTuYw==
   dependencies:
     "@graphql-typed-document-node/core" "^3.1.1"
     "@wry/context" "^0.7.3"
@@ -6581,10 +6581,10 @@ change-case-all@1.0.15:
     upper-case "^2.0.2"
     upper-case-first "^2.0.2"
 
-change-case@5.0.2:
-  version "5.0.2"
-  resolved "https://registry.yarnpkg.com/change-case/-/change-case-5.0.2.tgz#0f1885d310b84065a17b20e8231c7dff37207627"
-  integrity sha512-tH6YZXViaeC2/Mnt8m4gSmbZfNorC2rhwCX2bXw8SYZWr8ljCPB7iA+1TLG9t7yroWBFauc63LlOZ1gucMVCWw==
+change-case@5.1.2:
+  version "5.1.2"
+  resolved "https://registry.yarnpkg.com/change-case/-/change-case-5.1.2.tgz#1a1feb43f88b7595c6e8db44b5a27b24fa8a9ebd"
+  integrity sha512-CAtbGEDulyjzs05RXy3uKcwqeztz/dMEuAc1Xu9NQBsbrhuGMneL0u9Dj5SoutLKBFYun8txxYIwhjtLNfUmCA==
 
 change-case@^4.1.2:
   version "4.1.2"
@@ -7136,10 +7136,10 @@ core-js-pure@^3.23.3:
   resolved "https://registry.yarnpkg.com/core-js-pure/-/core-js-pure-3.32.0.tgz#5d79f85da7a4373e9a06494ccbef995a4c639f8b"
   integrity sha512-qsev1H+dTNYpDUEURRuOXMvpdtAnNEvQWS/FMJ2Vb5AY8ZP4rAPQldkE27joykZPJTe0+IVgHZYh1P5Xu1/i1g==
 
-core-js@3.33.0, core-js@^3.33.0:
-  version "3.33.0"
-  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.33.0.tgz#70366dbf737134761edb017990cf5ce6c6369c40"
-  integrity sha512-HoZr92+ZjFEKar5HS6MC776gYslNOKHt75mEBKWKnPeFDpZ6nH5OeF3S6HFT1mUAUZKrzkez05VboaX8myjSuw==
+core-js@3.33.1, core-js@^3.33.0:
+  version "3.33.1"
+  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.33.1.tgz#ef3766cfa382482d0a2c2bc5cb52c6d88805da52"
+  integrity sha512-qVSq3s+d4+GsqN0teRCJtM6tdEEXyWxjzbhVrCHmBS5ZTM0FS2MOS0D13dUXAWDUN6a+lHI/N1hF9Ytz6iLl9Q==
 
 core-util-is@~1.0.0:
   version "1.0.3"
@@ -11674,10 +11674,10 @@ leaflet-defaulticon-compatibility@0.1.2:
   resolved "https://registry.yarnpkg.com/leaflet-defaulticon-compatibility/-/leaflet-defaulticon-compatibility-0.1.2.tgz#f5e1a5841aeab9d1682d17887348855a741b3c2a"
   integrity sha512-IrKagWxkTwzxUkFIumy/Zmo3ksjuAu3zEadtOuJcKzuXaD76Gwvg2Z1mLyx7y52ykOzM8rAH5ChBs4DnfdGa6Q==
 
-leaflet-geosearch@3.9.0:
-  version "3.9.0"
-  resolved "https://registry.yarnpkg.com/leaflet-geosearch/-/leaflet-geosearch-3.9.0.tgz#8123ee9078292ff278ef2b93dc9a4bd25a396690"
-  integrity sha512-6bls8jxwGE2DdFXOUBwXlC8+kI7SlT2MuNYgH5/bl5qwzEiobolsgwNvL99mspgfLZjODhH97jrXPX4LVMe4ZQ==
+leaflet-geosearch@3.10.2:
+  version "3.10.2"
+  resolved "https://registry.yarnpkg.com/leaflet-geosearch/-/leaflet-geosearch-3.10.2.tgz#1c336fbb4ad03e774ece173fb4c16dc1121011d5"
+  integrity sha512-tXi+/7Mt+K3n3rvPmORUra8BrGxY8/e22XSsCciZNQfMan4a2lID4MLzzvnZomiEHEdlYxVLId/yUxRPvf60fA==
   optionalDependencies:
     "@googlemaps/js-api-loader" "^1.14.3"
     leaflet "^1.6.0"
@@ -12380,10 +12380,10 @@ ml-array-rescale@^1.3.7:
     ml-array-max "^1.2.4"
     ml-array-min "^1.2.3"
 
-ml-matrix@6.10.5:
-  version "6.10.5"
-  resolved "https://registry.yarnpkg.com/ml-matrix/-/ml-matrix-6.10.5.tgz#96210951b44c930e75181822f0a3f8e166b54ecc"
-  integrity sha512-3RNGo8Ls3JR/f+8t0pNrvoDW6SmLNDBpQN6FzkFvNx7FJ3GL7Ic1kdxlDYavU3pRwxJFgBrRwZ0FwE+JjX+tvQ==
+ml-matrix@6.10.7:
+  version "6.10.7"
+  resolved "https://registry.yarnpkg.com/ml-matrix/-/ml-matrix-6.10.7.tgz#e62f26bcfbf385396daf11d408621bc6a9545a8e"
+  integrity sha512-v0AciHOXnCEYz8Dq4r5TeA+BFyIabBwng9y/rFVF43mhh3Ho2jDhJ6UZ0IUPRiedmfNcJDmI1j7YFdY30mHAcQ==
   dependencies:
     is-any-array "^2.0.1"
     ml-array-rescale "^1.3.7"
@@ -13999,10 +13999,10 @@ react-router@6.3.0:
   dependencies:
     history "^5.2.0"
 
-react-scroll@1.8.9:
-  version "1.8.9"
-  resolved "https://registry.yarnpkg.com/react-scroll/-/react-scroll-1.8.9.tgz#96f8a82f882b187970c2338759225c7e619d915b"
-  integrity sha512-9m7ztraiX/l6L7erzYAD3fhnveNckei6/NkWfqwN2e0FRdoE2W6Pk4oi2Nah7mWpPCPAeIgegfaqZACTimPOwg==
+react-scroll@1.9.0:
+  version "1.9.0"
+  resolved "https://registry.yarnpkg.com/react-scroll/-/react-scroll-1.9.0.tgz#2984006e184afd0e4018f837d127edf5fa8f152c"
+  integrity sha512-mamNcaX9Ng+JeSbBu97nWwRhYvL2oba+xR2GxvyXsbDeGP+gkYIKZ+aDMMj/n20TbV9SCWm/H7nyuNTSiXA6yA==
   dependencies:
     lodash.throttle "^4.1.1"
     prop-types "^15.7.2"
@@ -15600,10 +15600,10 @@ tiny-warning@^1.0.2, tiny-warning@^1.0.3:
   resolved "https://registry.yarnpkg.com/tiny-warning/-/tiny-warning-1.0.3.tgz#94a30db453df4c643d0fd566060d60a875d84754"
   integrity sha512-lBN9zLN/oAf68o3zNXYrdCt1kP8WsiGW8Oo2ka41b2IM5JL/S1CTyX1rW0mb/zSuJun0ZUrDxx4sqvYS2FWzPA==
 
-title-case@4.1.0:
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/title-case/-/title-case-4.1.0.tgz#6f99732cf0a4a1e7c988a44bd75af24294a4380d"
-  integrity sha512-X6j4JkYviJJ7jPVuBkd1geC35pq+3J5z3q1N5z57FIhBooKQqrO4B7C6dy3RzSJIKYB6Ze0/G3KcWtinzO7MGg==
+title-case@4.1.2:
+  version "4.1.2"
+  resolved "https://registry.yarnpkg.com/title-case/-/title-case-4.1.2.tgz#76d4c0a50b1a49d17c30542a8700aa2d3251297f"
+  integrity sha512-K9Mmf3WWSF0DCAMLk6so4EFyxhh9puTZSnfkpFnp+EGLewLQTYOeYKDXE4PCFU5dUmrqXwSVzZXbpJ6gFIm9Ow==
 
 title-case@^3.0.3:
   version "3.0.3"
