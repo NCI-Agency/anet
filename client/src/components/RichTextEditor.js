@@ -154,7 +154,7 @@ const RichTextEditor = ({
       <Slate
         editor={editor}
         initialValue={slateValue}
-        onChange={newValue => {
+        onValueChange={newValue => {
           setSlateValue(newValue)
           serializeDebounced(editor, onChange)
           makeToolbarAccessible(editor)
