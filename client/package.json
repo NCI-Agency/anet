@@ -184,7 +184,7 @@
     "slate": "0.100.0",
     "slate-history": "0.100.0",
     "slate-hyperscript": "0.100.0",
-    "slate-react": "0.100.0",
+    "slate-react": "0.100.1",
     "title-case": "4.1.2",
     "use-debounce": "9.0.4",
     "uuid": "9.0.1",

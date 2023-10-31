@@ -14791,10 +14791,10 @@ slate-hyperscript@0.100.0:
   dependencies:
     is-plain-object "^5.0.0"
 
-slate-react@0.100.0:
-  version "0.100.0"
-  resolved "https://registry.yarnpkg.com/slate-react/-/slate-react-0.100.0.tgz#f53b11a8dde151d15cebbdb15ca40ee7f04ab4d6"
-  integrity sha512-cWq3tiOvYDJE96ISjnZrX/5IrGcqT4tVVW+PeGquUbrEK/Vq9/850juucjXMLl4zQAtXehy+fxWaJQWPeclUDQ==
+slate-react@0.100.1:
+  version "0.100.1"
+  resolved "https://registry.yarnpkg.com/slate-react/-/slate-react-0.100.1.tgz#d542cd9181e3ad5639dcd8d9911a50da1bf46d71"
+  integrity sha512-CHlUhopb+3VL0YWXPGcloUlaib4BvaT50+UOudj+rsZaa/EQVgmP6czLqLlXhlyLNiOnp5QaWso/qeoLwuBOyQ==
   dependencies:
     "@juggle/resize-observer" "^3.4.0"
     "@types/is-hotkey" "^0.1.8"
