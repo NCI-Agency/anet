@@ -105,7 +105,9 @@ async function populateReport(report, user, args) {
     return [..._uniqWith(reportTasks, _isEqual)]
   }
   const tasks = await getTasks()
-  const engagementDate = faker.date.recent({ days: 365 })
+  const engagementDate = fuzzy.withProbability(0.9)
+    ? faker.date.past()
+    : faker.date.future()
   const state = fuzzy.withProbability(0.05)
     ? Report.STATE.CANCELLED
     : (args && args.state) || Report.STATE.DRAFT
