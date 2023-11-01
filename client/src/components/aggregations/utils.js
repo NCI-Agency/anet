@@ -214,23 +214,38 @@ export const GET_CALENDAR_EVENTS_FROM = {
 }
 
 export function reportsToEvents(reports) {
-  return reports.map(r => {
-    const who =
-      (r.primaryAdvisor && new Person(r.primaryAdvisor).toString()) || ""
-    const where =
-      (r.principalOrg && r.principalOrg.shortName) ||
-      (r.location && r.location.name) ||
-      ""
-    return {
-      title: who + "@" + where,
-      start: moment(r.engagementDate).format("YYYY-MM-DD HH:mm"),
-      end: moment(r.engagementDate)
-        .add(r.duration, "minutes")
-        .format("YYYY-MM-DD HH:mm"),
-      url: Report.pathFor(r),
-      classNames: [`event-${Report.getStateForClassName(r)}`],
-      extendedProps: { ...r },
-      allDay: !Settings.engagementsIncludeTimeAndDuration || r.duration === null
-    }
-  })
+  return reports
+    .map(r => {
+      const who =
+        (r.primaryAdvisor && new Person(r.primaryAdvisor).toString()) || ""
+      const where =
+        (r.principalOrg && r.principalOrg.shortName) ||
+        (r.location && r.location.name) ||
+        ""
+      const start = new Date(r.engagementDate)
+      start.setSeconds(0, 0) // truncate at the minute part
+      return {
+        title: who + "@" + where,
+        start,
+        end: moment(start).add(r.duration, "minutes").toDate(),
+        url: Report.pathFor(r),
+        classNames: [`event-${Report.getStateForClassName(r)}`],
+        extendedProps: { ...r },
+        allDay:
+          !Settings.engagementsIncludeTimeAndDuration || r.duration === null
+      }
+    })
+    .sort(
+      (r1, r2) =>
+        // first the all-day events
+        r2.allDay - r1.allDay ||
+        // then (for events that are not all-day)
+        (!r1.allDay &&
+          // ascending by start date
+          (r1.start - r2.start ||
+            // ascending by end date
+            r1.end - r2.end)) ||
+        // and finally ascending by title
+        r1.title.localeCompare(r2.title)
+    )
 }
