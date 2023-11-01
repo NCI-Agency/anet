@@ -30,11 +30,16 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Attachment;
+import mil.dds.anet.beans.GenericRelatedObject;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.database.AttachmentDao;
+import mil.dds.anet.database.LocationDao;
+import mil.dds.anet.database.OrganizationDao;
+import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.Utils;
 import org.apache.tika.Tika;
 import org.apache.tika.io.TikaInputStream;
 import org.glassfish.jersey.media.multipart.FormDataParam;
@@ -76,10 +81,10 @@ public class AttachmentResource {
     if (!hasAttachmentPermission(user, null)) {
       throw new WebApplicationException("You don't have permission to upload attachments",
           Status.FORBIDDEN);
-
     }
     assertAllowedMimeType(attachment.getMimeType());
     assertAllowedClassification(attachment.getClassification());
+    assertAllowedRelatedObjects(user, attachment.getAttachmentRelatedObjects());
 
     attachment.setAuthorUuid(DaoUtils.getUuid(user));
     attachment = dao.insert(attachment);
@@ -129,10 +134,12 @@ public class AttachmentResource {
     if (!hasAttachmentPermission(user, existing)) {
       throw new WebApplicationException("You don't have permission to update this attachment",
           Status.FORBIDDEN);
-
     }
     assertAllowedMimeType(attachment.getMimeType());
     assertAllowedClassification(attachment.getClassification());
+    assertAllowedRelatedObjects(user,
+        existing.loadAttachmentRelatedObjects(AnetObjectEngine.getInstance().getContext()).join());
+    assertAllowedRelatedObjects(user, attachment.getAttachmentRelatedObjects());
 
     final int numRows = dao.update(attachment);
     if (numRows == 0) {
@@ -151,6 +158,8 @@ public class AttachmentResource {
       throw new WebApplicationException("You don't have permission to delete this attachment",
           Status.FORBIDDEN);
     }
+    assertAllowedRelatedObjects(user,
+        existing.loadAttachmentRelatedObjects(AnetObjectEngine.getInstance().getContext()).join());
 
     final int numRows = dao.delete(attachmentUuid);
     if (numRows == 0) {
@@ -214,19 +223,45 @@ public class AttachmentResource {
         || Objects.equals(existingAttachment.getAuthorUuid(), DaoUtils.getUuid(user));
   }
 
+  private void assertAllowedRelatedObjects(final Person user,
+      final List<GenericRelatedObject> relatedObjects) {
+    if (Utils.isEmptyOrNull(relatedObjects)) {
+      return;
+    }
+    if (!relatedObjects.stream().allMatch(aro -> isAllowedRelatedObject(user, aro))) {
+      throw new WebApplicationException(
+          "You are not allowed to link/unlink the attachment to/from one of the requested objects",
+          Status.BAD_REQUEST);
+    }
+  }
+
+  private boolean isAllowedRelatedObject(final Person user,
+      final GenericRelatedObject relatedObject) {
+    // Check whether the user is allowed to link to the attachmentRelatedObjects!
+    return switch (relatedObject.getRelatedObjectType()) {
+      case LocationDao.TABLE_NAME ->
+        LocationResource.hasPermission(user, relatedObject.getRelatedObjectUuid());
+      case OrganizationDao.TABLE_NAME ->
+        OrganizationResource.hasPermission(user, relatedObject.getRelatedObjectUuid());
+      case ReportDao.TABLE_NAME ->
+        ReportResource.hasPermission(user, relatedObject.getRelatedObjectUuid());
+      // TODO: add other object types if and when attachments to them are allowed
+      default -> false;
+    };
+  }
+
   private void assertAllowedMimeType(final String mimeType) {
-    final Map<String, Object> attachmentSettings = getAttachmentSettings();
-    final var allowedMimeTypes = (List<String>) attachmentSettings.get("mimeTypes");
+    final var allowedMimeTypes = getAllowedMimeTypes();
     if (!allowedMimeTypes.contains(mimeType)) {
       throw new WebApplicationException(
-          String.format("Files of type \"%s\" are not allowed", mimeType), Status.NOT_ACCEPTABLE);
+          String.format("Files of type \"%s\" are not allowed", mimeType), Status.BAD_REQUEST);
     }
   }
 
   private void assertAllowedClassification(final String classificationKey) {
     if (classificationKey != null) {
       // if the classification is set, check if it is valid
-      final Map<String, String> allowedClassifications = getAllowedClassifications();
+      final var allowedClassifications = getAllowedClassifications();
       if (!allowedClassifications.containsKey(classificationKey)) {
         throw new WebApplicationException("Classification is not allowed", Status.BAD_REQUEST);
       }
@@ -234,23 +269,27 @@ public class AttachmentResource {
   }
 
   private void assertAttachmentEnabled() {
-    final Map<String, Object> attachmentSettings = getAttachmentSettings();
+    final var attachmentSettings = getAttachmentSettings();
     final Boolean attachmentDisabled = (Boolean) attachmentSettings.get("featureDisabled");
-
-    if (attachmentDisabled) {
+    if (Boolean.TRUE.equals(attachmentDisabled)) {
       throw new WebApplicationException("Attachment feature is disabled", Status.FORBIDDEN);
     }
   }
 
+  @SuppressWarnings("unchecked")
   public static Map<String, Object> getAttachmentSettings() {
     return (Map<String, Object>) AnetObjectEngine.getConfiguration()
         .getDictionaryEntry("fields.attachment");
   }
 
+  @SuppressWarnings("unchecked")
   public static Map<String, String> getAllowedClassifications() {
-    final Map<String, Object> attachmentSettings = getAttachmentSettings();
-    final Map<String, Object> classification =
-        (Map<String, Object>) attachmentSettings.get("classification");
+    final var classification = (Map<String, Object>) getAttachmentSettings().get("classification");
     return (Map<String, String>) classification.get("choices");
+  }
+
+  @SuppressWarnings("unchecked")
+  public static List<String> getAllowedMimeTypes() {
+    return (List<String>) getAttachmentSettings().get("mimeTypes");
   }
 }

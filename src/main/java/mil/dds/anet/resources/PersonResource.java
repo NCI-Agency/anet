@@ -245,8 +245,7 @@ public class PersonResource {
 
     final String winnerUuid = DaoUtils.getUuid(winner);
     if (loserUuid.equals(winnerUuid)) {
-      throw new WebApplicationException("You selected the same person twice",
-          Status.NOT_ACCEPTABLE);
+      throw new WebApplicationException("You selected the same person twice", Status.BAD_REQUEST);
     }
 
     final Person existingWinner = dao.getByUuid(winnerUuid);

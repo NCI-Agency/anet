@@ -19,7 +19,9 @@ public class AuthUtils {
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  public static String UNAUTH_MESSAGE = "You do not have permissions to do this";
+  public static final String UNAUTH_MESSAGE = "You do not have permissions to do this";
+
+  private AuthUtils() {}
 
   public static void assertAdministrator(Person user) {
     logger.debug("Asserting admin status for {}", user);
@@ -80,12 +82,15 @@ public class AuthUtils {
 
   public static void assertSuperuser(Person user) {
     logger.debug("Asserting superuser position for {}", user);
-    Position position = DaoUtils.getPosition(user);
-    if (position != null && (position.getType() == PositionType.SUPERUSER
-        || position.getType() == PositionType.ADMINISTRATOR)) {
-      return;
+    if (!isSuperuser(user)) {
+      throw new WebApplicationException(UNAUTH_MESSAGE, Status.FORBIDDEN);
     }
-    throw new WebApplicationException(UNAUTH_MESSAGE, Status.FORBIDDEN);
+  }
+
+  public static boolean isSuperuser(Person user) {
+    Position position = DaoUtils.getPosition(user);
+    return position != null && (position.getType() == PositionType.SUPERUSER
+        || position.getType() == PositionType.ADMINISTRATOR);
   }
 
   public static boolean isAdmin(Person user) {
