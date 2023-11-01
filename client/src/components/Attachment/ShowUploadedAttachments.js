@@ -21,10 +21,11 @@ const ShowUploadedAttachments = ({ attachmentList }) => {
   return (
     <>
       <Messages error={error} />
-      {uploadedList?.map((attachment, index) => (
+      {uploadedList?.map(attachment => (
         <AttachmentCard
+          key={attachment.uuid}
           attachment={attachment}
-          key={index}
+          edit
           remove={remove}
           setError={setError}
           setRemove={setRemove}

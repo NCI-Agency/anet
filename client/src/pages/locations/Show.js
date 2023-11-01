@@ -187,12 +187,10 @@ const LocationShow = ({ pageDispatchers }) => {
                   component={FieldHelper.ReadonlyField}
                   humanValue={
                     <div className="attachment-card-list">
-                      {location.attachments.map((attachment, index) => (
+                      {location.attachments.map(attachment => (
                         <AttachmentCard
-                          key={index}
+                          key={attachment.uuid}
                           attachment={attachment}
-                          index={index}
-                          edit={false}
                         />
                       ))}
                     </div>

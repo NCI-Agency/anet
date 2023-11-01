@@ -149,11 +149,11 @@ const UploadAttachment = ({
 
       {/** **** Show uploaded files in here **** **/}
       <div style={{ display: "flex", flexWrap: "wrap" }}>
-        {uploadedList.map((attachment, index) => (
+        {uploadedList.map(attachment => (
           <AttachmentCard
-            key={index}
+            key={attachment.uuid}
             attachment={attachment}
-            index={index}
+            edit
             remove={remove}
             setError={setError}
             setRemove={setRemove}

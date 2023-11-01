@@ -474,12 +474,10 @@ const OrganizationShow = ({ pageDispatchers }) => {
                   component={FieldHelper.ReadonlyField}
                   humanValue={
                     <div className="attachment-card-list">
-                      {organization.attachments.map((attachment, index) => (
+                      {organization.attachments.map(attachment => (
                         <AttachmentCard
-                          key={index}
+                          key={attachment.uuid}
                           attachment={attachment}
-                          index={index}
-                          edit={false}
                         />
                       ))}
                     </div>
