@@ -12,7 +12,6 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
@@ -20,11 +19,9 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.recentActivity.Activity;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.utils.DaoUtils;
-import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.InsertionOrderLinkedList;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractCustomizableAnetBean;
-import mil.dds.anet.views.UuidFetcher;
 
 public class Person extends AbstractCustomizableAnetBean
     implements Principal, RelatableObject, SubscribableObject, WithStatus, Comparable<Person> {
@@ -35,8 +32,6 @@ public class Person extends AbstractCustomizableAnetBean
   public static enum Role {
     ADVISOR, PRINCIPAL
   }
-
-  private static final String AVATAR_TYPE = "png";
 
   @GraphQLQuery
   @GraphQLInputField
@@ -83,8 +78,9 @@ public class Person extends AbstractCustomizableAnetBean
   private List<PersonPositionHistory> previousPositions;
   // annotated below
   private Set<String> authorizationGroupUuids;
-  // annotated below
-  private Optional<byte[]> avatar;
+  @GraphQLQuery
+  @GraphQLInputField
+  private String avatarUuid;
   @GraphQLQuery
   @GraphQLInputField
   private String code;
@@ -287,36 +283,12 @@ public class Person extends AbstractCustomizableAnetBean
     return authorizationGroupUuids;
   }
 
-  @GraphQLInputField
-  public void setAvatar(byte[] avatar) {
-    this.avatar = Optional.ofNullable(avatar);
+  public String getAvatarUuid() {
+    return avatarUuid;
   }
 
-  @GraphQLQuery(name = "avatar")
-  public CompletableFuture<byte[]> loadAvatar(@GraphQLRootContext Map<String, Object> context,
-      @GraphQLArgument(name = "size", defaultValue = "256") int size) {
-    if (avatar != null) {
-      return CompletableFuture.completedFuture(resizeAvatar(size));
-    }
-    return new UuidFetcher<Person>().load(context, IdDataLoaderKey.PEOPLE_AVATARS, uuid)
-        .thenApply(o -> {
-          // Careful, `o` might be null
-          avatar = Optional.ofNullable(o == null ? null : o.getAvatarData());
-          return resizeAvatar(size);
-        });
-  }
-
-  public byte[] resizeAvatar(int size) {
-    try {
-      return Utils.resizeImage(getAvatarData(), size, size, AVATAR_TYPE);
-    } catch (Exception e) {
-      return null;
-    }
-  }
-
-  @JsonIgnore
-  public byte[] getAvatarData() {
-    return avatar == null ? null : avatar.orElse(null);
+  public void setAvatarUuid(String avatarUuid) {
+    this.avatarUuid = avatarUuid;
   }
 
   public String getCode() {
@@ -361,7 +333,7 @@ public class Person extends AbstractCustomizableAnetBean
         && Objects.equals(other.getDomainUsername(), domainUsername)
         && Objects.equals(other.getOpenIdSubject(), openIdSubject)
         && Objects.equals(other.getPendingVerification(), pendingVerification)
-        && Objects.equals(other.getAvatarData(), getAvatarData())
+        && Objects.equals(other.getAvatarUuid(), avatarUuid)
         && Objects.equals(other.getCode(), code)
         && (createdAt != null ? createdAt.equals(other.getCreatedAt())
             : (other.getCreatedAt() == null && updatedAt != null)
@@ -372,7 +344,7 @@ public class Person extends AbstractCustomizableAnetBean
   @Override
   public int hashCode() {
     return Objects.hash(super.hashCode(), uuid, name, status, role, emailAddress, phoneNumber, rank,
-        biography, domainUsername, openIdSubject, pendingVerification, avatar, code, createdAt,
+        biography, domainUsername, openIdSubject, pendingVerification, avatarUuid, code, createdAt,
         updatedAt);
   }
 

@@ -111,7 +111,7 @@ const GQL_GET_TASK = gql`
           name
           rank
           role
-          avatar(size: 32)
+          avatarUuid
         }
       }
       planningApprovalSteps {
@@ -126,7 +126,7 @@ const GQL_GET_TASK = gql`
             name
             rank
             role
-            avatar(size: 32)
+            avatarUuid
           }
         }
       }
@@ -142,7 +142,7 @@ const GQL_GET_TASK = gql`
             name
             rank
             role
-            avatar(size: 32)
+            avatarUuid
           }
         }
       }

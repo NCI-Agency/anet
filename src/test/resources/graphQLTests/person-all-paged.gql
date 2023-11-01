@@ -4,8 +4,8 @@ personList(query:{pageNum:${pageNum}, pageSize:${pageSize}}) {
     name
     rank
     role
+    avatarUuid
     emailAddress
-    avatar(size: 32)
     position {
       uuid
       name

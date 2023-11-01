@@ -112,7 +112,7 @@ export default class Position extends Model {
     .concat(Model.yupSchema)
 
   static autocompleteQuery =
-    "uuid name code type role status location { uuid name } organization { uuid shortName longName identificationCode } person { uuid name rank role avatar(size: 32) }"
+    "uuid name code type role status location { uuid name } organization { uuid shortName longName identificationCode } person { uuid name rank role avatarUuid }"
 
   static autocompleteQueryWithNotes = `${this.autocompleteQuery} ${GRAPHQL_NOTES_FIELDS}`
 
@@ -136,7 +136,7 @@ export default class Position extends Model {
       name
       rank
       role
-      avatar(size: 32)
+      avatarUuid
     }
     associatedPositions {
       uuid
@@ -148,7 +148,7 @@ export default class Position extends Model {
         name
         rank
         role
-        avatar(size: 32)
+        avatarUuid
       }
       organization {
         uuid
@@ -165,7 +165,7 @@ export default class Position extends Model {
         name
         rank
         role
-        avatar(size: 32)
+        avatarUuid
         previousPositions {
           startTime
           endTime

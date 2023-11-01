@@ -62,9 +62,9 @@ const LinkTo = ({
   // Avatar
   const avatarComponent = showAvatar &&
     !button &&
-    Object.prototype.hasOwnProperty.call(model, "avatar") && (
+    Object.hasOwn(model, "avatarUuid") && (
       <AvatarDisplayComponent
-        avatar={modelInstance.avatar}
+        avatarUuid={modelInstance.avatarUuid}
         height={32}
         width={32}
         style={{ marginLeft: 5, marginRight: 5 }}

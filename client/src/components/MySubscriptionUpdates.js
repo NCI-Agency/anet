@@ -39,9 +39,10 @@ const GQL_GET_MY_SUBSCRIPTION_UPDATES = gql`
             identificationCode
           }
           ... on Person {
-            role
-            rank
             name
+            rank
+            role
+            avatarUuid
           }
           ... on Position {
             type
@@ -72,9 +73,10 @@ const GQL_GET_MY_SUBSCRIPTION_UPDATES = gql`
               identificationCode
             }
             ... on Person {
-              role
-              rank
               name
+              rank
+              role
+              avatarUuid
             }
             ... on Position {
               type

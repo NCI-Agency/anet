@@ -63,6 +63,7 @@ const GQL_GET_PERSON = gql`
       name
       rank
       role
+      avatarUuid
       status
       pendingVerification
       isSubscribed
@@ -75,7 +76,6 @@ const GQL_GET_PERSON = gql`
       country
       gender
       endOfTourDate
-      avatar(size: 256)
       code
       position {
         uuid
@@ -98,7 +98,7 @@ const GQL_GET_PERSON = gql`
             name
             rank
             role
-            avatar(size: 32)
+            avatarUuid
           }
           organization {
             uuid
@@ -304,7 +304,7 @@ const PersonShow = ({ pageDispatchers }) => {
                   <Row>
                     <Col md={6}>
                       <AvatarDisplayComponent
-                        avatar={person.avatar}
+                        avatarUuid={person.avatarUuid}
                         height={256}
                         width={256}
                         style={{

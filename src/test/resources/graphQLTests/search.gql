@@ -16,18 +16,21 @@ reportList (query:{text:"${searchQuery}",pageSize:0}) {
       name
       rank
       role
+      avatarUuid
     }
     primaryAdvisor {
       uuid
       name
       rank
       role
+      avatarUuid
     }
     primaryPrincipal {
       uuid
       name
       rank
       role
+      avatarUuid
     }
     advisorOrg {
       uuid
@@ -65,6 +68,7 @@ reportList (query:{text:"${searchQuery}",pageSize:0}) {
             name
             rank
             role
+            avatarUuid
           }
         }
       }
@@ -73,6 +77,7 @@ reportList (query:{text:"${searchQuery}",pageSize:0}) {
         name
         rank
         role
+        avatarUuid
       }
     }
     updatedAt
@@ -86,8 +91,8 @@ personList (query:{text:"${searchQuery}",pageSize:0}) {
     name
     rank
     role
+    avatarUuid
     emailAddress
-    avatar(size: 32)
     position {
       uuid
       name
@@ -130,7 +135,7 @@ positionList (query:{text:"${searchQuery}",pageSize:0}) {
       name
       rank
       role
-      avatar(size: 32)
+      avatarUuid
     }
   }
 }

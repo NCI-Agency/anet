@@ -54,7 +54,7 @@ const GQL_GET_ORGANIZATION = gql`
             name
             rank
             role
-            avatar(size: 32)
+            avatarUuid
           }
         }
       }
@@ -80,7 +80,7 @@ const GQL_GET_ORGANIZATION = gql`
           name
           rank
           role
-          avatar(size: 32)
+          avatarUuid
         }
       }
       approvalSteps {
@@ -94,7 +94,7 @@ const GQL_GET_ORGANIZATION = gql`
             name
             rank
             role
-            avatar(size: 32)
+            avatarUuid
           }
         }
       }

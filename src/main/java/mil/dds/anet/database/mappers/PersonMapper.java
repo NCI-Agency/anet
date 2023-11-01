@@ -34,6 +34,7 @@ public class PersonMapper implements RowMapper<Person> {
     a.setStatus(MapperUtils.getEnumIdx(rs, "people_status", Person.Status.class));
     a.setRole(MapperUtils.getEnumIdx(rs, "people_role", Role.class));
     a.setEmailAddress(MapperUtils.getOptionalString(rs, "people_emailAddress"));
+    a.setAvatarUuid(MapperUtils.getOptionalString(rs, "people_avatarUuid"));
     a.setPhoneNumber(MapperUtils.getOptionalString(rs, "people_phoneNumber"));
     a.setCountry(MapperUtils.getOptionalString(rs, "people_country"));
     a.setGender(MapperUtils.getOptionalString(rs, "people_gender"));
@@ -44,10 +45,6 @@ public class PersonMapper implements RowMapper<Person> {
     a.setDomainUsername(MapperUtils.getOptionalString(rs, "people_domainUsername"));
     a.setOpenIdSubject(MapperUtils.getOptionalString(rs, "people_openIdSubject"));
     a.setPendingVerification(MapperUtils.getOptionalBoolean(rs, "people_pendingVerification"));
-    // Treat "avatar" special so it only gets loaded & set when explicitly requested
-    if (MapperUtils.containsColumnNamed(rs, "people_avatar")) {
-      a.setAvatar(rs.getBytes("people_avatar"));
-    }
 
     return a;
   }

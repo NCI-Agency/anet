@@ -14,10 +14,10 @@ authorizationGroupList(query:{pageSize:0}) {
 	}
 	... on Person {
 	  uuid
-	  role
-	  rank
 	  name
-	  avatar(size: 32)
+	  rank
+	  role
+	  avatarUuid
 	}
 	... on Position {
 	  uuid

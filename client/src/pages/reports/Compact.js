@@ -69,7 +69,7 @@ const GQL_GET_REPORT = gql`
         name
         rank
         role
-        avatar(size: 32)
+        avatarUuid
         position {
           uuid
           organization {
@@ -88,7 +88,7 @@ const GQL_GET_REPORT = gql`
                   name
                   rank
                   role
-                  avatar(size: 32)
+                  avatarUuid
                 }
               }
             }
@@ -98,14 +98,14 @@ const GQL_GET_REPORT = gql`
       attendees {
         uuid
         name
+        rank
+        role
+        avatarUuid
+        status
         primary
         author
         attendee
-        rank
-        role
-        status
         endOfTourDate
-        avatar(size: 32)
         position {
           uuid
           name
@@ -130,12 +130,14 @@ const GQL_GET_REPORT = gql`
         name
         rank
         role
+        avatarUuid
       }
       primaryPrincipal {
         uuid
         name
         rank
         role
+        avatarUuid
       }
       tasks {
         uuid
@@ -170,7 +172,7 @@ const GQL_GET_REPORT = gql`
           name
           rank
           role
-          avatar(size: 32)
+          avatarUuid
         }
       }
       principalOrg {
@@ -201,7 +203,7 @@ const GQL_GET_REPORT = gql`
               name
               rank
               role
-              avatar(size: 32)
+              avatarUuid
             }
           }
         }
@@ -210,7 +212,7 @@ const GQL_GET_REPORT = gql`
           name
           rank
           role
-          avatar(size: 32)
+          avatarUuid
         }
       }
       approvalStep {

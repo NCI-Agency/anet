@@ -86,7 +86,7 @@ const SecurityBanner = ({ onLogout, handleSecurityBannerBottom }) => {
               showIcon={false}
             >
               <AvatarDisplayComponent
-                avatar={currentUser.avatar}
+                avatarUuid={currentUser.avatarUuid}
                 width={25}
                 height={25}
               />{" "}

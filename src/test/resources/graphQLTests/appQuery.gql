@@ -3,10 +3,10 @@ me {
   name
   rank
   role
-  emailAddress
+  avatarUuid
   status
+  emailAddress
   pendingVerification
-  avatar(size: 32)
   code
   authorizationGroupUuids
   position {
@@ -49,7 +49,8 @@ me {
         uuid
         name
         rank
-        avatar(size: 32)
+        role
+        avatarUuid
         position {
           uuid
           name

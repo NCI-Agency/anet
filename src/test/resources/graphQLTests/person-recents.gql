@@ -4,9 +4,9 @@ personList(query: {status: ACTIVE, inMyReports: true, sortBy: RECENT, sortOrder:
     name
     rank
     role
+    avatarUuid
     status
     endOfTourDate
-    avatar(size: 32)
     position {
       uuid
       name

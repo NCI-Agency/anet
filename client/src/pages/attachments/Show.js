@@ -35,7 +35,7 @@ const GQL_GET_ATTACHMENT = gql`
         name
         rank
         role
-        avatar(size: 32)
+        avatarUuid
       }
       attachmentRelatedObjects {
         relatedObject {
@@ -51,10 +51,10 @@ const GQL_GET_ATTACHMENT = gql`
             identificationCode
           }
           ... on Person {
-            role
-            rank
             name
-            avatar(size: 32)
+            rank
+            role
+            avatarUuid
           }
           ... on Position {
             type

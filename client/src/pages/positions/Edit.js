@@ -43,7 +43,7 @@ const GQL_GET_POSITION = gql`
           name
           rank
           role
-          avatar(size: 32)
+          avatarUuid
         }
       }
       organization {
@@ -58,7 +58,7 @@ const GQL_GET_POSITION = gql`
         name
         rank
         role
-        avatar(size: 32)
+        avatarUuid
       }
       customFields
       ${GRAPHQL_NOTES_FIELDS}

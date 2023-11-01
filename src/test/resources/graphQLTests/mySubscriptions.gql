@@ -18,9 +18,10 @@ mySubscriptions(query: {pageSize:0}) {
         identificationCode
       }
       ... on Person {
-        role
-        rank
         name
+        rank
+        role
+        avatarUuid
       }
       ... on Position {
         type

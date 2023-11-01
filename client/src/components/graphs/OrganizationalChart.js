@@ -1,6 +1,5 @@
 import { gql } from "@apollo/client"
 import API from "api"
-import { AVATAR_DATA_PREAMBLE } from "components/AvatarDisplayComponent"
 import SVGCanvas from "components/graphs/SVGCanvas"
 import {
   mapPageDispatchersToProps,
@@ -38,10 +37,11 @@ const GQL_GET_CHART_DATA = gql`
           uuid
         }
         person {
-          rank
-          name
           uuid
-          avatar(size: 32)
+          name
+          rank
+          role
+          avatarUuid
         }
       }
       childrenOrgs(query: { status: ACTIVE }) {
@@ -67,10 +67,11 @@ const GQL_GET_CHART_DATA = gql`
             uuid
           }
           person {
-            rank
-            name
             uuid
-            avatar(size: 32)
+            name
+            rank
+            role
+            avatarUuid
           }
         }
       }
@@ -335,8 +336,8 @@ const OrganizationalChart = ({
       .attr("height", d => getRoleValue(d, 26, 13))
       .attr("y", d => getRoleValue(d, -15, -10))
       .attr("href", d =>
-        d?.person?.avatar
-          ? `${AVATAR_DATA_PREAMBLE}${d.person.avatar}`
+        d?.person?.avatarUuid
+          ? `/api/attachment/view/${d.person.avatarUuid}`
           : DEFAULT_AVATAR
       )
 

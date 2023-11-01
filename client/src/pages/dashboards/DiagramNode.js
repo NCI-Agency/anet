@@ -29,7 +29,7 @@ import * as React from "react"
 
 const ENTITY_GQL_FIELDS = {
   Report: GRAPHQL_ENTITY_FIELDS.Report,
-  Person: `uuid, name, role, avatar(size: 64), ${GRAPHQL_NOTES_FIELDS}`,
+  Person: `uuid, name, role, avatarUuid, ${GRAPHQL_NOTES_FIELDS}`,
   Organization: GRAPHQL_ENTITY_FIELDS.Organization,
   Position: GRAPHQL_ENTITY_FIELDS.Position,
   Location: GRAPHQL_ENTITY_FIELDS.Location,
@@ -144,23 +144,22 @@ export const DiagramNodeWidget = ({ size, node, engine }) => {
         backgroundColor: node.isSelected() ? "rgba(0, 0, 255, 0.3)" : null
       }}
     >
-      {modelInstance &&
-      Object.prototype.hasOwnProperty.call(modelInstance, "avatar") ? (
+      {modelInstance && Object.hasOwn(modelInstance, "avatarUuid") ? (
         <AvatarDisplayComponent
-          avatar={modelInstance.avatar}
+          avatarUuid={modelInstance.avatarUuid}
           height={64}
           width={64}
           style={{ pointerEvents: "none" }}
         />
-        ) : (
-          <img
-            src={modelInstance?.iconUrl()}
-            alt=""
-            width={48}
-            height={48}
-            style={{ marginLeft: 8, marginTop: 8, pointerEvents: "none" }}
-          />
-        )}
+      ) : (
+        <img
+          src={modelInstance?.iconUrl()}
+          alt=""
+          width={48}
+          height={48}
+          style={{ marginLeft: 8, marginTop: 8, pointerEvents: "none" }}
+        />
+      )}
       {anetObjectType && anetObject && (
         <div style={{ paddingTop: 5 }}>
           <LinkTo

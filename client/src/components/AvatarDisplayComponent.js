@@ -5,14 +5,14 @@ import DEFAULT_AVATAR from "resources/default_avatar.svg"
 export const AVATAR_DATA_PREAMBLE = "data:image/png;base64,"
 
 const AvatarDisplayComponent = ({
-  avatar,
+  avatarUuid,
   height,
   width,
   style,
   className
 }) => (
   <img
-    src={avatar ? `${AVATAR_DATA_PREAMBLE}${avatar}` : DEFAULT_AVATAR}
+    src={avatarUuid ? `/api/attachment/view/${avatarUuid}` : DEFAULT_AVATAR}
     className={className}
     height={height}
     width={width}
@@ -22,7 +22,7 @@ const AvatarDisplayComponent = ({
 )
 
 AvatarDisplayComponent.propTypes = {
-  avatar: PropTypes.string,
+  avatarUuid: PropTypes.string,
   className: PropTypes.string,
   height: PropTypes.number,
   width: PropTypes.number,

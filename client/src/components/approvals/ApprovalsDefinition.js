@@ -214,7 +214,7 @@ const ApprovalsDefinition = ({
                 ],
                 matchPersonName: true
               }}
-              fields="uuid, name, code, type, person { uuid, name, rank, role, avatar(size: 32) }"
+              fields="uuid, name, code, type, person { uuid, name, rank, role, avatarUuid }"
               addon={POSITIONS_ICON}
             />
           }

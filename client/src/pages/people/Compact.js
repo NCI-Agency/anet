@@ -49,6 +49,7 @@ const GQL_GET_PERSON = gql`
       name
       rank
       role
+      avatarUuid
       status
       pendingVerification
       emailAddress
@@ -58,7 +59,6 @@ const GQL_GET_PERSON = gql`
       country
       gender
       endOfTourDate
-      avatar(size: 256)
       code
       position {
         uuid
@@ -81,7 +81,7 @@ const GQL_GET_PERSON = gql`
             name
             rank
             role
-            avatar(size: 32)
+            avatarUuid
           }
           organization {
             uuid
@@ -254,7 +254,7 @@ const CompactPersonView = ({ pageDispatchers }) => {
         key="avatar"
         content={
           <AvatarDisplayComponent
-            avatar={person.avatar}
+            avatarUuid={person.avatarUuid}
             height={pageSize.avatarSize}
             width={pageSize.avatarSize}
             style={{
@@ -584,10 +584,6 @@ CompactPersonViewHeader.propTypes = {
   setPageSize: PropTypes.func,
   leftColumnFields: PropTypes.string,
   setLeftColumnFields: PropTypes.func
-}
-
-CompactPersonViewHeader.defaultProps = {
-  noReport: false
 }
 
 function onPresetSelect(fields, optionalFields, setOptionalFields) {

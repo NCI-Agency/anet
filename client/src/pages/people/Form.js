@@ -68,7 +68,9 @@ const PersonForm = ({
   const navigate = useNavigate()
   const confirmHasReplacementButton = useRef(null)
   const [error, setError] = useState(null)
-  const [currentAvatar, setCurrentAvatar] = useState(initialValues.avatar)
+  const [currentAvatarUuid, setCurrentAvatarUuid] = useState(
+    initialValues.avatarUuid
+  )
   const [showWrongPersonModal, setShowWrongPersonModal] = useState(false)
   const [wrongPersonOptionValue, setWrongPersonOptionValue] = useState(null)
   const [showSimilarPeople, setShowSimilarPeople] = useState(false)
@@ -224,7 +226,7 @@ const PersonForm = ({
                   {/* Col contains the avatar and edit button */}
                   <Col sm={12} md={12} lg={4} xl={3} className="text-center">
                     <AvatarDisplayComponent
-                      avatar={currentAvatar}
+                      avatarUuid={currentAvatarUuid}
                       height={256}
                       width={256}
                     />
@@ -711,8 +713,8 @@ const PersonForm = ({
     }
   }
 
-  function onAvatarUpdate(updatedAvatar) {
-    setCurrentAvatar(updatedAvatar)
+  function onAvatarUpdate(updatedAvatarUuid) {
+    setCurrentAvatarUuid(updatedAvatarUuid)
   }
 
   function handleLastNameOnKeyDown(event) {
@@ -766,7 +768,7 @@ const PersonForm = ({
   }
 
   function save(values, form) {
-    values.avatar = currentAvatar
+    values.avatarUuid = currentAvatarUuid
     const person = Person.filterClientSideFields(new Person(values))
     if (values.pendingVerification) {
       person.pendingVerification = false

@@ -102,8 +102,8 @@ const GQL_GET_PERSON_LIST = gql`
         name
         rank
         role
+        avatarUuid
         emailAddress
-        avatar(size: 32)
         position {
           uuid
           name
@@ -153,7 +153,7 @@ const GQL_GET_POSITION_LIST = gql`
           name
           rank
           role
-          avatar(size: 32)
+          avatarUuid
         }
       }
     }

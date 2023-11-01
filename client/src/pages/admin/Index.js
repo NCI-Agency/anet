@@ -77,8 +77,10 @@ const RECENT_ACTIVITIES = gql`
   fragment recentActivity on RecentUserActivity {
     user {
       uuid
-      rank
       name
+      rank
+      role
+      avatarUuid
       domainUsername
     }
     activity {
