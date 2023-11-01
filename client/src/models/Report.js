@@ -315,8 +315,11 @@ export default class Report extends Model {
           _isEmpty(reportSensitiveInformation) ||
           _isEmpty(reportSensitiveInformationText)
             ? schema.nullable()
-            : schema.required(`You should provide authorization groups who can access the sensitive information.
-            If you do not do so, you will remain the only one authorized to see the sensitive information you have entered`)
+            : schema.required().min(
+              1,
+              `You should provide authorization groups who can access the sensitive information.
+               If you do not do so, you will remain the only one authorized to see the sensitive information you have entered`
+            )
       )
   })
 
