@@ -36,7 +36,6 @@ public abstract class AbstractUserActivitySearcher extends
         break;
     }
     qb.addSelectClause("count");
-    qb.addTotalCount();
     qb.addFromClause(WITH_CLAUSE_NAME);
     addOrderByClauses(qb, query);
   }

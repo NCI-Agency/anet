@@ -46,7 +46,6 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
 
   protected void buildQuery(Set<String> subFields, PersonSearchQuery query) {
     qb.addSelectClause(getTableFields(subFields));
-    qb.addTotalCount();
     qb.addFromClause("people");
 
     if (query.getOrgUuid() != null || query.getLocationUuid() != null

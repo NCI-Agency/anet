@@ -29,7 +29,6 @@ public abstract class AbstractOrganizationSearcher extends
   @Override
   protected void buildQuery(OrganizationSearchQuery query) {
     qb.addSelectClause(OrganizationDao.ORGANIZATION_FIELDS);
-    qb.addTotalCount();
     qb.addFromClause("organizations");
 
     if (hasTextQuery(query)) {
