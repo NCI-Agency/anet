@@ -221,7 +221,7 @@ const UserActivitiesOverTime = ({
                   variant="outline-secondary"
                   className="ms-4"
                 >
-                  Today
+                  {showTodayLabel(aggregationPeriod)}
                 </Button>
                 <div className="d-flex align-items-center">
                   <FormSelect
@@ -367,6 +367,17 @@ const UserActivitiesOverTime = ({
       aggregationPeriod: newPeriod
     })
     setAggregationPeriod(newPeriod)
+  }
+
+  function showTodayLabel(period) {
+    switch (period) {
+      case "MONTH":
+        return "This month"
+      case "WEEK":
+        return "This week"
+      default:
+        return "Today"
+    }
   }
 
   function toggleShowDeleted() {
