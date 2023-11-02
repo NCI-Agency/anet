@@ -791,7 +791,10 @@ export function initInvisibleFields(
   config,
   parentFieldName = DEFAULT_CUSTOM_FIELDS_PARENT
 ) {
-  if (anetObj[parentFieldName]) {
+  if (
+    anetObj[parentFieldName] &&
+    !anetObj[parentFieldName][INVISIBLE_CUSTOM_FIELDS_FIELD]
+  ) {
     // set initial invisible custom fields
     anetObj[parentFieldName][INVISIBLE_CUSTOM_FIELDS_FIELD] =
       getInvisibleFields(config, parentFieldName, anetObj)
