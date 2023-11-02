@@ -940,7 +940,8 @@ export default class Model {
     NOTES_FIELD,
     IS_SUBSCRIBED_FIELD,
     DEFAULT_CUSTOM_FIELDS_PARENT,
-    SENSITIVE_CUSTOM_FIELDS_PARENT
+    SENSITIVE_CUSTOM_FIELDS_PARENT,
+    "attachments"
   ]
 
   static filterClientSideFields(obj, ...additionalFields) {

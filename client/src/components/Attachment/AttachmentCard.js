@@ -23,9 +23,7 @@ const AttachmentCard = ({
   previewStyle,
   captionStyle,
   edit,
-  remove,
   setError,
-  setRemove,
   uploadedList,
   setUploadedList
 }) => {
@@ -107,9 +105,6 @@ const AttachmentCard = ({
     API.mutation(GQL_DELETE_ATTACHMENT, { uuid: attachment.uuid })
       .then(data => {
         setUploadedList(newAttachments)
-        if (!remove) {
-          setRemove(true)
-        }
         toast.success(
           `Your attachment ${attachment.fileName} has been successfully deleted`
         )
@@ -126,9 +121,7 @@ AttachmentCard.propTypes = {
   previewStyle: PropTypes.object,
   captionStyle: PropTypes.object,
   edit: PropTypes.bool,
-  remove: PropTypes.bool,
   setError: PropTypes.func,
-  setRemove: PropTypes.func,
   uploadedList: PropTypes.array,
   setUploadedList: PropTypes.func
 }

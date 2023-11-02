@@ -178,6 +178,9 @@ const ReportForm = ({
   // update the yup schema for the selected tasks/attendees instant assessments
   const [reportTasks, setReportTasks] = useState(initialValues.tasks)
   const [reportPeople, setReportPeople] = useState(initialValues.reportPeople)
+  const [attachmentList, setAttachmentList] = useState(
+    initialValues?.attachments
+  )
   const [showCustomFields, setShowCustomFields] = useState(
     !!Settings.fields.report.customFields
   )
@@ -924,7 +927,8 @@ const ReportForm = ({
                     component={FieldHelper.SpecialField}
                     widget={
                       <UploadAttachment
-                        edit={edit}
+                        attachments={attachmentList}
+                        updateAttachments={setAttachmentList}
                         relatedObjectType={Report.relatedObjectType}
                         relatedObjectUuid={values.uuid}
                         saveRelatedObject={() =>

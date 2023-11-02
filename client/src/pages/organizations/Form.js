@@ -57,6 +57,9 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
   const { loadAppData, currentUser } = useContext(AppContext)
   const navigate = useNavigate()
   const [error, setError] = useState(null)
+  const [attachmentList, setAttachmentList] = useState(
+    initialValues?.attachments
+  )
   const statusButtons = [
     {
       id: "statusActiveButton",
@@ -376,7 +379,8 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                     component={FieldHelper.SpecialField}
                     widget={
                       <UploadAttachment
-                        edit={edit}
+                        attachments={attachmentList}
+                        updateAttachments={setAttachmentList}
                         relatedObjectType={Organization.relatedObjectType}
                         relatedObjectUuid={values.uuid}
                       />
