@@ -1,42 +1,38 @@
 import AvatarComponent from "components/AvatarComponent"
-import { AVATAR_DATA_PREAMBLE } from "components/AvatarDisplayComponent"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, Modal } from "react-bootstrap"
 
-const AvatarEditModal = ({ title, onAvatarUpdate }) => {
+const AvatarEditModal = ({ title, currentAvatar, images, onAvatarUpdate }) => {
   const [showModal, setShowModal] = useState(false)
-  const [currentPreview, setCurrentPreview] = useState(null)
 
   return (
-    <div style={{ marginTop: "10px" }}>
+    <>
       <Button variant="outline-secondary" onClick={open}>
         {title}
       </Button>
 
       <Modal
         centered
+        backdrop="static"
         show={showModal}
         onHide={close}
-        size="lg"
+        size="xl"
         style={{ zIndex: "1202" }}
       >
         <Modal.Header closeButton>
           <Modal.Title>{title}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <AvatarComponent onChangePreview={setCurrentPreview} />
+          <AvatarComponent
+            currentAvatar={currentAvatar}
+            images={images}
+            onClose={close}
+            onSave={save}
+          />
         </Modal.Body>
-        <Modal.Footer className="justify-content-between">
-          <Button onClick={close} variant="outline-secondary">
-            Cancel
-          </Button>
-          <Button onClick={save} variant="primary">
-            Save
-          </Button>
-        </Modal.Footer>
       </Modal>
-    </div>
+    </>
   )
 
   function open(e) {
@@ -48,16 +44,21 @@ const AvatarEditModal = ({ title, onAvatarUpdate }) => {
     setShowModal(false)
   }
 
-  function save() {
-    // Strip preamble, only leaving the base64-encoded data
-    const re = new RegExp(`^${AVATAR_DATA_PREAMBLE}`)
-    const b64 = currentPreview?.replace(re, "") || null
-    onAvatarUpdate(b64)
+  async function dataUrlToBytes(dataUrl) {
+    const res = await fetch(dataUrl)
+    return new Uint8Array(await res.arrayBuffer())
+  }
+
+  async function save(chosenImage, imageData) {
+    onAvatarUpdate(chosenImage, await dataUrlToBytes(imageData))
     close()
   }
 }
+
 AvatarEditModal.propTypes = {
   title: PropTypes.string.isRequired,
+  currentAvatar: PropTypes.object,
+  images: PropTypes.array.isRequired,
   onAvatarUpdate: PropTypes.func.isRequired
 }
 

@@ -2,8 +2,6 @@ import PropTypes from "prop-types"
 import React from "react"
 import DEFAULT_AVATAR from "resources/default_avatar.svg"
 
-export const AVATAR_DATA_PREAMBLE = "data:image/png;base64,"
-
 const AvatarDisplayComponent = ({
   avatarUuid,
   height,

@@ -3,8 +3,11 @@ import { Icon, IconSize, Intent } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import API from "api"
 import AppContext from "components/AppContext"
-import AvatarDisplayComponent from "components/AvatarDisplayComponent"
+import UploadAttachment, {
+  attachmentSave
+} from "components/Attachment/UploadAttachment"
 import AvatarEditModal from "components/AvatarEditModal"
+import ConfirmDestructive from "components/ConfirmDestructive"
 import CustomDateInput from "components/CustomDateInput"
 import {
   CustomFieldsContainer,
@@ -41,7 +44,10 @@ import {
   Row
 } from "react-bootstrap"
 import { useNavigate } from "react-router-dom"
+import { toast } from "react-toastify"
 import Settings from "settings"
+import utils from "utils"
+import PersonAvatar from "./Avatar"
 
 const GQL_CREATE_PERSON = gql`
   mutation ($person: PersonInput!) {
@@ -53,6 +59,11 @@ const GQL_CREATE_PERSON = gql`
 const GQL_UPDATE_PERSON = gql`
   mutation ($person: PersonInput!) {
     updatePerson(person: $person)
+  }
+`
+const GQL_UPDATE_PERSON_AVATAR = gql`
+  mutation ($person: PersonInput!) {
+    updatePersonAvatar(person: $person)
   }
 `
 const MIN_CHARS_FOR_DUPLICATES = 2
@@ -69,7 +80,10 @@ const PersonForm = ({
   const confirmHasReplacementButton = useRef(null)
   const [error, setError] = useState(null)
   const [currentAvatarUuid, setCurrentAvatarUuid] = useState(
-    initialValues.avatarUuid
+    initialValues?.avatarUuid
+  )
+  const [attachmentList, setAttachmentList] = useState(
+    initialValues?.attachments
   )
   const [showWrongPersonModal, setShowWrongPersonModal] = useState(false)
   const [wrongPersonOptionValue, setWrongPersonOptionValue] = useState(null)
@@ -193,6 +207,15 @@ const PersonForm = ({
         // only admins can change back to ACTIVE (but nobody can change status of self!)
         const disableStatusChange =
           (initialValues.status === Model.STATUS.INACTIVE && !isAdmin) || isSelf
+        const currentAvatar = attachmentList?.find(
+          a => a.uuid === currentAvatarUuid
+        )
+        const otherAttachments = attachmentList?.filter(
+          a => a.uuid !== currentAvatarUuid
+        )
+        const imageAttachments = attachmentList?.filter(a =>
+          a.mimeType?.startsWith("image/")
+        )
         const fullName = Person.fullName(Person.parseFullName(values.name))
         const nameMessage = "This is not " + (isSelf ? "me" : fullName)
         const modalTitle = `It is possible that the information of ${fullName} is out of date. Please help us identify if any of the following is the case:`
@@ -223,18 +246,46 @@ const PersonForm = ({
               <Fieldset>
                 {/* Main Row for the first FieldSet */}
                 <Row>
-                  {/* Col contains the avatar and edit button */}
-                  <Col sm={12} md={12} lg={4} xl={3} className="text-center">
-                    <AvatarDisplayComponent
-                      avatarUuid={currentAvatarUuid}
-                      height={256}
-                      width={256}
-                    />
-                    <AvatarEditModal
-                      title="Edit avatar"
-                      onAvatarUpdate={onAvatarUpdate}
-                    />
-                  </Col>
+                  {edit && (
+                    /* Col contains the avatar and edit button */
+                    <Col sm={12} md={12} lg={4} xl={3} className="text-center">
+                      <PersonAvatar avatar={currentAvatar} />
+                      {(_isEmpty(imageAttachments) && (
+                        <span>
+                          <em>
+                            Upload some image attachments first before setting
+                            an avatar
+                          </em>
+                        </span>
+                      )) || (
+                        <div className="d-flex justify-content-around mt-3">
+                          {currentAvatar && (
+                            <ConfirmDestructive
+                              onConfirm={updateAvatar}
+                              operation="clear"
+                              objectType="the avatar"
+                              objectDisplay={`for ${values.name}`}
+                              title="Clear avatar"
+                              variant="outline-danger"
+                              buttonSize="xs"
+                            >
+                              Clear avatar
+                            </ConfirmDestructive>
+                          )}
+                          <AvatarEditModal
+                            title={
+                              currentAvatar
+                                ? "Set a new avatar"
+                                : "Set an avatar"
+                            }
+                            currentAvatar={currentAvatar}
+                            images={imageAttachments}
+                            onAvatarUpdate={onAvatarUpdate}
+                          />
+                        </div>
+                      )}
+                    </Col>
+                  )}
                   {/* Col contains the rest of the fields for the first FieldSet */}
                   <Col
                     lg={8}
@@ -302,7 +353,7 @@ const PersonForm = ({
                                 setOnSaveRedirectToHome(
                                   wrongPersonOptionValue === "needNewAccount"
                                 )
-                                submitForm()
+                                await submitForm()
                               }}
                               title="Confirm to reset account"
                               body="Are you sure you want to reset this account?"
@@ -638,6 +689,28 @@ const PersonForm = ({
                   }}
                   widget={<RichTextEditor className="biography" />}
                 />
+
+                {edit && (
+                  <Field
+                    name="uploadAttachments"
+                    label="Attachments"
+                    component={FieldHelper.SpecialField}
+                    widget={
+                      <UploadAttachment
+                        attachments={otherAttachments}
+                        updateAttachments={a =>
+                          setAttachmentList(
+                            currentAvatar ? [currentAvatar, ...a] : a
+                          )}
+                        relatedObjectType={Person.relatedObjectType}
+                        relatedObjectUuid={values.uuid}
+                      />
+                    }
+                    onHandleBlur={() => {
+                      setFieldTouched("uploadAttachments", true, false)
+                    }}
+                  />
+                )}
               </Fieldset>
 
               {!_isEmpty(Person.customFields) && (
@@ -713,8 +786,35 @@ const PersonForm = ({
     }
   }
 
-  function onAvatarUpdate(updatedAvatarUuid) {
-    setCurrentAvatarUuid(updatedAvatarUuid)
+  async function updateAvatar(newAvatarUuid) {
+    await API.mutation(GQL_UPDATE_PERSON_AVATAR, {
+      person: { uuid: initialValues.uuid, avatarUuid: newAvatarUuid }
+    })
+      .then(() => {
+        toast.success(`Avatar ${newAvatarUuid ? "updated" : "deleted"}`)
+        setCurrentAvatarUuid(newAvatarUuid)
+        loadAppData() // avatar was changed!
+      })
+      .catch(() => toast.error("Avatar update failed"))
+  }
+
+  async function onAvatarUpdate(chosenImage, data) {
+    const mimeType = "image/png"
+    const baseName = utils.stripExtension(chosenImage.fileName)
+    const newAvatar = await attachmentSave(
+      `${baseName}.png`,
+      mimeType,
+      data.length,
+      initialValues.name,
+      new Blob([data], { type: mimeType }),
+      Person.relatedObjectType,
+      initialValues.uuid,
+      attachmentList,
+      setAttachmentList
+    )
+    if (newAvatar?.uuid) {
+      await updateAvatar(newAvatar?.uuid)
+    }
   }
 
   function handleLastNameOnKeyDown(event) {

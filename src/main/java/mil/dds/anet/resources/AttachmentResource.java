@@ -35,6 +35,7 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.database.AttachmentDao;
 import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.database.OrganizationDao;
+import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
@@ -245,6 +246,8 @@ public class AttachmentResource {
         OrganizationResource.hasPermission(user, relatedObject.getRelatedObjectUuid());
       case ReportDao.TABLE_NAME ->
         ReportResource.hasPermission(user, relatedObject.getRelatedObjectUuid());
+      case PersonDao.TABLE_NAME ->
+        PersonResource.hasPermission(user, relatedObject.getRelatedObjectUuid());
       // TODO: add other object types if and when attachments to them are allowed
       default -> false;
     };

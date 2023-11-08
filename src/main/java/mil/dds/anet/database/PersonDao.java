@@ -126,10 +126,10 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   public Person insertInternal(Person p) {
     final String sql = "/* personInsert */ INSERT INTO people "
         + "(uuid, name, status, role, \"emailAddress\", \"phoneNumber\", rank, "
-        + "\"pendingVerification\", gender, country, \"avatarUuid\", code, \"endOfTourDate\", biography, "
+        + "\"pendingVerification\", gender, country, code, \"endOfTourDate\", biography, "
         + "\"domainUsername\", \"openIdSubject\", \"createdAt\", \"updatedAt\", \"customFields\") "
         + "VALUES (:uuid, :name, :status, :role, :emailAddress, :phoneNumber, :rank, "
-        + ":pendingVerification, :gender, :country, :avatarUuid, :code, :endOfTourDate, :biography, "
+        + ":pendingVerification, :gender, :country, :code, :endOfTourDate, :biography, "
         + ":domainUsername, :openIdSubject, :createdAt, :updatedAt, :customFields)";
     getDbHandle().createUpdate(sql).bindBean(p)
         .bind("createdAt", DaoUtils.asLocalDateTime(p.getCreatedAt()))
@@ -161,7 +161,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   public int updateInternal(Person p) {
     final String sql = "/* personUpdate */ UPDATE people "
         + "SET name = :name, status = :status, role = :role, gender = :gender, country = :country, "
-        + "\"emailAddress\" = :emailAddress, \"avatarUuid\" = :avatarUuid, code = :code, "
+        + "\"emailAddress\" = :emailAddress, code = :code, "
         + "\"phoneNumber\" = :phoneNumber, rank = :rank, biography = :biography, "
         + "\"pendingVerification\" = :pendingVerification, \"domainUsername\" = :domainUsername, "
         + "\"updatedAt\" = :updatedAt, \"customFields\" = :customFields, \"endOfTourDate\" = :endOfTourDate "
@@ -173,6 +173,18 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
         .bind("status", DaoUtils.getEnumId(p.getStatus()))
         .bind("role", DaoUtils.getEnumId(p.getRole())).execute();
     evictFromCache(p);
+    return nr;
+  }
+
+  @InTransaction
+  public int updateAvatar(Person p) {
+    DaoUtils.setUpdateFields(p);
+    final String sql = "/* personUpdateAvatar */ UPDATE people "
+        + "SET \"avatarUuid\" = :avatarUuid, \"updatedAt\" = :updatedAt WHERE uuid = :uuid";
+
+    final int nr = getDbHandle().createUpdate(sql).bindBean(p)
+        .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt())).execute();
+    evictFromCacheByPersonUuid(p.getUuid());
     return nr;
   }
 
@@ -375,6 +387,8 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
 
     // Update the winner's fields
     update(winner);
+    // Update the winner's avatar
+    updateAvatar(winner);
 
     // For reports where both winner and loser are in the reportPeople:
     // 1. set winner's isPrimary, isAttendee and is isAuthor flags to the logical OR of both
@@ -416,6 +430,9 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     // Update comment authors
     updateForMerge("comments", "authorUuid", winnerUuid, loserUuid);
 
+    // Update attachment authors
+    updateForMerge("attachments", "authorUuid", winnerUuid, loserUuid);
+
     // Remove winner and loser from (old) position
     final LocalDateTime now = DaoUtils.asLocalDateTime(Instant.now());
     getDbHandle()
@@ -441,6 +458,10 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
 
     // Update notes
     updateM2mForMerge("noteRelatedObjects", "noteUuid", "relatedObjectUuid", winnerUuid, loserUuid);
+
+    // Update attachments
+    updateM2mForMerge("attachmentRelatedObjects", "attachmentUuid", "relatedObjectUuid", winnerUuid,
+        loserUuid);
 
     // Update customSensitiveInformation for winner
     DaoUtils.saveCustomSensitiveInformation(null, PersonDao.TABLE_NAME, winnerUuid,
