@@ -20,10 +20,10 @@
     "@jridgewell/gen-mapping" "^0.3.0"
     "@jridgewell/trace-mapping" "^0.3.9"
 
-"@apollo/client@3.8.6":
-  version "3.8.6"
-  resolved "https://registry.yarnpkg.com/@apollo/client/-/client-3.8.6.tgz#d90f2a9b0147d8fc96c7a867588b5b2165cc4085"
-  integrity sha512-FnHg3vhQP8tQzgBs6oTJCFFIbovelDGYujj6MK7CJneiHf62TJstCIO0Ot4A1h7XrgFEtgl8a/OgajQWqrTuYw==
+"@apollo/client@3.8.7":
+  version "3.8.7"
+  resolved "https://registry.yarnpkg.com/@apollo/client/-/client-3.8.7.tgz#090b1518f513503b9a6a690ee3eaec49529822e1"
+  integrity sha512-DnQtFkQrCyxHTSa9gR84YRLmU/al6HeXcLZazVe+VxKBmx/Hj4rV8xWtzfWYX5ijartsqDR7SJgV037MATEecA==
   dependencies:
     "@graphql-typed-document-node/core" "^3.1.1"
     "@wry/context" "^0.7.3"
@@ -1769,10 +1769,10 @@
   dependencies:
     fast-deep-equal "^3.1.3"
 
-"@graphiql/react@^0.19.4":
-  version "0.19.4"
-  resolved "https://registry.yarnpkg.com/@graphiql/react/-/react-0.19.4.tgz#7ce928c944cbac6ae36258de7ce96758365dee3f"
-  integrity sha512-qg3N2Zeuq2+GDMZddz7K/ak1p5O56kKuLM/idOJZD+Lxbk2e8Eye3KWM24lJuuCi2gdvJuqPMfCdewLXrHhEkw==
+"@graphiql/react@^0.20.2":
+  version "0.20.2"
+  resolved "https://registry.yarnpkg.com/@graphiql/react/-/react-0.20.2.tgz#8ed900c50d19244d85ff61ad9480cc616b6ae6b5"
+  integrity sha512-/crAUlM+4iVHyNHVdiZjsTEqfMXBHfjEvrMwCwTVig6YXmCAVuaxqkD7NlDtrrPQArLGkABmf1Nw7ObRpby5lg==
   dependencies:
     "@graphiql/toolkit" "^0.9.1"
     "@headlessui/react" "^1.7.15"
@@ -5886,19 +5886,10 @@ axe-core@^4.6.2:
   resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.7.2.tgz#040a7342b20765cb18bb50b628394c21bccc17a0"
   integrity sha512-zIURGIS1E1Q4pcrMjp+nnEh+16G56eG/MUllJH8yEvw7asDo7Ac9uhC9KIH5jzpITueEZolfYglnCGIuSBz39g==
 
-axios@1.5.1:
-  version "1.5.1"
-  resolved "https://registry.yarnpkg.com/axios/-/axios-1.5.1.tgz#11fbaa11fc35f431193a9564109c88c1f27b585f"
-  integrity sha512-Q28iYCWzNHjAm+yEAot5QaAMxhMghWLFVf7rRdwhUI+c2jix2DUXjAHXVi+s1ibs3mjPO/cCgbA++3BjD0vP/A==
-  dependencies:
-    follow-redirects "^1.15.0"
-    form-data "^4.0.0"
-    proxy-from-env "^1.1.0"
-
-axios@^1.6.0:
-  version "1.6.0"
-  resolved "https://registry.yarnpkg.com/axios/-/axios-1.6.0.tgz#f1e5292f26b2fd5c2e66876adc5b06cdbd7d2102"
-  integrity sha512-EZ1DYihju9pwVB+jg67ogm+Tmqc6JmhamRN6I4Zt8DfZu5lbcQGw3ozH9lFejSJgs/ibaef3A9PMXPLeefFGJg==
+axios@1.6.1, axios@^1.6.0:
+  version "1.6.1"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-1.6.1.tgz#76550d644bf0a2d469a01f9244db6753208397d7"
+  integrity sha512-vfBmhDpKafglh0EldBEbVuoe7DyAavGSLWhuSm5ZSEKQnHhBf0xAAwybbNH1IkrJNGnS/VG4I5yxig1pCEXE4g==
   dependencies:
     follow-redirects "^1.15.0"
     form-data "^4.0.0"
@@ -7105,10 +7096,10 @@ core-js-pure@^3.23.3:
   resolved "https://registry.yarnpkg.com/core-js-pure/-/core-js-pure-3.32.0.tgz#5d79f85da7a4373e9a06494ccbef995a4c639f8b"
   integrity sha512-qsev1H+dTNYpDUEURRuOXMvpdtAnNEvQWS/FMJ2Vb5AY8ZP4rAPQldkE27joykZPJTe0+IVgHZYh1P5Xu1/i1g==
 
-core-js@3.33.1, core-js@^3.33.0:
-  version "3.33.1"
-  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.33.1.tgz#ef3766cfa382482d0a2c2bc5cb52c6d88805da52"
-  integrity sha512-qVSq3s+d4+GsqN0teRCJtM6tdEEXyWxjzbhVrCHmBS5ZTM0FS2MOS0D13dUXAWDUN6a+lHI/N1hF9Ytz6iLl9Q==
+core-js@3.33.2, core-js@^3.33.0:
+  version "3.33.2"
+  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.33.2.tgz#312bbf6996a3a517c04c99b9909cdd27138d1ceb"
+  integrity sha512-XeBzWI6QL3nJQiHmdzbAOiMYqjrb7hwU7A39Qhvd/POSa/t9E1AeZyEZx3fNvp/vtM8zXwhoL0FsiS0hD0pruQ==
 
 core-util-is@~1.0.0:
   version "1.0.3"
@@ -9787,12 +9778,12 @@ graphemer@^1.4.0:
   resolved "https://registry.yarnpkg.com/graphemer/-/graphemer-1.4.0.tgz#fb2f1d55e0e3a1849aeffc90c4fa0dd53a0e66c6"
   integrity sha512-EtKwoO6kxCL9WO5xipiHTZlSzBm7WLT627TqC/uVRd0HKmq8NXyebnNYxDoBi7wt8eTWrUrKXCOVaFq9x1kgag==
 
-graphiql@3.0.6:
-  version "3.0.6"
-  resolved "https://registry.yarnpkg.com/graphiql/-/graphiql-3.0.6.tgz#c23b26874bab3f3a14ba74b91f8d4b870feb6548"
-  integrity sha512-PuyAhRQibTrwT3RUKmwIGrJAB+M1gg+TAftmChjBqQW0n5WMFFvP5Wcr2NEikomY0s06+oKeUGhBU2iPrq+cSQ==
+graphiql@3.0.9:
+  version "3.0.9"
+  resolved "https://registry.yarnpkg.com/graphiql/-/graphiql-3.0.9.tgz#89a26e87e9b0972f6948b5e96ecd36bf53bf26c6"
+  integrity sha512-xl9yEr6U4Wc3wmqvtP2sV2a3zGQkqrAMtU90x45QnpNT9MBgBn38HD1Yg5jExXxER65xmYWlGoYdAiD8v/dbEw==
   dependencies:
-    "@graphiql/react" "^0.19.4"
+    "@graphiql/react" "^0.20.2"
     "@graphiql/toolkit" "^0.9.1"
     graphql-language-service "^5.2.0"
     markdown-it "^12.2.0"
@@ -12323,10 +12314,10 @@ ml-array-rescale@^1.3.7:
     ml-array-max "^1.2.4"
     ml-array-min "^1.2.3"
 
-ml-matrix@6.10.7:
-  version "6.10.7"
-  resolved "https://registry.yarnpkg.com/ml-matrix/-/ml-matrix-6.10.7.tgz#e62f26bcfbf385396daf11d408621bc6a9545a8e"
-  integrity sha512-v0AciHOXnCEYz8Dq4r5TeA+BFyIabBwng9y/rFVF43mhh3Ho2jDhJ6UZ0IUPRiedmfNcJDmI1j7YFdY30mHAcQ==
+ml-matrix@6.10.8:
+  version "6.10.8"
+  resolved "https://registry.yarnpkg.com/ml-matrix/-/ml-matrix-6.10.8.tgz#47adc9d289558c34ef435ad030932a4ea16c56f7"
+  integrity sha512-AOWniClvQMbGx2V0mqzOScINLe+PjAjpjTN3zYRG7gV5Zp29fu9b2E0PfTdnupN03USOQMvkjT9/8yB4hEEahg==
   dependencies:
     is-any-array "^2.0.1"
     ml-array-rescale "^1.3.7"
