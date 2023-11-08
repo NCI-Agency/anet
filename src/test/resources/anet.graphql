@@ -434,6 +434,7 @@ type Mutation {
   updateNote(note: NoteInput): Note
   updateOrganization(organization: OrganizationInput): Int
   updatePerson(person: PersonInput): Int
+  updatePersonAvatar(person: PersonInput): Int!
   updatePersonHistory(person: PersonInput): Int!
   updatePosition(position: PositionInput): Int
   updatePositionHistory(position: PositionInput): Int!

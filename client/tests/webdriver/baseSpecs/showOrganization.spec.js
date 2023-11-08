@@ -126,7 +126,7 @@ describe("Show organization page", () => {
       await (await ShowOrganization.getCard()).waitForExist()
       await (await ShowOrganization.getCard()).waitForDisplayed()
       expect(await ShowOrganization.getFileData()).to.be.equal(
-        "attachO…\n12.0 KB"
+        "attachOrganization"
       )
     })
     it("We can go to the show page of Attachment", async() => {

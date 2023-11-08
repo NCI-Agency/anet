@@ -20,10 +20,12 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.ws.rs.ForbiddenException;
+import javax.ws.rs.WebApplicationException;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.test.client.AnetBeanList_Organization;
 import mil.dds.anet.test.client.AnetBeanList_Person;
 import mil.dds.anet.test.client.AnetBeanList_Position;
+import mil.dds.anet.test.client.Attachment;
 import mil.dds.anet.test.client.CustomSensitiveInformation;
 import mil.dds.anet.test.client.CustomSensitiveInformationInput;
 import mil.dds.anet.test.client.Organization;
@@ -60,23 +62,20 @@ public class PersonResourceTest extends AbstractResourceTest {
   private static final String _POSITION_FIELDS =
       "uuid name code type role status organization { uuid }";
   private static final String _PERSON_FIELDS =
-      "uuid name status role emailAddress phoneNumber rank biography country avatar code"
+      "uuid name status role emailAddress phoneNumber rank biography country avatarUuid code"
           + " gender endOfTourDate domainUsername openIdSubject pendingVerification createdAt updatedAt"
           + " customFields";
   public static final String PERSON_FIELDS_ONLY_HISTORY =
       "{ uuid previousPositions { startTime endTime position { uuid } } }";
   public static final String POSITION_FIELDS = String.format("{ %s person { %s } %s }",
       _POSITION_FIELDS, _PERSON_FIELDS, _CUSTOM_SENSITIVE_INFORMATION_FIELDS);
-  public static final String FIELDS = String.format("{ %s position { %s } %s }", _PERSON_FIELDS,
-      _POSITION_FIELDS, _CUSTOM_SENSITIVE_INFORMATION_FIELDS);
-
-  // 200 x 200 avatar
-  final File DEFAULT_AVATAR =
-      new File(PersonResourceTest.class.getResource("/assets/default_avatar.png").getFile());
+  public static final String FIELDS =
+      String.format("{ %s position { %s } attachments %s %s }", _PERSON_FIELDS, _POSITION_FIELDS,
+          AttachmentResourceTest.ATTACHMENT_FIELDS, _CUSTOM_SENSITIVE_INFORMATION_FIELDS);
 
   @Test
   public void testCreatePerson()
-      throws IOException, GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     final Person jack = getJackJackson();
 
     Person retPerson = jackQueryExecutor.person(FIELDS, jack.getUuid());
@@ -108,10 +107,6 @@ public class PersonResourceTest extends AbstractResourceTest {
     updatedNewPersonInput.setCountry("The Commonwealth of Canada");
     updatedNewPersonInput.setCode("A123456");
 
-    // update avatar
-    byte[] defaultAvatarData = Files.readAllBytes(DEFAULT_AVATAR.toPath());
-    updatedNewPersonInput.setAvatar(defaultAvatarData);
-
     // update HTML of biography
     updatedNewPersonInput.setBiography(UtilsTest.getCombinedHtmlTestCase().getInput());
     // update JSON of customFields
@@ -123,7 +118,6 @@ public class PersonResourceTest extends AbstractResourceTest {
     retPerson = jackQueryExecutor.person(FIELDS, updatedNewPersonInput.getUuid());
     assertThat(retPerson.getName()).isEqualTo(updatedNewPersonInput.getName());
     assertThat(retPerson.getCode()).isEqualTo(updatedNewPersonInput.getCode());
-    assertThat(retPerson.getAvatar()).isNotEmpty();
     // check that HTML of biography is sanitized after update
     assertThat(retPerson.getBiography()).isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
     // check that JSON of customFields is sanitized after update
@@ -351,6 +345,57 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(retPerson2.getDomainUsername()).isNull();
     assertThat(retPerson2.getOpenIdSubject()).isNull();
     assertThat(retPerson2.getPosition()).isNull();
+  }
+
+  @Test
+  void testPersonAvatar()
+      throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
+    final Person erin = getRegularUser();
+    final QueryExecutor erinQueryExecutor = getQueryExecutor(erin.getDomainUsername());
+    final MutationExecutor erinMutationExecutor = getMutationExecutor(erin.getDomainUsername());
+    final MutationExecutor rebeccaMutationExecutor = getMutationExecutor("rebecca");
+
+    Person retPerson = erinQueryExecutor.person(FIELDS, erin.getUuid());
+    assertThat(retPerson).isNotNull();
+    assertThat(retPerson.getAttachments()).isNotEmpty();
+    assertThat(retPerson.getAvatarUuid()).isNull();
+
+    final Attachment attachment = retPerson.getAttachments().get(0);
+    final PersonInput personWithAvatarInput =
+        PersonInput.builder().withUuid(erin.getUuid()).withAvatarUuid(attachment.getUuid()).build();
+    final PersonInput personWithoutAvatarInput =
+        PersonInput.builder().withUuid(erin.getUuid()).build();
+
+    // Set own avatar
+    Integer nrUpdated = erinMutationExecutor.updatePersonAvatar("", personWithAvatarInput);
+    assertThat(nrUpdated).isOne();
+    retPerson = erinQueryExecutor.person(FIELDS, erin.getUuid());
+    assertThat(retPerson.getAvatarUuid()).isEqualTo(attachment.getUuid());
+
+    // Update as someone else
+    try {
+      jackMutationExecutor.updatePersonAvatar("", personWithAvatarInput);
+      fail("Expected an exception");
+    } catch (WebApplicationException expectedException) {
+    }
+
+    // Update as Erin's superuser
+    nrUpdated = rebeccaMutationExecutor.updatePersonAvatar("", personWithoutAvatarInput);
+    assertThat(nrUpdated).isOne();
+    retPerson = erinQueryExecutor.person(FIELDS, erin.getUuid());
+    assertThat(retPerson.getAvatarUuid()).isNull();
+
+    // Update as admin
+    nrUpdated = adminMutationExecutor.updatePersonAvatar("", personWithAvatarInput);
+    assertThat(nrUpdated).isOne();
+    retPerson = erinQueryExecutor.person(FIELDS, erin.getUuid());
+    assertThat(retPerson.getAvatarUuid()).isEqualTo(attachment.getUuid());
+
+    // Erase own avatar again
+    nrUpdated = erinMutationExecutor.updatePersonAvatar("", personWithoutAvatarInput);
+    assertThat(nrUpdated).isOne();
+    retPerson = erinQueryExecutor.person(FIELDS, erin.getUuid());
+    assertThat(retPerson.getAvatarUuid()).isNull();
   }
 
   @Test
