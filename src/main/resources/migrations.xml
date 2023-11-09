@@ -4470,7 +4470,7 @@
 			WHERE "parentTaskUuid" IS NULL;
 		</sql>
 	</changeSet>
-	
+
 	<changeSet id="add-role-to-positions" author="hyesilAnka" >
 		<addColumn tableName="positions" >
 			<column name="role" type="int" defaultValue="0" >
@@ -4603,6 +4603,24 @@
 				WHERE people.uuid = attachments."authorUuid" AND attachments."fileName" = 'avatar-' || attachments."authorUuid" || '.png'
 			);
 		</sql>
+	</changeSet>
+
+	<changeSet id="add-unique-taskResponsiblePositions-constraint" author="gjvoosten">
+		<addUniqueConstraint tableName="taskResponsiblePositions"
+							 columnNames="taskUuid, positionUuid"
+							 constraintName="UQ_TaskResponsiblePositions" />
+	</changeSet>
+
+	<changeSet id="add-unique-authorizationGroupRelatedObjects-constraint" author="gjvoosten">
+		<addUniqueConstraint tableName="authorizationGroupRelatedObjects"
+							 columnNames="authorizationGroupUuid, relatedObjectType, relatedObjectUuid"
+							 constraintName="UQ_AuthorizationGroupRelatedObjects" />
+	</changeSet>
+
+	<changeSet id="add-unique-attachmentRelatedObjects-constraint" author="gjvoosten">
+		<addUniqueConstraint tableName="attachmentRelatedObjects"
+							 columnNames="attachmentUuid, relatedObjectType, relatedObjectUuid"
+							 constraintName="UQ_AttachmentRelatedObjects" />
 	</changeSet>
 
 </databaseChangeLog>
