@@ -157,18 +157,16 @@ const OrganizationalChart = ({
     if (!data || !root) {
       return
     }
-    const nodeSize = [200, 80 + 26 * personnelDepth]
+    const nodeSize = [250, 80 + 26 * personnelDepth]
 
     const calculateBounds = rootArg => {
-      const boundingBox = rootArg.descendants().reduce(
-        (box, nodeArg) => {
-          return {
-            xmin: Math.min(box.xmin, nodeArg.x || 0),
-            xmax: Math.max(box.xmax, nodeArg.x || 0),
-            ymin: Math.min(box.ymin, nodeArg.y || 0),
-            ymax: Math.max(box.ymax, nodeArg.y || 0)
-          }
-        },
+      const boundingBox = rootArg.descendants(root).reduce(
+        (box, nodeArg) => ({
+          xmin: Math.min(box.xmin, nodeArg.x ?? 0),
+          xmax: Math.max(box.xmax, nodeArg.x ?? 0),
+          ymin: Math.min(box.ymin, nodeArg.y ?? 0),
+          ymax: Math.max(box.ymax, nodeArg.y ?? 0)
+        }),
         {
           xmin: Number.MAX_SAFE_INTEGER,
           xmax: Number.MIN_SAFE_INTEGER,
@@ -183,7 +181,7 @@ const OrganizationalChart = ({
           boundingBox.ymax - boundingBox.ymin + nodeSize[1]
         ],
         center: [
-          (boundingBox.xmax + boundingBox.xmin + nodeSize[0] - 50) / 2,
+          (boundingBox.xmax + boundingBox.xmin + nodeSize[0] - 200) / 2,
           (boundingBox.ymax + boundingBox.ymin + nodeSize[1] - 50) / 2
         ]
       }
