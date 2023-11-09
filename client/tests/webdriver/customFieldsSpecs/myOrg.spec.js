@@ -19,6 +19,7 @@ describe("My Organization page", () => {
 
   describe("When checking the report statistics part of the page", () => {
     it("Should see different types of fields statistics", async() => {
+      await (await MyOrg.getReportStatisticsButton()).click()
       // Note: checks like length.above are being made because the wdio tests
       // might also be run after the jacocoTestReport, without resetting the
       // database, and in that case we have more reports in the statistics

@@ -165,11 +165,11 @@ ReportCollection.propTypes = {
 
 ReportCollection.defaultProps = {
   viewFormats: [
-    FORMAT_STATISTICS,
     FORMAT_SUMMARY,
     FORMAT_TABLE,
     FORMAT_CALENDAR,
-    FORMAT_MAP
+    FORMAT_MAP,
+    FORMAT_STATISTICS
   ]
 }
 
