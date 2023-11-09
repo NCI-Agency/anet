@@ -396,6 +396,15 @@ task dbDrop(dependsOn: 'compileJava', type: JavaExec) {
 	args = ["db", "drop-all", "--confirm-delete-everything", anetConfig]
 }
 dbDrop.mustRunAfter('dbWait')
+dbDrop.finalizedBy('dbDropLargeObjects')
+
+task dbDropLargeObjects(type: DockerExecContainer) {
+	group = "database runtime"
+	description = "Drop unreferenced large objects from the database"
+	containerId = dbContainerName
+	commands = [ ["vacuumlo", "-U", run.environment["ANET_DB_USERNAME"], run.environment["ANET_DB_NAME"]] as String[] ]
+}
+dbDropLargeObjects.mustRunAfter('dbDrop')
 
 task pushPsqlBaseData(type: DockerCopyFileToContainer) {
 	group = "database runtime"
@@ -453,7 +462,7 @@ task pushDbDump(type: DockerCopyFileToContainer) {
 	remotePath = psqlPushDataPath
 }
 
-task dbRestore(type: DockerExecContainer, dependsOn: pushDbDump) {
+task dbRestore(type: DockerExecContainer, dependsOn: [pushDbDump, dbDrop]) {
 	group = "database runtime"
 	description = "Restores the ANET database in the container"
 	containerId = dbContainerName
