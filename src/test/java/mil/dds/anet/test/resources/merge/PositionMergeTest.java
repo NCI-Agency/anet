@@ -80,10 +80,9 @@ public class PositionMergeTest extends AbstractResourceTest {
     mergedPositionInput.setStatus(secondPosition.getStatus());
     mergedPositionInput.setType(secondPosition.getType());
 
-    final Position mergedPosition =
-        adminMutationExecutor.mergePositions(FIELDS, secondPosition.getUuid(), mergedPositionInput);
-    assertThat(mergedPosition).isNotNull();
-    assertThat(mergedPosition.getUuid()).isNotNull();
+    final int nrUpdated =
+        adminMutationExecutor.mergePositions("", secondPosition.getUuid(), mergedPositionInput);
+    assertThat(nrUpdated).isOne();
 
     // Assert that loser is gone.
     try {

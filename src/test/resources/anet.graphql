@@ -419,7 +419,7 @@ type Mutation {
   emailRollup(advisorOrganizationUuid: String, email: AnetEmailInput, endDate: Instant, orgType: OrganizationType, principalOrganizationUuid: String, startDate: Instant): Int
   mergeLocations(loserUuid: String, winnerLocation: LocationInput): Int
   mergePeople(loserUuid: String, winnerPerson: PersonInput): Int
-  mergePositions(loserUuid: String, winnerPosition: PositionInput): Position
+  mergePositions(loserUuid: String, winnerPosition: PositionInput): Int
   publishReport(uuid: String): Int!
   putPersonInPosition(person: PersonInput, uuid: String): Int!
   rejectReport(comment: CommentInput, uuid: String): Int!
@@ -774,7 +774,6 @@ type Query {
   positionList(query: PositionSearchQueryInput): AnetBeanList_Position
   projectVersion: String
   recentActivities: RecentActivities
-  relatedObjectAttachments(uuid: String): [Attachment]
   report(uuid: String): Report
   reportList(query: ReportSearchQueryInput): AnetBeanList_Report
   rollupGraph(advisorOrganizationUuid: String, endDate: Instant, orgType: OrganizationType, principalOrganizationUuid: String, startDate: Instant): [RollupGraph]

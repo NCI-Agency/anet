@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -62,15 +61,6 @@ public class AttachmentResource {
   @GraphQLQuery(name = "attachment")
   public Attachment getByUuid(@GraphQLArgument(name = "uuid") String uuid) {
     return getAttachment(uuid);
-  }
-
-  @GraphQLQuery(name = "relatedObjectAttachments")
-  public List<Attachment> getRelatedObjectAttachments(
-      @GraphQLRootContext Map<String, Object> context,
-      @GraphQLArgument(name = "uuid") String uuid) {
-    final List<List<Attachment>> attachments =
-        dao.getRelatedObjectAttachments(Collections.singletonList(uuid));
-    return attachments.get(0);
   }
 
   @GraphQLMutation(name = "createAttachment")
