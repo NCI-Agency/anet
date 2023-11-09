@@ -27,9 +27,9 @@ import mil.dds.anet.test.client.Status;
 import mil.dds.anet.test.client.util.MutationExecutor;
 import org.junit.jupiter.api.Test;
 
-class AttachmentResourceTest extends AbstractResourceTest {
+public class AttachmentResourceTest extends AbstractResourceTest {
 
-  protected static final String ATTACHMENT_FIELDS =
+  public static final String ATTACHMENT_FIELDS =
       "{ uuid mimeType fileName description classification caption author { uuid }"
           + " attachmentRelatedObjects { objectUuid relatedObjectType relatedObjectUuid } }";
   private static final String _ATTACHMENTS_FIELDS =

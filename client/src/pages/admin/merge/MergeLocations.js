@@ -48,9 +48,7 @@ import utils from "utils"
 
 const GQL_MERGE_LOCATION = gql`
   mutation ($loserUuid: String!, $winnerLocation: LocationInput!) {
-    mergeLocations(loserUuid: $loserUuid, winnerLocation: $winnerLocation) {
-      uuid
-    }
+    mergeLocations(loserUuid: $loserUuid, winnerLocation: $winnerLocation)
   }
 `
 
@@ -306,8 +304,8 @@ const MergeLocations = ({ pageDispatchers }) => {
       winnerLocation
     })
       .then(res => {
-        if (res.mergeLocations) {
-          navigate(Location.pathFor({ uuid: res.mergeLocations.uuid }), {
+        if (res) {
+          navigate(Location.pathFor({ uuid: mergedLocation.uuid }), {
             state: {
               success: "Locations merged. Displaying merged Location below."
             }

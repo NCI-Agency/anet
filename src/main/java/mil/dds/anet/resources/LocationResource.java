@@ -123,7 +123,7 @@ public class LocationResource {
   }
 
   @GraphQLMutation(name = "mergeLocations")
-  public Location mergeLocations(@GraphQLRootContext Map<String, Object> context,
+  public Integer mergeLocations(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "loserUuid") String loserUuid,
       @GraphQLArgument(name = "winnerLocation") Location winnerLocation) {
     final Person user = DaoUtils.getUserFromContext(context);
@@ -141,7 +141,7 @@ public class LocationResource {
           Status.NOT_FOUND);
     }
     AnetAuditLogger.log("Location {} merged into {} by {}", loserLocation, winnerLocation, user);
-    return winnerLocation;
+    return numRows;
   }
 
   private void validateLocation(Location winnerLocation) {

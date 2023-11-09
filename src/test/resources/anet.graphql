@@ -417,7 +417,7 @@ type Mutation {
   deleteSubscription(uuid: String): Int
   emailReport(email: AnetEmailInput, uuid: String): Int
   emailRollup(advisorOrganizationUuid: String, email: AnetEmailInput, endDate: Instant, orgType: OrganizationType, principalOrganizationUuid: String, startDate: Instant): Int
-  mergeLocations(loserUuid: String, winnerLocation: LocationInput): Location
+  mergeLocations(loserUuid: String, winnerLocation: LocationInput): Int
   mergePeople(loserUuid: String, winnerPerson: PersonInput): Int
   mergePositions(loserUuid: String, winnerPosition: PositionInput): Position
   publishReport(uuid: String): Int!
