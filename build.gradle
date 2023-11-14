@@ -140,7 +140,7 @@ dependencies {
 
 	// GraphQL dependencies
 	implementation 'com.graphql-java:graphql-java:20.2'
-	implementation 'com.graphql-java:java-dataloader:3.2.1'
+	implementation 'com.graphql-java:java-dataloader:3.2.2'
 	implementation 'io.leangen.graphql:spqr:0.12.1'
 	// The graphql-java-client-runtime module aggregates all dependencies for the generated code,
 	// including the plugin runtime
@@ -744,7 +744,7 @@ jar {
 //Configure the Java Checkstyle settings. Run with ./gradlew check
 checkstyle {
 	configFile = rootProject.file('config/google_checks.xml')
-	toolVersion = '10.12.4'
+	toolVersion = '10.12.5'
 }
 //Easiest way to avoid checking generated code
 checkstyleTest {
