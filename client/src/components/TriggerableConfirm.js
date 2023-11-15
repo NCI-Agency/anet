@@ -61,7 +61,7 @@ const TriggerableConfirm = ({
           <Modal.Title>{title}</Modal.Title>
         </Modal.Header>
         <Modal.Body>{body}</Modal.Body>
-        <Modal.Footer className="align-items-stretch">
+        <Modal.Footer className="justify-content-between">
           <Col>
             <Button
               className="float-start"
