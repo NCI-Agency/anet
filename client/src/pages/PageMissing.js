@@ -18,8 +18,9 @@ const PageMissing = ({ pageDispatchers }) => {
     pageDispatchers
   })
   usePageTitle("Page not found")
+  const page = params?.[0] ?? params?.["*"] ?? ""
 
-  return <NotFound text={`Page ${params[0]} not found.`} />
+  return <NotFound text={`Page ${page} not found.`} />
 }
 
 PageMissing.propTypes = {
