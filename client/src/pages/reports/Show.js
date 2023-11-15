@@ -393,6 +393,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
   const canEmail = !report.isDraft()
   const hasAuthorizationGroups =
     report.authorizationGroups && report.authorizationGroups.length > 0
+  const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
 
   return (
     <Formik
@@ -670,7 +671,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                   />
                 )}
 
-                {!Settings.fields.attachment.featureDisabled && (
+                {attachmentsEnabled && (
                   <Field
                     name="attachments"
                     label="Attachments"

@@ -216,6 +216,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
   const orgSettings = isPrincipalOrg
     ? Settings.fields.principal.org
     : Settings.fields.advisor.org
+  const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
 
   const myOrg =
     currentUser && currentUser.position
@@ -468,21 +469,23 @@ const OrganizationShow = ({ pageDispatchers }) => {
                   }
                 />
 
-                <Field
-                  name="attachments"
-                  label="Attachments"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={
-                    <div className="attachment-card-list">
-                      {organization.attachments.map(attachment => (
-                        <AttachmentCard
-                          key={attachment.uuid}
-                          attachment={attachment}
-                        />
-                      ))}
-                    </div>
-                  }
-                />
+                {attachmentsEnabled && (
+                  <Field
+                    name="attachments"
+                    label="Attachments"
+                    component={FieldHelper.ReadonlyField}
+                    humanValue={
+                      <div className="attachment-card-list">
+                        {organization.attachments.map(attachment => (
+                          <AttachmentCard
+                            key={attachment.uuid}
+                            attachment={attachment}
+                          />
+                        ))}
+                      </div>
+                    }
+                  />
+                )}
               </Fieldset>
 
               {Settings.fields.organization.customFields && (

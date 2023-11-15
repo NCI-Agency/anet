@@ -2,8 +2,10 @@ import AttachmentCard from "components/Attachment/AttachmentCard"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 import PropTypes from "prop-types"
 import React from "react"
+import Settings from "settings"
 
 export const PersonAvatar = ({ avatar, avatarUuid, width, height }) => {
+  const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
   const avatarStyle = {
     width: `${width}px`,
     height: `${height}px`,
@@ -14,7 +16,7 @@ export const PersonAvatar = ({ avatar, avatarUuid, width, height }) => {
   }
   return (
     <>
-      {(avatar && (
+      {(attachmentsEnabled && avatar && (
         <AttachmentCard
           attachment={avatar}
           previewStyle={avatarStyle}

@@ -249,6 +249,10 @@ const ReportForm = ({
   const supportEmail = Settings.SUPPORT_EMAIL_ADDR
   const supportEmailMessage = supportEmail ? `at ${supportEmail}` : ""
   const advisorPositionSingular = Settings.fields.advisor.position.name
+  const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
+  const attachmentEditEnabled =
+    attachmentsEnabled &&
+    (!Settings.fields.attachment.restrictToAdmins || currentUser.isAdmin())
 
   let recents = []
   if (data) {
@@ -920,7 +924,7 @@ const ReportForm = ({
                   widget={<RichTextEditor className="reportTextField" />}
                 />
 
-                {!Settings.fields.attachment.featureDisabled && (
+                {attachmentEditEnabled && (
                   <Field
                     name="uploadAttachments"
                     label="Attachments"

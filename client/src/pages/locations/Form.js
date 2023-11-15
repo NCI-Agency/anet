@@ -67,6 +67,10 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
   const [showSimilarLocations, setShowSimilarLocations] = useState(false)
   const canEditName =
     (!edit && currentUser.isSuperuser()) || (edit && currentUser.isAdmin())
+  const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
+  const attachmentEditEnabled =
+    attachmentsEnabled &&
+    (!Settings.fields.attachment.restrictToAdmins || currentUser.isAdmin())
   const statusButtons = [
     {
       id: "statusActiveButton",
@@ -245,7 +249,7 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
                   widget={<RichTextEditor className="description" />}
                 />
 
-                {edit && (
+                {edit && attachmentEditEnabled && (
                   <Field
                     name="uploadAttachments"
                     label="Attachments"

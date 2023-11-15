@@ -59,7 +59,9 @@ public class AttachmentResource {
   }
 
   @GraphQLQuery(name = "attachment")
-  public Attachment getByUuid(@GraphQLArgument(name = "uuid") String uuid) {
+  public Attachment getByUuid(@GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "uuid") String uuid) {
+    assertAttachmentEnabled();
     return getAttachment(uuid);
   }
 
@@ -67,12 +69,8 @@ public class AttachmentResource {
   public String createAttachment(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "attachment") Attachment attachment) {
     assertAttachmentEnabled();
-
     final Person user = DaoUtils.getUserFromContext(context);
-    if (!hasAttachmentPermission(user, null)) {
-      throw new WebApplicationException("You don't have permission to upload attachments",
-          Status.FORBIDDEN);
-    }
+    assertAttachmentPermission(user, null, "You don't have permission to create attachments");
     assertAllowedMimeType(attachment.getMimeType());
     assertAllowedClassification(attachment.getClassification());
     assertAllowedRelatedObjects(user, attachment.getAttachmentRelatedObjects());
@@ -90,8 +88,9 @@ public class AttachmentResource {
   public Response uploadAttachmentContent(final @Auth Person user, @PathParam("uuid") String uuid,
       @FormDataParam("file") InputStream attachmentContent) {
     assertAttachmentEnabled();
-
     final Attachment attachment = getAttachment(uuid);
+    assertAttachmentPermission(user, attachment,
+        "You don't have permission to upload content for this attachment");
     dao.saveContentBlob(uuid, checkMimeType(attachment, attachmentContent));
     return Response.noContent().build();
   }
@@ -120,12 +119,11 @@ public class AttachmentResource {
   @GraphQLMutation(name = "updateAttachment")
   public String updateAttachment(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "attachment") Attachment attachment) {
-    final Attachment existing = getAttachment(DaoUtils.getUuid(attachment));
+    assertAttachmentEnabled();
     final Person user = DaoUtils.getUserFromContext(context);
-    if (!hasAttachmentPermission(user, existing)) {
-      throw new WebApplicationException("You don't have permission to update this attachment",
-          Status.FORBIDDEN);
-    }
+    final Attachment existing = getAttachment(DaoUtils.getUuid(attachment));
+    assertAttachmentPermission(user, existing,
+        "You don't have permission to update this attachment");
     assertAllowedMimeType(attachment.getMimeType());
     assertAllowedClassification(attachment.getClassification());
     assertAllowedRelatedObjects(user,
@@ -143,12 +141,11 @@ public class AttachmentResource {
   @GraphQLMutation(name = "deleteAttachment")
   public Integer deleteAttachment(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "uuid") String attachmentUuid) {
-    final Attachment existing = getAttachment(attachmentUuid);
+    assertAttachmentEnabled();
     final Person user = DaoUtils.getUserFromContext(context);
-    if (!hasAttachmentPermission(user, existing)) {
-      throw new WebApplicationException("You don't have permission to delete this attachment",
-          Status.FORBIDDEN);
-    }
+    final Attachment existing = getAttachment(attachmentUuid);
+    assertAttachmentPermission(user, existing,
+        "You don't have permission to delete this attachment");
     assertAllowedRelatedObjects(user,
         existing.loadAttachmentRelatedObjects(AnetObjectEngine.getInstance().getContext()).join());
 
@@ -165,6 +162,7 @@ public class AttachmentResource {
   @Path("/download/{uuid}")
   @Produces(MediaType.APPLICATION_OCTET_STREAM)
   public Response downloadAttachment(final @Auth Person user, @PathParam("uuid") String uuid) {
+    assertAttachmentEnabled();
     final Attachment attachment = getAttachment(uuid);
     final ResponseBuilder response =
         Response.ok(streamContentBlob(uuid)).type(MediaType.APPLICATION_OCTET_STREAM)
@@ -176,6 +174,7 @@ public class AttachmentResource {
   @Timed
   @Path("/view/{uuid}")
   public Response viewAttachment(final @Auth Person user, @PathParam("uuid") String uuid) {
+    assertAttachmentEnabled();
     final Attachment attachment = getAttachment(uuid);
     final ResponseBuilder response =
         Response.ok(streamContentBlob(uuid)).type(attachment.getMimeType())
@@ -199,19 +198,6 @@ public class AttachmentResource {
     final ParameterList parameterList = new ParameterList();
     parameterList.set("filename", attachment.getFileName(), StandardCharsets.UTF_8.toString());
     return new ContentDisposition(disposition, parameterList).toString();
-  }
-
-  private boolean hasAttachmentPermission(final Person user, final Attachment existingAttachment) {
-    final Map<String, Object> attachmentSettings = getAttachmentSettings();
-    final Boolean userUploadDisabled = (Boolean) attachmentSettings.get("restrictToAdmins");
-
-    if (Boolean.TRUE.equals(userUploadDisabled) && !AuthUtils.isAdmin(user)) {
-      return false;
-    }
-
-    // only admin or owner can update attachment
-    return existingAttachment == null || AuthUtils.isAdmin(user)
-        || Objects.equals(existingAttachment.getAuthorUuid(), DaoUtils.getUuid(user));
   }
 
   private void assertAllowedRelatedObjects(final Person user,
@@ -266,6 +252,20 @@ public class AttachmentResource {
     final Boolean attachmentDisabled = (Boolean) attachmentSettings.get("featureDisabled");
     if (Boolean.TRUE.equals(attachmentDisabled)) {
       throw new WebApplicationException("Attachment feature is disabled", Status.FORBIDDEN);
+    }
+  }
+
+  private void assertAttachmentPermission(final Person user, final Attachment attachment,
+      final String message) {
+    if (AuthUtils.isAdmin(user)) {
+      return;
+    }
+    final var attachmentSettings = getAttachmentSettings();
+    final Boolean restrictToAdmins = (Boolean) attachmentSettings.get("restrictToAdmins");
+    final boolean isAuthor =
+        attachment == null || Objects.equals(attachment.getAuthorUuid(), DaoUtils.getUuid(user));
+    if (Boolean.TRUE.equals(restrictToAdmins) || !isAuthor) {
+      throw new WebApplicationException(message, Status.FORBIDDEN);
     }
   }
 

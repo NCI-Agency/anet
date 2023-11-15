@@ -205,6 +205,7 @@ const PersonShow = ({ pageDispatchers }) => {
           .map(ap => ap.person.uuid)
           .includes(person.uuid)))
   const canAddOndemandAssessment = isAdmin
+  const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
 
   const action = (
     <div>
@@ -314,7 +315,10 @@ const PersonShow = ({ pageDispatchers }) => {
                 <Container fluid>
                   <Row>
                     <Col md={6}>
-                      <PersonAvatar avatar={currentAvatar} />
+                      <PersonAvatar
+                        avatar={currentAvatar}
+                        avatarUuid={currentAvatar?.uuid}
+                      />
                       {leftColumnUnderAvatar}
                     </Col>
                     <Col md={6}>{rightColumn}</Col>
@@ -324,21 +328,23 @@ const PersonShow = ({ pageDispatchers }) => {
                   </Row>
                 </Container>
 
-                <Field
-                  name="attachments"
-                  label="Attachments"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={
-                    <div className="attachment-card-list">
-                      {otherAttachments?.map(attachment => (
-                        <AttachmentCard
-                          key={attachment.uuid}
-                          attachment={attachment}
-                        />
-                      ))}
-                    </div>
-                  }
-                />
+                {attachmentsEnabled && (
+                  <Field
+                    name="attachments"
+                    label="Attachments"
+                    component={FieldHelper.ReadonlyField}
+                    humanValue={
+                      <div className="attachment-card-list">
+                        {otherAttachments?.map(attachment => (
+                          <AttachmentCard
+                            key={attachment.uuid}
+                            attachment={attachment}
+                          />
+                        ))}
+                      </div>
+                    }
+                  />
+                )}
               </Fieldset>
 
               {canEdit && (

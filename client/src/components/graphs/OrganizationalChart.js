@@ -139,6 +139,7 @@ const OrganizationalChart = ({
   const canvas = d3.select(canvasRef.current)
   const link = d3.select(linkRef.current)
   const node = d3.select(nodeRef.current)
+  const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
 
   useEffect(() => {
     data &&
@@ -334,7 +335,7 @@ const OrganizationalChart = ({
       .attr("height", d => getRoleValue(d, 26, 13))
       .attr("y", d => getRoleValue(d, -15, -10))
       .attr("href", d =>
-        d?.person?.avatarUuid
+        attachmentsEnabled && d?.person?.avatarUuid
           ? `/api/attachment/view/${d.person.avatarUuid}`
           : DEFAULT_AVATAR
       )
@@ -363,7 +364,16 @@ const OrganizationalChart = ({
       .attr("font-weight", d => getRoleValue(d, "bold", ""))
       .style("text-anchor", "start")
       .text(d => utils.ellipsize(d.name, getRoleValue(d, 23, 31)))
-  }, [data, expanded, navigate, personnelDepth, root, link, node])
+  }, [
+    attachmentsEnabled,
+    data,
+    expanded,
+    navigate,
+    personnelDepth,
+    root,
+    link,
+    node
+  ])
 
   if (done) {
     return result

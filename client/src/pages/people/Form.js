@@ -92,6 +92,10 @@ const PersonForm = ({
   const [onSaveRedirectToHome, setOnSaveRedirectToHome] = useState(
     Person.isPendingVerification(initialValues)
   )
+  const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
+  const attachmentEditEnabled =
+    attachmentsEnabled &&
+    (!Settings.fields.attachment.restrictToAdmins || currentUser.isAdmin())
   const statusButtons = [
     {
       id: "statusActiveButton",
@@ -249,8 +253,11 @@ const PersonForm = ({
                   {edit && (
                     /* Col contains the avatar and edit button */
                     <Col sm={12} md={12} lg={4} xl={3} className="text-center">
-                      <PersonAvatar avatar={currentAvatar} />
-                      {(_isEmpty(imageAttachments) && (
+                      <PersonAvatar
+                        avatar={currentAvatar}
+                        avatarUuid={currentAvatar?.uuid}
+                      />
+                      {(attachmentsEnabled && _isEmpty(imageAttachments) && (
                         <span>
                           <em>
                             Upload some image attachments first before setting
@@ -272,16 +279,18 @@ const PersonForm = ({
                               Clear avatar
                             </ConfirmDestructive>
                           )}
-                          <AvatarEditModal
-                            title={
-                              currentAvatar
-                                ? "Set a new avatar"
-                                : "Set an avatar"
-                            }
-                            currentAvatar={currentAvatar}
-                            images={imageAttachments}
-                            onAvatarUpdate={onAvatarUpdate}
-                          />
+                          {attachmentEditEnabled && (
+                            <AvatarEditModal
+                              title={
+                                currentAvatar
+                                  ? "Set a new avatar"
+                                  : "Set an avatar"
+                              }
+                              currentAvatar={currentAvatar}
+                              images={imageAttachments}
+                              onAvatarUpdate={onAvatarUpdate}
+                            />
+                          )}
                         </div>
                       )}
                     </Col>
@@ -690,7 +699,7 @@ const PersonForm = ({
                   widget={<RichTextEditor className="biography" />}
                 />
 
-                {edit && (
+                {edit && attachmentEditEnabled && (
                   <Field
                     name="uploadAttachments"
                     label="Attachments"
@@ -795,7 +804,13 @@ const PersonForm = ({
         setCurrentAvatarUuid(newAvatarUuid)
         loadAppData() // avatar was changed!
       })
-      .catch(() => toast.error("Avatar update failed"))
+      .catch(error =>
+        toast.error(
+          `Avatar ${newAvatarUuid ? "update" : "delete"} failed: ${
+            error.message
+          }`
+        )
+      )
   }
 
   async function onAvatarUpdate(chosenImage, data) {

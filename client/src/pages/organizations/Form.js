@@ -60,6 +60,10 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
   const [attachmentList, setAttachmentList] = useState(
     initialValues?.attachments
   )
+  const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
+  const attachmentEditEnabled =
+    attachmentsEnabled &&
+    (!Settings.fields.attachment.restrictToAdmins || currentUser.isAdmin())
   const statusButtons = [
     {
       id: "statusActiveButton",
@@ -372,7 +376,7 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                   </>
                 )}
 
-                {edit && (
+                {edit && attachmentEditEnabled && (
                   <Field
                     name="uploadAttachments"
                     label="Attachments"
