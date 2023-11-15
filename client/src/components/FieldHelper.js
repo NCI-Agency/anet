@@ -395,6 +395,7 @@ const ButtonToggleGroupField = ({
 }) => {
   let { className } = otherProps
   const { validationState } = getFormGroupValidationState(field, form)
+  className = classNames(className, "flex-wrap")
   if (validationState) {
     className = classNames(className, "is-invalid")
   }
