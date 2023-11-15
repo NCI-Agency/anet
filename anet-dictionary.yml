@@ -319,6 +319,8 @@ fields:
         NU_rel_EU: NATO UNCLASSIFIED Releasable to EU
     mimeTypes:
       - application/pdf
+      - image/avif
+      - image/gif
       - image/jpeg
       - image/png
       - image/webp
