@@ -61,12 +61,6 @@ const OrganizationTasks = ({ pageDispatchers, queryParams, organization }) => {
 
   const { pageSize, totalCount } = paginatedTasks
 
-  if (_get(tasks, "length", 0) === 0) {
-    return (
-      <em>This organization doesn't have any {pluralize(taskShortLabel)}</em>
-    )
-  }
-
   return (
     <Fieldset
       id="tasks"
@@ -83,39 +77,43 @@ const OrganizationTasks = ({ pageDispatchers, queryParams, organization }) => {
         )
       }
     >
-      <UltimatePaginationTopDown
-        componentClassName="searchPagination"
-        className="float-end"
-        pageNum={pageNum}
-        pageSize={pageSize}
-        totalCount={totalCount}
-        goToPage={setPageNum}
-      >
-        <Table striped hover responsive>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Description</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {Task.map(tasks, (task, idx) => (
-              <tr key={task.uuid} id={`task_${idx}`}>
-                <td>
-                  <BreadcrumbTrail
-                    modelType="Task"
-                    leaf={task}
-                    ascendantObjects={task.ascendantTasks}
-                    parentField="parentTask"
-                  />
-                </td>
-                <td>{task.longName}</td>
+      {(_get(tasks, "length", 0) === 0 && (
+        <em>This organization doesn't have any {pluralize(taskShortLabel)}</em>
+      )) || (
+        <UltimatePaginationTopDown
+          componentClassName="searchPagination"
+          className="float-end"
+          pageNum={pageNum}
+          pageSize={pageSize}
+          totalCount={totalCount}
+          goToPage={setPageNum}
+        >
+          <Table striped hover responsive>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Description</th>
               </tr>
-            ))}
-          </tbody>
-        </Table>
-      </UltimatePaginationTopDown>
+            </thead>
+
+            <tbody>
+              {Task.map(tasks, (task, idx) => (
+                <tr key={task.uuid} id={`task_${idx}`}>
+                  <td>
+                    <BreadcrumbTrail
+                      modelType="Task"
+                      leaf={task}
+                      ascendantObjects={task.ascendantTasks}
+                      parentField="parentTask"
+                    />
+                  </td>
+                  <td>{task.longName}</td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </UltimatePaginationTopDown>
+      )}
     </Fieldset>
   )
 }
