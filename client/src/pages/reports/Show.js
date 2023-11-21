@@ -362,23 +362,26 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
   const tasksLabel = pluralize(Settings.fields.task.subLevel.shortLabel)
   const DictField = DictionaryField(Field)
 
-  // User can approve if report is pending approval and user is one of the approvers in the current approval step
+  // User can approve when admin,
+  // or if report is pending approval and user is one of the approvers in the current approval step
   const canApprove =
-    report.isPending() &&
-    report.approvalStep?.approvers?.some(member =>
-      Position.isEqual(member, currentUser?.position)
-    )
-  const canRequestChanges = canApprove || (report.isApproved() && isAdmin)
+    isAdmin ||
+    (report.isPending() &&
+      report.approvalStep?.approvers?.some(member =>
+        Position.isEqual(member, currentUser?.position)
+      ))
   // Approved reports may be published by an admin user
   const canPublish = report.isApproved() && isAdmin
-  // Warn admins when they try to approve their own report
+  // Approvers and publishers can request changes
+  const canRequestChanges = canApprove || canPublish
+  // Warn authors when they try to approve their own report
   const warnApproveOwnReport = canApprove && isAuthor
 
   // Attending authors can edit if report is not published
   // Non-attending authors can only edit if it is future
   let canEdit =
     isAuthor && !report.isPublished() && (report.isFuture() || isAttending)
-  // Approvers can edit
+  // Approvers can also edit
   canEdit = canEdit || canApprove
   // Authors and approvers can always read assessments
   const canReadAssessments = isAuthor || canApprove
