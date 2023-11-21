@@ -631,18 +631,22 @@ const ReportForm = ({
                   />
                 )}
 
-                {!isFutureEngagement && !values.cancelled && (
-                  <FastField
-                    name="atmosphere"
-                    label={Settings.fields.report.atmosphere}
-                    component={FieldHelper.RadioButtonToggleGroupField}
-                    buttons={atmosphereButtons}
-                    onChange={value => setFieldValue("atmosphere", value, true)}
-                    className="atmosphere-form-group"
-                  />
+                {!isFutureEngagement &&
+                  !values.cancelled &&
+                  Settings.fields.report.atmosphere && (
+                    <FastField
+                      name="atmosphere"
+                      label={Settings.fields.report.atmosphere}
+                      component={FieldHelper.RadioButtonToggleGroupField}
+                      buttons={atmosphereButtons}
+                      onChange={value =>
+                        setFieldValue("atmosphere", value, true)}
+                      className="atmosphere-form-group"
+                    />
                 )}
                 {!isFutureEngagement &&
                   !values.cancelled &&
+                  Settings.fields.report.atmosphere &&
                   values.atmosphere && (
                     <Field
                       name="atmosphereDetails"
@@ -872,7 +876,7 @@ const ReportForm = ({
                     />
                 )}
 
-                {!isFutureEngagement && (
+                {!isFutureEngagement && Settings.fields.report.nextSteps && (
                   <FastField
                     name="nextSteps"
                     label={Settings.fields.report.nextSteps.label}

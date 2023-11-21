@@ -247,7 +247,7 @@ export default class Report extends Model {
         .string()
         .nullable()
         .when("engagementDate", ([engagementDate], schema) =>
-          !Report.isFuture(engagementDate)
+          Settings.fields.report.nextSteps && !Report.isFuture(engagementDate)
             ? schema.required(
               `You must provide a brief summary of the ${Settings.fields.report.nextSteps.label}`
             )
@@ -264,6 +264,8 @@ export default class Report extends Model {
             cancelled
               ? schema.nullable()
               : Settings.fields.report.keyOutcomes &&
+                (!Settings.fields.report.requirements ||
+                  Settings.fields.report.requirements.keyOutcomes) &&
                 !Report.isFuture(engagementDate)
                 ? schema.required(
                   `You must provide a brief summary of the ${Settings.fields.report.keyOutcomes}`
@@ -413,26 +415,35 @@ export default class Report extends Model {
   static checkPrimaryAttendee(reportPeople, role) {
     const primaryAttendee = Report.getPrimaryAttendee(reportPeople, role)
     const roleName = Person.humanNameOfRole(role)
-    if (!primaryAttendee && role === Person.ROLE.ADVISOR) {
-      return `You must provide the primary ${roleName} for the Engagement`
-    } else if (!primaryAttendee && role === Person.ROLE.PRINCIPAL) {
-      return `No primary ${roleName} has been provided for the Engagement`
-    } else if (primaryAttendee.status !== Model.STATUS.ACTIVE) {
-      return `The primary ${roleName} - ${primaryAttendee.name} - needs to have an active profile`
-    } else if (
-      primaryAttendee.endOfTourDate &&
-      moment(primaryAttendee.endOfTourDate).isBefore(moment().startOf("day"))
+    if (
+      !Settings.fields.report.requirements ||
+      Settings.fields.report.requirements.primaryAttendee
     ) {
-      return `The primary ${roleName}'s - ${primaryAttendee.name} - end of tour date has passed`
-    } else if (!primaryAttendee.position) {
-      return `The primary ${roleName} - ${primaryAttendee.name} - needs to be assigned to a position`
-    } else if (primaryAttendee.position.status !== Model.STATUS.ACTIVE) {
-      return `The primary ${roleName} - ${primaryAttendee.name} - needs to be in an active position`
+      if (!primaryAttendee && role === Person.ROLE.ADVISOR) {
+        return `You must provide the primary ${roleName} for the Engagement`
+      } else if (!primaryAttendee && role === Person.ROLE.PRINCIPAL) {
+        return `No primary ${roleName} has been provided for the Engagement`
+      } else if (primaryAttendee.status !== Model.STATUS.ACTIVE) {
+        return `The primary ${roleName} - ${primaryAttendee.name} - needs to have an active profile`
+      } else if (
+        primaryAttendee.endOfTourDate &&
+        moment(primaryAttendee.endOfTourDate).isBefore(moment().startOf("day"))
+      ) {
+        return `The primary ${roleName}'s - ${primaryAttendee.name} - end of tour date has passed`
+      } else if (!primaryAttendee.position) {
+        return `The primary ${roleName} - ${primaryAttendee.name} - needs to be assigned to a position`
+      } else if (primaryAttendee.position.status !== Model.STATUS.ACTIVE) {
+        return `The primary ${roleName} - ${primaryAttendee.name} - needs to be in an active position`
+      }
     }
   }
 
   static checkAttendingAuthor(reportPeople) {
-    if (!reportPeople?.some(rp => rp.author && rp.attendee)) {
+    if (
+      (!Settings.fields.report.requirements ||
+        Settings.fields.report.requirements.attendingAuthor) &&
+      !reportPeople?.some(rp => rp.author && rp.attendee)
+    ) {
       return "You must provide at least 1 attending author"
     }
   }

@@ -53,6 +53,10 @@ $defs:
           title: Optional styling for the bootstrap component class
           description: Used for styling this field.
           additionalProperties: true
+        exclude:
+          type: boolean
+          default: no
+          description: Set to true to exclude to input field
 
 # definition for fields that present a choice to be selected from
   choiceField:
@@ -559,7 +563,7 @@ properties:
       report:
         type: object
         additionalProperties: false
-        required: [intent, atmosphere, atmosphereDetails, cancelled, nextSteps, reportText]
+        required: [intent, atmosphere, cancelled, nextSteps, reportText]
         properties:
           canUnpublishReports:
             type: boolean
@@ -571,19 +575,21 @@ properties:
             title: The label for a report's intent
             description: Used in the UI where a report's intent is shown.
           atmosphere:
-            type: string
-            title: The label for a report's athmosphere
-            description: Used in the UI where a report's athmosphere is shown.
+            type: [string, boolean]
+            title: The label for a report's atmosphere
+            description: Used in the UI where a report's atmosphere is shown.
           atmosphereDetails:
             type: string
-            title: The label for report's athmosphere details
-            description: Used in the UI where a report's athmosphere details are shown.
+            title: The label for report's atmosphere details
+            description: Used in the UI where a report's atmosphere details are shown.
           cancelled:
             type: string
             title: The label for a report's cancelled
             description: Used in the UI where a report's cancelled is shown.
           nextSteps:
-            "$ref": "#/$defs/inputField"
+            oneOf:
+             - type: boolean
+             - "$ref": "#/$defs/inputField"
           keyOutcomes:
             type: string
             title: The label for report's key outcomes
@@ -604,6 +610,17 @@ properties:
                   type: string
                   enum:
                     [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, POINT_LOCATION, ADVISOR_LOCATION, PRINCIPAL_LOCATION]
+          requirements:
+            type: object
+            properties:
+              primaryAttendee:
+                type: boolean
+                description: Require at least 1 attending advisor
+                default: yes
+              attendingAuthor:
+                type: boolean
+                description: Require the author to attend the meeting
+                default: yes
           customFields:
             type: object
             additionalProperties:

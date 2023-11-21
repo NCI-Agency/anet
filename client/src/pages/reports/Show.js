@@ -656,7 +656,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                   />
                 )}
 
-                {!report.cancelled && (
+                {!report.cancelled && Settings.fields.report.atmosphere && (
                   <Field
                     name="atmosphere"
                     label={Settings.fields.report.atmosphere}
