@@ -1,6 +1,12 @@
 import Page from "./page"
 
+const PAGE_URL = "/people/:uuid"
+
 class ShowPerson extends Page {
+  async open(uuid) {
+    await super.open(PAGE_URL.replace(":uuid", uuid))
+  }
+
   async getEditButton() {
     return browser.$("div a.edit-person")
   }

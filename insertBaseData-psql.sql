@@ -1176,6 +1176,14 @@ INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "
   FROM organizations org
   WHERE org."shortName" = 'EF 2.2';
 
+-- Add attachments for people
+INSERT INTO attachments (uuid, "authorUuid", "fileName", "caption", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt")
+	VALUES ('13318e42-a0a3-438f-8ed5-dc16b1ef17bc', :authorUuid, 'attachPerson.png', 'attachPerson', 'image/png', lo_import('/var/tmp/default_avatar.png'), 12316, 'We can add attachments to a person', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "relatedObjectUuid")
+  SELECT '13318e42-a0a3-438f-8ed5-dc16b1ef17bc', 'people', p.uuid
+  FROM people p
+  WHERE p."domainUsername" = 'erin';
+
 -- Update the full-text indexes
 REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_fts_authorizationGroups";
 REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_fts_locations";

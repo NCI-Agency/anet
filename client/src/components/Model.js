@@ -39,6 +39,7 @@ export const GRAPHQL_NOTE_FIELDS = /* GraphQL */ `
     name
     rank
     role
+    avatarUuid
   }
   noteRelatedObjects {
     objectUuid
@@ -57,10 +58,10 @@ export const GRAPHQL_NOTE_FIELDS = /* GraphQL */ `
         identificationCode
       }
       ... on Person {
+        name
         role
         rank
-        name
-        avatar(size: 32)
+        avatarUuid
       }
       ... on Position {
         type
@@ -87,7 +88,7 @@ export const GRAPHQL_NOTES_FIELDS = /* GraphQL */ `
 // Entity type --> GQL query
 export const GRAPHQL_ENTITY_FIELDS = {
   Report: "uuid intent engagementDate",
-  Person: "uuid name role avatar(size: 32)",
+  Person: "uuid name role avatarUuid",
   Organization: "uuid shortName",
   Position: "uuid name",
   Location: "uuid name",
@@ -940,7 +941,8 @@ export default class Model {
     NOTES_FIELD,
     IS_SUBSCRIBED_FIELD,
     DEFAULT_CUSTOM_FIELDS_PARENT,
-    SENSITIVE_CUSTOM_FIELDS_PARENT
+    SENSITIVE_CUSTOM_FIELDS_PARENT,
+    "attachments"
   ]
 
   static filterClientSideFields(obj, ...additionalFields) {

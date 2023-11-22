@@ -57,6 +57,13 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
   const { loadAppData, currentUser } = useContext(AppContext)
   const navigate = useNavigate()
   const [error, setError] = useState(null)
+  const [attachmentList, setAttachmentList] = useState(
+    initialValues?.attachments
+  )
+  const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
+  const attachmentEditEnabled =
+    attachmentsEnabled &&
+    (!Settings.fields.attachment.restrictToAdmins || currentUser.isAdmin())
   const statusButtons = [
     {
       id: "statusActiveButton",
@@ -369,14 +376,15 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                   </>
                 )}
 
-                {edit && (
+                {edit && attachmentEditEnabled && (
                   <Field
                     name="uploadAttachments"
                     label="Attachments"
                     component={FieldHelper.SpecialField}
                     widget={
                       <UploadAttachment
-                        edit={edit}
+                        attachments={attachmentList}
+                        updateAttachments={setAttachmentList}
                         relatedObjectType={Organization.relatedObjectType}
                         relatedObjectUuid={values.uuid}
                       />

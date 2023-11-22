@@ -19,13 +19,17 @@ const GQL_DELETE_ATTACHMENT = gql`
 
 const AttachmentCard = ({
   attachment,
+  onClick,
+  previewStyle,
+  captionStyle,
   edit,
-  remove,
   setError,
-  setRemove,
   uploadedList,
   setUploadedList
 }) => {
+  const computedCaptionStyle = captionStyle ?? {
+    maxWidth: edit ? "201px" : "176px"
+  }
   const { backgroundSize, backgroundImage } = utils.getAttachmentIconDetails(
     attachment,
     true
@@ -38,30 +42,35 @@ const AttachmentCard = ({
           className="image-preview info-show card-image"
           style={{
             backgroundSize,
-            backgroundImage: `url(${backgroundImage})`
+            backgroundImage: `url(${backgroundImage})`,
+            ...previewStyle
           }}
+          onClick={() => onClick?.(attachment)}
         >
           <div className="file-info image-info">
             <div style={{ display: "grid" }}>
-              <LinkTo
-                className="detail-btn"
-                modelType="Attachment"
-                model={attachment}
-              >
-                {" "}
-              </LinkTo>
+              {!onClick && (
+                <LinkTo
+                  className="detail-btn"
+                  modelType="Attachment"
+                  model={attachment}
+                >
+                  {" "}
+                </LinkTo>
+              )}
             </div>
           </div>
         </div>
         <Card.Body className="p-1 d-block">
-          <Card.Title style={{ fontSize: "15px" }} className="info-line">
-            {utils.ellipsize(attachment?.fileName, 8)}
-            <span>
-              {utils.humanReadableFileSize(attachment?.contentLength)}
-            </span>
+          <Card.Title
+            title={attachment?.caption || attachment?.fileName}
+            style={computedCaptionStyle}
+            className="info-line"
+          >
+            {attachment?.caption || attachment?.fileName}
           </Card.Title>
           {edit && (
-            <div className="info-line">
+            <div className="button-line">
               <div>
                 <LinkTo
                   modelType="Attachment"
@@ -96,9 +105,6 @@ const AttachmentCard = ({
     API.mutation(GQL_DELETE_ATTACHMENT, { uuid: attachment.uuid })
       .then(data => {
         setUploadedList(newAttachments)
-        if (!remove) {
-          setRemove(true)
-        }
         toast.success(
           `Your attachment ${attachment.fileName} has been successfully deleted`
         )
@@ -111,17 +117,17 @@ const AttachmentCard = ({
 
 AttachmentCard.propTypes = {
   attachment: PropTypes.object,
+  onClick: PropTypes.func,
+  previewStyle: PropTypes.object,
+  captionStyle: PropTypes.object,
   edit: PropTypes.bool,
-  remove: PropTypes.bool,
   setError: PropTypes.func,
-  setRemove: PropTypes.func,
   uploadedList: PropTypes.array,
   setUploadedList: PropTypes.func
 }
 
 AttachmentCard.defaultProps = {
-  edit: true,
-  remove: undefined
+  previewStyle: { maxHeight: "155px" }
 }
 
 export default AttachmentCard

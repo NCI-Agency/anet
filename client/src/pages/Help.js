@@ -26,6 +26,8 @@ const GQL_GET_ORGANIZATION = gql`
             uuid
             name
             rank
+            role
+            avatarUuid
             emailAddress
           }
         }

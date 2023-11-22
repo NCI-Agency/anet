@@ -40,12 +40,14 @@ const GQL_GET_REPORT_LIST = gql`
           name
           rank
           role
+          avatarUuid
         }
         primaryPrincipal {
           uuid
           name
           rank
           role
+          avatarUuid
         }
         advisorOrg {
           uuid
@@ -95,6 +97,7 @@ const GQL_GET_REPORT_LIST = gql`
                 name
                 rank
                 role
+                avatarUuid
               }
             }
           }
@@ -103,6 +106,7 @@ const GQL_GET_REPORT_LIST = gql`
             name
             rank
             role
+            avatarUuid
           }
         }
         updatedAt

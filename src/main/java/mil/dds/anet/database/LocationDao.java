@@ -88,6 +88,10 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
     updateM2mForMerge("noteRelatedObjects", "noteUuid", "relatedObjectUuid", winnerLocationUuid,
         loserLocationUuid);
 
+    // Update attachments
+    updateM2mForMerge("attachmentRelatedObjects", "attachmentUuid", "relatedObjectUuid",
+        winnerLocationUuid, loserLocationUuid);
+
     // Update customSensitiveInformation for winner
     DaoUtils.saveCustomSensitiveInformation(null, LocationDao.TABLE_NAME, winnerLocationUuid,
         winnerLocation.getCustomSensitiveInformation());

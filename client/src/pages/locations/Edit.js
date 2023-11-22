@@ -12,7 +12,7 @@ import {
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
 } from "components/RelatedObjectNotes"
-import { Location } from "models"
+import { Attachment, Location } from "models"
 import React from "react"
 import { connect } from "react-redux"
 import { useParams } from "react-router-dom"
@@ -41,7 +41,7 @@ const GQL_GET_LOCATION = gql`
             name
             rank
             role
-            avatar(size: 32)
+            avatarUuid
           }
         }
       }
@@ -56,9 +56,12 @@ const GQL_GET_LOCATION = gql`
             name
             rank
             role
-            avatar(size: 32)
+            avatarUuid
           }
         }
+      }
+      attachments {
+        ${Attachment.basicFieldsQuery}
       }
       customFields
       ${GRAPHQL_NOTES_FIELDS}

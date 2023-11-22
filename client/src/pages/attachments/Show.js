@@ -35,7 +35,7 @@ const GQL_GET_ATTACHMENT = gql`
         name
         rank
         role
-        avatar(size: 32)
+        avatarUuid
       }
       attachmentRelatedObjects {
         relatedObject {
@@ -51,10 +51,10 @@ const GQL_GET_ATTACHMENT = gql`
             identificationCode
           }
           ... on Person {
-            role
-            rank
             name
-            avatar(size: 32)
+            rank
+            role
+            avatarUuid
           }
           ... on Position {
             type
@@ -136,7 +136,9 @@ const AttachmentShow = ({ pageDispatchers }) => {
   const stateSuccess = routerLocation.state && routerLocation.state.success
   const stateError = routerLocation.state && routerLocation.state.error
   const canEdit =
-    currentUser.isAdmin() || currentUser.uuid === attachment.author.uuid
+    currentUser.isAdmin() ||
+    (!Settings.fields.attachment.restrictToAdmins &&
+      currentUser.uuid === attachment.author.uuid)
   const { backgroundSize, backgroundImage, contentMissing } =
     utils.getAttachmentIconDetails(attachment)
   return (

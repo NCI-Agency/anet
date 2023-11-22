@@ -17,7 +17,10 @@ import java.util.Optional;
 import java.util.UUID;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.WebApplicationException;
+import mil.dds.anet.resources.AttachmentResource;
 import mil.dds.anet.test.TestData;
+import mil.dds.anet.test.client.AttachmentInput;
+import mil.dds.anet.test.client.GenericRelatedObjectInput;
 import mil.dds.anet.test.client.Organization;
 import mil.dds.anet.test.client.Person;
 import mil.dds.anet.test.client.PersonInput;
@@ -100,6 +103,18 @@ public class PersonMergeTest extends AbstractResourceTest {
     historyList.add(hist1);
     historyList.add(hist2);
 
+    // Add an attachment
+    final GenericRelatedObjectInput loserPersonAttachment = GenericRelatedObjectInput.builder()
+        .withRelatedObjectType("people").withRelatedObjectUuid(loser.getUuid()).build();
+    final AttachmentInput loserPersonAttachmentInput =
+        AttachmentInput.builder().withFileName("testLoserPersonAttachment.jpg")
+            .withMimeType(AttachmentResource.getAllowedMimeTypes().get(0))
+            .withAttachmentRelatedObjects(List.of(loserPersonAttachment)).build();
+    final String createdLoserPersonAttachmentUuid =
+        adminMutationExecutor.createAttachment("", loserPersonAttachmentInput);
+    assertThat(createdLoserPersonAttachmentUuid).isNotNull();
+
+    // Create a person
     final PersonInput winnerInput = PersonInput.builder().withName("Winner for merging")
         .withRole(Role.ADVISOR).withStatus(Status.ACTIVE).withPreviousPositions(historyList)
         .withPosition(posInput2)
@@ -115,9 +130,22 @@ public class PersonMergeTest extends AbstractResourceTest {
     final Person winner = adminMutationExecutor.createPerson(FIELDS, winnerInput);
     assertThat(winner).isNotNull();
     assertThat(winner.getUuid()).isNotNull();
+
+    // Add an attachment
+    final GenericRelatedObjectInput winnerPersonAttachment = GenericRelatedObjectInput.builder()
+        .withRelatedObjectType("people").withRelatedObjectUuid(winner.getUuid()).build();
+    final AttachmentInput winnerPersonAttachmentInput =
+        AttachmentInput.builder().withFileName("testLoserPersonAttachment.jpg")
+            .withMimeType(AttachmentResource.getAllowedMimeTypes().get(0))
+            .withAttachmentRelatedObjects(List.of(winnerPersonAttachment)).build();
+    final String createdWinnerPersonAttachmentUuid =
+        adminMutationExecutor.createAttachment("", winnerPersonAttachmentInput);
+    assertThat(createdWinnerPersonAttachmentUuid).isNotNull();
+
+    // Merge the two persons
     winnerInput.setUuid(winner.getUuid());
     nrUpdated = adminMutationExecutor.mergePeople("", loser.getUuid(), winnerInput);
-    assertThat(nrUpdated).isEqualTo(1);
+    assertThat(nrUpdated).isOne();
 
     // Assert that loser is gone.
     try {
@@ -125,6 +153,10 @@ public class PersonMergeTest extends AbstractResourceTest {
       fail("Expected NotFoundException");
     } catch (NotFoundException expectedException) {
     }
+
+    // Check that attachments have been merged
+    final Person mergedPerson = adminQueryExecutor.person(FIELDS, winnerInput.getUuid());
+    assertThat(mergedPerson.getAttachments()).hasSize(2);
 
     // Assert that the position is empty.
     Position winnerPos = adminQueryExecutor.position(POSITION_FIELDS, created.getUuid());

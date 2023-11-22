@@ -25,10 +25,10 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
           }
           ... on Person {
             uuid
-            role
-            rank
             name
-            avatar(size: 32)
+            rank
+            role
+            avatarUuid
           }
           ... on Position {
             uuid

@@ -9,11 +9,6 @@
   display: flex !important;
 }
 
-.triggerable-confirm-bootstrap-modal .modal-content {
-  width: max-content;
-  white-space: wrap;
-}
-
 .triggerable-confirm-bootstrap-modal .modal-footer {
   display: flex !important;
 }
@@ -24,7 +19,6 @@
   }
 
   .triggerable-confirm-bootstrap-modal .modal-footer button {
-    white-space: normal;
     margin-bottom: 0.5rem;
   }
 }

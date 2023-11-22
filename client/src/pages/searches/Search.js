@@ -22,13 +22,7 @@ import {
 } from "components/Page"
 import PersonTable from "components/PersonTable"
 import PositionTable from "components/PositionTable"
-import ReportCollection, {
-  FORMAT_CALENDAR,
-  FORMAT_MAP,
-  FORMAT_STATISTICS,
-  FORMAT_SUMMARY,
-  FORMAT_TABLE
-} from "components/ReportCollection"
+import ReportCollection from "components/ReportCollection"
 import {
   getSearchQuery,
   SearchDescription,
@@ -102,8 +96,8 @@ const GQL_GET_PERSON_LIST = gql`
         name
         rank
         role
+        avatarUuid
         emailAddress
-        avatar(size: 32)
         position {
           uuid
           name
@@ -153,7 +147,7 @@ const GQL_GET_POSITION_LIST = gql`
           name
           rank
           role
-          avatar(size: 32)
+          avatarUuid
         }
       }
     }
@@ -873,13 +867,6 @@ const Search = ({
             queryParams={reportsSearchQueryParams}
             setTotalCount={setNumReports}
             paginationKey="SEARCH_reports"
-            viewFormats={[
-              FORMAT_SUMMARY,
-              FORMAT_TABLE,
-              FORMAT_CALENDAR,
-              FORMAT_MAP,
-              FORMAT_STATISTICS
-            ]}
           />
         </Fieldset>
       )}

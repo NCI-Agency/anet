@@ -51,9 +51,14 @@ import TaskShow from "pages/tasks/Show"
 import { PAGE_URLS } from "pages/util"
 import React, { useContext } from "react"
 import { Navigate, Route, Routes } from "react-router-dom"
+import Settings from "settings"
 
 const Routing = () => {
   const { currentUser } = useContext(AppContext)
+  const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
+  const attachmentEditEnabled =
+    attachmentsEnabled &&
+    (!Settings.fields.attachment.restrictToAdmins || currentUser.isAdmin())
   return (
     <Routes>
       <Route index path={PAGE_URLS.HOME} element={<Home />} />
@@ -74,12 +79,16 @@ const Routing = () => {
           <Route path="min" element={<ReportShow />} />
         </Route>
       </Route>
-      <Route path={PAGE_URLS.ATTACHMENTS}>
-        <Route path=":uuid">
-          <Route index element={<AttachmentShow />} />
-          <Route path="edit" element={<AttachmentEdit />} />
+      {attachmentsEnabled && (
+        <Route path={PAGE_URLS.ATTACHMENTS}>
+          <Route path=":uuid">
+            <Route index element={<AttachmentShow />} />
+            {attachmentEditEnabled && (
+              <Route path="edit" element={<AttachmentEdit />} />
+            )}
+          </Route>
         </Route>
-      </Route>
+      )}
       <Route path={PAGE_URLS.PEOPLE}>
         <Route path="new" element={<PersonNew />} />
         <Route path=":uuid">

@@ -120,6 +120,7 @@ export default class Person extends Model {
         )
         .default("")
         .label(Settings.fields.person.rank),
+      avatarUuid: yup.string().nullable().default(null),
       gender: yup
         .string()
         .nullable()
@@ -172,13 +173,14 @@ export default class Person extends Model {
     .concat(Model.yupSchema)
 
   static autocompleteQuery =
-    "uuid name rank role status endOfTourDate avatar(size: 32) position { uuid name type role code status organization { uuid shortName longName identificationCode } location { uuid name } }"
+    "uuid name rank role status endOfTourDate avatarUuid position { uuid name type role code status organization { uuid shortName longName identificationCode } location { uuid name } }"
 
   static allFieldsQuery = `
     uuid
     name
     rank
     role
+    avatarUuid
     status
     pendingVerification
     emailAddress
@@ -189,7 +191,6 @@ export default class Person extends Model {
     country
     gender
     endOfTourDate
-    avatar(size: 256)
     code
     position {
       uuid
@@ -212,7 +213,7 @@ export default class Person extends Model {
           name
           rank
           role
-          avatar(size: 32)
+          avatarUuid
         }
         organization {
           uuid

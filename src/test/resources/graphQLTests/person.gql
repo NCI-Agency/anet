@@ -3,6 +3,7 @@ person(uuid:"${personUuid}") {
   name
   rank
   role
+  avatarUuid
   status
   pendingVerification
   isSubscribed
@@ -15,7 +16,6 @@ person(uuid:"${personUuid}") {
   country
   gender
   endOfTourDate
-  avatar(size: 256)
   position {
     uuid
     name
@@ -35,7 +35,7 @@ person(uuid:"${personUuid}") {
         name
         rank
         role
-        avatar(size: 32)
+        avatarUuid
       }
       organization {
         uuid
@@ -65,6 +65,7 @@ person(uuid:"${personUuid}") {
       name
       rank
       role
+      avatarUuid
     }
     noteRelatedObjects {
       objectUuid
@@ -83,9 +84,10 @@ person(uuid:"${personUuid}") {
           identificationCode
         }
         ... on Person {
-          role
-          rank
           name
+          rank
+          role
+          avatarUuid
         }
         ... on Position {
           type

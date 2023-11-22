@@ -40,18 +40,18 @@ const GQL_GET_REPORT = gql`
         name
         rank
         role
-        avatar(size: 32)
+        avatarUuid
       }
       reportPeople {
         uuid
         name
+        rank
+        role
+        avatarUuid
+        status
         author
         primary
         attendee
-        rank
-        role
-        status
-        avatar(size: 32)
         position {
           uuid
           name

@@ -17,18 +17,21 @@ reportList(query: {releasedAtStart: -259200000, pageSize: 3, sortBy: RELEASED_AT
       name
       rank
       role
+      avatarUuid
     }
     primaryAdvisor {
       uuid
       name
       rank
       role
+      avatarUuid
     }
     primaryPrincipal {
       uuid
       name
       rank
       role
+      avatarUuid
     }
     advisorOrg {
       uuid
@@ -66,6 +69,7 @@ reportList(query: {releasedAtStart: -259200000, pageSize: 3, sortBy: RELEASED_AT
             name
             rank
             role
+            avatarUuid
           }
         }
       }
@@ -74,6 +78,7 @@ reportList(query: {releasedAtStart: -259200000, pageSize: 3, sortBy: RELEASED_AT
         name
         rank
         role
+        avatarUuid
       }
     }
     updatedAt

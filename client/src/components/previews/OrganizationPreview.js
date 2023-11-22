@@ -37,10 +37,10 @@ const GQL_PERSON_FIELDS = `
   fragment personFields on Person {
     uuid
     name
-    status
     rank
     role
-    avatar(size: 32)
+    avatarUuid
+    status
   }
 `
 const GQL_POSITION_FIELDS = `

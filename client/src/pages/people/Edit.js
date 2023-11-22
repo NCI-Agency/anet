@@ -16,7 +16,7 @@ import {
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
 } from "components/RelatedObjectNotes"
-import { Person } from "models"
+import { Attachment, Person } from "models"
 import moment from "moment"
 import React from "react"
 import { connect } from "react-redux"
@@ -32,9 +32,10 @@ const GQL_GET_PERSON = gql`
       name
       rank
       role
+      avatarUuid
+      status
       emailAddress
       phoneNumber
-      status
       pendingVerification
       domainUsername
       openIdSubject
@@ -42,7 +43,6 @@ const GQL_GET_PERSON = gql`
       country
       gender
       endOfTourDate
-      avatar(size: 256)
       code
       position {
         uuid
@@ -55,6 +55,9 @@ const GQL_GET_PERSON = gql`
           longName
           identificationCode
         }
+      }
+      attachments {
+        ${Attachment.basicFieldsQuery}
       }
       customFields
       ${GRAPHQL_CUSTOM_SENSITIVE_INFORMATION_FIELDS}

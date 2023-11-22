@@ -35,6 +35,11 @@ public class PersonResource {
     this.config = config;
   }
 
+  public static boolean hasPermission(final Person user, final String personUuid) {
+    return canCreateOrUpdatePerson(user,
+        AnetObjectEngine.getInstance().getPersonDao().getByUuid(personUuid), false);
+  }
+
   /**
    * Returns a single person entry based on UUID.
    */
@@ -84,7 +89,7 @@ public class PersonResource {
     return created;
   }
 
-  private boolean canCreateOrUpdatePerson(Person editor, Person subject, boolean create) {
+  private static boolean canCreateOrUpdatePerson(Person editor, Person subject, boolean create) {
     if (editor.getUuid().equals(subject.getUuid())) {
       return true;
     }
@@ -186,6 +191,22 @@ public class PersonResource {
         p.getCustomSensitiveInformation());
 
     AnetAuditLogger.log("Person {} updated by {}", p, user);
+    // GraphQL mutations *have* to return something, so we return the number of updated rows
+    return numRows;
+  }
+
+  @GraphQLMutation(name = "updatePersonAvatar")
+  public int updatePersonAvatar(@GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "person") Person p) {
+    final Person user = DaoUtils.getUserFromContext(context);
+    final Person existing = dao.getByUuid(p.getUuid());
+    assertCanUpdatePerson(user, existing);
+    final int numRows = dao.updateAvatar(p);
+    if (numRows == 0) {
+      throw new WebApplicationException("Couldn't process person avatar update", Status.NOT_FOUND);
+    }
+
+    AnetAuditLogger.log("Person {} avatar updated by {}", p, user);
     // GraphQL mutations *have* to return something, so we return the number of updated rows
     return numRows;
   }

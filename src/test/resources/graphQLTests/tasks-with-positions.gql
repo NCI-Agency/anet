@@ -21,7 +21,7 @@ taskList(query: {pageSize: 0}) {
         name
         rank
         role
-        avatar(size: 32)
+        avatarUuid
       }
     }
     customFields

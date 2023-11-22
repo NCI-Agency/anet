@@ -13,13 +13,7 @@ import {
   usePageTitle
 } from "components/Page"
 import { RelatedObjectsTable } from "components/RelatedObjectsTable"
-import ReportCollection, {
-  FORMAT_CALENDAR,
-  FORMAT_MAP,
-  FORMAT_STATISTICS,
-  FORMAT_SUMMARY,
-  FORMAT_TABLE
-} from "components/ReportCollection"
+import ReportCollection from "components/ReportCollection"
 import { Field, Form, Formik } from "formik"
 import { AuthorizationGroup } from "models"
 import React, { useContext } from "react"
@@ -45,10 +39,10 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
           }
           ... on Person {
             uuid
-            role
-            rank
             name
-            avatar(size: 32)
+            rank
+            role
+            avatarUuid
           }
           ... on Position {
             uuid
@@ -140,13 +134,6 @@ const AuthorizationGroupShow = ({ pageDispatchers }) => {
                     authorizationGroupUuid: uuid
                   }}
                   mapId="reports"
-                  viewFormats={[
-                    FORMAT_SUMMARY,
-                    FORMAT_TABLE,
-                    FORMAT_CALENDAR,
-                    FORMAT_MAP,
-                    FORMAT_STATISTICS
-                  ]}
                 />
               </Fieldset>
             </Form>

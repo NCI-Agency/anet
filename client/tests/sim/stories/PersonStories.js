@@ -11,25 +11,21 @@ import afghanSurnames from "./afghanSurnames"
 const availableLocales = Object.keys(allLocales)
 const availableRanks = Settings.fields.person.ranks.map(r => r.value)
 
-function principalName(_gender) {
-  const gender = _gender === "MALE" ? "m" : "f"
-  const result = {
+function principalName(gender) {
+  return {
     firstName: faker.helpers.arrayElement(
-      afghanFirstNames.filter(d => d.gender === gender)
+      afghanFirstNames.filter(d => d.gender === gender.toLowerCase().charAt(0))
     ).name,
     lastName: faker.helpers.arrayElement(afghanSurnames).name
   }
-  return result
 }
 
 function advisorName(gender, locale) {
   const localeFaker = allFakers[locale]
-  const genderInt = gender === "MALE" ? 0 : 1
-  const name = {
-    firstName: localeFaker.person.firstName(genderInt),
-    lastName: localeFaker.person.lastName(genderInt)
+  return {
+    firstName: localeFaker.person.firstName(gender.toLowerCase()),
+    lastName: localeFaker.person.lastName(gender.toLowerCase())
   }
-  return name
 }
 
 function randomPerson(role, status) {

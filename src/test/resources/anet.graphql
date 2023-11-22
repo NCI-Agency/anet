@@ -254,9 +254,6 @@ enum AuthorizationGroupSearchSortBy {
   RECENT
 }
 
-"""Base64-encoded binary"""
-scalar Base64String
-
 """"""
 type Comment {
   author: Person
@@ -420,9 +417,9 @@ type Mutation {
   deleteSubscription(uuid: String): Int
   emailReport(email: AnetEmailInput, uuid: String): Int
   emailRollup(advisorOrganizationUuid: String, email: AnetEmailInput, endDate: Instant, orgType: OrganizationType, principalOrganizationUuid: String, startDate: Instant): Int
-  mergeLocations(loserUuid: String, winnerLocation: LocationInput): Location
+  mergeLocations(loserUuid: String, winnerLocation: LocationInput): Int
   mergePeople(loserUuid: String, winnerPerson: PersonInput): Int
-  mergePositions(loserUuid: String, winnerPosition: PositionInput): Position
+  mergePositions(loserUuid: String, winnerPosition: PositionInput): Int
   publishReport(uuid: String): Int!
   putPersonInPosition(person: PersonInput, uuid: String): Int!
   rejectReport(comment: CommentInput, uuid: String): Int!
@@ -437,6 +434,7 @@ type Mutation {
   updateNote(note: NoteInput): Note
   updateOrganization(organization: OrganizationInput): Int
   updatePerson(person: PersonInput): Int
+  updatePersonAvatar(person: PersonInput): Int!
   updatePersonHistory(person: PersonInput): Int!
   updatePosition(position: PositionInput): Int
   updatePositionHistory(position: PositionInput): Int!
@@ -563,7 +561,7 @@ type Person {
   attendedReports(query: ReportSearchQueryInput): AnetBeanList_Report
   authoredReports(query: ReportSearchQueryInput): AnetBeanList_Report
   authorizationGroupUuids: [String]
-  avatar(size: Int = 256): Base64String
+  avatarUuid: String
   biography: String
   code: String
   country: String
@@ -591,7 +589,7 @@ type Person {
 
 """"""
 input PersonInput {
-  avatar: Base64String
+  avatarUuid: String
   biography: String
   code: String
   country: String
@@ -776,7 +774,6 @@ type Query {
   positionList(query: PositionSearchQueryInput): AnetBeanList_Position
   projectVersion: String
   recentActivities: RecentActivities
-  relatedObjectAttachments(uuid: String): [Attachment]
   report(uuid: String): Report
   reportList(query: ReportSearchQueryInput): AnetBeanList_Report
   rollupGraph(advisorOrganizationUuid: String, endDate: Instant, orgType: OrganizationType, principalOrganizationUuid: String, startDate: Instant): [RollupGraph]
@@ -911,7 +908,7 @@ type ReportPerson {
   author: Boolean!
   authoredReports(query: ReportSearchQueryInput): AnetBeanList_Report
   authorizationGroupUuids: [String]
-  avatar(size: Int = 256): Base64String
+  avatarUuid: String
   biography: String
   code: String
   country: String
@@ -942,7 +939,7 @@ type ReportPerson {
 input ReportPersonInput {
   attendee: Boolean!
   author: Boolean!
-  avatar: Base64String
+  avatarUuid: String
   biography: String
   code: String
   country: String

@@ -229,7 +229,7 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
                     onChange={value => setPerson(value)}
                     objectType={Person}
                     valueKey="name"
-                    fields="uuid name rank role avatar(size: 32) position { uuid name type organization {uuid} }"
+                    fields="uuid name rank role avatarUuid position { uuid name type organization {uuid} }"
                     addon={PEOPLE_ICON}
                     vertical
                   />

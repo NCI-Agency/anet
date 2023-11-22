@@ -36,7 +36,7 @@ const PERSON_SINGLE_SELECT_PARAMETERS = {
   },
   objectType: Person,
   fields:
-    "uuid name rank role avatar(size: 32) position { uuid name type organization {uuid} } previousPositions { startTime endTime position { uuid }}",
+    "uuid name rank role avatarUuid position { uuid name type organization {uuid} } previousPositions { startTime endTime position { uuid }}",
   addon: PEOPLE_ICON
 }
 
@@ -55,7 +55,7 @@ const POSITION_SINGLE_SELECT_PARAMETERS = {
   },
   objectType: Position,
   fields:
-    "uuid name code type organization { uuid shortName longName identificationCode} person { uuid name rank role avatar(size: 32) } previousPeople { startTime endTime person {uuid} }",
+    "uuid name code type organization { uuid shortName longName identificationCode} person { uuid name rank role avatarUuid } previousPeople { startTime endTime person {uuid} }",
   addon: POSITIONS_ICON
 }
 

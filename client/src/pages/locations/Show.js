@@ -75,6 +75,7 @@ const LocationShow = ({ pageDispatchers }) => {
   }
   const location = new Location(data ? data.location : {})
   const canEdit = currentUser.isSuperuser()
+  const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
 
   return (
     <Formik enableReinitialize initialValues={location}>
@@ -181,23 +182,23 @@ const LocationShow = ({ pageDispatchers }) => {
                   />
                 )}
 
-                <Field
-                  name="attachments"
-                  label="Attachments"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={
-                    <div className="attachment-card-list">
-                      {location.attachments.map((attachment, index) => (
-                        <AttachmentCard
-                          key={index}
-                          attachment={attachment}
-                          index={index}
-                          edit={false}
-                        />
-                      ))}
-                    </div>
-                  }
-                />
+                {attachmentsEnabled && (
+                  <Field
+                    name="attachments"
+                    label="Attachments"
+                    component={FieldHelper.ReadonlyField}
+                    humanValue={
+                      <div className="attachment-card-list">
+                        {location.attachments.map(attachment => (
+                          <AttachmentCard
+                            key={attachment.uuid}
+                            attachment={attachment}
+                          />
+                        ))}
+                      </div>
+                    }
+                  />
+                )}
               </Fieldset>
 
               {Settings.fields.location.customFields && (

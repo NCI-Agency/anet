@@ -53,9 +53,7 @@ import utils from "utils"
 
 const GQL_MERGE_POSITION = gql`
   mutation ($loserUuid: String!, $winnerPosition: PositionInput!) {
-    mergePositions(loserUuid: $loserUuid, winnerPosition: $winnerPosition) {
-      uuid
-    }
+    mergePositions(loserUuid: $loserUuid, winnerPosition: $winnerPosition)
   }
 `
 
@@ -417,8 +415,8 @@ const MergePositions = ({ pageDispatchers }) => {
       winnerPosition
     })
       .then(res => {
-        if (res.mergePositions) {
-          navigate(Position.pathFor({ uuid: res.mergePositions.uuid }), {
+        if (res) {
+          navigate(Position.pathFor({ uuid: mergedPosition.uuid }), {
             state: {
               success: "Positions merged. Displaying merged Position below."
             }

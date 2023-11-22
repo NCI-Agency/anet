@@ -6,7 +6,7 @@ import API from "api"
 import AppContext from "components/AppContext"
 import AssessmentResultsContainer from "components/assessments/AssessmentResultsContainer"
 import AssignPositionModal from "components/AssignPositionModal"
-import AvatarDisplayComponent from "components/AvatarDisplayComponent"
+import AttachmentCard from "components/Attachment/AttachmentCard"
 import { mapReadonlyCustomFieldsToComps } from "components/CustomFields"
 import EditAssociatedPositionsModal from "components/EditAssociatedPositionsModal"
 import EditHistory from "components/EditHistory"
@@ -36,7 +36,7 @@ import ReportCollection from "components/ReportCollection"
 import RichTextEditor from "components/RichTextEditor"
 import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
-import { Person, Position } from "models"
+import { Attachment, Person, Position } from "models"
 import moment from "moment"
 import { personTour } from "pages/HopscotchTour"
 import React, { useContext, useState } from "react"
@@ -55,6 +55,7 @@ import { connect } from "react-redux"
 import { useLocation, useNavigate, useParams } from "react-router-dom"
 import Settings from "settings"
 import utils from "utils"
+import PersonAvatar from "./Avatar"
 
 const GQL_GET_PERSON = gql`
   query($uuid: String!) {
@@ -63,6 +64,7 @@ const GQL_GET_PERSON = gql`
       name
       rank
       role
+      avatarUuid
       status
       pendingVerification
       isSubscribed
@@ -75,7 +77,6 @@ const GQL_GET_PERSON = gql`
       country
       gender
       endOfTourDate
-      avatar(size: 256)
       code
       position {
         uuid
@@ -98,7 +99,7 @@ const GQL_GET_PERSON = gql`
             name
             rank
             role
-            avatar(size: 32)
+            avatarUuid
           }
           organization {
             uuid
@@ -115,6 +116,9 @@ const GQL_GET_PERSON = gql`
           uuid
           name
         }
+      }
+      attachments {
+        ${Attachment.basicFieldsQuery}
       }
       customFields
       ${GRAPHQL_CUSTOM_SENSITIVE_INFORMATION_FIELDS}
@@ -201,6 +205,7 @@ const PersonShow = ({ pageDispatchers }) => {
           .map(ap => ap.person.uuid)
           .includes(person.uuid)))
   const canAddOndemandAssessment = isAdmin
+  const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
 
   const action = (
     <div>
@@ -252,6 +257,13 @@ const PersonShow = ({ pageDispatchers }) => {
       return true
     })
     .map(field => cloneField(field, 4))
+
+  const currentAvatar = person?.attachments?.find(
+    a => a.uuid === person?.avatarUuid
+  )
+  const otherAttachments = person?.attachments?.filter(
+    a => a.uuid !== person?.avatarUuid
+  )
   const numberOfFieldsUnderAvatar = person.getNumberOfFieldsInLeftColumn() || 6
   const leftColumnUnderAvatar = orderedFields.slice(
     0,
@@ -303,16 +315,9 @@ const PersonShow = ({ pageDispatchers }) => {
                 <Container fluid>
                   <Row>
                     <Col md={6}>
-                      <AvatarDisplayComponent
-                        avatar={person.avatar}
-                        height={256}
-                        width={256}
-                        style={{
-                          maxWidth: "100%",
-                          display: "block",
-                          margin: "0 auto",
-                          marginBottom: "10px"
-                        }}
+                      <PersonAvatar
+                        avatar={currentAvatar}
+                        avatarUuid={currentAvatar?.uuid}
                       />
                       {leftColumnUnderAvatar}
                     </Col>
@@ -322,7 +327,26 @@ const PersonShow = ({ pageDispatchers }) => {
                     <Col md={12}>{fullWidthFields}</Col>
                   </Row>
                 </Container>
+
+                {attachmentsEnabled && (
+                  <Field
+                    name="attachments"
+                    label="Attachments"
+                    component={FieldHelper.ReadonlyField}
+                    humanValue={
+                      <div className="attachment-card-list">
+                        {otherAttachments?.map(attachment => (
+                          <AttachmentCard
+                            key={attachment.uuid}
+                            attachment={attachment}
+                          />
+                        ))}
+                      </div>
+                    }
+                  />
+                )}
               </Fieldset>
+
               {canEdit && (
                 <AssignPositionModal
                   showModal={showAssignPositionModal}

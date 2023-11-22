@@ -48,7 +48,7 @@ const GQL_GET_POSITION_LIST = gql`
           name
           rank
           role
-          avatar(size: 32)
+          avatarUuid
         }
         associatedPositions {
           uuid
@@ -71,7 +71,8 @@ const GQL_GET_POSITION_LIST = gql`
             uuid
             name
             rank
-            avatar(size: 32)
+            role
+            avatarUuid
             ${GRAPHQL_NOTIFICATIONS_NOTE_FIELDS}
           }
         }

@@ -159,7 +159,7 @@ const MergePeople = ({ pageDispatchers }) => {
                 label="Avatar"
                 value={
                   <AvatarDisplayComponent
-                    avatar={mergedPerson.avatar}
+                    avatarUuid={mergedPerson.avatarUuid}
                     height={128}
                     width={128}
                     style={{
@@ -173,10 +173,12 @@ const MergePeople = ({ pageDispatchers }) => {
                 action={
                   matchingRoles &&
                   getClearButton(() =>
-                    dispatchMergeActions(setAMergedField("avatar", null, null))
+                    dispatchMergeActions(
+                      setAMergedField("avatarUuid", null, null)
+                    )
                   )
                 }
-                fieldName="avatar"
+                fieldName="avatarUuid"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
@@ -582,10 +584,10 @@ const PersonColumn = ({
         <fieldset>
           <PersonField
             label="Avatar"
-            fieldName="avatar"
+            fieldName="avatarUuid"
             value={
               <AvatarDisplayComponent
-                avatar={person.avatar}
+                avatarUuid={person.avatarUuid}
                 height={128}
                 width={128}
                 style={{
@@ -601,12 +603,12 @@ const PersonColumn = ({
               getActionButton(
                 () => {
                   dispatchMergeActions(
-                    setAMergedField("avatar", person.avatar, align)
+                    setAMergedField("avatarUuid", person.avatarUuid, align)
                   )
                 },
                 align,
                 mergeState,
-                "avatar"
+                "avatarUuid"
               )
             }
             mergeState={mergeState}

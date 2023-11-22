@@ -4,9 +4,9 @@ personList(query: {pageSize: ${maxResults}, status: ACTIVE, inMyReports: true, s
     name
     rank
     role
+    avatarUuid
     status
     endOfTourDate
-    avatar(size: 32)
     position {
       uuid
       name

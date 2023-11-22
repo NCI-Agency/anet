@@ -25,7 +25,6 @@ import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.io.EofException;
-import org.jdbi.v3.core.result.ResultIterable;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
 import org.jdbi.v3.sqlobject.statement.SqlBatch;
@@ -101,8 +100,9 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AbstractSearchQuery<?
   public int deleteInternal(String uuid) {
     deleteAttachmentRelatedObjects(uuid);
     return getDbHandle()
-        .createUpdate("/* deleteAttachment */ DELETE FROM attachments where uuid = :uuid")
-        .bind("uuid", uuid).execute();
+        .createQuery("/* deleteAttachment */ DELETE FROM attachments WHERE uuid = :uuid"
+            + " RETURNING CASE WHEN content IS NULL THEN 1 ELSE lo_unlink(content) END")
+        .bind("uuid", uuid).mapTo(Integer.class).one();
   }
 
   public interface AttachmentContent {
@@ -235,7 +235,8 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AbstractSearchQuery<?
     // delete attachments for the related object if they no longer have any links
     getDbHandle()
         .createUpdate("/* deleteAttachments */ DELETE FROM attachments"
-            + " WHERE uuid in (<attachmentUuids>) AND uuid NOT IN (" + selectAttachmentUuids + ")")
+            + " WHERE uuid in (<attachmentUuids>) AND uuid NOT IN (" + selectAttachmentUuids + ")"
+            + " RETURNING lo_unlink(content)")
         .bindList(NULL_KEYWORD, "attachmentUuids", attachmentUuids)
         .bind(relatedObjectTypeParam, relatedObjectType)
         .bind(relatedObjectUuidParam, relatedObjectUuid).execute();

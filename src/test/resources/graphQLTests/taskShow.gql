@@ -46,6 +46,7 @@ task(uuid: "${taskUuid}") {
         name
         rank
         role
+        avatarUuid
       }
       noteRelatedObjects {
         objectUuid
@@ -64,10 +65,10 @@ task(uuid: "${taskUuid}") {
             identificationCode
           }
           ... on Person {
-            role
-            rank
             name
-            avatar(size: 32)
+            rank
+            role
+            avatarUuid
           }
           ... on Position {
             type
@@ -103,7 +104,7 @@ task(uuid: "${taskUuid}") {
       name
       rank
       role
-      avatar(size: 32)
+      avatarUuid
     }
   }
   planningApprovalSteps {
@@ -118,7 +119,7 @@ task(uuid: "${taskUuid}") {
         name
         rank
         role
-        avatar(size: 32)
+        avatarUuid
       }
     }
   }
@@ -134,7 +135,7 @@ task(uuid: "${taskUuid}") {
         name
         rank
         role
-        avatar(size: 32)
+        avatarUuid
       }
     }
   }
@@ -151,6 +152,7 @@ task(uuid: "${taskUuid}") {
       name
       rank
       role
+      avatarUuid
     }
     noteRelatedObjects {
       objectUuid
@@ -169,10 +171,10 @@ task(uuid: "${taskUuid}") {
           identificationCode
         }
         ... on Person {
-          role
-          rank
           name
-          avatar(size: 32)
+          rank
+          role
+          avatarUuid
         }
         ... on Position {
           type

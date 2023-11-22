@@ -3,7 +3,6 @@ import styled from "@emotion/styled"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
 import AppContext from "components/AppContext"
-import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 import CompactTable, {
   CompactFooterContent,
   CompactHeaderContent,
@@ -41,6 +40,7 @@ import { connect } from "react-redux"
 import { useNavigate, useParams } from "react-router-dom"
 import Settings from "settings"
 import utils from "utils"
+import PersonAvatar from "./Avatar"
 
 const GQL_GET_PERSON = gql`
   query($uuid: String!) {
@@ -49,6 +49,7 @@ const GQL_GET_PERSON = gql`
       name
       rank
       role
+      avatarUuid
       status
       pendingVerification
       emailAddress
@@ -58,7 +59,6 @@ const GQL_GET_PERSON = gql`
       country
       gender
       endOfTourDate
-      avatar(size: 256)
       code
       position {
         uuid
@@ -81,7 +81,7 @@ const GQL_GET_PERSON = gql`
             name
             rank
             role
-            avatar(size: 32)
+            avatarUuid
           }
           organization {
             uuid
@@ -239,6 +239,7 @@ const CompactPersonView = ({ pageDispatchers }) => {
   const containsSensitiveInformation = !!orderedFields.find(field =>
     Object.keys(Person.customSensitiveInformation).includes(field.key)
   )
+
   const numberOfFieldsUnderAvatar = leftColumnFields || 6
   const leftColumUnderAvatar = orderedFields.slice(0, numberOfFieldsUnderAvatar)
   const rightColumn = orderedFields.slice(numberOfFieldsUnderAvatar)
@@ -253,16 +254,10 @@ const CompactPersonView = ({ pageDispatchers }) => {
       <CompactRow
         key="avatar"
         content={
-          <AvatarDisplayComponent
-            avatar={person.avatar}
-            height={pageSize.avatarSize}
+          <PersonAvatar
+            avatarUuid={person.avatarUuid}
             width={pageSize.avatarSize}
-            style={{
-              maxWidth: "100%",
-              display: "block",
-              margin: "0 auto",
-              marginBottom: "10px"
-            }}
+            height={pageSize.avatarSize}
           />
         }
       />
@@ -584,10 +579,6 @@ CompactPersonViewHeader.propTypes = {
   setPageSize: PropTypes.func,
   leftColumnFields: PropTypes.string,
   setLeftColumnFields: PropTypes.func
-}
-
-CompactPersonViewHeader.defaultProps = {
-  noReport: false
 }
 
 function onPresetSelect(fields, optionalFields, setOptionalFields) {

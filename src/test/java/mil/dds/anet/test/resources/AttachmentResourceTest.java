@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.database.OrganizationDao;
+import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.resources.AttachmentResource;
 import mil.dds.anet.test.client.Attachment;
@@ -18,6 +19,7 @@ import mil.dds.anet.test.client.Location;
 import mil.dds.anet.test.client.LocationInput;
 import mil.dds.anet.test.client.LocationType;
 import mil.dds.anet.test.client.Organization;
+import mil.dds.anet.test.client.Person;
 import mil.dds.anet.test.client.Report;
 import mil.dds.anet.test.client.ReportInput;
 import mil.dds.anet.test.client.ReportState;
@@ -25,9 +27,9 @@ import mil.dds.anet.test.client.Status;
 import mil.dds.anet.test.client.util.MutationExecutor;
 import org.junit.jupiter.api.Test;
 
-class AttachmentResourceTest extends AbstractResourceTest {
+public class AttachmentResourceTest extends AbstractResourceTest {
 
-  protected static final String ATTACHMENT_FIELDS =
+  public static final String ATTACHMENT_FIELDS =
       "{ uuid mimeType fileName description classification caption author { uuid }"
           + " attachmentRelatedObjects { objectUuid relatedObjectType relatedObjectUuid } }";
   private static final String _ATTACHMENTS_FIELDS =
@@ -463,6 +465,162 @@ class AttachmentResourceTest extends AbstractResourceTest {
     succeedAttachmentDelete(jackMutationExecutor, attachment.getUuid());
     final Report report = jackQueryExecutor.report(OBJECT_FIELDS, reportUuid);
     assertThat(report.getAttachments()).hasSize(nrOfAttachments - 1);
+  }
+
+  @Test
+  void testPersonAttachments()
+      throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
+    // Get test person
+    final Person testPerson =
+        adminQueryExecutor.person(OBJECT_FIELDS, "df9c7381-56ac-4bc5-8e24-ec524bccd7e9");
+    assertThat(testPerson).isNotNull();
+    assertThat(testPerson.getUuid()).isNotNull();
+    final int nrOfAttachments = testPerson.getAttachments().size();
+
+    // Add attachment to test person
+    final AttachmentInput testAttachmentInput =
+        buildAttachment(PersonDao.TABLE_NAME, testPerson.getUuid());
+
+    // Test attachment create
+    final CreatePersonAttachmentsResult result = testCreatePersonAttachments(testAttachmentInput);
+
+    // Check the person
+    final Person person = jackQueryExecutor.person(OBJECT_FIELDS, testPerson.getUuid());
+    assertThat(person.getAttachments()).hasSize(nrOfAttachments + 4);
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    final Attachment userAttachment = person.getAttachments().stream()
+        .filter(a -> result.userAttachmentUuid().equals(a.getUuid())).findAny().get();
+    assertAttachmentDetails(result.userAttachmentUuid(), testAttachmentInput, userAttachment);
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    final Attachment superuserAttachment1 = person.getAttachments().stream()
+        .filter(a -> result.superuserAttachmentUuid1().equals(a.getUuid())).findAny().get();
+    assertAttachmentDetails(result.superuserAttachmentUuid1(), testAttachmentInput,
+        superuserAttachment1);
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    final Attachment superuserAttachment2 = person.getAttachments().stream()
+        .filter(a -> result.superuserAttachmentUuid2().equals(a.getUuid())).findAny().get();
+    assertAttachmentDetails(result.superuserAttachmentUuid2(), testAttachmentInput,
+        superuserAttachment2);
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    final Attachment adminAttachment = person.getAttachments().stream()
+        .filter(a -> result.adminAttachmentUuid().equals(a.getUuid())).findAny().get();
+    assertAttachmentDetails(result.adminAttachmentUuid(), testAttachmentInput, adminAttachment);
+
+    // Test attachment update
+    testUpdatePersonAttachments(person.getUuid(), person.getAttachments().size(), userAttachment,
+        superuserAttachment1, superuserAttachment2);
+
+    // Test attachment delete
+    testDeletePersonAttachments(person.getUuid(), person.getAttachments().size(), userAttachment,
+        superuserAttachment1, superuserAttachment2, adminAttachment);
+  }
+
+  private CreatePersonAttachmentsResult testCreatePersonAttachments(
+      AttachmentInput testAttachmentInput)
+      throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
+    // S - create attachment as normal user
+    final String userAttachmentUuid =
+        succeedAttachmentCreate(erinMutationExecutor, testAttachmentInput);
+
+    // F - create attachment as superuser of different person
+    failAttachmentCreate(henryMutationExecutor, testAttachmentInput);
+
+    // S - create attachment as superuser
+    final String superuserAttachmentUuid1 =
+        succeedAttachmentCreate(rebeccaMutationExecutor, testAttachmentInput);
+    final String superuserAttachmentUuid2 =
+        succeedAttachmentCreate(rebeccaMutationExecutor, testAttachmentInput);
+
+    // S - create attachment as admin
+    final String adminAttachmentUuid =
+        succeedAttachmentCreate(adminMutationExecutor, testAttachmentInput);
+
+    return new CreatePersonAttachmentsResult(userAttachmentUuid, superuserAttachmentUuid1,
+        superuserAttachmentUuid2, adminAttachmentUuid);
+  }
+
+  private record CreatePersonAttachmentsResult(String userAttachmentUuid,
+      String superuserAttachmentUuid1, String superuserAttachmentUuid2,
+      String adminAttachmentUuid) {}
+
+  private void testUpdatePersonAttachments(final String personUuid, final int nrOfAttachments,
+      final Attachment userAttachment, final Attachment superuserAttachment1,
+      final Attachment superuserAttachment2)
+      throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
+    // S - update attachment as normal user
+    userAttachment.setFileName("erinUpdatedAttachment.jpg");
+    succeedAttachmentUpdate(erinMutationExecutor, getInput(userAttachment, AttachmentInput.class));
+    Person person = jackQueryExecutor.person(OBJECT_FIELDS, personUuid);
+    assertThat(person.getAttachments()).hasSize(nrOfAttachments);
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    final Attachment updatedUserAttachment = person.getAttachments().stream()
+        .filter(a -> userAttachment.getUuid().equals(a.getUuid())).findAny().get();
+    assertThat(updatedUserAttachment.getFileName()).isEqualTo(userAttachment.getFileName());
+
+    // F - update attachment as superuser of different person
+    superuserAttachment1.setFileName("henryUpdatedAttachment.jpg");
+    failAttachmentUpdate(henryMutationExecutor,
+        getInput(superuserAttachment1, AttachmentInput.class));
+
+    // F - update attachment as different superuser
+    superuserAttachment1.setFileName("jacobUpdatedAttachment.jpg");
+    failAttachmentUpdate(jacobMutationExecutor,
+        getInput(superuserAttachment1, AttachmentInput.class));
+
+    // S - update attachment as superuser
+    superuserAttachment1.setFileName("rebeccaUpdatedAttachment.jpg");
+    succeedAttachmentUpdate(rebeccaMutationExecutor,
+        getInput(superuserAttachment1, AttachmentInput.class));
+    person = jackQueryExecutor.person(OBJECT_FIELDS, personUuid);
+    assertThat(person.getAttachments()).hasSize(nrOfAttachments);
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    final Attachment updatedSuperuserAttachment1 = person.getAttachments().stream()
+        .filter(a -> superuserAttachment1.getUuid().equals(a.getUuid())).findAny().get();
+    assertThat(updatedSuperuserAttachment1.getFileName())
+        .isEqualTo(superuserAttachment1.getFileName());
+
+    // S - update attachment as admin
+    superuserAttachment2.setFileName("adminUpdatedAttachment.jpg");
+    succeedAttachmentUpdate(adminMutationExecutor,
+        getInput(superuserAttachment2, AttachmentInput.class));
+    person = jackQueryExecutor.person(OBJECT_FIELDS, personUuid);
+    assertThat(person.getAttachments()).hasSize(nrOfAttachments);
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    final Attachment updatedSuperuserAttachment2 = person.getAttachments().stream()
+        .filter(a -> superuserAttachment2.getUuid().equals(a.getUuid())).findAny().get();
+    assertThat(updatedSuperuserAttachment2.getFileName())
+        .isEqualTo(superuserAttachment2.getFileName());
+  }
+
+  private void testDeletePersonAttachments(final String personUuid, final int nrOfAttachments,
+      final Attachment userAttachment, final Attachment superuserAttachment1,
+      final Attachment superuserAttachment2, final Attachment adminAttachment)
+      throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
+    // S - delete attachment as normal user
+    succeedAttachmentDelete(erinMutationExecutor, userAttachment.getUuid());
+    Person person = jackQueryExecutor.person(OBJECT_FIELDS, personUuid);
+    assertThat(person.getAttachments()).hasSize(nrOfAttachments - 1);
+
+    // F - delete attachment as superuser of different person
+    failAttachmentDelete(henryMutationExecutor, superuserAttachment1.getUuid());
+
+    // F - delete attachment as different superuser
+    failAttachmentDelete(jacobMutationExecutor, superuserAttachment1.getUuid());
+
+    // S - delete attachment as superuser
+    succeedAttachmentDelete(rebeccaMutationExecutor, superuserAttachment1.getUuid());
+    person = jackQueryExecutor.person(OBJECT_FIELDS, personUuid);
+    assertThat(person.getAttachments()).hasSize(nrOfAttachments - 2);
+
+    // S - delete superuser attachment as admin
+    succeedAttachmentDelete(adminMutationExecutor, superuserAttachment2.getUuid());
+    person = jackQueryExecutor.person(OBJECT_FIELDS, personUuid);
+    assertThat(person.getAttachments()).hasSize(nrOfAttachments - 3);
+
+    // S - delete ADMIN attachment as admin
+    succeedAttachmentDelete(adminMutationExecutor, adminAttachment.getUuid());
+    person = jackQueryExecutor.person(OBJECT_FIELDS, personUuid);
+    assertThat(person.getAttachments()).hasSize(nrOfAttachments - 4);
   }
 
   private GenericRelatedObjectInput createAttachmentRelatedObject(final String tableName,

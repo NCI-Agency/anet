@@ -179,7 +179,7 @@ export default class Location extends Model {
           name
           rank
           role
-          avatar(size: 32)
+          avatarUuid
         }
       }
     }
@@ -194,7 +194,7 @@ export default class Location extends Model {
           name
           rank
           role
-          avatar(size: 32)
+          avatarUuid
         }
       }
     }

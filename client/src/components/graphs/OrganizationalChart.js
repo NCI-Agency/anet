@@ -1,6 +1,5 @@
 import { gql } from "@apollo/client"
 import API from "api"
-import { AVATAR_DATA_PREAMBLE } from "components/AvatarDisplayComponent"
 import SVGCanvas from "components/graphs/SVGCanvas"
 import {
   mapPageDispatchersToProps,
@@ -38,10 +37,11 @@ const GQL_GET_CHART_DATA = gql`
           uuid
         }
         person {
-          rank
-          name
           uuid
-          avatar(size: 32)
+          name
+          rank
+          role
+          avatarUuid
         }
       }
       childrenOrgs(query: { status: ACTIVE }) {
@@ -67,10 +67,11 @@ const GQL_GET_CHART_DATA = gql`
             uuid
           }
           person {
-            rank
-            name
             uuid
-            avatar(size: 32)
+            name
+            rank
+            role
+            avatarUuid
           }
         }
       }
@@ -138,6 +139,7 @@ const OrganizationalChart = ({
   const canvas = d3.select(canvasRef.current)
   const link = d3.select(linkRef.current)
   const node = d3.select(nodeRef.current)
+  const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
 
   useEffect(() => {
     data &&
@@ -156,18 +158,16 @@ const OrganizationalChart = ({
     if (!data || !root) {
       return
     }
-    const nodeSize = [200, 80 + 26 * personnelDepth]
+    const nodeSize = [250, 80 + 26 * personnelDepth]
 
     const calculateBounds = rootArg => {
-      const boundingBox = rootArg.descendants().reduce(
-        (box, nodeArg) => {
-          return {
-            xmin: Math.min(box.xmin, nodeArg.x || 0),
-            xmax: Math.max(box.xmax, nodeArg.x || 0),
-            ymin: Math.min(box.ymin, nodeArg.y || 0),
-            ymax: Math.max(box.ymax, nodeArg.y || 0)
-          }
-        },
+      const boundingBox = rootArg.descendants(root).reduce(
+        (box, nodeArg) => ({
+          xmin: Math.min(box.xmin, nodeArg.x ?? 0),
+          xmax: Math.max(box.xmax, nodeArg.x ?? 0),
+          ymin: Math.min(box.ymin, nodeArg.y ?? 0),
+          ymax: Math.max(box.ymax, nodeArg.y ?? 0)
+        }),
         {
           xmin: Number.MAX_SAFE_INTEGER,
           xmax: Number.MIN_SAFE_INTEGER,
@@ -182,7 +182,7 @@ const OrganizationalChart = ({
           boundingBox.ymax - boundingBox.ymin + nodeSize[1]
         ],
         center: [
-          (boundingBox.xmax + boundingBox.xmin + nodeSize[0] - 50) / 2,
+          (boundingBox.xmax + boundingBox.xmin + nodeSize[0] - 200) / 2,
           (boundingBox.ymax + boundingBox.ymin + nodeSize[1] - 50) / 2
         ]
       }
@@ -335,8 +335,8 @@ const OrganizationalChart = ({
       .attr("height", d => getRoleValue(d, 26, 13))
       .attr("y", d => getRoleValue(d, -15, -10))
       .attr("href", d =>
-        d?.person?.avatar
-          ? `${AVATAR_DATA_PREAMBLE}${d.person.avatar}`
+        attachmentsEnabled && d?.person?.avatarUuid
+          ? `/api/attachment/view/${d.person.avatarUuid}`
           : DEFAULT_AVATAR
       )
 
@@ -364,7 +364,16 @@ const OrganizationalChart = ({
       .attr("font-weight", d => getRoleValue(d, "bold", ""))
       .style("text-anchor", "start")
       .text(d => utils.ellipsize(d.name, getRoleValue(d, 23, 31)))
-  }, [data, expanded, navigate, personnelDepth, root, link, node])
+  }, [
+    attachmentsEnabled,
+    data,
+    expanded,
+    navigate,
+    personnelDepth,
+    root,
+    link,
+    node
+  ])
 
   if (done) {
     return result

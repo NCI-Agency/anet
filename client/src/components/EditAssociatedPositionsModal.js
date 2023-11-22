@@ -144,7 +144,7 @@ const EditAssociatedPositionsModal = ({
                           overlayRenderRow={PositionOverlayRow}
                           filterDefs={positionsFilters}
                           objectType={Position}
-                          fields="uuid, name, code, type, person { uuid, name, rank, role, avatar(size: 32) }, organization { uuid, shortName, longName, identificationCode }"
+                          fields="uuid, name, code, type, person { uuid, name, rank, role, avatarUuid }, organization { uuid, shortName, longName, identificationCode }"
                           addon={POSITIONS_ICON}
                         />
                       }

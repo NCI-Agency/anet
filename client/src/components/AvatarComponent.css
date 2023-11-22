@@ -1,0 +1,5 @@
+.custom-cropper {
+  max-height: 480px;
+  background-color: transparent;
+  margin: 0 auto 10px;
+}

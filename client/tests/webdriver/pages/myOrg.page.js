@@ -1,6 +1,10 @@
 import Page from "./page"
 
 class MyOrg extends Page {
+  async getReportStatisticsButton() {
+    return browser.$("#reports button[value='statistics']")
+  }
+
   async getEngagementDateStatistics() {
     return (await browser.$("[id^=engagementDate-statistics]")).$(".fc")
   }

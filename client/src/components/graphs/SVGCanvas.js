@@ -1,25 +1,11 @@
 import PropTypes from "prop-types"
 import React, { useRef } from "react"
 import { Button } from "react-bootstrap"
+import DEFAULT_AVATAR from "resources/default_avatar.svg?inline"
 import DOWNLOAD_ICON from "resources/download.png"
 
 const SVGCanvas = ({ width, height, exportTitle, zoomFn, children }) => {
   const svgRef = useRef(null)
-  const exportSvg = () => {
-    const svgBlob = new Blob(
-      ['<?xml version="1.0" standalone="no"?>', svgRef.current.outerHTML],
-      {
-        type: "image/svg+xml;charset=utf-8"
-      }
-    )
-    const svgUrl = URL.createObjectURL(svgBlob)
-    const downloadLink = document.createElement("a")
-    downloadLink.href = svgUrl
-    downloadLink.download = exportTitle
-    document.body.appendChild(downloadLink)
-    downloadLink.click()
-    document.body.removeChild(downloadLink)
-  }
 
   return (
     <div>
@@ -70,6 +56,48 @@ const SVGCanvas = ({ width, height, exportTitle, zoomFn, children }) => {
       </svg>
     </div>
   )
+
+  async function exportSvg() {
+    const svgClone = svgRef.current.cloneNode(true)
+    const images = svgClone.getElementsByTagName("image")
+    const allPromises = []
+    for (const image of images) {
+      if (!image.getAttribute("href").startsWith("data:")) {
+        // Replace image with its Base64-encoded data
+        const promise = toDataUrl(image.getAttribute("href"))
+          .then(dataUrl => image.setAttribute("href", dataUrl))
+          .catch(() => image.setAttribute("href", DEFAULT_AVATAR))
+        allPromises.push(promise)
+      }
+    }
+    await Promise.all(allPromises)
+    const svgBlob = new Blob(
+      ['<?xml version="1.0" standalone="no"?>', svgClone.outerHTML],
+      {
+        type: "image/svg+xml;charset=utf-8"
+      }
+    )
+    const svgUrl = URL.createObjectURL(svgBlob)
+    const downloadLink = document.createElement("a")
+    downloadLink.href = svgUrl
+    downloadLink.download = exportTitle
+    document.body.appendChild(downloadLink)
+    downloadLink.click()
+    document.body.removeChild(downloadLink)
+  }
+
+  async function toDataUrl(imageUrl) {
+    const image = new Image()
+    image.crossOrigin = "anonymous"
+    image.src = imageUrl
+    await image.decode()
+    const canvas = document.createElement("canvas")
+    const context = canvas.getContext("2d")
+    canvas.height = image.naturalHeight
+    canvas.width = image.naturalWidth
+    context.drawImage(image, 0, 0)
+    return canvas.toDataURL()
+  }
 }
 
 SVGCanvas.propTypes = {

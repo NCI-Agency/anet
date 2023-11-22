@@ -178,6 +178,9 @@ const ReportForm = ({
   // update the yup schema for the selected tasks/attendees instant assessments
   const [reportTasks, setReportTasks] = useState(initialValues.tasks)
   const [reportPeople, setReportPeople] = useState(initialValues.reportPeople)
+  const [attachmentList, setAttachmentList] = useState(
+    initialValues?.attachments
+  )
   const [showCustomFields, setShowCustomFields] = useState(
     !!Settings.fields.report.customFields
   )
@@ -246,6 +249,10 @@ const ReportForm = ({
   const supportEmail = Settings.SUPPORT_EMAIL_ADDR
   const supportEmailMessage = supportEmail ? `at ${supportEmail}` : ""
   const advisorPositionSingular = Settings.fields.advisor.position.name
+  const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
+  const attachmentEditEnabled =
+    attachmentsEnabled &&
+    (!Settings.fields.attachment.restrictToAdmins || currentUser.isAdmin())
 
   let recents = []
   if (data) {
@@ -917,14 +924,15 @@ const ReportForm = ({
                   widget={<RichTextEditor className="reportTextField" />}
                 />
 
-                {!Settings.fields.attachment.featureDisabled && (
+                {attachmentEditEnabled && (
                   <Field
                     name="uploadAttachments"
                     label="Attachments"
                     component={FieldHelper.SpecialField}
                     widget={
                       <UploadAttachment
-                        edit={edit}
+                        attachments={attachmentList}
+                        updateAttachments={setAttachmentList}
                         relatedObjectType={Report.relatedObjectType}
                         relatedObjectUuid={values.uuid}
                         saveRelatedObject={() =>

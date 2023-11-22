@@ -80,7 +80,7 @@ const GQL_GET_REPORT = gql`
         name
         rank
         role
-        avatar(size: 32)
+        avatarUuid
         position {
           uuid
           organization {
@@ -99,7 +99,7 @@ const GQL_GET_REPORT = gql`
                   name
                   rank
                   role
-                  avatar(size: 32)
+                  avatarUuid
                 }
               }
             }
@@ -109,14 +109,14 @@ const GQL_GET_REPORT = gql`
       reportPeople {
         uuid
         name
+        rank
+        role
+        avatarUuid
+        status
         author
         primary
         attendee
-        rank
-        role
-        status
         endOfTourDate
-        avatar(size: 32)
         position {
           uuid
           name
@@ -174,7 +174,7 @@ const GQL_GET_REPORT = gql`
           name
           rank
           role
-          avatar(size: 32)
+          avatarUuid
         }
       }
       principalOrg {
@@ -205,7 +205,7 @@ const GQL_GET_REPORT = gql`
               name
               rank
               role
-              avatar(size: 32)
+              avatarUuid
             }
           }
         }
@@ -214,7 +214,7 @@ const GQL_GET_REPORT = gql`
           name
           rank
           role
-          avatar(size: 32)
+          avatarUuid
         }
       }
       approvalStep {
@@ -393,6 +393,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
   const canEmail = !report.isDraft()
   const hasAuthorizationGroups =
     report.authorizationGroups && report.authorizationGroups.length > 0
+  const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
 
   return (
     <Formik
@@ -670,19 +671,17 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                   />
                 )}
 
-                {!Settings.fields.attachment.featureDisabled && (
+                {attachmentsEnabled && (
                   <Field
                     name="attachments"
                     label="Attachments"
                     component={FieldHelper.ReadonlyField}
                     humanValue={
                       <div className="attachment-card-list">
-                        {report.attachments.map((attachment, index) => (
+                        {report.attachments.map(attachment => (
                           <AttachmentCard
-                            key={index}
+                            key={attachment.uuid}
                             attachment={attachment}
-                            index={index}
-                            edit={false}
                           />
                         ))}
                       </div>

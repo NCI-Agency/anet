@@ -153,11 +153,6 @@ public final class BatchingUtils {
             (BatchLoader<String, Person>) keys -> CompletableFuture
                 .supplyAsync(() -> engine.getPersonDao().getByIds(keys), dispatcherService),
             dataLoaderOptions));
-    dataLoaderRegistry.register(IdDataLoaderKey.PEOPLE_AVATARS.toString(),
-        DataLoaderFactory.newDataLoader(
-            (BatchLoader<String, Person>) keys -> CompletableFuture
-                .supplyAsync(() -> engine.getPersonDao().getAvatars(keys), dispatcherService),
-            dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.PERSON_ORGANIZATIONS.toString(),
         DataLoaderFactory.newDataLoader(
             (BatchLoader<String, List<Organization>>) foreignKeys -> CompletableFuture.supplyAsync(

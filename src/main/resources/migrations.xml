@@ -4470,7 +4470,7 @@
 			WHERE "parentTaskUuid" IS NULL;
 		</sql>
 	</changeSet>
-	
+
 	<changeSet id="add-role-to-positions" author="hyesilAnka" >
 		<addColumn tableName="positions" >
 			<column name="role" type="int" defaultValue="0" >
@@ -4568,6 +4568,59 @@
 
 		<!-- Now drop authorizationGroupPositions -->
 		<dropTable tableName="authorizationGroupPositions" />
+	</changeSet>
+
+	<changeSet id="migrate-people-avatar-to-attachment" author="gjvoosten">
+		<sql>
+			INSERT INTO attachments
+					(uuid, "authorUuid", "fileName", "mimeType", content, "contentLength",
+					description, classification, caption, "createdAt", "updatedAt")
+				SELECT ${uuid_function}, uuid, 'avatar-' || uuid || '.png', 'image/png', lo_from_bytea(0, avatar), length(avatar),
+					'Automatically migrated avatar of ' || name, NULL, name, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+				FROM people
+				WHERE avatar IS NOT NULL;
+			UPDATE people SET avatar = NULL;
+			INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "relatedObjectUuid")
+				SELECT uuid, 'people', attachments."authorUuid"
+				FROM attachments
+				WHERE attachments."fileName" = 'avatar-' || attachments."authorUuid" || '.png';
+		</sql>
+		<dropColumn tableName="people" columnName="avatar" />
+		<addColumn tableName="people">
+			<column name="avatarUuid" type="${uuid_type}" />
+		</addColumn>
+		<addForeignKeyConstraint
+			baseTableName="people"
+			baseColumnNames="avatarUuid"
+			constraintName="FK_people_attachment"
+			referencedTableName="attachments"
+			referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION" />
+		<sql>
+			UPDATE people SET "avatarUuid" = (
+				SELECT uuid
+				FROM attachments
+				WHERE people.uuid = attachments."authorUuid" AND attachments."fileName" = 'avatar-' || attachments."authorUuid" || '.png'
+			);
+		</sql>
+	</changeSet>
+
+	<changeSet id="add-unique-taskResponsiblePositions-constraint" author="gjvoosten">
+		<addUniqueConstraint tableName="taskResponsiblePositions"
+							 columnNames="taskUuid, positionUuid"
+							 constraintName="UQ_TaskResponsiblePositions" />
+	</changeSet>
+
+	<changeSet id="add-unique-authorizationGroupRelatedObjects-constraint" author="gjvoosten">
+		<addUniqueConstraint tableName="authorizationGroupRelatedObjects"
+							 columnNames="authorizationGroupUuid, relatedObjectType, relatedObjectUuid"
+							 constraintName="UQ_AuthorizationGroupRelatedObjects" />
+	</changeSet>
+
+	<changeSet id="add-unique-attachmentRelatedObjects-constraint" author="gjvoosten">
+		<addUniqueConstraint tableName="attachmentRelatedObjects"
+							 columnNames="attachmentUuid, relatedObjectType, relatedObjectUuid"
+							 constraintName="UQ_AttachmentRelatedObjects" />
 	</changeSet>
 
 </databaseChangeLog>

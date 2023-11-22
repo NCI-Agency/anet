@@ -61,6 +61,13 @@
   justify-content: space-between;
 }
 .info-line {
+  font-size: 15px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.button-line {
   width: 100%;
   display: flex;
   justify-content: space-between;
@@ -74,15 +81,6 @@
   width: 100%;
   height: 120px;
   place-content: center;
-}
-.icon:hover {
-  cursor: pointer;
-}
-.edit:hover {
-  color: blue;
-}
-.delete:hover {
-  color: #cd2222;
 }
 
 /******** ATTACHMENT CARD ********/
@@ -104,10 +102,6 @@
   flex: 0 0 calc(20%);
   margin: 0 0 10px;
   box-sizing: border-box;
-}
-
-.attachment-card .card {
-  max-height: 155px;
 }
 
 /******** ATTACHMENT SHOW PAGE ********/

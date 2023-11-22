@@ -72,10 +72,10 @@ const GQL_PERSON_FIELDS = `
   fragment personFields on Person {
     uuid
     name
-    status
     rank
     role
-    avatar(size: 32)
+    avatarUuid
+    status
   }
 `
 const GQL_POSITION_FIELDS = `
@@ -216,6 +216,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
   const orgSettings = isPrincipalOrg
     ? Settings.fields.principal.org
     : Settings.fields.advisor.org
+  const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
 
   const myOrg =
     currentUser && currentUser.position
@@ -468,23 +469,23 @@ const OrganizationShow = ({ pageDispatchers }) => {
                   }
                 />
 
-                <Field
-                  name="attachments"
-                  label="Attachments"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={
-                    <div className="attachment-card-list">
-                      {organization.attachments.map((attachment, index) => (
-                        <AttachmentCard
-                          key={index}
-                          attachment={attachment}
-                          index={index}
-                          edit={false}
-                        />
-                      ))}
-                    </div>
-                  }
-                />
+                {attachmentsEnabled && (
+                  <Field
+                    name="attachments"
+                    label="Attachments"
+                    component={FieldHelper.ReadonlyField}
+                    humanValue={
+                      <div className="attachment-card-list">
+                        {organization.attachments.map(attachment => (
+                          <AttachmentCard
+                            key={attachment.uuid}
+                            attachment={attachment}
+                          />
+                        ))}
+                      </div>
+                    }
+                  />
+                )}
               </Fieldset>
 
               {Settings.fields.organization.customFields && (
@@ -519,6 +520,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
                 <ReportCollection
                   paginationKey={`r_${uuid}`}
                   queryParams={reportQueryParams}
+                  mapId="reports"
                   reportsFilter={
                     <>
                       <Button

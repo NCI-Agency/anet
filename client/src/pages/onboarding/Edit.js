@@ -21,9 +21,10 @@ const GQL_GET_PERSON = gql`
       name
       rank
       role
+      avatarUuid
+      status
       emailAddress
       phoneNumber
-      status
       pendingVerification
       biography
       country
@@ -31,7 +32,6 @@ const GQL_GET_PERSON = gql`
       endOfTourDate
       domainUsername
       openIdSubject
-      avatar(size: 256)
       code
       position {
         uuid

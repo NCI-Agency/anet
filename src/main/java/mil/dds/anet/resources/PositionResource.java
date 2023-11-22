@@ -269,7 +269,7 @@ public class PositionResource {
   }
 
   @GraphQLMutation(name = "mergePositions")
-  public Position mergePositions(@GraphQLRootContext Map<String, Object> context,
+  public Integer mergePositions(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "winnerPosition") Position winnerPosition,
       @GraphQLArgument(name = "loserUuid") String loserUuid) {
     final Person user = DaoUtils.getUserFromContext(context);
@@ -302,7 +302,7 @@ public class PositionResource {
           Status.NOT_FOUND);
     }
     AnetAuditLogger.log("Position {} merged into {} by {}", loserPosition, winnerPosition, user);
-    return winnerPosition;
+    return numRows;
   }
 
   private void arePositionsMergeable(Position winnerPos, Position loserPos) {

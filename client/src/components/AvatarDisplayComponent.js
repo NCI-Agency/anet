@@ -1,28 +1,34 @@
 import PropTypes from "prop-types"
 import React from "react"
 import DEFAULT_AVATAR from "resources/default_avatar.svg"
-
-export const AVATAR_DATA_PREAMBLE = "data:image/png;base64,"
+import Settings from "settings"
 
 const AvatarDisplayComponent = ({
-  avatar,
+  avatarUuid,
   height,
   width,
   style,
   className
-}) => (
-  <img
-    src={avatar ? `${AVATAR_DATA_PREAMBLE}${avatar}` : DEFAULT_AVATAR}
-    className={className}
-    height={height}
-    width={width}
-    alt="Avatar"
-    style={style}
-  />
-)
+}) => {
+  const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
+  return (
+    <img
+      src={
+        attachmentsEnabled && avatarUuid
+          ? `/api/attachment/view/${avatarUuid}`
+          : DEFAULT_AVATAR
+      }
+      className={className}
+      height={height}
+      width={width}
+      alt="Avatar"
+      style={style}
+    />
+  )
+}
 
 AvatarDisplayComponent.propTypes = {
-  avatar: PropTypes.string,
+  avatarUuid: PropTypes.string,
   className: PropTypes.string,
   height: PropTypes.number,
   width: PropTypes.number,

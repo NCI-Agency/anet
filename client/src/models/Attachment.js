@@ -34,16 +34,6 @@ export default class Attachment extends Model {
 
   static autocompleteQuery = Attachment.basicFieldsQuery
 
-  static _resourceOverride = ["attachments"].join("/")
-
-  static pathFor(instance, query) {
-    return Model.pathFor(instance, query, this._resourceOverride)
-  }
-
-  static pathForNew(query) {
-    return Model.pathForNew(query, this._resourceOverride)
-  }
-
   static humanNameOfStatus(status) {
     return utils.sentenceCase(status)
   }

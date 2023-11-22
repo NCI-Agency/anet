@@ -28,10 +28,10 @@ organization(uuid:"${orgUuid}") {
     person {
       uuid
       name
-      status
       rank
       role
-      avatar(size: 32)
+      avatarUuid
+      status
     }
     associatedPositions {
       uuid
@@ -42,10 +42,10 @@ organization(uuid:"${orgUuid}") {
       person {
         uuid
         name
-        status
         rank
         role
-        avatar(size: 32)
+        avatarUuid
+        status
       }
     }
   }
@@ -60,7 +60,7 @@ organization(uuid:"${orgUuid}") {
         name
         rank
         role
-        avatar(size: 32)
+        avatarUuid
       }
     }
   }
@@ -75,7 +75,7 @@ organization(uuid:"${orgUuid}") {
         name
         rank
         role
-        avatar(size: 32)
+        avatarUuid
       }
     }
   }
@@ -91,6 +91,7 @@ organization(uuid:"${orgUuid}") {
       name
       rank
       role
+      avatarUuid
     }
     noteRelatedObjects {
       objectUuid
@@ -109,9 +110,10 @@ organization(uuid:"${orgUuid}") {
           identificationCode
         }
         ... on Person {
-          role
-          rank
           name
+          rank
+          role
+          avatarUuid
         }
         ... on Position {
           type

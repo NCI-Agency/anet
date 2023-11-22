@@ -12,7 +12,7 @@ import {
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
 } from "components/RelatedObjectNotes"
-import { Person, Report, Task } from "models"
+import { Attachment, Person, Report, Task } from "models"
 import React from "react"
 import { connect } from "react-redux"
 import { useParams } from "react-router-dom"
@@ -43,19 +43,19 @@ const GQL_GET_REPORT = gql`
         name
         rank
         role
-        avatar(size: 32)
+        avatarUuid
       }
       reportPeople {
         uuid
         name
+        rank
+        role
+        avatarUuid
+        status
         author
         primary
         attendee
-        rank
-        role
-        status
         endOfTourDate
-        avatar(size: 32)
         position {
           uuid
           name
@@ -114,6 +114,9 @@ const GQL_GET_REPORT = gql`
         uuid
         name
         description
+      }
+      attachments {
+        ${Attachment.basicFieldsQuery}
       }
       customFields
       ${GRAPHQL_NOTES_FIELDS}

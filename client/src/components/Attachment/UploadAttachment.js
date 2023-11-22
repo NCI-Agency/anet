@@ -13,7 +13,6 @@ import utils from "utils"
 import { RELATED_OBJECT_TYPE_TO_ENTITY_TYPE } from "utils_links"
 import "./Attachment.css"
 import AttachmentCard from "./AttachmentCard"
-import UploadedAttachments from "./UploadedAttachments"
 
 const GQL_CREATE_ATTACHMENT = gql`
   mutation ($attachment: AttachmentInput!) {
@@ -21,102 +20,134 @@ const GQL_CREATE_ATTACHMENT = gql`
   }
 `
 
-const GQL_UPDATE_ATTACHMENT = gql`
-  mutation ($attachment: AttachmentInput!) {
-    updateAttachment(attachment: $attachment)
-  }
-`
+export const attachmentSave = async(
+  fileName,
+  mimeType,
+  contentLength,
+  caption,
+  file,
+  relatedObjectType,
+  relatedObjectUuid,
+  attachments,
+  updateAttachments
+) => {
+  const attachment = Attachment.filterClientSideFields(
+    new Attachment({
+      fileName,
+      mimeType,
+      caption,
+      contentLength,
+      attachmentRelatedObjects: [
+        {
+          relatedObjectType,
+          relatedObjectUuid
+        }
+      ]
+    })
+  )
+  return API.mutation(GQL_CREATE_ATTACHMENT, { attachment })
+    .then(response => {
+      attachment.uuid = response.createAttachment
+      const [authHeaderName, authHeaderValue] = API._getAuthHeader()
+      const toastId = `uploadProgress.${attachment.uuid}`
+      toast.info(`Upload of ${attachment.fileName} in progress`, {
+        toastId,
+        autoClose: false,
+        closeOnClick: false,
+        pauseOnHover: false
+      })
+      return axios
+        .postForm(
+          `/api/attachment/uploadAttachmentContent/${attachment.uuid}`,
+          { file },
+          {
+            headers: { [authHeaderName]: authHeaderValue },
+            onUploadProgress: progressEvent => {
+              if (progressEvent.progress === 1) {
+                toast.update(toastId, {
+                  render: `Processing uploaded attachment ${attachment.fileName}`
+                })
+              } else {
+                toast.update(toastId, {
+                  progress: progressEvent.progress
+                })
+              }
+            }
+          }
+        )
+        .then(() => {
+          toast.done(toastId)
+          updateAttachments([...attachments, attachment])
+          toast.success(
+            `Your attachment ${attachment.fileName} has been uploaded`
+          )
+          return attachment
+        })
+        .catch(error => {
+          toast.dismiss(toastId)
+          attachment.contentLength = -1
+          updateAttachments([...attachments, attachment])
+          toast.error(
+            `Attachment content upload failed for ${attachment.fileName}: ${
+              error.response?.data?.error || error.message
+            }`
+          )
+          return attachment
+        })
+    })
+    .catch(error => {
+      toast.error(
+        `Attachment upload for ${attachment.fileName} failed: ${error.message}`
+      )
+      return undefined
+    })
+}
 
 const UploadAttachment = ({
-  edit,
+  attachments,
+  updateAttachments,
   relatedObjectType,
   relatedObjectUuid,
   saveRelatedObject
 }) => {
   const [error, setError] = useState(null)
-  const [remove, setRemove] = useState(false)
-  const [uploadedList, setUploadedList] = useState([])
 
-  const attachmentSave = async(e, uuid) => {
+  const handleFileEvent = async e => {
     const file = e.target?.files?.[0]
     if (!file) {
       // No file was selected, just return
       return
     }
-    const selectedAttachment = new Attachment({
-      fileName: file.name,
-      mimeType: file.type,
-      caption: utils.stripExtension(file.name),
-      contentLength: file.size,
-      attachmentRelatedObjects: [
-        {
-          relatedObjectType,
-          relatedObjectUuid: uuid
-        }
-      ]
-    })
-    return save(selectedAttachment, false)
-      .then(response => {
-        selectedAttachment.uuid = response.createAttachment
-        const [authHeaderName, authHeaderValue] = API._getAuthHeader()
-        const toastId = `uploadProgress.${selectedAttachment.uuid}`
-        toast.info(`Upload of ${selectedAttachment.fileName} in progress`, {
-          toastId,
-          autoClose: false,
-          closeOnClick: false,
-          pauseOnHover: false
-        })
-        return axios
-          .postForm(
-            `/api/attachment/uploadAttachmentContent/${selectedAttachment.uuid}`,
-            { file },
-            {
-              headers: { [authHeaderName]: authHeaderValue },
-              onUploadProgress: progressEvent => {
-                if (progressEvent.progress === 1) {
-                  toast.update(toastId, {
-                    render: `Processing uploaded attachment ${selectedAttachment.fileName}`
-                  })
-                } else {
-                  toast.update(toastId, {
-                    progress: progressEvent.progress
-                  })
-                }
-              }
-            }
-          )
-          .then(() => {
-            toast.done(toastId)
-            setUploadedList(current => [...current, selectedAttachment])
-            toast.success(
-              `Your attachment ${selectedAttachment.fileName} has been uploaded`
-            )
-          })
-          .catch(error => {
-            toast.dismiss(toastId)
-            selectedAttachment.contentLength = -1
-            setUploadedList(current => [...current, selectedAttachment])
-            toast.error(
-              `Attachment content upload failed for ${
-                selectedAttachment.fileName
-              }: ${error.response?.data?.error || error.message}`
-            )
-          })
-      })
-      .catch(error =>
-        toast.error(
-          `Attachment upload for ${selectedAttachment.fileName} failed: ${error.message}`
-        )
-      )
-  }
-
-  const handleFileEvent = async e => {
+    const caption = utils.stripExtension(file.name)
     if (relatedObjectUuid) {
-      await attachmentSave(e, relatedObjectUuid)
+      await attachmentSave(
+        file.name,
+        file.type,
+        file.size,
+        caption,
+        file,
+        relatedObjectType,
+        relatedObjectUuid,
+        attachments,
+        updateAttachments
+      )
     } else {
       // Save the related object first
       saveRelatedObject()
-        .then(async response => await attachmentSave(e, response.uuid))
+        .then(
+          async response =>
+            await attachmentSave(
+              file.name,
+              file.type,
+              file.size,
+              caption,
+              file,
+              relatedObjectType,
+              response.uuid,
+              attachments,
+              updateAttachments
+            )
+        )
         .catch(() =>
           toast.error(
             `Attaching the file failed; there was an error saving the ${RELATED_OBJECT_TYPE_TO_ENTITY_TYPE[relatedObjectType]}`
@@ -148,37 +179,33 @@ const UploadAttachment = ({
       </section>
 
       {/** **** Show uploaded files in here **** **/}
-      <div style={{ display: "flex", flexWrap: "wrap" }}>
-        {uploadedList.map((attachment, index) => (
+      <div className="attachment-card-list">
+        {attachments.map(attachment => (
           <AttachmentCard
-            key={index}
+            key={attachment.uuid}
             attachment={attachment}
-            index={index}
-            remove={remove}
+            edit
             setError={setError}
-            setRemove={setRemove}
-            uploadedList={uploadedList}
-            setUploadedList={setUploadedList}
+            uploadedList={attachments}
+            setUploadedList={updateAttachments}
           />
         ))}
-        {/** When on an edit page, show uploaded attachments **/}
-        {edit && <UploadedAttachments uuid={relatedObjectUuid} />}
       </div>
     </div>
   )
-
-  function save(values, edit) {
-    const attachment = Attachment.filterClientSideFields(values)
-    const operation = edit ? GQL_UPDATE_ATTACHMENT : GQL_CREATE_ATTACHMENT
-    return API.mutation(operation, { attachment })
-  }
 }
 
 UploadAttachment.propTypes = {
-  edit: PropTypes.bool,
+  attachments: PropTypes.array,
+  updateAttachments: PropTypes.func,
   relatedObjectType: PropTypes.string.isRequired,
   relatedObjectUuid: PropTypes.string,
   saveRelatedObject: PropTypes.func
+}
+
+UploadAttachment.defaultProps = {
+  attachments: [],
+  updateAttachments: () => {}
 }
 
 export default UploadAttachment

@@ -33,10 +33,10 @@ const GQL_GET_APP_DATA = gql`
       name
       rank
       role
-      emailAddress
+      avatarUuid
       status
+      emailAddress
       pendingVerification
-      avatar(size: 32)
       code
       authorizationGroupUuids
       position {
@@ -81,7 +81,8 @@ const GQL_GET_APP_DATA = gql`
             uuid
             name
             rank
-            avatar(size: 32)
+            role
+            avatarUuid
             position {
               uuid
               name

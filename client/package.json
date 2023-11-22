@@ -162,7 +162,7 @@
     "prop-types": "15.8.1",
     "querystring": "0.2.1",
     "react": "18.2.0",
-    "react-avatar-edit": "1.2.0",
+    "react-advanced-cropper": "^0.19.4",
     "react-bootstrap": "2.4.0",
     "react-container-dimensions": "1.4.1",
     "react-dom": "18.2.0",
