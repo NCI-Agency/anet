@@ -1,6 +1,12 @@
 import Page from "./page"
 
+const PAGE_URL = "/tasks/:uuid"
+
 class ShowTask extends Page {
+  async openAsAdminUser(uuid) {
+    await super.openAsAdminUser(PAGE_URL.replace(":uuid", uuid))
+  }
+
   async getShortName() {
     return browser.$(".title-text")
   }
