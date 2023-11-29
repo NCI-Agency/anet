@@ -292,7 +292,7 @@ const ReportSummaryRow = ({ report }) => {
         <Row>
           <Col md={12}>
             <span>
-              <strong>Location: </strong>
+              <strong>{Settings.fields.report.location?.label}: </strong>
               <LinkTo modelType="Location" model={report.location} />
               {"  "}
               <Badge bg="secondary">
@@ -306,7 +306,8 @@ const ReportSummaryRow = ({ report }) => {
         <Col md={12}>
           {report.intent && (
             <span>
-              <strong>{Settings.fields.report.intent}:</strong> {report.intent}
+              <strong>{Settings.fields.report.intent?.label}:</strong>{" "}
+              {report.intent}
             </span>
           )}
         </Col>
@@ -315,7 +316,7 @@ const ReportSummaryRow = ({ report }) => {
         <Col md={12}>
           {report.keyOutcomes && (
             <span>
-              <strong>{Settings.fields.report.keyOutcomes}:</strong>{" "}
+              <strong>{Settings.fields.report.keyOutcomes?.label}:</strong>{" "}
               {report.keyOutcomes}
             </span>
           )}
@@ -325,7 +326,7 @@ const ReportSummaryRow = ({ report }) => {
         <Col md={12}>
           {report.nextSteps && (
             <span>
-              <strong>{Settings.fields.report.nextSteps.label}:</strong>{" "}
+              <strong>{Settings.fields.report.nextSteps?.label}:</strong>{" "}
               {report.nextSteps}
             </span>
           )}
@@ -335,7 +336,7 @@ const ReportSummaryRow = ({ report }) => {
         <Col md={12}>
           {report.atmosphere && (
             <span>
-              <strong>{Settings.fields.report.atmosphere}:</strong>{" "}
+              <strong>{Settings.fields.report.atmosphere?.label}:</strong>{" "}
               {utils.sentenceCase(report.atmosphere)}
               {report.atmosphereDetails && ` – ${report.atmosphereDetails}`}
             </span>

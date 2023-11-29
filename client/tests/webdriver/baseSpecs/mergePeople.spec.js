@@ -102,7 +102,9 @@ describe("Merge people of the same role", () => {
       await (await MergePeople.getColumnContent("left", "Role")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.role)
     expect(
-      await (await MergePeople.getColumnContent("left", "Position")).getText()
+      await (
+        await MergePeople.getColumnContent("left", "Current Position")
+      ).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.position)
     expect(await MergePeople.getPreviousPositions("left")).to.eql(
       EXAMPLE_PEOPLE.validLeft.previousPositions
@@ -166,7 +168,9 @@ describe("Merge people of the same role", () => {
       await (await MergePeople.getColumnContent("right", "Role")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validRight.role)
     expect(
-      await (await MergePeople.getColumnContent("right", "Position")).getText()
+      await (
+        await MergePeople.getColumnContent("right", "Current Position")
+      ).getText()
     ).to.eq(EXAMPLE_PEOPLE.validRight.position)
     expect(await MergePeople.getPreviousPositions("right")).to.eql(
       EXAMPLE_PEOPLE.validRight.previousPositions
@@ -211,7 +215,9 @@ describe("Merge people of the same role", () => {
       await (await MergePeople.getColumnContent("mid", "Role")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.role)
     expect(
-      await (await MergePeople.getColumnContent("mid", "Position")).getText()
+      await (
+        await MergePeople.getColumnContent("mid", "Current Position")
+      ).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.position)
     expect(await MergePeople.getPreviousPositions("mid")).to.eql(
       EXAMPLE_PEOPLE.validLeft.previousPositions
@@ -254,7 +260,9 @@ describe("Merge people of the same role", () => {
       await (await MergePeople.getColumnContent("mid", "Role")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validRight.role)
     expect(
-      await (await MergePeople.getColumnContent("mid", "Position")).getText()
+      await (
+        await MergePeople.getColumnContent("mid", "Current Position")
+      ).getText()
     ).to.eq(EXAMPLE_PEOPLE.validRight.position)
     expect(await MergePeople.getPreviousPositions("mid")).to.eql(
       EXAMPLE_PEOPLE.validRight.previousPositions
@@ -302,14 +310,18 @@ describe("Merge people of the same role", () => {
       await (await MergePeople.getColumnContent("mid", "Role")).getText()
     ).to.equal(EXAMPLE_PEOPLE.validLeft.role)
 
-    await (await MergePeople.getSelectButton("left", "Position")).click()
+    await (
+      await MergePeople.getSelectButton("left", "Current Position")
+    ).click()
     await MergePeople.waitForColumnToChange(
       EXAMPLE_PEOPLE.validLeft.position,
       "mid",
-      "Position"
+      "Current Position"
     )
     expect(
-      await (await MergePeople.getColumnContent("mid", "Position")).getText()
+      await (
+        await MergePeople.getColumnContent("mid", "Current Position")
+      ).getText()
     ).to.equal(EXAMPLE_PEOPLE.validLeft.position)
 
     await (await MergePeople.getSelectButton("left", "Status")).click()
@@ -497,7 +509,9 @@ describe("Merge people of different roles", () => {
       await (await MergePeople.getColumnContent("mid", "Role")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.role)
     expect(
-      await (await MergePeople.getColumnContent("mid", "Position")).getText()
+      await (
+        await MergePeople.getColumnContent("mid", "Current Position")
+      ).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.position)
     expect(await MergePeople.getPreviousPositions("mid")).to.eql(
       EXAMPLE_PEOPLE.validLeft.previousPositions
@@ -539,7 +553,9 @@ describe("Merge people of different roles", () => {
       await (await MergePeople.getColumnContent("mid", "Role")).getText()
     ).to.eq(EXAMPLE_PEOPLE.advisorRight.role)
     expect(
-      await (await MergePeople.getColumnContent("mid", "Position")).getText()
+      await (
+        await MergePeople.getColumnContent("mid", "Current Position")
+      ).getText()
     ).to.eq(EXAMPLE_PEOPLE.advisorRight.position)
     expect(await MergePeople.getPreviousPositions("mid")).to.eql(
       EXAMPLE_PEOPLE.advisorRight.previousPositions

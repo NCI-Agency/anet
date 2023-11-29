@@ -10,7 +10,7 @@ import { customFieldsJSONString } from "components/CustomFields"
 import EditAssociatedPositions from "components/EditAssociatedPositions"
 import EditHistory from "components/EditHistory"
 import LinkTo from "components/LinkTo"
-import PositionField from "components/MergeField"
+import MergeField from "components/MergeField"
 import Messages from "components/Messages"
 import {
   CUSTOM_FIELD_TYPE_DEFAULTS,
@@ -24,6 +24,7 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
+import DictionaryField from "HOC/DictionaryField"
 import useMergeObjects, {
   ALIGN_OPTIONS,
   areAllSet,
@@ -72,6 +73,7 @@ const MergePositions = ({ pageDispatchers }) => {
   })
   usePageTitle("Merge Positions")
 
+  const DictMergeField = DictionaryField(MergeField)
   const position1 = mergeState[MERGE_SIDES.LEFT]
   const position2 = mergeState[MERGE_SIDES.RIGHT]
   const mergedPosition = mergeState.merged
@@ -136,8 +138,8 @@ const MergePositions = ({ pageDispatchers }) => {
           )}
           {areAllSet(position1, position2, mergedPosition) && (
             <fieldset>
-              <PositionField
-                label="Name"
+              <DictMergeField
+                dictProps={Settings.fields.position.name}
                 value={mergedPosition.name}
                 align={ALIGN_OPTIONS.CENTER}
                 action={getInfoButton("Name is required.")}
@@ -145,8 +147,8 @@ const MergePositions = ({ pageDispatchers }) => {
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
-              <PositionField
-                label="Organization"
+              <DictMergeField
+                dictProps={Settings.fields.position.organization}
                 value={
                   <LinkTo
                     modelType="Organization"
@@ -159,8 +161,8 @@ const MergePositions = ({ pageDispatchers }) => {
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
-              <PositionField
-                label="Type"
+              <DictMergeField
+                dictProps={Settings.fields.position.type}
                 value={mergedPosition.type}
                 align={ALIGN_OPTIONS.CENTER}
                 action={getInfoButton("Type is required.")}
@@ -168,17 +170,19 @@ const MergePositions = ({ pageDispatchers }) => {
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
-              <PositionField
-                label={Settings.fields.position.role.label}
+              <DictMergeField
+                dictProps={Settings.fields.position.role}
                 value={Position.humanNameOfRole(mergedPosition.role)}
                 align={ALIGN_OPTIONS.CENTER}
-                action={getInfoButton("Role is required.")}
+                action={getInfoButton(
+                  `${Settings.fields.position.role?.label} is required.`
+                )}
                 fieldName="role"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
-              <PositionField
-                label="Code"
+              <DictMergeField
+                dictProps={Settings.fields.position.code}
                 value={mergedPosition.code}
                 align={ALIGN_OPTIONS.CENTER}
                 action={getClearButton(() =>
@@ -188,8 +192,8 @@ const MergePositions = ({ pageDispatchers }) => {
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
-              <PositionField
-                label="Status"
+              <DictMergeField
+                dictProps={Settings.fields.position.status}
                 value={mergedPosition.status}
                 align={ALIGN_OPTIONS.CENTER}
                 action={getActivationButton(
@@ -210,7 +214,7 @@ const MergePositions = ({ pageDispatchers }) => {
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
-              <PositionField
+              <MergeField
                 label="Associated Positions"
                 value={
                   <>
@@ -244,7 +248,7 @@ const MergePositions = ({ pageDispatchers }) => {
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
-              <PositionField
+              <MergeField
                 label="Previous People"
                 value={
                   <>
@@ -279,7 +283,7 @@ const MergePositions = ({ pageDispatchers }) => {
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
-              <PositionField
+              <MergeField
                 label="Person"
                 value={
                   <LinkTo modelType="Person" model={mergedPosition.person} />
@@ -293,7 +297,7 @@ const MergePositions = ({ pageDispatchers }) => {
                 dispatchMergeActions={dispatchMergeActions}
               />
               {mergeState?.merged?.type === Position.TYPE.SUPERUSER && (
-                <PositionField
+                <MergeField
                   label="Organizations Administrated"
                   fieldName="organizationsAdministrated"
                   value={
@@ -321,7 +325,7 @@ const MergePositions = ({ pageDispatchers }) => {
                         fieldName
                       ]
                     return (
-                      <PositionField
+                      <MergeField
                         key={fieldName}
                         label={fieldConfig.label || fieldName}
                         value={JSON.stringify(fieldValue)}
@@ -342,8 +346,8 @@ const MergePositions = ({ pageDispatchers }) => {
                     )
                   }
                 )}
-              <PositionField
-                label="Location"
+              <DictMergeField
+                dictProps={Settings.fields.position.location}
                 value={
                   <LinkTo
                     modelType="Location"
@@ -445,7 +449,7 @@ const MidColTitle = styled.div`
 `
 
 function getPositionFilters(mergeState, align) {
-  const positionsFilters = {
+  return {
     allAdvisorPositions: {
       label: "All",
       queryVars: {
@@ -455,10 +459,10 @@ function getPositionFilters(mergeState, align) {
       }
     }
   }
-  return positionsFilters
 }
 
 const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
+  const DictMergeField = DictionaryField(MergeField)
   const position = mergeState[align]
   const idForPosition = label.replace(/\s+/g, "")
   return (
@@ -493,8 +497,8 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
       </FormGroup>
       {areAllSet(position) && (
         <fieldset>
-          <PositionField
-            label="Name"
+          <DictMergeField
+            dictProps={Settings.fields.position.name}
             fieldName="name"
             value={position.name}
             align={align}
@@ -517,8 +521,8 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
           />
-          <PositionField
-            label="Organization"
+          <DictMergeField
+            dictProps={Settings.fields.position.organization}
             fieldName="organization"
             value={
               <LinkTo modelType="Organization" model={position.organization} />
@@ -527,16 +531,16 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
           />
-          <PositionField
-            label="Type"
+          <DictMergeField
+            dictProps={Settings.fields.position.type}
             fieldName="type"
             value={position.type}
             align={align}
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
           />
-          <PositionField
-            label={Settings.fields.position.role.label}
+          <DictMergeField
+            dictProps={Settings.fields.position.role}
             fieldName="role"
             value={position.humanNameOfRole()}
             align={align}
@@ -552,8 +556,8 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
           />
-          <PositionField
-            label="Code"
+          <DictMergeField
+            dictProps={Settings.fields.position.code}
             fieldName="code"
             value={position.code}
             align={align}
@@ -569,8 +573,8 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
           />
-          <PositionField
-            label="Status"
+          <DictMergeField
+            dictProps={Settings.fields.position.status}
             fieldName="status"
             value={position.status}
             align={align}
@@ -586,7 +590,7 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
           />
-          <PositionField
+          <MergeField
             label="Associated Positions"
             fieldName="associatedPositions"
             value={
@@ -611,7 +615,7 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
           />
-          <PositionField
+          <MergeField
             label="Previous People"
             fieldName="previousPeople"
             value={<PreviousPeople history={position.previousPeople} />}
@@ -632,7 +636,7 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
           />
-          <PositionField
+          <MergeField
             label="Person"
             fieldName="person"
             value={<LinkTo modelType="Person" model={position.person} />}
@@ -655,7 +659,7 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
             dispatchMergeActions={dispatchMergeActions}
           />
           {position.type === Position.TYPE.SUPERUSER && (
-            <PositionField
+            <MergeField
               label="Organizations Administrated"
               fieldName="organizationsAdministrated"
               value={
@@ -688,11 +692,11 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
                   position[DEFAULT_CUSTOM_FIELDS_PARENT][fieldName]
 
                 return (
-                  <PositionField
+                  <MergeField
                     key={fieldName}
                     fieldName={`${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`}
                     label={fieldConfig.label || fieldName}
-                    // To be able to see arrays and ojects
+                    // To be able to see arrays and objects
                     value={JSON.stringify(fieldValue)}
                     align={align}
                     action={getActionButton(
@@ -714,8 +718,8 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
                 )
               }
             )}
-          <PositionField
-            label="Location"
+          <DictMergeField
+            dictProps={Settings.fields.position.location}
             fieldName="location"
             value={<LinkTo modelType="Location" model={position.location} />}
             align={align}

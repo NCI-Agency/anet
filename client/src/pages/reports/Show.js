@@ -35,6 +35,7 @@ import RichTextEditor from "components/RichTextEditor"
 import { deserializeQueryParams } from "components/SearchFilters"
 import TriggerableConfirm from "components/TriggerableConfirm"
 import { Field, Form, Formik } from "formik"
+import DictionaryField from "HOC/DictionaryField"
 import _concat from "lodash/concat"
 import _isEmpty from "lodash/isEmpty"
 import _upperFirst from "lodash/upperFirst"
@@ -359,6 +360,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
     Person.isEqual(currentUser, rp)
   )
   const tasksLabel = pluralize(Settings.fields.task.subLevel.shortLabel)
+  const DictField = DictionaryField(Field)
 
   // User can approve if report is pending approval and user is one of the approvers in the current approval step
   const canApprove =
@@ -549,38 +551,35 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
               />
               <Fieldset className="show-report-overview">
                 <Field
-                  name="intent"
                   label="Summary"
+                  name="summary"
                   component={FieldHelper.SpecialField}
                   widget={
-                    <div id="intent" className="form-control-plaintext">
-                      <p>
-                        <strong>{Settings.fields.report.intent}:</strong>{" "}
-                        {report.intent}
-                      </p>
-                      {report.keyOutcomes && (
-                        <p>
-                          <span>
-                            <strong>
-                              {Settings.fields.report.keyOutcomes ||
-                                "Key outcomes"}
-                              :
-                            </strong>{" "}
-                            {report.keyOutcomes}&nbsp;
-                          </span>
-                        </p>
-                      )}
-                      <p>
-                        <strong>
-                          {Settings.fields.report.nextSteps.label}:
-                        </strong>{" "}
-                        {report.nextSteps}
-                      </p>
+                    <div id="report-summary">
+                      <DictField
+                        dictProps={Settings.fields.report.intent}
+                        name="intent"
+                        component={FieldHelper.ReadonlyField}
+                        style={{ marginBottom: 0 }}
+                      />
+                      <DictField
+                        dictProps={Settings.fields.report.keyOutcomes}
+                        name="keyOutcomes"
+                        component={FieldHelper.ReadonlyField}
+                        style={{ marginBottom: 0 }}
+                      />
+                      <DictField
+                        dictProps={Settings.fields.report.nextSteps}
+                        name="nextSteps"
+                        component={FieldHelper.ReadonlyField}
+                        style={{ marginBottom: 0 }}
+                      />
                     </div>
                   }
                 />
 
-                <Field
+                <DictField
+                  dictProps={Settings.fields.report.engagementDate}
                   name="engagementDate"
                   component={FieldHelper.ReadonlyField}
                   humanValue={
@@ -595,9 +594,9 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                 />
 
                 {Settings.engagementsIncludeTimeAndDuration && (
-                  <Field
+                  <DictField
+                    dictProps={Settings.fields.report.duration}
                     name="duration"
-                    label="Duration (minutes)"
                     component={FieldHelper.ReadonlyField}
                   />
                 )}
@@ -637,7 +636,8 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                   }
                 />
 
-                <Field
+                <DictField
+                  dictProps={Settings.fields.report.location}
                   name="location"
                   component={FieldHelper.ReadonlyField}
                   humanValue={
@@ -648,27 +648,28 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                 />
 
                 {report.cancelled && (
-                  <Field
+                  <DictField
+                    dictProps={Settings.fields.report.cancelledReason}
                     name="cancelledReason"
-                    label="Cancelled Reason"
                     component={FieldHelper.ReadonlyField}
                     humanValue={utils.sentenceCase(report.cancelledReason)}
                   />
                 )}
 
                 {!report.cancelled && (
-                  <Field
-                    name="atmosphere"
-                    label={Settings.fields.report.atmosphere}
-                    component={FieldHelper.ReadonlyField}
-                    humanValue={
-                      <>
-                        {utils.sentenceCase(report.atmosphere)}
-                        {report.atmosphereDetails &&
-                          ` – ${report.atmosphereDetails}`}
-                      </>
-                    }
-                  />
+                  <>
+                    <DictField
+                      dictProps={Settings.fields.report.atmosphere}
+                      name="atmosphere"
+                      component={FieldHelper.ReadonlyField}
+                      humanValue={utils.sentenceCase(report.atmosphere)}
+                    />
+                    <DictField
+                      dictProps={Settings.fields.report.atmosphereDetails}
+                      name="atmosphereDetails"
+                      component={FieldHelper.ReadonlyField}
+                    />
+                  </>
                 )}
 
                 {attachmentsEnabled && (
@@ -706,7 +707,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
               </Fieldset>
               {report.reportText && (
                 <Fieldset
-                  title={Settings.fields.report.reportText}
+                  title={Settings.fields.report.reportText?.label}
                   id="report-text"
                 >
                   <RichTextEditor readOnly value={report.reportText} />

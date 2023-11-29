@@ -10,6 +10,7 @@ import {
   SearchQueryPropType
 } from "components/SearchFilters"
 import { Form, Formik } from "formik"
+import DictionaryField from "HOC/DictionaryField"
 import _cloneDeep from "lodash/cloneDeep"
 import { Organization, Position } from "models"
 import PropTypes from "prop-types"
@@ -75,16 +76,25 @@ const AdvancedSearch = ({
 
   const advancedSearchMenuContent = (
     <Dropdown style={{ maxHeight: "400px", overflowY: "auto" }}>
-      {Object.keys(filterDefs).map(filterKey => (
-        <Dropdown.Item
-          disabled={existingKeys.includes(filterKey)}
-          key={filterKey}
-          onClick={() => addFilter(filterKey)}
-          // shouldDismissPopover={false}
-        >
-          {filterKey}
-        </Dropdown.Item>
-      ))}
+      {Object.entries(filterDefs).map(([filterKey, filterDef]) => {
+        const dictProps = filterDef.dictProps
+        const label = dictProps?.label || filterKey
+        const ChildComponent = dictProps
+          ? DictionaryField(Dropdown.Item)
+          : Dropdown.Item
+        const additionalProps = dictProps ? { dictProps } : {}
+        return (
+          <ChildComponent
+            disabled={existingKeys.includes(filterKey)}
+            key={filterKey}
+            onClick={() => addFilter(filterKey)}
+            {...additionalProps}
+            // shouldDismissPopover={false}
+          >
+            {label}
+          </ChildComponent>
+        )
+      })}
     </Dropdown>
   )
 
@@ -330,8 +340,12 @@ const SearchFilter = ({
   orgFilterQueryParams,
   updateOrgFilterQueryParams
 }) => {
-  const label = filter.key
-  const ChildComponent = element.component
+  const dictProps = element.dictProps
+  const label = dictProps?.label || filter.key
+  const ChildComponent = dictProps
+    ? DictionaryField(element.component)
+    : element.component
+  const additionalProps = dictProps ? { dictProps } : {}
   const { queryKey } = element.props || undefined
 
   return (
@@ -346,6 +360,7 @@ const SearchFilter = ({
               value={filter.value || ""}
               onChange={onChange}
               orgFilterQueryParams={orgFilterQueryParams}
+              {...additionalProps}
               {...element.props}
             />
           </div>
@@ -376,6 +391,7 @@ SearchFilter.propTypes = {
   updateOrgFilterQueryParams: PropTypes.func,
   element: PropTypes.shape({
     component: PropTypes.func.isRequired,
+    dictProps: PropTypes.object,
     props: PropTypes.object
   })
 }

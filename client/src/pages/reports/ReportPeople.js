@@ -53,7 +53,7 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
               </TableContainer>
             </td>
           </tr>
-          {showNonAttending ? (
+          {showNonAttending && (
             <tr>
               <th>Non-attending</th>
               <td style={{ padding: "0" }}>
@@ -69,7 +69,7 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
                 </TableContainer>
               </td>
             </tr>
-          ) : null}
+          )}
         </tbody>
       </Table>
     </div>

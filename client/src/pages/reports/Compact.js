@@ -32,6 +32,7 @@ import { ActionButton, ActionStatus } from "components/ReportWorkflow"
 import RichTextEditor from "components/RichTextEditor"
 import SimpleMultiCheckboxDropdown from "components/SimpleMultiCheckboxDropdown"
 import { Formik } from "formik"
+import DictionaryField from "HOC/DictionaryField"
 import _isEmpty from "lodash/isEmpty"
 import { Person, Report, Task } from "models"
 import moment from "moment"
@@ -284,6 +285,9 @@ const CompactReportView = ({ pageDispatchers }) => {
       />
     )
   }
+
+  const DictCompactRow = DictionaryField(CompactRow)
+
   // Get initial tasks/attendees instant assessments values
   report = Object.assign(report, report.getTasksEngagementAssessments())
   report = Object.assign(report, report.getAttendeesEngagementAssessments())
@@ -322,43 +326,44 @@ const CompactReportView = ({ pageDispatchers }) => {
                   label={getReportSubTitle()}
                   className="reportField"
                 />
-                <CompactRow
-                  label="purpose"
+                <DictCompactRow
+                  dictProps={Settings.fields.report.intent}
                   content={report.intent}
                   className="reportField"
                 />
-                <CompactRow
-                  label={Settings.fields.report.keyOutcomes || "key outcomes"}
+                <DictCompactRow
+                  dictProps={Settings.fields.report.keyOutcomes}
                   content={report.keyOutcomes}
                   className="reportField"
                 />
-                {!report.cancelled ? (
-                  <CompactRow
-                    label={Settings.fields.report.atmosphere}
-                    content={
-                      <>
-                        {utils.sentenceCase(report.atmosphere)}
-                        {report.atmosphereDetails &&
-                          ` – ${report.atmosphereDetails}`}
-                      </>
-                    }
-                    className="reportField"
-                  />
-                ) : null}
-                <CompactRow
-                  label={Settings.fields.report.nextSteps.label}
+                {!report.cancelled && (
+                  <>
+                    <DictCompactRow
+                      dictProps={Settings.fields.report.atmosphere}
+                      value={utils.sentenceCase(report.atmosphere)}
+                      className="reportField"
+                    />
+                    <DictCompactRow
+                      dictProps={Settings.fields.report.atmosphereDetails}
+                      value={report.atmosphereDetails}
+                      className="reportField"
+                    />
+                  </>
+                )}
+                <DictCompactRow
+                  dictProps={Settings.fields.report.nextSteps}
                   content={report.nextSteps}
                   className="reportField"
                 />
                 <CompactRow
                   id="principals"
-                  label="principals"
+                  label="Principals"
                   content={getAttendeesAndAssessments(Person.ROLE.PRINCIPAL)}
                   className="reportField"
                 />
                 <CompactRow
                   id="advisors"
-                  label="advisors"
+                  label="Advisors"
                   content={getAttendeesAndAssessments(Person.ROLE.ADVISOR)}
                   className="reportField"
                 />
@@ -368,37 +373,37 @@ const CompactReportView = ({ pageDispatchers }) => {
                   content={getTasksAndAssessments()}
                   className="reportField"
                 />
-                {report.cancelled ? (
-                  <CompactRow
-                    label="cancelled reason"
+                {report.cancelled && (
+                  <DictCompactRow
+                    dictProps={Settings.fields.report.cancelledReason}
                     content={utils.sentenceCase(report.cancelledReason)}
                     className="reportField"
                   />
-                ) : null}
-                {optionalFields.workflow.active && report.showWorkflow() ? (
+                )}
+                {optionalFields.workflow.active && report.showWorkflow() && (
                   <CompactRowReportWorkflow
                     workflow={report.workflow}
                     className="reportField"
                     isCompact
                   />
-                ) : null}
-                {report.reportText ? (
-                  <CompactRow
-                    label={Settings.fields.report.reportText}
+                )}
+                {report.reportText && (
+                  <DictCompactRow
+                    dictProps={Settings.fields.report.reportText}
                     content={
                       <RichTextEditor readOnly value={report.reportText} />
                     }
                     className="reportField"
                   />
-                ) : null}
-                {Settings.fields.report.customFields ? (
+                )}
+                {Settings.fields.report.customFields && (
                   <ReadonlyCustomFields
                     fieldsConfig={Settings.fields.report.customFields}
                     values={report}
                     vertical
                     isCompact
                   />
-                ) : null}
+                )}
               </FullColumn>
             </CompactTable>
             <CompactFooterContent object={report} />

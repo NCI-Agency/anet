@@ -39,24 +39,28 @@ maxTextFieldLength: 250
 fields:
 
   task:
+    status:
+      label: Status
     shortLabel: Objective / Effort
     shortName:
       label: Objective / Effort number
-      placeholder: Enter an objective / effort name, example....
+      placeholder: Enter an objective / effort name, example …
     longLabel: Objectives and Efforts
     longName:
       label: Objective / Effort long name
-      placeholder: Enter an objective / effort long name, example ....
-    description: Objective / Effort description
+      placeholder: Enter an objective / effort long name, example …
+    description:
+      label: Objective / Effort description
+      placeholder: Fill in the description of this objective / effort
     topLevel:
       shortLabel: Objective
       shortName:
         label: Name of this Objective
-        placeholder: Enter a Name for this Objective name, example ....
+        placeholder: Enter a Name for this Objective name, example …
       longLabel: Objectives
       longName:
         label: Long Name of this Objective
-        placeholder: Enter a long name for this Objective, example ....
+        placeholder: Enter a long name for this Objective, example …
       assessments:
         topTaskOnceReport:
           label: Engagement assessment of objective
@@ -133,11 +137,11 @@ fields:
       shortLabel: Effort
       shortName:
         label: Effort name
-        placeholder: Enter an effort name, example....
+        placeholder: Enter an effort name, example …
       longLabel: Efforts
       longName:
         label: Effort Long Name
-        placeholder: Enter an effort Long Name, example ....
+        placeholder: Enter an effort Long Name, example …
       assessments:
         subTaskMonthly:
           label: Monthly assessment of effort
@@ -275,16 +279,21 @@ fields:
                 - type: required
                   params: [You must provide the answer to subTask11COnceReport.questionForNegative]
 
+    projectedCompletion:
+      label: Projected Completion
+    plannedCompletion:
+      label: Planned Completion
     parentTask:
       label: Parent objective / effort
       placeholder: Start typing to search for a higher level objective / effort
-    childrenTasks: Sub efforts
+    childrenTasks:
+      label: Sub efforts
     taskedOrganizations:
       label: Tasked organizations
-      placeholder: Search for an organization...
+      placeholder: Search for an organization…
     responsiblePositions:
       label: Responsible positions
-      placeholder: Search for a position...
+      placeholder: Search for a position…
     customFields:
       projectStatus:
         type: enum
@@ -304,11 +313,14 @@ fields:
   attachment:
     featureDisabled: false
     restrictToAdmins: false
-    fileName: Filename
+    fileName:
+      label: Filename
     caption:
       label: Caption
-      placeholder: Enter a caption, example....
-    description: Description
+      placeholder: Enter a caption
+    description:
+      label: Description
+      placeholder: Enter a description of this attachment
     classification:
       type: enum
       label: Security Marking
@@ -328,16 +340,35 @@ fields:
 
   report:
     canUnpublishReports: true
-    intent: Engagement purpose
-    atmosphere: Atmospherics
-    atmosphereDetails: Atmospherics details
-    cancelled: ''
+    intent:
+      label: Engagement purpose
+      placeholder: What is the engagement supposed to achieve?
+    engagementDate:
+      label: Engagement date
+    duration:
+      label: Duration (minutes)
+    atmosphere:
+      label: Atmospherics
+    atmosphereDetails:
+      label: Atmospherics details
+      placeholder: Describe the atmosphere
+    cancelled:
+      label: ''
+    cancelledReason:
+      label: due to
     nextSteps:
       label: Next steps
-      maxTextFieldLength: 1000
-    keyOutcomes: Key outcomes
-    reportText: Key details
+      placeholder: Fill in the next steps after this engagement
+      maxLength: 1000
+    keyOutcomes:
+      label: Key outcomes
+      placeholder: Fill in the key outcomes of this engagement
+    reportText:
+      label: Key details
+      placeholder: Fill in a detailed report of the engagement
     location:
+      label: Location
+      placeholder: Search for the engagement location…
       filter: [POINT_LOCATION, VIRTUAL_LOCATION]
     customFields:
       relatedReport:
@@ -474,19 +505,34 @@ fields:
           orgUuid: 70193ee9-05b4-4aac-80b5-75609825db9f
 
   person:
-    firstName: First name
-    lastName: Last name
-    domainUsername: Domain username
-    openIdSubject: OpenID subject
-    position: Current Position
-    prevPositions: Previous Positions
+    status:
+      label: Status
+    firstName:
+      label: First name
+      placeholder: First name(s) - Lower-case except for the first letter of each name
+    lastName:
+      label: Last name
+      placeholder: LAST NAME
+    domainUsername:
+      label: Domain username
+    openIdSubject:
+      label: OpenID subject
+    position:
+      label: Current Position
+      placeholder: Fill in the person's current position
+    prevPositions:
+      label: Previous Positions
     emailAddress:
       label: Email
       placeholder: Only the following email domain names are allowed. ( example.com, cmil.mil, mission.ita, nato.int, *.isaf.nato.int )
-    phoneNumber: Phone
-    country: Nationality
-    code: ID card number
-    rank: Rank
+    phoneNumber:
+      label: Phone
+    country:
+      label: Nationality
+    code:
+      label: ID card number
+    rank:
+      label: Rank
     ranks:
       - value: CIV
         description: the rank of CIV
@@ -547,9 +593,13 @@ fields:
       - value: OF-9
         description: the rank of OF-9
         app6Modifier: K
-    gender: Gender
-    endOfTourDate: End of tour
-    biography: Biography
+    gender:
+      label: Gender
+    endOfTourDate:
+      label: End of tour
+    biography:
+      label: Biography
+      placeholder: Fill in the biography of this person
     customFields:
       placeOfBirth:
         type: anet_object
@@ -675,6 +725,16 @@ fields:
             color: 'skyblue'
 
   location:
+    status:
+      label: Status
+    name:
+      label: Name
+      placeholder: Fill in the name of this location
+    type:
+      label: Type
+    description:
+      label: Description
+      placeholder: Fill in the description of this location
     superuserTypeOptions: [POINT_LOCATION]
     format: LAT_LON
     customFields:
@@ -757,7 +817,22 @@ fields:
             visibleWhen: $[?(@ && @.colourOptions === 'GREEN')]
 
   position:
-    name: Position Name
+    status:
+      label: Status
+    name:
+      label: Position Name
+      placeholder: Name/Description of Position
+    type:
+      label: Type
+    code:
+      label: Position code
+      placeholder: The official code for this position
+    organization:
+      label: Organization
+      placeholder: Search the organization for this position…
+    location:
+      label: Location
+      placeholder: Search for the location where this Position will operate from…
     role:
       label: Position Role
       types:
@@ -845,9 +920,30 @@ fields:
             visibleWhen: $[?(@ && @.colourOptions === 'GREEN')]
 
   organization:
-    shortName: Name
-    parentOrg: Parent Organization
-    profile: Profile
+    status:
+      label: Status
+    shortName:
+      label: Name
+      placeholder: e.g. EF1.1
+    longName:
+      label: Description
+      placeholder: e.g. Force Sustainment
+    identificationCode:
+      label: UIC
+      placeholder: the six character code
+    type:
+      label: Type
+    parentOrg:
+      label: Parent Organization
+      placeholder: Search for a higher level organization…
+    childrenOrgs:
+      label: Sub Organizations
+    location:
+      label: Location
+      placeholder: Search for the location where this Organization will operate from…
+    profile:
+      label: Profile
+      placeholder: Fill in the profile of this organization
     assessments:
       organizationAnnually:
         label: Interaction Plan
@@ -1456,29 +1552,20 @@ fields:
     position:
       name: NATO Billet
       type: ANET User
-      code:
-        label: CE Post Number
-        placeholder: the CE post number for this position
       location:
         filter: [POINT_LOCATION]
       organizationsAdministrated:
         label: Organizations administrated
-        placeholder: Search for an organization...
+        placeholder: Search for an organization…
 
     org:
       name: Advisor Organization
       allOrgName: Advisor Organizations
-      longName:
-        label: Description
-        placeholder: e.g. Force Sustainment
-      identificationCode:
-        label: UIC
-        placeholder: the six character code
       location:
         filter: [ADVISOR_LOCATION]
       administratingPositions:
         label: Assigned Superusers
-        placeholder: Search for a position...
+        placeholder: Search for a position…
 
   principal:
     person:
@@ -1719,26 +1806,17 @@ fields:
     position:
       name: Afghan Tashkil
       type: Afghan Partner
-      code:
-        label: Tashkil
-        placeholder: the Afghan taskhil ID for this position
       location:
         filter: [POINT_LOCATION]
 
     org:
       name: Afghan Government Organization
       allOrgName: Principal Organizations
-      longName:
-        label: Official Organization Name
-        placeholder: e.g. Afghan Ministry of Defense
-      identificationCode:
-        label: UIC
-        placeholder: the six character code
       location:
         filter: [PRINCIPAL_LOCATION]
       administratingPositions:
         label: Assigned Superusers
-        placeholder: Search for a position...
+        placeholder: Search for a position…
 
   superuser:
 

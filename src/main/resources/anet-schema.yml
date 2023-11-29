@@ -19,7 +19,6 @@ $defs:
 # base definition for all Fields. Every field is assumed to have a label
   labeledField:
     type: object
-    required: [label]
     properties:
       label:
         type: string
@@ -30,29 +29,33 @@ $defs:
         title: The color of the label, optional
         description: Used in the UI where a label for the field is shown.
 
-# definition for fields that allow free-form entry
+# extensible definition for fields that allow free-form entry
+  extensibleInputField:
+    allOf:
+      - "$ref": "#/$defs/labeledField"
+      - properties:
+          placeholder:
+            type: string
+            title: The placeholder for this field
+            description: Used in the UI where a placeholder for the field is shown (example input).
+          asA:
+            type: string
+            title: The bootstrap component class
+            description: Used to determine how the user interface of this particular field looks.
+          maxLength:
+            type: integer
+            minimum: 1
+            description: Used in the UI for a text input field's maximum input length.
+          style:
+            type: object
+            title: Optional styling for the bootstrap component class
+            description: Used for styling this field.
+            additionalProperties: true
+
+# non-extensible definition for fields that allow free-form entry
   inputField:
     unevaluatedProperties: false
-    allOf:
-    - "$ref": "#/$defs/labeledField"
-    - properties:
-        placeholder:
-          type: string
-          title: The placeholder for this field
-          description: Used in the UI where a placeholder for the field is shown (example input).
-        asA:
-          type: string
-          title: The bootstrap component class
-          description: Used to determine how the user interface of this particular field looks.
-        maxTextFieldLength:
-          type: integer
-          minimum: 1
-          description: Used in the UI for a text input field's maximum input length.
-        style:
-          type: object
-          title: Optional styling for the bootstrap component class
-          description: Used for styling this field.
-          additionalProperties: true
+    "$ref": "#/$defs/extensibleInputField"
 
 # definition for fields that present a choice to be selected from
   choiceField:
@@ -470,8 +473,12 @@ properties:
       task:
         type: object
         additionalProperties: false
-        required: [shortLabel, shortName, longLabel, longName, description, topLevel, subLevel, taskedOrganizations, responsiblePositions]
+        required: [status, shortLabel, shortName, longLabel, longName, description, topLevel, subLevel,
+                   projectedCompletion, plannedCompletion, parentTask, childrenTasks,
+                   taskedOrganizations, responsiblePositions]
         properties:
+          status:
+            "$ref": "#/$defs/labeledField"
           shortLabel:
             type: string
             title: The short label for this field
@@ -485,9 +492,7 @@ properties:
           longName:
             "$ref": "#/$defs/inputField"
           description:
-            type: string
-            title: The label for a task's description
-            description: Used in the UI where a task's description is shown.
+            "$ref": "#/$defs/inputField"
           topLevel:
             type: object
             additionalProperties: false
@@ -514,9 +519,7 @@ properties:
           parentTask:
             "$ref": "#/$defs/inputField"
           childrenTasks:
-            type: string
-            title: The sub tasks for this field
-            description: Used in the UI where sub tasks for task are shown.
+            "$ref": "#/$defs/labeledField"
           taskedOrganizations:
             "$ref": "#/$defs/inputField"
           responsiblePositions:
@@ -540,26 +543,25 @@ properties:
             title: Whether the attachment functionality is restricted to admins
             description: Used for restricting attachment functionality to admins
           fileName:
-            type: string
-            title: The label for the filename of an attachment
-            description: Used in the UI where an attachment's filename is shown.
+            "$ref": "#/$defs/labeledField"
           caption:
             "$ref": "#/$defs/inputField"
           description:
-            type: string
-            title: The label for a attachment's description
-            description: Used in the UI where an attachment's description is shown.
+            "$ref": "#/$defs/inputField"
           classification:
             "$ref": "#/$defs/customField"
           mimeTypes:
             type: array
+            title: The allowed MIME types for uploading attachments
+            description: Used for restricting the types of attachments that can be uploaded
             uniqueItems: true
             minItems: 1
 
       report:
         type: object
         additionalProperties: false
-        required: [intent, atmosphere, atmosphereDetails, cancelled, nextSteps, reportText]
+        required: [intent, engagementDate, duration, atmosphere, atmosphereDetails, cancelled,
+                   cancelledReason, nextSteps, keyOutcomes, reportText, location]
         properties:
           canUnpublishReports:
             type: boolean
@@ -567,43 +569,37 @@ properties:
             title: Whether reports can be unpublished
             description: Used for reports; if set to `true`, admins can change report state from published to draft
           intent:
-            type: string
-            title: The label for a report's intent
-            description: Used in the UI where a report's intent is shown.
+            "$ref": "#/$defs/inputField"
+          engagementDate:
+            "$ref": "#/$defs/inputField"
+          duration:
+            "$ref": "#/$defs/inputField"
           atmosphere:
-            type: string
-            title: The label for a report's athmosphere
-            description: Used in the UI where a report's athmosphere is shown.
+            "$ref": "#/$defs/inputField"
           atmosphereDetails:
-            type: string
-            title: The label for report's athmosphere details
-            description: Used in the UI where a report's athmosphere details are shown.
+            "$ref": "#/$defs/inputField"
           cancelled:
-            type: string
-            title: The label for a report's cancelled
-            description: Used in the UI where a report's cancelled is shown.
+            "$ref": "#/$defs/inputField"
+          cancelledReason:
+            "$ref": "#/$defs/inputField"
           nextSteps:
             "$ref": "#/$defs/inputField"
           keyOutcomes:
-            type: string
-            title: The label for report's key outcomes
-            description: Used in the UI where report's key outcomes are shown.
+            "$ref": "#/$defs/inputField"
           reportText:
-            type: string
-            title: The label for report's engagement details
-            description: Used in the UI where report's engagement details are shown.
+            "$ref": "#/$defs/inputField"
           location:
-            type: object
-            additionalProperties: false
             required: [filter]
-            properties:
-              filter:
-                type: array
-                uniqueItems: true
-                items:
-                  type: string
-                  enum:
-                    [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, POINT_LOCATION, ADVISOR_LOCATION, PRINCIPAL_LOCATION]
+            allOf:
+            - "$ref": "#/$defs/extensibleInputField"
+            - properties:
+                filter:
+                  type: array
+                  uniqueItems: true
+                  items:
+                    type: string
+                    enum:
+                      [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, POINT_LOCATION, ADVISOR_LOCATION, PRINCIPAL_LOCATION]
           customFields:
             type: object
             additionalProperties:
@@ -631,50 +627,34 @@ properties:
       person:
         type: object
         additionalProperties: false
-        required: [firstName, lastName, domainUsername, openIdSubject, emailAddress, phoneNumber, country, rank, ranks, gender, endOfTourDate, biography, position, prevPositions]
+        required: [status, firstName, lastName, position, prevPositions, domainUsername, openIdSubject,
+                   emailAddress, phoneNumber, country, code, rank, ranks, gender, endOfTourDate,
+                   biography]
         properties:
+          status:
+            "$ref": "#/$defs/labeledField"
           firstName:
-            type: string
-            title: The label for a person's first name
-            description: Used in the UI where a person's first name is shown.
+            "$ref": "#/$defs/inputField"
           lastName:
-            type: string
-            title: The label for a person's last name
-            description: Used in the UI where a person's last name is shown.
+            "$ref": "#/$defs/inputField"
           position:
-            type: string
-            title: The label for person's current position
-            description: Used in Person page UI where a person's position is shown.
+            "$ref": "#/$defs/inputField"
           prevPositions:
-            type: string
-            title: The label for person's previous positions
-            description: Used in Person page UI where a person's previous positions are shown.
+            "$ref": "#/$defs/labeledField"
           domainUsername:
-            type: string
-            title: The label for a person's domain username
-            description: Used in the UI where a person's domain username is shown.
+            "$ref": "#/$defs/inputField"
           openIdSubject:
-            type: string
-            title: The label for a person's OpenID subject
-            description: Used in the UI where a person's OpenID subject is shown.
+            "$ref": "#/$defs/labeledField"
           emailAddress:
             "$ref": "#/$defs/inputField"
           phoneNumber:
-            type: string
-            title: The label for a person's phone number
-            description: Used in the UI where a person's phone number is shown.
+            "$ref": "#/$defs/inputField"
           country:
-            type: string
-            title: The label for a person's country
-            description: Used in the UI where a person's country is shown.
+            "$ref": "#/$defs/inputField"
           code:
-            type: string
-            title: The label for a person's code
-            description: Used in the UI where a person's code is shown.
+            "$ref": "#/$defs/inputField"
           rank:
-            type: string
-            title: The label for a person's rank
-            description: Used in the UI where a person's rank is shown.
+            "$ref": "#/$defs/inputField"
           ranks:
             type: array
             uniqueItems: true
@@ -682,17 +662,11 @@ properties:
             items:
               "$ref": "#/$defs/describedValue"
           gender:
-            type: string
-            title: The label for a person's gender
-            description: Used in the UI where a person's gender is shown.
+            "$ref": "#/$defs/inputField"
           endOfTourDate:
-            type: string
-            title: The label for a person's end of tour date
-            description: Used in the UI where a person's end of tour date is shown.
+            "$ref": "#/$defs/inputField"
           biography:
-            type: string
-            title: The label for a person's biography
-            description: Used in the UI where a person's biography is shown.
+            "$ref": "#/$defs/inputField"
           customFields:
             type: object
             additionalProperties:
@@ -705,8 +679,16 @@ properties:
       location:
         type: object
         additionalProperties: false
-        required: [format]
+        required: [status, name, type, description, superuserTypeOptions, format]
         properties:
+          status:
+            "$ref": "#/$defs/labeledField"
+          name:
+            "$ref": "#/$defs/inputField"
+          type:
+            "$ref": "#/$defs/inputField"
+          description:
+            "$ref": "#/$defs/inputField"
           superuserTypeOptions:
             type: array
             uniqueItems: true
@@ -727,12 +709,20 @@ properties:
       position:
         type: object
         additionalProperties: false
-        required: [name, role]
+        required: [status, name, type, code, organization, role]
         properties:
+          status:
+            "$ref": "#/$defs/labeledField"
           name:
-            type: string
-            title: The label for a position's name
-            description: Used in the UI where a position's name is shown.
+            "$ref": "#/$defs/inputField"
+          type:
+            "$ref": "#/$defs/inputField"
+          code:
+            "$ref": "#/$defs/inputField"
+          organization:
+            "$ref": "#/$defs/inputField"
+          location:
+            "$ref": "#/$defs/inputField"
           role:
             type: object
             additionalProperties: false
@@ -766,20 +756,26 @@ properties:
       organization:
         type: object
         additionalProperties: false
-        required: [shortName, parentOrg, profile]
+        required: [status, shortName, longName, identificationCode, type, parentOrg, childrenOrgs, location, profile]
         properties:
+          status:
+            "$ref": "#/$defs/labeledField"
           shortName:
-            type: string
-            title: The label for an organization's short name
-            description: Used in the UI where an organization's short name is shown.
+            "$ref": "#/$defs/inputField"
+          longName:
+            "$ref": "#/$defs/inputField"
+          identificationCode:
+            "$ref": "#/$defs/inputField"
+          type:
+            "$ref": "#/$defs/inputField"
           parentOrg:
-            type: string
-            title: The label for an organization's parent organization
-            description: Used in the UI where an organization's parent organization is shown.
+            "$ref": "#/$defs/inputField"
+          childrenOrgs:
+            "$ref": "#/$defs/labeledField"
+          location:
+            "$ref": "#/$defs/inputField"
           profile:
-            type: string
-            title: The label for an organization's profile
-            description: Used in the UI where an organization's profile is shown
+            "$ref": "#/$defs/inputField"
           assessments:
             type: object
             additionalProperties:
@@ -838,7 +834,7 @@ properties:
           position:
             type: object
             additionalProperties: false
-            required: [name, type, code]
+            required: [name, type, location, organizationsAdministrated]
             properties:
               name:
                 type: string
@@ -848,8 +844,6 @@ properties:
                 type: string
                 title: The permissions type of this field
                 description: Used in the UI for the type/permissions of an advisor position.
-              code:
-                "$ref": "#/$defs/inputField"
               location:
                 type: object
                 additionalProperties: false
@@ -868,7 +862,7 @@ properties:
           org:
             type: object
             additionalProperties: false
-            required: [name, allOrgName, longName]
+            required: [name, allOrgName, location, administratingPositions]
             properties:
               name:
                 type: string
@@ -878,10 +872,6 @@ properties:
                 type: string
                 title: The name used to represent 'all advisor organizations'
                 description: Used in the UI to refer to all advisor organizations collectively.
-              longName:
-                "$ref": "#/$defs/inputField"
-              identificationCode:
-                "$ref": "#/$defs/inputField"
               location:
                 type: object
                 additionalProperties: false
@@ -945,7 +935,7 @@ properties:
           position:
             type: object
             additionalProperties: false
-            required: [name, type, code]
+            required: [name, type, location]
             properties:
               name:
                 type: string
@@ -955,8 +945,6 @@ properties:
                 type: string
                 title: The permissions type of this field
                 description: Used in the UI for the type/permissions of a principal position.
-              code:
-                "$ref": "#/$defs/inputField"
               location:
                 type: object
                 additionalProperties: false
@@ -973,7 +961,7 @@ properties:
           org:
             type: object
             additionalProperties: false
-            required: [name, allOrgName, longName, administratingPositions]
+            required: [name, allOrgName, location, administratingPositions]
             properties:
               name:
                 type: string
@@ -983,10 +971,6 @@ properties:
                 type: string
                 title: The name used to represent 'all principal organizations'
                 description: Used in the UI to refer to all principal organizations collectively.
-              longName:
-                "$ref": "#/$defs/inputField"
-              identificationCode:
-                "$ref": "#/$defs/inputField"
               location:
                 type: object
                 additionalProperties: false

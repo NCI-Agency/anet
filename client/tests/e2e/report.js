@@ -410,7 +410,7 @@ async function approveReport(t, user) {
   await t.context.logout()
 }
 test.serial("Verify that validations work", async t => {
-  t.plan(27)
+  t.plan(26)
 
   const {
     assertElementText,
@@ -558,34 +558,21 @@ test.serial("Verify that validations work", async t => {
   const $atmosphereDetails = await $("#atmosphereDetails")
   t.is(
     await $atmosphereDetails.getAttribute("placeholder"),
-    "Why was this engagement positive? (optional)"
+    "Describe the atmosphere"
   )
 
   const $neutralAtmosphereButton = await $('label[for="atmosphere_NEUTRAL"]')
   await $neutralAtmosphereButton.click()
   t.is(
-    (await $atmosphereDetails.getAttribute("placeholder")).trim(),
-    "Why was this engagement neutral?"
+    await $atmosphereDetails.getAttribute("placeholder"),
+    "Describe the atmosphere"
   )
 
   const $negativeAtmosphereButton = await $('label[for="atmosphere_NEGATIVE"]')
   await $negativeAtmosphereButton.click()
   t.is(
-    (await $atmosphereDetails.getAttribute("placeholder")).trim(),
-    "Why was this engagement negative?"
-  )
-
-  const $atmosphereDetailsInput = await t.context.driver.findElement(
-    By.css('input[id="atmosphereDetails"]')
-  )
-
-  await $neutralAtmosphereButton.click()
-  // check that parent div.form-group now has a class 'has-error'
-  await verifyFieldIsRequired(
-    $atmosphereDetailsInput,
-    "atmosphereDetails",
-    "input",
-    "Neutral atmospherics details"
+    await $atmosphereDetails.getAttribute("placeholder"),
+    "Describe the atmosphere"
   )
 
   const $reportPeopleFieldsetTitle = await $(

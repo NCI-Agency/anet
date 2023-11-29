@@ -31,6 +31,7 @@ import {
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import { getBreadcrumbTrailAsText } from "components/BreadcrumbTrail"
 import Model from "components/Model"
+import DictionaryField from "HOC/DictionaryField"
 import _isEmpty from "lodash/isEmpty"
 import _pickBy from "lodash/pickBy"
 import { Location, Organization, Person, Position, Report, Task } from "models"
@@ -92,52 +93,6 @@ const SubscriptionFilter = {
     queryKey: "subscribed",
     msg: "By me"
   }
-}
-
-const taskFilters = () => {
-  const taskShortLabel = Settings.fields.task.shortLabel
-  const taskFiltersObj = {
-    "Within Organization": {
-      component: OrganizationFilter,
-      deserializer: deserializeOrganizationFilter,
-      props: {
-        queryKey: "taskedOrgUuid",
-        queryRecurseStrategyKey: "orgRecurseStrategy",
-        fixedRecurseStrategy: RECURSE_STRATEGY.CHILDREN
-      }
-    },
-    [`Within ${taskShortLabel}`]: {
-      component: TaskFilter,
-      deserializer: deserializeTaskFilter,
-      props: {
-        queryKey: "parentTaskUuid",
-        queryRecurseStrategyKey: "parentTaskRecurseStrategy",
-        fixedRecurseStrategy: RECURSE_STRATEGY.CHILDREN
-      }
-    }
-  }
-  const projectedCompletion = Settings.fields.task.projectedCompletion
-  if (projectedCompletion) {
-    taskFiltersObj[projectedCompletion.label] = {
-      component: DateRangeFilter,
-      deserializer: deserializeDateRangeFilter,
-      props: {
-        queryKey: "projectedCompletion"
-      }
-    }
-  }
-  const plannedCompletion = Settings.fields.task.plannedCompletion
-  if (plannedCompletion) {
-    taskFiltersObj[plannedCompletion.label] = {
-      component: DateRangeFilter,
-      deserializer: deserializeDateRangeFilter,
-      props: {
-        queryKey: "plannedCompletion"
-      }
-    }
-  }
-
-  return taskFiltersObj
 }
 
 const advancedSelectFilterPersonProps = {
@@ -285,6 +240,7 @@ export const searchFilters = function() {
       },
       "Engagement Date": {
         component: DateRangeFilter,
+        dictProps: Settings.fields.report.engagementDate,
         deserializer: deserializeDateRangeFilter,
         props: {
           queryKey: "engagementDate"
@@ -313,6 +269,7 @@ export const searchFilters = function() {
       },
       Location: {
         component: AdvancedSelectFilter,
+        dictProps: Settings.fields.report.location,
         deserializer: deserializeAdvancedSelectFilter,
         props: Object.assign({}, advancedSelectFilterLocationProps, {
           filterDefs: locationWidgetFilters,
@@ -339,8 +296,9 @@ export const searchFilters = function() {
           ]
         }
       },
-      [Settings.fields.report.atmosphere]: {
+      Atmospherics: {
         component: SelectFilter,
+        dictProps: Settings.fields.report.atmosphere,
         deserializer: deserializeSelectFilter,
         props: {
           queryKey: "atmosphere",
@@ -386,6 +344,7 @@ export const searchFilters = function() {
       },
       Role: {
         component: SelectFilter,
+        dictProps: Settings.fields.person.role,
         deserializer: deserializeSelectFilter,
         props: {
           queryKey: "role",
@@ -407,6 +366,7 @@ export const searchFilters = function() {
       },
       Rank: {
         component: SelectFilter,
+        dictProps: Settings.fields.person.rank,
         deserializer: deserializeSelectFilter,
         props: {
           queryKey: "rank",
@@ -416,6 +376,7 @@ export const searchFilters = function() {
       },
       Nationality: {
         component: SelectFilter,
+        dictProps: Settings.fields.person.country,
         deserializer: deserializeSelectFilter,
         props: {
           queryKey: "country",
@@ -450,6 +411,7 @@ export const searchFilters = function() {
     filters: {
       "Organization Type": {
         component: SelectFilter,
+        dictProps: Settings.fields.organization.type,
         deserializer: deserializeSelectFilter,
         props: {
           queryKey: "type",
@@ -474,6 +436,7 @@ export const searchFilters = function() {
       },
       Location: {
         component: AdvancedSelectFilter,
+        dictProps: Settings.fields.organization.location,
         deserializer: deserializeAdvancedSelectFilter,
         props: Object.assign({}, advancedSelectFilterLocationProps, {
           filterDefs: locationWidgetFilters,
@@ -497,6 +460,7 @@ export const searchFilters = function() {
     filters: {
       [POSITION_POSITION_TYPE_FILTER_KEY]: {
         component: SelectFilter,
+        dictProps: Settings.fields.position.type,
         deserializer: deserializeSelectFilter,
         props: {
           queryKey: "type",
@@ -526,6 +490,7 @@ export const searchFilters = function() {
       },
       Location: {
         component: AdvancedSelectFilter,
+        dictProps: Settings.fields.position.location,
         deserializer: deserializeAdvancedSelectFilter,
         props: Object.assign({}, advancedSelectFilterLocationProps, {
           filterDefs: locationWidgetFilters,
@@ -564,6 +529,7 @@ export const searchFilters = function() {
     filters: {
       "Location Type": {
         component: SelectFilter,
+        dictProps: Settings.fields.location.type,
         deserializer: deserializeSelectFilter,
         props: {
           queryKey: "type",
@@ -574,9 +540,43 @@ export const searchFilters = function() {
     }
   }
 
-  // Task filters
   filters[SEARCH_OBJECT_TYPES.TASKS] = {
-    filters: taskFilters()
+    filters: {
+      "Within Organization": {
+        component: OrganizationFilter,
+        deserializer: deserializeOrganizationFilter,
+        props: {
+          queryKey: "taskedOrgUuid",
+          queryRecurseStrategyKey: "orgRecurseStrategy",
+          fixedRecurseStrategy: RECURSE_STRATEGY.CHILDREN
+        }
+      },
+      [`Within ${Settings.fields.task.shortLabel}`]: {
+        component: TaskFilter,
+        deserializer: deserializeTaskFilter,
+        props: {
+          queryKey: "parentTaskUuid",
+          queryRecurseStrategyKey: "parentTaskRecurseStrategy",
+          fixedRecurseStrategy: RECURSE_STRATEGY.CHILDREN
+        }
+      },
+      "Projected Completion": {
+        component: DateRangeFilter,
+        dictProps: Settings.fields.task.projectedCompletion,
+        deserializer: deserializeDateRangeFilter,
+        props: {
+          queryKey: "projectedCompletion"
+        }
+      },
+      "Planned Completion": {
+        component: DateRangeFilter,
+        dictProps: Settings.fields.task.plannedCompletion,
+        deserializer: deserializeDateRangeFilter,
+        props: {
+          queryKey: "plannedCompletion"
+        }
+      }
+    }
   }
 
   for (const filtersForType of Object.values(filters)) {
@@ -598,8 +598,12 @@ const extraFilters = function() {
 }
 
 const SearchFilterDisplay = ({ filter, element, showSeparator }) => {
-  const label = filter.key
-  const ChildComponent = element.component
+  const dictProps = element.dictProps
+  const label = dictProps?.label || filter.key
+  const ChildComponent = dictProps
+    ? DictionaryField(element.component)
+    : element.component
+  const additionalProps = dictProps ? { dictProps } : {}
   const sep = showSeparator ? ", " : ""
   return (
     <>
@@ -608,6 +612,7 @@ const SearchFilterDisplay = ({ filter, element, showSeparator }) => {
         <ChildComponent
           value={filter.value || ""}
           asFormField={false}
+          {...additionalProps}
           {...element.props}
         />
       </em>
@@ -620,6 +625,7 @@ SearchFilterDisplay.propTypes = {
   filter: PropTypes.object,
   element: PropTypes.shape({
     component: PropTypes.func.isRequired,
+    dictProps: PropTypes.object,
     props: PropTypes.object
   }),
   showSeparator: PropTypes.bool
@@ -637,31 +643,30 @@ export const SearchDescription = ({ searchQuery, showPlaceholders }) => {
   const filters = searchQuery.filters
   return (
     <span className="asLink">
-      <>
-        <b>
-          {searchQuery.objectType
-            ? SEARCH_OBJECT_LABELS[searchQuery.objectType]
-            : "Everything"}
-        </b>
-        {filters.length > 0 ? (
-          <>
-            <> filtered on </>
-            {filters.map(
-              (filter, i) =>
-                filterDefs[filter.key] && (
-                  <SearchFilterDisplay
-                    key={filter.key}
-                    filter={filter}
-                    element={filterDefs[filter.key]}
-                    showSeparator={i !== filters.length - 1}
-                  />
-                )
-            )}
-          </>
-        ) : (
-          showPlaceholders && " - add filters"
-        )}
-      </>
+      <b>
+        {searchQuery.objectType
+          ? SEARCH_OBJECT_LABELS[searchQuery.objectType]
+          : "Everything"}
+      </b>
+      {filters.length > 0 ? (
+        <>
+          {" "}
+          filtered on{" "}
+          {filters.map(
+            (filter, i) =>
+              filterDefs[filter.key] && (
+                <SearchFilterDisplay
+                  key={filter.key}
+                  filter={filter}
+                  element={filterDefs[filter.key]}
+                  showSeparator={i !== filters.length - 1}
+                />
+              )
+          )}
+        </>
+      ) : (
+        showPlaceholders && " - add filters"
+      )}
     </span>
   )
 }

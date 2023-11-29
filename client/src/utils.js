@@ -257,7 +257,7 @@ export default {
   },
 
   getMaxTextFieldLength: function(field) {
-    return field?.maxTextFieldLength || Settings.maxTextFieldLength
+    return field?.maxLength || Settings.maxTextFieldLength
   },
 
   pluralizeWord: function(count, word) {

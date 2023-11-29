@@ -205,8 +205,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
     )
   }
   const organization = new Organization(data ? data.organization : {})
-  const IdentificationCodeFieldWithLabel = DictionaryField(Field)
-  const LongNameWithLabel = DictionaryField(Field)
+  const DictField = DictionaryField(Field)
 
   const canAdministrateOrg =
     currentUser &&
@@ -361,23 +360,24 @@ const OrganizationShow = ({ pageDispatchers }) => {
                 action={action}
               />
               <Fieldset id="info">
-                <LongNameWithLabel
-                  dictProps={orgSettings.longName}
+                <DictField
+                  dictProps={Settings.fields.organization.longName}
                   name="longName"
                   component={FieldHelper.ReadonlyField}
                 />
 
-                <Field
+                <DictField
+                  dictProps={Settings.fields.organization.type}
                   name="type"
                   component={FieldHelper.ReadonlyField}
                   humanValue={Organization.humanNameOfType}
                 />
 
                 {organization.parentOrg && organization.parentOrg.uuid && (
-                  <Field
+                  <DictField
+                    dictProps={Settings.fields.organization.parentOrg}
                     name="parentOrg"
                     component={FieldHelper.ReadonlyField}
-                    label={Settings.fields.organization.parentOrg}
                     humanValue={
                       organization.parentOrg && (
                         <LinkTo
@@ -391,10 +391,10 @@ const OrganizationShow = ({ pageDispatchers }) => {
 
                 {organization.childrenOrgs &&
                   organization.childrenOrgs.length > 0 && (
-                    <Field
+                    <DictField
+                      dictProps={Settings.fields.organization.childrenOrgs}
                       name="childrenOrgs"
                       component={FieldHelper.ReadonlyField}
-                      label="Sub organizations"
                       humanValue={
                         <ListGroup>
                           {organization.childrenOrgs.map(childOrg => (
@@ -426,14 +426,15 @@ const OrganizationShow = ({ pageDispatchers }) => {
                   )
                 )}
 
-                <IdentificationCodeFieldWithLabel
-                  dictProps={orgSettings.identificationCode}
+                <DictField
+                  dictProps={Settings.fields.organization.identificationCode}
                   name="identificationCode"
                   component={FieldHelper.ReadonlyField}
                 />
 
                 {organization.location && (
-                  <Field
+                  <DictField
+                    dictProps={Settings.fields.organization.location}
                     name="location"
                     component={FieldHelper.ReadonlyField}
                     humanValue={
@@ -454,16 +455,17 @@ const OrganizationShow = ({ pageDispatchers }) => {
                   />
                 )}
 
-                <Field
+                <DictField
+                  dictProps={Settings.fields.organization.status}
                   name="status"
                   component={FieldHelper.ReadonlyField}
                   humanValue={Organization.humanNameOfStatus}
                 />
 
-                <Field
+                <DictField
+                  dictProps={Settings.fields.organization.profile}
                   name="profile"
                   component={FieldHelper.ReadonlyField}
-                  label={Settings.fields.organization.profile}
                   humanValue={
                     <RichTextEditor readOnly value={organization.profile} />
                   }

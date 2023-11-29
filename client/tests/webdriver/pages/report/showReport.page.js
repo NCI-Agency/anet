@@ -79,9 +79,7 @@ class ShowReport extends Page {
   }
 
   async getIntent() {
-    const text =
-      (await (await browser.$("#intent > p:first-child")).getText()) || ""
-    return text.slice(text.indexOf(": ") + 2)
+    return (await browser.$("#intent")).getText()
   }
 
   async getEngagementDate() {

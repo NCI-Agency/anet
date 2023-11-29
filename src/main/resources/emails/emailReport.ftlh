@@ -246,17 +246,17 @@ ${sender.name} sent you a report from ANET:
         <div class="col-sm-7">
           <div id="intent" class="form-control-static">
             <p>
-              <strong>${fields.report.intent}:</strong> ${(report.intent)!}
+              <strong>${fields.report.intent.label!}:</strong> ${(report.intent)!}
             </p>
             <#if report.keyOutcomes??>
               <#if fields.report.keyOutcomes??>
                 <p>
-                  <span><strong>${fields.report.keyOutcomes}:</strong> ${(report.keyOutcomes)!}</span>
+                  <span><strong>${fields.report.keyOutcomes.label!}:</strong> ${(report.keyOutcomes)!}</span>
                 </p>
               </#if>
             </#if>
             <p>
-              <strong>${fields.report.nextSteps.label}:</strong> ${(report.nextSteps)!}
+              <strong>${fields.report.nextSteps.label!}:</strong> ${(report.nextSteps)!}
             </p>
           </div>
         </div>
@@ -304,7 +304,7 @@ ${sender.name} sent you a report from ANET:
             </div>
           </div>
         <#else>
-          <label for="atmosphere" class="col-sm-2 control-label">${fields.report.atmosphere}</label>
+          <label for="atmosphere" class="col-sm-2 control-label">${fields.report.atmosphere.label!}</label>
           <div class="col-sm-7">
             <div id="atmosphere" class="form-control-static">
               ${(report.atmosphere)!?capitalize} - ${(report.atmosphereDetails)!}
@@ -461,7 +461,7 @@ ${sender.name} sent you a report from ANET:
   <#if report.reportText??>
     <div>
       <h2 class="legend">
-        <span class="title-text">${fields.report.reportText}</span>
+        <span class="title-text">${fields.report.reportText.label!}</span>
       </h2>
       <fieldset>
         <div>

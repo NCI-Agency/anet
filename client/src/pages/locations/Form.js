@@ -21,6 +21,7 @@ import RichTextEditor from "components/RichTextEditor"
 import SimilarObjectsModal from "components/SimilarObjectsModal"
 import { FastField, Field, Form, Formik } from "formik"
 import { convertLatLngToMGRS, parseCoordinate } from "geoUtils"
+import DictionaryField from "HOC/DictionaryField"
 import _escape from "lodash/escape"
 import _isEqual from "lodash/isEqual"
 import { Location, Position } from "models"
@@ -106,6 +107,8 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
     }
   }
 
+  const DictFastField = DictionaryField(FastField)
+
   return (
     <Formik
       enableReinitialize
@@ -170,7 +173,8 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
               <Fieldset>
-                <FastField
+                <DictFastField
+                  dictProps={Settings.fields.location.name}
                   name="name"
                   component={FieldHelper.InputField}
                   disabled={!canEditName}
@@ -194,7 +198,8 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
                   }
                 />
 
-                <FastField
+                <DictFastField
+                  dictProps={Settings.fields.location.type}
                   name="type"
                   component={FieldHelper.SpecialField}
                   disabled={!canEditName}
@@ -226,14 +231,16 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
                   setFieldTouched={setFieldTouched}
                 />
 
-                <FastField
+                <DictFastField
+                  dictProps={Settings.fields.location.status}
                   name="status"
                   component={FieldHelper.RadioButtonToggleGroupField}
                   buttons={statusButtons}
                   onChange={value => setFieldValue("status", value)}
                 />
 
-                <FastField
+                <DictFastField
+                  dictProps={Settings.fields.location.description}
                   name="description"
                   component={FieldHelper.SpecialField}
                   onChange={value => {
@@ -246,7 +253,14 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
                     // validation will be done by setFieldValue
                     setFieldTouched("description", true, false)
                   }}
-                  widget={<RichTextEditor className="description" />}
+                  widget={
+                    <RichTextEditor
+                      className="description"
+                      placeholder={
+                        Settings.fields.location.description?.placeholder
+                      }
+                    />
+                  }
                 />
 
                 {edit && attachmentEditEnabled && (

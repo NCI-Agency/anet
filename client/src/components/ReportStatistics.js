@@ -69,7 +69,7 @@ const REPORT_FIELDS_FOR_STATISTICS = {
   },
   atmosphere: {
     type: CUSTOM_FIELD_TYPE.ENUM,
-    label: Settings.fields.report.atmosphere,
+    label: Settings.fields.report.atmosphere?.label,
     choices: choicesFactory(Report.ATMOSPHERE, Report.ATMOSPHERE_LABELS)
   }
 }

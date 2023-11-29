@@ -69,10 +69,12 @@ describe("Merge positions page", () => {
     await MergePositions.waitForColumnToChange(
       EXAMPLE_POSITIONS.validLeft.fullName,
       "left",
-      "Name"
+      "Position Name"
     )
     expect(
-      await (await MergePositions.getColumnContent("left", "Name")).getText()
+      await (
+        await MergePositions.getColumnContent("left", "Position Name")
+      ).getText()
     ).to.eq(EXAMPLE_POSITIONS.validLeft.fullName)
     expect(
       await (
@@ -139,10 +141,12 @@ describe("Merge positions page", () => {
     await MergePositions.waitForColumnToChange(
       EXAMPLE_POSITIONS.validRight.fullName,
       "right",
-      "Name"
+      "Position Name"
     )
     expect(
-      await (await MergePositions.getColumnContent("right", "Name")).getText()
+      await (
+        await MergePositions.getColumnContent("right", "Position Name")
+      ).getText()
     ).to.eq(EXAMPLE_POSITIONS.validRight.fullName)
     expect(
       await (
@@ -180,10 +184,12 @@ describe("Merge positions page", () => {
     await MergePositions.waitForColumnToChange(
       EXAMPLE_POSITIONS.validLeft.fullName,
       "mid",
-      "Name"
+      "Position Name"
     )
     expect(
-      await (await MergePositions.getColumnContent("mid", "Name")).getText()
+      await (
+        await MergePositions.getColumnContent("mid", "Position Name")
+      ).getText()
     ).to.eq(EXAMPLE_POSITIONS.validLeft.fullName)
     expect(
       await (
@@ -224,10 +230,12 @@ describe("Merge positions page", () => {
     await MergePositions.waitForColumnToChange(
       EXAMPLE_POSITIONS.validRight.fullName,
       "mid",
-      "Name"
+      "Position Name"
     )
     expect(
-      await (await MergePositions.getColumnContent("mid", "Name")).getText()
+      await (
+        await MergePositions.getColumnContent("mid", "Position Name")
+      ).getText()
     ).to.eq(EXAMPLE_POSITIONS.validRight.fullName)
     expect(
       await (
@@ -262,14 +270,18 @@ describe("Merge positions page", () => {
     ).to.eq(EXAMPLE_POSITIONS.validRight.location)
   })
   it("Should be able to select from both left and right side.", async() => {
-    await (await MergePositions.getSelectButton("left", "Name")).click()
+    await (
+      await MergePositions.getSelectButton("left", "Position Name")
+    ).click()
     await MergePositions.waitForColumnToChange(
       EXAMPLE_POSITIONS.validLeft.fullName,
       "mid",
-      "Name"
+      "Position Name"
     )
     expect(
-      await (await MergePositions.getColumnContent("mid", "Name")).getText()
+      await (
+        await MergePositions.getColumnContent("mid", "Position Name")
+      ).getText()
     ).to.eq(EXAMPLE_POSITIONS.validLeft.fullName)
 
     await (
@@ -316,7 +328,7 @@ describe("Merge positions page", () => {
     await MergePositions.waitForColumnToChange(
       EXAMPLE_POSITIONS.validLeft.fullName,
       "mid",
-      "Name"
+      "Position Name"
     )
     await (await MergePositions.getEditAssociatedPositionsButton()).click()
     await (

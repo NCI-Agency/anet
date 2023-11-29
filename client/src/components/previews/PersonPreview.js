@@ -7,6 +7,7 @@ import LinkTo from "components/LinkTo"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import PreviousPositions from "components/PreviousPositions"
 import RichTextEditor from "components/RichTextEditor"
+import DictionaryField from "HOC/DictionaryField"
 import { Person, Position } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
@@ -96,6 +97,8 @@ const PersonPreview = ({ className, uuid }) => {
   )
 
   const person = new Person(data.person ? data.person : {})
+  const DictPreviewField = DictionaryField(PreviewField)
+
   // The position for this person's counterparts
   const position = person.position
   const assignedRole =
@@ -124,56 +127,56 @@ const PersonPreview = ({ className, uuid }) => {
               />
             </div>
 
-            <PreviewField
-              label={Settings.fields.person.rank}
+            <DictPreviewField
+              dictProps={Settings.fields.person.rank}
               value={person.rank}
             />
 
-            <PreviewField
-              label="Role"
+            <DictPreviewField
+              dictProps={Settings.fields.person.role}
               value={Person.humanNameOfRole(person.role)}
             />
 
             {isAdmin && (
-              <PreviewField
-                label={Settings.fields.person.domainUsername}
+              <DictPreviewField
+                dictProps={Settings.fields.person.domainUsername}
                 value={person.domainUsername}
               />
             )}
 
-            <PreviewField
-              label="Status"
+            <DictPreviewField
+              dictProps={Settings.fields.person.status}
               value={Person.humanNameOfStatus(person.status)}
             />
           </Col>
           <Col>
-            <PreviewField
-              label={Settings.fields.person.phoneNumber}
+            <DictPreviewField
+              dictProps={Settings.fields.person.phoneNumber}
               value={person.phoneNumber}
             />
 
-            <PreviewField
-              label={Settings.fields.person.emailAddress.label}
+            <DictPreviewField
+              dictProps={Settings.fields.person.emailAddress}
               value={person.emailAddress}
             />
 
-            <PreviewField
-              label={Settings.fields.person.country}
+            <DictPreviewField
+              dictProps={Settings.fields.person.country}
               value={person.country}
             />
 
-            <PreviewField
-              label={Settings.fields.person.code}
+            <DictPreviewField
+              dictProps={Settings.fields.person.code}
               value={person.code}
             />
 
-            <PreviewField
-              label={Settings.fields.person.gender}
+            <DictPreviewField
+              dictProps={Settings.fields.person.gender}
               value={person.gender}
             />
 
-            <PreviewField
-              label={Settings.fields.person.endOfTourDate}
+            <DictPreviewField
+              dictProps={Settings.fields.person.endOfTourDate}
               value={
                 person.endOfTourDate &&
                 moment(person.endOfTourDate).format(
@@ -184,16 +187,17 @@ const PersonPreview = ({ className, uuid }) => {
           </Col>
         </Row>
 
-        <div className="preview-field-label">Biography</div>
+        <div className="preview-field-label">
+          {Settings.fields.person.biography?.label}
+        </div>
         <div className="preview-field-value">
           <RichTextEditor readOnly value={person.biography} />
         </div>
       </div>
       <br />
-      <h4>Position</h4>
+      <h4>{Settings.fields.person.position?.label}</h4>
       <div className="preview-section">
         <div
-          title="Current Position"
           id="current-position"
           className={!position || !position.uuid ? "warning" : undefined}
         >
@@ -209,7 +213,7 @@ const PersonPreview = ({ className, uuid }) => {
         )}
       </div>
       <br />
-      <h4>Previous positions</h4>
+      <h4>{Settings.fields.person.prevPositions?.label}</h4>
       <div className="preview-section">
         <PreviousPositions history={person.previousPositions} />
       </div>

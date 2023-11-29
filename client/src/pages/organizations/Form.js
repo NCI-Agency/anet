@@ -88,8 +88,9 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
       label: Settings.fields.principal.org.name
     }
   ]
-  const IdentificationCodeFieldWithLabel = DictionaryField(FastField)
-  const LongNameWithLabel = DictionaryField(FastField)
+
+  const DictField = DictionaryField(Field)
+  const DictFastField = DictionaryField(FastField)
 
   return (
     <Formik
@@ -119,9 +120,6 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
           ? currentUser &&
             currentUser.hasAdministrativePermissionsForOrganization(values)
           : canAdministrateParentOrg
-        const orgSettings = isAdvisorOrg
-          ? Settings.fields.advisor.org
-          : Settings.fields.principal.org
         const orgSearchQuery = {
           status: Model.STATUS.ACTIVE,
           type: values.type
@@ -211,25 +209,26 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
               <Fieldset>
                 {!canAdministrateOrg ? (
                   <>
-                    <FastField
+                    <DictFastField
+                      dictProps={Settings.fields.organization.shortName}
                       name="shortName"
                       component={FieldHelper.ReadonlyField}
-                      label={Settings.fields.organization.shortName}
                     />
-                    <LongNameWithLabel
-                      dictProps={orgSettings.longName}
+                    <DictField
+                      dictProps={Settings.fields.organization.longName}
                       name="longName"
                       component={FieldHelper.ReadonlyField}
                     />
-                    <FastField
+                    <DictField
+                      dictProps={Settings.fields.organization.type}
                       name="type"
                       component={FieldHelper.ReadonlyField}
                       humanValue={Organization.humanNameOfType}
                     />
-                    <FastField
+                    <DictFastField
+                      dictProps={Settings.fields.organization.parentOrg}
                       name="parentOrg"
                       component={FieldHelper.ReadonlyField}
-                      label={Settings.fields.organization.parentOrg}
                       humanValue={
                         values.parentOrg && (
                           <LinkTo
@@ -239,12 +238,15 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                         )
                       }
                     />
-                    <IdentificationCodeFieldWithLabel
-                      dictProps={orgSettings.identificationCode}
+                    <DictField
+                      dictProps={
+                        Settings.fields.organization.identificationCode
+                      }
                       name="identificationCode"
                       component={FieldHelper.ReadonlyField}
                     />
-                    <FastField
+                    <DictFastField
+                      dictProps={Settings.fields.organization.location}
                       name="location"
                       component={FieldHelper.ReadonlyField}
                       humanValue={
@@ -261,15 +263,16 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                         )
                       }
                     />
-                    <FastField
+                    <DictFastField
+                      dictProps={Settings.fields.organization.status}
                       name="status"
                       component={FieldHelper.ReadonlyField}
                       humanValue={Organization.humanNameOfStatus}
                     />
-                    <FastField
+                    <DictFastField
+                      dictProps={Settings.fields.organization.profile}
                       name="profile"
                       component={FieldHelper.ReadonlyField}
-                      label={Settings.fields.organization.profile}
                       humanValue={
                         <RichTextEditor readOnly className="profile" />
                       }
@@ -277,27 +280,27 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                   </>
                 ) : (
                   <>
-                    <FastField
+                    <DictFastField
+                      dictProps={Settings.fields.organization.shortName}
                       name="shortName"
                       component={FieldHelper.InputField}
-                      label={Settings.fields.organization.shortName}
-                      placeholder="e.g. EF1.1"
                     />
-                    <LongNameWithLabel
-                      dictProps={orgSettings.longName}
+                    <DictField
+                      dictProps={Settings.fields.organization.longName}
                       name="longName"
                       component={FieldHelper.InputField}
                     />
-                    <FastField
+                    <DictField
+                      dictProps={Settings.fields.organization.type}
                       name="type"
                       component={FieldHelper.RadioButtonToggleGroupField}
                       buttons={typeButtons}
                       onChange={value => setFieldValue("type", value)}
                       disabled={!isAdmin}
                     />
-                    <Field
+                    <DictFastField
+                      dictProps={Settings.fields.organization.parentOrg}
                       name="parentOrg"
-                      label={Settings.fields.organization.parentOrg}
                       component={FieldHelper.SpecialField}
                       onChange={value => {
                         // validation will be done by setFieldValue
@@ -308,7 +311,9 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                       widget={
                         <AdvancedSingleSelect
                           fieldName="parentOrg"
-                          placeholder="Search for a higher level organization..."
+                          placeholder={
+                            Settings.fields.organization.parentOrg.placeholder
+                          }
                           showRemoveButton={isAdmin}
                           value={values.parentOrg}
                           overlayColumns={["Name"]}
@@ -322,14 +327,16 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                         />
                       }
                     />
-                    <IdentificationCodeFieldWithLabel
-                      dictProps={orgSettings.identificationCode}
+                    <DictField
+                      dictProps={
+                        Settings.fields.organization.identificationCode
+                      }
                       name="identificationCode"
                       component={FieldHelper.InputField}
                     />
-                    <Field
+                    <DictFastField
+                      dictProps={Settings.fields.organization.location}
                       name="location"
-                      label="Location"
                       component={FieldHelper.SpecialField}
                       onChange={value => {
                         // validation will be done by setFieldValue
@@ -339,7 +346,9 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                       widget={
                         <AdvancedSingleSelect
                           fieldName="location"
-                          placeholder="Search for the location where this Organization will operate from..."
+                          placeholder={
+                            Settings.fields.organization.location.placeholder
+                          }
                           value={values.location}
                           overlayColumns={["Name"]}
                           overlayRenderRow={LocationOverlayRow}
@@ -351,16 +360,17 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                         />
                       }
                     />
-                    <FastField
+                    <DictFastField
+                      dictProps={Settings.fields.organization.status}
                       name="status"
                       component={FieldHelper.RadioButtonToggleGroupField}
                       buttons={statusButtons}
                       onChange={value => setFieldValue("status", value)}
                     />
-                    <FastField
+                    <DictFastField
+                      dictProps={Settings.fields.organization.profile}
                       name="profile"
                       component={FieldHelper.SpecialField}
-                      label={Settings.fields.organization.profile}
                       onChange={value => {
                         // prevent initial unnecessary render of RichTextEditor
                         if (!_isEqual(values.profile, value)) {
@@ -371,7 +381,14 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                         // validation will be done by setFieldValue
                         setFieldTouched("profile", true, false)
                       }}
-                      widget={<RichTextEditor className="profile" />}
+                      widget={
+                        <RichTextEditor
+                          className="profile"
+                          placeholder={
+                            Settings.fields.organization.profile?.placeholder
+                          }
+                        />
+                      }
                     />
                   </>
                 )}

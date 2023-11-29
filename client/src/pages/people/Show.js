@@ -35,6 +35,7 @@ import RelatedObjectNotes, {
 import ReportCollection from "components/ReportCollection"
 import RichTextEditor from "components/RichTextEditor"
 import { Field, Form, Formik } from "formik"
+import DictionaryField from "HOC/DictionaryField"
 import _isEmpty from "lodash/isEmpty"
 import { Attachment, Person, Position } from "models"
 import moment from "moment"
@@ -520,12 +521,11 @@ const PersonShow = ({ pageDispatchers }) => {
       status: Person.humanNameOfStatus(person.status)
     }
     return person.getNormalFieldsOrdered().reduce((accum, key) => {
+      const DictField = DictionaryField(Field)
       accum[key] = (
-        <Field
+        <DictField
+          dictProps={Settings.fields.person[key]}
           name={key}
-          label={
-            Settings.fields.person[key]?.label || Settings.fields.person[key]
-          }
           component={FieldHelper.ReadonlyField}
           humanValue={humanValuesExceptions[key]}
           className={classNameExceptions[key]}

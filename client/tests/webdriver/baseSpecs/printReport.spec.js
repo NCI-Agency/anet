@@ -39,12 +39,13 @@ describe("Show print report page", () => {
     })
     it("We should see the correct report fields", async() => {
       const mustHaveFieldTexts = [
-        "purpose",
+        "Engagement purpose",
         "Key outcomes",
-        "Next steps",
-        "principals",
-        "advisors",
         "Atmospherics",
+        "Atmospherics details",
+        "Next steps",
+        "Principals",
+        "Advisors",
         "Efforts"
       ]
       const fields = await ShowReport.getCompactReportFields()

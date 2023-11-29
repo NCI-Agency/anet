@@ -9,7 +9,7 @@ import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 import { customFieldsJSONString } from "components/CustomFields"
 import EditHistory from "components/EditHistory"
 import LinkTo from "components/LinkTo"
-import PersonField from "components/MergeField"
+import MergeField from "components/MergeField"
 import Messages from "components/Messages"
 import {
   CUSTOM_FIELD_TYPE_DEFAULTS,
@@ -25,6 +25,7 @@ import {
 } from "components/Page"
 import PreviousPositions from "components/PreviousPositions"
 import RichTextEditor from "components/RichTextEditor"
+import DictionaryField from "HOC/DictionaryField"
 import useMergeObjects, {
   ALIGN_OPTIONS,
   areAllSet,
@@ -72,10 +73,10 @@ const MergePeople = ({ pageDispatchers }) => {
   })
   usePageTitle("Merge People")
 
+  const DictMergeField = DictionaryField(MergeField)
   const person1 = mergeState[MERGE_SIDES.LEFT]
   const person2 = mergeState[MERGE_SIDES.RIGHT]
   const mergedPerson = mergeState.merged
-
   const matchingRoles = person1?.role === person2?.role
 
   return (
@@ -140,22 +141,26 @@ const MergePeople = ({ pageDispatchers }) => {
                   <li>Name</li>
                   <li>Role</li>
                   <li>Status</li>
-                  <li>{Settings.fields.person.rank}</li>
-                  <li>{Settings.fields.person.gender}</li>
-                  <li>{Settings.fields.person.country}</li>
+                  <li>{Settings.fields.person.rank?.label}</li>
+                  {!Settings.fields.person.gender?.exclude && (
+                    <li>{Settings.fields.person.gender?.label}</li>
+                  )}
+                  <li>{Settings.fields.person.country?.label}</li>
                 </ul>
-                If the Merged Person will be an {Person.ROLE.ADVISOR}:
+                - If the Merged Person will be an {Person.ROLE.ADVISOR}, also
+                required are:
                 <ul>
-                  <li>{Settings.fields.person.emailAddress.label}</li>
-                  <li>{Settings.fields.person.endOfTourDate}</li>
+                  <li>{Settings.fields.person.emailAddress?.label}</li>
+                  {!Settings.fields.person.endOfTourDate?.exclude && (
+                    <li>{Settings.fields.person.endOfTourDate?.label}</li>
+                  )}
                 </ul>
-                are also required.
               </Callout>
             </div>
           )}
           {areAllSet(person1, person2, mergedPerson) && (
             <fieldset>
-              <PersonField
+              <MergeField
                 label="Avatar"
                 value={
                   <AvatarDisplayComponent
@@ -182,7 +187,7 @@ const MergePeople = ({ pageDispatchers }) => {
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
-              <PersonField
+              <MergeField
                 label="Name"
                 value={mergedPerson.name}
                 align={ALIGN_OPTIONS.CENTER}
@@ -191,8 +196,8 @@ const MergePeople = ({ pageDispatchers }) => {
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
-              <PersonField
-                label="Domain username"
+              <DictMergeField
+                dictProps={Settings.fields.person.domainUsername}
                 value={mergedPerson.domainUsername}
                 align={ALIGN_OPTIONS.CENTER}
                 action={
@@ -207,8 +212,8 @@ const MergePeople = ({ pageDispatchers }) => {
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
-              <PersonField
-                label="OpenID subject"
+              <DictMergeField
+                dictProps={Settings.fields.person.openIdSubject}
                 value={mergedPerson.openIdSubject}
                 align={ALIGN_OPTIONS.CENTER}
                 action={
@@ -223,7 +228,7 @@ const MergePeople = ({ pageDispatchers }) => {
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
-              <PersonField
+              <MergeField
                 label="Role"
                 value={mergedPerson.role}
                 align={ALIGN_OPTIONS.CENTER}
@@ -232,8 +237,8 @@ const MergePeople = ({ pageDispatchers }) => {
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
-              <PersonField
-                label="Position"
+              <DictMergeField
+                dictProps={Settings.fields.person.position}
                 value={
                   <LinkTo modelType="Position" model={mergedPerson.position} />
                 }
@@ -248,8 +253,8 @@ const MergePeople = ({ pageDispatchers }) => {
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
-              <PersonField
-                label="Previous Positions"
+              <DictMergeField
+                dictProps={Settings.fields.person.prevPositions}
                 value={
                   <>
                     <PreviousPositions
@@ -290,8 +295,8 @@ const MergePeople = ({ pageDispatchers }) => {
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
-              <PersonField
-                label="Status"
+              <DictMergeField
+                dictProps={Settings.fields.person.status}
                 value={mergedPerson.status}
                 align={ALIGN_OPTIONS.CENTER}
                 action={
@@ -315,14 +320,14 @@ const MergePeople = ({ pageDispatchers }) => {
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
-              <PersonField
-                label={Settings.fields.person.emailAddress.label}
+              <DictMergeField
+                dictProps={Settings.fields.person.emailAddress}
                 value={mergedPerson.emailAddress}
                 align={ALIGN_OPTIONS.CENTER}
                 action={
                   mergedPerson.role === Person.ROLE.ADVISOR
                     ? getInfoButton(
-                      `${Settings.fields.person.emailAddress.label} is required.`
+                      `${Settings.fields.person.emailAddress?.label} is required.`
                     )
                     : matchingRoles &&
                       getClearButton(() =>
@@ -335,8 +340,8 @@ const MergePeople = ({ pageDispatchers }) => {
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
-              <PersonField
-                label={Settings.fields.person.phoneNumber}
+              <DictMergeField
+                dictProps={Settings.fields.person.phoneNumber}
                 value={mergedPerson.phoneNumber}
                 align={ALIGN_OPTIONS.CENTER}
                 action={
@@ -351,41 +356,41 @@ const MergePeople = ({ pageDispatchers }) => {
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
-              <PersonField
-                label={Settings.fields.person.rank}
+              <DictMergeField
+                dictProps={Settings.fields.person.rank}
                 value={mergedPerson.rank}
                 align={ALIGN_OPTIONS.CENTER}
                 action={getInfoButton(
-                  `${Settings.fields.person.rank} is required.`
+                  `${Settings.fields.person.rank?.label} is required.`
                 )}
                 fieldName="rank"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
-              <PersonField
-                label={Settings.fields.person.gender}
+              <DictMergeField
+                dictProps={Settings.fields.person.gender}
                 value={mergedPerson.gender}
                 align={ALIGN_OPTIONS.CENTER}
                 action={getInfoButton(
-                  `${Settings.fields.person.gender} is required.`
+                  `${Settings.fields.person.gender?.label} is required.`
                 )}
                 fieldName="gender"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
-              <PersonField
-                label={Settings.fields.person.country}
+              <DictMergeField
+                dictProps={Settings.fields.person.country}
                 value={mergedPerson.country}
                 align={ALIGN_OPTIONS.CENTER}
                 action={getInfoButton(
-                  `${Settings.fields.person.country} is required.`
+                  `${Settings.fields.person.country?.label} is required.`
                 )}
                 fieldName="country"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
-              <PersonField
-                label={Settings.fields.person.code}
+              <DictMergeField
+                dictProps={Settings.fields.person.code}
                 value={mergedPerson.code}
                 align={ALIGN_OPTIONS.CENTER}
                 action={
@@ -398,8 +403,8 @@ const MergePeople = ({ pageDispatchers }) => {
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
-              <PersonField
-                label={Settings.fields.person.endOfTourDate}
+              <DictMergeField
+                dictProps={Settings.fields.person.endOfTourDate}
                 value={moment(mergedPerson.endOfTourDate).format(
                   Settings.dateFormats.forms.displayShort.date
                 )}
@@ -407,7 +412,7 @@ const MergePeople = ({ pageDispatchers }) => {
                 action={
                   mergedPerson.role === Person.ROLE.ADVISOR
                     ? getInfoButton(
-                      `${Settings.fields.person.endOfTourDate} is required`
+                      `${Settings.fields.person.endOfTourDate?.label} is required`
                     )
                     : matchingRoles &&
                       getClearButton(() =>
@@ -420,8 +425,8 @@ const MergePeople = ({ pageDispatchers }) => {
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
-              <PersonField
-                label="Biography"
+              <DictMergeField
+                dictProps={Settings.fields.person.biography}
                 value={
                   <RichTextEditor readOnly value={mergedPerson.biography} />
                 }
@@ -442,7 +447,7 @@ const MergePeople = ({ pageDispatchers }) => {
                     const fieldValue =
                       mergedPerson?.[DEFAULT_CUSTOM_FIELDS_PARENT]?.[fieldName]
                     return (
-                      <PersonField
+                      <MergeField
                         key={fieldName}
                         label={fieldConfig.label || fieldName}
                         value={JSON.stringify(fieldValue)}
@@ -547,6 +552,7 @@ const PersonColumn = ({
   dispatchMergeActions,
   actionButtons
 }) => {
+  const DictMergeField = DictionaryField(MergeField)
   const person = mergeState[align]
   const idForPerson = label.replace(/\s+/g, "")
 
@@ -582,7 +588,7 @@ const PersonColumn = ({
       </Form.Group>
       {areAllSet(person) && (
         <fieldset>
-          <PersonField
+          <MergeField
             label="Avatar"
             fieldName="avatarUuid"
             value={
@@ -614,7 +620,7 @@ const PersonColumn = ({
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
           />
-          <PersonField
+          <MergeField
             label="Name"
             fieldName="name"
             value={person.name}
@@ -645,8 +651,8 @@ const PersonColumn = ({
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
           />
-          <PersonField
-            label="Domain username"
+          <DictMergeField
+            dictProps={Settings.fields.person.domainUsername}
             fieldName="domainUsername"
             value={person.domainUsername}
             align={align}
@@ -670,8 +676,8 @@ const PersonColumn = ({
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
           />
-          <PersonField
-            label="OpenID subject"
+          <DictMergeField
+            dictProps={Settings.fields.person.openIdSubject}
             fieldName="openIdSubject"
             value={person.openIdSubject}
             align={align}
@@ -695,7 +701,7 @@ const PersonColumn = ({
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
           />
-          <PersonField
+          <MergeField
             label="Role"
             fieldName="role"
             value={person.role}
@@ -716,8 +722,8 @@ const PersonColumn = ({
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
           />
-          <PersonField
-            label="Position"
+          <DictMergeField
+            dictProps={Settings.fields.person.position}
             fieldName="position"
             value={<LinkTo modelType="Position" model={person.position} />}
             align={align}
@@ -737,8 +743,8 @@ const PersonColumn = ({
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
           />
-          <PersonField
-            label="Previous Positions"
+          <DictMergeField
+            dictProps={Settings.fields.person.prevPositions}
             fieldName="previousPositions"
             value={<PreviousPositions history={person.previousPositions} />}
             align={align}
@@ -762,8 +768,8 @@ const PersonColumn = ({
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
           />
-          <PersonField
-            label="Status"
+          <DictMergeField
+            dictProps={Settings.fields.person.status}
             fieldName="status"
             value={person.status}
             align={align}
@@ -783,8 +789,8 @@ const PersonColumn = ({
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
           />
-          <PersonField
-            label={Settings.fields.person.emailAddress.label}
+          <DictMergeField
+            dictProps={Settings.fields.person.emailAddress}
             fieldName="emailAddress"
             value={person.emailAddress}
             align={align}
@@ -804,8 +810,8 @@ const PersonColumn = ({
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
           />
-          <PersonField
-            label={Settings.fields.person.phoneNumber}
+          <DictMergeField
+            dictProps={Settings.fields.person.phoneNumber}
             fieldName="phoneNumber"
             value={person.phoneNumber}
             align={align}
@@ -825,8 +831,8 @@ const PersonColumn = ({
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
           />
-          <PersonField
-            label={Settings.fields.person.rank}
+          <DictMergeField
+            dictProps={Settings.fields.person.rank}
             fieldName="rank"
             value={person.rank}
             align={align}
@@ -846,8 +852,8 @@ const PersonColumn = ({
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
           />
-          <PersonField
-            label={Settings.fields.person.gender}
+          <DictMergeField
+            dictProps={Settings.fields.person.gender}
             fieldName="gender"
             value={person.gender}
             align={align}
@@ -867,8 +873,8 @@ const PersonColumn = ({
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
           />
-          <PersonField
-            label={Settings.fields.person.country}
+          <DictMergeField
+            dictProps={Settings.fields.person.country}
             fieldName="country"
             value={person.country}
             align={align}
@@ -888,8 +894,8 @@ const PersonColumn = ({
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
           />
-          <PersonField
-            label={Settings.fields.person.code}
+          <DictMergeField
+            dictProps={Settings.fields.person.code}
             fieldName="code"
             value={person.code}
             align={align}
@@ -909,8 +915,8 @@ const PersonColumn = ({
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
           />
-          <PersonField
-            label={Settings.fields.person.endOfTourDate}
+          <DictMergeField
+            dictProps={Settings.fields.person.endOfTourDate}
             fieldName="endOfTourDate"
             value={moment(person.endOfTourDate).format(
               Settings.dateFormats.forms.displayShort.date
@@ -936,8 +942,8 @@ const PersonColumn = ({
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
           />
-          <PersonField
-            label="Biography"
+          <DictMergeField
+            dictProps={Settings.fields.person.biography}
             fieldName="biography"
             value={<RichTextEditor readOnly value={person.biography} />}
             align={align}
@@ -964,11 +970,11 @@ const PersonColumn = ({
                   person[DEFAULT_CUSTOM_FIELDS_PARENT][fieldName]
 
                 return (
-                  <PersonField
+                  <MergeField
                     key={fieldName}
                     fieldName={`${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`}
                     label={fieldConfig.label || fieldName}
-                    // To be able to see arrays and ojects
+                    // To be able to see arrays and objects
                     value={JSON.stringify(fieldValue)}
                     align={align}
                     action={

@@ -5,6 +5,7 @@ import LinkTo from "components/LinkTo"
 import NoPaginationTaskTable from "components/NoPaginationTaskTable"
 import PlanningConflictForReport from "components/PlanningConflictForReport"
 import RichTextEditor from "components/RichTextEditor"
+import DictionaryField from "HOC/DictionaryField"
 import { Person, Report, Task } from "models"
 import moment from "moment"
 import ReportPeople from "pages/reports/ReportPeople"
@@ -122,6 +123,7 @@ const ReportPreview = ({ className, uuid }) => {
   report = new Report(data.report)
   const reportType = report.isFuture() ? "planned engagement" : "report"
   const tasksLabel = pluralize(Settings.fields.task.subLevel.shortLabel)
+  const DictPreviewField = DictionaryField(PreviewField)
 
   // Get initial tasks/people instant assessments values
   const hasAssessments = report.engagementDate && !report.isFuture()
@@ -174,32 +176,29 @@ const ReportPreview = ({ className, uuid }) => {
           extraColForValue
           label="Summary"
           value={
-            <div id="intent" className="form-control-static">
-              <p>
-                <strong>{Settings.fields.report.intent}:</strong>{" "}
-                {report.intent}
-              </p>
-              {report.keyOutcomes && (
-                <p>
-                  <span>
-                    <strong>
-                      {Settings.fields.report.keyOutcomes || "Key outcomes"}:
-                    </strong>{" "}
-                    {report.keyOutcomes}&nbsp;
-                  </span>
-                </p>
-              )}
-              <p>
-                <strong>{Settings.fields.report.nextSteps.label}:</strong>{" "}
-                {report.nextSteps}
-              </p>
+            <div id="report-summary">
+              <DictPreviewField
+                dictProps={Settings.fields.report.intent}
+                name="intent"
+                style={{ marginBottom: 0 }}
+              />
+              <DictPreviewField
+                dictProps={Settings.fields.report.keyOutcomes}
+                name="keyOutcomes"
+                style={{ marginBottom: 0 }}
+              />
+              <DictPreviewField
+                dictProps={Settings.fields.report.nextSteps}
+                name="nextSteps"
+                style={{ marginBottom: 0 }}
+              />
             </div>
           }
         />
 
-        <PreviewField
+        <DictPreviewField
+          dictProps={Settings.fields.report.engagementDate}
           extraColForValue
-          label="Engagement date"
           value={
             <>
               <>
@@ -214,9 +213,9 @@ const ReportPreview = ({ className, uuid }) => {
         />
 
         {Settings.engagementsIncludeTimeAndDuration && report.duration && (
-          <PreviewField
+          <DictPreviewField
+            dictProps={Settings.fields.report.duration}
             extraColForValue
-            label="Duration (minutes)"
             value={report.duration}
           />
         )}
@@ -246,9 +245,9 @@ const ReportPreview = ({ className, uuid }) => {
           }
         />
 
-        <PreviewField
+        <DictPreviewField
+          dictProps={Settings.fields.report.location}
           extraColForValue
-          label="Location"
           value={
             report.location && (
               <LinkTo modelType="Location" model={report.location} />
@@ -257,24 +256,26 @@ const ReportPreview = ({ className, uuid }) => {
         />
 
         {report.cancelled && (
-          <PreviewField
+          <DictPreviewField
+            dictProps={Settings.fields.report.cancelledReason}
             extraColForValue
-            label="Cancelled Reason"
             value={utils.sentenceCase(report.cancelledReason)}
           />
         )}
 
         {!report.cancelled && (
-          <PreviewField
-            extraColForValue
-            label={Settings.fields.report.atmosphere}
-            value={
-              <>
-                {utils.sentenceCase(report.atmosphere)}
-                {report.atmosphereDetails && ` – ${report.atmosphereDetails}`}
-              </>
-            }
-          />
+          <>
+            <DictPreviewField
+              dictProps={Settings.fields.report.atmosphere}
+              extraColForValue
+              value={utils.sentenceCase(report.atmosphere)}
+            />
+            <DictPreviewField
+              dictProps={Settings.fields.report.atmosphereDetails}
+              extraColForValue
+              value={report.atmosphereDetails}
+            />
+          </>
         )}
       </div>
       <h4>
@@ -287,7 +288,7 @@ const ReportPreview = ({ className, uuid }) => {
       </div>
       {report.reportText && (
         <>
-          <h4>{Settings.fields.report.reportText}</h4>
+          <h4>{Settings.fields.report.reportText.label}</h4>
           <div className="preview-section">
             <RichTextEditor readOnly value={report.reportText} />
           </div>

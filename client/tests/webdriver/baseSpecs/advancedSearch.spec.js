@@ -10,13 +10,13 @@ const ANET_OBJECT_TYPES = {
     sampleFilter: "Organization"
   },
   Organizations: {
-    sampleFilter: "Organization Type"
+    sampleFilter: "Type"
   },
   Positions: {
-    sampleFilter: "Position Type"
+    sampleFilter: "Type"
   },
   Locations: {
-    sampleFilter: "Location Type"
+    sampleFilter: "Type"
   },
   "Objective / Efforts": {
     sampleFilter: "Organization"

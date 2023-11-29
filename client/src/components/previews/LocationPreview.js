@@ -5,10 +5,12 @@ import GeoLocation from "components/GeoLocation"
 import Leaflet from "components/Leaflet"
 import RichTextEditor from "components/RichTextEditor"
 import { convertLatLngToMGRS } from "geoUtils"
+import DictionaryField from "HOC/DictionaryField"
 import _escape from "lodash/escape"
 import { Location } from "models"
 import PropTypes from "prop-types"
 import React from "react"
+import Settings from "settings"
 
 const GQL_GET_LOCATION = gql`
   query ($uuid: String!) {
@@ -38,6 +40,7 @@ const LocationPreview = ({ className, uuid }) => {
 
   const location = new Location(data.location ? data.location : {})
   const label = Location.LOCATION_FORMAT_LABELS[Location.locationFormat]
+  const DictPreviewField = DictionaryField(PreviewField)
 
   const marker = {
     id: location.uuid || 0,
@@ -56,8 +59,8 @@ const LocationPreview = ({ className, uuid }) => {
         <h4>{`Location ${location.name}`}</h4>
       </div>
       <div className="preview-section">
-        <PreviewField
-          label="Type"
+        <DictPreviewField
+          dictProps={Settings.fields.location.type}
           value={Location.humanNameOfType(location.type)}
         />
 
@@ -77,14 +80,14 @@ const LocationPreview = ({ className, uuid }) => {
           }
         />
 
-        <PreviewField
-          label="Status"
+        <DictPreviewField
+          dictProps={Settings.fields.location.status}
           value={Location.humanNameOfStatus(location.status)}
         />
 
         {location.description && (
-          <PreviewField
-            label="Description"
+          <DictPreviewField
+            dictProps={Settings.fields.location.description}
             value={<RichTextEditor readOnly value={location.description} />}
           />
         )}

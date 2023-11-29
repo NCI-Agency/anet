@@ -201,11 +201,11 @@ const Navigation = ({
                 handleOnClick={resetPages}
               >
                 {`My ${pluralize(taskShortLabel)}`}
-                {notifications?.tasksWithPendingAssessments?.length ? (
+                {!!notifications?.tasksWithPendingAssessments?.length && (
                   <NotificationBadge>
                     {notifications.tasksWithPendingAssessments.length}
                   </NotificationBadge>
-                ) : null}
+                )}
               </SidebarLink>
               <SidebarLink
                 id="my-counterparts-nav"
@@ -213,11 +213,12 @@ const Navigation = ({
                 handleOnClick={resetPages}
               >
                 My Counterparts
-                {notifications?.counterpartsWithPendingAssessments?.length ? (
+                {!!notifications?.counterpartsWithPendingAssessments
+                  ?.length && (
                   <NotificationBadge>
                     {notifications.counterpartsWithPendingAssessments.length}
                   </NotificationBadge>
-                ) : null}
+                )}
               </SidebarLink>
             </>
           )}

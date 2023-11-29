@@ -11,6 +11,7 @@ import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
 import RichTextEditor from "components/RichTextEditor"
 import { FastField, Field, Form, Formik } from "formik"
+import DictionaryField from "HOC/DictionaryField"
 import _isEqual from "lodash/isEqual"
 import { Attachment } from "models"
 import PropTypes from "prop-types"
@@ -49,6 +50,7 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
     value: key,
     label: classifications[key]
   }))
+  const DictFastField = DictionaryField(FastField)
 
   return (
     <Formik
@@ -100,18 +102,15 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
                     />
                   </Col>
                   <Col className="attachment-details" xs={12} sm={3} lg={10}>
-                    <FastField
+                    <DictFastField
+                      dictProps={Settings.fields.attachment.caption}
                       name="caption"
-                      label={Settings.fields.attachment.caption.label}
-                      placeholder={
-                        Settings.fields.attachment.caption.placeholder
-                      }
                       component={FieldHelper.InputField}
                     />
 
-                    <FastField
+                    <DictFastField
+                      dictProps={Settings.fields.attachment.fileName}
                       name="fileName"
-                      label={Settings.fields.attachment.fileName}
                       component={FieldHelper.ReadonlyField}
                     />
 
@@ -129,18 +128,18 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
                     />
 
                     {canEdit ? (
-                      <FastField
+                      <DictFastField
+                        dictProps={Settings.fields.attachment.classification}
                         name="classification"
-                        label={Settings.fields.attachment.classification.label}
                         component={FieldHelper.RadioButtonToggleGroupField}
                         buttons={classificationButtons}
                         onChange={value =>
                           setFieldValue("classification", value)}
                       />
                     ) : (
-                      <Field
+                      <DictFastField
+                        dictProps={Settings.fields.attachment.classification}
                         name="classification"
-                        label={Settings.fields.attachment.classification.label}
                         component={FieldHelper.ReadonlyField}
                       />
                     )}
@@ -157,9 +156,9 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
                       />
                     )}
 
-                    <FastField
+                    <DictFastField
+                      dictProps={Settings.fields.attachment.description}
                       name="description"
-                      label={Settings.fields.attachment.description}
                       component={FieldHelper.SpecialField}
                       onChange={value => {
                         // prevent initial unnecessary render of RichTextEditor
@@ -171,7 +170,14 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
                         // validation will be done by setFieldValue
                         setFieldTouched("description", true, false)
                       }}
-                      widget={<RichTextEditor className="description" />}
+                      widget={
+                        <RichTextEditor
+                          className="description"
+                          placeholder={
+                            Settings.fields.attachment.description?.placeholder
+                          }
+                        />
+                      }
                     />
                   </Col>
                 </div>

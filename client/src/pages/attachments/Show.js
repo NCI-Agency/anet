@@ -17,6 +17,7 @@ import {
 } from "components/Page"
 import RichTextEditor from "components/RichTextEditor"
 import { Field, Form, Formik } from "formik"
+import DictionaryField from "HOC/DictionaryField"
 import { Attachment } from "models"
 import PropTypes from "prop-types"
 import React, { useContext } from "react"
@@ -133,6 +134,8 @@ const AttachmentShow = ({ pageDispatchers }) => {
   }
 
   const attachment = new Attachment(data ? data.attachment : {})
+  const DictField = DictionaryField(Field)
+
   const stateSuccess = routerLocation.state && routerLocation.state.success
   const stateError = routerLocation.state && routerLocation.state.error
   const canEdit =
@@ -195,9 +198,9 @@ const AttachmentShow = ({ pageDispatchers }) => {
                     />
                   </Col>
                   <Col className="attachment-details" xs={12} sm={3} lg={8}>
-                    <Field
+                    <DictField
+                      dictProps={Settings.fields.attachment.fileName}
                       name="fileName"
-                      label={Settings.fields.attachment.fileName}
                       component={FieldHelper.ReadonlyField}
                     />
                     <Field
@@ -218,9 +221,9 @@ const AttachmentShow = ({ pageDispatchers }) => {
                         attachment.contentLength
                       )}
                     />
-                    <Field
+                    <DictField
+                      dictProps={Settings.fields.attachment.classification}
                       name="classification"
-                      label={Settings.fields.attachment.classification.label}
                       component={FieldHelper.ReadonlyField}
                       humanValue={classifications[attachment.classification]}
                     />
@@ -233,9 +236,9 @@ const AttachmentShow = ({ pageDispatchers }) => {
                         />
                       }
                     />
-                    <Field
+                    <DictField
+                      dictProps={Settings.fields.attachment.description}
                       name="description"
-                      label={Settings.fields.attachment.description}
                       component={FieldHelper.ReadonlyField}
                       humanValue={
                         <RichTextEditor readOnly value={values.description} />

@@ -38,7 +38,7 @@ export default class Organization extends Model {
         .string()
         .required()
         .default("")
-        .label(Settings.fields.organization.shortName),
+        .label(Settings.fields.organization.shortName?.label),
       longName: yup.string().nullable().default(""),
       status: yup
         .string()
@@ -49,12 +49,16 @@ export default class Organization extends Model {
         .string()
         .required()
         .default(() => Organization.TYPE.ADVISOR_ORG),
-      location: yup.object().nullable().default(null).label("Location"),
+      location: yup
+        .object()
+        .nullable()
+        .default(null)
+        .label(Settings.fields.organization.location?.label),
       parentOrg: yup
         .object()
         .nullable()
         .default({})
-        .label(Settings.fields.organization.parentOrg),
+        .label(Settings.fields.organization.parentOrg?.label),
       childrenOrgs: yup.array().nullable().default([]),
       planningApprovalSteps: yup
         .array()
