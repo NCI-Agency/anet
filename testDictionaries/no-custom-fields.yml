@@ -280,8 +280,10 @@ fields:
 
     projectedCompletion:
       label: Projected Completion
+      exclude: true
     plannedCompletion:
       label: Planned Completion
+      exclude: true
     parentTask:
       label: Parent objective / effort
       placeholder: Start typing to search for a higher level objective / effort
@@ -333,9 +335,11 @@ fields:
       label: Duration (minutes)
     atmosphere:
       label: Atmospherics
+      exclude: false
     atmosphereDetails:
       label: Atmospherics details
       placeholder: Describe the atmosphere
+      exclude: false
     cancelled:
       label: ''
     cancelledReason:
@@ -344,9 +348,11 @@ fields:
       label: Next steps
       placeholder: Fill in the next steps after this engagement
       maxLength: 1000
+      exclude: false
     keyOutcomes:
       label: Key outcomes
       placeholder: Fill in the key outcomes of this engagement
+      exclude: false
     reportText:
       label: Key details
       placeholder: Fill in a detailed report of the engagement
@@ -386,6 +392,7 @@ fields:
       label: Nationality
     code:
       label: ID card number
+      exclude: true
     rank:
       label: Rank
     ranks:
@@ -450,8 +457,10 @@ fields:
         app6Modifier: K
     gender:
       label: Gender
+      exclude: false
     endOfTourDate:
       label: End of tour
+      exclude: false
     biography:
       label: Biography
       placeholder: Fill in the biography of this person
@@ -502,6 +511,7 @@ fields:
     code:
       label: Position code
       placeholder: The official code for this position
+      exclude: true
     organization:
       label: Organization
       placeholder: Search the organization for this position…
@@ -527,6 +537,7 @@ fields:
     identificationCode:
       label: UIC
       placeholder: the six character code
+      exclude: true
     type:
       label: Type
     parentOrg:
@@ -631,7 +642,6 @@ fields:
         - emailAddress
         - phoneNumber
         - country
-        - code
         - rank
         - gender
         - endOfTourDate
@@ -1295,7 +1305,6 @@ fields:
         - domainUsername
         - openIdSubject
         - emailAddress
-        - code
         - politicalPosition
         - rank
         - gender

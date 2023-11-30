@@ -128,8 +128,12 @@ export default class Person extends Model {
       gender: yup
         .string()
         .nullable()
-        .required(
-          `You must provide the ${Settings.fields.person.gender?.label}`
+        .when([], (_, schema) =>
+          Settings.fields.person.gender?.exclude
+            ? schema
+            : schema.required(
+              `You must provide the ${Settings.fields.person.gender?.label}`
+            )
         )
         .default("")
         .label(Settings.fields.person.gender?.label),
@@ -144,7 +148,10 @@ export default class Person extends Model {
         .when(
           ["role", "pendingVerification"],
           ([role, pendingVerification], schema) => {
-            if (Person.isPrincipal({ role })) {
+            if (
+              Settings.fields.person.endOfTourDate?.exclude ||
+              Person.isPrincipal({ role })
+            ) {
               return schema
             } else {
               // endOfTourDate is not required but if there is, it must be greater than today

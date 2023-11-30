@@ -126,9 +126,11 @@ const NORMAL_FIELD_OPTIONS = Object.entries(
     "firstName"
   )
 ).reduce((accum, [k, v]) => {
-  accum[k] = {
-    text: v?.label || v,
-    active: !DEFAULT_FIELD_GROUP_EXCEPTIONS.find(field => field === k)
+  if (!v?.exclude) {
+    accum[k] = {
+      text: v?.label || v,
+      active: !DEFAULT_FIELD_GROUP_EXCEPTIONS.find(field => field === k)
+    }
   }
   return accum
 }, {})

@@ -52,10 +52,26 @@ $defs:
             description: Used for styling this field.
             additionalProperties: true
 
+# properties for input fields that can be excluded
+  excludableInputFieldProperties:
+    properties:
+      exclude:
+        type: boolean
+        default: false
+        title: Whether this input field should be excluded
+        description: Used for excluding input fields that are irrelevant.
+
 # non-extensible definition for fields that allow free-form entry
   inputField:
     unevaluatedProperties: false
     "$ref": "#/$defs/extensibleInputField"
+
+# non-extensible definition for input fields that can be excluded
+  excludableInputField:
+    unevaluatedProperties: false
+    allOf:
+      - "$ref": "#/$defs/extensibleInputField"
+      - "$ref": "#/$defs/excludableInputFieldProperties"
 
 # definition for fields that present a choice to be selected from
   choiceField:
@@ -513,9 +529,9 @@ properties:
           subLevel:
             "$ref": "#/properties/fields/properties/task/properties/topLevel"
           projectedCompletion:
-            "$ref": "#/$defs/inputField"
+            "$ref": "#/$defs/excludableInputField"
           plannedCompletion:
-            "$ref": "#/$defs/inputField"
+            "$ref": "#/$defs/excludableInputField"
           parentTask:
             "$ref": "#/$defs/inputField"
           childrenTasks:
@@ -575,17 +591,17 @@ properties:
           duration:
             "$ref": "#/$defs/inputField"
           atmosphere:
-            "$ref": "#/$defs/inputField"
+            "$ref": "#/$defs/excludableInputField"
           atmosphereDetails:
-            "$ref": "#/$defs/inputField"
+            "$ref": "#/$defs/excludableInputField"
           cancelled:
             "$ref": "#/$defs/inputField"
           cancelledReason:
             "$ref": "#/$defs/inputField"
           nextSteps:
-            "$ref": "#/$defs/inputField"
+            "$ref": "#/$defs/excludableInputField"
           keyOutcomes:
-            "$ref": "#/$defs/inputField"
+            "$ref": "#/$defs/excludableInputField"
           reportText:
             "$ref": "#/$defs/inputField"
           location:
@@ -652,7 +668,7 @@ properties:
           country:
             "$ref": "#/$defs/inputField"
           code:
-            "$ref": "#/$defs/inputField"
+            "$ref": "#/$defs/excludableInputField"
           rank:
             "$ref": "#/$defs/inputField"
           ranks:
@@ -662,9 +678,9 @@ properties:
             items:
               "$ref": "#/$defs/describedValue"
           gender:
-            "$ref": "#/$defs/inputField"
+            "$ref": "#/$defs/excludableInputField"
           endOfTourDate:
-            "$ref": "#/$defs/inputField"
+            "$ref": "#/$defs/excludableInputField"
           biography:
             "$ref": "#/$defs/inputField"
           customFields:
@@ -718,7 +734,7 @@ properties:
           type:
             "$ref": "#/$defs/inputField"
           code:
-            "$ref": "#/$defs/inputField"
+            "$ref": "#/$defs/excludableInputField"
           organization:
             "$ref": "#/$defs/inputField"
           location:
@@ -765,7 +781,7 @@ properties:
           longName:
             "$ref": "#/$defs/inputField"
           identificationCode:
-            "$ref": "#/$defs/inputField"
+            "$ref": "#/$defs/excludableInputField"
           type:
             "$ref": "#/$defs/inputField"
           parentOrg:

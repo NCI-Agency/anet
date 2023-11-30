@@ -605,7 +605,7 @@ const SearchFilterDisplay = ({ filter, element, showSeparator }) => {
     : element.component
   const additionalProps = dictProps ? { dictProps } : {}
   const sep = showSeparator ? ", " : ""
-  return (
+  return dictProps?.exclude ? null : (
     <>
       <b>{label}</b>:{" "}
       <em>

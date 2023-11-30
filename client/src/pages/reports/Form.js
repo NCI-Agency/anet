@@ -830,14 +830,7 @@ const ReportForm = ({
                 </Fieldset>
               )}
 
-              <Fieldset
-                title={
-                  !values.cancelled
-                    ? "Meeting discussion"
-                    : "Next steps and details"
-                }
-                id="meeting-details"
-              >
+              <Fieldset title="Engagement details" id="meeting-details">
                 {Settings.fields.report.keyOutcomes &&
                   !isFutureEngagement &&
                   !values.cancelled && (

@@ -6,7 +6,7 @@ const ADMIN_ORG_COMPLETE = "ANET Administrators"
 const ADVISOR_ORG = "EF 2.2"
 const ADVISOR_ORG_COMPLETE = "EF 2.2"
 const PRINCIPAL_ORG = "MoI"
-const PRINCIPAL_ORG_COMPLETE = "MoI | Ministry of Interior | P12345"
+const PRINCIPAL_ORG_COMPLETE = "MoI | Ministry of Interior"
 const SIMILAR_ADVISOR_POSITION_NAME = "EF 1.1 Advisor for Agriculture"
 
 describe("Create position page", () => {

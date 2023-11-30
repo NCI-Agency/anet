@@ -83,7 +83,7 @@ const AdvancedSearch = ({
           ? DictionaryField(Dropdown.Item)
           : Dropdown.Item
         const additionalProps = dictProps ? { dictProps } : {}
-        return (
+        return dictProps?.exclude ? null : (
           <ChildComponent
             disabled={existingKeys.includes(filterKey)}
             key={filterKey}
@@ -348,7 +348,7 @@ const SearchFilter = ({
   const additionalProps = dictProps ? { dictProps } : {}
   const { queryKey } = element.props || undefined
 
-  return (
+  return dictProps?.exclude ? null : (
     <FormGroup controlId={queryKey} className="form-group">
       <Row>
         <Col xs={12} sm={3} lg={2} className="label-align">

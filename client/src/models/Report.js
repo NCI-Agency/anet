@@ -131,32 +131,19 @@ export default class Report extends Model {
         .when(
           ["cancelled", "engagementDate"],
           ([cancelled, engagementDate], schema) =>
-            cancelled
-              ? schema.nullable()
-              : !Report.isFuture(engagementDate)
-                ? schema.required(
-                  `You must provide the overall ${Settings.fields.report.atmosphere?.label} of the engagement`
-                )
-                : schema.nullable()
+            Settings.fields.report.atmosphere?.exclude ||
+            cancelled ||
+            Report.isFuture(engagementDate)
+              ? schema
+              : schema.required(
+                `You must provide the overall ${Settings.fields.report.atmosphere?.label} of the engagement`
+              )
         )
         .default(null)
         .label(Settings.fields.report.atmosphere?.label),
       atmosphereDetails: yup
         .string()
         .nullable()
-        .when(
-          ["cancelled", "atmosphere", "engagementDate"],
-          ([cancelled, atmosphere, engagementDate], schema) =>
-            cancelled
-              ? schema.nullable()
-              : !Report.isFuture(engagementDate)
-                ? atmosphere === Report.ATMOSPHERE.POSITIVE
-                  ? schema.nullable()
-                  : schema.required(
-                    `You must provide ${Settings.fields.report.atmosphereDetails?.label} if the engagement was not Positive`
-                  )
-                : schema.nullable()
-        )
         .default("")
         .label(Settings.fields.report.atmosphereDetails?.label),
       location: yup
@@ -251,11 +238,12 @@ export default class Report extends Model {
         .string()
         .nullable()
         .when("engagementDate", ([engagementDate], schema) =>
-          !Report.isFuture(engagementDate)
-            ? schema.required(
+          Settings.fields.report.nextSteps?.exclude ||
+          Report.isFuture(engagementDate)
+            ? schema
+            : schema.required(
               `You must provide a brief summary of the ${Settings.fields.report.nextSteps?.label}`
             )
-            : schema.nullable()
         )
         .default("")
         .label(Settings.fields.report.nextSteps?.label),
@@ -265,14 +253,13 @@ export default class Report extends Model {
         .when(
           ["cancelled", "engagementDate"],
           ([cancelled, engagementDate], schema) =>
-            cancelled
-              ? schema.nullable()
-              : Settings.fields.report.keyOutcomes &&
-                !Report.isFuture(engagementDate)
-                ? schema.required(
-                  `You must provide a brief summary of the ${Settings.fields.report.keyOutcomes?.label}`
-                )
-                : schema.nullable()
+            Settings.fields.report.keyOutcomes?.exclude ||
+            cancelled ||
+            Report.isFuture(engagementDate)
+              ? schema
+              : schema.required(
+                `You must provide a brief summary of the ${Settings.fields.report.keyOutcomes?.label}`
+              )
         )
         .default("")
         .label(Settings.fields.report.keyOutcomes?.label),

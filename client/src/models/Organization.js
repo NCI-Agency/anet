@@ -159,7 +159,12 @@ export default class Organization extends Model {
   }
 
   toString() {
-    return [this.shortName, this.longName, this.identificationCode]
+    return [
+      this.shortName,
+      this.longName,
+      !Settings.fields.organization.identificationCode?.exclude &&
+        this.identificationCode
+    ]
       .filter(Boolean)
       .join(" | ")
   }
