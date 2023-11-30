@@ -132,6 +132,7 @@ export default class Report extends Model {
           ["cancelled", "engagementDate"],
           ([cancelled, engagementDate], schema) =>
             Settings.fields.report.atmosphere?.exclude ||
+            Settings.fields.report.atmosphere?.optional ||
             cancelled ||
             Report.isFuture(engagementDate)
               ? schema
@@ -239,6 +240,7 @@ export default class Report extends Model {
         .nullable()
         .when("engagementDate", ([engagementDate], schema) =>
           Settings.fields.report.nextSteps?.exclude ||
+          Settings.fields.report.nextSteps?.optional ||
           Report.isFuture(engagementDate)
             ? schema
             : schema.required(
@@ -254,6 +256,7 @@ export default class Report extends Model {
           ["cancelled", "engagementDate"],
           ([cancelled, engagementDate], schema) =>
             Settings.fields.report.keyOutcomes?.exclude ||
+            Settings.fields.report.keyOutcomes?.optional ||
             cancelled ||
             Report.isFuture(engagementDate)
               ? schema

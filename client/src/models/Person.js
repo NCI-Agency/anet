@@ -92,27 +92,33 @@ export default class Person extends Model {
         .nullable()
         .email()
         .when("role", ([role], schema) =>
-          schema.test(
-            "emailAddress",
-            "emailAddress error",
-            (emailAddress, testContext) => {
-              const r = utils.handleEmailValidation(
-                emailAddress,
-                role === Person.ROLE.ADVISOR
-              )
-              return r.isValid
-                ? true
-                : testContext.createError({ message: r.message })
-            }
-          )
+          Settings.fields.person.emailAddress?.optional
+            ? schema
+            : schema.test(
+              "emailAddress",
+              "emailAddress error",
+              (emailAddress, testContext) => {
+                const r = utils.handleEmailValidation(
+                  emailAddress,
+                  role === Person.ROLE.ADVISOR
+                )
+                return r.isValid
+                  ? true
+                  : testContext.createError({ message: r.message })
+              }
+            )
         )
         .default("")
         .label(Settings.fields.person.emailAddress?.label),
       country: yup
         .string()
         .nullable()
-        .required(
-          `You must provide the ${Settings.fields.person.country?.label}`
+        .when([], (_, schema) =>
+          Settings.fields.person.country?.optional
+            ? schema
+            : schema.required(
+              `You must provide the ${Settings.fields.person.country?.label}`
+            )
         )
         .default("")
         .label(Settings.fields.person.country?.label),
@@ -129,7 +135,8 @@ export default class Person extends Model {
         .string()
         .nullable()
         .when([], (_, schema) =>
-          Settings.fields.person.gender?.exclude
+          Settings.fields.person.gender?.exclude ||
+          Settings.fields.person.gender?.optional
             ? schema
             : schema.required(
               `You must provide the ${Settings.fields.person.gender?.label}`
@@ -147,24 +154,17 @@ export default class Person extends Model {
         .nullable()
         .when(
           ["role", "pendingVerification"],
-          ([role, pendingVerification], schema) => {
-            if (
-              Settings.fields.person.endOfTourDate?.exclude ||
-              Person.isPrincipal({ role })
-            ) {
-              return schema
-            } else {
-              // endOfTourDate is not required but if there is, it must be greater than today
-              if (Person.isPendingVerification({ pendingVerification })) {
-                schema = schema.test(
-                  "end-of-tour-date",
-                  `The ${Settings.fields.person.endOfTourDate?.label} date must be in the future`,
-                  endOfTourDate => endOfTourDate > Date.now()
-                )
-              }
-              return schema
-            }
-          }
+          ([role, pendingVerification], schema) =>
+            Settings.fields.person.endOfTourDate?.exclude ||
+            Settings.fields.person.endOfTourDate?.optional ||
+            Person.isPrincipal({ role }) ||
+            !Person.isPendingVerification({ pendingVerification })
+              ? schema
+              : schema.test(
+                "end-of-tour-date",
+                `The ${Settings.fields.person.endOfTourDate?.label} date must be in the future`,
+                endOfTourDate => endOfTourDate > Date.now()
+              )
         )
         .default(null)
         .label(Settings.fields.person.endOfTourDate?.label),

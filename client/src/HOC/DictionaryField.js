@@ -10,7 +10,7 @@ const DictionaryField = WrappedComponent => {
     } else {
       return (
         <WrappedComponent
-          {...Object.without(dictProps, "exclude")}
+          {...Object.without(dictProps, "exclude", "optional")}
           {...otherProps}
         />
       )

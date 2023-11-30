@@ -95,15 +95,12 @@ export default class Position extends Model {
         .default(null)
         .label(Settings.fields.position.location?.label)
         .when("type", ([type], schema) =>
-          [
-            Position.TYPE.ADVISOR,
-            Position.TYPE.SUPERUSER,
-            Position.TYPE.ADMINISTRATOR
-          ].includes(type)
-            ? schema.required(
+          Settings.fields.position.location?.optional ||
+          type === Position.TYPE.PRINCIPAL
+            ? schema
+            : schema.required(
               `Location is required for ${advisorPosition.name}`
             )
-            : schema.nullable()
         )
     })
 

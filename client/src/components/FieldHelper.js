@@ -482,7 +482,7 @@ const ButtonToggleGroupField = ({
         {!_isEmpty(buttons) && enableClear && (
           <RemoveButton
             title="Clear choice"
-            onClick={() => form.setFieldValue(field.name, "", true)}
+            onClick={() => form.setFieldValue(field.name, null, true)}
           />
         )}
       </>

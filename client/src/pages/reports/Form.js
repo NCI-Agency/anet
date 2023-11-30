@@ -641,6 +641,7 @@ const ReportForm = ({
                       dictProps={Settings.fields.report.atmosphere}
                       name="atmosphere"
                       component={FieldHelper.RadioButtonToggleGroupField}
+                      enableClear={Settings.fields.report.atmosphere?.optional}
                       buttons={atmosphereButtons}
                       onChange={value =>
                         setFieldValue("atmosphere", value, true)}

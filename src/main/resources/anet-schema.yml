@@ -52,6 +52,15 @@ $defs:
             description: Used for styling this field.
             additionalProperties: true
 
+# properties for input fields that can be made optional
+  optionableInputFieldProperties:
+    properties:
+      optional:
+        type: boolean
+        default: false
+        title: Whether this input field should be optional
+        description: Used for making input fields optional that are by default required.
+
 # properties for input fields that can be excluded
   excludableInputFieldProperties:
     properties:
@@ -66,11 +75,26 @@ $defs:
     unevaluatedProperties: false
     "$ref": "#/$defs/extensibleInputField"
 
+# non-extensible definition for input fields that can be made optional
+  optionableInputField:
+    unevaluatedProperties: false
+    allOf:
+      - "$ref": "#/$defs/extensibleInputField"
+      - "$ref": "#/$defs/optionableInputFieldProperties"
+
 # non-extensible definition for input fields that can be excluded
   excludableInputField:
     unevaluatedProperties: false
     allOf:
       - "$ref": "#/$defs/extensibleInputField"
+      - "$ref": "#/$defs/excludableInputFieldProperties"
+
+# non-extensible definition for input fields that can be made optional or excluded
+  optionableExcludableInputField:
+    unevaluatedProperties: false
+    allOf:
+      - "$ref": "#/$defs/extensibleInputField"
+      - "$ref": "#/$defs/optionableInputFieldProperties"
       - "$ref": "#/$defs/excludableInputFieldProperties"
 
 # definition for fields that present a choice to be selected from
@@ -591,7 +615,7 @@ properties:
           duration:
             "$ref": "#/$defs/inputField"
           atmosphere:
-            "$ref": "#/$defs/excludableInputField"
+            "$ref": "#/$defs/optionableExcludableInputField"
           atmosphereDetails:
             "$ref": "#/$defs/excludableInputField"
           cancelled:
@@ -599,9 +623,9 @@ properties:
           cancelledReason:
             "$ref": "#/$defs/inputField"
           nextSteps:
-            "$ref": "#/$defs/excludableInputField"
+            "$ref": "#/$defs/optionableExcludableInputField"
           keyOutcomes:
-            "$ref": "#/$defs/excludableInputField"
+            "$ref": "#/$defs/optionableExcludableInputField"
           reportText:
             "$ref": "#/$defs/inputField"
           location:
@@ -662,11 +686,11 @@ properties:
           openIdSubject:
             "$ref": "#/$defs/labeledField"
           emailAddress:
-            "$ref": "#/$defs/inputField"
+            "$ref": "#/$defs/optionableInputField"
           phoneNumber:
             "$ref": "#/$defs/inputField"
           country:
-            "$ref": "#/$defs/inputField"
+            "$ref": "#/$defs/optionableInputField"
           code:
             "$ref": "#/$defs/excludableInputField"
           rank:
@@ -678,9 +702,9 @@ properties:
             items:
               "$ref": "#/$defs/describedValue"
           gender:
-            "$ref": "#/$defs/excludableInputField"
+            "$ref": "#/$defs/optionableExcludableInputField"
           endOfTourDate:
-            "$ref": "#/$defs/excludableInputField"
+            "$ref": "#/$defs/optionableExcludableInputField"
           biography:
             "$ref": "#/$defs/inputField"
           customFields:
@@ -738,32 +762,30 @@ properties:
           organization:
             "$ref": "#/$defs/inputField"
           location:
-            "$ref": "#/$defs/inputField"
+            "$ref": "#/$defs/optionableInputField"
           role:
             type: object
-            additionalProperties: false
+            unevaluatedProperties: false
             required: [types]
-            title: The label for a position's role
             description: Used in the UI where a position's roles are displayed as choices
-            properties:
-              label:
-                type: string
-                description: UI label of position-role
-              types:
-                type: object
-                description: Enumeration of position role types
-                required: [member, deputy, leader]
-                additionalProperties: false
-                properties:
-                  member:
-                    type: string
-                    description: UI label of member position
-                  deputy:
-                    type: string
-                    description: UI label of deputy position
-                  leader:
-                    type: string
-                    description: UI label of leader position
+            allOf:
+              - "$ref": "#/$defs/extensibleInputField"
+              - properties:
+                  types:
+                    type: object
+                    description: Enumeration of position role types
+                    required: [member, deputy, leader]
+                    additionalProperties: false
+                    properties:
+                      member:
+                        type: string
+                        description: UI label of member position
+                      deputy:
+                        type: string
+                        description: UI label of deputy position
+                      leader:
+                        type: string
+                        description: UI label of leader position
           customFields:
             type: object
             additionalProperties:

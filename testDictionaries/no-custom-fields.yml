@@ -336,6 +336,7 @@ fields:
     atmosphere:
       label: Atmospherics
       exclude: false
+      optional: false
     atmosphereDetails:
       label: Atmospherics details
       placeholder: Describe the atmosphere
@@ -349,10 +350,12 @@ fields:
       placeholder: Fill in the next steps after this engagement
       maxLength: 1000
       exclude: false
+      optional: false
     keyOutcomes:
       label: Key outcomes
       placeholder: Fill in the key outcomes of this engagement
       exclude: false
+      optional: false
     reportText:
       label: Key details
       placeholder: Fill in a detailed report of the engagement
@@ -386,10 +389,12 @@ fields:
     emailAddress:
       label: Email
       placeholder: Only the following email domain names are allowed. ( example.com, cmil.mil, mission.ita, nato.int, *.isaf.nato.int )
+      optional: false
     phoneNumber:
       label: Phone
     country:
       label: Nationality
+      optional: false
     code:
       label: ID card number
       exclude: true
@@ -458,9 +463,11 @@ fields:
     gender:
       label: Gender
       exclude: false
+      optional: false
     endOfTourDate:
       label: End of tour
       exclude: false
+      optional: false
     biography:
       label: Biography
       placeholder: Fill in the biography of this person
@@ -518,6 +525,7 @@ fields:
     location:
       label: Location
       placeholder: Search for the location where this Position will operate from…
+      optional: false
     role:
       label: Position Role
       types:
