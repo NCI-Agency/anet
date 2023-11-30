@@ -85,7 +85,8 @@ const Field = ({
   isCompact,
   extraAddon,
   labelColumnWidth,
-  className
+  className,
+  style
 }) => {
   const id = getFieldId(field)
   const widget = useMemo(
@@ -139,7 +140,7 @@ const Field = ({
           {children}
         </>
       ) : (
-        <Row style={{ marginBottom: "1rem" }}>
+        <Row style={{ marginBottom: "1rem", ...style }}>
           {label !== null && (
             <Col sm={labelColumnWidth} as={Form.Label}>
               {label}
@@ -170,7 +171,8 @@ Field.propTypes = {
   extraAddon: PropTypes.object,
   isCompact: PropTypes.bool,
   labelColumnWidth: PropTypes.number,
-  className: PropTypes.string
+  className: PropTypes.string,
+  style: PropTypes.object
 }
 Field.defaultProps = {
   vertical: false, // default direction of label and input = horizontal
@@ -276,7 +278,7 @@ export const ReadonlyField = ({
   isCompact,
   ...otherProps
 }) => {
-  const { className } = otherProps
+  const { className, style } = otherProps
   const widgetElem = useMemo(
     () => (
       <FormControl as="div" plaintext {...field} {...otherProps}>
@@ -297,6 +299,7 @@ export const ReadonlyField = ({
       vertical={vertical}
       isCompact={isCompact}
       className={className}
+      style={style}
     >
       {children}
     </Field>
@@ -479,7 +482,7 @@ const ButtonToggleGroupField = ({
         {!_isEmpty(buttons) && enableClear && (
           <RemoveButton
             title="Clear choice"
-            onClick={() => form.setFieldValue(field.name, "", true)}
+            onClick={() => form.setFieldValue(field.name, null, true)}
           />
         )}
       </>

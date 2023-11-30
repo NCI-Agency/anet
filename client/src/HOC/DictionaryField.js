@@ -5,10 +5,15 @@ import React from "react"
 const DictionaryField = WrappedComponent => {
   const Wrapper = ({ dictProps, ...otherProps }) => {
     // Only display field if the dictProps are defined
-    if (!_isEmpty(dictProps)) {
-      return <WrappedComponent {...Object.assign({}, dictProps, otherProps)} />
-    } else {
+    if (_isEmpty(dictProps) || dictProps?.exclude) {
       return null
+    } else {
+      return (
+        <WrappedComponent
+          {...Object.without(dictProps, "exclude", "optional")}
+          {...otherProps}
+        />
+      )
     }
   }
   Wrapper.propTypes = {

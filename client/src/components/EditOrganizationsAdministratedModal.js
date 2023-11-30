@@ -31,7 +31,7 @@ const EditOrganizationsAdministratedModal = ({
 }) => {
   const [error, setError] = useState(null)
 
-  const OrganizationsAdministratedMultiSelect = DictionaryField(FastField)
+  const DictFastField = DictionaryField(FastField)
   const organizationsFilters = {
     allOrganizations: {
       label: "All organizations",
@@ -65,10 +65,10 @@ const EditOrganizationsAdministratedModal = ({
                 <Container fluid>
                   <Row>
                     <Col md={12}>
-                      <OrganizationsAdministratedMultiSelect
+                      <DictFastField
+                        dictProps={organizationsAdministratedSettings}
                         name="organizationsAdministrated"
                         component={FieldHelper.SpecialField}
-                        dictProps={organizationsAdministratedSettings}
                         onChange={value => {
                           // validation will be done by setFieldValue
                           value = value.map(organization =>

@@ -24,6 +24,7 @@ import { jumpToTop } from "components/Page"
 import PositionTable from "components/PositionTable"
 import RichTextEditor from "components/RichTextEditor"
 import { FastField, Field, Form, Formik } from "formik"
+import DictionaryField from "HOC/DictionaryField"
 import _isEqual from "lodash/isEqual"
 import { Organization, Position, Task } from "models"
 import PropTypes from "prop-types"
@@ -35,7 +36,6 @@ import POSITIONS_ICON from "resources/positions.png"
 import TASKS_ICON from "resources/tasks.png"
 import Settings from "settings"
 import utils from "utils"
-import DictionaryField from "../../HOC/DictionaryField"
 
 const GQL_CREATE_TASK = gql`
   mutation ($task: TaskInput!) {
@@ -67,13 +67,8 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
     }
   ]
 
-  const ShortNameField = DictionaryField(Field)
-  const LongNameField = DictionaryField(Field)
-  const TaskParentTask = DictionaryField(FastField)
-  const PlannedCompletionField = DictionaryField(FastField)
-  const ProjectedCompletionField = DictionaryField(FastField)
-  const TaskedOrganizationsMultiSelect = DictionaryField(FastField)
-  const ResponsiblePositionsMultiSelect = DictionaryField(FastField)
+  const DictField = DictionaryField(Field)
+  const DictFastField = DictionaryField(FastField)
 
   const taskedOrganizationsFilters = {
     allAdvisorOrganizations: {
@@ -170,23 +165,23 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
               <Fieldset>
-                <ShortNameField
+                <DictField
                   dictProps={fieldSettings.shortName}
                   name="shortName"
                   component={FieldHelper.InputField}
                   disabled={disabled}
                 />
 
-                <LongNameField
+                <DictField
                   dictProps={fieldSettings.longName}
                   name="longName"
                   component={FieldHelper.InputField}
                 />
 
-                <TaskedOrganizationsMultiSelect
+                <DictFastField
+                  dictProps={Settings.fields.task.taskedOrganizations}
                   name="taskedOrganizations"
                   component={FieldHelper.SpecialField}
-                  dictProps={Settings.fields.task.taskedOrganizations}
                   onChange={value => {
                     // validation will be done by setFieldValue
                     setFieldTouched("taskedOrganizations", true, false) // onBlur doesn't work when selecting an option
@@ -213,10 +208,10 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
                 />
 
                 {Settings.fields.task.parentTask && (
-                  <TaskParentTask
+                  <DictFastField
+                    dictProps={Settings.fields.task.parentTask}
                     name="parentTask"
                     component={FieldHelper.SpecialField}
-                    dictProps={Settings.fields.task.parentTask}
                     onChange={value => {
                       // validation will be done by setFieldValue
                       setFieldTouched("parentTask", true, false) // onBlur doesn't work when selecting an option
@@ -244,40 +239,37 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
                   />
                 )}
 
-                {Settings.fields.task.plannedCompletion && (
-                  <PlannedCompletionField
-                    dictProps={Settings.fields.task.plannedCompletion}
-                    name="plannedCompletion"
-                    component={FieldHelper.SpecialField}
-                    onChange={value =>
-                      setFieldValue("plannedCompletion", value)}
-                    onBlur={() => setFieldTouched("plannedCompletion")}
-                    widget={<CustomDateInput id="plannedCompletion" />}
-                    disabled={disabled}
-                  />
-                )}
+                <DictFastField
+                  dictProps={Settings.fields.task.plannedCompletion}
+                  name="plannedCompletion"
+                  component={FieldHelper.SpecialField}
+                  onChange={value => setFieldValue("plannedCompletion", value)}
+                  onBlur={() => setFieldTouched("plannedCompletion")}
+                  widget={<CustomDateInput id="plannedCompletion" />}
+                  disabled={disabled}
+                />
 
-                {Settings.fields.task.projectedCompletion && (
-                  <ProjectedCompletionField
-                    dictProps={Settings.fields.task.projectedCompletion}
-                    name="projectedCompletion"
-                    component={FieldHelper.SpecialField}
-                    onChange={value =>
-                      setFieldValue("projectedCompletion", value)}
-                    onBlur={() => setFieldTouched("projectedCompletion")}
-                    widget={<CustomDateInput id="projectedCompletion" />}
-                    disabled={disabled}
-                  />
-                )}
+                <DictFastField
+                  dictProps={Settings.fields.task.projectedCompletion}
+                  name="projectedCompletion"
+                  component={FieldHelper.SpecialField}
+                  onChange={value =>
+                    setFieldValue("projectedCompletion", value)}
+                  onBlur={() => setFieldTouched("projectedCompletion")}
+                  widget={<CustomDateInput id="projectedCompletion" />}
+                  disabled={disabled}
+                />
 
                 {disabled ? (
-                  <FastField
+                  <DictFastField
+                    dictProps={Settings.fields.task.status}
                     name="status"
                     component={FieldHelper.ReadonlyField}
                     humanValue={Position.humanNameOfStatus}
                   />
                 ) : (
-                  <FastField
+                  <DictFastField
+                    dictProps={Settings.fields.task.status}
                     name="status"
                     component={FieldHelper.RadioButtonToggleGroupField}
                     buttons={statusButtons}
@@ -285,9 +277,9 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
                   />
                 )}
 
-                <FastField
+                <DictFastField
+                  dictProps={Settings.fields.task.description}
                   name="description"
-                  label={fieldSettings.description}
                   component={FieldHelper.SpecialField}
                   onChange={value => {
                     // prevent initial unnecessary render of RichTextEditor
@@ -299,15 +291,24 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
                     // validation will be done by setFieldValue
                     setFieldTouched("description", true, false)
                   }}
-                  widget={<RichTextEditor className="description" />}
+                  widget={
+                    <RichTextEditor
+                      className="description"
+                      placeholder={
+                        Settings.fields.task.description?.placeholder
+                      }
+                    />
+                  }
                 />
               </Fieldset>
 
-              <Fieldset title="Responsible positions">
-                <ResponsiblePositionsMultiSelect
+              <Fieldset
+                title={Settings.fields.task.responsiblePositions?.label}
+              >
+                <DictFastField
+                  dictProps={Settings.fields.task.responsiblePositions}
                   name="responsiblePositions"
                   component={FieldHelper.SpecialField}
-                  dictProps={Settings.fields.task.responsiblePositions}
                   onChange={value => {
                     // validation will be done by setFieldValue
                     value = value.map(position =>

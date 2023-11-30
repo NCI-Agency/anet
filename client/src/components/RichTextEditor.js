@@ -86,6 +86,7 @@ const ELEMENT_TAGS = {
 
 const RichTextEditor = ({
   value,
+  placeholder,
   onChange,
   onHandleBlur,
   className,
@@ -184,6 +185,7 @@ const RichTextEditor = ({
             />
           )}
           <Editable
+            placeholder={placeholder}
             renderElement={renderElement}
             renderLeaf={renderLeaf}
             onBlur={onHandleBlur}
@@ -210,6 +212,7 @@ const RichTextEditor = ({
 
 RichTextEditor.propTypes = {
   value: PropTypes.string,
+  placeholder: PropTypes.string,
   onChange: PropTypes.func,
   onHandleBlur: PropTypes.func,
   className: PropTypes.string,

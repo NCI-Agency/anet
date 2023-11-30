@@ -48,36 +48,32 @@ export default class Task extends Model {
         .string()
         .required()
         .default("")
-        .label(Settings.fields.task.shortName.label),
+        .label(Settings.fields.task.shortName?.label),
       longName: yup
         .string()
         .nullable()
         .default("")
-        .label(Settings.fields.task.longName.label),
+        .label(Settings.fields.task.longName?.label),
       description: yup
         .string()
         .nullable()
         .default("")
-        .label(Settings.fields.task.description),
+        .label(Settings.fields.task.description?.label),
       category: yup.string().nullable().default(""),
       taskedOrganizations: yup
         .array()
         .nullable()
         .default([])
-        .label(Settings.fields.task.taskedOrganizations.label),
-      parentTask: yup
-        .object()
-        .nullable()
-        .default({})
-        .label(parentTask && parentTask.label),
+        .label(Settings.fields.task.taskedOrganizations?.label),
+      parentTask: yup.object().nullable().default({}).label(parentTask?.label),
       projectedCompletion: yupDate
         .nullable()
         .default(null)
-        .label(projectedCompletion && projectedCompletion.label),
+        .label(projectedCompletion?.label),
       plannedCompletion: yupDate
         .nullable()
         .default(null)
-        .label(plannedCompletion && plannedCompletion.label),
+        .label(plannedCompletion?.label),
       status: yup
         .string()
         .required()
@@ -86,7 +82,7 @@ export default class Task extends Model {
         .array()
         .nullable()
         .default([])
-        .label(responsiblePositions && responsiblePositions.label),
+        .label(responsiblePositions?.label),
       // FIXME: resolve code duplication in yup schema for approval steps
       planningApprovalSteps: yup
         .array()

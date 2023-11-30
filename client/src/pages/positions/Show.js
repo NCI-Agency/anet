@@ -97,7 +97,7 @@ const PositionShow = ({ pageDispatchers }) => {
   }
 
   const position = new Position(data ? data.position : {})
-  const CodeFieldWithLabel = DictionaryField(Field)
+  const DictField = DictionaryField(Field)
 
   const isPrincipal = position.type === Position.TYPE.PRINCIPAL
   const isSuperuser = position.type === Position.TYPE.SUPERUSER
@@ -193,14 +193,16 @@ const PositionShow = ({ pageDispatchers }) => {
                 action={action}
               />
               <Fieldset>
-                <Field
+                <DictField
+                  dictProps={Settings.fields.position.type}
                   name="type"
                   component={FieldHelper.ReadonlyField}
                   humanValue={Position.humanNameOfType}
                 />
 
                 {position.organization && (
-                  <Field
+                  <DictField
+                    dictProps={Settings.fields.position.organization}
                     name="organization"
                     component={FieldHelper.ReadonlyField}
                     humanValue={
@@ -214,7 +216,8 @@ const PositionShow = ({ pageDispatchers }) => {
                   />
                 )}
 
-                <Field
+                <DictField
+                  dictProps={Settings.fields.position.location}
                   name="location"
                   component={FieldHelper.ReadonlyField}
                   humanValue={
@@ -232,21 +235,22 @@ const PositionShow = ({ pageDispatchers }) => {
                   }
                 />
 
-                <CodeFieldWithLabel
-                  dictProps={positionSettings.code}
+                <DictField
+                  dictProps={Settings.fields.position.code}
                   name="code"
                   component={FieldHelper.ReadonlyField}
                 />
 
-                <Field
+                <DictField
+                  dictProps={Settings.fields.position.status}
                   name="status"
                   component={FieldHelper.ReadonlyField}
                   humanValue={Position.humanNameOfStatus}
                 />
 
-                <Field
+                <DictField
+                  dictProps={Settings.fields.position.role}
                   name="role"
-                  label={Settings.fields.position.role.label}
                   component={FieldHelper.ReadonlyField}
                   humanValue={Position.humanNameOfRole}
                 />

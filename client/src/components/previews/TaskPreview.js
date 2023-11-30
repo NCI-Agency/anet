@@ -6,6 +6,7 @@ import LinkTo from "components/LinkTo"
 import Model from "components/Model"
 import PositionTable from "components/PositionTable"
 import RichTextEditor from "components/RichTextEditor"
+import DictionaryField from "HOC/DictionaryField"
 import { Task } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
@@ -125,6 +126,7 @@ const TaskPreview = ({ className, uuid }) => {
     Model.populateCustomFields(data.task)
   }
   const task = new Task(data.task ? data.task : {})
+  const DictPreviewField = DictionaryField(PreviewField)
 
   const fieldSettings = task.fieldSettings()
   return (
@@ -133,12 +135,12 @@ const TaskPreview = ({ className, uuid }) => {
         <h4>{`${fieldSettings.shortLabel} ${task.shortName}`}</h4>
       </div>
       <div className="preview-section">
-        <PreviewField
-          label={fieldSettings.longName.label}
+        <DictPreviewField
+          dictProps={fieldSettings.longName}
           value={task.longName}
         />
-        <PreviewField
-          label={Settings.fields.task.taskedOrganizations.label}
+        <DictPreviewField
+          dictProps={Settings.fields.task.taskedOrganizations}
           value={
             task.taskedOrganizations && (
               <>
@@ -155,8 +157,8 @@ const TaskPreview = ({ className, uuid }) => {
         />
 
         {Settings.fields.task.parentTask && task.parentTask?.uuid && (
-          <PreviewField
-            label={Settings.fields.task.parentTask.label}
+          <DictPreviewField
+            dictProps={Settings.fields.task.parentTask}
             value={
               task.parentTask && (
                 <BreadcrumbTrail
@@ -172,8 +174,8 @@ const TaskPreview = ({ className, uuid }) => {
 
         {Settings.fields.task.childrenTasks &&
           task.childrenTasks?.length > 0 && (
-            <PreviewField
-              label={Settings.fields.task.childrenTasks}
+            <DictPreviewField
+              dictProps={Settings.fields.task.childrenTasks}
               name="subEfforts"
               value={
                 <ListGroup>
@@ -188,8 +190,8 @@ const TaskPreview = ({ className, uuid }) => {
         )}
 
         {Settings.fields.task.plannedCompletion && (
-          <PreviewField
-            label={Settings.fields.task.plannedCompletion.label}
+          <DictPreviewField
+            dictProps={Settings.fields.task.plannedCompletion}
             value={
               task.plannedCompletion &&
               moment(task.plannedCompletion).format(
@@ -200,8 +202,8 @@ const TaskPreview = ({ className, uuid }) => {
         )}
 
         {Settings.fields.task.projectedCompletion && (
-          <PreviewField
-            label={Settings.fields.task.projectedCompletion.label}
+          <DictPreviewField
+            dictProps={Settings.fields.task.projectedCompletion}
             value={
               task.projectedCompletion &&
               moment(task.projectedCompletion).format(
@@ -211,20 +213,20 @@ const TaskPreview = ({ className, uuid }) => {
           />
         )}
 
-        <PreviewField
-          label="Status"
+        <DictPreviewField
+          dictProps={Settings.fields.task.status}
           value={Task.humanNameOfStatus(task.status)}
         />
 
         {task.description && (
-          <PreviewField
-            label={Settings.fields.task.description}
+          <DictPreviewField
+            dictProps={Settings.fields.task.description}
             value={<RichTextEditor readOnly value={task.description} />}
           />
         )}
       </div>
 
-      <h4>Responsible positions</h4>
+      <h4>{Settings.fields.task.responsiblePositions?.label}</h4>
       <div className="preview-section">
         <PositionTable positions={task.responsiblePositions} />
       </div>

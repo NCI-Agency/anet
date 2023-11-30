@@ -30,6 +30,7 @@ import { GRAPHQL_NOTES_FIELDS } from "components/RelatedObjectNotes"
 import RichTextEditor from "components/RichTextEditor"
 import SimpleMultiCheckboxDropdown from "components/SimpleMultiCheckboxDropdown"
 import { Field, Formik } from "formik"
+import DictionaryField from "HOC/DictionaryField"
 import _isEmpty from "lodash/isEmpty"
 import { Person } from "models"
 import moment from "moment"
@@ -112,7 +113,7 @@ const DEFAULT_FIELD_GROUP_EXCEPTIONS = [
   "emailAddress",
   "phone",
   "code",
-  "endOfTour"
+  "endOfTourDate"
 ]
 
 const NORMAL_FIELD_OPTIONS = Object.entries(
@@ -125,9 +126,11 @@ const NORMAL_FIELD_OPTIONS = Object.entries(
     "firstName"
   )
 ).reduce((accum, [k, v]) => {
-  accum[k] = {
-    text: v?.label || v,
-    active: !DEFAULT_FIELD_GROUP_EXCEPTIONS.find(field => field === k)
+  if (!v?.exclude) {
+    accum[k] = {
+      text: v?.label || v,
+      active: !DEFAULT_FIELD_GROUP_EXCEPTIONS.find(field => field === k)
+    }
   }
   return accum
 }, {})
@@ -398,13 +401,12 @@ const CompactPersonView = ({ pageDispatchers }) => {
       role: Person.humanNameOfRole(person.role),
       status: Person.humanNameOfStatus(person.status)
     }
+    const DictField = DictionaryField(Field)
     return person.getNormalFieldsOrdered().reduce((accum, key) => {
       accum[key] = (
-        <Field
+        <DictField
+          dictProps={Settings.fields.person[key]}
           name={key}
-          label={
-            Settings.fields.person[key]?.label || Settings.fields.person[key]
-          }
           component={FieldHelper.ReadonlyField}
           humanValue={humanValuesExceptions[key]}
           className={classNameExceptions[key]}

@@ -2,6 +2,7 @@ import { gql } from "@apollo/client"
 import API from "api"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
+import DictionaryField from "HOC/DictionaryField"
 import { Location, Position } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
@@ -84,14 +85,12 @@ const PositionPreview = ({ className, uuid }) => {
   }
 
   const position = new Position(data.position ? data.position : {})
+  const DictPreviewField = DictionaryField(PreviewField)
 
   const isPrincipal = position.type === Position.TYPE.PRINCIPAL
   const assignedRole = isPrincipal
     ? Settings.fields.advisor.person.name
     : Settings.fields.principal.person.name
-  const positionSettings = isPrincipal
-    ? Settings.fields.principal.position
-    : Settings.fields.advisor.position
 
   return (
     <div className={`${className} preview-content-scroll`}>
@@ -99,22 +98,22 @@ const PositionPreview = ({ className, uuid }) => {
         <h4>{`Position ${position.name}`}</h4>
       </div>
       <div className="preview-section">
-        <PreviewField
-          label="Type"
+        <DictPreviewField
+          dictProps={Settings.fields.position.type}
           value={Position.humanNameOfType(position.type)}
         />
 
         {position.organization && (
-          <PreviewField
-            label="Organization"
+          <DictPreviewField
+            dictProps={Settings.fields.position.organization}
             value={
               <LinkTo modelType="Organization" model={position.organization} />
             }
           />
         )}
 
-        <PreviewField
-          label="Location"
+        <DictPreviewField
+          dictProps={Settings.fields.position.location}
           value={
             position.location && (
               <>
@@ -127,18 +126,18 @@ const PositionPreview = ({ className, uuid }) => {
           }
         />
 
-        <PreviewField
-          label={positionSettings.code.label}
+        <DictPreviewField
+          dictProps={Settings.fields.position.code}
           value={position.code}
         />
 
-        <PreviewField
-          label="Status"
+        <DictPreviewField
+          dictProps={Settings.fields.position.status}
           value={Position.humanNameOfStatus(position.status)}
         />
 
-        <PreviewField
-          label={Settings.fields.position.role.label}
+        <DictPreviewField
+          dictProps={Settings.fields.position.role}
           value={Position.humanNameOfRole(position.role)}
         />
       </div>

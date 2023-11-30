@@ -6,10 +6,9 @@ const EXAMPLE_POSITIONS = {
   validLeft: {
     search: "merge one",
     fullName: "Merge One",
-    organization: "MoD | Ministry of Defense | Z12345",
+    organization: "MoD | Ministry of Defense",
     type: "PRINCIPAL",
     role: "Deputy",
-    code: "MOD-M1-HQ-00001",
     status: "ACTIVE",
     person: "CIV BEMERGED, Myposwill",
     associatedPositions: [
@@ -28,10 +27,9 @@ const EXAMPLE_POSITIONS = {
   validRight: {
     search: "merge two",
     fullName: "Merge Two",
-    organization: "MoD | Ministry of Defense | Z12345",
+    organization: "MoD | Ministry of Defense",
     type: "PRINCIPAL",
     role: "Leader",
-    code: "MOD-M2-HQ-00001",
     status: "ACTIVE",
     person: "Unspecified",
     associatedPositions: [
@@ -69,10 +67,12 @@ describe("Merge positions page", () => {
     await MergePositions.waitForColumnToChange(
       EXAMPLE_POSITIONS.validLeft.fullName,
       "left",
-      "Name"
+      "Position Name"
     )
     expect(
-      await (await MergePositions.getColumnContent("left", "Name")).getText()
+      await (
+        await MergePositions.getColumnContent("left", "Position Name")
+      ).getText()
     ).to.eq(EXAMPLE_POSITIONS.validLeft.fullName)
     expect(
       await (
@@ -87,9 +87,6 @@ describe("Merge positions page", () => {
         await MergePositions.getColumnContent("left", "Position Role")
       ).getText()
     ).to.eq(EXAMPLE_POSITIONS.validLeft.role)
-    expect(
-      await (await MergePositions.getColumnContent("left", "Code")).getText()
-    ).to.eq(EXAMPLE_POSITIONS.validLeft.code)
     expect(
       await (await MergePositions.getColumnContent("left", "Status")).getText()
     ).to.eq(EXAMPLE_POSITIONS.validLeft.status)
@@ -139,10 +136,12 @@ describe("Merge positions page", () => {
     await MergePositions.waitForColumnToChange(
       EXAMPLE_POSITIONS.validRight.fullName,
       "right",
-      "Name"
+      "Position Name"
     )
     expect(
-      await (await MergePositions.getColumnContent("right", "Name")).getText()
+      await (
+        await MergePositions.getColumnContent("right", "Position Name")
+      ).getText()
     ).to.eq(EXAMPLE_POSITIONS.validRight.fullName)
     expect(
       await (
@@ -157,9 +156,6 @@ describe("Merge positions page", () => {
         await MergePositions.getColumnContent("right", "Position Role")
       ).getText()
     ).to.eq(EXAMPLE_POSITIONS.validRight.role)
-    expect(
-      await (await MergePositions.getColumnContent("right", "Code")).getText()
-    ).to.eq(EXAMPLE_POSITIONS.validRight.code)
     expect(
       await (await MergePositions.getColumnContent("right", "Status")).getText()
     ).to.eq(EXAMPLE_POSITIONS.validRight.status)
@@ -180,10 +176,12 @@ describe("Merge positions page", () => {
     await MergePositions.waitForColumnToChange(
       EXAMPLE_POSITIONS.validLeft.fullName,
       "mid",
-      "Name"
+      "Position Name"
     )
     expect(
-      await (await MergePositions.getColumnContent("mid", "Name")).getText()
+      await (
+        await MergePositions.getColumnContent("mid", "Position Name")
+      ).getText()
     ).to.eq(EXAMPLE_POSITIONS.validLeft.fullName)
     expect(
       await (
@@ -198,9 +196,6 @@ describe("Merge positions page", () => {
         await MergePositions.getColumnContent("mid", "Position Role")
       ).getText()
     ).to.eq(EXAMPLE_POSITIONS.validLeft.role)
-    expect(
-      await (await MergePositions.getColumnContent("mid", "Code")).getText()
-    ).to.eq(EXAMPLE_POSITIONS.validLeft.code)
     expect(
       await (await MergePositions.getColumnContent("mid", "Status")).getText()
     ).to.eq(EXAMPLE_POSITIONS.validLeft.status)
@@ -224,10 +219,12 @@ describe("Merge positions page", () => {
     await MergePositions.waitForColumnToChange(
       EXAMPLE_POSITIONS.validRight.fullName,
       "mid",
-      "Name"
+      "Position Name"
     )
     expect(
-      await (await MergePositions.getColumnContent("mid", "Name")).getText()
+      await (
+        await MergePositions.getColumnContent("mid", "Position Name")
+      ).getText()
     ).to.eq(EXAMPLE_POSITIONS.validRight.fullName)
     expect(
       await (
@@ -242,9 +239,6 @@ describe("Merge positions page", () => {
         await MergePositions.getColumnContent("mid", "Position Role")
       ).getText()
     ).to.eq(EXAMPLE_POSITIONS.validRight.role)
-    expect(
-      await (await MergePositions.getColumnContent("mid", "Code")).getText()
-    ).to.eq(EXAMPLE_POSITIONS.validRight.code)
     expect(
       await (await MergePositions.getColumnContent("mid", "Status")).getText()
     ).to.eq(EXAMPLE_POSITIONS.validRight.status)
@@ -262,14 +256,18 @@ describe("Merge positions page", () => {
     ).to.eq(EXAMPLE_POSITIONS.validRight.location)
   })
   it("Should be able to select from both left and right side.", async() => {
-    await (await MergePositions.getSelectButton("left", "Name")).click()
+    await (
+      await MergePositions.getSelectButton("left", "Position Name")
+    ).click()
     await MergePositions.waitForColumnToChange(
       EXAMPLE_POSITIONS.validLeft.fullName,
       "mid",
-      "Name"
+      "Position Name"
     )
     expect(
-      await (await MergePositions.getColumnContent("mid", "Name")).getText()
+      await (
+        await MergePositions.getColumnContent("mid", "Position Name")
+      ).getText()
     ).to.eq(EXAMPLE_POSITIONS.validLeft.fullName)
 
     await (
@@ -285,16 +283,6 @@ describe("Merge positions page", () => {
         await MergePositions.getColumnContent("mid", "Position Role")
       ).getText()
     ).to.equal(EXAMPLE_POSITIONS.validLeft.role)
-
-    await (await MergePositions.getSelectButton("left", "Code")).click()
-    await MergePositions.waitForColumnToChange(
-      EXAMPLE_POSITIONS.validLeft.code,
-      "mid",
-      "Code"
-    )
-    expect(
-      await (await MergePositions.getColumnContent("mid", "Code")).getText()
-    ).to.equal(EXAMPLE_POSITIONS.validLeft.code)
 
     await (
       await MergePositions.getSelectButton("left", "Associated Positions")
@@ -316,7 +304,7 @@ describe("Merge positions page", () => {
     await MergePositions.waitForColumnToChange(
       EXAMPLE_POSITIONS.validLeft.fullName,
       "mid",
-      "Name"
+      "Position Name"
     )
     await (await MergePositions.getEditAssociatedPositionsButton()).click()
     await (

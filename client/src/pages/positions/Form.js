@@ -116,7 +116,8 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
     }
   ])
 
-  const CodeFieldWithLabel = DictionaryField(Field)
+  const DictField = DictionaryField(Field)
+  const DictFastField = DictionaryField(FastField)
 
   // For advisor types of positions, add permissions property.
   // The permissions property allows selecting a
@@ -148,10 +149,6 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
         submitForm
       }) => {
         const isPrincipal = values.type === Position.TYPE.PRINCIPAL
-        const positionSettings = isPrincipal
-          ? Settings.fields.principal.position
-          : Settings.fields.advisor.position
-
         const isAdmin = currentUser && currentUser.isAdmin()
         const permissionsButtons = isAdmin
           ? adminPermissionsButtons
@@ -210,11 +207,10 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
               <Fieldset>
-                <Field
+                <DictField
+                  dictProps={Settings.fields.position.name}
                   name="name"
                   component={FieldHelper.InputField}
-                  label={Settings.fields.position.name}
-                  placeholder="Name/Description of Position"
                   extraColElem={
                     !edit && values.name.length >= MIN_CHARS_FOR_DUPLICATES ? (
                       <>
@@ -236,13 +232,15 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
                 />
 
                 {edit ? (
-                  <FastField
+                  <DictField
+                    dictProps={Settings.fields.position.type}
                     name="type"
                     component={FieldHelper.ReadonlyField}
                     humanValue={Position.humanNameOfType}
                   />
                 ) : (
-                  <FastField
+                  <DictField
+                    dictProps={Settings.fields.position.type}
                     name="type"
                     component={FieldHelper.RadioButtonToggleGroupField}
                     buttons={typeButtons}
@@ -259,9 +257,9 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
                   />
                 )}
 
-                <Field
+                <DictField
+                  dictProps={Settings.fields.position.organization}
                   name="organization"
-                  label="Organization"
                   component={FieldHelper.SpecialField}
                   onChange={value => {
                     // validation will be done by setFieldValue
@@ -271,7 +269,9 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
                   widget={
                     <AdvancedSingleSelect
                       fieldName="organization"
-                      placeholder="Search the organization for this position..."
+                      placeholder={
+                        Settings.fields.position.organization.placeholder
+                      }
                       value={values.organization}
                       overlayColumns={["Name"]}
                       overlayRenderRow={OrganizationOverlayRow}
@@ -285,9 +285,9 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
                   }
                 />
 
-                <Field
+                <DictField
+                  dictProps={Settings.fields.position.location}
                   name="location"
-                  label="Location"
                   component={FieldHelper.SpecialField}
                   onChange={value => {
                     // validation will be done by setFieldValue
@@ -297,7 +297,9 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
                   widget={
                     <AdvancedSingleSelect
                       fieldName="location"
-                      placeholder="Search for the location where this Position will operate from..."
+                      placeholder={
+                        Settings.fields.position.location.placeholder
+                      }
                       value={values.location}
                       overlayColumns={["Name"]}
                       overlayRenderRow={LocationOverlayRow}
@@ -310,13 +312,14 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
                   }
                 />
 
-                <CodeFieldWithLabel
-                  dictProps={positionSettings.code}
+                <DictField
+                  dictProps={Settings.fields.position.code}
                   name="code"
                   component={FieldHelper.InputField}
                 />
 
-                <FastField
+                <DictFastField
+                  dictProps={Settings.fields.position.status}
                   name="status"
                   component={FieldHelper.RadioButtonToggleGroupField}
                   buttons={statusButtons}
@@ -332,11 +335,11 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
                       </span>
                     </FormBS.Text>
                   )}
-                </FastField>
+                </DictFastField>
 
-                <FastField
+                <DictField
+                  dictProps={Settings.fields.position.role}
                   name="role"
-                  label={Settings.fields.position.role.label}
                   component={FieldHelper.RadioButtonToggleGroupField}
                   buttons={positionRoleButtons}
                   onChange={value => setFieldValue("role", value)}

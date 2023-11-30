@@ -61,7 +61,7 @@ export default class Position extends Model {
         .string()
         .required("Position name is required")
         .default("")
-        .label(Settings.fields.position.name),
+        .label(Settings.fields.position.name?.label),
       type: yup
         .string()
         .required()
@@ -81,7 +81,7 @@ export default class Position extends Model {
         .object()
         .nullable()
         .default(null)
-        .label("Organization")
+        .label(Settings.fields.position.organization?.label)
         .test(
           "required-object",
           // eslint-disable-next-line no-template-curly-in-string
@@ -93,17 +93,14 @@ export default class Position extends Model {
         .object()
         .nullable()
         .default(null)
-        .label("Location")
+        .label(Settings.fields.position.location?.label)
         .when("type", ([type], schema) =>
-          [
-            Position.TYPE.ADVISOR,
-            Position.TYPE.SUPERUSER,
-            Position.TYPE.ADMINISTRATOR
-          ].includes(type)
-            ? schema.required(
+          Settings.fields.position.location?.optional ||
+          type === Position.TYPE.PRINCIPAL
+            ? schema
+            : schema.required(
               `Location is required for ${advisorPosition.name}`
             )
-            : schema.nullable()
         )
     })
 

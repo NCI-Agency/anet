@@ -100,7 +100,7 @@ Dear ${approvalStepName},
 </div>
 
 <div>
-  <strong>${fields.report.atmosphere}:</strong> ${(report.atmosphere)!}
+  <strong>${fields.report.atmosphere.label!}:</strong> ${(report.atmosphere)!}
   <#if report.atmosphereDetails??>
 	  - ${(report.atmosphereDetails)!}
   </#if>
@@ -129,14 +129,14 @@ Dear ${approvalStepName},
 
 <div class="row">
   <div class="col-md-8">
-    <p><strong>${fields.report.intent}:</strong> ${report.intent}</p>
+    <p><strong>${fields.report.intent.label!}:</strong> ${report.intent}</p>
     <#if report.keyOutcomes??>
       <#if fields.report.keyOutcomes??>
-        <p><strong>${fields.report.keyOutcomes}:</strong> ${(report.keyOutcomes)!}</p>
+        <p><strong>${fields.report.keyOutcomes.label!}:</strong> ${(report.keyOutcomes)!}</p>
       </#if>
     </#if>
     <#if report.nextSteps??>
-      <p><strong>${fields.report.nextSteps.label}:</strong> ${(report.nextSteps)!}</p>
+      <p><strong>${fields.report.nextSteps.label!}:</strong> ${(report.nextSteps)!}</p>
     </#if>
   </div>
 </div>

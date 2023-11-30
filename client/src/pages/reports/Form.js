@@ -37,6 +37,7 @@ import {
 import { EXCLUDED_ASSESSMENT_FIELDS } from "components/RelatedObjectNotes"
 import RichTextEditor from "components/RichTextEditor"
 import { FastField, Field, Form, Formik } from "formik"
+import DictionaryField from "HOC/DictionaryField"
 import _cloneDeep from "lodash/cloneDeep"
 import _debounce from "lodash/debounce"
 import _isEmpty from "lodash/isEmpty"
@@ -264,6 +265,9 @@ const ReportForm = ({
     }
   }
 
+  const DictField = DictionaryField(Field)
+  const DictFastField = DictionaryField(FastField)
+
   const isAuthor = initialValues.reportPeople?.some(
     a => a.author && Person.isEqual(currentUser, a)
   )
@@ -469,12 +473,11 @@ const ReportForm = ({
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
               <Fieldset>
-                <FastField
+                <DictFastField
+                  dictProps={Settings.fields.report.intent}
                   name="intent"
-                  label={Settings.fields.report.intent}
                   component={FieldHelper.InputField}
                   asA="textarea"
-                  placeholder="What is the engagement supposed to achieve?"
                   maxLength={Settings.maxTextFieldLength}
                   onChange={event => {
                     setFieldTouched("intent", true, false)
@@ -499,7 +502,8 @@ const ReportForm = ({
                   className="meeting-goal"
                 />
 
-                <FastField
+                <DictFastField
+                  dictProps={Settings.fields.report.engagementDate}
                   name="engagementDate"
                   component={FieldHelper.SpecialField}
                   onChange={value => {
@@ -521,12 +525,12 @@ const ReportForm = ({
                       </span>
                     </FormBS.Text>
                   )}
-                </FastField>
+                </DictFastField>
 
                 {Settings.engagementsIncludeTimeAndDuration && (
-                  <FastField
+                  <DictFastField
+                    dictProps={Settings.fields.report.duration}
                     name="duration"
-                    label="Duration (minutes)"
                     component={FieldHelper.InputField}
                     inputType="number"
                     onWheelCapture={event => event.currentTarget.blur()} // Prevent scroll action on number input
@@ -543,7 +547,8 @@ const ReportForm = ({
                   />
                 )}
 
-                <FastField
+                <DictFastField
+                  dictProps={Settings.fields.report.location}
                   name="location"
                   component={FieldHelper.SpecialField}
                   onChange={value => {
@@ -554,7 +559,7 @@ const ReportForm = ({
                   widget={
                     <AdvancedSingleSelect
                       fieldName="location"
-                      placeholder="Search for the engagement location..."
+                      placeholder={Settings.fields.report.location.placeholder}
                       value={values.location}
                       overlayColumns={["Name"]}
                       overlayRenderRow={LocationOverlayRow}
@@ -587,10 +592,10 @@ const ReportForm = ({
                 />
 
                 {!isFutureEngagement && (
-                  <FastField
+                  <DictFastField
+                    dictProps={Settings.fields.report.cancelled}
                     name="cancelled"
                     component={FieldHelper.SpecialField}
-                    label={Settings.fields.report.cancelled}
                     widget={
                       <FormBS.Check
                         type="checkbox"
@@ -611,9 +616,8 @@ const ReportForm = ({
                   />
                 )}
                 {!isFutureEngagement && values.cancelled && (
-                  <FastField
-                    name="cancelledReason"
-                    label="due to"
+                  <DictField
+                    dictProps={Settings.fields.report.cancelledReason}
                     component={FieldHelper.SpecialField}
                     onChange={event => {
                       // validation will be done by setFieldValue
@@ -632,21 +636,20 @@ const ReportForm = ({
                 )}
 
                 {!isFutureEngagement && !values.cancelled && (
-                  <FastField
-                    name="atmosphere"
-                    label={Settings.fields.report.atmosphere}
-                    component={FieldHelper.RadioButtonToggleGroupField}
-                    buttons={atmosphereButtons}
-                    onChange={value => setFieldValue("atmosphere", value, true)}
-                    className="atmosphere-form-group"
-                  />
-                )}
-                {!isFutureEngagement &&
-                  !values.cancelled &&
-                  values.atmosphere && (
-                    <Field
+                  <>
+                    <DictFastField
+                      dictProps={Settings.fields.report.atmosphere}
+                      name="atmosphere"
+                      component={FieldHelper.RadioButtonToggleGroupField}
+                      enableClear={Settings.fields.report.atmosphere?.optional}
+                      buttons={atmosphereButtons}
+                      onChange={value =>
+                        setFieldValue("atmosphere", value, true)}
+                      className="atmosphere-form-group"
+                    />
+                    <DictField
+                      dictProps={Settings.fields.report.atmosphereDetails}
                       name="atmosphereDetails"
-                      label={Settings.fields.report.atmosphereDetails}
                       component={FieldHelper.InputField}
                       onChange={event => {
                         setFieldTouched("atmosphereDetails", true, false)
@@ -657,13 +660,9 @@ const ReportForm = ({
                         )
                         validateFieldDebounced("atmosphereDetails")
                       }}
-                      placeholder={`Why was this engagement ${values.atmosphere.toLowerCase()}? ${
-                        values.atmosphere === Report.ATMOSPHERE.POSITIVE
-                          ? "(optional)"
-                          : ""
-                      }`}
                       className="atmosphere-details"
                     />
+                  </>
                 )}
               </Fieldset>
 
@@ -832,20 +831,13 @@ const ReportForm = ({
                 </Fieldset>
               )}
 
-              <Fieldset
-                title={
-                  !values.cancelled
-                    ? "Meeting discussion"
-                    : "Next steps and details"
-                }
-                id="meeting-details"
-              >
+              <Fieldset title="Engagement details" id="meeting-details">
                 {Settings.fields.report.keyOutcomes &&
                   !isFutureEngagement &&
                   !values.cancelled && (
-                    <FastField
+                    <DictFastField
+                      dictProps={Settings.fields.report.keyOutcomes}
                       name="keyOutcomes"
-                      label={Settings.fields.report.keyOutcomes}
                       component={FieldHelper.InputField}
                       asA="textarea"
                       onChange={event => {
@@ -873,9 +865,9 @@ const ReportForm = ({
                 )}
 
                 {!isFutureEngagement && (
-                  <FastField
+                  <DictFastField
+                    dictProps={Settings.fields.report.nextSteps}
                     name="nextSteps"
-                    label={Settings.fields.report.nextSteps.label}
                     component={FieldHelper.InputField}
                     asA="textarea"
                     onChange={event => {
@@ -907,9 +899,9 @@ const ReportForm = ({
                   />
                 )}
 
-                <FastField
+                <DictFastField
+                  dictProps={Settings.fields.report.reportText}
                   name="reportText"
-                  label={Settings.fields.report.reportText}
                   component={FieldHelper.SpecialField}
                   onChange={value => {
                     // prevent initial unnecessary render of RichTextEditor
@@ -921,7 +913,14 @@ const ReportForm = ({
                     // validation will be done by setFieldValue
                     setFieldTouched("reportText", true, false)
                   }}
-                  widget={<RichTextEditor className="reportTextField" />}
+                  widget={
+                    <RichTextEditor
+                      className="reportTextField"
+                      placeholder={
+                        Settings.fields.report.reportText?.placeholder
+                      }
+                    />
+                  }
                 />
 
                 {attachmentEditEnabled && (

@@ -25,6 +25,7 @@ import ReportCollection from "components/ReportCollection"
 import RichTextEditor from "components/RichTextEditor"
 import { Field, Form, Formik } from "formik"
 import { convertLatLngToMGRS } from "geoUtils"
+import DictionaryField from "HOC/DictionaryField"
 import _escape from "lodash/escape"
 import { Attachment, Location } from "models"
 import React, { useContext, useState } from "react"
@@ -76,6 +77,7 @@ const LocationShow = ({ pageDispatchers }) => {
   const location = new Location(data ? data.location : {})
   const canEdit = currentUser.isSuperuser()
   const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
+  const DictField = DictionaryField(Field)
 
   return (
     <Formik enableReinitialize initialValues={location}>
@@ -146,9 +148,14 @@ const LocationShow = ({ pageDispatchers }) => {
                 action={action}
               />
               <Fieldset>
-                <Field name="name" component={FieldHelper.ReadonlyField} />
+                <DictField
+                  dictProps={Settings.fields.location.name}
+                  name="name"
+                  component={FieldHelper.ReadonlyField}
+                />
 
-                <Field
+                <DictField
+                  dictProps={Settings.fields.location.type}
                   name="type"
                   component={FieldHelper.ReadonlyField}
                   humanValue={Location.humanNameOfType(location.type)}
@@ -166,14 +173,16 @@ const LocationShow = ({ pageDispatchers }) => {
                   displayType={GEO_LOCATION_DISPLAY_TYPE.FORM_FIELD}
                 />
 
-                <Field
+                <DictField
+                  dictProps={Settings.fields.location.status}
                   name="status"
                   component={FieldHelper.ReadonlyField}
                   humanValue={Location.humanNameOfStatus}
                 />
 
                 {values.description && (
-                  <Field
+                  <DictField
+                    dictProps={Settings.fields.location.description}
                     name="description"
                     component={FieldHelper.ReadonlyField}
                     humanValue={

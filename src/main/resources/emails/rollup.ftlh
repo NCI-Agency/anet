@@ -114,10 +114,10 @@ a {
 
 <#macro renderReport report>
 	<#if report.cancelledReason??>
-	    <p className="report-cancelled" style="border-left:16px solid #DA9795;padding-left:10px;">
-	        <strong>Cancelled:</strong>
-	        ${(report.cancelledReason)!}
-	    </p>
+		<p className="report-cancelled" style="border-left:16px solid #DA9795;padding-left:10px;">
+			<strong>Cancelled:</strong>
+			${(report.cancelledReason)!}
+		</p>
 	</#if>
 
 	<div>
@@ -136,7 +136,7 @@ a {
 	</div>
 
 	<div>
-		<strong>${fields.report.atmosphere}:</strong> ${(report.atmosphere)!}
+		<strong>${fields.report.atmosphere.label!}:</strong> ${(report.atmosphere)!}
 		<#if report.atmosphereDetails??>
 			- ${(report.atmosphereDetails)!}
 		</#if>
@@ -160,17 +160,17 @@ a {
 
     <div class="row">
         <div class="col-md-8">
-            <p><strong>${fields.report.intent}:</strong> ${(report.intent)!}</p>
+            <p><strong>${fields.report.intent.label!}:</strong> ${(report.intent)!}</p>
             <#if report.keyOutcomes??>
-				<#if fields.report.keyOutcomes??>
-                	<p><strong>${fields.report.keyOutcomes}:</strong> ${(report.keyOutcomes)!}</p>
-            	</#if>
+              <#if fields.report.keyOutcomes??>
+                <p><strong>${fields.report.keyOutcomes.label!}:</strong> ${(report.keyOutcomes)!}</p>
+              </#if>
             </#if>
             <#if report.nextSteps??>
-                <p><strong>${fields.report.nextSteps.label}:</strong> ${(report.nextSteps)!}</p>
+                <p><strong>${fields.report.nextSteps.label!}:</strong> ${(report.nextSteps)!}</p>
             </#if>
             <#if showReportText >
-                <p><strong>${fields.report.reportText}</strong> ${(report.reportText)!?no_esc}</p>
+                <p><strong>${fields.report.reportText.label!}</strong> ${(report.reportText)!?no_esc}</p>
             </#if>
         </div>
     </div>

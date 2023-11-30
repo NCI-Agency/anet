@@ -66,95 +66,108 @@ export default class Person extends Model {
         .when("role", ([role], schema) =>
           Person.isAdvisor({ role })
             ? schema.required(
-              `You must provide the ${Settings.fields.person.firstName}`
+              `You must provide the ${Settings.fields.person.firstName?.label}`
             )
             : schema.nullable()
         )
         .default("")
-        .label(Settings.fields.person.firstName),
+        .label(Settings.fields.person.firstName?.label),
       // not actually in the database, but used for validation
       lastName: yup
         .string()
         .nullable()
         .uppercase()
-        .required(`You must provide the ${Settings.fields.person.lastName}`)
+        .required(
+          `You must provide the ${Settings.fields.person.lastName?.label}`
+        )
         .default("")
-        .label(Settings.fields.person.lastName),
+        .label(Settings.fields.person.lastName?.label),
       domainUsername: yup
         .string()
         .nullable()
         .default("")
-        .label(Settings.fields.person.domainUsername),
+        .label(Settings.fields.person.domainUsername?.label),
       emailAddress: yup
         .string()
         .nullable()
         .email()
         .when("role", ([role], schema) =>
-          schema.test(
-            "emailAddress",
-            "emailAddress error",
-            (emailAddress, testContext) => {
-              const r = utils.handleEmailValidation(
-                emailAddress,
-                role === Person.ROLE.ADVISOR
-              )
-              return r.isValid
-                ? true
-                : testContext.createError({ message: r.message })
-            }
-          )
+          Settings.fields.person.emailAddress?.optional
+            ? schema
+            : schema.test(
+              "emailAddress",
+              "emailAddress error",
+              (emailAddress, testContext) => {
+                const r = utils.handleEmailValidation(
+                  emailAddress,
+                  role === Person.ROLE.ADVISOR
+                )
+                return r.isValid
+                  ? true
+                  : testContext.createError({ message: r.message })
+              }
+            )
         )
         .default("")
-        .label(Settings.fields.person.emailAddress.label),
+        .label(Settings.fields.person.emailAddress?.label),
       country: yup
         .string()
         .nullable()
-        .required(`You must provide the ${Settings.fields.person.country}`)
+        .when([], (_, schema) =>
+          Settings.fields.person.country?.optional
+            ? schema
+            : schema.required(
+              `You must provide the ${Settings.fields.person.country?.label}`
+            )
+        )
         .default("")
-        .label(Settings.fields.person.country),
+        .label(Settings.fields.person.country?.label),
       rank: yup
         .string()
         .nullable()
         .required(
-          `You must provide the ${Settings.fields.person.rank} (Military rank, CIV and CTR values are available)`
+          `You must provide the ${Settings.fields.person.rank?.label} (Military rank, CIV and CTR values are available)`
         )
         .default("")
-        .label(Settings.fields.person.rank),
+        .label(Settings.fields.person.rank?.label),
       avatarUuid: yup.string().nullable().default(null),
       gender: yup
         .string()
         .nullable()
-        .required(`You must provide the ${Settings.fields.person.gender}`)
+        .when([], (_, schema) =>
+          Settings.fields.person.gender?.exclude ||
+          Settings.fields.person.gender?.optional
+            ? schema
+            : schema.required(
+              `You must provide the ${Settings.fields.person.gender?.label}`
+            )
+        )
         .default("")
-        .label(Settings.fields.person.gender),
+        .label(Settings.fields.person.gender?.label),
       phoneNumber: yup
         .string()
         .nullable()
         .default("")
-        .label(Settings.fields.person.phoneNumber),
+        .label(Settings.fields.person.phoneNumber?.label),
       code: yup.string().nullable().default(""),
       endOfTourDate: yupDate
         .nullable()
         .when(
           ["role", "pendingVerification"],
-          ([role, pendingVerification], schema) => {
-            if (Person.isPrincipal({ role })) {
-              return schema
-            } else {
-              // endOfTourDate is not required but if there is, it must be greater than today
-              if (Person.isPendingVerification({ pendingVerification })) {
-                schema = schema.test(
-                  "end-of-tour-date",
-                  `The ${Settings.fields.person.endOfTourDate} date must be in the future`,
-                  endOfTourDate => endOfTourDate > Date.now()
-                )
-              }
-              return schema
-            }
-          }
+          ([role, pendingVerification], schema) =>
+            Settings.fields.person.endOfTourDate?.exclude ||
+            Settings.fields.person.endOfTourDate?.optional ||
+            Person.isPrincipal({ role }) ||
+            !Person.isPendingVerification({ pendingVerification })
+              ? schema
+              : schema.test(
+                "end-of-tour-date",
+                `The ${Settings.fields.person.endOfTourDate?.label} date must be in the future`,
+                endOfTourDate => endOfTourDate > Date.now()
+              )
         )
         .default(null)
-        .label(Settings.fields.person.endOfTourDate),
+        .label(Settings.fields.person.endOfTourDate?.label),
       biography: yup.string().nullable().default(""),
       position: yup.object().nullable().default({}),
       pendingVerification: yup.boolean().default(false),

@@ -26,6 +26,7 @@ import RelatedObjectNotes, {
 import ReportCollection from "components/ReportCollection"
 import RichTextEditor from "components/RichTextEditor"
 import { Field, Form, Formik } from "formik"
+import DictionaryField from "HOC/DictionaryField"
 import _isEmpty from "lodash/isEmpty"
 import { Task } from "models"
 import moment from "moment"
@@ -34,7 +35,6 @@ import { ListGroup, ListGroupItem } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
 import Settings from "settings"
-import DictionaryField from "../../HOC/DictionaryField"
 
 const GQL_GET_TASK = gql`
   query($uuid: String!) {
@@ -192,10 +192,7 @@ const TaskShow = ({ pageDispatchers }) => {
     : task.descendantTasks?.map(task => new Task(task))
 
   const fieldSettings = task.fieldSettings()
-  const LongNameField = DictionaryField(Field)
-  const TaskParentTask = DictionaryField(Field)
-  const PlannedCompletionField = DictionaryField(Field)
-  const ProjectedCompletionField = DictionaryField(Field)
+  const DictField = DictionaryField(Field)
 
   // Admins can edit tasks or users in positions related to the task
   const isAdmin = currentUser && currentUser.isAdmin()
@@ -270,14 +267,14 @@ const TaskShow = ({ pageDispatchers }) => {
                 }}
               >
                 <Fieldset style={{ flex: "1 1 0" }}>
-                  <LongNameField
+                  <DictField
                     dictProps={fieldSettings.longName}
                     name="longName"
                     component={FieldHelper.ReadonlyField}
                   />
-                  <Field
+                  <DictField
+                    dictProps={Settings.fields.task.taskedOrganizations}
                     name="taskedOrganizations"
-                    label={Settings.fields.task.taskedOrganizations.label}
                     component={FieldHelper.ReadonlyField}
                     humanValue={
                       task.taskedOrganizations && (
@@ -294,7 +291,7 @@ const TaskShow = ({ pageDispatchers }) => {
                     }
                   />
                   {Settings.fields.task.parentTask && task.parentTask?.uuid && (
-                    <TaskParentTask
+                    <DictField
                       dictProps={Settings.fields.task.parentTask}
                       name="parentTask"
                       component={FieldHelper.ReadonlyField}
@@ -312,8 +309,8 @@ const TaskShow = ({ pageDispatchers }) => {
                   )}
                   {Settings.fields.task.childrenTasks &&
                     task.childrenTasks?.length > 0 && (
-                      <Field
-                        label={Settings.fields.task.childrenTasks}
+                      <DictField
+                        dictProps={Settings.fields.task.childrenTasks}
                         name="subEfforts"
                         component={FieldHelper.ReadonlyField}
                         humanValue={
@@ -332,7 +329,7 @@ const TaskShow = ({ pageDispatchers }) => {
                       />
                   )}
                   {Settings.fields.task.plannedCompletion && (
-                    <PlannedCompletionField
+                    <DictField
                       dictProps={Settings.fields.task.plannedCompletion}
                       name="plannedCompletion"
                       component={FieldHelper.ReadonlyField}
@@ -345,7 +342,7 @@ const TaskShow = ({ pageDispatchers }) => {
                     />
                   )}
                   {Settings.fields.task.projectedCompletion && (
-                    <ProjectedCompletionField
+                    <DictField
                       dictProps={Settings.fields.task.projectedCompletion}
                       name="projectedCompletion"
                       component={FieldHelper.ReadonlyField}
@@ -357,15 +354,16 @@ const TaskShow = ({ pageDispatchers }) => {
                       }
                     />
                   )}
-                  <Field
+                  <DictField
+                    dictProps={Settings.fields.task.status}
                     name="status"
                     component={FieldHelper.ReadonlyField}
                     humanValue={Task.humanNameOfStatus}
                   />
-                  <Field
+                  <DictField
+                    dictProps={Settings.fields.task.description}
                     name="description"
                     component={FieldHelper.ReadonlyField}
-                    label={Settings.fields.task.description}
                     humanValue={
                       <RichTextEditor readOnly value={values.description} />
                     }
@@ -386,7 +384,7 @@ const TaskShow = ({ pageDispatchers }) => {
               </Fieldset>
             )}
 
-            <Fieldset title="Responsible positions">
+            <Fieldset title={Settings.fields.task.responsiblePositions?.label}>
               <PositionTable positions={task.responsiblePositions} />
             </Fieldset>
 

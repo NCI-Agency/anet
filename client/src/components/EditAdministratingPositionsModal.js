@@ -37,7 +37,7 @@ const EditAdministratingPositionsModal = ({
         ?.administratingPositions) ??
     []
 
-  const AdministratingPositionsMultiSelect = DictionaryField(FastField)
+  const DictFastField = DictionaryField(FastField)
   const positionsFilters = {
     allAdvisorPositions: {
       label: "All advisor positions",
@@ -74,10 +74,10 @@ const EditAdministratingPositionsModal = ({
                 <Container fluid>
                   <Row>
                     <Col md={12}>
-                      <AdministratingPositionsMultiSelect
+                      <DictFastField
+                        dictProps={orgSettings.administratingPositions}
                         name="administratingPositions"
                         component={FieldHelper.SpecialField}
-                        dictProps={orgSettings.administratingPositions}
                         onChange={value => {
                           // validation will be done by setFieldValue
                           value = value.map(position =>

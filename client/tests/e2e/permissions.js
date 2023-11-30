@@ -99,7 +99,7 @@ test.serial("checking superuser permissions", async t => {
   const $principalOrgLink = await getFromSearchResults(
     t,
     "MoD",
-    "MoD | Ministry of Defense | Z12345",
+    "MoD | Ministry of Defense",
     "organizations"
   )
   await $principalOrgLink.click()
@@ -159,16 +159,12 @@ test.serial("checking superuser permissions", async t => {
   const $modLink = await getFromSearchResults(
     t,
     "MoD",
-    "MoD | Ministry of Defense | Z12345",
+    "MoD | Ministry of Defense",
     "organizations"
   )
   await $modLink.click()
   // Check that Bob is (also) superuser of MoD
-  await findSuperuserLink(
-    t,
-    "CIV BOBTOWN, Bob",
-    "MoD | Ministry of Defense | Z12345"
-  )
+  await findSuperuserLink(t, "CIV BOBTOWN, Bob", "MoD | Ministry of Defense")
   await pageHelpers.clickPersonNameFromSupportedPositionsFieldset(
     "CIV KYLESON, Kyle"
   )
@@ -254,7 +250,7 @@ validateUserCannotEditOtherUser(
 )
 
 test.serial("checking admin permissions", async t => {
-  t.plan(15)
+  t.plan(14)
 
   const {
     $,
@@ -310,7 +306,7 @@ test.serial("checking admin permissions", async t => {
   const $principalOrgLink = await getFromSearchResults(
     t,
     "MoD",
-    "MoD | Ministry of Defense | Z12345",
+    "MoD | Ministry of Defense",
     "organizations"
   )
   await $principalOrgLink.click()
@@ -569,11 +565,6 @@ async function validateAdminPrincipalOrgPermissions(t) {
     t,
     "#longName",
     "Field longName of a principal organization should be enabled for admins"
-  )
-  await assertElementEnabled(
-    t,
-    "#identificationCode",
-    "Field identificationCode of a principal organization should be enabled for admins"
   )
 }
 
