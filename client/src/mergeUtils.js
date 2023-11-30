@@ -252,30 +252,36 @@ export function mergedPersonIsValid(mergedPerson) {
     msg.push("Role")
   }
   if (!mergedPerson.status) {
-    msg.push("Status")
+    msg.push(Settings.fields.person.status?.label)
   }
   if (!mergedPerson.rank) {
-    msg.push(Settings.fields.person.rank)
+    msg.push(Settings.fields.person.rank?.label)
   }
-  if (!mergedPerson.gender) {
-    msg.push(Settings.fields.person.gender)
+  if (!Settings.fields.person.gender?.optional && !mergedPerson.gender) {
+    msg.push(Settings.fields.person.gender?.label)
   }
-  if (!mergedPerson.country) {
-    msg.push(Settings.fields.person.country)
+  if (!Settings.fields.person.country?.optional && !mergedPerson.country) {
+    msg.push(Settings.fields.person.country?.label)
   }
   if (mergedPerson.role === Person.ROLE.ADVISOR) {
-    if (!mergedPerson.emailAddress) {
+    if (
+      !Settings.fields.person.emailAddress?.optional &&
+      !mergedPerson.emailAddress
+    ) {
       msg.push(
         `${
-          Settings.fields.person.emailAddress.label
+          Settings.fields.person.emailAddress?.label
         } for ${Person.humanNameOfRole(Person.ROLE.ADVISOR)} role`
       )
     }
-    if (!mergedPerson.endOfTourDate) {
+    if (
+      !Settings.fields.person.endOfTourDate?.optional &&
+      !mergedPerson.endOfTourDate
+    ) {
       msg.push(
-        `${Settings.fields.person.endOfTourDate} for ${Person.humanNameOfRole(
-          Person.ROLE.ADVISOR
-        )} role`
+        `${
+          Settings.fields.person.endOfTourDate?.label
+        } for ${Person.humanNameOfRole(Person.ROLE.ADVISOR)} role`
       )
     }
   }

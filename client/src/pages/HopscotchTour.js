@@ -12,6 +12,7 @@ const principalSingular = Settings.fields.principal.person.name
 const principalPlural = pluralize(principalSingular)
 const advisorPositionSingular = Settings.fields.advisor.position.name
 const principalPositionSingular = Settings.fields.principal.position.name
+const positionCode = Settings.fields.position.code.label
 
 const userTour = (currentUser, navigate) => {
   return {
@@ -247,7 +248,7 @@ const orgTour = (currentUser, navigate) => {
       },
       {
         title: "Supported positions",
-        content: `This section shows positions in your organization that currently have people assigned to them. The ${advisorPositionSingular} column tells you the name and ${Settings.fields.position.code.label} of the position. To update this information, click on the position and select the "Edit" option.`,
+        content: `This section shows positions in your organization that currently have people assigned to them. The ${advisorPositionSingular} column tells you the name and ${positionCode} of the position. To update this information, click on the position and select the "Edit" option.`,
         target: "#supportedPositions h4",
         placement: "top"
       },
@@ -308,7 +309,7 @@ const positionTour = (currentUser, navigate) => {
     steps: [
       {
         title: "Positions",
-        content: `This section allows you to quickly review this position's detailed information, such as the position's ${Settings.fields.position.code.label} or ${Settings.fields.position.code.label}, status, and organization.`,
+        content: `This section allows you to quickly review this position's detailed information, such as the position's ${positionCode}, status, and organization.`,
         target: ".persistent-tour-launcher",
         placement: "left"
       },

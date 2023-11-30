@@ -142,17 +142,23 @@ const MergePeople = ({ pageDispatchers }) => {
                   <li>Role</li>
                   <li>Status</li>
                   <li>{Settings.fields.person.rank?.label}</li>
-                  {!Settings.fields.person.gender?.exclude && (
-                    <li>{Settings.fields.person.gender?.label}</li>
+                  {!Settings.fields.person.gender?.exclude &&
+                    !Settings.fields.person.gender?.optional && (
+                      <li>{Settings.fields.person.gender?.label}</li>
                   )}
-                  <li>{Settings.fields.person.country?.label}</li>
+                  {!Settings.fields.person.country?.optional && (
+                    <li>{Settings.fields.person.country?.label}</li>
+                  )}
                 </ul>
                 - If the Merged Person will be an {Person.ROLE.ADVISOR}, also
                 required are:
                 <ul>
-                  <li>{Settings.fields.person.emailAddress?.label}</li>
-                  {!Settings.fields.person.endOfTourDate?.exclude && (
-                    <li>{Settings.fields.person.endOfTourDate?.label}</li>
+                  {!Settings.fields.person.emailAddress?.optional && (
+                    <li>{Settings.fields.person.emailAddress?.label}</li>
+                  )}
+                  {!Settings.fields.person.endOfTourDate?.exclude &&
+                    !Settings.fields.person.endOfTourDate?.optional && (
+                      <li>{Settings.fields.person.endOfTourDate?.label}</li>
                   )}
                 </ul>
               </Callout>
@@ -325,7 +331,8 @@ const MergePeople = ({ pageDispatchers }) => {
                 value={mergedPerson.emailAddress}
                 align={ALIGN_OPTIONS.CENTER}
                 action={
-                  mergedPerson.role === Person.ROLE.ADVISOR
+                  mergedPerson.role === Person.ROLE.ADVISOR &&
+                  !Settings.fields.person.emailAddress?.optional
                     ? getInfoButton(
                       `${Settings.fields.person.emailAddress?.label} is required.`
                     )
@@ -371,9 +378,17 @@ const MergePeople = ({ pageDispatchers }) => {
                 dictProps={Settings.fields.person.gender}
                 value={mergedPerson.gender}
                 align={ALIGN_OPTIONS.CENTER}
-                action={getInfoButton(
-                  `${Settings.fields.person.gender?.label} is required.`
-                )}
+                action={
+                  !Settings.fields.person.gender?.optional
+                    ? getInfoButton(
+                      `${Settings.fields.person.gender?.label} is required.`
+                    )
+                    : getClearButton(() =>
+                      dispatchMergeActions(
+                        setAMergedField("gender", "", null)
+                      )
+                    )
+                }
                 fieldName="gender"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
@@ -382,9 +397,17 @@ const MergePeople = ({ pageDispatchers }) => {
                 dictProps={Settings.fields.person.country}
                 value={mergedPerson.country}
                 align={ALIGN_OPTIONS.CENTER}
-                action={getInfoButton(
-                  `${Settings.fields.person.country?.label} is required.`
-                )}
+                action={
+                  !Settings.fields.person.country?.optional
+                    ? getInfoButton(
+                      `${Settings.fields.person.country?.label} is required.`
+                    )
+                    : getClearButton(() =>
+                      dispatchMergeActions(
+                        setAMergedField("country", "", null)
+                      )
+                    )
+                }
                 fieldName="country"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
@@ -410,7 +433,8 @@ const MergePeople = ({ pageDispatchers }) => {
                 )}
                 align={ALIGN_OPTIONS.CENTER}
                 action={
-                  mergedPerson.role === Person.ROLE.ADVISOR
+                  mergedPerson.role === Person.ROLE.ADVISOR &&
+                  !Settings.fields.person.endOfTourDate?.optional
                     ? getInfoButton(
                       `${Settings.fields.person.endOfTourDate?.label} is required`
                     )
