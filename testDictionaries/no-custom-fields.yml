@@ -367,10 +367,10 @@ fields:
       optionalAttendingAuthor: false
       optionalPrimaryAdvisor: false
       optionalPrimaryPrincipal: true
-    attendeeGroups:
-      - label: Linguists
-        filter:
-          orgUuid: 70193ee9-05b4-4aac-80b5-75609825db9f
+      attendeeGroups:
+        - label: Linguists
+          filter:
+            orgUuid: 70193ee9-05b4-4aac-80b5-75609825db9f
 
   person:
     status:
