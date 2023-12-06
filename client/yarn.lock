@@ -14831,10 +14831,10 @@ slate-hyperscript@0.100.0:
   dependencies:
     is-plain-object "^5.0.0"
 
-slate-react@0.101.0:
-  version "0.101.0"
-  resolved "https://registry.yarnpkg.com/slate-react/-/slate-react-0.101.0.tgz#7bcf39792a644ea5d7a887425d1acbd4c17c9ad3"
-  integrity sha512-GAwAi9cT8pWLt65p6Fab33UXH2MKE1NRzHhqAnV+32u20vy4dre/dIGyyqrFyOp3lgBBitgjyo6N2g26y63gOA==
+slate-react@0.101.2:
+  version "0.101.2"
+  resolved "https://registry.yarnpkg.com/slate-react/-/slate-react-0.101.2.tgz#61d2d61826ac9f891306dc640a96916535bfe980"
+  integrity sha512-Jirty7d+tP8Cb+g8KrGUE7HvdC1z1jiysfdad2fTKIyXOrAq30cx4De+JzjfWDuB3LJDriu+Ii4PYXva3mKlhg==
   dependencies:
     "@juggle/resize-observer" "^3.4.0"
     "@types/is-hotkey" "^0.1.8"
@@ -14846,10 +14846,10 @@ slate-react@0.101.0:
     scroll-into-view-if-needed "^3.1.0"
     tiny-invariant "1.3.1"
 
-slate@0.100.0:
-  version "0.100.0"
-  resolved "https://registry.yarnpkg.com/slate/-/slate-0.100.0.tgz#33e4b55192fe4d35f6c062d238bd49bbee0d9b8d"
-  integrity sha512-cK+xwLBrbQof4rEfTzgC8loBWsDFEXq8nOBY7QahwY59Zq4bsBNcwiMw2VIzTv+WGNsmyHp4eAk/HJbz2aAUkQ==
+slate@0.101.1:
+  version "0.101.1"
+  resolved "https://registry.yarnpkg.com/slate/-/slate-0.101.1.tgz#a1585f2ef15e671deb097b85ef8d3905690b4ae1"
+  integrity sha512-k/rVkVb0TEMmaTbkRVJeJzE8lxnyGDc0VC67D91Zrf5hcdHfVaWypBGD25QHCJsndn9Xa0jSJ/xfM2new5E2Zg==
   dependencies:
     immer "^10.0.3"
     is-plain-object "^5.0.0"
