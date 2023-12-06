@@ -379,6 +379,8 @@ fields:
       label: Location
       placeholder: Search for the engagement location…
       filter: [POINT_LOCATION, VIRTUAL_LOCATION]
+    reportPeople:
+      optionalAttendingAuthor: false
     customFields:
       relatedReport:
         type: anet_object

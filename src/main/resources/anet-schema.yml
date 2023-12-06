@@ -640,6 +640,13 @@ properties:
                     type: string
                     enum:
                       [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, POINT_LOCATION, ADVISOR_LOCATION, PRINCIPAL_LOCATION]
+          reportPeople:
+            required: [optionalAttendingAuthor]
+            properties:
+              optionalAttendingAuthor:
+                type: boolean
+                default: false
+                description: Defines if having an attending author for a report is optional
           customFields:
             type: object
             additionalProperties:

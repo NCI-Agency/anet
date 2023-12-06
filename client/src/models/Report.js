@@ -426,8 +426,11 @@ export default class Report extends Model {
   }
 
   static checkAttendingAuthor(reportPeople) {
-    if (!reportPeople?.some(rp => rp.author && rp.attendee)) {
-      return "You must provide at least 1 attending author"
+    const optionalAttendingAuthor =
+      Settings.fields.report.reportPeople?.optionalAttendingAuthor
+    const attendingAuthor = reportPeople?.some(rp => rp.author && rp.attendee)
+    if (!attendingAuthor && !optionalAttendingAuthor) {
+      return "You must provide at least 1 attending author(s)"
     }
   }
 
