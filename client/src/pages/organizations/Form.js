@@ -214,12 +214,12 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                       name="shortName"
                       component={FieldHelper.ReadonlyField}
                     />
-                    <DictField
+                    <DictFastField
                       dictProps={Settings.fields.organization.longName}
                       name="longName"
                       component={FieldHelper.ReadonlyField}
                     />
-                    <DictField
+                    <DictFastField
                       dictProps={Settings.fields.organization.type}
                       name="type"
                       component={FieldHelper.ReadonlyField}
@@ -238,7 +238,7 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                         )
                       }
                     />
-                    <DictField
+                    <DictFastField
                       dictProps={
                         Settings.fields.organization.identificationCode
                       }
@@ -285,12 +285,12 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                       name="shortName"
                       component={FieldHelper.InputField}
                     />
-                    <DictField
+                    <DictFastField
                       dictProps={Settings.fields.organization.longName}
                       name="longName"
                       component={FieldHelper.InputField}
                     />
-                    <DictField
+                    <DictFastField
                       dictProps={Settings.fields.organization.type}
                       name="type"
                       component={FieldHelper.RadioButtonToggleGroupField}
@@ -298,7 +298,7 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                       onChange={value => setFieldValue("type", value)}
                       disabled={!isAdmin}
                     />
-                    <DictFastField
+                    <DictField
                       dictProps={Settings.fields.organization.parentOrg}
                       name="parentOrg"
                       component={FieldHelper.SpecialField}
@@ -327,14 +327,14 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                         />
                       }
                     />
-                    <DictField
+                    <DictFastField
                       dictProps={
                         Settings.fields.organization.identificationCode
                       }
                       name="identificationCode"
                       component={FieldHelper.InputField}
                     />
-                    <DictFastField
+                    <DictField
                       dictProps={Settings.fields.organization.location}
                       name="location"
                       component={FieldHelper.SpecialField}

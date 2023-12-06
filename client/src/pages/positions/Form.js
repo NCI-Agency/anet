@@ -232,14 +232,14 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
                 />
 
                 {edit ? (
-                  <DictField
+                  <DictFastField
                     dictProps={Settings.fields.position.type}
                     name="type"
                     component={FieldHelper.ReadonlyField}
                     humanValue={Position.humanNameOfType}
                   />
                 ) : (
-                  <DictField
+                  <DictFastField
                     dictProps={Settings.fields.position.type}
                     name="type"
                     component={FieldHelper.RadioButtonToggleGroupField}
@@ -337,7 +337,7 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
                   )}
                 </DictFastField>
 
-                <DictField
+                <DictFastField
                   dictProps={Settings.fields.position.role}
                   name="role"
                   component={FieldHelper.RadioButtonToggleGroupField}
