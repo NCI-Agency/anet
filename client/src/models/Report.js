@@ -162,20 +162,10 @@ export default class Report extends Model {
         .array()
         .nullable()
         .when("cancelled", ([cancelled], schema) =>
+          // Only do validation warning when engagement not cancelled
           cancelled
-            ? schema.nullable()
-            : schema // Only do validation warning when engagement not cancelled
-              .test(
-                "primary-advisor",
-                "primary advisor error",
-                (reportPeople, testContext) => {
-                  const message = Report.checkPrimaryAttendee(
-                    reportPeople,
-                    Person.ROLE.ADVISOR
-                  )
-                  return message ? testContext.createError({ message }) : true
-                }
-              )
+            ? schema
+            : Report.testPrimaryAttendees(schema, false)
               .test(
                 "no-author",
                 "no author error",
@@ -281,20 +271,8 @@ export default class Report extends Model {
       .array()
       .nullable()
       .when("cancelled", ([cancelled], schema) =>
-        cancelled
-          ? schema.nullable()
-          : schema // Only do validation warning when engagement not cancelled
-            .test(
-              "primary-principal",
-              "primary principal error",
-              (reportPeople, testContext) => {
-                const message = Report.checkPrimaryAttendee(
-                  reportPeople,
-                  Person.ROLE.PRINCIPAL
-                )
-                return message ? testContext.createError({ message }) : true
-              }
-            )
+        // Only do validation warning when engagement not cancelled
+        cancelled ? schema : Report.testPrimaryAttendees(schema, true)
       ),
     reportSensitiveInformation: yup.object().nullable().default({}),
     authorizationGroups: yup
@@ -316,6 +294,36 @@ export default class Report extends Model {
             )
       )
   })
+
+  static testPrimaryAttendees(schema, asWarning) {
+    return schema
+      .test(
+        "primary-advisor",
+        "primary advisor error",
+        (reportPeople, testContext) => {
+          const message = Report.checkPrimaryAttendee(
+            reportPeople,
+            Person.ROLE.ADVISOR,
+            Settings.fields.report.reportPeople?.optionalPrimaryAdvisor,
+            asWarning
+          )
+          return message ? testContext.createError({ message }) : true
+        }
+      )
+      .test(
+        "primary-principal",
+        "primary principal error",
+        (reportPeople, testContext) => {
+          const message = Report.checkPrimaryAttendee(
+            reportPeople,
+            Person.ROLE.PRINCIPAL,
+            Settings.fields.report.reportPeople?.optionalPrimaryPrincipal,
+            asWarning
+          )
+          return message ? testContext.createError({ message }) : true
+        }
+      )
+  }
 
   static autocompleteQuery = "uuid, intent, authors { uuid, name, rank, role }"
 
@@ -404,13 +412,13 @@ export default class Report extends Model {
     return this.intent || "None"
   }
 
-  static checkPrimaryAttendee(reportPeople, role) {
+  static checkPrimaryAttendee(reportPeople, role, optional, asWarning) {
     const primaryAttendee = Report.getPrimaryAttendee(reportPeople, role)
     const roleName = Person.humanNameOfRole(role)
-    if (!primaryAttendee && role === Person.ROLE.ADVISOR) {
-      return `You must provide the primary ${roleName} for the Engagement`
-    } else if (!primaryAttendee && role === Person.ROLE.PRINCIPAL) {
-      return `No primary ${roleName} has been provided for the Engagement`
+    if (!primaryAttendee) {
+      if ((optional && asWarning) || (!optional && !asWarning)) {
+        return `No primary ${roleName} has been provided for the Engagement`
+      }
     } else if (primaryAttendee.status !== Model.STATUS.ACTIVE) {
       return `The primary ${roleName} - ${primaryAttendee.name} - needs to have an active profile`
     } else if (

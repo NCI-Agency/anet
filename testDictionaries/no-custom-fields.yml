@@ -365,6 +365,8 @@ fields:
       filter: [POINT_LOCATION, VIRTUAL_LOCATION]
     reportPeople:
       optionalAttendingAuthor: false
+      optionalPrimaryAdvisor: false
+      optionalPrimaryPrincipal: true
     attendeeGroups:
       - label: Linguists
         filter:

@@ -381,6 +381,8 @@ fields:
       filter: [POINT_LOCATION, VIRTUAL_LOCATION]
     reportPeople:
       optionalAttendingAuthor: false
+      optionalPrimaryAdvisor: false
+      optionalPrimaryPrincipal: true
     customFields:
       relatedReport:
         type: anet_object
