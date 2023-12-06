@@ -634,36 +634,6 @@ const ReportForm = ({
                     }
                   />
                 )}
-
-                {!isFutureEngagement && !values.cancelled && (
-                  <>
-                    <DictFastField
-                      dictProps={Settings.fields.report.atmosphere}
-                      name="atmosphere"
-                      component={FieldHelper.RadioButtonToggleGroupField}
-                      enableClear={Settings.fields.report.atmosphere?.optional}
-                      buttons={atmosphereButtons}
-                      onChange={value =>
-                        setFieldValue("atmosphere", value, true)}
-                      className="atmosphere-form-group"
-                    />
-                    <DictField
-                      dictProps={Settings.fields.report.atmosphereDetails}
-                      name="atmosphereDetails"
-                      component={FieldHelper.InputField}
-                      onChange={event => {
-                        setFieldTouched("atmosphereDetails", true, false)
-                        setFieldValue(
-                          "atmosphereDetails",
-                          event.target.value,
-                          false
-                        )
-                        validateFieldDebounced("atmosphereDetails")
-                      }}
-                      className="atmosphere-details"
-                    />
-                  </>
-                )}
               </Fieldset>
 
               <Fieldset
@@ -832,6 +802,36 @@ const ReportForm = ({
               )}
 
               <Fieldset title="Engagement details" id="meeting-details">
+                {!isFutureEngagement && !values.cancelled && (
+                  <>
+                    <DictFastField
+                      dictProps={Settings.fields.report.atmosphere}
+                      name="atmosphere"
+                      component={FieldHelper.RadioButtonToggleGroupField}
+                      enableClear={Settings.fields.report.atmosphere?.optional}
+                      buttons={atmosphereButtons}
+                      onChange={value =>
+                        setFieldValue("atmosphere", value, true)}
+                      className="atmosphere-form-group"
+                    />
+                    <DictField
+                      dictProps={Settings.fields.report.atmosphereDetails}
+                      name="atmosphereDetails"
+                      component={FieldHelper.InputField}
+                      onChange={event => {
+                        setFieldTouched("atmosphereDetails", true, false)
+                        setFieldValue(
+                          "atmosphereDetails",
+                          event.target.value,
+                          false
+                        )
+                        validateFieldDebounced("atmosphereDetails")
+                      }}
+                      className="atmosphere-details"
+                    />
+                  </>
+                )}
+
                 {Settings.fields.report.keyOutcomes &&
                   !isFutureEngagement &&
                   !values.cancelled && (
