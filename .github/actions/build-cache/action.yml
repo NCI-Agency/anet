@@ -12,7 +12,7 @@ runs:
   - name: Set up chromedriver
     run: echo "CHROMEDRIVER_FILEPATH=$CHROMEWEBDRIVER/chromedriver" >> $GITHUB_ENV
     shell: bash
-  - uses: actions/setup-java@v3
+  - uses: actions/setup-java@v4
     with:
       distribution: "zulu"
       java-version: 17
