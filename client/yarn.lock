@@ -13757,10 +13757,10 @@ react-popper@^2.3.0:
     react-fast-compare "^3.0.1"
     warning "^4.0.2"
 
-react-redux-loading-bar@5.0.4:
-  version "5.0.4"
-  resolved "https://registry.yarnpkg.com/react-redux-loading-bar/-/react-redux-loading-bar-5.0.4.tgz#06dffcc53a447828dec1a26903e6b22807dd4254"
-  integrity sha512-ttLFYETh9zfyxJdTa5a1+KTWquxX3UN7F/XYslNTeCE8cpnWNpBbUOg8TcaZmOoWEWjCe/i5sV/Mvvr0xsGBBw==
+react-redux-loading-bar@5.0.5:
+  version "5.0.5"
+  resolved "https://registry.yarnpkg.com/react-redux-loading-bar/-/react-redux-loading-bar-5.0.5.tgz#cb141fb6638e8789f63e110471f071d1c96111b9"
+  integrity sha512-0wAk4EjSuyi7cRDgyMLKNhZQF0bgWOATBkMas6MSISw7RSc8/Zm4zAVt7eC+lf4pDz77AVbQF13R+iS6fpn91Q==
   dependencies:
     prop-types "^15.7.2"
     react-lifecycles-compat "^3.0.4"
