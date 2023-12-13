@@ -139,6 +139,8 @@ $defs:
         type: string
       asA:
         type: string
+      htmlSize:
+        type: number
       filters:
         type: array
         uniqueItems: true

@@ -643,6 +643,8 @@ fields:
         type: enumset
         label: Choose one or more of the options
         helpText: Help text for choosing multiple values
+        asA: select
+        htmlSize: 4
         choices:
           opt1:
             label: Option 1
@@ -650,6 +652,12 @@ fields:
             label: Option 2
           opt3:
             label: Option 3
+          opt4:
+            label: Option 4
+          opt5:
+            label: Option 5
+          opt6:
+            label: Option 6
       inputFieldName:
         type: text
         label: Text field
