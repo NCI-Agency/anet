@@ -11,8 +11,7 @@ let capabilities
 const testEnv =
   (process.env.GIT_TAG_NAME && "remote") || process.env.TEST_ENV || "local"
 if (testEnv === "local") {
-  // This gives us access to send Chrome commands.
-  require("chromedriver")
+  // Set capabilities for local Chrome
   capabilities = webdriver.Capabilities.chrome()
 } else {
   // Set capabilities for BrowserStack

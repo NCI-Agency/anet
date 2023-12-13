@@ -61,8 +61,8 @@ const config = {
       // grid with only 5 firefox instances available you can make sure that not more than
       // 5 instances get started at a time.
       maxInstances: 5,
-      //
       browserName: "chrome",
+      // browserVersion: "stable",
       acceptInsecureCerts: true,
       "goog:chromeOptions": {
         // run in incognito mode
@@ -307,11 +307,7 @@ const config = {
 }
 const testEnv =
   (process.env.GIT_TAG_NAME && "remote") || process.env.TEST_ENV || "local"
-if (testEnv === "local") {
-  config.services = ["chromedriver"]
-  config.port = 9515
-  config.path = "/"
-} else {
+if (testEnv !== "local") {
   const capabilities = require("./browserstack.config.js")
   const bsOptions = capabilities["bstack:options"]
   config.services = [
