@@ -485,8 +485,18 @@ properties:
   reportWorkflow:
     type: object
     additionalProperties: false
-    required: [nbOfHoursQuarantineApproved, nbOfHoursApprovalTimeout]
+    required: [optionalApprovalWorkflow, optionalPlanningApprovalWorkflow, nbOfHoursQuarantineApproved, nbOfHoursApprovalTimeout]
     properties:
+      optionalApprovalWorkflow:
+        type: boolean
+        title: Whether having a report approval workflow (including the default workflow) is optional
+        description: Used in the report approval logic to automatically approve an engagement report
+                     if the workflow is optional and there is no defined workflow.
+      optionalPlanningApprovalWorkflow:
+        type: boolean
+        title: Whether having a report planning approval workflow (including the default workflow) is optional
+        description: Used in the report approval logic to automatically approve a planned engagement report
+                     if the workflow is optional and there is no defined planning workflow.
       nbOfHoursQuarantineApproved:
         type: integer
         minimum: 0
