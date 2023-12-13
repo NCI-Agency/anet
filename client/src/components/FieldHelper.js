@@ -17,6 +17,7 @@ import {
   Form,
   FormControl,
   FormGroup,
+  FormSelect,
   InputGroup,
   ListGroup,
   Row,
@@ -520,30 +521,135 @@ ButtonToggleGroupField.propTypes = {
 export const RadioButtonToggleGroupField = ({
   field, // { name, value, onChange, onBlur }
   form, // also values, setXXXX, handleXXXX, dirty, isValid, status, etc.
+  asA,
+  enableClear,
   ...props
-}) => (
-  <ButtonToggleGroupField field={field} form={form} type="radio" {...props} />
-)
+}) =>
+  (asA === "select" && (
+    <SelectField field={field} form={form} {...props} />
+  )) || (
+    <ButtonToggleGroupField
+      field={field}
+      form={form}
+      type="radio"
+      enableClear={enableClear}
+      {...props}
+    />
+  )
 RadioButtonToggleGroupField.propTypes = {
   field: PropTypes.object,
-  form: PropTypes.object
+  form: PropTypes.object,
+  asA: PropTypes.string,
+  enableClear: PropTypes.bool
 }
 
 export const CheckboxButtonToggleGroupField = ({
   field, // { name, value, onChange, onBlur }
   form, // also values, setXXXX, handleXXXX, dirty, isValid, status, etc.
+  asA,
+  enableClear,
   ...props
-}) => (
-  <ButtonToggleGroupField
-    field={field}
-    form={form}
-    type="checkbox"
-    {...props}
-  />
-)
+}) =>
+  (asA === "select" && (
+    <SelectField field={field} form={form} multiple {...props} />
+  )) || (
+    <ButtonToggleGroupField
+      field={field}
+      form={form}
+      type="checkbox"
+      enableClear={enableClear}
+      {...props}
+    />
+  )
 CheckboxButtonToggleGroupField.propTypes = {
   field: PropTypes.object,
-  form: PropTypes.object
+  form: PropTypes.object,
+  asA: PropTypes.string,
+  enableClear: PropTypes.bool
+}
+
+export const SelectField = ({
+  field, // { name, value, onChange, onBlur }
+  form, // contains, touched, errors, values, setXXXX, handleXXXX, dirty, isValid, status, etc.
+  label,
+  buttons,
+  multiple,
+  onChange,
+  className,
+  children,
+  extraColElem,
+  addon,
+  vertical,
+  extraAddon,
+  ...otherProps
+}) => {
+  const { validationState } = getFormGroupValidationState(field, form)
+  if (validationState) {
+    className = classNames(className, "is-invalid")
+  }
+  const widgetElem = useMemo(
+    () => (
+      <FormSelect
+        {...field}
+        value={field.value ?? ""}
+        multiple={multiple}
+        isInvalid={validationState}
+        className={className}
+        onChange={e => {
+          let newValue
+          if (!multiple) {
+            // First (empty) option must be the empty string (""); replace with null when selected
+            newValue = e.target.value || null
+          } else {
+            newValue = []
+            for (const opt of e.target.options) {
+              if (opt.selected) {
+                newValue.push(opt.value)
+              }
+            }
+          }
+          onChange(newValue)
+        }}
+        {...otherProps}
+      >
+        {!multiple && <option />}
+        {buttons.map(option => (
+          <option key={`${field.name}_${option.value}`} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </FormSelect>
+    ),
+    [field, className, otherProps, buttons, multiple, onChange, validationState]
+  )
+  return (
+    <Field
+      field={field}
+      form={form}
+      label={label}
+      widgetElem={widgetElem}
+      extraColElem={extraColElem}
+      addon={addon}
+      vertical={vertical}
+      extraAddon={extraAddon}
+    >
+      {children}
+    </Field>
+  )
+}
+SelectField.propTypes = {
+  field: PropTypes.object,
+  form: PropTypes.object,
+  label: PropTypes.string,
+  buttons: PropTypes.array.isRequired,
+  multiple: PropTypes.bool,
+  onChange: PropTypes.func.isRequired,
+  className: PropTypes.string,
+  children: PropTypes.any,
+  extraColElem: PropTypes.object,
+  addon: PropTypes.object,
+  vertical: PropTypes.bool,
+  extraAddon: PropTypes.object
 }
 
 export default Field
