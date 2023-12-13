@@ -1,8 +1,7 @@
 import API from "api"
 import {
   CustomFieldsContainer,
-  customFieldsJSONString,
-  SPECIAL_WIDGET_TYPES
+  customFieldsJSONString
 } from "components/CustomFields"
 import Messages from "components/Messages"
 import Model, {
@@ -35,12 +34,7 @@ const AssessmentModal = ({
   entity
 }) => {
   const [assessmentError, setAssessmentError] = useState(null)
-  const hasQuestionSets = !_isEmpty(assessmentConfig.questionSets)
   const dictionaryPath = entity.getAssessmentDictionaryPath()
-  const hasRichTextEditor = Object.values(
-    assessmentConfig.questions || {}
-  ).find(question => question.widget === SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR)
-  const wideModal = hasQuestionSets || hasRichTextEditor
   const edit = !!note.uuid
   const initialValues = useMemo(
     () =>
@@ -50,92 +44,90 @@ const AssessmentModal = ({
     [assessment, assessmentYupSchema]
   )
   return (
-    <>
-      <Modal
-        centered
-        show={showModal}
-        onHide={closeModal}
-        dialogClassName={wideModal && "wide-assessment-modal"}
-        style={{ zIndex: "1250" }}
+    <Modal
+      centered
+      show={showModal}
+      onHide={closeModal}
+      size="lg"
+      style={{ zIndex: "1250" }}
+    >
+      <Formik
+        enableReinitialize
+        onSubmit={onAssessmentSubmit}
+        validationSchema={assessmentYupSchema}
+        initialValues={initialValues}
       >
-        <Formik
-          enableReinitialize
-          onSubmit={onAssessmentSubmit}
-          validationSchema={assessmentYupSchema}
-          initialValues={initialValues}
-        >
-          {({
-            isSubmitting,
-            isValid,
-            setFieldValue,
-            setFieldTouched,
-            validateForm,
-            values,
-            submitForm
-          }) => {
-            return (
-              <Form>
-                <Modal.Header closeButton>
-                  <Modal.Title>{title}</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      padding: 5,
-                      height: "100%"
-                    }}
-                  >
-                    <Messages error={assessmentError} />
-                    {!_isEmpty(assessmentConfig.questions) && (
-                      <CustomFieldsContainer
-                        fieldsConfig={assessmentConfig.questions}
-                        parentFieldName={ENTITY_ASSESSMENT_PARENT_FIELD}
-                        formikProps={{
-                          setFieldTouched,
-                          setFieldValue,
-                          values,
-                          validateForm
-                        }}
-                        vertical
-                      />
-                    )}
-                    {!_isEmpty(assessmentConfig.questionSets) && (
-                      <QuestionSet
-                        entity={entity}
-                        questionSets={assessmentConfig.questionSets}
-                        parentFieldName={`${ENTITY_ASSESSMENT_PARENT_FIELD}.questionSets`}
-                        formikProps={{
-                          setFieldTouched,
-                          setFieldValue,
-                          values,
-                          validateForm
-                        }}
-                        readonly={false}
-                        vertical
-                      />
-                    )}
-                  </div>
-                </Modal.Body>
-                <Modal.Footer className="justify-content-between">
-                  <Button onClick={closeModal} variant="outline-secondary">
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={submitForm}
-                    variant="primary"
-                    disabled={isSubmitting}
-                  >
-                    Save
-                  </Button>
-                </Modal.Footer>
-              </Form>
-            )
-          }}
-        </Formik>
-      </Modal>
-    </>
+        {({
+          isSubmitting,
+          isValid,
+          setFieldValue,
+          setFieldTouched,
+          validateForm,
+          values,
+          submitForm
+        }) => {
+          return (
+            <Form>
+              <Modal.Header closeButton>
+                <Modal.Title>{title}</Modal.Title>
+              </Modal.Header>
+              <Modal.Body>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    padding: 5,
+                    height: "100%"
+                  }}
+                >
+                  <Messages error={assessmentError} />
+                  {!_isEmpty(assessmentConfig.questions) && (
+                    <CustomFieldsContainer
+                      fieldsConfig={assessmentConfig.questions}
+                      parentFieldName={ENTITY_ASSESSMENT_PARENT_FIELD}
+                      formikProps={{
+                        setFieldTouched,
+                        setFieldValue,
+                        values,
+                        validateForm
+                      }}
+                      vertical
+                    />
+                  )}
+                  {!_isEmpty(assessmentConfig.questionSets) && (
+                    <QuestionSet
+                      entity={entity}
+                      questionSets={assessmentConfig.questionSets}
+                      parentFieldName={`${ENTITY_ASSESSMENT_PARENT_FIELD}.questionSets`}
+                      formikProps={{
+                        setFieldTouched,
+                        setFieldValue,
+                        values,
+                        validateForm
+                      }}
+                      readonly={false}
+                      vertical
+                    />
+                  )}
+                </div>
+              </Modal.Body>
+              <Modal.Footer className="justify-content-between">
+                <Button onClick={closeModal} variant="outline-secondary">
+                  Cancel
+                </Button>
+                <Button
+                  onClick={submitForm}
+                  variant="primary"
+                  disabled={isSubmitting}
+                >
+                  Save
+                </Button>
+              </Modal.Footer>
+            </Form>
+          )
+        }}
+      </Formik>
+    </Modal>
   )
 
   function closeModal() {
