@@ -28,7 +28,7 @@ java {
 boolean isTestEnv = project.hasProperty("testEnv")
 String dropwizardVersion = "2.1.10"
 String logbackVersion = "1.3.5"
-String log4jVersion = "2.21.1"
+String log4jVersion = "2.22.0"
 String keycloakVersion = "23.0.1"
 String psqlPushDataPath = "/var/tmp"
 String keycloakContainerPath = "/opt/keycloak"
@@ -89,14 +89,14 @@ dependencies {
 	implementation "io.dropwizard:dropwizard-views-freemarker:${dropwizardVersion}"
 	implementation 'io.dropwizard-bundles:dropwizard-configurable-assets-bundle:1.3.5'
 	implementation "io.dropwizard:dropwizard-forms:${dropwizardVersion}"
-	implementation "org.jdbi:jdbi3-postgres:3.41.3"
+	implementation "org.jdbi:jdbi3-postgres:3.42.0"
 
-	implementation 'ru.vyarus.guicey:guicey-jdbi3:5.9.3'
+	implementation 'ru.vyarus.guicey:guicey-jdbi3:5.10.0'
 	implementation 'com.google.guava:guava:32.1.3-jre' // Pick the non-Android version of Guice
 	implementation 'commons-collections:commons-collections:3.2.2'
 
 	// Supported database is PostgreSQL:
-	implementation 'org.postgresql:postgresql:42.6.0'
+	implementation 'org.postgresql:postgresql:42.7.1'
 	implementation 'org.liquibase:liquibase-core:4.23.1'
 
 	// For caching domain users (used in every request in the AuthenticationFilter)
@@ -108,7 +108,7 @@ dependencies {
 	implementation 'javax.cache:cache-api:1.1.1'
 	implementation 'commons-beanutils:commons-beanutils:1.9.4'
 
-	implementation 'org.simplejavamail:simple-java-mail:8.3.1'
+	implementation 'org.simplejavamail:simple-java-mail:8.5.0'
 	implementation 'org.eclipse.angus:jakarta.mail:2.0.2'
 	implementation "ch.qos.logback:logback-classic:${logbackVersion}"
 	implementation "ch.qos.logback:logback-core:${logbackVersion}"
@@ -124,16 +124,16 @@ dependencies {
 	// Used for converting GraphQL request output to XML:
 	implementation 'com.github.javadev:underscore-lodash:1.26'
 	// For JSON schema validation, supports detailed error reporting
-	implementation 'com.networknt:json-schema-validator:1.0.87'
+	implementation 'com.networknt:json-schema-validator:1.0.88'
 
 	// used for writing Excel documents
-	implementation 'org.apache.poi:poi:5.2.4'
-	implementation 'org.apache.poi:poi-ooxml:5.2.4'
+	implementation 'org.apache.poi:poi:5.2.5'
+	implementation 'org.apache.poi:poi-ooxml:5.2.5'
 	// For inferring MIME types of attachments
 	implementation 'org.apache.tika:tika-core:2.9.1'
 
 	// For parsing HTML to check for 'empty' input
-	implementation 'org.jsoup:jsoup:1.16.2'
+	implementation 'org.jsoup:jsoup:1.17.1'
 
 	// For fast and simple image scaling
 	implementation 'net.coobird:thumbnailator:0.4.20'
@@ -753,7 +753,7 @@ jar {
 //Configure the Java Checkstyle settings. Run with ./gradlew check
 checkstyle {
 	configFile = rootProject.file('config/google_checks.xml')
-	toolVersion = '10.12.5'
+	toolVersion = '10.12.6'
 }
 //Easiest way to avoid checking generated code
 checkstyleTest {
