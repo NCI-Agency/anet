@@ -9,7 +9,7 @@ plugins {
 	id "com.diffplug.spotless" version "6.23.3"
 	id "com.graphql_java_generator.graphql-gradle-plugin" version "1.18.11"
 	id "org.beryx.runtime" version "1.13.0"
-	id "com.netflix.nebula.rpm" version "11.5.0"
+	id "com.netflix.nebula.rpm" version "11.6.0"
 }
 
 apply plugin: 'java'
