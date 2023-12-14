@@ -105,13 +105,23 @@ public class AttachmentResource {
       return attachmentContent;
     }
     if (!detectedMimeType.equals(attachment.getMimeType())) {
-      logger.error(
-          "Attachment content upload rejected for attachment {} (\"{}\"): "
-              + "stated mimeType \"{}\" differs from detected mimeType \"{}\"",
-          attachment.getUuid(), attachment.getFileName(), attachment.getMimeType(),
-          detectedMimeType);
-      throw new WebApplicationException("Attachment content does not match the MIME type",
-          Status.BAD_REQUEST);
+      if (getAllowedMimeTypes().contains(detectedMimeType)) {
+        logger.info(
+            "Attachment content upload for attachment {} (\"{}\"): "
+                + "updated stated mimeType \"{}\" to detected mimeType \"{}\"",
+            attachment.getUuid(), attachment.getFileName(), attachment.getMimeType(),
+            detectedMimeType);
+        attachment.setMimeType(detectedMimeType);
+        dao.updateMimeType(attachment);
+      } else {
+        logger.error(
+            "Attachment content upload rejected for attachment {} (\"{}\"): "
+                + "stated mimeType \"{}\" differs from detected mimeType \"{}\"",
+            attachment.getUuid(), attachment.getFileName(), attachment.getMimeType(),
+            detectedMimeType);
+        throw new WebApplicationException("Attachment content does not match the MIME type",
+            Status.BAD_REQUEST);
+      }
     }
     return tikaInputStream;
   }

@@ -92,8 +92,7 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AbstractSearchQuery<?
             + "UPDATE \"attachments\" SET \"mimeType\" = :mimeType, \"fileName\" = :fileName, "
             + "\"description\" = :description, \"classification\" = :classification, "
             + "\"caption\" = :caption, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
-        .bindBean(obj).bind("updatedAt", DaoUtils.asLocalDateTime(obj.getUpdatedAt()))
-        .bind("updatedAt", DaoUtils.asLocalDateTime(obj.getUpdatedAt())).execute();
+        .bindBean(obj).bind("updatedAt", DaoUtils.asLocalDateTime(obj.getUpdatedAt())).execute();
   }
 
   @Override
@@ -103,6 +102,14 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AbstractSearchQuery<?
         .createQuery("/* deleteAttachment */ DELETE FROM attachments WHERE uuid = :uuid"
             + " RETURNING CASE WHEN content IS NULL THEN 1 ELSE lo_unlink(content) END")
         .bind("uuid", uuid).mapTo(Integer.class).one();
+  }
+
+  @InTransaction
+  public int updateMimeType(Attachment obj) {
+    return getDbHandle()
+        .createUpdate("/* updateAttachmentMimeType */ "
+            + "UPDATE \"attachments\" SET \"mimeType\" = :mimeType WHERE uuid = :uuid")
+        .bindBean(obj).execute();
   }
 
   public interface AttachmentContent {
