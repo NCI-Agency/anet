@@ -218,11 +218,9 @@ class ShowPerson extends Page {
   }
 
   async getValidationErrorMessages() {
-    return Promise.all(
-      (await this.getInvalidFeedback()).map(
-        async errorDiv => await errorDiv.getText()
-      )
-    )
+    return await (
+      await this.getInvalidFeedback()
+    ).map(async errorDiv => await errorDiv.getText())
   }
 }
 

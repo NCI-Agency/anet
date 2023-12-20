@@ -5,17 +5,14 @@ export const getRichTextContent = async(
   index
 ) => {
   const tags = selector.split(" ")
-  const convertedSelector = (
-    await Promise.all(tags.map(async tag => await convertTagForEditor(tag)))
-  ).join(" ")
+  const convertedTag = tags.map(tag => convertTagForEditor(tag)).join(" ")
+  const convertedSelector = await richTextEditor.$(convertedTag)
   if (multipleElements) {
-    return (
-      await (await richTextEditor.$(convertedSelector)).$$(multipleElements)
-    )[index]
+    return (await convertedSelector.$$(multipleElements))[index]
   }
-  return richTextEditor.$(convertedSelector)
+  return convertedSelector
 
-  async function convertTagForEditor(tag) {
+  function convertTagForEditor(tag) {
     let convertedTag = tag
     // Some tags are deserialized into different tags having the same appearance
     switch (tag) {

@@ -92,15 +92,12 @@ class MergePeople extends Page {
     const previousPositionsElements = await browser.$$(
       `//div[@id="${side}-merge-per-col"]//div[text()="Previous Positions"]/following-sibling::div//table//tbody//tr`
     )
-    const previousPositions = await Promise.all(
-      previousPositionsElements.map(async elem => {
-        return {
-          name: await (await elem.$$("td"))[0].getText(),
-          date: await (await elem.$$("td"))[1].getText()
-        }
-      })
-    )
-    return previousPositions
+    return await previousPositionsElements.map(async elem => {
+      return {
+        name: await (await elem.$$("td"))[0].getText(),
+        date: await (await elem.$$("td"))[1].getText()
+      }
+    })
   }
 
   async waitForAdvancedSelectLoading(compareStr) {
@@ -154,10 +151,9 @@ class MergePeople extends Page {
 
   async areNotesExist(notes) {
     let areExist = true
-    const allNoteTexts = await Promise.all(
-      (
-        await this.getNoteCards()
-      ).map(async card => await (await card.$(".card-body > div")).getText())
+    const noteCards = await this.getNoteCards()
+    const allNoteTexts = await noteCards.map(
+      async card => await (await card.$(".card-body > div")).getText()
     )
     for (const note of notes) {
       if (!allNoteTexts.includes(note)) {

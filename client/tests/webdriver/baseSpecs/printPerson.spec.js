@@ -73,9 +73,7 @@ describe("Show person page", () => {
       await (await ShowPerson.getSelectAllButton()).click()
       await ShowPerson.waitForCompactField(
         false,
-        ...(await Promise.all(
-          Object.values(SOME_FIELDS).map(async field => field.fieldLabel)
-        ))
+        ...Object.values(SOME_FIELDS).map(field => field.fieldLabel)
       )
     })
     it("All fields can be cleared using the optional fields dropdown", async() => {
@@ -84,9 +82,7 @@ describe("Show person page", () => {
       await (await ShowPerson.getClearAllButton()).click()
       await ShowPerson.waitForCompactField(
         true,
-        ...(await Promise.all(
-          Object.values(SOME_FIELDS).map(async field => field.fieldLabel)
-        ))
+        ...Object.values(SOME_FIELDS).map(field => field.fieldLabel)
       )
     })
     it("Individual fields can be selected using optional fields dropdown", async() => {

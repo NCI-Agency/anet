@@ -75,15 +75,12 @@ class MergePositions extends Page {
     const associatedPositionRows = await browser.$$(
       "#assigned-principal tbody tr"
     )
-    const winnerAps = await Promise.all(
-      associatedPositionRows.map(async elem => {
-        return {
-          person: await (await elem.$$("td"))[0].getText(),
-          position: await (await elem.$$("td"))[1].getText()
-        }
-      })
-    )
-    return winnerAps
+    return await associatedPositionRows.map(async elem => {
+      return {
+        person: await (await elem.$$("td"))[0].getText(),
+        position: await (await elem.$$("td"))[1].getText()
+      }
+    })
   }
 
   async getShowNotesButton() {
@@ -117,30 +114,24 @@ class MergePositions extends Page {
     const associatedPositionElements = await browser.$$(
       `//div[@id="${side}-merge-pos-col"]//div[text()="Associated Positions"]//following-sibling::div//table//tbody//tr`
     )
-    const associatedPositions = await Promise.all(
-      associatedPositionElements.map(async elem => {
-        return {
-          person: await (await elem.$$("td"))[0].getText(),
-          position: await (await elem.$$("td"))[1].getText()
-        }
-      })
-    )
-    return associatedPositions
+    return await associatedPositionElements.map(async elem => {
+      return {
+        person: await (await elem.$$("td"))[0].getText(),
+        position: await (await elem.$$("td"))[1].getText()
+      }
+    })
   }
 
   async getPreviousPeople(side) {
     const previousPeopleElements = await browser.$$(
       `//div[@id="${side}-merge-pos-col"]//div[text()="Previous People"]/following-sibling::div//table//tbody//tr`
     )
-    const previousPeople = await Promise.all(
-      previousPeopleElements.map(async elem => {
-        return {
-          name: await (await elem.$$("td"))[0].getText(),
-          date: await (await elem.$$("td"))[1].getText()
-        }
-      })
-    )
-    return previousPeople
+    return await previousPeopleElements.map(async elem => {
+      return {
+        name: await (await elem.$$("td"))[0].getText(),
+        date: await (await elem.$$("td"))[1].getText()
+      }
+    })
   }
 
   async waitForAdvancedSelectLoading(compareStr) {
@@ -194,20 +185,15 @@ class MergePositions extends Page {
 
   async getAssociatedPositionsInModal(side) {
     const selectedSide = await browser.$$(`#edit-ap-${side} tbody tr`)
-    const associatedPositions = await Promise.all(
-      selectedSide.map(async elem => {
-        return {
-          // On the right column first td is button while on the other columns last td is the button
-          person: await (
-            await elem.$$("td")
-          )[side === "right" ? 1 : 0].getText(),
-          position: await (
-            await elem.$$("td")
-          )[side === "right" ? 2 : 1].getText()
-        }
-      })
-    )
-    return associatedPositions
+    return await selectedSide.map(async elem => {
+      return {
+        // On the right column first td is button while on the other columns last td is the button
+        person: await (await elem.$$("td"))[side === "right" ? 1 : 0].getText(),
+        position: await (
+          await elem.$$("td")
+        )[side === "right" ? 2 : 1].getText()
+      }
+    })
   }
 
   async getAssociatedPositionActionButton(side, index) {
@@ -217,10 +203,9 @@ class MergePositions extends Page {
 
   async areNotesExist(notes) {
     let areExist = true
-    const allNoteTexts = await Promise.all(
-      (
-        await this.getNoteCards()
-      ).map(async card => await (await card.$(".card-body > div")).getText())
+    const noteCards = await this.getNoteCards()
+    const allNoteTexts = await noteCards.map(
+      async card => await (await card.$(".card-body > div")).getText()
     )
     for (const note of notes) {
       if (!allNoteTexts.includes(note)) {
