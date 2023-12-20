@@ -149,10 +149,7 @@ const AttachmentShow = ({ pageDispatchers }) => {
       {({ values }) => {
         const action = (
           <>
-            <Button
-              className="d-flex p-0 align-items-center"
-              disabled={contentMissing}
-            >
+            <Button variant="primary" disabled={contentMissing}>
               <a
                 href={`/api/attachment/download/${attachment.uuid}`}
                 style={{

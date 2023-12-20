@@ -209,7 +209,7 @@ const PersonShow = ({ pageDispatchers }) => {
   const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
 
   const action = (
-    <div>
+    <>
       <Button value="compactView" variant="primary" onClick={onCompactClick}>
         Summary / Print
       </Button>
@@ -234,7 +234,7 @@ const PersonShow = ({ pageDispatchers }) => {
           }
         }
       />
-    </div>
+    </>
   )
   const emailHumanValue = (
     <a href={`mailto:${person.emailAddress}`}>{person.emailAddress}</a>

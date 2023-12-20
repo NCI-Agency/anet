@@ -1,3 +1,4 @@
+import classNames from "classnames"
 import { CompactRow } from "components/Compact"
 import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
@@ -37,7 +38,13 @@ const Fieldset = ({
     >
       {(title || action) && (
         <h4 className="legend">
-          <span className="title-text">{title}</span>
+          <span
+            className={classNames("title-text", "ellipsized-text", {
+              "limit-title-text": action
+            })}
+          >
+            {title}
+          </span>
           {action && <small className="action-small">{action}</small>}
         </h4>
       )}

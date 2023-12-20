@@ -45,7 +45,7 @@ const AttachmentPreview = ({ className, uuid }) => {
   return (
     <div className={`${className} preview-content-scroll`}>
       <div className="preview-sticky-title">
-        <h4>{`Attachment ${attachment.caption}`}</h4>
+        <h4 className="ellipsized-text">{`Attachment ${attachment.caption}`}</h4>
       </div>
       <div className="preview-section">
         <Row>

@@ -128,30 +128,26 @@ const PositionShow = ({ pageDispatchers }) => {
         const action = (
           <>
             {canEdit && (
-              <span style={{ marginLeft: "1rem" }}>
-                <LinkTo
-                  modelType="Position"
-                  model={position}
-                  edit
-                  button="primary"
-                  className="edit-position"
-                >
-                  Edit
-                </LinkTo>
-              </span>
+              <LinkTo
+                modelType="Position"
+                model={position}
+                edit
+                button="primary"
+                className="edit-position"
+              >
+                Edit
+              </LinkTo>
             )}
-            <span className="ms-3">
-              <RelatedObjectNotes
-                notes={position.notes}
-                relatedObject={
-                  position.uuid && {
-                    relatedObjectType: Position.relatedObjectType,
-                    relatedObjectUuid: position.uuid,
-                    relatedObject: position
-                  }
+            <RelatedObjectNotes
+              notes={position.notes}
+              relatedObject={
+                position.uuid && {
+                  relatedObjectType: Position.relatedObjectType,
+                  relatedObjectUuid: position.uuid,
+                  relatedObject: position
                 }
-              />
-            </span>
+              }
+            />
           </>
         )
         return (

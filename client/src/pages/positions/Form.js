@@ -181,7 +181,7 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
           values.person &&
           values.person.uuid
         const action = (
-          <div>
+          <>
             <Button
               key="submit"
               variant="primary"
@@ -191,7 +191,7 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
               Save Position
             </Button>
             {notesComponent}
-          </div>
+          </>
         )
         const organizationFilters = {
           allOrganizations: {

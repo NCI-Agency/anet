@@ -53,35 +53,38 @@ fieldset {
   width: 100%;
 }
 
-.legend {
-  float: left;
+.ellipsized-text {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  display: inline-block;
+  max-width: 100%;
+}
+
+h4.legend {
   width: 100%;
   color: #363636;
   border: none;
   font-weight: normal;
-}
-
-h4.legend {
   margin-top: 1rem;
-}
-
-.legend small {
-  float: right;
   display: flex;
-  font-size: 1.2rem;
-  margin: 1rem 0.5rem 0 0;
+  flex-wrap: wrap;
+  row-gap: 0.5rem;
+  column-gap: 0.5rem;
+  justify-content: space-between;
 }
 
-.legend small .btn {
-  margin-top: -2rem;
+h4.legend span.limit-title-text {
+  max-width: calc(100% - 400px);
+  min-width: 20rem;
 }
 
-.legend small .btn.btn-outline-danger.float-end {
-  margin-top: -1.5rem;
-}
-
-.legend small :not(.btn-group) .btn + .btn {
-  margin-left: 1rem;
+h4.legend small.action-small {
+  display: flex;
+  flex-wrap: wrap;
+  row-gap: 0.5rem;
+  column-gap: 0.5rem;
+  margin-right: 0.5rem;
 }
 
 .form-top-submit {
@@ -1204,7 +1207,6 @@ header.searchPagination {
 }
 
 .rollup-date-range-container {
-  padding-bottom: 8px;
   display: flex;
   align-items: center;
 }
@@ -1273,21 +1275,6 @@ div[id*='fg-entityAssessment'] {
   /* hide guide tour on small screen as it is broken */
   .persistent-tour-launcher {
     display: none;
-  }
-
-  .scroll-anchor-container .action-small {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: flex-end;
-  }
-
-  .scroll-anchor-container .action-small > * {
-    margin: 5px 0 0 0;
-  }
-
-  .legend small .btn {
-    margin: 5px 0 0 0;
   }
 
   fieldset {

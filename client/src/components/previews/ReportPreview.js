@@ -171,7 +171,7 @@ const ReportPreview = ({ className, uuid }) => {
         </div>
       )}
 
-      <h4>Report {reportTitle}</h4>
+      <h4 className="ellipsized-text">Report {reportTitle}</h4>
       <div className="preview-section">
         <PreviewField
           extraColForValue
