@@ -438,6 +438,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
           </div>
         )
 
+        const reportTitle = report.intent || `#${report.uuid}`
         return (
           <div className="report-show">
             {renderEmailModal(values, setFieldValue)}
@@ -544,7 +545,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                         persistent
                       />
                     )}{" "}
-                    Report #{report.uuid}
+                    Report {reportTitle}
                   </>
                 }
                 action={action}

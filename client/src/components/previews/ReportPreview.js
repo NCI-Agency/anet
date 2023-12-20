@@ -132,6 +132,7 @@ const ReportPreview = ({ className, uuid }) => {
     report = Object.assign(report, report.getAttendeesEngagementAssessments())
   }
 
+  const reportTitle = report.intent || `#${report.uuid}`
   return (
     <div className={`report-preview preview-content-scroll ${className || ""}`}>
       {report.isPublished() && (
@@ -170,7 +171,7 @@ const ReportPreview = ({ className, uuid }) => {
         </div>
       )}
 
-      <h4>Report {uuid}</h4>
+      <h4>Report {reportTitle}</h4>
       <div className="preview-section">
         <PreviewField
           extraColForValue
