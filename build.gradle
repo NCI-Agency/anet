@@ -108,7 +108,7 @@ dependencies {
 	implementation 'javax.cache:cache-api:1.1.1'
 	implementation 'commons-beanutils:commons-beanutils:1.9.4'
 
-	implementation 'org.simplejavamail:simple-java-mail:8.5.0'
+	implementation 'org.simplejavamail:simple-java-mail:8.5.1'
 	implementation 'org.eclipse.angus:jakarta.mail:2.0.2'
 	implementation "ch.qos.logback:logback-classic:${logbackVersion}"
 	implementation "ch.qos.logback:logback-core:${logbackVersion}"
@@ -124,7 +124,7 @@ dependencies {
 	// Used for converting GraphQL request output to XML:
 	implementation 'com.github.javadev:underscore-lodash:1.26'
 	// For JSON schema validation, supports detailed error reporting
-	implementation 'com.networknt:json-schema-validator:1.0.88'
+	implementation 'com.networknt:json-schema-validator:1.1.0'
 
 	// used for writing Excel documents
 	implementation 'org.apache.poi:poi:5.2.5'
