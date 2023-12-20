@@ -73,16 +73,14 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
         const { backgroundSize, backgroundImage } =
           utils.getAttachmentIconDetails(values)
         const action = (
-          <div>
-            <Button
-              key="submit"
-              variant="primary"
-              onClick={submitForm}
-              disabled={isSubmitting}
-            >
-              Save Attachment
-            </Button>
-          </div>
+          <Button
+            key="submit"
+            variant="primary"
+            onClick={submitForm}
+            disabled={isSubmitting}
+          >
+            Save Attachment
+          </Button>
         )
         return (
           <div>

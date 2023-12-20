@@ -146,7 +146,7 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
         const disabled = !isAdmin
         const fieldSettings = values.fieldSettings()
         const action = (
-          <div>
+          <>
             <Button
               key="submit"
               variant="primary"
@@ -156,7 +156,7 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
               Save {fieldSettings.shortLabel}
             </Button>
             {notesComponent}
-          </div>
+          </>
         )
         return (
           <div>

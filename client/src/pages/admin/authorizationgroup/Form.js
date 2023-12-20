@@ -57,16 +57,14 @@ const AuthorizationGroupForm = ({ edit, title, initialValues }) => {
     >
       {({ isSubmitting, dirty, setFieldValue, submitForm }) => {
         const action = (
-          <div>
-            <Button
-              key="submit"
-              variant="primary"
-              onClick={submitForm}
-              disabled={isSubmitting}
-            >
-              Save Authorization Group
-            </Button>
-          </div>
+          <Button
+            key="submit"
+            variant="primary"
+            onClick={submitForm}
+            disabled={isSubmitting}
+          >
+            Save Authorization Group
+          </Button>
         )
         return (
           <div>

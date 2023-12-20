@@ -127,7 +127,7 @@ const OrganizationPreview = ({ className, uuid }) => {
   return (
     <div className={`${className} preview-content-scroll`}>
       <div className="preview-sticky-title">
-        <h4>{`Organization ${organization.shortName}`}</h4>
+        <h4 className="ellipsized-text">{`Organization ${organization.shortName}`}</h4>
       </div>
       <div className="preview-section">
         <DictPreviewField

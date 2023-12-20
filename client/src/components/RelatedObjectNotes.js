@@ -105,7 +105,11 @@ const RelatedObjectNotes = ({
 
   return (
     <>
-      <Button onClick={handleShow} title="Show notes">
+      <Button
+        onClick={handleShow}
+        title="Show notes"
+        style={{ display: noNotes ? "inline-block" : "inline-grid" }}
+      >
         {!noNotes && <NotificationBadge>{badgeLabel}</NotificationBadge>}
         <Icon icon={IconNames.COMMENT} />
       </Button>

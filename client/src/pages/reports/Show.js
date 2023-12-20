@@ -406,7 +406,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
     >
       {({ isValid, setFieldValue, values }) => {
         const action = (
-          <div>
+          <>
             {canEmail && (
               <Button onClick={toggleEmailModal} variant="outline-secondary">
                 Email report
@@ -435,7 +435,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                 }
               }
             />
-          </div>
+          </>
         )
 
         const reportTitle = report.intent || `#${report.uuid}`

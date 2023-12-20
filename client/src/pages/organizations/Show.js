@@ -273,7 +273,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
     <Formik enableReinitialize initialValues={organization}>
       {({ values }) => {
         const action = (
-          <div>
+          <>
             {canAdministrateOrg && (
               <LinkTo
                 modelType="Organization"
@@ -307,7 +307,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
                 }
               }
             />
-          </div>
+          </>
         )
         return (
           <div>

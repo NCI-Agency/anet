@@ -424,7 +424,7 @@ const ReportForm = ({
           isAuthor
         // Skip validation on save!
         const action = (
-          <div>
+          <>
             <Button
               variant="primary"
               onClick={() => onSubmit(values, { resetForm, setSubmitting })}
@@ -433,7 +433,7 @@ const ReportForm = ({
               {submitText}
             </Button>
             {notesComponent}
-          </div>
+          </>
         )
         const isFutureEngagement = Report.isFuture(values.engagementDate)
         const hasAssessments = values.engagementDate && !isFutureEngagement

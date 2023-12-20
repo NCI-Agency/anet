@@ -115,7 +115,7 @@ const PersonPreview = ({ className, uuid }) => {
   return (
     <div className={`${className} preview-content-scroll`}>
       <div className="preview-sticky-title">
-        <h4>{`${person.rank} ${person.name}`}</h4>
+        <h4 className="ellipsized-text">{`${person.rank} ${person.name}`}</h4>
       </div>
       <div className="preview-section">
         <Row>

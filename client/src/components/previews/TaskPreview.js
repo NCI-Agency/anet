@@ -132,7 +132,7 @@ const TaskPreview = ({ className, uuid }) => {
   return (
     <div className={`${className} preview-content-scroll`}>
       <div className="preview-sticky-title">
-        <h4>{`${fieldSettings.shortLabel} ${task.shortName}`}</h4>
+        <h4 className="ellipsized-text">{`${fieldSettings.shortLabel} ${task.shortName}`}</h4>
       </div>
       <div className="preview-section">
         <DictPreviewField

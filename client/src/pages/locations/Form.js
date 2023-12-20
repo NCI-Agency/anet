@@ -147,7 +147,7 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
           })
         }
         const action = (
-          <div>
+          <>
             <Button
               key="submit"
               variant="primary"
@@ -157,7 +157,7 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
               Save Location
             </Button>
             {notesComponent}
-          </div>
+          </>
         )
 
         const coordinates = {

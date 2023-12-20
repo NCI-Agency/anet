@@ -143,7 +143,7 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
           values.parentOrg = {}
         }
         const action = canAdministrateOrg && (
-          <div>
+          <>
             <Button
               key="submit"
               variant="primary"
@@ -153,7 +153,7 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
               Save Organization
             </Button>
             {notesComponent}
-          </div>
+          </>
         )
         const tasksFilters = {
           allTasks: {

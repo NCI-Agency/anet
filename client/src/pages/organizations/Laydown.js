@@ -69,11 +69,11 @@ const OrganizationLaydown = ({ organization, refetch, readOnly }) => {
         className="scroll-anchor-container"
       >
         <div style={{ display: "flex", flexDirection: "column" }}>
-          <div>
-            <h4 className="legend">
-              <span className="title-text">Organization Diagram</span>
-            </h4>
-          </div>
+          <h4 className="legend">
+            <span className="title-text ellipsized-text">
+              Organization Diagram
+            </span>
+          </h4>
           <div style={{ backgroundColor: "white" }}>
             <ContainerDimensions>
               {({ width, height }) => (
@@ -95,19 +95,17 @@ const OrganizationLaydown = ({ organization, refetch, readOnly }) => {
         id="supportedPositions"
         title="Supported positions"
         action={
-          <div>
-            {canAdministrateOrg && (
-              <LinkTo
-                modelType="Position"
-                model={Position.pathForNew({
-                  organizationUuid: organization.uuid
-                })}
-                button
-              >
-                Create position
-              </LinkTo>
-            )}
-          </div>
+          canAdministrateOrg && (
+            <LinkTo
+              modelType="Position"
+              model={Position.pathForNew({
+                organizationUuid: organization.uuid
+              })}
+              button
+            >
+              Create position
+            </LinkTo>
+          )
         }
       >
         {renderPositionTable(supportedPositions)}
@@ -120,15 +118,13 @@ const OrganizationLaydown = ({ organization, refetch, readOnly }) => {
         id="vacantPositions"
         title="Vacant positions"
         action={
-          <div>
-            {numInactivePos > 0 && (
-              <Button onClick={toggleShowInactive} variant="outline-secondary">
-                {(showInactivePositions ? "Hide " : "Show ") +
-                  numInactivePos +
-                  " inactive position(s)"}
-              </Button>
-            )}
-          </div>
+          numInactivePos > 0 && (
+            <Button onClick={toggleShowInactive} variant="outline-secondary">
+              {(showInactivePositions ? "Hide " : "Show ") +
+                numInactivePos +
+                " inactive position(s)"}
+            </Button>
+          )
         }
       >
         {renderPositionTable(positionsNeedingAttention)}

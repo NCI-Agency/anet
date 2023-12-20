@@ -137,15 +137,13 @@ const AdminIndex = ({ pageDispatchers }) => {
       <Formik enableReinitialize onSubmit={onSubmit} initialValues={settings}>
         {({ values, isSubmitting, submitForm }) => {
           const action = (
-            <div>
-              <Button
-                variant="primary"
-                onClick={submitForm}
-                disabled={isSubmitting}
-              >
-                Save settings
-              </Button>
-            </div>
+            <Button
+              variant="primary"
+              onClick={submitForm}
+              disabled={isSubmitting}
+            >
+              Save settings
+            </Button>
           )
           return (
             <Form className="form-horizontal" method="post">
@@ -186,7 +184,7 @@ const AdminIndex = ({ pageDispatchers }) => {
               </Fieldset>
               <div className="submit-buttons">
                 <div />
-                {action}
+                <div>{action}</div>
               </div>
             </Form>
           )

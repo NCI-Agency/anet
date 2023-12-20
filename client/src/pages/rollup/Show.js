@@ -439,7 +439,7 @@ const RollupShow = ({ pageDispatchers, searchQuery, setSearchQuery }) => {
           </div>
         }
         action={
-          <span>
+          <>
             <Button
               id="print-rollup"
               href={previewPlaceholderUrl}
@@ -456,7 +456,7 @@ const RollupShow = ({ pageDispatchers, searchQuery, setSearchQuery }) => {
             >
               Email rollup
             </Button>
-          </span>
+          </>
         }
         style={fieldsetStyle}
       >
