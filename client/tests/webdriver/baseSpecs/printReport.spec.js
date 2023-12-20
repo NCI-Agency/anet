@@ -49,9 +49,7 @@ describe("Show print report page", () => {
         "Efforts"
       ]
       const fields = await ShowReport.getCompactReportFields()
-      const fieldTexts = await Promise.all(
-        Array.from(fields).map(async field => await field.getText())
-      )
+      const fieldTexts = await fields.map(async field => await field.getText())
       for (const mustHave of mustHaveFieldTexts) {
         expect(fieldTexts).to.contain(mustHave)
       }

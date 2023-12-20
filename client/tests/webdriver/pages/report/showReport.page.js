@@ -195,9 +195,7 @@ class ShowReport extends Page {
     const elements = await (withAssessments
       ? browser.$$(`#${type} > td > table > tbody > tr > td > span`)
       : browser.$$(`#${type} > td > span`))
-    return await Promise.all(
-      elements.map(async element => (await element).getText())
-    )
+    return await elements.map(async element => (await element).getText())
   }
 
   async selectOptionalField(field) {
