@@ -169,12 +169,13 @@ const ReportEdit = ({ pageDispatchers }) => {
     reportInitialValues.reportPeople
   )
 
+  const reportTitle = report.intent || `#${report.uuid}`
   return (
     <div className="report-edit">
       <ReportForm
         edit
         initialValues={reportInitialValues}
-        title={`Report #${report.uuid}`}
+        title={`Report ${reportTitle}`}
         showSensitiveInfo={!!report.reportSensitiveInformation?.text}
         notesComponent={
           <RelatedObjectNotes
