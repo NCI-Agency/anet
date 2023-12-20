@@ -71,11 +71,8 @@ class ShowReport extends Page {
   }
 
   async getUuid() {
-    const title =
-      (await (
-        await browser.$("//span[@class='title-text'][contains(.,'Report #')]")
-      ).getText()) || ""
-    return title.slice(title.lastIndexOf("#") + 1)
+    const url = await browser.getUrl()
+    return url.slice(url.lastIndexOf("/") + 1)
   }
 
   async getIntent() {
