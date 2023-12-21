@@ -149,6 +149,7 @@ const MultiTypeAdvancedSelectComponent = ({
   objectType,
   entityTypes,
   value,
+  valueKey,
   isMultiSelect,
   filters,
   className
@@ -175,7 +176,9 @@ const MultiTypeAdvancedSelectComponent = ({
   const SelectComponent = isMultiSelect
     ? AdvancedMultiSelect
     : AdvancedSingleSelect
-  const extraSelectProps = isMultiSelect ? {} : { showRemoveButton: false }
+  const extraSelectProps = isMultiSelect
+    ? {}
+    : { valueKey, showRemoveButton: false }
   const filterDefs =
     typeof advancedSelectProps.filterDefs === "function"
       ? advancedSelectProps.filterDefs(filters[0]?.[entityType])
@@ -235,6 +238,7 @@ MultiTypeAdvancedSelectComponent.propTypes = {
   objectType: PropTypes.string,
   entityTypes: PropTypes.arrayOf(PropTypes.string).isRequired,
   value: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
+  valueKey: PropTypes.string,
   isMultiSelect: PropTypes.bool.isRequired,
   filters: PropTypes.array,
   className: PropTypes.string

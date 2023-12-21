@@ -4,24 +4,25 @@ import { FastField, Form, Formik } from "formik"
 import PropTypes from "prop-types"
 import React, { useCallback } from "react"
 import { Button, Form as FormBS, Modal } from "react-bootstrap"
-import { Transforms } from "slate"
+import { Editor, Transforms } from "slate"
 import { ReactEditor } from "slate-react"
 import { ANET_LINK, EXTERNAL_LINK, getEntityInfoFromUrl } from "utils_links"
 import * as yup from "yup"
 
-const LinkSourceAnet = ({
-  editor,
-  showModal,
-  setShowModal,
-  selection,
-  external
-}) => {
+const LinkSourceAnet = ({ editor, showModal, setShowModal, external }) => {
   const insertAnetLink = useCallback(
     node => {
       ReactEditor.focus(editor)
-      if (selection) {
+      if (editor.selection) {
+        const { replaceSelection, selectedParentNode } = getParentNodeProps(
+          editor,
+          external
+        )
+        if (replaceSelection) {
+          Transforms.removeNodes(editor, { at: selectedParentNode?.[1] })
+        }
         Transforms.insertNodes(editor, node, {
-          at: { path: selection.focus.path, offset: selection.focus.offset },
+          at: editor.selection.focus,
           select: true
         })
       } else {
@@ -32,8 +33,10 @@ const LinkSourceAnet = ({
       Transforms.move(editor, { distance: 1 })
       setShowModal(false)
     },
-    [editor, selection, setShowModal]
+    [editor, external, setShowModal]
   )
+
+  const value = getParentNodeProps(editor, external)?.value
 
   return (
     <Modal
@@ -51,6 +54,8 @@ const LinkSourceAnet = ({
       <Modal.Body>
         {external ? (
           <ExternalLinkForm
+            url={value?.url}
+            text={value?.text}
             onConfirm={(values, form) => {
               const externalLinkNode = createExternalLinkNode(
                 values.url,
@@ -62,6 +67,9 @@ const LinkSourceAnet = ({
           />
         ) : (
           <MultiTypeAdvancedSelectComponent
+            objectType={value?.objectType}
+            value={value?.object}
+            valueKey={value?.object && "uuid"}
             onConfirm={(value, objectType) => {
               const anetLinkNode = createAnetLinkNode(objectType, value.uuid)
               insertAnetLink(anetLinkNode)
@@ -71,13 +79,35 @@ const LinkSourceAnet = ({
       </Modal.Body>
     </Modal>
   )
+
+  function getParentNodeProps(editor, external) {
+    const selectedParentNode =
+      editor.selection && Editor.parent(editor, editor.selection)
+    const selectedParent = selectedParentNode?.[0]
+    let value
+    if (external && selectedParent?.type === EXTERNAL_LINK) {
+      value = {
+        url: selectedParent.url,
+        text: selectedParent.children?.[0]?.text
+      }
+    } else if (!external && selectedParent?.type === ANET_LINK) {
+      value = {
+        objectType: selectedParent.entityType,
+        object: selectedParent.entityUuid
+          ? { uuid: selectedParent.entityUuid }
+          : null
+      }
+    } else {
+      value = null
+    }
+    return { replaceSelection: !!value, selectedParentNode, value }
+  }
 }
 
 LinkSourceAnet.propTypes = {
   editor: PropTypes.object.isRequired,
   showModal: PropTypes.bool,
   setShowModal: PropTypes.func.isRequired,
-  selection: PropTypes.object,
   external: PropTypes.bool
 }
 
@@ -85,7 +115,7 @@ LinkSourceAnet.defaultProps = {
   external: false
 }
 
-const ExternalLinkForm = ({ onConfirm, onCancel }) => {
+const ExternalLinkForm = ({ url, text, onConfirm, onCancel }) => {
   const yupSchema = yup.object().shape({
     url: yup.string().required("Url is required").default(""),
     text: yup.string().required("Text is required").default("")
@@ -94,7 +124,7 @@ const ExternalLinkForm = ({ onConfirm, onCancel }) => {
     <Formik
       validateOnMount
       validationSchema={yupSchema}
-      initialValues={{ url: "", text: "" }}
+      initialValues={{ url, text }}
       onSubmit={onConfirm}
     >
       {({ submitForm, isSubmitting, isValid }) => {
@@ -131,8 +161,15 @@ const ExternalLinkForm = ({ onConfirm, onCancel }) => {
 }
 
 ExternalLinkForm.propTypes = {
+  url: PropTypes.string,
+  text: PropTypes.string,
   onConfirm: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired
+}
+
+ExternalLinkForm.defaultProps = {
+  url: "",
+  text: ""
 }
 
 function createAnetLinkNode(entityType, entityUuid) {
