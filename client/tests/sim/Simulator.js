@@ -1,6 +1,6 @@
+import colors from "@colors/colors"
 import { faker } from "@faker-js/faker"
 import Aigle from "aigle"
-import colors from "colors"
 import scenarioMapping from "./scenarios/scenarios"
 import { fuzzy, normalCDF, normalPPF, sleep } from "./simutils"
 
