@@ -140,13 +140,13 @@ export const searchFilters = function() {
   const authorWidgetFilters = {
     all: {
       label: "All",
-      queryVars: { role: Person.ROLE.ADVISOR }
+      queryVars: { role: Person.ROLE.ADVISOR, pendingVerification: false }
     }
   }
   const attendeeWidgetFilters = {
     all: {
       label: "All",
-      queryVars: {}
+      queryVars: { pendingVerification: false }
     }
   }
   const pendingApprovalOfWidgetFilters = authorWidgetFilters

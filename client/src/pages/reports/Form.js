@@ -326,11 +326,15 @@ const ReportForm = ({
         const reportPeopleFilters = {
           all: {
             label: "All",
-            queryVars: { matchPositionName: true }
+            queryVars: { matchPositionName: true, pendingVerification: false }
           },
           activeAdvisors: {
             label: "All advisors",
-            queryVars: { role: Person.ROLE.ADVISOR, matchPositionName: true }
+            queryVars: {
+              role: Person.ROLE.ADVISOR,
+              matchPositionName: true,
+              pendingVerification: false
+            }
           },
           activePrincipals: {
             label: "All principals",
@@ -343,6 +347,7 @@ const ReportForm = ({
             queryVars: {
               role: Person.ROLE.ADVISOR,
               matchPositionName: true,
+              pendingVerification: false,
               orgUuid: currentOrg.uuid
             }
           }
