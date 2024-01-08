@@ -189,7 +189,7 @@ Map.propTypes = {
  */
 const PendingApprovalReports = ({ pageDispatchers, queryParams, style }) => {
   const [focusedSelection, setFocusedSelection] = useState(null)
-  usePageTitle("Pendig Approval Reports")
+  usePageTitle("Pending Approval Reports")
 
   const advisorOrgLabel = Settings.fields.advisor.org.name
   const chartId = "not_approved_reports_chart"
