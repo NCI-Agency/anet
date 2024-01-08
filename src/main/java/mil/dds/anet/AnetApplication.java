@@ -278,8 +278,8 @@ public class AnetApplication extends Application<AnetConfiguration> {
             combinedName.append(mn);
           }
         }
-        // Fall back to just the name
-        if (combinedName.length() == 0) {
+        if (combinedName.isEmpty() && !Utils.isEmptyOrNull(token.getName())) {
+          // Fall back to just the name
           combinedName.append(token.getName());
         }
         return combinedName.toString();

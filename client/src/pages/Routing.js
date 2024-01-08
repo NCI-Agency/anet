@@ -22,6 +22,7 @@ import LocationEdit from "pages/locations/Edit"
 import LocationNew from "pages/locations/New"
 import LocationShow from "pages/locations/Show"
 import OnboardingEdit from "pages/onboarding/Edit"
+import OnboardingNew from "pages/onboarding/New"
 import OnboardingShow from "pages/onboarding/Show"
 import OrganizationEdit from "pages/organizations/Edit"
 import OrganizationNew from "pages/organizations/New"
@@ -172,8 +173,9 @@ const Routing = () => {
       <Route path={PAGE_URLS.ONBOARDING}>
         {currentUser.isPendingVerification() ? (
           <>
-            <Route index element={<OnboardingShow />} />
+            <Route index path="new" element={<OnboardingNew />} />
             <Route path="edit" element={<OnboardingEdit />} />
+            <Route path="show" element={<OnboardingShow />} />
           </>
         ) : (
           // Replace with home if user account exists already.

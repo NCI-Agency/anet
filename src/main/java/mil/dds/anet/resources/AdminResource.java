@@ -28,6 +28,7 @@ import mil.dds.anet.beans.search.UserActivitySearchQuery;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.database.AdminDao;
 import mil.dds.anet.database.UserActivityDao;
+import mil.dds.anet.graphql.AllowUnverifiedUsers;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AnetConstants;
 import mil.dds.anet.utils.AuthUtils;
@@ -48,6 +49,7 @@ public class AdminResource {
   }
 
   @GraphQLQuery(name = "adminSettings")
+  @AllowUnverifiedUsers
   public List<AdminSetting> getAll() {
     return dao.getAllSettings();
   }
@@ -95,6 +97,7 @@ public class AdminResource {
    * on startup,it is read and set with AnetConfiguration loadVersion method
    */
   @GraphQLQuery(name = "projectVersion")
+  @AllowUnverifiedUsers
   public String getProjectVersion() {
     return config.getVersion();
   }

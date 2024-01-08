@@ -18,6 +18,7 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.recentActivity.Activity;
 import mil.dds.anet.beans.search.ReportSearchQuery;
+import mil.dds.anet.graphql.AllowUnverifiedUsers;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.InsertionOrderLinkedList;
 import mil.dds.anet.utils.Utils;
@@ -89,6 +90,13 @@ public class Person extends AbstractCustomizableAnetBean
   private Deque<Activity> recentActivities;
 
   @Override
+  @AllowUnverifiedUsers
+  public String getUuid() {
+    return super.getUuid();
+  }
+
+  @Override
+  @AllowUnverifiedUsers
   public String getName() {
     return name;
   }
@@ -98,6 +106,7 @@ public class Person extends AbstractCustomizableAnetBean
   }
 
   @Override
+  @AllowUnverifiedUsers
   public Status getStatus() {
     return status;
   }
@@ -107,6 +116,7 @@ public class Person extends AbstractCustomizableAnetBean
     this.status = status;
   }
 
+  @AllowUnverifiedUsers
   public Role getRole() {
     return role;
   }
@@ -115,6 +125,7 @@ public class Person extends AbstractCustomizableAnetBean
     this.role = role;
   }
 
+  @AllowUnverifiedUsers
   public Boolean getPendingVerification() {
     return pendingVerification;
   }
@@ -123,6 +134,7 @@ public class Person extends AbstractCustomizableAnetBean
     this.pendingVerification = pendingVerification;
   }
 
+  @AllowUnverifiedUsers
   public String getEmailAddress() {
     return emailAddress;
   }
@@ -131,6 +143,7 @@ public class Person extends AbstractCustomizableAnetBean
     this.emailAddress = Utils.trimStringReturnNull(emailAddress);
   }
 
+  @AllowUnverifiedUsers
   public String getPhoneNumber() {
     return phoneNumber;
   }
@@ -139,6 +152,7 @@ public class Person extends AbstractCustomizableAnetBean
     this.phoneNumber = Utils.trimStringReturnNull(phoneNumber);
   }
 
+  @AllowUnverifiedUsers
   public String getGender() {
     return gender;
   }
@@ -147,6 +161,7 @@ public class Person extends AbstractCustomizableAnetBean
     this.gender = Utils.trimStringReturnNull(gender);
   }
 
+  @AllowUnverifiedUsers
   public String getCountry() {
     return country;
   }
@@ -155,6 +170,7 @@ public class Person extends AbstractCustomizableAnetBean
     this.country = Utils.trimStringReturnNull(country);
   }
 
+  @AllowUnverifiedUsers
   public Instant getEndOfTourDate() {
     return endOfTourDate;
   }
@@ -163,6 +179,7 @@ public class Person extends AbstractCustomizableAnetBean
     this.endOfTourDate = endOfTourDate;
   }
 
+  @AllowUnverifiedUsers
   public String getRank() {
     return rank;
   }
@@ -171,6 +188,7 @@ public class Person extends AbstractCustomizableAnetBean
     this.rank = Utils.trimStringReturnNull(rank);
   }
 
+  @AllowUnverifiedUsers
   public String getBiography() {
     return biography;
   }
@@ -179,6 +197,7 @@ public class Person extends AbstractCustomizableAnetBean
     this.biography = Utils.trimStringReturnNull(biography);
   }
 
+  @AllowUnverifiedUsers
   public String getDomainUsername() {
     return domainUsername;
   }
@@ -187,6 +206,7 @@ public class Person extends AbstractCustomizableAnetBean
     this.domainUsername = domainUsername;
   }
 
+  @AllowUnverifiedUsers
   public String getOpenIdSubject() {
     return openIdSubject;
   }
@@ -291,6 +311,7 @@ public class Person extends AbstractCustomizableAnetBean
     this.avatarUuid = avatarUuid;
   }
 
+  @AllowUnverifiedUsers
   public String getCode() {
     return code;
   }

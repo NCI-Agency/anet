@@ -5,6 +5,7 @@ import io.leangen.graphql.annotations.GraphQLIgnore;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import javax.ws.rs.WebApplicationException;
+import mil.dds.anet.graphql.AllowUnverifiedUsers;
 import mil.dds.anet.views.AbstractAnetBean;
 
 public class AdminSetting extends AbstractAnetBean {
@@ -28,6 +29,7 @@ public class AdminSetting extends AbstractAnetBean {
     // just ignore
   }
 
+  @AllowUnverifiedUsers
   public String getKey() {
     return key;
   }
@@ -36,6 +38,7 @@ public class AdminSetting extends AbstractAnetBean {
     this.key = key;
   }
 
+  @AllowUnverifiedUsers
   public String getValue() {
     return value;
   }

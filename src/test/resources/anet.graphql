@@ -431,6 +431,7 @@ type Mutation {
   updateAttachment(attachment: AttachmentInput): String
   updateAuthorizationGroup(authorizationGroup: AuthorizationGroupInput): Int
   updateLocation(location: LocationInput): Int
+  updateMe(person: PersonInput): Int
   updateNote(note: NoteInput): Note
   updateOrganization(organization: OrganizationInput): Int
   updatePerson(person: PersonInput): Int

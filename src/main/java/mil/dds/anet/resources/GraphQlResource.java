@@ -13,6 +13,8 @@ import graphql.schema.visibility.NoIntrospectionGraphqlFieldVisibility;
 import io.dropwizard.auth.Auth;
 import io.leangen.graphql.GraphQLSchemaGenerator;
 import io.leangen.graphql.annotations.GraphQLInputField;
+import io.leangen.graphql.execution.InvocationContext;
+import io.leangen.graphql.execution.ResolverInterceptor;
 import io.leangen.graphql.generator.mapping.common.ScalarMapper;
 import io.leangen.graphql.metadata.strategy.DefaultInclusionStrategy;
 import io.leangen.graphql.metadata.strategy.InputFieldInclusionParams;
@@ -41,12 +43,14 @@ import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.config.AnetConfiguration;
+import mil.dds.anet.graphql.AllowUnverifiedUsers;
 import mil.dds.anet.graphql.DateTimeMapper;
 import mil.dds.anet.graphql.outputtransformers.JsonToXlsxTransformer;
 import mil.dds.anet.graphql.outputtransformers.JsonToXmlTransformer;
 import mil.dds.anet.graphql.outputtransformers.XsltXmlTransformer;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.BatchingUtils;
+import mil.dds.anet.utils.DaoUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dataloader.DataLoaderRegistry;
 import org.jdbi.v3.core.ConnectionException;
@@ -90,6 +94,24 @@ public class GraphQlResource {
           return Response.ok(json, this.mediaType);
         }
       };
+
+  private static class AuthorizationInterceptor implements ResolverInterceptor {
+    @Override
+    public Object aroundInvoke(final InvocationContext invocationContext,
+        final Continuation continuation) throws Exception {
+      final Map<String, Object> context =
+          invocationContext.getResolutionEnvironment().dataFetchingEnvironment.getContext();
+      final Person currentUser = DaoUtils.getUserFromContext(context);
+      final AllowUnverifiedUsers allowUnverifiedUsers = invocationContext.getResolver()
+          .getExecutable().getDelegate().getAnnotation(AllowUnverifiedUsers.class);
+      if (allowUnverifiedUsers == null
+          && Boolean.TRUE.equals(currentUser.getPendingVerification())) {
+        // Simply return null so the GraphQL response contains no extra information
+        return null;
+      }
+      return continuation.proceed(invocationContext);
+    }
+  }
 
   public GraphQlResource() {}
 
@@ -173,7 +195,9 @@ public class GraphQlResource {
         })
         // Load our DateTimeMapper:
         .withTypeMappers(
-            (config, defaults) -> defaults.insertBefore(ScalarMapper.class, new DateTimeMapper()));
+            (config, defaults) -> defaults.insertBefore(ScalarMapper.class, new DateTimeMapper()))
+        // Intercept calls to check whether user is authorized
+        .withResolverInterceptors(new AuthorizationInterceptor());
     for (final Object resource : resources) {
       schemaGenerator.withOperationsFromSingleton(resource);
     }
