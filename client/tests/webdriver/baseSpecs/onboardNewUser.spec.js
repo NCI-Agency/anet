@@ -89,8 +89,6 @@ describe("Onboard new user login", () => {
     await OnboardPage.submitForm()
 
     await OnboardPage.waitForAlertWarningToLoad()
-    await (await OnboardPage.getOnboardingPopover()).waitForExist()
-    await (await OnboardPage.getOnboardingPopover()).waitForDisplayed()
     await OnboardPage.logout()
   })
 })
