@@ -251,6 +251,43 @@ public class PersonResource {
     return dao.search(Utils.getSubFields(env), query);
   }
 
+  @GraphQLMutation(name = "approvePerson")
+  public Integer approvePerson(@GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "uuid") String personUuid) {
+    return approveOrDeletePerson(context, personUuid, true);
+  }
+
+  @GraphQLMutation(name = "deletePerson")
+  public Integer deletePerson(@GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "uuid") String personUuid) {
+    return approveOrDeletePerson(context, personUuid, false);
+  }
+
+  public Integer approveOrDeletePerson(Map<String, Object> context, String personUuid,
+      boolean isApproved) {
+    Person user = DaoUtils.getUserFromContext(context);
+    final Person person = dao.getByUuid(personUuid);
+    if (person == null) {
+      throw new WebApplicationException("Person not found", Status.NOT_FOUND);
+    }
+
+    AuthUtils.assertAdministrator(user);
+    if (!Boolean.TRUE.equals(person.getPendingVerification())) {
+      throw new WebApplicationException("Person is not pending verification", Status.FORBIDDEN);
+    }
+
+    final int numRows = isApproved ? dao.approve(personUuid) : dao.delete(personUuid);
+    if (numRows == 0) {
+      throw new WebApplicationException(
+          "Couldn't " + (isApproved ? "approve" : "delete") + " person",
+          Status.INTERNAL_SERVER_ERROR);
+    }
+
+    AnetAuditLogger.log("Person {} " + (isApproved ? "approved" : "deleted") + " by {}", person,
+        user);
+    return numRows;
+  }
+
   /**
    * Convenience method for API testing.
    */

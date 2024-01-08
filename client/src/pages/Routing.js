@@ -9,6 +9,7 @@ import MergePeople from "pages/admin/merge/MergePeople"
 import MergePositions from "pages/admin/merge/MergePositions"
 import UserActivitiesOverTime from "pages/admin/useractivities/UserActivitiesOverTime"
 import UserActivitiesPerPeriod from "pages/admin/useractivities/UserActivitiesPerPeriod"
+import UsersPendingVerification from "pages/admin/UsersPendingVerification"
 import AttachmentEdit from "pages/attachments/Edit"
 import AttachmentShow from "pages/attachments/Show"
 import BoardDashboard from "pages/dashboards/BoardDashboard"
@@ -136,6 +137,12 @@ const Routing = () => {
       {currentUser.isAdmin() && (
         <Route path={PAGE_URLS.ADMIN}>
           <Route index element={<AdminIndex />} />
+          {!Settings.automaticallyAllowAllNewUsers && (
+            <Route
+              path="usersPendingVerification"
+              element={<UsersPendingVerification />}
+            />
+          )}
           <Route path="merge">
             <Route path="people" element={<MergePeople />} />
             <Route path="positions" element={<MergePositions />} />

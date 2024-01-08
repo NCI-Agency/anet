@@ -394,6 +394,7 @@ scalar Long
 """Mutation root"""
 type Mutation {
   addComment(comment: CommentInput, uuid: String): Comment
+  approvePerson(uuid: String): Int
   approveReport(comment: CommentInput, uuid: String): Int!
   clearCache: String
   createAttachment(attachment: AttachmentInput): String
@@ -410,6 +411,7 @@ type Mutation {
   deleteAttachment(uuid: String): Int
   deleteNote(uuid: String): Int
   deleteObjectSubscription(uuid: String): Int
+  deletePerson(uuid: String): Int
   deletePersonFromPosition(uuid: String): Int
   deletePosition(uuid: String): Int
   deleteReport(uuid: String): Int
