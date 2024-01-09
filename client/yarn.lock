@@ -4891,10 +4891,10 @@
     node-gyp-build "^4.2.2"
     resolve-from "^5.0.0"
 
-"@wdio/browserstack-service@8.27.0":
-  version "8.27.0"
-  resolved "https://registry.yarnpkg.com/@wdio/browserstack-service/-/browserstack-service-8.27.0.tgz#4689a232f352e50590a41204f395eda23da0ff0b"
-  integrity sha512-2zTI/wZlZzSy9kIzvarIagjE80r+nXWOiw9ni+AbdhOYSxhfv2uSBaQEMugA9Z9u0Vc3mGmL27ZNHxsjAP/PnA==
+"@wdio/browserstack-service@8.27.1":
+  version "8.27.1"
+  resolved "https://registry.yarnpkg.com/@wdio/browserstack-service/-/browserstack-service-8.27.1.tgz#ba8ff089ae5b083918da8b3d89232823f565e4e0"
+  integrity sha512-5+54/mfAmnV6InW49+943WJL1btp4g60HQqzmlOhszeG4MJ/ytWjrLeX4l4VQtoaa0H1e35IazXSnVVyzioL0Q==
   dependencies:
     "@types/gitconfiglocal" "^2.0.1"
     "@wdio/logger" "8.24.12"
@@ -4911,10 +4911,10 @@
     webdriverio "8.27.0"
     winston-transport "^4.5.0"
 
-"@wdio/cli@8.27.0":
-  version "8.27.0"
-  resolved "https://registry.yarnpkg.com/@wdio/cli/-/cli-8.27.0.tgz#99eb3c0ac86eb0dd7360a8a1dd05bf8aa99ac60e"
-  integrity sha512-wdNYNvu52XxOqNHqDMGAtexBz+MM0RE2Z5U5ljyllbP3ed5vcvvK9vswURtI4cFGoqobVeoC7wif3VeD3aN+aQ==
+"@wdio/cli@8.27.1":
+  version "8.27.1"
+  resolved "https://registry.yarnpkg.com/@wdio/cli/-/cli-8.27.1.tgz#3412a9a3e77a555415141197afc83ec51ee894f6"
+  integrity sha512-RY9o4h0iN6UGpU31X5c9mu/TK2FlHtKtDaRJYunm5ycZvGahQcN+naYpea1ftDr4IpI2gGGlHxvEeHkJF7urDQ==
   dependencies:
     "@types/node" "^20.1.1"
     "@wdio/config" "8.27.0"
