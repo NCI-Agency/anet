@@ -14,11 +14,24 @@ export default {
     "@storybook/addon-essentials",
     "@storybook/addon-links",
     {
-      name: "@storybook/addon-styling",
+      name: "@storybook/addon-styling-webpack",
       options: {
-        postCss: {
-          implementation: require("postcss")
-        }
+        rules: [
+          {
+            test: /\.css$/,
+            use: [
+              "style-loader",
+              {
+                loader: "css-loader",
+                options: { importLoaders: 1 }
+              },
+              {
+                loader: "postcss-loader",
+                options: { implementation: require.resolve("postcss") }
+              }
+            ]
+          }
+        ]
       }
     }
   ],
