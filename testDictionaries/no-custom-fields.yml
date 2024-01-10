@@ -30,6 +30,8 @@ printOptions:
   sensitiveInformationTooltipText: Releasability Information
 
 reportWorkflow:
+  optionalApprovalWorkflow: false
+  optionalPlanningApprovalWorkflow: true
   nbOfHoursQuarantineApproved: 24
   nbOfHoursApprovalTimeout: 48
 

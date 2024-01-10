@@ -41,6 +41,7 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery;
+import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
 import mil.dds.anet.database.mappers.AuthorizationGroupMapper;
 import mil.dds.anet.database.mappers.ReportMapper;
@@ -813,37 +814,44 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     final List<ApprovalStep> steps = r.computeApprovalSteps(engine.getContext(), engine).join();
 
     // Write the submission action
+    final boolean futureEngagement = r.isFutureEngagement();
     final ReportAction action = new ReportAction();
     action.setReportUuid(r.getUuid());
     action.setPersonUuid(user.getUuid());
     action.setType(ActionType.SUBMIT);
-    action.setPlanned(r.isFutureEngagement());
+    action.setPlanned(futureEngagement);
     engine.getReportActionDao().insert(action);
 
-    if (r.isFutureEngagement() && Utils.isEmptyOrNull(steps)) {
-      // Future engagements without planning approval chain will be approved directly
-      // Write the approval action
-      final ReportAction approval = new ReportAction();
-      approval.setReportUuid(r.getUuid());
-      approval.setPersonUuid(user.getUuid());
-      approval.setType(ActionType.APPROVE);
-      approval.setPlanned(true); // so the FutureEngagementWorker can find this
-      engine.getReportActionDao().insert(approval);
-      r.setState(ReportState.APPROVED);
-    } else if (Utils.isEmptyOrNull(steps)) {
-      // Approval workflow has not been defined!
-      final String msg;
-      final String defaultOrgUuid = engine.getDefaultOrgUuid();
-      if (Utils.isEmptyOrNull(defaultOrgUuid)) {
-        msg = "The default approval organization is undefined";
+    if (Utils.isEmptyOrNull(steps)) {
+      final AnetConfiguration config = AnetObjectEngine.getConfiguration();
+      if ((futureEngagement && Boolean.TRUE
+          .equals(config.getDictionaryEntry("reportWorkflow.optionalPlanningApprovalWorkflow")))
+          || (!futureEngagement && Boolean.TRUE
+              .equals(config.getDictionaryEntry("reportWorkflow.optionalApprovalWorkflow")))) {
+        // Approval is optional, approve directly by writing the approval action
+        final ReportAction approval = new ReportAction();
+        approval.setReportUuid(r.getUuid());
+        approval.setPersonUuid(user.getUuid());
+        approval.setType(ActionType.APPROVE);
+        approval.setPlanned(futureEngagement); // so the FutureEngagementWorker can find this
+        engine.getReportActionDao().insert(approval);
+        r.setState(ReportState.APPROVED);
       } else {
-        final Organization defaultOrg = engine.getOrganizationDao().getByUuid(defaultOrgUuid);
-        msg = defaultOrg == null
-            ? "The default approval organization with uuid '" + defaultOrgUuid + "' does not exist"
-            : "The default approval organization " + defaultOrg
-                + " is missing an approval workflow";
+        // No approval workflow has been defined, and approval is not optional!
+        final String msg;
+        final String defaultOrgUuid = engine.getDefaultOrgUuid();
+        if (Utils.isEmptyOrNull(defaultOrgUuid)) {
+          msg = "The default approval organization is undefined";
+        } else {
+          final Organization defaultOrg = engine.getOrganizationDao().getByUuid(defaultOrgUuid);
+          msg = defaultOrg == null
+              ? "The default approval organization with uuid '" + defaultOrgUuid
+                  + "' does not exist"
+              : "The default approval organization " + defaultOrg
+                  + " is missing an approval workflow";
+        }
+        throw new WebApplicationException(msg + "; please contact your administrator!");
       }
-      throw new WebApplicationException(msg + "; please contact your administrator!");
     } else {
       // Push the report into the first step of this workflow
       r.setApprovalStep(steps.get(0));
