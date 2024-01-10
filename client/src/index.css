@@ -1133,11 +1133,6 @@ header.searchPagination {
   opacity: 1;
 }
 
-.rich-text-modal, .wide-assessment-modal {
-  width: 700px;
-  max-width: 100%;
-}
-
 @page {
   margin: 0;
 }

@@ -49,8 +49,8 @@ const RelatedObjectNoteModal = ({
       centered
       show={showModal}
       onHide={close}
+      size="lg"
       style={{ zIndex: "1300" }}
-      dialogClassName="rich-text-modal"
     >
       <Formik
         enableReinitialize
