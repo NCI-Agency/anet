@@ -1,7 +1,7 @@
 import { Icon } from "@blueprintjs/core"
 import { Tooltip2 } from "@blueprintjs/popover2"
 import PropTypes from "prop-types"
-import React, { useRef } from "react"
+import React from "react"
 import { Editor, Transforms } from "slate"
 import { useSlate } from "slate-react"
 import { ANET_LINK, EXTERNAL_LINK } from "utils_links"
@@ -27,7 +27,6 @@ const Toolbar = ({
   toolbarRef
 }) => {
   const editor = useSlate()
-  const selectionRef = useRef(editor.selection)
 
   return (
     <>
@@ -110,7 +109,6 @@ const Toolbar = ({
           text="ANET Link"
           showModal={showAnetLinksModal}
           setShowModal={setShowAnetLinksModal}
-          selectionRef={selectionRef}
           tooltipText="ANET link (Ctrl + ⇧ + k)"
         />
         <EditorToggleButton
@@ -120,7 +118,6 @@ const Toolbar = ({
           icon="link"
           showModal={showExternalLinksModal}
           setShowModal={setShowExternalLinksModal}
-          selectionRef={selectionRef}
           tooltipText="External link (Ctrl + ⇧ + a)"
         />
         <EditorToggleButton
@@ -150,13 +147,11 @@ const Toolbar = ({
         editor={editor}
         showModal={showAnetLinksModal}
         setShowModal={setShowAnetLinksModal}
-        selection={selectionRef.current}
       />
       <LinkSourceAnet
         editor={editor}
         showModal={showExternalLinksModal}
         setShowModal={setShowExternalLinksModal}
-        selection={selectionRef.current}
         external
       />
     </>
@@ -216,6 +211,12 @@ function isMarkActive(editor, format) {
   return marks && marks[format] === true
 }
 
+function isModalActive(editor, format, showModal) {
+  const selectedParent =
+    editor.selection && Editor.parent(editor, editor.selection)?.[0]
+  return showModal || selectedParent?.type === format
+}
+
 const EditorToggleButton = ({
   type,
   editor,
@@ -225,7 +226,6 @@ const EditorToggleButton = ({
   tooltipText,
   showModal,
   setShowModal,
-  selectionRef,
   onClick,
   showFullSize,
   setShowFullSize
@@ -242,13 +242,13 @@ const EditorToggleButton = ({
       onMouseDown = () => toggleBlock(editor, format)
       break
     case BUTTON_TYPES.MODAL:
-      isActive = showModal
+      isActive = isModalActive(editor, format, showModal)
       onMouseDown = () => {
-        selectionRef.current = editor.selection
         setShowModal(true)
       }
       break
     case BUTTON_TYPES.FULLSCREEN:
+      isActive = showFullSize
       onMouseDown = () => setShowFullSize(!showFullSize)
       break
     default:
@@ -287,7 +287,6 @@ EditorToggleButton.propTypes = {
   tooltipText: PropTypes.string,
   showModal: PropTypes.bool,
   setShowModal: PropTypes.func,
-  selectionRef: PropTypes.object,
   onClick: PropTypes.func,
   showFullSize: PropTypes.bool,
   setShowFullSize: PropTypes.func
