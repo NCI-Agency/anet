@@ -32,7 +32,7 @@ const DailyRollupChart = ({
     let chart = d3.select(node.current)
     const xLabels = [].concat.apply(
       [],
-      data.map(d => d.published + d.cancelled)
+      data.map(d => d.published + d.planned + d.cancelled)
     )
     const yLabels = {}
     const yDomain = data.map(d => {
@@ -144,21 +144,42 @@ const DailyRollupChart = ({
       .attr("dy", ".35em")
       .style("text-anchor", "end")
       .text(d => d.published || "")
+      .attr("fill", utils.getContrastYIQ(barColors.published))
 
     bar
       .append("rect")
       .attr("x", d => d.published && xScale(d.published))
+      .attr("width", d => d.planned && xScale(d.planned))
+      .attr("height", BAR_HEIGHT)
+      .attr("fill", barColors.planned)
+
+    bar
+      .append("text")
+      .attr("x", d => xScale(d.published + d.planned) - 6)
+      .attr("y", BAR_HEIGHT / 2)
+      .attr("dy", ".35em")
+      .style("text-anchor", "end")
+      .text(d => d.planned || "")
+      .attr("fill", utils.getContrastYIQ(barColors.planned))
+
+    bar
+      .append("rect")
+      .attr(
+        "x",
+        d => (d.published || d.planned) && xScale(d.published + d.planned)
+      )
       .attr("width", d => d.cancelled && xScale(d.cancelled))
       .attr("height", BAR_HEIGHT)
       .attr("fill", barColors.cancelled)
 
     bar
       .append("text")
-      .attr("x", d => xScale(d.published) + xScale(d.cancelled) - 6)
+      .attr("x", d => xScale(d.published + d.planned + d.cancelled) - 6)
       .attr("y", BAR_HEIGHT / 2)
       .attr("dy", ".35em")
       .style("text-anchor", "end")
       .text(d => d.cancelled || "")
+      .attr("fill", utils.getContrastYIQ(barColors.cancelled))
   }, [node, width, height, data, onBarClick, tooltip, barColors])
 
   return <svg id={chartId} ref={node} width={width} height={height} />
@@ -173,7 +194,8 @@ DailyRollupChart.propTypes = {
   tooltip: PropTypes.func,
   barColors: PropTypes.shape({
     cancelled: PropTypes.string.isRequired,
-    published: PropTypes.string.isRequired
+    published: PropTypes.string.isRequired,
+    planned: PropTypes.string.isRequired
   }).isRequired
 }
 

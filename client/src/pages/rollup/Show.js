@@ -56,6 +56,7 @@ const GQL_GET_REPORT_LIST = gql`
       list {
         uuid
         state
+        engagementDate
         advisorOrg {
           uuid
           shortName
@@ -170,13 +171,17 @@ const Chart = ({ queryParams, pageDispatchers, setOrg }) => {
   const CHART_ID = "reports_by_organization"
   const barColors = {
     cancelled: "#ec971f",
-    published: "#75eb75"
+    published: "#75eb75",
+    planned: "#2965cc"
   }
   const legendCss = {
     width: "14px",
     height: "14px",
     display: "inline-block"
   }
+  const publishedLabel = "Published engagement reports"
+  const plannedLabel = "Approved planned engagements"
+  const cancelledLabel = "Cancelled engagements"
   return (
     <div className="scrollable-y">
       <ContainerDimensions>
@@ -203,8 +208,9 @@ const Chart = ({ queryParams, pageDispatchers, setOrg }) => {
               onBarClick={setOrg}
               tooltip={d => `
               <h4>${d.org.shortName}</h4>
-              <p>Published: ${d.published}</p>
-              <p>Cancelled: ${d.cancelled}</p>
+              <p>${publishedLabel}: ${d.published}</p>
+              <p>${plannedLabel}: ${d.planned}</p>
+              <p>${cancelledLabel}: ${d.cancelled}</p>
               <p>Click to view details</p>
             `}
               barColors={barColors}
@@ -214,16 +220,32 @@ const Chart = ({ queryParams, pageDispatchers, setOrg }) => {
       </ContainerDimensions>
 
       <div className="graph-legend">
-        <div style={{ ...legendCss, background: barColors.published }} />{" "}
-        Published reports:&nbsp;
-        <strong>
+        <div
+          className="me-1"
+          style={{ ...legendCss, background: barColors.published }}
+        />
+        {publishedLabel}:
+        <strong className="ms-1">
           {displayedGraphData.reduce((acc, org) => acc + org.published, 0)}
         </strong>
       </div>
       <div className="graph-legend">
-        <div style={{ ...legendCss, background: barColors.cancelled }} />{" "}
-        Cancelled engagements:&nbsp;
-        <strong>
+        <div
+          className="me-1"
+          style={{ ...legendCss, background: barColors.planned }}
+        />
+        {plannedLabel}:
+        <strong className="ms-1">
+          {displayedGraphData.reduce((acc, org) => acc + org.planned, 0)}
+        </strong>
+      </div>
+      <div className="graph-legend">
+        <div
+          className="me-1"
+          style={{ ...legendCss, background: barColors.cancelled }}
+        />
+        {cancelledLabel}:
+        <strong className="ms-1">
           {displayedGraphData.reduce((acc, org) => acc + org.cancelled, 0)}
         </strong>
       </div>
@@ -237,15 +259,26 @@ Chart.propTypes = {
   setOrg: PropTypes.func
 }
 
-const updateOrgReports = (orgReports, displayedOrg, reportState) => {
+const updateOrgReports = (
+  orgReports,
+  displayedOrg,
+  reportState,
+  engagementDate
+) => {
   // Initialize the organization object if it is the first report belongs to the organization
   const elem = (orgReports[displayedOrg.uuid] ??= {
     org: displayedOrg,
     published: 0,
+    planned: 0,
     cancelled: 0
   })
+  const now = moment()
   if (reportState === Report.STATE.PUBLISHED) {
-    elem.published++
+    if (now.isBefore(engagementDate)) {
+      elem.planned++
+    } else {
+      elem.published++
+    }
   } else if (reportState === Report.STATE.CANCELLED) {
     elem.cancelled++
   }
@@ -261,7 +294,12 @@ const generateChartDataFromAllReports = (allReports, orgFilterUuid) => {
         const displayedAdvisorOrg = orgFilterUuid
           ? r.advisorOrg
           : topLevelAdvisorOrg
-        updateOrgReports(acc.advisorOrgReports, displayedAdvisorOrg, r.state)
+        updateOrgReports(
+          acc.advisorOrgReports,
+          displayedAdvisorOrg,
+          r.state,
+          r.engagementDate
+        )
       }
       if (r.principalOrg) {
         const topLevelPrincipalOrg = r.principalOrg.ascendantOrgs[0]
@@ -271,7 +309,8 @@ const generateChartDataFromAllReports = (allReports, orgFilterUuid) => {
         updateOrgReports(
           acc.principalOrgReports,
           displayedPrincipalOrg,
-          r.state
+          r.state,
+          r.engagementDate
         )
       }
 
