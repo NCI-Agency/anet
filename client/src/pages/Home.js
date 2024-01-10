@@ -1,5 +1,6 @@
 import { gql } from "@apollo/client"
 import {
+  clearSearchQuery,
   DEFAULT_PAGE_PROPS,
   DEFAULT_SEARCH_PROPS,
   SEARCH_OBJECT_TYPES,
@@ -14,7 +15,8 @@ import MySubscriptionUpdates from "components/MySubscriptionUpdates"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
-  useBoilerplate
+  useBoilerplate,
+  usePageTitle
 } from "components/Page"
 import { deserializeQueryParams } from "components/SearchFilters"
 import { LAST_WEEK } from "dateUtils"
@@ -24,14 +26,20 @@ import PropTypes from "prop-types"
 import React, { useContext } from "react"
 import { Button, Col, Container, Row } from "react-bootstrap"
 import { connect } from "react-redux"
-import { useLocation, useNavigate } from "react-router-dom"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
-import { usePageTitle } from "../components/Page"
 
 const GQL_GET_REPORT_COUNT = gql`
   query ($reportQuery: ReportSearchQueryInput) {
     reportList(query: $reportQuery) {
+      totalCount
+    }
+  }
+`
+const GQL_GET_USERS_PENDING_VERIFICATION = gql`
+  query ($personQuery: PersonSearchQueryInput) {
+    personList(query: $personQuery) {
       totalCount
     }
   }
@@ -273,7 +281,42 @@ HomeTiles.propTypes = {
   currentUser: PropTypes.instanceOf(Person)
 }
 
-const Home = ({ setSearchQuery, pageDispatchers }) => {
+const UsersPendingVerification = ({ pageDispatchers, clearSearchQuery }) => {
+  const { loading, error, data } = API.useApiQuery(
+    GQL_GET_USERS_PENDING_VERIFICATION,
+    {
+      personQuery: { pageSize: 1, pendingVerification: true }
+    }
+  )
+  const { done, result } = useBoilerplate({
+    loading,
+    error,
+    pageDispatchers
+  })
+  if (done) {
+    return result
+  }
+
+  const { totalCount } = data.personList
+  return (
+    <Fieldset title="Users Pending Verification">
+      {totalCount <= 0 ? (
+        <em>No users pending verification</em>
+      ) : (
+        <Link to="/admin/usersPendingVerification" onClick={clearSearchQuery}>
+          {totalCount} user(s) pending verification
+        </Link>
+      )}
+    </Fieldset>
+  )
+}
+
+UsersPendingVerification.propTypes = {
+  pageDispatchers: PageDispatchersPropType,
+  clearSearchQuery: PropTypes.func.isRequired
+}
+
+const Home = ({ pageDispatchers, setSearchQuery, clearSearchQuery }) => {
   const { currentUser } = useContext(AppContext)
   const routerLocation = useLocation()
   const stateSuccess = routerLocation.state && routerLocation.state.success
@@ -336,6 +379,13 @@ const Home = ({ setSearchQuery, pageDispatchers }) => {
         />
       </Fieldset>
 
+      {!Settings.automaticallyAllowAllNewUsers && currentUser?.isAdmin() && (
+        <UsersPendingVerification
+          pageDispatchers={pageDispatchers}
+          clearSearchQuery={clearSearchQuery}
+        />
+      )}
+
       <MySubscriptionUpdates />
     </div>
   )
@@ -343,13 +393,15 @@ const Home = ({ setSearchQuery, pageDispatchers }) => {
 
 Home.propTypes = {
   setSearchQuery: PropTypes.func.isRequired,
-  pageDispatchers: PageDispatchersPropType
+  pageDispatchers: PageDispatchersPropType,
+  clearSearchQuery: PropTypes.func.isRequired
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => {
   const pageDispatchers = mapPageDispatchersToProps(dispatch, ownProps)
   return {
     setSearchQuery: searchQuery => dispatch(setSearchQuery(searchQuery)),
+    clearSearchQuery: () => dispatch(clearSearchQuery()),
     ...pageDispatchers
   }
 }

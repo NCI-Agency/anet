@@ -9,6 +9,7 @@ import MergePeople from "pages/admin/merge/MergePeople"
 import MergePositions from "pages/admin/merge/MergePositions"
 import UserActivitiesOverTime from "pages/admin/useractivities/UserActivitiesOverTime"
 import UserActivitiesPerPeriod from "pages/admin/useractivities/UserActivitiesPerPeriod"
+import UsersPendingVerification from "pages/admin/UsersPendingVerification"
 import AttachmentEdit from "pages/attachments/Edit"
 import AttachmentShow from "pages/attachments/Show"
 import BoardDashboard from "pages/dashboards/BoardDashboard"
@@ -22,6 +23,7 @@ import LocationEdit from "pages/locations/Edit"
 import LocationNew from "pages/locations/New"
 import LocationShow from "pages/locations/Show"
 import OnboardingEdit from "pages/onboarding/Edit"
+import OnboardingNew from "pages/onboarding/New"
 import OnboardingShow from "pages/onboarding/Show"
 import OrganizationEdit from "pages/organizations/Edit"
 import OrganizationNew from "pages/organizations/New"
@@ -135,6 +137,12 @@ const Routing = () => {
       {currentUser.isAdmin() && (
         <Route path={PAGE_URLS.ADMIN}>
           <Route index element={<AdminIndex />} />
+          {!Settings.automaticallyAllowAllNewUsers && (
+            <Route
+              path="usersPendingVerification"
+              element={<UsersPendingVerification />}
+            />
+          )}
           <Route path="merge">
             <Route path="people" element={<MergePeople />} />
             <Route path="positions" element={<MergePositions />} />
@@ -172,8 +180,9 @@ const Routing = () => {
       <Route path={PAGE_URLS.ONBOARDING}>
         {currentUser.isPendingVerification() ? (
           <>
-            <Route index element={<OnboardingShow />} />
+            <Route index path="new" element={<OnboardingNew />} />
             <Route path="edit" element={<OnboardingEdit />} />
+            <Route path="show" element={<OnboardingShow />} />
           </>
         ) : (
           // Replace with home if user account exists already.

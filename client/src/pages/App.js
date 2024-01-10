@@ -200,7 +200,7 @@ const App = ({ pageDispatchers, pageProps }) => {
     appState.currentUser.isPendingVerification() &&
     !routerLocation.pathname.startsWith("/onboarding")
   ) {
-    return <Navigate replace to="/onboarding" />
+    return <Navigate replace to="/onboarding/new" />
   }
   return (
     <AppContext.Provider

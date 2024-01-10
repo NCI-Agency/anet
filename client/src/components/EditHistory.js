@@ -643,6 +643,7 @@ function getSingleSelectParameters(historyEntityType, parentEntityType) {
   if (historyEntityType === "person") {
     const personSearchQuery = {
       status: Model.STATUS.ACTIVE,
+      pendingVerification: false,
       role:
         parentEntityType === Position.TYPE.PRINCIPAL
           ? Person.ROLE.PRINCIPAL

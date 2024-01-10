@@ -381,6 +381,27 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   }
 
   @InTransaction
+  public int approve(String personUuid) {
+    final int nr = getDbHandle()
+        .createUpdate("UPDATE people SET \"pendingVerification\" = :pendingVerification"
+            + " WHERE uuid = :personUuid")
+        .bind("pendingVerification", false).bind("personUuid", personUuid).execute();
+    // Evict the person from the domain users cache
+    evictFromCacheByPersonUuid(personUuid);
+    return nr;
+  }
+
+  @Override
+  public int deleteInternal(String personUuid) {
+    // Just delete the person; if it fails, this means it still has relations
+    final int nr = getDbHandle().createUpdate("DELETE FROM people WHERE uuid = :personUuid")
+        .bind("personUuid", personUuid).execute();
+    // Evict the person from the domain users cache
+    evictFromCacheByPersonUuid(personUuid);
+    return nr;
+  }
+
+  @InTransaction
   public int mergePeople(Person winner, Person loser) {
     final String winnerUuid = winner.getUuid();
     final String loserUuid = loser.getUuid();

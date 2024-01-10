@@ -5,10 +5,6 @@ class Onboard extends CreatePerson {
     return browser.$(".onboarding-new h1")
   }
 
-  async getOnboardingPopover() {
-    return browser.$(".hopscotch-bubble-container")
-  }
-
   async getCreateYourAccountBtn() {
     return browser.$(".create-account-button-wrapper .btn-primary")
   }

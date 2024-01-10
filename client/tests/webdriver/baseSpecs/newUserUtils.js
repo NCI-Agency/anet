@@ -42,6 +42,4 @@ export async function createOnboardingNewPerson(
 
   await CreatePerson.submitForm()
   await Home.waitForAlertWarningToLoad()
-  await (await Home.getOnboardingPopover()).waitForExist()
-  await (await Home.getOnboardingPopover()).waitForDisplayed()
 }

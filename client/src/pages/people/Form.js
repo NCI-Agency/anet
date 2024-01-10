@@ -57,6 +57,11 @@ const GQL_CREATE_PERSON = gql`
     }
   }
 `
+const GQL_UPDATE_SELF = gql`
+  mutation ($person: PersonInput!) {
+    updateMe(person: $person)
+  }
+`
 const GQL_UPDATE_PERSON = gql`
   mutation ($person: PersonInput!) {
     updatePerson(person: $person)
@@ -71,6 +76,7 @@ const MIN_CHARS_FOR_DUPLICATES = 2
 
 const PersonForm = ({
   edit,
+  forOnboarding,
   title,
   saveText,
   initialValues,
@@ -90,10 +96,9 @@ const PersonForm = ({
   const [wrongPersonOptionValue, setWrongPersonOptionValue] = useState(null)
   const [showSimilarPeople, setShowSimilarPeople] = useState(false)
   // redirect first time users to the homepage in order to be able to use onboarding
-  const [onSaveRedirectToHome, setOnSaveRedirectToHome] = useState(
-    Person.isPendingVerification(initialValues)
-  )
-  const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
+  const [onSaveRedirectToHome, setOnSaveRedirectToHome] = useState(false)
+  const attachmentsEnabled =
+    !Settings.fields.attachment.featureDisabled && !forOnboarding
   const attachmentEditEnabled =
     attachmentsEnabled &&
     (!Settings.fields.attachment.restrictToAdmins || currentUser.isAdmin())
@@ -334,7 +339,8 @@ const PersonForm = ({
                             </Col>
                           </Row>
                         </Col>
-                        {!edit &&
+                        {!forOnboarding &&
+                          !edit &&
                           values.firstName.length >= MIN_CHARS_FOR_DUPLICATES &&
                           values.lastName.length >=
                             MIN_CHARS_FOR_DUPLICATES && (
@@ -354,7 +360,7 @@ const PersonForm = ({
                             </Col>
                         )}
 
-                        {edit && (
+                        {!forOnboarding && edit && (
                           <Col>
                             <TriggerableConfirm
                               onConfirm={async() => {
@@ -733,7 +739,7 @@ const PersonForm = ({
                 )}
               </Fieldset>
 
-              {!_isEmpty(Person.customFields) && (
+              {!forOnboarding && !_isEmpty(Person.customFields) && (
                 <Fieldset title="Person information" id="custom-fields">
                   <CustomFieldsContainer
                     fieldsConfig={Person.customFields}
@@ -747,7 +753,7 @@ const PersonForm = ({
                 </Fieldset>
               )}
 
-              {!_isEmpty(authorizedSensitiveFields) && (
+              {!forOnboarding && !_isEmpty(authorizedSensitiveFields) && (
                 <Fieldset title="Sensitive information" id="sensitive-fields">
                   <CustomFieldsContainer
                     fieldsConfig={authorizedSensitiveFields}
@@ -875,7 +881,8 @@ const PersonForm = ({
       loadAppData()
       navigate("/")
     } else {
-      const operation = edit ? "updatePerson" : "createPerson"
+      const updateOperation = forOnboarding ? "updateMe" : "updatePerson"
+      const operation = edit ? updateOperation : "createPerson"
       const person = new Person({
         uuid: response[operation].uuid
           ? response[operation].uuid
@@ -884,19 +891,25 @@ const PersonForm = ({
       if (Person.isEqual(currentUser, values)) {
         loadAppData()
       }
-      if (!edit) {
-        navigate(Person.pathForEdit(person), { replace: true })
+      if (forOnboarding && !Settings.automaticallyAllowAllNewUsers) {
+        navigate("/onboarding/show", {
+          state: { success: "Your profile was updated" }
+        })
+      } else {
+        if (!edit) {
+          navigate(Person.pathForEdit(person), { replace: true })
+        }
+        navigate(Person.pathFor(person), {
+          state: { success: "Person saved" }
+        })
       }
-      navigate(Person.pathFor(person), {
-        state: { success: "Person saved" }
-      })
     }
   }
 
   function save(values, form) {
     values.avatarUuid = currentAvatarUuid
     const person = Person.filterClientSideFields(new Person(values))
-    if (values.pendingVerification) {
+    if (values.pendingVerification && Settings.automaticallyAllowAllNewUsers) {
       person.pendingVerification = false
     }
     person.name = Person.fullName(
@@ -905,7 +918,8 @@ const PersonForm = ({
     )
     person.customSensitiveInformation = updateCustomSensitiveInformation(values)
     person.customFields = customFieldsJSONString(values)
-    return API.mutation(edit ? GQL_UPDATE_PERSON : GQL_CREATE_PERSON, {
+    const updateMutation = forOnboarding ? GQL_UPDATE_SELF : GQL_UPDATE_PERSON
+    return API.mutation(edit ? updateMutation : GQL_CREATE_PERSON, {
       person
     })
   }
@@ -937,6 +951,7 @@ PersonForm.propTypes = {
   initialValues: PropTypes.instanceOf(Person).isRequired,
   title: PropTypes.string,
   edit: PropTypes.bool,
+  forOnboarding: PropTypes.bool,
   saveText: PropTypes.string,
   notesComponent: PropTypes.node
 }
@@ -944,6 +959,7 @@ PersonForm.propTypes = {
 PersonForm.defaultProps = {
   title: "",
   edit: false,
+  forOnboarding: false,
   saveText: "Save Person"
 }
 

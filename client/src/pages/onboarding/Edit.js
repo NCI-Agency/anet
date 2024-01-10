@@ -14,14 +14,13 @@ import PersonForm from "pages/people/Form"
 import React, { useContext } from "react"
 import { connect } from "react-redux"
 
-const GQL_GET_PERSON = gql`
-  query ($uuid: String!) {
-    person(uuid: $uuid) {
+const GQL_GET_SELF = gql`
+  query {
+    me {
       uuid
       name
       rank
       role
-      avatarUuid
       status
       emailAddress
       phoneNumber
@@ -33,12 +32,6 @@ const GQL_GET_PERSON = gql`
       domainUsername
       openIdSubject
       code
-      position {
-        uuid
-        name
-        type
-        role
-      }
     }
   }
 `
@@ -47,9 +40,7 @@ const OnboardingEdit = ({ pageDispatchers }) => {
   const {
     currentUser: { uuid }
   } = useContext(AppContext)
-  const { loading, error, data } = API.useApiQuery(GQL_GET_PERSON, {
-    uuid
-  })
+  const { loading, error, data } = API.useApiQuery(GQL_GET_SELF)
   const { done, result } = useBoilerplate({
     loading,
     error,
@@ -59,14 +50,14 @@ const OnboardingEdit = ({ pageDispatchers }) => {
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
-  usePageTitle("Create your account")
+  usePageTitle("Fill in your profile")
   if (done) {
     return result
   }
 
-  const person = new Person(data ? data.person : {})
+  const person = new Person(data ? data.me : {})
 
-  if (data.person.endOfTourDate) {
+  if (person.endOfTourDate) {
     person.endOfTourDate = moment(person.endOfTourDate).format()
   }
   const parsedFullName = Person.parseFullName(person.name)
@@ -78,8 +69,9 @@ const OnboardingEdit = ({ pageDispatchers }) => {
       <PersonForm
         initialValues={person}
         edit
-        title="Create your account"
-        saveText="Create profile"
+        forOnboarding
+        title="Fill in your profile"
+        saveText="Save"
       />
     </div>
   )

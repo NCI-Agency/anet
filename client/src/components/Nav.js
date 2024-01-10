@@ -60,16 +60,17 @@ const SidebarLink = ({
   children,
   handleOnClick,
   id,
-  setIsMenuLinksOpened
+  setIsMenuLinksOpened,
+  isActive
 }) => (
   <Nav.Item
     onClick={() => {
-      handleOnClick()
-      setIsMenuLinksOpened && setIsMenuLinksOpened()
+      handleOnClick?.()
+      setIsMenuLinksOpened?.()
     }}
   >
-    <LinkContainer to={linkTo}>
-      <Nav.Link eventKey={id}>
+    <LinkContainer to={linkTo} isActive={isActive}>
+      <Nav.Link eventKey={id} active={false}>
         <span>{children}</span>
       </Nav.Link>
     </LinkContainer>
@@ -80,7 +81,33 @@ SidebarLink.propTypes = {
   children: PropTypes.node,
   handleOnClick: PropTypes.func,
   setIsMenuLinksOpened: PropTypes.func,
-  id: PropTypes.string.isRequired
+  id: PropTypes.string.isRequired,
+  isActive: PropTypes.bool
+}
+
+const SidebarContainer = ({
+  linkTo,
+  children,
+  handleOnClick,
+  setIsMenuLinksOpened
+}) => {
+  return (
+    <LinkContainer
+      to={linkTo}
+      onClick={() => {
+        handleOnClick?.()
+        setIsMenuLinksOpened?.()
+      }}
+    >
+      <NavDropdown.Item>{children}</NavDropdown.Item>
+    </LinkContainer>
+  )
+}
+SidebarContainer.propTypes = {
+  linkTo: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
+  children: PropTypes.node,
+  handleOnClick: PropTypes.func,
+  setIsMenuLinksOpened: PropTypes.func
 }
 
 const Navigation = ({
@@ -99,12 +126,12 @@ const Navigation = ({
 
   const routerLocation = useLocation()
   const path = routerLocation.pathname
-  const inAdmin = path.indexOf("/admin") === 0
-  const inMerge = path.indexOf("/admin/merge") === 0
-  const inUserActivities = path.indexOf("/admin/userActivities") === 0
+  const inAdmin = path.startsWith("/admin")
+  const inMerge = path.startsWith("/admin/merge")
+  const inUserActivities = path.startsWith("/admin/userActivities")
 
   const [orgUuid, inOrg, myOrg, inMyOrg] = useMemo(() => {
-    const inOrg = path.indexOf("/organizations") === 0
+    const inOrg = path.startsWith("/organizations")
     const orgUuid = inOrg ? path.split("/")[2] : null
     const myOrg = currentUser.position?.uuid
       ? currentUser.position?.organization
@@ -113,13 +140,13 @@ const Navigation = ({
     return [orgUuid, inOrg, myOrg, inMyOrg]
   }, [path, currentUser.position?.uuid, currentUser.position?.organization])
 
-  const inMyCounterParts = path.indexOf("/positions/counterparts") === 0
-  const inMyTasks = path.indexOf("/tasks/mine") === 0
-  const inMyReports = path.indexOf("/reports/mine") === 0
-  const inMySubscriptions = path.indexOf("/subscriptions/mine") === 0
-  const inInsights = path.indexOf("/insights") === 0
-  const inDashboards = path.indexOf("/dashboards") === 0
-  const inMySavedSearches = path.indexOf("/search/mine") === 0
+  const inMyCounterParts = path.startsWith("/positions/counterparts")
+  const inMyTasks = path.startsWith("/tasks/mine")
+  const inMyReports = path.startsWith("/reports/mine")
+  const inMySubscriptions = path.startsWith("/subscriptions/mine")
+  const inInsights = path.startsWith("/insights")
+  const inDashboards = path.startsWith("/dashboards")
+  const inMySavedSearches = path.startsWith("/search/mine")
 
   const advisorOrganizationUuids = advisorOrganizations.map(o => o.uuid)
   const principalOrganizationUuids = principalOrganizations.map(o => o.uuid)
@@ -256,16 +283,14 @@ const Navigation = ({
         active={inOrg && advisorOrganizationUuids.includes(orgUuid) && !inMyOrg}
       >
         {Organization.map(advisorOrganizations, org => (
-          <LinkContainer
-            to={Organization.pathFor(org)}
+          <SidebarContainer
             key={org.uuid}
-            onClick={() => {
-              clearSearchQuery()
-              setIsMenuLinksOpened(false)
-            }}
+            linkTo={Organization.pathFor(org)}
+            handleOnClick={clearSearchQuery}
+            setIsMenuLinksOpened={() => setIsMenuLinksOpened(false)}
           >
-            <NavDropdown.Item>{org.shortName}</NavDropdown.Item>
-          </LinkContainer>
+            {org.shortName}
+          </SidebarContainer>
         ))}
       </NavDropdown>
 
@@ -279,16 +304,14 @@ const Navigation = ({
         }
       >
         {Organization.map(principalOrganizations, org => (
-          <LinkContainer
-            to={Organization.pathFor(org)}
+          <SidebarContainer
             key={org.uuid}
-            onClick={() => {
-              clearSearchQuery()
-              setIsMenuLinksOpened(false)
-            }}
+            linkTo={Organization.pathFor(org)}
+            handleOnClick={clearSearchQuery}
+            setIsMenuLinksOpened={() => setIsMenuLinksOpened(false)}
           >
-            <NavDropdown.Item>{org.shortName}</NavDropdown.Item>
-          </LinkContainer>
+            {org.shortName}
+          </SidebarContainer>
         ))}
       </NavDropdown>
 
@@ -305,53 +328,60 @@ const Navigation = ({
 
       {currentUser.isAdmin() && (
         <Nav.Item>
-          <LinkContainer
-            to="/admin"
-            onClick={() => {
+          <SidebarLink
+            id="admin-pages"
+            linkTo="/admin"
+            handleOnClick={() => {
               clearSearchQuery()
               setIsMenuLinksOpened(false)
             }}
             isActive={inAdmin}
           >
-            <Nav.Link>Admin</Nav.Link>
-          </LinkContainer>
+            Admin
+          </SidebarLink>
 
           {inAdmin && (
             <Nav className="flex-column">
               <span id="style-nav" style={{ lineHeight: "10pt" }}>
+                {!Settings.automaticallyAllowAllNewUsers && (
+                  <SidebarLink
+                    id="users-pending-verification"
+                    linkTo="/admin/usersPendingVerification"
+                    handleOnClick={resetPages}
+                  >
+                    Users pending verification
+                  </SidebarLink>
+                )}
                 <NavDropdown title="Merge" id="merge" active={inMerge}>
                   {MERGE_OPTIONS.map(mergeOption => (
-                    <LinkContainer
-                      to={`/admin/merge/${mergeOption.key}`}
+                    <SidebarContainer
                       key={mergeOption.key}
-                      onClick={resetPages}
+                      linkTo={`/admin/merge/${mergeOption.key}`}
+                      handleOnClick={resetPages}
                     >
-                      <NavDropdown.Item>{mergeOption.label}</NavDropdown.Item>
-                    </LinkContainer>
+                      {mergeOption.label}
+                    </SidebarContainer>
                   ))}
                 </NavDropdown>
-                <Nav.Item>
-                  <LinkContainer
-                    to="/admin/authorizationGroups"
-                    onClick={resetPages}
-                  >
-                    <Nav.Link>Authorization groups</Nav.Link>
-                  </LinkContainer>
-                </Nav.Item>
+                <SidebarLink
+                  id="authorization-groups"
+                  linkTo="/admin/authorizationGroups"
+                  handleOnClick={resetPages}
+                >
+                  Authorization groups
+                </SidebarLink>
                 <NavDropdown
                   title="User activities"
                   id="user-activities"
                   active={inUserActivities}
                 >
                   {USER_ACTIVITY_OPTIONS.map(userActivityOption => (
-                    <LinkContainer
-                      to={`/admin/userActivities/${userActivityOption.key}`}
+                    <SidebarContainer
                       key={userActivityOption.key}
+                      linkTo={`/admin/userActivities/${userActivityOption.key}`}
                     >
-                      <NavDropdown.Item>
-                        {userActivityOption.label}
-                      </NavDropdown.Item>
-                    </LinkContainer>
+                      {userActivityOption.label}
+                    </SidebarContainer>
                   ))}
                 </NavDropdown>
                 <SidebarLink
@@ -387,18 +417,14 @@ const Navigation = ({
       {(currentUser.isAdmin() || currentUser.isSuperuser()) && (
         <NavDropdown title="Insights" id="insights" active={inInsights}>
           {INSIGHTS.map(insight => (
-            <LinkContainer
-              to={`/insights/${insight}`}
+            <SidebarContainer
               key={insight}
-              onClick={() => {
-                clearSearchQuery()
-                setIsMenuLinksOpened(false)
-              }}
+              linkTo={`/insights/${insight}`}
+              handleOnClick={clearSearchQuery}
+              setIsMenuLinksOpened={() => setIsMenuLinksOpened(false)}
             >
-              <NavDropdown.Item>
-                {INSIGHT_DETAILS[insight].navTitle}
-              </NavDropdown.Item>
-            </LinkContainer>
+              {INSIGHT_DETAILS[insight].navTitle}
+            </SidebarContainer>
           ))}
         </NavDropdown>
       )}
@@ -406,16 +432,14 @@ const Navigation = ({
       {Settings.dashboards && (
         <NavDropdown title="Dashboards" id="dashboards" active={inDashboards}>
           {Settings.dashboards.map(dashboard => (
-            <LinkContainer
-              to={`/dashboards/${dashboard.type}/${dashboard.label}`}
+            <SidebarContainer
               key={dashboard.label}
-              onClick={() => {
-                clearSearchQuery()
-                setIsMenuLinksOpened(false)
-              }}
+              linkTo={`/dashboards/${dashboard.type}/${dashboard.label}`}
+              handleOnClick={clearSearchQuery}
+              setIsMenuLinksOpened={() => setIsMenuLinksOpened(false)}
             >
-              <NavDropdown.Item>{dashboard.label}</NavDropdown.Item>
-            </LinkContainer>
+              {dashboard.label}
+            </SidebarContainer>
           ))}
         </NavDropdown>
       )}

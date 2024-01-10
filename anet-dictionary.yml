@@ -1900,6 +1900,7 @@ imagery:
         layers: GEBCO_LATEST
         format: "image/png"
 
+automaticallyAllowAllNewUsers: true
 automaticallyInactivateUsers:
   emailRemindersDaysPrior: [15, 30, 45]
   ignoredDomainNames: []

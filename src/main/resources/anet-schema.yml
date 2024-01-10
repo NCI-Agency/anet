@@ -364,7 +364,21 @@ $defs:
 #########################################################
 type: object
 additionalProperties: false
-required: [keycloakConfiguration, CONNECTION_ERROR_MSG, VERSION_CHANGED_MSG, SUPPORT_EMAIL_ADDR, dateFormats, reportWorkflow, maxTextFieldLength, fields, pinned_ORGs, non_reporting_ORGs, domainNames, activeDomainNames, imagery]
+required:
+  - keycloakConfiguration
+  - CONNECTION_ERROR_MSG
+  - VERSION_CHANGED_MSG
+  - SUPPORT_EMAIL_ADDR
+  - dateFormats
+  - reportWorkflow
+  - maxTextFieldLength
+  - fields
+  - pinned_ORGs
+  - non_reporting_ORGs
+  - domainNames
+  - activeDomainNames
+  - imagery
+  - automaticallyAllowAllNewUsers
 properties:
   keycloakConfiguration:
     type: object
@@ -1207,6 +1221,11 @@ properties:
 
   decisives:
     type: array
+
+  automaticallyAllowAllNewUsers:
+    type: boolean
+    title: Auto account verification.
+    description: Whether newly onboarded users should be automatically verified; when false, admins must explicitly verify new users.
 
   automaticallyInactivateUsers:
     type: object

@@ -149,10 +149,18 @@ public class ReportResourceTest extends AbstractResourceTest {
         .withEmailAddress("hunter+testApprover1@example.com").withName("Test Approver 1")
         .withRole(Role.ADVISOR).withStatus(Status.ACTIVE).build();
     approver1 = findOrPutPersonInDb(approver1);
+    if (Boolean.TRUE.equals(approver1.getPendingVerification())) {
+      // Approve newly created user
+      adminMutationExecutor.approvePerson("", approver1.getUuid());
+    }
     Person approver2 = Person.builder().withDomainUsername("testapprover2")
         .withEmailAddress("hunter+testApprover2@example.com").withName("Test Approver 2")
         .withRole(Role.ADVISOR).withStatus(Status.ACTIVE).build();
     approver2 = findOrPutPersonInDb(approver2);
+    if (Boolean.TRUE.equals(approver2.getPendingVerification())) {
+      // Approve newly created user
+      adminMutationExecutor.approvePerson("", approver2.getUuid());
+    }
 
     final PositionInput approver1PosInput = PositionInput.builder()
         .withName("Test Approver 1 Position").withOrganization(getOrganizationInput(advisorOrg))

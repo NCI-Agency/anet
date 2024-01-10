@@ -8,6 +8,7 @@ import io.leangen.graphql.annotations.GraphQLRootContext;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
@@ -20,6 +21,7 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.database.PersonDao;
+import mil.dds.anet.graphql.AllowUnverifiedUsers;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
@@ -249,12 +251,83 @@ public class PersonResource {
     return dao.search(Utils.getSubFields(env), query);
   }
 
+  @GraphQLMutation(name = "approvePerson")
+  public Integer approvePerson(@GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "uuid") String personUuid) {
+    return approveOrDeletePerson(context, personUuid, true);
+  }
+
+  @GraphQLMutation(name = "deletePerson")
+  public Integer deletePerson(@GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "uuid") String personUuid) {
+    return approveOrDeletePerson(context, personUuid, false);
+  }
+
+  public Integer approveOrDeletePerson(Map<String, Object> context, String personUuid,
+      boolean isApproved) {
+    Person user = DaoUtils.getUserFromContext(context);
+    final Person person = dao.getByUuid(personUuid);
+    if (person == null) {
+      throw new WebApplicationException("Person not found", Status.NOT_FOUND);
+    }
+
+    AuthUtils.assertAdministrator(user);
+    if (!Boolean.TRUE.equals(person.getPendingVerification())) {
+      throw new WebApplicationException("Person is not pending verification", Status.FORBIDDEN);
+    }
+
+    final int numRows = isApproved ? dao.approve(personUuid) : dao.delete(personUuid);
+    if (numRows == 0) {
+      throw new WebApplicationException(
+          "Couldn't " + (isApproved ? "approve" : "delete") + " person",
+          Status.INTERNAL_SERVER_ERROR);
+    }
+
+    AnetAuditLogger.log("Person {} " + (isApproved ? "approved" : "deleted") + " by {}", person,
+        user);
+    return numRows;
+  }
+
   /**
    * Convenience method for API testing.
    */
   @GraphQLQuery(name = "me")
+  @AllowUnverifiedUsers
   public Person getCurrentUser(@GraphQLRootContext Map<String, Object> context) {
     return DaoUtils.getUserFromContext(context);
+  }
+
+  @GraphQLMutation(name = "updateMe")
+  @AllowUnverifiedUsers
+  public Integer updateCurrentUser(@GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "person") Person p) {
+    final Person user = DaoUtils.getUserFromContext(context);
+    if (!Objects.equals(DaoUtils.getUuid(user), p.getUuid())) {
+      throw new WebApplicationException("You can only update yourself", Status.FORBIDDEN);
+    }
+
+    if (p.getRole().equals(Role.ADVISOR) && !Utils.isEmptyOrNull(p.getEmailAddress())) {
+      validateEmail(p.getEmailAddress());
+    }
+
+    final Boolean automaticallyAllowAllNewUsers =
+        (Boolean) this.config.getDictionaryEntry("automaticallyAllowAllNewUsers");
+    if (Boolean.FALSE.equals(automaticallyAllowAllNewUsers)) {
+      // Users can not verify their own account!
+      final Person existing = dao.getByUuid(p.getUuid());
+      p.setPendingVerification(existing.getPendingVerification());
+    }
+
+    p.setBiography(
+        Utils.isEmptyHtml(p.getBiography()) ? null : Utils.sanitizeHtml(p.getBiography()));
+    final int numRows = dao.update(p);
+    if (numRows == 0) {
+      throw new WebApplicationException("Couldn't process person update", Status.NOT_FOUND);
+    }
+
+    AnetAuditLogger.log("Person {} updated by themselves", p);
+    // GraphQL mutations *have* to return something, so we return the number of updated rows
+    return numRows;
   }
 
   @GraphQLMutation(name = "mergePeople")
