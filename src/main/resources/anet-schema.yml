@@ -642,29 +642,44 @@ properties:
                     type: string
                     enum:
                       [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, POINT_LOCATION, ADVISOR_LOCATION, PRINCIPAL_LOCATION]
+          reportPeople:
+            required: [optionalAttendingAuthor, optionalPrimaryAdvisor, optionalPrimaryPrincipal]
+            properties:
+              optionalAttendingAuthor:
+                type: boolean
+                default: false
+                description: Defines if having an attending author for a report is optional
+              optionalPrimaryAdvisor:
+                type: boolean
+                default: false
+                description: Defines if having a primary advisor for a report is optional
+              optionalPrimaryPrincipal:
+                type: boolean
+                default: false
+                description: Defines if having a primary principal for a report is optional
+              attendeeGroups:
+                type: array
+                uniqueItems: true
+                items:
+                  type: object
+                  additionalProperties: false
+                  title: Attendee-group
+                  required: [label, filter]
+                  properties:
+                    label:
+                      type: string
+                      title: The label of the attendee group
+                    filter:
+                      type: object
+                      title: Attendee group filters
+                      properties:
+                        orgUuid:
+                          type: string
+                          title: UUID of organisation membership to form
           customFields:
             type: object
             additionalProperties:
               "$ref": "#/$defs/customField"
-          attendeeGroups:
-            type: array
-            uniqueItems: true
-            items:
-              type: object
-              additionalProperties: false
-              title: Attendee-group
-              required: [label, filter]
-              properties:
-                label:
-                  type: string
-                  title: The label of the attendee group
-                filter:
-                  type: object
-                  title: Attendee group filters
-                  properties:
-                    orgUuid:
-                      type: string
-                      title: UUID of organisation membership to form
 
       person:
         type: object

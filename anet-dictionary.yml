@@ -379,6 +379,14 @@ fields:
       label: Location
       placeholder: Search for the engagement location…
       filter: [POINT_LOCATION, VIRTUAL_LOCATION]
+    reportPeople:
+      optionalAttendingAuthor: false
+      optionalPrimaryAdvisor: false
+      optionalPrimaryPrincipal: true
+      attendeeGroups:
+        - label: Linguists
+          filter:
+            orgUuid: 70193ee9-05b4-4aac-80b5-75609825db9f
     customFields:
       relatedReport:
         type: anet_object
@@ -508,10 +516,6 @@ fields:
             typeError: Qty must be a number
             label: Qty
         visibleWhen: $[?(@ && @.multipleButtons && (@.multipleButtons.indexOf('assist') != -1 || @.multipleButtons.indexOf('other') != -1))]
-    attendeeGroups:
-      - label: Linguists
-        filter:
-          orgUuid: 70193ee9-05b4-4aac-80b5-75609825db9f
 
   person:
     status:

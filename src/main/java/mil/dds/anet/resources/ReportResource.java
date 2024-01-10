@@ -398,15 +398,26 @@ public class ReportResource {
 
     if (r.getAdvisorOrgUuid() == null) {
       final ReportPerson advisor = r.loadPrimaryAdvisor(engine.getContext()).join();
+      final Boolean optionalPrimaryAdvisor =
+          (Boolean) config.getDictionaryEntry("fields.report.reportPeople.optionalPrimaryAdvisor");
       if (advisor == null) {
-        throw new WebApplicationException("Report missing primary advisor", Status.BAD_REQUEST);
+        if (!Boolean.TRUE.equals(optionalPrimaryAdvisor)) {
+          throw new WebApplicationException("Report missing primary advisor", Status.BAD_REQUEST);
+        }
+      } else {
+        r.setAdvisorOrg(
+            engine.getOrganizationForPerson(engine.getContext(), advisor.getUuid()).join());
       }
-      r.setAdvisorOrg(
-          engine.getOrganizationForPerson(engine.getContext(), advisor.getUuid()).join());
     }
     if (r.getPrincipalOrgUuid() == null) {
       final ReportPerson principal = r.loadPrimaryPrincipal(engine.getContext()).join();
-      if (principal != null) {
+      final Boolean optionalPrimaryPrincipal = (Boolean) config
+          .getDictionaryEntry("fields.report.reportPeople.optionalPrimaryPrincipal");
+      if (principal == null) {
+        if (!Boolean.TRUE.equals(optionalPrimaryPrincipal)) {
+          throw new WebApplicationException("Report missing primary principal", Status.BAD_REQUEST);
+        }
+      } else {
         r.setPrincipalOrg(
             engine.getOrganizationForPerson(engine.getContext(), principal.getUuid()).join());
       }
