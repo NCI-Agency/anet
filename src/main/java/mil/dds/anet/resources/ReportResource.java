@@ -343,22 +343,24 @@ public class ReportResource {
 
   @SuppressWarnings("checkstyle:MissingSwitchDefault")
   private void assertCanUpdateReport(Report report, Person editor, boolean isAuthor) {
-    String permError = "You do not have permission to edit this report. ";
+    if (AuthUtils.isAdmin(editor)) {
+      // Admins can do *anything*
+      return;
+    }
+    final String permError = "You do not have permission to edit this report. ";
     switch (report.getState()) {
-      case DRAFT:
-      case REJECTED:
-      case APPROVED:
-      case CANCELLED:
+      case DRAFT, REJECTED, APPROVED, CANCELLED:
         // Must be an author
-        if (!isAuthor) {
+        if (!(isAuthor || AuthUtils.isAdmin(editor))) {
           throw new WebApplicationException(permError + "Must be an author of this report.",
               Status.FORBIDDEN);
         }
         break;
       case PENDING_APPROVAL:
         // Must be an author or the approver
-        boolean canApprove = engine.canUserApproveStep(engine.getContext(), editor.getUuid(),
-            report.getApprovalStepUuid(), report.getAdvisorOrgUuid()).join();
+        boolean canApprove =
+            AuthUtils.isAdmin(editor) || engine.canUserApproveStep(engine.getContext(),
+                editor.getUuid(), report.getApprovalStepUuid(), report.getAdvisorOrgUuid()).join();
         if (!isAuthor && !canApprove) {
           throw new WebApplicationException(
               permError + "Must be an author of this report or a current approver.",
@@ -366,9 +368,12 @@ public class ReportResource {
         }
         break;
       case PUBLISHED:
-        AnetAuditLogger.log("attempt to edit published report {} by editor {} was forbidden",
-            report.getUuid(), editor);
-        throw new WebApplicationException("Cannot edit a published report", Status.FORBIDDEN);
+        if (!AuthUtils.isAdmin(editor)) {
+          AnetAuditLogger.log("attempt to edit published report {} by editor {} was forbidden",
+              report.getUuid(), editor);
+          throw new WebApplicationException("Cannot edit a published report", Status.FORBIDDEN);
+        }
+        break;
       default:
         throw new WebApplicationException("Unknown report state", Status.FORBIDDEN);
     }
