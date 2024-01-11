@@ -31,7 +31,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.eclipse.jetty.http.MimeTypes;
 
 /**
- * Servlet responsible for serving assets to the caller.  This is basically completely stolen from
+ * Servlet responsible for serving assets to the caller. This is basically completely stolen from
  * {@link io.dropwizard.servlets.assets.AssetServlet} with the exception of allowing for override
  * options.
  *
@@ -55,27 +55,24 @@ public class AssetServlet extends HttpServlet {
    * (typically a file: or jar: URL). The assets are served at URIs rooted at {@code uriPath}. For
    * example, given a {@code resourceURL} of {@code "file:/data/assets"} and a {@code uriPath} of
    * {@code "/js"}, an {@code AssetServlet} would serve the contents of {@code
-   * /data/assets/example.js} in response to a request for {@code /js/example.js}. If a directory
-   * is requested and {@code indexFile} is defined, then {@code AssetServlet} will attempt to
-   * serve a file with that name in that directory. If a directory is requested and {@code
+   * /data/assets/example.js} in response to a request for {@code /js/example.js}. If a directory is
+   * requested and {@code indexFile} is defined, then {@code AssetServlet} will attempt to serve a
+   * file with that name in that directory. If a directory is requested and {@code
    * indexFile} is null, it will serve a 404.
    *
    * @param resourcePathToUriPathMapping A mapping from base URL's from which assets are loaded to
-   *                                     the URI path fragment in which the requests for that asset
-   *                                     are rooted
-   * @param indexFile                    the filename to use when directories are requested, or null
-   *                                     to serve no indexes
-   * @param defaultCharset               the default character set
-   * @param spec                         the CacheBuilderSpec to use
-   * @param overrides                    the path overrides
-   * @param mimeTypes                    the mimeType overrides
+   *        the URI path fragment in which the requests for that asset are rooted
+   * @param indexFile the filename to use when directories are requested, or null to serve no
+   *        indexes
+   * @param defaultCharset the default character set
+   * @param spec the CacheBuilderSpec to use
+   * @param overrides the path overrides
+   * @param mimeTypes the mimeType overrides
    */
   public AssetServlet(Iterable<Map.Entry<String, String>> resourcePathToUriPathMapping,
-                      String indexFile,
-                      Charset defaultCharset,
-                      CacheBuilderSpec spec,
-                      Iterable<Map.Entry<String, String>> overrides,
-                      Iterable<Map.Entry<String, String>> mimeTypes) {
+      String indexFile, Charset defaultCharset, CacheBuilderSpec spec,
+      Iterable<Map.Entry<String, String>> overrides,
+      Iterable<Map.Entry<String, String>> mimeTypes) {
     this.defaultCharset = defaultCharset;
     AssetLoader loader = new AssetLoader(resourcePathToUriPathMapping, indexFile, overrides);
 
@@ -128,7 +125,7 @@ public class AssetServlet extends HttpServlet {
 
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-          throws ServletException, IOException {
+      throws ServletException, IOException {
     try {
       final StringBuilder builder = new StringBuilder(req.getServletPath());
       if (req.getPathInfo() != null) {
@@ -174,8 +171,8 @@ public class AssetServlet extends HttpServlet {
           resp.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
           usingRanges = true;
 
-          resp.addHeader(HttpHeaders.CONTENT_RANGE, "bytes "
-                  + Joiner.on(",").join(ranges) + "/" + resourceLength);
+          resp.addHeader(HttpHeaders.CONTENT_RANGE,
+              "bytes " + Joiner.on(",").join(ranges) + "/" + resourceLength);
         }
       }
 
@@ -204,8 +201,8 @@ public class AssetServlet extends HttpServlet {
         }
       }
 
-      if (mediaType.is(MediaType.ANY_VIDEO_TYPE)
-              || mediaType.is(MediaType.ANY_AUDIO_TYPE) || usingRanges) {
+      if (mediaType.is(MediaType.ANY_VIDEO_TYPE) || mediaType.is(MediaType.ANY_AUDIO_TYPE)
+          || usingRanges) {
         resp.addHeader(HttpHeaders.ACCEPT_RANGES, "bytes");
       }
 
@@ -219,7 +216,7 @@ public class AssetServlet extends HttpServlet {
         if (usingRanges) {
           for (final ByteRange range : ranges) {
             output.write(cachedAsset.getResource(), range.getStart(),
-                    range.getEnd() - range.getStart() + 1);
+                range.getEnd() - range.getStart() + 1);
           }
         } else {
           output.write(cachedAsset.getResource());
@@ -232,19 +229,18 @@ public class AssetServlet extends HttpServlet {
 
   private boolean isCachedClientSide(HttpServletRequest req, Asset cachedAsset) {
     return cachedAsset.getETag().equals(req.getHeader(HttpHeaders.IF_NONE_MATCH))
-            || (req.getDateHeader(HttpHeaders.IF_MODIFIED_SINCE)
-            >= cachedAsset.getLastModifiedTime());
+        || (req.getDateHeader(HttpHeaders.IF_MODIFIED_SINCE) >= cachedAsset.getLastModifiedTime());
   }
 
   /**
    * Parses a given Range header for one or more byte ranges.
    *
-   * @param rangeHeader    Range header to parse
+   * @param rangeHeader Range header to parse
    * @param resourceLength Length of the resource in bytes
    * @return List of parsed ranges
    */
   private ImmutableList<ByteRange> parseRangeHeader(final String rangeHeader,
-                                                    final int resourceLength) {
+      final int resourceLength) {
     final ImmutableList.Builder<ByteRange> builder = ImmutableList.builder();
     if (rangeHeader.contains("=")) {
       final String[] parts = rangeHeader.split("=");
@@ -264,8 +260,7 @@ public class AssetServlet extends HttpServlet {
     private final Iterable<Map.Entry<String, String>> overrides;
 
     private AssetLoader(Iterable<Map.Entry<String, String>> resourcePathToUriMappings,
-                        String indexFilename,
-                        Iterable<Map.Entry<String, String>> overrides) {
+        String indexFilename, Iterable<Map.Entry<String, String>> overrides) {
       for (Map.Entry<String, String> mapping : resourcePathToUriMappings) {
         final String trimmedPath = SLASHES.trimFrom(mapping.getKey());
         String resourcePath = trimmedPath.isEmpty() ? trimmedPath : trimmedPath + '/';
@@ -273,8 +268,8 @@ public class AssetServlet extends HttpServlet {
         String uriPath = trimmedUri.isEmpty() ? "/" : trimmedUri;
 
         if (this.resourcePathToUriMappings.containsKey(resourcePath)) {
-          throw new IllegalArgumentException("ResourcePathToUriMappings contains multiple mappings "
-                  + "for " + resourcePath);
+          throw new IllegalArgumentException(
+              "ResourcePathToUriMappings contains multiple mappings " + "for " + resourcePath);
         }
         this.resourcePathToUriMappings.put(resourcePath, uriPath);
       }
@@ -296,7 +291,7 @@ public class AssetServlet extends HttpServlet {
         }
 
         final String requestedResourcePath =
-                SLASHES.trimFrom(key.substring(mapping.getValue().length()));
+            SLASHES.trimFrom(key.substring(mapping.getValue().length()));
         final String absolutePath = SLASHES.trimFrom(mapping.getKey() + requestedResourcePath);
 
         try {
@@ -378,7 +373,7 @@ public class AssetServlet extends HttpServlet {
   }
 
   /**
-   * An asset implementation backed by the file-system.  If the backing file changes on disk, then
+   * An asset implementation backed by the file-system. If the backing file changes on disk, then
    * this asset will automatically reload its contents from disk.
    */
   private static class FileSystemAsset implements Asset {
@@ -431,8 +426,8 @@ public class AssetServlet extends HttpServlet {
   }
 
   /**
-   * A static asset implementation.  This implementation just encapsulates the raw bytes of an
-   * asset (presumably loaded from the classpath) and will never change.
+   * A static asset implementation. This implementation just encapsulates the raw bytes of an asset
+   * (presumably loaded from the classpath) and will never change.
    */
   private static class StaticAsset implements Asset {
     private final byte[] resource;
