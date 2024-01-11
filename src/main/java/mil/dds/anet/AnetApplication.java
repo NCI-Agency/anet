@@ -1,8 +1,6 @@
 package mil.dds.anet;
 
 import com.codahale.metrics.MetricRegistry;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
 import de.ahus1.keycloak.dropwizard.AbstractKeycloakAuthenticator;
 import de.ahus1.keycloak.dropwizard.KeycloakBundle;
@@ -132,8 +130,8 @@ public class AnetApplication extends Application<AnetConfiguration> {
     bootstrap.addCommand(new MaintenanceCommand(this));
 
     // Serve assets on /assets
-    bootstrap.addBundle(new ConfiguredAssetsBundle(ImmutableMap.<String, String>builder()
-        .put("/assets/", "/assets/").put("/imagery/", "/imagery/").put("/data/", "/data/").build(),
+    bootstrap.addBundle(new ConfiguredAssetsBundle(
+        Map.of("/assets/", "/assets/", "/imagery/", "/imagery/", "/data/", "/data/"),
         "index.html"));
 
     // Use Freemarker to handle rendering TEXT_HTML views.
@@ -149,7 +147,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
     bootstrap.addBundle(new MultiPartBundle());
 
     // Add Dropwizard-Keycloak
-    bootstrap.addBundle(new KeycloakBundle<AnetConfiguration>() {
+    bootstrap.addBundle(new KeycloakBundle<>() {
       @Override
       protected AnetKeycloakConfiguration getKeycloakConfiguration(
           AnetConfiguration configuration) {
@@ -399,10 +397,10 @@ public class AnetApplication extends Application<AnetConfiguration> {
     final AttachmentResource attachmentResource = new AttachmentResource(engine);
     final GraphQlResource graphQlResource = injector.getInstance(GraphQlResource.class);
     graphQlResource.initialise(engine, configuration,
-        ImmutableList.of(reportResource, personResource, positionResource, locationResource,
-            orgResource, taskResource, adminResource, savedSearchResource,
-            authorizationGroupResource, noteResource, approvalStepResource, subscriptionResource,
-            subscriptionUpdateResource, attachmentResource),
+        List.of(reportResource, personResource, positionResource, locationResource, orgResource,
+            taskResource, adminResource, savedSearchResource, authorizationGroupResource,
+            noteResource, approvalStepResource, subscriptionResource, subscriptionUpdateResource,
+            attachmentResource),
         metricRegistry);
 
     // Register all of the HTTP Resources

@@ -1,14 +1,10 @@
 package io.dropwizard.bundles.assets;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
-import com.google.common.base.Charsets;
 import com.google.common.cache.CacheBuilderSpec;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import io.dropwizard.ConfiguredBundle;
-import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -182,8 +178,7 @@ public class ConfiguredAssetsBundle implements ConfiguredBundle<AssetsBundleConf
    */
   public ConfiguredAssetsBundle(String resourcePath, String uriPath, String indexFile,
       String assetsName, CacheBuilderSpec cacheBuilderSpec) {
-    this(ImmutableMap.<String, String>builder().put(resourcePath, uriPath).build(), indexFile,
-        assetsName, cacheBuilderSpec);
+    this(Map.of(resourcePath, uriPath), indexFile, assetsName, cacheBuilderSpec);
   }
 
   /**
@@ -285,20 +280,18 @@ public class ConfiguredAssetsBundle implements ConfiguredBundle<AssetsBundleConf
       String assetsName, CacheBuilderSpec cacheBuilderSpec) {
     for (Map.Entry<String, String> mapping : resourcePathToUriMappings.entrySet()) {
       String resourcePath = mapping.getKey();
-      checkArgument(resourcePath.startsWith("/"), "%s is not an absolute path", resourcePath);
-      checkArgument(!"/".equals(resourcePath), "%s is the classpath root", resourcePath);
+      if (!resourcePath.startsWith("/")) {
+        throw new IllegalArgumentException(resourcePath + " is not an absolute path");
+      }
+      if ("/".equals(resourcePath)) {
+        throw new IllegalArgumentException(resourcePath + " is the classpath root");
+      }
     }
     this.resourcePathToUriMappings =
         Iterables.unmodifiableIterable(resourcePathToUriMappings.entrySet());
     this.cacheBuilderSpec = cacheBuilderSpec;
     this.indexFile = indexFile;
     this.assetsName = assetsName;
-  }
-
-
-  @Override
-  public void initialize(Bootstrap<?> bootstrap) {
-    // nothing to do
   }
 
   @Override
@@ -321,7 +314,7 @@ public class ConfiguredAssetsBundle implements ConfiguredBundle<AssetsBundleConf
       servletResourcePathToUriMappings = resourcePathToUriMappings;
     }
     AssetServlet servlet = new AssetServlet(servletResourcePathToUriMappings, indexFile,
-        Charsets.UTF_8, spec, overrides, mimeTypes);
+        StandardCharsets.UTF_8, spec, overrides, mimeTypes);
 
     for (Map.Entry<String, String> mapping : servletResourcePathToUriMappings) {
       String mappingPath = mapping.getValue();
