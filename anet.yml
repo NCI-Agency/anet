@@ -29,7 +29,7 @@ graphQlRequestTimeoutMs: 15000
 assets:
   cacheControlHeader: max-age=259200, public
   mimeTypes:
-    ".js.map": application/json
+    "js.map": application/json
   overrides:
     /imagery: imagery
     /data: data
