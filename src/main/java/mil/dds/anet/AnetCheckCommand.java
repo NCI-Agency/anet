@@ -1,8 +1,8 @@
 package mil.dds.anet;
 
-import io.dropwizard.Application;
-import io.dropwizard.cli.CheckCommand;
-import io.dropwizard.setup.Bootstrap;
+import io.dropwizard.core.Application;
+import io.dropwizard.core.cli.CheckCommand;
+import io.dropwizard.core.setup.Bootstrap;
 import mil.dds.anet.config.AnetConfiguration;
 import net.sourceforge.argparse4j.inf.Namespace;
 

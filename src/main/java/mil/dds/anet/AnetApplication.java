@@ -7,19 +7,19 @@ import de.ahus1.keycloak.dropwizard.KeycloakBundle;
 import de.ahus1.keycloak.dropwizard.KeycloakConfiguration;
 import freemarker.template.Configuration;
 import freemarker.template.Version;
-import io.dropwizard.Application;
 import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.auth.Authorizer;
 import io.dropwizard.bundles.assets.ConfiguredAssetsBundle;
-import io.dropwizard.cli.ServerCommand;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
+import io.dropwizard.core.Application;
+import io.dropwizard.core.cli.ServerCommand;
+import io.dropwizard.core.setup.Bootstrap;
+import io.dropwizard.core.setup.Environment;
 import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.forms.MultiPartBundle;
 import io.dropwizard.migrations.MigrationsBundle;
-import io.dropwizard.setup.Bootstrap;
-import io.dropwizard.setup.Environment;
-import io.dropwizard.views.ViewBundle;
+import io.dropwizard.views.common.ViewBundle;
 import java.lang.invoke.MethodHandles;
 import java.security.Principal;
 import java.util.EnumSet;
@@ -250,13 +250,8 @@ public class AnetApplication extends Application<AnetConfiguration> {
 
       @Override
       protected Authorizer<Person> createAuthorizer() {
-        return new Authorizer<Person>() {
-          @Override
-          public boolean authorize(Person principal, String role) {
-            // We don't use @RolesAllowed type authorizations
-            return false;
-          }
-        };
+        // We don't use @RolesAllowed type authorizations
+        return (person, s, containerRequestContext) -> false;
       }
 
       private String getCombinedName(AccessToken token) {
