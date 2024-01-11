@@ -16,8 +16,8 @@ public class AssetsConfiguration {
   private Map<String, String> mappings = Maps.newHashMap();
 
   /**
-   * Initialize cacheSpec to null so that whatever may be specified by code is able to be
-   * by configuration. If null the default cache spec of "maximumSize=100" will be used.
+   * Initialize cacheSpec to null so that whatever may be specified by code is able to be by
+   * configuration. If null the default cache spec of "maximumSize=100" will be used.
    *
    * @see ConfiguredAssetsBundle#DEFAULT_CACHE_SPEC
    */
@@ -34,12 +34,8 @@ public class AssetsConfiguration {
 
   private Map<String, String> resourcePathToUriMappings;
 
-  private AssetsConfiguration(
-      String cacheControlHeader,
-      String cacheSpec,
-      Map<String, String> mappings,
-      Map<String, String> mimeTypes,
-      Map<String, String> overrides) {
+  private AssetsConfiguration(String cacheControlHeader, String cacheSpec,
+      Map<String, String> mappings, Map<String, String> mimeTypes, Map<String, String> overrides) {
 
     this.cacheControlHeader = cacheControlHeader;
     this.cacheSpec = cacheSpec;
@@ -49,8 +45,9 @@ public class AssetsConfiguration {
   }
 
   /**
-   * A series of mappings from resource paths (in the classpath)
-   * to the uri path that hosts the resource
+   * A series of mappings from resource paths (in the classpath) to the uri path that hosts the
+   * resource
+   * 
    * @return The resourcePathToUriMappings.
    */
   public Map<String, String> getResourcePathToUriMappings() {
@@ -58,8 +55,8 @@ public class AssetsConfiguration {
       ImmutableMap.Builder<String, String> mapBuilder = ImmutableMap.<String, String>builder();
       // Ensure that resourcePath and uri ends with a '/'
       for (Map.Entry<String, String> mapping : mappings().entrySet()) {
-        mapBuilder
-            .put(ensureEndsWithSlash(mapping.getKey()), ensureEndsWithSlash(mapping.getValue()));
+        mapBuilder.put(ensureEndsWithSlash(mapping.getKey()),
+            ensureEndsWithSlash(mapping.getValue()));
       }
       resourcePathToUriMappings = mapBuilder.build();
     }

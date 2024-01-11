@@ -19,8 +19,7 @@ public class UrlUtil {
       throws MalformedURLException {
     final String protocol = resourceUrl.getProtocol();
     // If zip protocol switch to jar protocol
-    if ("zip".equals(protocol)
-        && resourceUrl.getPath().contains(".jar" + JAR_URL_SEPARATOR)) {
+    if ("zip".equals(protocol) && resourceUrl.getPath().contains(".jar" + JAR_URL_SEPARATOR)) {
       String filePath = resourceUrl.getFile();
       if (!filePath.startsWith("/")) {
         filePath = "/" + filePath;
