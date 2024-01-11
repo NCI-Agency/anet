@@ -2,8 +2,8 @@ package io.dropwizard.bundles.assets;
 
 import com.google.common.cache.CacheBuilderSpec;
 import com.google.common.collect.Iterables;
-import io.dropwizard.ConfiguredBundle;
-import io.dropwizard.setup.Environment;
+import io.dropwizard.core.ConfiguredBundle;
+import io.dropwizard.core.setup.Environment;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -323,9 +323,9 @@ public class ConfiguredAssetsBundle implements ConfiguredBundle<AssetsBundleConf
       }
       mappingPath += "*";
       servlet.setCacheControlHeader(config.getCacheControlHeader());
-      LOGGER.info("Registering ConfiguredAssetBundle with name: {} for path {}", assetsName,
+      LOGGER.info("Registering ConfiguredAssetBundle with name: {} for path {}", mapping.getKey(),
           mappingPath);
-      env.servlets().addServlet(assetsName, servlet).addMapping(mappingPath);
+      env.servlets().addServlet(mapping.getKey(), servlet).addMapping(mappingPath);
     }
   }
 }
