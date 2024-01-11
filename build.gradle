@@ -87,7 +87,6 @@ dependencies {
 	implementation "io.dropwizard:dropwizard-migrations:${dropwizardVersion}"
 	implementation "io.dropwizard:dropwizard-auth:${dropwizardVersion}"
 	implementation "io.dropwizard:dropwizard-views-freemarker:${dropwizardVersion}"
-	implementation 'io.dropwizard-bundles:dropwizard-configurable-assets-bundle:1.3.5'
 	implementation "io.dropwizard:dropwizard-forms:${dropwizardVersion}"
 	implementation "org.jdbi:jdbi3-postgres:3.43.0"
 
