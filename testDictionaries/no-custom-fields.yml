@@ -643,7 +643,7 @@ fields:
       name: NATO Member
       countries: [Albania , Armenia, Australia, Austria, Azerbaijan, Belgium, Bosnia-Herzegovina, Bulgaria, Croatia, Czech Republic, Denmark, Estonia, Finland,
                   Georgia, Germany, Greece, Hungary, Iceland, Italy, Latvia, Lithuania, Luxembourg, Macedonia, Mongolia, Montenegro, Netherlands, New Zealand,
-                  Norway, Poland, Portugal, Romania, Slovakia, Slovenia, Spain, Sweden, Turkey, Ukraine, United Kingdom, United States of America]
+                  Norway, Poland, Portugal, Romania, Slovakia, Slovenia, Spain, Sweden, Türkiye, Ukraine, United Kingdom, United States of America]
       # number of fields after Avatar in the left column for advisors
       # adjust this number if two columns are not balanced on the Person Page
       numberOfFieldsInLeftColumn: 6
