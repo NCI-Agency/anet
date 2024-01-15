@@ -167,11 +167,11 @@ public class TaskDao extends AnetSubscribableObjectDao<Task, TaskSearchQuery> {
   }
 
   @InTransaction
-  public int removePositionFromTask(Position p, Task t) {
+  public int removePositionFromTask(String positionUuid, String taskUuid) {
     return getDbHandle()
         .createUpdate("/* removePositionFromTask*/ DELETE FROM \"taskResponsiblePositions\" "
             + "WHERE \"taskUuid\" = :taskUuid AND \"positionUuid\" = :positionUuid")
-        .bind("taskUuid", t.getUuid()).bind("positionUuid", p.getUuid()).execute();
+        .bind("taskUuid", taskUuid).bind("positionUuid", positionUuid).execute();
   }
 
   public CompletableFuture<List<Position>> getResponsiblePositionsForTask(
@@ -189,12 +189,12 @@ public class TaskDao extends AnetSubscribableObjectDao<Task, TaskSearchQuery> {
   }
 
   @InTransaction
-  public int removeTaskedOrganizationsFromTask(Organization o, String taskUuid) {
+  public int removeTaskedOrganizationsFromTask(String organizationUuid, String taskUuid) {
     return getDbHandle()
         .createUpdate(
             "/* removeTaskedOrganizationsFromTask*/ DELETE FROM \"taskTaskedOrganizations\" "
                 + "WHERE \"taskUuid\" = :taskUuid AND \"organizationUuid\" = :organizationUuid")
-        .bind("taskUuid", taskUuid).bind("organizationUuid", o.getUuid()).execute();
+        .bind("taskUuid", taskUuid).bind("organizationUuid", organizationUuid).execute();
   }
 
   public CompletableFuture<List<Organization>> getTaskedOrganizationsForTask(
