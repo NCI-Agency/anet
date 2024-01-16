@@ -1,6 +1,7 @@
 import { clearSearchQuery, resetPages } from "actions"
 import AppContext from "components/AppContext"
 import ResponsiveLayoutContext from "components/ResponsiveLayoutContext"
+import _isEmpty from "lodash/isEmpty"
 import { Organization } from "models"
 import { INSIGHT_DETAILS, INSIGHTS } from "pages/insights/Show"
 import pluralize from "pluralize"
@@ -137,6 +138,7 @@ const Navigation = ({ allOrganizations, resetPages, clearSearchQuery }) => {
 
   const inMyCounterParts = path.startsWith("/positions/counterparts")
   const inMyTasks = path.startsWith("/tasks/mine")
+  const inMyAuthorizationGroups = path.startsWith("/authorizationGroups/mine")
   const inMyReports = path.startsWith("/reports/mine")
   const inMySubscriptions = path.startsWith("/subscriptions/mine")
   const inInsights = path.startsWith("/insights")
@@ -153,6 +155,7 @@ const Navigation = ({ allOrganizations, resetPages, clearSearchQuery }) => {
       inMyCounterParts ||
       inMyReports ||
       inMyTasks ||
+      inMyAuthorizationGroups ||
       inMySubscriptions ||
       inMySavedSearches
     ) {
@@ -163,6 +166,7 @@ const Navigation = ({ allOrganizations, resetPages, clearSearchQuery }) => {
     inMyCounterParts,
     inMyReports,
     inMyTasks,
+    inMyAuthorizationGroups,
     inMySubscriptions,
     inMySavedSearches
   ])
@@ -267,6 +271,17 @@ const Navigation = ({ allOrganizations, resetPages, clearSearchQuery }) => {
           >
             My Saved Searches
           </SidebarLink>
+          {!_isEmpty(
+            currentUser?.position?.authorizationGroupsAdministrated
+          ) && (
+            <SidebarLink
+              id="my-authorizationGroups-nav"
+              linkTo={{ pathname: "/authorizationGroups/mine" }}
+              handleOnClick={resetPages}
+            >
+              My Authorization Groups
+            </SidebarLink>
+          )}
         </div>
       </Collapse>
 

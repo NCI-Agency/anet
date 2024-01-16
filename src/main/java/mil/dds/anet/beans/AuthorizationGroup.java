@@ -21,6 +21,8 @@ public class AuthorizationGroup extends AbstractAnetBean implements RelatableObj
   private String description;
   // annotated below
   private List<GenericRelatedObject> authorizationGroupRelatedObjects;
+  // annotated below
+  private List<Position> administrativePositions;
   @GraphQLQuery
   @GraphQLInputField
   private Status status;
@@ -61,6 +63,28 @@ public class AuthorizationGroup extends AbstractAnetBean implements RelatableObj
 
   public List<GenericRelatedObject> getAuthorizationGroupRelatedObjects() {
     return authorizationGroupRelatedObjects;
+  }
+
+  @GraphQLQuery(name = "administrativePositions")
+  public CompletableFuture<List<Position>> loadAdministrativePositions(
+      @GraphQLRootContext Map<String, Object> context) {
+    if (administrativePositions != null) {
+      return CompletableFuture.completedFuture(administrativePositions);
+    }
+    return AnetObjectEngine.getInstance().getAuthorizationGroupDao()
+        .getAdministrativePositionsForAuthorizationGroup(context, uuid).thenApply(o -> {
+          administrativePositions = o;
+          return o;
+        });
+  }
+
+  public List<Position> getAdministrativePositions() {
+    return administrativePositions;
+  }
+
+  @GraphQLInputField(name = "administrativePositions")
+  public void setAdministrativePositions(List<Position> positions) {
+    this.administrativePositions = positions;
   }
 
   @Override

@@ -22,6 +22,7 @@ export default class AuthorizationGroup extends Model {
       .string()
       .required()
       .default(() => Model.STATUS.ACTIVE),
+    administrativePositions: yup.array().nullable().default([]),
     authorizationGroupRelatedObjects: yup.array().nullable().default([])
   })
 

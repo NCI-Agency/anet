@@ -64,6 +64,8 @@ public class Position extends AbstractCustomizableAnetBean
   private List<Task> responsibleTasks;
   // annotated below
   private List<Organization> organizationsAdministrated;
+  // annotated below
+  private List<AuthorizationGroup> authorizationGroupsAdministrated;
 
   public String getName() {
     return name;
@@ -308,6 +310,15 @@ public class Position extends AbstractCustomizableAnetBean
           organizationsAdministrated = o;
           return o;
         });
+  }
+
+  @GraphQLQuery(name = "authorizationGroupsAdministrated")
+  public List<AuthorizationGroup> getAuthorizationGroupsAdministrated() {
+    if (authorizationGroupsAdministrated == null) {
+      authorizationGroupsAdministrated = AnetObjectEngine.getInstance().getAuthorizationGroupDao()
+          .getAuthorizationGroupsAdministratedByPosition(uuid);
+    }
+    return authorizationGroupsAdministrated;
   }
 
   @Override
