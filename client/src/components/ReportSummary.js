@@ -1,4 +1,6 @@
 import { gql } from "@apollo/client"
+import { Icon } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import API from "api"
 import { BreadcrumbTrail } from "components/BreadcrumbTrail"
 import LinkTo from "components/LinkTo"
@@ -110,6 +112,9 @@ const GQL_GET_REPORT_LIST = gql`
           }
         }
         updatedAt
+        attachments {
+          uuid
+        }
       }
     }
   }
@@ -363,6 +368,16 @@ const ReportSummaryRow = ({ report }) => {
                   />
                 </React.Fragment>
               ))}
+            </span>
+          )}
+        </Col>
+      </Row>
+      <Row>
+        <Col md={12}>
+          {report.attachments.length > 0 && (
+            <span>
+              <Icon icon={IconNames.PAPERCLIP} />
+              {`${report.attachments.length} attachment(s)`}
             </span>
           )}
         </Col>
