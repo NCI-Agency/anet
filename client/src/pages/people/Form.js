@@ -219,7 +219,9 @@ const PersonForm = ({
         // admins and superusers with edit permissions can change status to INACTIVE,
         // only admins can change back to ACTIVE (but nobody can change status of self!)
         const disableStatusChange =
-          (initialValues.status === Model.STATUS.INACTIVE && !isAdmin) || isSelf
+          (initialValues.status === Model.STATUS.INACTIVE && !isAdmin) ||
+          isPendingVerification ||
+          isSelf
         const currentAvatar = attachmentList?.find(
           a => a.uuid === currentAvatarUuid
         )
@@ -559,13 +561,6 @@ const PersonForm = ({
                     )}
 
                     {disableStatusChange ? (
-                      <DictFastField
-                        dictProps={Settings.fields.person.status}
-                        name="status"
-                        component={FieldHelper.ReadonlyField}
-                        humanValue={Person.humanNameOfStatus(values.status)}
-                      />
-                    ) : isPendingVerification ? (
                       <DictFastField
                         dictProps={Settings.fields.person.status}
                         name="status"
