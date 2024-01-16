@@ -215,6 +215,7 @@ input AttachmentInput {
 
 """"""
 type AuthorizationGroup {
+  administrativePositions: [Position]
   authorizationGroupRelatedObjects: [GenericRelatedObject]
   createdAt: Instant
   description: String
@@ -226,6 +227,7 @@ type AuthorizationGroup {
 
 """"""
 input AuthorizationGroupInput {
+  administrativePositions: [PositionInput]
   authorizationGroupRelatedObjects: [GenericRelatedObjectInput]
   createdAt: Instant
   description: String
@@ -661,6 +663,7 @@ enum PersonSearchSortBy {
 type Position {
   associatedPositions: [Position]
   attachments: [Attachment]
+  authorizationGroupsAdministrated: [AuthorizationGroup]
   code: String
   createdAt: Instant
   customFields: String

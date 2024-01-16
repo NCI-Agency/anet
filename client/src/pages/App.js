@@ -46,6 +46,9 @@ const GQL_GET_APP_DATA = gql`
         role
         status
         isApprover
+        authorizationGroupsAdministrated {
+          uuid
+        }
         organization {
           uuid
           shortName
@@ -128,6 +131,9 @@ const GQL_GET_APP_DATA = gql`
           descendantOrgs {
             uuid
           }
+        }
+        authorizationGroupsAdministrated {
+          uuid
         }
       }
     }
