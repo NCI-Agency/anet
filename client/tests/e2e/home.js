@@ -52,6 +52,7 @@ test("Home Page", async t => {
 
   await t.context.pageHelpers.clickMenuLinksButton()
   const $myReportsLink = await $('a[href*="/reports/mine"]')
+  await t.context.driver.wait(t.context.until.elementIsVisible($myReportsLink))
   await $myReportsLink.click()
   await t.context.driver.sleep(shortWaitMs) // wait for transition
   await assertElementNotPresent(

@@ -400,6 +400,9 @@ test.beforeEach(t => {
       const $menuLinksButton = await t.context.$(
         "#leftNav div:nth-child(3) > a"
       )
+      await t.context.driver.wait(
+        t.context.until.elementIsVisible($menuLinksButton)
+      )
       await $menuLinksButton.click()
     },
     async clickMyOrgLink() {
