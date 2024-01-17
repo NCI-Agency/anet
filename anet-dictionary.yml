@@ -421,6 +421,7 @@ fields:
           - Organization
           - Location
           - Task
+          - AuthorizationGroup
       additionalEngagementNeeded:
         type: array_of_anet_objects
         label: Additional engagement needed for
