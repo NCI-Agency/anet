@@ -1,4 +1,5 @@
 import Model from "components/Model"
+import AUTHORIZATION_GROUPS_ICON from "resources/authorizationGroups.png"
 import utils from "utils"
 import * as yup from "yup"
 
@@ -38,6 +39,10 @@ export default class AuthorizationGroup extends Model {
 
   humanNameOfStatus() {
     return AuthorizationGroup.humanNameOfStatus(this.status)
+  }
+
+  iconUrl() {
+    return AUTHORIZATION_GROUPS_ICON
   }
 
   toString() {

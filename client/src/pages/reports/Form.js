@@ -1,6 +1,4 @@
 import { gql } from "@apollo/client"
-import { Icon } from "@blueprintjs/core"
-import { IconNames } from "@blueprintjs/icons"
 import API from "api"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import {
@@ -60,6 +58,7 @@ import { Button, Collapse, Form as FormBS } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
+import AUTHORIZATION_GROUPS_ICON from "resources/authorizationGroups.png"
 import LOCATIONS_ICON from "resources/locations.png"
 import PEOPLE_ICON from "resources/people.png"
 import TASKS_ICON from "resources/tasks.png"
@@ -1017,7 +1016,7 @@ const ReportForm = ({
                               status: Model.STATUS.ACTIVE
                             }}
                             fields={AuthorizationGroup.autocompleteQuery}
-                            addon={<Icon icon={IconNames.LOCK} />}
+                            addon={AUTHORIZATION_GROUPS_ICON}
                           />
                         }
                         extraColElem={
