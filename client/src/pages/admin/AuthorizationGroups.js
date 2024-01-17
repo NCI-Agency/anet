@@ -1,6 +1,7 @@
 import { gql } from "@apollo/client"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
+import AuthorizationGroupTable from "components/AuthorizationGroupTable"
 import Fieldset from "components/Fieldset"
 import {
   mapPageDispatchersToProps,
@@ -10,7 +11,6 @@ import {
 } from "components/Page"
 import React from "react"
 import { connect } from "react-redux"
-import AuthorizationGroupTable from "./AuthorizationGroupTable"
 
 const GQL_GET_AUTHORIZATION_GROUP_LIST = gql`
   query ($query: AuthorizationGroupSearchQueryInput) {
