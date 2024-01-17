@@ -15,6 +15,10 @@ class CreateAuthorizationGroup extends Page {
     return browser.$("#name")
   }
 
+  async getNameDisplay() {
+    return browser.$(".title-text")
+  }
+
   async getDescription() {
     return browser.$("#description")
   }

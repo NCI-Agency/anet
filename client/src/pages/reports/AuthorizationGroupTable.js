@@ -3,6 +3,7 @@ import RemoveButton from "components/RemoveButton"
 import PropTypes from "prop-types"
 import React from "react"
 import { Table } from "react-bootstrap"
+import Settings from "settings"
 
 const AuthorizationGroupTable = ({
   authorizationGroups,
@@ -12,8 +13,8 @@ const AuthorizationGroupTable = ({
   <Table striped hover responsive>
     <thead>
       <tr>
-        <th>Name</th>
-        <th>Description</th>
+        <th>{Settings.fields.authorizationGroup.name?.label}</th>
+        <th>{Settings.fields.authorizationGroup.description?.label}</th>
         {showDelete && <th />}
       </tr>
     </thead>
@@ -21,7 +22,7 @@ const AuthorizationGroupTable = ({
       {authorizationGroups.map((ag, agIndex) => (
         <tr key={ag.uuid}>
           <td>
-            <LinkTo model={ag} modelType="AuthorizationGroup" isLink={false} />
+            <LinkTo model={ag} modelType="AuthorizationGroup" />
           </td>
           <td>{ag.description}</td>
           {showDelete && (

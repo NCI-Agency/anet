@@ -4,6 +4,7 @@ import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSe
 import { PositionOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import { ENTITY_TYPES } from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
 import AppContext from "components/AppContext"
+import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
@@ -14,6 +15,7 @@ import PositionTable from "components/PositionTable"
 import { RelatedObjectsTableInput } from "components/RelatedObjectsTable"
 import { FastField, Field, Form, Formik } from "formik"
 import { AuthorizationGroup, Position } from "models"
+import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
 import { Button } from "react-bootstrap"
@@ -96,9 +98,16 @@ const AuthorizationGroupForm = ({ edit, title, initialValues }) => {
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
               <Fieldset>
-                <FastField name="name" component={FieldHelper.InputField} />
+                <DictionaryField
+                  wrappedComponent={FastField}
+                  dictProps={Settings.fields.authorizationGroup.name}
+                  name="name"
+                  component={FieldHelper.InputField}
+                />
 
-                <FastField
+                <DictionaryField
+                  wrappedComponent={FastField}
+                  dictProps={Settings.fields.authorizationGroup.description}
                   name="description"
                   component={FieldHelper.InputField}
                   asA="textarea"
@@ -120,16 +129,21 @@ const AuthorizationGroupForm = ({ edit, title, initialValues }) => {
                   }
                 />
 
-                <FastField
+                <DictionaryField
+                  wrappedComponent={FastField}
+                  dictProps={Settings.fields.authorizationGroup.status}
                   name="status"
                   component={FieldHelper.RadioButtonToggleGroupField}
                   buttons={statusButtons}
                   onChange={value => setFieldValue("status", value)}
                 />
 
-                <Field
+                <DictionaryField
+                  wrappedComponent={Field}
+                  dictProps={
+                    Settings.fields.authorizationGroup.administrativePositions
+                  }
                   name="administrativePositions"
-                  label="Assigned superusers"
                   component={FieldHelper.SpecialField}
                   onChange={value => {
                     // validation will be done by setFieldValue
@@ -164,13 +178,20 @@ const AuthorizationGroupForm = ({ edit, title, initialValues }) => {
                   }
                 />
 
-                <Field
+                <DictionaryField
+                  wrappedComponent={Field}
+                  dictProps={
+                    Settings.fields.authorizationGroup
+                      .authorizationGroupRelatedObjects
+                  }
                   name="relatedObjects"
-                  label="Members"
                   component={FieldHelper.SpecialField}
                   widget={
                     <RelatedObjectsTableInput
-                      title="Member"
+                      title={pluralize.singular(
+                        Settings.fields.authorizationGroup
+                          .authorizationGroupRelatedObjects?.label
+                      )}
                       relatedObjects={relatedObjects}
                       objectType={ENTITY_TYPES.POSITIONS}
                       entityTypes={[
