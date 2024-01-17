@@ -90,7 +90,8 @@ export const GRAPHQL_ENTITY_FIELDS = {
   Organization: "uuid shortName",
   Position: "uuid name",
   Location: "uuid name",
-  Task: "uuid shortName longName"
+  Task: "uuid shortName longName",
+  AuthorizationGroup: "uuid name description"
 }
 
 export const GQL_CREATE_NOTE = gql`
