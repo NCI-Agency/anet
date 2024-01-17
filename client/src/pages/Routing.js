@@ -1,6 +1,5 @@
 import AppContext from "components/AppContext"
 import _isEmpty from "lodash/isEmpty"
-import AuthorizationGroups from "pages/admin/AuthorizationGroups"
 import AdminIndex from "pages/admin/Index"
 import MergeLocations from "pages/admin/merge/MergeLocations"
 import MergePeople from "pages/admin/merge/MergePeople"
@@ -151,9 +150,6 @@ const Routing = () => {
       {currentUser.isAdmin() && (
         <Route path={PAGE_URLS.ADMIN}>
           <Route index element={<AdminIndex />} />
-          <Route path="authorizationGroups">
-            <Route index element={<AuthorizationGroups />} />
-          </Route>
           {!Settings.automaticallyAllowAllNewUsers && (
             <Route
               path="usersPendingVerification"
