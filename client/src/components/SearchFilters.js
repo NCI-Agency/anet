@@ -444,7 +444,7 @@ export const searchFilters = function() {
           queryKey: "locationUuid"
         })
       },
-      [`Has ${Settings.fields.organization.profile}?`]: {
+      [`Has ${Settings.fields.organization.profile?.label}?`]: {
         component: RadioButtonFilter,
         deserializer: deserializeSelectFilter,
         props: {
