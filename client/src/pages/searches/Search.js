@@ -7,6 +7,7 @@ import {
   setPagination
 } from "actions"
 import API from "api"
+import AuthorizationGroupTable from "components/AuthorizationGroupTable"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
@@ -61,7 +62,6 @@ import POSITIONS_ICON from "resources/positions.png"
 import REPORTS_ICON from "resources/reports.png"
 import TASKS_ICON from "resources/tasks.png"
 import Settings from "settings"
-import AuthorizationGroupTable from "../admin/AuthorizationGroupTable"
 
 const GQL_CREATE_SAVED_SEARCH = gql`
   mutation ($savedSearch: SavedSearchInput!) {

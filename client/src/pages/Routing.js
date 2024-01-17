@@ -1,9 +1,5 @@
 import AppContext from "components/AppContext"
 import _isEmpty from "lodash/isEmpty"
-import AuthorizationGroupEdit from "pages/admin/authorizationgroup/Edit"
-import MyAuthorizationGroups from "pages/admin/authorizationgroup/MyAuthorizationGroups"
-import AuthorizationGroupNew from "pages/admin/authorizationgroup/New"
-import AuthorizationGroupShow from "pages/admin/authorizationgroup/Show"
 import AuthorizationGroups from "pages/admin/AuthorizationGroups"
 import AdminIndex from "pages/admin/Index"
 import MergeLocations from "pages/admin/merge/MergeLocations"
@@ -14,6 +10,10 @@ import UserActivitiesPerPeriod from "pages/admin/useractivities/UserActivitiesPe
 import UsersPendingVerification from "pages/admin/UsersPendingVerification"
 import AttachmentEdit from "pages/attachments/Edit"
 import AttachmentShow from "pages/attachments/Show"
+import AuthorizationGroupEdit from "pages/authorizationGroups/Edit"
+import MyAuthorizationGroups from "pages/authorizationGroups/MyAuthorizationGroups"
+import AuthorizationGroupNew from "pages/authorizationGroups/New"
+import AuthorizationGroupShow from "pages/authorizationGroups/Show"
 import BoardDashboard from "pages/dashboards/BoardDashboard"
 import DecisivesDashboard from "pages/dashboards/DecisivesDashboard"
 import KanbanDashboard from "pages/dashboards/KanbanDashboard"
@@ -137,46 +137,39 @@ const Routing = () => {
         </Route>
       </Route>
       <Route path="authorizationGroups">
+        {currentUser.isAdmin() && (
+          <Route path="new" element={<AuthorizationGroupNew />} />
+        )}
+        <Route path=":uuid">
+          <Route index element={<AuthorizationGroupShow />} />
+          <Route path="edit" element={<AuthorizationGroupEdit />} />
+        </Route>
         {!_isEmpty(currentUser?.position?.authorizationGroupsAdministrated) && (
           <Route path="mine" element={<MyAuthorizationGroups />} />
         )}
       </Route>
-      {(currentUser.isAdmin() ||
-        !_isEmpty(currentUser?.position?.authorizationGroupsAdministrated)) && (
+      {currentUser.isAdmin() && (
         <Route path={PAGE_URLS.ADMIN}>
+          <Route index element={<AdminIndex />} />
           <Route path="authorizationGroups">
-            {currentUser.isAdmin() && (
-              <>
-                <Route index element={<AuthorizationGroups />} />
-                <Route path="new" element={<AuthorizationGroupNew />} />
-              </>
-            )}
-            <Route path=":uuid">
-              <Route index element={<AuthorizationGroupShow />} />
-              <Route path="edit" element={<AuthorizationGroupEdit />} />
-            </Route>
+            <Route index element={<AuthorizationGroups />} />
           </Route>
-          {currentUser.isAdmin() && (
-            <>
-              <Route index element={<AdminIndex />} />
-              {!Settings.automaticallyAllowAllNewUsers && (
-                <Route
-                  path="usersPendingVerification"
-                  element={<UsersPendingVerification />}
-                />
-              )}
-              <Route path="merge">
-                <Route path="people" element={<MergePeople />} />
-                <Route path="positions" element={<MergePositions />} />
-                <Route path="locations" element={<MergeLocations />} />
-              </Route>
-              <Route path="userActivities">
-                <Route path="perPeriod" element={<UserActivitiesPerPeriod />} />
-                <Route path="overTime" element={<UserActivitiesOverTime />} />
-              </Route>
-              <Route path="graphiql" element={<GraphiQL />} />
-            </>
+          {!Settings.automaticallyAllowAllNewUsers && (
+            <Route
+              path="usersPendingVerification"
+              element={<UsersPendingVerification />}
+            />
           )}
+          <Route path="merge">
+            <Route path="people" element={<MergePeople />} />
+            <Route path="positions" element={<MergePositions />} />
+            <Route path="locations" element={<MergeLocations />} />
+          </Route>
+          <Route path="userActivities">
+            <Route path="perPeriod" element={<UserActivitiesPerPeriod />} />
+            <Route path="overTime" element={<UserActivitiesOverTime />} />
+          </Route>
+          <Route path="graphiql" element={<GraphiQL />} />
         </Route>
       )}
       <Route path={PAGE_URLS.INSIGHTS}>
