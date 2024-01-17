@@ -61,6 +61,7 @@ import POSITIONS_ICON from "resources/positions.png"
 import REPORTS_ICON from "resources/reports.png"
 import TASKS_ICON from "resources/tasks.png"
 import Settings from "settings"
+import AuthorizationGroupTable from "../admin/AuthorizationGroupTable"
 
 const GQL_CREATE_SAVED_SEARCH = gql`
   mutation ($savedSearch: SavedSearchInput!) {
@@ -191,6 +192,42 @@ const GQL_GET_LOCATION_LIST = gql`
     }
   }
 `
+const GQL_GET_AUTHORIZATION_GROUP_LIST = gql`
+  query ($authorizationGroupQuery: AuthorizationGroupSearchQueryInput) {
+    authorizationGroupList(query: $authorizationGroupQuery) {
+      pageNum
+      pageSize
+      totalCount
+      list {
+        uuid
+        name
+        description
+        status
+        authorizationGroupRelatedObjects {
+          relatedObjectType
+          relatedObjectUuid
+          relatedObject {
+            ... on Organization {
+              uuid
+              shortName
+            }
+            ... on Person {
+              uuid
+              name
+              rank
+              avatarUuid
+            }
+            ... on Position {
+              uuid
+              type
+              name
+            }
+          }
+        }
+      }
+    }
+  }
+`
 
 const DEFAULT_PAGESIZE = 10
 
@@ -217,10 +254,11 @@ const Organizations = ({
       setPageNum(0)
     }
   }, [queryParams, setPagination, paginationKey, queryParamsUnchanged])
-  const organizationQuery = Object.assign({}, queryParams, {
+  const organizationQuery = {
+    ...queryParams,
     pageNum: queryParamsUnchanged ? pageNum : 0,
     pageSize: queryParams.pageSize || DEFAULT_PAGESIZE
-  })
+  }
   const { loading, error, data } = API.useApiQuery(GQL_GET_ORGANIZATION_LIST, {
     organizationQuery
   })
@@ -231,10 +269,7 @@ const Organizations = ({
   })
   // Update the total count
   const totalCount = done ? null : data?.organizationList?.totalCount
-  useEffect(
-    () => setTotalCount && setTotalCount(totalCount),
-    [setTotalCount, totalCount]
-  )
+  useEffect(() => setTotalCount?.(totalCount), [setTotalCount, totalCount])
   if (done) {
     return result
   }
@@ -312,10 +347,11 @@ const People = ({
       setPageNum(0)
     }
   }, [queryParams, setPagination, paginationKey, queryParamsUnchanged])
-  const personQuery = Object.assign({}, queryParams, {
+  const personQuery = {
+    ...queryParams,
     pageNum: queryParamsUnchanged ? pageNum : 0,
     pageSize: queryParams.pageSize || DEFAULT_PAGESIZE
-  })
+  }
   const { loading, error, data } = API.useApiQuery(GQL_GET_PERSON_LIST, {
     personQuery
   })
@@ -326,10 +362,7 @@ const People = ({
   })
   // Update the total count
   const totalCount = done ? null : data?.personList?.totalCount
-  useEffect(
-    () => setTotalCount && setTotalCount(totalCount),
-    [setTotalCount, totalCount]
-  )
+  useEffect(() => setTotalCount?.(totalCount), [setTotalCount, totalCount])
   if (done) {
     return result
   }
@@ -386,10 +419,11 @@ const Positions = ({
       setPageNum(0)
     }
   }, [queryParams, setPagination, paginationKey, queryParamsUnchanged])
-  const positionQuery = Object.assign({}, queryParams, {
+  const positionQuery = {
+    ...queryParams,
     pageNum: queryParamsUnchanged ? pageNum : 0,
     pageSize: queryParams.pageSize || DEFAULT_PAGESIZE
-  })
+  }
   const { loading, error, data } = API.useApiQuery(GQL_GET_POSITION_LIST, {
     positionQuery
   })
@@ -400,10 +434,7 @@ const Positions = ({
   })
   // Update the total count
   const totalCount = done ? null : data?.positionList?.totalCount
-  useEffect(
-    () => setTotalCount && setTotalCount(totalCount),
-    [setTotalCount, totalCount]
-  )
+  useEffect(() => setTotalCount?.(totalCount), [setTotalCount, totalCount])
   if (done) {
     return result
   }
@@ -460,10 +491,11 @@ export const Tasks = ({
       setPageNum(0)
     }
   }, [queryParams, setPagination, paginationKey, queryParamsUnchanged])
-  const taskQuery = Object.assign({}, queryParams, {
+  const taskQuery = {
+    ...queryParams,
     pageNum: queryParamsUnchanged ? pageNum : 0,
     pageSize: queryParams.pageSize || DEFAULT_PAGESIZE
-  })
+  }
   const { loading, error, data } = API.useApiQuery(GQL_GET_TASK_LIST, {
     taskQuery
   })
@@ -474,10 +506,7 @@ export const Tasks = ({
   })
   // Update the total count
   const totalCount = done ? null : data?.taskList?.totalCount
-  useEffect(
-    () => setTotalCount && setTotalCount(totalCount),
-    [setTotalCount, totalCount]
-  )
+  useEffect(() => setTotalCount?.(totalCount), [setTotalCount, totalCount])
   if (done) {
     return result
   }
@@ -534,10 +563,11 @@ const Locations = ({
       setPageNum(0)
     }
   }, [queryParams, setPagination, paginationKey, queryParamsUnchanged])
-  const locationQuery = Object.assign({}, queryParams, {
+  const locationQuery = {
+    ...queryParams,
     pageNum: queryParamsUnchanged ? pageNum : 0,
     pageSize: queryParams.pageSize || DEFAULT_PAGESIZE
-  })
+  }
   const { loading, error, data } = API.useApiQuery(GQL_GET_LOCATION_LIST, {
     locationQuery
   })
@@ -548,10 +578,7 @@ const Locations = ({
   })
   // Update the total count
   const totalCount = done ? null : data?.locationList?.totalCount
-  useEffect(
-    () => setTotalCount && setTotalCount(totalCount),
-    [setTotalCount, totalCount]
-  )
+  useEffect(() => setTotalCount?.(totalCount), [setTotalCount, totalCount])
   if (done) {
     return result
   }
@@ -585,6 +612,85 @@ Locations.propTypes = {
   setPagination: PropTypes.func.isRequired
 }
 
+const AuthorizationGroups = ({
+  pageDispatchers,
+  queryParams,
+  setTotalCount,
+  paginationKey,
+  pagination,
+  setPagination
+}) => {
+  // (Re)set pageNum to 0 if the queryParams change, and make sure we retrieve page 0 in that case
+  const latestQueryParams = useRef(queryParams)
+  const queryParamsUnchanged = _isEqual(latestQueryParams.current, queryParams)
+  const [pageNum, setPageNum] = useState(
+    queryParamsUnchanged && pagination[paginationKey]
+      ? pagination[paginationKey].pageNum
+      : 0
+  )
+  useEffect(() => {
+    if (!queryParamsUnchanged) {
+      latestQueryParams.current = queryParams
+      setPagination(paginationKey, 0)
+      setPageNum(0)
+    }
+  }, [queryParams, setPagination, paginationKey, queryParamsUnchanged])
+  const authorizationGroupQuery = {
+    ...queryParams,
+    pageNum: queryParamsUnchanged ? pageNum : 0,
+    pageSize: queryParams.pageSize || DEFAULT_PAGESIZE
+  }
+  const { loading, error, data } = API.useApiQuery(
+    GQL_GET_AUTHORIZATION_GROUP_LIST,
+    {
+      authorizationGroupQuery
+    }
+  )
+  const { done, result } = useBoilerplate({
+    loading,
+    error,
+    pageDispatchers
+  })
+  // Update the total count
+  const totalCount = done ? null : data?.authorizationGroupList?.totalCount
+  useEffect(() => setTotalCount?.(totalCount), [setTotalCount, totalCount])
+  if (done) {
+    return result
+  }
+
+  const paginatedAuthorizationGroups = data ? data.authorizationGroupList : []
+  const {
+    pageSize,
+    pageNum: curPage,
+    list: authorizationGroups
+  } = paginatedAuthorizationGroups
+
+  return (
+    <AuthorizationGroupTable
+      authorizationGroups={authorizationGroups}
+      pageSize={pageSize}
+      pageNum={curPage}
+      totalCount={totalCount}
+      goToPage={setPage}
+      id="authorizationGroups-search-results"
+    />
+  )
+
+  function setPage(pageNum) {
+    setPagination(paginationKey, pageNum)
+    setPageNum(pageNum)
+  }
+}
+
+AuthorizationGroups.propTypes = {
+  pageDispatchers: PageDispatchersPropType,
+  queryParams: PropTypes.object,
+  setTotalCount: PropTypes.func,
+  paginationKey: PropTypes.string.isRequired,
+  pagination: PropTypes.object.isRequired,
+  setPagination: PropTypes.func.isRequired
+}
+
 const sum = (...args) => {
   return args.reduce((prev, curr) => (curr === null ? prev : prev + curr))
 }
@@ -604,6 +710,7 @@ const Search = ({
   const [numTasks, setNumTasks] = useState(null)
   const [numLocations, setNumLocations] = useState(null)
   const [numReports, setNumReports] = useState(null)
+  const [numAuthorizationGroups, setNumAuthorizationGroups] = useState(null)
   usePageTitle("Search")
   const numResults = sum(
     numOrganizations,
@@ -611,7 +718,8 @@ const Search = ({
     numPositions,
     numTasks,
     numLocations,
-    numReports
+    numReports,
+    numAuthorizationGroups
   )
   const taskShortLabel = Settings.fields.task.shortLabel
   // Memo'ize the search query parameters we use to prevent unnecessary re-renders
@@ -620,19 +728,19 @@ const Search = ({
     [searchQuery]
   )
   const genericSearchQueryParams = useMemo(
-    () =>
-      Object.assign({}, searchQueryParams, {
-        sortBy: "NAME",
-        sortOrder: "ASC"
-      }),
+    () => ({
+      ...searchQueryParams,
+      sortBy: "NAME",
+      sortOrder: "ASC"
+    }),
     [searchQueryParams]
   )
   const reportsSearchQueryParams = useMemo(
-    () =>
-      Object.assign({}, searchQueryParams, {
-        sortBy: "ENGAGEMENT_DATE",
-        sortOrder: "DESC"
-      }),
+    () => ({
+      ...searchQueryParams,
+      sortBy: "ENGAGEMENT_DATE",
+      sortOrder: "DESC"
+    }),
     [searchQueryParams]
   )
   const queryTypes = searchQuery.objectType
@@ -651,6 +759,9 @@ const Search = ({
     queryTypes.includes(SEARCH_OBJECT_TYPES.LOCATIONS) && numLocations > 0
   const hasReportsResults =
     queryTypes.includes(SEARCH_OBJECT_TYPES.REPORTS) && numReports > 0
+  const hasAuthorizationGroupsResults =
+    queryTypes.includes(SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS) &&
+    numAuthorizationGroups > 0
   useBoilerplate({
     pageProps: DEFAULT_PAGE_PROPS,
     searchProps: DEFAULT_SEARCH_PROPS,
@@ -733,6 +844,19 @@ const Search = ({
                 {hasReportsResults && (
                   <Badge pill bg="secondary" className="float-end">
                     {numReports}
+                  </Badge>
+                )}
+              </AnchorNavItem>
+
+              <AnchorNavItem
+                to="authorizationGroups"
+                disabled={!hasAuthorizationGroupsResults}
+              >
+                <img src={REPORTS_ICON} alt="" />{" "}
+                {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS]}{" "}
+                {hasAuthorizationGroupsResults && (
+                  <Badge pill bg="secondary" className="float-end">
+                    {numAuthorizationGroups}
                   </Badge>
                 )}
               </AnchorNavItem>
@@ -934,6 +1058,18 @@ const Search = ({
             queryParams={reportsSearchQueryParams}
             setTotalCount={setNumReports}
             paginationKey="SEARCH_reports"
+          />
+        </Fieldset>
+      )}
+      {queryTypes.includes(SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS) && (
+        <Fieldset id="authorizationGroups" title="Authorization Groups">
+          <AuthorizationGroups
+            pageDispatchers={pageDispatchers}
+            queryParams={genericSearchQueryParams}
+            setTotalCount={setNumAuthorizationGroups}
+            paginationKey="SEARCH_authorizationGroups"
+            pagination={pagination}
+            setPagination={setPagination}
           />
         </Fieldset>
       )}
