@@ -15,6 +15,9 @@ import AuthorizationGroupTable from "./AuthorizationGroupTable"
 const GQL_GET_AUTHORIZATION_GROUP_LIST = gql`
   query ($query: AuthorizationGroupSearchQueryInput) {
     authorizationGroupList(query: $query) {
+      pageNum
+      pageSize
+      totalCount
       list {
         uuid
         name

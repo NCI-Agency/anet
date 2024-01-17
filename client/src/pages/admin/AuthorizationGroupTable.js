@@ -1,16 +1,24 @@
 import LinkTo from "components/LinkTo"
+import { mapPageDispatchersToProps } from "components/Page"
+import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import { AuthorizationGroup } from "models"
 import PropTypes from "prop-types"
 import React from "react"
 import { Table } from "react-bootstrap"
+import { connect } from "react-redux"
 
-const AuthorizationGroupTable = props => {
-  const authorizationGroups = AuthorizationGroup.fromArray(
-    props.authorizationGroups
-  )
+const AuthorizationGroupTable = ({
+  id,
+  authorizationGroups,
+  pageSize,
+  pageNum,
+  totalCount,
+  goToPage
+}) => {
+  const ags = AuthorizationGroup.fromArray(authorizationGroups)
 
-  return (
-    <Table striped hover responsive>
+  const table = (
+    <Table striped hover responsive id={id}>
       <thead>
         <tr>
           <th>Name</th>
@@ -21,7 +29,7 @@ const AuthorizationGroupTable = props => {
       </thead>
 
       <tbody>
-        {authorizationGroups.map(authorizationGroup => (
+        {ags.map(authorizationGroup => (
           <tr key={authorizationGroup.uuid}>
             <td>
               <LinkTo
@@ -46,10 +54,33 @@ const AuthorizationGroupTable = props => {
       </tbody>
     </Table>
   )
+  return !goToPage ? (
+    table
+  ) : (
+    <div>
+      <UltimatePaginationTopDown
+        componentClassName="searchPagination"
+        className="float-end"
+        pageNum={pageNum}
+        pageSize={pageSize}
+        totalCount={totalCount}
+        goToPage={goToPage}
+      >
+        {table}
+      </UltimatePaginationTopDown>
+    </div>
+  )
 }
 
 AuthorizationGroupTable.propTypes = {
-  authorizationGroups: PropTypes.array.isRequired
+  id: PropTypes.string,
+  // list of authorizationGroups:
+  authorizationGroups: PropTypes.array.isRequired,
+  // fill these when pagination wanted:
+  totalCount: PropTypes.number,
+  pageNum: PropTypes.number,
+  pageSize: PropTypes.number,
+  goToPage: PropTypes.func
 }
 
-export default AuthorizationGroupTable
+export default connect(null, mapPageDispatchersToProps)(AuthorizationGroupTable)

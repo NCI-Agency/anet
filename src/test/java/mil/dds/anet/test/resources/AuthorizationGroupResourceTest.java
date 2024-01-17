@@ -10,8 +10,10 @@ import javax.ws.rs.ForbiddenException;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PositionDao;
+import mil.dds.anet.test.client.AnetBeanList_AuthorizationGroup;
 import mil.dds.anet.test.client.AuthorizationGroup;
 import mil.dds.anet.test.client.AuthorizationGroupInput;
+import mil.dds.anet.test.client.AuthorizationGroupSearchQueryInput;
 import mil.dds.anet.test.client.GenericRelatedObjectInput;
 import mil.dds.anet.test.client.Status;
 import mil.dds.anet.test.client.util.MutationExecutor;
@@ -26,6 +28,16 @@ class AuthorizationGroupResourceTest extends AbstractResourceTest {
       + " relatedObject { " + "... on Organization { uuid shortName longName identificationCode }"
       + " ... on Person { uuid name rank avatarUuid }"
       + " ... on Position { uuid type name } } } }";
+
+  @Test
+  void searchTest() throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    // Search by name
+    final AuthorizationGroupSearchQueryInput query =
+        AuthorizationGroupSearchQueryInput.builder().withText("EF").build();
+    AnetBeanList_AuthorizationGroup ags =
+        jackQueryExecutor.authorizationGroupList(getListFields(FIELDS), query);
+    assertThat(ags.getList()).isNotEmpty();
+  }
 
   @Test
   void testCreateAsAdmin()

@@ -110,7 +110,7 @@ const BaseLocationTable = ({
         totalCount={totalCount}
         goToPage={goToPage}
       >
-        <Table responsive hover striped id="locations-search-results">
+        <Table responsive hover striped id={id}>
           <thead>
             <tr>
               <th>Name</th>
