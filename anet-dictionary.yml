@@ -342,6 +342,20 @@ fields:
       - image/webp
       - text/plain
 
+  authorizationGroup:
+    status:
+      label: Status
+    name:
+      label: Name
+      placeholder: Fill in the name of this authorizationGroup
+    description:
+      label: Description
+      placeholder: Fill in the description of this authorizationGroup
+    administrativePositions:
+      label: Assigned superusers
+    authorizationGroupRelatedObjects:
+      label: Members
+
   report:
     canUnpublishReports: true
     intent:

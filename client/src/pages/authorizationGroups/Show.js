@@ -16,10 +16,13 @@ import PositionTable from "components/PositionTable"
 import { RelatedObjectsTable } from "components/RelatedObjectsTable"
 import ReportCollection from "components/ReportCollection"
 import { Field, Form, Formik } from "formik"
+import DictionaryField from "HOC/DictionaryField"
 import { AuthorizationGroup } from "models"
+import pluralize from "pluralize"
 import React, { useContext } from "react"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
+import Settings from "settings"
 
 const GQL_GET_AUTHORIZATION_GROUP = gql`
   query ($uuid: String) {
@@ -104,6 +107,7 @@ const AuthorizationGroupShow = ({ pageDispatchers }) => {
   const authorizationGroup = new AuthorizationGroup(
     data ? data.authorizationGroup : {}
   )
+  const DictField = DictionaryField(Field)
   const stateSuccess = routerLocation.state?.success
   const stateError = routerLocation.state?.error
   const isAssignedSuperuser =
@@ -134,29 +138,42 @@ const AuthorizationGroupShow = ({ pageDispatchers }) => {
                 action={action}
               />
               <Fieldset>
-                <Field name="name" component={FieldHelper.ReadonlyField} />
-
-                <Field
+                <DictField
+                  dictProps={Settings.fields.authorizationGroup.description}
                   name="description"
                   component={FieldHelper.ReadonlyField}
                 />
 
-                <Field
+                <DictField
+                  dictProps={Settings.fields.authorizationGroup.status}
                   name="status"
                   component={FieldHelper.ReadonlyField}
                   humanValue={AuthorizationGroup.humanNameOfStatus}
                 />
               </Fieldset>
 
-              <Fieldset title="Assigned superusers">
+              <Fieldset
+                title={
+                  Settings.fields.authorizationGroup.administrativePositions
+                    ?.label
+                }
+              >
                 <PositionTable
                   positions={authorizationGroup.administrativePositions}
                 />
               </Fieldset>
 
-              <Fieldset title="Members">
+              <Fieldset
+                title={
+                  Settings.fields.authorizationGroup
+                    .authorizationGroupRelatedObjects?.label
+                }
+              >
                 <RelatedObjectsTable
-                  title="Member"
+                  title={pluralize.singular(
+                    Settings.fields.authorizationGroup
+                      .authorizationGroupRelatedObjects?.label
+                  )}
                   relatedObjects={values.authorizationGroupRelatedObjects}
                 />
               </Fieldset>

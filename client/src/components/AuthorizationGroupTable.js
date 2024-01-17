@@ -6,6 +6,7 @@ import PropTypes from "prop-types"
 import React from "react"
 import { Table } from "react-bootstrap"
 import { connect } from "react-redux"
+import Settings from "settings"
 
 const AuthorizationGroupTable = ({
   id,
@@ -21,10 +22,15 @@ const AuthorizationGroupTable = ({
     <Table striped hover responsive id={id}>
       <thead>
         <tr>
-          <th>Name</th>
-          <th>Description</th>
-          <th>Members</th>
-          <th>Status</th>
+          <th>{Settings.fields.authorizationGroup.name?.label}</th>
+          <th>{Settings.fields.authorizationGroup.description?.label}</th>
+          <th>
+            {
+              Settings.fields.authorizationGroup
+                .authorizationGroupRelatedObjects?.label
+            }
+          </th>
+          <th>{Settings.fields.authorizationGroup.status?.label}</th>
         </tr>
       </thead>
 
