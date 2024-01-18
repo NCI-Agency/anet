@@ -1,6 +1,7 @@
 import LinkTo from "components/LinkTo"
 import { mapPageDispatchersToProps } from "components/Page"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
+import _get from "lodash/get"
 import { AuthorizationGroup } from "models"
 import PropTypes from "prop-types"
 import React from "react"
@@ -16,8 +17,11 @@ const AuthorizationGroupTable = ({
   totalCount,
   goToPage
 }) => {
-  const ags = AuthorizationGroup.fromArray(authorizationGroups)
+  if (_get(authorizationGroups, "length", 0) === 0) {
+    return <em>No authorization groups found</em>
+  }
 
+  const ags = AuthorizationGroup.fromArray(authorizationGroups)
   const table = (
     <Table striped hover responsive id={id}>
       <thead>

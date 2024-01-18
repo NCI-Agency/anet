@@ -219,6 +219,7 @@ type AuthorizationGroup {
   authorizationGroupRelatedObjects: [GenericRelatedObject]
   createdAt: Instant
   description: String
+  isSubscribed: Boolean
   name: String
   status: Status
   updatedAt: Instant
@@ -246,6 +247,7 @@ input AuthorizationGroupSearchQueryInput {
   sortBy: AuthorizationGroupSearchSortBy
   sortOrder: SortOrder
   status: Status
+  subscribed: Boolean
   text: String
 }
 
@@ -1100,7 +1102,7 @@ enum Status {
 }
 
 """"""
-union SubscribableObject = Location | Organization | Person | Position | Report | ReportPerson | Task
+union SubscribableObject = AuthorizationGroup | Location | Organization | Person | Position | Report | ReportPerson | Task
 
 """"""
 type Subscription {

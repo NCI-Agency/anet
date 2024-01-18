@@ -7,7 +7,6 @@ import static mil.dds.anet.test.resources.SubscriptionResourceTest.deleteSubscri
 import static mil.dds.anet.test.resources.SubscriptionResourceTest.getSubscribedObjectUuid;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.google.common.collect.Lists;
 import com.graphql_java_generator.exception.GraphQLRequestExecutionException;
 import com.graphql_java_generator.exception.GraphQLRequestPreparationException;
 import java.time.Instant;
@@ -19,6 +18,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import mil.dds.anet.database.AuthorizationGroupDao;
 import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
@@ -26,6 +26,7 @@ import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.TaskDao;
 import mil.dds.anet.test.client.AnetBeanList_SubscriptionUpdate;
+import mil.dds.anet.test.client.AuthorizationGroup;
 import mil.dds.anet.test.client.GenericRelatedObjectInput;
 import mil.dds.anet.test.client.Location;
 import mil.dds.anet.test.client.Note;
@@ -63,6 +64,8 @@ public class SubscriptionUpdateResourceTest extends AbstractResourceTest {
           put(PositionDao.TABLE_NAME, SubscriptionUpdateResourceTest::updatePosition);
           put(ReportDao.TABLE_NAME, SubscriptionUpdateResourceTest::updateReport);
           put(TaskDao.TABLE_NAME, SubscriptionUpdateResourceTest::updateTask);
+          put(AuthorizationGroupDao.TABLE_NAME,
+              SubscriptionUpdateResourceTest::updateAuthorizationGroup);
         }
       };
 
@@ -237,14 +240,15 @@ public class SubscriptionUpdateResourceTest extends AbstractResourceTest {
               getLocationInput(getLocation(getSubscribedObjectUuid(LocationDao.TABLE_NAME))))
           .withCancelledReason(ReportCancelledReason.CANCELLED_BY_ADVISOR)
           .withReportPeople(
-              getReportPeopleInput(Lists.newArrayList(personToPrimaryReportAuthor(getJackJackson()),
+              getReportPeopleInput(List.of(personToPrimaryReportAuthor(getJackJackson()),
                   personToReportPerson(getPerson(getSubscribedObjectUuid(PersonDao.TABLE_NAME)),
                       false),
                   personToPrimaryReportPerson(getChristopfTopferness(), true))))
           .withAdvisorOrg(getOrganizationInput(
               getOrganization(getSubscribedObjectUuid(OrganizationDao.TABLE_NAME))))
-          .withTasks(Lists
-              .newArrayList(getTaskInput(getTask(getSubscribedObjectUuid(TaskDao.TABLE_NAME)))))
+          .withTasks(List.of(getTaskInput(getTask(getSubscribedObjectUuid(TaskDao.TABLE_NAME)))))
+          .withAuthorizationGroups(List.of(getAuthorizationGroupInput(
+              getAuthorizationGroup(getSubscribedObjectUuid(AuthorizationGroupDao.TABLE_NAME)))))
           .withNextSteps("<p>Test report next steps for subscription updates</p>")
           .withReportText("<p>Test report intent for subscription updates</p>").build();
       final String reportUuid =
@@ -341,5 +345,21 @@ public class SubscriptionUpdateResourceTest extends AbstractResourceTest {
   private static Task getTask(final String subscribedObjectUuid)
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     return jackQueryExecutor.task(TaskResourceTest.FIELDS, subscribedObjectUuid);
+  }
+
+  private static void updateAuthorizationGroup(final String subscribedObjectUuid) {
+    try {
+      final AuthorizationGroup subscribedObject = getAuthorizationGroup(subscribedObjectUuid);
+      adminMutationExecutor.updateAuthorizationGroup("",
+          getAuthorizationGroupInput(subscribedObject));
+    } catch (GraphQLRequestExecutionException | GraphQLRequestPreparationException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private static AuthorizationGroup getAuthorizationGroup(final String subscribedObjectUuid)
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    return jackQueryExecutor.authorizationGroup(AuthorizationGroupResourceTest.FIELDS,
+        subscribedObjectUuid);
   }
 }

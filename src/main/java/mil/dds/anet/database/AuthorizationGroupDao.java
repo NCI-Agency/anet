@@ -28,7 +28,7 @@ import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public class AuthorizationGroupDao
-    extends AnetBaseDao<AuthorizationGroup, AuthorizationGroupSearchQuery> {
+    extends AnetSubscribableObjectDao<AuthorizationGroup, AuthorizationGroupSearchQuery> {
 
   private static final String[] fields =
       {"uuid", "name", "description", "status", "createdAt", "updatedAt"};
@@ -260,6 +260,11 @@ public class AuthorizationGroupDao
         + " WHERE agap.\"positionUuid\" = :positionUuid";
     return getDbHandle().createQuery(sql).bind("positionUuid", positionUuid)
         .map(new AuthorizationGroupMapper()).list();
+  }
+
+  @Override
+  public SubscriptionUpdateGroup getSubscriptionUpdate(AuthorizationGroup obj) {
+    return getCommonSubscriptionUpdate(obj, TABLE_NAME, "authorizationGroups.uuid");
   }
 
 }
