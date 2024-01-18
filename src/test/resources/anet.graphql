@@ -243,7 +243,6 @@ input AuthorizationGroupSearchQueryInput {
   inMyReports: Boolean
   pageNum: Int
   pageSize: Int
-  positionUuid: String
   sortBy: AuthorizationGroupSearchSortBy
   sortOrder: SortOrder
   status: Status
