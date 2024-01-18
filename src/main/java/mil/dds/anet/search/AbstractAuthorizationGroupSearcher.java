@@ -6,7 +6,6 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AuthorizationGroupSearchQuery;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.database.AuthorizationGroupDao;
-import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.mappers.AuthorizationGroupMapper;
 import mil.dds.anet.utils.DaoUtils;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
@@ -37,16 +36,6 @@ public abstract class AbstractAuthorizationGroupSearcher
     }
 
     qb.addEnumEqualsClause("status", "\"authorizationGroups\".status", query.getStatus());
-
-    if (query.getPositionUuid() != null) {
-      // Search for authorization groups related to a given position
-      qb.addWhereClause("\"authorizationGroups\".uuid IN"
-          + " (SELECT ap.\"authorizationGroupUuid\" FROM \"authorizationGroupRelatedObjects\" agro"
-          + " WHERE agro.\"relatedObjectType\" = :relatedObjectTypePosition"
-          + " AND agro.\"relatedObjectUuid\" = :relatedObjectUuid)");
-      qb.addSqlArg("relatedObjectTypePosition", PositionDao.TABLE_NAME);
-      qb.addSqlArg("relatedObjectUuid", query.getPositionUuid());
-    }
 
     if (query.getUser() != null && query.getSubscribed()) {
       qb.addWhereClause(Searcher.getSubscriptionReferences(query.getUser(), qb.getSqlArgs(),
