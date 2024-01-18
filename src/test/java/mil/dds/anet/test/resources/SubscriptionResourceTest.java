@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import javax.ws.rs.ClientErrorException;
+import mil.dds.anet.database.AuthorizationGroupDao;
 import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
@@ -19,6 +20,7 @@ import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.TaskDao;
 import mil.dds.anet.test.client.AnetBeanList_Subscription;
+import mil.dds.anet.test.client.AuthorizationGroup;
 import mil.dds.anet.test.client.Location;
 import mil.dds.anet.test.client.Organization;
 import mil.dds.anet.test.client.Person;
@@ -43,7 +45,7 @@ public class SubscriptionResourceTest extends AbstractResourceTest {
 
   protected static final String FIELDS = "{ uuid createdAt updatedAt subscriber { uuid }"
       + " subscribedObjectType subscribedObjectUuid subscribedObject {"
-      + " ... on Location { uuid } ... on Organization { uuid }"
+      + " ... on AuthorizationGroup { uuid } ... on Location { uuid } ... on Organization { uuid }"
       + " ... on Person { uuid } ... on Position { uuid }"
       + " ... on Report { uuid } ... on Task { uuid } } }";
 
@@ -65,6 +67,8 @@ public class SubscriptionResourceTest extends AbstractResourceTest {
       put(ReportDao.TABLE_NAME, "9bb1861c-1f55-4a1b-bd3d-3c1f56d739b5");
       // Task: EF 5
       put(TaskDao.TABLE_NAME, "242efaa3-d5de-4970-996d-50ca90ef6480");
+      // AuthorizationGroup: Inactive positions
+      put(AuthorizationGroupDao.TABLE_NAME, "90a5196d-acf3-4a81-8ff9-3a8c7acabdf3");
     }
   };
 
@@ -409,30 +413,28 @@ public class SubscriptionResourceTest extends AbstractResourceTest {
     }
 
     assertThat(subscribedObject).isNotNull();
-    if (subscribedObject instanceof Location) {
-      final Location location = (Location) subscribedObject;
+    if (subscribedObject instanceof Location location) {
       assertThat(subscription.getSubscribedObjectType()).isEqualTo(LocationDao.TABLE_NAME);
       assertThat(subscription.getSubscribedObjectUuid()).isEqualTo(location.getUuid());
-    } else if (subscribedObject instanceof Organization) {
-      final Organization organization = (Organization) subscribedObject;
+    } else if (subscribedObject instanceof Organization organization) {
       assertThat(subscription.getSubscribedObjectType()).isEqualTo(OrganizationDao.TABLE_NAME);
       assertThat(subscription.getSubscribedObjectUuid()).isEqualTo(organization.getUuid());
-    } else if (subscribedObject instanceof Person) {
-      final Person person = (Person) subscribedObject;
+    } else if (subscribedObject instanceof Person person) {
       assertThat(subscription.getSubscribedObjectType()).isEqualTo(PersonDao.TABLE_NAME);
       assertThat(subscription.getSubscribedObjectUuid()).isEqualTo(person.getUuid());
-    } else if (subscribedObject instanceof Position) {
-      final Position position = (Position) subscribedObject;
+    } else if (subscribedObject instanceof Position position) {
       assertThat(subscription.getSubscribedObjectType()).isEqualTo(PositionDao.TABLE_NAME);
       assertThat(subscription.getSubscribedObjectUuid()).isEqualTo(position.getUuid());
-    } else if (subscribedObject instanceof Report) {
-      final Report report = (Report) subscribedObject;
+    } else if (subscribedObject instanceof Report report) {
       assertThat(subscription.getSubscribedObjectType()).isEqualTo(ReportDao.TABLE_NAME);
       assertThat(subscription.getSubscribedObjectUuid()).isEqualTo(report.getUuid());
-    } else if (subscribedObject instanceof Task) {
-      final Task task = (Task) subscribedObject;
+    } else if (subscribedObject instanceof Task task) {
       assertThat(subscription.getSubscribedObjectType()).isEqualTo(TaskDao.TABLE_NAME);
       assertThat(subscription.getSubscribedObjectUuid()).isEqualTo(task.getUuid());
+    } else if (subscribedObject instanceof AuthorizationGroup authorizationGroup) {
+      assertThat(subscription.getSubscribedObjectType())
+          .isEqualTo(AuthorizationGroupDao.TABLE_NAME);
+      assertThat(subscription.getSubscribedObjectUuid()).isEqualTo(authorizationGroup.getUuid());
     } else {
       fail("Unknown subscribedObjectType: {}", subscribedObject);
     }

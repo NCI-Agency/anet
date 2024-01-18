@@ -17,7 +17,7 @@ import mil.dds.anet.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractCustomizableAnetBean extends AbstractAnetBean {
+public abstract class AbstractCustomizableAnetBean extends AbstractSubscribableAnetBean {
 
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -29,8 +29,6 @@ public abstract class AbstractCustomizableAnetBean extends AbstractAnetBean {
   private List<Note> notes;
   // annotated below
   private List<CustomSensitiveInformation> customSensitiveInformation;
-  // annotated below
-  private Boolean isSubscribed;
   // annotated below
   private List<Attachment> attachments;
 
@@ -90,15 +88,6 @@ public abstract class AbstractCustomizableAnetBean extends AbstractAnetBean {
     this.customSensitiveInformation = customSensitiveInformation;
   }
 
-  @GraphQLQuery(name = "isSubscribed")
-  public synchronized Boolean isSubscribed(@GraphQLRootContext Map<String, Object> context) {
-    if (isSubscribed == null) {
-      isSubscribed =
-          AnetObjectEngine.getInstance().getSubscriptionDao().isSubscribedObject(context, uuid);
-    }
-    return isSubscribed;
-  }
-
   public void checkAndFixCustomFields() {
     try {
       setCustomFields(Utils.sanitizeJson(getCustomFields()));
@@ -114,12 +103,12 @@ public abstract class AbstractCustomizableAnetBean extends AbstractAnetBean {
       return false;
     }
     final AbstractCustomizableAnetBean other = (AbstractCustomizableAnetBean) o;
-    return Objects.equals(customFields, other.getCustomFields());
+    return super.equals(o) && Objects.equals(customFields, other.getCustomFields());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(customFields);
+    return Objects.hash(super.hashCode(), customFields);
   }
 
 }

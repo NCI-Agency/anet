@@ -20,7 +20,7 @@ import mil.dds.anet.test.client.util.MutationExecutor;
 import org.junit.jupiter.api.Test;
 
 class AuthorizationGroupResourceTest extends AbstractResourceTest {
-  private static final String FIELDS = "{ uuid name description status"
+  protected static final String FIELDS = "{ uuid name description status"
       + " administrativePositions { uuid name code type role status location { uuid name }"
       + " organization { uuid shortName longName identificationCode }"
       + " person { uuid name rank avatarUuid } }"

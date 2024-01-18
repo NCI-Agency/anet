@@ -33,6 +33,9 @@ const GQL_GET_MY_SUBSCRIPTIONS = gql`
         subscribedObjectType
         subscribedObjectUuid
         subscribedObject {
+          ... on AuthorizationGroup {
+            name
+          }
           ... on Location {
             name
           }

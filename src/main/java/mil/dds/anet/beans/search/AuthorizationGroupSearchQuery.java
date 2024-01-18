@@ -4,7 +4,7 @@ import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 
 public class AuthorizationGroupSearchQuery
-    extends AbstractSearchQuery<AuthorizationGroupSearchSortBy> {
+    extends SubscribableObjectSearchQuery<AuthorizationGroupSearchSortBy> {
 
   @GraphQLQuery
   @GraphQLInputField

@@ -11,10 +11,11 @@ import mil.dds.anet.beans.SubscribableObject;
 import mil.dds.anet.beans.search.AbstractSearchQuery;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.views.AbstractCustomizableAnetBean;
+import mil.dds.anet.views.AbstractSubscribableAnetBean;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 @InTransaction
-public abstract class AnetSubscribableObjectDao<T extends AbstractCustomizableAnetBean & SubscribableObject, S extends AbstractSearchQuery<?>>
+public abstract class AnetSubscribableObjectDao<T extends AbstractSubscribableAnetBean & SubscribableObject, S extends AbstractSearchQuery<?>>
     extends AnetBaseDao<T, S> {
 
   public abstract SubscriptionUpdateGroup getSubscriptionUpdate(T obj);
@@ -52,7 +53,7 @@ public abstract class AnetSubscribableObjectDao<T extends AbstractCustomizableAn
     return null;
   }
 
-  protected SubscriptionUpdateGroup getCommonSubscriptionUpdate(AbstractCustomizableAnetBean obj,
+  protected SubscriptionUpdateGroup getCommonSubscriptionUpdate(AbstractSubscribableAnetBean obj,
       String tableName, String paramName) {
     final boolean isParam = (obj != null);
     final String uuid = isParam ? obj.getUuid() : null;
