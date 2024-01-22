@@ -18,6 +18,8 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.recentActivity.Activity;
 import mil.dds.anet.beans.search.ReportSearchQuery;
+import mil.dds.anet.database.AuthorizationGroupDao;
+import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.graphql.AllowUnverifiedUsers;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.InsertionOrderLinkedList;
@@ -74,7 +76,7 @@ public class Person extends AbstractCustomizableAnetBean
   // annotated below
   private List<PersonPositionHistory> previousPositions;
   // annotated below
-  private Set<String> authorizationGroupUuids;
+  private List<AuthorizationGroup> authorizationGroups;
   @GraphQLQuery
   @GraphQLInputField
   private String avatarUuid;
@@ -84,6 +86,7 @@ public class Person extends AbstractCustomizableAnetBean
 
   // non-GraphQL
   private Deque<Activity> recentActivities;
+  private Set<String> authorizationGroupUuids;
 
   @Override
   @AllowUnverifiedUsers
@@ -290,13 +293,25 @@ public class Person extends AbstractCustomizableAnetBean
     return AnetObjectEngine.getInstance().getReportDao().search(context, query);
   }
 
-  @GraphQLQuery(name = "authorizationGroupUuids")
-  public Set<String> loadAuthorizationGroupUuids() {
+  @JsonIgnore
+  public Set<String> getAuthorizationGroupUuids() {
     if (authorizationGroupUuids == null) {
       authorizationGroupUuids = AnetObjectEngine.getInstance().getAuthorizationGroupDao()
-          .getAuthorizationGroupUuidsForPerson(uuid);
+          .getAuthorizationGroupUuidsForRelatedObject(PersonDao.TABLE_NAME, uuid);
     }
     return authorizationGroupUuids;
+  }
+
+  @GraphQLQuery(name = "authorizationGroups")
+  public List<AuthorizationGroup> loadAuthorizationGroups() {
+    if (authorizationGroups == null) {
+      final Set<String> agUuids = getAuthorizationGroupUuids();
+      if (agUuids != null) {
+        authorizationGroups = AnetObjectEngine.getInstance().getAuthorizationGroupDao()
+            .getByIds(agUuids.stream().toList());
+      }
+    }
+    return authorizationGroups;
   }
 
   public String getAvatarUuid() {

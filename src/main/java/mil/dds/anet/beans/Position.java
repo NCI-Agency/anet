@@ -8,11 +8,14 @@ import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.search.M2mBatchParams;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.TaskSearchQuery;
+import mil.dds.anet.database.AuthorizationGroupDao;
+import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractCustomizableAnetBean;
@@ -66,6 +69,8 @@ public class Position extends AbstractCustomizableAnetBean
   private List<Organization> organizationsAdministrated;
   // annotated below
   private List<AuthorizationGroup> authorizationGroupsAdministrated;
+  // annotated below
+  private List<AuthorizationGroup> authorizationGroups;
 
   public String getName() {
     return name;
@@ -319,6 +324,21 @@ public class Position extends AbstractCustomizableAnetBean
           .getAuthorizationGroupsAdministratedByPosition(uuid);
     }
     return authorizationGroupsAdministrated;
+  }
+
+  @GraphQLQuery(name = "authorizationGroups")
+  public List<AuthorizationGroup> loadAuthorizationGroups() {
+    if (authorizationGroups == null) {
+      AuthorizationGroupDao authorizationGroupDao =
+          AnetObjectEngine.getInstance().getAuthorizationGroupDao();
+      final Set<String> authorizationGroupUuids = authorizationGroupDao
+          .getAuthorizationGroupUuidsForRelatedObject(PositionDao.TABLE_NAME, uuid);
+      if (authorizationGroupUuids != null) {
+        authorizationGroups = AnetObjectEngine.getInstance().getAuthorizationGroupDao()
+            .getByIds(authorizationGroupUuids.stream().toList());
+      }
+    }
+    return authorizationGroups;
   }
 
   @Override

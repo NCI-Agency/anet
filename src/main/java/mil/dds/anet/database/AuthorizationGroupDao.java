@@ -214,40 +214,71 @@ public class AuthorizationGroupDao
   }
 
   @InTransaction
-  public Set<String> getAuthorizationGroupUuidsForPerson(String personUuid) {
+  public Set<String> getAuthorizationGroupUuidsForRelatedObject(String relatedObjectType,
+      String relatedObjectUuid) {
     final String mainSelectClause = "SELECT ag.uuid FROM \"authorizationGroups\" ag"
         + " INNER JOIN \"authorizationGroupRelatedObjects\" agro"
         + " ON ag.uuid = agro.\"authorizationGroupUuid\"";
     final String mainWhereClause = " WHERE ag.status = :status"; // only active groups
-    final String positionClause = " AND positions.\"currentPersonUuid\" = :personUuid";
+    final String positionClause =
+        isForPerson(relatedObjectType) ? " AND positions.\"currentPersonUuid\" = :relatedObjectUuid"
+            : " AND positions.uuid = :relatedObjectUuid";
 
     // Now build the query using UNION ALL, so it can be optimized
-    final StringBuilder sql = new StringBuilder("/* batch.getAuthorizationGroupsByPerson */");
+    final StringBuilder sql = new StringBuilder("/* getAuthorizationGroupUuidsForRelatedObject */");
     sql.append(" WITH RECURSIVE parent_orgs(uuid, parent_uuid) AS"
         + " (SELECT uuid, uuid as parent_uuid FROM organizations"
         + " UNION ALL SELECT pt.uuid, bt.\"parentOrgUuid\" FROM organizations bt"
         + " INNER JOIN parent_orgs pt ON bt.uuid = pt.parent_uuid) ");
 
-    // Check for person
+    if (isForPerson(relatedObjectType)) {
+      // Check for person
+      sql.append(mainSelectClause);
+      sql.append(mainWhereClause + " AND \"relatedObjectType\" = '" + PersonDao.TABLE_NAME
+          + "' AND \"relatedObjectUuid\" = :relatedObjectUuid");
+      sql.append(" UNION ALL ");
+    }
+
+    if (isForPersonOrPosition(relatedObjectType)) {
+      // Check for position
+      sql.append(mainSelectClause + ", positions");
+      sql.append(mainWhereClause + positionClause + " AND agro.\"relatedObjectType\" = '"
+          + PositionDao.TABLE_NAME + "' AND agro.\"relatedObjectUuid\" = positions.uuid");
+      sql.append(" UNION ALL ");
+    }
+
+    // Recursively check for organization (and transitive parents thereof)
     sql.append(mainSelectClause);
-    sql.append(mainWhereClause + " AND \"relatedObjectType\" = '" + PersonDao.TABLE_NAME
-        + "' AND \"relatedObjectUuid\" = :personUuid");
-
-    // Check for position
-    sql.append(" UNION ALL ");
-    sql.append(mainSelectClause + ", positions");
-    sql.append(mainWhereClause + positionClause + " AND agro.\"relatedObjectType\" = '"
-        + PositionDao.TABLE_NAME + "' AND agro.\"relatedObjectUuid\" = positions.uuid");
-
-    // Recursively check for user's organization (and transitive parents thereof)
-    sql.append(" UNION ALL ");
-    sql.append(mainSelectClause + ", positions, parent_orgs");
-    sql.append(mainWhereClause + positionClause + " AND agro.\"relatedObjectType\" = '"
-        + OrganizationDao.TABLE_NAME + "' AND agro.\"relatedObjectUuid\" = parent_orgs.parent_uuid"
-        + " AND positions.\"organizationUuid\" = parent_orgs.uuid");
+    if (isForPersonOrPosition(relatedObjectType)) {
+      sql.append(", positions");
+    }
+    sql.append(", parent_orgs");
+    sql.append(mainWhereClause);
+    if (isForPersonOrPosition(relatedObjectType)) {
+      sql.append(positionClause);
+    }
+    sql.append(" AND agro.\"relatedObjectType\" = '" + OrganizationDao.TABLE_NAME
+        + "' AND agro.\"relatedObjectUuid\" = parent_orgs.parent_uuid");
+    if (isForPersonOrPosition(relatedObjectType)) {
+      sql.append(" AND positions.\"organizationUuid\" = parent_orgs.uuid");
+    } else {
+      sql.append(" AND parent_orgs.uuid = :relatedObjectUuid");
+    }
 
     return getDbHandle().createQuery(sql).bind("status", DaoUtils.getEnumId(Status.ACTIVE))
-        .bind("personUuid", personUuid).mapTo(String.class).set();
+        .bind("relatedObjectUuid", relatedObjectUuid).mapTo(String.class).set();
+  }
+
+  private boolean isForPerson(String relatedObjectType) {
+    return PersonDao.TABLE_NAME.equals(relatedObjectType);
+  }
+
+  private boolean isForPosition(String relatedObjectType) {
+    return PositionDao.TABLE_NAME.equals(relatedObjectType);
+  }
+
+  private boolean isForPersonOrPosition(String relatedObjectType) {
+    return isForPerson(relatedObjectType) || isForPosition(relatedObjectType);
   }
 
   @InTransaction

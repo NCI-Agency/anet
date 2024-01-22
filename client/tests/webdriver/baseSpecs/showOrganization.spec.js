@@ -4,6 +4,7 @@ import Search from "../pages/search.page"
 import ShowOrganization from "../pages/showOrganization.page"
 
 const ORGANIZATION_UUID = "ccbee4bb-08b8-42df-8cb5-65e8172f657b" // EF 2.2
+const ORGANIZATION_WITH_AG_UUID = "7f939a44-b9e4-48e0-98f5-7d0ea38a6ecf" // EF 5.1
 const ORGANIZATION_EF2_SEARCH_STRING = "EF 2"
 const ORGANIZATION_EF22_SEARCH_STRING = "EF 2.2"
 const LEADER_POSITION_TEXT = "EF 2.2 Final Reviewer"
@@ -99,6 +100,27 @@ describe("Show organization page", () => {
 
       // Log out
       await ShowOrganization.logout()
+    })
+  })
+
+  describe("When on the show page of an organization with authorizationGroup(s)", () => {
+    it("We should see a table with authorizationGroups", async() => {
+      await ShowOrganization.open(ORGANIZATION_WITH_AG_UUID)
+      await (
+        await ShowOrganization.getAuthorizationGroupsTable()
+      ).waitForExist()
+      await (
+        await ShowOrganization.getAuthorizationGroupsTable()
+      ).waitForDisplayed()
+      expect(
+        await (await ShowOrganization.getAuthorizationGroupsTable()).getText()
+      ).to.contain("EF 5")
+    })
+    it("We can go to the show page of authorizationGroup", async() => {
+      await (await ShowOrganization.getAuthorizationGroup(1)).click()
+      await expect(await browser.getUrl()).to.include(
+        "/authorizationGroups/ab1a7d99-4529-44b1-a118-bdee3ca8296b"
+      )
     })
   })
 

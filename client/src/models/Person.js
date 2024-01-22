@@ -465,7 +465,7 @@ export default class Person extends Model {
   static FILTERED_CLIENT_SIDE_FIELDS = [
     "firstName",
     "lastName",
-    "authorizationGroupUuids"
+    "authorizationGroups"
   ]
 
   static filterClientSideFields(obj, ...additionalFields) {
