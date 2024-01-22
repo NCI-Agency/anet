@@ -487,6 +487,7 @@ type Organization {
   approvalSteps: [ApprovalStep]
   ascendantOrgs(query: OrganizationSearchQueryInput): [Organization]
   attachments: [Attachment]
+  authorizationGroups: [AuthorizationGroup]
   childrenOrgs(query: OrganizationSearchQueryInput): [Organization]
   createdAt: Instant
   customFields: String
@@ -557,7 +558,7 @@ type Person {
   attachments: [Attachment]
   attendedReports(query: ReportSearchQueryInput): AnetBeanList_Report
   authoredReports(query: ReportSearchQueryInput): AnetBeanList_Report
-  authorizationGroupUuids: [String]
+  authorizationGroups: [AuthorizationGroup]
   avatarUuid: String
   biography: String
   code: String
@@ -664,6 +665,7 @@ enum PersonSearchSortBy {
 type Position {
   associatedPositions: [Position]
   attachments: [Attachment]
+  authorizationGroups: [AuthorizationGroup]
   authorizationGroupsAdministrated: [AuthorizationGroup]
   code: String
   createdAt: Instant
@@ -904,7 +906,7 @@ type ReportPerson {
   attendee: Boolean!
   author: Boolean!
   authoredReports(query: ReportSearchQueryInput): AnetBeanList_Report
-  authorizationGroupUuids: [String]
+  authorizationGroups: [AuthorizationGroup]
   avatarUuid: String
   biography: String
   code: String

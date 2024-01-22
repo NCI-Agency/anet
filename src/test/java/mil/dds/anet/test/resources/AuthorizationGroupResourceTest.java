@@ -15,6 +15,9 @@ import mil.dds.anet.test.client.AuthorizationGroup;
 import mil.dds.anet.test.client.AuthorizationGroupInput;
 import mil.dds.anet.test.client.AuthorizationGroupSearchQueryInput;
 import mil.dds.anet.test.client.GenericRelatedObjectInput;
+import mil.dds.anet.test.client.Organization;
+import mil.dds.anet.test.client.Person;
+import mil.dds.anet.test.client.Position;
 import mil.dds.anet.test.client.Status;
 import mil.dds.anet.test.client.util.MutationExecutor;
 import org.junit.jupiter.api.Test;
@@ -145,5 +148,36 @@ class AuthorizationGroupResourceTest extends AbstractResourceTest {
             GenericRelatedObjectInput.builder().withRelatedObjectType(OrganizationDao.TABLE_NAME)
                 .withRelatedObjectUuid(admin.getPosition().getOrganization().getUuid()).build()))
         .build();
+  }
+
+  @Test
+  void testAuthorizationGroupsByRelatedObject()
+      throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
+    // Authorization group EF 5 should transitively contain all related objects below
+    final String expectedAuthorizationGroupUuid = "ab1a7d99-4529-44b1-a118-bdee3ca8296b";
+    final String fields = "{ uuid authorizationGroups { uuid } }";
+
+    // CIV BRATTON, Creed
+    final Person person = jackQueryExecutor.person(fields, "31cba227-f6c6-49e9-9483-fce441bea624");
+    assertThat(person).isNotNull();
+    assertThat(person.getAuthorizationGroups()).hasSize(1);
+    assertThat(person.getAuthorizationGroups().get(0).getUuid())
+        .isEqualTo(expectedAuthorizationGroupUuid);
+
+    // EF 5.1 Advisor Quality Assurance
+    final Position position =
+        jackQueryExecutor.position(fields, "05c42ce0-34a0-4391-8b2f-c4cd85ee6b47");
+    assertThat(position).isNotNull();
+    assertThat(position.getAuthorizationGroups()).hasSize(1);
+    assertThat(position.getAuthorizationGroups().get(0).getUuid())
+        .isEqualTo(expectedAuthorizationGroupUuid);
+
+    // EF 5.1
+    final Organization organization =
+        jackQueryExecutor.organization(fields, "7f939a44-b9e4-48e0-98f5-7d0ea38a6ecf");
+    assertThat(organization).isNotNull();
+    assertThat(organization.getAuthorizationGroups()).hasSize(1);
+    assertThat(organization.getAuthorizationGroups().get(0).getUuid())
+        .isEqualTo(expectedAuthorizationGroupUuid);
   }
 }

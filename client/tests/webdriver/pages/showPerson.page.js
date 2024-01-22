@@ -223,6 +223,15 @@ class ShowPerson extends Page {
       await this.getInvalidFeedback()
     ).map(async errorDiv => await errorDiv.getText())
   }
+
+  async getAuthorizationGroupsTable() {
+    return browser.$("#authorizationGroups table")
+  }
+
+  async getAuthorizationGroup(i) {
+    const agTable = await this.getAuthorizationGroupsTable()
+    return agTable.$(`tbody tr:nth-child(${i}) td:first-child a`)
+  }
 }
 
 export default new ShowPerson()

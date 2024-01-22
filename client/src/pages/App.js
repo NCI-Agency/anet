@@ -37,7 +37,9 @@ const GQL_GET_APP_DATA = gql`
       emailAddress
       pendingVerification
       code
-      authorizationGroupUuids
+      authorizationGroups {
+        uuid
+      }
       position {
         uuid
         name

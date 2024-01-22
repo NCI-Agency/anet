@@ -4,6 +4,7 @@ import API from "api"
 import AppContext from "components/AppContext"
 import AssignPersonModal from "components/AssignPersonModal"
 import AssociatedPositions from "components/AssociatedPositions"
+import AuthorizationGroupTable from "components/AuthorizationGroupTable"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import EditAssociatedPositionsModal from "components/EditAssociatedPositionsModal"
@@ -41,6 +42,11 @@ const GQL_GET_POSITION = gql`
   query($uuid: String!) {
     position(uuid: $uuid) {
       ${Position.allFieldsQuery}
+      authorizationGroups {
+        uuid
+        name
+        description
+      }
     }
   }
 `
@@ -230,6 +236,17 @@ const PositionShow = ({ pageDispatchers }) => {
                   dictProps={Settings.fields.position.code}
                   name="code"
                   component={FieldHelper.ReadonlyField}
+                />
+
+                <DictField
+                  dictProps={Settings.fields.position.authorizationGroups}
+                  name="authorizationGroups"
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={
+                    <AuthorizationGroupTable
+                      authorizationGroups={position.authorizationGroups}
+                    />
+                  }
                 />
 
                 <DictField

@@ -175,6 +175,15 @@ class ShowOrganization extends Page {
       timeout: 20000
     })
   }
+
+  async getAuthorizationGroupsTable() {
+    return browser.$("#authorizationGroups table")
+  }
+
+  async getAuthorizationGroup(i) {
+    const agTable = await this.getAuthorizationGroupsTable()
+    return agTable.$(`tbody tr:nth-child(${i}) td:first-child a`)
+  }
 }
 
 export default new ShowOrganization()

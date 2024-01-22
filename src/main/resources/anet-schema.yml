@@ -726,7 +726,7 @@ properties:
         additionalProperties: false
         required: [status, firstName, lastName, position, prevPositions, domainUsername, openIdSubject,
                    emailAddress, phoneNumber, country, code, rank, ranks, gender, endOfTourDate,
-                   biography]
+                   biography, authorizationGroups]
         properties:
           status:
             "$ref": "#/$defs/labeledField"
@@ -766,6 +766,8 @@ properties:
             "$ref": "#/$defs/optionableExcludableInputField"
           biography:
             "$ref": "#/$defs/inputField"
+          authorizationGroups:
+            "$ref": "#/$defs/labeledField"
           customFields:
             type: object
             additionalProperties:
@@ -808,7 +810,7 @@ properties:
       position:
         type: object
         additionalProperties: false
-        required: [status, name, type, code, organization, role]
+        required: [status, name, type, code, organization, role, authorizationGroups]
         properties:
           status:
             "$ref": "#/$defs/labeledField"
@@ -822,6 +824,8 @@ properties:
             "$ref": "#/$defs/inputField"
           location:
             "$ref": "#/$defs/optionableInputField"
+          authorizationGroups:
+            "$ref": "#/$defs/labeledField"
           role:
             type: object
             unevaluatedProperties: false
@@ -853,7 +857,7 @@ properties:
       organization:
         type: object
         additionalProperties: false
-        required: [status, shortName, longName, identificationCode, type, parentOrg, childrenOrgs, location, profile]
+        required: [status, shortName, longName, identificationCode, type, parentOrg, childrenOrgs, location, profile, authorizationGroups]
         properties:
           status:
             "$ref": "#/$defs/labeledField"
@@ -873,6 +877,8 @@ properties:
             "$ref": "#/$defs/inputField"
           profile:
             "$ref": "#/$defs/inputField"
+          authorizationGroups:
+            "$ref": "#/$defs/labeledField"
           assessments:
             type: object
             additionalProperties:

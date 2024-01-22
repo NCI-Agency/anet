@@ -5,6 +5,7 @@ import AppContext from "components/AppContext"
 import Approvals from "components/approvals/Approvals"
 import AssessmentResultsContainer from "components/assessments/AssessmentResultsContainer"
 import AttachmentCard from "components/Attachment/AttachmentCard"
+import AuthorizationGroupTable from "components/AuthorizationGroupTable"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -153,6 +154,11 @@ const GQL_GET_ORGANIZATION = gql`
             ...personFields
           }
         }
+      }
+      authorizationGroups {
+        uuid
+        name
+        description
       }
       attachments {
         ${Attachment.basicFieldsQuery}
@@ -433,6 +439,17 @@ const OrganizationShow = ({ pageDispatchers }) => {
                     }
                   />
                 )}
+
+                <DictField
+                  dictProps={Settings.fields.organization.authorizationGroups}
+                  name="authorizationGroups"
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={
+                    <AuthorizationGroupTable
+                      authorizationGroups={organization.authorizationGroups}
+                    />
+                  }
+                />
 
                 <DictField
                   dictProps={Settings.fields.organization.status}
