@@ -1,0 +1,28 @@
+import { Meta } from "@storybook/addon-docs"
+import approvalFlowDiagram from ".../assets/approvalFlowDiagram.png"
+
+<Meta title="3. ANET Admin Stories/1. Approval chains" />
+
+## Approval Chains
+
+On report publication, or planned engagement approval, the corresponding approval chain initiated.
+Approval chains are configures in organizations.
+By editing an organization, a user can also edit the approval chains.
+Each organization can define 2 types of approval processes:
+
+1. Engagement planning approval
+1. Report publication approval
+
+The organization, to which the _primary advisor_ belongs, is used to determine which approval process is followed.
+Depending on the report engagement data,  that being in the future or the past,
+either the _engagement planning approval process_ or the _report publication approval process_ is applied.
+
+If the _primary advisor_ organization has no process defined, the approval process falls back on the default approval organization.
+The [default approval organization](/docs/3-anet-admin-stories-2-default-approval-organization--docs) is defined the _administrator settings_.
+
+The following diagram shows which rules are used for the report or engagement approval process:
+
+<img src={approvalFlowDiagram} title="Approval chain flow chart" />
+
+With the ANET dictionary options, `reportWorkflow.optionalApprovalWorkflow` and `reportWorkflow.optionalPlanningApprovalWorkflow`,
+will allow to publish a report in case of an empty approval chain instead of resulting in an error.
