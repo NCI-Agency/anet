@@ -1,5 +1,6 @@
 import { gql } from "@apollo/client"
 import API from "api"
+import Checkbox from "components/Checkbox"
 import LinkTo from "components/LinkTo"
 import {
   mapPageDispatchersToProps,
@@ -114,7 +115,12 @@ const BasePositionTable = ({
   pageSize,
   pageNum,
   totalCount,
-  goToPage
+  goToPage,
+  allowSelection,
+  isAllSelected,
+  toggleAll,
+  isSelected,
+  toggleSelection
 }) => {
   if (_get(positions, "length", 0) === 0) {
     return <em>No positions found</em>
@@ -133,6 +139,11 @@ const BasePositionTable = ({
         <Table striped hover responsive className="positions_table" id={id}>
           <thead>
             <tr>
+              {allowSelection && (
+                <th style={{ verticalAlign: "middle", textAlign: "center" }}>
+                  <Checkbox checked={isAllSelected()} onChange={toggleAll} />
+                </th>
+              )}
               <th>Name</th>
               <th>Location</th>
               <th>Organization</th>
@@ -149,6 +160,16 @@ const BasePositionTable = ({
               pos.code && nameComponents.push(pos.code)
               return (
                 <tr key={pos.uuid}>
+                  {allowSelection && (
+                    <td
+                      style={{ verticalAlign: "middle", textAlign: "center" }}
+                    >
+                      <Checkbox
+                        checked={isSelected(pos.uuid)}
+                        onChange={() => toggleSelection(pos.uuid)}
+                      />
+                    </td>
+                  )}
                   <td>
                     <LinkTo modelType="Position" model={pos}>
                       {nameComponents.join(" - ")}
@@ -210,7 +231,13 @@ BasePositionTable.propTypes = {
   totalCount: PropTypes.number,
   pageNum: PropTypes.number,
   pageSize: PropTypes.number,
-  goToPage: PropTypes.func
+  goToPage: PropTypes.func,
+  allowSelection: PropTypes.bool,
+  // if allowSelection is true:
+  isAllSelected: PropTypes.func,
+  toggleAll: PropTypes.func,
+  isSelected: PropTypes.func,
+  toggleSelection: PropTypes.func
 }
 
 export default connect(null, mapPageDispatchersToProps)(PositionTable)

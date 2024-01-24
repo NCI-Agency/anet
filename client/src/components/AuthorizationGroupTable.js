@@ -1,3 +1,4 @@
+import Checkbox from "components/Checkbox"
 import LinkTo from "components/LinkTo"
 import { mapPageDispatchersToProps } from "components/Page"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
@@ -17,7 +18,12 @@ const AuthorizationGroupTable = ({
   pageSize,
   pageNum,
   totalCount,
-  goToPage
+  goToPage,
+  allowSelection,
+  isAllSelected,
+  toggleAll,
+  isSelected,
+  toggleSelection
 }) => {
   if (_get(authorizationGroups, "length", 0) === 0) {
     return <em>No authorization groups found</em>
@@ -28,6 +34,11 @@ const AuthorizationGroupTable = ({
     <Table striped hover responsive id={id}>
       <thead>
         <tr>
+          {allowSelection && (
+            <th style={{ verticalAlign: "middle", textAlign: "center" }}>
+              <Checkbox checked={isAllSelected()} onChange={toggleAll} />
+            </th>
+          )}
           <th>{Settings.fields.authorizationGroup.name?.label}</th>
           <th>{Settings.fields.authorizationGroup.description?.label}</th>
           {showMembers && (
@@ -47,6 +58,14 @@ const AuthorizationGroupTable = ({
       <tbody>
         {ags.map(authorizationGroup => (
           <tr key={authorizationGroup.uuid}>
+            {allowSelection && (
+              <td style={{ verticalAlign: "middle", textAlign: "center" }}>
+                <Checkbox
+                  checked={isSelected(authorizationGroup.uuid)}
+                  onChange={() => toggleSelection(authorizationGroup.uuid)}
+                />
+              </td>
+            )}
             <td>
               <LinkTo
                 modelType="AuthorizationGroup"
@@ -103,7 +122,13 @@ AuthorizationGroupTable.propTypes = {
   totalCount: PropTypes.number,
   pageNum: PropTypes.number,
   pageSize: PropTypes.number,
-  goToPage: PropTypes.func
+  goToPage: PropTypes.func,
+  allowSelection: PropTypes.bool,
+  // if allowSelection is true:
+  isAllSelected: PropTypes.func,
+  toggleAll: PropTypes.func,
+  isSelected: PropTypes.func,
+  toggleSelection: PropTypes.func
 }
 
 export default connect(null, mapPageDispatchersToProps)(AuthorizationGroupTable)

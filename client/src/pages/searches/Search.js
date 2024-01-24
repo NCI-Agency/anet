@@ -8,6 +8,7 @@ import {
 } from "actions"
 import API from "api"
 import AuthorizationGroupTable from "components/AuthorizationGroupTable"
+import Checkbox from "components/Checkbox"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
@@ -48,8 +49,10 @@ import {
   Dropdown,
   Modal,
   Nav,
+  OverlayTrigger,
   Row,
-  Table
+  Table,
+  Tooltip
 } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useNavigate } from "react-router-dom"
@@ -238,7 +241,9 @@ const Organizations = ({
   setTotalCount,
   paginationKey,
   pagination,
-  setPagination
+  setPagination,
+  allowSelection,
+  updateRecipients
 }) => {
   // (Re)set pageNum to 0 if the queryParams change, and make sure we retrieve page 0 in that case
   const latestQueryParams = useRef(queryParams)
@@ -248,6 +253,7 @@ const Organizations = ({
       ? pagination[paginationKey].pageNum
       : 0
   )
+  const [selectedUuids, setSelectedUuids] = useState(new Set())
   useEffect(() => {
     if (!queryParamsUnchanged) {
       latestQueryParams.current = queryParams
@@ -293,12 +299,25 @@ const Organizations = ({
         <Table responsive hover striped id="organizations-search-results">
           <thead>
             <tr>
+              {allowSelection && (
+                <th style={{ verticalAlign: "middle", textAlign: "center" }}>
+                  <Checkbox checked={isAllSelected()} onChange={toggleAll} />
+                </th>
+              )}
               <th>Name</th>
             </tr>
           </thead>
           <tbody>
             {Organization.map(organizations, org => (
               <tr key={org.uuid}>
+                {allowSelection && (
+                  <td style={{ verticalAlign: "middle", textAlign: "center" }}>
+                    <Checkbox
+                      checked={isSelected(org.uuid)}
+                      onChange={() => toggleSelection(org.uuid)}
+                    />
+                  </td>
+                )}
                 <td>
                   <LinkTo modelType="Organization" model={org} />
                 </td>
@@ -314,6 +333,22 @@ const Organizations = ({
     setPagination(paginationKey, pageNum)
     setPageNum(pageNum)
   }
+
+  function isAllSelected() {
+    return _isAllSelected(organizations, selectedUuids)
+  }
+
+  function toggleAll() {
+    _toggleAll(organizations, selectedUuids, setSelectedUuids, updateRecipients)
+  }
+
+  function isSelected(uuid) {
+    return _isSelected(uuid, selectedUuids)
+  }
+
+  function toggleSelection(uuid) {
+    _toggleSelection(uuid, selectedUuids, setSelectedUuids, updateRecipients)
+  }
 }
 
 Organizations.propTypes = {
@@ -322,7 +357,9 @@ Organizations.propTypes = {
   setTotalCount: PropTypes.func,
   paginationKey: PropTypes.string.isRequired,
   pagination: PropTypes.object.isRequired,
-  setPagination: PropTypes.func.isRequired
+  setPagination: PropTypes.func.isRequired,
+  allowSelection: PropTypes.bool,
+  updateRecipients: PropTypes.func
 }
 
 const People = ({
@@ -331,7 +368,9 @@ const People = ({
   setTotalCount,
   paginationKey,
   pagination,
-  setPagination
+  setPagination,
+  allowSelection,
+  updateRecipients
 }) => {
   // (Re)set pageNum to 0 if the queryParams change, and make sure we retrieve page 0 in that case
   const latestQueryParams = useRef(queryParams)
@@ -341,6 +380,7 @@ const People = ({
       ? pagination[paginationKey].pageNum
       : 0
   )
+  const [selectedUuids, setSelectedUuids] = useState(new Set())
   useEffect(() => {
     if (!queryParamsUnchanged) {
       latestQueryParams.current = queryParams
@@ -378,6 +418,11 @@ const People = ({
       pageNum={curPage}
       totalCount={totalCount}
       goToPage={setPage}
+      allowSelection={allowSelection}
+      isAllSelected={isAllSelected}
+      toggleAll={toggleAll}
+      isSelected={isSelected}
+      toggleSelection={toggleSelection}
       id="people-search-results"
     />
   )
@@ -385,6 +430,22 @@ const People = ({
   function setPage(pageNum) {
     setPagination(paginationKey, pageNum)
     setPageNum(pageNum)
+  }
+
+  function isAllSelected() {
+    return _isAllSelected(people, selectedUuids)
+  }
+
+  function toggleAll() {
+    _toggleAll(people, selectedUuids, setSelectedUuids, updateRecipients)
+  }
+
+  function isSelected(uuid) {
+    return _isSelected(uuid, selectedUuids)
+  }
+
+  function toggleSelection(uuid) {
+    _toggleSelection(uuid, selectedUuids, setSelectedUuids, updateRecipients)
   }
 }
 
@@ -394,7 +455,9 @@ People.propTypes = {
   setTotalCount: PropTypes.func,
   paginationKey: PropTypes.string.isRequired,
   pagination: PropTypes.object.isRequired,
-  setPagination: PropTypes.func.isRequired
+  setPagination: PropTypes.func.isRequired,
+  allowSelection: PropTypes.bool,
+  updateRecipients: PropTypes.func
 }
 
 const Positions = ({
@@ -403,7 +466,9 @@ const Positions = ({
   setTotalCount,
   paginationKey,
   pagination,
-  setPagination
+  setPagination,
+  allowSelection,
+  updateRecipients
 }) => {
   // (Re)set pageNum to 0 if the queryParams change, and make sure we retrieve page 0 in that case
   const latestQueryParams = useRef(queryParams)
@@ -413,6 +478,7 @@ const Positions = ({
       ? pagination[paginationKey].pageNum
       : 0
   )
+  const [selectedUuids, setSelectedUuids] = useState(new Set())
   useEffect(() => {
     if (!queryParamsUnchanged) {
       latestQueryParams.current = queryParams
@@ -450,6 +516,11 @@ const Positions = ({
       pageNum={curPage}
       totalCount={totalCount}
       goToPage={setPage}
+      allowSelection={allowSelection}
+      isAllSelected={isAllSelected}
+      toggleAll={toggleAll}
+      isSelected={isSelected}
+      toggleSelection={toggleSelection}
       id="positions-search-results"
     />
   )
@@ -457,6 +528,22 @@ const Positions = ({
   function setPage(pageNum) {
     setPagination(paginationKey, pageNum)
     setPageNum(pageNum)
+  }
+
+  function isAllSelected() {
+    return _isAllSelected(positions, selectedUuids)
+  }
+
+  function toggleAll() {
+    _toggleAll(positions, selectedUuids, setSelectedUuids, updateRecipients)
+  }
+
+  function isSelected(uuid) {
+    return _isSelected(uuid, selectedUuids)
+  }
+
+  function toggleSelection(uuid) {
+    _toggleSelection(uuid, selectedUuids, setSelectedUuids, updateRecipients)
   }
 }
 
@@ -466,7 +553,9 @@ Positions.propTypes = {
   setTotalCount: PropTypes.func,
   paginationKey: PropTypes.string.isRequired,
   pagination: PropTypes.object.isRequired,
-  setPagination: PropTypes.func.isRequired
+  setPagination: PropTypes.func.isRequired,
+  allowSelection: PropTypes.bool,
+  updateRecipients: PropTypes.func
 }
 
 export const Tasks = ({
@@ -619,7 +708,9 @@ const AuthorizationGroups = ({
   setTotalCount,
   paginationKey,
   pagination,
-  setPagination
+  setPagination,
+  allowSelection,
+  updateRecipients
 }) => {
   // (Re)set pageNum to 0 if the queryParams change, and make sure we retrieve page 0 in that case
   const latestQueryParams = useRef(queryParams)
@@ -629,6 +720,7 @@ const AuthorizationGroups = ({
       ? pagination[paginationKey].pageNum
       : 0
   )
+  const [selectedUuids, setSelectedUuids] = useState(new Set())
   useEffect(() => {
     if (!queryParamsUnchanged) {
       latestQueryParams.current = queryParams
@@ -675,6 +767,11 @@ const AuthorizationGroups = ({
       pageNum={curPage}
       totalCount={totalCount}
       goToPage={setPage}
+      allowSelection={allowSelection}
+      isAllSelected={isAllSelected}
+      toggleAll={toggleAll}
+      isSelected={isSelected}
+      toggleSelection={toggleSelection}
       id="authorizationGroups-search-results"
     />
   )
@@ -682,6 +779,27 @@ const AuthorizationGroups = ({
   function setPage(pageNum) {
     setPagination(paginationKey, pageNum)
     setPageNum(pageNum)
+  }
+
+  function isAllSelected() {
+    return _isAllSelected(authorizationGroups, selectedUuids)
+  }
+
+  function toggleAll() {
+    _toggleAll(
+      authorizationGroups,
+      selectedUuids,
+      setSelectedUuids,
+      updateRecipients
+    )
+  }
+
+  function isSelected(uuid) {
+    return _isSelected(uuid, selectedUuids)
+  }
+
+  function toggleSelection(uuid) {
+    _toggleSelection(uuid, selectedUuids, setSelectedUuids, updateRecipients)
   }
 }
 
@@ -691,11 +809,64 @@ AuthorizationGroups.propTypes = {
   setTotalCount: PropTypes.func,
   paginationKey: PropTypes.string.isRequired,
   pagination: PropTypes.object.isRequired,
-  setPagination: PropTypes.func.isRequired
+  setPagination: PropTypes.func.isRequired,
+  allowSelection: PropTypes.bool,
+  updateRecipients: PropTypes.func
 }
 
 const sum = (...args) => {
   return args.reduce((prev, curr) => (curr === null ? prev : prev + curr))
+}
+
+function _isSubsetOf(set, subset) {
+  return new Set([...set, ...subset]).size === set.size
+}
+
+function _isAllSelected(list, selectedUuids) {
+  return _isSubsetOf(
+    selectedUuids,
+    list.map(l => l.uuid)
+  )
+}
+
+function _toggleAll(list, selectedUuids, setSelectedUuids, updateRecipients) {
+  if (_isAllSelected(list, selectedUuids)) {
+    list.forEach(l => selectedUuids.delete(l.uuid))
+  } else {
+    list.forEach(l => selectedUuids.add(l.uuid))
+  }
+  _updateSelection(selectedUuids, setSelectedUuids, updateRecipients)
+}
+
+function _isSelected(uuid, selectedUuids) {
+  return selectedUuids.has(uuid)
+}
+
+function _toggleSelection(
+  uuid,
+  selectedUuids,
+  setSelectedUuids,
+  updateRecipients
+) {
+  if (_isSelected(uuid, selectedUuids)) {
+    selectedUuids.delete(uuid)
+  } else {
+    selectedUuids.add(uuid)
+  }
+  _updateSelection(selectedUuids, setSelectedUuids, updateRecipients)
+}
+
+function _updateSelection(selectedUuids, setSelectedUuids, updateRecipients) {
+  const newSelection = new Set(selectedUuids)
+  setSelectedUuids(newSelection)
+  updateRecipients(newSelection)
+}
+
+const DEFAULT_RECIPIENTS = {
+  [SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS]: new Set(),
+  [SEARCH_OBJECT_TYPES.ORGANIZATIONS]: new Set(),
+  [SEARCH_OBJECT_TYPES.PEOPLE]: new Set(),
+  [SEARCH_OBJECT_TYPES.POSITIONS]: new Set()
 }
 
 const Search = ({
@@ -714,15 +885,20 @@ const Search = ({
   const [numLocations, setNumLocations] = useState(null)
   const [numReports, setNumReports] = useState(null)
   const [numAuthorizationGroups, setNumAuthorizationGroups] = useState(null)
+  const [prepareEmail, setPrepareEmail] = useState(false)
+  const [recipients, setRecipients] = useState({ ...DEFAULT_RECIPIENTS })
   usePageTitle("Search")
-  const numResults = sum(
+  const numResultsThatCanBeEmailed = sum(
     numOrganizations,
     numPeople,
     numPositions,
+    numAuthorizationGroups
+  )
+  const numResults = sum(
+    numResultsThatCanBeEmailed,
     numTasks,
     numLocations,
-    numReports,
-    numAuthorizationGroups
+    numReports
   )
   const taskShortLabel = Settings.fields.task.shortLabel
   // Memo'ize the search query parameters we use to prevent unnecessary re-renders
@@ -746,9 +922,43 @@ const Search = ({
     }),
     [searchQueryParams]
   )
-  const queryTypes = searchQuery.objectType
-    ? [searchQuery.objectType]
-    : Object.keys(SEARCH_OBJECT_TYPES)
+  const queryTypes = useMemo(
+    () =>
+      searchQuery.objectType
+        ? [searchQuery.objectType]
+        : Object.keys(SEARCH_OBJECT_TYPES),
+    [searchQuery.objectType]
+  )
+  const latestQuery = useRef({ queryTypes, searchQueryParams })
+  const queryUnchanged = _isEqual(latestQuery.current, {
+    queryTypes,
+    searchQueryParams
+  })
+  useEffect(() => {
+    if (!queryUnchanged) {
+      latestQuery.current = { queryTypes, searchQueryParams }
+      setNumAuthorizationGroups(0)
+      setNumLocations(0)
+      setNumOrganizations(0)
+      setNumPeople(0)
+      setNumPositions(0)
+      setNumReports(0)
+      setNumTasks(0)
+      setRecipients({ ...DEFAULT_RECIPIENTS })
+    }
+  }, [
+    queryUnchanged,
+    queryTypes,
+    searchQueryParams,
+    setRecipients,
+    setNumAuthorizationGroups,
+    setNumLocations,
+    setNumOrganizations,
+    setNumPeople,
+    setNumPositions,
+    setNumReports,
+    setNumTasks
+  ])
   const hasOrganizationsResults =
     queryTypes.includes(SEARCH_OBJECT_TYPES.ORGANIZATIONS) &&
     numOrganizations > 0
@@ -770,6 +980,7 @@ const Search = ({
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
+  const prepareEmailButtonProps = getPrepareEmailButtonProps()
 
   return (
     <div>
@@ -868,48 +1079,85 @@ const Search = ({
         </Container>
       </SubNav>
       <div className="d-flex justify-content-end">
-        {numResults > 0 && (
-          <Dropdown id="dropdown-custom-1">
-            <Dropdown.Toggle variant="outline-secondary">
-              Export{" "}
-              <img
-                src={DOWNLOAD_ICON}
-                height={16}
-                alt="Export search results"
-              />
-            </Dropdown.Toggle>
-            {/* TODO: Show a warning when there are more than exportUtils.MAX_NR_OF_EXPORTS results */}
-            <Dropdown.Menu className="super-colors">
-              <Dropdown.Item
-                onClick={() =>
-                  exportResults(searchQueryParams, queryTypes, "xlsx", setError)}
-              >
-                Excel (xlsx)
-              </Dropdown.Item>
-              <Dropdown.Item
-                onClick={() =>
-                  exportResults(searchQueryParams, queryTypes, "kml", setError)}
-              >
-                Google Earth (kml)
-              </Dropdown.Item>
-              <Dropdown.Item
-                onClick={() =>
-                  exportResults(searchQueryParams, queryTypes, "nvg", setError)}
-              >
-                NATO Vector Graphics (nvg)
-              </Dropdown.Item>
-            </Dropdown.Menu>
-          </Dropdown>
-        )}
-        {numResults >= 0 && (
-          <Button
-            onClick={openSaveModal}
-            id="saveSearchButton"
-            style={{ marginLeft: 12 }}
-            variant="outline-secondary"
+        {numResultsThatCanBeEmailed > 0 && (
+          <OverlayTrigger
+            placement="bottom"
+            overlay={
+              <Tooltip id="prepareEmailButton-tooltip">
+                {prepareEmailButtonProps.tooltip}
+              </Tooltip>
+            }
           >
-            Save search
-          </Button>
+            <span>
+              <Button
+                onClick={doPrepareEmail}
+                id="prepareEmailButton"
+                style={{ marginRight: 12 }}
+                variant={prepareEmailButtonProps.variant}
+                disabled={prepareEmailButtonProps.disabled}
+              >
+                {prepareEmailButtonProps.text}
+              </Button>
+            </span>
+          </OverlayTrigger>
+        )}
+        {numResults > 0 && (
+          <>
+            <Dropdown id="dropdown-custom-1">
+              <Dropdown.Toggle variant="outline-secondary">
+                Export{" "}
+                <img
+                  src={DOWNLOAD_ICON}
+                  height={16}
+                  alt="Export search results"
+                />
+              </Dropdown.Toggle>
+              {/* TODO: Show a warning when there are more than exportUtils.MAX_NR_OF_EXPORTS results */}
+              <Dropdown.Menu className="super-colors">
+                <Dropdown.Item
+                  onClick={() =>
+                    exportResults(
+                      searchQueryParams,
+                      queryTypes,
+                      "xlsx",
+                      setError
+                    )}
+                >
+                  Excel (xlsx)
+                </Dropdown.Item>
+                <Dropdown.Item
+                  onClick={() =>
+                    exportResults(
+                      searchQueryParams,
+                      queryTypes,
+                      "kml",
+                      setError
+                    )}
+                >
+                  Google Earth (kml)
+                </Dropdown.Item>
+                <Dropdown.Item
+                  onClick={() =>
+                    exportResults(
+                      searchQueryParams,
+                      queryTypes,
+                      "nvg",
+                      setError
+                    )}
+                >
+                  NATO Vector Graphics (nvg)
+                </Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
+            <Button
+              onClick={openSaveModal}
+              id="saveSearchButton"
+              style={{ marginLeft: 12 }}
+              variant="outline-secondary"
+            >
+              Save search
+            </Button>
+          </>
         )}
       </div>
       <Messages error={error} /> {/* success is shown through toast */}
@@ -944,6 +1192,9 @@ const Search = ({
             paginationKey="SEARCH_organizations"
             pagination={pagination}
             setPagination={setPagination}
+            allowSelection={prepareEmail}
+            updateRecipients={r =>
+              updateRecipients(SEARCH_OBJECT_TYPES.ORGANIZATIONS, r)}
           />
         </Fieldset>
       )}
@@ -968,6 +1219,9 @@ const Search = ({
             paginationKey="SEARCH_people"
             pagination={pagination}
             setPagination={setPagination}
+            allowSelection={prepareEmail}
+            updateRecipients={r =>
+              updateRecipients(SEARCH_OBJECT_TYPES.PEOPLE, r)}
           />
         </Fieldset>
       )}
@@ -992,6 +1246,9 @@ const Search = ({
             paginationKey="SEARCH_positions"
             pagination={pagination}
             setPagination={setPagination}
+            allowSelection={prepareEmail}
+            updateRecipients={r =>
+              updateRecipients(SEARCH_OBJECT_TYPES.POSITIONS, r)}
           />
         </Fieldset>
       )}
@@ -1085,6 +1342,9 @@ const Search = ({
             paginationKey="SEARCH_authorizationGroups"
             pagination={pagination}
             setPagination={setPagination}
+            allowSelection={prepareEmail}
+            updateRecipients={r =>
+              updateRecipients(SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS, r)}
           />
         </Fieldset>
       )}
@@ -1130,6 +1390,54 @@ const Search = ({
         </Modal.Body>
       </Modal>
     )
+  }
+
+  function getPrepareEmailButtonProps() {
+    if (!prepareEmail) {
+      return {
+        disabled: false,
+        text: "Prepare email",
+        tooltip:
+          "Click this button to start selecting recipients from the search results",
+        variant: "outline-secondary"
+      }
+    } else if (!hasRecipients()) {
+      return {
+        disabled: true,
+        text: "Select some recipients",
+        tooltip: "Select some recipients to be able to create an email",
+        variant: "outline-danger"
+      }
+    } else {
+      return {
+        disabled: false,
+        text: "Create email",
+        tooltip:
+          "Click this button to start creating an email to the selected recipients",
+        variant: "primary"
+      }
+    }
+  }
+
+  function doPrepareEmail() {
+    if (prepareEmail && hasRecipients()) {
+      const numRecipients = Object.values(recipients).reduce(
+        (s, r) => s + r.size,
+        0
+      )
+      alert(`Do something clever now with the ${numRecipients} recipient(s)… ☺`)
+    } else {
+      setPrepareEmail(!prepareEmail)
+    }
+  }
+
+  function hasRecipients() {
+    return Object.values(recipients).some(r => !!r.size)
+  }
+
+  function updateRecipients(objectType, newRecipients) {
+    recipients[objectType] = newRecipients
+    setRecipients({ ...recipients })
   }
 
   function onSubmitSaveSearch(values, form) {
