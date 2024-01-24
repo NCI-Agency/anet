@@ -1,22 +1,23 @@
 import { Meta } from "@storybook/addon-docs"
 
-<Meta title="3. ANET Admin Stories/Default Approval Organization" />
+<Meta title="3. ANET Admin Stories/2. Default Approval Organization" />
 
 ## Setting a Default Approval Organization
 
-As an administrator, you have the ability to modify the default approval organization. The default
-approver organization is the organization that reports will have to be approved by if the author is
-not part of another organization. Typically, if reports go through these approval steps it means
+As an administrator, you have the ability to modify the default approval organization.
+The default approver organization if the organization of the primary advisor does not specify any
+[approval chain](/docs/3-anet-admin-stories-1-approval-chains--docs).
+
+Typically, if reports go through these approval steps it means
 that the person who submitted the report needs to be placed into a position, which will add them to
 an organization.
 
 If, for example, you have the admin organization acting as the default approval organization, you’ll
 be responsible for reviewing reports submitted by an advisor without an organization. If you see
-this, you should check to see if they’ve been added to a position, and whether or not that position
-has an organization.
+this, you should check to see if they’ve been added to a position, and whether that position has an organization.
 
 To set the default approval organization, start by selecting “Admin” from the left-hand menu bar on
 the home screen. From there, you’ll see a field called “Default approval organization”. To change
-the default approval organization, enter the number of the organization that you would like to be
+the default approval organization, enter the uuid of the organization that you would like to be
 the default organization. Once you’re done, click the “Save settings” button at the bottom of the
 page.
