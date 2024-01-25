@@ -42,7 +42,7 @@ class CreateAuthorizationGroup extends Page {
   }
 
   async getRelatedObjectsInput() {
-    return browser.$("#relatedObjects")
+    return browser.$("#authorizationGroupRelatedObjects")
   }
 
   async getRelatedObjectsTable() {

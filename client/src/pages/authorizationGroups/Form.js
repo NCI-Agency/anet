@@ -40,9 +40,6 @@ const AuthorizationGroupForm = ({ edit, title, initialValues }) => {
   const { currentUser } = useContext(AppContext)
   const navigate = useNavigate()
   const [error, setError] = useState(null)
-  const [relatedObjects, setRelatedObjects] = useState(
-    initialValues.authorizationGroupRelatedObjects || []
-  )
   const positionsFilters = {
     allSuperusers: {
       label: "All superusers",
@@ -184,7 +181,7 @@ const AuthorizationGroupForm = ({ edit, title, initialValues }) => {
                     Settings.fields.authorizationGroup
                       .authorizationGroupRelatedObjects
                   }
-                  name="relatedObjects"
+                  name="authorizationGroupRelatedObjects"
                   component={FieldHelper.SpecialField}
                   widget={
                     <RelatedObjectsTableInput
@@ -192,14 +189,15 @@ const AuthorizationGroupForm = ({ edit, title, initialValues }) => {
                         Settings.fields.authorizationGroup
                           .authorizationGroupRelatedObjects?.label
                       )}
-                      relatedObjects={relatedObjects}
+                      relatedObjects={values.authorizationGroupRelatedObjects}
                       objectType={ENTITY_TYPES.POSITIONS}
                       entityTypes={[
                         ENTITY_TYPES.POSITIONS,
                         ENTITY_TYPES.ORGANIZATIONS,
                         ENTITY_TYPES.PEOPLE
                       ]}
-                      setRelatedObjects={setRelatedObjects}
+                      setRelatedObjects={value =>
+                        setFieldValue("authorizationGroupRelatedObjects", value)}
                       showDelete
                     />
                   }
@@ -272,9 +270,10 @@ const AuthorizationGroupForm = ({ edit, title, initialValues }) => {
 
   function save(values, form) {
     const authorizationGroup = AuthorizationGroup.filterClientSideFields(values)
-    authorizationGroup.authorizationGroupRelatedObjects = relatedObjects.map(
-      ro => Object.without(ro, "relatedObject")
-    )
+    authorizationGroup.authorizationGroupRelatedObjects =
+      authorizationGroup.authorizationGroupRelatedObjects.map(ro =>
+        Object.without(ro, "relatedObject")
+      )
     return API.mutation(
       edit ? GQL_UPDATE_AUTHORIZATION_GROUP : GQL_CREATE_AUTHORIZATION_GROUP,
       { authorizationGroup }
