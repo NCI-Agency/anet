@@ -8,13 +8,12 @@ import {
 } from "actions"
 import API from "api"
 import AuthorizationGroupTable from "components/AuthorizationGroupTable"
-import Checkbox from "components/Checkbox"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
-import LinkTo from "components/LinkTo"
 import LocationTable from "components/LocationTable"
 import Messages from "components/Messages"
 import { AnchorNavItem } from "components/Nav"
+import OrganizationTable from "components/OrganizationTable"
 import {
   jumpToTop,
   mapPageDispatchersToProps,
@@ -32,12 +31,9 @@ import {
 } from "components/SearchFilters"
 import SubNav from "components/SubNav"
 import TaskTable from "components/TaskTable"
-import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import { exportResults } from "exportUtils"
 import { Field, Form, Formik } from "formik"
-import _get from "lodash/get"
 import _isEqual from "lodash/isEqual"
-import { Organization } from "models"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useEffect, useMemo, useRef, useState } from "react"
@@ -51,7 +47,6 @@ import {
   Nav,
   OverlayTrigger,
   Row,
-  Table,
   Tooltip
 } from "react-bootstrap"
 import { connect } from "react-redux"
@@ -281,52 +276,27 @@ const Organizations = ({
     return result
   }
 
-  const organizations = data ? data.organizationList.list : []
-  if (_get(organizations, "length", 0) === 0) {
-    return <em>No organizations found</em>
-  }
+  const paginatedOrganizations = data ? data.organizationList : []
+  const {
+    pageSize,
+    pageNum: curPage,
+    list: organizations
+  } = paginatedOrganizations
 
   return (
-    <div>
-      <UltimatePaginationTopDown
-        componentClassName="searchPagination"
-        className="float-end"
-        pageNum={pageNum}
-        pageSize={organizationQuery.pageSize}
-        totalCount={totalCount}
-        goToPage={setPage}
-      >
-        <Table responsive hover striped id="organizations-search-results">
-          <thead>
-            <tr>
-              {allowSelection && (
-                <th style={{ verticalAlign: "middle", textAlign: "center" }}>
-                  <Checkbox checked={isAllSelected()} onChange={toggleAll} />
-                </th>
-              )}
-              <th>Name</th>
-            </tr>
-          </thead>
-          <tbody>
-            {Organization.map(organizations, org => (
-              <tr key={org.uuid}>
-                {allowSelection && (
-                  <td style={{ verticalAlign: "middle", textAlign: "center" }}>
-                    <Checkbox
-                      checked={isSelected(org.uuid)}
-                      onChange={() => toggleSelection(org.uuid)}
-                    />
-                  </td>
-                )}
-                <td>
-                  <LinkTo modelType="Organization" model={org} />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-      </UltimatePaginationTopDown>
-    </div>
+    <OrganizationTable
+      organizations={organizations}
+      pageSize={pageSize}
+      pageNum={curPage}
+      totalCount={totalCount}
+      goToPage={setPage}
+      allowSelection={allowSelection}
+      isAllSelected={isAllSelected}
+      toggleAll={toggleAll}
+      isSelected={isSelected}
+      toggleSelection={toggleSelection}
+      id="organizations-search-results"
+    />
   )
 
   function setPage(pageNum) {
