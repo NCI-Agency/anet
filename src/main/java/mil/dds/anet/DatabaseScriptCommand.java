@@ -1,9 +1,9 @@
 package mil.dds.anet;
 
-import io.dropwizard.cli.ConfiguredCommand;
+import io.dropwizard.core.cli.ConfiguredCommand;
+import io.dropwizard.core.setup.Bootstrap;
+import io.dropwizard.core.setup.Environment;
 import io.dropwizard.jdbi3.JdbiFactory;
-import io.dropwizard.setup.Bootstrap;
-import io.dropwizard.setup.Environment;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;

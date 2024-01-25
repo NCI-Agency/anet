@@ -2,7 +2,7 @@ package mil.dds.anet;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Injector;
-import io.dropwizard.Application;
+import io.dropwizard.core.Application;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;

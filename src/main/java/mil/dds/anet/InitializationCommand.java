@@ -1,8 +1,8 @@
 package mil.dds.anet;
 
-import io.dropwizard.Application;
-import io.dropwizard.cli.EnvironmentCommand;
-import io.dropwizard.setup.Environment;
+import io.dropwizard.core.Application;
+import io.dropwizard.core.cli.EnvironmentCommand;
+import io.dropwizard.core.setup.Environment;
 import java.util.List;
 import mil.dds.anet.beans.AdminSetting;
 import mil.dds.anet.beans.ApprovalStep;
