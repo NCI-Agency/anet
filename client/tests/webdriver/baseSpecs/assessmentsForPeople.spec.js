@@ -39,15 +39,21 @@ describe("For the periodic person assessments", () => {
 
     it("Should display nested question sets", async() => {
       await (
-        await ShowPerson.getAssessmentsTable("principalQuarterly", "quarterly")
+        await ShowPerson.getAssessmentsTable(
+          "interlocutorQuarterly",
+          "quarterly"
+        )
       ).waitForExist()
       await (
-        await ShowPerson.getAssessmentsTable("principalQuarterly", "quarterly")
+        await ShowPerson.getAssessmentsTable(
+          "interlocutorQuarterly",
+          "quarterly"
+        )
       ).waitForDisplayed()
 
       await (
         await ShowPerson.getAddAssessmentButton(
-          "principalQuarterly",
+          "interlocutorQuarterly",
           "quarterly"
         )
       ).click()
@@ -69,7 +75,7 @@ describe("For the periodic person assessments", () => {
       // NOTE: assuming assessment question content here, may change in future
       await ShowPerson.fillAssessmentQuestion(ADVISOR_1_PERSON_CREATE_DETAILS)
       await ShowPerson.saveAssessmentAndWaitForModalClose(
-        "principalQuarterly",
+        "interlocutorQuarterly",
         "quarterly",
         VALUE_TO_TEXT_FOR_PERSON[ADVISOR_1_PERSON_CREATE_DETAILS[0]]
       )
@@ -77,7 +83,7 @@ describe("For the periodic person assessments", () => {
 
     it("Should show the same assessment details with the details just created", async() => {
       await assertAssessmentDetails(
-        "principalQuarterly",
+        "interlocutorQuarterly",
         "quarterly",
         ADVISOR_1_PERSON_CREATE_DETAILS
       )
@@ -95,7 +101,7 @@ describe("For the periodic person assessments", () => {
         ADVISOR_1_PERSON_CREATE_DETAILS[1]
       )
       await ShowPerson.saveAssessmentAndWaitForModalClose(
-        "principalQuarterly",
+        "interlocutorQuarterly",
         "quarterly",
         VALUE_TO_TEXT_FOR_PERSON[ADVISOR_1_PERSON_EDIT_DETAILS[0]]
       )
@@ -103,7 +109,7 @@ describe("For the periodic person assessments", () => {
 
     it("Should show the same assessment details with the details just edited", async() => {
       await assertAssessmentDetails(
-        "principalQuarterly",
+        "interlocutorQuarterly",
         "quarterly",
         ADVISOR_1_PERSON_EDIT_DETAILS
       )
@@ -127,7 +133,7 @@ describe("For the periodic person assessments", () => {
       expect(
         await (
           await ShowPerson.getAddAssessmentButton(
-            "principalQuarterly",
+            "interlocutorQuarterly",
             "quarterly"
           )
         ).isExisting()
@@ -146,7 +152,7 @@ describe("For the periodic person assessments", () => {
         ADVISOR_1_PERSON_EDIT_DETAILS[1]
       )
       await ShowPerson.saveAssessmentAndWaitForModalClose(
-        "principalQuarterly",
+        "interlocutorQuarterly",
         "quarterly",
         VALUE_TO_TEXT_FOR_PERSON[ADMIN_PERSON_EDIT_DETAILS[0]]
       )
@@ -154,7 +160,7 @@ describe("For the periodic person assessments", () => {
 
     it("Should show the same assessment details with the details just edited", async() => {
       await assertAssessmentDetails(
-        "principalQuarterly",
+        "interlocutorQuarterly",
         "quarterly",
         ADMIN_PERSON_EDIT_DETAILS
       )
@@ -164,7 +170,7 @@ describe("For the periodic person assessments", () => {
       await (await ShowPerson.getDeleteAssessmentButton()).click()
       await ShowPerson.confirmDelete()
       await ShowPerson.waitForDeletedAssessmentToDisappear(
-        "principalQuarterly",
+        "interlocutorQuarterly",
         "quarterly"
       )
       await ShowPerson.logout()

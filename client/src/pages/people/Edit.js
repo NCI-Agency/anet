@@ -31,12 +31,12 @@ const GQL_GET_PERSON = gql`
       uuid
       name
       rank
-      role
       avatarUuid
       status
       emailAddress
       phoneNumber
       pendingVerification
+      user
       domainUsername
       openIdSubject
       biography

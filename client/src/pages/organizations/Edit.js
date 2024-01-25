@@ -28,7 +28,6 @@ const GQL_GET_ORGANIZATION = gql`
       longName
       identificationCode
       status
-      type
       location {
         uuid
         name
@@ -53,7 +52,6 @@ const GQL_GET_ORGANIZATION = gql`
             uuid
             name
             rank
-            role
             avatarUuid
           }
         }
@@ -79,7 +77,6 @@ const GQL_GET_ORGANIZATION = gql`
           uuid
           name
           rank
-          role
           avatarUuid
         }
       }
@@ -93,7 +90,6 @@ const GQL_GET_ORGANIZATION = gql`
             uuid
             name
             rank
-            role
             avatarUuid
           }
         }

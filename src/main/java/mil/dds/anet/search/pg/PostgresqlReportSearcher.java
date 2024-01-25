@@ -67,16 +67,6 @@ public class PostgresqlReportSearcher extends AbstractReportSearcher {
   }
 
   @Override
-  protected void addAdvisorOrgUuidQuery(ReportSearchQuery query) {
-    addAdvisorOrgUuidQuery(qb, query);
-  }
-
-  @Override
-  protected void addPrincipalOrgUuidQuery(ReportSearchQuery query) {
-    addPrincipalOrgUuidQuery(qb, query);
-  }
-
-  @Override
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, ReportSearchQuery query) {
     if (hasTextQuery(query) && !query.isSortByPresent()) {
       // We're doing a full-text search without an explicit sort order,

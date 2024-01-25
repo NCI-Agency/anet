@@ -16,7 +16,6 @@ position(uuid:"${positionUuid}") {
     uuid
     name
     rank
-    role
     avatarUuid
   }
   associatedPositions {
@@ -27,7 +26,6 @@ position(uuid:"${positionUuid}") {
       uuid
       name
       rank
-      role
       avatarUuid
     }
     organization {
@@ -44,7 +42,6 @@ position(uuid:"${positionUuid}") {
       uuid
       name
       rank
-      role
       avatarUuid
     }
   }
@@ -63,7 +60,6 @@ position(uuid:"${positionUuid}") {
       uuid
       name
       rank
-      role
       avatarUuid
     }
     noteRelatedObjects {
@@ -85,7 +81,6 @@ position(uuid:"${positionUuid}") {
         ... on Person {
           name
           rank
-          role
           avatarUuid
         }
         ... on Position {

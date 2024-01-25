@@ -68,16 +68,16 @@ test.serial("Move someone in and out of a position", async t => {
   const $vacantPositionRows = await $$("#vacantPositions table tbody tr")
   let $positionToFillCell
   for (const $row of $vacantPositionRows) {
-    const [$billetCell, $posRoleCell, $advisorCell] = await $row.findElements(
+    const [$billetCell, $posRoleCell, $personCell] = await $row.findElements(
       By.css("td")
     )
     const billetText = await $billetCell.getText()
     const roleText = await $posRoleCell.getText()
-    const advisorText = await $advisorCell.getText()
+    const personText = await $personCell.getText()
 
     if (
       billetText === positionName &&
-      advisorText === "Unfilled" &&
+      personText === "Unfilled" &&
       roleText === positionRole
     ) {
       $positionToFillCell = $billetCell
@@ -172,16 +172,16 @@ test.serial("Move someone in and out of a position", async t => {
   const $supportedPositionsRows = await $$("#supportedPositions table tbody tr")
   let foundCorrectRow = false
   for (const $row of $supportedPositionsRows) {
-    const [$billetCell, $posRoleCell, $advisorCell] = await $row.findElements(
+    const [$billetCell, $posRoleCell, $personCell] = await $row.findElements(
       By.css("td")
     )
     const billetText = await $billetCell.getText()
     const roleText = await $posRoleCell.getText()
-    const advisorText = await $advisorCell.getText()
+    const personText = await $personCell.getText()
 
     if (
       billetText === positionName &&
-      advisorText === personName &&
+      personText === personName &&
       roleText === positionRole
     ) {
       foundCorrectRow = true
@@ -211,8 +211,8 @@ test.serial("Update permissions while changing positions", async t => {
 
   const testUserMapper = {
     admin: 0,
-    advisor_1: 1,
-    advisor_2: 2,
+    regular_1: 1,
+    regular_2: 2,
     superuser_1: 3,
     superuser_2: 4
   }
@@ -254,12 +254,12 @@ test.serial("Update permissions while changing positions", async t => {
 
   // Helper function to navigate to the organization home page.
   async function navigateOrganization(orgName) {
-    // Click on "Advisor Organizations" dropdown menu.
-    const advisorOrganizations = await t.context.driver.findElement(
-      By.linkText("Advisor Organizations")
+    // Click on "Top-Level Organizations" dropdown menu.
+    const topLevelOrganizations = await t.context.driver.findElement(
+      By.linkText("Top-level Organizations")
     )
     // Click on the dropdown menu button.
-    await advisorOrganizations.click()
+    await topLevelOrganizations.click()
     // From the menu, select the desired organization.
     const organization = await t.context.driver.findElements(By.css("a"))
     for (const org of organization) {
@@ -295,7 +295,7 @@ test.serial("Update permissions while changing positions", async t => {
     )
     // Wait until the information is displayed.
     await t.context.driver.wait(until.elementIsVisible($infoText), mediumWaitMs)
-    // Assert if the position type is converted to "ANET User".
+    // Assert if the position type is converted to "Regular position".
     await assertElementText(t, $infoText, permission)
   }
 
@@ -305,13 +305,13 @@ test.serial("Update permissions while changing positions", async t => {
   await t.context.driver.sleep(mediumWaitMs)
 
   // ***********************************************
-  // Removing a Superuser from a position and check if the position is converted to ANET User.
+  // Removing a Superuser from a position and check if the position is converted to Regular position.
   // ***********************************************
 
   await navigateOrganization("EF 5")
   await navigateSubOrganization("EF 5.1")
 
-  // Click to the given advisor name from the "Supported positions" div.
+  // Click to the given position name from the "Supported positions" div.
   await t.context.pageHelpers.clickPersonNameFromSupportedPositionsFieldset(
     testUsers[testUserMapper.superuser_2].personName, // Dwight
     testUsers[testUserMapper.superuser_2].positionName // EF 5.1 Superuser Sales 2
@@ -371,20 +371,20 @@ test.serial("Update permissions while changing positions", async t => {
 
   await checkPermission(
     testUsers[testUserMapper.superuser_2].positionName,
-    "ANET User"
+    "Regular position"
   )
 
   // ***********************************************
-  // Removing a ANET User from a position and check if the position remains as ANET User.
+  // Removing a Regular position from a position and check if the position remains as Regular position.
   // ***********************************************
 
   await navigateOrganization("EF 5")
   await navigateSubOrganization("EF 5.1")
 
-  // Click to the given advisor name from the "Supported positions" div.
+  // Click to the given position name from the "Supported positions" div.
   await t.context.pageHelpers.clickPersonNameFromSupportedPositionsFieldset(
-    testUsers[testUserMapper.advisor_2].personName, // Kevin
-    testUsers[testUserMapper.advisor_2].positionName // EF 5.1 Advisor Accounting
+    testUsers[testUserMapper.regular_2].personName, // Kevin
+    testUsers[testUserMapper.regular_2].positionName // EF 5.1 Advisor Accounting
   )
   // Wait for transition.
   await t.context.driver.sleep(longWaitMs)
@@ -425,13 +425,13 @@ test.serial("Update permissions while changing positions", async t => {
   await t.context.driver.sleep(mediumWaitMs)
 
   await checkPermission(
-    testUsers[testUserMapper.advisor_2].positionName,
-    "ANET User"
+    testUsers[testUserMapper.regular_2].positionName,
+    "Regular position"
   )
 
   // ***********************************************
   // Moving an ANET Superuser to another position and check if new position permission is
-  // converted to ANET Superuser and old position permission is converted to ANET User.
+  // converted to ANET Superuser and old position permission is converted to Regular position.
   // ***********************************************
 
   await navigateOrganization("EF 5")
@@ -439,7 +439,7 @@ test.serial("Update permissions while changing positions", async t => {
 
   // Grab the specified position from the DOM.
   const positionButton = await t.context.driver.findElement(
-    By.linkText(testUsers[testUserMapper.advisor_1].positionName) // EF 5.1 Advisor Quality Assurance (Creed)
+    By.linkText(testUsers[testUserMapper.regular_1].positionName) // EF 5.1 Advisor Quality Assurance (Creed)
   )
   // Click on the position link.
   await positionButton.click()
@@ -461,7 +461,7 @@ test.serial("Update permissions while changing positions", async t => {
   await personInputField.click()
   // Wait for transition
   await t.context.driver.sleep(mediumWaitMs)
-  // Find desired advisor from the list and click on the name.
+  // Find desired position from the list and click on the name.
   for (let i = 0; i < 4; i++) {
     const listItems = await t.context.driver.findElements(By.css("td"))
     for (const item of listItems) {
@@ -506,7 +506,7 @@ test.serial("Update permissions while changing positions", async t => {
 
   await checkPermission(
     testUsers[testUserMapper.superuser_1].positionName,
-    "ANET User"
+    "Regular position"
   )
 
   await t.context.logout()

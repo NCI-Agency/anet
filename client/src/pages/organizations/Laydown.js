@@ -44,7 +44,6 @@ const OrganizationLaydown = ({ organization, refetch, readOnly }) => {
     !readOnly &&
     currentUser &&
     currentUser.hasAdministrativePermissionsForOrganization(organization)
-  const isPrincipalOrg = organization.type === Organization.TYPE.PRINCIPAL_ORG
   const numInactivePos = organization.positions.filter(
     p => p.status === Model.STATUS.INACTIVE
   ).length
@@ -57,9 +56,7 @@ const OrganizationLaydown = ({ organization, refetch, readOnly }) => {
   )
   const allAdministratingPositions = getAllAdministratingPositions(organization)
 
-  const orgSettings = isPrincipalOrg
-    ? Settings.fields.principal.org
-    : Settings.fields.advisor.org
+  const orgSettings = Settings.fields.regular.org
 
   return (
     <Element name="laydown">
@@ -163,19 +160,11 @@ const OrganizationLaydown = ({ organization, refetch, readOnly }) => {
   )
 
   function renderPositionTable(positions) {
-    let posNameHeader, posPersonHeader, otherNameHeader, otherPersonHeader
     const posRoleHeader = Settings.fields.position.role.label
-    if (organization.isAdvisorOrg()) {
-      posNameHeader = Settings.fields.advisor.position.name
-      posPersonHeader = Settings.fields.advisor.person.name
-      otherNameHeader = Settings.fields.principal.position.name
-      otherPersonHeader = Settings.fields.principal.person.name
-    } else {
-      otherNameHeader = Settings.fields.advisor.position.name
-      otherPersonHeader = Settings.fields.advisor.person.name
-      posNameHeader = Settings.fields.principal.position.name
-      posPersonHeader = Settings.fields.principal.person.name
-    }
+    const posNameHeader = Settings.fields.regular.position.name
+    const posPersonHeader = Settings.fields.regular.person.name
+    const otherNameHeader = Settings.fields.regular.position.name
+    const otherPersonHeader = Settings.fields.regular.person.name
     return (
       <Table striped hover responsive>
         <thead>

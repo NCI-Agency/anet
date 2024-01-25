@@ -17,7 +17,7 @@ describe("When creating a Report with conflicts", () => {
       .milliseconds(0),
     duration: "60",
     advisors: ["CIV REPORTGUY, Ima"],
-    principals: ["CIV KYLESON, Kyle"]
+    interlocutors: ["CIV KYLESON, Kyle"]
   }
   const report02 = {
     intent: "2222222222",
@@ -29,7 +29,7 @@ describe("When creating a Report with conflicts", () => {
       .milliseconds(0),
     duration: "10",
     advisors: ["CIV REPORTGUY, Ima", "CIV REPORTGIRL, Ima"],
-    principals: ["CIV KYLESON, Kyle", "Maj CHRISVILLE, Chris"]
+    interlocutors: ["CIV KYLESON, Kyle", "Maj CHRISVILLE, Chris"]
   }
 
   it("Should create first draft report without any conflicts", async() => {
@@ -54,11 +54,11 @@ describe("When creating a Report with conflicts", () => {
     expect(advisor02.name).to.equal(report01.advisors[0])
     expect(await advisor02.conflictButton.isExisting()).to.equal(false)
 
-    const principal01 = await CreateReport.getPersonByName(
-      report01.principals[0]
+    const interlocutor01 = await CreateReport.getPersonByName(
+      report01.interlocutors[0]
     )
-    expect(principal01.name).to.equal(report01.principals[0])
-    expect(await principal01.conflictButton.isExisting()).to.equal(false)
+    expect(interlocutor01.name).to.equal(report01.interlocutors[0])
+    expect(await interlocutor01.conflictButton.isExisting()).to.equal(false)
 
     await CreateReport.submitForm()
     await ShowReport.waitForShowReportToLoad()
@@ -98,17 +98,17 @@ describe("When creating a Report with conflicts", () => {
     expect(advisor03.name).to.equal(report02.advisors[1])
     expect(await advisor03.conflictButton.isExisting()).to.equal(false)
 
-    const principal01 = await CreateReport.getPersonByName(
-      report02.principals[0]
+    const interlocutor01 = await CreateReport.getPersonByName(
+      report02.interlocutors[0]
     )
-    expect(principal01.name).to.equal(report02.principals[0])
-    expect(await principal01.conflictButton.isExisting()).to.equal(true)
+    expect(interlocutor01.name).to.equal(report02.interlocutors[0])
+    expect(await interlocutor01.conflictButton.isExisting()).to.equal(true)
 
-    const principal02 = await CreateReport.getPersonByName(
-      report02.principals[1]
+    const interlocutor02 = await CreateReport.getPersonByName(
+      report02.interlocutors[1]
     )
-    expect(principal02.name).to.equal(report02.principals[1])
-    expect(await principal02.conflictButton.isExisting()).to.equal(false)
+    expect(interlocutor02.name).to.equal(report02.interlocutors[1])
+    expect(await interlocutor02.conflictButton.isExisting()).to.equal(false)
 
     await CreateReport.submitForm()
     await ShowReport.waitForShowReportToLoad()
@@ -157,12 +157,12 @@ describe("When creating a Report with conflicts", () => {
     expect(await advisor02.conflictButton.isExisting()).to.equal(true)
     expect(await advisor02.conflictButton.getText()).to.match(/conflict/)
 
-    const principal01 = await ShowReport.getAttendeeByName(
-      report01.principals[0]
+    const interlocutor01 = await ShowReport.getAttendeeByName(
+      report01.interlocutors[0]
     )
-    expect(principal01.name).to.equal(report01.principals[0])
-    expect(await principal01.conflictButton.isExisting()).to.equal(true)
-    expect(await principal01.conflictButton.getText()).to.match(/conflict/)
+    expect(interlocutor01.name).to.equal(report01.interlocutors[0])
+    expect(await interlocutor01.conflictButton.isExisting()).to.equal(true)
+    expect(await interlocutor01.conflictButton.getText()).to.match(/conflict/)
   })
 
   it("Should display second report with conflicts", async() => {
@@ -203,14 +203,16 @@ describe("When creating a Report with conflicts", () => {
     expect(await advisor03.conflictButton.isExisting()).to.equal(true)
     expect(await advisor03.conflictButton.getText()).to.match(/conflict/)
 
-    const principal01 = await ShowReport.getAttendeeByName("CIV KYLESON, Kyle")
-    expect(await principal01.conflictButton.isExisting()).to.equal(true)
-    expect(await principal01.conflictButton.getText()).to.match(/conflict/)
+    const interlocutor01 = await ShowReport.getAttendeeByName(
+      "CIV KYLESON, Kyle"
+    )
+    expect(await interlocutor01.conflictButton.isExisting()).to.equal(true)
+    expect(await interlocutor01.conflictButton.getText()).to.match(/conflict/)
 
-    const principal02 = await ShowReport.getAttendeeByName(
+    const interlocutor02 = await ShowReport.getAttendeeByName(
       "Maj CHRISVILLE, Chris"
     )
-    expect(await principal02.conflictButton.isExisting()).to.equal(false)
+    expect(await interlocutor02.conflictButton.isExisting()).to.equal(false)
   })
 
   it("Should delete the first report", async() => {

@@ -110,7 +110,6 @@ const GQL_GET_TASK = gql`
           uuid
           name
           rank
-          role
           avatarUuid
         }
       }
@@ -125,7 +124,6 @@ const GQL_GET_TASK = gql`
             uuid
             name
             rank
-            role
             avatarUuid
           }
         }
@@ -141,7 +139,6 @@ const GQL_GET_TASK = gql`
             uuid
             name
             rank
-            role
             avatarUuid
           }
         }

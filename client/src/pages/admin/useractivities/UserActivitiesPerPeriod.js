@@ -65,8 +65,8 @@ const GQL_GET_USER_ACTIVITY_LIST_BY_PERSON = gql`
           uuid
           name
           rank
-          role
           avatarUuid
+          user
           domainUsername
         }
         visitedAt

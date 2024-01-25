@@ -63,15 +63,15 @@ _Note_: it will also start the back-end but at this step we are not interested i
 ### The Base Data Set
 Provided with the ANET source code is the file `insertBaseData-psql.sql`.  This file contains a series of raw SQL commands that insert some sample data into the database that is both required in order to pass all the unit tests, and also helpful for quickly developing and testing new features.  The Base Data Set includes a set of fake users, organizations, locations, and reports.  Here are some of the accounts that you can use to log in and test with:
 
-| User | username | organization | position | role |
-|------|----------|--------------|----------|------|
-| Erin Erinson | erin | EF2.2 | EF2.2 Advisor D | Advisor who can also approve their own reports |
-| Rebecca Beccabon | rebecca | EF2.2 | EF2.2 Final Reviewer | Superuser |
-| Arthur Dmin | arthur | ANET Admins | ANET Administrator | Administrator |
-| Jack Jackson | jack | EF2.1 | EF2.1 Advisor B | Advisor |
-| Henry Henderson | henry | EF2.1 | EF2.1 Superuser | Superuser |
-| Steve Steveson |-| MoD | Cost Adder | Principal |
-| Ihave Noposition| nopos |-| - | Advisor |
+| User             | username | organization | position             | role                                                  |
+|------------------|----------|--------------|----------------------|-------------------------------------------------------|
+| Erin Erinson     | erin     | EF2.2        | EF2.2 Advisor D      | Regular person who can also approve their own reports |
+| Rebecca Beccabon | rebecca  | EF2.2        | EF2.2 Final Reviewer | Superuser                                             |
+| Arthur Dmin      | arthur   | ANET Admins  | ANET Administrator   | Administrator                                         |
+| Jack Jackson     | jack     | EF2.1        | EF2.1 Advisor B      | Regular person                                        |
+| Henry Henderson  | henry    | EF2.1        | EF2.1 Superuser      | Superuser                                             |
+| Steve Steveson   | -        | MoD          | Cost Adder           | Regular person                                        |
+| Ihave Noposition | nopos    | -            | -                    | Regular person                                        |
 
 To log in as one of the base data users, when prompted for a username and password, enter their username as both the username and the password. See [Users defined locally in the realm](keycloak.md#dev-users) for other possible users.
 
@@ -250,4 +250,4 @@ NB: You only need node.js and the npm dependencies for developing. When we deplo
 In the `anet.yml` file there is a flag for `developmentMode`.  The only thing this flag currently does is:
 1. Run the account deactivation worker once on startup.
 
-To simulate a "new user" in development mode, create a new user in the Keycloak realm, then log on to ANET as that user.  This will activate the same code path as if a user came to the production system with a valid Windows Authentication Principal but we don't find them in the `people` table. This will start the new user workflow (onboarding). Note: if you enter an unknown username, ANET will reject you.
+To simulate a "new user" in development mode, create a new user in the Keycloak realm, then log on to ANET as that user. This will start the new user workflow (onboarding). Note: if you enter an unknown username, ANET will reject you.

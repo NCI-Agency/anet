@@ -2,7 +2,6 @@ person(uuid:"${personUuid}") {
   uuid
   name
   rank
-  role
   avatarUuid
   status
   pendingVerification
@@ -34,7 +33,6 @@ person(uuid:"${personUuid}") {
         uuid
         name
         rank
-        role
         avatarUuid
       }
       organization {
@@ -64,7 +62,6 @@ person(uuid:"${personUuid}") {
       uuid
       name
       rank
-      role
       avatarUuid
     }
     noteRelatedObjects {
@@ -86,7 +83,6 @@ person(uuid:"${personUuid}") {
         ... on Person {
           name
           rank
-          role
           avatarUuid
         }
         ... on Position {

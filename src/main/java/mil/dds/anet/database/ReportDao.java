@@ -26,7 +26,6 @@ import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Organization;
-import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Report;
@@ -36,6 +35,7 @@ import mil.dds.anet.beans.ReportAction.ActionType;
 import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.beans.ReportSensitiveInformation;
 import mil.dds.anet.beans.RollupGraph;
+import mil.dds.anet.beans.RollupGraph.RollupGraphType;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
@@ -75,7 +75,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
   public static final String[] minimalFields = {"uuid", "approvalStepUuid",
       "advisorOrganizationUuid", "createdAt", "updatedAt", "engagementDate", "releasedAt", "state"};
   public static final String[] additionalFields = {"duration", "intent", "exsum", "locationUuid",
-      "principalOrganizationUuid", "atmosphere", "cancelledReason", "atmosphereDetails", "text",
+      "interlocutorOrganizationUuid", "atmosphere", "cancelledReason", "atmosphereDetails", "text",
       "keyOutcomes", "nextSteps", "customFields"};
   public static final String[] allFields =
       ObjectArrays.concat(minimalFields, additionalFields, String.class);
@@ -119,11 +119,11 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
         + "text, \"keyOutcomes\", \"nextSteps\", "
         + "\"engagementDate\", \"releasedAt\", duration, atmosphere, \"cancelledReason\", "
         + "\"atmosphereDetails\", \"advisorOrganizationUuid\", "
-        + "\"principalOrganizationUuid\", \"customFields\") VALUES "
+        + "\"interlocutorOrganizationUuid\", \"customFields\") VALUES "
         + "(:uuid, :state, :createdAt, :updatedAt, :locationUuid, :intent, "
         + ":exsum, :reportText, :keyOutcomes, :nextSteps, :engagementDate, :releasedAt, "
         + ":duration, :atmosphere, :cancelledReason, :atmosphereDetails, :advisorOrgUuid, "
-        + ":principalOrgUuid, :customFields)";
+        + ":interlocutorOrgUuid, :customFields)";
 
     getDbHandle().createUpdate(sql).bindBean(r)
         .bind("createdAt", DaoUtils.asLocalDateTime(r.getCreatedAt()))
@@ -161,8 +161,8 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
 
   public interface ReportBatch {
     @SqlBatch("INSERT INTO \"reportPeople\""
-        + " (\"reportUuid\", \"personUuid\", \"isPrimary\", \"isAuthor\", \"isAttendee\")"
-        + " VALUES (:reportUuid, :uuid, :primary, :author, :attendee)")
+        + " (\"reportUuid\", \"personUuid\", \"isPrimary\", \"isAuthor\", \"isAttendee\", \"isInterlocutor\")"
+        + " VALUES (:reportUuid, :uuid, :primary, :author, :attendee, :interlocutor)")
     void insertReportPeople(@Bind("reportUuid") String reportUuid,
         @BindBean List<ReportPerson> reportPeople);
 
@@ -237,7 +237,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
         + "duration = :duration, atmosphere = :atmosphere, "
         + "\"atmosphereDetails\" = :atmosphereDetails, "
         + "\"cancelledReason\" = :cancelledReason, "
-        + "\"principalOrganizationUuid\" = :principalOrgUuid, "
+        + "\"interlocutorOrganizationUuid\" = :interlocutorOrgUuid, "
         + "\"advisorOrganizationUuid\" = :advisorOrgUuid, "
         + "\"customFields\" = :customFields WHERE uuid = :uuid";
 
@@ -261,10 +261,9 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
 
   @InTransaction
   public int addPersonToReport(ReportPerson rp, Report r) {
-    return getDbHandle()
-        .createUpdate("/* addReportPerson */ INSERT INTO \"reportPeople\" "
-            + "(\"personUuid\", \"reportUuid\", \"isPrimary\", \"isAuthor\", \"isAttendee\")"
-            + " VALUES (:personUuid, :reportUuid, :primary, :author, :attendee)")
+    return getDbHandle().createUpdate("/* addReportPerson */ INSERT INTO \"reportPeople\" "
+        + "(\"personUuid\", \"reportUuid\", \"isPrimary\", \"isAuthor\", \"isAttendee\", \"isInterlocutor\")"
+        + " VALUES (:personUuid, :reportUuid, :primary, :author, :attendee, :interlocutor)")
         .bind("personUuid", rp.getUuid()).bind("reportUuid", r.getUuid()).bindBean(rp).execute();
   }
 
@@ -278,10 +277,9 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
 
   @InTransaction
   public int updatePersonOnReport(ReportPerson rp, Report r) {
-    return getDbHandle()
-        .createUpdate("/* updatePersonOnReport*/ UPDATE \"reportPeople\" "
-            + "SET \"isPrimary\" = :primary, \"isAuthor\" = :author, \"isAttendee\" = :attendee"
-            + " WHERE \"reportUuid\" = :reportUuid AND \"personUuid\" = :personUuid")
+    return getDbHandle().createUpdate("/* updatePersonOnReport*/ UPDATE \"reportPeople\" "
+        + "SET \"isPrimary\" = :primary, \"isAuthor\" = :author, \"isAttendee\" = :attendee, \"isInterlocutor\" = :interlocutor"
+        + " WHERE \"reportUuid\" = :reportUuid AND \"personUuid\" = :personUuid")
         .bind("reportUuid", r.getUuid()).bind("personUuid", rp.getUuid()).bindBean(rp).execute();
   }
 
@@ -436,11 +434,10 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
    * Generates the Rollup Graph for a particular Organization Type, starting at the root of the org
    * hierarchy
    */
-  public List<RollupGraph> getDailyRollupGraph(Instant start, Instant end, OrganizationType orgType,
+  public List<RollupGraph> getDailyRollupGraph(Instant start, Instant end, RollupGraphType orgType,
       Map<String, Organization> nonReportingOrgs) {
     final List<Map<String, Object>> results = rollupQuery(start, end, orgType, null, false);
-    final Map<String, Organization> orgMap =
-        AnetObjectEngine.getInstance().buildTopLevelOrgHash(orgType);
+    final Map<String, Organization> orgMap = AnetObjectEngine.getInstance().buildTopLevelOrgHash();
 
     return generateRollupGraphFromResults(results, orgMap, nonReportingOrgs);
   }
@@ -450,7 +447,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
    * Organization
    */
   public List<RollupGraph> getDailyRollupGraph(Instant start, Instant end, String parentOrgUuid,
-      OrganizationType orgType, Map<String, Organization> nonReportingOrgs) {
+      RollupGraphType orgType, Map<String, Organization> nonReportingOrgs) {
     List<Organization> orgList = null;
     final Map<String, Organization> orgMap;
     if (!parentOrgUuid.equals(Organization.DUMMY_ORG_UUID)) {
@@ -518,10 +515,9 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
 
     sql.append(" WHERE positions.\"currentPersonUuid\" = \"reportPeople\".\"personUuid\"");
     sql.append(" AND \"reportPeople\".\"reportUuid\" = reports.uuid");
+    sql.append(" AND \"reportPeople\".\"isInterlocutor\" = :isInterlocutor");
     sql.append(" %6$s");
     sql.append(" AND reports.\"advisorOrganizationUuid\" = organizations.uuid");
-    sql.append(
-        " AND positions.type in ( :positionAdvisor, :positionSuperuser, :positionAdministrator )");
     sql.append(
         " AND reports.state IN ( :reportPublished, :reportApproved, :reportPending, :reportDraft )");
     sql.append(" AND reports.\"createdAt\" BETWEEN :startDate and :endDate");
@@ -554,9 +550,8 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     sql.append(" WHERE positions.\"currentPersonUuid\" = \"reportPeople\".\"personUuid\"");
     sql.append(" %6$s");
     sql.append(" AND \"reportPeople\".\"reportUuid\" = reports.uuid");
+    sql.append(" AND \"reportPeople\".\"isInterlocutor\" = :isInterlocutor");
     sql.append(" AND reports.\"advisorOrganizationUuid\" = organizations.uuid");
-    sql.append(
-        " AND positions.type in ( :positionAdvisor, :positionSuperuser, :positionAdministrator )");
     sql.append(
         " AND reports.state IN ( :reportPublished, :reportApproved, :reportPending, :reportDraft )");
     sql.append(" AND reports.\"engagementDate\" BETWEEN :startDate and :endDate");
@@ -596,13 +591,11 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
 
     DaoUtils.addInstantAsLocalDateTime(sqlArgs, "startDate", start);
     DaoUtils.addInstantAsLocalDateTime(sqlArgs, "endDate", end);
-    sqlArgs.put("positionAdvisor", DaoUtils.getEnumId(Position.PositionType.ADVISOR));
-    sqlArgs.put("positionSuperuser", DaoUtils.getEnumId(Position.PositionType.SUPERUSER));
-    sqlArgs.put("positionAdministrator", DaoUtils.getEnumId(Position.PositionType.ADMINISTRATOR));
     sqlArgs.put("reportDraft", DaoUtils.getEnumId(ReportState.DRAFT));
     sqlArgs.put("reportPending", DaoUtils.getEnumId(ReportState.PENDING_APPROVAL));
     sqlArgs.put("reportApproved", DaoUtils.getEnumId(ReportState.APPROVED));
     sqlArgs.put("reportPublished", DaoUtils.getEnumId(ReportState.PUBLISHED));
+    sqlArgs.put("isInterlocutor", false);
 
     return getDbHandle().createQuery(String.format(sql.toString(), fmtArgs)).bindMap(sqlArgs)
         .map(new MapMapper(false)).list();
@@ -617,11 +610,11 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
    * @param missingOrgReports true if we want to look for reports specifically with NULL org uuid's
    */
   @InTransaction
-  public List<Map<String, Object>> rollupQuery(Instant start, Instant end, OrganizationType orgType,
+  public List<Map<String, Object>> rollupQuery(Instant start, Instant end, RollupGraphType orgType,
       List<Organization> orgs, boolean missingOrgReports) {
     String orgColumn =
-        String.format("\"%s\"", orgType == OrganizationType.ADVISOR_ORG ? "advisorOrganizationUuid"
-            : "principalOrganizationUuid");
+        String.format("\"%s\"", RollupGraphType.ADVISOR.equals(orgType) ? "advisorOrganizationUuid"
+            : "interlocutorOrganizationUuid");
     final Map<String, Object> sqlArgs = new HashMap<String, Object>();
     final Map<String, List<?>> listArgs = new HashMap<>();
 
@@ -727,13 +720,14 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
   }
 
   static class ReportPeopleBatcher extends ForeignKeyBatcher<ReportPerson> {
-    private static final String sql = "/* batch.getPeopleForReport */ SELECT "
-        + PersonDao.PERSON_FIELDS
-        + ", \"reportPeople\".\"reportUuid\", \"reportPeople\".\"isPrimary\""
-        + ", \"reportPeople\".\"isAuthor\", \"reportPeople\".\"isAttendee\" FROM \"reportPeople\" "
-        + "LEFT JOIN people ON \"reportPeople\".\"personUuid\" = people.uuid "
-        + "WHERE \"reportPeople\".\"reportUuid\" IN ( <foreignKeys> ) "
-        + "ORDER BY people.name, people.uuid";
+    private static final String sql =
+        "/* batch.getPeopleForReport */ SELECT " + PersonDao.PERSON_FIELDS
+            + ", \"reportPeople\".\"reportUuid\", \"reportPeople\".\"isPrimary\""
+            + ", \"reportPeople\".\"isAuthor\", \"reportPeople\".\"isAttendee\""
+            + ", \"reportPeople\".\"isInterlocutor\" FROM \"reportPeople\" "
+            + "LEFT JOIN people ON \"reportPeople\".\"personUuid\" = people.uuid "
+            + "WHERE \"reportPeople\".\"reportUuid\" IN ( <foreignKeys> ) "
+            + "ORDER BY people.name, people.uuid";
 
     public ReportPeopleBatcher() {
       super(sql, "foreignKeys", new ReportPersonMapper(), "reportUuid");
@@ -1018,8 +1012,8 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
         .add(getCommonSubscriptionUpdateStatement(isParam, isParam ? obj.getAdvisorOrgUuid() : null,
             "organizations", "reports.advisorOrganizationUuid"));
     update.stmts.add(
-        getCommonSubscriptionUpdateStatement(isParam, isParam ? obj.getPrincipalOrgUuid() : null,
-            "organizations", "reports.principalOrganizationUuid"));
+        getCommonSubscriptionUpdateStatement(isParam, isParam ? obj.getInterlocutorOrgUuid() : null,
+            "organizations", "reports.interlocutorOrganizationUuid"));
     // update tasks
     update.stmts.add(new SubscriptionUpdateStatement("tasks",
         "SELECT \"taskUuid\" FROM \"reportTasks\" WHERE \"reportUuid\" = "

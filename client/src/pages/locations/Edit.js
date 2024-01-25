@@ -40,7 +40,6 @@ const GQL_GET_LOCATION = gql`
             uuid
             name
             rank
-            role
             avatarUuid
           }
         }
@@ -55,7 +54,6 @@ const GQL_GET_LOCATION = gql`
             uuid
             name
             rank
-            role
             avatarUuid
           }
         }

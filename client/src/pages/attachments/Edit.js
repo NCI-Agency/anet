@@ -33,7 +33,6 @@ const GQL_GET_ATTACHMENT = gql`
           ... on Person {
             name
             rank
-            role
             avatarUuid
           }
           ... on Position {
@@ -55,7 +54,6 @@ const GQL_GET_ATTACHMENT = gql`
         uuid
         name
         rank
-        role
         avatarUuid
       }
     }

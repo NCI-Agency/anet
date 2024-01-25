@@ -8,9 +8,7 @@ import mil.dds.anet.beans.AdminSetting;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
 import mil.dds.anet.beans.Organization;
-import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionType;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
@@ -101,7 +99,6 @@ public class InitializationCommand extends EnvironmentCommand<AnetConfiguration>
   private String createInitialAdministrator(Namespace namespace, AnetObjectEngine engine) {
     // Create admin organization
     Organization adminOrg = new Organization();
-    adminOrg.setType(OrganizationType.ADVISOR_ORG);
     adminOrg.setShortName(namespace.getString("adminOrgName"));
     adminOrg.setStatus(Organization.Status.ACTIVE);
     adminOrg = engine.getOrganizationDao().insert(adminOrg);
@@ -119,7 +116,7 @@ public class InitializationCommand extends EnvironmentCommand<AnetConfiguration>
     Person admin = new Person();
     admin.setName(namespace.getString("adminFullName"));
     admin.setDomainUsername(namespace.getString("adminDomainUsername"));
-    admin.setRole(Role.ADVISOR);
+    admin.setUser(true);
     admin = engine.getPersonDao().insert(admin);
     engine.getPositionDao().setPersonInPosition(admin.getUuid(), adminPos.getUuid());
 

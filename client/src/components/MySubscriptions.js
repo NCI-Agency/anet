@@ -44,7 +44,6 @@ const GQL_GET_MY_SUBSCRIPTIONS = gql`
           ... on Person {
             name
             rank
-            role
             avatarUuid
           }
           ... on Position {

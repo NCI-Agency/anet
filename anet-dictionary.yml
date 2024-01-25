@@ -528,6 +528,8 @@ fields:
     lastName:
       label: Last name
       placeholder: LAST NAME
+    user:
+      label: ANET user
     domainUsername:
       label: Domain username
     openIdSubject:
@@ -1128,19 +1130,16 @@ fields:
             visibleWhen: $[?(@ && @.colourOptions === 'GREEN')]
 
   advisor:
-
     person:
-      name: NATO Member
-      countries: [Albania , Armenia, Australia, Austria, Azerbaijan, Belgium, Bosnia-Herzegovina, Bulgaria, Croatia, Czech Republic, Denmark, Estonia, Finland,
-                  Georgia, Germany, Greece, Hungary, Iceland, Italy, Latvia, Lithuania, Luxembourg, Macedonia, Mongolia, Montenegro, Netherlands, New Zealand,
-                  Norway, Poland, Portugal, Romania, Slovakia, Slovenia, Spain, Sweden, Türkiye, Ukraine, United Kingdom, United States of America]
-      # number of fields after Avatar in the left column for advisors
+      name: Advisor
+      # number of fields after Avatar in the left column for advisors (i.e. ANET users)
       # adjust this number if two columns are not balanced on the Person Page
       numberOfFieldsInLeftColumn: 6
       # select and order person fields (including custom fields)
       showPageOrderedFields:
         - position
         - prevPositions
+        - user
         - domainUsername
         - openIdSubject
         - emailAddress
@@ -1160,8 +1159,61 @@ fields:
         - arrayFieldName
       showAsFullWidthFields:
         - biography
+    org:
+      name: Advisor Organization
+
+  interlocutor:
+    person:
+      name: Interlocutor
+    org:
+      name: Interlocutor Organization
+
+  superuser:
+    position:
+      name: Superuser
+      type: ANET Superuser
+
+  administrator:
+    position:
+      name: Administrator
+      type: ANET Administrator
+
+  regular:
+    person:
+      name: Person
+      countries: [Afghanistan, Albania , Armenia, Australia, Austria, Azerbaijan, Belgium, Bosnia-Herzegovina, Bulgaria, Croatia, Czech Republic, Denmark, Estonia, Finland,
+                  Georgia, Germany, Greece, Hungary, Iceland, Italy, Latvia, Lithuania, Luxembourg, Macedonia, Mongolia, Montenegro, Netherlands, New Zealand,
+                  Norway, Poland, Portugal, Romania, Slovakia, Slovenia, Spain, Sweden, Turkey, Ukraine, United Kingdom, United States of America]
+      # number of fields after Avatar in the left column for persons
+      # adjust this number if two columns are not balanced on the Person Page
+      numberOfFieldsInLeftColumn: 7
+      # select and order person fields (including custom fields)
+      showPageOrderedFields:
+        - position
+        - prevPositions
+        - phoneNumber
+        - country
+        - birthday
+        - placeOfBirth
+        - placeOfResidence
+        - colourOptions
+        - textareaFieldName
+        - emailAddress
+        - multipleButtons
+        - inputFieldName
+        - politicalPosition
+        - rank
+        - numberFieldName
+        - nlt
+        - nlt_dt
+        - gender
+        - endOfTourDate
+        - biography
+        - arrayFieldName
+      showAsFullWidthFields:
+        - biography
       assessments:
-        advisorOnceReportLinguist:
+        personOnceReportLinguist:
           label: Engagement assessment of linguist
           recurrence: once
           relatedObjectType: report
@@ -1201,7 +1253,7 @@ fields:
                 no:
                   label: "No"
             documentQuality:
-              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.advisorOnceReportLinguist && @.advisorOnceReportLinguist.preparedDocuments === "yes")]
+              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.personOnceReportLinguist && @.personOnceReportLinguist.preparedDocuments === "yes")]
               type: enum
               helpText: "What was the quality of the document the linguist prepared?"
               label: Document quality
@@ -1234,7 +1286,7 @@ fields:
             translator:
               label: Translator Questions
               description: Set of questions to assess the linguist in translator role
-              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.advisorOnceReportLinguist && @.advisorOnceReportLinguist.linguistRole === "translator")]
+              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.personOnceReportLinguist && @.personOnceReportLinguist.linguistRole === "translator")]
               questions:
                 translatorGotAdequateTime:
                   type: enum
@@ -1275,7 +1327,7 @@ fields:
                       label: Bad
                       color: "#fc5a03"
                 translatorSubjectComment:
-                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.advisorOnceReportLinguist && @.advisorOnceReportLinguist.questionSets && @.advisorOnceReportLinguist.questionSets.translator && @.advisorOnceReportLinguist.questionSets.translator.questions.translatorSubjectVocabularyScore === "B")]
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.personOnceReportLinguist && @.personOnceReportLinguist.questionSets && @.personOnceReportLinguist.questionSets.translator && @.personOnceReportLinguist.questionSets.translator.questions.translatorSubjectVocabularyScore === "B")]
                   type: special_field
                   helpText: "Comment on bad translator subject vocabulary"
                   label: Vocabulary comments
@@ -1302,7 +1354,7 @@ fields:
                       label: Bad
                       color: "#fc5a03"
                 translatorOverallComment:
-                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.advisorOnceReportLinguist && @.advisorOnceReportLinguist.questionSets && @.advisorOnceReportLinguist.questionSets.translator && @.advisorOnceReportLinguist.questionSets.translator.questions.translatorOverallScore === "B")]
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.personOnceReportLinguist && @.personOnceReportLinguist.questionSets && @.personOnceReportLinguist.questionSets.translator && @.personOnceReportLinguist.questionSets.translator.questions.translatorOverallScore === "B")]
                   type: special_field
                   helpText: "Comment on bad overall translator evaluation"
                   label: Overall comments
@@ -1312,7 +1364,7 @@ fields:
             interpreter:
               label: Interpreter Questions
               description: Set of questions to assess the linguist in interpreter role
-              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.advisorOnceReportLinguist && @.advisorOnceReportLinguist.linguistRole === "interpreter")]
+              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.personOnceReportLinguist && @.personOnceReportLinguist.linguistRole === "interpreter")]
               questions:
                 interpreterHadPreMeeting:
                   type: enum
@@ -1353,7 +1405,7 @@ fields:
                       label: Bad
                       color: "#fc5a03"
                 interpreterSubjectVocabularyComment:
-                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid &&  @.advisorOnceReportLinguist && @.advisorOnceReportLinguist.questionSets && @.advisorOnceReportLinguist.questionSets.interpreter && @.advisorOnceReportLinguist.questionSets.interpreter.questions.interpreterSubjectVocabularyScore === "B")]
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid &&  @.personOnceReportLinguist && @.personOnceReportLinguist.questionSets && @.personOnceReportLinguist.questionSets.interpreter && @.personOnceReportLinguist.questionSets.interpreter.questions.interpreterSubjectVocabularyScore === "B")]
                   type: special_field
                   helpText: "Comment on bad interpreter subject vocabulary"
                   label: Vocabulary comments
@@ -1381,7 +1433,7 @@ fields:
                       label: Bad
                       color: "#fc5a03"
                 interpreterSubjectUnderstandingComment:
-                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.advisorOnceReportLinguist && @.advisorOnceReportLinguist.questionSets && @.advisorOnceReportLinguist.questionSets.interpreter && @.advisorOnceReportLinguist.questionSets.interpreter.questions.interpreterSubjectUnderstandingScore === "B")]
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.personOnceReportLinguist && @.personOnceReportLinguist.questionSets && @.personOnceReportLinguist.questionSets.interpreter && @.personOnceReportLinguist.questionSets.interpreter.questions.interpreterSubjectUnderstandingScore === "B")]
                   type: special_field
                   helpText: "Comment on bad interpreter subject understanding"
                   label: Subject understanding comments
@@ -1409,7 +1461,7 @@ fields:
                       label: Bad
                       color: "#fc5a03"
                 interpreterWorkEthicComment:
-                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.advisorOnceReportLinguist && @.advisorOnceReportLinguist.questionSets && @.advisorOnceReportLinguist.questionSets.interpreter && @.advisorOnceReportLinguist.questionSets.interpreter.questions.interpreterWorkEthicScore === "B")]
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.personOnceReportLinguist && @.personOnceReportLinguist.questionSets && @.personOnceReportLinguist.questionSets.interpreter && @.personOnceReportLinguist.questionSets.interpreter.questions.interpreterWorkEthicScore === "B")]
                   type: special_field
                   helpText: "Comment on bad interpreter work ethic"
                   label: Work ethic comments
@@ -1437,7 +1489,7 @@ fields:
                       label: Bad
                       color: "#fc5a03"
                 interpreterPostureComment:
-                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.advisorOnceReportLinguist && @.advisorOnceReportLinguist.questionSets && @.advisorOnceReportLinguist.questionSets.interpreter && @.advisorOnceReportLinguist.questionSets.interpreter.questions.interpreterPostureScore === "B")]
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.personOnceReportLinguist && @.personOnceReportLinguist.questionSets && @.personOnceReportLinguist.questionSets.interpreter && @.personOnceReportLinguist.questionSets.interpreter.questions.interpreterPostureScore === "B")]
                   type: special_field
                   helpText: "Comment on bad interpreter posture"
                   label: Posture comments
@@ -1465,7 +1517,7 @@ fields:
                       label: Bad
                       color: "#fc5a03"
                 interpreterRoleComment:
-                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.advisorOnceReportLinguist && @.advisorOnceReportLinguist.questionSets && @.advisorOnceReportLinguist.questionSets.interpreter && @.advisorOnceReportLinguist.questionSets.interpreter.questions.interpreterRoleScore === "B")]
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.personOnceReportLinguist && @.personOnceReportLinguist.questionSets && @.personOnceReportLinguist.questionSets.interpreter && @.personOnceReportLinguist.questionSets.interpreter.questions.interpreterRoleScore === "B")]
                   type: special_field
                   helpText: "Comment on bad interpreter role"
                   label: Role comment
@@ -1492,14 +1544,14 @@ fields:
                       label: Bad
                       color: "#fc5a03"
                 interpreterInterpretationOverallComment:
-                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.advisorOnceReportLinguist && @.advisorOnceReportLinguist.questionSets && @.advisorOnceReportLinguist.questionSets.interpreter && @.advisorOnceReportLinguist.questionSets.interpreter.questions.interpreterInterpretationOverallScore === "B")]
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.personOnceReportLinguist && @.personOnceReportLinguist.questionSets && @.personOnceReportLinguist.questionSets.interpreter && @.personOnceReportLinguist.questionSets.interpreter.questions.interpreterInterpretationOverallScore === "B")]
                   type: special_field
                   helpText: "Comment on bad overall interpreter evaluation"
                   label: Overall evaluation comment
                   widget: richTextEditor
                   style:
                     height: 100px
-        advisorOnceReportLinguistLin:
+        personOnceReportLinguistLin:
           label: Engagement assessment of linguist GUIST, Lin
           recurrence: once
           relatedObjectType: report
@@ -1525,9 +1577,10 @@ fields:
               validations:
                 - type: required
                   params: [You must provide the answer to advisorOnceReportLinguistLin.questionForNegative]
-        advisorMonthly:
+        advisorPeriodic:
           label: Monthly assessment of advisor
           recurrence: monthly
+          test: $.subject[?(@property === "user" && @ === true)]
           questions:
             question1:
                 type: special_field
@@ -1538,6 +1591,7 @@ fields:
         advisorOndemand:
           label: Ondemand assessment of advisor
           recurrence: ondemand
+          test: $.subject[?(@property === "user" && @ === true)]
           questions:
             assessmentDate:
               type: date
@@ -1548,65 +1602,10 @@ fields:
               widget: richTextEditor
               style:
                 height: 70px
-        advisorQuarterlyNoWrite:
-          label: Quarterly assessment of advisor, no write
-          recurrence: quarterly
-          test: $.subject[?(@property === "noSuchProperty" && @.match(/^willNeverMatch/i))]
-          authorizationGroupUuids:
-            write: []
-          questions:
-            question1:
-              type: number
-              label: Test Question 1
-        advisorOnceReportNoWrite:
-          label: Engagement assessment of advisor, no write
-          recurrence: once
-          relatedObjectType: report
-          test: $.subject[?(@property === "noSuchProperty" && @.match(/^willNeverMatch/i))]
-          authorizationGroupUuids:
-            write: []
-          questions:
-            question1:
-              type: number
-              label: Test Question 1
-        advisorOndemandNoWrite:
-          label: Ondemand assessment of advisor, no write
-          recurrence: ondemand
-          authorizationGroupUuids:
-            write: []
-          questions:
-            assessmentDate:
-              type: date
-              label: Assessment date
-            question1:
-              type: number
-              label: Test Question 1
-    position:
-      name: NATO Billet
-      type: ANET User
-      location:
-        filter: [POINT_LOCATION]
-      organizationsAdministrated:
-        label: Organizations administrated
-        placeholder: Search for an organization…
-
-    org:
-      name: Advisor Organization
-      allOrgName: Advisor Organizations
-      location:
-        filter: [ADVISOR_LOCATION]
-      administratingPositions:
-        label: Assigned Superusers
-        placeholder: Search for a position…
-
-  principal:
-    person:
-      name: Afghan Partner
-      countries: [Afghanistan]
-      assessments:
-        principalMonthly:
-          label: Monthly assessment of principal
+        interlocutorMonthly:
+          label: Monthly assessment of interlocutor
           recurrence: monthly
+          test: $.subject[?(@property === "user" && @ !== true)]
           authorizationGroupUuids:
             read: ['c21e7321-7ec5-4837-8805-a302f9575754']
             write: ['39a78d51-c351-452c-9206-4305ec8dd76d']
@@ -1617,26 +1616,27 @@ fields:
               label: This question is required but will be filtered out
               validations:
                 - type: required
-                  params: [You must provide the answer to principalMonthly.requiredButFilteredOutQuestion]
+                  params: [You must provide the answer to interlocutorMonthly.requiredButFilteredOutQuestion]
             questionForChristopf:
               test: $.subject[?(@property === "name" && @ === "TOPFERNESS, Christopf")]
               type: text
               label: This question applies only to Christopf
               validations:
                 - type: required
-                  params: [You must provide the answer to principalMonthly.questionForChristopf]
+                  params: [You must provide the answer to interlocutorMonthly.questionForChristopf]
             text:
               type: special_field
               label: Text
               widget: richTextEditor
               style:
                 height: 100px
-        principalQuarterly:
-          label: Quarterly assessment of principal
+        interlocutorQuarterly:
+          label: Quarterly assessment of interlocutor
           recurrence: quarterly
+          test: $.subject[?(@property === "user" && @ !== true)]
           questions:
             test1:
-              test: $.subject.position.organization[?(@property === "identificationCode" && @.match(/^Z/i))]
+              test: $.subject.position.organization[?(@property === "identificationCode" && @ && @.match(/^Z/i))]
               type: enum
               label: Test question 1
               choices:
@@ -1664,7 +1664,7 @@ fields:
           questionSets:
             topLevelQs:
               label: Top Level Question Set
-              test: $.subject.position.organization[?(@property === "identificationCode" && @.match(/^Z/i))]
+              test: $.subject.position.organization[?(@property === "identificationCode" && @ && @.match(/^Z/i))]
               questions:
                 test2:
                   type: enum
@@ -1702,10 +1702,11 @@ fields:
                       validations:
                         - type: required
                           params: [You must provide Test question 3]
-        principalOnceReport:
-          label: Engagement assessment of principal
+        interlocutorOnceReport:
+          label: Engagement assessment of interlocutor
           recurrence: once
           relatedObjectType: report
+          test: $.subject[?(@property === "interlocutor" && @ === true)]
           questions:
             question1:
               type: enum
@@ -1721,7 +1722,7 @@ fields:
                   label: high
                   color: '#ff8279'
             question2:
-              test: $.subject.position.organization[?(@property === "identificationCode" && @.match(/^P/i))]
+              test: $.subject.position.organization[?(@property === "identificationCode" && @ && @.match(/^P/i))]
               type: enumset
               label: Attendee from P org
               choices:
@@ -1729,7 +1730,7 @@ fields:
                   label: P
                   color: '#ff0000'
             question3:
-              test: $.subject.position.organization[?(@property === "identificationCode" && @.match(/^Z/i))]
+              test: $.subject.position.organization[?(@property === "identificationCode" && @ && @.match(/^Z/i))]
               type: enumset
               label: Attendee from Z org
               choices:
@@ -1744,10 +1745,10 @@ fields:
                 yes:
                   label: 👍
                   color: '#0000ff'
-        principalOndemandScreeningAndVetting:
-          label: Screening & Vetting of principal from MoD
+        interlocutorOndemandScreeningAndVetting:
+          label: Screening & Vetting of interlocutor from MoD
           recurrence: ondemand
-          test: $.subject.position.organization[?(@property === "shortName" && @.match(/^MoD/i))]
+          test: $[?(@property === "subject" && @.user !== true && @.position && @.position.organization && @.position.organization.shortName && @.position.organization.shortName.match(/^MoD/i))]
           onDemandAssessmentExpirationDays: 180
           authorizationGroupUuids:
             read: ['c21e7321-7ec5-4837-8805-a302f9575754']
@@ -1759,14 +1760,14 @@ fields:
               label: This question is required but will be filtered out
               validations:
                 - type: required
-                  params: [You must provide the answer to principalOndemandScreeningAndVetting.requiredButFilteredOutQuestion]
+                  params: [You must provide the answer to interlocutorOndemandScreeningAndVetting.requiredButFilteredOutQuestion]
             questionForChristopf:
               test: $.subject[?(@property === "name" && @ === "TOPFERNESS, Christopf")]
               type: text
               label: This question applies only to Christopf
               validations:
                 - type: required
-                  params: [You must provide the answer to this principalOndemandScreeningAndVetting.questionForChristopf]
+                  params: [You must provide the answer to this interlocutorOndemandScreeningAndVetting.questionForChristopf]
             assessmentDate:
               type: date
               label: Screening and vetting date
@@ -1804,62 +1805,58 @@ fields:
               widget: richTextEditor
               style:
                 height: 70px
-      # number of fields after Avatar in the left column for principals
-      # adjust this number if two columns are not balanced on the Person Page
-      numberOfFieldsInLeftColumn: 7
-      # select and order person fields (including custom fields)
-      showPageOrderedFields:
-        - position
-        - prevPositions
-        - phoneNumber
-        - country
-        - birthday
-        - placeOfBirth
-        - placeOfResidence
-        - colourOptions
-        - textareaFieldName
-        - domainUsername
-        - openIdSubject
-        - emailAddress
-        - multipleButtons
-        - inputFieldName
-        - politicalPosition
-        - rank
-        - numberFieldName
-        - nlt
-        - nlt_dt
-        - gender
-        - endOfTourDate
-        - biography
-        - arrayFieldName
-      showAsFullWidthFields:
-        - biography
+        advisorQuarterlyNoWrite:
+          label: Quarterly assessment of advisor, no write
+          recurrence: quarterly
+          test: $[?(@property === "subject" && @.user !== true && @.noSuchProperty && @.noSuchProperty.match(/^willNeverMatch/i))]
+          authorizationGroupUuids:
+            write: []
+          questions:
+            question1:
+              type: number
+              label: Test Question 1
+        advisorOnceReportNoWrite:
+          label: Engagement assessment of advisor, no write
+          recurrence: once
+          relatedObjectType: report
+          test: $[?(@property === "subject" && @.user !== true && @.noSuchProperty && @.noSuchProperty.match(/^willNeverMatch/i))]
+          authorizationGroupUuids:
+            write: []
+          questions:
+            question1:
+              type: number
+              label: Test Question 1
+        advisorOndemandNoWrite:
+          label: Ondemand assessment of advisor, no write
+          recurrence: ondemand
+          test: $.subject[?(@property === "user" && @ === true)]
+          authorizationGroupUuids:
+            write: []
+          questions:
+            assessmentDate:
+              type: date
+              label: Assessment date
+            question1:
+              type: number
+              label: Test Question 1
+
     position:
-      name: Afghan Tashkil
-      type: Afghan Partner
+      name: Regular
+      type: Regular position
       location:
         filter: [POINT_LOCATION]
+      organizationsAdministrated:
+        label: Organizations administrated
+        placeholder: Search for an organization…
 
     org:
-      name: Afghan Government Organization
-      allOrgName: Principal Organizations
+      name: Organization
+      allOrgName: Top-level Organizations
       location:
-        filter: [PRINCIPAL_LOCATION]
+        filter: [POINT_LOCATION]
       administratingPositions:
         label: Assigned Superusers
         placeholder: Search for a position…
-
-  superuser:
-
-    position:
-      name: Superuser
-      type: ANET Superuser
-
-  administrator:
-
-    position:
-      name: Administrator
-      type: ANET Administrator
 
 pinned_ORGs: [Key Leader Engagement]
 non_reporting_ORGs: [ANET Administrators]

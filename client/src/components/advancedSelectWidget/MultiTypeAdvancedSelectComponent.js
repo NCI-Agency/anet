@@ -33,18 +33,6 @@ const peopleFilters = {
   allEntities: {
     label: "All",
     queryVars: { matchPositionName: true, pendingVerification: false }
-  },
-  activeAdvisors: {
-    label: "All advisors",
-    queryVars: {
-      role: Models.Person.ROLE.ADVISOR,
-      matchPositionName: true,
-      pendingVerification: false
-    }
-  },
-  activePrincipals: {
-    label: "All principals",
-    queryVars: { role: Models.Person.ROLE.PRINCIPAL }
   }
 }
 

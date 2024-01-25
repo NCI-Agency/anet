@@ -16,7 +16,6 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
@@ -42,7 +41,7 @@ public class Report extends AbstractCustomizableAnetBean
   }
 
   public enum ReportCancelledReason {
-    CANCELLED_BY_ADVISOR, CANCELLED_BY_PRINCIPAL, CANCELLED_DUE_TO_TRANSPORTATION,
+    CANCELLED_BY_ADVISOR, CANCELLED_BY_INTERLOCUTOR, CANCELLED_DUE_TO_TRANSPORTATION,
     CANCELLED_DUE_TO_FORCE_PROTECTION, CANCELLED_DUE_TO_ROUTES, CANCELLED_DUE_TO_THREAT,
     NO_REASON_GIVEN, CANCELLED_DUE_TO_AVAILABILITY_OF_INTERPRETERS, CANCELLED_DUE_TO_NETWORK_ISSUES
   }
@@ -99,11 +98,11 @@ public class Report extends AbstractCustomizableAnetBean
   // annotated below
   private ForeignObjectHolder<Organization> advisorOrg = new ForeignObjectHolder<>();
   // annotated below
-  private ForeignObjectHolder<Organization> principalOrg = new ForeignObjectHolder<>();
+  private ForeignObjectHolder<Organization> interlocutorOrg = new ForeignObjectHolder<>();
   // annotated below
   private ForeignObjectHolder<ReportPerson> primaryAdvisor = new ForeignObjectHolder<>();
   // annotated below
-  private ForeignObjectHolder<ReportPerson> primaryPrincipal = new ForeignObjectHolder<>();
+  private ForeignObjectHolder<ReportPerson> primaryInterlocutor = new ForeignObjectHolder<>();
   // annotated below
   private List<ReportPerson> authors;
   // annotated below
@@ -316,8 +315,7 @@ public class Report extends AbstractCustomizableAnetBean
     return loadReportPeople(context) // Force the load of reportPeople
         .thenApply(l -> {
           final ReportPerson o =
-              l.stream().filter(p -> p.isPrimary() && p.getRole().equals(Role.ADVISOR)).findFirst()
-                  .orElse(null);
+              l.stream().filter(p -> p.isPrimary() && !p.isInterlocutor()).findFirst().orElse(null);
           primaryAdvisor.setForeignObject(o);
           return o;
         });
@@ -328,25 +326,24 @@ public class Report extends AbstractCustomizableAnetBean
     return primaryAdvisor.getForeignObject();
   }
 
-  @GraphQLQuery(name = "primaryPrincipal")
-  public CompletableFuture<ReportPerson> loadPrimaryPrincipal(
+  @GraphQLQuery(name = "primaryInterlocutor")
+  public CompletableFuture<ReportPerson> loadPrimaryInterlocutor(
       @GraphQLRootContext Map<String, Object> context) {
-    if (primaryPrincipal.hasForeignObject()) {
-      return CompletableFuture.completedFuture(primaryPrincipal.getForeignObject());
+    if (primaryInterlocutor.hasForeignObject()) {
+      return CompletableFuture.completedFuture(primaryInterlocutor.getForeignObject());
     }
     return loadReportPeople(context) // Force the load of reportPeople
         .thenApply(l -> {
           final ReportPerson o =
-              l.stream().filter(p -> p.isPrimary() && p.getRole().equals(Role.PRINCIPAL))
-                  .findFirst().orElse(null);
-          primaryPrincipal.setForeignObject(o);
+              l.stream().filter(p -> p.isPrimary() && p.isInterlocutor()).findFirst().orElse(null);
+          primaryInterlocutor.setForeignObject(o);
           return o;
         });
   }
 
   @JsonIgnore
-  public ReportPerson getPrimaryPrincipal() {
-    return primaryPrincipal.getForeignObject();
+  public ReportPerson getPrimaryInterlocutor() {
+    return primaryInterlocutor.getForeignObject();
   }
 
   @GraphQLQuery(name = "authors")
@@ -446,37 +443,37 @@ public class Report extends AbstractCustomizableAnetBean
     return advisorOrg.getForeignObject();
   }
 
-  @GraphQLQuery(name = "principalOrg")
-  public CompletableFuture<Organization> loadPrincipalOrg(
+  @GraphQLQuery(name = "interlocutorOrg")
+  public CompletableFuture<Organization> loadInterlocutorOrg(
       @GraphQLRootContext Map<String, Object> context) {
-    if (principalOrg.hasForeignObject()) {
-      return CompletableFuture.completedFuture(principalOrg.getForeignObject());
+    if (interlocutorOrg.hasForeignObject()) {
+      return CompletableFuture.completedFuture(interlocutorOrg.getForeignObject());
     }
     return new UuidFetcher<Organization>()
-        .load(context, IdDataLoaderKey.ORGANIZATIONS, principalOrg.getForeignUuid())
+        .load(context, IdDataLoaderKey.ORGANIZATIONS, interlocutorOrg.getForeignUuid())
         .thenApply(o -> {
-          principalOrg.setForeignObject(o);
+          interlocutorOrg.setForeignObject(o);
           return o;
         });
   }
 
   @JsonIgnore
-  public void setPrincipalOrgUuid(String principalOrgUuid) {
-    this.principalOrg = new ForeignObjectHolder<>(principalOrgUuid);
+  public void setInterlocutorOrgUuid(String interlocutorOrgUuid) {
+    this.interlocutorOrg = new ForeignObjectHolder<>(interlocutorOrgUuid);
   }
 
   @JsonIgnore
-  public String getPrincipalOrgUuid() {
-    return principalOrg.getForeignUuid();
+  public String getInterlocutorOrgUuid() {
+    return interlocutorOrg.getForeignUuid();
   }
 
-  public Organization getPrincipalOrg() {
-    return principalOrg.getForeignObject();
+  public Organization getInterlocutorOrg() {
+    return interlocutorOrg.getForeignObject();
   }
 
-  @GraphQLInputField(name = "principalOrg")
-  public void setPrincipalOrg(Organization principalOrg) {
-    this.principalOrg = new ForeignObjectHolder<>(principalOrg);
+  @GraphQLInputField(name = "interlocutorOrg")
+  public void setInterlocutorOrg(Organization interlocutorOrg) {
+    this.interlocutorOrg = new ForeignObjectHolder<>(interlocutorOrg);
   }
 
   // TODO: batch load? (used in reports/{Minimal,Show}.js

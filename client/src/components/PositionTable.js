@@ -43,7 +43,6 @@ const GQL_GET_POSITION_LIST = gql`
           uuid
           name
           rank
-          role
           avatarUuid
         }
       }

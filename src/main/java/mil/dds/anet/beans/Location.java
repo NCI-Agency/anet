@@ -19,8 +19,12 @@ public class Location extends AbstractCustomizableAnetBean
   public static final String DUMMY_LOCATION_UUID = "-1";
 
   public enum LocationType {
-    PHYSICAL_LOCATION("P"), GEOGRAPHICAL_AREA("PA"), POINT_LOCATION("PP"), ADVISOR_LOCATION("PPA"),
-    PRINCIPAL_LOCATION("PPP"), VIRTUAL_LOCATION("V");
+    PHYSICAL_LOCATION("P"), GEOGRAPHICAL_AREA("PA"), POINT_LOCATION("PP"), // -
+    @Deprecated
+    _PLACEHOLDER_3_(""), // Should no longer be used but remain in place to keep the correct values
+    @Deprecated
+    _PLACEHOLDER_4_(""), // Should no longer be used but remain in place to keep the correct values
+    VIRTUAL_LOCATION("V");
 
     private static final Map<String, LocationType> BY_CODE = new HashMap<>();
     static {
@@ -33,9 +37,9 @@ public class Location extends AbstractCustomizableAnetBean
       return BY_CODE.get(code);
     }
 
-    private String code;
+    private final String code;
 
-    private LocationType(String code) {
+    LocationType(String code) {
       this.code = code;
     }
 
@@ -165,10 +169,9 @@ public class Location extends AbstractCustomizableAnetBean
 
   @Override
   public boolean equals(Object o) {
-    if (!(o instanceof Location)) {
+    if (!(o instanceof Location other)) {
       return false;
     }
-    final Location other = (Location) o;
     return super.equals(o) && Objects.equals(other.getUuid(), uuid)
         && Objects.equals(other.getName(), name) && Objects.equals(other.getStatus(), status)
         && Objects.equals(other.getLat(), lat) && Objects.equals(other.getLng(), lng)

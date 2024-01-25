@@ -207,14 +207,9 @@ const ApprovalsDefinition = ({
               objectType={Position}
               queryParams={{
                 status: Model.STATUS.ACTIVE,
-                type: [
-                  Position.TYPE.ADVISOR,
-                  Position.TYPE.SUPERUSER,
-                  Position.TYPE.ADMINISTRATOR
-                ],
                 matchPersonName: true
               }}
-              fields="uuid, name, code, type, person { uuid, name, rank, role, avatarUuid }"
+              fields="uuid name code type person { uuid name rank avatarUuid }"
               addon={POSITIONS_ICON}
             />
           }

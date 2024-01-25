@@ -134,23 +134,11 @@ public class OrganizationResource {
       // modified with the parent organization update
       if (!Objects.equals(org.getParentOrgUuid(), existing.getParentOrgUuid())) {
         if (org.getParentOrgUuid() != null) {
-          final Organization parentOrg = dao.getByUuid(org.getParentOrgUuid());
-          if (parentOrg.getType() != org.getType()) {
-            throw new WebApplicationException(
-                "You cannot assign a different type of organization as the parent",
-                Status.FORBIDDEN);
-          }
           assertPermission(user, org.getParentOrgUuid());
         }
         if (existing.getParentOrgUuid() != null) {
           assertPermission(user, existing.getParentOrgUuid());
         }
-      }
-      // User is not authorized to change the organization type
-      if (org.getType() != existing.getType()) {
-        throw new WebApplicationException(
-            "You do not have permissions to change the type of this organization",
-            Status.FORBIDDEN);
       }
     }
 

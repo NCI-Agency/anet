@@ -80,7 +80,6 @@ const GQL_GET_REPORT = gql`
         uuid
         name
         rank
-        role
         avatarUuid
         position {
           uuid
@@ -99,7 +98,6 @@ const GQL_GET_REPORT = gql`
                   uuid
                   name
                   rank
-                  role
                   avatarUuid
                 }
               }
@@ -111,12 +109,13 @@ const GQL_GET_REPORT = gql`
         uuid
         name
         rank
-        role
         avatarUuid
         status
         author
         primary
         attendee
+        interlocutor
+        user
         endOfTourDate
         position {
           uuid
@@ -139,7 +138,7 @@ const GQL_GET_REPORT = gql`
       primaryAdvisor {
         uuid
       }
-      primaryPrincipal {
+      primaryInterlocutor {
         uuid
       }
       tasks {
@@ -174,23 +173,20 @@ const GQL_GET_REPORT = gql`
           uuid
           name
           rank
-          role
           avatarUuid
         }
       }
-      principalOrg {
+      interlocutorOrg {
         uuid
         shortName
         longName
         identificationCode
-        type
       }
       advisorOrg {
         uuid
         shortName
         longName
         identificationCode
-        type
       }
       workflow {
         type
@@ -205,7 +201,6 @@ const GQL_GET_REPORT = gql`
               uuid
               name
               rank
-              role
               avatarUuid
             }
           }
@@ -214,7 +209,6 @@ const GQL_GET_REPORT = gql`
           uuid
           name
           rank
-          role
           avatarUuid
         }
       }
@@ -618,7 +612,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
 
                 <Field
                   name="advisorOrg"
-                  label={Settings.fields.advisor.org.name}
+                  label={Settings.fields.regular.org.name}
                   component={FieldHelper.ReadonlyField}
                   humanValue={
                     <LinkTo
@@ -629,13 +623,13 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                 />
 
                 <Field
-                  name="principalOrg"
-                  label={Settings.fields.principal.org.name}
+                  name="interlocutorOrg"
+                  label={Settings.fields.interlocutor.org.name}
                   component={FieldHelper.ReadonlyField}
                   humanValue={
                     <LinkTo
                       modelType="Organization"
-                      model={report.principalOrg}
+                      model={report.interlocutorOrg}
                     />
                   }
                 />
@@ -913,15 +907,13 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
     }
     const supportEmail = Settings.SUPPORT_EMAIL_ADDR
     const supportEmailMessage = supportEmail ? `at ${supportEmail}` : ""
-    const advisorPositionSingular = Settings.fields.advisor.position.name
     if (!currentUser.hasAssignedPosition()) {
       return (
         <div className="alert alert-warning" style={alertStyle}>
-          You cannot submit a report: you are not assigned to a{" "}
-          {advisorPositionSingular} position.
+          You cannot submit a report: you are not assigned to a position.
           <br />
           Please contact your organization's superuser(s) and request to be
-          assigned to a {advisorPositionSingular} position.
+          assigned to a position.
           <br />
           If you are unsure, you can also contact the support team{" "}
           {supportEmailMessage}.
@@ -930,11 +922,11 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
     } else {
       return (
         <div className="alert alert-warning" style={alertStyle}>
-          You cannot submit a report: your assigned {advisorPositionSingular}{" "}
-          position has an inactive status.
+          You cannot submit a report: your assigned position has an inactive
+          status.
           <br />
           Please contact your organization's superusers and request them to
-          assign you to an active {advisorPositionSingular} position.
+          assign you to an active position.
           <br />
           If you are unsure, you can also contact the support team{" "}
           {supportEmailMessage}.

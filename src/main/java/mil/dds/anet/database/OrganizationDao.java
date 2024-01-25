@@ -33,8 +33,8 @@ public class OrganizationDao
     extends AnetSubscribableObjectDao<Organization, OrganizationSearchQuery> {
 
   private static final String[] fields =
-      {"uuid", "shortName", "longName", "status", "identificationCode", "profile", "type",
-          "createdAt", "updatedAt", "parentOrgUuid", "locationUuid", "customFields"};
+      {"uuid", "shortName", "longName", "status", "identificationCode", "profile", "createdAt",
+          "updatedAt", "parentOrgUuid", "locationUuid", "customFields"};
   public static final String TABLE_NAME = "organizations";
   public static final String ORGANIZATION_FIELDS =
       DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
@@ -127,7 +127,7 @@ public class OrganizationDao
         + ", \"shortName\" AS \"organizations_shortName\""
         + ", \"longName\" AS \"organizations_longName\", status AS organizations_status"
         + ", \"identificationCode\" AS \"organizations_identificationCode\""
-        + ", type AS organizations_type, \"parentOrgUuid\" AS \"organizations_parentOrgUuid\""
+        + ", \"parentOrgUuid\" AS \"organizations_parentOrgUuid\""
         + ", \"createdAt\" AS \"organizations_createdAt\""
         + ", \"updatedAt\" AS \"organizations_updatedAt\""
         + ", \"locationUuid\" AS \"organizations_locationUuid\""
@@ -148,14 +148,13 @@ public class OrganizationDao
   public Organization insertInternal(Organization org) {
     getDbHandle().createUpdate(
         "/* insertOrg */ INSERT INTO organizations (uuid, \"shortName\", \"longName\", status, "
-            + "\"identificationCode\", profile, type, \"createdAt\", \"updatedAt\", \"parentOrgUuid\", "
+            + "\"identificationCode\", profile, \"createdAt\", \"updatedAt\", \"parentOrgUuid\", "
             + "\"locationUuid\", \"customFields\") VALUES (:uuid, :shortName, :longName, :status, "
-            + ":identificationCode, :profile, :type, :createdAt, :updatedAt, :parentOrgUuid, :locationUuid, "
+            + ":identificationCode, :profile, :createdAt, :updatedAt, :parentOrgUuid, :locationUuid, "
             + ":customFields)")
         .bindBean(org).bind("createdAt", DaoUtils.asLocalDateTime(org.getCreatedAt()))
         .bind("updatedAt", DaoUtils.asLocalDateTime(org.getUpdatedAt()))
         .bind("status", DaoUtils.getEnumId(org.getStatus()))
-        .bind("type", DaoUtils.getEnumId(org.getType()))
         .bind("parentOrgUuid", DaoUtils.getUuid(org.getParentOrg()))
         .bind("locationUuid", DaoUtils.getUuid(org.getLocation())).execute();
     final OrganizationBatch ob = getDbHandle().attach(OrganizationBatch.class);
@@ -177,13 +176,12 @@ public class OrganizationDao
     return getDbHandle()
         .createUpdate("/* updateOrg */ UPDATE organizations "
             + "SET \"shortName\" = :shortName, \"longName\" = :longName, status = :status, "
-            + "\"identificationCode\" = :identificationCode, profile = :profile, type = :type, "
+            + "\"identificationCode\" = :identificationCode, profile = :profile, "
             + "\"updatedAt\" = :updatedAt, \"parentOrgUuid\" = :parentOrgUuid, "
             + "\"locationUuid\" = :locationUuid, "
             + "\"customFields\" = :customFields WHERE uuid = :uuid")
         .bindBean(org).bind("updatedAt", DaoUtils.asLocalDateTime(org.getUpdatedAt()))
         .bind("status", DaoUtils.getEnumId(org.getStatus()))
-        .bind("type", DaoUtils.getEnumId(org.getType()))
         .bind("parentOrgUuid", DaoUtils.getUuid(org.getParentOrg()))
         .bind("locationUuid", DaoUtils.getUuid(org.getLocation())).execute();
   }

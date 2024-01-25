@@ -37,15 +37,14 @@ import mil.dds.anet.beans.GenericRelatedObject;
 import mil.dds.anet.beans.Note;
 import mil.dds.anet.beans.Note.NoteType;
 import mil.dds.anet.beans.Organization;
-import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.ReportAction;
 import mil.dds.anet.beans.ReportAction.ActionType;
 import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.beans.RollupGraph;
+import mil.dds.anet.beans.RollupGraph.RollupGraphType;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ReportSearchQuery;
@@ -136,17 +135,17 @@ public class ReportResource {
       throw new WebApplicationException("Can only create Draft reports", Status.BAD_REQUEST);
     }
 
-    Person primaryAdvisor = findPrimaryAttendee(r, Role.ADVISOR);
+    Person primaryAdvisor = findPrimaryAttendee(r, false);
     if (r.getAdvisorOrgUuid() == null && primaryAdvisor != null) {
       logger.debug("Setting advisor org for new report based on {}", primaryAdvisor);
       r.setAdvisorOrg(
           engine.getOrganizationForPerson(engine.getContext(), primaryAdvisor.getUuid()).join());
     }
-    Person primaryPrincipal = findPrimaryAttendee(r, Role.PRINCIPAL);
-    if (r.getPrincipalOrgUuid() == null && primaryPrincipal != null) {
-      logger.debug("Setting principal org for new report based on {}", primaryPrincipal);
-      r.setPrincipalOrg(
-          engine.getOrganizationForPerson(engine.getContext(), primaryPrincipal.getUuid()).join());
+    Person primaryInterlocutor = findPrimaryAttendee(r, true);
+    if (r.getInterlocutorOrgUuid() == null && primaryInterlocutor != null) {
+      logger.debug("Setting interlocutor org for new report based on {}", primaryInterlocutor);
+      r.setInterlocutorOrg(engine
+          .getOrganizationForPerson(engine.getContext(), primaryInterlocutor.getUuid()).join());
     }
 
     r.setReportText(
@@ -190,13 +189,13 @@ public class ReportResource {
     return r;
   }
 
-  private Person findPrimaryAttendee(Report r, Role role) {
+  private Person findPrimaryAttendee(Report r, boolean isInterlocutor) {
     if (r.getReportPeople() == null) {
       return null;
     }
     return r.getReportPeople().stream()
-        .filter(p -> p.isAttendee() && p.isPrimary() && role.equals(p.getRole())).findFirst()
-        .orElse(null);
+        .filter(p -> p.isAttendee() && p.isPrimary() && p.isInterlocutor() == isInterlocutor)
+        .findFirst().orElse(null);
   }
 
   /**
@@ -234,7 +233,7 @@ public class ReportResource {
     }
 
     // If there is a change to the primary advisor, change the advisor Org.
-    final Person primaryAdvisor = findPrimaryAttendee(r, Role.ADVISOR);
+    final Person primaryAdvisor = findPrimaryAttendee(r, false);
     final ReportPerson existingPrimaryAdvisor =
         existing.loadPrimaryAdvisor(engine.getContext()).join();
     if (Utils.uuidEqual(primaryAdvisor, existingPrimaryAdvisor) == false
@@ -245,16 +244,16 @@ public class ReportResource {
       r.setAdvisorOrgUuid(existing.getAdvisorOrgUuid());
     }
 
-    final Person primaryPrincipal = findPrimaryAttendee(r, Role.PRINCIPAL);
-    final ReportPerson existingPrimaryPrincipal =
-        existing.loadPrimaryPrincipal(engine.getContext()).join();
-    if (Utils.uuidEqual(primaryPrincipal, existingPrimaryPrincipal) == false
-        || existing.getPrincipalOrgUuid() == null) {
-      r.setPrincipalOrg(
-          engine.getOrganizationForPerson(engine.getContext(), DaoUtils.getUuid(primaryPrincipal))
-              .join());
+    final Person primaryInterlocutor = findPrimaryAttendee(r, true);
+    final ReportPerson existingPrimaryInterlocutor =
+        existing.loadPrimaryInterlocutor(engine.getContext()).join();
+    if (Utils.uuidEqual(primaryInterlocutor, existingPrimaryInterlocutor) == false
+        || existing.getInterlocutorOrgUuid() == null) {
+      r.setInterlocutorOrg(engine
+          .getOrganizationForPerson(engine.getContext(), DaoUtils.getUuid(primaryInterlocutor))
+          .join());
     } else {
-      r.setPrincipalOrgUuid(existing.getPrincipalOrgUuid());
+      r.setInterlocutorOrgUuid(existing.getInterlocutorOrgUuid());
     }
 
     r.setReportText(
@@ -278,7 +277,8 @@ public class ReportResource {
         if (existingPerson.isPresent()) {
           if (existingPerson.get().isPrimary() != rp.isPrimary()
               || existingPerson.get().isAttendee() != rp.isAttendee()
-              || existingPerson.get().isAuthor() != rp.isAuthor()) {
+              || existingPerson.get().isAuthor() != rp.isAuthor()
+              || existingPerson.get().isInterlocutor() != rp.isInterlocutor()) {
             dao.updatePersonOnReport(rp, r);
           }
           existingPeople.remove(existingPerson.get());
@@ -414,17 +414,18 @@ public class ReportResource {
             engine.getOrganizationForPerson(engine.getContext(), advisor.getUuid()).join());
       }
     }
-    if (r.getPrincipalOrgUuid() == null) {
-      final ReportPerson principal = r.loadPrimaryPrincipal(engine.getContext()).join();
-      final Boolean optionalPrimaryPrincipal = (Boolean) config
+    if (r.getInterlocutorOrgUuid() == null) {
+      final ReportPerson interlocutor = r.loadPrimaryInterlocutor(engine.getContext()).join();
+      final Boolean optionalPrimaryInterlocutor = (Boolean) config
           .getDictionaryEntry("fields.report.reportPeople.optionalPrimaryPrincipal");
-      if (principal == null) {
-        if (!Boolean.TRUE.equals(optionalPrimaryPrincipal)) {
-          throw new WebApplicationException("Report missing primary principal", Status.BAD_REQUEST);
+      if (interlocutor == null) {
+        if (!Boolean.TRUE.equals(optionalPrimaryInterlocutor)) {
+          throw new WebApplicationException("Report missing primary interlocutor",
+              Status.BAD_REQUEST);
         }
       } else {
-        r.setPrincipalOrg(
-            engine.getOrganizationForPerson(engine.getContext(), principal.getUuid()).join());
+        r.setInterlocutorOrg(
+            engine.getOrganizationForPerson(engine.getContext(), interlocutor.getUuid()).join());
       }
     }
 
@@ -726,20 +727,17 @@ public class ReportResource {
    *
    * @param start Start timestamp for the rollup period
    * @param end end timestamp for the rollup period
-   * @param orgType If both advisorOrgUuid and principalOrgUuid are NULL then the type of
-   *        organization (ADVISOR_ORG or PRINCIPAL_ORG) that the chart should filter on
-   * @param advisorOrgUuid if set then the parent advisor org to create the graph off of. All
-   *        reports will be by/about this org or a child org.
-   * @param principalOrgUuid if set then the parent principal org to create the graph off of. All
-   *        reports will be by/about this org or a child org.
+   * @param orgType The type of organization (ADVISOR or INTERLOCUTOR) that the chart should filter
+   *        on
+   * @param orgUuid if set then the parent advisor org to create the graph off of. All reports will
+   *        be by/about this org or a child org.
    */
   @GraphQLQuery(name = "rollupGraph")
   public List<RollupGraph> getDailyRollupGraph(@GraphQLArgument(name = "startDate") Instant start,
       @GraphQLArgument(name = "endDate") Instant end,
-      @GraphQLArgument(name = "orgType") OrganizationType orgType,
-      @GraphQLArgument(name = "advisorOrganizationUuid") String advisorOrgUuid,
-      @GraphQLArgument(name = "principalOrganizationUuid") String principalOrgUuid) {
-    final List<RollupGraph> dailyRollupGraph;
+      @GraphQLArgument(name = "orgType") RollupGraphType orgType,
+      @GraphQLArgument(name = "orgUuid") String orgUuid) {
+    ;
 
     @SuppressWarnings("unchecked")
     final List<String> nonReportingOrgsShortNames =
@@ -747,18 +745,9 @@ public class ReportResource {
     final Map<String, Organization> nonReportingOrgs =
         getOrgsByShortNames(nonReportingOrgsShortNames);
 
-    if (principalOrgUuid != null) {
-      dailyRollupGraph = dao.getDailyRollupGraph(start, end, principalOrgUuid,
-          OrganizationType.PRINCIPAL_ORG, nonReportingOrgs);
-    } else if (advisorOrgUuid != null) {
-      dailyRollupGraph = dao.getDailyRollupGraph(start, end, advisorOrgUuid,
-          OrganizationType.ADVISOR_ORG, nonReportingOrgs);
-    } else {
-      if (orgType == null) {
-        orgType = OrganizationType.ADVISOR_ORG;
-      }
-      dailyRollupGraph = dao.getDailyRollupGraph(start, end, orgType, nonReportingOrgs);
-    }
+    final List<RollupGraph> dailyRollupGraph =
+        (orgUuid == null) ? dao.getDailyRollupGraph(start, end, orgType, nonReportingOrgs)
+            : dao.getDailyRollupGraph(start, end, orgUuid, orgType, nonReportingOrgs);
 
     Collections.sort(dailyRollupGraph, getRollupGraphComparator());
 
@@ -768,16 +757,14 @@ public class ReportResource {
   @GraphQLMutation(name = "emailRollup")
   public Integer emailRollup(@GraphQLArgument(name = "startDate") Instant start,
       @GraphQLArgument(name = "endDate") Instant end,
-      @GraphQLArgument(name = "orgType") OrganizationType orgType,
-      @GraphQLArgument(name = "advisorOrganizationUuid") String advisorOrgUuid,
-      @GraphQLArgument(name = "principalOrganizationUuid") String principalOrgUuid,
+      @GraphQLArgument(name = "orgType") RollupGraphType orgType,
+      @GraphQLArgument(name = "orgUuid") String orgUuid,
       @GraphQLArgument(name = "email") AnetEmail email) {
     DailyRollupEmail action = new DailyRollupEmail();
     action.setStartDate(start);
     action.setEndDate(end);
     action.setComment(email.getComment());
-    action.setAdvisorOrganizationUuid(advisorOrgUuid);
-    action.setPrincipalOrganizationUuid(principalOrgUuid);
+    action.setOrgUuid(orgUuid);
     action.setChartOrgType(orgType);
 
     email.setAction(action);
@@ -789,16 +776,14 @@ public class ReportResource {
   @GraphQLQuery(name = "showRollupEmail")
   public String showRollupEmail(@GraphQLArgument(name = "startDate") Instant start,
       @GraphQLArgument(name = "endDate") Instant end,
-      @GraphQLArgument(name = "orgType") OrganizationType orgType,
-      @GraphQLArgument(name = "advisorOrganizationUuid") String advisorOrgUuid,
-      @GraphQLArgument(name = "principalOrganizationUuid") String principalOrgUuid,
+      @GraphQLArgument(name = "orgType") RollupGraphType orgType,
+      @GraphQLArgument(name = "orgUuid") String orgUuid,
       @GraphQLArgument(name = "showText", defaultValue = "false") Boolean showReportText) {
     DailyRollupEmail action = new DailyRollupEmail();
     action.setStartDate(start);
     action.setEndDate(end);
     action.setChartOrgType(orgType);
-    action.setAdvisorOrganizationUuid(advisorOrgUuid);
-    action.setPrincipalOrganizationUuid(principalOrgUuid);
+    action.setOrgUuid(orgUuid);
 
     final Map<String, Object> context = new HashMap<String, Object>();
     context.put("context", engine.getContext());

@@ -14,6 +14,7 @@ public class ReportPersonMapper implements RowMapper<ReportPerson> {
     rp.setPrimary(r.getBoolean("isPrimary"));
     rp.setAuthor(r.getBoolean("isAuthor"));
     rp.setAttendee(r.getBoolean("isAttendee"));
+    rp.setInterlocutor(r.getBoolean("isInterlocutor"));
     return rp;
   }
 

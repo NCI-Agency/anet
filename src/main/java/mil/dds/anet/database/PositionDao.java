@@ -300,9 +300,9 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
 
   private PositionType revokePrivilege(final Position position) {
     // Revoke privilege from old position;
-    // if this was a SUPERUSER or ADMINISTRATOR, change to ADVISOR
+    // if this was a SUPERUSER or ADMINISTRATOR, change to REGULAR
     return (position.getType() == PositionType.SUPERUSER
-        || position.getType() == PositionType.ADMINISTRATOR) ? PositionType.ADVISOR
+        || position.getType() == PositionType.ADMINISTRATOR) ? PositionType.REGULAR
             : position.getType();
   }
 

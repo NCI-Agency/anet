@@ -9,7 +9,8 @@ const TRAIN_ENGAGEMENT_BUTTON = "train"
 const REQUIRED_PERSON_FIELDS = {
   lastname: "customPerson",
   rank: "CIV",
-  gender: "MALE"
+  gender: "MALE",
+  country: "Turkey"
 }
 
 describe("When working with custom fields for different anet objects", () => {
@@ -211,6 +212,9 @@ describe("When working with custom fields for different anet objects", () => {
       await (
         await CreatePerson.getGender()
       ).selectByAttribute("value", REQUIRED_PERSON_FIELDS.gender)
+      await (
+        await CreatePerson.getCountry()
+      ).selectByAttribute("value", REQUIRED_PERSON_FIELDS.country)
     })
 
     it("Should not show default invisible fields", async() => {

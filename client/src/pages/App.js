@@ -32,7 +32,6 @@ const GQL_GET_APP_DATA = gql`
       uuid
       name
       rank
-      role
       avatarUuid
       status
       emailAddress
@@ -81,7 +80,6 @@ const GQL_GET_APP_DATA = gql`
             uuid
             name
             rank
-            role
             avatarUuid
             position {
               uuid
@@ -139,28 +137,11 @@ const GQL_GET_APP_DATA = gql`
       value
     }
 
-    topLevelAdvisorOrgs: organizationList(
+    topLevelOrgs: organizationList(
       query: {
         pageSize: 0
         hasParentOrg: false
         status: ACTIVE
-        type: ADVISOR_ORG
-      }
-    ) {
-      list {
-        uuid
-        shortName
-        longName
-        identificationCode
-      }
-    }
-
-    topLevelPrincipalOrgs: organizationList(
-      query: {
-        pageSize: 0
-        hasParentOrg: false
-        status: ACTIVE
-        type: PRINCIPAL_ORG
       }
     ) {
       list {
@@ -217,8 +198,7 @@ const App = ({ pageDispatchers, pageProps }) => {
         pageHistory={navigate}
         location={routerLocation}
         sidebarData={{
-          advisorOrganizations: appState.advisorOrganizations,
-          principalOrganizations: appState.principalOrganizations
+          allOrganizations: appState.allOrganizations
         }}
       >
         <ToastContainer theme="colored" />
@@ -240,12 +220,7 @@ const App = ({ pageDispatchers, pageProps }) => {
       return organizations
     }
 
-    const advisorOrganizations = getSortedOrganizationsFromData(
-      data.topLevelAdvisorOrgs
-    )
-    const principalOrganizations = getSortedOrganizationsFromData(
-      data.topLevelPrincipalOrgs
-    )
+    const allOrganizations = getSortedOrganizationsFromData(data.topLevelOrgs)
     const settings = {}
     data.adminSettings.forEach(
       setting => (settings[setting.key] = setting.value)
@@ -256,8 +231,7 @@ const App = ({ pageDispatchers, pageProps }) => {
     return {
       currentUser,
       settings,
-      advisorOrganizations,
-      principalOrganizations,
+      allOrganizations,
       notifications
     }
   }

@@ -380,12 +380,12 @@ enum LocationSearchSortBy {
 
 """"""
 enum LocationType {
-  ADVISOR_LOCATION
   GEOGRAPHICAL_AREA
   PHYSICAL_LOCATION
   POINT_LOCATION
-  PRINCIPAL_LOCATION
   VIRTUAL_LOCATION
+  _PLACEHOLDER_3_ @deprecated(reason: "Deprecated")
+  _PLACEHOLDER_4_ @deprecated(reason: "Deprecated")
 }
 
 """A 64-bit signed integer"""
@@ -418,7 +418,7 @@ type Mutation {
   deleteSavedSearch(uuid: String): Int
   deleteSubscription(uuid: String): Int
   emailReport(email: AnetEmailInput, uuid: String): Int
-  emailRollup(advisorOrganizationUuid: String, email: AnetEmailInput, endDate: Instant, orgType: OrganizationType, principalOrganizationUuid: String, startDate: Instant): Int
+  emailRollup(email: AnetEmailInput, endDate: Instant, orgType: RollupGraphType, orgUuid: String, startDate: Instant): Int
   mergeLocations(loserUuid: String, winnerLocation: LocationInput): Int
   mergePeople(loserUuid: String, winnerPerson: PersonInput): Int
   mergePositions(loserUuid: String, winnerPosition: PositionInput): Int
@@ -501,7 +501,6 @@ type Organization {
   shortName: String
   status: Status
   tasks: [Task]
-  type: OrganizationType
   updatedAt: Instant
   uuid: String
 }
@@ -522,7 +521,6 @@ input OrganizationInput {
   shortName: String
   status: Status
   tasks: [TaskInput]
-  type: OrganizationType
   updatedAt: Instant
   uuid: String
 }
@@ -542,7 +540,6 @@ input OrganizationSearchQueryInput {
   status: Status
   subscribed: Boolean
   text: String
-  type: OrganizationType
 }
 
 """"""
@@ -550,12 +547,6 @@ enum OrganizationSearchSortBy {
   CREATED_AT
   NAME
   TYPE
-}
-
-""""""
-enum OrganizationType {
-  ADVISOR_ORG
-  PRINCIPAL_ORG
 }
 
 """"""
@@ -584,9 +575,9 @@ type Person {
   position: Position
   previousPositions: [PersonPositionHistory]
   rank: String
-  role: Role
   status: Status
   updatedAt: Instant
+  user: Boolean
   uuid: String
 }
 
@@ -610,9 +601,9 @@ input PersonInput {
   position: PositionInput
   previousPositions: [PersonPositionHistoryInput]
   rank: String
-  role: Role
   status: Status
   updatedAt: Instant
+  user: Boolean
   uuid: String
 }
 
@@ -651,7 +642,6 @@ input PersonSearchQueryInput {
   pageSize: Int
   pendingVerification: Boolean
   rank: String
-  role: Role
   sortBy: PersonSearchSortBy
   sortOrder: SortOrder
   status: Status
@@ -750,9 +740,9 @@ enum PositionSearchSortBy {
 """"""
 enum PositionType {
   ADMINISTRATOR
-  ADVISOR
-  PRINCIPAL
+  REGULAR
   SUPERUSER
+  _PLACEHOLDER_1_ @deprecated(reason: "Deprecated")
 }
 
 """Query root"""
@@ -779,8 +769,8 @@ type Query {
   recentActivities: RecentActivities
   report(uuid: String): Report
   reportList(query: ReportSearchQueryInput): AnetBeanList_Report
-  rollupGraph(advisorOrganizationUuid: String, endDate: Instant, orgType: OrganizationType, principalOrganizationUuid: String, startDate: Instant): [RollupGraph]
-  showRollupEmail(advisorOrganizationUuid: String, endDate: Instant, orgType: OrganizationType, principalOrganizationUuid: String, showText: Boolean = false, startDate: Instant): String
+  rollupGraph(endDate: Instant, orgType: RollupGraphType, orgUuid: String, startDate: Instant): [RollupGraph]
+  showRollupEmail(endDate: Instant, orgType: RollupGraphType, orgUuid: String, showText: Boolean = false, startDate: Instant): String
   task(uuid: String): Task
   taskList(query: TaskSearchQueryInput): AnetBeanList_Task
   userActivityList(query: UserActivitySearchQueryInput): AnetBeanList_UserActivity
@@ -829,14 +819,14 @@ type Report {
   engagementStatus: [EngagementStatus]
   exsum: String
   intent: String
+  interlocutorOrg: Organization
   isSubscribed: Boolean
   keyOutcomes: String
   location: Location
   nextSteps: String
   notes: [Note]
   primaryAdvisor: ReportPerson
-  primaryPrincipal: ReportPerson
-  principalOrg: Organization
+  primaryInterlocutor: ReportPerson
   releasedAt: Instant
   reportPeople: [ReportPerson]
   reportSensitiveInformation: ReportSensitiveInformation
@@ -862,7 +852,7 @@ type ReportAction {
 """"""
 enum ReportCancelledReason {
   CANCELLED_BY_ADVISOR
-  CANCELLED_BY_PRINCIPAL
+  CANCELLED_BY_INTERLOCUTOR
   CANCELLED_DUE_TO_AVAILABILITY_OF_INTERPRETERS
   CANCELLED_DUE_TO_FORCE_PROTECTION
   CANCELLED_DUE_TO_NETWORK_ISSUES
@@ -889,10 +879,10 @@ input ReportInput {
   engagementDayOfWeek: Int
   exsum: String
   intent: String
+  interlocutorOrg: OrganizationInput
   keyOutcomes: String
   location: LocationInput
   nextSteps: String
-  principalOrg: OrganizationInput
   releasedAt: Instant
   reportPeople: [ReportPersonInput]
   reportSensitiveInformation: ReportSensitiveInformationInput
@@ -922,6 +912,7 @@ type ReportPerson {
   emailAddress: String
   endOfTourDate: Instant
   gender: String
+  interlocutor: Boolean!
   isSubscribed: Boolean
   name: String
   notes: [Note]
@@ -932,9 +923,9 @@ type ReportPerson {
   previousPositions: [PersonPositionHistory]
   primary: Boolean!
   rank: String
-  role: Role
   status: Status
   updatedAt: Instant
+  user: Boolean
   uuid: String
 }
 
@@ -953,6 +944,7 @@ input ReportPersonInput {
   emailAddress: String
   endOfTourDate: Instant
   gender: String
+  interlocutor: Boolean!
   name: String
   openIdSubject: String
   pendingVerification: Boolean
@@ -961,15 +953,14 @@ input ReportPersonInput {
   previousPositions: [PersonPositionHistoryInput]
   primary: Boolean!
   rank: String
-  role: Role
   status: Status
   updatedAt: Instant
+  user: Boolean
   uuid: String
 }
 
 """"""
 input ReportSearchQueryInput {
-  advisorOrgUuid: String
   atmosphere: Atmosphere
   attendeePositionUuid: String
   attendeeUuid: String
@@ -984,16 +975,13 @@ input ReportSearchQueryInput {
   engagementDayOfWeek: Int
   engagementStatus: [EngagementStatus]
   inMyReports: Boolean
-  includeAdvisorOrgChildren: Boolean
   includeEngagementDayOfWeek: Boolean
-  includePrincipalOrgChildren: Boolean
   locationUuid: String
   orgRecurseStrategy: RecurseStrategy
   orgUuid: String
   pageNum: Int
   pageSize: Int
   pendingApprovalOf: String
-  principalOrgUuid: String
   releasedAtEnd: Instant
   releasedAtStart: Instant
   sensitiveInfo: Boolean
@@ -1044,16 +1032,16 @@ enum ReportState {
 }
 
 """"""
-enum Role {
-  ADVISOR
-  PRINCIPAL
-}
-
-""""""
 type RollupGraph {
   cancelled: Int!
   org: Organization
   published: Int!
+}
+
+""""""
+enum RollupGraphType {
+  ADVISOR
+  INTERLOCUTOR
 }
 
 """"""

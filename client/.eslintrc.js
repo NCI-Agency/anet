@@ -27,7 +27,7 @@ module.exports = {
     "react-hooks"
   ],
   rules: {
-    eqeqeq: ["error", "always"],
+    eqeqeq: ["error", "always", { null: "ignore" }],
     "import/no-anonymous-default-export": "off",
     "import/order": [
       "warn",

@@ -22,7 +22,10 @@ public class Position extends AbstractCustomizableAnetBean
     implements RelatableObject, SubscribableObject, WithStatus {
 
   public static enum PositionType {
-    ADVISOR, PRINCIPAL, SUPERUSER, ADMINISTRATOR
+    REGULAR, // -
+    @Deprecated
+    _PLACEHOLDER_1_, // Should no longer be used but remain in place to keep the correct values
+    SUPERUSER, ADMINISTRATOR
   }
 
   public static enum PositionRole {

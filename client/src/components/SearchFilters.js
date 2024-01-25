@@ -34,7 +34,7 @@ import Model from "components/Model"
 import DictionaryField from "HOC/DictionaryField"
 import _isEmpty from "lodash/isEmpty"
 import _pickBy from "lodash/pickBy"
-import { Location, Organization, Person, Position, Report, Task } from "models"
+import { Location, Person, Position, Report, Task } from "models"
 import PropTypes from "prop-types"
 import React from "react"
 import LOCATIONS_ICON from "resources/locations.png"
@@ -140,7 +140,7 @@ export const searchFilters = function() {
   const authorWidgetFilters = {
     all: {
       label: "All",
-      queryVars: { role: Person.ROLE.ADVISOR, pendingVerification: false }
+      queryVars: { pendingVerification: false }
     }
   }
   const attendeeWidgetFilters = {
@@ -153,13 +153,7 @@ export const searchFilters = function() {
   const authorPositionWidgetFilters = {
     all: {
       label: "All",
-      queryVars: {
-        type: [
-          Position.TYPE.ADVISOR,
-          Position.TYPE.SUPERUSER,
-          Position.TYPE.ADMINISTRATOR
-        ]
-      }
+      queryVars: {}
     }
   }
   const attendeePositionWidgetFilters = {
@@ -328,7 +322,7 @@ export const searchFilters = function() {
     }
   }
 
-  const countries = Settings.fields.advisor.person.countries || [] // TODO: make search also work with principal countries
+  const countries = Settings.fields.regular.person.countries || []
   const ranks = (Settings.fields.person.ranks || []).map(f => f.value)
 
   filters[SEARCH_OBJECT_TYPES.PEOPLE] = {
@@ -340,19 +334,6 @@ export const searchFilters = function() {
           queryKey: "orgUuid",
           queryRecurseStrategyKey: "orgRecurseStrategy",
           fixedRecurseStrategy: RECURSE_STRATEGY.CHILDREN
-        }
-      },
-      Role: {
-        component: SelectFilter,
-        dictProps: Settings.fields.person.role,
-        deserializer: deserializeSelectFilter,
-        props: {
-          queryKey: "role",
-          options: [Person.ROLE.ADVISOR, Person.ROLE.PRINCIPAL],
-          labels: [
-            Settings.fields.advisor.person.name,
-            Settings.fields.principal.person.name
-          ]
         }
       },
       Location: {
@@ -409,22 +390,6 @@ export const searchFilters = function() {
 
   filters[SEARCH_OBJECT_TYPES.ORGANIZATIONS] = {
     filters: {
-      "Organization Type": {
-        component: SelectFilter,
-        dictProps: Settings.fields.organization.type,
-        deserializer: deserializeSelectFilter,
-        props: {
-          queryKey: "type",
-          options: [
-            Organization.TYPE.ADVISOR_ORG,
-            Organization.TYPE.PRINCIPAL_ORG
-          ],
-          labels: [
-            Settings.fields.advisor.org.name,
-            Settings.fields.principal.org.name
-          ]
-        }
-      },
       "Within Organization": {
         component: OrganizationFilter,
         deserializer: deserializeOrganizationFilter,
@@ -465,14 +430,12 @@ export const searchFilters = function() {
         props: {
           queryKey: "type",
           options: [
-            Position.TYPE.PRINCIPAL,
-            Position.TYPE.ADVISOR,
+            Position.TYPE.REGULAR,
             Position.TYPE.SUPERUSER,
             Position.TYPE.ADMINISTRATOR
           ],
           labels: [
-            Settings.fields.principal.position.name,
-            Settings.fields.advisor.position.name,
+            Settings.fields.regular.position.name,
             Settings.fields.superuser.position.name,
             Settings.fields.administrator.position.name
           ],
@@ -519,8 +482,6 @@ export const searchFilters = function() {
   }
 
   const locationTypeOptions = [
-    Location.LOCATION_TYPES.ADVISOR_LOCATION,
-    Location.LOCATION_TYPES.PRINCIPAL_LOCATION,
     Location.LOCATION_TYPES.POINT_LOCATION,
     Location.LOCATION_TYPES.GEOGRAPHICAL_AREA,
     Location.LOCATION_TYPES.VIRTUAL_LOCATION
