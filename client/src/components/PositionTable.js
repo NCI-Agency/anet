@@ -117,6 +117,7 @@ const BasePositionTable = ({
   totalCount,
   goToPage,
   allowSelection,
+  selection,
   isAllSelected,
   toggleAll,
   isSelected,
@@ -128,6 +129,9 @@ const BasePositionTable = ({
 
   return (
     <div>
+      {allowSelection && (
+        <em className="float-start">{selection.size} selected</em>
+      )}
       <UltimatePaginationTopDown
         componentClassName="searchPagination"
         className="float-end"
@@ -234,6 +238,7 @@ BasePositionTable.propTypes = {
   goToPage: PropTypes.func,
   allowSelection: PropTypes.bool,
   // if allowSelection is true:
+  selection: PropTypes.instanceOf(Set),
   isAllSelected: PropTypes.func,
   toggleAll: PropTypes.func,
   isSelected: PropTypes.func,

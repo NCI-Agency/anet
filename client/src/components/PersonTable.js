@@ -107,6 +107,7 @@ const BasePersonTable = ({
   totalCount,
   goToPage,
   allowSelection,
+  selection,
   isAllSelected,
   toggleAll,
   isSelected,
@@ -118,6 +119,9 @@ const BasePersonTable = ({
 
   return (
     <div>
+      {allowSelection && (
+        <em className="float-start">{selection.size} selected</em>
+      )}
       <UltimatePaginationTopDown
         componentClassName="searchPagination"
         className="float-end"
@@ -130,9 +134,12 @@ const BasePersonTable = ({
           <thead>
             <tr>
               {allowSelection && (
-                <th style={{ verticalAlign: "middle", textAlign: "center" }}>
-                  <Checkbox checked={isAllSelected()} onChange={toggleAll} />
-                </th>
+                <>
+                  <th style={{ verticalAlign: "middle", textAlign: "center" }}>
+                    <Checkbox checked={isAllSelected()} onChange={toggleAll} />
+                  </th>
+                  <th>Email</th>
+                </>
               )}
               <th>Name</th>
               <th>Position</th>
@@ -144,12 +151,17 @@ const BasePersonTable = ({
             {people.map(person => (
               <tr key={person.uuid}>
                 {allowSelection && (
-                  <td style={{ verticalAlign: "middle", textAlign: "center" }}>
-                    <Checkbox
-                      checked={isSelected(person.uuid)}
-                      onChange={() => toggleSelection(person.uuid)}
-                    />
-                  </td>
+                  <>
+                    <td
+                      style={{ verticalAlign: "middle", textAlign: "center" }}
+                    >
+                      <Checkbox
+                        checked={isSelected(person.uuid)}
+                        onChange={() => toggleSelection(person.uuid)}
+                      />
+                    </td>
+                    <td>{person.emailAddress}</td>
+                  </>
                 )}
                 <td>
                   <LinkTo modelType="Person" model={person} />
@@ -195,6 +207,7 @@ BasePersonTable.propTypes = {
   goToPage: PropTypes.func,
   allowSelection: PropTypes.bool,
   // if allowSelection is true:
+  selection: PropTypes.instanceOf(Set),
   isAllSelected: PropTypes.func,
   toggleAll: PropTypes.func,
   isSelected: PropTypes.func,

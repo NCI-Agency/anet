@@ -3,7 +3,7 @@ import LinkTo from "components/LinkTo"
 import { mapPageDispatchersToProps } from "components/Page"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _get from "lodash/get"
-import { AuthorizationGroup } from "models"
+import { AuthorizationGroup, Person } from "models"
 import PropTypes from "prop-types"
 import React from "react"
 import { Table } from "react-bootstrap"
@@ -20,6 +20,7 @@ const AuthorizationGroupTable = ({
   totalCount,
   goToPage,
   allowSelection,
+  selection,
   isAllSelected,
   toggleAll,
   isSelected,
@@ -35,9 +36,12 @@ const AuthorizationGroupTable = ({
       <thead>
         <tr>
           {allowSelection && (
-            <th style={{ verticalAlign: "middle", textAlign: "center" }}>
-              <Checkbox checked={isAllSelected()} onChange={toggleAll} />
-            </th>
+            <>
+              <th style={{ verticalAlign: "middle", textAlign: "center" }}>
+                <Checkbox checked={isAllSelected()} onChange={toggleAll} />
+              </th>
+              <th>Email</th>
+            </>
           )}
           <th>{Settings.fields.authorizationGroup.name?.label}</th>
           <th>{Settings.fields.authorizationGroup.description?.label}</th>
@@ -59,12 +63,15 @@ const AuthorizationGroupTable = ({
         {ags.map(authorizationGroup => (
           <tr key={authorizationGroup.uuid}>
             {allowSelection && (
-              <td style={{ verticalAlign: "middle", textAlign: "center" }}>
-                <Checkbox
-                  checked={isSelected(authorizationGroup.uuid)}
-                  onChange={() => toggleSelection(authorizationGroup.uuid)}
-                />
-              </td>
+              <>
+                <td style={{ verticalAlign: "middle", textAlign: "center" }}>
+                  <Checkbox
+                    checked={isSelected(authorizationGroup.uuid)}
+                    onChange={() => toggleSelection(authorizationGroup.uuid)}
+                  />
+                </td>
+                <td>{getEmailAddresses(authorizationGroup)}</td>
+              </>
             )}
             <td>
               <LinkTo
@@ -97,6 +104,9 @@ const AuthorizationGroupTable = ({
     table
   ) : (
     <div>
+      {allowSelection && (
+        <em className="float-start">{selection.size} selected</em>
+      )}
       <UltimatePaginationTopDown
         componentClassName="searchPagination"
         className="float-end"
@@ -109,6 +119,26 @@ const AuthorizationGroupTable = ({
       </UltimatePaginationTopDown>
     </div>
   )
+
+  function getEmailAddresses(authorizationGroup) {
+    return authorizationGroup.authorizationGroupRelatedObjects
+      .map(agro => {
+        // TODO: support multiple emailAddress networks
+        if (
+          agro.relatedObjectType === Person.relatedObjectType &&
+          agro.relatedObject.emailAddress
+        ) {
+          return {
+            uuid: agro.relatedObjectUuid,
+            emailAddress: agro.relatedObject.emailAddress
+          }
+        }
+        // TODO: support emailAddress for organizations and positions
+        return undefined
+      })
+      .filter(Boolean)
+      .map(e => <div key={e.uuid}>{e.emailAddress}</div>)
+  }
 }
 
 AuthorizationGroupTable.propTypes = {
@@ -125,6 +155,7 @@ AuthorizationGroupTable.propTypes = {
   goToPage: PropTypes.func,
   allowSelection: PropTypes.bool,
   // if allowSelection is true:
+  selection: PropTypes.instanceOf(Set),
   isAllSelected: PropTypes.func,
   toggleAll: PropTypes.func,
   isSelected: PropTypes.func,

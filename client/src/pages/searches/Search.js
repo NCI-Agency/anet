@@ -215,6 +215,7 @@ const GQL_GET_AUTHORIZATION_GROUP_LIST = gql`
               name
               rank
               avatarUuid
+              emailAddress
             }
             ... on Position {
               uuid
@@ -291,6 +292,7 @@ const Organizations = ({
       totalCount={totalCount}
       goToPage={setPage}
       allowSelection={allowSelection}
+      selection={selectedUuids}
       isAllSelected={isAllSelected}
       toggleAll={toggleAll}
       isSelected={isSelected}
@@ -389,6 +391,7 @@ const People = ({
       totalCount={totalCount}
       goToPage={setPage}
       allowSelection={allowSelection}
+      selection={selectedUuids}
       isAllSelected={isAllSelected}
       toggleAll={toggleAll}
       isSelected={isSelected}
@@ -487,6 +490,7 @@ const Positions = ({
       totalCount={totalCount}
       goToPage={setPage}
       allowSelection={allowSelection}
+      selection={selectedUuids}
       isAllSelected={isAllSelected}
       toggleAll={toggleAll}
       isSelected={isSelected}
@@ -738,6 +742,7 @@ const AuthorizationGroups = ({
       totalCount={totalCount}
       goToPage={setPage}
       allowSelection={allowSelection}
+      selection={selectedUuids}
       isAllSelected={isAllSelected}
       toggleAll={toggleAll}
       isSelected={isSelected}
@@ -855,7 +860,6 @@ const Search = ({
   const [numLocations, setNumLocations] = useState(null)
   const [numReports, setNumReports] = useState(null)
   const [numAuthorizationGroups, setNumAuthorizationGroups] = useState(null)
-  const [prepareEmail, setPrepareEmail] = useState(false)
   const [recipients, setRecipients] = useState({ ...DEFAULT_RECIPIENTS })
   usePageTitle("Search")
   const numResultsThatCanBeEmailed = sum(
@@ -876,6 +880,7 @@ const Search = ({
     () => getSearchQuery(searchQuery),
     [searchQuery]
   )
+  const withEmail = !!searchQueryParams.emailNetwork
   const genericSearchQueryParams = useMemo(
     () => ({
       ...searchQueryParams,
@@ -1049,7 +1054,7 @@ const Search = ({
         </Container>
       </SubNav>
       <div className="d-flex justify-content-end">
-        {numResultsThatCanBeEmailed > 0 && (
+        {withEmail && numResultsThatCanBeEmailed > 0 && (
           <OverlayTrigger
             placement="bottom"
             overlay={
@@ -1162,7 +1167,7 @@ const Search = ({
             paginationKey="SEARCH_organizations"
             pagination={pagination}
             setPagination={setPagination}
-            allowSelection={prepareEmail}
+            allowSelection={withEmail}
             updateRecipients={r =>
               updateRecipients(SEARCH_OBJECT_TYPES.ORGANIZATIONS, r)}
           />
@@ -1189,7 +1194,7 @@ const Search = ({
             paginationKey="SEARCH_people"
             pagination={pagination}
             setPagination={setPagination}
-            allowSelection={prepareEmail}
+            allowSelection={withEmail}
             updateRecipients={r =>
               updateRecipients(SEARCH_OBJECT_TYPES.PEOPLE, r)}
           />
@@ -1216,13 +1221,13 @@ const Search = ({
             paginationKey="SEARCH_positions"
             pagination={pagination}
             setPagination={setPagination}
-            allowSelection={prepareEmail}
+            allowSelection={withEmail}
             updateRecipients={r =>
               updateRecipients(SEARCH_OBJECT_TYPES.POSITIONS, r)}
           />
         </Fieldset>
       )}
-      {queryTypes.includes(SEARCH_OBJECT_TYPES.TASKS) && (
+      {queryTypes.includes(SEARCH_OBJECT_TYPES.TASKS) && !withEmail && (
         <Fieldset
           id="tasks"
           title={
@@ -1246,7 +1251,7 @@ const Search = ({
           />
         </Fieldset>
       )}
-      {queryTypes.includes(SEARCH_OBJECT_TYPES.LOCATIONS) && (
+      {queryTypes.includes(SEARCH_OBJECT_TYPES.LOCATIONS) && !withEmail && (
         <Fieldset
           id="locations"
           title={
@@ -1270,7 +1275,7 @@ const Search = ({
           />
         </Fieldset>
       )}
-      {queryTypes.includes(SEARCH_OBJECT_TYPES.REPORTS) && (
+      {queryTypes.includes(SEARCH_OBJECT_TYPES.REPORTS) && !withEmail && (
         <Fieldset
           id="reports"
           title={
@@ -1312,7 +1317,7 @@ const Search = ({
             paginationKey="SEARCH_authorizationGroups"
             pagination={pagination}
             setPagination={setPagination}
-            allowSelection={prepareEmail}
+            allowSelection={withEmail}
             updateRecipients={r =>
               updateRecipients(SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS, r)}
           />
@@ -1363,22 +1368,7 @@ const Search = ({
   }
 
   function getPrepareEmailButtonProps() {
-    if (!prepareEmail) {
-      return {
-        disabled: false,
-        text: "Prepare email",
-        tooltip:
-          "Click this button to start selecting recipients from the search results",
-        variant: "outline-secondary"
-      }
-    } else if (!hasRecipients()) {
-      return {
-        disabled: true,
-        text: "Select some recipients",
-        tooltip: "Select some recipients to be able to create an email",
-        variant: "outline-danger"
-      }
-    } else {
+    if (hasRecipients()) {
       return {
         disabled: false,
         text: "Create email",
@@ -1386,18 +1376,23 @@ const Search = ({
           "Click this button to start creating an email to the selected recipients",
         variant: "primary"
       }
+    } else {
+      return {
+        disabled: true,
+        text: "Select some recipients",
+        tooltip: "Select some recipients to be able to create an email",
+        variant: "outline-danger"
+      }
     }
   }
 
   function doPrepareEmail() {
-    if (prepareEmail && hasRecipients()) {
+    if (hasRecipients()) {
       const numRecipients = Object.values(recipients).reduce(
         (s, r) => s + r.size,
         0
       )
       alert(`Do something clever now with the ${numRecipients} recipient(s)… ☺`)
-    } else {
-      setPrepareEmail(!prepareEmail)
     }
   }
 
