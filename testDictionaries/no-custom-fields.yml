@@ -1381,6 +1381,9 @@ non_reporting_ORGs: [ANET Administrators]
 tasking_ORGs: [EF 2.2, EF 9]
 domainNames: [example.com, cmil.mil, mission.ita, nato.int, "*.isaf.nato.int"]
 activeDomainNames: [example.com, cmil.mil, mission.ita, nato.int, "*.isaf.nato.int"]
+emailNetworks:
+  - Internet
+  - NS
 imagery:
   mapOptions:
     crs: EPSG3857

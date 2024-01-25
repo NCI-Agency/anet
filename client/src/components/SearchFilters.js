@@ -97,6 +97,15 @@ const SubscriptionFilter = {
   }
 }
 
+const EmailFilter = {
+  component: SelectFilter,
+  deserializer: deserializeSelectFilter,
+  props: {
+    queryKey: "emailNetwork",
+    options: Settings.emailNetworks
+  }
+}
+
 const advancedSelectFilterPersonProps = {
   overlayColumns: ["Name", "Position", "Location", "Organization"],
   overlayRenderRow: PersonDetailedOverlayRow,
@@ -572,6 +581,7 @@ export const searchFilters = function(includeAdminFilters) {
   for (const filtersForType of Object.values(filters)) {
     filtersForType.filters.Status = StatusFilter
     filtersForType.filters.Subscribed = SubscriptionFilter
+    filtersForType.filters["With Email"] = EmailFilter
   }
 
   return filters

@@ -121,6 +121,11 @@ public abstract class AbstractPositionSearcher
       qb.addSqlArg("deleted", false);
     }
 
+    if (query.getEmailNetwork() != null) {
+      // TODO: check for emailAddress
+      qb.addWhereClause("FALSE");
+    }
+
     addOrderByClauses(qb, query);
   }
 

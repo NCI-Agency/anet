@@ -379,6 +379,7 @@ required:
   - non_reporting_ORGs
   - domainNames
   - activeDomainNames
+  - emailNetworks
   - imagery
   - automaticallyAllowAllNewUsers
 properties:
@@ -1168,6 +1169,15 @@ properties:
       type: string
       title: The list of active (email) domain names
       description: Valid email domain names for this ANET instance; may contain wildcards.
+
+  emailNetworks:
+    type: array
+    uniqueItems: true
+    minItems: 1
+    items:
+      type: string
+      title: The list of supported email networks
+      description: Valid email networks for this ANET instance; e.g Internet, NS.
 
   imagery:
     type: object

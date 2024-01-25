@@ -107,6 +107,11 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
       qb.addSqlArg("userUuid", DaoUtils.getUuid(query.getUser()));
     }
 
+    if (query.getEmailNetwork() != null) {
+      // TODO: support multiple emailAddress networks
+      qb.addIsNotNullOrEmptyClause("\"emailAddress\"");
+    }
+
     addOrderByClauses(qb, query);
   }
 

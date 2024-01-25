@@ -68,6 +68,11 @@ public abstract class AbstractOrganizationSearcher extends
       addParentOrgUuidQuery(query);
     }
 
+    if (query.getEmailNetwork() != null) {
+      // TODO: check for emailAddress
+      qb.addWhereClause("FALSE");
+    }
+
     addOrderByClauses(qb, query);
   }
 

@@ -88,6 +88,11 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
       qb.addSqlArg("userUuid", DaoUtils.getUuid(query.getUser()));
     }
 
+    if (query.getEmailNetwork() != null) {
+      // Should never match
+      qb.addWhereClause("FALSE");
+    }
+
     addOrderByClauses(qb, query);
   }
 
