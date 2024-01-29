@@ -44,7 +44,6 @@ import mil.dds.anet.test.client.Task;
 import mil.dds.anet.test.client.TaskInput;
 import mil.dds.anet.test.client.util.MutationExecutor;
 import mil.dds.anet.test.client.util.QueryExecutor;
-import mil.dds.anet.utils.DaoUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
 import org.slf4j.Logger;
@@ -95,10 +94,8 @@ public abstract class AbstractResourceTest {
 
   @BeforeAll
   void setUp() {
-    if (DaoUtils.isPostgresql()) {
-      // Update full-text index
-      refreshMaterializedViews();
-    }
+    // Update full-text index
+    refreshMaterializedViews();
     admin = findOrPutPersonInDb(Person.builder().withDomainUsername(adminUser).build());
   }
 

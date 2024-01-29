@@ -114,7 +114,7 @@ public class AnetObjectEngine {
     subscriptionUpdateDao = injector.getInstance(SubscriptionUpdateDao.class);
     userActivityDao = injector.getInstance(UserActivityDao.class);
     this.metricRegistry = metricRegistry;
-    searcher = Searcher.getSearcher(DaoUtils.getDbType(dbUrl), injector);
+    searcher = Searcher.getSearcher(injector);
     configuration = config;
     instance = this;
   }

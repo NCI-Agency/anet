@@ -85,23 +85,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
   public static final String REPORT_FIELDS =
       DaoUtils.buildFieldAliases(TABLE_NAME, allFields, true);
 
-  private String weekFormat;
-
-  public String getWeekFormat() {
-    if (weekFormat == null) {
-      weekFormat = getWeekFormat(getDbType());
-    }
-    return weekFormat;
-  }
-
-  private String getWeekFormat(DaoUtils.DbType dbType) {
-    switch (dbType) {
-      case POSTGRESQL:
-        return "EXTRACT(WEEK FROM %s)";
-      default:
-        throw new RuntimeException("No week format found for " + dbType);
-    }
-  }
+  private static final String weekFormat = "EXTRACT(WEEK FROM %s)";
 
   @InTransaction
   public Report insert(Report r, Person user) {
@@ -506,8 +490,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     sql.append("organizations.\"shortName\" AS \"organizationShortName\",");
     sql.append("%3$s");
     sql.append("%4$s");
-    sql.append(" ").append(String.format(getWeekFormat(), "reports.\"createdAt\""))
-        .append(" AS week,");
+    sql.append(" ").append(String.format(weekFormat, "reports.\"createdAt\"")).append(" AS week,");
     sql.append("COUNT(\"reportPeople\".\"personUuid\") AS \"nrReportsSubmitted\"");
 
     sql.append(" FROM ");
@@ -532,7 +515,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     sql.append("organizations.\"shortName\",");
     sql.append("%7$s");
     sql.append("%8$s");
-    sql.append(" " + String.format(getWeekFormat(), "reports.\"createdAt\""));
+    sql.append(" ").append(String.format(weekFormat, "reports.\"createdAt\""));
     sql.append(") a");
 
     sql.append(" FULL OUTER JOIN (");
@@ -541,7 +524,8 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     sql.append("organizations.\"shortName\" AS \"organizationShortName\",");
     sql.append("%3$s");
     sql.append("%4$s");
-    sql.append(" " + String.format(getWeekFormat(), "reports.\"engagementDate\"") + " AS week,");
+    sql.append(" ").append(String.format(weekFormat, "reports.\"engagementDate\""))
+        .append(" AS week,");
     sql.append("COUNT(\"reportPeople\".\"personUuid\") AS \"nrEngagementsAttended\"");
 
     sql.append(" FROM ");
@@ -566,7 +550,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     sql.append("organizations.\"shortName\",");
     sql.append("%7$s");
     sql.append("%8$s");
-    sql.append(" " + String.format(getWeekFormat(), "reports.\"engagementDate\""));
+    sql.append(" ").append(String.format(weekFormat, "reports.\"engagementDate\""));
     sql.append(") b");
 
     sql.append(" ON ");

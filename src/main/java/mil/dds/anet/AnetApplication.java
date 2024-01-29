@@ -59,7 +59,6 @@ import mil.dds.anet.threads.MaterializedViewRefreshWorker;
 import mil.dds.anet.threads.PendingAssessmentsNotificationWorker;
 import mil.dds.anet.threads.ReportApprovalWorker;
 import mil.dds.anet.threads.ReportPublicationWorker;
-import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.HttpsRedirectFilter;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.RequestLoggingFilter;
@@ -361,13 +360,11 @@ public class AnetApplication extends Application<AnetConfiguration> {
       scheduler.scheduleAtFixedRate(pendingAssessmentsNotificationWorker, 6, 6, TimeUnit.HOURS);
       scheduler.schedule(pendingAssessmentsNotificationWorker, 25, TimeUnit.SECONDS);
 
-      if (DaoUtils.isPostgresql()) {
-        // Wait 60 seconds between updates of PostgreSQL materialized views,
-        // starting 30 seconds after boot-up.
-        final MaterializedViewRefreshWorker materializedViewRefreshWorker =
-            new MaterializedViewRefreshWorker(configuration, engine.getAdminDao());
-        scheduler.scheduleWithFixedDelay(materializedViewRefreshWorker, 30, 60, TimeUnit.SECONDS);
-      }
+      // Wait 60 seconds between updates of PostgreSQL materialized views,
+      // starting 30 seconds after boot-up.
+      final MaterializedViewRefreshWorker materializedViewRefreshWorker =
+          new MaterializedViewRefreshWorker(configuration, engine.getAdminDao());
+      scheduler.scheduleWithFixedDelay(materializedViewRefreshWorker, 30, 60, TimeUnit.SECONDS);
     }
 
     // Create all of the HTTP Resources.

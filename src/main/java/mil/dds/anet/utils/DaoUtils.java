@@ -1,7 +1,6 @@
 package mil.dds.anet.utils;
 
 import com.google.common.base.Joiner;
-import java.lang.invoke.MethodHandles;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -21,32 +20,8 @@ import mil.dds.anet.beans.Note;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.views.AbstractAnetBean;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class DaoUtils {
-
-  public enum DbType {
-    POSTGRESQL("postgresql");
-
-    private final String jdbcTag;
-
-    DbType(String tag) {
-      jdbcTag = tag;
-    }
-
-    public static DbType fromTag(String tag) {
-      for (DbType t : DbType.values()) {
-        if (t.jdbcTag.equalsIgnoreCase(tag)) {
-          return t;
-        }
-      }
-      throw new IllegalArgumentException("No database type found for JDBC tag " + tag);
-    }
-  }
-
-  private static final Logger logger =
-      LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   public static String getUuid(AbstractAnetBean obj) {
     if (obj == null) {
@@ -67,23 +42,6 @@ public class DaoUtils {
       return null;
     }
     return o.toString();
-  }
-
-  /* This never changes during execution, so statically cache it. */
-  private static DbType DB_TYPE = null;
-
-  public static DbType getDbType(String dbUrl) {
-    // No locking because this operation is idempotent and safe
-    if (DB_TYPE == null) {
-      final String driverType = dbUrl.split(":", 3)[1].toLowerCase();
-      DB_TYPE = DbType.fromTag(driverType);
-      logger.info("Detected and cached database type as {}", DB_TYPE);
-    }
-    return DB_TYPE;
-  }
-
-  public static boolean isPostgresql() {
-    return getDbType(AnetObjectEngine.getInstance().getDbUrl()) == DbType.POSTGRESQL;
   }
 
   public static String getNewUuid() {
