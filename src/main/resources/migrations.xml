@@ -4676,4 +4676,48 @@
 		</createIndex>
 	</changeSet>
 
+	<changeSet id="add_authorizationGroup_administrative_positions" author="gjvoosten">
+		<createTable tableName="authorizationGroupAdministrativePositions">
+			<column name="authorizationGroupUuid" type="${uuid_type}">
+				<constraints nullable="false"/>
+			</column>
+			<column name="positionUuid" type="${uuid_type}">
+				<constraints nullable="false"/>
+			</column>
+		</createTable>
+		<addUniqueConstraint
+			tableName="authorizationGroupAdministrativePositions"
+			columnNames="authorizationGroupUuid, positionUuid"
+			constraintName="UQ_uniqueAuthorizationGroupAdministrativePositions"
+		/>
+		<addForeignKeyConstraint
+			baseColumnNames="authorizationGroupUuid"
+			baseTableName="authorizationGroupAdministrativePositions"
+			constraintName="FK_authorizationGroupAdministrativePositions_authorizationGroup"
+			referencedColumnNames="uuid"
+			referencedTableName="authorizationGroups"
+			onDelete="NO ACTION" onUpdate="NO ACTION"
+		/>
+		<addForeignKeyConstraint
+			constraintName="FK_authorizationGroupAdministrativePositions_position"
+			baseColumnNames="positionUuid"
+			baseTableName="authorizationGroupAdministrativePositions"
+			referencedColumnNames="uuid"
+			referencedTableName="positions"
+			onDelete="NO ACTION" onUpdate="NO ACTION"
+		/>
+		<createIndex
+			indexName="IDX_authorizationGroupAdministrativePositions_authorizationGroupUuid"
+			tableName="authorizationGroupAdministrativePositions"
+		>
+			<column name="authorizationGroupUuid"/>
+		</createIndex>
+		<createIndex
+			indexName="IDX_authorizationGroupAdministrativePositions_positionUuid"
+			tableName="authorizationGroupAdministrativePositions"
+		>
+			<column name="positionUuid"/>
+		</createIndex>
+	</changeSet>
+
 </databaseChangeLog>

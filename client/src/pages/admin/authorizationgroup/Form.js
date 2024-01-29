@@ -1,19 +1,24 @@
 import { gql } from "@apollo/client"
 import API from "api"
+import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
+import { PositionOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import { ENTITY_TYPES } from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
+import AppContext from "components/AppContext"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
 import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
+import PositionTable from "components/PositionTable"
 import { RelatedObjectsTableInput } from "components/RelatedObjectsTable"
-import { Field, Form, Formik } from "formik"
-import { AuthorizationGroup } from "models"
+import { FastField, Field, Form, Formik } from "formik"
+import { AuthorizationGroup, Position } from "models"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useContext, useState } from "react"
 import { Button } from "react-bootstrap"
 import { useNavigate } from "react-router-dom"
+import POSITIONS_ICON from "resources/positions.png"
 import Settings from "settings"
 
 const GQL_CREATE_AUTHORIZATION_GROUP = gql`
@@ -30,11 +35,22 @@ const GQL_UPDATE_AUTHORIZATION_GROUP = gql`
 `
 
 const AuthorizationGroupForm = ({ edit, title, initialValues }) => {
+  const { currentUser } = useContext(AppContext)
   const navigate = useNavigate()
   const [error, setError] = useState(null)
   const [relatedObjects, setRelatedObjects] = useState(
     initialValues.authorizationGroupRelatedObjects || []
   )
+  const positionsFilters = {
+    allSuperusers: {
+      label: "All superusers",
+      queryVars: {
+        status: Model.STATUS.ACTIVE,
+        type: [Position.TYPE.SUPERUSER],
+        matchPersonName: true
+      }
+    }
+  }
   const statusButtons = [
     {
       id: "statusActiveButton",
@@ -55,7 +71,14 @@ const AuthorizationGroupForm = ({ edit, title, initialValues }) => {
       validationSchema={AuthorizationGroup.yupSchema}
       initialValues={initialValues}
     >
-      {({ isSubmitting, dirty, setFieldValue, submitForm }) => {
+      {({
+        isSubmitting,
+        dirty,
+        setFieldValue,
+        setFieldTouched,
+        values,
+        submitForm
+      }) => {
         const action = (
           <Button
             key="submit"
@@ -73,9 +96,9 @@ const AuthorizationGroupForm = ({ edit, title, initialValues }) => {
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
               <Fieldset>
-                <Field name="name" component={FieldHelper.InputField} />
+                <FastField name="name" component={FieldHelper.InputField} />
 
-                <Field
+                <FastField
                   name="description"
                   component={FieldHelper.InputField}
                   asA="textarea"
@@ -97,11 +120,48 @@ const AuthorizationGroupForm = ({ edit, title, initialValues }) => {
                   }
                 />
 
-                <Field
+                <FastField
                   name="status"
                   component={FieldHelper.RadioButtonToggleGroupField}
                   buttons={statusButtons}
                   onChange={value => setFieldValue("status", value)}
+                />
+
+                <Field
+                  name="administrativePositions"
+                  label="Assigned superusers"
+                  component={FieldHelper.SpecialField}
+                  onChange={value => {
+                    // validation will be done by setFieldValue
+                    value = value.map(position =>
+                      Position.filterClientSideFields(position)
+                    )
+                    setFieldTouched("administrativePositions", true, false) // onBlur doesn't work when selecting an option
+                    setFieldValue("administrativePositions", value)
+                  }}
+                  widget={
+                    <AdvancedMultiSelect
+                      fieldName="administrativePositions"
+                      value={values.administrativePositions}
+                      renderSelected={
+                        <PositionTable
+                          positions={values.administrativePositions}
+                          showDelete={currentUser?.isAdmin()}
+                        />
+                      }
+                      overlayColumns={[
+                        "Position",
+                        "Organization",
+                        "Current Occupant"
+                      ]}
+                      overlayRenderRow={PositionOverlayRow}
+                      filterDefs={positionsFilters}
+                      objectType={Position}
+                      fields={Position.autocompleteQuery}
+                      addon={POSITIONS_ICON}
+                      disabled={!currentUser?.isAdmin()}
+                    />
+                  }
                 />
 
                 <Field

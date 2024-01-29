@@ -167,9 +167,11 @@ public class OrganizationResource {
 
     if (org.getTasks() != null) {
       logger.debug("Editing tasks for {}", org);
-      Utils.addRemoveElementsByUuid(existing.loadTasks(engine.getContext()).join(), org.getTasks(),
+      final List<Task> existingTasks = existing.loadTasks(engine.getContext()).join();
+      Utils.addRemoveElementsByUuid(existingTasks, org.getTasks(),
           newTask -> engine.getTaskDao().addTaskedOrganizationsToTask(org, newTask),
-          oldTaskUuid -> engine.getTaskDao().removeTaskedOrganizationsFromTask(org, oldTaskUuid));
+          oldTaskUuid -> engine.getTaskDao().removeTaskedOrganizationsFromTask(org.getUuid(),
+              oldTaskUuid));
     }
 
     if (AuthUtils.isAdmin(user) && org.getAdministratingPositions() != null) {

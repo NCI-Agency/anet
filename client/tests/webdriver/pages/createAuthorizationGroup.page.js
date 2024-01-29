@@ -41,9 +41,39 @@ class CreateAuthorizationGroup extends Page {
     return browser.$("#relatedObjects")
   }
 
+  async getRelatedObjectsTable() {
+    return browser.$(".related_objects_table")
+  }
+
+  async getRelatedObjectsTableEntry(relatedObjectText) {
+    return (await this.getRelatedObjectsTable()).$(
+      `//tr/td/span/a[text()="${relatedObjectText}"]`
+    )
+  }
+
   async getRelatedObjectsAdvancedSelectFirstItem() {
     return browser.$(
       "#entitySelect-popover tbody tr:first-child td:nth-child(2) span"
+    )
+  }
+
+  async getAdministrativePositionsInput() {
+    return browser.$("#administrativePositions")
+  }
+
+  async getAdministrativePositionsTable() {
+    return browser.$(".positions_table")
+  }
+
+  async getAdministrativePositionsTableEntry(administrativePositionText) {
+    return (await this.getAdministrativePositionsTable()).$(
+      `//tr/td/span/a[text()="${administrativePositionText}"]`
+    )
+  }
+
+  async getAdministrativePositionsAdvancedSelectFirstItem() {
+    return browser.$(
+      "#administrativePositions-popover tbody tr:first-child td:nth-child(2) span"
     )
   }
 
@@ -51,27 +81,39 @@ class CreateAuthorizationGroup extends Page {
     return browser.$("#formBottomSubmit")
   }
 
+  async getEditButton() {
+    return browser.$("//a[text()='Edit']")
+  }
+
+  async getMemberTypeButton(memberType) {
+    return browser.$(`button=${memberType}`)
+  }
+
+  async getMyAuthorizationGroups() {
+    return browser.$("#my-authorization-groups")
+  }
+
+  async getAuthorizationGroupLink(authorizationGroupName) {
+    return (await this.getMyAuthorizationGroups()).$(
+      `//tr/td/span/a[text()="${authorizationGroupName}"]`
+    )
+  }
+
   async open() {
     // Only admin users can create authorization groups
     await super.openAsAdminUser(PAGE_URL)
   }
 
-  async waitForRelatedObjectsAdvancedSelectToChange(value) {
-    await (await this.getRelatedObjectsAdvancedSelectFirstItem()).waitForExist()
+  async waitForAdvancedSelectToChange(value, getFirstItemCallback) {
+    await (await getFirstItemCallback()).waitForExist()
     return browser.waitUntil(
       async() => {
-        return (
-          (await (
-            await this.getRelatedObjectsAdvancedSelectFirstItem()
-          ).getText()) === value
-        )
+        return (await (await getFirstItemCallback()).getText()) === value
       },
       {
         timeout: 5000,
         timeoutMsg:
-          'Expected relatedObjects advanced select input to contain "' +
-          value +
-          '" after 5s'
+          'Expected advanced select input to contain "' + value + '" after 5s'
       }
     )
   }

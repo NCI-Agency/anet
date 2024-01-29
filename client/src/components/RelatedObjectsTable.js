@@ -95,7 +95,7 @@ export const RelatedObjectsTableInput = ({
   }))
 
   return (
-    <div id="related_objects">
+    <div className="related_objects">
       <MultiTypeAdvancedSelectComponent
         value={fieldValue}
         objectType={objectType}

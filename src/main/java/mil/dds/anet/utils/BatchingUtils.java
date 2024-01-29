@@ -103,6 +103,13 @@ public final class BatchingUtils {
                 () -> engine.getAuthorizationGroupDao().getByIds(keys), dispatcherService),
             dataLoaderOptions));
     dataLoaderRegistry.register(
+        FkDataLoaderKey.AUTHORIZATION_GROUP_ADMINISTRATIVE_POSITIONS.toString(),
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, List<Position>>) foreignKeys -> CompletableFuture.supplyAsync(
+                () -> engine.getAuthorizationGroupDao().getAdministrativePositions(foreignKeys),
+                dispatcherService),
+            dataLoaderOptions));
+    dataLoaderRegistry.register(
         FkDataLoaderKey.AUTHORIZATION_GROUP_AUTHORIZATION_GROUP_RELATED_OBJECTS.toString(),
         DataLoaderFactory.newDataLoader(
             (BatchLoader<String, List<GenericRelatedObject>>) foreignKeys -> CompletableFuture

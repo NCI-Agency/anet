@@ -12,6 +12,7 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
+import PositionTable from "components/PositionTable"
 import { RelatedObjectsTable } from "components/RelatedObjectsTable"
 import ReportCollection from "components/ReportCollection"
 import { Field, Form, Formik } from "formik"
@@ -27,6 +28,30 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
       name
       description
       status
+      administrativePositions {
+        uuid
+        name
+        code
+        type
+        role
+        status
+        location {
+          uuid
+          name
+        }
+        organization {
+          uuid
+          shortName
+          longName
+          identificationCode
+        }
+        person {
+          uuid
+          name
+          rank
+          avatarUuid
+        }
+      }
       authorizationGroupRelatedObjects {
         relatedObjectType
         relatedObjectUuid
@@ -81,7 +106,11 @@ const AuthorizationGroupShow = ({ pageDispatchers }) => {
   )
   const stateSuccess = routerLocation.state?.success
   const stateError = routerLocation.state?.error
-  const canEdit = currentUser.isSuperuser()
+  const isAssignedSuperuser =
+    currentUser.position?.authorizationGroupsAdministrated?.some(
+      aga => aga.uuid === authorizationGroup.uuid
+    )
+  const canEdit = currentUser.isAdmin() || isAssignedSuperuser
 
   return (
     <Formik enableReinitialize initialValues={authorizationGroup}>
@@ -116,6 +145,12 @@ const AuthorizationGroupShow = ({ pageDispatchers }) => {
                   name="status"
                   component={FieldHelper.ReadonlyField}
                   humanValue={AuthorizationGroup.humanNameOfStatus}
+                />
+              </Fieldset>
+
+              <Fieldset title="Assigned superusers">
+                <PositionTable
+                  positions={authorizationGroup.administrativePositions}
                 />
               </Fieldset>
 

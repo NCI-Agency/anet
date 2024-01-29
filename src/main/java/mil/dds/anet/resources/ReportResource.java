@@ -296,37 +296,18 @@ public class ReportResource {
     if (r.getTasks() != null) {
       final List<Task> existingTasks =
           dao.getTasksForReport(engine.getContext(), r.getUuid()).join();
-      final List<String> existingTaskUuids =
-          existingTasks.stream().map(p -> p.getUuid()).collect(Collectors.toList());
-      for (Task p : r.getTasks()) {
-        int idx = existingTaskUuids.indexOf(p.getUuid());
-        if (idx == -1) {
-          dao.addTaskToReport(p, r);
-        } else {
-          existingTaskUuids.remove(idx);
-        }
-      }
-      for (String uuid : existingTaskUuids) {
-        dao.removeTaskFromReport(uuid, r);
-      }
+      Utils.addRemoveElementsByUuid(existingTasks, r.getTasks(),
+          newTask -> dao.addTaskToReport(newTask, r),
+          oldTaskUuid -> dao.removeTaskFromReport(oldTaskUuid, r));
     }
 
     // Update AuthorizationGroups:
     if (r.getAuthorizationGroups() != null) {
       final List<AuthorizationGroup> existingAuthorizationGroups =
           dao.getAuthorizationGroupsForReport(r.getUuid());
-      for (final AuthorizationGroup t : r.getAuthorizationGroups()) {
-        Optional<AuthorizationGroup> existingAuthorizationGroup = existingAuthorizationGroups
-            .stream().filter(el -> el.getUuid().equals(t.getUuid())).findFirst();
-        if (existingAuthorizationGroup.isPresent()) {
-          existingAuthorizationGroups.remove(existingAuthorizationGroup.get());
-        } else {
-          dao.addAuthorizationGroupToReport(t, r);
-        }
-      }
-      for (final AuthorizationGroup t : existingAuthorizationGroups) {
-        dao.removeAuthorizationGroupFromReport(t, r);
-      }
+      Utils.addRemoveElementsByUuid(existingAuthorizationGroups, r.getAuthorizationGroups(),
+          newAg -> dao.addAuthorizationGroupToReport(newAg, r),
+          oldAgUuid -> dao.removeAuthorizationGroupFromReport(oldAgUuid, r.getUuid()));
     }
 
     DaoUtils.saveCustomSensitiveInformation(editor, ReportDao.TABLE_NAME, r.getUuid(),
