@@ -909,7 +909,7 @@ INSERT INTO "authorizationGroupRelatedObjects" ("authorizationGroupUuid", "relat
   FROM positions p
   WHERE p.status = 1;
 
--- Report authorization groups
+-- Report authorization groups for reports with sensitive information
 INSERT INTO "reportAuthorizationGroups" ("reportUuid", "authorizationGroupUuid")
   SELECT DISTINCT rp."reportUuid", agro."authorizationGroupUuid"
   FROM "reportPeople" rp
@@ -917,7 +917,12 @@ INSERT INTO "reportAuthorizationGroups" ("reportUuid", "authorizationGroupUuid")
   JOIN "peoplePositions" pp on pp."personUuid" = p.uuid
   JOIN positions pos on pp."positionUuid" = pos.uuid,
   "authorizationGroupRelatedObjects" agro
-  WHERE agro."relatedObjectType" = 'organizations'
+  WHERE EXISTS (
+    SELECT *
+    FROM "reportsSensitiveInformation" rsi
+    WHERE rsi."reportUuid" = rp."reportUuid"
+  )
+  AND agro."relatedObjectType" = 'organizations'
   AND pos."organizationUuid" = agro."relatedObjectUuid"
   AND NOT EXISTS (
     SELECT *

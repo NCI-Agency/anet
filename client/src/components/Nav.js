@@ -350,13 +350,6 @@ const Navigation = ({ allOrganizations, resetPages, clearSearchQuery }) => {
                     </SidebarContainer>
                   ))}
                 </NavDropdown>
-                <SidebarLink
-                  id="authorization-groups"
-                  linkTo="/admin/authorizationGroups"
-                  handleOnClick={resetPages}
-                >
-                  Authorization groups
-                </SidebarLink>
                 <NavDropdown
                   title="User activities"
                   id="user-activities"

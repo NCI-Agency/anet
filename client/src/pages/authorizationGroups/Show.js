@@ -7,8 +7,10 @@ import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import {
+  jumpToTop,
   mapPageDispatchersToProps,
   PageDispatchersPropType,
+  SubscriptionIcon,
   useBoilerplate,
   usePageTitle
 } from "components/Page"
@@ -16,10 +18,13 @@ import PositionTable from "components/PositionTable"
 import { RelatedObjectsTable } from "components/RelatedObjectsTable"
 import ReportCollection from "components/ReportCollection"
 import { Field, Form, Formik } from "formik"
+import DictionaryField from "HOC/DictionaryField"
 import { AuthorizationGroup } from "models"
-import React, { useContext } from "react"
+import pluralize from "pluralize"
+import React, { useContext, useState } from "react"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
+import Settings from "settings"
 
 const GQL_GET_AUTHORIZATION_GROUP = gql`
   query ($uuid: String) {
@@ -28,6 +33,7 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
       name
       description
       status
+      isSubscribed
       administrativePositions {
         uuid
         name
@@ -83,7 +89,9 @@ const AuthorizationGroupShow = ({ pageDispatchers }) => {
   const { currentUser } = useContext(AppContext)
   const { uuid } = useParams()
   const routerLocation = useLocation()
-  const { loading, error, data } = API.useApiQuery(
+  const stateSuccess = routerLocation.state?.success
+  const [stateError, setStateError] = useState(routerLocation.state?.error)
+  const { loading, error, data, refetch } = API.useApiQuery(
     GQL_GET_AUTHORIZATION_GROUP,
     { uuid }
   )
@@ -104,8 +112,7 @@ const AuthorizationGroupShow = ({ pageDispatchers }) => {
   const authorizationGroup = new AuthorizationGroup(
     data ? data.authorizationGroup : {}
   )
-  const stateSuccess = routerLocation.state?.success
-  const stateError = routerLocation.state?.error
+  const DictField = DictionaryField(Field)
   const isAssignedSuperuser =
     currentUser.position?.authorizationGroupsAdministrated?.some(
       aga => aga.uuid === authorizationGroup.uuid
@@ -130,33 +137,64 @@ const AuthorizationGroupShow = ({ pageDispatchers }) => {
             <Messages success={stateSuccess} error={stateError} />
             <Form className="form-horizontal" method="post">
               <Fieldset
-                title={`Authorization Group ${authorizationGroup.name}`}
+                title={
+                  <>
+                    {
+                      <SubscriptionIcon
+                        subscribedObjectType="authorizationGroups"
+                        subscribedObjectUuid={authorizationGroup.uuid}
+                        isSubscribed={authorizationGroup.isSubscribed}
+                        updatedAt={authorizationGroup.updatedAt}
+                        refetch={refetch}
+                        setError={error => {
+                          setStateError(error)
+                          jumpToTop()
+                        }}
+                        persistent
+                      />
+                    }{" "}
+                    Authorization Group {authorizationGroup.name}
+                  </>
+                }
                 action={action}
               />
               <Fieldset>
-                <Field name="name" component={FieldHelper.ReadonlyField} />
-
-                <Field
+                <DictField
+                  dictProps={Settings.fields.authorizationGroup.description}
                   name="description"
                   component={FieldHelper.ReadonlyField}
                 />
 
-                <Field
+                <DictField
+                  dictProps={Settings.fields.authorizationGroup.status}
                   name="status"
                   component={FieldHelper.ReadonlyField}
                   humanValue={AuthorizationGroup.humanNameOfStatus}
                 />
               </Fieldset>
 
-              <Fieldset title="Assigned superusers">
+              <Fieldset
+                title={
+                  Settings.fields.authorizationGroup.administrativePositions
+                    ?.label
+                }
+              >
                 <PositionTable
                   positions={authorizationGroup.administrativePositions}
                 />
               </Fieldset>
 
-              <Fieldset title="Members">
+              <Fieldset
+                title={
+                  Settings.fields.authorizationGroup
+                    .authorizationGroupRelatedObjects?.label
+                }
+              >
                 <RelatedObjectsTable
-                  title="Member"
+                  title={pluralize.singular(
+                    Settings.fields.authorizationGroup
+                      .authorizationGroupRelatedObjects?.label
+                  )}
                   relatedObjects={values.authorizationGroupRelatedObjects}
                 />
               </Fieldset>

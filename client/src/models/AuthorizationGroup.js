@@ -1,4 +1,5 @@
 import Model from "components/Model"
+import AUTHORIZATION_GROUPS_ICON from "resources/authorizationGroups.png"
 import utils from "utils"
 import * as yup from "yup"
 
@@ -28,19 +29,6 @@ export default class AuthorizationGroup extends Model {
 
   static autocompleteQuery = "uuid name description"
 
-  static _resourceOverride = [
-    "admin",
-    utils.resourceize(this.resourceName)
-  ].join("/")
-
-  static pathFor(instance, query) {
-    return Model.pathFor(instance, query, this._resourceOverride)
-  }
-
-  static pathForNew(query) {
-    return Model.pathForNew(query, this._resourceOverride)
-  }
-
   static humanNameOfStatus(status) {
     return utils.sentenceCase(status)
   }
@@ -51,6 +39,10 @@ export default class AuthorizationGroup extends Model {
 
   humanNameOfStatus() {
     return AuthorizationGroup.humanNameOfStatus(this.status)
+  }
+
+  iconUrl() {
+    return AUTHORIZATION_GROUPS_ICON
   }
 
   toString() {

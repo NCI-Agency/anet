@@ -206,7 +206,7 @@ $defs:
               uniqueItems: true
               items:
                 type: string
-                enum: [Location, Organization, Person, Position, Report, Task]
+                enum: [AuthorizationGroup, Location, Organization, Person, Position, Report, Task]
           required: [types]
         - properties:
             type:
@@ -533,7 +533,7 @@ properties:
   fields:
     type: object
     additionalProperties: false
-    required: [task, attachment, report, person, position, organization, advisor, interlocutor, regular, superuser, administrator]
+    required: [task, attachment, authorizationGroup, report, person, position, organization, advisor, interlocutor, regular, superuser, administrator]
     properties:
 
       task:
@@ -622,6 +622,22 @@ properties:
             description: Used for restricting the types of attachments that can be uploaded
             uniqueItems: true
             minItems: 1
+
+      authorizationGroup:
+        type: object
+        additionalProperties: false
+        required: [status, name, description, administrativePositions, authorizationGroupRelatedObjects]
+        properties:
+          status:
+            "$ref": "#/$defs/labeledField"
+          name:
+            "$ref": "#/$defs/inputField"
+          description:
+            "$ref": "#/$defs/inputField"
+          administrativePositions:
+            "$ref": "#/$defs/labeledField"
+          authorizationGroupRelatedObjects:
+            "$ref": "#/$defs/labeledField"
 
       report:
         type: object

@@ -30,6 +30,9 @@ const GQL_GET_MY_SUBSCRIPTION_UPDATES = gql`
         updatedObjectType
         updatedObjectUuid
         updatedObject {
+          ... on AuthorizationGroup {
+            name
+          }
           ... on Location {
             name
           }
@@ -63,6 +66,9 @@ const GQL_GET_MY_SUBSCRIPTION_UPDATES = gql`
           subscribedObjectType
           subscribedObjectUuid
           subscribedObject {
+            ... on AuthorizationGroup {
+              name
+            }
             ... on Location {
               name
             }
