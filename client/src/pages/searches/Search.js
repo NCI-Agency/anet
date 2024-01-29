@@ -33,6 +33,7 @@ import SubNav from "components/SubNav"
 import TaskTable from "components/TaskTable"
 import { exportResults } from "exportUtils"
 import { Field, Form, Formik } from "formik"
+import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
@@ -800,10 +801,14 @@ function _isSubsetOf(set, subset) {
 }
 
 function _isAllSelected(list, selectedUuids) {
-  return _isSubsetOf(
+  if (_isEmpty(selectedUuids)) {
+    return false // nothing selected
+  }
+  const isSubset = _isSubsetOf(
     selectedUuids,
     list.map(l => l.uuid)
   )
+  return isSubset || null // return indeterminate if only some are selected
 }
 
 function _toggleAll(list, selectedUuids, setSelectedUuids, updateRecipients) {

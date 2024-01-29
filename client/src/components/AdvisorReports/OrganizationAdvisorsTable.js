@@ -25,6 +25,17 @@ const OrganizationAdvisorsTable = ({
       // Toggle row selection
       rows[index].selected = !data[index].selected
       setData(rows)
+      const nrSelected = rows.reduce(
+        (prev, curr) => (curr.selected ? prev + 1 : prev),
+        0
+      )
+      if (nrSelected === 0) {
+        setSelectedAll(false)
+      } else if (nrSelected === rows.length) {
+        setSelectedAll(true)
+      } else {
+        setSelectedAll(null) // return indeterminate if only some are selected
+      }
     }
     return data.map((organization, index) => {
       const checked =
