@@ -43,6 +43,7 @@ import {
   Button,
   Container,
   Dropdown,
+  FormSelect,
   Modal,
   Nav,
   OverlayTrigger,
@@ -229,6 +230,7 @@ const GQL_GET_AUTHORIZATION_GROUP_LIST = gql`
   }
 `
 
+const PAGESIZES = [10, 25, 50, 100]
 const DEFAULT_PAGESIZE = 10
 
 const Organizations = ({
@@ -852,6 +854,7 @@ const Search = ({
 }) => {
   const navigate = useNavigate()
   const [error, setError] = useState(null)
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGESIZE)
   const [showSaveSearch, setShowSaveSearch] = useState(false)
   const [numOrganizations, setNumOrganizations] = useState(null)
   const [numPeople, setNumPeople] = useState(null)
@@ -884,10 +887,11 @@ const Search = ({
   const genericSearchQueryParams = useMemo(
     () => ({
       ...searchQueryParams,
+      pageSize,
       sortBy: "NAME",
       sortOrder: "ASC"
     }),
-    [searchQueryParams]
+    [searchQueryParams, pageSize]
   )
   const reportsSearchQueryParams = useMemo(
     () => ({
@@ -1063,11 +1067,10 @@ const Search = ({
               </Tooltip>
             }
           >
-            <span>
+            <span className="me-2">
               <Button
                 onClick={doPrepareEmail}
                 id="prepareEmailButton"
-                style={{ marginRight: 12 }}
                 variant={prepareEmailButtonProps.variant}
                 disabled={prepareEmailButtonProps.disabled}
               >
@@ -1124,14 +1127,29 @@ const Search = ({
                 </Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>
-            <Button
-              onClick={openSaveModal}
-              id="saveSearchButton"
-              style={{ marginLeft: 12 }}
-              variant="outline-secondary"
-            >
-              Save search
-            </Button>
+            <span className="ms-2">
+              <Button
+                onClick={openSaveModal}
+                id="saveSearchButton"
+                variant="outline-secondary"
+              >
+                Save search
+              </Button>
+            </span>
+            <div className="ms-2">
+              Results per page:
+              <FormSelect
+                defaultValue={pageSize}
+                onChange={e =>
+                  setPageSize(parseInt(e.target.value, 10) || DEFAULT_PAGESIZE)}
+              >
+                {PAGESIZES.map(size => (
+                  <option key={size} value={size}>
+                    {size}
+                  </option>
+                ))}
+              </FormSelect>
+            </div>
           </>
         )}
       </div>
