@@ -459,7 +459,7 @@
     "username" : "bonny",
     "firstName" : "Bonny",
     "lastName" : "Bonnsdottir",
-    "email" : "bonny@nato.int",
+    "email" : "bonny@example.com",
     "emailVerified" : false,
     "createdTimestamp" : 1590405859146,
     "enabled" : true,

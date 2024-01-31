@@ -5,7 +5,7 @@ import OnboardPage from "../pages/onboard.page"
 const ONBOARD_USER = {
   lastName: "BONNSDOTTIR",
   firstName: "Bonny",
-  emailAddress: "bonny@nato.int"
+  emailAddress: "bonny@example.com"
 }
 
 // Only required fields in onboarding/edit page
