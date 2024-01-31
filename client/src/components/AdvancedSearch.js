@@ -3,6 +3,7 @@ import "@blueprintjs/popover2/lib/css/blueprint-popover2.css"
 import styled from "@emotion/styled"
 import { resetPagination, SEARCH_OBJECT_LABELS, setSearchQuery } from "actions"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
+import DictionaryField from "components/DictionaryField"
 import RemoveButton from "components/RemoveButton"
 import {
   findCommonFiltersForAllObjectTypes,
@@ -10,7 +11,6 @@ import {
   SearchQueryPropType
 } from "components/SearchFilters"
 import { Form, Formik } from "formik"
-import DictionaryField from "HOC/DictionaryField"
 import _cloneDeep from "lodash/cloneDeep"
 import { Organization, Position } from "models"
 import PropTypes from "prop-types"
@@ -79,10 +79,10 @@ const AdvancedSearch = ({
       {Object.entries(filterDefs).map(([filterKey, filterDef]) => {
         const dictProps = filterDef.dictProps
         const label = dictProps?.label || filterKey
-        const ChildComponent = dictProps
-          ? DictionaryField(Dropdown.Item)
-          : Dropdown.Item
-        const additionalProps = dictProps ? { dictProps } : {}
+        const ChildComponent = dictProps ? DictionaryField : Dropdown.Item
+        const additionalProps = dictProps
+          ? { wrappedComponent: Dropdown.Item, dictProps }
+          : {}
         return dictProps?.exclude ? null : (
           <ChildComponent
             disabled={existingKeys.includes(filterKey)}
@@ -342,10 +342,10 @@ const SearchFilter = ({
 }) => {
   const dictProps = element.dictProps
   const label = dictProps?.label || filter.key
-  const ChildComponent = dictProps
-    ? DictionaryField(element.component)
-    : element.component
-  const additionalProps = dictProps ? { dictProps } : {}
+  const ChildComponent = dictProps ? DictionaryField : element.component
+  const additionalProps = dictProps
+    ? { wrappedComponent: element.component, dictProps }
+    : {}
   const { queryKey } = element.props || undefined
 
   return dictProps?.exclude ? null : (

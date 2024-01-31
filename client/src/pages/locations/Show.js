@@ -5,6 +5,7 @@ import AppContext from "components/AppContext"
 import Approvals from "components/approvals/Approvals"
 import AttachmentCard from "components/Attachment/AttachmentCard"
 import { ReadonlyCustomFields } from "components/CustomFields"
+import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import GeoLocation, { GEO_LOCATION_DISPLAY_TYPE } from "components/GeoLocation"
@@ -25,7 +26,6 @@ import ReportCollection from "components/ReportCollection"
 import RichTextEditor from "components/RichTextEditor"
 import { Field, Form, Formik } from "formik"
 import { convertLatLngToMGRS } from "geoUtils"
-import DictionaryField from "HOC/DictionaryField"
 import _escape from "lodash/escape"
 import { Attachment, Location } from "models"
 import React, { useContext, useState } from "react"
@@ -77,7 +77,6 @@ const LocationShow = ({ pageDispatchers }) => {
   const location = new Location(data ? data.location : {})
   const canEdit = currentUser.isSuperuser()
   const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
-  const DictField = DictionaryField(Field)
 
   return (
     <Formik enableReinitialize initialValues={location}>
@@ -144,13 +143,15 @@ const LocationShow = ({ pageDispatchers }) => {
                 action={action}
               />
               <Fieldset>
-                <DictField
+                <DictionaryField
+                  wrappedComponent={Field}
                   dictProps={Settings.fields.location.name}
                   name="name"
                   component={FieldHelper.ReadonlyField}
                 />
 
-                <DictField
+                <DictionaryField
+                  wrappedComponent={Field}
                   dictProps={Settings.fields.location.type}
                   name="type"
                   component={FieldHelper.ReadonlyField}
@@ -169,7 +170,8 @@ const LocationShow = ({ pageDispatchers }) => {
                   displayType={GEO_LOCATION_DISPLAY_TYPE.FORM_FIELD}
                 />
 
-                <DictField
+                <DictionaryField
+                  wrappedComponent={Field}
                   dictProps={Settings.fields.location.status}
                   name="status"
                   component={FieldHelper.ReadonlyField}
@@ -177,7 +179,8 @@ const LocationShow = ({ pageDispatchers }) => {
                 />
 
                 {values.description && (
-                  <DictField
+                  <DictionaryField
+                    wrappedComponent={Field}
                     dictProps={Settings.fields.location.description}
                     name="description"
                     component={FieldHelper.ReadonlyField}

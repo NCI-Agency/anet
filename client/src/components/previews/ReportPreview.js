@@ -1,11 +1,11 @@
 import { gql } from "@apollo/client"
 import API from "api"
+import DictionaryField from "components/DictionaryField"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import NoPaginationTaskTable from "components/NoPaginationTaskTable"
 import PlanningConflictForReport from "components/PlanningConflictForReport"
 import RichTextEditor from "components/RichTextEditor"
-import DictionaryField from "HOC/DictionaryField"
 import { Person, Report, Task } from "models"
 import moment from "moment"
 import ReportPeople from "pages/reports/ReportPeople"
@@ -123,7 +123,6 @@ const ReportPreview = ({ className, uuid }) => {
   report = new Report(data.report)
   const reportType = report.isFuture() ? "planned engagement" : "report"
   const tasksLabel = pluralize(Settings.fields.task.subLevel.shortLabel)
-  const DictPreviewField = DictionaryField(PreviewField)
 
   // Get initial tasks/people instant assessments values
   const hasAssessments = report.engagementDate && !report.isFuture()
@@ -178,17 +177,20 @@ const ReportPreview = ({ className, uuid }) => {
           label="Summary"
           value={
             <div id="report-summary">
-              <DictPreviewField
+              <DictionaryField
+                wrappedComponent={PreviewField}
                 dictProps={Settings.fields.report.intent}
                 name="intent"
                 style={{ marginBottom: 0 }}
               />
-              <DictPreviewField
+              <DictionaryField
+                wrappedComponent={PreviewField}
                 dictProps={Settings.fields.report.keyOutcomes}
                 name="keyOutcomes"
                 style={{ marginBottom: 0 }}
               />
-              <DictPreviewField
+              <DictionaryField
+                wrappedComponent={PreviewField}
                 dictProps={Settings.fields.report.nextSteps}
                 name="nextSteps"
                 style={{ marginBottom: 0 }}
@@ -197,7 +199,8 @@ const ReportPreview = ({ className, uuid }) => {
           }
         />
 
-        <DictPreviewField
+        <DictionaryField
+          wrappedComponent={PreviewField}
           dictProps={Settings.fields.report.engagementDate}
           extraColForValue
           value={
@@ -214,7 +217,8 @@ const ReportPreview = ({ className, uuid }) => {
         />
 
         {Settings.engagementsIncludeTimeAndDuration && report.duration && (
-          <DictPreviewField
+          <DictionaryField
+            wrappedComponent={PreviewField}
             dictProps={Settings.fields.report.duration}
             extraColForValue
             value={report.duration}
@@ -246,7 +250,8 @@ const ReportPreview = ({ className, uuid }) => {
           }
         />
 
-        <DictPreviewField
+        <DictionaryField
+          wrappedComponent={PreviewField}
           dictProps={Settings.fields.report.location}
           extraColForValue
           value={
@@ -257,7 +262,8 @@ const ReportPreview = ({ className, uuid }) => {
         />
 
         {report.cancelled && (
-          <DictPreviewField
+          <DictionaryField
+            wrappedComponent={PreviewField}
             dictProps={Settings.fields.report.cancelledReason}
             extraColForValue
             value={utils.sentenceCase(report.cancelledReason)}
@@ -266,12 +272,14 @@ const ReportPreview = ({ className, uuid }) => {
 
         {!report.cancelled && (
           <>
-            <DictPreviewField
+            <DictionaryField
+              wrappedComponent={PreviewField}
               dictProps={Settings.fields.report.atmosphere}
               extraColForValue
               value={utils.sentenceCase(report.atmosphere)}
             />
-            <DictPreviewField
+            <DictionaryField
+              wrappedComponent={PreviewField}
               dictProps={Settings.fields.report.atmosphereDetails}
               extraColForValue
               value={report.atmosphereDetails}

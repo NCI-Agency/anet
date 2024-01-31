@@ -13,6 +13,7 @@ import CompactTable, {
   PAGE_SIZES
 } from "components/Compact"
 import { mapReadonlyCustomFieldsToComps } from "components/CustomFields"
+import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import {
@@ -30,7 +31,6 @@ import { GRAPHQL_NOTES_FIELDS } from "components/RelatedObjectNotes"
 import RichTextEditor from "components/RichTextEditor"
 import SimpleMultiCheckboxDropdown from "components/SimpleMultiCheckboxDropdown"
 import { Field, Formik } from "formik"
-import DictionaryField from "HOC/DictionaryField"
 import _isEmpty from "lodash/isEmpty"
 import { Person } from "models"
 import moment from "moment"
@@ -401,10 +401,10 @@ const CompactPersonView = ({ pageDispatchers }) => {
       role: Person.humanNameOfRole(person.role),
       status: Person.humanNameOfStatus(person.status)
     }
-    const DictField = DictionaryField(Field)
     return person.getNormalFieldsOrdered().reduce((accum, key) => {
       accum[key] = (
-        <DictField
+        <DictionaryField
+          wrappedComponent={Field}
           dictProps={Settings.fields.person[key]}
           name={key}
           component={FieldHelper.ReadonlyField}

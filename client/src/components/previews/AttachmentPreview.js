@@ -1,9 +1,9 @@
 import { gql } from "@apollo/client"
 import API from "api"
+import DictionaryField from "components/DictionaryField"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import RichTextEditor from "components/RichTextEditor"
-import DictionaryField from "HOC/DictionaryField"
 import { Attachment } from "models"
 import PropTypes from "prop-types"
 import React from "react"
@@ -40,7 +40,6 @@ const AttachmentPreview = ({ className, uuid }) => {
 
   const attachment = new Attachment(data.attachment ? data.attachment : {})
   const { backgroundImage } = utils.getAttachmentIconDetails(attachment)
-  const DictPreviewField = DictionaryField(PreviewField)
 
   return (
     <div className={`${className} preview-content-scroll`}>
@@ -57,7 +56,8 @@ const AttachmentPreview = ({ className, uuid }) => {
                 style={{ width: "100%", borderRadius: "5px" }}
               />
             </Col>
-            <DictPreviewField
+            <DictionaryField
+              wrappedComponent={PreviewField}
               dictProps={Settings.fields.attachment.fileName}
               value={attachment.fileName}
             />
@@ -70,7 +70,8 @@ const AttachmentPreview = ({ className, uuid }) => {
               label="Content length"
               value={utils.humanReadableFileSize(attachment.contentLength)}
             />
-            <DictPreviewField
+            <DictionaryField
+              wrappedComponent={PreviewField}
               dictProps={Settings.fields.attachment.classification}
               value={Attachment.humanNameOfStatus(
                 attachment.classification

@@ -6,6 +6,7 @@ import Approvals from "components/approvals/Approvals"
 import AssessmentResultsContainer from "components/assessments/AssessmentResultsContainer"
 import AttachmentCard from "components/Attachment/AttachmentCard"
 import { ReadonlyCustomFields } from "components/CustomFields"
+import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
@@ -28,7 +29,6 @@ import ReportCollection from "components/ReportCollection"
 import RichTextEditor from "components/RichTextEditor"
 import SubNav from "components/SubNav"
 import { Field, Form, Formik } from "formik"
-import DictionaryField from "HOC/DictionaryField"
 import _isEmpty from "lodash/isEmpty"
 import { Attachment, Location, Organization, Report } from "models"
 import { PositionRole } from "models/Position"
@@ -205,7 +205,6 @@ const OrganizationShow = ({ pageDispatchers }) => {
     )
   }
   const organization = new Organization(data ? data.organization : {})
-  const DictField = DictionaryField(Field)
 
   const canAdministrateOrg =
     currentUser &&
@@ -360,13 +359,15 @@ const OrganizationShow = ({ pageDispatchers }) => {
                 action={action}
               />
               <Fieldset id="info">
-                <DictField
+                <DictionaryField
+                  wrappedComponent={Field}
                   dictProps={Settings.fields.organization.longName}
                   name="longName"
                   component={FieldHelper.ReadonlyField}
                 />
 
-                <DictField
+                <DictionaryField
+                  wrappedComponent={Field}
                   dictProps={Settings.fields.organization.type}
                   name="type"
                   component={FieldHelper.ReadonlyField}
@@ -374,7 +375,8 @@ const OrganizationShow = ({ pageDispatchers }) => {
                 />
 
                 {organization.parentOrg && organization.parentOrg.uuid && (
-                  <DictField
+                  <DictionaryField
+                    wrappedComponent={Field}
                     dictProps={Settings.fields.organization.parentOrg}
                     name="parentOrg"
                     component={FieldHelper.ReadonlyField}
@@ -391,7 +393,8 @@ const OrganizationShow = ({ pageDispatchers }) => {
 
                 {organization.childrenOrgs &&
                   organization.childrenOrgs.length > 0 && (
-                    <DictField
+                    <DictionaryField
+                      wrappedComponent={Field}
                       dictProps={Settings.fields.organization.childrenOrgs}
                       name="childrenOrgs"
                       component={FieldHelper.ReadonlyField}
@@ -426,14 +429,16 @@ const OrganizationShow = ({ pageDispatchers }) => {
                   )
                 )}
 
-                <DictField
+                <DictionaryField
+                  wrappedComponent={Field}
                   dictProps={Settings.fields.organization.identificationCode}
                   name="identificationCode"
                   component={FieldHelper.ReadonlyField}
                 />
 
                 {organization.location && (
-                  <DictField
+                  <DictionaryField
+                    wrappedComponent={Field}
                     dictProps={Settings.fields.organization.location}
                     name="location"
                     component={FieldHelper.ReadonlyField}
@@ -455,14 +460,16 @@ const OrganizationShow = ({ pageDispatchers }) => {
                   />
                 )}
 
-                <DictField
+                <DictionaryField
+                  wrappedComponent={Field}
                   dictProps={Settings.fields.organization.status}
                   name="status"
                   component={FieldHelper.ReadonlyField}
                   humanValue={Organization.humanNameOfStatus}
                 />
 
-                <DictField
+                <DictionaryField
+                  wrappedComponent={Field}
                   dictProps={Settings.fields.organization.profile}
                   name="profile"
                   component={FieldHelper.ReadonlyField}

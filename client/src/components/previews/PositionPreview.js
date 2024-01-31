@@ -1,8 +1,8 @@
 import { gql } from "@apollo/client"
 import API from "api"
+import DictionaryField from "components/DictionaryField"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
-import DictionaryField from "HOC/DictionaryField"
 import { Location, Position } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
@@ -85,7 +85,6 @@ const PositionPreview = ({ className, uuid }) => {
   }
 
   const position = new Position(data.position ? data.position : {})
-  const DictPreviewField = DictionaryField(PreviewField)
 
   const isPrincipal = position.type === Position.TYPE.PRINCIPAL
   const assignedRole = isPrincipal
@@ -98,13 +97,15 @@ const PositionPreview = ({ className, uuid }) => {
         <h4 className="ellipsized-text">{`Position ${position.name}`}</h4>
       </div>
       <div className="preview-section">
-        <DictPreviewField
+        <DictionaryField
+          wrappedComponent={PreviewField}
           dictProps={Settings.fields.position.type}
           value={Position.humanNameOfType(position.type)}
         />
 
         {position.organization && (
-          <DictPreviewField
+          <DictionaryField
+            wrappedComponent={PreviewField}
             dictProps={Settings.fields.position.organization}
             value={
               <LinkTo modelType="Organization" model={position.organization} />
@@ -112,7 +113,8 @@ const PositionPreview = ({ className, uuid }) => {
           />
         )}
 
-        <DictPreviewField
+        <DictionaryField
+          wrappedComponent={PreviewField}
           dictProps={Settings.fields.position.location}
           value={
             position.location && (
@@ -126,17 +128,20 @@ const PositionPreview = ({ className, uuid }) => {
           }
         />
 
-        <DictPreviewField
+        <DictionaryField
+          wrappedComponent={PreviewField}
           dictProps={Settings.fields.position.code}
           value={position.code}
         />
 
-        <DictPreviewField
+        <DictionaryField
+          wrappedComponent={PreviewField}
           dictProps={Settings.fields.position.status}
           value={Position.humanNameOfStatus(position.status)}
         />
 
-        <DictPreviewField
+        <DictionaryField
+          wrappedComponent={PreviewField}
           dictProps={Settings.fields.position.role}
           value={Position.humanNameOfRole(position.role)}
         />

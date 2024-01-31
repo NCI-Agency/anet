@@ -6,6 +6,7 @@ import Approvals from "components/approvals/Approvals"
 import AssessmentResultsContainer from "components/assessments/AssessmentResultsContainer"
 import { BreadcrumbTrail } from "components/BreadcrumbTrail"
 import { ReadonlyCustomFields } from "components/CustomFields"
+import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
@@ -26,7 +27,6 @@ import RelatedObjectNotes, {
 import ReportCollection from "components/ReportCollection"
 import RichTextEditor from "components/RichTextEditor"
 import { Field, Form, Formik } from "formik"
-import DictionaryField from "HOC/DictionaryField"
 import _isEmpty from "lodash/isEmpty"
 import { Task } from "models"
 import moment from "moment"
@@ -192,7 +192,6 @@ const TaskShow = ({ pageDispatchers }) => {
     : task.descendantTasks?.map(task => new Task(task))
 
   const fieldSettings = task.fieldSettings()
-  const DictField = DictionaryField(Field)
 
   // Admins can edit tasks or users in positions related to the task
   const isAdmin = currentUser && currentUser.isAdmin()
@@ -263,12 +262,14 @@ const TaskShow = ({ pageDispatchers }) => {
                 }}
               >
                 <Fieldset style={{ flex: "1 1 0" }}>
-                  <DictField
+                  <DictionaryField
+                    wrappedComponent={Field}
                     dictProps={fieldSettings.longName}
                     name="longName"
                     component={FieldHelper.ReadonlyField}
                   />
-                  <DictField
+                  <DictionaryField
+                    wrappedComponent={Field}
                     dictProps={Settings.fields.task.taskedOrganizations}
                     name="taskedOrganizations"
                     component={FieldHelper.ReadonlyField}
@@ -287,7 +288,8 @@ const TaskShow = ({ pageDispatchers }) => {
                     }
                   />
                   {Settings.fields.task.parentTask && task.parentTask?.uuid && (
-                    <DictField
+                    <DictionaryField
+                      wrappedComponent={Field}
                       dictProps={Settings.fields.task.parentTask}
                       name="parentTask"
                       component={FieldHelper.ReadonlyField}
@@ -305,7 +307,8 @@ const TaskShow = ({ pageDispatchers }) => {
                   )}
                   {Settings.fields.task.childrenTasks &&
                     task.childrenTasks?.length > 0 && (
-                      <DictField
+                      <DictionaryField
+                        wrappedComponent={Field}
                         dictProps={Settings.fields.task.childrenTasks}
                         name="subEfforts"
                         component={FieldHelper.ReadonlyField}
@@ -325,7 +328,8 @@ const TaskShow = ({ pageDispatchers }) => {
                       />
                   )}
                   {Settings.fields.task.plannedCompletion && (
-                    <DictField
+                    <DictionaryField
+                      wrappedComponent={Field}
                       dictProps={Settings.fields.task.plannedCompletion}
                       name="plannedCompletion"
                       component={FieldHelper.ReadonlyField}
@@ -338,7 +342,8 @@ const TaskShow = ({ pageDispatchers }) => {
                     />
                   )}
                   {Settings.fields.task.projectedCompletion && (
-                    <DictField
+                    <DictionaryField
+                      wrappedComponent={Field}
                       dictProps={Settings.fields.task.projectedCompletion}
                       name="projectedCompletion"
                       component={FieldHelper.ReadonlyField}
@@ -350,13 +355,15 @@ const TaskShow = ({ pageDispatchers }) => {
                       }
                     />
                   )}
-                  <DictField
+                  <DictionaryField
+                    wrappedComponent={Field}
                     dictProps={Settings.fields.task.status}
                     name="status"
                     component={FieldHelper.ReadonlyField}
                     humanValue={Task.humanNameOfStatus}
                   />
-                  <DictField
+                  <DictionaryField
+                    wrappedComponent={Field}
                     dictProps={Settings.fields.task.description}
                     name="description"
                     component={FieldHelper.ReadonlyField}

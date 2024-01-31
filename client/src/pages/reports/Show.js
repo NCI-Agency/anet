@@ -11,6 +11,7 @@ import InstantAssessmentsContainerField from "components/assessments/instant/Ins
 import AttachmentCard from "components/Attachment/AttachmentCard"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import { ReadonlyCustomFields } from "components/CustomFields"
+import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
@@ -35,7 +36,6 @@ import RichTextEditor from "components/RichTextEditor"
 import { deserializeQueryParams } from "components/SearchFilters"
 import TriggerableConfirm from "components/TriggerableConfirm"
 import { Field, Form, Formik } from "formik"
-import DictionaryField from "HOC/DictionaryField"
 import _concat from "lodash/concat"
 import _isEmpty from "lodash/isEmpty"
 import _upperFirst from "lodash/upperFirst"
@@ -360,7 +360,6 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
     Person.isEqual(currentUser, rp)
   )
   const tasksLabel = pluralize(Settings.fields.task.subLevel.shortLabel)
-  const DictField = DictionaryField(Field)
 
   // User can approve when admin,
   // or if report is pending approval and user is one of the approvers in the current approval step
@@ -560,19 +559,22 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                   component={FieldHelper.SpecialField}
                   widget={
                     <div id="report-summary">
-                      <DictField
+                      <DictionaryField
+                        wrappedComponent={Field}
                         dictProps={Settings.fields.report.intent}
                         name="intent"
                         component={FieldHelper.ReadonlyField}
                         style={{ marginBottom: 0 }}
                       />
-                      <DictField
+                      <DictionaryField
+                        wrappedComponent={Field}
                         dictProps={Settings.fields.report.keyOutcomes}
                         name="keyOutcomes"
                         component={FieldHelper.ReadonlyField}
                         style={{ marginBottom: 0 }}
                       />
-                      <DictField
+                      <DictionaryField
+                        wrappedComponent={Field}
                         dictProps={Settings.fields.report.nextSteps}
                         name="nextSteps"
                         component={FieldHelper.ReadonlyField}
@@ -582,7 +584,8 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                   }
                 />
 
-                <DictField
+                <DictionaryField
+                  wrappedComponent={Field}
                   dictProps={Settings.fields.report.engagementDate}
                   name="engagementDate"
                   component={FieldHelper.ReadonlyField}
@@ -598,7 +601,8 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                 />
 
                 {Settings.engagementsIncludeTimeAndDuration && (
-                  <DictField
+                  <DictionaryField
+                    wrappedComponent={Field}
                     dictProps={Settings.fields.report.duration}
                     name="duration"
                     component={FieldHelper.ReadonlyField}
@@ -640,7 +644,8 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                   }
                 />
 
-                <DictField
+                <DictionaryField
+                  wrappedComponent={Field}
                   dictProps={Settings.fields.report.location}
                   name="location"
                   component={FieldHelper.ReadonlyField}
@@ -652,7 +657,8 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                 />
 
                 {report.cancelled && (
-                  <DictField
+                  <DictionaryField
+                    wrappedComponent={Field}
                     dictProps={Settings.fields.report.cancelledReason}
                     name="cancelledReason"
                     component={FieldHelper.ReadonlyField}
@@ -662,13 +668,15 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
 
                 {!report.cancelled && (
                   <>
-                    <DictField
+                    <DictionaryField
+                      wrappedComponent={Field}
                       dictProps={Settings.fields.report.atmosphere}
                       name="atmosphere"
                       component={FieldHelper.ReadonlyField}
                       humanValue={utils.sentenceCase(report.atmosphere)}
                     />
-                    <DictField
+                    <DictionaryField
+                      wrappedComponent={Field}
                       dictProps={Settings.fields.report.atmosphereDetails}
                       name="atmosphereDetails"
                       component={FieldHelper.ReadonlyField}

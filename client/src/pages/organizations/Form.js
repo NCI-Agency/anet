@@ -14,6 +14,7 @@ import {
   CustomFieldsContainer,
   customFieldsJSONString
 } from "components/CustomFields"
+import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
@@ -24,7 +25,6 @@ import NoPaginationTaskTable from "components/NoPaginationTaskTable"
 import { jumpToTop } from "components/Page"
 import RichTextEditor from "components/RichTextEditor"
 import { FastField, Field, Form, Formik } from "formik"
-import DictionaryField from "HOC/DictionaryField"
 import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
 import { Location, Organization, Position, Task } from "models"
@@ -88,9 +88,6 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
       label: Settings.fields.principal.org.name
     }
   ]
-
-  const DictField = DictionaryField(Field)
-  const DictFastField = DictionaryField(FastField)
 
   return (
     <Formik
@@ -209,23 +206,27 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
               <Fieldset>
                 {!canAdministrateOrg ? (
                   <>
-                    <DictFastField
+                    <DictionaryField
+                      wrappedComponent={FastField}
                       dictProps={Settings.fields.organization.shortName}
                       name="shortName"
                       component={FieldHelper.ReadonlyField}
                     />
-                    <DictFastField
+                    <DictionaryField
+                      wrappedComponent={FastField}
                       dictProps={Settings.fields.organization.longName}
                       name="longName"
                       component={FieldHelper.ReadonlyField}
                     />
-                    <DictFastField
+                    <DictionaryField
+                      wrappedComponent={FastField}
                       dictProps={Settings.fields.organization.type}
                       name="type"
                       component={FieldHelper.ReadonlyField}
                       humanValue={Organization.humanNameOfType}
                     />
-                    <DictFastField
+                    <DictionaryField
+                      wrappedComponent={FastField}
                       dictProps={Settings.fields.organization.parentOrg}
                       name="parentOrg"
                       component={FieldHelper.ReadonlyField}
@@ -238,14 +239,16 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                         )
                       }
                     />
-                    <DictFastField
+                    <DictionaryField
+                      wrappedComponent={FastField}
                       dictProps={
                         Settings.fields.organization.identificationCode
                       }
                       name="identificationCode"
                       component={FieldHelper.ReadonlyField}
                     />
-                    <DictFastField
+                    <DictionaryField
+                      wrappedComponent={FastField}
                       dictProps={Settings.fields.organization.location}
                       name="location"
                       component={FieldHelper.ReadonlyField}
@@ -263,13 +266,15 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                         )
                       }
                     />
-                    <DictFastField
+                    <DictionaryField
+                      wrappedComponent={FastField}
                       dictProps={Settings.fields.organization.status}
                       name="status"
                       component={FieldHelper.ReadonlyField}
                       humanValue={Organization.humanNameOfStatus}
                     />
-                    <DictFastField
+                    <DictionaryField
+                      wrappedComponent={FastField}
                       dictProps={Settings.fields.organization.profile}
                       name="profile"
                       component={FieldHelper.ReadonlyField}
@@ -280,17 +285,20 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                   </>
                 ) : (
                   <>
-                    <DictFastField
+                    <DictionaryField
+                      wrappedComponent={FastField}
                       dictProps={Settings.fields.organization.shortName}
                       name="shortName"
                       component={FieldHelper.InputField}
                     />
-                    <DictFastField
+                    <DictionaryField
+                      wrappedComponent={FastField}
                       dictProps={Settings.fields.organization.longName}
                       name="longName"
                       component={FieldHelper.InputField}
                     />
-                    <DictFastField
+                    <DictionaryField
+                      wrappedComponent={FastField}
                       dictProps={Settings.fields.organization.type}
                       name="type"
                       component={FieldHelper.RadioButtonToggleGroupField}
@@ -298,7 +306,8 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                       onChange={value => setFieldValue("type", value)}
                       disabled={!isAdmin}
                     />
-                    <DictField
+                    <DictionaryField
+                      wrappedComponent={Field}
                       dictProps={Settings.fields.organization.parentOrg}
                       name="parentOrg"
                       component={FieldHelper.SpecialField}
@@ -327,14 +336,16 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                         />
                       }
                     />
-                    <DictFastField
+                    <DictionaryField
+                      wrappedComponent={FastField}
                       dictProps={
                         Settings.fields.organization.identificationCode
                       }
                       name="identificationCode"
                       component={FieldHelper.InputField}
                     />
-                    <DictField
+                    <DictionaryField
+                      wrappedComponent={Field}
                       dictProps={Settings.fields.organization.location}
                       name="location"
                       component={FieldHelper.SpecialField}
@@ -360,14 +371,16 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                         />
                       }
                     />
-                    <DictFastField
+                    <DictionaryField
+                      wrappedComponent={FastField}
                       dictProps={Settings.fields.organization.status}
                       name="status"
                       component={FieldHelper.RadioButtonToggleGroupField}
                       buttons={statusButtons}
                       onChange={value => setFieldValue("status", value)}
                     />
-                    <DictFastField
+                    <DictionaryField
+                      wrappedComponent={FastField}
                       dictProps={Settings.fields.organization.profile}
                       name="profile"
                       component={FieldHelper.SpecialField}

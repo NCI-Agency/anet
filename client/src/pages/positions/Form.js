@@ -12,6 +12,7 @@ import {
   CustomFieldsContainer,
   customFieldsJSONString
 } from "components/CustomFields"
+import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
@@ -21,7 +22,6 @@ import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
 import SimilarObjectsModal from "components/SimilarObjectsModal"
 import { FastField, Field, Form, Formik } from "formik"
-import DictionaryField from "HOC/DictionaryField"
 import { Location, Organization, Position } from "models"
 import { PositionRole } from "models/Position"
 import PropTypes from "prop-types"
@@ -116,9 +116,6 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
     }
   ])
 
-  const DictField = DictionaryField(Field)
-  const DictFastField = DictionaryField(FastField)
-
   // For advisor types of positions, add permissions property.
   // The permissions property allows selecting a
   // specific advisor type and is removed in the onSubmit method.
@@ -207,7 +204,8 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
               <Fieldset>
-                <DictField
+                <DictionaryField
+                  wrappedComponent={Field}
                   dictProps={Settings.fields.position.name}
                   name="name"
                   component={FieldHelper.InputField}
@@ -232,14 +230,16 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
                 />
 
                 {edit ? (
-                  <DictFastField
+                  <DictionaryField
+                    wrappedComponent={FastField}
                     dictProps={Settings.fields.position.type}
                     name="type"
                     component={FieldHelper.ReadonlyField}
                     humanValue={Position.humanNameOfType}
                   />
                 ) : (
-                  <DictFastField
+                  <DictionaryField
+                    wrappedComponent={FastField}
                     dictProps={Settings.fields.position.type}
                     name="type"
                     component={FieldHelper.RadioButtonToggleGroupField}
@@ -257,7 +257,8 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
                   />
                 )}
 
-                <DictField
+                <DictionaryField
+                  wrappedComponent={Field}
                   dictProps={Settings.fields.position.organization}
                   name="organization"
                   component={FieldHelper.SpecialField}
@@ -285,7 +286,8 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
                   }
                 />
 
-                <DictField
+                <DictionaryField
+                  wrappedComponent={Field}
                   dictProps={Settings.fields.position.location}
                   name="location"
                   component={FieldHelper.SpecialField}
@@ -312,13 +314,15 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
                   }
                 />
 
-                <DictField
+                <DictionaryField
+                  wrappedComponent={Field}
                   dictProps={Settings.fields.position.code}
                   name="code"
                   component={FieldHelper.InputField}
                 />
 
-                <DictFastField
+                <DictionaryField
+                  wrappedComponent={FastField}
                   dictProps={Settings.fields.position.status}
                   name="status"
                   component={FieldHelper.RadioButtonToggleGroupField}
@@ -335,9 +339,10 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
                       </span>
                     </FormBS.Text>
                   )}
-                </DictFastField>
+                </DictionaryField>
 
-                <DictFastField
+                <DictionaryField
+                  wrappedComponent={FastField}
                   dictProps={Settings.fields.position.role}
                   name="role"
                   component={FieldHelper.RadioButtonToggleGroupField}

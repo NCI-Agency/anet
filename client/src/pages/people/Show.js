@@ -8,6 +8,7 @@ import AssessmentResultsContainer from "components/assessments/AssessmentResults
 import AssignPositionModal from "components/AssignPositionModal"
 import AttachmentCard from "components/Attachment/AttachmentCard"
 import { mapReadonlyCustomFieldsToComps } from "components/CustomFields"
+import DictionaryField from "components/DictionaryField"
 import EditAssociatedPositionsModal from "components/EditAssociatedPositionsModal"
 import EditHistory from "components/EditHistory"
 import * as FieldHelper from "components/FieldHelper"
@@ -35,7 +36,6 @@ import RelatedObjectNotes, {
 import ReportCollection from "components/ReportCollection"
 import RichTextEditor from "components/RichTextEditor"
 import { Field, Form, Formik } from "formik"
-import DictionaryField from "HOC/DictionaryField"
 import _isEmpty from "lodash/isEmpty"
 import { Attachment, Person, Position } from "models"
 import moment from "moment"
@@ -521,9 +521,9 @@ const PersonShow = ({ pageDispatchers }) => {
       status: Person.humanNameOfStatus(person.status)
     }
     return person.getNormalFieldsOrdered().reduce((accum, key) => {
-      const DictField = DictionaryField(Field)
       accum[key] = (
-        <DictField
+        <DictionaryField
+          wrappedComponent={Field}
           dictProps={Settings.fields.person[key]}
           name={key}
           component={FieldHelper.ReadonlyField}

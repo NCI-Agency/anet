@@ -14,6 +14,7 @@ import {
   CustomFieldsContainer,
   customFieldsJSONString
 } from "components/CustomFields"
+import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
@@ -24,7 +25,6 @@ import { jumpToTop } from "components/Page"
 import PositionTable from "components/PositionTable"
 import RichTextEditor from "components/RichTextEditor"
 import { FastField, Field, Form, Formik } from "formik"
-import DictionaryField from "HOC/DictionaryField"
 import _isEqual from "lodash/isEqual"
 import { Organization, Position, Task } from "models"
 import PropTypes from "prop-types"
@@ -66,9 +66,6 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
       label: "Inactive"
     }
   ]
-
-  const DictField = DictionaryField(Field)
-  const DictFastField = DictionaryField(FastField)
 
   const taskedOrganizationsFilters = {
     allAdvisorOrganizations: {
@@ -165,20 +162,23 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
               <Fieldset>
-                <DictField
+                <DictionaryField
+                  wrappedComponent={Field}
                   dictProps={fieldSettings.shortName}
                   name="shortName"
                   component={FieldHelper.InputField}
                   disabled={disabled}
                 />
 
-                <DictField
+                <DictionaryField
+                  wrappedComponent={Field}
                   dictProps={fieldSettings.longName}
                   name="longName"
                   component={FieldHelper.InputField}
                 />
 
-                <DictFastField
+                <DictionaryField
+                  wrappedComponent={FastField}
                   dictProps={Settings.fields.task.taskedOrganizations}
                   name="taskedOrganizations"
                   component={FieldHelper.SpecialField}
@@ -208,7 +208,8 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
                 />
 
                 {Settings.fields.task.parentTask && (
-                  <DictFastField
+                  <DictionaryField
+                    wrappedComponent={FastField}
                     dictProps={Settings.fields.task.parentTask}
                     name="parentTask"
                     component={FieldHelper.SpecialField}
@@ -239,7 +240,8 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
                   />
                 )}
 
-                <DictFastField
+                <DictionaryField
+                  wrappedComponent={FastField}
                   dictProps={Settings.fields.task.plannedCompletion}
                   name="plannedCompletion"
                   component={FieldHelper.SpecialField}
@@ -249,7 +251,8 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
                   disabled={disabled}
                 />
 
-                <DictFastField
+                <DictionaryField
+                  wrappedComponent={FastField}
                   dictProps={Settings.fields.task.projectedCompletion}
                   name="projectedCompletion"
                   component={FieldHelper.SpecialField}
@@ -261,14 +264,16 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
                 />
 
                 {disabled ? (
-                  <DictFastField
+                  <DictionaryField
+                    wrappedComponent={FastField}
                     dictProps={Settings.fields.task.status}
                     name="status"
                     component={FieldHelper.ReadonlyField}
                     humanValue={Position.humanNameOfStatus}
                   />
                 ) : (
-                  <DictFastField
+                  <DictionaryField
+                    wrappedComponent={FastField}
                     dictProps={Settings.fields.task.status}
                     name="status"
                     component={FieldHelper.RadioButtonToggleGroupField}
@@ -277,7 +282,8 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
                   />
                 )}
 
-                <DictFastField
+                <DictionaryField
+                  wrappedComponent={FastField}
                   dictProps={Settings.fields.task.description}
                   name="description"
                   component={FieldHelper.SpecialField}
@@ -305,7 +311,8 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
               <Fieldset
                 title={Settings.fields.task.responsiblePositions?.label}
               >
-                <DictFastField
+                <DictionaryField
+                  wrappedComponent={FastField}
                   dictProps={Settings.fields.task.responsiblePositions}
                   name="responsiblePositions"
                   component={FieldHelper.SpecialField}

@@ -1,10 +1,10 @@
 import { gql } from "@apollo/client"
 import API from "api"
+import DictionaryField from "components/DictionaryField"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import Model from "components/Model"
 import RichTextEditor from "components/RichTextEditor"
-import DictionaryField from "HOC/DictionaryField"
 import _isEmpty from "lodash/isEmpty"
 import { Location, Organization } from "models"
 import { PositionRole } from "models/Position"
@@ -122,7 +122,6 @@ const OrganizationPreview = ({ className, uuid }) => {
   const organization = new Organization(
     data.organization ? data.organization : {}
   )
-  const DictPreviewField = DictionaryField(PreviewField)
 
   return (
     <div className={`${className} preview-content-scroll`}>
@@ -130,18 +129,21 @@ const OrganizationPreview = ({ className, uuid }) => {
         <h4 className="ellipsized-text">{`Organization ${organization.shortName}`}</h4>
       </div>
       <div className="preview-section">
-        <DictPreviewField
+        <DictionaryField
+          wrappedComponent={PreviewField}
           dictProps={Settings.fields.organization.longName}
           value={organization.longName}
         />
 
-        <DictPreviewField
+        <DictionaryField
+          wrappedComponent={PreviewField}
           dictProps={Settings.fields.organization.type}
           value={Organization.humanNameOfType(organization.type)}
         />
 
         {organization?.parentOrg?.uuid && (
-          <DictPreviewField
+          <DictionaryField
+            wrappedComponent={PreviewField}
             dictProps={Settings.fields.organization.parentOrg}
             value={
               <LinkTo modelType="Organization" model={organization.parentOrg} />
@@ -150,7 +152,8 @@ const OrganizationPreview = ({ className, uuid }) => {
         )}
 
         {organization?.childrenOrgs?.length > 0 && (
-          <DictPreviewField
+          <DictionaryField
+            wrappedComponent={PreviewField}
             dictProps={Settings.fields.organization.childrenOrgs}
             value={
               <ListGroup>
@@ -176,12 +179,14 @@ const OrganizationPreview = ({ className, uuid }) => {
           pluralize(utils.titleCase(PositionRole.DEPUTY.humanNameOfRole()))
         )}
 
-        <DictPreviewField
+        <DictionaryField
+          wrappedComponent={PreviewField}
           dictProps={Settings.fields.organization.identificationCode}
           value={organization.identificationCode}
         />
 
-        <DictPreviewField
+        <DictionaryField
+          wrappedComponent={PreviewField}
           dictProps={Settings.fields.organization.location}
           value={
             organization.location && (
@@ -195,13 +200,15 @@ const OrganizationPreview = ({ className, uuid }) => {
           }
         />
 
-        <DictPreviewField
+        <DictionaryField
+          wrappedComponent={PreviewField}
           dictProps={Settings.fields.organization.status}
           value={Organization.humanNameOfStatus(organization.status)}
         />
 
         {organization.profile && (
-          <DictPreviewField
+          <DictionaryField
+            wrappedComponent={PreviewField}
             dictProps={Settings.fields.organization.profile}
             value={<RichTextEditor readOnly value={organization.profile} />}
           />
