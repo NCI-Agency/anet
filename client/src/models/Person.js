@@ -3,7 +3,8 @@ import Model, {
   createCustomFieldsSchema,
   GRAPHQL_NOTES_FIELDS,
   SENSITIVE_CUSTOM_FIELDS_PARENT,
-  yupDate
+  yupDate,
+  yupEmailAddresses
 } from "components/Model"
 import _isEmpty from "lodash/isEmpty"
 import PEOPLE_ICON from "resources/people.png"
@@ -94,6 +95,7 @@ export default class Person extends Model {
         )
         .default("")
         .label(Settings.fields.person.emailAddress?.label),
+      emailAddresses: yupEmailAddresses,
       country: yup
         .string()
         .nullable()

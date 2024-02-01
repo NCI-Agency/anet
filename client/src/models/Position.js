@@ -1,6 +1,7 @@
 import Model, {
   createCustomFieldsSchema,
-  GRAPHQL_NOTES_FIELDS
+  GRAPHQL_NOTES_FIELDS,
+  yupEmailAddresses
 } from "components/Model"
 import POSITIONS_ICON from "resources/positions.png"
 import Settings from "settings"
@@ -89,7 +90,8 @@ export default class Position extends Model {
         .object()
         .nullable()
         .default(null)
-        .label(Settings.fields.position.location?.label)
+        .label(Settings.fields.position.location?.label),
+      emailAddresses: yupEmailAddresses
     })
 
     // not actually in the database, the database contains the JSON customFields

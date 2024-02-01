@@ -1,10 +1,21 @@
+import {
+  getFormGroupValidationState,
+  getHelpBlock
+} from "components/FieldHelper"
 import RemoveButton from "components/RemoveButton"
+import { Field, FieldArray } from "formik"
 import PropTypes from "prop-types"
 import React from "react"
 import { Table } from "react-bootstrap"
 import Settings from "settings"
 
-const EmailAddressInputTable = ({ emailAddresses, handleChange }) => {
+export const initializeEmailAddresses = emailAddresses =>
+  Settings.emailNetworks.map(network => ({
+    network,
+    address: emailAddresses?.find(e => e.network === network)?.address || ""
+  }))
+
+const EmailAddressInputTable = ({ fieldArrayName, emailAddresses }) => {
   return (
     <Table striped hover responsive>
       <thead>
@@ -14,63 +25,57 @@ const EmailAddressInputTable = ({ emailAddresses, handleChange }) => {
         </tr>
       </thead>
       <tbody>
-        {Settings.emailNetworks.map(en => (
-          <tr key={en}>
-            <td style={{ verticalAlign: "middle" }}>{en}</td>
-            <td className="input-group">
-              <input
-                className="form-control"
-                name={`${en}-address`}
-                value={getEmailAddress(en, emailAddresses)}
-                onChange={e =>
-                  setEmailAddress(en, emailAddresses, e?.target?.value)}
-              />
-              <RemoveButton
-                id={`${en}-clear`}
-                title="Clear address"
-                onClick={() => clearEmailAddress(en, emailAddresses)}
-              />
-            </td>
-          </tr>
-        ))}
+        <FieldArray name="emailAddresses">
+          {({ form, replace }) =>
+            emailAddresses.map((e, i) => {
+              const fieldName = `${fieldArrayName}.${i}.address`
+              const { className } = getFormGroupValidationState(
+                fieldName,
+                form,
+                "form-control"
+              )
+              return (
+                <tr key={e.network}>
+                  <td style={{ verticalAlign: "middle" }}>{e.network}</td>
+                  <td className="input-group">
+                    <Field
+                      className={className}
+                      name={fieldName}
+                      value={e.address}
+                    />
+                    <RemoveButton
+                      id={`clear-${fieldName}`}
+                      title="Clear address"
+                      onClick={() =>
+                        clearEmailAddress(fieldName, form, replace, i)}
+                    />
+                    {getHelpBlock(fieldName, form)}
+                  </td>
+                </tr>
+              )
+            })}
+        </FieldArray>
       </tbody>
     </Table>
   )
 
-  function _getEmailAddress(network, emailAddresses) {
-    return emailAddresses.find(ea => ea.network === network)
-  }
-
-  function getEmailAddress(network, emailAddresses) {
-    return _getEmailAddress(network, emailAddresses)?.address || ""
-  }
-
-  function setEmailAddress(network, emailAddresses, address) {
-    const existingEmailAddress = _getEmailAddress(network, emailAddresses)
-    if (existingEmailAddress) {
-      existingEmailAddress.address = address
-    } else {
-      emailAddresses.push({ network, address })
-    }
-    handleChange([...emailAddresses])
-  }
-
-  function clearEmailAddress(network, emailAddresses, callback) {
-    const emailAddress = _getEmailAddress(network, emailAddresses)
+  function clearEmailAddress(fieldName, form, replace, i) {
+    const emailAddress = emailAddresses[i]
     if (emailAddress) {
       emailAddress.address = ""
-      handleChange([...emailAddresses])
+      replace(i, emailAddress)
+      form.setFieldTouched(fieldName)
     }
   }
 }
 
 EmailAddressInputTable.propTypes = {
-  emailAddresses: PropTypes.array.isRequired,
-  handleChange: PropTypes.func.isRequired
+  fieldArrayName: PropTypes.string,
+  emailAddresses: PropTypes.array.isRequired
 }
 
 EmailAddressInputTable.defaultProps = {
-  emailAddresses: []
+  fieldArrayName: "emailAddresses"
 }
 
 export default EmailAddressInputTable

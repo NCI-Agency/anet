@@ -13,7 +13,9 @@ import {
   customFieldsJSONString
 } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
-import EmailAddressInputTable from "components/EmailAddressInputTable"
+import EmailAddressInputTable, {
+  initializeEmailAddresses
+} from "components/EmailAddressInputTable"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
@@ -54,6 +56,9 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
   const navigate = useNavigate()
   const [error, setError] = useState(null)
   const [showSimilarPositions, setShowSimilarPositions] = useState(false)
+  initialValues.emailAddresses = initializeEmailAddresses(
+    initialValues.emailAddresses
+  )
   const statusButtons = [
     {
       id: "statusActiveButton",
@@ -304,17 +309,12 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
 
                 <DictionaryField
                   wrappedComponent={FastField}
+                  as="div"
                   dictProps={Settings.fields.position.emailAddresses}
-                  name="emailAddresses"
                   component={FieldHelper.SpecialField}
                   widget={
                     <EmailAddressInputTable
                       emailAddresses={values.emailAddresses}
-                      handleChange={value => {
-                        // validation will be done by setFieldValue
-                        setFieldTouched("emailAddresses", true, false)
-                        setFieldValue("emailAddresses", value, true)
-                      }}
                     />
                   }
                 />
