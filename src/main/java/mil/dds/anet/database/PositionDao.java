@@ -577,6 +577,12 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
         newOrg -> addOrganizationToPosition(winner, newOrg),
         oldOrgUuid -> removeOrganizationFromPosition(oldOrgUuid, winner));
 
+    // Update emailAddresses
+    final EmailAddressDao emailAddressDao = AnetObjectEngine.getInstance().getEmailAddressDao();
+    emailAddressDao.updateEmailAddresses(PositionDao.TABLE_NAME, loserUuid, null);
+    emailAddressDao.updateEmailAddresses(PositionDao.TABLE_NAME, winnerUuid,
+        winner.getEmailAddresses());
+
     // Update customSensitiveInformation for winner
     DaoUtils.saveCustomSensitiveInformation(null, PositionDao.TABLE_NAME, winnerUuid,
         winner.getCustomSensitiveInformation());

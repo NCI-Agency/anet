@@ -110,6 +110,10 @@ export default class Position extends Model {
     isSubscribed
     updatedAt
     code
+    emailAddresses {
+      network
+      address
+    }
     organization {
       uuid
       shortName

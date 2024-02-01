@@ -185,6 +185,10 @@ export default class Person extends Model {
     gender
     endOfTourDate
     code
+    emailAddresses {
+      network
+      address
+    }
     position {
       uuid
       name

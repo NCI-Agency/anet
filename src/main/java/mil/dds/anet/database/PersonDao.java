@@ -485,6 +485,12 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     updateM2mForMerge("attachmentRelatedObjects", "attachmentUuid", "relatedObjectUuid", winnerUuid,
         loserUuid);
 
+    // Update emailAddresses
+    final EmailAddressDao emailAddressDao = AnetObjectEngine.getInstance().getEmailAddressDao();
+    emailAddressDao.updateEmailAddresses(PersonDao.TABLE_NAME, loserUuid, null);
+    emailAddressDao.updateEmailAddresses(PersonDao.TABLE_NAME, winnerUuid,
+        winner.getEmailAddresses());
+
     // Update customSensitiveInformation for winner
     DaoUtils.saveCustomSensitiveInformation(null, PersonDao.TABLE_NAME, winnerUuid,
         winner.getCustomSensitiveInformation());
