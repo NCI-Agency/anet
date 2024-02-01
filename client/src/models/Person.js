@@ -4,7 +4,7 @@ import Model, {
   GRAPHQL_NOTES_FIELDS,
   SENSITIVE_CUSTOM_FIELDS_PARENT,
   yupDate,
-  yupEmailAddresses
+  yupEmailAddressesWithValidation
 } from "components/Model"
 import _isEmpty from "lodash/isEmpty"
 import PEOPLE_ICON from "resources/people.png"
@@ -95,7 +95,18 @@ export default class Person extends Model {
         )
         .default("")
         .label(Settings.fields.person.emailAddress?.label),
-      emailAddresses: yupEmailAddresses,
+      emailAddresses: yupEmailAddressesWithValidation(
+        "emailAddress",
+        "emailAddress error",
+        function(address, testContext) {
+          const { from } = this
+          const user = from[1].value.user
+          const r = utils.handleEmailValidation(address, user)
+          return Settings.fields.person.emailAddress?.optional || r.isValid
+            ? true
+            : testContext.createError({ message: r.message })
+        }
+      ),
       country: yup
         .string()
         .nullable()

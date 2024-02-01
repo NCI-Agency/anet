@@ -414,7 +414,7 @@ fields:
       label: Previous Positions
     emailAddress:
       label: Email
-      placeholder: Only the following email domain names are allowed. ( example.com, cmil.mil, mission.ita, nato.int, *.isaf.nato.int )
+      placeholder: Enter email address
       optional: false
     emailAddresses:
       label: Email addresses
@@ -1387,8 +1387,8 @@ fields:
 pinned_ORGs: [Key Leader Engagement]
 non_reporting_ORGs: [ANET Administrators]
 tasking_ORGs: [EF 2.2, EF 9]
-domainNames: [example.com, cmil.mil, mission.ita, nato.int, "*.isaf.nato.int"]
-activeDomainNames: [example.com, cmil.mil, mission.ita, nato.int, "*.isaf.nato.int"]
+domainNames: [example.com, example.ns, cmil.mil, mission.ita, nato.int, "*.isaf.nato.int"]
+activeDomainNames: [example.com, example.ns, cmil.mil, mission.ita, nato.int, "*.isaf.nato.int"]
 emailNetworks:
   - Internet
   - NS

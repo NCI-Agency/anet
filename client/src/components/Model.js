@@ -152,15 +152,26 @@ export const yupDate = yup.date().transform(function(value, originalValue) {
   return newValue.isValid() ? newValue.toDate() : null
 })
 
-export const yupEmailAddress = yup.object().shape({
-  network: yup.string().nullable().required("Email network is required"),
-  address: yup.string().email("Address must be a valid email").nullable()
-})
-export const yupEmailAddresses = yup
-  .array()
-  .of(yupEmailAddress)
-  .nullable()
-  .default([])
+const yupEmailAddressWithValidation = (name, message, test) =>
+  yup.object().shape({
+    network: yup.string().nullable().required("Email network is required"),
+    address: yup
+      .string()
+      .email("Address must be a valid email")
+      .nullable()
+      .test(name, message, test)
+  })
+export const yupEmailAddressesWithValidation = (
+  name = "",
+  message = "",
+  test = () => true
+) =>
+  yup
+    .array()
+    .of(yupEmailAddressWithValidation(name, message, test))
+    .nullable()
+    .default([])
+export const yupEmailAddresses = yupEmailAddressesWithValidation()
 
 export const CUSTOM_FIELD_TYPE = {
   TEXT: "text",
