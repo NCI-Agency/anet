@@ -32,6 +32,10 @@ const GQL_GET_SELF = gql`
       domainUsername
       openIdSubject
       code
+      emailAddresses {
+        network
+        address
+      }
     }
   }
 `

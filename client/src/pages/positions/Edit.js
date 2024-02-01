@@ -29,6 +29,10 @@ const GQL_GET_POSITION = gql`
       status
       type
       role
+      emailAddresses {
+        network
+        address
+      }
       location {
         uuid
         name

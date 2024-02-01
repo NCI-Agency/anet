@@ -2,6 +2,7 @@ import { gql } from "@apollo/client"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
 import AppContext from "components/AppContext"
+import EmailAddressTable from "components/EmailAddressTable"
 import Fieldset from "components/Fieldset"
 import {
   mapPageDispatchersToProps,
@@ -27,6 +28,10 @@ const GQL_GET_ORGANIZATION = gql`
             rank
             avatarUuid
             emailAddress
+            emailAddresses {
+              network
+              address
+            }
           }
         }
       }
@@ -163,9 +168,8 @@ const HelpConditional = ({
         <ul>
           {superusers.map(user => (
             <li key={user.uuid}>
-              <a href={`mailto:${user.emailAddress}`}>
-                {user.rank} {user.name} - {user.emailAddress}
-              </a>
+              {user.rank} {user.name}:
+              <EmailAddressTable emailAddresses={user.emailAddresses} />
             </li>
           ))}
           {superusers.length === 0 && <em>No superusers found</em>}

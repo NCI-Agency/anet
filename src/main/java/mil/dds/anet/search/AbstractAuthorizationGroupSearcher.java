@@ -6,7 +6,6 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AuthorizationGroupSearchQuery;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.database.AuthorizationGroupDao;
-import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.mappers.AuthorizationGroupMapper;
 import mil.dds.anet.utils.DaoUtils;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
@@ -60,11 +59,11 @@ public abstract class AbstractAuthorizationGroupSearcher
     if (query.getEmailNetwork() != null) {
       qb.addFromClause("JOIN \"authorizationGroupRelatedObjects\" agro"
           + " ON agro.\"authorizationGroupUuid\" = \"authorizationGroups\".uuid"
-          + " LEFT JOIN people \"agroPeople\" ON agro.\"relatedObjectUuid\" = \"agroPeople\".uuid"
-          + " AND agro.\"relatedObjectType\" = '" + PersonDao.TABLE_NAME + "'");
-      // TODO: support multiple emailAddress networks
-      qb.addIsNotNullOrEmptyClause("\"agroPeople\".\"emailAddress\"");
-      // TODO: support emailAddress for organizations and positions
+          + " LEFT JOIN \"emailAddresses\" \"agroEmail\""
+          + " ON agro.\"relatedObjectType\" = \"agroEmail\".\"relatedObjectType\""
+          + " AND agro.\"relatedObjectUuid\" = \"agroEmail\".\"relatedObjectUuid\"");
+      qb.addStringEqualsClause("emailNetwork", "\"agroEmail\".network", query.getEmailNetwork());
+      qb.addIsNotNullOrEmptyClause("\"agroEmail\".address");
     }
 
     addOrderByClauses(qb, query);

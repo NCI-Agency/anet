@@ -28,6 +28,10 @@ const GQL_GET_ORGANIZATION = gql`
       longName
       identificationCode
       status
+      emailAddresses {
+        network
+        address
+      }
       location {
         uuid
         name

@@ -330,6 +330,18 @@ input CustomSensitiveInformationInput {
 }
 
 """"""
+type EmailAddress {
+  address: String
+  network: String
+}
+
+""""""
+input EmailAddressInput {
+  address: String
+  network: String
+}
+
+""""""
 enum EngagementStatus {
   CANCELLED
   FUTURE
@@ -523,6 +535,7 @@ type Organization {
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformation]
   descendantOrgs(query: OrganizationSearchQueryInput): [Organization]
+  emailAddresses(network: String): [EmailAddress]
   identificationCode: String
   isSubscribed: Boolean
   location: Location
@@ -546,6 +559,7 @@ input OrganizationInput {
   createdAt: Instant
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformationInput]
+  emailAddresses: [EmailAddressInput]
   identificationCode: String
   location: LocationInput
   longName: String
@@ -599,6 +613,7 @@ type Person {
   customSensitiveInformation: [CustomSensitiveInformation]
   domainUsername: String
   emailAddress: String
+  emailAddresses(network: String): [EmailAddress]
   endOfTourDate: Instant
   gender: String
   isSubscribed: Boolean
@@ -627,6 +642,7 @@ input PersonInput {
   customSensitiveInformation: [CustomSensitiveInformationInput]
   domainUsername: String
   emailAddress: String
+  emailAddresses: [EmailAddressInput]
   endOfTourDate: Instant
   gender: String
   name: String
@@ -703,6 +719,7 @@ type Position {
   createdAt: Instant
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformation]
+  emailAddresses(network: String): [EmailAddress]
   isApprover: Boolean
   isSubscribed: Boolean
   location: Location
@@ -727,6 +744,7 @@ input PositionInput {
   createdAt: Instant
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformationInput]
+  emailAddresses: [EmailAddressInput]
   location: LocationInput
   name: String
   organization: OrganizationInput
@@ -952,6 +970,7 @@ type ReportPerson {
   customSensitiveInformation: [CustomSensitiveInformation]
   domainUsername: String
   emailAddress: String
+  emailAddresses(network: String): [EmailAddress]
   endOfTourDate: Instant
   gender: String
   interlocutor: Boolean!
@@ -984,6 +1003,7 @@ input ReportPersonInput {
   customSensitiveInformation: [CustomSensitiveInformationInput]
   domainUsername: String
   emailAddress: String
+  emailAddresses: [EmailAddressInput]
   endOfTourDate: Instant
   gender: String
   interlocutor: Boolean!

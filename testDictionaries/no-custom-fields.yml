@@ -416,6 +416,8 @@ fields:
       label: Email
       placeholder: Only the following email domain names are allowed. ( example.com, cmil.mil, mission.ita, nato.int, *.isaf.nato.int )
       optional: false
+    emailAddresses:
+      label: Email addresses
     phoneNumber:
       label: Phone
     country:
@@ -561,6 +563,8 @@ fields:
         member: Member
         deputy: Deputy
         leader: Leader
+    emailAddresses:
+      label: Email addresses
     authorizationGroups:
       label: Authorization groups
 
@@ -590,6 +594,8 @@ fields:
     profile:
       label: Profile
       placeholder: Fill in the profile of this organization
+    emailAddresses:
+      label: Email addresses
     authorizationGroups:
       label: Authorization groups
     assessments:
@@ -679,6 +685,7 @@ fields:
         - openIdSubject
         - authorizationGroups
         - emailAddress
+        - emailAddresses
         - phoneNumber
         - country
         - rank
@@ -723,6 +730,7 @@ fields:
         - country
         - birthday
         - emailAddress
+        - emailAddresses
         - politicalPosition
         - rank
         - gender

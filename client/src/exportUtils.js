@@ -3,6 +3,12 @@ import { SEARCH_OBJECT_TYPES } from "actions"
 import API from "api"
 import FileSaver from "file-saver"
 
+const GQL_EMAIL_ADDRESSES = `
+  emailAddresses(network: $emailNetwork) {
+    network
+    address
+  }
+`
 const GQL_GET_ORGANIZATION_LIST = gql`
   fragment organizations on Query {
     organizations: organizationList(query: $organizationQuery) {
@@ -14,6 +20,7 @@ const GQL_GET_ORGANIZATION_LIST = gql`
         shortName
         longName
         identificationCode
+        ${GQL_EMAIL_ADDRESSES}
       }
     }
   }
@@ -29,6 +36,7 @@ const GQL_GET_PERSON_LIST = gql`
         name
         rank
         emailAddress
+        ${GQL_EMAIL_ADDRESSES}
         position {
           uuid
           name
@@ -63,6 +71,7 @@ const GQL_GET_POSITION_LIST = gql`
         type
         role
         status
+        ${GQL_EMAIL_ADDRESSES}
         location {
           uuid
           name
@@ -233,6 +242,7 @@ const GQL_GET_DATA = gql`
     $locationQuery: LocationSearchQueryInput
     $includeReports: Boolean!
     $reportQuery: ReportSearchQueryInput
+    $emailNetwork: String
   ) {
     ...organizations @include(if: $includeOrganizations)
     ...people @include(if: $includePeople)
@@ -309,6 +319,7 @@ export const exportResults = (
       sortBy: "ENGAGEMENT_DATE",
       sortOrder: "DESC"
     })
+  const { emailNetwork } = searchQueryParams
   const variables = {
     includeOrganizations,
     organizationQuery,
@@ -321,7 +332,8 @@ export const exportResults = (
     includeLocations,
     locationQuery,
     includeReports,
-    reportQuery
+    reportQuery,
+    emailNetwork
   }
   return API.queryExport(GQL_GET_DATA, variables, exportType)
     .then(blob => {

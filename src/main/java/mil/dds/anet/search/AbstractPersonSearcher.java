@@ -108,8 +108,11 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
     }
 
     if (query.getEmailNetwork() != null) {
-      // TODO: support multiple emailAddress networks
-      qb.addIsNotNullOrEmptyClause("\"emailAddress\"");
+      qb.addFromClause("JOIN \"emailAddresses\" \"pplEmail\""
+          + " ON \"pplEmail\".\"relatedObjectType\" = '" + PersonDao.TABLE_NAME + "'"
+          + " AND \"pplEmail\".\"relatedObjectUuid\" = people.uuid");
+      qb.addStringEqualsClause("emailNetwork", "\"pplEmail\".network", query.getEmailNetwork());
+      qb.addIsNotNullOrEmptyClause("\"pplEmail\".address");
     }
 
     addOrderByClauses(qb, query);

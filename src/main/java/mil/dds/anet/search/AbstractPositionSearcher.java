@@ -122,8 +122,11 @@ public abstract class AbstractPositionSearcher
     }
 
     if (query.getEmailNetwork() != null) {
-      // TODO: check for emailAddress
-      qb.addWhereClause("FALSE");
+      qb.addFromClause("JOIN \"emailAddresses\" \"posEmail\""
+          + " ON \"posEmail\".\"relatedObjectType\" = '" + PositionDao.TABLE_NAME + "'"
+          + " AND \"posEmail\".\"relatedObjectUuid\" = positions.uuid");
+      qb.addStringEqualsClause("emailNetwork", "\"posEmail\".network", query.getEmailNetwork());
+      qb.addIsNotNullOrEmptyClause("\"posEmail\".address");
     }
 
     addOrderByClauses(qb, query);

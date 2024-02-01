@@ -3,6 +3,7 @@ import API from "api"
 import AppContext from "components/AppContext"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 import DictionaryField from "components/DictionaryField"
+import EmailAddressTable from "components/EmailAddressTable"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
@@ -34,6 +35,10 @@ const GQL_GET_PERSON = gql`
       gender
       endOfTourDate
       code
+      emailAddresses {
+        network
+        address
+      }
       position {
         uuid
         name
@@ -160,6 +165,14 @@ const PersonPreview = ({ className, uuid }) => {
               wrappedComponent={PreviewField}
               dictProps={Settings.fields.person.emailAddress}
               value={person.emailAddress}
+            />
+
+            <DictionaryField
+              wrappedComponent={PreviewField}
+              dictProps={Settings.fields.person.emailAddresses}
+              value={
+                <EmailAddressTable emailAddresses={person.emailAddresses} />
+              }
             />
 
             <DictionaryField

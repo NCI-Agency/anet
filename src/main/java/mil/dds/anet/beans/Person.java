@@ -18,15 +18,14 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.recentActivity.Activity;
 import mil.dds.anet.beans.search.ReportSearchQuery;
-import mil.dds.anet.database.AuthorizationGroupDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.graphql.AllowUnverifiedUsers;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.InsertionOrderLinkedList;
 import mil.dds.anet.utils.Utils;
-import mil.dds.anet.views.AbstractCustomizableAnetBean;
+import mil.dds.anet.views.AbstractEmailableAnetBean;
 
-public class Person extends AbstractCustomizableAnetBean
+public class Person extends AbstractEmailableAnetBean
     implements Principal, RelatableObject, SubscribableObject, WithStatus, Comparable<Person> {
 
   private static final Comparator<Person> COMPARATOR =

@@ -1,6 +1,7 @@
 import { gql } from "@apollo/client"
 import API from "api"
 import DictionaryField from "components/DictionaryField"
+import EmailAddressTable from "components/EmailAddressTable"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import { Location, Position } from "models"
@@ -19,6 +20,10 @@ const GQL_GET_POSITION = gql`
       role
       status
       code
+      emailAddresses {
+        network
+        address
+      }
       organization {
         uuid
         shortName
@@ -125,6 +130,12 @@ const PositionPreview = ({ className, uuid }) => {
           wrappedComponent={PreviewField}
           dictProps={Settings.fields.position.code}
           value={position.code}
+        />
+
+        <DictionaryField
+          wrappedComponent={PreviewField}
+          dictProps={Settings.fields.position.emailAddresses}
+          value={<EmailAddressTable emailAddresses={position.emailAddresses} />}
         />
 
         <DictionaryField

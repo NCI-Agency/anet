@@ -4726,4 +4726,29 @@
 		</addColumn>
 	</changeSet>
 
+	<changeSet id="add-emailAddresses" author="gjvoosten">
+		<createTable tableName="emailAddresses">
+			<column name="network" type="varchar(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="address" type="varchar(255)">
+				<constraints nullable="false" />
+			</column>
+			<!-- The next two columns combined act as a generic foreign key reference to a (table name, uuid)-tuple -->
+			<column name="relatedObjectType" type="varchar(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="relatedObjectUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<!-- Related objects can have at most one email address per network -->
+		<addUniqueConstraint
+			tableName="emailAddresses"
+			columnNames="network, relatedObjectType, relatedObjectUuid"
+			constraintName="UQ_EmailAddressNetworkRelatedObject"
+		/>
+	</changeSet>
+
 </databaseChangeLog>

@@ -19,6 +19,7 @@ import mil.dds.anet.beans.Position.PositionType;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.config.AnetConfiguration;
+import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.graphql.AllowUnverifiedUsers;
 import mil.dds.anet.utils.AnetAuditLogger;
@@ -29,9 +30,11 @@ import mil.dds.anet.utils.Utils;
 
 public class PersonResource {
   private final PersonDao dao;
+  private final AnetObjectEngine engine;
   private final AnetConfiguration config;
 
   public PersonResource(AnetObjectEngine engine, AnetConfiguration config) {
+    this.engine = engine;
     this.dao = engine.getPersonDao();
     this.config = config;
   }
@@ -64,8 +67,7 @@ public class PersonResource {
     }
 
     final String positionUuid = DaoUtils.getUuid(p.getPosition());
-    if (positionUuid != null
-        && AnetObjectEngine.getInstance().getPositionDao().getByUuid(positionUuid) == null) {
+    if (positionUuid != null && engine.getPositionDao().getByUuid(positionUuid) == null) {
       throw new WebApplicationException("Position " + p.getPosition() + " does not exist",
           Status.BAD_REQUEST);
     }
@@ -79,9 +81,12 @@ public class PersonResource {
     Person created = dao.insert(p);
 
     if (DaoUtils.getUuid(created.getPosition()) != null) {
-      AnetObjectEngine.getInstance().getPositionDao().setPersonInPosition(created.getUuid(),
+      engine.getPositionDao().setPersonInPosition(created.getUuid(),
           DaoUtils.getUuid(created.getPosition()));
     }
+
+    engine.getEmailAddressDao().updateEmailAddresses(OrganizationDao.TABLE_NAME, created.getUuid(),
+        p.getEmailAddresses());
 
     DaoUtils.saveCustomSensitiveInformation(user, PersonDao.TABLE_NAME, created.getUuid(),
         p.getCustomSensitiveInformation());
@@ -137,20 +142,17 @@ public class PersonResource {
       if (existingPos == null && positionUuid != null) {
         // Update the position for this person.
         AuthUtils.assertSuperuser(user);
-        AnetObjectEngine.getInstance().getPositionDao().setPersonInPosition(DaoUtils.getUuid(p),
-            positionUuid);
+        engine.getPositionDao().setPersonInPosition(DaoUtils.getUuid(p), positionUuid);
         AnetAuditLogger.log("Person {} put in position {} by {}", p, p.getPosition(), user);
       } else if (existingPos != null && positionUuid == null) {
         // Remove this person from their position.
         AuthUtils.assertSuperuser(user);
-        AnetObjectEngine.getInstance().getPositionDao()
-            .removePersonFromPosition(existingPos.getUuid());
+        engine.getPositionDao().removePersonFromPosition(existingPos.getUuid());
         AnetAuditLogger.log("Person {} removed from position {} by {}", p, existingPos, user);
       } else if (existingPos != null && !existingPos.getUuid().equals(positionUuid)) {
         // Update the position for this person.
         AuthUtils.assertSuperuser(user);
-        AnetObjectEngine.getInstance().getPositionDao().setPersonInPosition(DaoUtils.getUuid(p),
-            positionUuid);
+        engine.getPositionDao().setPersonInPosition(DaoUtils.getUuid(p), positionUuid);
         AnetAuditLogger.log("Person {} put in position {} by {}", p, p.getPosition(), user);
       }
     }
@@ -178,8 +180,7 @@ public class PersonResource {
         }
         AnetAuditLogger.log("Person {} removed from position by {} because they are now inactive",
             p, user);
-        AnetObjectEngine.getInstance().getPositionDao()
-            .removePersonFromPosition(existingPos.getUuid());
+        engine.getPositionDao().removePersonFromPosition(existingPos.getUuid());
       }
     }
 
@@ -189,6 +190,9 @@ public class PersonResource {
     if (numRows == 0) {
       throw new WebApplicationException("Couldn't process person update", Status.NOT_FOUND);
     }
+
+    engine.getEmailAddressDao().updateEmailAddresses(PersonDao.TABLE_NAME, p.getUuid(),
+        p.getEmailAddresses());
 
     DaoUtils.saveCustomSensitiveInformation(user, PersonDao.TABLE_NAME, p.getUuid(),
         p.getCustomSensitiveInformation());
@@ -225,14 +229,13 @@ public class PersonResource {
     ResourceUtils.validateHistoryInput(p.getUuid(), p.getPreviousPositions(), true,
         existingPositionUuid);
 
-    if (AnetObjectEngine.getInstance().getPersonDao().hasHistoryConflict(p.getUuid(), null,
-        p.getPreviousPositions(), true)) {
+    if (dao.hasHistoryConflict(p.getUuid(), null, p.getPreviousPositions(), true)) {
       throw new WebApplicationException(
           "At least one of the positions in the history is occupied for the specified period.",
           Status.CONFLICT);
     }
 
-    final int numRows = AnetObjectEngine.getInstance().getPersonDao().updatePersonHistory(p);
+    final int numRows = dao.updatePersonHistory(p);
     AnetAuditLogger.log("History updated for person {} by {}", p, user);
     return numRows;
   }
@@ -326,6 +329,9 @@ public class PersonResource {
       throw new WebApplicationException("Couldn't process person update", Status.NOT_FOUND);
     }
 
+    engine.getEmailAddressDao().updateEmailAddresses(PersonDao.TABLE_NAME, p.getUuid(),
+        p.getEmailAddresses());
+
     AnetAuditLogger.log("Person {} updated by themselves", p);
     // GraphQL mutations *have* to return something, so we return the number of updated rows
     return numRows;
@@ -358,8 +364,7 @@ public class PersonResource {
     ResourceUtils.validateHistoryInput(winnerUuid, winner.getPreviousPositions(), true,
         winnerPositionUuid);
 
-    if (AnetObjectEngine.getInstance().getPersonDao().hasHistoryConflict(winnerUuid, loserUuid,
-        winner.getPreviousPositions(), true)) {
+    if (dao.hasHistoryConflict(winnerUuid, loserUuid, winner.getPreviousPositions(), true)) {
       throw new WebApplicationException(
           "At least one of the positions in the history is occupied for the specified period.",
           Status.CONFLICT);

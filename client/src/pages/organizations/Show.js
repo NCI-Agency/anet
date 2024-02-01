@@ -8,6 +8,7 @@ import AttachmentCard from "components/Attachment/AttachmentCard"
 import AuthorizationGroupTable from "components/AuthorizationGroupTable"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
+import EmailAddressTable from "components/EmailAddressTable"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
@@ -95,6 +96,10 @@ const GQL_GET_ORGANIZATION = gql`
       isSubscribed
       profile
       updatedAt
+      emailAddresses {
+        network
+        address
+      }
       location {
         ...locationFields
         lat
@@ -443,6 +448,18 @@ const OrganizationShow = ({ pageDispatchers }) => {
                     }
                   />
                 )}
+
+                <DictionaryField
+                  wrappedComponent={Field}
+                  dictProps={Settings.fields.organization.emailAddresses}
+                  name="emailAddresses"
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={
+                    <EmailAddressTable
+                      emailAddresses={organization.emailAddresses}
+                    />
+                  }
+                />
 
                 <DictionaryField
                   wrappedComponent={Field}

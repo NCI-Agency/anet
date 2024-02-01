@@ -45,6 +45,10 @@ const GQL_GET_PERSON = gql`
       gender
       endOfTourDate
       code
+      emailAddresses {
+        network
+        address
+      }
       position {
         uuid
         name

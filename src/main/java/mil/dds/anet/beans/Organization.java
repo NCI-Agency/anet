@@ -22,10 +22,10 @@ import mil.dds.anet.database.AuthorizationGroupDao;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
-import mil.dds.anet.views.AbstractCustomizableAnetBean;
+import mil.dds.anet.views.AbstractEmailableAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
-public class Organization extends AbstractCustomizableAnetBean
+public class Organization extends AbstractEmailableAnetBean
     implements RelatableObject, SubscribableObject, WithStatus {
 
   /** Pseudo uuid to represent all/top-level organization(s). */

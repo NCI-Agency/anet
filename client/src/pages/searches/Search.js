@@ -64,6 +64,12 @@ import REPORTS_ICON from "resources/reports.png"
 import TASKS_ICON from "resources/tasks.png"
 import Settings from "settings"
 
+const GQL_EMAIL_ADDRESSES = `
+  emailAddresses(network: $emailNetwork) {
+    network
+    address
+  }
+`
 const GQL_CREATE_SAVED_SEARCH = gql`
   mutation ($savedSearch: SavedSearchInput!) {
     createSavedSearch(savedSearch: $savedSearch) {
@@ -72,7 +78,10 @@ const GQL_CREATE_SAVED_SEARCH = gql`
   }
 `
 const GQL_GET_ORGANIZATION_LIST = gql`
-  query ($organizationQuery: OrganizationSearchQueryInput) {
+  query (
+    $organizationQuery: OrganizationSearchQueryInput
+    $emailNetwork: String
+  ) {
     organizationList(query: $organizationQuery) {
       pageNum
       pageSize
@@ -82,12 +91,13 @@ const GQL_GET_ORGANIZATION_LIST = gql`
         shortName
         longName
         identificationCode
+        ${GQL_EMAIL_ADDRESSES}
       }
     }
   }
 `
 const GQL_GET_PERSON_LIST = gql`
-  query ($personQuery: PersonSearchQueryInput) {
+  query ($personQuery: PersonSearchQueryInput, $emailNetwork: String) {
     personList(query: $personQuery) {
       pageNum
       pageSize
@@ -98,6 +108,7 @@ const GQL_GET_PERSON_LIST = gql`
         rank
         avatarUuid
         emailAddress
+        ${GQL_EMAIL_ADDRESSES}
         position {
           uuid
           name
@@ -120,7 +131,7 @@ const GQL_GET_PERSON_LIST = gql`
   }
 `
 const GQL_GET_POSITION_LIST = gql`
-  query ($positionQuery: PositionSearchQueryInput) {
+  query ($positionQuery: PositionSearchQueryInput, $emailNetwork: String) {
     positionList(query: $positionQuery) {
       pageNum
       pageSize
@@ -132,6 +143,7 @@ const GQL_GET_POSITION_LIST = gql`
         type
         role
         status
+        ${GQL_EMAIL_ADDRESSES}
         location {
           uuid
           name
@@ -194,7 +206,10 @@ const GQL_GET_LOCATION_LIST = gql`
   }
 `
 const GQL_GET_AUTHORIZATION_GROUP_LIST = gql`
-  query ($authorizationGroupQuery: AuthorizationGroupSearchQueryInput) {
+  query (
+    $authorizationGroupQuery: AuthorizationGroupSearchQueryInput
+    $emailNetwork: String
+  ) {
     authorizationGroupList(query: $authorizationGroupQuery) {
       pageNum
       pageSize
@@ -211,6 +226,7 @@ const GQL_GET_AUTHORIZATION_GROUP_LIST = gql`
             ... on Organization {
               uuid
               shortName
+              ${GQL_EMAIL_ADDRESSES}
             }
             ... on Person {
               uuid
@@ -218,11 +234,13 @@ const GQL_GET_AUTHORIZATION_GROUP_LIST = gql`
               rank
               avatarUuid
               emailAddress
+              ${GQL_EMAIL_ADDRESSES}
             }
             ... on Position {
               uuid
               type
               name
+              ${GQL_EMAIL_ADDRESSES}
             }
           }
         }
@@ -265,8 +283,10 @@ const Organizations = ({
     pageNum: queryParamsUnchanged ? pageNum : 0,
     pageSize: queryParams.pageSize || DEFAULT_PAGESIZE
   }
+  const { emailNetwork } = queryParams
   const { loading, error, data } = API.useApiQuery(GQL_GET_ORGANIZATION_LIST, {
-    organizationQuery
+    organizationQuery,
+    emailNetwork
   })
   const { done, result } = useBoilerplate({
     loading,
@@ -368,8 +388,10 @@ const People = ({
     pageNum: queryParamsUnchanged ? pageNum : 0,
     pageSize: queryParams.pageSize || DEFAULT_PAGESIZE
   }
+  const { emailNetwork } = queryParams
   const { loading, error, data } = API.useApiQuery(GQL_GET_PERSON_LIST, {
-    personQuery
+    personQuery,
+    emailNetwork
   })
   const { done, result } = useBoilerplate({
     loading,
@@ -467,8 +489,10 @@ const Positions = ({
     pageNum: queryParamsUnchanged ? pageNum : 0,
     pageSize: queryParams.pageSize || DEFAULT_PAGESIZE
   }
+  const { emailNetwork } = queryParams
   const { loading, error, data } = API.useApiQuery(GQL_GET_POSITION_LIST, {
-    positionQuery
+    positionQuery,
+    emailNetwork
   })
   const { done, result } = useBoilerplate({
     loading,
@@ -710,10 +734,12 @@ const AuthorizationGroups = ({
     pageNum: queryParamsUnchanged ? pageNum : 0,
     pageSize: queryParams.pageSize || DEFAULT_PAGESIZE
   }
+  const { emailNetwork } = queryParams
   const { loading, error, data } = API.useApiQuery(
     GQL_GET_AUTHORIZATION_GROUP_LIST,
     {
-      authorizationGroupQuery
+      authorizationGroupQuery,
+      emailNetwork
     }
   )
   const { done, result } = useBoilerplate({

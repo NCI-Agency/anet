@@ -1,6 +1,7 @@
 import { gql } from "@apollo/client"
 import API from "api"
 import Checkbox from "components/Checkbox"
+import EmailAddressList from "components/EmailAddressList"
 import LinkTo from "components/LinkTo"
 import {
   mapPageDispatchersToProps,
@@ -26,6 +27,10 @@ const GQL_GET_PERSON_LIST = gql`
         rank
         avatarUuid
         emailAddress
+        emailAddresses {
+          network
+          address
+        }
         position {
           uuid
           name
@@ -160,7 +165,11 @@ const BasePersonTable = ({
                         onChange={() => toggleSelection(person.uuid)}
                       />
                     </td>
-                    <td>{person.emailAddress}</td>
+                    <td>
+                      <EmailAddressList
+                        emailAddresses={person.emailAddresses}
+                      />
+                    </td>
                   </>
                 )}
                 <td>

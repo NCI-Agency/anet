@@ -8,6 +8,7 @@ TRUNCATE TABLE "authorizationGroupRelatedObjects" CASCADE;
 TRUNCATE TABLE "authorizationGroups" CASCADE;
 TRUNCATE TABLE "comments" CASCADE;
 TRUNCATE TABLE "customSensitiveInformation" CASCADE;
+TRUNCATE TABLE "emailAddresses" CASCADE;
 TRUNCATE TABLE "jobHistory" CASCADE;
 TRUNCATE TABLE "locations" CASCADE;
 TRUNCATE TABLE "noteRelatedObjects" CASCADE;
@@ -33,49 +34,119 @@ TRUNCATE TABLE "taskTaskedOrganizations" CASCADE;
 TRUNCATE TABLE "tasks" CASCADE;
 TRUNCATE TABLE "userActivities" CASCADE;
 
---Advisors
+-- Create people
 INSERT INTO people (uuid, name, status, "emailAddress", "phoneNumber", rank, biography, "user", "domainUsername", "openIdSubject", country, gender, "endOfTourDate", "createdAt", "updatedAt") VALUES
-  (uuid_generate_v4(), 'JACKSON, Jack', 0, 'hunter+jack@example.com', '123-456-78960', 'OF-9', 'Jack is an advisor in EF 2.1', true, 'jack', '89003390-168e-4dc3-a582-5b38ae264bdd', 'Germany', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'ELIZAWELL, Elizabeth', 0, 'hunter+liz@example.com', '+1-777-7777', 'Capt', 'Elizabeth is a test advisor we have in the database who is in EF 1.1', true, 'elizabeth', '06547ee2-dcc3-420c-96cb-5f3bb3793b4d', 'United States of America', 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+-- Advisors
+  ('b5d495af-44d5-4c35-851a-1039352a8307', 'JACKSON, Jack', 0, 'hunter+jack@example.com', '123-456-78960', 'OF-9', 'Jack is an advisor in EF 2.1', true, 'jack', '89003390-168e-4dc3-a582-5b38ae264bdd', 'Germany', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('a9d65d96-d107-45c3-bbaa-1133a354335b', 'ELIZAWELL, Elizabeth', 0, 'hunter+liz@example.com', '+1-777-7777', 'Capt', 'Elizabeth is a test advisor we have in the database who is in EF 1.1', true, 'elizabeth', '06547ee2-dcc3-420c-96cb-5f3bb3793b4d', 'United States of America', 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('00b19ebf-0d4d-4b0f-93c8-9023ccb59c49', 'SOLENOID, Selena', 0, 'hunter+selena@example.com', '+1-111-1111', 'CIV', 'Selena is a test advisor in EF 1.2', true, 'selena', 'ce1df48e-fd6e-4dc4-bc00-9bb65a0d6910', 'United States of America', 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 'ERINSON, Erin', 0, 'hunter+erin@example.com', '+9-23-2323-2323', 'CIV', 'Erin is an Advisor in EF 2.2 who can approve reports', true, 'erin', '04c29bab-7b20-4ff2-8583-8ad3dbcff4d6', 'Australia', 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'REINTON, Reina', 0, 'hunter+reina@example.com', '+23-23-11222', 'CIV', 'Reina is an Advisor in EF 2.2', true, 'reina', '5b585887-1c3d-4f47-bccb-cdfebfd6e919', 'Italy', 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('1ad0c049-6ce8-4890-84f6-5e6a364764c4', 'REINTON, Reina', 0, 'hunter+reina@example.com', '+23-23-11222', 'CIV', 'Reina is an Advisor in EF 2.2', true, 'reina', '5b585887-1c3d-4f47-bccb-cdfebfd6e919', 'Italy', 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('39d02d26-49eb-43b5-9cec-344777213a67', 'DVISOR, A', 0, 'hunter+advisor@example.com', '+444-44-4444', 'OF-2', 'A Dvisor was born for this job', true, 'advisor', 'd09a55cf-6aa4-4bbf-8bf3-055ddcb4d27c', 'Canada', 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'31cba227-f6c6-49e9-9483-fce441bea624', 'BRATTON, Creed', 0, 'creed+bratton@example.com', '+444-44-4444', 'CIV', 'Let me first settle in.', true, 'creed', 'efad3f0d-3cd0-40fc-ac7e-90a1fa343e89', 'United States of America', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'MALONE, Kevin', 0, 'kevin+malone@example.com', '+444-44-4444', 'CIV', 'Sometimes numbers just dont add up.', true, 'kevin', 'cf05120c-bb43-408f-93ac-609c996a9da5', 'United States of America', 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'GUIST, Lin', 0, 'lin+guist@example.com', '+444-44-4444', 'CIV', 'Lin can speak so many languages', true, 'lin', 'd8d9eb8f-acfd-40fa-91c7-1ddc4401b8da', 'United States of America', 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'PRETER, Inter', 0, 'inter+preter@example.com', '+444-44-4444', 'CIV', 'Inter is fluent in various languages', true, 'inter', '7a17af5d-7863-47b5-8034-4e2f79f3fa0b', 'United States of America', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
--- Advisor with no position for testing
-  (uuid_generate_v4(), 'NOPOSITION, Ihave', 0, 'hunter+noPosition@example.com', '+444-44-4545', 'OF-2', 'I need a career change', true, 'nopos', 'e88f6157-61bf-4d43-96eb-f65a91d927c0', 'Canada', 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'REPORTGUY, Ima', 0, 'ima+reportguy@example.com', '+444-44-4545', 'CIV', 'I need a career change', true, 'reportguy', NULL, 'France', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'REPORTGIRL, Ima', 0, 'ima+reportgirl@example.com', '+444-44-4545', 'CIV', 'I need a career change', true, 'reportgirl', NULL, 'Mexico', 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('31cba227-f6c6-49e9-9483-fce441bea624', 'BRATTON, Creed', 0, 'creed+bratton@example.com', '+444-44-4444', 'CIV', 'Let me first settle in.', true, 'creed', 'efad3f0d-3cd0-40fc-ac7e-90a1fa343e89', 'United States of America', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('d4e1ae87-e519-4ec6-b0a4-5c3b19a0183e', 'MALONE, Kevin', 0, 'kevin+malone@example.com', '+444-44-4444', 'CIV', 'Sometimes numbers just dont add up.', true, 'kevin', 'cf05120c-bb43-408f-93ac-609c996a9da5', 'United States of America', 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('02fdbd68-866f-457a-990c-fbd79bc9b96c', 'GUIST, Lin', 0, 'lin+guist@example.com', '+444-44-4444', 'CIV', 'Lin can speak so many languages', true, 'lin', 'd8d9eb8f-acfd-40fa-91c7-1ddc4401b8da', 'United States of America', 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('bcd9d5e4-bf6c-42de-9246-8116f2b23bdc', 'PRETER, Inter', 0, 'inter+preter@example.com', '+444-44-4444', 'CIV', 'Inter is fluent in various languages', true, 'inter', '7a17af5d-7863-47b5-8034-4e2f79f3fa0b', 'United States of America', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('c71f707a-667f-4713-9552-8510d69a308b', 'ROGERS, Ben', 0, 'ben+rogers@example.com', '+99-9999-9999', 'CIV', NULL, true, NULL, NULL, 'Italy', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('c033862b-a4ef-4043-acd5-a2b399a10f00', 'RIVERS, Kevin', 0, 'kevin+rivers@example.com', '+99-9999-9999', 'CIV', NULL, true, NULL, NULL, 'Italy', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+-- Advisors with no position for testing
+  ('bdd91de7-09c7-4f09-97e4-d3325bb92dab', 'NOPOSITION, Ihave', 0, 'hunter+noPosition@example.com', '+444-44-4545', 'OF-2', 'I need a career change', true, 'nopos', 'e88f6157-61bf-4d43-96eb-f65a91d927c0', 'Canada', 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('7914ceba-7f89-493b-bd03-eee7e19c60a8', 'REPORTGUY, Ima', 0, 'ima+reportguy@example.com', '+444-44-4545', 'CIV', 'I need a career change', true, 'reportguy', NULL, 'France', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('d9f3ee10-6e01-4d57-9916-67978608e9ba', 'REPORTGIRL, Ima', 0, 'ima+reportgirl@example.com', '+444-44-4545', 'CIV', 'I need a career change', true, 'reportgirl', NULL, 'Mexico', 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('7a15d0cc-520f-451c-80d8-399b4642c852', 'BEAU, Yoshie', 0, 'hunter+yoshie@example.com', '+1-202-7320', 'CIV', NULL, true, 'yoshie', 'b3f67185-77e7-42a0-a2eb-f0739077eab5', 'United States of America', 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('f73f5cc9-69fd-4ceb-81b9-a0a840914bd8', 'SHARTON, Shardul', 1, 'hunter+shardul@example.com', '+99-9999-9999', 'CIV', NULL, false, NULL, NULL, 'Italy', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 -- Interlocutors
   ('90fa5784-9e63-4353-8119-357bcd88e287', 'STEVESON, Steve', 0, 'hunter+steve@example.com', '+011-232-12324', 'LtCol', 'this is a sample person who could be a Interlocutor!', false, NULL, NULL, 'Afghanistan', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('6866ce4d-1f8c-4f78-bdc2-4767e9a859b0', 'ROGWELL, Roger', 0, 'hunter+roger@example.com', '+1-412-7324', 'Maj', 'Roger is another test person we have in the database', false, NULL, NULL, 'Afghanistan', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('237e8bf7-2ae4-4d49-b7c8-eca6a92d4767', 'TOPFERNESS, Christopf', 0, 'hunter+christopf@example.com', '+1-422222222', 'CIV', 'Christopf works in the MoD Office', false, NULL, NULL, 'Afghanistan', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'CHRISVILLE, Chris', 0, 'chrisville+chris@example.com', '+1-412-7324', 'Maj', 'Chris is another test person we have in the database', false, NULL, NULL, 'Afghanistan', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'KYLESON, Kyle', 0, 'kyleson+kyle@example.com', '+1-412-7324', 'CIV', 'Kyle is another test person we have in the database', false, NULL, NULL, 'Afghanistan', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'BEMERGED, Myposwill', 0, 'bemerged+myposwill@example.com', '+1-412-7324', 'CIV', 'Myposwill is a test person whose position will be merged', false, NULL, NULL, 'Afghanistan', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('5fa54ffd-cc90-493a-b4b1-73e9c4568177', 'CHRISVILLE, Chris', 0, 'chrisville+chris@example.com', '+1-412-7324', 'Maj', 'Chris is another test person we have in the database', false, NULL, NULL, 'Afghanistan', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('0c5a8ba7-7436-47fd-bead-b8393246a300', 'KYLESON, Kyle', 0, 'kyleson+kyle@example.com', '+1-412-7324', 'CIV', 'Kyle is another test person we have in the database', false, NULL, NULL, 'Afghanistan', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('cebeb179-2a64-4d0c-a06b-76e68f80b5e5', 'BEMERGED, Myposwill', 0, 'bemerged+myposwill@example.com', '+1-412-7324', 'CIV', 'Myposwill is a test person whose position will be merged', false, NULL, NULL, 'Afghanistan', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('3cb2076c-5317-47fe-86ad-76f298993917', 'MERGED, Duplicate Winner', 0, 'merged+winner@example.com', '+1-234-5678', 'CIV', 'Winner is a test person who will be merged', false, NULL, NULL, 'Afghanistan', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('c725aef3-cdd1-4baf-ac72-f28219b234e9', 'MERGED, Duplicate Loser', 0, 'merged+loser@example.com', '+1-876-5432', 'CTR', 'Loser is a test person who will be merged', false, NULL, NULL, 'Afghanistan', 'FEMALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('7d90bf90-b3b1-4e99-84bf-5e50b9dcc9d6', 'HUNTMAN, Hunter', 0, 'hunter+hunter@example.com', '+1-412-9314', 'CIV', NULL, false, NULL, NULL, 'United States of America', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('33f708e0-bf7c-47a0-baf1-730afa4f0c98', 'NICHOLSON, Nick', 0, 'hunter+nick@example.com', '+1-202-7324', 'CIV', NULL, true, 'nick', '2a1e98bd-13dc-49c9-a1c5-7137eacc0e8f', 'United States of America', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 -- Superusers
-  (uuid_generate_v4(), 'BOBTOWN, Bob', 0, 'hunter+bob@example.com', '+1-444-7324', 'CIV', 'Bob is a Superuser in EF 1.1', true, 'bob', '505c6bd9-e2d1-4f9e-83b0-ecc9279c42c5', 'United States of America', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'HENDERSON, Henry', 0, 'hunter+henry@example.com', '+2-456-7324', 'BGen', 'Henry is a Superuser in EF 2.1', true, 'henry', '04fbbc19-3bd9-4075-8dd8-bc8c741d8c3c', 'United States of America', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'JACOBSON, Jacob', 0, 'hunter+jacob@example.com', '+2-456-7324', 'CIV', 'Jacob is a Superuser in EF 2.2', true, 'jacob', '19fcef93-1b1a-472b-97f5-77f46cf6f3fd', 'Italy', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('98fa4da5-ec99-457b-a4bc-2aa9064e2ca7', 'BOBTOWN, Bob', 0, 'hunter+bob@example.com', '+1-444-7324', 'CIV', 'Bob is a Superuser in EF 1.1', true, 'bob', '505c6bd9-e2d1-4f9e-83b0-ecc9279c42c5', 'United States of America', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('ff0cec0b-8eca-48ee-82fe-addce6136f3b', 'HENDERSON, Henry', 0, 'hunter+henry@example.com', '+2-456-7324', 'BGen', 'Henry is a Superuser in EF 2.1', true, 'henry', '04fbbc19-3bd9-4075-8dd8-bc8c741d8c3c', 'United States of America', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('19fe53bb-90f4-4482-abfc-d85b85deabd9', 'JACOBSON, Jacob', 0, 'hunter+jacob@example.com', '+2-456-7324', 'CIV', 'Jacob is a Superuser in EF 2.2', true, 'jacob', '19fcef93-1b1a-472b-97f5-77f46cf6f3fd', 'Italy', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('f683335a-91e3-4788-aa3f-9eed384f4ac1', 'BECCABON, Rebecca', 0, 'hunter+rebecca@example.com', '+2-456-7324', 'CTR', 'Rebecca is a Superuser in EF 2.2', true, 'rebecca', '9eb4b898-6fe4-40f8-abca-e893424d75d1', 'Germany', 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'ANDERSON, Andrew', 0, 'hunter+andrew@example.com', '+1-412-7324', 'CIV', 'Andrew is the EF 1 Manager', true, 'andrew', '3276c85a-bf03-4591-a74b-56d70ac8eec0', 'United States of America', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'SCHRUTE, Dwight', 0, 'dwight+schrute@example.com', '+1-412-7324', 'CIV', 'Beets & Battlestar Galactica.', true, 'dwight', 'cb23f6a5-1321-4330-b972-22d98bff12af', 'United States of America', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'HALPERT, Jim', 0, 'jim+halpert@example.com', '+1-412-7324', 'CIV', 'Lets prank dwight.', true, 'jim', 'e8c81377-eaac-4ace-8aa6-7b255b53494c', 'United States of America', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
--- Administrator
-  (uuid_generate_v4(), 'DMIN, Arthur', '0', 'hunter+arthur@example.com', NULL, 'CIV', 'An administrator', true, 'arthur', 'abc72322-1452-4222-bb71-a0b3db435175', 'Albania', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'SCOTT, Michael', '0', 'michael+scott@example.com', NULL, 'CIV', 'Worlds best boss.', true, 'michael', 'bd482701-2342-4a50-ba92-d956007a8828', 'United States of America', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
---People
-  (uuid_generate_v4(), 'HUNTMAN, Hunter', 0, 'hunter+hunter@example.com', '+1-412-9314', 'CIV', NULL, false, NULL, NULL, 'United States of America', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'NICHOLSON, Nick', 0, 'hunter+nick@example.com', '+1-202-7324', 'CIV', NULL, true, 'nick', '2a1e98bd-13dc-49c9-a1c5-7137eacc0e8f', 'United States of America', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'BEAU, Yoshie', 0, 'hunter+yoshie@example.com', '+1-202-7320', 'CIV', NULL, true, 'yoshie', 'b3f67185-77e7-42a0-a2eb-f0739077eab5', 'United States of America', 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'SHARTON, Shardul', 1, 'hunter+shardul@example.com', '+99-9999-9999', 'CIV', NULL, false, NULL, NULL, 'Italy', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'ROGERS, Ben', 0, 'ben+rogers@example.com', '+99-9999-9999', 'CIV', NULL, true, NULL, NULL, 'Italy', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'RIVERS, Kevin', 0, 'kevin+rivers@example.com', '+99-9999-9999', 'CIV', NULL, true, NULL, NULL, 'Italy', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  ('1a557db0-5af5-4ea3-b926-28b5f2e88bf7', 'ANDERSON, Andrew', 0, 'hunter+andrew@example.com', '+1-412-7324', 'CIV', 'Andrew is the EF 1 Manager', true, 'andrew', '3276c85a-bf03-4591-a74b-56d70ac8eec0', 'United States of America', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('ad442c97-ca89-4c63-9a4d-336f17ca856b', 'SCHRUTE, Dwight', 0, 'dwight+schrute@example.com', '+1-412-7324', 'CIV', 'Beets & Battlestar Galactica.', true, 'dwight', 'cb23f6a5-1321-4330-b972-22d98bff12af', 'United States of America', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('b6754f19-b67e-4603-bfe6-af8c61760eef', 'HALPERT, Jim', 0, 'jim+halpert@example.com', '+1-412-7324', 'CIV', 'Lets prank dwight.', true, 'jim', 'e8c81377-eaac-4ace-8aa6-7b255b53494c', 'United States of America', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+-- Administrators
+  ('87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'DMIN, Arthur', '0', 'hunter+arthur@example.com', NULL, 'CIV', 'An administrator', true, 'arthur', 'abc72322-1452-4222-bb71-a0b3db435175', 'Albania', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('46ba6a73-0cd7-4efb-8e99-215e98cc5987', 'SCOTT, Michael', '0', 'michael+scott@example.com', NULL, 'CIV', 'Worlds best boss.', true, 'michael', 'bd482701-2342-4a50-ba92-d956007a8828', 'United States of America', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+-- Email addresses for people
+INSERT INTO "emailAddresses" (network, address, "relatedObjectType", "relatedObjectUuid") VALUES
+-- Advisors
+  ('Internet', 'jack@example.com', 'people', 'b5d495af-44d5-4c35-851a-1039352a8307'),
+  ('NS', 'jack@example.ns', 'people', 'b5d495af-44d5-4c35-851a-1039352a8307'),
+  ('Internet', 'liz@example.com', 'people', 'a9d65d96-d107-45c3-bbaa-1133a354335b'),
+  ('NS', 'liz@example.ns', 'people', 'a9d65d96-d107-45c3-bbaa-1133a354335b'),
+  ('Internet', 'selena@example.com', 'people', '00b19ebf-0d4d-4b0f-93c8-9023ccb59c49'),
+  ('NS', 'selena@example.ns', 'people', '00b19ebf-0d4d-4b0f-93c8-9023ccb59c49'),
+  ('Internet', 'erin@example.com', 'people', 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9'),
+  ('NS', 'erin@example.ns', 'people', 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9'),
+  ('Internet', 'reina@example.com', 'people', '1ad0c049-6ce8-4890-84f6-5e6a364764c4'),
+  ('NS', 'reina@example.ns', 'people', '1ad0c049-6ce8-4890-84f6-5e6a364764c4'),
+  ('Internet', 'advisor@example.com', 'people', '39d02d26-49eb-43b5-9cec-344777213a67'),
+  ('NS', 'advisor@example.ns', 'people', '39d02d26-49eb-43b5-9cec-344777213a67'),
+  ('Internet', 'creed.bratton@example.com', 'people', '31cba227-f6c6-49e9-9483-fce441bea624'),
+  ('NS', 'creed.bratton@example.ns', 'people', '31cba227-f6c6-49e9-9483-fce441bea624'),
+  ('Internet', 'kevin.malone@example.com', 'people', 'd4e1ae87-e519-4ec6-b0a4-5c3b19a0183e'),
+  ('NS', 'kevin.malone@example.ns', 'people', 'd4e1ae87-e519-4ec6-b0a4-5c3b19a0183e'),
+  ('Internet', 'lin.guist@example.com', 'people', '02fdbd68-866f-457a-990c-fbd79bc9b96c'),
+  ('NS', 'lin.guist@example.ns', 'people', '02fdbd68-866f-457a-990c-fbd79bc9b96c'),
+  ('Internet', 'inter.preter@example.com', 'people', 'bcd9d5e4-bf6c-42de-9246-8116f2b23bdc'),
+  ('NS', 'inter.preter@example.ns', 'people', 'bcd9d5e4-bf6c-42de-9246-8116f2b23bdc'),
+  ('Internet', 'yoshie@example.com', 'people', '7a15d0cc-520f-451c-80d8-399b4642c852'),
+  ('NS', 'yoshie@example.ns', 'people', '7a15d0cc-520f-451c-80d8-399b4642c852'),
+  ('Internet', 'shardul@example.com', 'people', 'f73f5cc9-69fd-4ceb-81b9-a0a840914bd8'),
+  ('NS', 'shardul@example.ns', 'people', 'f73f5cc9-69fd-4ceb-81b9-a0a840914bd8'),
+  ('Internet', 'ben+rogers@example.com', 'people', 'c71f707a-667f-4713-9552-8510d69a308b'),
+  ('NS', 'ben+rogers@example.ns', 'people', 'c71f707a-667f-4713-9552-8510d69a308b'),
+  ('Internet', 'kevin+rivers@example.com', 'people', 'c033862b-a4ef-4043-acd5-a2b399a10f00'),
+  ('NS', 'kevin+rivers@example.ns', 'people', 'c033862b-a4ef-4043-acd5-a2b399a10f00'),
+-- Advisors with no position for testing
+  ('Internet', 'noPosition@example.com', 'people', 'bdd91de7-09c7-4f09-97e4-d3325bb92dab'),
+  ('NS', 'noPosition@example.ns', 'people', 'bdd91de7-09c7-4f09-97e4-d3325bb92dab'),
+  ('Internet', 'ima.reportguy@example.com', 'people', '7914ceba-7f89-493b-bd03-eee7e19c60a8'),
+  ('NS', 'ima.reportguy@example.ns', 'people', '7914ceba-7f89-493b-bd03-eee7e19c60a8'),
+  ('Internet', 'ima.reportgirl@example.com', 'people', 'd9f3ee10-6e01-4d57-9916-67978608e9ba'),
+  ('NS', 'ima.reportgirl@example.ns', 'people', 'd9f3ee10-6e01-4d57-9916-67978608e9ba'),
+-- Interlocutors
+  ('Internet', 'steve@example.com', 'people', '90fa5784-9e63-4353-8119-357bcd88e287'),
+  ('Internet', 'roger@example.com', 'people', '6866ce4d-1f8c-4f78-bdc2-4767e9a859b0'),
+  ('Internet', 'christopf@example.com', 'people', '237e8bf7-2ae4-4d49-b7c8-eca6a92d4767'),
+  ('Internet', 'chrisville.chris@example.com', 'people', '5fa54ffd-cc90-493a-b4b1-73e9c4568177'),
+  ('Internet', 'kyleson.kyle@example.com', 'people', '0c5a8ba7-7436-47fd-bead-b8393246a300'),
+  ('Internet', 'bemerged.myposwill@example.com', 'people', 'cebeb179-2a64-4d0c-a06b-76e68f80b5e5'),
+  ('Internet', 'merged.winner@example.com', 'people', '3cb2076c-5317-47fe-86ad-76f298993917'),
+  ('Internet', 'merged.loser@example.com', 'people', 'c725aef3-cdd1-4baf-ac72-f28219b234e9'),
+  ('Internet', 'hunter@example.com', 'people', '7d90bf90-b3b1-4e99-84bf-5e50b9dcc9d6'),
+  ('Internet', 'nick@example.com', 'people', '33f708e0-bf7c-47a0-baf1-730afa4f0c98'),
+-- Superusers
+  ('Internet', 'bob@example.com', 'people', '98fa4da5-ec99-457b-a4bc-2aa9064e2ca7'),
+  ('NS', 'bob@example.ns', 'people', '98fa4da5-ec99-457b-a4bc-2aa9064e2ca7'),
+  ('Internet', 'henry@example.com', 'people', 'ff0cec0b-8eca-48ee-82fe-addce6136f3b'),
+  ('NS', 'henry@example.ns', 'people', 'ff0cec0b-8eca-48ee-82fe-addce6136f3b'),
+  ('Internet', 'jacob@example.com', 'people', '19fe53bb-90f4-4482-abfc-d85b85deabd9'),
+  ('NS', 'jacob@example.ns', 'people', '19fe53bb-90f4-4482-abfc-d85b85deabd9'),
+  ('Internet', 'rebecca@example.com', 'people', 'f683335a-91e3-4788-aa3f-9eed384f4ac1'),
+  ('NS', 'rebecca@example.ns', 'people', 'f683335a-91e3-4788-aa3f-9eed384f4ac1'),
+  ('Internet', 'andrew@example.com', 'people', '1a557db0-5af5-4ea3-b926-28b5f2e88bf7'),
+  ('NS', 'andrew@example.ns', 'people', '1a557db0-5af5-4ea3-b926-28b5f2e88bf7'),
+  ('Internet', 'dwight.schrute@example.com', 'people', 'ad442c97-ca89-4c63-9a4d-336f17ca856b'),
+  ('NS', 'dwight.schrute@example.ns', 'people', 'ad442c97-ca89-4c63-9a4d-336f17ca856b'),
+  ('Internet', 'jim.halpert@example.com', 'people', 'b6754f19-b67e-4603-bfe6-af8c61760eef'),
+  ('NS', 'jim.halpert@example.ns', 'people', 'b6754f19-b67e-4603-bfe6-af8c61760eef'),
+-- Administrators
+  ('Internet', 'arthur@example.com', 'people', '87fdbc6a-3109-4e11-9702-a894d6ca31ef'),
+  ('NS', 'arthur@example.ns', 'people', '87fdbc6a-3109-4e11-9702-a894d6ca31ef'),
+  ('Internet', 'michael.scott@example.com', 'people', '46ba6a73-0cd7-4efb-8e99-215e98cc5987'),
+  ('NS', 'michael.scott@example.ns', 'people', '46ba6a73-0cd7-4efb-8e99-215e98cc5987');
 
 -- Create locations
 INSERT INTO locations (uuid, type, name, lat, lng, "createdAt", "updatedAt") VALUES
@@ -155,6 +226,17 @@ INSERT INTO positions (uuid, name, type, role, status, "currentPersonUuid", "loc
   (uuid_generate_v4(), 'EF 9 Approver', 0, 0, 0, NULL, '7339f9e3-99d1-497a-9e3b-1269c4c287fe', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'LNG Advisor A', 0, 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'LNG Advisor B', 0, 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+-- Email addresses for advisor positions
+INSERT INTO "emailAddresses" (network, address, "relatedObjectType", "relatedObjectUuid") VALUES
+  ('Internet', 'ef11advisorG@example.com', 'positions', '888d6c4b-deaa-4218-b8fd-abfb7c81a4c6'),
+  ('NS', 'ef11advisorG@example.ns', 'positions', '888d6c4b-deaa-4218-b8fd-abfb7c81a4c6'),
+  ('Internet', 'ef12advisor@example.com', 'positions', '525d6c4b-deaa-4218-b8fd-abfb7c81a4c2'),
+  ('NS', 'ef12advisor@example.ns', 'positions', '525d6c4b-deaa-4218-b8fd-abfb7c81a4c2'),
+  ('Internet', 'ef22advisorSewingFacilities@example.com', 'positions', '2b7d86a9-3ed4-4843-ab4e-136c3ab109bf'),
+  ('NS', 'ef22advisorSewingFacilities@example.ns', 'positions', '2b7d86a9-3ed4-4843-ab4e-136c3ab109bf'),
+  ('Internet', 'ef51advisorQualityAssurance@example.com', 'positions', '05c42ce0-34a0-4391-8b2f-c4cd85ee6b47'),
+  ('NS', 'ef51advisorQualityAssurance@example.ns', 'positions', '05c42ce0-34a0-4391-8b2f-c4cd85ee6b47');
 
 -- Put Andrew in the EF 1 Manager Billet
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
@@ -316,6 +398,15 @@ INSERT INTO organizations(uuid, "shortName", "longName", "parentOrgUuid", "creat
   (uuid_generate_v4(), 'EF 5.4', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 5'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 6.1', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 6'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 6.2', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 6'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+-- Email addresses for organizations
+INSERT INTO "emailAddresses" (network, address, "relatedObjectType", "relatedObjectUuid") VALUES
+  ('Internet', 'lng@example.com', 'organizations', '70193ee9-05b4-4aac-80b5-75609825db9f'),
+  ('NS', 'lng@example.ns', 'organizations', '70193ee9-05b4-4aac-80b5-75609825db9f'),
+  ('Internet', 'ef22@example.com', 'organizations', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b'),
+  ('NS', 'ef22@example.ns', 'organizations', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b'),
+  ('Internet', 'ef51@example.com', 'organizations', '7f939a44-b9e4-48e0-98f5-7d0ea38a6ecf'),
+  ('NS', 'ef51@example.ns', 'organizations', '7f939a44-b9e4-48e0-98f5-7d0ea38a6ecf');
 
 -- Add some positions to organizations
 UPDATE positions SET "organizationUuid" = (SELECT uuid FROM organizations WHERE "shortName" ='EF 1') WHERE name LIKE 'EF 1 %';
@@ -514,6 +605,23 @@ INSERT INTO positions (uuid, name, code, type, role, status, "currentPersonUuid"
   (N'e87f0f60-ad13-4c1c-96f7-672c595b81c7', 'Merge Two', 'MOD-M2-HQ-00001', 0, 2, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (N'885dd6bf-4647-4ef7-9bc4-4dd2826064bb', 'Chief of Merge People Test 1', 'MOI-MPT1-HQ-00001', 0, 1, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Interior'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (N'4dc40a27-19ae-4e03-a4f3-55b2c768725f', 'Chief of Merge People Test 2', 'MOI-MPT2-HQ-00001', 0, 1, 0, NULL, (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Interior'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+-- Email addresses for interlocutor positions
+INSERT INTO "emailAddresses" (network, address, "relatedObjectType", "relatedObjectUuid") VALUES
+  ('Internet', 'minister@mod.example.com', 'positions', '879121d2-d265-4d26-8a2b-bd073caa474e'),
+  ('Internet', 'chiefOfStaff@mod.example.com', 'positions', '1a45ccd6-40e3-4c51-baf5-15e7e9b8f03d'),
+  ('Internet', 'executiveAssistant@mod.example.com', 'positions', '4be6baa5-c611-4c70-a2a8-c01bf9b7d2bc'),
+  ('Internet', 'planningCaptain@mod.example.com', 'positions', 'a9ab507e-cda9-469b-8d9e-b47445852af4'),
+  ('Internet', 'directorOfBudgeting@mod.example.com', 'positions', '61371573-eefc-4b85-81a0-27d6c0b78c58'),
+  ('Internet', 'writerOfExpenses@mod.example.com', 'positions', 'c2e3fdff-2b36-4ef9-9790-afbca0c53f57'),
+  ('Internet', 'costAdder@mod.example.com', 'positions', 'c065c2b6-a04a-4ead-a3a2-5aabf921446d'),
+  ('Internet', 'chiefOfPolice@moi.example.com', 'positions', '731ee4f9-f21b-4166-b03d-d7ba5e7f735c'),
+  ('Internet', 'chiefOfTests@moi.example.com', 'positions', '18f42d92-ada7-11eb-8529-0242ac130003'),
+  ('Internet', 'directorOfTests@mod.example.com', 'positions', '338e4d54-ada7-11eb-8529-0242ac130003'),
+  ('Internet', 'mergeOne@mod.example.com', 'positions', '25fe500c-3503-4ba8-a9a4-09b29b50c1f1'),
+  ('Internet', 'mergeTwo@mod.example.com', 'positions', 'e87f0f60-ad13-4c1c-96f7-672c595b81c7'),
+  ('Internet', 'chiefOfMergePeopleTest1@moi.example.com', 'positions', '885dd6bf-4647-4ef7-9bc4-4dd2826064bb'),
+  ('Internet', 'chiefOfMergePeopleTest2@moi.example.com', 'positions', '4dc40a27-19ae-4e03-a4f3-55b2c768725f');
 
 -- Put Steve into a Tashkil and associate with the EF 1.1 Advisor A Billet
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES

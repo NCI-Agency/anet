@@ -1,6 +1,7 @@
 import { gql } from "@apollo/client"
 import API from "api"
 import Checkbox from "components/Checkbox"
+import EmailAddressList from "components/EmailAddressList"
 import LinkTo from "components/LinkTo"
 import {
   mapPageDispatchersToProps,
@@ -124,9 +125,12 @@ const BaseOrganizationTable = ({
           <thead>
             <tr>
               {allowSelection && (
-                <th style={{ verticalAlign: "middle", textAlign: "center" }}>
-                  <Checkbox checked={isAllSelected()} onChange={toggleAll} />
-                </th>
+                <>
+                  <th style={{ verticalAlign: "middle", textAlign: "center" }}>
+                    <Checkbox checked={isAllSelected()} onChange={toggleAll} />
+                  </th>
+                  <th>Email</th>
+                </>
               )}
               <th>Name</th>
               {showDelete && <th />}
@@ -136,12 +140,19 @@ const BaseOrganizationTable = ({
             {Organization.map(organizations, org => (
               <tr key={org.uuid}>
                 {allowSelection && (
-                  <td style={{ verticalAlign: "middle", textAlign: "center" }}>
-                    <Checkbox
-                      checked={isSelected(org.uuid)}
-                      onChange={() => toggleSelection(org.uuid)}
-                    />
-                  </td>
+                  <>
+                    <td
+                      style={{ verticalAlign: "middle", textAlign: "center" }}
+                    >
+                      <Checkbox
+                        checked={isSelected(org.uuid)}
+                        onChange={() => toggleSelection(org.uuid)}
+                      />
+                    </td>
+                    <td>
+                      <EmailAddressList emailAddresses={org.emailAddresses} />
+                    </td>
+                  </>
                 )}
                 <td>
                   <LinkTo modelType="Organization" model={org} />

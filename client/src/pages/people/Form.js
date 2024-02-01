@@ -15,6 +15,7 @@ import {
   updateCustomSensitiveInformation
 } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
+import EmailAddressInputTable from "components/EmailAddressInputTable"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
@@ -570,6 +571,22 @@ const PersonForm = ({
                   name="emailAddress"
                   type="email"
                   component={FieldHelper.InputField}
+                />
+                <DictionaryField
+                  wrappedComponent={FastField}
+                  dictProps={Settings.fields.person.emailAddresses}
+                  name="emailAddresses"
+                  component={FieldHelper.SpecialField}
+                  widget={
+                    <EmailAddressInputTable
+                      emailAddresses={values.emailAddresses}
+                      handleChange={value => {
+                        // validation will be done by setFieldValue
+                        setFieldTouched("emailAddresses", true, false)
+                        setFieldValue("emailAddresses", value, true)
+                      }}
+                    />
+                  }
                 />
                 <DictionaryField
                   wrappedComponent={FastField}

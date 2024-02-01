@@ -1,9 +1,10 @@
 import Checkbox from "components/Checkbox"
+import EmailAddressList from "components/EmailAddressList"
 import LinkTo from "components/LinkTo"
 import { mapPageDispatchersToProps } from "components/Page"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _get from "lodash/get"
-import { AuthorizationGroup, Person } from "models"
+import { AuthorizationGroup } from "models"
 import PropTypes from "prop-types"
 import React from "react"
 import { Table } from "react-bootstrap"
@@ -70,7 +71,16 @@ const AuthorizationGroupTable = ({
                     onChange={() => toggleSelection(authorizationGroup.uuid)}
                   />
                 </td>
-                <td>{getEmailAddresses(authorizationGroup)}</td>
+                <td>
+                  {authorizationGroup.authorizationGroupRelatedObjects.map(
+                    agro => (
+                      <EmailAddressList
+                        key={agro.relatedObjectUuid}
+                        emailAddresses={agro.relatedObject?.emailAddresses}
+                      />
+                    )
+                  )}
+                </td>
               </>
             )}
             <td>
@@ -119,26 +129,6 @@ const AuthorizationGroupTable = ({
       </UltimatePaginationTopDown>
     </div>
   )
-
-  function getEmailAddresses(authorizationGroup) {
-    return authorizationGroup.authorizationGroupRelatedObjects
-      .map(agro => {
-        // TODO: support multiple emailAddress networks
-        if (
-          agro.relatedObjectType === Person.relatedObjectType &&
-          agro.relatedObject.emailAddress
-        ) {
-          return {
-            uuid: agro.relatedObjectUuid,
-            emailAddress: agro.relatedObject.emailAddress
-          }
-        }
-        // TODO: support emailAddress for organizations and positions
-        return undefined
-      })
-      .filter(Boolean)
-      .map(e => <div key={e.uuid}>{e.emailAddress}</div>)
-  }
 }
 
 AuthorizationGroupTable.propTypes = {

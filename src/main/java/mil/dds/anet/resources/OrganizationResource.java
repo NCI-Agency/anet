@@ -99,6 +99,9 @@ public class OrganizationResource {
       }
     }
 
+    engine.getEmailAddressDao().updateEmailAddresses(OrganizationDao.TABLE_NAME, created.getUuid(),
+        org.getEmailAddresses());
+
     DaoUtils.saveCustomSensitiveInformation(user, OrganizationDao.TABLE_NAME, created.getUuid(),
         org.getCustomSensitiveInformation());
 
@@ -189,6 +192,9 @@ public class OrganizationResource {
         existing.loadApprovalSteps(engine.getContext()).join();
     Utils.updateApprovalSteps(org, org.getPlanningApprovalSteps(), existingPlanningApprovalSteps,
         org.getApprovalSteps(), existingApprovalSteps);
+
+    engine.getEmailAddressDao().updateEmailAddresses(OrganizationDao.TABLE_NAME, org.getUuid(),
+        org.getEmailAddresses());
 
     return numRows;
   }

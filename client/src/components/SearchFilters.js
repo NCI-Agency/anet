@@ -102,7 +102,8 @@ const EmailFilter = {
   deserializer: deserializeSelectFilter,
   props: {
     queryKey: "emailNetwork",
-    options: Settings.emailNetworks
+    options: Settings.emailNetworks,
+    labels: Settings.emailNetworks
   }
 }
 

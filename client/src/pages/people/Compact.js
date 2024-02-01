@@ -14,6 +14,7 @@ import CompactTable, {
 } from "components/Compact"
 import { mapReadonlyCustomFieldsToComps } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
+import EmailAddressTable from "components/EmailAddressTable"
 import * as FieldHelper from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import {
@@ -62,6 +63,10 @@ const GQL_GET_PERSON = gql`
       gender
       endOfTourDate
       code
+      emailAddresses {
+        network
+        address
+      }
       position {
         uuid
         name
@@ -392,6 +397,9 @@ const CompactPersonView = ({ pageDispatchers }) => {
       biography: <RichTextEditor readOnly value={person.biography} />,
       user: utils.formatBoolean(person.user),
       emailAddress: emailHumanValue,
+      emailAddresses: (
+        <EmailAddressTable emailAddresses={person.emailAddresses} />
+      ),
       endOfTourDate:
         person.endOfTourDate &&
         moment(person.endOfTourDate).format(

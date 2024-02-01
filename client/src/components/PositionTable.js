@@ -1,6 +1,7 @@
 import { gql } from "@apollo/client"
 import API from "api"
 import Checkbox from "components/Checkbox"
+import EmailAddressList from "components/EmailAddressList"
 import LinkTo from "components/LinkTo"
 import {
   mapPageDispatchersToProps,
@@ -144,9 +145,12 @@ const BasePositionTable = ({
           <thead>
             <tr>
               {allowSelection && (
-                <th style={{ verticalAlign: "middle", textAlign: "center" }}>
-                  <Checkbox checked={isAllSelected()} onChange={toggleAll} />
-                </th>
+                <>
+                  <th style={{ verticalAlign: "middle", textAlign: "center" }}>
+                    <Checkbox checked={isAllSelected()} onChange={toggleAll} />
+                  </th>
+                  <th>Email</th>
+                </>
               )}
               <th>Name</th>
               <th>Location</th>
@@ -165,14 +169,19 @@ const BasePositionTable = ({
               return (
                 <tr key={pos.uuid}>
                   {allowSelection && (
-                    <td
-                      style={{ verticalAlign: "middle", textAlign: "center" }}
-                    >
-                      <Checkbox
-                        checked={isSelected(pos.uuid)}
-                        onChange={() => toggleSelection(pos.uuid)}
-                      />
-                    </td>
+                    <>
+                      <td
+                        style={{ verticalAlign: "middle", textAlign: "center" }}
+                      >
+                        <Checkbox
+                          checked={isSelected(pos.uuid)}
+                          onChange={() => toggleSelection(pos.uuid)}
+                        />
+                      </td>
+                      <td>
+                        <EmailAddressList emailAddresses={pos.emailAddresses} />
+                      </td>
+                    </>
                   )}
                   <td>
                     <LinkTo modelType="Position" model={pos}>

@@ -15,6 +15,8 @@ import {
   customFieldsJSONString
 } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
+import EmailAddressInputTable from "components/EmailAddressInputTable"
+import EmailAddressTable from "components/EmailAddressTable"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
@@ -243,6 +245,17 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                     />
                     <DictionaryField
                       wrappedComponent={FastField}
+                      dictProps={Settings.fields.organization.emailAddresses}
+                      name="emailAddresses"
+                      component={FieldHelper.ReadonlyField}
+                      humanValue={
+                        <EmailAddressTable
+                          emailAddresses={values.emailAddresses}
+                        />
+                      }
+                    />
+                    <DictionaryField
+                      wrappedComponent={FastField}
                       dictProps={Settings.fields.organization.status}
                       name="status"
                       component={FieldHelper.ReadonlyField}
@@ -334,6 +347,22 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                           fields={Location.autocompleteQuery}
                           valueKey="name"
                           addon={LOCATIONS_ICON}
+                        />
+                      }
+                    />
+                    <DictionaryField
+                      wrappedComponent={FastField}
+                      dictProps={Settings.fields.organization.emailAddresses}
+                      name="emailAddresses"
+                      component={FieldHelper.SpecialField}
+                      widget={
+                        <EmailAddressInputTable
+                          emailAddresses={values.emailAddresses}
+                          handleChange={value => {
+                            // validation will be done by setFieldValue
+                            setFieldTouched("emailAddresses", true, false)
+                            setFieldValue("emailAddresses", value, true)
+                          }}
                         />
                       }
                     />

@@ -3,6 +3,7 @@ import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_MIN_HEAD } from "actions"
 import API from "api"
 import AppContext from "components/AppContext"
 import DictionaryField from "components/DictionaryField"
+import EmailAddressTable from "components/EmailAddressTable"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
@@ -41,6 +42,10 @@ const GQL_GET_SELF = gql`
       domainUsername
       openIdSubject
       code
+      emailAddresses {
+        network
+        address
+      }
     }
   }
 `
@@ -169,6 +174,9 @@ const OnboardingShow = ({ pageDispatchers }) => {
     const humanValuesExceptions = {
       biography: <RichTextEditor readOnly value={person.biography} />,
       emailAddress: emailHumanValue,
+      emailAddresses: (
+        <EmailAddressTable emailAddresses={person.emailAddresses} />
+      ),
       endOfTourDate:
         person.endOfTourDate &&
         moment(person.endOfTourDate).format(
