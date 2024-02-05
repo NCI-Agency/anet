@@ -239,9 +239,7 @@ const ReportForm = ({
   if (done) {
     return result
   }
-  const submitText = currentUser.hasActivePosition()
-    ? "Preview and submit"
-    : "Save draft"
+  const submitText = "Save Report"
   const tasksLabel = pluralize(Settings.fields.task.subLevel.shortLabel)
   const showAssignedPositionWarning = !currentUser.hasAssignedPosition()
   const showActivePositionWarning =

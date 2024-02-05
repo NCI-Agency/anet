@@ -212,7 +212,7 @@ const reportTour = (currentUser, navigate) => {
         placement: "right"
       },
       {
-        title: "Preview and submit",
+        title: "Save Report",
         content:
           "Pressing this button will save the report as a draft and take you to the preview page. You will have a chance to review your report before you send it for approval and then to the SFAC.",
         target: "#formBottomSubmit",
@@ -280,7 +280,7 @@ const orgTour = (currentUser, navigate) => {
         placement: "top"
       },
       {
-        title: "Your orginization's reports",
+        title: "Your organization's reports",
         content:
           "Here, you'll find the complete list of all reports authored by your members of your organization.",
         target: "#reports h4",
@@ -334,7 +334,7 @@ const positionTour = (currentUser, navigate) => {
       },
       {
         title: `Assigned ${principalSingular} or ${advisorSingular}`,
-        content: `If you're looking at a ${advisorPositionSingular} position, you'll see the people this position is responisble for advising. If you're looking at a ${principalPositionSingular} position, you'll see the ${advisorPlural} advising that ${principalPositionSingular} here. You can update this information by clicking the "Change assigned ${advisorSingular}" or "Change assigned ${principalSingular}" button, depending on what type of position you're looking at.`,
+        content: `If you're looking at a ${advisorPositionSingular} position, you'll see the people this position is responsible for advising. If you're looking at a ${principalPositionSingular} position, you'll see the ${advisorPlural} advising that ${principalPositionSingular} here. You can update this information by clicking the "Change assigned ${advisorSingular}" or "Change assigned ${principalSingular}" button, depending on what type of position you're looking at.`,
         target: "#assigned-principal h4",
         placement: "top"
       },
