@@ -9,10 +9,12 @@ import {
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _get from "lodash/get"
 import { Task } from "models"
+import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Table } from "react-bootstrap"
 import { connect } from "react-redux"
+import Settings from "settings"
 
 const GQL_GET_TASK_LIST = gql`
   query ($taskQuery: TaskSearchQueryInput) {
@@ -96,8 +98,9 @@ const BaseTaskTable = ({
   totalCount,
   goToPage
 }) => {
+  const taskShortLabel = Settings.fields.task.shortLabel
   if (_get(tasks, "length", 0) === 0) {
-    return <em>No tasks found</em>
+    return <em>No {pluralize(taskShortLabel)} found</em>
   }
 
   return (

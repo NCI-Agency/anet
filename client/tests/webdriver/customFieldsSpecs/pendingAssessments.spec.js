@@ -152,7 +152,7 @@ describe("In my tasks page", () => {
       await (await MyTasks.getMyPendingTasks()).waitForDisplayed()
       expect(
         await (await MyTasks.getMyPendingTasksContent()).getText()
-      ).to.equal("No tasks found")
+      ).to.equal("No Objective / Efforts found")
       await MyTasks.logout()
     })
   })
