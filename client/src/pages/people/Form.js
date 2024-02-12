@@ -30,6 +30,7 @@ import { FastField, Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
 import { Person } from "models"
+import moment from "moment"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useContext, useRef, useState } from "react"
@@ -683,7 +684,11 @@ const PersonForm = ({
                   name="endOfTourDate"
                   component={FieldHelper.SpecialField}
                   value={values.endOfTourDate}
-                  onChange={value => setFieldValue("endOfTourDate", value)}
+                  onChange={value =>
+                    setFieldValue(
+                      "endOfTourDate",
+                      moment(value).endOf("day").format()
+                    )}
                   onBlur={() => setFieldTouched("endOfTourDate")}
                   widget={
                     <CustomDateInput id="endOfTourDate" canClearSelection />

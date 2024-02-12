@@ -120,7 +120,7 @@ public class AccountDeactivationWorkerTest {
   public void testDeactivation() throws Exception {
 
     // Configure
-    final Person testPersonEotActive = createDummyPerson(Instant.now().minus(1, ChronoUnit.DAYS),
+    final Person testPersonEotActive = createDummyPerson(Instant.now().minus(1, ChronoUnit.HOURS),
         "test1_eot_acive@test.com", Person.Status.ACTIVE);
 
     final Person testPersonEotInactive = createDummyPerson(Instant.now().minus(1, ChronoUnit.DAYS),
