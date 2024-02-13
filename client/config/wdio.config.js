@@ -147,7 +147,22 @@ const config = {
   // Test reporter for stdout.
   // The only one supported by default is 'dot'
   // see also: https://webdriver.io/docs/dot-reporter
-  reporters: ["spec"],
+  reporters: [
+    "spec",
+    [
+      "junit",
+      {
+        outputDir: "./build/test-results/wdio",
+        outputFileFormat: opts => {
+          const [cid0, cid1] = opts.cid.split("-", 2)
+          return `wdio-${cid0.padStart(3, "0")}-${cid1.padStart(
+            3,
+            "0"
+          )}-test-results.xml`
+        }
+      }
+    ]
+  ],
 
   //
   // Options to be passed to Mocha.
