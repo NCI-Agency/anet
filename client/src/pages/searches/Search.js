@@ -802,7 +802,19 @@ const Search = ({
         </Alert>
       )}
       {queryTypes.includes(SEARCH_OBJECT_TYPES.ORGANIZATIONS) && (
-        <Fieldset id="organizations" title="Organizations">
+        <Fieldset
+          id="organizations"
+          title={
+            <>
+              Organizations
+              {hasOrganizationsResults && (
+                <Badge pill bg="secondary" className="ms-1">
+                  {numOrganizations}
+                </Badge>
+              )}
+            </>
+          }
+        >
           <Organizations
             pageDispatchers={pageDispatchers}
             queryParams={genericSearchQueryParams}
@@ -814,7 +826,19 @@ const Search = ({
         </Fieldset>
       )}
       {queryTypes.includes(SEARCH_OBJECT_TYPES.PEOPLE) && (
-        <Fieldset id="people" title="People">
+        <Fieldset
+          id="people"
+          title={
+            <>
+              People
+              {hasPeopleResults && (
+                <Badge pill bg="secondary" className="ms-1">
+                  {numPeople}
+                </Badge>
+              )}
+            </>
+          }
+        >
           <People
             pageDispatchers={pageDispatchers}
             queryParams={genericSearchQueryParams}
@@ -826,7 +850,19 @@ const Search = ({
         </Fieldset>
       )}
       {queryTypes.includes(SEARCH_OBJECT_TYPES.POSITIONS) && (
-        <Fieldset id="positions" title="Positions">
+        <Fieldset
+          id="positions"
+          title={
+            <>
+              Positions
+              {hasPositionsResults && (
+                <Badge pill bg="secondary" className="ms-1">
+                  {numPositions}
+                </Badge>
+              )}
+            </>
+          }
+        >
           <Positions
             pageDispatchers={pageDispatchers}
             queryParams={genericSearchQueryParams}
@@ -838,7 +874,19 @@ const Search = ({
         </Fieldset>
       )}
       {queryTypes.includes(SEARCH_OBJECT_TYPES.TASKS) && (
-        <Fieldset id="tasks" title={pluralize(taskShortLabel)}>
+        <Fieldset
+          id="tasks"
+          title={
+            <>
+              {pluralize(taskShortLabel)}
+              {hasTasksResults && (
+                <Badge pill bg="secondary" className="ms-1">
+                  {numTasks}
+                </Badge>
+              )}
+            </>
+          }
+        >
           <Tasks
             pageDispatchers={pageDispatchers}
             queryParams={genericSearchQueryParams}
@@ -850,7 +898,19 @@ const Search = ({
         </Fieldset>
       )}
       {queryTypes.includes(SEARCH_OBJECT_TYPES.LOCATIONS) && (
-        <Fieldset id="locations" title="Locations">
+        <Fieldset
+          id="locations"
+          title={
+            <>
+              Locations
+              {hasLocationsResults && (
+                <Badge pill bg="secondary" className="ms-1">
+                  {numLocations}
+                </Badge>
+              )}
+            </>
+          }
+        >
           <Locations
             pageDispatchers={pageDispatchers}
             queryParams={genericSearchQueryParams}
@@ -862,7 +922,19 @@ const Search = ({
         </Fieldset>
       )}
       {queryTypes.includes(SEARCH_OBJECT_TYPES.REPORTS) && (
-        <Fieldset id="reports" title="Reports">
+        <Fieldset
+          id="reports"
+          title={
+            <>
+              Reports
+              {hasReportsResults && (
+                <Badge pill bg="secondary" className="ms-1">
+                  {numReports}
+                </Badge>
+              )}
+            </>
+          }
+        >
           <ReportCollection
             queryParams={reportsSearchQueryParams}
             setTotalCount={setNumReports}

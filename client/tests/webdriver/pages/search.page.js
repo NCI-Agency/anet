@@ -1,6 +1,18 @@
 import Page from "./page"
 
 class Search extends Page {
+  async getMain() {
+    return browser.$("div#main-viewport")
+  }
+
+  async getNoResultsFound() {
+    return browser.$('//div/b[text()="No search results found!"]')
+  }
+
+  async getFoundCounter(entity) {
+    return browser.$(`div#${entity} span span`)
+  }
+
   async getFoundPeopleTable() {
     return browser.$("div#people #people-search-results")
   }
@@ -15,6 +27,14 @@ class Search extends Page {
 
   async getFoundReportTable() {
     return browser.$("div#reports .report-collection")
+  }
+
+  async getFoundPositionTable() {
+    return browser.$("div#positions #positions-search-results")
+  }
+
+  async getFoundLocationTable() {
+    return browser.$("div#locations #locations-search-results")
   }
 
   async linkOfPersonFound(name) {
