@@ -137,7 +137,7 @@ const HomeTiles = ({ currentUser, setSearchQuery, pageDispatchers }) => {
 
   function adminQueries(currentUser) {
     return [
-      allDraft(),
+      myDraft(currentUser),
       allPending(),
       pendingMe(currentUser),
       allPlanned(),
@@ -164,13 +164,6 @@ const HomeTiles = ({ currentUser, setSearchQuery, pageDispatchers }) => {
       myOrgFuture(currentUser),
       mySensitiveInfo()
     ]
-  }
-
-  function allDraft() {
-    return {
-      title: "All draft reports",
-      query: { state: [Report.STATE.DRAFT, Report.STATE.REJECTED] }
-    }
   }
 
   function myDraft(currentUser) {

@@ -76,14 +76,6 @@ class Home extends Page {
     return (await this.getMyTasksLink()).$("span.badge")
   }
 
-  async getAllDraftReports() {
-    return browser.$('//button[contains(text(), "All draft reports")]')
-  }
-
-  async getAllDraftReportsCount() {
-    return (await this.getAllDraftReports()).$("h1")
-  }
-
   async getMyDraftReports() {
     return browser.$('//button[contains(text(), "My draft reports")]')
   }

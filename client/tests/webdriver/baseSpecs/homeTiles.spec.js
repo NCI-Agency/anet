@@ -28,11 +28,20 @@ describe("When checking the home page tiles", () => {
       await Home.openAsAdminUser()
       await (await Home.getHomeTilesContainer()).waitForExist()
       await (await Home.getHomeTilesContainer()).waitForDisplayed()
-      // We should at least see Arthur's and Erin's own drafts (might be more if tests have run)
-      const draft = await (await Home.getAllDraftReportsCount()).getText()
-      expect(parseInt(draft, 10)).to.be.at.least(2)
+      // We should at least see Arthur's own draft (might be more if tests have run)
+      const draft = await (await Home.getMyDraftReportsCount()).getText()
+      expect(parseInt(draft, 10)).to.be.at.least(1)
       // Load drafts
-      await (await Home.getAllDraftReports()).click()
+      await (await Home.getMyDraftReports()).click()
+      await Search.selectReportTable()
+      await browser.pause(500)
+      // Arthur's draft report should be there
+      // eslint-disable-next-line no-unused-expressions
+      expect(
+        await (
+          await Search.linkOfReportFound(ARTHURS_DRAFT_REPORT)
+        ).isExisting()
+      ).to.be.true
       // Search for Erin's draft report
       await (await Home.getSearchBar()).setValue(ERINS_DRAFT_REPORT)
       await (await Home.getSubmitSearch()).click()
@@ -41,7 +50,7 @@ describe("When checking the home page tiles", () => {
       // eslint-disable-next-line no-unused-expressions
       expect(
         await (await Search.linkOfReportFound(ERINS_DRAFT_REPORT)).isExisting()
-      ).to.be.true
+      ).to.be.false
     })
   })
 

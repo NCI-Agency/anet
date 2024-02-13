@@ -2280,7 +2280,7 @@ public class ReportResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  void testAdminFindsAllDrafts()
+  void testAdminCanFindAllDrafts()
       throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
     final ReportSearchQueryInput draftsQuery = ReportSearchQueryInput.builder()
         .withState(List.of(ReportState.DRAFT)).withPageSize(0).build();
@@ -2292,13 +2292,29 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(erinsDraftReports.getTotalCount()).isOne();
     final Report erinsDraftReport = erinsDraftReports.getList().get(0);
 
+    // Even when including all drafts (or trying to)
+    draftsQuery.setIncludeAllDrafts(true);
+    AnetBeanList_Report erinsDraftReportsAgain =
+        erinQueryExecutor.reportList(getListFields(FIELDS), draftsQuery);
+    assertThat(erinsDraftReportsAgain.getTotalCount()).isOne();
+    draftsQuery.setIncludeAllDrafts(false);
+
     // Erin's superuser should not be able to find it
     final QueryExecutor rebeccaMutationExecutor = getQueryExecutor("rebecca");
     AnetBeanList_Report rebeccaDraftReports =
         rebeccaMutationExecutor.reportList(getListFields(FIELDS), draftsQuery);
     assertThat(rebeccaDraftReports.getTotalCount()).isZero();
 
-    // Admin should find all drafts
+    // Admin should normally find only their own drafts
+    AnetBeanList_Report adminDraftReports =
+        adminQueryExecutor.reportList(getListFields(FIELDS), draftsQuery);
+    assertThat(adminDraftReports.getTotalCount()).isOne();
+    // List should not include Erin's draft
+    assertThat(adminDraftReports.getList())
+        .noneMatch(report -> report.getUuid().equals(erinsDraftReport.getUuid()));
+
+    // Except when including all drafts
+    draftsQuery.setIncludeAllDrafts(true);
     AnetBeanList_Report allDraftReports =
         adminQueryExecutor.reportList(getListFields(FIELDS), draftsQuery);
     assertThat(allDraftReports.getTotalCount()).isGreaterThan(1);

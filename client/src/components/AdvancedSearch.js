@@ -2,6 +2,7 @@ import { Popover2, Popover2InteractionKind } from "@blueprintjs/popover2"
 import "@blueprintjs/popover2/lib/css/blueprint-popover2.css"
 import styled from "@emotion/styled"
 import { resetPagination, SEARCH_OBJECT_LABELS, setSearchQuery } from "actions"
+import AppContext from "components/AppContext"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
 import DictionaryField from "components/DictionaryField"
 import RemoveButton from "components/RemoveButton"
@@ -14,7 +15,7 @@ import { Form, Formik } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
 import { Organization, Position } from "models"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useContext, useState } from "react"
 import {
   Button,
   Col,
@@ -53,6 +54,7 @@ const AdvancedSearch = ({
   searchObjectTypes,
   text
 }) => {
+  const { currentUser } = useContext(AppContext)
   const navigate = useNavigate()
   const [objectType, setObjectType] = useState(searchQuery.objectType)
   const [filters, setFilters] = useState(
@@ -62,7 +64,7 @@ const AdvancedSearch = ({
   const [orgFilterQueryParams, setOrgFilterQueryParams] = useState(
     getOrgQueryParams(null)
   )
-  const ALL_FILTERS = searchFilters()
+  const ALL_FILTERS = searchFilters(currentUser?.isAdmin())
   const commonFiltersForAllObjectTypes = findCommonFiltersForAllObjectTypes(
     searchObjectTypes,
     ALL_FILTERS
@@ -352,7 +354,7 @@ const SearchFilter = ({
     <FormGroup controlId={queryKey} className="form-group">
       <Row>
         <Col xs={12} sm={3} lg={2} className="label-align">
-          <FormLabel>{label}</FormLabel>
+          <FormLabel className={element.labelClass}>{label}</FormLabel>
         </Col>
         <Col xs={10} sm={8} lg={9}>
           <div>
@@ -392,6 +394,7 @@ SearchFilter.propTypes = {
   element: PropTypes.shape({
     component: PropTypes.func.isRequired,
     dictProps: PropTypes.object,
+    labelClass: PropTypes.string,
     props: PropTypes.object
   })
 }
