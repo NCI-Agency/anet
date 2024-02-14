@@ -282,6 +282,7 @@ export const searchFilters = function(includeAdminFilters) {
       State: {
         component: ReportStateFilter,
         deserializer: deserializeReportStateFilter,
+        isDefault: true,
         props: {
           queryKey: "state"
         }
