@@ -33,6 +33,7 @@ import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.search.AbstractSearchQueryBuilder.Comparison;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.Utils;
 
 public abstract class AbstractReportSearcher extends AbstractSearcher<Report, ReportSearchQuery>
     implements IReportSearcher {
@@ -217,7 +218,21 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
       qb.addSqlArg("approverUuid", query.getPendingApprovalOf());
     }
 
-    qb.addInClause("states", "reports.state", query.getState());
+    if (Utils.isEmptyOrNull(query.getState()) && query.getPendingApprovalOf() == null) {
+      // When not otherwise specified, restrict search to specific report states
+      final List<ReportState> reportStates;
+      if (Utils.isEmptyOrNull(query.getEngagementStatus())) {
+        // just published
+        reportStates = List.of(ReportState.PUBLISHED);
+      } else {
+        // published or cancelled
+        reportStates = List.of(ReportState.PUBLISHED, ReportState.CANCELLED);
+      }
+      qb.addInClause("states", "reports.state", reportStates);
+    } else {
+      // search for the states specified in the query
+      qb.addInClause("states", "reports.state", query.getState());
+    }
 
     if (query.getEngagementStatus() != null) {
       final List<String> engagementStatusClauses = new ArrayList<>();

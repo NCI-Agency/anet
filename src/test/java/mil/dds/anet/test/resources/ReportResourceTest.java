@@ -1119,8 +1119,9 @@ public class ReportResourceTest extends AbstractResourceTest {
     final Person jack = getJackJackson();
     final Person steve = getSteveSteveson();
 
-    // Search based on report Text body
-    ReportSearchQueryInput query = ReportSearchQueryInput.builder().withText("spreadsheet").build();
+    // Search based on report Text body, for any report State
+    ReportSearchQueryInput query = ReportSearchQueryInput.builder()
+        .withState(List.of(ReportState.values())).withText("spreadsheet").build();
     AnetBeanList_Report searchResults = jackQueryExecutor.reportList(getListFields(FIELDS), query);
     assertThat(searchResults.getList()).isNotEmpty();
 
@@ -1250,7 +1251,8 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(locSearchResults.getList()).isNotEmpty();
     Location cabot = locSearchResults.getList().get(0);
 
-    query = ReportSearchQueryInput.builder().withLocationUuid(cabot.getUuid()).build();
+    query = ReportSearchQueryInput.builder().withState(List.of(ReportState.values()))
+        .withLocationUuid(cabot.getUuid()).build();
     searchResults = jackQueryExecutor.reportList(getListFields(FIELDS), query);
     assertThat(searchResults.getList()).isNotEmpty();
     assertThat(searchResults.getList().stream()

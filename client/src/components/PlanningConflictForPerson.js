@@ -38,6 +38,7 @@ const BasePlanningConflictForPerson = ({ person, report, iconOnly }) => {
   const { loading, error, data } = API.useApiQuery(GET_PERSON_WITH_REPORTS, {
     uuid: person.uuid,
     attendedReportsQuery: {
+      state: Object.values(Report.STATE),
       engagementDateStart: moment(report.engagementDate)
         .startOf("day")
         .valueOf(),

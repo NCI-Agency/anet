@@ -37,6 +37,7 @@ const PlanningConflictForReport = ({ report, text, largeIcon }) => {
     {
       uuid: report.uuid,
       attendedReportsQuery: {
+        state: Object.values(Report.STATE),
         engagementDateStart: moment(report.engagementDate)
           .startOf("day")
           .valueOf(),
