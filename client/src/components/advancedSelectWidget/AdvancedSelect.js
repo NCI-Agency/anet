@@ -297,15 +297,12 @@ const AdvancedSelect = ({
     <>
       {!(disabled && renderSelectedWithDelete) && (
         <>
-          <div
-            id={`${fieldName}-popover`}
-            className={classNames(className, "advanced-select-popover")}
-          >
+          <div className={classNames(className, "advanced-select-popover")}>
             <InputGroup>
               <Popover2
-                popoverClassName="bp4-popover2-content-sizing"
+                popoverClassName="advanced-select-popover bp4-popover2-content-sizing"
                 content={
-                  <Row className="border-between">
+                  <Row id={`${fieldName}-popover`} className="border-between">
                     <FilterAsNav
                       items={filterDefs}
                       currentFilter={filterType}
@@ -355,21 +352,19 @@ const AdvancedSelect = ({
                 disabled={disabled}
                 interactionKind={Popover2InteractionKind.CLICK}
                 onInteraction={handleInteraction}
-                usePortal={false}
+                usePortal
                 autoFocus={false}
                 enforceFocus={false}
                 placement="bottom"
                 modifiers={{
                   preventOverflow: {
-                    options: {
-                      rootBoundary: "viewport"
-                    }
+                    enabled: false
                   },
                   hide: {
                     enabled: false
                   },
                   flip: {
-                    enabled: false
+                    enabled: true
                   }
                 }}
               >
@@ -474,7 +469,7 @@ const AdvancedSelect = ({
 }
 AdvancedSelect.propTypes = propTypes
 AdvancedSelect.defaultProps = {
-  pageSize: 6,
+  pageSize: 5,
   disabled: false,
   filterDefs: {},
   closeOverlayOnAdd: false,

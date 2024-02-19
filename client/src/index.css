@@ -984,6 +984,8 @@ header.searchPagination {
 .advanced-select-popover .bp4-popover2-content {
   min-width: 400px;
   max-width: 90vw !important;
+  max-height: 47vh !important;
+  overflow-y: scroll;
 }
 
 .advanced-search {
@@ -996,15 +998,6 @@ header.searchPagination {
 
 .advanced-search-form {
   padding-bottom: 5px;
-}
-
-.advanced-search .col-3 select {
-  margin-top: -8px;
-}
-
-.advanced-search .col-1 .btn img,
-.advanced-search .col-sm-1 .btn img {
-  vertical-align: baseline;
 }
 
 .general-banner {

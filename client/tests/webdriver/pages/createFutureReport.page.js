@@ -23,7 +23,7 @@ class CreateFutureReport extends CreateReport {
   }
 
   async getAttendeesFieldAdvancedSelectFirstItem() {
-    return (await this.getAttendeesFieldFormGroup()).$(
+    return browser.$(
       `div[id="${attId}-popover"] tbody tr:first-child td:nth-child(2)`
     )
   }
@@ -59,7 +59,7 @@ class CreateFutureReport extends CreateReport {
   }
 
   async getTasksFieldAdvancedSelectFirstItem() {
-    return (await this.getTasksFieldFormGroup()).$(
+    return browser.$(
       `div[id="${tskId}-popover"] tbody tr:first-child td:nth-child(2)`
     )
   }

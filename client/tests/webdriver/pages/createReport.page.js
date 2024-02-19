@@ -77,7 +77,7 @@ export class CreateReport extends Page {
   }
 
   async getTestReferenceFieldAdvancedSelectFirstItem() {
-    return (await this.getTestReferenceFieldFormGroup()).$(
+    return browser.$(
       `div[id="${RELATED_REPORT_ID}-popover"] tbody tr:first-child td:nth-child(2)`
     )
   }
@@ -116,12 +116,10 @@ export class CreateReport extends Page {
   }
 
   async getTestMultiReferenceFieldAdvancedSelect() {
-    await (await this.getTestMultiReferenceFieldFormGroup())
+    await browser
       .$(`div[id="${ADDITIONAL_ENGAGEMENTS_ID}-popover"] tbody`)
       .waitForExist()
-    return (await this.getTestMultiReferenceFieldFormGroup()).$(
-      `div[id="${ADDITIONAL_ENGAGEMENTS_ID}-popover"] tbody`
-    )
+    return browser.$(`div[id="${ADDITIONAL_ENGAGEMENTS_ID}-popover"] tbody`)
   }
 
   async getEngagementTypesFieldFormGroup() {
