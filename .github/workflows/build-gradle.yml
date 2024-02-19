@@ -87,11 +87,23 @@ jobs:
       with:
         fetch-depth: 0
     - uses: ./.github/actions/build-cache
+    - run: |
+        rm -rf client/build/test-results
+        mkdir -p client/build/test-results
     - run: ./gradlew -PtestEnv dockerCreateDB dockerStartDB
     - run: ./gradlew -PtestEnv dockerConfigureKeycloak dockerStartKeycloak
     - run: ./gradlew -PtestEnv dockerCreateFakeSmtpServer dockerStartFakeSmtpServer
     - run: ./gradlew -PtestEnv dbWait dbMigrate dbLoad
     - run: ./gradlew -PtestEnv test jacocoTestReport
+    - run: ./gradlew yarn_run_server-junit-merge
+    - name: Strip slashes from dictionary name
+      id: strip-slashes
+      run: echo "dictionary=${ANET_DICTIONARY_NAME//\//_}" >> $GITHUB_OUTPUT
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      with:
+        name: server-test-results for ${{ steps.strip-slashes.outputs.dictionary }}
+        path: client/build/test-results/server-test-results.xml
 
   test-client:
     needs: build
@@ -101,10 +113,10 @@ jobs:
       fail-fast: false
       matrix:
         dictionary: [anet-dictionary.yml]
-        client-tests: [test-jest, test-wdio, test-wdio-ie, test-e2e]
+        client-tests: [jest, wdio-junit, e2e-junit]
         include:
           - dictionary: testDictionaries/no-custom-fields.yml
-            client-tests: test-wdio-noCF
+            client-tests: wdio-noCF-junit
 
     env:
       ANET_DICTIONARY_NAME: ${{ matrix.dictionary }}
@@ -115,6 +127,9 @@ jobs:
       with:
         fetch-depth: 0
     - uses: ./.github/actions/build-cache
+    - run: |
+        rm -rf client/build/test-results
+        mkdir -p client/build/test-results
     - run: ./gradlew -PtestEnv dockerCreateDB dockerStartDB
     - run: ./gradlew -PtestEnv dockerConfigureKeycloak dockerStartKeycloak
     - run: ./gradlew -PtestEnv dockerCreateFakeSmtpServer dockerStartFakeSmtpServer
@@ -127,12 +142,20 @@ jobs:
     - name: Set local identifier for BrowserStack
       id: browserstack-local
       run: echo "identifier=github-${GITHUB_RUN_ID}-${DB_DRIVER}-${CLIENT_TESTS}" >> $GITHUB_OUTPUT
-    - run: ./gradlew yarn_run_${CLIENT_TESTS}
+    - run: ./gradlew yarn_run_test-${CLIENT_TESTS}
       env:
         GIT_TAG_NAME: ${{ steps.tagName.outputs.tag }}
         BROWSERSTACK_LOCAL_IDENTIFIER: ${{ steps.browserstack-local.outputs.identifier }}
         BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
         BROWSERSTACK_USER: ${{ secrets.BROWSERSTACK_USER }}
+    - name: Strip slashes from dictionary name
+      id: strip-slashes
+      run: echo "dictionary=${ANET_DICTIONARY_NAME//\//_}" >> $GITHUB_OUTPUT
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.client-tests }}-test-results for ${{ steps.strip-slashes.outputs.dictionary }}
+        path: client/build/test-results/${{ matrix.client-tests }}-test-results.xml
     - run: head -1000 logs/clientLog.log
       if: always()
 

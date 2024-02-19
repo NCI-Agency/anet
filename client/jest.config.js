@@ -7,6 +7,16 @@ module.exports = {
       "<rootDir>/config/jest/FileStub.js",
     "^.+\\.css$": "<rootDir>/config/jest/CSSStub.js"
   },
+  reporters: [
+    "default",
+    [
+      "jest-junit",
+      {
+        outputDirectory: "./build/test-results",
+        outputName: "jest-test-results.xml"
+      }
+    ]
+  ],
   setupFiles: ["<rootDir>/config/polyfills.js"],
   setupFilesAfterEnv: ["<rootDir>/jest-setup.js"],
   testEnvironment: "jsdom",
