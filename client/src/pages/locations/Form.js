@@ -9,6 +9,7 @@ import {
   CustomFieldsContainer,
   customFieldsJSONString
 } from "components/CustomFields"
+import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import GeoLocation from "components/GeoLocation"
@@ -21,7 +22,6 @@ import RichTextEditor from "components/RichTextEditor"
 import SimilarObjectsModal from "components/SimilarObjectsModal"
 import { FastField, Field, Form, Formik } from "formik"
 import { convertLatLngToMGRS, parseCoordinate } from "geoUtils"
-import DictionaryField from "HOC/DictionaryField"
 import _escape from "lodash/escape"
 import _isEqual from "lodash/isEqual"
 import { Location, Position } from "models"
@@ -107,8 +107,6 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
     }
   }
 
-  const DictFastField = DictionaryField(FastField)
-
   return (
     <Formik
       enableReinitialize
@@ -173,7 +171,8 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
               <Fieldset>
-                <DictFastField
+                <DictionaryField
+                  wrappedComponent={FastField}
                   dictProps={Settings.fields.location.name}
                   name="name"
                   component={FieldHelper.InputField}
@@ -198,7 +197,8 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
                   }
                 />
 
-                <DictFastField
+                <DictionaryField
+                  wrappedComponent={FastField}
                   dictProps={Settings.fields.location.type}
                   name="type"
                   component={FieldHelper.SpecialField}
@@ -231,7 +231,8 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
                   setFieldTouched={setFieldTouched}
                 />
 
-                <DictFastField
+                <DictionaryField
+                  wrappedComponent={FastField}
                   dictProps={Settings.fields.location.status}
                   name="status"
                   component={FieldHelper.RadioButtonToggleGroupField}
@@ -239,7 +240,8 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
                   onChange={value => setFieldValue("status", value)}
                 />
 
-                <DictFastField
+                <DictionaryField
+                  wrappedComponent={FastField}
                   dictProps={Settings.fields.location.description}
                   name="description"
                   component={FieldHelper.SpecialField}

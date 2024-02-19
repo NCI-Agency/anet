@@ -14,6 +14,7 @@ import {
   customFieldsJSONString,
   updateCustomSensitiveInformation
 } from "components/CustomFields"
+import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
@@ -26,7 +27,6 @@ import RichTextEditor from "components/RichTextEditor"
 import SimilarObjectsModal from "components/SimilarObjectsModal"
 import TriggerableConfirm from "components/TriggerableConfirm"
 import { FastField, Field, Form, Formik } from "formik"
-import DictionaryField from "HOC/DictionaryField"
 import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
 import { Person } from "models"
@@ -159,9 +159,6 @@ const PersonForm = ({
     }
   ]
 
-  const DictField = DictionaryField(Field)
-  const DictFastField = DictionaryField(FastField)
-
   return (
     <Formik
       enableReinitialize
@@ -219,7 +216,9 @@ const PersonForm = ({
         // admins and superusers with edit permissions can change status to INACTIVE,
         // only admins can change back to ACTIVE (but nobody can change status of self!)
         const disableStatusChange =
-          (initialValues.status === Model.STATUS.INACTIVE && !isAdmin) || isSelf
+          (initialValues.status === Model.STATUS.INACTIVE && !isAdmin) ||
+          isPendingVerification ||
+          isSelf
         const currentAvatar = attachmentList?.find(
           a => a.uuid === currentAvatarUuid
         )
@@ -318,7 +317,8 @@ const PersonForm = ({
                         <Col sm={7}>
                           <Row>
                             <Col>
-                              <DictFastField
+                              <DictionaryField
+                                wrappedComponent={FastField}
                                 dictProps={Settings.fields.person.lastName}
                                 name="lastName"
                                 component={FieldHelper.InputFieldNoLabel}
@@ -329,7 +329,8 @@ const PersonForm = ({
                             </Col>
                             ,
                             <Col>
-                              <DictFastField
+                              <DictionaryField
+                                wrappedComponent={FastField}
                                 dictProps={Settings.fields.person.firstName}
                                 name="firstName"
                                 component={FieldHelper.InputFieldNoLabel}
@@ -511,7 +512,8 @@ const PersonForm = ({
                     </FormGroup>
 
                     {isAdmin && (
-                      <DictFastField
+                      <DictionaryField
+                        wrappedComponent={FastField}
                         dictProps={Settings.fields.person.domainUsername}
                         name="domainUsername"
                         component={FieldHelper.InputField}
@@ -559,21 +561,16 @@ const PersonForm = ({
                     )}
 
                     {disableStatusChange ? (
-                      <DictFastField
-                        dictProps={Settings.fields.person.status}
-                        name="status"
-                        component={FieldHelper.ReadonlyField}
-                        humanValue={Person.humanNameOfStatus(values.status)}
-                      />
-                    ) : isPendingVerification ? (
-                      <DictFastField
+                      <DictionaryField
+                        wrappedComponent={FastField}
                         dictProps={Settings.fields.person.status}
                         name="status"
                         component={FieldHelper.ReadonlyField}
                         humanValue={Person.humanNameOfStatus(values.status)}
                       />
                     ) : (
-                      <DictField
+                      <DictionaryField
+                        wrappedComponent={Field}
                         dictProps={Settings.fields.person.status}
                         name="status"
                         component={FieldHelper.RadioButtonToggleGroupField}
@@ -601,25 +598,28 @@ const PersonForm = ({
                             </span>
                           </FormText>
                         )}
-                      </DictField>
+                      </DictionaryField>
                     )}
                   </Col>
                 </Row>
               </Fieldset>
 
               <Fieldset title="Additional information">
-                <DictFastField
+                <DictionaryField
+                  wrappedComponent={FastField}
                   dictProps={Settings.fields.person.emailAddress}
                   name="emailAddress"
                   type="email"
                   component={FieldHelper.InputField}
                 />
-                <DictFastField
+                <DictionaryField
+                  wrappedComponent={FastField}
                   dictProps={Settings.fields.person.phoneNumber}
                   name="phoneNumber"
                   component={FieldHelper.InputField}
                 />
-                <DictFastField
+                <DictionaryField
+                  wrappedComponent={FastField}
                   dictProps={Settings.fields.person.rank}
                   name="rank"
                   component={FieldHelper.SpecialField}
@@ -635,7 +635,8 @@ const PersonForm = ({
                     </FormSelect>
                   }
                 />
-                <DictFastField
+                <DictionaryField
+                  wrappedComponent={FastField}
                   dictProps={Settings.fields.person.gender}
                   name="gender"
                   component={FieldHelper.SpecialField}
@@ -653,7 +654,8 @@ const PersonForm = ({
                     </FormSelect>
                   }
                 />
-                <DictFastField
+                <DictionaryField
+                  wrappedComponent={FastField}
                   dictProps={Settings.fields.person.country}
                   name="country"
                   component={FieldHelper.SpecialField}
@@ -668,13 +670,15 @@ const PersonForm = ({
                     </FormSelect>
                   }
                 />
-                <DictFastField
+                <DictionaryField
+                  wrappedComponent={FastField}
                   dictProps={Settings.fields.person.code}
                   name="code"
                   component={FieldHelper.InputField}
                   disabled={!isAdmin}
                 />
-                <DictFastField
+                <DictionaryField
+                  wrappedComponent={FastField}
                   dictProps={Settings.fields.person.endOfTourDate}
                   name="endOfTourDate"
                   component={FieldHelper.SpecialField}
@@ -690,8 +694,9 @@ const PersonForm = ({
                       Be aware that the end of tour date is in the past.
                     </Alert>
                   )}
-                </DictFastField>
-                <DictFastField
+                </DictionaryField>
+                <DictionaryField
+                  wrappedComponent={FastField}
                   dictProps={Settings.fields.person.biography}
                   name="biography"
                   component={FieldHelper.SpecialField}

@@ -6,6 +6,7 @@ import AssignPersonModal from "components/AssignPersonModal"
 import AssociatedPositions from "components/AssociatedPositions"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import { ReadonlyCustomFields } from "components/CustomFields"
+import DictionaryField from "components/DictionaryField"
 import EditAssociatedPositionsModal from "components/EditAssociatedPositionsModal"
 import EditHistory from "components/EditHistory"
 import EditOrganizationsAdministratedModal from "components/EditOrganizationsAdministratedModal"
@@ -26,7 +27,6 @@ import {
 } from "components/Page"
 import RelatedObjectNotes from "components/RelatedObjectNotes"
 import { Field, Form, Formik } from "formik"
-import DictionaryField from "HOC/DictionaryField"
 import { Location, Position } from "models"
 import { positionTour } from "pages/HopscotchTour"
 import React, { useContext, useState } from "react"
@@ -97,7 +97,6 @@ const PositionShow = ({ pageDispatchers }) => {
   }
 
   const position = new Position(data ? data.position : {})
-  const DictField = DictionaryField(Field)
 
   const isPrincipal = position.type === Position.TYPE.PRINCIPAL
   const isSuperuser = position.type === Position.TYPE.SUPERUSER
@@ -189,7 +188,8 @@ const PositionShow = ({ pageDispatchers }) => {
                 action={action}
               />
               <Fieldset>
-                <DictField
+                <DictionaryField
+                  wrappedComponent={Field}
                   dictProps={Settings.fields.position.type}
                   name="type"
                   component={FieldHelper.ReadonlyField}
@@ -197,7 +197,8 @@ const PositionShow = ({ pageDispatchers }) => {
                 />
 
                 {position.organization && (
-                  <DictField
+                  <DictionaryField
+                    wrappedComponent={Field}
                     dictProps={Settings.fields.position.organization}
                     name="organization"
                     component={FieldHelper.ReadonlyField}
@@ -212,7 +213,8 @@ const PositionShow = ({ pageDispatchers }) => {
                   />
                 )}
 
-                <DictField
+                <DictionaryField
+                  wrappedComponent={Field}
                   dictProps={Settings.fields.position.location}
                   name="location"
                   component={FieldHelper.ReadonlyField}
@@ -231,20 +233,23 @@ const PositionShow = ({ pageDispatchers }) => {
                   }
                 />
 
-                <DictField
+                <DictionaryField
+                  wrappedComponent={Field}
                   dictProps={Settings.fields.position.code}
                   name="code"
                   component={FieldHelper.ReadonlyField}
                 />
 
-                <DictField
+                <DictionaryField
+                  wrappedComponent={Field}
                   dictProps={Settings.fields.position.status}
                   name="status"
                   component={FieldHelper.ReadonlyField}
                   humanValue={Position.humanNameOfStatus}
                 />
 
-                <DictField
+                <DictionaryField
+                  wrappedComponent={Field}
                   dictProps={Settings.fields.position.role}
                   name="role"
                   component={FieldHelper.ReadonlyField}

@@ -1,6 +1,7 @@
 import { gql } from "@apollo/client"
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
+import AppContext from "components/AppContext"
 import { initInvisibleFields } from "components/CustomFields"
 import {
   DEFAULT_CUSTOM_FIELDS_PARENT,
@@ -18,7 +19,7 @@ import RelatedObjectNotes, {
 } from "components/RelatedObjectNotes"
 import { Attachment, Person } from "models"
 import moment from "moment"
-import React from "react"
+import React, { useContext } from "react"
 import { connect } from "react-redux"
 import { useParams } from "react-router-dom"
 import Settings from "settings"
@@ -67,6 +68,7 @@ const GQL_GET_PERSON = gql`
 `
 
 const PersonEdit = ({ pageDispatchers }) => {
+  const { currentUser } = useContext(AppContext)
   const { uuid } = useParams()
   const { loading, error, data } = API.useApiQuery(GQL_GET_PERSON, {
     uuid
@@ -103,12 +105,10 @@ const PersonEdit = ({ pageDispatchers }) => {
     }
   }
   const person = new Person(data ? data.person : {})
-  const legendText = person.isPendingVerification()
-    ? "Create your account"
-    : `Edit ${person.name}`
-  const saveText = person.isPendingVerification()
-    ? "Update profile"
-    : "Save Person"
+  const isPending =
+    person.isPendingVerification() && Person.isEqual(currentUser, person)
+  const legendText = isPending ? "Create your account" : `Edit ${person.name}`
+  const saveText = isPending ? "Update profile" : "Save Person"
 
   // mutates the object
   initInvisibleFields(person, Settings.fields.person.customFields)

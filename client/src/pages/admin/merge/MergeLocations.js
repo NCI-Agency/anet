@@ -7,6 +7,7 @@ import { LocationOverlayRow } from "components/advancedSelectWidget/AdvancedSele
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import ApprovalSteps from "components/ApprovalSteps"
 import { customFieldsJSONString } from "components/CustomFields"
+import DictionaryField from "components/DictionaryField"
 import BaseGeoLocation from "components/GeoLocation"
 import MergeField from "components/MergeField"
 import Messages from "components/Messages"
@@ -24,7 +25,6 @@ import {
 } from "components/Page"
 import RichTextEditor from "components/RichTextEditor"
 import { convertLatLngToMGRS } from "geoUtils"
-import DictionaryField from "HOC/DictionaryField"
 import useMergeObjects, {
   ALIGN_OPTIONS,
   areAllSet,
@@ -71,7 +71,6 @@ const MergeLocations = ({ pageDispatchers }) => {
   })
   usePageTitle("Merge Locations")
 
-  const DictMergeField = DictionaryField(MergeField)
   const location1 = mergeState[MERGE_SIDES.LEFT]
   const location2 = mergeState[MERGE_SIDES.RIGHT]
   const mergedLocation = mergeState.merged
@@ -140,7 +139,8 @@ const MergeLocations = ({ pageDispatchers }) => {
           )}
           {areAllSet(location1, location2, mergedLocation) && (
             <fieldset>
-              <DictMergeField
+              <DictionaryField
+                wrappedComponent={MergeField}
                 dictProps={Settings.fields.location.name}
                 value={mergedLocation.name}
                 align={ALIGN_OPTIONS.CENTER}
@@ -152,7 +152,8 @@ const MergeLocations = ({ pageDispatchers }) => {
                 dispatchMergeActions={dispatchMergeActions}
               />
 
-              <DictMergeField
+              <DictionaryField
+                wrappedComponent={MergeField}
                 dictProps={Settings.fields.location.type}
                 value={Location.humanNameOfType(mergedLocation.type)}
                 align={ALIGN_OPTIONS.CENTER}
@@ -192,7 +193,8 @@ const MergeLocations = ({ pageDispatchers }) => {
                 dispatchMergeActions={dispatchMergeActions}
               />
               {getLeafletMap("merged-location-map", mergedLocation)}
-              <DictMergeField
+              <DictionaryField
+                wrappedComponent={MergeField}
                 dictProps={Settings.fields.location.status}
                 fieldName="status"
                 value={mergedLocation.status}
@@ -214,7 +216,8 @@ const MergeLocations = ({ pageDispatchers }) => {
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
-              <DictMergeField
+              <DictionaryField
+                wrappedComponent={MergeField}
                 dictProps={Settings.fields.location.description}
                 value={
                   <RichTextEditor readOnly value={mergedLocation.description} />
@@ -370,7 +373,6 @@ const LocationColumn = ({
   setLocationFormat,
   locationFormatLabel
 }) => {
-  const DictMergeField = DictionaryField(MergeField)
   const location = mergeState[align]
   const idForLocation = label.replace(/\s+/g, "")
   return (
@@ -408,7 +410,8 @@ const LocationColumn = ({
       </FormGroup>
       {areAllSet(location) && (
         <fieldset>
-          <DictMergeField
+          <DictionaryField
+            wrappedComponent={MergeField}
             dictProps={Settings.fields.location.name}
             fieldName="name"
             value={location.name}
@@ -430,7 +433,8 @@ const LocationColumn = ({
             dispatchMergeActions={dispatchMergeActions}
           />
 
-          <DictMergeField
+          <DictionaryField
+            wrappedComponent={MergeField}
             dictProps={Settings.fields.location.type}
             fieldName="type"
             value={Location.humanNameOfType(location.type)}
@@ -489,7 +493,8 @@ const LocationColumn = ({
             dispatchMergeActions={dispatchMergeActions}
           />
           {getLeafletMap(`merge-location-map-${align}`, location)}
-          <DictMergeField
+          <DictionaryField
+            wrappedComponent={MergeField}
             dictProps={Settings.fields.location.status}
             fieldName="status"
             value={location.status}
@@ -507,7 +512,8 @@ const LocationColumn = ({
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
           />
-          <DictMergeField
+          <DictionaryField
+            wrappedComponent={MergeField}
             dictProps={Settings.fields.location.description}
             fieldName="description"
             value={<RichTextEditor readOnly value={location.description} />}

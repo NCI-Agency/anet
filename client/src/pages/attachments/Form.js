@@ -3,6 +3,7 @@ import API from "api"
 import AppContext from "components/AppContext"
 import AttachmentRelatedObjectsTable from "components/Attachment/AttachmentRelatedObjectsTable"
 import ConfirmDestructive from "components/ConfirmDestructive"
+import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
@@ -11,7 +12,6 @@ import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
 import RichTextEditor from "components/RichTextEditor"
 import { FastField, Field, Form, Formik } from "formik"
-import DictionaryField from "HOC/DictionaryField"
 import _isEqual from "lodash/isEqual"
 import { Attachment } from "models"
 import PropTypes from "prop-types"
@@ -50,7 +50,6 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
     value: key,
     label: classifications[key]
   }))
-  const DictFastField = DictionaryField(FastField)
 
   return (
     <Formik
@@ -100,13 +99,15 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
                     />
                   </Col>
                   <Col className="attachment-details" xs={12} sm={3} lg={10}>
-                    <DictFastField
+                    <DictionaryField
+                      wrappedComponent={FastField}
                       dictProps={Settings.fields.attachment.caption}
                       name="caption"
                       component={FieldHelper.InputField}
                     />
 
-                    <DictFastField
+                    <DictionaryField
+                      wrappedComponent={FastField}
                       dictProps={Settings.fields.attachment.fileName}
                       name="fileName"
                       component={FieldHelper.ReadonlyField}
@@ -126,7 +127,8 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
                     />
 
                     {canEdit ? (
-                      <DictFastField
+                      <DictionaryField
+                        wrappedComponent={FastField}
                         dictProps={Settings.fields.attachment.classification}
                         name="classification"
                         component={FieldHelper.RadioButtonToggleGroupField}
@@ -135,7 +137,8 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
                           setFieldValue("classification", value)}
                       />
                     ) : (
-                      <DictFastField
+                      <DictionaryField
+                        wrappedComponent={FastField}
                         dictProps={Settings.fields.attachment.classification}
                         name="classification"
                         component={FieldHelper.ReadonlyField}
@@ -154,7 +157,8 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
                       />
                     )}
 
-                    <DictFastField
+                    <DictionaryField
+                      wrappedComponent={FastField}
                       dictProps={Settings.fields.attachment.description}
                       name="description"
                       component={FieldHelper.SpecialField}

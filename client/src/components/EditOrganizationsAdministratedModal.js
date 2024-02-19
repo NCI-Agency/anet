@@ -2,12 +2,12 @@ import { gql } from "@apollo/client"
 import API from "api"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import { OrganizationOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
+import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
 import Messages from "components/Messages"
 import Model from "components/Model"
 import OrganizationTable from "components/OrganizationTable"
 import { FastField, Form, Formik } from "formik"
-import DictionaryField from "HOC/DictionaryField"
 import Organization from "models/Organization"
 import Position from "models/Position"
 import PropTypes from "prop-types"
@@ -31,7 +31,6 @@ const EditOrganizationsAdministratedModal = ({
 }) => {
   const [error, setError] = useState(null)
 
-  const DictFastField = DictionaryField(FastField)
   const organizationsFilters = {
     allOrganizations: {
       label: "All organizations",
@@ -65,7 +64,8 @@ const EditOrganizationsAdministratedModal = ({
                 <Container fluid>
                   <Row>
                     <Col md={12}>
-                      <DictFastField
+                      <DictionaryField
+                        wrappedComponent={FastField}
                         dictProps={organizationsAdministratedSettings}
                         name="organizationsAdministrated"
                         component={FieldHelper.SpecialField}

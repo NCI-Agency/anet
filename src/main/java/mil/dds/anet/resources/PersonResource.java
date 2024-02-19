@@ -164,6 +164,7 @@ public class PersonResource {
           p, existing.getDomainUsername(), existing.getOpenIdSubject(), user);
       p.setDomainUsername(null);
       p.setOpenIdSubject(null);
+      dao.updateAuthenticationDetails(p);
     }
 
     // Automatically remove people from a position if they are inactive.

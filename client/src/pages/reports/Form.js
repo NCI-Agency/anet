@@ -19,6 +19,7 @@ import {
   CustomFieldsContainer,
   customFieldsJSONString
 } from "components/CustomFields"
+import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
@@ -37,7 +38,6 @@ import {
 import { EXCLUDED_ASSESSMENT_FIELDS } from "components/RelatedObjectNotes"
 import RichTextEditor from "components/RichTextEditor"
 import { FastField, Field, Form, Formik } from "formik"
-import DictionaryField from "HOC/DictionaryField"
 import _cloneDeep from "lodash/cloneDeep"
 import _debounce from "lodash/debounce"
 import _isEmpty from "lodash/isEmpty"
@@ -239,9 +239,7 @@ const ReportForm = ({
   if (done) {
     return result
   }
-  const submitText = currentUser.hasActivePosition()
-    ? "Preview and submit"
-    : "Save draft"
+  const submitText = "Save Report"
   const tasksLabel = pluralize(Settings.fields.task.subLevel.shortLabel)
   const showAssignedPositionWarning = !currentUser.hasAssignedPosition()
   const showActivePositionWarning =
@@ -264,9 +262,6 @@ const ReportForm = ({
       authorizationGroups: data.authorizationGroupList.list
     }
   }
-
-  const DictField = DictionaryField(Field)
-  const DictFastField = DictionaryField(FastField)
 
   const isAuthor = initialValues.reportPeople?.some(
     a => a.author && Person.isEqual(currentUser, a)
@@ -479,7 +474,8 @@ const ReportForm = ({
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
               <Fieldset>
-                <DictFastField
+                <DictionaryField
+                  wrappedComponent={FastField}
                   dictProps={Settings.fields.report.intent}
                   name="intent"
                   component={FieldHelper.InputField}
@@ -508,7 +504,8 @@ const ReportForm = ({
                   className="meeting-goal"
                 />
 
-                <DictFastField
+                <DictionaryField
+                  wrappedComponent={FastField}
                   dictProps={Settings.fields.report.engagementDate}
                   name="engagementDate"
                   component={FieldHelper.SpecialField}
@@ -531,10 +528,11 @@ const ReportForm = ({
                       </span>
                     </FormBS.Text>
                   )}
-                </DictFastField>
+                </DictionaryField>
 
                 {Settings.engagementsIncludeTimeAndDuration && (
-                  <DictFastField
+                  <DictionaryField
+                    wrappedComponent={FastField}
                     dictProps={Settings.fields.report.duration}
                     name="duration"
                     component={FieldHelper.InputField}
@@ -553,7 +551,8 @@ const ReportForm = ({
                   />
                 )}
 
-                <DictFastField
+                <DictionaryField
+                  wrappedComponent={FastField}
                   dictProps={Settings.fields.report.location}
                   name="location"
                   component={FieldHelper.SpecialField}
@@ -598,7 +597,8 @@ const ReportForm = ({
                 />
 
                 {!isFutureEngagement && (
-                  <DictFastField
+                  <DictionaryField
+                    wrappedComponent={FastField}
                     dictProps={Settings.fields.report.cancelled}
                     name="cancelled"
                     component={FieldHelper.SpecialField}
@@ -622,7 +622,8 @@ const ReportForm = ({
                   />
                 )}
                 {!isFutureEngagement && values.cancelled && (
-                  <DictField
+                  <DictionaryField
+                    wrappedComponent={Field}
                     dictProps={Settings.fields.report.cancelledReason}
                     component={FieldHelper.SpecialField}
                     onChange={event => {
@@ -810,7 +811,8 @@ const ReportForm = ({
               <Fieldset title="Engagement details" id="meeting-details">
                 {!isFutureEngagement && !values.cancelled && (
                   <>
-                    <DictFastField
+                    <DictionaryField
+                      wrappedComponent={FastField}
                       dictProps={Settings.fields.report.atmosphere}
                       name="atmosphere"
                       component={FieldHelper.RadioButtonToggleGroupField}
@@ -820,7 +822,8 @@ const ReportForm = ({
                         setFieldValue("atmosphere", value, true)}
                       className="atmosphere-form-group"
                     />
-                    <DictField
+                    <DictionaryField
+                      wrappedComponent={Field}
                       dictProps={Settings.fields.report.atmosphereDetails}
                       name="atmosphereDetails"
                       component={FieldHelper.InputField}
@@ -841,7 +844,8 @@ const ReportForm = ({
                 {Settings.fields.report.keyOutcomes &&
                   !isFutureEngagement &&
                   !values.cancelled && (
-                    <DictFastField
+                    <DictionaryField
+                      wrappedComponent={FastField}
                       dictProps={Settings.fields.report.keyOutcomes}
                       name="keyOutcomes"
                       component={FieldHelper.InputField}
@@ -871,7 +875,8 @@ const ReportForm = ({
                 )}
 
                 {!isFutureEngagement && (
-                  <DictFastField
+                  <DictionaryField
+                    wrappedComponent={FastField}
                     dictProps={Settings.fields.report.nextSteps}
                     name="nextSteps"
                     component={FieldHelper.InputField}
@@ -905,7 +910,8 @@ const ReportForm = ({
                   />
                 )}
 
-                <DictFastField
+                <DictionaryField
+                  wrappedComponent={FastField}
                   dictProps={Settings.fields.report.reportText}
                   name="reportText"
                   component={FieldHelper.SpecialField}

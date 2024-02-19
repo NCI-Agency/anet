@@ -18,6 +18,7 @@ import CompactTable, {
   PAGE_SIZES
 } from "components/Compact"
 import { ReadonlyCustomFields } from "components/CustomFields"
+import DictionaryField from "components/DictionaryField"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
@@ -32,7 +33,6 @@ import { ActionButton, ActionStatus } from "components/ReportWorkflow"
 import RichTextEditor from "components/RichTextEditor"
 import SimpleMultiCheckboxDropdown from "components/SimpleMultiCheckboxDropdown"
 import { Formik } from "formik"
-import DictionaryField from "HOC/DictionaryField"
 import _isEmpty from "lodash/isEmpty"
 import { Person, Report, Task } from "models"
 import moment from "moment"
@@ -286,8 +286,6 @@ const CompactReportView = ({ pageDispatchers }) => {
     )
   }
 
-  const DictCompactRow = DictionaryField(CompactRow)
-
   // Get initial tasks/attendees instant assessments values
   report = Object.assign(report, report.getTasksEngagementAssessments())
   report = Object.assign(report, report.getAttendeesEngagementAssessments())
@@ -326,31 +324,36 @@ const CompactReportView = ({ pageDispatchers }) => {
                   label={getReportSubTitle()}
                   className="reportField"
                 />
-                <DictCompactRow
+                <DictionaryField
+                  wrappedComponent={CompactRow}
                   dictProps={Settings.fields.report.intent}
                   content={report.intent}
                   className="reportField"
                 />
-                <DictCompactRow
+                <DictionaryField
+                  wrappedComponent={CompactRow}
                   dictProps={Settings.fields.report.keyOutcomes}
                   content={report.keyOutcomes}
                   className="reportField"
                 />
                 {!report.cancelled && (
                   <>
-                    <DictCompactRow
+                    <DictionaryField
+                      wrappedComponent={CompactRow}
                       dictProps={Settings.fields.report.atmosphere}
                       value={utils.sentenceCase(report.atmosphere)}
                       className="reportField"
                     />
-                    <DictCompactRow
+                    <DictionaryField
+                      wrappedComponent={CompactRow}
                       dictProps={Settings.fields.report.atmosphereDetails}
                       value={report.atmosphereDetails}
                       className="reportField"
                     />
                   </>
                 )}
-                <DictCompactRow
+                <DictionaryField
+                  wrappedComponent={CompactRow}
                   dictProps={Settings.fields.report.nextSteps}
                   content={report.nextSteps}
                   className="reportField"
@@ -374,7 +377,8 @@ const CompactReportView = ({ pageDispatchers }) => {
                   className="reportField"
                 />
                 {report.cancelled && (
-                  <DictCompactRow
+                  <DictionaryField
+                    wrappedComponent={CompactRow}
                     dictProps={Settings.fields.report.cancelledReason}
                     content={utils.sentenceCase(report.cancelledReason)}
                     className="reportField"
@@ -388,7 +392,8 @@ const CompactReportView = ({ pageDispatchers }) => {
                   />
                 )}
                 {report.reportText && (
-                  <DictCompactRow
+                  <DictionaryField
+                    wrappedComponent={CompactRow}
                     dictProps={Settings.fields.report.reportText}
                     content={
                       <RichTextEditor readOnly value={report.reportText} />

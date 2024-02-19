@@ -3,12 +3,12 @@ import API from "api"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import { PositionOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import { customFieldsJSONString } from "components/CustomFields"
+import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
 import Messages from "components/Messages"
 import Model from "components/Model"
 import PositionTable from "components/PositionTable"
 import { FastField, Form, Formik } from "formik"
-import DictionaryField from "HOC/DictionaryField"
 import Organization from "models/Organization"
 import Position from "models/Position"
 import PropTypes from "prop-types"
@@ -37,7 +37,6 @@ const EditAdministratingPositionsModal = ({
         ?.administratingPositions) ??
     []
 
-  const DictFastField = DictionaryField(FastField)
   const positionsFilters = {
     allAdvisorPositions: {
       label: "All advisor positions",
@@ -74,7 +73,8 @@ const EditAdministratingPositionsModal = ({
                 <Container fluid>
                   <Row>
                     <Col md={12}>
-                      <DictFastField
+                      <DictionaryField
+                        wrappedComponent={FastField}
                         dictProps={orgSettings.administratingPositions}
                         name="administratingPositions"
                         component={FieldHelper.SpecialField}

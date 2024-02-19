@@ -2,6 +2,7 @@ import { gql } from "@apollo/client"
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_MIN_HEAD } from "actions"
 import API from "api"
 import AppContext from "components/AppContext"
+import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
@@ -13,7 +14,6 @@ import {
 } from "components/Page"
 import RichTextEditor from "components/RichTextEditor"
 import { Field, Form, Formik } from "formik"
-import DictionaryField from "HOC/DictionaryField"
 import { Person } from "models"
 import moment from "moment"
 import React, { useContext } from "react"
@@ -178,9 +178,9 @@ const OnboardingShow = ({ pageDispatchers }) => {
       status: Person.humanNameOfStatus(person.status)
     }
     return person.getNormalFieldsOrdered().reduce((accum, key) => {
-      const DictField = DictionaryField(Field)
       accum[key] = (
-        <DictField
+        <DictionaryField
+          wrappedComponent={Field}
           dictProps={Settings.fields.person[key]}
           name={key}
           component={FieldHelper.ReadonlyField}

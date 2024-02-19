@@ -4,7 +4,8 @@ import { FastField, Form, Formik } from "formik"
 import PropTypes from "prop-types"
 import React, { useCallback } from "react"
 import { Button, Form as FormBS, Modal } from "react-bootstrap"
-import { Editor, Transforms } from "slate"
+import { getSelectedParentNode } from "richTextUtils"
+import { Transforms } from "slate"
 import { ReactEditor } from "slate-react"
 import { ANET_LINK, EXTERNAL_LINK, getEntityInfoFromUrl } from "utils_links"
 import * as yup from "yup"
@@ -79,29 +80,6 @@ const LinkSourceAnet = ({ editor, showModal, setShowModal, external }) => {
       </Modal.Body>
     </Modal>
   )
-
-  function getParentNodeProps(editor, external) {
-    const selectedParentNode =
-      editor.selection && Editor.parent(editor, editor.selection)
-    const selectedParent = selectedParentNode?.[0]
-    let value
-    if (external && selectedParent?.type === EXTERNAL_LINK) {
-      value = {
-        url: selectedParent.url,
-        text: selectedParent.children?.[0]?.text
-      }
-    } else if (!external && selectedParent?.type === ANET_LINK) {
-      value = {
-        objectType: selectedParent.entityType,
-        object: selectedParent.entityUuid
-          ? { uuid: selectedParent.entityUuid }
-          : null
-      }
-    } else {
-      value = null
-    }
-    return { replaceSelection: !!value, selectedParentNode, value }
-  }
 }
 
 LinkSourceAnet.propTypes = {
@@ -191,6 +169,28 @@ function createExternalLinkNode(url, text) {
     url,
     children: [{ text }]
   }
+}
+
+function getParentNodeProps(editor, external) {
+  const selectedParentNode = getSelectedParentNode(editor)
+  const selectedParent = selectedParentNode?.[0]
+  let value
+  if (external && selectedParent?.type === EXTERNAL_LINK) {
+    value = {
+      url: selectedParent.url,
+      text: selectedParent.children?.[0]?.text
+    }
+  } else if (!external && selectedParent?.type === ANET_LINK) {
+    value = {
+      objectType: selectedParent.entityType,
+      object: selectedParent.entityUuid
+        ? { uuid: selectedParent.entityUuid }
+        : null
+    }
+  } else {
+    value = null
+  }
+  return { replaceSelection: !!value, selectedParentNode, value }
 }
 
 export default LinkSourceAnet

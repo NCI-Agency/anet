@@ -30,8 +30,8 @@ import {
   TaskOverlayRow
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import { getBreadcrumbTrailAsText } from "components/BreadcrumbTrail"
+import DictionaryField from "components/DictionaryField"
 import Model from "components/Model"
-import DictionaryField from "HOC/DictionaryField"
 import _isEmpty from "lodash/isEmpty"
 import _pickBy from "lodash/pickBy"
 import { Location, Organization, Person, Position, Report, Task } from "models"
@@ -444,7 +444,7 @@ export const searchFilters = function() {
           queryKey: "locationUuid"
         })
       },
-      [`Has ${Settings.fields.organization.profile}?`]: {
+      [`Has ${Settings.fields.organization.profile?.label}?`]: {
         component: RadioButtonFilter,
         deserializer: deserializeSelectFilter,
         props: {
@@ -600,10 +600,10 @@ const extraFilters = function() {
 const SearchFilterDisplay = ({ filter, element, showSeparator }) => {
   const dictProps = element.dictProps
   const label = dictProps?.label || filter.key
-  const ChildComponent = dictProps
-    ? DictionaryField(element.component)
-    : element.component
-  const additionalProps = dictProps ? { dictProps } : {}
+  const ChildComponent = dictProps ? DictionaryField : element.component
+  const additionalProps = dictProps
+    ? { wrappedComponent: element.component, dictProps }
+    : {}
   const sep = showSeparator ? ", " : ""
   return dictProps?.exclude ? null : (
     <>

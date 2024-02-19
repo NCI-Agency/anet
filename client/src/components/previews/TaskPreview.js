@@ -1,12 +1,12 @@
 import { gql } from "@apollo/client"
 import API from "api"
 import { BreadcrumbTrail } from "components/BreadcrumbTrail"
+import DictionaryField from "components/DictionaryField"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import Model from "components/Model"
 import PositionTable from "components/PositionTable"
 import RichTextEditor from "components/RichTextEditor"
-import DictionaryField from "HOC/DictionaryField"
 import { Task } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
@@ -126,7 +126,6 @@ const TaskPreview = ({ className, uuid }) => {
     Model.populateCustomFields(data.task)
   }
   const task = new Task(data.task ? data.task : {})
-  const DictPreviewField = DictionaryField(PreviewField)
 
   const fieldSettings = task.fieldSettings()
   return (
@@ -135,11 +134,13 @@ const TaskPreview = ({ className, uuid }) => {
         <h4 className="ellipsized-text">{`${fieldSettings.shortLabel} ${task.shortName}`}</h4>
       </div>
       <div className="preview-section">
-        <DictPreviewField
+        <DictionaryField
+          wrappedComponent={PreviewField}
           dictProps={fieldSettings.longName}
           value={task.longName}
         />
-        <DictPreviewField
+        <DictionaryField
+          wrappedComponent={PreviewField}
           dictProps={Settings.fields.task.taskedOrganizations}
           value={
             task.taskedOrganizations && (
@@ -157,7 +158,8 @@ const TaskPreview = ({ className, uuid }) => {
         />
 
         {Settings.fields.task.parentTask && task.parentTask?.uuid && (
-          <DictPreviewField
+          <DictionaryField
+            wrappedComponent={PreviewField}
             dictProps={Settings.fields.task.parentTask}
             value={
               task.parentTask && (
@@ -174,7 +176,8 @@ const TaskPreview = ({ className, uuid }) => {
 
         {Settings.fields.task.childrenTasks &&
           task.childrenTasks?.length > 0 && (
-            <DictPreviewField
+            <DictionaryField
+              wrappedComponent={PreviewField}
               dictProps={Settings.fields.task.childrenTasks}
               name="subEfforts"
               value={
@@ -190,7 +193,8 @@ const TaskPreview = ({ className, uuid }) => {
         )}
 
         {Settings.fields.task.plannedCompletion && (
-          <DictPreviewField
+          <DictionaryField
+            wrappedComponent={PreviewField}
             dictProps={Settings.fields.task.plannedCompletion}
             value={
               task.plannedCompletion &&
@@ -202,7 +206,8 @@ const TaskPreview = ({ className, uuid }) => {
         )}
 
         {Settings.fields.task.projectedCompletion && (
-          <DictPreviewField
+          <DictionaryField
+            wrappedComponent={PreviewField}
             dictProps={Settings.fields.task.projectedCompletion}
             value={
               task.projectedCompletion &&
@@ -213,13 +218,15 @@ const TaskPreview = ({ className, uuid }) => {
           />
         )}
 
-        <DictPreviewField
+        <DictionaryField
+          wrappedComponent={PreviewField}
           dictProps={Settings.fields.task.status}
           value={Task.humanNameOfStatus(task.status)}
         />
 
         {task.description && (
-          <DictPreviewField
+          <DictionaryField
+            wrappedComponent={PreviewField}
             dictProps={Settings.fields.task.description}
             value={<RichTextEditor readOnly value={task.description} />}
           />

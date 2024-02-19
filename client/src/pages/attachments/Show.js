@@ -5,6 +5,7 @@ import classNames from "classnames"
 import AppContext from "components/AppContext"
 import "components/Attachment/Attachment.css"
 import AttachmentRelatedObjectsTable from "components/Attachment/AttachmentRelatedObjectsTable"
+import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
@@ -17,7 +18,6 @@ import {
 } from "components/Page"
 import RichTextEditor from "components/RichTextEditor"
 import { Field, Form, Formik } from "formik"
-import DictionaryField from "HOC/DictionaryField"
 import { Attachment } from "models"
 import PropTypes from "prop-types"
 import React, { useContext } from "react"
@@ -134,7 +134,6 @@ const AttachmentShow = ({ pageDispatchers }) => {
   }
 
   const attachment = new Attachment(data ? data.attachment : {})
-  const DictField = DictionaryField(Field)
 
   const stateSuccess = routerLocation.state && routerLocation.state.success
   const stateError = routerLocation.state && routerLocation.state.error
@@ -195,7 +194,8 @@ const AttachmentShow = ({ pageDispatchers }) => {
                     />
                   </Col>
                   <Col className="attachment-details" xs={12} sm={3} lg={8}>
-                    <DictField
+                    <DictionaryField
+                      wrappedComponent={Field}
                       dictProps={Settings.fields.attachment.fileName}
                       name="fileName"
                       component={FieldHelper.ReadonlyField}
@@ -218,7 +218,8 @@ const AttachmentShow = ({ pageDispatchers }) => {
                         attachment.contentLength
                       )}
                     />
-                    <DictField
+                    <DictionaryField
+                      wrappedComponent={Field}
                       dictProps={Settings.fields.attachment.classification}
                       name="classification"
                       component={FieldHelper.ReadonlyField}
@@ -233,7 +234,8 @@ const AttachmentShow = ({ pageDispatchers }) => {
                         />
                       }
                     />
-                    <DictField
+                    <DictionaryField
+                      wrappedComponent={Field}
                       dictProps={Settings.fields.attachment.description}
                       name="description"
                       component={FieldHelper.ReadonlyField}

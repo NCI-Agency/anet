@@ -2,12 +2,12 @@ import { gql } from "@apollo/client"
 import API from "api"
 import AppContext from "components/AppContext"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
+import DictionaryField from "components/DictionaryField"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import PreviousPositions from "components/PreviousPositions"
 import RichTextEditor from "components/RichTextEditor"
-import DictionaryField from "HOC/DictionaryField"
 import { Person, Position } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
@@ -97,7 +97,6 @@ const PersonPreview = ({ className, uuid }) => {
   )
 
   const person = new Person(data.person ? data.person : {})
-  const DictPreviewField = DictionaryField(PreviewField)
 
   // The position for this person's counterparts
   const position = person.position
@@ -127,55 +126,65 @@ const PersonPreview = ({ className, uuid }) => {
               />
             </div>
 
-            <DictPreviewField
+            <DictionaryField
+              wrappedComponent={PreviewField}
               dictProps={Settings.fields.person.rank}
               value={person.rank}
             />
 
-            <DictPreviewField
+            <DictionaryField
+              wrappedComponent={PreviewField}
               dictProps={Settings.fields.person.role}
               value={Person.humanNameOfRole(person.role)}
             />
 
             {isAdmin && (
-              <DictPreviewField
+              <DictionaryField
+                wrappedComponent={PreviewField}
                 dictProps={Settings.fields.person.domainUsername}
                 value={person.domainUsername}
               />
             )}
 
-            <DictPreviewField
+            <DictionaryField
+              wrappedComponent={PreviewField}
               dictProps={Settings.fields.person.status}
               value={Person.humanNameOfStatus(person.status)}
             />
           </Col>
           <Col>
-            <DictPreviewField
+            <DictionaryField
+              wrappedComponent={PreviewField}
               dictProps={Settings.fields.person.phoneNumber}
               value={person.phoneNumber}
             />
 
-            <DictPreviewField
+            <DictionaryField
+              wrappedComponent={PreviewField}
               dictProps={Settings.fields.person.emailAddress}
               value={person.emailAddress}
             />
 
-            <DictPreviewField
+            <DictionaryField
+              wrappedComponent={PreviewField}
               dictProps={Settings.fields.person.country}
               value={person.country}
             />
 
-            <DictPreviewField
+            <DictionaryField
+              wrappedComponent={PreviewField}
               dictProps={Settings.fields.person.code}
               value={person.code}
             />
 
-            <DictPreviewField
+            <DictionaryField
+              wrappedComponent={PreviewField}
               dictProps={Settings.fields.person.gender}
               value={person.gender}
             />
 
-            <DictPreviewField
+            <DictionaryField
+              wrappedComponent={PreviewField}
               dictProps={Settings.fields.person.endOfTourDate}
               value={
                 person.endOfTourDate &&

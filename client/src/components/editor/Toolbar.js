@@ -2,6 +2,7 @@ import { Icon } from "@blueprintjs/core"
 import { Tooltip2 } from "@blueprintjs/popover2"
 import PropTypes from "prop-types"
 import React from "react"
+import { getSelectedParentNode } from "richTextUtils"
 import { Editor, Transforms } from "slate"
 import { useSlate } from "slate-react"
 import { ANET_LINK, EXTERNAL_LINK } from "utils_links"
@@ -212,8 +213,7 @@ function isMarkActive(editor, format) {
 }
 
 function isModalActive(editor, format, showModal) {
-  const selectedParent =
-    editor.selection && Editor.parent(editor, editor.selection)?.[0]
+  const selectedParent = getSelectedParentNode(editor)?.[0]
   return showModal || selectedParent?.type === format
 }
 
