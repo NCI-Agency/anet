@@ -180,9 +180,8 @@ const PersonForm = ({
         const isAdmin = currentUser && currentUser.isAdmin()
         const isAdvisor = Person.isAdvisor(values)
         const isPendingVerification = Person.isPendingVerification(values)
-        const endOfTourDateInPast = values.endOfTourDate
-          ? values.endOfTourDate <= Date.now()
-          : false
+        const endOfTourDateInPast =
+          values.endOfTourDate && values.endOfTourDate <= Date.now()
         const willAutoKickPosition =
           values.status === Model.STATUS.INACTIVE &&
           values.position &&
@@ -687,7 +686,7 @@ const PersonForm = ({
                   onChange={value =>
                     setFieldValue(
                       "endOfTourDate",
-                      moment(value).endOf("day").format()
+                      value && moment(value).endOf("day").toDate()
                     )}
                   onBlur={() => setFieldTouched("endOfTourDate")}
                   widget={
