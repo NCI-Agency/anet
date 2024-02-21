@@ -201,7 +201,7 @@
     "lint:fix": "yarn run lint --fix",
     "prettier:check": "NODE_ENV=development prettier-eslint --list-different '.??*.js' '.storybook/*.js' '**/*.js'",
     "prettier:format": "NODE_ENV=development prettier-eslint --write '.??*.js' '.storybook/*.js' '**/*.js'",
-    "test": "echo 'Run \"test-all\" to execute all client-side tests, or pick a specific test target: \"test-jest\", \"test-wdio\", \"test-wdio-ie\", \"test-e2e\".' ; exit 1",
+    "test": "echo 'Run \"test-all\" to execute all client-side tests, or pick a specific test target: \"test-jest\", \"test-wdio\", \"test-e2e\".' ; exit 1",
     "test-all": "yarn run test-jest && yarn run test-wdio && yarn run test-e2e",
     "test-e2e": "export SERVER_URL=${SERVER_URL:-'http://localhost:8180'} ; NODE_ENV=test ava --config ava.config.js",
     "test-wdio": "export SERVER_URL=${SERVER_URL:-'http://localhost:8180'} SUITE=${TEST_WDIO_SUITE:-withCustomFields} ; NODE_ENV=test wdio run ./config/wdio.config.js --suite base --suite ${SUITE}",
