@@ -1,6 +1,8 @@
 import { gql } from "@apollo/client"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
+import { OrganizationOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
+import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -11,6 +13,8 @@ import {
   GENERAL_BANNER_VISIBILITY
 } from "components/GeneralBanner"
 import Messages from "components/Messages"
+import Model from "components/Model"
+import NavigationWarning from "components/NavigationWarning"
 import {
   jumpToTop,
   mapPageDispatchersToProps,
@@ -19,24 +23,15 @@ import {
   usePageTitle
 } from "components/Page"
 import { Field, Form, Formik } from "formik"
+import { Organization } from "models"
 import moment from "moment"
 import RecentActivityTable from "pages/admin/RecentActivityTable"
 import React, { useContext, useState } from "react"
 import { Button, Col, Container, FormSelect, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { toast } from "react-toastify"
+import ORGANIZATIONS_ICON from "resources/organizations.png"
 import { v4 as uuidv4 } from "uuid"
-
-const DROPDOWN_FIELDS = [
-  {
-    name: GENERAL_BANNER_LEVEL,
-    options: GENERAL_BANNER_LEVELS
-  },
-  {
-    name: GENERAL_BANNER_VISIBILITY,
-    options: GENERAL_BANNER_VISIBILITIES
-  }
-]
 
 const GQL_GET_ADMIN_SETTINGS = gql`
   query {
@@ -90,6 +85,99 @@ const RECENT_ACTIVITIES = gql`
     }
   }
 `
+
+function convertFormToValue(key, value) {
+  return SPECIAL_FIELDS[key]?.convertFormToValue
+    ? SPECIAL_FIELDS[key].convertFormToValue(value)
+    : value
+}
+
+function convertValueToForm(key, value) {
+  return SPECIAL_FIELDS[key]?.convertValueToForm
+    ? SPECIAL_FIELDS[key].convertValueToForm(value)
+    : value
+}
+
+const SPECIAL_FIELDS = {
+  DEFAULT_APPROVAL_ORGANIZATION: {
+    widget: key => (
+      <AdvancedSingleSelect
+        fieldName={key}
+        overlayColumns={["Name"]}
+        overlayRenderRow={OrganizationOverlayRow}
+        filterDefs={{
+          allAdvisorOrganizations: {
+            label: "All advisor organizations",
+            queryVars: {
+              status: Model.STATUS.ACTIVE,
+              type: Organization.TYPE.ADVISOR_ORG
+            }
+          }
+        }}
+        objectType={Organization}
+        fields={Organization.autocompleteQuery}
+        valueKey="uuid"
+        addon={ORGANIZATIONS_ICON}
+        keepSearchText
+      />
+    ),
+    convertValueToForm: value => ({
+      uuid: value
+    }),
+    convertFormToValue: value => value?.uuid,
+    onChange: (key, value, setFieldTouched, setFieldValue) => {
+      // Make sure we keep only the uuid
+      const plainValue = convertFormToValue(key, value)
+      const formValue = convertValueToForm(key, plainValue)
+      // validation will be done by setFieldValue
+      setFieldTouched(key, true, false) // onBlur doesn't work when selecting an option
+      setFieldValue(key, formValue)
+    }
+  },
+  [GENERAL_BANNER_LEVEL]: {
+    widget: () => (
+      <FormSelect className="form-control">
+        {Object.values(GENERAL_BANNER_LEVELS).map(option => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </FormSelect>
+    )
+  },
+  [GENERAL_BANNER_VISIBILITY]: {
+    widget: () => (
+      <FormSelect className="form-control">
+        {Object.values(GENERAL_BANNER_VISIBILITIES).map(option => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </FormSelect>
+    )
+  }
+}
+
+function getFieldProps(key, value, setFieldTouched, setFieldValue) {
+  let fieldProps = {
+    key,
+    name: key,
+    component: FieldHelper.InputField
+  }
+  if (SPECIAL_FIELDS[key]) {
+    fieldProps = {
+      ...fieldProps,
+      component: FieldHelper.SpecialField,
+      widget: SPECIAL_FIELDS[key].widget(key, value),
+      ...(SPECIAL_FIELDS[key]?.onChange && {
+        onChange: v =>
+          SPECIAL_FIELDS[key].onChange(key, v, setFieldTouched, setFieldValue)
+      })
+    }
+  }
+  return fieldProps
+}
+
 const AdminIndex = ({ pageDispatchers }) => {
   const { loadAppData } = useContext(AppContext)
   const [recentActivities, setRecentActivities] = useState(null)
@@ -114,7 +202,10 @@ const AdminIndex = ({ pageDispatchers }) => {
   }
 
   const settings = {}
-  data.adminSettings.forEach(setting => (settings[setting.key] = setting.value))
+  data.adminSettings.forEach(
+    setting =>
+      (settings[setting.key] = convertValueToForm(setting.key, setting.value))
+  )
 
   const recentActivitiesActionButton = (
     <Button
@@ -133,9 +224,15 @@ const AdminIndex = ({ pageDispatchers }) => {
 
   return (
     <div>
-      <Messages success={saveSuccess} error={saveError} />
       <Formik enableReinitialize onSubmit={onSubmit} initialValues={settings}>
-        {({ values, isSubmitting, submitForm }) => {
+        {({
+          isSubmitting,
+          dirty,
+          setFieldValue,
+          setFieldTouched,
+          values,
+          submitForm
+        }) => {
           const action = (
             <Button
               variant="primary"
@@ -146,47 +243,28 @@ const AdminIndex = ({ pageDispatchers }) => {
             </Button>
           )
           return (
-            <Form className="form-horizontal" method="post">
-              <Fieldset title="Site settings" action={action} />
-              <Fieldset>
-                {Object.map(settings, (key, value) => {
-                  const dropdownField = DROPDOWN_FIELDS.find(
-                    field => field.name === key
-                  )
-                  if (dropdownField) {
-                    return (
-                      <Field
-                        name={key}
-                        key={key}
-                        component={FieldHelper.SpecialField}
-                        widget={
-                          <FormSelect className="form-control">
-                            {Object.values(dropdownField.options).map(
-                              option => (
-                                <option key={option.value} value={option.value}>
-                                  {option.label}
-                                </option>
-                              )
-                            )}
-                          </FormSelect>
-                        }
-                      />
+            <>
+              <NavigationWarning isBlocking={dirty && !isSubmitting} />
+              <Messages success={saveSuccess} error={saveError} />
+              <Form className="form-horizontal" method="post">
+                <Fieldset title="Site settings" action={action} />
+                <Fieldset>
+                  {Object.map(values, (key, value) => {
+                    const fieldProps = getFieldProps(
+                      key,
+                      value,
+                      setFieldTouched,
+                      setFieldValue
                     )
-                  }
-                  return (
-                    <Field
-                      key={key}
-                      name={key}
-                      component={FieldHelper.InputField}
-                    />
-                  )
-                })}
-              </Fieldset>
-              <div className="submit-buttons">
-                <div />
-                <div>{action}</div>
-              </div>
-            </Form>
+                    return <Field {...fieldProps} />
+                  })}
+                </Fieldset>
+                <div className="submit-buttons">
+                  <div />
+                  <div>{action}</div>
+                </div>
+              </Form>
+            </>
           )
         }}
       </Formik>
@@ -258,7 +336,10 @@ const AdminIndex = ({ pageDispatchers }) => {
 
   function onSubmit(values, form) {
     // settings as JSON
-    const settings = Object.map(values, (key, value) => ({ key, value }))
+    const settings = Object.map(values, (key, value) => ({
+      key,
+      value: convertFormToValue(key, value)
+    }))
     return API.mutation(GQL_SAVE_ADMIN_SETTINGS, { settings })
       .then(response => onSubmitSuccess(response, values, form))
       .catch(error => {
