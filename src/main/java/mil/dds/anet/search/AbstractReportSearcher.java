@@ -33,6 +33,7 @@ import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.search.AbstractSearchQueryBuilder.Comparison;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.Utils;
 
 public abstract class AbstractReportSearcher extends AbstractSearcher<Report, ReportSearchQuery>
     implements IReportSearcher {
@@ -217,7 +218,21 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
       qb.addSqlArg("approverUuid", query.getPendingApprovalOf());
     }
 
-    qb.addInClause("states", "reports.state", query.getState());
+    if (Utils.isEmptyOrNull(query.getState()) && query.getPendingApprovalOf() == null) {
+      // When not otherwise specified, restrict search to specific report states
+      final List<ReportState> reportStates;
+      if (Utils.isEmptyOrNull(query.getEngagementStatus())) {
+        // just published
+        reportStates = List.of(ReportState.PUBLISHED);
+      } else {
+        // published or cancelled
+        reportStates = List.of(ReportState.PUBLISHED, ReportState.CANCELLED);
+      }
+      qb.addInClause("states", "reports.state", reportStates);
+    } else {
+      // search for the states specified in the query
+      qb.addInClause("states", "reports.state", query.getState());
+    }
 
     if (query.getEngagementStatus() != null) {
       final List<String> engagementStatusClauses = new ArrayList<>();
@@ -300,26 +315,20 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
       qb.addSqlArg("userUuid", DaoUtils.getUuid(query.getUser()));
     }
 
-    if (!query.isSystemSearch() && !AuthUtils.isAdmin(query.getUser())) {
-      // Apply a filter to restrict access to other's draft, rejected or approved reports.
-      // When the search is performed by the system (for instance by a worker, systemSearch = true)
-      // or an admin, do not apply this filter.
-      if (query.getUser() == null) {
-        qb.addWhereClause("reports.state != :draftState");
-        qb.addWhereClause("reports.state != :rejectedState");
-        qb.addWhereClause("reports.state != :approvedState");
-        qb.addSqlArg("draftState", DaoUtils.getEnumId(ReportState.DRAFT));
-        qb.addSqlArg("rejectedState", DaoUtils.getEnumId(ReportState.REJECTED));
-        qb.addSqlArg("approvedState", DaoUtils.getEnumId(ReportState.APPROVED));
-      } else {
-        qb.addWhereClause("((reports.state != :draftState AND reports.state != :rejectedState) OR ("
-            + " reports.uuid IN (SELECT \"reportUuid\" FROM \"reportPeople\""
-            + " WHERE \"isAuthor\" = :isAuthor AND \"personUuid\" = :userUuid)))");
-        qb.addSqlArg("draftState", DaoUtils.getEnumId(ReportState.DRAFT));
-        qb.addSqlArg("rejectedState", DaoUtils.getEnumId(ReportState.REJECTED));
-        qb.addSqlArg("isAuthor", true);
-        qb.addSqlArg("userUuid", DaoUtils.getUuid(query.getUser()));
-      }
+    if (!query.isSystemSearch() && (!AuthUtils.isAdmin(query.getUser())
+        || !Boolean.TRUE.equals(query.getIncludeAllDrafts()))) {
+      // Apply a filter to restrict access to other's draft or rejected reports.
+      // When the search is performed by the system (for instance by a worker, systemSearch = true),
+      // do not apply this filter.
+      // Admins see all drafts/rejected when "include all drafts" is true,
+      // else admins and other users only ever see their own drafts/rejected (and all other reports)
+      qb.addWhereClause("((reports.state != :draftState AND reports.state != :rejectedState) OR ("
+          + "reports.uuid IN (SELECT \"reportUuid\" FROM \"reportPeople\""
+          + " WHERE \"isAuthor\" = :isAuthor AND \"personUuid\" = :userUuid)))");
+      qb.addSqlArg("draftState", DaoUtils.getEnumId(ReportState.DRAFT));
+      qb.addSqlArg("rejectedState", DaoUtils.getEnumId(ReportState.REJECTED));
+      qb.addSqlArg("isAuthor", true);
+      qb.addSqlArg("userUuid", DaoUtils.getUuid(query.getUser()));
     }
 
     addOrderByClauses(qb, query);

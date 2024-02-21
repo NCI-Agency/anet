@@ -3,8 +3,6 @@ package mil.dds.anet.test.resources;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.graphql_java_generator.exception.GraphQLRequestExecutionException;
 import com.graphql_java_generator.exception.GraphQLRequestPreparationException;
 import java.lang.invoke.MethodHandles;
@@ -209,14 +207,14 @@ public class ReportResourceTest extends AbstractResourceTest {
     final ApprovalStepInput approvalStepInput =
         ApprovalStepInput.builder().withName("Test Group for Approving")
             .withType(ApprovalStepType.REPORT_APPROVAL).withRelatedObjectUuid(advisorOrg.getUuid())
-            .withApprovers(ImmutableList.of(getPositionInput(approver1Pos))).build();
+            .withApprovers(List.of(getPositionInput(approver1Pos))).build();
     approvalStepsInput.add(approvalStepInput);
 
     // Adding a new approval step to an AO automatically puts it at the end of the approval process.
     final ApprovalStepInput releaseApprovalStepInput =
         ApprovalStepInput.builder().withName("Test Group of Releasers")
             .withType(ApprovalStepType.REPORT_APPROVAL).withRelatedObjectUuid(advisorOrg.getUuid())
-            .withApprovers(ImmutableList.of(getPositionInput(approver2Pos))).build();
+            .withApprovers(List.of(getPositionInput(approver2Pos))).build();
     approvalStepsInput.add(releaseApprovalStepInput);
     final OrganizationInput advisorOrgInput = getOrganizationInput(advisorOrg);
     advisorOrgInput.setApprovalSteps(approvalStepsInput);
@@ -259,11 +257,11 @@ public class ReportResourceTest extends AbstractResourceTest {
     // Write a Report
     final ReportPerson nonAttendingAuthor = personToReportAuthor(getElizabethElizawell());
     nonAttendingAuthor.setAttendee(false);
-    final ArrayList<ReportPerson> reportPeople =
-        Lists.newArrayList(principal, personToReportAuthor(author), nonAttendingAuthor);
+    final List<ReportPerson> reportPeople =
+        List.of(principal, personToReportAuthor(author), nonAttendingAuthor);
     final ReportInput rInput = ReportInput.builder().withEngagementDate(Instant.now())
         .withDuration(120).withReportPeople(getReportPeopleInput(reportPeople))
-        .withTasks(Lists.newArrayList(getTaskInput(action))).withLocation(getLocationInput(loc))
+        .withTasks(List.of(getTaskInput(action))).withLocation(getLocationInput(loc))
         .withAtmosphere(Atmosphere.POSITIVE).withAtmosphereDetails("Everybody was super nice!")
         .withIntent("A testing report to test that reporting reports")
         // set HTML of report text
@@ -490,7 +488,7 @@ public class ReportResourceTest extends AbstractResourceTest {
         .contains(loc.getUuid());
 
     // Go and delete the entire approval chain!
-    advisorOrg.setApprovalSteps(ImmutableList.of());
+    advisorOrg.setApprovalSteps(List.of());
     nrUpdated = adminMutationExecutor.updateOrganization("", getOrganizationInput(advisorOrg));
     assertThat(nrUpdated).isEqualTo(1);
 
@@ -584,14 +582,14 @@ public class ReportResourceTest extends AbstractResourceTest {
     final ApprovalStepInput approvalStepInput =
         ApprovalStepInput.builder().withName("Test Group for Approving")
             .withType(ApprovalStepType.REPORT_APPROVAL).withRelatedObjectUuid(advisorOrg.getUuid())
-            .withApprovers(ImmutableList.of(getPositionInput(approver1Pos))).build();
+            .withApprovers(List.of(getPositionInput(approver1Pos))).build();
     approvalStepsInput.add(approvalStepInput);
 
     // Adding a new approval step to an AO automatically puts it at the end of the approval process.
     final ApprovalStepInput releaseApprovalStepInput =
         ApprovalStepInput.builder().withName("Test Group of Releasers")
             .withType(ApprovalStepType.REPORT_APPROVAL).withRelatedObjectUuid(advisorOrg.getUuid())
-            .withApprovers(ImmutableList.of(getPositionInput(approver2Pos))).build();
+            .withApprovers(List.of(getPositionInput(approver2Pos))).build();
     approvalStepsInput.add(releaseApprovalStepInput);
     final OrganizationInput advisorOrgInput = getOrganizationInput(advisorOrg);
     advisorOrgInput.setApprovalSteps(approvalStepsInput);
@@ -632,21 +630,21 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(loc.getUuid()).isNotNull();
 
     // Write a Report
-    final ReportInput rInput = ReportInput.builder().withEngagementDate(Instant.now())
-        .withDuration(120)
-        .withReportPeople(
-            getReportPeopleInput(Lists.newArrayList(reportAttendee, personToReportAuthor(author))))
-        .withTasks(Lists.newArrayList(getTaskInput(action))).withLocation(getLocationInput(loc))
-        .withAtmosphere(Atmosphere.POSITIVE).withAtmosphereDetails("Everybody was super nice!")
-        .withIntent("A testing report to test that reporting reports")
-        // set HTML of report text
-        .withReportText(UtilsTest.getCombinedHtmlTestCase().getInput())
-        // set JSON of customFields
-        .withCustomFields(UtilsTest.getCombinedJsonTestCase().getInput())
-        .withNextSteps("This is the next steps on a report")
-        .withKeyOutcomes("These are the key outcomes of this engagement")
-        .withAdvisorOrg(getOrganizationInput(advisorOrg))
-        .withPrincipalOrg(getOrganizationInput(reportAttendeeOrg)).build();
+    final ReportInput rInput =
+        ReportInput.builder().withEngagementDate(Instant.now()).withDuration(120)
+            .withReportPeople(
+                getReportPeopleInput(List.of(reportAttendee, personToReportAuthor(author))))
+            .withTasks(List.of(getTaskInput(action))).withLocation(getLocationInput(loc))
+            .withAtmosphere(Atmosphere.POSITIVE).withAtmosphereDetails("Everybody was super nice!")
+            .withIntent("A testing report to test that reporting reports")
+            // set HTML of report text
+            .withReportText(UtilsTest.getCombinedHtmlTestCase().getInput())
+            // set JSON of customFields
+            .withCustomFields(UtilsTest.getCombinedJsonTestCase().getInput())
+            .withNextSteps("This is the next steps on a report")
+            .withKeyOutcomes("These are the key outcomes of this engagement")
+            .withAdvisorOrg(getOrganizationInput(advisorOrg))
+            .withPrincipalOrg(getOrganizationInput(reportAttendeeOrg)).build();
     final Report created = authorMutationExecutor.createReport(FIELDS, rInput);
     assertThat(created).isNotNull();
     assertThat(created.getUuid()).isNotNull();
@@ -859,7 +857,7 @@ public class ReportResourceTest extends AbstractResourceTest {
         .contains(loc.getUuid());
 
     // Go and delete the entire approval chain!
-    advisorOrg.setApprovalSteps(ImmutableList.of());
+    advisorOrg.setApprovalSteps(List.of());
     nrUpdated = adminMutationExecutor.updateOrganization("", getOrganizationInput(advisorOrg));
     assertThat(nrUpdated).isEqualTo(1);
 
@@ -886,7 +884,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     final MutationExecutor authorMutationExecutor = getMutationExecutor(author.getDomainUsername());
 
     final List<ReportPersonInput> reportPeopleInput =
-        getReportPeopleInput(ImmutableList.of(personToPrimaryReportPerson(roger),
+        getReportPeopleInput(List.of(personToPrimaryReportPerson(roger),
             personToPrimaryReportPerson(jack), personToReportAuthor(author)));
 
     // Write a report as that person
@@ -975,9 +973,8 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(nrUpdated).isEqualTo(1);
 
     // Change primary advisor of the report to someone in EF 1.1
-    returned.setReportPeople(
-        ImmutableList.of(personToPrimaryReportPerson(roger), personToReportPerson(jack),
-            personToPrimaryReportPerson(bob), personToReportAuthor(author)));
+    returned.setReportPeople(List.of(personToPrimaryReportPerson(roger), personToReportPerson(jack),
+        personToPrimaryReportPerson(bob), personToReportAuthor(author)));
     final Report updated =
         authorMutationExecutor.updateReport(FIELDS, getReportInput(returned), true);
     assertThat(updated).isNotNull();
@@ -1046,8 +1043,8 @@ public class ReportResourceTest extends AbstractResourceTest {
         .withNextSteps("These are the next steps summarized")
         .withReportText("This report was generated by ReportsResourceTest#reportEditTest")
         .withReportPeople(getReportPeopleInput(
-            ImmutableList.of(personToPrimaryReportPerson(roger), personToReportAuthor(elizabeth))))
-        .withTasks(ImmutableList.of(getTaskInput(taskSearchResults.getList().get(0)))).build();
+            List.of(personToPrimaryReportPerson(roger), personToReportAuthor(elizabeth))))
+        .withTasks(List.of(getTaskInput(taskSearchResults.getList().get(0)))).build();
     Report returned = elizabethMutationExecutor.createReport(FIELDS, rInput);
     assertThat(returned).isNotNull();
     assertThat(returned.getUuid()).isNotNull();
@@ -1058,9 +1055,9 @@ public class ReportResourceTest extends AbstractResourceTest {
     returned.setReportText(UtilsTest.getCombinedHtmlTestCase().getInput());
     // u[date JSON of customFields
     returned.setCustomFields(UtilsTest.getCombinedJsonTestCase().getInput());
-    returned.setReportPeople(ImmutableList.of(personToPrimaryReportPerson(roger),
-        personToReportPerson(nick), personToPrimaryReportAuthor(elizabeth)));
-    returned.setTasks(ImmutableList.of());
+    returned.setReportPeople(List.of(personToPrimaryReportPerson(roger), personToReportPerson(nick),
+        personToPrimaryReportAuthor(elizabeth)));
+    returned.setTasks(List.of());
     Report updated = elizabethMutationExecutor.updateReport(FIELDS, getReportInput(returned), true);
     assertThat(updated).isNotNull();
 
@@ -1097,10 +1094,10 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     // Bob edits the report (change reportText, remove Person, add a Task)
     returned3.setReportText(rInput.getReportText() + ", edited by Bob!!");
-    returned3.setReportPeople(ImmutableList.of(personToPrimaryReportPerson(nick),
-        personToPrimaryReportAuthor(elizabeth)));
-    returned3.setTasks(
-        ImmutableList.of(taskSearchResults.getList().get(1), taskSearchResults.getList().get(2)));
+    returned3.setReportPeople(
+        List.of(personToPrimaryReportPerson(nick), personToPrimaryReportAuthor(elizabeth)));
+    returned3
+        .setTasks(List.of(taskSearchResults.getList().get(1), taskSearchResults.getList().get(2)));
     updated = getMutationExecutor("bob").updateReport(FIELDS, getReportInput(returned3), true);
     assertThat(updated).isNotNull();
 
@@ -1122,8 +1119,9 @@ public class ReportResourceTest extends AbstractResourceTest {
     final Person jack = getJackJackson();
     final Person steve = getSteveSteveson();
 
-    // Search based on report Text body
-    ReportSearchQueryInput query = ReportSearchQueryInput.builder().withText("spreadsheet").build();
+    // Search based on report Text body, for any report State
+    ReportSearchQueryInput query = ReportSearchQueryInput.builder()
+        .withState(List.of(ReportState.values())).withText("spreadsheet").build();
     AnetBeanList_Report searchResults = jackQueryExecutor.reportList(getListFields(FIELDS), query);
     assertThat(searchResults.getList()).isNotEmpty();
 
@@ -1253,7 +1251,8 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(locSearchResults.getList()).isNotEmpty();
     Location cabot = locSearchResults.getList().get(0);
 
-    query = ReportSearchQueryInput.builder().withLocationUuid(cabot.getUuid()).build();
+    query = ReportSearchQueryInput.builder().withState(List.of(ReportState.values()))
+        .withLocationUuid(cabot.getUuid()).build();
     searchResults = jackQueryExecutor.reportList(getListFields(FIELDS), query);
     assertThat(searchResults.getList()).isNotEmpty();
     assertThat(searchResults.getList().stream()
@@ -1262,12 +1261,12 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     // Search by Status.
     query.setLocationUuid(null);
-    query.setState(ImmutableList.of(ReportState.CANCELLED));
+    query.setState(List.of(ReportState.CANCELLED));
     searchResults = jackQueryExecutor.reportList(getListFields(FIELDS), query);
     assertThat(searchResults.getList()).isNotEmpty();
     final int numCancelled = searchResults.getTotalCount();
 
-    query.setState(ImmutableList.of(ReportState.CANCELLED, ReportState.PUBLISHED));
+    query.setState(List.of(ReportState.CANCELLED, ReportState.PUBLISHED));
     searchResults = jackQueryExecutor.reportList(getListFields(FIELDS), query);
     assertThat(searchResults.getList()).isNotEmpty();
     assertThat(searchResults.getTotalCount()).isGreaterThan(numCancelled);
@@ -1470,8 +1469,8 @@ public class ReportResourceTest extends AbstractResourceTest {
     final Person jack = getJackJackson();
     final Person roger = getRogerRogwell();
     final List<ReportPersonInput> reportPeopleInput =
-        getReportPeopleInput(ImmutableList.of(personToPrimaryReportPerson(roger),
-            personToReportPerson(jack), personToPrimaryReportAuthor(elizabeth)));
+        getReportPeopleInput(List.of(personToPrimaryReportPerson(roger), personToReportPerson(jack),
+            personToPrimaryReportAuthor(elizabeth)));
 
     // Write a report as that person
     final ReportInput rInput = ReportInput.builder()
@@ -1543,12 +1542,12 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     // Liz was supposed to meet with Steve, but he cancelled.
 
-    final ReportInput rInput =
-        ReportInput.builder().withIntent("Meet with Steve about a thing we never got to talk about")
-            .withEngagementDate(Instant.now()).withDuration(45)
-            .withReportPeople(getReportPeopleInput(ImmutableList
-                .of(personToPrimaryReportAuthor(elizabeth), personToPrimaryReportPerson(steve))))
-            .withCancelledReason(ReportCancelledReason.CANCELLED_BY_PRINCIPAL).build();
+    final ReportInput rInput = ReportInput.builder()
+        .withIntent("Meet with Steve about a thing we never got to talk about")
+        .withEngagementDate(Instant.now()).withDuration(45)
+        .withReportPeople(getReportPeopleInput(
+            List.of(personToPrimaryReportAuthor(elizabeth), personToPrimaryReportPerson(steve))))
+        .withCancelledReason(ReportCancelledReason.CANCELLED_BY_PRINCIPAL).build();
 
     final Report saved = elizabethMutationExecutor.createReport(FIELDS, rInput);
     assertThat(saved).isNotNull();
@@ -1590,13 +1589,12 @@ public class ReportResourceTest extends AbstractResourceTest {
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     final Person steve = getSteveSteveson();
 
-    final ReportInput rInput =
-        ReportInput.builder().withIntent("Test the Daily rollup graph")
-            .withNextSteps("Check for a change in the rollup graph")
-            .withKeyOutcomes("Foobar the bazbiz")
-            .withReportPeople(getReportPeopleInput(ImmutableList
-                .of(personToPrimaryReportAuthor(admin), personToPrimaryReportPerson(steve))))
-            .build();
+    final ReportInput rInput = ReportInput.builder().withIntent("Test the Daily rollup graph")
+        .withNextSteps("Check for a change in the rollup graph")
+        .withKeyOutcomes("Foobar the bazbiz")
+        .withReportPeople(getReportPeopleInput(
+            List.of(personToPrimaryReportAuthor(admin), personToPrimaryReportPerson(steve))))
+        .build();
     Report r = adminMutationExecutor.createReport(FIELDS, rInput);
     assertThat(r).isNotNull();
     assertThat(r.getUuid()).isNotNull();
@@ -1675,8 +1673,8 @@ public class ReportResourceTest extends AbstractResourceTest {
     final ReportInput rInput = ReportInput.builder().withIntent("Test the Daily rollup graph")
         .withNextSteps("Check for a change in the rollup graph")
         .withKeyOutcomes("Foobar the bazbiz")
-        .withReportPeople(getReportPeopleInput(ImmutableList
-            .of(personToPrimaryReportAuthor(elizabeth), personToPrimaryReportPerson(steve))))
+        .withReportPeople(getReportPeopleInput(
+            List.of(personToPrimaryReportAuthor(elizabeth), personToPrimaryReportPerson(steve))))
         .build();
     Report r = elizabethMutationExecutor.createReport(FIELDS, rInput);
     assertThat(r).isNotNull();
@@ -1755,8 +1753,7 @@ public class ReportResourceTest extends AbstractResourceTest {
         // set HTML of report sensitive information
         .withText(UtilsTest.getCombinedHtmlTestCase().getInput()).build();
     final ReportInput rInput = ReportInput.builder()
-        .withReportPeople(
-            getReportPeopleInput(ImmutableList.of(personToPrimaryReportAuthor(elizabeth))))
+        .withReportPeople(getReportPeopleInput(List.of(personToPrimaryReportAuthor(elizabeth))))
         .withReportText(
             "This reportTest was generated by ReportsResourceTest#testSensitiveInformation")
         .withReportSensitiveInformation(rsiInput).build();
@@ -1861,7 +1858,7 @@ public class ReportResourceTest extends AbstractResourceTest {
   }
 
   private ReportSearchQueryInput.Builder setupQueryEngagementDayOfWeek() {
-    return ReportSearchQueryInput.builder().withState(ImmutableList.of(ReportState.PUBLISHED));
+    return ReportSearchQueryInput.builder().withState(List.of(ReportState.PUBLISHED));
   }
 
   private AnetBeanList_Report runSearchQuery(ReportSearchQueryInput query)
@@ -1975,7 +1972,7 @@ public class ReportResourceTest extends AbstractResourceTest {
         .withNextSteps("Retrieve the advisor reports insight")
         .withLocation(getLocationInput(getLocation(author, "General Hospital")))
         .withEngagementDate(engagementDate)
-        .withReportPeople(getReportPeopleInput(Lists.newArrayList(reportPerson)))
+        .withReportPeople(getReportPeopleInput(List.of(reportPerson)))
         .withAdvisorOrg(getOrganizationInput(advisorOrganization)).build();
     final Report created = adminMutationExecutor.createReport(FIELDS, rInput);
     assertThat(created).isNotNull();
@@ -2004,7 +2001,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     final Instant engagementDate =
         Instant.now().atZone(DaoUtils.getServerNativeZoneId()).minusWeeks(2).toInstant();
     final ReportInput rInput = ReportInput.builder()
-        .withReportPeople(getReportPeopleInput(ImmutableList.of(
+        .withReportPeople(getReportPeopleInput(List.of(
             personToPrimaryReportPerson(getSteveSteveson()),
             personToPrimaryReportPerson(getElizabethElizawell()), personToReportAuthor(author))))
         .withState(ReportState.DRAFT).withAtmosphere(Atmosphere.POSITIVE)
@@ -2024,7 +2021,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(searchResults).isNotEmpty();
     final Task t11a =
         searchResults.stream().filter(t -> t.getShortName().equals("1.1.A")).findFirst().get();
-    rInput.setTasks(ImmutableList.of(getTaskInput(t11a)));
+    rInput.setTasks(List.of(getTaskInput(t11a)));
 
     // Create the report
     final Report created = authorMutationExecutor.createReport(FIELDS, rInput);
@@ -2108,7 +2105,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     final Person author = getJackJackson();
     final MutationExecutor authorMutationExecutor = getMutationExecutor(author.getDomainUsername());
     final ReportInput rInput = ReportInput.builder()
-        .withReportPeople(getReportPeopleInput(ImmutableList.of(personToReportAuthor(author))))
+        .withReportPeople(getReportPeopleInput(List.of(personToReportAuthor(author))))
         .withState(ReportState.DRAFT).withAtmosphere(Atmosphere.POSITIVE)
         .withIntent("Testing report authors").withEngagementDate(Instant.now()).build();
     final Report reportFirstAuthor = authorMutationExecutor.createReport(FIELDS, rInput);
@@ -2129,7 +2126,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     // Add a second author
     final Person liz = getElizabethElizawell();
     reportFirstAuthor
-        .setReportPeople(ImmutableList.of(personToReportAuthor(author), personToReportAuthor(liz)));
+        .setReportPeople(List.of(personToReportAuthor(author), personToReportAuthor(liz)));
     final Report reportTwoAuthors =
         authorMutationExecutor.updateReport(FIELDS, getReportInput(reportFirstAuthor), true);
     assertThat(reportTwoAuthors.getReportPeople())
@@ -2138,7 +2135,7 @@ public class ReportResourceTest extends AbstractResourceTest {
         .anyMatch(rp -> Objects.equals(rp.getUuid(), liz.getUuid()) && rp.getAuthor());
 
     // Remove the first author
-    reportTwoAuthors.setReportPeople(ImmutableList.of(personToReportAuthor(liz)));
+    reportTwoAuthors.setReportPeople(List.of(personToReportAuthor(liz)));
     final Report reportSecondAuthor =
         authorMutationExecutor.updateReport(FIELDS, getReportInput(reportTwoAuthors), true);
     assertThat(reportSecondAuthor.getReportPeople())
@@ -2156,7 +2153,7 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     // Try to add first author again, should fail
     reportSecondAuthor
-        .setReportPeople(ImmutableList.of(personToReportAuthor(author), personToReportAuthor(liz)));
+        .setReportPeople(List.of(personToReportAuthor(author), personToReportAuthor(liz)));
     try {
       authorMutationExecutor.updateReport(FIELDS, getReportInput(reportSecondAuthor), true);
       fail("Expected ForbiddenException");
@@ -2198,7 +2195,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     final Instant engagementDate = Instant.now().atZone(DaoUtils.getServerNativeZoneId())
         .minusWeeks(isFuture ? -2 : 2).toInstant();
     final ReportInput rInput = ReportInput.builder()
-        .withReportPeople(getReportPeopleInput(ImmutableList.of(
+        .withReportPeople(getReportPeopleInput(List.of(
             personToPrimaryReportPerson(getSteveSteveson()), personToPrimaryReportAuthor(author))))
         .withState(ReportState.DRAFT).withAtmosphere(Atmosphere.POSITIVE)
         .withIntent("Testing unpublishing").withKeyOutcomes("Unpublishing works")
@@ -2216,7 +2213,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(searchResults).isNotEmpty();
     final Task t11a =
         searchResults.stream().filter(t -> t.getShortName().equals("EF7")).findFirst().get();
-    rInput.setTasks(ImmutableList.of(getTaskInput(t11a)));
+    rInput.setTasks(List.of(getTaskInput(t11a)));
 
     // Create the report
     final Report created = authorMutationExecutor.createReport(FIELDS, rInput);
@@ -2280,7 +2277,7 @@ public class ReportResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  void testAdminFindsAllDrafts()
+  void testAdminCanFindAllDrafts()
       throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
     final ReportSearchQueryInput draftsQuery = ReportSearchQueryInput.builder()
         .withState(List.of(ReportState.DRAFT)).withPageSize(0).build();
@@ -2292,13 +2289,29 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(erinsDraftReports.getTotalCount()).isOne();
     final Report erinsDraftReport = erinsDraftReports.getList().get(0);
 
+    // Even when including all drafts (or trying to)
+    draftsQuery.setIncludeAllDrafts(true);
+    AnetBeanList_Report erinsDraftReportsAgain =
+        erinQueryExecutor.reportList(getListFields(FIELDS), draftsQuery);
+    assertThat(erinsDraftReportsAgain.getTotalCount()).isOne();
+    draftsQuery.setIncludeAllDrafts(false);
+
     // Erin's superuser should not be able to find it
     final QueryExecutor rebeccaMutationExecutor = getQueryExecutor("rebecca");
     AnetBeanList_Report rebeccaDraftReports =
         rebeccaMutationExecutor.reportList(getListFields(FIELDS), draftsQuery);
     assertThat(rebeccaDraftReports.getTotalCount()).isZero();
 
-    // Admin should find all drafts
+    // Admin should normally find only their own drafts
+    AnetBeanList_Report adminDraftReports =
+        adminQueryExecutor.reportList(getListFields(FIELDS), draftsQuery);
+    assertThat(adminDraftReports.getTotalCount()).isOne();
+    // List should not include Erin's draft
+    assertThat(adminDraftReports.getList())
+        .noneMatch(report -> report.getUuid().equals(erinsDraftReport.getUuid()));
+
+    // Except when including all drafts
+    draftsQuery.setIncludeAllDrafts(true);
     AnetBeanList_Report allDraftReports =
         adminQueryExecutor.reportList(getListFields(FIELDS), draftsQuery);
     assertThat(allDraftReports.getTotalCount()).isGreaterThan(1);

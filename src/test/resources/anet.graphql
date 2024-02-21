@@ -985,6 +985,7 @@ input ReportSearchQueryInput {
   engagementStatus: [EngagementStatus]
   inMyReports: Boolean
   includeAdvisorOrgChildren: Boolean
+  includeAllDrafts: Boolean
   includeEngagementDayOfWeek: Boolean
   includePrincipalOrgChildren: Boolean
   locationUuid: String

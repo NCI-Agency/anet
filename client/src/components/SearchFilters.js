@@ -29,6 +29,7 @@ import {
   PositionOverlayRow,
   TaskOverlayRow
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
+import AppContext from "components/AppContext"
 import { getBreadcrumbTrailAsText } from "components/BreadcrumbTrail"
 import DictionaryField from "components/DictionaryField"
 import Model from "components/Model"
@@ -36,7 +37,7 @@ import _isEmpty from "lodash/isEmpty"
 import _pickBy from "lodash/pickBy"
 import { Location, Organization, Person, Position, Report, Task } from "models"
 import PropTypes from "prop-types"
-import React from "react"
+import React, { useContext } from "react"
 import LOCATIONS_ICON from "resources/locations.png"
 import PEOPLE_ICON from "resources/people.png"
 import POSITIONS_ICON from "resources/positions.png"
@@ -89,6 +90,7 @@ const StatusFilter = {
 const SubscriptionFilter = {
   component: CheckboxFilter,
   deserializer: deserializeCheckboxFilter,
+  labelClass: "pt-0",
   props: {
     queryKey: "subscribed",
     msg: "By me"
@@ -133,7 +135,7 @@ const advancedSelectFilterTaskProps = {
   addon: TASKS_ICON
 }
 
-export const searchFilters = function() {
+export const searchFilters = function(includeAdminFilters) {
   const filters = {}
 
   const taskShortLabel = Settings.fields.task.shortLabel
@@ -280,51 +282,71 @@ export const searchFilters = function() {
       State: {
         component: ReportStateFilter,
         deserializer: deserializeReportStateFilter,
+        isDefault: true,
         props: {
           queryKey: "state"
         }
-      },
-      "Engagement Status": {
-        component: SelectFilter,
-        deserializer: deserializeSelectFilter,
-        props: {
-          queryKey: "engagementStatus",
-          options: [
-            Report.ENGAGEMENT_STATUS.HAPPENED,
-            Report.ENGAGEMENT_STATUS.FUTURE,
-            Report.ENGAGEMENT_STATUS.CANCELLED
-          ]
-        }
-      },
-      Atmospherics: {
-        component: SelectFilter,
-        dictProps: Settings.fields.report.atmosphere,
-        deserializer: deserializeSelectFilter,
-        props: {
-          queryKey: "atmosphere",
-          options: [
-            Report.ATMOSPHERE.POSITIVE,
-            Report.ATMOSPHERE.NEUTRAL,
-            Report.ATMOSPHERE.NEGATIVE
-          ]
-        }
-      },
-      "Sensitive Info": {
-        component: CheckboxFilter,
-        deserializer: deserializeCheckboxFilter,
-        props: {
-          queryKey: "sensitiveInfo"
-        }
-      },
-      [taskShortLabel]: {
-        component: AdvancedSelectFilter,
-        deserializer: deserializeAdvancedSelectFilter,
-        props: Object.assign({}, advancedSelectFilterTaskProps, {
-          filterDefs: taskWidgetFilters,
-          placeholder: `Filter reports by ${taskShortLabel}...`,
-          queryKey: "taskUuid"
-        })
       }
+    }
+  }
+  if (includeAdminFilters) {
+    filters[SEARCH_OBJECT_TYPES.REPORTS].filters = {
+      ...filters[SEARCH_OBJECT_TYPES.REPORTS].filters,
+      "Include all Drafts?": {
+        component: RadioButtonFilter,
+        deserializer: deserializeRadioButtonFilter,
+        labelClass: "pt-0",
+        props: {
+          queryKey: "includeAllDrafts",
+          options: [true, false],
+          labels: ["Yes", "No"]
+        }
+      }
+    }
+  }
+  filters[SEARCH_OBJECT_TYPES.REPORTS].filters = {
+    ...filters[SEARCH_OBJECT_TYPES.REPORTS].filters,
+    "Engagement Status": {
+      component: SelectFilter,
+      deserializer: deserializeSelectFilter,
+      props: {
+        queryKey: "engagementStatus",
+        options: [
+          Report.ENGAGEMENT_STATUS.HAPPENED,
+          Report.ENGAGEMENT_STATUS.FUTURE,
+          Report.ENGAGEMENT_STATUS.CANCELLED
+        ]
+      }
+    },
+    Atmospherics: {
+      component: SelectFilter,
+      dictProps: Settings.fields.report.atmosphere,
+      deserializer: deserializeSelectFilter,
+      props: {
+        queryKey: "atmosphere",
+        options: [
+          Report.ATMOSPHERE.POSITIVE,
+          Report.ATMOSPHERE.NEUTRAL,
+          Report.ATMOSPHERE.NEGATIVE
+        ]
+      }
+    },
+    "Sensitive Info": {
+      component: CheckboxFilter,
+      deserializer: deserializeCheckboxFilter,
+      labelClass: "pt-0",
+      props: {
+        queryKey: "sensitiveInfo"
+      }
+    },
+    [taskShortLabel]: {
+      component: AdvancedSelectFilter,
+      deserializer: deserializeAdvancedSelectFilter,
+      props: Object.assign({}, advancedSelectFilterTaskProps, {
+        filterDefs: taskWidgetFilters,
+        placeholder: `Filter reports by ${taskShortLabel}...`,
+        queryKey: "taskUuid"
+      })
     }
   }
 
@@ -387,6 +409,7 @@ export const searchFilters = function() {
       "Has Biography?": {
         component: RadioButtonFilter,
         deserializer: deserializeSelectFilter,
+        labelClass: "pt-0",
         props: {
           queryKey: "hasBiography",
           options: [true, false],
@@ -396,6 +419,7 @@ export const searchFilters = function() {
       "Pending Verification": {
         component: RadioButtonFilter,
         deserializer: deserializeSelectFilter,
+        labelClass: "pt-0",
         isDefault: true,
         props: {
           queryKey: "pendingVerification",
@@ -447,6 +471,7 @@ export const searchFilters = function() {
       [`Has ${Settings.fields.organization.profile?.label}?`]: {
         component: RadioButtonFilter,
         deserializer: deserializeSelectFilter,
+        labelClass: "pt-0",
         props: {
           queryKey: "hasProfile",
           options: [true, false],
@@ -501,6 +526,7 @@ export const searchFilters = function() {
       "Is Filled?": {
         component: RadioButtonFilter,
         deserializer: deserializeRadioButtonFilter,
+        labelClass: "pt-0",
         props: {
           queryKey: "isFilled",
           options: [true, false],
@@ -510,6 +536,7 @@ export const searchFilters = function() {
       "Has Pending Assessments": {
         component: CheckboxFilter,
         deserializer: deserializeCheckboxFilter,
+        labelClass: "pt-0",
         props: {
           queryKey: "hasPendingAssessments",
           msg: "Yes"
@@ -632,7 +659,8 @@ SearchFilterDisplay.propTypes = {
 }
 
 export const SearchDescription = ({ searchQuery, showPlaceholders }) => {
-  const ALL_FILTERS = searchFilters()
+  const { currentUser } = useContext(AppContext)
+  const ALL_FILTERS = searchFilters(currentUser?.isAdmin())
   const filterDefs =
     searchQuery.objectType && SEARCH_OBJECT_TYPES[searchQuery.objectType]
       ? ALL_FILTERS[SEARCH_OBJECT_TYPES[searchQuery.objectType]].filters
@@ -704,7 +732,7 @@ export const deserializeQueryParams = (
       }
       return null
     })
-    const ALL_FILTERS = searchFilters()
+    const ALL_FILTERS = searchFilters(true)
     const filterDefs = ALL_FILTERS[objType].filters
     Object.entries(filterDefs).map(([filterKey, filterDef]) => {
       const deser = filterDef.deserializer(

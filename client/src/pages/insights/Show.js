@@ -34,7 +34,7 @@ import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
 
 export const NOT_APPROVED_REPORTS = "not-approved-reports"
-export const CANCELLED_REPORTS = "cancelled-reports"
+export const CANCELLED_REPORTS = "cancelled-engagement-reports"
 export const REPORTS_BY_TASK = "reports-by-task"
 export const REPORTS_BY_DAY_OF_WEEK = "reports-by-day-of-week"
 export const FUTURE_ENGAGEMENTS_BY_LOCATION = "future-engagements-by-location"
