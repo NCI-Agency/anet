@@ -2,7 +2,7 @@ import Page from "./page"
 
 // Copied from src/pages/insights/Show.js
 const NOT_APPROVED_REPORTS = "not-approved-reports"
-const CANCELLED_REPORTS = "cancelled-reports"
+const CANCELLED_REPORTS = "cancelled-engagement-reports"
 const REPORTS_BY_TASK = "reports-by-task"
 const REPORTS_BY_DAY_OF_WEEK = "reports-by-day-of-week"
 const FUTURE_ENGAGEMENTS_BY_LOCATION = "future-engagements-by-location"
