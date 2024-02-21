@@ -174,6 +174,9 @@ describe("Create report form page", () => {
 
       // Check search query does not reset when changing object type
       // Default input type is People
+      await (
+        await CreateReport.getTestMultiReferenceFieldButton("People")
+      ).scrollIntoView()
       expect(
         await (
           await CreateReport.getTestMultiReferenceField()
@@ -195,6 +198,9 @@ describe("Create report form page", () => {
         ).getText()
       ).to.include(SEARCH_PEOPLE_COMPLETE_1)
       // Change input type to Organizations
+      await (
+        await CreateReport.getTestMultiReferenceFieldButton("Organizations")
+      ).scrollIntoView()
       await (
         await CreateReport.getTestMultiReferenceFieldButton("Organizations")
       ).click()
@@ -219,6 +225,9 @@ describe("Create report form page", () => {
         ).getText()
       ).to.include(SEARCH_ORGANIZATION_COMPLETE)
       // Change input type to Positions
+      await (
+        await CreateReport.getTestMultiReferenceFieldButton("Positions")
+      ).scrollIntoView()
       await (
         await CreateReport.getTestMultiReferenceFieldButton("Positions")
       ).click()
@@ -249,6 +258,9 @@ describe("Create report form page", () => {
         await (await CreateReport.getTestMultiReferenceField()).getValue()
       ).to.equal(SEARCH_KEY)
       // Change input type to People
+      await (
+        await CreateReport.getTestMultiReferenceFieldButton("People")
+      ).scrollIntoView()
       await (
         await CreateReport.getTestMultiReferenceFieldButton("People")
       ).click()
@@ -326,6 +338,9 @@ describe("Create report form page", () => {
       ).to.include(PERSON_VALUE_2)
 
       // Change input type to Positions
+      await (
+        await CreateReport.getTestMultiReferenceFieldButton("Positions")
+      ).scrollIntoView()
       await (
         await CreateReport.getTestMultiReferenceFieldButton("Positions")
       ).click()
