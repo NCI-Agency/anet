@@ -10,10 +10,13 @@ import ReportStatistics from "components/ReportStatistics"
 import ReportSummary from "components/ReportSummary"
 import ReportTable from "components/ReportTable"
 import { RECURRENCE_TYPE, useResponsiveNumberOfPeriods } from "periodUtils"
+import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button } from "react-bootstrap"
 import { connect } from "react-redux"
+import Settings from "settings"
+import { ATTENDEE_TYPE_ADVISOR, ATTENDEE_TYPE_INTERLOCUTOR } from "./Calendar"
 
 export const FORMAT_CALENDAR = "calendar"
 export const FORMAT_SUMMARY = "summary"
@@ -38,6 +41,9 @@ const ReportCollection = ({
   const [numberOfPeriods, setNumberOfPeriods] = useState(3)
   const contRef = useResponsiveNumberOfPeriods(setNumberOfPeriods)
   const [viewFormat, setViewFormat] = useState(viewFormats[0])
+  const [calendarAttendeeType, setCalendarAttendeeType] = useState(
+    Settings.calendarOptions.attendeesType
+  )
   const showHeader = viewFormats.length > 1 || reportsFilter
   const statisticsRecurrence = [RECURRENCE_TYPE.MONTHLY]
   const idSuffix = mapId || paginationKey || "reports"
@@ -47,39 +53,63 @@ const ReportCollection = ({
         {showHeader && (
           <header>
             {viewFormats.length > 1 && (
-              <ButtonToggleGroup
-                value={viewFormat}
-                onChange={setViewFormat}
-                className="d-print-none"
-              >
-                {viewFormats.includes(FORMAT_TABLE) && (
-                  <Button value={FORMAT_TABLE} variant="outline-secondary">
-                    Table
-                  </Button>
+              <>
+                <ButtonToggleGroup
+                  value={viewFormat}
+                  onChange={setViewFormat}
+                  className="d-print-none"
+                >
+                  {viewFormats.includes(FORMAT_TABLE) && (
+                    <Button value={FORMAT_TABLE} variant="outline-secondary">
+                      Table
+                    </Button>
+                  )}
+                  {viewFormats.includes(FORMAT_SUMMARY) && (
+                    <Button value={FORMAT_SUMMARY} variant="outline-secondary">
+                      Summary
+                    </Button>
+                  )}
+                  {viewFormats.includes(FORMAT_CALENDAR) && (
+                    <Button value={FORMAT_CALENDAR} variant="outline-secondary">
+                      Calendar
+                    </Button>
+                  )}
+                  {viewFormats.includes(FORMAT_MAP) && (
+                    <Button value={FORMAT_MAP} variant="outline-secondary">
+                      Map
+                    </Button>
+                  )}
+                  {viewFormats.includes(FORMAT_STATISTICS) && (
+                    <Button
+                      value={FORMAT_STATISTICS}
+                      variant="outline-secondary"
+                    >
+                      Statistics
+                    </Button>
+                  )}
+                </ButtonToggleGroup>
+                {viewFormat === FORMAT_CALENDAR && (
+                  <ButtonToggleGroup
+                    value={calendarAttendeeType}
+                    onChange={setCalendarAttendeeType}
+                    className="float-end"
+                  >
+                    <Button
+                      value={ATTENDEE_TYPE_ADVISOR}
+                      variant="outline-secondary"
+                    >
+                      {pluralize(Settings.fields.advisor.person.name)}
+                    </Button>
+                    <Button
+                      value={ATTENDEE_TYPE_INTERLOCUTOR}
+                      variant="outline-secondary"
+                    >
+                      {pluralize(Settings.fields.interlocutor.person.name)}
+                    </Button>
+                  </ButtonToggleGroup>
                 )}
-                {viewFormats.includes(FORMAT_SUMMARY) && (
-                  <Button value={FORMAT_SUMMARY} variant="outline-secondary">
-                    Summary
-                  </Button>
-                )}
-                {viewFormats.includes(FORMAT_CALENDAR) && (
-                  <Button value={FORMAT_CALENDAR} variant="outline-secondary">
-                    Calendar
-                  </Button>
-                )}
-                {viewFormats.includes(FORMAT_MAP) && (
-                  <Button value={FORMAT_MAP} variant="outline-secondary">
-                    Map
-                  </Button>
-                )}
-                {viewFormats.includes(FORMAT_STATISTICS) && (
-                  <Button value={FORMAT_STATISTICS} variant="outline-secondary">
-                    Statistics
-                  </Button>
-                )}
-              </ButtonToggleGroup>
+              </>
             )}
-
             {reportsFilter && (
               <div className="reports-filter">Filter: {reportsFilter}</div>
             )}
@@ -92,6 +122,7 @@ const ReportCollection = ({
               pageDispatchers={pageDispatchers}
               queryParams={queryParams}
               setTotalCount={setTotalCount}
+              attendeeType={calendarAttendeeType}
             />
           )}
           {viewFormat === FORMAT_TABLE && (

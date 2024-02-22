@@ -5,6 +5,9 @@ SUPPORT_EMAIL_ADDR: support@example.com
 
 engagementsIncludeTimeAndDuration: true
 
+calendarOptions:
+  attendeesType: Advisor
+
 dateFormats:
   email:
     date: d MMMM yyyy Z

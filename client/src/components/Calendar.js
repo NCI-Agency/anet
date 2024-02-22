@@ -9,6 +9,9 @@ import PropTypes from "prop-types"
 import React from "react"
 import "./Calendar.css"
 
+export const ATTENDEE_TYPE_ADVISOR = "Advisor"
+export const ATTENDEE_TYPE_INTERLOCUTOR = "Interlocutor"
+
 const Calendar = ({ events, eventClick, calendarComponentRef }) => (
   <FullCalendar
     plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}

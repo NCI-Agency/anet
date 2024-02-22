@@ -22,6 +22,10 @@ const GQL_GET_REPORT_LIST = gql`
           uuid
           name
         }
+        primaryInterlocutor {
+          uuid
+          name
+        }
         interlocutorOrg {
           uuid
           shortName
@@ -45,10 +49,12 @@ const GQL_GET_REPORT_LIST = gql`
 const ReportCalendar = ({
   pageDispatchers: { showLoading, hideLoading },
   queryParams,
-  setTotalCount
+  setTotalCount,
+  attendeeType
 }) => {
   const navigate = useNavigate()
   const prevReportQuery = useRef(null)
+  const prevAttendeeType = useRef(null)
   const apiPromise = useRef(null)
   const calendarComponentRef = useRef(null)
   return (
@@ -69,11 +75,15 @@ const ReportCalendar = ({
       engagementDateStart: moment(fetchInfo.start).startOf("day"),
       engagementDateEnd: moment(fetchInfo.end).endOf("day")
     })
-    if (_isEqual(prevReportQuery.current, reportQuery)) {
+    if (
+      _isEqual(prevReportQuery.current, reportQuery) &&
+      _isEqual(prevAttendeeType.current, attendeeType)
+    ) {
       // Optimise, return previous API promise instead of calling API.query again
       return apiPromise.current
     }
     prevReportQuery.current = reportQuery
+    prevAttendeeType.current = attendeeType
     if (setTotalCount) {
       // Reset the total count
       setTotalCount(null)
@@ -88,7 +98,7 @@ const ReportCalendar = ({
         const { totalCount } = data.reportList
         setTotalCount(totalCount)
       }
-      const results = reportsToEvents(reports)
+      const results = reportsToEvents(reports, attendeeType)
       hideLoading()
       return results
     })
@@ -99,7 +109,8 @@ const ReportCalendar = ({
 ReportCalendar.propTypes = {
   pageDispatchers: PageDispatchersPropType,
   queryParams: PropTypes.object,
-  setTotalCount: PropTypes.func
+  setTotalCount: PropTypes.func,
+  attendeeType: PropTypes.string.isRequired
 }
 
 export default ReportCalendar

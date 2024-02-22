@@ -2,12 +2,14 @@ import RichTextEditor from "components/RichTextEditor"
 import _clone from "lodash/clone"
 import _cloneDeep from "lodash/cloneDeep"
 import _isEmpty from "lodash/isEmpty"
+import _isEqual from "lodash/isEqual"
 import { Person, Report } from "models"
 import moment from "moment"
 import { AssessmentPeriodPropType, PeriodPropType } from "periodUtils"
 import PropTypes from "prop-types"
 import React from "react"
 import Settings from "settings"
+import { ATTENDEE_TYPE_INTERLOCUTOR } from "../Calendar"
 
 export const aggregationWidgetPropTypes = {
   widgetId: PropTypes.string.isRequired,
@@ -213,11 +215,14 @@ export const GET_CALENDAR_EVENTS_FROM = {
   [CALENDAR_OBJECT_TYPES.REPORT]: reportsToEvents
 }
 
-export function reportsToEvents(reports) {
+export function reportsToEvents(reports, attendeeType) {
   return reports
     .map(r => {
-      const who =
-        (r.primaryAdvisor && new Person(r.primaryAdvisor).toString()) || ""
+      const who = _isEqual(attendeeType, ATTENDEE_TYPE_INTERLOCUTOR)
+        ? (r.primaryInterlocutor &&
+            new Person(r.primaryInterlocutor).toString()) ||
+          ""
+        : (r.primaryAdvisor && new Person(r.primaryAdvisor).toString()) || ""
       const where =
         (r.interlocutorOrg && r.interlocutorOrg.shortName) ||
         (r.location && r.location.name) ||
