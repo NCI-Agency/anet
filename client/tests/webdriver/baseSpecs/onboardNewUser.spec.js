@@ -32,18 +32,18 @@ describe("Onboard new user login", () => {
     await browser.pause(500) // wait for the page transition and rendering of custom fields
 
     // Check that these are properly copied from the authentication server
-    await (await OnboardPage.getLastName()).waitForDisplayed()
     await (await OnboardPage.getLastName()).waitForExist()
+    await (await OnboardPage.getLastName()).waitForDisplayed()
     expect(await (await OnboardPage.getLastName()).getValue()).to.equal(
       ONBOARD_USER.lastName
     )
-    await (await OnboardPage.getFirstName()).waitForDisplayed()
     await (await OnboardPage.getFirstName()).waitForExist()
+    await (await OnboardPage.getFirstName()).waitForDisplayed()
     expect(await (await OnboardPage.getFirstName()).getValue()).to.equal(
       ONBOARD_USER.firstName
     )
-    await (await OnboardPage.getEmailAddress()).waitForDisplayed()
     await (await OnboardPage.getEmailAddress()).waitForExist()
+    await (await OnboardPage.getEmailAddress()).waitForDisplayed()
     expect(await (await OnboardPage.getEmailAddress()).getValue()).to.equal(
       ONBOARD_USER.emailAddress
     )
@@ -51,12 +51,12 @@ describe("Onboard new user login", () => {
 
   it("Should not save if endOfTourDate is not in the future", async() => {
     await (await OnboardPage.getEndOfTourDate()).waitForExist()
-    await (await OnboardPage.getEndOfTourDate()).click()
+    await (await OnboardPage.getEndOfTourDate()).waitForDisplayed()
 
-    await (await OnboardPage.getEndOfTourToday()).waitForDisplayed()
-    await (await OnboardPage.getEndOfTourToday()).waitForExist()
-    // select a date
-    await (await OnboardPage.getEndOfTourToday()).click()
+    const yesterday = moment().subtract(1, "days").format("DD-MM-YYYY")
+    await OnboardPage.deleteInput(OnboardPage.getEndOfTourDate())
+    await (await OnboardPage.getEndOfTourDate()).setValue(yesterday)
+
     await (await OnboardPage.getLastName()).click()
     const errorMessage = await (await OnboardPage.getEndOfTourDate())
       .$("..")
