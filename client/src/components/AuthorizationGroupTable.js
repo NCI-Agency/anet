@@ -12,6 +12,8 @@ import Settings from "settings"
 const AuthorizationGroupTable = ({
   id,
   authorizationGroups,
+  showMembers,
+  showStatus,
   pageSize,
   pageNum,
   totalCount,
@@ -28,13 +30,17 @@ const AuthorizationGroupTable = ({
         <tr>
           <th>{Settings.fields.authorizationGroup.name?.label}</th>
           <th>{Settings.fields.authorizationGroup.description?.label}</th>
-          <th>
-            {
-              Settings.fields.authorizationGroup
-                .authorizationGroupRelatedObjects?.label
-            }
-          </th>
-          <th>{Settings.fields.authorizationGroup.status?.label}</th>
+          {showMembers && (
+            <th>
+              {
+                Settings.fields.authorizationGroup
+                  .authorizationGroupRelatedObjects?.label
+              }
+            </th>
+          )}
+          {showStatus && (
+            <th>{Settings.fields.authorizationGroup.status?.label}</th>
+          )}
         </tr>
       </thead>
 
@@ -48,17 +54,21 @@ const AuthorizationGroupTable = ({
               />
             </td>
             <td>{authorizationGroup.description}</td>
-            <td>
-              {authorizationGroup.authorizationGroupRelatedObjects.map(agro => (
-                <div key={agro.relatedObjectUuid}>
-                  <LinkTo
-                    modelType={agro.relatedObjectType}
-                    model={agro.relatedObject}
-                  />
-                </div>
-              ))}
-            </td>
-            <td>{authorizationGroup.humanNameOfStatus()} </td>
+            {showMembers && (
+              <td>
+                {authorizationGroup.authorizationGroupRelatedObjects.map(
+                  agro => (
+                    <div key={agro.relatedObjectUuid}>
+                      <LinkTo
+                        modelType={agro.relatedObjectType}
+                        model={agro.relatedObject}
+                      />
+                    </div>
+                  )
+                )}
+              </td>
+            )}
+            {showStatus && <td>{authorizationGroup.humanNameOfStatus()} </td>}
           </tr>
         ))}
       </tbody>
@@ -86,6 +96,9 @@ AuthorizationGroupTable.propTypes = {
   id: PropTypes.string,
   // list of authorizationGroups:
   authorizationGroups: PropTypes.array.isRequired,
+  // optional columns
+  showMembers: PropTypes.bool,
+  showStatus: PropTypes.bool,
   // fill these when pagination wanted:
   totalCount: PropTypes.number,
   pageNum: PropTypes.number,

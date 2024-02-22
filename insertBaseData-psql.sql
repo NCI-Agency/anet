@@ -889,6 +889,7 @@ INSERT INTO "authorizationGroups" (uuid, name, description, status, "createdAt",
   ('1050c9e3-e679-4c60-8bdc-5139fbc1c10b', 'EF 1.1', 'The complete EF 1.1 organisation', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('39a78d51-c351-452c-9206-4305ec8dd76d', 'EF 2.1', 'The complete EF 2.1 organisation', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('c21e7321-7ec5-4837-8805-a302f9575754', 'EF 2.2', 'The complete EF 2.2 organisation', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('ab1a7d99-4529-44b1-a118-bdee3ca8296b', 'EF 5', 'The complete EF 5 organization', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('90a5196d-acf3-4a81-8ff9-3a8c7acabdf3', 'Inactive positions', 'Inactive positions', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Authorization group members
@@ -904,6 +905,10 @@ INSERT INTO "authorizationGroupRelatedObjects" ("authorizationGroupUuid", "relat
   SELECT 'c21e7321-7ec5-4837-8805-a302f9575754', 'organizations', o.uuid
   FROM organizations o
   WHERE o."shortName" = 'EF 2.2';
+INSERT INTO "authorizationGroupRelatedObjects" ("authorizationGroupUuid", "relatedObjectType", "relatedObjectUuid")
+  SELECT 'ab1a7d99-4529-44b1-a118-bdee3ca8296b', 'organizations', o.uuid
+  FROM organizations o
+  WHERE o."shortName" = 'EF 5';
 INSERT INTO "authorizationGroupRelatedObjects" ("authorizationGroupUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT '90a5196d-acf3-4a81-8ff9-3a8c7acabdf3', 'positions', p.uuid
   FROM positions p

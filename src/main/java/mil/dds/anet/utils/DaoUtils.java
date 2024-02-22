@@ -144,7 +144,7 @@ public class DaoUtils {
     if (user == null) {
       return Collections.emptySet();
     }
-    return user.loadAuthorizationGroupUuids();
+    return user.getAuthorizationGroupUuids();
   }
 
   public static boolean isUserInAuthorizationGroup(final Set<String> userAuthorizationGroupUuids,

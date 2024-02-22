@@ -7,6 +7,7 @@ import AppContext from "components/AppContext"
 import AssessmentResultsContainer from "components/assessments/AssessmentResultsContainer"
 import AssignPositionModal from "components/AssignPositionModal"
 import AttachmentCard from "components/Attachment/AttachmentCard"
+import AuthorizationGroupTable from "components/AuthorizationGroupTable"
 import { mapReadonlyCustomFieldsToComps } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
 import EditAssociatedPositionsModal from "components/EditAssociatedPositionsModal"
@@ -116,6 +117,11 @@ const GQL_GET_PERSON = gql`
           uuid
           name
         }
+      }
+      authorizationGroups {
+        uuid
+        name
+        description
       }
       attachments {
         ${Attachment.basicFieldsQuery}
@@ -503,6 +509,11 @@ const PersonShow = ({ pageDispatchers }) => {
 
     // map fields that have specific human value
     const humanValuesExceptions = {
+      authorizationGroups: (
+        <AuthorizationGroupTable
+          authorizationGroups={person.authorizationGroups}
+        />
+      ),
       biography: <RichTextEditor readOnly value={person.biography} />,
       user: utils.formatBoolean(person.user),
       emailAddress: emailHumanValue,

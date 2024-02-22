@@ -493,6 +493,8 @@ fields:
     biography:
       label: Biography
       placeholder: Fill in the biography of this person
+    authorizationGroups:
+      label: Authorization groups
     customSensitiveInformation:
       birthday:
         type: date
@@ -554,6 +556,8 @@ fields:
         member: Member
         deputy: Deputy
         leader: Leader
+    authorizationGroups:
+      label: Authorization groups
 
   organization:
     status:
@@ -581,6 +585,8 @@ fields:
     profile:
       label: Profile
       placeholder: Fill in the profile of this organization
+    authorizationGroups:
+      label: Authorization groups
     assessments:
       organizationAnnually:
         label: Interaction Plan
@@ -666,6 +672,7 @@ fields:
         - user
         - domainUsername
         - openIdSubject
+        - authorizationGroups
         - emailAddress
         - phoneNumber
         - country

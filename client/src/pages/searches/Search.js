@@ -669,6 +669,8 @@ const AuthorizationGroups = ({
   return (
     <AuthorizationGroupTable
       authorizationGroups={authorizationGroups}
+      showMembers
+      showStatus
       pageSize={pageSize}
       pageNum={curPage}
       totalCount={totalCount}

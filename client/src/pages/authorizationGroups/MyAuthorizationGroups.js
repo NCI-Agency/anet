@@ -78,6 +78,8 @@ const MyAuthorizationGroups = ({ pageDispatchers }) => {
       >
         <AuthorizationGroupTable
           authorizationGroups={authorizationGroupsAdministrated}
+          showMembers
+          showStatus
         />
       </Fieldset>
     </div>
