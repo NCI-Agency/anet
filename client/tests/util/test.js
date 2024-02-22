@@ -90,9 +90,10 @@ test.beforeEach(t => {
   let builder = new webdriver.Builder()
   if (testEnv === "local") {
     const chrome = require("selenium-webdriver/chrome")
+    const options = new chrome.Options(capabilities).addArguments("--headless")
     builder = builder
-      .forBrowser("chrome")
-      .setChromeOptions(new chrome.Options(capabilities).headless())
+      .forBrowser(webdriver.Browser.CHROME)
+      .setChromeOptions(options)
       /*
        * If we don't explicitly define ServiceBuilder for ChromeDriver it uses a default ServiceBuilder
        * which is a singleton, shared amongst different driver instances. As a result, the same
