@@ -1,29 +1,54 @@
 import { expect } from "chai"
+import { v4 as uuidv4 } from "uuid"
 import CreateAuthorizationGroup from "../pages/createAuthorizationGroup.page"
 
-const POSITION = "ANET"
+const AUTHORIZATION_GROUP_NAME_PREFIX = "test authorization group"
+const AUTHORIZATION_GROUP_DESCRIPTION_PREFIX = "this is just a"
+let authorizationGroupName
+let authorizationGroupDescription
+
+const POSITION = "anet"
 const POSITION_COMPLETE = "ANET Administrator"
+const ORGANIZATION = "moi"
+const ORGANIZATION_COMPLETE = "MoI | Ministry of Interior"
+const PERSON = "jacob"
+const PERSON_COMPLETE = "CIV JACOBSON, Jacob"
+const ADMINISTRATIVE_POSITION_1 = "rebecca"
+const ADMINISTRATIVE_POSITION_1_COMPLETE = "EF 2.2 Final Reviewer"
+const ADMINISTRATIVE_POSITION_2 = "jacob"
+const ADMINISTRATIVE_POSITION_2_COMPLETE = "EF 2.2 Superuser"
+const POSITION2 = "jack"
+const POSITION2_COMPLETE = "EF 2.1 Advisor B"
 
-describe("Create authorization group form page", () => {
-  beforeEach("On the create authorization group page...", async() => {
-    await CreateAuthorizationGroup.open()
-    await (await CreateAuthorizationGroup.getForm()).waitForExist()
-    await (await CreateAuthorizationGroup.getForm()).waitForDisplayed()
-  })
-
-  afterEach("On the create authorization group page...", async() => {
-    await CreateAuthorizationGroup.logout()
-  })
-
-  describe("When creating an authorization group", () => {
+describe("When creating/editing an authorization group", () => {
+  describe("When creating an authorization group as admin", () => {
+    it("Should navigate to the create authorization group page", async() => {
+      await CreateAuthorizationGroup.open()
+      await (await CreateAuthorizationGroup.getForm()).waitForExist()
+      await (await CreateAuthorizationGroup.getForm()).waitForDisplayed()
+    })
     it("Should save an authorization group with only a name and description", async() => {
+      authorizationGroupName = `${AUTHORIZATION_GROUP_NAME_PREFIX} ${uuidv4()}`
+      authorizationGroupDescription = `${AUTHORIZATION_GROUP_DESCRIPTION_PREFIX} ${authorizationGroupName}`
       await (await CreateAuthorizationGroup.getName()).waitForDisplayed()
       await (
         await CreateAuthorizationGroup.getName()
-      ).setValue("authorization group 1")
+      ).setValue(authorizationGroupName)
       await (
         await CreateAuthorizationGroup.getDescription()
-      ).setValue("this is just a test authorization group")
+      ).setValue(authorizationGroupDescription)
+      // eslint-disable-next-line no-unused-expressions
+      expect(
+        await (
+          await CreateAuthorizationGroup.getRelatedObjectsTable()
+        ).isExisting()
+      ).to.be.false
+      // eslint-disable-next-line no-unused-expressions
+      expect(
+        await (
+          await CreateAuthorizationGroup.getAdministrativePositionsTable()
+        ).isExisting()
+      ).to.be.false
       await (
         await CreateAuthorizationGroup.getStatusActiveButton()
       ).waitForDisplayed()
@@ -39,14 +64,28 @@ describe("Create authorization group form page", () => {
         ).getValue()
       ).to.not.equal("ACTIVE")
       await (await CreateAuthorizationGroup.getStatusInactiveButton()).click()
-      // eslint-disable-next-line no-unused-expressions
-      expect(await $(".related_objects_table").isExisting()).to.be.false
+      await CreateAuthorizationGroup.submitForm()
+      await CreateAuthorizationGroup.waitForAlertSuccessToLoad()
+      const alertMessage = await (
+        await CreateAuthorizationGroup.getAlertSuccess()
+      ).getText()
+      expect(alertMessage).to.equal("Authorization Group saved")
+    })
+    it("Should save an authorization group with some members", async() => {
+      await (await CreateAuthorizationGroup.getEditButton()).waitForExist()
+      await (await CreateAuthorizationGroup.getEditButton()).waitForDisplayed()
+      await (await CreateAuthorizationGroup.getEditButton()).click()
+      await (await CreateAuthorizationGroup.getForm()).waitForExist()
+      await (await CreateAuthorizationGroup.getForm()).waitForDisplayed()
       await (await CreateAuthorizationGroup.getRelatedObjectsInput()).click()
+
+      // Add a position
       await (
         await CreateAuthorizationGroup.getRelatedObjectsInput()
       ).setValue(POSITION)
-      await CreateAuthorizationGroup.waitForRelatedObjectsAdvancedSelectToChange(
-        POSITION_COMPLETE
+      await CreateAuthorizationGroup.waitForAdvancedSelectToChange(
+        POSITION_COMPLETE,
+        CreateAuthorizationGroup.getRelatedObjectsAdvancedSelectFirstItem
       )
       expect(
         await (
@@ -56,25 +95,343 @@ describe("Create authorization group form page", () => {
       await (
         await CreateAuthorizationGroup.getRelatedObjectsAdvancedSelectFirstItem()
       ).click()
-      // Click outside the overlay
-      await (await CreateAuthorizationGroup.getName()).click()
-      // Advanced select input does not get empty
-      expect(
-        await (
-          await CreateAuthorizationGroup.getRelatedObjectsInput()
-        ).getValue()
-      ).to.equal(POSITION)
       // The position is added to a table underneath, so relatedObjects table exists now
       // eslint-disable-next-line no-unused-expressions
-      expect(await $(".related_objects_table").isExisting()).to.be.true
-      // FIXME: assert that the position is added to the relatedObjects table
-      // FIXME: add tests for adding people and organizations
+      expect(
+        await (
+          await CreateAuthorizationGroup.getRelatedObjectsTable()
+        ).isExisting()
+      ).to.be.true
+      // eslint-disable-next-line no-unused-expressions
+      expect(
+        await (
+          await CreateAuthorizationGroup.getRelatedObjectsTableEntry(
+            POSITION_COMPLETE
+          )
+        ).isExisting()
+      ).to.be.true
+
+      // Add an organization
+      await (
+        await CreateAuthorizationGroup.getMemberTypeButton("Organizations")
+      ).click()
+      await CreateAuthorizationGroup.deleteInput(
+        CreateAuthorizationGroup.getRelatedObjectsInput()
+      )
+      await (
+        await CreateAuthorizationGroup.getRelatedObjectsInput()
+      ).setValue(ORGANIZATION)
+      await CreateAuthorizationGroup.waitForAdvancedSelectToChange(
+        ORGANIZATION_COMPLETE,
+        CreateAuthorizationGroup.getRelatedObjectsAdvancedSelectFirstItem
+      )
+      expect(
+        await (
+          await CreateAuthorizationGroup.getRelatedObjectsAdvancedSelectFirstItem()
+        ).getText()
+      ).to.include(ORGANIZATION_COMPLETE)
+      await (
+        await CreateAuthorizationGroup.getRelatedObjectsAdvancedSelectFirstItem()
+      ).click()
+      // eslint-disable-next-line no-unused-expressions
+      expect(
+        await (
+          await CreateAuthorizationGroup.getRelatedObjectsTableEntry(
+            ORGANIZATION_COMPLETE
+          )
+        ).isExisting()
+      ).to.be.true
+
+      // Add a person
+      await (
+        await CreateAuthorizationGroup.getMemberTypeButton("People")
+      ).click()
+      await CreateAuthorizationGroup.deleteInput(
+        CreateAuthorizationGroup.getRelatedObjectsInput()
+      )
+      await (
+        await CreateAuthorizationGroup.getRelatedObjectsInput()
+      ).setValue(PERSON)
+      await CreateAuthorizationGroup.waitForAdvancedSelectToChange(
+        PERSON_COMPLETE,
+        CreateAuthorizationGroup.getRelatedObjectsAdvancedSelectFirstItem
+      )
+      expect(
+        await (
+          await CreateAuthorizationGroup.getRelatedObjectsAdvancedSelectFirstItem()
+        ).getText()
+      ).to.include(PERSON_COMPLETE)
+      await (
+        await CreateAuthorizationGroup.getRelatedObjectsAdvancedSelectFirstItem()
+      ).click()
+      // eslint-disable-next-line no-unused-expressions
+      expect(
+        await (
+          await CreateAuthorizationGroup.getRelatedObjectsTableEntry(
+            PERSON_COMPLETE
+          )
+        ).isExisting()
+      ).to.be.true
+
+      // Click outside the overlay
+      await (await CreateAuthorizationGroup.getName()).click()
       await CreateAuthorizationGroup.submitForm()
       await CreateAuthorizationGroup.waitForAlertSuccessToLoad()
       const alertMessage = await (
         await CreateAuthorizationGroup.getAlertSuccess()
       ).getText()
       expect(alertMessage).to.equal("Authorization Group saved")
+      /* eslint-disable no-unused-expressions */
+      expect(
+        await (
+          await CreateAuthorizationGroup.getRelatedObjectsTableEntry(
+            POSITION_COMPLETE
+          )
+        ).isExisting()
+      ).to.be.true
+      expect(
+        await (
+          await CreateAuthorizationGroup.getRelatedObjectsTableEntry(
+            ORGANIZATION_COMPLETE
+          )
+        ).isExisting()
+      ).to.be.true
+      expect(
+        await (
+          await CreateAuthorizationGroup.getRelatedObjectsTableEntry(
+            PERSON_COMPLETE
+          )
+        ).isExisting()
+      ).to.be.true
+      /* eslint-enable no-unused-expressions */
+    })
+    it("Should save an authorization group with assigned superusers", async() => {
+      await (await CreateAuthorizationGroup.getEditButton()).waitForExist()
+      await (await CreateAuthorizationGroup.getEditButton()).waitForDisplayed()
+      await (await CreateAuthorizationGroup.getEditButton()).click()
+      await (await CreateAuthorizationGroup.getForm()).waitForExist()
+      await (await CreateAuthorizationGroup.getForm()).waitForDisplayed()
+      await (
+        await CreateAuthorizationGroup.getAdministrativePositionsInput()
+      ).click()
+
+      // Add a position
+      await (
+        await CreateAuthorizationGroup.getAdministrativePositionsInput()
+      ).setValue(ADMINISTRATIVE_POSITION_1)
+      await CreateAuthorizationGroup.waitForAdvancedSelectToChange(
+        ADMINISTRATIVE_POSITION_1_COMPLETE,
+        CreateAuthorizationGroup.getAdministrativePositionsAdvancedSelectFirstItem
+      )
+      expect(
+        await (
+          await CreateAuthorizationGroup.getAdministrativePositionsAdvancedSelectFirstItem()
+        ).getText()
+      ).to.include(ADMINISTRATIVE_POSITION_1_COMPLETE)
+      await (
+        await CreateAuthorizationGroup.getAdministrativePositionsAdvancedSelectFirstItem()
+      ).click()
+      // The position is added to a table underneath, so administrativePositions table exists now
+      // eslint-disable-next-line no-unused-expressions
+      expect(
+        await (
+          await CreateAuthorizationGroup.getAdministrativePositionsTable()
+        ).isExisting()
+      ).to.be.true
+      // eslint-disable-next-line no-unused-expressions
+      expect(
+        await (
+          await CreateAuthorizationGroup.getAdministrativePositionsTableEntry(
+            ADMINISTRATIVE_POSITION_1_COMPLETE
+          )
+        ).isExisting()
+      ).to.be.true
+
+      // Add another position
+      await (
+        await CreateAuthorizationGroup.getAdministrativePositionsInput()
+      ).setValue(ADMINISTRATIVE_POSITION_2)
+      await CreateAuthorizationGroup.waitForAdvancedSelectToChange(
+        ADMINISTRATIVE_POSITION_2_COMPLETE,
+        CreateAuthorizationGroup.getAdministrativePositionsAdvancedSelectFirstItem
+      )
+      expect(
+        await (
+          await CreateAuthorizationGroup.getAdministrativePositionsAdvancedSelectFirstItem()
+        ).getText()
+      ).to.include(ADMINISTRATIVE_POSITION_2_COMPLETE)
+      await (
+        await CreateAuthorizationGroup.getAdministrativePositionsAdvancedSelectFirstItem()
+      ).click()
+      // eslint-disable-next-line no-unused-expressions
+      expect(
+        await (
+          await CreateAuthorizationGroup.getAdministrativePositionsTableEntry(
+            ADMINISTRATIVE_POSITION_2_COMPLETE
+          )
+        ).isExisting()
+      ).to.be.true
+
+      // Click outside the overlay
+      await (await CreateAuthorizationGroup.getName()).click()
+      await CreateAuthorizationGroup.submitForm()
+      await CreateAuthorizationGroup.waitForAlertSuccessToLoad()
+      const alertMessage = await (
+        await CreateAuthorizationGroup.getAlertSuccess()
+      ).getText()
+      expect(alertMessage).to.equal("Authorization Group saved")
+      /* eslint-disable no-unused-expressions */
+      expect(
+        await (
+          await CreateAuthorizationGroup.getAdministrativePositionsTableEntry(
+            ADMINISTRATIVE_POSITION_1_COMPLETE
+          )
+        ).isExisting()
+      ).to.be.true
+      expect(
+        await (
+          await CreateAuthorizationGroup.getAdministrativePositionsTableEntry(
+            ADMINISTRATIVE_POSITION_2_COMPLETE
+          )
+        ).isExisting()
+      ).to.be.true
+      /* eslint-enable no-unused-expressions */
+    })
+    it("Should logout again", async() => {
+      await CreateAuthorizationGroup.logout()
+    })
+  })
+
+  describe("When editing an authorization group as assigned superuser", () => {
+    it("Should navigate to the my authorization groups page", async() => {
+      await CreateAuthorizationGroup.openAsSuperuser(
+        "/authorizationGroups/mine"
+      )
+      await (
+        await CreateAuthorizationGroup.getMyAuthorizationGroups()
+      ).waitForExist()
+      await (
+        await CreateAuthorizationGroup.getMyAuthorizationGroups()
+      ).waitForDisplayed()
+      await (
+        await CreateAuthorizationGroup.getAuthorizationGroupLink(
+          authorizationGroupName
+        )
+      ).click()
+    })
+    it("Should be able to save the authorization group with a changed name and description", async() => {
+      await (await CreateAuthorizationGroup.getEditButton()).waitForExist()
+      await (await CreateAuthorizationGroup.getEditButton()).waitForDisplayed()
+      await (await CreateAuthorizationGroup.getEditButton()).click()
+      await (await CreateAuthorizationGroup.getForm()).waitForExist()
+      await (await CreateAuthorizationGroup.getForm()).waitForDisplayed()
+      await (await CreateAuthorizationGroup.getName()).setValue("-edited")
+      await (
+        await CreateAuthorizationGroup.getDescription()
+      ).setValue("-edited")
+      await CreateAuthorizationGroup.submitForm()
+      await CreateAuthorizationGroup.waitForAlertSuccessToLoad()
+      const alertMessage = await (
+        await CreateAuthorizationGroup.getAlertSuccess()
+      ).getText()
+      expect(alertMessage).to.equal("Authorization Group saved")
+      expect(
+        await (await CreateAuthorizationGroup.getName()).getText()
+      ).to.equal(`${authorizationGroupName}-edited`)
+      expect(
+        await (await CreateAuthorizationGroup.getDescription()).getText()
+      ).to.equal(`${authorizationGroupDescription}-edited`)
+    })
+    it("Should not be able to change the authorization group's assigned superusers", async() => {
+      // Should not be able to add administrative positions
+      // eslint-disable-next-line no-unused-expressions
+      expect(
+        await (
+          await CreateAuthorizationGroup.getAdministrativePositionsInput()
+        ).isExisting()
+      ).to.be.false
+      // Should not be able to remove administrative positions
+      // eslint-disable-next-line no-unused-expressions
+      expect(
+        await (
+          await (
+            await CreateAuthorizationGroup.getAdministrativePositionsTable()
+          ).$("button")
+        ).isExisting()
+      ).to.be.false
+    })
+    it("Should be able to save the authorization group with changed members", async() => {
+      await (await CreateAuthorizationGroup.getEditButton()).waitForExist()
+      await (await CreateAuthorizationGroup.getEditButton()).waitForDisplayed()
+      await (await CreateAuthorizationGroup.getEditButton()).click()
+      await (await CreateAuthorizationGroup.getForm()).waitForExist()
+      await (await CreateAuthorizationGroup.getForm()).waitForDisplayed()
+
+      // Add a position
+      await (
+        await CreateAuthorizationGroup.getRelatedObjectsInput()
+      ).setValue(POSITION2)
+      await CreateAuthorizationGroup.waitForAdvancedSelectToChange(
+        POSITION2_COMPLETE,
+        CreateAuthorizationGroup.getRelatedObjectsAdvancedSelectFirstItem
+      )
+      expect(
+        await (
+          await CreateAuthorizationGroup.getRelatedObjectsAdvancedSelectFirstItem()
+        ).getText()
+      ).to.include(POSITION2_COMPLETE)
+      await (
+        await CreateAuthorizationGroup.getRelatedObjectsAdvancedSelectFirstItem()
+      ).click()
+      // eslint-disable-next-line no-unused-expressions
+      expect(
+        await (
+          await CreateAuthorizationGroup.getRelatedObjectsTableEntry(
+            POSITION2_COMPLETE
+          )
+        ).isExisting()
+      ).to.be.true
+
+      // Remove a position
+      const adminPosition =
+        await CreateAuthorizationGroup.getRelatedObjectsTableEntry(
+          POSITION_COMPLETE
+        )
+      await (await adminPosition.$("../../../td/button")).click()
+      // eslint-disable-next-line no-unused-expressions
+      expect(
+        await (
+          await CreateAuthorizationGroup.getRelatedObjectsTableEntry(
+            POSITION_COMPLETE
+          )
+        ).isExisting()
+      ).to.be.false
+
+      await CreateAuthorizationGroup.submitForm()
+      await CreateAuthorizationGroup.waitForAlertSuccessToLoad()
+      const alertMessage = await (
+        await CreateAuthorizationGroup.getAlertSuccess()
+      ).getText()
+      expect(alertMessage).to.equal("Authorization Group saved")
+      /* eslint-disable no-unused-expressions */
+      expect(
+        await (
+          await CreateAuthorizationGroup.getRelatedObjectsTableEntry(
+            POSITION2_COMPLETE
+          )
+        ).isExisting()
+      ).to.be.true
+      expect(
+        await (
+          await CreateAuthorizationGroup.getRelatedObjectsTableEntry(
+            POSITION_COMPLETE
+          )
+        ).isExisting()
+      ).to.be.false
+      /* eslint-enable no-unused-expressions */
+    })
+    it("Should logout again", async() => {
+      await CreateAuthorizationGroup.logout()
     })
   })
 })

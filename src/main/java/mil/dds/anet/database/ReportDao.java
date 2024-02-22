@@ -292,11 +292,12 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
   }
 
   @InTransaction
-  public int removeAuthorizationGroupFromReport(AuthorizationGroup a, Report r) {
+  public int removeAuthorizationGroupFromReport(String authorizationGroupUuid, String reportUuid) {
     return getDbHandle().createUpdate(
         "/* removeAuthorizationGroupFromReport*/ DELETE FROM \"reportAuthorizationGroups\" "
             + "WHERE \"reportUuid\" = :reportUuid AND \"authorizationGroupUuid\" = :authorizationGroupUuid")
-        .bind("reportUuid", r.getUuid()).bind("authorizationGroupUuid", a.getUuid()).execute();
+        .bind("reportUuid", reportUuid).bind("authorizationGroupUuid", authorizationGroupUuid)
+        .execute();
   }
 
   @InTransaction

@@ -5,7 +5,7 @@ import { Table } from "react-bootstrap"
 
 const AttachmentRelatedObjectsTable = ({ relatedObjects }) => {
   return (
-    <div id="related_objects">
+    <div className="related_objects">
       {!relatedObjects?.length ? (
         <em>No linked objects</em>
       ) : (

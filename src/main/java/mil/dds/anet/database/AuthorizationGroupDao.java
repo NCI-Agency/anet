@@ -1,5 +1,7 @@
 package mil.dds.anet.database;
 
+import static org.jdbi.v3.sqlobject.customizer.BindList.EmptyHandling.NULL_STRING;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +22,7 @@ import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
+import org.jdbi.v3.sqlobject.customizer.BindList;
 import org.jdbi.v3.sqlobject.statement.SqlBatch;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
@@ -99,9 +102,24 @@ public class AuthorizationGroupDao
         @Bind("authorizationGroupUuid") String authorizationGroupUuid,
         @BindBean List<GenericRelatedObject> authorizationGroupRelatedObjects);
 
-    @SqlUpdate("DELETE FROM \"authorizationGroupRelatedObjects\" WHERE \"authorizationGroupUuid\" = :authorizationGroupUuid")
+    @SqlUpdate("DELETE FROM \"authorizationGroupRelatedObjects\""
+        + " WHERE \"authorizationGroupUuid\" = :authorizationGroupUuid")
     void deleteAuthorizationGroupRelatedObjects(
         @Bind("authorizationGroupUuid") String authorizationGroupUuid);
+
+    @SqlBatch("INSERT INTO \"authorizationGroupAdministrativePositions\""
+        + " (\"authorizationGroupUuid\", \"positionUuid\")"
+        + " VALUES (:authorizationGroupUuid, :uuid)")
+    void insertAdministrativePositions(
+        @Bind("authorizationGroupUuid") String authorizationGroupUuid,
+        @BindBean List<Position> positions);
+
+    @SqlUpdate("DELETE FROM \"authorizationGroupAdministrativePositions\""
+        + " WHERE \"authorizationGroupUuid\" = :authorizationGroupUuid"
+        + " AND \"positionUuid\" IN ( <positionUuids> )")
+    void deleteAdministrativePositions(
+        @Bind("authorizationGroupUuid") String authorizationGroupUuid,
+        @BindList(value = "positionUuids", onEmpty = NULL_STRING) List<String> positionUuids);
   }
 
   @Override
@@ -120,26 +138,20 @@ public class AuthorizationGroupDao
   }
 
   @InTransaction
-  public int addPositionToAuthorizationGroup(Position p, AuthorizationGroup a) {
-    return getDbHandle().createUpdate(
-        "/* addPositionToAuthorizationGroup */ INSERT INTO \"authorizationGroupRelatedObjects\""
-            + " (\"authorizationGroupUuid\", \"relatedObjectType\", \"relatedObjectUuid\") "
-            + "VALUES (:authorizationGroupUuid, :relatedObjectTypePosition, :relatedObjectUuid)")
-        .bind("authorizationGroupUuid", a.getUuid())
-        .bind("relatedObjectTypePosition", PositionDao.TABLE_NAME)
-        .bind("relatedObjectUuid", p.getUuid()).execute();
+  public void addAdministrativePositions(String authorizationGroupUuid, List<Position> positions) {
+    final AuthorizationGroupBatch ab = getDbHandle().attach(AuthorizationGroupBatch.class);
+    if (positions != null) {
+      ab.insertAdministrativePositions(authorizationGroupUuid, positions);
+    }
   }
 
   @InTransaction
-  public int removePositionFromAuthorizationGroup(String positionUuid, AuthorizationGroup a) {
-    return getDbHandle().createUpdate(
-        "/* removePositionFromAuthorizationGroup*/ DELETE FROM \"authorizationGroupRelatedObjects\""
-            + " WHERE \"authorizationGroupUuid\" = :authorizationGroupUuid"
-            + " AND \"relatedObjectType\" = :relatedObjectTypePosition"
-            + " AND \"relatedObjectUuid\" = :relatedObjectUuid")
-        .bind("authorizationGroupUuid", a.getUuid())
-        .bind("relatedObjectTypePosition", PositionDao.TABLE_NAME)
-        .bind("relatedObjectUuid", positionUuid).execute();
+  public void removeAdministrativePositions(String authorizationGroupUuid,
+      List<String> positionUuids) {
+    final AuthorizationGroupBatch ab = getDbHandle().attach(AuthorizationGroupBatch.class);
+    if (positionUuids != null) {
+      ab.deleteAdministrativePositions(authorizationGroupUuid, positionUuids);
+    }
   }
 
   static class AuthorizationGroupRelatedObjectsBatcher
@@ -156,9 +168,10 @@ public class AuthorizationGroupDao
 
   public List<List<GenericRelatedObject>> getAuthorizationGroupRelatedObjects(
       List<String> foreignKeys) {
-    final ForeignKeyBatcher<GenericRelatedObject> attachmentRelatedObjectsBatcher = AnetObjectEngine
-        .getInstance().getInjector().getInstance(AuthorizationGroupRelatedObjectsBatcher.class);
-    return attachmentRelatedObjectsBatcher.getByForeignKeys(foreignKeys);
+    final ForeignKeyBatcher<GenericRelatedObject> authorizationGroupRelatedObjectsBatcher =
+        AnetObjectEngine.getInstance().getInjector()
+            .getInstance(AuthorizationGroupRelatedObjectsBatcher.class);
+    return authorizationGroupRelatedObjectsBatcher.getByForeignKeys(foreignKeys);
   }
 
   public CompletableFuture<List<GenericRelatedObject>> getRelatedObjects(
@@ -166,6 +179,32 @@ public class AuthorizationGroupDao
     return new ForeignKeyFetcher<GenericRelatedObject>().load(context,
         FkDataLoaderKey.AUTHORIZATION_GROUP_AUTHORIZATION_GROUP_RELATED_OBJECTS,
         authorizationGroup.getUuid());
+  }
+
+  static class AuthorizationGroupAdministrativePositionsBatcher
+      extends ForeignKeyBatcher<Position> {
+    private static final String SQL = "/* batch.getAuthorizationGroupAdministrativePositions */"
+        + " SELECT \"authorizationGroupAdministrativePositions\".\"authorizationGroupUuid\","
+        + PositionDao.POSITION_FIELDS + " FROM \"authorizationGroupAdministrativePositions\""
+        + " INNER JOIN positions on positions.uuid = \"authorizationGroupAdministrativePositions\".\"positionUuid\""
+        + " WHERE \"authorizationGroupAdministrativePositions\".\"authorizationGroupUuid\" IN ( <foreignKeys> )";
+
+    public AuthorizationGroupAdministrativePositionsBatcher() {
+      super(SQL, "foreignKeys", new PositionMapper(), "authorizationGroupUuid");
+    }
+  }
+
+  public List<List<Position>> getAdministrativePositions(List<String> foreignKeys) {
+    final ForeignKeyBatcher<Position> authorizationGroupAdministrativePositionsBatcher =
+        AnetObjectEngine.getInstance().getInjector()
+            .getInstance(AuthorizationGroupAdministrativePositionsBatcher.class);
+    return authorizationGroupAdministrativePositionsBatcher.getByForeignKeys(foreignKeys);
+  }
+
+  public CompletableFuture<List<Position>> getAdministrativePositionsForAuthorizationGroup(
+      Map<String, Object> context, String authorizationGroupUuid) {
+    return new ForeignKeyFetcher<Position>().load(context,
+        FkDataLoaderKey.AUTHORIZATION_GROUP_ADMINISTRATIVE_POSITIONS, authorizationGroupUuid);
   }
 
   @Override
@@ -209,6 +248,18 @@ public class AuthorizationGroupDao
 
     return getDbHandle().createQuery(sql).bind("status", DaoUtils.getEnumId(Status.ACTIVE))
         .bind("personUuid", personUuid).mapTo(String.class).set();
+  }
+
+  @InTransaction
+  public List<AuthorizationGroup> getAuthorizationGroupsAdministratedByPosition(
+      String positionUuid) {
+    final String sql = "/* getAuthorizationGroupsAdministratedByPosition */ SELECT "
+        + AUTHORIZATION_GROUP_FIELDS + " FROM \"authorizationGroups\""
+        + " JOIN \"authorizationGroupAdministrativePositions\" agap"
+        + " ON agap.\"authorizationGroupUuid\" = \"authorizationGroups\".uuid"
+        + " WHERE agap.\"positionUuid\" = :positionUuid";
+    return getDbHandle().createQuery(sql).bind("positionUuid", positionUuid)
+        .map(new AuthorizationGroupMapper()).list();
   }
 
 }

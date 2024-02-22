@@ -27,6 +27,8 @@ import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.test.client.AnetBeanList_Person;
 import mil.dds.anet.test.client.ApprovalStep;
 import mil.dds.anet.test.client.ApprovalStepInput;
+import mil.dds.anet.test.client.AuthorizationGroup;
+import mil.dds.anet.test.client.AuthorizationGroupInput;
 import mil.dds.anet.test.client.Location;
 import mil.dds.anet.test.client.LocationInput;
 import mil.dds.anet.test.client.Note;
@@ -302,6 +304,11 @@ public abstract class AbstractResourceTest {
   protected static List<ApprovalStepInput> getApprovalStepsInput(
       final List<ApprovalStep> approvalSteps) {
     return approvalSteps.stream().map(as -> getApprovalStepInput(as)).collect(Collectors.toList());
+  }
+
+  protected static AuthorizationGroupInput getAuthorizationGroupInput(
+      final AuthorizationGroup authorizationGroup) {
+    return getInput(authorizationGroup, AuthorizationGroupInput.class);
   }
 
   protected static LocationInput getLocationInput(final Location location) {

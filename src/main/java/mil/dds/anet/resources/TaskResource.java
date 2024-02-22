@@ -119,35 +119,18 @@ public class TaskResource {
       }
       // Update positions:
       if (t.getResponsiblePositions() != null) {
-        for (final Position p : t.getResponsiblePositions()) {
-          Optional<Position> existingPosition = existingResponsiblePositions.stream()
-              .filter(el -> el.getUuid().equals(p.getUuid())).findFirst();
-          if (existingPosition.isPresent()) {
-            existingResponsiblePositions.remove(existingPosition.get());
-          } else {
-            dao.addPositionToTask(p, t);
-          }
-        }
-        for (final Position p : existingResponsiblePositions) {
-          dao.removePositionFromTask(p, t);
-        }
+        Utils.addRemoveElementsByUuid(existingResponsiblePositions, t.getResponsiblePositions(),
+            newPos -> dao.addPositionToTask(newPos, t),
+            oldPosUuid -> dao.removePositionFromTask(oldPosUuid, t.getUuid()));
       }
+
       // Update tasked organizations:
       if (t.getTaskedOrganizations() != null) {
         final List<Organization> existingTaskedOrganizations =
             dao.getTaskedOrganizationsForTask(engine.getContext(), t.getUuid()).join();
-        for (final Organization org : t.getTaskedOrganizations()) {
-          Optional<Organization> existingOrganization = existingTaskedOrganizations.stream()
-              .filter(el -> el.getUuid().equals(org.getUuid())).findFirst();
-          if (existingOrganization.isPresent()) {
-            existingTaskedOrganizations.remove(existingOrganization.get());
-          } else {
-            dao.addTaskedOrganizationsToTask(org, t);
-          }
-        }
-        for (final Organization org : existingTaskedOrganizations) {
-          dao.removeTaskedOrganizationsFromTask(org, t.getUuid());
-        }
+        Utils.addRemoveElementsByUuid(existingTaskedOrganizations, t.getTaskedOrganizations(),
+            newOrg -> dao.addTaskedOrganizationsToTask(newOrg, t),
+            oldOrgUuid -> dao.removeTaskedOrganizationsFromTask(oldOrgUuid, t.getUuid()));
       }
 
       // Load the existing task, so we can check for differences.

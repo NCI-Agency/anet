@@ -20,6 +20,30 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
       name
       description
       status
+      administrativePositions {
+        uuid
+        name
+        code
+        type
+        role
+        status
+        location {
+          uuid
+          name
+        }
+        organization {
+          uuid
+          shortName
+          longName
+          identificationCode
+        }
+        person {
+          uuid
+          name
+          rank
+          avatarUuid
+        }
+      }
       authorizationGroupRelatedObjects {
         relatedObjectType
         relatedObjectUuid
