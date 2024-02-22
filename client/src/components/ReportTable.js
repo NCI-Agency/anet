@@ -34,21 +34,18 @@ const GQL_GET_REPORT_LIST = gql`
           uuid
           name
           rank
-          role
           avatarUuid
         }
         primaryAdvisor {
           uuid
           name
           rank
-          role
           avatarUuid
         }
-        primaryPrincipal {
+        primaryInterlocutor {
           uuid
           name
           rank
-          role
           avatarUuid
         }
         advisorOrg {
@@ -57,7 +54,7 @@ const GQL_GET_REPORT_LIST = gql`
           longName
           identificationCode
         }
-        principalOrg {
+        interlocutorOrg {
           uuid
           shortName
           longName

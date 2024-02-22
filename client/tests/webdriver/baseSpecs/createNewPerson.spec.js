@@ -2,7 +2,7 @@ import { expect } from "chai"
 import moment from "moment"
 import CreatePerson from "../pages/createNewPerson.page"
 
-const VALID_PERSON_PRINCIPAL = {
+const VALID_PERSON_INTERLOCUTOR = {
   lastName: "Doe"
 }
 const VALID_PERSON_ADVISOR = {
@@ -17,7 +17,7 @@ const SIMILAR_PERSON_ADVISOR = {
 }
 
 describe("Create new Person form page", () => {
-  describe("When creating a Principle user", () => {
+  describe("When creating a non-user", () => {
     beforeEach("On the create person page...", async() => {
       await CreatePerson.openAsSuperuser()
       await (await CreatePerson.getForm()).waitForExist()
@@ -28,11 +28,11 @@ describe("Create new Person form page", () => {
       await CreatePerson.logout()
     })
 
-    it("Should not save a principle without gender being filled in", async() => {
+    it("Should not save a person without gender being filled in", async() => {
       await (await CreatePerson.getLastName()).waitForDisplayed()
       await (
         await CreatePerson.getLastName()
-      ).setValue(VALID_PERSON_PRINCIPAL.lastName)
+      ).setValue(VALID_PERSON_INTERLOCUTOR.lastName)
       await (await CreatePerson.getGender()).click()
       await (await CreatePerson.getLastName()).click()
       const errorMessage = await browser.$(
@@ -56,6 +56,12 @@ describe("Create new Person form page", () => {
         "value",
         await CreatePerson.getRandomOption(await CreatePerson.getRank())
       )
+      await (
+        await CreatePerson.getCountry()
+      ).selectByAttribute(
+        "value",
+        await CreatePerson.getRandomOption(await CreatePerson.getCountry())
+      )
       await CreatePerson.submitForm()
       await CreatePerson.waitForAlertSuccessToLoad()
       const alertMessage = await (
@@ -63,11 +69,11 @@ describe("Create new Person form page", () => {
       ).getText()
       expect(alertMessage).to.equal("Person saved")
     })
-    it("Should save a principle without first name", async() => {
+    it("Should save a person without first name", async() => {
       await (await CreatePerson.getLastName()).waitForDisplayed()
       await (
         await CreatePerson.getLastName()
-      ).setValue(VALID_PERSON_PRINCIPAL.lastName)
+      ).setValue(VALID_PERSON_INTERLOCUTOR.lastName)
       await (
         await CreatePerson.getRank()
       ).selectByAttribute(
@@ -80,6 +86,12 @@ describe("Create new Person form page", () => {
         "value",
         await CreatePerson.getRandomOption(await CreatePerson.getGender())
       )
+      await (
+        await CreatePerson.getCountry()
+      ).selectByAttribute(
+        "value",
+        await CreatePerson.getRandomOption(await CreatePerson.getCountry())
+      )
       await CreatePerson.submitForm()
       await CreatePerson.waitForAlertSuccessToLoad()
       const alertMessage = await (
@@ -87,11 +99,11 @@ describe("Create new Person form page", () => {
       ).getText()
       expect(alertMessage).to.equal("Person saved")
     })
-    it("Should not save a principle without a valid email address", async() => {
+    it("Should not save a person without a valid email address", async() => {
       await (await CreatePerson.getLastName()).waitForDisplayed()
       await (
         await CreatePerson.getLastName()
-      ).setValue(VALID_PERSON_PRINCIPAL.lastName)
+      ).setValue(VALID_PERSON_INTERLOCUTOR.lastName)
       await (
         await CreatePerson.getRank()
       ).selectByAttribute(
@@ -103,6 +115,12 @@ describe("Create new Person form page", () => {
       ).selectByAttribute(
         "value",
         await CreatePerson.getRandomOption(await CreatePerson.getGender())
+      )
+      await (
+        await CreatePerson.getCountry()
+      ).selectByAttribute(
+        "value",
+        await CreatePerson.getRandomOption(await CreatePerson.getCountry())
       )
       await (await CreatePerson.getEmailAddress()).setValue("notValidEmail@")
       await (await CreatePerson.getLastName()).click()
@@ -128,7 +146,7 @@ describe("Create new Person form page", () => {
     })
   })
 
-  describe("When creating an Advisor user", () => {
+  describe("When creating a user", () => {
     it("Should display possible duplicates with similar names", async() => {
       await CreatePerson.openAsAdmin()
       await (await CreatePerson.getForm()).waitForExist()
@@ -158,13 +176,13 @@ describe("Create new Person form page", () => {
       await CreatePerson.openAsAdmin()
       await (await CreatePerson.getForm()).waitForExist()
       await (await CreatePerson.getForm()).waitForDisplayed()
-      await (await CreatePerson.getRoleAdvisorButton()).waitForExist()
-      await (await CreatePerson.getRoleAdvisorButton()).click()
+      await (await CreatePerson.getUserTrueButton()).waitForExist()
+      await (await CreatePerson.getUserTrueButton()).click()
       const warningMessage = await browser.$(".alert.alert-warning")
       await warningMessage.waitForExist()
       await warningMessage.waitForDisplayed()
       expect(await warningMessage.getText()).to.equal(
-        "Creating a NATO Member in ANET could result in duplicate accounts if this person logs in later. If you notice duplicate accounts, please contact an ANET administrator."
+        "Creating a user in ANET could result in duplicate accounts if this person logs in later. If you notice duplicate accounts you should take action."
       )
       // Don't logout, next test continues…
     })
@@ -176,8 +194,8 @@ describe("Create new Person form page", () => {
       await (
         await CreatePerson.getFirstName()
       ).setValue(VALID_PERSON_ADVISOR.firstName)
-      await (await CreatePerson.getRoleAdvisorButton()).waitForExist()
-      await (await CreatePerson.getRoleAdvisorButton()).click()
+      await (await CreatePerson.getUserTrueButton()).waitForExist()
+      await (await CreatePerson.getUserTrueButton()).click()
       await (
         await CreatePerson.getEmailAddress()
       ).setValue(VALID_PERSON_ADVISOR.emailAddress)
@@ -217,8 +235,8 @@ describe("Create new Person form page", () => {
       await (
         await CreatePerson.getFirstName()
       ).setValue(VALID_PERSON_ADVISOR.firstName)
-      await (await CreatePerson.getRoleAdvisorButton()).waitForExist()
-      await (await CreatePerson.getRoleAdvisorButton()).click()
+      await (await CreatePerson.getUserTrueButton()).waitForExist()
+      await (await CreatePerson.getUserTrueButton()).click()
       await CreatePerson.deleteInput(CreatePerson.getEmailAddress())
       await (
         await CreatePerson.getEmailAddress()

@@ -456,7 +456,7 @@ const MidColTitle = styled.div`
 
 function getPositionFilters(mergeState, align) {
   return {
-    allAdvisorPositions: {
+    allPositions: {
       label: "All",
       queryVars: {
         status: Position.STATUS.ACTIVE,

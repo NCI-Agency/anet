@@ -117,10 +117,14 @@ public class AccountDeactivationWorker extends AbstractWorker {
 
   private void deactivateAccount(Person p) {
     AnetAuditLogger.log(
-        "Person {} status set to {} by system because the End-of-Tour date has been reached", p,
-        p.getStatus());
-
+        "Person {} status set to inactive by system because the End-of-Tour date has been reached",
+        p);
     p.setStatus(Person.Status.INACTIVE);
+
+    AnetAuditLogger.log(
+        "Person {} user status set to false by system because the End-of-Tour date has been reached",
+        p);
+    p.setUser(false);
 
     AnetAuditLogger.log(
         "Person {} domainUsername '{}' and openIdSubject '{}' cleared by system because they are now inactive",

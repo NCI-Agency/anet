@@ -166,6 +166,13 @@ export default {
     return "?" + encodeQuery(queryParams)
   },
 
+  formatBoolean: function(b, emptyForNullOrUndefined) {
+    if (emptyForNullOrUndefined && b == null) {
+      return ""
+    }
+    return b ? "Yes" : "No"
+  },
+
   treatFunctionsAsEqual: function(value1, value2) {
     if (typeof value1 === "function" && typeof value2 === "function") {
       return true

@@ -67,21 +67,16 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
   ]
   const typeButtons = [
     {
-      id: "typeAdvisorButton",
-      value: Position.TYPE.ADVISOR,
-      label: Settings.fields.advisor.position.name
-    },
-    {
-      id: "typePrincipalButton",
-      value: Position.TYPE.PRINCIPAL,
-      label: Settings.fields.principal.position.name
+      id: "typeRegularButton",
+      value: Position.TYPE.REGULAR,
+      label: Settings.fields.regular.position.name
     }
   ]
   const nonAdminPermissionsButtons = [
     {
-      id: "permsAdvisorButton",
-      value: Position.TYPE.ADVISOR,
-      label: Settings.fields.advisor.position.type
+      id: "permsRegularButton",
+      value: Position.TYPE.REGULAR,
+      label: Settings.fields.regular.position.type
     }
   ]
   const adminPermissionsButtons = nonAdminPermissionsButtons.concat([
@@ -116,18 +111,9 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
     }
   ])
 
-  // For advisor types of positions, add permissions property.
   // The permissions property allows selecting a
-  // specific advisor type and is removed in the onSubmit method.
-  if (
-    [
-      Position.TYPE.ADVISOR,
-      Position.TYPE.SUPERUSER,
-      Position.TYPE.ADMINISTRATOR
-    ].includes(initialValues.type)
-  ) {
-    initialValues.permissions = initialValues.type
-  }
+  // specific type and is removed in the onSubmit method.
+  initialValues.permissions = initialValues.type
 
   return (
     <Formik
@@ -145,7 +131,6 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
         validateForm,
         submitForm
       }) => {
-        const isPrincipal = values.type === Position.TYPE.PRINCIPAL
         const isAdmin = currentUser && currentUser.isAdmin()
         const permissionsButtons = isAdmin
           ? adminPermissionsButtons
@@ -158,9 +143,6 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
         const positionRoleButtons =
           isAdmin || isSuperuser ? adminRolesButtons : nonAdminRolesButtons
         const orgSearchQuery = { status: Model.STATUS.ACTIVE }
-        orgSearchQuery.type = isPrincipal
-          ? Organization.TYPE.PRINCIPAL_ORG
-          : Organization.TYPE.ADVISOR_ORG
         if (isSuperuser) {
           orgSearchQuery.parentOrgUuid = [...administratingOrgUuids]
           orgSearchQuery.orgRecurseStrategy = RECURSE_STRATEGY.CHILDREN
@@ -248,14 +230,12 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
                   />
                 )}
 
-                {!isPrincipal && (
-                  <FastField
-                    name="permissions"
-                    component={FieldHelper.RadioButtonToggleGroupField}
-                    buttons={permissionsButtons}
-                    onChange={value => setFieldValue("permissions", value)}
-                  />
-                )}
+                <FastField
+                  name="permissions"
+                  component={FieldHelper.RadioButtonToggleGroupField}
+                  buttons={permissionsButtons}
+                  onChange={value => setFieldValue("permissions", value)}
+                />
 
                 <DictionaryField
                   wrappedComponent={Field}
@@ -398,15 +378,16 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
   )
 
   function getLocationFilters(values) {
-    return Settings?.fields[
-      values.type === Position.TYPE.ADVISOR ? "advisor" : "principal"
-    ]?.position?.location?.filter.reduce((accummulator, filter) => {
-      accummulator[filter] = {
-        label: Location.humanNameOfType(filter),
-        queryVars: { type: filter }
-      }
-      return accummulator
-    }, {})
+    return Settings?.fields.regular?.position?.location?.filter.reduce(
+      (accumulator, filter) => {
+        accumulator[filter] = {
+          label: Location.humanNameOfType(filter),
+          queryVars: { type: filter }
+        }
+        return accumulator
+      },
+      {}
+    )
   }
 
   function onCancel() {
@@ -448,9 +429,7 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
       "responsibleTasks"
     )
 
-    if (position.type !== Position.TYPE.PRINCIPAL) {
-      position.type = position.permissions || Position.TYPE.ADVISOR
-    }
+    position.type = position.permissions || Position.TYPE.REGULAR
     // Remove permissions property, was added temporarily in order to be able
     // to select a specific advisor type.
     delete position.permissions

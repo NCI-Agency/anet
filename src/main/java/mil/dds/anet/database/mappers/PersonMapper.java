@@ -3,7 +3,6 @@ package mil.dds.anet.database.mappers;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.beans.Position;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
@@ -32,7 +31,7 @@ public class PersonMapper implements RowMapper<Person> {
     MapperUtils.setCustomizableBeanFields(a, rs, "people");
     a.setName(MapperUtils.getOptionalString(rs, "people_name"));
     a.setStatus(MapperUtils.getEnumIdx(rs, "people_status", Person.Status.class));
-    a.setRole(MapperUtils.getEnumIdx(rs, "people_role", Role.class));
+    a.setUser(MapperUtils.getOptionalBoolean(rs, "people_user"));
     a.setEmailAddress(MapperUtils.getOptionalString(rs, "people_emailAddress"));
     a.setAvatarUuid(MapperUtils.getOptionalString(rs, "people_avatarUuid"));
     a.setPhoneNumber(MapperUtils.getOptionalString(rs, "people_phoneNumber"));

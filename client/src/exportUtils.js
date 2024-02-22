@@ -14,7 +14,6 @@ const GQL_GET_ORGANIZATION_LIST = gql`
         shortName
         longName
         identificationCode
-        type
       }
     }
   }
@@ -29,7 +28,6 @@ const GQL_GET_PERSON_LIST = gql`
         uuid
         name
         rank
-        role
         emailAddress
         position {
           uuid
@@ -79,7 +77,6 @@ const GQL_GET_POSITION_LIST = gql`
           uuid
           name
           rank
-          role
         }
       }
     }
@@ -148,19 +145,16 @@ const GQL_GET_REPORT_LIST = gql`
           uuid
           name
           rank
-          role
         }
         reportPeople {
           uuid
           name
           rank
-          role
         }
         primaryAdvisor {
           uuid
           name
           rank
-          role
           position {
             uuid
             organization {
@@ -171,11 +165,10 @@ const GQL_GET_REPORT_LIST = gql`
             }
           }
         }
-        primaryPrincipal {
+        primaryInterlocutor {
           uuid
           name
           rank
-          role
         }
         advisorOrg {
           uuid
@@ -183,7 +176,7 @@ const GQL_GET_REPORT_LIST = gql`
           longName
           identificationCode
         }
-        principalOrg {
+        interlocutorOrg {
           uuid
           shortName
           longName
@@ -212,7 +205,6 @@ const GQL_GET_REPORT_LIST = gql`
                 uuid
                 name
                 rank
-                role
               }
             }
           }
@@ -220,7 +212,6 @@ const GQL_GET_REPORT_LIST = gql`
             uuid
             name
             rank
-            role
           }
         }
         updatedAt

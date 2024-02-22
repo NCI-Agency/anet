@@ -26,7 +26,6 @@ const GQL_GET_USERS_PENDING_VERIFICATION = gql`
         uuid
         name
         rank
-        role
         avatarUuid
         emailAddress
         pendingVerification

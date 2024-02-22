@@ -54,18 +54,18 @@ import org.junit.jupiter.api.Test;
 public class TaskApprovalTest extends AbstractResourceTest {
 
   private static final String ORGANIZATION_FIELDS =
-      "{ uuid shortName longName status identificationCode type }";
+      "{ uuid shortName longName status identificationCode }";
   private static final String POSITION_FIELDS =
       "{ uuid name code type status organization " + ORGANIZATION_FIELDS + " }";
   private static final String PERSON_FIELDS =
-      "{ uuid name status role rank domainUsername openIdSubject emailAddress position "
+      "{ uuid name status user rank domainUsername openIdSubject emailAddress position "
           + POSITION_FIELDS + " }";
   private static final String APPROVAL_STEP_FIELDS =
       "{ uuid name restrictedApproval relatedObjectUuid nextStepUuid approvers"
-          + " { uuid name person { uuid name rank role } } }";
+          + " { uuid name person { uuid name rank } } }";
   private static final String REPORT_FIELDS =
       "{ uuid state workflow { type createdAt person { uuid } step " + APPROVAL_STEP_FIELDS
-          + " } reportPeople { uuid role primary author attendee } }";
+          + " } reportPeople { uuid primary author attendee interlocutor } }";
   private static final String TASK_FIELDS =
       "{ uuid shortName longName status" + " plannedCompletion projectedCompletion"
           + " taskedOrganizations { uuid shortName longName identificationCode }"
@@ -679,14 +679,15 @@ public class TaskApprovalTest extends AbstractResourceTest {
     if (reportAdvisor == null) {
       reportAdvisor = getPersonFromDb("REINTON, Reina");
     }
-    final ReportPerson advisor = personToPrimaryReportPerson(reportAdvisor);
-    final ReportPerson principal = personToPrimaryReportPerson(getPersonFromDb("STEVESON, Steve"));
+    final ReportPerson advisor = personToPrimaryReportPerson(reportAdvisor, false);
+    final ReportPerson interlocutor =
+        personToPrimaryReportPerson(getPersonFromDb("STEVESON, Steve"), true);
     final String testText = String.format("Test report for task approval workflow — %1$s", text);
     final ReportInput reportInput = ReportInput.builder()
         .withEngagementDate(Instant.now().plus(isPlanned ? 14 : -14, ChronoUnit.DAYS))
         .withDuration(120)
         .withReportPeople(getReportPeopleInput(
-            Lists.newArrayList(advisor, principal, personToReportAuthor(author))))
+            Lists.newArrayList(advisor, interlocutor, personToReportAuthor(author))))
         .withTasks(Lists.newArrayList(taskInput))
         .withLocation(LocationInput.builder().withUuid(TEST_LOCATION_UUID).build())
         .withAtmosphere(Atmosphere.POSITIVE).withIntent(testText).withReportText(testText)

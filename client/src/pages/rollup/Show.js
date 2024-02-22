@@ -37,7 +37,7 @@ import {
   SearchQueryPropType
 } from "components/SearchFilters"
 import { Field, Form, Formik } from "formik"
-import { Organization, Report } from "models"
+import { Report, RollupGraph } from "models"
 import moment from "moment"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
@@ -62,27 +62,23 @@ const GQL_GET_REPORT_LIST = gql`
           shortName
           longName
           identificationCode
-          type
           ascendantOrgs {
             uuid
             shortName
             longName
             identificationCode
-            type
           }
         }
-        principalOrg {
+        interlocutorOrg {
           uuid
           shortName
           longName
           identificationCode
-          type
           ascendantOrgs {
             uuid
             shortName
             longName
             identificationCode
-            type
           }
         }
       }
@@ -94,15 +90,13 @@ const GQL_SHOW_ROLLUP_EMAIL = gql`
   query (
     $startDate: Instant!
     $endDate: Instant!
-    $principalOrganizationUuid: String
-    $advisorOrganizationUuid: String
-    $orgType: OrganizationType
+    $orgUuid: String
+    $orgType: RollupGraphType
   ) {
     showRollupEmail(
       startDate: $startDate
       endDate: $endDate
-      principalOrganizationUuid: $principalOrganizationUuid
-      advisorOrganizationUuid: $advisorOrganizationUuid
+      orgUuid: $orgUuid
       orgType: $orgType
     )
   }
@@ -112,23 +106,26 @@ const GQL_EMAIL_ROLLUP = gql`
     $startDate: Instant!
     $endDate: Instant!
     $email: AnetEmailInput!
-    $principalOrganizationUuid: String
-    $advisorOrganizationUuid: String
-    $orgType: OrganizationType
+    $orgUuid: String
+    $orgType: RollupGraphType
   ) {
     emailRollup(
       startDate: $startDate
       endDate: $endDate
       email: $email
-      principalOrganizationUuid: $principalOrganizationUuid
-      advisorOrganizationUuid: $advisorOrganizationUuid
+      orgUuid: $orgUuid
       orgType: $orgType
     )
   }
 `
 
-const Chart = ({ queryParams, pageDispatchers, setOrg }) => {
-  const [orgType, setOrgType] = useState(Organization.TYPE.ADVISOR_ORG)
+const Chart = ({
+  queryParams,
+  pageDispatchers,
+  setOrg,
+  orgType,
+  setOrgType
+}) => {
   const { loading, error, data } = API.useApiQuery(GQL_GET_REPORT_LIST, {
     reportQuery: { ...queryParams, pageSize: 0 }
   })
@@ -153,16 +150,16 @@ const Chart = ({ queryParams, pageDispatchers, setOrg }) => {
       a.org.shortName > b.org.shortName ? 1 : -1
     )
   }, [graphData])
-  const principalOrgGraphData = useMemo(() => {
-    return Object.values(graphData?.principalOrgReports || {}).sort((a, b) =>
+  const interlocutorOrgGraphData = useMemo(() => {
+    return Object.values(graphData?.interlocutorOrgReports || {}).sort((a, b) =>
       a.org.shortName > b.org.shortName ? 1 : -1
     )
   }, [graphData])
 
   const displayedGraphData =
-    orgType === Organization.TYPE.ADVISOR_ORG
+    orgType === RollupGraph.TYPE.ADVISOR
       ? advisorOrgGraphData
-      : principalOrgGraphData
+      : interlocutorOrgGraphData
 
   if (done) {
     return result
@@ -189,16 +186,16 @@ const Chart = ({ queryParams, pageDispatchers, setOrg }) => {
           <>
             <ButtonToggleGroup value={orgType} onChange={setOrgType}>
               <Button
-                value={Organization.TYPE.ADVISOR_ORG}
+                value={RollupGraph.TYPE.ADVISOR}
                 variant="outline-secondary"
               >
                 {pluralize(Settings.fields.advisor.org.name)}
               </Button>
               <Button
-                value={Organization.TYPE.PRINCIPAL_ORG}
+                value={RollupGraph.TYPE.INTERLOCUTOR}
                 variant="outline-secondary"
               >
-                {pluralize(Settings.fields.principal.org.name)}
+                {pluralize(Settings.fields.interlocutor.org.name)}
               </Button>
             </ButtonToggleGroup>
             <DailyRollupChart
@@ -256,7 +253,9 @@ const Chart = ({ queryParams, pageDispatchers, setOrg }) => {
 Chart.propTypes = {
   queryParams: PropTypes.object,
   pageDispatchers: PageDispatchersPropType,
-  setOrg: PropTypes.func
+  setOrg: PropTypes.func,
+  orgType: PropTypes.oneOf(Object.values(RollupGraph.TYPE)),
+  setOrgType: PropTypes.func
 }
 
 const updateOrgReports = (
@@ -301,14 +300,14 @@ const generateChartDataFromAllReports = (allReports, orgFilterUuid) => {
           r.engagementDate
         )
       }
-      if (r.principalOrg) {
-        const topLevelPrincipalOrg = r.principalOrg.ascendantOrgs[0]
-        const displayedPrincipalOrg = orgFilterUuid
-          ? r.principalOrg
-          : topLevelPrincipalOrg
+      if (r.interlocutorOrg) {
+        const topLevelInterlocutorOrg = r.interlocutorOrg.ascendantOrgs[0]
+        const displayedInterlocutorOrg = orgFilterUuid
+          ? r.interlocutorOrg
+          : topLevelInterlocutorOrg
         updateOrgReports(
-          acc.principalOrgReports,
-          displayedPrincipalOrg,
+          acc.interlocutorOrgReports,
+          displayedInterlocutorOrg,
           r.state,
           r.engagementDate
         )
@@ -316,7 +315,7 @@ const generateChartDataFromAllReports = (allReports, orgFilterUuid) => {
 
       return acc
     },
-    { advisorOrgReports: {}, principalOrgReports: {} }
+    { advisorOrgReports: {}, interlocutorOrgReports: {} }
   )
 }
 
@@ -368,6 +367,7 @@ Map.propTypes = {
 
 const RollupShow = ({ pageDispatchers, searchQuery, setSearchQuery }) => {
   const [period, setPeriod] = useState(ROLLUP_PERIODS[0])
+  const [orgType, setOrgType] = useState(RollupGraph.TYPE.ADVISOR)
   const [showEmailModal, setShowEmailModal] = useState(false)
   const [saveSuccess, setSaveSuccess] = useState(null)
   const [saveError, setSaveError] = useState(null)
@@ -382,6 +382,7 @@ const RollupShow = ({ pageDispatchers, searchQuery, setSearchQuery }) => {
   }
   const startDate = moment(queryParams.releasedAtStart)
   const endDate = moment(queryParams.releasedAtEnd)
+  const { orgUuid } = queryParams
   useBoilerplate({
     pageProps: DEFAULT_PAGE_PROPS,
     searchProps: REPORT_SEARCH_PROPS,
@@ -522,6 +523,8 @@ const RollupShow = ({ pageDispatchers, searchQuery, setSearchQuery }) => {
         queryParams={queryParams}
         pageDispatchers={pageDispatchers}
         setOrg={changeOrganization}
+        orgType={orgType}
+        setOrgType={setOrgType}
       />
     )
   }
@@ -715,7 +718,9 @@ const RollupShow = ({ pageDispatchers, searchQuery, setSearchQuery }) => {
   function showPreview(print) {
     const variables = {
       startDate: getRollupStart().valueOf(),
-      endDate: getRollupEnd().valueOf()
+      endDate: getRollupEnd().valueOf(),
+      orgType,
+      orgUuid
     }
     return API.query(GQL_SHOW_ROLLUP_EMAIL, variables).then(data => {
       const rollupWindow = window.open("", "rollup")
@@ -760,6 +765,8 @@ const RollupShow = ({ pageDispatchers, searchQuery, setSearchQuery }) => {
     const variables = {
       startDate: getRollupStart().valueOf(),
       endDate: getRollupEnd().valueOf(),
+      orgType,
+      orgUuid,
       email: emailDelivery
     }
     return API.mutation(GQL_EMAIL_ROLLUP, variables)

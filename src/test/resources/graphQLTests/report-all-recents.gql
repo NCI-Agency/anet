@@ -9,7 +9,6 @@ personList(query: {pageSize: 6, status: ACTIVE, inMyReports: true, sortBy: RECEN
     uuid
     name
     rank
-    role
     avatarUuid
     status
     endOfTourDate

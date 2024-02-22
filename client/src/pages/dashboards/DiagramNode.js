@@ -29,7 +29,7 @@ import * as React from "react"
 
 const ENTITY_GQL_FIELDS = {
   Report: GRAPHQL_ENTITY_FIELDS.Report,
-  Person: `uuid, name, role, avatarUuid, ${GRAPHQL_NOTES_FIELDS}`,
+  Person: `uuid name avatarUuid ${GRAPHQL_NOTES_FIELDS}`,
   Organization: GRAPHQL_ENTITY_FIELDS.Organization,
   Position: GRAPHQL_ENTITY_FIELDS.Position,
   Location: GRAPHQL_ENTITY_FIELDS.Location,

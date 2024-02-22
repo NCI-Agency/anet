@@ -15,7 +15,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Organization;
-import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Task;
@@ -355,14 +354,10 @@ public class AnetObjectEngine {
   /*
    * Helper function to build a map of organization UUIDs to their top level parent organization
    * object.
-   * 
-   * @param orgType: The Organzation Type (ADVISOR_ORG, or PRINCIPAL_ORG) to look for. pass NULL to
-   * get all orgs.
    */
-  public Map<String, Organization> buildTopLevelOrgHash(OrganizationType orgType) {
+  public Map<String, Organization> buildTopLevelOrgHash() {
     OrganizationSearchQuery orgQuery = new OrganizationSearchQuery();
     orgQuery.setPageSize(0);
-    orgQuery.setType(orgType);
     List<Organization> orgs = getOrganizationDao().search(orgQuery).getList();
 
     return Utils.buildParentOrgMapping(orgs, null);

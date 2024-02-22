@@ -40,6 +40,7 @@ import mil.dds.anet.test.client.ApprovalStepType;
 import mil.dds.anet.test.client.Atmosphere;
 import mil.dds.anet.test.client.Attachment;
 import mil.dds.anet.test.client.AttachmentInput;
+import mil.dds.anet.test.client.AuthorizationGroup;
 import mil.dds.anet.test.client.Comment;
 import mil.dds.anet.test.client.GenericRelatedObjectInput;
 import mil.dds.anet.test.client.Location;
@@ -48,7 +49,6 @@ import mil.dds.anet.test.client.LocationSearchSortBy;
 import mil.dds.anet.test.client.Organization;
 import mil.dds.anet.test.client.OrganizationInput;
 import mil.dds.anet.test.client.OrganizationSearchQueryInput;
-import mil.dds.anet.test.client.OrganizationType;
 import mil.dds.anet.test.client.Person;
 import mil.dds.anet.test.client.PersonInput;
 import mil.dds.anet.test.client.PersonSearchQueryInput;
@@ -57,6 +57,7 @@ import mil.dds.anet.test.client.Position;
 import mil.dds.anet.test.client.PositionInput;
 import mil.dds.anet.test.client.PositionRole;
 import mil.dds.anet.test.client.PositionType;
+import mil.dds.anet.test.client.RecurseStrategy;
 import mil.dds.anet.test.client.Report;
 import mil.dds.anet.test.client.ReportAction;
 import mil.dds.anet.test.client.ReportCancelledReason;
@@ -67,7 +68,6 @@ import mil.dds.anet.test.client.ReportSearchQueryInput;
 import mil.dds.anet.test.client.ReportSearchSortBy;
 import mil.dds.anet.test.client.ReportSensitiveInformationInput;
 import mil.dds.anet.test.client.ReportState;
-import mil.dds.anet.test.client.Role;
 import mil.dds.anet.test.client.RollupGraph;
 import mil.dds.anet.test.client.SortOrder;
 import mil.dds.anet.test.client.Status;
@@ -91,15 +91,15 @@ public class ReportResourceTest extends AbstractResourceTest {
   private static final String COMMENT_FIELDS = "{ uuid text author { uuid } }";
   private static final String LOCATION_FIELDS = "{ uuid name status lat lng }";
   private static final String _ORGANIZATION_FIELDS =
-      "uuid shortName longName status identificationCode type";
+      "uuid shortName longName status identificationCode";
   private static final String ORGANIZATION_FIELDS = String.format(
       "{ %1$s approvalSteps { uuid name nextStepUuid relatedObjectUuid } }", _ORGANIZATION_FIELDS);
   private static final String _PERSON_FIELDS =
-      "uuid name status role emailAddress phoneNumber rank biography country"
+      "uuid name status user emailAddress phoneNumber rank biography country"
           + " gender endOfTourDate domainUsername openIdSubject pendingVerification createdAt updatedAt";
   private static final String PERSON_FIELDS = String.format("{ %1$s }", _PERSON_FIELDS);
   private static final String REPORT_PEOPLE_FIELDS =
-      String.format("{ %1$s primary author attendee }", _PERSON_FIELDS);
+      String.format("{ %1$s primary author attendee interlocutor }", _PERSON_FIELDS);
   private static final String POSITION_FIELDS = "{ uuid isApprover person { uuid } }";
   private static final String REPORT_FIELDS =
       "uuid intent exsum state cancelledReason atmosphere atmosphereDetails"
@@ -111,7 +111,7 @@ public class ReportResourceTest extends AbstractResourceTest {
   private static final String TASK_FIELDS =
       String.format("{ %1$s parentTask { %1$s } }", _TASK_FIELDS);
   protected static final String FIELDS = String.format(
-      "{ %1$s advisorOrg %2$s principalOrg %2$s authors %3$s attendees %3$s"
+      "{ %1$s advisorOrg %2$s interlocutorOrg %2$s authors %3$s attendees %3$s"
           + " reportPeople %3$s tasks %4$s approvalStep { uuid relatedObjectUuid } location %5$s"
           + " comments %6$s notes %7$s authorizationGroups { uuid name }"
           + " workflow { step { uuid relatedObjectUuid approvers { uuid person { uuid } } }"
@@ -128,13 +128,13 @@ public class ReportResourceTest extends AbstractResourceTest {
     final QueryExecutor authorQueryExecutor = getQueryExecutor(author.getDomainUsername());
     final MutationExecutor authorMutationExecutor = getMutationExecutor(author.getDomainUsername());
 
-    // Create a principal for the report
-    final Person principalPerson = getSteveSteveson();
-    final ReportPerson principal = personToPrimaryReportPerson(principalPerson);
-    final Position principalPosition = principalPerson.getPosition();
-    assertThat(principalPosition).isNotNull();
-    final Organization principalOrg = principalPosition.getOrganization();
-    assertThat(principalOrg).isNotNull();
+    // Create a interlocutor for the report
+    final Person interlocutorPerson = getSteveSteveson();
+    final ReportPerson interlocutor = personToPrimaryReportPerson(interlocutorPerson, true);
+    final Position interlocutorPosition = interlocutorPerson.getPosition();
+    assertThat(interlocutorPosition).isNotNull();
+    final Organization interlocutorOrg = interlocutorPosition.getOrganization();
+    assertThat(interlocutorOrg).isNotNull();
 
     // Create an Advising Organization for the report writer
     final Organization advisorOrg = adminMutationExecutor.createOrganization(ORGANIZATION_FIELDS,
@@ -145,7 +145,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     // Create leadership people in the AO who can approve this report
     Person approver1 = Person.builder().withDomainUsername("testapprover1")
         .withEmailAddress("hunter+testApprover1@example.com").withName("Test Approver 1")
-        .withRole(Role.ADVISOR).withStatus(Status.ACTIVE).build();
+        .withStatus(Status.ACTIVE).build();
     approver1 = findOrPutPersonInDb(approver1);
     if (Boolean.TRUE.equals(approver1.getPendingVerification())) {
       // Approve newly created user
@@ -153,7 +153,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     }
     Person approver2 = Person.builder().withDomainUsername("testapprover2")
         .withEmailAddress("hunter+testApprover2@example.com").withName("Test Approver 2")
-        .withRole(Role.ADVISOR).withStatus(Status.ACTIVE).build();
+        .withStatus(Status.ACTIVE).build();
     approver2 = findOrPutPersonInDb(approver2);
     if (Boolean.TRUE.equals(approver2.getPendingVerification())) {
       // Approve newly created user
@@ -186,7 +186,7 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     // Create a billet for the author
     final PositionInput authorBilletInput =
-        PositionInput.builder().withName("A report writer").withType(PositionType.ADVISOR)
+        PositionInput.builder().withName("A report writer").withType(PositionType.REGULAR)
             .withRole(PositionRole.MEMBER).withOrganization(getOrganizationInput(advisorOrg))
             .withLocation(getLocationInput(getGeneralHospital())).withStatus(Status.ACTIVE).build();
     final Position authorBillet =
@@ -258,7 +258,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     final ReportPerson nonAttendingAuthor = personToReportAuthor(getElizabethElizawell());
     nonAttendingAuthor.setAttendee(false);
     final List<ReportPerson> reportPeople =
-        List.of(principal, personToReportAuthor(author), nonAttendingAuthor);
+        List.of(interlocutor, personToReportAuthor(author), nonAttendingAuthor);
     final ReportInput rInput = ReportInput.builder().withEngagementDate(Instant.now())
         .withDuration(120).withReportPeople(getReportPeopleInput(reportPeople))
         .withTasks(List.of(getTaskInput(action))).withLocation(getLocationInput(loc))
@@ -271,7 +271,7 @@ public class ReportResourceTest extends AbstractResourceTest {
         .withNextSteps("This is the next steps on a report")
         .withKeyOutcomes("These are the key outcomes of this engagement")
         .withAdvisorOrg(getOrganizationInput(advisorOrg))
-        .withPrincipalOrg(getOrganizationInput(principalOrg)).build();
+        .withInterlocutorOrg(getOrganizationInput(interlocutorOrg)).build();
     final Report created = authorMutationExecutor.createReport(FIELDS, rInput);
     assertThat(created).isNotNull();
     assertThat(created.getUuid()).isNotNull();
@@ -279,7 +279,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     final Report check = authorQueryExecutor.report(FIELDS, created.getUuid());
     assertThat(check.getState()).isEqualTo(ReportState.DRAFT);
     assertThat(check.getAdvisorOrg().getUuid()).isEqualTo(advisorOrg.getUuid());
-    assertThat(check.getPrincipalOrg().getUuid()).isEqualTo(principalOrg.getUuid());
+    assertThat(check.getInterlocutorOrg().getUuid()).isEqualTo(interlocutorOrg.getUuid());
     // check that HTML of report text is sanitized after create
     assertThat(check.getReportText()).isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
     // check that JSON of customFields is sanitized after create
@@ -335,12 +335,13 @@ public class ReportResourceTest extends AbstractResourceTest {
     // verify the location on this report
     assertThat(returned.getLocation().getUuid()).isEqualTo(loc.getUuid());
 
-    // verify the principals on this report
-    assertThat(returned.getAttendees().stream().map(a -> a.getUuid()).collect(Collectors.toSet()))
-        .contains(principal.getUuid());
+    // verify the interlocutors on this report
+    assertThat(
+        returned.getAttendees().stream().map(ReportPerson::getUuid).collect(Collectors.toSet()))
+        .contains(interlocutor.getUuid());
 
     // verify the tasks on this report
-    assertThat(returned.getTasks().stream().map(t -> t.getUuid()).collect(Collectors.toSet()))
+    assertThat(returned.getTasks().stream().map(Task::getUuid).collect(Collectors.toSet()))
         .contains(action.getUuid());
 
     // Verify this shows up on the approvers list of pending documents
@@ -351,14 +352,14 @@ public class ReportResourceTest extends AbstractResourceTest {
         getMutationExecutor(approver1.getDomainUsername());
     AnetBeanList_Report pending =
         approver1QueryExecutor.reportList(getListFields(FIELDS), pendingQuery);
-    assertThat(pending.getList().stream().map(r -> r.getUuid()).collect(Collectors.toSet()))
+    assertThat(pending.getList().stream().map(Report::getUuid).collect(Collectors.toSet()))
         .contains(returned.getUuid());
 
-    // Run a search for this users pending approvals
+    // Run a search for this user's pending approvals
     final ReportSearchQueryInput searchQuery =
         ReportSearchQueryInput.builder().withPendingApprovalOf(approver1.getUuid()).build();
     pending = approver1QueryExecutor.reportList(getListFields(FIELDS), searchQuery);
-    assertThat(pending.getList().size()).isGreaterThan(0);
+    assertThat(pending.getList().size()).isPositive();
 
     // Check on Report status for who needs to approve
     List<ReportAction> workflow = returned.getWorkflow();
@@ -448,7 +449,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     final List<Comment> commentsReturned = returned.getComments();
     assertThat(commentsReturned).hasSize(3); // the rejection comment will be there as well.
     // Assert order of comments!
-    assertThat(commentsReturned.stream().map(c -> c.getUuid()).collect(Collectors.toList()))
+    assertThat(commentsReturned.stream().map(Comment::getUuid).collect(Collectors.toList()))
         .containsSequence(commentOne.getUuid(), commentTwo.getUuid());
 
     // Verify this report shows up in the daily rollup
@@ -457,8 +458,8 @@ public class ReportResourceTest extends AbstractResourceTest {
             Instant.now().atZone(DaoUtils.getServerNativeZoneId()).minusDays(1).toInstant())
         .build();
     AnetBeanList_Report rollup = adminQueryExecutor.reportList(getListFields(FIELDS), query);
-    assertThat(rollup.getTotalCount()).isGreaterThan(0);
-    assertThat(rollup.getList().stream().map(r -> r.getUuid()).collect(Collectors.toSet()))
+    assertThat(rollup.getTotalCount()).isPositive();
+    assertThat(rollup.getList().stream().map(Report::getUuid).collect(Collectors.toSet()))
         .contains(returned.getUuid());
 
     // Pull recent People, Tasks, and Locations and verify that the records from the last report are
@@ -468,15 +469,15 @@ public class ReportResourceTest extends AbstractResourceTest {
             .withSortBy(PersonSearchSortBy.RECENT).withSortOrder(SortOrder.DESC).build();
     final AnetBeanList_Person recentPeople =
         authorQueryExecutor.personList(getListFields(PERSON_FIELDS), queryPeople);
-    assertThat(recentPeople.getList().stream().map(p -> p.getUuid()).collect(Collectors.toSet()))
-        .contains(principalPerson.getUuid());
+    assertThat(recentPeople.getList().stream().map(Person::getUuid).collect(Collectors.toSet()))
+        .contains(interlocutorPerson.getUuid());
 
     final TaskSearchQueryInput queryTasks =
         TaskSearchQueryInput.builder().withStatus(Status.ACTIVE).withInMyReports(true)
             .withSortBy(TaskSearchSortBy.RECENT).withSortOrder(SortOrder.DESC).build();
     final AnetBeanList_Task recentTasks =
         authorQueryExecutor.taskList(getListFields(TASK_FIELDS), queryTasks);
-    assertThat(recentTasks.getList().stream().map(t -> t.getUuid()).collect(Collectors.toSet()))
+    assertThat(recentTasks.getList().stream().map(Task::getUuid).collect(Collectors.toSet()))
         .contains(action.getUuid());
 
     final LocationSearchQueryInput queryLocations =
@@ -484,7 +485,8 @@ public class ReportResourceTest extends AbstractResourceTest {
             .withSortBy(LocationSearchSortBy.RECENT).withSortOrder(SortOrder.DESC).build();
     final AnetBeanList_Location recentLocations =
         authorQueryExecutor.locationList(getListFields(LOCATION_FIELDS), queryLocations);
-    assertThat(recentLocations.getList().stream().map(l -> l.getUuid()).collect(Collectors.toSet()))
+    assertThat(
+        recentLocations.getList().stream().map(Location::getUuid).collect(Collectors.toSet()))
         .contains(loc.getUuid());
 
     // Go and delete the entire approval chain!
@@ -504,7 +506,7 @@ public class ReportResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void createReportWithoutPrincipal()
+  public void createReportWithoutInterlocutor()
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     // Create a report writer
     final Person author = getNickNicholson();
@@ -513,7 +515,7 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     // Create a person for the report
     final Person reportAttendeePerson = getJackJackson();
-    final ReportPerson reportAttendee = personToPrimaryReportPerson(reportAttendeePerson);
+    final ReportPerson reportAttendee = personToPrimaryReportPerson(reportAttendeePerson, false);
     final Position reportAttendeePosition = reportAttendeePerson.getPosition();
     assertThat(reportAttendeePosition).isNotNull();
     final Organization reportAttendeeOrg = reportAttendeePosition.getOrganization();
@@ -528,11 +530,11 @@ public class ReportResourceTest extends AbstractResourceTest {
     // Create leadership people in the AO who can approve this report
     Person approver1 = Person.builder().withDomainUsername("testapprover1")
         .withEmailAddress("hunter+testApprover1@example.com").withName("Test Approver 1")
-        .withRole(Role.ADVISOR).withStatus(Status.ACTIVE).build();
+        .withStatus(Status.ACTIVE).build();
     approver1 = findOrPutPersonInDb(approver1);
     Person approver2 = Person.builder().withDomainUsername("testapprover2")
         .withEmailAddress("hunter+testApprover2@example.com").withName("Test Approver 2")
-        .withRole(Role.ADVISOR).withStatus(Status.ACTIVE).build();
+        .withStatus(Status.ACTIVE).build();
     approver2 = findOrPutPersonInDb(approver2);
 
     final PositionInput approver1PosInput = PositionInput.builder()
@@ -561,7 +563,7 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     // Create a billet for the author
     final PositionInput authorBilletInput =
-        PositionInput.builder().withName("A report writer").withType(PositionType.ADVISOR)
+        PositionInput.builder().withName("A report writer").withType(PositionType.REGULAR)
             .withRole(PositionRole.MEMBER).withOrganization(getOrganizationInput(advisorOrg))
             .withLocation(getLocationInput(getGeneralHospital())).withStatus(Status.ACTIVE).build();
     final Position authorBillet =
@@ -613,13 +615,13 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     // Create some tasks for this organization
     final Task top = adminMutationExecutor.createTask(TASK_FIELDS,
-        TestData.createTaskInput("test-1-2", "Principal Test Top Task", "TOP", null,
+        TestData.createTaskInput("test-1-2", "Interlocutor Test Top Task", "TOP", null,
             Collections.singletonList(getOrganizationInput(advisorOrg)), Status.ACTIVE));
     assertThat(top).isNotNull();
     assertThat(top.getUuid()).isNotNull();
     final Task action =
         adminMutationExecutor.createTask(TASK_FIELDS, TestData.createTaskInput("test-1-3",
-            "Principal Test Task Action", "Action", getTaskInput(top), null, Status.ACTIVE));
+            "Interlocutor Test Task Action", "Action", getTaskInput(top), null, Status.ACTIVE));
     assertThat(action).isNotNull();
     assertThat(action.getUuid()).isNotNull();
 
@@ -644,13 +646,13 @@ public class ReportResourceTest extends AbstractResourceTest {
             .withNextSteps("This is the next steps on a report")
             .withKeyOutcomes("These are the key outcomes of this engagement")
             .withAdvisorOrg(getOrganizationInput(advisorOrg))
-            .withPrincipalOrg(getOrganizationInput(reportAttendeeOrg)).build();
+            .withInterlocutorOrg(getOrganizationInput(reportAttendeeOrg)).build();
     final Report created = authorMutationExecutor.createReport(FIELDS, rInput);
     assertThat(created).isNotNull();
     assertThat(created.getUuid()).isNotNull();
     assertThat(created.getState()).isEqualTo(ReportState.DRAFT);
     assertThat(created.getAdvisorOrg().getUuid()).isEqualTo(advisorOrg.getUuid());
-    assertThat(created.getPrincipalOrg().getUuid()).isEqualTo(reportAttendeeOrg.getUuid());
+    assertThat(created.getInterlocutorOrg().getUuid()).isEqualTo(reportAttendeeOrg.getUuid());
     // check that HTML of report text is sanitized after create
     assertThat(created.getReportText()).isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
     // check that JSON of customFields is sanitized after create
@@ -704,12 +706,13 @@ public class ReportResourceTest extends AbstractResourceTest {
     // verify the location on this report
     assertThat(returned.getLocation().getUuid()).isEqualTo(loc.getUuid());
 
-    // verify the principals on this report
-    assertThat(returned.getAttendees().stream().map(a -> a.getUuid()).collect(Collectors.toSet()))
+    // verify the interlocutors on this report
+    assertThat(
+        returned.getAttendees().stream().map(ReportPerson::getUuid).collect(Collectors.toSet()))
         .contains(reportAttendee.getUuid());
 
     // verify the tasks on this report
-    assertThat(returned.getTasks().stream().map(t -> t.getUuid()).collect(Collectors.toSet()))
+    assertThat(returned.getTasks().stream().map(Task::getUuid).collect(Collectors.toSet()))
         .contains(action.getUuid());
 
     // Verify this shows up on the approvers list of pending documents
@@ -720,14 +723,14 @@ public class ReportResourceTest extends AbstractResourceTest {
         getMutationExecutor(approver1.getDomainUsername());
     AnetBeanList_Report pending =
         approver1QueryExecutor.reportList(getListFields(FIELDS), pendingQuery);
-    assertThat(pending.getList().stream().map(r -> r.getUuid()).collect(Collectors.toSet()))
+    assertThat(pending.getList().stream().map(Report::getUuid).collect(Collectors.toSet()))
         .contains(returned.getUuid());
 
-    // Run a search for this users pending approvals
+    // Run a search for this user's pending approvals
     final ReportSearchQueryInput searchQuery =
         ReportSearchQueryInput.builder().withPendingApprovalOf(approver1.getUuid()).build();
     pending = approver1QueryExecutor.reportList(getListFields(FIELDS), searchQuery);
-    assertThat(pending.getList().size()).isGreaterThan(0);
+    assertThat(pending.getList().size()).isPositive();
 
     // Check on Report status for who needs to approve
     List<ReportAction> workflow = returned.getWorkflow();
@@ -817,7 +820,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     final List<Comment> commentsReturned = returned.getComments();
     assertThat(commentsReturned).hasSize(3); // the rejection comment will be there as well.
     // Assert order of comments!
-    assertThat(commentsReturned.stream().map(c -> c.getUuid()).collect(Collectors.toList()))
+    assertThat(commentsReturned.stream().map(Comment::getUuid).collect(Collectors.toList()))
         .containsSequence(commentOne.getUuid(), commentTwo.getUuid());
 
     // Verify this report shows up in the daily rollup
@@ -826,8 +829,8 @@ public class ReportResourceTest extends AbstractResourceTest {
             Instant.now().atZone(DaoUtils.getServerNativeZoneId()).minusDays(1).toInstant())
         .build();
     AnetBeanList_Report rollup = adminQueryExecutor.reportList(getListFields(FIELDS), query);
-    assertThat(rollup.getTotalCount()).isGreaterThan(0);
-    assertThat(rollup.getList().stream().map(r -> r.getUuid()).collect(Collectors.toSet()))
+    assertThat(rollup.getTotalCount()).isPositive();
+    assertThat(rollup.getList().stream().map(Report::getUuid).collect(Collectors.toSet()))
         .contains(returned.getUuid());
 
     // Pull recent People, Tasks, and Locations and verify that the records from the last report are
@@ -837,7 +840,7 @@ public class ReportResourceTest extends AbstractResourceTest {
             .withSortBy(PersonSearchSortBy.RECENT).withSortOrder(SortOrder.DESC).build();
     final AnetBeanList_Person recentPeople =
         authorQueryExecutor.personList(getListFields(PERSON_FIELDS), queryPeople);
-    assertThat(recentPeople.getList().stream().map(p -> p.getUuid()).collect(Collectors.toSet()))
+    assertThat(recentPeople.getList().stream().map(Person::getUuid).collect(Collectors.toSet()))
         .contains(reportAttendeePerson.getUuid());
 
     final TaskSearchQueryInput queryTasks =
@@ -845,7 +848,7 @@ public class ReportResourceTest extends AbstractResourceTest {
             .withSortBy(TaskSearchSortBy.RECENT).withSortOrder(SortOrder.DESC).build();
     final AnetBeanList_Task recentTasks =
         authorQueryExecutor.taskList(getListFields(TASK_FIELDS), queryTasks);
-    assertThat(recentTasks.getList().stream().map(t -> t.getUuid()).collect(Collectors.toSet()))
+    assertThat(recentTasks.getList().stream().map(Task::getUuid).collect(Collectors.toSet()))
         .contains(action.getUuid());
 
     final LocationSearchQueryInput queryLocations =
@@ -853,7 +856,8 @@ public class ReportResourceTest extends AbstractResourceTest {
             .withSortBy(LocationSearchSortBy.RECENT).withSortOrder(SortOrder.DESC).build();
     final AnetBeanList_Location recentLocations =
         authorQueryExecutor.locationList(getListFields(LOCATION_FIELDS), queryLocations);
-    assertThat(recentLocations.getList().stream().map(l -> l.getUuid()).collect(Collectors.toSet()))
+    assertThat(
+        recentLocations.getList().stream().map(Location::getUuid).collect(Collectors.toSet()))
         .contains(loc.getUuid());
 
     // Go and delete the entire approval chain!
@@ -876,7 +880,7 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     // Create a Person who isn't in a Billet
     final PersonInput authorInput =
-        PersonInput.builder().withName("A New Guy").withRole(Role.ADVISOR).withStatus(Status.ACTIVE)
+        PersonInput.builder().withName("A New Guy").withUser(true).withStatus(Status.ACTIVE)
             .withDomainUsername("newguy").withEmailAddress("newGuy@example.com").build();
     final Person author = adminMutationExecutor.createPerson(PERSON_FIELDS, authorInput);
     assertThat(author).isNotNull();
@@ -884,8 +888,8 @@ public class ReportResourceTest extends AbstractResourceTest {
     final MutationExecutor authorMutationExecutor = getMutationExecutor(author.getDomainUsername());
 
     final List<ReportPersonInput> reportPeopleInput =
-        getReportPeopleInput(List.of(personToPrimaryReportPerson(roger),
-            personToPrimaryReportPerson(jack), personToReportAuthor(author)));
+        getReportPeopleInput(List.of(personToPrimaryReportPerson(roger, true),
+            personToPrimaryReportPerson(jack, false), personToReportAuthor(author)));
 
     // Write a report as that person
     final ReportInput rInput = ReportInput.builder()
@@ -943,15 +947,15 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     // Create billet for Author
     final PositionInput billetInput = PositionInput.builder().withName("EF 1.1 new advisor")
-        .withType(PositionType.ADVISOR).withRole(PositionRole.MEMBER)
+        .withType(PositionType.REGULAR).withRole(PositionRole.MEMBER)
         .withLocation(getLocationInput(getGeneralHospital())).withStatus(Status.ACTIVE).build();
 
     // Put billet in EF 1.1
-    final OrganizationSearchQueryInput queryOrgs = OrganizationSearchQueryInput.builder()
-        .withText("EF 1").withType(OrganizationType.ADVISOR_ORG).build();
+    final OrganizationSearchQueryInput queryOrgs =
+        OrganizationSearchQueryInput.builder().withText("EF 1").build();
     final AnetBeanList_Organization results =
         adminQueryExecutor.organizationList(getListFields(ORGANIZATION_FIELDS), queryOrgs);
-    assertThat(results.getList().size()).isGreaterThan(0);
+    assertThat(results.getList().size()).isPositive();
     Organization ef11 = null;
     for (final Organization org : results.getList()) {
       if (org.getShortName().trim().equalsIgnoreCase("ef 1.1")) {
@@ -973,8 +977,9 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(nrUpdated).isEqualTo(1);
 
     // Change primary advisor of the report to someone in EF 1.1
-    returned.setReportPeople(List.of(personToPrimaryReportPerson(roger), personToReportPerson(jack),
-        personToPrimaryReportPerson(bob), personToReportAuthor(author)));
+    returned.setReportPeople(
+        List.of(personToPrimaryReportPerson(roger, true), personToReportPerson(jack, false),
+            personToPrimaryReportPerson(bob, false), personToReportAuthor(author)));
     final Report updated =
         authorMutationExecutor.updateReport(FIELDS, getReportInput(returned), true);
     assertThat(updated).isNotNull();
@@ -1043,7 +1048,7 @@ public class ReportResourceTest extends AbstractResourceTest {
         .withNextSteps("These are the next steps summarized")
         .withReportText("This report was generated by ReportsResourceTest#reportEditTest")
         .withReportPeople(getReportPeopleInput(
-            List.of(personToPrimaryReportPerson(roger), personToReportAuthor(elizabeth))))
+            List.of(personToPrimaryReportPerson(roger, true), personToReportAuthor(elizabeth))))
         .withTasks(List.of(getTaskInput(taskSearchResults.getList().get(0)))).build();
     Report returned = elizabethMutationExecutor.createReport(FIELDS, rInput);
     assertThat(returned).isNotNull();
@@ -1055,8 +1060,8 @@ public class ReportResourceTest extends AbstractResourceTest {
     returned.setReportText(UtilsTest.getCombinedHtmlTestCase().getInput());
     // u[date JSON of customFields
     returned.setCustomFields(UtilsTest.getCombinedJsonTestCase().getInput());
-    returned.setReportPeople(List.of(personToPrimaryReportPerson(roger), personToReportPerson(nick),
-        personToPrimaryReportAuthor(elizabeth)));
+    returned.setReportPeople(List.of(personToPrimaryReportPerson(roger, true),
+        personToReportPerson(nick, false), personToPrimaryReportAuthor(elizabeth)));
     returned.setTasks(List.of());
     Report updated = elizabethMutationExecutor.updateReport(FIELDS, getReportInput(returned), true);
     assertThat(updated).isNotNull();
@@ -1068,7 +1073,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(returned2.getTasks()).isEmpty();
     final List<ReportPerson> returned2Attendees = returned2.getAttendees();
     assertThat(returned2Attendees).hasSize(3);
-    assertThat(returned2Attendees.stream().map(a -> a.getUuid()).collect(Collectors.toSet()))
+    assertThat(returned2Attendees.stream().map(ReportPerson::getUuid).collect(Collectors.toSet()))
         .contains(roger.getUuid());
     // check that HTML of report text is sanitized after update
     assertThat(returned2.getReportText())
@@ -1095,7 +1100,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     // Bob edits the report (change reportText, remove Person, add a Task)
     returned3.setReportText(rInput.getReportText() + ", edited by Bob!!");
     returned3.setReportPeople(
-        List.of(personToPrimaryReportPerson(nick), personToPrimaryReportAuthor(elizabeth)));
+        List.of(personToPrimaryReportPerson(nick, false), personToPrimaryReportAuthor(elizabeth)));
     returned3
         .setTasks(List.of(taskSearchResults.getList().get(1), taskSearchResults.getList().get(2)));
     updated = getMutationExecutor("bob").updateReport(FIELDS, getReportInput(returned3), true);
@@ -1105,7 +1110,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(returned4.getReportText()).endsWith("Bob!!");
     final List<ReportPerson> returned4Attendees = returned4.getAttendees();
     assertThat(returned4Attendees).hasSize(2);
-    assertThat(returned4Attendees.stream().map(a -> a.getUuid()).collect(Collectors.toSet()))
+    assertThat(returned4Attendees.stream().map(ReportPerson::getUuid).collect(Collectors.toSet()))
         .contains(nick.getUuid());
     assertThat(returned4.getTasks()).hasSize(2);
 
@@ -1135,10 +1140,9 @@ public class ReportResourceTest extends AbstractResourceTest {
     query.setAuthorUuid(jack.getUuid());
     searchResults = jackQueryExecutor.reportList(getListFields(FIELDS), query);
     assertThat(searchResults.getList()).isNotEmpty();
-    assertThat(searchResults.getList().stream().filter(r -> {
-      final List<ReportPerson> authors = r.getAuthors();
-      return authors.stream().filter(p -> p.getUuid().equals(jack.getUuid())).count() > 0;
-    }).count()).isEqualTo(searchResults.getList().size());
+    assertThat(searchResults.getList().stream()
+        .filter(r -> r.getAuthors().stream().anyMatch(p -> p.getUuid().equals(jack.getUuid())))
+        .count()).isEqualTo(searchResults.getList().size());
     final int numResults = searchResults.getList().size();
 
     // Search by Author with Date Filtering
@@ -1190,17 +1194,17 @@ public class ReportResourceTest extends AbstractResourceTest {
     })).hasSameSizeAs(searchResults.getList());
 
     // Search by direct organization
-    OrganizationSearchQueryInput queryOrgs = OrganizationSearchQueryInput.builder().withText("EF 1")
-        .withType(OrganizationType.ADVISOR_ORG).build();
+    OrganizationSearchQueryInput queryOrgs =
+        OrganizationSearchQueryInput.builder().withText("EF 1").build();
     AnetBeanList_Organization orgs =
         jackQueryExecutor.organizationList(getListFields(ORGANIZATION_FIELDS), queryOrgs);
-    assertThat(orgs.getList().size()).isGreaterThan(0);
+    assertThat(orgs.getList().size()).isPositive();
     Organization ef11 =
         orgs.getList().stream().filter(o -> o.getShortName().equals("EF 1.1")).findFirst().get();
     assertThat(ef11.getShortName()).isEqualToIgnoringCase("EF 1.1");
 
-    query = ReportSearchQueryInput.builder().withAdvisorOrgUuid(ef11.getUuid())
-        .withIncludeAdvisorOrgChildren(false).build();
+    query = ReportSearchQueryInput.builder().withOrgUuid(ef11.getUuid())
+        .withOrgRecurseStrategy(RecurseStrategy.NONE).build();
     searchResults = jackQueryExecutor.reportList(getListFields(FIELDS), query);
     assertThat(searchResults.getList()).isNotEmpty();
     assertThat(searchResults.getList().stream().filter(r -> {
@@ -1213,23 +1217,21 @@ public class ReportResourceTest extends AbstractResourceTest {
     })).hasSameSizeAs(searchResults.getList());
 
     // Search by parent organization
-    queryOrgs = OrganizationSearchQueryInput.builder().withText("ef 1")
-        .withType(OrganizationType.ADVISOR_ORG).build();
+    queryOrgs = OrganizationSearchQueryInput.builder().withText("ef 1").build();
     orgs = jackQueryExecutor.organizationList(getListFields(ORGANIZATION_FIELDS), queryOrgs);
-    assertThat(orgs.getList().size()).isGreaterThan(0);
+    assertThat(orgs.getList().size()).isPositive();
     Organization ef1 = orgs.getList().stream()
         .filter(o -> o.getShortName().equalsIgnoreCase("ef 1")).findFirst().get();
     assertThat(ef1.getShortName()).isEqualToIgnoringCase("EF 1");
 
-    query.setAdvisorOrgUuid(ef1.getUuid());
-    query.setIncludeAdvisorOrgChildren(true);
+    query.setOrgUuid(ef1.getUuid());
+    query.setOrgRecurseStrategy(RecurseStrategy.CHILDREN);
     searchResults = jackQueryExecutor.reportList(getListFields(FIELDS), query);
     assertThat(searchResults.getList()).isNotEmpty();
     // #TODO: figure out how to verify the results?
 
-    // Check search for just an org, when we don't know if it's advisor or principal.
+    // Check search for just an org
     query.setOrgUuid(ef11.getUuid());
-    query.setAdvisorOrgUuid(null);
     searchResults = jackQueryExecutor.reportList(getListFields(FIELDS), query);
     assertThat(searchResults.getList()).isNotEmpty();
     assertThat(searchResults.getList().stream().filter(r -> {
@@ -1271,31 +1273,30 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(searchResults.getList()).isNotEmpty();
     assertThat(searchResults.getTotalCount()).isGreaterThan(numCancelled);
 
-    queryOrgs = OrganizationSearchQueryInput.builder().withText("Defense")
-        .withType(OrganizationType.PRINCIPAL_ORG).build();
+    queryOrgs = OrganizationSearchQueryInput.builder().withText("Defense").build();
     orgs = jackQueryExecutor.organizationList(getListFields(ORGANIZATION_FIELDS), queryOrgs);
-    assertThat(orgs.getList().size()).isGreaterThan(0);
+    assertThat(orgs.getList().size()).isPositive();
     Organization mod = orgs.getList().stream().filter(o -> o.getShortName().equalsIgnoreCase("MoD"))
         .findFirst().get();
     assertThat(mod.getShortName()).isEqualToIgnoringCase("MoD");
 
-    // Search by Principal Organization
+    // Search by Interlocutor Organization
     query.setState(null);
-    query.setPrincipalOrgUuid(mod.getUuid());
+    query.setOrgUuid(mod.getUuid());
     searchResults = jackQueryExecutor.reportList(getListFields(FIELDS), query);
     assertThat(searchResults.getList()).isNotEmpty();
     assertThat(searchResults.getList().stream().filter(r -> {
       try {
-        return r.getPrincipalOrg().getUuid().equals(mod.getUuid());
+        return r.getInterlocutorOrg().getUuid().equals(mod.getUuid());
       } catch (Exception e) {
         fail("error", e);
         return false;
       }
     })).hasSameSizeAs(searchResults.getList());
 
-    // Search by Principal Parent Organization
-    query.setPrincipalOrgUuid(mod.getUuid());
-    query.setIncludePrincipalOrgChildren(true);
+    // Search by Interlocutor Parent Organization
+    query.setOrgUuid(mod.getUuid());
+    query.setOrgRecurseStrategy(RecurseStrategy.CHILDREN);
     searchResults = jackQueryExecutor.reportList(getListFields(FIELDS), query);
     assertThat(searchResults.getList()).isNotEmpty();
     // TODO: figure out how to verify the results?
@@ -1314,36 +1315,43 @@ public class ReportResourceTest extends AbstractResourceTest {
         .build(); // get them all
     searchResults = jackQueryExecutor.reportList(getListFields(FIELDS), query);
     assertThat(searchResults.getList().stream()
-        .filter(r -> r.getIntent().contains("Hospital usage of Drugs")).count()).isGreaterThan(0);
+        .filter(r -> r.getIntent().contains("Hospital usage of Drugs")).count()).isPositive();
 
     /// find EF 2.2
-    queryOrgs = OrganizationSearchQueryInput.builder().withText("ef 2.2")
-        .withType(OrganizationType.ADVISOR_ORG).build();
+    queryOrgs = OrganizationSearchQueryInput.builder().withText("ef 2.2").build();
     orgs = jackQueryExecutor.organizationList(getListFields(ORGANIZATION_FIELDS), queryOrgs);
-    assertThat(orgs.getList().size()).isGreaterThan(0);
+    assertThat(orgs.getList().size()).isPositive();
     Organization ef22 = orgs.getList().stream()
         .filter(o -> o.getShortName().equalsIgnoreCase("ef 2.2")).findFirst().get();
     assertThat(ef22.getShortName()).isEqualToIgnoringCase("EF 2.2");
 
-
-    // Search for a report by both principal AND advisor orgs.
-    query = ReportSearchQueryInput.builder().withAdvisorOrgUuid(mod.getUuid())
-        .withPrincipalOrgUuid(ef22.getUuid()).build();
+    // Search for a report by interlocutor org
+    query = ReportSearchQueryInput.builder().withOrgUuid(mod.getUuid()).build();
     searchResults = jackQueryExecutor.reportList(getListFields(FIELDS), query);
     assertThat(searchResults.getList().stream()
-        .filter(r -> r.getAdvisorOrg().getUuid().equals(ef22.getUuid())
-            && r.getPrincipalOrg().getUuid().equals(mod.getUuid()))
-        .count()).isEqualTo(searchResults.getList().size());
+        .filter(r -> r.getInterlocutorOrg().getUuid().equals(mod.getUuid())).count())
+        .isEqualTo(searchResults.getList().size());
 
-    // this might fail if there are any children of ef22 or mod, but there aren't in the base data
-    // set.
-    query.setIncludeAdvisorOrgChildren(true);
-    query.setIncludePrincipalOrgChildren(true);
+    // this might fail if there are any children of mod, but there aren't in the base data set
+    query.setOrgRecurseStrategy(RecurseStrategy.CHILDREN);
     searchResults = jackQueryExecutor.reportList(getListFields(FIELDS), query);
     assertThat(searchResults.getList().stream()
-        .filter(r -> r.getAdvisorOrg().getUuid().equals(ef22.getUuid())
-            && r.getPrincipalOrg().getUuid().equals(mod.getUuid()))
-        .count()).isEqualTo(searchResults.getList().size());
+        .filter(r -> r.getInterlocutorOrg().getUuid().equals(mod.getUuid())).count())
+        .isEqualTo(searchResults.getList().size());
+
+    // Search for a report by advisor org
+    query = ReportSearchQueryInput.builder().withOrgUuid(ef22.getUuid()).build();
+    searchResults = jackQueryExecutor.reportList(getListFields(FIELDS), query);
+    assertThat(searchResults.getList().stream()
+        .filter(r -> r.getAdvisorOrg().getUuid().equals(ef22.getUuid())).count())
+        .isEqualTo(searchResults.getList().size());
+
+    // this might fail if there are any children of ef22, but there aren't in the base data set
+    query.setOrgRecurseStrategy(RecurseStrategy.CHILDREN);
+    searchResults = jackQueryExecutor.reportList(getListFields(FIELDS), query);
+    assertThat(searchResults.getList().stream()
+        .filter(r -> r.getAdvisorOrg().getUuid().equals(ef22.getUuid())).count())
+        .isEqualTo(searchResults.getList().size());
 
     // Search by Atmosphere
     query = ReportSearchQueryInput.builder().withAtmosphere(Atmosphere.NEGATIVE).build();
@@ -1377,7 +1385,7 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     // Search by list of authorization groups
     final List<String> agUuids = Arrays.asList("1", "2", "3"); // FIXME: use real uuid's
-    final Set<String> agUuidSet = new HashSet<String>(agUuids);
+    final Set<String> agUuidSet = new HashSet<>(agUuids);
     query = ReportSearchQueryInput.builder().withAuthorizationGroupUuid(agUuids).build();
     final List<Report> reportList =
         adminQueryExecutor.reportList(getListFields(FIELDS), query).getList();
@@ -1385,8 +1393,8 @@ public class ReportResourceTest extends AbstractResourceTest {
     for (final Report report : reportList) {
       assertThat(report.getAuthorizationGroups()).isNotNull();
       assertThat(report.getAuthorizationGroups()).isNotEmpty();
-      final Set<String> collect = report.getAuthorizationGroups().stream().map(ag -> ag.getUuid())
-          .collect(Collectors.toSet());
+      final Set<String> collect = report.getAuthorizationGroups().stream()
+          .map(AuthorizationGroup::getUuid).collect(Collectors.toSet());
       collect.retainAll(agUuidSet);
       assertThat(collect).isNotEmpty();
     }
@@ -1432,7 +1440,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     query.setUpdatedAtEnd(startDate);
     query.setPageSize(0);
     results = adminQueryExecutor.reportList(getListFields(FIELDS), query);
-    assertThat(results.getList().size()).isEqualTo(0);
+    assertThat(results.getList().size()).isZero();
   }
 
   @Test
@@ -1444,7 +1452,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     // Search by author position
     final AnetBeanList_Report results = adminQueryExecutor.reportList(getListFields(FIELDS), query);
     assertThat(results).isNotNull();
-    assertThat(results.getList().size()).isGreaterThan(0);
+    assertThat(results.getList().size()).isPositive();
   }
 
   @Test
@@ -1456,7 +1464,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     // Search by attendee position
     final AnetBeanList_Report results = adminQueryExecutor.reportList(getListFields(FIELDS), query);
     assertThat(results).isNotNull();
-    assertThat(results.getList().size()).isGreaterThan(0);
+    assertThat(results.getList().size()).isPositive();
   }
 
   @Test
@@ -1469,8 +1477,8 @@ public class ReportResourceTest extends AbstractResourceTest {
     final Person jack = getJackJackson();
     final Person roger = getRogerRogwell();
     final List<ReportPersonInput> reportPeopleInput =
-        getReportPeopleInput(List.of(personToPrimaryReportPerson(roger), personToReportPerson(jack),
-            personToPrimaryReportAuthor(elizabeth)));
+        getReportPeopleInput(List.of(personToPrimaryReportPerson(roger, true),
+            personToReportPerson(jack, false), personToPrimaryReportAuthor(elizabeth)));
 
     // Write a report as that person
     final ReportInput rInput = ReportInput.builder()
@@ -1537,17 +1545,17 @@ public class ReportResourceTest extends AbstractResourceTest {
     final QueryExecutor elizabethQueryExecutor = getQueryExecutor(elizabeth.getDomainUsername());
     final MutationExecutor elizabethMutationExecutor =
         getMutationExecutor(elizabeth.getDomainUsername());
-    final Person steve = getSteveSteveson(); // Principal
+    final Person steve = getSteveSteveson(); // Interlocutor
     final Person bob = getBobBobtown(); // Report Approver
 
     // Liz was supposed to meet with Steve, but he cancelled.
 
-    final ReportInput rInput = ReportInput.builder()
-        .withIntent("Meet with Steve about a thing we never got to talk about")
-        .withEngagementDate(Instant.now()).withDuration(45)
-        .withReportPeople(getReportPeopleInput(
-            List.of(personToPrimaryReportAuthor(elizabeth), personToPrimaryReportPerson(steve))))
-        .withCancelledReason(ReportCancelledReason.CANCELLED_BY_PRINCIPAL).build();
+    final ReportInput rInput =
+        ReportInput.builder().withIntent("Meet with Steve about a thing we never got to talk about")
+            .withEngagementDate(Instant.now()).withDuration(45)
+            .withReportPeople(getReportPeopleInput(List.of(personToPrimaryReportAuthor(elizabeth),
+                personToPrimaryReportPerson(steve, true))))
+            .withCancelledReason(ReportCancelledReason.CANCELLED_BY_INTERLOCUTOR).build();
 
     final Report saved = elizabethMutationExecutor.createReport(FIELDS, rInput);
     assertThat(saved).isNotNull();
@@ -1558,7 +1566,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     final Report returned = elizabethQueryExecutor.report(FIELDS, saved.getUuid());
     assertThat(returned.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
     assertThat(returned.getCancelledReason())
-        .isEqualTo(ReportCancelledReason.CANCELLED_BY_PRINCIPAL);
+        .isEqualTo(ReportCancelledReason.CANCELLED_BY_INTERLOCUTOR);
 
     // Bob gets the approval (EF1 Approvers)
     final ReportSearchQueryInput pendingQuery =
@@ -1593,7 +1601,7 @@ public class ReportResourceTest extends AbstractResourceTest {
         .withNextSteps("Check for a change in the rollup graph")
         .withKeyOutcomes("Foobar the bazbiz")
         .withReportPeople(getReportPeopleInput(
-            List.of(personToPrimaryReportAuthor(admin), personToPrimaryReportPerson(steve))))
+            List.of(personToPrimaryReportAuthor(admin), personToPrimaryReportPerson(steve, true))))
         .build();
     Report r = adminMutationExecutor.createReport(FIELDS, rInput);
     assertThat(r).isNotNull();
@@ -1605,7 +1613,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     Instant endDate =
         Instant.now().atZone(DaoUtils.getServerNativeZoneId()).plusDays(1).toInstant();
     final List<RollupGraph> startGraph =
-        adminQueryExecutor.rollupGraph(ROLLUP_FIELDS, null, endDate, null, null, startDate);
+        adminQueryExecutor.rollupGraph(ROLLUP_FIELDS, endDate, null, null, startDate);
 
     // Submit the report
     try {
@@ -1642,7 +1650,7 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     // Check on the daily rollup graph now.
     final List<RollupGraph> endGraph =
-        adminQueryExecutor.rollupGraph(ROLLUP_FIELDS, null, endDate, null, null, startDate);
+        adminQueryExecutor.rollupGraph(ROLLUP_FIELDS, endDate, null, null, startDate);
 
     final Organization org = admin.getPosition().getOrganization();
     @SuppressWarnings("unchecked")
@@ -1672,9 +1680,8 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     final ReportInput rInput = ReportInput.builder().withIntent("Test the Daily rollup graph")
         .withNextSteps("Check for a change in the rollup graph")
-        .withKeyOutcomes("Foobar the bazbiz")
-        .withReportPeople(getReportPeopleInput(
-            List.of(personToPrimaryReportAuthor(elizabeth), personToPrimaryReportPerson(steve))))
+        .withKeyOutcomes("Foobar the bazbiz").withReportPeople(getReportPeopleInput(List
+            .of(personToPrimaryReportAuthor(elizabeth), personToPrimaryReportPerson(steve, true))))
         .build();
     Report r = elizabethMutationExecutor.createReport(FIELDS, rInput);
     assertThat(r).isNotNull();
@@ -1686,7 +1693,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     final Instant endDate =
         Instant.now().atZone(DaoUtils.getServerNativeZoneId()).plusDays(1).toInstant();
     final List<RollupGraph> startGraph =
-        adminQueryExecutor.rollupGraph(ROLLUP_FIELDS, null, endDate, null, null, startDate);
+        adminQueryExecutor.rollupGraph(ROLLUP_FIELDS, endDate, null, null, startDate);
 
     // Submit the report
     try {
@@ -1723,7 +1730,7 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     // Check on the daily rollup graph now.
     final List<RollupGraph> endGraph =
-        adminQueryExecutor.rollupGraph(ROLLUP_FIELDS, null, endDate, null, null, startDate);
+        adminQueryExecutor.rollupGraph(ROLLUP_FIELDS, endDate, null, null, startDate);
 
     final Organization org = admin.getPosition().getOrganization();
     @SuppressWarnings("unchecked")
@@ -1795,7 +1802,7 @@ public class ReportResourceTest extends AbstractResourceTest {
         PersonSearchQueryInput.builder().withText("erin").build();
     final AnetBeanList_Person erinSearchResults =
         adminQueryExecutor.personList(getListFields(PERSON_FIELDS), erinQuery);
-    assertThat(erinSearchResults.getTotalCount()).isGreaterThan(0);
+    assertThat(erinSearchResults.getTotalCount()).isPositive();
     final Optional<Person> erinResult = erinSearchResults.getList().stream()
         .filter(p -> p.getName().equals("ERINSON, Erin")).findFirst();
     assertThat(erinResult).isNotEmpty();
@@ -1807,7 +1814,7 @@ public class ReportResourceTest extends AbstractResourceTest {
             .withSortOrder(SortOrder.ASC).build();
     final AnetBeanList_Report reportSearchResults =
         getQueryExecutor("erin").reportList(getListFields(FIELDS), reportQuery);
-    assertThat(reportSearchResults.getTotalCount()).isGreaterThan(0);
+    assertThat(reportSearchResults.getTotalCount()).isPositive();
     final Optional<Report> reportResult = reportSearchResults.getList().stream()
         .filter(r -> reportQuery.getText().equals(r.getKeyOutcomes())).findFirst();
     assertThat(reportResult).isNotEmpty();
@@ -1820,14 +1827,14 @@ public class ReportResourceTest extends AbstractResourceTest {
         PersonSearchQueryInput.builder().withText("reina").build();
     final AnetBeanList_Person searchResults =
         adminQueryExecutor.personList(getListFields(PERSON_FIELDS), reinaQuery);
-    assertThat(searchResults.getTotalCount()).isGreaterThan(0);
+    assertThat(searchResults.getTotalCount()).isPositive();
     final Optional<Person> reinaResult = searchResults.getList().stream()
         .filter(p -> p.getName().equals("REINTON, Reina")).findFirst();
     assertThat(reinaResult).isNotEmpty();
 
     final AnetBeanList_Report reportSearchResults2 =
         getQueryExecutor("reina").reportList(getListFields(FIELDS), reportQuery);
-    assertThat(reportSearchResults2.getTotalCount()).isGreaterThan(0);
+    assertThat(reportSearchResults2.getTotalCount()).isPositive();
     final Optional<Report> reportResult2 = reportSearchResults2.getList().stream()
         .filter(r -> reportQuery.getText().equals(r.getKeyOutcomes())).findFirst();
     assertThat(reportResult2).isNotEmpty();
@@ -1840,14 +1847,14 @@ public class ReportResourceTest extends AbstractResourceTest {
         PersonSearchQueryInput.builder().withText("elizabeth").build();
     final AnetBeanList_Person searchResults3 =
         adminQueryExecutor.personList(getListFields(PERSON_FIELDS), elizabethQuery);
-    assertThat(searchResults3.getTotalCount()).isGreaterThan(0);
+    assertThat(searchResults3.getTotalCount()).isPositive();
     final Optional<Person> elizabethResult3 = searchResults3.getList().stream()
         .filter(p -> p.getName().equals("ELIZAWELL, Elizabeth")).findFirst();
     assertThat(elizabethResult3).isNotEmpty();
 
     final AnetBeanList_Report reportSearchResults3 =
         getQueryExecutor("elizabeth").reportList(getListFields(FIELDS), reportQuery);
-    assertThat(reportSearchResults3.getTotalCount()).isGreaterThan(0);
+    assertThat(reportSearchResults3.getTotalCount()).isPositive();
     final Optional<Report> reportResult3 = reportSearchResults3.getList().stream()
         .filter(r -> reportQuery.getText().equals(r.getKeyOutcomes())).findFirst();
     assertThat(reportResult3).isNotEmpty();
@@ -1921,7 +1928,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(reportResults).isNotNull();
 
     final List<Report> reports = reportResults.getList();
-    assertThat(reports.size()).isEqualTo(0);
+    assertThat(reports.size()).isZero();
   }
 
   @Test
@@ -1947,7 +1954,7 @@ public class ReportResourceTest extends AbstractResourceTest {
               "{ uuid name stats { week nrReportsSubmitted nrEngagementsAttended } }", "-1", 3);
       if (isSuperuser) {
         assertThat(advisorReports).isNotNull();
-        assertThat(advisorReports.size()).isGreaterThan(0);
+        assertThat(advisorReports.size()).isPositive();
       } else {
         fail("Expected ForbiddenException");
       }
@@ -2001,9 +2008,10 @@ public class ReportResourceTest extends AbstractResourceTest {
     final Instant engagementDate =
         Instant.now().atZone(DaoUtils.getServerNativeZoneId()).minusWeeks(2).toInstant();
     final ReportInput rInput = ReportInput.builder()
-        .withReportPeople(getReportPeopleInput(List.of(
-            personToPrimaryReportPerson(getSteveSteveson()),
-            personToPrimaryReportPerson(getElizabethElizawell()), personToReportAuthor(author))))
+        .withReportPeople(
+            getReportPeopleInput(List.of(personToPrimaryReportPerson(getSteveSteveson(), true),
+                personToPrimaryReportPerson(getElizabethElizawell(), false),
+                personToReportAuthor(author))))
         .withState(ReportState.DRAFT).withAtmosphere(Atmosphere.POSITIVE)
         .withIntent("Testing the report approval flow")
         .withKeyOutcomes("Report approval flow works")
@@ -2041,30 +2049,30 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(submitted.getWorkflow()).isNotNull();
     final List<ReportAction> t11aActions = submitted.getWorkflow().stream().filter(
         ra -> ra.getStep() != null && t11a.getUuid().equals(ra.getStep().getRelatedObjectUuid()))
-        .collect(Collectors.toList());
+        .toList();
     assertThat(t11aActions.size()).isEqualTo(1);
     final ReportAction t11aAction = t11aActions.get(0);
     final ApprovalStep t11aStep = t11aAction.getStep();
     assertThat(t11aStep).isNotNull();
     final List<Position> t11aApprovers = t11aStep.getApprovers();
-    assertThat(t11aApprovers.size()).isGreaterThan(0);
+    assertThat(t11aApprovers.size()).isPositive();
     assertThat(
         t11aApprovers.stream().anyMatch(a -> andrew.getUuid().equals(a.getPerson().getUuid())))
-        .isEqualTo(true);
+        .isTrue();
 
     // Check that the approval workflow has a step for location Portugal Cove Ferry Terminal
     final List<ReportAction> locActions = submitted.getWorkflow().stream()
         .filter(
             ra -> ra.getStep() != null && loc.getUuid().equals(ra.getStep().getRelatedObjectUuid()))
-        .collect(Collectors.toList());
+        .toList();
     assertThat(locActions.size()).isEqualTo(1);
     final ReportAction locAction = locActions.get(0);
     final ApprovalStep locStep = locAction.getStep();
     assertThat(locStep).isNotNull();
     final List<Position> locApprovers = locStep.getApprovers();
-    assertThat(locApprovers.size()).isGreaterThan(0);
+    assertThat(locApprovers.size()).isPositive();
     assertThat(locApprovers.stream().anyMatch(a -> admin.getUuid().equals(a.getPerson().getUuid())))
-        .isEqualTo(true);
+        .isTrue();
 
     // Have the report approved by the EF 1.1 approver
     numRows = getMutationExecutor("bob").approveReport("", null, submitted.getUuid());
@@ -2195,8 +2203,9 @@ public class ReportResourceTest extends AbstractResourceTest {
     final Instant engagementDate = Instant.now().atZone(DaoUtils.getServerNativeZoneId())
         .minusWeeks(isFuture ? -2 : 2).toInstant();
     final ReportInput rInput = ReportInput.builder()
-        .withReportPeople(getReportPeopleInput(List.of(
-            personToPrimaryReportPerson(getSteveSteveson()), personToPrimaryReportAuthor(author))))
+        .withReportPeople(
+            getReportPeopleInput(List.of(personToPrimaryReportPerson(getSteveSteveson(), true),
+                personToPrimaryReportAuthor(author))))
         .withState(ReportState.DRAFT).withAtmosphere(Atmosphere.POSITIVE)
         .withIntent("Testing unpublishing").withKeyOutcomes("Unpublishing works")
         .withNextSteps("Approve before unpublishing")

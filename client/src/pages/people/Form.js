@@ -31,7 +31,6 @@ import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
 import { Person } from "models"
 import moment from "moment"
-import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useContext, useRef, useState } from "react"
 import {
@@ -42,7 +41,6 @@ import {
   FormGroup,
   FormLabel,
   FormSelect,
-  FormText,
   Row
 } from "react-bootstrap"
 import { useNavigate } from "react-router-dom"
@@ -115,36 +113,6 @@ const PersonForm = ({
       label: "INACTIVE"
     }
   ]
-  const advisorSingular = Settings.fields.advisor.person.name
-  const advisorPlural = pluralize(advisorSingular)
-  const userRoleButtons = [
-    {
-      id: "roleAdvisorButton",
-      title: `Superusers cannot create ${advisorSingular} profiles. ANET uses the domain user name to authenticate and uniquely identify each ANET user. To ensure that ${advisorPlural} have the correct domain name associated with their profile, it is required that each new ${advisorSingular} individually logs into ANET and creates their own ANET profile.`,
-      value: Person.ROLE.ADVISOR,
-      label: Settings.fields.advisor.person.name,
-      disabled: true
-    },
-    {
-      id: "rolePrincipalButton",
-      value: Person.ROLE.PRINCIPAL,
-      label: Settings.fields.principal.person.name
-    }
-  ]
-  const adminRoleButtons = [
-    {
-      id: "roleAdvisorButton",
-      title: null,
-      value: Person.ROLE.ADVISOR,
-      label: Settings.fields.advisor.person.name,
-      disabled: false
-    },
-    {
-      id: "rolePrincipalButton",
-      value: Person.ROLE.PRINCIPAL,
-      label: Settings.fields.principal.person.name
-    }
-  ]
   const genderOptions = [
     {
       label: "Not Specified",
@@ -178,7 +146,6 @@ const PersonForm = ({
       }) => {
         const isSelf = Person.isEqual(currentUser, values)
         const isAdmin = currentUser && currentUser.isAdmin()
-        const isAdvisor = Person.isAdvisor(values)
         const isPendingVerification = Person.isPendingVerification(values)
         const endOfTourDateInPast =
           values.endOfTourDate && values.endOfTourDate <= Date.now()
@@ -197,8 +164,7 @@ const PersonForm = ({
             values.position
           )
         const ranks = Settings.fields.person.ranks || []
-        const roleButtons = isAdmin ? adminRoleButtons : userRoleButtons
-        const countries = getCountries(values.role)
+        const countries = getCountries()
         if (countries.length === 1 && !values.country) {
           // Assign default country if there's only one
           values.country = countries[0]
@@ -512,52 +478,50 @@ const PersonForm = ({
                     </FormGroup>
 
                     {isAdmin && (
-                      <DictionaryField
-                        wrappedComponent={FastField}
-                        dictProps={Settings.fields.person.domainUsername}
-                        name="domainUsername"
-                        component={FieldHelper.InputField}
-                        extraColElem={
-                          <span className="text-danger">
-                            Be careful when changing this field; you might lock
-                            someone out or create duplicate accounts.
-                          </span>
-                        }
-                      />
-                    )}
+                      <>
+                        <DictionaryField
+                          wrappedComponent={FastField}
+                          dictProps={Settings.fields.person.user}
+                          name="user"
+                          component={FieldHelper.RadioButtonToggleGroupField}
+                          buttons={[
+                            {
+                              id: "isUser",
+                              value: true,
+                              label: "Yes"
+                            },
+                            {
+                              id: "isNotUser",
+                              value: false,
+                              label: "No"
+                            }
+                          ]}
+                          onChange={value => setFieldValue("user", value)}
+                        >
+                          {values.user && (
+                            <Alert variant="warning">
+                              Creating a user in ANET could result in duplicate
+                              accounts if this person logs in later. If you
+                              notice duplicate accounts you should take action.
+                            </Alert>
+                          )}
+                        </DictionaryField>
 
-                    {edit ? (
-                      <FastField
-                        name="role"
-                        component={FieldHelper.ReadonlyField}
-                        humanValue={Person.humanNameOfRole(values.role)}
-                      />
-                    ) : (
-                      <FastField
-                        name="role"
-                        component={FieldHelper.RadioButtonToggleGroupField}
-                        buttons={roleButtons}
-                        onChange={value => {
-                          const roleCountries = getCountries(value)
-                          // Reset country value on role change
-                          if (roleCountries.length === 1) {
-                            // Assign default country if there's only one
-                            setFieldValue("country", roleCountries[0])
-                          } else {
-                            setFieldValue("country", "")
-                          }
-                          setFieldValue("role", value)
-                        }}
-                      >
-                        {isAdvisor && (
-                          <Alert variant="warning">
-                            Creating a {Settings.fields.advisor.person.name} in
-                            ANET could result in duplicate accounts if this
-                            person logs in later. If you notice duplicate
-                            accounts, please contact an ANET administrator.
-                          </Alert>
+                        {values.user && (
+                          <DictionaryField
+                            wrappedComponent={FastField}
+                            dictProps={Settings.fields.person.domainUsername}
+                            name="domainUsername"
+                            component={FieldHelper.InputField}
+                            extraColElem={
+                              <span className="text-danger">
+                                Be careful when changing this field; you might
+                                lock someone out or create duplicate accounts.
+                              </span>
+                            }
+                          />
                         )}
-                      </FastField>
+                      </>
                     )}
 
                     {disableStatusChange ? (
@@ -578,25 +542,20 @@ const PersonForm = ({
                         onChange={value => setFieldValue("status", value)}
                       >
                         {willAutoKickPosition && (
-                          <FormText>
-                            <span className="text-danger">
-                              Setting this person to inactive will automatically
-                              remove them from the{" "}
-                              <strong>{values.position.name}</strong> position.
-                            </span>
-                          </FormText>
+                          <Alert variant="warning">
+                            Setting this person to inactive will automatically
+                            remove them from the{" "}
+                            <strong>{values.position.name}</strong> position.
+                          </Alert>
                         )}
                         {warnDomainUsername && (
-                          <FormText>
-                            <span className="text-danger">
-                              Setting this person to inactive means the next
-                              person to logon with the user name{" "}
-                              <strong>{values.domainUsername}</strong> will have
-                              to create a new profile. Do you want the next
-                              person to login with this user name to create a
-                              new profile?
-                            </span>
-                          </FormText>
+                          <Alert variant="warning">
+                            Setting this person to inactive means the next
+                            person to logon with the username{" "}
+                            <strong>{values.domainUsername}</strong> will have
+                            to create a new profile. Do you want the next person
+                            to login with this username to create a new profile?
+                          </Alert>
                         )}
                       </DictionaryField>
                     )}
@@ -693,7 +652,7 @@ const PersonForm = ({
                     <CustomDateInput id="endOfTourDate" canClearSelection />
                   }
                 >
-                  {isAdvisor && endOfTourDateInPast && (
+                  {endOfTourDateInPast && (
                     <Alert variant="warning">
                       Be aware that the end of tour date is in the past.
                     </Alert>
@@ -810,15 +769,8 @@ const PersonForm = ({
     </Formik>
   )
 
-  function getCountries(role) {
-    switch (role) {
-      case Person.ROLE.ADVISOR:
-        return Settings.fields.advisor.person.countries
-      case Person.ROLE.PRINCIPAL:
-        return Settings.fields.principal.person.countries
-      default:
-        return []
-    }
+  function getCountries() {
+    return Settings.fields.regular.person.countries
   }
 
   async function updateAvatar(newAvatarUuid) {

@@ -21,7 +21,6 @@ report(uuid:"${reportUuid}") {
     uuid
     name
     rank
-    role
     avatarUuid
     position {
       uuid
@@ -40,7 +39,6 @@ report(uuid:"${reportUuid}") {
               uuid
               name
               rank
-              role
               avatarUuid
             }
           }
@@ -52,7 +50,6 @@ report(uuid:"${reportUuid}") {
     uuid
     name
     rank
-    role
     avatarUuid
     status
     primary
@@ -78,7 +75,7 @@ report(uuid:"${reportUuid}") {
   primaryAdvisor {
     uuid
   }
-  primaryPrincipal {
+  primaryInterlocutor {
     uuid
   }
   tasks {
@@ -101,23 +98,20 @@ report(uuid:"${reportUuid}") {
       uuid
       name
       rank
-      role
       avatarUuid
     }
   }
-  principalOrg {
+  interlocutorOrg {
     uuid
     shortName
     longName
     identificationCode
-    type
   }
   advisorOrg {
     uuid
     shortName
     longName
     identificationCode
-    type
   }
   workflow {
     type
@@ -132,7 +126,6 @@ report(uuid:"${reportUuid}") {
           uuid
           name
           rank
-          role
           avatarUuid
         }
       }
@@ -141,7 +134,6 @@ report(uuid:"${reportUuid}") {
       uuid
       name
       rank
-      role
       avatarUuid
     }
   }
@@ -173,7 +165,6 @@ report(uuid:"${reportUuid}") {
       uuid
       name
       rank
-      role
       avatarUuid
     }
     noteRelatedObjects {
@@ -195,7 +186,6 @@ report(uuid:"${reportUuid}") {
         ... on Person {
           name
           rank
-          role
           avatarUuid
         }
         ... on Position {

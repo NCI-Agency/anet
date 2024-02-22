@@ -56,8 +56,6 @@ const GQL_MERGE_PERSON = gql`
   }
 `
 
-const NONMATCHING_ROLE_WARNING = "People on each side has different roles."
-
 const MergePeople = ({ pageDispatchers }) => {
   const navigate = useNavigate()
   const [saveError, setSaveError] = useState(null)
@@ -76,17 +74,11 @@ const MergePeople = ({ pageDispatchers }) => {
   const person1 = mergeState[MERGE_SIDES.LEFT]
   const person2 = mergeState[MERGE_SIDES.RIGHT]
   const mergedPerson = mergeState.merged
-  const matchingRoles = person1?.role === person2?.role
 
   return (
     <Container fluid>
       <Row>
-        <Messages
-          error={saveError}
-          warning={
-            person1 && person2 && !matchingRoles ? NONMATCHING_ROLE_WARNING : ""
-          }
-        />
+        <Messages error={saveError} />
         <h4>Merge People Tool</h4>
       </Row>
       <Row>
@@ -96,7 +88,7 @@ const MergePeople = ({ pageDispatchers }) => {
             dispatchMergeActions={dispatchMergeActions}
             align={ALIGN_OPTIONS.LEFT}
             label="Person 1"
-            actionButtons={matchingRoles}
+            actionButtons
           />
         </Col>
         <Col md={4} id="mid-merge-per-col">
@@ -135,10 +127,10 @@ const MergePeople = ({ pageDispatchers }) => {
           {areAllSet(person1, person2, !mergedPerson) && (
             <div style={{ padding: "16px 5%" }}>
               <Callout intent="primary">
-                <br />- Required fields are:{" "}
+                <br />- Required fields are:
                 <ul>
                   <li>Name</li>
-                  <li>Role</li>
+                  <li>{Settings.fields.person.user?.label}</li>
                   <li>Status</li>
                   <li>{Settings.fields.person.rank?.label}</li>
                   {!Settings.fields.person.gender?.exclude &&
@@ -149,8 +141,8 @@ const MergePeople = ({ pageDispatchers }) => {
                     <li>{Settings.fields.person.country?.label}</li>
                   )}
                 </ul>
-                - If the Merged Person will be an {Person.ROLE.ADVISOR}, also
-                required are:
+                If the Merged Person will be an{" "}
+                {Settings.fields.person.user?.label}:
                 <ul>
                   {!Settings.fields.person.emailAddress?.optional && (
                     <li>{Settings.fields.person.emailAddress?.label}</li>
@@ -160,6 +152,7 @@ const MergePeople = ({ pageDispatchers }) => {
                       <li>{Settings.fields.person.endOfTourDate?.label}</li>
                   )}
                 </ul>
+                are also required.
               </Callout>
             </div>
           )}
@@ -180,14 +173,11 @@ const MergePeople = ({ pageDispatchers }) => {
                   />
                 }
                 align={ALIGN_OPTIONS.CENTER}
-                action={
-                  matchingRoles &&
-                  getClearButton(() =>
-                    dispatchMergeActions(
-                      setAMergedField("avatarUuid", null, null)
-                    )
+                action={getClearButton(() =>
+                  dispatchMergeActions(
+                    setAMergedField("avatarUuid", null, null)
                   )
-                }
+                )}
                 fieldName="avatarUuid"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
@@ -203,17 +193,26 @@ const MergePeople = ({ pageDispatchers }) => {
               />
               <DictionaryField
                 wrappedComponent={MergeField}
+                dictProps={Settings.fields.person.user}
+                value={utils.formatBoolean(mergedPerson.user, true)}
+                align={ALIGN_OPTIONS.CENTER}
+                action={getInfoButton(
+                  `${Settings.fields.person.user?.label} is required.`
+                )}
+                fieldName="user"
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
+              <DictionaryField
+                wrappedComponent={MergeField}
                 dictProps={Settings.fields.person.domainUsername}
                 value={mergedPerson.domainUsername}
                 align={ALIGN_OPTIONS.CENTER}
-                action={
-                  matchingRoles &&
-                  getClearButton(() =>
-                    dispatchMergeActions(
-                      setAMergedField("domainUsername", "", null)
-                    )
+                action={getClearButton(() =>
+                  dispatchMergeActions(
+                    setAMergedField("domainUsername", "", null)
                   )
-                }
+                )}
                 fieldName="domainUsername"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
@@ -223,24 +222,12 @@ const MergePeople = ({ pageDispatchers }) => {
                 dictProps={Settings.fields.person.openIdSubject}
                 value={mergedPerson.openIdSubject}
                 align={ALIGN_OPTIONS.CENTER}
-                action={
-                  matchingRoles &&
-                  getClearButton(() =>
-                    dispatchMergeActions(
-                      setAMergedField("openIdSubject", "", null)
-                    )
+                action={getClearButton(() =>
+                  dispatchMergeActions(
+                    setAMergedField("openIdSubject", "", null)
                   )
-                }
+                )}
                 fieldName="openIdSubject"
-                mergeState={mergeState}
-                dispatchMergeActions={dispatchMergeActions}
-              />
-              <MergeField
-                label="Role"
-                value={mergedPerson.role}
-                align={ALIGN_OPTIONS.CENTER}
-                action={getInfoButton("Role is required.")}
-                fieldName="role"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
@@ -251,12 +238,9 @@ const MergePeople = ({ pageDispatchers }) => {
                   <LinkTo modelType="Position" model={mergedPerson.position} />
                 }
                 align={ALIGN_OPTIONS.CENTER}
-                action={
-                  matchingRoles &&
-                  getClearButton(() =>
-                    dispatchMergeActions(setAMergedField("position", {}, null))
-                  )
-                }
+                action={getClearButton(() =>
+                  dispatchMergeActions(setAMergedField("position", {}, null))
+                )}
                 fieldName="position"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
@@ -279,9 +263,8 @@ const MergePeople = ({ pageDispatchers }) => {
                       currentlyOccupyingEntity={mergedPerson.position}
                       parentEntityUuid1={person1.uuid}
                       parentEntityUuid2={person2.uuid}
-                      showEditButton={matchingRoles}
+                      showEditButton
                       historyEntityType="position"
-                      parentEntityType="person"
                       midColTitle="Merged Person History"
                       mainTitle="Pick and Choose positions and dates for Positions History"
                       setHistory={history =>
@@ -292,14 +275,11 @@ const MergePeople = ({ pageDispatchers }) => {
                   </>
                 }
                 align={ALIGN_OPTIONS.CENTER}
-                action={
-                  matchingRoles &&
-                  getClearButton(() =>
-                    dispatchMergeActions(
-                      setAMergedField("previousPositions", [], null)
-                    )
+                action={getClearButton(() =>
+                  dispatchMergeActions(
+                    setAMergedField("previousPositions", [], null)
                   )
-                }
+                )}
                 fieldName="previousPositions"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
@@ -309,23 +289,20 @@ const MergePeople = ({ pageDispatchers }) => {
                 dictProps={Settings.fields.person.status}
                 value={mergedPerson.status}
                 align={ALIGN_OPTIONS.CENTER}
-                action={
-                  matchingRoles &&
-                  getActivationButton(
-                    mergedPerson.status === Person.STATUS.ACTIVE,
-                    () =>
-                      dispatchMergeActions(
-                        setAMergedField(
-                          "status",
-                          mergedPerson.status === Person.STATUS.ACTIVE
-                            ? Person.STATUS.INACTIVE
-                            : Person.STATUS.ACTIVE,
-                          null
-                        )
-                      ),
-                    Person.getInstanceName
-                  )
-                }
+                action={getActivationButton(
+                  mergedPerson.status === Person.STATUS.ACTIVE,
+                  () =>
+                    dispatchMergeActions(
+                      setAMergedField(
+                        "status",
+                        mergedPerson.status === Person.STATUS.ACTIVE
+                          ? Person.STATUS.INACTIVE
+                          : Person.STATUS.ACTIVE,
+                        null
+                      )
+                    ),
+                  Person.getInstanceName
+                )}
                 fieldName="status"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
@@ -336,17 +313,16 @@ const MergePeople = ({ pageDispatchers }) => {
                 value={mergedPerson.emailAddress}
                 align={ALIGN_OPTIONS.CENTER}
                 action={
-                  mergedPerson.role === Person.ROLE.ADVISOR &&
-                  !Settings.fields.person.emailAddress?.optional
+                  !Settings.fields.person.emailAddress?.optional &&
+                  mergedPerson.user
                     ? getInfoButton(
                       `${Settings.fields.person.emailAddress?.label} is required.`
                     )
-                    : matchingRoles &&
-                      getClearButton(() =>
-                        dispatchMergeActions(
-                          setAMergedField("emailAddress", "", null)
-                        )
+                    : getClearButton(() =>
+                      dispatchMergeActions(
+                        setAMergedField("emailAddress", "", null)
                       )
+                    )
                 }
                 fieldName="emailAddress"
                 mergeState={mergeState}
@@ -357,14 +333,9 @@ const MergePeople = ({ pageDispatchers }) => {
                 dictProps={Settings.fields.person.phoneNumber}
                 value={mergedPerson.phoneNumber}
                 align={ALIGN_OPTIONS.CENTER}
-                action={
-                  matchingRoles &&
-                  getClearButton(() =>
-                    dispatchMergeActions(
-                      setAMergedField("phoneNumber", "", null)
-                    )
-                  )
-                }
+                action={getClearButton(() =>
+                  dispatchMergeActions(setAMergedField("phoneNumber", "", null))
+                )}
                 fieldName="phoneNumber"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
@@ -426,12 +397,9 @@ const MergePeople = ({ pageDispatchers }) => {
                 dictProps={Settings.fields.person.code}
                 value={mergedPerson.code}
                 align={ALIGN_OPTIONS.CENTER}
-                action={
-                  matchingRoles &&
-                  getClearButton(() =>
-                    dispatchMergeActions(setAMergedField("code", "", null))
-                  )
-                }
+                action={getClearButton(() =>
+                  dispatchMergeActions(setAMergedField("code", "", null))
+                )}
                 fieldName="code"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
@@ -444,17 +412,16 @@ const MergePeople = ({ pageDispatchers }) => {
                 )}
                 align={ALIGN_OPTIONS.CENTER}
                 action={
-                  mergedPerson.role === Person.ROLE.ADVISOR &&
-                  !Settings.fields.person.endOfTourDate?.optional
+                  !Settings.fields.person.endOfTourDate?.optional &&
+                  mergedPerson.user
                     ? getInfoButton(
                       `${Settings.fields.person.endOfTourDate?.label} is required`
                     )
-                    : matchingRoles &&
-                      getClearButton(() =>
-                        dispatchMergeActions(
-                          setAMergedField("endOfTourDate", null, null)
-                        )
+                    : getClearButton(() =>
+                      dispatchMergeActions(
+                        setAMergedField("endOfTourDate", null, null)
                       )
+                    )
                 }
                 fieldName="endOfTourDate"
                 mergeState={mergeState}
@@ -467,12 +434,9 @@ const MergePeople = ({ pageDispatchers }) => {
                   <RichTextEditor readOnly value={mergedPerson.biography} />
                 }
                 align={ALIGN_OPTIONS.CENTER}
-                action={
-                  matchingRoles &&
-                  getClearButton(() =>
-                    dispatchMergeActions(setAMergedField("biography", "", null))
-                  )
-                }
+                action={getClearButton(() =>
+                  dispatchMergeActions(setAMergedField("biography", "", null))
+                )}
                 fieldName="biography"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
@@ -488,18 +452,15 @@ const MergePeople = ({ pageDispatchers }) => {
                         label={fieldConfig.label || fieldName}
                         value={JSON.stringify(fieldValue)}
                         align={ALIGN_OPTIONS.CENTER}
-                        action={
-                          matchingRoles &&
-                          getClearButton(() =>
-                            dispatchMergeActions(
-                              setAMergedField(
-                                `${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`,
-                                CUSTOM_FIELD_TYPE_DEFAULTS[fieldConfig.type],
-                                null
-                              )
+                        action={getClearButton(() =>
+                          dispatchMergeActions(
+                            setAMergedField(
+                              `${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`,
+                              CUSTOM_FIELD_TYPE_DEFAULTS[fieldConfig.type],
+                              null
                             )
                           )
-                        }
+                        )}
                         fieldName={`${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`}
                         mergeState={mergeState}
                         dispatchMergeActions={dispatchMergeActions}
@@ -516,7 +477,7 @@ const MergePeople = ({ pageDispatchers }) => {
             dispatchMergeActions={dispatchMergeActions}
             align={ALIGN_OPTIONS.RIGHT}
             label="Person 2"
-            actionButtons={matchingRoles}
+            actionButtons
           />
         </Col>
       </Row>
@@ -688,6 +649,28 @@ const PersonColumn = ({
           />
           <DictionaryField
             wrappedComponent={MergeField}
+            dictProps={Settings.fields.person.user}
+            fieldName="user"
+            value={utils.formatBoolean(person.user)}
+            align={align}
+            action={
+              actionButtons &&
+              getActionButton(
+                () => {
+                  dispatchMergeActions(
+                    setAMergedField("user", person.user, align)
+                  )
+                },
+                align,
+                mergeState,
+                "domainUsername"
+              )
+            }
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
+          />
+          <DictionaryField
+            wrappedComponent={MergeField}
             dictProps={Settings.fields.person.domainUsername}
             fieldName="domainUsername"
             value={person.domainUsername}
@@ -733,27 +716,6 @@ const PersonColumn = ({
                 align,
                 mergeState,
                 "openIdSubject"
-              )
-            }
-            mergeState={mergeState}
-            dispatchMergeActions={dispatchMergeActions}
-          />
-          <MergeField
-            label="Role"
-            fieldName="role"
-            value={person.role}
-            align={align}
-            action={
-              actionButtons &&
-              getActionButton(
-                () => {
-                  dispatchMergeActions(
-                    setAMergedField("role", person.role, align)
-                  )
-                },
-                align,
-                mergeState,
-                "role"
               )
             }
             mergeState={mergeState}

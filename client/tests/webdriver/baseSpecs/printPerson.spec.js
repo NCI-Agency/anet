@@ -16,10 +16,6 @@ const SOME_FIELDS = {
     id: "phoneNumber",
     fieldLabel: "Phone"
   },
-  domainUsername: {
-    id: "domainUsername",
-    fieldLabel: "Domain username"
-  },
   gender: {
     id: "gender",
     fieldLabel: "Gender"
@@ -36,7 +32,6 @@ const PRESET_DEFAULT_LABELS = [
   "Phone",
   "Nationality",
   "Date of birth",
-  "Domain username",
   "Position on the political spectrum",
   "Rank",
   "Biography"
@@ -47,7 +42,6 @@ const PRESET_WITHOUT_SENSITIVE_LABELS = [
   "Previous Positions",
   "Phone",
   "Nationality",
-  "Domain username",
   "Rank",
   "Biography"
 ]

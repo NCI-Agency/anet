@@ -47,7 +47,6 @@ const GQL_GET_POSITION_LIST = gql`
           uuid
           name
           rank
-          role
           avatarUuid
         }
         associatedPositions {
@@ -71,7 +70,6 @@ const GQL_GET_POSITION_LIST = gql`
             uuid
             name
             rank
-            role
             avatarUuid
             ${GRAPHQL_NOTIFICATIONS_NOTE_FIELDS}
           }
@@ -134,7 +132,7 @@ const PendingAssessmentsByPosition = ({
   return (
     <div>
       <Fieldset id="pending" title="Positions with pending assessments">
-        <AdvisorList
+        <PositionList
           positions={positions}
           pageSize={pageSize}
           pageNum={curPage}
@@ -152,7 +150,7 @@ PendingAssessmentsByPosition.propTypes = {
   style: PropTypes.object
 }
 
-const AdvisorList = ({
+const PositionList = ({
   positions,
   pageSize,
   pageNum,
@@ -182,7 +180,7 @@ const AdvisorList = ({
                 {Settings.fields.advisor.person.name}
               </th>
               <th colSpan="3" style={borderStyle}>
-                {Settings.fields.principal.person.name} to assess
+                {Settings.fields.regular.person.name} to assess
               </th>
               <th colSpan="1">{Settings.fields.task.shortLabel} to assess</th>
             </tr>
@@ -223,7 +221,7 @@ const AdvisorList = ({
                     )}
                   </td>
                   <td colSpan="3" style={borderStyle}>
-                    <PrincipalList
+                    <InterlocutorList
                       positions={
                         notifications.counterpartsWithPendingAssessments
                       }
@@ -244,7 +242,7 @@ const AdvisorList = ({
   )
 }
 
-AdvisorList.propTypes = {
+PositionList.propTypes = {
   positions: PropTypes.array.isRequired,
   totalCount: PropTypes.number,
   pageNum: PropTypes.number,
@@ -252,9 +250,9 @@ AdvisorList.propTypes = {
   goToPage: PropTypes.func
 }
 
-const PrincipalList = ({ positions }) => {
+const InterlocutorList = ({ positions }) => {
   if (_isEmpty(positions)) {
-    return <em>No {Settings.fields.principal.person.name} to assess</em>
+    return <em>No {Settings.fields.regular.person.name} to assess</em>
   }
   return (
     <Table responsive style={{ background: "transparent" }}>
@@ -286,7 +284,7 @@ const PrincipalList = ({ positions }) => {
   )
 }
 
-PrincipalList.propTypes = {
+InterlocutorList.propTypes = {
   positions: PropTypes.array.isRequired
 }
 

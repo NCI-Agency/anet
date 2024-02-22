@@ -26,13 +26,13 @@ describe("In my counterparts page", () => {
       ).click()
       await (
         await AssessmentsSection.getAssessmentsSection(
-          "principalQuarterly",
+          "interlocutorQuarterly",
           "quarterly"
         )
       ).waitForDisplayed()
       const newAssessmentButton =
         await AssessmentsSection.getNewAssessmentButton(
-          "principalQuarterly",
+          "interlocutorQuarterly",
           "quarterly"
         )
       await newAssessmentButton.waitForDisplayed()
@@ -92,13 +92,13 @@ describe("In my counterparts page", () => {
       ).click()
       await (
         await AssessmentsSection.getAssessmentsSection(
-          "principalQuarterly",
+          "interlocutorQuarterly",
           "quarterly"
         )
       ).waitForDisplayed()
       const newAssessmentButton =
         await AssessmentsSection.getNewAssessmentButton(
-          "principalQuarterly",
+          "interlocutorQuarterly",
           "quarterly"
         )
       await newAssessmentButton.waitForDisplayed()
@@ -301,7 +301,7 @@ describe("In new report page", () => {
     })
     it("Should be able to add instant assessments for attendees", async() => {
       const report = {
-        principals: [
+        interlocutors: [
           "Maj ROGWELL, Roger",
           "LtCol STEVESON, Steve",
           "CIV HUNTMAN, Hunter"

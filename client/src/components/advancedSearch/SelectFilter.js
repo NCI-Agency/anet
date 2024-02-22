@@ -1,16 +1,9 @@
 import useSearchFilter from "components/advancedSearch/hooks"
-import { Position } from "models"
 import PropTypes from "prop-types"
 import React from "react"
 import { Form } from "react-bootstrap"
 import { deserializeSearchFilter } from "searchUtils"
 import utils from "utils"
-
-const advisorSearchPositionTypes = [
-  Position.TYPE.ADVISOR,
-  Position.TYPE.SUPERUSER,
-  Position.TYPE.ADMINISTRATOR
-]
 
 const SelectFilter = ({
   asFormField,
@@ -24,14 +17,7 @@ const SelectFilter = ({
   const defaultValue = {
     value: inputValue.value || options[0] || ""
   }
-  const toQuery = val => {
-    // Searching for advisors implies searching for superusers and admins as well
-    const valueForQuery =
-      isPositionTypeFilter && val.value === Position.TYPE.ADVISOR
-        ? advisorSearchPositionTypes
-        : val.value
-    return { [queryKey]: valueForQuery }
-  }
+  const toQuery = val => ({ [queryKey]: val.value })
   const [value, setValue] = useSearchFilter(
     asFormField,
     onChange,

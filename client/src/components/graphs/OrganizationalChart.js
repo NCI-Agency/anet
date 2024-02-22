@@ -28,7 +28,6 @@ const GQL_GET_CHART_DATA = gql`
       shortName
       longName
       identificationCode
-      type
       positions {
         name
         uuid
@@ -40,7 +39,6 @@ const GQL_GET_CHART_DATA = gql`
           uuid
           name
           rank
-          role
           avatarUuid
         }
       }
@@ -52,7 +50,6 @@ const GQL_GET_CHART_DATA = gql`
         shortName
         longName
         identificationCode
-        type
         childrenOrgs(query: { status: ACTIVE }) {
           uuid
         }
@@ -70,7 +67,6 @@ const GQL_GET_CHART_DATA = gql`
             uuid
             name
             rank
-            role
             avatarUuid
           }
         }
@@ -99,6 +95,36 @@ const sortPositions = (positions, truncateLimit) => {
   )
 
   return allResults.slice(0, truncateLimit)
+}
+
+const determineUnitCode = positions =>
+  Settings.fields.person.ranks.find(
+    element => element.value === positions?.[0]?.person?.rank
+  )?.app6Modifier
+
+const determineAffiliation = positions => {
+  let affiliation = "U"
+  for (const position of positions) {
+    const person = position?.person
+    if (person) {
+      if (person.user) {
+        // has at least one user, return early
+        return "F"
+      }
+      // has at least one filled position
+      affiliation = "N"
+    }
+  }
+  return affiliation
+}
+
+const determineSymbol = positions => {
+  const sortedPositions = sortPositions(positions)
+  const unitCode = determineUnitCode(sortedPositions)
+  const affiliation = determineAffiliation(sortedPositions)
+  return new ms.Symbol(`S${affiliation}GPU------${unitCode || "-"}`, {
+    size: 22
+  })
 }
 
 // TODO: enable once innerhtml in svg is polyfilled
@@ -282,18 +308,7 @@ const OrganizationalChart = ({
       .append("g")
       .on("click", (event, d) => navigate(Organization.pathFor(d.data)))
       .each(function(d) {
-        const positions = sortPositions(d.data.positions)
-        const unitcode = Settings.fields.person.ranks.find(
-          element => element.value === positions?.[0]?.person?.rank
-        )?.app6Modifier
-
-        const sym = new ms.Symbol(
-          `S${
-            d.data.type === Organization.TYPE.ADVISOR_ORG ? "F" : "N"
-          }GPU------${unitcode || "-"}`,
-          { size: 22 }
-        )
-        this.appendChild(sym.asDOM())
+        return this.appendChild(determineSymbol(d.data.positions).asDOM())
       })
 
     iconNodeG

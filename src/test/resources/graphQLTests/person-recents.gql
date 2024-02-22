@@ -3,7 +3,6 @@ personList(query: {status: ACTIVE, inMyReports: true, sortBy: RECENT, sortOrder:
     uuid
     name
     rank
-    role
     avatarUuid
     status
     endOfTourDate

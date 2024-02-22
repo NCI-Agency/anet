@@ -29,7 +29,6 @@ const GQL_GET_POSITION = gql`
         uuid
         name
         rank
-        role
         avatarUuid
       }
       associatedPositions {
@@ -40,7 +39,6 @@ const GQL_GET_POSITION = gql`
           uuid
           name
           rank
-          role
           avatarUuid
         }
         organization {
@@ -57,7 +55,6 @@ const GQL_GET_POSITION = gql`
           uuid
           name
           rank
-          role
           avatarUuid
         }
       }
@@ -85,11 +82,7 @@ const PositionPreview = ({ className, uuid }) => {
   }
 
   const position = new Position(data.position ? data.position : {})
-
-  const isPrincipal = position.type === Position.TYPE.PRINCIPAL
-  const assignedRole = isPrincipal
-    ? Settings.fields.advisor.person.name
-    : Settings.fields.principal.person.name
+  const assignedRole = Settings.fields.regular.person.name
 
   return (
     <div className={`${className} preview-content-scroll`}>

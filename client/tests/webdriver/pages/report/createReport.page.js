@@ -69,19 +69,25 @@ class CreateReport extends cr.CreateReport {
 
   async getPersonByName(name) {
     const personRow = await browser.$$(
-      `//div[@id="reportPeopleContainer"]//tr[td[@class="reportPeopleName" and .//a[text()="${name}"]]]/td[@class="conflictButton" or @class="reportPeopleName"]`
+      `//div[@id="reportPeopleContainer"]//tr[td[@class="reportPeopleName" and .//a[text()="${name}"]]]/td[@class="primary-attendee" or @class="conflictButton" or @class="reportPeopleName"]`
     )
     await (
       await personRow[0].$("div.bp4-spinner")
     ).waitForExist({ reverse: true })
 
     return {
-      name: await personRow[1].getText(),
-      conflictButton: await personRow[0].$("./span")
+      name: await personRow[2].getText(),
+      conflictButton: await personRow[1].$("./span"),
+      advisorCheckbox: await personRow[0].$(
+        "input[name='reportInterlocutorADVISOR']"
+      ),
+      interlocutorCheckbox: await personRow[0].$(
+        "input[name='reportInterlocutorINTERLOCUTOR']"
+      )
     }
   }
 
-  async selectAttendeeByName(name) {
+  async selectAttendeeByName(name, interlocutor) {
     await (await this.getReportPeople()).click()
     // wait for reportPeople table loader to disappear
     await (await this.getReportPeopleTable()).waitForDisplayed()
@@ -105,6 +111,10 @@ class CreateReport extends cr.CreateReport {
     await (
       await this.getReportPeopleTable()
     ).waitForExist({ reverse: true, timeout: 3000 })
+    if (!interlocutor) {
+      const { interlocutorCheckbox } = await this.getPersonByName(name)
+      await interlocutorCheckbox.click()
+    }
   }
 
   async getTasks() {
@@ -198,13 +208,13 @@ class CreateReport extends cr.CreateReport {
 
     if (Array.isArray(fields.advisors) && fields.advisors.length) {
       for (const at of fields.advisors) {
-        await this.selectAttendeeByName(at)
+        await this.selectAttendeeByName(at, false)
       }
     }
 
-    if (Array.isArray(fields.principals) && fields.principals.length) {
-      for (const at of fields.principals) {
-        await this.selectAttendeeByName(at)
+    if (Array.isArray(fields.interlocutors) && fields.interlocutors.length) {
+      for (const at of fields.interlocutors) {
+        await this.selectAttendeeByName(at, true)
       }
     }
 

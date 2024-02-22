@@ -36,7 +36,7 @@ const PERSON_SINGLE_SELECT_PARAMETERS = {
   },
   objectType: Person,
   fields:
-    "uuid name rank role avatarUuid position { uuid name type organization {uuid} } previousPositions { startTime endTime position { uuid }}",
+    "uuid name rank avatarUuid position { uuid name type organization {uuid} } previousPositions { startTime endTime position { uuid }}",
   addon: PEOPLE_ICON
 }
 
@@ -55,7 +55,7 @@ const POSITION_SINGLE_SELECT_PARAMETERS = {
   },
   objectType: Position,
   fields:
-    "uuid name code type organization { uuid shortName longName identificationCode} person { uuid name rank role avatarUuid } previousPeople { startTime endTime person {uuid} }",
+    "uuid name code type organization { uuid shortName longName identificationCode} person { uuid name rank avatarUuid } previousPeople { startTime endTime person {uuid} }",
   addon: POSITIONS_ICON
 }
 
@@ -67,7 +67,6 @@ function EditHistory({
   initialHistory,
   setHistory,
   historyEntityType,
-  parentEntityType,
   parentEntityUuid1,
   parentEntityUuid2,
   historyComp: HistoryComp,
@@ -84,10 +83,7 @@ function EditHistory({
   }, [initialHistory, history1])
   const [finalHistory, setFinalHistory] = useState(getInitialState)
 
-  const singleSelectParameters = getSingleSelectParameters(
-    historyEntityType,
-    parentEntityType
-  )
+  const singleSelectParameters = getSingleSelectParameters(historyEntityType)
 
   // Update finalHistory every time the modal is opened to check if the history is changed by changing the current entity.
   useEffect(() => {
@@ -416,7 +412,6 @@ EditHistory.propTypes = {
   initialHistory: PropTypes.array,
   setHistory: PropTypes.func.isRequired,
   historyEntityType: PropTypes.string,
-  parentEntityType: PropTypes.string.isRequired,
   parentEntityUuid1: PropTypes.string.isRequired,
   parentEntityUuid2: PropTypes.string,
   historyComp: PropTypes.func,
@@ -434,7 +429,6 @@ EditHistory.defaultProps = {
   history2: null,
   initialHistory: null,
   historyEntityType: "person",
-  parentEntityType: "position",
   currentlyOccupyingEntity: null,
   mainTitle: "Pick and Choose History Items"
 }
@@ -639,15 +633,11 @@ function giveEachItemUuid(history) {
   })
 }
 
-function getSingleSelectParameters(historyEntityType, parentEntityType) {
+function getSingleSelectParameters(historyEntityType) {
   if (historyEntityType === "person") {
     const personSearchQuery = {
       status: Model.STATUS.ACTIVE,
-      pendingVerification: false,
-      role:
-        parentEntityType === Position.TYPE.PRINCIPAL
-          ? Person.ROLE.PRINCIPAL
-          : Person.ROLE.ADVISOR
+      pendingVerification: false
     }
 
     const personFilters = {
@@ -659,18 +649,10 @@ function getSingleSelectParameters(historyEntityType, parentEntityType) {
     return { ...PERSON_SINGLE_SELECT_PARAMETERS, filterDefs: personFilters }
   } else if (historyEntityType === "position") {
     const positionsFilters = {
-      allAdvisorPositions: {
+      allPositions: {
         label: "All",
         queryVars: {
-          status: Position.STATUS.ACTIVE,
-          type:
-            parentEntityType === Person.ROLE.PRINCIPAL
-              ? Position.TYPE.PRINCIPAL
-              : [
-                Position.TYPE.ADVISOR,
-                Position.TYPE.SUPERUSER,
-                Position.TYPE.ADMINISTRATOR
-              ]
+          status: Position.STATUS.ACTIVE
         }
       }
     }

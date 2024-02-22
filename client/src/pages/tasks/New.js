@@ -24,7 +24,6 @@ const GQL_GET_ORGANIZATION = gql`
       shortName
       longName
       identificationCode
-      type
     }
   }
 `

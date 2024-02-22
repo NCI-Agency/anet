@@ -22,7 +22,7 @@ const GQL_GET_REPORT_LIST = gql`
           uuid
           name
         }
-        principalOrg {
+        interlocutorOrg {
           uuid
           shortName
           longName

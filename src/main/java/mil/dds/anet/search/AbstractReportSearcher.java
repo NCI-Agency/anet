@@ -12,11 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Location;
-import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.EngagementStatus;
 import mil.dds.anet.beans.Report.ReportCancelledReason;
@@ -43,7 +40,7 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
   private static final Map<String, String> FIELD_MAPPING = ImmutableMap.<String, String>builder()
       .put("reportText", "text").put("location", "locationUuid")
       .put("approvalStep", "approvalStepUuid").put("advisorOrg", "advisorOrganizationUuid")
-      .put("principalOrg", "principalOrganizationUuid").build();
+      .put("interlocutorOrg", "interlocutorOrganizationUuid").build();
 
   public AbstractReportSearcher(AbstractSearchQueryBuilder<Report, ReportSearchQuery> qb) {
     super(qb);
@@ -186,20 +183,7 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
     }
 
     if (query.getOrgUuid() != null) {
-      if (query.getAdvisorOrgUuid() != null || query.getPrincipalOrgUuid() != null) {
-        throw new WebApplicationException(
-            "Cannot combine orgUuid with principalOrgUuid or advisorOrgUuid parameters",
-            Status.BAD_REQUEST);
-      }
       addOrgUuidQuery(query);
-    }
-
-    if (query.getAdvisorOrgUuid() != null) {
-      addAdvisorOrgUuidQuery(query);
-    }
-
-    if (query.getPrincipalOrgUuid() != null) {
-      addPrincipalOrgUuidQuery(query);
     }
 
     if (query.getLocationUuid() != null) {
@@ -354,45 +338,13 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
     if (RecurseStrategy.CHILDREN.equals(query.getOrgRecurseStrategy())
         || RecurseStrategy.PARENTS.equals(query.getOrgRecurseStrategy())) {
       qb.addRecursiveClause(outerQb, "reports",
-          new String[] {"\"advisorOrganizationUuid\"", "\"principalOrganizationUuid\""},
+          new String[] {"\"advisorOrganizationUuid\"", "\"interlocutorOrganizationUuid\""},
           "parent_orgs", "organizations", "\"parentOrgUuid\"", "orgUuid", query.getOrgUuid(),
           RecurseStrategy.CHILDREN.equals(query.getOrgRecurseStrategy()));
     } else {
       qb.addWhereClause(
-          "(reports.\"advisorOrganizationUuid\" = :orgUuid OR reports.\"principalOrganizationUuid\" = :orgUuid)");
+          "(reports.\"advisorOrganizationUuid\" = :orgUuid OR reports.\"interlocutorOrganizationUuid\" = :orgUuid)");
       qb.addSqlArg("orgUuid", query.getOrgUuid());
-    }
-  }
-
-  protected abstract void addAdvisorOrgUuidQuery(ReportSearchQuery query);
-
-  protected void addAdvisorOrgUuidQuery(
-      AbstractSearchQueryBuilder<Report, ReportSearchQuery> outerQb, ReportSearchQuery query) {
-    if (Organization.DUMMY_ORG_UUID.equals(query.getAdvisorOrgUuid())) {
-      qb.addWhereClause("reports.\"advisorOrganizationUuid\" IS NULL");
-    } else if (!query.getIncludeAdvisorOrgChildren()) {
-      qb.addStringEqualsClause("advisorOrganizationUuid", "reports.\"advisorOrganizationUuid\"",
-          query.getAdvisorOrgUuid());
-    } else {
-      qb.addRecursiveClause(outerQb, "reports", "\"advisorOrganizationUuid\"",
-          "advisor_parent_orgs", "organizations", "\"parentOrgUuid\"", "advisorOrganizationUuid",
-          query.getAdvisorOrgUuid(), true);
-    }
-  }
-
-  protected abstract void addPrincipalOrgUuidQuery(ReportSearchQuery query);
-
-  protected void addPrincipalOrgUuidQuery(
-      AbstractSearchQueryBuilder<Report, ReportSearchQuery> outerQb, ReportSearchQuery query) {
-    if (Organization.DUMMY_ORG_UUID.equals(query.getPrincipalOrgUuid())) {
-      qb.addWhereClause("reports.\"principalOrganizationUuid\" IS NULL");
-    } else if (!query.getIncludePrincipalOrgChildren()) {
-      qb.addStringEqualsClause("principalOrganizationUuid", "reports.\"principalOrganizationUuid\"",
-          query.getPrincipalOrgUuid());
-    } else {
-      qb.addRecursiveClause(outerQb, "reports", "\"principalOrganizationUuid\"",
-          "principal_parent_orgs", "organizations", "\"parentOrgUuid\"",
-          "principalOrganizationUuid", query.getPrincipalOrgUuid(), true);
     }
   }
 

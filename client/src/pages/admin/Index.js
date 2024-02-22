@@ -74,8 +74,8 @@ const RECENT_ACTIVITIES = gql`
       uuid
       name
       rank
-      role
       avatarUuid
+      user
       domainUsername
     }
     activity {
@@ -106,11 +106,10 @@ const SPECIAL_FIELDS = {
         overlayColumns={["Name"]}
         overlayRenderRow={OrganizationOverlayRow}
         filterDefs={{
-          allAdvisorOrganizations: {
-            label: "All advisor organizations",
+          allOrganizations: {
+            label: "All organizations",
             queryVars: {
-              status: Model.STATUS.ACTIVE,
-              type: Organization.TYPE.ADVISOR_ORG
+              status: Model.STATUS.ACTIVE
             }
           }
         }}

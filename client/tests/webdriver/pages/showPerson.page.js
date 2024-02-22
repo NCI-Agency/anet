@@ -141,9 +141,10 @@ class ShowPerson extends Page {
   }
 
   async waitForCompactField(reverse, ...fields) {
+    const compactView = await this.getCompactView()
     for (const field of fields) {
       await (
-        await (await this.getCompactView()).$(`//th[text()="${field}"]`)
+        await compactView.$(`//th[text()="${field}"]`)
       ).waitForDisplayed({ reverse })
     }
   }

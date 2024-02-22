@@ -459,7 +459,7 @@ const CancelledEngagementReports = ({
 
   function getAdditionalReportParams() {
     return focusedSelection.focusedIsOrg
-      ? { advisorOrgUuid: focusedSelection.focusedSelection.advisorOrg.uuid }
+      ? { orgUuid: focusedSelection.focusedSelection.advisorOrg.uuid }
       : { cancelledReason: focusedSelection.focusedSelection.cancelledReason }
   }
 }

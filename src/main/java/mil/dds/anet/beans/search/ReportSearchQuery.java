@@ -53,30 +53,12 @@ public class ReportSearchQuery extends SubscribableObjectSearchQuery<ReportSearc
   @GraphQLQuery
   @GraphQLInputField
   Atmosphere atmosphere;
-
-  // Can use either orgUuid or one or both of advisorOrgUuid and principalOrgUuid
-  // only use orgUuid if you don't know the type of the organization.
-  @GraphQLQuery
-  @GraphQLInputField
-  String advisorOrgUuid;
-  @GraphQLQuery
-  @GraphQLInputField
-  Boolean includeAdvisorOrgChildren;
-  // Set principalOrgUuid or advisorOrgUuid = Organization.DUMMY_ORG_UUID to tell ANET to search for
-  // reports specifically with a NULL organizationUuid.
-  @GraphQLQuery
-  @GraphQLInputField
-  String principalOrgUuid;
-  @GraphQLQuery
-  @GraphQLInputField
-  Boolean includePrincipalOrgChildren;
   @GraphQLQuery
   @GraphQLInputField
   String orgUuid;
   @GraphQLQuery
   @GraphQLInputField
   private RecurseStrategy orgRecurseStrategy;
-
   @GraphQLQuery
   @GraphQLInputField
   String locationUuid;
@@ -223,38 +205,6 @@ public class ReportSearchQuery extends SubscribableObjectSearchQuery<ReportSearc
     this.atmosphere = atmosphere;
   }
 
-  public String getAdvisorOrgUuid() {
-    return advisorOrgUuid;
-  }
-
-  public void setAdvisorOrgUuid(String advisorOrgUuid) {
-    this.advisorOrgUuid = advisorOrgUuid;
-  }
-
-  public boolean getIncludeAdvisorOrgChildren() {
-    return Boolean.TRUE.equals(includeAdvisorOrgChildren);
-  }
-
-  public void setIncludeAdvisorOrgChildren(Boolean includeAdvisorOrgChildren) {
-    this.includeAdvisorOrgChildren = includeAdvisorOrgChildren;
-  }
-
-  public String getPrincipalOrgUuid() {
-    return principalOrgUuid;
-  }
-
-  public void setPrincipalOrgUuid(String principalOrgUuid) {
-    this.principalOrgUuid = principalOrgUuid;
-  }
-
-  public boolean getIncludePrincipalOrgChildren() {
-    return Boolean.TRUE.equals(includePrincipalOrgChildren);
-  }
-
-  public void setIncludePrincipalOrgChildren(Boolean includePrincipalOrgChildren) {
-    this.includePrincipalOrgChildren = includePrincipalOrgChildren;
-  }
-
   public String getOrgUuid() {
     return orgUuid;
   }
@@ -372,7 +322,6 @@ public class ReportSearchQuery extends SubscribableObjectSearchQuery<ReportSearc
     return Objects.hash(super.hashCode(), authorUuid, engagementDateStart, engagementDateEnd,
         engagementDayOfWeek, includeEngagementDayOfWeek, createdAtStart, createdAtEnd,
         updatedAtStart, updatedAtEnd, releasedAtStart, releasedAtEnd, attendeeUuid, atmosphere,
-        advisorOrgUuid, includeAdvisorOrgChildren, principalOrgUuid, includePrincipalOrgChildren,
         orgUuid, orgRecurseStrategy, locationUuid, taskUuid, pendingApprovalOf, state,
         includeAllDrafts, engagementStatus, cancelledReason, authorPositionUuid,
         attendeePositionUuid, authorizationGroupUuid, sensitiveInfo, systemSearch);
@@ -397,10 +346,6 @@ public class ReportSearchQuery extends SubscribableObjectSearchQuery<ReportSearc
         && Objects.equals(getReleasedAtEnd(), other.getReleasedAtEnd())
         && Objects.equals(getAttendeeUuid(), other.getAttendeeUuid())
         && Objects.equals(getAtmosphere(), other.getAtmosphere())
-        && Objects.equals(getAdvisorOrgUuid(), other.getAdvisorOrgUuid())
-        && Objects.equals(getIncludeAdvisorOrgChildren(), other.getIncludeAdvisorOrgChildren())
-        && Objects.equals(getPrincipalOrgUuid(), other.getPrincipalOrgUuid())
-        && Objects.equals(getIncludePrincipalOrgChildren(), other.getIncludePrincipalOrgChildren())
         && Objects.equals(getOrgUuid(), other.getOrgUuid())
         && Objects.equals(getOrgRecurseStrategy(), other.getOrgRecurseStrategy())
         && Objects.equals(getLocationUuid(), other.getLocationUuid())

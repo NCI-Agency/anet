@@ -49,13 +49,14 @@ const GQL_GET_PERSON = gql`
       uuid
       name
       rank
-      role
       avatarUuid
       status
       pendingVerification
       emailAddress
       phoneNumber
+      user
       domainUsername
+      openIdSubject
       biography
       country
       gender
@@ -81,7 +82,6 @@ const GQL_GET_PERSON = gql`
             uuid
             name
             rank
-            role
             avatarUuid
           }
           organization {
@@ -390,6 +390,7 @@ const CompactPersonView = ({ pageDispatchers }) => {
     // map fields that have specific human value
     const humanValuesExceptions = {
       biography: <RichTextEditor readOnly value={person.biography} />,
+      user: utils.formatBoolean(person.user),
       emailAddress: emailHumanValue,
       endOfTourDate:
         person.endOfTourDate &&
@@ -398,7 +399,6 @@ const CompactPersonView = ({ pageDispatchers }) => {
         ),
       position: getPositionHumanValue(),
       prevPositions: getPrevPositionsHumanValue(),
-      role: Person.humanNameOfRole(person.role),
       status: Person.humanNameOfStatus(person.status)
     }
     return person.getNormalFieldsOrdered().reduce((accum, key) => {

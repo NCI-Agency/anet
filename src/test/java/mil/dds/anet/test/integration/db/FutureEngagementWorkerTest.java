@@ -94,12 +94,12 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
   }
 
   @Test
-  public void testNoReports() {
+  void testNoReports() {
     testFutureEngagementWorker(0);
   }
 
   @Test
-  public void reportsOK() {
+  void reportsOK() {
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final Report report = createTestReport("reportsOK_1", true, true, true);
     engine.getReportDao().update(report);
@@ -121,7 +121,7 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
   }
 
   @Test
-  public void testReportDueInFuture() {
+  void testReportDueInFuture() {
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final Report report = createTestReport("testReportDueInFuture_1", true, true, true);
     report.setEngagementDate(Instant.now().plus(Duration.ofDays(2L)));
@@ -133,7 +133,7 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
   }
 
   @Test
-  public void testReportDueEndToday() {
+  void testReportDueEndToday() {
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final Report report = createTestReport("testReportDueEndToday_1", true, true, true);
     report.setEngagementDate(Instant.now());
@@ -148,17 +148,16 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
   }
 
   @Test
-  public void testGH3304()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void testGH3304() throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     // Create a draft report
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final ReportDao reportDao = engine.getReportDao();
     final Person author = getRegularUserBean();
     final MutationExecutor authorMutationExecutor = getMutationExecutor(author.getDomainUsername());
     final ReportPerson advisor = personToPrimaryReportAuthor(author);
-    final ReportPerson principal = personToPrimaryReportPerson(getSteveStevesonBean());
+    final ReportPerson interlocutor = personToPrimaryReportPerson(getSteveStevesonBean(), true);
     final Report draftReport = reportDao.insert(TestBeans.getTestReport("testGH3304",
-        getFutureDate(), null, Lists.newArrayList(advisor, principal)));
+        getFutureDate(), null, Lists.newArrayList(advisor, interlocutor)));
 
     // Submit the report
     authorMutationExecutor.submitReport("", draftReport.getUuid());
@@ -196,7 +195,7 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
   }
 
   @Test
-  public void testReportApprovalStates() {
+  void testReportApprovalStates() {
     checkApprovalStepType(ApprovalStepType.PLANNING_APPROVAL, true, "1");
     checkApprovalStepType(ApprovalStepType.REPORT_APPROVAL, false, "2");
   }
@@ -226,7 +225,7 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
   }
 
   @Test
-  public void testReportStates() {
+  void testReportStates() {
     checkReportState(ReportState.APPROVED, true, "APPROVED");
     checkReportState(ReportState.CANCELLED, false, "CANCELLED");
     checkReportState(ReportState.DRAFT, false, "DRAFT");
@@ -258,7 +257,7 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
   }
 
   @Test
-  public void testApprovalStepReport() {
+  void testApprovalStepReport() {
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final Report report = createTestReport("testApprovalStepReport_1", true, true, true);
 
@@ -281,7 +280,7 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
   }
 
   @Test
-  public void testPlanningApprovalStepReport() {
+  void testPlanningApprovalStepReport() {
     final Report report = createTestReport("testPlanningApprovalStepReport_1", true, false, true);
 
     expectedIds.add("testPlanningApprovalStepReport_1");
@@ -293,7 +292,7 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
   }
 
   @Test
-  public void testAutomaticallyApprovedReport() {
+  void testAutomaticallyApprovedReport() {
     // Report in automatic approve step (no planning workflow)
     final Report report = createTestReport("testAutomaticallyApprovedReport_1", false, true, true);
 
@@ -306,7 +305,7 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
   }
 
   @Test
-  public void testPublishedReport() {
+  void testPublishedReport() {
     final Report report = createPublishedTestReport("testPublishedReport_1");
     expectedIds.add("testPublishedReport_1");
     testFutureEngagementWorker(1);
@@ -330,7 +329,7 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final int emailSize = engine.getEmailDao().getAll().size();
     futureEngagementWorker.run();
-    assertThat(engine.getEmailDao().getAll().size()).isEqualTo(emailSize + expectedCount);
+    assertThat(engine.getEmailDao().getAll()).hasSize(emailSize + expectedCount);
   }
 
   // Email integration
@@ -341,7 +340,7 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
     emailWorker.run();
 
     final List<EmailResponse> emails = emailServer.requestAllEmailsFromServer();
-    assertThat(emails.size()).isEqualTo(expectedIds.size());
+    assertThat(emails).hasSameSizeAs(expectedIds);
     emails.forEach(e -> assertThat(expectedIds).contains(e.to.text.split("@")[0]));
     emails.forEach(e -> assertThat(unexpectedIds).doesNotContain(e.to.text.split("@")[0]));
   }
@@ -404,7 +403,7 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
     final int emailSize = emailDao.getAll().size();
     reportDao.publish(report, null);
     // Should have sent email for publication
-    assertThat(emailDao.getAll().size()).isEqualTo(emailSize + 1);
+    assertThat(emailDao.getAll()).hasSize(emailSize + 1);
     expectedIds.add(toAddressId);
 
     setPastDate(report);

@@ -116,25 +116,24 @@ const AssignPositionModal = ({ person, showModal, onCancel, onSuccess }) => {
               position will be converted from{" "}
               <b>{Position.convertType(position.type)}</b> to{" "}
               <b>{Position.convertType(person.position.type)}</b>.
-              {person.position.type !== Position.TYPE.ADVISOR && (
+              {person.position.type !== Position.TYPE.REGULAR && (
                 <>
                   {" "}
                   Furthermore, permissions of the
                   <b>{person.position.name}</b> position will be converted from{" "}
                   <b>{Position.convertType(person.position.type)}</b> to{" "}
-                  <b>{Settings.fields.advisor.position.type}</b>.
+                  <b>{Settings.fields.regular.position.type}</b>.
                 </>
               )}
             </>
           ) : (
-            person.position.type !== Position.TYPE.ADVISOR &&
-            person.position.type !== Position.TYPE.PRINCIPAL && (
+            person.position.type !== Position.TYPE.REGULAR && (
               <>
                 {" "}
                 Permissions of the <b>{person.position.name}</b> position will
                 be converted from{" "}
                 <b>{Position.convertType(person.position.type)}</b> to{" "}
-                <b>{Settings.fields.advisor.position.type}</b>.
+                <b>{Settings.fields.regular.position.type}</b>.
               </>
             )
           )}
@@ -146,15 +145,14 @@ const AssignPositionModal = ({ person, showModal, onCancel, onSuccess }) => {
       position.name !== person.position.name &&
       _isEmpty(position.person) &&
       !_isEmpty(person.position) &&
-      person.position.type !== Position.TYPE.ADVISOR &&
-      person.position.type !== Position.TYPE.PRINCIPAL
+      person.position.type !== Position.TYPE.REGULAR
     ) {
       const errorMessage = (
         <>
           Permissions of the <b>{person.position.name}</b> position will be
           converted from <b>{Position.convertType(person.position.type)}</b> to{" "}
-          <b>{Settings.fields.advisor.position.type}</b>
-          {person.position.type !== Position.TYPE.ADVISOR ? (
+          <b>{Settings.fields.regular.position.type}</b>
+          {person.position.type !== Position.TYPE.REGULAR ? (
             <>
               {" "}
               and permissions of the <b>{position.name}</b> position will be
@@ -167,8 +165,7 @@ const AssignPositionModal = ({ person, showModal, onCancel, onSuccess }) => {
       )
       newError = { message: errorMessage }
     } else if (
-      !Position.isAdvisor(latestPersonProp.current.position) &&
-      !Position.isPrincipal(latestPersonProp.current.position) &&
+      !Position.isRegular(latestPersonProp.current.position) &&
       !_isEmpty(person.position) &&
       (removeUser || !position)
     ) {
@@ -177,7 +174,7 @@ const AssignPositionModal = ({ person, showModal, onCancel, onSuccess }) => {
           If you save, permissions of the <b>{person.position.name}</b> position
           will be converted from{" "}
           <b>{Position.convertType(person.position.type)}</b> to{" "}
-          <b>{Settings.fields.advisor.position.type}</b>.
+          <b>{Settings.fields.regular.position.type}</b>.
         </>
       )
       newError = { message: errorMessage }
@@ -187,21 +184,17 @@ const AssignPositionModal = ({ person, showModal, onCancel, onSuccess }) => {
 
   const newPosition = position ? new Position(position) : new Position()
 
-  const positionSearchQuery = { status: Model.STATUS.ACTIVE }
-  if (person.role === Person.ROLE.ADVISOR) {
-    positionSearchQuery.type = [Position.TYPE.ADVISOR]
-    if (currentUser.isAdmin()) {
-      // only admins can put people in admin billets.
-      positionSearchQuery.type.push(Position.TYPE.ADMINISTRATOR)
-      positionSearchQuery.type.push(Position.TYPE.SUPERUSER)
-    } else if (currentUser.isSuperuser()) {
-      // Only superusers can put people in superuser billets
-      positionSearchQuery.type.push(Position.TYPE.SUPERUSER)
-    }
-  } else if (person.role === Person.ROLE.PRINCIPAL) {
-    positionSearchQuery.type = [Position.TYPE.PRINCIPAL]
+  const positionSearchQuery = {
+    status: Model.STATUS.ACTIVE,
+    type: [Position.TYPE.REGULAR]
   }
-  if (currentUser.isSuperuser() && !currentUser.isAdmin()) {
+  if (currentUser.isAdmin()) {
+    // only admins can put people in admin billets.
+    positionSearchQuery.type.push(Position.TYPE.ADMINISTRATOR)
+    positionSearchQuery.type.push(Position.TYPE.SUPERUSER)
+  } else if (currentUser.isSuperuser()) {
+    // Only superusers can put people in superuser billets
+    positionSearchQuery.type.push(Position.TYPE.SUPERUSER)
     // Superusers are limited to their organizations
     const administratingOrgUuids =
       currentUser.position.organizationsAdministrated.map(org => org.uuid)
@@ -209,7 +202,7 @@ const AssignPositionModal = ({ person, showModal, onCancel, onSuccess }) => {
     positionSearchQuery.orgRecurseStrategy = RECURSE_STRATEGY.CHILDREN
   }
   const positionsFilters = {
-    allAdvisorPositions: {
+    allPositions: {
       label: "All",
       queryVars: positionSearchQuery
     }
@@ -231,10 +224,7 @@ const AssignPositionModal = ({ person, showModal, onCancel, onSuccess }) => {
                 <Button
                   variant="danger"
                   onClick={() => {
-                    if (
-                      Position.isAdvisor(latestPersonProp.current.position) ||
-                      Position.isPrincipal(latestPersonProp.current.position)
-                    ) {
+                    if (Position.isRegular(latestPersonProp.current.position)) {
                       setPosition(null)
                       setDoSave(true)
                     } else {
@@ -279,7 +269,7 @@ const AssignPositionModal = ({ person, showModal, onCancel, onSuccess }) => {
                     onChange={value => setPosition(value)}
                     objectType={Position}
                     valueKey="name"
-                    fields="uuid name code type organization { uuid shortName longName identificationCode} person { uuid name rank role avatarUuid }"
+                    fields="uuid name code type organization { uuid shortName longName identificationCode} person { uuid name rank avatarUuid }"
                     addon={POSITIONS_ICON}
                     vertical
                   />

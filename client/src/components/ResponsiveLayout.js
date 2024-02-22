@@ -125,8 +125,7 @@ ResponsiveLayout.propTypes = {
     useNavigation: PropTypes.bool
   }).isRequired,
   sidebarData: PropTypes.shape({
-    advisorOrganizations: PropTypes.array,
-    principalOrganizations: PropTypes.array
+    allOrganizations: PropTypes.array
   }),
   children: PropTypes.node
 }

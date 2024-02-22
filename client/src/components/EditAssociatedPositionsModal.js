@@ -76,31 +76,19 @@ const EditAssociatedPositionsModal = ({
 }) => {
   const { currentUser } = useContext(AppContext)
   const [error, setError] = useState(null)
-  const assignedRole =
-    position.type === Position.TYPE.PRINCIPAL
-      ? Settings.fields.advisor.person.name
-      : Settings.fields.principal.person.name
+  const assignedRole = Settings.fields.regular.person.name
   const positionSearchQuery = {
     status: Model.STATUS.ACTIVE,
     matchPersonName: true
   }
-  if (position.type === Position.TYPE.PRINCIPAL) {
-    positionSearchQuery.type = [
-      Position.TYPE.ADVISOR,
-      Position.TYPE.SUPERUSER,
-      Position.TYPE.ADMINISTRATOR
-    ]
-    if (currentUser.isAdmin() === false) {
-      // Superusers can only assign a position in their organization!
-      positionSearchQuery.organizationUuid =
-        currentUser.position.organization.uuid
-      positionSearchQuery.orgRecurseStrategy = RECURSE_STRATEGY.CHILDREN
-    }
-  } else {
-    positionSearchQuery.type = [Position.TYPE.PRINCIPAL]
+  if (currentUser.isAdmin() === false) {
+    // Superusers can only assign a position in their organization!
+    positionSearchQuery.organizationUuid =
+      currentUser.position.organization.uuid
+    positionSearchQuery.orgRecurseStrategy = RECURSE_STRATEGY.CHILDREN
   }
   const positionsFilters = {
-    allAdvisorPositions: {
+    allPositions: {
       label: "All",
       queryVars: positionSearchQuery
     }
@@ -144,7 +132,7 @@ const EditAssociatedPositionsModal = ({
                           overlayRenderRow={PositionOverlayRow}
                           filterDefs={positionsFilters}
                           objectType={Position}
-                          fields="uuid, name, code, type, person { uuid, name, rank, role, avatarUuid }, organization { uuid, shortName, longName, identificationCode }"
+                          fields="uuid name code type person { uuid name rank avatarUuid } organization { uuid shortName longName identificationCode }"
                           addon={POSITIONS_ICON}
                         />
                       }

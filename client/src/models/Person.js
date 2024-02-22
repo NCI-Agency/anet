@@ -6,16 +6,11 @@ import Model, {
   yupDate
 } from "components/Model"
 import _isEmpty from "lodash/isEmpty"
-import AFG_ICON from "resources/afg_small.png"
 import PEOPLE_ICON from "resources/people.png"
-import RS_ICON from "resources/rs_small.png"
 import Settings from "settings"
 import utils from "utils"
 import * as yup from "yup"
 import Position from "./Position"
-
-export const advisorPerson = Settings.fields.advisor.person
-export const principalPerson = Settings.fields.principal.person
 
 export default class Person extends Model {
   static resourceName = "Person"
@@ -23,21 +18,11 @@ export default class Person extends Model {
   static getInstanceName = "person"
   static relatedObjectType = "people"
 
-  static ROLE = {
-    ADVISOR: "ADVISOR",
-    PRINCIPAL: "PRINCIPAL"
-  }
-
   static nameDelimiter = ","
 
-  static advisorAssessmentDictionaryPath = "fields.advisor.person.assessments"
-  static principalAssessmentDictionaryPath =
-    "fields.principal.person.assessments"
+  static assessmentDictionaryPath = "fields.regular.person.assessments"
 
-  static advisorAssessmentConfig = Settings.fields.advisor.person.assessments
-
-  static principalAssessmentConfig =
-    Settings.fields.principal.person.assessments
+  static assessmentConfig = Settings.fields.regular.person.assessments
 
   static customFields = Settings.fields.person.customFields
 
@@ -51,8 +36,8 @@ export default class Person extends Model {
     SENSITIVE_CUSTOM_FIELDS_PARENT
   )
 
-  static principalShowPageOrderedFields = Person.initShowPageFieldsOrdered(true)
-  static advisorShowPageOrderedFields = Person.initShowPageFieldsOrdered(false)
+  static advisorShowPageOrderedFields = Person.initShowPageFieldsOrdered(true)
+  static regularShowPageOrderedFields = Person.initShowPageFieldsOrdered(false)
 
   static yupSchema = yup
     .object()
@@ -63,12 +48,12 @@ export default class Person extends Model {
       firstName: yup
         .string()
         .nullable()
-        .when("role", ([role], schema) =>
-          Person.isAdvisor({ role })
-            ? schema.required(
+        .when("user", ([user], schema) =>
+          !user
+            ? schema
+            : schema.required(
               `You must provide the ${Settings.fields.person.firstName?.label}`
             )
-            : schema.nullable()
         )
         .default("")
         .label(Settings.fields.person.firstName?.label),
@@ -82,6 +67,10 @@ export default class Person extends Model {
         )
         .default("")
         .label(Settings.fields.person.lastName?.label),
+      user: yup
+        .boolean()
+        .default(false)
+        .label(Settings.fields.person.user?.label),
       domainUsername: yup
         .string()
         .nullable()
@@ -91,22 +80,17 @@ export default class Person extends Model {
         .string()
         .nullable()
         .email()
-        .when("role", ([role], schema) =>
-          Settings.fields.person.emailAddress?.optional
-            ? schema
-            : schema.test(
-              "emailAddress",
-              "emailAddress error",
-              (emailAddress, testContext) => {
-                const r = utils.handleEmailValidation(
-                  emailAddress,
-                  role === Person.ROLE.ADVISOR
-                )
-                return r.isValid
-                  ? true
-                  : testContext.createError({ message: r.message })
-              }
-            )
+        .when("user", ([user], schema) =>
+          schema.test(
+            "emailAddress",
+            "emailAddress error",
+            (emailAddress, testContext) => {
+              const r = utils.handleEmailValidation(emailAddress, user)
+              return Settings.fields.person.emailAddress?.optional || r.isValid
+                ? true
+                : testContext.createError({ message: r.message })
+            }
+          )
         )
         .default("")
         .label(Settings.fields.person.emailAddress?.label),
@@ -153,11 +137,11 @@ export default class Person extends Model {
       endOfTourDate: yupDate
         .nullable()
         .when(
-          ["role", "pendingVerification"],
-          ([role, pendingVerification], schema) =>
+          ["user", "pendingVerification"],
+          ([user, pendingVerification], schema) =>
             Settings.fields.person.endOfTourDate?.exclude ||
             Settings.fields.person.endOfTourDate?.optional ||
-            Person.isPrincipal({ role }) ||
+            !user ||
             !Person.isPendingVerification({ pendingVerification })
               ? schema
               : schema.test(
@@ -171,10 +155,6 @@ export default class Person extends Model {
       biography: yup.string().nullable().default(""),
       position: yup.object().nullable().default({}),
       pendingVerification: yup.boolean().default(false),
-      role: yup
-        .string()
-        .nullable()
-        .default(() => Person.ROLE.PRINCIPAL),
       status: yup
         .string()
         .nullable()
@@ -186,18 +166,18 @@ export default class Person extends Model {
     .concat(Model.yupSchema)
 
   static autocompleteQuery =
-    "uuid name rank role status endOfTourDate avatarUuid position { uuid name type role code status organization { uuid shortName longName identificationCode } location { uuid name } }"
+    "uuid name rank status user endOfTourDate avatarUuid position { uuid name type role code status organization { uuid shortName longName identificationCode } location { uuid name } }"
 
   static allFieldsQuery = `
     uuid
     name
     rank
-    role
     avatarUuid
     status
     pendingVerification
     emailAddress
     phoneNumber
+    user
     domainUsername
     openIdSubject
     biography
@@ -225,7 +205,6 @@ export default class Person extends Model {
           uuid
           name
           rank
-          role
           avatarUuid
         }
         organization {
@@ -261,22 +240,8 @@ export default class Person extends Model {
     super(Model.fillObject(props, Person.yupSchema))
   }
 
-  static humanNameOfRole(role) {
-    if (role === Person.ROLE.ADVISOR) {
-      return Settings.fields.advisor.person.name
-    }
-    if (role === Person.ROLE.PRINCIPAL) {
-      return principalPerson.name
-    }
-    throw new Error(`Unrecognized role: ${role}`)
-  }
-
   static humanNameOfStatus(status) {
     return utils.sentenceCase(status)
-  }
-
-  humanNameOfRole() {
-    return Person.humanNameOfRole(this.role)
   }
 
   humanNameOfStatus() {
@@ -289,22 +254,6 @@ export default class Person extends Model {
 
   isPendingVerification() {
     return Person.isPendingVerification(this)
-  }
-
-  static isAdvisor(person) {
-    return person.role === Person.ROLE.ADVISOR
-  }
-
-  isAdvisor() {
-    return Person.isAdvisor(this)
-  }
-
-  static isPrincipal(person) {
-    return person.role === Person.ROLE.PRINCIPAL
-  }
-
-  isPrincipal() {
-    return Person.isPrincipal(this)
   }
 
   isAdmin() {
@@ -363,13 +312,7 @@ export default class Person extends Model {
   }
 
   iconUrl() {
-    if (this.isAdvisor()) {
-      return RS_ICON
-    } else if (this.isPrincipal()) {
-      return AFG_ICON
-    } else {
-      return PEOPLE_ICON
-    }
+    return PEOPLE_ICON
   }
 
   toString() {
@@ -425,15 +368,14 @@ export default class Person extends Model {
   }
 
   getNumberOfFieldsInLeftColumn() {
-    return this.isPrincipal()
-      ? Settings.fields.principal.person.numberOfFieldsInLeftColumn
-      : Settings.fields.advisor.person.numberOfFieldsInLeftColumn
+    return Settings.fields[this.user ? "advisor" : "regular"].person
+      .numberOfFieldsInLeftColumn
   }
 
   getShowPageFieldsOrdered() {
-    return this.isPrincipal()
-      ? Person.principalShowPageOrderedFields
-      : Person.advisorShowPageOrderedFields
+    return this.user
+      ? Person.advisorShowPageOrderedFields
+      : Person.regularShowPageOrderedFields
   }
 
   /**
@@ -441,24 +383,19 @@ export default class Person extends Model {
    */
   getFullWidthFields() {
     return (
-      (this.isPrincipal()
-        ? Settings.fields.principal.person.showAsFullWidthFields
-        : Settings.fields.advisor.person.showAsFullWidthFields) || []
+      Settings.fields[this.user ? "advisor" : "regular"].person
+        .showAsFullWidthFields || []
     )
   }
 
-  static initShowPageFieldsOrdered(isPrincipal) {
-    const fieldsArrayFromConfig = isPrincipal
-      ? Settings.fields.principal.person.showPageOrderedFields
-      : Settings.fields.advisor.person.showPageOrderedFields
+  static initShowPageFieldsOrdered(user) {
+    const fieldsArrayFromConfig =
+      Settings.fields[user ? "advisor" : "regular"].person.showPageOrderedFields
 
-    return Person.filterInvalidShowPageFields(
-      fieldsArrayFromConfig || [],
-      isPrincipal
-    )
+    return Person.filterInvalidShowPageFields(fieldsArrayFromConfig || [], user)
   }
 
-  static filterInvalidShowPageFields(fieldsArrayFromConfig, isPrincipal) {
+  static filterInvalidShowPageFields(fieldsArrayFromConfig, user) {
     return fieldsArrayFromConfig.filter(field => {
       if (
         Settings.fields.person[field] ||
@@ -472,7 +409,7 @@ export default class Person extends Model {
         "Person.js",
         366,
         `Wrong field name in dictionary.fields.${
-          isPrincipal ? "principal" : "advisor"
+          user ? "advisor" : "regular"
         }.showPageOrderedFields, field name: ${field}`
       )
       return false
@@ -518,19 +455,11 @@ export default class Person extends Model {
   }
 
   getAssessmentDictionaryPath() {
-    return this.isAdvisor()
-      ? Person.advisorAssessmentDictionaryPath
-      : Person.principalAssessmentDictionaryPath
+    return Person.assessmentDictionaryPath
   }
 
   getAssessmentsConfig() {
-    let config
-    if (this.isAdvisor()) {
-      config = Person.advisorAssessmentConfig
-    } else if (this.isPrincipal()) {
-      config = Person.principalAssessmentConfig
-    }
-    return config || {}
+    return Person.assessmentConfig || {}
   }
 
   static FILTERED_CLIENT_SIDE_FIELDS = [

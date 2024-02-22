@@ -88,7 +88,7 @@ public abstract class AbstractResourceTest {
   private static BatchingUtils batchingUtils;
 
   private static final String PERSON_FIELDS =
-      "{ uuid name domainUsername openIdSubject role emailAddress rank status phoneNumber biography"
+      "{ uuid name domainUsername openIdSubject user emailAddress rank status phoneNumber biography"
           + " pendingVerification createdAt updatedAt position { uuid name type status"
           + " organization { uuid shortName parentOrg { uuid shortName } } } }";
 
@@ -210,7 +210,7 @@ public abstract class AbstractResourceTest {
     return findOrPutPersonInDb(Person.builder().withDomainUsername("yoshie").build());
   }
 
-  // Principals in the test database
+  // Interlocutors in the test database
   public static Person getChristopfTopferness() {
     return findOrPutPersonInDb(Person.builder().withName("TOPFERNESS, Christopf").build());
   }
@@ -371,14 +371,14 @@ public abstract class AbstractResourceTest {
   }
 
   // Conversions from Person to ReportPerson
-  public static ReportPerson personToPrimaryReportPerson(Person p) {
-    final ReportPerson rp = personToReportPerson(p);
+  public static ReportPerson personToPrimaryReportPerson(Person p, boolean interlocutor) {
+    final ReportPerson rp = personToReportPerson(p, interlocutor);
     rp.setPrimary(true);
     return rp;
   }
 
   public static ReportPerson personToReportAuthor(Person p) {
-    final ReportPerson rp = personToReportPerson(p);
+    final ReportPerson rp = personToReportPerson(p, false);
     rp.setAuthor(true);
     return rp;
   }
@@ -389,23 +389,23 @@ public abstract class AbstractResourceTest {
     return rp;
   }
 
-  public static ReportPerson personToReportPerson(Person p) {
-    final ReportPerson rp =
-        ReportPerson.builder().withPrimary(false).withAuthor(false).withAttendee(true).build();
+  public static ReportPerson personToReportPerson(Person p, boolean interlocutor) {
+    final ReportPerson rp = ReportPerson.builder().withPrimary(false).withAuthor(false)
+        .withAttendee(true).withInterlocutor(interlocutor).build();
     BeanUtils.copyProperties(p, rp);
     return rp;
   }
 
   // The above for regular beans
   public static mil.dds.anet.beans.ReportPerson personToPrimaryReportPerson(
-      mil.dds.anet.beans.Person p) {
-    final mil.dds.anet.beans.ReportPerson rp = personToReportPerson(p);
+      mil.dds.anet.beans.Person p, boolean interlocutor) {
+    final mil.dds.anet.beans.ReportPerson rp = personToReportPerson(p, interlocutor);
     rp.setPrimary(true);
     return rp;
   }
 
   public static mil.dds.anet.beans.ReportPerson personToReportAuthor(mil.dds.anet.beans.Person p) {
-    final mil.dds.anet.beans.ReportPerson rp = personToReportPerson(p);
+    final mil.dds.anet.beans.ReportPerson rp = personToReportPerson(p, false);
     rp.setAuthor(true);
     return rp;
   }
@@ -417,11 +417,13 @@ public abstract class AbstractResourceTest {
     return rp;
   }
 
-  public static mil.dds.anet.beans.ReportPerson personToReportPerson(mil.dds.anet.beans.Person p) {
+  public static mil.dds.anet.beans.ReportPerson personToReportPerson(mil.dds.anet.beans.Person p,
+      boolean interlocutor) {
     final mil.dds.anet.beans.ReportPerson rp = new mil.dds.anet.beans.ReportPerson();
     rp.setPrimary(false);
     rp.setAuthor(false);
     rp.setAttendee(true);
+    rp.setInterlocutor(interlocutor);
     BeanUtils.copyProperties(p, rp);
     return rp;
   }

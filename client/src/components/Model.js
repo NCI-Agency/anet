@@ -38,7 +38,6 @@ export const GRAPHQL_NOTE_FIELDS = /* GraphQL */ `
     uuid
     name
     rank
-    role
     avatarUuid
   }
   noteRelatedObjects {
@@ -59,7 +58,6 @@ export const GRAPHQL_NOTE_FIELDS = /* GraphQL */ `
       }
       ... on Person {
         name
-        role
         rank
         avatarUuid
       }
@@ -88,7 +86,7 @@ export const GRAPHQL_NOTES_FIELDS = /* GraphQL */ `
 // Entity type --> GQL query
 export const GRAPHQL_ENTITY_FIELDS = {
   Report: "uuid intent engagementDate",
-  Person: "uuid name role avatarUuid",
+  Person: "uuid name avatarUuid",
   Organization: "uuid shortName",
   Position: "uuid name",
   Location: "uuid name",
@@ -442,8 +440,7 @@ export default class Model {
     author: PropTypes.shape({
       uuid: PropTypes.string,
       name: PropTypes.string,
-      rank: PropTypes.string,
-      role: PropTypes.string
+      rank: PropTypes.string
     }),
     noteRelatedObjects: Model.noteRelatedObjectsPropType
   })

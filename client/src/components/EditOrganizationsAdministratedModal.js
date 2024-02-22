@@ -44,7 +44,7 @@ const EditOrganizationsAdministratedModal = ({
     <Formik enableReinitialize onSubmit={onSubmit} initialValues={position}>
       {({ setFieldValue, values, submitForm, setFieldTouched }) => {
         const organizationsAdministratedSettings =
-          Settings.fields.advisor.position.organizationsAdministrated
+          Settings.fields.regular.position.organizationsAdministrated
         return (
           <Modal
             centered

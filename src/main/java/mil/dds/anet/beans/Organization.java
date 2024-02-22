@@ -28,10 +28,6 @@ public class Organization extends AbstractCustomizableAnetBean
   /** Pseudo uuid to represent all/top-level organization(s). */
   public static final String DUMMY_ORG_UUID = "-1";
 
-  public static enum OrganizationType {
-    ADVISOR_ORG, PRINCIPAL_ORG
-  }
-
   @GraphQLQuery
   @GraphQLInputField
   String shortName;
@@ -49,9 +45,6 @@ public class Organization extends AbstractCustomizableAnetBean
   private String profile;
   // annotated below
   private ForeignObjectHolder<Organization> parentOrg = new ForeignObjectHolder<>();
-  @GraphQLQuery
-  @GraphQLInputField
-  OrganizationType type;
   // annotated below
   private ForeignObjectHolder<Location> location = new ForeignObjectHolder<>();
   /* The following are all Lazy Loaded */
@@ -167,14 +160,6 @@ public class Organization extends AbstractCustomizableAnetBean
   @GraphQLInputField(name = "parentOrg")
   public void setParentOrg(Organization parentOrg) {
     this.parentOrg = new ForeignObjectHolder<>(parentOrg);
-  }
-
-  public OrganizationType getType() {
-    return type;
-  }
-
-  public void setType(OrganizationType type) {
-    this.type = type;
   }
 
   @GraphQLQuery(name = "positions")
@@ -335,18 +320,18 @@ public class Organization extends AbstractCustomizableAnetBean
         && Objects.equals(other.getLongName(), longName)
         && Objects.equals(other.getStatus(), status)
         && Objects.equals(other.getIdentificationCode(), identificationCode)
-        && Objects.equals(other.getProfile(), profile) && Objects.equals(other.getType(), type);
+        && Objects.equals(other.getProfile(), profile);
   }
 
   @Override
   public int hashCode() {
     return Objects.hash(super.hashCode(), uuid, shortName, longName, status, identificationCode,
-        profile, type, createdAt, updatedAt);
+        profile, createdAt, updatedAt);
   }
 
   @Override
   public String toString() {
-    return String.format("[uuid:%s shortName:%s longName:%s identificationCode:%s type:%s]", uuid,
-        shortName, longName, identificationCode, type);
+    return String.format("[uuid:%s shortName:%s longName:%s identificationCode:%s]", uuid,
+        shortName, longName, identificationCode);
   }
 }

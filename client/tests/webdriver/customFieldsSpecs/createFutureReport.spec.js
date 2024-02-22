@@ -2,8 +2,8 @@ import { expect } from "chai"
 import moment from "moment"
 import CreateFutureReport from "../pages/createFutureReport.page"
 
-const PRINCIPAL = "Christopf"
-const PRINCIPAL_VALUE = `CIV TOPFERNESS, ${PRINCIPAL}`
+const INTERLOCUTOR = "Christopf"
+const INTERLOCUTOR_VALUE = `CIV TOPFERNESS, ${INTERLOCUTOR}`
 
 const TASK = "1.2.A"
 const TASK_VALUE = "EF 1 » EF 1.2 » 1.2.A"
@@ -19,25 +19,27 @@ describe("Create report form page", () => {
       await (await CreateFutureReport.getForm()).waitForDisplayed()
     })
 
-    it("Should be able to select principal and task", async() => {
+    it("Should be able to select interlocutor and task", async() => {
       await (await CreateFutureReport.getAttendeesFieldLabel()).waitForExist()
       await (
         await CreateFutureReport.getAttendeesFieldLabel()
       ).waitForDisplayed()
       // Don't set engagementDate yet
 
-      // Select principal
+      // Select interlocutor
       await (await CreateFutureReport.getAttendeesFieldLabel()).click()
-      await (await CreateFutureReport.getAttendeesField()).setValue(PRINCIPAL)
+      await (
+        await CreateFutureReport.getAttendeesField()
+      ).setValue(INTERLOCUTOR)
       await CreateFutureReport.waitForAdvancedSelectToChange(
         CreateFutureReport.getAttendeesFieldAdvancedSelectFirstItem(),
-        PRINCIPAL_VALUE
+        INTERLOCUTOR_VALUE
       )
       expect(
         await (
           await CreateFutureReport.getAttendeesFieldAdvancedSelectFirstItem()
         ).getText()
-      ).to.include(PRINCIPAL_VALUE)
+      ).to.include(INTERLOCUTOR_VALUE)
       await (
         await CreateFutureReport.getAttendeesFieldAdvancedSelectFirstItem()
       ).click()
@@ -54,7 +56,7 @@ describe("Create report form page", () => {
       /* eslint-enable no-unused-expressions */
       expect(
         await (await CreateFutureReport.getAttendeesFieldValueRow(2)).getText()
-      ).to.include(PRINCIPAL_VALUE)
+      ).to.include(INTERLOCUTOR_VALUE)
 
       // Select task
       await (await CreateFutureReport.getTasksFieldLabel()).click()
@@ -139,7 +141,7 @@ describe("Create report form page", () => {
       ).to.be.true
       expect(
         await (
-          await CreateFutureReport.getAttendeeAssessment(PRINCIPAL_VALUE)
+          await CreateFutureReport.getAttendeeAssessment(INTERLOCUTOR_VALUE)
         ).isExisting()
       ).to.be.true
       // Task assessments should be shown in the form
@@ -165,7 +167,7 @@ describe("Create report form page", () => {
       ).to.be.true
       expect(
         await (
-          await CreateFutureReport.getAttendeeAssessment(PRINCIPAL_VALUE)
+          await CreateFutureReport.getAttendeeAssessment(INTERLOCUTOR_VALUE)
         ).isExisting()
       ).to.be.true
       // Task assessments should be shown in the display

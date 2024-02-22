@@ -19,10 +19,6 @@ class CreateOrganization extends Page {
     return browser.$("#fg-shortName div.invalid-feedback")
   }
 
-  async getTypeAdvisorButton() {
-    return browser.$('label[for="type_ADVISOR_ORG"]')
-  }
-
   async getShortNameInput() {
     return browser.$("#shortName")
   }

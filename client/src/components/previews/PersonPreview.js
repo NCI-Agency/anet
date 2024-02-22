@@ -22,12 +22,12 @@ const GQL_GET_PERSON = gql`
       uuid
       name
       rank
-      role
       avatarUuid
       status
       pendingVerification
       emailAddress
       phoneNumber
+      user
       domainUsername
       biography
       country
@@ -54,7 +54,6 @@ const GQL_GET_PERSON = gql`
             uuid
             name
             rank
-            role
             avatarUuid
           }
           organization {
@@ -100,10 +99,7 @@ const PersonPreview = ({ className, uuid }) => {
 
   // The position for this person's counterparts
   const position = person.position
-  const assignedRole =
-    position.type === Position.TYPE.PRINCIPAL
-      ? Settings.fields.advisor.person.name
-      : Settings.fields.principal.person.name
+  const assignedRole = Settings.fields.regular.person.name
 
   // User can always edit themselves
   // Admins can always edit anybody
@@ -132,18 +128,19 @@ const PersonPreview = ({ className, uuid }) => {
               value={person.rank}
             />
 
-            <DictionaryField
-              wrappedComponent={PreviewField}
-              dictProps={Settings.fields.person.role}
-              value={Person.humanNameOfRole(person.role)}
-            />
-
             {isAdmin && (
-              <DictionaryField
-                wrappedComponent={PreviewField}
-                dictProps={Settings.fields.person.domainUsername}
-                value={person.domainUsername}
-              />
+              <>
+                <DictionaryField
+                  wrappedComponent={PreviewField}
+                  dictProps={Settings.fields.person.user}
+                  value={utils.formatBoolean(person.user)}
+                />
+                <DictionaryField
+                  wrappedComponent={PreviewField}
+                  dictProps={Settings.fields.person.domainUsername}
+                  value={person.domainUsername}
+                />
+              </>
             )}
 
             <DictionaryField
@@ -246,12 +243,10 @@ const PersonPreview = ({ className, uuid }) => {
   }
 
   function renderCounterparts(position) {
-    const assocTitle =
-      position.type === Position.TYPE.PRINCIPAL ? "Is advised by" : "Advises"
     return (
       <Form.Group controlId="counterparts">
         <Col sm={4}>
-          <Form.Label>{assocTitle}</Form.Label>
+          <Form.Label>Counterpart of</Form.Label>
         </Col>
         <Col sm={12}>
           <Table striped hover responsive>
@@ -296,8 +291,8 @@ const PersonPreview = ({ className, uuid }) => {
     if (Person.isEqual(currentUser, person)) {
       return (
         <em>
-          You are not assigned to a position. Contact your organization's super
-          user to be added.
+          You are not assigned to a position. Contact your organization's
+          superuser to be added.
         </em>
       )
     } else {

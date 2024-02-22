@@ -12,7 +12,6 @@ import _escape from "lodash/escape"
 import _isEmpty from "lodash/isEmpty"
 import _set from "lodash/set"
 import { Location } from "models"
-import Person from "models/Person"
 import React, { useCallback, useReducer } from "react"
 import { Button } from "react-bootstrap"
 import { toast } from "react-toastify"
@@ -248,9 +247,6 @@ export function unassignedPerson(position1, position2, mergedPosition) {
 
 export function mergedPersonIsValid(mergedPerson) {
   const msg = []
-  if (!mergedPerson.role) {
-    msg.push("Role")
-  }
   if (!mergedPerson.status) {
     msg.push(Settings.fields.person.status?.label)
   }
@@ -263,27 +259,19 @@ export function mergedPersonIsValid(mergedPerson) {
   if (!Settings.fields.person.country?.optional && !mergedPerson.country) {
     msg.push(Settings.fields.person.country?.label)
   }
-  if (mergedPerson.role === Person.ROLE.ADVISOR) {
-    if (
-      !Settings.fields.person.emailAddress?.optional &&
-      !mergedPerson.emailAddress
-    ) {
-      msg.push(
-        `${
-          Settings.fields.person.emailAddress?.label
-        } for ${Person.humanNameOfRole(Person.ROLE.ADVISOR)} role`
-      )
-    }
-    if (
-      !Settings.fields.person.endOfTourDate?.optional &&
-      !mergedPerson.endOfTourDate
-    ) {
-      msg.push(
-        `${
-          Settings.fields.person.endOfTourDate?.label
-        } for ${Person.humanNameOfRole(Person.ROLE.ADVISOR)} role`
-      )
-    }
+  if (
+    !Settings.fields.person.emailAddress?.optional &&
+    mergedPerson.user &&
+    !mergedPerson.emailAddress
+  ) {
+    msg.push(Settings.fields.person.emailAddress?.label)
+  }
+  if (
+    !Settings.fields.person.endOfTourDate?.optional &&
+    mergedPerson.user &&
+    !mergedPerson.endOfTourDate
+  ) {
+    msg.push(Settings.fields.person.endOfTourDate?.label)
   }
   if (_isEmpty(msg)) {
     return true

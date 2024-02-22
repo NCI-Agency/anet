@@ -4526,7 +4526,7 @@
 			onDelete="NO ACTION" onUpdate="NO ACTION" />
 
 	</changeSet>
-	
+
 	<changeSet id="add-caption-column-to-attachments" author="mesut-simsoft" >
 		<addColumn tableName="attachments" >
 			<column name="caption" type="varchar(255)" />
@@ -4621,6 +4621,59 @@
 		<addUniqueConstraint tableName="attachmentRelatedObjects"
 							 columnNames="attachmentUuid, relatedObjectType, relatedObjectUuid"
 							 constraintName="UQ_AttachmentRelatedObjects" />
+	</changeSet>
+
+	<changeSet id="drop-advisor-principal-distinction" author="gjvoosten">
+		<!-- add user field to people -->
+		<addColumn tableName="people">
+			<column name="user" type="boolean" defaultValue="false" />
+		</addColumn>
+		<!-- add isInterlocutor field to reportPeople -->
+		<addColumn tableName="reportPeople">
+			<column name="isInterlocutor" type="boolean" defaultValue="true" />
+		</addColumn>
+
+		<!-- update some types and assessment keys, set the user status of people,
+		     and infer the interlocutor status of attendees -->
+		<sql>
+			UPDATE positions SET type = 0
+				WHERE type = 1;
+			UPDATE locations SET type = 'PP'
+				WHERE type IN ('PPA', 'PPP');
+			UPDATE notes SET "assessmentKey" = replace("assessmentKey", 'fields.principal', 'fields.regular')
+				WHERE "assessmentKey" LIKE 'fields.principal%';
+			UPDATE notes SET "assessmentKey" = replace("assessmentKey", 'principal', 'interlocutor')
+				WHERE "assessmentKey" LIKE '%principal%';
+			UPDATE "people" SET "user" = true
+				WHERE role = 0
+				AND (
+					("openIdSubject" IS NOT NULL AND "openIdSubject" != '')
+					OR ("domainUsername" IS NOT NULL AND "domainUsername" != '')
+				);
+			UPDATE "reportPeople" SET "isInterlocutor" = false
+				WHERE "personUuid" in (SELECT uuid FROM people WHERE role = 0);
+		</sql>
+
+		<!-- drop obsolete columns -->
+		<dropColumn tableName="organizations" columnName="type" />
+		<dropColumn tableName="people" columnName="role" />
+
+		<!-- rename principalOrg column -->
+		<dropIndex tableName="reports" indexName="IDX_reports_principalOrganizationUuid" />
+		<dropForeignKeyConstraint
+			baseTableName="reports" constraintName="FK_reports_principalOrg" />
+		<renameColumn
+			columnDataType="${uuid_type}"
+			oldColumnName="principalOrganizationUuid"
+			newColumnName="interlocutorOrganizationUuid"
+			tableName="reports" />
+		<addForeignKeyConstraint baseColumnNames="interlocutorOrganizationUuid" baseTableName="reports"
+			constraintName="FK_reports_interlocutorOrg" onDelete="NO ACTION" onUpdate="NO ACTION"
+			referencedColumnNames="uuid" referencedTableName="organizations" />
+		<createIndex
+			indexName="IDX_reports_interlocutorOrganizationUuid" tableName="reports">
+			<column name="interlocutorOrganizationUuid"/>
+		</createIndex>
 	</changeSet>
 
 </databaseChangeLog>

@@ -9,8 +9,8 @@ import React, { useState } from "react"
 import { v4 as uuidv4 } from "uuid"
 import linguistAssessmentsDoc from "./linguistAssessments.stories.mdx"
 
-const assessmentSubkey = "advisorOnceReportLinguist"
-const assessmentKey = `fields.advisor.person.assessments.${assessmentSubkey}`
+const assessmentSubkey = "personOnceReportLinguist"
+const assessmentKey = `fields.regular.person.assessments.${assessmentSubkey}`
 
 const translator = {
   attendee: true,
@@ -23,7 +23,7 @@ const translator = {
   emailAddress: "",
   name: "GUIST, Lin",
   notes: [],
-  role: "ADVISOR",
+  user: true,
   position: {
     name: "LNG Advisor A",
     organization: {

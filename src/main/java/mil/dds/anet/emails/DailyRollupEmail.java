@@ -2,16 +2,17 @@ package mil.dds.anet.emails;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Organization;
-import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.ReportCancelledReason;
+import mil.dds.anet.beans.RollupGraph.RollupGraphType;
+import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchSortBy;
@@ -25,9 +26,8 @@ public class DailyRollupEmail implements AnetEmailAction {
   private Instant startDate;
   private Instant endDate;
   // show the table based off this organization type.
-  private OrganizationType chartOrgType = OrganizationType.PRINCIPAL_ORG;
-  private String advisorOrganizationUuid;
-  private String principalOrganizationUuid;
+  private RollupGraphType chartOrgType = RollupGraphType.INTERLOCUTOR;
+  private String orgUuid;
   private String comment;
 
   @Override
@@ -60,20 +60,20 @@ public class DailyRollupEmail implements AnetEmailAction {
     query.setPageSize(0);
     query.setReleasedAtStart(startDate);
     query.setReleasedAtEnd(endDate);
+    // FIXME: Do we want to filter on engagement date? It makes the rollup email different from the
+    // on-screen rollup.
     query.setEngagementDateStart(engagementDateStart);
     query.setSortBy(ReportSearchSortBy.ENGAGEMENT_DATE);
     query.setSortOrder(SortOrder.DESC);
-    query.setPrincipalOrgUuid(principalOrganizationUuid);
-    query.setIncludePrincipalOrgChildren(true);
-    query.setAdvisorOrgUuid(advisorOrganizationUuid);
-    query.setIncludeAdvisorOrgChildren(true);
+    query.setOrgUuid(orgUuid);
+    query.setOrgRecurseStrategy(RecurseStrategy.CHILDREN);
 
     List<Report> reports = AnetObjectEngine.getInstance().getReportDao().search(query).getList();
 
     ReportGrouping allReports = new ReportGrouping(reports);
 
     if (chartOrgType == null) {
-      chartOrgType = OrganizationType.PRINCIPAL_ORG;
+      chartOrgType = RollupGraphType.INTERLOCUTOR;
     }
 
     context.put("reports", allReports);
@@ -81,18 +81,12 @@ public class DailyRollupEmail implements AnetEmailAction {
     context.put("title", getSubject(context));
     context.put("comment", comment);
 
-    List<ReportGrouping> outerGrouping = null;
-    if (principalOrganizationUuid != null) {
-      outerGrouping = allReports.getGroupingForParent(principalOrganizationUuid);
-    } else if (advisorOrganizationUuid != null) {
-      outerGrouping = allReports.getGroupingForParent(advisorOrganizationUuid);
-    } else {
-      outerGrouping = allReports.getByGrouping(chartOrgType);
-    }
-
+    final List<ReportGrouping> outerGrouping =
+        (orgUuid == null) ? allReports.getByGrouping(chartOrgType)
+            : allReports.getGroupingForParent(orgUuid, chartOrgType);
     context.put("innerOrgType",
-        (OrganizationType.ADVISOR_ORG.equals(chartOrgType)) ? OrganizationType.PRINCIPAL_ORG
-            : OrganizationType.ADVISOR_ORG);
+        RollupGraphType.ADVISOR.equals(chartOrgType) ? RollupGraphType.INTERLOCUTOR
+            : RollupGraphType.ADVISOR);
     context.put("outerGrouping", outerGrouping);
     context.put(SHOW_REPORT_TEXT_FLAG, false);
 
@@ -104,7 +98,7 @@ public class DailyRollupEmail implements AnetEmailAction {
     List<Report> reports;
 
     public ReportGrouping() {
-      this.reports = new LinkedList<Report>();
+      this.reports = new LinkedList<>();
     }
 
     public ReportGrouping(List<Report> reports) {
@@ -116,8 +110,7 @@ public class DailyRollupEmail implements AnetEmailAction {
     }
 
     public List<Report> getNonCancelled() {
-      return reports.stream().filter(r -> r.getCancelledReason() == null)
-          .collect(Collectors.toList());
+      return reports.stream().filter(r -> r.getCancelledReason() == null).toList();
     }
 
     public void addReport(Report r) {
@@ -132,31 +125,27 @@ public class DailyRollupEmail implements AnetEmailAction {
       this.name = name;
     }
 
-    public List<ReportGrouping> getByGrouping(String groupByOrgType) {
-      return getByGrouping(OrganizationType.valueOf(groupByOrgType));
-    }
-
-    public List<ReportGrouping> getByGrouping(OrganizationType orgType) {
+    public List<ReportGrouping> getByGrouping(RollupGraphType orgType) {
       final Map<String, Organization> orgUuidToTopOrg =
-          AnetObjectEngine.getInstance().buildTopLevelOrgHash(orgType);
+          AnetObjectEngine.getInstance().buildTopLevelOrgHash();
       return groupReports(orgUuidToTopOrg, orgType);
     }
 
-    public List<ReportGrouping> getGroupingForParent(String parentOrgUuid) {
+    public List<ReportGrouping> getGroupingForParent(String parentOrgUuid,
+        RollupGraphType orgType) {
       final Map<String, Organization> orgUuidToTopOrg =
           AnetObjectEngine.getInstance().buildTopLevelOrgHash(parentOrgUuid);
-      final OrganizationType orgType = orgUuidToTopOrg.get(parentOrgUuid).getType();
       return groupReports(orgUuidToTopOrg, orgType);
     }
 
     private List<ReportGrouping> groupReports(Map<String, Organization> orgUuidToTopOrg,
-        OrganizationType orgType) {
+        RollupGraphType orgType) {
       final Map<String, ReportGrouping> orgUuidToReports = new HashMap<>();
+      final Map<String, Object> context = AnetObjectEngine.getInstance().getContext();
       for (Report r : reports) {
-        final Map<String, Object> context = AnetObjectEngine.getInstance().getContext();
         final Organization reportOrg =
-            (orgType == OrganizationType.ADVISOR_ORG) ? r.loadAdvisorOrg(context).join()
-                : r.loadPrincipalOrg(context).join();
+            RollupGraphType.ADVISOR.equals(orgType) ? r.loadAdvisorOrg(context).join()
+                : r.loadInterlocutorOrg(context).join();
         final String topOrgUuid;
         final String topOrgName;
         if (reportOrg == null) {
@@ -172,17 +161,15 @@ public class DailyRollupEmail implements AnetEmailAction {
             topOrgName = topOrg.getShortName();
           }
         }
-        ReportGrouping group = orgUuidToReports.get(topOrgUuid);
-        if (group == null) {
-          group = new ReportGrouping();
-          group.setName(topOrgName);
-          orgUuidToReports.put(topOrgUuid, group);
-        }
+        ReportGrouping group = orgUuidToReports.computeIfAbsent(topOrgUuid, k -> {
+          final ReportGrouping newGroup = new ReportGrouping();
+          newGroup.setName(topOrgName);
+          return newGroup;
+        });
         group.addReport(r);
       }
-      return orgUuidToReports.values().stream().sorted((a, b) -> a.getName().compareTo(b.getName()))
-          .collect(Collectors.toList());
-
+      return orgUuidToReports.values().stream()
+          .sorted(Comparator.comparing(ReportGrouping::getName)).toList();
     }
 
     public long getCountByCancelledReason(ReportCancelledReason reason) {
@@ -211,28 +198,20 @@ public class DailyRollupEmail implements AnetEmailAction {
     this.endDate = endDate;
   }
 
-  public OrganizationType getChartOrgType() {
+  public RollupGraphType getChartOrgType() {
     return chartOrgType;
   }
 
-  public void setChartOrgType(OrganizationType chartOrgType) {
+  public void setChartOrgType(RollupGraphType chartOrgType) {
     this.chartOrgType = chartOrgType;
   }
 
-  public String getAdvisorOrganizationUuid() {
-    return advisorOrganizationUuid;
+  public String getOrgUuid() {
+    return orgUuid;
   }
 
-  public void setAdvisorOrganizationUuid(String advisorOrganizationUuid) {
-    this.advisorOrganizationUuid = advisorOrganizationUuid;
-  }
-
-  public String getPrincipalOrganizationUuid() {
-    return principalOrganizationUuid;
-  }
-
-  public void setPrincipalOrganizationUuid(String principalOrganizationUuid) {
-    this.principalOrganizationUuid = principalOrganizationUuid;
+  public void setOrgUuid(String orgUuid) {
+    this.orgUuid = orgUuid;
   }
 
   public String getComment() {

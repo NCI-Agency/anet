@@ -3,7 +3,7 @@ import Home from "../pages/home.page"
 import MyReports, { REPORT_STATES } from "../pages/myReports.page"
 import ShowReport from "../pages/report/showReport.page"
 
-const PRINCIPALS = [
+const INTERLOCUTORS = [
   "Maj CHRISVILLE, Chris",
   "CIV KYLESON, Kyle",
   "CIV SHARTON, Shardul"
@@ -44,7 +44,7 @@ describe("Show print report page", () => {
         "Atmospherics",
         "Atmospherics details",
         "Next steps",
-        "Principals",
+        "Interlocutors",
         "Advisors",
         "Efforts"
       ]
@@ -79,14 +79,14 @@ describe("Show print report page", () => {
       expect(compactBannerText).to.equal(bannerSecurityText)
     })
     it("Should display all attendees", async() => {
-      const displayedPrincipals = await ShowReport.getCompactViewElements(
-        "principals"
+      const displayedInterlocutors = await ShowReport.getCompactViewElements(
+        "interlocutors"
       )
       const displayedAdvisors = await ShowReport.getCompactViewElements(
         "advisors"
       )
-      for (const principal of PRINCIPALS) {
-        expect(displayedPrincipals).to.contain(principal)
+      for (const interlocutor of INTERLOCUTORS) {
+        expect(displayedInterlocutors).to.contain(interlocutor)
       }
       for (const advisor of ADVISORS) {
         expect(displayedAdvisors).to.contain(advisor)
@@ -94,12 +94,12 @@ describe("Show print report page", () => {
     })
     it("Should display all attendees when assessments are shown", async() => {
       await ShowReport.selectOptionalField("assessments")
-      const displayedPrincipals = await ShowReport.getCompactViewElements(
-        "principals",
+      const displayedInterlocutors = await ShowReport.getCompactViewElements(
+        "interlocutors",
         true
       )
-      for (const principal of PRINCIPALS) {
-        expect(displayedPrincipals).to.contain(principal)
+      for (const interlocutor of INTERLOCUTORS) {
+        expect(displayedInterlocutors).to.contain(interlocutor)
       }
       const displayedAdvisors = await ShowReport.getCompactViewElements(
         "advisors",

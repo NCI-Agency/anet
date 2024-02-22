@@ -107,17 +107,16 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
           </b>{" "}
           position. By selecting them, their current position will be left
           unfilled
-          {person.position.type !== Position.TYPE.ADVISOR &&
-          person.position.type !== Position.TYPE.PRINCIPAL ? (
+          {person.position.type !== Position.TYPE.REGULAR ? (
             <>
               {" "}
               and the position's permissions will be converted from{" "}
               <b>{Position.convertType(person.position.type)}</b> to{" "}
-              <b>{Settings.fields.advisor.position.type}</b>.
+              <b>{Settings.fields.regular.position.type}</b>.
             </>
-            ) : (
-              <>.</>
-            )}
+          ) : (
+            <>.</>
+          )}
           {position.type !== person.position.type && (
             <>
               {" "}
@@ -131,15 +130,14 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
       )
       newError = { message: errorMessage }
     } else if (
-      !Position.isAdvisor(latestPositionProp.current) &&
-      !Position.isPrincipal(latestPositionProp.current) &&
+      !Position.isRegular(latestPositionProp.current) &&
       (removeUser || !person)
     ) {
       const errorMessage = (
         <>
           If you save, permissions of the <b>{position.name}</b> position will
           be converted from <b>{Position.convertType(position.type)}</b> to{" "}
-          <b>{Settings.fields.advisor.position.type}</b>.
+          <b>{Settings.fields.regular.position.type}</b>.
         </>
       )
       newError = { message: errorMessage }
@@ -149,11 +147,7 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
 
   const personSearchQuery = {
     status: Model.STATUS.ACTIVE,
-    pendingVerification: false,
-    role:
-      position.type === Position.TYPE.PRINCIPAL
-        ? Person.ROLE.PRINCIPAL
-        : Person.ROLE.ADVISOR
+    pendingVerification: false
   }
   const personFilters = {
     allPersons: {
@@ -179,10 +173,7 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
                 <Button
                   variant="danger"
                   onClick={() => {
-                    if (
-                      Position.isAdvisor(latestPositionProp.current) ||
-                      Position.isPrincipal(latestPositionProp.current)
-                    ) {
+                    if (Position.isRegular(latestPositionProp.current)) {
                       setPerson(null)
                       setDoSave(true)
                     } else {
@@ -207,10 +198,7 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
                 <hr className="assignModalSplit" />
               </>
             )}
-            {removeUser &&
-              !Position.isPrincipal(latestPositionProp.current) && (
-                <Messages error={error} />
-            )}
+            {removeUser && <Messages error={error} />}
           </div>
         )}
         {!removeUser && (
@@ -229,7 +217,7 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
                     onChange={value => setPerson(value)}
                     objectType={Person}
                     valueKey="name"
-                    fields="uuid name rank role avatarUuid position { uuid name type organization {uuid} }"
+                    fields="uuid name rank avatarUuid position { uuid name type organization {uuid} }"
                     addon={PEOPLE_ICON}
                     vertical
                   />

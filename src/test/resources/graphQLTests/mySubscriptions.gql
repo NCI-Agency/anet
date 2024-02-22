@@ -20,7 +20,6 @@ mySubscriptions(query: {pageSize:0}) {
       ... on Person {
         name
         rank
-        role
         avatarUuid
       }
       ... on Position {

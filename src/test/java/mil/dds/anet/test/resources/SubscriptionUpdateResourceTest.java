@@ -169,7 +169,7 @@ public class SubscriptionUpdateResourceTest extends AbstractResourceTest {
     // * to the report itself
     // * to the report's people
     // * to the report's people's positions
-    // * to the report's advisorOrg (and principalOrg, but we're not testing that here)
+    // * to the report's advisorOrg (and interlocutorOrg, but we're not testing that here)
     // * to the report's tasks
     // * to the report's location
     final AnetBeanList_SubscriptionUpdate jackSubscriptionUpdates2 =
@@ -238,8 +238,9 @@ public class SubscriptionUpdateResourceTest extends AbstractResourceTest {
           .withCancelledReason(ReportCancelledReason.CANCELLED_BY_ADVISOR)
           .withReportPeople(
               getReportPeopleInput(Lists.newArrayList(personToPrimaryReportAuthor(getJackJackson()),
-                  personToReportPerson(getPerson(getSubscribedObjectUuid(PersonDao.TABLE_NAME))),
-                  personToPrimaryReportPerson(getChristopfTopferness()))))
+                  personToReportPerson(getPerson(getSubscribedObjectUuid(PersonDao.TABLE_NAME)),
+                      false),
+                  personToPrimaryReportPerson(getChristopfTopferness(), true))))
           .withAdvisorOrg(getOrganizationInput(
               getOrganization(getSubscribedObjectUuid(OrganizationDao.TABLE_NAME))))
           .withTasks(Lists

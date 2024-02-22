@@ -31,7 +31,6 @@ import java.util.concurrent.TimeUnit;
 import javax.servlet.DispatcherType;
 import javax.servlet.http.HttpServletRequest;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.config.AnetKeycloakConfiguration;
 import mil.dds.anet.database.PersonDao;
@@ -231,7 +230,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
             final Person newPerson = new Person();
             logger.trace("creating new user with domainUsername={}, email={} and openIdSubject={}",
                 username, email, openIdSubject);
-            newPerson.setRole(Role.ADVISOR);
+            newPerson.setUser(true);
             newPerson.setPendingVerification(true);
             // Copy some data from the authentication token
             newPerson.setOpenIdSubject(openIdSubject);

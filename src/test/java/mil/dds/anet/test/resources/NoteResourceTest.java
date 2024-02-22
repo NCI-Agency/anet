@@ -57,8 +57,8 @@ public class NoteResourceTest extends AbstractResourceTest {
   private static final String PERSON_FIELDS = String.format("{ uuid name %1$s }", _NOTES_FIELDS);
   private static final String POSITION_FIELDS = String.format(
       "{ uuid name type status organization { uuid } location { uuid } %1$s }", _NOTES_FIELDS);
-  private static final String REPORT_FIELDS =
-      String.format("{ uuid intent state reportPeople { uuid name author attendee primary }"
+  private static final String REPORT_FIELDS = String
+      .format("{ uuid intent state reportPeople { uuid name author attendee primary interlocutor }"
           + " tasks { uuid shortName } %1$s }", _NOTES_FIELDS);
   private static final String TASK_FIELDS = String.format("{ uuid shortName %1$s }", _NOTES_FIELDS);
 
@@ -232,7 +232,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     // Create test position
     final PositionInput testPositionInput = PositionInput.builder()
         .withName("a test position created by testDeleteDanglingPositionNote")
-        .withType(PositionType.ADVISOR).withStatus(Status.INACTIVE).withRole(PositionRole.MEMBER)
+        .withType(PositionType.REGULAR).withStatus(Status.INACTIVE).withRole(PositionRole.MEMBER)
         .withOrganization(getOrganizationInput(admin.getPosition().getOrganization()))
         .withLocation(getLocationInput(getGeneralHospital())).build();
     final Position testPosition =
@@ -298,8 +298,8 @@ public class NoteResourceTest extends AbstractResourceTest {
   public void testFreeTextNotes()
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     // Note: future DIAGRAM note tests can be the same as these
-    final Person principalPerson = getSteveSteveson();
-    final String principalPersonUuid = principalPerson.getUuid();
+    final Person interlocutorPerson = getSteveSteveson();
+    final String interlocutorPersonUuid = interlocutorPerson.getUuid();
 
     final NoteInput freeTextNoteInput =
         NoteInput.builder().withType(NoteType.FREE_TEXT).withText("Free text test").build();
@@ -307,34 +307,35 @@ public class NoteResourceTest extends AbstractResourceTest {
     failNoteCreate(jackMutationExecutor, freeTextNoteInput);
 
     // - S: create with self
-    final GenericRelatedObjectInput testPrincipalNroInput =
-        createNoteRelatedObject(PersonDao.TABLE_NAME, principalPersonUuid);
-    freeTextNoteInput.setNoteRelatedObjects(Collections.singletonList(testPrincipalNroInput));
+    final GenericRelatedObjectInput testInterlocutorNroInput =
+        createNoteRelatedObject(PersonDao.TABLE_NAME, interlocutorPersonUuid);
+    freeTextNoteInput.setNoteRelatedObjects(Collections.singletonList(testInterlocutorNroInput));
 
     final Note freeTextNote = succeedNoteCreate(jackMutationExecutor, freeTextNoteInput);
-    final List<Note> principalNotes = Lists.newArrayList(freeTextNote);
+    final List<Note> interlocutorNotes = Lists.newArrayList(freeTextNote);
     final List<NoteInput> testNoteInputs = Lists.newArrayList(freeTextNoteInput);
 
     // - S: create as admin
     final NoteInput freeTextNoteInputAdmin = NoteInput.builder().withType(NoteType.FREE_TEXT)
         .withText("Free text test as admin").build();
-    freeTextNoteInputAdmin.setNoteRelatedObjects(Collections.singletonList(testPrincipalNroInput));
+    freeTextNoteInputAdmin
+        .setNoteRelatedObjects(Collections.singletonList(testInterlocutorNroInput));
     final Note freeTextNoteAdmin = succeedNoteCreate(adminMutationExecutor, freeTextNoteInputAdmin);
-    principalNotes.add(freeTextNoteAdmin);
-    principalPerson.setNotes(principalNotes);
+    interlocutorNotes.add(freeTextNoteAdmin);
+    interlocutorPerson.setNotes(interlocutorNotes);
     testNoteInputs.add(freeTextNoteInputAdmin);
 
     // - S: read it
-    Collections.reverse(principalPerson.getNotes());
-    assertFreeTextNotes(principalPerson.getNotes(), testNoteInputs, 1);
+    Collections.reverse(interlocutorPerson.getNotes());
+    assertFreeTextNotes(interlocutorPerson.getNotes(), testNoteInputs, 1);
 
     // - S: read it as someone else
     final QueryExecutor bobQueryExecutor = getQueryExecutor(getBobBobtown().getDomainUsername());
-    final Person bobPerson = bobQueryExecutor.person(PERSON_FIELDS, principalPersonUuid);
+    final Person bobPerson = bobQueryExecutor.person(PERSON_FIELDS, interlocutorPersonUuid);
     assertFreeTextNotes(bobPerson.getNotes(), testNoteInputs, 1);
 
     // - S: read it as admin
-    final Person adminPerson = adminQueryExecutor.person(PERSON_FIELDS, principalPersonUuid);
+    final Person adminPerson = adminQueryExecutor.person(PERSON_FIELDS, interlocutorPersonUuid);
     assertFreeTextNotes(adminPerson.getNotes(), testNoteInputs, 1);
 
     // - S: update it
@@ -367,15 +368,16 @@ public class NoteResourceTest extends AbstractResourceTest {
     // - S: delete it
     succeedNoteDelete(jackMutationExecutor, updatedNoteJack);
     assertThat(updatedNotesInput.remove(updatedNoteInputJack)).isTrue();
-    Collections.reverse(jackQueryExecutor.person(PERSON_FIELDS, principalPersonUuid).getNotes());
-    assertFreeTextNotes(jackQueryExecutor.person(PERSON_FIELDS, principalPersonUuid).getNotes(),
+    Collections.reverse(jackQueryExecutor.person(PERSON_FIELDS, interlocutorPersonUuid).getNotes());
+    assertFreeTextNotes(jackQueryExecutor.person(PERSON_FIELDS, interlocutorPersonUuid).getNotes(),
         updatedNotesInput, 1);
 
     // - S: delete it as admin
     succeedNoteDelete(adminMutationExecutor, updatedNoteAdmin);
     assertThat(updatedNotesInput.remove(updatedNoteInputAdmin)).isTrue();
-    Collections.reverse(adminQueryExecutor.person(PERSON_FIELDS, principalPersonUuid).getNotes());
-    assertFreeTextNotes(adminQueryExecutor.person(PERSON_FIELDS, principalPersonUuid).getNotes(),
+    Collections
+        .reverse(adminQueryExecutor.person(PERSON_FIELDS, interlocutorPersonUuid).getNotes());
+    assertFreeTextNotes(adminQueryExecutor.person(PERSON_FIELDS, interlocutorPersonUuid).getNotes(),
         updatedNotesInput, 1);
   }
 
@@ -384,7 +386,7 @@ public class NoteResourceTest extends AbstractResourceTest {
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     // Instant ('once') ASSESSMENT note tests for person through the NoteResource methods
     testInstantAssessments("testInstantPersonAssessments",
-        "fields.advisor.person.assessments.advisorOnceReportLinguist", true, TEST_SUBTASK_UUID);
+        "fields.regular.person.assessments.personOnceReportLinguist", true, TEST_SUBTASK_UUID);
   }
 
   @Test
@@ -393,7 +395,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     // Instant ('once') ASSESSMENT note tests for person through the NoteResource methods, with
     // empty write authorization groups defined in the dictionary
     testInstantAssessmentsEmptyWriteAuthGroups("testInstantPersonAssessmentsNoAuthGroups",
-        "fields.advisor.person.assessments.advisorOnceReportNoWrite", true, TEST_SUBTASK_UUID);
+        "fields.regular.person.assessments.advisorOnceReportNoWrite", true, TEST_SUBTASK_UUID);
   }
 
   @Test
@@ -402,7 +404,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     // Instant ('once') ASSESSMENT note tests for person through the NoteResource methods, with no
     // authorization groups defined in the dictionary
     testInstantAssessmentsNoAuthGroups("testInstantPersonAssessmentsNoAuthGroups",
-        "fields.principal.person.assessments.principalOnceReport", true, TEST_SUBTASK_UUID);
+        "fields.regular.person.assessments.interlocutorOnceReport", true, TEST_SUBTASK_UUID);
   }
 
   @Test
@@ -411,7 +413,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     // Instant ('once') ASSESSMENT note tests for person through
     // ReportResource::updateReportAssessments
     testInstantAssessmentsViaReport("testInstantPersonAssessmentsViaReport",
-        "fields.advisor.person.assessments.advisorOnceReportLinguist", true, TEST_SUBTASK_UUID);
+        "fields.regular.person.assessments.personOnceReportLinguist", true, TEST_SUBTASK_UUID);
   }
 
   @Test
@@ -421,7 +423,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     // ReportResource::updateReportAssessments, with empty write authorization groups defined in the
     // dictionary
     testInstantAssessmentsViaReportEmptyWriteAuthGroups("testInstantPersonAssessmentsNoAuthGroups",
-        "fields.advisor.person.assessments.advisorOnceReportNoWrite", true, TEST_SUBTASK_UUID);
+        "fields.regular.person.assessments.advisorOnceReportNoWrite", true, TEST_SUBTASK_UUID);
   }
 
   @Test
@@ -431,7 +433,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     // ReportResource::updateReportAssessments, with no authorization groups defined in the
     // dictionary
     testInstantAssessmentsViaReportNoAuthGroups("testInstantPersonAssessmentsNoAuthGroups",
-        "fields.principal.person.assessments.principalOnceReport", true, TEST_SUBTASK_UUID);
+        "fields.regular.person.assessments.interlocutorOnceReport", true, TEST_SUBTASK_UUID);
   }
 
   @Test
@@ -495,7 +497,7 @@ public class NoteResourceTest extends AbstractResourceTest {
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     // On-demand ASSESSMENT note tests
     final String assessmentKey =
-        "fields.principal.person.assessments.principalOndemandScreeningAndVetting";
+        "fields.regular.person.assessments.interlocutorOndemandScreeningAndVetting";
     final String recurrence = "ondemand";
 
     // - F: create without relatedObjects
@@ -515,45 +517,46 @@ public class NoteResourceTest extends AbstractResourceTest {
     failNoteCreate(jackMutationExecutor, testNoteInputFail);
 
     // - F: create for a report and a person
-    final Person principalPerson = getSteveSteveson();
-    final String principalPersonUuid = principalPerson.getUuid();
-    final GenericRelatedObjectInput testPrincipalNroInput =
-        createNoteRelatedObject(PersonDao.TABLE_NAME, principalPersonUuid);
+    final Person interlocutorPerson = getSteveSteveson();
+    final String interlocutorPersonUuid = interlocutorPerson.getUuid();
+    final GenericRelatedObjectInput testInterlocutorNroInput =
+        createNoteRelatedObject(PersonDao.TABLE_NAME, interlocutorPersonUuid);
     testNoteInputFail = createAssessment(assessmentKey, "test", recurrence, testReportNroInput,
-        testPrincipalNroInput);
+        testInterlocutorNroInput);
     failNoteCreate(jackMutationExecutor, testNoteInputFail);
 
     // - F: create for a person as someone not in the write auth.groups
-    testNoteInputFail = createAssessment(assessmentKey, "test", recurrence, testPrincipalNroInput);
+    testNoteInputFail =
+        createAssessment(assessmentKey, "test", recurrence, testInterlocutorNroInput);
     final MutationExecutor erinMutationExecutor =
         getMutationExecutor(getRegularUser().getDomainUsername());
     failNoteCreate(erinMutationExecutor, testNoteInputFail);
 
     // - S: create for a person as someone in the write auth.groups
     final NoteInput testNoteInputJack =
-        createAssessment(assessmentKey, "jack", recurrence, testPrincipalNroInput);
+        createAssessment(assessmentKey, "jack", recurrence, testInterlocutorNroInput);
     final List<NoteInput> testNoteInputs = Lists.newArrayList(testNoteInputJack);
     final Note createdNoteJack = succeedNoteCreate(jackMutationExecutor, testNoteInputJack);
 
     // - S: create for a person as admin
     final NoteInput testNoteInputAdmin =
-        createAssessment(assessmentKey, "admin", recurrence, testPrincipalNroInput);
+        createAssessment(assessmentKey, "admin", recurrence, testInterlocutorNroInput);
     testNoteInputs.add(testNoteInputAdmin);
     final Note createdNoteAdmin = succeedNoteCreate(adminMutationExecutor, testNoteInputAdmin);
 
     // - F: read it as someone not in the read and write auth.groups
     final QueryExecutor bobQueryExecutor = getQueryExecutor(getBobBobtown().getDomainUsername());
-    final Person bobPerson = bobQueryExecutor.person(PERSON_FIELDS, principalPersonUuid);
+    final Person bobPerson = bobQueryExecutor.person(PERSON_FIELDS, interlocutorPersonUuid);
     assertNotes(bobPerson.getNotes(), Collections.emptyList(), assessmentKey, 1);
 
     // - S: read it as someone in the read auth.groups
     final QueryExecutor erinQueryExecutor = getQueryExecutor(getRegularUser().getDomainUsername());
-    final Person erinPerson = erinQueryExecutor.person(PERSON_FIELDS, principalPersonUuid);
+    final Person erinPerson = erinQueryExecutor.person(PERSON_FIELDS, interlocutorPersonUuid);
     final List<Note> testNotes = erinPerson.getNotes();
     assertNotes(testNotes, testNoteInputs, assessmentKey, 1);
 
     // - S: read it as admin
-    final Person adminPerson = adminQueryExecutor.person(PERSON_FIELDS, principalPersonUuid);
+    final Person adminPerson = adminQueryExecutor.person(PERSON_FIELDS, interlocutorPersonUuid);
     assertNotes(adminPerson.getNotes(), testNoteInputs, assessmentKey, 1);
 
     // - F: update it as someone not in the write auth.groups
@@ -578,13 +581,13 @@ public class NoteResourceTest extends AbstractResourceTest {
     // note author shouldn't matter
     succeedNoteDelete(jackMutationExecutor, updatedNoteAdmin);
     assertThat(updatedNotesInput.remove(updatedNoteInputAdmin)).isTrue();
-    assertNotes(erinQueryExecutor.person(PERSON_FIELDS, principalPersonUuid).getNotes(),
+    assertNotes(erinQueryExecutor.person(PERSON_FIELDS, interlocutorPersonUuid).getNotes(),
         updatedNotesInput, assessmentKey, 1);
 
     // - S: delete it as admin
     succeedNoteDelete(adminMutationExecutor, updatedNoteJack);
     assertThat(updatedNotesInput.remove(updatedNoteInputJack)).isTrue();
-    assertNotes(erinQueryExecutor.person(PERSON_FIELDS, principalPersonUuid).getNotes(),
+    assertNotes(erinQueryExecutor.person(PERSON_FIELDS, interlocutorPersonUuid).getNotes(),
         updatedNotesInput, assessmentKey, 1);
   }
 
@@ -593,26 +596,26 @@ public class NoteResourceTest extends AbstractResourceTest {
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     // On-demand ASSESSMENT note tests, with empty write authorization groups defined in the
     // dictionary
-    final String assessmentKey = "fields.advisor.person.assessments.advisorOndemandNoWrite";
+    final String assessmentKey = "fields.regular.person.assessments.advisorOndemandNoWrite";
     final String recurrence = "ondemand";
 
     // - F: create for a person with empty write auth.groups defined in the dictionary
-    final Person principalPerson = getSteveSteveson();
-    final String principalPersonUuid = principalPerson.getUuid();
-    final GenericRelatedObjectInput testPrincipalNroInput =
-        createNoteRelatedObject(PersonDao.TABLE_NAME, principalPersonUuid);
+    final Person interlocutorPerson = getSteveSteveson();
+    final String interlocutorPersonUuid = interlocutorPerson.getUuid();
+    final GenericRelatedObjectInput testInterlocutorNroInput =
+        createNoteRelatedObject(PersonDao.TABLE_NAME, interlocutorPersonUuid);
     final NoteInput testNoteInputJack =
-        createAssessment(assessmentKey, "jack", recurrence, testPrincipalNroInput);
+        createAssessment(assessmentKey, "jack", recurrence, testInterlocutorNroInput);
     failNoteCreate(jackMutationExecutor, testNoteInputJack);
 
     // - S: create for a person as admin
     final NoteInput testNoteInputAdmin =
-        createAssessment(assessmentKey, "admin", recurrence, testPrincipalNroInput);
+        createAssessment(assessmentKey, "admin", recurrence, testInterlocutorNroInput);
     final List<NoteInput> testNoteInputs = Lists.newArrayList(testNoteInputAdmin);
     final Note createdNoteAdmin = succeedNoteCreate(adminMutationExecutor, testNoteInputAdmin);
 
     // - S: read it with no read auth.groups defined in the dictionary
-    final Person jackPerson = jackQueryExecutor.person(PERSON_FIELDS, principalPersonUuid);
+    final Person jackPerson = jackQueryExecutor.person(PERSON_FIELDS, interlocutorPersonUuid);
     assertNotes(jackPerson.getNotes(), testNoteInputs, assessmentKey, 1);
 
     // - F: update it with empty write auth.groups defined in the dictionary
@@ -626,7 +629,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     // - S: delete it as admin
     succeedNoteDelete(adminMutationExecutor, createdNoteAdmin);
     testNoteInputs.remove(testNoteInputAdmin);
-    assertNotes(adminQueryExecutor.person(PERSON_FIELDS, principalPersonUuid).getNotes(),
+    assertNotes(adminQueryExecutor.person(PERSON_FIELDS, interlocutorPersonUuid).getNotes(),
         testNoteInputs, assessmentKey, 1);
   }
 
@@ -634,21 +637,21 @@ public class NoteResourceTest extends AbstractResourceTest {
   void testOndemandAssessmentsNoAuthGroups()
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     // On-demand ASSESSMENT note tests, with no authorization groups defined in the dictionary
-    final String assessmentKey = "fields.advisor.person.assessments.advisorOndemand";
+    final String assessmentKey = "fields.regular.person.assessments.advisorOndemand";
     final String recurrence = "ondemand";
 
     // - S: create for a person with no auth.groups defined in the dictionary
-    final Person principalPerson = getSteveSteveson();
-    final String principalPersonUuid = principalPerson.getUuid();
-    final GenericRelatedObjectInput testPrincipalNroInput =
-        createNoteRelatedObject(PersonDao.TABLE_NAME, principalPersonUuid);
+    final Person interlocutorPerson = getSteveSteveson();
+    final String interlocutorPersonUuid = interlocutorPerson.getUuid();
+    final GenericRelatedObjectInput testInterlocutorNroInput =
+        createNoteRelatedObject(PersonDao.TABLE_NAME, interlocutorPersonUuid);
     final NoteInput testNoteInputJack =
-        createAssessment(assessmentKey, "jack", recurrence, testPrincipalNroInput);
+        createAssessment(assessmentKey, "jack", recurrence, testInterlocutorNroInput);
     final List<NoteInput> testNoteInputs = Lists.newArrayList(testNoteInputJack);
     final Note createdNoteJack = succeedNoteCreate(jackMutationExecutor, testNoteInputJack);
 
     // - S: read it with no auth.groups defined in the dictionary
-    final Person jackPerson = jackQueryExecutor.person(PERSON_FIELDS, principalPersonUuid);
+    final Person jackPerson = jackQueryExecutor.person(PERSON_FIELDS, interlocutorPersonUuid);
     assertNotes(jackPerson.getNotes(), testNoteInputs, assessmentKey, 1);
 
     // - S: update it with no auth.groups defined in the dictionary
@@ -659,7 +662,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     // - S: delete it with no auth.groups defined in the dictionary
     succeedNoteDelete(jackMutationExecutor, createdNoteJack);
     testNoteInputs.remove(testNoteInputJack);
-    assertNotes(adminQueryExecutor.person(PERSON_FIELDS, principalPersonUuid).getNotes(),
+    assertNotes(adminQueryExecutor.person(PERSON_FIELDS, interlocutorPersonUuid).getNotes(),
         testNoteInputs, assessmentKey, 1);
   }
 
@@ -667,7 +670,7 @@ public class NoteResourceTest extends AbstractResourceTest {
   public void testPeriodicPersonAssessments()
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     // Periodic ASSESSMENT note tests for person
-    final String assessmentKey = "fields.principal.person.assessments.principalMonthly";
+    final String assessmentKey = "fields.regular.person.assessments.interlocutorMonthly";
     final String recurrence = "monthly";
     final MutationExecutor personCounterpartMutationExecutor =
         getMutationExecutor(getRegularUser().getDomainUsername());
@@ -683,33 +686,34 @@ public class NoteResourceTest extends AbstractResourceTest {
     failNoteCreate(personCounterpartMutationExecutor, testNoteInputFail);
 
     // - F: create for a report and a person
-    final GenericRelatedObjectInput testPrincipalNroInput =
+    final GenericRelatedObjectInput testInterlocutorNroInput =
         createNoteRelatedObject(PersonDao.TABLE_NAME, TEST_COUNTERPART_PERSON_UUID);
     testNoteInputFail = createAssessment(assessmentKey, "test", recurrence, testReportNroInput,
-        testPrincipalNroInput);
+        testInterlocutorNroInput);
     failNoteCreate(personCounterpartMutationExecutor, testNoteInputFail);
 
     // - S: create for a person as someone with counterpart not in the write auth.groups
     final NoteInput testNoteInput =
-        createAssessment(assessmentKey, "erin", recurrence, testPrincipalNroInput);
+        createAssessment(assessmentKey, "erin", recurrence, testInterlocutorNroInput);
     final List<NoteInput> testNoteInputs = Lists.newArrayList(testNoteInput);
     final Note createdNote = succeedNoteCreate(personCounterpartMutationExecutor, testNoteInput);
 
     // - F: create for a person as someone without counterpart not in the write auth.groups
-    testNoteInputFail = createAssessment(assessmentKey, "reina", recurrence, testPrincipalNroInput);
+    testNoteInputFail =
+        createAssessment(assessmentKey, "reina", recurrence, testInterlocutorNroInput);
     final MutationExecutor reinaMutationExecutor =
         getMutationExecutor(getReinaReinton().getDomainUsername());
     failNoteCreate(reinaMutationExecutor, testNoteInputFail);
 
     // - S: create for a person as someone without counterpart in the write auth.groups
     final NoteInput testNoteInputJack =
-        createAssessment(assessmentKey, "jack", recurrence, testPrincipalNroInput);
+        createAssessment(assessmentKey, "jack", recurrence, testInterlocutorNroInput);
     testNoteInputs.add(testNoteInputJack);
     final Note createdNoteJack = succeedNoteCreate(jackMutationExecutor, testNoteInputJack);
 
     // - S: create for a person as admin
     final NoteInput testNoteInputAdmin =
-        createAssessment(assessmentKey, "admin", recurrence, testPrincipalNroInput);
+        createAssessment(assessmentKey, "admin", recurrence, testInterlocutorNroInput);
     testNoteInputs.add(testNoteInputAdmin);
     final Note createdNoteAdmin = succeedNoteCreate(adminMutationExecutor, testNoteInputAdmin);
 
@@ -781,16 +785,14 @@ public class NoteResourceTest extends AbstractResourceTest {
   void testPeriodicPersonAssessmentsEmptyWriteAuthGroups()
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     // Periodic ASSESSMENT note tests for person, with empty write authorization groups defined in
-    // the
-    // dictionary
-    final String assessmentKey = "fields.advisor.person.assessments.advisorQuarterlyNoWrite";
+    // the dictionary
+    final String assessmentKey = "fields.regular.person.assessments.advisorQuarterlyNoWrite";
     final String recurrence = "quarterly";
     final MutationExecutor personCounterpartMutationExecutor =
         getMutationExecutor(getRegularUser().getDomainUsername());
 
     // - F: create for a person as someone without counterpart and empty write auth.groups defined
-    // in
-    // the dictionary
+    // in the dictionary
     final GenericRelatedObjectInput testPersonNroInput =
         createNoteRelatedObject(PersonDao.TABLE_NAME, TEST_COUNTERPART_PERSON_UUID);
     final NoteInput testNoteInputFail =
@@ -800,8 +802,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     failNoteCreate(andrewMutationExecutor, testNoteInputFail);
 
     // - S: create for a person as someone with counterpart and empty write auth.groups defined in
-    // the
-    // dictionary
+    // the dictionary
     final NoteInput testNoteInput =
         createAssessment(assessmentKey, "erin", recurrence, testPersonNroInput);
     final List<NoteInput> testNoteInputs = Lists.newArrayList(testNoteInput);
@@ -844,7 +845,7 @@ public class NoteResourceTest extends AbstractResourceTest {
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     // Periodic ASSESSMENT note tests for person, with no authorization groups defined in the
     // dictionary
-    final String assessmentKey = "fields.principal.person.assessments.principalQuarterly";
+    final String assessmentKey = "fields.regular.person.assessments.interlocutorQuarterly";
     final String recurrence = "quarterly";
     final MutationExecutor personCounterpartMutationExecutor =
         getMutationExecutor(getRegularUser().getDomainUsername());
@@ -1007,8 +1008,7 @@ public class NoteResourceTest extends AbstractResourceTest {
         getMutationExecutor(taskResponsible.getDomainUsername());
 
     // - F: create for a task as someone without task permission and empty write auth.groups defined
-    // in
-    // the dictionary
+    // in the dictionary
     final GenericRelatedObjectInput testTaskNroInput =
         createNoteRelatedObject(TaskDao.TABLE_NAME, TEST_RESPONSIBLE_TASK_UUID);
     final NoteInput testNoteInputFail =
@@ -1036,8 +1036,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     failNoteUpdate(erinMutationExecutor, updatedNoteInputErin);
 
     // - S: update it as someone with task permission and with empty write auth.groups defined in
-    // the
-    // dictionary
+    // the dictionary
     final NoteInput updatedNoteInput = getNoteInput(createdNote);
     updatedNoteInput.setText(createAssessmentText("updated by andrew", recurrence));
     final List<NoteInput> updatedNotesInput = Lists.newArrayList(updatedNoteInput);
@@ -1048,8 +1047,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     failNoteDelete(erinMutationExecutor, createdNote);
 
     // - S: delete it as someone with task permission and with empty write auth.groups defined in
-    // the
-    // dictionary
+    // the dictionary
     succeedNoteDelete(taskResponsibleMutationExecutor, updatedNote);
     assertThat(updatedNotesInput.remove(updatedNoteInput)).isTrue();
     assertNotes(erinQueryExecutor.task(TASK_FIELDS, TEST_RESPONSIBLE_TASK_UUID).getNotes(),
@@ -1110,14 +1108,14 @@ public class NoteResourceTest extends AbstractResourceTest {
         getMutationExecutor(reportAuthor.getDomainUsername());
 
     // Create a test report
-    final Person principalPerson = getSteveSteveson();
-    final ReportPerson principal = personToPrimaryReportPerson(principalPerson);
+    final Person interlocutorPerson = getSteveSteveson();
+    final ReportPerson interlocutor = personToPrimaryReportPerson(interlocutorPerson, true);
     final TaskInput taskInput = TaskInput.builder().withUuid(taskUuid).build();
-    final ReportInput reportInput = ReportInput.builder().withEngagementDate(Instant.now())
-        .withIntent(testName)
-        .withReportPeople(
-            getReportPeopleInput(Lists.newArrayList(principal, personToReportAuthor(reportAuthor))))
-        .withTasks(Lists.newArrayList(taskInput)).build();
+    final ReportInput reportInput =
+        ReportInput.builder().withEngagementDate(Instant.now()).withIntent(testName)
+            .withReportPeople(getReportPeopleInput(
+                Lists.newArrayList(interlocutor, personToReportAuthor(reportAuthor))))
+            .withTasks(Lists.newArrayList(taskInput)).build();
     final Report createdReport =
         reportAuthorMutationExecutor.createReport(REPORT_FIELDS, reportInput);
     final String reportUuid = createdReport.getUuid();
@@ -1271,26 +1269,26 @@ public class NoteResourceTest extends AbstractResourceTest {
         getMutationExecutor(reportAuthor.getDomainUsername());
 
     // Create a test report
-    final Person principalPerson = getSteveSteveson();
-    final ReportPerson principal = personToPrimaryReportPerson(principalPerson);
+    final Person interlocutorPerson = getSteveSteveson();
+    final ReportPerson interlocutor = personToPrimaryReportPerson(interlocutorPerson, true);
     final TaskInput taskInput = TaskInput.builder().withUuid(taskUuid).build();
-    final ReportInput reportInput = ReportInput.builder().withEngagementDate(Instant.now())
-        .withIntent(testName)
-        .withReportPeople(
-            getReportPeopleInput(Lists.newArrayList(principal, personToReportAuthor(reportAuthor))))
-        .withTasks(Lists.newArrayList(taskInput)).build();
+    final ReportInput reportInput =
+        ReportInput.builder().withEngagementDate(Instant.now()).withIntent(testName)
+            .withReportPeople(getReportPeopleInput(
+                Lists.newArrayList(interlocutor, personToReportAuthor(reportAuthor))))
+            .withTasks(Lists.newArrayList(taskInput)).build();
     final Report createdReport =
         reportAuthorMutationExecutor.createReport(REPORT_FIELDS, reportInput);
 
     // - S: create as author for a report and a person
     final GenericRelatedObjectInput testReportNroInput =
         createNoteRelatedObject(ReportDao.TABLE_NAME, createdReport.getUuid());
-    final GenericRelatedObjectInput testPrincipalNroInput =
-        createNoteRelatedObject(PersonDao.TABLE_NAME, principalPerson.getUuid());
+    final GenericRelatedObjectInput testInterlocutorNroInput =
+        createNoteRelatedObject(PersonDao.TABLE_NAME, interlocutorPerson.getUuid());
     final GenericRelatedObjectInput testTaskNroInput =
         createNoteRelatedObject(TaskDao.TABLE_NAME, taskUuid);
     final NoteInput testNoteInputAuthor = createAssessment(assessmentKey, "author", recurrence,
-        testReportNroInput, forPerson ? testPrincipalNroInput : testTaskNroInput);
+        testReportNroInput, forPerson ? testInterlocutorNroInput : testTaskNroInput);
     final List<NoteInput> testNoteInputs = Lists.newArrayList(testNoteInputAuthor);
     final Note createdNoteAuthor =
         succeedNoteCreate(reportAuthorMutationExecutor, testNoteInputAuthor);
@@ -1324,26 +1322,26 @@ public class NoteResourceTest extends AbstractResourceTest {
         getMutationExecutor(reportAuthor.getDomainUsername());
 
     // Create a test report
-    final Person principalPerson = getSteveSteveson();
-    final ReportPerson principal = personToPrimaryReportPerson(principalPerson);
+    final Person interlocutorPerson = getSteveSteveson();
+    final ReportPerson interlocutor = personToPrimaryReportPerson(interlocutorPerson, true);
     final TaskInput taskInput = TaskInput.builder().withUuid(taskUuid).build();
-    final ReportInput reportInput = ReportInput.builder().withEngagementDate(Instant.now())
-        .withIntent(testName)
-        .withReportPeople(
-            getReportPeopleInput(Lists.newArrayList(principal, personToReportAuthor(reportAuthor))))
-        .withTasks(Lists.newArrayList(taskInput)).build();
+    final ReportInput reportInput =
+        ReportInput.builder().withEngagementDate(Instant.now()).withIntent(testName)
+            .withReportPeople(getReportPeopleInput(
+                Lists.newArrayList(interlocutor, personToReportAuthor(reportAuthor))))
+            .withTasks(Lists.newArrayList(taskInput)).build();
     final Report createdReport =
         reportAuthorMutationExecutor.createReport(REPORT_FIELDS, reportInput);
 
     // - S: create as author for a report and a person
     final GenericRelatedObjectInput testReportNroInput =
         createNoteRelatedObject(ReportDao.TABLE_NAME, createdReport.getUuid());
-    final GenericRelatedObjectInput testPrincipalNroInput =
-        createNoteRelatedObject(PersonDao.TABLE_NAME, principalPerson.getUuid());
+    final GenericRelatedObjectInput testInterlocutorNroInput =
+        createNoteRelatedObject(PersonDao.TABLE_NAME, interlocutorPerson.getUuid());
     final GenericRelatedObjectInput testTaskNroInput =
         createNoteRelatedObject(TaskDao.TABLE_NAME, taskUuid);
     final NoteInput testNoteInputAuthor = createAssessment(assessmentKey, "author", recurrence,
-        testReportNroInput, forPerson ? testPrincipalNroInput : testTaskNroInput);
+        testReportNroInput, forPerson ? testInterlocutorNroInput : testTaskNroInput);
     final List<NoteInput> testNoteInputs = Lists.newArrayList(testNoteInputAuthor);
     final Note createdNoteAuthor =
         succeedNoteCreate(reportAuthorMutationExecutor, testNoteInputAuthor);
@@ -1378,13 +1376,13 @@ public class NoteResourceTest extends AbstractResourceTest {
         getMutationExecutor(reportApprover.getDomainUsername());
 
     // Create a test report
-    final Person principalPerson = getSteveSteveson();
-    final ReportPerson principal = personToPrimaryReportPerson(principalPerson);
+    final Person interlocutorPerson = getSteveSteveson();
+    final ReportPerson interlocutor = personToPrimaryReportPerson(interlocutorPerson, true);
     final TaskInput taskInput = TaskInput.builder().withUuid(taskUuid).build();
     final ReportInput reportInput =
         ReportInput.builder().withEngagementDate(Instant.now()).withIntent(testName)
             .withReportPeople(getReportPeopleInput(
-                Lists.newArrayList(principal, personToPrimaryReportAuthor(reportAuthor))))
+                Lists.newArrayList(interlocutor, personToPrimaryReportAuthor(reportAuthor))))
             .withTasks(Lists.newArrayList(taskInput)).build();
     final Report createdReport =
         reportAuthorMutationExecutor.createReport(REPORT_FIELDS, reportInput);
@@ -1587,13 +1585,13 @@ public class NoteResourceTest extends AbstractResourceTest {
         getMutationExecutor(reportAuthor.getDomainUsername());
 
     // Create a test report
-    final Person principalPerson = getSteveSteveson();
-    final ReportPerson principal = personToPrimaryReportPerson(principalPerson);
+    final Person interlocutorPerson = getSteveSteveson();
+    final ReportPerson interlocutor = personToPrimaryReportPerson(interlocutorPerson, true);
     final TaskInput taskInput = TaskInput.builder().withUuid(taskUuid).build();
     final ReportInput reportInput =
         ReportInput.builder().withEngagementDate(Instant.now()).withIntent(testName)
             .withReportPeople(getReportPeopleInput(
-                Lists.newArrayList(principal, personToPrimaryReportAuthor(reportAuthor))))
+                Lists.newArrayList(interlocutor, personToPrimaryReportAuthor(reportAuthor))))
             .withTasks(Lists.newArrayList(taskInput)).build();
     final Report createdReport =
         reportAuthorMutationExecutor.createReport(REPORT_FIELDS, reportInput);
@@ -1603,12 +1601,12 @@ public class NoteResourceTest extends AbstractResourceTest {
     // - S: create as author for a report and a person
     final GenericRelatedObjectInput testReportNroInput =
         createNoteRelatedObject(ReportDao.TABLE_NAME, reportUuid);
-    final GenericRelatedObjectInput testPrincipalNroInput =
-        createNoteRelatedObject(PersonDao.TABLE_NAME, principalPerson.getUuid());
+    final GenericRelatedObjectInput testInterlocutorNroInput =
+        createNoteRelatedObject(PersonDao.TABLE_NAME, interlocutorPerson.getUuid());
     final GenericRelatedObjectInput testTaskNroInput =
         createNoteRelatedObject(TaskDao.TABLE_NAME, taskUuid);
     final NoteInput testNoteInputAuthor = createAssessment(assessmentKey, "author", recurrence,
-        testReportNroInput, forPerson ? testPrincipalNroInput : testTaskNroInput);
+        testReportNroInput, forPerson ? testInterlocutorNroInput : testTaskNroInput);
     final List<NoteInput> testNoteInputs = Lists.newArrayList(testNoteInputAuthor);
     succeedUpdateReportAssessments(reportAuthorMutationExecutor, reportUuid, testNoteInputAuthor);
 
@@ -1651,13 +1649,13 @@ public class NoteResourceTest extends AbstractResourceTest {
         getMutationExecutor(reportAuthor.getDomainUsername());
 
     // Create a test report
-    final Person principalPerson = getSteveSteveson();
-    final ReportPerson principal = personToPrimaryReportPerson(principalPerson);
+    final Person interlocutorPerson = getSteveSteveson();
+    final ReportPerson interlocutor = personToPrimaryReportPerson(interlocutorPerson, true);
     final TaskInput taskInput = TaskInput.builder().withUuid(taskUuid).build();
     final ReportInput reportInput =
         ReportInput.builder().withEngagementDate(Instant.now()).withIntent(testName)
             .withReportPeople(getReportPeopleInput(
-                Lists.newArrayList(principal, personToPrimaryReportAuthor(reportAuthor))))
+                Lists.newArrayList(interlocutor, personToPrimaryReportAuthor(reportAuthor))))
             .withTasks(Lists.newArrayList(taskInput)).build();
     final Report createdReport =
         reportAuthorMutationExecutor.createReport(REPORT_FIELDS, reportInput);
@@ -1667,12 +1665,12 @@ public class NoteResourceTest extends AbstractResourceTest {
     // - S: create as author for a report and a person
     final GenericRelatedObjectInput testReportNroInput =
         createNoteRelatedObject(ReportDao.TABLE_NAME, reportUuid);
-    final GenericRelatedObjectInput testPrincipalNroInput =
-        createNoteRelatedObject(PersonDao.TABLE_NAME, principalPerson.getUuid());
+    final GenericRelatedObjectInput testInterlocutorNroInput =
+        createNoteRelatedObject(PersonDao.TABLE_NAME, interlocutorPerson.getUuid());
     final GenericRelatedObjectInput testTaskNroInput =
         createNoteRelatedObject(TaskDao.TABLE_NAME, taskUuid);
     final NoteInput testNoteInputAuthor = createAssessment(assessmentKey, "author", recurrence,
-        testReportNroInput, forPerson ? testPrincipalNroInput : testTaskNroInput);
+        testReportNroInput, forPerson ? testInterlocutorNroInput : testTaskNroInput);
     final List<NoteInput> testNoteInputs = Lists.newArrayList(testNoteInputAuthor);
     succeedUpdateReportAssessments(reportAuthorMutationExecutor, reportUuid, testNoteInputAuthor);
 
