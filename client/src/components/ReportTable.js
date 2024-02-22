@@ -1,4 +1,6 @@
 import { gql } from "@apollo/client"
+import { Icon } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import API from "api"
 import LinkTo from "components/LinkTo"
 import { PageDispatchersPropType, useBoilerplate } from "components/Page"
@@ -72,6 +74,9 @@ const GQL_GET_REPORT_LIST = gql`
           shortName
         }
         updatedAt
+        attachments {
+          uuid
+        }
       }
     }
   }
@@ -149,6 +154,9 @@ const ReportTable = ({
               <th>Summary</th>
               {showStatus && <th>Status</th>}
               <th>Engagement Date</th>
+              <th title="Does the report have attachments?">
+                <Icon icon={IconNames.PAPERCLIP} />
+              </th>
             </tr>
           </thead>
 
@@ -177,6 +185,13 @@ const ReportTable = ({
                 <td>
                   {moment(report.engagementDate).format(
                     Report.getEngagementDateFormat()
+                  )}
+                </td>
+                <td
+                  title={`The report has ${report.attachments.length} attachment(s)`}
+                >
+                  {report.attachments.length > 0 && (
+                    <Icon icon={IconNames.PAPERCLIP} />
                   )}
                 </td>
               </tr>
