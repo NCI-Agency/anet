@@ -20,6 +20,9 @@ const ANET_OBJECT_TYPES = {
   },
   "Objective / Efforts": {
     sampleFilter: "Organization"
+  },
+  "Authorization Groups": {
+    sampleFilter: undefined
   }
 }
 const COMMON_FILTER_TEXT = "Status"
@@ -29,6 +32,7 @@ const PERSON_DEFAULT_FILTER = "Pending Verification"
 const PERSON_INDEX = 1
 
 const ADD_FILTER_BUTTON_TEXT = "+ Add another filter"
+
 describe("When using advanced search", () => {
   it("Should show a link like button with correct text under search bar that opens a popover", async() => {
     await Home.open()
@@ -101,13 +105,17 @@ describe("When using advanced search", () => {
   })
   it("Should show add another filter button with correct text", async() => {
     const buttons = await AdvancedSearch.getAnetObjectSearchToggleButtons()
-    for (const [, button] of buttons.entries()) {
+    for (const [i, button] of buttons.entries()) {
       await button.click()
-      await (await AdvancedSearch.getAddFilterButtonText()).waitForExist()
-      await (await AdvancedSearch.getAddFilterButtonText()).waitForDisplayed()
-      expect(
-        await (await AdvancedSearch.getAddFilterButtonText()).getText()
-      ).to.equal(ADD_FILTER_BUTTON_TEXT)
+      const sampleFilter =
+        ANET_OBJECT_TYPES[await getObjectType(i)].sampleFilter
+      if (sampleFilter) {
+        await (await AdvancedSearch.getAddFilterButtonText()).waitForExist()
+        await (await AdvancedSearch.getAddFilterButtonText()).waitForDisplayed()
+        expect(
+          await (await AdvancedSearch.getAddFilterButtonText()).getText()
+        ).to.equal(ADD_FILTER_BUTTON_TEXT)
+      }
     }
   })
 
@@ -115,16 +123,18 @@ describe("When using advanced search", () => {
     const buttons = await AdvancedSearch.getAnetObjectSearchToggleButtons()
     for (const [i, button] of buttons.entries()) {
       await button.click()
-      await (await AdvancedSearch.getAddFilterButtonText()).waitForExist()
-      await (await AdvancedSearch.getAddFilterButtonText()).waitForDisplayed()
-      await (await AdvancedSearch.getAddFilterButton()).click()
-      await (await AdvancedSearch.getAddFilterPopover()).waitForExist()
-      await (await AdvancedSearch.getAddFilterPopover()).waitForDisplayed()
-      expect(
-        await (await AdvancedSearch.getAddFilterPopover()).getText()
-      ).to.match(
-        new RegExp(ANET_OBJECT_TYPES[await getObjectType(i)].sampleFilter)
-      )
+      const sampleFilter =
+        ANET_OBJECT_TYPES[await getObjectType(i)].sampleFilter
+      if (sampleFilter) {
+        await (await AdvancedSearch.getAddFilterButtonText()).waitForExist()
+        await (await AdvancedSearch.getAddFilterButtonText()).waitForDisplayed()
+        await (await AdvancedSearch.getAddFilterButton()).click()
+        await (await AdvancedSearch.getAddFilterPopover()).waitForExist()
+        await (await AdvancedSearch.getAddFilterPopover()).waitForDisplayed()
+        expect(
+          await (await AdvancedSearch.getAddFilterPopover()).getText()
+        ).to.match(new RegExp(sampleFilter))
+      }
     }
   })
 })

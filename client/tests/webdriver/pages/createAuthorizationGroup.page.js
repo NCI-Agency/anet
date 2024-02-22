@@ -1,6 +1,6 @@
 import Page from "./page"
 
-const PAGE_URL = "/admin/authorizationGroups/new"
+const PAGE_URL = "/authorizationGroups/new"
 
 class CreateAuthorizationGroup extends Page {
   async getForm() {
@@ -13,6 +13,10 @@ class CreateAuthorizationGroup extends Page {
 
   async getName() {
     return browser.$("#name")
+  }
+
+  async getNameDisplay() {
+    return browser.$(".title-text")
   }
 
   async getDescription() {

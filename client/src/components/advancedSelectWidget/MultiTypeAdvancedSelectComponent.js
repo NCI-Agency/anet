@@ -1,6 +1,7 @@
 import { SEARCH_OBJECT_LABELS, SEARCH_OBJECT_TYPES } from "actions"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import {
+  AuthorizationGroupOverlayRow,
   LocationOverlayRow,
   OrganizationOverlayRow,
   PersonDetailedOverlayRow,
@@ -15,6 +16,7 @@ import * as Models from "models"
 import PropTypes from "prop-types"
 import React, { useCallback, useMemo, useState } from "react"
 import { Button } from "react-bootstrap"
+import AUTHORIZATION_GROUPS_ICON from "resources/authorizationGroups.png"
 import LOCATIONS_ICON from "resources/locations.png"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
 import PEOPLE_ICON from "resources/people.png"
@@ -117,13 +119,24 @@ const widgetPropsTask = {
   addon: TASKS_ICON
 }
 
+const widgetPropsAuthorizationGroup = {
+  objectType: Models.AuthorizationGroup,
+  overlayRenderRow: AuthorizationGroupOverlayRow,
+  overlayColumns: ["Name"],
+  filterDefs: entityFilters,
+  queryParams: { status: Model.STATUS.ACTIVE },
+  fields: Models.AuthorizationGroup.autocompleteQuery,
+  addon: AUTHORIZATION_GROUPS_ICON
+}
+
 export const ENTITY_TYPES = {
   REPORTS: Models.Report.resourceName,
   PEOPLE: Models.Person.resourceName,
   ORGANIZATIONS: Models.Organization.resourceName,
   POSITIONS: Models.Position.resourceName,
   LOCATIONS: Models.Location.resourceName,
-  TASKS: Models.Task.resourceName
+  TASKS: Models.Task.resourceName,
+  AUTHORIZATION_GROUPS: Models.AuthorizationGroup.resourceName
 }
 
 const widgetTypeMapping = {
@@ -132,7 +145,8 @@ const widgetTypeMapping = {
   [ENTITY_TYPES.ORGANIZATIONS]: widgetPropsOrganization,
   [ENTITY_TYPES.POSITIONS]: widgetPropsPosition,
   [ENTITY_TYPES.LOCATIONS]: widgetPropsLocation,
-  [ENTITY_TYPES.TASKS]: widgetPropsTask
+  [ENTITY_TYPES.TASKS]: widgetPropsTask,
+  [ENTITY_TYPES.AUTHORIZATION_GROUPS]: widgetPropsAuthorizationGroup
 }
 
 const MultiTypeAdvancedSelectComponent = ({

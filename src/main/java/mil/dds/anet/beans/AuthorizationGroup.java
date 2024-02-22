@@ -9,9 +9,10 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.utils.Utils;
-import mil.dds.anet.views.AbstractAnetBean;
+import mil.dds.anet.views.AbstractSubscribableAnetBean;
 
-public class AuthorizationGroup extends AbstractAnetBean implements RelatableObject, WithStatus {
+public class AuthorizationGroup extends AbstractSubscribableAnetBean
+    implements RelatableObject, SubscribableObject, WithStatus {
 
   @GraphQLQuery
   @GraphQLInputField

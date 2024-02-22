@@ -336,8 +336,8 @@ describe("When creating/editing an authorization group", () => {
       ).getText()
       expect(alertMessage).to.equal("Authorization Group saved")
       expect(
-        await (await CreateAuthorizationGroup.getName()).getText()
-      ).to.equal(`${authorizationGroupName}-edited`)
+        await (await CreateAuthorizationGroup.getNameDisplay()).getText()
+      ).to.equal(`Authorization Group ${authorizationGroupName}-edited`)
       expect(
         await (await CreateAuthorizationGroup.getDescription()).getText()
       ).to.equal(`${authorizationGroupDescription}-edited`)

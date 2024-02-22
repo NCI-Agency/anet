@@ -567,6 +567,8 @@ export const searchFilters = function(includeAdminFilters) {
     }
   }
 
+  filters[SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS] = { filters: {} }
+
   for (const filtersForType of Object.values(filters)) {
     filtersForType.filters.Status = StatusFilter
     filtersForType.filters.Subscribed = SubscriptionFilter
