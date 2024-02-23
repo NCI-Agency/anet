@@ -106,15 +106,15 @@ public class ApprovalStepDao extends AnetBaseDao<ApprovalStep, AbstractSearchQue
   }
 
   public List<List<ApprovalStep>> getPlanningApprovalSteps(List<String> foreignKeys) {
-    final ForeignKeyBatcher<ApprovalStep> organizationIdBatcher = AnetObjectEngine.getInstance()
+    final ForeignKeyBatcher<ApprovalStep> relatedObjectIdBatcher = AnetObjectEngine.getInstance()
         .getInjector().getInstance(PlanningApprovalStepsBatcher.class);
-    return organizationIdBatcher.getByForeignKeys(foreignKeys);
+    return relatedObjectIdBatcher.getByForeignKeys(foreignKeys);
   }
 
   public List<List<ApprovalStep>> getApprovalSteps(List<String> foreignKeys) {
-    final ForeignKeyBatcher<ApprovalStep> organizationIdBatcher =
+    final ForeignKeyBatcher<ApprovalStep> relatedObjectIdBatcher =
         AnetObjectEngine.getInstance().getInjector().getInstance(ApprovalStepsBatcher.class);
-    return organizationIdBatcher.getByForeignKeys(foreignKeys);
+    return relatedObjectIdBatcher.getByForeignKeys(foreignKeys);
   }
 
   @Override
