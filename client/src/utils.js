@@ -152,6 +152,12 @@ export default {
     return { isValid: true, to: toAddresses }
   },
 
+  createMailtoLink: function(emailAddress) {
+    return (
+      <a href={`mailto:${encodeURIComponent(emailAddress)}`}>{emailAddress}</a>
+    )
+  },
+
   parseQueryString: function(queryString) {
     if (!queryString) {
       return {}

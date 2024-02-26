@@ -2,6 +2,7 @@ import _get from "lodash/get"
 import PropTypes from "prop-types"
 import React from "react"
 import { Table } from "react-bootstrap"
+import utils from "utils"
 
 const EmailAddressTable = ({ emailAddresses }) => {
   if (_get(emailAddresses, "length", 0) === 0) {
@@ -20,9 +21,7 @@ const EmailAddressTable = ({ emailAddresses }) => {
         {emailAddresses.map(ea => (
           <tr key={ea.network}>
             <td>{ea.network}</td>
-            <td>
-              <a href={`mailto:${ea.address}`}>{ea.address}</a>
-            </td>
+            <td>{utils.createMailtoLink(ea.address)}</td>
           </tr>
         ))}
       </tbody>

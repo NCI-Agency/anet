@@ -1,12 +1,11 @@
 import PropTypes from "prop-types"
 import React from "react"
+import utils from "utils"
 
 const EmailAddressList = ({ emailAddresses }) => (
   <>
     {emailAddresses?.map(ea => (
-      <div key={ea.network}>
-        <a href={`mailto:${ea.address}`}>{ea.address}</a>
-      </div>
+      <div key={ea.network}>{utils.createMailtoLink(ea.address)}</div>
     ))}
   </>
 )

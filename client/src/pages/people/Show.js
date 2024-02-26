@@ -242,9 +242,7 @@ const PersonShow = ({ pageDispatchers }) => {
       />
     </>
   )
-  const emailHumanValue = (
-    <a href={`mailto:${person.emailAddress}`}>{person.emailAddress}</a>
-  )
+  const emailHumanValue = utils.createMailtoLink(person.emailAddress)
 
   const extraColElems = {
     position: getPositionActions(),

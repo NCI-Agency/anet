@@ -235,9 +235,7 @@ const CompactPersonView = ({ pageDispatchers }) => {
   const hasPosition = position && position.uuid
   // Keys of fields which should span over 2 columns
   const fullWidthFieldKeys = person.getFullWidthFields()
-  const emailHumanValue = (
-    <a href={`mailto:${person.emailAddress}`}>{person.emailAddress}</a>
-  )
+  const emailHumanValue = utils.createMailtoLink(person.emailAddress)
   const orderedFields = orderPersonFields().filter(
     field => !fullWidthFieldKeys.includes(field.key)
   )
