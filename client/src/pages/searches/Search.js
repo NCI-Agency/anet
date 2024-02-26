@@ -1166,7 +1166,7 @@ const Search = ({
           >
             <span className="me-2">
               <Button
-                onClick={doPrepareEmail}
+                href={prepareEmailButtonProps.href}
                 id="prepareEmailButton"
                 variant={prepareEmailButtonProps.variant}
                 disabled={prepareEmailButtonProps.disabled}
@@ -1487,6 +1487,7 @@ const Search = ({
       return {
         disabled: false,
         text: "Create email",
+        href: createMailtoLink(),
         tooltip:
           "Click this button to start creating an email to the selected recipients",
         variant: "primary"
@@ -1501,14 +1502,15 @@ const Search = ({
     }
   }
 
-  function doPrepareEmail() {
-    if (hasRecipients()) {
-      const numRecipients = Object.values(recipients).reduce(
-        (s, r) => s + r.size,
-        0
+  function createMailtoLink() {
+    const emailAddresses = new Set()
+    Object.values(recipients).forEach(m =>
+      m?.forEach(v =>
+        v?.forEach(e => emailAddresses.add(encodeURIComponent(e.address)))
       )
-      alert(`Do something clever now with the ${numRecipients} recipient(s)… ☺`)
-    }
+    )
+    const mailtoLink = [...emailAddresses.values()].join(",")
+    return `mailto:${mailtoLink}`
   }
 
   function hasRecipients() {
