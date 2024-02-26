@@ -115,7 +115,7 @@ dependencies {
 	implementation 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20220608.1'
 	implementation 'com.mikesamuel:json-sanitizer:1.2.3'
 	// Authentication
-	implementation 'de.ahus1.keycloak.dropwizard:keycloak-dropwizard:2.0.0'
+	implementation 'de.ahus1.keycloak.dropwizard:keycloak-dropwizard:3.0.0'
 	implementation "org.keycloak:keycloak-jetty94-adapter:${keycloakVersion}"
 	implementation "org.keycloak:keycloak-jaxrs-oauth-client:${keycloakVersion}"
 	implementation "org.keycloak:keycloak-policy-enforcer:${keycloakVersion}"
