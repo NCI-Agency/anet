@@ -162,7 +162,8 @@ const BasePersonTable = ({
                     >
                       <Checkbox
                         checked={isSelected(person.uuid)}
-                        onChange={() => toggleSelection(person.uuid)}
+                        onChange={() =>
+                          toggleSelection(person.uuid, person.emailAddresses)}
                       />
                     </td>
                     <td>
@@ -216,7 +217,7 @@ BasePersonTable.propTypes = {
   goToPage: PropTypes.func,
   allowSelection: PropTypes.bool,
   // if allowSelection is true:
-  selection: PropTypes.instanceOf(Set),
+  selection: PropTypes.instanceOf(Map),
   isAllSelected: PropTypes.func,
   toggleAll: PropTypes.func,
   isSelected: PropTypes.func,

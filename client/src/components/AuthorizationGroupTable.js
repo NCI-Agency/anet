@@ -68,7 +68,11 @@ const AuthorizationGroupTable = ({
                 <td style={{ verticalAlign: "middle", textAlign: "center" }}>
                   <Checkbox
                     checked={isSelected(authorizationGroup.uuid)}
-                    onChange={() => toggleSelection(authorizationGroup.uuid)}
+                    onChange={() =>
+                      toggleSelection(
+                        authorizationGroup.uuid,
+                        authorizationGroup.emailAddresses
+                      )}
                   />
                 </td>
                 <td>
@@ -145,7 +149,7 @@ AuthorizationGroupTable.propTypes = {
   goToPage: PropTypes.func,
   allowSelection: PropTypes.bool,
   // if allowSelection is true:
-  selection: PropTypes.instanceOf(Set),
+  selection: PropTypes.instanceOf(Map),
   isAllSelected: PropTypes.func,
   toggleAll: PropTypes.func,
   isSelected: PropTypes.func,

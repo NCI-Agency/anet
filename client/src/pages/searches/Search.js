@@ -270,7 +270,9 @@ const Organizations = ({
       ? pagination[paginationKey].pageNum
       : 0
   )
-  const [selectedUuids, setSelectedUuids] = useState(new Set())
+  const [selectedEmailAddresses, setSelectedEmailAddresses] = useState(
+    new Map()
+  )
   useEffect(() => {
     if (!queryParamsUnchanged) {
       latestQueryParams.current = queryParams
@@ -315,7 +317,7 @@ const Organizations = ({
       totalCount={totalCount}
       goToPage={setPage}
       allowSelection={allowSelection}
-      selection={selectedUuids}
+      selection={selectedEmailAddresses}
       isAllSelected={isAllSelected}
       toggleAll={toggleAll}
       isSelected={isSelected}
@@ -330,19 +332,30 @@ const Organizations = ({
   }
 
   function isAllSelected() {
-    return _isAllSelected(organizations, selectedUuids)
+    return _isAllSelected(organizations, selectedEmailAddresses)
   }
 
   function toggleAll() {
-    _toggleAll(organizations, selectedUuids, setSelectedUuids, updateRecipients)
+    _toggleAll(
+      organizations,
+      selectedEmailAddresses,
+      setSelectedEmailAddresses,
+      updateRecipients
+    )
   }
 
   function isSelected(uuid) {
-    return _isSelected(uuid, selectedUuids)
+    return _isSelected(uuid, selectedEmailAddresses)
   }
 
-  function toggleSelection(uuid) {
-    _toggleSelection(uuid, selectedUuids, setSelectedUuids, updateRecipients)
+  function toggleSelection(uuid, emailAddresses) {
+    _toggleSelection(
+      uuid,
+      emailAddresses,
+      selectedEmailAddresses,
+      setSelectedEmailAddresses,
+      updateRecipients
+    )
   }
 }
 
@@ -375,7 +388,9 @@ const People = ({
       ? pagination[paginationKey].pageNum
       : 0
   )
-  const [selectedUuids, setSelectedUuids] = useState(new Set())
+  const [selectedEmailAddresses, setSelectedEmailAddresses] = useState(
+    new Map()
+  )
   useEffect(() => {
     if (!queryParamsUnchanged) {
       latestQueryParams.current = queryParams
@@ -416,7 +431,7 @@ const People = ({
       totalCount={totalCount}
       goToPage={setPage}
       allowSelection={allowSelection}
-      selection={selectedUuids}
+      selection={selectedEmailAddresses}
       isAllSelected={isAllSelected}
       toggleAll={toggleAll}
       isSelected={isSelected}
@@ -431,19 +446,30 @@ const People = ({
   }
 
   function isAllSelected() {
-    return _isAllSelected(people, selectedUuids)
+    return _isAllSelected(people, selectedEmailAddresses)
   }
 
   function toggleAll() {
-    _toggleAll(people, selectedUuids, setSelectedUuids, updateRecipients)
+    _toggleAll(
+      people,
+      selectedEmailAddresses,
+      setSelectedEmailAddresses,
+      updateRecipients
+    )
   }
 
   function isSelected(uuid) {
-    return _isSelected(uuid, selectedUuids)
+    return _isSelected(uuid, selectedEmailAddresses)
   }
 
-  function toggleSelection(uuid) {
-    _toggleSelection(uuid, selectedUuids, setSelectedUuids, updateRecipients)
+  function toggleSelection(uuid, emailAddresses) {
+    _toggleSelection(
+      uuid,
+      emailAddresses,
+      selectedEmailAddresses,
+      setSelectedEmailAddresses,
+      updateRecipients
+    )
   }
 }
 
@@ -476,7 +502,9 @@ const Positions = ({
       ? pagination[paginationKey].pageNum
       : 0
   )
-  const [selectedUuids, setSelectedUuids] = useState(new Set())
+  const [selectedEmailAddresses, setSelectedEmailAddresses] = useState(
+    new Map()
+  )
   useEffect(() => {
     if (!queryParamsUnchanged) {
       latestQueryParams.current = queryParams
@@ -517,7 +545,7 @@ const Positions = ({
       totalCount={totalCount}
       goToPage={setPage}
       allowSelection={allowSelection}
-      selection={selectedUuids}
+      selection={selectedEmailAddresses}
       isAllSelected={isAllSelected}
       toggleAll={toggleAll}
       isSelected={isSelected}
@@ -532,19 +560,30 @@ const Positions = ({
   }
 
   function isAllSelected() {
-    return _isAllSelected(positions, selectedUuids)
+    return _isAllSelected(positions, selectedEmailAddresses)
   }
 
   function toggleAll() {
-    _toggleAll(positions, selectedUuids, setSelectedUuids, updateRecipients)
+    _toggleAll(
+      positions,
+      selectedEmailAddresses,
+      setSelectedEmailAddresses,
+      updateRecipients
+    )
   }
 
   function isSelected(uuid) {
-    return _isSelected(uuid, selectedUuids)
+    return _isSelected(uuid, selectedEmailAddresses)
   }
 
-  function toggleSelection(uuid) {
-    _toggleSelection(uuid, selectedUuids, setSelectedUuids, updateRecipients)
+  function toggleSelection(uuid, emailAddresses) {
+    _toggleSelection(
+      uuid,
+      emailAddresses,
+      selectedEmailAddresses,
+      setSelectedEmailAddresses,
+      updateRecipients
+    )
   }
 }
 
@@ -721,7 +760,9 @@ const AuthorizationGroups = ({
       ? pagination[paginationKey].pageNum
       : 0
   )
-  const [selectedUuids, setSelectedUuids] = useState(new Set())
+  const [selectedEmailAddresses, setSelectedEmailAddresses] = useState(
+    new Map()
+  )
   useEffect(() => {
     if (!queryParamsUnchanged) {
       latestQueryParams.current = queryParams
@@ -771,7 +812,7 @@ const AuthorizationGroups = ({
       totalCount={totalCount}
       goToPage={setPage}
       allowSelection={allowSelection}
-      selection={selectedUuids}
+      selection={selectedEmailAddresses}
       isAllSelected={isAllSelected}
       toggleAll={toggleAll}
       isSelected={isSelected}
@@ -786,24 +827,30 @@ const AuthorizationGroups = ({
   }
 
   function isAllSelected() {
-    return _isAllSelected(authorizationGroups, selectedUuids)
+    return _isAllSelected(authorizationGroups, selectedEmailAddresses)
   }
 
   function toggleAll() {
     _toggleAll(
       authorizationGroups,
-      selectedUuids,
-      setSelectedUuids,
+      selectedEmailAddresses,
+      setSelectedEmailAddresses,
       updateRecipients
     )
   }
 
   function isSelected(uuid) {
-    return _isSelected(uuid, selectedUuids)
+    return _isSelected(uuid, selectedEmailAddresses)
   }
 
-  function toggleSelection(uuid) {
-    _toggleSelection(uuid, selectedUuids, setSelectedUuids, updateRecipients)
+  function toggleSelection(uuid, emailAddresses) {
+    _toggleSelection(
+      uuid,
+      emailAddresses,
+      selectedEmailAddresses,
+      setSelectedEmailAddresses,
+      updateRecipients
+    )
   }
 }
 
@@ -826,7 +873,8 @@ function _isSubsetOf(set, subset) {
   return new Set([...set, ...subset]).size === set.size
 }
 
-function _isAllSelected(list, selectedUuids) {
+function _isAllSelected(list, selectedEmailAddresses) {
+  const selectedUuids = new Set(selectedEmailAddresses?.keys())
   if (_isEmpty(selectedUuids)) {
     return false // nothing selected
   }
@@ -837,44 +885,62 @@ function _isAllSelected(list, selectedUuids) {
   return isSubset || null // return indeterminate if only some are selected
 }
 
-function _toggleAll(list, selectedUuids, setSelectedUuids, updateRecipients) {
-  if (_isAllSelected(list, selectedUuids)) {
-    list.forEach(l => selectedUuids.delete(l.uuid))
+function _toggleAll(
+  list,
+  selectedEmailAddresses,
+  setSelectedEmailAddresses,
+  updateRecipients
+) {
+  if (_isAllSelected(list, selectedEmailAddresses)) {
+    list.forEach(l => selectedEmailAddresses.delete(l.uuid))
   } else {
-    list.forEach(l => selectedUuids.add(l.uuid))
+    list.forEach(l => selectedEmailAddresses.set(l.uuid, l.emailAddresses))
   }
-  _updateSelection(selectedUuids, setSelectedUuids, updateRecipients)
+  _updateSelection(
+    selectedEmailAddresses,
+    setSelectedEmailAddresses,
+    updateRecipients
+  )
 }
 
-function _isSelected(uuid, selectedUuids) {
-  return selectedUuids.has(uuid)
+function _isSelected(uuid, setSelectedEmailAddresses) {
+  return setSelectedEmailAddresses.has(uuid)
 }
 
 function _toggleSelection(
   uuid,
-  selectedUuids,
-  setSelectedUuids,
+  emailAddresses,
+  selectedEmailAddresses,
+  setSelectedEmailAddresses,
   updateRecipients
 ) {
-  if (_isSelected(uuid, selectedUuids)) {
-    selectedUuids.delete(uuid)
+  if (_isSelected(uuid, selectedEmailAddresses)) {
+    selectedEmailAddresses.delete(uuid)
   } else {
-    selectedUuids.add(uuid)
+    selectedEmailAddresses.set(uuid, emailAddresses)
   }
-  _updateSelection(selectedUuids, setSelectedUuids, updateRecipients)
+  _updateSelection(
+    selectedEmailAddresses,
+    setSelectedEmailAddresses,
+    updateRecipients
+  )
 }
 
-function _updateSelection(selectedUuids, setSelectedUuids, updateRecipients) {
-  const newSelection = new Set(selectedUuids)
-  setSelectedUuids(newSelection)
+function _updateSelection(
+  selectedEmailAddresses,
+  setSelectedEmailAddresses,
+  updateRecipients
+) {
+  const newSelection = new Map(selectedEmailAddresses)
+  setSelectedEmailAddresses(newSelection)
   updateRecipients(newSelection)
 }
 
 const DEFAULT_RECIPIENTS = {
-  [SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS]: new Set(),
-  [SEARCH_OBJECT_TYPES.ORGANIZATIONS]: new Set(),
-  [SEARCH_OBJECT_TYPES.PEOPLE]: new Set(),
-  [SEARCH_OBJECT_TYPES.POSITIONS]: new Set()
+  [SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS]: new Map(),
+  [SEARCH_OBJECT_TYPES.ORGANIZATIONS]: new Map(),
+  [SEARCH_OBJECT_TYPES.PEOPLE]: new Map(),
+  [SEARCH_OBJECT_TYPES.POSITIONS]: new Map()
 }
 
 const Search = ({

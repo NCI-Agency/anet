@@ -146,7 +146,8 @@ const BaseOrganizationTable = ({
                     >
                       <Checkbox
                         checked={isSelected(org.uuid)}
-                        onChange={() => toggleSelection(org.uuid)}
+                        onChange={() =>
+                          toggleSelection(org.uuid, org.emailAddresses)}
                       />
                     </td>
                     <td>
@@ -187,7 +188,7 @@ BaseOrganizationTable.propTypes = {
   goToPage: PropTypes.func,
   allowSelection: PropTypes.bool,
   // if allowSelection is true:
-  selection: PropTypes.instanceOf(Set),
+  selection: PropTypes.instanceOf(Map),
   isAllSelected: PropTypes.func,
   toggleAll: PropTypes.func,
   isSelected: PropTypes.func,
