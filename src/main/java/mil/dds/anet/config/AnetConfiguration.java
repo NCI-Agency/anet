@@ -234,7 +234,7 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
       } else {
         final JsonSchemaFactory factory = JsonSchemaFactory
             .builder(JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V201909))
-            .objectMapper(yamlMapper).build();
+            .jsonMapper(yamlMapper).build();
         final JsonSchema schema = factory.getSchema(inputStream);
         final JsonNode anetDictionary = jsonMapper.valueToTree(dictionaryMap);
         final Set<ValidationMessage> errors = schema.validate(anetDictionary);
