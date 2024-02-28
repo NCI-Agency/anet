@@ -7,96 +7,88 @@ describe("When using search", () => {
     await Home.openAsSuperuser()
     await (await Home.getSearchBar()).setValue("")
     await (await Home.getSubmitSearch()).click()
+    // Wait for search results
+    await browser.pause(2000)
     // Reports
     expect(
-      parseInt(
-        await (
-          await Search.getFoundElement(Search.getFoundCounter("reports"))
-        ).getText()
-      )
+      parseInt(await (await Search.getFoundCounter("reports")).getText())
     ).to.be.greaterThan(0)
-    await Search.getFoundElement(Search.getFoundReportTable())
+    expect(await (await Search.getFoundReportTable()).isExisting()).to.equal(
+      true
+    )
     // People
     expect(
-      parseInt(
-        await (
-          await Search.getFoundElement(Search.getFoundCounter("people"))
-        ).getText()
-      )
+      parseInt(await (await Search.getFoundCounter("people")).getText())
     ).to.be.greaterThan(0)
-    await Search.getFoundElement(Search.getFoundPeopleTable())
+    expect(await (await Search.getFoundPeopleTable()).isExisting()).to.equal(
+      true
+    )
     // Organizations
     expect(
-      parseInt(
-        await (
-          await Search.getFoundElement(Search.getFoundCounter("organizations"))
-        ).getText()
-      )
+      parseInt(await (await Search.getFoundCounter("organizations")).getText())
     ).to.be.greaterThan(0)
-    await Search.getFoundElement(Search.getFoundOrganizationTable())
+    expect(
+      await (await Search.getFoundOrganizationTable()).isExisting()
+    ).to.equal(true)
     // Positions
     expect(
-      parseInt(
-        await (
-          await Search.getFoundElement(Search.getFoundCounter("positions"))
-        ).getText()
-      )
+      parseInt(await (await Search.getFoundCounter("positions")).getText())
     ).to.be.greaterThan(0)
-    await Search.getFoundElement(Search.getFoundPositionTable())
+    expect(await (await Search.getFoundPositionTable()).isExisting()).to.equal(
+      true
+    )
     // Locations
     expect(
-      parseInt(
-        await (
-          await Search.getFoundElement(Search.getFoundCounter("locations"))
-        ).getText()
-      )
+      parseInt(await (await Search.getFoundCounter("locations")).getText())
     ).to.be.greaterThan(0)
-    await Search.getFoundElement(Search.getFoundLocationTable())
+    expect(await (await Search.getFoundLocationTable()).isExisting()).to.equal(
+      true
+    )
     // Tasks
     expect(
-      parseInt(
-        await (
-          await Search.getFoundElement(Search.getFoundCounter("tasks"))
-        ).getText()
-      )
+      parseInt(await (await Search.getFoundCounter("tasks")).getText())
     ).to.be.greaterThan(0)
-    await Search.getFoundElement(Search.getFoundTaskTable())
+    expect(await (await Search.getFoundTaskTable()).isExisting()).to.equal(true)
     // Authorization groups
     expect(
       parseInt(
         await (await Search.getFoundCounter("authorizationGroups")).getText()
       )
     ).to.be.greaterThan(0)
-    await Search.getFoundElement(Search.getFoundAuthorizationGroupTable())
+    expect(
+      await (await Search.getFoundAuthorizationGroupTable()).isExisting()
+    ).to.equal(true)
   })
   it("Should not show results counters when searching in all entities and no results found", async() => {
     await Home.openAsSuperuser()
     await (await Home.getSearchBar()).setValue("·$%&")
     await (await Home.getSubmitSearch()).click()
+    // Wait for search results
+    await browser.pause(2000)
     expect(await (await Search.getNoResultsFound()).isDisplayed()).to.equal(
       true
     )
     // Reports
     expect(
-      await (await Search.getFoundCounter("reports")).isDisplayed()
+      await (await Search.getFoundCounter("reports")).isExisting()
     ).to.equal(false)
     expect(
-      await (await Search.getFoundCounter("people")).isDisplayed()
+      await (await Search.getFoundCounter("people")).isExisting()
     ).to.equal(false)
     expect(
-      await (await Search.getFoundCounter("organizations")).isDisplayed()
+      await (await Search.getFoundCounter("organizations")).isExisting()
     ).to.equal(false)
     expect(
-      await (await Search.getFoundCounter("positions")).isDisplayed()
+      await (await Search.getFoundCounter("positions")).isExisting()
     ).to.equal(false)
     expect(
-      await (await Search.getFoundCounter("locations")).isDisplayed()
+      await (await Search.getFoundCounter("locations")).isExisting()
     ).to.equal(false)
+    expect(await (await Search.getFoundCounter("tasks")).isExisting()).to.equal(
+      false
+    )
     expect(
-      await (await Search.getFoundCounter("tasks")).isDisplayed()
-    ).to.equal(false)
-    expect(
-      await (await Search.getFoundCounter("authorizationGroups")).isDisplayed()
+      await (await Search.getFoundCounter("authorizationGroups")).isExisting()
     ).to.equal(false)
   })
 })
