@@ -53,7 +53,6 @@ const GQL_GET_PERSON = gql`
       avatarUuid
       status
       pendingVerification
-      emailAddress
       phoneNumber
       user
       domainUsername
@@ -115,7 +114,6 @@ const GQL_GET_PERSON = gql`
 // Redundant fields to print
 const DEFAULT_FIELD_GROUP_EXCEPTIONS = [
   "gender",
-  "emailAddress",
   "phone",
   "code",
   "endOfTourDate"
@@ -235,7 +233,6 @@ const CompactPersonView = ({ pageDispatchers }) => {
   const hasPosition = position && position.uuid
   // Keys of fields which should span over 2 columns
   const fullWidthFieldKeys = person.getFullWidthFields()
-  const emailHumanValue = utils.createMailtoLink(person.emailAddress)
   const orderedFields = orderPersonFields().filter(
     field => !fullWidthFieldKeys.includes(field.key)
   )
@@ -394,7 +391,6 @@ const CompactPersonView = ({ pageDispatchers }) => {
     const humanValuesExceptions = {
       biography: <RichTextEditor readOnly value={person.biography} />,
       user: utils.formatBoolean(person.user),
-      emailAddress: emailHumanValue,
       emailAddresses: (
         <EmailAddressTable emailAddresses={person.emailAddresses} />
       ),

@@ -107,7 +107,6 @@ const GQL_GET_PERSON_LIST = gql`
         name
         rank
         avatarUuid
-        emailAddress
         ${GQL_EMAIL_ADDRESSES}
         position {
           uuid
@@ -233,7 +232,6 @@ const GQL_GET_AUTHORIZATION_GROUP_LIST = gql`
               name
               rank
               avatarUuid
-              emailAddress
               ${GQL_EMAIL_ADDRESSES}
             }
             ... on Position {

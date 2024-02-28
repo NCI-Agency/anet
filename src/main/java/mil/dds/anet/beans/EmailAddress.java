@@ -21,6 +21,13 @@ public class EmailAddress extends AbstractAnetBean {
   private String relatedObjectType;
   private String relatedObjectUuid;
 
+  public EmailAddress() {}
+
+  public EmailAddress(final String network, final String address) {
+    this.network = network;
+    this.address = address;
+  }
+
   @Override
   @JsonIgnore
   @GraphQLIgnore

@@ -612,4 +612,8 @@ public class Utils {
         .map(sf -> sf.getQualifiedName()).collect(Collectors.toSet());
   }
 
+  public static String getEmailNetworkForNotifications() {
+    return (String) AnetObjectEngine.getConfiguration()
+        .getDictionaryEntry("emailNetworkForNotifications");
+  }
 }

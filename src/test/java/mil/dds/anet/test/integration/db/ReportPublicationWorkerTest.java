@@ -15,6 +15,7 @@ import java.util.Map;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
+import mil.dds.anet.beans.EmailAddress;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.ReportState;
@@ -22,6 +23,7 @@ import mil.dds.anet.beans.ReportAction;
 import mil.dds.anet.beans.ReportAction.ActionType;
 import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.config.AnetConfiguration;
+import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.test.integration.config.AnetTestConfiguration;
 import mil.dds.anet.test.integration.utils.EmailResponse;
 import mil.dds.anet.test.integration.utils.FakeSmtpServer;
@@ -29,6 +31,7 @@ import mil.dds.anet.test.integration.utils.TestBeans;
 import mil.dds.anet.test.resources.AbstractResourceTest;
 import mil.dds.anet.threads.AnetEmailWorker;
 import mil.dds.anet.threads.ReportPublicationWorker;
+import mil.dds.anet.utils.Utils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -214,8 +217,11 @@ class ReportPublicationWorkerTest {
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final ReportPerson author =
         AbstractResourceTest.personToReportAuthor(TestBeans.getTestPerson());
-    author.setEmailAddress(toAddressId + allowedEmail);
     engine.getPersonDao().insert(author);
+    final EmailAddress emailAddress =
+        new EmailAddress(Utils.getEmailNetworkForNotifications(), toAddressId + allowedEmail);
+    engine.getEmailAddressDao().updateEmailAddresses(PersonDao.TABLE_NAME, author.getUuid(),
+        List.of(emailAddress));
 
     final Organization organization = TestBeans.getTestOrganization();
     engine.getOrganizationDao().insert(organization);

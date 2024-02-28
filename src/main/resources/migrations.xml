@@ -4855,4 +4855,23 @@
 		</sql>
 	</changeSet>
 
+	<changeSet id="drop-people-emailAddress" author="gjvoosten">
+		<!-- Migrate existing people.emailAddress -->
+		<sql>
+			INSERT INTO "emailAddresses" ("network", "address", "relatedObjectType", "relatedObjectUuid")
+			SELECT
+				CASE WHEN p.user IS TRUE THEN 'NS' ELSE 'Internet' END,
+				p."emailAddress",
+				'people',
+				p."uuid"
+			FROM
+				people p
+			WHERE
+				p."emailAddress" IS NOT NULL;
+		</sql>
+
+		<!-- Now drop people.emailAddress -->
+		<dropColumn tableName="people" columnName="emailAddress" />
+	</changeSet>
+
 </databaseChangeLog>

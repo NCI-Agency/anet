@@ -412,10 +412,6 @@ fields:
       placeholder: Fill in the person's current position
     prevPositions:
       label: Previous Positions
-    emailAddress:
-      label: Email
-      placeholder: Enter email address
-      optional: false
     emailAddresses:
       label: Email addresses
     phoneNumber:
@@ -684,7 +680,6 @@ fields:
         - domainUsername
         - openIdSubject
         - authorizationGroups
-        - emailAddress
         - emailAddresses
         - phoneNumber
         - country
@@ -729,7 +724,6 @@ fields:
         - phoneNumber
         - country
         - birthday
-        - emailAddress
         - emailAddresses
         - politicalPosition
         - rank
@@ -1392,6 +1386,7 @@ activeDomainNames: [example.com, example.ns, cmil.mil, mission.ita, nato.int, "*
 emailNetworks:
   - Internet
   - NS
+emailNetworkForNotifications: NS
 imagery:
   mapOptions:
     crs: EPSG3857

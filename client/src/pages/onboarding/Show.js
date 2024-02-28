@@ -22,7 +22,6 @@ import { Alert, Col, Container, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { Link, useLocation } from "react-router-dom"
 import Settings from "settings"
-import utils from "utils"
 import PersonAvatar from "../people/Avatar"
 
 const GQL_GET_SELF = gql`
@@ -32,7 +31,6 @@ const GQL_GET_SELF = gql`
       name
       rank
       status
-      emailAddress
       phoneNumber
       pendingVerification
       biography
@@ -79,7 +77,6 @@ const OnboardingShow = ({ pageDispatchers }) => {
       Edit
     </Link>
   )
-  const emailHumanValue = utils.createMailtoLink(person.emailAddress)
 
   // Keys of fields which should span over 2 columns
   const fullWidthFieldKeys = person.getFullWidthFields()
@@ -172,7 +169,6 @@ const OnboardingShow = ({ pageDispatchers }) => {
     // map fields that have specific human value
     const humanValuesExceptions = {
       biography: <RichTextEditor readOnly value={person.biography} />,
-      emailAddress: emailHumanValue,
       emailAddresses: (
         <EmailAddressTable emailAddresses={person.emailAddresses} />
       ),

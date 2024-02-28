@@ -4,7 +4,10 @@ personList(query:{pageSize:0}) {
     name
     rank
     avatarUuid
-    emailAddress
+    emailAddresses {
+      network
+      address
+    }
     position {
       uuid
       name

@@ -13,13 +13,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.EmailAddress;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionType;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.config.AnetConfiguration;
-import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.graphql.AllowUnverifiedUsers;
 import mil.dds.anet.utils.AnetAuditLogger;
@@ -72,8 +72,8 @@ public class PersonResource {
           Status.BAD_REQUEST);
     }
 
-    if (Boolean.TRUE.equals(p.getUser()) && !Utils.isEmptyOrNull(p.getEmailAddress())) {
-      validateEmail(p.getEmailAddress());
+    if (Boolean.TRUE.equals(p.getUser()) && !Utils.isEmptyOrNull(p.getEmailAddresses())) {
+      validateEmail(p.getEmailAddresses());
     }
 
     p.setBiography(
@@ -85,7 +85,7 @@ public class PersonResource {
           DaoUtils.getUuid(created.getPosition()));
     }
 
-    engine.getEmailAddressDao().updateEmailAddresses(OrganizationDao.TABLE_NAME, created.getUuid(),
+    engine.getEmailAddressDao().updateEmailAddresses(PersonDao.TABLE_NAME, created.getUuid(),
         p.getEmailAddresses());
 
     DaoUtils.saveCustomSensitiveInformation(user, PersonDao.TABLE_NAME, created.getUuid(),
@@ -130,8 +130,8 @@ public class PersonResource {
     final Person existing = dao.getByUuid(p.getUuid());
     assertCanUpdatePerson(user, existing);
 
-    if (Boolean.TRUE.equals(p.getUser()) && !Utils.isEmptyOrNull(p.getEmailAddress())) {
-      validateEmail(p.getEmailAddress());
+    if (Boolean.TRUE.equals(p.getUser()) && !Utils.isEmptyOrNull(p.getEmailAddresses())) {
+      validateEmail(p.getEmailAddresses());
     }
 
     // Swap the position first in order to do the authentication check.
@@ -310,8 +310,8 @@ public class PersonResource {
       throw new WebApplicationException("You can only update yourself", Status.FORBIDDEN);
     }
 
-    if (Boolean.TRUE.equals(p.getUser()) && !Utils.isEmptyOrNull(p.getEmailAddress())) {
-      validateEmail(p.getEmailAddress());
+    if (Boolean.TRUE.equals(p.getUser()) && !Utils.isEmptyOrNull(p.getEmailAddresses())) {
+      validateEmail(p.getEmailAddresses());
     }
 
     final Boolean automaticallyAllowAllNewUsers =
@@ -382,7 +382,16 @@ public class PersonResource {
     return numRows;
   }
 
+  private void validateEmail(final List<EmailAddress> emailAddresses) {
+    for (final EmailAddress emailAddress : emailAddresses) {
+      validateEmail(emailAddress.getAddress());
+    }
+  }
+
   private void validateEmail(String emailInput) {
+    if (Utils.isEmptyOrNull(emailInput)) {
+      return;
+    }
     final String[] splittedEmail = emailInput.split("@");
     if (splittedEmail.length < 2 || splittedEmail[1].length() == 0) {
       throw new WebApplicationException("Please provide a valid email address", Status.BAD_REQUEST);

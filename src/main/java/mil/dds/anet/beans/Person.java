@@ -45,9 +45,6 @@ public class Person extends AbstractEmailableAnetBean
   private Boolean pendingVerification = false;
   @GraphQLQuery
   @GraphQLInputField
-  private String emailAddress;
-  @GraphQLQuery
-  @GraphQLInputField
   private String phoneNumber;
   @GraphQLQuery
   @GraphQLInputField
@@ -130,15 +127,6 @@ public class Person extends AbstractEmailableAnetBean
 
   public void setPendingVerification(Boolean pendingVerification) {
     this.pendingVerification = pendingVerification;
-  }
-
-  @AllowUnverifiedUsers
-  public String getEmailAddress() {
-    return emailAddress;
-  }
-
-  public void setEmailAddress(String emailAddress) {
-    this.emailAddress = Utils.trimStringReturnNull(emailAddress);
   }
 
   @AllowUnverifiedUsers
@@ -358,7 +346,6 @@ public class Person extends AbstractEmailableAnetBean
     return super.equals(o) && Objects.equals(uuid, other.getUuid())
         && Objects.equals(other.getName(), name) && Objects.equals(other.getStatus(), status)
         && Objects.equals(other.getUser(), user)
-        && Objects.equals(other.getEmailAddress(), emailAddress)
         && Objects.equals(other.getPhoneNumber(), phoneNumber)
         && Objects.equals(other.getRank(), rank) && Objects.equals(other.getBiography(), biography)
         && Objects.equals(other.getDomainUsername(), domainUsername)
@@ -374,9 +361,8 @@ public class Person extends AbstractEmailableAnetBean
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), uuid, name, status, user, emailAddress, phoneNumber, rank,
-        biography, domainUsername, openIdSubject, pendingVerification, avatarUuid, code, createdAt,
-        updatedAt);
+    return Objects.hash(super.hashCode(), uuid, name, status, user, phoneNumber, rank, biography,
+        domainUsername, openIdSubject, pendingVerification, avatarUuid, code, createdAt, updatedAt);
   }
 
   @Override

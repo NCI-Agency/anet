@@ -36,6 +36,8 @@ import mil.dds.anet.test.client.Attachment;
 import mil.dds.anet.test.client.AttachmentInput;
 import mil.dds.anet.test.client.AuthorizationGroup;
 import mil.dds.anet.test.client.Comment;
+import mil.dds.anet.test.client.EmailAddress;
+import mil.dds.anet.test.client.EmailAddressInput;
 import mil.dds.anet.test.client.GenericRelatedObjectInput;
 import mil.dds.anet.test.client.Location;
 import mil.dds.anet.test.client.LocationSearchQueryInput;
@@ -70,6 +72,7 @@ import mil.dds.anet.test.client.TaskSearchQueryInput;
 import mil.dds.anet.test.client.TaskSearchSortBy;
 import mil.dds.anet.test.utils.UtilsTest;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.Utils;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,7 +89,7 @@ class ReportResourceTest extends AbstractResourceTest {
   private static final String ORGANIZATION_FIELDS = String.format(
       "{ %1$s approvalSteps { uuid name nextStepUuid relatedObjectUuid } }", _ORGANIZATION_FIELDS);
   private static final String _PERSON_FIELDS =
-      "uuid name status user emailAddress phoneNumber rank biography country"
+      "uuid name status user phoneNumber rank biography country"
           + " gender endOfTourDate domainUsername openIdSubject pendingVerification createdAt updatedAt";
   private static final String PERSON_FIELDS = String.format("{ %1$s }", _PERSON_FIELDS);
   private static final String REPORT_PEOPLE_FIELDS =
@@ -131,16 +134,24 @@ class ReportResourceTest extends AbstractResourceTest {
     assertThat(advisorOrg.getUuid()).isNotNull();
 
     // Create leadership people in the AO who can approve this report
-    final Person approver1 = findOrPutPersonInDb(Person.builder()
-        .withDomainUsername("testapprover1").withEmailAddress("hunter+testApprover1@example.com")
-        .withName("Test Approver 1").withStatus(Status.ACTIVE).build());
+    final EmailAddress emailAddress1 =
+        EmailAddress.builder().withNetwork(Utils.getEmailNetworkForNotifications())
+            .withAddress("testApprover1@example.com").build();
+    final Person approver1tpl = Person.builder().withDomainUsername("testapprover1")
+        .withEmailAddresses(List.of(emailAddress1)).withName("Test Approver 1")
+        .withStatus(Status.ACTIVE).build();
+    final Person approver1 = findOrPutPersonInDb(approver1tpl);
     if (Boolean.TRUE.equals(approver1.getPendingVerification())) {
       // Approve newly created user
       withCredentials(adminUser, t -> mutationExecutor.approvePerson("", approver1.getUuid()));
     }
-    final Person approver2 = findOrPutPersonInDb(Person.builder()
-        .withDomainUsername("testapprover2").withEmailAddress("hunter+testApprover2@example.com")
-        .withName("Test Approver 2").withStatus(Status.ACTIVE).build());
+    final EmailAddress emailAddress2 =
+        EmailAddress.builder().withNetwork(Utils.getEmailNetworkForNotifications())
+            .withAddress("testApprover2@example.com").build();
+    final Person approver2tpl = Person.builder().withDomainUsername("testapprover2")
+        .withEmailAddresses(List.of(emailAddress2)).withName("Test Approver 2")
+        .withStatus(Status.ACTIVE).build();
+    final Person approver2 = findOrPutPersonInDb(approver2tpl);
     if (Boolean.TRUE.equals(approver2.getPendingVerification())) {
       // Approve newly created user
       withCredentials(adminUser, t -> mutationExecutor.approvePerson("", approver2.getUuid()));
@@ -542,12 +553,20 @@ class ReportResourceTest extends AbstractResourceTest {
     assertThat(advisorOrg.getUuid()).isNotNull();
 
     // Create leadership people in the AO who can approve this report
-    final Person approver1 = findOrPutPersonInDb(Person.builder()
-        .withDomainUsername("testapprover1").withEmailAddress("hunter+testApprover1@example.com")
-        .withName("Test Approver 1").withStatus(Status.ACTIVE).build());
-    final Person approver2 = findOrPutPersonInDb(Person.builder()
-        .withDomainUsername("testapprover2").withEmailAddress("hunter+testApprover2@example.com")
-        .withName("Test Approver 2").withStatus(Status.ACTIVE).build());
+    final EmailAddress emailAddress1 =
+        EmailAddress.builder().withNetwork(Utils.getEmailNetworkForNotifications())
+            .withAddress("testApprover1@example.com").build();
+    final Person approver1tpl = Person.builder().withDomainUsername("testapprover1")
+        .withEmailAddresses(List.of(emailAddress1)).withName("Test Approver 1")
+        .withStatus(Status.ACTIVE).build();
+    final Person approver1 = findOrPutPersonInDb(approver1tpl);
+    final EmailAddress emailAddress2 =
+        EmailAddress.builder().withNetwork(Utils.getEmailNetworkForNotifications())
+            .withAddress("testApprover2@example.com").build();
+    final Person approver2tpl = Person.builder().withDomainUsername("testapprover2")
+        .withEmailAddresses(List.of(emailAddress2)).withName("Test Approver 2")
+        .withStatus(Status.ACTIVE).build();
+    final Person approver2 = findOrPutPersonInDb(approver2tpl);
 
     final PositionInput approver1PosInput = PositionInput.builder()
         .withName("Test Approver 1 Position").withOrganization(getOrganizationInput(advisorOrg))
@@ -922,9 +941,12 @@ class ReportResourceTest extends AbstractResourceTest {
     final Person ben = getBenRogers();
 
     // Create a Person who isn't in a Billet
+    final EmailAddressInput emailAddressInput =
+        EmailAddressInput.builder().withNetwork(Utils.getEmailNetworkForNotifications())
+            .withAddress("newguy@example.com").build();
     final PersonInput authorInput =
         PersonInput.builder().withName("A New Guy").withUser(true).withStatus(Status.ACTIVE)
-            .withDomainUsername("newguy").withEmailAddress("newGuy@example.com").build();
+            .withDomainUsername("newguy").withEmailAddresses(List.of(emailAddressInput)).build();
     final Person author =
         withCredentials(adminUser, t -> mutationExecutor.createPerson(PERSON_FIELDS, authorInput));
     assertThat(author).isNotNull();

@@ -15,10 +15,10 @@ import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.utils.DaoUtils;
 
 public class TestBeans {
+
   public static Person getTestPerson() {
     Person p = new Person();
     p.setName("TEST, Test");
-    p.setEmailAddress("test_person@test.anet");
     p.setPhoneNumber("+0-00000");
     p.setRank("CIV");
     p.setStatus(Person.Status.ACTIVE);

@@ -26,7 +26,6 @@ const GQL_GET_PERSON = gql`
       avatarUuid
       status
       pendingVerification
-      emailAddress
       phoneNumber
       user
       domainUsername
@@ -159,12 +158,6 @@ const PersonPreview = ({ className, uuid }) => {
               wrappedComponent={PreviewField}
               dictProps={Settings.fields.person.phoneNumber}
               value={person.phoneNumber}
-            />
-
-            <DictionaryField
-              wrappedComponent={PreviewField}
-              dictProps={Settings.fields.person.emailAddress}
-              value={person.emailAddress}
             />
 
             <DictionaryField

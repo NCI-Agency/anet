@@ -71,7 +71,6 @@ const GQL_GET_PERSON = gql`
       pendingVerification
       isSubscribed
       updatedAt
-      emailAddress
       phoneNumber
       user
       domainUsername
@@ -242,7 +241,6 @@ const PersonShow = ({ pageDispatchers }) => {
       />
     </>
   )
-  const emailHumanValue = utils.createMailtoLink(person.emailAddress)
 
   const extraColElems = {
     position: getPositionActions(),
@@ -519,7 +517,6 @@ const PersonShow = ({ pageDispatchers }) => {
       ),
       biography: <RichTextEditor readOnly value={person.biography} />,
       user: utils.formatBoolean(person.user),
-      emailAddress: emailHumanValue,
       emailAddresses: (
         <EmailAddressTable emailAddresses={person.emailAddresses} />
       ),

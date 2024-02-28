@@ -30,9 +30,11 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import mil.dds.anet.beans.EmailAddress;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.config.AnetKeycloakConfiguration;
+import mil.dds.anet.database.EmailAddressDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.StatementLogger;
 import mil.dds.anet.resources.AdminResource;
@@ -234,14 +236,22 @@ public class AnetApplication extends Application<AnetConfiguration> {
             // Copy some data from the authentication token
             newPerson.setOpenIdSubject(openIdSubject);
             newPerson.setDomainUsername(username);
-            newPerson.setEmailAddress(email);
             newPerson.setName(getCombinedName(token));
             /*
              * Note: there's also token.getGender(), but that's not generally available in AD/LDAP,
              * and token.getPhoneNumber(), but that requires scope="openid phone" on the
              * authentication request, which is hard to accomplish with current Keycloak code.
              */
-            return dao.insert(newPerson);
+            final Person authPerson = dao.insert(newPerson);
+            if (!Utils.isEmptyOrNull(email)) {
+              final EmailAddressDao emailAddressDao =
+                  AnetObjectEngine.getInstance().getEmailAddressDao();
+              final EmailAddress emailAddress =
+                  new EmailAddress(Utils.getEmailNetworkForNotifications(), email);
+              emailAddressDao.updateEmailAddresses(PersonDao.TABLE_NAME, authPerson.getUuid(),
+                  List.of(emailAddress));
+            }
+            return authPerson;
           }
         };
       }

@@ -8,6 +8,7 @@ import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.EmailAddress;
 import mil.dds.anet.database.mappers.EmailAddressMapper;
+import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
@@ -20,6 +21,12 @@ import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public class EmailAddressDao {
 
+  public static final String[] fields =
+      {"network", "address", "relatedObjectType", "relatedObjectUuid"};
+  public static final String TABLE_NAME = "emailAddresses";
+  public static final String EMAIL_ADDRESS_FIELDS =
+      DaoUtils.buildFieldAliases(TABLE_NAME, fields, false);
+
   @Inject
   private Provider<Handle> handle;
 
@@ -29,9 +36,9 @@ public class EmailAddressDao {
 
   static class EmailAddressesForRelatedObjectsBatcher extends ForeignKeyBatcher<EmailAddress> {
     private static final String SQL =
-        "/* batch.getEmailAddressesForRelatedObject */ SELECT * FROM \"emailAddresses\""
-            + " WHERE \"relatedObjectUuid\" IN ( <foreignKeys> )"
-            + " ORDER BY \"relatedObjectType\", \"relatedObjectUuid\", network, address";
+        "/* batch.getEmailAddressesForRelatedObject */ SELECT " + EMAIL_ADDRESS_FIELDS
+            + "FROM \"emailAddresses\"" + " WHERE \"relatedObjectUuid\" IN ( <foreignKeys> )"
+            + " ORDER BY \"relatedObjectType\", \"relatedObjectUuid\", \"network\", \"address\"";
 
     public EmailAddressesForRelatedObjectsBatcher() {
       super(SQL, "foreignKeys", new EmailAddressMapper(), "relatedObjectUuid");
@@ -45,11 +52,9 @@ public class EmailAddressDao {
   }
 
   public CompletableFuture<List<EmailAddress>> getEmailAddressesForRelatedObject(
-      Map<String, Object> context, String relatedObjectUuid, String network) {
-    return new ForeignKeyFetcher<EmailAddress>()
-        .load(context, FkDataLoaderKey.EMAIL_ADDRESSES_FOR_RELATED_OBJECT, relatedObjectUuid)
-        .thenApply(l -> Utils.isEmptyOrNull(network) ? l
-            : l.stream().filter(ea -> network.equals(ea.getNetwork())).toList());
+      Map<String, Object> context, String relatedObjectUuid) {
+    return new ForeignKeyFetcher<EmailAddress>().load(context,
+        FkDataLoaderKey.EMAIL_ADDRESSES_FOR_RELATED_OBJECT, relatedObjectUuid);
   }
 
   public interface EmailAddressBatch {

@@ -144,9 +144,7 @@ const MergePeople = ({ pageDispatchers }) => {
                 If the Merged Person will be an{" "}
                 {Settings.fields.person.user?.label}:
                 <ul>
-                  {!Settings.fields.person.emailAddress?.optional && (
-                    <li>{Settings.fields.person.emailAddress?.label}</li>
-                  )}
+                  {/* FIXME: Optional/required emailAddresses? */}
                   {!Settings.fields.person.endOfTourDate?.exclude &&
                     !Settings.fields.person.endOfTourDate?.optional && (
                       <li>{Settings.fields.person.endOfTourDate?.label}</li>
@@ -304,27 +302,6 @@ const MergePeople = ({ pageDispatchers }) => {
                   Person.getInstanceName
                 )}
                 fieldName="status"
-                mergeState={mergeState}
-                dispatchMergeActions={dispatchMergeActions}
-              />
-              <DictionaryField
-                wrappedComponent={MergeField}
-                dictProps={Settings.fields.person.emailAddress}
-                value={mergedPerson.emailAddress}
-                align={ALIGN_OPTIONS.CENTER}
-                action={
-                  !Settings.fields.person.emailAddress?.optional &&
-                  mergedPerson.user
-                    ? getInfoButton(
-                      `${Settings.fields.person.emailAddress?.label} is required.`
-                    )
-                    : getClearButton(() =>
-                      dispatchMergeActions(
-                        setAMergedField("emailAddress", "", null)
-                      )
-                    )
-                }
-                fieldName="emailAddress"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
@@ -770,25 +747,6 @@ const PersonColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
               align,
               mergeState,
               "status"
-            )}
-            mergeState={mergeState}
-            dispatchMergeActions={dispatchMergeActions}
-          />
-          <DictionaryField
-            wrappedComponent={MergeField}
-            dictProps={Settings.fields.person.emailAddress}
-            fieldName="emailAddress"
-            value={person.emailAddress}
-            align={align}
-            action={getActionButton(
-              () => {
-                dispatchMergeActions(
-                  setAMergedField("emailAddress", person.emailAddress, align)
-                )
-              },
-              align,
-              mergeState,
-              "emailAddress"
             )}
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}

@@ -21,7 +21,6 @@ const GQL_GET_SELF = gql`
       name
       rank
       status
-      emailAddress
       phoneNumber
       pendingVerification
       biography

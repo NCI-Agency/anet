@@ -88,7 +88,7 @@ public abstract class AbstractResourceTest {
   protected Person admin;
 
   private static final String PERSON_FIELDS =
-      "{ uuid name domainUsername openIdSubject user emailAddress rank status phoneNumber biography"
+      "{ uuid name domainUsername openIdSubject user rank status phoneNumber biography"
           + " pendingVerification createdAt updatedAt position { uuid name type status"
           + " organization { uuid shortName parentOrg { uuid shortName } } } }";
 

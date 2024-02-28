@@ -4,7 +4,10 @@ me {
   rank
   avatarUuid
   status
-  emailAddress
+  emailAddresses {
+    network
+    address
+  }
   pendingVerification
   code
   authorizationGroups {

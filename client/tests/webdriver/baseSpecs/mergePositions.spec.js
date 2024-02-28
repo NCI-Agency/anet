@@ -10,6 +10,7 @@ const EXAMPLE_POSITIONS = {
     type: "REGULAR",
     role: "Deputy",
     status: "ACTIVE",
+    email: "Network Address\nInternet mergeOne@mod.example.com",
     person: "CIV BEMERGED, Myposwill",
     associatedPositions: [
       { person: "Unfilled", position: "EF 1.1 Advisor B" },
@@ -31,6 +32,7 @@ const EXAMPLE_POSITIONS = {
     type: "REGULAR",
     role: "Leader",
     status: "ACTIVE",
+    email: "Network Address\nInternet mergeTwo@mod.example.com",
     person: "Unspecified",
     associatedPositions: [
       { person: "Unfilled", position: "EF 1.1 Advisor C" },
@@ -90,6 +92,11 @@ describe("Merge positions page", () => {
     expect(
       await (await MergePositions.getColumnContent("left", "Status")).getText()
     ).to.eq(EXAMPLE_POSITIONS.validLeft.status)
+    expect(
+      await (
+        await MergePositions.getColumnContent("left", "Email addresses")
+      ).getText()
+    ).to.eq(EXAMPLE_POSITIONS.validLeft.email)
     expect(
       await (await MergePositions.getColumnContent("left", "Person")).getText()
     ).to.eq(EXAMPLE_POSITIONS.validLeft.person)
@@ -160,6 +167,11 @@ describe("Merge positions page", () => {
       await (await MergePositions.getColumnContent("right", "Status")).getText()
     ).to.eq(EXAMPLE_POSITIONS.validRight.status)
     expect(
+      await (
+        await MergePositions.getColumnContent("right", "Email addresses")
+      ).getText()
+    ).to.eq(EXAMPLE_POSITIONS.validRight.email)
+    expect(
       await (await MergePositions.getColumnContent("right", "Person")).getText()
     ).to.eq(EXAMPLE_POSITIONS.validRight.person)
     expect(await MergePositions.getAssociatedPositions("right")).to.eql(
@@ -199,6 +211,11 @@ describe("Merge positions page", () => {
     expect(
       await (await MergePositions.getColumnContent("mid", "Status")).getText()
     ).to.eq(EXAMPLE_POSITIONS.validLeft.status)
+    expect(
+      await (
+        await MergePositions.getColumnContent("mid", "Email addresses")
+      ).getText()
+    ).to.eq(EXAMPLE_POSITIONS.validLeft.email)
     expect(
       await (await MergePositions.getColumnContent("mid", "Person")).getText()
     ).to.eq(EXAMPLE_POSITIONS.validLeft.person)
@@ -242,6 +259,11 @@ describe("Merge positions page", () => {
     expect(
       await (await MergePositions.getColumnContent("mid", "Status")).getText()
     ).to.eq(EXAMPLE_POSITIONS.validRight.status)
+    expect(
+      await (
+        await MergePositions.getColumnContent("mid", "Email addresses")
+      ).getText()
+    ).to.eq(EXAMPLE_POSITIONS.validRight.email)
     expect(
       await (await MergePositions.getColumnContent("mid", "Person")).getText()
     ).to.eq(EXAMPLE_POSITIONS.validRight.person)

@@ -32,7 +32,6 @@ public class PersonMapper implements RowMapper<Person> {
     a.setName(MapperUtils.getOptionalString(rs, "people_name"));
     a.setStatus(MapperUtils.getEnumIdx(rs, "people_status", Person.Status.class));
     a.setUser(MapperUtils.getOptionalBoolean(rs, "people_user"));
-    a.setEmailAddress(MapperUtils.getOptionalString(rs, "people_emailAddress"));
     a.setAvatarUuid(MapperUtils.getOptionalString(rs, "people_avatarUuid"));
     a.setPhoneNumber(MapperUtils.getOptionalString(rs, "people_phoneNumber"));
     a.setCountry(MapperUtils.getOptionalString(rs, "people_country"));

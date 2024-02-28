@@ -8,7 +8,7 @@ const VALID_PERSON_INTERLOCUTOR = {
 const VALID_PERSON_ADVISOR = {
   lastName: "Roe",
   firstName: "Jane",
-  emailAddress: "test@NATO.INT"
+  emailAddresses: ["", "test@NATO.INT"]
 }
 
 const SIMILAR_PERSON_ADVISOR = {
@@ -122,20 +122,18 @@ describe("Create new Person form page", () => {
         "value",
         await CreatePerson.getRandomOption(await CreatePerson.getCountry())
       )
-      await (await CreatePerson.getEmailAddress()).setValue("notValidEmail@")
+      await (await CreatePerson.getEmailAddress(0)).setValue("notValidEmail@")
       await (await CreatePerson.getLastName()).click()
-      const errorMessage = await browser.$(
-        "input#emailAddress + div.invalid-feedback"
-      )
+      const errorMessage = await CreatePerson.getEmailAddressMessage(0)
       await errorMessage.waitForExist()
       await errorMessage.waitForDisplayed()
       expect(await errorMessage.getText()).to.equal(
-        "Email must be a valid email"
+        "Address must be a valid email"
       )
 
       // perform submit form to prevent warning dialog
-      await CreatePerson.deleteInput(CreatePerson.getEmailAddress())
-      await (await CreatePerson.getEmailAddress()).setValue("test@example.com")
+      await CreatePerson.deleteInput(CreatePerson.getEmailAddress(0))
+      await (await CreatePerson.getEmailAddress(0)).setValue("test@example.com")
       await (await CreatePerson.getLastName()).click()
       await CreatePerson.submitForm()
       await CreatePerson.waitForAlertSuccessToLoad()
@@ -196,9 +194,13 @@ describe("Create new Person form page", () => {
       ).setValue(VALID_PERSON_ADVISOR.firstName)
       await (await CreatePerson.getUserTrueButton()).waitForExist()
       await (await CreatePerson.getUserTrueButton()).click()
-      await (
-        await CreatePerson.getEmailAddress()
-      ).setValue(VALID_PERSON_ADVISOR.emailAddress)
+      for (const [
+        index,
+        address
+      ] of VALID_PERSON_ADVISOR.emailAddresses.entries()) {
+        await CreatePerson.deleteInput(CreatePerson.getEmailAddress(index))
+        await (await CreatePerson.getEmailAddress(index)).setValue(address)
+      }
       await (
         await CreatePerson.getRank()
       ).selectByAttribute(
@@ -219,11 +221,11 @@ describe("Create new Person form page", () => {
       )
       await (await CreatePerson.getEndOfTourDate()).setValue("")
       await (await CreatePerson.getLastName()).click()
-      const errorMessage = await browser.$(
-        "input#emailAddress + div.invalid-feedback"
-      )
-      // element should *not* be visible!
-      await errorMessage.waitForDisplayed({ timeout: 1000, reverse: true })
+      for (const [index] of VALID_PERSON_ADVISOR.emailAddresses.entries()) {
+        const errorMessage = await CreatePerson.getEmailAddressMessage(index)
+        // element should *not* be visible!
+        await errorMessage.waitForDisplayed({ timeout: 1000, reverse: true })
+      }
       // Don't logout, next test continues…
     })
 
@@ -237,16 +239,19 @@ describe("Create new Person form page", () => {
       ).setValue(VALID_PERSON_ADVISOR.firstName)
       await (await CreatePerson.getUserTrueButton()).waitForExist()
       await (await CreatePerson.getUserTrueButton()).click()
-      await CreatePerson.deleteInput(CreatePerson.getEmailAddress())
-      await (
-        await CreatePerson.getEmailAddress()
-      ).setValue(VALID_PERSON_ADVISOR.emailAddress)
+      for (const [
+        index,
+        address
+      ] of VALID_PERSON_ADVISOR.emailAddresses.entries()) {
+        await CreatePerson.deleteInput(CreatePerson.getEmailAddress(index))
+        await (await CreatePerson.getEmailAddress(index)).setValue(address)
+      }
       await (await CreatePerson.getLastName()).click()
-      const errorMessage = await browser.$(
-        "input#emailAddress + div.invalid-feedback"
-      )
-      // element should *not* be visible!
-      await errorMessage.waitForDisplayed({ timeout: 1000, reverse: true })
+      for (const [index] of VALID_PERSON_ADVISOR.emailAddresses.entries()) {
+        const errorMessage = await CreatePerson.getEmailAddressMessage(index)
+        // element should *not* be visible!
+        await errorMessage.waitForDisplayed({ timeout: 1000, reverse: true })
+      }
       await (
         await CreatePerson.getRank()
       ).selectByAttribute(

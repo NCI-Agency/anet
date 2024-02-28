@@ -380,6 +380,7 @@ required:
   - domainNames
   - activeDomainNames
   - emailNetworks
+  - emailNetworkForNotifications
   - imagery
   - automaticallyAllowAllNewUsers
 properties:
@@ -750,7 +751,7 @@ properties:
         type: object
         additionalProperties: false
         required: [status, firstName, lastName, position, prevPositions, domainUsername, openIdSubject,
-                   emailAddress, emailAddresses, phoneNumber, country, code, rank, ranks, gender, endOfTourDate,
+                   emailAddresses, phoneNumber, country, code, rank, ranks, gender, endOfTourDate,
                    biography, authorizationGroups]
         properties:
           status:
@@ -769,8 +770,6 @@ properties:
             "$ref": "#/$defs/inputField"
           openIdSubject:
             "$ref": "#/$defs/labeledField"
-          emailAddress:
-            "$ref": "#/$defs/optionableInputField"
           emailAddresses:
             "$ref": "#/$defs/labeledField"
           phoneNumber:
@@ -1184,6 +1183,11 @@ properties:
       type: string
       title: The list of supported email networks
       description: Valid email networks for this ANET instance; e.g Internet, NS.
+
+  emailNetworkForNotifications:
+    type: string
+    title: The email network to be used for email notifications sent by ANET
+    description: Should be one of the networks listed under `emailNetworks` above.
 
   imagery:
     type: object

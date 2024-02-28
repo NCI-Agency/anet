@@ -22,6 +22,7 @@ import mil.dds.anet.test.client.ApprovalStep;
 import mil.dds.anet.test.client.ApprovalStepInput;
 import mil.dds.anet.test.client.ApprovalStepType;
 import mil.dds.anet.test.client.Atmosphere;
+import mil.dds.anet.test.client.EmailAddress;
 import mil.dds.anet.test.client.LocationInput;
 import mil.dds.anet.test.client.Organization;
 import mil.dds.anet.test.client.OrganizationInput;
@@ -49,13 +50,14 @@ import org.junit.jupiter.api.TestInstance;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class TaskApprovalTest extends AbstractResourceTest {
 
+  private static final String EMAIL_ADDRESS_FIELDS = "{ network address }";
   private static final String ORGANIZATION_FIELDS =
       "{ uuid shortName longName status identificationCode }";
   private static final String POSITION_FIELDS =
       "{ uuid name code type status organization " + ORGANIZATION_FIELDS + " }";
   private static final String PERSON_FIELDS =
-      "{ uuid name status user rank domainUsername openIdSubject emailAddress position "
-          + POSITION_FIELDS + " }";
+      "{ uuid name status user rank domainUsername openIdSubject emailAddresses "
+          + EMAIL_ADDRESS_FIELDS + " position " + POSITION_FIELDS + " }";
   private static final String APPROVAL_STEP_FIELDS =
       "{ uuid name restrictedApproval relatedObjectUuid nextStepUuid approvers"
           + " { uuid name person { uuid name rank } } }";
@@ -710,16 +712,18 @@ public class TaskApprovalTest extends AbstractResourceTest {
     assertThat(emails).hasSize(expectedNrOfEmails);
     // Check that each message has one of the intended recipients
     emails.forEach(e -> assertThat(expectedRecipients)
-        .anyMatch(r -> emailMatchesRecipient(e, r.getEmailAddress())));
+        .anyMatch(r -> emailMatchesRecipient(e, r.getEmailAddresses())));
     // Check that each recipient received a message
     Arrays.asList(expectedRecipients).forEach(
-        r -> assertThat(emails).anyMatch(e -> emailMatchesRecipient(e, r.getEmailAddress())));
+        r -> assertThat(emails).anyMatch(e -> emailMatchesRecipient(e, r.getEmailAddresses())));
     // Clean up
     clearEmailsOnServer();
   }
 
-  private boolean emailMatchesRecipient(EmailResponse email, String expectedRecipientAddress) {
-    return email.to.values.stream().anyMatch(v -> v.address.equals(expectedRecipientAddress));
+  private boolean emailMatchesRecipient(EmailResponse email,
+      List<EmailAddress> expectedRecipientAddresses) {
+    return email.to.values.stream().anyMatch(
+        v -> expectedRecipientAddresses.stream().anyMatch(ea -> v.address.equals(ea.getAddress())));
   }
 
   private void sendEmailsToServer() {

@@ -35,7 +35,6 @@ const GQL_GET_PERSON_LIST = gql`
         uuid
         name
         rank
-        emailAddress
         ${GQL_EMAIL_ADDRESSES}
         position {
           uuid

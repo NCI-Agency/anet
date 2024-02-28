@@ -10,7 +10,7 @@ const EXAMPLE_PEOPLE = {
     user: "No",
     position: "Chief of Merge People Test 1",
     status: "ACTIVE",
-    email: "merged+winner@example.com",
+    email: "Network Address\nInternet merged.winner@example.com",
     phone: "+1-234-5678",
     rank: "CIV",
     gender: "MALE",
@@ -33,7 +33,7 @@ const EXAMPLE_PEOPLE = {
     user: "No",
     position: "Chief of Merge People Test 2",
     status: "ACTIVE",
-    email: "merged+loser@example.com",
+    email: "Network Address\nInternet merged.loser@example.com",
     phone: "+1-876-5432",
     rank: "CTR",
     gender: "FEMALE",
@@ -56,7 +56,7 @@ const EXAMPLE_PEOPLE = {
     user: "Yes",
     position: "EF 1 Manager",
     status: "ACTIVE",
-    email: "hunter+andrew@example.com",
+    email: "Network Address\nInternet andrew@example.com\nNS andrew@example.ns",
     phone: "+1-412-7324",
     rank: "CIV",
     gender: "MALE",
@@ -113,7 +113,9 @@ describe("Merge people who are both non-users", () => {
       await (await MergePeople.getColumnContent("left", "Status")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.status)
     expect(
-      await (await MergePeople.getColumnContent("left", "Email")).getText()
+      await (
+        await MergePeople.getColumnContent("left", "Email addresses")
+      ).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.email)
     expect(
       await (await MergePeople.getColumnContent("left", "Phone")).getText()
@@ -179,7 +181,9 @@ describe("Merge people who are both non-users", () => {
       await (await MergePeople.getColumnContent("right", "Status")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validRight.status)
     expect(
-      await (await MergePeople.getColumnContent("right", "Email")).getText()
+      await (
+        await MergePeople.getColumnContent("right", "Email addresses")
+      ).getText()
     ).to.eq(EXAMPLE_PEOPLE.validRight.email)
     expect(
       await (await MergePeople.getColumnContent("right", "Phone")).getText()
@@ -226,7 +230,9 @@ describe("Merge people who are both non-users", () => {
       await (await MergePeople.getColumnContent("mid", "Status")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.status)
     expect(
-      await (await MergePeople.getColumnContent("mid", "Email")).getText()
+      await (
+        await MergePeople.getColumnContent("mid", "Email addresses")
+      ).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.email)
     expect(
       await (await MergePeople.getColumnContent("mid", "Phone")).getText()
@@ -271,7 +277,9 @@ describe("Merge people who are both non-users", () => {
       await (await MergePeople.getColumnContent("mid", "Status")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validRight.status)
     expect(
-      await (await MergePeople.getColumnContent("mid", "Email")).getText()
+      await (
+        await MergePeople.getColumnContent("mid", "Email addresses")
+      ).getText()
     ).to.eq(EXAMPLE_PEOPLE.validRight.email)
     expect(
       await (await MergePeople.getColumnContent("mid", "Phone")).getText()
@@ -334,14 +342,16 @@ describe("Merge people who are both non-users", () => {
       await (await MergePeople.getColumnContent("mid", "Status")).getText()
     ).to.equal(EXAMPLE_PEOPLE.validLeft.status)
 
-    await (await MergePeople.getSelectButton("left", "Email")).click()
+    await (await MergePeople.getSelectButton("left", "Email addresses")).click()
     await MergePeople.waitForColumnToChange(
       EXAMPLE_PEOPLE.validLeft.email,
       "mid",
-      "Email"
+      "Email addresses"
     )
     expect(
-      await (await MergePeople.getColumnContent("mid", "Email")).getText()
+      await (
+        await MergePeople.getColumnContent("mid", "Email addresses")
+      ).getText()
     ).to.equal(EXAMPLE_PEOPLE.validLeft.email)
 
     await (await MergePeople.getSelectButton("left", "Phone")).click()
@@ -354,14 +364,16 @@ describe("Merge people who are both non-users", () => {
       await (await MergePeople.getColumnContent("mid", "Phone")).getText()
     ).to.equal(EXAMPLE_PEOPLE.validLeft.phone)
 
-    await (await MergePeople.getSelectButton("left", "Email")).click()
+    await (await MergePeople.getSelectButton("left", "Email addresses")).click()
     await MergePeople.waitForColumnToChange(
       EXAMPLE_PEOPLE.validLeft.email,
       "mid",
-      "Email"
+      "Email addresses"
     )
     expect(
-      await (await MergePeople.getColumnContent("mid", "Email")).getText()
+      await (
+        await MergePeople.getColumnContent("mid", "Email addresses")
+      ).getText()
     ).to.equal(EXAMPLE_PEOPLE.validLeft.email)
 
     await (await MergePeople.getSelectButton("left", "Rank")).click()
@@ -505,7 +517,9 @@ describe("Merge user with non-user", () => {
       await (await MergePeople.getColumnContent("mid", "Status")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.status)
     expect(
-      await (await MergePeople.getColumnContent("mid", "Email")).getText()
+      await (
+        await MergePeople.getColumnContent("mid", "Email addresses")
+      ).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.email)
     expect(
       await (await MergePeople.getColumnContent("mid", "Phone")).getText()
@@ -549,7 +563,9 @@ describe("Merge user with non-user", () => {
       await (await MergePeople.getColumnContent("mid", "Status")).getText()
     ).to.eq(EXAMPLE_PEOPLE.userRight.status)
     expect(
-      await (await MergePeople.getColumnContent("mid", "Email")).getText()
+      await (
+        await MergePeople.getColumnContent("mid", "Email addresses")
+      ).getText()
     ).to.eq(EXAMPLE_PEOPLE.userRight.email)
     expect(
       await (await MergePeople.getColumnContent("mid", "Phone")).getText()

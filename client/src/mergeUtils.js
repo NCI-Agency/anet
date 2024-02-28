@@ -259,13 +259,7 @@ export function mergedPersonIsValid(mergedPerson) {
   if (!Settings.fields.person.country?.optional && !mergedPerson.country) {
     msg.push(Settings.fields.person.country?.label)
   }
-  if (
-    !Settings.fields.person.emailAddress?.optional &&
-    mergedPerson.user &&
-    !mergedPerson.emailAddress
-  ) {
-    msg.push(Settings.fields.person.emailAddress?.label)
-  }
+  // FIXME: Optional/required emailAddresses?
   if (
     !Settings.fields.person.endOfTourDate?.optional &&
     mergedPerson.user &&

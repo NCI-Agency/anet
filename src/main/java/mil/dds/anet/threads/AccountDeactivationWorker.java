@@ -6,9 +6,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AnetEmail;
+import mil.dds.anet.beans.EmailAddress;
 import mil.dds.anet.beans.JobHistory;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
@@ -59,6 +61,10 @@ public class AccountDeactivationWorker extends AbstractWorker {
     final List<Person> persons =
         AnetObjectEngine.getInstance().getPersonDao().search(query).getList();
 
+    // Make sure all email addresses are loaded
+    CompletableFuture.allOf(persons.stream().map(p -> p.loadEmailAddresses(context, null))
+        .toArray(CompletableFuture<?>[]::new)).join();
+
     // Send emails to let users know their account will soon be deactivated or deactivate accounts
     // that reach the end-of-tour date
     persons.forEach(p -> {
@@ -90,8 +96,9 @@ public class AccountDeactivationWorker extends AbstractWorker {
   private void checkDeactivationStatus(final Person person, final Integer daysBeforeWarning,
       final Integer nextWarning, final Instant now, final Instant lastRun,
       final List<String> ignoredDomainNames, final Integer warningIntervalInSecs) {
-    if (person.getStatus() == Person.Status.INACTIVE
-        || Utils.isEmailIgnored(person.getEmailAddress(), ignoredDomainNames)) {
+    if (person.getStatus() == Person.Status.INACTIVE || Utils.isEmailIgnored(
+        person.getNotificationEmailAddress().map(EmailAddress::getAddress).orElse(null),
+        ignoredDomainNames)) {
       // Skip inactive ANET users or users from ignored domains
       return;
     }
@@ -148,12 +155,19 @@ public class AccountDeactivationWorker extends AbstractWorker {
   }
 
   private void sendAccountDeactivationEmail(Person p) {
+    final String address =
+        p.getNotificationEmailAddress().map(EmailAddress::getAddress).orElse(null);
+    if (Utils.isEmptyOrNull(address)) {
+      logger.info(
+          "Person {} does not have an email address, not sending account deactivation email", p);
+      return;
+    }
     try {
       AnetEmail email = new AnetEmail();
       AccountDeactivationEmail action = new AccountDeactivationEmail();
       action.setPerson(p);
       email.setAction(action);
-      email.addToAddress(p.getEmailAddress());
+      email.addToAddress(address);
       AnetEmailWorker.sendEmailAsync(email);
     } catch (Exception e) {
       logger.error("Exception when sending account deactivation email", e);
@@ -161,13 +175,21 @@ public class AccountDeactivationWorker extends AbstractWorker {
   }
 
   private void sendDeactivationWarningEmail(Person p, Instant nextReminder) {
+    final String address =
+        p.getNotificationEmailAddress().map(EmailAddress::getAddress).orElse(null);
+    if (Utils.isEmptyOrNull(address)) {
+      logger.info(
+          "Person {} does not have an email address, not sending account deactivation warning email",
+          p);
+      return;
+    }
     try {
       AnetEmail email = new AnetEmail();
       AccountDeactivationWarningEmail action = new AccountDeactivationWarningEmail();
       action.setPerson(p);
       action.setNextReminder(nextReminder);
       email.setAction(action);
-      email.addToAddress(p.getEmailAddress());
+      email.addToAddress(address);
       AnetEmailWorker.sendEmailAsync(email);
     } catch (Exception e) {
       logger.error("Exception when sending deactivation warning email", e);

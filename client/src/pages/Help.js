@@ -28,7 +28,6 @@ const GQL_GET_ORGANIZATION = gql`
             name
             rank
             avatarUuid
-            emailAddress
             emailAddresses {
               network
               address

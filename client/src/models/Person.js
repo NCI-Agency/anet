@@ -77,24 +77,6 @@ export default class Person extends Model {
         .nullable()
         .default("")
         .label(Settings.fields.person.domainUsername?.label),
-      emailAddress: yup
-        .string()
-        .nullable()
-        .email()
-        .when("user", ([user], schema) =>
-          schema.test(
-            "emailAddress",
-            "emailAddress error",
-            (emailAddress, testContext) => {
-              const r = utils.handleEmailValidation(emailAddress, user)
-              return Settings.fields.person.emailAddress?.optional || r.isValid
-                ? true
-                : testContext.createError({ message: r.message })
-            }
-          )
-        )
-        .default("")
-        .label(Settings.fields.person.emailAddress?.label),
       emailAddresses: yupEmailAddressesWithValidation(
         "emailAddress",
         "emailAddress error",
@@ -188,7 +170,6 @@ export default class Person extends Model {
     avatarUuid
     status
     pendingVerification
-    emailAddress
     phoneNumber
     user
     domainUsername

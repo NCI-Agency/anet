@@ -55,8 +55,14 @@ export class CreatePerson extends Page {
     return browser.$('label[for="user_false"]')
   }
 
-  async getEmailAddress() {
-    return browser.$("#emailAddress")
+  async getEmailAddress(index) {
+    return browser.$(`input[name="emailAddresses.${index}.address"]`)
+  }
+
+  async getEmailAddressMessage(index) {
+    return browser.$(
+      `input[name="emailAddresses.${index}.address"] ~ div.invalid-feedback`
+    )
   }
 
   async getPhoneNumber() {

@@ -572,13 +572,6 @@ const PersonForm = ({
               <Fieldset title="Additional information">
                 <DictionaryField
                   wrappedComponent={FastField}
-                  dictProps={Settings.fields.person.emailAddress}
-                  name="emailAddress"
-                  type="email"
-                  component={FieldHelper.InputField}
-                />
-                <DictionaryField
-                  wrappedComponent={FastField}
                   as="div"
                   dictProps={Settings.fields.person.emailAddresses}
                   component={FieldHelper.SpecialField}

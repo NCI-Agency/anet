@@ -26,7 +26,6 @@ const GQL_GET_PERSON_LIST = gql`
         name
         rank
         avatarUuid
-        emailAddress
         emailAddresses {
           network
           address

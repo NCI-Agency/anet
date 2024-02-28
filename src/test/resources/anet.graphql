@@ -612,7 +612,6 @@ type Person {
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformation]
   domainUsername: String
-  emailAddress: String
   emailAddresses(network: String): [EmailAddress]
   endOfTourDate: Instant
   gender: String
@@ -641,7 +640,6 @@ input PersonInput {
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformationInput]
   domainUsername: String
-  emailAddress: String
   emailAddresses: [EmailAddressInput]
   endOfTourDate: Instant
   gender: String
@@ -969,7 +967,6 @@ type ReportPerson {
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformation]
   domainUsername: String
-  emailAddress: String
   emailAddresses(network: String): [EmailAddress]
   endOfTourDate: Instant
   gender: String
@@ -1002,7 +999,6 @@ input ReportPersonInput {
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformationInput]
   domainUsername: String
-  emailAddress: String
   emailAddresses: [EmailAddressInput]
   endOfTourDate: Instant
   gender: String
