@@ -9,6 +9,12 @@ class Search extends Page {
     return browser.$('//div/b[text()="No search results found!"]')
   }
 
+  async getFoundElement(element) {
+    await (await element).waitForExist({ timeout: 2000 })
+    await (await element).waitForDisplayed()
+    return await element
+  }
+
   async getFoundCounter(entity) {
     return browser.$(`div#${entity} span span`)
   }
@@ -35,6 +41,12 @@ class Search extends Page {
 
   async getFoundLocationTable() {
     return browser.$("div#locations #locations-search-results")
+  }
+
+  async getFoundAuthorizationGroupTable() {
+    return browser.$(
+      "div#authorizationGroups #authorizationGroups-search-results"
+    )
   }
 
   async linkOfPersonFound(name) {

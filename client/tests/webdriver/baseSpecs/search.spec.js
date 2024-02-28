@@ -9,40 +9,65 @@ describe("When using search", () => {
     await (await Home.getSubmitSearch()).click()
     // Reports
     expect(
-      parseInt(await (await Search.getFoundCounter("reports")).getText())
+      parseInt(
+        await (
+          await Search.getFoundElement(Search.getFoundCounter("reports"))
+        ).getText()
+      )
     ).to.be.greaterThan(0)
-    await (await Search.getFoundReportTable()).waitForExist({ timeout: 20000 })
+    await Search.getFoundElement(Search.getFoundReportTable())
     // People
     expect(
-      parseInt(await (await Search.getFoundCounter("people")).getText())
+      parseInt(
+        await (
+          await Search.getFoundElement(Search.getFoundCounter("people"))
+        ).getText()
+      )
     ).to.be.greaterThan(0)
-    await (await Search.getFoundPeopleTable()).waitForExist({ timeout: 20000 })
+    await Search.getFoundElement(Search.getFoundPeopleTable())
     // Organizations
     expect(
-      parseInt(await (await Search.getFoundCounter("organizations")).getText())
+      parseInt(
+        await (
+          await Search.getFoundElement(Search.getFoundCounter("organizations"))
+        ).getText()
+      )
     ).to.be.greaterThan(0)
-    await (
-      await Search.getFoundOrganizationTable()
-    ).waitForExist({ timeout: 20000 })
+    await Search.getFoundElement(Search.getFoundOrganizationTable())
     // Positions
     expect(
-      parseInt(await (await Search.getFoundCounter("positions")).getText())
+      parseInt(
+        await (
+          await Search.getFoundElement(Search.getFoundCounter("positions"))
+        ).getText()
+      )
     ).to.be.greaterThan(0)
-    await (
-      await Search.getFoundPositionTable()
-    ).waitForExist({ timeout: 20000 })
+    await Search.getFoundElement(Search.getFoundPositionTable())
     // Locations
     expect(
-      parseInt(await (await Search.getFoundCounter("locations")).getText())
+      parseInt(
+        await (
+          await Search.getFoundElement(Search.getFoundCounter("locations"))
+        ).getText()
+      )
     ).to.be.greaterThan(0)
-    await (
-      await Search.getFoundLocationTable()
-    ).waitForExist({ timeout: 20000 })
+    await Search.getFoundElement(Search.getFoundLocationTable())
     // Tasks
     expect(
-      parseInt(await (await Search.getFoundCounter("tasks")).getText())
+      parseInt(
+        await (
+          await Search.getFoundElement(Search.getFoundCounter("tasks"))
+        ).getText()
+      )
     ).to.be.greaterThan(0)
-    await (await Search.getFoundTaskTable()).waitForExist({ timeout: 20000 })
+    await Search.getFoundElement(Search.getFoundTaskTable())
+    // Authorization groups
+    expect(
+      parseInt(
+        await (await Search.getFoundCounter("authorizationGroups")).getText()
+      )
+    ).to.be.greaterThan(0)
+    await Search.getFoundElement(Search.getFoundAuthorizationGroupTable())
   })
   it("Should not show results counters when searching in all entities and no results found", async() => {
     await Home.openAsSuperuser()
@@ -69,6 +94,9 @@ describe("When using search", () => {
     ).to.equal(false)
     expect(
       await (await Search.getFoundCounter("tasks")).isDisplayed()
+    ).to.equal(false)
+    expect(
+      await (await Search.getFoundCounter("authorizationGroups")).isDisplayed()
     ).to.equal(false)
   })
 })

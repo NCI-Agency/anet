@@ -1065,7 +1065,19 @@ const Search = ({
         </Fieldset>
       )}
       {queryTypes.includes(SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS) && (
-        <Fieldset id="authorizationGroups" title="Authorization Groups">
+        <Fieldset
+          id="authorizationGroups"
+          title={
+            <>
+              Authorization Groups
+              {hasAuthorizationGroupsResults && (
+                <Badge pill bg="secondary" className="ms-1">
+                  {numAuthorizationGroups}
+                </Badge>
+              )}
+            </>
+          }
+        >
           <AuthorizationGroups
             pageDispatchers={pageDispatchers}
             queryParams={genericSearchQueryParams}
