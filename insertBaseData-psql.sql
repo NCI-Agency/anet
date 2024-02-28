@@ -73,7 +73,9 @@ INSERT INTO people (uuid, name, status, "emailAddress", "phoneNumber", rank, bio
   (uuid_generate_v4(), 'HUNTMAN, Hunter', 0, 'hunter+hunter@example.com', '+1-412-9314', 'CIV', NULL, false, NULL, NULL, 'United States of America', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'NICHOLSON, Nick', 0, 'hunter+nick@example.com', '+1-202-7324', 'CIV', NULL, true, 'nick', '2a1e98bd-13dc-49c9-a1c5-7137eacc0e8f', 'United States of America', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'BEAU, Yoshie', 0, 'hunter+yoshie@example.com', '+1-202-7320', 'CIV', NULL, true, 'yoshie', 'b3f67185-77e7-42a0-a2eb-f0739077eab5', 'United States of America', 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'SHARTON, Shardul', 1, 'hunter+shardul@example.com', '+99-9999-9999', 'CIV', NULL, false, NULL, NULL, 'Italy', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  (uuid_generate_v4(), 'SHARTON, Shardul', 1, 'hunter+shardul@example.com', '+99-9999-9999', 'CIV', NULL, false, NULL, NULL, 'Italy', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'ROGERS, Ben', 0, 'ben+rogers@example.com', '+99-9999-9999', 'CIV', NULL, true, NULL, NULL, 'Italy', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'RIVERS, Kevin', 0, 'kevin+rivers@example.com', '+99-9999-9999', 'CIV', NULL, true, NULL, NULL, 'Italy', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Create locations
 INSERT INTO locations (uuid, type, name, lat, lng, "createdAt", "updatedAt") VALUES
@@ -147,6 +149,8 @@ INSERT INTO positions (uuid, name, type, role, status, "currentPersonUuid", "loc
   (uuid_generate_v4(), 'EF 5.1 Advisor Accounting', 0, 0, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 5.1 Superuser Sales 1', 2, 1, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 5.1 Superuser Sales 2', 2, 1, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'EF 6 Approver', 0, 0, 0, NULL, '7339f9e3-99d1-497a-9e3b-1269c4c287fe', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'EF 6.1 Advisor', 0, 0, 0, NULL, '7339f9e3-99d1-497a-9e3b-1269c4c287fe', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 9 Advisor', 0, 0, 0, NULL, '7339f9e3-99d1-497a-9e3b-1269c4c287fe', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 9 Approver', 0, 0, 0, NULL, '7339f9e3-99d1-497a-9e3b-1269c4c287fe', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'LNG Advisor A', 0, 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
@@ -246,6 +250,16 @@ INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
   ((SELECT uuid from positions where name = 'EF 5 Admin'), (SELECT uuid from people where "emailAddress" = 'michael+scott@example.com'), CURRENT_TIMESTAMP);
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "emailAddress" = 'michael+scott@example.com') WHERE name = 'EF 5 Admin';
 
+-- Put Kevin Rivers into the EF 6 Approver
+INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt")
+VALUES ((SELECT uuid from positions where name = 'EF 6 Approver'), (SELECT uuid from people where "emailAddress" = 'kevin+rivers@example.com'), CURRENT_TIMESTAMP);
+UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "emailAddress" = 'kevin+rivers@example.com') WHERE name = 'EF 6 Approver';
+
+-- Put Ben Rogers into the EF 6.1 Advisor
+INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt")
+VALUES ((SELECT uuid from positions where name = 'EF 6.1 Advisor'), (SELECT uuid from people where "emailAddress" = 'ben+rogers@example.com'), CURRENT_TIMESTAMP);
+UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "emailAddress" = 'ben+rogers@example.com') WHERE name = 'EF 6.1 Advisor';
+
 -- Put Nick into the EF 9 Advisor
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
   ((SELECT uuid from positions where name = 'EF 9 Advisor'), (SELECT uuid from people where "emailAddress" = 'hunter+nick@example.com'), CURRENT_TIMESTAMP);
@@ -313,6 +327,8 @@ UPDATE positions SET "organizationUuid" = (SELECT uuid FROM organizations WHERE 
 UPDATE positions SET "organizationUuid" = (SELECT uuid FROM organizations WHERE "shortName" ='EF 4') WHERE name LIKE 'EF 4%';
 UPDATE positions SET "organizationUuid" = (SELECT uuid FROM organizations WHERE "shortName" ='EF 5') WHERE name LIKE 'EF 5%';
 UPDATE positions SET "organizationUuid" = (SELECT uuid FROM organizations WHERE "shortName" ='EF 5.1') WHERE name LIKE 'EF 5.1%';
+UPDATE positions SET "organizationUuid" = (SELECT uuid FROM organizations WHERE "shortName" ='EF 6') WHERE name LIKE 'EF 6%';
+UPDATE positions SET "organizationUuid" = (SELECT uuid FROM organizations WHERE "shortName" ='EF 6.1') WHERE name LIKE 'EF 6.1%';
 UPDATE positions SET "organizationUuid" = (SELECT uuid FROM organizations WHERE "shortName" ='EF 9') WHERE name LIKE 'EF 9%';
 UPDATE positions SET "organizationUuid" = (SELECT uuid FROM organizations WHERE "shortName" ='LNG') WHERE name LIKE 'LNG%';
 UPDATE positions SET "organizationUuid" = (SELECT uuid FROM organizations WHERE "shortName" ='ANET Administrators') where name = 'ANET Administrator';
@@ -340,6 +356,12 @@ INSERT INTO approvers ("approvalStepUuid", "positionUuid") VALUES
   ((SELECT uuid from "approvalSteps" WHERE name='EF 2.2 Initial Approvers'), (SELECT uuid from positions where name = 'EF 2.2 Superuser')),
   ((SELECT uuid from "approvalSteps" WHERE name='EF 2.2 Initial Approvers'), (SELECT uuid from positions where name = 'EF 2.2 Advisor D')),
   ((SELECT uuid from "approvalSteps" WHERE name='EF 2.2 Secondary Reviewers'), (SELECT uuid from positions where name = 'EF 2.2 Final Reviewer'));
+
+-- Create the EF 6 approval process
+INSERT INTO "approvalSteps" (uuid, "relatedObjectUuid", name, type)
+VALUES (uuid_generate_v4(), (SELECT uuid from organizations where "shortName"='EF 6'), 'EF 6 Approvers', 1);
+INSERT INTO approvers ("approvalStepUuid", "positionUuid")
+VALUES ((SELECT uuid from "approvalSteps" WHERE name='EF 6 Approvers'), (SELECT uuid from positions where name = 'EF 6 Approver'));
 
 -- Create the EF 9 approval process
 INSERT INTO "approvalSteps" (uuid, "relatedObjectUuid", name, type) VALUES

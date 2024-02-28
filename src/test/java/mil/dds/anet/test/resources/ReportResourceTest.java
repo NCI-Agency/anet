@@ -872,11 +872,12 @@ public class ReportResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void testDefaultApprovalFlow() throws NumberFormatException,
+  public void testInheritedAndDefaultApprovalFlow() throws NumberFormatException,
       GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     final Person jack = getJackJackson();
     final Person roger = getRogerRogwell();
     final Person bob = getBobBobtown();
+    final Person ben = getBenRogers();
 
     // Create a Person who isn't in a Billet
     final PersonInput authorInput =
@@ -945,58 +946,59 @@ public class ReportResourceTest extends AbstractResourceTest {
         TestData.createCommentInput("default approval chain test rejection"), returned.getUuid());
     assertThat(numRows).isOne();
 
-    // Create billet for Author
-    final PositionInput billetInput = PositionInput.builder().withName("EF 1.1 new advisor")
-        .withType(PositionType.REGULAR).withRole(PositionRole.MEMBER)
-        .withLocation(getLocationInput(getGeneralHospital())).withStatus(Status.ACTIVE).build();
-
-    // Put billet in EF 1.1
-    final OrganizationSearchQueryInput queryOrgs =
-        OrganizationSearchQueryInput.builder().withText("EF 1").build();
+    // Fetch needed organizations
+    final OrganizationSearchQueryInput queryOrgs = OrganizationSearchQueryInput.builder().build();
+    queryOrgs.setPageSize(0);
     final AnetBeanList_Organization results =
         adminQueryExecutor.organizationList(getListFields(ORGANIZATION_FIELDS), queryOrgs);
-    assertThat(results.getList().size()).isPositive();
-    Organization ef11 = null;
-    for (final Organization org : results.getList()) {
-      if (org.getShortName().trim().equalsIgnoreCase("ef 1.1")) {
-        billetInput.setOrganization(getOrganizationInput(org));
-        ef11 = org;
-        break;
-      }
-    }
-    assertThat(billetInput.getOrganization()).isNotNull();
-    assertThat(ef11).isNotNull();
+    Optional<Organization> ef11 = results.getList().stream()
+        .filter(org -> org.getShortName().trim().equalsIgnoreCase("EF 1.1")).findFirst();
+    Optional<Organization> ef6 = results.getList().stream()
+        .filter(org -> org.getShortName().trim().equalsIgnoreCase("EF 6")).findFirst();
+    assertThat(ef11.isPresent()).isTrue();
+    assertThat(ef6.isPresent()).isTrue();
 
-    final Position billet = adminMutationExecutor.createPosition(POSITION_FIELDS, billetInput);
-    assertThat(billet).isNotNull();
-    assertThat(billet.getUuid()).isNotNull();
-
-    // Put Author in the billet
-    Integer nrUpdated =
-        adminMutationExecutor.putPersonInPosition("", getPersonInput(author), billet.getUuid());
-    assertThat(nrUpdated).isEqualTo(1);
-
-    // Change primary advisor of the report to someone in EF 1.1
+    // Change primary advisor of the report to someone in EF 1.1 (Bob)
     returned.setReportPeople(
         List.of(personToPrimaryReportPerson(roger, true), personToReportPerson(jack, false),
             personToPrimaryReportPerson(bob, false), personToReportAuthor(author)));
+
     final Report updated =
         authorMutationExecutor.updateReport(FIELDS, getReportInput(returned), true);
     assertThat(updated).isNotNull();
     assertThat(updated.getAdvisorOrg().getUuid()).isNotEqualTo(returned.getAdvisorOrg().getUuid());
 
+    // Re-submit the reported
+    numRows = authorMutationExecutor.submitReport("", r.getUuid());
+    assertThat(numRows).isOne();
+
+    // Report should now have the EF 1.1 approval step
+    validateReportApprovalStep(jackQueryExecutor.report(FIELDS, r.getUuid()), ef11.get().getUuid());
+
+    // Change primary advisor of the report to someone in EF 6.1 (Ben)
+    updated.setReportPeople(
+        List.of(personToPrimaryReportPerson(roger, true), personToReportPerson(jack, false),
+            personToPrimaryReportPerson(ben, false), personToReportAuthor(author)));
+
+    final Report updated2 =
+        authorMutationExecutor.updateReport(FIELDS, getReportInput(updated), true);
+    assertThat(updated2).isNotNull();
+    assertThat(updated2.getAdvisorOrg().getUuid()).isNotEqualTo(updated.getAdvisorOrg().getUuid());
+
     // Re-submit the report
     numRows = authorMutationExecutor.submitReport("", r.getUuid());
     assertThat(numRows).isOne();
 
-    // Report should now be up for review by primary advisor org's (EF 1.1) approvers
-    final Report returned2 = jackQueryExecutor.report(FIELDS, r.getUuid());
-    assertThat(returned2.getUuid()).isEqualTo(r.getUuid());
-    assertThat(returned2.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
-    assertThat(returned2.getApprovalStep().getUuid())
-        .isNotEqualTo(returned.getApprovalStep().getUuid());
-    assertThat(returned2.getApprovalStep()).isNotNull();
-    assertThat(returned2.getApprovalStep().getRelatedObjectUuid()).isEqualTo(ef11.getUuid());
+    // EF 6.1 does not have approval steps but EF 6 does,
+    // Report should now be up for review by EF 6 approvers due to inheriting approval steps form
+    // parent
+    validateReportApprovalStep(jackQueryExecutor.report(FIELDS, r.getUuid()), ef6.get().getUuid());
+  }
+
+  private void validateReportApprovalStep(Report report, String organizationUuid) {
+    assertThat(report.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
+    assertThat(report.getApprovalStep()).isNotNull();
+    assertThat(report.getApprovalStep().getRelatedObjectUuid()).isEqualTo(organizationUuid);
   }
 
   private static void failSubmit(final Report r, final String defaultOrgSetting,
@@ -2332,6 +2334,7 @@ public class ReportResourceTest extends AbstractResourceTest {
         .anyMatch(report -> !report.getUuid().equals(erinsDraftReport.getUuid()));
   }
 
+  @Test
   void testAdminCanSubmit()
       throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
     // Erin's Draft report, ready for submission

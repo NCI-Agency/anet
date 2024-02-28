@@ -653,9 +653,25 @@ public class Report extends AbstractCustomizableAnetBean
 
   private CompletableFuture<List<ApprovalStep>> getOrganizationWorkflow(Map<String, Object> context,
       AnetObjectEngine engine, String advisorOrgUuid) {
-    return isFutureEngagement()
-        ? getPlanningWorkflowForRelatedObject(context, engine, advisorOrgUuid)
-        : getWorkflowForRelatedObject(context, engine, advisorOrgUuid);
+    if (advisorOrgUuid == null) {
+      // No more parents, return empty steps
+      return CompletableFuture.completedFuture(new ArrayList<>());
+    }
+
+    final CompletableFuture<List<ApprovalStep>> orgStepsFuture =
+        isFutureEngagement() ? getPlanningWorkflowForRelatedObject(context, engine, advisorOrgUuid)
+            : getWorkflowForRelatedObject(context, engine, advisorOrgUuid);
+
+    return orgStepsFuture.thenCompose(orgSteps -> {
+      if (!orgSteps.isEmpty()) {
+        // Return approval steps of parent
+        return CompletableFuture.completedFuture(orgSteps);
+      }
+      // Keep looking in the parent organization
+      return new UuidFetcher<Organization>()
+          .load(context, IdDataLoaderKey.ORGANIZATIONS, advisorOrgUuid)
+          .thenCompose(o -> getOrganizationWorkflow(context, engine, o.getParentOrgUuid()));
+    });
   }
 
   private CompletableFuture<List<ApprovalStep>> getPlanningWorkflowForRelatedObject(
