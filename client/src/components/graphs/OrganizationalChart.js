@@ -39,6 +39,7 @@ const GQL_GET_CHART_DATA = gql`
           uuid
           name
           rank
+          user
           avatarUuid
         }
       }
@@ -67,6 +68,7 @@ const GQL_GET_CHART_DATA = gql`
             uuid
             name
             rank
+            user
             avatarUuid
           }
         }
