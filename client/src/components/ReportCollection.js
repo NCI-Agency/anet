@@ -4,7 +4,10 @@ import {
   mapPageDispatchersToProps,
   PageDispatchersPropType
 } from "components/Page"
-import ReportCalendar from "components/ReportCalendar"
+import ReportCalendar, {
+  ATTENDEE_TYPE_ADVISOR,
+  ATTENDEE_TYPE_INTERLOCUTOR
+} from "components/ReportCalendar"
 import ReportMap from "components/ReportMap"
 import ReportStatistics from "components/ReportStatistics"
 import ReportSummary from "components/ReportSummary"
@@ -16,7 +19,6 @@ import React, { useState } from "react"
 import { Button } from "react-bootstrap"
 import { connect } from "react-redux"
 import Settings from "settings"
-import { ATTENDEE_TYPE_ADVISOR, ATTENDEE_TYPE_INTERLOCUTOR } from "./Calendar"
 
 export const FORMAT_CALENDAR = "calendar"
 export const FORMAT_SUMMARY = "summary"

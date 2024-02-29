@@ -6,7 +6,7 @@ SUPPORT_EMAIL_ADDR: support@example.com
 engagementsIncludeTimeAndDuration: true
 
 calendarOptions:
-  attendeesType: Advisor
+  attendeesType: advisor
 
 dateFormats:
   email:

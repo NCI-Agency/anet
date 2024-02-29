@@ -9,6 +9,9 @@ import PropTypes from "prop-types"
 import React, { useRef } from "react"
 import { useNavigate } from "react-router-dom"
 
+export const ATTENDEE_TYPE_ADVISOR = "advisor"
+export const ATTENDEE_TYPE_INTERLOCUTOR = "interlocutor"
+
 const GQL_GET_REPORT_LIST = gql`
   query ($reportQuery: ReportSearchQueryInput) {
     reportList(query: $reportQuery) {
@@ -75,11 +78,23 @@ const ReportCalendar = ({
       engagementDateStart: moment(fetchInfo.start).startOf("day"),
       engagementDateEnd: moment(fetchInfo.end).endOf("day")
     })
-    if (
-      _isEqual(prevReportQuery.current, reportQuery) &&
-      _isEqual(prevAttendeeType.current, attendeeType)
-    ) {
-      // Optimise, return previous API promise instead of calling API.query again
+    if (_isEqual(prevReportQuery.current, reportQuery)) {
+      if (prevAttendeeType.current !== attendeeType) {
+        // Only attendeeType changed, just recompute events
+        prevAttendeeType.current = attendeeType
+        showLoading()
+        apiPromise.current = apiPromise.current.then(data => {
+          // Each report is stored in the extendedProps
+          const reports = data.map(d => d.extendedProps)
+          const results = reportsToEvents(
+            reports,
+            attendeeType === ATTENDEE_TYPE_INTERLOCUTOR
+          )
+          hideLoading()
+          return results
+        })
+      }
+      // Optimise, return API promise instead of calling API.query again
       return apiPromise.current
     }
     prevReportQuery.current = reportQuery
@@ -98,7 +113,10 @@ const ReportCalendar = ({
         const { totalCount } = data.reportList
         setTotalCount(totalCount)
       }
-      const results = reportsToEvents(reports, attendeeType)
+      const results = reportsToEvents(
+        reports,
+        attendeeType === ATTENDEE_TYPE_INTERLOCUTOR
+      )
       hideLoading()
       return results
     })

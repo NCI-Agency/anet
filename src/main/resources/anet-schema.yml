@@ -370,6 +370,7 @@ required:
   - VERSION_CHANGED_MSG
   - SUPPORT_EMAIL_ADDR
   - dateFormats
+  - calendarOptions
   - reportWorkflow
   - maxTextFieldLength
   - fields
@@ -484,7 +485,8 @@ properties:
       attendeesType:
         type: string
         description: This value determines which names are shown by default in the report calendar, either advisor or interlocutor.
-        enum: [Advisor, Interlocutor]
+        enum: [advisor, interlocutor]
+
   menuOptions:
     type: object
     additionalProperties: false
