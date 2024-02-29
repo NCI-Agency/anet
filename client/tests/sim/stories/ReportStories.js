@@ -3,32 +3,24 @@ import Model from "components/Model"
 import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
 import _uniqWith from "lodash/uniqWith"
-import { Location, Person, Position, Report } from "models"
+import { Location, Report } from "models"
 import { fuzzy, populate, runGQL } from "../simutils"
 import { getRandomObject } from "./NoteStories"
 
-const getRandomPerson = async function(user, hasPosition, type, role) {
+const getRandomPerson = async function(user, hasPosition) {
   if (hasPosition) {
     const position = await getRandomObject(
       user,
       "positions",
       {
         status: Model.STATUS.ACTIVE,
-        isFilled: true,
-        type
+        isFilled: true
       },
-      "uuid type person { uuid name role }"
+      "uuid person { uuid name }"
     )
     return position === null ? null : position.person
   } else {
-    const person = await getRandomObject(
-      user,
-      "people",
-      {
-        role
-      },
-      "uuid name role"
-    )
+    const person = await getRandomObject(user, "people", {}, "uuid name")
     return person
   }
 }
@@ -37,25 +29,19 @@ async function populateReport(report, user, args) {
   const location = await getRandomObject(user, "locations", {
     status: Model.STATUS.ACTIVE,
     type: fuzzy.withProbability(0.75)
-      ? Location.LOCATION_TYPES.PRINCIPAL_LOCATION
-      : fuzzy.withProbability(0.95)
-        ? Location.LOCATION_TYPES.ADVISOR_LOCATION
-        : Location.LOCATION_TYPES.VIRTUAL_LOCATION
+      ? Location.LOCATION_TYPES.POINT_LOCATION
+      : Location.LOCATION_TYPES.VIRTUAL_LOCATION
   })
   async function getAttendees() {
     const reportPeople = []
     const nbOfAdvisors = faker.number.int({ min: 1, max: 5 })
     let primary = true
     for (let i = 0; i < nbOfAdvisors; i++) {
-      const advisor = await getRandomPerson(
-        user,
-        primary,
-        [Position.TYPE.ADVISOR],
-        Person.ROLE.ADVISOR
-      )
+      const advisor = await getRandomPerson(user, primary)
       if (advisor) {
         advisor.primary = primary
         advisor.attendee = true
+        advisor.interlocutor = false
         // Set the first random advisor attendee as author
         advisor.author = i === 0
         primary = false
@@ -63,21 +49,17 @@ async function populateReport(report, user, args) {
       }
     }
 
-    const nbOfPrincipals = faker.number.int({ min: 1, max: 5 })
+    const nbOfInterlocutors = faker.number.int({ min: 1, max: 5 })
     primary = true
-    for (let i = 0; i < nbOfPrincipals; i++) {
-      const principal = await getRandomPerson(
-        user,
-        primary,
-        [Position.TYPE.PRINCIPAL],
-        Person.ROLE.PRINCIPAL
-      )
-      if (principal) {
-        principal.primary = primary
-        principal.attendee = true
-        principal.author = false
+    for (let i = 0; i < nbOfInterlocutors; i++) {
+      const interlocutor = await getRandomPerson(user, primary)
+      if (interlocutor) {
+        interlocutor.primary = primary
+        interlocutor.attendee = true
+        interlocutor.interlocutor = true
+        interlocutor.author = false
         primary = false
-        reportPeople.push(principal)
+        reportPeople.push(interlocutor)
       }
     }
 
@@ -116,7 +98,7 @@ async function populateReport(report, user, args) {
       ? null
       : faker.helpers.arrayElement([
         "CANCELLED_BY_ADVISOR",
-        "CANCELLED_BY_PRINCIPAL",
+        "CANCELLED_BY_INTERLOCUTOR",
         "CANCELLED_DUE_TO_TRANSPORTATION",
         "CANCELLED_DUE_TO_FORCE_PROTECTION",
         "CANCELLED_DUE_TO_ROUTES",

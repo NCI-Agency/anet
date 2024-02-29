@@ -9,14 +9,24 @@ async function populateLocation(location, user) {
     type: () =>
       fuzzy.withProbability(0.6)
         ? Location.LOCATION_TYPES.GEOGRAPHICAL_AREA
-        : fuzzy.withProbability(0.75)
-          ? Location.LOCATION_TYPES.PRINCIPAL_LOCATION
-          : Location.LOCATION_TYPES.ADVISOR_LOCATION,
+        : Location.LOCATION_TYPES.POINT_LOCATION,
     name: () => faker.location.city(),
     lat: () =>
-      parseFloat(faker.location.latitude(38.4862816432, 29.318572496, 10)),
+      parseFloat(
+        faker.location.latitude({
+          max: 38.4862816432,
+          min: 29.318572496,
+          precision: 10
+        })
+      ),
     lng: () =>
-      parseFloat(faker.location.longitude(75.1580277851, 60.5284298033, 10))
+      parseFloat(
+        faker.location.longitude({
+          max: 75.1580277851,
+          min: 60.5284298033,
+          precision: 10
+        })
+      )
   }
   populate(location, template)
     .status.always()

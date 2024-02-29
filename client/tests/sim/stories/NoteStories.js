@@ -1,7 +1,6 @@
 import { faker } from "@faker-js/faker"
 import { NOTE_TYPE } from "components/Model"
 import _isEmpty from "lodash/isEmpty"
-import { Person } from "models"
 import { populate, runGQL } from "../simutils"
 
 function getListEndpoint(type) {
@@ -90,9 +89,7 @@ async function populateNote(note, user, relatedObjectType) {
   const obj = await getRandomObject(user, relatedObjectType)
   const relatedObject =
     obj && obj.uuid ? { relatedObjectType, relatedObjectUuid: obj.uuid } : null
-  const author = await getRandomObject(user, "people", {
-    role: Person.ROLE.ADVISOR
-  })
+  const author = await getRandomObject(user, "people")
   const template = {
     author: () => author,
     type: () => NOTE_TYPE.FREE_TEXT,
