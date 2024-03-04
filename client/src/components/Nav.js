@@ -394,20 +394,18 @@ const Navigation = ({ allOrganizations, resetPages, clearSearchQuery }) => {
         Help
       </SidebarLink>
 
-      {(currentUser.isAdmin() || currentUser.isSuperuser()) && (
-        <NavDropdown title="Insights" id="insights" active={inInsights}>
-          {INSIGHTS.map(insight => (
-            <SidebarContainer
-              key={insight}
-              linkTo={`/insights/${insight}`}
-              handleOnClick={clearSearchQuery}
-              setIsMenuLinksOpened={() => setIsMenuLinksOpened(false)}
-            >
-              {INSIGHT_DETAILS[insight].navTitle}
-            </SidebarContainer>
-          ))}
-        </NavDropdown>
-      )}
+      <NavDropdown title="Insights" id="insights" active={inInsights}>
+        {INSIGHTS.map(insight => (
+          <SidebarContainer
+            key={insight}
+            linkTo={`/insights/${insight}`}
+            handleOnClick={clearSearchQuery}
+            setIsMenuLinksOpened={() => setIsMenuLinksOpened(false)}
+          >
+            {INSIGHT_DETAILS[insight].navTitle}
+          </SidebarContainer>
+        ))}
+      </NavDropdown>
 
       {Settings.dashboards && (
         <NavDropdown title="Dashboards" id="dashboards" active={inDashboards}>
