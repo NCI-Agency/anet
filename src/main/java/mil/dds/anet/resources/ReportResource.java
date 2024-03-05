@@ -126,7 +126,8 @@ public class ReportResource {
     if (r.getState() == null) {
       r.setState(ReportState.DRAFT);
     }
-    if (r.getReportPeople() == null || r.getReportPeople().stream().noneMatch(p -> p.isAuthor())) {
+    if (r.getReportPeople() == null
+        || r.getReportPeople().stream().noneMatch(ReportPerson::isAuthor)) {
       throw new WebApplicationException("Report must have at least one author", Status.BAD_REQUEST);
     }
 
@@ -180,7 +181,7 @@ public class ReportResource {
         action.setEditor(editor);
         email.setAction(action);
         email.setToAddresses(existing.loadAuthors(AnetObjectEngine.getInstance().getContext())
-            .join().stream().map(rp -> rp.getEmailAddress()).collect(Collectors.toList()));
+            .join().stream().map(Person::getEmailAddress).collect(Collectors.toList()));
         AnetEmailWorker.sendEmailAsync(email);
       }
     }
@@ -214,7 +215,8 @@ public class ReportResource {
       throw new WebApplicationException("Report not found", Status.NOT_FOUND);
     }
 
-    if (r.getReportPeople() == null || r.getReportPeople().stream().noneMatch(p -> p.isAuthor())) {
+    if (r.getReportPeople() == null
+        || r.getReportPeople().stream().noneMatch(ReportPerson::isAuthor)) {
       throw new WebApplicationException("Report must have at least one author", Status.BAD_REQUEST);
     }
 
@@ -236,7 +238,7 @@ public class ReportResource {
     final Person primaryAdvisor = findPrimaryAttendee(r, false);
     final ReportPerson existingPrimaryAdvisor =
         existing.loadPrimaryAdvisor(engine.getContext()).join();
-    if (Utils.uuidEqual(primaryAdvisor, existingPrimaryAdvisor) == false
+    if (!Utils.uuidEqual(primaryAdvisor, existingPrimaryAdvisor)
         || existing.getAdvisorOrgUuid() == null) {
       r.setAdvisorOrg(engine
           .getOrganizationForPerson(engine.getContext(), DaoUtils.getUuid(primaryAdvisor)).join());
@@ -247,7 +249,7 @@ public class ReportResource {
     final Person primaryInterlocutor = findPrimaryAttendee(r, true);
     final ReportPerson existingPrimaryInterlocutor =
         existing.loadPrimaryInterlocutor(engine.getContext()).join();
-    if (Utils.uuidEqual(primaryInterlocutor, existingPrimaryInterlocutor) == false
+    if (!Utils.uuidEqual(primaryInterlocutor, existingPrimaryInterlocutor)
         || existing.getInterlocutorOrgUuid() == null) {
       r.setInterlocutorOrg(engine
           .getOrganizationForPerson(engine.getContext(), DaoUtils.getUuid(primaryInterlocutor))
@@ -467,7 +469,7 @@ public class ReportResource {
 
     // Add the comment
     final Comment comment1 = reportComment.comment;
-    if (comment1 != null && comment1.getText() != null && comment1.getText().trim().length() > 0) {
+    if (comment1 != null && comment1.getText() != null && !comment1.getText().trim().isEmpty()) {
       comment1.setReportUuid(r.getUuid());
       comment1.setAuthorUuid(approver.getUuid());
       engine.getCommentDao().insert(comment1);
@@ -547,7 +549,7 @@ public class ReportResource {
     AnetEmail email = new AnetEmail();
     email.setAction(action);
     email.setToAddresses(r.loadAuthors(AnetObjectEngine.getInstance().getContext()).join().stream()
-        .map(rp -> rp.getEmailAddress()).collect(Collectors.toList()));
+        .map(Person::getEmailAddress).collect(Collectors.toList()));
     AnetEmailWorker.sendEmailAsync(email);
   }
 
@@ -641,7 +643,7 @@ public class ReportResource {
     action.setComment(comment);
     email.setAction(action);
     email.setToAddresses(r.loadAuthors(AnetObjectEngine.getInstance().getContext()).join().stream()
-        .map(rp -> rp.getEmailAddress()).collect(Collectors.toList()));
+        .map(Person::getEmailAddress).collect(Collectors.toList()));
     AnetEmailWorker.sendEmailAsync(email);
   }
 
@@ -718,7 +720,6 @@ public class ReportResource {
       @GraphQLArgument(name = "endDate") Instant end,
       @GraphQLArgument(name = "orgType") RollupGraphType orgType,
       @GraphQLArgument(name = "orgUuid") String orgUuid) {
-    ;
 
     @SuppressWarnings("unchecked")
     final List<String> nonReportingOrgsShortNames =
@@ -802,9 +803,6 @@ public class ReportResource {
       @GraphQLArgument(name = "weeksAgo", defaultValue = "3") int weeksAgo,
       @GraphQLArgument(name = "orgUuid",
           defaultValue = Organization.DUMMY_ORG_UUID) String orgUuid) {
-    final Person user = DaoUtils.getUserFromContext(context);
-    AuthUtils.assertSuperuser(user);
-
     Instant now = Instant.now();
     Instant weekStart = now.atZone(DaoUtils.getServerNativeZoneId()).with(DayOfWeek.MONDAY)
         .withHour(0).withMinute(0).withSecond(0).withNano(0).plusWeeks(1).toInstant();
@@ -826,12 +824,12 @@ public class ReportResource {
     final Set<String> tlf = Stream.of(topLevelField).collect(Collectors.toSet());
     final List<Map<String, Object>> groupedResults =
         Utils.resultGrouper(list, groupName, groupCol, tlf);
-    final List<AdvisorReportsEntry> result = new LinkedList<AdvisorReportsEntry>();
+    final List<AdvisorReportsEntry> result = new LinkedList<>();
     for (final Map<String, Object> group : groupedResults) {
       final AdvisorReportsEntry entry = new AdvisorReportsEntry();
       entry.setUuid((String) group.get(groupCol));
       entry.setName((String) group.get(topLevelField));
-      final List<AdvisorReportsStats> stats = new LinkedList<AdvisorReportsStats>();
+      final List<AdvisorReportsStats> stats = new LinkedList<>();
       @SuppressWarnings("unchecked")
       final List<Map<String, Object>> groupStats = (List<Map<String, Object>>) group.get(groupName);
       for (final Map<String, Object> groupSt : groupStats) {
@@ -1019,8 +1017,7 @@ public class ReportResource {
     if (beans == null) {
       return false;
     }
-    return beans.stream().filter(b -> Objects.equals(b.getUuid(), nro.getRelatedObjectUuid()))
-        .findAny().isPresent();
+    return beans.stream().anyMatch(b -> Objects.equals(b.getUuid(), nro.getRelatedObjectUuid()));
   }
 
   private void checkNotePermission(final NoteDao noteDao, final Person user,
