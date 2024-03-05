@@ -1,5 +1,8 @@
 import { expect } from "chai"
-import Insights, { INSIGHTS } from "../pages/insights.page"
+import Insights, {
+  INSIGHTS,
+  PENDING_ASSESSMENTS_BY_POSITION
+} from "../pages/insights.page"
 
 describe("Insights pages", () => {
   it("Should open each insights page for admin user", async() => {
@@ -36,9 +39,11 @@ describe("Insights pages", () => {
     await Insights.logout()
   })
 
-  it("Should open each insights page for regular user", async() => {
+  it("Should open each insights page except pending assessments for regular user", async() => {
     await Insights.openAsPositionlessUser()
-    for (const insight of INSIGHTS) {
+    for (const insight of INSIGHTS.filter(
+      ins => ins !== PENDING_ASSESSMENTS_BY_POSITION
+    )) {
       await (await Insights.getInsightsMenu()).waitForExist()
       await (await Insights.getInsightsMenu()).waitForDisplayed()
       await (await Insights.getInsightsMenu()).click()
@@ -50,6 +55,17 @@ describe("Insights pages", () => {
       expect(await (await Insights.getInsightDiv(insight)).isExisting()).to.be
         .true
     }
+
+    await (await Insights.getInsightsMenu()).waitForExist()
+    await (await Insights.getInsightsMenu()).waitForDisplayed()
+    await (await Insights.getInsightsMenu()).click()
+    // eslint-disable-next-line no-unused-expressions
+    expect(
+      await (
+        await Insights.getInsightLink(PENDING_ASSESSMENTS_BY_POSITION)
+      ).isExisting()
+    ).to.be.false
+
     await Insights.logout()
   })
 })

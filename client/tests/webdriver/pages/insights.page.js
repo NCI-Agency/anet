@@ -6,7 +6,7 @@ const CANCELLED_REPORTS = "cancelled-engagement-reports"
 const REPORTS_BY_TASK = "reports-by-task"
 const REPORTS_BY_DAY_OF_WEEK = "reports-by-day-of-week"
 const FUTURE_ENGAGEMENTS_BY_LOCATION = "future-engagements-by-location"
-const PENDING_ASSESSMENTS_BY_POSITION = "pending-assessments-by-position"
+export const PENDING_ASSESSMENTS_BY_POSITION = "pending-assessments-by-position"
 const ADVISOR_REPORTS = "advisor-reports"
 export const INSIGHTS = [
   NOT_APPROVED_REPORTS,
