@@ -32,6 +32,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import mil.dds.anet.beans.EmailAddress;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.WithStatus.Status;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.config.AnetKeycloakConfiguration;
 import mil.dds.anet.database.EmailAddressDao;
@@ -169,7 +170,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
             final PersonDao dao = AnetObjectEngine.getInstance().getPersonDao();
             final AccessToken token = securityContext.getToken();
             // Call non-synchronized method first
-            Person person = findUser(dao, token);
+            Person person = findUser(dao, token.getSubject(), true);
             if (person == null) {
               // Call synchronized method
               person = findOrCreateUser(dao, token);
@@ -178,9 +179,9 @@ public class AnetApplication extends Application<AnetConfiguration> {
           }
 
           // Non-synchronized method, safe to run multiple times in parallel
-          private Person findUser(final PersonDao dao, final AccessToken token) {
-            final String openIdSubject = token.getSubject();
-            final List<Person> p = dao.findByOpenIdSubject(openIdSubject);
+          private Person findUser(final PersonDao dao, final String openIdSubject,
+              final boolean activeUser) {
+            final List<Person> p = dao.findByOpenIdSubject(openIdSubject, activeUser);
             if (!p.isEmpty()) {
               final Person existingPerson = p.get(0);
               logger.trace("found existing user={} by openIdSubject={}", existingPerson,
@@ -195,23 +196,19 @@ public class AnetApplication extends Application<AnetConfiguration> {
           // simultaneous authentication requests
           private synchronized Person findOrCreateUser(final PersonDao dao,
               final AccessToken token) {
-            final Person person = findUser(dao, token);
+            final String openIdSubject = token.getSubject();
+            final String username = token.getPreferredUsername();
+            final Person person = findUser(dao, openIdSubject, false);
             if (person != null) {
-              return person;
+              return updatePerson(dao, person, openIdSubject, username);
             }
 
             // Might be user from before Keycloak integration, try username
-            final String username = token.getPreferredUsername();
-            final String openIdSubject = token.getSubject();
             List<Person> p = dao.findByDomainUsername(username);
             if (!p.isEmpty()) {
               final Person existingPerson = p.get(0);
-              logger.trace(
-                  "found existing user={} by domainUsername={}; setting openIdSubject={} (was {})",
-                  existingPerson, username, openIdSubject, existingPerson.getOpenIdSubject());
-              existingPerson.setOpenIdSubject(openIdSubject);
-              dao.updateAuthenticationDetails(existingPerson);
-              return existingPerson;
+              logger.trace("found existing user={} by domainUsername={}", existingPerson, username);
+              return updatePerson(dao, existingPerson, openIdSubject, username);
             }
 
             // Fall back to email
@@ -219,15 +216,35 @@ public class AnetApplication extends Application<AnetConfiguration> {
             p = dao.findByEmailAddress(email);
             if (!p.isEmpty()) {
               final Person existingPerson = p.get(0);
-              logger.trace(
-                  "found existing user={} by emailAddress={}; setting openIdSubject={} (was {})",
-                  existingPerson, email, openIdSubject, existingPerson.getOpenIdSubject());
-              existingPerson.setOpenIdSubject(openIdSubject);
-              dao.updateAuthenticationDetails(existingPerson);
-              return existingPerson;
+              logger.trace("found existing user={} by emailAddress={}", existingPerson, email);
+              return updatePerson(dao, existingPerson, openIdSubject, username);
             }
 
             // Not found, first time this user has ever logged in
+            return createPerson(dao, openIdSubject, username, email, getCombinedName(token));
+          }
+
+          private Person updatePerson(final PersonDao dao, final Person person,
+              final String openIdSubject, final String username) {
+            logger.trace(
+                "updating user={} with domainUsername={} (was {}) and openIdSubject={} (was {})",
+                person, username, person.getDomainUsername(), openIdSubject,
+                person.getOpenIdSubject());
+            person.setDomainUsername(username);
+            person.setOpenIdSubject(openIdSubject);
+            if (person.getStatus() != Status.ACTIVE || !Boolean.TRUE.equals(person.getUser())) {
+              logger.trace("reactivating user={}", person);
+              person.setStatus(Status.ACTIVE);
+              person.setUser(true);
+              person.setPendingVerification(true);
+              person.setEndOfTourDate(null);
+            }
+            dao.updateAuthenticationDetails(person);
+            return person;
+          }
+
+          private Person createPerson(final PersonDao dao, final String openIdSubject,
+              final String username, final String email, final String name) {
             final Person newPerson = new Person();
             logger.trace("creating new user with domainUsername={}, email={} and openIdSubject={}",
                 username, email, openIdSubject);
@@ -236,22 +253,22 @@ public class AnetApplication extends Application<AnetConfiguration> {
             // Copy some data from the authentication token
             newPerson.setOpenIdSubject(openIdSubject);
             newPerson.setDomainUsername(username);
-            newPerson.setName(getCombinedName(token));
+            newPerson.setName(name);
             /*
              * Note: there's also token.getGender(), but that's not generally available in AD/LDAP,
              * and token.getPhoneNumber(), but that requires scope="openid phone" on the
              * authentication request, which is hard to accomplish with current Keycloak code.
              */
-            final Person authPerson = dao.insert(newPerson);
+            final Person person = dao.insert(newPerson);
             if (!Utils.isEmptyOrNull(email)) {
               final EmailAddressDao emailAddressDao =
                   AnetObjectEngine.getInstance().getEmailAddressDao();
               final EmailAddress emailAddress =
                   new EmailAddress(Utils.getEmailNetworkForNotifications(), email);
-              emailAddressDao.updateEmailAddresses(PersonDao.TABLE_NAME, authPerson.getUuid(),
+              emailAddressDao.updateEmailAddresses(PersonDao.TABLE_NAME, person.getUuid(),
                   List.of(emailAddress));
             }
-            return authPerson;
+            return person;
           }
         };
       }

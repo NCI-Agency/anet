@@ -339,11 +339,16 @@ public class PersonResourceTest extends AbstractResourceTest {
 
     final PersonInput newPersonInput = PersonInput.builder().withName("Namey McNameface")
         .withStatus(Status.ACTIVE).withDomainUsername("namey_" + Instant.now().toEpochMilli())
+        .withOpenIdSubject(DaoUtils.getNewUuid()).withUser(true)
         .withPosition(getPositionInput(retPos)).build();
     final Person retPerson =
         withCredentials(adminUser, t -> mutationExecutor.createPerson(FIELDS, newPersonInput));
     assertThat(retPerson).isNotNull();
     assertThat(retPerson.getUuid()).isNotNull();
+    assertThat(retPerson.getStatus()).isEqualTo(Status.ACTIVE);
+    assertThat(retPerson.getDomainUsername()).isEqualTo(newPersonInput.getDomainUsername());
+    assertThat(retPerson.getOpenIdSubject()).isEqualTo(newPersonInput.getOpenIdSubject());
+    assertThat(retPerson.getUser()).isEqualTo(newPersonInput.getUser());
     assertThat(retPerson.getPosition()).isNotNull();
 
     retPerson.setStatus(Status.INACTIVE);
@@ -353,9 +358,70 @@ public class PersonResourceTest extends AbstractResourceTest {
 
     final Person retPerson2 =
         withCredentials(adminUser, t -> queryExecutor.person(FIELDS, retPerson.getUuid()));
-    assertThat(retPerson2.getDomainUsername()).isNull();
-    assertThat(retPerson2.getOpenIdSubject()).isNull();
+    assertThat(retPerson2.getStatus()).isEqualTo(Status.INACTIVE);
+    assertThat(retPerson2.getDomainUsername()).isEqualTo(retPerson.getDomainUsername());
+    assertThat(retPerson2.getOpenIdSubject()).isEqualTo(retPerson.getOpenIdSubject());
+    assertThat(retPerson2.getUser()).isEqualTo(retPerson.getUser());
     assertThat(retPerson2.getPosition()).isNull();
+  }
+
+  @Test
+  void testReactivatePerson() {
+    final String noPosUuid = "bdd91de7-09c7-4f09-97e4-d3325bb92dab";
+    final String noPosDomainUsername = "nopos";
+    final Person noPosPerson =
+        withCredentials(jackUser, t -> queryExecutor.person(FIELDS, noPosUuid));
+    assertThat(noPosPerson).isNotNull();
+    assertThat(noPosPerson.getUuid()).isEqualTo(noPosUuid);
+    assertThat(noPosPerson.getDomainUsername()).isEqualTo(noPosDomainUsername);
+
+    // Inactivate user nopos
+    noPosPerson.setStatus(Status.INACTIVE);
+    Integer nrUpdated = withCredentials(adminUser,
+        t -> mutationExecutor.updatePerson("", getPersonInput(noPosPerson)));
+    assertThat(nrUpdated).isEqualTo(1);
+
+    final Person noPosInactive =
+        withCredentials(adminUser, t -> queryExecutor.person(FIELDS, noPosUuid));
+    assertThat(noPosInactive.getStatus()).isEqualTo(Status.INACTIVE);
+    assertThat(noPosInactive.getDomainUsername()).isEqualTo(noPosPerson.getDomainUsername());
+    assertThat(noPosInactive.getOpenIdSubject()).isEqualTo(noPosPerson.getOpenIdSubject());
+    assertThat(noPosInactive.getUser()).isEqualTo(noPosPerson.getUser());
+
+    // Reactivate user nopos by querying as nopos
+    final Person noPosAuth = withCredentials(noPosDomainUsername, t -> queryExecutor.me(FIELDS));
+    assertThat(noPosAuth.getStatus()).isEqualTo(Status.ACTIVE);
+    assertThat(noPosAuth.getDomainUsername()).isEqualTo(noPosPerson.getDomainUsername());
+    assertThat(noPosAuth.getOpenIdSubject()).isEqualTo(noPosPerson.getOpenIdSubject());
+    assertThat(noPosAuth.getUser()).isEqualTo(noPosPerson.getUser());
+    assertThat(noPosAuth.getPendingVerification()).isTrue();
+
+    // Until verified, user nopos should not be able to query other stuff
+    final Person p1 =
+        withCredentials(noPosDomainUsername, t -> queryExecutor.person(FIELDS, noPosUuid));
+    assertThat(p1).isNull();
+
+    // Verify user nopos
+    final PersonInput noPosReactivateInput = getPersonInput(noPosAuth);
+    noPosReactivateInput.setPendingVerification(false);
+    nrUpdated = withCredentials(noPosDomainUsername,
+        t -> mutationExecutor.updateMe("", noPosReactivateInput));
+    assertThat(nrUpdated).isEqualTo(1);
+
+    // User nopos should now be fully available again
+    final Person noPosReactivated =
+        withCredentials(adminUser, t -> queryExecutor.person(FIELDS, noPosUuid));
+    assertThat(noPosReactivated.getStatus()).isEqualTo(Status.ACTIVE);
+    assertThat(noPosReactivated.getDomainUsername()).isEqualTo(noPosPerson.getDomainUsername());
+    assertThat(noPosReactivated.getOpenIdSubject()).isEqualTo(noPosPerson.getOpenIdSubject());
+    assertThat(noPosReactivated.getUser()).isEqualTo(noPosPerson.getUser());
+    assertThat(noPosReactivated.getPendingVerification()).isFalse();
+
+    // User nopos should now be able to query other stuff again
+    final Person p2 =
+        withCredentials(noPosDomainUsername, t -> queryExecutor.person(FIELDS, noPosUuid));
+    assertThat(p2).isNotNull();
+    assertThat(p2.getUuid()).isEqualTo(noPosUuid);
   }
 
   @Test
