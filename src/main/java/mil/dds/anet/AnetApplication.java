@@ -211,17 +211,9 @@ public class AnetApplication extends Application<AnetConfiguration> {
               return updatePerson(dao, existingPerson, openIdSubject, username);
             }
 
-            // Fall back to email
-            final String email = token.getEmail();
-            p = dao.findByEmailAddress(email);
-            if (!p.isEmpty()) {
-              final Person existingPerson = p.get(0);
-              logger.trace("found existing user={} by emailAddress={}", existingPerson, email);
-              return updatePerson(dao, existingPerson, openIdSubject, username);
-            }
-
             // Not found, first time this user has ever logged in
-            return createPerson(dao, openIdSubject, username, email, getCombinedName(token));
+            return createPerson(dao, openIdSubject, username, token.getEmail(),
+                getCombinedName(token));
           }
 
           private Person updatePerson(final PersonDao dao, final Person person,

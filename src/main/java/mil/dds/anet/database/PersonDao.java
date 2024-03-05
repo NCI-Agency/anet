@@ -213,22 +213,6 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   }
 
   @InTransaction
-  // Should only be used during authentication
-  public List<Person> findByEmailAddress(String emailAddress) {
-    if (Utils.isEmptyOrNull(emailAddress)) {
-      return Collections.emptyList();
-    }
-    return getDbHandle()
-        .createQuery("/* findByEmailAddress */ SELECT " + PERSON_FIELDS + ","
-            + PositionDao.POSITION_FIELDS
-            + "FROM people LEFT JOIN positions ON people.uuid = positions.\"currentPersonUuid\" "
-            + "LEFT JOIN \"emailAddresses\" ON \"emailAddresses\".\"relatedObjectType\" = '"
-            + TABLE_NAME + "' AND people.uuid = \"emailAddresses\".\"relatedObjectUuid\" "
-            + "WHERE \"emailAddresses\".address = :emailAddress")
-        .bind("emailAddress", emailAddress).map(new PersonMapper()).list();
-  }
-
-  @InTransaction
   public List<Person> findByOpenIdSubject(String openIdSubject, boolean activeUser) {
     if (Utils.isEmptyOrNull(openIdSubject)) {
       return Collections.emptyList();
