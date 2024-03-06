@@ -4720,4 +4720,9 @@
 		</createIndex>
 	</changeSet>
 
+	<changeSet id="add_classification_to_reports" author="Chessray">
+		<addColumn tableName="reports">
+			<column name="classification" type="${long_text_type}" />
+		</addColumn>
+	</changeSet>
 </databaseChangeLog>
