@@ -1,0 +1,16 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="WebDriver - All Tests" type="WdioConfigurationType">
+    <node-interpreter>project</node-interpreter>
+    <node-options />
+    <wdio-package>$PROJECT_DIR$/client/node_modules/@wdio/cli</wdio-package>
+    <working-directory>$PROJECT_DIR$/client</working-directory>
+    <pass-parent-env>true</pass-parent-env>
+    <envs>
+      <env name="SERVER_URL" value="http://localhost:8080" />
+    </envs>
+    <wdio-config-file-path>$PROJECT_DIR$/client/config/wdio.config.js</wdio-config-file-path>
+    <wdio-framework>Mocha</wdio-framework>
+    <test-file>$PROJECT_DIR$/client/tests/webdriver/baseSpecs/*.spec.js</test-file>
+    <method v="2" />
+  </configuration>
+</component>
