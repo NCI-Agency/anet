@@ -3,7 +3,11 @@ import AppContext from "components/AppContext"
 import ResponsiveLayoutContext from "components/ResponsiveLayoutContext"
 import _isEmpty from "lodash/isEmpty"
 import { Organization } from "models"
-import { INSIGHT_DETAILS, INSIGHTS } from "pages/insights/Show"
+import {
+  INSIGHT_DETAILS,
+  INSIGHTS,
+  PENDING_ASSESSMENTS_BY_POSITION
+} from "pages/insights/Show"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useContext, useEffect, useMemo, useState } from "react"
@@ -109,6 +113,13 @@ SidebarContainer.propTypes = {
   children: PropTypes.node,
   handleOnClick: PropTypes.func,
   setIsMenuLinksOpened: PropTypes.func
+}
+
+function hasAccessToInsight(currentUser, insight) {
+  return (
+    insight !== PENDING_ASSESSMENTS_BY_POSITION ||
+    currentUser.hasAssignedPosition()
+  )
 }
 
 const Navigation = ({ allOrganizations, resetPages, clearSearchQuery }) => {
@@ -394,20 +405,20 @@ const Navigation = ({ allOrganizations, resetPages, clearSearchQuery }) => {
         Help
       </SidebarLink>
 
-      {(currentUser.isAdmin() || currentUser.isSuperuser()) && (
-        <NavDropdown title="Insights" id="insights" active={inInsights}>
-          {INSIGHTS.map(insight => (
-            <SidebarContainer
-              key={insight}
-              linkTo={`/insights/${insight}`}
-              handleOnClick={clearSearchQuery}
-              setIsMenuLinksOpened={() => setIsMenuLinksOpened(false)}
-            >
-              {INSIGHT_DETAILS[insight].navTitle}
-            </SidebarContainer>
-          ))}
-        </NavDropdown>
-      )}
+      <NavDropdown title="Insights" id="insights" active={inInsights}>
+        {INSIGHTS.filter(insight =>
+          hasAccessToInsight(currentUser, insight)
+        ).map(insight => (
+          <SidebarContainer
+            key={insight}
+            linkTo={`/insights/${insight}`}
+            handleOnClick={clearSearchQuery}
+            setIsMenuLinksOpened={() => setIsMenuLinksOpened(false)}
+          >
+            {INSIGHT_DETAILS[insight].navTitle}
+          </SidebarContainer>
+        ))}
+      </NavDropdown>
 
       {Settings.dashboards && (
         <NavDropdown title="Dashboards" id="dashboards" active={inDashboards}>

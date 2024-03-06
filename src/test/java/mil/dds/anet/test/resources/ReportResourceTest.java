@@ -1947,23 +1947,15 @@ public class ReportResourceTest extends AbstractResourceTest {
 
   private void advisorReportInsights(final Person user)
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    final Position position = user.getPosition();
-    final boolean isSuperuser = position.getType() == PositionType.SUPERUSER;
     try {
       createTestReport();
       final List<AdvisorReportsEntry> advisorReports =
           getQueryExecutor(user.getDomainUsername()).advisorReportInsights(
               "{ uuid name stats { week nrReportsSubmitted nrEngagementsAttended } }", "-1", 3);
-      if (isSuperuser) {
-        assertThat(advisorReports).isNotNull();
-        assertThat(advisorReports.size()).isPositive();
-      } else {
-        fail("Expected ForbiddenException");
-      }
+      assertThat(advisorReports).isNotNull();
+      assertThat(advisorReports.size()).isPositive();
     } catch (ForbiddenException expectedException) {
-      if (isSuperuser) {
-        fail("Unexpected ForbiddenException");
-      }
+      fail("Unexpected ForbiddenException");
     }
   }
 
