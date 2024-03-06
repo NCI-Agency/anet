@@ -1,7 +1,7 @@
 import moment from "moment"
 import Settings from "settings"
 import { v4 as uuidv4 } from "uuid"
-import Report from "../../src/models/Report"
+import Report from "../../../src/models/Report"
 
 function tStart(report) {
   return moment(report.engagementDate).toDate().getTime()

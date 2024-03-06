@@ -1,12 +1,12 @@
 import { render, screen } from "@testing-library/react"
 import React from "react"
 import { BrowserRouter } from "react-router-dom"
-import AppContext from "../../src/components/AppContext"
+import AppContext from "../../../src/components/AppContext"
 import SecurityBanner, {
   SETTING_KEY_CLASSIFICATION,
   SETTING_KEY_COLOR,
   SETTING_KEY_RELEASABILITY
-} from "../../src/components/SecurityBanner"
+} from "../../../src/components/SecurityBanner"
 
 const Wrapper = connection => {
   const appSettings = {}

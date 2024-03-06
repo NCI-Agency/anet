@@ -1,5 +1,5 @@
 import moment from "moment"
-import { PERIOD_FACTORIES, RECURRENCE_TYPE } from "../../src/periodUtils"
+import { PERIOD_FACTORIES, RECURRENCE_TYPE } from "../../../src/periodUtils"
 
 const FORMAT = "YYYY-MM-DD"
 // 7 examples
