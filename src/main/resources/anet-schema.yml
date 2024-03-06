@@ -372,6 +372,7 @@ required:
   - dateFormats
   - reportWorkflow
   - maxTextFieldLength
+  - classification
   - fields
   - pinned_ORGs
   - non_reporting_ORGs
@@ -530,6 +531,14 @@ properties:
     title: The maximum number of characters allowed in selected text fields
     description: Used in the UI for report intent, report key outcomes, report next steps, authorization group description
 
+  classification:
+    type: object
+    properties:
+      label:
+        type: string
+      choices:
+        type: object
+
   fields:
     type: object
     additionalProperties: false
@@ -598,7 +607,7 @@ properties:
       attachment:
         type: object
         additionalProperties: false
-        required: [featureDisabled, restrictToAdmins, fileName, caption, description, classification]
+        required: [featureDisabled, restrictToAdmins, fileName, caption, description]
         properties:
           featureDisabled:
             type: boolean
@@ -614,8 +623,6 @@ properties:
             "$ref": "#/$defs/inputField"
           description:
             "$ref": "#/$defs/inputField"
-          classification:
-            "$ref": "#/$defs/customField"
           mimeTypes:
             type: array
             title: The allowed MIME types for uploading attachments

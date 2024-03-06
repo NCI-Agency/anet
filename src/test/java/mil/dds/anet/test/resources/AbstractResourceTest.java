@@ -1,5 +1,6 @@
 package mil.dds.anet.test.resources;
 
+import static mil.dds.anet.utils.ResourceUtils.getAllowedClassifications;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
@@ -473,4 +474,7 @@ public abstract class AbstractResourceTest {
     return ClientBuilder.newBuilder().register(HttpAuthenticationFeature.basic(user, user)).build();
   }
 
+  protected String getFirstClassification() {
+    return getAllowedClassifications().keySet().iterator().next();
+  }
 }

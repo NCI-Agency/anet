@@ -104,7 +104,7 @@ public class ReportResourceTest extends AbstractResourceTest {
   private static final String REPORT_FIELDS =
       "uuid intent exsum state cancelledReason atmosphere atmosphereDetails"
           + " engagementDate duration engagementDayOfWeek keyOutcomes nextSteps reportText"
-          + " createdAt updatedAt customFields";
+          + " createdAt updatedAt customFields classification";
   private static final String ROLLUP_FIELDS =
       String.format("{ org { %1$s } published cancelled }", _ORGANIZATION_FIELDS);
   private static final String _TASK_FIELDS = "uuid shortName longName category";
@@ -646,7 +646,8 @@ public class ReportResourceTest extends AbstractResourceTest {
             .withNextSteps("This is the next steps on a report")
             .withKeyOutcomes("These are the key outcomes of this engagement")
             .withAdvisorOrg(getOrganizationInput(advisorOrg))
-            .withInterlocutorOrg(getOrganizationInput(reportAttendeeOrg)).build();
+            .withInterlocutorOrg(getOrganizationInput(reportAttendeeOrg))
+            .withClassification(getFirstClassification()).build();
     final Report created = authorMutationExecutor.createReport(FIELDS, rInput);
     assertThat(created).isNotNull();
     assertThat(created.getUuid()).isNotNull();

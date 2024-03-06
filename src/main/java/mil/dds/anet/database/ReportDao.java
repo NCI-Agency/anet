@@ -72,8 +72,9 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   // Must always retrieve these e.g. for ORDER BY or search post-processing
-  public static final String[] minimalFields = {"uuid", "approvalStepUuid",
-      "advisorOrganizationUuid", "createdAt", "updatedAt", "engagementDate", "releasedAt", "state"};
+  public static final String[] minimalFields =
+      {"uuid", "approvalStepUuid", "advisorOrganizationUuid", "createdAt", "updatedAt",
+          "engagementDate", "releasedAt", "state", "classification"};
   public static final String[] additionalFields = {"duration", "intent", "exsum", "locationUuid",
       "interlocutorOrganizationUuid", "atmosphere", "cancelledReason", "atmosphereDetails", "text",
       "keyOutcomes", "nextSteps", "customFields"};
@@ -119,11 +120,11 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
         + "text, \"keyOutcomes\", \"nextSteps\", "
         + "\"engagementDate\", \"releasedAt\", duration, atmosphere, \"cancelledReason\", "
         + "\"atmosphereDetails\", \"advisorOrganizationUuid\", "
-        + "\"interlocutorOrganizationUuid\", \"customFields\") VALUES "
+        + "\"interlocutorOrganizationUuid\", \"customFields\", \"classification\") VALUES "
         + "(:uuid, :state, :createdAt, :updatedAt, :locationUuid, :intent, "
         + ":exsum, :reportText, :keyOutcomes, :nextSteps, :engagementDate, :releasedAt, "
         + ":duration, :atmosphere, :cancelledReason, :atmosphereDetails, :advisorOrgUuid, "
-        + ":interlocutorOrgUuid, :customFields)";
+        + ":interlocutorOrgUuid, :customFields, :classification)";
 
     getDbHandle().createUpdate(sql).bindBean(r)
         .bind("createdAt", DaoUtils.asLocalDateTime(r.getCreatedAt()))
@@ -238,8 +239,8 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
         + "\"atmosphereDetails\" = :atmosphereDetails, "
         + "\"cancelledReason\" = :cancelledReason, "
         + "\"interlocutorOrganizationUuid\" = :interlocutorOrgUuid, "
-        + "\"advisorOrganizationUuid\" = :advisorOrgUuid, "
-        + "\"customFields\" = :customFields WHERE uuid = :uuid";
+        + "\"advisorOrganizationUuid\" = :advisorOrgUuid, " + "\"customFields\" = :customFields, "
+        + "\"classification\" = :classification WHERE uuid = :uuid";
 
     return getDbHandle().createUpdate(sql).bindBean(r)
         .bind("updatedAt", DaoUtils.asLocalDateTime(r.getUpdatedAt()))

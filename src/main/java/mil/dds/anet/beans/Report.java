@@ -91,6 +91,11 @@ public class Report extends AbstractCustomizableAnetBean
   @GraphQLQuery
   @GraphQLInputField
   String reportText;
+
+  @GraphQLQuery
+  @GraphQLInputField
+  private String classification;
+
   // annotated below
   private List<ReportPerson> reportPeople;
   // annotated below
@@ -191,6 +196,14 @@ public class Report extends AbstractCustomizableAnetBean
 
   public void setDuration(Integer duration) {
     this.duration = duration;
+  }
+
+  public String getClassification() {
+    return classification;
+  }
+
+  public void setClassification(final String classification) {
+    this.classification = classification;
   }
 
   @GraphQLQuery(name = "location")

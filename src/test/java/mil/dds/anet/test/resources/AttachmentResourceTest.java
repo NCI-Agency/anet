@@ -706,10 +706,4 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     final var allowedMimeTypes = AttachmentResource.getAllowedMimeTypes();
     return allowedMimeTypes.get(0);
   }
-
-  private String getFirstClassification() {
-    final var allowedClassifications = AttachmentResource.getAllowedClassifications();
-    return allowedClassifications.keySet().iterator().next();
-  }
-
 }

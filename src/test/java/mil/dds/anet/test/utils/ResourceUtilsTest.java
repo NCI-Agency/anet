@@ -1,5 +1,11 @@
 package mil.dds.anet.test.utils;
 
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import static mil.dds.anet.utils.ResourceUtils.assertAllowedClassification;
+import static mil.dds.anet.utils.ResourceUtils.getAllowedClassifications;
+import static org.assertj.core.api.BDDAssertions.then;
+import static org.assertj.core.api.BDDAssertions.thenNoException;
+import static org.assertj.core.api.BDDAssertions.thenThrownBy;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.lang.invoke.MethodHandles;
@@ -8,14 +14,20 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.beans.Position;
+import mil.dds.anet.test.integration.utils.TestApp;
 import mil.dds.anet.utils.ResourceUtils;
+import net.bytebuddy.utility.RandomString;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@ExtendWith(TestApp.class)
 public class ResourceUtilsTest {
 
   protected static final Logger logger =
@@ -174,5 +186,24 @@ public class ResourceUtilsTest {
 
   private Instant toInstant(final Object testDate) {
     return testDate == null ? null : Instant.parse((String) testDate);
+  }
+
+  @Test
+  void shouldContainClassificationEntries() {
+    then(getAllowedClassifications()).isNotNull().isNotEmpty();
+  }
+
+  @Test
+  void shouldPassWithoutExceptionForExistingClassification() {
+    thenNoException().isThrownBy(() -> assertAllowedClassification("undefined"));
+  }
+
+  @Test
+  void shouldThrowWebApplicationExceptionForUnknownClassification() {
+    thenThrownBy(() -> assertAllowedClassification(RandomString.make()))
+        .isInstanceOf(WebApplicationException.class).hasMessage("Classification is not allowed")
+        .asInstanceOf(InstanceOfAssertFactories.type(WebApplicationException.class))
+        .extracting(WebApplicationException::getResponse).extracting(Response::getStatus)
+        .isEqualTo(BAD_REQUEST.getStatusCode());
   }
 }
