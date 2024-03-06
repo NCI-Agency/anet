@@ -54,6 +54,7 @@ import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.utils.SqDataLoaderKey;
 import mil.dds.anet.utils.Utils;
+import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import mil.dds.anet.views.SearchQueryFetcher;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -462,13 +463,13 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
       orgList = AnetObjectEngine.getInstance().getOrganizationDao().search(query).getList();
       Optional<Organization> parentOrg =
           orgList.stream().filter(o -> o.getUuid().equals(parentOrgUuid)).findFirst();
-      if (parentOrg.isPresent() == false) {
+      if (parentOrg.isEmpty()) {
         throw new WebApplicationException("No such organization with uuid " + parentOrgUuid,
             Status.NOT_FOUND);
       }
       orgMap = Utils.buildParentOrgMapping(orgList, parentOrgUuid);
     } else {
-      orgMap = new HashMap<String, Organization>(); // guaranteed to match no orgs!
+      orgMap = new HashMap<>(); // guaranteed to match no orgs!
     }
 
     final List<Map<String, Object>> results = rollupQuery(start, end, orgType, orgList,
@@ -481,7 +482,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
   @InTransaction
   public List<Map<String, Object>> getAdvisorReportInsights(Instant start, Instant end,
       String orgUuid) {
-    final Map<String, Object> sqlArgs = new HashMap<String, Object>();
+    final Map<String, Object> sqlArgs = new HashMap<>();
     final StringBuilder sql = new StringBuilder();
 
     sql.append("/* AdvisorReportInsightsQuery */ ");
@@ -505,7 +506,9 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     sql.append("organizations.\"shortName\" AS \"organizationShortName\",");
     sql.append("%3$s");
     sql.append("%4$s");
-    sql.append(" " + String.format(getWeekFormat(), "reports.\"createdAt\"") + " AS week,");
+    sql.append(" ")
+       .append(String.format(getWeekFormat(), "reports.\"createdAt\""))
+       .append(" AS week,");
     sql.append("COUNT(\"reportPeople\".\"personUuid\") AS \"nrReportsSubmitted\"");
 
     sql.append(" FROM ");
@@ -617,12 +620,13 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     String orgColumn =
         String.format("\"%s\"", RollupGraphType.ADVISOR.equals(orgType) ? "advisorOrganizationUuid"
             : "interlocutorOrganizationUuid");
-    final Map<String, Object> sqlArgs = new HashMap<String, Object>();
+    final Map<String, Object> sqlArgs = new HashMap<>();
     final Map<String, List<?>> listArgs = new HashMap<>();
 
     StringBuilder sql = new StringBuilder();
-    sql.append(
-        "/* RollupQuery */ SELECT " + orgColumn + " as \"orgUuid\", state, count(*) AS count ");
+    sql.append("/* RollupQuery */ SELECT ")
+       .append(orgColumn)
+       .append(" as \"orgUuid\", state, count(*) AS count ");
     sql.append("FROM reports WHERE ");
 
     sql.append("\"releasedAt\" >= :startDate and \"releasedAt\" < :endDate "
@@ -633,14 +637,20 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
         getRollupEngagmentStart(start));
 
     if (!Utils.isEmptyOrNull(orgs)) {
-      sql.append("AND " + orgColumn + " IN ( <orgUuids> ) ");
+      sql.append("AND ")
+         .append(orgColumn)
+         .append(" IN ( <orgUuids> ) ");
       listArgs.put("orgUuids",
-          orgs.stream().map(org -> org.getUuid()).collect(Collectors.toList()));
+          orgs.stream().map(AbstractAnetBean::getUuid).collect(Collectors.toList()));
     } else if (missingOrgReports) {
-      sql.append(" AND " + orgColumn + " IS NULL ");
+      sql.append(" AND ")
+         .append(orgColumn)
+         .append(" IS NULL ");
     }
 
-    sql.append("GROUP BY " + orgColumn + ", state");
+    sql.append("GROUP BY ")
+       .append(orgColumn)
+       .append(", state");
 
     final Query q = getDbHandle().createQuery(sql.toString()).bindMap(sqlArgs);
     for (final Map.Entry<String, List<?>> listArg : listArgs.entrySet()) {
@@ -668,11 +678,8 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
       final ReportState state = ReportState.values()[(Integer) result.get("state")];
 
       final String parentOrgUuid = DaoUtils.getUuid(orgMap.get(orgUuid));
-      Map<ReportState, Integer> orgBar = rollup.get(parentOrgUuid);
-      if (orgBar == null) {
-        orgBar = new HashMap<ReportState, Integer>();
-        rollup.put(parentOrgUuid, orgBar);
-      }
+      Map<ReportState, Integer> orgBar =
+          rollup.computeIfAbsent(parentOrgUuid, k -> new HashMap<>());
       orgBar.put(state, Utils.orIfNull(orgBar.get(state), 0) + count);
     }
 
@@ -684,15 +691,15 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
         continue;
       }
       final String parentOrgUuid = DaoUtils.getUuid(orgMap.get(orgUuid));
-      if (!rollup.keySet().contains(parentOrgUuid)) {
-        final Map<ReportState, Integer> orgBar = new HashMap<ReportState, Integer>();
+      if (!rollup.containsKey(parentOrgUuid)) {
+        final Map<ReportState, Integer> orgBar = new HashMap<>();
         orgBar.put(ReportState.PUBLISHED, 0);
         orgBar.put(ReportState.CANCELLED, 0);
         rollup.put(parentOrgUuid, orgBar);
       }
     }
 
-    final List<RollupGraph> result = new LinkedList<RollupGraph>();
+    final List<RollupGraph> result = new LinkedList<>();
     for (Map.Entry<String, Map<ReportState, Integer>> entry : rollup.entrySet()) {
       Map<ReportState, Integer> values = entry.getValue();
       RollupGraph bar = new RollupGraph();
@@ -799,8 +806,10 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     final ReportPublishedEmail action = new ReportPublishedEmail();
     action.setReport(r);
     email.setAction(action);
-    email.setToAddresses(r.loadAuthors(AnetObjectEngine.getInstance().getContext()).join().stream()
-        .map(rp -> rp.getEmailAddress()).collect(Collectors.toList()));
+    email.setToAddresses(
+        r.loadAuthors(AnetObjectEngine.getInstance().getContext()).join().stream()
+            .map(Person::getEmailAddress)
+            .collect(Collectors.toList()));
     AnetEmailWorker.sendEmailAsync(email);
   }
 
@@ -950,7 +959,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
    */
   @InTransaction
   public List<Report> getFutureToPastReports(Instant end) {
-    final Map<String, Object> sqlArgs = new HashMap<String, Object>();
+    final Map<String, Object> sqlArgs = new HashMap<>();
     StringBuilder sql = new StringBuilder();
 
     sql.append("/* getFutureToPastReports */");
