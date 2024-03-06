@@ -24,5 +24,34 @@ The following diagram shows which rules are used for the report or engagement ap
 
 <img src={approvalFlowDiagram} title="Approval chain flow chart" />
 
-With the ANET dictionary options, `reportWorkflow.optionalApprovalWorkflow` and `reportWorkflow.optionalPlanningApprovalWorkflow`,
-will allow to publish a report in case of an empty approval chain instead of resulting in an error.
+## Dictionary settings for the approval workflow
+
+The following settings in the ANET dictionary influence the report workflow for approval and
+publication:
+
+```
+reportWorkflow:
+  nbOfHoursQuarantineApproved: 24
+  nbOfHoursApprovalTimeout: 48
+```
+
+In ANET, there are two background tasks running that relate to this, the **ReportPublicationWorker**
+and the **ReportApprovalWorker**. Both run every 5 minutes, and check for any work to do.
+
+The **ReportApprovalWorker** checks for reports that have been 'stuck' in an approval step for at
+least the amount of hours configured in `reportWorkflow.nbOfHoursApprovalTimeout`. If no-one has
+approved that step during that period, the step is automatically approved, and the workflow moves on
+to the next step in the report's workflow.
+
+The **ReportPublicationWorker** checks for reports that have been approved in their final approval
+step for at least the amount of hours ago configured in `reportWorkflow.nbOfHoursQuarantineApproved`.
+These reports will be published (their state changes from _Approved_ to _Published_). Note that for
+administrators, it is also possible to publish reports manually before this period has passed. In an
+administrator's Home page, the right-most tile labeled _"All approved reports"_ shows the number of
+reports pending publication. Clicking on this tile shows these reports, and an administrator can
+then pick them one by one and publish them.
+
+Both `reportWorkflow` settings can be set to as little as 0 (zero) hours. For the
+`reportWorkflow.nbOfHoursApprovalTimeout` that is quite unusual (it effectively means the approval
+workflow will be bypassed completely). But for `reportWorkflow.nbOfHoursQuarantineApproved` it can
+make sense in some situations.
