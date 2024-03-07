@@ -176,6 +176,13 @@ const ReportPreview = ({ className, uuid }) => {
             <div id="report-summary">
               <DictionaryField
                 wrappedComponent={PreviewField}
+                dictProps={Settings.classification}
+                value={Report.humanNameOfStatus(
+                  report.classification
+                ).toUpperCase()}
+              />
+              <DictionaryField
+                wrappedComponent={PreviewField}
                 dictProps={Settings.fields.report.intent}
                 name="intent"
                 style={{ marginBottom: 0 }}

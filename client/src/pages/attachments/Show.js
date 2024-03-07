@@ -171,8 +171,7 @@ const AttachmentShow = ({ pageDispatchers }) => {
             )}
           </>
         )
-        const classifications =
-          Settings.fields.attachment.classification.choices
+        const classifications = Settings.classification.choices
         return (
           <div>
             <Messages success={stateSuccess} error={stateError} />
@@ -218,7 +217,7 @@ const AttachmentShow = ({ pageDispatchers }) => {
                     />
                     <DictionaryField
                       wrappedComponent={Field}
-                      dictProps={Settings.fields.attachment.classification}
+                      dictProps={Settings.classification}
                       name="classification"
                       component={FieldHelper.ReadonlyField}
                       humanValue={classifications[attachment.classification]}

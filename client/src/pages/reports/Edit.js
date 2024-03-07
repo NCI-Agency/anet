@@ -25,6 +25,7 @@ const GQL_GET_REPORT = gql`
     report(uuid: $uuid) {
       uuid
       intent
+      classification
       engagementDate
       duration
       atmosphere

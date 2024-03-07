@@ -10,6 +10,10 @@ class ShowReport extends Page {
   REPORT_IS_PENDING_APPROVALS = "This report is PENDING approvals."
   REPORT_IS_APPROVED = "This report is APPROVED."
 
+  async getClassification() {
+    return browser.$("#classification")
+  }
+
   async getEditReportButton() {
     return browser.$("//a[text()='Edit']")
   }

@@ -1,6 +1,9 @@
 import { expect } from "chai"
+import ShowAttachment from "../pages/attachment/showAttachment.page"
 import MyReports, { REPORT_STATES } from "../pages/myReports.page"
 import ShowReport from "../pages/report/showReport.page"
+
+const REPORT_CLASSIFICATION = ""
 
 describe("Show report page", () => {
   beforeEach("Open the show report page", async() => {
@@ -29,9 +32,14 @@ describe("Show report page", () => {
         await ShowReport.getTasksEngagementAssessments()
       ).$$("[name*=question3]")
       expect(question3Assessments).to.have.length(2)
+      await (await ShowAttachment.getClassification()).waitForExist()
+      await (await ShowAttachment.getClassification()).waitForDisplayed()
+      expect(
+        await (await ShowAttachment.getClassification()).getText()
+      ).to.equal(REPORT_CLASSIFICATION)
     })
   })
-  describe("WHen on the show page of a report with attachment(s)", () => {
+  describe("When on the show page of a report with attachment(s)", () => {
     it("We should see a container for Attachment List", async() => {
       // Attachment container
       await (await ShowReport.getAttachments()).waitForExist()

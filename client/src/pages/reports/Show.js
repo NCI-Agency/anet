@@ -58,6 +58,7 @@ const GQL_GET_REPORT = gql`
     report(uuid: $uuid) {
       uuid
       intent
+      classification
       engagementDate
       duration
       atmosphere
@@ -571,6 +572,13 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                         wrappedComponent={Field}
                         dictProps={Settings.fields.report.nextSteps}
                         name="nextSteps"
+                        component={FieldHelper.ReadonlyField}
+                        style={{ marginBottom: 0 }}
+                      />
+                      <DictionaryField
+                        wrappedComponent={Field}
+                        dictProps={Settings.classification}
+                        name="classification"
                         component={FieldHelper.ReadonlyField}
                         style={{ marginBottom: 0 }}
                       />

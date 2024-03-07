@@ -331,6 +331,10 @@ export default class Report extends Model {
     super(Model.fillObject(props, Report.yupSchema))
   }
 
+  static humanNameOfStatus(status) {
+    return utils.sentenceCase(status)
+  }
+
   static isDraft(state) {
     return state === Report.STATE.DRAFT
   }
