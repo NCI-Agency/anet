@@ -308,7 +308,8 @@ public abstract class AbstractResourceTest {
 
   protected static List<ApprovalStepInput> getApprovalStepsInput(
       final List<ApprovalStep> approvalSteps) {
-    return approvalSteps.stream().map(AbstractResourceTest::getApprovalStepInput).collect(Collectors.toList());
+    return approvalSteps.stream().map(AbstractResourceTest::getApprovalStepInput)
+        .collect(Collectors.toList());
   }
 
   protected static AuthorizationGroupInput getAuthorizationGroupInput(
@@ -334,7 +335,8 @@ public abstract class AbstractResourceTest {
 
   protected static List<OrganizationInput> getOrganizationsInput(
       final List<Organization> organizations) {
-    return organizations.stream().map(AbstractResourceTest::getOrganizationInput).collect(Collectors.toList());
+    return organizations.stream().map(AbstractResourceTest::getOrganizationInput)
+        .collect(Collectors.toList());
   }
 
   protected static List<PersonInput> getPeopleInput(
@@ -348,7 +350,8 @@ public abstract class AbstractResourceTest {
 
   protected static List<ReportPersonInput> getReportPeopleInput(
       final List<ReportPerson> reportPeople) {
-    return reportPeople.stream().map(AbstractResourceTest::getReportPersonInput).collect(Collectors.toList());
+    return reportPeople.stream().map(AbstractResourceTest::getReportPersonInput)
+        .collect(Collectors.toList());
   }
 
   protected static ReportPersonInput getReportPersonInput(final ReportPerson reportPerson) {
@@ -360,7 +363,8 @@ public abstract class AbstractResourceTest {
   }
 
   protected static List<PositionInput> getPositionsInput(final List<Position> positions) {
-    return positions.stream().map(AbstractResourceTest::getPositionInput).collect(Collectors.toList());
+    return positions.stream().map(AbstractResourceTest::getPositionInput)
+        .collect(Collectors.toList());
   }
 
   protected static PersonPositionHistoryInput getPersonPositionHistoryInput(

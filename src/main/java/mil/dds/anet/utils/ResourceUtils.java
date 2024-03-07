@@ -106,9 +106,7 @@ public class ResourceUtils {
   }
 
   private static void checkAndFixText(final Note n) {
-    if (n.getText() == null || n.getText()
-                                .trim()
-                                .isEmpty()) {
+    if (n.getText() == null || n.getText().trim().isEmpty()) {
       throw new WebApplicationException("Note text must not be empty", Status.BAD_REQUEST);
     }
     sanitizeText(n);

@@ -506,9 +506,8 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     sql.append("organizations.\"shortName\" AS \"organizationShortName\",");
     sql.append("%3$s");
     sql.append("%4$s");
-    sql.append(" ")
-       .append(String.format(getWeekFormat(), "reports.\"createdAt\""))
-       .append(" AS week,");
+    sql.append(" ").append(String.format(getWeekFormat(), "reports.\"createdAt\""))
+        .append(" AS week,");
     sql.append("COUNT(\"reportPeople\".\"personUuid\") AS \"nrReportsSubmitted\"");
 
     sql.append(" FROM ");
@@ -624,9 +623,8 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     final Map<String, List<?>> listArgs = new HashMap<>();
 
     StringBuilder sql = new StringBuilder();
-    sql.append("/* RollupQuery */ SELECT ")
-       .append(orgColumn)
-       .append(" as \"orgUuid\", state, count(*) AS count ");
+    sql.append("/* RollupQuery */ SELECT ").append(orgColumn)
+        .append(" as \"orgUuid\", state, count(*) AS count ");
     sql.append("FROM reports WHERE ");
 
     sql.append("\"releasedAt\" >= :startDate and \"releasedAt\" < :endDate "
@@ -637,20 +635,14 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
         getRollupEngagmentStart(start));
 
     if (!Utils.isEmptyOrNull(orgs)) {
-      sql.append("AND ")
-         .append(orgColumn)
-         .append(" IN ( <orgUuids> ) ");
+      sql.append("AND ").append(orgColumn).append(" IN ( <orgUuids> ) ");
       listArgs.put("orgUuids",
           orgs.stream().map(AbstractAnetBean::getUuid).collect(Collectors.toList()));
     } else if (missingOrgReports) {
-      sql.append(" AND ")
-         .append(orgColumn)
-         .append(" IS NULL ");
+      sql.append(" AND ").append(orgColumn).append(" IS NULL ");
     }
 
-    sql.append("GROUP BY ")
-       .append(orgColumn)
-       .append(", state");
+    sql.append("GROUP BY ").append(orgColumn).append(", state");
 
     final Query q = getDbHandle().createQuery(sql.toString()).bindMap(sqlArgs);
     for (final Map.Entry<String, List<?>> listArg : listArgs.entrySet()) {
@@ -806,10 +798,8 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     final ReportPublishedEmail action = new ReportPublishedEmail();
     action.setReport(r);
     email.setAction(action);
-    email.setToAddresses(
-        r.loadAuthors(AnetObjectEngine.getInstance().getContext()).join().stream()
-            .map(Person::getEmailAddress)
-            .collect(Collectors.toList()));
+    email.setToAddresses(r.loadAuthors(AnetObjectEngine.getInstance().getContext()).join().stream()
+        .map(Person::getEmailAddress).collect(Collectors.toList()));
     AnetEmailWorker.sendEmailAsync(email);
   }
 

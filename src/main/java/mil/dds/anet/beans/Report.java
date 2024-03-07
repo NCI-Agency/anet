@@ -799,8 +799,7 @@ public class Report extends AbstractCustomizableAnetBean
       return false;
     }
 
-    return super.equals(o)
-        && Objects.equals(r.getUuid(), uuid)
+    return super.equals(o) && Objects.equals(r.getUuid(), uuid)
         && Objects.equals(r.getState(), state)
         && Objects.equals(r.getApprovalStepUuid(), getApprovalStepUuid())
         && Objects.equals(r.getCreatedAt(), createdAt)
@@ -808,15 +807,12 @@ public class Report extends AbstractCustomizableAnetBean
         && Objects.equals(r.getEngagementDate(), engagementDate)
         && Objects.equals(r.getDuration(), duration)
         && Objects.equals(r.getLocationUuid(), getLocationUuid())
-        && Objects.equals(r.getIntent(), intent)
-        && Objects.equals(r.getExsum(), exsum)
+        && Objects.equals(r.getIntent(), intent) && Objects.equals(r.getExsum(), exsum)
         && Objects.equals(r.getAtmosphere(), atmosphere)
         && Objects.equals(r.getAtmosphereDetails(), atmosphereDetails)
-        && Objects.equals(r.getReportPeople(), reportPeople)
-        && Objects.equals(r.getTasks(), tasks)
+        && Objects.equals(r.getReportPeople(), reportPeople) && Objects.equals(r.getTasks(), tasks)
         && Objects.equals(r.getReportText(), reportText)
-        && Objects.equals(r.getNextSteps(), nextSteps)
-        && Objects.equals(r.getComments(), comments)
+        && Objects.equals(r.getNextSteps(), nextSteps) && Objects.equals(r.getComments(), comments)
         && Objects.equals(r.getReportSensitiveInformation(), reportSensitiveInformation)
         && Objects.equals(r.getAuthorizationGroups(), authorizationGroups);
   }
