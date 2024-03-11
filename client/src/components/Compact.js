@@ -119,7 +119,10 @@ const CompactViewS = styled.div`
   }
 `
 
-export const CompactHeaderContent = ({ sensitiveInformation }) => {
+export const CompactHeaderContent = ({
+  classification,
+  sensitiveInformation
+}) => {
   const { appSettings } = useContext(AppContext)
   return (
     <HeaderContentS bgc={appSettings[SETTING_KEY_COLOR]}>
@@ -127,12 +130,14 @@ export const CompactHeaderContent = ({ sensitiveInformation }) => {
       <ClassificationBoxS>
         <ClassificationBanner />
         {sensitiveInformation && <SensitivityInformation />}
+        <span>Classification: {classification}</span>
       </ClassificationBoxS>
     </HeaderContentS>
   )
 }
 
 CompactHeaderContent.propTypes = {
+  classification: PropTypes.string,
   sensitiveInformation: PropTypes.bool
 }
 
