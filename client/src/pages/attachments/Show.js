@@ -171,7 +171,6 @@ const AttachmentShow = ({ pageDispatchers }) => {
             )}
           </>
         )
-        const classifications = Settings.classification.choices
         return (
           <div>
             <Messages success={stateSuccess} error={stateError} />
@@ -220,7 +219,11 @@ const AttachmentShow = ({ pageDispatchers }) => {
                       dictProps={Settings.classification}
                       name="classification"
                       component={FieldHelper.ReadonlyField}
-                      humanValue={classifications[attachment.classification]}
+                      humanValue={
+                        Settings.classification.choices[
+                          attachment.classification
+                        ]
+                      }
                     />
                     <Field
                       name="used in"

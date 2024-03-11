@@ -45,10 +45,11 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
   const [error, setError] = useState(null)
   const canEdit =
     currentUser.isAdmin() || currentUser.uuid === initialValues.author.uuid
-  const classifications = Settings.classification.choices
-  const classificationButtons = Object.keys(classifications).map(key => ({
-    value: key,
-    label: classifications[key]
+  const classificationButtons = Object.entries(
+    Settings.classification.choices
+  ).map(([value, label]) => ({
+    value,
+    label
   }))
 
   return (
