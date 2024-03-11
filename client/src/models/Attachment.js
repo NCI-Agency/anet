@@ -1,5 +1,4 @@
 import Model from "components/Model"
-import utils from "utils"
 import * as yup from "yup"
 
 export default class Attachment extends Model {
@@ -34,16 +33,8 @@ export default class Attachment extends Model {
 
   static autocompleteQuery = Attachment.basicFieldsQuery
 
-  static humanNameOfStatus(status) {
-    return utils.sentenceCase(status)
-  }
-
   constructor(props) {
     super(Model.fillObject(props, Attachment.yupSchema))
-  }
-
-  humanNameOfStatus() {
-    return Attachment.humanNameOfStatus(this.status)
   }
 
   static FILTERED_CLIENT_SIDE_FIELDS = []
