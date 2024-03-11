@@ -250,6 +250,12 @@ const ReportForm = ({
   const attachmentEditEnabled =
     attachmentsEnabled &&
     (!Settings.fields.attachment.restrictToAdmins || currentUser.isAdmin())
+  const classificationButtons = Object.entries(
+    Settings.classification.choices
+  ).map(([value, label]) => ({
+    value,
+    label
+  }))
 
   let recents = []
   if (data) {
@@ -486,6 +492,15 @@ const ReportForm = ({
                     </>
                   }
                   className="meeting-goal"
+                />
+
+                <DictionaryField
+                  wrappedComponent={FastField}
+                  dictProps={Settings.classification}
+                  name="classification"
+                  component={FieldHelper.RadioButtonToggleGroupField}
+                  buttons={classificationButtons}
+                  onChange={value => setFieldValue("classification", value)}
                 />
 
                 <DictionaryField
