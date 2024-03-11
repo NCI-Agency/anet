@@ -575,14 +575,17 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                         component={FieldHelper.ReadonlyField}
                         style={{ marginBottom: 0 }}
                       />
-                      <DictionaryField
-                        wrappedComponent={Field}
-                        dictProps={Settings.classification}
-                        name="classification"
-                        component={FieldHelper.ReadonlyField}
-                        style={{ marginBottom: 0 }}
-                      />
                     </div>
+                  }
+                />
+
+                <DictionaryField
+                  wrappedComponent={Field}
+                  dictProps={Settings.classification}
+                  name="classification"
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={
+                    Settings.classification.choices[report.classification]
                   }
                 />
 
