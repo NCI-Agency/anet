@@ -20,6 +20,7 @@ const GQL_GET_REPORT = gql`
     report(uuid: $uuid) {
       uuid
       intent
+      classification
       engagementDate
       duration
       atmosphere
@@ -176,13 +177,6 @@ const ReportPreview = ({ className, uuid }) => {
             <div id="report-summary">
               <DictionaryField
                 wrappedComponent={PreviewField}
-                dictProps={Settings.classification}
-                value={Report.humanNameOfStatus(
-                  report.classification
-                ).toUpperCase()}
-              />
-              <DictionaryField
-                wrappedComponent={PreviewField}
                 dictProps={Settings.fields.report.intent}
                 name="intent"
                 style={{ marginBottom: 0 }}
@@ -201,6 +195,13 @@ const ReportPreview = ({ className, uuid }) => {
               />
             </div>
           }
+        />
+
+        <DictionaryField
+          wrappedComponent={PreviewField}
+          dictProps={Settings.classification}
+          name="classification"
+          value={Settings.classification.choices[report.classification]}
         />
 
         <DictionaryField
