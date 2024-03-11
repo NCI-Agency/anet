@@ -1168,8 +1168,8 @@ header.searchPagination {
     padding: 0 !important;
     overflow: visible !important;
   }
-  /* adds random characters at the end of document which causes printed pdf to have empty pages*/
-  svg > text#__react_svg_text_measurement_id {
+  /* adds random characters at the end of document which causes printed pdf to have empty pages */
+  svg > text#svg-text-measurement-id {
     display: none;
   }
 }
