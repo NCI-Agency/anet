@@ -6,8 +6,6 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.graphql_java_generator.exception.GraphQLRequestExecutionException;
-import com.graphql_java_generator.exception.GraphQLRequestPreparationException;
 import io.dropwizard.testing.junit5.DropwizardAppExtension;
 import java.io.IOException;
 import java.time.Duration;
@@ -26,7 +24,6 @@ import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.database.EmailDao;
 import mil.dds.anet.database.ReportDao;
-import mil.dds.anet.test.client.util.MutationExecutor;
 import mil.dds.anet.test.integration.config.AnetTestConfiguration;
 import mil.dds.anet.test.integration.utils.EmailResponse;
 import mil.dds.anet.test.integration.utils.FakeSmtpServer;
@@ -148,19 +145,19 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
   }
 
   @Test
-  void testGH3304() throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void testGH3304() {
     // Create a draft report
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final ReportDao reportDao = engine.getReportDao();
     final Person author = getRegularUserBean();
-    final MutationExecutor authorMutationExecutor = getMutationExecutor(author.getDomainUsername());
     final ReportPerson advisor = personToPrimaryReportAuthor(author);
     final ReportPerson interlocutor = personToPrimaryReportPerson(getSteveStevesonBean(), true);
     final Report draftReport = reportDao.insert(TestBeans.getTestReport("testGH3304",
         getFutureDate(), null, Lists.newArrayList(advisor, interlocutor)));
 
     // Submit the report
-    authorMutationExecutor.submitReport("", draftReport.getUuid());
+    withCredentials(author.getDomainUsername(),
+        t -> mutationExecutor.submitReport("", draftReport.getUuid()));
     // This planned report gets approved automatically
     final Report submittedReport = testReportState(draftReport.getUuid(), ReportState.APPROVED);
 
@@ -181,7 +178,8 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
     final Report redraftedReport = testReportDraft(updatedReport.getUuid());
 
     // Submit the report
-    authorMutationExecutor.submitReport("", redraftedReport.getUuid());
+    withCredentials(author.getDomainUsername(),
+        t -> mutationExecutor.submitReport("", redraftedReport.getUuid()));
     // This should send an email to the approver
     expectedIds.add("hunter+jacob");
     // State should be PENDING_APPROVAL

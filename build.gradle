@@ -7,7 +7,7 @@ plugins {
 	id "com.bmuschko.docker-remote-api" version "9.4.0"
 	id "com.github.node-gradle.node" version "7.0.2"
 	id "com.diffplug.spotless" version "6.25.0"
-	id "com.graphql_java_generator.graphql-gradle-plugin" version "1.18.11"
+	id "com.graphql-java-generator.graphql-gradle-plugin3" version "2.4"
 	id "org.beryx.runtime" version "1.13.1"
 	id "com.netflix.nebula.rpm" version "11.8.1"
 }
@@ -143,10 +143,8 @@ dependencies {
 	implementation 'io.leangen.graphql:spqr:0.12.1'
 	// The graphql-java-client-runtime module aggregates all dependencies for the generated code,
 	// including the plugin runtime
-	testImplementation('com.graphql-java-generator:graphql-java-client-runtime:1.18.11') {
-		// We don't actually need any of these (dragged in through org.springframework.boot)
-		exclude group: 'io.netty'
-	}
+	testImplementation 'com.graphql-java-generator:graphql-java-client-runtime:2.4'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test:2.7.18'
 	// We use some extended scalars in `generateClientCodeConf` below
 	testImplementation 'com.graphql-java:graphql-java-extended-scalars:20.0'
 
@@ -182,6 +180,8 @@ test {
 	jacoco {
 		destinationFile = file("$buildDir/jacoco/test-${run.environment['DB_DRIVER']}.exec")
 	}
+        // Prevent java.lang.NoClassDefFoundError: org/slf4j/impl/StaticLoggerBinder from Spring Boot
+	systemProperty "org.springframework.boot.logging.LoggingSystem", "none"
 }
 
 jacoco {
@@ -325,7 +325,7 @@ task dbInit(dependsOn: 'compileJava', type: JavaExec) {
 			"--adminPosName", adminPosName,
 			"--adminFullName", adminFullName,
 			"--adminDomainUsername", adminDomainUsername,
-                        anetConfig
+			anetConfig
 		])
 	}
 	args cmdline
@@ -702,7 +702,6 @@ generateClientCodeConf {
 	schemaFileFolder = 'src/test/resources/'
 	schemaFilePattern = 'anet.graphql'
 	packageName = 'mil.dds.anet.test.client'
-	// Set recommended parameters to respect the future 2.x behavior
 	separateUtilityClasses = true
 	copyRuntimeSources = false
 	generateDeprecatedRequestResponse = false

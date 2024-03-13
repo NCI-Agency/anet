@@ -3,8 +3,6 @@ package mil.dds.anet.test.resources;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
-import com.graphql_java_generator.exception.GraphQLRequestExecutionException;
-import com.graphql_java_generator.exception.GraphQLRequestPreparationException;
 import java.lang.invoke.MethodHandles;
 import java.time.Instant;
 import java.time.ZonedDateTime;
@@ -18,10 +16,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.ForbiddenException;
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.WebApplicationException;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.database.AdminDao;
 import mil.dds.anet.database.ReportDao;
@@ -74,8 +68,6 @@ import mil.dds.anet.test.client.Status;
 import mil.dds.anet.test.client.Task;
 import mil.dds.anet.test.client.TaskSearchQueryInput;
 import mil.dds.anet.test.client.TaskSearchSortBy;
-import mil.dds.anet.test.client.util.MutationExecutor;
-import mil.dds.anet.test.client.util.QueryExecutor;
 import mil.dds.anet.test.integration.utils.TestApp;
 import mil.dds.anet.test.utils.UtilsTest;
 import mil.dds.anet.utils.DaoUtils;
@@ -83,7 +75,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ReportResourceTest extends AbstractResourceTest {
+class ReportResourceTest extends AbstractResourceTest {
 
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -121,14 +113,11 @@ public class ReportResourceTest extends AbstractResourceTest {
       COMMENT_FIELDS, NoteResourceTest.NOTE_FIELDS, AttachmentResourceTest.ATTACHMENT_FIELDS);
 
   @Test
-  public void createReport()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void createReport() {
     // Create a report writer
     final Person author = getNickNicholson();
-    final QueryExecutor authorQueryExecutor = getQueryExecutor(author.getDomainUsername());
-    final MutationExecutor authorMutationExecutor = getMutationExecutor(author.getDomainUsername());
 
-    // Create a interlocutor for the report
+    // Create an interlocutor for the report
     final Person interlocutorPerson = getSteveSteveson();
     final ReportPerson interlocutor = personToPrimaryReportPerson(interlocutorPerson, true);
     final Position interlocutorPosition = interlocutorPerson.getPosition();
@@ -137,51 +126,49 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(interlocutorOrg).isNotNull();
 
     // Create an Advising Organization for the report writer
-    final Organization advisorOrg = adminMutationExecutor.createOrganization(ORGANIZATION_FIELDS,
-        TestData.createAdvisorOrganizationInput(true));
+    final Organization advisorOrg = withCredentials(adminUser, t -> mutationExecutor
+        .createOrganization(ORGANIZATION_FIELDS, TestData.createAdvisorOrganizationInput(true)));
     assertThat(advisorOrg).isNotNull();
     assertThat(advisorOrg.getUuid()).isNotNull();
 
     // Create leadership people in the AO who can approve this report
-    Person approver1 = Person.builder().withDomainUsername("testapprover1")
-        .withEmailAddress("hunter+testApprover1@example.com").withName("Test Approver 1")
-        .withStatus(Status.ACTIVE).build();
-    approver1 = findOrPutPersonInDb(approver1);
+    final Person approver1 = findOrPutPersonInDb(Person.builder()
+        .withDomainUsername("testapprover1").withEmailAddress("hunter+testApprover1@example.com")
+        .withName("Test Approver 1").withStatus(Status.ACTIVE).build());
     if (Boolean.TRUE.equals(approver1.getPendingVerification())) {
       // Approve newly created user
-      adminMutationExecutor.approvePerson("", approver1.getUuid());
+      withCredentials(adminUser, t -> mutationExecutor.approvePerson("", approver1.getUuid()));
     }
-    Person approver2 = Person.builder().withDomainUsername("testapprover2")
-        .withEmailAddress("hunter+testApprover2@example.com").withName("Test Approver 2")
-        .withStatus(Status.ACTIVE).build();
-    approver2 = findOrPutPersonInDb(approver2);
+    final Person approver2 = findOrPutPersonInDb(Person.builder()
+        .withDomainUsername("testapprover2").withEmailAddress("hunter+testApprover2@example.com")
+        .withName("Test Approver 2").withStatus(Status.ACTIVE).build());
     if (Boolean.TRUE.equals(approver2.getPendingVerification())) {
       // Approve newly created user
-      adminMutationExecutor.approvePerson("", approver2.getUuid());
+      withCredentials(adminUser, t -> mutationExecutor.approvePerson("", approver2.getUuid()));
     }
 
     final PositionInput approver1PosInput = PositionInput.builder()
         .withName("Test Approver 1 Position").withOrganization(getOrganizationInput(advisorOrg))
         .withLocation(getLocationInput(getGeneralHospital())).withType(PositionType.SUPERUSER)
         .withRole(PositionRole.MEMBER).withStatus(Status.ACTIVE).build();
-    Position approver1Pos =
-        adminMutationExecutor.createPosition(POSITION_FIELDS, approver1PosInput);
+    final Position approver1Pos = withCredentials(adminUser,
+        t -> mutationExecutor.createPosition(POSITION_FIELDS, approver1PosInput));
     assertThat(approver1Pos).isNotNull();
     assertThat(approver1Pos.getUuid()).isNotNull();
-    Integer nrUpdated = adminMutationExecutor.putPersonInPosition("", getPersonInput(approver1),
-        approver1Pos.getUuid());
+    Integer nrUpdated = withCredentials(adminUser, t -> mutationExecutor.putPersonInPosition("",
+        getPersonInput(approver1), approver1Pos.getUuid()));
     assertThat(nrUpdated).isEqualTo(1);
 
     final PositionInput approver2PosInput = PositionInput.builder()
         .withName("Test Approver 2 Position").withOrganization(getOrganizationInput(advisorOrg))
         .withLocation(getLocationInput(getGeneralHospital())).withType(PositionType.SUPERUSER)
         .withRole(PositionRole.MEMBER).withStatus(Status.ACTIVE).build();
-    final Position approver2Pos =
-        adminMutationExecutor.createPosition(POSITION_FIELDS, approver2PosInput);
+    final Position approver2Pos = withCredentials(adminUser,
+        t -> mutationExecutor.createPosition(POSITION_FIELDS, approver2PosInput));
     assertThat(approver2Pos).isNotNull();
     assertThat(approver2Pos.getUuid()).isNotNull();
-    nrUpdated = adminMutationExecutor.putPersonInPosition("", getPersonInput(approver2),
-        approver2Pos.getUuid());
+    nrUpdated = withCredentials(adminUser, t -> mutationExecutor.putPersonInPosition("",
+        getPersonInput(approver2), approver2Pos.getUuid()));
     assertThat(nrUpdated).isEqualTo(1);
 
     // Create a billet for the author
@@ -189,16 +176,17 @@ public class ReportResourceTest extends AbstractResourceTest {
         PositionInput.builder().withName("A report writer").withType(PositionType.REGULAR)
             .withRole(PositionRole.MEMBER).withOrganization(getOrganizationInput(advisorOrg))
             .withLocation(getLocationInput(getGeneralHospital())).withStatus(Status.ACTIVE).build();
-    final Position authorBillet =
-        adminMutationExecutor.createPosition(POSITION_FIELDS, authorBilletInput);
+    final Position authorBillet = withCredentials(adminUser,
+        t -> mutationExecutor.createPosition(POSITION_FIELDS, authorBilletInput));
     assertThat(authorBillet).isNotNull();
     assertThat(authorBillet.getUuid()).isNotNull();
 
     // Set this author in this billet
-    nrUpdated = adminMutationExecutor.putPersonInPosition("", getPersonInput(author),
-        authorBillet.getUuid());
+    nrUpdated = withCredentials(adminUser, t -> mutationExecutor.putPersonInPosition("",
+        getPersonInput(author), authorBillet.getUuid()));
     assertThat(nrUpdated).isEqualTo(1);
-    final Position checkit = adminQueryExecutor.position(POSITION_FIELDS, authorBillet.getUuid());
+    final Position checkit = withCredentials(adminUser,
+        t -> queryExecutor.position(POSITION_FIELDS, authorBillet.getUuid()));
     assertThat(checkit.getPerson()).isNotNull();
     assertThat(checkit.getPerson().getUuid()).isEqualTo(author.getUuid());
 
@@ -219,13 +207,14 @@ public class ReportResourceTest extends AbstractResourceTest {
     final OrganizationInput advisorOrgInput = getOrganizationInput(advisorOrg);
     advisorOrgInput.setApprovalSteps(approvalStepsInput);
 
-    nrUpdated = adminMutationExecutor.updateOrganization("", advisorOrgInput);
+    nrUpdated =
+        withCredentials(adminUser, t -> mutationExecutor.updateOrganization("", advisorOrgInput));
     assertThat(nrUpdated).isEqualTo(1);
     // Pull the approval workflow for this AO
-    final Organization orgWithSteps =
-        adminQueryExecutor.organization(ORGANIZATION_FIELDS, advisorOrg.getUuid());
+    final Organization orgWithSteps = withCredentials(adminUser,
+        t -> queryExecutor.organization(ORGANIZATION_FIELDS, advisorOrg.getUuid()));
     final List<ApprovalStep> steps = orgWithSteps.getApprovalSteps();
-    assertThat(steps.size()).isEqualTo(2);
+    assertThat(steps).hasSize(2);
     final ApprovalStep approvalStep = steps.get(0);
     assertThat(approvalStep.getName()).isEqualTo(approvalStepInput.getName());
     final ApprovalStep releaseApprovalStep = steps.get(1);
@@ -233,24 +222,27 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(releaseApprovalStep.getName()).isEqualTo(releaseApprovalStepInput.getName());
 
     // Ensure approver1 is now an approver
-    approver1Pos = adminQueryExecutor.position(POSITION_FIELDS, approver1Pos.getUuid());
-    assertThat(approver1Pos.getIsApprover()).isTrue();
+    final Position approver1Pos3 = withCredentials(adminUser,
+        t -> queryExecutor.position(POSITION_FIELDS, approver1Pos.getUuid()));
+    assertThat(approver1Pos3.getIsApprover()).isTrue();
 
     // Create some tasks for this organization
-    final Task top = adminMutationExecutor.createTask(TASK_FIELDS,
-        TestData.createTaskInput("test-1", "Test Top Task", "TOP", null,
-            Collections.singletonList(getOrganizationInput(advisorOrg)), Status.ACTIVE));
+    final Task top = withCredentials(adminUser,
+        t -> mutationExecutor.createTask(TASK_FIELDS,
+            TestData.createTaskInput("test-1", "Test Top Task", "TOP", null,
+                Collections.singletonList(getOrganizationInput(advisorOrg)), Status.ACTIVE)));
     assertThat(top).isNotNull();
     assertThat(top.getUuid()).isNotNull();
-    final Task action =
-        adminMutationExecutor.createTask(TASK_FIELDS, TestData.createTaskInput("test-1-1",
-            "Test Task Action", "Action", getTaskInput(top), null, Status.ACTIVE));
+    final Task action = withCredentials(adminUser,
+        t -> mutationExecutor.createTask(TASK_FIELDS, TestData.createTaskInput("test-1-1",
+            "Test Task Action", "Action", getTaskInput(top), null, Status.ACTIVE)));
     assertThat(action).isNotNull();
     assertThat(action.getUuid()).isNotNull();
 
     // Create a Location that this Report was written at
-    final Location loc = adminMutationExecutor.createLocation(LOCATION_FIELDS,
-        TestData.createLocationInput("The Boat Dock", 1.23, 4.56));
+    final Location loc =
+        withCredentials(adminUser, t -> mutationExecutor.createLocation(LOCATION_FIELDS,
+            TestData.createLocationInput("The Boat Dock", 1.23, 4.56)));
     assertThat(loc).isNotNull();
     assertThat(loc.getUuid()).isNotNull();
 
@@ -272,11 +264,13 @@ public class ReportResourceTest extends AbstractResourceTest {
         .withKeyOutcomes("These are the key outcomes of this engagement")
         .withAdvisorOrg(getOrganizationInput(advisorOrg))
         .withInterlocutorOrg(getOrganizationInput(interlocutorOrg)).build();
-    final Report created = authorMutationExecutor.createReport(FIELDS, rInput);
+    final Report created = withCredentials(author.getDomainUsername(),
+        t -> mutationExecutor.createReport(FIELDS, rInput));
     assertThat(created).isNotNull();
     assertThat(created.getUuid()).isNotNull();
     // Retrieve the report and do some additional checks
-    final Report check = authorQueryExecutor.report(FIELDS, created.getUuid());
+    final Report check = withCredentials(author.getDomainUsername(),
+        t -> queryExecutor.report(FIELDS, created.getUuid()));
     assertThat(check.getState()).isEqualTo(ReportState.DRAFT);
     assertThat(check.getAdvisorOrg().getUuid()).isEqualTo(advisorOrg.getUuid());
     assertThat(check.getInterlocutorOrg().getUuid()).isEqualTo(interlocutorOrg.getUuid());
@@ -290,80 +284,89 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     // Have another regular user try to submit the report
     try {
-      getMutationExecutor(getRegularUser().getDomainUsername()).submitReport("", created.getUuid());
-      fail("Expected ForbiddenException");
-    } catch (ForbiddenException expectedException) {
+      withCredentials(getRegularUser().getDomainUsername(),
+          t -> mutationExecutor.submitReport("", created.getUuid()));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      // OK
     }
 
     // Have a superuser of another AO try to submit the report
     try {
-      getMutationExecutor(getSuperuser().getDomainUsername()).submitReport("", created.getUuid());
-      fail("Expected ForbiddenException");
-    } catch (ForbiddenException expectedException) {
+      withCredentials(getSuperuser().getDomainUsername(),
+          t -> mutationExecutor.submitReport("", created.getUuid()));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      // OK
     }
 
     // Have the author submit the report
-    int numRows = authorMutationExecutor.submitReport("", created.getUuid());
+    int numRows = withCredentials(author.getDomainUsername(),
+        t -> mutationExecutor.submitReport("", created.getUuid()));
     assertThat(numRows).isOne();
 
-    Report returned = authorQueryExecutor.report(FIELDS, created.getUuid());
-    assertThat(returned.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
+    final Report returned1 = withCredentials(author.getDomainUsername(),
+        t -> queryExecutor.report(FIELDS, created.getUuid()));
+    assertThat(returned1.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
 
     // Verify that author can still edit the report
-    returned.setAtmosphereDetails("Everybody was super nice! Again!");
-    final Report r2 = authorMutationExecutor.updateReport(FIELDS, getReportInput(returned), true);
-    assertThat(r2.getAtmosphereDetails()).isEqualTo(returned.getAtmosphereDetails());
+    returned1.setAtmosphereDetails("Everybody was super nice! Again!");
+    final Report r2 = withCredentials(author.getDomainUsername(),
+        t -> mutationExecutor.updateReport(FIELDS, getReportInput(returned1), true));
+    assertThat(r2.getAtmosphereDetails()).isEqualTo(returned1.getAtmosphereDetails());
 
     // Have the author submit the report, again
-    numRows = authorMutationExecutor.submitReport("", created.getUuid());
+    numRows = withCredentials(author.getDomainUsername(),
+        t -> mutationExecutor.submitReport("", created.getUuid()));
     assertThat(numRows).isOne();
 
-    returned = authorQueryExecutor.report(FIELDS, created.getUuid());
-    assertThat(returned.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
+    final Report returned2 = withCredentials(author.getDomainUsername(),
+        t -> queryExecutor.report(FIELDS, created.getUuid()));
+    assertThat(returned2.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
 
     // The author should not be able to submit the report now
     try {
-      authorMutationExecutor.submitReport("", returned.getUuid());
-      fail("Expected BadRequestException");
-    } catch (BadRequestException expectedException) {
+      withCredentials(author.getDomainUsername(),
+          t -> mutationExecutor.submitReport("", returned2.getUuid()));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      // OK
     }
 
     logger.debug("Expecting report {} in step {} because of org {} on author {}",
-        returned.getUuid(), approvalStep.getUuid(), advisorOrg.getUuid(), author);
-    assertThat(returned.getApprovalStep().getUuid()).isEqualTo(approvalStep.getUuid());
+        returned2.getUuid(), approvalStep.getUuid(), advisorOrg.getUuid(), author);
+    assertThat(returned2.getApprovalStep().getUuid()).isEqualTo(approvalStep.getUuid());
 
     // verify the location on this report
-    assertThat(returned.getLocation().getUuid()).isEqualTo(loc.getUuid());
+    assertThat(returned2.getLocation().getUuid()).isEqualTo(loc.getUuid());
 
     // verify the interlocutors on this report
     assertThat(
-        returned.getAttendees().stream().map(ReportPerson::getUuid).collect(Collectors.toSet()))
+        returned2.getAttendees().stream().map(ReportPerson::getUuid).collect(Collectors.toSet()))
         .contains(interlocutor.getUuid());
 
     // verify the tasks on this report
-    assertThat(returned.getTasks().stream().map(Task::getUuid).collect(Collectors.toSet()))
+    assertThat(returned2.getTasks().stream().map(Task::getUuid).collect(Collectors.toSet()))
         .contains(action.getUuid());
 
     // Verify this shows up on the approvers list of pending documents
     final ReportSearchQueryInput pendingQuery =
         ReportSearchQueryInput.builder().withPendingApprovalOf(approver1.getUuid()).build();
-    final QueryExecutor approver1QueryExecutor = getQueryExecutor(approver1.getDomainUsername());
-    final MutationExecutor approver1MutationExecutor =
-        getMutationExecutor(approver1.getDomainUsername());
-    AnetBeanList_Report pending =
-        approver1QueryExecutor.reportList(getListFields(FIELDS), pendingQuery);
+    AnetBeanList_Report pending = withCredentials(approver1.getDomainUsername(),
+        t -> queryExecutor.reportList(getListFields(FIELDS), pendingQuery));
     assertThat(pending.getList().stream().map(Report::getUuid).collect(Collectors.toSet()))
-        .contains(returned.getUuid());
+        .contains(returned2.getUuid());
 
     // Run a search for this user's pending approvals
     final ReportSearchQueryInput searchQuery =
         ReportSearchQueryInput.builder().withPendingApprovalOf(approver1.getUuid()).build();
-    pending = approver1QueryExecutor.reportList(getListFields(FIELDS), searchQuery);
-    assertThat(pending.getList().size()).isPositive();
+    pending = withCredentials(approver1.getDomainUsername(),
+        t -> queryExecutor.reportList(getListFields(FIELDS), searchQuery));
+    assertThat(pending.getList()).isNotEmpty();
 
     // Check on Report status for who needs to approve
-    List<ReportAction> workflow = returned.getWorkflow();
-    assertThat(workflow.size()).isEqualTo(3);
+    List<ReportAction> workflow = returned2.getWorkflow();
+    assertThat(workflow).hasSize(3);
     ReportAction reportAction = workflow.get(1);
     assertThat(reportAction.getPerson()).isNull(); // Because this hasn't been approved yet.
     assertThat(reportAction.getCreatedAt()).isNull();
@@ -372,58 +375,67 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(reportAction.getStep().getUuid()).isEqualTo(releaseApprovalStep.getUuid());
 
     // Reject the report
-    numRows = approver1MutationExecutor.rejectReport("",
-        TestData.createCommentInput("a test rejection"), created.getUuid());
+    numRows = withCredentials(approver1.getDomainUsername(), t -> mutationExecutor.rejectReport("",
+        TestData.createCommentInput("a test rejection"), created.getUuid()));
     assertThat(numRows).isOne();
 
     // Check on report status to verify it was rejected
-    returned = authorQueryExecutor.report(FIELDS, created.getUuid());
-    assertThat(returned.getState()).isEqualTo(ReportState.REJECTED);
-    assertThat(returned.getApprovalStep()).isNull();
+    final Report returned3 = withCredentials(author.getDomainUsername(),
+        t -> queryExecutor.report(FIELDS, created.getUuid()));
+    assertThat(returned3.getState()).isEqualTo(ReportState.REJECTED);
+    assertThat(returned3.getApprovalStep()).isNull();
 
     // Author needs to re-submit
-    numRows = authorMutationExecutor.submitReport("", created.getUuid());
+    numRows = withCredentials(author.getDomainUsername(),
+        t -> mutationExecutor.submitReport("", created.getUuid()));
     assertThat(numRows).isOne();
 
     // TODO: Approver modify the report *specifically change the attendees!*
 
     // Approve the report
-    numRows = approver1MutationExecutor.approveReport("", null, created.getUuid());
+    numRows = withCredentials(approver1.getDomainUsername(),
+        t -> mutationExecutor.approveReport("", null, created.getUuid()));
     assertThat(numRows).isOne();
 
     // Check on Report status to verify it got moved forward
-    returned = authorQueryExecutor.report(FIELDS, created.getUuid());
-    assertThat(returned.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
-    assertThat(returned.getApprovalStep().getUuid()).isEqualTo(releaseApprovalStep.getUuid());
+    final Report returned4 = withCredentials(author.getDomainUsername(),
+        t -> queryExecutor.report(FIELDS, created.getUuid()));
+    assertThat(returned4.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
+    assertThat(returned4.getApprovalStep().getUuid()).isEqualTo(releaseApprovalStep.getUuid());
 
     // Verify that the wrong person cannot approve this report.
     try {
-      approver1MutationExecutor.approveReport("", null, created.getUuid());
-      fail("Expected ForbiddenException");
-    } catch (ForbiddenException expectedException) {
+      withCredentials(approver1.getDomainUsername(),
+          t -> mutationExecutor.approveReport("", null, created.getUuid()));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      // OK
     }
 
     // Approve the report
-    numRows = getMutationExecutor(approver2.getDomainUsername()).approveReport("", null,
-        created.getUuid());
+    numRows = withCredentials(approver2.getDomainUsername(),
+        t -> mutationExecutor.approveReport("", null, created.getUuid()));
     assertThat(numRows).isOne();
 
     // Check on Report status to verify it got moved forward
-    returned = authorQueryExecutor.report(FIELDS, created.getUuid());
-    assertThat(returned.getState()).isEqualTo(ReportState.APPROVED);
-    assertThat(returned.getApprovalStep()).isNull();
+    final Report returned5 = withCredentials(author.getDomainUsername(),
+        t -> queryExecutor.report(FIELDS, created.getUuid()));
+    assertThat(returned5.getState()).isEqualTo(ReportState.APPROVED);
+    assertThat(returned5.getApprovalStep()).isNull();
 
     // The author should not be able to submit the report now
     try {
-      authorMutationExecutor.submitReport("", returned.getUuid());
-      fail("Expected BadRequestException");
-    } catch (BadRequestException expectedException) {
+      withCredentials(author.getDomainUsername(),
+          t -> mutationExecutor.submitReport("", returned5.getUuid()));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      // OK
     }
 
     // check on report status to see that it got approved.
-    workflow = returned.getWorkflow();
+    workflow = returned5.getWorkflow();
     // there were 5 actions on the report: submit, reject, submit, approve, approve
-    assertThat(workflow.size()).isEqualTo(6);
+    assertThat(workflow).hasSize(6);
     reportAction = workflow.get(4);
     assertThat(reportAction.getPerson().getUuid()).isEqualTo(approver1.getUuid());
     assertThat(reportAction.getCreatedAt()).isNotNull();
@@ -432,21 +444,25 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(reportAction.getStep().getUuid()).isEqualTo(releaseApprovalStep.getUuid());
 
     // Admin can publish approved reports.
-    numRows = adminMutationExecutor.publishReport("", created.getUuid());
+    numRows =
+        withCredentials(adminUser, t -> mutationExecutor.publishReport("", created.getUuid()));
     assertThat(numRows).isOne();
 
     // Post a comment on the report because it's awesome
-    final Comment commentOne = authorMutationExecutor.addComment(COMMENT_FIELDS,
-        TestData.createCommentInput("This is a test comment one"), created.getUuid());
+    final Comment commentOne =
+        withCredentials(author.getDomainUsername(), t -> mutationExecutor.addComment(COMMENT_FIELDS,
+            TestData.createCommentInput("This is a test comment one"), created.getUuid()));
     assertThat(commentOne.getUuid()).isNotNull();
     assertThat(commentOne.getAuthor().getUuid()).isEqualTo(author.getUuid());
 
-    final Comment commentTwo = approver1MutationExecutor.addComment(COMMENT_FIELDS,
-        TestData.createCommentInput("This is a test comment two"), created.getUuid());
+    final Comment commentTwo = withCredentials(approver1.getDomainUsername(),
+        t -> mutationExecutor.addComment(COMMENT_FIELDS,
+            TestData.createCommentInput("This is a test comment two"), created.getUuid()));
     assertThat(commentTwo.getUuid()).isNotNull();
 
-    returned = approver1QueryExecutor.report(FIELDS, created.getUuid());
-    final List<Comment> commentsReturned = returned.getComments();
+    final Report returned6 = withCredentials(approver1.getDomainUsername(),
+        t -> queryExecutor.report(FIELDS, created.getUuid()));
+    final List<Comment> commentsReturned = returned6.getComments();
     assertThat(commentsReturned).hasSize(3); // the rejection comment will be there as well.
     // Assert order of comments!
     assertThat(commentsReturned.stream().map(Comment::getUuid).collect(Collectors.toList()))
@@ -457,45 +473,47 @@ public class ReportResourceTest extends AbstractResourceTest {
         .withReleasedAtStart(
             Instant.now().atZone(DaoUtils.getServerNativeZoneId()).minusDays(1).toInstant())
         .build();
-    AnetBeanList_Report rollup = adminQueryExecutor.reportList(getListFields(FIELDS), query);
+    AnetBeanList_Report rollup =
+        withCredentials(adminUser, t -> queryExecutor.reportList(getListFields(FIELDS), query));
     assertThat(rollup.getTotalCount()).isPositive();
     assertThat(rollup.getList().stream().map(Report::getUuid).collect(Collectors.toSet()))
-        .contains(returned.getUuid());
+        .contains(returned6.getUuid());
 
     // Pull recent People, Tasks, and Locations and verify that the records from the last report are
     // there.
     final PersonSearchQueryInput queryPeople =
         PersonSearchQueryInput.builder().withStatus(Status.ACTIVE).withInMyReports(true)
             .withSortBy(PersonSearchSortBy.RECENT).withSortOrder(SortOrder.DESC).build();
-    final AnetBeanList_Person recentPeople =
-        authorQueryExecutor.personList(getListFields(PERSON_FIELDS), queryPeople);
+    final AnetBeanList_Person recentPeople = withCredentials(author.getDomainUsername(),
+        t -> queryExecutor.personList(getListFields(PERSON_FIELDS), queryPeople));
     assertThat(recentPeople.getList().stream().map(Person::getUuid).collect(Collectors.toSet()))
         .contains(interlocutorPerson.getUuid());
 
     final TaskSearchQueryInput queryTasks =
         TaskSearchQueryInput.builder().withStatus(Status.ACTIVE).withInMyReports(true)
             .withSortBy(TaskSearchSortBy.RECENT).withSortOrder(SortOrder.DESC).build();
-    final AnetBeanList_Task recentTasks =
-        authorQueryExecutor.taskList(getListFields(TASK_FIELDS), queryTasks);
+    final AnetBeanList_Task recentTasks = withCredentials(author.getDomainUsername(),
+        t -> queryExecutor.taskList(getListFields(TASK_FIELDS), queryTasks));
     assertThat(recentTasks.getList().stream().map(Task::getUuid).collect(Collectors.toSet()))
         .contains(action.getUuid());
 
     final LocationSearchQueryInput queryLocations =
         LocationSearchQueryInput.builder().withStatus(Status.ACTIVE).withInMyReports(true)
             .withSortBy(LocationSearchSortBy.RECENT).withSortOrder(SortOrder.DESC).build();
-    final AnetBeanList_Location recentLocations =
-        authorQueryExecutor.locationList(getListFields(LOCATION_FIELDS), queryLocations);
+    final AnetBeanList_Location recentLocations = withCredentials(author.getDomainUsername(),
+        t -> queryExecutor.locationList(getListFields(LOCATION_FIELDS), queryLocations));
     assertThat(
         recentLocations.getList().stream().map(Location::getUuid).collect(Collectors.toSet()))
         .contains(loc.getUuid());
 
     // Go and delete the entire approval chain!
     advisorOrg.setApprovalSteps(List.of());
-    nrUpdated = adminMutationExecutor.updateOrganization("", getOrganizationInput(advisorOrg));
+    nrUpdated = withCredentials(adminUser,
+        t -> mutationExecutor.updateOrganization("", getOrganizationInput(advisorOrg)));
     assertThat(nrUpdated).isEqualTo(1);
 
-    Organization updatedOrg =
-        adminQueryExecutor.organization(ORGANIZATION_FIELDS, advisorOrg.getUuid());
+    Organization updatedOrg = withCredentials(adminUser,
+        t -> queryExecutor.organization(ORGANIZATION_FIELDS, advisorOrg.getUuid()));
     assertThat(updatedOrg).isNotNull();
     assertThat(updatedOrg.getApprovalSteps()).isEmpty();
   }
@@ -506,12 +524,9 @@ public class ReportResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void createReportWithoutInterlocutor()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void createReportWithoutInterlocutor() {
     // Create a report writer
     final Person author = getNickNicholson();
-    final QueryExecutor authorQueryExecutor = getQueryExecutor(author.getDomainUsername());
-    final MutationExecutor authorMutationExecutor = getMutationExecutor(author.getDomainUsername());
 
     // Create a person for the report
     final Person reportAttendeePerson = getJackJackson();
@@ -522,43 +537,41 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(reportAttendeeOrg).isNotNull();
 
     // Create an Advising Organization for the report writer
-    final Organization advisorOrg = adminMutationExecutor.createOrganization(ORGANIZATION_FIELDS,
-        TestData.createAdvisorOrganizationInput(true));
+    final Organization advisorOrg = withCredentials(adminUser, t -> mutationExecutor
+        .createOrganization(ORGANIZATION_FIELDS, TestData.createAdvisorOrganizationInput(true)));
     assertThat(advisorOrg).isNotNull();
     assertThat(advisorOrg.getUuid()).isNotNull();
 
     // Create leadership people in the AO who can approve this report
-    Person approver1 = Person.builder().withDomainUsername("testapprover1")
-        .withEmailAddress("hunter+testApprover1@example.com").withName("Test Approver 1")
-        .withStatus(Status.ACTIVE).build();
-    approver1 = findOrPutPersonInDb(approver1);
-    Person approver2 = Person.builder().withDomainUsername("testapprover2")
-        .withEmailAddress("hunter+testApprover2@example.com").withName("Test Approver 2")
-        .withStatus(Status.ACTIVE).build();
-    approver2 = findOrPutPersonInDb(approver2);
+    final Person approver1 = findOrPutPersonInDb(Person.builder()
+        .withDomainUsername("testapprover1").withEmailAddress("hunter+testApprover1@example.com")
+        .withName("Test Approver 1").withStatus(Status.ACTIVE).build());
+    final Person approver2 = findOrPutPersonInDb(Person.builder()
+        .withDomainUsername("testapprover2").withEmailAddress("hunter+testApprover2@example.com")
+        .withName("Test Approver 2").withStatus(Status.ACTIVE).build());
 
     final PositionInput approver1PosInput = PositionInput.builder()
         .withName("Test Approver 1 Position").withOrganization(getOrganizationInput(advisorOrg))
         .withLocation(getLocationInput(getGeneralHospital())).withType(PositionType.SUPERUSER)
         .withRole(PositionRole.MEMBER).withStatus(Status.ACTIVE).build();
-    Position approver1Pos =
-        adminMutationExecutor.createPosition(POSITION_FIELDS, approver1PosInput);
+    final Position approver1Pos = withCredentials(adminUser,
+        t -> mutationExecutor.createPosition(POSITION_FIELDS, approver1PosInput));
     assertThat(approver1Pos).isNotNull();
     assertThat(approver1Pos.getUuid()).isNotNull();
-    Integer nrUpdated = adminMutationExecutor.putPersonInPosition("", getPersonInput(approver1),
-        approver1Pos.getUuid());
+    Integer nrUpdated = withCredentials(adminUser, t -> mutationExecutor.putPersonInPosition("",
+        getPersonInput(approver1), approver1Pos.getUuid()));
     assertThat(nrUpdated).isEqualTo(1);
 
     final PositionInput approver2PosInput = PositionInput.builder()
         .withName("Test Approver 2 Position").withOrganization(getOrganizationInput(advisorOrg))
         .withLocation(getLocationInput(getGeneralHospital())).withType(PositionType.SUPERUSER)
         .withRole(PositionRole.MEMBER).withStatus(Status.ACTIVE).build();
-    final Position approver2Pos =
-        adminMutationExecutor.createPosition(POSITION_FIELDS, approver2PosInput);
+    final Position approver2Pos = withCredentials(adminUser,
+        t -> mutationExecutor.createPosition(POSITION_FIELDS, approver2PosInput));
     assertThat(approver2Pos).isNotNull();
     assertThat(approver2Pos.getUuid()).isNotNull();
-    nrUpdated = adminMutationExecutor.putPersonInPosition("", getPersonInput(approver2),
-        approver2Pos.getUuid());
+    nrUpdated = withCredentials(adminUser, t -> mutationExecutor.putPersonInPosition("",
+        getPersonInput(approver2), approver2Pos.getUuid()));
     assertThat(nrUpdated).isEqualTo(1);
 
     // Create a billet for the author
@@ -566,16 +579,17 @@ public class ReportResourceTest extends AbstractResourceTest {
         PositionInput.builder().withName("A report writer").withType(PositionType.REGULAR)
             .withRole(PositionRole.MEMBER).withOrganization(getOrganizationInput(advisorOrg))
             .withLocation(getLocationInput(getGeneralHospital())).withStatus(Status.ACTIVE).build();
-    final Position authorBillet =
-        adminMutationExecutor.createPosition(POSITION_FIELDS, authorBilletInput);
+    final Position authorBillet = withCredentials(adminUser,
+        t -> mutationExecutor.createPosition(POSITION_FIELDS, authorBilletInput));
     assertThat(authorBillet).isNotNull();
     assertThat(authorBillet.getUuid()).isNotNull();
 
     // Set this author in this billet
-    nrUpdated = adminMutationExecutor.putPersonInPosition("", getPersonInput(author),
-        authorBillet.getUuid());
+    nrUpdated = withCredentials(adminUser, t -> mutationExecutor.putPersonInPosition("",
+        getPersonInput(author), authorBillet.getUuid()));
     assertThat(nrUpdated).isEqualTo(1);
-    final Position checkit = adminQueryExecutor.position(POSITION_FIELDS, authorBillet.getUuid());
+    final Position checkit = withCredentials(adminUser,
+        t -> queryExecutor.position(POSITION_FIELDS, authorBillet.getUuid()));
     assertThat(checkit.getPerson()).isNotNull();
     assertThat(checkit.getPerson().getUuid()).isEqualTo(author.getUuid());
 
@@ -596,13 +610,14 @@ public class ReportResourceTest extends AbstractResourceTest {
     final OrganizationInput advisorOrgInput = getOrganizationInput(advisorOrg);
     advisorOrgInput.setApprovalSteps(approvalStepsInput);
 
-    nrUpdated = adminMutationExecutor.updateOrganization("", advisorOrgInput);
+    nrUpdated =
+        withCredentials(adminUser, t -> mutationExecutor.updateOrganization("", advisorOrgInput));
     assertThat(nrUpdated).isEqualTo(1);
     // Pull the approval workflow for this AO
-    final Organization orgWithSteps =
-        adminQueryExecutor.organization(ORGANIZATION_FIELDS, advisorOrg.getUuid());
+    final Organization orgWithSteps = withCredentials(adminUser,
+        t -> queryExecutor.organization(ORGANIZATION_FIELDS, advisorOrg.getUuid()));
     final List<ApprovalStep> steps = orgWithSteps.getApprovalSteps();
-    assertThat(steps.size()).isEqualTo(2);
+    assertThat(steps).hasSize(2);
     final ApprovalStep approvalStep = steps.get(0);
     assertThat(approvalStep.getName()).isEqualTo(approvalStepInput.getName());
     final ApprovalStep releaseApprovalStep = steps.get(1);
@@ -610,24 +625,27 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(releaseApprovalStep.getName()).isEqualTo(releaseApprovalStepInput.getName());
 
     // Ensure approver1 is now an approver
-    approver1Pos = adminQueryExecutor.position(POSITION_FIELDS, approver1Pos.getUuid());
-    assertThat(approver1Pos.getIsApprover()).isTrue();
+    final Position approver1Pos1 = withCredentials(adminUser,
+        t -> queryExecutor.position(POSITION_FIELDS, approver1Pos.getUuid()));
+    assertThat(approver1Pos1.getIsApprover()).isTrue();
 
     // Create some tasks for this organization
-    final Task top = adminMutationExecutor.createTask(TASK_FIELDS,
-        TestData.createTaskInput("test-1-2", "Interlocutor Test Top Task", "TOP", null,
-            Collections.singletonList(getOrganizationInput(advisorOrg)), Status.ACTIVE));
+    final Task top = withCredentials(adminUser,
+        t -> mutationExecutor.createTask(TASK_FIELDS,
+            TestData.createTaskInput("test-1-2", "Interlocutor Test Top Task", "TOP", null,
+                Collections.singletonList(getOrganizationInput(advisorOrg)), Status.ACTIVE)));
     assertThat(top).isNotNull();
     assertThat(top.getUuid()).isNotNull();
-    final Task action =
-        adminMutationExecutor.createTask(TASK_FIELDS, TestData.createTaskInput("test-1-3",
-            "Interlocutor Test Task Action", "Action", getTaskInput(top), null, Status.ACTIVE));
+    final Task action = withCredentials(adminUser,
+        t -> mutationExecutor.createTask(TASK_FIELDS, TestData.createTaskInput("test-1-3",
+            "Interlocutor Test Task Action", "Action", getTaskInput(top), null, Status.ACTIVE)));
     assertThat(action).isNotNull();
     assertThat(action.getUuid()).isNotNull();
 
     // Create a Location that this Report was written at
-    final Location loc = adminMutationExecutor.createLocation(LOCATION_FIELDS,
-        TestData.createLocationInput("The Boat Dock", 1.23, 4.56));
+    final Location loc =
+        withCredentials(adminUser, t -> mutationExecutor.createLocation(LOCATION_FIELDS,
+            TestData.createLocationInput("The Boat Dock", 1.23, 4.56)));
     assertThat(loc).isNotNull();
     assertThat(loc.getUuid()).isNotNull();
 
@@ -648,7 +666,8 @@ public class ReportResourceTest extends AbstractResourceTest {
             .withAdvisorOrg(getOrganizationInput(advisorOrg))
             .withInterlocutorOrg(getOrganizationInput(reportAttendeeOrg))
             .withClassification(getFirstClassification()).build();
-    final Report created = authorMutationExecutor.createReport(FIELDS, rInput);
+    final Report created = withCredentials(author.getDomainUsername(),
+        t -> mutationExecutor.createReport(FIELDS, rInput));
     assertThat(created).isNotNull();
     assertThat(created.getUuid()).isNotNull();
     assertThat(created.getState()).isEqualTo(ReportState.DRAFT);
@@ -662,80 +681,89 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     // Have another regular user try to submit the report
     try {
-      getMutationExecutor(getRegularUser().getDomainUsername()).submitReport("", created.getUuid());
-      fail("Expected ForbiddenException");
-    } catch (ForbiddenException expectedException) {
+      withCredentials(getRegularUser().getDomainUsername(),
+          t -> mutationExecutor.submitReport("", created.getUuid()));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      // OK
     }
 
     // Have a superuser of another AO try to submit the report
     try {
-      getMutationExecutor(getSuperuser().getDomainUsername()).submitReport("", created.getUuid());
-      fail("Expected ForbiddenException");
-    } catch (ForbiddenException expectedException) {
+      withCredentials(getSuperuser().getDomainUsername(),
+          t -> mutationExecutor.submitReport("", created.getUuid()));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      // OK
     }
 
     // Have the author submit the report
-    int numRows = authorMutationExecutor.submitReport("", created.getUuid());
+    int numRows = withCredentials(author.getDomainUsername(),
+        t -> mutationExecutor.submitReport("", created.getUuid()));
     assertThat(numRows).isOne();
 
-    Report returned = authorQueryExecutor.report(FIELDS, created.getUuid());
-    assertThat(returned.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
+    final Report returned1 = withCredentials(author.getDomainUsername(),
+        t -> queryExecutor.report(FIELDS, created.getUuid()));
+    assertThat(returned1.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
 
     // Verify that author can still edit the report
-    returned.setAtmosphereDetails("Everybody was super nice! Again!");
-    final Report r2 = authorMutationExecutor.updateReport(FIELDS, getReportInput(returned), true);
-    assertThat(r2.getAtmosphereDetails()).isEqualTo(returned.getAtmosphereDetails());
+    returned1.setAtmosphereDetails("Everybody was super nice! Again!");
+    final Report r2 = withCredentials(author.getDomainUsername(),
+        t -> mutationExecutor.updateReport(FIELDS, getReportInput(returned1), true));
+    assertThat(r2.getAtmosphereDetails()).isEqualTo(returned1.getAtmosphereDetails());
 
     // Have the author submit the report, again
-    numRows = authorMutationExecutor.submitReport("", created.getUuid());
+    numRows = withCredentials(author.getDomainUsername(),
+        t -> mutationExecutor.submitReport("", created.getUuid()));
     assertThat(numRows).isOne();
 
-    returned = authorQueryExecutor.report(FIELDS, created.getUuid());
-    assertThat(returned.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
+    final Report returned2 = withCredentials(author.getDomainUsername(),
+        t -> queryExecutor.report(FIELDS, created.getUuid()));
+    assertThat(returned2.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
 
     // The author should not be able to submit the report now
     try {
-      authorMutationExecutor.submitReport("", returned.getUuid());
-      fail("Expected BadRequestException");
-    } catch (BadRequestException expectedException) {
+      withCredentials(author.getDomainUsername(),
+          t -> mutationExecutor.submitReport("", returned2.getUuid()));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      // OK
     }
 
     logger.debug("Expecting report {} in step {} because of org {} on author {}",
-        returned.getUuid(), approvalStep.getUuid(), advisorOrg.getUuid(), author);
-    assertThat(returned.getApprovalStep().getUuid()).isEqualTo(approvalStep.getUuid());
+        returned2.getUuid(), approvalStep.getUuid(), advisorOrg.getUuid(), author);
+    assertThat(returned2.getApprovalStep().getUuid()).isEqualTo(approvalStep.getUuid());
 
     // verify the location on this report
-    assertThat(returned.getLocation().getUuid()).isEqualTo(loc.getUuid());
+    assertThat(returned2.getLocation().getUuid()).isEqualTo(loc.getUuid());
 
     // verify the interlocutors on this report
     assertThat(
-        returned.getAttendees().stream().map(ReportPerson::getUuid).collect(Collectors.toSet()))
+        returned2.getAttendees().stream().map(ReportPerson::getUuid).collect(Collectors.toSet()))
         .contains(reportAttendee.getUuid());
 
     // verify the tasks on this report
-    assertThat(returned.getTasks().stream().map(Task::getUuid).collect(Collectors.toSet()))
+    assertThat(returned2.getTasks().stream().map(Task::getUuid).collect(Collectors.toSet()))
         .contains(action.getUuid());
 
     // Verify this shows up on the approvers list of pending documents
     final ReportSearchQueryInput pendingQuery =
         ReportSearchQueryInput.builder().withPendingApprovalOf(approver1.getUuid()).build();
-    final QueryExecutor approver1QueryExecutor = getQueryExecutor(approver1.getDomainUsername());
-    final MutationExecutor approver1MutationExecutor =
-        getMutationExecutor(approver1.getDomainUsername());
-    AnetBeanList_Report pending =
-        approver1QueryExecutor.reportList(getListFields(FIELDS), pendingQuery);
+    AnetBeanList_Report pending = withCredentials(approver1.getDomainUsername(),
+        t -> queryExecutor.reportList(getListFields(FIELDS), pendingQuery));
     assertThat(pending.getList().stream().map(Report::getUuid).collect(Collectors.toSet()))
-        .contains(returned.getUuid());
+        .contains(returned2.getUuid());
 
     // Run a search for this user's pending approvals
     final ReportSearchQueryInput searchQuery =
         ReportSearchQueryInput.builder().withPendingApprovalOf(approver1.getUuid()).build();
-    pending = approver1QueryExecutor.reportList(getListFields(FIELDS), searchQuery);
-    assertThat(pending.getList().size()).isPositive();
+    pending = withCredentials(approver1.getDomainUsername(),
+        t -> queryExecutor.reportList(getListFields(FIELDS), searchQuery));
+    assertThat(pending.getList()).isNotEmpty();
 
     // Check on Report status for who needs to approve
-    List<ReportAction> workflow = returned.getWorkflow();
-    assertThat(workflow.size()).isEqualTo(3);
+    List<ReportAction> workflow = returned2.getWorkflow();
+    assertThat(workflow).hasSize(3);
     ReportAction reportAction = workflow.get(1);
     assertThat(reportAction.getPerson()).isNull(); // Because this hasn't been approved yet.
     assertThat(reportAction.getCreatedAt()).isNull();
@@ -744,58 +772,67 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(reportAction.getStep().getUuid()).isEqualTo(releaseApprovalStep.getUuid());
 
     // Reject the report
-    numRows = approver1MutationExecutor.rejectReport("",
-        TestData.createCommentInput("a test rejection"), created.getUuid());
+    numRows = withCredentials(approver1.getDomainUsername(), t -> mutationExecutor.rejectReport("",
+        TestData.createCommentInput("a test rejection"), created.getUuid()));
     assertThat(numRows).isOne();
 
     // Check on report status to verify it was rejected
-    returned = authorQueryExecutor.report(FIELDS, created.getUuid());
-    assertThat(returned.getState()).isEqualTo(ReportState.REJECTED);
-    assertThat(returned.getApprovalStep()).isNull();
+    final Report returned3 = withCredentials(author.getDomainUsername(),
+        t -> queryExecutor.report(FIELDS, created.getUuid()));
+    assertThat(returned3.getState()).isEqualTo(ReportState.REJECTED);
+    assertThat(returned3.getApprovalStep()).isNull();
 
     // Author needs to re-submit
-    numRows = authorMutationExecutor.submitReport("", created.getUuid());
+    numRows = withCredentials(author.getDomainUsername(),
+        t -> mutationExecutor.submitReport("", created.getUuid()));
     assertThat(numRows).isOne();
 
     // TODO: Approver modify the report *specifically change the attendees!*
 
     // Approve the report
-    numRows = approver1MutationExecutor.approveReport("", null, created.getUuid());
+    numRows = withCredentials(approver1.getDomainUsername(),
+        t -> mutationExecutor.approveReport("", null, created.getUuid()));
     assertThat(numRows).isOne();
 
     // Check on Report status to verify it got moved forward
-    returned = authorQueryExecutor.report(FIELDS, created.getUuid());
-    assertThat(returned.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
-    assertThat(returned.getApprovalStep().getUuid()).isEqualTo(releaseApprovalStep.getUuid());
+    final Report returned4 = withCredentials(author.getDomainUsername(),
+        t -> queryExecutor.report(FIELDS, created.getUuid()));
+    assertThat(returned4.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
+    assertThat(returned4.getApprovalStep().getUuid()).isEqualTo(releaseApprovalStep.getUuid());
 
     // Verify that the wrong person cannot approve this report.
     try {
-      approver1MutationExecutor.approveReport("", null, created.getUuid());
-      fail("Expected ForbiddenException");
-    } catch (ForbiddenException expectedException) {
+      withCredentials(approver1.getDomainUsername(),
+          t -> mutationExecutor.approveReport("", null, created.getUuid()));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      // OK
     }
 
     // Approve the report
-    numRows = getMutationExecutor(approver2.getDomainUsername()).approveReport("", null,
-        created.getUuid());
+    numRows = withCredentials(approver2.getDomainUsername(),
+        t -> mutationExecutor.approveReport("", null, created.getUuid()));
     assertThat(numRows).isOne();
 
     // Check on Report status to verify it got moved forward
-    returned = authorQueryExecutor.report(FIELDS, created.getUuid());
-    assertThat(returned.getState()).isEqualTo(ReportState.APPROVED);
-    assertThat(returned.getApprovalStep()).isNull();
+    final Report returned5 = withCredentials(author.getDomainUsername(),
+        t -> queryExecutor.report(FIELDS, created.getUuid()));
+    assertThat(returned5.getState()).isEqualTo(ReportState.APPROVED);
+    assertThat(returned5.getApprovalStep()).isNull();
 
     // The author should not be able to submit the report now
     try {
-      authorMutationExecutor.submitReport("", returned.getUuid());
-      fail("Expected BadRequestException");
-    } catch (BadRequestException expectedException) {
+      withCredentials(author.getDomainUsername(),
+          t -> mutationExecutor.submitReport("", returned5.getUuid()));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      // OK
     }
 
     // check on report status to see that it got approved.
-    workflow = returned.getWorkflow();
+    workflow = returned5.getWorkflow();
     // there were 5 actions on the report: submit, reject, submit, approve, approve
-    assertThat(workflow.size()).isEqualTo(6);
+    assertThat(workflow).hasSize(6);
     reportAction = workflow.get(4);
     assertThat(reportAction.getPerson().getUuid()).isEqualTo(approver1.getUuid());
     assertThat(reportAction.getCreatedAt()).isNotNull();
@@ -804,21 +841,25 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(reportAction.getStep().getUuid()).isEqualTo(releaseApprovalStep.getUuid());
 
     // Admin can publish approved reports.
-    numRows = adminMutationExecutor.publishReport("", created.getUuid());
+    numRows =
+        withCredentials(adminUser, t -> mutationExecutor.publishReport("", created.getUuid()));
     assertThat(numRows).isOne();
 
     // Post a comment on the report because it's awesome
-    final Comment commentOne = authorMutationExecutor.addComment(COMMENT_FIELDS,
-        TestData.createCommentInput("This is a test comment one"), created.getUuid());
+    final Comment commentOne =
+        withCredentials(author.getDomainUsername(), t -> mutationExecutor.addComment(COMMENT_FIELDS,
+            TestData.createCommentInput("This is a test comment one"), created.getUuid()));
     assertThat(commentOne.getUuid()).isNotNull();
     assertThat(commentOne.getAuthor().getUuid()).isEqualTo(author.getUuid());
 
-    final Comment commentTwo = approver1MutationExecutor.addComment(COMMENT_FIELDS,
-        TestData.createCommentInput("This is a test comment two"), created.getUuid());
+    final Comment commentTwo = withCredentials(approver1.getDomainUsername(),
+        t -> mutationExecutor.addComment(COMMENT_FIELDS,
+            TestData.createCommentInput("This is a test comment two"), created.getUuid()));
     assertThat(commentTwo.getUuid()).isNotNull();
 
-    returned = approver1QueryExecutor.report(FIELDS, created.getUuid());
-    final List<Comment> commentsReturned = returned.getComments();
+    final Report returned6 = withCredentials(approver1.getDomainUsername(),
+        t -> queryExecutor.report(FIELDS, created.getUuid()));
+    final List<Comment> commentsReturned = returned6.getComments();
     assertThat(commentsReturned).hasSize(3); // the rejection comment will be there as well.
     // Assert order of comments!
     assertThat(commentsReturned.stream().map(Comment::getUuid).collect(Collectors.toList()))
@@ -829,52 +870,53 @@ public class ReportResourceTest extends AbstractResourceTest {
         .withReleasedAtStart(
             Instant.now().atZone(DaoUtils.getServerNativeZoneId()).minusDays(1).toInstant())
         .build();
-    AnetBeanList_Report rollup = adminQueryExecutor.reportList(getListFields(FIELDS), query);
+    AnetBeanList_Report rollup =
+        withCredentials(adminUser, t -> queryExecutor.reportList(getListFields(FIELDS), query));
     assertThat(rollup.getTotalCount()).isPositive();
     assertThat(rollup.getList().stream().map(Report::getUuid).collect(Collectors.toSet()))
-        .contains(returned.getUuid());
+        .contains(returned6.getUuid());
 
     // Pull recent People, Tasks, and Locations and verify that the records from the last report are
     // there.
     final PersonSearchQueryInput queryPeople =
         PersonSearchQueryInput.builder().withStatus(Status.ACTIVE).withInMyReports(true)
             .withSortBy(PersonSearchSortBy.RECENT).withSortOrder(SortOrder.DESC).build();
-    final AnetBeanList_Person recentPeople =
-        authorQueryExecutor.personList(getListFields(PERSON_FIELDS), queryPeople);
+    final AnetBeanList_Person recentPeople = withCredentials(author.getDomainUsername(),
+        t -> queryExecutor.personList(getListFields(PERSON_FIELDS), queryPeople));
     assertThat(recentPeople.getList().stream().map(Person::getUuid).collect(Collectors.toSet()))
         .contains(reportAttendeePerson.getUuid());
 
     final TaskSearchQueryInput queryTasks =
         TaskSearchQueryInput.builder().withStatus(Status.ACTIVE).withInMyReports(true)
             .withSortBy(TaskSearchSortBy.RECENT).withSortOrder(SortOrder.DESC).build();
-    final AnetBeanList_Task recentTasks =
-        authorQueryExecutor.taskList(getListFields(TASK_FIELDS), queryTasks);
+    final AnetBeanList_Task recentTasks = withCredentials(author.getDomainUsername(),
+        t -> queryExecutor.taskList(getListFields(TASK_FIELDS), queryTasks));
     assertThat(recentTasks.getList().stream().map(Task::getUuid).collect(Collectors.toSet()))
         .contains(action.getUuid());
 
     final LocationSearchQueryInput queryLocations =
         LocationSearchQueryInput.builder().withStatus(Status.ACTIVE).withInMyReports(true)
             .withSortBy(LocationSearchSortBy.RECENT).withSortOrder(SortOrder.DESC).build();
-    final AnetBeanList_Location recentLocations =
-        authorQueryExecutor.locationList(getListFields(LOCATION_FIELDS), queryLocations);
+    final AnetBeanList_Location recentLocations = withCredentials(author.getDomainUsername(),
+        t -> queryExecutor.locationList(getListFields(LOCATION_FIELDS), queryLocations));
     assertThat(
         recentLocations.getList().stream().map(Location::getUuid).collect(Collectors.toSet()))
         .contains(loc.getUuid());
 
     // Go and delete the entire approval chain!
     advisorOrg.setApprovalSteps(List.of());
-    nrUpdated = adminMutationExecutor.updateOrganization("", getOrganizationInput(advisorOrg));
+    nrUpdated = withCredentials(adminUser,
+        t -> mutationExecutor.updateOrganization("", getOrganizationInput(advisorOrg)));
     assertThat(nrUpdated).isEqualTo(1);
 
-    Organization updatedOrg =
-        adminQueryExecutor.organization(ORGANIZATION_FIELDS, advisorOrg.getUuid());
+    Organization updatedOrg = withCredentials(adminUser,
+        t -> queryExecutor.organization(ORGANIZATION_FIELDS, advisorOrg.getUuid()));
     assertThat(updatedOrg).isNotNull();
     assertThat(updatedOrg.getApprovalSteps()).isEmpty();
   }
 
   @Test
-  public void testInheritedAndDefaultApprovalFlow() throws NumberFormatException,
-      GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void testInheritedAndDefaultApprovalFlow() throws NumberFormatException {
     final Person jack = getJackJackson();
     final Person roger = getRogerRogwell();
     final Person bob = getBobBobtown();
@@ -884,10 +926,10 @@ public class ReportResourceTest extends AbstractResourceTest {
     final PersonInput authorInput =
         PersonInput.builder().withName("A New Guy").withUser(true).withStatus(Status.ACTIVE)
             .withDomainUsername("newguy").withEmailAddress("newGuy@example.com").build();
-    final Person author = adminMutationExecutor.createPerson(PERSON_FIELDS, authorInput);
+    final Person author =
+        withCredentials(adminUser, t -> mutationExecutor.createPerson(PERSON_FIELDS, authorInput));
     assertThat(author).isNotNull();
     assertThat(author.getUuid()).isNotNull();
-    final MutationExecutor authorMutationExecutor = getMutationExecutor(author.getDomainUsername());
 
     final List<ReportPersonInput> reportPeopleInput =
         getReportPeopleInput(List.of(personToPrimaryReportPerson(roger, true),
@@ -901,7 +943,7 @@ public class ReportResourceTest extends AbstractResourceTest {
             "I just got here in town and am writing a report for the first time, but have no reporting structure set up")
         .withKeyOutcomes("Summary for the key outcomes").withNextSteps("Summary for the next steps")
         .withEngagementDate(Instant.now()).withDuration(75).build();
-    final Report r = jackMutationExecutor.createReport(FIELDS, rInput);
+    final Report r = withCredentials(jackUser, t -> mutationExecutor.createReport(FIELDS, rInput));
     assertThat(r).isNotNull();
     assertThat(r.getUuid()).isNotNull();
 
@@ -919,22 +961,24 @@ public class ReportResourceTest extends AbstractResourceTest {
     failSubmit(r, defaultOrgSetting, mil.dds.anet.beans.Organization.DUMMY_ORG_UUID);
 
     // Set the defaultOrgUuid back to the correct value
-    final int numSettings = adminMutationExecutor.saveAdminSettings("", List.of(
-        AdminSettingInput.builder().withKey(defaultOrgSetting).withValue(defaultOrgUuid).build()));
+    final int numSettings = withCredentials(adminUser,
+        t -> mutationExecutor.saveAdminSettings("", List.of(AdminSettingInput.builder()
+            .withKey(defaultOrgSetting).withValue(defaultOrgUuid).build())));
     assertThat(numSettings).isOne();
     // Submit the report (by admin who can do that, as author doesn't have a position)
-    int numRows = adminMutationExecutor.submitReport("", r.getUuid());
+    int numRows = withCredentials(adminUser, t -> mutationExecutor.submitReport("", r.getUuid()));
     assertThat(numRows).isOne();
 
     // Check the approval Step
-    final Report returned = jackQueryExecutor.report(FIELDS, r.getUuid());
+    final Report returned =
+        withCredentials(jackUser, t -> queryExecutor.report(FIELDS, r.getUuid()));
     assertThat(returned.getUuid()).isEqualTo(r.getUuid());
     assertThat(returned.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
 
     // Find the default ApprovalSteps
     assertThat(defaultOrgUuid).isNotNull();
-    final Organization orgWithSteps =
-        jackQueryExecutor.organization(ORGANIZATION_FIELDS, defaultOrgUuid);
+    final Organization orgWithSteps = withCredentials(jackUser,
+        t -> queryExecutor.organization(ORGANIZATION_FIELDS, defaultOrgUuid));
     final List<ApprovalStep> steps = orgWithSteps.getApprovalSteps();
     assertThat(steps).isNotNull();
     assertThat(steps).hasSize(1);
@@ -943,57 +987,63 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(returned.getApprovalStep().getUuid()).isEqualTo(steps.get(0).getUuid());
 
     // The only default approver is admin; reject the report
-    numRows = adminMutationExecutor.rejectReport("",
-        TestData.createCommentInput("default approval chain test rejection"), returned.getUuid());
+    numRows = withCredentials(adminUser, t -> mutationExecutor.rejectReport("",
+        TestData.createCommentInput("default approval chain test rejection"), returned.getUuid()));
     assertThat(numRows).isOne();
 
     // Fetch needed organizations
     final OrganizationSearchQueryInput queryOrgs = OrganizationSearchQueryInput.builder().build();
     queryOrgs.setPageSize(0);
-    final AnetBeanList_Organization results =
-        adminQueryExecutor.organizationList(getListFields(ORGANIZATION_FIELDS), queryOrgs);
+    final AnetBeanList_Organization results = withCredentials(adminUser,
+        t -> queryExecutor.organizationList(getListFields(ORGANIZATION_FIELDS), queryOrgs));
     Optional<Organization> ef11 = results.getList().stream()
         .filter(org -> org.getShortName().trim().equalsIgnoreCase("EF 1.1")).findFirst();
     Optional<Organization> ef6 = results.getList().stream()
         .filter(org -> org.getShortName().trim().equalsIgnoreCase("EF 6")).findFirst();
-    assertThat(ef11.isPresent()).isTrue();
-    assertThat(ef6.isPresent()).isTrue();
+    assertThat(ef11).isPresent();
+    assertThat(ef6).isPresent();
 
     // Change primary advisor of the report to someone in EF 1.1 (Bob)
     returned.setReportPeople(
         List.of(personToPrimaryReportPerson(roger, true), personToReportPerson(jack, false),
             personToPrimaryReportPerson(bob, false), personToReportAuthor(author)));
 
-    final Report updated =
-        authorMutationExecutor.updateReport(FIELDS, getReportInput(returned), true);
+    final Report updated = withCredentials(author.getDomainUsername(),
+        t -> mutationExecutor.updateReport(FIELDS, getReportInput(returned), true));
     assertThat(updated).isNotNull();
     assertThat(updated.getAdvisorOrg().getUuid()).isNotEqualTo(returned.getAdvisorOrg().getUuid());
 
     // Re-submit the reported
-    numRows = authorMutationExecutor.submitReport("", r.getUuid());
+    numRows = withCredentials(author.getDomainUsername(),
+        t -> mutationExecutor.submitReport("", r.getUuid()));
     assertThat(numRows).isOne();
 
     // Report should now have the EF 1.1 approval step
-    validateReportApprovalStep(jackQueryExecutor.report(FIELDS, r.getUuid()), ef11.get().getUuid());
+    validateReportApprovalStep(
+        withCredentials(jackUser, t -> queryExecutor.report(FIELDS, r.getUuid())),
+        ef11.get().getUuid());
 
     // Change primary advisor of the report to someone in EF 6.1 (Ben)
     updated.setReportPeople(
         List.of(personToPrimaryReportPerson(roger, true), personToReportPerson(jack, false),
             personToPrimaryReportPerson(ben, false), personToReportAuthor(author)));
 
-    final Report updated2 =
-        authorMutationExecutor.updateReport(FIELDS, getReportInput(updated), true);
+    final Report updated2 = withCredentials(author.getDomainUsername(),
+        t -> mutationExecutor.updateReport(FIELDS, getReportInput(updated), true));
     assertThat(updated2).isNotNull();
     assertThat(updated2.getAdvisorOrg().getUuid()).isNotEqualTo(updated.getAdvisorOrg().getUuid());
 
     // Re-submit the report
-    numRows = authorMutationExecutor.submitReport("", r.getUuid());
+    numRows = withCredentials(author.getDomainUsername(),
+        t -> mutationExecutor.submitReport("", r.getUuid()));
     assertThat(numRows).isOne();
 
     // EF 6.1 does not have approval steps but EF 6 does,
     // Report should now be up for review by EF 6 approvers due to inheriting approval steps form
     // parent
-    validateReportApprovalStep(jackQueryExecutor.report(FIELDS, r.getUuid()), ef6.get().getUuid());
+    validateReportApprovalStep(
+        withCredentials(jackUser, t -> queryExecutor.report(FIELDS, r.getUuid())),
+        ef6.get().getUuid());
   }
 
   private void validateReportApprovalStep(Report report, String organizationUuid) {
@@ -1002,29 +1052,25 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(report.getApprovalStep().getRelatedObjectUuid()).isEqualTo(organizationUuid);
   }
 
-  private static void failSubmit(final Report r, final String defaultOrgSetting,
-      final String defaultOrgValue)
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    final int numSettings = adminMutationExecutor.saveAdminSettings("", List.of(
-        AdminSettingInput.builder().withKey(defaultOrgSetting).withValue(defaultOrgValue).build()));
+  private void failSubmit(final Report r, final String defaultOrgSetting,
+      final String defaultOrgValue) {
+    final int numSettings = withCredentials(adminUser,
+        t -> mutationExecutor.saveAdminSettings("", List.of(AdminSettingInput.builder()
+            .withKey(defaultOrgSetting).withValue(defaultOrgValue).build())));
     assertThat(numSettings).isOne();
     // Submit the report: should fail
     try {
-      adminMutationExecutor.submitReport("", r.getUuid());
-      fail("Expected WebApplicationException");
-    } catch (WebApplicationException expected) {
+      withCredentials(adminUser, t -> mutationExecutor.submitReport("", r.getUuid()));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
       // OK
     }
   }
 
   @Test
-  public void reportEditTest()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void reportEditTest() {
     // Elizabeth writes a report about meeting with Roger
     final Person elizabeth = getElizabethElizawell();
-    final QueryExecutor elizabethQueryExecutor = getQueryExecutor(elizabeth.getDomainUsername());
-    final MutationExecutor elizabethMutationExecutor =
-        getMutationExecutor(elizabeth.getDomainUsername());
     final Person roger = getRogerRogwell();
     final Person nick = getNickNicholson();
     final Person bob = getBobBobtown();
@@ -1032,16 +1078,16 @@ public class ReportResourceTest extends AbstractResourceTest {
     // Fetch some objects from the DB that we'll use later.
     final LocationSearchQueryInput queryLocs =
         LocationSearchQueryInput.builder().withText("Police").build();
-    final AnetBeanList_Location locSearchResults =
-        elizabethQueryExecutor.locationList(getListFields(LOCATION_FIELDS), queryLocs);
+    final AnetBeanList_Location locSearchResults = withCredentials(elizabeth.getDomainUsername(),
+        t -> queryExecutor.locationList(getListFields(LOCATION_FIELDS), queryLocs));
     assertThat(locSearchResults).isNotNull();
     assertThat(locSearchResults.getList()).isNotEmpty();
     final Location loc = locSearchResults.getList().get(0);
 
     final TaskSearchQueryInput queryTasks =
         TaskSearchQueryInput.builder().withText("Budgeting").build();
-    final AnetBeanList_Task taskSearchResults =
-        elizabethQueryExecutor.taskList(getListFields(TASK_FIELDS), queryTasks);
+    final AnetBeanList_Task taskSearchResults = withCredentials(elizabeth.getDomainUsername(),
+        t -> queryExecutor.taskList(getListFields(TASK_FIELDS), queryTasks));
     assertThat(taskSearchResults.getTotalCount()).isGreaterThan(2);
 
     final ReportInput rInput = ReportInput.builder()
@@ -1053,7 +1099,8 @@ public class ReportResourceTest extends AbstractResourceTest {
         .withReportPeople(getReportPeopleInput(
             List.of(personToPrimaryReportPerson(roger, true), personToReportAuthor(elizabeth))))
         .withTasks(List.of(getTaskInput(taskSearchResults.getList().get(0)))).build();
-    Report returned = elizabethMutationExecutor.createReport(FIELDS, rInput);
+    Report returned = withCredentials(elizabeth.getDomainUsername(),
+        t -> mutationExecutor.createReport(FIELDS, rInput));
     assertThat(returned).isNotNull();
     assertThat(returned.getUuid()).isNotNull();
 
@@ -1066,11 +1113,13 @@ public class ReportResourceTest extends AbstractResourceTest {
     returned.setReportPeople(List.of(personToPrimaryReportPerson(roger, true),
         personToReportPerson(nick, false), personToPrimaryReportAuthor(elizabeth)));
     returned.setTasks(List.of());
-    Report updated = elizabethMutationExecutor.updateReport(FIELDS, getReportInput(returned), true);
+    Report updated = withCredentials(elizabeth.getDomainUsername(),
+        t -> mutationExecutor.updateReport(FIELDS, getReportInput(returned), true));
     assertThat(updated).isNotNull();
 
     // Verify the report changed
-    Report returned2 = elizabethQueryExecutor.report(FIELDS, returned.getUuid());
+    Report returned2 = withCredentials(elizabeth.getDomainUsername(),
+        t -> queryExecutor.report(FIELDS, returned.getUuid()));
     assertThat(returned2.getIntent()).isEqualTo(rInput.getIntent());
     assertThat(returned2.getLocation().getUuid()).isEqualTo(loc.getUuid());
     assertThat(returned2.getTasks()).isEmpty();
@@ -1086,17 +1135,18 @@ public class ReportResourceTest extends AbstractResourceTest {
         .isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
 
     // Elizabeth submits the report
-    int numRows = elizabethMutationExecutor.submitReport("", returned.getUuid());
+    int numRows = withCredentials(elizabeth.getDomainUsername(),
+        t -> mutationExecutor.submitReport("", returned.getUuid()));
     assertThat(numRows).isOne();
-    Report returned3 = elizabethQueryExecutor.report(FIELDS, returned.getUuid());
+    Report returned3 = withCredentials(elizabeth.getDomainUsername(),
+        t -> queryExecutor.report(FIELDS, returned.getUuid()));
     assertThat(returned3.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
 
     // Bob gets the approval (EF1 Approvers)
     final ReportSearchQueryInput pendingQuery =
         ReportSearchQueryInput.builder().withPendingApprovalOf(bob.getUuid()).build();
-    final QueryExecutor bobQueryExecutor = getQueryExecutor("bob");
     AnetBeanList_Report pendingBobsApproval =
-        bobQueryExecutor.reportList(getListFields(FIELDS), pendingQuery);
+        withCredentials("bob", t -> queryExecutor.reportList(getListFields(FIELDS), pendingQuery));
     assertThat(pendingBobsApproval.getList().stream()
         .anyMatch(rpt -> rpt.getUuid().equals(returned3.getUuid()))).isTrue();
 
@@ -1106,10 +1156,12 @@ public class ReportResourceTest extends AbstractResourceTest {
         List.of(personToPrimaryReportPerson(nick, false), personToPrimaryReportAuthor(elizabeth)));
     returned3
         .setTasks(List.of(taskSearchResults.getList().get(1), taskSearchResults.getList().get(2)));
-    updated = getMutationExecutor("bob").updateReport(FIELDS, getReportInput(returned3), true);
+    updated = withCredentials("bob",
+        t -> mutationExecutor.updateReport(FIELDS, getReportInput(returned3), true));
     assertThat(updated).isNotNull();
 
-    Report returned4 = elizabethQueryExecutor.report(FIELDS, returned.getUuid());
+    Report returned4 = withCredentials(elizabeth.getDomainUsername(),
+        t -> queryExecutor.report(FIELDS, returned.getUuid()));
     assertThat(returned4.getReportText()).endsWith("Bob!!");
     final List<ReportPerson> returned4Attendees = returned4.getAttendees();
     assertThat(returned4Attendees).hasSize(2);
@@ -1117,31 +1169,34 @@ public class ReportResourceTest extends AbstractResourceTest {
         .contains(nick.getUuid());
     assertThat(returned4.getTasks()).hasSize(2);
 
-    numRows = getMutationExecutor("bob").approveReport("", null, returned.getUuid());
+    numRows =
+        withCredentials("bob", t -> mutationExecutor.approveReport("", null, returned.getUuid()));
     assertThat(numRows).isOne();
   }
 
   @Test
-  public void searchTest()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void searchTest() {
     final Person jack = getJackJackson();
     final Person steve = getSteveSteveson();
 
     // Search based on report Text body, for any report State
-    ReportSearchQueryInput query = ReportSearchQueryInput.builder()
+    final ReportSearchQueryInput query1 = ReportSearchQueryInput.builder()
         .withState(List.of(ReportState.values())).withText("spreadsheet").build();
-    AnetBeanList_Report searchResults = jackQueryExecutor.reportList(getListFields(FIELDS), query);
+    AnetBeanList_Report searchResults =
+        withCredentials(jackUser, t -> queryExecutor.reportList(getListFields(FIELDS), query1));
     assertThat(searchResults.getList()).isNotEmpty();
 
     // Search based on summary
-    query.setText("Amherst");
-    searchResults = jackQueryExecutor.reportList(getListFields(FIELDS), query);
+    query1.setText("Amherst");
+    searchResults =
+        withCredentials(jackUser, t -> queryExecutor.reportList(getListFields(FIELDS), query1));
     assertThat(searchResults.getList()).isNotEmpty();
 
     // Search by Author
-    query.setText(null);
-    query.setAuthorUuid(jack.getUuid());
-    searchResults = jackQueryExecutor.reportList(getListFields(FIELDS), query);
+    query1.setText(null);
+    query1.setAuthorUuid(jack.getUuid());
+    searchResults =
+        withCredentials(jackUser, t -> queryExecutor.reportList(getListFields(FIELDS), query1));
     assertThat(searchResults.getList()).isNotEmpty();
     assertThat(searchResults.getList().stream()
         .filter(r -> r.getAuthors().stream().anyMatch(p -> p.getUuid().equals(jack.getUuid())))
@@ -1149,20 +1204,22 @@ public class ReportResourceTest extends AbstractResourceTest {
     final int numResults = searchResults.getList().size();
 
     // Search by Author with Date Filtering
-    query.setEngagementDateStart(
+    query1.setEngagementDateStart(
         ZonedDateTime.of(2016, 6, 1, 0, 0, 0, 0, DaoUtils.getServerNativeZoneId()).toInstant());
-    query.setEngagementDateEnd(
+    query1.setEngagementDateEnd(
         ZonedDateTime.of(2016, 6, 15, 0, 0, 0, 0, DaoUtils.getServerNativeZoneId()).toInstant());
-    searchResults = jackQueryExecutor.reportList(getListFields(FIELDS), query);
+    searchResults =
+        withCredentials(jackUser, t -> queryExecutor.reportList(getListFields(FIELDS), query1));
     assertThat(searchResults.getList()).isNotEmpty();
-    assertThat(searchResults.getList().size()).isLessThan(numResults);
+    assertThat(searchResults.getList()).hasSizeLessThan(numResults);
 
     // Search by Attendee
-    query.setEngagementDateStart(null);
-    query.setEngagementDateEnd(null);
-    query.setAuthorUuid(null);
-    query.setAttendeeUuid(steve.getUuid());
-    searchResults = jackQueryExecutor.reportList(getListFields(FIELDS), query);
+    query1.setEngagementDateStart(null);
+    query1.setEngagementDateEnd(null);
+    query1.setAuthorUuid(null);
+    query1.setAttendeeUuid(steve.getUuid());
+    searchResults =
+        withCredentials(jackUser, t -> queryExecutor.reportList(getListFields(FIELDS), query1));
     assertThat(searchResults.getList()).isNotEmpty();
     assertThat(searchResults.getList().stream().filter(r -> {
       try {
@@ -1175,17 +1232,18 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     final TaskSearchQueryInput queryTasks =
         TaskSearchQueryInput.builder().withText("1.1.A").build();
-    final AnetBeanList_Task taskResults =
-        jackQueryExecutor.taskList(getListFields(TASK_FIELDS), queryTasks);
+    final AnetBeanList_Task taskResults = withCredentials(jackUser,
+        t -> queryExecutor.taskList(getListFields(TASK_FIELDS), queryTasks));
     assertThat(taskResults).isNotNull();
     assertThat(taskResults.getList()).isNotEmpty();
     Task task = taskResults.getList().stream().filter(t -> "1.1.A".equals(t.getShortName()))
         .findFirst().get();
 
     // Search by Task
-    query.setAttendeeUuid(null);
-    query.setTaskUuid(task.getUuid());
-    searchResults = jackQueryExecutor.reportList(getListFields(FIELDS), query);
+    query1.setAttendeeUuid(null);
+    query1.setTaskUuid(task.getUuid());
+    searchResults =
+        withCredentials(jackUser, t -> queryExecutor.reportList(getListFields(FIELDS), query1));
     assertThat(searchResults.getList()).isNotEmpty();
     assertThat(searchResults.getList().stream().filter(r -> {
       try {
@@ -1197,18 +1255,19 @@ public class ReportResourceTest extends AbstractResourceTest {
     })).hasSameSizeAs(searchResults.getList());
 
     // Search by direct organization
-    OrganizationSearchQueryInput queryOrgs =
+    final OrganizationSearchQueryInput queryOrgs1 =
         OrganizationSearchQueryInput.builder().withText("EF 1").build();
-    AnetBeanList_Organization orgs =
-        jackQueryExecutor.organizationList(getListFields(ORGANIZATION_FIELDS), queryOrgs);
-    assertThat(orgs.getList().size()).isPositive();
+    AnetBeanList_Organization orgs = withCredentials(jackUser,
+        t -> queryExecutor.organizationList(getListFields(ORGANIZATION_FIELDS), queryOrgs1));
+    assertThat(orgs.getList()).isNotEmpty();
     Organization ef11 =
         orgs.getList().stream().filter(o -> o.getShortName().equals("EF 1.1")).findFirst().get();
     assertThat(ef11.getShortName()).isEqualToIgnoringCase("EF 1.1");
 
-    query = ReportSearchQueryInput.builder().withOrgUuid(ef11.getUuid())
-        .withOrgRecurseStrategy(RecurseStrategy.NONE).build();
-    searchResults = jackQueryExecutor.reportList(getListFields(FIELDS), query);
+    final ReportSearchQueryInput query2 = ReportSearchQueryInput.builder()
+        .withOrgUuid(ef11.getUuid()).withOrgRecurseStrategy(RecurseStrategy.NONE).build();
+    searchResults =
+        withCredentials(jackUser, t -> queryExecutor.reportList(getListFields(FIELDS), query2));
     assertThat(searchResults.getList()).isNotEmpty();
     assertThat(searchResults.getList().stream().filter(r -> {
       try {
@@ -1220,22 +1279,26 @@ public class ReportResourceTest extends AbstractResourceTest {
     })).hasSameSizeAs(searchResults.getList());
 
     // Search by parent organization
-    queryOrgs = OrganizationSearchQueryInput.builder().withText("ef 1").build();
-    orgs = jackQueryExecutor.organizationList(getListFields(ORGANIZATION_FIELDS), queryOrgs);
-    assertThat(orgs.getList().size()).isPositive();
+    final OrganizationSearchQueryInput queryOrgs2 =
+        OrganizationSearchQueryInput.builder().withText("ef 1").build();
+    orgs = withCredentials(jackUser,
+        t -> queryExecutor.organizationList(getListFields(ORGANIZATION_FIELDS), queryOrgs2));
+    assertThat(orgs.getList()).isNotEmpty();
     Organization ef1 = orgs.getList().stream()
         .filter(o -> o.getShortName().equalsIgnoreCase("ef 1")).findFirst().get();
     assertThat(ef1.getShortName()).isEqualToIgnoringCase("EF 1");
 
-    query.setOrgUuid(ef1.getUuid());
-    query.setOrgRecurseStrategy(RecurseStrategy.CHILDREN);
-    searchResults = jackQueryExecutor.reportList(getListFields(FIELDS), query);
+    query2.setOrgUuid(ef1.getUuid());
+    query2.setOrgRecurseStrategy(RecurseStrategy.CHILDREN);
+    searchResults =
+        withCredentials(jackUser, t -> queryExecutor.reportList(getListFields(FIELDS), query2));
     assertThat(searchResults.getList()).isNotEmpty();
     // #TODO: figure out how to verify the results?
 
     // Check search for just an org
-    query.setOrgUuid(ef11.getUuid());
-    searchResults = jackQueryExecutor.reportList(getListFields(FIELDS), query);
+    query2.setOrgUuid(ef11.getUuid());
+    searchResults =
+        withCredentials(jackUser, t -> queryExecutor.reportList(getListFields(FIELDS), query2));
     assertThat(searchResults.getList()).isNotEmpty();
     assertThat(searchResults.getList().stream().filter(r -> {
       try {
@@ -1250,43 +1313,49 @@ public class ReportResourceTest extends AbstractResourceTest {
     // Search by location
     final LocationSearchQueryInput queryLocs =
         LocationSearchQueryInput.builder().withText("Cabot").build();
-    final AnetBeanList_Location locSearchResults =
-        jackQueryExecutor.locationList(getListFields(LOCATION_FIELDS), queryLocs);
+    final AnetBeanList_Location locSearchResults = withCredentials(jackUser,
+        t -> queryExecutor.locationList(getListFields(LOCATION_FIELDS), queryLocs));
     assertThat(locSearchResults).isNotNull();
     assertThat(locSearchResults.getList()).isNotEmpty();
     Location cabot = locSearchResults.getList().get(0);
 
-    query = ReportSearchQueryInput.builder().withState(List.of(ReportState.values()))
-        .withLocationUuid(cabot.getUuid()).build();
-    searchResults = jackQueryExecutor.reportList(getListFields(FIELDS), query);
+    final ReportSearchQueryInput query3 = ReportSearchQueryInput.builder()
+        .withState(List.of(ReportState.values())).withLocationUuid(cabot.getUuid()).build();
+    searchResults =
+        withCredentials(jackUser, t -> queryExecutor.reportList(getListFields(FIELDS), query3));
     assertThat(searchResults.getList()).isNotEmpty();
     assertThat(searchResults.getList().stream()
         .filter(r -> r.getLocation().getUuid().equals(cabot.getUuid())))
         .hasSameSizeAs(searchResults.getList());
 
     // Search by Status.
-    query.setLocationUuid(null);
-    query.setState(List.of(ReportState.CANCELLED));
-    searchResults = jackQueryExecutor.reportList(getListFields(FIELDS), query);
+    query3.setLocationUuid(null);
+    query3.setState(List.of(ReportState.CANCELLED));
+    searchResults =
+        withCredentials(jackUser, t -> queryExecutor.reportList(getListFields(FIELDS), query3));
     assertThat(searchResults.getList()).isNotEmpty();
     final int numCancelled = searchResults.getTotalCount();
 
-    query.setState(List.of(ReportState.CANCELLED, ReportState.PUBLISHED));
-    searchResults = jackQueryExecutor.reportList(getListFields(FIELDS), query);
+    query3.setState(List.of(ReportState.CANCELLED, ReportState.PUBLISHED));
+    searchResults =
+        withCredentials(jackUser, t -> queryExecutor.reportList(getListFields(FIELDS), query3));
     assertThat(searchResults.getList()).isNotEmpty();
     assertThat(searchResults.getTotalCount()).isGreaterThan(numCancelled);
 
-    queryOrgs = OrganizationSearchQueryInput.builder().withText("Defense").build();
-    orgs = jackQueryExecutor.organizationList(getListFields(ORGANIZATION_FIELDS), queryOrgs);
-    assertThat(orgs.getList().size()).isPositive();
+    final OrganizationSearchQueryInput queryOrgs3 =
+        OrganizationSearchQueryInput.builder().withText("Defense").build();
+    orgs = withCredentials(jackUser,
+        t -> queryExecutor.organizationList(getListFields(ORGANIZATION_FIELDS), queryOrgs3));
+    assertThat(orgs.getList()).isNotEmpty();
     Organization mod = orgs.getList().stream().filter(o -> o.getShortName().equalsIgnoreCase("MoD"))
         .findFirst().get();
     assertThat(mod.getShortName()).isEqualToIgnoringCase("MoD");
 
     // Search by Interlocutor Organization
-    query.setState(null);
-    query.setOrgUuid(mod.getUuid());
-    searchResults = jackQueryExecutor.reportList(getListFields(FIELDS), query);
+    query3.setState(null);
+    query3.setOrgUuid(mod.getUuid());
+    searchResults =
+        withCredentials(jackUser, t -> queryExecutor.reportList(getListFields(FIELDS), query3));
     assertThat(searchResults.getList()).isNotEmpty();
     assertThat(searchResults.getList().stream().filter(r -> {
       try {
@@ -1298,15 +1367,17 @@ public class ReportResourceTest extends AbstractResourceTest {
     })).hasSameSizeAs(searchResults.getList());
 
     // Search by Interlocutor Parent Organization
-    query.setOrgUuid(mod.getUuid());
-    query.setOrgRecurseStrategy(RecurseStrategy.CHILDREN);
-    searchResults = jackQueryExecutor.reportList(getListFields(FIELDS), query);
+    query3.setOrgUuid(mod.getUuid());
+    query3.setOrgRecurseStrategy(RecurseStrategy.CHILDREN);
+    searchResults =
+        withCredentials(jackUser, t -> queryExecutor.reportList(getListFields(FIELDS), query3));
     assertThat(searchResults.getList()).isNotEmpty();
     // TODO: figure out how to verify the results?
 
-    query = ReportSearchQueryInput.builder().withText("spreadsheet")
+    final ReportSearchQueryInput query4 = ReportSearchQueryInput.builder().withText("spreadsheet")
         .withSortBy(ReportSearchSortBy.ENGAGEMENT_DATE).withSortOrder(SortOrder.ASC).build();
-    searchResults = jackQueryExecutor.reportList(getListFields(FIELDS), query);
+    searchResults =
+        withCredentials(jackUser, t -> queryExecutor.reportList(getListFields(FIELDS), query4));
     Instant prev = Instant.ofEpochMilli(0L);
     for (Report res : searchResults.getList()) {
       assertThat(res.getEngagementDate()).isAfter(prev);
@@ -1314,84 +1385,95 @@ public class ReportResourceTest extends AbstractResourceTest {
     }
 
     // Search for report text with stopwords
-    query = ReportSearchQueryInput.builder().withText("Hospital usage of Drugs").withPageSize(0)
-        .build(); // get them all
-    searchResults = jackQueryExecutor.reportList(getListFields(FIELDS), query);
+    final ReportSearchQueryInput query5 = ReportSearchQueryInput.builder()
+        .withText("Hospital usage of Drugs").withPageSize(0).build(); // get them all
+    searchResults =
+        withCredentials(jackUser, t -> queryExecutor.reportList(getListFields(FIELDS), query5));
     assertThat(searchResults.getList().stream()
         .filter(r -> r.getIntent().contains("Hospital usage of Drugs")).count()).isPositive();
 
     /// find EF 2.2
-    queryOrgs = OrganizationSearchQueryInput.builder().withText("ef 2.2").build();
-    orgs = jackQueryExecutor.organizationList(getListFields(ORGANIZATION_FIELDS), queryOrgs);
-    assertThat(orgs.getList().size()).isPositive();
+    final OrganizationSearchQueryInput queryOrgs4 =
+        OrganizationSearchQueryInput.builder().withText("ef 2.2").build();
+    orgs = withCredentials(jackUser,
+        t -> queryExecutor.organizationList(getListFields(ORGANIZATION_FIELDS), queryOrgs4));
+    assertThat(orgs.getList()).isNotEmpty();
     Organization ef22 = orgs.getList().stream()
         .filter(o -> o.getShortName().equalsIgnoreCase("ef 2.2")).findFirst().get();
     assertThat(ef22.getShortName()).isEqualToIgnoringCase("EF 2.2");
 
     // Search for a report by interlocutor org
-    query = ReportSearchQueryInput.builder().withOrgUuid(mod.getUuid()).build();
-    searchResults = jackQueryExecutor.reportList(getListFields(FIELDS), query);
+    final ReportSearchQueryInput query6 =
+        ReportSearchQueryInput.builder().withOrgUuid(mod.getUuid()).build();
+    searchResults =
+        withCredentials(jackUser, t -> queryExecutor.reportList(getListFields(FIELDS), query6));
     assertThat(searchResults.getList().stream()
         .filter(r -> r.getInterlocutorOrg().getUuid().equals(mod.getUuid())).count())
         .isEqualTo(searchResults.getList().size());
 
     // this might fail if there are any children of mod, but there aren't in the base data set
-    query.setOrgRecurseStrategy(RecurseStrategy.CHILDREN);
-    searchResults = jackQueryExecutor.reportList(getListFields(FIELDS), query);
+    query6.setOrgRecurseStrategy(RecurseStrategy.CHILDREN);
+    searchResults =
+        withCredentials(jackUser, t -> queryExecutor.reportList(getListFields(FIELDS), query6));
     assertThat(searchResults.getList().stream()
         .filter(r -> r.getInterlocutorOrg().getUuid().equals(mod.getUuid())).count())
         .isEqualTo(searchResults.getList().size());
 
     // Search for a report by advisor org
-    query = ReportSearchQueryInput.builder().withOrgUuid(ef22.getUuid()).build();
-    searchResults = jackQueryExecutor.reportList(getListFields(FIELDS), query);
+    final ReportSearchQueryInput query7 =
+        ReportSearchQueryInput.builder().withOrgUuid(ef22.getUuid()).build();
+    searchResults =
+        withCredentials(jackUser, t -> queryExecutor.reportList(getListFields(FIELDS), query7));
     assertThat(searchResults.getList().stream()
         .filter(r -> r.getAdvisorOrg().getUuid().equals(ef22.getUuid())).count())
         .isEqualTo(searchResults.getList().size());
 
     // this might fail if there are any children of ef22, but there aren't in the base data set
-    query.setOrgRecurseStrategy(RecurseStrategy.CHILDREN);
-    searchResults = jackQueryExecutor.reportList(getListFields(FIELDS), query);
+    query7.setOrgRecurseStrategy(RecurseStrategy.CHILDREN);
+    searchResults =
+        withCredentials(jackUser, t -> queryExecutor.reportList(getListFields(FIELDS), query7));
     assertThat(searchResults.getList().stream()
         .filter(r -> r.getAdvisorOrg().getUuid().equals(ef22.getUuid())).count())
         .isEqualTo(searchResults.getList().size());
 
     // Search by Atmosphere
-    query = ReportSearchQueryInput.builder().withAtmosphere(Atmosphere.NEGATIVE).build();
-    searchResults = jackQueryExecutor.reportList(getListFields(FIELDS), query);
+    final ReportSearchQueryInput query8 =
+        ReportSearchQueryInput.builder().withAtmosphere(Atmosphere.NEGATIVE).build();
+    searchResults =
+        withCredentials(jackUser, t -> queryExecutor.reportList(getListFields(FIELDS), query8));
     assertThat(searchResults.getList().stream()
         .filter(r -> r.getAtmosphere().equals(Atmosphere.NEGATIVE)).count())
         .isEqualTo(searchResults.getList().size());
   }
 
   @Test
-  public void searchInactiveReportsTest()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void searchInactiveReportsTest() {
     // All reports are considered ACTIVE; check that none are INACTIVE
     final ReportSearchQueryInput query =
         ReportSearchQueryInput.builder().withStatus(Status.INACTIVE).build();
     final AnetBeanList_Report searchResults =
-        adminQueryExecutor.reportList(getListFields(FIELDS), query);
+        withCredentials(adminUser, t -> queryExecutor.reportList(getListFields(FIELDS), query));
     assertThat(searchResults.getTotalCount()).isZero();
     assertThat(searchResults.getList()).isEmpty();
   }
 
   @Test
-  public void searchAuthorizationGroupUuid()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void searchAuthorizationGroupUuid() {
     // Search by empty list of authorization groups should not return reports
-    ReportSearchQueryInput query = ReportSearchQueryInput.builder()
+    final ReportSearchQueryInput query1 = ReportSearchQueryInput.builder()
         .withAuthorizationGroupUuid(Collections.emptyList()).build();
     final AnetBeanList_Report searchResults =
-        adminQueryExecutor.reportList(getListFields(FIELDS), query);
+        withCredentials(adminUser, t -> queryExecutor.reportList(getListFields(FIELDS), query1));
     assertThat(searchResults.getList()).isEmpty();
 
     // Search by list of authorization groups
     final List<String> agUuids = Arrays.asList("1", "2", "3"); // FIXME: use real uuid's
     final Set<String> agUuidSet = new HashSet<>(agUuids);
-    query = ReportSearchQueryInput.builder().withAuthorizationGroupUuid(agUuids).build();
+    final ReportSearchQueryInput query2 =
+        ReportSearchQueryInput.builder().withAuthorizationGroupUuid(agUuids).build();
     final List<Report> reportList =
-        adminQueryExecutor.reportList(getListFields(FIELDS), query).getList();
+        withCredentials(adminUser, t -> queryExecutor.reportList(getListFields(FIELDS), query2))
+            .getList();
 
     for (final Report report : reportList) {
       assertThat(report.getAuthorizationGroups()).isNotNull();
@@ -1404,8 +1486,7 @@ public class ReportResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void searchUpdatedAtStartAndEndTest()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void searchUpdatedAtStartAndEndTest() {
     // insertBaseData has 1 report that is updatedAt 2 days before current timestamp
     final Instant startDate =
         Instant.now().atZone(DaoUtils.getServerNativeZoneId()).minusDays(3).toInstant();
@@ -1415,68 +1496,70 @@ public class ReportResourceTest extends AbstractResourceTest {
     // Greater than startDate and smaller than endDate
     final ReportSearchQueryInput query = ReportSearchQueryInput.builder()
         .withUpdatedAtStart(startDate).withUpdatedAtEnd(endDate).withPageSize(0).build();
-    AnetBeanList_Report results = adminQueryExecutor.reportList(getListFields(FIELDS), query);
-    assertThat(results.getList().size()).isEqualTo(1);
+    AnetBeanList_Report results =
+        withCredentials(adminUser, t -> queryExecutor.reportList(getListFields(FIELDS), query));
+    assertThat(results.getList()).hasSize(1);
     Instant actualReportDate = results.getList().get(0).getUpdatedAt();
 
     // Greater than startDate and equal to endDate
     query.setUpdatedAtStart(startDate);
     query.setUpdatedAtEnd(actualReportDate);
-    results = adminQueryExecutor.reportList(getListFields(FIELDS), query);
-    assertThat(results.getList().size()).isEqualTo(1);
+    results =
+        withCredentials(adminUser, t -> queryExecutor.reportList(getListFields(FIELDS), query));
+    assertThat(results.getList()).hasSize(1);
 
     // Equal to startDate and smaller than endDate
     query.setUpdatedAtStart(actualReportDate);
     query.setUpdatedAtEnd(endDate);
-    results = adminQueryExecutor.reportList(getListFields(FIELDS), query);
-    assertThat(results.getList().size()).isEqualTo(1);
+    results =
+        withCredentials(adminUser, t -> queryExecutor.reportList(getListFields(FIELDS), query));
+    assertThat(results.getList()).hasSize(1);
 
     // Equal to startDate and equal to endDate
     query.setUpdatedAtStart(actualReportDate);
     query.setUpdatedAtEnd(actualReportDate);
-    results = adminQueryExecutor.reportList(getListFields(FIELDS), query);
-    assertThat(results.getList().size()).isEqualTo(1);
+    results =
+        withCredentials(adminUser, t -> queryExecutor.reportList(getListFields(FIELDS), query));
+    assertThat(results.getList()).hasSize(1);
 
     // A day before the startDate and startDate (no results expected)
     query.setUpdatedAtStart(
         startDate.atZone(DaoUtils.getServerNativeZoneId()).minusDays(1).toInstant());
     query.setUpdatedAtEnd(startDate);
     query.setPageSize(0);
-    results = adminQueryExecutor.reportList(getListFields(FIELDS), query);
-    assertThat(results.getList().size()).isZero();
+    results =
+        withCredentials(adminUser, t -> queryExecutor.reportList(getListFields(FIELDS), query));
+    assertThat(results.getList()).isEmpty();
   }
 
   @Test
-  public void searchByAuthorPosition()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void searchByAuthorPosition() {
     final ReportSearchQueryInput query = ReportSearchQueryInput.builder()
         .withAuthorPositionUuid(admin.getPosition().getUuid()).build();
 
     // Search by author position
-    final AnetBeanList_Report results = adminQueryExecutor.reportList(getListFields(FIELDS), query);
+    final AnetBeanList_Report results =
+        withCredentials(adminUser, t -> queryExecutor.reportList(getListFields(FIELDS), query));
     assertThat(results).isNotNull();
-    assertThat(results.getList().size()).isPositive();
+    assertThat(results.getList()).isNotEmpty();
   }
 
   @Test
-  public void searchAttendeePosition()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void searchAttendeePosition() {
     final ReportSearchQueryInput query = ReportSearchQueryInput.builder()
         .withAttendeePositionUuid(admin.getPosition().getUuid()).build();
 
     // Search by attendee position
-    final AnetBeanList_Report results = adminQueryExecutor.reportList(getListFields(FIELDS), query);
+    final AnetBeanList_Report results =
+        withCredentials(adminUser, t -> queryExecutor.reportList(getListFields(FIELDS), query));
     assertThat(results).isNotNull();
-    assertThat(results.getList().size()).isPositive();
+    assertThat(results.getList()).isNotEmpty();
   }
 
   @Test
-  void reportDeleteTest()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void reportDeleteTest() {
     final Map<String, Object> attachmentSettings = AttachmentResource.getAttachmentSettings();
     final Person elizabeth = getElizabethElizawell();
-    final MutationExecutor elizabethMutationExecutor =
-        getMutationExecutor(elizabeth.getDomainUsername());
     final Person jack = getJackJackson();
     final Person roger = getRogerRogwell();
     final List<ReportPersonInput> reportPeopleInput =
@@ -1490,7 +1573,8 @@ public class ReportResourceTest extends AbstractResourceTest {
         .withReportText("I'm writing a report that I intend to delete very soon.")
         .withKeyOutcomes("Summary for the key outcomes").withNextSteps("Summary for the next steps")
         .withEngagementDate(Instant.now()).withDuration(15).build();
-    final Report r = elizabethMutationExecutor.createReport(FIELDS, rInput);
+    final Report r = withCredentials(elizabeth.getDomainUsername(),
+        t -> mutationExecutor.createReport(FIELDS, rInput));
     assertThat(r).isNotNull();
     assertThat(r.getUuid()).isNotNull();
 
@@ -1504,11 +1588,12 @@ public class ReportResourceTest extends AbstractResourceTest {
         AttachmentInput.builder().withFileName("testDeleteAttachment.jpg").withMimeType(mimeType)
             .withDescription("a test attachment created by testDeleteAttachment")
             .withAttachmentRelatedObjects(Collections.singletonList(testAroInput)).build();
-    final String createdAttachmentUuid =
-        elizabethMutationExecutor.createAttachment("", testAttachmentInput);
+    final String createdAttachmentUuid = withCredentials(elizabeth.getDomainUsername(),
+        t -> mutationExecutor.createAttachment("", testAttachmentInput));
     assertThat(createdAttachmentUuid).isNotNull();
 
-    final Report updatedReport = adminQueryExecutor.report(FIELDS, r.getUuid());
+    final Report updatedReport =
+        withCredentials(adminUser, t -> queryExecutor.report(FIELDS, r.getUuid()));
     assertThat(updatedReport.getAttachments()).hasSize(1);
     final Attachment reportAttachment = updatedReport.getAttachments().get(0);
     assertThat(reportAttachment.getUuid()).isEqualTo(createdAttachmentUuid);
@@ -1516,38 +1601,38 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     // Try to delete by jack, this should fail.
     try {
-      jackMutationExecutor.deleteReport("", r.getUuid());
-      fail("Expected ForbiddenException");
-    } catch (ForbiddenException expectedException) {
+      withCredentials(jackUser, t -> mutationExecutor.deleteReport("", r.getUuid()));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      // OK
     }
 
     // Now have the author delete this report.
-    final Integer nrDeleted = elizabethMutationExecutor.deleteReport("", r.getUuid());
+    final Integer nrDeleted = withCredentials(elizabeth.getDomainUsername(),
+        t -> mutationExecutor.deleteReport("", r.getUuid()));
     assertThat(nrDeleted).isEqualTo(1);
 
     // Assert the report is gone.
     try {
-      getQueryExecutor("elizabeth").report(FIELDS, r.getUuid());
-      fail("Expected NotFoundException");
-    } catch (NotFoundException expectedException) {
+      withCredentials("elizabeth", t -> queryExecutor.report(FIELDS, r.getUuid()));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      // OK
     }
 
     // Assert that the attachment is gone
     try {
-      adminQueryExecutor.attachment(AttachmentResourceTest.ATTACHMENT_FIELDS,
-          reportAttachment.getUuid());
-      fail("Expected NotFoundException");
-    } catch (NotFoundException expectedException) {
+      withCredentials(adminUser, t -> queryExecutor
+          .attachment(AttachmentResourceTest.ATTACHMENT_FIELDS, reportAttachment.getUuid()));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      // OK
     }
   }
 
   @Test
-  public void reportCancelTest()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void reportCancelTest() {
     final Person elizabeth = getElizabethElizawell(); // Report Author
-    final QueryExecutor elizabethQueryExecutor = getQueryExecutor(elizabeth.getDomainUsername());
-    final MutationExecutor elizabethMutationExecutor =
-        getMutationExecutor(elizabeth.getDomainUsername());
     final Person steve = getSteveSteveson(); // Interlocutor
     final Person bob = getBobBobtown(); // Report Approver
 
@@ -1560,13 +1645,16 @@ public class ReportResourceTest extends AbstractResourceTest {
                 personToPrimaryReportPerson(steve, true))))
             .withCancelledReason(ReportCancelledReason.CANCELLED_BY_INTERLOCUTOR).build();
 
-    final Report saved = elizabethMutationExecutor.createReport(FIELDS, rInput);
+    final Report saved = withCredentials(elizabeth.getDomainUsername(),
+        t -> mutationExecutor.createReport(FIELDS, rInput));
     assertThat(saved).isNotNull();
     assertThat(saved.getUuid()).isNotNull();
 
-    int numRows = elizabethMutationExecutor.submitReport("", saved.getUuid());
+    int numRows = withCredentials(elizabeth.getDomainUsername(),
+        t -> mutationExecutor.submitReport("", saved.getUuid()));
     assertThat(numRows).isOne();
-    final Report returned = elizabethQueryExecutor.report(FIELDS, saved.getUuid());
+    final Report returned = withCredentials(elizabeth.getDomainUsername(),
+        t -> queryExecutor.report(FIELDS, saved.getUuid()));
     assertThat(returned.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
     assertThat(returned.getCancelledReason())
         .isEqualTo(ReportCancelledReason.CANCELLED_BY_INTERLOCUTOR);
@@ -1575,29 +1663,32 @@ public class ReportResourceTest extends AbstractResourceTest {
     final ReportSearchQueryInput pendingQuery =
         ReportSearchQueryInput.builder().withPendingApprovalOf(bob.getUuid()).build();
     AnetBeanList_Report pendingBobsApproval =
-        getQueryExecutor("bob").reportList(getListFields(FIELDS), pendingQuery);
+        withCredentials("bob", t -> queryExecutor.reportList(getListFields(FIELDS), pendingQuery));
     assertThat(pendingBobsApproval.getList().stream()
         .anyMatch(rpt -> rpt.getUuid().equals(returned.getUuid()))).isTrue();
 
     // Bob should approve this report.
-    numRows = getMutationExecutor("bob").approveReport("", null, saved.getUuid());
+    numRows =
+        withCredentials("bob", t -> mutationExecutor.approveReport("", null, saved.getUuid()));
     assertThat(numRows).isOne();
 
     // Ensure it went to cancelled status.
-    final Report returned2 = elizabethQueryExecutor.report(FIELDS, saved.getUuid());
+    final Report returned2 = withCredentials(elizabeth.getDomainUsername(),
+        t -> queryExecutor.report(FIELDS, saved.getUuid()));
     assertThat(returned2.getState()).isEqualTo(ReportState.CANCELLED);
 
     // The author should not be able to submit the report now
     try {
-      elizabethMutationExecutor.submitReport("", returned2.getUuid());
-      fail("Expected BadRequestException");
-    } catch (BadRequestException expectedException) {
+      withCredentials(elizabeth.getDomainUsername(),
+          t -> mutationExecutor.submitReport("", returned2.getUuid()));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      // OK
     }
   }
 
   @Test
-  public void dailyRollupGraphNonReportingTest()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void dailyRollupGraphNonReportingTest() {
     final Person steve = getSteveSteveson();
 
     final ReportInput rInput = ReportInput.builder().withIntent("Test the Daily rollup graph")
@@ -1606,54 +1697,58 @@ public class ReportResourceTest extends AbstractResourceTest {
         .withReportPeople(getReportPeopleInput(
             List.of(personToPrimaryReportAuthor(admin), personToPrimaryReportPerson(steve, true))))
         .build();
-    Report r = adminMutationExecutor.createReport(FIELDS, rInput);
-    assertThat(r).isNotNull();
-    assertThat(r.getUuid()).isNotNull();
+    final Report r1 =
+        withCredentials(adminUser, t -> mutationExecutor.createReport(FIELDS, rInput));
+    assertThat(r1).isNotNull();
+    assertThat(r1.getUuid()).isNotNull();
 
     // Pull the daily rollup graph
     Instant startDate =
         Instant.now().atZone(DaoUtils.getServerNativeZoneId()).minusDays(1).toInstant();
     Instant endDate =
         Instant.now().atZone(DaoUtils.getServerNativeZoneId()).plusDays(1).toInstant();
-    final List<RollupGraph> startGraph =
-        adminQueryExecutor.rollupGraph(ROLLUP_FIELDS, endDate, null, null, startDate);
+    final List<RollupGraph> startGraph = withCredentials(adminUser,
+        t -> queryExecutor.rollupGraph(ROLLUP_FIELDS, endDate, null, null, startDate));
 
     // Submit the report
     try {
-      adminMutationExecutor.submitReport("", r.getUuid());
-      fail("Expected BadRequestException");
-    } catch (BadRequestException expectedException) {
+      withCredentials(adminUser, t -> mutationExecutor.submitReport("", r1.getUuid()));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      // OK
     }
 
     // Oops set the engagementDate.
-    r.setEngagementDate(Instant.now());
-    r.setDuration(50);
-    final Report updated = adminMutationExecutor.updateReport(FIELDS, getReportInput(r), true);
+    r1.setEngagementDate(Instant.now());
+    r1.setDuration(50);
+    final Report updated = withCredentials(adminUser,
+        t -> mutationExecutor.updateReport(FIELDS, getReportInput(r1), true));
     assertThat(updated).isNotNull();
 
     // Re-submit the report, it should work.
-    int numRows = adminMutationExecutor.submitReport("", r.getUuid());
+    int numRows = withCredentials(adminUser, t -> mutationExecutor.submitReport("", r1.getUuid()));
     assertThat(numRows).isOne();
 
     // Admin can approve his own reports.
-    numRows = adminMutationExecutor.approveReport("", null, r.getUuid());
+    numRows =
+        withCredentials(adminUser, t -> mutationExecutor.approveReport("", null, r1.getUuid()));
     assertThat(numRows).isOne();
 
     // Verify report is in APPROVED state.
-    r = adminQueryExecutor.report(FIELDS, r.getUuid());
-    assertThat(r.getState()).isEqualTo(ReportState.APPROVED);
+    final Report r2 = withCredentials(adminUser, t -> queryExecutor.report(FIELDS, r1.getUuid()));
+    assertThat(r2.getState()).isEqualTo(ReportState.APPROVED);
 
     // Admin can publish approved reports.
-    numRows = adminMutationExecutor.publishReport("", r.getUuid());
+    numRows = withCredentials(adminUser, t -> mutationExecutor.publishReport("", r2.getUuid()));
     assertThat(numRows).isOne();
 
     // Verify report is in PUBLISHED state.
-    r = adminQueryExecutor.report(FIELDS, r.getUuid());
-    assertThat(r.getState()).isEqualTo(ReportState.PUBLISHED);
+    final Report r3 = withCredentials(adminUser, t -> queryExecutor.report(FIELDS, r2.getUuid()));
+    assertThat(r3.getState()).isEqualTo(ReportState.PUBLISHED);
 
     // Check on the daily rollup graph now.
-    final List<RollupGraph> endGraph =
-        adminQueryExecutor.rollupGraph(ROLLUP_FIELDS, endDate, null, null, startDate);
+    final List<RollupGraph> endGraph = withCredentials(adminUser,
+        t -> queryExecutor.rollupGraph(ROLLUP_FIELDS, endDate, null, null, startDate));
 
     final Organization org = admin.getPosition().getOrganization();
     @SuppressWarnings("unchecked")
@@ -1673,12 +1768,8 @@ public class ReportResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void dailyRollupGraphReportingTest()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void dailyRollupGraphReportingTest() {
     final Person elizabeth = getElizabethElizawell();
-    final QueryExecutor elizabethQueryExecutor = getQueryExecutor(elizabeth.getDomainUsername());
-    final MutationExecutor elizabethMutationExecutor =
-        getMutationExecutor(elizabeth.getDomainUsername());
     final Person steve = getSteveSteveson();
 
     final ReportInput rInput = ReportInput.builder().withIntent("Test the Daily rollup graph")
@@ -1686,54 +1777,61 @@ public class ReportResourceTest extends AbstractResourceTest {
         .withKeyOutcomes("Foobar the bazbiz").withReportPeople(getReportPeopleInput(List
             .of(personToPrimaryReportAuthor(elizabeth), personToPrimaryReportPerson(steve, true))))
         .build();
-    Report r = elizabethMutationExecutor.createReport(FIELDS, rInput);
-    assertThat(r).isNotNull();
-    assertThat(r.getUuid()).isNotNull();
+    final Report r1 = withCredentials(elizabeth.getDomainUsername(),
+        t -> mutationExecutor.createReport(FIELDS, rInput));
+    assertThat(r1).isNotNull();
+    assertThat(r1.getUuid()).isNotNull();
 
     // Pull the daily rollup graph
     final Instant startDate =
         Instant.now().atZone(DaoUtils.getServerNativeZoneId()).minusDays(1).toInstant();
     final Instant endDate =
         Instant.now().atZone(DaoUtils.getServerNativeZoneId()).plusDays(1).toInstant();
-    final List<RollupGraph> startGraph =
-        adminQueryExecutor.rollupGraph(ROLLUP_FIELDS, endDate, null, null, startDate);
+    final List<RollupGraph> startGraph = withCredentials(adminUser,
+        t -> queryExecutor.rollupGraph(ROLLUP_FIELDS, endDate, null, null, startDate));
 
     // Submit the report
     try {
-      elizabethMutationExecutor.submitReport("", r.getUuid());
-      fail("Expected BadRequestException");
-    } catch (BadRequestException expectedException) {
+      withCredentials(elizabeth.getDomainUsername(),
+          t -> mutationExecutor.submitReport("", r1.getUuid()));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      // OK
     }
 
     // Oops set the engagementDate.
-    r.setEngagementDate(Instant.now());
-    r.setDuration(115);
-    final Report updated = elizabethMutationExecutor.updateReport(FIELDS, getReportInput(r), true);
+    r1.setEngagementDate(Instant.now());
+    r1.setDuration(115);
+    final Report updated = withCredentials(elizabeth.getDomainUsername(),
+        t -> mutationExecutor.updateReport(FIELDS, getReportInput(r1), true));
     assertThat(updated).isNotNull();
 
     // Re-submit the report, it should work.
-    int numRows = elizabethMutationExecutor.submitReport("", r.getUuid());
+    int numRows = withCredentials(elizabeth.getDomainUsername(),
+        t -> mutationExecutor.submitReport("", r1.getUuid()));
     assertThat(numRows).isOne();
 
     // Approve report.
-    numRows = getMutationExecutor("bob").approveReport("", null, r.getUuid());
+    numRows = withCredentials("bob", t -> mutationExecutor.approveReport("", null, r1.getUuid()));
     assertThat(numRows).isOne();
 
     // Verify report is in APPROVED state.
-    r = elizabethQueryExecutor.report(FIELDS, r.getUuid());
-    assertThat(r.getState()).isEqualTo(ReportState.APPROVED);
+    final Report r2 = withCredentials(elizabeth.getDomainUsername(),
+        t -> queryExecutor.report(FIELDS, r1.getUuid()));
+    assertThat(r2.getState()).isEqualTo(ReportState.APPROVED);
 
     // Admin can publish approved reports.
-    numRows = adminMutationExecutor.publishReport("", r.getUuid());
+    numRows = withCredentials(adminUser, t -> mutationExecutor.publishReport("", r1.getUuid()));
     assertThat(numRows).isOne();
 
     // Verify report is in PUBLISHED state.
-    r = elizabethQueryExecutor.report(FIELDS, r.getUuid());
-    assertThat(r.getState()).isEqualTo(ReportState.PUBLISHED);
+    final Report r3 = withCredentials(elizabeth.getDomainUsername(),
+        t -> queryExecutor.report(FIELDS, r1.getUuid()));
+    assertThat(r3.getState()).isEqualTo(ReportState.PUBLISHED);
 
     // Check on the daily rollup graph now.
-    final List<RollupGraph> endGraph =
-        adminQueryExecutor.rollupGraph(ROLLUP_FIELDS, endDate, null, null, startDate);
+    final List<RollupGraph> endGraph = withCredentials(adminUser,
+        t -> queryExecutor.rollupGraph(ROLLUP_FIELDS, endDate, null, null, startDate));
 
     final Organization org = admin.getPosition().getOrganization();
     @SuppressWarnings("unchecked")
@@ -1754,11 +1852,8 @@ public class ReportResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void testSensitiveInformationByAuthor()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void testSensitiveInformationByAuthor() {
     final Person elizabeth = getElizabethElizawell();
-    final MutationExecutor elizabethMutationExecutor =
-        getMutationExecutor(elizabeth.getDomainUsername());
     final ReportSensitiveInformationInput rsiInput = ReportSensitiveInformationInput.builder()
         // set HTML of report sensitive information
         .withText(UtilsTest.getCombinedHtmlTestCase().getInput()).build();
@@ -1767,7 +1862,8 @@ public class ReportResourceTest extends AbstractResourceTest {
         .withReportText(
             "This reportTest was generated by ReportsResourceTest#testSensitiveInformation")
         .withReportSensitiveInformation(rsiInput).build();
-    final Report returned = elizabethMutationExecutor.createReport(FIELDS, rInput);
+    final Report returned = withCredentials(elizabeth.getDomainUsername(),
+        t -> mutationExecutor.createReport(FIELDS, rInput));
     assertThat(returned).isNotNull();
     assertThat(returned.getUuid()).isNotNull();
     // elizabeth should be allowed to see it returned, as she's the author
@@ -1776,7 +1872,8 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(returned.getReportSensitiveInformation().getText())
         .isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
 
-    final Report returned2 = getQueryExecutor("elizabeth").report(FIELDS, returned.getUuid());
+    final Report returned2 = withCredentials(elizabeth.getDomainUsername(),
+        t -> queryExecutor.report(FIELDS, returned.getUuid()));
     // elizabeth should be allowed to see it
     assertThat(returned2.getReportSensitiveInformation()).isNotNull();
     assertThat(returned2.getReportSensitiveInformation().getText())
@@ -1785,26 +1882,26 @@ public class ReportResourceTest extends AbstractResourceTest {
     // update HTML of report sensitive information
     returned2.getReportSensitiveInformation()
         .setText(UtilsTest.getCombinedHtmlTestCase().getInput());
-    final Report updated =
-        elizabethMutationExecutor.updateReport(FIELDS, getReportInput(returned2), true);
+    final Report updated = withCredentials(elizabeth.getDomainUsername(),
+        t -> mutationExecutor.updateReport(FIELDS, getReportInput(returned2), true));
     assertThat(updated).isNotNull();
     assertThat(updated.getReportSensitiveInformation()).isNotNull();
     // check that HTML of report sensitive information is sanitized after update
     assertThat(updated.getReportSensitiveInformation().getText())
         .isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
 
-    final Report returned3 = getQueryExecutor("jack").report(FIELDS, returned.getUuid());
+    final Report returned3 =
+        withCredentials(jackUser, t -> queryExecutor.report(FIELDS, returned.getUuid()));
     // jack should not be allowed to see it
     assertThat(returned3.getReportSensitiveInformation()).isNull();
   }
 
   @Test
-  public void testSensitiveInformationByAuthorizationGroup()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void testSensitiveInformationByAuthorizationGroup() {
     final PersonSearchQueryInput erinQuery =
         PersonSearchQueryInput.builder().withText("erin").build();
-    final AnetBeanList_Person erinSearchResults =
-        adminQueryExecutor.personList(getListFields(PERSON_FIELDS), erinQuery);
+    final AnetBeanList_Person erinSearchResults = withCredentials(adminUser,
+        t -> queryExecutor.personList(getListFields(PERSON_FIELDS), erinQuery));
     assertThat(erinSearchResults.getTotalCount()).isPositive();
     final Optional<Person> erinResult = erinSearchResults.getList().stream()
         .filter(p -> p.getName().equals("ERINSON, Erin")).findFirst();
@@ -1816,7 +1913,7 @@ public class ReportResourceTest extends AbstractResourceTest {
             // page
             .withSortOrder(SortOrder.ASC).build();
     final AnetBeanList_Report reportSearchResults =
-        getQueryExecutor("erin").reportList(getListFields(FIELDS), reportQuery);
+        withCredentials("erin", t -> queryExecutor.reportList(getListFields(FIELDS), reportQuery));
     assertThat(reportSearchResults.getTotalCount()).isPositive();
     final Optional<Report> reportResult = reportSearchResults.getList().stream()
         .filter(r -> reportQuery.getText().equals(r.getKeyOutcomes())).findFirst();
@@ -1828,15 +1925,15 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     final PersonSearchQueryInput reinaQuery =
         PersonSearchQueryInput.builder().withText("reina").build();
-    final AnetBeanList_Person searchResults =
-        adminQueryExecutor.personList(getListFields(PERSON_FIELDS), reinaQuery);
+    final AnetBeanList_Person searchResults = withCredentials(adminUser,
+        t -> queryExecutor.personList(getListFields(PERSON_FIELDS), reinaQuery));
     assertThat(searchResults.getTotalCount()).isPositive();
     final Optional<Person> reinaResult = searchResults.getList().stream()
         .filter(p -> p.getName().equals("REINTON, Reina")).findFirst();
     assertThat(reinaResult).isNotEmpty();
 
     final AnetBeanList_Report reportSearchResults2 =
-        getQueryExecutor("reina").reportList(getListFields(FIELDS), reportQuery);
+        withCredentials("reina", t -> queryExecutor.reportList(getListFields(FIELDS), reportQuery));
     assertThat(reportSearchResults2.getTotalCount()).isPositive();
     final Optional<Report> reportResult2 = reportSearchResults2.getList().stream()
         .filter(r -> reportQuery.getText().equals(r.getKeyOutcomes())).findFirst();
@@ -1848,15 +1945,15 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     final PersonSearchQueryInput elizabethQuery =
         PersonSearchQueryInput.builder().withText("elizabeth").build();
-    final AnetBeanList_Person searchResults3 =
-        adminQueryExecutor.personList(getListFields(PERSON_FIELDS), elizabethQuery);
+    final AnetBeanList_Person searchResults3 = withCredentials(adminUser,
+        t -> queryExecutor.personList(getListFields(PERSON_FIELDS), elizabethQuery));
     assertThat(searchResults3.getTotalCount()).isPositive();
     final Optional<Person> elizabethResult3 = searchResults3.getList().stream()
         .filter(p -> p.getName().equals("ELIZAWELL, Elizabeth")).findFirst();
     assertThat(elizabethResult3).isNotEmpty();
 
-    final AnetBeanList_Report reportSearchResults3 =
-        getQueryExecutor("elizabeth").reportList(getListFields(FIELDS), reportQuery);
+    final AnetBeanList_Report reportSearchResults3 = withCredentials("elizabeth",
+        t -> queryExecutor.reportList(getListFields(FIELDS), reportQuery));
     assertThat(reportSearchResults3.getTotalCount()).isPositive();
     final Optional<Report> reportResult3 = reportSearchResults3.getList().stream()
         .filter(r -> reportQuery.getText().equals(r.getKeyOutcomes())).findFirst();
@@ -1871,14 +1968,12 @@ public class ReportResourceTest extends AbstractResourceTest {
     return ReportSearchQueryInput.builder().withState(List.of(ReportState.PUBLISHED));
   }
 
-  private AnetBeanList_Report runSearchQuery(ReportSearchQueryInput query)
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    return adminQueryExecutor.reportList(getListFields(FIELDS), query);
+  private AnetBeanList_Report runSearchQuery(ReportSearchQueryInput query) {
+    return withCredentials(adminUser, t -> queryExecutor.reportList(getListFields(FIELDS), query));
   }
 
   @Test
-  public void testEngagementDayOfWeekNotIncludedInResults()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void testEngagementDayOfWeekNotIncludedInResults() {
     final ReportSearchQueryInput query = setupQueryEngagementDayOfWeek().build();
     final AnetBeanList_Report reportResults = runSearchQuery(query);
 
@@ -1891,8 +1986,7 @@ public class ReportResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void testEngagementDayOfWeekIncludedInResults()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void testEngagementDayOfWeekIncludedInResults() {
     final ReportSearchQueryInput query =
         setupQueryEngagementDayOfWeek().withIncludeEngagementDayOfWeek(true).build();
 
@@ -1907,8 +2001,7 @@ public class ReportResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void testSetEngagementDayOfWeek()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void testSetEngagementDayOfWeek() {
     final ReportSearchQueryInput query = setupQueryEngagementDayOfWeek().withEngagementDayOfWeek(1)
         .withIncludeEngagementDayOfWeek(true).build();
 
@@ -1922,8 +2015,7 @@ public class ReportResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void testSetEngagementDayOfWeekOutsideWeekRange()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void testSetEngagementDayOfWeekOutsideWeekRange() {
     final ReportSearchQueryInput query = setupQueryEngagementDayOfWeek().withEngagementDayOfWeek(0)
         .withIncludeEngagementDayOfWeek(true).build();
 
@@ -1931,37 +2023,35 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(reportResults).isNotNull();
 
     final List<Report> reports = reportResults.getList();
-    assertThat(reports.size()).isZero();
+    assertThat(reports).isEmpty();
   }
 
   @Test
-  public void testAdvisorReportInsightsSuperuser()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void testAdvisorReportInsightsSuperuser() {
     advisorReportInsights(getSuperuser());
   }
 
   @Test
-  public void testAdvisorReportInsightsRegularUser()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void testAdvisorReportInsightsRegularUser() {
     advisorReportInsights(getRegularUser());
   }
 
-  private void advisorReportInsights(final Person user)
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  private void advisorReportInsights(final Person user) {
     try {
       createTestReport();
       final List<AdvisorReportsEntry> advisorReports =
-          getQueryExecutor(user.getDomainUsername()).advisorReportInsights(
-              "{ uuid name stats { week nrReportsSubmitted nrEngagementsAttended } }", "-1", 3);
+          withCredentials(user.getDomainUsername(),
+              t -> queryExecutor.advisorReportInsights(
+                  "{ uuid name stats { week nrReportsSubmitted nrEngagementsAttended } }", "-1",
+                  3));
       assertThat(advisorReports).isNotNull();
-      assertThat(advisorReports.size()).isPositive();
-    } catch (ForbiddenException expectedException) {
-      fail("Unexpected ForbiddenException");
+      assertThat(advisorReports).isNotEmpty();
+    } catch (Exception e) {
+      fail("Unexpected Exception", e);
     }
   }
 
-  private void createTestReport()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  private void createTestReport() {
     final Person author = getJackJackson();
     final ReportPerson reportPerson = personToPrimaryReportAuthor(author);
     final Position advisorPosition = author.getPosition();
@@ -1976,29 +2066,26 @@ public class ReportResourceTest extends AbstractResourceTest {
         .withEngagementDate(engagementDate)
         .withReportPeople(getReportPeopleInput(List.of(reportPerson)))
         .withAdvisorOrg(getOrganizationInput(advisorOrganization)).build();
-    final Report created = adminMutationExecutor.createReport(FIELDS, rInput);
+    final Report created =
+        withCredentials(adminUser, t -> mutationExecutor.createReport(FIELDS, rInput));
     assertThat(created).isNotNull();
     assertThat(created.getUuid()).isNotNull();
   }
 
-  private Location getLocation(Person user, String name)
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  private Location getLocation(Person user, String name) {
     final LocationSearchQueryInput query =
         LocationSearchQueryInput.builder().withText(name).build();
-    final AnetBeanList_Location results = getQueryExecutor(user.getDomainUsername())
-        .locationList(getListFields(LOCATION_FIELDS), query);
+    final AnetBeanList_Location results = withCredentials(user.getDomainUsername(),
+        t -> queryExecutor.locationList(getListFields(LOCATION_FIELDS), query));
     assertThat(results).isNotNull();
     assertThat(results.getList()).isNotEmpty();
     return results.getList().get(0);
   }
 
   @Test
-  public void testApprovalFlow() throws NumberFormatException, GraphQLRequestExecutionException,
-      GraphQLRequestPreparationException {
+  void testApprovalFlow() throws NumberFormatException {
     // Fill a report
     final Person author = getJackJackson();
-    final QueryExecutor authorQueryExecutor = getQueryExecutor(author.getDomainUsername());
-    final MutationExecutor authorMutationExecutor = getMutationExecutor(author.getDomainUsername());
     final Location loc = getLocation(author, "Portugal Cove Ferry Terminal");
     final Instant engagementDate =
         Instant.now().atZone(DaoUtils.getServerNativeZoneId()).minusWeeks(2).toInstant();
@@ -2016,8 +2103,8 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     // Reference task 1.1.A
     final TaskSearchQueryInput query = TaskSearchQueryInput.builder().withText("1.1.A").build();
-    final AnetBeanList_Task searchObjects =
-        authorQueryExecutor.taskList(getListFields(TASK_FIELDS), query);
+    final AnetBeanList_Task searchObjects = withCredentials(author.getDomainUsername(),
+        t -> queryExecutor.taskList(getListFields(TASK_FIELDS), query));
     assertThat(searchObjects).isNotNull();
     assertThat(searchObjects.getList()).isNotEmpty();
     final List<Task> searchResults = searchObjects.getList();
@@ -2027,15 +2114,18 @@ public class ReportResourceTest extends AbstractResourceTest {
     rInput.setTasks(List.of(getTaskInput(t11a)));
 
     // Create the report
-    final Report created = authorMutationExecutor.createReport(FIELDS, rInput);
+    final Report created = withCredentials(author.getDomainUsername(),
+        t -> mutationExecutor.createReport(FIELDS, rInput));
     assertThat(created).isNotNull();
     assertThat(created.getUuid()).isNotNull();
     assertThat(created.getState()).isEqualTo(ReportState.DRAFT);
 
     // Submit the report
-    int numRows = authorMutationExecutor.submitReport("", created.getUuid());
+    int numRows = withCredentials(author.getDomainUsername(),
+        t -> mutationExecutor.submitReport("", created.getUuid()));
     assertThat(numRows).isOne();
-    final Report submitted = authorQueryExecutor.report(FIELDS, created.getUuid());
+    final Report submitted = withCredentials(author.getDomainUsername(),
+        t -> queryExecutor.report(FIELDS, created.getUuid()));
     assertThat(submitted).isNotNull();
     assertThat(submitted.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
 
@@ -2045,12 +2135,12 @@ public class ReportResourceTest extends AbstractResourceTest {
     final List<ReportAction> t11aActions = submitted.getWorkflow().stream().filter(
         ra -> ra.getStep() != null && t11a.getUuid().equals(ra.getStep().getRelatedObjectUuid()))
         .toList();
-    assertThat(t11aActions.size()).isEqualTo(1);
+    assertThat(t11aActions).hasSize(1);
     final ReportAction t11aAction = t11aActions.get(0);
     final ApprovalStep t11aStep = t11aAction.getStep();
     assertThat(t11aStep).isNotNull();
     final List<Position> t11aApprovers = t11aStep.getApprovers();
-    assertThat(t11aApprovers.size()).isPositive();
+    assertThat(t11aApprovers).isNotEmpty();
     assertThat(
         t11aApprovers.stream().anyMatch(a -> andrew.getUuid().equals(a.getPerson().getUuid())))
         .isTrue();
@@ -2060,19 +2150,21 @@ public class ReportResourceTest extends AbstractResourceTest {
         .filter(
             ra -> ra.getStep() != null && loc.getUuid().equals(ra.getStep().getRelatedObjectUuid()))
         .toList();
-    assertThat(locActions.size()).isEqualTo(1);
+    assertThat(locActions).hasSize(1);
     final ReportAction locAction = locActions.get(0);
     final ApprovalStep locStep = locAction.getStep();
     assertThat(locStep).isNotNull();
     final List<Position> locApprovers = locStep.getApprovers();
-    assertThat(locApprovers.size()).isPositive();
+    assertThat(locApprovers).isNotEmpty();
     assertThat(locApprovers.stream().anyMatch(a -> admin.getUuid().equals(a.getPerson().getUuid())))
         .isTrue();
 
     // Have the report approved by the EF 1.1 approver
-    numRows = getMutationExecutor("bob").approveReport("", null, submitted.getUuid());
+    numRows =
+        withCredentials("bob", t -> mutationExecutor.approveReport("", null, submitted.getUuid()));
     assertThat(numRows).isOne();
-    final Report approvedStep1 = authorQueryExecutor.report(FIELDS, created.getUuid());
+    final Report approvedStep1 = withCredentials(author.getDomainUsername(),
+        t -> queryExecutor.report(FIELDS, created.getUuid()));
     assertThat(approvedStep1).isNotNull();
     assertThat(approvedStep1.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
 
@@ -2082,10 +2174,11 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(step2.getRelatedObjectUuid()).isEqualTo(t11a.getUuid());
 
     // Have the report approved by the 1.1.A approver
-    numRows = getMutationExecutor(andrew.getDomainUsername()).approveReport("", null,
-        submitted.getUuid());
+    numRows = withCredentials(andrew.getDomainUsername(),
+        t -> mutationExecutor.approveReport("", null, submitted.getUuid()));
     assertThat(numRows).isOne();
-    final Report approvedStep2 = authorQueryExecutor.report(FIELDS, created.getUuid());
+    final Report approvedStep2 = withCredentials(author.getDomainUsername(),
+        t -> queryExecutor.report(FIELDS, created.getUuid()));
     assertThat(approvedStep2).isNotNull();
     assertThat(approvedStep1.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
 
@@ -2095,23 +2188,24 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(step3.getRelatedObjectUuid()).isEqualTo(loc.getUuid());
 
     // Have the report approved by the location Portugal Cove Ferry Terminal approver
-    numRows = adminMutationExecutor.approveReport("", null, submitted.getUuid());
+    numRows = withCredentials(adminUser,
+        t -> mutationExecutor.approveReport("", null, submitted.getUuid()));
     assertThat(numRows).isOne();
-    final Report approvedStep3 = authorQueryExecutor.report(FIELDS, created.getUuid());
+    final Report approvedStep3 = withCredentials(author.getDomainUsername(),
+        t -> queryExecutor.report(FIELDS, created.getUuid()));
     assertThat(approvedStep3).isNotNull();
     assertThat(approvedStep3.getState()).isEqualTo(ReportState.APPROVED);
   }
 
   @Test
-  public void testReportAuthors()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void testReportAuthors() {
     final Person author = getJackJackson();
-    final MutationExecutor authorMutationExecutor = getMutationExecutor(author.getDomainUsername());
     final ReportInput rInput = ReportInput.builder()
         .withReportPeople(getReportPeopleInput(List.of(personToReportAuthor(author))))
         .withState(ReportState.DRAFT).withAtmosphere(Atmosphere.POSITIVE)
         .withIntent("Testing report authors").withEngagementDate(Instant.now()).build();
-    final Report reportFirstAuthor = authorMutationExecutor.createReport(FIELDS, rInput);
+    final Report reportFirstAuthor = withCredentials(author.getDomainUsername(),
+        t -> mutationExecutor.createReport(FIELDS, rInput));
     assertThat(reportFirstAuthor).isNotNull();
     assertThat(reportFirstAuthor.getUuid()).isNotNull();
     assertThat(reportFirstAuthor.getState()).isEqualTo(ReportState.DRAFT);
@@ -2121,17 +2215,19 @@ public class ReportResourceTest extends AbstractResourceTest {
     // Try to remove the author, should fail
     reportFirstAuthor.setReportPeople(null);
     try {
-      authorMutationExecutor.updateReport(FIELDS, getReportInput(reportFirstAuthor), true);
-      fail("Expected BadRequestException");
-    } catch (BadRequestException expectedException) {
+      withCredentials(author.getDomainUsername(),
+          t -> mutationExecutor.updateReport(FIELDS, getReportInput(reportFirstAuthor), true));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      // OK
     }
 
     // Add a second author
     final Person liz = getElizabethElizawell();
     reportFirstAuthor
         .setReportPeople(List.of(personToReportAuthor(author), personToReportAuthor(liz)));
-    final Report reportTwoAuthors =
-        authorMutationExecutor.updateReport(FIELDS, getReportInput(reportFirstAuthor), true);
+    final Report reportTwoAuthors = withCredentials(author.getDomainUsername(),
+        t -> mutationExecutor.updateReport(FIELDS, getReportInput(reportFirstAuthor), true));
     assertThat(reportTwoAuthors.getReportPeople())
         .anyMatch(rp -> Objects.equals(rp.getUuid(), author.getUuid()) && rp.getAuthor());
     assertThat(reportTwoAuthors.getReportPeople())
@@ -2139,8 +2235,8 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     // Remove the first author
     reportTwoAuthors.setReportPeople(List.of(personToReportAuthor(liz)));
-    final Report reportSecondAuthor =
-        authorMutationExecutor.updateReport(FIELDS, getReportInput(reportTwoAuthors), true);
+    final Report reportSecondAuthor = withCredentials(author.getDomainUsername(),
+        t -> mutationExecutor.updateReport(FIELDS, getReportInput(reportTwoAuthors), true));
     assertThat(reportSecondAuthor.getReportPeople())
         .noneMatch(rp -> Objects.equals(rp.getUuid(), author.getUuid()) && rp.getAuthor());
     assertThat(reportSecondAuthor.getReportPeople())
@@ -2149,51 +2245,52 @@ public class ReportResourceTest extends AbstractResourceTest {
     // Try to edit the report as the first author, should fail
     reportSecondAuthor.setIntent("Testing report authors again");
     try {
-      authorMutationExecutor.updateReport(FIELDS, getReportInput(reportSecondAuthor), true);
-      fail("Expected ForbiddenException");
-    } catch (ForbiddenException expectedException) {
+      withCredentials(author.getDomainUsername(),
+          t -> mutationExecutor.updateReport(FIELDS, getReportInput(reportSecondAuthor), true));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      // OK
     }
 
     // Try to add first author again, should fail
     reportSecondAuthor
         .setReportPeople(List.of(personToReportAuthor(author), personToReportAuthor(liz)));
     try {
-      authorMutationExecutor.updateReport(FIELDS, getReportInput(reportSecondAuthor), true);
-      fail("Expected ForbiddenException");
-    } catch (ForbiddenException expectedException) {
+      withCredentials(author.getDomainUsername(),
+          t -> mutationExecutor.updateReport(FIELDS, getReportInput(reportSecondAuthor), true));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      // OK
     }
 
     // Try to delete the report as the first author, should fail
     try {
-      authorMutationExecutor.deleteReport("", reportSecondAuthor.getUuid());
-      fail("Expected ForbiddenException");
-    } catch (ForbiddenException expectedException) {
+      withCredentials(author.getDomainUsername(),
+          t -> mutationExecutor.deleteReport("", reportSecondAuthor.getUuid()));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      // OK
     }
 
     // Have the remaining author delete this report.
-    final Integer nrDeleted =
-        getMutationExecutor("elizabeth").deleteReport("", reportSecondAuthor.getUuid());
+    final Integer nrDeleted = withCredentials("elizabeth",
+        t -> mutationExecutor.deleteReport("", reportSecondAuthor.getUuid()));
     assertThat(nrDeleted).isEqualTo(1);
   }
 
   @Test
-  public void testUnpublishReport()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void testUnpublishReport() {
     testUnpublishReport(false);
   }
 
   @Test
-  public void testUnpublishFutureReport()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void testUnpublishFutureReport() {
     testUnpublishReport(true);
   }
 
-  private void testUnpublishReport(boolean isFuture)
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  private void testUnpublishReport(boolean isFuture) {
     final Person author =
         findOrPutPersonInDb(Person.builder().withDomainUsername("selena").build());
-    final QueryExecutor authorQueryExecutor = getQueryExecutor(author.getDomainUsername());
-    final MutationExecutor authorMutationExecutor = getMutationExecutor(author.getDomainUsername());
     final Location loc = getLocation(author, "Cabot Tower");
     final Instant engagementDate = Instant.now().atZone(DaoUtils.getServerNativeZoneId())
         .minusWeeks(isFuture ? -2 : 2).toInstant();
@@ -2209,8 +2306,8 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     // Reference task EF7
     final TaskSearchQueryInput query = TaskSearchQueryInput.builder().withText("EF7").build();
-    final AnetBeanList_Task searchObjects =
-        authorQueryExecutor.taskList(getListFields(TASK_FIELDS), query);
+    final AnetBeanList_Task searchObjects = withCredentials(author.getDomainUsername(),
+        t -> queryExecutor.taskList(getListFields(TASK_FIELDS), query));
     assertThat(searchObjects).isNotNull();
     assertThat(searchObjects.getList()).isNotEmpty();
     final List<Task> searchResults = searchObjects.getList();
@@ -2220,95 +2317,106 @@ public class ReportResourceTest extends AbstractResourceTest {
     rInput.setTasks(List.of(getTaskInput(t11a)));
 
     // Create the report
-    final Report created = authorMutationExecutor.createReport(FIELDS, rInput);
+    final Report created = withCredentials(author.getDomainUsername(),
+        t -> mutationExecutor.createReport(FIELDS, rInput));
     assertThat(created).isNotNull();
     assertThat(created.getUuid()).isNotNull();
     assertThat(created.getState()).isEqualTo(ReportState.DRAFT);
 
     // Submit the report
-    int numRows = authorMutationExecutor.submitReport("", created.getUuid());
+    int numRows = withCredentials(author.getDomainUsername(),
+        t -> mutationExecutor.submitReport("", created.getUuid()));
     assertThat(numRows).isOne();
-    final Report submitted = authorQueryExecutor.report(FIELDS, created.getUuid());
+    final Report submitted = withCredentials(author.getDomainUsername(),
+        t -> queryExecutor.report(FIELDS, created.getUuid()));
     assertThat(submitted).isNotNull();
     if (!isFuture) {
       assertThat(submitted.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
       // Approve
-      numRows = adminMutationExecutor.approveReport("", null, created.getUuid());
+      numRows = withCredentials(adminUser,
+          t -> mutationExecutor.approveReport("", null, created.getUuid()));
       assertThat(numRows).isOne();
     }
-    final Report approved = authorQueryExecutor.report(FIELDS, created.getUuid());
+    final Report approved = withCredentials(author.getDomainUsername(),
+        t -> queryExecutor.report(FIELDS, created.getUuid()));
     assertThat(approved).isNotNull();
     assertThat(approved.getState()).isEqualTo(ReportState.APPROVED);
 
     // Try to unpublish report that is not published
     try {
-      adminMutationExecutor.unpublishReport("", approved.getUuid());
-      fail("Expected BadRequestException");
-    } catch (BadRequestException expectedException) {
+      withCredentials(adminUser, t -> mutationExecutor.unpublishReport("", approved.getUuid()));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      // OK
     }
 
     // Publish report
-    numRows = adminMutationExecutor.publishReport("", approved.getUuid());
+    numRows =
+        withCredentials(adminUser, t -> mutationExecutor.publishReport("", approved.getUuid()));
     assertThat(numRows).isOne();
-    final Report published = authorQueryExecutor.report(FIELDS, created.getUuid());
+    final Report published = withCredentials(author.getDomainUsername(),
+        t -> queryExecutor.report(FIELDS, created.getUuid()));
     assertThat(published).isNotNull();
     assertThat(published.getState()).isEqualTo(ReportState.PUBLISHED);
 
     // Try to unpublish published report by regular user
     try {
-      authorMutationExecutor.unpublishReport("", published.getUuid());
-      fail("Expected ForbiddenException");
-    } catch (ForbiddenException expectedException) {
+      withCredentials(author.getDomainUsername(),
+          t -> mutationExecutor.unpublishReport("", published.getUuid()));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      // OK
     }
     // Try to unpublish published report by superuser
     try {
-      getMutationExecutor("bob").unpublishReport("", published.getUuid());
-      fail("Expected ForbiddenException");
-    } catch (ForbiddenException expectedException) {
+      withCredentials("bob", t -> mutationExecutor.unpublishReport("", published.getUuid()));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      // OK
     }
     // Unpublish published report by admin
-    final Integer nrUnpublished = adminMutationExecutor.unpublishReport("", published.getUuid());
+    final Integer nrUnpublished =
+        withCredentials(adminUser, t -> mutationExecutor.unpublishReport("", published.getUuid()));
     assertThat(nrUnpublished).isEqualTo(1);
     // Check that workflow has been extended
-    final Report unpublished = authorQueryExecutor.report(FIELDS, published.getUuid());
+    final Report unpublished = withCredentials(author.getDomainUsername(),
+        t -> queryExecutor.report(FIELDS, published.getUuid()));
     assertThat(unpublished).isNotNull();
     assertThat(unpublished.getState()).isEqualTo(ReportState.DRAFT);
     assertThat(unpublished.getWorkflow()).hasSize(published.getWorkflow().size() + 1);
 
     // Clean up
-    final Integer nrDeleted = authorMutationExecutor.deleteReport("", unpublished.getUuid());
+    final Integer nrDeleted = withCredentials(author.getDomainUsername(),
+        t -> mutationExecutor.deleteReport("", unpublished.getUuid()));
     assertThat(nrDeleted).isEqualTo(1);
   }
 
   @Test
-  void testAdminCanFindAllDrafts()
-      throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
+  void testAdminCanFindAllDrafts() {
     final ReportSearchQueryInput draftsQuery = ReportSearchQueryInput.builder()
         .withState(List.of(ReportState.DRAFT)).withPageSize(0).build();
 
     // Normal users should find only their own drafts
-    final QueryExecutor erinQueryExecutor = getQueryExecutor("erin");
     AnetBeanList_Report erinsDraftReports =
-        erinQueryExecutor.reportList(getListFields(FIELDS), draftsQuery);
+        withCredentials("erin", t -> queryExecutor.reportList(getListFields(FIELDS), draftsQuery));
     assertThat(erinsDraftReports.getTotalCount()).isOne();
     final Report erinsDraftReport = erinsDraftReports.getList().get(0);
 
     // Even when including all drafts (or trying to)
     draftsQuery.setIncludeAllDrafts(true);
     AnetBeanList_Report erinsDraftReportsAgain =
-        erinQueryExecutor.reportList(getListFields(FIELDS), draftsQuery);
+        withCredentials("erin", t -> queryExecutor.reportList(getListFields(FIELDS), draftsQuery));
     assertThat(erinsDraftReportsAgain.getTotalCount()).isOne();
     draftsQuery.setIncludeAllDrafts(false);
 
     // Erin's superuser should not be able to find it
-    final QueryExecutor rebeccaMutationExecutor = getQueryExecutor("rebecca");
-    AnetBeanList_Report rebeccaDraftReports =
-        rebeccaMutationExecutor.reportList(getListFields(FIELDS), draftsQuery);
+    AnetBeanList_Report rebeccaDraftReports = withCredentials("rebecca",
+        t -> queryExecutor.reportList(getListFields(FIELDS), draftsQuery));
     assertThat(rebeccaDraftReports.getTotalCount()).isZero();
 
     // Admin should normally find only their own drafts
-    AnetBeanList_Report adminDraftReports =
-        adminQueryExecutor.reportList(getListFields(FIELDS), draftsQuery);
+    AnetBeanList_Report adminDraftReports = withCredentials(adminUser,
+        t -> queryExecutor.reportList(getListFields(FIELDS), draftsQuery));
     assertThat(adminDraftReports.getTotalCount()).isEqualTo(2);
     // List should not include Erin's draft
     assertThat(adminDraftReports.getList())
@@ -2316,8 +2424,8 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     // Except when including all drafts
     draftsQuery.setIncludeAllDrafts(true);
-    AnetBeanList_Report allDraftReports =
-        adminQueryExecutor.reportList(getListFields(FIELDS), draftsQuery);
+    AnetBeanList_Report allDraftReports = withCredentials(adminUser,
+        t -> queryExecutor.reportList(getListFields(FIELDS), draftsQuery));
     assertThat(allDraftReports.getTotalCount()).isGreaterThan(1);
     // List should include Erin's draft
     assertThat(allDraftReports.getList())
@@ -2328,34 +2436,33 @@ public class ReportResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  void testAdminCanSubmit()
-      throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
+  void testAdminCanSubmit() {
     // Erin's Draft report, ready for submission
     final String uuid = "530b735e-1134-4daa-9e87-4491c888a4f7";
-    final Report report = adminQueryExecutor.report(FIELDS, uuid);
+    final Report report = withCredentials(adminUser, t -> queryExecutor.report(FIELDS, uuid));
     assertThat(report.getState()).isEqualTo(ReportState.DRAFT);
 
     // Erin's superuser should not be able to submit it
-    final MutationExecutor rebeccaMutationExecutor = getMutationExecutor("rebecca");
     try {
-      rebeccaMutationExecutor.submitReport("", uuid);
-      fail("Expected ForbiddenException");
-    } catch (ForbiddenException expectedException) {
+      withCredentials("rebecca", t -> mutationExecutor.submitReport("", uuid));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      // OK
     }
 
     // Admin should be able to submit it
     try {
-      adminMutationExecutor.submitReport("", uuid);
-    } catch (ForbiddenException expectedException) {
-      fail("Unexpected ForbiddenException");
+      withCredentials(adminUser, t -> mutationExecutor.submitReport("", uuid));
+    } catch (Exception e) {
+      fail("Unexpected Exception", e);
     }
-    final Report submittedReport = adminQueryExecutor.report(FIELDS, uuid);
+    final Report submittedReport =
+        withCredentials(adminUser, t -> queryExecutor.report(FIELDS, uuid));
     assertThat(submittedReport.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
 
     // Erin should be able to edit it again
-    final MutationExecutor erinMutationExecutor = getMutationExecutor("erin");
-    final Report updatedReport =
-        erinMutationExecutor.updateReport(FIELDS, getReportInput(report), false);
+    final Report updatedReport = withCredentials("erin",
+        t -> mutationExecutor.updateReport(FIELDS, getReportInput(report), false));
 
     // It should be back to Draft
     assertThat(updatedReport.getState()).isEqualTo(ReportState.DRAFT);

@@ -7,9 +7,6 @@ import static org.assertj.core.api.Assertions.fail;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.graphql_java_generator.client.GraphQLConfiguration;
-import com.graphql_java_generator.exception.GraphQLRequestExecutionException;
-import com.graphql_java_generator.exception.GraphQLRequestPreparationException;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.testing.junit5.DropwizardAppExtension;
@@ -18,13 +15,14 @@ import java.lang.invoke.MethodHandles;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.database.AdminDao;
 import mil.dds.anet.database.mappers.MapperUtils;
+import mil.dds.anet.test.GraphQLPluginConfiguration;
 import mil.dds.anet.test.client.AnetBeanList_Person;
 import mil.dds.anet.test.client.ApprovalStep;
 import mil.dds.anet.test.client.ApprovalStepInput;
@@ -49,22 +47,36 @@ import mil.dds.anet.test.client.ReportPerson;
 import mil.dds.anet.test.client.ReportPersonInput;
 import mil.dds.anet.test.client.Task;
 import mil.dds.anet.test.client.TaskInput;
-import mil.dds.anet.test.client.util.GraphQLRequest;
 import mil.dds.anet.test.client.util.MutationExecutor;
 import mil.dds.anet.test.client.util.QueryExecutor;
 import mil.dds.anet.test.integration.utils.TestApp;
 import mil.dds.anet.utils.BatchingUtils;
 import mil.dds.anet.utils.DaoUtils;
-import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
+@SpringBootTest
 @ExtendWith(TestApp.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public abstract class AbstractResourceTest {
+
+  @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+  @Autowired
+  protected QueryExecutor queryExecutor;
+
+  @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+  @Autowired
+  protected MutationExecutor mutationExecutor;
+
+  @Autowired
+  protected GraphQLPluginConfiguration.AuthenticationInjector authenticationInjector;
 
   protected static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -80,10 +92,7 @@ public abstract class AbstractResourceTest {
   }
 
   protected static final String adminUser = "arthur";
-  protected static final QueryExecutor adminQueryExecutor = getQueryExecutor(adminUser);
-  protected static final MutationExecutor adminMutationExecutor = getMutationExecutor(adminUser);
-  protected static final QueryExecutor jackQueryExecutor = getQueryExecutor("jack");
-  protected static final MutationExecutor jackMutationExecutor = getMutationExecutor("jack");
+  protected static final String jackUser = "jack";
 
   protected static Client client;
   protected static Person admin;
@@ -96,7 +105,7 @@ public abstract class AbstractResourceTest {
           + " organization { uuid shortName parentOrg { uuid shortName } } } }";
 
   @BeforeAll
-  public static void setUp() {
+  public void setUp() {
     if (DaoUtils.isPostgresql()) {
       // Update full-text index
       refreshMaterializedViews();
@@ -124,7 +133,7 @@ public abstract class AbstractResourceTest {
   }
 
   @AfterAll
-  public static void tearDown() {
+  public void tearDown() {
     client.close();
     batchingUtils.shutdown();
   }
@@ -132,7 +141,7 @@ public abstract class AbstractResourceTest {
   /*
    * Finds the specified person in the database. If missing, creates them.
    */
-  public static Person findOrPutPersonInDb(Person stub) {
+  public Person findOrPutPersonInDb(Person stub) {
     try {
       if (stub.getDomainUsername() != null) {
         final Person user = findPerson(stub);
@@ -142,8 +151,8 @@ public abstract class AbstractResourceTest {
       } else {
         final PersonSearchQueryInput query =
             PersonSearchQueryInput.builder().withText(stub.getName()).build();
-        final AnetBeanList_Person searchObjects =
-            jackQueryExecutor.personList(getListFields(PERSON_FIELDS), query);
+        final AnetBeanList_Person searchObjects = withCredentials(jackUser,
+            t -> queryExecutor.personList(getListFields(PERSON_FIELDS), query));
         for (final Person p : searchObjects.getList()) {
           if (p.getName().equals(stub.getName())) {
             return p;
@@ -152,142 +161,141 @@ public abstract class AbstractResourceTest {
       }
 
       // Insert into DB
-      return adminMutationExecutor.createPerson(PERSON_FIELDS, getPersonInput(stub));
-    } catch (GraphQLRequestExecutionException | GraphQLRequestPreparationException e) {
+      return withCredentials(adminUser,
+          t -> mutationExecutor.createPerson(PERSON_FIELDS, getPersonInput(stub)));
+    } catch (Exception e) {
       logger.error("problems finding user", e);
       return null;
     }
   }
 
-  public static Person findPerson(Person stub)
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    final QueryExecutor stubQueryExecutor = getQueryExecutor(stub.getDomainUsername());
-    return stubQueryExecutor.me(PERSON_FIELDS);
+  public Person findPerson(Person stub) {
+    return withCredentials(stub.getDomainUsername(), t -> queryExecutor.me(PERSON_FIELDS));
   }
 
   // Location in the test database
-  public static Location getGeneralHospital()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    return adminQueryExecutor.location("{ uuid }", "0855fb0a-995e-4a79-a132-4024ee2983ff");
+  public Location getGeneralHospital() {
+    return withCredentials(admin.getDomainUsername(),
+        t -> queryExecutor.location("{ uuid }", "0855fb0a-995e-4a79-a132-4024ee2983ff"));
   }
 
   // Advisors in the test database
-  public static Person getSuperuser() {
+  public Person getSuperuser() {
     final Person rebecca =
         findOrPutPersonInDb(Person.builder().withDomainUsername("rebecca").build());
     assertThat(rebecca).isNotNull();
     return rebecca;
   }
 
-  public static Person getRegularUser() {
+  public Person getRegularUser() {
     final Person erin = findOrPutPersonInDb(Person.builder().withDomainUsername("erin").build());
     assertThat(erin).isNotNull();
     return erin;
   }
 
-  public static Person getAndrewAnderson() {
+  public Person getAndrewAnderson() {
     return findOrPutPersonInDb(Person.builder().withDomainUsername("andrew").build());
   }
 
-  public static Person getBobBobtown() {
+  public Person getBobBobtown() {
     return findOrPutPersonInDb(Person.builder().withDomainUsername("bob").build());
   }
 
-  public static Person getElizabethElizawell() {
+  public Person getElizabethElizawell() {
     return findOrPutPersonInDb(Person.builder().withDomainUsername("elizabeth").build());
   }
 
-  public static Person getJackJackson() {
-    return findOrPutPersonInDb(Person.builder().withDomainUsername("jack").build());
+  public Person getJackJackson() {
+    return findOrPutPersonInDb(Person.builder().withDomainUsername(jackUser).build());
   }
 
-  public static Person getNickNicholson() {
+  public Person getNickNicholson() {
     return findOrPutPersonInDb(Person.builder().withDomainUsername("nick").build());
   }
 
-  public static Person getReinaReinton() {
+  public Person getReinaReinton() {
     return findOrPutPersonInDb(Person.builder().withDomainUsername("reina").build());
   }
 
-  public static Person getYoshieBeau() {
+  public Person getYoshieBeau() {
     return findOrPutPersonInDb(Person.builder().withDomainUsername("yoshie").build());
   }
 
-  public static Person getBenRogers() {
+  public Person getBenRogers() {
     return findOrPutPersonInDb(Person.builder().withName("ROGERS, Ben").build());
   }
 
   // Interlocutors in the test database
-  public static Person getChristopfTopferness() {
+  public Person getChristopfTopferness() {
     return findOrPutPersonInDb(Person.builder().withName("TOPFERNESS, Christopf").build());
   }
 
-  public static Person getHunterHuntman() {
+  public Person getHunterHuntman() {
     return findOrPutPersonInDb(Person.builder().withName("HUNTMAN, Hunter").build());
   }
 
-  public static Person getRogerRogwell() {
+  public Person getRogerRogwell() {
     return findOrPutPersonInDb(Person.builder().withName("ROGWELL, Roger").build());
   }
 
-  public static Person getShardulSharton() {
+  public Person getShardulSharton() {
     return findOrPutPersonInDb(Person.builder().withName("SHARTON, Shardul").build());
   }
 
-  public static Person getSteveSteveson() {
+  public Person getSteveSteveson() {
     return findOrPutPersonInDb(Person.builder().withName("STEVESON, Steve").build());
   }
 
   // Getting the above as a normal bean
-  public static mil.dds.anet.beans.Person getSuperuserBean() {
+  public mil.dds.anet.beans.Person getSuperuserBean() {
     return getInput(getSuperuser(), mil.dds.anet.beans.Person.class);
   }
 
-  public static mil.dds.anet.beans.Person getRegularUserBean() {
+  public mil.dds.anet.beans.Person getRegularUserBean() {
     return getInput(getRegularUser(), mil.dds.anet.beans.Person.class);
   }
 
-  public static mil.dds.anet.beans.Person getAndrewAndersonBean() {
+  public mil.dds.anet.beans.Person getAndrewAndersonBean() {
     return getInput(getAndrewAnderson(), mil.dds.anet.beans.Person.class);
   }
 
-  public static mil.dds.anet.beans.Person getBobBobtownBean() {
+  public mil.dds.anet.beans.Person getBobBobtownBean() {
     return getInput(getBobBobtown(), mil.dds.anet.beans.Person.class);
   }
 
-  public static mil.dds.anet.beans.Person getElizabethElizawellBean() {
+  public mil.dds.anet.beans.Person getElizabethElizawellBean() {
     return getInput(getElizabethElizawell(), mil.dds.anet.beans.Person.class);
   }
 
-  public static mil.dds.anet.beans.Person getJackJacksonBean() {
+  public mil.dds.anet.beans.Person getJackJacksonBean() {
     return getInput(getJackJackson(), mil.dds.anet.beans.Person.class);
   }
 
-  public static mil.dds.anet.beans.Person getNickNicholsonBean() {
+  public mil.dds.anet.beans.Person getNickNicholsonBean() {
     return getInput(getNickNicholson(), mil.dds.anet.beans.Person.class);
   }
 
-  public static mil.dds.anet.beans.Person getReinaReintonBean() {
+  public mil.dds.anet.beans.Person getReinaReintonBean() {
     return getInput(getReinaReinton(), mil.dds.anet.beans.Person.class);
   }
 
-  public static mil.dds.anet.beans.Person getChristopfTopfernessBean() {
+  public mil.dds.anet.beans.Person getChristopfTopfernessBean() {
     return getInput(getChristopfTopferness(), mil.dds.anet.beans.Person.class);
   }
 
-  public static mil.dds.anet.beans.Person getHunterHuntmanBean() {
+  public mil.dds.anet.beans.Person getHunterHuntmanBean() {
     return getInput(getHunterHuntman(), mil.dds.anet.beans.Person.class);
   }
 
-  public static mil.dds.anet.beans.Person getRogerRogwellBean() {
+  public mil.dds.anet.beans.Person getRogerRogwellBean() {
     return getInput(getRogerRogwell(), mil.dds.anet.beans.Person.class);
   }
 
-  public static mil.dds.anet.beans.Person getShardulShartonBean() {
+  public mil.dds.anet.beans.Person getShardulShartonBean() {
     return getInput(getShardulSharton(), mil.dds.anet.beans.Person.class);
   }
 
-  public static mil.dds.anet.beans.Person getSteveStevesonBean() {
+  public mil.dds.anet.beans.Person getSteveStevesonBean() {
     return getInput(getSteveSteveson(), mil.dds.anet.beans.Person.class);
   }
 
@@ -449,33 +457,32 @@ public abstract class AbstractResourceTest {
     return String.format("{ pageNum pageSize totalCount list %s }", fields);
   }
 
-  // Get GraphQL request executors
-  protected static GraphQLRequest getGraphQlRequest(String user, String graphQlRequest)
-      throws GraphQLRequestPreparationException {
-    final GraphQLRequest req = new GraphQLRequest(graphQlRequest);
-    req.setInstanceConfiguration(getGraphQlConfiguration(user));
-    return req;
+  /**
+   * Extension of {@link Function} that allows the passed function to throw {@link Exception}s.
+   * These exceptions will be caught and re-thrown as {@link RuntimeException}s.
+   */
+  @FunctionalInterface
+  public interface ThrowingFunction<T, R> extends Function<T, R> {
+    @Override
+    default R apply(final T t) {
+      try {
+        return applyThrows(t);
+      } catch (final Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+    R applyThrows(final T t) throws Exception;
   }
 
-  protected static QueryExecutor getQueryExecutor(String user) {
-    return new QueryExecutor(getGraphQlEndpoint(), getClient(user));
-  }
-
-  protected static MutationExecutor getMutationExecutor(String user) {
-    return new MutationExecutor(getGraphQlEndpoint(), getClient(user));
-  }
-
-  @SuppressWarnings("deprecation")
-  private static GraphQLConfiguration getGraphQlConfiguration(String user) {
-    return new GraphQLConfiguration(getGraphQlEndpoint(), getClient(user));
-  }
-
-  private static String getGraphQlEndpoint() {
-    return String.format("http://localhost:%1$d/graphql", TestApp.app.getLocalPort());
-  }
-
-  private static Client getClient(String user) {
-    return ClientBuilder.newBuilder().register(HttpAuthenticationFeature.basic(user, user)).build();
+  public synchronized <R> R withCredentials(final String userNameAndPassword,
+      final ThrowingFunction<Object, R> authenticatedCallback) throws RuntimeException {
+    authenticationInjector.setCredentials(userNameAndPassword);
+    try {
+      return authenticatedCallback.apply(null);
+    } finally {
+      authenticationInjector.setCredentials(null);
+    }
   }
 
   protected String getFirstClassification() {
