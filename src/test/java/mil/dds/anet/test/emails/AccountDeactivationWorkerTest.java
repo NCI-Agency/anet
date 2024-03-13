@@ -33,7 +33,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @PrepareForTest({AnetEmailWorker.class, AnetObjectEngine.class, AnetConfiguration.class,
     PersonDao.class, PositionDao.class, AccountDeactivationEmail.class,
     AccountDeactivationWarningEmail.class})
-@PowerMockIgnore("javax.security.*")
+@PowerMockIgnore("jakarta.security.*")
 public class AccountDeactivationWorkerTest {
 
   private AnetConfiguration config;

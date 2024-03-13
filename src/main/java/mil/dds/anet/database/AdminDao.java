@@ -1,10 +1,10 @@
 package mil.dds.anet.database;
 
+import jakarta.inject.Inject;
+import jakarta.inject.Provider;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.inject.Inject;
-import javax.inject.Provider;
 import mil.dds.anet.beans.AdminSetting;
 import mil.dds.anet.database.mappers.AdminSettingMapper;
 import org.jdbi.v3.core.Handle;

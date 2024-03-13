@@ -3,9 +3,9 @@ package mil.dds.anet.beans.search;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
+import jakarta.annotation.Nonnull;
 import java.util.Objects;
 import java.util.Optional;
-import javax.annotation.Nonnull;
 import mil.dds.anet.beans.Person;
 
 public abstract class AbstractSearchQuery<T extends ISortBy> implements ISearchQuery<T>, Cloneable {
