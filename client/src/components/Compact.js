@@ -118,11 +118,29 @@ const CompactViewS = styled.div`
     }
   }
 `
+export const ClassifiedHeaderContent = ({ classification }) => {
+  return (
+    <ClassifiedHeaderContentS>
+      <div className="reportField">
+        <label style={{ fontWeight: "bold" }}>
+          {Settings.classification.label}:
+        </label>
+        &nbsp;
+        <span>{classification.toUpperCase()}</span>
+      </div>
+    </ClassifiedHeaderContentS>
+  )
+}
 
-export const CompactHeaderContent = ({
-  classification,
-  sensitiveInformation
-}) => {
+ClassifiedHeaderContent.propTypes = {
+  classification: PropTypes.string
+}
+
+const ClassifiedHeaderContentS = styled.div`
+  text-align: center;
+`
+
+export const CompactHeaderContent = ({ sensitiveInformation }) => {
   const { appSettings } = useContext(AppContext)
   return (
     <HeaderContentS bgc={appSettings[SETTING_KEY_COLOR]}>
@@ -130,14 +148,12 @@ export const CompactHeaderContent = ({
       <ClassificationBoxS>
         <ClassificationBanner />
         {sensitiveInformation && <SensitivityInformation />}
-        <span>Classification: {classification}</span>
       </ClassificationBoxS>
     </HeaderContentS>
   )
 }
 
 CompactHeaderContent.propTypes = {
-  classification: PropTypes.string,
   sensitiveInformation: PropTypes.bool
 }
 

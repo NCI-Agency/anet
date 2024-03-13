@@ -466,6 +466,14 @@ const ReportForm = ({
               <Fieldset>
                 <DictionaryField
                   wrappedComponent={FastField}
+                  dictProps={Settings.classification}
+                  name="classification"
+                  component={FieldHelper.RadioButtonToggleGroupField}
+                  buttons={classificationButtons}
+                  onChange={value => setFieldValue("classification", value)}
+                />
+                <DictionaryField
+                  wrappedComponent={FastField}
                   dictProps={Settings.fields.report.intent}
                   name="intent"
                   component={FieldHelper.InputField}
@@ -492,15 +500,6 @@ const ReportForm = ({
                     </>
                   }
                   className="meeting-goal"
-                />
-
-                <DictionaryField
-                  wrappedComponent={FastField}
-                  dictProps={Settings.classification}
-                  name="classification"
-                  component={FieldHelper.RadioButtonToggleGroupField}
-                  buttons={classificationButtons}
-                  onChange={value => setFieldValue("classification", value)}
                 />
 
                 <DictionaryField

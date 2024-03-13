@@ -170,6 +170,13 @@ const ReportPreview = ({ className, uuid }) => {
 
       <h4 className="ellipsized-text">Report {reportTitle}</h4>
       <div className="preview-section">
+        <DictionaryField
+          wrappedComponent={PreviewField}
+          dictProps={Settings.classification}
+          name="classification"
+          value={Settings.classification.choices[report.classification]}
+        />
+
         <PreviewField
           extraColForValue
           label="Summary"
@@ -195,13 +202,6 @@ const ReportPreview = ({ className, uuid }) => {
               />
             </div>
           }
-        />
-
-        <DictionaryField
-          wrappedComponent={PreviewField}
-          dictProps={Settings.classification}
-          name="classification"
-          value={Settings.classification.choices[report.classification]}
         />
 
         <DictionaryField

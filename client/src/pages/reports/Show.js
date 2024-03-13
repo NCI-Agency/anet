@@ -548,6 +548,15 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                 action={action}
               />
               <Fieldset className="show-report-overview">
+                <DictionaryField
+                  wrappedComponent={Field}
+                  dictProps={Settings.classification}
+                  name="classification"
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={
+                    Settings.classification.choices[report.classification]
+                  }
+                />
                 <Field
                   label="Summary"
                   name="summary"
@@ -576,16 +585,6 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                         style={{ marginBottom: 0 }}
                       />
                     </div>
-                  }
-                />
-
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.classification}
-                  name="classification"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={
-                    Settings.classification.choices[report.classification]
                   }
                 />
 

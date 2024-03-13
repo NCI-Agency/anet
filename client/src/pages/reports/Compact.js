@@ -6,6 +6,7 @@ import AppContext from "components/AppContext"
 import InstantAssessmentsContainerField from "components/assessments/instant/InstantAssessmentsContainerField"
 import { BreadcrumbTrail } from "components/BreadcrumbTrail"
 import CompactTable, {
+  ClassifiedHeaderContent,
   CompactFooterContent,
   CompactHeaderContent,
   CompactRow,
@@ -306,7 +307,11 @@ const CompactReportView = ({ pageDispatchers }) => {
             pageSize={pageSize}
             backgroundText={backgroundText}
           >
-            <CompactHeaderContent classification={report.classification} />
+            {report.classification == null ? (
+              <CompactHeaderContent />
+            ) : (
+              <ClassifiedHeaderContent classification={report.classification} />
+            )}
             <CompactTable>
               <FullColumn>
                 <CompactTitle
@@ -327,14 +332,6 @@ const CompactReportView = ({ pageDispatchers }) => {
                   wrappedComponent={CompactRow}
                   dictProps={Settings.fields.report.keyOutcomes}
                   content={report.keyOutcomes}
-                  className="reportField"
-                />
-                <DictionaryField
-                  wrappedComponent={CompactRow}
-                  dictProps={Settings.classification}
-                  content={
-                    Settings.classification.choices[report.classification]
-                  }
                   className="reportField"
                 />
                 {!report.cancelled && (
