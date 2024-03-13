@@ -470,6 +470,7 @@ const ReportForm = ({
                   name="classification"
                   component={FieldHelper.RadioButtonToggleGroupField}
                   buttons={classificationButtons}
+                  enableClear
                   onChange={value => setFieldValue("classification", value)}
                 />
                 <DictionaryField

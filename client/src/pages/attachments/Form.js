@@ -134,6 +134,7 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
                         name="classification"
                         component={FieldHelper.RadioButtonToggleGroupField}
                         buttons={classificationButtons}
+                        enableClear
                         onChange={value =>
                           setFieldValue("classification", value)}
                       />
