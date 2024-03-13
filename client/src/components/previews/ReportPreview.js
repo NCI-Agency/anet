@@ -132,6 +132,14 @@ const ReportPreview = ({ className, uuid }) => {
   const reportTitle = report.intent || `#${report.uuid}`
   return (
     <div className={`report-preview preview-content-scroll ${className || ""}`}>
+      {report.classification && (
+        <div style={{ width: "100%", fontSize: "18px", textAlign: "center" }}>
+          <span style={{ fontWeight: "bold" }}>
+            {Settings.classification.choices[report.classification]}
+          </span>
+        </div>
+      )}
+
       {report.isPublished() && (
         <div className="preview-section text-center">
           <h4 className="text-danger">This {reportType} is PUBLISHED.</h4>
@@ -170,13 +178,6 @@ const ReportPreview = ({ className, uuid }) => {
 
       <h4 className="ellipsized-text">Report {reportTitle}</h4>
       <div className="preview-section">
-        <DictionaryField
-          wrappedComponent={PreviewField}
-          dictProps={Settings.classification}
-          name="classification"
-          value={Settings.classification.choices[report.classification]}
-        />
-
         <PreviewField
           extraColForValue
           label="Summary"

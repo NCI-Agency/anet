@@ -442,6 +442,16 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
 
             <Messages success={saveSuccess} error={saveError} />
 
+            {report.classification && (
+              <div
+                style={{ width: "100%", fontSize: "18px", textAlign: "center" }}
+              >
+                <span style={{ fontWeight: "bold" }}>
+                  {Settings.classification.choices[report.classification]}
+                </span>
+              </div>
+            )}
+
             {report.isPublished() && (
               <Fieldset style={{ textAlign: "center" }}>
                 <h4 className="text-danger">This {reportType} is PUBLISHED.</h4>
@@ -548,15 +558,6 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                 action={action}
               />
               <Fieldset className="show-report-overview">
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.classification}
-                  name="classification"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={
-                    Settings.classification.choices[report.classification]
-                  }
-                />
                 <Field
                   label="Summary"
                   name="summary"
