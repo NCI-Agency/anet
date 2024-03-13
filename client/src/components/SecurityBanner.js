@@ -208,19 +208,30 @@ ConnectionBanner.propTypes = {
   connection: PropTypes.object.isRequired
 }
 
-export const CompactSecurityBanner = () => {
+export const CompactSecurityBanner = ({ classification }) => {
   const { appSettings } = useContext(AppContext)
   return (
     <CompactBannerS className="banner" bgc={appSettings[SETTING_KEY_COLOR]}>
-      <span className="classificationText">
-        {appSettings[SETTING_KEY_CLASSIFICATION]?.toUpperCase() || ""}
-      </span>{" "}
-      <span className="releasabilityText">
-        {utils.titleCase(appSettings[SETTING_KEY_RELEASABILITY] || "")}
-      </span>
+      {(classification && (
+        <span className="classificationText">{classification}</span>
+      )) || (
+        <>
+          <span className="classificationText">
+            {appSettings[SETTING_KEY_CLASSIFICATION]?.toUpperCase() || ""}
+          </span>{" "}
+          <span className="releasabilityText">
+            {utils.titleCase(appSettings[SETTING_KEY_RELEASABILITY] || "")}
+          </span>
+        </>
+      )}
     </CompactBannerS>
   )
 }
+
+CompactSecurityBanner.propTypes = {
+  classification: PropTypes.string
+}
+
 const CompactBannerS = styled.div`
   & > span.classificationText {
     font-weight: bold;

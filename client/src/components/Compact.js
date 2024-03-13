@@ -118,35 +118,17 @@ const CompactViewS = styled.div`
     }
   }
 `
-export const ClassifiedHeaderContent = ({ classification }) => {
-  return (
-    <ClassifiedHeaderContentS>
-      <div className="reportField">
-        <label style={{ fontWeight: "bold" }}>
-          {Settings.classification.label}:
-        </label>
-        &nbsp;
-        <span>{classification.toUpperCase()}</span>
-      </div>
-    </ClassifiedHeaderContentS>
-  )
-}
 
-ClassifiedHeaderContent.propTypes = {
-  classification: PropTypes.string
-}
-
-const ClassifiedHeaderContentS = styled.div`
-  text-align: center;
-`
-
-export const CompactHeaderContent = ({ sensitiveInformation }) => {
+export const CompactHeaderContent = ({
+  classification,
+  sensitiveInformation
+}) => {
   const { appSettings } = useContext(AppContext)
   return (
     <HeaderContentS bgc={appSettings[SETTING_KEY_COLOR]}>
       <img src={anetLogo} alt="logo" width="50" height="12" />
       <ClassificationBoxS>
-        <ClassificationBanner />
+        <ClassificationBanner classification={classification} />
         {sensitiveInformation && <SensitivityInformation />}
       </ClassificationBoxS>
     </HeaderContentS>
@@ -154,6 +136,7 @@ export const CompactHeaderContent = ({ sensitiveInformation }) => {
 }
 
 CompactHeaderContent.propTypes = {
+  classification: PropTypes.string,
   sensitiveInformation: PropTypes.bool
 }
 
@@ -287,12 +270,16 @@ const FooterContentS = styled.div`
   background-color: ${props => props.bgc} !important;
 `
 
-const ClassificationBanner = () => {
+const ClassificationBanner = ({ classification }) => {
   return (
     <ClassificationBannerS>
-      <CompactSecurityBanner />
+      <CompactSecurityBanner classification={classification} />
     </ClassificationBannerS>
   )
+}
+
+ClassificationBanner.propTypes = {
+  classification: PropTypes.string
 }
 
 const ClassificationBannerS = styled.div`

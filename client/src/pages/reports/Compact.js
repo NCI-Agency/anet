@@ -6,7 +6,6 @@ import AppContext from "components/AppContext"
 import InstantAssessmentsContainerField from "components/assessments/instant/InstantAssessmentsContainerField"
 import { BreadcrumbTrail } from "components/BreadcrumbTrail"
 import CompactTable, {
-  ClassifiedHeaderContent,
   CompactFooterContent,
   CompactHeaderContent,
   CompactRow,
@@ -307,11 +306,11 @@ const CompactReportView = ({ pageDispatchers }) => {
             pageSize={pageSize}
             backgroundText={backgroundText}
           >
-            {report.classification == null ? (
-              <CompactHeaderContent />
-            ) : (
-              <ClassifiedHeaderContent classification={report.classification} />
-            )}
+            <CompactHeaderContent
+              classification={
+                Settings.classification.choices[report.classification]
+              }
+            />
             <CompactTable>
               <FullColumn>
                 <CompactTitle
