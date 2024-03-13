@@ -348,7 +348,7 @@ const CoordinateActionButtons = ({
   setLocationFormat
 }) => {
   return (
-    <Col sm={3} style={{ padding: "0 8px" }}>
+    <Col sm={4} style={{ padding: "0 8px" }}>
       <Tooltip2 content="Clear coordinates">
         <Button
           variant="outline-danger"

@@ -112,7 +112,8 @@ export const propTypes = {
   // Optional: GraphQL string of fields to return from search.
   fields: PropTypes.string,
   handleAddItem: PropTypes.func,
-  handleRemoveItem: PropTypes.func
+  handleRemoveItem: PropTypes.func,
+  createEntityComponent: PropTypes.func
 }
 
 const AdvancedSelect = ({
@@ -137,7 +138,8 @@ const AdvancedSelect = ({
   queryParams,
   fields,
   handleAddItem,
-  handleRemoveItem
+  handleRemoveItem,
+  createEntityComponent
 }) => {
   const firstFilter = Object.keys(filterDefs)[0]
 
@@ -156,6 +158,8 @@ const AdvancedSelect = ({
   const [results, setResults] = useState({})
   const [showOverlay, setShowOverlay] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [showCreateEntityComponent, setShowCreateEntityComponent] =
+    useState(false)
   const [fetchType, setFetchType] = useState(FETCH_TYPE.NONE)
   const [doReset, setDoReset] = useState(false)
 
@@ -283,6 +287,7 @@ const AdvancedSelect = ({
       setIsLoading(false)
       setShowOverlay(false)
       setFilterType(firstFilter)
+      setShowCreateEntityComponent(false)
       if (!keepSearchText) {
         setSearchTerms(selectedValueAsString)
       }
@@ -332,7 +337,36 @@ const AdvancedSelect = ({
                         renderRow={overlayRenderRow}
                         isLoading={isLoading}
                         loaderMessage={
-                          <div style={{ width: "300px" }}>No results found</div>
+                          (createEntityComponent && (
+                            <>
+                              {(showCreateEntityComponent && (
+                                <div>
+                                  {createEntityComponent(
+                                    searchTerms,
+                                    setDoReset
+                                  )}
+                                </div>
+                              )) || (
+                                <>
+                                  <div>
+                                    No results found.
+                                    <span
+                                      id="createEntityLink"
+                                      className="asLink"
+                                      onClick={() =>
+                                        setShowCreateEntityComponent(true)}
+                                    >
+                                      Click here to create a new {fieldName}
+                                    </span>
+                                  </div>
+                                </>
+                              )}
+                            </>
+                          )) || (
+                            <div style={{ width: "300px" }}>
+                              No results found
+                            </div>
+                          )
                         }
                       />
                       <UltimatePagination
@@ -460,6 +494,7 @@ const AdvancedSelect = ({
     setPageNum(results && filterResults ? filterResults.pageNum : 0)
     setIsLoading(shouldFetchResults)
     setFetchType(shouldFetchResults ? FETCH_TYPE.NORMAL : FETCH_TYPE.NONE)
+    setShowCreateEntityComponent(false)
   }
 
   function goToPage(pageNum) {

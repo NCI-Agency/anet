@@ -14,6 +14,7 @@ const AdvancedSingleSelect = props => {
       {...props}
       handleAddItem={handleAddItem}
       handleRemoveItem={handleRemoveItem}
+      createEntityComponent={props.createEntityComponent}
       closeOverlayOnAdd
       selectedValueAsString={
         _isEmpty(props.value)

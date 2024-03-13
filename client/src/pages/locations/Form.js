@@ -56,7 +56,14 @@ const LOCATION_TYPES_ADMIN = [
 const LOCATION_TYPES_SUPERUSER =
   Settings?.fields?.location?.superuserTypeOptions
 
-const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
+const LocationForm = ({
+  edit,
+  title,
+  initialValues,
+  notesComponent,
+  afterSaveActions,
+  afterCancelActions
+}) => {
   const { currentUser } = useContext(AppContext)
   const navigate = useNavigate()
   const [error, setError] = useState(null)
@@ -64,8 +71,10 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
     initialValues?.attachments
   )
   const [showSimilarLocations, setShowSimilarLocations] = useState(false)
+  const regularUsersCanCreateLocations = Settings.regularUsersCanCreateLocations
   const canEditName =
-    (!edit && currentUser.isSuperuser()) || (edit && currentUser.isAdmin())
+    (!edit && (regularUsersCanCreateLocations || currentUser.isSuperuser())) ||
+    (edit && currentUser.isAdmin())
   const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
   const attachmentEditEnabled =
     attachmentsEnabled &&
@@ -381,7 +390,13 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
   }
 
   function onCancel() {
-    navigate(-1)
+    if (afterCancelActions) {
+      // Whatever logic the calling component implements
+      afterCancelActions()
+    } else {
+      // Default behaviour, navigate back
+      navigate(-1)
+    }
   }
 
   function onSubmit(values, form) {
@@ -401,15 +416,22 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
         ? response[operation].uuid
         : initialValues.uuid
     })
+    location.name = values.name
     // reset the form to latest values
     // to avoid unsaved changes prompt if it somehow becomes dirty
     form.resetForm({ values, isSubmitting: true })
-    if (!edit) {
-      navigate(Location.pathForEdit(location), { replace: true })
+    if (afterSaveActions) {
+      // Whatever logic the calling component defines
+      afterSaveActions(location)
+    } else {
+      // Default behaviour, navigate depending on edit mode
+      if (!edit) {
+        navigate(Location.pathForEdit(location), { replace: true })
+      }
+      navigate(Location.pathFor(location), {
+        state: { success: "Location saved" }
+      })
     }
-    navigate(Location.pathFor(location), {
-      state: { success: "Location saved" }
-    })
   }
 
   function save(values) {
@@ -425,7 +447,9 @@ LocationForm.propTypes = {
   initialValues: PropTypes.instanceOf(Location).isRequired,
   title: PropTypes.string,
   edit: PropTypes.bool,
-  notesComponent: PropTypes.node
+  notesComponent: PropTypes.node,
+  afterSaveActions: PropTypes.func,
+  afterCancelActions: PropTypes.func
 }
 
 LocationForm.defaultProps = {

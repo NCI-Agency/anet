@@ -399,6 +399,12 @@ properties:
     title: The support email address
     description: The email address where support requests can be sent.
 
+  regularUsersCanCreateLocations:
+    type: boolean
+    default: false
+    title: Whether regular users can also create locations
+    description: Used for locations; if set to `true` all ANET users can create or edit locations
+
   engagementsIncludeTimeAndDuration:
     type: boolean
     default: false

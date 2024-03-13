@@ -50,6 +50,7 @@ import {
   Task
 } from "models"
 import moment from "moment"
+import LocationForm from "pages/locations/Form"
 import { RECURRENCE_TYPE } from "periodUtils"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
@@ -250,6 +251,8 @@ const ReportForm = ({
   const attachmentEditEnabled =
     attachmentsEnabled &&
     (!Settings.fields.attachment.restrictToAdmins || currentUser.isAdmin())
+  const canCreateLocation =
+    Settings.regularUsersCanCreateLocations || currentUser.isSuperuser()
   const classificationButtons = Object.entries(
     Settings.classification.choices
   ).map(([value, label]) => ({
@@ -572,6 +575,26 @@ const ReportForm = ({
                       fields={Location.autocompleteQuery}
                       valueKey="name"
                       addon={LOCATIONS_ICON}
+                      createEntityComponent={
+                        (canCreateLocation &&
+                          ((searchText, setDoReset) => (
+                            <LocationForm
+                              initialValues={new Location({ name: searchText })}
+                              title="Create New Location"
+                              afterSaveActions={value => {
+                                // validation will be done by setFieldValue
+                                setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
+                                setFieldValue("location", value, true)
+                                setDoReset(true)
+                                toast.success("The location has been saved")
+                              }}
+                              afterCancelActions={() => {
+                                setDoReset(true)
+                              }}
+                            />
+                          ))) ||
+                        null
+                      }
                     />
                   }
                   extraColElem={

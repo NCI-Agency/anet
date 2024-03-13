@@ -3,6 +3,9 @@ package mil.dds.anet.test.resources;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
+import java.util.HashMap;
+import java.util.Map;
+import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.client.AnetBeanList_Location;
 import mil.dds.anet.test.client.Location;
@@ -71,22 +74,29 @@ public class LocationResourceTest extends AbstractResourceTest {
 
   @Test
   void locationCreateSuperuserPermissionTest() {
-    createLocation(getSuperuser());
+    createLocation(getSuperuser(), false);
   }
 
   @Test
   void locationCreateRegularUserPermissionTest() {
-    createLocation(getRegularUser());
+    // By default the test dictionary dos not allows regular users to create locations
+    createLocation(getRegularUser(), false);
+    // Now test when they are allowed
+    final AnetConfiguration config = dropwizardApp.getConfiguration();
+    final Map<String, Object> dict = new HashMap<>(config.getDictionary());
+    dict.put("regularUsersCanCreateLocations", true);
+    config.setDictionary(dict);
+    createLocation(getRegularUser(), true);
   }
 
-  private void createLocation(Person user) {
+  private void createLocation(Person user, boolean regularUsersCanCreateLocations) {
     final Position position = user.getPosition();
     final boolean isSuperuser = position.getType() == PositionType.SUPERUSER;
     final LocationInput lInput = TestData.createLocationInput("The Boat Dock2", 43.21, -87.65);
     try {
       final Location l = withCredentials(user.getDomainUsername(),
           t -> mutationExecutor.createLocation(FIELDS, lInput));
-      if (isSuperuser) {
+      if (regularUsersCanCreateLocations || isSuperuser) {
         assertThat(l).isNotNull();
         assertThat(l.getUuid()).isNotNull();
       } else {
