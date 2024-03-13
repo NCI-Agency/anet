@@ -370,6 +370,7 @@ required:
   - VERSION_CHANGED_MSG
   - SUPPORT_EMAIL_ADDR
   - dateFormats
+  - calendarOptions
   - reportWorkflow
   - maxTextFieldLength
   - fields
@@ -475,6 +476,16 @@ properties:
                 type: string
                 title: The long date/time format if `engagementsIncludeTimeAndDuration` is `true`
                 description: Used to show the report engagement date/time in the user interface; should be easy to read, e.g. "Sunday, 6 December 1998 @ 15:30"; see https://momentjs.com/docs/#/displaying/format/ for format specifiers.
+
+  calendarOptions:
+    type: object
+    additionalProperties: false
+    required: [attendeesType]
+    properties:
+      attendeesType:
+        type: string
+        description: This value determines which names are shown by default in the report calendar, either advisor or interlocutor.
+        enum: [advisor, interlocutor]
 
   menuOptions:
     type: object

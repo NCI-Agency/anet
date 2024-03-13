@@ -213,11 +213,14 @@ export const GET_CALENDAR_EVENTS_FROM = {
   [CALENDAR_OBJECT_TYPES.REPORT]: reportsToEvents
 }
 
-export function reportsToEvents(reports) {
+export function reportsToEvents(reports, showInterlocutors) {
   return reports
     .map(r => {
-      const who =
-        (r.primaryAdvisor && new Person(r.primaryAdvisor).toString()) || ""
+      const who = showInterlocutors
+        ? (r.primaryInterlocutor &&
+            new Person(r.primaryInterlocutor).toString()) ||
+          ""
+        : (r.primaryAdvisor && new Person(r.primaryAdvisor).toString()) || ""
       const where =
         (r.interlocutorOrg && r.interlocutorOrg.shortName) ||
         (r.location && r.location.name) ||

@@ -9,6 +9,9 @@ import PropTypes from "prop-types"
 import React, { useRef } from "react"
 import { useNavigate } from "react-router-dom"
 
+export const ATTENDEE_TYPE_ADVISOR = "advisor"
+export const ATTENDEE_TYPE_INTERLOCUTOR = "interlocutor"
+
 const GQL_GET_REPORT_LIST = gql`
   query ($reportQuery: ReportSearchQueryInput) {
     reportList(query: $reportQuery) {
@@ -19,6 +22,10 @@ const GQL_GET_REPORT_LIST = gql`
         uuid
         intent
         primaryAdvisor {
+          uuid
+          name
+        }
+        primaryInterlocutor {
           uuid
           name
         }
@@ -45,10 +52,12 @@ const GQL_GET_REPORT_LIST = gql`
 const ReportCalendar = ({
   pageDispatchers: { showLoading, hideLoading },
   queryParams,
-  setTotalCount
+  setTotalCount,
+  attendeeType
 }) => {
   const navigate = useNavigate()
   const prevReportQuery = useRef(null)
+  const prevAttendeeType = useRef(null)
   const apiPromise = useRef(null)
   const calendarComponentRef = useRef(null)
   return (
@@ -70,10 +79,26 @@ const ReportCalendar = ({
       engagementDateEnd: moment(fetchInfo.end).endOf("day")
     })
     if (_isEqual(prevReportQuery.current, reportQuery)) {
-      // Optimise, return previous API promise instead of calling API.query again
+      if (prevAttendeeType.current !== attendeeType) {
+        // Only attendeeType changed, just recompute events
+        prevAttendeeType.current = attendeeType
+        showLoading()
+        apiPromise.current = apiPromise.current.then(data => {
+          // Each report is stored in the extendedProps
+          const reports = data.map(d => d.extendedProps)
+          const results = reportsToEvents(
+            reports,
+            attendeeType === ATTENDEE_TYPE_INTERLOCUTOR
+          )
+          hideLoading()
+          return results
+        })
+      }
+      // Optimise, return API promise instead of calling API.query again
       return apiPromise.current
     }
     prevReportQuery.current = reportQuery
+    prevAttendeeType.current = attendeeType
     if (setTotalCount) {
       // Reset the total count
       setTotalCount(null)
@@ -88,7 +113,10 @@ const ReportCalendar = ({
         const { totalCount } = data.reportList
         setTotalCount(totalCount)
       }
-      const results = reportsToEvents(reports)
+      const results = reportsToEvents(
+        reports,
+        attendeeType === ATTENDEE_TYPE_INTERLOCUTOR
+      )
       hideLoading()
       return results
     })
@@ -99,7 +127,8 @@ const ReportCalendar = ({
 ReportCalendar.propTypes = {
   pageDispatchers: PageDispatchersPropType,
   queryParams: PropTypes.object,
-  setTotalCount: PropTypes.func
+  setTotalCount: PropTypes.func,
+  attendeeType: PropTypes.string.isRequired
 }
 
 export default ReportCalendar
