@@ -16,7 +16,10 @@ import java.util.stream.Collectors;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Attachment;
 import mil.dds.anet.beans.GenericRelatedObject;
+import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AbstractSearchQuery;
+import mil.dds.anet.beans.search.AttachmentSearchQuery;
 import mil.dds.anet.database.mappers.AttachmentMapper;
 import mil.dds.anet.database.mappers.GenericRelatedObjectMapper;
 import mil.dds.anet.utils.DaoUtils;
@@ -50,6 +53,11 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AbstractSearchQuery<?
   @Override
   public Attachment getByUuid(String uuid) {
     return getByIds(Arrays.asList(uuid)).get(0);
+  }
+
+  public AnetBeanList<Attachment> search(Person user, AttachmentSearchQuery query) {
+    return AnetObjectEngine.getInstance().getSearcher().getAttachmentSearcher().runSearch(query,
+        user);
   }
 
   static class SelfIdBatcher extends IdBatcher<Attachment> {

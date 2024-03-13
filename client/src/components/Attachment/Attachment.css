@@ -122,6 +122,30 @@
   transform: scale(1.5);
 }
 
+/******** ATTACHMENT TABLE ********/
+.attachments_table thead tr,
+.attachments_table tbody tr {
+  display: flex;
+}
+
+.attachments_table td,
+.attachments_table thead tr th {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+}
+
+.attachments_table thead tr th:first-child,
+.attachments_table td:first-child {
+  width: 30%;
+}
+
+.attachments_table td:not(:first-child),
+.attachments_table thead tr th:not(:first-child) {
+  width: 100%;
+}
+
 @media screen and (max-width: 768px) {
   .attachment-card {
     flex: 0 0 calc(100%);

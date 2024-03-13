@@ -58,6 +58,14 @@ enum AggregationType {
 }
 
 """"""
+type AnetBeanList_Attachment {
+  list: [Attachment]
+  pageNum: Int
+  pageSize: Int
+  totalCount: Int
+}
+
+""""""
 type AnetBeanList_AuthorizationGroup {
   list: [AuthorizationGroup]
   pageNum: Int
@@ -211,6 +219,38 @@ input AttachmentInput {
   mimeType: String
   updatedAt: Instant
   uuid: String
+}
+
+""""""
+type AttachmentRelatedObject {
+  attachmentUuid: String
+  relatedObject: RelatableObject
+  relatedObjectType: String
+  relatedObjectUuid: String
+}
+
+""""""
+input AttachmentRelatedObjectInput {
+  attachmentUuid: String
+  relatedObjectType: String
+  relatedObjectUuid: String
+}
+
+""""""
+input AttachmentSearchQueryInput {
+  authorUuid: String
+  inMyReports: Boolean
+  pageNum: Int
+  pageSize: Int
+  sortBy: AttachmentSearchSortBy
+  sortOrder: SortOrder
+  status: Status
+  text: String
+}
+
+""""""
+enum AttachmentSearchSortBy {
+  CREATED_AT
 }
 
 """"""
@@ -757,6 +797,7 @@ type Query {
   advisorReportInsights(orgUuid: String = "-1", weeksAgo: Int = 3): [AdvisorReportsEntry]
   approvalStepInUse(uuid: String): Boolean!
   attachment(uuid: String): Attachment
+  myAttachments(query: AttachmentSearchQueryInput): AnetBeanList_Attachment
   authorizationGroup(uuid: String): AuthorizationGroup
   authorizationGroupList(query: AuthorizationGroupSearchQueryInput): AnetBeanList_AuthorizationGroup
   location(uuid: String): Location

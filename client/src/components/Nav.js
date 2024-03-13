@@ -269,6 +269,13 @@ const Navigation = ({ allOrganizations, resetPages, clearSearchQuery }) => {
             </SidebarLink>
           )}
           <SidebarLink
+            id="my-attachments-nav"
+            linkTo={{ pathname: "/attachments/mine" }}
+            handleOnClick={resetPages}
+          >
+            My Attachments
+          </SidebarLink>
+          <SidebarLink
             linkTo={{ pathname: "/subscriptions/mine" }}
             handleOnClick={resetPages}
             id="my-subscriptions"

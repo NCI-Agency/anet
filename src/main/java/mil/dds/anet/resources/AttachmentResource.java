@@ -15,13 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -31,6 +25,8 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Attachment;
 import mil.dds.anet.beans.GenericRelatedObject;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.lists.AnetBeanList;
+import mil.dds.anet.beans.search.AttachmentSearchQuery;
 import mil.dds.anet.database.AttachmentDao;
 import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.database.OrganizationDao;
@@ -63,6 +59,12 @@ public class AttachmentResource {
       @GraphQLArgument(name = "uuid") String uuid) {
     assertAttachmentEnabled();
     return getAttachment(uuid);
+  }
+
+  @GraphQLQuery(name = "myAttachments")
+  public AnetBeanList<Attachment> getMyAttachments(@GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "query") AttachmentSearchQuery query) {
+    return dao.search(DaoUtils.getUserFromContext(context), query);
   }
 
   @GraphQLMutation(name = "createAttachment")
