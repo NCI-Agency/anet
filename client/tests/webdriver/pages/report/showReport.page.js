@@ -11,7 +11,7 @@ class ShowReport extends Page {
   REPORT_IS_APPROVED = "This report is APPROVED."
 
   async getClassification() {
-    return browser.$("#classification")
+    return browser.$("#report-classification")
   }
 
   async getEditReportButton() {

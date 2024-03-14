@@ -446,7 +446,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
               <div
                 style={{ width: "100%", fontSize: "18px", textAlign: "center" }}
               >
-                <span style={{ fontWeight: "bold" }}>
+                <span style={{ fontWeight: "bold" }} id="report-classification">
                   {Settings.classification.choices[report.classification]}
                 </span>
               </div>
