@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 import mil.dds.anet.test.client.Person;
 import mil.dds.anet.test.client.Query;
-import mil.dds.anet.test.integration.utils.TestApp;
+import mil.dds.anet.utils.Utils;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -94,22 +94,22 @@ class GraphQlResourceTest extends AbstractResourceTest {
 
           // Test POST request
           final Map<String, Object> respPost =
-              httpQuery("/graphql", admin).post(Entity.json(query), new GenericType<>() {});
+              httpQuery(null, admin).post(Entity.json(query), new GenericType<>() {});
           doAsserts(f, respPost);
 
           // Test GET request
-          final Map<String, Object> respGet = httpQuery(
-              "/graphql?query=" + URLEncoder.encode("{" + raw + "}", StandardCharsets.UTF_8), admin)
-              .get(new GenericType<>() {});
+          final Map<String, Object> respGet =
+              httpQuery("query=" + URLEncoder.encode("{" + raw + "}", StandardCharsets.UTF_8),
+                  admin).get(new GenericType<>() {});
           doAsserts(f, respGet);
 
           // POST and GET responses should be equal
           assertThat(respPost.get("data")).isEqualTo(respGet.get("data"));
 
           // Test GET request over XML
-          final String respGetXml = httpQuery("/graphql?output=xml&query="
-              + URLEncoder.encode("{" + raw + "}", StandardCharsets.UTF_8), admin)
-              .get(new GenericType<>() {});
+          final String respGetXml = httpQuery(
+              "output=xml&query=" + URLEncoder.encode("{" + raw + "}", StandardCharsets.UTF_8),
+              admin).get(new GenericType<>() {});
           assertThat(respGetXml).isNotNull();
           int len = respGetXml.length();
           assertThat(len).isPositive();
@@ -121,23 +121,23 @@ class GraphQlResourceTest extends AbstractResourceTest {
           // Test POST request over XML
           query.put("output", "xml");
           final String respPostXml =
-              httpQuery("/graphql", admin).post(Entity.json(query), new GenericType<>() {});
+              httpQuery(null, admin).post(Entity.json(query), new GenericType<>() {});
 
           // POST and GET responses over XML should be equal
           assertThat(respPostXml).isEqualTo(respGetXml);
 
           // Test GET request over XLSX
           // Note: getting the resulting XLSX as String is a quick & easy hack
-          final String respGetXlsx = httpQuery("/graphql?output=xlsx&query="
-              + URLEncoder.encode("{" + raw + "}", StandardCharsets.UTF_8), admin)
-              .get(new GenericType<>() {});
+          final String respGetXlsx = httpQuery(
+              "output=xlsx&query=" + URLEncoder.encode("{" + raw + "}", StandardCharsets.UTF_8),
+              admin).get(new GenericType<>() {});
           assertThat(respGetXlsx).isNotNull();
           assertThat(respGetXlsx).isNotEmpty();
 
           // Test POST request over XLSX
           query.put("output", "xlsx");
           final String respPostXlsx =
-              httpQuery("/graphql", admin).post(Entity.json(query), new GenericType<>() {});
+              httpQuery(null, admin).post(Entity.json(query), new GenericType<>() {});
           assertThat(respPostXlsx).isNotNull();
           assertThat(respPostXlsx).isNotEmpty();
           // Note: can't compare respGetXlsx and respPostXlsx directly, as they will be different,
@@ -160,11 +160,16 @@ class GraphQlResourceTest extends AbstractResourceTest {
   /*
    * Helper method to build httpQuery with authentication and Accept headers.
    */
-  private Builder httpQuery(String path, Person authUser) {
+  private Builder httpQuery(String query, Person authUser) {
     final String authString = Base64.getEncoder().encodeToString(
         (authUser.getDomainUsername() + ":" + authUser.getDomainUsername()).getBytes());
-    return client.target(String.format("http://localhost:%d%s", TestApp.app.getLocalPort(), path))
-        .request().header("Authorization", "Basic " + authString)
+    final StringBuilder url = new StringBuilder(graphqlEndpoint);
+    if (!Utils.isEmptyOrNull(query)) {
+      url.append("?");
+      url.append(query);
+    }
+    return testClient.target(url.toString()).request()
+        .header("Authorization", "Basic " + authString)
         .header("Accept", MediaType.APPLICATION_JSON_TYPE.toString());
   }
 

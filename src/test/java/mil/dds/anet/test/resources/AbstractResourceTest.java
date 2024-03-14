@@ -7,15 +7,10 @@ import static org.assertj.core.api.Assertions.fail;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.dropwizard.client.JerseyClientBuilder;
-import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.testing.junit5.DropwizardAppExtension;
-import io.dropwizard.util.Duration;
 import jakarta.ws.rs.client.Client;
 import java.lang.invoke.MethodHandles;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import mil.dds.anet.AnetObjectEngine;
@@ -49,13 +44,9 @@ import mil.dds.anet.test.client.Task;
 import mil.dds.anet.test.client.TaskInput;
 import mil.dds.anet.test.client.util.MutationExecutor;
 import mil.dds.anet.test.client.util.QueryExecutor;
-import mil.dds.anet.test.integration.utils.TestApp;
-import mil.dds.anet.utils.BatchingUtils;
 import mil.dds.anet.utils.DaoUtils;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -63,7 +54,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-@ExtendWith(TestApp.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public abstract class AbstractResourceTest {
 
@@ -78,26 +68,25 @@ public abstract class AbstractResourceTest {
   @Autowired
   protected GraphQLPluginConfiguration.AuthenticationInjector authenticationInjector;
 
+  @Autowired
+  protected DropwizardAppExtension<AnetConfiguration> dropwizardApp;
+
+  @Autowired
+  protected Client testClient;
+
+  @Autowired
+  protected String graphqlEndpoint;
+
   protected static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  private static final JerseyClientConfiguration config = new JerseyClientConfiguration();
   private static final ObjectMapper ignoringMapper = MapperUtils.getDefaultMapper()
       .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-  static {
-    config.setTimeout(Duration.seconds(60L));
-    config.setConnectionTimeout(Duration.seconds(30L));
-    config.setConnectionRequestTimeout(Duration.seconds(30L));
-  }
 
   protected static final String adminUser = "arthur";
   protected static final String jackUser = "jack";
 
-  protected static Client client;
-  protected static Person admin;
-  protected static Map<String, Object> context;
-  private static BatchingUtils batchingUtils;
+  protected Person admin;
 
   private static final String PERSON_FIELDS =
       "{ uuid name domainUsername openIdSubject user emailAddress rank status phoneNumber biography"
@@ -110,12 +99,7 @@ public abstract class AbstractResourceTest {
       // Update full-text index
       refreshMaterializedViews();
     }
-    final DropwizardAppExtension<AnetConfiguration> app = TestApp.app;
-    client = new JerseyClientBuilder(app.getEnvironment()).using(config).build("test client");
     admin = findOrPutPersonInDb(Person.builder().withDomainUsername(adminUser).build());
-    context = new HashMap<>();
-    batchingUtils = new BatchingUtils(AnetObjectEngine.getInstance(), false, false);
-    context.put("dataLoaderRegistry", batchingUtils.getDataLoaderRegistry());
   }
 
   private static void refreshMaterializedViews() {
@@ -130,12 +114,6 @@ public abstract class AbstractResourceTest {
         fail("Exception in refreshMaterializedViews()", e);
       }
     }
-  }
-
-  @AfterAll
-  public void tearDown() {
-    client.close();
-    batchingUtils.shutdown();
   }
 
   /*

@@ -10,15 +10,16 @@ import java.util.List;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.database.PersonDao;
-import mil.dds.anet.test.integration.utils.TestApp;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.TestInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.test.context.SpringBootTest;
 
-@ExtendWith(TestApp.class)
-public class PersonDaoTest {
+@SpringBootTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+class PersonDaoTest {
 
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -119,15 +120,15 @@ public class PersonDaoTest {
       // end
   };
 
-  private static PersonDao personDao;
+  private PersonDao personDao;
 
   @BeforeAll
-  public static void setUpClass() throws Exception {
+  public void setUpClass() {
     personDao = AnetObjectEngine.getInstance().getPersonDao();
   }
 
   @Test
-  public void hasHistoryConflictForPersonTest() {
+  void hasHistoryConflictForPersonTest() {
     // History tests for Dvisor and Dvisor's own position
     checkHistoryConflict(DVISOR_UUID, null, EF22_ASF_UUID, true, testData1);
     // History tests for Selena and Dvisor's position
@@ -135,7 +136,7 @@ public class PersonDaoTest {
   }
 
   @Test
-  public void hasHistoryConflictForPositionTest() {
+  void hasHistoryConflictForPositionTest() {
     // History tests for Dvisor's own position and Dvisor
     checkHistoryConflict(DVISOR_UUID, null, EF22_ASF_UUID, false, testData1);
     // History tests for Selena's position and Dvisor:
@@ -143,7 +144,7 @@ public class PersonDaoTest {
   }
 
   @Test
-  public void hasHistoryConflictForMergingPersonTest() {
+  void hasHistoryConflictForMergingPersonTest() {
     // History tests for merging positions if DVISOR_UUID is winner
     checkHistoryConflict(DVISOR_UUID, STEVESON_STEVE, EF22_ASF_UUID, true, testData1);
     // History tests for merging positions if DVISOR_UUID is winner
@@ -151,7 +152,7 @@ public class PersonDaoTest {
   }
 
   @Test
-  public void hasHistoryConflictForMergingPositionTest() {
+  void hasHistoryConflictForMergingPositionTest() {
     // History tests for merging positions if EF22_ASF_UUID is winner
     checkHistoryConflict(DVISOR_UUID, EF11_G_UUID, EF22_ASF_UUID, false, testData1);
     // History tests for merging positions if EF12_A_UUID is winner

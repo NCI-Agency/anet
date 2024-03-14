@@ -25,7 +25,6 @@ import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.test.integration.config.AnetTestConfiguration;
 import mil.dds.anet.test.integration.utils.EmailResponse;
 import mil.dds.anet.test.integration.utils.FakeSmtpServer;
-import mil.dds.anet.test.integration.utils.TestApp;
 import mil.dds.anet.test.integration.utils.TestBeans;
 import mil.dds.anet.test.resources.AbstractResourceTest;
 import mil.dds.anet.threads.AnetEmailWorker;
@@ -33,25 +32,31 @@ import mil.dds.anet.threads.ReportPublicationWorker;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.TestInstance;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
-@ExtendWith(TestApp.class)
-public class ReportPublicationWorkerTest {
-  private final static List<String> expectedIds = new ArrayList<>();
-  private final static List<String> unexpectedIds = new ArrayList<>();
+@SpringBootTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+class ReportPublicationWorkerTest {
 
-  private static ReportPublicationWorker reportPublicationWorker;
-  private static FakeSmtpServer emailServer;
-  private static AnetEmailWorker emailWorker;
+  @Autowired
+  protected DropwizardAppExtension<AnetConfiguration> dropwizardApp;
 
-  private static boolean executeEmailServerTests;
-  private static String allowedEmail;
+  private final List<String> expectedIds = new ArrayList<>();
+  private final List<String> unexpectedIds = new ArrayList<>();
+
+  private ReportPublicationWorker reportPublicationWorker;
+  private FakeSmtpServer emailServer;
+  private AnetEmailWorker emailWorker;
+
+  private boolean executeEmailServerTests;
+  private String allowedEmail;
 
   @BeforeAll
   @SuppressWarnings("unchecked")
-  public static void setUpClass() throws Exception {
-    final DropwizardAppExtension<AnetConfiguration> app = TestApp.app;
-    final AnetConfiguration configuration = app.getConfiguration();
+  public void setUpClass() throws Exception {
+    final AnetConfiguration configuration = dropwizardApp.getConfiguration();
     final Map<String, Object> dictionary = new HashMap<>(configuration.getDictionary());
     final Map<String, Object> reportWorkflowSettings =
         (Map<String, Object>) dictionary.get("reportWorkflow");
@@ -82,7 +87,7 @@ public class ReportPublicationWorkerTest {
   }
 
   @AfterAll
-  public static void tearDownClass() throws Exception {
+  public void tearDownClass() throws Exception {
     // Test that all emails have been correctly sent
     testReportPublicationWorkerEmail();
 
@@ -94,12 +99,12 @@ public class ReportPublicationWorkerTest {
   }
 
   @Test
-  public void testNoReports() {
+  void testNoReports() {
     testReportPublicationWorker(0);
   }
 
   @Test
-  public void testApprovalStepReport() {
+  void testApprovalStepReport() {
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final Report report = createTestReport("testApprovalStepReport_1");
     final ApprovalStep step = report.getApprovalStep();
@@ -125,7 +130,7 @@ public class ReportPublicationWorkerTest {
   }
 
   @Test
-  public void testPlanningApprovalStepReport() {
+  void testPlanningApprovalStepReport() {
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final Report report = createTestReport("testPlanningApprovalStepReport_1");
     final ApprovalStep step = report.getApprovalStep();
@@ -151,7 +156,7 @@ public class ReportPublicationWorkerTest {
   }
 
   @Test
-  public void testAutomaticallyApprovedReport() {
+  void testAutomaticallyApprovedReport() {
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final Report report = createTestReport("testAutomaticallyApprovedReport_1");
     report.setApprovalStep(null);
@@ -189,23 +194,23 @@ public class ReportPublicationWorkerTest {
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final int emailSize = engine.getEmailDao().getAll().size();
     reportPublicationWorker.run();
-    assertThat(engine.getEmailDao().getAll().size()).isEqualTo(emailSize + expectedCount);
+    assertThat(engine.getEmailDao().getAll()).hasSize(emailSize + expectedCount);
   }
 
   // Email integration
-  private static void testReportPublicationWorkerEmail() throws IOException, InterruptedException {
+  private void testReportPublicationWorkerEmail() throws IOException, InterruptedException {
     assumeTrue(executeEmailServerTests, "Email server tests configured to be skipped.");
 
     // Make sure all messages have been (asynchronously) sent
     emailWorker.run();
 
     final List<EmailResponse> emails = emailServer.requestAllEmailsFromServer();
-    assertThat(emails.size()).isEqualTo(expectedIds.size());
+    assertThat(emails).hasSameSizeAs(expectedIds);
     emails.forEach(e -> assertThat(expectedIds).contains(e.to.text.split("@")[0]));
     emails.forEach(e -> assertThat(unexpectedIds).doesNotContain(e.to.text.split("@")[0]));
   }
 
-  private static Report createTestReport(final String toAddressId) {
+  private Report createTestReport(final String toAddressId) {
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final ReportPerson author =
         AbstractResourceTest.personToReportAuthor(TestBeans.getTestPerson());

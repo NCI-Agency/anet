@@ -1,6 +1,14 @@
 package mil.dds.anet.test;
 
+import io.dropwizard.client.JerseyClientBuilder;
+import io.dropwizard.client.JerseyClientConfiguration;
+import io.dropwizard.testing.ConfigOverride;
+import io.dropwizard.testing.junit5.DropwizardAppExtension;
+import io.dropwizard.util.Duration;
+import jakarta.ws.rs.client.Client;
 import java.util.Map;
+import mil.dds.anet.AnetApplication;
+import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -13,8 +21,9 @@ import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.WebClient;
 
 /**
- * This Spring {@link Configuration} class overrides the default Spring Bean 'webClient' for this
- * GraphQL schema.
+ * Override the default Spring beans 'graphqlEndpoint' and 'webClient' as configured by
+ * {@link mil.dds.anet.test.client.spring_autoconfiguration.GraphQLPluginAutoConfiguration}, with
+ * specific settings for our GraphQL schema, and also initialize some other useful Spring beans.
  */
 @Configuration
 public class GraphQLPluginConfiguration {
@@ -47,11 +56,32 @@ public class GraphQLPluginConfiguration {
     return new AuthenticationInjector();
   }
 
+  @Bean
+  DropwizardAppExtension<AnetConfiguration> dropwizardApp() throws Exception {
+    final DropwizardAppExtension<AnetConfiguration> app = new DropwizardAppExtension<>(
+        AnetApplication.class, "anet.yml", ConfigOverride.config("testMode", "true"));
+    app.before();
+    return app;
+  }
+
+  @Bean
+  Client testClient(DropwizardAppExtension<?> app) {
+    final JerseyClientConfiguration config = new JerseyClientConfiguration();
+    config.setTimeout(Duration.seconds(60L));
+    config.setConnectionTimeout(Duration.seconds(30L));
+    config.setConnectionRequestTimeout(Duration.seconds(30L));
+    return new JerseyClientBuilder(app.getEnvironment()).using(config).build("test client");
+  }
+
   @Primary
   @Bean
-  public WebClient webClient(
-      @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection") String graphqlEndpoint,
-      AuthenticationInjector authenticationInjector) {
+  String graphqlEndpoint(DropwizardAppExtension<?> dropwizardApp) {
+    return String.format("http://localhost:%1$d/graphql", dropwizardApp.getLocalPort());
+  }
+
+  @Primary
+  @Bean
+  WebClient webClient(String graphqlEndpoint, AuthenticationInjector authenticationInjector) {
     return WebClient.builder().baseUrl(graphqlEndpoint)
         .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
         .defaultUriVariables(Map.of("url", graphqlEndpoint))

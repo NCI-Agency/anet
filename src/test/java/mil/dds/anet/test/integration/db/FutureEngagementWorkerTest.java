@@ -27,7 +27,6 @@ import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.test.integration.config.AnetTestConfiguration;
 import mil.dds.anet.test.integration.utils.EmailResponse;
 import mil.dds.anet.test.integration.utils.FakeSmtpServer;
-import mil.dds.anet.test.integration.utils.TestApp;
 import mil.dds.anet.test.integration.utils.TestBeans;
 import mil.dds.anet.test.resources.AbstractResourceTest;
 import mil.dds.anet.threads.AnetEmailWorker;
@@ -35,26 +34,31 @@ import mil.dds.anet.threads.FutureEngagementWorker;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.TestInstance;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
-@ExtendWith(TestApp.class)
-public class FutureEngagementWorkerTest extends AbstractResourceTest {
+@SpringBootTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+class FutureEngagementWorkerTest extends AbstractResourceTest {
 
-  private final static List<String> expectedIds = new ArrayList<>();
-  private final static List<String> unexpectedIds = new ArrayList<>();
+  @Autowired
+  protected DropwizardAppExtension<AnetConfiguration> dropwizardApp;
 
-  private static FutureEngagementWorker futureEngagementWorker;
-  private static FakeSmtpServer emailServer;
-  private static AnetEmailWorker emailWorker;
+  private final List<String> expectedIds = new ArrayList<>();
+  private final List<String> unexpectedIds = new ArrayList<>();
 
-  private static boolean executeEmailServerTests;
-  private static String allowedEmail;
+  private FutureEngagementWorker futureEngagementWorker;
+  private FakeSmtpServer emailServer;
+  private AnetEmailWorker emailWorker;
+
+  private boolean executeEmailServerTests;
+  private String allowedEmail;
 
   @BeforeAll
   @SuppressWarnings("unchecked")
-  public static void setUpClass() throws Exception {
-    final DropwizardAppExtension<AnetConfiguration> app = TestApp.app;
-    if (app.getConfiguration().getSmtp().isDisabled()) {
+  public void setUpClass() throws Exception {
+    if (dropwizardApp.getConfiguration().getSmtp().isDisabled()) {
       fail("'ANET_SMTP_DISABLE' system environment variable must have value 'false' to run test.");
     }
 
@@ -62,13 +66,14 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
         AnetTestConfiguration.getConfiguration().get("emailServerTestsExecute").toString());
 
     allowedEmail =
-        "@" + ((List<String>) app.getConfiguration().getDictionaryEntry("domainNames")).get(0);
+        "@" + ((List<String>) dropwizardApp.getConfiguration().getDictionaryEntry("domainNames"))
+            .get(0);
 
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
-    emailWorker = new AnetEmailWorker(app.getConfiguration(), engine.getEmailDao());
+    emailWorker = new AnetEmailWorker(dropwizardApp.getConfiguration(), engine.getEmailDao());
     futureEngagementWorker =
-        new FutureEngagementWorker(app.getConfiguration(), engine.getReportDao());
-    emailServer = new FakeSmtpServer(app.getConfiguration().getSmtp());
+        new FutureEngagementWorker(dropwizardApp.getConfiguration(), engine.getReportDao());
+    emailServer = new FakeSmtpServer(dropwizardApp.getConfiguration().getSmtp());
 
     // Flush all reports from previous tests
     futureEngagementWorker.run();
@@ -79,7 +84,7 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
   }
 
   @AfterAll
-  public static void tearDownClass() throws Exception {
+  public void tearDownClass() throws Exception {
     // Test that all emails have been correctly sent
     testFutureEngagementWorkerEmail();
 
@@ -331,7 +336,7 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
   }
 
   // Email integration
-  private static void testFutureEngagementWorkerEmail() throws IOException, InterruptedException {
+  private void testFutureEngagementWorkerEmail() throws IOException, InterruptedException {
     assumeTrue(executeEmailServerTests, "Email server tests configured to be skipped.");
 
     // Make sure all messages have been (asynchronously) sent

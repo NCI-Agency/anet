@@ -38,7 +38,6 @@ import mil.dds.anet.test.client.Task;
 import mil.dds.anet.test.client.TaskInput;
 import mil.dds.anet.test.integration.utils.EmailResponse;
 import mil.dds.anet.test.integration.utils.FakeSmtpServer;
-import mil.dds.anet.test.integration.utils.TestApp;
 import mil.dds.anet.threads.AnetEmailWorker;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -90,8 +89,8 @@ public class TaskApprovalTest extends AbstractResourceTest {
   private static List<Organization> savedOrganizations;
 
   @BeforeAll
-  public static void setUpEmailServer() throws Exception {
-    final AnetConfiguration config = TestApp.app.getConfiguration();
+  public void setUpEmailServer() throws Exception {
+    final AnetConfiguration config = dropwizardApp.getConfiguration();
     if (config.getSmtp().isDisabled()) {
       fail("'ANET_SMTP_DISABLE' system environment variable must have value 'false' to run test.");
     }

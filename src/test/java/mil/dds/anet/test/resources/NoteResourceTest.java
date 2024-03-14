@@ -36,7 +36,6 @@ import mil.dds.anet.test.client.Status;
 import mil.dds.anet.test.client.Task;
 import mil.dds.anet.test.client.TaskInput;
 import mil.dds.anet.test.client.TaskSearchQueryInput;
-import mil.dds.anet.test.integration.utils.TestApp;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.mapper.MapMapper;
 import org.jdbi.v3.core.statement.Query;
@@ -74,8 +73,8 @@ public class NoteResourceTest extends AbstractResourceTest {
   private static NoteCounterDao noteCounterDao;
 
   @BeforeAll
-  public static void setUpDao() {
-    final Injector injector = InjectorLookup.getInjector(TestApp.app.getApplication()).get();
+  public void setUpDao() {
+    final Injector injector = InjectorLookup.getInjector(dropwizardApp.getApplication()).get();
     noteCounterDao = injector.getInstance(NoteCounterDao.class);
   }
 
