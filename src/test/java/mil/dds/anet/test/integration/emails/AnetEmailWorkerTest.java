@@ -38,7 +38,7 @@ class AnetEmailWorkerTest {
 
   @BeforeAll
   @SuppressWarnings("unchecked")
-  public void setUp() throws Exception {
+  void setUp() throws Exception {
     final boolean executeEmailServerTests = Boolean.parseBoolean(
         AnetTestConfiguration.getConfiguration().get("emailServerTestsExecute").toString());
 
@@ -59,7 +59,7 @@ class AnetEmailWorkerTest {
   }
 
   @AfterAll
-  public void tearDown() throws Exception {
+  void tearDown() throws Exception {
     // Clear the email server after test
     emailServer.clearEmailServer();
 

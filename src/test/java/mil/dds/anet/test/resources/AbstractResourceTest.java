@@ -94,7 +94,7 @@ public abstract class AbstractResourceTest {
           + " organization { uuid shortName parentOrg { uuid shortName } } } }";
 
   @BeforeAll
-  public void setUp() {
+  void setUp() {
     if (DaoUtils.isPostgresql()) {
       // Update full-text index
       refreshMaterializedViews();

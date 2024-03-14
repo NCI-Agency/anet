@@ -123,7 +123,7 @@ class PersonDaoTest {
   private PersonDao personDao;
 
   @BeforeAll
-  public void setUpClass() {
+  void setUpClass() {
     personDao = AnetObjectEngine.getInstance().getPersonDao();
   }
 

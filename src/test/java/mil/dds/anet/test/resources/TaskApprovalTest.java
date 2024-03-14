@@ -89,7 +89,7 @@ public class TaskApprovalTest extends AbstractResourceTest {
   private static List<Organization> savedOrganizations;
 
   @BeforeAll
-  public void setUpEmailServer() throws Exception {
+  void setUpEmailServer() throws Exception {
     final AnetConfiguration config = dropwizardApp.getConfiguration();
     if (config.getSmtp().isDisabled()) {
       fail("'ANET_SMTP_DISABLE' system environment variable must have value 'false' to run test.");
@@ -105,13 +105,13 @@ public class TaskApprovalTest extends AbstractResourceTest {
 
   @BeforeEach
   @AfterEach
-  public void clearEmailServer() {
+  void clearEmailServer() {
     // Clear the email server before and after each test
     clearEmailsOnServer();
   }
 
   @BeforeAll
-  public void saveTaskApprovalSteps() {
+  void saveTaskApprovalSteps() {
     final Task task = getTaskFromDb(TEST_TASK_UUID);
     savedPlanningApprovalSteps = Lists.newArrayList(task.getPlanningApprovalSteps());
     savedPlanningApprovalSteps.stream().findFirst()
@@ -122,7 +122,7 @@ public class TaskApprovalTest extends AbstractResourceTest {
   }
 
   @AfterAll
-  public void restoreTaskApprovalSteps() {
+  void restoreTaskApprovalSteps() {
     final TaskInput taskInput = getTaskInput(getTaskFromDb(TEST_TASK_UUID));
     final List<ApprovalStepInput> pasInput = getApprovalStepsInput(savedPlanningApprovalSteps);
     pasInput.stream().findFirst()

@@ -53,7 +53,7 @@ class PendingAssessmentsNotificationWorkerTest {
   private boolean executeEmailServerTests;
 
   @BeforeAll
-  public void setUpClass() throws Exception {
+  void setUpClass() throws Exception {
     if (dropwizardApp.getConfiguration().getSmtp().isDisabled()) {
       fail("'ANET_SMTP_DISABLE' system environment variable must have value 'false' to run test.");
     }
@@ -74,7 +74,7 @@ class PendingAssessmentsNotificationWorkerTest {
   }
 
   @AfterAll
-  public void tearDownClass() throws Exception {
+  void tearDownClass() throws Exception {
     // Clear the email server after testing
     flushEmail();
 

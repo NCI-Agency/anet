@@ -57,7 +57,7 @@ class FutureEngagementWorkerTest extends AbstractResourceTest {
 
   @BeforeAll
   @SuppressWarnings("unchecked")
-  public void setUpClass() throws Exception {
+  void setUpClass() throws Exception {
     if (dropwizardApp.getConfiguration().getSmtp().isDisabled()) {
       fail("'ANET_SMTP_DISABLE' system environment variable must have value 'false' to run test.");
     }
@@ -84,7 +84,7 @@ class FutureEngagementWorkerTest extends AbstractResourceTest {
   }
 
   @AfterAll
-  public void tearDownClass() throws Exception {
+  void tearDownClass() throws Exception {
     // Test that all emails have been correctly sent
     testFutureEngagementWorkerEmail();
 

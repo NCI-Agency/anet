@@ -55,7 +55,7 @@ class ReportPublicationWorkerTest {
 
   @BeforeAll
   @SuppressWarnings("unchecked")
-  public void setUpClass() throws Exception {
+  void setUpClass() throws Exception {
     final AnetConfiguration configuration = dropwizardApp.getConfiguration();
     final Map<String, Object> dictionary = new HashMap<>(configuration.getDictionary());
     final Map<String, Object> reportWorkflowSettings =
@@ -87,7 +87,7 @@ class ReportPublicationWorkerTest {
   }
 
   @AfterAll
-  public void tearDownClass() throws Exception {
+  void tearDownClass() throws Exception {
     // Test that all emails have been correctly sent
     testReportPublicationWorkerEmail();
 

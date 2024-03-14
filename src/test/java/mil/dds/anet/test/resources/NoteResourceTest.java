@@ -73,7 +73,7 @@ public class NoteResourceTest extends AbstractResourceTest {
   private static NoteCounterDao noteCounterDao;
 
   @BeforeAll
-  public void setUpDao() {
+  void setUpDao() {
     final Injector injector = InjectorLookup.getInjector(dropwizardApp.getApplication()).get();
     noteCounterDao = injector.getInstance(NoteCounterDao.class);
   }

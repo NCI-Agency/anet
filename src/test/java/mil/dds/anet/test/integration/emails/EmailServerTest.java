@@ -30,7 +30,7 @@ class EmailServerTest {
   private FakeSmtpServer emailServer;
 
   @BeforeEach
-  public void setup() throws Exception {
+  void setup() throws Exception {
     final boolean executeEmailServerTests = Boolean.parseBoolean(
         AnetTestConfiguration.getConfiguration().get("emailServerTestsExecute").toString());
 
@@ -44,7 +44,7 @@ class EmailServerTest {
   }
 
   @AfterEach
-  public void tearDown() throws Exception {
+  void tearDown() throws Exception {
     // Clear the email server after test
     emailServer.clearEmailServer();
   }
