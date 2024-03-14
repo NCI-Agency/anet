@@ -15,7 +15,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -61,10 +67,11 @@ public class AttachmentResource {
     return getAttachment(uuid);
   }
 
-  @GraphQLQuery(name = "myAttachments")
-  public AnetBeanList<Attachment> getMyAttachments(@GraphQLRootContext Map<String, Object> context,
+  @GraphQLQuery(name = "attachmentList")
+  public AnetBeanList<Attachment> search(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "query") AttachmentSearchQuery query) {
-    return dao.search(DaoUtils.getUserFromContext(context), query);
+    query.setUser(DaoUtils.getUserFromContext(context));
+    return dao.search(query);
   }
 
   @GraphQLMutation(name = "createAttachment")

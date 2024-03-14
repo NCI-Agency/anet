@@ -3,8 +3,8 @@ import Page from "./page"
 const PAGE_URL = "/attachments/mine"
 
 class MyAttachments extends Page {
-  async open(credentials) {
-    await super.open(PAGE_URL, credentials)
+  async openAsAdminUser() {
+    await super.openAsAdminUser(PAGE_URL)
   }
 
   async getMyAttachments() {

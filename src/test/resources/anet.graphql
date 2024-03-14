@@ -222,21 +222,6 @@ input AttachmentInput {
 }
 
 """"""
-type AttachmentRelatedObject {
-  attachmentUuid: String
-  relatedObject: RelatableObject
-  relatedObjectType: String
-  relatedObjectUuid: String
-}
-
-""""""
-input AttachmentRelatedObjectInput {
-  attachmentUuid: String
-  relatedObjectType: String
-  relatedObjectUuid: String
-}
-
-""""""
 input AttachmentSearchQueryInput {
   authorUuid: String
   inMyReports: Boolean
@@ -797,7 +782,7 @@ type Query {
   advisorReportInsights(orgUuid: String = "-1", weeksAgo: Int = 3): [AdvisorReportsEntry]
   approvalStepInUse(uuid: String): Boolean!
   attachment(uuid: String): Attachment
-  myAttachments(query: AttachmentSearchQueryInput): AnetBeanList_Attachment
+  attachmentList(query: AttachmentSearchQueryInput): AnetBeanList_Attachment
   authorizationGroup(uuid: String): AuthorizationGroup
   authorizationGroupList(query: AuthorizationGroupSearchQueryInput): AnetBeanList_AuthorizationGroup
   location(uuid: String): Location

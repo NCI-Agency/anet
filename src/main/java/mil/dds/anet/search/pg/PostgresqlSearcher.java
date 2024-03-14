@@ -1,7 +1,18 @@
 package mil.dds.anet.search.pg;
 
 import com.google.inject.Injector;
-import mil.dds.anet.search.*;
+import mil.dds.anet.search.IAttachmentSearcher;
+import mil.dds.anet.search.IAuthorizationGroupSearcher;
+import mil.dds.anet.search.ILocationSearcher;
+import mil.dds.anet.search.IOrganizationSearcher;
+import mil.dds.anet.search.IPersonSearcher;
+import mil.dds.anet.search.IPositionSearcher;
+import mil.dds.anet.search.IReportSearcher;
+import mil.dds.anet.search.ISubscriptionSearcher;
+import mil.dds.anet.search.ISubscriptionUpdateSearcher;
+import mil.dds.anet.search.ITaskSearcher;
+import mil.dds.anet.search.IUserActivitySearcher;
+import mil.dds.anet.search.Searcher;
 
 public class PostgresqlSearcher extends Searcher {
 

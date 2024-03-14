@@ -13,7 +13,20 @@ import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.resources.AttachmentResource;
-import mil.dds.anet.test.client.*;
+import mil.dds.anet.test.client.AnetBeanList_Attachment;
+import mil.dds.anet.test.client.Attachment;
+import mil.dds.anet.test.client.AttachmentInput;
+import mil.dds.anet.test.client.AttachmentSearchQueryInput;
+import mil.dds.anet.test.client.GenericRelatedObjectInput;
+import mil.dds.anet.test.client.Location;
+import mil.dds.anet.test.client.LocationInput;
+import mil.dds.anet.test.client.LocationType;
+import mil.dds.anet.test.client.Organization;
+import mil.dds.anet.test.client.Person;
+import mil.dds.anet.test.client.Report;
+import mil.dds.anet.test.client.ReportInput;
+import mil.dds.anet.test.client.ReportState;
+import mil.dds.anet.test.client.Status;
 import mil.dds.anet.test.client.util.MutationExecutor;
 import mil.dds.anet.test.client.util.QueryExecutor;
 import org.junit.jupiter.api.Test;
@@ -673,11 +686,10 @@ public class AttachmentResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void myAttachments()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-
+  public void myAttachments() {
     Person jack = getJackJackson();
-    final AnetBeanList_Attachment jackAttachments = getAttachments(jackQueryExecutor);
+    final AnetBeanList_Attachment jackAttachments =
+        getAttachments(jackQueryExecutor, jack.getUuid());
 
     assertThat(jackAttachments.getList()).isNotEmpty();
     assertThat(jackAttachments.getList().stream()
@@ -685,11 +697,12 @@ public class AttachmentResourceTest extends AbstractResourceTest {
         .hasSameElementsAs(jackAttachments.getList());
   }
 
-  protected static AnetBeanList_Attachment getAttachments(final QueryExecutor queryExecutor) {
+  protected static AnetBeanList_Attachment getAttachments(final QueryExecutor queryExecutor,
+      final String authorUuid) {
     try {
       final AttachmentSearchQueryInput ssqi =
-          AttachmentSearchQueryInput.builder().withPageSize(0).build();
-      return queryExecutor.myAttachments(getListFields(ATTACHMENT_FIELDS), ssqi);
+          AttachmentSearchQueryInput.builder().withPageSize(0).withAuthorUuid(authorUuid).build();
+      return queryExecutor.attachmentList(getListFields(ATTACHMENT_FIELDS), ssqi);
     } catch (GraphQLRequestExecutionException | GraphQLRequestPreparationException e) {
       throw new RuntimeException(e);
     }

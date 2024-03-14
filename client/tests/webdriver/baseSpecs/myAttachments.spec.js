@@ -16,22 +16,16 @@ describe("Home page", () => {
 })
 
 describe("My Attachments page", () => {
-  beforeEach("Open the my attachments page", async() => {
-    await MyAttachments.open("arthur")
-  })
-
-  afterEach("On the my attachments page...", async() => {
-    await MyAttachments.logout()
-  })
-
   describe("When checking the content of the page", () => {
-    it("Should see a table of the user attachments", async() => {
+    it("Should see a table of arthur's attachments", async() => {
+      await MyAttachments.openAsAdminUser()
       await (await MyAttachments.getMyAttachments()).waitForDisplayed()
       const myAttachments = await (
         await MyAttachments.getMyAttachments()
-      ).$$("tr")
-      // table has a header and 5 attachment rows
-      expect(myAttachments).to.have.length(5)
+      ).$$("table.attachments_table > tbody > tr")
+      // table has a header and 4 attachment rows
+      expect(myAttachments).to.have.length(4)
+      await MyAttachments.logout()
     })
   })
 })

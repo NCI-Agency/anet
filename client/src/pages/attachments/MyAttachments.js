@@ -1,5 +1,8 @@
 import { gql } from "@apollo/client"
 import API from "api"
+import AppContext from "components/AppContext"
+import AttachmentImage from "components/Attachment/AttachmentImage"
+import AttachmentRelatedObjectsTable from "components/Attachment/AttachmentRelatedObjectsTable"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import {
@@ -9,26 +12,20 @@ import {
   usePageTitle
 } from "components/Page"
 import UltimatePagination from "components/UltimatePagination"
-import PropTypes from "prop-types"
-import React, { useEffect, useState } from "react"
+import { Attachment } from "models"
+import React, { useContext, useState } from "react"
 import { Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import utils from "utils"
 
-const GQL_GET_MY_ATTACHMENTS = gql`
-  query ($attachmentsQuery: AttachmentSearchQueryInput) {
-    myAttachments(query: $attachmentsQuery) {
+const GQL_GET_ATTACHMENT_LIST = gql`
+  query ($attachmentQuery: AttachmentSearchQueryInput) {
+    attachmentList(query: $attachmentQuery) {
       totalCount
       pageNum
       pageSize
       list {
-        uuid
-        fileName
-        caption
-        contentLength
-        mimeType
-        classification
-        description
+        ${Attachment.basicFieldsQuery}
         author {
           uuid
           name
@@ -45,6 +42,8 @@ const GQL_GET_MY_ATTACHMENTS = gql`
             }
             ... on Organization {
               shortName
+              longName
+              identificationCode
             }
             ... on Person {
               name
@@ -60,6 +59,7 @@ const GQL_GET_MY_ATTACHMENTS = gql`
             }
             ... on Task {
               shortName
+              longName
             }
           }
           relatedObjectUuid
@@ -70,29 +70,17 @@ const GQL_GET_MY_ATTACHMENTS = gql`
   }
 `
 
-const MyAttachments = ({
-  forceRefetch,
-  setForceRefetch,
-  refetchCallback,
-  pageDispatchers
-}) => {
+const MyAttachments = ({ pageDispatchers }) => {
+  const { currentUser } = useContext(AppContext)
   const [pageNum, setPageNum] = useState(0)
-  const attachmentsQuery = {
+  const attachmentQuery = {
     pageNum,
-    pageSize: 10
+    pageSize: 10,
+    authorUuid: currentUser?.uuid
   }
-  const { loading, error, data, refetch } = API.useApiQuery(
-    GQL_GET_MY_ATTACHMENTS,
-    {
-      attachmentsQuery
-    }
-  )
-  useEffect(() => {
-    if (forceRefetch) {
-      setForceRefetch(false)
-      refetch()
-    }
-  }, [forceRefetch, setForceRefetch, refetch])
+  const { loading, error, data } = API.useApiQuery(GQL_GET_ATTACHMENT_LIST, {
+    attachmentQuery
+  })
   const { done, result } = useBoilerplate({
     loading,
     error,
@@ -103,7 +91,7 @@ const MyAttachments = ({
     return result
   }
 
-  const paginatedAttachments = data.myAttachments
+  const paginatedAttachments = data.attachmentList
   const attachments = paginatedAttachments ? paginatedAttachments.list : []
   const { pageSize, totalCount } = paginatedAttachments
   const attachmentsExist = totalCount > 0
@@ -126,55 +114,33 @@ const MyAttachments = ({
             <thead>
               <tr>
                 <th>Content</th>
-                <th>Name</th>
                 <th>Caption</th>
                 <th>Used In</th>
               </tr>
             </thead>
             <tbody>
               {attachments.map(attachment => {
-                const { backgroundImage } = utils.getAttachmentIconDetails(
-                  attachment,
-                  true
-                )
+                const { backgroundSize, backgroundImage, contentMissing } =
+                  utils.getAttachmentIconDetails(attachment, true)
                 return (
                   <tr key={attachment.uuid}>
                     <td>
-                      <div
-                        key={attachment.id}
-                        style={{
-                          backgroundSize: "cover",
-                          height: "40px",
-                          width: "40px",
-                          backgroundPosition: "center",
-                          backgroundImage: `url(${backgroundImage})`,
-                          backgroundRepeat: "no-repeat"
-                        }}
-                      />
-                    </td>
-                    <td>
-                      <LinkTo modelType="Attachment" model={attachment}>
-                        {attachment.fileName}
-                      </LinkTo>
-                    </td>
-                    <td>{attachment.caption}</td>
-                    <td>
-                      {attachment.attachmentRelatedObjects[0] ? (
-                        <LinkTo
-                          modelType={
-                            attachment.attachmentRelatedObjects[0]
-                              .relatedObjectType
-                          }
-                          model={{
-                            uuid: attachment.attachmentRelatedObjects[0]
-                              .relatedObjectUuid,
-                            ...attachment.attachmentRelatedObjects[0]
-                              .relatedObject
-                          }}
+                      <div style={{ width: "50px", height: "50px" }}>
+                        <AttachmentImage
+                          uuid={attachment.uuid}
+                          contentMissing={contentMissing}
+                          backgroundSize={backgroundSize}
+                          backgroundImage={backgroundImage}
                         />
-                      ) : (
-                        <>No linked objects</>
-                      )}
+                      </div>
+                    </td>
+                    <td>
+                      <LinkTo modelType="Attachment" model={attachment} />
+                    </td>
+                    <td>
+                      <AttachmentRelatedObjectsTable
+                        relatedObjects={attachment.attachmentRelatedObjects}
+                      />
                     </td>
                   </tr>
                 )
@@ -190,9 +156,6 @@ const MyAttachments = ({
 }
 
 MyAttachments.propTypes = {
-  forceRefetch: PropTypes.bool.isRequired,
-  setForceRefetch: PropTypes.func.isRequired,
-  refetchCallback: PropTypes.func.isRequired,
   pageDispatchers: PageDispatchersPropType
 }
 
