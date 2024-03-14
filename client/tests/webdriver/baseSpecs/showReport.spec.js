@@ -2,8 +2,6 @@ import { expect } from "chai"
 import MyReports, { REPORT_STATES } from "../pages/myReports.page"
 import ShowReport from "../pages/report/showReport.page"
 
-const REPORT_CLASSIFICATION = ""
-
 describe("Show report page", () => {
   beforeEach("Open the show report page", async() => {
     await MyReports.open("arthur")
@@ -31,11 +29,6 @@ describe("Show report page", () => {
         await ShowReport.getTasksEngagementAssessments()
       ).$$("[name*=question3]")
       expect(question3Assessments).to.have.length(2)
-      await (await ShowReport.getClassification()).waitForExist()
-      await (await ShowReport.getClassification()).waitForDisplayed()
-      expect(await (await ShowReport.getClassification()).getText()).to.equal(
-        REPORT_CLASSIFICATION
-      )
     })
   })
   describe("When on the show page of a report with attachment(s)", () => {
@@ -54,6 +47,26 @@ describe("Show report page", () => {
       await (await ShowReport.getImageClick()).click()
       await expect(await browser.getUrl()).to.include(
         "/attachments/f076406f-1a9b-4fc9-8ab2-cd2a138ec26d"
+      )
+    })
+  })
+})
+
+const REPORT_CLASSIFICATION = "NATO UNCLASSIFIED"
+describe("Show report page with classification", () => {
+  beforeEach("Open the show report page", async() => {
+    await MyReports.open("arthur")
+    await MyReports.selectReport(
+      "A classified report from Arthur",
+      REPORT_STATES.DRAFT
+    )
+  })
+  describe("When on the show page of a report with classification", () => {
+    it("We should see the classification related to the current report", async() => {
+      await (await ShowReport.getClassification()).waitForExist()
+      await (await ShowReport.getClassification()).waitForDisplayed()
+      expect(await (await ShowReport.getClassification()).getText()).to.equal(
+        REPORT_CLASSIFICATION
       )
     })
   })

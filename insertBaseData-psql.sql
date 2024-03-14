@@ -774,6 +774,19 @@ INSERT INTO "reportTasks" ("taskUuid", "reportUuid") VALUES
   ((SELECT uuid from tasks where "shortName" = '1.2.B'), :reportuuid);
 
 SELECT ('''' || uuid_generate_v4() || '''') AS reportuuid \gset
+INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "nextSteps", "keyOutcomes", state, "engagementDate", atmosphere, "advisorOrganizationUuid", "interlocutorOrganizationUuid", "classification") VALUES
+  (:reportuuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'A classified report from Arthur', '',
+  'keep on testing!','check the classification', 0, CURRENT_TIMESTAMP + INTERVAL '1 minute', 0,
+  (SELECT uuid FROM organizations where "shortName" = 'ANET Administrators'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Interior'), 'NU');
+INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
+  ((SELECT uuid FROM people where "emailAddress"='hunter+arthur@example.com'), :reportuuid, TRUE, TRUE, FALSE),
+  ((SELECT uuid FROM people where "emailAddress"='hunter+shardul@example.com'), :reportuuid, TRUE, FALSE, TRUE),
+  ((SELECT uuid FROM people where "emailAddress"='lin+guist@example.com'), :reportuuid, FALSE, FALSE, FALSE),
+  ((SELECT uuid FROM people where "emailAddress"='kyleson+kyle@example.com'), :reportuuid, FALSE, FALSE, TRUE),
+  ((SELECT uuid FROM people where "emailAddress"='chrisville+chris@example.com'), :reportuuid, FALSE, FALSE, TRUE);
+
+
+SELECT ('''' || uuid_generate_v4() || '''') AS reportuuid \gset
 INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "nextSteps", "keyOutcomes", state, "engagementDate", atmosphere, "advisorOrganizationUuid", "interlocutorOrganizationUuid") VALUES
   (:reportuuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'A test report to be unpublished from Arthur', '',
   'I need to edit this report so unpublish it please','have reports in organizations', 2, CURRENT_TIMESTAMP + INTERVAL '1 minute', 0,

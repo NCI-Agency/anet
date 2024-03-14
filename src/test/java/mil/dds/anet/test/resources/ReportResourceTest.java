@@ -2309,7 +2309,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     // Admin should normally find only their own drafts
     AnetBeanList_Report adminDraftReports =
         adminQueryExecutor.reportList(getListFields(FIELDS), draftsQuery);
-    assertThat(adminDraftReports.getTotalCount()).isOne();
+    assertThat(adminDraftReports.getTotalCount()).isEqualTo(2);
     // List should not include Erin's draft
     assertThat(adminDraftReports.getList())
         .noneMatch(report -> report.getUuid().equals(erinsDraftReport.getUuid()));
