@@ -135,6 +135,8 @@ public class ReportResource {
       throw new WebApplicationException("Can only create Draft reports", Status.BAD_REQUEST);
     }
 
+    ResourceUtils.assertAllowedClassification(r.getClassification());
+
     Person primaryAdvisor = findPrimaryAttendee(r, false);
     if (r.getAdvisorOrgUuid() == null && primaryAdvisor != null) {
       logger.debug("Setting advisor org for new report based on {}", primaryAdvisor);
@@ -150,8 +152,6 @@ public class ReportResource {
 
     r.setReportText(
         Utils.isEmptyHtml(r.getReportText()) ? null : Utils.sanitizeHtml(r.getReportText()));
-
-    ResourceUtils.assertAllowedClassification(r.getClassification());
 
     final Report created = dao.insert(r, author);
 
@@ -209,7 +209,6 @@ public class ReportResource {
    * @return the report as it was stored in the database before this method was called.
    */
   private Report executeReportUpdates(Person editor, Report r) {
-    ResourceUtils.assertAllowedClassification(r.getClassification());
     // Verify this person has access to edit this report
     // Either they are an author, or an approver for the current step.
     final Report existing = dao.getByUuid(r.getUuid());
@@ -228,6 +227,7 @@ public class ReportResource {
     // Only *existing* authors can change a report!
     final boolean isAuthor = existing.isAuthor(editor);
     assertCanUpdateReport(r, editor, isAuthor);
+    ResourceUtils.assertAllowedClassification(r.getClassification());
 
     // State should not change when report is being edited by an approver
     // State should change to draft when the report is being edited by one of the existing authors
@@ -885,7 +885,7 @@ public class ReportResource {
     @Override
     public int compare(final RollupGraph o1, final RollupGraph o2) {
 
-      int result;
+      final int result;
 
       if (o1.getOrg() != null && o2.getOrg() == null) {
         result = -1;

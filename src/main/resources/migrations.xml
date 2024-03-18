@@ -4725,4 +4725,5 @@
 			<column name="classification" type="${long_text_type}" />
 		</addColumn>
 	</changeSet>
+
 </databaseChangeLog>
