@@ -1,5 +1,10 @@
 package mil.dds.anet.test.utils;
 
+import static mil.dds.anet.utils.ResourceUtils.assertAllowedClassification;
+import static mil.dds.anet.utils.ResourceUtils.getAllowedClassifications;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.lang.invoke.MethodHandles;
@@ -11,11 +16,14 @@ import javax.ws.rs.WebApplicationException;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.beans.Position;
+import mil.dds.anet.test.integration.utils.TestApp;
 import mil.dds.anet.utils.ResourceUtils;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@ExtendWith(TestApp.class)
 public class ResourceUtilsTest {
 
   protected static final Logger logger =
@@ -174,5 +182,21 @@ public class ResourceUtilsTest {
 
   private Instant toInstant(final Object testDate) {
     return testDate == null ? null : Instant.parse((String) testDate);
+  }
+
+  @Test
+  void shouldContainClassificationEntries() {
+    assertThat(getAllowedClassifications()).isNotNull().isNotEmpty();
+  }
+
+  @Test
+  void shouldPassWithoutExceptionForExistingClassification() {
+    assertThatNoException().isThrownBy(() -> assertAllowedClassification("undefined"));
+  }
+
+  @Test
+  void shouldThrowWebApplicationExceptionForUnknownClassification() {
+    assertThatThrownBy(() -> assertAllowedClassification("Totally public"))
+        .isInstanceOf(WebApplicationException.class).hasMessage("Classification is not allowed");
   }
 }

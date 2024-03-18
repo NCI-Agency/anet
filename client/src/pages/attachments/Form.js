@@ -45,10 +45,11 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
   const [error, setError] = useState(null)
   const canEdit =
     currentUser.isAdmin() || currentUser.uuid === initialValues.author.uuid
-  const classifications = Settings.fields.attachment.classification.choices
-  const classificationButtons = Object.keys(classifications).map(key => ({
-    value: key,
-    label: classifications[key]
+  const classificationButtons = Object.entries(
+    Settings.classification.choices
+  ).map(([value, label]) => ({
+    value,
+    label
   }))
 
   return (
@@ -129,17 +130,18 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
                     {canEdit ? (
                       <DictionaryField
                         wrappedComponent={FastField}
-                        dictProps={Settings.fields.attachment.classification}
+                        dictProps={Settings.classification}
                         name="classification"
                         component={FieldHelper.RadioButtonToggleGroupField}
                         buttons={classificationButtons}
+                        enableClear
                         onChange={value =>
                           setFieldValue("classification", value)}
                       />
                     ) : (
                       <DictionaryField
                         wrappedComponent={FastField}
-                        dictProps={Settings.fields.attachment.classification}
+                        dictProps={Settings.classification}
                         name="classification"
                         component={FieldHelper.ReadonlyField}
                       />

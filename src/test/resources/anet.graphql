@@ -815,6 +815,7 @@ type Report {
   authorizationGroups: [AuthorizationGroup]
   authors: [ReportPerson]
   cancelledReason: ReportCancelledReason
+  classification: String
   comments: [Comment]
   createdAt: Instant
   customFields: String
@@ -876,6 +877,7 @@ input ReportInput {
   atmosphereDetails: String
   authorizationGroups: [AuthorizationGroupInput]
   cancelledReason: ReportCancelledReason
+  classification: String
   comments: [CommentInput]
   createdAt: Instant
   customFields: String

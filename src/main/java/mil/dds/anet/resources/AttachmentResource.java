@@ -1,5 +1,7 @@
 package mil.dds.anet.resources;
 
+import static mil.dds.anet.AnetObjectEngine.getConfiguration;
+
 import com.codahale.metrics.annotation.Timed;
 import io.dropwizard.auth.Auth;
 import io.leangen.graphql.annotations.GraphQLArgument;
@@ -39,6 +41,7 @@ import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.ResourceUtils;
 import mil.dds.anet.utils.Utils;
 import org.apache.tika.Tika;
 import org.apache.tika.io.TikaInputStream;
@@ -72,7 +75,7 @@ public class AttachmentResource {
     final Person user = DaoUtils.getUserFromContext(context);
     assertAttachmentPermission(user, null, "You don't have permission to create attachments");
     assertAllowedMimeType(attachment.getMimeType());
-    assertAllowedClassification(attachment.getClassification());
+    ResourceUtils.assertAllowedClassification(attachment.getClassification());
     assertAllowedRelatedObjects(user, attachment.getAttachmentRelatedObjects());
 
     attachment.setAuthorUuid(DaoUtils.getUuid(user));
@@ -135,7 +138,7 @@ public class AttachmentResource {
     assertAttachmentPermission(user, existing,
         "You don't have permission to update this attachment");
     assertAllowedMimeType(attachment.getMimeType());
-    assertAllowedClassification(attachment.getClassification());
+    ResourceUtils.assertAllowedClassification(attachment.getClassification());
     assertAllowedRelatedObjects(user,
         existing.loadAttachmentRelatedObjects(AnetObjectEngine.getInstance().getContext()).join());
     assertAllowedRelatedObjects(user, attachment.getAttachmentRelatedObjects());
@@ -247,16 +250,6 @@ public class AttachmentResource {
     }
   }
 
-  private void assertAllowedClassification(final String classificationKey) {
-    if (classificationKey != null) {
-      // if the classification is set, check if it is valid
-      final var allowedClassifications = getAllowedClassifications();
-      if (!allowedClassifications.containsKey(classificationKey)) {
-        throw new WebApplicationException("Classification is not allowed", Status.BAD_REQUEST);
-      }
-    }
-  }
-
   private void assertAttachmentEnabled() {
     final var attachmentSettings = getAttachmentSettings();
     final Boolean attachmentDisabled = (Boolean) attachmentSettings.get("featureDisabled");
@@ -281,14 +274,7 @@ public class AttachmentResource {
 
   @SuppressWarnings("unchecked")
   public static Map<String, Object> getAttachmentSettings() {
-    return (Map<String, Object>) AnetObjectEngine.getConfiguration()
-        .getDictionaryEntry("fields.attachment");
-  }
-
-  @SuppressWarnings("unchecked")
-  public static Map<String, String> getAllowedClassifications() {
-    final var classification = (Map<String, Object>) getAttachmentSettings().get("classification");
-    return (Map<String, String>) classification.get("choices");
+    return (Map<String, Object>) getConfiguration().getDictionaryEntry("fields.attachment");
   }
 
   @SuppressWarnings("unchecked")

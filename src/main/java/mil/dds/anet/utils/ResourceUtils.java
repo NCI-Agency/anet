@@ -3,8 +3,10 @@ package mil.dds.anet.utils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
+import java.util.Map;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Note;
 import mil.dds.anet.beans.Note.NoteType;
 import mil.dds.anet.beans.PersonPositionHistory;
@@ -104,7 +106,7 @@ public class ResourceUtils {
   }
 
   private static void checkAndFixText(final Note n) {
-    if (n.getText() == null || n.getText().trim().length() == 0) {
+    if (n.getText() == null || n.getText().trim().isEmpty()) {
       throw new WebApplicationException("Note text must not be empty", Status.BAD_REQUEST);
     }
     sanitizeText(n);
@@ -129,4 +131,19 @@ public class ResourceUtils {
     }
   }
 
+  @SuppressWarnings("unchecked")
+  public static Map<String, String> getAllowedClassifications() {
+    return (Map<String, String>) ((Map<String, Object>) AnetObjectEngine.getConfiguration()
+        .getDictionaryEntry("classification")).get("choices");
+  }
+
+  public static void assertAllowedClassification(final String classificationKey) {
+    if (classificationKey != null) {
+      // if the classification is set, check if it is valid
+      final var allowedClassifications = getAllowedClassifications();
+      if (!allowedClassifications.containsKey(classificationKey)) {
+        throw new WebApplicationException("Classification is not allowed", Status.BAD_REQUEST);
+      }
+    }
+  }
 }

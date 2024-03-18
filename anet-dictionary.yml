@@ -41,6 +41,14 @@ reportWorkflow:
 
 maxTextFieldLength: 250
 
+classification:
+  label: Security Marking
+  choices:
+    undefined: Undefined
+    public: Public
+    NU: NATO UNCLASSIFIED
+    NU_rel_EU: NATO UNCLASSIFIED Releasable to EU
+
 fields:
 
   task:
@@ -328,14 +336,6 @@ fields:
     description:
       label: Description
       placeholder: Enter a description of this attachment
-    classification:
-      type: enum
-      label: Security Marking
-      choices:
-        undefined: Undefined
-        public: Public
-        NU: NATO UNCLASSIFIED
-        NU_rel_EU: NATO UNCLASSIFIED Releasable to EU
     mimeTypes:
       - application/pdf
       - image/avif

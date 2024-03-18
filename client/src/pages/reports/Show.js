@@ -58,6 +58,7 @@ const GQL_GET_REPORT = gql`
     report(uuid: $uuid) {
       uuid
       intent
+      classification
       engagementDate
       duration
       atmosphere
@@ -440,6 +441,16 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
             {renderEmailModal(values, setFieldValue)}
 
             <Messages success={saveSuccess} error={saveError} />
+
+            {report.classification && (
+              <div
+                style={{ width: "100%", fontSize: "18px", textAlign: "center" }}
+              >
+                <span style={{ fontWeight: "bold" }} id="report-classification">
+                  {Settings.classification.choices[report.classification]}
+                </span>
+              </div>
+            )}
 
             {report.isPublished() && (
               <Fieldset style={{ textAlign: "center" }}>

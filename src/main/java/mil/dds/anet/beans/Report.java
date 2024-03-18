@@ -19,6 +19,7 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
+import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.AbstractCustomizableAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
@@ -91,6 +92,11 @@ public class Report extends AbstractCustomizableAnetBean
   @GraphQLQuery
   @GraphQLInputField
   String reportText;
+
+  @GraphQLQuery
+  @GraphQLInputField
+  private String classification;
+
   // annotated below
   private List<ReportPerson> reportPeople;
   // annotated below
@@ -191,6 +197,14 @@ public class Report extends AbstractCustomizableAnetBean
 
   public void setDuration(Integer duration) {
     this.duration = duration;
+  }
+
+  public String getClassification() {
+    return classification;
+  }
+
+  public void setClassification(final String classification) {
+    this.classification = classification;
   }
 
   @GraphQLQuery(name = "location")
@@ -607,12 +621,7 @@ public class Report extends AbstractCustomizableAnetBean
     // Check if there are report actions for this step
     final Optional<ReportAction> existing =
         actions.stream().filter(a -> Objects.equals(DaoUtils.getUuid(step), a.getStepUuid()))
-            .max(new Comparator<ReportAction>() {
-              @Override
-              public int compare(ReportAction a, ReportAction b) {
-                return a.getCreatedAt().compareTo(b.getCreatedAt());
-              }
-            });
+            .max(Comparator.comparing(AbstractAnetBean::getCreatedAt));
     return existing.isPresent() ? null : step;
   }
 
@@ -677,7 +686,7 @@ public class Report extends AbstractCustomizableAnetBean
   private CompletableFuture<List<ApprovalStep>> getPlanningWorkflowForRelatedObject(
       Map<String, Object> context, AnetObjectEngine engine, String relatedObjectUuid) {
     if (relatedObjectUuid == null) {
-      return CompletableFuture.completedFuture(new ArrayList<ApprovalStep>());
+      return CompletableFuture.completedFuture(new ArrayList<>());
     }
 
     return engine.getPlanningApprovalStepsForRelatedObject(context, relatedObjectUuid);
@@ -686,7 +695,7 @@ public class Report extends AbstractCustomizableAnetBean
   private CompletableFuture<List<ApprovalStep>> getWorkflowForRelatedObject(
       Map<String, Object> context, AnetObjectEngine engine, String relatedObjectUuid) {
     if (relatedObjectUuid == null) {
-      return CompletableFuture.completedFuture(new ArrayList<ApprovalStep>());
+      return CompletableFuture.completedFuture(new ArrayList<>());
     }
 
     return engine.getApprovalStepsForRelatedObject(context, relatedObjectUuid);
@@ -770,7 +779,7 @@ public class Report extends AbstractCustomizableAnetBean
 
   @GraphQLQuery(name = "engagementStatus")
   public List<EngagementStatus> loadEngagementStatus() {
-    LinkedList<EngagementStatus> statuses = new LinkedList<EngagementStatus>();
+    LinkedList<EngagementStatus> statuses = new LinkedList<>();
     if (state == ReportState.CANCELLED) {
       statuses.add(EngagementStatus.CANCELLED);
     }
@@ -786,10 +795,10 @@ public class Report extends AbstractCustomizableAnetBean
 
   @Override
   public boolean equals(Object o) {
-    if (!(o instanceof Report)) {
+    if (!(o instanceof final Report r)) {
       return false;
     }
-    final Report r = (Report) o;
+
     return super.equals(o) && Objects.equals(r.getUuid(), uuid)
         && Objects.equals(r.getState(), state)
         && Objects.equals(r.getApprovalStepUuid(), getApprovalStepUuid())

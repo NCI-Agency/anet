@@ -71,10 +71,9 @@ const AttachmentPreview = ({ className, uuid }) => {
             />
             <DictionaryField
               wrappedComponent={PreviewField}
-              dictProps={Settings.fields.attachment.classification}
-              value={Attachment.humanNameOfStatus(
-                attachment.classification
-              ).toUpperCase()}
+              dictProps={Settings.classification}
+              name="classification"
+              value={Settings.classification.choices[attachment.classification]}
             />
           </Col>
         </Row>

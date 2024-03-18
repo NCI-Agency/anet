@@ -1,5 +1,6 @@
 package mil.dds.anet.test.resources;
 
+import static mil.dds.anet.utils.ResourceUtils.getAllowedClassifications;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
@@ -307,7 +308,8 @@ public abstract class AbstractResourceTest {
 
   protected static List<ApprovalStepInput> getApprovalStepsInput(
       final List<ApprovalStep> approvalSteps) {
-    return approvalSteps.stream().map(as -> getApprovalStepInput(as)).collect(Collectors.toList());
+    return approvalSteps.stream().map(AbstractResourceTest::getApprovalStepInput)
+        .collect(Collectors.toList());
   }
 
   protected static AuthorizationGroupInput getAuthorizationGroupInput(
@@ -324,7 +326,7 @@ public abstract class AbstractResourceTest {
   }
 
   protected static List<NoteInput> getNotesInput(final List<Note> notes) {
-    return notes.stream().map(n -> getNoteInput(n)).collect(Collectors.toList());
+    return notes.stream().map(AbstractResourceTest::getNoteInput).collect(Collectors.toList());
   }
 
   protected static OrganizationInput getOrganizationInput(final Organization organization) {
@@ -333,12 +335,13 @@ public abstract class AbstractResourceTest {
 
   protected static List<OrganizationInput> getOrganizationsInput(
       final List<Organization> organizations) {
-    return organizations.stream().map(o -> getOrganizationInput(o)).collect(Collectors.toList());
+    return organizations.stream().map(AbstractResourceTest::getOrganizationInput)
+        .collect(Collectors.toList());
   }
 
   protected static List<PersonInput> getPeopleInput(
       final List<mil.dds.anet.test.client.Person> people) {
-    return people.stream().map(p -> getPersonInput(p)).collect(Collectors.toList());
+    return people.stream().map(AbstractResourceTest::getPersonInput).collect(Collectors.toList());
   }
 
   protected static PersonInput getPersonInput(final mil.dds.anet.test.client.Person person) {
@@ -347,7 +350,8 @@ public abstract class AbstractResourceTest {
 
   protected static List<ReportPersonInput> getReportPeopleInput(
       final List<ReportPerson> reportPeople) {
-    return reportPeople.stream().map(rp -> getReportPersonInput(rp)).collect(Collectors.toList());
+    return reportPeople.stream().map(AbstractResourceTest::getReportPersonInput)
+        .collect(Collectors.toList());
   }
 
   protected static ReportPersonInput getReportPersonInput(final ReportPerson reportPerson) {
@@ -359,7 +363,8 @@ public abstract class AbstractResourceTest {
   }
 
   protected static List<PositionInput> getPositionsInput(final List<Position> positions) {
-    return positions.stream().map(p -> getPositionInput(p)).collect(Collectors.toList());
+    return positions.stream().map(AbstractResourceTest::getPositionInput)
+        .collect(Collectors.toList());
   }
 
   protected static PersonPositionHistoryInput getPersonPositionHistoryInput(
@@ -369,7 +374,7 @@ public abstract class AbstractResourceTest {
 
   protected static List<PersonPositionHistoryInput> getPersonPositionHistoryInput(
       final List<PersonPositionHistory> history) {
-    return history.stream().map(pph -> getPersonPositionHistoryInput(pph))
+    return history.stream().map(AbstractResourceTest::getPersonPositionHistoryInput)
         .collect(Collectors.toList());
   }
 
@@ -473,4 +478,7 @@ public abstract class AbstractResourceTest {
     return ClientBuilder.newBuilder().register(HttpAuthenticationFeature.basic(user, user)).build();
   }
 
+  protected String getFirstClassification() {
+    return getAllowedClassifications().keySet().iterator().next();
+  }
 }

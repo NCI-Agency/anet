@@ -50,6 +50,7 @@ const GQL_GET_REPORT = gql`
     report(uuid: $uuid) {
       uuid
       intent
+      classification
       engagementDate
       duration
       atmosphere
@@ -305,7 +306,11 @@ const CompactReportView = ({ pageDispatchers }) => {
             pageSize={pageSize}
             backgroundText={backgroundText}
           >
-            <CompactHeaderContent />
+            <CompactHeaderContent
+              classification={
+                Settings.classification.choices[report.classification]
+              }
+            />
             <CompactTable>
               <FullColumn>
                 <CompactTitle

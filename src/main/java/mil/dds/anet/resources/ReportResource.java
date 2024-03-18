@@ -12,7 +12,6 @@ import java.lang.invoke.MethodHandles;
 import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -136,6 +135,8 @@ public class ReportResource {
       throw new WebApplicationException("Can only create Draft reports", Status.BAD_REQUEST);
     }
 
+    ResourceUtils.assertAllowedClassification(r.getClassification());
+
     Person primaryAdvisor = findPrimaryAttendee(r, false);
     if (r.getAdvisorOrgUuid() == null && primaryAdvisor != null) {
       logger.debug("Setting advisor org for new report based on {}", primaryAdvisor);
@@ -226,6 +227,7 @@ public class ReportResource {
     // Only *existing* authors can change a report!
     final boolean isAuthor = existing.isAuthor(editor);
     assertCanUpdateReport(r, editor, isAuthor);
+    ResourceUtils.assertAllowedClassification(r.getClassification());
 
     // State should not change when report is being edited by an approver
     // State should change to draft when the report is being edited by one of the existing authors
@@ -731,7 +733,7 @@ public class ReportResource {
         (orgUuid == null) ? dao.getDailyRollupGraph(start, end, orgType, nonReportingOrgs)
             : dao.getDailyRollupGraph(start, end, orgUuid, orgType, nonReportingOrgs);
 
-    Collections.sort(dailyRollupGraph, getRollupGraphComparator());
+    dailyRollupGraph.sort(getRollupGraphComparator());
 
     return dailyRollupGraph;
   }
@@ -767,7 +769,7 @@ public class ReportResource {
     action.setChartOrgType(orgType);
     action.setOrgUuid(orgUuid);
 
-    final Map<String, Object> context = new HashMap<String, Object>();
+    final Map<String, Object> context = new HashMap<>();
     context.put("context", engine.getContext());
     context.put("serverUrl", config.getServerUrl());
     context.put(AdminSettingKeys.SECURITY_BANNER_CLASSIFICATION.name(),
@@ -883,7 +885,7 @@ public class ReportResource {
     @Override
     public int compare(final RollupGraph o1, final RollupGraph o2) {
 
-      int result = 0;
+      final int result;
 
       if (o1.getOrg() != null && o2.getOrg() == null) {
         result = -1;
@@ -1033,10 +1035,10 @@ public class ReportResource {
     context.put("dateFormatter",
         DateTimeFormatter.ofPattern((String) config.getDictionaryEntry("dateFormats.email.date"))
             .withZone(DaoUtils.getServerNativeZoneId()));
-    context.put("engagementsIncludeTimeAndDuration", Boolean.TRUE
-        .equals((Boolean) config.getDictionaryEntry("engagementsIncludeTimeAndDuration")));
-    final String edtfPattern = (String) config.getDictionaryEntry(Boolean.TRUE
-        .equals((Boolean) config.getDictionaryEntry("engagementsIncludeTimeAndDuration"))
+    context.put("engagementsIncludeTimeAndDuration",
+        Boolean.TRUE.equals(config.getDictionaryEntry("engagementsIncludeTimeAndDuration")));
+    final String edtfPattern = (String) config.getDictionaryEntry(
+        Boolean.TRUE.equals(config.getDictionaryEntry("engagementsIncludeTimeAndDuration"))
             ? "dateFormats.email.withTime"
             : "dateFormats.email.date");
     context.put("engagementDateFormatter",
