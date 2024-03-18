@@ -12,7 +12,6 @@ import java.lang.invoke.MethodHandles;
 import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -152,6 +151,8 @@ public class ReportResource {
     r.setReportText(
         Utils.isEmptyHtml(r.getReportText()) ? null : Utils.sanitizeHtml(r.getReportText()));
 
+    ResourceUtils.assertAllowedClassification(r.getClassification());
+
     final Report created = dao.insert(r, author);
 
     DaoUtils.saveCustomSensitiveInformation(author, ReportDao.TABLE_NAME, created.getUuid(),
@@ -208,6 +209,7 @@ public class ReportResource {
    * @return the report as it was stored in the database before this method was called.
    */
   private Report executeReportUpdates(Person editor, Report r) {
+    ResourceUtils.assertAllowedClassification(r.getClassification());
     // Verify this person has access to edit this report
     // Either they are an author, or an approver for the current step.
     final Report existing = dao.getByUuid(r.getUuid());
@@ -731,7 +733,7 @@ public class ReportResource {
         (orgUuid == null) ? dao.getDailyRollupGraph(start, end, orgType, nonReportingOrgs)
             : dao.getDailyRollupGraph(start, end, orgUuid, orgType, nonReportingOrgs);
 
-    Collections.sort(dailyRollupGraph, getRollupGraphComparator());
+    dailyRollupGraph.sort(getRollupGraphComparator());
 
     return dailyRollupGraph;
   }
@@ -767,7 +769,7 @@ public class ReportResource {
     action.setChartOrgType(orgType);
     action.setOrgUuid(orgUuid);
 
-    final Map<String, Object> context = new HashMap<String, Object>();
+    final Map<String, Object> context = new HashMap<>();
     context.put("context", engine.getContext());
     context.put("serverUrl", config.getServerUrl());
     context.put(AdminSettingKeys.SECURITY_BANNER_CLASSIFICATION.name(),
@@ -883,7 +885,7 @@ public class ReportResource {
     @Override
     public int compare(final RollupGraph o1, final RollupGraph o2) {
 
-      int result = 0;
+      int result;
 
       if (o1.getOrg() != null && o2.getOrg() == null) {
         result = -1;
@@ -1033,10 +1035,10 @@ public class ReportResource {
     context.put("dateFormatter",
         DateTimeFormatter.ofPattern((String) config.getDictionaryEntry("dateFormats.email.date"))
             .withZone(DaoUtils.getServerNativeZoneId()));
-    context.put("engagementsIncludeTimeAndDuration", Boolean.TRUE
-        .equals((Boolean) config.getDictionaryEntry("engagementsIncludeTimeAndDuration")));
-    final String edtfPattern = (String) config.getDictionaryEntry(Boolean.TRUE
-        .equals((Boolean) config.getDictionaryEntry("engagementsIncludeTimeAndDuration"))
+    context.put("engagementsIncludeTimeAndDuration",
+        Boolean.TRUE.equals(config.getDictionaryEntry("engagementsIncludeTimeAndDuration")));
+    final String edtfPattern = (String) config.getDictionaryEntry(
+        Boolean.TRUE.equals(config.getDictionaryEntry("engagementsIncludeTimeAndDuration"))
             ? "dateFormats.email.withTime"
             : "dateFormats.email.date");
     context.put("engagementDateFormatter",
