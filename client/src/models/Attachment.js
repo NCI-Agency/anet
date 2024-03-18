@@ -52,6 +52,6 @@ export default class Attachment extends Model {
   }
 
   toString() {
-    return this.fileName || this.description
+    return this.caption || this.fileName || this.description
   }
 }

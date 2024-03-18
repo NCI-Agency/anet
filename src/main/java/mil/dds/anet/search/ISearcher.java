@@ -22,4 +22,6 @@ public interface ISearcher {
 
   public IUserActivitySearcher getUserActivitySearcher();
 
+  public IAttachmentSearcher getAttachmentSearcher();
+
 }

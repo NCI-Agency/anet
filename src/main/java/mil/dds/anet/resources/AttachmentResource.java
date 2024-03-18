@@ -33,6 +33,8 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Attachment;
 import mil.dds.anet.beans.GenericRelatedObject;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.lists.AnetBeanList;
+import mil.dds.anet.beans.search.AttachmentSearchQuery;
 import mil.dds.anet.database.AttachmentDao;
 import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.database.OrganizationDao;
@@ -66,6 +68,13 @@ public class AttachmentResource {
       @GraphQLArgument(name = "uuid") String uuid) {
     assertAttachmentEnabled();
     return getAttachment(uuid);
+  }
+
+  @GraphQLQuery(name = "attachmentList")
+  public AnetBeanList<Attachment> search(@GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "query") AttachmentSearchQuery query) {
+    query.setUser(DaoUtils.getUserFromContext(context));
+    return dao.search(query);
   }
 
   @GraphQLMutation(name = "createAttachment")

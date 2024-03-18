@@ -1,9 +1,9 @@
 import { gql } from "@apollo/client"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
-import classNames from "classnames"
 import AppContext from "components/AppContext"
 import "components/Attachment/Attachment.css"
+import AttachmentImage from "components/Attachment/AttachmentImage"
 import AttachmentRelatedObjectsTable from "components/Attachment/AttachmentRelatedObjectsTable"
 import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
@@ -19,7 +19,6 @@ import {
 import RichTextEditor from "components/RichTextEditor"
 import { Field, Form, Formik } from "formik"
 import { Attachment } from "models"
-import PropTypes from "prop-types"
 import React, { useContext } from "react"
 import { Button, Col } from "react-bootstrap"
 import { connect } from "react-redux"
@@ -73,44 +72,6 @@ const GQL_GET_ATTACHMENT = gql`
     }
   }
 `
-
-const AttachmentImage = ({
-  uuid,
-  backgroundSize,
-  backgroundImage,
-  contentMissing
-}) => {
-  const image = (
-    <div
-      className="image-preview info-show card-image attachment-image"
-      style={{
-        backgroundSize,
-        backgroundImage: `url(${backgroundImage})`
-      }}
-    />
-  )
-  return (
-    <div
-      className={classNames("img-container", {
-        "img-hover-zoom": !contentMissing
-      })}
-    >
-      {contentMissing ? (
-        <>{image}</>
-      ) : (
-        <a href={`/api/attachment/view/${uuid}`} className="d-flex h-100">
-          {image}
-        </a>
-      )}
-    </div>
-  )
-}
-AttachmentImage.propTypes = {
-  uuid: PropTypes.string.isRequired,
-  backgroundSize: PropTypes.string.isRequired,
-  backgroundImage: PropTypes.string.isRequired,
-  contentMissing: PropTypes.bool.isRequired
-}
 
 const AttachmentShow = ({ pageDispatchers }) => {
   const { currentUser } = useContext(AppContext)

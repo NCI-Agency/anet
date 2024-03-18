@@ -8,6 +8,7 @@ import UserActivitiesOverTime from "pages/admin/useractivities/UserActivitiesOve
 import UserActivitiesPerPeriod from "pages/admin/useractivities/UserActivitiesPerPeriod"
 import UsersPendingVerification from "pages/admin/UsersPendingVerification"
 import AttachmentEdit from "pages/attachments/Edit"
+import MyAttachments from "pages/attachments/MyAttachments"
 import AttachmentShow from "pages/attachments/Show"
 import AuthorizationGroupEdit from "pages/authorizationGroups/Edit"
 import MyAuthorizationGroups from "pages/authorizationGroups/MyAuthorizationGroups"
@@ -84,6 +85,7 @@ const Routing = () => {
       </Route>
       {attachmentsEnabled && (
         <Route path={PAGE_URLS.ATTACHMENTS}>
+          <Route path="mine" element={<MyAttachments />} />
           <Route path=":uuid">
             <Route index element={<AttachmentShow />} />
             {attachmentEditEnabled && (

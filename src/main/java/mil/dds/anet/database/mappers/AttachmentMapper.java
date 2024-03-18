@@ -18,6 +18,11 @@ public class AttachmentMapper implements RowMapper<Attachment> {
     a.setDescription(MapperUtils.getOptionalString(rs, "attachments_description"));
     a.setClassification(MapperUtils.getOptionalString(rs, "attachments_classification"));
     a.setCaption(MapperUtils.getOptionalString(rs, "attachments_caption"));
+
+    if (MapperUtils.containsColumnNamed(rs, "totalCount")) {
+      ctx.define("totalCount", rs.getInt("totalCount"));
+    }
+
     return a;
   }
 }
