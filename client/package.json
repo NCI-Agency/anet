@@ -116,7 +116,7 @@
     "xhr2": "0.2.1"
   },
   "dependencies": {
-    "@apollo/client": "3.9.5",
+    "@apollo/client": "3.9.7",
     "@blueprintjs/core": "4.20.2",
     "@blueprintjs/datetime": "4.4.37",
     "@blueprintjs/popover2": "1.14.11",
@@ -129,13 +129,13 @@
     "@fullcalendar/react": "6.1.11",
     "@fullcalendar/timegrid": "6.1.11",
     "@projectstorm/react-diagrams": "7.0.4",
-    "axios": "1.6.7",
+    "axios": "1.6.8",
     "bootstrap": "5.1.3",
     "change-case": "5.4.3",
     "classnames": "2.5.1",
     "closest": "0.0.1",
     "core-js": "3.36.0",
-    "d3": "7.8.5",
+    "d3": "7.9.0",
     "dagre": "0.8.5",
     "email-addresses": "5.0.0",
     "escape-html": "1.0.3",
@@ -174,7 +174,7 @@
     "react-router-bootstrap": "0.26.2",
     "react-router-dom": "6.3.0",
     "react-scroll": "1.9.0",
-    "react-toastify": "10.0.4",
+    "react-toastify": "10.0.5",
     "react-ultimate-pagination": "1.3.2",
     "react-use-dimensions": "1.2.1",
     "reduce-css-calc": "2.1.8",
@@ -189,7 +189,7 @@
     "title-case": "4.3.1",
     "use-debounce": "10.0.0",
     "uuid": "9.0.1",
-    "yup": "1.3.3"
+    "yup": "1.4.0"
   },
   "resolutions": {
     "chromedriver": "link:./node_modules/.cache/null"
