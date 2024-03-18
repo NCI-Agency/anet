@@ -3,11 +3,8 @@ package mil.dds.anet.test.resources;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
-import com.graphql_java_generator.exception.GraphQLRequestExecutionException;
-import com.graphql_java_generator.exception.GraphQLRequestPreparationException;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.ws.rs.ForbiddenException;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.test.client.AdminSetting;
 import mil.dds.anet.test.client.AdminSettingInput;
@@ -15,110 +12,93 @@ import mil.dds.anet.test.client.Person;
 import mil.dds.anet.test.client.Position;
 import mil.dds.anet.test.client.PositionType;
 import mil.dds.anet.test.client.RecentActivities;
-import mil.dds.anet.test.client.util.GraphQLRequest;
-import mil.dds.anet.test.client.util.MutationExecutor;
-import mil.dds.anet.test.client.util.QueryExecutor;
 import mil.dds.anet.utils.AnetConstants;
 import org.junit.jupiter.api.Test;
 
-public class AdminResourceTest extends AbstractResourceTest {
+class AdminResourceTest extends AbstractResourceTest {
 
   @Test
-  public void saveAdminPermissionTest()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void saveAdminPermissionTest() {
     saveSettings(admin);
   }
 
   @Test
-  public void saveSuperuserPermissionTest()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void saveSuperuserPermissionTest() {
     saveSettings(getSuperuser());
   }
 
   @Test
-  public void saveRegularUserPermissionTest()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void saveRegularUserPermissionTest() {
     saveSettings(getRegularUser());
   }
 
   @Test
-  public void clearCacheAdminTest()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void clearCacheAdminTest() {
     clearCache(admin);
   }
 
   @Test
-  public void clearCacheRegularUserTest()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void clearCacheRegularUserTest() {
     clearCache(getRegularUser());
   }
 
   @Test
-  public void clearCacheSuperuserTest()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void clearCacheSuperuserTest() {
     clearCache(getSuperuser());
   }
 
   @Test
-  public void reloadDictionaryAdminTest()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void reloadDictionaryAdminTest() {
     reloadDictionary(admin);
   }
 
   @Test
-  public void reloadDictionaryRegularUserTest()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void reloadDictionaryRegularUserTest() {
     reloadDictionary(getRegularUser());
   }
 
   @Test
-  public void recentActivitiesSuperuserTest()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void recentActivitiesSuperuserTest() {
     recentActivities(getSuperuser());
   }
 
   @Test
-  public void recentActivitiesAdminTest()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void recentActivitiesAdminTest() {
     recentActivities(admin);
   }
 
   @Test
-  public void recentActivitiesRegularUserTest()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void recentActivitiesRegularUserTest() {
     recentActivities(getRegularUser());
   }
 
-  private void saveSettings(Person user)
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    final QueryExecutor userQueryExecutor = getQueryExecutor(user.getDomainUsername());
-    final MutationExecutor userMutationExecutor = getMutationExecutor(user.getDomainUsername());
+  private void saveSettings(Person user) {
     final Position position = user.getPosition();
     final boolean isAdmin = position.getType() == PositionType.ADMINISTRATOR;
 
-    final List<AdminSetting> settings = userQueryExecutor.adminSettings("{ key value }");
+    final List<AdminSetting> settings = withCredentials(user.getDomainUsername(),
+        t -> queryExecutor.adminSettings("{ key value }"));
     final List<AdminSettingInput> input = settings.stream()
         .map(
             as -> AdminSettingInput.builder().withKey(as.getKey()).withValue(as.getValue()).build())
         .collect(Collectors.toList());
 
     try {
-      final Integer nrUpdated = userMutationExecutor.saveAdminSettings("", input);
+      final Integer nrUpdated = withCredentials(user.getDomainUsername(),
+          t -> mutationExecutor.saveAdminSettings("", input));
       if (isAdmin) {
         assertThat(nrUpdated).isEqualTo(input.size());
       } else {
-        fail("Expected ForbiddenException");
+        fail("Expected an Exception");
       }
-    } catch (ForbiddenException expectedException) {
+    } catch (Exception expectedException) {
       if (isAdmin) {
-        fail("Unexpected ForbiddenException");
+        fail("Unexpected Exception", expectedException);
       }
     }
   }
 
-  private void clearCache(Person user)
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    final MutationExecutor userMutationExecutor = getMutationExecutor(user.getDomainUsername());
+  private void clearCache(Person user) {
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final boolean isAdmin = user.getPosition().getType() == PositionType.ADMINISTRATOR;
 
@@ -126,57 +106,57 @@ public class AdminResourceTest extends AbstractResourceTest {
     engine.getPersonDao().findByOpenIdSubject(user.getOpenIdSubject());
 
     try {
-      final String result = userMutationExecutor.clearCache("");
+      final String result =
+          withCredentials(user.getDomainUsername(), t -> mutationExecutor.clearCache(""));
       if (isAdmin) {
         assertThat(result).isEqualTo(AnetConstants.USERCACHE_MESSAGE);
       } else {
-        fail("Expected ForbiddenException");
+        fail("Expected an Exception");
       }
-    } catch (ForbiddenException expectedException) {
+    } catch (Exception expectedException) {
       if (isAdmin) {
-        fail("Unexpected ForbiddenException");
+        fail("Unexpected Exception", expectedException);
       }
     }
   }
 
-  private void reloadDictionary(Person user)
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    final MutationExecutor userMutationExecutor = getMutationExecutor(user.getDomainUsername());
+  private void reloadDictionary(Person user) {
     final boolean isAdmin = user.getPosition().getType() == PositionType.ADMINISTRATOR;
 
     try {
-      final String result = userMutationExecutor.reloadDictionary("");
+      final String result =
+          withCredentials(user.getDomainUsername(), t -> mutationExecutor.reloadDictionary(""));
       if (isAdmin) {
         assertThat(result).isEqualTo(AnetConstants.DICTIONARY_RELOAD_MESSAGE);
       } else {
-        fail("Expected ForbiddenException");
+        fail("Expected an Exception");
       }
-    } catch (ForbiddenException expectedException) {
+    } catch (Exception expectedException) {
       if (isAdmin) {
-        fail("Unexpected ForbiddenException");
+        fail("Unexpected Exception", expectedException);
       }
     }
   }
 
-  private void recentActivities(Person user)
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    final GraphQLRequest graphQlRequest = getGraphQlRequest(user.getDomainUsername(),
-        "query { recentActivities { byActivity { ...recentActivity } byUser { ...recentActivity } } }"
-            + " fragment recentActivity on RecentUserActivity {"
-            + " user { uuid rank name domainUsername } activity { time ip request } }");
+  private void recentActivities(Person user) {
+    final String recentActivityFields =
+        "user { uuid rank name domainUsername } activity { time ip request }";
+    final String fields =
+        String.format("{ byActivity { %1$s } byUser { %1$s } }", recentActivityFields);
     final boolean isAdmin = user.getPosition().getType() == PositionType.ADMINISTRATOR;
 
     try {
-      final RecentActivities recentActivities = graphQlRequest.execQuery().getRecentActivities();
+      final RecentActivities recentActivities =
+          withCredentials(user.getDomainUsername(), t -> queryExecutor.recentActivities(fields));
       if (isAdmin) {
         assertThat(recentActivities.getByUser()).isNotEmpty();
         assertThat(recentActivities.getByActivity()).isNotEmpty();
       } else {
-        fail("Expected ForbiddenException");
+        fail("Expected an Exception");
       }
-    } catch (ForbiddenException expectedException) {
+    } catch (Exception expectedException) {
       if (isAdmin) {
-        fail("Unexpected ForbiddenException");
+        fail("Unexpected Exception", expectedException);
       }
     }
   }

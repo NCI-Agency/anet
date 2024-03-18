@@ -4,9 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 import com.google.common.collect.ImmutableMap;
-import com.graphql_java_generator.exception.GraphQLRequestExecutionException;
-import com.graphql_java_generator.exception.GraphQLRequestPreparationException;
 import graphql.introspection.IntrospectionQuery;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation.Builder;
+import jakarta.ws.rs.core.GenericType;
+import jakarta.ws.rs.core.MediaType;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -16,58 +18,55 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.GenericType;
-import javax.ws.rs.core.MediaType;
 import mil.dds.anet.test.client.Person;
 import mil.dds.anet.test.client.Query;
-import mil.dds.anet.test.integration.utils.TestApp;
+import mil.dds.anet.utils.Utils;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class GraphQlResourceTest extends AbstractResourceTest {
+class GraphQlResourceTest extends AbstractResourceTest {
 
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   @Test
-  public void testIntrospection() {
+  void testIntrospection() {
     // only admin can do introspection query
     try {
-      final Query resp = adminQueryExecutor.exec(IntrospectionQuery.INTROSPECTION_QUERY);
+      final Query resp = withCredentials(adminUser,
+          t -> queryExecutor.exec(IntrospectionQuery.INTROSPECTION_QUERY));
       assertThat(resp).isNotNull(); // we could check a million things here
     } catch (Exception e) {
-      fail("Unexpected exception", e);
+      fail("Unexpected Exception", e);
     }
     try {
-      getQueryExecutor(getSuperuser().getDomainUsername())
-          .exec(IntrospectionQuery.INTROSPECTION_QUERY);
-      fail("Expected exception");
-    } catch (Exception e) {
-      // correct
+      withCredentials(getSuperuser().getDomainUsername(),
+          t -> queryExecutor.exec(IntrospectionQuery.INTROSPECTION_QUERY));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      // OK
     }
     try {
-      getQueryExecutor(getRegularUser().getDomainUsername())
-          .exec(IntrospectionQuery.INTROSPECTION_QUERY);
-      fail("Expected exception");
-    } catch (Exception e) {
-      // correct
+      withCredentials(getRegularUser().getDomainUsername(),
+          t -> queryExecutor.exec(IntrospectionQuery.INTROSPECTION_QUERY));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      // OK
     }
   }
 
   @Test
-  public void testGraphQlFiles()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    final Person jack = jackQueryExecutor.me("{ uuid attendedReports { list { uuid } } }");
+  void testGraphQlFiles() {
+    final Person jack = withCredentials(jackUser,
+        t -> queryExecutor.me("{ uuid attendedReports { list { uuid } } }"));
     final Person steve = getSteveSteveson();
     final File testDir = new File(GraphQlResourceTest.class.getResource("/graphQLTests").getFile());
     assertThat(testDir.getAbsolutePath()).isNotNull();
-    assertThat(testDir.isDirectory()).isTrue();
+    assertThat(testDir).isDirectory();
 
-    Map<String, Object> variables = new HashMap<String, Object>();
+    Map<String, Object> variables = new HashMap<>();
     variables.put("personUuid", jack.getUuid());
     variables.put("positionUuid", steve.getPosition().getUuid());
     variables.put("orgUuid", steve.getPosition().getOrganization().getUuid());
@@ -85,7 +84,7 @@ public class GraphQlResourceTest extends AbstractResourceTest {
       if (f.isFile()) {
         try (final FileInputStream input = new FileInputStream(f)) {
           String raw = IOUtils.toString(input, StandardCharsets.UTF_8);
-          final Map<String, Object> query = new HashMap<String, Object>();
+          final Map<String, Object> query = new HashMap<>();
           for (final Map.Entry<String, Object> entry : variables.entrySet()) {
             raw = raw.replace("${" + entry.getKey() + "}", entry.getValue().toString());
           }
@@ -94,26 +93,26 @@ public class GraphQlResourceTest extends AbstractResourceTest {
           logger.info("Processing file {}", f);
 
           // Test POST request
-          final Map<String, Object> respPost = httpQuery("/graphql", admin).post(Entity.json(query),
-              new GenericType<Map<String, Object>>() {});
+          final Map<String, Object> respPost =
+              httpQuery(null, admin).post(Entity.json(query), new GenericType<>() {});
           doAsserts(f, respPost);
 
           // Test GET request
           final Map<String, Object> respGet =
-              httpQuery("/graphql?query=" + URLEncoder.encode("{" + raw + "}", "UTF-8"), admin)
-                  .get(new GenericType<Map<String, Object>>() {});
+              httpQuery("query=" + URLEncoder.encode("{" + raw + "}", StandardCharsets.UTF_8),
+                  admin).get(new GenericType<>() {});
           doAsserts(f, respGet);
 
           // POST and GET responses should be equal
           assertThat(respPost.get("data")).isEqualTo(respGet.get("data"));
 
           // Test GET request over XML
-          final String respGetXml =
-              httpQuery("/graphql?output=xml&query=" + URLEncoder.encode("{" + raw + "}", "UTF-8"),
-                  admin).get(new GenericType<String>() {});
+          final String respGetXml = httpQuery(
+              "output=xml&query=" + URLEncoder.encode("{" + raw + "}", StandardCharsets.UTF_8),
+              admin).get(new GenericType<>() {});
           assertThat(respGetXml).isNotNull();
           int len = respGetXml.length();
-          assertThat(len).isGreaterThan(0);
+          assertThat(len).isPositive();
           assertThat(respGetXml.substring(0, 1)).isEqualTo("<");
           String xmlHeader = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>";
           assertThat(respGetXml.substring(0, xmlHeader.length())).isEqualTo(xmlHeader);
@@ -122,25 +121,25 @@ public class GraphQlResourceTest extends AbstractResourceTest {
           // Test POST request over XML
           query.put("output", "xml");
           final String respPostXml =
-              httpQuery("/graphql", admin).post(Entity.json(query), new GenericType<String>() {});
+              httpQuery(null, admin).post(Entity.json(query), new GenericType<>() {});
 
           // POST and GET responses over XML should be equal
           assertThat(respPostXml).isEqualTo(respGetXml);
 
           // Test GET request over XLSX
           // Note: getting the resulting XLSX as String is a quick & easy hack
-          final String respGetXlsx =
-              httpQuery("/graphql?output=xlsx&query=" + URLEncoder.encode("{" + raw + "}", "UTF-8"),
-                  admin).get(new GenericType<String>() {});
+          final String respGetXlsx = httpQuery(
+              "output=xlsx&query=" + URLEncoder.encode("{" + raw + "}", StandardCharsets.UTF_8),
+              admin).get(new GenericType<>() {});
           assertThat(respGetXlsx).isNotNull();
-          assertThat(respGetXlsx.length()).isGreaterThan(0);
+          assertThat(respGetXlsx).isNotEmpty();
 
           // Test POST request over XLSX
           query.put("output", "xlsx");
           final String respPostXlsx =
-              httpQuery("/graphql", admin).post(Entity.json(query), new GenericType<String>() {});
+              httpQuery(null, admin).post(Entity.json(query), new GenericType<>() {});
           assertThat(respPostXlsx).isNotNull();
-          assertThat(respPostXlsx.length()).isGreaterThan(0);
+          assertThat(respPostXlsx).isNotEmpty();
           // Note: can't compare respGetXlsx and respPostXlsx directly, as they will be different,
           // unfortunately
         } catch (IOException e) {
@@ -161,11 +160,16 @@ public class GraphQlResourceTest extends AbstractResourceTest {
   /*
    * Helper method to build httpQuery with authentication and Accept headers.
    */
-  private Builder httpQuery(String path, Person authUser) {
+  private Builder httpQuery(String query, Person authUser) {
     final String authString = Base64.getEncoder().encodeToString(
         (authUser.getDomainUsername() + ":" + authUser.getDomainUsername()).getBytes());
-    return client.target(String.format("http://localhost:%d%s", TestApp.app.getLocalPort(), path))
-        .request().header("Authorization", "Basic " + authString)
+    final StringBuilder url = new StringBuilder(graphqlEndpoint);
+    if (!Utils.isEmptyOrNull(query)) {
+      url.append("?");
+      url.append(query);
+    }
+    return testClient.target(url.toString()).request()
+        .header("Authorization", "Basic " + authString)
         .header("Accept", MediaType.APPLICATION_JSON_TYPE.toString());
   }
 

@@ -15,46 +15,51 @@ import mil.dds.anet.database.EmailDao;
 import mil.dds.anet.test.integration.config.AnetTestConfiguration;
 import mil.dds.anet.test.integration.utils.EmailResponse;
 import mil.dds.anet.test.integration.utils.FakeSmtpServer;
-import mil.dds.anet.test.integration.utils.TestApp;
 import mil.dds.anet.threads.AnetEmailWorker;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.TestInstance;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
-@ExtendWith(TestApp.class)
-public class AnetEmailWorkerTest {
+@SpringBootTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+class AnetEmailWorkerTest {
 
-  private static String allowedEmail;
-  private static EmailDao emailDao;
-  private static FakeSmtpServer emailServer;
-  private static AnetEmailWorker emailWorker = null;
+  @Autowired
+  protected DropwizardAppExtension<AnetConfiguration> dropwizardApp;
+
+  private String allowedEmail;
+  private EmailDao emailDao;
+  private FakeSmtpServer emailServer;
+  private AnetEmailWorker emailWorker = null;
 
   @BeforeAll
   @SuppressWarnings("unchecked")
-  public static void setUp() throws Exception {
+  void setUp() throws Exception {
     final boolean executeEmailServerTests = Boolean.parseBoolean(
         AnetTestConfiguration.getConfiguration().get("emailServerTestsExecute").toString());
 
     assumeTrue(executeEmailServerTests, "Email server tests configured to be skipped.");
 
-    final DropwizardAppExtension<AnetConfiguration> app = TestApp.app;
     emailDao = mock(EmailDao.class, Mockito.RETURNS_DEEP_STUBS);
-    emailWorker = new AnetEmailWorker(app.getConfiguration(), emailDao);
+    emailWorker = new AnetEmailWorker(dropwizardApp.getConfiguration(), emailDao);
 
     allowedEmail =
-        "@" + ((List<String>) app.getConfiguration().getDictionaryEntry("domainNames")).get(0);
-    app.getConfiguration().setEmailFromAddr("test_from_address" + allowedEmail);
+        "@" + ((List<String>) dropwizardApp.getConfiguration().getDictionaryEntry("domainNames"))
+            .get(0);
+    dropwizardApp.getConfiguration().setEmailFromAddr("test_from_address" + allowedEmail);
 
-    emailServer = new FakeSmtpServer(app.getConfiguration().getSmtp());
+    emailServer = new FakeSmtpServer(dropwizardApp.getConfiguration().getSmtp());
 
     // Clear the email server before starting test
     emailServer.clearEmailServer();
   }
 
   @AfterAll
-  public static void tearDown() throws Exception {
+  void tearDown() throws Exception {
     // Clear the email server after test
     emailServer.clearEmailServer();
 
@@ -64,11 +69,11 @@ public class AnetEmailWorkerTest {
 
   /**
    * Test the worker.
-   * 
+   *
    * @throws Exception On error from the email server
    */
   @Test
-  public void testWorker() throws Exception {
+  void testWorker() throws Exception {
     final List<String> toAddresses = new ArrayList<>();
     toAddresses.add("test_to_address" + allowedEmail);
     final AnetEmail testEmail = createTestEmail(1, toAddresses, "test_comment");
@@ -83,7 +88,7 @@ public class AnetEmailWorkerTest {
 
     // Verify
     final List<EmailResponse> emails = emailServer.requestAllEmailsFromServer();
-    assertThat(emails.size()).isEqualTo(1);
+    assertThat(emails).hasSize(1);
   }
 
   private AnetEmail createTestEmail(final int id, final List<String> toAddresses,

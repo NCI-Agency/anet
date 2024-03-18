@@ -1,9 +1,9 @@
 package mil.dds.anet.database;
 
+import jakarta.inject.Inject;
+import jakarta.inject.Provider;
 import java.time.Instant;
 import java.util.function.BiConsumer;
-import javax.inject.Inject;
-import javax.inject.Provider;
 import mil.dds.anet.beans.JobHistory;
 import mil.dds.anet.database.mappers.JobHistoryMapper;
 import mil.dds.anet.utils.DaoUtils;

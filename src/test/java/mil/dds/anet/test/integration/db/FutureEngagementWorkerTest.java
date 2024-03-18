@@ -6,8 +6,6 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.graphql_java_generator.exception.GraphQLRequestExecutionException;
-import com.graphql_java_generator.exception.GraphQLRequestPreparationException;
 import io.dropwizard.testing.junit5.DropwizardAppExtension;
 import java.io.IOException;
 import java.time.Duration;
@@ -26,11 +24,9 @@ import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.database.EmailDao;
 import mil.dds.anet.database.ReportDao;
-import mil.dds.anet.test.client.util.MutationExecutor;
 import mil.dds.anet.test.integration.config.AnetTestConfiguration;
 import mil.dds.anet.test.integration.utils.EmailResponse;
 import mil.dds.anet.test.integration.utils.FakeSmtpServer;
-import mil.dds.anet.test.integration.utils.TestApp;
 import mil.dds.anet.test.integration.utils.TestBeans;
 import mil.dds.anet.test.resources.AbstractResourceTest;
 import mil.dds.anet.threads.AnetEmailWorker;
@@ -38,26 +34,31 @@ import mil.dds.anet.threads.FutureEngagementWorker;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.TestInstance;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
-@ExtendWith(TestApp.class)
-public class FutureEngagementWorkerTest extends AbstractResourceTest {
+@SpringBootTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+class FutureEngagementWorkerTest extends AbstractResourceTest {
 
-  private final static List<String> expectedIds = new ArrayList<>();
-  private final static List<String> unexpectedIds = new ArrayList<>();
+  @Autowired
+  protected DropwizardAppExtension<AnetConfiguration> dropwizardApp;
 
-  private static FutureEngagementWorker futureEngagementWorker;
-  private static FakeSmtpServer emailServer;
-  private static AnetEmailWorker emailWorker;
+  private final List<String> expectedIds = new ArrayList<>();
+  private final List<String> unexpectedIds = new ArrayList<>();
 
-  private static boolean executeEmailServerTests;
-  private static String allowedEmail;
+  private FutureEngagementWorker futureEngagementWorker;
+  private FakeSmtpServer emailServer;
+  private AnetEmailWorker emailWorker;
+
+  private boolean executeEmailServerTests;
+  private String allowedEmail;
 
   @BeforeAll
   @SuppressWarnings("unchecked")
-  public static void setUpClass() throws Exception {
-    final DropwizardAppExtension<AnetConfiguration> app = TestApp.app;
-    if (app.getConfiguration().getSmtp().isDisabled()) {
+  void setUpClass() throws Exception {
+    if (dropwizardApp.getConfiguration().getSmtp().isDisabled()) {
       fail("'ANET_SMTP_DISABLE' system environment variable must have value 'false' to run test.");
     }
 
@@ -65,13 +66,14 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
         AnetTestConfiguration.getConfiguration().get("emailServerTestsExecute").toString());
 
     allowedEmail =
-        "@" + ((List<String>) app.getConfiguration().getDictionaryEntry("domainNames")).get(0);
+        "@" + ((List<String>) dropwizardApp.getConfiguration().getDictionaryEntry("domainNames"))
+            .get(0);
 
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
-    emailWorker = new AnetEmailWorker(app.getConfiguration(), engine.getEmailDao());
+    emailWorker = new AnetEmailWorker(dropwizardApp.getConfiguration(), engine.getEmailDao());
     futureEngagementWorker =
-        new FutureEngagementWorker(app.getConfiguration(), engine.getReportDao());
-    emailServer = new FakeSmtpServer(app.getConfiguration().getSmtp());
+        new FutureEngagementWorker(dropwizardApp.getConfiguration(), engine.getReportDao());
+    emailServer = new FakeSmtpServer(dropwizardApp.getConfiguration().getSmtp());
 
     // Flush all reports from previous tests
     futureEngagementWorker.run();
@@ -82,7 +84,7 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
   }
 
   @AfterAll
-  public static void tearDownClass() throws Exception {
+  void tearDownClass() throws Exception {
     // Test that all emails have been correctly sent
     testFutureEngagementWorkerEmail();
 
@@ -148,19 +150,19 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
   }
 
   @Test
-  void testGH3304() throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void testGH3304() {
     // Create a draft report
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final ReportDao reportDao = engine.getReportDao();
     final Person author = getRegularUserBean();
-    final MutationExecutor authorMutationExecutor = getMutationExecutor(author.getDomainUsername());
     final ReportPerson advisor = personToPrimaryReportAuthor(author);
     final ReportPerson interlocutor = personToPrimaryReportPerson(getSteveStevesonBean(), true);
     final Report draftReport = reportDao.insert(TestBeans.getTestReport("testGH3304",
         getFutureDate(), null, Lists.newArrayList(advisor, interlocutor)));
 
     // Submit the report
-    authorMutationExecutor.submitReport("", draftReport.getUuid());
+    withCredentials(author.getDomainUsername(),
+        t -> mutationExecutor.submitReport("", draftReport.getUuid()));
     // This planned report gets approved automatically
     final Report submittedReport = testReportState(draftReport.getUuid(), ReportState.APPROVED);
 
@@ -181,7 +183,8 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
     final Report redraftedReport = testReportDraft(updatedReport.getUuid());
 
     // Submit the report
-    authorMutationExecutor.submitReport("", redraftedReport.getUuid());
+    withCredentials(author.getDomainUsername(),
+        t -> mutationExecutor.submitReport("", redraftedReport.getUuid()));
     // This should send an email to the approver
     expectedIds.add("hunter+jacob");
     // State should be PENDING_APPROVAL
@@ -333,7 +336,7 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
   }
 
   // Email integration
-  private static void testFutureEngagementWorkerEmail() throws IOException, InterruptedException {
+  private void testFutureEngagementWorkerEmail() throws IOException, InterruptedException {
     assumeTrue(executeEmailServerTests, "Email server tests configured to be skipped.");
 
     // Make sure all messages have been (asynchronously) sent

@@ -23,7 +23,6 @@ import mil.dds.anet.database.TaskDao;
 import mil.dds.anet.emails.PendingAssessmentsNotificationEmail;
 import mil.dds.anet.test.integration.config.AnetTestConfiguration;
 import mil.dds.anet.test.integration.utils.FakeSmtpServer;
-import mil.dds.anet.test.integration.utils.TestApp;
 import mil.dds.anet.threads.AnetEmailWorker;
 import mil.dds.anet.threads.PendingAssessmentsNotificationWorker;
 import mil.dds.anet.utils.PendingAssessmentsHelper.AssessmentDates;
@@ -31,26 +30,31 @@ import mil.dds.anet.utils.PendingAssessmentsHelper.Recurrence;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.TestInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
-@ExtendWith(TestApp.class)
-public class PendingAssessmentsNotificationWorkerTest {
+@SpringBootTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+class PendingAssessmentsNotificationWorkerTest {
 
   protected static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  private static PendingAssessmentsNotificationWorker pendingAssessmentsNotificationWorker;
-  private static AnetEmailWorker emailWorker;
-  private static FakeSmtpServer emailServer;
+  @Autowired
+  protected DropwizardAppExtension<AnetConfiguration> dropwizardApp;
 
-  private static boolean executeEmailServerTests;
+  private PendingAssessmentsNotificationWorker pendingAssessmentsNotificationWorker;
+  private AnetEmailWorker emailWorker;
+  private FakeSmtpServer emailServer;
+
+  private boolean executeEmailServerTests;
 
   @BeforeAll
-  public static void setUpClass() throws Exception {
-    final DropwizardAppExtension<AnetConfiguration> app = TestApp.app;
-    if (app.getConfiguration().getSmtp().isDisabled()) {
+  void setUpClass() throws Exception {
+    if (dropwizardApp.getConfiguration().getSmtp().isDisabled()) {
       fail("'ANET_SMTP_DISABLE' system environment variable must have value 'false' to run test.");
     }
 
@@ -58,10 +62,10 @@ public class PendingAssessmentsNotificationWorkerTest {
         AnetTestConfiguration.getConfiguration().get("emailServerTestsExecute").toString());
 
     pendingAssessmentsNotificationWorker =
-        new PendingAssessmentsNotificationWorker(app.getConfiguration());
-    emailWorker =
-        new AnetEmailWorker(app.getConfiguration(), AnetObjectEngine.getInstance().getEmailDao());
-    emailServer = new FakeSmtpServer(app.getConfiguration().getSmtp());
+        new PendingAssessmentsNotificationWorker(dropwizardApp.getConfiguration());
+    emailWorker = new AnetEmailWorker(dropwizardApp.getConfiguration(),
+        AnetObjectEngine.getInstance().getEmailDao());
+    emailServer = new FakeSmtpServer(dropwizardApp.getConfiguration().getSmtp());
 
     // Flush all assessment notifications
     pendingAssessmentsNotificationWorker.run();
@@ -70,7 +74,7 @@ public class PendingAssessmentsNotificationWorkerTest {
   }
 
   @AfterAll
-  public static void tearDownClass() throws Exception {
+  void tearDownClass() throws Exception {
     // Clear the email server after testing
     flushEmail();
 
@@ -79,7 +83,7 @@ public class PendingAssessmentsNotificationWorkerTest {
   }
 
   @Test
-  public void testGetAssessmentDates() {
+  void testGetAssessmentDates() {
     final Object[][] testData = new Object[][] {
         // each item has: { test date, recurrence, expected assessment date,
         // expected notification date, expected reminder date }
@@ -184,13 +188,13 @@ public class PendingAssessmentsNotificationWorkerTest {
   }
 
   @Test
-  public void testNoAssessments() {
+  void testNoAssessments() {
     // There should be no new pending assessments since the run in setUpClass()
     testPendingAssessmentsNotificationWorker(0);
   }
 
   @Test
-  public void testInitialDataAssessments() throws Exception {
+  void testInitialDataAssessments() throws Exception {
     final JobHistoryDao jobHistoryDao = AnetObjectEngine.getInstance().getJobHistoryDao();
     final JobHistory jobHistory =
         jobHistoryDao.getByJobName(pendingAssessmentsNotificationWorker.getClass().getSimpleName());
@@ -277,7 +281,7 @@ public class PendingAssessmentsNotificationWorkerTest {
     return emails.subList(prevEmailSize, emails.size());
   }
 
-  private static void flushEmail() throws Exception {
+  private void flushEmail() throws Exception {
     assumeTrue(executeEmailServerTests, "Email server tests configured to be skipped.");
 
     // Flush all messages

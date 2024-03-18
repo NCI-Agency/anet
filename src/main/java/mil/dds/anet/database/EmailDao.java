@@ -2,10 +2,10 @@ package mil.dds.anet.database;
 
 import static org.jdbi.v3.core.statement.EmptyHandling.NULL_KEYWORD;
 
+import jakarta.inject.Inject;
+import jakarta.inject.Provider;
 import java.time.Instant;
 import java.util.List;
-import javax.inject.Inject;
-import javax.inject.Provider;
 import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.database.mappers.AnetEmailMapper;
 import mil.dds.anet.utils.DaoUtils;

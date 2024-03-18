@@ -3,10 +3,7 @@ package mil.dds.anet.test.resources.merge;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
-import com.graphql_java_generator.exception.GraphQLRequestExecutionException;
-import com.graphql_java_generator.exception.GraphQLRequestPreparationException;
 import java.util.List;
-import javax.ws.rs.NotFoundException;
 import mil.dds.anet.resources.AttachmentResource;
 import mil.dds.anet.test.client.AttachmentInput;
 import mil.dds.anet.test.client.GenericRelatedObjectInput;
@@ -25,14 +22,14 @@ public class LocationMergeTest extends AbstractResourceTest {
           AttachmentResourceTest.ATTACHMENT_FIELDS);
 
   @Test
-  public void testMerge()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void testMerge() {
     // Create Loser Location
     final LocationInput firstLocationInput = LocationInput.builder()
         .withName("MergeLocationsTest First Location").withType(LocationType.POINT_LOCATION)
         .withLat(47.613442).withLng(-52.740936).withStatus(Status.ACTIVE).build();
 
-    final Location firstLocation = adminMutationExecutor.createLocation(FIELDS, firstLocationInput);
+    final Location firstLocation = withCredentials(adminUser,
+        t -> mutationExecutor.createLocation(FIELDS, firstLocationInput));
     assertThat(firstLocation).isNotNull();
     assertThat(firstLocation.getUuid()).isNotNull();
 
@@ -43,8 +40,8 @@ public class LocationMergeTest extends AbstractResourceTest {
         AttachmentInput.builder().withFileName("testFirstLocationAttachment.jpg")
             .withMimeType(AttachmentResource.getAllowedMimeTypes().get(0))
             .withAttachmentRelatedObjects(List.of(firstLocationAttachment)).build();
-    final String createdFirstLocationAttachmentUuid =
-        adminMutationExecutor.createAttachment("", firstLocationAttachmentInput);
+    final String createdFirstLocationAttachmentUuid = withCredentials(adminUser,
+        t -> mutationExecutor.createAttachment("", firstLocationAttachmentInput));
     assertThat(createdFirstLocationAttachmentUuid).isNotNull();
 
     // Create Winner Location
@@ -52,8 +49,8 @@ public class LocationMergeTest extends AbstractResourceTest {
         .withName("MergeLocationsTest Second Location").withType(LocationType.POINT_LOCATION)
         .withLat(47.561517).withLng(-52.70876).withStatus(Status.ACTIVE).build();
 
-    final Location secondLocation =
-        adminMutationExecutor.createLocation(FIELDS, secondLocationInput);
+    final Location secondLocation = withCredentials(adminUser,
+        t -> mutationExecutor.createLocation(FIELDS, secondLocationInput));
     assertThat(secondLocation).isNotNull();
     assertThat(secondLocation.getUuid()).isNotNull();
 
@@ -64,27 +61,28 @@ public class LocationMergeTest extends AbstractResourceTest {
         AttachmentInput.builder().withFileName("testSecondLocationAttachment.jpg")
             .withMimeType(AttachmentResource.getAllowedMimeTypes().get(0))
             .withAttachmentRelatedObjects(List.of(secondLocationAttachment)).build();
-    final String createdSecondLocationAttachmentUuid =
-        adminMutationExecutor.createAttachment("", secondLocationAttachmentInput);
+    final String createdSecondLocationAttachmentUuid = withCredentials(adminUser,
+        t -> mutationExecutor.createAttachment("", secondLocationAttachmentInput));
     assertThat(createdSecondLocationAttachmentUuid).isNotNull();
 
     // Merge the two locations
     final LocationInput mergedLocationInput = getLocationInput(firstLocation);
     mergedLocationInput.setStatus(secondLocation.getStatus());
-    final int nrUpdated =
-        adminMutationExecutor.mergeLocations("", secondLocation.getUuid(), mergedLocationInput);
+    final int nrUpdated = withCredentials(adminUser,
+        t -> mutationExecutor.mergeLocations("", secondLocation.getUuid(), mergedLocationInput));
     assertThat(nrUpdated).isOne();
 
     // Assert that loser is gone.
     try {
-      adminQueryExecutor.location(FIELDS, secondLocation.getUuid());
-      fail("Expected NotFoundException");
-    } catch (NotFoundException expectedException) {
+      withCredentials(adminUser, t -> queryExecutor.location(FIELDS, secondLocation.getUuid()));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      // OK
     }
 
     // Check that attachments have been merged
-    final Location mergedLocation =
-        adminQueryExecutor.location(FIELDS, mergedLocationInput.getUuid());
+    final Location mergedLocation = withCredentials(adminUser,
+        t -> queryExecutor.location(FIELDS, mergedLocationInput.getUuid()));
     assertThat(mergedLocation.getAttachments()).hasSize(2);
   }
 

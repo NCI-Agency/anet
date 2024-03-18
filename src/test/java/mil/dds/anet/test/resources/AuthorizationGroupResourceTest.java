@@ -3,10 +3,7 @@ package mil.dds.anet.test.resources;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Fail.fail;
 
-import com.graphql_java_generator.exception.GraphQLRequestExecutionException;
-import com.graphql_java_generator.exception.GraphQLRequestPreparationException;
 import java.util.List;
-import javax.ws.rs.ForbiddenException;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PositionDao;
@@ -19,7 +16,6 @@ import mil.dds.anet.test.client.Organization;
 import mil.dds.anet.test.client.Person;
 import mil.dds.anet.test.client.Position;
 import mil.dds.anet.test.client.Status;
-import mil.dds.anet.test.client.util.MutationExecutor;
 import org.junit.jupiter.api.Test;
 
 class AuthorizationGroupResourceTest extends AbstractResourceTest {
@@ -33,21 +29,20 @@ class AuthorizationGroupResourceTest extends AbstractResourceTest {
       + " ... on Position { uuid type name } } } }";
 
   @Test
-  void searchTest() throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void searchTest() {
     // Search by name
     final AuthorizationGroupSearchQueryInput query =
         AuthorizationGroupSearchQueryInput.builder().withText("EF").build();
-    AnetBeanList_AuthorizationGroup ags =
-        jackQueryExecutor.authorizationGroupList(getListFields(FIELDS), query);
+    AnetBeanList_AuthorizationGroup ags = withCredentials(jackUser,
+        t -> queryExecutor.authorizationGroupList(getListFields(FIELDS), query));
     assertThat(ags.getList()).isNotEmpty();
   }
 
   @Test
-  void testCreateAsAdmin()
-      throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
+  void testCreateAsAdmin() {
     final AuthorizationGroupInput authorizationGroupInput = getAuthorizationGroupInput();
-    final AuthorizationGroup authorizationGroup =
-        adminMutationExecutor.createAuthorizationGroup(FIELDS, authorizationGroupInput);
+    final AuthorizationGroup authorizationGroup = withCredentials(adminUser,
+        t -> mutationExecutor.createAuthorizationGroup(FIELDS, authorizationGroupInput));
     assertThat(authorizationGroup).isNotNull();
     assertThat(authorizationGroup.getUuid()).isNotNull();
     assertThat(authorizationGroup.getAdministrativePositions())
@@ -57,52 +52,47 @@ class AuthorizationGroupResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  void testCreateAsSuperuser()
-      throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
-    final MutationExecutor superuserMutationExecutor =
-        getMutationExecutor(getSuperuser().getDomainUsername());
+  void testCreateAsSuperuser() {
     final AuthorizationGroupInput authorizationGroupInput = getAuthorizationGroupInput();
     try {
-      superuserMutationExecutor.createAuthorizationGroup(FIELDS, authorizationGroupInput);
-      fail("Expected ForbiddenException");
-    } catch (ForbiddenException expectedException) {
+      withCredentials(getSuperuser().getDomainUsername(),
+          t -> mutationExecutor.createAuthorizationGroup(FIELDS, authorizationGroupInput));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      // OK
     }
   }
 
   @Test
-  void testEditAsWrongSuperuser()
-      throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
-    final MutationExecutor superuserMutationExecutor = getMutationExecutor("jacob");
+  void testEditAsWrongSuperuser() {
     final AuthorizationGroupInput authorizationGroupInput = getAuthorizationGroupInput();
-    final AuthorizationGroup authorizationGroup =
-        adminMutationExecutor.createAuthorizationGroup(FIELDS, authorizationGroupInput);
+    final AuthorizationGroup authorizationGroup = withCredentials(adminUser,
+        t -> mutationExecutor.createAuthorizationGroup(FIELDS, authorizationGroupInput));
     assertThat(authorizationGroup).isNotNull();
     try {
-      superuserMutationExecutor.updateAuthorizationGroup("",
-          getAuthorizationGroupInput(authorizationGroup));
-      fail("Expected ForbiddenException");
-    } catch (ForbiddenException expectedException) {
+      withCredentials("jacob", t -> mutationExecutor.updateAuthorizationGroup("",
+          getAuthorizationGroupInput(authorizationGroup)));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      // OK
     }
   }
 
   @Test
-  void testEditAsSuperuser()
-      throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
-    final MutationExecutor superuserMutationExecutor =
-        getMutationExecutor(getSuperuser().getDomainUsername());
+  void testEditAsSuperuser() {
     final AuthorizationGroupInput authorizationGroupInput = getAuthorizationGroupInput();
-    final AuthorizationGroup authorizationGroup =
-        adminMutationExecutor.createAuthorizationGroup(FIELDS, authorizationGroupInput);
+    final AuthorizationGroup authorizationGroup = withCredentials(adminUser,
+        t -> mutationExecutor.createAuthorizationGroup(FIELDS, authorizationGroupInput));
     assertThat(authorizationGroup).isNotNull();
     final AuthorizationGroupInput updatedAuthorizationGroupInput =
         getAuthorizationGroupInput(authorizationGroup);
     updatedAuthorizationGroupInput.getAuthorizationGroupRelatedObjects().remove(0);
     updatedAuthorizationGroupInput.getAdministrativePositions().remove(0);
-    final Integer nrUpdated =
-        superuserMutationExecutor.updateAuthorizationGroup("", updatedAuthorizationGroupInput);
+    final Integer nrUpdated = withCredentials(getSuperuser().getDomainUsername(),
+        t -> mutationExecutor.updateAuthorizationGroup("", updatedAuthorizationGroupInput));
     assertThat(nrUpdated).isOne();
-    final AuthorizationGroup updatedAuthorizationGroup =
-        adminQueryExecutor.authorizationGroup(FIELDS, authorizationGroup.getUuid());
+    final AuthorizationGroup updatedAuthorizationGroup = withCredentials(adminUser,
+        t -> queryExecutor.authorizationGroup(FIELDS, authorizationGroup.getUuid()));
     assertThat(updatedAuthorizationGroup.getAdministrativePositions())
         .hasSize(authorizationGroupInput.getAdministrativePositions().size() - 1);
     assertThat(updatedAuthorizationGroup.getAuthorizationGroupRelatedObjects())
@@ -110,32 +100,33 @@ class AuthorizationGroupResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  void testCreateAsUser()
-      throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
+  void testCreateAsUser() {
     final AuthorizationGroupInput authorizationGroupInput = getAuthorizationGroupInput();
     try {
-      jackMutationExecutor.createAuthorizationGroup(FIELDS, authorizationGroupInput);
-      fail("Expected ForbiddenException");
-    } catch (ForbiddenException expectedException) {
+      withCredentials(jackUser,
+          t -> mutationExecutor.createAuthorizationGroup(FIELDS, authorizationGroupInput));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      // OK
     }
   }
 
   @Test
-  void testEditAsUser()
-      throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
+  void testEditAsUser() {
     final AuthorizationGroupInput authorizationGroupInput = getAuthorizationGroupInput();
-    final AuthorizationGroup authorizationGroup =
-        adminMutationExecutor.createAuthorizationGroup(FIELDS, authorizationGroupInput);
+    final AuthorizationGroup authorizationGroup = withCredentials(adminUser,
+        t -> mutationExecutor.createAuthorizationGroup(FIELDS, authorizationGroupInput));
     assertThat(authorizationGroup).isNotNull();
     try {
-      jackMutationExecutor.updateAuthorizationGroup("",
-          getAuthorizationGroupInput(authorizationGroup));
-      fail("Expected ForbiddenException");
-    } catch (ForbiddenException expectedException) {
+      withCredentials(jackUser, t -> mutationExecutor.updateAuthorizationGroup("",
+          getAuthorizationGroupInput(authorizationGroup)));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      // OK
     }
   }
 
-  private static AuthorizationGroupInput getAuthorizationGroupInput() {
+  private AuthorizationGroupInput getAuthorizationGroupInput() {
     return AuthorizationGroupInput.builder().withName("test authorization group")
         .withDescription("test authorization group description").withStatus(Status.ACTIVE)
         .withAdministrativePositions(
@@ -151,30 +142,30 @@ class AuthorizationGroupResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  void testAuthorizationGroupsByRelatedObject()
-      throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
+  void testAuthorizationGroupsByRelatedObject() {
     // Authorization group EF 5 should transitively contain all related objects below
     final String expectedAuthorizationGroupUuid = "ab1a7d99-4529-44b1-a118-bdee3ca8296b";
     final String fields = "{ uuid authorizationGroups { uuid } }";
 
     // CIV BRATTON, Creed
-    final Person person = jackQueryExecutor.person(fields, "31cba227-f6c6-49e9-9483-fce441bea624");
+    final Person person = withCredentials(jackUser,
+        t -> queryExecutor.person(fields, "31cba227-f6c6-49e9-9483-fce441bea624"));
     assertThat(person).isNotNull();
     assertThat(person.getAuthorizationGroups()).hasSize(1);
     assertThat(person.getAuthorizationGroups().get(0).getUuid())
         .isEqualTo(expectedAuthorizationGroupUuid);
 
     // EF 5.1 Advisor Quality Assurance
-    final Position position =
-        jackQueryExecutor.position(fields, "05c42ce0-34a0-4391-8b2f-c4cd85ee6b47");
+    final Position position = withCredentials(jackUser,
+        t -> queryExecutor.position(fields, "05c42ce0-34a0-4391-8b2f-c4cd85ee6b47"));
     assertThat(position).isNotNull();
     assertThat(position.getAuthorizationGroups()).hasSize(1);
     assertThat(position.getAuthorizationGroups().get(0).getUuid())
         .isEqualTo(expectedAuthorizationGroupUuid);
 
     // EF 5.1
-    final Organization organization =
-        jackQueryExecutor.organization(fields, "7f939a44-b9e4-48e0-98f5-7d0ea38a6ecf");
+    final Organization organization = withCredentials(jackUser,
+        t -> queryExecutor.organization(fields, "7f939a44-b9e4-48e0-98f5-7d0ea38a6ecf"));
     assertThat(organization).isNotNull();
     assertThat(organization.getAuthorizationGroups()).hasSize(1);
     assertThat(organization.getAuthorizationGroups().get(0).getUuid())

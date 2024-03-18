@@ -3,8 +3,6 @@ package mil.dds.anet.test.resources;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
-import com.graphql_java_generator.exception.GraphQLRequestExecutionException;
-import com.graphql_java_generator.exception.GraphQLRequestPreparationException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -27,8 +25,6 @@ import mil.dds.anet.test.client.Report;
 import mil.dds.anet.test.client.ReportInput;
 import mil.dds.anet.test.client.ReportState;
 import mil.dds.anet.test.client.Status;
-import mil.dds.anet.test.client.util.MutationExecutor;
-import mil.dds.anet.test.client.util.QueryExecutor;
 import org.junit.jupiter.api.Test;
 
 public class AttachmentResourceTest extends AbstractResourceTest {
@@ -40,19 +36,8 @@ public class AttachmentResourceTest extends AbstractResourceTest {
       String.format("attachments %1$s", ATTACHMENT_FIELDS);
   private static final String OBJECT_FIELDS = String.format("{ uuid %1$s }", _ATTACHMENTS_FIELDS);
 
-  // Normal user
-  private final MutationExecutor erinMutationExecutor =
-      getMutationExecutor(getRegularUser().getDomainUsername());
-  // Superuser of EF 2.1
-  private final MutationExecutor henryMutationExecutor = getMutationExecutor("henry");
-  // Superusers of EF 2.2
-  private final MutationExecutor rebeccaMutationExecutor =
-      getMutationExecutor(getSuperuser().getDomainUsername());
-  private final MutationExecutor jacobMutationExecutor = getMutationExecutor("jacob");
-
   @Test
-  void testAttachment()
-      throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
+  void testAttachment() {
     final Map<String, Object> attachmentSettings = AttachmentResource.getAttachmentSettings();
 
     final AttachmentInput testAttachmentInput =
@@ -61,21 +46,20 @@ public class AttachmentResourceTest extends AbstractResourceTest {
             .withAttachmentRelatedObjects(List.of()).build();
 
     // Fail attachment create with a mimetype that is not allowed
-    failAttachmentCreate(jackMutationExecutor, testAttachmentInput);
+    failAttachmentCreate(jackUser, testAttachmentInput);
 
     // Fail attachment create with wrong classification
     testAttachmentInput.setMimeType(getFirstMimeType());
     testAttachmentInput.setClassification("NATO_UNCLASSIFIED");
-    failAttachmentCreate(jackMutationExecutor, testAttachmentInput);
+    failAttachmentCreate(jackUser, testAttachmentInput);
 
     // FIXME: change this setting in the dictionary, then test it!
     final Boolean userUploadDisabled = (Boolean) attachmentSettings.get("restrictToAdmins");
     if (userUploadDisabled) {
       // Fail attachment create with any user other than admin
-      failAttachmentCreate(jackMutationExecutor, testAttachmentInput);
+      failAttachmentCreate(jackUser, testAttachmentInput);
       // Succeed attachment create as admin
-      final String createdAttachmentUuid =
-          succeedAttachmentCreate(adminMutationExecutor, testAttachmentInput);
+      final String createdAttachmentUuid = succeedAttachmentCreate(adminUser, testAttachmentInput);
       assertThat(createdAttachmentUuid).isNotNull();
     }
 
@@ -85,13 +69,12 @@ public class AttachmentResourceTest extends AbstractResourceTest {
         .withDescription("a test attachment created by testCreateAttachment")
         .withCaption("testCaption").withClassification(getFirstClassification())
         .withAttachmentRelatedObjects(List.of()).build();
-    final String createdAttachmentUuid2 =
-        succeedAttachmentCreate(jackMutationExecutor, testAttachmentInput2);
+    final String createdAttachmentUuid2 = succeedAttachmentCreate(jackUser, testAttachmentInput2);
     assertThat(createdAttachmentUuid2).isNotNull();
 
     // Get the attachment
-    final Attachment createdAttachment =
-        jackQueryExecutor.attachment(ATTACHMENT_FIELDS, createdAttachmentUuid2);
+    final Attachment createdAttachment = withCredentials(jackUser,
+        t -> queryExecutor.attachment(ATTACHMENT_FIELDS, createdAttachmentUuid2));
     assertThat(createdAttachment.getAuthor().getUuid()).isEqualTo(getJackJackson().getUuid());
     assertThat(createdAttachment.getFileName()).isEqualTo(testAttachmentInput2.getFileName());
     assertThat(createdAttachment.getMimeType()).isEqualTo(testAttachmentInput2.getMimeType());
@@ -105,14 +88,13 @@ public class AttachmentResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  void testLocationAttachments()
-      throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
+  void testLocationAttachments() {
     // Create test location
     final LocationInput testLocationInput = LocationInput.builder().withStatus(Status.ACTIVE)
         .withName("a test location created by testLocationAttachment")
         .withType(LocationType.VIRTUAL_LOCATION).build();
-    final Location testLocation =
-        adminMutationExecutor.createLocation(OBJECT_FIELDS, testLocationInput);
+    final Location testLocation = withCredentials(adminUser,
+        t -> mutationExecutor.createLocation(OBJECT_FIELDS, testLocationInput));
     assertThat(testLocation).isNotNull();
     assertThat(testLocation.getUuid()).isNotNull();
     final int nrOfAttachments = testLocation.getAttachments().size();
@@ -126,7 +108,8 @@ public class AttachmentResourceTest extends AbstractResourceTest {
         testCreateLocationAttachments(testAttachmentInput);
 
     // Check the location
-    final Location location = jackQueryExecutor.location(OBJECT_FIELDS, testLocation.getUuid());
+    final Location location = withCredentials(jackUser,
+        t -> queryExecutor.location(OBJECT_FIELDS, testLocation.getUuid()));
     assertThat(location.getAttachments()).hasSize(nrOfAttachments + 3);
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     final Attachment superuserAttachment1 = location.getAttachments().stream()
@@ -153,20 +136,16 @@ public class AttachmentResourceTest extends AbstractResourceTest {
   }
 
   private CreateLocationAttachmentsResult testCreateLocationAttachments(
-      AttachmentInput testAttachmentInput)
-      throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
+      AttachmentInput testAttachmentInput) {
     // F - create attachment as normal user
-    failAttachmentCreate(erinMutationExecutor, testAttachmentInput);
+    failAttachmentCreate("erin", testAttachmentInput);
 
     // S - create attachment as superuser
-    final String superuserAttachmentUuid1 =
-        succeedAttachmentCreate(rebeccaMutationExecutor, testAttachmentInput);
-    final String superuserAttachmentUuid2 =
-        succeedAttachmentCreate(rebeccaMutationExecutor, testAttachmentInput);
+    final String superuserAttachmentUuid1 = succeedAttachmentCreate("rebecca", testAttachmentInput);
+    final String superuserAttachmentUuid2 = succeedAttachmentCreate("rebecca", testAttachmentInput);
 
     // S - create attachment as admin
-    final String adminAttachmentUuid =
-        succeedAttachmentCreate(adminMutationExecutor, testAttachmentInput);
+    final String adminAttachmentUuid = succeedAttachmentCreate(adminUser, testAttachmentInput);
 
     return new CreateLocationAttachmentsResult(superuserAttachmentUuid1, superuserAttachmentUuid2,
         adminAttachmentUuid);
@@ -176,23 +155,20 @@ public class AttachmentResourceTest extends AbstractResourceTest {
       String superuserAttachmentUuid2, String adminAttachmentUuid) {}
 
   private void testUpdateLocationAttachments(final String locationUuid, final int nrOfAttachments,
-      final Attachment superuserAttachment1, final Attachment superuserAttachment2)
-      throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
+      final Attachment superuserAttachment1, final Attachment superuserAttachment2) {
     // F - update attachment as normal user
     superuserAttachment1.setFileName("erinUpdatedAttachment.jpg");
-    failAttachmentUpdate(erinMutationExecutor,
-        getInput(superuserAttachment1, AttachmentInput.class));
+    failAttachmentUpdate("erin", getInput(superuserAttachment1, AttachmentInput.class));
 
     // F - update attachment as different superuser
     superuserAttachment1.setFileName("henryUpdatedAttachment.jpg");
-    failAttachmentUpdate(henryMutationExecutor,
-        getInput(superuserAttachment1, AttachmentInput.class));
+    failAttachmentUpdate("henry", getInput(superuserAttachment1, AttachmentInput.class));
 
     // S - update attachment as superuser
     superuserAttachment1.setFileName("jackUpdatedAttachment.jpg");
-    succeedAttachmentUpdate(rebeccaMutationExecutor,
-        getInput(superuserAttachment1, AttachmentInput.class));
-    Location location = jackQueryExecutor.location(OBJECT_FIELDS, locationUuid);
+    succeedAttachmentUpdate("rebecca", getInput(superuserAttachment1, AttachmentInput.class));
+    Location location =
+        withCredentials(jackUser, t -> queryExecutor.location(OBJECT_FIELDS, locationUuid));
     assertThat(location.getAttachments()).hasSize(nrOfAttachments);
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     final Attachment updatedSuperuserAttachment1 = location.getAttachments().stream()
@@ -202,9 +178,8 @@ public class AttachmentResourceTest extends AbstractResourceTest {
 
     // S - update attachment as admin
     superuserAttachment2.setFileName("adminUpdatedAttachment.jpg");
-    succeedAttachmentUpdate(adminMutationExecutor,
-        getInput(superuserAttachment2, AttachmentInput.class));
-    location = jackQueryExecutor.location(OBJECT_FIELDS, locationUuid);
+    succeedAttachmentUpdate(adminUser, getInput(superuserAttachment2, AttachmentInput.class));
+    location = withCredentials(jackUser, t -> queryExecutor.location(OBJECT_FIELDS, locationUuid));
     assertThat(location.getAttachments()).hasSize(nrOfAttachments);
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     final Attachment updatedSuperuserAttachment2 = location.getAttachments().stream()
@@ -215,36 +190,35 @@ public class AttachmentResourceTest extends AbstractResourceTest {
 
   private void testDeleteLocationAttachments(final String locationUuid, final int nrOfAttachments,
       final Attachment superuserAttachment1, final Attachment superuserAttachment2,
-      final Attachment adminAttachment)
-      throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
+      final Attachment adminAttachment) {
     // F - delete attachment as normal user
-    failAttachmentDelete(erinMutationExecutor, superuserAttachment1.getUuid());
+    failAttachmentDelete("erin", superuserAttachment1.getUuid());
 
     // F - delete attachment as different superuser
-    failAttachmentDelete(henryMutationExecutor, superuserAttachment1.getUuid());
+    failAttachmentDelete("henry", superuserAttachment1.getUuid());
 
     // S - delete attachment as superuser
-    succeedAttachmentDelete(rebeccaMutationExecutor, superuserAttachment1.getUuid());
-    Location location = jackQueryExecutor.location(OBJECT_FIELDS, locationUuid);
+    succeedAttachmentDelete("rebecca", superuserAttachment1.getUuid());
+    Location location =
+        withCredentials(jackUser, t -> queryExecutor.location(OBJECT_FIELDS, locationUuid));
     assertThat(location.getAttachments()).hasSize(nrOfAttachments - 1);
 
     // S - delete superuser attachment as admin
-    succeedAttachmentDelete(adminMutationExecutor, superuserAttachment2.getUuid());
-    location = jackQueryExecutor.location(OBJECT_FIELDS, locationUuid);
+    succeedAttachmentDelete(adminUser, superuserAttachment2.getUuid());
+    location = withCredentials(jackUser, t -> queryExecutor.location(OBJECT_FIELDS, locationUuid));
     assertThat(location.getAttachments()).hasSize(nrOfAttachments - 2);
 
     // S - delete admin attachment as admin
-    succeedAttachmentDelete(adminMutationExecutor, adminAttachment.getUuid());
-    location = jackQueryExecutor.location(OBJECT_FIELDS, locationUuid);
+    succeedAttachmentDelete(adminUser, adminAttachment.getUuid());
+    location = withCredentials(jackUser, t -> queryExecutor.location(OBJECT_FIELDS, locationUuid));
     assertThat(location.getAttachments()).hasSize(nrOfAttachments - 3);
   }
 
   @Test
-  void testOrganizationAttachments()
-      throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
+  void testOrganizationAttachments() {
     // Get test organization
-    final Organization testOrganization =
-        adminQueryExecutor.organization(OBJECT_FIELDS, "ccbee4bb-08b8-42df-8cb5-65e8172f657b");
+    final Organization testOrganization = withCredentials(adminUser,
+        t -> queryExecutor.organization(OBJECT_FIELDS, "ccbee4bb-08b8-42df-8cb5-65e8172f657b"));
     assertThat(testOrganization).isNotNull();
     assertThat(testOrganization.getUuid()).isNotNull();
     final int nrOfAttachments = testOrganization.getAttachments().size();
@@ -258,8 +232,8 @@ public class AttachmentResourceTest extends AbstractResourceTest {
         testCreateOrganizationAttachments(testAttachmentInput);
 
     // Check the organization
-    final Organization organization =
-        jackQueryExecutor.organization(OBJECT_FIELDS, testOrganization.getUuid());
+    final Organization organization = withCredentials(jackUser,
+        t -> queryExecutor.organization(OBJECT_FIELDS, testOrganization.getUuid()));
     assertThat(organization.getAttachments()).hasSize(nrOfAttachments + 3);
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     final Attachment superuserAttachment1 = organization.getAttachments().stream()
@@ -286,23 +260,19 @@ public class AttachmentResourceTest extends AbstractResourceTest {
   }
 
   private CreateOrganizationAttachmentsResult testCreateOrganizationAttachments(
-      AttachmentInput testAttachmentInput)
-      throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
+      AttachmentInput testAttachmentInput) {
     // F - create attachment as normal user
-    failAttachmentCreate(erinMutationExecutor, testAttachmentInput);
+    failAttachmentCreate("erin", testAttachmentInput);
 
     // F - create attachment as superuser of different organization
-    failAttachmentCreate(henryMutationExecutor, testAttachmentInput);
+    failAttachmentCreate("henry", testAttachmentInput);
 
     // S - create attachment as superuser
-    final String superuserAttachmentUuid1 =
-        succeedAttachmentCreate(rebeccaMutationExecutor, testAttachmentInput);
-    final String superuserAttachmentUuid2 =
-        succeedAttachmentCreate(rebeccaMutationExecutor, testAttachmentInput);
+    final String superuserAttachmentUuid1 = succeedAttachmentCreate("rebecca", testAttachmentInput);
+    final String superuserAttachmentUuid2 = succeedAttachmentCreate("rebecca", testAttachmentInput);
 
     // S - create attachment as admin
-    final String adminAttachmentUuid =
-        succeedAttachmentCreate(adminMutationExecutor, testAttachmentInput);
+    final String adminAttachmentUuid = succeedAttachmentCreate(adminUser, testAttachmentInput);
 
     return new CreateOrganizationAttachmentsResult(superuserAttachmentUuid1,
         superuserAttachmentUuid2, adminAttachmentUuid);
@@ -313,28 +283,24 @@ public class AttachmentResourceTest extends AbstractResourceTest {
 
   private void testUpdateOrganizationAttachments(final String organizationUuid,
       final int nrOfAttachments, final Attachment superuserAttachment1,
-      final Attachment superuserAttachment2)
-      throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
+      final Attachment superuserAttachment2) {
     // F - update attachment as normal user
     superuserAttachment1.setFileName("erinUpdatedAttachment.jpg");
-    failAttachmentUpdate(erinMutationExecutor,
-        getInput(superuserAttachment1, AttachmentInput.class));
+    failAttachmentUpdate("erin", getInput(superuserAttachment1, AttachmentInput.class));
 
     // F - update attachment as superuser of different organization
     superuserAttachment1.setFileName("henryUpdatedAttachment.jpg");
-    failAttachmentUpdate(henryMutationExecutor,
-        getInput(superuserAttachment1, AttachmentInput.class));
+    failAttachmentUpdate("henry", getInput(superuserAttachment1, AttachmentInput.class));
 
     // F - update attachment as different superuser
     superuserAttachment1.setFileName("jacobUpdatedAttachment.jpg");
-    failAttachmentUpdate(jacobMutationExecutor,
-        getInput(superuserAttachment1, AttachmentInput.class));
+    failAttachmentUpdate("jacob", getInput(superuserAttachment1, AttachmentInput.class));
 
     // S - update attachment as superuser
     superuserAttachment1.setFileName("rebeccaUpdatedAttachment.jpg");
-    succeedAttachmentUpdate(rebeccaMutationExecutor,
-        getInput(superuserAttachment1, AttachmentInput.class));
-    Organization organization = jackQueryExecutor.organization(OBJECT_FIELDS, organizationUuid);
+    succeedAttachmentUpdate("rebecca", getInput(superuserAttachment1, AttachmentInput.class));
+    Organization organization =
+        withCredentials(jackUser, t -> queryExecutor.organization(OBJECT_FIELDS, organizationUuid));
     assertThat(organization.getAttachments()).hasSize(nrOfAttachments);
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     final Attachment updatedSuperuserAttachment1 = organization.getAttachments().stream()
@@ -344,9 +310,9 @@ public class AttachmentResourceTest extends AbstractResourceTest {
 
     // S - update attachment as admin
     superuserAttachment2.setFileName("adminUpdatedAttachment.jpg");
-    succeedAttachmentUpdate(adminMutationExecutor,
-        getInput(superuserAttachment2, AttachmentInput.class));
-    organization = jackQueryExecutor.organization(OBJECT_FIELDS, organizationUuid);
+    succeedAttachmentUpdate(adminUser, getInput(superuserAttachment2, AttachmentInput.class));
+    organization =
+        withCredentials(jackUser, t -> queryExecutor.organization(OBJECT_FIELDS, organizationUuid));
     assertThat(organization.getAttachments()).hasSize(nrOfAttachments);
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     final Attachment updatedSuperuserAttachment2 = organization.getAttachments().stream()
@@ -357,42 +323,44 @@ public class AttachmentResourceTest extends AbstractResourceTest {
 
   private void testDeleteOrganizationAttachments(final String organizationUuid,
       final int nrOfAttachments, final Attachment superuserAttachment1,
-      final Attachment superuserAttachment2, final Attachment adminAttachment)
-      throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
+      final Attachment superuserAttachment2, final Attachment adminAttachment) {
     // F - delete attachment as normal user
-    failAttachmentDelete(erinMutationExecutor, superuserAttachment1.getUuid());
+    failAttachmentDelete("erin", superuserAttachment1.getUuid());
 
     // F - delete attachment as superuser of different organization
-    failAttachmentDelete(henryMutationExecutor, superuserAttachment1.getUuid());
+    failAttachmentDelete("henry", superuserAttachment1.getUuid());
 
     // F - delete attachment as different superuser
-    failAttachmentDelete(jacobMutationExecutor, superuserAttachment1.getUuid());
+    failAttachmentDelete("jacob", superuserAttachment1.getUuid());
 
     // S - delete attachment as superuser
-    succeedAttachmentDelete(rebeccaMutationExecutor, superuserAttachment1.getUuid());
-    Organization organization = jackQueryExecutor.organization(OBJECT_FIELDS, organizationUuid);
+    succeedAttachmentDelete("rebecca", superuserAttachment1.getUuid());
+    Organization organization =
+        withCredentials(jackUser, t -> queryExecutor.organization(OBJECT_FIELDS, organizationUuid));
     assertThat(organization.getAttachments()).hasSize(nrOfAttachments - 1);
 
     // S - delete superuser attachment as admin
-    succeedAttachmentDelete(adminMutationExecutor, superuserAttachment2.getUuid());
-    organization = jackQueryExecutor.organization(OBJECT_FIELDS, organizationUuid);
+    succeedAttachmentDelete(adminUser, superuserAttachment2.getUuid());
+    organization =
+        withCredentials(jackUser, t -> queryExecutor.organization(OBJECT_FIELDS, organizationUuid));
     assertThat(organization.getAttachments()).hasSize(nrOfAttachments - 2);
 
     // S - delete admin attachment as admin
-    succeedAttachmentDelete(adminMutationExecutor, adminAttachment.getUuid());
-    organization = jackQueryExecutor.organization(OBJECT_FIELDS, organizationUuid);
+    succeedAttachmentDelete(adminUser, adminAttachment.getUuid());
+    organization =
+        withCredentials(jackUser, t -> queryExecutor.organization(OBJECT_FIELDS, organizationUuid));
     assertThat(organization.getAttachments()).hasSize(nrOfAttachments - 3);
   }
 
   @Test
-  void testReportAttachment()
-      throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
+  void testReportAttachment() {
     // Create test report
     final ReportInput testReportInput = ReportInput.builder().withState(ReportState.DRAFT)
         .withIntent("a test report created by testReportAttachment")
         .withReportPeople(getReportPeopleInput(List.of(personToReportAuthor(getJackJackson()))))
         .build();
-    final Report testReport = jackMutationExecutor.createReport(OBJECT_FIELDS, testReportInput);
+    final Report testReport = withCredentials(jackUser,
+        t -> mutationExecutor.createReport(OBJECT_FIELDS, testReportInput));
     assertThat(testReport).isNotNull();
     assertThat(testReport.getUuid()).isNotNull();
     final int nrOfAttachments = testReport.getAttachments().size();
@@ -405,7 +373,8 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     final String createdAttachmentUuid = testCreateReportAttachment(testAttachmentInput);
 
     // Check the report
-    final Report report = jackQueryExecutor.report(OBJECT_FIELDS, testReport.getUuid());
+    final Report report =
+        withCredentials(jackUser, t -> queryExecutor.report(OBJECT_FIELDS, testReport.getUuid()));
     assertThat(report.getAttachments()).hasSize(nrOfAttachments + 1);
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     final Attachment attachment = report.getAttachments().stream()
@@ -419,36 +388,35 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     testDeleteReportAttachment(report.getUuid(), report.getAttachments().size(), attachment);
 
     // Finally, delete the report
-    jackMutationExecutor.deleteReport("", report.getUuid());
+    withCredentials(jackUser, t -> mutationExecutor.deleteReport("", report.getUuid()));
   }
 
-  private String testCreateReportAttachment(final AttachmentInput testAttachmentInput)
-      throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
+  private String testCreateReportAttachment(final AttachmentInput testAttachmentInput) {
     // F - create attachment as non-author
-    failAttachmentCreate(erinMutationExecutor, testAttachmentInput);
+    failAttachmentCreate("erin", testAttachmentInput);
 
     // F - create attachment as admin
-    failAttachmentCreate(adminMutationExecutor, testAttachmentInput);
+    failAttachmentCreate(adminUser, testAttachmentInput);
 
     // S - create attachment as author
-    return succeedAttachmentCreate(jackMutationExecutor, testAttachmentInput);
+    return succeedAttachmentCreate(jackUser, testAttachmentInput);
   }
 
   private void testUpdateReportAttachment(final String reportUuid, final int nrOfAttachments,
-      final Attachment attachment)
-      throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
+      final Attachment attachment) {
     // F - update attachment as non-author
     attachment.setFileName("erinUpdatedAttachment.jpg");
-    failAttachmentUpdate(erinMutationExecutor, getInput(attachment, AttachmentInput.class));
+    failAttachmentUpdate("erin", getInput(attachment, AttachmentInput.class));
 
     // F - update attachment as admin
     attachment.setFileName("adminUpdatedAttachment.jpg");
-    failAttachmentUpdate(erinMutationExecutor, getInput(attachment, AttachmentInput.class));
+    failAttachmentUpdate("erin", getInput(attachment, AttachmentInput.class));
 
     // S - update attachment as author
     attachment.setFileName("jackUpdatedAttachment.jpg");
-    succeedAttachmentUpdate(jackMutationExecutor, getInput(attachment, AttachmentInput.class));
-    final Report report = jackQueryExecutor.report(OBJECT_FIELDS, reportUuid);
+    succeedAttachmentUpdate(jackUser, getInput(attachment, AttachmentInput.class));
+    final Report report =
+        withCredentials(jackUser, t -> queryExecutor.report(OBJECT_FIELDS, reportUuid));
     assertThat(report.getAttachments()).hasSize(nrOfAttachments);
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     final Attachment updatedAttachment = report.getAttachments().stream()
@@ -457,26 +425,25 @@ public class AttachmentResourceTest extends AbstractResourceTest {
   }
 
   private void testDeleteReportAttachment(final String reportUuid, final int nrOfAttachments,
-      final Attachment attachment)
-      throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
+      final Attachment attachment) {
     // F - delete attachment as non-author
-    failAttachmentDelete(erinMutationExecutor, attachment.getUuid());
+    failAttachmentDelete("erin", attachment.getUuid());
 
     // F - delete attachment as admin
-    failAttachmentDelete(adminMutationExecutor, attachment.getUuid());
+    failAttachmentDelete(adminUser, attachment.getUuid());
 
     // S - delete attachment as author
-    succeedAttachmentDelete(jackMutationExecutor, attachment.getUuid());
-    final Report report = jackQueryExecutor.report(OBJECT_FIELDS, reportUuid);
+    succeedAttachmentDelete(jackUser, attachment.getUuid());
+    final Report report =
+        withCredentials(jackUser, t -> queryExecutor.report(OBJECT_FIELDS, reportUuid));
     assertThat(report.getAttachments()).hasSize(nrOfAttachments - 1);
   }
 
   @Test
-  void testPersonAttachments()
-      throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
+  void testPersonAttachments() {
     // Get test person
-    final Person testPerson =
-        adminQueryExecutor.person(OBJECT_FIELDS, "df9c7381-56ac-4bc5-8e24-ec524bccd7e9");
+    final Person testPerson = withCredentials(adminUser,
+        t -> queryExecutor.person(OBJECT_FIELDS, "df9c7381-56ac-4bc5-8e24-ec524bccd7e9"));
     assertThat(testPerson).isNotNull();
     assertThat(testPerson.getUuid()).isNotNull();
     final int nrOfAttachments = testPerson.getAttachments().size();
@@ -489,7 +456,8 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     final CreatePersonAttachmentsResult result = testCreatePersonAttachments(testAttachmentInput);
 
     // Check the person
-    final Person person = jackQueryExecutor.person(OBJECT_FIELDS, testPerson.getUuid());
+    final Person person =
+        withCredentials(jackUser, t -> queryExecutor.person(OBJECT_FIELDS, testPerson.getUuid()));
     assertThat(person.getAttachments()).hasSize(nrOfAttachments + 4);
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     final Attachment userAttachment = person.getAttachments().stream()
@@ -520,24 +488,19 @@ public class AttachmentResourceTest extends AbstractResourceTest {
   }
 
   private CreatePersonAttachmentsResult testCreatePersonAttachments(
-      AttachmentInput testAttachmentInput)
-      throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
+      AttachmentInput testAttachmentInput) {
     // S - create attachment as normal user
-    final String userAttachmentUuid =
-        succeedAttachmentCreate(erinMutationExecutor, testAttachmentInput);
+    final String userAttachmentUuid = succeedAttachmentCreate("erin", testAttachmentInput);
 
     // F - create attachment as superuser of different person
-    failAttachmentCreate(henryMutationExecutor, testAttachmentInput);
+    failAttachmentCreate("henry", testAttachmentInput);
 
     // S - create attachment as superuser
-    final String superuserAttachmentUuid1 =
-        succeedAttachmentCreate(rebeccaMutationExecutor, testAttachmentInput);
-    final String superuserAttachmentUuid2 =
-        succeedAttachmentCreate(rebeccaMutationExecutor, testAttachmentInput);
+    final String superuserAttachmentUuid1 = succeedAttachmentCreate("rebecca", testAttachmentInput);
+    final String superuserAttachmentUuid2 = succeedAttachmentCreate("rebecca", testAttachmentInput);
 
     // S - create attachment as admin
-    final String adminAttachmentUuid =
-        succeedAttachmentCreate(adminMutationExecutor, testAttachmentInput);
+    final String adminAttachmentUuid = succeedAttachmentCreate(adminUser, testAttachmentInput);
 
     return new CreatePersonAttachmentsResult(userAttachmentUuid, superuserAttachmentUuid1,
         superuserAttachmentUuid2, adminAttachmentUuid);
@@ -549,12 +512,11 @@ public class AttachmentResourceTest extends AbstractResourceTest {
 
   private void testUpdatePersonAttachments(final String personUuid, final int nrOfAttachments,
       final Attachment userAttachment, final Attachment superuserAttachment1,
-      final Attachment superuserAttachment2)
-      throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
+      final Attachment superuserAttachment2) {
     // S - update attachment as normal user
     userAttachment.setFileName("erinUpdatedAttachment.jpg");
-    succeedAttachmentUpdate(erinMutationExecutor, getInput(userAttachment, AttachmentInput.class));
-    Person person = jackQueryExecutor.person(OBJECT_FIELDS, personUuid);
+    succeedAttachmentUpdate("erin", getInput(userAttachment, AttachmentInput.class));
+    Person person = withCredentials(jackUser, t -> queryExecutor.person(OBJECT_FIELDS, personUuid));
     assertThat(person.getAttachments()).hasSize(nrOfAttachments);
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     final Attachment updatedUserAttachment = person.getAttachments().stream()
@@ -563,19 +525,16 @@ public class AttachmentResourceTest extends AbstractResourceTest {
 
     // F - update attachment as superuser of different person
     superuserAttachment1.setFileName("henryUpdatedAttachment.jpg");
-    failAttachmentUpdate(henryMutationExecutor,
-        getInput(superuserAttachment1, AttachmentInput.class));
+    failAttachmentUpdate("henry", getInput(superuserAttachment1, AttachmentInput.class));
 
     // F - update attachment as different superuser
     superuserAttachment1.setFileName("jacobUpdatedAttachment.jpg");
-    failAttachmentUpdate(jacobMutationExecutor,
-        getInput(superuserAttachment1, AttachmentInput.class));
+    failAttachmentUpdate("jacob", getInput(superuserAttachment1, AttachmentInput.class));
 
     // S - update attachment as superuser
     superuserAttachment1.setFileName("rebeccaUpdatedAttachment.jpg");
-    succeedAttachmentUpdate(rebeccaMutationExecutor,
-        getInput(superuserAttachment1, AttachmentInput.class));
-    person = jackQueryExecutor.person(OBJECT_FIELDS, personUuid);
+    succeedAttachmentUpdate("rebecca", getInput(superuserAttachment1, AttachmentInput.class));
+    person = withCredentials(jackUser, t -> queryExecutor.person(OBJECT_FIELDS, personUuid));
     assertThat(person.getAttachments()).hasSize(nrOfAttachments);
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     final Attachment updatedSuperuserAttachment1 = person.getAttachments().stream()
@@ -585,9 +544,8 @@ public class AttachmentResourceTest extends AbstractResourceTest {
 
     // S - update attachment as admin
     superuserAttachment2.setFileName("adminUpdatedAttachment.jpg");
-    succeedAttachmentUpdate(adminMutationExecutor,
-        getInput(superuserAttachment2, AttachmentInput.class));
-    person = jackQueryExecutor.person(OBJECT_FIELDS, personUuid);
+    succeedAttachmentUpdate(adminUser, getInput(superuserAttachment2, AttachmentInput.class));
+    person = withCredentials(jackUser, t -> queryExecutor.person(OBJECT_FIELDS, personUuid));
     assertThat(person.getAttachments()).hasSize(nrOfAttachments);
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     final Attachment updatedSuperuserAttachment2 = person.getAttachments().stream()
@@ -598,32 +556,31 @@ public class AttachmentResourceTest extends AbstractResourceTest {
 
   private void testDeletePersonAttachments(final String personUuid, final int nrOfAttachments,
       final Attachment userAttachment, final Attachment superuserAttachment1,
-      final Attachment superuserAttachment2, final Attachment adminAttachment)
-      throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
+      final Attachment superuserAttachment2, final Attachment adminAttachment) {
     // S - delete attachment as normal user
-    succeedAttachmentDelete(erinMutationExecutor, userAttachment.getUuid());
-    Person person = jackQueryExecutor.person(OBJECT_FIELDS, personUuid);
+    succeedAttachmentDelete("erin", userAttachment.getUuid());
+    Person person = withCredentials(jackUser, t -> queryExecutor.person(OBJECT_FIELDS, personUuid));
     assertThat(person.getAttachments()).hasSize(nrOfAttachments - 1);
 
     // F - delete attachment as superuser of different person
-    failAttachmentDelete(henryMutationExecutor, superuserAttachment1.getUuid());
+    failAttachmentDelete("henry", superuserAttachment1.getUuid());
 
     // F - delete attachment as different superuser
-    failAttachmentDelete(jacobMutationExecutor, superuserAttachment1.getUuid());
+    failAttachmentDelete("jacob", superuserAttachment1.getUuid());
 
     // S - delete attachment as superuser
-    succeedAttachmentDelete(rebeccaMutationExecutor, superuserAttachment1.getUuid());
-    person = jackQueryExecutor.person(OBJECT_FIELDS, personUuid);
+    succeedAttachmentDelete("rebecca", superuserAttachment1.getUuid());
+    person = withCredentials(jackUser, t -> queryExecutor.person(OBJECT_FIELDS, personUuid));
     assertThat(person.getAttachments()).hasSize(nrOfAttachments - 2);
 
     // S - delete superuser attachment as admin
-    succeedAttachmentDelete(adminMutationExecutor, superuserAttachment2.getUuid());
-    person = jackQueryExecutor.person(OBJECT_FIELDS, personUuid);
+    succeedAttachmentDelete(adminUser, superuserAttachment2.getUuid());
+    person = withCredentials(jackUser, t -> queryExecutor.person(OBJECT_FIELDS, personUuid));
     assertThat(person.getAttachments()).hasSize(nrOfAttachments - 3);
 
     // S - delete ADMIN attachment as admin
-    succeedAttachmentDelete(adminMutationExecutor, adminAttachment.getUuid());
-    person = jackQueryExecutor.person(OBJECT_FIELDS, personUuid);
+    succeedAttachmentDelete(adminUser, adminAttachment.getUuid());
+    person = withCredentials(jackUser, t -> queryExecutor.person(OBJECT_FIELDS, personUuid));
     assertThat(person.getAttachments()).hasSize(nrOfAttachments - 4);
   }
 
@@ -633,63 +590,59 @@ public class AttachmentResourceTest extends AbstractResourceTest {
         .withRelatedObjectUuid(uuid).build();
   }
 
-  private String succeedAttachmentCreate(final MutationExecutor mutationExecutor,
-      final AttachmentInput attachmentInput)
-      throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
-    final String createdAttachmentUuid = mutationExecutor.createAttachment("", attachmentInput);
+  private String succeedAttachmentCreate(final String username,
+      final AttachmentInput attachmentInput) {
+    final String createdAttachmentUuid =
+        withCredentials(username, t -> mutationExecutor.createAttachment("", attachmentInput));
     assertThat(createdAttachmentUuid).isNotNull();
     return createdAttachmentUuid;
   }
 
-  private void failAttachmentCreate(final MutationExecutor mutationExecutor,
-      final AttachmentInput attachmentInput) {
+  private void failAttachmentCreate(final String username, final AttachmentInput attachmentInput) {
     try {
-      mutationExecutor.createAttachment("", attachmentInput);
+      withCredentials(username, t -> mutationExecutor.createAttachment("", attachmentInput));
       fail("Expected exception creating attachment");
-    } catch (Exception expected) {
+    } catch (Exception expectedException) {
       // OK
     }
   }
 
-  private void succeedAttachmentDelete(final MutationExecutor mutationExecutor,
-      final String attachmentUuid)
-      throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
-    final Integer nrDeleted = mutationExecutor.deleteAttachment("", attachmentUuid);
+  private void succeedAttachmentDelete(final String username, final String attachmentUuid) {
+    final Integer nrDeleted =
+        withCredentials(username, t -> mutationExecutor.deleteAttachment("", attachmentUuid));
     assertThat(nrDeleted).isOne();
   }
 
-  private void failAttachmentDelete(final MutationExecutor mutationExecutor,
-      final String attachmentUuid) {
+  private void failAttachmentDelete(final String username, final String attachmentUuid) {
     try {
-      mutationExecutor.deleteAttachment("", attachmentUuid);
+      withCredentials(username, t -> mutationExecutor.deleteAttachment("", attachmentUuid));
       fail("Expected exception deleting attachment");
-    } catch (Exception expected) {
+    } catch (Exception expectedException) {
       // OK
     }
   }
 
-  private void succeedAttachmentUpdate(final MutationExecutor mutationExecutor,
-      final AttachmentInput attachmentInput)
-      throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
-    final String updatedAttachmentUuid = mutationExecutor.updateAttachment("", attachmentInput);
+  private void succeedAttachmentUpdate(final String username,
+      final AttachmentInput attachmentInput) {
+    final String updatedAttachmentUuid =
+        withCredentials(username, t -> mutationExecutor.updateAttachment("", attachmentInput));
     assertThat(updatedAttachmentUuid).isNotNull();
   }
 
-  private void failAttachmentUpdate(final MutationExecutor mutationExecutor,
-      final AttachmentInput attachmentInput) {
+  private void failAttachmentUpdate(final String username, final AttachmentInput attachmentInput) {
     try {
-      mutationExecutor.updateAttachment("", attachmentInput);
+      withCredentials(username, t -> mutationExecutor.updateAttachment("", attachmentInput));
       fail("Expected exception updating attachment");
-    } catch (Exception expected) {
+    } catch (Exception expectedException) {
       // OK
     }
   }
 
   @Test
-  public void myAttachments() {
-    Person jack = getJackJackson();
+  void myAttachments() {
+    final Person jack = getJackJackson();
     final AnetBeanList_Attachment jackAttachments =
-        getAttachments(jackQueryExecutor, jack.getUuid());
+        getAttachments(jack.getDomainUsername(), jack.getUuid());
 
     assertThat(jackAttachments.getList()).isNotEmpty();
     assertThat(jackAttachments.getList().stream()
@@ -697,15 +650,11 @@ public class AttachmentResourceTest extends AbstractResourceTest {
         .hasSameElementsAs(jackAttachments.getList());
   }
 
-  protected static AnetBeanList_Attachment getAttachments(final QueryExecutor queryExecutor,
-      final String authorUuid) {
-    try {
-      final AttachmentSearchQueryInput ssqi =
-          AttachmentSearchQueryInput.builder().withPageSize(0).withAuthorUuid(authorUuid).build();
-      return queryExecutor.attachmentList(getListFields(ATTACHMENT_FIELDS), ssqi);
-    } catch (GraphQLRequestExecutionException | GraphQLRequestPreparationException e) {
-      throw new RuntimeException(e);
-    }
+  protected AnetBeanList_Attachment getAttachments(final String username, final String authorUuid) {
+    final AttachmentSearchQueryInput ssqi =
+        AttachmentSearchQueryInput.builder().withPageSize(0).withAuthorUuid(authorUuid).build();
+    return withCredentials(username,
+        t -> queryExecutor.attachmentList(getListFields(ATTACHMENT_FIELDS), ssqi));
   }
 
   private void assertAttachmentDetails(final String attachmentUuid,

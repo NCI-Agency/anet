@@ -1,7 +1,7 @@
 package mil.dds.anet.database;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
+import jakarta.inject.Inject;
+import jakarta.inject.Provider;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.UserActivity;
 import mil.dds.anet.beans.lists.AnetBeanList;

@@ -7,30 +7,29 @@ import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import jakarta.ws.rs.WebApplicationException;
 import java.lang.invoke.MethodHandles;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import javax.ws.rs.WebApplicationException;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.beans.Position;
-import mil.dds.anet.test.integration.utils.TestApp;
 import mil.dds.anet.utils.ResourceUtils;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.test.context.SpringBootTest;
 
-@ExtendWith(TestApp.class)
-public class ResourceUtilsTest {
+@SpringBootTest
+class ResourceUtilsTest {
 
   protected static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   @Test
-  public void testValidateHistoryInput() {
+  void testValidateHistoryInput() {
     // We test the following conditions:
     // - Uuid cannot be null.
     // - Start time cannot be empty.

@@ -4,8 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 import com.google.common.collect.Lists;
-import com.graphql_java_generator.exception.GraphQLRequestExecutionException;
-import com.graphql_java_generator.exception.GraphQLRequestPreparationException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -14,9 +12,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.ForbiddenException;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.test.client.AnetBeanList_Person;
@@ -39,18 +36,17 @@ import mil.dds.anet.test.client.ReportSearchQueryInput;
 import mil.dds.anet.test.client.ReportState;
 import mil.dds.anet.test.client.Task;
 import mil.dds.anet.test.client.TaskInput;
-import mil.dds.anet.test.client.util.MutationExecutor;
-import mil.dds.anet.test.client.util.QueryExecutor;
 import mil.dds.anet.test.integration.utils.EmailResponse;
 import mil.dds.anet.test.integration.utils.FakeSmtpServer;
-import mil.dds.anet.test.integration.utils.TestApp;
 import mil.dds.anet.threads.AnetEmailWorker;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class TaskApprovalTest extends AbstractResourceTest {
 
   private static final String ORGANIZATION_FIELDS =
@@ -93,8 +89,8 @@ public class TaskApprovalTest extends AbstractResourceTest {
   private static List<Organization> savedOrganizations;
 
   @BeforeAll
-  public static void setUpEmailServer() throws Exception {
-    final AnetConfiguration config = TestApp.app.getConfiguration();
+  void setUpEmailServer() throws Exception {
+    final AnetConfiguration config = dropwizardApp.getConfiguration();
     if (config.getSmtp().isDisabled()) {
       fail("'ANET_SMTP_DISABLE' system environment variable must have value 'false' to run test.");
     }
@@ -109,13 +105,13 @@ public class TaskApprovalTest extends AbstractResourceTest {
 
   @BeforeEach
   @AfterEach
-  public void clearEmailServer() {
+  void clearEmailServer() {
     // Clear the email server before and after each test
     clearEmailsOnServer();
   }
 
   @BeforeAll
-  public static void saveTaskApprovalSteps() throws Exception {
+  void saveTaskApprovalSteps() {
     final Task task = getTaskFromDb(TEST_TASK_UUID);
     savedPlanningApprovalSteps = Lists.newArrayList(task.getPlanningApprovalSteps());
     savedPlanningApprovalSteps.stream().findFirst()
@@ -126,8 +122,7 @@ public class TaskApprovalTest extends AbstractResourceTest {
   }
 
   @AfterAll
-  public static void restoreTaskApprovalSteps()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void restoreTaskApprovalSteps() {
     final TaskInput taskInput = getTaskInput(getTaskFromDb(TEST_TASK_UUID));
     final List<ApprovalStepInput> pasInput = getApprovalStepsInput(savedPlanningApprovalSteps);
     pasInput.stream().findFirst()
@@ -144,8 +139,7 @@ public class TaskApprovalTest extends AbstractResourceTest {
   // submitted report, no approval step for effort
   // => there should be no approval step for the effort on the report workflow
   @Test
-  public void testNoSteps()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void testNoSteps() {
     final TaskInput taskInput = getTaskInput(clearTaskApprovalSteps(TEST_TASK_UUID));
 
     final Report report = submitReport("testNoSteps", getPersonFromDb("ERINSON, Erin"), null,
@@ -161,19 +155,16 @@ public class TaskApprovalTest extends AbstractResourceTest {
   // => approver should see the report as pending approval
   // => approver should be able to approve the report
   @Test
-  public void testUnrestrictedStepMatchingOrgReportPublication()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void testUnrestrictedStepMatchingOrgReportPublication() {
     testUnrestrictedStepMatchingOrg("testUnrestrictedStepMatchingOrgReportPublication", false);
   }
 
   @Test
-  public void testUnrestrictedStepMatchingOrgPlannedEngagement()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void testUnrestrictedStepMatchingOrgPlannedEngagement() {
     testUnrestrictedStepMatchingOrg("testUnrestrictedStepMatchingOrgPlannedEngagement", true);
   }
 
-  private void testUnrestrictedStepMatchingOrg(String text, boolean isPlanned)
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  private void testUnrestrictedStepMatchingOrg(String text, boolean isPlanned) {
     final TaskInput taskInput = getTaskInput(clearTaskApprovalSteps(TEST_TASK_UUID));
 
     final Person approver = getApprover(isPlanned);
@@ -201,19 +192,16 @@ public class TaskApprovalTest extends AbstractResourceTest {
   // => approver should see the report as pending approval
   // => approver should be able to approve the report
   @Test
-  public void testUnrestrictedStepNoMatchingOrgReportPublication()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void testUnrestrictedStepNoMatchingOrgReportPublication() {
     testUnrestrictedStepNoMatchingOrg("testUnrestrictedStepNoMatchingOrgReportPublication", false);
   }
 
   @Test
-  public void testUnrestrictedStepNoMatchingOrgPlannedEngagement()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void testUnrestrictedStepNoMatchingOrgPlannedEngagement() {
     testUnrestrictedStepNoMatchingOrg("testUnrestrictedStepNoMatchingOrgPlannedEngagement", true);
   }
 
-  private void testUnrestrictedStepNoMatchingOrg(String text, boolean isPlanned)
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  private void testUnrestrictedStepNoMatchingOrg(String text, boolean isPlanned) {
     final TaskInput taskInput = getTaskInput(clearTaskApprovalSteps(TEST_TASK_UUID));
 
     // Someone from EF 1.1
@@ -242,19 +230,16 @@ public class TaskApprovalTest extends AbstractResourceTest {
   // => approver should not see the report as pending approval
   // => approver should not be able to approve the report
   @Test
-  public void testRestrictedStepNoMatchingOrgReportPublication()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void testRestrictedStepNoMatchingOrgReportPublication() {
     testRestrictedStepNoMatchingOrg("testRestrictedStepNoMatchingOrgReportPublication", false);
   }
 
   @Test
-  public void testRestrictedStepNoMatchingOrgPlannedEngagement()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void testRestrictedStepNoMatchingOrgPlannedEngagement() {
     testRestrictedStepNoMatchingOrg("testRestrictedStepNoMatchingOrgPlannedEngagement", true);
   }
 
-  private void testRestrictedStepNoMatchingOrg(String text, boolean isPlanned)
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  private void testRestrictedStepNoMatchingOrg(String text, boolean isPlanned) {
     final TaskInput taskInput = getTaskInput(clearTaskApprovalSteps(TEST_TASK_UUID));
 
     // Someone from EF 1.1
@@ -285,19 +270,16 @@ public class TaskApprovalTest extends AbstractResourceTest {
   // => approver should see the report as pending approval
   // => approver should be able to approve the report
   @Test
-  public void testRestrictedStepMatchingOrgReportPublication()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void testRestrictedStepMatchingOrgReportPublication() {
     testRestrictedStepMatchingOrg("testRestrictedStepMatchingOrgReportPublication", false);
   }
 
   @Test
-  public void testRestrictedStepMatchingOrgPlannedEngagement()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void testRestrictedStepMatchingOrgPlannedEngagement() {
     testRestrictedStepMatchingOrg("testRestrictedStepMatchingOrgPlannedEngagement", true);
   }
 
-  private void testRestrictedStepMatchingOrg(String text, boolean isPlanned)
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  private void testRestrictedStepMatchingOrg(String text, boolean isPlanned) {
     final TaskInput taskInput = getTaskInput(clearTaskApprovalSteps(TEST_TASK_UUID));
 
     final Person approver = getApprover(isPlanned);
@@ -328,21 +310,18 @@ public class TaskApprovalTest extends AbstractResourceTest {
   // after the edit approver should not see the report as pending approval
   // and approver should not be able to approve the report
   @Test
-  public void testRestrictedStepEditedMatchingOrgReportPublication()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void testRestrictedStepEditedMatchingOrgReportPublication() {
     testRestrictedStepEditedMatchingOrg("testRestrictedStepEditedMatchingOrgReportPublication",
         false);
   }
 
   @Test
-  public void testRestrictedStepEditedMatchingOrgPlannedEngagement()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void testRestrictedStepEditedMatchingOrgPlannedEngagement() {
     testRestrictedStepEditedMatchingOrg("testRestrictedStepEditedMatchingOrgPlannedEngagement",
         true);
   }
 
-  private void testRestrictedStepEditedMatchingOrg(String text, boolean isPlanned)
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  private void testRestrictedStepEditedMatchingOrg(String text, boolean isPlanned) {
     final TaskInput taskInput = getTaskInput(clearTaskApprovalSteps(TEST_TASK_UUID));
 
     final Person approver = getApprover(isPlanned);
@@ -396,19 +375,16 @@ public class TaskApprovalTest extends AbstractResourceTest {
   // => approver 3 should see the report as pending approval
   // => approver 3 should be able to approve the report
   @Test
-  public void testMultipleStepsReportPublication()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void testMultipleStepsReportPublication() {
     testMultipleSteps("testMultipleStepsReportPublication", false);
   }
 
   @Test
-  public void testMultipleStepsPlannedEngagement()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void testMultipleStepsPlannedEngagement() {
     testMultipleSteps("testMultipleStepsPlannedEngagement", false);
   }
 
-  private void testMultipleSteps(String text, boolean isPlanned)
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  private void testMultipleSteps(String text, boolean isPlanned) {
     final TaskInput taskInput = getTaskInput(clearTaskApprovalSteps(TEST_TASK_UUID));
 
     // An unrestricted step
@@ -466,8 +442,7 @@ public class TaskApprovalTest extends AbstractResourceTest {
   // => approver from A should see reports 1 and 2
   // => approver from B should see report 3
   @Test
-  public void testGH3442()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  void testGH3442() {
     final boolean isPlanned = false;
     final String text = "testTwoReports";
     final TaskInput taskInput = getTaskInput(clearTaskApprovalSteps(TEST_TASK_UUID));
@@ -557,11 +532,10 @@ public class TaskApprovalTest extends AbstractResourceTest {
     assertThat(paginatedResults.getTotalCount()).isEqualTo(allResults.getTotalCount());
     assertThat(paginatedResults.getPageNum()).isEqualTo(pendingQuery.getPageNum());
     assertThat(paginatedResults.getPageSize()).isEqualTo(pendingQuery.getPageSize());
-    assertThat(paginatedResults.getList().size()).isEqualTo(size);
+    assertThat(paginatedResults.getList()).hasSize(size);
   }
 
-  private Task clearTaskApprovalSteps(String uuid)
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  private Task clearTaskApprovalSteps(String uuid) {
     final TaskInput taskInput = getTaskInput(getTaskFromDb(uuid));
     taskInput.setPlanningApprovalSteps(Collections.emptyList());
     taskInput.setApprovalSteps(Collections.emptyList());
@@ -569,8 +543,7 @@ public class TaskApprovalTest extends AbstractResourceTest {
   }
 
   private Task updateTaskApprovalSteps(TaskInput taskInput, Person approver, boolean isPlanned,
-      boolean restrictedApproval)
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+      boolean restrictedApproval) {
     final ApprovalStepInput asInput = getApprovalStepInput(approver, isPlanned, restrictedApproval);
     if (isPlanned) {
       taskInput.setPlanningApprovalSteps(Lists.newArrayList(asInput));
@@ -581,29 +554,22 @@ public class TaskApprovalTest extends AbstractResourceTest {
   }
 
   private ApprovalStepInput getApprovalStepInput(Person approver, boolean isPlanned,
-      boolean restrictedApproval)
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+      boolean restrictedApproval) {
     final Person unrelatedApprover = getPersonFromDb("ANDERSON, Andrew");
-    final ApprovalStepInput asInput =
-        ApprovalStepInput.builder().withName("Task approval by " + approver.getName())
-            .withType(
-                isPlanned ? ApprovalStepType.PLANNING_APPROVAL : ApprovalStepType.REPORT_APPROVAL)
-            .withRestrictedApproval(restrictedApproval)
-            .withApprovers(getPositionsInput(
-                Lists.newArrayList(approver.getPosition(), unrelatedApprover.getPosition())))
-            .build();
-    return asInput;
+    return ApprovalStepInput.builder().withName("Task approval by " + approver.getName())
+        .withType(isPlanned ? ApprovalStepType.PLANNING_APPROVAL : ApprovalStepType.REPORT_APPROVAL)
+        .withRestrictedApproval(restrictedApproval).withApprovers(getPositionsInput(
+            Lists.newArrayList(approver.getPosition(), unrelatedApprover.getPosition())))
+        .build();
   }
 
-  private Person getApprover(boolean isPlanned)
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  private Person getApprover(boolean isPlanned) {
     // Both from EF 2.1
     return getPersonFromDb(isPlanned ? "JACKSON, Jack" : "HENDERSON, Henry");
   }
 
   private Task replaceApproversFromTaskApprovalSteps(TaskInput taskInput, Person approver,
-      boolean isPlanned)
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+      boolean isPlanned) {
     if (isPlanned) {
       taskInput.getPlanningApprovalSteps().get(0)
           .setApprovers(getPositionsInput(Lists.newArrayList(approver.getPosition())));
@@ -614,8 +580,7 @@ public class TaskApprovalTest extends AbstractResourceTest {
     return updateTask(taskInput);
   }
 
-  private void organizationalApproval(Report report, boolean isPlanned)
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  private void organizationalApproval(Report report, boolean isPlanned) {
     // No organizational workflow for planned engagements
     if (!isPlanned) {
       final Person jacob = getPersonFromDb("JACOBSON, Jacob");
@@ -629,18 +594,17 @@ public class TaskApprovalTest extends AbstractResourceTest {
     }
   }
 
-  private void approveReport(Report report, Person person, boolean expectedToFail)
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    final MutationExecutor personMutationExecutor = getMutationExecutor(person.getDomainUsername());
+  private void approveReport(Report report, Person person, boolean expectedToFail) {
     try {
-      final int numRows = personMutationExecutor.approveReport("", null, report.getUuid());
+      final int numRows = withCredentials(person.getDomainUsername(),
+          t -> mutationExecutor.approveReport("", null, report.getUuid()));
       if (expectedToFail) {
         fail("Expected an exception");
       }
       assertThat(numRows).isOne();
-    } catch (BadRequestException | ForbiddenException e) {
+    } catch (Exception e) {
       if (!expectedToFail) {
-        fail("Unexpected exception");
+        fail("Unexpected exception", e);
       }
     }
 
@@ -648,15 +612,12 @@ public class TaskApprovalTest extends AbstractResourceTest {
   }
 
   private AnetBeanList_Report checkPendingApproval(Person approver, Report report, int size,
-      boolean checkEmails, ReportSearchQueryInput pendingQuery)
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    final QueryExecutor approverQueryExecutor = getQueryExecutor(approver.getDomainUsername());
-    if (pendingQuery == null) {
-      pendingQuery = new ReportSearchQueryInput();
-    }
-    pendingQuery.setPendingApprovalOf(approver.getUuid());
-    final AnetBeanList_Report pendingApproval =
-        approverQueryExecutor.reportList(getListFields(REPORT_FIELDS), pendingQuery);
+      boolean checkEmails, ReportSearchQueryInput pendingQuery) {
+    final ReportSearchQueryInput query =
+        Objects.requireNonNullElseGet(pendingQuery, ReportSearchQueryInput::new);
+    query.setPendingApprovalOf(approver.getUuid());
+    final AnetBeanList_Report pendingApproval = withCredentials(approver.getDomainUsername(),
+        t -> queryExecutor.reportList(getListFields(REPORT_FIELDS), query));
     assertThat(pendingApproval.getList()).filteredOn(rpt -> rpt.getUuid().equals(report.getUuid()))
         .hasSize(size);
     if (checkEmails) {
@@ -672,10 +633,7 @@ public class TaskApprovalTest extends AbstractResourceTest {
   }
 
   private Report submitReport(String text, Person author, Person reportAdvisor, TaskInput taskInput,
-      boolean isPlanned, ReportState expectedState)
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    final QueryExecutor authorQueryExecutor = getQueryExecutor(author.getDomainUsername());
-    final MutationExecutor authorMutationExecutor = getMutationExecutor(author.getDomainUsername());
+      boolean isPlanned, ReportState expectedState) {
     if (reportAdvisor == null) {
       reportAdvisor = getPersonFromDb("REINTON, Reina");
     }
@@ -694,20 +652,22 @@ public class TaskApprovalTest extends AbstractResourceTest {
         .withNextSteps(testText).withKeyOutcomes(testText).build();
 
     // Create the report
-    final Report createdReport = authorMutationExecutor.createReport("{ uuid }", reportInput);
+    final Report createdReport = withCredentials(author.getDomainUsername(),
+        t -> mutationExecutor.createReport("{ uuid }", reportInput));
     assertThat(createdReport).isNotNull();
     assertThat(createdReport.getUuid()).isNotNull();
 
     // Retrieve the created report
-    final Report created =
-        authorQueryExecutor.report("{ uuid state advisorOrg { uuid } }", createdReport.getUuid());
+    final Report created = withCredentials(author.getDomainUsername(),
+        t -> queryExecutor.report("{ uuid state advisorOrg { uuid } }", createdReport.getUuid()));
     assertThat(created.getUuid()).isNotNull();
     assertThat(created.getState()).isEqualTo(ReportState.DRAFT);
     assertThat(created.getAdvisorOrg().getUuid())
         .isEqualTo(reportAdvisor.getPosition().getOrganization().getUuid());
 
     // Have the author submit the report
-    final int numRows = authorMutationExecutor.submitReport("", created.getUuid());
+    final int numRows = withCredentials(author.getDomainUsername(),
+        t -> mutationExecutor.submitReport("", created.getUuid()));
     assertThat(numRows).isOne();
 
     sendEmailsToServer();
@@ -720,22 +680,20 @@ public class TaskApprovalTest extends AbstractResourceTest {
     return submitted;
   }
 
-  private Report getReport(Person author, String reportUuid)
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    final QueryExecutor authorQueryExecutor = getQueryExecutor(author.getDomainUsername());
-    final Report returned = authorQueryExecutor.report(REPORT_FIELDS, reportUuid);
+  private Report getReport(Person author, String reportUuid) {
+    final Report returned = withCredentials(author.getDomainUsername(),
+        t -> queryExecutor.report(REPORT_FIELDS, reportUuid));
     assertThat(returned).isNotNull();
     return returned;
   }
 
-  private void deleteReport(Person author, Report report)
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    final MutationExecutor authorMutationExecutor = getMutationExecutor(author.getDomainUsername());
-    final Report updated =
-        authorMutationExecutor.updateReport(REPORT_FIELDS, getReportInput(report), true);
+  private void deleteReport(Person author, Report report) {
+    final Report updated = withCredentials(author.getDomainUsername(),
+        t -> mutationExecutor.updateReport(REPORT_FIELDS, getReportInput(report), true));
     assertThat(updated).isNotNull();
     assertThat(updated.getState()).isEqualTo(ReportState.DRAFT);
-    authorMutationExecutor.deleteReport("", report.getUuid());
+    withCredentials(author.getDomainUsername(),
+        t -> mutationExecutor.deleteReport("", report.getUuid()));
   }
 
   private void assertWorkflowSize(Report report, String taskUuid, int expectedSize) {
@@ -749,7 +707,7 @@ public class TaskApprovalTest extends AbstractResourceTest {
   private void assertEmails(int expectedNrOfEmails, Person... expectedRecipients) {
     final List<EmailResponse> emails = getEmailsFromServer();
     // Check the number of email messages
-    assertThat(emails.size()).isEqualTo(expectedNrOfEmails);
+    assertThat(emails).hasSize(expectedNrOfEmails);
     // Check that each message has one of the intended recipients
     emails.forEach(e -> assertThat(expectedRecipients)
         .anyMatch(r -> emailMatchesRecipient(e, r.getEmailAddress())));
@@ -786,30 +744,28 @@ public class TaskApprovalTest extends AbstractResourceTest {
     }
   }
 
-  private static Person getPersonFromDb(String name)
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+  private Person getPersonFromDb(String name) {
     final PersonSearchQueryInput personQuery =
         PersonSearchQueryInput.builder().withText(name).build();
-    final AnetBeanList_Person searchResults =
-        adminQueryExecutor.personList(getListFields(PERSON_FIELDS), personQuery);
-    assertThat(searchResults.getTotalCount()).isGreaterThan(0);
+    final AnetBeanList_Person searchResults = withCredentials(adminUser,
+        t -> queryExecutor.personList(getListFields(PERSON_FIELDS), personQuery));
+    assertThat(searchResults.getTotalCount()).isPositive();
     final Optional<Person> personResult =
         searchResults.getList().stream().filter(p -> p.getName().equals(name)).findFirst();
     assertThat(personResult).isNotEmpty();
     return personResult.get();
   }
 
-  private static Task getTaskFromDb(String uuid)
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    final Task task = adminQueryExecutor.task(TASK_FIELDS, uuid);
+  private Task getTaskFromDb(String uuid) {
+    final Task task = withCredentials(adminUser, t -> queryExecutor.task(TASK_FIELDS, uuid));
     assertThat(task).isNotNull();
     assertThat(task.getUuid()).isEqualTo(uuid);
     return task;
   }
 
-  private static Task updateTask(TaskInput task)
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    final Integer nrUpdated = adminMutationExecutor.updateTask("", task);
+  private Task updateTask(TaskInput task) {
+    final Integer nrUpdated =
+        withCredentials(adminUser, t -> mutationExecutor.updateTask("", task));
     assertThat(nrUpdated).isEqualTo(1);
     return getTaskFromDb(task.getUuid());
   }

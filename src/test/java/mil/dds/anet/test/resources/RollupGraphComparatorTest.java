@@ -4,17 +4,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import mil.dds.anet.beans.RollupGraph;
 import mil.dds.anet.resources.ReportResource.RollupGraphComparator;
 import mil.dds.anet.test.TestData;
 import org.junit.jupiter.api.Test;
 
-public class RollupGraphComparatorTest {
+class RollupGraphComparatorTest {
 
   @Test
-  public void performComparisonTest() {
+  void performComparisonTest() {
 
     List<RollupGraph> rollupGraphs = new ArrayList<>();
 
@@ -34,8 +33,7 @@ public class RollupGraphComparatorTest {
     rollupGraph4.getOrg().setShortName("a name");
     rollupGraphs.add(rollupGraph4);
 
-    Collections.sort(rollupGraphs,
-        new RollupGraphComparator(Arrays.asList("c name", "xxx", "yyy", "b name")));
+    rollupGraphs.sort(new RollupGraphComparator(Arrays.asList("c name", "xxx", "yyy", "b name")));
 
     assertThat(rollupGraphs.get(0).getOrg().getShortName()).withFailMessage("incorrect name")
         .isEqualTo("c name");
@@ -48,7 +46,7 @@ public class RollupGraphComparatorTest {
   }
 
   @Test
-  public void performComparisonTestNullOrgs() {
+  void performComparisonTestNullOrgs() {
 
     List<RollupGraph> rollupGraphs = new ArrayList<>();
 
@@ -68,8 +66,7 @@ public class RollupGraphComparatorTest {
     rollupGraph4.getOrg().setShortName("a name");
     rollupGraphs.add(rollupGraph4);
 
-    Collections.sort(rollupGraphs,
-        new RollupGraphComparator(Arrays.asList("c name", "xxx", "yyy", "b name")));
+    rollupGraphs.sort(new RollupGraphComparator(Arrays.asList("c name", "xxx", "yyy", "b name")));
 
     assertThat(rollupGraphs.get(0).getOrg().getShortName()).withFailMessage("incorrect name")
         .isEqualTo("c name");
@@ -80,7 +77,7 @@ public class RollupGraphComparatorTest {
   }
 
   @Test
-  public void performComparisonTestEmptyList() {
+  void performComparisonTestEmptyList() {
 
     List<RollupGraph> rollupGraphs = new ArrayList<>();
 
@@ -96,7 +93,7 @@ public class RollupGraphComparatorTest {
     rollupGraph3.getOrg().setShortName("b name");
     rollupGraphs.add(rollupGraph3);
 
-    Collections.sort(rollupGraphs, new RollupGraphComparator(new ArrayList<>()));
+    rollupGraphs.sort(new RollupGraphComparator(new ArrayList<>()));
 
     assertThat(rollupGraphs.get(0).getOrg().getShortName()).withFailMessage("incorrect name")
         .isEqualTo("a name");
