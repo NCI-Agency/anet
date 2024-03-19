@@ -66,9 +66,7 @@
     },
     {
       "matchPackagePrefixes": [
-        "ch.qos.logback",
-        "com.graphql-java-generator",
-        "com.graphql_java_generator"
+        "ch.qos.logback"
       ],
       "enabled": false
     },
