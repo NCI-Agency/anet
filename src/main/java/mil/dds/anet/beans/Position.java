@@ -16,6 +16,8 @@ import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.database.AuthorizationGroupDao;
 import mil.dds.anet.database.PositionDao;
+import mil.dds.anet.graphql.AllowUnverifiedUsers;
+import mil.dds.anet.graphql.RestrictToAuthorizationGroups;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractEmailableAnetBean;
@@ -339,6 +341,17 @@ public class Position extends AbstractEmailableAnetBean
       }
     }
     return authorizationGroups;
+  }
+
+  @Override
+  @GraphQLQuery(name = "emailAddresses")
+  @AllowUnverifiedUsers
+  @RestrictToAuthorizationGroups(
+      authorizationGroupSetting = "fields.position.emailAddresses.authorizationGroupUuids")
+  public CompletableFuture<List<EmailAddress>> loadEmailAddresses(
+      @GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "network") String network) {
+    return super.loadEmailAddresses(context, network);
   }
 
   @Override

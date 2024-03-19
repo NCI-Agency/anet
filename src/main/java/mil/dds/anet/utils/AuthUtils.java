@@ -33,13 +33,13 @@ public class AuthUtils {
 
   public static boolean canAdministrateOrg(final Person user, final String organizationUuid) {
     if (organizationUuid == null) {
-      logger.error("Organization {} is null or has a null UUID in canAdministrateOrg check for {}",
+      logger.debug("Organization {} is null or has a null UUID in canAdministrateOrg check for {}",
           organizationUuid, user);
       return false;
     }
     Position position = DaoUtils.getPosition(user);
     if (position == null) {
-      logger.warn("User {} has no position, hence no permissions", user);
+      logger.debug("User {} has no position, hence no permissions", user);
       return false;
     }
     if (position.getType() == PositionType.ADMINISTRATOR) {
