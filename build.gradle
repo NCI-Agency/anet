@@ -138,15 +138,15 @@ dependencies {
 	implementation 'net.coobird:thumbnailator:0.4.20'
 
 	// GraphQL dependencies
-	implementation 'com.graphql-java:graphql-java:20.2'
+	implementation 'com.graphql-java:graphql-java:21.3'
 	implementation 'com.graphql-java:java-dataloader:3.2.2'
-	implementation 'io.leangen.graphql:spqr:0.12.1'
+	implementation 'io.leangen.graphql:spqr:0.12.4'
 	// The graphql-java-client-runtime module aggregates all dependencies for the generated code,
 	// including the plugin runtime
 	testImplementation 'com.graphql-java-generator:graphql-java-client-runtime:2.4'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test:2.7.18'
 	// We use some extended scalars in `generateClientCodeConf` below
-	testImplementation 'com.graphql-java:graphql-java-extended-scalars:20.0'
+	testImplementation 'com.graphql-java:graphql-java-extended-scalars:21.0'
 
 	testImplementation "io.dropwizard:dropwizard-testing:${dropwizardVersion}"
 	testImplementation "io.dropwizard:dropwizard-client:${dropwizardVersion}"
