@@ -58,8 +58,6 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   public static final String TABLE_NAME = "people";
   public static final String PERSON_FIELDS =
       DaoUtils.buildFieldAliases(TABLE_NAME, allFields, true);
-  public static final String PERSON_FIELDS_NOAS =
-      DaoUtils.buildFieldAliases(TABLE_NAME, allFields, false);
 
   private static final String EHCACHE_CONFIG = "/ehcache-config.xml";
   private static final String DOMAIN_USERS_CACHE = "domainUsersCache";

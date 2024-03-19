@@ -41,8 +41,11 @@ public class PersonResource {
   }
 
   public static boolean hasPermission(final Person user, final String personUuid) {
-    return canCreateOrUpdatePerson(user,
-        AnetObjectEngine.getInstance().getPersonDao().getByUuid(personUuid), false);
+    return hasPermission(user, AnetObjectEngine.getInstance().getPersonDao().getByUuid(personUuid));
+  }
+
+  public static boolean hasPermission(final Person user, final Person person) {
+    return canCreateOrUpdatePerson(user, person, false);
   }
 
   /**
