@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 import com.google.common.collect.ImmutableMap;
-import graphql.introspection.IntrospectionQuery;
+import graphql.introspection.IntrospectionQueryBuilder;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.Invocation.Builder;
 import jakarta.ws.rs.core.GenericType;
@@ -33,24 +33,28 @@ class GraphQlResourceTest extends AbstractResourceTest {
 
   @Test
   void testIntrospection() {
+    // With oneOf=true (the default), the graphql-java-generator throws an exception
+    final IntrospectionQueryBuilder.Options introspectionOptions =
+        IntrospectionQueryBuilder.Options.defaultOptions().isOneOf(false);
+    final String introspectionQuery = IntrospectionQueryBuilder.build(introspectionOptions);
+
     // only admin can do introspection query
     try {
-      final Query resp = withCredentials(adminUser,
-          t -> queryExecutor.exec(IntrospectionQuery.INTROSPECTION_QUERY));
+      final Query resp = withCredentials(adminUser, t -> queryExecutor.exec(introspectionQuery));
       assertThat(resp).isNotNull(); // we could check a million things here
     } catch (Exception e) {
       fail("Unexpected Exception", e);
     }
     try {
       withCredentials(getSuperuser().getDomainUsername(),
-          t -> queryExecutor.exec(IntrospectionQuery.INTROSPECTION_QUERY));
+          t -> queryExecutor.exec(introspectionQuery));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
       // OK
     }
     try {
       withCredentials(getRegularUser().getDomainUsername(),
-          t -> queryExecutor.exec(IntrospectionQuery.INTROSPECTION_QUERY));
+          t -> queryExecutor.exec(introspectionQuery));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
       // OK
