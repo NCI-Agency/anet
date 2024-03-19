@@ -27,7 +27,7 @@ java {
 
 boolean isTestEnv = project.hasProperty("testEnv")
 String dropwizardVersion = "4.0.7"
-String logbackVersion = "1.3.5"
+String logbackVersion = "1.4.14"
 String log4jVersion = "2.23.1"
 String keycloakVersion = "24.0.1"
 String psqlPushDataPath = "/var/tmp"
