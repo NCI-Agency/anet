@@ -1,3 +1,6 @@
+"""Indicates an Input Object is a OneOf Input Object."""
+directive @oneOf on INPUT_OBJECT
+
 """"""
 enum ActionType {
   APPROVE
