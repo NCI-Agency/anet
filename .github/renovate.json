@@ -58,7 +58,6 @@
       "matchPackageNames": [
         "autoprefixer",
         "react-router-dom",
-        "org.liquibase:liquibase-core",
         "com.graphql-java:graphql-java",
         "com.graphql-java:graphql-java-extended-scalars",
         "io.leangen.graphql:spqr"
@@ -67,9 +66,7 @@
     },
     {
       "matchPackagePrefixes": [
-        "ch.qos.logback",
-        "com.graphql-java-generator",
-        "com.graphql_java_generator"
+        "ch.qos.logback"
       ],
       "enabled": false
     },

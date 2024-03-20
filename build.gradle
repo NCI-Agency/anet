@@ -27,7 +27,7 @@ java {
 
 boolean isTestEnv = project.hasProperty("testEnv")
 String dropwizardVersion = "4.0.7"
-String logbackVersion = "1.3.5"
+String logbackVersion = "1.4.14"
 String log4jVersion = "2.23.1"
 String keycloakVersion = "24.0.1"
 String psqlPushDataPath = "/var/tmp"
@@ -96,7 +96,7 @@ dependencies {
 
 	// Supported database is PostgreSQL:
 	implementation 'org.postgresql:postgresql:42.7.3'
-	implementation 'org.liquibase:liquibase-core:4.23.1'
+	implementation 'org.liquibase:liquibase-core:4.26.0'
 
 	// For caching domain users (used in every request in the AuthenticationFilter)
 	implementation('org.ehcache:ehcache:3.10.8') {
@@ -138,15 +138,15 @@ dependencies {
 	implementation 'net.coobird:thumbnailator:0.4.20'
 
 	// GraphQL dependencies
-	implementation 'com.graphql-java:graphql-java:20.2'
+	implementation 'com.graphql-java:graphql-java:21.3'
 	implementation 'com.graphql-java:java-dataloader:3.2.2'
-	implementation 'io.leangen.graphql:spqr:0.12.1'
+	implementation 'io.leangen.graphql:spqr:0.12.4'
 	// The graphql-java-client-runtime module aggregates all dependencies for the generated code,
 	// including the plugin runtime
 	testImplementation 'com.graphql-java-generator:graphql-java-client-runtime:2.4'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test:2.7.18'
 	// We use some extended scalars in `generateClientCodeConf` below
-	testImplementation 'com.graphql-java:graphql-java-extended-scalars:20.0'
+	testImplementation 'com.graphql-java:graphql-java-extended-scalars:21.0'
 
 	testImplementation "io.dropwizard:dropwizard-testing:${dropwizardVersion}"
 	testImplementation "io.dropwizard:dropwizard-client:${dropwizardVersion}"
