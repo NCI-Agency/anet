@@ -392,7 +392,10 @@ const CompactPersonView = ({ pageDispatchers }) => {
       biography: <RichTextEditor readOnly value={person.biography} />,
       user: utils.formatBoolean(person.user),
       emailAddresses: (
-        <EmailAddressTable emailAddresses={person.emailAddresses} />
+        <EmailAddressTable
+          label={Settings.fields.person.emailAddresses.label}
+          emailAddresses={person.emailAddresses}
+        />
       ),
       endOfTourDate:
         person.endOfTourDate &&

@@ -4,9 +4,9 @@ import React from "react"
 import { Table } from "react-bootstrap"
 import utils from "utils"
 
-const EmailAddressTable = ({ emailAddresses }) => {
+const EmailAddressTable = ({ label, emailAddresses }) => {
   if (_get(emailAddresses, "length", 0) === 0) {
-    return <em>No email addresses found</em>
+    return <em>No {label.toLowerCase()} available</em>
   }
 
   return (
@@ -30,6 +30,7 @@ const EmailAddressTable = ({ emailAddresses }) => {
 }
 
 EmailAddressTable.propTypes = {
+  label: PropTypes.string.isRequired,
   emailAddresses: PropTypes.array
 }
 

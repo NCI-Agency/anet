@@ -16,6 +16,7 @@ import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Table } from "react-bootstrap"
 import { connect } from "react-redux"
+import Settings from "settings"
 
 const GQL_GET_ORGANIZATION_LIST = gql`
   query ($organizationQuery: OrganizationSearchQueryInput) {
@@ -151,7 +152,12 @@ const BaseOrganizationTable = ({
                       />
                     </td>
                     <td>
-                      <EmailAddressList emailAddresses={org.emailAddresses} />
+                      <EmailAddressList
+                        label={
+                          Settings.fields.organization.emailAddresses.label
+                        }
+                        emailAddresses={org.emailAddresses}
+                      />
                     </td>
                   </>
                 )}
