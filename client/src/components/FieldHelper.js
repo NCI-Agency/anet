@@ -404,7 +404,7 @@ const ButtonToggleGroupField = ({
   const { className } = getFormGroupValidationState(
     field.name,
     form,
-    classNames(otherProps?.className, "flex-wrap")
+    otherProps?.className
   )
   const widgetElem = useMemo(
     () => (
