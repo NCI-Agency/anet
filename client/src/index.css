@@ -206,6 +206,10 @@ a.btn {
   white-space: normal;
 }
 
+.btn-group {
+  flex-wrap: wrap;
+}
+
 .btn-group .radio-inline,
 .btn-group-vertical .radio-inline {
   padding: 0;
