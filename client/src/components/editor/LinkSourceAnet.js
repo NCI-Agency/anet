@@ -42,6 +42,7 @@ const LinkSourceAnet = ({ editor, showModal, setShowModal, external }) => {
   return (
     <Modal
       centered
+      size="lg"
       show={showModal}
       aria-labelledby="Link chooser"
       className="editor-link-chooser"
