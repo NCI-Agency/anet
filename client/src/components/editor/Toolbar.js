@@ -1,4 +1,5 @@
 import { Icon } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import { Tooltip2 } from "@blueprintjs/popover2"
 import PropTypes from "prop-types"
 import React from "react"
@@ -36,77 +37,77 @@ const Toolbar = ({
           type={BUTTON_TYPES.MARK}
           editor={editor}
           format="bold"
-          icon="bold"
+          icon={IconNames.BOLD}
           tooltipText="Bold (Ctrl + b)"
         />
         <EditorToggleButton
           type={BUTTON_TYPES.MARK}
           editor={editor}
           format="italic"
-          icon="italic"
+          icon={IconNames.ITALIC}
           tooltipText="Italic (Ctrl + i)"
         />
         <EditorToggleButton
           type={BUTTON_TYPES.MARK}
           editor={editor}
           format="underline"
-          icon="underline"
+          icon={IconNames.UNDERLINE}
           tooltipText="Underline (Ctrl + u)"
         />
         <EditorToggleButton
           type={BUTTON_TYPES.MARK}
           editor={editor}
           format="strikethrough"
-          icon="strikethrough"
+          icon={IconNames.STRIKETHROUGH}
           tooltipText="Strikethrough (Ctrl + ⇧ + x)"
         />
         <EditorToggleButton
           type={BUTTON_TYPES.BLOCK}
           editor={editor}
           format="block-quote"
-          icon="citation"
+          icon={IconNames.CITATION}
           tooltipText="Block quote (Alt + q)"
         />
         <EditorToggleButton
           type={BUTTON_TYPES.BLOCK}
           editor={editor}
           format="heading-one"
-          icon="header-one"
+          icon={IconNames.HEADER_ONE}
           tooltipText="Heading one (Alt + 1)"
         />
         <EditorToggleButton
           type={BUTTON_TYPES.BLOCK}
           editor={editor}
           format="heading-two"
-          icon="header-two"
+          icon={IconNames.HEADER_TWO}
           tooltipText="Heading two (Alt + 2)"
         />
         <EditorToggleButton
           type={BUTTON_TYPES.BLOCK}
           editor={editor}
           format="heading-three"
-          icon="header-three"
+          icon={IconNames.HEADER_THREE}
           tooltipText="Heading three (Alt + 3)"
         />
         <EditorToggleButton
           type={BUTTON_TYPES.BLOCK}
           editor={editor}
           format="bulleted-list"
-          icon="properties"
+          icon={IconNames.PROPERTIES}
           tooltipText="Bulleted list (Alt + b)"
         />
         <EditorToggleButton
           type={BUTTON_TYPES.BLOCK}
           editor={editor}
           format="numbered-list"
-          icon="numbered-list"
+          icon={IconNames.NUMBERED_LIST}
           tooltipText="Numbered list (Alt + n)"
         />
         <EditorToggleButton
           type={BUTTON_TYPES.MODAL}
           editor={editor}
           format={ANET_LINK}
-          icon="link"
+          icon={IconNames.LINK}
           text="ANET Link"
           showModal={showAnetLinksModal}
           setShowModal={setShowAnetLinksModal}
@@ -116,25 +117,25 @@ const Toolbar = ({
           type={BUTTON_TYPES.MODAL}
           editor={editor}
           format={EXTERNAL_LINK}
-          icon="link"
+          icon={IconNames.LINK}
           showModal={showExternalLinksModal}
           setShowModal={setShowExternalLinksModal}
           tooltipText="External link (Ctrl + ⇧ + a)"
         />
         <EditorToggleButton
-          icon="undo"
+          icon={IconNames.UNDO}
           onClick={editor.undo}
           tooltipText="Undo (Ctrl + z)"
         />
         <EditorToggleButton
-          icon="redo"
+          icon={IconNames.REDO}
           onClick={editor.redo}
           tooltipText="Redo (Ctrl + y or Ctrl + ⇧ + z)"
         />
         {!disableFullSize && (
           <EditorToggleButton
             type={BUTTON_TYPES.FULLSCREEN}
-            icon={showFullSize ? "minimize" : "fullscreen"}
+            icon={showFullSize ? IconNames.MINIMIZE : IconNames.FULLSCREEN}
             editor={editor}
             showFullSize={showFullSize}
             setShowFullSize={setShowFullSize}
