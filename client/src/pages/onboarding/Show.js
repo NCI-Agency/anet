@@ -170,7 +170,10 @@ const OnboardingShow = ({ pageDispatchers }) => {
     const humanValuesExceptions = {
       biography: <RichTextEditor readOnly value={person.biography} />,
       emailAddresses: (
-        <EmailAddressTable emailAddresses={person.emailAddresses} />
+        <EmailAddressTable
+          label={Settings.fields.person.emailAddresses.label}
+          emailAddresses={person.emailAddresses}
+        />
       ),
       endOfTourDate:
         person.endOfTourDate &&

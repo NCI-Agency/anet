@@ -16,6 +16,7 @@ import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Table } from "react-bootstrap"
 import { connect } from "react-redux"
+import Settings from "settings"
 import utils from "utils"
 
 const GQL_GET_POSITION_LIST = gql`
@@ -180,7 +181,10 @@ const BasePositionTable = ({
                         />
                       </td>
                       <td>
-                        <EmailAddressList emailAddresses={pos.emailAddresses} />
+                        <EmailAddressList
+                          label={Settings.fields.position.emailAddresses.label}
+                          emailAddresses={pos.emailAddresses}
+                        />
                       </td>
                     </>
                   )}

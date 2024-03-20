@@ -201,7 +201,10 @@ const OrganizationPreview = ({ className, uuid }) => {
           wrappedComponent={PreviewField}
           dictProps={Settings.fields.organization.emailAddresses}
           value={
-            <EmailAddressTable emailAddresses={organization.emailAddresses} />
+            <EmailAddressTable
+              label={Settings.fields.organization.emailAddresses.label}
+              emailAddresses={organization.emailAddresses}
+            />
           }
         />
 

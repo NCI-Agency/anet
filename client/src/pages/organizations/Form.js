@@ -255,6 +255,9 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                       component={FieldHelper.ReadonlyField}
                       humanValue={
                         <EmailAddressTable
+                          label={
+                            Settings.fields.organization.emailAddresses.label
+                          }
                           emailAddresses={values.emailAddresses}
                         />
                       }
