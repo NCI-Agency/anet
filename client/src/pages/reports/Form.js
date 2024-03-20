@@ -15,7 +15,8 @@ import ConfirmDestructive from "components/ConfirmDestructive"
 import CustomDateInput from "components/CustomDateInput"
 import {
   CustomFieldsContainer,
-  customFieldsJSONString
+  customFieldsJSONString,
+  initInvisibleFields
 } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
@@ -161,6 +162,40 @@ const GQL_UPDATE_REPORT_ASSESSMENTS = gql`
 `
 
 const AUTOSAVE_TIMEOUT = process.env.ANET_TEST_MODE === "true" ? 300 : 30
+
+const CreateNewLocation = ({
+  name,
+  setFieldTouched,
+  setFieldValue,
+  setDoReset
+}) => {
+  const location = new Location({ name })
+  // mutates the object
+  initInvisibleFields(location, Settings.fields.location.customFields)
+  return (
+    <LocationForm
+      initialValues={location}
+      title="Create a new Location"
+      afterSaveActions={value => {
+        // validation will be done by setFieldValue
+        setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
+        setFieldValue("location", value, true)
+        setDoReset(true)
+        toast.success("The location has been saved")
+      }}
+      afterCancelActions={() => {
+        setDoReset(true)
+      }}
+    />
+  )
+}
+
+CreateNewLocation.propTypes = {
+  name: PropTypes.string,
+  setFieldTouched: PropTypes.func.isRequired,
+  setFieldValue: PropTypes.func.isRequired,
+  setDoReset: PropTypes.func.isRequired
+}
 
 const ReportForm = ({
   pageDispatchers,
@@ -576,24 +611,16 @@ const ReportForm = ({
                       valueKey="name"
                       addon={LOCATIONS_ICON}
                       createEntityComponent={
-                        (canCreateLocation &&
-                          ((searchText, setDoReset) => (
-                            <LocationForm
-                              initialValues={new Location({ name: searchText })}
-                              title="Create New Location"
-                              afterSaveActions={value => {
-                                // validation will be done by setFieldValue
-                                setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
-                                setFieldValue("location", value, true)
-                                setDoReset(true)
-                                toast.success("The location has been saved")
-                              }}
-                              afterCancelActions={() => {
-                                setDoReset(true)
-                              }}
+                        !canCreateLocation
+                          ? null
+                          : (searchTerms, setDoReset) => (
+                            <CreateNewLocation
+                              name={searchTerms}
+                              setFieldTouched={setFieldTouched}
+                              setFieldValue={setFieldValue}
+                              setDoReset={setDoReset}
                             />
-                          ))) ||
-                        null
+                          )
                       }
                     />
                   }

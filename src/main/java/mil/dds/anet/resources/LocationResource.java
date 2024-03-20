@@ -23,7 +23,7 @@ import mil.dds.anet.utils.Utils;
 
 public class LocationResource {
 
-  protected final AnetConfiguration config;
+  private final AnetConfiguration config;
   private final AnetObjectEngine engine;
   private final LocationDao dao;
 
@@ -66,9 +66,7 @@ public class LocationResource {
     l.setDescription(
         Utils.isEmptyHtml(l.getDescription()) ? null : Utils.sanitizeHtml(l.getDescription()));
     final Person user = DaoUtils.getUserFromContext(context);
-    final boolean regularUsersCanAddLocations =
-        Boolean.TRUE.equals(config.getDictionaryEntry("regularUsersCanCreateLocations"));
-    if (!regularUsersCanAddLocations) {
+    if (Boolean.FALSE.equals(config.getDictionaryEntry("regularUsersCanCreateLocations"))) {
       assertPermission(user, DaoUtils.getUuid(l));
     }
     if (l.getName() == null || l.getName().trim().length() == 0) {

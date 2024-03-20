@@ -88,7 +88,7 @@ export const BaseGeoLocation = ({
   }
 
   return (
-    <div id="fg-location">
+    <div id="fg-geoLocation">
       <CoordinatesFormField
         coordinates={coordinates}
         editable
@@ -348,7 +348,7 @@ const CoordinateActionButtons = ({
   setLocationFormat
 }) => {
   return (
-    <Col sm={4} style={{ padding: "0 8px" }}>
+    <Col sm={3} style={{ padding: "0 8px" }}>
       <Tooltip2 content="Clear coordinates">
         <Button
           variant="outline-danger"

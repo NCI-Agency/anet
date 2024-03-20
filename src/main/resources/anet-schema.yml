@@ -821,6 +821,13 @@ properties:
               type: string
               enum:
                 [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, POINT_LOCATION, ADVISOR_LOCATION, PRINCIPAL_LOCATION]
+          regularuserTypeOptions:
+            type: array
+            uniqueItems: true
+            items:
+              type: string
+              enum:
+                [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, POINT_LOCATION, ADVISOR_LOCATION, PRINCIPAL_LOCATION]
           format:
             type: string
             title: Default format for location

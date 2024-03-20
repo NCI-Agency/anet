@@ -56,6 +56,9 @@ const LOCATION_TYPES_ADMIN = [
 const LOCATION_TYPES_SUPERUSER =
   Settings?.fields?.location?.superuserTypeOptions
 
+const LOCATION_TYPES_REGULARUSER =
+  Settings?.fields?.location?.regularuserTypeOptions
+
 const LocationForm = ({
   edit,
   title,
@@ -385,7 +388,7 @@ const LocationForm = ({
       case Position.TYPE.SUPERUSER:
         return LOCATION_TYPES_SUPERUSER
       default:
-        return []
+        return LOCATION_TYPES_REGULARUSER
     }
   }
 
