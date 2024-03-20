@@ -10,6 +10,7 @@ import {
 } from "components/Page"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _get from "lodash/get"
+import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Table } from "react-bootstrap"
@@ -160,11 +161,13 @@ const BasePersonTable = ({
                     <td
                       style={{ verticalAlign: "middle", textAlign: "center" }}
                     >
-                      <Checkbox
-                        checked={isSelected(person.uuid)}
-                        onChange={() =>
-                          toggleSelection(person.uuid, person.emailAddresses)}
-                      />
+                      {!_isEmpty(person.emailAddresses) && (
+                        <Checkbox
+                          checked={isSelected(person.uuid)}
+                          onChange={() =>
+                            toggleSelection(person.uuid, person.emailAddresses)}
+                        />
+                      )}
                     </td>
                     <td>
                       <EmailAddressList

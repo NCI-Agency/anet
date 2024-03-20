@@ -11,6 +11,7 @@ import {
 import RemoveButton from "components/RemoveButton"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _get from "lodash/get"
+import _isEmpty from "lodash/isEmpty"
 import { Position } from "models"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
@@ -174,11 +175,13 @@ const BasePositionTable = ({
                       <td
                         style={{ verticalAlign: "middle", textAlign: "center" }}
                       >
-                        <Checkbox
-                          checked={isSelected(pos.uuid)}
-                          onChange={() =>
-                            toggleSelection(pos.uuid, pos.emailAddresses)}
-                        />
+                        {!_isEmpty(pos.emailAddresses) && (
+                          <Checkbox
+                            checked={isSelected(pos.uuid)}
+                            onChange={() =>
+                              toggleSelection(pos.uuid, pos.emailAddresses)}
+                          />
+                        )}
                       </td>
                       <td>
                         <EmailAddressList
