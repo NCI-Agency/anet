@@ -4,7 +4,7 @@
   "private": true,
   "homepage": "/assets/client",
   "devDependencies": {
-    "@babel/core": "7.24.1",
+    "@babel/core": "7.24.3",
     "@babel/eslint-parser": "7.24.1",
     "@babel/plugin-proposal-class-properties": "7.18.6",
     "@babel/plugin-proposal-decorators": "7.24.1",
