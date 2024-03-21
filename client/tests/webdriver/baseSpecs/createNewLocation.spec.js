@@ -96,4 +96,18 @@ describe("When creating a new Location", () => {
     expect(await (await CreateNewLocation.getDuplicatesButton()).isExisting())
       .to.be.false
   })
+
+  it("Should allow map maximisation", async() => {
+    expect(
+      await (
+        await CreateNewLocation.getMaximiseLeafletButton()
+      ).getAttribute("title")
+    ).to.equal("Full Screen")
+    await (await CreateNewLocation.getMaximiseLeafletButton()).click()
+    expect(
+      await (
+        await CreateNewLocation.getMaximiseLeafletButton()
+      ).getAttribute("title")
+    ).to.equal("Exit Full Screen")
+  })
 })
