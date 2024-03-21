@@ -15,7 +15,8 @@ import ConfirmDestructive from "components/ConfirmDestructive"
 import CustomDateInput from "components/CustomDateInput"
 import {
   CustomFieldsContainer,
-  customFieldsJSONString
+  customFieldsJSONString,
+  initInvisibleFields
 } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
@@ -50,6 +51,7 @@ import {
   Task
 } from "models"
 import moment from "moment"
+import LocationForm from "pages/locations/Form"
 import { RECURRENCE_TYPE } from "periodUtils"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
@@ -161,6 +163,40 @@ const GQL_UPDATE_REPORT_ASSESSMENTS = gql`
 
 const AUTOSAVE_TIMEOUT = process.env.ANET_TEST_MODE === "true" ? 300 : 30
 
+const CreateNewLocation = ({
+  name,
+  setFieldTouched,
+  setFieldValue,
+  setDoReset
+}) => {
+  const location = new Location({ name })
+  // mutates the object
+  initInvisibleFields(location, Settings.fields.location.customFields)
+  return (
+    <LocationForm
+      initialValues={location}
+      title="Create a new Location"
+      afterSaveActions={value => {
+        // validation will be done by setFieldValue
+        setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
+        setFieldValue("location", value, true)
+        setDoReset(true)
+        toast.success("The location has been saved")
+      }}
+      afterCancelActions={() => {
+        setDoReset(true)
+      }}
+    />
+  )
+}
+
+CreateNewLocation.propTypes = {
+  name: PropTypes.string,
+  setFieldTouched: PropTypes.func.isRequired,
+  setFieldValue: PropTypes.func.isRequired,
+  setDoReset: PropTypes.func.isRequired
+}
+
 const ReportForm = ({
   pageDispatchers,
   edit,
@@ -250,6 +286,8 @@ const ReportForm = ({
   const attachmentEditEnabled =
     attachmentsEnabled &&
     (!Settings.fields.attachment.restrictToAdmins || currentUser.isAdmin())
+  const canCreateLocation =
+    Settings.regularUsersCanCreateLocations || currentUser.isSuperuser()
   const classificationButtons = Object.entries(
     Settings.classification.choices
   ).map(([value, label]) => ({
@@ -572,6 +610,18 @@ const ReportForm = ({
                       fields={Location.autocompleteQuery}
                       valueKey="name"
                       addon={LOCATIONS_ICON}
+                      createEntityComponent={
+                        !canCreateLocation
+                          ? null
+                          : (searchTerms, setDoReset) => (
+                            <CreateNewLocation
+                              name={searchTerms}
+                              setFieldTouched={setFieldTouched}
+                              setFieldValue={setFieldValue}
+                              setDoReset={setDoReset}
+                            />
+                          )
+                      }
                     />
                   }
                   extraColElem={

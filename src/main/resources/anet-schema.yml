@@ -399,6 +399,12 @@ properties:
     title: The support email address
     description: The email address where support requests can be sent.
 
+  regularUsersCanCreateLocations:
+    type: boolean
+    default: false
+    title: Whether regular users can also create locations
+    description: Used for locations; if set to `true` all ANET users can create or edit locations
+
   engagementsIncludeTimeAndDuration:
     type: boolean
     default: false
@@ -809,6 +815,13 @@ properties:
           description:
             "$ref": "#/$defs/inputField"
           superuserTypeOptions:
+            type: array
+            uniqueItems: true
+            items:
+              type: string
+              enum:
+                [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, POINT_LOCATION, ADVISOR_LOCATION, PRINCIPAL_LOCATION]
+          regularuserTypeOptions:
             type: array
             uniqueItems: true
             items:

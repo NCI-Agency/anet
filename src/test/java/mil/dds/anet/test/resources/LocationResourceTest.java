@@ -3,6 +3,9 @@ package mil.dds.anet.test.resources;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
+import java.util.HashMap;
+import java.util.Map;
+import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.client.AnetBeanList_Location;
 import mil.dds.anet.test.client.Location;
@@ -71,29 +74,34 @@ public class LocationResourceTest extends AbstractResourceTest {
 
   @Test
   void locationCreateSuperuserPermissionTest() {
-    createLocation(getSuperuser());
+    createLocation(getSuperuser(), true);
   }
 
   @Test
   void locationCreateRegularUserPermissionTest() {
-    createLocation(getRegularUser());
+    // By default, the test dictionary allows regular users to create locations
+    createLocation(getRegularUser(), true);
+    // Now test when they are not allowed
+    final AnetConfiguration config = dropwizardApp.getConfiguration();
+    final Map<String, Object> dict = new HashMap<>(config.getDictionary());
+    dict.put("regularUsersCanCreateLocations", false);
+    config.setDictionary(dict);
+    createLocation(getRegularUser(), false);
   }
 
-  private void createLocation(Person user) {
-    final Position position = user.getPosition();
-    final boolean isSuperuser = position.getType() == PositionType.SUPERUSER;
+  private void createLocation(Person user, boolean shouldSucceed) {
     final LocationInput lInput = TestData.createLocationInput("The Boat Dock2", 43.21, -87.65);
     try {
       final Location l = withCredentials(user.getDomainUsername(),
           t -> mutationExecutor.createLocation(FIELDS, lInput));
-      if (isSuperuser) {
+      if (shouldSucceed) {
         assertThat(l).isNotNull();
         assertThat(l.getUuid()).isNotNull();
       } else {
         fail("Expected an Exception");
       }
     } catch (Exception expectedException) {
-      if (isSuperuser) {
+      if (shouldSucceed) {
         fail("Unexpected Exception", expectedException);
       }
     }

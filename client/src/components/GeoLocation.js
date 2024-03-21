@@ -88,7 +88,7 @@ export const BaseGeoLocation = ({
   }
 
   return (
-    <div id="fg-location">
+    <div id="fg-geoLocation">
       <CoordinatesFormField
         coordinates={coordinates}
         editable

@@ -14,6 +14,7 @@ import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.LocationSearchQuery;
+import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
@@ -22,10 +23,12 @@ import mil.dds.anet.utils.Utils;
 
 public class LocationResource {
 
+  private final AnetConfiguration config;
   private final AnetObjectEngine engine;
   private final LocationDao dao;
 
-  public LocationResource(AnetObjectEngine engine) {
+  public LocationResource(AnetObjectEngine engine, AnetConfiguration config) {
+    this.config = config;
     this.engine = engine;
     this.dao = engine.getLocationDao();
   }
@@ -63,7 +66,9 @@ public class LocationResource {
     l.setDescription(
         Utils.isEmptyHtml(l.getDescription()) ? null : Utils.sanitizeHtml(l.getDescription()));
     final Person user = DaoUtils.getUserFromContext(context);
-    assertPermission(user, DaoUtils.getUuid(l));
+    if (Boolean.FALSE.equals(config.getDictionaryEntry("regularUsersCanCreateLocations"))) {
+      assertPermission(user, DaoUtils.getUuid(l));
+    }
     if (l.getName() == null || l.getName().trim().length() == 0) {
       throw new WebApplicationException("Location name must not be empty", Status.BAD_REQUEST);
     }

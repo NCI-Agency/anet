@@ -374,7 +374,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
     final LoggingResource loggingResource = new LoggingResource();
     final PersonResource personResource = new PersonResource(engine, configuration);
     final TaskResource taskResource = new TaskResource(engine, configuration);
-    final LocationResource locationResource = new LocationResource(engine);
+    final LocationResource locationResource = new LocationResource(engine, configuration);
     final OrganizationResource orgResource = new OrganizationResource(engine);
     final PositionResource positionResource = new PositionResource(engine);
     final ReportResource reportResource = new ReportResource(engine, configuration);

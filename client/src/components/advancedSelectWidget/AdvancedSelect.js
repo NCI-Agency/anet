@@ -112,7 +112,8 @@ export const propTypes = {
   // Optional: GraphQL string of fields to return from search.
   fields: PropTypes.string,
   handleAddItem: PropTypes.func,
-  handleRemoveItem: PropTypes.func
+  handleRemoveItem: PropTypes.func,
+  createEntityComponent: PropTypes.func
 }
 
 const AdvancedSelect = ({
@@ -137,7 +138,8 @@ const AdvancedSelect = ({
   queryParams,
   fields,
   handleAddItem,
-  handleRemoveItem
+  handleRemoveItem,
+  createEntityComponent
 }) => {
   const firstFilter = Object.keys(filterDefs)[0]
 
@@ -156,6 +158,8 @@ const AdvancedSelect = ({
   const [results, setResults] = useState({})
   const [showOverlay, setShowOverlay] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [showCreateEntityComponent, setShowCreateEntityComponent] =
+    useState(false)
   const [fetchType, setFetchType] = useState(FETCH_TYPE.NONE)
   const [doReset, setDoReset] = useState(false)
 
@@ -283,6 +287,7 @@ const AdvancedSelect = ({
       setIsLoading(false)
       setShowOverlay(false)
       setFilterType(firstFilter)
+      setShowCreateEntityComponent(false)
       if (!keepSearchText) {
         setSearchTerms(selectedValueAsString)
       }
@@ -303,48 +308,69 @@ const AdvancedSelect = ({
                 popoverClassName="advanced-select-popover bp4-popover2-content-sizing"
                 content={
                   <Row id={`${fieldName}-popover`} className="border-between">
-                    <FilterAsNav
-                      items={filterDefs}
-                      currentFilter={filterType}
-                      handleOnClick={changeFilterType}
-                    />
+                    {(showCreateEntityComponent && (
+                      <Col md="12">
+                        {createEntityComponent(searchTerms, setDoReset)}
+                      </Col>
+                    )) || (
+                      <>
+                        <FilterAsNav
+                          items={filterDefs}
+                          currentFilter={filterType}
+                          handleOnClick={changeFilterType}
+                        />
 
-                    <FilterAsDropdown
-                      items={filterDefs}
-                      handleOnChange={handleOnChangeSelect}
-                    />
+                        <FilterAsDropdown
+                          items={filterDefs}
+                          handleOnChange={handleOnChangeSelect}
+                        />
 
-                    <Col md={hasMultipleItems(filterDefs) ? 9 : 12}>
-                      <OverlayTable
-                        fieldName={fieldName}
-                        items={items}
-                        pageNum={pageNum}
-                        selectedItems={value}
-                        handleAddItem={item => {
-                          handleAddItem(item)
-                          if (closeOverlayOnAdd) {
-                            setDoReset(true)
-                          }
-                        }}
-                        handleRemoveItem={handleRemoveItem}
-                        objectType={objectType}
-                        columns={[""].concat(overlayColumns)}
-                        renderRow={overlayRenderRow}
-                        isLoading={isLoading}
-                        loaderMessage={
-                          <div style={{ width: "300px" }}>No results found</div>
-                        }
-                      />
-                      <UltimatePagination
-                        Component="footer"
-                        componentClassName="searchPagination"
-                        className="float-end"
-                        pageNum={pageNum}
-                        pageSize={pageSize}
-                        totalCount={totalCount}
-                        goToPage={goToPage}
-                      />
-                    </Col>
+                        <Col md={hasMultipleItems(filterDefs) ? 9 : 12}>
+                          <OverlayTable
+                            fieldName={fieldName}
+                            items={items}
+                            pageNum={pageNum}
+                            selectedItems={value}
+                            handleAddItem={item => {
+                              handleAddItem(item)
+                              if (closeOverlayOnAdd) {
+                                setDoReset(true)
+                              }
+                            }}
+                            handleRemoveItem={handleRemoveItem}
+                            objectType={objectType}
+                            columns={[""].concat(overlayColumns)}
+                            renderRow={overlayRenderRow}
+                            isLoading={isLoading}
+                            loaderMessage={
+                              <div style={{ width: "300px" }}>
+                                <div>No results found.</div>
+                                {createEntityComponent && (
+                                  <div>
+                                    <Button
+                                      id="createEntityLink"
+                                      onClick={() =>
+                                        setShowCreateEntityComponent(true)}
+                                    >
+                                      Create a new {fieldName}
+                                    </Button>
+                                  </div>
+                                )}
+                              </div>
+                            }
+                          />
+                          <UltimatePagination
+                            Component="footer"
+                            componentClassName="searchPagination"
+                            className="float-end"
+                            pageNum={pageNum}
+                            pageSize={pageSize}
+                            totalCount={totalCount}
+                            goToPage={goToPage}
+                          />
+                        </Col>
+                      </>
+                    )}
                   </Row>
                 }
                 isOpen={showOverlay}
