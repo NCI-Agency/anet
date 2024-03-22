@@ -1,7 +1,10 @@
 import { gql } from "@apollo/client"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
-import { OrganizationOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
+import {
+  AuthorizationGroupOverlayRow,
+  OrganizationOverlayRow
+} from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
 import * as FieldHelper from "components/FieldHelper"
@@ -23,13 +26,14 @@ import {
   usePageTitle
 } from "components/Page"
 import { Field, Form, Formik } from "formik"
-import { Organization } from "models"
+import { AuthorizationGroup, Organization } from "models"
 import moment from "moment"
 import RecentActivityTable from "pages/admin/RecentActivityTable"
 import React, { useContext, useState } from "react"
 import { Button, Col, Container, FormSelect, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { toast } from "react-toastify"
+import AUTHORIZATION_GROUPS_ICON from "resources/authorizationGroups.png"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
 import { v4 as uuidv4 } from "uuid"
 
@@ -154,6 +158,40 @@ const SPECIAL_FIELDS = {
         ))}
       </FormSelect>
     )
+  },
+  UNLIMITED_EXPORTS_AUTHORIZATION_GROUP: {
+    widget: key => (
+      <AdvancedSingleSelect
+        fieldName={key}
+        overlayColumns={["Name"]}
+        overlayRenderRow={AuthorizationGroupOverlayRow}
+        filterDefs={{
+          allAuthorizationGroups: {
+            label: "All authorization groups",
+            queryVars: {
+              status: Model.STATUS.ACTIVE
+            }
+          }
+        }}
+        objectType={AuthorizationGroup}
+        fields={AuthorizationGroup.autocompleteQuery}
+        valueKey="uuid"
+        addon={AUTHORIZATION_GROUPS_ICON}
+        keepSearchText
+      />
+    ),
+    convertValueToForm: value => ({
+      uuid: value
+    }),
+    convertFormToValue: value => value?.uuid,
+    onChange: (key, value, setFieldTouched, setFieldValue) => {
+      // Make sure we keep only the uuid
+      const plainValue = convertFormToValue(key, value)
+      const formValue = convertValueToForm(key, plainValue)
+      // validation will be done by setFieldValue
+      setFieldTouched(key, true, false) // onBlur doesn't work when selecting an option
+      setFieldValue(key, formValue)
+    }
   }
 }
 

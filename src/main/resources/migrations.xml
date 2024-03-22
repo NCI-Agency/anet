@@ -5128,4 +5128,11 @@
 		<!-- Rolling back is not useful anymore -->
 	</changeSet>
 
+	<changeSet id="add_unlimited_exports_authorization_group_to_admin_settings" author="pacodelcastillolopez">
+		<!-- add new unlimited exports authorization group with an empty value -->
+		<insert tableName="adminSettings">
+			<column name="key" value="UNLIMITED_EXPORTS_AUTHORIZATION_GROUP" />
+		</insert>
+	</changeSet>
+
 </databaseChangeLog>
