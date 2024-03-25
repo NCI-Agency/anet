@@ -2493,4 +2493,12 @@ class ReportResourceTest extends AbstractResourceTest {
     assertThat(updatedReport.getState()).isEqualTo(ReportState.DRAFT);
   }
 
+  @Test
+  void shouldBeSearchableViaCustomFields() {
+    final var query = ReportSearchQueryInput.builder().withText("minim").build();
+    final var searchObjects =
+        withCredentials(adminUser, t -> queryExecutor.reportList(getListFields(FIELDS), query));
+    assertThat(searchObjects).isNotNull();
+    assertThat(searchObjects.getTotalCount()).isGreaterThan(0);
+  }
 }
