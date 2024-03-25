@@ -11940,19 +11940,19 @@ jwt-decode@^4.0.0:
   resolved "https://registry.yarnpkg.com/jwt-decode/-/jwt-decode-4.0.0.tgz#2270352425fd413785b2faf11f6e755c5151bd4b"
   integrity sha512-+KJGIyHgkGuIq3IEBNftfhW/LfWhXUIY6OmyVWjliu5KH1y0fw7VQ8YndE2O4qZdMSd9SqbnC8GOcZEy0Om7sA==
 
-keycloak-connect@24.0.1:
-  version "24.0.1"
-  resolved "https://registry.yarnpkg.com/keycloak-connect/-/keycloak-connect-24.0.1.tgz#7ec6d4b4dbba824017a32b090532bbb81a8d075c"
-  integrity sha512-DlXI6fPR+t58pKVECxvOua5S/rws0CU3yz2juxKQor4b8PKoY0sN/QZ2vxBGPHmvMKtH8VodmPJA2k/VoiD5uw==
+keycloak-connect@24.0.2:
+  version "24.0.2"
+  resolved "https://registry.yarnpkg.com/keycloak-connect/-/keycloak-connect-24.0.2.tgz#753484a3370ffe7366a7a75ec847c4b50df8e6e0"
+  integrity sha512-o4hrHAI5SxIVqyD1yY0uIhDM6y9hZyyb3pJc1yYakhfhn2WPqmOGeq8zELPS1XJpj+k/paS+65LW45en1HgebA==
   dependencies:
     jwk-to-pem "^2.0.0"
   optionalDependencies:
     chromedriver latest
 
-keycloak-js@24.0.1:
-  version "24.0.1"
-  resolved "https://registry.yarnpkg.com/keycloak-js/-/keycloak-js-24.0.1.tgz#8de412bb2b914457b0dc9387a4a824bd0e8d171d"
-  integrity sha512-leV4mlpa0dqYUXTAuq1ufUfk8DOSBCembjQwMwzYrM6xfHSKpcZMxviTWXqro52LMSsYAnivSKVNEvBkLzi7Eg==
+keycloak-js@24.0.2:
+  version "24.0.2"
+  resolved "https://registry.yarnpkg.com/keycloak-js/-/keycloak-js-24.0.2.tgz#9e7320ed1859b0f493acbc57c64728da2b5eb49b"
+  integrity sha512-V2N8cSz3NfON98XHp+DCzvrb1WW35JalL5Zphe/uoVWOxcof7v522Yz9Q2O3BqXqXP3V/H9ml6o24BwwtXUTGA==
   dependencies:
     js-sha256 "^0.11.0"
     jwt-decode "^4.0.0"
