@@ -90,7 +90,8 @@ public abstract class AbstractResourceTest {
   private static final String PERSON_FIELDS =
       "{ uuid name domainUsername openIdSubject user rank status phoneNumber biography"
           + " pendingVerification createdAt updatedAt position { uuid name type status"
-          + " organization { uuid shortName parentOrg { uuid shortName } } } }";
+          + " organization { uuid shortName parentOrg { uuid shortName } } } "
+          + " emailAddresses { network address } }";
 
   @BeforeAll
   void setUp() {

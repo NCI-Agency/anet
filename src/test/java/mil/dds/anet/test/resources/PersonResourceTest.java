@@ -45,23 +45,22 @@ public class PersonResourceTest extends AbstractResourceTest {
 
   private static final String BIRTHDAY_FIELD = "birthday";
   private static final String POLITICAL_POSITION_FIELD = "politicalPosition";
+  private static final String _EMAIL_ADDRESSES_FIELDS = "emailAddresses { network address }";
   private static final String _CUSTOM_SENSITIVE_INFORMATION_FIELDS =
       "customSensitiveInformation { uuid customFieldName customFieldValue"
           + " relatedObjectType relatedObjectUuid createdAt updatedAt }";
-  private static final String _EMAIL_ADDRESS_FIELDS = "network address";
-  private static final String _POSITION_FIELDS =
-      "uuid name code type role status organization { uuid }";
+  private static final String _POSITION_FIELDS = String.format(
+      "uuid name code type role status organization { uuid } %1$s", _EMAIL_ADDRESSES_FIELDS);
   private static final String _PERSON_FIELDS =
-      "uuid name status user phoneNumber rank biography country avatarUuid code"
+      String.format("uuid name status user phoneNumber rank biography country avatarUuid code"
           + " gender endOfTourDate domainUsername openIdSubject pendingVerification createdAt updatedAt"
-          + " customFields";
+          + " customFields %1$s", _EMAIL_ADDRESSES_FIELDS);
   public static final String PERSON_FIELDS_ONLY_HISTORY =
       "{ uuid previousPositions { startTime endTime position { uuid } } }";
   public static final String POSITION_FIELDS = String.format("{ %s person { %s } %s }",
       _POSITION_FIELDS, _PERSON_FIELDS, _CUSTOM_SENSITIVE_INFORMATION_FIELDS);
   public static final String FIELDS =
-      String.format("{ %s emailAddresses { %s } position { %s } attachments %s %s }",
-          _PERSON_FIELDS, _EMAIL_ADDRESS_FIELDS, _POSITION_FIELDS,
+      String.format("{ %s position { %s } attachments %s %s }", _PERSON_FIELDS, _POSITION_FIELDS,
           AttachmentResourceTest.ATTACHMENT_FIELDS, _CUSTOM_SENSITIVE_INFORMATION_FIELDS);
 
   @Test

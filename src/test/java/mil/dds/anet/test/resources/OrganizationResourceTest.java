@@ -28,12 +28,14 @@ import org.junit.jupiter.api.Test;
 
 class OrganizationResourceTest extends AbstractResourceTest {
 
+  private static final String _EMAIL_ADDRESSES_FIELDS = "emailAddresses { network address }";
   protected static final String FIELDS =
-      "{ uuid shortName longName status identificationCode profile location"
+      String.format("{ uuid shortName longName status identificationCode profile location"
           + " customFields tasks { uuid } parentOrg { uuid }"
-          + " approvalSteps { uuid name approvers { uuid } } }";
-  private static final String POSITION_FIELDS =
-      "{ uuid name code type role status organization { uuid } location { uuid } }";
+          + " approvalSteps { uuid name approvers { uuid } } %1$s }", _EMAIL_ADDRESSES_FIELDS);
+  private static final String POSITION_FIELDS = String.format(
+      "{ uuid name code type role status organization { uuid } location { uuid } %1$s }",
+      _EMAIL_ADDRESSES_FIELDS);
 
   @Test
   void createAO() {
