@@ -276,6 +276,7 @@ const Organizations = ({
       latestQueryParams.current = queryParams
       setPagination(paginationKey, 0)
       setPageNum(0)
+      setSelectedEmailAddresses(new Map())
     }
   }, [queryParams, setPagination, paginationKey, queryParamsUnchanged])
   const organizationQuery = {
@@ -394,6 +395,7 @@ const People = ({
       latestQueryParams.current = queryParams
       setPagination(paginationKey, 0)
       setPageNum(0)
+      setSelectedEmailAddresses(new Map())
     }
   }, [queryParams, setPagination, paginationKey, queryParamsUnchanged])
   const personQuery = {
@@ -508,6 +510,7 @@ const Positions = ({
       latestQueryParams.current = queryParams
       setPagination(paginationKey, 0)
       setPageNum(0)
+      setSelectedEmailAddresses(new Map())
     }
   }, [queryParams, setPagination, paginationKey, queryParamsUnchanged])
   const positionQuery = {
@@ -766,6 +769,7 @@ const AuthorizationGroups = ({
       latestQueryParams.current = queryParams
       setPagination(paginationKey, 0)
       setPageNum(0)
+      setSelectedEmailAddresses(new Map())
     }
   }, [queryParams, setPagination, paginationKey, queryParamsUnchanged])
   const authorizationGroupQuery = {
