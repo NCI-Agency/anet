@@ -71,7 +71,9 @@ const AuthorizationGroupTable = ({
                     onChange={() =>
                       toggleSelection(
                         authorizationGroup.uuid,
-                        authorizationGroup.emailAddresses
+                        authorizationGroup.authorizationGroupRelatedObjects.flatMap(
+                          agro => agro.relatedObject?.emailAddresses
+                        )
                       )}
                   />
                 </td>

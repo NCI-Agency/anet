@@ -824,13 +824,22 @@ const AuthorizationGroups = ({
     setPageNum(pageNum)
   }
 
+  function getListWithEmailAddresses() {
+    return authorizationGroups.map(ag => ({
+      uuid: ag.uuid,
+      emailAddresses: ag.authorizationGroupRelatedObjects.flatMap(
+        agro => agro.relatedObject?.emailAddresses
+      )
+    }))
+  }
+
   function isAllSelected() {
-    return _isAllSelected(authorizationGroups, selectedEmailAddresses)
+    return _isAllSelected(getListWithEmailAddresses(), selectedEmailAddresses)
   }
 
   function toggleAll() {
     _toggleAll(
-      authorizationGroups,
+      getListWithEmailAddresses(),
       selectedEmailAddresses,
       setSelectedEmailAddresses,
       updateRecipients
