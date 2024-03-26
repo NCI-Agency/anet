@@ -112,7 +112,7 @@ dependencies {
 	implementation "ch.qos.logback:logback-classic:${logbackVersion}"
 	implementation "ch.qos.logback:logback-core:${logbackVersion}"
 	implementation "ch.qos.logback:logback-access:${logbackVersion}"
-	implementation 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20220608.1'
+	implementation 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20240325.1'
 	implementation 'com.mikesamuel:json-sanitizer:1.2.3'
 	// Authentication
 	implementation 'de.ahus1.keycloak.dropwizard:keycloak-dropwizard:3.0.0'
