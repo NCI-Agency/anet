@@ -7,6 +7,7 @@ import {
   setPagination
 } from "actions"
 import API from "api"
+import AppContext from "components/AppContext"
 import AuthorizationGroupTable from "components/AuthorizationGroupTable"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -35,11 +36,12 @@ import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import { exportResults } from "exportUtils"
 import { Field, Form, Formik } from "formik"
 import _get from "lodash/get"
+import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
 import { Organization } from "models"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
-import React, { useEffect, useMemo, useRef, useState } from "react"
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react"
 import {
   Alert,
   Badge,
@@ -63,6 +65,11 @@ import POSITIONS_ICON from "resources/positions.png"
 import REPORTS_ICON from "resources/reports.png"
 import TASKS_ICON from "resources/tasks.png"
 import Settings from "settings"
+
+// By default limit exports to the first 1000 results
+const MAX_NR_OF_EXPORTS = 1000
+export const UNLIMITED_RESULTS_AUTHORIZATION_GROUP =
+  "UNLIMITED_RESULTS_AUTHORIZATION_GROUP"
 
 const GQL_CREATE_SAVED_SEARCH = gql`
   mutation ($savedSearch: SavedSearchInput!) {
@@ -704,6 +711,7 @@ const Search = ({
   pagination,
   setPagination
 }) => {
+  const { currentUser, appSettings } = useContext(AppContext)
   const navigate = useNavigate()
   const [error, setError] = useState(null)
   const [showSaveSearch, setShowSaveSearch] = useState(false)
@@ -882,19 +890,37 @@ const Search = ({
             <Dropdown.Menu className="super-colors">
               <Dropdown.Item
                 onClick={() =>
-                  exportResults(searchQueryParams, queryTypes, "xlsx", setError)}
+                  exportResults(
+                    searchQueryParams,
+                    queryTypes,
+                    "xlsx",
+                    getResultsLimit(),
+                    setError
+                  )}
               >
                 Excel (xlsx)
               </Dropdown.Item>
               <Dropdown.Item
                 onClick={() =>
-                  exportResults(searchQueryParams, queryTypes, "kml", setError)}
+                  exportResults(
+                    searchQueryParams,
+                    queryTypes,
+                    "kml",
+                    getResultsLimit(),
+                    setError
+                  )}
               >
                 Google Earth (kml)
               </Dropdown.Item>
               <Dropdown.Item
                 onClick={() =>
-                  exportResults(searchQueryParams, queryTypes, "nvg", setError)}
+                  exportResults(
+                    searchQueryParams,
+                    queryTypes,
+                    "nvg",
+                    getResultsLimit(),
+                    setError
+                  )}
               >
                 NATO Vector Graphics (nvg)
               </Dropdown.Item>
@@ -1168,6 +1194,27 @@ const Search = ({
 
   function closeSaveModal() {
     setShowSaveSearch(false)
+  }
+
+  function getResultsLimit() {
+    const authorizationGroupUuids = [
+      appSettings[UNLIMITED_RESULTS_AUTHORIZATION_GROUP]
+    ]
+    if (_isEmpty(authorizationGroupUuids)) {
+      // No groups defined means: everybody has results limited
+      return MAX_NR_OF_EXPORTS
+    }
+    const userAuthorizationGroupUuids =
+      currentUser?.authorizationGroups?.map(ag => ag.uuid) ?? []
+    if (
+      authorizationGroupUuids?.some(ag =>
+        userAuthorizationGroupUuids.includes(ag)
+      )
+    ) {
+      return 0
+    } else {
+      return MAX_NR_OF_EXPORTS
+    }
   }
 }
 

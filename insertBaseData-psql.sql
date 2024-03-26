@@ -846,6 +846,7 @@ INSERT INTO "adminSettings" (key, value) VALUES
   ('SECURITY_BANNER_RELEASABILITY', 'releasable to DEMO MISSION'),
   ('SECURITY_BANNER_COLOR', 'green'),
   ('DEFAULT_APPROVAL_ORGANIZATION', (select uuid from organizations where "shortName"='ANET Administrators')),
+  ('UNLIMITED_RESULTS_AUTHORIZATION_GROUP', ''),
   ('HELP_LINK_URL', 'http://google.com'),
   ('CONTACT_EMAIL', 'team-anet@example.com'),
   ('DAILY_ROLLUP_MAX_REPORT_AGE_DAYS', '14'),
