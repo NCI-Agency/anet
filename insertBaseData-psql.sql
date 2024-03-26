@@ -63,7 +63,7 @@ INSERT INTO people (uuid, name, status, "phoneNumber", rank, biography, "user", 
   ('0c5a8ba7-7436-47fd-bead-b8393246a300', 'KYLESON, Kyle', 0, '+1-412-7324', 'CIV', 'Kyle is another test person we have in the database', false, NULL, NULL, 'Afghanistan', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('cebeb179-2a64-4d0c-a06b-76e68f80b5e5', 'BEMERGED, Myposwill', 0, '+1-412-7324', 'CIV', 'Myposwill is a test person whose position will be merged', false, NULL, NULL, 'Afghanistan', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('3cb2076c-5317-47fe-86ad-76f298993917', 'MERGED, Duplicate Winner', 0, '+1-234-5678', 'CIV', 'Winner is a test person who will be merged', false, NULL, NULL, 'Afghanistan', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('c725aef3-cdd1-4baf-ac72-f28219b234e9', 'MERGED, Duplicate Loser', 0, '+1-876-5432', 'CTR', 'Loser is a test person who will be merged', false, NULL, NULL, 'Afghanistan', 'FEMALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('c725aef3-cdd1-4baf-ac72-f28219b234e9', 'MERGED, Duplicate Loser', 0, NULL, 'CTR', 'Loser is a test person who will be merged', false, NULL, NULL, 'Afghanistan', 'FEMALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('7d90bf90-b3b1-4e99-84bf-5e50b9dcc9d6', 'HUNTMAN, Hunter', 0, '+1-412-9314', 'CIV', NULL, false, NULL, NULL, 'United States of America', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('33f708e0-bf7c-47a0-baf1-730afa4f0c98', 'NICHOLSON, Nick', 0, '+1-202-7324', 'CIV', NULL, true, 'nick', '2a1e98bd-13dc-49c9-a1c5-7137eacc0e8f', 'United States of America', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 -- Superusers
@@ -114,8 +114,6 @@ INSERT INTO "emailAddresses" (network, address, "relatedObjectType", "relatedObj
   ('Internet', 'kevin+rivers@example.com', 'people', 'c033862b-a4ef-4043-acd5-a2b399a10f00'),
   ('NS', 'kevin+rivers@example.ns', 'people', 'c033862b-a4ef-4043-acd5-a2b399a10f00'),
 -- Advisors with no position for testing
-  ('Internet', 'noPosition@example.com', 'people', 'bdd91de7-09c7-4f09-97e4-d3325bb92dab'),
-  ('NS', 'noPosition@example.ns', 'people', 'bdd91de7-09c7-4f09-97e4-d3325bb92dab'),
   ('Internet', 'ima.reportguy@example.com', 'people', '7914ceba-7f89-493b-bd03-eee7e19c60a8'),
   ('NS', 'ima.reportguy@example.ns', 'people', '7914ceba-7f89-493b-bd03-eee7e19c60a8'),
   ('Internet', 'ima.reportgirl@example.com', 'people', 'd9f3ee10-6e01-4d57-9916-67978608e9ba'),
@@ -128,7 +126,6 @@ INSERT INTO "emailAddresses" (network, address, "relatedObjectType", "relatedObj
   ('Internet', 'kyleson.kyle@example.com', 'people', '0c5a8ba7-7436-47fd-bead-b8393246a300'),
   ('Internet', 'bemerged.myposwill@example.com', 'people', 'cebeb179-2a64-4d0c-a06b-76e68f80b5e5'),
   ('Internet', 'merged.winner@example.com', 'people', '3cb2076c-5317-47fe-86ad-76f298993917'),
-  ('Internet', 'merged.loser@example.com', 'people', 'c725aef3-cdd1-4baf-ac72-f28219b234e9'),
   ('Internet', 'hunter@example.com', 'people', '7d90bf90-b3b1-4e99-84bf-5e50b9dcc9d6'),
   ('Internet', 'nick@example.com', 'people', '33f708e0-bf7c-47a0-baf1-730afa4f0c98'),
 -- Superusers
@@ -396,7 +393,7 @@ INSERT INTO organizations(uuid, "shortName", "longName", "createdAt", "updatedAt
 
 -- Sub-organizations
 INSERT INTO organizations(uuid, "shortName", "longName", "parentOrgUuid", "createdAt", "updatedAt") VALUES
-  (uuid_generate_v4(), 'EF 1.1', '', (SELECT uuid from organizations WHERE "shortName" ='EF 1'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('04614b0f-7e8e-4bf1-8bc5-13abaffeab8a', 'EF 1.1', '', (SELECT uuid from organizations WHERE "shortName" ='EF 1'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 1.2', '', (SELECT uuid from organizations WHERE "shortName" ='EF 1'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 2.1', '', (SELECT uuid from organizations WHERE "shortName" ='EF 2'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'EF 2.2', '', (SELECT uuid from organizations WHERE "shortName" ='EF 2'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
@@ -419,6 +416,8 @@ WHERE "shortName"='LNG';
 INSERT INTO "emailAddresses" (network, address, "relatedObjectType", "relatedObjectUuid") VALUES
   ('Internet', 'lng@example.com', 'organizations', '70193ee9-05b4-4aac-80b5-75609825db9f'),
   ('NS', 'lng@example.ns', 'organizations', '70193ee9-05b4-4aac-80b5-75609825db9f'),
+  ('Internet', 'ef11@example.com', 'organizations', '04614b0f-7e8e-4bf1-8bc5-13abaffeab8a'),
+  ('NS', 'ef11@example.ns', 'organizations', '04614b0f-7e8e-4bf1-8bc5-13abaffeab8a'),
   ('Internet', 'ef22@example.com', 'organizations', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b'),
   ('NS', 'ef22@example.ns', 'organizations', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b'),
   ('Internet', 'ef51@example.com', 'organizations', '7f939a44-b9e4-48e0-98f5-7d0ea38a6ecf'),
@@ -639,7 +638,6 @@ INSERT INTO "emailAddresses" (network, address, "relatedObjectType", "relatedObj
   ('Internet', 'chiefOfTests@moi.example.com', 'positions', '18f42d92-ada7-11eb-8529-0242ac130003'),
   ('Internet', 'directorOfTests@mod.example.com', 'positions', '338e4d54-ada7-11eb-8529-0242ac130003'),
   ('Internet', 'mergeOne@mod.example.com', 'positions', '25fe500c-3503-4ba8-a9a4-09b29b50c1f1'),
-  ('Internet', 'mergeTwo@mod.example.com', 'positions', 'e87f0f60-ad13-4c1c-96f7-672c595b81c7'),
   ('Internet', 'chiefOfMergePeopleTest1@moi.example.com', 'positions', '885dd6bf-4647-4ef7-9bc4-4dd2826064bb'),
   ('Internet', 'chiefOfMergePeopleTest2@moi.example.com', 'positions', '4dc40a27-19ae-4e03-a4f3-55b2c768725f');
 
