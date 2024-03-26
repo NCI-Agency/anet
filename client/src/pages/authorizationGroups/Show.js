@@ -2,6 +2,7 @@ import { gql } from "@apollo/client"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
 import AppContext from "components/AppContext"
+import AuthorizationGroupMembersTable from "components/AuthorizationGroupMembersTable"
 import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -16,16 +17,20 @@ import {
   usePageTitle
 } from "components/Page"
 import PositionTable from "components/PositionTable"
-import { RelatedObjectsTable } from "components/RelatedObjectsTable"
 import ReportCollection from "components/ReportCollection"
 import { Field, Form, Formik } from "formik"
 import { AuthorizationGroup } from "models"
-import pluralize from "pluralize"
 import React, { useContext, useState } from "react"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
 import Settings from "settings"
 
+const GQL_EMAIL_ADDRESSES = `
+  emailAddresses {
+    network
+    address
+  }
+`
 const GQL_GET_AUTHORIZATION_GROUP = gql`
   query ($uuid: String) {
     authorizationGroup(uuid: $uuid) {
@@ -67,17 +72,20 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
             shortName
             longName
             identificationCode
+            ${GQL_EMAIL_ADDRESSES}
           }
           ... on Person {
             uuid
             name
             rank
             avatarUuid
+            ${GQL_EMAIL_ADDRESSES}
           }
           ... on Position {
             uuid
             type
             name
+            ${GQL_EMAIL_ADDRESSES}
           }
         }
       }
@@ -191,12 +199,8 @@ const AuthorizationGroupShow = ({ pageDispatchers }) => {
                     .authorizationGroupRelatedObjects?.label
                 }
               >
-                <RelatedObjectsTable
-                  title={pluralize.singular(
-                    Settings.fields.authorizationGroup
-                      .authorizationGroupRelatedObjects?.label
-                  )}
-                  relatedObjects={values.authorizationGroupRelatedObjects}
+                <AuthorizationGroupMembersTable
+                  authorizationGroup={authorizationGroup}
                 />
               </Fieldset>
 
