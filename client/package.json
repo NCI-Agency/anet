@@ -116,7 +116,7 @@
     "xhr2": "0.2.1"
   },
   "dependencies": {
-    "@apollo/client": "3.9.7",
+    "@apollo/client": "3.9.9",
     "@blueprintjs/core": "4.20.2",
     "@blueprintjs/datetime": "4.4.37",
     "@blueprintjs/popover2": "1.14.11",
