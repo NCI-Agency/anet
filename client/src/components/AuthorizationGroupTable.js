@@ -1,15 +1,48 @@
 import Checkbox from "components/Checkbox"
-import EmailAddressList from "components/EmailAddressList"
 import LinkTo from "components/LinkTo"
 import { mapPageDispatchersToProps } from "components/Page"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _get from "lodash/get"
 import { AuthorizationGroup } from "models"
+import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React from "react"
 import { Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import Settings from "settings"
+import utils from "utils"
+
+const TruncatedList = ({ elementType, elements, maxLines, renderElement }) => {
+  const n = elements?.length ?? 0
+  if (!utils.isNumeric(maxLines) || n <= maxLines) {
+    return elements?.map(renderElement)
+  }
+  if (maxLines === 0 || maxLines === 1) {
+    return (
+      <em>
+        {n} {n === 1 ? elementType : pluralize(elementType)}
+      </em>
+    )
+  }
+  const elems = []
+  const toShow = maxLines - 1
+  for (let i = 0; i < toShow; i++) {
+    elems.push(renderElement(elements[i]))
+  }
+  elems.push(<div key="more">… and {n - toShow} more</div>)
+  return elems
+}
+
+TruncatedList.propTypes = {
+  elementType: PropTypes.string.isRequired,
+  elements: PropTypes.array,
+  maxLines: PropTypes.number,
+  renderElement: PropTypes.func.isRequired
+}
+
+TruncatedList.defaultProps = {
+  maxLines: 0
+}
 
 const AuthorizationGroupTable = ({
   id,
@@ -61,58 +94,70 @@ const AuthorizationGroupTable = ({
       </thead>
 
       <tbody>
-        {ags.map(authorizationGroup => (
-          <tr key={authorizationGroup.uuid}>
-            {allowSelection && (
-              <>
-                <td style={{ verticalAlign: "middle", textAlign: "center" }}>
-                  <Checkbox
-                    checked={isSelected(authorizationGroup.uuid)}
-                    onChange={() =>
-                      toggleSelection(
-                        authorizationGroup.uuid,
-                        authorizationGroup.authorizationGroupRelatedObjects.flatMap(
-                          agro => agro.relatedObject?.emailAddresses
-                        )
+        {ags.map(authorizationGroup => {
+          const agEmailAddresses =
+            authorizationGroup.authorizationGroupRelatedObjects.flatMap(agro =>
+              agro.relatedObject?.emailAddresses?.map(ea => ({
+                key: agro.relatedObjectUuid,
+                ...ea
+              }))
+            )
+          return (
+            <tr key={authorizationGroup.uuid}>
+              {allowSelection && (
+                <>
+                  <td style={{ verticalAlign: "middle", textAlign: "center" }}>
+                    <Checkbox
+                      checked={isSelected(authorizationGroup.uuid)}
+                      onChange={() =>
+                        toggleSelection(
+                          authorizationGroup.uuid,
+                          agEmailAddresses
+                        )}
+                    />
+                  </td>
+                  <td>
+                    <TruncatedList
+                      elementType="email address"
+                      elements={agEmailAddresses}
+                      renderElement={ea => (
+                        <div key={ea.key}>
+                          {utils.createMailtoLink(ea.address)}
+                        </div>
                       )}
+                    />
+                  </td>
+                </>
+              )}
+              <td>
+                <LinkTo
+                  modelType="AuthorizationGroup"
+                  model={authorizationGroup}
+                />
+              </td>
+              <td>{authorizationGroup.description}</td>
+              {showMembers && (
+                <td>
+                  <TruncatedList
+                    elementType="member"
+                    elements={
+                      authorizationGroup.authorizationGroupRelatedObjects
+                    }
+                    renderElement={agro => (
+                      <div key={agro.relatedObjectUuid}>
+                        <LinkTo
+                          modelType={agro.relatedObjectType}
+                          model={agro.relatedObject}
+                        />
+                      </div>
+                    )}
                   />
                 </td>
-                <td>
-                  {authorizationGroup.authorizationGroupRelatedObjects.map(
-                    agro => (
-                      <EmailAddressList
-                        key={agro.relatedObjectUuid}
-                        emailAddresses={agro.relatedObject?.emailAddresses}
-                      />
-                    )
-                  )}
-                </td>
-              </>
-            )}
-            <td>
-              <LinkTo
-                modelType="AuthorizationGroup"
-                model={authorizationGroup}
-              />
-            </td>
-            <td>{authorizationGroup.description}</td>
-            {showMembers && (
-              <td>
-                {authorizationGroup.authorizationGroupRelatedObjects.map(
-                  agro => (
-                    <div key={agro.relatedObjectUuid}>
-                      <LinkTo
-                        modelType={agro.relatedObjectType}
-                        model={agro.relatedObject}
-                      />
-                    </div>
-                  )
-                )}
-              </td>
-            )}
-            {showStatus && <td>{authorizationGroup.humanNameOfStatus()} </td>}
-          </tr>
-        ))}
+              )}
+              {showStatus && <td>{authorizationGroup.humanNameOfStatus()} </td>}
+            </tr>
+          )
+        })}
       </tbody>
     </Table>
   )
