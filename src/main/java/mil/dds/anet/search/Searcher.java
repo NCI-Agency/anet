@@ -21,13 +21,8 @@ public abstract class Searcher implements ISearcher {
     this.injector = injector;
   }
 
-  public static Searcher getSearcher(DaoUtils.DbType dbType, Injector injector) {
-    switch (dbType) {
-      case POSTGRESQL:
-        return new PostgresqlSearcher(injector);
-      default:
-        throw new RuntimeException("No searcher found for " + dbType);
-    }
+  public static Searcher getSearcher(Injector injector) {
+    return new PostgresqlSearcher(injector);
   }
 
   public static String getSubscriptionReferences(Person user, Map<String, Object> args,

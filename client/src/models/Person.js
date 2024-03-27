@@ -3,7 +3,8 @@ import Model, {
   createCustomFieldsSchema,
   GRAPHQL_NOTES_FIELDS,
   SENSITIVE_CUSTOM_FIELDS_PARENT,
-  yupDate
+  yupDate,
+  yupEmailAddressesWithValidation
 } from "components/Model"
 import _isEmpty from "lodash/isEmpty"
 import PEOPLE_ICON from "resources/people.png"
@@ -76,24 +77,18 @@ export default class Person extends Model {
         .nullable()
         .default("")
         .label(Settings.fields.person.domainUsername?.label),
-      emailAddress: yup
-        .string()
-        .nullable()
-        .email()
-        .when("user", ([user], schema) =>
-          schema.test(
-            "emailAddress",
-            "emailAddress error",
-            (emailAddress, testContext) => {
-              const r = utils.handleEmailValidation(emailAddress, user)
-              return Settings.fields.person.emailAddress?.optional || r.isValid
-                ? true
-                : testContext.createError({ message: r.message })
-            }
-          )
-        )
-        .default("")
-        .label(Settings.fields.person.emailAddress?.label),
+      emailAddresses: yupEmailAddressesWithValidation(
+        "emailAddress",
+        "emailAddress error",
+        function(address, testContext) {
+          const { from } = this
+          const user = from[1].value.user
+          const r = utils.handleEmailValidation(address, user)
+          return Settings.fields.person.emailAddress?.optional || r.isValid
+            ? true
+            : testContext.createError({ message: r.message })
+        }
+      ),
       country: yup
         .string()
         .nullable()
@@ -175,7 +170,6 @@ export default class Person extends Model {
     avatarUuid
     status
     pendingVerification
-    emailAddress
     phoneNumber
     user
     domainUsername
@@ -185,6 +179,10 @@ export default class Person extends Model {
     gender
     endOfTourDate
     code
+    emailAddresses {
+      network
+      address
+    }
     position {
       uuid
       name

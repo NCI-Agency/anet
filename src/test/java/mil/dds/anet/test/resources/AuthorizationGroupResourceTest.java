@@ -127,6 +127,7 @@ class AuthorizationGroupResourceTest extends AbstractResourceTest {
   }
 
   private AuthorizationGroupInput getAuthorizationGroupInput() {
+    final String noposPersonUuid = "bdd91de7-09c7-4f09-97e4-d3325bb92dab";
     return AuthorizationGroupInput.builder().withName("test authorization group")
         .withDescription("test authorization group description").withStatus(Status.ACTIVE)
         .withAdministrativePositions(
@@ -135,7 +136,7 @@ class AuthorizationGroupResourceTest extends AbstractResourceTest {
             GenericRelatedObjectInput.builder().withRelatedObjectType(PositionDao.TABLE_NAME)
                 .withRelatedObjectUuid(getRegularUser().getPosition().getUuid()).build(),
             GenericRelatedObjectInput.builder().withRelatedObjectType(PersonDao.TABLE_NAME)
-                .withRelatedObjectUuid(getElizabethElizawell().getUuid()).build(),
+                .withRelatedObjectUuid(noposPersonUuid).build(),
             GenericRelatedObjectInput.builder().withRelatedObjectType(OrganizationDao.TABLE_NAME)
                 .withRelatedObjectUuid(admin.getPosition().getOrganization().getUuid()).build()))
         .build();

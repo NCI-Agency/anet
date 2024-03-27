@@ -56,6 +56,16 @@ public abstract class AbstractAuthorizationGroupSearcher
       qb.addSqlArg("userUuid", DaoUtils.getUuid(query.getUser()));
     }
 
+    if (query.getEmailNetwork() != null) {
+      qb.addFromClause("JOIN \"authorizationGroupRelatedObjects\" agro"
+          + " ON agro.\"authorizationGroupUuid\" = \"authorizationGroups\".uuid"
+          + " LEFT JOIN \"emailAddresses\" \"agroEmail\""
+          + " ON agro.\"relatedObjectType\" = \"agroEmail\".\"relatedObjectType\""
+          + " AND agro.\"relatedObjectUuid\" = \"agroEmail\".\"relatedObjectUuid\"");
+      qb.addStringEqualsClause("emailNetwork", "\"agroEmail\".network", query.getEmailNetwork());
+      qb.addIsNotNullOrEmptyClause("\"agroEmail\".address");
+    }
+
     addOrderByClauses(qb, query);
   }
 

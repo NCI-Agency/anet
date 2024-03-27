@@ -1,6 +1,7 @@
 import { gql } from "@apollo/client"
 import API from "api"
 import DictionaryField from "components/DictionaryField"
+import EmailAddressTable from "components/EmailAddressTable"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import Model from "components/Model"
@@ -58,6 +59,10 @@ const GQL_GET_ORGANIZATION = gql`
       ...organizationFields
       status
       profile
+      emailAddresses {
+        network
+        address
+      }
       location {
         ...locationFields
         lat
@@ -189,6 +194,14 @@ const OrganizationPreview = ({ className, uuid }) => {
                 </Badge>
               </>
             )
+          }
+        />
+
+        <DictionaryField
+          wrappedComponent={PreviewField}
+          dictProps={Settings.fields.organization.emailAddresses}
+          value={
+            <EmailAddressTable emailAddresses={organization.emailAddresses} />
           }
         />
 

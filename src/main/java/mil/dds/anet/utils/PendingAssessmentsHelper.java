@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AnetEmail;
+import mil.dds.anet.beans.EmailAddress;
 import mil.dds.anet.beans.Note.NoteType;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
@@ -541,24 +542,26 @@ public class PendingAssessmentsHelper {
         objectsToAssessByPosition.entrySet().stream().map(otabp -> {
           final Position pos = otabp.getKey();
           // Get the person to be notified
-          return pos.loadPerson(context).thenApply(advisor -> {
-            if (!Boolean.TRUE.equals(advisor.getUser())) {
-              return CompletableFuture.completedFuture(null);
-            }
-            final ObjectsToAssess ota = otabp.getValue();
-            includedObjectsToAssessByPosition.put(pos, ota);
-            final Set<Position> positionsToAssess = ota.positionsToAssess();
-            final Set<Task> tasksToAssess = ota.tasksToAssess();
-            logger.info("advisor {} should do assessments:", advisor);
-            positionsToAssess.forEach(pta -> logger.info(" - {} for position {} held by person {}",
-                allPositionsToAssess.get(pta), pta, pta.getPerson()));
-            tasksToAssess
-                .forEach(tta -> logger.info(" - {} for task {}", allTasksToAssess.get(tta), tta));
-            if (sendEmail) {
-              sendEmail(advisor, positionsToAssess, tasksToAssess);
-            }
-            return null;
-          });
+          return pos.loadPerson(context)
+              .thenCompose(advisor -> advisor.loadEmailAddresses(context, null).thenCompose(l -> {
+                if (!Boolean.TRUE.equals(advisor.getUser())) {
+                  return CompletableFuture.completedFuture(null);
+                }
+                final ObjectsToAssess ota = otabp.getValue();
+                includedObjectsToAssessByPosition.put(pos, ota);
+                final Set<Position> positionsToAssess = ota.positionsToAssess();
+                final Set<Task> tasksToAssess = ota.tasksToAssess();
+                logger.info("advisor {} should do assessments:", advisor);
+                positionsToAssess
+                    .forEach(pta -> logger.info(" - {} for position {} held by person {}",
+                        allPositionsToAssess.get(pta), pta, pta.getPerson()));
+                tasksToAssess.forEach(
+                    tta -> logger.info(" - {} for task {}", allTasksToAssess.get(tta), tta));
+                if (sendEmail) {
+                  sendEmail(advisor, positionsToAssess, tasksToAssess);
+                }
+                return CompletableFuture.completedFuture(null);
+              }));
         }).toArray(CompletableFuture<?>[]::new);
     // Wait for our futures to complete before returning
     return CompletableFuture.allOf(allFutures)
@@ -567,13 +570,20 @@ public class PendingAssessmentsHelper {
 
   private void sendEmail(Person advisor, final Set<Position> positionsToAssess,
       final Set<Task> tasksToAssess) {
+    final String address =
+        advisor.getNotificationEmailAddress().map(EmailAddress::getAddress).orElse(null);
+    if (Utils.isEmptyOrNull(address)) {
+      logger.info("Person {} does not have an email address, not sending pending assessments email",
+          advisor);
+      return;
+    }
     final AnetEmail email = new AnetEmail();
     final PendingAssessmentsNotificationEmail action = new PendingAssessmentsNotificationEmail();
     action.setAdvisor(advisor);
     action.setPositionsToAssess(positionsToAssess);
     action.setTasksToAssess(tasksToAssess);
     email.setAction(action);
-    email.setToAddresses(Collections.singletonList(advisor.getEmailAddress()));
+    email.setToAddresses(List.of(address));
     AnetEmailWorker.sendEmailAsync(email);
   }
 

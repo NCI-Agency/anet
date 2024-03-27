@@ -83,6 +83,9 @@ public class PositionResource {
       dao.setPersonInPosition(pos.getPersonUuid(), created.getUuid());
     }
 
+    engine.getEmailAddressDao().updateEmailAddresses(PositionDao.TABLE_NAME, created.getUuid(),
+        pos.getEmailAddresses());
+
     DaoUtils.saveCustomSensitiveInformation(user, PositionDao.TABLE_NAME, created.getUuid(),
         pos.getCustomSensitiveInformation());
 
@@ -139,6 +142,9 @@ public class PositionResource {
           pos.getOrganizationsAdministrated(), newOrg -> dao.addOrganizationToPosition(pos, newOrg),
           oldOrgUuid -> dao.removeOrganizationFromPosition(oldOrgUuid, pos));
     }
+
+    engine.getEmailAddressDao().updateEmailAddresses(PositionDao.TABLE_NAME, pos.getUuid(),
+        pos.getEmailAddresses());
 
     DaoUtils.saveCustomSensitiveInformation(user, PositionDao.TABLE_NAME, pos.getUuid(),
         pos.getCustomSensitiveInformation());

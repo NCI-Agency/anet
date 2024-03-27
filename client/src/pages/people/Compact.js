@@ -14,6 +14,7 @@ import CompactTable, {
 } from "components/Compact"
 import { mapReadonlyCustomFieldsToComps } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
+import EmailAddressTable from "components/EmailAddressTable"
 import * as FieldHelper from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import {
@@ -52,7 +53,6 @@ const GQL_GET_PERSON = gql`
       avatarUuid
       status
       pendingVerification
-      emailAddress
       phoneNumber
       user
       domainUsername
@@ -62,6 +62,10 @@ const GQL_GET_PERSON = gql`
       gender
       endOfTourDate
       code
+      emailAddresses {
+        network
+        address
+      }
       position {
         uuid
         name
@@ -110,7 +114,6 @@ const GQL_GET_PERSON = gql`
 // Redundant fields to print
 const DEFAULT_FIELD_GROUP_EXCEPTIONS = [
   "gender",
-  "emailAddress",
   "phone",
   "code",
   "endOfTourDate"
@@ -230,9 +233,6 @@ const CompactPersonView = ({ pageDispatchers }) => {
   const hasPosition = position && position.uuid
   // Keys of fields which should span over 2 columns
   const fullWidthFieldKeys = person.getFullWidthFields()
-  const emailHumanValue = (
-    <a href={`mailto:${person.emailAddress}`}>{person.emailAddress}</a>
-  )
   const orderedFields = orderPersonFields().filter(
     field => !fullWidthFieldKeys.includes(field.key)
   )
@@ -391,7 +391,9 @@ const CompactPersonView = ({ pageDispatchers }) => {
     const humanValuesExceptions = {
       biography: <RichTextEditor readOnly value={person.biography} />,
       user: utils.formatBoolean(person.user),
-      emailAddress: emailHumanValue,
+      emailAddresses: (
+        <EmailAddressTable emailAddresses={person.emailAddresses} />
+      ),
       endOfTourDate:
         person.endOfTourDate &&
         moment(person.endOfTourDate).format(

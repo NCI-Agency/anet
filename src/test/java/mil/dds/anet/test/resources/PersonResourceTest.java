@@ -45,15 +45,16 @@ public class PersonResourceTest extends AbstractResourceTest {
 
   private static final String BIRTHDAY_FIELD = "birthday";
   private static final String POLITICAL_POSITION_FIELD = "politicalPosition";
+  private static final String _EMAIL_ADDRESSES_FIELDS = "emailAddresses { network address }";
   private static final String _CUSTOM_SENSITIVE_INFORMATION_FIELDS =
       "customSensitiveInformation { uuid customFieldName customFieldValue"
           + " relatedObjectType relatedObjectUuid createdAt updatedAt }";
-  private static final String _POSITION_FIELDS =
-      "uuid name code type role status organization { uuid }";
+  private static final String _POSITION_FIELDS = String.format(
+      "uuid name code type role status organization { uuid } %1$s", _EMAIL_ADDRESSES_FIELDS);
   private static final String _PERSON_FIELDS =
-      "uuid name status user emailAddress phoneNumber rank biography country avatarUuid code"
+      String.format("uuid name status user phoneNumber rank biography country avatarUuid code"
           + " gender endOfTourDate domainUsername openIdSubject pendingVerification createdAt updatedAt"
-          + " customFields";
+          + " customFields %1$s", _EMAIL_ADDRESSES_FIELDS);
   public static final String PERSON_FIELDS_ONLY_HISTORY =
       "{ uuid previousPositions { startTime endTime position { uuid } } }";
   public static final String POSITION_FIELDS = String.format("{ %s person { %s } %s }",
@@ -294,14 +295,12 @@ public class PersonResourceTest extends AbstractResourceTest {
 
 
     // Search by email Address
-    query2.setText("hunter+arthur@example.com");
+    query2.setText("arthur@example.com");
     searchResults =
         withCredentials(jackUser, t -> queryExecutor.personList(getListFields(FIELDS), query2));
-    matchCount = searchResults.getList().stream()
-        .filter(p -> p.getEmailAddress().equals("hunter+arthur@example.com")).count();
+    matchCount = searchResults.getList().stream().filter(p -> p.getEmailAddresses().stream()
+        .anyMatch(ea -> "arthur@example.com".equals(ea.getAddress()))).count();
     assertThat(matchCount).isEqualTo(1);
-    // TODO: should we enforce that this query returns ONLY arthur? I think not since we're using
-    // the plus addressing for testing..
 
     // Search for persons with biography filled
     final PersonSearchQueryInput query3 =

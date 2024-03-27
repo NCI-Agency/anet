@@ -15,6 +15,10 @@ import {
   customFieldsJSONString
 } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
+import EmailAddressInputTable, {
+  initializeEmailAddresses
+} from "components/EmailAddressInputTable"
+import EmailAddressTable from "components/EmailAddressTable"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
@@ -64,6 +68,9 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
   const attachmentEditEnabled =
     attachmentsEnabled &&
     (!Settings.fields.attachment.restrictToAdmins || currentUser.isAdmin())
+  initialValues.emailAddresses = initializeEmailAddresses(
+    initialValues.emailAddresses
+  )
   const statusButtons = [
     {
       id: "statusActiveButton",
@@ -243,6 +250,17 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                     />
                     <DictionaryField
                       wrappedComponent={FastField}
+                      dictProps={Settings.fields.organization.emailAddresses}
+                      name="emailAddresses"
+                      component={FieldHelper.ReadonlyField}
+                      humanValue={
+                        <EmailAddressTable
+                          emailAddresses={values.emailAddresses}
+                        />
+                      }
+                    />
+                    <DictionaryField
+                      wrappedComponent={FastField}
                       dictProps={Settings.fields.organization.status}
                       name="status"
                       component={FieldHelper.ReadonlyField}
@@ -334,6 +352,17 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                           fields={Location.autocompleteQuery}
                           valueKey="name"
                           addon={LOCATIONS_ICON}
+                        />
+                      }
+                    />
+                    <DictionaryField
+                      wrappedComponent={FastField}
+                      as="div"
+                      dictProps={Settings.fields.organization.emailAddresses}
+                      component={FieldHelper.SpecialField}
+                      widget={
+                        <EmailAddressInputTable
+                          emailAddresses={values.emailAddresses}
                         />
                       }
                     />

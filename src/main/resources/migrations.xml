@@ -29,6 +29,8 @@
 	<!-- Full-text search weights -->
 	<property name="fts_high" value="'A'" dbms="postgresql" />
 	<property name="fts_low" value="'B'" dbms="postgresql" />
+	<property name="fts_lower" value="'C'" dbms="postgresql" />
+	<property name="fts_lowest" value="'D'" dbms="postgresql" />
 
 	<!-- For storing the avatar -->
 	<property name="blob_type" value="blob" dbms="mssql" />
@@ -4724,6 +4726,152 @@
 		<addColumn tableName="reports">
 			<column name="classification" type="${long_text_type}" />
 		</addColumn>
+	</changeSet>
+
+	<changeSet id="add-emailAddresses" author="gjvoosten">
+		<createTable tableName="emailAddresses">
+			<column name="network" type="varchar(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="address" type="varchar(255)">
+				<constraints nullable="false" />
+			</column>
+			<!-- The next two columns combined act as a generic foreign key reference to a (table name, uuid)-tuple -->
+			<column name="relatedObjectType" type="varchar(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="relatedObjectUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<!-- Related objects can have at most one email address per network -->
+		<addUniqueConstraint
+			tableName="emailAddresses"
+			columnNames="network, relatedObjectType, relatedObjectUuid"
+			constraintName="UQ_EmailAddressNetworkRelatedObject"
+		/>
+	</changeSet>
+
+	<changeSet id="alter-full_text-index-add-email_addresses" author="gjvoosten" runInTransaction="false" >
+		<sql>
+			<!-- Add generated full-text column to emailAddresses;
+			     use 'simple' config for address column -->
+			ALTER TABLE "emailAddresses"
+				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector('simple', coalesce("emailAddresses".address, '')), ${fts_low})
+					|| setweight(to_tsvector('simple', translate(coalesce("emailAddresses".address, ''), '@', ' ')), ${fts_lower})
+					|| setweight(to_tsvector('simple', translate(coalesce("emailAddresses".address, ''), '@.', '  ')), ${fts_lowest})
+				) STORED;
+
+			<!-- Drop full-text materialized views (incl. indexes);
+			     copied from changeset alter-postgresql-fulltext -->
+			DROP MATERIALIZED VIEW mv_fts_organizations;
+			DROP MATERIALIZED VIEW mv_fts_people;
+			DROP MATERIALIZED VIEW mv_fts_positions;
+
+			<!-- Drop generated full-text column;
+			     copied from changeset alter-postgresql-fulltext -->
+			ALTER TABLE people DROP COLUMN full_text;
+
+			<!-- Re-add generated full-text column;
+			     use 'anet' config only for columns containing English text,
+			     use 'simple' config for all columns;
+			     copied from changeset alter-postgresql-fulltext -->
+			ALTER TABLE people
+				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector('simple', coalesce(people.name, '')), ${fts_high}) ||
+					setweight(to_tsvector('simple', coalesce(people.code, '')), ${fts_high}) ||
+					setweight(to_tsvector('simple', coalesce(people."domainUsername", '')), ${fts_high}) ||
+					setweight(to_tsvector('simple', coalesce(people."phoneNumber", '')), ${fts_high}) ||
+					setweight(to_tsvector(${fts_config}, coalesce(people.biography, ''))
+						  || to_tsvector('simple', coalesce(people.biography, '')), ${fts_low})
+				) STORED;
+
+			<!-- Re-create full-text materialized views and indexes;
+			     add the emailAddresses, otherwise mostly
+			     copied from changeset alter-postgresql-fulltext -->
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_organizations(uuid, full_text) AS
+				SELECT
+					organizations.uuid,
+					organizations.full_text
+					|| coalesce(tsvector_agg(notes.full_text), ''::tsvector)
+					|| coalesce(tsvector_agg("emailAddresses".full_text), ''::tsvector)
+				FROM organizations
+				LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'organizations'
+					AND "noteRelatedObjects"."relatedObjectUuid" = organizations.uuid
+				LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
+				LEFT JOIN "emailAddresses" ON "emailAddresses"."relatedObjectType" = 'organizations'
+					AND "emailAddresses"."relatedObjectUuid" = organizations.uuid
+				GROUP BY organizations.uuid
+				WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_organizations_uuid" ON mv_fts_organizations(uuid);
+			CREATE INDEX "FT_mv_fts_organizations" ON mv_fts_organizations USING gin(full_text);
+			CREATE INDEX "TR_organizations_uuid" ON mv_fts_organizations USING gin(uuid gin_trgm_ops);
+
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_people(uuid, full_text) AS
+				SELECT
+					people.uuid,
+					people.full_text
+					|| coalesce(tsvector_agg(positions.full_text), ''::tsvector)
+					|| coalesce(tsvector_agg(organizations.full_text), ''::tsvector)
+					|| coalesce(tsvector_agg(notes.full_text), ''::tsvector)
+					|| coalesce(tsvector_agg("emailAddresses".full_text), ''::tsvector)
+				FROM people
+				LEFT JOIN positions ON positions."currentPersonUuid" = people.uuid
+				LEFT JOIN organizations ON organizations.uuid = positions."organizationUuid"
+				LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'people'
+					AND "noteRelatedObjects"."relatedObjectUuid" = people.uuid
+				LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
+				LEFT JOIN "emailAddresses" ON "emailAddresses"."relatedObjectType" = 'people'
+					AND "emailAddresses"."relatedObjectUuid" = people.uuid
+				GROUP BY people.uuid
+				WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_people_uuid" ON mv_fts_people(uuid);
+			CREATE INDEX "FT_mv_fts_people" ON mv_fts_people USING gin(full_text);
+			CREATE INDEX "TR_people_uuid" ON mv_fts_people USING gin(uuid gin_trgm_ops);
+
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_positions(uuid, full_text) AS
+				SELECT
+					positions.uuid,
+					positions.full_text
+					|| coalesce(tsvector_agg(people.full_text), ''::tsvector)
+					|| coalesce(tsvector_agg(organizations.full_text), ''::tsvector)
+					|| coalesce(tsvector_agg(notes.full_text), ''::tsvector)
+					|| coalesce(tsvector_agg("emailAddresses".full_text), ''::tsvector)
+				FROM positions
+				LEFT JOIN people ON people.uuid = positions."currentPersonUuid"
+				LEFT JOIN organizations ON organizations.uuid = positions."organizationUuid"
+				LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'positions'
+					AND "noteRelatedObjects"."relatedObjectUuid" = positions.uuid
+				LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
+				LEFT JOIN "emailAddresses" ON "emailAddresses"."relatedObjectType" = 'positions'
+					AND "emailAddresses"."relatedObjectUuid" = positions.uuid
+				GROUP BY positions.uuid
+				WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_positions" ON mv_fts_positions(uuid);
+			CREATE INDEX "FT_mv_fts_positions" ON mv_fts_positions USING gin(full_text);
+			CREATE INDEX "TR_positions_uuid" ON mv_fts_positions USING gin(uuid gin_trgm_ops);
+		</sql>
+	</changeSet>
+
+	<changeSet id="drop-people-emailAddress" author="gjvoosten">
+		<!-- Migrate existing people.emailAddress -->
+		<sql>
+			INSERT INTO "emailAddresses" ("network", "address", "relatedObjectType", "relatedObjectUuid")
+			SELECT
+				CASE WHEN p.user IS TRUE THEN 'NS' ELSE 'Internet' END,
+				p."emailAddress",
+				'people',
+				p."uuid"
+			FROM
+				people p
+			WHERE
+				p."emailAddress" IS NOT NULL;
+		</sql>
+
+		<!-- Now drop people.emailAddress -->
+		<dropColumn tableName="people" columnName="emailAddress" />
 	</changeSet>
 
 </databaseChangeLog>

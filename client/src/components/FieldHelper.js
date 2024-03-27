@@ -38,16 +38,20 @@ const getHumanValue = (field, humanValue) => {
   }
 }
 
-const getFormGroupValidationState = (field, form) => {
+export const getFormGroupValidationState = (fieldName, form, className) => {
   const { touched, errors } = form
-  const fieldTouched = _get(touched, field.name)
-  const fieldError = _get(errors, field.name)
-  return { validationState: fieldTouched && fieldError, fieldError }
+  const fieldTouched = _get(touched, fieldName)
+  const fieldError = _get(errors, fieldName)
+  const validationState = fieldTouched && fieldError
+  if (validationState) {
+    className = classNames(className, "is-invalid")
+  }
+  return { validationState, fieldError, className }
 }
 
-const getHelpBlock = (field, form) => {
+export const getHelpBlock = (fieldName, form) => {
   const { validationState, fieldError } = getFormGroupValidationState(
-    field,
+    fieldName,
     form
   )
   return (
@@ -62,7 +66,7 @@ const FieldNoLabel = ({ field, form, widgetElem, children }) => {
   return (
     <FormGroup id={`fg-${id}`} controlId={id}>
       {widgetElem}
-      {getHelpBlock(field, form)}
+      {getHelpBlock(field.name, form)}
       {children}
     </FormGroup>
   )
@@ -122,7 +126,7 @@ const Field = ({
         content={
           <>
             {widget}
-            {getHelpBlock(field, form)}
+            {getHelpBlock(field.name, form)}
             {extraColElem}
             {children}
           </>
@@ -137,7 +141,7 @@ const Field = ({
         <>
           <div>{label !== null && <Form.Label>{label}</Form.Label>}</div>
           {widget}
-          {getHelpBlock(field, form)}
+          {getHelpBlock(field.name, form)}
           {children}
         </>
       ) : (
@@ -150,7 +154,7 @@ const Field = ({
           <Col sm={widgetWidth}>
             <div>
               {widget}
-              {getHelpBlock(field, form)}
+              {getHelpBlock(field.name, form)}
               {children}
             </div>
           </Col>
@@ -193,7 +197,7 @@ export const InputField = ({
   extraAddon,
   ...otherProps
 }) => {
-  const { validationState } = getFormGroupValidationState(field, form)
+  const { validationState } = getFormGroupValidationState(field.name, form)
   const widgetElem = useMemo(
     () => (
       <FormControl
@@ -241,7 +245,7 @@ export const InputFieldNoLabel = ({
   children,
   ...otherProps
 }) => {
-  const { validationState } = getFormGroupValidationState(field, form)
+  const { validationState } = getFormGroupValidationState(field.name, form)
   const widgetElem = useMemo(
     () => (
       <FormControl
@@ -332,11 +336,11 @@ export const SpecialField = ({
   isCompact,
   ...otherProps
 }) => {
-  const { validationState } = getFormGroupValidationState(field, form)
-  let { className } = widget.props
-  if (validationState) {
-    className = classNames(className, "is-invalid")
-  }
+  const { className } = getFormGroupValidationState(
+    field.name,
+    form,
+    widget.props?.className
+  )
   const widgetElem = useMemo(
     () => React.cloneElement(widget, { ...field, ...otherProps, className }),
     [className, field, otherProps, widget]
@@ -397,12 +401,11 @@ const ButtonToggleGroupField = ({
   enableClear,
   ...otherProps
 }) => {
-  let { className } = otherProps
-  const { validationState } = getFormGroupValidationState(field, form)
-  className = classNames(className, "flex-wrap")
-  if (validationState) {
-    className = classNames(className, "is-invalid")
-  }
+  const { className } = getFormGroupValidationState(
+    field.name,
+    form,
+    classNames(otherProps?.className, "flex-wrap")
+  )
   const widgetElem = useMemo(
     () => (
       <>
@@ -583,10 +586,8 @@ export const SelectField = ({
   extraAddon,
   ...otherProps
 }) => {
-  const { validationState } = getFormGroupValidationState(field, form)
-  if (validationState) {
-    className = classNames(className, "is-invalid")
-  }
+  const { validationState, className: updatedClassName } =
+    getFormGroupValidationState(field.name, form, className)
   const widgetElem = useMemo(
     () => (
       <FormSelect
@@ -594,7 +595,7 @@ export const SelectField = ({
         value={field.value ?? ""}
         multiple={multiple}
         isInvalid={validationState}
-        className={className}
+        className={updatedClassName}
         onChange={e => {
           let newValue
           if (!multiple) {
@@ -620,7 +621,15 @@ export const SelectField = ({
         ))}
       </FormSelect>
     ),
-    [field, className, otherProps, buttons, multiple, onChange, validationState]
+    [
+      field,
+      updatedClassName,
+      otherProps,
+      buttons,
+      multiple,
+      onChange,
+      validationState
+    ]
   )
   return (
     <Field

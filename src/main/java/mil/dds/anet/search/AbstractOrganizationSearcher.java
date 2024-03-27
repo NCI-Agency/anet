@@ -68,6 +68,14 @@ public abstract class AbstractOrganizationSearcher extends
       addParentOrgUuidQuery(query);
     }
 
+    if (query.getEmailNetwork() != null) {
+      qb.addFromClause("JOIN \"emailAddresses\" \"orgEmail\""
+          + " ON \"orgEmail\".\"relatedObjectType\" = '" + OrganizationDao.TABLE_NAME + "'"
+          + " AND \"orgEmail\".\"relatedObjectUuid\" = organizations.uuid");
+      qb.addStringEqualsClause("emailNetwork", "\"orgEmail\".network", query.getEmailNetwork());
+      qb.addIsNotNullOrEmptyClause("\"orgEmail\".address");
+    }
+
     addOrderByClauses(qb, query);
   }
 

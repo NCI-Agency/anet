@@ -9,12 +9,6 @@ class Search extends Page {
     return browser.$('//div/b[text()="No search results found!"]')
   }
 
-  async getFoundElement(element) {
-    await (await element).waitForExist({ timeout: 2000 })
-    await (await element).waitForDisplayed()
-    return await element
-  }
-
   async getFoundCounter(entity) {
     return browser.$(`div#${entity} span span`)
   }

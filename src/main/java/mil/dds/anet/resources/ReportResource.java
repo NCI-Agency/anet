@@ -176,14 +176,10 @@ public class ReportResource {
       boolean canApprove = engine.canUserApproveStep(engine.getContext(), editor.getUuid(),
           existing.getApprovalStepUuid(), existing.getAdvisorOrgUuid()).join();
       if (canApprove) {
-        AnetEmail email = new AnetEmail();
         ReportEditedEmail action = new ReportEditedEmail();
         action.setReport(existing);
         action.setEditor(editor);
-        email.setAction(action);
-        email.setToAddresses(existing.loadAuthors(AnetObjectEngine.getInstance().getContext())
-            .join().stream().map(Person::getEmailAddress).collect(Collectors.toList()));
-        AnetEmailWorker.sendEmailAsync(email);
+        ReportDao.sendEmailToReportAuthors(action, existing);
       }
     }
 
@@ -548,11 +544,7 @@ public class ReportResource {
     action.setReport(r);
     action.setRejector(rejector);
     action.setComment(rejectionComment);
-    AnetEmail email = new AnetEmail();
-    email.setAction(action);
-    email.setToAddresses(r.loadAuthors(AnetObjectEngine.getInstance().getContext()).join().stream()
-        .map(Person::getEmailAddress).collect(Collectors.toList()));
-    AnetEmailWorker.sendEmailAsync(email);
+    ReportDao.sendEmailToReportAuthors(action, r);
   }
 
   @GraphQLMutation(name = "publishReport")
@@ -639,14 +631,10 @@ public class ReportResource {
   }
 
   private void sendNewCommentEmail(Report r, Comment comment) {
-    AnetEmail email = new AnetEmail();
     NewReportCommentEmail action = new NewReportCommentEmail();
     action.setReport(r);
     action.setComment(comment);
-    email.setAction(action);
-    email.setToAddresses(r.loadAuthors(AnetObjectEngine.getInstance().getContext()).join().stream()
-        .map(Person::getEmailAddress).collect(Collectors.toList()));
-    AnetEmailWorker.sendEmailAsync(email);
+    ReportDao.sendEmailToReportAuthors(action, r);
   }
 
   @GraphQLMutation(name = "emailReport")
@@ -722,7 +710,6 @@ public class ReportResource {
       @GraphQLArgument(name = "endDate") Instant end,
       @GraphQLArgument(name = "orgType") RollupGraphType orgType,
       @GraphQLArgument(name = "orgUuid") String orgUuid) {
-
     @SuppressWarnings("unchecked")
     final List<String> nonReportingOrgsShortNames =
         (List<String>) config.getDictionaryEntry("non_reporting_ORGs");

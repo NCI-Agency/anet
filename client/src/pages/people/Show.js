@@ -12,6 +12,7 @@ import { mapReadonlyCustomFieldsToComps } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
 import EditAssociatedPositionsModal from "components/EditAssociatedPositionsModal"
 import EditHistory from "components/EditHistory"
+import EmailAddressTable from "components/EmailAddressTable"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
@@ -70,7 +71,6 @@ const GQL_GET_PERSON = gql`
       pendingVerification
       isSubscribed
       updatedAt
-      emailAddress
       phoneNumber
       user
       domainUsername
@@ -80,6 +80,10 @@ const GQL_GET_PERSON = gql`
       gender
       endOfTourDate
       code
+      emailAddresses {
+        network
+        address
+      }
       position {
         uuid
         name
@@ -236,9 +240,6 @@ const PersonShow = ({ pageDispatchers }) => {
         }
       />
     </>
-  )
-  const emailHumanValue = (
-    <a href={`mailto:${person.emailAddress}`}>{person.emailAddress}</a>
   )
 
   const extraColElems = {
@@ -516,7 +517,9 @@ const PersonShow = ({ pageDispatchers }) => {
       ),
       biography: <RichTextEditor readOnly value={person.biography} />,
       user: utils.formatBoolean(person.user),
-      emailAddress: emailHumanValue,
+      emailAddresses: (
+        <EmailAddressTable emailAddresses={person.emailAddresses} />
+      ),
       endOfTourDate:
         person.endOfTourDate &&
         moment(person.endOfTourDate).format(

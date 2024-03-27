@@ -1,6 +1,7 @@
 import Model, {
   createCustomFieldsSchema,
-  GRAPHQL_NOTES_FIELDS
+  GRAPHQL_NOTES_FIELDS,
+  yupEmailAddresses
 } from "components/Model"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
 import Settings from "settings"
@@ -95,7 +96,8 @@ export default class Organization extends Model {
         .default([]),
       positions: yup.array().nullable().default([]),
       tasks: yup.array().nullable().default([]),
-      profile: yup.string().nullable().default("")
+      profile: yup.string().nullable().default(""),
+      emailAddresses: yupEmailAddresses
     })
     // not actually in the database, the database contains the JSON customFields
     .concat(Organization.customFieldsSchema)

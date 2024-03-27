@@ -412,10 +412,8 @@ fields:
       placeholder: Fill in the person's current position
     prevPositions:
       label: Previous Positions
-    emailAddress:
-      label: Email
-      placeholder: Only the following email domain names are allowed. ( example.com, cmil.mil, mission.ita, nato.int, *.isaf.nato.int )
-      optional: false
+    emailAddresses:
+      label: Email addresses
     phoneNumber:
       label: Phone
     country:
@@ -561,6 +559,8 @@ fields:
         member: Member
         deputy: Deputy
         leader: Leader
+    emailAddresses:
+      label: Email addresses
     authorizationGroups:
       label: Authorization groups
 
@@ -590,6 +590,8 @@ fields:
     profile:
       label: Profile
       placeholder: Fill in the profile of this organization
+    emailAddresses:
+      label: Email addresses
     authorizationGroups:
       label: Authorization groups
     assessments:
@@ -678,7 +680,7 @@ fields:
         - domainUsername
         - openIdSubject
         - authorizationGroups
-        - emailAddress
+        - emailAddresses
         - phoneNumber
         - country
         - rank
@@ -722,7 +724,7 @@ fields:
         - phoneNumber
         - country
         - birthday
-        - emailAddress
+        - emailAddresses
         - politicalPosition
         - rank
         - gender
@@ -1379,8 +1381,12 @@ fields:
 pinned_ORGs: [Key Leader Engagement]
 non_reporting_ORGs: [ANET Administrators]
 tasking_ORGs: [EF 2.2, EF 9]
-domainNames: [example.com, cmil.mil, mission.ita, nato.int, "*.isaf.nato.int"]
-activeDomainNames: [example.com, cmil.mil, mission.ita, nato.int, "*.isaf.nato.int"]
+domainNames: [example.com, example.ns, cmil.mil, mission.ita, nato.int, "*.isaf.nato.int"]
+activeDomainNames: [example.com, example.ns, cmil.mil, mission.ita, nato.int, "*.isaf.nato.int"]
+emailNetworks:
+  - Internet
+  - NS
+emailNetworkForNotifications: NS
 imagery:
   mapOptions:
     crs: EPSG3857

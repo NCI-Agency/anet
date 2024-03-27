@@ -7,6 +7,7 @@ public enum FkDataLoaderKey {
   ATTACHMENT_RELATED_OBJECT_ATTACHMENTS, // attachmentRelatedObject.attachments
   AUTHORIZATION_GROUP_ADMINISTRATIVE_POSITIONS, // authorizationGroup.administrativePositions
   AUTHORIZATION_GROUP_AUTHORIZATION_GROUP_RELATED_OBJECTS, // authorizationGroup.authorizationGroupRelatedObjects
+  EMAIL_ADDRESSES_FOR_RELATED_OBJECT, // <relatedObject>.emailAddresses
   NOTE_NOTE_RELATED_OBJECTS, // note.noteRelatedObjects
   NOTE_RELATED_OBJECT_NOTES, // noteRelatedObject.notes
   ORGANIZATION_ADMINISTRATIVE_POSITIONS, // organization.responsiblePositions

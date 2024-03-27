@@ -1,19 +1,30 @@
 import PropTypes from "prop-types"
-import React from "react"
+import React, { useEffect, useRef } from "react"
 
-const Checkbox = props => (
-  <div className="checkbox">
-    <label className="d-flex align-items-center">
-      <input
-        className="checkbox"
-        type="checkbox"
-        checked={props.checked}
-        onChange={props.onChange}
-      />
-      {props.label}
-    </label>
-  </div>
-)
+const Checkbox = ({ checked, onChange, label }) => {
+  const inputRef = useRef(null)
+  useEffect(() => {
+    const input = inputRef.current
+    if (input) {
+      input.checked = checked
+      input.indeterminate = checked == null
+    }
+  }, [checked])
+
+  return (
+    <div className="checkbox">
+      <label className="d-flex align-items-center">
+        <input
+          className="checkbox"
+          type="checkbox"
+          ref={inputRef}
+          onChange={onChange}
+        />
+        {label}
+      </label>
+    </div>
+  )
+}
 Checkbox.propTypes = {
   checked: PropTypes.bool,
   onChange: PropTypes.func,

@@ -25,6 +25,7 @@ import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
 import mil.dds.anet.beans.AuthorizationGroup;
+import mil.dds.anet.beans.EmailAddress;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
@@ -47,6 +48,7 @@ import mil.dds.anet.database.mappers.AuthorizationGroupMapper;
 import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.database.mappers.ReportPersonMapper;
 import mil.dds.anet.database.mappers.TaskMapper;
+import mil.dds.anet.emails.AnetEmailAction;
 import mil.dds.anet.emails.ApprovalNeededEmail;
 import mil.dds.anet.emails.ReportPublishedEmail;
 import mil.dds.anet.threads.AnetEmailWorker;
@@ -85,23 +87,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
   public static final String REPORT_FIELDS =
       DaoUtils.buildFieldAliases(TABLE_NAME, allFields, true);
 
-  private String weekFormat;
-
-  public String getWeekFormat() {
-    if (weekFormat == null) {
-      weekFormat = getWeekFormat(getDbType());
-    }
-    return weekFormat;
-  }
-
-  private String getWeekFormat(DaoUtils.DbType dbType) {
-    switch (dbType) {
-      case POSTGRESQL:
-        return "EXTRACT(WEEK FROM %s)";
-      default:
-        throw new RuntimeException("No week format found for " + dbType);
-    }
-  }
+  private static final String weekFormat = "EXTRACT(WEEK FROM %s)";
 
   @InTransaction
   public Report insert(Report r, Person user) {
@@ -506,8 +492,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     sql.append("organizations.\"shortName\" AS \"organizationShortName\",");
     sql.append("%3$s");
     sql.append("%4$s");
-    sql.append(" ").append(String.format(getWeekFormat(), "reports.\"createdAt\""))
-        .append(" AS week,");
+    sql.append(" ").append(String.format(weekFormat, "reports.\"createdAt\"")).append(" AS week,");
     sql.append("COUNT(\"reportPeople\".\"personUuid\") AS \"nrReportsSubmitted\"");
 
     sql.append(" FROM ");
@@ -532,7 +517,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     sql.append("organizations.\"shortName\",");
     sql.append("%7$s");
     sql.append("%8$s");
-    sql.append(" " + String.format(getWeekFormat(), "reports.\"createdAt\""));
+    sql.append(" ").append(String.format(weekFormat, "reports.\"createdAt\""));
     sql.append(") a");
 
     sql.append(" FULL OUTER JOIN (");
@@ -541,7 +526,8 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     sql.append("organizations.\"shortName\" AS \"organizationShortName\",");
     sql.append("%3$s");
     sql.append("%4$s");
-    sql.append(" " + String.format(getWeekFormat(), "reports.\"engagementDate\"") + " AS week,");
+    sql.append(" ").append(String.format(weekFormat, "reports.\"engagementDate\""))
+        .append(" AS week,");
     sql.append("COUNT(\"reportPeople\".\"personUuid\") AS \"nrEngagementsAttended\"");
 
     sql.append(" FROM ");
@@ -566,7 +552,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     sql.append("organizations.\"shortName\",");
     sql.append("%7$s");
     sql.append("%8$s");
-    sql.append(" " + String.format(getWeekFormat(), "reports.\"engagementDate\""));
+    sql.append(" ").append(String.format(weekFormat, "reports.\"engagementDate\""));
     sql.append(") b");
 
     sql.append(" ON ");
@@ -779,27 +765,41 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
 
   public void sendApprovalNeededEmail(Report r, ApprovalStep approvalStep) {
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
-    final List<Position> approvers = approvalStep.loadApprovers(engine.getContext()).join();
     final List<ReportPerson> authors = r.loadAuthors(engine.getContext()).join();
-    final AnetEmail approverEmail = new AnetEmail();
-    final ApprovalNeededEmail action = new ApprovalNeededEmail();
-    action.setReport(r);
-    approverEmail.setAction(action);
-    approverEmail.setToAddresses(approvers.stream()
+    final List<Position> approverPositions = approvalStep.loadApprovers(engine.getContext()).join();
+    final List<Person> approvers = approverPositions.stream()
         .filter(a -> (a.getPersonUuid() != null)
             && authors.stream().noneMatch(p -> a.getPersonUuid().equals(p.getUuid())))
-        .map(a -> a.loadPerson(engine.getContext()).join().getEmailAddress())
-        .collect(Collectors.toList()));
-    AnetEmailWorker.sendEmailAsync(approverEmail);
+        .map(a -> a.loadPerson(engine.getContext()).join()).toList();
+    final ApprovalNeededEmail action = new ApprovalNeededEmail();
+    action.setReport(r);
+    sendEmailToReportPeople(action, approvers);
   }
 
   public void sendReportPublishedEmail(Report r) {
-    final AnetEmail email = new AnetEmail();
     final ReportPublishedEmail action = new ReportPublishedEmail();
     action.setReport(r);
+    sendEmailToReportAuthors(action, r);
+  }
+
+  public static void sendEmailToReportAuthors(AnetEmailAction action, Report report) {
+    final List<ReportPerson> authors =
+        report.loadAuthors(AnetObjectEngine.getInstance().getContext()).join();
+    sendEmailToReportPeople(action, authors);
+  }
+
+  public static void sendEmailToReportPeople(AnetEmailAction action,
+      List<? extends Person> people) {
+    // Make sure all email addresses are loaded
+    CompletableFuture.allOf(people.stream()
+        .map(a -> a.loadEmailAddresses(AnetObjectEngine.getInstance().getContext(), null))
+        .toArray(CompletableFuture<?>[]::new)).join();
+    AnetEmail email = new AnetEmail();
     email.setAction(action);
-    email.setToAddresses(r.loadAuthors(AnetObjectEngine.getInstance().getContext()).join().stream()
-        .map(Person::getEmailAddress).collect(Collectors.toList()));
+    final List<String> addresses = people.stream()
+        .map(p -> p.getNotificationEmailAddress().map(EmailAddress::getAddress).orElse(null))
+        .filter(ea -> !Utils.isEmptyOrNull(ea)).toList();
+    email.setToAddresses(addresses);
     AnetEmailWorker.sendEmailAsync(email);
   }
 

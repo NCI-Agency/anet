@@ -5,7 +5,7 @@ import OnboardPage from "../pages/onboard.page"
 const ONBOARD_USER = {
   lastName: "BONNSDOTTIR",
   firstName: "Bonny",
-  emailAddress: "bonny@nato.int"
+  emailAddresses: ["", "bonny@example.com"]
 }
 
 // Only required fields in onboarding/edit page
@@ -42,11 +42,13 @@ describe("Onboard new user login", () => {
     expect(await (await OnboardPage.getFirstName()).getValue()).to.equal(
       ONBOARD_USER.firstName
     )
-    await (await OnboardPage.getEmailAddress()).waitForExist()
-    await (await OnboardPage.getEmailAddress()).waitForDisplayed()
-    expect(await (await OnboardPage.getEmailAddress()).getValue()).to.equal(
-      ONBOARD_USER.emailAddress
-    )
+    await (await OnboardPage.getEmailAddress(0)).waitForExist()
+    await (await OnboardPage.getEmailAddress(0)).waitForDisplayed()
+    for (const [index, address] of ONBOARD_USER.emailAddresses.entries()) {
+      expect(
+        await (await OnboardPage.getEmailAddress(index)).getValue()
+      ).to.equal(address)
+    }
   })
 
   it("Should not save if endOfTourDate is not in the future", async() => {

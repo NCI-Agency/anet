@@ -2,7 +2,13 @@ import { faker } from "@faker-js/faker"
 import Model from "components/Model"
 import { Organization } from "models"
 import utils from "utils"
-import { identity, populate, runGQL } from "../simutils"
+import {
+  createEmailAddresses,
+  fuzzy,
+  identity,
+  populate,
+  runGQL
+} from "../simutils"
 
 // List of service sub-organizations (used at the second level)
 const services = [
@@ -38,8 +44,7 @@ function randomOrganization() {
     longName: name,
     identificationCode: () => faker.helpers.replaceSymbols("??????"),
     parentOrg: identity,
-    status: () => faker.helpers.objectValue(Organization.STATUS),
-    type: () => faker.helpers.objectValue(Organization.TYPE)
+    status: () => faker.helpers.objectValue(Organization.STATUS)
   }
 
   // approvalSteps: [],
@@ -65,7 +70,6 @@ async function createHierarchy(user, grow, args) {
 
   const longName = faker.company.name()
   const shortName = abbreviateCompanyName(longName)
-  const type = args.type || Organization.TYPE.PRINCIPAL_ORG // faker.helpers.objectValue(Organization.TYPE)
   const status = args.status || Model.STATUS.ACTIVE // faker.helpers.objectValue(Model.STATUS)
   const usedServices = []
 
@@ -116,13 +120,19 @@ async function createHierarchy(user, grow, args) {
     org.parentOrg = utils.getReference(parentOrg)
     org.shortName = (shortName + " " + path.join(".")).trim()
     org.identificationCode = faker.helpers.replaceSymbols("??????")
-    org.type = type
     org.status = status
+    if (fuzzy.withProbability(0.5)) {
+      const orgSlug = org.shortName.replace(/[ .]/g, "")
+      org.emailAddresses = createEmailAddresses(
+        fuzzy.withProbability(0.5),
+        `info_${orgSlug}`
+      )
+    }
 
     console.debug(
-      `Creating ${org.type.toLowerCase().green} ${
-        level > 0 ? "sub-" : ""
-      }organization ${org.longName.green} (${org.shortName.green})`
+      `Creating ${level > 0 ? "sub-" : ""}organization ${org.longName.green} (${
+        org.shortName.green
+      })`
     )
 
     // store the organization in the database
@@ -147,7 +157,7 @@ async function createHierarchy(user, grow, args) {
  */
 function abbreviateCompanyName(name) {
   return name
-    .split(/[^\w]+/)
+    .split(/\W+/)
     .filter(d => d !== "and")
     .map(d => d.charAt(0).toUpperCase())
     .join("")
@@ -197,7 +207,6 @@ const createOrganization = async function(user, parentOrg, path) {
     .identificationCode.always()
     .parentOrg.always()
     .status.always()
-    .type.always()
 
   if (path.length === 1 && org.longName) {
     path[0] = abbreviateCompanyName(org.longName)

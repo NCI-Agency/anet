@@ -16,6 +16,7 @@ import java.util.List;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
+import mil.dds.anet.beans.EmailAddress;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
@@ -23,6 +24,7 @@ import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.database.EmailDao;
+import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.test.integration.config.AnetTestConfiguration;
 import mil.dds.anet.test.integration.utils.EmailResponse;
@@ -31,6 +33,7 @@ import mil.dds.anet.test.integration.utils.TestBeans;
 import mil.dds.anet.test.resources.AbstractResourceTest;
 import mil.dds.anet.threads.AnetEmailWorker;
 import mil.dds.anet.threads.FutureEngagementWorker;
+import mil.dds.anet.utils.Utils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -178,7 +181,7 @@ class FutureEngagementWorkerTest extends AbstractResourceTest {
     // Report is no longer planned, so this should update it
     testFutureEngagementWorker(1);
     // This should send an email to the author
-    expectedIds.add("hunter+erin");
+    expectedIds.add("erin");
     // State should be DRAFT now
     final Report redraftedReport = testReportDraft(updatedReport.getUuid());
 
@@ -186,7 +189,7 @@ class FutureEngagementWorkerTest extends AbstractResourceTest {
     withCredentials(author.getDomainUsername(),
         t -> mutationExecutor.submitReport("", redraftedReport.getUuid()));
     // This should send an email to the approver
-    expectedIds.add("hunter+jacob");
+    expectedIds.add("jacob");
     // State should be PENDING_APPROVAL
     final Report resubmittedReport =
         testReportState(redraftedReport.getUuid(), ReportState.PENDING_APPROVAL);
@@ -361,8 +364,11 @@ class FutureEngagementWorkerTest extends AbstractResourceTest {
     final ReportDao reportDao = engine.getReportDao();
 
     final ReportPerson author = personToReportAuthor(TestBeans.getTestPerson());
-    author.setEmailAddress(toAddressId + allowedEmail);
     engine.getPersonDao().insert(author);
+    final EmailAddress emailAddress =
+        new EmailAddress(Utils.getEmailNetworkForNotifications(), toAddressId + allowedEmail);
+    engine.getEmailAddressDao().updateEmailAddresses(PersonDao.TABLE_NAME, author.getUuid(),
+        List.of(emailAddress));
 
     ApprovalStep approvalStep = null;
     if (addApprovalStep) {

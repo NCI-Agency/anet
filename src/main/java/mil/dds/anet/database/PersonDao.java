@@ -49,9 +49,9 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
 
   // Must always retrieve these e.g. for ORDER BY
   public static final String[] minimalFields = {"uuid", "name", "rank", "createdAt"};
-  public static final String[] additionalFields = {"status", "user", "emailAddress", "avatarUuid",
-      "phoneNumber", "biography", "country", "gender", "endOfTourDate", "domainUsername",
-      "openIdSubject", "pendingVerification", "code", "updatedAt", "customFields"};
+  public static final String[] additionalFields = {"status", "user", "avatarUuid", "phoneNumber",
+      "biography", "country", "gender", "endOfTourDate", "domainUsername", "openIdSubject",
+      "pendingVerification", "code", "updatedAt", "customFields"};
   public static final String[] allFields =
       ObjectArrays.concat(minimalFields, additionalFields, String.class);
   public static final String TABLE_NAME = "people";
@@ -125,10 +125,10 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   @Override
   public Person insertInternal(Person p) {
     final String sql = "/* personInsert */ INSERT INTO people "
-        + "(uuid, name, status, \"user\", \"emailAddress\", \"phoneNumber\", rank, "
+        + "(uuid, name, status, \"user\", \"phoneNumber\", rank, "
         + "\"pendingVerification\", gender, country, code, \"endOfTourDate\", biography, "
         + "\"domainUsername\", \"openIdSubject\", \"createdAt\", \"updatedAt\", \"customFields\") "
-        + "VALUES (:uuid, :name, :status, :user, :emailAddress, :phoneNumber, :rank, "
+        + "VALUES (:uuid, :name, :status, :user, :phoneNumber, :rank, "
         + ":pendingVerification, :gender, :country, :code, :endOfTourDate, :biography, "
         + ":domainUsername, :openIdSubject, :createdAt, :updatedAt, :customFields)";
     getDbHandle().createUpdate(sql).bindBean(p)
@@ -160,8 +160,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   public int updateInternal(Person p) {
     final String sql = "/* personUpdate */ UPDATE people "
         + "SET name = :name, status = :status, \"user\" = :user, gender = :gender, country = :country, "
-        + "\"emailAddress\" = :emailAddress, code = :code, "
-        + "\"phoneNumber\" = :phoneNumber, rank = :rank, biography = :biography, "
+        + "code = :code, \"phoneNumber\" = :phoneNumber, rank = :rank, biography = :biography, "
         + "\"pendingVerification\" = :pendingVerification, \"domainUsername\" = :domainUsername, "
         + "\"updatedAt\" = :updatedAt, \"customFields\" = :customFields, \"endOfTourDate\" = :endOfTourDate "
         + "WHERE uuid = :uuid";
@@ -223,7 +222,9 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
         .createQuery("/* findByEmailAddress */ SELECT " + PERSON_FIELDS + ","
             + PositionDao.POSITION_FIELDS
             + "FROM people LEFT JOIN positions ON people.uuid = positions.\"currentPersonUuid\" "
-            + "WHERE people.user = :user AND people.\"emailAddress\" = :emailAddress "
+            + "LEFT JOIN \"emailAddresses\" ON \"emailAddresses\".\"relatedObjectType\" = '"
+            + TABLE_NAME + "' AND people.uuid = \"emailAddresses\".\"relatedObjectUuid\" "
+            + "WHERE people.user = :user AND \"emailAddresses\".address = :emailAddress "
             + "AND people.status != :inactiveStatus")
         .bind("user", true).bind("emailAddress", emailAddress)
         .bind("inactiveStatus", DaoUtils.getEnumId(Person.Status.INACTIVE)).map(new PersonMapper())
@@ -356,11 +357,13 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   private Person copyPerson(Person person) {
     if (person != null) {
       try {
+        // Copy person
         final Person personCopy = new Person();
         for (final String prop : allFields) {
           PropertyUtils.setSimpleProperty(personCopy, prop,
               PropertyUtils.getSimpleProperty(person, prop));
         }
+        // Copy position
         final Position position = person.getPosition();
         if (position != null) {
           final Position positionCopy = new Position();
@@ -484,6 +487,12 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     // Update attachments
     updateM2mForMerge("attachmentRelatedObjects", "attachmentUuid", "relatedObjectUuid", winnerUuid,
         loserUuid);
+
+    // Update emailAddresses
+    final EmailAddressDao emailAddressDao = AnetObjectEngine.getInstance().getEmailAddressDao();
+    emailAddressDao.updateEmailAddresses(PersonDao.TABLE_NAME, loserUuid, null);
+    emailAddressDao.updateEmailAddresses(PersonDao.TABLE_NAME, winnerUuid,
+        winner.getEmailAddresses());
 
     // Update customSensitiveInformation for winner
     DaoUtils.saveCustomSensitiveInformation(null, PersonDao.TABLE_NAME, winnerUuid,

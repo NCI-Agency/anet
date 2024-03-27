@@ -459,7 +459,7 @@
     "username" : "bonny",
     "firstName" : "Bonny",
     "lastName" : "Bonnsdottir",
-    "email" : "bonny@nato.int",
+    "email" : "bonny@example.com",
     "emailVerified" : false,
     "createdTimestamp" : 1590405859146,
     "enabled" : true,
@@ -707,6 +707,9 @@
   }, {
     "id" : "39f5a6ff-22a6-4257-a50e-a64942a5115b",
     "username" : "newguy",
+    "firstName" : "Guy",
+    "lastName" : "New",
+    "email" : "newguy@example.com",
     "emailVerified" : false,
     "createdTimestamp" : 1589461163498,
     "enabled" : true,

@@ -107,6 +107,14 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
       qb.addSqlArg("userUuid", DaoUtils.getUuid(query.getUser()));
     }
 
+    if (query.getEmailNetwork() != null) {
+      qb.addFromClause("JOIN \"emailAddresses\" \"pplEmail\""
+          + " ON \"pplEmail\".\"relatedObjectType\" = '" + PersonDao.TABLE_NAME + "'"
+          + " AND \"pplEmail\".\"relatedObjectUuid\" = people.uuid");
+      qb.addStringEqualsClause("emailNetwork", "\"pplEmail\".network", query.getEmailNetwork());
+      qb.addIsNotNullOrEmptyClause("\"pplEmail\".address");
+    }
+
     addOrderByClauses(qb, query);
   }
 

@@ -21,7 +21,6 @@ const GQL_GET_SELF = gql`
       name
       rank
       status
-      emailAddress
       phoneNumber
       pendingVerification
       biography
@@ -32,6 +31,10 @@ const GQL_GET_SELF = gql`
       domainUsername
       openIdSubject
       code
+      emailAddresses {
+        network
+        address
+      }
     }
   }
 `

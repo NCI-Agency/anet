@@ -18,15 +18,14 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.recentActivity.Activity;
 import mil.dds.anet.beans.search.ReportSearchQuery;
-import mil.dds.anet.database.AuthorizationGroupDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.graphql.AllowUnverifiedUsers;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.InsertionOrderLinkedList;
 import mil.dds.anet.utils.Utils;
-import mil.dds.anet.views.AbstractCustomizableAnetBean;
+import mil.dds.anet.views.AbstractEmailableAnetBean;
 
-public class Person extends AbstractCustomizableAnetBean
+public class Person extends AbstractEmailableAnetBean
     implements Principal, RelatableObject, SubscribableObject, WithStatus, Comparable<Person> {
 
   private static final Comparator<Person> COMPARATOR =
@@ -44,9 +43,6 @@ public class Person extends AbstractCustomizableAnetBean
   @GraphQLQuery
   @GraphQLInputField
   private Boolean pendingVerification = false;
-  @GraphQLQuery
-  @GraphQLInputField
-  private String emailAddress;
   @GraphQLQuery
   @GraphQLInputField
   private String phoneNumber;
@@ -131,15 +127,6 @@ public class Person extends AbstractCustomizableAnetBean
 
   public void setPendingVerification(Boolean pendingVerification) {
     this.pendingVerification = pendingVerification;
-  }
-
-  @AllowUnverifiedUsers
-  public String getEmailAddress() {
-    return emailAddress;
-  }
-
-  public void setEmailAddress(String emailAddress) {
-    this.emailAddress = Utils.trimStringReturnNull(emailAddress);
   }
 
   @AllowUnverifiedUsers
@@ -359,7 +346,6 @@ public class Person extends AbstractCustomizableAnetBean
     return super.equals(o) && Objects.equals(uuid, other.getUuid())
         && Objects.equals(other.getName(), name) && Objects.equals(other.getStatus(), status)
         && Objects.equals(other.getUser(), user)
-        && Objects.equals(other.getEmailAddress(), emailAddress)
         && Objects.equals(other.getPhoneNumber(), phoneNumber)
         && Objects.equals(other.getRank(), rank) && Objects.equals(other.getBiography(), biography)
         && Objects.equals(other.getDomainUsername(), domainUsername)
@@ -375,9 +361,8 @@ public class Person extends AbstractCustomizableAnetBean
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), uuid, name, status, user, emailAddress, phoneNumber, rank,
-        biography, domainUsername, openIdSubject, pendingVerification, avatarUuid, code, createdAt,
-        updatedAt);
+    return Objects.hash(super.hashCode(), uuid, name, status, user, phoneNumber, rank, biography,
+        domainUsername, openIdSubject, pendingVerification, avatarUuid, code, createdAt, updatedAt);
   }
 
   @Override

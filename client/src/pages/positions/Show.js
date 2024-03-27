@@ -11,6 +11,7 @@ import DictionaryField from "components/DictionaryField"
 import EditAssociatedPositionsModal from "components/EditAssociatedPositionsModal"
 import EditHistory from "components/EditHistory"
 import EditOrganizationsAdministratedModal from "components/EditOrganizationsAdministratedModal"
+import EmailAddressTable from "components/EmailAddressTable"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
@@ -42,6 +43,10 @@ const GQL_GET_POSITION = gql`
   query($uuid: String!) {
     position(uuid: $uuid) {
       ${Position.allFieldsQuery}
+      emailAddresses {
+        network
+        address
+      }
       authorizationGroups {
         uuid
         name
@@ -239,6 +244,18 @@ const PositionShow = ({ pageDispatchers }) => {
                   dictProps={Settings.fields.position.code}
                   name="code"
                   component={FieldHelper.ReadonlyField}
+                />
+
+                <DictionaryField
+                  wrappedComponent={Field}
+                  dictProps={Settings.fields.position.emailAddresses}
+                  name="emailAddresses"
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={
+                    <EmailAddressTable
+                      emailAddresses={position.emailAddresses}
+                    />
+                  }
                 />
 
                 <DictionaryField

@@ -27,8 +27,11 @@ const GQL_GET_USERS_PENDING_VERIFICATION = gql`
         name
         rank
         avatarUuid
-        emailAddress
         pendingVerification
+        emailAddresses {
+          network
+          address
+        }
       }
     }
   }

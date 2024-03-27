@@ -1,4 +1,6 @@
+import { faker } from "@faker-js/faker"
 import fetch from "cross-fetch"
+import Settings from "settings"
 
 export const sleep = seconds => {
   return new Promise(resolve => setTimeout(resolve, (seconds || 0) * 1000))
@@ -235,6 +237,37 @@ function populate(instance, scheme, context) {
   return populator
 }
 
+function createDomainName(onNs) {
+  let domainName
+  if (onNs) {
+    domainName = faker.helpers.arrayElement(Settings.domainNames)
+    if (domainName.startsWith("*")) {
+      domainName = faker.internet.domainWord() + domainName.slice(1)
+    }
+  } else if (fuzzy.withProbability(0.25)) {
+    domainName = faker.internet.domainName()
+  }
+  return domainName
+}
+
+function createEmailAddresses(onNs, email, orgEmailAddresses) {
+  let domainName
+  if (!orgEmailAddresses) {
+    domainName = createDomainName(onNs)
+  } else {
+    const orgEmailAddress = orgEmailAddresses.find(
+      oea => (onNs && oea.network === "NS") || (!onNs && oea.network !== "NS")
+    )
+    domainName = orgEmailAddress?.address?.split("@")?.[1]
+  }
+  if (email && domainName) {
+    return [
+      { network: onNs ? "NS" : "Internet", address: `${email}@${domainName}` }
+    ]
+  }
+  return null
+}
+
 // Our initial admin, should always be there
 const specialUser = { name: "arthur", password: "arthur" }
 
@@ -246,5 +279,7 @@ export {
   normalPDF,
   normalCDF,
   normalPPF,
+  createDomainName,
+  createEmailAddresses,
   specialUser
 }

@@ -34,9 +34,12 @@ const GQL_GET_APP_DATA = gql`
       rank
       avatarUuid
       status
-      emailAddress
       pendingVerification
       code
+      emailAddresses {
+        network
+        address
+      }
       authorizationGroups {
         uuid
       }

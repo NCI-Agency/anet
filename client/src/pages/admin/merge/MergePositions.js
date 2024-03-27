@@ -10,6 +10,7 @@ import { customFieldsJSONString } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
 import EditAssociatedPositions from "components/EditAssociatedPositions"
 import EditHistory from "components/EditHistory"
+import EmailAddressTable from "components/EmailAddressTable"
 import LinkTo from "components/LinkTo"
 import MergeField from "components/MergeField"
 import Messages from "components/Messages"
@@ -216,6 +217,24 @@ const MergePositions = ({ pageDispatchers }) => {
                   Position.getInstanceName
                 )}
                 fieldName="status"
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
+              <DictionaryField
+                wrappedComponent={MergeField}
+                dictProps={Settings.fields.position.emailAddresses}
+                value={
+                  <EmailAddressTable
+                    emailAddresses={mergedPosition.emailAddresses}
+                  />
+                }
+                align={ALIGN_OPTIONS.CENTER}
+                action={getClearButton(() =>
+                  dispatchMergeActions(
+                    setAMergedField("emailAddresses", [], null)
+                  )
+                )}
+                fieldName="emailAddresses"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
@@ -597,6 +616,31 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
               align,
               mergeState,
               "status"
+            )}
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
+          />
+          <DictionaryField
+            wrappedComponent={MergeField}
+            dictProps={Settings.fields.position.emailAddresses}
+            fieldName="emailAddresses"
+            value={
+              <EmailAddressTable emailAddresses={position.emailAddresses} />
+            }
+            align={align}
+            action={getActionButton(
+              () => {
+                dispatchMergeActions(
+                  setAMergedField(
+                    "emailAddresses",
+                    position.emailAddresses,
+                    align
+                  )
+                )
+              },
+              align,
+              mergeState,
+              "emailAddresses"
             )}
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}

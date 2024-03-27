@@ -34,7 +34,6 @@ const GQL_GET_PERSON = gql`
       rank
       avatarUuid
       status
-      emailAddress
       phoneNumber
       pendingVerification
       user
@@ -45,6 +44,10 @@ const GQL_GET_PERSON = gql`
       gender
       endOfTourDate
       code
+      emailAddresses {
+        network
+        address
+      }
       position {
         uuid
         name

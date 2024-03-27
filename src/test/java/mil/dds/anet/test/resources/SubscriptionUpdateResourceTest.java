@@ -245,7 +245,7 @@ class SubscriptionUpdateResourceTest extends SubscriptionTestHelper {
   }
 
   private Location getLocation(final String subscribedObjectUuid) {
-    return withCredentials(jackUser,
+    return withCredentials(adminUser,
         t -> queryExecutor.location(LocationResourceTest.FIELDS, subscribedObjectUuid));
   }
 
@@ -256,7 +256,7 @@ class SubscriptionUpdateResourceTest extends SubscriptionTestHelper {
   }
 
   private Organization getOrganization(final String subscribedObjectUuid) {
-    return withCredentials(jackUser,
+    return withCredentials(adminUser,
         t -> queryExecutor.organization(OrganizationResourceTest.FIELDS, subscribedObjectUuid));
   }
 
@@ -267,7 +267,7 @@ class SubscriptionUpdateResourceTest extends SubscriptionTestHelper {
   }
 
   private Person getPerson(final String subscribedObjectUuid) {
-    return withCredentials(jackUser,
+    return withCredentials(adminUser,
         t -> queryExecutor.person(PersonResourceTest.FIELDS, subscribedObjectUuid));
   }
 
@@ -278,7 +278,7 @@ class SubscriptionUpdateResourceTest extends SubscriptionTestHelper {
   }
 
   private Position getPosition(final String subscribedObjectUuid) {
-    return withCredentials(jackUser,
+    return withCredentials(adminUser,
         t -> queryExecutor.position(PositionResourceTest.FIELDS, subscribedObjectUuid));
   }
 
@@ -289,7 +289,7 @@ class SubscriptionUpdateResourceTest extends SubscriptionTestHelper {
   }
 
   private Task getTask(final String subscribedObjectUuid) {
-    return withCredentials(jackUser,
+    return withCredentials(adminUser,
         t -> queryExecutor.task(TaskResourceTest.FIELDS, subscribedObjectUuid));
   }
 
@@ -300,7 +300,7 @@ class SubscriptionUpdateResourceTest extends SubscriptionTestHelper {
   }
 
   private AuthorizationGroup getAuthorizationGroup(final String subscribedObjectUuid) {
-    return withCredentials(jackUser, t -> queryExecutor
+    return withCredentials(adminUser, t -> queryExecutor
         .authorizationGroup(AuthorizationGroupResourceTest.FIELDS, subscribedObjectUuid));
   }
 }

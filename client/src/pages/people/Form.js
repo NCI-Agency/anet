@@ -15,6 +15,9 @@ import {
   updateCustomSensitiveInformation
 } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
+import EmailAddressInputTable, {
+  initializeEmailAddresses
+} from "components/EmailAddressInputTable"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
@@ -101,6 +104,9 @@ const PersonForm = ({
   const attachmentEditEnabled =
     attachmentsEnabled &&
     (!Settings.fields.attachment.restrictToAdmins || currentUser.isAdmin())
+  initialValues.emailAddresses = initializeEmailAddresses(
+    initialValues.emailAddresses
+  )
   const statusButtons = [
     {
       id: "statusActiveButton",
@@ -566,10 +572,14 @@ const PersonForm = ({
               <Fieldset title="Additional information">
                 <DictionaryField
                   wrappedComponent={FastField}
-                  dictProps={Settings.fields.person.emailAddress}
-                  name="emailAddress"
-                  type="email"
-                  component={FieldHelper.InputField}
+                  as="div"
+                  dictProps={Settings.fields.person.emailAddresses}
+                  component={FieldHelper.SpecialField}
+                  widget={
+                    <EmailAddressInputTable
+                      emailAddresses={values.emailAddresses}
+                    />
+                  }
                 />
                 <DictionaryField
                   wrappedComponent={FastField}

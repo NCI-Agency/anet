@@ -213,36 +213,36 @@ class PendingAssessmentsNotificationWorkerTest {
       final PendingAssessmentsNotificationEmail action =
           (PendingAssessmentsNotificationEmail) email.getAction();
       switch (to.split("@")[0]) {
-        case "hunter+jack":
+        case "jack":
           // Jack should assess task 2.B
           assertAssessments(action, Collections.emptySet(), ImmutableSet.of("2.B"));
           break;
-        case "hunter+erin":
+        case "erin":
           // Erin should assess position Planning Captain
           assertAssessments(action, ImmutableSet.of("Planning Captain"), Collections.emptySet());
           break;
-        case "hunter+henry":
+        case "henry":
           // Henry should assess task 2.A
           assertAssessments(action, Collections.emptySet(), ImmutableSet.of("2.A"));
           break;
-        case "hunter+liz":
+        case "liz":
           // Elizabeth should assess position Cost Adder - MoD and task 1.1.A
           assertAssessments(action, ImmutableSet.of("Cost Adder - MoD"), ImmutableSet.of("1.1.A"));
           break;
-        case "hunter+bob":
+        case "bob":
           // Bob should assess task 1.1
           assertAssessments(action, Collections.emptySet(), ImmutableSet.of("1.1"));
           break;
-        case "hunter+andrew":
+        case "andrew":
           // Andrew should assess tasks 1.1.A, 1.2.A and 1.2.B
           assertAssessments(action, Collections.emptySet(),
               ImmutableSet.of("1.1.A", "1.2.A", "1.2.B"));
           break;
-        case "kevin+malone":
+        case "kevin.malone":
           // Kevin should assess position Chief of Tests
           assertAssessments(action, ImmutableSet.of("Chief of Tests"), Collections.emptySet());
           break;
-        case "creed+bratton":
+        case "creed.bratton":
           // Creed should assess position Director of Tests
           assertAssessments(action, ImmutableSet.of("Director of Tests"), Collections.emptySet());
           break;

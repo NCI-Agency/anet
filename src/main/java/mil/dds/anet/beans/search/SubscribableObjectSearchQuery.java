@@ -11,6 +11,10 @@ public abstract class SubscribableObjectSearchQuery<T extends ISortBy>
   @GraphQLInputField
   private Boolean subscribed;
 
+  @GraphQLQuery
+  @GraphQLInputField
+  private String emailNetwork;
+
   public SubscribableObjectSearchQuery(T defaultSortBy) {
     super(defaultSortBy);
   }
@@ -23,9 +27,17 @@ public abstract class SubscribableObjectSearchQuery<T extends ISortBy>
     this.subscribed = subscribed;
   }
 
+  public String getEmailNetwork() {
+    return emailNetwork;
+  }
+
+  public void setEmailNetwork(String emailNetwork) {
+    this.emailNetwork = emailNetwork;
+  }
+
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), subscribed);
+    return Objects.hash(super.hashCode(), subscribed, emailNetwork);
   }
 
   @Override
@@ -36,7 +48,7 @@ public abstract class SubscribableObjectSearchQuery<T extends ISortBy>
     @SuppressWarnings("unchecked")
     final SubscribableObjectSearchQuery<T> other = (SubscribableObjectSearchQuery<T>) obj;
     return super.equals(obj) && Objects.equals(getSubscribed(), other.getSubscribed())
-        && Objects.equals(getUser(), other.getUser());
+        && Objects.equals(getEmailNetwork(), other.getEmailNetwork());
   }
 
   @Override

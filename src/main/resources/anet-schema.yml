@@ -379,6 +379,8 @@ required:
   - non_reporting_ORGs
   - domainNames
   - activeDomainNames
+  - emailNetworks
+  - emailNetworkForNotifications
   - imagery
   - automaticallyAllowAllNewUsers
 properties:
@@ -749,7 +751,7 @@ properties:
         type: object
         additionalProperties: false
         required: [status, firstName, lastName, position, prevPositions, domainUsername, openIdSubject,
-                   emailAddress, phoneNumber, country, code, rank, ranks, gender, endOfTourDate,
+                   emailAddresses, phoneNumber, country, code, rank, ranks, gender, endOfTourDate,
                    biography, authorizationGroups]
         properties:
           status:
@@ -768,8 +770,8 @@ properties:
             "$ref": "#/$defs/inputField"
           openIdSubject:
             "$ref": "#/$defs/labeledField"
-          emailAddress:
-            "$ref": "#/$defs/optionableInputField"
+          emailAddresses:
+            "$ref": "#/$defs/labeledField"
           phoneNumber:
             "$ref": "#/$defs/inputField"
           country:
@@ -841,7 +843,7 @@ properties:
       position:
         type: object
         additionalProperties: false
-        required: [status, name, type, code, organization, role, authorizationGroups]
+        required: [status, name, type, code, organization, role, emailAddresses, authorizationGroups]
         properties:
           status:
             "$ref": "#/$defs/labeledField"
@@ -855,6 +857,8 @@ properties:
             "$ref": "#/$defs/inputField"
           location:
             "$ref": "#/$defs/optionableInputField"
+          emailAddresses:
+            "$ref": "#/$defs/labeledField"
           authorizationGroups:
             "$ref": "#/$defs/labeledField"
           role:
@@ -888,7 +892,7 @@ properties:
       organization:
         type: object
         additionalProperties: false
-        required: [status, shortName, longName, identificationCode, type, parentOrg, childrenOrgs, location, profile, authorizationGroups]
+        required: [status, shortName, longName, identificationCode, type, parentOrg, childrenOrgs, location, profile, emailAddresses, authorizationGroups]
         properties:
           status:
             "$ref": "#/$defs/labeledField"
@@ -908,6 +912,8 @@ properties:
             "$ref": "#/$defs/inputField"
           profile:
             "$ref": "#/$defs/inputField"
+          emailAddresses:
+            "$ref": "#/$defs/labeledField"
           authorizationGroups:
             "$ref": "#/$defs/labeledField"
           assessments:
@@ -1168,6 +1174,20 @@ properties:
       type: string
       title: The list of active (email) domain names
       description: Valid email domain names for this ANET instance; may contain wildcards.
+
+  emailNetworks:
+    type: array
+    uniqueItems: true
+    minItems: 1
+    items:
+      type: string
+      title: The list of supported email networks
+      description: Valid email networks for this ANET instance; e.g Internet, NS.
+
+  emailNetworkForNotifications:
+    type: string
+    title: The email network to be used for email notifications sent by ANET
+    description: Should be one of the networks listed under `emailNetworks` above.
 
   imagery:
     type: object

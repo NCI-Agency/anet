@@ -2,11 +2,9 @@ package mil.dds.anet.database;
 
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
-import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AbstractSearchQuery;
 import mil.dds.anet.utils.DaoUtils;
-import mil.dds.anet.utils.DaoUtils.DbType;
 import mil.dds.anet.views.AbstractAnetBean;
 import org.jdbi.v3.core.Handle;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
@@ -44,10 +42,6 @@ public abstract class AnetBaseDao<T extends AbstractAnetBean, S extends Abstract
 
   protected Handle getDbHandle() {
     return handle.get();
-  }
-
-  protected DbType getDbType() {
-    return DaoUtils.getDbType(AnetObjectEngine.getInstance().getDbUrl());
   }
 
   public AnetBeanList<T> search(S query) {

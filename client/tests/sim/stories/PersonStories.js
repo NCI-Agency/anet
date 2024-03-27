@@ -4,43 +4,49 @@ import { countries } from "countries-list"
 import { getAlpha2Code } from "i18n-iso-countries"
 import { Person } from "models"
 import Settings from "settings"
-import { fuzzy, identity, populate, runGQL } from "../simutils"
+import {
+  createEmailAddresses,
+  fuzzy,
+  identity,
+  populate,
+  runGQL
+} from "../simutils"
 import afghanFirstNames from "./afghanFirstNames"
 import afghanSurnames from "./afghanSurnames"
 
 const availableLocales = Object.keys(allLocales)
 const availableRanks = Settings.fields.person.ranks.map(r => r.value)
 
-function principalName(gender) {
+function afghanName(gender) {
+  const genderForName =
+    gender === "NOT SPECIFIED" ? undefined : gender.toLowerCase().charAt(0)
   return {
     firstName: faker.helpers.arrayElement(
-      afghanFirstNames.filter(d => d.gender === gender.toLowerCase().charAt(0))
+      afghanFirstNames.filter(d => !genderForName || d.gender === genderForName)
     ).name,
     lastName: faker.helpers.arrayElement(afghanSurnames).name
   }
 }
 
-function advisorName(gender, locale) {
+function personName(gender, locale) {
+  const genderForName =
+    gender === "NOT SPECIFIED" ? undefined : gender.toLowerCase()
   const localeFaker = allFakers[locale]
   return {
-    firstName: localeFaker.person.firstName(gender.toLowerCase()),
-    lastName: localeFaker.person.lastName(gender.toLowerCase())
+    firstName: localeFaker.person.firstName(genderForName),
+    lastName: localeFaker.person.lastName(genderForName)
   }
 }
 
-function randomPerson(role, status) {
-  const gender = fuzzy.withProbability(0.9) ? "MALE" : "FEMALE"
-  if (!role) {
-    role = faker.helpers.arrayElement([
-      Person.ROLE.PRINCIPAL,
-      Person.ROLE.ADVISOR
-    ])
-  }
+function randomPerson(isUser, status) {
+  const gender = fuzzy.withProbability(0.1)
+    ? "NOT SPECIFIED"
+    : fuzzy.withProbability(0.5)
+      ? "MALE"
+      : "FEMALE"
   const defaultLangCode = "en"
   const country = faker.helpers.arrayElement(
-    role === Person.ROLE.PRINCIPAL
-      ? Settings.fields.principal.person.countries
-      : Settings.fields.advisor.person.countries
+    Settings.fields.regular.person.countries
   )
   // Countries in the Settings from anet.yml are in English
   const countryCode = getAlpha2Code(country, "en")
@@ -63,24 +69,21 @@ function randomPerson(role, status) {
   const locale = availableLocales.includes(langCode)
     ? langCode
     : defaultLangCode
-  const name = (role === Person.ROLE.PRINCIPAL ? principalName : advisorName)(
+  const name = (fuzzy.withProbability(0.1) ? afghanName : personName)(
     gender,
     locale
   )
   const rank = faker.helpers.arrayElement(availableRanks)
-  let email = ""
-  if (role === Person.ROLE.ADVISOR) {
-    let domainName = faker.helpers.arrayElement(Settings.domainNames)
-    if (domainName.startsWith("*")) {
-      domainName = faker.internet.domainWord() + domainName.slice(1)
-    }
-    email = faker.internet.email({
+  let domainUsername
+  if (isUser) {
+    domainUsername = faker.internet.userName({
       firstName: name.firstName,
-      lastName: name.lastName,
-      provider: domainName
+      lastName: name.lastName
     })
-  } else if (fuzzy.withProbability(0.25)) {
-    email = faker.internet.email({
+  }
+  let email
+  if (isUser || fuzzy.withProbability(0.25)) {
+    email = faker.internet.displayName({
       firstName: name.firstName,
       lastName: name.lastName
     })
@@ -95,9 +98,9 @@ function randomPerson(role, status) {
     phoneNumber: () => faker.phone.phoneNumber(),
     endOfTourDate: () => faker.date.future(),
     biography: () => faker.lorem.paragraphs(),
-    role: () => role,
-    position: identity,
-    emailAddress: () => email
+    user: () => isUser,
+    domainUsername: () => domainUsername,
+    emailAddresses: () => createEmailAddresses(isUser, email)
   }
 }
 
@@ -112,34 +115,35 @@ function modifiedPerson() {
     phoneNumber: () => faker.phone.phoneNumber(),
     endOfTourDate: () => faker.date.future(),
     biography: () => faker.lorem.paragraphs(),
-    role: identity,
-    position: identity,
-    emailAddress: (value, instance) => {
+    user: identity,
+    emailAddresses: (value, instance) => {
       const name = Person.parseFullName(instance.name)
-      return faker.internet.email({
+      const email = faker.internet.displayName({
         firstName: name.firstName,
         lastName: name.lastName
       })
+      return createEmailAddresses(instance.user, email)
     }
   }
 }
 
-const _createPerson = async function(user, role, status) {
+const _createPerson = async function(user, isUser, status) {
   const person = Person.filterClientSideFields(new Person())
-  populate(person, randomPerson(role, status))
+  populate(person, randomPerson(isUser, status))
     .name.always()
-    .role.always()
     .status.always()
     .rank.always()
+    .user.always()
+    .domainUsername.always()
     .country.always()
     .gender.always()
     .endOfTourDate.always()
     .biography.always()
-    .emailAddress.always()
+    .emailAddresses.always()
 
   console.debug(
-    `Creating ${person.gender.toLowerCase().green} ${
-      person.role.toLowerCase().green
+    `Creating ${person.user ? "user " : ""}${
+      person.gender.toLowerCase().green
     } ${person.name.green}`
   )
 
@@ -202,7 +206,6 @@ const updatePerson = async function(user) {
           uuid
           biography
           country
-          emailAddress
           endOfTourDate
           gender
           name
@@ -227,7 +230,7 @@ const updatePerson = async function(user) {
     .gender.never()
     .endOfTourDate.sometimes()
     .biography.often()
-    .emailAddress.rarely()
+    .emailAddresses.rarely()
 
   return (
     await runGQL(user, {
@@ -296,13 +299,11 @@ const _deletePerson = async function(user) {
           person(uuid: "${person0.uuid}") {
               biography
               country
-              emailAddress
               endOfTourDate
               gender
               name
               phoneNumber
               rank
-              role
               status
               uuid
           }
@@ -354,7 +355,7 @@ const createPerson = async function(user, grow, args) {
       return "(skipped)"
     }
   }
-  return _createPerson(user, args && args.role, args && args.status)
+  return _createPerson(user, args?.user, args?.status)
 }
 
 const deletePerson = async function(user, grow) {

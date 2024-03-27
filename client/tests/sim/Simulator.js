@@ -101,7 +101,7 @@ async function runBuildup(scenario) {
           await buildup.runnable(user, grow, buildup.arguments)
         } catch (e) {
           console.log(
-            colors.red(`Buildup '${buildup.name}' iteration ${i} failed`)
+            colors.red(`Buildup '${buildup.name}' iteration ${i} failed: ${e}`)
           )
         }
       }

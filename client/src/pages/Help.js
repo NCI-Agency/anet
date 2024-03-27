@@ -2,6 +2,7 @@ import { gql } from "@apollo/client"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
 import AppContext from "components/AppContext"
+import EmailAddressTable from "components/EmailAddressTable"
 import Fieldset from "components/Fieldset"
 import {
   mapPageDispatchersToProps,
@@ -14,6 +15,7 @@ import PropTypes from "prop-types"
 import React, { useContext } from "react"
 import { connect } from "react-redux"
 import TOUR_SCREENSHOT from "resources/tour-screenshot.png"
+import utils from "utils"
 
 const GQL_GET_ORGANIZATION = gql`
   query ($uuid: String) {
@@ -26,7 +28,10 @@ const GQL_GET_ORGANIZATION = gql`
             name
             rank
             avatarUuid
-            emailAddress
+            emailAddresses {
+              network
+              address
+            }
           }
         }
       }
@@ -163,9 +168,8 @@ const HelpConditional = ({
         <ul>
           {superusers.map(user => (
             <li key={user.uuid}>
-              <a href={`mailto:${user.emailAddress}`}>
-                {user.rank} {user.name} - {user.emailAddress}
-              </a>
+              {user.rank} {user.name}:
+              <EmailAddressTable emailAddresses={user.emailAddresses} />
             </li>
           ))}
           {superusers.length === 0 && <em>No superusers found</em>}
@@ -185,7 +189,7 @@ const HelpConditional = ({
         <h4>4. Contact ANET support</h4>
         <p>
           Technical issues may be able to be resolved by the ANET
-          administrators: <a href={`mailto:${email}`}>{email}</a>
+          administrators: {utils.createMailtoLink(email)}
         </p>
       </Fieldset>
     </div>

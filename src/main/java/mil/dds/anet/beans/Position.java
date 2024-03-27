@@ -18,10 +18,10 @@ import mil.dds.anet.database.AuthorizationGroupDao;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
-import mil.dds.anet.views.AbstractCustomizableAnetBean;
+import mil.dds.anet.views.AbstractEmailableAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
-public class Position extends AbstractCustomizableAnetBean
+public class Position extends AbstractEmailableAnetBean
     implements RelatableObject, SubscribableObject, WithStatus {
 
   public static enum PositionType {

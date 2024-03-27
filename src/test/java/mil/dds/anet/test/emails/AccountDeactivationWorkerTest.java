@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AnetEmail;
+import mil.dds.anet.beans.EmailAddress;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AnetBeanList;
@@ -19,6 +20,7 @@ import mil.dds.anet.emails.AccountDeactivationEmail;
 import mil.dds.anet.emails.AccountDeactivationWarningEmail;
 import mil.dds.anet.threads.AccountDeactivationWorker;
 import mil.dds.anet.threads.AnetEmailWorker;
+import mil.dds.anet.utils.Utils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -156,7 +158,9 @@ public class AccountDeactivationWorkerTest {
 
     final Person testPerson = new Person();
     testPerson.setEndOfTourDate(endOfTour);
-    testPerson.setEmailAddress(email);
+    final EmailAddress emailAddress =
+        new EmailAddress(Utils.getEmailNetworkForNotifications(), email);
+    testPerson.setEmailAddresses(List.of(emailAddress));
     testPerson.setStatus(status);
     testPerson.setDomainUsername(domainName);
     testPerson.setPosition(new Position());

@@ -1,5 +1,7 @@
 import { gql } from "@apollo/client"
 import API from "api"
+import Checkbox from "components/Checkbox"
+import EmailAddressList from "components/EmailAddressList"
 import LinkTo from "components/LinkTo"
 import {
   mapPageDispatchersToProps,
@@ -94,7 +96,13 @@ const BaseOrganizationTable = ({
   pageSize,
   pageNum,
   totalCount,
-  goToPage
+  goToPage,
+  allowSelection,
+  selection,
+  isAllSelected,
+  toggleAll,
+  isSelected,
+  toggleSelection
 }) => {
   if (_get(organizations, "length", 0) === 0) {
     return <em>No organizations found</em>
@@ -102,6 +110,9 @@ const BaseOrganizationTable = ({
 
   return (
     <div>
+      {allowSelection && (
+        <em className="float-start">{selection.size} selected</em>
+      )}
       <UltimatePaginationTopDown
         componentClassName="searchPagination"
         className="float-end"
@@ -113,6 +124,14 @@ const BaseOrganizationTable = ({
         <Table striped hover responsive className="organizations_table" id={id}>
           <thead>
             <tr>
+              {allowSelection && (
+                <>
+                  <th style={{ verticalAlign: "middle", textAlign: "center" }}>
+                    <Checkbox checked={isAllSelected()} onChange={toggleAll} />
+                  </th>
+                  <th>Email</th>
+                </>
+              )}
               <th>Name</th>
               {showDelete && <th />}
             </tr>
@@ -120,6 +139,22 @@ const BaseOrganizationTable = ({
           <tbody>
             {Organization.map(organizations, org => (
               <tr key={org.uuid}>
+                {allowSelection && (
+                  <>
+                    <td
+                      style={{ verticalAlign: "middle", textAlign: "center" }}
+                    >
+                      <Checkbox
+                        checked={isSelected(org.uuid)}
+                        onChange={() =>
+                          toggleSelection(org.uuid, org.emailAddresses)}
+                      />
+                    </td>
+                    <td>
+                      <EmailAddressList emailAddresses={org.emailAddresses} />
+                    </td>
+                  </>
+                )}
                 <td>
                   <LinkTo modelType="Organization" model={org} />
                 </td>
@@ -150,7 +185,14 @@ BaseOrganizationTable.propTypes = {
   totalCount: PropTypes.number,
   pageNum: PropTypes.number,
   pageSize: PropTypes.number,
-  goToPage: PropTypes.func
+  goToPage: PropTypes.func,
+  allowSelection: PropTypes.bool,
+  // if allowSelection is true:
+  selection: PropTypes.instanceOf(Map),
+  isAllSelected: PropTypes.func,
+  toggleAll: PropTypes.func,
+  isSelected: PropTypes.func,
+  toggleSelection: PropTypes.func
 }
 
 export default connect(null, mapPageDispatchersToProps)(OrganizationTable)

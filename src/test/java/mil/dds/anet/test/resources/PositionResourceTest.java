@@ -35,9 +35,13 @@ import mil.dds.anet.utils.Utils;
 import org.junit.jupiter.api.Test;
 
 public class PositionResourceTest extends AbstractResourceTest {
-  private static final String _ORGANIZATION_FIELDS = "uuid shortName";
-  private static final String _PERSON_FIELDS = "uuid name";
-  private static final String _POSITION_FIELDS = "uuid name code type role status customFields";
+  private static final String _EMAIL_ADDRESSES_FIELDS = "emailAddresses { network address }";
+  private static final String _ORGANIZATION_FIELDS =
+      String.format("uuid shortName %1$s", _EMAIL_ADDRESSES_FIELDS);
+  private static final String _PERSON_FIELDS =
+      String.format("uuid name %1$s", _EMAIL_ADDRESSES_FIELDS);
+  private static final String _POSITION_FIELDS =
+      String.format("uuid name code type role status customFields %1$s", _EMAIL_ADDRESSES_FIELDS);
   public static final String ORGANIZATION_FIELDS =
       String.format("{ %1$s positions { %2$s organization { uuid } location { uuid } } }",
           _ORGANIZATION_FIELDS, _POSITION_FIELDS);
