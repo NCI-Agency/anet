@@ -21,7 +21,7 @@ import _escape from "lodash/escape"
 import _isEqual from "lodash/isEqual"
 import PropTypes from "prop-types"
 import React, { useMemo, useState } from "react"
-import ContainerDimensions from "react-container-dimensions"
+import { useResizeDetector } from "react-resize-detector"
 import Settings from "settings"
 
 const GQL_GET_REPORT_LIST = gql`
@@ -47,6 +47,7 @@ const Chart = ({
   goToSelection,
   selectedBarClass
 }) => {
+  const { width, height, ref } = useResizeDetector()
   const reportQuery = Object.assign({}, queryParams, { pageSize: 0 })
   const { loading, error, data } = API.useApiQuery(GQL_GET_REPORT_LIST, {
     reportQuery
@@ -66,29 +67,25 @@ const Chart = ({
     return result
   }
   return (
-    <div className="non-scrollable">
-      <ContainerDimensions>
-        {({ width, height }) => (
-          <BarChart
-            width={width}
-            height={height}
-            chartId={chartId}
-            data={graphData}
-            xProp="task.uuid"
-            yProp="reportsCount"
-            xLabel="task.shortName"
-            onBarClick={goToSelection}
-            tooltip={d => `
+    <div ref={ref} className="non-scrollable">
+      <BarChart
+        width={width}
+        height={height}
+        chartId={chartId}
+        data={graphData}
+        xProp="task.uuid"
+        yProp="reportsCount"
+        xLabel="task.shortName"
+        onBarClick={goToSelection}
+        tooltip={d => `
               <h4>${_escape(d.task.shortName)}</h4>
               <p>${_escape(d.reportsCount)}</p>
             `}
-            selectedBarClass={selectedBarClass}
-            selectedBar={
-              focusedSelection ? "bar_" + focusedSelection.task.uuid : ""
-            }
-          />
-        )}
-      </ContainerDimensions>
+        selectedBarClass={selectedBarClass}
+        selectedBar={
+          focusedSelection ? "bar_" + focusedSelection.task.uuid : ""
+        }
+      />
     </div>
   )
 }
@@ -122,21 +119,20 @@ Collection.propTypes = {
   queryParams: PropTypes.object
 }
 
-const Map = ({ queryParams }) => (
-  <div className="non-scrollable">
-    <ContainerDimensions>
-      {({ width, height }) => (
-        <ReportCollection
-          queryParams={queryParams}
-          width={width}
-          height={height}
-          marginBottom={0}
-          viewFormats={[FORMAT_MAP]}
-        />
-      )}
-    </ContainerDimensions>
-  </div>
-)
+const Map = ({ queryParams }) => {
+  const { width, height, ref } = useResizeDetector()
+  return (
+    <div ref={ref} className="non-scrollable">
+      <ReportCollection
+        queryParams={queryParams}
+        width={width}
+        height={height}
+        marginBottom={0}
+        viewFormats={[FORMAT_MAP]}
+      />
+    </div>
+  )
+}
 
 Map.propTypes = {
   queryParams: PropTypes.object

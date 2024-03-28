@@ -8018,20 +8018,19 @@ __metadata:
     react: "npm:18.2.0"
     react-advanced-cropper: "npm:^0.19.4"
     react-bootstrap: "npm:2.4.0"
-    react-container-dimensions: "npm:1.4.1"
     react-dom: "npm:18.2.0"
     react-is: "npm:18.2.0"
     react-moment-proptypes: "npm:1.8.1"
     react-mosaic-component: "npm:6.1.0"
     react-redux: "npm:9.1.0"
     react-redux-loading-bar: "npm:5.0.8"
+    react-resize-detector: "npm:10.0.1"
     react-router-bootstrap: "npm:0.26.2"
     react-router-dom: "npm:6.3.0"
     react-scroll: "npm:1.9.0"
     react-test-renderer: "npm:18.2.0"
     react-toastify: "npm:10.0.5"
     react-ultimate-pagination: "npm:1.3.2"
-    react-use-dimensions: "npm:1.2.1"
     reduce-css-calc: "npm:2.1.8"
     redux: "npm:5.0.1"
     redux-persist: "npm:6.0.0"
@@ -8954,13 +8953,6 @@ __metadata:
   version: 5.0.5
   resolution: "basic-ftp@npm:5.0.5"
   checksum: 10c0/be983a3997749856da87b839ffce6b8ed6c7dbf91ea991d5c980d8add275f9f2926c19f80217ac3e7f353815be879371d636407ca72b038cea8cab30e53928a6
-  languageName: node
-  linkType: hard
-
-"batch-processor@npm:1.0.0":
-  version: 1.0.0
-  resolution: "batch-processor@npm:1.0.0"
-  checksum: 10c0/048b868811bed4cd03a0eec35264055f0f3fe4ab62f501809dce4a8a7b845d905fa5051b4af8b3c5123181116b1e2b6dfabf608829043b60cf61f4da3a359b60
   languageName: node
   linkType: hard
 
@@ -11779,15 +11771,6 @@ __metadata:
   version: 1.4.717
   resolution: "electron-to-chromium@npm:1.4.717"
   checksum: 10c0/1de0a9f078211471442010d574634d147491c06f415cc3c178dd378004c4ee5e743cda288973ac01f5204abc6b5bc7bec1d770807b60eb012b49aae4c9570985
-  languageName: node
-  linkType: hard
-
-"element-resize-detector@npm:^1.1.10":
-  version: 1.2.4
-  resolution: "element-resize-detector@npm:1.2.4"
-  dependencies:
-    batch-processor: "npm:1.0.0"
-  checksum: 10c0/8c180c8c2a6d5b83678f994e937890f06db6355009cce2bde3c690a45510c92f53f927431926b27db416739aa7b661c7d3afe237d17cd16491ecccfa740cda08
   languageName: node
   linkType: hard
 
@@ -14930,7 +14913,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"invariant@npm:^2.2.2, invariant@npm:^2.2.4":
+"invariant@npm:^2.2.4":
   version: 2.2.4
   resolution: "invariant@npm:2.2.4"
   dependencies:
@@ -19240,7 +19223,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prop-types@npm:15.8.1, prop-types@npm:^15.0.0, prop-types@npm:^15.5.8, prop-types@npm:^15.6.1, prop-types@npm:^15.6.2, prop-types@npm:^15.7.2, prop-types@npm:^15.8.1":
+"prop-types@npm:15.8.1, prop-types@npm:^15.0.0, prop-types@npm:^15.6.1, prop-types@npm:^15.6.2, prop-types@npm:^15.7.2, prop-types@npm:^15.8.1":
   version: 15.8.1
   resolution: "prop-types@npm:15.8.1"
   dependencies:
@@ -19600,20 +19583,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-container-dimensions@npm:1.4.1":
-  version: 1.4.1
-  resolution: "react-container-dimensions@npm:1.4.1"
-  dependencies:
-    element-resize-detector: "npm:^1.1.10"
-    invariant: "npm:^2.2.2"
-    prop-types: "npm:^15.5.8"
-  peerDependencies:
-    react: ^0.14.0 || ^15.0.0 || 16.x
-    react-dom: ^0.14.0 || ^15.0.0 || 16.x
-  checksum: 10c0/61d018f51009fbb5ce4d2a9a13c2935a5b0bc8bdd0fb0059e4fb9da2db0ab2b5dfcb97cfbe7b5d18312ad210254c95b57085db0359efe125c332165ff9540b71
-  languageName: node
-  linkType: hard
-
 "react-day-picker@npm:7.4.9":
   version: 7.4.9
   resolution: "react-day-picker@npm:7.4.9"
@@ -19937,6 +19906,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-resize-detector@npm:10.0.1":
+  version: 10.0.1
+  resolution: "react-resize-detector@npm:10.0.1"
+  dependencies:
+    lodash: "npm:^4.17.21"
+  peerDependencies:
+    react: ^18.0.0
+    react-dom: ^18.0.0
+  checksum: 10c0/2d4f354f35e8a6c0421c875d9014f7a41a734ac5d83eea7bbc5adf8332173325ed10ee4ea74332040823b5c9d188539a3a86337a80cc1f533c8ab5f78e68dc7e
+  languageName: node
+  linkType: hard
+
 "react-router-bootstrap@npm:0.26.2":
   version: 0.26.2
   resolution: "react-router-bootstrap@npm:0.26.2"
@@ -20065,17 +20046,6 @@ __metadata:
     react: ^0.14.0 || ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
     react-dom: ^0.14.0 || ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
   checksum: 10c0/f666503373000b2960f91e4c84d6a7d4432641de012aa016f208a82d4accdf20fc9f98f02c6e22189744071a84efe0d4d19eb18a8d43587c10681937abc5b6b4
-  languageName: node
-  linkType: hard
-
-"react-use-dimensions@npm:1.2.1":
-  version: 1.2.1
-  resolution: "react-use-dimensions@npm:1.2.1"
-  peerDependencies:
-    "@types/react": ^16.8.20
-    react: ^16.8.x
-    typescript: ^3.5.2
-  checksum: 10c0/32f0ff084f12f4ea09acec6ef0a74f8ea7f9cfba60c43d6670bd5eab7c3dceded06da4f1956b8646d83d856bfd3487ca1ea4f74a719d54474736127b5ff68600
   languageName: node
   linkType: hard
 

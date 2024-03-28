@@ -9,8 +9,7 @@ import { Organization, Person, Position } from "models"
 import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
 import { Button, Table } from "react-bootstrap"
-import ContainerDimensions from "react-container-dimensions"
-import { Element } from "react-scroll"
+import { useResizeDetector } from "react-resize-detector"
 import Settings from "settings"
 import utils from "utils"
 
@@ -34,6 +33,7 @@ function getAllAdministratingPositions(organization) {
 
 const OrganizationLaydown = ({ organization, refetch, readOnly }) => {
   const { currentUser } = useContext(AppContext)
+  const { width, height, ref } = useResizeDetector()
   const [showInactivePositions, setShowInactivePositions] = useState(false)
   const [
     showAdministratingPositionsModal,
@@ -59,34 +59,19 @@ const OrganizationLaydown = ({ organization, refetch, readOnly }) => {
   const orgSettings = Settings.fields.regular.org
 
   return (
-    <Element name="laydown">
-      <Element
-        id="orgChart"
-        name="orgChart"
-        className="scroll-anchor-container"
-      >
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <h4 className="legend">
-            <span className="title-text ellipsized-text">
-              Organization Diagram
-            </span>
-          </h4>
-          <div style={{ backgroundColor: "white" }}>
-            <ContainerDimensions>
-              {({ width, height }) => (
-                <OrganizationalChart
-                  org={organization}
-                  exportTitle={
-                    readOnly ? null : `Organization diagram for ${organization}`
-                  }
-                  width={width}
-                  height={height}
-                />
-              )}
-            </ContainerDimensions>
-          </div>
+    <>
+      <Fieldset id="orgChart" title="Organization Diagram">
+        <div ref={ref}>
+          <OrganizationalChart
+            org={organization}
+            exportTitle={
+              readOnly ? null : `Organization diagram for ${organization}`
+            }
+            width={width}
+            height={height}
+          />
         </div>
-      </Element>
+      </Fieldset>
 
       <Fieldset
         id="supportedPositions"
@@ -156,7 +141,7 @@ const OrganizationLaydown = ({ organization, refetch, readOnly }) => {
           onSuccess={() => hideAdministratingPositionsModal(true)}
         />
       </Fieldset>
-    </Element>
+    </>
   )
 
   function renderPositionTable(positions) {
