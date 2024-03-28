@@ -384,4 +384,12 @@ class TaskResourceTest extends AbstractResourceTest {
     }
   }
 
+  @Test
+  void shouldBeSearchableViaCustomFields() {
+    final var query = TaskSearchQueryInput.builder().withText("RED").build();
+    final var searchObjects =
+        withCredentials(adminUser, t -> queryExecutor.taskList(getListFields(FIELDS), query));
+    assertThat(searchObjects).isNotNull();
+    assertThat(searchObjects.getTotalCount()).isGreaterThan(0);
+  }
 }
