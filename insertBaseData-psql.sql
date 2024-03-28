@@ -714,12 +714,11 @@ UPDATE positions SET "locationUuid" = (SELECT uuid from LOCATIONS where name = '
 -- Write a couple of reports!
 
 SELECT ('''' || N'9bb1861c-1f55-4a1b-bd3d-3c1f56d739b5' || '''') AS reportuuid \gset
-INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "nextSteps", state, "engagementDate", atmosphere, "advisorOrganizationUuid", "interlocutorOrganizationUuid", "customFields") VALUES
+INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "nextSteps", state, "engagementDate", atmosphere, "advisorOrganizationUuid", "interlocutorOrganizationUuid") VALUES
   (:reportuuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'Discuss improvements in Annual Budgeting process',
   'Today I met with this dude to tell him all the great things that he can do to improve his budgeting process. I hope he listened to me',
   'Meet with the dude again next week', 2, '2016-05-25', 0,
-  (SELECT uuid FROM organizations where "shortName" = 'EF 2.1'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'),
-   '{"echelons":"Ut enim ad minim veniam"}');
+  (SELECT uuid FROM organizations where "shortName" = 'EF 2.1'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
   ((SELECT uuid FROM people where name = 'STEVESON, Steve'), :reportuuid, TRUE, FALSE, TRUE),
   ((SELECT uuid FROM people where "domainUsername" = 'jack'), :reportuuid, TRUE, TRUE, FALSE);
@@ -888,10 +887,11 @@ INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor",
   ((SELECT uuid FROM people where "domainUsername" = 'erin'), :reportuuid, TRUE, TRUE, FALSE);
 
 SELECT ('''' || uuid_generate_v4() || '''') AS reportuuid \gset
-INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "nextSteps", "keyOutcomes", state, "engagementDate", atmosphere, "advisorOrganizationUuid", "interlocutorOrganizationUuid") VALUES
+INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "nextSteps", "keyOutcomes", state, "engagementDate", atmosphere, "advisorOrganizationUuid", "interlocutorOrganizationUuid","customFields") VALUES
   (:reportuuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'A test report from Arthur', '',
   'keep on testing!','have reports in organizations', 2, CURRENT_TIMESTAMP + INTERVAL '1 minute', 0,
-  (SELECT uuid FROM organizations where "shortName" = 'ANET Administrators'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Interior'));
+  (SELECT uuid FROM organizations where "shortName" = 'ANET Administrators'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Interior'),
+   '{"invisibleCustomFields":["formCustomFields.trainingEvent","formCustomFields.numberTrained","formCustomFields.levelTrained","formCustomFields.trainingDate","formCustomFields.assetsUsed"],"itemsAgreed":[],"echelons":"Ut enim ad minim veniam","systemProcess":"","multipleButtons":["advise"],"additionalEngagementNeeded":[],"relatedObject":null,"relatedReport":null}');
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
   ((SELECT uuid FROM people where "domainUsername" = 'arthur'), :reportuuid, TRUE, TRUE, FALSE),
   ((SELECT uuid FROM people where name = 'SHARTON, Shardul'), :reportuuid, TRUE, FALSE, TRUE),
