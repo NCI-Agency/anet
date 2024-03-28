@@ -103,7 +103,7 @@ class AdminResourceTest extends AbstractResourceTest {
     final boolean isAdmin = user.getPosition().getType() == PositionType.ADMINISTRATOR;
 
     // Cache a person
-    engine.getPersonDao().findByOpenIdSubject(user.getOpenIdSubject());
+    engine.getPersonDao().findByOpenIdSubject(user.getOpenIdSubject(), true);
 
     try {
       final String result =

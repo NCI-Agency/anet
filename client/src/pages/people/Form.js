@@ -159,9 +159,6 @@ const PersonForm = ({
           values.status === Model.STATUS.INACTIVE &&
           values.position &&
           !!values.position.uuid
-        const warnDomainUsername =
-          values.status === Model.STATUS.INACTIVE &&
-          !_isEmpty(values.domainUsername)
         const authorizedSensitiveFields =
           currentUser &&
           Person.getAuthorizedSensitiveFields(
@@ -552,15 +549,6 @@ const PersonForm = ({
                             Setting this person to inactive will automatically
                             remove them from the{" "}
                             <strong>{values.position.name}</strong> position.
-                          </Alert>
-                        )}
-                        {warnDomainUsername && (
-                          <Alert variant="warning">
-                            Setting this person to inactive means the next
-                            person to logon with the username{" "}
-                            <strong>{values.domainUsername}</strong> will have
-                            to create a new profile. Do you want the next person
-                            to login with this username to create a new profile?
                           </Alert>
                         )}
                       </DictionaryField>
