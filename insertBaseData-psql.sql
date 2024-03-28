@@ -79,8 +79,8 @@ INSERT INTO people (uuid, name, status, "phoneNumber", rank, biography, "user", 
   ('46ba6a73-0cd7-4efb-8e99-215e98cc5987', 'SCOTT, Michael', '0', NULL, 'CIV', 'Worlds best boss.', true, 'michael', 'bd482701-2342-4a50-ba92-d956007a8828', 'United States of America', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 UPDATE people
-SET "customFields"='{"inputField":"Lorem ipsum dolor sit amet"}'
-WHERE uuid='87fdbc6a-3109-4e11-9702-a894d6ca31ef';
+SET "customFields"='{"invisibleCustomFields":["formCustomFields.textareaFieldName","formCustomFields.numberFieldName"],"arrayFieldName":[],"nlt_dt":null,"nlt":null,"colourOptions":"","inputFieldName":"Lorem ipsum dolor sit amet","multipleButtons":[],"placeOfResidence":null,"placeOfBirth":null}'
+WHERE name='DMIN, Arthur';
 
 -- Email addresses for people
 INSERT INTO "emailAddresses" (network, address, "relatedObjectType", "relatedObjectUuid") VALUES
@@ -186,8 +186,8 @@ INSERT INTO locations (uuid, type, name, "createdAt", "updatedAt") VALUES
   (N'b0979678-0ed0-4b42-9b26-9976fcfa1b81', 'PP', 'MoI Office Building ABC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 UPDATE locations
-SET "customFields"='{"inputFieldName":"consectetur adipisici elit"}'
-WHERE uuid=N'b0979678-0ed0-4b42-9b26-9976fcfa1b81';
+SET "customFields"='{"invisibleCustomFields":["formCustomFields.textareaFieldName","formCustomFields.numberFieldName"],"arrayFieldName":[],"nlt_dt":null,"nlt":null,"colourOptions":"","inputFieldName":"consectetur adipisici elit","multipleButtons":[]}'
+WHERE name='MoI Coffee Shop';
 
 -- Create advisor positions
 INSERT INTO positions (uuid, name, type, role, status, "currentPersonUuid", "locationUuid", "createdAt", "updatedAt") VALUES
@@ -236,8 +236,8 @@ INSERT INTO positions (uuid, name, type, role, status, "currentPersonUuid", "loc
   (uuid_generate_v4(), 'LNG Advisor B', 0, 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 UPDATE positions
-SET "customFields"='{"inputFieldName":"sed eiusmod tempor incidunt ut labore et dolore magna aliqua"}'
-WHERE uuid=N'05c42ce0-34a0-4391-8b2f-c4cd85ee6b47';
+SET "customFields"='{"invisibleCustomFields":["formCustomFields.textareaFieldName","formCustomFields.numberFieldName"],"arrayFieldName":[],"nlt_dt":null,"nlt":null,"colourOptions":"","inputFieldName":"sed eiusmod tempor incidunt ut labore et dolore magna aliqua","multipleButtons":[]}'
+WHERE name='EF 5.1 Advisor Quality Assurance';
 
 -- Email addresses for advisor positions
 INSERT INTO "emailAddresses" (network, address, "relatedObjectType", "relatedObjectUuid") VALUES
@@ -412,8 +412,8 @@ INSERT INTO organizations(uuid, "shortName", "longName", "parentOrgUuid", "creat
   (uuid_generate_v4(), 'EF 6.2', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 6'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 UPDATE organizations
-SET "customFields"='{"inputFieldName":"quis nostrud exercitation ullamco laboris"}'
-WHERE "shortName"='ANET Administrators';
+SET "customFields"='{"invisibleCustomFields":["formCustomFields.textareaFieldName","formCustomFields.numberFieldName"],"arrayFieldName":[],"nlt_dt":null,"nlt":null,"colourOptions":"","inputFieldName":"quis nostrud exercitation ullamco laboris","multipleButtons":[]}'
+WHERE "shortName"='LNG';
 
 -- Email addresses for organizations
 INSERT INTO "emailAddresses" (network, address, "relatedObjectType", "relatedObjectUuid") VALUES
@@ -523,8 +523,8 @@ INSERT INTO tasks (uuid, "shortName", "longName", category, "createdAt", "update
   (uuid_generate_v4(), 'TAAC Air', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL);
 
 UPDATE tasks
-SET "customFields"='{"projectStatus":"red"}'
-WHERE uuid='9b9f4205-0721-4893-abf8-69e020d4db23';
+SET "customFields"='{"invisibleCustomFields":[],"projectStatus":"RED"}'
+WHERE "shortName"='EF 3';
 
 INSERT INTO "taskTaskedOrganizations" ("taskUuid", "organizationUuid") VALUES
   ((SELECT uuid from tasks where "shortName" = '1.1.A'), (SELECT uuid from organizations where "shortName"='EF 1.1')),
