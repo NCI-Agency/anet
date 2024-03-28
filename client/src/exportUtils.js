@@ -131,7 +131,6 @@ const GQL_GET_LOCATION_LIST = gql`
     }
   }
 `
-
 const GQL_GET_REPORT_LIST = gql`
   fragment reports on Query {
     reports: reportList(query: $reportQuery) {
@@ -227,6 +226,41 @@ const GQL_GET_REPORT_LIST = gql`
     }
   }
 `
+const GQL_GET_AUTHORIZATION_GROUP_LIST = gql`
+  fragment authorizationGroups on Query {
+    authorizationGroups: authorizationGroupList(query: $authorizationGroupQuery) {
+      pageNum
+      pageSize
+      totalCount
+      list {
+        uuid
+        name
+        description
+        status
+        authorizationGroupRelatedObjects {
+          relatedObjectType
+          relatedObject {
+            ... on Organization {
+              shortName
+              ${GQL_EMAIL_ADDRESSES}
+            }
+            ... on Person {
+              name
+              rank
+              ${GQL_EMAIL_ADDRESSES}
+            }
+            ... on Position {
+              type
+              name
+              ${GQL_EMAIL_ADDRESSES}
+            }
+          }
+        }
+      }
+    }
+  }
+`
+
 const GQL_GET_DATA = gql`
   query (
     $includeOrganizations: Boolean!
@@ -241,6 +275,8 @@ const GQL_GET_DATA = gql`
     $locationQuery: LocationSearchQueryInput
     $includeReports: Boolean!
     $reportQuery: ReportSearchQueryInput
+    $includeAuthorizationGroups: Boolean!
+    $authorizationGroupQuery: AuthorizationGroupSearchQueryInput
     $emailNetwork: String
   ) {
     ...organizations @include(if: $includeOrganizations)
@@ -249,6 +285,7 @@ const GQL_GET_DATA = gql`
     ...tasks @include(if: $includeTasks)
     ...locations @include(if: $includeLocations)
     ...reports @include(if: $includeReports)
+    ...authorizationGroups @include(if: $includeAuthorizationGroups)
   }
 
   ${GQL_GET_ORGANIZATION_LIST}
@@ -257,6 +294,7 @@ const GQL_GET_DATA = gql`
   ${GQL_GET_TASK_LIST}
   ${GQL_GET_LOCATION_LIST}
   ${GQL_GET_REPORT_LIST}
+  ${GQL_GET_AUTHORIZATION_GROUP_LIST}
 `
 
 // Limit exports to the first 1000 results
@@ -276,6 +314,9 @@ export const exportResults = (
   const includeTasks = queryTypes.includes(SEARCH_OBJECT_TYPES.TASKS)
   const includeLocations = queryTypes.includes(SEARCH_OBJECT_TYPES.LOCATIONS)
   const includeReports = queryTypes.includes(SEARCH_OBJECT_TYPES.REPORTS)
+  const includeAuthorizationGroups = queryTypes.includes(
+    SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS
+  )
   const organizationQuery = !includeOrganizations
     ? {}
     : Object.assign({}, searchQueryParams, {
@@ -318,6 +359,13 @@ export const exportResults = (
       sortBy: "ENGAGEMENT_DATE",
       sortOrder: "DESC"
     })
+  const authorizationGroupQuery = !includeAuthorizationGroups
+    ? {}
+    : Object.assign({}, searchQueryParams, {
+      pageSize: MAX_NR_OF_EXPORTS,
+      sortBy: "NAME",
+      sortOrder: "DESC"
+    })
   const { emailNetwork } = searchQueryParams
   const variables = {
     includeOrganizations,
@@ -332,6 +380,8 @@ export const exportResults = (
     locationQuery,
     includeReports,
     reportQuery,
+    includeAuthorizationGroups,
+    authorizationGroupQuery,
     emailNetwork
   }
   return API.queryExport(GQL_GET_DATA, variables, exportType)
