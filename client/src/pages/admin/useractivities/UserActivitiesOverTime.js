@@ -25,8 +25,8 @@ import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, FormSelect, Table } from "react-bootstrap"
-import ContainerDimensions from "react-container-dimensions"
 import { connect } from "react-redux"
+import { useResizeDetector } from "react-resize-detector"
 import { useNavigate } from "react-router-dom"
 import utils from "utils"
 
@@ -66,6 +66,7 @@ const UserActivitiesOverTime = ({
   setUserActivitiesState
 }) => {
   const navigate = useNavigate()
+  const { width, height, ref } = useResizeDetector()
   const [aggregationPeriod, setAggregationPeriod] = useState(
     userActivitiesState?.aggregationPeriod ?? DEFAULT_AGGREGATION_PERIOD
   )
@@ -272,22 +273,18 @@ const UserActivitiesOverTime = ({
       <p>${_escape(d.count)}</p>
     `
     return (
-      <div className="non-scrollable">
-        <ContainerDimensions>
-          {({ width, height }) => (
-            <BarChart
-              width={width}
-              height={height}
-              chartId="user_activity_chart"
-              data={userActivities}
-              xProp="visitedAt"
-              yProp="count"
-              xLabel="dateLabel"
-              onBarClick={goToSelection}
-              tooltip={tooltip}
-            />
-          )}
-        </ContainerDimensions>
+      <div ref={ref} className="non-scrollable">
+        <BarChart
+          width={width}
+          height={height}
+          chartId="user_activity_chart"
+          data={userActivities}
+          xProp="visitedAt"
+          yProp="count"
+          xLabel="dateLabel"
+          onBarClick={goToSelection}
+          tooltip={tooltip}
+        />
       </div>
     )
   }

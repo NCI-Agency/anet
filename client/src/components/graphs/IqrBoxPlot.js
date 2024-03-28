@@ -3,14 +3,18 @@ import * as d3 from "d3"
 import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
 import React, { useEffect, useRef } from "react"
-import useDimensions from "react-use-dimensions"
+import { useResizeDetector } from "react-resize-detector"
 
 const IqrBoxPlot = ({ values, levels, width, height, whenUnspecified }) => {
   const cursorRef = useRef(null)
   const axisRef = useRef(null)
-  const [containerRef, containerBox] = useDimensions()
-  const containerHeight = containerBox.height || 0
-  const containerWidth = containerBox.width || 0
+  const {
+    width: containerBoxWidth,
+    height: containerBoxHeight,
+    ref: containerRef
+  } = useResizeDetector()
+  const containerHeight = containerBoxHeight ?? 0
+  const containerWidth = containerBoxWidth ?? 0
   const MARGIN = 13
   const scaleYPosition = containerHeight - 30
 

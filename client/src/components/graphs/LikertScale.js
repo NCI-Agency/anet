@@ -4,7 +4,7 @@ import * as d3 from "d3"
 import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
 import React, { useCallback, useEffect, useRef } from "react"
-import useDimensions from "react-use-dimensions"
+import { useResizeDetector } from "react-resize-detector"
 import utils from "utils"
 
 const LikertScale = ({
@@ -19,10 +19,14 @@ const LikertScale = ({
 }) => {
   const cursorRef = useRef(null)
   const axisRef = useRef(null)
-  const [containerRef, containerBox] = useDimensions()
-  const containerHeight = containerBox.height || 0
-  const containerWidth = containerBox.width || 0
-  const containerX = containerBox.x || 0
+  const {
+    width: containerBoxWidth,
+    height: containerBoxHeight,
+    ref: containerRef
+  } = useResizeDetector()
+  const containerHeight = containerBoxHeight ?? 0
+  const containerWidth = containerBoxWidth ?? 0
+  const containerX = containerRef.current?.getBoundingClientRect?.()?.x ?? 0
   const MARGIN_LEFT = editable ? 25 : 13
   const MARGIN_RIGHT = 13
   const scaleYPosition = containerHeight - 30

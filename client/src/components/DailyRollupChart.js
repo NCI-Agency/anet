@@ -7,7 +7,6 @@ import { addD3Tooltip } from "./D3Tooltip"
 
 const DailyRollupChart = ({
   width,
-  height,
   chartId,
   data,
   onBarClick,
@@ -180,14 +179,13 @@ const DailyRollupChart = ({
       .style("text-anchor", "end")
       .text(d => d.cancelled || "")
       .attr("fill", utils.getContrastYIQ(barColors.cancelled))
-  }, [node, width, height, data, onBarClick, tooltip, barColors])
+  }, [node, width, data, onBarClick, tooltip, barColors])
 
-  return <svg id={chartId} ref={node} width={width} height={height} />
+  return <svg id={chartId} ref={node} width={width} />
 }
 
 DailyRollupChart.propTypes = {
   width: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-  height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   chartId: PropTypes.string,
   data: PropTypes.array,
   onBarClick: PropTypes.func,

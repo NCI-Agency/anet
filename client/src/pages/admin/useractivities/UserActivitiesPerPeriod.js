@@ -27,8 +27,8 @@ import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, FormSelect, Table } from "react-bootstrap"
-import ContainerDimensions from "react-container-dimensions"
 import { connect } from "react-redux"
+import { useResizeDetector } from "react-resize-detector"
 import { useLocation } from "react-router-dom"
 import utils from "utils"
 
@@ -105,6 +105,7 @@ const UserActivitiesPerPeriod = ({
   userActivitiesState,
   setUserActivitiesState
 }) => {
+  const { width, height, ref } = useResizeDetector()
   const [pageNum, setPageNum] = useState(0)
   const [pageSize, setPageSize] = useState(DEFAULT_PAGESIZE)
   const [aggregationPeriod, setAggregationPeriod] = useState(
@@ -335,21 +336,17 @@ const UserActivitiesPerPeriod = ({
     }
 
     return (
-      <div className="non-scrollable">
-        <ContainerDimensions>
-          {({ width, height }) => (
-            <BarChart
-              width={width}
-              height={height}
-              chartId="user_activity_chart"
-              data={userActivities}
-              xProp={xProp}
-              yProp="count"
-              xLabel={xLabel}
-              tooltip={tooltip}
-            />
-          )}
-        </ContainerDimensions>
+      <div ref={ref} className="non-scrollable">
+        <BarChart
+          width={width}
+          height={height}
+          chartId="user_activity_chart"
+          data={userActivities}
+          xProp={xProp}
+          yProp="count"
+          xLabel={xLabel}
+          tooltip={tooltip}
+        />
       </div>
     )
   }

@@ -43,8 +43,8 @@ import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useMemo, useState } from "react"
 import { Button, FormText, Modal } from "react-bootstrap"
-import ContainerDimensions from "react-container-dimensions"
 import { connect } from "react-redux"
+import { useResizeDetector } from "react-resize-detector"
 import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
 import utils from "utils"
@@ -126,6 +126,7 @@ const Chart = ({
   orgType,
   setOrgType
 }) => {
+  const { width, ref } = useResizeDetector()
   const { loading, error, data } = API.useApiQuery(GQL_GET_REPORT_LIST, {
     reportQuery: { ...queryParams, pageSize: 0 }
   })
@@ -180,41 +181,32 @@ const Chart = ({
   const plannedLabel = "Approved planned engagements"
   const cancelledLabel = "Cancelled engagements"
   return (
-    <div className="scrollable-y">
-      <ContainerDimensions>
-        {({ width }) => (
-          <>
-            <ButtonToggleGroup value={orgType} onChange={setOrgType}>
-              <Button
-                value={RollupGraph.TYPE.ADVISOR}
-                variant="outline-secondary"
-              >
-                {pluralize(Settings.fields.advisor.org.name)}
-              </Button>
-              <Button
-                value={RollupGraph.TYPE.INTERLOCUTOR}
-                variant="outline-secondary"
-              >
-                {pluralize(Settings.fields.interlocutor.org.name)}
-              </Button>
-            </ButtonToggleGroup>
-            <DailyRollupChart
-              width={width}
-              chartId={CHART_ID}
-              data={displayedGraphData}
-              onBarClick={setOrg}
-              tooltip={d => `
-              <h4>${d.org.shortName}</h4>
-              <p>${publishedLabel}: ${d.published}</p>
-              <p>${plannedLabel}: ${d.planned}</p>
-              <p>${cancelledLabel}: ${d.cancelled}</p>
-              <p>Click to view details</p>
-            `}
-              barColors={barColors}
-            />
-          </>
-        )}
-      </ContainerDimensions>
+    <div ref={ref} className="scrollable-y">
+      <ButtonToggleGroup value={orgType} onChange={setOrgType}>
+        <Button value={RollupGraph.TYPE.ADVISOR} variant="outline-secondary">
+          {pluralize(Settings.fields.advisor.org.name)}
+        </Button>
+        <Button
+          value={RollupGraph.TYPE.INTERLOCUTOR}
+          variant="outline-secondary"
+        >
+          {pluralize(Settings.fields.interlocutor.org.name)}
+        </Button>
+      </ButtonToggleGroup>
+      <DailyRollupChart
+        width={width}
+        chartId={CHART_ID}
+        data={displayedGraphData}
+        onBarClick={setOrg}
+        tooltip={d => `
+            <h4>${d.org.shortName}</h4>
+            <p>${publishedLabel}: ${d.published}</p>
+            <p>${plannedLabel}: ${d.planned}</p>
+            <p>${cancelledLabel}: ${d.cancelled}</p>
+            <p>Click to view details</p>
+          `}
+        barColors={barColors}
+      />
 
       <div className="graph-legend">
         <div
@@ -345,21 +337,20 @@ Collection.propTypes = {
   queryParams: PropTypes.object
 }
 
-const Map = ({ queryParams }) => (
-  <div className="non-scrollable">
-    <ContainerDimensions>
-      {({ width, height }) => (
-        <ReportCollection
-          queryParams={queryParams}
-          width={width}
-          height={height}
-          marginBottom={0}
-          viewFormats={[FORMAT_MAP]}
-        />
-      )}
-    </ContainerDimensions>
-  </div>
-)
+const Map = ({ queryParams }) => {
+  const { width, height, ref } = useResizeDetector()
+  return (
+    <div ref={ref} className="non-scrollable">
+      <ReportCollection
+        queryParams={queryParams}
+        width={width}
+        height={height}
+        marginBottom={0}
+        viewFormats={[FORMAT_MAP]}
+      />
+    </div>
+  )
+}
 
 Map.propTypes = {
   queryParams: PropTypes.object

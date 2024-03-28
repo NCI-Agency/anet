@@ -11,7 +11,6 @@ import { addD3Tooltip } from "./D3Tooltip"
  */
 const HorizontalBarChart = ({
   width,
-  height,
   chartId,
   data,
   onBarClick,
@@ -273,7 +272,6 @@ const HorizontalBarChart = ({
   }, [
     node,
     width,
-    height,
     chartId,
     data,
     onBarClick,
@@ -287,7 +285,7 @@ const HorizontalBarChart = ({
       <div>
         <em>No data</em>
       </div>
-    )) || <svg id={chartId} ref={node} width={width} height={height} />
+    )) || <svg id={chartId} ref={node} width={width} />
   )
 
   function bindElementOnClick(element, onClickHandler) {
@@ -299,7 +297,6 @@ const HorizontalBarChart = ({
 
 HorizontalBarChart.propTypes = {
   width: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-  height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   chartId: PropTypes.string,
   data: PropTypes.object,
   onBarClick: PropTypes.func,
