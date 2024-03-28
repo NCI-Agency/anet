@@ -11,11 +11,13 @@ import {
 import RemoveButton from "components/RemoveButton"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _get from "lodash/get"
+import _isEmpty from "lodash/isEmpty"
 import { Organization } from "models"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Table } from "react-bootstrap"
 import { connect } from "react-redux"
+import Settings from "settings"
 
 const GQL_GET_ORGANIZATION_LIST = gql`
   query ($organizationQuery: OrganizationSearchQueryInput) {
@@ -144,14 +146,21 @@ const BaseOrganizationTable = ({
                     <td
                       style={{ verticalAlign: "middle", textAlign: "center" }}
                     >
-                      <Checkbox
-                        checked={isSelected(org.uuid)}
-                        onChange={() =>
-                          toggleSelection(org.uuid, org.emailAddresses)}
-                      />
+                      {!_isEmpty(org.emailAddresses) && (
+                        <Checkbox
+                          checked={isSelected(org.uuid)}
+                          onChange={() =>
+                            toggleSelection(org.uuid, org.emailAddresses)}
+                        />
+                      )}
                     </td>
                     <td>
-                      <EmailAddressList emailAddresses={org.emailAddresses} />
+                      <EmailAddressList
+                        label={
+                          Settings.fields.organization.emailAddresses.label
+                        }
+                        emailAddresses={org.emailAddresses}
+                      />
                     </td>
                   </>
                 )}

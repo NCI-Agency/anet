@@ -157,14 +157,24 @@ const PersonPreview = ({ className, uuid }) => {
             <DictionaryField
               wrappedComponent={PreviewField}
               dictProps={Settings.fields.person.phoneNumber}
-              value={person.phoneNumber}
+              value={
+                person.phoneNumber || (
+                  <em>
+                    No {Settings.fields.person.phoneNumber.label.toLowerCase()}{" "}
+                    available
+                  </em>
+                )
+              }
             />
 
             <DictionaryField
               wrappedComponent={PreviewField}
               dictProps={Settings.fields.person.emailAddresses}
               value={
-                <EmailAddressTable emailAddresses={person.emailAddresses} />
+                <EmailAddressTable
+                  label={Settings.fields.person.emailAddresses.label}
+                  emailAddresses={person.emailAddresses}
+                />
               }
             />
 

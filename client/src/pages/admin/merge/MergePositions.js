@@ -225,6 +225,7 @@ const MergePositions = ({ pageDispatchers }) => {
                 dictProps={Settings.fields.position.emailAddresses}
                 value={
                   <EmailAddressTable
+                    label={Settings.fields.position.emailAddresses.label}
                     emailAddresses={mergedPosition.emailAddresses}
                   />
                 }
@@ -625,7 +626,10 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
             dictProps={Settings.fields.position.emailAddresses}
             fieldName="emailAddresses"
             value={
-              <EmailAddressTable emailAddresses={position.emailAddresses} />
+              <EmailAddressTable
+                label={Settings.fields.position.emailAddresses.label}
+                emailAddresses={position.emailAddresses}
+              />
             }
             align={align}
             action={getActionButton(

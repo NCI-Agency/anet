@@ -310,6 +310,7 @@ const MergePeople = ({ pageDispatchers }) => {
                 dictProps={Settings.fields.person.emailAddresses}
                 value={
                   <EmailAddressTable
+                    label={Settings.fields.person.emailAddresses.label}
                     emailAddresses={mergedPerson.emailAddresses}
                   />
                 }
@@ -755,7 +756,12 @@ const PersonColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
             wrappedComponent={MergeField}
             dictProps={Settings.fields.person.emailAddresses}
             fieldName="emailAddresses"
-            value={<EmailAddressTable emailAddresses={person.emailAddresses} />}
+            value={
+              <EmailAddressTable
+                label={Settings.fields.person.emailAddresses.label}
+                emailAddresses={person.emailAddresses}
+              />
+            }
             align={align}
             action={getActionButton(
               () => {

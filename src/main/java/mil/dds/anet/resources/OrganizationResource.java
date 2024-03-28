@@ -44,6 +44,10 @@ public class OrganizationResource {
     return AuthUtils.isAdmin(user) || AuthUtils.canAdministrateOrg(user, organizationUuid);
   }
 
+  public static boolean hasPermission(final Person user, final Organization organization) {
+    return hasPermission(user, organization.getUuid());
+  }
+
   public static void assertPermission(final Person user, final String organizationUuid) {
     if (!hasPermission(user, organizationUuid)) {
       throw new WebApplicationException(AuthUtils.UNAUTH_MESSAGE, Status.FORBIDDEN);

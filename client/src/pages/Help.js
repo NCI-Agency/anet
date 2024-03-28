@@ -15,6 +15,7 @@ import PropTypes from "prop-types"
 import React, { useContext } from "react"
 import { connect } from "react-redux"
 import TOUR_SCREENSHOT from "resources/tour-screenshot.png"
+import Settings from "settings"
 import utils from "utils"
 
 const GQL_GET_ORGANIZATION = gql`
@@ -169,7 +170,10 @@ const HelpConditional = ({
           {superusers.map(user => (
             <li key={user.uuid}>
               {user.rank} {user.name}:
-              <EmailAddressTable emailAddresses={user.emailAddresses} />
+              <EmailAddressTable
+                label={Settings.fields.person.emailAddresses.label}
+                emailAddresses={user.emailAddresses}
+              />
             </li>
           ))}
           {superusers.length === 0 && <em>No superusers found</em>}

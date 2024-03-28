@@ -27,7 +27,6 @@ public class AnetDbLogger implements SqlLogger {
     final String renderedSql = context.getRenderedSql();
     if (logger.isDebugEnabled() && !renderedSql.startsWith("INSERT INTO \"userActivities\"")) {
       final String msg = renderedSql.replace(PersonDao.PERSON_FIELDS, " <PERSON_FIELDS> ")
-          .replace(PersonDao.PERSON_FIELDS_NOAS, " <PERSON_FIELDS> ")
           .replace(PositionDao.POSITION_FIELDS, " <POSITION_FIELDS> ")
           .replace(OrganizationDao.ORGANIZATION_FIELDS, " <ORGANIZATION_FIELDS> ")
           .replace(ReportDao.REPORT_FIELDS, " <REPORT_FIELDS> ")

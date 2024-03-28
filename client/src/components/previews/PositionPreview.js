@@ -135,7 +135,12 @@ const PositionPreview = ({ className, uuid }) => {
         <DictionaryField
           wrappedComponent={PreviewField}
           dictProps={Settings.fields.position.emailAddresses}
-          value={<EmailAddressTable emailAddresses={position.emailAddresses} />}
+          value={
+            <EmailAddressTable
+              label={Settings.fields.position.emailAddresses.label}
+              emailAddresses={position.emailAddresses}
+            />
+          }
         />
 
         <DictionaryField
