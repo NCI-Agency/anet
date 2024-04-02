@@ -748,10 +748,13 @@ public class PositionResourceTest extends AbstractResourceTest {
 
   @Test
   void shouldBeSearchableViaCustomFields() {
-    final var query = PositionSearchQueryInput.builder().withText("aliqua").build();
+    final var searchText = "aliqua";
+    final var query = PositionSearchQueryInput.builder().withText(searchText).build();
     final var searchObjects =
         withCredentials(adminUser, t -> queryExecutor.positionList(getListFields(FIELDS), query));
     assertThat(searchObjects).isNotNull();
-    assertThat(searchObjects.getTotalCount()).isGreaterThan(0);
+    assertThat(searchObjects.getTotalCount()).isEqualTo(1);
+    assertThat(searchObjects.getList()).allSatisfy(
+        searchResult -> assertThat(searchResult.getCustomFields()).contains(searchText));
   }
 }

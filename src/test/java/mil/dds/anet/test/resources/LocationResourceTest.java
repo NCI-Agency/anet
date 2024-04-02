@@ -145,11 +145,14 @@ public class LocationResourceTest extends AbstractResourceTest {
 
   @Test
   void shouldBeSearchableViaCustomFields() {
+    final var searchText = "consectetur";
     final LocationSearchQueryInput query =
-        LocationSearchQueryInput.builder().withText("consectetur").build();
+        LocationSearchQueryInput.builder().withText(searchText).build();
     final AnetBeanList_Location searchObjects =
         withCredentials(adminUser, t -> queryExecutor.locationList(getListFields(FIELDS), query));
     assertThat(searchObjects).isNotNull();
-    assertThat(searchObjects.getTotalCount()).isGreaterThan(0);
+    assertThat(searchObjects.getTotalCount()).isEqualTo(1);
+    assertThat(searchObjects.getList()).allSatisfy(
+        searchResult -> assertThat(searchResult.getCustomFields()).contains(searchText));
   }
 }
