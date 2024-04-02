@@ -17,6 +17,7 @@ import mil.dds.anet.beans.EmailAddress;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionType;
+import mil.dds.anet.beans.WithStatus;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.config.AnetConfiguration;
@@ -158,19 +159,14 @@ public class PersonResource {
     }
 
     // If person changed to inactive, clear out the user status and domainUsername and openIdSubject
-    if (Person.Status.INACTIVE.equals(p.getStatus())
-        && !Person.Status.INACTIVE.equals(existing.getStatus())) {
-      AnetAuditLogger.log("Person {} user status set to false, "
-          + "and domainUsername '{}' and openIdSubject '{}' cleared by {} because they are now inactive",
-          p, existing.getDomainUsername(), existing.getOpenIdSubject(), user);
-      p.setUser(false);
-      p.setDomainUsername(null);
-      p.setOpenIdSubject(null);
+    if (WithStatus.Status.INACTIVE.equals(p.getStatus())
+        && !WithStatus.Status.INACTIVE.equals(existing.getStatus())) {
+      AnetAuditLogger.log("Person {} user status set to false", p);
       dao.updateAuthenticationDetails(p);
     }
 
     // Automatically remove people from a position if they are inactive.
-    if (Person.Status.INACTIVE.equals(p.getStatus()) && p.getPosition() != null) {
+    if (WithStatus.Status.INACTIVE.equals(p.getStatus()) && p.getPosition() != null) {
       Position existingPos = DaoUtils.getPosition(existing);
       if (existingPos != null) {
         // A user can reset 'themselves' if the account was incorrect ("This is not me")

@@ -24,6 +24,7 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.beans.Position;
+import mil.dds.anet.beans.WithStatus;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.recentActivity.Activity;
 import mil.dds.anet.beans.search.PersonSearchQuery;
@@ -144,11 +145,13 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   public int updateAuthenticationDetails(Person p) {
     DaoUtils.setUpdateFields(p);
     final String sql = "/* personUpdateAuthenticationDetails */ UPDATE people "
-        + "SET \"openIdSubject\" = :openIdSubject , \"updatedAt\" = :updatedAt "
-        + "WHERE uuid = :uuid";
-    final int nr = getDbHandle().createUpdate(sql).bind("openIdSubject", p.getOpenIdSubject())
-        .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt())).bind("uuid", p.getUuid())
-        .execute();
+        + "SET \"openIdSubject\" = :openIdSubject , \"domainUsername\" = :domainUsername, "
+        + "status = :status, \"user\" = :user, \"pendingVerification\" = :pendingVerification, "
+        + "\"endOfTourDate\" = :endOfTourDate, \"updatedAt\" = :updatedAt WHERE uuid = :uuid";
+    final int nr = getDbHandle().createUpdate(sql).bindBean(p)
+        .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
+        .bind("endOfTourDate", DaoUtils.asLocalDateTime(p.getEndOfTourDate()))
+        .bind("status", DaoUtils.getEnumId(p.getStatus())).execute();
     evictFromCache(p);
     // The openIdSubject has changed, evict original person as well
     evictFromCache(findInCache(p));
@@ -205,34 +208,12 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
         .createQuery("/* findByDomainUsername */ SELECT " + PERSON_FIELDS + ","
             + PositionDao.POSITION_FIELDS
             + "FROM people LEFT JOIN positions ON people.uuid = positions.\"currentPersonUuid\" "
-            + "WHERE people.user = :user AND people.\"domainUsername\" = :domainUsername "
-            + "AND people.status != :inactiveStatus")
-        .bind("user", true).bind("domainUsername", domainUsername)
-        .bind("inactiveStatus", DaoUtils.getEnumId(Person.Status.INACTIVE)).map(new PersonMapper())
-        .list();
+            + "WHERE people.\"domainUsername\" = :domainUsername")
+        .bind("domainUsername", domainUsername).map(new PersonMapper()).list();
   }
 
   @InTransaction
-  // Should only be used during authentication
-  public List<Person> findByEmailAddress(String emailAddress) {
-    if (Utils.isEmptyOrNull(emailAddress)) {
-      return Collections.emptyList();
-    }
-    return getDbHandle()
-        .createQuery("/* findByEmailAddress */ SELECT " + PERSON_FIELDS + ","
-            + PositionDao.POSITION_FIELDS
-            + "FROM people LEFT JOIN positions ON people.uuid = positions.\"currentPersonUuid\" "
-            + "LEFT JOIN \"emailAddresses\" ON \"emailAddresses\".\"relatedObjectType\" = '"
-            + TABLE_NAME + "' AND people.uuid = \"emailAddresses\".\"relatedObjectUuid\" "
-            + "WHERE people.user = :user AND \"emailAddresses\".address = :emailAddress "
-            + "AND people.status != :inactiveStatus")
-        .bind("user", true).bind("emailAddress", emailAddress)
-        .bind("inactiveStatus", DaoUtils.getEnumId(Person.Status.INACTIVE)).map(new PersonMapper())
-        .list();
-  }
-
-  @InTransaction
-  public List<Person> findByOpenIdSubject(String openIdSubject) {
+  public List<Person> findByOpenIdSubject(String openIdSubject, boolean activeUser) {
     if (Utils.isEmptyOrNull(openIdSubject)) {
       return Collections.emptyList();
     }
@@ -240,15 +221,19 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     if (person != null) {
       return Collections.singletonList(person);
     }
-    final List<Person> people = getDbHandle()
-        .createQuery("/* findByOpenIdSubject */ SELECT " + PERSON_FIELDS + ","
-            + PositionDao.POSITION_FIELDS
+    String sql =
+        "/* findByOpenIdSubject */ SELECT " + PERSON_FIELDS + "," + PositionDao.POSITION_FIELDS
             + "FROM people LEFT JOIN positions ON people.uuid = positions.\"currentPersonUuid\" "
-            + "WHERE people.user = :user AND people.\"openIdSubject\" = :openIdSubject "
-            + "AND people.status != :inactiveStatus")
-        .bind("user", true).bind("openIdSubject", openIdSubject)
-        .bind("inactiveStatus", DaoUtils.getEnumId(Person.Status.INACTIVE)).map(new PersonMapper())
-        .list();
+            + "WHERE people.\"openIdSubject\" = :openIdSubject";
+    if (activeUser) {
+      sql += " AND people.user = :user AND people.status != :inactiveStatus";
+    }
+    final Query query = getDbHandle().createQuery(sql).bind("openIdSubject", openIdSubject);
+    if (activeUser) {
+      query.bind("user", true).bind("inactiveStatus",
+          DaoUtils.getEnumId(WithStatus.Status.INACTIVE));
+    }
+    final List<Person> people = query.map(new PersonMapper()).list();
     // There should at most one match
     people.stream().forEach(p -> putInCache(p));
     return people;
@@ -316,7 +301,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
 
   /**
    * Just to be on the safe side, we only cache objects retrieved inside
-   * {@link #findByOpenIdSubject(String)}.
+   * {@link #findByOpenIdSubject(String, boolean)}.
    *
    * @param person the person to be evicted from the domain users cache
    */

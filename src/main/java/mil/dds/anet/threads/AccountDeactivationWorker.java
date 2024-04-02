@@ -14,6 +14,7 @@ import mil.dds.anet.beans.EmailAddress;
 import mil.dds.anet.beans.JobHistory;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
+import mil.dds.anet.beans.WithStatus.Status;
 import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.database.PersonDao;
@@ -53,9 +54,10 @@ public class AccountDeactivationWorker extends AbstractWorker {
     // Pick the earliest warning
     final int daysBeforeLatestWarning = warningDays.get(0);
 
-    // Get a list of all people with a end of tour coming up using the earliest warning date
+    // Get a list of all active people with an end of tour coming up using the earliest warning date
     final PersonSearchQuery query = new PersonSearchQuery();
     query.setPageSize(0);
+    query.setStatus(Status.ACTIVE);
     final Instant latestWarningDate = now.plus(daysBeforeLatestWarning, ChronoUnit.DAYS);
     query.setEndOfTourDateEnd(latestWarningDate);
     final List<Person> persons =
@@ -96,10 +98,10 @@ public class AccountDeactivationWorker extends AbstractWorker {
   private void checkDeactivationStatus(final Person person, final Integer daysBeforeWarning,
       final Integer nextWarning, final Instant now, final Instant lastRun,
       final List<String> ignoredDomainNames, final Integer warningIntervalInSecs) {
-    if (person.getStatus() == Person.Status.INACTIVE || Utils.isEmailIgnored(
+    if (Utils.isEmailIgnored(
         person.getNotificationEmailAddress().map(EmailAddress::getAddress).orElse(null),
         ignoredDomainNames)) {
-      // Skip inactive ANET users or users from ignored domains
+      // Skip users from ignored domains
       return;
     }
 
@@ -126,18 +128,7 @@ public class AccountDeactivationWorker extends AbstractWorker {
     AnetAuditLogger.log(
         "Person {} status set to inactive by system because the End-of-Tour date has been reached",
         p);
-    p.setStatus(Person.Status.INACTIVE);
-
-    AnetAuditLogger.log(
-        "Person {} user status set to false by system because the End-of-Tour date has been reached",
-        p);
-    p.setUser(false);
-
-    AnetAuditLogger.log(
-        "Person {} domainUsername '{}' and openIdSubject '{}' cleared by system because they are now inactive",
-        p, p.getDomainUsername(), p.getOpenIdSubject());
-    p.setDomainUsername(null);
-    p.setOpenIdSubject(null);
+    p.setStatus(Status.INACTIVE);
 
     Position existingPos = DaoUtils.getPosition(p);
     if (existingPos != null) {
@@ -148,7 +139,7 @@ public class AccountDeactivationWorker extends AbstractWorker {
     }
 
     // Update
-    dao.update(p);
+    dao.updateAuthenticationDetails(p);
 
     // Send email to inform user
     sendAccountDeactivationEmail(p);
