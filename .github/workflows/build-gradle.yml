@@ -99,11 +99,13 @@ jobs:
     - name: Strip slashes from dictionary name
       id: strip-slashes
       run: echo "dictionary=${ANET_DICTIONARY_NAME//\//_}" >> $GITHUB_OUTPUT
+      if: always()
     - name: Upload test results
       uses: actions/upload-artifact@v4
       with:
         name: server-test-results for ${{ steps.strip-slashes.outputs.dictionary }}
         path: client/build/test-results/server-test-results.xml
+      if: always()
 
   test-client:
     needs: build
@@ -148,15 +150,17 @@ jobs:
         BROWSERSTACK_LOCAL_IDENTIFIER: ${{ steps.browserstack-local.outputs.identifier }}
         BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
         BROWSERSTACK_USER: ${{ secrets.BROWSERSTACK_USER }}
+    - run: head -1000 logs/clientLog.log
+      if: always()
     - name: Strip slashes from dictionary name
       id: strip-slashes
       run: echo "dictionary=${ANET_DICTIONARY_NAME//\//_}" >> $GITHUB_OUTPUT
+      if: always()
     - name: Upload test results
       uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.client-tests }}-test-results for ${{ steps.strip-slashes.outputs.dictionary }}
         path: client/build/test-results/${{ matrix.client-tests }}-test-results.xml
-    - run: head -1000 logs/clientLog.log
       if: always()
 
   run-storybook:
