@@ -400,6 +400,7 @@ const OrganizationalChart = ({
     <SVGCanvas
       width={width}
       height={height}
+      style={{ backgroundColor: "white" }}
       exportTitle={exportTitle}
       zoomFn={increment =>
         setPersonnelDepth(Math.max(0, personnelDepth + increment))}
@@ -416,8 +417,13 @@ OrganizationalChart.propTypes = {
   pageDispatchers: PageDispatchersPropType,
   org: PropTypes.object.isRequired,
   exportTitle: PropTypes.string,
-  width: PropTypes.number.isRequired,
-  height: PropTypes.number.isRequired
+  width: PropTypes.number,
+  height: PropTypes.number
+}
+
+OrganizationalChart.defaultProps = {
+  width: 100,
+  height: 100
 }
 
 export default connect(null, mapPageDispatchersToProps)(OrganizationalChart)

@@ -4,11 +4,22 @@ import { Button } from "react-bootstrap"
 import DEFAULT_AVATAR from "resources/default_avatar.svg?inline"
 import DOWNLOAD_ICON from "resources/download.png"
 
-const SVGCanvas = ({ width, height, exportTitle, zoomFn, children }) => {
+const SVGCanvas = ({
+  width,
+  height,
+  style: initialStyle,
+  exportTitle,
+  zoomFn,
+  children
+}) => {
   const svgRef = useRef(null)
+  const style =
+    zoomFn || exportTitle
+      ? { position: "relative", ...initialStyle }
+      : initialStyle
 
   return (
-    <div>
+    <div style={style}>
       {zoomFn && (
         <div
           style={{
@@ -103,6 +114,7 @@ const SVGCanvas = ({ width, height, exportTitle, zoomFn, children }) => {
 SVGCanvas.propTypes = {
   width: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired,
+  style: PropTypes.object,
   exportTitle: PropTypes.string,
   zoomFn: PropTypes.func,
   children: PropTypes.node

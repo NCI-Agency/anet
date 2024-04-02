@@ -2,7 +2,7 @@ import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useLayoutEffect } from "react"
 import { momentObj } from "react-moment-proptypes"
-import useDimensions from "react-use-dimensions"
+import { useResizeDetector } from "react-resize-detector"
 
 const ASSESSMENT_PERIOD_DATE_FORMAT = "YYYY-MM-DD"
 
@@ -295,12 +295,11 @@ function getPeriodNumberForScreen(width) {
 }
 
 export const useResponsiveNumberOfPeriods = setNumberOfPeriods => {
-  const [contRef, dimensions] = useDimensions()
+  const { width, ref } = useResizeDetector()
   useLayoutEffect(() => {
-    if (dimensions?.width) {
-      const containerWidth = dimensions.width
-      setNumberOfPeriods(getPeriodNumberForScreen(containerWidth))
+    if (width) {
+      setNumberOfPeriods(getPeriodNumberForScreen(width))
     }
-  }, [setNumberOfPeriods, dimensions])
-  return contRef
+  }, [setNumberOfPeriods, width])
+  return ref
 }
