@@ -31,8 +31,8 @@ test.serial("Draft and submit a report", async t => {
 
   await pageHelpers.clickTodayButton()
 
-  const $intent = await $("#intent")
-  await $intent.click() // click intent to make sure the date picker is being closed
+  // send escape key to make sure the date picker is being closed
+  await t.context.driver.actions().sendKeys(t.context.Key.ESCAPE).perform()
 
   const $locationAdvancedSelect = await pageHelpers.chooseAdvancedSelectOption(
     "#location",
@@ -426,11 +426,10 @@ test.serial("Verify that validations work", async t => {
     "Create a new Report"
   )
 
-  const $searchBarInput = await $("#searchBarInput")
-
   async function verifyFieldIsRequired($input, id, type, fieldName) {
     await $input.click()
     await $input.clear()
+    const $searchBarInput = await $("#searchBarInput")
     await $searchBarInput.click()
 
     await t.context.driver.wait(
@@ -441,6 +440,9 @@ test.serial("Verify that validations work", async t => {
 
     await $input.sendKeys("user input")
     await $input.sendKeys(t.context.Key.TAB) // fire blur event
+    // send escape key to make sure any pop-ups are being closed
+    await t.context.driver.actions().sendKeys(t.context.Key.ESCAPE).perform()
+
     t.false(
       (await t.context.driver.findElements(
         By.css(`textarea[id="${id}"] ~ div[class="invalid-feedback"]`)
@@ -502,6 +504,9 @@ test.serial("Verify that validations work", async t => {
       t.context.Key.TAB
   )
 
+  // send escape key to make sure the date picker is being closed
+  await t.context.driver.actions().sendKeys(t.context.Key.ESCAPE).perform()
+
   // check date and time
   const dateTimeFormat = "DD-MM-YYYY HH:mm"
   const dateTimeValue = await $engagementDate.getAttribute("value")
@@ -511,8 +516,6 @@ test.serial("Verify that validations work", async t => {
     expectedDateTime,
     'Clicking the "today" button puts the current date in the engagement field'
   )
-
-  await $meetingGoalInput.click() // click intent to make sure the date picker is being closed
 
   const $locationInput = await $("#location")
   t.is(
