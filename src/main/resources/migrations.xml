@@ -4885,14 +4885,49 @@
 			DROP MATERIALIZED VIEW mv_fts_organizations;
 			DROP MATERIALIZED VIEW mv_fts_tasks;
 
-			-- TODO: Ideally, this should recurse down the JSON structure; left as an exercise…
-			CREATE OR REPLACE FUNCTION jsonb_value_agg (p_json text, ignore_key text default 'invisibleCustomFields')
+			CREATE OR REPLACE FUNCTION jsonb_value_agg (p_json jsonb, ignore_key text default 'invisibleCustomFields')
 				RETURNS text
 			AS
 			'
 			BEGIN
-				RETURN coalesce(string_agg(value, '' ''), '' '')
-				FROM jsonb_each_text(p_json::jsonb)
+				RETURN CASE
+					WHEN jsonb_typeof(p_json) = ''array'' THEN jsonb_array_value_agg(p_json, ignore_key)
+					WHEN jsonb_typeof(p_json) = ''object'' THEN jsonb_object_value_agg(p_json, ignore_key)
+					WHEN jsonb_typeof(p_json) = ''string''
+						AND p_json #>> ''{}'' !~ ''^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{1,3}Z$''
+						THEN coalesce(p_json #>> ''{}'', '''')
+					ELSE ''''
+				END;
+			EXCEPTION
+				WHEN OTHERS THEN
+				RETURN NULL;
+			END;
+			'
+			LANGUAGE plpgsql
+			IMMUTABLE;
+
+			CREATE OR REPLACE FUNCTION jsonb_array_value_agg (p_json jsonb, ignore_key text default 'invisibleCustomFields')
+				RETURNS text
+			AS
+			'
+			BEGIN
+				RETURN string_agg(jsonb_value_agg(value, ignore_key), '' '')
+				FROM jsonb_array_elements(p_json);
+			EXCEPTION
+				WHEN OTHERS THEN
+				RETURN NULL;
+			END;
+			'
+			LANGUAGE plpgsql
+			IMMUTABLE;
+
+			CREATE OR REPLACE FUNCTION jsonb_object_value_agg (p_json jsonb, ignore_key text default 'invisibleCustomFields')
+				RETURNS text
+			AS
+			'
+			BEGIN
+				RETURN string_agg(jsonb_value_agg(value, ignore_key), '' '')
+				FROM jsonb_each(p_json)
 				WHERE key != ignore_key;
 			EXCEPTION
 				WHEN OTHERS THEN
@@ -4913,8 +4948,8 @@
 							|| to_tsvector('simple', coalesce(reports."nextSteps", '')), ${fts_high}) ||
 					setweight(to_tsvector(${fts_config}, coalesce(reports.text, ''))
 							|| to_tsvector('simple', coalesce(reports.text, '')), ${fts_low}) ||
-					setweight(to_tsvector(${fts_config}, jsonb_value_agg(reports."customFields"))
-							|| to_tsvector('simple', jsonb_value_agg(reports."customFields")), ${fts_lower})
+					setweight(to_tsvector(${fts_config}, jsonb_value_agg(reports."customFields"::jsonb))
+							|| to_tsvector('simple', jsonb_value_agg(reports."customFields"::jsonb)), ${fts_lower})
 				) STORED;
 
 			ALTER TABLE people DROP COLUMN full_text;
@@ -4926,8 +4961,8 @@
 					setweight(to_tsvector('simple', coalesce(people."phoneNumber", '')), ${fts_high}) ||
 					setweight(to_tsvector(${fts_config}, coalesce(people.biography, ''))
 							|| to_tsvector('simple', coalesce(people.biography, '')), ${fts_low}) ||
-					setweight(to_tsvector(${fts_config}, jsonb_value_agg(people."customFields"))
-							|| to_tsvector('simple', jsonb_value_agg(people."customFields")), ${fts_lower})
+					setweight(to_tsvector(${fts_config}, jsonb_value_agg(people."customFields"::jsonb))
+							|| to_tsvector('simple', jsonb_value_agg(people."customFields"::jsonb)), ${fts_lower})
 				) STORED;
 
 			ALTER TABLE locations DROP COLUMN full_text;
@@ -4937,8 +4972,8 @@
 							|| to_tsvector('simple', coalesce(locations.name, '')), ${fts_high}) ||
 					setweight(to_tsvector(${fts_config}, coalesce(locations.description, ''))
 							|| to_tsvector('simple', coalesce(locations.description, '')), ${fts_low}) ||
-					setweight(to_tsvector(${fts_config}, jsonb_value_agg(locations."customFields"))
-							|| to_tsvector('simple', jsonb_value_agg(locations."customFields")), ${fts_lower})
+					setweight(to_tsvector(${fts_config}, jsonb_value_agg(locations."customFields"::jsonb))
+							|| to_tsvector('simple', jsonb_value_agg(locations."customFields"::jsonb)), ${fts_lower})
 				) STORED;
 
 			ALTER TABLE positions DROP COLUMN full_text;
@@ -4947,8 +4982,8 @@
 					setweight(to_tsvector('simple', coalesce(positions.code, '')), ${fts_high}) ||
 					setweight(to_tsvector(${fts_config}, coalesce(positions.name, ''))
 							|| to_tsvector('simple', coalesce(positions.name, '')), ${fts_high}) ||
-					setweight(to_tsvector(${fts_config}, jsonb_value_agg(positions."customFields"))
-							|| to_tsvector('simple', jsonb_value_agg(positions."customFields")), ${fts_lower})
+					setweight(to_tsvector(${fts_config}, jsonb_value_agg(positions."customFields"::jsonb))
+							|| to_tsvector('simple', jsonb_value_agg(positions."customFields"::jsonb)), ${fts_lower})
 				) STORED;
 
 			ALTER TABLE organizations DROP COLUMN full_text;
@@ -4960,8 +4995,8 @@
 							|| to_tsvector('simple', coalesce(organizations."longName", '')), ${fts_low}) ||
 					setweight(to_tsvector(${fts_config}, coalesce(organizations.profile, ''))
 							|| to_tsvector('simple', coalesce(organizations.profile, '')), ${fts_low}) ||
-					setweight(to_tsvector(${fts_config}, jsonb_value_agg(organizations."customFields"))
-							|| to_tsvector('simple', jsonb_value_agg(organizations."customFields")), ${fts_lower})
+					setweight(to_tsvector(${fts_config}, jsonb_value_agg(organizations."customFields"::jsonb))
+							|| to_tsvector('simple', jsonb_value_agg(organizations."customFields"::jsonb)), ${fts_lower})
 				) STORED;
 
 			ALTER TABLE tasks DROP COLUMN full_text;
@@ -4972,8 +5007,8 @@
 							|| to_tsvector('simple', coalesce(tasks."longName", '')), ${fts_high}) ||
 					setweight(to_tsvector(${fts_config}, coalesce(tasks.description, ''))
 							|| to_tsvector('simple', coalesce(tasks.description, '')), ${fts_low}) ||
-					setweight(to_tsvector(${fts_config}, jsonb_value_agg(tasks."customFields"))
-							|| to_tsvector('simple', jsonb_value_agg(tasks."customFields")), ${fts_lower})
+					setweight(to_tsvector(${fts_config}, jsonb_value_agg(tasks."customFields"::jsonb))
+							|| to_tsvector('simple', jsonb_value_agg(tasks."customFields"::jsonb)), ${fts_lower})
 				) STORED;
 
 			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_reports(uuid, full_text) AS
