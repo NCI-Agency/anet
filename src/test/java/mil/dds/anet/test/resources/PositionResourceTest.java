@@ -753,7 +753,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     final var searchObjects =
         withCredentials(adminUser, t -> queryExecutor.positionList(getListFields(FIELDS), query));
     assertThat(searchObjects).isNotNull();
-    assertThat(searchObjects.getTotalCount()).isEqualTo(1);
+    assertThat(searchObjects.getTotalCount()).isOne();
     assertThat(searchObjects.getList()).allSatisfy(
         searchResult -> assertThat(searchResult.getCustomFields()).contains(searchText));
   }

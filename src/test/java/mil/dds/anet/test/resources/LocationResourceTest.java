@@ -151,7 +151,7 @@ public class LocationResourceTest extends AbstractResourceTest {
     final AnetBeanList_Location searchObjects =
         withCredentials(adminUser, t -> queryExecutor.locationList(getListFields(FIELDS), query));
     assertThat(searchObjects).isNotNull();
-    assertThat(searchObjects.getTotalCount()).isEqualTo(1);
+    assertThat(searchObjects.getTotalCount()).isOne();
     assertThat(searchObjects.getList()).allSatisfy(
         searchResult -> assertThat(searchResult.getCustomFields()).contains(searchText));
   }

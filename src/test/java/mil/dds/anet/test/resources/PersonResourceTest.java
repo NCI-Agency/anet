@@ -892,7 +892,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     final AnetBeanList_Person searchObjects =
         withCredentials(adminUser, t -> queryExecutor.personList(getListFields(FIELDS), query));
     assertThat(searchObjects).isNotNull();
-    assertThat(searchObjects.getTotalCount()).isEqualTo(1);
+    assertThat(searchObjects.getTotalCount()).isOne();
     assertThat(searchObjects.getList()).allSatisfy(
         searchResult -> assertThat(searchResult.getCustomFields()).contains(searchText));
   }
