@@ -78,6 +78,10 @@ INSERT INTO people (uuid, name, status, "phoneNumber", rank, biography, "user", 
   ('87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'DMIN, Arthur', '0', NULL, 'CIV', 'An administrator', true, 'arthur', 'abc72322-1452-4222-bb71-a0b3db435175', 'Albania', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('46ba6a73-0cd7-4efb-8e99-215e98cc5987', 'SCOTT, Michael', '0', NULL, 'CIV', 'Worlds best boss.', true, 'michael', 'bd482701-2342-4a50-ba92-d956007a8828', 'United States of America', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
+UPDATE people
+SET "customFields"='{"invisibleCustomFields":["formCustomFields.textareaFieldName","formCustomFields.numberFieldName"],"arrayFieldName":[],"nlt_dt":null,"nlt":null,"colourOptions":"","inputFieldName":"Lorem ipsum dolor sit amet","multipleButtons":[],"placeOfResidence":null,"placeOfBirth":null}'
+WHERE name='DMIN, Arthur';
+
 -- Email addresses for people
 INSERT INTO "emailAddresses" (network, address, "relatedObjectType", "relatedObjectUuid") VALUES
 -- Advisors
@@ -181,6 +185,10 @@ INSERT INTO locations (uuid, type, name, "createdAt", "updatedAt") VALUES
   (N'c136bf89-cc24-43a5-8f51-0f41dfc9ab77', 'PP', 'MoI Mazar-i-Sharif', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (N'b0979678-0ed0-4b42-9b26-9976fcfa1b81', 'PP', 'MoI Office Building ABC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
+UPDATE locations
+SET "customFields"='{"invisibleCustomFields":["formCustomFields.textareaFieldName","formCustomFields.numberFieldName"],"arrayFieldName":[],"nlt_dt":null,"nlt":null,"colourOptions":"","inputFieldName":"consectetur adipisici elit","multipleButtons":[]}'
+WHERE name='MoI Coffee Shop';
+
 -- Create advisor positions
 INSERT INTO positions (uuid, name, type, role, status, "currentPersonUuid", "locationUuid", "createdAt", "updatedAt") VALUES
   (uuid_generate_v4(), 'ANET Administrator', 3, 0, 0, NULL, 'c8fdb53f-6f93-46fc-b0fa-f005c7b49667', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
@@ -226,6 +234,10 @@ INSERT INTO positions (uuid, name, type, role, status, "currentPersonUuid", "loc
   (uuid_generate_v4(), 'EF 9 Approver', 0, 0, 0, NULL, '7339f9e3-99d1-497a-9e3b-1269c4c287fe', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'LNG Advisor A', 0, 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'LNG Advisor B', 0, 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+UPDATE positions
+SET "customFields"='{"invisibleCustomFields":["formCustomFields.textareaFieldName","formCustomFields.numberFieldName"],"arrayFieldName":[],"nlt_dt":null,"nlt":null,"colourOptions":"","inputFieldName":"sed eiusmod tempor incidunt ut labore et dolore magna aliqua","multipleButtons":[]}'
+WHERE name='EF 5.1 Advisor Quality Assurance';
 
 -- Email addresses for advisor positions
 INSERT INTO "emailAddresses" (network, address, "relatedObjectType", "relatedObjectUuid") VALUES
@@ -399,6 +411,10 @@ INSERT INTO organizations(uuid, "shortName", "longName", "parentOrgUuid", "creat
   (uuid_generate_v4(), 'EF 6.1', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 6'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 6.2', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 6'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
+UPDATE organizations
+SET "customFields"='{"invisibleCustomFields":["formCustomFields.textareaFieldName","formCustomFields.numberFieldName"],"arrayFieldName":[],"nlt_dt":null,"nlt":null,"colourOptions":"","inputFieldName":"quis nostrud exercitation ullamco laboris","multipleButtons":[]}'
+WHERE "shortName"='LNG';
+
 -- Email addresses for organizations
 INSERT INTO "emailAddresses" (network, address, "relatedObjectType", "relatedObjectUuid") VALUES
   ('Internet', 'lng@example.com', 'organizations', '70193ee9-05b4-4aac-80b5-75609825db9f'),
@@ -505,6 +521,10 @@ INSERT INTO tasks (uuid, "shortName", "longName", category, "createdAt", "update
   (uuid_generate_v4(), 'TAAC-W', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
   (uuid_generate_v4(), 'TAAC-C', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
   (uuid_generate_v4(), 'TAAC Air', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL);
+
+UPDATE tasks
+SET "customFields"='{"invisibleCustomFields":[],"projectStatus":"RED"}'
+WHERE "shortName"='EF 3';
 
 INSERT INTO "taskTaskedOrganizations" ("taskUuid", "organizationUuid") VALUES
   ((SELECT uuid from tasks where "shortName" = '1.1.A'), (SELECT uuid from organizations where "shortName"='EF 1.1')),
@@ -867,10 +887,11 @@ INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor",
   ((SELECT uuid FROM people where "domainUsername" = 'erin'), :reportuuid, TRUE, TRUE, FALSE);
 
 SELECT ('''' || uuid_generate_v4() || '''') AS reportuuid \gset
-INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "nextSteps", "keyOutcomes", state, "engagementDate", atmosphere, "advisorOrganizationUuid", "interlocutorOrganizationUuid") VALUES
+INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "nextSteps", "keyOutcomes", state, "engagementDate", atmosphere, "advisorOrganizationUuid", "interlocutorOrganizationUuid","customFields") VALUES
   (:reportuuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'A test report from Arthur', '',
   'keep on testing!','have reports in organizations', 2, CURRENT_TIMESTAMP + INTERVAL '1 minute', 0,
-  (SELECT uuid FROM organizations where "shortName" = 'ANET Administrators'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Interior'));
+  (SELECT uuid FROM organizations where "shortName" = 'ANET Administrators'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Interior'),
+   '{"invisibleCustomFields":["formCustomFields.trainingEvent","formCustomFields.numberTrained","formCustomFields.levelTrained","formCustomFields.trainingDate","formCustomFields.assetsUsed"],"itemsAgreed":[],"echelons":"Ut enim ad minim veniam","systemProcess":"","multipleButtons":["advise"],"additionalEngagementNeeded":[],"relatedObject":null,"relatedReport":null}');
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
   ((SELECT uuid FROM people where "domainUsername" = 'arthur'), :reportuuid, TRUE, TRUE, FALSE),
   ((SELECT uuid FROM people where name = 'SHARTON, Shardul'), :reportuuid, TRUE, FALSE, TRUE),

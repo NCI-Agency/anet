@@ -884,4 +884,16 @@ public class PersonResourceTest extends AbstractResourceTest {
     }
   }
 
+  @Test
+  void shouldBeSearchableViaCustomFields() {
+    final var searchText = "ipsum";
+    final PersonSearchQueryInput query =
+        PersonSearchQueryInput.builder().withText(searchText).build();
+    final AnetBeanList_Person searchObjects =
+        withCredentials(adminUser, t -> queryExecutor.personList(getListFields(FIELDS), query));
+    assertThat(searchObjects).isNotNull();
+    assertThat(searchObjects.getTotalCount()).isOne();
+    assertThat(searchObjects.getList()).allSatisfy(
+        searchResult -> assertThat(searchResult.getCustomFields()).contains(searchText));
+  }
 }

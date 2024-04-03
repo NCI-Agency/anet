@@ -565,4 +565,15 @@ class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(numOrg).isOne();
   }
 
+  @Test
+  void shouldBeSearchableViaCustomFields() {
+    final var searchText = "exercitation";
+    final var query = OrganizationSearchQueryInput.builder().withText(searchText).build();
+    final var searchObjects = withCredentials(adminUser,
+        t -> queryExecutor.organizationList(getListFields(FIELDS), query));
+    assertThat(searchObjects).isNotNull();
+    assertThat(searchObjects.getTotalCount()).isOne();
+    assertThat(searchObjects.getList()).allSatisfy(
+        searchResult -> assertThat(searchResult.getCustomFields()).contains(searchText));
+  }
 }

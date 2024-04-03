@@ -143,4 +143,16 @@ public class LocationResourceTest extends AbstractResourceTest {
     }
   }
 
+  @Test
+  void shouldBeSearchableViaCustomFields() {
+    final var searchText = "consectetur";
+    final LocationSearchQueryInput query =
+        LocationSearchQueryInput.builder().withText(searchText).build();
+    final AnetBeanList_Location searchObjects =
+        withCredentials(adminUser, t -> queryExecutor.locationList(getListFields(FIELDS), query));
+    assertThat(searchObjects).isNotNull();
+    assertThat(searchObjects.getTotalCount()).isOne();
+    assertThat(searchObjects.getList()).allSatisfy(
+        searchResult -> assertThat(searchResult.getCustomFields()).contains(searchText));
+  }
 }
