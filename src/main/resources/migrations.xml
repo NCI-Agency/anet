@@ -4874,17 +4874,27 @@
 		<dropColumn tableName="people" columnName="emailAddress" />
 	</changeSet>
 
-	<changeSet id="add-customFields-to-fulltext-index" author="chessray">
+	<changeSet id="add-customFields-to-fulltext-index" author="chessray" runInTransaction="false">
 		<sql>
 			<!-- Drop full-text materialized views (incl. indexes) since we cannot just ALTER them;
 			     copied from multiple changesets -->
-			DROP MATERIALIZED VIEW mv_fts_reports;
-			DROP MATERIALIZED VIEW mv_fts_people;
 			DROP MATERIALIZED VIEW mv_fts_locations;
-			DROP MATERIALIZED VIEW mv_fts_positions;
 			DROP MATERIALIZED VIEW mv_fts_organizations;
+			DROP MATERIALIZED VIEW mv_fts_people;
+			DROP MATERIALIZED VIEW mv_fts_positions;
+			DROP MATERIALIZED VIEW mv_fts_reports;
 			DROP MATERIALIZED VIEW mv_fts_tasks;
 
+			<!-- Drop generated full-text columns;
+			     copied from multiple changesets -->
+			ALTER TABLE locations DROP COLUMN full_text;
+			ALTER TABLE organizations DROP COLUMN full_text;
+			ALTER TABLE people DROP COLUMN full_text;
+			ALTER TABLE positions DROP COLUMN full_text;
+			ALTER TABLE reports DROP COLUMN full_text;
+			ALTER TABLE tasks DROP COLUMN full_text;
+
+			<!-- Define functions for aggregating JSON values recursively, to be used in the full-text index -->
 			CREATE OR REPLACE FUNCTION jsonb_value_agg (p_json jsonb, ignore_key text default 'invisibleCustomFields')
 				RETURNS text
 			AS
@@ -4937,7 +4947,50 @@
 			LANGUAGE plpgsql
 			IMMUTABLE;
 
-			ALTER TABLE reports DROP COLUMN full_text;
+			<!-- Re-add generated full-text columns, with the customFields column included-->
+			ALTER TABLE locations
+				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, coalesce(locations.name, ''))
+							|| to_tsvector('simple', coalesce(locations.name, '')), ${fts_high}) ||
+					setweight(to_tsvector(${fts_config}, coalesce(locations.description, ''))
+							|| to_tsvector('simple', coalesce(locations.description, '')), ${fts_low}) ||
+					setweight(to_tsvector(${fts_config}, jsonb_value_agg(locations."customFields"::jsonb))
+							|| to_tsvector('simple', jsonb_value_agg(locations."customFields"::jsonb)), ${fts_lower})
+				) STORED;
+
+			ALTER TABLE organizations
+				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector('simple', coalesce(organizations."identificationCode", '')), ${fts_high}) ||
+					setweight(to_tsvector('simple', coalesce(organizations."shortName", '')), ${fts_high}) ||
+					setweight(to_tsvector(${fts_config}, coalesce(organizations."longName", ''))
+							|| to_tsvector('simple', coalesce(organizations."longName", '')), ${fts_low}) ||
+					setweight(to_tsvector(${fts_config}, coalesce(organizations.profile, ''))
+							|| to_tsvector('simple', coalesce(organizations.profile, '')), ${fts_low}) ||
+					setweight(to_tsvector(${fts_config}, jsonb_value_agg(organizations."customFields"::jsonb))
+							|| to_tsvector('simple', jsonb_value_agg(organizations."customFields"::jsonb)), ${fts_lower})
+				) STORED;
+
+			ALTER TABLE people
+				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector('simple', coalesce(people.name, '')), ${fts_high}) ||
+					setweight(to_tsvector('simple', coalesce(people.code, '')), ${fts_high}) ||
+					setweight(to_tsvector('simple', coalesce(people."domainUsername", '')), ${fts_high}) ||
+					setweight(to_tsvector('simple', coalesce(people."phoneNumber", '')), ${fts_high}) ||
+					setweight(to_tsvector(${fts_config}, coalesce(people.biography, ''))
+							|| to_tsvector('simple', coalesce(people.biography, '')), ${fts_low}) ||
+					setweight(to_tsvector(${fts_config}, jsonb_value_agg(people."customFields"::jsonb))
+							|| to_tsvector('simple', jsonb_value_agg(people."customFields"::jsonb)), ${fts_lower})
+				) STORED;
+
+			ALTER TABLE positions
+				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector('simple', coalesce(positions.code, '')), ${fts_high}) ||
+					setweight(to_tsvector(${fts_config}, coalesce(positions.name, ''))
+							|| to_tsvector('simple', coalesce(positions.name, '')), ${fts_high}) ||
+					setweight(to_tsvector(${fts_config}, jsonb_value_agg(positions."customFields"::jsonb))
+							|| to_tsvector('simple', jsonb_value_agg(positions."customFields"::jsonb)), ${fts_lower})
+				) STORED;
+
 			ALTER TABLE reports
 				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
 					setweight(to_tsvector(${fts_config}, coalesce(reports.intent, ''))
@@ -4952,54 +5005,6 @@
 							|| to_tsvector('simple', jsonb_value_agg(reports."customFields"::jsonb)), ${fts_lower})
 				) STORED;
 
-			ALTER TABLE people DROP COLUMN full_text;
-			ALTER TABLE people
-				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
-					setweight(to_tsvector('simple', coalesce(people.name, '')), ${fts_high}) ||
-					setweight(to_tsvector('simple', coalesce(people.code, '')), ${fts_high}) ||
-					setweight(to_tsvector('simple', coalesce(people."domainUsername", '')), ${fts_high}) ||
-					setweight(to_tsvector('simple', coalesce(people."phoneNumber", '')), ${fts_high}) ||
-					setweight(to_tsvector(${fts_config}, coalesce(people.biography, ''))
-							|| to_tsvector('simple', coalesce(people.biography, '')), ${fts_low}) ||
-					setweight(to_tsvector(${fts_config}, jsonb_value_agg(people."customFields"::jsonb))
-							|| to_tsvector('simple', jsonb_value_agg(people."customFields"::jsonb)), ${fts_lower})
-				) STORED;
-
-			ALTER TABLE locations DROP COLUMN full_text;
-			ALTER TABLE locations
-				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
-					setweight(to_tsvector(${fts_config}, coalesce(locations.name, ''))
-							|| to_tsvector('simple', coalesce(locations.name, '')), ${fts_high}) ||
-					setweight(to_tsvector(${fts_config}, coalesce(locations.description, ''))
-							|| to_tsvector('simple', coalesce(locations.description, '')), ${fts_low}) ||
-					setweight(to_tsvector(${fts_config}, jsonb_value_agg(locations."customFields"::jsonb))
-							|| to_tsvector('simple', jsonb_value_agg(locations."customFields"::jsonb)), ${fts_lower})
-				) STORED;
-
-			ALTER TABLE positions DROP COLUMN full_text;
-			ALTER TABLE positions
-				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
-					setweight(to_tsvector('simple', coalesce(positions.code, '')), ${fts_high}) ||
-					setweight(to_tsvector(${fts_config}, coalesce(positions.name, ''))
-							|| to_tsvector('simple', coalesce(positions.name, '')), ${fts_high}) ||
-					setweight(to_tsvector(${fts_config}, jsonb_value_agg(positions."customFields"::jsonb))
-							|| to_tsvector('simple', jsonb_value_agg(positions."customFields"::jsonb)), ${fts_lower})
-				) STORED;
-
-			ALTER TABLE organizations DROP COLUMN full_text;
-			ALTER TABLE organizations
-				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
-					setweight(to_tsvector('simple', coalesce(organizations."identificationCode", '')), ${fts_high}) ||
-					setweight(to_tsvector('simple', coalesce(organizations."shortName", '')), ${fts_high}) ||
-					setweight(to_tsvector(${fts_config}, coalesce(organizations."longName", ''))
-							|| to_tsvector('simple', coalesce(organizations."longName", '')), ${fts_low}) ||
-					setweight(to_tsvector(${fts_config}, coalesce(organizations.profile, ''))
-							|| to_tsvector('simple', coalesce(organizations.profile, '')), ${fts_low}) ||
-					setweight(to_tsvector(${fts_config}, jsonb_value_agg(organizations."customFields"::jsonb))
-							|| to_tsvector('simple', jsonb_value_agg(organizations."customFields"::jsonb)), ${fts_lower})
-				) STORED;
-
-			ALTER TABLE tasks DROP COLUMN full_text;
 			ALTER TABLE tasks
 				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
 					setweight(to_tsvector('simple', coalesce(tasks."shortName", '')), ${fts_high}) ||
@@ -5011,23 +5016,41 @@
 							|| to_tsvector('simple', jsonb_value_agg(tasks."customFields"::jsonb)), ${fts_lower})
 				) STORED;
 
-			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_reports(uuid, full_text) AS
-			SELECT
-				reports.uuid,
-				reports.full_text
-					|| coalesce(tsvector_agg(notes.full_text), ''::tsvector)
-			FROM reports
-					LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'reports'
-				AND "noteRelatedObjects"."relatedObjectUuid" = reports.uuid
-					LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
-			GROUP BY reports.uuid
-				WITH DATA;
-			CREATE UNIQUE INDEX "UQ_mv_fts_reports_uuid" ON mv_fts_reports(uuid);
-			CREATE INDEX "FT_mv_fts_reports" ON mv_fts_reports USING gin(full_text);
-			CREATE INDEX "TR_reports_uuid" ON mv_fts_reports USING gin(uuid gin_trgm_ops);
-
 			<!-- Re-create full-text materialized views and indexes;
-			     copied from the last changeset the respective fulltext view has been created before -->
+			     copied from the last changeset where the respective view was created before -->
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_locations(uuid, full_text) AS
+			SELECT
+				locations.uuid,
+				locations.full_text
+					|| coalesce(tsvector_agg(notes.full_text), ''::tsvector)
+			FROM locations
+					LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'locations'
+				AND "noteRelatedObjects"."relatedObjectUuid" = locations.uuid
+					LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
+			GROUP BY locations.uuid
+				WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_locations_uuid" ON mv_fts_locations(uuid);
+			CREATE INDEX "FT_mv_fts_locations" ON mv_fts_locations USING gin(full_text);
+			CREATE INDEX "TR_locations_uuid" ON mv_fts_locations USING gin(uuid gin_trgm_ops);
+
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_organizations(uuid, full_text) AS
+			SELECT
+				organizations.uuid,
+				organizations.full_text
+					|| coalesce(tsvector_agg(notes.full_text), ''::tsvector)
+					|| coalesce(tsvector_agg("emailAddresses".full_text), ''::tsvector)
+			FROM organizations
+					LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'organizations'
+				AND "noteRelatedObjects"."relatedObjectUuid" = organizations.uuid
+					LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
+					LEFT JOIN "emailAddresses" ON "emailAddresses"."relatedObjectType" = 'organizations'
+				AND "emailAddresses"."relatedObjectUuid" = organizations.uuid
+			GROUP BY organizations.uuid
+				WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_organizations_uuid" ON mv_fts_organizations(uuid);
+			CREATE INDEX "FT_mv_fts_organizations" ON mv_fts_organizations USING gin(full_text);
+			CREATE INDEX "TR_organizations_uuid" ON mv_fts_organizations USING gin(uuid gin_trgm_ops);
+
 			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_people(uuid, full_text) AS
 			SELECT
 				people.uuid,
@@ -5049,21 +5072,6 @@
 			CREATE UNIQUE INDEX "UQ_mv_fts_people_uuid" ON mv_fts_people(uuid);
 			CREATE INDEX "FT_mv_fts_people" ON mv_fts_people USING gin(full_text);
 			CREATE INDEX "TR_people_uuid" ON mv_fts_people USING gin(uuid gin_trgm_ops);
-
-			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_locations(uuid, full_text) AS
-			SELECT
-				locations.uuid,
-				locations.full_text
-					|| coalesce(tsvector_agg(notes.full_text), ''::tsvector)
-			FROM locations
-					LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'locations'
-				AND "noteRelatedObjects"."relatedObjectUuid" = locations.uuid
-					LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
-			GROUP BY locations.uuid
-				WITH DATA;
-			CREATE UNIQUE INDEX "UQ_mv_fts_locations_uuid" ON mv_fts_locations(uuid);
-			CREATE INDEX "FT_mv_fts_locations" ON mv_fts_locations USING gin(full_text);
-			CREATE INDEX "TR_locations_uuid" ON mv_fts_locations USING gin(uuid gin_trgm_ops);
 
 			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_positions(uuid, full_text) AS
 			SELECT
@@ -5087,23 +5095,20 @@
 			CREATE INDEX "FT_mv_fts_positions" ON mv_fts_positions USING gin(full_text);
 			CREATE INDEX "TR_positions_uuid" ON mv_fts_positions USING gin(uuid gin_trgm_ops);
 
-			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_organizations(uuid, full_text) AS
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_reports(uuid, full_text) AS
 			SELECT
-				organizations.uuid,
-				organizations.full_text
+				reports.uuid,
+				reports.full_text
 					|| coalesce(tsvector_agg(notes.full_text), ''::tsvector)
-					|| coalesce(tsvector_agg("emailAddresses".full_text), ''::tsvector)
-			FROM organizations
-					LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'organizations'
-				AND "noteRelatedObjects"."relatedObjectUuid" = organizations.uuid
+			FROM reports
+					LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'reports'
+				AND "noteRelatedObjects"."relatedObjectUuid" = reports.uuid
 					LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
-					LEFT JOIN "emailAddresses" ON "emailAddresses"."relatedObjectType" = 'organizations'
-				AND "emailAddresses"."relatedObjectUuid" = organizations.uuid
-			GROUP BY organizations.uuid
+			GROUP BY reports.uuid
 				WITH DATA;
-			CREATE UNIQUE INDEX "UQ_mv_fts_organizations_uuid" ON mv_fts_organizations(uuid);
-			CREATE INDEX "FT_mv_fts_organizations" ON mv_fts_organizations USING gin(full_text);
-			CREATE INDEX "TR_organizations_uuid" ON mv_fts_organizations USING gin(uuid gin_trgm_ops);
+			CREATE UNIQUE INDEX "UQ_mv_fts_reports_uuid" ON mv_fts_reports(uuid);
+			CREATE INDEX "FT_mv_fts_reports" ON mv_fts_reports USING gin(full_text);
+			CREATE INDEX "TR_reports_uuid" ON mv_fts_reports USING gin(uuid gin_trgm_ops);
 
 			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_tasks(uuid, full_text) AS
 			SELECT
