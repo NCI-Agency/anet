@@ -691,6 +691,7 @@ input PersonSearchQueryInput {
   pageNum: Int
   pageSize: Int
   pendingVerification: Boolean
+  positionType: [PositionType]
   rank: String
   sortBy: PersonSearchSortBy
   sortOrder: SortOrder

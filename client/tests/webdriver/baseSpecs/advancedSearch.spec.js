@@ -1,32 +1,33 @@
 import { expect } from "chai"
+import _isEmpty from "lodash/isEmpty"
 import AdvancedSearch from "../pages/advancedSearch"
 import Home from "../pages/home.page"
 
 const ANET_OBJECT_TYPES = {
   Reports: {
-    sampleFilter: "Author"
+    sampleFilters: ["Author"]
   },
   People: {
-    sampleFilter: "Organization"
+    sampleFilters: ["Within Organization", "Holding Position As"]
   },
   Organizations: {
-    sampleFilter: "Within Organization"
+    sampleFilters: ["Within Organization"]
   },
   Positions: {
-    sampleFilter: "Type"
+    sampleFilters: ["Type"]
   },
   Locations: {
-    sampleFilter: "Type"
+    sampleFilters: ["Type"]
   },
   "Objective / Efforts": {
-    sampleFilter: "Organization"
+    sampleFilters: ["Within Organization"]
   },
   "Authorization Groups": {
-    sampleFilter: undefined
+    sampleFilters: []
   }
 }
 const COMMON_FILTER_TEXT = "Status"
-const ALL_COMMON_FILTERS = [COMMON_FILTER_TEXT, "Subscribed"]
+const ALL_COMMON_FILTERS = [COMMON_FILTER_TEXT, "Subscribed", "With Email"]
 
 const PERSON_DEFAULT_FILTER = "Pending Verification"
 const PERSON_INDEX = 1
@@ -107,9 +108,9 @@ describe("When using advanced search", () => {
     const buttons = await AdvancedSearch.getAnetObjectSearchToggleButtons()
     for (const [i, button] of buttons.entries()) {
       await button.click()
-      const sampleFilter =
-        ANET_OBJECT_TYPES[await getObjectType(i)].sampleFilter
-      if (sampleFilter) {
+      const sampleFilters =
+        ANET_OBJECT_TYPES[await getObjectType(i)].sampleFilters
+      if (!_isEmpty(sampleFilters)) {
         await (await AdvancedSearch.getAddFilterButtonText()).waitForExist()
         await (await AdvancedSearch.getAddFilterButtonText()).waitForDisplayed()
         expect(
@@ -123,17 +124,18 @@ describe("When using advanced search", () => {
     const buttons = await AdvancedSearch.getAnetObjectSearchToggleButtons()
     for (const [i, button] of buttons.entries()) {
       await button.click()
-      const sampleFilter =
-        ANET_OBJECT_TYPES[await getObjectType(i)].sampleFilter
-      if (sampleFilter) {
-        await (await AdvancedSearch.getAddFilterButtonText()).waitForExist()
-        await (await AdvancedSearch.getAddFilterButtonText()).waitForDisplayed()
+      const sampleFilters =
+        ANET_OBJECT_TYPES[await getObjectType(i)].sampleFilters
+      if (!_isEmpty(sampleFilters)) {
         await (await AdvancedSearch.getAddFilterButton()).click()
         await (await AdvancedSearch.getAddFilterPopover()).waitForExist()
         await (await AdvancedSearch.getAddFilterPopover()).waitForDisplayed()
-        expect(
-          await (await AdvancedSearch.getAddFilterPopover()).getText()
-        ).to.match(new RegExp(sampleFilter))
+        for (const sampleFilter of sampleFilters) {
+          expect(
+            await (await AdvancedSearch.getAddFilterPopover()).getText()
+          ).to.match(new RegExp(sampleFilter))
+          await (await AdvancedSearch.getSearchFilter(sampleFilter)).click()
+        }
       }
     }
   })

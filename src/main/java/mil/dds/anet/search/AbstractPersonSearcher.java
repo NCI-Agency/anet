@@ -14,6 +14,7 @@ import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.search.AbstractSearchQueryBuilder.Comparison;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.Utils;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, PersonSearchQuery>
@@ -49,7 +50,7 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
     qb.addFromClause("people");
 
     if (query.getOrgUuid() != null || query.getLocationUuid() != null
-        || query.getMatchPositionName()) {
+        || query.getMatchPositionName() || !Utils.isEmptyOrNull(query.getPositionType())) {
       qb.addFromClause("LEFT JOIN positions ON people.uuid = positions.\"currentPersonUuid\"");
     }
 
@@ -91,6 +92,8 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
         qb.addWhereClause("people.biography IS NULL");
       }
     }
+
+    qb.addInClause("types", "positions.type", query.getPositionType());
 
     if (Boolean.TRUE.equals(query.isInMyReports())) {
       qb.addSelectClause("\"inMyReports\".max AS \"inMyReports_max\"");

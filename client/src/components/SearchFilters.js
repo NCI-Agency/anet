@@ -42,10 +42,7 @@ import LOCATIONS_ICON from "resources/locations.png"
 import PEOPLE_ICON from "resources/people.png"
 import POSITIONS_ICON from "resources/positions.png"
 import TASKS_ICON from "resources/tasks.png"
-import {
-  POSITION_POSITION_TYPE_FILTER_KEY,
-  RECURSE_STRATEGY
-} from "searchUtils"
+import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
 
 export const SearchQueryPropType = PropTypes.shape({
@@ -407,6 +404,23 @@ export const searchFilters = function(includeAdminFilters) {
           labels: ["Yes", "No"]
         }
       },
+      "Holding Position As": {
+        component: SelectFilter,
+        deserializer: deserializeSelectFilter,
+        props: {
+          queryKey: "positionType",
+          options: [
+            Position.TYPE.REGULAR,
+            Position.TYPE.SUPERUSER,
+            Position.TYPE.ADMINISTRATOR
+          ],
+          labels: [
+            Settings.fields.regular.position.name,
+            Settings.fields.superuser.position.name,
+            Settings.fields.administrator.position.name
+          ]
+        }
+      },
       "Pending Verification": {
         component: RadioButtonFilter,
         deserializer: deserializeSelectFilter,
@@ -458,7 +472,7 @@ export const searchFilters = function(includeAdminFilters) {
 
   filters[SEARCH_OBJECT_TYPES.POSITIONS] = {
     filters: {
-      [POSITION_POSITION_TYPE_FILTER_KEY]: {
+      Type: {
         component: SelectFilter,
         dictProps: Settings.fields.position.type,
         deserializer: deserializeSelectFilter,
@@ -473,8 +487,7 @@ export const searchFilters = function(includeAdminFilters) {
             Settings.fields.regular.position.name,
             Settings.fields.superuser.position.name,
             Settings.fields.administrator.position.name
-          ],
-          isPositionTypeFilter: true
+          ]
         }
       },
       "Within Organization": {

@@ -3,6 +3,8 @@ package mil.dds.anet.beans.search;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import java.time.Instant;
+import java.util.List;
+import mil.dds.anet.beans.Position.PositionType;
 
 public class PersonSearchQuery extends SubscribableObjectSearchQuery<PersonSearchSortBy> {
 
@@ -44,6 +46,11 @@ public class PersonSearchQuery extends SubscribableObjectSearchQuery<PersonSearc
   @GraphQLQuery
   @GraphQLInputField
   Boolean hasBiography;
+
+  // Find people whose current position is of the given type
+  @GraphQLQuery
+  @GraphQLInputField
+  List<PositionType> positionType;
 
   public PersonSearchQuery() {
     super(PersonSearchSortBy.NAME);
@@ -129,6 +136,14 @@ public class PersonSearchQuery extends SubscribableObjectSearchQuery<PersonSearc
 
   public void setHasBiography(Boolean hasBiography) {
     this.hasBiography = hasBiography;
+  }
+
+  public List<PositionType> getPositionType() {
+    return positionType;
+  }
+
+  public void setPositionType(List<PositionType> positionType) {
+    this.positionType = positionType;
   }
 
   @Override
