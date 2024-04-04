@@ -1,7 +1,7 @@
 import { faker } from "@faker-js/faker"
 import { NOTE_TYPE } from "components/Model"
 import _isEmpty from "lodash/isEmpty"
-import { populate, runGQL } from "../simutils"
+import { createHtmlParagraphs, populate, runGQL } from "../simutils"
 
 function getListEndpoint(type) {
   switch (type) {
@@ -94,7 +94,7 @@ async function populateNote(note, user, relatedObjectType) {
     author: () => author,
     type: () => NOTE_TYPE.FREE_TEXT,
     noteRelatedObjects: () => [relatedObject],
-    text: () => faker.lorem.paragraphs()
+    text: () => createHtmlParagraphs()
   }
   populate(note, template)
     .author.always()

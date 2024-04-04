@@ -6,6 +6,7 @@ import { Person } from "models"
 import Settings from "settings"
 import {
   createEmailAddresses,
+  createHtmlParagraphs,
   fuzzy,
   identity,
   populate,
@@ -97,7 +98,7 @@ function randomPerson(isUser, status) {
     gender: () => gender,
     phoneNumber: () => faker.phone.phoneNumber(),
     endOfTourDate: () => faker.date.future(),
-    biography: () => faker.lorem.paragraphs(),
+    biography: () => createHtmlParagraphs(),
     user: () => isUser,
     domainUsername: () => domainUsername,
     emailAddresses: () => createEmailAddresses(isUser, email)
@@ -114,7 +115,7 @@ function modifiedPerson() {
     gender: identity,
     phoneNumber: () => faker.phone.phoneNumber(),
     endOfTourDate: () => faker.date.future(),
-    biography: () => faker.lorem.paragraphs(),
+    biography: () => createHtmlParagraphs(),
     user: identity,
     emailAddresses: (value, instance) => {
       const name = Person.parseFullName(instance.name)
