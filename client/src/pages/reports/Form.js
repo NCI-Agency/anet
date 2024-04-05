@@ -440,6 +440,11 @@ const ReportForm = ({
           }
         }
 
+        tasksFilters.allUnassignedTasks = {
+          label: "All unassigned tasks",
+          queryVars: { taskedOrgUuid: null }
+        }
+
         const authorizationGroupsFilters = {
           allAuthorizationGroups: {
             label: "All authorization groups",
