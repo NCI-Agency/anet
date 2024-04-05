@@ -107,7 +107,7 @@ dependencies {
 	implementation 'javax.cache:cache-api:1.1.1'
 	implementation 'commons-beanutils:commons-beanutils:1.9.4'
 
-	implementation 'org.simplejavamail:simple-java-mail:8.8.0'
+	implementation 'org.simplejavamail:simple-java-mail:8.8.2'
 	implementation 'org.eclipse.angus:jakarta.mail:2.0.3'
 	implementation "ch.qos.logback:logback-classic:${logbackVersion}"
 	implementation "ch.qos.logback:logback-core:${logbackVersion}"
@@ -129,7 +129,7 @@ dependencies {
 	implementation 'org.apache.poi:poi:5.2.5'
 	implementation 'org.apache.poi:poi-ooxml:5.2.5'
 	// For inferring MIME types of attachments
-	implementation 'org.apache.tika:tika-core:2.9.1'
+	implementation 'org.apache.tika:tika-core:2.9.2'
 
 	// For parsing HTML to check for 'empty' input
 	implementation 'org.jsoup:jsoup:1.17.2'
@@ -185,7 +185,7 @@ test {
 }
 
 jacoco {
-	toolVersion = "0.8.11"
+	toolVersion = "0.8.12"
 }
 
 jacocoTestReport {
