@@ -433,16 +433,16 @@ const ReportForm = ({
           }
         }
 
+        tasksFilters.allUnassignedTasks = {
+          label: `All unassigned ${tasksLabel}`,
+          queryVars: { hasParentTask: true, taskedOrgUuid: "-1" }
+        }
+
         if (currentUser.isAdmin()) {
           tasksFilters.allTasks = {
             label: `All ${tasksLabel}`,
             queryVars: { hasParentTask: true }
           }
-        }
-
-        tasksFilters.allUnassignedTasks = {
-          label: `All unassigned ${tasksLabel}`,
-          queryVars: { hasParentTask: true, taskedOrgUuid: "-1" }
         }
 
         const authorizationGroupsFilters = {
