@@ -45,9 +45,7 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
           AnetObjectEngine.getInstance().getTaskDao().getSubscriptionUpdate(null)));
     }
 
-    if (query.getTaskedOrgUuid() != null) {
-      addTaskedOrgUuidQuery(query);
-    }
+    addTaskedOrgUuidQuery(query);
 
     qb.addStringEqualsClause("category", "tasks.category", query.getCategory());
     qb.addEnumEqualsClause("status", "tasks.status", query.getStatus());
@@ -102,17 +100,23 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
   }
 
   protected void addTaskedOrgUuidQuery(TaskSearchQuery query) {
-    qb.addFromClause(
-        "LEFT JOIN \"taskTaskedOrganizations\" ON tasks.uuid = \"taskTaskedOrganizations\".\"taskUuid\"");
-
-    if (RecurseStrategy.CHILDREN.equals(query.getOrgRecurseStrategy())
-        || RecurseStrategy.PARENTS.equals(query.getOrgRecurseStrategy())) {
-      qb.addRecursiveClause(null, "\"taskTaskedOrganizations\"", "\"organizationUuid\"",
-          "parent_orgs", "organizations", "\"parentOrgUuid\"", "orgUuid", query.getTaskedOrgUuid(),
-          RecurseStrategy.CHILDREN.equals(query.getOrgRecurseStrategy()));
+    final var taskedOrgUuid = query.getTaskedOrgUuid();
+    if (taskedOrgUuid == null) {
+      qb.addWhereClause(
+          "tasks.uuid NOT IN (SELECT DISTINCT \"taskUuid\" FROM \"taskTaskedOrganizations\")");
     } else {
-      qb.addStringEqualsClause("orgUuid", "\"taskTaskedOrganizations\".\"organizationUuid\"",
-          query.getTaskedOrgUuid());
+      qb.addFromClause(
+          "LEFT JOIN \"taskTaskedOrganizations\" ON tasks.uuid = \"taskTaskedOrganizations\".\"taskUuid\"");
+
+      if (RecurseStrategy.CHILDREN.equals(query.getOrgRecurseStrategy())
+          || RecurseStrategy.PARENTS.equals(query.getOrgRecurseStrategy())) {
+        qb.addRecursiveClause(null, "\"taskTaskedOrganizations\"", "\"organizationUuid\"",
+            "parent_orgs", "organizations", "\"parentOrgUuid\"", "orgUuid", taskedOrgUuid,
+            RecurseStrategy.CHILDREN.equals(query.getOrgRecurseStrategy()));
+      } else {
+        qb.addStringEqualsClause("orgUuid", "\"taskTaskedOrganizations\".\"organizationUuid\"",
+            taskedOrgUuid);
+      }
     }
   }
 
