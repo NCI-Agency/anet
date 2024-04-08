@@ -296,14 +296,11 @@ const GQL_GET_DATA = gql`
   ${GQL_GET_REPORT_LIST}
   ${GQL_GET_AUTHORIZATION_GROUP_LIST}
 `
-
-// Limit exports to the first 1000 results
-const MAX_NR_OF_EXPORTS = 1000
-
 export const exportResults = (
   searchQueryParams,
   queryTypes,
   exportType,
+  maxNumberResults,
   setError
 ) => {
   const includeOrganizations = queryTypes.includes(
@@ -320,49 +317,49 @@ export const exportResults = (
   const organizationQuery = !includeOrganizations
     ? {}
     : Object.assign({}, searchQueryParams, {
-      pageSize: MAX_NR_OF_EXPORTS,
+      pageSize: maxNumberResults,
       sortBy: "NAME",
       sortOrder: "ASC"
     })
   const personQuery = !includePeople
     ? {}
     : Object.assign({}, searchQueryParams, {
-      pageSize: MAX_NR_OF_EXPORTS,
+      pageSize: maxNumberResults,
       sortBy: "NAME",
       sortOrder: "ASC"
     })
   const positionQuery = !includePositions
     ? {}
     : Object.assign({}, searchQueryParams, {
-      pageSize: MAX_NR_OF_EXPORTS,
+      pageSize: maxNumberResults,
       sortBy: "NAME",
       sortOrder: "ASC"
     })
   const taskQuery = !includeTasks
     ? {}
     : Object.assign({}, searchQueryParams, {
-      pageSize: MAX_NR_OF_EXPORTS,
+      pageSize: maxNumberResults,
       sortBy: "NAME",
       sortOrder: "ASC"
     })
   const locationQuery = !includeLocations
     ? {}
     : Object.assign({}, searchQueryParams, {
-      pageSize: MAX_NR_OF_EXPORTS,
+      pageSize: maxNumberResults,
       sortBy: "NAME",
       sortOrder: "ASC"
     })
   const reportQuery = !includeReports
     ? {}
     : Object.assign({}, searchQueryParams, {
-      pageSize: MAX_NR_OF_EXPORTS,
+      pageSize: maxNumberResults,
       sortBy: "ENGAGEMENT_DATE",
       sortOrder: "DESC"
     })
   const authorizationGroupQuery = !includeAuthorizationGroups
     ? {}
     : Object.assign({}, searchQueryParams, {
-      pageSize: MAX_NR_OF_EXPORTS,
+      pageSize: maxNumberResults,
       sortBy: "NAME",
       sortOrder: "DESC"
     })

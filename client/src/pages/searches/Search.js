@@ -7,6 +7,7 @@ import {
   setPagination
 } from "actions"
 import API from "api"
+import AppContext from "components/AppContext"
 import AuthorizationGroupTable from "components/AuthorizationGroupTable"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -37,7 +38,7 @@ import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
-import React, { useEffect, useMemo, useRef, useState } from "react"
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react"
 import {
   Alert,
   Badge,
@@ -63,6 +64,11 @@ import POSITIONS_ICON from "resources/positions.png"
 import REPORTS_ICON from "resources/reports.png"
 import TASKS_ICON from "resources/tasks.png"
 import Settings from "settings"
+
+// By default limit exports to the first 1000 results
+const MAX_NR_OF_EXPORTS = 1000
+export const UNLIMITED_EXPORTS_AUTHORIZATION_GROUP =
+  "UNLIMITED_EXPORTS_AUTHORIZATION_GROUP"
 
 const GQL_EMAIL_ADDRESSES = `
   emailAddresses(network: $emailNetwork) {
@@ -960,6 +966,7 @@ const Search = ({
   pagination,
   setPagination
 }) => {
+  const { currentUser, appSettings } = useContext(AppContext)
   const navigate = useNavigate()
   const [error, setError] = useState(null)
   const [pageSize, setPageSize] = useState(DEFAULT_PAGESIZE)
@@ -1009,6 +1016,12 @@ const Search = ({
     }),
     [searchQueryParams]
   )
+  const exportMaxResults = currentUser?.authorizationGroups
+    ?.map(ag => ag.uuid)
+    ?.includes(appSettings[UNLIMITED_EXPORTS_AUTHORIZATION_GROUP])
+    ? 0
+    : MAX_NR_OF_EXPORTS
+
   const queryTypes = useMemo(
     () =>
       searchQuery.objectType
@@ -1206,6 +1219,7 @@ const Search = ({
                       searchQueryParams,
                       queryTypes,
                       "xlsx",
+                      exportMaxResults,
                       setError
                     )}
                 >
@@ -1217,6 +1231,7 @@ const Search = ({
                       searchQueryParams,
                       queryTypes,
                       "kml",
+                      exportMaxResults,
                       setError
                     )}
                 >
@@ -1228,6 +1243,7 @@ const Search = ({
                       searchQueryParams,
                       queryTypes,
                       "nvg",
+                      exportMaxResults,
                       setError
                     )}
                 >
