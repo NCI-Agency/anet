@@ -29,7 +29,7 @@ describe("When creating a Report with conflicts", () => {
       .milliseconds(0),
     duration: "10",
     advisors: ["CIV REPORTGUY, Ima", "CIV REPORTGIRL, Ima"],
-    interlocutors: ["CIV KYLESON, Kyle", "Maj CHRISVILLE, Chris"]
+    interlocutors: ["CIV KYLESON, Kyle", "OF-3 CHRISVILLE, Chris"]
   }
 
   it("Should create first draft report without any conflicts", async() => {
@@ -210,7 +210,7 @@ describe("When creating a Report with conflicts", () => {
     expect(await interlocutor01.conflictButton.getText()).to.match(/conflict/)
 
     const interlocutor02 = await ShowReport.getAttendeeByName(
-      "Maj CHRISVILLE, Chris"
+      "OF-3 CHRISVILLE, Chris"
     )
     expect(await interlocutor02.conflictButton.isExisting()).to.equal(false)
   })

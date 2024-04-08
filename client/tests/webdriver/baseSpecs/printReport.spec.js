@@ -4,7 +4,7 @@ import MyReports, { REPORT_STATES } from "../pages/myReports.page"
 import ShowReport from "../pages/report/showReport.page"
 
 const INTERLOCUTORS = [
-  "Maj CHRISVILLE, Chris",
+  "OF-3 CHRISVILLE, Chris",
   "CIV KYLESON, Kyle",
   "CIV SHARTON, Shardul"
 ]

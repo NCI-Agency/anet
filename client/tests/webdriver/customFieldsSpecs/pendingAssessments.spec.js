@@ -88,7 +88,7 @@ describe("In my counterparts page", () => {
     })
     it("Should be able to add a quarterly assessment with 1 question for the counterpart", async() => {
       await (
-        await MyCounterparts.getMyCounterpart("Maj ROGWELL, Roger")
+        await MyCounterparts.getMyCounterpart("OF-3 ROGWELL, Roger")
       ).click()
       await (
         await AssessmentsSection.getAssessmentsSection(
@@ -302,8 +302,8 @@ describe("In new report page", () => {
     it("Should be able to add instant assessments for attendees", async() => {
       const report = {
         interlocutors: [
-          "Maj ROGWELL, Roger",
-          "LtCol STEVESON, Steve",
+          "OF-3 ROGWELL, Roger",
+          "OF-4 STEVESON, Steve",
           "CIV HUNTMAN, Hunter"
         ]
       }
@@ -318,13 +318,13 @@ describe("In new report page", () => {
         const assessment = attendeeAssessmentRows[i + 1]
         const questions = await assessment.$$("td > div")
         switch (await attendee.getText()) {
-          case "Maj ROGWELL, Roger":
+          case "OF-3 ROGWELL, Roger":
             expect(questions).to.have.length(2)
             expect(await questions[1].getAttribute("id")).to.match(
               /\.question2$/
             )
             break
-          case "LtCol STEVESON, Steve":
+          case "OF-4 STEVESON, Steve":
             expect(questions).to.have.length(2)
             expect(await questions[1].getAttribute("id")).to.match(
               /\.question3$/
@@ -352,10 +352,10 @@ describe("In new report page", () => {
         const assessment = attendeeAssessmentRows[i + 1]
         const questions = await assessment.$$("td > div")
         switch (await attendee.getText()) {
-          case "Maj ROGWELL, Roger":
+          case "OF-3 ROGWELL, Roger":
             expect(questions).to.have.length(3)
             break
-          case "LtCol STEVESON, Steve":
+          case "OF-4 STEVESON, Steve":
             expect(questions).to.have.length(3)
             break
           case "CIV HUNTMAN, Hunter":
