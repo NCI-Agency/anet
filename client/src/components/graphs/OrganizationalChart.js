@@ -102,19 +102,19 @@ const sortPositions = (positions, truncateLimit) => {
 const determineUnitCode = positions =>
   Settings.fields.person.ranks.find(
     element => element.value === positions?.[0]?.person?.rank
-  )?.app6Modifier
+  )?.app6Modifier || "00"
 
 const determineAffiliation = positions => {
-  let affiliation = "U"
+  let affiliation = "1"
   for (const position of positions) {
     const person = position?.person
     if (person) {
       if (person.user) {
         // has at least one user, return early
-        return "F"
+        return "3"
       }
       // has at least one filled position
-      affiliation = "N"
+      affiliation = "4"
     }
   }
   return affiliation
@@ -124,7 +124,7 @@ const determineSymbol = positions => {
   const sortedPositions = sortPositions(positions)
   const unitCode = determineUnitCode(sortedPositions)
   const affiliation = determineAffiliation(sortedPositions)
-  return new ms.Symbol(`S${affiliation}GPU------${unitCode || "-"}`, {
+  return new ms.Symbol(`100${affiliation}1000${unitCode}`, {
     size: 22
   })
 }

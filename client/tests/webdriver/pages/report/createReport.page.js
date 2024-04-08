@@ -94,8 +94,8 @@ class CreateReport extends cr.CreateReport {
     let searchTerm = name
     if (
       (await searchTerm.startsWith("CIV")) ||
-      (await searchTerm.startsWith("LtCol")) ||
-      (await searchTerm.startsWith("Maj"))
+      (await searchTerm.startsWith("OF-4")) ||
+      (await searchTerm.startsWith("OF-3"))
     ) {
       searchTerm = name.substr(name.indexOf(" ") + 1)
     }

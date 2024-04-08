@@ -114,7 +114,7 @@ test.serial("Draft and submit a report", async t => {
     $interlocutorOrg2 /* eslint-enable no-unused-vars */
   ] = await $$(".interlocutorAttendeesTable tbody tr:last-child td")
 
-  await assertElementText(t, $interlocutorName2, "LtCol STEVESON, Steve")
+  await assertElementText(t, $interlocutorName2, "OF-4 STEVESON, Steve")
   const $interlocutorPrimaryInput2 = await $interlocutorControls2.findElement(
     By.css("[name = 'primaryAttendeeINTERLOCUTOR']")
   )
