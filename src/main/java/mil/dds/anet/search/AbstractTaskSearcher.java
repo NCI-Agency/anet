@@ -1,6 +1,7 @@
 package mil.dds.anet.search;
 
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AbstractBatchParams;
@@ -45,7 +46,9 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
           AnetObjectEngine.getInstance().getTaskDao().getSubscriptionUpdate(null)));
     }
 
-    addTaskedOrgUuidQuery(query);
+    if (query.getTaskedOrgUuid() != null) {
+      addTaskedOrgUuidQuery(query);
+    }
 
     qb.addStringEqualsClause("category", "tasks.category", query.getCategory());
     qb.addEnumEqualsClause("status", "tasks.status", query.getStatus());
@@ -101,7 +104,7 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
 
   protected void addTaskedOrgUuidQuery(TaskSearchQuery query) {
     final var taskedOrgUuid = query.getTaskedOrgUuid();
-    if (taskedOrgUuid == null) {
+    if (Organization.DUMMY_ORG_UUID.equals(taskedOrgUuid)) {
       qb.addWhereClause(
           "tasks.uuid NOT IN (SELECT DISTINCT \"taskUuid\" FROM \"taskTaskedOrganizations\")");
     } else {

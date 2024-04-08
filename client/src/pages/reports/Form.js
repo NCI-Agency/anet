@@ -441,8 +441,8 @@ const ReportForm = ({
         }
 
         tasksFilters.allUnassignedTasks = {
-          label: "All unassigned tasks",
-          queryVars: { taskedOrgUuid: null }
+          label: `All unassigned ${tasksLabel}`,
+          queryVars: { hasParentTask: true, taskedOrgUuid: "-1" }
         }
 
         const authorizationGroupsFilters = {
