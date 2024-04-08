@@ -1,7 +1,6 @@
 package mil.dds.anet.search;
 
 import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AbstractBatchParams;
@@ -48,6 +47,12 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
 
     if (query.getTaskedOrgUuid() != null) {
       addTaskedOrgUuidQuery(query);
+    }
+
+    if (query.getIsAssigned() != null) {
+      qb.addWhereClause(
+          String.format("tasks.uuid%sIN (SELECT \"taskUuid\" FROM \"taskTaskedOrganizations\")",
+              query.getIsAssigned() ? " " : " NOT "));
     }
 
     qb.addStringEqualsClause("category", "tasks.category", query.getCategory());
@@ -103,23 +108,17 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
   }
 
   protected void addTaskedOrgUuidQuery(TaskSearchQuery query) {
-    final var taskedOrgUuid = query.getTaskedOrgUuid();
-    if (Organization.DUMMY_ORG_UUID.equals(taskedOrgUuid)) {
-      qb.addWhereClause(
-          "tasks.uuid NOT IN (SELECT DISTINCT \"taskUuid\" FROM \"taskTaskedOrganizations\")");
-    } else {
-      qb.addFromClause(
-          "LEFT JOIN \"taskTaskedOrganizations\" ON tasks.uuid = \"taskTaskedOrganizations\".\"taskUuid\"");
+    qb.addFromClause(
+        "LEFT JOIN \"taskTaskedOrganizations\" ON tasks.uuid = \"taskTaskedOrganizations\".\"taskUuid\"");
 
-      if (RecurseStrategy.CHILDREN.equals(query.getOrgRecurseStrategy())
-          || RecurseStrategy.PARENTS.equals(query.getOrgRecurseStrategy())) {
-        qb.addRecursiveClause(null, "\"taskTaskedOrganizations\"", "\"organizationUuid\"",
-            "parent_orgs", "organizations", "\"parentOrgUuid\"", "orgUuid", taskedOrgUuid,
-            RecurseStrategy.CHILDREN.equals(query.getOrgRecurseStrategy()));
-      } else {
-        qb.addStringEqualsClause("orgUuid", "\"taskTaskedOrganizations\".\"organizationUuid\"",
-            taskedOrgUuid);
-      }
+    if (RecurseStrategy.CHILDREN.equals(query.getOrgRecurseStrategy())
+        || RecurseStrategy.PARENTS.equals(query.getOrgRecurseStrategy())) {
+      qb.addRecursiveClause(null, "\"taskTaskedOrganizations\"", "\"organizationUuid\"",
+          "parent_orgs", "organizations", "\"parentOrgUuid\"", "orgUuid", query.getTaskedOrgUuid(),
+          RecurseStrategy.CHILDREN.equals(query.getOrgRecurseStrategy()));
+    } else {
+      qb.addStringEqualsClause("orgUuid", "\"taskTaskedOrganizations\".\"organizationUuid\"",
+          query.getTaskedOrgUuid());
     }
   }
 
