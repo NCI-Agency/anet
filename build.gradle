@@ -62,6 +62,7 @@ run.environment("ANET_SMTP_STARTTLS", run.environment["ANET_SMTP_STARTTLS"] ?: "
 run.environment("ANET_SMTP_SSLTRUST", run.environment["ANET_SMTP_SSLTRUST"] ?: run.environment["ANET_SMTP_SERVER"])
 run.environment("ANET_SMTP_HTTP_PORT", run.environment["ANET_SMTP_HTTP_PORT"] ?: isTestEnv ? 1180 : 1080)
 run.environment("ANET_DICTIONARY_NAME", run.environment["ANET_DICTIONARY_NAME"] ?: "anet-dictionary.yml")
+run.environment("ANET_TEST_MODE", run.environment["ANET_TEST_MODE"] ?: isTestEnv ? "true" : "false")
 
 String anetConfig = run.environment["ANET_CONFIG"] ?: "anet.yml"
 String adminOrgName = run.environment["ANET_ADMIN_ORG_NAME"] ?: "ANET Administrators"
@@ -284,7 +285,7 @@ task buildClient(dependsOn: 'yarn', type: YarnTask) {
 	inputs.dir("client/public").withPathSensitivity(PathSensitivity.RELATIVE)
 	outputs.dir("$buildDir/resources/main/assets/client")
 	outputs.cacheIf { true }
-	environment = [ "ANET_TEST_MODE": isTestEnv ? "true" : "false" ]
+	environment = [ "ANET_TEST_MODE": run.environment["ANET_TEST_MODE"] ]
 	args = ['run', 'build']
 }
 
