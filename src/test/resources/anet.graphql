@@ -526,6 +526,11 @@ enum NoteType {
 """"""
 type Organization {
   administratingPositions: [Position]
+  app6amplifier: String
+  app6context: String
+  app6hq: String
+  app6standardIdentity: String
+  app6symbolSet: String
   approvalSteps: [ApprovalStep]
   ascendantOrgs(query: OrganizationSearchQueryInput): [Organization]
   attachments: [Attachment]
@@ -555,6 +560,11 @@ type Organization {
 """"""
 input OrganizationInput {
   administratingPositions: [PositionInput]
+  app6amplifier: String
+  app6context: String
+  app6hq: String
+  app6standardIdentity: String
+  app6symbolSet: String
   approvalSteps: [ApprovalStepInput]
   createdAt: Instant
   customFields: String
