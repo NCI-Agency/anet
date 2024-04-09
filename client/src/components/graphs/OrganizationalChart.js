@@ -43,6 +43,13 @@ const GQL_GET_CHART_DATA = gql`
           avatarUuid
         }
       }
+      ascendantOrgs {
+        positions {
+          person {
+            user
+          }
+        }
+      }
       childrenOrgs(query: { status: ACTIVE }) {
         uuid
       }
@@ -51,6 +58,13 @@ const GQL_GET_CHART_DATA = gql`
         shortName
         longName
         identificationCode
+        ascendantOrgs {
+          positions {
+            person {
+              user
+            }
+          }
+        }
         childrenOrgs(query: { status: ACTIVE }) {
           uuid
         }
@@ -104,26 +118,28 @@ const determineUnitCode = positions =>
     element => element.value === positions?.[0]?.person?.rank
   )?.app6Modifier || "00"
 
-const determineAffiliation = positions => {
+const determineAffiliation = org => {
   let affiliation = "1"
-  for (const position of positions) {
-    const person = position?.person
-    if (person) {
-      if (person.user) {
-        // has at least one user, return early
-        return "3"
+  for (const ascendantOrg of org?.ascendantOrgs?.reverse()) {
+    for (const position of ascendantOrg?.positions) {
+      const person = position?.person
+      if (person) {
+        if (person.user) {
+          // has at least one user, return early
+          return "3"
+        }
+        // has at least one filled position
+        affiliation = "4"
       }
-      // has at least one filled position
-      affiliation = "4"
     }
   }
   return affiliation
 }
 
-const determineSymbol = positions => {
-  const sortedPositions = sortPositions(positions)
+const determineSymbol = org => {
+  const sortedPositions = sortPositions(org?.positions)
   const unitCode = determineUnitCode(sortedPositions)
-  const affiliation = determineAffiliation(sortedPositions)
+  const affiliation = determineAffiliation(org)
   return new ms.Symbol(`100${affiliation}1000${unitCode}`, {
     size: 22
   })
@@ -310,7 +326,7 @@ const OrganizationalChart = ({
       .append("g")
       .on("click", (event, d) => navigate(Organization.pathFor(d.data)))
       .each(function(d) {
-        return this.appendChild(determineSymbol(d.data.positions).asDOM())
+        return this.appendChild(determineSymbol(d.data).asDOM())
       })
 
     iconNodeG

@@ -340,9 +340,30 @@ export default {
     }
     return { backgroundSize, backgroundImage, contentMissing }
   },
+
   stripExtension: function(fileName) {
     const index = fileName.lastIndexOf(".")
     return index === -1 ? fileName : fileName.substring(0, index)
+  },
+
+  getAscendantObjectsAsList: function(leaf, ascendantObjects, parentField) {
+    const parentMap =
+      ascendantObjects?.reduce((acc, val) => {
+        acc[val.uuid] = val
+        return acc
+      }, {}) || {}
+    parentMap[leaf.uuid] = leaf
+    let uuid = leaf.uuid
+    const trail = []
+    while (uuid) {
+      const node = parentMap[uuid]
+      if (!node) {
+        break
+      }
+      trail.unshift(node)
+      uuid = node[parentField]?.uuid
+    }
+    return trail
   }
 }
 

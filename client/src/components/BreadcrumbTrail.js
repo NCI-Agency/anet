@@ -1,26 +1,7 @@
 import LinkTo from "components/LinkTo"
 import PropTypes from "prop-types"
 import React from "react"
-
-const getBreadcrumbTrail = (leaf, ascendantObjects, parentField) => {
-  const parentMap =
-    ascendantObjects?.reduce((acc, val) => {
-      acc[val.uuid] = val
-      return acc
-    }, {}) || {}
-  parentMap[leaf.uuid] = leaf
-  let uuid = leaf.uuid
-  const trail = []
-  while (uuid) {
-    const node = parentMap[uuid]
-    if (!node) {
-      break
-    }
-    trail.unshift(node)
-    uuid = node[parentField]?.uuid
-  }
-  return trail
-}
+import utils from "utils"
 
 export const getBreadcrumbTrailAsText = (
   leaf,
@@ -28,7 +9,11 @@ export const getBreadcrumbTrailAsText = (
   parentField,
   labelField
 ) => {
-  const trail = getBreadcrumbTrail(leaf, ascendantObjects, parentField)
+  const trail = utils.getAscendantObjectsAsList(
+    leaf,
+    ascendantObjects,
+    parentField
+  )
   return trail.map(node => node[labelField]).join(" » ")
 }
 
@@ -40,7 +25,11 @@ export const BreadcrumbTrail = ({
   isLink,
   style
 }) => {
-  const trail = getBreadcrumbTrail(leaf, ascendantObjects, parentField)
+  const trail = utils.getAscendantObjectsAsList(
+    leaf,
+    ascendantObjects,
+    parentField
+  )
   return (
     <span>
       {trail.map((node, i) => (
