@@ -28,6 +28,14 @@ const GQL_GET_CHART_DATA = gql`
       shortName
       longName
       identificationCode
+      app6context
+      app6standardIdentity
+      app6symbolSet
+      app6hq
+      app6amplifier
+      parentOrg {
+        uuid
+      }
       positions {
         name
         uuid
@@ -44,10 +52,11 @@ const GQL_GET_CHART_DATA = gql`
         }
       }
       ascendantOrgs {
-        positions {
-          person {
-            user
-          }
+        uuid
+        app6context
+        app6standardIdentity
+        parentOrg {
+          uuid
         }
       }
       childrenOrgs(query: { status: ACTIVE }) {
@@ -58,11 +67,17 @@ const GQL_GET_CHART_DATA = gql`
         shortName
         longName
         identificationCode
+        app6context
+        app6standardIdentity
+        app6symbolSet
+        app6hq
+        app6amplifier
         ascendantOrgs {
-          positions {
-            person {
-              user
-            }
+          uuid
+          app6context
+          app6standardIdentity
+          parentOrg {
+            uuid
           }
         }
         childrenOrgs(query: { status: ACTIVE }) {
@@ -113,36 +128,28 @@ const sortPositions = (positions, truncateLimit) => {
   return allResults.slice(0, truncateLimit)
 }
 
-const determineUnitCode = positions =>
-  Settings.fields.person.ranks.find(
-    element => element.value === positions?.[0]?.person?.rank
-  )?.app6Modifier || "00"
-
-const determineAffiliation = org => {
-  let affiliation = "1"
-  for (const ascendantOrg of org?.ascendantOrgs?.reverse()) {
-    for (const position of ascendantOrg?.positions) {
-      const person = position?.person
-      if (person) {
-        if (person.user) {
-          // has at least one user, return early
-          return "3"
-        }
-        // has at least one filled position
-        affiliation = "4"
-      }
-    }
-  }
-  return affiliation
-}
-
 const determineSymbol = org => {
-  const sortedPositions = sortPositions(org?.positions)
-  const unitCode = determineUnitCode(sortedPositions)
-  const affiliation = determineAffiliation(org)
-  return new ms.Symbol(`100${affiliation}1000${unitCode}`, {
-    size: 22
-  })
+  const ascendantOrgs =
+    utils
+      .getAscendantObjectsAsList(org, org.ascendantOrgs, "parentOrg")
+      ?.reverse() || []
+  const context = utils.determineApp6field(ascendantOrgs, "app6context", "0")
+  const standardIdentity = utils.determineApp6field(
+    ascendantOrgs,
+    "app6standardIdentity",
+    "1"
+  )
+  const symbolSet = org?.app6symbolSet || "00"
+  const hq = org?.app6hq || "0"
+  const amplifier = org?.app6amplifier || "00"
+  const version = "14" // APP-6E
+  const status = "0" // Present
+  return new ms.Symbol(
+    `${version}${context}${standardIdentity}${symbolSet}${status}${hq}${amplifier}`,
+    {
+      size: 22
+    }
+  )
 }
 
 // TODO: enable once innerhtml in svg is polyfilled
