@@ -33,7 +33,8 @@ public class OrganizationDao
     extends AnetSubscribableObjectDao<Organization, OrganizationSearchQuery> {
 
   private static final String[] fields =
-      {"uuid", "shortName", "longName", "status", "identificationCode", "profile", "createdAt",
+      {"uuid", "shortName", "longName", "status", "identificationCode", "profile", "app6context",
+          "app6standardIdentity", "app6symbolSet", "app6hq", "app6amplifier", "createdAt",
           "updatedAt", "parentOrgUuid", "locationUuid", "customFields"};
   public static final String TABLE_NAME = "organizations";
   public static final String ORGANIZATION_FIELDS =
@@ -146,12 +147,15 @@ public class OrganizationDao
 
   @Override
   public Organization insertInternal(Organization org) {
-    getDbHandle().createUpdate(
-        "/* insertOrg */ INSERT INTO organizations (uuid, \"shortName\", \"longName\", status, "
-            + "\"identificationCode\", profile, \"createdAt\", \"updatedAt\", \"parentOrgUuid\", "
-            + "\"locationUuid\", \"customFields\") VALUES (:uuid, :shortName, :longName, :status, "
-            + ":identificationCode, :profile, :createdAt, :updatedAt, :parentOrgUuid, :locationUuid, "
-            + ":customFields)")
+    getDbHandle()
+        .createUpdate(
+            "/* insertOrg */ INSERT INTO organizations (uuid, \"shortName\", \"longName\", status, "
+                + "\"identificationCode\", profile, app6context, \"app6standardIdentity\", "
+                + "\"app6symbolSet\", app6hq, app6amplifier, \"createdAt\", \"updatedAt\", "
+                + "\"parentOrgUuid\", \"locationUuid\", \"customFields\") "
+                + "VALUES (:uuid, :shortName, :longName, :status, :identificationCode, :profile, "
+                + ":app6context, :app6standardIdentity, :app6symbolSet, :app6hq, :app6amplifier, "
+                + ":createdAt, :updatedAt, :parentOrgUuid, :locationUuid, :customFields)")
         .bindBean(org).bind("createdAt", DaoUtils.asLocalDateTime(org.getCreatedAt()))
         .bind("updatedAt", DaoUtils.asLocalDateTime(org.getUpdatedAt()))
         .bind("status", DaoUtils.getEnumId(org.getStatus()))
@@ -173,13 +177,13 @@ public class OrganizationDao
 
   @Override
   public int updateInternal(Organization org) {
-    return getDbHandle()
-        .createUpdate("/* updateOrg */ UPDATE organizations "
-            + "SET \"shortName\" = :shortName, \"longName\" = :longName, status = :status, "
-            + "\"identificationCode\" = :identificationCode, profile = :profile, "
-            + "\"updatedAt\" = :updatedAt, \"parentOrgUuid\" = :parentOrgUuid, "
-            + "\"locationUuid\" = :locationUuid, "
-            + "\"customFields\" = :customFields WHERE uuid = :uuid")
+    return getDbHandle().createUpdate("/* updateOrg */ UPDATE organizations "
+        + "SET \"shortName\" = :shortName, \"longName\" = :longName, status = :status, "
+        + "\"identificationCode\" = :identificationCode, profile = :profile, "
+        + "app6context = :app6context, \"app6standardIdentity\" = :app6standardIdentity, "
+        + "\"app6symbolSet\" = :app6symbolSet, app6hq = :app6hq, app6amplifier = :app6amplifier, "
+        + "\"updatedAt\" = :updatedAt, \"parentOrgUuid\" = :parentOrgUuid, "
+        + "\"locationUuid\" = :locationUuid, \"customFields\" = :customFields WHERE uuid = :uuid")
         .bindBean(org).bind("updatedAt", DaoUtils.asLocalDateTime(org.getUpdatedAt()))
         .bind("status", DaoUtils.getEnumId(org.getStatus()))
         .bind("parentOrgUuid", DaoUtils.getUuid(org.getParentOrg()))

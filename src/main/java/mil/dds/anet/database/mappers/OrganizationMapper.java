@@ -17,6 +17,12 @@ public class OrganizationMapper implements RowMapper<Organization> {
     org.setStatus(MapperUtils.getEnumIdx(r, "organizations_status", Organization.Status.class));
     org.setIdentificationCode(r.getString("organizations_identificationCode"));
     org.setProfile(MapperUtils.getOptionalString(r, "organizations_profile"));
+    org.setApp6context(MapperUtils.getOptionalString(r, "organizations_app6context"));
+    org.setApp6standardIdentity(
+        MapperUtils.getOptionalString(r, "organizations_app6standardIdentity"));
+    org.setApp6symbolSet(MapperUtils.getOptionalString(r, "organizations_app6symbolSet"));
+    org.setApp6hq(MapperUtils.getOptionalString(r, "organizations_app6hq"));
+    org.setApp6amplifier(MapperUtils.getOptionalString(r, "organizations_app6amplifier"));
     org.setParentOrgUuid(r.getString("organizations_parentOrgUuid"));
     org.setLocationUuid(r.getString("organizations_locationUuid"));
 

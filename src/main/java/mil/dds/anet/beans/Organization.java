@@ -48,6 +48,21 @@ public class Organization extends AbstractEmailableAnetBean
   @GraphQLQuery
   @GraphQLInputField
   private String profile;
+  @GraphQLQuery
+  @GraphQLInputField
+  private String app6context;
+  @GraphQLQuery
+  @GraphQLInputField
+  private String app6standardIdentity;
+  @GraphQLQuery
+  @GraphQLInputField
+  private String app6symbolSet;
+  @GraphQLQuery
+  @GraphQLInputField
+  private String app6hq;
+  @GraphQLQuery
+  @GraphQLInputField
+  private String app6amplifier;
   // annotated below
   private ForeignObjectHolder<Organization> parentOrg = new ForeignObjectHolder<>();
   // annotated below
@@ -135,6 +150,46 @@ public class Organization extends AbstractEmailableAnetBean
 
   public void setProfile(String profile) {
     this.profile = Utils.trimStringReturnNull(profile);
+  }
+
+  public String getApp6context() {
+    return app6context;
+  }
+
+  public void setApp6context(String app6context) {
+    this.app6context = app6context;
+  }
+
+  public String getApp6standardIdentity() {
+    return app6standardIdentity;
+  }
+
+  public void setApp6standardIdentity(String app6standardIdentity) {
+    this.app6standardIdentity = app6standardIdentity;
+  }
+
+  public String getApp6symbolSet() {
+    return app6symbolSet;
+  }
+
+  public void setApp6symbolSet(String app6symbolSet) {
+    this.app6symbolSet = app6symbolSet;
+  }
+
+  public String getApp6hq() {
+    return app6hq;
+  }
+
+  public void setApp6hq(String app6hq) {
+    this.app6hq = app6hq;
+  }
+
+  public String getApp6amplifier() {
+    return app6amplifier;
+  }
+
+  public void setApp6amplifier(String app6amplifier) {
+    this.app6amplifier = app6amplifier;
   }
 
   @GraphQLQuery(name = "parentOrg")
@@ -353,13 +408,19 @@ public class Organization extends AbstractEmailableAnetBean
         && Objects.equals(other.getLongName(), longName)
         && Objects.equals(other.getStatus(), status)
         && Objects.equals(other.getIdentificationCode(), identificationCode)
-        && Objects.equals(other.getProfile(), profile);
+        && Objects.equals(other.getProfile(), profile)
+        && Objects.equals(other.getApp6context(), app6context)
+        && Objects.equals(other.getApp6standardIdentity(), app6standardIdentity)
+        && Objects.equals(other.getApp6symbolSet(), app6symbolSet)
+        && Objects.equals(other.getApp6hq(), app6hq)
+        && Objects.equals(other.getApp6amplifier(), app6amplifier);
   }
 
   @Override
   public int hashCode() {
     return Objects.hash(super.hashCode(), uuid, shortName, longName, status, identificationCode,
-        profile, createdAt, updatedAt);
+        profile, app6context, app6standardIdentity, app6symbolSet, app6hq, app6amplifier, createdAt,
+        updatedAt);
   }
 
   @Override
