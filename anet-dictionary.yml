@@ -608,31 +608,22 @@ fields:
         description: the rank of WO-5
       - value: OF-1
         description: the rank of OF-1
-        app6Modifier: "15"
       - value: OF-2
         description: the rank of OF-2
-        app6Modifier: "15"
       - value: OF-3
         description: the rank of OF-3
-        app6Modifier: "15"
       - value: OF-4
         description: the rank of OF-4
-        app6Modifier: "16"
       - value: OF-5
         description: the rank of OF-5
-        app6Modifier: "17"
       - value: OF-6
         description: the rank of OF-6
-        app6Modifier: "18"
       - value: OF-7
         description: the rank of OF-7
-        app6Modifier: "21"
       - value: OF-8
         description: the rank of OF-8
-        app6Modifier: "22"
       - value: OF-9
         description: the rank of OF-9
-        app6Modifier: "23"
     gender:
       label: Gender
       exclude: false

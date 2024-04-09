@@ -364,6 +364,15 @@ export default {
       uuid = node[parentField]?.uuid
     }
     return trail
+  },
+
+  determineApp6field: function(ascendantOrgs, app6field, defaultValue) {
+    for (const ascendantOrg of ascendantOrgs) {
+      if (ascendantOrg?.[app6field]) {
+        return ascendantOrg[app6field]
+      }
+    }
+    return defaultValue
   }
 }
 
