@@ -5135,4 +5135,96 @@
 		</insert>
 	</changeSet>
 
+	<changeSet id="add-app6-fields-to-organizations" author="gjvoosten">
+		<addColumn tableName="organizations">
+			<column name="app6context" type="varchar(255)" />
+			<column name="app6standardIdentity" type="varchar(255)" />
+			<column name="app6symbolSet" type="varchar(255)" />
+			<column name="app6hq" type="varchar(255)" />
+			<column name="app6amplifier" type="varchar(255)" />
+		</addColumn>
+	</changeSet>
+
+	<changeSet id="fill-app6-fields-for-organizations" author="gjvoosten">
+		<sql>
+			WITH
+			RECURSIVE parent_orgs(uuid, parent_uuid) AS (
+				SELECT
+					uuid,
+					uuid AS parent_uuid
+				FROM organizations
+				UNION ALL
+				SELECT
+					pt.uuid,
+					bt."parentOrgUuid"
+				FROM organizations bt
+				INNER JOIN parent_orgs pt ON bt.uuid = pt.parent_uuid
+			),
+			tlp AS (
+				SELECT DISTINCT
+					por.uuid,
+					por.parent_uuid
+				FROM parent_orgs por
+				LEFT JOIN organizations org ON org.uuid = por.parent_uuid
+				WHERE por.parent_uuid IS NOT NULL
+				AND org."parentOrgUuid" IS NULL
+			),
+			chu AS (
+				SELECT DISTINCT
+					org.uuid,
+					BOOL_OR(peo."user") AS "user"
+				FROM organizations org
+				LEFT JOIN parent_orgs por ON por.parent_uuid = org.uuid
+				LEFT JOIN positions pos ON pos."organizationUuid" = por.uuid
+				LEFT JOIN people peo ON peo.uuid = pos."currentPersonUuid"
+				GROUP BY org.uuid
+			),
+			chp AS (
+				SELECT DISTINCT
+					org.uuid,
+					TRUE AS "pos"
+				FROM organizations org
+				LEFT JOIN parent_orgs por ON por.parent_uuid = org.uuid
+				LEFT JOIN positions pos ON pos."organizationUuid" = por.uuid
+				WHERE pos.uuid IS NOT NULL
+			)
+			UPDATE organizations
+			SET
+				"app6context" = sq."app6context",
+				"app6standardIdentity" = sq."app6standardIdentity",
+				"app6symbolSet" = sq."app6symbolSet"
+			FROM (
+				SELECT DISTINCT
+					org.uuid,
+					CASE
+						WHEN org."parentOrgUuid" IS NULL THEN '0'
+					END AS "app6context",
+					CASE
+						WHEN org."parentOrgUuid" IS NOT NULL THEN NULL
+						WHEN chu."user" THEN '3'
+						WHEN chp.pos THEN '4'
+					END AS "app6standardIdentity",
+					CASE
+						WHEN chu."user" THEN '10'
+						WHEN chp.pos THEN '11'
+					END AS "app6symbolSet"
+				FROM organizations org
+				LEFT JOIN positions pos ON pos."organizationUuid" = org.uuid
+				LEFT JOIN tlp ON tlp.uuid = org.uuid
+				LEFT JOIN chu ON chu.uuid = tlp.parent_uuid
+				LEFT JOIN chp ON chp.uuid = tlp.parent_uuid
+			) sq
+			WHERE organizations.uuid = sq.uuid;
+		</sql>
+		<rollback>
+			<sql>
+				UPDATE organizations
+				SET
+					"app6context" = NULL,
+					"app6standardIdentity" = NULL,
+					"app6symbolSet" = NULL
+			</sql>
+		</rollback>
+	</changeSet>
+
 </databaseChangeLog>
