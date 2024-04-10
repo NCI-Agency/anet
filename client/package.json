@@ -64,7 +64,7 @@
     "countries-list": "3.1.0",
     "cross-fetch": "4.0.0",
     "cross-spawn": "7.0.3",
-    "css-loader": "6.11.0",
+    "css-loader": "7.1.1",
     "dotenv": "16.4.5",
     "encoding": "0.1.13",
     "eslint": "8.57.0",
