@@ -24,6 +24,8 @@ const clientConfig = merge.merge(common.clientConfig, {
     minimizer: [
       new TerserPlugin({
         terserOptions: {
+          // Prevent warnings from react-scroll "Listener must be a named function"
+          keep_fnames: true,
           parse: {
             // https://github.com/facebook/create-react-app/pull/4234
             ecma: 8
