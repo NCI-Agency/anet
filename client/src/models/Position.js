@@ -247,9 +247,7 @@ export default class Position extends Model {
     return POSITIONS_ICON
   }
 
-  static FILTERED_CLIENT_SIDE_FIELDS = [
-    // Fill if necessary
-  ]
+  static FILTERED_CLIENT_SIDE_FIELDS = ["authorizationGroups"]
 
   static filterClientSideFields(obj, ...additionalFields) {
     // Filter formCustomFields in associatedPositions

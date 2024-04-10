@@ -151,7 +151,8 @@ export default class Organization extends Model {
     "ascendantOrgs",
     "descendantOrgs",
     "positions",
-    "tasks"
+    "tasks",
+    "authorizationGroups"
   ]
 
   static filterClientSideFields(obj, ...additionalFields) {
