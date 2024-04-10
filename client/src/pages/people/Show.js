@@ -517,8 +517,16 @@ const PersonShow = ({ pageDispatchers }) => {
       ),
       biography: <RichTextEditor readOnly value={person.biography} />,
       user: utils.formatBoolean(person.user),
+      phoneNumber: person.phoneNumber || (
+        <em>
+          No {Settings.fields.person.phoneNumber.label.toLowerCase()} available
+        </em>
+      ),
       emailAddresses: (
-        <EmailAddressTable emailAddresses={person.emailAddresses} />
+        <EmailAddressTable
+          label={Settings.fields.person.emailAddresses.label}
+          emailAddresses={person.emailAddresses}
+        />
       ),
       endOfTourDate:
         person.endOfTourDate &&

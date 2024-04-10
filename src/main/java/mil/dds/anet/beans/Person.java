@@ -20,6 +20,7 @@ import mil.dds.anet.beans.recentActivity.Activity;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.graphql.AllowUnverifiedUsers;
+import mil.dds.anet.graphql.RestrictToAuthorizationGroups;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.InsertionOrderLinkedList;
 import mil.dds.anet.utils.Utils;
@@ -130,6 +131,8 @@ public class Person extends AbstractEmailableAnetBean
   }
 
   @AllowUnverifiedUsers
+  @RestrictToAuthorizationGroups(
+      authorizationGroupSetting = "fields.person.phoneNumber.authorizationGroupUuids")
   public String getPhoneNumber() {
     return phoneNumber;
   }
@@ -332,6 +335,17 @@ public class Person extends AbstractEmailableAnetBean
   }
 
   @Override
+  @GraphQLQuery(name = "emailAddresses")
+  @AllowUnverifiedUsers
+  @RestrictToAuthorizationGroups(
+      authorizationGroupSetting = "fields.person.emailAddresses.authorizationGroupUuids")
+  public CompletableFuture<List<EmailAddress>> loadEmailAddresses(
+      @GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "network") String network) {
+    return super.loadEmailAddresses(context, network);
+  }
+
+  @Override
   public int compareTo(Person o) {
     // Used by Collections.sort() in AdminResource::recentActivities
     return COMPARATOR.compare(this, o);
@@ -379,5 +393,4 @@ public class Person extends AbstractEmailableAnetBean
     p.setUuid(uuid);
     return p;
   }
-
 }

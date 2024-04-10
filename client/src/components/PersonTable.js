@@ -10,10 +10,12 @@ import {
 } from "components/Page"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _get from "lodash/get"
+import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Table } from "react-bootstrap"
 import { connect } from "react-redux"
+import Settings from "settings"
 
 const GQL_GET_PERSON_LIST = gql`
   query ($personQuery: PersonSearchQueryInput) {
@@ -159,14 +161,17 @@ const BasePersonTable = ({
                     <td
                       style={{ verticalAlign: "middle", textAlign: "center" }}
                     >
-                      <Checkbox
-                        checked={isSelected(person.uuid)}
-                        onChange={() =>
-                          toggleSelection(person.uuid, person.emailAddresses)}
-                      />
+                      {!_isEmpty(person.emailAddresses) && (
+                        <Checkbox
+                          checked={isSelected(person.uuid)}
+                          onChange={() =>
+                            toggleSelection(person.uuid, person.emailAddresses)}
+                        />
+                      )}
                     </td>
                     <td>
                       <EmailAddressList
+                        label={Settings.fields.person.emailAddresses.label}
                         emailAddresses={person.emailAddresses}
                       />
                     </td>

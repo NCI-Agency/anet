@@ -294,12 +294,12 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(matchCount).isEqualTo(1);
 
 
-    // Search by email Address
-    query2.setText("arthur@example.com");
+    // Search by email address
+    query2.setText("jack@example.com");
     searchResults =
         withCredentials(jackUser, t -> queryExecutor.personList(getListFields(FIELDS), query2));
     matchCount = searchResults.getList().stream().filter(p -> p.getEmailAddresses().stream()
-        .anyMatch(ea -> "arthur@example.com".equals(ea.getAddress()))).count();
+        .anyMatch(ea -> "jack@example.com".equals(ea.getAddress()))).count();
     assertThat(matchCount).isEqualTo(1);
 
     // Search for persons with biography filled

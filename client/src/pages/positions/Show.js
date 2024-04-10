@@ -253,6 +253,7 @@ const PositionShow = ({ pageDispatchers }) => {
                   component={FieldHelper.ReadonlyField}
                   humanValue={
                     <EmailAddressTable
+                      label={Settings.fields.position.emailAddresses.label}
                       emailAddresses={position.emailAddresses}
                     />
                   }

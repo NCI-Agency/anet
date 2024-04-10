@@ -5,17 +5,18 @@ import { Meta } from "@storybook/addon-docs"
 ## Sensitive information and Authorization Groups
 
 In general, almost all information in ANET is accessible to all fully authenticated users. However,
-in some places, ANET can record sensitive information. This comes in two different flavors:
+in some places, ANET can record sensitive information. This comes in different flavors:
 
 1. sensitive information text as part of engagement reports
 1. custom sensitive information fields for e.g. people, as defined in the ANET dictionary
    (configuration)
+1. optionally: restricted access to point-of-contact details (phone numbers, email addresses)
 
-For both flavors, access to the sensitive information is first and foremost restricted to people
+For all flavors, access to the sensitive information is first and foremost restricted to people
 holding active positions in the chosen authorization groups. For engagement reports, authors are
 allowed to select these authorization groups themselves. For the custom sensitive information
-fields, the authorization groups that have access are defined in the ANET configuration, by the
-application administrator.
+fields and optionally the restricted point-of-contact details, the authorization groups that have
+access are defined in the ANET configuration, by the application administrator.
 
 Note that there is a difference between this key being absent from the dictionary, and defining an
 empty list for this key. The absence of the key means anyone can access this information, and an
@@ -46,10 +47,13 @@ fields:
         …
 ```
 
-In addition to people in the authorization groups, sensitive information in engagement reports is
-also accessible to the report's author(s). And sensitive information for people or positions is also
-accessible to those people's or position's counterparts.
-
 Administrators define the available authorization groups, and who is in them. These groups should
 have a descriptive name, so report authors know which ones to choose. Also, administrators have
 access to all information.
+
+In addition to people in the authorization groups:
+1. sensitive information in engagement reports is also accessible to the report's author(s)
+1. custom sensitive information for people or positions is also accessible to those people's or
+   position's counterparts
+1. restricted point-of-contact details are accessible by superusers for positions and organizations
+   in the hierarchy they manage

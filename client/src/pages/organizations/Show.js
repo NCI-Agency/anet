@@ -456,6 +456,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
                   component={FieldHelper.ReadonlyField}
                   humanValue={
                     <EmailAddressTable
+                      label={Settings.fields.organization.emailAddresses.label}
                       emailAddresses={organization.emailAddresses}
                     />
                   }

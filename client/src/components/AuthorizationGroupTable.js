@@ -3,6 +3,7 @@ import LinkTo from "components/LinkTo"
 import { mapPageDispatchersToProps } from "components/Page"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _get from "lodash/get"
+import _isEmpty from "lodash/isEmpty"
 import { AuthorizationGroup } from "models"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
@@ -94,55 +95,54 @@ const AuthorizationGroupTable = ({
       </thead>
 
       <tbody>
-        {ags.map(authorizationGroup => {
-          const agEmailAddresses =
-            authorizationGroup.authorizationGroupRelatedObjects.flatMap(agro =>
+        {ags.map(ag => {
+          const agEmailAddresses = ag.authorizationGroupRelatedObjects
+            .flatMap(agro =>
               agro.relatedObject?.emailAddresses?.map(ea => ({
                 key: agro.relatedObjectUuid,
                 ...ea
               }))
             )
+            .filter(Boolean)
           return (
-            <tr key={authorizationGroup.uuid}>
+            <tr key={ag.uuid}>
               {allowSelection && (
                 <>
                   <td style={{ verticalAlign: "middle", textAlign: "center" }}>
-                    <Checkbox
-                      checked={isSelected(authorizationGroup.uuid)}
-                      onChange={() =>
-                        toggleSelection(
-                          authorizationGroup.uuid,
-                          agEmailAddresses
-                        )}
-                    />
+                    {!_isEmpty(agEmailAddresses) && (
+                      <Checkbox
+                        checked={isSelected(ag.uuid)}
+                        onChange={() =>
+                          toggleSelection(ag.uuid, agEmailAddresses)}
+                      />
+                    )}
                   </td>
                   <td>
-                    <TruncatedList
-                      elementType="email address"
-                      elements={agEmailAddresses}
-                      renderElement={ea => (
-                        <div key={ea.key}>
-                          {utils.createMailtoLink(ea.address)}
-                        </div>
-                      )}
-                    />
+                    {(_isEmpty(agEmailAddresses) && (
+                      <em>No email addresses available</em>
+                    )) || (
+                      <TruncatedList
+                        elementType="email address"
+                        elements={agEmailAddresses}
+                        renderElement={ea => (
+                          <div key={ea.key}>
+                            {utils.createMailtoLink(ea.address)}
+                          </div>
+                        )}
+                      />
+                    )}
                   </td>
                 </>
               )}
               <td>
-                <LinkTo
-                  modelType="AuthorizationGroup"
-                  model={authorizationGroup}
-                />
+                <LinkTo modelType="AuthorizationGroup" model={ag} />
               </td>
-              <td>{authorizationGroup.description}</td>
+              <td>{ag.description}</td>
               {showMembers && (
                 <td>
                   <TruncatedList
                     elementType="member"
-                    elements={
-                      authorizationGroup.authorizationGroupRelatedObjects
-                    }
+                    elements={ag.authorizationGroupRelatedObjects}
                     renderElement={agro => (
                       <div key={agro.relatedObjectUuid}>
                         <LinkTo
@@ -154,7 +154,7 @@ const AuthorizationGroupTable = ({
                   />
                 </td>
               )}
-              {showStatus && <td>{authorizationGroup.humanNameOfStatus()} </td>}
+              {showStatus && <td>{ag.humanNameOfStatus()} </td>}
             </tr>
           )
         })}

@@ -70,10 +70,35 @@ $defs:
         title: Whether this input field should be excluded
         description: Used for excluding input fields that are irrelevant.
 
+# properties for fields that can be restricted
+  restrictableFieldProperties:
+    properties:
+      authorizationGroupUuids:
+        type: array
+        uniqueItems: true
+        items:
+          type: string
+          description: The list of authorization group uuid's that have access to this field.
+            If not specified, anyone has access. An empty array denies everyone access.
+
+# non-extensible definition for restrictable labeled fields
+  restrictableLabeledField:
+    unevaluatedProperties: false
+    allOf:
+      - "$ref": "#/$defs/labeledField"
+      - "$ref": "#/$defs/restrictableFieldProperties"
+
 # non-extensible definition for fields that allow free-form entry
   inputField:
     unevaluatedProperties: false
     "$ref": "#/$defs/extensibleInputField"
+
+# non-extensible definition for restrictable fields that allow free-form entry
+  restrictableInputField:
+    unevaluatedProperties: false
+    allOf:
+      - "$ref": "#/$defs/extensibleInputField"
+      - "$ref": "#/$defs/restrictableFieldProperties"
 
 # non-extensible definition for input fields that can be made optional
   optionableInputField:
@@ -771,9 +796,9 @@ properties:
           openIdSubject:
             "$ref": "#/$defs/labeledField"
           emailAddresses:
-            "$ref": "#/$defs/labeledField"
+            "$ref": "#/$defs/restrictableLabeledField"
           phoneNumber:
-            "$ref": "#/$defs/inputField"
+            "$ref": "#/$defs/restrictableInputField"
           country:
             "$ref": "#/$defs/optionableInputField"
           code:
@@ -858,7 +883,7 @@ properties:
           location:
             "$ref": "#/$defs/optionableInputField"
           emailAddresses:
-            "$ref": "#/$defs/labeledField"
+            "$ref": "#/$defs/restrictableLabeledField"
           authorizationGroups:
             "$ref": "#/$defs/labeledField"
           role:
@@ -913,7 +938,7 @@ properties:
           profile:
             "$ref": "#/$defs/inputField"
           emailAddresses:
-            "$ref": "#/$defs/labeledField"
+            "$ref": "#/$defs/restrictableLabeledField"
           authorizationGroups:
             "$ref": "#/$defs/labeledField"
           assessments:

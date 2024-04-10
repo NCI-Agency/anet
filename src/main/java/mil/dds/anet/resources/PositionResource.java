@@ -32,6 +32,19 @@ public class PositionResource {
     this.dao = engine.getPositionDao();
   }
 
+  public static boolean hasPermission(final Person user, final Position position) {
+    if (position.getType() == PositionType.ADMINISTRATOR) {
+      return AuthUtils.isAdmin(user);
+    }
+    return AuthUtils.canAdministrateOrg(user, position.getOrganizationUuid());
+  }
+
+  public static void assertPermission(final Person user, final Position position) {
+    if (!hasPermission(user, position)) {
+      throw new WebApplicationException(AuthUtils.UNAUTH_MESSAGE, Status.FORBIDDEN);
+    }
+  }
+
   @GraphQLQuery(name = "position")
   public Position getByUuid(@GraphQLArgument(name = "uuid") String uuid) {
     Position p = dao.getByUuid(uuid);
@@ -58,23 +71,12 @@ public class PositionResource {
     }
   }
 
-  private void assertCanUpdatePosition(Person user, Position pos) {
-    if (pos.getType() == PositionType.ADMINISTRATOR) {
-      AuthUtils.assertAdministrator(user);
-    }
-    if (pos.getOrganizationUuid() == null) {
-      throw new WebApplicationException("A Position must belong to an organization",
-          Status.BAD_REQUEST);
-    }
-    AuthUtils.assertCanAdministrateOrg(user, pos.getOrganizationUuid());
-  }
-
   @GraphQLMutation(name = "createPosition")
   public Position createPosition(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "position") Position pos) {
     pos.checkAndFixCustomFields();
     final Person user = DaoUtils.getUserFromContext(context);
-    assertCanUpdatePosition(user, pos);
+    assertPermission(user, pos);
     validatePosition(user, pos);
 
     final Position created = dao.insert(pos);
@@ -125,7 +127,7 @@ public class PositionResource {
       @GraphQLArgument(name = "position") Position pos) {
     pos.checkAndFixCustomFields();
     final Person user = DaoUtils.getUserFromContext(context);
-    assertCanUpdatePosition(user, pos);
+    assertPermission(user, pos);
     validatePosition(user, pos);
 
     final Position existing = dao.getByUuid(pos.getUuid());
@@ -185,7 +187,7 @@ public class PositionResource {
       @GraphQLArgument(name = "position") Position pos) {
     final Person user = DaoUtils.getUserFromContext(context);
     final Position existing = dao.getByUuid(pos.getUuid());
-    assertCanUpdatePosition(user, existing);
+    assertPermission(user, existing);
 
     ResourceUtils.validateHistoryInput(pos.getUuid(), pos.getPreviousPeople(), false,
         existing.getPersonUuid());

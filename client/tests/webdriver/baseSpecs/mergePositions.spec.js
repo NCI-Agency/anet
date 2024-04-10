@@ -32,7 +32,7 @@ const EXAMPLE_POSITIONS = {
     type: "REGULAR",
     role: "Leader",
     status: "ACTIVE",
-    email: "Network Address\nInternet mergeTwo@mod.example.com",
+    email: "No email addresses available",
     person: "Unspecified",
     associatedPositions: [
       { person: "Unfilled", position: "EF 1.1 Advisor C" },

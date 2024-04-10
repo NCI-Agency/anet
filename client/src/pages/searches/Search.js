@@ -837,9 +837,9 @@ const AuthorizationGroups = ({
   function getListWithEmailAddresses() {
     return authorizationGroups.map(ag => ({
       uuid: ag.uuid,
-      emailAddresses: ag.authorizationGroupRelatedObjects.flatMap(
-        agro => agro.relatedObject?.emailAddresses
-      )
+      emailAddresses: ag.authorizationGroupRelatedObjects
+        .flatMap(agro => agro.relatedObject?.emailAddresses)
+        .filter(Boolean)
     }))
   }
 
@@ -897,7 +897,7 @@ function _isAllSelected(list, selectedEmailAddresses) {
   }
   const isSubset = _isSubsetOf(
     selectedUuids,
-    list.map(l => l.uuid)
+    list.filter(l => !_isEmpty(l.emailAddresses)).map(l => l.uuid)
   )
   return isSubset || null // return indeterminate if only some are selected
 }
@@ -911,7 +911,9 @@ function _toggleAll(
   if (_isAllSelected(list, selectedEmailAddresses)) {
     list.forEach(l => selectedEmailAddresses.delete(l.uuid))
   } else {
-    list.forEach(l => selectedEmailAddresses.set(l.uuid, l.emailAddresses))
+    list
+      .filter(l => !_isEmpty(l.emailAddresses))
+      .forEach(l => selectedEmailAddresses.set(l.uuid, l.emailAddresses))
   }
   _updateSelection(
     selectedEmailAddresses,

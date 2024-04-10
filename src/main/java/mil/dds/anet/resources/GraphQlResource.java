@@ -14,6 +14,7 @@ import io.dropwizard.auth.Auth;
 import io.leangen.graphql.GraphQLSchemaGenerator;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.execution.InvocationContext;
+import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.execution.ResolverInterceptor;
 import io.leangen.graphql.generator.mapping.common.ScalarMapper;
 import io.leangen.graphql.metadata.strategy.DefaultInclusionStrategy;
@@ -41,10 +42,13 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.Position;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.graphql.AllowUnverifiedUsers;
 import mil.dds.anet.graphql.DateTimeMapper;
+import mil.dds.anet.graphql.RestrictToAuthorizationGroups;
 import mil.dds.anet.graphql.outputtransformers.JsonToXlsxTransformer;
 import mil.dds.anet.graphql.outputtransformers.JsonToXmlTransformer;
 import mil.dds.anet.graphql.outputtransformers.XsltXmlTransformer;
@@ -99,17 +103,63 @@ public class GraphQlResource {
     @Override
     public Object aroundInvoke(final InvocationContext invocationContext,
         final Continuation continuation) throws Exception {
+      final AnnotatedElement delegate =
+          invocationContext.getResolver().getExecutable().getDelegate();
+      final ResolutionEnvironment resolutionEnvironment =
+          invocationContext.getResolutionEnvironment();
       final Map<String, Object> context =
-          invocationContext.getResolutionEnvironment().dataFetchingEnvironment.getContext();
+          resolutionEnvironment.dataFetchingEnvironment.getContext();
       final Person currentUser = DaoUtils.getUserFromContext(context);
-      final AllowUnverifiedUsers allowUnverifiedUsers = invocationContext.getResolver()
-          .getExecutable().getDelegate().getAnnotation(AllowUnverifiedUsers.class);
-      if (allowUnverifiedUsers == null
-          && Boolean.TRUE.equals(currentUser.getPendingVerification())) {
+
+      // Check for unverified users
+      if (denyUnverifiedUsers(delegate, currentUser)) {
         // Simply return null so the GraphQL response contains no extra information
         return null;
       }
+
+      // Check for access restricted to authorizationGroups
+      if (denyRestrictedAccess(delegate, resolutionEnvironment, currentUser)) {
+        // Simply return null so the GraphQL response contains no extra information
+        return null;
+      }
+
       return continuation.proceed(invocationContext);
+    }
+
+    private boolean denyUnverifiedUsers(AnnotatedElement delegate, Person currentUser) {
+      final AllowUnverifiedUsers allowUnverifiedUsers =
+          delegate.getAnnotation(AllowUnverifiedUsers.class);
+      return allowUnverifiedUsers == null
+          && Boolean.TRUE.equals(currentUser.getPendingVerification());
+    }
+
+    private boolean denyRestrictedAccess(AnnotatedElement delegate,
+        ResolutionEnvironment resolutionEnvironment, Person currentUser) {
+      final RestrictToAuthorizationGroups restrictToAuthorizationGroups =
+          delegate.getAnnotation(RestrictToAuthorizationGroups.class);
+      if (restrictToAuthorizationGroups != null) {
+        final String authorizationGroupSetting =
+            restrictToAuthorizationGroups.authorizationGroupSetting();
+        @SuppressWarnings("unchecked")
+        final List<String> authorizationGroupUuids = (List<String>) AnetObjectEngine
+            .getConfiguration().getDictionaryEntry(authorizationGroupSetting);
+        if (authorizationGroupUuids != null) {
+          // Make sure the current user's authorizationGroups are loaded (should happen only once
+          // per request execution)
+          currentUser.loadAuthorizationGroups();
+          if (!DaoUtils.isInAuthorizationGroup(currentUser.getAuthorizationGroupUuids(),
+              authorizationGroupUuids)) {
+            if (resolutionEnvironment.context instanceof Person contextPerson) {
+              return !PersonResource.hasPermission(currentUser, contextPerson);
+            } else if (resolutionEnvironment.context instanceof Position contextPosition) {
+              return !PositionResource.hasPermission(currentUser, contextPosition);
+            } else if (resolutionEnvironment.context instanceof Organization contextOrganization) {
+              return !OrganizationResource.hasPermission(currentUser, contextOrganization);
+            }
+          }
+        }
+      }
+      return false;
     }
   }
 
