@@ -135,6 +135,14 @@ export const PositionOverlayRow = item => (
   </React.Fragment>
 )
 
+export const OrganizationSimpleOverlayRow = item => (
+  <React.Fragment key={item.uuid}>
+    <td>
+      <AsLink modelType="Organization" model={item} />
+    </td>
+  </React.Fragment>
+)
+
 export const PersonSimpleOverlayRow = item => (
   <React.Fragment key={item.uuid}>
     <td>

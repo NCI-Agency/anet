@@ -180,7 +180,7 @@ const useMergeObjects = mergeableType => {
 const OBJECT_TYPE_TO_VALIDATOR = {
   [MODEL_TO_OBJECT_TYPE.AuthorizationGroup]: null,
   [MODEL_TO_OBJECT_TYPE.Location]: validForGeneral,
-  [MODEL_TO_OBJECT_TYPE.Organization]: null,
+  [MODEL_TO_OBJECT_TYPE.Organization]: validForGeneral,
   [MODEL_TO_OBJECT_TYPE.Person]: validForGeneral,
   [MODEL_TO_OBJECT_TYPE.Position]: validPositions,
   [MODEL_TO_OBJECT_TYPE.Report]: null,
@@ -266,6 +266,36 @@ export function mergedPersonIsValid(mergedPerson) {
   ) {
     msg.push(Settings.fields.person.endOfTourDate?.label)
   }
+  if (_isEmpty(msg)) {
+    return true
+  } else {
+    const msgContainer = (
+      <div>
+        <div>It is required to fill the following fields:</div>
+        <ul>
+          {msg.map((m, index) => (
+            <li key={index}>{m}</li>
+          ))}
+        </ul>
+      </div>
+    )
+    toast.warning(msgContainer)
+    return false
+  }
+}
+
+export function mergedOrganizationIsValid(mergedOrganization) {
+  const msg = []
+  if (!mergedOrganization.status) {
+    msg.push(Settings.fields.organization.status?.label)
+  }
+  if (!mergedOrganization.shortName) {
+    msg.push(Settings.fields.shortName.status?.label)
+  }
+  if (!mergedOrganization.identificationCode) {
+    msg.push(Settings.fields.identificationCode.status?.label)
+  }
+
   if (_isEmpty(msg)) {
     return true
   } else {
