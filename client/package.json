@@ -104,7 +104,7 @@
     "react-test-renderer": "18.2.0",
     "selenium-webdriver": "4.19.0",
     "storybook": "7.6.17",
-    "style-loader": "3.3.4",
+    "style-loader": "4.0.0",
     "tap-xunit": "2.4.1",
     "thread-loader": "4.0.2",
     "ts-node": "10.9.2",
