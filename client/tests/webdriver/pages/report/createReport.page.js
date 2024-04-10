@@ -121,8 +121,22 @@ class CreateReport extends cr.CreateReport {
     return browser.$("#tasks")
   }
 
+  async getTaskSearchPopover() {
+    return browser.$("#tasks-popover")
+  }
+
+  async getTaskSearchFilters() {
+    return (await this.getTaskSearchPopover()).$(".advanced-select-filters")
+  }
+
   async getTasksTable() {
-    return browser.$("#tasks-popover .table-responsive table")
+    return (await this.getTaskSearchPopover()).$(".table-responsive table")
+  }
+
+  async getAllUnassignedTasksFilterButton() {
+    return (await this.getTaskSearchFilters()).$(
+      ".btn-link=All unassigned Efforts"
+    )
   }
 
   async selectTaskByName(name) {
