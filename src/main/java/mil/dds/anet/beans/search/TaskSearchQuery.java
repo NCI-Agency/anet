@@ -9,6 +9,10 @@ import java.util.Objects;
 
 public class TaskSearchQuery extends SubscribableObjectSearchQuery<TaskSearchSortBy> {
 
+  // Find tasks that are (not) assigned to one or more Organizations
+  @GraphQLQuery
+  @GraphQLInputField
+  private Boolean isAssigned;
   @GraphQLQuery
   @GraphQLInputField
   private String taskedOrgUuid;
@@ -50,6 +54,14 @@ public class TaskSearchQuery extends SubscribableObjectSearchQuery<TaskSearchSor
 
   public TaskSearchQuery() {
     super(TaskSearchSortBy.NAME);
+  }
+
+  public Boolean getIsAssigned() {
+    return isAssigned;
+  }
+
+  public void setIsAssigned(final Boolean isAssigned) {
+    this.isAssigned = isAssigned;
   }
 
   public String getTaskedOrgUuid() {
@@ -142,7 +154,7 @@ public class TaskSearchQuery extends SubscribableObjectSearchQuery<TaskSearchSor
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), taskedOrgUuid, orgRecurseStrategy, category,
+    return Objects.hash(super.hashCode(), isAssigned, taskedOrgUuid, orgRecurseStrategy, category,
         plannedCompletionEnd, plannedCompletionStart, projectedCompletionEnd,
         projectedCompletionStart, parentTaskUuid, parentTaskRecurseStrategy,
         responsiblePositionUuid);
@@ -154,7 +166,8 @@ public class TaskSearchQuery extends SubscribableObjectSearchQuery<TaskSearchSor
       return false;
     }
     final TaskSearchQuery other = (TaskSearchQuery) obj;
-    return super.equals(obj) && Objects.equals(getTaskedOrgUuid(), other.getTaskedOrgUuid())
+    return super.equals(obj) && Objects.equals(getIsAssigned(), other.getIsAssigned())
+        && Objects.equals(getTaskedOrgUuid(), other.getTaskedOrgUuid())
         && Objects.equals(getOrgRecurseStrategy(), other.getOrgRecurseStrategy())
         && Objects.equals(getCategory(), other.getCategory())
         && Objects.equals(getPlannedCompletionEnd(), other.getPlannedCompletionEnd())

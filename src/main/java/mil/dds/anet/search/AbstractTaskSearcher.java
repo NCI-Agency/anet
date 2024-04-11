@@ -49,6 +49,12 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
       addTaskedOrgUuidQuery(query);
     }
 
+    if (query.getIsAssigned() != null) {
+      qb.addWhereClause(
+          String.format("tasks.uuid%sIN (SELECT \"taskUuid\" FROM \"taskTaskedOrganizations\")",
+              query.getIsAssigned() ? " " : " NOT "));
+    }
+
     qb.addStringEqualsClause("category", "tasks.category", query.getCategory());
     qb.addEnumEqualsClause("status", "tasks.status", query.getStatus());
     qb.addDateRangeClause("plannedCompletionStart", "tasks.\"plannedCompletion\"", Comparison.AFTER,
