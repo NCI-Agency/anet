@@ -1276,6 +1276,7 @@ input TaskSearchQueryInput {
   emailNetwork: String
   hasParentTask: Boolean
   inMyReports: Boolean
+  isAssigned: Boolean
   orgRecurseStrategy: RecurseStrategy
   pageNum: Int
   pageSize: Int
