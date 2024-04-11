@@ -433,6 +433,11 @@ const ReportForm = ({
           }
         }
 
+        tasksFilters.allUnassignedTasks = {
+          label: `All unassigned ${tasksLabel}`,
+          queryVars: { hasParentTask: true, isAssigned: false }
+        }
+
         if (currentUser.isAdmin()) {
           tasksFilters.allTasks = {
             label: `All ${tasksLabel}`,
