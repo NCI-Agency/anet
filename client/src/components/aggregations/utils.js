@@ -216,19 +216,23 @@ export const GET_CALENDAR_EVENTS_FROM = {
 export function reportsToEvents(reports, showInterlocutors) {
   return reports
     .map(r => {
-      const who = showInterlocutors
-        ? (r.primaryInterlocutor &&
-            new Person(r.primaryInterlocutor).toString()) ||
-          ""
-        : (r.primaryAdvisor && new Person(r.primaryAdvisor).toString()) || ""
-      const where =
-        (r.interlocutorOrg && r.interlocutorOrg.shortName) ||
-        (r.location && r.location.name) ||
-        ""
+      // If no other data available title is the location name
+      let title = `@${r.location?.name}`
+      const primaryPerson = showInterlocutors
+        ? r.primaryInterlocutor
+        : r.primaryAdvisor
+      if (primaryPerson) {
+        // We have a primary person and therefore also an organization
+        const primaryOrg = showInterlocutors ? r.interlocutorOrg : r.advisorOrg
+        title = `${primaryOrg.shortName}: ${new Person(
+          primaryPerson
+        ).toString()}`
+      }
+
       const start = new Date(r.engagementDate)
       start.setSeconds(0, 0) // truncate at the minute part
       return {
-        title: who + "@" + where,
+        title,
         start,
         end: moment(start).add(r.duration, "minutes").toDate(),
         url: Report.pathFor(r),
