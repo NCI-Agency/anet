@@ -57,6 +57,7 @@
     {
       "matchPackageNames": [
         "autoprefixer",
+        "chai",
         "react-router-dom",
         "com.graphql-java:graphql-java",
         "com.graphql-java:graphql-java-extended-scalars",
