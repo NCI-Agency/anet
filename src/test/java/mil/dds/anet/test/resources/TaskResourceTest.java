@@ -212,6 +212,18 @@ class TaskResourceTest extends AbstractResourceTest {
   }
 
   @Test
+  void shouldFindOnlyUnassignedTasks() {
+    final var query = TaskSearchQueryInput.builder().withIsAssigned(false).build();
+    final var searchObjects =
+        withCredentials(jackUser, t -> queryExecutor.taskList(getListFields(FIELDS), query));
+    assertThat(searchObjects).isNotNull();
+    assertThat(searchObjects.getList()).isNotEmpty();
+    final var searchResults = searchObjects.getList();
+    assertThat(searchResults).isNotEmpty()
+        .allSatisfy(result -> assertThat(result.getTaskedOrganizations()).isNullOrEmpty());
+  }
+
+  @Test
   void duplicateTaskTest() {
     final Task taskEF7 = withCredentials(adminUser,
         t -> queryExecutor.task(FIELDS, "19364d81-3203-483d-a6bf-461d58888c76"));
