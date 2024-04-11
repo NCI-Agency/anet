@@ -540,6 +540,16 @@ export const searchFilters = function(includeAdminFilters) {
 
   filters[SEARCH_OBJECT_TYPES.TASKS] = {
     filters: {
+      "Is Assigned?": {
+        component: RadioButtonFilter,
+        deserializer: deserializeRadioButtonFilter,
+        labelClass: "pt-0",
+        props: {
+          queryKey: "isAssigned",
+          options: [true, false],
+          labels: ["Yes", "No"]
+        }
+      },
       "Within Organization": {
         component: OrganizationFilter,
         deserializer: deserializeOrganizationFilter,
