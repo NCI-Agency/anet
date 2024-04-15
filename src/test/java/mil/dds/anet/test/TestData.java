@@ -44,7 +44,7 @@ public class TestData {
   public static OrganizationInput createAdvisorOrganizationInput(
       boolean generateIdentificationCode) {
     return OrganizationInput.builder().withShortName("TBAE").withLongName("The Best Advisors Ever")
-        .withStatus(Status.ACTIVE)
+        .withStatus(Status.ACTIVE).withProfile("<p>This organization has no profile.</p>")
         .withIdentificationCode(generateIdentificationCode ? UUID.randomUUID().toString() : null)
         .build();
   }
