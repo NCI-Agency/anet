@@ -24,6 +24,8 @@ const GQL_GET_ORGANIZATION = gql`
       shortName
       longName
       identificationCode
+      app6context
+      app6standardIdentity
     }
   }
 `

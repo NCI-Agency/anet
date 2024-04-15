@@ -373,6 +373,13 @@ export default {
       }
     }
     return defaultValue
+  },
+
+  getButtonsFromChoices: function(choices) {
+    return Object.entries(choices).map(([value, label]) => ({
+      value,
+      label
+    }))
   }
 }
 
