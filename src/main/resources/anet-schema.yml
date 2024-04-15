@@ -126,15 +126,11 @@ $defs:
   choiceField:
     unevaluatedProperties: false
     allOf:
-    - "$ref": "#/$defs/labeledField"
+    - "$ref": "#/$defs/extensibleInputField"
     - properties:
-        enum:
+        choices:
           type: object
-          title: The placeholder for this field
-          description: Used in the UI where a placeholder for the field is shown (example input).
-          additionalProperties:
-            "$ref": "#/$defs/labeledField"
-      required: [enum]
+      required: [choices]
 
 # definition for custom fields
   customField:
@@ -917,7 +913,9 @@ properties:
       organization:
         type: object
         additionalProperties: false
-        required: [status, shortName, longName, identificationCode, type, parentOrg, childrenOrgs, location, profile, emailAddresses, authorizationGroups]
+        required: [status, shortName, longName, identificationCode, type, parentOrg, childrenOrgs,
+                   location, profile, app6context, app6standardIdentity, app6symbolSet, app6hq,
+                   app6amplifier, emailAddresses, authorizationGroups]
         properties:
           status:
             "$ref": "#/$defs/labeledField"
@@ -937,6 +935,16 @@ properties:
             "$ref": "#/$defs/inputField"
           profile:
             "$ref": "#/$defs/inputField"
+          app6context:
+            "$ref": "#/$defs/choiceField"
+          app6standardIdentity:
+            "$ref": "#/$defs/choiceField"
+          app6symbolSet:
+            "$ref": "#/$defs/choiceField"
+          app6hq:
+            "$ref": "#/$defs/choiceField"
+          app6amplifier:
+            "$ref": "#/$defs/choiceField"
           emailAddresses:
             "$ref": "#/$defs/restrictableLabeledField"
           authorizationGroups:

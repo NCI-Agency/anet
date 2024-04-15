@@ -28,6 +28,12 @@ const GQL_GET_ORGANIZATION = gql`
       longName
       identificationCode
       status
+      profile
+      app6context
+      app6standardIdentity
+      app6symbolSet
+      app6hq
+      app6amplifier
       emailAddresses {
         network
         address
@@ -39,12 +45,19 @@ const GQL_GET_ORGANIZATION = gql`
         lng
         type
       }
-      profile
       parentOrg {
         uuid
         shortName
         longName
         identificationCode
+        ascendantOrgs {
+          uuid
+          app6context
+          app6standardIdentity
+          parentOrg {
+            uuid
+          }
+        }
       }
       planningApprovalSteps {
         uuid

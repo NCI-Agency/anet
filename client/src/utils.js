@@ -352,8 +352,7 @@ export default {
         acc[val.uuid] = val
         return acc
       }, {}) || {}
-    parentMap[leaf.uuid] = leaf
-    let uuid = leaf.uuid
+    let uuid = leaf?.uuid
     const trail = []
     while (uuid) {
       const node = parentMap[uuid]
@@ -373,6 +372,13 @@ export default {
       }
     }
     return defaultValue
+  },
+
+  getButtonsFromChoices: function(choices) {
+    return Object.entries(choices).map(([value, label]) => ({
+      value,
+      label
+    }))
   }
 }
 

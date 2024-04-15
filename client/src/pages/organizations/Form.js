@@ -57,6 +57,8 @@ const GQL_UPDATE_ORGANIZATION = gql`
   }
 `
 
+const autocompleteQuery = `${Organization.autocompleteQuery} ascendantOrgs { uuid app6context app6standardIdentity parentOrg { uuid } }`
+
 const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
   const { loadAppData, currentUser } = useContext(AppContext)
   const navigate = useNavigate()
@@ -122,6 +124,8 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
           ]
           orgSearchQuery.orgRecurseStrategy = RECURSE_STRATEGY.CHILDREN
         }
+        const { parentContext, parentStandardIdentity } =
+          Organization.getApp6ParentFields(values.parentOrg, values)
         const action = canAdministrateOrg && (
           <>
             <Button
@@ -305,7 +309,7 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                           overlayRenderRow={OrganizationOverlayRow}
                           filterDefs={organizationFilters}
                           objectType={Organization}
-                          fields={Organization.autocompleteQuery}
+                          fields={autocompleteQuery}
                           queryParams={orgSearchQuery}
                           valueKey="shortName"
                           addon={ORGANIZATIONS_ICON}
@@ -411,6 +415,87 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                     }}
                   />
                 )}
+              </Fieldset>
+
+              <Fieldset title="APP-06 symbology" id="app6-symbology">
+                <DictionaryField
+                  wrappedComponent={Field}
+                  dictProps={Settings.fields.organization.app6context}
+                  name="app6context"
+                  component={FieldHelper.SelectField}
+                  buttons={utils.getButtonsFromChoices(
+                    Settings.fields.organization.app6context.choices
+                  )}
+                  onChange={value => setFieldValue("app6context", value)}
+                  extraColElem={
+                    parentContext && (
+                      <div style={{ paddingTop: "9px" }}>
+                        <em>
+                          {
+                            Settings.fields.organization.app6context.choices[
+                              parentContext
+                            ]
+                          }{" "}
+                          (inherited from parent)
+                        </em>
+                      </div>
+                    )
+                  }
+                />
+                <DictionaryField
+                  wrappedComponent={Field}
+                  dictProps={Settings.fields.organization.app6standardIdentity}
+                  name="app6standardIdentity"
+                  component={FieldHelper.SelectField}
+                  buttons={utils.getButtonsFromChoices(
+                    Settings.fields.organization.app6standardIdentity.choices
+                  )}
+                  onChange={value =>
+                    setFieldValue("app6standardIdentity", value)}
+                  extraColElem={
+                    parentStandardIdentity && (
+                      <div style={{ paddingTop: "9px" }}>
+                        <em>
+                          {
+                            Settings.fields.organization.app6standardIdentity
+                              .choices[parentStandardIdentity]
+                          }{" "}
+                          (inherited from parent)
+                        </em>
+                      </div>
+                    )
+                  }
+                />
+                <DictionaryField
+                  wrappedComponent={Field}
+                  dictProps={Settings.fields.organization.app6symbolSet}
+                  name="app6symbolSet"
+                  component={FieldHelper.SelectField}
+                  buttons={utils.getButtonsFromChoices(
+                    Settings.fields.organization.app6symbolSet.choices
+                  )}
+                  onChange={value => setFieldValue("app6symbolSet", value)}
+                />
+                <DictionaryField
+                  wrappedComponent={Field}
+                  dictProps={Settings.fields.organization.app6hq}
+                  name="app6hq"
+                  component={FieldHelper.SelectField}
+                  buttons={utils.getButtonsFromChoices(
+                    Settings.fields.organization.app6hq.choices
+                  )}
+                  onChange={value => setFieldValue("app6hq", value)}
+                />
+                <DictionaryField
+                  wrappedComponent={Field}
+                  dictProps={Settings.fields.organization.app6amplifier}
+                  name="app6amplifier"
+                  component={FieldHelper.SelectField}
+                  buttons={utils.getButtonsFromChoices(
+                    Settings.fields.organization.app6amplifier.choices
+                  )}
+                  onChange={value => setFieldValue("app6amplifier", value)}
+                />
               </Fieldset>
 
               <div>

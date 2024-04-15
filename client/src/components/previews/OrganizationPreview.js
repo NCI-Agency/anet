@@ -59,6 +59,11 @@ const GQL_GET_ORGANIZATION = gql`
       ...organizationFields
       status
       profile
+      app6context
+      app6standardIdentity
+      app6symbolSet
+      app6hq
+      app6amplifier
       emailAddresses {
         network
         address
@@ -76,6 +81,11 @@ const GQL_GET_ORGANIZATION = gql`
       }
       ascendantOrgs(query: { status: ACTIVE }) {
         ...organizationFields
+        app6context
+        app6standardIdentity
+        parentOrg {
+          uuid
+        }
         administratingPositions {
           ...positionFields
           location {
@@ -125,6 +135,8 @@ const OrganizationPreview = ({ className, uuid }) => {
   const organization = new Organization(
     data.organization ? data.organization : {}
   )
+  const { parentContext, parentStandardIdentity } =
+    Organization.getApp6ParentFields(organization, organization)
 
   return (
     <div className={`${className} preview-content-scroll`}>
@@ -221,6 +233,77 @@ const OrganizationPreview = ({ className, uuid }) => {
             value={<RichTextEditor readOnly value={organization.profile} />}
           />
         )}
+      </div>
+
+      <h4>APP-06 symbology</h4>
+      <div className="preview-section">
+        <DictionaryField
+          wrappedComponent={PreviewField}
+          dictProps={Settings.fields.organization.app6context}
+          value={
+            (parentContext && (
+              <em>
+                {
+                  Settings.fields.organization.app6context.choices[
+                    parentContext
+                  ]
+                }{" "}
+                (inherited from parent)
+              </em>
+            )) ||
+            Settings.fields.organization.app6context.choices[
+              organization.app6context
+            ]
+          }
+        />
+
+        <DictionaryField
+          wrappedComponent={PreviewField}
+          dictProps={Settings.fields.organization.app6standardIdentity}
+          value={
+            (parentStandardIdentity && (
+              <em>
+                {
+                  Settings.fields.organization.app6standardIdentity.choices[
+                    parentStandardIdentity
+                  ]
+                }{" "}
+                (inherited from parent)
+              </em>
+            )) ||
+            Settings.fields.organization.app6standardIdentity.choices[
+              [organization.app6standardIdentity]
+            ]
+          }
+        />
+
+        <DictionaryField
+          wrappedComponent={PreviewField}
+          dictProps={Settings.fields.organization.app6symbolSet}
+          value={
+            Settings.fields.organization.app6symbolSet.choices[
+              organization.app6symbolSet
+            ]
+          }
+        />
+
+        <DictionaryField
+          wrappedComponent={PreviewField}
+          dictProps={Settings.fields.organization.app6hq}
+          value={
+            Settings.fields.organization.app6hq.choices[organization.app6hq]
+          }
+        />
+
+        <DictionaryField
+          wrappedComponent={PreviewField}
+          dictProps={Settings.fields.organization.app6amplifier}
+          value={
+            Settings.fields.organization.app6amplifier.choices[
+              organization.app6amplifier
+            ]
+          }
+        />
       </div>
 
       <OrganizationLaydown

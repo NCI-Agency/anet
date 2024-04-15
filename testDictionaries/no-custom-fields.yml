@@ -585,6 +585,106 @@ fields:
     profile:
       label: Profile
       placeholder: Fill in the profile of this organization
+    app6context:
+      label: Context
+      choices:
+        0: Reality
+        1: Exercise
+        2: Simulation
+        3: Restricted target
+        4: No strike entity
+        5: Restricted target – exercise
+        6: No strike entity – exercise
+        7: Restricted target – simulation
+        8: No strike entity – simulation
+    app6standardIdentity:
+      label: Standard Identity
+      choices:
+        0: Pending
+        1: Unknown
+        2: Assumed friend
+        3: Friend
+        4: Neutral
+        5: Suspect
+        6: Hostile
+    app6symbolSet:
+      label: Symbol Set
+      choices:
+        00: Unknown
+        01: Air
+        02: Air missile
+        05: Space
+        06: Space missile
+        10: Land unit
+        11: Land civilian unit/organization
+        15: Land equipment
+        20: Land installations
+        25: Control measures
+        27: Dismounted individual
+        30: Sea surface
+        35: Sea subsurface
+        36: Mine warfare
+        40: Stability and civil support activities symbols
+        45: Atmospheric (meteorological)
+        46: Oceanographic
+        47: Meteorological space
+        50: Signals intelligence - space
+        51: Signals intelligence - air
+        52: Signals intelligence - land equipment
+        53: Signals intelligence - surface
+        54: Signals intelligence - subsurface
+        60: Cyberspace
+        61: Cyberspace - space
+        62: Cyberspace - air
+        63: Cyberspace - land unit
+        64: Cyberspace - land equipment
+        65: Cyberspace - land installation
+        66: Cyberspace - dismounted individual
+        67: Cyberspace - sea surface
+        68: Cyberspace - sea subsurface
+    app6hq:
+      label: HQ/Task Force
+      choices:
+        0: Not applicable
+        1: Feint/dummy
+        2: Headquarters
+        3: Feint/dummy headquarters
+        4: Task force
+        5: Feint/dummy task force
+        6: Task force headquarters
+        7: Feint/dummy task force headquarters
+    app6amplifier:
+      label: Amplifier
+      choices:
+        00: Unknown
+        11: "Echelon at brigade and below: Team/crew"
+        12: "Echelon at brigade and below: Squad"
+        13: "Echelon at brigade and below: Section"
+        14: "Echelon at brigade and below: Platoon/detachment"
+        15: "Echelon at brigade and below: Company/battery/troop"
+        16: "Echelon at brigade and below: Battalion/squadron"
+        17: "Echelon at brigade and below: Regiment/group"
+        18: "Echelon at brigade and below: Brigade"
+        21: "Echelon at division and above: Division"
+        22: "Echelon at division and above: Corps/marine expeditionary force"
+        23: "Echelon at division and above: Army"
+        24: "Echelon at division and above: Army group/front"
+        25: "Echelon at division and above: Region/theatre"
+        26: "Echelon at division and above: Command"
+        31: "Equipment mobility on land: Standard mobility/on-road mobility"
+        32: "Equipment mobility on land: High mobility/off-road mobility"
+        33: "Equipment mobility on land: Tracked"
+        34: "Equipment mobility on land: Wheeled and tracked combination"
+        35: "Equipment mobility on land: Towed"
+        36: "Equipment mobility on land: Rail"
+        37: "Equipment mobility on land: Pack animals"
+        41: "Equipment mobility on snow: Over snow (prime mover)"
+        42: "Equipment mobility on snow: Sled"
+        51: "Equipment mobility on water: Barge"
+        52: "Equipment mobility on water: Amphibious"
+        61: "Naval towed array: Short towed array"
+        62: "Naval towed array: Long towed array"
+        71: "Leadership indicator: Leader individual"
     emailAddresses:
       label: Email addresses
       authorizationGroupUuids: ['ab1a7d99-4529-44b1-a118-bdee3ca8296b']

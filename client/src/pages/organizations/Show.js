@@ -95,6 +95,11 @@ const GQL_GET_ORGANIZATION = gql`
       status
       isSubscribed
       profile
+      app6context
+      app6standardIdentity
+      app6symbolSet
+      app6hq
+      app6amplifier
       updatedAt
       emailAddresses {
         network
@@ -113,6 +118,11 @@ const GQL_GET_ORGANIZATION = gql`
       }
       ascendantOrgs(query: { status: ACTIVE }) {
         ...organizationFields
+        app6context
+        app6standardIdentity
+        parentOrg {
+          uuid
+        }
         administratingPositions {
           ...positionFields
           location {
@@ -220,6 +230,8 @@ const OrganizationShow = ({ pageDispatchers }) => {
     currentUser.hasAdministrativePermissionsForOrganization(organization)
   const orgSettings = Settings.fields.regular.org
   const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
+  const { parentContext, parentStandardIdentity } =
+    Organization.getApp6ParentFields(organization, organization)
 
   const myOrg =
     currentUser && currentUser.position
@@ -509,6 +521,87 @@ const OrganizationShow = ({ pageDispatchers }) => {
                     }
                   />
                 )}
+              </Fieldset>
+
+              <Fieldset title="APP-06 symbology" id="app6-symbology">
+                <DictionaryField
+                  wrappedComponent={Field}
+                  dictProps={Settings.fields.organization.app6context}
+                  name="app6context"
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={
+                    (parentContext && (
+                      <em>
+                        {
+                          Settings.fields.organization.app6context.choices[
+                            parentContext
+                          ]
+                        }{" "}
+                        (inherited from parent)
+                      </em>
+                    )) ||
+                    Settings.fields.organization.app6context.choices[
+                      organization.app6context
+                    ]
+                  }
+                />
+
+                <DictionaryField
+                  wrappedComponent={Field}
+                  dictProps={Settings.fields.organization.app6standardIdentity}
+                  name="app6standardIdentity"
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={
+                    (parentStandardIdentity && (
+                      <em>
+                        {
+                          Settings.fields.organization.app6standardIdentity
+                            .choices[parentStandardIdentity]
+                        }{" "}
+                        (inherited from parent)
+                      </em>
+                    )) ||
+                    Settings.fields.organization.app6standardIdentity.choices[
+                      organization.app6standardIdentity
+                    ]
+                  }
+                />
+
+                <DictionaryField
+                  wrappedComponent={Field}
+                  dictProps={Settings.fields.organization.app6symbolSet}
+                  name="app6symbolSet"
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={
+                    Settings.fields.organization.app6symbolSet.choices[
+                      organization.app6symbolSet
+                    ]
+                  }
+                />
+
+                <DictionaryField
+                  wrappedComponent={Field}
+                  dictProps={Settings.fields.organization.app6hq}
+                  name="app6hq"
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={
+                    Settings.fields.organization.app6hq.choices[
+                      organization.app6hq
+                    ]
+                  }
+                />
+
+                <DictionaryField
+                  wrappedComponent={Field}
+                  dictProps={Settings.fields.organization.app6amplifier}
+                  name="app6amplifier"
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={
+                    Settings.fields.organization.app6amplifier.choices[
+                      organization.app6amplifier
+                    ]
+                  }
+                />
               </Fieldset>
 
               {Settings.fields.organization.customFields && (
