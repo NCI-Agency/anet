@@ -35,7 +35,7 @@ import _isEqual from "lodash/isEqual"
 import { Person } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
-import React, { useContext, useRef, useState } from "react"
+import React, { useContext, useEffect, useRef, useState } from "react"
 import {
   Alert,
   Button,
@@ -49,6 +49,7 @@ import {
 import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
 import Settings from "settings"
+import { useDebouncedCallback } from "use-debounce"
 import utils from "utils"
 import PersonAvatar from "./Avatar"
 
@@ -74,6 +75,14 @@ const GQL_UPDATE_PERSON_AVATAR = gql`
     updatePersonAvatar(person: $person)
   }
 `
+const GQL_GET_PERSON_COUNT = gql`
+  query ($personQuery: PersonSearchQueryInput) {
+    personList(query: $personQuery) {
+      totalCount
+    }
+  }
+`
+
 const MIN_CHARS_FOR_DUPLICATES = 2
 
 const PersonForm = ({
@@ -97,6 +106,12 @@ const PersonForm = ({
   const [showWrongPersonModal, setShowWrongPersonModal] = useState(false)
   const [wrongPersonOptionValue, setWrongPersonOptionValue] = useState(null)
   const [showSimilarPeople, setShowSimilarPeople] = useState(false)
+  const [showSimilarPeopleMessage, setShowSimilarPeopleMessage] =
+    useState(false)
+  const [personFirstName, setPersonFirstName] = useState(
+    initialValues?.firstName
+  )
+  const [personLastName, setPersonLastName] = useState(initialValues?.lastName)
   // redirect first time users to the homepage in order to be able to use onboarding
   const [onSaveRedirectToHome, setOnSaveRedirectToHome] = useState(false)
   const attachmentsEnabled =
@@ -133,6 +148,13 @@ const PersonForm = ({
       value: "FEMALE"
     }
   ]
+  const checkPotentialDuplicatesDebounced = useDebouncedCallback(
+    checkPotentialDuplicates,
+    400
+  )
+  useEffect(() => {
+    checkPotentialDuplicatesDebounced(personFirstName, personLastName)
+  }, [checkPotentialDuplicatesDebounced, personFirstName, personLastName])
 
   return (
     <Formik
@@ -287,47 +309,51 @@ const PersonForm = ({
                           <Row>
                             <Col>
                               <DictionaryField
-                                wrappedComponent={FastField}
+                                wrappedComponent={Field}
                                 dictProps={Settings.fields.person.lastName}
                                 name="lastName"
                                 component={FieldHelper.InputFieldNoLabel}
                                 display="inline"
                                 disabled={!canEditName}
                                 onKeyDown={handleLastNameOnKeyDown}
+                                onChange={event => {
+                                  setFieldValue("lastName", event.target.value)
+                                  setPersonLastName(event.target.value)
+                                }}
                               />
                             </Col>
                             ,
                             <Col>
                               <DictionaryField
-                                wrappedComponent={FastField}
+                                wrappedComponent={Field}
                                 dictProps={Settings.fields.person.firstName}
                                 name="firstName"
                                 component={FieldHelper.InputFieldNoLabel}
                                 display="inline"
                                 disabled={!canEditName}
+                                onChange={event => {
+                                  setFieldValue("firstName", event.target.value)
+                                  setPersonFirstName(event.target.value)
+                                }}
                               />
                             </Col>
                           </Row>
                         </Col>
-                        {!forOnboarding &&
-                          !edit &&
-                          values.firstName.length >= MIN_CHARS_FOR_DUPLICATES &&
-                          values.lastName.length >=
-                            MIN_CHARS_FOR_DUPLICATES && (
-                            <Col>
-                              <Button
-                                variant="outline-secondary"
-                                onClick={() => setShowSimilarPeople(true)}
-                              >
-                                <Icon
-                                  icon={IconNames.WARNING_SIGN}
-                                  intent={Intent.WARNING}
-                                  size={IconSize.STANDARD}
-                                  style={{ margin: "0 6px" }}
-                                />
-                                Possible Duplicates
-                              </Button>
-                            </Col>
+                        {showSimilarPeopleMessage && (
+                          <Col>
+                            <Button
+                              variant="outline-secondary"
+                              onClick={() => setShowSimilarPeople(true)}
+                            >
+                              <Icon
+                                icon={IconNames.WARNING_SIGN}
+                                intent={Intent.WARNING}
+                                size={IconSize.STANDARD}
+                                style={{ margin: "0 6px" }}
+                              />
+                              Possible Duplicates
+                            </Button>
+                          </Col>
                         )}
 
                         {!forOnboarding && edit && (
@@ -902,6 +928,33 @@ const PersonForm = ({
           )
           break
       }
+    }
+  }
+  async function checkPotentialDuplicates(firstName, lastName) {
+    if (
+      !forOnboarding &&
+      !edit &&
+      (firstName.length >= MIN_CHARS_FOR_DUPLICATES ||
+        lastName.length >= MIN_CHARS_FOR_DUPLICATES)
+    ) {
+      const personQuery = {
+        pageSize: 1,
+        text: `${firstName} ${lastName}`
+      }
+      try {
+        const response = await API.query(GQL_GET_PERSON_COUNT, {
+          personQuery
+        })
+        setError(null)
+        setShowSimilarPeopleMessage(response?.personList.totalCount > 0)
+      } catch (error) {
+        setError(error)
+        setShowSimilarPeopleMessage(false)
+        jumpToTop()
+      }
+    } else {
+      setError(null)
+      setShowSimilarPeopleMessage(false)
     }
   }
 }

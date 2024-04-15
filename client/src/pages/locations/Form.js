@@ -26,10 +26,11 @@ import _escape from "lodash/escape"
 import _isEqual from "lodash/isEqual"
 import { Location, Position } from "models"
 import PropTypes from "prop-types"
-import React, { useContext, useState } from "react"
+import React, { useContext, useEffect, useState } from "react"
 import { Button, FormSelect } from "react-bootstrap"
 import { useNavigate } from "react-router-dom"
 import Settings from "settings"
+import { useDebouncedCallback } from "use-debounce"
 
 const GQL_CREATE_LOCATION = gql`
   mutation ($location: LocationInput!) {
@@ -43,6 +44,15 @@ const GQL_UPDATE_LOCATION = gql`
     updateLocation(location: $location)
   }
 `
+
+const GQL_GET_LOCATION_COUNT = gql`
+  query ($locationQuery: LocationSearchQueryInput) {
+    locationList(query: $locationQuery) {
+      totalCount
+    }
+  }
+`
+
 const MIN_CHARS_FOR_DUPLICATES = 3
 
 // Location types to be shown to admins in the new location page.
@@ -74,6 +84,9 @@ const LocationForm = ({
     initialValues?.attachments
   )
   const [showSimilarLocations, setShowSimilarLocations] = useState(false)
+  const [showSimilarLocationsMessage, setShowSimilarLocationsMessage] =
+    useState(false)
+  const [locationName, setLocationName] = useState(initialValues?.name)
   const regularUsersCanCreateLocations = Settings.regularUsersCanCreateLocations
   const canEditName =
     (!edit && (regularUsersCanCreateLocations || currentUser.isSuperuser())) ||
@@ -111,6 +124,13 @@ const LocationForm = ({
       }
     }
   }
+  const checkPotentialDuplicatesDebounced = useDebouncedCallback(
+    checkPotentialDuplicates,
+    400
+  )
+  useEffect(() => {
+    checkPotentialDuplicatesDebounced(locationName)
+  }, [checkPotentialDuplicatesDebounced, locationName])
 
   return (
     <Formik
@@ -177,13 +197,17 @@ const LocationForm = ({
               <Fieldset title={title} action={action} />
               <Fieldset>
                 <DictionaryField
-                  wrappedComponent={FastField}
+                  wrappedComponent={Field}
                   dictProps={Settings.fields.location.name}
                   name="name"
                   component={FieldHelper.InputField}
                   disabled={!canEditName}
+                  onChange={event => {
+                    setFieldValue("name", event.target.value)
+                    setLocationName(event.target.value)
+                  }}
                   extraColElem={
-                    !edit && values.name.length >= MIN_CHARS_FOR_DUPLICATES ? (
+                    showSimilarLocationsMessage ? (
                       <>
                         <Button
                           onClick={() => setShowSimilarLocations(true)}
@@ -443,6 +467,29 @@ const LocationForm = ({
     return API.mutation(edit ? GQL_UPDATE_LOCATION : GQL_CREATE_LOCATION, {
       location
     })
+  }
+
+  async function checkPotentialDuplicates(locationName) {
+    if (!edit && locationName.length >= MIN_CHARS_FOR_DUPLICATES) {
+      const locationQuery = {
+        pageSize: 1,
+        text: locationName
+      }
+      try {
+        const response = await API.query(GQL_GET_LOCATION_COUNT, {
+          locationQuery
+        })
+        setError(null)
+        setShowSimilarLocationsMessage(response?.locationList.totalCount > 0)
+      } catch (error) {
+        setError(error)
+        setShowSimilarLocationsMessage(false)
+        jumpToTop()
+      }
+    } else {
+      setError(null)
+      setShowSimilarLocationsMessage(false)
+    }
   }
 }
 
