@@ -13,7 +13,12 @@ const DictionaryField = ({
   } else {
     return (
       <WrappedComponent
-        {...Object.without(dictProps, "exclude", "optional")}
+        {...Object.without(
+          dictProps,
+          "exclude",
+          "optional",
+          "authorizationGroupUuids"
+        )}
         {...otherProps}
       />
     )
