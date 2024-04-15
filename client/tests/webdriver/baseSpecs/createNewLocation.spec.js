@@ -6,6 +6,7 @@ import {
   LOCATION_COORDS,
   LOCATION_NAME,
   LOCATION_TYPE,
+  NOT_SIMILAR_LOCATION,
   SIMILAR_LOCATION
 } from "./locationUtils"
 
@@ -82,5 +83,17 @@ describe("When creating a new Location", () => {
     await (await CreateNewLocation.getCreateButton()).click()
     await (await CreateNewLocation.getSuccessMsg()).waitForExist()
     await (await CreateNewLocation.getSuccessMsg()).waitForDisplayed()
+  })
+
+  it("Should not display possible duplicates button", async() => {
+    await CreateNewLocation.open()
+    await (await CreateNewLocation.getForm()).waitForExist()
+    await (await CreateNewLocation.getForm()).waitForDisplayed()
+    await (
+      await CreateNewLocation.getNameField()
+    ).setValue(NOT_SIMILAR_LOCATION.name)
+    // eslint-disable-next-line no-unused-expressions
+    expect(await (await CreateNewLocation.getDuplicatesButton()).isExisting())
+      .to.be.false
   })
 })

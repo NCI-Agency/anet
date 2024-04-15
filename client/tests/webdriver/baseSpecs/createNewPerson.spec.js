@@ -10,6 +10,10 @@ const VALID_PERSON_ADVISOR = {
   firstName: "Jane",
   emailAddresses: ["", "test@NATO.INT"]
 }
+const NOT_SIMILAR_PERSON_ADVISOR = {
+  lastName: "XXX",
+  firstName: "XXX"
+}
 
 const SIMILAR_PERSON_ADVISOR = {
   lastName: "ERINSON",
@@ -282,6 +286,23 @@ describe("Create new Person form page", () => {
       ).getText()
       expect(alertMessage).to.equal("Person saved")
       await CreatePerson.logout()
+    })
+
+    it("Should not display possible duplicates button", async() => {
+      await CreatePerson.openAsAdmin()
+      await (await CreatePerson.getForm()).waitForExist()
+      await (await CreatePerson.getForm()).waitForDisplayed()
+      await (await CreatePerson.getLastName()).waitForDisplayed()
+      await (
+        await CreatePerson.getLastName()
+      ).setValue(NOT_SIMILAR_PERSON_ADVISOR.lastName)
+      await (await CreatePerson.getFirstName()).waitForDisplayed()
+      await (
+        await CreatePerson.getFirstName()
+      ).setValue(NOT_SIMILAR_PERSON_ADVISOR.firstName)
+      // eslint-disable-next-line no-unused-expressions
+      expect(await (await CreatePerson.getDuplicatesButton()).isExisting()).to
+        .be.false
     })
   })
 })

@@ -28,13 +28,14 @@ import { FastField, Field, Form, Formik } from "formik"
 import { Location, Organization, Position } from "models"
 import { PositionRole } from "models/Position"
 import PropTypes from "prop-types"
-import React, { useContext, useState } from "react"
+import React, { useContext, useEffect, useState } from "react"
 import { Button, Form as FormBS } from "react-bootstrap"
 import { useNavigate } from "react-router-dom"
 import LOCATIONS_ICON from "resources/locations.png"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
 import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
+import { useDebouncedCallback } from "use-debounce"
 import utils from "utils"
 
 const GQL_CREATE_POSITION = gql`
@@ -49,6 +50,13 @@ const GQL_UPDATE_POSITION = gql`
     updatePosition(position: $position)
   }
 `
+const GQL_GET_POSITION_COUNT = gql`
+  query ($positionQuery: PositionSearchQueryInput) {
+    positionList(query: $positionQuery) {
+      totalCount
+    }
+  }
+`
 const MIN_CHARS_FOR_DUPLICATES = 3
 
 const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
@@ -56,6 +64,9 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
   const navigate = useNavigate()
   const [error, setError] = useState(null)
   const [showSimilarPositions, setShowSimilarPositions] = useState(false)
+  const [showSimilarPositionsMessage, setShowSimilarPositionsMessage] =
+    useState(false)
+  const [positionName, setPositionName] = useState(initialValues?.name)
   initialValues.emailAddresses = initializeEmailAddresses(
     initialValues.emailAddresses
   )
@@ -116,6 +127,13 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
       label: PositionRole.LEADER.humanNameOfRole()
     }
   ])
+  const checkPotentialDuplicatesDebounced = useDebouncedCallback(
+    checkPotentialDuplicates,
+    400
+  )
+  useEffect(() => {
+    checkPotentialDuplicatesDebounced(positionName)
+  }, [checkPotentialDuplicatesDebounced, positionName])
 
   // The permissions property allows selecting a
   // specific type and is removed in the onSubmit method.
@@ -197,8 +215,12 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
                   dictProps={Settings.fields.position.name}
                   name="name"
                   component={FieldHelper.InputField}
+                  onChange={event => {
+                    setFieldValue("name", event.target.value)
+                    setPositionName(event.target.value)
+                  }}
                   extraColElem={
-                    !edit && values.name.length >= MIN_CHARS_FOR_DUPLICATES ? (
+                    showSimilarPositionsMessage ? (
                       <>
                         <Button
                           onClick={() => setShowSimilarPositions(true)}
@@ -460,6 +482,29 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
     return API.mutation(edit ? GQL_UPDATE_POSITION : GQL_CREATE_POSITION, {
       position
     })
+  }
+
+  async function checkPotentialDuplicates(positionName) {
+    if (!edit && positionName.length >= MIN_CHARS_FOR_DUPLICATES) {
+      const positionQuery = {
+        pageSize: 1,
+        text: positionName
+      }
+      try {
+        const response = await API.query(GQL_GET_POSITION_COUNT, {
+          positionQuery
+        })
+        setError(null)
+        setShowSimilarPositionsMessage(response?.positionList.totalCount > 0)
+      } catch (error) {
+        setError(error)
+        setShowSimilarPositionsMessage(false)
+        jumpToTop()
+      }
+    } else {
+      setError(null)
+      setShowSimilarPositionsMessage(false)
+    }
   }
 }
 

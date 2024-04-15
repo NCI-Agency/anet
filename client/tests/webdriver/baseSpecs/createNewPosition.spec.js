@@ -5,6 +5,7 @@ const ADMIN_ORG = "ANET Admin"
 const ADMIN_ORG_COMPLETE = "ANET Administrators"
 const INTERLOCUTOR_ORG = "MoI"
 const INTERLOCUTOR_ORG_COMPLETE = "MoI | Ministry of Interior"
+const NOT_SIMILAR_ADVISOR_POSITION_NAME = "XXX"
 const SIMILAR_ADVISOR_POSITION_NAME = "EF 1.1 Advisor for Agriculture"
 
 describe("Create position page", () => {
@@ -136,6 +137,18 @@ describe("Create position page", () => {
       await CreatePosition.submitForm()
       await CreatePosition.waitForAlertSuccessToLoad()
       await CreatePosition.logout()
+    })
+
+    it("Should not display possible duplicates button", async() => {
+      await CreatePosition.openAsAdminUser()
+      await (await CreatePosition.getForm()).waitForExist()
+      await (await CreatePosition.getForm()).waitForDisplayed()
+      await (
+        await CreatePosition.getPositionNameInput()
+      ).setValue(NOT_SIMILAR_ADVISOR_POSITION_NAME)
+      // eslint-disable-next-line no-unused-expressions
+      expect(await (await CreatePosition.getDuplicatesButton()).isExisting()).to
+        .be.false
     })
   })
 })
