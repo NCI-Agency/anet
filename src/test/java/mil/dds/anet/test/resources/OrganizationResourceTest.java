@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableList;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.client.AnetBeanList_Organization;
@@ -31,6 +32,7 @@ class OrganizationResourceTest extends AbstractResourceTest {
   private static final String _EMAIL_ADDRESSES_FIELDS = "emailAddresses { network address }";
   protected static final String FIELDS =
       String.format("{ uuid shortName longName status identificationCode profile location"
+          + " app6context app6standardIdentity app6symbolSet app6hq app6amplifier"
           + " customFields tasks { uuid } parentOrg { uuid }"
           + " approvalSteps { uuid name approvers { uuid } } %1$s }", _EMAIL_ADDRESSES_FIELDS);
   private static final String POSITION_FIELDS = String.format(
@@ -41,6 +43,11 @@ class OrganizationResourceTest extends AbstractResourceTest {
   void createAO() {
     // Create a new AO
     final OrganizationInput aoInput = TestData.createAdvisorOrganizationInput(true);
+    aoInput.setApp6context(getApp6Choice("app6context"));
+    aoInput.setApp6standardIdentity(getApp6Choice("app6standardIdentity"));
+    aoInput.setApp6symbolSet(getApp6Choice("app6symbolSet"));
+    aoInput.setApp6hq(getApp6Choice("app6hq"));
+    aoInput.setApp6amplifier(getApp6Choice("app6amplifier"));
     final Organization created =
         withCredentials(adminUser, t -> mutationExecutor.createOrganization(FIELDS, aoInput));
     assertThat(created).isNotNull();
@@ -49,6 +56,11 @@ class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(aoInput.getLongName()).isEqualTo(created.getLongName());
     assertThat(aoInput.getIdentificationCode()).isEqualTo(created.getIdentificationCode());
     assertThat(aoInput.getProfile()).isEqualTo(created.getProfile());
+    assertThat(aoInput.getApp6context()).isEqualTo(created.getApp6context());
+    assertThat(aoInput.getApp6standardIdentity()).isEqualTo(created.getApp6standardIdentity());
+    assertThat(aoInput.getApp6symbolSet()).isEqualTo(created.getApp6symbolSet());
+    assertThat(aoInput.getApp6hq()).isEqualTo(created.getApp6hq());
+    assertThat(aoInput.getApp6amplifier()).isEqualTo(created.getApp6amplifier());
     // update name of the AO
     created.setLongName("Ao McAoFace");
     Integer nrUpdated = withCredentials(adminUser,
@@ -186,6 +198,13 @@ class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(returnedSteps.get(0).getApprovers())
         .allMatch(a -> a.getUuid().equals(admin.getPosition().getUuid()));
     assertThat(returnedSteps.get(1).getApprovers()).allMatch(a -> a.getUuid().equals(b1.getUuid()));
+  }
+
+  private String getApp6Choice(final String app6field) {
+    @SuppressWarnings("unchecked")
+    final Map<String, String> app6fieldChoices = (Map<String, String>) dropwizardApp
+        .getConfiguration().getDictionaryEntry("fields.organization." + app6field + ".choices");
+    return app6fieldChoices.keySet().stream().findFirst().orElse(null);
   }
 
   @Test
