@@ -268,6 +268,16 @@ function createEmailAddresses(onNs, email, orgEmailAddresses) {
   return null
 }
 
+function createHtmlParagraphs(min = 3, max = 10) {
+  return `<p>${faker.lorem.paragraphs(
+    {
+      min,
+      max
+    },
+    "</p><p>"
+  )}</p>`
+}
+
 // Our initial admin, should always be there
 const specialUser = { name: "arthur", password: "arthur" }
 
@@ -281,5 +291,6 @@ export {
   normalPPF,
   createDomainName,
   createEmailAddresses,
+  createHtmlParagraphs,
   specialUser
 }

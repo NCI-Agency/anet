@@ -88,7 +88,6 @@ const OrganizationNewConditional = ({
   const organization = new Organization()
   if (data) {
     organization.parentOrg = new Organization(data.organization)
-    organization.type = organization.parentOrg.type
   }
   // mutates the object
   initInvisibleFields(organization, Settings.fields.organization.customFields)

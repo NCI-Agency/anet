@@ -4,7 +4,7 @@ import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
 import _uniqWith from "lodash/uniqWith"
 import { Location, Report } from "models"
-import { fuzzy, populate, runGQL } from "../simutils"
+import { createHtmlParagraphs, fuzzy, populate, runGQL } from "../simutils"
 import { getRandomObject } from "./NoteStories"
 
 const getRandomPerson = async function(user, hasPosition) {
@@ -116,7 +116,7 @@ async function populateReport(report, user, args) {
     location,
     reportPeople,
     tasks,
-    reportText: () => faker.lorem.paragraphs(),
+    reportText: () => createHtmlParagraphs(),
     nextSteps: () => faker.lorem.sentence(),
     keyOutcomes: () => faker.lorem.sentence(),
     reportSensitiveInformation: () => null,

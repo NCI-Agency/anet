@@ -156,6 +156,9 @@ public class InitializationCommand extends EnvironmentCommand<AnetConfiguration>
     // Set empty external documentation link text
     saveAdminSetting(engine, AdminSettingKeys.EXTERNAL_DOCUMENTATION_LINK_TEXT, "");
 
+    // Set empty external documentation link url
+    saveAdminSetting(engine, AdminSettingKeys.EXTERNAL_DOCUMENTATION_LINK_URL, "");
+
     // Set general banner level as default
     saveAdminSetting(engine, AdminSettingKeys.GENERAL_BANNER_LEVEL, "notice");
 
@@ -167,6 +170,9 @@ public class InitializationCommand extends EnvironmentCommand<AnetConfiguration>
 
     // Set daily rollup max report age days as default
     saveAdminSetting(engine, AdminSettingKeys.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS, "14");
+
+    // Set empty unlimited exports authorization group
+    saveAdminSetting(engine, AdminSettingKeys.UNLIMITED_EXPORTS_AUTHORIZATION_GROUP, "");
   }
 
   private void saveAdminSetting(final AnetObjectEngine engine, final AdminSettingKeys key,

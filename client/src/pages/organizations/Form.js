@@ -111,10 +111,7 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
           ? currentUser &&
             currentUser.hasAdministrativePermissionsForOrganization(values)
           : canAdministrateParentOrg
-        const orgSearchQuery = {
-          status: Model.STATUS.ACTIVE,
-          type: values.type
-        }
+        const orgSearchQuery = { status: Model.STATUS.ACTIVE }
         // Superusers can select parent organizations among the ones their position is administrating
         if (!isAdmin) {
           const orgsAdministratedUuids =
@@ -124,14 +121,6 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
             ...orgsAdministratedUuids
           ]
           orgSearchQuery.orgRecurseStrategy = RECURSE_STRATEGY.CHILDREN
-        }
-        // Reset the parentOrg property when changing the organization type
-        if (
-          values.parentOrg &&
-          values.parentOrg.type &&
-          values.parentOrg.type !== values.type
-        ) {
-          values.parentOrg = {}
         }
         const action = canAdministrateOrg && (
           <>

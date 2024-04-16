@@ -4,6 +4,7 @@ import { Organization } from "models"
 import utils from "utils"
 import {
   createEmailAddresses,
+  createHtmlParagraphs,
   fuzzy,
   identity,
   populate,
@@ -44,7 +45,8 @@ function randomOrganization() {
     longName: name,
     identificationCode: () => faker.helpers.replaceSymbols("??????"),
     parentOrg: identity,
-    status: () => faker.helpers.objectValue(Organization.STATUS)
+    status: () => faker.helpers.objectValue(Organization.STATUS),
+    profile: () => createHtmlParagraphs()
   }
 
   // approvalSteps: [],
@@ -121,6 +123,7 @@ async function createHierarchy(user, grow, args) {
     org.shortName = (shortName + " " + path.join(".")).trim()
     org.identificationCode = faker.helpers.replaceSymbols("??????")
     org.status = status
+    org.profile = createHtmlParagraphs()
     if (fuzzy.withProbability(0.5)) {
       const orgSlug = org.shortName.replace(/[ .]/g, "")
       org.emailAddresses = createEmailAddresses(
@@ -207,6 +210,7 @@ const createOrganization = async function(user, parentOrg, path) {
     .identificationCode.always()
     .parentOrg.always()
     .status.always()
+    .profile.always()
 
   if (path.length === 1 && org.longName) {
     path[0] = abbreviateCompanyName(org.longName)

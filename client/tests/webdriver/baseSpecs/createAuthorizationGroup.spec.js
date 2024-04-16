@@ -20,6 +20,8 @@ const ADMINISTRATIVE_POSITION_2_COMPLETE = "EF 2.2 Superuser"
 const POSITION2 = "jack"
 const POSITION2_COMPLETE = "EF 2.1 Advisor B"
 
+const SHORT_WAIT_MS = 200
+
 describe("When creating/editing an authorization group", () => {
   describe("When creating an authorization group as admin", () => {
     it("Should navigate to the create authorization group page", async() => {
@@ -95,6 +97,7 @@ describe("When creating/editing an authorization group", () => {
       await (
         await CreateAuthorizationGroup.getRelatedObjectsAdvancedSelectFirstItem()
       ).click()
+      await browser.pause(SHORT_WAIT_MS)
       // The position is added to a table underneath, so relatedObjects table exists now
       // eslint-disable-next-line no-unused-expressions
       expect(
@@ -133,6 +136,7 @@ describe("When creating/editing an authorization group", () => {
       await (
         await CreateAuthorizationGroup.getRelatedObjectsAdvancedSelectFirstItem()
       ).click()
+      await browser.pause(SHORT_WAIT_MS)
       // eslint-disable-next-line no-unused-expressions
       expect(
         await (
@@ -164,6 +168,7 @@ describe("When creating/editing an authorization group", () => {
       await (
         await CreateAuthorizationGroup.getRelatedObjectsAdvancedSelectFirstItem()
       ).click()
+      await browser.pause(SHORT_WAIT_MS)
       // eslint-disable-next-line no-unused-expressions
       expect(
         await (
@@ -383,6 +388,7 @@ describe("When creating/editing an authorization group", () => {
       await (
         await CreateAuthorizationGroup.getRelatedObjectsAdvancedSelectFirstItem()
       ).click()
+      await browser.pause(SHORT_WAIT_MS)
       // eslint-disable-next-line no-unused-expressions
       expect(
         await (

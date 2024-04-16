@@ -1,7 +1,7 @@
 import { faker } from "@faker-js/faker"
 import Model from "components/Model"
 import { Location } from "models"
-import { fuzzy, populate, runGQL } from "../simutils"
+import { createHtmlParagraphs, fuzzy, populate, runGQL } from "../simutils"
 
 async function populateLocation(location, user) {
   const template = {
@@ -26,7 +26,8 @@ async function populateLocation(location, user) {
           min: 60.5284298033,
           precision: 10
         })
-      )
+      ),
+    description: () => createHtmlParagraphs()
   }
   populate(location, template)
     .status.always()
@@ -34,6 +35,7 @@ async function populateLocation(location, user) {
     .name.always()
     .lat.always()
     .lng.always()
+    .description.always()
   return location
 }
 
