@@ -203,9 +203,8 @@ describe("When creating a Report with conflicts", () => {
     expect(await advisor03.conflictButton.isExisting()).to.equal(true)
     expect(await advisor03.conflictButton.getText()).to.match(/conflict/)
 
-    const interlocutor01 = await ShowReport.getAttendeeByName(
-      "CIV KYLESON, Kyle"
-    )
+    const interlocutor01 =
+      await ShowReport.getAttendeeByName("CIV KYLESON, Kyle")
     expect(await interlocutor01.conflictButton.isExisting()).to.equal(true)
     expect(await interlocutor01.conflictButton.getText()).to.match(/conflict/)
 

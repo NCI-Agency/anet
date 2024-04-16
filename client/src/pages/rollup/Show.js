@@ -152,8 +152,8 @@ const Chart = ({
     )
   }, [graphData])
   const interlocutorOrgGraphData = useMemo(() => {
-    return Object.values(graphData?.interlocutorOrgReports || {}).sort((a, b) =>
-      a.org.shortName > b.org.shortName ? 1 : -1
+    return Object.values(graphData?.interlocutorOrgReports || {}).sort(
+      (a, b) => (a.org.shortName > b.org.shortName ? 1 : -1)
     )
   }, [graphData])
 
