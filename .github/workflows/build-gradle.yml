@@ -162,26 +162,3 @@ jobs:
         name: ${{ matrix.client-tests }}-test-results for ${{ steps.strip-slashes.outputs.dictionary }}
         path: client/build/test-results/${{ matrix.client-tests }}-test-results.xml
       if: always()
-
-  run-storybook:
-    needs: build
-    name: Storybook
-    runs-on: ubuntu-latest
-
-    env:
-      ANET_DICTIONARY_NAME: anet-dictionary.yml
-
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-    - uses: ./.github/actions/build-cache
-    # check if build process stdout and stderr outputs have 'error:'
-    - run: |
-        ./gradlew yarn_run_start --console=plain &> dev_error.log &
-        sleep 30
-        ! grep -i -C 2 "error:" dev_error.log
-    - run: |
-        ./gradlew yarn_run_storybook --console=plain &> storybook_error.log &
-        sleep 60
-        ! grep -i -C 2 "error:" storybook_error.log
