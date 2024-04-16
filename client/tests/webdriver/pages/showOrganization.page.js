@@ -7,6 +7,10 @@ class ShowOrganization extends Page {
     await super.open(PAGE_URL.replace(":uuid", uuid))
   }
 
+  async getCreateSubOrganizationButton() {
+    return browser.$('//a[text()="Create sub-organization"]')
+  }
+
   async getAlertSuccess() {
     return browser.$(".alert-success")
   }
@@ -21,6 +25,26 @@ class ShowOrganization extends Page {
 
   async getProfile() {
     return browser.$('div[id="profile"]')
+  }
+
+  async getApp6context() {
+    return browser.$('div[id="app6context"]')
+  }
+
+  async getApp6standardIdentity() {
+    return browser.$('div[id="app6standardIdentity"]')
+  }
+
+  async getApp6symbolSet() {
+    return browser.$('div[id="app6symbolSet"]')
+  }
+
+  async getApp6hq() {
+    return browser.$('div[id="app6hq"]')
+  }
+
+  async getApp6amplifier() {
+    return browser.$('div[id="app6amplifier"]')
   }
 
   async getLeaders() {
