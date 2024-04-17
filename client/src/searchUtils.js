@@ -1,5 +1,3 @@
-export const POSITION_POSITION_TYPE_FILTER_KEY = "Position Type"
-
 export const RECURSE_STRATEGY = {
   NONE: "NONE",
   CHILDREN: "CHILDREN",

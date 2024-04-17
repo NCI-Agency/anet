@@ -10,7 +10,6 @@ const SelectFilter = ({
   queryKey,
   value: inputValue,
   onChange,
-  isPositionTypeFilter,
   options,
   labels
 }) => {
@@ -57,8 +56,7 @@ SelectFilter.propTypes = {
     })
   ]),
   onChange: PropTypes.func, // eslint-disable-line react/no-unused-prop-types
-  asFormField: PropTypes.bool,
-  isPositionTypeFilter: PropTypes.bool
+  asFormField: PropTypes.bool
 }
 SelectFilter.defaultProps = {
   asFormField: true

@@ -160,6 +160,7 @@ dependencies {
 	testImplementation 'org.powermock:powermock-module-junit4-rule:2.0.9'
 
 	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
+	testImplementation 'org.junit.jupiter:junit-jupiter-params:5.10.2'
 	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
 
 	// Avoid "ERROR StatusLogger Log4j2 could not find a logging implementation.

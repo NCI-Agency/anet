@@ -40,6 +40,8 @@ import mil.dds.anet.test.client.Status;
 import mil.dds.anet.test.utils.UtilsTest;
 import mil.dds.anet.utils.DaoUtils;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 public class PersonResourceTest extends AbstractResourceTest {
 
@@ -315,6 +317,19 @@ public class PersonResourceTest extends AbstractResourceTest {
     searchResults =
         withCredentials(jackUser, t -> queryExecutor.personList(getListFields(FIELDS), query4));
     assertThat(searchResults.getList()).isNotEmpty();
+  }
+
+  @ParameterizedTest
+  @EnumSource(value = PositionType.class, names = {"_PLACEHOLDER_1_"},
+      mode = EnumSource.Mode.EXCLUDE)
+  void searchUsersByPositionType(PositionType positionType) {
+    final PersonSearchQueryInput query = PersonSearchQueryInput.builder().withPageSize(0)
+        .withPositionType(List.of(positionType)).build();
+    final AnetBeanList_Person people =
+        withCredentials(adminUser, t -> queryExecutor.personList(getListFields(FIELDS), query));
+    assertThat(people).isNotNull();
+    assertThat(people.getList()).isNotEmpty()
+        .allMatch(p -> p.getPosition().getType() == positionType);
   }
 
   @Test
