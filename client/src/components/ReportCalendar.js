@@ -29,6 +29,12 @@ const GQL_GET_REPORT_LIST = gql`
           uuid
           name
         }
+        advisorOrg {
+          uuid
+          shortName
+          longName
+          identificationCode
+        }
         interlocutorOrg {
           uuid
           shortName
