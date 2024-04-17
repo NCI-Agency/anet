@@ -69,14 +69,6 @@ const GQL_GET_CHART_DATA = gql`
         app6symbolSet
         app6hq
         app6amplifier
-        ascendantOrgs {
-          uuid
-          app6context
-          app6standardIdentity
-          parentOrg {
-            uuid
-          }
-        }
         childrenOrgs(query: { status: ACTIVE }) {
           uuid
         }
@@ -125,10 +117,10 @@ const sortPositions = (positions, truncateLimit) => {
   return allResults.slice(0, truncateLimit)
 }
 
-const determineSymbol = org => {
+const determineSymbol = (org, allAscendantOrgs) => {
   const ascendantOrgs =
     utils
-      .getAscendantObjectsAsList(org, org.ascendantOrgs, "parentOrg")
+      .getAscendantObjectsAsList(org, allAscendantOrgs, "parentOrg")
       ?.reverse() || []
   const context = utils.determineApp6field(ascendantOrgs, "app6context", "0")
   const standardIdentity = utils.determineApp6field(
@@ -261,6 +253,11 @@ const OrganizationalChart = ({
       return
     }
 
+    const allAscendantOrgs = utils.getAscendantObjectsAsMap(
+      (data.organization?.ascendantOrgs ?? []).concat(
+        data.organization?.descendantOrgs ?? []
+      )
+    )
     const linkSelect = link.selectAll("path").data(tree.current(root).links())
 
     linkSelect.attr(
@@ -330,7 +327,9 @@ const OrganizationalChart = ({
       .append("g")
       .on("click", (event, d) => navigate(Organization.pathFor(d.data)))
       .each(function(d) {
-        return this.appendChild(determineSymbol(d.data).asDOM())
+        return this.appendChild(
+          determineSymbol(d.data, allAscendantOrgs).asDOM()
+        )
       })
 
     iconNodeG

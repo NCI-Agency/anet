@@ -346,12 +346,19 @@ export default {
     return index === -1 ? fileName : fileName.substring(0, index)
   },
 
-  getAscendantObjectsAsList: function(leaf, ascendantObjects, parentField) {
-    const parentMap =
+  getAscendantObjectsAsMap: function(ascendantObjects) {
+    return (
       ascendantObjects?.reduce((acc, val) => {
         acc[val.uuid] = val
         return acc
       }, {}) || {}
+    )
+  },
+
+  getAscendantObjectsAsList: function(leaf, ascendantObjects, parentField) {
+    const parentMap = Array.isArray(ascendantObjects)
+      ? this.getAscendantObjectsAsMap(ascendantObjects)
+      : ascendantObjects
     let uuid = leaf?.uuid
     const trail = []
     while (uuid) {
