@@ -436,29 +436,29 @@ task deleteDbDump(type: DockerExecContainer) {
 	group = "database runtime"
 	description = "Deletes the database dump in the container"
 	containerId = dbContainerName
-	commands = [ ["rm", "-f", "${psqlPushDataPath}/anet-db-dump.sql"] as String[] ]
+	commands = [ ["rm", "-f", "${psqlPushDataPath}/${run.environment["ANET_DB_NAME"]}-db-dump.sql"] as String[] ]
 }
 
 task dbDump(type: DockerExecContainer, dependsOn: deleteDbDump) {
 	group = "database runtime"
 	description = "Dumps the ANET database in the container"
 	containerId = dbContainerName
-	commands = [ ["pg_dump", "-U", run.environment["ANET_DB_USERNAME"], "-d", run.environment["ANET_DB_NAME"], "-f", "${psqlPushDataPath}/anet-db-dump.sql"] as String[] ]
+	commands = [ ["pg_dump", "-U", run.environment["ANET_DB_USERNAME"], "-d", run.environment["ANET_DB_NAME"], "-f", "${psqlPushDataPath}/${run.environment["ANET_DB_NAME"]}-db-dump.sql"] as String[] ]
 }
 
 task extractDbDump(type: DockerCopyFileFromContainer, dependsOn: dbDump) {
 	group = "database runtime"
 	description = "Extracts the dumped database from the container"
 	containerId = dbContainerName
-	hostPath = "${buildDir}/db/anet-db-dump.sql"
-	remotePath = "${psqlPushDataPath}/anet-db-dump.sql"
+	hostPath = "${buildDir}/db/${run.environment["ANET_DB_NAME"]}-db-dump.sql"
+	remotePath = "${psqlPushDataPath}/${run.environment["ANET_DB_NAME"]}-db-dump.sql"
 }
 
 task pushDbDump(type: DockerCopyFileToContainer) {
 	group = "database runtime"
 	description = "Copies the database dump to the container"
 	containerId = dbContainerName
-	hostPath = "${buildDir}/db/anet-db-dump.sql"
+	hostPath = "${buildDir}/db/${run.environment["ANET_DB_NAME"]}-db-dump.sql"
 	remotePath = psqlPushDataPath
 }
 
@@ -466,7 +466,7 @@ task dbRestore(type: DockerExecContainer, dependsOn: [pushDbDump, dbDrop]) {
 	group = "database runtime"
 	description = "Restores the ANET database in the container"
 	containerId = dbContainerName
-	commands = [ ["psql", "-U", run.environment["ANET_DB_USERNAME"], "-d", run.environment["ANET_DB_NAME"], "-f", "${psqlPushDataPath}/anet-db-dump.sql"] as String[] ]
+	commands = [ ["psql", "-U", run.environment["ANET_DB_USERNAME"], "-d", run.environment["ANET_DB_NAME"], "-f", "${psqlPushDataPath}/${run.environment["ANET_DB_NAME"]}-db-dump.sql"] as String[] ]
 }
 
 task dockerBuildImage(dependsOn: installDist, type: DockerBuildImage) {

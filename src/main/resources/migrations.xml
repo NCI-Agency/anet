@@ -4895,14 +4895,14 @@
 			ALTER TABLE tasks DROP COLUMN full_text;
 
 			<!-- Define functions for aggregating JSON values recursively, to be used in the full-text index -->
-			CREATE OR REPLACE FUNCTION jsonb_value_agg (p_json jsonb, ignore_key text default 'invisibleCustomFields')
+			CREATE OR REPLACE FUNCTION jsonb_value_agg(p_json jsonb, ignore_key text default 'invisibleCustomFields')
 				RETURNS text
 			AS
 			'
 			BEGIN
 				RETURN CASE
-					WHEN jsonb_typeof(p_json) = ''array'' THEN jsonb_array_value_agg(p_json, ignore_key)
-					WHEN jsonb_typeof(p_json) = ''object'' THEN jsonb_object_value_agg(p_json, ignore_key)
+					WHEN jsonb_typeof(p_json) = ''array'' THEN public.jsonb_array_value_agg(p_json, ignore_key)
+					WHEN jsonb_typeof(p_json) = ''object'' THEN public.jsonb_object_value_agg(p_json, ignore_key)
 					WHEN jsonb_typeof(p_json) = ''string''
 						AND p_json #>> ''{}'' !~ ''^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{1,3}Z$''
 						THEN coalesce(p_json #>> ''{}'', '''')
@@ -4916,12 +4916,12 @@
 			LANGUAGE plpgsql
 			IMMUTABLE;
 
-			CREATE OR REPLACE FUNCTION jsonb_array_value_agg (p_json jsonb, ignore_key text default 'invisibleCustomFields')
+			CREATE OR REPLACE FUNCTION jsonb_array_value_agg(p_json jsonb, ignore_key text default 'invisibleCustomFields')
 				RETURNS text
 			AS
 			'
 			BEGIN
-				RETURN string_agg(jsonb_value_agg(value, ignore_key), '' '')
+				RETURN string_agg(public.jsonb_value_agg(value, ignore_key), '' '')
 				FROM jsonb_array_elements(p_json);
 			EXCEPTION
 				WHEN OTHERS THEN
@@ -4931,12 +4931,12 @@
 			LANGUAGE plpgsql
 			IMMUTABLE;
 
-			CREATE OR REPLACE FUNCTION jsonb_object_value_agg (p_json jsonb, ignore_key text default 'invisibleCustomFields')
+			CREATE OR REPLACE FUNCTION jsonb_object_value_agg(p_json jsonb, ignore_key text default 'invisibleCustomFields')
 				RETURNS text
 			AS
 			'
 			BEGIN
-				RETURN string_agg(jsonb_value_agg(value, ignore_key), '' '')
+				RETURN string_agg(public.jsonb_value_agg(value, ignore_key), '' '')
 				FROM jsonb_each(p_json)
 				WHERE key != ignore_key;
 			EXCEPTION
