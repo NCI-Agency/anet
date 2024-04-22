@@ -6,7 +6,7 @@ runs:
   - uses: actions/checkout@v4
     with:
       fetch-depth: 0
-  - name: Setup kernel for a.o. Storybook, increase number of file watches
+  - name: Setup kernel, increase number of file watches
     run: echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
     shell: bash
   - name: Set up chromedriver

@@ -20,7 +20,6 @@ We recommend reading through the documentation in the following order:
 1. [Working on the backend](./docs/backend-overview.md)
 1. [Working on the frontend](./docs/frontend-overview.md)
 1. See [DOCUMENTATION.md](./docs/DOCUMENTATION.md), [INSTALL.md](./docs/INSTALL.md) and [TROUBLESHOOT.md](./docs/TROUBLESHOOT.md) for additional information.
-1. See [our Storybook on Chromatic](https://www.chromatic.com/build?appId=612fa06864063b003a65dead) for detailed documentation.
 
 
 ## Contributing

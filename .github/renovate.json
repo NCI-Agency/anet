@@ -86,13 +86,6 @@
       "matchPackagePrefixes": ["@graphql-codegen/"]
     },
     {
-      "labels": ["devDependencies"],
-      "groupName": "NPM, dev-dependencies, Storybook",
-      "matchManagers": ["npm"],
-      "matchDepTypes": ["devDependencies"],
-      "matchPackagePrefixes": ["@storybook/", "storybook"]
-    },
-    {
       "groupName": "NPM, dev-dependencies, WebdriverIO",
       "matchManagers": ["npm"],
       "matchDepTypes": ["devDependencies"],

@@ -79,12 +79,10 @@ describe("Show print report page", () => {
       expect(compactBannerText).to.equal(bannerSecurityText)
     })
     it("Should display all attendees", async() => {
-      const displayedInterlocutors = await ShowReport.getCompactViewElements(
-        "interlocutors"
-      )
-      const displayedAdvisors = await ShowReport.getCompactViewElements(
-        "advisors"
-      )
+      const displayedInterlocutors =
+        await ShowReport.getCompactViewElements("interlocutors")
+      const displayedAdvisors =
+        await ShowReport.getCompactViewElements("advisors")
       for (const interlocutor of INTERLOCUTORS) {
         expect(displayedInterlocutors).to.contain(interlocutor)
       }
