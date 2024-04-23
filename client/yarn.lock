@@ -4589,9 +4589,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@testing-library/react@npm:15.0.0":
-  version: 15.0.0
-  resolution: "@testing-library/react@npm:15.0.0"
+"@testing-library/react@npm:15.0.4":
+  version: 15.0.4
+  resolution: "@testing-library/react@npm:15.0.4"
   dependencies:
     "@babel/runtime": "npm:^7.12.5"
     "@testing-library/dom": "npm:^10.0.0"
@@ -4599,7 +4599,7 @@ __metadata:
   peerDependencies:
     react: ^18.0.0
     react-dom: ^18.0.0
-  checksum: 10c0/564c865767ef1eb3af16585df3b3111d76ac67f4103c3664ddecf4ad1dabf605fb9ca7c54d8718d14ed0f044d139814eff4ca28fdd62a7309c58146ca9c64877
+  checksum: 10c0/2f58729e39b93915c527557e87396e02deb5aecd3cf806427deee19bcccf8114681bf259c24b6a4a916e98710193b190ec321e842faaac4196131e22c8a8ac92
   languageName: node
   linkType: hard
 
@@ -6254,7 +6254,7 @@ __metadata:
     "@graphql-codegen/visitor-plugin-common": "npm:5.1.0"
     "@projectstorm/react-diagrams": "npm:7.0.4"
     "@testing-library/jest-dom": "npm:6.4.2"
-    "@testing-library/react": "npm:15.0.0"
+    "@testing-library/react": "npm:15.0.4"
     "@trivago/prettier-plugin-sort-imports": "npm:4.3.0"
     "@wdio/browserstack-service": "npm:8.35.1"
     "@wdio/cli": "npm:8.35.1"
