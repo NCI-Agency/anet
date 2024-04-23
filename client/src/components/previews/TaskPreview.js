@@ -176,7 +176,6 @@ const TaskPreview = ({ className, uuid }) => {
             <DictionaryField
               wrappedComponent={PreviewField}
               dictProps={Settings.fields.task.childrenTasks}
-              name="subEfforts"
               value={
                 <ListGroup>
                   {task.childrenTasks?.map(task => (

@@ -186,19 +186,19 @@ const ReportPreview = ({ className, uuid }) => {
               <DictionaryField
                 wrappedComponent={PreviewField}
                 dictProps={Settings.fields.report.intent}
-                name="intent"
+                value={report.intent}
                 style={{ marginBottom: 0 }}
               />
               <DictionaryField
                 wrappedComponent={PreviewField}
                 dictProps={Settings.fields.report.keyOutcomes}
-                name="keyOutcomes"
+                value={report.keyOutcomes}
                 style={{ marginBottom: 0 }}
               />
               <DictionaryField
                 wrappedComponent={PreviewField}
                 dictProps={Settings.fields.report.nextSteps}
-                name="nextSteps"
+                value={report.nextSteps}
                 style={{ marginBottom: 0 }}
               />
             </div>
