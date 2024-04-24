@@ -108,7 +108,7 @@ dependencies {
 	implementation 'javax.cache:cache-api:1.1.1'
 	implementation 'commons-beanutils:commons-beanutils:1.9.4'
 
-	implementation 'org.simplejavamail:simple-java-mail:8.8.2'
+	implementation 'org.simplejavamail:simple-java-mail:8.8.4'
 	implementation 'org.eclipse.angus:jakarta.mail:2.0.3'
 	implementation "ch.qos.logback:logback-classic:${logbackVersion}"
 	implementation "ch.qos.logback:logback-core:${logbackVersion}"
@@ -140,7 +140,7 @@ dependencies {
 
 	// GraphQL dependencies
 	implementation 'com.graphql-java:graphql-java:21.3'
-	implementation 'com.graphql-java:java-dataloader:3.2.2'
+	implementation 'com.graphql-java:java-dataloader:3.3.0'
 	implementation 'io.leangen.graphql:spqr:0.12.4'
 	// The graphql-java-client-runtime module aggregates all dependencies for the generated code,
 	// including the plugin runtime
