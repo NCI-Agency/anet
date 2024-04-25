@@ -1,7 +1,7 @@
 import { gql } from "@apollo/client"
 import { Icon } from "@blueprintjs/core"
+import "normalize.css"
 import "@blueprintjs/core/lib/css/blueprint.css"
-import "@blueprintjs/datetime/lib/css/blueprint-datetime.css"
 import { IconNames } from "@blueprintjs/icons"
 import {
   DEFAULT_PAGE_PROPS,
