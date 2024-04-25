@@ -1,4 +1,5 @@
 import { Icon, IconSize } from "@blueprintjs/core"
+import "normalize.css"
 import "@blueprintjs/core/lib/css/blueprint.css"
 import { IconNames } from "@blueprintjs/icons"
 // needed for the mosaic tile buttons (expand, close):
