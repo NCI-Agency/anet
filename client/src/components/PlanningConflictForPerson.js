@@ -1,12 +1,14 @@
 import { gql } from "@apollo/client"
-import { Callout, Icon, Intent, Spinner } from "@blueprintjs/core"
-import { IconNames } from "@blueprintjs/icons"
 import {
-  Popover2,
-  Popover2InteractionKind,
-  Tooltip2
-} from "@blueprintjs/popover2"
-import "@blueprintjs/popover2/lib/css/blueprint-popover2.css"
+  Callout,
+  Icon,
+  Intent,
+  Spinner,
+  Popover,
+  PopoverInteractionKind,
+  Tooltip
+} from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import API from "api"
 import LinkTo from "components/LinkTo"
 import Person from "models/Person"
@@ -48,20 +50,20 @@ const BasePlanningConflictForPerson = ({ person, report, iconOnly }) => {
 
   if (loading) {
     return (
-      <Tooltip2 content="Checking for planning conflicts...">
+      <Tooltip content="Checking for planning conflicts...">
         <Spinner intent={Intent.WARNING} size={20} />
-      </Tooltip2>
+      </Tooltip>
     )
   }
 
   if (error) {
     return (
-      <Tooltip2
+      <Tooltip
         content="Error occured while checking for planning conflicts!"
         intent={Intent.DANGER}
       >
         <Icon icon={IconNames.ERROR} intent={Intent.DANGER} />
-      </Tooltip2>
+      </Tooltip>
     )
   }
 
@@ -78,8 +80,8 @@ const BasePlanningConflictForPerson = ({ person, report, iconOnly }) => {
   }
 
   return (
-    <Popover2
-      interactionKind={Popover2InteractionKind.CLICK}
+    <Popover
+      interactionKind={PopoverInteractionKind.CLICK}
       usePortal={false}
       autoFocus={false}
       enforceFocus={false}
@@ -112,7 +114,7 @@ const BasePlanningConflictForPerson = ({ person, report, iconOnly }) => {
           </>
         )}
       </Button>
-    </Popover2>
+    </Popover>
   )
 }
 

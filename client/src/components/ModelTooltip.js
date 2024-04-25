@@ -1,17 +1,17 @@
-import { Tooltip2 } from "@blueprintjs/popover2"
+import { Tooltip } from "@blueprintjs/core"
 import PropTypes from "prop-types"
 import React from "react"
 import "./ModelTooltip.css"
 
 const ModelTooltip = ({ tooltipContent, children, ...tooltipProps }) => {
   return (
-    <Tooltip2
+    <Tooltip
       style={{ overflow: "auto" }}
       content={tooltipContent}
       {...tooltipProps}
     >
       {children}
-    </Tooltip2>
+    </Tooltip>
   )
 }
 
