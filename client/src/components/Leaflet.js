@@ -9,6 +9,8 @@ import {
 import "leaflet-geosearch/assets/css/leaflet.css"
 import { GestureHandling } from "leaflet-gesture-handling"
 import "leaflet-gesture-handling/dist/leaflet-gesture-handling.css"
+import "leaflet.fullscreen"
+import "leaflet.fullscreen/Control.FullScreen.css"
 import { MarkerClusterGroup } from "leaflet.markercluster"
 import "leaflet.markercluster/dist/MarkerCluster.css"
 import "leaflet.markercluster/dist/MarkerCluster.Default.css"
@@ -144,7 +146,12 @@ const Leaflet = ({
   useEffect(() => {
     Map.addInitHook("addHandler", "gestureHandling", GestureHandling)
     const mapOptions = Object.assign(
-      { zoomControl: true, gestureHandling: true },
+      {
+        zoomControl: true,
+        gestureHandling: true,
+        fullscreenControl: true,
+        fullscreenControlOptions: { position: "topleft" }
+      },
       Settings.imagery.mapOptions.leafletOptions,
       Settings.imagery.mapOptions.crs && {
         crs: CRS[Settings.imagery.mapOptions.crs]
