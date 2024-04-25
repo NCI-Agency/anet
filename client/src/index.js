@@ -1,4 +1,5 @@
 import { ApolloProvider } from "@apollo/client"
+import { OverlaysProvider } from "@blueprintjs/core"
 import API from "api"
 import "bootstrap/dist/css/bootstrap.css"
 import { jumpToTop } from "components/Page"
@@ -29,7 +30,9 @@ root.render(
     <PersistGate persistor={persistor}>
       <ApolloProvider client={API.client}>
         <BrowserRouter onUpdate={jumpToTop}>
-          <App />
+          <OverlaysProvider>
+            <App />
+          </OverlaysProvider>
         </BrowserRouter>
       </ApolloProvider>
     </PersistGate>
