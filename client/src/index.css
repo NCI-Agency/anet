@@ -341,24 +341,6 @@ span.asLink:focus {
   margin: 0;
 }
 
-.home-tile-row span.close-getting-started {
-  position: relative;
-  top: -10px;
-  right: 5px;
-  font-size: 1.2rem;
-  float: right;
-  cursor: pointer;
-  opacity: 0.2;
-  color: #000;
-  text-shadow: 0 1px 0 #fff;
-  font-weight: bold;
-}
-
-.home-tile-row span.close-getting-started:hover {
-  opacity: 0.5;
-  text-decoration: none;
-}
-
 button.home-tile.btn {
   text-align: center;
   padding: 10px;
@@ -544,53 +526,6 @@ li#search-nav .nav > li a {
 
 .onboarding-new .create-account-button-wrapper {
   text-align: center;
-}
-
-.getting-started-grid {
-  padding-left: 0;
-  padding-right: 0;
-}
-
-.getting-started-grid .row {
-  width: 100%;
-  margin-left: auto;
-  margin-right: auto;
-  text-align: center;
-}
-
-.getting-started-grid .row:first-child {
-  margin-bottom: 20px;
-}
-
-.getting-started-grid .row:last-child {
-  margin-top: 20px;
-}
-
-.getting-started-grid .row h3,
-button {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.getting-started-grid .row h3 {
-  font-size: 16px;
-}
-
-.getting-started-grid .row button {
-  font-size: 12px;
-}
-
-.getting-started-grid {
-  padding-top: 15px;
-  padding-bottom: 15px;
-}
-
-.getting-started-grid a {
-  font-weight: bold;
-}
-
-.getting-started-grid p {
-  margin-bottom: 0;
 }
 
 table hr.attendee-divider {
