@@ -1,6 +1,5 @@
-import { Icon, Intent } from "@blueprintjs/core"
+import { Icon, Intent, Tooltip } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
-import { Tooltip2 } from "@blueprintjs/popover2"
 import Leaflet from "components/Leaflet"
 import {
   DEFAULT_CUSTOM_FIELDS_PARENT,
@@ -296,25 +295,25 @@ export function areAllSet(...args) {
 
 export function getInfoButton(infoText) {
   return (
-    <Tooltip2 content={infoText} intent={Intent.PRIMARY}>
+    <Tooltip content={infoText} intent={Intent.PRIMARY}>
       <Button variant="default">
         <Icon icon={IconNames.INFO_SIGN} intent={Intent.PRIMARY} />
       </Button>
-    </Tooltip2>
+    </Tooltip>
   )
 }
 
 export function getClearButton(onClear) {
   return (
-    <Tooltip2 content="Clear field value" intent={Intent.DANGER}>
+    <Tooltip content="Clear field value" intent={Intent.DANGER}>
       <RemoveButton onClick={onClear} />
-    </Tooltip2>
+    </Tooltip>
   )
 }
 
 export function getActivationButton(isActive, onClickAction, instanceName) {
   return (
-    <Tooltip2
+    <Tooltip
       content={
         isActive ? `Deactivate ${instanceName}` : `Activate ${instanceName}`
       }
@@ -327,7 +326,7 @@ export function getActivationButton(isActive, onClickAction, instanceName) {
       >
         <Icon icon={isActive ? IconNames.STOP : IconNames.PLAY} />
       </Button>
-    </Tooltip2>
+    </Tooltip>
   )
 }
 

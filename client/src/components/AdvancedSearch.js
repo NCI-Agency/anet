@@ -1,5 +1,4 @@
-import { Popover2, Popover2InteractionKind } from "@blueprintjs/popover2"
-import "@blueprintjs/popover2/lib/css/blueprint-popover2.css"
+import { Popover, PopoverInteractionKind } from "@blueprintjs/core"
 import styled from "@emotion/styled"
 import { resetPagination, SEARCH_OBJECT_LABELS, setSearchQuery } from "actions"
 import AppContext from "components/AppContext"
@@ -159,10 +158,10 @@ const AdvancedSearch = ({
                     "No additional filters available"
                   )
                 ) : (
-                  <Popover2
+                  <Popover
                     content={advancedSearchMenuContent}
                     captureDismiss
-                    interactionKind={Popover2InteractionKind.CLICK}
+                    interactionKind={PopoverInteractionKind.CLICK}
                     usePortal={false}
                     autoFocus
                     enforceFocus
@@ -181,7 +180,7 @@ const AdvancedSearch = ({
                     <Button variant="link" id="addFilterDropdown">
                       + Add {filters.length > 0 && "another"} filter
                     </Button>
-                  </Popover2>
+                  </Popover>
                 )}
               </div>
               <div

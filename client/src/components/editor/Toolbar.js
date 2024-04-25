@@ -1,6 +1,5 @@
-import { Icon } from "@blueprintjs/core"
+import { Icon, Tooltip } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
-import { Tooltip2 } from "@blueprintjs/popover2"
 import PropTypes from "prop-types"
 import React from "react"
 import { getSelectedParentNode } from "richTextUtils"
@@ -257,7 +256,7 @@ const EditorToggleButton = ({
   }
 
   return (
-    <Tooltip2
+    <Tooltip
       content={tooltipText}
       position="top"
       hoverOpenDelay={1000}
@@ -275,7 +274,7 @@ const EditorToggleButton = ({
         <Icon icon={icon} />
         {text}
       </button>
-    </Tooltip2>
+    </Tooltip>
   )
 }
 

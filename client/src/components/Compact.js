@@ -1,7 +1,6 @@
 // Print friendly table layout for pages
-import { Icon, Intent } from "@blueprintjs/core"
+import { Icon, Intent, Tooltip } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
-import { Tooltip2 } from "@blueprintjs/popover2"
 import styled from "@emotion/styled"
 import AppContext from "components/AppContext"
 import LinkTo from "components/LinkTo"
@@ -181,12 +180,12 @@ const SensitivityInformation = () => {
         - {Settings.printOptions.sensitiveInformationText}
       </span>
       <span className="sensitivity-tooltip">
-        <Tooltip2
+        <Tooltip
           content={Settings.printOptions.sensitiveInformationTooltipText}
           intent={Intent.WARNING}
         >
           <Icon icon={IconNames.INFO_SIGN} intent={Intent.PRIMARY} />
-        </Tooltip2>
+        </Tooltip>
       </span>
     </SensitivityInformationS>
   )
