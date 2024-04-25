@@ -141,7 +141,7 @@
     "leaflet-defaulticon-compatibility": "0.1.2",
     "leaflet-geosearch": "3.11.1",
     "leaflet-gesture-handling": "1.2.2",
-    "leaflet.fullscreen": "3.0.1",
+    "leaflet.fullscreen": "3.0.2",
     "leaflet.markercluster": "1.5.3",
     "locale-compare-polyfill": "0.0.2",
     "lodash": "4.17.21",
