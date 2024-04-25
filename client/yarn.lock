@@ -1963,7 +1963,30 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@blueprintjs/datetime@npm:5.3.4":
+"@blueprintjs/datetime2@npm:2.3.4":
+  version: 2.3.4
+  resolution: "@blueprintjs/datetime2@npm:2.3.4"
+  dependencies:
+    "@blueprintjs/core": "npm:^5.10.2"
+    "@blueprintjs/datetime": "npm:^5.3.4"
+    "@blueprintjs/icons": "npm:^5.9.0"
+    classnames: "npm:^2.3.1"
+    date-fns: "npm:^2.28.0"
+    react-day-picker: "npm:^8.10.0"
+    react-innertext: "npm:^1.1.5"
+    tslib: "npm:~2.6.2"
+  peerDependencies:
+    "@types/react": ^16.14.41 || 17 || 18
+    react: ^16.8 || 17 || 18
+    react-dom: ^16.8 || 17 || 18
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+  checksum: 10c0/acfc5e21cdda123535c41c2f9b1030417fbaa4fd817e98731494a24ac826186cde5810a13607c5704f5e3a276fea382c16dc6b6cb03b5b0b64b59f818bfea3fb
+  languageName: node
+  linkType: hard
+
+"@blueprintjs/datetime@npm:^5.3.4":
   version: 5.3.4
   resolution: "@blueprintjs/datetime@npm:5.3.4"
   dependencies:
@@ -2002,24 +2025,6 @@ __metadata:
     "@types/react":
       optional: true
   checksum: 10c0/0613ffde563995846374395d3e3e689ed4671a684ca0dd690fc59c8be376b028301ff775b116175aed87e6aa56c423422f9cae7ab82bd6f9a606ac19f6643fc3
-  languageName: node
-  linkType: hard
-
-"@blueprintjs/popover2@npm:2.1.4":
-  version: 2.1.4
-  resolution: "@blueprintjs/popover2@npm:2.1.4"
-  dependencies:
-    "@blueprintjs/core": "npm:^5.10.2"
-    classnames: "npm:^2.3.1"
-    tslib: "npm:~2.6.2"
-  peerDependencies:
-    "@types/react": ^16.14.41 || 17 || 18
-    react: ^16.8 || 17 || 18
-    react-dom: ^16.8 || 17 || 18
-  peerDependenciesMeta:
-    "@types/react":
-      optional: true
-  checksum: 10c0/3a4ddef34dc7e5464827904fd4b920f5b1c61d88de6d8112bd206fa2d2d15afddc1dbfe190f30c5b6a8daecafae88a44f9e39679e0ddfb081ebe4befa2755709
   languageName: node
   linkType: hard
 
@@ -6243,8 +6248,7 @@ __metadata:
     "@babel/register": "npm:7.23.7"
     "@babel/runtime": "npm:7.24.4"
     "@blueprintjs/core": "npm:5.10.2"
-    "@blueprintjs/datetime": "npm:5.3.4"
-    "@blueprintjs/popover2": "npm:2.1.4"
+    "@blueprintjs/datetime2": "npm:2.3.4"
     "@colors/colors": "npm:1.6.0"
     "@emotion/react": "npm:11.11.4"
     "@emotion/styled": "npm:11.11.5"
@@ -16887,6 +16891,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-day-picker@npm:^8.10.0":
+  version: 8.10.1
+  resolution: "react-day-picker@npm:8.10.1"
+  peerDependencies:
+    date-fns: ^2.28.0 || ^3.0.0
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0
+  checksum: 10c0/a0ff28c4b61b3882e6a825b19e5679e2fdf3256cf1be8eb0a0c028949815c1ae5a6561474c2c19d231c010c8e0e0b654d3a322610881e0655abca05a2e03d9df
+  languageName: node
+  linkType: hard
+
 "react-dnd-html5-backend@npm:^16.0.1":
   version: 16.0.1
   resolution: "react-dnd-html5-backend@npm:16.0.1"
@@ -16979,6 +16993,16 @@ __metadata:
   version: 3.2.2
   resolution: "react-fast-compare@npm:3.2.2"
   checksum: 10c0/0bbd2f3eb41ab2ff7380daaa55105db698d965c396df73e6874831dbafec8c4b5b08ba36ff09df01526caa3c61595247e3269558c284e37646241cba2b90a367
+  languageName: node
+  linkType: hard
+
+"react-innertext@npm:^1.1.5":
+  version: 1.1.5
+  resolution: "react-innertext@npm:1.1.5"
+  peerDependencies:
+    "@types/react": ">=0.0.0 <=99"
+    react: ">=0.0.0 <=99"
+  checksum: 10c0/45335918ac83334133a9fa0df4ce109e0d4a45d54b783a8eaec88811b36dd5c3bbb5d9a6af2da1eed518a6f325a6ffae4be7bd30878596e0ec1760b231a8e0ee
   languageName: node
   linkType: hard
 
