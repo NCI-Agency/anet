@@ -72,7 +72,7 @@
   display: flex;
   justify-content: space-between;
 }
-.file-info > .bp4-popover2-target {
+.file-info > .bp5-popover-target {
   height: 100%;
   width: 100%;
 }

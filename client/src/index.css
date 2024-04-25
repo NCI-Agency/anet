@@ -285,11 +285,8 @@ a.btn {
 }
 
 .header .logo img,
-.header button {
+.header button:not(.bp5-button) {
   height: 38px;
-}
-
-.header button {
   font-weight: bold;
 }
 
@@ -398,7 +395,7 @@ button.home-tile.btn {
   text-align: center;
 }
 
-form.advanced-search-form ~ div.bp4-overlay.bp4-overlay-open.bp4-overlay-inline div.advanced-search.form-horizontal {
+form.advanced-search-form ~ div.bp5-overlay.bp5-overlay-open.bp5-overlay-inline div.advanced-search.form-horizontal {
   max-height: 70vh;
   overflow: auto;
 }
@@ -972,20 +969,20 @@ header.searchPagination {
   outline: none;
 }
 
-.advanced-select-popover .bp4-popover2-content-sizing {
+.advanced-select-popover .bp5-popover-content-sizing {
   width: 100% !important;
 }
 
-.advanced-select-popover .input-group > span.bp4-popover2-target {
+.advanced-select-popover .input-group > span.bp5-popover-target {
   display: block;
   width: 100%;
 }
 
-.advanced-select-popover .bp4-popover2-transition-container {
+.advanced-select-popover .bp5-popover-transition-container {
   top: 50px !important;
 }
 
-.advanced-select-popover .bp4-popover2-content {
+.advanced-select-popover .bp5-popover-content {
   min-width: 400px;
   max-width: 90vw !important;
   max-height: 47vh !important;
@@ -1248,7 +1245,7 @@ div[id*='fg-entityAssessment'] {
     font-size: 12px;
   }
 
-  .search-popover-target ~ .bp4-overlay > .bp4-popover2-transition-container {
+  .search-popover-target ~ .bp5-overlay > .bp5-popover-transition-container {
     left: 5vw !important;
     width: 90vw;
   }

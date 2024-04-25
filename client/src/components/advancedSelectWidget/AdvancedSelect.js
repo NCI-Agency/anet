@@ -305,7 +305,7 @@ const AdvancedSelect = ({
           <div className={classNames(className, "advanced-select-popover")}>
             <InputGroup>
               <Popover2
-                popoverClassName="advanced-select-popover bp4-popover2-content-sizing"
+                popoverClassName="advanced-select-popover bp5-popover-content-sizing"
                 content={
                   <Row id={`${fieldName}-popover`} className="border-between">
                     {(showCreateEntityComponent && (
