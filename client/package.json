@@ -88,7 +88,7 @@
     "keycloak-connect": "24.0.3",
     "moment-timezone": "0.5.45",
     "postcss": "8.4.38",
-    "postcss-calc": "9.0.1",
+    "postcss-calc": "10.0.0",
     "postcss-flexbugs-fixes": "5.0.2",
     "postcss-loader": "8.1.1",
     "prettier-eslint-cli": "8.0.1",
