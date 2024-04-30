@@ -5178,15 +5178,6 @@
 				LEFT JOIN positions pos ON pos."organizationUuid" = por.uuid
 				LEFT JOIN people peo ON peo.uuid = pos."currentPersonUuid"
 				GROUP BY org.uuid
-			),
-			chp AS (
-				SELECT DISTINCT
-					org.uuid,
-					TRUE AS "pos"
-				FROM organizations org
-				LEFT JOIN parent_orgs por ON por.parent_uuid = org.uuid
-				LEFT JOIN positions pos ON pos."organizationUuid" = por.uuid
-				WHERE pos.uuid IS NOT NULL
 			)
 			UPDATE organizations
 			SET
@@ -5202,17 +5193,14 @@
 					CASE
 						WHEN org."parentOrgUuid" IS NOT NULL THEN NULL
 						WHEN chu."user" THEN '3'
-						WHEN chp.pos THEN '4'
 					END AS "app6standardIdentity",
 					CASE
 						WHEN chu."user" THEN '10'
-						WHEN chp.pos THEN '11'
 					END AS "app6symbolSet"
 				FROM organizations org
 				LEFT JOIN positions pos ON pos."organizationUuid" = org.uuid
 				LEFT JOIN tlp ON tlp.uuid = org.uuid
 				LEFT JOIN chu ON chu.uuid = tlp.parent_uuid
-				LEFT JOIN chp ON chp.uuid = tlp.parent_uuid
 			) sq
 			WHERE organizations.uuid = sq.uuid;
 		</sql>
