@@ -355,7 +355,11 @@ export default {
     )
   },
 
-  getAscendantObjectsAsList: function(leaf, ascendantObjects, parentField) {
+  getAscendantObjectsAsList: function(
+    leaf,
+    ascendantObjects = [],
+    parentField
+  ) {
     const parentMap = Array.isArray(ascendantObjects)
       ? this.getAscendantObjectsAsMap(ascendantObjects)
       : ascendantObjects
