@@ -1,3 +1,4 @@
+import { expect } from "chai"
 import Page from "./page"
 
 const PAGE_URL = "/organizations/new"
@@ -27,6 +28,42 @@ class CreateOrganization extends Page {
     return browser.$("#longName")
   }
 
+  async getParentOrganizationInput() {
+    return browser.$("#parentOrg")
+  }
+
+  async getClearParentOrganizationButton() {
+    return browser.$("#fg-parentOrg div.input-group button")
+  }
+
+  async getParentOrganizationSearchPopover() {
+    return browser.$("#parentOrg-popover")
+  }
+
+  async getParentOrganizationsTable() {
+    return (await this.getParentOrganizationSearchPopover()).$(
+      ".table-responsive table"
+    )
+  }
+
+  async selectParentOrganizationByText(name) {
+    await (await this.getParentOrganizationInput()).click()
+    // wait for parentOrg table loader to disappear
+    await (await this.getParentOrganizationsTable()).waitForDisplayed()
+    await browser.keys(name)
+    await (await this.getParentOrganizationsTable()).waitForDisplayed()
+    const radioButton = await (
+      await this.getParentOrganizationsTable()
+    ).$("tbody tr:first-child td:first-child input.form-check-input")
+    if (!(await radioButton.isSelected())) {
+      await radioButton.click()
+    }
+    await (await this.getShortNameInput()).click()
+    await (
+      await this.getParentOrganizationSearchPopover()
+    ).waitForExist({ reverse: true, timeout: 3000 })
+  }
+
   async getLocationInput() {
     return browser.$("#location")
   }
@@ -41,6 +78,46 @@ class CreateOrganization extends Page {
     return browser.$("#fg-profile .editable")
   }
 
+  async getApp6contextInput() {
+    return browser.$("#app6context")
+  }
+
+  async getApp6contextExtraColumn() {
+    return browser.$("#fg-app6context div.col-sm-3")
+  }
+
+  async getApp6standardIdentityInput() {
+    return browser.$("#app6standardIdentity")
+  }
+
+  async getApp6standardIdentityExtraColumn() {
+    return browser.$("#fg-app6standardIdentity div.col-sm-3")
+  }
+
+  async getApp6symbolSetInput() {
+    return browser.$("#app6symbolSet")
+  }
+
+  async getApp6symbolSetExtraColumn() {
+    return browser.$("#fg-app6symbolSet div.col-sm-3")
+  }
+
+  async getApp6hqInput() {
+    return browser.$("#app6hq")
+  }
+
+  async getApp6hqExtraColumn() {
+    return browser.$("#fg-app6hq div.col-sm-3")
+  }
+
+  async getApp6amplifierInput() {
+    return browser.$("#app6amplifier")
+  }
+
+  async getApp6amplifierExtraColumn() {
+    return browser.$("#fg-app6amplifier div.col-sm-3")
+  }
+
   async openAsSuperuser() {
     await super.openAsSuperuser(PAGE_URL)
   }
@@ -51,6 +128,44 @@ class CreateOrganization extends Page {
 
   async submitForm() {
     await (await this.getSubmitButton()).click()
+  }
+
+  async fillOrganization(org) {
+    await (await this.getShortNameInput()).setValue(org.shortName)
+    await (await this.getLongNameInput()).setValue(org.description)
+    await (await this.getLocationInput()).click()
+    await (await this.getLocationInput()).setValue(org.location)
+    await this.waitForLocationAdvancedSelectToChange(org.location)
+    expect(
+      await (await this.getLocationAdvancedSelectFirstItem()).getText()
+    ).to.include(org.location)
+    await (await this.getLocationAdvancedSelectFirstItem()).click()
+    await this.fillOrganizationProfile(org.profile)
+    if (org.app6contextInput) {
+      await (
+        await this.getApp6contextInput()
+      ).selectByAttribute("value", org.app6contextInput)
+    }
+    if (org.app6standardIdentityInput) {
+      await (
+        await this.getApp6standardIdentityInput()
+      ).selectByAttribute("value", org.app6standardIdentityInput)
+    }
+    if (org.app6symbolSetInput) {
+      await (
+        await this.getApp6symbolSetInput()
+      ).selectByAttribute("value", org.app6symbolSetInput)
+    }
+    if (org.app6hqInput) {
+      await (
+        await this.getApp6hqInput()
+      ).selectByAttribute("value", org.app6hqInput)
+    }
+    if (org.app6amplifierInput) {
+      await (
+        await this.getApp6amplifierInput()
+      ).selectByAttribute("value", org.app6amplifierInput)
+    }
   }
 
   async waitForLocationAdvancedSelectToChange(value) {

@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableList;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.client.AnetBeanList_Organization;
@@ -31,6 +32,7 @@ class OrganizationResourceTest extends AbstractResourceTest {
   private static final String _EMAIL_ADDRESSES_FIELDS = "emailAddresses { network address }";
   protected static final String FIELDS =
       String.format("{ uuid shortName longName status identificationCode profile location"
+          + " app6context app6standardIdentity app6symbolSet app6hq app6amplifier"
           + " customFields tasks { uuid } parentOrg { uuid }"
           + " approvalSteps { uuid name approvers { uuid } } %1$s }", _EMAIL_ADDRESSES_FIELDS);
   private static final String POSITION_FIELDS = String.format(
@@ -41,6 +43,11 @@ class OrganizationResourceTest extends AbstractResourceTest {
   void createAO() {
     // Create a new AO
     final OrganizationInput aoInput = TestData.createAdvisorOrganizationInput(true);
+    aoInput.setApp6context(getApp6Choice("app6context"));
+    aoInput.setApp6standardIdentity(getApp6Choice("app6standardIdentity"));
+    aoInput.setApp6symbolSet(getApp6Choice("app6symbolSet"));
+    aoInput.setApp6hq(getApp6Choice("app6hq"));
+    aoInput.setApp6amplifier(getApp6Choice("app6amplifier"));
     final Organization created =
         withCredentials(adminUser, t -> mutationExecutor.createOrganization(FIELDS, aoInput));
     assertThat(created).isNotNull();
@@ -48,8 +55,12 @@ class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(aoInput.getShortName()).isEqualTo(created.getShortName());
     assertThat(aoInput.getLongName()).isEqualTo(created.getLongName());
     assertThat(aoInput.getIdentificationCode()).isEqualTo(created.getIdentificationCode());
-    assertThat(aoInput.getLocation()).isEqualTo(created.getLocation());
     assertThat(aoInput.getProfile()).isEqualTo(created.getProfile());
+    assertThat(aoInput.getApp6context()).isEqualTo(created.getApp6context());
+    assertThat(aoInput.getApp6standardIdentity()).isEqualTo(created.getApp6standardIdentity());
+    assertThat(aoInput.getApp6symbolSet()).isEqualTo(created.getApp6symbolSet());
+    assertThat(aoInput.getApp6hq()).isEqualTo(created.getApp6hq());
+    assertThat(aoInput.getApp6amplifier()).isEqualTo(created.getApp6amplifier());
     // update name of the AO
     created.setLongName("Ao McAoFace");
     Integer nrUpdated = withCredentials(adminUser,
@@ -189,6 +200,13 @@ class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(returnedSteps.get(1).getApprovers()).allMatch(a -> a.getUuid().equals(b1.getUuid()));
   }
 
+  private String getApp6Choice(final String app6field) {
+    @SuppressWarnings("unchecked")
+    final Map<String, String> app6fieldChoices = (Map<String, String>) dropwizardApp
+        .getConfiguration().getDictionaryEntry("fields.organization." + app6field + ".choices");
+    return app6fieldChoices.keySet().stream().findFirst().orElse(null);
+  }
+
   @Test
   void createDuplicateAO() {
     // Create a new AO
@@ -200,7 +218,6 @@ class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(aoInput.getShortName()).isEqualTo(created.getShortName());
     assertThat(aoInput.getLongName()).isEqualTo(created.getLongName());
     assertThat(aoInput.getIdentificationCode()).isEqualTo(created.getIdentificationCode());
-    assertThat(aoInput.getLocation()).isEqualTo(created.getLocation());
     assertThat(aoInput.getProfile()).isEqualTo(created.getProfile());
 
     // Trying to create another AO with the same identificationCode should fail
@@ -223,7 +240,6 @@ class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(ao1Input.getShortName()).isEqualTo(created1.getShortName());
     assertThat(ao1Input.getLongName()).isEqualTo(created1.getLongName());
     assertThat(ao1Input.getIdentificationCode()).isEqualTo(created1.getIdentificationCode());
-    assertThat(ao1Input.getLocation()).isEqualTo(created1.getLocation());
     assertThat(ao1Input.getProfile()).isEqualTo(created1.getProfile());
 
     // Create another new AO
@@ -235,7 +251,6 @@ class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(ao2Input.getShortName()).isEqualTo(created2.getShortName());
     assertThat(ao2Input.getLongName()).isEqualTo(created2.getLongName());
     assertThat(ao2Input.getIdentificationCode()).isEqualTo(created2.getIdentificationCode());
-    assertThat(ao2Input.getLocation()).isEqualTo(created2.getLocation());
     assertThat(ao2Input.getProfile()).isEqualTo(created2.getProfile());
 
     // Trying to update AO2 with the same identificationCode as AO1 should fail
@@ -260,7 +275,6 @@ class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(ao1Input.getShortName()).isEqualTo(created1.getShortName());
     assertThat(ao1Input.getLongName()).isEqualTo(created1.getLongName());
     assertThat(ao1Input.getIdentificationCode()).isEqualTo(created1.getIdentificationCode());
-    assertThat(ao1Input.getLocation()).isEqualTo(created1.getLocation());
     assertThat(ao1Input.getProfile()).isEqualTo(created1.getProfile());
 
     // Creating another AO with NULL identificationCode should succeed
@@ -271,7 +285,6 @@ class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(ao1Input.getShortName()).isEqualTo(created2.getShortName());
     assertThat(ao1Input.getLongName()).isEqualTo(created2.getLongName());
     assertThat(ao1Input.getIdentificationCode()).isEqualTo(created2.getIdentificationCode());
-    assertThat(ao1Input.getLocation()).isEqualTo(created2.getLocation());
     assertThat(ao1Input.getProfile()).isEqualTo(created2.getProfile());
 
     // Creating an AO with empty identificationCode should succeed
@@ -283,7 +296,6 @@ class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(ao1Input.getShortName()).isEqualTo(created3.getShortName());
     assertThat(ao1Input.getLongName()).isEqualTo(created3.getLongName());
     assertThat(ao1Input.getIdentificationCode()).isEqualTo(created3.getIdentificationCode());
-    assertThat(ao1Input.getLocation()).isEqualTo(created3.getLocation());
     assertThat(ao1Input.getProfile()).isEqualTo(created3.getProfile());
 
     // Creating another AO with empty identificationCode should succeed
@@ -294,7 +306,6 @@ class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(ao1Input.getShortName()).isEqualTo(created4.getShortName());
     assertThat(ao1Input.getLongName()).isEqualTo(created4.getLongName());
     assertThat(ao1Input.getIdentificationCode()).isEqualTo(created4.getIdentificationCode());
-    assertThat(ao1Input.getLocation()).isEqualTo(created4.getLocation());
     assertThat(ao1Input.getProfile()).isEqualTo(created4.getProfile());
 
     // Create a new AO with non-NULL identificationCode
@@ -306,7 +317,6 @@ class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(ao5Input.getShortName()).isEqualTo(created5.getShortName());
     assertThat(ao5Input.getLongName()).isEqualTo(created5.getLongName());
     assertThat(ao5Input.getIdentificationCode()).isEqualTo(created5.getIdentificationCode());
-    assertThat(ao5Input.getLocation()).isEqualTo(created5.getLocation());
     assertThat(ao1Input.getProfile()).isEqualTo(created5.getProfile());
 
     // Updating this AO with empty identificationCode should succeed

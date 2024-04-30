@@ -28,6 +28,11 @@ const GQL_GET_CHART_DATA = gql`
       shortName
       longName
       identificationCode
+      app6context
+      app6standardIdentity
+      app6symbolSet
+      app6hq
+      app6amplifier
       positions {
         name
         uuid
@@ -43,6 +48,14 @@ const GQL_GET_CHART_DATA = gql`
           avatarUuid
         }
       }
+      ascendantOrgs {
+        uuid
+        app6context
+        app6standardIdentity
+        parentOrg {
+          uuid
+        }
+      }
       childrenOrgs(query: { status: ACTIVE }) {
         uuid
       }
@@ -51,6 +64,11 @@ const GQL_GET_CHART_DATA = gql`
         shortName
         longName
         identificationCode
+        app6context
+        app6standardIdentity
+        app6symbolSet
+        app6hq
+        app6amplifier
         childrenOrgs(query: { status: ACTIVE }) {
           uuid
         }
@@ -99,34 +117,28 @@ const sortPositions = (positions, truncateLimit) => {
   return allResults.slice(0, truncateLimit)
 }
 
-const determineUnitCode = positions =>
-  Settings.fields.person.ranks.find(
-    element => element.value === positions?.[0]?.person?.rank
-  )?.app6Modifier
-
-const determineAffiliation = positions => {
-  let affiliation = "U"
-  for (const position of positions) {
-    const person = position?.person
-    if (person) {
-      if (person.user) {
-        // has at least one user, return early
-        return "F"
-      }
-      // has at least one filled position
-      affiliation = "N"
+const determineSymbol = (org, allAscendantOrgs) => {
+  const ascendantOrgs =
+    utils
+      .getAscendantObjectsAsList(org, allAscendantOrgs, "parentOrg")
+      ?.reverse() || []
+  const context = utils.determineApp6field(ascendantOrgs, "app6context", "0")
+  const standardIdentity = utils.determineApp6field(
+    ascendantOrgs,
+    "app6standardIdentity",
+    "1"
+  )
+  const symbolSet = org?.app6symbolSet || "00"
+  const hq = org?.app6hq || "0"
+  const amplifier = org?.app6amplifier || "00"
+  const version = "14" // APP-6E
+  const status = "0" // Present
+  return new ms.Symbol(
+    `${version}${context}${standardIdentity}${symbolSet}${status}${hq}${amplifier}`,
+    {
+      size: 22
     }
-  }
-  return affiliation
-}
-
-const determineSymbol = positions => {
-  const sortedPositions = sortPositions(positions)
-  const unitCode = determineUnitCode(sortedPositions)
-  const affiliation = determineAffiliation(sortedPositions)
-  return new ms.Symbol(`S${affiliation}GPU------${unitCode || "-"}`, {
-    size: 22
-  })
+  )
 }
 
 // TODO: enable once innerhtml in svg is polyfilled
@@ -241,6 +253,11 @@ const OrganizationalChart = ({
       return
     }
 
+    const allAscendantOrgs = utils.getAscendantObjectsAsMap(
+      (data.organization?.ascendantOrgs ?? []).concat(
+        data.organization?.descendantOrgs ?? []
+      )
+    )
     const linkSelect = link.selectAll("path").data(tree.current(root).links())
 
     linkSelect.attr(
@@ -310,7 +327,9 @@ const OrganizationalChart = ({
       .append("g")
       .on("click", (event, d) => navigate(Organization.pathFor(d.data)))
       .each(function(d) {
-        return this.appendChild(determineSymbol(d.data.positions).asDOM())
+        return this.appendChild(
+          determineSymbol(d.data, allAscendantOrgs).asDOM()
+        )
       })
 
     iconNodeG

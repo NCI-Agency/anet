@@ -24,6 +24,14 @@ const GQL_GET_ORGANIZATION = gql`
       shortName
       longName
       identificationCode
+      ascendantOrgs {
+        uuid
+        app6context
+        app6standardIdentity
+        parentOrg {
+          uuid
+        }
+      }
     }
   }
 `

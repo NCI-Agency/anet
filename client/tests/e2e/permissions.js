@@ -137,7 +137,7 @@ test.serial("checking superuser permissions", async t => {
     "EF 1 | Planning Programming, Budgeting and Execution"
   )
   await pageHelpers.clickPersonNameFromSupportedPositionsFieldset(
-    "Capt ELIZAWELL, Elizabeth"
+    "OF-2 ELIZAWELL, Elizabeth"
   )
   await t.context.driver.sleep(shortWaitMs) // wait for transition
   await validateUserCanEditUserForCurrentPage(t, true)

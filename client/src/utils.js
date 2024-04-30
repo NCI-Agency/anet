@@ -340,9 +340,56 @@ export default {
     }
     return { backgroundSize, backgroundImage, contentMissing }
   },
+
   stripExtension: function(fileName) {
     const index = fileName.lastIndexOf(".")
     return index === -1 ? fileName : fileName.substring(0, index)
+  },
+
+  getAscendantObjectsAsMap: function(ascendantObjects) {
+    return (
+      ascendantObjects?.reduce((acc, val) => {
+        acc[val.uuid] = val
+        return acc
+      }, {}) || {}
+    )
+  },
+
+  getAscendantObjectsAsList: function(
+    leaf,
+    ascendantObjects = [],
+    parentField
+  ) {
+    const parentMap = Array.isArray(ascendantObjects)
+      ? this.getAscendantObjectsAsMap(ascendantObjects)
+      : ascendantObjects
+    let uuid = leaf?.uuid
+    const trail = []
+    while (uuid) {
+      const node = parentMap[uuid]
+      if (!node) {
+        break
+      }
+      trail.unshift(node)
+      uuid = node[parentField]?.uuid
+    }
+    return trail
+  },
+
+  determineApp6field: function(ascendantOrgs, app6field, defaultValue) {
+    for (const ascendantOrg of ascendantOrgs) {
+      if (ascendantOrg?.[app6field]) {
+        return ascendantOrg[app6field]
+      }
+    }
+    return defaultValue
+  },
+
+  getButtonsFromChoices: function(choices) {
+    return Object.entries(choices).map(([value, label]) => ({
+      value,
+      label
+    }))
   }
 }
 

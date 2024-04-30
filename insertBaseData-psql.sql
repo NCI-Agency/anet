@@ -38,7 +38,7 @@ TRUNCATE TABLE "userActivities" CASCADE;
 INSERT INTO people (uuid, name, status, "phoneNumber", rank, biography, "user", "domainUsername", "openIdSubject", country, gender, "endOfTourDate", "createdAt", "updatedAt") VALUES
 -- Advisors
   ('b5d495af-44d5-4c35-851a-1039352a8307', 'JACKSON, Jack', 0, '123-456-78960', 'OF-9', 'Jack is an advisor in EF 2.1', true, 'jack', '89003390-168e-4dc3-a582-5b38ae264bdd', 'Germany', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('a9d65d96-d107-45c3-bbaa-1133a354335b', 'ELIZAWELL, Elizabeth', 0, '+1-777-7777', 'Capt', 'Elizabeth is a test advisor we have in the database who is in EF 1.1', true, 'elizabeth', '06547ee2-dcc3-420c-96cb-5f3bb3793b4d', 'United States of America', 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('a9d65d96-d107-45c3-bbaa-1133a354335b', 'ELIZAWELL, Elizabeth', 0, '+1-777-7777', 'OF-2', 'Elizabeth is a test advisor we have in the database who is in EF 1.1', true, 'elizabeth', '06547ee2-dcc3-420c-96cb-5f3bb3793b4d', 'United States of America', 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('00b19ebf-0d4d-4b0f-93c8-9023ccb59c49', 'SOLENOID, Selena', 0, '+1-111-1111', 'CIV', 'Selena is a test advisor in EF 1.2', true, 'selena', 'ce1df48e-fd6e-4dc4-bc00-9bb65a0d6910', 'United States of America', 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 'ERINSON, Erin', 0, '+9-23-2323-2323', 'CIV', 'Erin is an Advisor in EF 2.2 who can approve reports', true, 'erin', '04c29bab-7b20-4ff2-8583-8ad3dbcff4d6', 'Australia', 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('1ad0c049-6ce8-4890-84f6-5e6a364764c4', 'REINTON, Reina', 0, '+23-23-11222', 'CIV', 'Reina is an Advisor in EF 2.2', true, 'reina', '5b585887-1c3d-4f47-bccb-cdfebfd6e919', 'Italy', 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
@@ -56,10 +56,10 @@ INSERT INTO people (uuid, name, status, "phoneNumber", rank, biography, "user", 
   ('7a15d0cc-520f-451c-80d8-399b4642c852', 'BEAU, Yoshie', 0, '+1-202-7320', 'CIV', NULL, true, 'yoshie', 'b3f67185-77e7-42a0-a2eb-f0739077eab5', 'United States of America', 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('f73f5cc9-69fd-4ceb-81b9-a0a840914bd8', 'SHARTON, Shardul', 1, '+99-9999-9999', 'CIV', NULL, false, NULL, NULL, 'Italy', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 -- Interlocutors
-  ('90fa5784-9e63-4353-8119-357bcd88e287', 'STEVESON, Steve', 0, '+011-232-12324', 'LtCol', 'this is a sample person who could be a Interlocutor!', false, NULL, NULL, 'Afghanistan', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('6866ce4d-1f8c-4f78-bdc2-4767e9a859b0', 'ROGWELL, Roger', 0, '+1-412-7324', 'Maj', 'Roger is another test person we have in the database', false, NULL, NULL, 'Afghanistan', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('90fa5784-9e63-4353-8119-357bcd88e287', 'STEVESON, Steve', 0, '+011-232-12324', 'OF-4', 'this is a sample person who could be a Interlocutor!', false, NULL, NULL, 'Afghanistan', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('6866ce4d-1f8c-4f78-bdc2-4767e9a859b0', 'ROGWELL, Roger', 0, '+1-412-7324', 'OF-3', 'Roger is another test person we have in the database', false, NULL, NULL, 'Afghanistan', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('237e8bf7-2ae4-4d49-b7c8-eca6a92d4767', 'TOPFERNESS, Christopf', 0, '+1-422222222', 'CIV', 'Christopf works in the MoD Office', false, NULL, NULL, 'Afghanistan', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('5fa54ffd-cc90-493a-b4b1-73e9c4568177', 'CHRISVILLE, Chris', 0, '+1-412-7324', 'Maj', 'Chris is another test person we have in the database', false, NULL, NULL, 'Afghanistan', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('5fa54ffd-cc90-493a-b4b1-73e9c4568177', 'CHRISVILLE, Chris', 0, '+1-412-7324', 'OF-3', 'Chris is another test person we have in the database', false, NULL, NULL, 'Afghanistan', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('0c5a8ba7-7436-47fd-bead-b8393246a300', 'KYLESON, Kyle', 0, '+1-412-7324', 'CIV', 'Kyle is another test person we have in the database', false, NULL, NULL, 'Afghanistan', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('cebeb179-2a64-4d0c-a06b-76e68f80b5e5', 'BEMERGED, Myposwill', 0, '+1-412-7324', 'CIV', 'Myposwill is a test person whose position will be merged', false, NULL, NULL, 'Afghanistan', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('3cb2076c-5317-47fe-86ad-76f298993917', 'MERGED, Duplicate Winner', 0, '+1-234-5678', 'CIV', 'Winner is a test person who will be merged', false, NULL, NULL, 'Afghanistan', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
@@ -68,7 +68,7 @@ INSERT INTO people (uuid, name, status, "phoneNumber", rank, biography, "user", 
   ('33f708e0-bf7c-47a0-baf1-730afa4f0c98', 'NICHOLSON, Nick', 0, '+1-202-7324', 'CIV', NULL, true, 'nick', '2a1e98bd-13dc-49c9-a1c5-7137eacc0e8f', 'United States of America', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 -- Superusers
   ('98fa4da5-ec99-457b-a4bc-2aa9064e2ca7', 'BOBTOWN, Bob', 0, '+1-444-7324', 'CIV', 'Bob is a Superuser in EF 1.1', true, 'bob', '505c6bd9-e2d1-4f9e-83b0-ecc9279c42c5', 'United States of America', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('ff0cec0b-8eca-48ee-82fe-addce6136f3b', 'HENDERSON, Henry', 0, '+2-456-7324', 'BGen', 'Henry is a Superuser in EF 2.1', true, 'henry', '04fbbc19-3bd9-4075-8dd8-bc8c741d8c3c', 'United States of America', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('ff0cec0b-8eca-48ee-82fe-addce6136f3b', 'HENDERSON, Henry', 0, '+2-456-7324', 'OF-6', 'Henry is a Superuser in EF 2.1', true, 'henry', '04fbbc19-3bd9-4075-8dd8-bc8c741d8c3c', 'United States of America', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('19fe53bb-90f4-4482-abfc-d85b85deabd9', 'JACOBSON, Jacob', 0, '+2-456-7324', 'CIV', 'Jacob is a Superuser in EF 2.2', true, 'jacob', '19fcef93-1b1a-472b-97f5-77f46cf6f3fd', 'Italy', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('f683335a-91e3-4788-aa3f-9eed384f4ac1', 'BECCABON, Rebecca', 0, '+2-456-7324', 'CTR', 'Rebecca is a Superuser in EF 2.2', true, 'rebecca', '9eb4b898-6fe4-40f8-abca-e893424d75d1', 'Germany', 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('1a557db0-5af5-4ea3-b926-28b5f2e88bf7', 'ANDERSON, Andrew', 0, '+1-412-7324', 'CIV', 'Andrew is the EF 1 Manager', true, 'andrew', '3276c85a-bf03-4591-a74b-56d70ac8eec0', 'United States of America', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
@@ -372,41 +372,41 @@ INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'inter') WHERE name = 'LNG Advisor B';
 
 -- Top-level organizations
-INSERT INTO organizations(uuid, "shortName", "longName", "createdAt", "updatedAt") VALUES
-  (uuid_generate_v4(), 'ANET Administrators','', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('70193ee9-05b4-4aac-80b5-75609825db9f', 'LNG', 'Linguistic', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 1', 'Planning Programming, Budgeting and Execution', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 2', '', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 3', '', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 4', '', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 5', '', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 6', '', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF7', '', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF8', '', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 9', 'Gender', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'TAAC-N', '', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'TAAC-S', '', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'TAAC-W', '', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'TAAC-E', '', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'TAAC-C', '', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'TAAC Air', '', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO organizations(uuid, "shortName", "longName", app6context, "app6standardIdentity", "app6symbolSet", "createdAt", "updatedAt") VALUES
+  (uuid_generate_v4(), 'ANET Administrators','', '0', '3', '10', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('70193ee9-05b4-4aac-80b5-75609825db9f', 'LNG', 'Linguistic', '0', '3', '10', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'EF 1', 'Planning Programming, Budgeting and Execution', '0', '3', '10', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'EF 2', '', '0', '3', '10', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'EF 3', '', '0', NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'EF 4', '', '0', '4', '11', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'EF 5', '', '0', '3', '10', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'EF 6', '', '0', '3', '10', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'EF7', '', '0', NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'EF8', '', '0', NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'EF 9', 'Gender', '0', '3', '10', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'TAAC-N', '', '0', NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'TAAC-S', '', '0', NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'TAAC-W', '', '0', NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'TAAC-E', '', '0', NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'TAAC-C', '', '0', NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'TAAC Air', '', '0', NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Sub-organizations
-INSERT INTO organizations(uuid, "shortName", "longName", "parentOrgUuid", "createdAt", "updatedAt") VALUES
-  ('04614b0f-7e8e-4bf1-8bc5-13abaffeab8a', 'EF 1.1', '', (SELECT uuid from organizations WHERE "shortName" ='EF 1'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 1.2', '', (SELECT uuid from organizations WHERE "shortName" ='EF 1'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 2.1', '', (SELECT uuid from organizations WHERE "shortName" ='EF 2'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'EF 2.2', '', (SELECT uuid from organizations WHERE "shortName" ='EF 2'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 4.1', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 4'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 4.2', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 4'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 4.3', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 4'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 4.4', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 4'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'7f939a44-b9e4-48e0-98f5-7d0ea38a6ecf', 'EF 5.1', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 5'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 5.2', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 5'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 5.3', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 5'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 5.4', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 5'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 6.1', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 6'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 6.2', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 6'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO organizations(uuid, "shortName", "longName", "parentOrgUuid", "app6symbolSet", "createdAt", "updatedAt") VALUES
+  ('04614b0f-7e8e-4bf1-8bc5-13abaffeab8a', 'EF 1.1', '', (SELECT uuid from organizations WHERE "shortName" ='EF 1'), '10', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'EF 1.2', '', (SELECT uuid from organizations WHERE "shortName" ='EF 1'), '10', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'EF 2.1', '', (SELECT uuid from organizations WHERE "shortName" ='EF 2'), '10', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'EF 2.2', '', (SELECT uuid from organizations WHERE "shortName" ='EF 2'), '10', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'EF 4.1', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 4'), '11', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'EF 4.2', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 4'), '11', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'EF 4.3', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 4'), '11', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'EF 4.4', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 4'), '11', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (N'7f939a44-b9e4-48e0-98f5-7d0ea38a6ecf', 'EF 5.1', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 5'), '10', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'EF 5.2', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 5'), '10', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'EF 5.3', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 5'), '10', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'EF 5.4', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 5'), '10', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'EF 6.1', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 6'), '10', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'EF 6.2', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 6'), '10', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 UPDATE organizations
 SET "customFields"='{"invisibleCustomFields":["formCustomFields.textareaFieldName","formCustomFields.numberFieldName"],"arrayFieldName":[],"nlt_dt":null,"nlt":null,"colourOptions":"","inputFieldName":"quis nostrud exercitation ullamco laboris","multipleButtons":[]}'
@@ -594,13 +594,13 @@ INSERT INTO approvers ("approvalStepUuid", "positionUuid") VALUES
   ((SELECT uuid from "approvalSteps" where name = 'Location approval'), (SELECT uuid from positions where name = 'ANET Administrator'));
 
 -- Top-level organizations
-INSERT INTO organizations (uuid, "shortName", "longName", "identificationCode", "createdAt", "updatedAt") VALUES
-  (uuid_generate_v4(), 'MoD', 'Ministry of Defense', 'Z12345', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'MoI', 'Ministry of Interior', 'P12345', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO organizations (uuid, "shortName", "longName", "identificationCode", app6context, "app6standardIdentity", "app6symbolSet", "createdAt", "updatedAt") VALUES
+  (uuid_generate_v4(), 'MoD', 'Ministry of Defense', 'Z12345', '0', '4', '11', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'MoI', 'Ministry of Interior', 'P12345', '0', '4', '11', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Sub-organizations
-INSERT INTO organizations (uuid, "shortName", "longName", "parentOrgUuid", "identificationCode", "createdAt", "updatedAt") VALUES
-  (uuid_generate_v4(), 'MOD-F', 'Ministry of Defense Finances', (SELECT uuid from organizations where "shortName" = 'MoD'), NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO organizations (uuid, "shortName", "longName", "parentOrgUuid", "identificationCode", "app6symbolSet", "createdAt", "updatedAt") VALUES
+  (uuid_generate_v4(), 'MOD-F', 'Ministry of Defense Finances', (SELECT uuid from organizations where "shortName" = 'MoD'), NULL, '11', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Assign responsible positions for organizations
 INSERT INTO "organizationAdministrativePositions" ("organizationUuid", "positionUuid") VALUES

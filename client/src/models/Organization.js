@@ -146,6 +146,24 @@ export default class Organization extends Model {
       .join(" | ")
   }
 
+  static getApp6ParentFields(organizationHierarchy, organizationValues) {
+    const ascendantOrgs =
+      utils
+        .getAscendantObjectsAsList(
+          organizationHierarchy,
+          organizationHierarchy?.ascendantOrgs,
+          "parentOrg"
+        )
+        ?.reverse() || []
+    const parentContext = organizationValues.app6context
+      ? undefined
+      : utils.determineApp6field(ascendantOrgs, "app6context")
+    const parentStandardIdentity = organizationValues.app6standardIdentity
+      ? undefined
+      : utils.determineApp6field(ascendantOrgs, "app6standardIdentity")
+    return { parentContext, parentStandardIdentity }
+  }
+
   static FILTERED_CLIENT_SIDE_FIELDS = [
     "childrenOrgs",
     "ascendantOrgs",

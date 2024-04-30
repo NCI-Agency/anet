@@ -73,7 +73,7 @@ public class TaskApprovalTest extends AbstractResourceTest {
   // Test report approval scenarios for tasks mostly use the following data:
   // - report task 2.A (which has tasked org EF 2)
   // - task 2.A has approver for planning OF-9 JACKSON, Jack (from org EF 2.1)
-  // - task 2.A has approver for publication BGen HENDERSON, Henry (from org EF 2.1)
+  // - task 2.A has approver for publication OF-6 HENDERSON, Henry (from org EF 2.1)
   // - report primary advisor CIV REINTON, Reina (from org EF 2.2)
 
   // Task 2.A
