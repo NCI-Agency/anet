@@ -6,6 +6,10 @@
   margin-bottom: 15px;
 }
 
+.preview-content-scroll fieldset {
+  margin-bottom: 15px;
+}
+
 .preview-field-label {
   font-weight: bold;
   padding-bottom: 7px;

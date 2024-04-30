@@ -216,7 +216,6 @@ const PersonPreview = ({ className, uuid }) => {
           <RichTextEditor readOnly value={person.biography} />
         </div>
       </div>
-      <br />
       <h4>{Settings.fields.person.position?.label}</h4>
       <div className="preview-section">
         <div
