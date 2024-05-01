@@ -18,9 +18,12 @@ class CreateReport extends cr.CreateReport {
     return browser.$("#engagementDate")
   }
 
-  async getTomorrow() {
-    const tomorrow = moment().add(1, "day").format("ddd MMM DD YYYY")
-    return browser.$(`div[aria-label="${tomorrow}"]`)
+  async getDatepicker() {
+    return browser.$("#fg-engagementDate .bp5-datepicker")
+  }
+
+  async getTodayButton() {
+    return (await this.getDatepicker()).$('//button/span[text()="Today"]')
   }
 
   async getReportPeople() {
@@ -72,7 +75,7 @@ class CreateReport extends cr.CreateReport {
       `//div[@id="reportPeopleContainer"]//tr[td[@class="reportPeopleName" and .//a[text()="${name}"]]]/td[@class="primary-attendee" or @class="conflictButton" or @class="reportPeopleName"]`
     )
     await (
-      await personRow[0].$("div.bp4-spinner")
+      await personRow[0].$("div.bp5-spinner")
     ).waitForExist({ reverse: true })
 
     return {
@@ -199,12 +202,12 @@ class CreateReport extends cr.CreateReport {
     if (moment.isMoment(fields.engagementDate)) {
       await (await this.getEngagementDate()).waitForClickable()
       await (await this.getEngagementDate()).click()
-      await (await this.getTomorrow()).waitForDisplayed()
+      await (await this.getTodayButton()).waitForDisplayed()
       await browser.keys(fields.engagementDate.format("DD-MM-YYYY HH:mm"))
 
       await (await this.getTitle()).click()
       await (
-        await this.getTomorrow()
+        await this.getDatepicker()
       ).waitForExist({ reverse: true, timeout: 3000 })
     }
 

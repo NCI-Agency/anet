@@ -29,7 +29,7 @@ describe("When creating a report with tasks", () => {
     ).waitForDisplayed()
     await (await CreateReport.getAllUnassignedTasksFilterButton()).click()
     const task13C = (await CreateReport.getTasksTable()).$(
-      ".bp4-popover2-target=1.3.C"
+      ".bp5-popover-target=1.3.C"
     )
     // eslint-disable-next-line no-unused-expressions
     expect(await task13C.isExisting()).to.be.true

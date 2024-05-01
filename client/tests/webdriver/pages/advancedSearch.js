@@ -38,7 +38,7 @@ class AdvancedSearch {
   }
 
   async getAddFilterPopover() {
-    return (await this.getAdvancedSearchPopover()).$(".bp4-popover2-content")
+    return (await this.getAdvancedSearchPopover()).$(".bp5-popover-content")
   }
 
   async getSearchFilter(filter) {
