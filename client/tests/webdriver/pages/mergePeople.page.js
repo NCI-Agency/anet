@@ -28,7 +28,7 @@ class MergePeople extends Page {
   }
 
   async getAdvancedSelectPopover() {
-    return browser.$(".bp4-popover2-content")
+    return browser.$(".bp5-popover-content")
   }
 
   async getPersonHeaderFromPopover() {
