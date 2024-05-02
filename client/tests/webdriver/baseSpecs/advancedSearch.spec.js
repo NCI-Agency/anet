@@ -1,6 +1,6 @@
 import { expect } from "chai"
 import _isEmpty from "lodash/isEmpty"
-import AdvancedSearch from "../pages/advancedSearch"
+import AdvancedSearch from "../pages/advancedSearch.page"
 import Home from "../pages/home.page"
 
 const ANET_OBJECT_TYPES = {
@@ -127,10 +127,10 @@ describe("When using advanced search", () => {
       const sampleFilters =
         ANET_OBJECT_TYPES[await getObjectType(i)].sampleFilters
       if (!_isEmpty(sampleFilters)) {
-        await (await AdvancedSearch.getAddFilterButton()).click()
-        await (await AdvancedSearch.getAddFilterPopover()).waitForExist()
-        await (await AdvancedSearch.getAddFilterPopover()).waitForDisplayed()
         for (const sampleFilter of sampleFilters) {
+          await (await AdvancedSearch.getAddFilterButton()).click()
+          await (await AdvancedSearch.getAddFilterPopover()).waitForExist()
+          await (await AdvancedSearch.getAddFilterPopover()).waitForDisplayed()
           expect(
             await (await AdvancedSearch.getAddFilterPopover()).getText()
           ).to.match(new RegExp(sampleFilter))
