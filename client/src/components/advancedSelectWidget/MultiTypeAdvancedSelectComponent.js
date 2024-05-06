@@ -182,9 +182,7 @@ const MultiTypeAdvancedSelectComponent = ({
   const SelectComponent = isMultiSelect
     ? AdvancedMultiSelect
     : AdvancedSingleSelect
-  const extraSelectProps = isMultiSelect
-    ? {}
-    : { valueKey, showRemoveButton: false }
+  const extraSelectProps = isMultiSelect ? {} : { showRemoveButton: false }
   const filterDefs =
     typeof advancedSelectProps.filterDefs === "function"
       ? advancedSelectProps.filterDefs(filters[0]?.[entityType])
@@ -222,6 +220,7 @@ const MultiTypeAdvancedSelectComponent = ({
         fieldLabel="Search in ANET:"
         placeholder={searchPlaceholder}
         value={value}
+        valueKey={valueKey}
         showEmbedded
         keepSearchText={entityTypes.length > 1}
         overlayColumns={advancedSelectProps.overlayColumns}

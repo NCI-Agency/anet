@@ -1,22 +1,27 @@
 import { gql } from "@apollo/client"
 import API from "api"
+import MultiTypeAdvancedSelectComponent, {
+  ENTITY_TYPES
+} from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
 import AppContext from "components/AppContext"
-import AttachmentRelatedObjectsTable from "components/Attachment/AttachmentRelatedObjectsTable"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
+import { MODEL_TO_OBJECT_TYPE, OBJECT_TYPE_TO_MODEL } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
+import RemoveButton from "components/RemoveButton"
 import RichTextEditor from "components/RichTextEditor"
 import { FastField, Field, Form, Formik } from "formik"
+import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
 import { Attachment } from "models"
 import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
-import { Button, Col } from "react-bootstrap"
+import { Button, Col, Table } from "react-bootstrap"
 import { useNavigate } from "react-router-dom"
 import Settings from "settings"
 import utils from "utils"
@@ -82,6 +87,7 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
             Save Attachment
           </Button>
         )
+
         return (
           <div>
             <NavigationWarning isBlocking={dirty && !isSubmitting} />
@@ -150,13 +156,87 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
                     {edit && (
                       <Field
                         name="used in"
-                        component={FieldHelper.ReadonlyField}
-                        humanValue={
-                          <AttachmentRelatedObjectsTable
-                            relatedObjects={values.attachmentRelatedObjects}
+                        component={FieldHelper.SpecialField}
+                        value={values.attachmentRelatedObjects}
+                        widget={
+                          <MultiTypeAdvancedSelectComponent
+                            fieldName="attachmentRelatedObjects"
+                            entityTypes={[
+                              ENTITY_TYPES.LOCATIONS,
+                              ENTITY_TYPES.ORGANIZATIONS,
+                              ENTITY_TYPES.PEOPLE,
+                              ENTITY_TYPES.REPORTS
+                            ]}
+                            valueKey="relatedObjectUuid"
+                            isMultiSelect
+                            onConfirm={(value, entityType) => {
+                              if (
+                                value.length >
+                                values.attachmentRelatedObjects?.length
+                              ) {
+                                // entity was added at the end, set correct value
+                                const addedEntity = value.pop()
+                                value.push({
+                                  relatedObjectType:
+                                    MODEL_TO_OBJECT_TYPE[entityType],
+                                  relatedObjectUuid: addedEntity.uuid,
+                                  relatedObject: addedEntity
+                                })
+                              }
+                              setFieldValue("attachmentRelatedObjects", value)
+                            }}
                           />
                         }
-                      />
+                      >
+                        {!_isEmpty(values.attachmentRelatedObjects) && (
+                          <Table
+                            id="attachmentRelatedObjects-value"
+                            striped
+                            hover
+                            responsive
+                          >
+                            <tbody>
+                              {values.attachmentRelatedObjects.map(entity => (
+                                <tr key={entity.relatedObjectUuid}>
+                                  <td>
+                                    <LinkTo
+                                      modelType={entity.relatedObjectType}
+                                      model={{
+                                        uuid: entity.relatedObjectUuid,
+                                        ...entity.relatedObject
+                                      }}
+                                    />
+                                  </td>
+                                  <td className="col-1">
+                                    <RemoveButton
+                                      title={`Unlink this ${OBJECT_TYPE_TO_MODEL[entity.relatedObjectType]}`}
+                                      onClick={() => {
+                                        let found = false
+                                        const newValue =
+                                          values.attachmentRelatedObjects.filter(
+                                            e => {
+                                              if (_isEqual(e, entity)) {
+                                                found = true
+                                                return false
+                                              }
+                                              return true
+                                            }
+                                          )
+                                        if (found) {
+                                          setFieldValue(
+                                            "attachmentRelatedObjects",
+                                            newValue
+                                          )
+                                        }
+                                      }}
+                                    />
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </Table>
+                        )}
+                      </Field>
                     )}
 
                     <DictionaryField

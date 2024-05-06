@@ -9,6 +9,7 @@ const AdvancedSelectOverlayTable = ({
   fieldName,
   objectType,
   items,
+  valueKey,
   pageNum,
   selectedItems,
   handleAddItem,
@@ -17,7 +18,7 @@ const AdvancedSelectOverlayTable = ({
   renderRow,
   selectItemComponent
 }) => {
-  const selectedItemsUuids = selectedItems.map(a => a.uuid)
+  const selectedItemsUuids = selectedItems.map(a => a[valueKey])
   return (
     <Table responsive hover striped>
       <thead>
@@ -57,6 +58,7 @@ AdvancedSelectOverlayTable.propTypes = {
   fieldName: PropTypes.string.isRequired,
   objectType: PropTypes.func.isRequired,
   items: PropTypes.array.isRequired,
+  valueKey: PropTypes.string.isRequired,
   pageNum: PropTypes.number,
   selectedItems: PropTypes.array.isRequired,
   handleAddItem: PropTypes.func,

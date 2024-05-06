@@ -166,9 +166,9 @@ public class AttachmentResource {
             assertAllowedRelatedObjects(user, newRelatedObjects, false);
             dao.insertAttachmentRelatedObjects(DaoUtils.getUuid(attachment), newRelatedObjects);
           }, oldRelatedObject -> {
-            assertAllowedRelatedObjects(user, List.of(oldRelatedObject), true);
-            dao.deleteAttachmentRelatedObjects(DaoUtils.getUuid(attachment),
-                List.of(DaoUtils.getUuid(oldRelatedObject)));
+            final List<GenericRelatedObject> oldRelatedObjects = List.of(oldRelatedObject);
+            assertAllowedRelatedObjects(user, oldRelatedObjects, true);
+            dao.deleteAttachmentRelatedObjects(DaoUtils.getUuid(attachment), oldRelatedObjects);
           }, null);
     }
 

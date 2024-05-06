@@ -220,10 +220,12 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AttachmentSearchQuery
     }
   }
 
-  public void deleteAttachmentRelatedObjects(String uuid, List<String> relatedObjectUuids) {
-    if (!Utils.isEmptyOrNull(relatedObjectUuids)) {
+  public void deleteAttachmentRelatedObjects(String uuid,
+      List<GenericRelatedObject> attachmentRelatedObjects) {
+    if (!Utils.isEmptyOrNull(attachmentRelatedObjects)) {
       final AttachmentBatch ab = getDbHandle().attach(AttachmentBatch.class);
-      ab.deleteAttachmentRelatedObjects(uuid, relatedObjectUuids);
+      ab.deleteAttachmentRelatedObjects(uuid, attachmentRelatedObjects.stream()
+          .map(GenericRelatedObject::getRelatedObjectUuid).toList());
     }
   }
 

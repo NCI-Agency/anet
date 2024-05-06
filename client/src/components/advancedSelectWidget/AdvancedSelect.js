@@ -93,6 +93,7 @@ export const propTypes = {
   ]),
   extraAddon: PropTypes.object,
   value: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
+  valueKey: PropTypes.string,
   renderSelected: PropTypes.oneOfType([PropTypes.func, PropTypes.object]), // how to render the selected items
   overlayTable: PropTypes.oneOfType([
     PropTypes.string,
@@ -126,6 +127,7 @@ const AdvancedSelect = ({
   addon,
   extraAddon,
   value,
+  valueKey,
   renderSelected,
   overlayTable: OverlayTable,
   overlayColumns,
@@ -330,6 +332,7 @@ const AdvancedSelect = ({
                             items={items}
                             pageNum={pageNum}
                             selectedItems={value}
+                            valueKey={valueKey}
                             handleAddItem={item => {
                               handleAddItem(item)
                               if (closeOverlayOnAdd) {
@@ -498,7 +501,8 @@ AdvancedSelect.defaultProps = {
   disabled: false,
   filterDefs: {},
   closeOverlayOnAdd: false,
-  selectedValueAsString: ""
+  selectedValueAsString: "",
+  valueKey: "uuid"
 }
 
 export default AdvancedSelect
