@@ -298,7 +298,7 @@ public class ReportResource {
           dao.getTasksForReport(engine.getContext(), r.getUuid()).join();
       Utils.addRemoveElementsByUuid(existingTasks, r.getTasks(),
           newTask -> dao.addTaskToReport(newTask, r),
-          oldTaskUuid -> dao.removeTaskFromReport(oldTaskUuid, r));
+          oldTask -> dao.removeTaskFromReport(DaoUtils.getUuid(oldTask), r));
     }
 
     // Update AuthorizationGroups:
@@ -307,7 +307,7 @@ public class ReportResource {
           dao.getAuthorizationGroupsForReport(r.getUuid());
       Utils.addRemoveElementsByUuid(existingAuthorizationGroups, r.getAuthorizationGroups(),
           newAg -> dao.addAuthorizationGroupToReport(newAg, r),
-          oldAgUuid -> dao.removeAuthorizationGroupFromReport(oldAgUuid, r.getUuid()));
+          oldAg -> dao.removeAuthorizationGroupFromReport(DaoUtils.getUuid(oldAg), r.getUuid()));
     }
 
     DaoUtils.saveCustomSensitiveInformation(editor, ReportDao.TABLE_NAME, r.getUuid(),
@@ -956,7 +956,8 @@ public class ReportResource {
           noteDao.insert(newAssessment);
         },
         // Delete old assessments:
-        oldAssessmentUuid -> {
+        oldAssessment -> {
+          final String oldAssessmentUuid = DaoUtils.getUuid(oldAssessment);
           final Note existingAssessment = Utils.getByUuid(existingAssessments, oldAssessmentUuid);
           checkNotePermission(noteDao, user, authorizationGroupUuids, existingAssessment,
               existingAssessment.getAuthorUuid(), UpdateType.DELETE);

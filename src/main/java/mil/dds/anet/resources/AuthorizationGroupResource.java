@@ -91,8 +91,8 @@ public class AuthorizationGroupResource {
     if (a.getAdministrativePositions() != null) {
       Utils.addRemoveElementsByUuid(existingAdministrativePositions, a.getAdministrativePositions(),
           newPosition -> dao.addAdministrativePositions(a.getUuid(), List.of(newPosition)),
-          oldPositionUuid -> dao.removeAdministrativePositions(a.getUuid(),
-              List.of(oldPositionUuid)));
+          oldPosition -> dao.removeAdministrativePositions(a.getUuid(),
+              List.of(DaoUtils.getUuid(oldPosition))));
     }
 
     AnetAuditLogger.log("AuthorizationGroup {} updated by {}", a, user);

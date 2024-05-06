@@ -111,8 +111,8 @@ public class PositionResource {
       Utils.addRemoveElementsByUuid(current.loadAssociatedPositions(engine.getContext()).join(),
           pos.getAssociatedPositions(), newPosition -> {
             dao.associatePosition(DaoUtils.getUuid(newPosition), DaoUtils.getUuid(pos));
-          }, oldPositionUuid -> {
-            dao.deletePositionAssociation(DaoUtils.getUuid(pos), oldPositionUuid);
+          }, oldPosition -> {
+            dao.deletePositionAssociation(DaoUtils.getUuid(pos), DaoUtils.getUuid(oldPosition));
           });
       AnetAuditLogger.log("Position {} associations changed to {} by {}", current,
           pos.getAssociatedPositions(), user);
@@ -142,7 +142,7 @@ public class PositionResource {
       Utils.addRemoveElementsByUuid(
           existing.loadOrganizationsAdministrated(engine.getContext()).join(),
           pos.getOrganizationsAdministrated(), newOrg -> dao.addOrganizationToPosition(pos, newOrg),
-          oldOrgUuid -> dao.removeOrganizationFromPosition(oldOrgUuid, pos));
+          oldOrg -> dao.removeOrganizationFromPosition(DaoUtils.getUuid(oldOrg), pos));
     }
 
     engine.getEmailAddressDao().updateEmailAddresses(PositionDao.TABLE_NAME, pos.getUuid(),

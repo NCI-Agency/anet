@@ -575,7 +575,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
     Utils.addRemoveElementsByUuid(existingPos.loadOrganizationsAdministrated(context).join(),
         Utils.orIfNull(winner.getOrganizationsAdministrated(), new ArrayList<>()),
         newOrg -> addOrganizationToPosition(winner, newOrg),
-        oldOrgUuid -> removeOrganizationFromPosition(oldOrgUuid, winner));
+        oldOrg -> removeOrganizationFromPosition(DaoUtils.getUuid(oldOrg), winner));
 
     // Update emailAddresses
     final EmailAddressDao emailAddressDao = AnetObjectEngine.getInstance().getEmailAddressDao();

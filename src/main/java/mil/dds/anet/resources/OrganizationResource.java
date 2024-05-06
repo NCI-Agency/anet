@@ -182,8 +182,8 @@ public class OrganizationResource {
       final List<Task> existingTasks = existing.loadTasks(engine.getContext()).join();
       Utils.addRemoveElementsByUuid(existingTasks, org.getTasks(),
           newTask -> engine.getTaskDao().addTaskedOrganizationsToTask(org, newTask),
-          oldTaskUuid -> engine.getTaskDao().removeTaskedOrganizationsFromTask(org.getUuid(),
-              oldTaskUuid));
+          oldTask -> engine.getTaskDao().removeTaskedOrganizationsFromTask(org.getUuid(),
+              DaoUtils.getUuid(oldTask)));
     }
 
     if (AuthUtils.isAdmin(user) && org.getAdministratingPositions() != null) {
@@ -192,7 +192,7 @@ public class OrganizationResource {
           existing.loadAdministratingPositions(engine.getContext()).join(),
           org.getAdministratingPositions(),
           newPosition -> dao.addPositionToOrganization(newPosition, org),
-          oldPositionUuid -> dao.removePositionFromOrganization(oldPositionUuid, org));
+          oldPosition -> dao.removePositionFromOrganization(DaoUtils.getUuid(oldPosition), org));
     }
 
     final List<ApprovalStep> existingPlanningApprovalSteps =
