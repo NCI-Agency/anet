@@ -5680,4 +5680,36 @@
 		<!-- Rolling back is not useful anymore -->
 	</changeSet>
 
+	<changeSet id="add-attachments-to-full_text-index" author="gjvoosten" runInTransaction="false">
+		<sql>
+			<!-- Add generated full-text column -->
+			ALTER TABLE attachments
+				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, coalesce(attachments.caption, ''))
+						  || to_tsvector('simple', coalesce(attachments.caption, '')), ${fts_high}) ||
+					setweight(to_tsvector('simple', coalesce(attachments."fileName", '')), ${fts_high}) ||
+					setweight(to_tsvector(${fts_config}, coalesce(attachments.description, ''))
+						  || to_tsvector('simple', coalesce(attachments.description, '')), ${fts_low})
+				) STORED;
+
+			<!-- Create full-text materialized views and indexes -->
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_attachments(uuid, full_text) AS
+				SELECT
+					attachments.uuid,
+					attachments.full_text
+				FROM attachments
+				GROUP BY attachments.uuid
+				WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_attachments_uuid" ON mv_fts_attachments(uuid);
+			CREATE INDEX "FT_mv_fts_attachments" ON mv_fts_attachments USING gin(full_text);
+			CREATE INDEX "TR_attachments_uuid" ON mv_fts_attachments USING gin(uuid gin_trgm_ops);
+		</sql>
+		<rollback>
+			<sql>
+				DROP MATERIALIZED VIEW mv_fts_attachments;
+				ALTER TABLE attachments DROP COLUMN full_text;
+			</sql>
+		</rollback>
+	</changeSet>
+
 </databaseChangeLog>

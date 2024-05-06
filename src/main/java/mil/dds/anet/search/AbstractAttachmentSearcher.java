@@ -43,12 +43,12 @@ public abstract class AbstractAttachmentSearcher
     }
 
     qb.addStringEqualsClause("authorUuid", "attachments.\"authorUuid\"", query.getAuthorUuid());
-    addOrderByClauses(qb, query);
-  }
 
-  @Override
-  protected void addTextQuery(AttachmentSearchQuery query) {
-    throw new UnsupportedOperationException();
+    if (hasTextQuery(query)) {
+      addTextQuery(query);
+    }
+
+    addOrderByClauses(qb, query);
   }
 
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb,
