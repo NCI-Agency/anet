@@ -1235,7 +1235,7 @@ INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjec
 -- Add attachments for reports
 SELECT ('''' || uuid || '''') AS "authorUuid" FROM people WHERE name = 'DMIN, Arthur' \gset
 INSERT INTO attachments (uuid, "authorUuid", "fileName", "caption", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt")
-	VALUES ('f076406f-1a9b-4fc9-8ab2-cd2a138ec26d', :authorUuid, 'test_attachment.png', 'test_attachment', 'image/png', lo_import('/var/tmp/default_avatar.png'), 12316, 'We can add attachments to a report', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES ('f076406f-1a9b-4fc9-8ab2-cd2a138ec26d', :authorUuid, 'attachReport.png', 'Arthur''s test report', 'image/png', lo_import('/var/tmp/default_avatar.png'), 12316, 'We can add attachments to a report', 'NU', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT 'f076406f-1a9b-4fc9-8ab2-cd2a138ec26d', 'reports', r.uuid
   FROM reports r
@@ -1243,7 +1243,7 @@ INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "
 
 -- Add attachments for locations
 INSERT INTO attachments (uuid, "authorUuid", "fileName", "caption", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt")
-	VALUES ('f7cd5b02-ef73-4ee8-814b-c5a7a916685d', :authorUuid, 'attachLocation.png', 'attachLocation', 'image/png', lo_import('/var/tmp/default_avatar.png'), 12316, 'We can add attachments to a location', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES ('f7cd5b02-ef73-4ee8-814b-c5a7a916685d', :authorUuid, 'attachLocation.png', 'Antarctica', 'image/png', lo_import('/var/tmp/default_avatar.png'), 12316, 'We can add attachments to a location', 'NU_rel_EU', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT 'f7cd5b02-ef73-4ee8-814b-c5a7a916685d', 'locations', loc.uuid
   FROM locations loc
@@ -1251,7 +1251,7 @@ INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "
 
 -- Add attachments for organizations
 INSERT INTO attachments (uuid, "authorUuid", "fileName", "caption", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt")
-	VALUES ('9ac41246-25ac-457c-b7d6-946c5f625f1f', :authorUuid, 'attachOrganization.png', 'attachOrganization', 'image/png', lo_import('/var/tmp/default_avatar.png'), 12316, 'We can add attachments to an organization', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES ('9ac41246-25ac-457c-b7d6-946c5f625f1f', :authorUuid, 'attachOrganization.png', 'EF 2.2', 'image/png', lo_import('/var/tmp/default_avatar.png'), 12316, 'We can add attachments to an organization', 'public', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT '9ac41246-25ac-457c-b7d6-946c5f625f1f', 'organizations', org.uuid
   FROM organizations org
@@ -1259,7 +1259,7 @@ INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "
 
 -- Add attachments for people
 INSERT INTO attachments (uuid, "authorUuid", "fileName", "caption", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt")
-	VALUES ('13318e42-a0a3-438f-8ed5-dc16b1ef17bc', :authorUuid, 'attachPerson.png', 'attachPerson', 'image/png', lo_import('/var/tmp/default_avatar.png'), 12316, 'We can add attachments to a person', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES ('13318e42-a0a3-438f-8ed5-dc16b1ef17bc', :authorUuid, 'attachPerson.png', 'Erin', 'image/png', lo_import('/var/tmp/default_avatar.png'), 12316, 'We can add attachments to a person', 'undefined', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT '13318e42-a0a3-438f-8ed5-dc16b1ef17bc', 'people', p.uuid
   FROM people p

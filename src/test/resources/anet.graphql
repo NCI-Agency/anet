@@ -227,8 +227,10 @@ input AttachmentInput {
 """"""
 input AttachmentSearchQueryInput {
   authorUuid: String
+  classification: String
   emailNetwork: String
   inMyReports: Boolean
+  mimeType: String
   pageNum: Int
   pageSize: Int
   sortBy: AttachmentSearchSortBy

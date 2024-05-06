@@ -7,11 +7,33 @@ public class AttachmentSearchQuery extends SubscribableObjectSearchQuery<Attachm
 
   @GraphQLQuery
   @GraphQLInputField
+  private String mimeType;
+  @GraphQLQuery
+  @GraphQLInputField
+  private String classification;
+  @GraphQLQuery
+  @GraphQLInputField
   private String authorUuid;
 
   public AttachmentSearchQuery() {
     super(AttachmentSearchSortBy.CREATED_AT);
     this.setSortOrder(SortOrder.DESC);
+  }
+
+  public String getMimeType() {
+    return mimeType;
+  }
+
+  public void setMimeType(String mimeType) {
+    this.mimeType = mimeType;
+  }
+
+  public void setClassification(String classification) {
+    this.classification = classification;
+  }
+
+  public String getClassification() {
+    return classification;
   }
 
   public String getAuthorUuid() {

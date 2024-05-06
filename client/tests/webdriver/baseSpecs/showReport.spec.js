@@ -41,7 +41,7 @@ describe("Show report page", () => {
       // Attachment card list
       await (await ShowReport.getCard()).waitForExist()
       await (await ShowReport.getCard()).waitForDisplayed()
-      expect(await ShowReport.getFileData()).to.be.equal("test_attachment")
+      expect(await ShowReport.getCaption()).to.be.equal("Arthur's test report")
     })
     it("We can go to the show page of Attachment", async() => {
       await (await ShowReport.getImageClick()).click()

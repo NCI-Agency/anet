@@ -30,7 +30,6 @@ public class Attachment extends AbstractAnetBean {
   @GraphQLInputField
   private String description;
 
-  // annotated below
   @GraphQLQuery
   @GraphQLInputField
   private String classification;

@@ -42,6 +42,9 @@ public abstract class AbstractAttachmentSearcher
       qb.addWhereClause("FALSE");
     }
 
+    qb.addStringEqualsClause("mimeType", "attachments.\"mimeType\"", query.getMimeType());
+    qb.addStringEqualsClause("classification", "attachments.classification",
+        query.getClassification());
     qb.addStringEqualsClause("authorUuid", "attachments.\"authorUuid\"", query.getAuthorUuid());
 
     if (hasTextQuery(query)) {

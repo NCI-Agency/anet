@@ -24,6 +24,9 @@ const ANET_OBJECT_TYPES = {
   },
   "Authorization Groups": {
     sampleFilters: []
+  },
+  Attachments: {
+    sampleFilters: ["Mime Type"]
   }
 }
 const COMMON_FILTER_TEXT = "Status"

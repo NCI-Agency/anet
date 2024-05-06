@@ -13,7 +13,7 @@ describe("Show location page", () => {
     it("We should see a card of Attachment", async() => {
       await (await ShowLocation.getCard()).waitForExist()
       await (await ShowLocation.getCard()).waitForDisplayed()
-      expect(await ShowLocation.getFileData()).to.be.equal("attachLocation")
+      expect(await ShowLocation.getCaption()).to.be.equal("Antarctica")
     })
     it("We can go to the show page of Attachment", async() => {
       await (await ShowLocation.getImageClick()).click()

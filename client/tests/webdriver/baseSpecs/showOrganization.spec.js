@@ -133,9 +133,7 @@ describe("Show organization page", () => {
     it("We should see a card of Attachment", async() => {
       await (await ShowOrganization.getCard()).waitForExist()
       await (await ShowOrganization.getCard()).waitForDisplayed()
-      expect(await ShowOrganization.getFileData()).to.be.equal(
-        "attachOrganization"
-      )
+      expect(await ShowOrganization.getCaption()).to.be.equal("EF 2.2")
     })
     it("We can go to the show page of Attachment", async() => {
       await (await ShowOrganization.getImageClick()).click()

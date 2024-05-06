@@ -627,7 +627,43 @@ export const searchFilters = function(includeAdminFilters) {
   }
 
   filters[SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS] = { filters: {} }
-  filters[SEARCH_OBJECT_TYPES.ATTACHMENTS] = { filters: {} }
+
+  const mimeTypes = Settings.fields.attachment.mimeTypes
+  const classificationOptions = Object.keys(Settings.classification.choices)
+  const classificationLabels = Object.values(Settings.classification.choices)
+  filters[SEARCH_OBJECT_TYPES.ATTACHMENTS] = {
+    filters: {
+      "Mime Type": {
+        component: SelectFilter,
+        deserializer: deserializeSelectFilter,
+        props: {
+          queryKey: "mimeType",
+          options: mimeTypes,
+          labels: mimeTypes
+        }
+      },
+      Classifications: {
+        component: SelectFilter,
+        dictProps: Settings.classification,
+        deserializer: deserializeSelectFilter,
+        props: {
+          queryKey: "classification",
+          options: classificationOptions,
+          labels: classificationLabels
+        }
+      },
+      Owner: {
+        component: AdvancedSelectFilter,
+        deserializer: deserializeAdvancedSelectFilter,
+        props: {
+          ...advancedSelectFilterPersonProps,
+          filterDefs: authorWidgetFilters,
+          placeholder: "Filter attachments by owner...",
+          queryKey: "authorUuid"
+        }
+      }
+    }
+  }
 
   for (const filtersForType of Object.values(filters)) {
     filtersForType.filters.Status = StatusFilter

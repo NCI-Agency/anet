@@ -25,6 +25,7 @@ import mil.dds.anet.test.client.Report;
 import mil.dds.anet.test.client.ReportInput;
 import mil.dds.anet.test.client.ReportState;
 import mil.dds.anet.test.client.Status;
+import mil.dds.anet.utils.Utils;
 import org.junit.jupiter.api.Test;
 
 public class AttachmentResourceTest extends AbstractResourceTest {
@@ -35,6 +36,71 @@ public class AttachmentResourceTest extends AbstractResourceTest {
   private static final String _ATTACHMENTS_FIELDS =
       String.format("attachments %1$s", ATTACHMENT_FIELDS);
   private static final String OBJECT_FIELDS = String.format("{ uuid %1$s }", _ATTACHMENTS_FIELDS);
+
+  @Test
+  void searchByMimeType() {
+    final AttachmentSearchQueryInput sqAll =
+        AttachmentSearchQueryInput.builder().withPageSize(0).build();
+    final AnetBeanList_Attachment attachmentList = withCredentials(adminUser,
+        t -> queryExecutor.attachmentList(getListFields(ATTACHMENT_FIELDS), sqAll));
+    assertThat(attachmentList).isNotNull();
+    assertThat(attachmentList.getList()).isNotEmpty();
+    final Map<String, List<Attachment>> attachmentsByMimeType =
+        attachmentList.getList().stream().collect(Collectors.groupingBy(Attachment::getMimeType));
+    attachmentsByMimeType.forEach((k, v) -> {
+      final AttachmentSearchQueryInput sqByMimeType =
+          AttachmentSearchQueryInput.builder().withPageSize(0).withMimeType(k).build();
+      final AnetBeanList_Attachment attachmentListForMimeType = withCredentials(adminUser,
+          t -> queryExecutor.attachmentList(getListFields(ATTACHMENT_FIELDS), sqByMimeType));
+      assertThat(attachmentListForMimeType).isNotNull();
+      assertThat(attachmentListForMimeType.getList()).usingRecursiveFieldByFieldElementComparator()
+          .hasSameElementsAs(v);
+    });
+  }
+
+  @Test
+  void searchByClassification() {
+    final AttachmentSearchQueryInput sqAll =
+        AttachmentSearchQueryInput.builder().withPageSize(0).build();
+    final AnetBeanList_Attachment attachmentList = withCredentials(adminUser,
+        t -> queryExecutor.attachmentList(getListFields(ATTACHMENT_FIELDS), sqAll));
+    assertThat(attachmentList).isNotNull();
+    assertThat(attachmentList.getList()).isNotEmpty();
+    final Map<String, List<Attachment>> attachmentsByClassification =
+        attachmentList.getList().stream().filter(a -> !Utils.isEmptyOrNull(a.getClassification()))
+            .collect(Collectors.groupingBy(Attachment::getClassification));
+    attachmentsByClassification.forEach((k, v) -> {
+      final AttachmentSearchQueryInput sqByClassification =
+          AttachmentSearchQueryInput.builder().withPageSize(0).withClassification(k).build();
+      final AnetBeanList_Attachment attachmentListForClassification = withCredentials(adminUser,
+          t -> queryExecutor.attachmentList(getListFields(ATTACHMENT_FIELDS), sqByClassification));
+      assertThat(attachmentListForClassification).isNotNull();
+      assertThat(attachmentListForClassification.getList())
+          .usingRecursiveFieldByFieldElementComparator().hasSameElementsAs(v);
+    });
+  }
+
+  @Test
+  void searchByCaption() {
+    final AttachmentSearchQueryInput sqAll =
+        AttachmentSearchQueryInput.builder().withPageSize(0).build();
+    final AnetBeanList_Attachment attachmentList = withCredentials(adminUser,
+        t -> queryExecutor.attachmentList(getListFields(ATTACHMENT_FIELDS), sqAll));
+    assertThat(attachmentList).isNotNull();
+    assertThat(attachmentList.getList()).isNotEmpty();
+    final Map<String, List<Attachment>> attachmentsByClassification =
+        attachmentList.getList().stream().filter(a -> !Utils.isEmptyOrNull(a.getCaption()))
+            .collect(Collectors.groupingBy(Attachment::getCaption));
+    attachmentsByClassification.forEach((k, v) -> {
+      final AttachmentSearchQueryInput sqByCaption =
+          AttachmentSearchQueryInput.builder().withPageSize(0).withText(k).build();
+      final AnetBeanList_Attachment attachmentListForCaption = withCredentials(adminUser,
+          t -> queryExecutor.attachmentList(getListFields(ATTACHMENT_FIELDS), sqByCaption));
+      assertThat(attachmentListForCaption).isNotNull();
+      assertThat(attachmentListForCaption.getList()).usingRecursiveFieldByFieldElementComparator()
+          .hasSameElementsAs(v);
+    });
+  }
 
   @Test
   void testAttachment() {
