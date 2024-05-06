@@ -1,6 +1,7 @@
 package mil.dds.anet.database;
 
 import static org.jdbi.v3.core.statement.EmptyHandling.NULL_KEYWORD;
+import static org.jdbi.v3.sqlobject.customizer.BindList.EmptyHandling.NULL_STRING;
 
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.io.IOException;
@@ -28,6 +29,7 @@ import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.io.EofException;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
+import org.jdbi.v3.sqlobject.customizer.BindList;
 import org.jdbi.v3.sqlobject.statement.SqlBatch;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
@@ -90,9 +92,6 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AttachmentSearchQuery
 
   @Override
   public int updateInternal(Attachment obj) {
-    deleteAttachmentRelatedObjects(DaoUtils.getUuid(obj));
-    insertAttachmentRelatedObjects(DaoUtils.getUuid(obj), obj.getAttachmentRelatedObjects());
-
     return getDbHandle()
         .createUpdate("/* updateAttachment */ "
             + "UPDATE \"attachments\" SET \"mimeType\" = :mimeType, \"fileName\" = :fileName, "
@@ -103,7 +102,7 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AttachmentSearchQuery
 
   @Override
   public int deleteInternal(String uuid) {
-    deleteAttachmentRelatedObjects(uuid);
+    deleteAllAttachmentRelatedObjects(uuid);
     return getDbHandle()
         .createQuery("/* deleteAttachment */ DELETE FROM attachments WHERE uuid = :uuid"
             + " RETURNING CASE WHEN content IS NULL THEN 1 ELSE lo_unlink(content) END")
@@ -204,9 +203,16 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AttachmentSearchQuery
         + "VALUES (:attachmentUuid, :relatedObjectType, :relatedObjectUuid)")
     void insertAttachmentRelatedObjects(@Bind("attachmentUuid") String attachmentUuid,
         @BindBean List<GenericRelatedObject> attachmentRelatedObjects);
+
+    @SqlUpdate("DELETE FROM \"attachmentRelatedObjects\""
+        + " WHERE \"attachmentUuid\" = :attachmentUuid"
+        + " AND \"relatedObjectUuid\" IN ( <relatedObjectUuids> )")
+    void deleteAttachmentRelatedObjects(@Bind("attachmentUuid") String attachmentUuid,
+        @BindList(value = "relatedObjectUuids",
+            onEmpty = NULL_STRING) List<String> relatedObjectUuids);
   }
 
-  private void insertAttachmentRelatedObjects(String uuid,
+  public void insertAttachmentRelatedObjects(String uuid,
       List<GenericRelatedObject> attachmentRelatedObjects) {
     if (!Utils.isEmptyOrNull(attachmentRelatedObjects)) {
       final AttachmentBatch ab = getDbHandle().attach(AttachmentBatch.class);
@@ -214,10 +220,17 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AttachmentSearchQuery
     }
   }
 
-  private void deleteAttachmentRelatedObjects(String attachmentUuid) {
+  public void deleteAttachmentRelatedObjects(String uuid, List<String> relatedObjectUuids) {
+    if (!Utils.isEmptyOrNull(relatedObjectUuids)) {
+      final AttachmentBatch ab = getDbHandle().attach(AttachmentBatch.class);
+      ab.deleteAttachmentRelatedObjects(uuid, relatedObjectUuids);
+    }
+  }
+
+  private void deleteAllAttachmentRelatedObjects(String attachmentUuid) {
     getDbHandle()
         .createUpdate(
-            "/* deleteAttachmentRelatedObjects */ DELETE FROM \"attachmentRelatedObjects\""
+            "/* deleteAllAttachmentRelatedObjects */ DELETE FROM \"attachmentRelatedObjects\""
                 + " WHERE \"attachmentUuid\" = :attachmentUuid")
         .bind("attachmentUuid", attachmentUuid).execute();
   }

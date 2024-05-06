@@ -58,9 +58,11 @@ public class AttachmentResource {
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private final AttachmentDao dao;
+  private final AnetObjectEngine engine;
 
   public AttachmentResource(AnetObjectEngine engine) {
     this.dao = engine.getAttachmentDao();
+    this.engine = engine;
   }
 
   @GraphQLQuery(name = "attachment")
@@ -85,7 +87,7 @@ public class AttachmentResource {
     assertAttachmentPermission(user, null, "You don't have permission to create attachments");
     assertAllowedMimeType(attachment.getMimeType());
     ResourceUtils.assertAllowedClassification(attachment.getClassification());
-    assertAllowedRelatedObjects(user, attachment.getAttachmentRelatedObjects());
+    assertAllowedRelatedObjects(user, attachment.getAttachmentRelatedObjects(), false);
 
     attachment.setAuthorUuid(DaoUtils.getUuid(user));
     attachment = dao.insert(attachment);
@@ -148,14 +150,28 @@ public class AttachmentResource {
         "You don't have permission to update this attachment");
     assertAllowedMimeType(attachment.getMimeType());
     ResourceUtils.assertAllowedClassification(attachment.getClassification());
-    assertAllowedRelatedObjects(user,
-        existing.loadAttachmentRelatedObjects(AnetObjectEngine.getInstance().getContext()).join());
-    assertAllowedRelatedObjects(user, attachment.getAttachmentRelatedObjects());
 
     final int numRows = dao.update(attachment);
     if (numRows == 0) {
       throw new WebApplicationException("Couldn't process attachment update", Status.NOT_FOUND);
     }
+
+    if (attachment.getAttachmentRelatedObjects() != null) {
+      logger.debug("Editing related objects for {}", attachment);
+      final List<GenericRelatedObject> existingRelatedObjects =
+          existing.loadAttachmentRelatedObjects(engine.getContext()).join();
+      Utils.updateElementsByKey(existingRelatedObjects, attachment.getAttachmentRelatedObjects(),
+          GenericRelatedObject::getRelatedObjectUuid, newRelatedObject -> {
+            final List<GenericRelatedObject> newRelatedObjects = List.of(newRelatedObject);
+            assertAllowedRelatedObjects(user, newRelatedObjects, false);
+            dao.insertAttachmentRelatedObjects(DaoUtils.getUuid(attachment), newRelatedObjects);
+          }, oldRelatedObject -> {
+            assertAllowedRelatedObjects(user, List.of(oldRelatedObject), true);
+            dao.deleteAttachmentRelatedObjects(DaoUtils.getUuid(attachment),
+                List.of(DaoUtils.getUuid(oldRelatedObject)));
+          }, null);
+    }
+
     AnetAuditLogger.log("Attachment {} updated by {}", DaoUtils.getUuid(attachment), user);
     return DaoUtils.getUuid(attachment);
   }
@@ -169,7 +185,7 @@ public class AttachmentResource {
     assertAttachmentPermission(user, existing,
         "You don't have permission to delete this attachment");
     assertAllowedRelatedObjects(user,
-        existing.loadAttachmentRelatedObjects(AnetObjectEngine.getInstance().getContext()).join());
+        existing.loadAttachmentRelatedObjects(engine.getContext()).join(), true);
 
     final int numRows = dao.delete(attachmentUuid);
     if (numRows == 0) {
@@ -223,15 +239,18 @@ public class AttachmentResource {
   }
 
   private void assertAllowedRelatedObjects(final Person user,
-      final List<GenericRelatedObject> relatedObjects) {
+      final List<GenericRelatedObject> relatedObjects, boolean forDelete) {
     if (Utils.isEmptyOrNull(relatedObjects)) {
       return;
     }
-    if (!relatedObjects.stream().allMatch(aro -> isAllowedRelatedObject(user, aro))) {
-      throw new WebApplicationException(
-          "You are not allowed to link/unlink the attachment to/from one of the requested objects",
-          Status.BAD_REQUEST);
-    }
+    relatedObjects.forEach(aro -> {
+      if (!isAllowedRelatedObject(user, aro)) {
+        throw new WebApplicationException(String.format(
+            "You are not allowed to %1$s the attachment %2$s one of the requested objects [%3$s:%4$s]",
+            forDelete ? "unlink" : "link", forDelete ? "from" : "to", aro.getRelatedObjectType(),
+            aro.getRelatedObjectUuid()), Status.BAD_REQUEST);
+      }
+    });
   }
 
   private boolean isAllowedRelatedObject(final Person user,
