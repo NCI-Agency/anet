@@ -3,7 +3,7 @@ package mil.dds.anet.beans.search;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 
-public class AttachmentSearchQuery extends AbstractSearchQuery<AttachmentSearchSortBy> {
+public class AttachmentSearchQuery extends SubscribableObjectSearchQuery<AttachmentSearchSortBy> {
 
   @GraphQLQuery
   @GraphQLInputField

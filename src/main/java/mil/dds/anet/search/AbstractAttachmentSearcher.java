@@ -27,6 +27,21 @@ public abstract class AbstractAttachmentSearcher
   protected void buildQuery(AttachmentSearchQuery query) {
     qb.addSelectClause(AttachmentDao.ATTACHMENT_FIELDS);
     qb.addFromClause("attachments");
+
+    // Filter out avatars
+    qb.addWhereClause("attachments.uuid NOT IN "
+        + "(SELECT \"avatarUuid\" FROM people WHERE \"avatarUuid\" IS NOT NULL)");
+
+    if (query.getUser() != null && query.getSubscribed()) {
+      // Should never match
+      qb.addWhereClause("FALSE");
+    }
+
+    if (query.getEmailNetwork() != null) {
+      // Should never match
+      qb.addWhereClause("FALSE");
+    }
+
     qb.addStringEqualsClause("authorUuid", "attachments.\"authorUuid\"", query.getAuthorUuid());
     addOrderByClauses(qb, query);
   }

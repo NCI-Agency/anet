@@ -1,4 +1,6 @@
 import { gql } from "@apollo/client"
+import { Icon } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import {
   DEFAULT_PAGE_PROPS,
   DEFAULT_SEARCH_PROPS,
@@ -8,6 +10,7 @@ import {
 } from "actions"
 import API from "api"
 import AppContext from "components/AppContext"
+import AttachmentTable from "components/Attachment/AttachmentTable"
 import AuthorizationGroupTable from "components/AuthorizationGroupTable"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -36,6 +39,7 @@ import { exportResults } from "exportUtils"
 import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
+import { Attachment } from "models"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react"
@@ -247,6 +251,57 @@ const GQL_GET_AUTHORIZATION_GROUP_LIST = gql`
               ${GQL_EMAIL_ADDRESSES}
             }
           }
+        }
+      }
+    }
+  }
+`
+const GQL_GET_ATTACHMENT_LIST = gql`
+  query ($attachmentQuery: AttachmentSearchQueryInput) {
+    attachmentList(query: $attachmentQuery) {
+      totalCount
+      pageNum
+      pageSize
+      list {
+        ${Attachment.basicFieldsQuery}
+        author {
+          uuid
+          name
+          rank
+          avatarUuid
+        }
+        attachmentRelatedObjects {
+          relatedObject {
+            ... on AuthorizationGroup {
+              name
+            }
+            ... on Location {
+              name
+            }
+            ... on Organization {
+              shortName
+              longName
+              identificationCode
+            }
+            ... on Person {
+              name
+              rank
+              avatarUuid
+            }
+            ... on Position {
+              type
+              name
+            }
+            ... on Report {
+              intent
+            }
+            ... on Task {
+              shortName
+              longName
+            }
+          }
+          relatedObjectUuid
+          relatedObjectType
         }
       }
     }
@@ -882,6 +937,79 @@ AuthorizationGroups.propTypes = {
   updateRecipients: PropTypes.func
 }
 
+const Attachments = ({
+  pageDispatchers,
+  queryParams,
+  setTotalCount,
+  paginationKey,
+  pagination,
+  setPagination
+}) => {
+  // (Re)set pageNum to 0 if the queryParams change, and make sure we retrieve page 0 in that case
+  const latestQueryParams = useRef(queryParams)
+  const queryParamsUnchanged = _isEqual(latestQueryParams.current, queryParams)
+  const [pageNum, setPageNum] = useState(
+    queryParamsUnchanged && pagination[paginationKey]
+      ? pagination[paginationKey].pageNum
+      : 0
+  )
+  useEffect(() => {
+    if (!queryParamsUnchanged) {
+      latestQueryParams.current = queryParams
+      setPagination(paginationKey, 0)
+      setPageNum(0)
+    }
+  }, [queryParams, setPagination, paginationKey, queryParamsUnchanged])
+  const attachmentQuery = {
+    ...queryParams,
+    pageNum: queryParamsUnchanged ? pageNum : 0,
+    pageSize: queryParams.pageSize || DEFAULT_PAGESIZE
+  }
+  const { loading, error, data } = API.useApiQuery(GQL_GET_ATTACHMENT_LIST, {
+    attachmentQuery
+  })
+  const { done, result } = useBoilerplate({
+    loading,
+    error,
+    pageDispatchers
+  })
+  // Update the total count
+  const totalCount = done ? null : data?.attachmentList?.totalCount
+  useEffect(() => setTotalCount?.(totalCount), [setTotalCount, totalCount])
+  if (done) {
+    return result
+  }
+
+  const paginatedAttachments = data ? data.attachmentList : []
+  const { pageSize, pageNum: curPage, list: attachments } = paginatedAttachments
+
+  return (
+    <AttachmentTable
+      attachments={attachments}
+      pageSize={pageSize}
+      pageNum={curPage}
+      totalCount={totalCount}
+      goToPage={setPage}
+      showOwner
+      id="attachments-search-results"
+    />
+  )
+
+  function setPage(pageNum) {
+    setPagination(paginationKey, pageNum)
+    setPageNum(pageNum)
+  }
+}
+
+Attachments.propTypes = {
+  pageDispatchers: PageDispatchersPropType,
+  queryParams: PropTypes.object,
+  setTotalCount: PropTypes.func,
+  paginationKey: PropTypes.string.isRequired,
+  pagination: PropTypes.object.isRequired,
+  setPagination: PropTypes.func.isRequired
+}
+
 const sum = (...args) => {
   return args.reduce((prev, curr) => (curr === null ? prev : prev + curr))
 }
@@ -980,6 +1108,7 @@ const Search = ({
   const [numLocations, setNumLocations] = useState(null)
   const [numReports, setNumReports] = useState(null)
   const [numAuthorizationGroups, setNumAuthorizationGroups] = useState(null)
+  const [numAttachments, setNumAttachments] = useState(null)
   const [recipients, setRecipients] = useState({ ...DEFAULT_RECIPIENTS })
   usePageTitle("Search")
   const numResultsThatCanBeEmailed = sum(
@@ -992,7 +1121,8 @@ const Search = ({
     numResultsThatCanBeEmailed,
     numTasks,
     numLocations,
-    numReports
+    numReports,
+    numAttachments
   )
   const taskShortLabel = Settings.fields.task.shortLabel
   // Memo'ize the search query parameters we use to prevent unnecessary re-renders
@@ -1007,6 +1137,15 @@ const Search = ({
       pageSize,
       sortBy: "NAME",
       sortOrder: "ASC"
+    }),
+    [searchQueryParams, pageSize]
+  )
+  const attachmentSearchQueryParams = useMemo(
+    () => ({
+      ...searchQueryParams,
+      pageSize,
+      sortBy: "CREATED_AT",
+      sortOrder: "DESC"
     }),
     [searchQueryParams, pageSize]
   )
@@ -1039,6 +1178,7 @@ const Search = ({
   useEffect(() => {
     if (!queryUnchanged) {
       latestQuery.current = { queryTypes, searchQueryParams }
+      setNumAttachments(0)
       setNumAuthorizationGroups(0)
       setNumLocations(0)
       setNumOrganizations(0)
@@ -1053,6 +1193,7 @@ const Search = ({
     queryTypes,
     searchQueryParams,
     setRecipients,
+    setNumAttachments,
     setNumAuthorizationGroups,
     setNumLocations,
     setNumOrganizations,
@@ -1077,6 +1218,8 @@ const Search = ({
   const hasAuthorizationGroupsResults =
     queryTypes.includes(SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS) &&
     numAuthorizationGroups > 0
+  const hasAttachmentsResults =
+    queryTypes.includes(SEARCH_OBJECT_TYPES.ATTACHMENTS) && numAttachments > 0
   useBoilerplate({
     pageProps: DEFAULT_PAGE_PROPS,
     searchProps: DEFAULT_SEARCH_PROPS,
@@ -1173,6 +1316,16 @@ const Search = ({
                 {hasAuthorizationGroupsResults && (
                   <Badge pill bg="secondary" className="float-end">
                     {numAuthorizationGroups}
+                  </Badge>
+                )}
+              </AnchorNavItem>
+
+              <AnchorNavItem to="attachments" disabled={!hasAttachmentsResults}>
+                <Icon icon={IconNames.PAPERCLIP} />{" "}
+                {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.ATTACHMENTS]}{" "}
+                {hasAttachmentsResults && (
+                  <Badge pill bg="secondary" className="float-end">
+                    {numAttachments}
                   </Badge>
                 )}
               </AnchorNavItem>
@@ -1464,6 +1617,30 @@ const Search = ({
             allowSelection={withEmail}
             updateRecipients={r =>
               updateRecipients(SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS, r)}
+          />
+        </Fieldset>
+      )}
+      {queryTypes.includes(SEARCH_OBJECT_TYPES.ATTACHMENTS) && !withEmail && (
+        <Fieldset
+          id="attachments"
+          title={
+            <>
+              Attachments
+              {hasAttachmentsResults && (
+                <Badge pill bg="secondary" className="ms-1">
+                  {numAttachments}
+                </Badge>
+              )}
+            </>
+          }
+        >
+          <Attachments
+            pageDispatchers={pageDispatchers}
+            queryParams={attachmentSearchQueryParams}
+            setTotalCount={setNumAttachments}
+            paginationKey="SEARCH_attachments"
+            pagination={pagination}
+            setPagination={setPagination}
           />
         </Fieldset>
       )}

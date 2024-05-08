@@ -627,6 +627,7 @@ export const searchFilters = function(includeAdminFilters) {
   }
 
   filters[SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS] = { filters: {} }
+  filters[SEARCH_OBJECT_TYPES.ATTACHMENTS] = { filters: {} }
 
   for (const filtersForType of Object.values(filters)) {
     filtersForType.filters.Status = StatusFilter

@@ -227,12 +227,14 @@ input AttachmentInput {
 """"""
 input AttachmentSearchQueryInput {
   authorUuid: String
+  emailNetwork: String
   inMyReports: Boolean
   pageNum: Int
   pageSize: Int
   sortBy: AttachmentSearchSortBy
   sortOrder: SortOrder
   status: Status
+  subscribed: Boolean
   text: String
 }
 
