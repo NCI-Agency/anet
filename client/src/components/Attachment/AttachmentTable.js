@@ -62,7 +62,11 @@ const AttachmentTable = ({
                     </div>
                   </td>
                   <td>
-                    <LinkTo modelType="Attachment" model={attachment} />
+                    <LinkTo
+                      modelType="Attachment"
+                      model={attachment}
+                      showIcon={false}
+                    />
                   </td>
                   <td>
                     {Settings.classification.choices[attachment.classification]}

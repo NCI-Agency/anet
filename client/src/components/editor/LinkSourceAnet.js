@@ -1,4 +1,6 @@
-import MultiTypeAdvancedSelectComponent from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
+import MultiTypeAdvancedSelectComponent, {
+  ALL_ENTITY_TYPES
+} from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
 import * as FieldHelper from "components/FieldHelper"
 import { FastField, Form, Formik } from "formik"
 import PropTypes from "prop-types"
@@ -70,6 +72,7 @@ const LinkSourceAnet = ({ editor, showModal, setShowModal, external }) => {
         ) : (
           <MultiTypeAdvancedSelectComponent
             objectType={value?.objectType}
+            entityTypes={ALL_ENTITY_TYPES}
             value={value?.object}
             valueKey={value?.object && "uuid"}
             onConfirm={(value, objectType) => {

@@ -51,9 +51,10 @@ const LinkTo = ({
   const modelInstance = new ModelClass(isModel ? model : {})
 
   // Icon
-  const iconComponent = showIcon && !button && modelInstance.iconUrl() && (
+  const iconUrl = modelInstance.iconUrl()
+  const iconComponent = showIcon && !button && iconUrl && (
     <img
-      src={modelInstance.iconUrl()}
+      src={iconUrl}
       alt=""
       style={{ marginLeft: 5, marginRight: 5, height: "1em" }}
     />

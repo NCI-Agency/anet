@@ -1,6 +1,4 @@
-import MultiTypeAdvancedSelectComponent, {
-  ENTITY_TYPES
-} from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
+import MultiTypeAdvancedSelectComponent from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
 import LinkTo from "components/LinkTo"
 import Model, { MODEL_TO_OBJECT_TYPE } from "components/Model"
 import RemoveButton from "components/RemoveButton"
@@ -140,12 +138,11 @@ RelatedObjectsTableInput.propTypes = {
   currentObject: Model.relatedObjectPropType,
   relatedObjects: Model.noteRelatedObjectsPropType.isRequired,
   objectType: PropTypes.string,
-  entityTypes: PropTypes.arrayOf(PropTypes.string).isRequired,
+  entityTypes: PropTypes.arrayOf(PropTypes.string),
   setRelatedObjects: PropTypes.func.isRequired,
   showDelete: PropTypes.bool
 }
 
 RelatedObjectsTableInput.defaultProps = {
-  entityTypes: Object.values(ENTITY_TYPES),
   showDelete: false
 }
