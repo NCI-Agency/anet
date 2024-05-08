@@ -50,16 +50,6 @@
   border-radius: 6px;
 }
 
-.file-info {
-  display: none;
-}
-.info-show:hover .file-info {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  background: #ffffff73;
-  justify-content: space-between;
-}
 .info-line {
   font-size: 15px;
   text-align: center;
@@ -71,10 +61,6 @@
   width: 100%;
   display: flex;
   justify-content: space-between;
-}
-.file-info > .bp5-popover-target {
-  height: 100%;
-  width: 100%;
 }
 .detail-btn {
   display: grid;

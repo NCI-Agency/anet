@@ -47,18 +47,16 @@ const AttachmentCard = ({
           }}
           onClick={() => onClick?.(attachment)}
         >
-          <div className="file-info image-info">
-            <div style={{ display: "grid" }}>
-              {!onClick && (
-                <LinkTo
-                  className="detail-btn"
-                  modelType="Attachment"
-                  model={attachment}
-                >
-                  {" "}
-                </LinkTo>
-              )}
-            </div>
+          <div style={{ display: "grid" }}>
+            {!onClick && (
+              <LinkTo
+                className="detail-btn"
+                modelType="Attachment"
+                model={attachment}
+              >
+                {" "}
+              </LinkTo>
+            )}
           </div>
         </div>
         <Card.Body className="p-1 d-block">
