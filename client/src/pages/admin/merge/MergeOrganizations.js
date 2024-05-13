@@ -402,7 +402,7 @@ const OrganizationColumn = ({
           fieldLabel="Select an organization"
           placeholder="Select an organization to merge"
           value={organization}
-          overlayColumns={["shortName"]}
+          overlayColumns={["Organization"]}
           overlayRenderRow={OrganizationSimpleOverlayRow}
           filterDefs={organizationsFilters}
           onChange={value => {

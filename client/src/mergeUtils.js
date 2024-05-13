@@ -290,10 +290,7 @@ export function mergedOrganizationIsValid(mergedOrganization) {
     msg.push(Settings.fields.organization.status?.label)
   }
   if (!mergedOrganization.shortName) {
-    msg.push(Settings.fields.shortName.status?.label)
-  }
-  if (!mergedOrganization.identificationCode) {
-    msg.push(Settings.fields.identificationCode.status?.label)
+    msg.push(Settings.fields.organization.shortName?.label)
   }
 
   if (_isEmpty(msg)) {

@@ -444,7 +444,9 @@ INSERT INTO organizations(uuid, "shortName", "longName", "parentOrgUuid", "app6s
   (uuid_generate_v4(), 'EF 5.3', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 5'), '10', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 5.4', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 5'), '10', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 6.1', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 6'), '10', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 6.2', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 6'), '10', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  (uuid_generate_v4(), 'EF 6.2', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 6'), '10', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'Merge Org 1', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 1'), '10', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'Merge Org 2', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 1'), '10', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 UPDATE organizations
 SET "locationUuid"='9c982685-5946-4dad-a7ee-0f5a12f5e170'

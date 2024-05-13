@@ -1,9 +1,157 @@
+import { expect } from "chai"
 import MergeOrganizations from "../pages/mergeOrganizations.page"
 
-describe("Merge organizations", () => {
+const EXAMPLE_ORGANIZATIONS = {
+  validLeft: {
+    search: "Merge Org 1",
+    shortName: "Merge Org 1",
+    parentOrg: "EF 1 | Planning Programming, Budgeting and Execution"
+  },
+  validRight: {
+    search: "Merge Org 2",
+    shortName: "Merge Org 2",
+    parentOrg: "EF 1 | Planning Programming, Budgeting and Execution"
+  }
+}
+
+describe("Merge organizations page", () => {
   it("Should display field values of the left organization", async() => {
     await MergeOrganizations.open()
     await (await MergeOrganizations.getTitle()).waitForExist()
     await (await MergeOrganizations.getTitle()).waitForDisplayed()
+
+    await (await MergeOrganizations.getLeftOrganizationField()).click()
+    await (
+      await MergeOrganizations.getLeftOrganizationField()
+    ).setValue(EXAMPLE_ORGANIZATIONS.validLeft.search)
+    await MergeOrganizations.waitForAdvancedSelectLoading(
+      EXAMPLE_ORGANIZATIONS.validLeft.shortName
+    )
+    await (await MergeOrganizations.getFirstItemFromAdvancedSelect()).click()
+    await browser.pause(500)
+    await MergeOrganizations.waitForColumnToChange(
+      EXAMPLE_ORGANIZATIONS.validLeft.shortName,
+      "left",
+      "Organization"
+    )
+    expect(
+      await (
+        await MergeOrganizations.getColumnContent("left", "Name")
+      ).getText()
+    ).to.eq(EXAMPLE_ORGANIZATIONS.validLeft.shortName)
+    expect(
+      await (
+        await MergeOrganizations.getColumnContent("left", "Parent Organization")
+      ).getText()
+    ).to.eq(EXAMPLE_ORGANIZATIONS.validLeft.parentOrg)
+  })
+  it("Should not allow to select the same organizations", async() => {
+    await (
+      await MergeOrganizations.getRightOrganizationField()
+    ).setValue(EXAMPLE_ORGANIZATIONS.validLeft.search)
+    await MergeOrganizations.waitForAdvancedSelectLoading(
+      EXAMPLE_ORGANIZATIONS.validLeft.shortName
+    )
+    await (await MergeOrganizations.getFirstItemFromAdvancedSelect()).click()
+
+    await (
+      await MergeOrganizations.getSameOrganizationsToast()
+    ).waitForDisplayed()
+  })
+  it("Should display fields values of the right organization", async() => {
+    await MergeOrganizations.open()
+    await (await MergeOrganizations.getTitle()).waitForExist()
+    await (await MergeOrganizations.getTitle()).waitForDisplayed()
+
+    await (
+      await MergeOrganizations.getRightOrganizationField()
+    ).setValue(EXAMPLE_ORGANIZATIONS.validRight.search)
+    await MergeOrganizations.waitForAdvancedSelectLoading(
+      EXAMPLE_ORGANIZATIONS.validRight.search
+    )
+    await (await MergeOrganizations.getFirstItemFromAdvancedSelect()).click()
+    await browser.pause(500)
+    await MergeOrganizations.waitForColumnToChange(
+      EXAMPLE_ORGANIZATIONS.validRight.shortName,
+      "right",
+      "Organization"
+    )
+    expect(
+      await (
+        await MergeOrganizations.getColumnContent("right", "Name")
+      ).getText()
+    ).to.eq(EXAMPLE_ORGANIZATIONS.validRight.shortName)
+    expect(
+      await (
+        await MergeOrganizations.getColumnContent(
+          "right",
+          "Parent Organization"
+        )
+      ).getText()
+    ).to.eq(EXAMPLE_ORGANIZATIONS.validRight.parentOrg)
+  })
+  it("Should be able to select all fields from left organization", async() => {
+    await (await MergeOrganizations.getUseAllButton("left")).click()
+    await browser.pause(500)
+
+    await MergeOrganizations.waitForColumnToChange(
+      EXAMPLE_ORGANIZATIONS.validLeft.shortName,
+      "mid",
+      "Name"
+    )
+    expect(
+      await (await MergeOrganizations.getColumnContent("mid", "Name")).getText()
+    ).to.eq(EXAMPLE_ORGANIZATIONS.validLeft.shortName)
+    expect(
+      await (
+        await MergeOrganizations.getColumnContent("mid", "Parent Organization")
+      ).getText()
+    ).to.eq(EXAMPLE_ORGANIZATIONS.validLeft.parentOrg)
+  })
+  it("Should be able to select all fields from right organization", async() => {
+    await (await MergeOrganizations.getUseAllButton("right")).click()
+    await browser.pause(500)
+
+    await MergeOrganizations.waitForColumnToChange(
+      EXAMPLE_ORGANIZATIONS.validRight.shortName,
+      "mid",
+      "Name"
+    )
+    expect(
+      await (await MergeOrganizations.getColumnContent("mid", "Name")).getText()
+    ).to.eq(EXAMPLE_ORGANIZATIONS.validRight.shortName)
+    expect(
+      await (
+        await MergeOrganizations.getColumnContent("mid", "Parent Organization")
+      ).getText()
+    ).to.eq(EXAMPLE_ORGANIZATIONS.validRight.parentOrg)
+  })
+  it("Should be able to select from both left and right side.", async() => {
+    await (await MergeOrganizations.getSelectButton("left", "Name")).click()
+    await MergeOrganizations.waitForColumnToChange(
+      EXAMPLE_ORGANIZATIONS.validLeft.shortName,
+      "mid",
+      "Name"
+    )
+    expect(
+      await (await MergeOrganizations.getColumnContent("mid", "Name")).getText()
+    ).to.eq(EXAMPLE_ORGANIZATIONS.validLeft.shortName)
+    await (
+      await MergeOrganizations.getSelectButton("right", "Parent Organization")
+    ).click()
+    await MergeOrganizations.waitForColumnToChange(
+      EXAMPLE_ORGANIZATIONS.validRight.parentOrg,
+      "mid",
+      "Parent Organization"
+    )
+    expect(
+      await (
+        await MergeOrganizations.getColumnContent("mid", "Parent Organization")
+      ).getText()
+    ).to.equal(EXAMPLE_ORGANIZATIONS.validRight.parentOrg)
+  })
+  it("Should be able to merge both organizations when winner is left organization", async() => {
+    await (await MergeOrganizations.getMergeOrganizationsButton()).click()
+    await MergeOrganizations.waitForSuccessAlert()
   })
 })
