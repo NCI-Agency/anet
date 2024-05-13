@@ -429,7 +429,8 @@ task dbLoad(dependsOn: [pushPsqlBaseData, pushPsqlImageData], type: DockerExecCo
 	group = "database runtime"
 	description = "Runs the ANET database load command for PostgreSQL; loads demo data."
 	containerId = dbContainerName
-	commands = [ ["psql", "-U", run.environment["ANET_DB_USERNAME"], "-d", run.environment["ANET_DB_NAME"], "-f", "${psqlPushDataPath}/insertBaseData-psql.sql"] as String[] ]
+	commands = [ ["psql", "-b", "-v", "ON_ERROR_STOP=1", "-U", run.environment["ANET_DB_USERNAME"], "-d", run.environment["ANET_DB_NAME"], "-f", "${psqlPushDataPath}/insertBaseData-psql.sql"] as String[] ]
+	successOnExitCodes = [0]
 }
 dbLoad.mustRunAfter('dbMigrate')
 
