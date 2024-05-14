@@ -261,9 +261,8 @@ const updateOrgReports = (
     planned: 0,
     cancelled: 0
   })
-  const now = moment()
   if (reportState === Report.STATE.PUBLISHED) {
-    if (now.isBefore(engagementDate)) {
+    if (Report.isFuture(engagementDate)) {
       elem.planned++
     } else {
       elem.published++
