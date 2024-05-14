@@ -19,6 +19,12 @@ import { Location } from "models"
 import PropTypes from "prop-types"
 import React, { useCallback, useEffect, useRef, useState } from "react"
 import MARKER_ICON_2X from "resources/leaflet/marker-icon-2x.png"
+import MARKER_ICON_AMBER_2X from "resources/leaflet/marker-icon-amber-2x.png"
+import MARKER_ICON_AMBER from "resources/leaflet/marker-icon-amber.png"
+import MARKER_ICON_BLUE_2X from "resources/leaflet/marker-icon-blue-2x.png"
+import MARKER_ICON_BLUE from "resources/leaflet/marker-icon-blue.png"
+import MARKER_ICON_GREEN_2X from "resources/leaflet/marker-icon-green-2x.png"
+import MARKER_ICON_GREEN from "resources/leaflet/marker-icon-green.png"
 import MARKER_ICON from "resources/leaflet/marker-icon.png"
 import MARKER_SHADOW from "resources/leaflet/marker-shadow.png"
 import Settings from "settings"
@@ -55,16 +61,40 @@ const searchProvider =
   Settings.imagery.geoSearcher &&
   geoSearcherProviders[Settings.imagery.geoSearcher.provider]()
 
-const icon = new Icon({
-  iconUrl: MARKER_ICON,
-  iconRetinaUrl: MARKER_ICON_2X,
+const commonIconProps = {
   shadowUrl: MARKER_SHADOW,
   iconSize: [25, 41],
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],
   tooltipAnchor: [16, -28],
   shadowSize: [41, 41]
+}
+const iconAmber = new Icon({
+  ...commonIconProps,
+  iconUrl: MARKER_ICON_AMBER,
+  iconRetinaUrl: MARKER_ICON_AMBER_2X
 })
+const iconBlue = new Icon({
+  ...commonIconProps,
+  iconUrl: MARKER_ICON_BLUE,
+  iconRetinaUrl: MARKER_ICON_BLUE_2X
+})
+const iconGreen = new Icon({
+  ...commonIconProps,
+  iconUrl: MARKER_ICON_GREEN,
+  iconRetinaUrl: MARKER_ICON_GREEN_2X
+})
+const iconDefault = new Icon({
+  ...commonIconProps,
+  iconUrl: MARKER_ICON,
+  iconRetinaUrl: MARKER_ICON_2X
+})
+export const ICON_TYPES = {
+  AMBER: iconAmber,
+  BLUE: iconBlue,
+  GREEN: iconGreen,
+  DEFAULT: iconDefault
+}
 
 const addLayers = (map, layerControl) => {
   let defaultLayer = null
@@ -120,7 +150,7 @@ const Leaflet = ({
           ? [m.lat, m.lng]
           : map.getCenter()
         const marker = new Marker(latLng, {
-          icon,
+          icon: m.icon || ICON_TYPES.DEFAULT,
           draggable: m.draggable || false,
           autoPan: m.autoPan || false,
           id: m.id
@@ -193,7 +223,7 @@ const Leaflet = ({
      * with respect to the click event X and Y coordinates. Since the click event is fired
      * after scroll, map coordinates shift with respect to click event X - Y coordinates
      * and eventually marker is placed a certain amount (scrolled height to be precise)
-     * belove the clicked point. Firefox doesn't behave this way and everything works as expected.
+     * below the clicked point. Firefox doesn't behave this way and everything works as expected.
      *
      * see https://github.com/Leaflet/Leaflet/issues/4125
      *

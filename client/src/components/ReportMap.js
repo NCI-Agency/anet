@@ -19,6 +19,8 @@ const GQL_GET_REPORT_LIST = gql`
       list {
         uuid
         intent
+        state
+        engagementDate
         location {
           uuid
           name

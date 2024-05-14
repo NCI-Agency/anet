@@ -2,12 +2,22 @@ import {
   aggregationWidgetDefaultProps,
   aggregationWidgetPropTypes
 } from "components/aggregations/utils"
-import Leaflet from "components/Leaflet"
+import Leaflet, { ICON_TYPES } from "components/Leaflet"
 import _escape from "lodash/escape"
 import _isEmpty from "lodash/isEmpty"
-import { Location } from "models"
+import { Location, Report } from "models"
 import PropTypes from "prop-types"
 import React, { useMemo } from "react"
+
+const getIcon = report => {
+  if (report.state === Report.STATE.CANCELLED) {
+    return ICON_TYPES.AMBER
+  }
+  if (Report.isFuture(report.engagementDate)) {
+    return ICON_TYPES.BLUE
+  }
+  return ICON_TYPES.GREEN
+}
 
 const ReportsMapWidget = ({
   values,
@@ -28,6 +38,7 @@ const ReportsMapWidget = ({
         label += `<br/>@ <b>${_escape(report.location.name)}</b>` // escape HTML in locationName!
         markerArray.push({
           id: report.uuid,
+          icon: getIcon(report),
           lat: report.location.lat,
           lng: report.location.lng,
           name: label
