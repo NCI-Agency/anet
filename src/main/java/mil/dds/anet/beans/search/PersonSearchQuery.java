@@ -3,6 +3,7 @@ package mil.dds.anet.beans.search;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import mil.dds.anet.beans.Position.PositionType;
 
@@ -10,7 +11,7 @@ public class PersonSearchQuery extends SubscribableObjectSearchQuery<PersonSearc
 
   @GraphQLQuery
   @GraphQLInputField
-  String orgUuid;
+  List<String> orgUuid;
   @GraphQLQuery
   @GraphQLInputField
   RecurseStrategy orgRecurseStrategy;
@@ -58,11 +59,11 @@ public class PersonSearchQuery extends SubscribableObjectSearchQuery<PersonSearc
   }
 
   @GraphQLQuery
-  public String getOrgUuid() {
+  public List<String> getOrgUuid() {
     return orgUuid;
   }
 
-  public void setOrgUuid(String orgUuid) {
+  public void setOrgUuid(List<String> orgUuid) {
     this.orgUuid = orgUuid;
   }
 
@@ -148,7 +149,11 @@ public class PersonSearchQuery extends SubscribableObjectSearchQuery<PersonSearc
 
   @Override
   public PersonSearchQuery clone() throws CloneNotSupportedException {
-    return (PersonSearchQuery) super.clone();
+    final PersonSearchQuery clone = (PersonSearchQuery) super.clone();
+    if (orgUuid != null) {
+      clone.setOrgUuid(new ArrayList<>(orgUuid));
+    }
+    return clone;
   }
 
 }

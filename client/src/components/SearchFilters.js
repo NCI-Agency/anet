@@ -383,8 +383,8 @@ export const searchFilters = function(includeAdminFilters) {
   filters[SEARCH_OBJECT_TYPES.PEOPLE] = {
     filters: {
       "Within Organization": {
-        component: OrganizationFilter,
-        deserializer: deserializeOrganizationFilter,
+        component: OrganizationMultiFilter,
+        deserializer: deserializeOrganizationMultiFilter,
         props: {
           queryKey: "orgUuid",
           queryRecurseStrategyKey: "orgRecurseStrategy",

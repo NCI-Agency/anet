@@ -704,7 +704,7 @@ input PersonSearchQueryInput {
   locationUuid: String
   matchPositionName: Boolean
   orgRecurseStrategy: RecurseStrategy
-  orgUuid: String
+  orgUuid: [String]
   pageNum: Int
   pageSize: Int
   pendingVerification: Boolean

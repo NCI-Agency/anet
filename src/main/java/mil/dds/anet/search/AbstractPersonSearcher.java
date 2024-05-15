@@ -71,14 +71,14 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
     qb.addObjectEqualsClause("pendingVerification", "people.\"pendingVerification\"",
         query.getPendingVerification());
 
-    if (query.getOrgUuid() != null) {
+    if (!Utils.isEmptyOrNull(query.getOrgUuid())) {
       if (RecurseStrategy.CHILDREN.equals(query.getOrgRecurseStrategy())
           || RecurseStrategy.PARENTS.equals(query.getOrgRecurseStrategy())) {
         qb.addRecursiveClause(null, "positions", "\"organizationUuid\"", "parent_orgs",
             "organizations", "\"parentOrgUuid\"", "orgUuid", query.getOrgUuid(),
             RecurseStrategy.CHILDREN.equals(query.getOrgRecurseStrategy()));
       } else {
-        qb.addStringEqualsClause("orgUuid", "positions.\"organizationUuid\"", query.getOrgUuid());
+        qb.addInListClause("orgUuid", "positions.\"organizationUuid\"", query.getOrgUuid());
       }
     }
 
