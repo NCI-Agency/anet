@@ -10,8 +10,7 @@ import CheckboxFilter, {
 import DateRangeFilter, {
   deserialize as deserializeDateRangeFilter
 } from "components/advancedSearch/DateRangeFilter"
-import OrganizationFilter, {
-  deserialize as deserializeOrganizationFilter,
+import {
   deserializeMulti as deserializeOrganizationMultiFilter,
   OrganizationMultiFilter
 } from "components/advancedSearch/OrganizationFilter"
@@ -591,8 +590,8 @@ export const searchFilters = function(includeAdminFilters) {
         }
       },
       "Within Organization": {
-        component: OrganizationFilter,
-        deserializer: deserializeOrganizationFilter,
+        component: OrganizationMultiFilter,
+        deserializer: deserializeOrganizationMultiFilter,
         props: {
           queryKey: "taskedOrgUuid",
           queryRecurseStrategyKey: "orgRecurseStrategy",

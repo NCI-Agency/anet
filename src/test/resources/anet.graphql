@@ -1312,7 +1312,7 @@ input TaskSearchQueryInput {
   sortOrder: SortOrder
   status: Status
   subscribed: Boolean
-  taskedOrgUuid: String
+  taskedOrgUuid: [String]
   text: String
 }
 
