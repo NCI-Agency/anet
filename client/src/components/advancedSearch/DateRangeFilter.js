@@ -7,12 +7,9 @@ import {
   dateRangeEndKey,
   dateRangeStartKey,
   dateToQuery,
-  LAST_3_MONTHS,
-  LAST_6_MONTHS,
   LAST_DAY,
   LAST_MONTH,
   LAST_WEEK,
-  LAST_YEAR,
   ON,
   RANGE_TYPE_LABELS
 } from "dateUtils"
@@ -85,15 +82,6 @@ const DateRangeFilter = ({
       </option>,
       <option key="last_month" value={LAST_MONTH}>
         {RANGE_TYPE_LABELS[LAST_MONTH]}
-      </option>,
-      <option key="last_3_months" value={LAST_3_MONTHS}>
-        {RANGE_TYPE_LABELS[LAST_3_MONTHS]}
-      </option>,
-      <option key="last_6_months" value={LAST_6_MONTHS}>
-        {RANGE_TYPE_LABELS[LAST_6_MONTHS]}
-      </option>,
-      <option key="last_year" value={LAST_YEAR}>
-        {RANGE_TYPE_LABELS[LAST_YEAR]}
       </option>
     ]
     const options = onlyBetween
@@ -208,14 +196,7 @@ export const deserialize = ({ queryKey }, query, key) => {
 
   if (query[startKey]) {
     toQueryValue[startKey] = query[startKey]
-    const lastValues = [
-      LAST_DAY,
-      LAST_WEEK,
-      LAST_MONTH,
-      LAST_3_MONTHS,
-      LAST_6_MONTHS,
-      LAST_YEAR
-    ]
+    const lastValues = [LAST_DAY, LAST_WEEK, LAST_MONTH]
     if (lastValues.indexOf(+query[startKey]) !== -1) {
       filterValue.relative = query[startKey]
     } else {
