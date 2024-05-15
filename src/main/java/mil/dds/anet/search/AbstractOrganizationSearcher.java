@@ -9,6 +9,7 @@ import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.mappers.OrganizationMapper;
+import mil.dds.anet.utils.Utils;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public abstract class AbstractOrganizationSearcher extends
@@ -64,7 +65,7 @@ public abstract class AbstractOrganizationSearcher extends
       }
     }
 
-    if (query.getParentOrgUuid() != null) {
+    if (!Utils.isEmptyOrNull(query.getParentOrgUuid())) {
       addParentOrgUuidQuery(query);
     }
 

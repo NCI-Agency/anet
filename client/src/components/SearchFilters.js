@@ -465,8 +465,8 @@ export const searchFilters = function(includeAdminFilters) {
   filters[SEARCH_OBJECT_TYPES.ORGANIZATIONS] = {
     filters: {
       "Within Organization": {
-        component: OrganizationFilter,
-        deserializer: deserializeOrganizationFilter,
+        component: OrganizationMultiFilter,
+        deserializer: deserializeOrganizationMultiFilter,
         props: {
           queryKey: "parentOrgUuid",
           queryRecurseStrategyKey: "orgRecurseStrategy",
