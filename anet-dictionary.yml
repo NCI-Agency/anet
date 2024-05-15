@@ -777,6 +777,12 @@ fields:
       placeholder: Fill in the name of this location
     type:
       label: Type
+    digram:
+      label: Digram
+      placeholder: Fill in the 2-letter code for this country
+    trigram:
+      label: Trigram
+      placeholder: Fill in the 3-letter code for this country
     description:
       label: Description
       placeholder: Fill in the description of this location
@@ -1306,9 +1312,6 @@ fields:
   regular:
     person:
       name: Person
-      countries: [Afghanistan, Albania , Armenia, Australia, Austria, Azerbaijan, Belgium, Bosnia-Herzegovina, Bulgaria, Croatia, Czech Republic, Denmark, Estonia, Finland,
-                  Georgia, Germany, Greece, Hungary, Iceland, Italy, Latvia, Lithuania, Luxembourg, Macedonia, Mongolia, Montenegro, Netherlands, New Zealand,
-                  Norway, Poland, Portugal, Romania, Slovakia, Slovenia, Spain, Sweden, Türkiye, Ukraine, United Kingdom, United States of America]
       # number of fields after Avatar in the left column for persons
       # adjust this number if two columns are not balanced on the Person Page
       numberOfFieldsInLeftColumn: 7

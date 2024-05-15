@@ -1,3 +1,5 @@
+import { Icon } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import { SEARCH_OBJECT_LABELS, SEARCH_OBJECT_TYPES } from "actions"
 import AdvancedSelectFilter, {
   deserialize as deserializeAdvancedSelectFilter
@@ -24,6 +26,7 @@ import TaskFilter, {
   deserialize as deserializeTaskFilter
 } from "components/advancedSearch/TaskFilter"
 import {
+  CountryOverlayRow,
   LocationOverlayRow,
   PersonDetailedOverlayRow,
   PositionOverlayRow,
@@ -104,6 +107,18 @@ const EmailFilter = {
   }
 }
 
+const advancedSelectFilterCountryProps = {
+  overlayColumns: [
+    Settings.fields.location.name?.label,
+    Settings.fields.location.digram?.label,
+    Settings.fields.location.trigram?.label
+  ],
+  overlayRenderRow: CountryOverlayRow,
+  objectType: Location,
+  valueKey: "name",
+  fields: Location.autocompleteQuery,
+  addon: <Icon icon={IconNames.FLAG} />
+}
 const advancedSelectFilterPersonProps = {
   overlayColumns: ["Name", "Position", "Location", "Organization"],
   overlayRenderRow: PersonDetailedOverlayRow,
@@ -171,12 +186,22 @@ export const searchFilters = function(includeAdminFilters) {
       queryVars: {}
     }
   }
-  const locationWidgetFilters = {
-    all: {
-      label: "All",
-      queryVars: {}
+  const countryWidgetFilters = {
+    activeCountries: {
+      label: "Active countries",
+      queryVars: {
+        type: Location.LOCATION_TYPES.COUNTRY,
+        status: Model.STATUS.ACTIVE
+      }
+    },
+    allCountries: {
+      label: "All countries",
+      queryVars: { type: Location.LOCATION_TYPES.COUNTRY }
     }
   }
+  const reportLocationWidgetFilters = Location.getReportLocationFilters()
+  const positionLocationWidgetFilters = Location.getPositionLocationFilters()
+  const organizationLocationFilters = Location.getOrganizationLocationFilters()
 
   const taskWidgetFilters = {
     all: {
@@ -275,7 +300,7 @@ export const searchFilters = function(includeAdminFilters) {
         dictProps: Settings.fields.report.location,
         deserializer: deserializeAdvancedSelectFilter,
         props: Object.assign({}, advancedSelectFilterLocationProps, {
-          filterDefs: locationWidgetFilters,
+          filterDefs: reportLocationWidgetFilters,
           placeholder: "Filter reports by location...",
           queryKey: "locationUuid"
         })
@@ -351,7 +376,6 @@ export const searchFilters = function(includeAdminFilters) {
     }
   }
 
-  const countries = Settings.fields.regular.person.countries || []
   const ranks = (Settings.fields.person.ranks || []).map(f => f.value)
 
   filters[SEARCH_OBJECT_TYPES.PEOPLE] = {
@@ -369,7 +393,7 @@ export const searchFilters = function(includeAdminFilters) {
         component: AdvancedSelectFilter,
         deserializer: deserializeAdvancedSelectFilter,
         props: Object.assign({}, advancedSelectFilterLocationProps, {
-          filterDefs: locationWidgetFilters,
+          filterDefs: positionLocationWidgetFilters,
           placeholder: "Filter by location...",
           queryKey: "locationUuid"
         })
@@ -385,14 +409,14 @@ export const searchFilters = function(includeAdminFilters) {
         }
       },
       Nationality: {
-        component: SelectFilter,
+        component: AdvancedSelectFilter,
         dictProps: Settings.fields.person.country,
-        deserializer: deserializeSelectFilter,
-        props: {
-          queryKey: "country",
-          options: countries,
-          labels: countries
-        }
+        deserializer: deserializeAdvancedSelectFilter,
+        props: Object.assign({}, advancedSelectFilterCountryProps, {
+          filterDefs: countryWidgetFilters,
+          placeholder: "Filter by country...",
+          queryKey: "countryUuid"
+        })
       },
       "Has Biography?": {
         component: RadioButtonFilter,
@@ -452,7 +476,7 @@ export const searchFilters = function(includeAdminFilters) {
         dictProps: Settings.fields.organization.location,
         deserializer: deserializeAdvancedSelectFilter,
         props: Object.assign({}, advancedSelectFilterLocationProps, {
-          filterDefs: locationWidgetFilters,
+          filterDefs: organizationLocationFilters,
           placeholder: "Filter by location...",
           queryKey: "locationUuid"
         })
@@ -504,7 +528,7 @@ export const searchFilters = function(includeAdminFilters) {
         dictProps: Settings.fields.position.location,
         deserializer: deserializeAdvancedSelectFilter,
         props: Object.assign({}, advancedSelectFilterLocationProps, {
-          filterDefs: locationWidgetFilters,
+          filterDefs: positionLocationWidgetFilters,
           placeholder: "Filter by location...",
           queryKey: "locationUuid"
         })
@@ -534,6 +558,7 @@ export const searchFilters = function(includeAdminFilters) {
   const locationTypeOptions = [
     Location.LOCATION_TYPES.POINT_LOCATION,
     Location.LOCATION_TYPES.GEOGRAPHICAL_AREA,
+    Location.LOCATION_TYPES.COUNTRY,
     Location.LOCATION_TYPES.VIRTUAL_LOCATION
   ]
   filters[SEARCH_OBJECT_TYPES.LOCATIONS] = {

@@ -21,6 +21,8 @@ const GQL_GET_LOCATION = gql`
       lng
       status
       type
+      digram
+      trigram
       description
     }
   }
@@ -64,27 +66,45 @@ const LocationPreview = ({ className, uuid }) => {
           value={Location.humanNameOfType(location.type)}
         />
 
-        <PreviewField
-          label={label}
-          value={
-            <GeoLocation
-              coordinates={{
-                lat: location.lat,
-                lng: location.lng,
-                displayedCoordinate: convertLatLngToMGRS(
-                  location.lat,
-                  location.lng
-                )
-              }}
-            />
-          }
-        />
+        {Location.hasCoordinates(location) && (
+          <PreviewField
+            label={label}
+            value={
+              <GeoLocation
+                coordinates={{
+                  lat: location.lat,
+                  lng: location.lng,
+                  displayedCoordinate: convertLatLngToMGRS(
+                    location.lat,
+                    location.lng
+                  )
+                }}
+              />
+            }
+          />
+        )}
 
         <DictionaryField
           wrappedComponent={PreviewField}
           dictProps={Settings.fields.location.status}
           value={Location.humanNameOfStatus(location.status)}
         />
+
+        {location.type === Location.LOCATION_TYPES.COUNTRY && (
+          <>
+            <DictionaryField
+              wrappedComponent={PreviewField}
+              dictProps={Settings.fields.location.digram}
+              value={location.digram}
+            />
+
+            <DictionaryField
+              wrappedComponent={PreviewField}
+              dictProps={Settings.fields.location.trigram}
+              value={location.trigram}
+            />
+          </>
+        )}
 
         {location.description && (
           <DictionaryField
@@ -95,7 +115,9 @@ const LocationPreview = ({ className, uuid }) => {
         )}
       </div>
 
-      <Leaflet markers={[marker]} mapId={`${uuid}`} />
+      {Location.hasCoordinates(location) && (
+        <Leaflet markers={[marker]} mapId={`${uuid}`} />
+      )}
     </div>
   )
 }

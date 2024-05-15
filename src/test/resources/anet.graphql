@@ -373,6 +373,7 @@ type Location {
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformation]
   description: String
+  digram: String
   isSubscribed: Boolean
   lat: Float
   lng: Float
@@ -380,6 +381,7 @@ type Location {
   notes: [Note]
   planningApprovalSteps: [ApprovalStep]
   status: Status
+  trigram: String
   type: LocationType
   updatedAt: Instant
   uuid: String
@@ -392,11 +394,13 @@ input LocationInput {
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformationInput]
   description: String
+  digram: String
   lat: Float
   lng: Float
   name: String
   planningApprovalSteps: [ApprovalStepInput]
   status: Status
+  trigram: String
   type: LocationType
   updatedAt: Instant
   uuid: String
@@ -425,6 +429,7 @@ enum LocationSearchSortBy {
 
 """"""
 enum LocationType {
+  COUNTRY
   GEOGRAPHICAL_AREA
   PHYSICAL_LOCATION
   POINT_LOCATION
@@ -617,7 +622,7 @@ type Person {
   avatarUuid: String
   biography: String
   code: String
-  country: String
+  country: Location
   createdAt: Instant
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformation]
@@ -628,6 +633,7 @@ type Person {
   isSubscribed: Boolean
   name: String
   notes: [Note]
+  obsoleteCountry: String
   openIdSubject: String
   pendingVerification: Boolean
   phoneNumber: String
@@ -645,7 +651,7 @@ input PersonInput {
   avatarUuid: String
   biography: String
   code: String
-  country: String
+  country: LocationInput
   createdAt: Instant
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformationInput]
@@ -654,6 +660,7 @@ input PersonInput {
   endOfTourDate: Instant
   gender: String
   name: String
+  obsoleteCountry: String
   openIdSubject: String
   pendingVerification: Boolean
   phoneNumber: String
@@ -688,7 +695,7 @@ input PersonPositionHistoryInput {
 
 """"""
 input PersonSearchQueryInput {
-  country: String
+  countryUuid: String
   emailNetwork: String
   endOfTourDateEnd: Instant
   endOfTourDateStart: Instant
@@ -973,7 +980,7 @@ type ReportPerson {
   avatarUuid: String
   biography: String
   code: String
-  country: String
+  country: Location
   createdAt: Instant
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformation]
@@ -985,6 +992,7 @@ type ReportPerson {
   isSubscribed: Boolean
   name: String
   notes: [Note]
+  obsoleteCountry: String
   openIdSubject: String
   pendingVerification: Boolean
   phoneNumber: String
@@ -1005,7 +1013,7 @@ input ReportPersonInput {
   avatarUuid: String
   biography: String
   code: String
-  country: String
+  country: LocationInput
   createdAt: Instant
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformationInput]
@@ -1015,6 +1023,7 @@ input ReportPersonInput {
   gender: String
   interlocutor: Boolean!
   name: String
+  obsoleteCountry: String
   openIdSubject: String
   pendingVerification: Boolean
   phoneNumber: String

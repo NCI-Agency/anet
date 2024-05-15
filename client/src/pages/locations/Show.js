@@ -158,17 +158,19 @@ const LocationShow = ({ pageDispatchers }) => {
                   humanValue={Location.humanNameOfType(location.type)}
                 />
 
-                <GeoLocation
-                  coordinates={{
-                    lat: location.lat,
-                    lng: location.lng,
-                    displayedCoordinate: convertLatLngToMGRS(
-                      location.lat,
-                      location.lng
-                    )
-                  }}
-                  displayType={GEO_LOCATION_DISPLAY_TYPE.FORM_FIELD}
-                />
+                {Location.hasCoordinates(location) && (
+                  <GeoLocation
+                    coordinates={{
+                      lat: location.lat,
+                      lng: location.lng,
+                      displayedCoordinate: convertLatLngToMGRS(
+                        location.lat,
+                        location.lng
+                      )
+                    }}
+                    displayType={GEO_LOCATION_DISPLAY_TYPE.FORM_FIELD}
+                  />
+                )}
 
                 <DictionaryField
                   wrappedComponent={Field}
@@ -177,6 +179,24 @@ const LocationShow = ({ pageDispatchers }) => {
                   component={FieldHelper.ReadonlyField}
                   humanValue={Location.humanNameOfStatus}
                 />
+
+                {location.type === Location.LOCATION_TYPES.COUNTRY && (
+                  <>
+                    <DictionaryField
+                      wrappedComponent={Field}
+                      dictProps={Settings.fields.location.digram}
+                      name="digram"
+                      component={FieldHelper.ReadonlyField}
+                    />
+
+                    <DictionaryField
+                      wrappedComponent={Field}
+                      dictProps={Settings.fields.location.trigram}
+                      name="trigram"
+                      component={FieldHelper.ReadonlyField}
+                    />
+                  </>
+                )}
 
                 {values.description && (
                   <DictionaryField
@@ -218,7 +238,9 @@ const LocationShow = ({ pageDispatchers }) => {
                 </Fieldset>
               )}
 
-              <Leaflet markers={[marker]} />
+              {Location.hasCoordinates(location) && (
+                <Leaflet markers={[marker]} />
+              )}
             </Form>
 
             <Approvals relatedObject={location} />

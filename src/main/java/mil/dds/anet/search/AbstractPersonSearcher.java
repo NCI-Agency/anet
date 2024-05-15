@@ -1,6 +1,5 @@
 package mil.dds.anet.search;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import java.util.Map;
 import java.util.Set;
@@ -22,7 +21,7 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
 
   private static final Set<String> ALL_FIELDS = Sets.newHashSet(PersonDao.allFields);
   private static final Set<String> MINIMAL_FIELDS = Sets.newHashSet(PersonDao.minimalFields);
-  private static final Map<String, String> FIELD_MAPPING = ImmutableMap.of();
+  private static final Map<String, String> FIELD_MAPPING = Map.of("country", "countryUuid");
 
   public AbstractPersonSearcher(AbstractSearchQueryBuilder<Person, PersonSearchQuery> qb) {
     super(qb);
@@ -68,7 +67,7 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
         query.getEndOfTourDateEnd());
     qb.addEnumEqualsClause("status", "people.status", query.getStatus());
     qb.addStringEqualsClause("rank", "people.rank", query.getRank());
-    qb.addStringEqualsClause("country", "people.country", query.getCountry());
+    qb.addStringEqualsClause("countryUuid", "people.\"countryUuid\"", query.getCountryUuid());
     qb.addObjectEqualsClause("pendingVerification", "people.\"pendingVerification\"",
         query.getPendingVerification());
 

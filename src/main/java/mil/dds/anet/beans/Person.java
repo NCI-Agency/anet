@@ -22,9 +22,11 @@ import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.graphql.AllowUnverifiedUsers;
 import mil.dds.anet.graphql.RestrictToAuthorizationGroups;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.InsertionOrderLinkedList;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractEmailableAnetBean;
+import mil.dds.anet.views.UuidFetcher;
 
 public class Person extends AbstractEmailableAnetBean
     implements Principal, RelatableObject, SubscribableObject, WithStatus, Comparable<Person> {
@@ -52,7 +54,9 @@ public class Person extends AbstractEmailableAnetBean
   private String gender;
   @GraphQLQuery
   @GraphQLInputField
-  private String country;
+  private String obsoleteCountry;
+  // annotated below
+  private ForeignObjectHolder<Location> country = new ForeignObjectHolder<>();
   @GraphQLQuery
   @GraphQLInputField
   private Instant endOfTourDate;
@@ -151,12 +155,44 @@ public class Person extends AbstractEmailableAnetBean
   }
 
   @AllowUnverifiedUsers
-  public String getCountry() {
-    return country;
+  public String getObsoleteCountry() {
+    return obsoleteCountry;
   }
 
-  public void setCountry(String country) {
-    this.country = Utils.trimStringReturnNull(country);
+  public void setObsoleteCountry(String obsoleteCountry) {
+    this.obsoleteCountry = obsoleteCountry;
+  }
+
+  @GraphQLQuery(name = "country")
+  @AllowUnverifiedUsers
+  public CompletableFuture<Location> loadCountry(@GraphQLRootContext Map<String, Object> context) {
+    if (country.hasForeignObject()) {
+      return CompletableFuture.completedFuture(country.getForeignObject());
+    }
+    return new UuidFetcher<Location>()
+        .load(context, IdDataLoaderKey.LOCATIONS, country.getForeignUuid()).thenApply(o -> {
+          country.setForeignObject(o);
+          return o;
+        });
+  }
+
+  @JsonIgnore
+  public void setCountryUuid(String countryUuid) {
+    this.country = new ForeignObjectHolder<>(countryUuid);
+  }
+
+  @JsonIgnore
+  public String getCountryUuid() {
+    return country.getForeignUuid();
+  }
+
+  @GraphQLInputField(name = "country")
+  public void setCountry(Location country) {
+    this.country = new ForeignObjectHolder<>(country);
+  }
+
+  public Location getCountry() {
+    return country.getForeignObject();
   }
 
   @AllowUnverifiedUsers

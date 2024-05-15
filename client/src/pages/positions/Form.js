@@ -202,6 +202,7 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
             queryVars: {}
           }
         }
+        const locationFilters = Location.getPositionLocationFilters()
 
         return (
           <div>
@@ -313,7 +314,7 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
                       value={values.location}
                       overlayColumns={["Name"]}
                       overlayRenderRow={LocationOverlayRow}
-                      filterDefs={getLocationFilters(values)}
+                      filterDefs={locationFilters}
                       objectType={Location}
                       fields={Location.autocompleteQuery}
                       valueKey="name"
@@ -416,19 +417,6 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
       }}
     </Formik>
   )
-
-  function getLocationFilters(values) {
-    return Settings?.fields.regular?.position?.location?.filter.reduce(
-      (accumulator, filter) => {
-        accumulator[filter] = {
-          label: Location.humanNameOfType(filter),
-          queryVars: { type: filter }
-        }
-        return accumulator
-      },
-      {}
-    )
-  }
 
   function onCancel() {
     navigate(-1)

@@ -728,7 +728,7 @@ properties:
                   items:
                     type: string
                     enum:
-                      [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, POINT_LOCATION, ADVISOR_LOCATION, PRINCIPAL_LOCATION]
+                      [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, POINT_LOCATION]
           reportPeople:
             required: [optionalAttendingAuthor, optionalPrimaryAdvisor, optionalPrimaryPrincipal]
             properties:
@@ -827,13 +827,17 @@ properties:
       location:
         type: object
         additionalProperties: false
-        required: [status, name, type, description, superuserTypeOptions, format]
+        required: [status, name, type, digram, trigram, description, superuserTypeOptions, format]
         properties:
           status:
             "$ref": "#/$defs/labeledField"
           name:
             "$ref": "#/$defs/inputField"
           type:
+            "$ref": "#/$defs/inputField"
+          digram:
+            "$ref": "#/$defs/inputField"
+          trigram:
             "$ref": "#/$defs/inputField"
           description:
             "$ref": "#/$defs/inputField"
@@ -843,14 +847,14 @@ properties:
             items:
               type: string
               enum:
-                [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, POINT_LOCATION, ADVISOR_LOCATION, PRINCIPAL_LOCATION]
+                [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, COUNTRY, POINT_LOCATION]
           regularuserTypeOptions:
             type: array
             uniqueItems: true
             items:
               type: string
               enum:
-                [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, POINT_LOCATION, ADVISOR_LOCATION, PRINCIPAL_LOCATION]
+                [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, COUNTRY, POINT_LOCATION]
           format:
             type: string
             title: Default format for location
@@ -1033,20 +1037,12 @@ properties:
           person:
             type: object
             additionalProperties: false
-            required: [name, countries, numberOfFieldsInLeftColumn, showPageOrderedFields]
+            required: [name, numberOfFieldsInLeftColumn, showPageOrderedFields]
             properties:
               name:
                 type: string
                 title: The name of this field
                 description: Used in the UI where a person inside an organization is shown.
-              countries:
-                type: array
-                uniqueItems: true
-                minItems: 1
-                items:
-                  type: string
-                  title: The list of possible countries
-                  description: Used in the UI where a country can be selected for a person inside an organization.
               showPageOrderedFields:
                 type: array
                 uniqueItems: true
@@ -1094,7 +1090,7 @@ properties:
                     items:
                       type: string
                       enum:
-                        [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, POINT_LOCATION, ADVISOR_LOCATION, PRINCIPAL_LOCATION]
+                        [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, POINT_LOCATION]
               organizationsAdministrated:
                 "$ref": "#/$defs/inputField"
 
@@ -1122,7 +1118,7 @@ properties:
                     items:
                       type: string
                       enum:
-                        [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, POINT_LOCATION, ADVISOR_LOCATION, PRINCIPAL_LOCATION]
+                        [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, POINT_LOCATION]
               administratingPositions:
                 "$ref": "#/$defs/inputField"
 

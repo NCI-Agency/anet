@@ -25,6 +25,8 @@ const GQL_GET_LOCATION = gql`
     location(uuid: $uuid) {
       uuid
       name
+      digram
+      trigram
       description
       status
       type

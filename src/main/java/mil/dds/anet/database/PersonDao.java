@@ -51,8 +51,8 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   // Must always retrieve these e.g. for ORDER BY
   public static final String[] minimalFields = {"uuid", "name", "rank", "createdAt"};
   public static final String[] additionalFields = {"status", "user", "avatarUuid", "phoneNumber",
-      "biography", "country", "gender", "endOfTourDate", "domainUsername", "openIdSubject",
-      "pendingVerification", "code", "updatedAt", "customFields"};
+      "biography", "obsoleteCountry", "countryUuid", "gender", "endOfTourDate", "domainUsername",
+      "openIdSubject", "pendingVerification", "code", "updatedAt", "customFields"};
   public static final String[] allFields =
       ObjectArrays.concat(minimalFields, additionalFields, String.class);
   public static final String TABLE_NAME = "people";
@@ -125,10 +125,10 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   public Person insertInternal(Person p) {
     final String sql = "/* personInsert */ INSERT INTO people "
         + "(uuid, name, status, \"user\", \"phoneNumber\", rank, "
-        + "\"pendingVerification\", gender, country, code, \"endOfTourDate\", biography, "
+        + "\"pendingVerification\", gender, \"countryUuid\", code, \"endOfTourDate\", biography, "
         + "\"domainUsername\", \"openIdSubject\", \"createdAt\", \"updatedAt\", \"customFields\") "
         + "VALUES (:uuid, :name, :status, :user, :phoneNumber, :rank, "
-        + ":pendingVerification, :gender, :country, :code, :endOfTourDate, :biography, "
+        + ":pendingVerification, :gender, :countryUuid, :code, :endOfTourDate, :biography, "
         + ":domainUsername, :openIdSubject, :createdAt, :updatedAt, :customFields)";
     getDbHandle().createUpdate(sql).bindBean(p)
         .bind("createdAt", DaoUtils.asLocalDateTime(p.getCreatedAt()))
@@ -160,7 +160,8 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   @Override
   public int updateInternal(Person p) {
     final String sql = "/* personUpdate */ UPDATE people "
-        + "SET name = :name, status = :status, \"user\" = :user, gender = :gender, country = :country, "
+        + "SET name = :name, status = :status, \"user\" = :user, gender = :gender, "
+        + "\"obsoleteCountry\" = :obsoleteCountry, \"countryUuid\" = :countryUuid, "
         + "code = :code, \"phoneNumber\" = :phoneNumber, rank = :rank, biography = :biography, "
         + "\"pendingVerification\" = :pendingVerification, \"domainUsername\" = :domainUsername, "
         + "\"updatedAt\" = :updatedAt, \"customFields\" = :customFields, \"endOfTourDate\" = :endOfTourDate "

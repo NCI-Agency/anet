@@ -24,7 +24,11 @@ const GQL_GET_SELF = gql`
       phoneNumber
       pendingVerification
       biography
-      country
+      obsoleteCountry
+      country {
+        uuid
+        name
+      }
       gender
       endOfTourDate
       user

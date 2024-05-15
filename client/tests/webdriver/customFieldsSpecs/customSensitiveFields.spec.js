@@ -173,9 +173,18 @@ describe("Creating and editing custom sensitive information", () => {
       await (
         await CreatePerson.getGender()
       ).selectByAttribute("value", NEW_PERSON_FIELDS_1.gender)
+
+      await (await CreatePerson.getCountryInput()).click()
       await (
-        await CreatePerson.getCountry()
-      ).selectByAttribute("value", NEW_PERSON_FIELDS_1.country)
+        await CreatePerson.getCountryInput()
+      ).setValue(NEW_PERSON_FIELDS_1.country)
+      await CreatePerson.waitForCountryAdvancedSelectToChange(
+        NEW_PERSON_FIELDS_1.country
+      )
+      expect(
+        await (await CreatePerson.getCountryAdvancedSelectFirstItem()).getText()
+      ).to.include(NEW_PERSON_FIELDS_1.country)
+      await (await CreatePerson.getCountryAdvancedSelectFirstItem()).click()
     })
     it("Should not be able to edit sensitive fields if not authorized", async() => {
       await (
@@ -228,9 +237,18 @@ describe("Creating and editing custom sensitive information", () => {
       await (
         await CreatePerson.getGender()
       ).selectByAttribute("value", NEW_PERSON_FIELDS_2.gender)
+
+      await (await CreatePerson.getCountryInput()).click()
       await (
-        await CreatePerson.getCountry()
-      ).selectByAttribute("value", NEW_PERSON_FIELDS_2.country)
+        await CreatePerson.getCountryInput()
+      ).setValue(NEW_PERSON_FIELDS_2.country)
+      await CreatePerson.waitForCountryAdvancedSelectToChange(
+        NEW_PERSON_FIELDS_2.country
+      )
+      expect(
+        await (await CreatePerson.getCountryAdvancedSelectFirstItem()).getText()
+      ).to.include(NEW_PERSON_FIELDS_2.country)
+      await (await CreatePerson.getCountryAdvancedSelectFirstItem()).click()
     })
     it("Should be able to create a new person with sensitive information", async() => {
       await CreatePerson.deleteInput(CreatePerson.getBirthday())

@@ -48,6 +48,14 @@ export const AuthorizationGroupOverlayRow = item => (
   </React.Fragment>
 )
 
+export const CountryOverlayRow = item => (
+  <React.Fragment key={item.uuid}>
+    <td>{item.name}</td>
+    <td>{item.digram}</td>
+    <td>{item.trigram}</td>
+  </React.Fragment>
+)
+
 export const LocationOverlayRow = item => (
   <React.Fragment key={item.uuid}>
     <td>

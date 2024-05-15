@@ -1,7 +1,9 @@
 import { gql } from "@apollo/client"
-import { Icon, IconSize, Intent } from "@blueprintjs/core"
+import { Icon, IconSize, Intent, Tooltip } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import API from "api"
+import { CountryOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
+import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
 import UploadAttachment, {
   attachmentSave
@@ -32,7 +34,7 @@ import TriggerableConfirm from "components/TriggerableConfirm"
 import { FastField, Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
-import { Person } from "models"
+import { Location, Person } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useContext, useEffect, useRef, useState } from "react"
@@ -148,6 +150,19 @@ const PersonForm = ({
       value: "FEMALE"
     }
   ]
+  const countryFilters = {
+    activeCountries: {
+      label: "Active countries",
+      queryVars: {
+        type: Location.LOCATION_TYPES.COUNTRY,
+        status: Model.STATUS.ACTIVE
+      }
+    },
+    allCountries: {
+      label: "All countries",
+      queryVars: { type: Location.LOCATION_TYPES.COUNTRY }
+    }
+  }
   const checkPotentialDuplicatesDebounced = useDebouncedCallback(
     checkPotentialDuplicates,
     400
@@ -189,11 +204,6 @@ const PersonForm = ({
             values.position
           )
         const ranks = Settings.fields.person.ranks || []
-        const countries = getCountries()
-        if (countries.length === 1 && !values.country) {
-          // Assign default country if there's only one
-          values.country = countries[0]
-        }
         // admins can edit all persons,
         // superusers for their organization hierarchy or position-less people,
         // and the user themselves when onboarding
@@ -638,19 +648,58 @@ const PersonForm = ({
                   }
                 />
                 <DictionaryField
-                  wrappedComponent={FastField}
+                  wrappedComponent={Field}
                   dictProps={Settings.fields.person.country}
                   name="country"
                   component={FieldHelper.SpecialField}
+                  onChange={value => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("country", true, false) // onBlur doesn't work when selecting an option
+                    setFieldValue("country", value)
+                    if (value) {
+                      setFieldValue("obsoleteCountry", null)
+                    }
+                  }}
                   widget={
-                    <FormSelect>
-                      <option />
-                      {countries.map(country => (
-                        <option key={country} value={country}>
-                          {country}
-                        </option>
-                      ))}
-                    </FormSelect>
+                    <AdvancedSingleSelect
+                      fieldName="country"
+                      placeholder={Settings.fields.person.country.placeholder}
+                      value={values.country}
+                      overlayColumns={[
+                        Settings.fields.location.name?.label,
+                        Settings.fields.location.digram?.label,
+                        Settings.fields.location.trigram?.label
+                      ]}
+                      overlayRenderRow={CountryOverlayRow}
+                      filterDefs={countryFilters}
+                      objectType={Location}
+                      fields={Location.autocompleteQuery}
+                      valueKey="name"
+                      addon={<Icon icon={IconNames.FLAG} />}
+                      showRemoveButton
+                    />
+                  }
+                  extraColElem={
+                    values.obsoleteCountry ? (
+                      <>
+                        <Tooltip
+                          content="Click here if the new value is correct, or select the correct value on the left."
+                          intent={Intent.PRIMARY}
+                        >
+                          <Button
+                            variant="link"
+                            onClick={() => {
+                              setFieldValue("obsoleteCountry", null)
+                              toast.info(
+                                `Cleared out old value for ${Settings.fields.person.country?.label}; don't forget to save!`
+                              )
+                            }}
+                          >
+                            <em>old value: {values.obsoleteCountry}</em>
+                          </Button>
+                        </Tooltip>
+                      </>
+                    ) : undefined
                   }
                 />
                 <DictionaryField
@@ -793,10 +842,6 @@ const PersonForm = ({
     </Formik>
   )
 
-  function getCountries() {
-    return Settings.fields.regular.person.countries
-  }
-
   async function updateAvatar(newAvatarUuid) {
     await API.mutation(GQL_UPDATE_PERSON_AVATAR, {
       person: { uuid: initialValues.uuid, avatarUuid: newAvatarUuid }
@@ -901,6 +946,7 @@ const PersonForm = ({
       { firstName: values.firstName, lastName: values.lastName },
       true
     )
+    person.country = utils.getReference(person.country)
     person.customSensitiveInformation = updateCustomSensitiveInformation(values)
     person.customFields = customFieldsJSONString(values)
     const updateMutation = forOnboarding ? GQL_UPDATE_SELF : GQL_UPDATE_PERSON

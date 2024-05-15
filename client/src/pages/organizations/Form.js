@@ -160,6 +160,7 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
             queryVars: {}
           }
         }
+        const locationFilters = Location.getOrganizationLocationFilters()
 
         const approversFilters = {
           allPositions: {
@@ -343,7 +344,7 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                           value={values.location}
                           overlayColumns={["Name"]}
                           overlayRenderRow={LocationOverlayRow}
-                          filterDefs={getLocationFilters(values)}
+                          filterDefs={locationFilters}
                           objectType={Location}
                           fields={Location.autocompleteQuery}
                           valueKey="name"
@@ -651,19 +652,6 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
       edit ? GQL_UPDATE_ORGANIZATION : GQL_CREATE_ORGANIZATION,
       { organization }
     ).then()
-  }
-
-  function getLocationFilters(values) {
-    return Settings?.fields.regular?.org?.location?.filter.reduce(
-      (accumulator, filter) => {
-        accumulator[filter] = {
-          label: Location.humanNameOfType(filter),
-          queryVars: { type: filter }
-        }
-        return accumulator
-      },
-      {}
-    )
   }
 }
 

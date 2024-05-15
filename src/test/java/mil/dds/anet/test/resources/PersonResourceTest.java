@@ -53,10 +53,11 @@ public class PersonResourceTest extends AbstractResourceTest {
           + " relatedObjectType relatedObjectUuid createdAt updatedAt }";
   private static final String _POSITION_FIELDS = String.format(
       "uuid name code type role status organization { uuid } %1$s", _EMAIL_ADDRESSES_FIELDS);
-  private static final String _PERSON_FIELDS =
-      String.format("uuid name status user phoneNumber rank biography country avatarUuid code"
+  private static final String _PERSON_FIELDS = String.format(
+      "uuid name status user phoneNumber rank biography obsoleteCountry country { uuid name } avatarUuid code"
           + " gender endOfTourDate domainUsername openIdSubject pendingVerification createdAt updatedAt"
-          + " customFields %1$s", _EMAIL_ADDRESSES_FIELDS);
+          + " customFields %1$s",
+      _EMAIL_ADDRESSES_FIELDS);
   public static final String PERSON_FIELDS_ONLY_HISTORY =
       "{ uuid previousPositions { startTime endTime position { uuid } } }";
   public static final String POSITION_FIELDS = String.format("{ %s person { %s } %s }",
@@ -79,7 +80,7 @@ public class PersonResourceTest extends AbstractResourceTest {
         .withBiography(UtilsTest.getCombinedHtmlTestCase().getInput())
         // set JSON of customFields
         .withCustomFields(UtilsTest.getCombinedJsonTestCase().getInput()).withGender("Female")
-        .withCountry("Canada").withCode("123456")
+        .withCode("123456")
         .withEndOfTourDate(
             ZonedDateTime.of(2020, 4, 1, 0, 0, 0, 0, DaoUtils.getServerNativeZoneId()).toInstant())
         .build();
@@ -96,7 +97,6 @@ public class PersonResourceTest extends AbstractResourceTest {
 
     final PersonInput updatedNewPersonInput = getPersonInput(newPerson);
     updatedNewPersonInput.setName("testCreatePerson updated name");
-    updatedNewPersonInput.setCountry("The Commonwealth of Canada");
     updatedNewPersonInput.setCode("A123456");
 
     // update HTML of biography

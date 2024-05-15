@@ -1,8 +1,7 @@
 import { allFakers, allLocales, faker } from "@faker-js/faker"
 import Model from "components/Model"
-import { countries } from "countries-list"
-import { getAlpha2Code } from "i18n-iso-countries"
-import { Person } from "models"
+import { countries, getCountryCode } from "countries-list"
+import { Location, Person } from "models"
 import Settings from "settings"
 import {
   createEmailAddresses,
@@ -14,6 +13,7 @@ import {
 } from "../simutils"
 import afghanFirstNames from "./afghanFirstNames"
 import afghanSurnames from "./afghanSurnames"
+import { getRandomObject } from "./NoteStories"
 
 const availableLocales = Object.keys(allLocales)
 const availableRanks = Settings.fields.person.ranks.map(r => r.value)
@@ -39,18 +39,20 @@ function personName(gender, locale) {
   }
 }
 
-function randomPerson(isUser, status) {
+async function randomPerson(user, isUser, status) {
   const gender = fuzzy.withProbability(0.1)
     ? "NOT SPECIFIED"
     : fuzzy.withProbability(0.5)
       ? "MALE"
       : "FEMALE"
   const defaultLangCode = "en"
-  const country = faker.helpers.arrayElement(
-    Settings.fields.regular.person.countries
+  const country = await getRandomObject(
+    user,
+    "locations",
+    { type: Location.LOCATION_TYPES.COUNTRY },
+    "uuid name digram"
   )
-  // Countries in the Settings from anet.yml are in English
-  const countryCode = getAlpha2Code(country, "en")
+  const countryCode = getCountryCode(country.name) || country.digram
   const countryByCode = countries[countryCode]
   // Some hacks for picking country-specific languages supported by faker
   const fakerHacks = {
@@ -130,7 +132,7 @@ function modifiedPerson() {
 
 const _createPerson = async function(user, isUser, status) {
   const person = Person.filterClientSideFields(new Person())
-  populate(person, randomPerson(isUser, status))
+  populate(person, await randomPerson(user, isUser, status))
     .name.always()
     .status.always()
     .rank.always()
@@ -206,7 +208,9 @@ const updatePerson = async function(user) {
         person (uuid:"${person.uuid}") {
           uuid
           biography
-          country
+          country {
+            uuid
+          }
           endOfTourDate
           gender
           name
@@ -299,7 +303,9 @@ const _deletePerson = async function(user) {
         query {
           person(uuid: "${person0.uuid}") {
               biography
-              country
+              country {
+                uuid
+              }
               endOfTourDate
               gender
               name

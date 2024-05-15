@@ -8,6 +8,7 @@ import AssessmentResultsContainer from "components/assessments/AssessmentResults
 import AssignPositionModal from "components/AssignPositionModal"
 import AttachmentCard from "components/Attachment/AttachmentCard"
 import AuthorizationGroupTable from "components/AuthorizationGroupTable"
+import CountryDisplay from "components/CountryDisplay"
 import { mapReadonlyCustomFieldsToComps } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
 import EditAssociatedPositionsModal from "components/EditAssociatedPositionsModal"
@@ -76,7 +77,11 @@ const GQL_GET_PERSON = gql`
       domainUsername
       openIdSubject
       biography
-      country
+      obsoleteCountry
+      country {
+        uuid
+        name
+      }
       gender
       endOfTourDate
       code
@@ -526,6 +531,12 @@ const PersonShow = ({ pageDispatchers }) => {
         <EmailAddressTable
           label={Settings.fields.person.emailAddresses.label}
           emailAddresses={person.emailAddresses}
+        />
+      ),
+      country: (
+        <CountryDisplay
+          country={person.country}
+          obsoleteCountry={person.obsoleteCountry}
         />
       ),
       endOfTourDate:

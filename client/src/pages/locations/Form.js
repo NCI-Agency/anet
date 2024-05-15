@@ -59,6 +59,7 @@ const MIN_CHARS_FOR_DUPLICATES = 3
 const LOCATION_TYPES_ADMIN = [
   Location.LOCATION_TYPES.POINT_LOCATION,
   Location.LOCATION_TYPES.GEOGRAPHICAL_AREA,
+  Location.LOCATION_TYPES.COUNTRY,
   Location.LOCATION_TYPES.VIRTUAL_LOCATION
 ]
 
@@ -252,13 +253,15 @@ const LocationForm = ({
                   }
                 />
 
-                <GeoLocation
-                  editable
-                  coordinates={coordinates}
-                  isSubmitting={isSubmitting}
-                  setFieldValue={setFieldValue}
-                  setFieldTouched={setFieldTouched}
-                />
+                {values.type !== Location.LOCATION_TYPES.VIRTUAL_LOCATION && (
+                  <GeoLocation
+                    editable
+                    coordinates={coordinates}
+                    isSubmitting={isSubmitting}
+                    setFieldValue={setFieldValue}
+                    setFieldTouched={setFieldTouched}
+                  />
+                )}
 
                 <DictionaryField
                   wrappedComponent={FastField}
@@ -268,6 +271,24 @@ const LocationForm = ({
                   buttons={statusButtons}
                   onChange={value => setFieldValue("status", value)}
                 />
+
+                {values.type === Location.LOCATION_TYPES.COUNTRY && (
+                  <>
+                    <DictionaryField
+                      wrappedComponent={Field}
+                      dictProps={Settings.fields.location.digram}
+                      name="digram"
+                      component={FieldHelper.InputField}
+                    />
+
+                    <DictionaryField
+                      wrappedComponent={Field}
+                      dictProps={Settings.fields.location.trigram}
+                      name="trigram"
+                      component={FieldHelper.InputField}
+                    />
+                  </>
+                )}
 
                 <DictionaryField
                   wrappedComponent={FastField}
@@ -314,12 +335,16 @@ const LocationForm = ({
                 )}
               </Fieldset>
 
-              <h3>Drag the marker below to set the location</h3>
-              <Leaflet
-                markers={[marker]}
-                onMapClick={(event, map) =>
-                  updateCoordinateFields(map.wrapLatLng(event.latlng))}
-              />
+              {values.type !== Location.LOCATION_TYPES.VIRTUAL_LOCATION && (
+                <>
+                  <h3>Drag the marker below to set the location</h3>
+                  <Leaflet
+                    markers={[marker]}
+                    onMapClick={(event, map) =>
+                      updateCoordinateFields(map.wrapLatLng(event.latlng))}
+                  />
+                </>
+              )}
 
               <ApprovalsDefinition
                 fieldName="planningApprovalSteps"

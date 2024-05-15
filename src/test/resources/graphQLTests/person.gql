@@ -15,7 +15,11 @@ person(uuid:"${personUuid}") {
   domainUsername
   openIdSubject
   biography
-  country
+  obsoleteCountry
+  country {
+    uuid
+    name
+  }
   gender
   endOfTourDate
   position {

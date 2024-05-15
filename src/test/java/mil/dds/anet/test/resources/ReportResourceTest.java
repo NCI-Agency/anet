@@ -91,7 +91,7 @@ class ReportResourceTest extends AbstractResourceTest {
       String.format("{ %1$s approvalSteps { uuid name nextStepUuid relatedObjectUuid } %2$s }",
           _ORGANIZATION_FIELDS, _EMAIL_ADDRESSES_FIELDS);
   private static final String _PERSON_FIELDS =
-      "uuid name status user phoneNumber rank biography country"
+      "uuid name status user phoneNumber rank biography obsoleteCountry country { uuid name }"
           + " gender endOfTourDate domainUsername openIdSubject pendingVerification createdAt updatedAt";
   private static final String PERSON_FIELDS =
       String.format("{ %1$s %2$s }", _PERSON_FIELDS, _EMAIL_ADDRESSES_FIELDS);

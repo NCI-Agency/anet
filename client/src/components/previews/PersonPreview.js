@@ -2,6 +2,7 @@ import { gql } from "@apollo/client"
 import API from "api"
 import AppContext from "components/AppContext"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
+import CountryDisplay from "components/CountryDisplay"
 import DictionaryField from "components/DictionaryField"
 import EmailAddressTable from "components/EmailAddressTable"
 import { PreviewField } from "components/FieldHelper"
@@ -30,7 +31,11 @@ const GQL_GET_PERSON = gql`
       user
       domainUsername
       biography
-      country
+      obsoleteCountry
+      country {
+        uuid
+        name
+      }
       gender
       endOfTourDate
       code
@@ -181,7 +186,12 @@ const PersonPreview = ({ className, uuid }) => {
             <DictionaryField
               wrappedComponent={PreviewField}
               dictProps={Settings.fields.person.country}
-              value={person.country}
+              value={
+                <CountryDisplay
+                  country={person.country}
+                  obsoleteCountry={person.obsoleteCountry}
+                />
+              }
             />
 
             <DictionaryField

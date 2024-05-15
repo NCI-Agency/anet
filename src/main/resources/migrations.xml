@@ -5215,4 +5215,469 @@
 		</rollback>
 	</changeSet>
 
+	<changeSet id="add-country-fields-to-locations" author="gjvoosten">
+		<addColumn tableName="locations">
+			<column name="digram" type="varchar(2)" />
+			<column name="trigram" type="varchar(3)" />
+		</addColumn>
+	</changeSet>
+
+	<changeSet id="insert-countries-into-locations" author="gjvoosten">
+		<sql>
+			INSERT INTO locations (uuid, type, status, name, digram, trigram) VALUES
+				(${uuid_function}, 'PAC', 0, 'Afghanistan', 'AF', 'AFG'),
+				(${uuid_function}, 'PAC', 0, 'Albania', 'AL', 'ALB'),
+				(${uuid_function}, 'PAC', 0, 'Algeria', 'AG', 'DZA'),
+				(${uuid_function}, 'PAC', 0, 'American Samoa', 'SS', 'ASM'),
+				(${uuid_function}, 'PAC', 0, 'Andorra', 'AN', 'AND'),
+				(${uuid_function}, 'PAC', 0, 'Angola', 'AO', 'AGO'),
+				(${uuid_function}, 'PAC', 0, 'Anguilla', 'AV', 'AIA'),
+				(${uuid_function}, 'PAC', 0, 'Antarctica', 'AY', 'ATA'),
+				(${uuid_function}, 'PAC', 0, 'Antigua and Barbuda', 'AC', 'ATG'),
+				(${uuid_function}, 'PAC', 0, 'Argentina', 'AR', 'ARG'),
+				(${uuid_function}, 'PAC', 0, 'Armenia', 'AM', 'ARM'),
+				(${uuid_function}, 'PAC', 0, 'Aruba', 'AA', 'ABW'),
+				(${uuid_function}, 'PAC', 0, 'Ashmore and Cartier Islands', 'AT', 'ACI'),
+				(${uuid_function}, 'PAC', 0, 'Australia', 'AS', 'AUS'),
+				(${uuid_function}, 'PAC', 0, 'Austria', 'AU', 'AUT'),
+				(${uuid_function}, 'PAC', 0, 'Azerbaijan', 'AJ', 'AZE'),
+				(${uuid_function}, 'PAC', 0, 'Bahrain', 'BA', 'BHR'),
+				(${uuid_function}, 'PAC', 0, 'Bangladesh', 'BD', 'BGD'),
+				(${uuid_function}, 'PAC', 0, 'Barbados', 'BB', 'BRB'),
+				(${uuid_function}, 'PAC', 0, 'Belarus', 'BO', 'BLR'),
+				(${uuid_function}, 'PAC', 0, 'Belgium', 'BE', 'BEL'),
+				(${uuid_function}, 'PAC', 0, 'Belize', 'BH', 'BLZ'),
+				(${uuid_function}, 'PAC', 0, 'Benin', 'BN', 'BEN'),
+				(${uuid_function}, 'PAC', 0, 'Bermuda', 'BM', 'BMU'),
+				(${uuid_function}, 'PAC', 0, 'Bhutan', 'BT', 'BTN'),
+				(${uuid_function}, 'PAC', 0, 'Bolivia', 'BL', 'BOL'),
+				(${uuid_function}, 'PAC', 0, 'Bosnia-Herzegovina', 'BK', 'BIH'),
+				(${uuid_function}, 'PAC', 0, 'Botswana', 'BC', 'BWA'),
+				(${uuid_function}, 'PAC', 0, 'Bouvet Island', 'BV', 'BVT'),
+				(${uuid_function}, 'PAC', 0, 'Brazil', 'BR', 'BRA'),
+				(${uuid_function}, 'PAC', 0, 'British Indian Ocean Territory', 'IO', 'IOT'),
+				(${uuid_function}, 'PAC', 0, 'British Virgin Islands', 'VS', 'VGB'),
+				(${uuid_function}, 'PAC', 0, 'Brunei', 'BX', 'BRN'),
+				(${uuid_function}, 'PAC', 0, 'Bulgaria', 'BG', 'BGR'),
+				(${uuid_function}, 'PAC', 0, 'Burkina Faso', 'UV', 'BFA'),
+				(${uuid_function}, 'PAC', 0, 'Burundi', 'BY', 'BDI'),
+				(${uuid_function}, 'PAC', 0, 'Cambodia', 'CB', 'KHM'),
+				(${uuid_function}, 'PAC', 0, 'Cameroon', 'CM', 'CMR'),
+				(${uuid_function}, 'PAC', 0, 'Canada', 'CA', 'CAN'),
+				(${uuid_function}, 'PAC', 0, 'Cape Verde', 'CV', 'CPV'),
+				(${uuid_function}, 'PAC', 0, 'Cayman Islands', 'CJ', 'CYM'),
+				(${uuid_function}, 'PAC', 0, 'Central African Republic', 'CT', 'CAF'),
+				(${uuid_function}, 'PAC', 0, 'Chad', 'CD', 'TCD'),
+				(${uuid_function}, 'PAC', 0, 'Chile', 'CI', 'CHL'),
+				(${uuid_function}, 'PAC', 0, 'Christmas Island', 'KT', 'CXR'),
+				(${uuid_function}, 'PAC', 0, 'Cocos (Keeling) Islands', 'CK', 'CCK'),
+				(${uuid_function}, 'PAC', 0, 'Colombia', 'CO', 'COL'),
+				(${uuid_function}, 'PAC', 0, 'Comoros', 'CN', 'COM'),
+				(${uuid_function}, 'PAC', 0, 'Cook Islands', 'CW', 'COK'),
+				(${uuid_function}, 'PAC', 0, 'Coral Sea Islands', 'CR', 'CSI'),
+				(${uuid_function}, 'PAC', 0, 'Costa Rica', 'CS', 'CRI'),
+				(${uuid_function}, 'PAC', 0, 'Côte d''Ivoire', 'IV', 'CIV'),
+				(${uuid_function}, 'PAC', 0, 'Croatia', 'HR', 'HRV'),
+				(${uuid_function}, 'PAC', 0, 'Cuba', 'CU', 'CUB'),
+				(${uuid_function}, 'PAC', 0, 'Cyprus', 'CY', 'CYP'),
+				(${uuid_function}, 'PAC', 0, 'Czech Republic', 'CZ', 'CZE'),
+				(${uuid_function}, 'PAC', 0, 'Democratic People''s Republic of Korea', 'KN', 'PRK'),
+				(${uuid_function}, 'PAC', 0, 'Democratic Republic of the Congo', 'CD', 'COD'),
+				(${uuid_function}, 'PAC', 0, 'Denmark', 'DA', 'DNK'),
+				(${uuid_function}, 'PAC', 0, 'Djibouti', 'DJ', 'DJI'),
+				(${uuid_function}, 'PAC', 0, 'Dominica', 'DO', 'DMA'),
+				(${uuid_function}, 'PAC', 0, 'Dominican Republic', 'DR', 'DOM'),
+				(${uuid_function}, 'PAC', 1, 'East Germany', 'GC', 'n/a'),
+				(${uuid_function}, 'PAC', 0, 'Ecuador', 'EC', 'ECU'),
+				(${uuid_function}, 'PAC', 0, 'Egypt', 'EG', 'EGY'),
+				(${uuid_function}, 'PAC', 0, 'El Salvador', 'SV', 'SLV'),
+				(${uuid_function}, 'PAC', 0, 'Equatorial Guinea', 'EK', 'GNQ'),
+				(${uuid_function}, 'PAC', 0, 'Eritrea', 'ER', 'ERI'),
+				(${uuid_function}, 'PAC', 0, 'Estonia', 'EN', 'EST'),
+				(${uuid_function}, 'PAC', 0, 'Ethiopia', 'ET', 'ETH'),
+				(${uuid_function}, 'PAC', 0, 'Falkland Islands', 'FK', 'FLK'),
+				(${uuid_function}, 'PAC', 0, 'Faroe Islands', 'FO', 'FRO'),
+				(${uuid_function}, 'PAC', 0, 'Federated States of Micronesia', 'FM', 'FSM'),
+				(${uuid_function}, 'PAC', 0, 'Fiji', 'FJ', 'FJI'),
+				(${uuid_function}, 'PAC', 0, 'Finland', 'FI', 'FIN'),
+				(${uuid_function}, 'PAC', 0, 'France', 'FR', 'FRA'),
+				(${uuid_function}, 'PAC', 0, 'French Guiana', 'FG', 'GUF'),
+				(${uuid_function}, 'PAC', 0, 'French Polynesia', 'FP', 'PYF'),
+				(${uuid_function}, 'PAC', 0, 'French Southern Territories', 'FS', 'ATF'),
+				(${uuid_function}, 'PAC', 0, 'Gabon', 'GA', 'GAB'),
+				(${uuid_function}, 'PAC', 0, 'Georgia', 'GG', 'GEO'),
+				(${uuid_function}, 'PAC', 0, 'Germany', 'DE', 'DEU'),
+				(${uuid_function}, 'PAC', 0, 'Ghana', 'GH', 'GHA'),
+				(${uuid_function}, 'PAC', 0, 'Gibraltar', 'GI', 'GIB'),
+				(${uuid_function}, 'PAC', 0, 'Greece', 'GR', 'GRC'),
+				(${uuid_function}, 'PAC', 0, 'Greenland', 'GL', 'GRL'),
+				(${uuid_function}, 'PAC', 0, 'Grenada', 'GJ', 'GRD'),
+				(${uuid_function}, 'PAC', 0, 'Guadeloupe', 'GP', 'GLP'),
+				(${uuid_function}, 'PAC', 0, 'Guam', 'GQ', 'GUM'),
+				(${uuid_function}, 'PAC', 0, 'Guatemala', 'GT', 'GTM'),
+				(${uuid_function}, 'PAC', 0, 'Guinea-Bissau', 'PU', 'GNB'),
+				(${uuid_function}, 'PAC', 0, 'Guinea', 'GV', 'GIN'),
+				(${uuid_function}, 'PAC', 0, 'Guyana', 'GY', 'GUY'),
+				(${uuid_function}, 'PAC', 0, 'Haiti', 'HA', 'HTI'),
+				(${uuid_function}, 'PAC', 0, 'Heard and McDonald Islands', 'HM', 'HMD'),
+				(${uuid_function}, 'PAC', 0, 'Honduras', 'HO', 'HND'),
+				(${uuid_function}, 'PAC', 0, 'Hong Kong', 'HK', 'HKG'),
+				(${uuid_function}, 'PAC', 0, 'Howland Island', 'HQ', 'HQI'),
+				(${uuid_function}, 'PAC', 0, 'Hungary', 'HU', 'HUN'),
+				(${uuid_function}, 'PAC', 0, 'Iceland', 'IC', 'ISL'),
+				(${uuid_function}, 'PAC', 0, 'India', 'IN', 'IND'),
+				(${uuid_function}, 'PAC', 0, 'Indonesia', 'ID', 'IDN'),
+				(${uuid_function}, 'PAC', 0, 'Iran', 'IR', 'IRN'),
+				(${uuid_function}, 'PAC', 0, 'Iraq', 'IZ', 'IRQ'),
+				(${uuid_function}, 'PAC', 0, 'Ireland', 'EI', 'IRL'),
+				(${uuid_function}, 'PAC', 0, 'Israel', 'IS', 'ISR'),
+				(${uuid_function}, 'PAC', 0, 'Italy', 'IT', 'ITA'),
+				(${uuid_function}, 'PAC', 0, 'Jamaica', 'JM', 'JAM'),
+				(${uuid_function}, 'PAC', 0, 'Jan Mayen Island', 'JN', 'JNM'),
+				(${uuid_function}, 'PAC', 0, 'Japan', 'JA', 'JPN'),
+				(${uuid_function}, 'PAC', 0, 'Johnston Atoll', 'JQ', 'JQA'),
+				(${uuid_function}, 'PAC', 0, 'Jordan', 'JO', 'JOR'),
+				(${uuid_function}, 'PAC', 0, 'Kazakhstan', 'KZ', 'KAZ'),
+				(${uuid_function}, 'PAC', 0, 'Kenya', 'KE', 'KEN'),
+				(${uuid_function}, 'PAC', 0, 'Kiribati', 'KR', 'KIR'),
+				(${uuid_function}, 'PAC', 0, 'Kosovo Albanian', NULL, 'KOA'),
+				(${uuid_function}, 'PAC', 0, 'Kosovo Bosniak', NULL, 'KOB'),
+				(${uuid_function}, 'PAC', 0, 'Kosovo Gorani', NULL, 'KOG'),
+				(${uuid_function}, 'PAC', 0, 'Kosovo Serbian', NULL, 'KOS'),
+				(${uuid_function}, 'PAC', 0, 'Kosovo Turks', NULL, 'KOT'),
+				(${uuid_function}, 'PAC', 0, 'Kuwait', 'KU', 'KWT'),
+				(${uuid_function}, 'PAC', 0, 'Kyrgyzstan', 'KG', 'KGZ'),
+				(${uuid_function}, 'PAC', 0, 'Laos', 'LA', 'LAO'),
+				(${uuid_function}, 'PAC', 0, 'Latvia', 'LG', 'LVA'),
+				(${uuid_function}, 'PAC', 0, 'Lebanon', 'LE', 'LBN'),
+				(${uuid_function}, 'PAC', 0, 'Lesotho', 'LT', 'LSO'),
+				(${uuid_function}, 'PAC', 0, 'Liberia', 'LI', 'LBR'),
+				(${uuid_function}, 'PAC', 0, 'Libya', 'LY', 'LBY'),
+				(${uuid_function}, 'PAC', 0, 'Liechtenstein', 'LS', 'LIE'),
+				(${uuid_function}, 'PAC', 0, 'Lithuania', 'LH', 'LTU'),
+				(${uuid_function}, 'PAC', 0, 'Luxembourg', 'LU', 'LUX'),
+				(${uuid_function}, 'PAC', 0, 'Macau', 'MC', 'MAC'),
+				(${uuid_function}, 'PAC', 0, 'Madagascar', 'MA', 'MDG'),
+				(${uuid_function}, 'PAC', 0, 'Malawi', 'MI', 'MWI'),
+				(${uuid_function}, 'PAC', 0, 'Malaysia', 'MY', 'MYS'),
+				(${uuid_function}, 'PAC', 0, 'Mali', 'ML', 'MLI'),
+				(${uuid_function}, 'PAC', 0, 'Malta', 'MT', 'MLT'),
+				(${uuid_function}, 'PAC', 0, 'Marshall Islands', 'RM', 'MHL'),
+				(${uuid_function}, 'PAC', 0, 'Martinique', 'MB', 'MTQ'),
+				(${uuid_function}, 'PAC', 0, 'Mauritania', 'MR', 'MRT'),
+				(${uuid_function}, 'PAC', 0, 'Mauritius', 'MP', 'MUS'),
+				(${uuid_function}, 'PAC', 0, 'Mayotte', 'YT', NULL),
+				(${uuid_function}, 'PAC', 0, 'Mexico', 'MX', 'MEX'),
+				(${uuid_function}, 'PAC', 0, 'Monaco', 'MN', 'MCO'),
+				(${uuid_function}, 'PAC', 0, 'Mongolia', 'MG', 'MNG'),
+				(${uuid_function}, 'PAC', 0, 'Montenegro', 'ME', 'MNE'),
+				(${uuid_function}, 'PAC', 0, 'Montserrat', 'MH', 'MSR'),
+				(${uuid_function}, 'PAC', 0, 'Morocco', 'MO', 'MAR'),
+				(${uuid_function}, 'PAC', 0, 'Mozambique', 'MZ', 'MOZ'),
+				(${uuid_function}, 'PAC', 0, 'Myanmar', 'MM', 'MMR'),
+				(${uuid_function}, 'PAC', 0, 'Namibia', 'WA', 'NAM'),
+				(${uuid_function}, 'PAC', 0, 'Nauru', 'NR', 'NRU'),
+				(${uuid_function}, 'PAC', 0, 'Nepal', 'NP', 'NPL'),
+				(${uuid_function}, 'PAC', 1, 'Netherlands Antilles', 'NA', 'ANT'),
+				(${uuid_function}, 'PAC', 0, 'Netherlands', 'NL', 'NLD'),
+				(${uuid_function}, 'PAC', 0, 'New Caledonia', 'NC', 'NCL'),
+				(${uuid_function}, 'PAC', 0, 'New Zealand', 'NZ', 'NZL'),
+				(${uuid_function}, 'PAC', 0, 'Nicaragua', 'NU', 'NIC'),
+				(${uuid_function}, 'PAC', 0, 'Nigeria', 'NG', 'NGA'),
+				(${uuid_function}, 'PAC', 0, 'Niger', 'NE', 'NER'),
+				(${uuid_function}, 'PAC', 0, 'Niue', 'NU', 'NIU'),
+				(${uuid_function}, 'PAC', 0, 'Norfolk Island', 'NF', 'NFK'),
+				(${uuid_function}, 'PAC', 0, 'Northern Mariana Islands', 'CQ', 'MNP'),
+				(${uuid_function}, 'PAC', 0, 'North Macedonia', 'MK', 'MKD'),
+				(${uuid_function}, 'PAC', 0, 'Norway', 'NO', 'NOR'),
+				(${uuid_function}, 'PAC', 0, 'Oman', 'MU', 'OMN'),
+				(${uuid_function}, 'PAC', 0, 'Pakistan', 'PK', 'PAK'),
+				(${uuid_function}, 'PAC', 0, 'Palau', 'PS', 'PLW'),
+				(${uuid_function}, 'PAC', 0, 'Palestinian Territory', 'PS', 'PSE'),
+				(${uuid_function}, 'PAC', 0, 'Panama', 'PM', 'PAN'),
+				(${uuid_function}, 'PAC', 0, 'Papua New Guinea', 'PP', 'PNG'),
+				(${uuid_function}, 'PAC', 0, 'Paracel Islands', 'PF', 'PFI'),
+				(${uuid_function}, 'PAC', 0, 'Paraguay', 'PA', 'PRY'),
+				(${uuid_function}, 'PAC', 0, 'People''s Republic of China', 'CH', 'CHN'),
+				(${uuid_function}, 'PAC', 0, 'Peru', 'PE', 'PER'),
+				(${uuid_function}, 'PAC', 0, 'Philippines', 'RP', 'PHL'),
+				(${uuid_function}, 'PAC', 0, 'Pitcairn Islands', 'PN', 'PCN'),
+				(${uuid_function}, 'PAC', 0, 'Poland', 'PL', 'POL'),
+				(${uuid_function}, 'PAC', 0, 'Portugal', 'PT', 'PRT'),
+				(${uuid_function}, 'PAC', 0, 'Puerto Rico', 'RQ', 'PRI'),
+				(${uuid_function}, 'PAC', 0, 'Qatar', 'QA', 'QAT'),
+				(${uuid_function}, 'PAC', 0, 'Republic of China (Taiwan)', 'TW', 'TWN'),
+				(${uuid_function}, 'PAC', 0, 'Republic of Korea', NULL, 'KOR'),
+				(${uuid_function}, 'PAC', 0, 'Republic of Korea', 'KS', 'KOR'),
+				(${uuid_function}, 'PAC', 0, 'Republic of Moldova', 'MD', 'MDA'),
+				(${uuid_function}, 'PAC', 0, 'Republic of the Congo', 'CF', 'COG'),
+				(${uuid_function}, 'PAC', 0, 'Réunion', 'RE', 'REU'),
+				(${uuid_function}, 'PAC', 0, 'Roma Ashkali Egyptian', NULL, 'RAE'),
+				(${uuid_function}, 'PAC', 0, 'Romania', 'RO', 'ROU'),
+				(${uuid_function}, 'PAC', 0, 'Russia', 'RU', 'RUS'),
+				(${uuid_function}, 'PAC', 0, 'Rwanda', 'RW', 'RWA'),
+				(${uuid_function}, 'PAC', 0, 'Saint Helena', 'SH', 'SHN'),
+				(${uuid_function}, 'PAC', 0, 'Saint Kitts and Nevis', 'SC', 'KNA'),
+				(${uuid_function}, 'PAC', 0, 'Saint Lucia', 'ST', 'LCA'),
+				(${uuid_function}, 'PAC', 0, 'Saint Pierre and Miquelon', 'SB', 'SPM'),
+				(${uuid_function}, 'PAC', 0, 'Saint Vincent and the Grenadines', 'VC', 'VCT'),
+				(${uuid_function}, 'PAC', 0, 'Samoa', 'SS', 'WSM'),
+				(${uuid_function}, 'PAC', 0, 'San Marino', 'SM', 'SMR'),
+				(${uuid_function}, 'PAC', 0, 'São Tomé and Príncipe', 'TP', 'STP'),
+				(${uuid_function}, 'PAC', 0, 'Saudi Arabia', 'SA', 'SAU'),
+				(${uuid_function}, 'PAC', 0, 'Senegal', 'SG', 'SEN'),
+				(${uuid_function}, 'PAC', 0, 'Serbia and Montenegro', NULL, 'SCG'),
+				(${uuid_function}, 'PAC', 0, 'Serbia', 'RS', 'SRB'),
+				(${uuid_function}, 'PAC', 0, 'Seychelles', 'SE', 'SYC'),
+				(${uuid_function}, 'PAC', 0, 'Sierra Leone', 'SL', 'SLE'),
+				(${uuid_function}, 'PAC', 0, 'Singapore', 'SN', 'SGP'),
+				(${uuid_function}, 'PAC', 0, 'Slovakia', 'LO', 'SVK'),
+				(${uuid_function}, 'PAC', 0, 'Slovenia', 'SI', 'SVN'),
+				(${uuid_function}, 'PAC', 0, 'Solomon Islands', 'BP', 'SLB'),
+				(${uuid_function}, 'PAC', 0, 'Somalia', 'SO', 'SOM'),
+				(${uuid_function}, 'PAC', 0, 'South Africa', 'SF', 'ZAF'),
+				(${uuid_function}, 'PAC', 0, 'South Georgia and South Sandwich Islands', 'SX', 'SGS'),
+				(${uuid_function}, 'PAC', 0, 'South Sudan', 'SS', 'SSD'),
+				(${uuid_function}, 'PAC', 0, 'Spain', 'ES', 'ESP'),
+				(${uuid_function}, 'PAC', 0, 'Sri Lanka', 'CE', 'LKA'),
+				(${uuid_function}, 'PAC', 0, 'Sudan', 'SU', 'SDN'),
+				(${uuid_function}, 'PAC', 0, 'Suriname', 'NS', 'SUR'),
+				(${uuid_function}, 'PAC', 0, 'Svalbard and Jan Mayen Islands', 'SJ', 'SJM'),
+				(${uuid_function}, 'PAC', 0, 'Swaziland', 'WZ', 'SWZ'),
+				(${uuid_function}, 'PAC', 0, 'Sweden', 'SW', 'SWE'),
+				(${uuid_function}, 'PAC', 0, 'Switzerland', 'SZ', 'CHE'),
+				(${uuid_function}, 'PAC', 0, 'Syria', 'SY', 'SYR'),
+				(${uuid_function}, 'PAC', 0, 'Tajikistan', 'TI', 'TJK'),
+				(${uuid_function}, 'PAC', 0, 'Tanzania', 'TZ', 'TZA'),
+				(${uuid_function}, 'PAC', 0, 'Thailand', 'TH', 'THA'),
+				(${uuid_function}, 'PAC', 0, 'The Bahamas', 'BF', 'BHS'),
+				(${uuid_function}, 'PAC', 0, 'The Gambia', 'GM', 'GMB'),
+				(${uuid_function}, 'PAC', 0, 'The Maldives', 'MV', 'MDV'),
+				(${uuid_function}, 'PAC', 0, 'Timor-Leste', 'TL', 'TLS'),
+				(${uuid_function}, 'PAC', 0, 'Togo', 'TO', 'TGO'),
+				(${uuid_function}, 'PAC', 0, 'Tokelau', 'TK', 'TKL'),
+				(${uuid_function}, 'PAC', 0, 'Tonga', 'TN', 'TON'),
+				(${uuid_function}, 'PAC', 0, 'Trinidad and Tobago', 'TD', 'TTO'),
+				(${uuid_function}, 'PAC', 0, 'Tunisia', 'TS', 'TUN'),
+				(${uuid_function}, 'PAC', 0, 'Türkiye', 'TU', 'TUR'),
+				(${uuid_function}, 'PAC', 0, 'Turkmenistan', 'TX', 'TKM'),
+				(${uuid_function}, 'PAC', 0, 'Turks and Caicos Islands', 'TK', 'TCA'),
+				(${uuid_function}, 'PAC', 0, 'Tuvalu', 'TV', 'TUV'),
+				(${uuid_function}, 'PAC', 0, 'Uganda', 'UG', 'UGA'),
+				(${uuid_function}, 'PAC', 0, 'Ukraine', 'UA', 'UKR'),
+				(${uuid_function}, 'PAC', 1, 'Union of Soviet Socialist Republics', 'UR', 'n/a'),
+				(${uuid_function}, 'PAC', 0, 'United Arab Emirates', 'TC', 'ARE'),
+				(${uuid_function}, 'PAC', 0, 'United Kingdom (Great Britain and Northern Ireland)', 'GB', 'GBR'),
+				(${uuid_function}, 'PAC', 0, 'United States', 'US', 'USA'),
+				(${uuid_function}, 'PAC', 0, 'Uruguay', 'UY', 'URY'),
+				(${uuid_function}, 'PAC', 0, 'U.S. Minor Outlying Islands', 'IQ', 'UMI'),
+				(${uuid_function}, 'PAC', 0, 'U.S. Virgin Islands', 'VI', 'VIR'),
+				(${uuid_function}, 'PAC', 0, 'Uzbekistan', 'UZ', 'UZB'),
+				(${uuid_function}, 'PAC', 0, 'Vanuatu', 'NH', 'VUT'),
+				(${uuid_function}, 'PAC', 0, 'Vatican City (Holy See)', 'VT', 'VAT'),
+				(${uuid_function}, 'PAC', 0, 'Venezuela', 'VE', 'VEN'),
+				(${uuid_function}, 'PAC', 0, 'Vietnam', 'VN', 'VNM'),
+				(${uuid_function}, 'PAC', 0, 'Wallis and Futuna Islands', 'WF', 'WLF'),
+				(${uuid_function}, 'PAC', 0, 'Western Sahara', 'WI', 'ESH'),
+				(${uuid_function}, 'PAC', 0, 'Yemen', 'YE', 'YEM'),
+				(${uuid_function}, 'PAC', 0, 'Yugoslavia (Federal Republic of)', 'YU', 'YUG'),
+				(${uuid_function}, 'PAC', 0, 'Zambia', 'ZA', 'ZMB'),
+				(${uuid_function}, 'PAC', 0, 'Zimbabwe', 'ZI', 'ZWE'),
+				-- Not an offical country, but used when nothing else seems to fit
+				(${uuid_function}, 'PAC', 0, 'Unknown', NULL, NULL);
+		</sql>
+		<rollback>
+			<sql>
+				DELETE FROM locations
+				WHERE type = 'PAC';
+			</sql>
+		</rollback>
+	</changeSet>
+
+	<changeSet id="add-countryUuid-to-people" author="gjvoosten">
+		<addColumn tableName="people">
+			<column name="countryUuid" type="${uuid_type}" />
+		</addColumn>
+		<addForeignKeyConstraint
+			constraintName="FK_people_country"
+			baseTableName="people"
+			baseColumnNames="countryUuid"
+			referencedTableName="locations"
+			referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION"
+		/>
+	</changeSet>
+
+	<changeSet id="link-people-to-countries" author="gjvoosten">
+		<sql>
+			-- Exact match
+			UPDATE people
+			SET "countryUuid" = l.uuid,
+			    country = NULL -- we have an exact match
+			FROM locations l
+			WHERE people."countryUuid" IS NULL
+			AND people.country IS NOT NULL
+			AND l.type = 'PAC'
+			AND l.name = people.country;
+
+			-- Exact match with trigram prefix
+			UPDATE people
+			SET "countryUuid" = l.uuid,
+			    country = NULL -- we have an exact match
+			FROM locations l
+			WHERE people."countryUuid" IS NULL
+			AND people.country IS NOT NULL
+			AND l.type = 'PAC'
+			AND people.country = l.trigram || ' - ' || l.name;
+
+			-- Some hard-coded exceptions
+			UPDATE people
+			SET "countryUuid" = l.uuid,
+			    country = NULL -- we have an exact match
+			FROM locations l
+			WHERE people."countryUuid" IS NULL
+			AND people.country = 'Albania,' -- typo in some dictionaries
+			AND l.type = 'PAC'
+			AND l.name = 'Albania';
+
+			UPDATE people
+			SET "countryUuid" = l.uuid,
+			    country = NULL -- we have an exact match
+			FROM locations l
+			WHERE people."countryUuid" IS NULL
+			AND people.country = 'Macedonia' -- old name
+			AND l.type = 'PAC'
+			AND l.name = 'North Macedonia';
+
+			UPDATE people
+			SET "countryUuid" = l.uuid,
+			    country = NULL -- we have an exact match
+			FROM locations l
+			WHERE people."countryUuid" IS NULL
+			AND people.country = 'Turkey' -- old name
+			AND l.type = 'PAC'
+			AND l.name = 'Türkiye';
+
+			UPDATE people
+			SET "countryUuid" = l.uuid,
+			    country = NULL -- we have an exact match
+			FROM locations l
+			WHERE people."countryUuid" IS NULL
+			AND people.country = 'TUR - Turkey' -- old name with prefix
+			AND l.type = 'PAC'
+			AND l.name = 'Türkiye';
+
+			UPDATE people
+			SET "countryUuid" = l.uuid,
+			    country = NULL -- we have an exact match
+			FROM locations l
+			WHERE people."countryUuid" IS NULL
+			AND people.country = 'United Kingdom' -- shorter name
+			AND l.type = 'PAC'
+			AND l.name = 'United Kingdom (Great Britain and Northern Ireland)';
+
+			UPDATE people
+			SET "countryUuid" = l.uuid,
+			    country = NULL -- we have an exact match
+			FROM locations l
+			WHERE people."countryUuid" IS NULL
+			AND people.country = 'United States of America' -- longer name
+			AND l.type = 'PAC'
+			AND l.name = 'United States';
+
+			-- Some heuristics (keep the old country for reference!):
+			-- prefix match
+			UPDATE people
+			SET "countryUuid" = l.uuid
+			FROM locations l
+			WHERE people."countryUuid" IS NULL
+			AND people.country IS NOT NULL
+			AND l.type = 'PAC'
+			AND l.name LIKE people.country || '%';
+
+			-- suffix match
+			UPDATE people
+			SET "countryUuid" = l.uuid
+			FROM locations l
+			WHERE people."countryUuid" IS NULL
+			AND people.country IS NOT NULL
+			AND l.type = 'PAC'
+			AND l.name LIKE '%' || people.country;
+
+			-- infix match
+			UPDATE people
+			SET "countryUuid" = l.uuid
+			FROM locations l
+			WHERE people."countryUuid" IS NULL
+			AND people.country IS NOT NULL
+			AND l.type = 'PAC'
+			AND l.name LIKE '%' || people.country || '%';
+
+			-- Finally, set unmatched ones to Unknown
+			UPDATE people
+			SET "countryUuid" = l.uuid
+			FROM locations l
+			WHERE people."countryUuid" IS NULL
+			AND people.country IS NOT NULL
+			AND l.type = 'PAC'
+			AND l.name = 'Unknown';
+		</sql>
+		<rollback>
+			<sql>
+				UPDATE people
+				SET "countryUuid" = NULL,
+				    country = l.name
+				FROM locations l
+				WHERE people."countryUuid" = l.uuid
+				AND people.country IS NULL;
+			</sql>
+		</rollback>
+	</changeSet>
+
+	<changeSet id="rename-old-people-country-column" author="gjvooosten">
+		<renameColumn tableName="people" oldColumnName="country" newColumnName="obsoleteCountry" />
+	</changeSet>
+
+	<changeSet id="add-ngrams-to-locations-fulltext-index" author="gjvoosten" runInTransaction="false">
+		<sql>
+			<!-- Drop full-text materialized view (incl. index) since we cannot just ALTER it -->
+			DROP MATERIALIZED VIEW mv_fts_locations;
+
+			<!-- Drop generated full-text column -->
+			ALTER TABLE locations DROP COLUMN full_text;
+
+			<!-- Re-add generated full-text column, with the digram and trigram columns included-->
+			ALTER TABLE locations
+				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, coalesce(locations.name, ''))
+							|| to_tsvector('simple', coalesce(locations.name, '')), ${fts_high}) ||
+					setweight(to_tsvector(${fts_config}, coalesce(locations.digram, ''))
+							|| to_tsvector('simple', coalesce(locations.digram, '')), ${fts_low}) ||
+					setweight(to_tsvector(${fts_config}, coalesce(locations.trigram, ''))
+							|| to_tsvector('simple', coalesce(locations.trigram, '')), ${fts_low}) ||
+					setweight(to_tsvector(${fts_config}, coalesce(locations.description, ''))
+							|| to_tsvector('simple', coalesce(locations.description, '')), ${fts_low}) ||
+					setweight(to_tsvector(${fts_config}, jsonb_value_agg(locations."customFields"::jsonb))
+							|| to_tsvector('simple', jsonb_value_agg(locations."customFields"::jsonb)), ${fts_lower})
+				) STORED;
+
+			<!-- Re-create full-text materialized view and index -->
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_locations(uuid, full_text) AS
+			SELECT
+				locations.uuid,
+				locations.full_text
+					|| coalesce(tsvector_agg(notes.full_text), ''::tsvector)
+			FROM locations
+					LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'locations'
+				AND "noteRelatedObjects"."relatedObjectUuid" = locations.uuid
+					LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
+			GROUP BY locations.uuid
+				WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_locations_uuid" ON mv_fts_locations(uuid);
+			CREATE INDEX "FT_mv_fts_locations" ON mv_fts_locations USING gin(full_text);
+			CREATE INDEX "TR_locations_uuid" ON mv_fts_locations USING gin(uuid gin_trgm_ops);
+		</sql>
+		<!-- Rolling back is not useful anymore -->
+	</changeSet>
+
 </databaseChangeLog>

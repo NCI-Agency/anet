@@ -17,7 +17,6 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Attachment;
 import mil.dds.anet.beans.GenericRelatedObject;
 import mil.dds.anet.beans.lists.AnetBeanList;
-import mil.dds.anet.beans.search.AbstractSearchQuery;
 import mil.dds.anet.beans.search.AttachmentSearchQuery;
 import mil.dds.anet.database.mappers.AttachmentMapper;
 import mil.dds.anet.database.mappers.GenericRelatedObjectMapper;
@@ -36,7 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
-public class AttachmentDao extends AnetBaseDao<Attachment, AbstractSearchQuery<?>> {
+public class AttachmentDao extends AnetBaseDao<Attachment, AttachmentSearchQuery> {
 
   public static final String[] fields = {"uuid", "authorUuid", "fileName", "mimeType",
       "description", "classification", "caption", "createdAt", "updatedAt"};
@@ -54,10 +53,6 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AbstractSearchQuery<?
     return getByIds(Arrays.asList(uuid)).get(0);
   }
 
-  public AnetBeanList<Attachment> search(final AttachmentSearchQuery query) {
-    return AnetObjectEngine.getInstance().getSearcher().getAttachmentSearcher().runSearch(query);
-  }
-
   static class SelfIdBatcher extends IdBatcher<Attachment> {
     private static final String sql = "/* batch.getAttachmentByUuids */ SELECT " + ATTACHMENT_FIELDS
         + " FROM \"attachments\" WHERE uuid IN ( <uuids> )";
@@ -72,6 +67,11 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AbstractSearchQuery<?
     final IdBatcher<Attachment> idBatcher =
         AnetObjectEngine.getInstance().getInjector().getInstance(SelfIdBatcher.class);
     return idBatcher.getByIds(uuids);
+  }
+
+  @Override
+  public AnetBeanList<Attachment> search(final AttachmentSearchQuery query) {
+    return AnetObjectEngine.getInstance().getSearcher().getAttachmentSearcher().runSearch(query);
   }
 
   @Override
