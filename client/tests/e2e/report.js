@@ -485,7 +485,7 @@ test.serial("Verify that validations work", async t => {
   await pageHelpers.clickTodayButton()
 
   // set time as well
-  const $hourInput = await $("input.bp4-timepicker-input.bp4-timepicker-hour")
+  const $hourInput = await $("input.bp5-timepicker-input.bp5-timepicker-hour")
   // clear field, enter data, fire blur event
   await $hourInput.sendKeys(
     t.context.Key.END +
@@ -494,7 +494,7 @@ test.serial("Verify that validations work", async t => {
       t.context.Key.TAB
   )
   const $minuteInput = await $(
-    "input.bp4-timepicker-input.bp4-timepicker-minute"
+    "input.bp5-timepicker-input.bp5-timepicker-minute"
   )
   // clear field, enter data, fire blur event
   await $minuteInput.sendKeys(

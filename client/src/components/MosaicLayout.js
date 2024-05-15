@@ -1,5 +1,4 @@
 import { Classes, Icon, IconSize } from "@blueprintjs/core"
-import "@blueprintjs/core/lib/css/blueprint.css"
 import { IconNames } from "@blueprintjs/icons"
 // needed for the mosaic tile buttons (expand, close):
 import "@blueprintjs/icons/lib/css/blueprint-icons.css"
@@ -30,7 +29,7 @@ const MosaicLayout = ({ visualizations, initialNode, description, style }) => {
       <div className="mosaic-container">
         {renderNavBar()}
         <Mosaic
-          blueprintNamespace="bp4"
+          blueprintNamespace="bp5"
           value={currentNode}
           onChange={updateCurrentNode}
           renderTile={(id, path) => {

@@ -1,6 +1,5 @@
-import { Icon, Intent } from "@blueprintjs/core"
+import { Icon, Intent, Tooltip } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
-import { Tooltip2 } from "@blueprintjs/popover2"
 import MultiTypeAdvancedSelectComponent from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
 import CustomDateInput from "components/CustomDateInput"
 import LinkAnetEntity from "components/editor/LinkAnetEntity"
@@ -958,9 +957,9 @@ const CustomField = ({
   if (authorizationGroupUuids || deprecated) {
     extraColElem = (
       <div>
-        <Tooltip2 content={fieldConfig.tooltipText} intent={Intent.WARNING}>
+        <Tooltip content={fieldConfig.tooltipText} intent={Intent.WARNING}>
           <Icon icon={IconNames.INFO_SIGN} intent={Intent.PRIMARY} />
-        </Tooltip2>
+        </Tooltip>
       </div>
     )
   }
@@ -1191,13 +1190,13 @@ export const mapReadonlyCustomFieldsToComps = ({
     if (fieldConfig.authorizationGroupUuids) {
       extraColElem = (
         <div>
-          <Tooltip2 content={fieldConfig.tooltipText} intent={Intent.WARNING}>
+          <Tooltip content={fieldConfig.tooltipText} intent={Intent.WARNING}>
             <Icon
               icon={IconNames.INFO_SIGN}
               intent={Intent.PRIMARY}
               className="sensitive-information-icon"
             />
-          </Tooltip2>
+          </Tooltip>
         </div>
       )
     }

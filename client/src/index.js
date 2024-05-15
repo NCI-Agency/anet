@@ -1,6 +1,6 @@
 import { ApolloProvider } from "@apollo/client"
+import { OverlaysProvider } from "@blueprintjs/core"
 import API from "api"
-import "bootstrap/dist/css/bootstrap.css"
 import { jumpToTop } from "components/Page"
 import "locale-compare-polyfill"
 import App from "pages/App"
@@ -10,7 +10,6 @@ import { Provider } from "react-redux"
 import { BrowserRouter } from "react-router-dom"
 import { persistStore } from "redux-persist"
 import { PersistGate } from "redux-persist/lib/integration/react"
-import "./bootstrapOverrides.css"
 import "./index.css"
 import configureStore from "./store/configureStore"
 
@@ -29,7 +28,9 @@ root.render(
     <PersistGate persistor={persistor}>
       <ApolloProvider client={API.client}>
         <BrowserRouter onUpdate={jumpToTop}>
-          <App />
+          <OverlaysProvider>
+            <App />
+          </OverlaysProvider>
         </BrowserRouter>
       </ApolloProvider>
     </PersistGate>

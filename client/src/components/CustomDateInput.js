@@ -1,12 +1,11 @@
-import "@blueprintjs/core/lib/css/blueprint.css"
-import { DateInput, TimePrecision } from "@blueprintjs/datetime"
+import { DateInput3, TimePrecision } from "@blueprintjs/datetime2"
+import "@blueprintjs/datetime2/lib/css/blueprint-datetime2.css"
 import "@blueprintjs/datetime/lib/css/blueprint-datetime.css"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useRef } from "react"
 import CALENDAR_ICON from "resources/calendar.png"
 import Settings from "settings"
-import "./BlueprintOverrides.css"
 
 const CalendarIcon = inputRef => (
   <img
@@ -44,17 +43,17 @@ const CustomDateInput = ({
     ? Settings.dateFormats.forms.input.withTime
     : Settings.dateFormats.forms.input.date
   const inputFormat = dateFormats[0]
+  const timePrecision = !withTime ? undefined : TimePrecision.MINUTE
   const timePickerProps = !withTime
     ? undefined
     : {
-      precision: TimePrecision.MINUTE,
       selectAllOnFocus: true
       // FIXME: clicking a time arrow immediately closes the dialog;
       // see https://github.com/palantir/blueprint/issues/3474
       // showArrowButtons: true
     }
   return (
-    <DateInput
+    <DateInput3
       inputProps={{
         id,
         style,
@@ -63,7 +62,7 @@ const CustomDateInput = ({
       }}
       className={className}
       rightElement={rightElement}
-      value={value && moment(value).toDate()}
+      value={value && moment(value).toISOString()}
       onChange={onChange}
       formatDate={date => {
         const dt = moment(date)
@@ -79,7 +78,9 @@ const CustomDateInput = ({
       canClearSelection={canClearSelection}
       showActionsBar
       closeOnSelection={!withTime}
+      timePrecision={timePrecision}
       timePickerProps={timePickerProps}
+      showTimezoneSelect={false}
       popoverProps={{ usePortal: false, placement }}
       disabled={disabled}
     />

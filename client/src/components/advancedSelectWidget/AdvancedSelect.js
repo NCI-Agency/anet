@@ -1,6 +1,5 @@
 import { gql } from "@apollo/client"
-import { Popover2, Popover2InteractionKind } from "@blueprintjs/popover2"
-import "@blueprintjs/popover2/lib/css/blueprint-popover2.css"
+import { Popover, PopoverInteractionKind } from "@blueprintjs/core"
 import API from "api"
 import classNames from "classnames"
 import UltimatePagination from "components/UltimatePagination"
@@ -304,8 +303,8 @@ const AdvancedSelect = ({
         <>
           <div className={classNames(className, "advanced-select-popover")}>
             <InputGroup>
-              <Popover2
-                popoverClassName="advanced-select-popover bp4-popover2-content-sizing"
+              <Popover
+                popoverClassName="advanced-select-popover bp5-popover-content-sizing"
                 content={
                   <Row id={`${fieldName}-popover`} className="border-between">
                     {(showCreateEntityComponent && (
@@ -376,7 +375,7 @@ const AdvancedSelect = ({
                 isOpen={showOverlay}
                 captureDismiss
                 disabled={disabled}
-                interactionKind={Popover2InteractionKind.CLICK}
+                interactionKind={PopoverInteractionKind.CLICK}
                 onInteraction={handleInteraction}
                 usePortal
                 autoFocus={false}
@@ -424,7 +423,7 @@ const AdvancedSelect = ({
                   )}
                   {extraAddon}
                 </InputGroup>
-              </Popover2>
+              </Popover>
             </InputGroup>
           </div>
           <AdvancedSelectTarget overlayRef={overlayContainer} />

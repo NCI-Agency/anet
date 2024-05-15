@@ -1,6 +1,5 @@
 import { gql } from "@apollo/client"
 import { Icon } from "@blueprintjs/core"
-import "@blueprintjs/core/lib/css/blueprint.css"
 import { IconNames } from "@blueprintjs/icons"
 import API from "api"
 import AppContext from "components/AppContext"
@@ -22,7 +21,6 @@ import React, { useContext, useState } from "react"
 import { Badge, Button, Card, Col, Offcanvas, Row } from "react-bootstrap"
 import Settings from "settings"
 import utils from "utils"
-import "./BlueprintOverrides.css"
 
 const GQL_DELETE_NOTE = gql`
   mutation ($uuid: String!) {

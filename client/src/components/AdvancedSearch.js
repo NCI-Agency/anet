@@ -1,5 +1,3 @@
-import { Popover2, Popover2InteractionKind } from "@blueprintjs/popover2"
-import "@blueprintjs/popover2/lib/css/blueprint-popover2.css"
 import styled from "@emotion/styled"
 import { resetPagination, SEARCH_OBJECT_LABELS, setSearchQuery } from "actions"
 import AppContext from "components/AppContext"
@@ -25,6 +23,46 @@ import {
 } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useNavigate } from "react-router-dom"
+
+const CustomToggle = React.forwardRef(({ onClick, children }, ref) => (
+  <Button
+    variant="link"
+    id="addFilterDropdown"
+    className="dropdown-toggle"
+    ref={ref}
+    onClick={e => {
+      e.preventDefault()
+      onClick(e)
+    }}
+  >
+    {children}
+  </Button>
+))
+CustomToggle.propTypes = {
+  onClick: PropTypes.func.isRequired,
+  children: PropTypes.node
+}
+
+const CustomMenu = React.forwardRef(
+  ({ style, className, "aria-labelledby": labeledBy, children }, ref) => {
+    return (
+      <div
+        ref={ref}
+        style={style}
+        className={className}
+        aria-labelledby={labeledBy}
+      >
+        <ul className="list-unstyled mb-0">{children}</ul>
+      </div>
+    )
+  }
+)
+CustomMenu.propTypes = {
+  style: PropTypes.object,
+  className: PropTypes.string,
+  "aria-labelledby": PropTypes.string,
+  children: PropTypes.node
+}
 
 const AdvancedSearch = ({
   onSearch,
@@ -55,7 +93,7 @@ const AdvancedSearch = ({
     existingKeys.length < Object.keys(filterDefs).length
 
   const advancedSearchMenuContent = (
-    <Dropdown style={{ maxHeight: "400px", overflowY: "auto" }}>
+    <>
       {Object.entries(filterDefs).map(([filterKey, filterDef]) => {
         const dictProps = filterDef.dictProps
         const label = dictProps?.label || filterKey
@@ -75,7 +113,7 @@ const AdvancedSearch = ({
           </ChildComponent>
         )
       })}
-    </Dropdown>
+    </>
   )
 
   const possibleFilterTypes = Object.keys(ALL_FILTERS).filter(type =>
@@ -159,29 +197,20 @@ const AdvancedSearch = ({
                     "No additional filters available"
                   )
                 ) : (
-                  <Popover2
-                    content={advancedSearchMenuContent}
-                    captureDismiss
-                    interactionKind={Popover2InteractionKind.CLICK}
-                    usePortal={false}
-                    autoFocus
-                    enforceFocus
-                    placement="right"
-                    modifiers={{
-                      preventOverflow: {
-                        options: {
-                          rootBoundary: "viewport"
-                        }
-                      },
-                      flip: {
-                        enabled: false
-                      }
-                    }}
-                  >
-                    <Button variant="link" id="addFilterDropdown">
+                  <Dropdown drop="end">
+                    <Dropdown.Toggle as={CustomToggle}>
                       + Add {filters.length > 0 && "another"} filter
-                    </Button>
-                  </Popover2>
+                    </Dropdown.Toggle>
+                    <Dropdown.Menu
+                      as={CustomMenu}
+                      popperConfig={{ strategy: "fixed" }}
+                      renderOnMount
+                      rootCloseEvent="click"
+                      style={{ maxHeight: "400px" }}
+                    >
+                      {advancedSearchMenuContent}
+                    </Dropdown.Menu>
+                  </Dropdown>
                 )}
               </div>
               <div

@@ -38,13 +38,13 @@ class AdvancedSearch {
   }
 
   async getAddFilterPopover() {
-    return (await this.getAdvancedSearchPopover()).$(".bp4-popover2-content")
+    return (await this.getAdvancedSearchPopover()).$(
+      'div[aria-labelledby="addFilterDropdown"] ul'
+    )
   }
 
   async getSearchFilter(filter) {
-    return (await this.getAdvancedSearchPopover()).$(
-      `//div/a[text()='${filter}']`
-    )
+    return (await this.getAddFilterPopover()).$(`//a[text()="${filter}"]`)
   }
 }
 

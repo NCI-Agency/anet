@@ -1,7 +1,5 @@
 import { gql } from "@apollo/client"
 import { Icon } from "@blueprintjs/core"
-import "@blueprintjs/core/lib/css/blueprint.css"
-import "@blueprintjs/datetime/lib/css/blueprint-datetime.css"
 import { IconNames } from "@blueprintjs/icons"
 import {
   DEFAULT_PAGE_PROPS,
@@ -11,7 +9,6 @@ import {
   setSearchQuery
 } from "actions"
 import API from "api"
-import "components/BlueprintOverrides.css"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
 import DailyRollupChart from "components/DailyRollupChart"
 import * as FieldHelper from "components/FieldHelper"

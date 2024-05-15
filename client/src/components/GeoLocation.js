@@ -1,11 +1,11 @@
-import { Icon, Intent } from "@blueprintjs/core"
-import { IconNames } from "@blueprintjs/icons"
 import {
-  Popover2,
-  Popover2InteractionKind,
-  Tooltip2
-} from "@blueprintjs/popover2"
-import "@blueprintjs/popover2/lib/css/blueprint-popover2.css"
+  Icon,
+  Intent,
+  Popover,
+  PopoverInteractionKind,
+  Tooltip
+} from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import styled from "@emotion/styled"
 import * as FieldHelper from "components/FieldHelper"
 import { Field } from "formik"
@@ -349,7 +349,7 @@ const CoordinateActionButtons = ({
 }) => {
   return (
     <Col sm={3} style={{ padding: "0 8px" }}>
-      <Tooltip2 content="Clear coordinates">
+      <Tooltip content="Clear coordinates">
         <Button
           variant="outline-danger"
           onClick={onClear}
@@ -357,7 +357,7 @@ const CoordinateActionButtons = ({
         >
           <Icon icon={IconNames.DELETE} />
         </Button>
-      </Tooltip2>
+      </Tooltip>
       <AllFormatsInfo
         coordinates={coordinates}
         locationFormat={locationFormat}
@@ -395,9 +395,9 @@ const AllFormatsInfo = ({
     return null
   }
   return (
-    <Popover2
+    <Popover
       placement="right"
-      interactionKind={Popover2InteractionKind.CLICK}
+      interactionKind={PopoverInteractionKind.CLICK}
       usePortal={false}
       autoFocus={false}
       enforceFocus={false}
@@ -455,7 +455,7 @@ const AllFormatsInfo = ({
         </div>
       }
     >
-      <Tooltip2 content="Display all coordinate formats">
+      <Tooltip content="Display all coordinate formats">
         <Button
           style={{ marginLeft: "8px" }}
           id="gloc-info-btn"
@@ -467,8 +467,8 @@ const AllFormatsInfo = ({
             icon={IconNames.INFO_SIGN}
           />
         </Button>
-      </Tooltip2>
-    </Popover2>
+      </Tooltip>
+    </Popover>
   )
 }
 
