@@ -182,7 +182,7 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
       }
     }
 
-    if (query.getOrgUuid() != null) {
+    if (!Utils.isEmptyOrNull(query.getOrgUuid())) {
       addOrgUuidQuery(query);
     }
 
@@ -347,9 +347,9 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
           "parent_orgs", "organizations", "\"parentOrgUuid\"", "orgUuid", query.getOrgUuid(),
           RecurseStrategy.CHILDREN.equals(query.getOrgRecurseStrategy()));
     } else {
-      qb.addWhereClause(
-          "(reports.\"advisorOrganizationUuid\" = :orgUuid OR reports.\"interlocutorOrganizationUuid\" = :orgUuid)");
-      qb.addSqlArg("orgUuid", query.getOrgUuid());
+      qb.addWhereClause("(reports.\"advisorOrganizationUuid\" IN ( <orgUuid> )"
+          + " OR reports.\"interlocutorOrganizationUuid\" IN ( <orgUuid> ))");
+      qb.addListArg("orgUuid", query.getOrgUuid());
     }
   }
 

@@ -835,6 +835,7 @@ type Query {
   mySubscriptions(query: SubscriptionSearchQueryInput): AnetBeanList_Subscription
   organization(uuid: String): Organization
   organizationList(query: OrganizationSearchQueryInput): AnetBeanList_Organization
+  organizations(uuids: [String]): [Organization]
   person(uuid: String): Person
   personList(query: PersonSearchQueryInput): AnetBeanList_Person
   position(uuid: String): Position
@@ -1058,7 +1059,7 @@ input ReportSearchQueryInput {
   includeEngagementDayOfWeek: Boolean
   locationUuid: String
   orgRecurseStrategy: RecurseStrategy
-  orgUuid: String
+  orgUuid: [String]
   pageNum: Int
   pageSize: Int
   pendingApprovalOf: String

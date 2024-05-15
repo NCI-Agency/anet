@@ -11,7 +11,9 @@ import DateRangeFilter, {
   deserialize as deserializeDateRangeFilter
 } from "components/advancedSearch/DateRangeFilter"
 import OrganizationFilter, {
-  deserialize as deserializeOrganizationFilter
+  deserialize as deserializeOrganizationFilter,
+  deserializeMulti as deserializeOrganizationMultiFilter,
+  OrganizationMultiFilter
 } from "components/advancedSearch/OrganizationFilter"
 import RadioButtonFilter, {
   deserialize as deserializeRadioButtonFilter
@@ -258,8 +260,8 @@ export const searchFilters = function(includeAdminFilters) {
         })
       },
       "Within Organization": {
-        component: OrganizationFilter,
-        deserializer: deserializeOrganizationFilter,
+        component: OrganizationMultiFilter,
+        deserializer: deserializeOrganizationMultiFilter,
         props: {
           queryKey: "orgUuid",
           queryRecurseStrategyKey: "orgRecurseStrategy",

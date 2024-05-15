@@ -55,7 +55,7 @@ public class ReportSearchQuery extends SubscribableObjectSearchQuery<ReportSearc
   Atmosphere atmosphere;
   @GraphQLQuery
   @GraphQLInputField
-  String orgUuid;
+  List<String> orgUuid;
   @GraphQLQuery
   @GraphQLInputField
   private RecurseStrategy orgRecurseStrategy;
@@ -205,11 +205,11 @@ public class ReportSearchQuery extends SubscribableObjectSearchQuery<ReportSearc
     this.atmosphere = atmosphere;
   }
 
-  public String getOrgUuid() {
+  public List<String> getOrgUuid() {
     return orgUuid;
   }
 
-  public void setOrgUuid(String orgUuid) {
+  public void setOrgUuid(List<String> orgUuid) {
     this.orgUuid = orgUuid;
   }
 
@@ -373,6 +373,9 @@ public class ReportSearchQuery extends SubscribableObjectSearchQuery<ReportSearc
     }
     if (authorizationGroupUuid != null) {
       clone.setAuthorizationGroupUuid(new ArrayList<>(authorizationGroupUuid));
+    }
+    if (orgUuid != null) {
+      clone.setOrgUuid(new ArrayList<>(orgUuid));
     }
     return clone;
   }

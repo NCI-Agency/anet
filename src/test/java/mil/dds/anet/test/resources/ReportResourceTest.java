@@ -8,6 +8,7 @@ import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -1290,7 +1291,7 @@ class ReportResourceTest extends AbstractResourceTest {
     assertThat(ef11.getShortName()).isEqualToIgnoringCase("EF 1.1");
 
     final ReportSearchQueryInput query2 = ReportSearchQueryInput.builder()
-        .withOrgUuid(ef11.getUuid()).withOrgRecurseStrategy(RecurseStrategy.NONE).build();
+        .withOrgUuid(List.of(ef11.getUuid())).withOrgRecurseStrategy(RecurseStrategy.NONE).build();
     searchResults =
         withCredentials(jackUser, t -> queryExecutor.reportList(getListFields(FIELDS), query2));
     assertThat(searchResults.getList()).isNotEmpty();
@@ -1313,15 +1314,16 @@ class ReportResourceTest extends AbstractResourceTest {
         .filter(o -> o.getShortName().equalsIgnoreCase("ef 1")).findFirst().get();
     assertThat(ef1.getShortName()).isEqualToIgnoringCase("EF 1");
 
-    query2.setOrgUuid(ef1.getUuid());
+    query2.setOrgUuid(List.of(ef1.getUuid()));
     query2.setOrgRecurseStrategy(RecurseStrategy.CHILDREN);
     searchResults =
         withCredentials(jackUser, t -> queryExecutor.reportList(getListFields(FIELDS), query2));
     assertThat(searchResults.getList()).isNotEmpty();
     // #TODO: figure out how to verify the results?
 
-    // Check search for just an org
-    query2.setOrgUuid(ef11.getUuid());
+    // Check search for just a single org, no recursion
+    query2.setOrgUuid(List.of(ef11.getUuid()));
+    query2.setOrgRecurseStrategy(null);
     searchResults =
         withCredentials(jackUser, t -> queryExecutor.reportList(getListFields(FIELDS), query2));
     assertThat(searchResults.getList()).isNotEmpty();
@@ -1378,7 +1380,7 @@ class ReportResourceTest extends AbstractResourceTest {
 
     // Search by Interlocutor Organization
     query3.setState(null);
-    query3.setOrgUuid(mod.getUuid());
+    query3.setOrgUuid(List.of(mod.getUuid()));
     searchResults =
         withCredentials(jackUser, t -> queryExecutor.reportList(getListFields(FIELDS), query3));
     assertThat(searchResults.getList()).isNotEmpty();
@@ -1392,7 +1394,7 @@ class ReportResourceTest extends AbstractResourceTest {
     })).hasSameSizeAs(searchResults.getList());
 
     // Search by Interlocutor Parent Organization
-    query3.setOrgUuid(mod.getUuid());
+    query3.setOrgUuid(List.of(mod.getUuid()));
     query3.setOrgRecurseStrategy(RecurseStrategy.CHILDREN);
     searchResults =
         withCredentials(jackUser, t -> queryExecutor.reportList(getListFields(FIELDS), query3));
@@ -1429,7 +1431,7 @@ class ReportResourceTest extends AbstractResourceTest {
 
     // Search for a report by interlocutor org
     final ReportSearchQueryInput query6 =
-        ReportSearchQueryInput.builder().withOrgUuid(mod.getUuid()).build();
+        ReportSearchQueryInput.builder().withOrgUuid(List.of(mod.getUuid())).build();
     searchResults =
         withCredentials(jackUser, t -> queryExecutor.reportList(getListFields(FIELDS), query6));
     assertThat(searchResults.getList().stream()
@@ -1446,7 +1448,7 @@ class ReportResourceTest extends AbstractResourceTest {
 
     // Search for a report by advisor org
     final ReportSearchQueryInput query7 =
-        ReportSearchQueryInput.builder().withOrgUuid(ef22.getUuid()).build();
+        ReportSearchQueryInput.builder().withOrgUuid(List.of(ef22.getUuid())).build();
     searchResults =
         withCredentials(jackUser, t -> queryExecutor.reportList(getListFields(FIELDS), query7));
     assertThat(searchResults.getList().stream()
@@ -1469,6 +1471,65 @@ class ReportResourceTest extends AbstractResourceTest {
     assertThat(searchResults.getList().stream()
         .filter(r -> r.getAtmosphere().equals(Atmosphere.NEGATIVE)).count())
         .isEqualTo(searchResults.getList().size());
+  }
+
+  @Test
+  void searchWithinMultipleOrganizations() {
+    final String EF1_UUID = "9a35caa7-a095-4963-ac7b-b784fde4d583";
+    final String EF2_UUID = "291abe56-e2c2-4a3a-8419-1661e5c5ac17";
+
+    final List<String> allEf1AndEf2ReportUuids =
+        new ArrayList<>(searchAllReports(List.of(EF1_UUID)));
+    allEf1AndEf2ReportUuids.addAll(searchAllReports(List.of(EF2_UUID)));
+    final List<String> combinedEf1AndEf2ReportUuids = searchAllReports(List.of(EF1_UUID, EF2_UUID));
+
+    // Now check that these match:
+    assertThat(allEf1AndEf2ReportUuids)
+        .containsExactlyInAnyOrderElementsOf(combinedEf1AndEf2ReportUuids);
+  }
+
+  private List<String> searchAllReports(List<String> orgUuid) {
+    // Search recursively for all organizations in the given hierarchy
+    final List<Organization> allOrgs = getDescendantOrgs(orgUuid);
+    final List<String> allOrgUuids = new ArrayList<>(orgUuid);
+    allOrgUuids.addAll(allOrgs.stream().map(Organization::getUuid).toList());
+
+    // Search recursively for all reports in the given organizations
+    final List<Report> allReports = searchReports(orgUuid, RecurseStrategy.CHILDREN);
+    // And check that all reports have an advisor org from the given hierarchy:
+    assertThat(allReports).allSatisfy(r -> assertThat(r.getAdvisorOrg()).isNotNull()
+        .extracting(Organization::getUuid).isIn(allOrgUuids));
+
+    // Combine search for reports in the whole hierarchy
+    final List<Report> combinedReports = allOrgUuids.stream()
+        .map(uuid -> searchReports(List.of(uuid), null)).flatMap(Collection::stream).toList();
+
+    // Now check that these two results match:
+    final List<String> allReportUuids = allReports.stream().map(Report::getUuid).toList();
+    final List<String> combinedReportUuids = combinedReports.stream().map(Report::getUuid).toList();
+    assertThat(allReportUuids).containsExactlyInAnyOrderElementsOf(combinedReportUuids);
+    return allReportUuids;
+  }
+
+  private List<Organization> getDescendantOrgs(final List<String> uuids) {
+    final String fields = String.format("{ %1$s descendantOrgs { %1$s } }", _ORGANIZATION_FIELDS);
+    final List<Organization> organizations =
+        withCredentials(jackUser, t -> queryExecutor.organizations(fields, uuids));
+    assertThat(organizations).isNotNull();
+    assertThat(organizations).allSatisfy(o -> assertThat(o.getDescendantOrgs()).isNotNull());
+    return organizations.stream().map(Organization::getDescendantOrgs).flatMap(Collection::stream)
+        .toList();
+  }
+
+  private List<Report> searchReports(final List<String> orgUuid,
+      final RecurseStrategy recurseStrategy) {
+    final ReportSearchQueryInput query = ReportSearchQueryInput.builder().withPageSize(0)
+        .withOrgUuid(orgUuid).withOrgRecurseStrategy(recurseStrategy).build();
+    final AnetBeanList_Report searchResults =
+        withCredentials(jackUser, t -> queryExecutor.reportList(getListFields(FIELDS), query));
+    assertThat(searchResults).isNotNull();
+    assertThat(searchResults.getList()).isNotNull();
+    return searchResults.getList();
   }
 
   @Test
