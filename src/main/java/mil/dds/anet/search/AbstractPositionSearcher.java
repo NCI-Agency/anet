@@ -15,6 +15,7 @@ import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.mappers.PositionMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.PendingAssessmentsHelper;
+import mil.dds.anet.utils.Utils;
 import org.jdbi.v3.core.Handle;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
@@ -79,7 +80,7 @@ public abstract class AbstractPositionSearcher
 
     qb.addInClause("types", "positions.type", query.getType());
 
-    if (query.getOrganizationUuid() != null) {
+    if (!Utils.isEmptyOrNull(query.getOrganizationUuid())) {
       if (RecurseStrategy.CHILDREN.equals(query.getOrgRecurseStrategy())
           || RecurseStrategy.PARENTS.equals(query.getOrgRecurseStrategy())) {
         qb.addRecursiveClause(null, "positions", "\"organizationUuid\"", "parent_orgs",
