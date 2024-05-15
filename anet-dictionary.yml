@@ -778,10 +778,10 @@ fields:
     type:
       label: Type
     digram:
-      label: Digram
+      label: Alpha-2 code
       placeholder: Fill in the 2-letter code for this country
     trigram:
-      label: Trigram
+      label: Alpha-3 code
       placeholder: Fill in the 3-letter code for this country
     description:
       label: Description
@@ -1981,7 +1981,7 @@ fields:
       name: Organization
       allOrgName: Top-level Organizations
       location:
-        filter: [POINT_LOCATION]
+        filter: [POINT_LOCATION, COUNTRY]
       administratingPositions:
         label: Assigned Superusers
         placeholder: Search for a position…

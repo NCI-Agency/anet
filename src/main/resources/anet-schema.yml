@@ -1118,7 +1118,7 @@ properties:
                     items:
                       type: string
                       enum:
-                        [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, POINT_LOCATION]
+                        [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, COUNTRY, POINT_LOCATION]
               administratingPositions:
                 "$ref": "#/$defs/inputField"
 
