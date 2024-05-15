@@ -7,9 +7,6 @@ export const ON = "3"
 export const LAST_DAY = -1 * 1000 * 60 * 60 * 24
 export const LAST_WEEK = LAST_DAY * 7
 export const LAST_MONTH = LAST_DAY * 30
-export const LAST_3_MONTHS = LAST_MONTH * 3
-export const LAST_6_MONTHS = LAST_MONTH * 6
-export const LAST_YEAR = LAST_MONTH * 12
 
 export const RANGE_TYPE_LABELS = {
   [BETWEEN]: "Between",
@@ -18,10 +15,7 @@ export const RANGE_TYPE_LABELS = {
   [ON]: "On",
   [LAST_DAY]: "Last 24 hours",
   [LAST_WEEK]: "Last 7 days",
-  [LAST_MONTH]: "Last 30 days",
-  [LAST_3_MONTHS]: "Last 90 days",
-  [LAST_6_MONTHS]: "Last 180 dsys",
-  [LAST_YEAR]: "Last 360 days"
+  [LAST_MONTH]: "Last 30 days"
 }
 
 export function dateRangeStartKey(queryKey) {
@@ -62,9 +56,9 @@ export function dateToQuery(queryKey, value) {
       [endKey]: startDateEnd
     }
   } else {
-    // LAST_* => Time relative to now, up till now
+    // LAST_DAY, LAST_WEEK, LAST_MONTH => Time relative to now, up till now
     return {
-      [startKey]: parseInt(value.relative, 10)
+      [startKey]: parseInt(value.relative)
     }
   }
 }
