@@ -93,7 +93,7 @@ const DateRangeFilter = ({
         disabled={onlyBetween}
         value={value.relative}
         onChange={handleChangeRelative}
-        style={{ marginRight: 5, width: "13.3rem" }}
+        style={{ marginRight: 5, width: "12rem" }}
       >
         {options}
       </Form.Select>
