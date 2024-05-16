@@ -1936,7 +1936,7 @@ fields:
         advisorQuarterlyNoWrite:
           label: Quarterly assessment of advisor, no write
           recurrence: quarterly
-          test: $[?(@property === "subject" && @.user !== true && @.noSuchProperty && @.noSuchProperty.match(/^willNeverMatch/i))]
+          test: $[?(@property === "subject" && @.user === true && @.noSuchProperty && @.noSuchProperty.match(/^willNeverMatch/i))]
           authorizationGroupUuids:
             write: []
           questions:
@@ -1947,7 +1947,7 @@ fields:
           label: Engagement assessment of advisor, no write
           recurrence: once
           relatedObjectType: report
-          test: $[?(@property === "subject" && @.user !== true && @.noSuchProperty && @.noSuchProperty.match(/^willNeverMatch/i))]
+          test: $[?(@property === "subject" && @.user === true && @.noSuchProperty && @.noSuchProperty.match(/^willNeverMatch/i))]
           authorizationGroupUuids:
             write: []
           questions:
