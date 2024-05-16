@@ -6412,7 +6412,7 @@ __metadata:
     slate: "npm:0.103.0"
     slate-history: "npm:0.100.0"
     slate-hyperscript: "npm:0.100.0"
-    slate-react: "npm:0.102.0"
+    slate-react: "npm:0.104.0"
     style-loader: "npm:4.0.0"
     tap-xunit: "npm:2.4.1"
     thread-loader: "npm:4.0.2"
@@ -18388,9 +18388,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"slate-react@npm:0.102.0":
-  version: 0.102.0
-  resolution: "slate-react@npm:0.102.0"
+"slate-react@npm:0.104.0":
+  version: 0.104.0
+  resolution: "slate-react@npm:0.104.0"
   dependencies:
     "@juggle/resize-observer": "npm:^3.4.0"
     "@types/is-hotkey": "npm:^0.1.8"
@@ -18405,7 +18405,7 @@ __metadata:
     react: ">=18.2.0"
     react-dom: ">=18.2.0"
     slate: ">=0.99.0"
-  checksum: 10c0/f405bc5561185c23eb1c32028e917abe45522058eaf4c158505a98fe83e22492228b3d5a7aa4ae150ed374f70c5592a6a62025f71b279208166af36ac601e29a
+  checksum: 10c0/10af6af9e2e48216a819876ad79bfd33b796b61b0ccea20b5b5249e5d7ffc1aa62e7bb7e30389cebe0ae0691a6e1e083ac23e99e69f22fd80150d4746719d25d
   languageName: node
   linkType: hard
 
