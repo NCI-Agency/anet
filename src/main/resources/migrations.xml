@@ -5712,4 +5712,17 @@
 		</rollback>
 	</changeSet>
 
+	<changeSet id="remove-undefined-from-classification" author="gjvoosten">
+		<sql>
+			UPDATE reports
+			SET classification = NULL
+			WHERE classification = 'undefined';
+
+			UPDATE attachments
+			SET classification = NULL
+			WHERE classification = 'undefined';
+		</sql>
+		<!-- Rolling back is not useful anymore -->
+	</changeSet>
+
 </databaseChangeLog>

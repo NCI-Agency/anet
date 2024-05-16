@@ -1259,7 +1259,7 @@ INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "
 
 -- Add attachments for people
 INSERT INTO attachments (uuid, "authorUuid", "fileName", "caption", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt")
-	VALUES ('13318e42-a0a3-438f-8ed5-dc16b1ef17bc', :authorUuid, 'attachPerson.png', 'Erin', 'image/png', lo_import('/var/tmp/default_avatar.png'), 12316, 'We can add attachments to a person', 'undefined', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES ('13318e42-a0a3-438f-8ed5-dc16b1ef17bc', :authorUuid, 'attachPerson.png', 'Erin', 'image/png', lo_import('/var/tmp/default_avatar.png'), 12316, 'We can add attachments to a person', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT '13318e42-a0a3-438f-8ed5-dc16b1ef17bc', 'people', p.uuid
   FROM people p
