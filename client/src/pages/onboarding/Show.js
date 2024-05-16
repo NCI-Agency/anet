@@ -2,6 +2,7 @@ import { gql } from "@apollo/client"
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_MIN_HEAD } from "actions"
 import API from "api"
 import AppContext from "components/AppContext"
+import CountryDisplay from "components/CountryDisplay"
 import DictionaryField from "components/DictionaryField"
 import EmailAddressTable from "components/EmailAddressTable"
 import * as FieldHelper from "components/FieldHelper"
@@ -34,7 +35,11 @@ const GQL_GET_SELF = gql`
       phoneNumber
       pendingVerification
       biography
-      country
+      obsoleteCountry
+      country {
+        uuid
+        name
+      }
       gender
       endOfTourDate
       user
@@ -180,6 +185,13 @@ const OnboardingShow = ({ pageDispatchers }) => {
         moment(person.endOfTourDate).format(
           Settings.dateFormats.forms.displayShort.date
         ),
+      country: (
+        <CountryDisplay
+          country={person.country}
+          obsoleteCountry={person.obsoleteCountry}
+          plain
+        />
+      ),
       status: Person.humanNameOfStatus(person.status)
     }
     return person.getNormalFieldsOrdered().reduce((accum, key) => {

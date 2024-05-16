@@ -19,7 +19,7 @@ public class PersonSearchQuery extends SubscribableObjectSearchQuery<PersonSearc
   String rank;
   @GraphQLQuery
   @GraphQLInputField
-  String country;
+  String countryUuid;
   @GraphQLQuery
   @GraphQLInputField
   Instant endOfTourDateStart;
@@ -82,12 +82,12 @@ public class PersonSearchQuery extends SubscribableObjectSearchQuery<PersonSearc
     this.rank = rank;
   }
 
-  public String getCountry() {
-    return country;
+  public String getCountryUuid() {
+    return countryUuid;
   }
 
-  public void setCountry(String country) {
-    this.country = country;
+  public void setCountryUuid(String countryUuid) {
+    this.countryUuid = countryUuid;
   }
 
   public String getLocationUuid() {

@@ -6,6 +6,7 @@ import API from "api"
 import { PersonSimpleOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
+import CountryDisplay from "components/CountryDisplay"
 import { customFieldsJSONString } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
 import EditHistory from "components/EditHistory"
@@ -371,18 +372,27 @@ const MergePeople = ({ pageDispatchers }) => {
               <DictionaryField
                 wrappedComponent={MergeField}
                 dictProps={Settings.fields.person.country}
-                value={mergedPerson.country}
+                value={
+                  <CountryDisplay
+                    country={mergedPerson.country}
+                    obsoleteCountry={mergedPerson.obsoleteCountry}
+                    plain
+                  />
+                }
                 align={ALIGN_OPTIONS.CENTER}
                 action={
                   !Settings.fields.person.country?.optional
                     ? getInfoButton(
                       `${Settings.fields.person.country?.label} is required.`
                     )
-                    : getClearButton(() =>
+                    : getClearButton(() => {
                       dispatchMergeActions(
                         setAMergedField("country", "", null)
                       )
-                    )
+                      dispatchMergeActions(
+                        setAMergedField("obsoleteCountry", "", null)
+                      )
+                    })
                 }
                 fieldName="country"
                 mergeState={mergeState}
@@ -841,12 +851,25 @@ const PersonColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
             wrappedComponent={MergeField}
             dictProps={Settings.fields.person.country}
             fieldName="country"
-            value={person.country}
+            value={
+              <CountryDisplay
+                country={person.country}
+                obsoleteCountry={person.obsoleteCountry}
+                plain
+              />
+            }
             align={align}
             action={getActionButton(
               () => {
                 dispatchMergeActions(
                   setAMergedField("country", person.country, align)
+                )
+                dispatchMergeActions(
+                  setAMergedField(
+                    "obsoleteCountry",
+                    person.obsoleteCountry,
+                    align
+                  )
                 )
               },
               align,

@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.graphql.AllowUnverifiedUsers;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractCustomizableAnetBean;
 
@@ -19,7 +20,10 @@ public class Location extends AbstractCustomizableAnetBean
   public static final String DUMMY_LOCATION_UUID = "-1";
 
   public enum LocationType {
-    PHYSICAL_LOCATION("P"), GEOGRAPHICAL_AREA("PA"), POINT_LOCATION("PP"), // -
+    PHYSICAL_LOCATION("P"), // -
+    GEOGRAPHICAL_AREA("PA"), // -
+    COUNTRY("PAC"), // -
+    POINT_LOCATION("PP"), // -
     @Deprecated
     _PLACEHOLDER_3_(""), // Should no longer be used but remain in place to keep the correct values
     @Deprecated
@@ -66,6 +70,12 @@ public class Location extends AbstractCustomizableAnetBean
   private LocationType type;
   @GraphQLQuery
   @GraphQLInputField
+  private String digram;
+  @GraphQLQuery
+  @GraphQLInputField
+  private String trigram;
+  @GraphQLQuery
+  @GraphQLInputField
   private String description;
   /* The following are all Lazy Loaded */
   // annotated below
@@ -73,6 +83,13 @@ public class Location extends AbstractCustomizableAnetBean
   // annotated below
   List<ApprovalStep> approvalSteps; /* Approval process for this Task */
 
+  @Override
+  @AllowUnverifiedUsers
+  public String getUuid() {
+    return super.getUuid();
+  }
+
+  @AllowUnverifiedUsers
   public String getName() {
     return name;
   }
@@ -107,12 +124,31 @@ public class Location extends AbstractCustomizableAnetBean
     this.lng = lng;
   }
 
+  @AllowUnverifiedUsers
   public LocationType getType() {
     return type;
   }
 
   public void setType(LocationType type) {
     this.type = type;
+  }
+
+  @AllowUnverifiedUsers
+  public String getDigram() {
+    return digram;
+  }
+
+  public void setDigram(String digram) {
+    this.digram = digram;
+  }
+
+  @AllowUnverifiedUsers
+  public String getTrigram() {
+    return trigram;
+  }
+
+  public void setTrigram(String trigram) {
+    this.trigram = trigram;
   }
 
   public String getDescription() {
@@ -175,14 +211,15 @@ public class Location extends AbstractCustomizableAnetBean
     return super.equals(o) && Objects.equals(other.getUuid(), uuid)
         && Objects.equals(other.getName(), name) && Objects.equals(other.getStatus(), status)
         && Objects.equals(other.getLat(), lat) && Objects.equals(other.getLng(), lng)
-        && Objects.equals(other.getType(), type) && Objects.equals(other.getCreatedAt(), createdAt)
+        && Objects.equals(other.getType(), type) && Objects.equals(other.digram, digram)
+        && Objects.equals(other.trigram, trigram) && Objects.equals(other.getCreatedAt(), createdAt)
         && Objects.equals(other.getDescription(), description);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), uuid, name, type, status, lat, lng, createdAt,
-        description);
+    return Objects.hash(super.hashCode(), uuid, name, type, status, lat, lng, digram, trigram,
+        createdAt, description);
   }
 
   @Override

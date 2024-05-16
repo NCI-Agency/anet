@@ -41,6 +41,7 @@ export default class Location extends Model {
   static LOCATION_TYPES = {
     PHYSICAL_LOCATION: "PHYSICAL_LOCATION",
     GEOGRAPHICAL_AREA: "GEOGRAPHICAL_AREA",
+    COUNTRY: "COUNTRY",
     POINT_LOCATION: "POINT_LOCATION",
     VIRTUAL_LOCATION: "VIRTUAL_LOCATION"
   }
@@ -49,6 +50,20 @@ export default class Location extends Model {
     .object()
     .shape({
       name: yup.string().required().default(""),
+      digram: yup
+        .string()
+        .nullable()
+        .optional()
+        .length(2)
+        .transform(value => value || null)
+        .default(null),
+      trigram: yup
+        .string()
+        .nullable()
+        .optional()
+        .length(3)
+        .transform(value => value || null)
+        .default(null),
       description: yup.string().nullable().default(""),
       status: yup
         .string()
@@ -152,13 +167,15 @@ export default class Location extends Model {
     .concat(Location.customFieldsSchema)
     .concat(Model.yupSchema)
 
-  static autocompleteQuery = "uuid name type"
+  static autocompleteQuery = "uuid name type digram trigram"
 
   static autocompleteQueryWithNotes = `${this.autocompleteQuery} ${GRAPHQL_NOTES_FIELDS}`
 
   static allFieldsQuery = `
     uuid
     name
+    digram
+    trigram
     description
     type
     lat
@@ -214,6 +231,34 @@ export default class Location extends Model {
 
   static humanNameOfType(type) {
     return utils.sentenceCase(type)
+  }
+
+  static getLocationFilters(filterDefs) {
+    return filterDefs?.reduce((accumulator, filter) => {
+      accumulator[filter] = {
+        label: Location.humanNameOfType(filter),
+        queryVars: { type: filter }
+      }
+      return accumulator
+    }, {})
+  }
+
+  static getOrganizationLocationFilters() {
+    return Location.getLocationFilters(
+      Settings?.fields.regular?.org?.location?.filter
+    )
+  }
+
+  static getPositionLocationFilters() {
+    return Location.getLocationFilters(
+      Settings?.fields.regular?.position?.location?.filter
+    )
+  }
+
+  static getReportLocationFilters() {
+    return Location.getLocationFilters(
+      Settings?.fields?.report?.location?.filter
+    )
   }
 
   constructor(props) {

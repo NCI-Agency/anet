@@ -12,8 +12,8 @@ import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSearchQuery> {
 
-  private static final String[] fields = {"uuid", "name", "status", "lat", "lng", "type",
-      "description", "createdAt", "updatedAt", "customFields"};
+  private static final String[] fields = {"uuid", "name", "status", "lat", "lng", "type", "digram",
+      "trigram", "description", "createdAt", "updatedAt", "customFields"};
   public static final String TABLE_NAME = "locations";
   public static final String LOCATION_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
 
@@ -42,9 +42,9 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
   @Override
   public Location insertInternal(Location l) {
     getDbHandle().createUpdate(
-        "/* locationInsert */ INSERT INTO locations (uuid, name, type, description, status, lat, lng, "
+        "/* locationInsert */ INSERT INTO locations (uuid, name, type, description, status, lat, lng, digram, trigram, "
             + "\"createdAt\", \"updatedAt\", \"customFields\") VALUES (:uuid, :name, :type, :description, :status, "
-            + ":lat, :lng, :createdAt, :updatedAt, :customFields)")
+            + ":lat, :lng, :digram, :trigram, :createdAt, :updatedAt, :customFields)")
         .bindBean(l).bind("createdAt", DaoUtils.asLocalDateTime(l.getCreatedAt()))
         .bind("updatedAt", DaoUtils.asLocalDateTime(l.getUpdatedAt()))
         .bind("status", DaoUtils.getEnumId(l.getStatus()))
@@ -56,6 +56,7 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
   public int updateInternal(Location l) {
     return getDbHandle().createUpdate("/* updateLocation */ UPDATE locations "
         + "SET name = :name, type = :type, description = :description, status = :status, lat = :lat, lng = :lng, "
+        + "digram = :digram, trigram = :trigram, "
         + "\"updatedAt\" = :updatedAt, \"customFields\" = :customFields WHERE uuid = :uuid")
         .bindBean(l).bind("updatedAt", DaoUtils.asLocalDateTime(l.getUpdatedAt()))
         .bind("status", DaoUtils.getEnumId(l.getStatus()))
@@ -80,6 +81,9 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
 
     // Update reports
     updateForMerge("reports", "locationUuid", winnerLocationUuid, loserLocationUuid);
+
+    // Update people
+    updateForMerge("people", "countryUuid", winnerLocationUuid, loserLocationUuid);
 
     // Update positions
     updateForMerge("positions", "locationUuid", winnerLocationUuid, loserLocationUuid);

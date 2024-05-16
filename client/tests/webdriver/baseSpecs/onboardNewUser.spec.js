@@ -80,9 +80,17 @@ describe("Onboard new user login", () => {
     await (
       await OnboardPage.getGender()
     ).selectByAttribute("value", personDetails.gender)
-    await (
-      await OnboardPage.getCountry()
-    ).selectByAttribute("value", personDetails.country)
+
+    await (await OnboardPage.getCountryInput()).click()
+    await (await OnboardPage.getCountryInput()).setValue(personDetails.country)
+    await OnboardPage.waitForCountryAdvancedSelectToChange(
+      personDetails.country
+    )
+    expect(
+      await (await OnboardPage.getCountryAdvancedSelectFirstItem()).getText()
+    ).to.include(personDetails.country)
+    await (await OnboardPage.getCountryAdvancedSelectFirstItem()).click()
+
     await (
       await OnboardPage.getEndOfTourDate()
     ).setValue(personDetails.endOfTourDate)

@@ -90,7 +90,7 @@ export default class Person extends Model {
         }
       ),
       country: yup
-        .string()
+        .object()
         .nullable()
         .when([], (_, schema) =>
           Settings.fields.person.country?.optional
@@ -99,7 +99,7 @@ export default class Person extends Model {
               `You must provide the ${Settings.fields.person.country?.label}`
             )
         )
-        .default("")
+        .default(null)
         .label(Settings.fields.person.country?.label),
       rank: yup
         .string()
@@ -175,7 +175,11 @@ export default class Person extends Model {
     domainUsername
     openIdSubject
     biography
-    country
+    obsoleteCountry
+    country {
+      uuid
+      name
+    }
     gender
     endOfTourDate
     code

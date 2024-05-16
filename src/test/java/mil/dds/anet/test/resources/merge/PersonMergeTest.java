@@ -15,8 +15,12 @@ import java.util.Optional;
 import java.util.UUID;
 import mil.dds.anet.resources.AttachmentResource;
 import mil.dds.anet.test.TestData;
+import mil.dds.anet.test.client.AnetBeanList_Location;
 import mil.dds.anet.test.client.AttachmentInput;
 import mil.dds.anet.test.client.GenericRelatedObjectInput;
+import mil.dds.anet.test.client.Location;
+import mil.dds.anet.test.client.LocationSearchQueryInput;
+import mil.dds.anet.test.client.LocationType;
 import mil.dds.anet.test.client.Organization;
 import mil.dds.anet.test.client.Person;
 import mil.dds.anet.test.client.PersonInput;
@@ -36,8 +40,18 @@ class PersonMergeTest extends AbstractResourceTest {
 
   @Test
   void testMerge() {
+    final LocationSearchQueryInput lsq =
+        LocationSearchQueryInput.builder().withType(LocationType.COUNTRY).withPageSize(2).build();
+    final AnetBeanList_Location locationList = withCredentials(adminUser,
+        t -> queryExecutor.locationList(getListFields("{ uuid name }"), lsq));
+    assertThat(locationList).isNotNull();
+    assertThat(locationList.getList()).hasSize(2);
+    final Location loserCountry = locationList.getList().get(0);
+    final Location winnerCountry = locationList.getList().get(0);
+
     // Create a person
-    final PersonInput loserInput1 = PersonInput.builder().withName("Loser for Merging").build();
+    final PersonInput loserInput1 = PersonInput.builder().withName("Loser for Merging")
+        .withCountry(getLocationInput(loserCountry)).build();
     final Person loser1 =
         withCredentials(adminUser, t -> mutationExecutor.createPerson(FIELDS, loserInput1));
     assertThat(loser1).isNotNull();
@@ -118,7 +132,7 @@ class PersonMergeTest extends AbstractResourceTest {
         .withBiography(UtilsTest.getCombinedHtmlTestCase().getInput())
         // set JSON of customFields
         .withCustomFields(UtilsTest.getCombinedJsonTestCase().getInput()).withGender("Female")
-        .withCountry("Canada").withCode("1234568")
+        .withCountry(getLocationInput(winnerCountry)).withCode("1234568")
         .withEndOfTourDate(
             ZonedDateTime.of(2020, 4, 1, 0, 0, 0, 0, DaoUtils.getServerNativeZoneId()).toInstant())
         .build();
@@ -162,6 +176,11 @@ class PersonMergeTest extends AbstractResourceTest {
     Position winnerPos =
         withCredentials(adminUser, t -> queryExecutor.position(POSITION_FIELDS, created.getUuid()));
     assertThat(winnerPos.getPerson()).isNull();
+
+    // Assert that winner has correct country
+    assertThat(mergedPerson.getCountry()).isNotNull();
+    assertThat(mergedPerson.getCountry().getUuid()).isEqualTo(winnerCountry.getUuid());
+    assertThat(mergedPerson.getCountry().getName()).isEqualTo(winnerCountry.getName());
 
     // Re-create loser and put into the position.
     final PersonInput loserInput2 = PersonInput.builder().withName("Loser for Merging").build();
@@ -207,7 +226,7 @@ class PersonMergeTest extends AbstractResourceTest {
         .withBiography(UtilsTest.getCombinedHtmlTestCase().getInput())
         // set JSON of customFields
         .withCustomFields(UtilsTest.getCombinedJsonTestCase().getInput()).withGender("Female")
-        .withCountry("Canada").withCode("1234568")
+        .withCode("1234568")
         .withEndOfTourDate(
             ZonedDateTime.of(2020, 4, 1, 0, 0, 0, 0, DaoUtils.getServerNativeZoneId()).toInstant())
         .build();

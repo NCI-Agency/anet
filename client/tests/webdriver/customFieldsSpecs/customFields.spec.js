@@ -212,9 +212,18 @@ describe("When working with custom fields for different anet objects", () => {
       await (
         await CreatePerson.getGender()
       ).selectByAttribute("value", REQUIRED_PERSON_FIELDS.gender)
+
+      await (await CreatePerson.getCountryInput()).click()
       await (
-        await CreatePerson.getCountry()
-      ).selectByAttribute("value", REQUIRED_PERSON_FIELDS.country)
+        await CreatePerson.getCountryInput()
+      ).setValue(REQUIRED_PERSON_FIELDS.country)
+      await CreatePerson.waitForCountryAdvancedSelectToChange(
+        REQUIRED_PERSON_FIELDS.country
+      )
+      expect(
+        await (await CreatePerson.getCountryAdvancedSelectFirstItem()).getText()
+      ).to.include(REQUIRED_PERSON_FIELDS.country)
+      await (await CreatePerson.getCountryAdvancedSelectFirstItem()).click()
     })
 
     it("Should not show default invisible fields", async() => {

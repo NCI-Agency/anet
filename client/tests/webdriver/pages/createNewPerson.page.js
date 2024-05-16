@@ -77,8 +77,31 @@ export class CreatePerson extends Page {
     return browser.$('select[name="gender"]')
   }
 
-  async getCountry() {
-    return browser.$('select[name="country"]')
+  async getCountryInput() {
+    return browser.$("#country")
+  }
+
+  async getCountryAdvancedSelectFirstItem() {
+    return browser.$("#country-popover tbody tr:first-child td:nth-child(2)")
+  }
+
+  async waitForCountryAdvancedSelectToChange(value) {
+    await (await this.getCountryAdvancedSelectFirstItem()).waitForExist()
+    return browser.waitUntil(
+      async() => {
+        return (
+          (await (await this.getCountryAdvancedSelectFirstItem()).getText()) ===
+          value
+        )
+      },
+      {
+        timeout: 5000,
+        timeoutMsg:
+          'Expected country advanced select input to contain "' +
+          value +
+          '" after 5s'
+      }
+    )
   }
 
   async getEndOfTourDate() {

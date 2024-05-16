@@ -3,11 +3,13 @@ import moment from "moment"
 import CreatePerson from "../pages/createNewPerson.page"
 
 const VALID_PERSON_INTERLOCUTOR = {
-  lastName: "Doe"
+  lastName: "Doe",
+  country: "Denmark"
 }
 const VALID_PERSON_ADVISOR = {
   lastName: "Roe",
   firstName: "Jane",
+  country: "Canada",
   emailAddresses: ["", "test@NATO.INT"]
 }
 const NOT_SIMILAR_PERSON_ADVISOR = {
@@ -60,12 +62,19 @@ describe("Create new Person form page", () => {
         "value",
         await CreatePerson.getRandomOption(await CreatePerson.getRank())
       )
+
+      await (await CreatePerson.getCountryInput()).click()
       await (
-        await CreatePerson.getCountry()
-      ).selectByAttribute(
-        "value",
-        await CreatePerson.getRandomOption(await CreatePerson.getCountry())
+        await CreatePerson.getCountryInput()
+      ).setValue(VALID_PERSON_INTERLOCUTOR.country)
+      await CreatePerson.waitForCountryAdvancedSelectToChange(
+        VALID_PERSON_INTERLOCUTOR.country
       )
+      expect(
+        await (await CreatePerson.getCountryAdvancedSelectFirstItem()).getText()
+      ).to.include(VALID_PERSON_INTERLOCUTOR.country)
+      await (await CreatePerson.getCountryAdvancedSelectFirstItem()).click()
+
       await CreatePerson.submitForm()
       await CreatePerson.waitForAlertSuccessToLoad()
       const alertMessage = await (
@@ -90,12 +99,19 @@ describe("Create new Person form page", () => {
         "value",
         await CreatePerson.getRandomOption(await CreatePerson.getGender())
       )
+
+      await (await CreatePerson.getCountryInput()).click()
       await (
-        await CreatePerson.getCountry()
-      ).selectByAttribute(
-        "value",
-        await CreatePerson.getRandomOption(await CreatePerson.getCountry())
+        await CreatePerson.getCountryInput()
+      ).setValue(VALID_PERSON_INTERLOCUTOR.country)
+      await CreatePerson.waitForCountryAdvancedSelectToChange(
+        VALID_PERSON_INTERLOCUTOR.country
       )
+      expect(
+        await (await CreatePerson.getCountryAdvancedSelectFirstItem()).getText()
+      ).to.include(VALID_PERSON_INTERLOCUTOR.country)
+      await (await CreatePerson.getCountryAdvancedSelectFirstItem()).click()
+
       await CreatePerson.submitForm()
       await CreatePerson.waitForAlertSuccessToLoad()
       const alertMessage = await (
@@ -120,12 +136,19 @@ describe("Create new Person form page", () => {
         "value",
         await CreatePerson.getRandomOption(await CreatePerson.getGender())
       )
+
+      await (await CreatePerson.getCountryInput()).click()
       await (
-        await CreatePerson.getCountry()
-      ).selectByAttribute(
-        "value",
-        await CreatePerson.getRandomOption(await CreatePerson.getCountry())
+        await CreatePerson.getCountryInput()
+      ).setValue(VALID_PERSON_INTERLOCUTOR.country)
+      await CreatePerson.waitForCountryAdvancedSelectToChange(
+        VALID_PERSON_INTERLOCUTOR.country
       )
+      expect(
+        await (await CreatePerson.getCountryAdvancedSelectFirstItem()).getText()
+      ).to.include(VALID_PERSON_INTERLOCUTOR.country)
+      await (await CreatePerson.getCountryAdvancedSelectFirstItem()).click()
+
       await (await CreatePerson.getEmailAddress(0)).setValue("notValidEmail@")
       await (await CreatePerson.getLastName()).click()
       const errorMessage = await CreatePerson.getEmailAddressMessage(0)
@@ -217,12 +240,19 @@ describe("Create new Person form page", () => {
         "value",
         await CreatePerson.getRandomOption(await CreatePerson.getGender())
       )
+
+      await (await CreatePerson.getCountryInput()).click()
       await (
-        await CreatePerson.getCountry()
-      ).selectByAttribute(
-        "value",
-        await CreatePerson.getRandomOption(await CreatePerson.getCountry())
+        await CreatePerson.getCountryInput()
+      ).setValue(VALID_PERSON_ADVISOR.country)
+      await CreatePerson.waitForCountryAdvancedSelectToChange(
+        VALID_PERSON_ADVISOR.country
       )
+      expect(
+        await (await CreatePerson.getCountryAdvancedSelectFirstItem()).getText()
+      ).to.include(VALID_PERSON_ADVISOR.country)
+      await (await CreatePerson.getCountryAdvancedSelectFirstItem()).click()
+
       await (await CreatePerson.getEndOfTourDate()).setValue("")
       await (await CreatePerson.getLastName()).click()
       for (const [index] of VALID_PERSON_ADVISOR.emailAddresses.entries()) {
@@ -235,14 +265,6 @@ describe("Create new Person form page", () => {
 
     it("Should save with a valid email address in uppercase", async() => {
       // Continue on the same page to prevent "Are you sure you wish to navigate away from the page" warning
-      await (
-        await CreatePerson.getLastName()
-      ).setValue(VALID_PERSON_ADVISOR.lastName)
-      await (
-        await CreatePerson.getFirstName()
-      ).setValue(VALID_PERSON_ADVISOR.firstName)
-      await (await CreatePerson.getUserTrueButton()).waitForExist()
-      await (await CreatePerson.getUserTrueButton()).click()
       for (const [
         index,
         address
@@ -256,26 +278,8 @@ describe("Create new Person form page", () => {
         // element should *not* be visible!
         await errorMessage.waitForDisplayed({ timeout: 1000, reverse: true })
       }
-      await (
-        await CreatePerson.getRank()
-      ).selectByAttribute(
-        "value",
-        await CreatePerson.getRandomOption(await CreatePerson.getRank())
-      )
-      await (
-        await CreatePerson.getGender()
-      ).selectByAttribute(
-        "value",
-        await CreatePerson.getRandomOption(await CreatePerson.getGender())
-      )
-      await (
-        await CreatePerson.getCountry()
-      ).selectByAttribute(
-        "value",
-        await CreatePerson.getRandomOption(await CreatePerson.getCountry())
-      )
-      const tomorrow = moment().add(1, "days").format("DD-MM-YYYY")
 
+      const tomorrow = moment().add(1, "days").format("DD-MM-YYYY")
       await CreatePerson.deleteInput(CreatePerson.getEndOfTourDate())
       await (await CreatePerson.getEndOfTourDate()).setValue(tomorrow)
       await (await CreatePerson.getLastName()).click()

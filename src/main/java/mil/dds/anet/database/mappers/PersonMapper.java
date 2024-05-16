@@ -34,7 +34,8 @@ public class PersonMapper implements RowMapper<Person> {
     a.setUser(MapperUtils.getOptionalBoolean(rs, "people_user"));
     a.setAvatarUuid(MapperUtils.getOptionalString(rs, "people_avatarUuid"));
     a.setPhoneNumber(MapperUtils.getOptionalString(rs, "people_phoneNumber"));
-    a.setCountry(MapperUtils.getOptionalString(rs, "people_country"));
+    a.setObsoleteCountry(MapperUtils.getOptionalString(rs, "people_obsoleteCountry"));
+    a.setCountryUuid(MapperUtils.getOptionalString(rs, "people_countryUuid"));
     a.setGender(MapperUtils.getOptionalString(rs, "people_gender"));
     a.setCode(MapperUtils.getOptionalString(rs, "people_code"));
     a.setEndOfTourDate(MapperUtils.getInstantAsLocalDateTime(rs, "people_endOfTourDate"));

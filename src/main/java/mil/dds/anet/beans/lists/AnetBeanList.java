@@ -3,6 +3,7 @@ package mil.dds.anet.beans.lists;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import java.util.List;
+import mil.dds.anet.graphql.AllowUnverifiedUsers;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.Query;
 
@@ -53,6 +54,7 @@ public class AnetBeanList<T> {
     }
   }
 
+  @AllowUnverifiedUsers
   public List<T> getList() {
     return list;
   }
@@ -61,6 +63,7 @@ public class AnetBeanList<T> {
     this.list = list;
   }
 
+  @AllowUnverifiedUsers
   public Integer getPageNum() {
     return pageNum;
   }
@@ -69,6 +72,7 @@ public class AnetBeanList<T> {
     this.pageNum = pageNum;
   }
 
+  @AllowUnverifiedUsers
   public Integer getPageSize() {
     return pageSize;
   }
@@ -77,6 +81,7 @@ public class AnetBeanList<T> {
     this.pageSize = pageSize;
   }
 
+  @AllowUnverifiedUsers
   public Integer getTotalCount() {
     return totalCount;
   }

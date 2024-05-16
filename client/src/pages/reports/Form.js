@@ -360,6 +360,7 @@ const ReportForm = ({
         const currentOrg =
           currentUser.position && currentUser.position.organization
 
+        const locationFilters = Location.getReportLocationFilters()
         const reportPeopleFilters = {
           all: {
             label: "All",
@@ -610,7 +611,7 @@ const ReportForm = ({
                       value={values.location}
                       overlayColumns={["Name"]}
                       overlayRenderRow={LocationOverlayRow}
-                      filterDefs={getLocationFilters()}
+                      filterDefs={locationFilters}
                       objectType={Location}
                       fields={Location.autocompleteQuery}
                       valueKey="name"
@@ -1223,19 +1224,6 @@ const ReportForm = ({
       }}
     </Formik>
   )
-
-  function getLocationFilters() {
-    return Settings?.fields?.report?.location?.filter.reduce(
-      (accumulator, filter) => {
-        accumulator[filter] = {
-          label: Location.humanNameOfType(filter),
-          queryVars: { type: filter }
-        }
-        return accumulator
-      },
-      {}
-    )
-  }
 
   function getReportType(values) {
     return values.engagementDate && Report.isFuture(values.engagementDate)

@@ -16,6 +16,7 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.LocationSearchQuery;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.database.LocationDao;
+import mil.dds.anet.graphql.AllowUnverifiedUsers;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
@@ -53,9 +54,15 @@ public class LocationResource {
   }
 
   @GraphQLQuery(name = "locationList")
+  @AllowUnverifiedUsers
   public AnetBeanList<Location> search(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "query") LocationSearchQuery query) {
-    query.setUser(DaoUtils.getUserFromContext(context));
+    final Person user = DaoUtils.getUserFromContext(context);
+    if (Boolean.TRUE.equals(user.getPendingVerification())) {
+      // Unverified users can only search for countries
+      query.setType(Location.LocationType.COUNTRY);
+    }
+    query.setUser(user);
     return dao.search(query);
   }
 

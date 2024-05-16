@@ -40,7 +40,11 @@ const GQL_GET_PERSON = gql`
       domainUsername
       openIdSubject
       biography
-      country
+      obsoleteCountry
+      country {
+        uuid
+        name
+      }
       gender
       endOfTourDate
       code

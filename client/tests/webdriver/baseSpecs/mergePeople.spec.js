@@ -60,7 +60,7 @@ const EXAMPLE_PEOPLE = {
     phone: "+1-412-7324",
     rank: "CIV",
     gender: "MALE",
-    nationality: "United States of America",
+    nationality: "United States",
     previousPositions: [
       {
         name: "EF 1 Manager",
