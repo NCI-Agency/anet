@@ -29,9 +29,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@apollo/client@npm:3.9.11":
-  version: 3.9.11
-  resolution: "@apollo/client@npm:3.9.11"
+"@apollo/client@npm:3.10.4":
+  version: 3.10.4
+  resolution: "@apollo/client@npm:3.10.4"
   dependencies:
     "@graphql-typed-document-node/core": "npm:^3.1.1"
     "@wry/caches": "npm:^1.0.0"
@@ -41,7 +41,7 @@ __metadata:
     hoist-non-react-statics: "npm:^3.3.2"
     optimism: "npm:^0.18.0"
     prop-types: "npm:^15.7.2"
-    rehackt: "npm:0.0.6"
+    rehackt: "npm:^0.1.0"
     response-iterator: "npm:^0.2.6"
     symbol-observable: "npm:^4.0.0"
     ts-invariant: "npm:^0.10.3"
@@ -62,7 +62,7 @@ __metadata:
       optional: true
     subscriptions-transport-ws:
       optional: true
-  checksum: 10c0/c7657a8e0d62f6d1e0b2da7573e9a9397af879946396e86682166596ffb201c22f7677d11cf65ca2ce97acc8ff2ee8e37c077716cd1b6ae9bb0e3a9cdfdecaf4
+  checksum: 10c0/057af5534db5e454957b2922fa973ccaa1b159d4cb39964b0a7fdbaeb07c779ca14eb680caa9579dfdbd85554ca7c5e9981d79ad1e6924ccef57e4acf6c67988
   languageName: node
   linkType: hard
 
@@ -2386,9 +2386,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphiql/react@npm:^0.21.0":
-  version: 0.21.0
-  resolution: "@graphiql/react@npm:0.21.0"
+"@graphiql/react@npm:^0.22.1":
+  version: 0.22.1
+  resolution: "@graphiql/react@npm:0.22.1"
   dependencies:
     "@graphiql/toolkit": "npm:^0.9.1"
     "@headlessui/react": "npm:^1.7.15"
@@ -2409,7 +2409,7 @@ __metadata:
     graphql: ^15.5.0 || ^16.0.0
     react: ^16.8.0 || ^17 || ^18
     react-dom: ^16.8.0 || ^17 || ^18
-  checksum: 10c0/8f77d9b1546c91712884d95442508e07e77f40bbf011612a7271aed8235ba5eafc12cbe2206f1026d3a69b454fe2dde5324915b6c3db0daaac8f7fca7df48d0e
+  checksum: 10c0/455c42d1fcb3e0f6f4f6eb2507251578d227dfafae02559e1bae311c2a50afe50c0cb0e8e61616f54a14c60e6c0a6e9648542ac0d2646fa135975a21a61b6c74
   languageName: node
   linkType: hard
 
@@ -6245,7 +6245,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "anet@workspace:."
   dependencies:
-    "@apollo/client": "npm:3.9.11"
+    "@apollo/client": "npm:3.10.4"
     "@babel/core": "npm:7.24.5"
     "@babel/eslint-parser": "npm:7.24.5"
     "@babel/plugin-proposal-class-properties": "npm:7.18.6"
@@ -6311,7 +6311,7 @@ __metadata:
     closest: "npm:0.0.1"
     config: "npm:3.3.11"
     copy-webpack-plugin: "npm:12.0.2"
-    core-js: "npm:3.37.0"
+    core-js: "npm:3.37.1"
     countries-list: "npm:3.1.0"
     cross-fetch: "npm:4.0.0"
     cross-spawn: "npm:7.0.3"
@@ -6338,9 +6338,9 @@ __metadata:
     eslint-webpack-plugin: "npm:4.1.0"
     express-session: "npm:1.18.0"
     file-saver: "npm:2.0.5"
-    formik: "npm:2.4.5"
+    formik: "npm:2.4.6"
     git-describe: "npm:4.1.1"
-    graphiql: "npm:3.2.0"
+    graphiql: "npm:3.2.2"
     graphql: "npm:16.8.1"
     handlebars: "npm:4.7.8"
     handlebars-loader: "npm:1.7.3"
@@ -6385,7 +6385,7 @@ __metadata:
     react-is: "npm:18.3.1"
     react-moment-proptypes: "npm:1.8.1"
     react-mosaic-component: "npm:6.1.0"
-    react-redux: "npm:9.1.1"
+    react-redux: "npm:9.1.2"
     react-redux-loading-bar: "npm:5.0.8"
     react-resize-detector: "npm:10.0.1"
     react-router-bootstrap: "npm:0.26.2"
@@ -8487,10 +8487,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"core-js@npm:3.37.0, core-js@npm:^3.33.0":
-  version: 3.37.0
-  resolution: "core-js@npm:3.37.0"
-  checksum: 10c0/7e00331f346318ca3f595c08ce9e74ddae744715aef137486c1399163afd79792fb94c3161280863adfdc3e30f8026912d56bd3036f93cacfc689d33e185f2ee
+"core-js@npm:3.37.1, core-js@npm:^3.33.0":
+  version: 3.37.1
+  resolution: "core-js@npm:3.37.1"
+  checksum: 10c0/440eb51a7a39128a320225fe349f870a3641b96c9ecd26470227db730ef8c161ea298eaea621db66ec0ff622a85299efb4e23afebf889c0a1748616102307675
   languageName: node
   linkType: hard
 
@@ -11242,9 +11242,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"formik@npm:2.4.5":
-  version: 2.4.5
-  resolution: "formik@npm:2.4.5"
+"formik@npm:2.4.6":
+  version: 2.4.6
+  resolution: "formik@npm:2.4.6"
   dependencies:
     "@types/hoist-non-react-statics": "npm:^3.3.1"
     deepmerge: "npm:^2.1.1"
@@ -11256,7 +11256,7 @@ __metadata:
     tslib: "npm:^2.0.0"
   peerDependencies:
     react: ">=16.8.0"
-  checksum: 10c0/61f0d9eb092edd122f0d2988ca3d0a01073bde38af977e96ba9818382dc1fefd4cdb016cd61f08443055a748bbbbe2a95347d4528b81cc5c1c6f75865fc84927
+  checksum: 10c0/e2853fc7833649386ff183eac9cb6a69a999c4b05aabe5636152e1cec1eb35ac0d9f511425624f0d7a88c6e19d4fd2aa259399a6683f0475c30170a5a3ea4f79
   languageName: node
   linkType: hard
 
@@ -11816,11 +11816,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"graphiql@npm:3.2.0":
-  version: 3.2.0
-  resolution: "graphiql@npm:3.2.0"
+"graphiql@npm:3.2.2":
+  version: 3.2.2
+  resolution: "graphiql@npm:3.2.2"
   dependencies:
-    "@graphiql/react": "npm:^0.21.0"
+    "@graphiql/react": "npm:^0.22.1"
     "@graphiql/toolkit": "npm:^0.9.1"
     graphql-language-service: "npm:^5.2.0"
     markdown-it: "npm:^14.1.0"
@@ -11828,7 +11828,7 @@ __metadata:
     graphql: ^15.5.0 || ^16.0.0
     react: ^16.8.0 || ^17 || ^18
     react-dom: ^16.8.0 || ^17 || ^18
-  checksum: 10c0/0212a3f55201ea3a097ecfe3ee86f01fefc1b5f26f394c1ac46c25b1fe750cc45b2ddd5cce9631444bc8871021188614431a3bbd4f78a89acca4fca67142115b
+  checksum: 10c0/ddf03c47d7e367bebc283fe4f5ded48f84ba260f34f4e97be11921ffbc4e95b9777e81e17b960465054dc475d3ba2c8187c2b0f8ca43c4b9ccd6b8c96b0eecfb
   languageName: node
   linkType: hard
 
@@ -17110,25 +17110,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-redux@npm:9.1.1":
-  version: 9.1.1
-  resolution: "react-redux@npm:9.1.1"
+"react-redux@npm:9.1.2":
+  version: 9.1.2
+  resolution: "react-redux@npm:9.1.2"
   dependencies:
     "@types/use-sync-external-store": "npm:^0.0.3"
     use-sync-external-store: "npm:^1.0.0"
   peerDependencies:
     "@types/react": ^18.2.25
     react: ^18.0
-    react-native: ">=0.69"
     redux: ^5.0.0
   peerDependenciesMeta:
     "@types/react":
       optional: true
-    react-native:
-      optional: true
     redux:
       optional: true
-  checksum: 10c0/40ccdc8d48aefeed02c025f46e4a2e6641a2996fe985feb70d25feaaf8f101f6ef937cd1420909cad4c8869a8c79323ee071f5b090b011b950e5ae09100f5767
+  checksum: 10c0/56ac98228e011b26e0202346af9c8dd408ad5ea8235d8761c8e05ea0953b8ca801cdf9d1f481fdec7b285d7f30ceef7238b46b3df7636ef77dd5c2ea8c5be5b2
   languageName: node
   linkType: hard
 
@@ -17561,9 +17558,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rehackt@npm:0.0.6":
-  version: 0.0.6
-  resolution: "rehackt@npm:0.0.6"
+"rehackt@npm:^0.1.0":
+  version: 0.1.0
+  resolution: "rehackt@npm:0.1.0"
   peerDependencies:
     "@types/react": "*"
     react: "*"
@@ -17572,7 +17569,7 @@ __metadata:
       optional: true
     react:
       optional: true
-  checksum: 10c0/814c9b80b2680dc0572639ecad1ed1961b23b606e53a00976ee4c4876f6ed736ea702381235ac40ed2a5c826fb55641b46ae23343e4ddd6378ced1da3d51ada7
+  checksum: 10c0/3d838bfee84ec06c976f21027936f3b0fdb7660ab8a2d4d3f19c65e0daa78a268aa81352311352b8576b89a074714b36ae6cd5bdadb6e975eca079f2b342de73
   languageName: node
   linkType: hard
 
