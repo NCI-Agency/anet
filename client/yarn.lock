@@ -6408,7 +6408,7 @@ __metadata:
     redux-persist: "npm:6.0.0"
     resize-observer-polyfill: "npm:1.5.1"
     scroll-into-view-if-needed: "npm:3.1.0"
-    selenium-webdriver: "npm:4.20.0"
+    selenium-webdriver: "npm:4.21.0"
     slate: "npm:0.103.0"
     slate-history: "npm:0.100.0"
     slate-hyperscript: "npm:0.100.0"
@@ -18071,14 +18071,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"selenium-webdriver@npm:4.20.0":
-  version: 4.20.0
-  resolution: "selenium-webdriver@npm:4.20.0"
+"selenium-webdriver@npm:4.21.0":
+  version: 4.21.0
+  resolution: "selenium-webdriver@npm:4.21.0"
   dependencies:
     jszip: "npm:^3.10.1"
     tmp: "npm:^0.2.3"
     ws: "npm:>=8.16.0"
-  checksum: 10c0/9c06d69607a463f5ee02441dd6c52c7af369dc147ff217d08e10382491ed7a5f79a29169c60d1e722c94a46073a73ae64056ebee92fdcfda234056867462b7b2
+  checksum: 10c0/d8c0df10cceee84843e1e306c0a1bdfe61c3174ecb7e538111ccb1a0dac0d4b30d635b1958476382eef8246ec50c2bd9b5054c08d5c007933b03807aca194d53
   languageName: node
   linkType: hard
 
