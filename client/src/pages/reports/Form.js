@@ -848,21 +848,6 @@ const ReportForm = ({
                 </Fieldset>
               )}
 
-              {showCustomFields && (
-                <Fieldset title="Engagement information" id="custom-fields">
-                  <CustomFieldsContainer
-                    fieldsConfig={Settings.fields.report.customFields}
-                    formikProps={{
-                      setFieldTouched,
-                      setFieldValue,
-                      values,
-                      validateForm
-                    }}
-                    setShowCustomFields={setShowCustomFields}
-                  />
-                </Fieldset>
-              )}
-
               <Fieldset title="Engagement details" id="meeting-details">
                 {!isFutureEngagement && !values.cancelled && (
                   <>
@@ -1134,6 +1119,21 @@ const ReportForm = ({
                   )}
                 </Collapse>
               </Fieldset>
+
+              {showCustomFields && (
+                <Fieldset title="Engagement information" id="custom-fields">
+                  <CustomFieldsContainer
+                    fieldsConfig={Settings.fields.report.customFields}
+                    formikProps={{
+                      setFieldTouched,
+                      setFieldValue,
+                      values,
+                      validateForm
+                    }}
+                    setShowCustomFields={setShowCustomFields}
+                  />
+                </Fieldset>
+              )}
 
               {hasAssessments && (
                 <>
