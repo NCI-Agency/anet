@@ -205,6 +205,9 @@ export const searchFilters = function(includeAdminFilters) {
   const organizationLocationFilters = Location.getOrganizationLocationFilters()
   const classificationOptions = Object.keys(Settings.classification.choices)
   const classificationLabels = Object.values(Settings.classification.choices)
+  // Allow explicit search for "no classification"
+  classificationOptions.unshift("")
+  classificationLabels.unshift("<none>")
 
   const taskWidgetFilters = {
     all: {

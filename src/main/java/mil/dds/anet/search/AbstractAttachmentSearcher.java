@@ -43,8 +43,16 @@ public abstract class AbstractAttachmentSearcher
     }
 
     qb.addStringEqualsClause("mimeType", "attachments.\"mimeType\"", query.getMimeType());
-    qb.addStringEqualsClause("classification", "attachments.classification",
-        query.getClassification());
+
+    if (query.getClassification() != null) {
+      if ("".equals(query.getClassification())) {
+        qb.addIsNullOrEmptyClause("attachments.classification");
+      } else {
+        qb.addStringEqualsClause("classification", "attachments.classification",
+            query.getClassification());
+      }
+    }
+
     qb.addStringEqualsClause("authorUuid", "attachments.\"authorUuid\"", query.getAuthorUuid());
 
     if (hasTextQuery(query)) {

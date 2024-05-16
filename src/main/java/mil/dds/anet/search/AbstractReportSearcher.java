@@ -299,7 +299,14 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
       qb.addSqlArg("userUuid", DaoUtils.getUuid(query.getUser()));
     }
 
-    qb.addStringEqualsClause("classification", "reports.classification", query.getClassification());
+    if (query.getClassification() != null) {
+      if ("".equals(query.getClassification())) {
+        qb.addIsNullOrEmptyClause("reports.classification");
+      } else {
+        qb.addStringEqualsClause("classification", "reports.classification",
+            query.getClassification());
+      }
+    }
 
     if (!query.isSystemSearch() && (!AuthUtils.isAdmin(query.getUser())
         || !Boolean.TRUE.equals(query.getIncludeAllDrafts()))) {
