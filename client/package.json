@@ -93,7 +93,7 @@
     "prettier-eslint-cli": "8.0.1",
     "react-is": "18.3.1",
     "react-test-renderer": "18.3.1",
-    "selenium-webdriver": "4.20.0",
+    "selenium-webdriver": "4.21.0",
     "style-loader": "4.0.0",
     "tap-xunit": "2.4.1",
     "thread-loader": "4.0.2",
