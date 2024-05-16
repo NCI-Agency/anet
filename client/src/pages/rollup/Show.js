@@ -313,7 +313,9 @@ const REPORT_SEARCH_PROPS = Object.assign({}, DEFAULT_SEARCH_PROPS, {
   searchObjectTypes: [SEARCH_OBJECT_TYPES.REPORTS]
 })
 
-const ROLLUP_PERIODS = ["day", "week", "month"]
+const QUARTER = "quarter"
+const HALF_YEAR = "half year"
+const ROLLUP_PERIODS = ["day", "week", "month", QUARTER, HALF_YEAR, "year"]
 
 const Collection = ({ queryParams }) => (
   <div className="scrollable">
@@ -525,13 +527,27 @@ const RollupShow = ({ pageDispatchers, searchQuery, setSearchQuery }) => {
     return <Map queryParams={queryParams} />
   }
 
+  function calculatePeriodBounds(delta, nextPeriod) {
+    let periodStart
+    let periodEnd
+    if (nextPeriod === HALF_YEAR) {
+      // No built-in logic in Moment.js
+      periodStart = moment(queryParams.releasedAtStart)
+        .add((queryParams.releasedAtStart.quarter() % 2) - 1, QUARTER)
+        .add(delta * 2, QUARTER)
+        .startOf(QUARTER)
+      periodEnd = moment(periodStart).add(1, QUARTER).endOf(QUARTER)
+    } else {
+      periodStart = moment(queryParams.releasedAtStart)
+        .add(delta, nextPeriod)
+        .startOf(nextPeriod)
+      periodEnd = moment(periodStart).endOf(nextPeriod)
+    }
+    return { periodStart, periodEnd }
+  }
+
   function showNextPeriod(nextPeriod) {
-    const periodStart = moment(queryParams.releasedAtStart)
-      .add(1, nextPeriod)
-      .startOf(nextPeriod)
-    const periodEnd = moment(queryParams.releasedAtStart)
-      .add(1, nextPeriod)
-      .endOf(nextPeriod)
+    const { periodStart, periodEnd } = calculatePeriodBounds(1, nextPeriod)
     const newQueryParams = {
       ...queryParams,
       releasedAtStart: periodStart,
@@ -545,12 +561,7 @@ const RollupShow = ({ pageDispatchers, searchQuery, setSearchQuery }) => {
   }
 
   function showPreviousPeriod(nextPeriod) {
-    const periodStart = moment(queryParams.releasedAtStart)
-      .subtract(1, nextPeriod)
-      .startOf(nextPeriod)
-    const periodEnd = moment(queryParams.releasedAtStart)
-      .subtract(1, nextPeriod)
-      .endOf(nextPeriod)
+    const { periodStart, periodEnd } = calculatePeriodBounds(-1, nextPeriod)
     const newQueryParams = {
       ...queryParams,
       releasedAtStart: periodStart,
@@ -564,8 +575,7 @@ const RollupShow = ({ pageDispatchers, searchQuery, setSearchQuery }) => {
   }
 
   function changePeriod(nextPeriod) {
-    const periodStart = moment(queryParams.releasedAtStart).startOf(nextPeriod)
-    const periodEnd = moment(queryParams.releasedAtStart).endOf(nextPeriod)
+    const { periodStart, periodEnd } = calculatePeriodBounds(0, nextPeriod)
     const newQueryParams = {
       ...queryParams,
       releasedAtStart: periodStart,
