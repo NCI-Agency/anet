@@ -203,6 +203,8 @@ export const searchFilters = function(includeAdminFilters) {
   const reportLocationWidgetFilters = Location.getReportLocationFilters()
   const positionLocationWidgetFilters = Location.getPositionLocationFilters()
   const organizationLocationFilters = Location.getOrganizationLocationFilters()
+  const classificationOptions = Object.keys(Settings.classification.choices)
+  const classificationLabels = Object.values(Settings.classification.choices)
 
   const taskWidgetFilters = {
     all: {
@@ -356,6 +358,16 @@ export const searchFilters = function(includeAdminFilters) {
           Report.ATMOSPHERE.NEUTRAL,
           Report.ATMOSPHERE.NEGATIVE
         ]
+      }
+    },
+    Classifications: {
+      component: SelectFilter,
+      dictProps: Settings.classification,
+      deserializer: deserializeSelectFilter,
+      props: {
+        queryKey: "classification",
+        options: classificationOptions,
+        labels: classificationLabels
       }
     },
     "Sensitive Info": {
@@ -629,8 +641,6 @@ export const searchFilters = function(includeAdminFilters) {
   filters[SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS] = { filters: {} }
 
   const mimeTypes = Settings.fields.attachment.mimeTypes
-  const classificationOptions = Object.keys(Settings.classification.choices)
-  const classificationLabels = Object.values(Settings.classification.choices)
   filters[SEARCH_OBJECT_TYPES.ATTACHMENTS] = {
     filters: {
       "Mime Type": {

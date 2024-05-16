@@ -92,6 +92,9 @@ public class ReportSearchQuery extends SubscribableObjectSearchQuery<ReportSearc
   @GraphQLQuery
   @GraphQLInputField
   private Boolean sensitiveInfo;
+  @GraphQLQuery
+  @GraphQLInputField
+  private String classification;
   // internal search parameter:
   @JsonIgnore
   private boolean systemSearch;
@@ -309,6 +312,14 @@ public class ReportSearchQuery extends SubscribableObjectSearchQuery<ReportSearc
     this.sensitiveInfo = sensitiveInfo;
   }
 
+  public void setClassification(String classification) {
+    this.classification = classification;
+  }
+
+  public String getClassification() {
+    return classification;
+  }
+
   public boolean isSystemSearch() {
     return systemSearch;
   }
@@ -324,7 +335,7 @@ public class ReportSearchQuery extends SubscribableObjectSearchQuery<ReportSearc
         updatedAtStart, updatedAtEnd, releasedAtStart, releasedAtEnd, attendeeUuid, atmosphere,
         orgUuid, orgRecurseStrategy, locationUuid, taskUuid, pendingApprovalOf, state,
         includeAllDrafts, engagementStatus, cancelledReason, authorPositionUuid,
-        attendeePositionUuid, authorizationGroupUuid, sensitiveInfo, systemSearch);
+        attendeePositionUuid, authorizationGroupUuid, sensitiveInfo, classification, systemSearch);
   }
 
   @Override
@@ -359,6 +370,7 @@ public class ReportSearchQuery extends SubscribableObjectSearchQuery<ReportSearc
         && Objects.equals(getAttendeePositionUuid(), other.getAttendeePositionUuid())
         && Objects.equals(getAuthorizationGroupUuid(), other.getAuthorizationGroupUuid())
         && Objects.equals(getSensitiveInfo(), other.getSensitiveInfo())
+        && Objects.equals(getClassification(), other.getClassification())
         && Objects.equals(isSystemSearch(), other.isSystemSearch());
   }
 

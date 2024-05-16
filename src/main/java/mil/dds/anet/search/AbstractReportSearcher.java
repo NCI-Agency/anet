@@ -299,6 +299,8 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
       qb.addSqlArg("userUuid", DaoUtils.getUuid(query.getUser()));
     }
 
+    qb.addStringEqualsClause("classification", "reports.classification", query.getClassification());
+
     if (!query.isSystemSearch() && (!AuthUtils.isAdmin(query.getUser())
         || !Boolean.TRUE.equals(query.getIncludeAllDrafts()))) {
       // Apply a filter to restrict access to other's draft or rejected reports.
