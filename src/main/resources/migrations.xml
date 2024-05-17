@@ -5725,4 +5725,12 @@
 		<!-- Rolling back is not useful anymore -->
 	</changeSet>
 
+	<changeSet id="add-location-column-geoShape" author="midmarch">
+		<!-- Add locations.geoShape, to expand location with geographical area's / boundaries -->
+		<addColumn tableName="locations">
+			<column name="geoShape" type="geometry" />
+		</addColumn>
+
+	</changeSet>
+
 </databaseChangeLog>
