@@ -87,7 +87,7 @@ String adminPosName = run.environment["ANET_ADMIN_POS_NAME"] ?: "ANET Administra
 String adminFullName = run.environment["ANET_ADMIN_FULL_NAME"] ?: "DMIN, Arthur"
 String adminDomainUsername = run.environment["ANET_ADMIN_DOMAIN_USERNAME"] ?: "arthur"
 
-String dbContainerName = isTestEnv ? "anet-psql-test-server" : "anet-psql-server"
+String dbContainerName = isTestEnv ? "anet-postgis-test-server" : "anet-postgis-server"
 String fakeSmtpContainerName = isTestEnv ? "anet-fake-smtp-test-server" : "anet-fake-smtp-server"
 String keycloakContainerName = "anet-keycloak-server"
 
@@ -456,7 +456,7 @@ task dockerPushImage(type: DockerPushImage) {
 
 task dockerPullDB(type: DockerPullImage) {
 	group = "database container"
-	image = "postgres:${run.environment['DB_VERSION']}"
+	image = "postgis/postgis:${run.environment['DB_VERSION']}"
 	description = "Pulls a docker image for the ANET DB from ${image}."
 }
 
