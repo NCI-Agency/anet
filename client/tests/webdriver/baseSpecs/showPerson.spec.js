@@ -31,7 +31,7 @@ describe("Show person page", () => {
     it("We should see a card of Attachment", async() => {
       await (await ShowPerson.getCard()).waitForExist()
       await (await ShowPerson.getCard()).waitForDisplayed()
-      expect(await ShowPerson.getFileData()).to.be.equal("attachPerson")
+      expect(await ShowPerson.getCaption()).to.be.equal("Erin")
     })
     it("We can go to the show page of Attachment", async() => {
       await (await ShowPerson.getImageClick()).click()

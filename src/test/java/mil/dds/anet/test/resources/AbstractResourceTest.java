@@ -101,9 +101,9 @@ public abstract class AbstractResourceTest {
   }
 
   private static void refreshMaterializedViews() {
-    final String[] materializedViews =
-        {"mv_fts_authorizationGroups", "mv_fts_locations", "mv_fts_organizations", "mv_fts_people",
-            "mv_fts_positions", "mv_fts_reports", "mv_fts_tasks"};
+    final String[] materializedViews = {"mv_fts_attachments", "mv_fts_authorizationGroups",
+        "mv_fts_locations", "mv_fts_organizations", "mv_fts_people", "mv_fts_positions",
+        "mv_fts_reports", "mv_fts_tasks"};
     final AdminDao adminDao = AnetObjectEngine.getInstance().getAdminDao();
     for (final String materializedView : materializedViews) {
       try {

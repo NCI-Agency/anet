@@ -35,7 +35,7 @@ class Page {
     return browser.$(".card")
   }
 
-  async getFileData() {
+  async getCaption() {
     return (await browser.$(".info-line")).getText()
   }
 

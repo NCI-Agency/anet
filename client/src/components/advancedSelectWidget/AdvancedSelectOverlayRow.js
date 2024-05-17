@@ -1,3 +1,4 @@
+import AttachmentImage from "components/Attachment/AttachmentImage"
 import { BreadcrumbTrail } from "components/BreadcrumbTrail"
 import LinkTo from "components/LinkTo"
 import { Location, Task } from "models"
@@ -6,6 +7,7 @@ import PropTypes from "prop-types"
 import React from "react"
 import { Badge } from "react-bootstrap"
 import Settings from "settings"
+import utils from "utils"
 
 const cursorStyle = {
   cursor: "pointer"
@@ -37,6 +39,35 @@ AsLink.propTypes = {
   model: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
   whenUnspecified: PropTypes.string,
   children: PropTypes.node
+}
+
+export const AttachmentOverlayRow = item => {
+  const { backgroundSize, backgroundImage, contentMissing } =
+    utils.getAttachmentIconDetails(item, true)
+  return (
+    <React.Fragment key={item.uuid}>
+      <td>
+        <div style={{ width: "50px", height: "50px" }}>
+          <AttachmentImage
+            uuid={item.uuid}
+            contentMissing={contentMissing}
+            backgroundSize={backgroundSize}
+            backgroundImage={backgroundImage}
+          />
+        </div>
+      </td>
+      <td>
+        <AsLink modelType="Attachment" model={item} />
+      </td>
+      <td>
+        <span>
+          {moment(item.createdAt).format(
+            Settings.dateFormats.forms.displayShort.withTime
+          )}
+        </span>
+      </td>
+    </React.Fragment>
+  )
 }
 
 export const AuthorizationGroupOverlayRow = item => (

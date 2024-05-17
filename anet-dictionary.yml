@@ -45,7 +45,6 @@ maxTextFieldLength: 250
 classification:
   label: Security Marking
   choices:
-    undefined: Undefined
     public: Public
     NU: NATO UNCLASSIFIED
     NU_rel_EU: NATO UNCLASSIFIED Releasable to EU

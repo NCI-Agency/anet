@@ -53,6 +53,7 @@ const AttachmentCard = ({
                 className="detail-btn"
                 modelType="Attachment"
                 model={attachment}
+                showIcon={false}
               >
                 {" "}
               </LinkTo>

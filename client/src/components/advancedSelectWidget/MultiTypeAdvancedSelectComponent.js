@@ -1,6 +1,9 @@
+import { Icon } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import { SEARCH_OBJECT_LABELS, SEARCH_OBJECT_TYPES } from "actions"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import {
+  AttachmentOverlayRow,
   AuthorizationGroupOverlayRow,
   LocationOverlayRow,
   OrganizationOverlayRow,
@@ -10,11 +13,12 @@ import {
   TaskOverlayRow
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
+import AppContext from "components/AppContext"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
 import Model from "components/Model"
 import * as Models from "models"
 import PropTypes from "prop-types"
-import React, { useCallback, useMemo, useState } from "react"
+import React, { useCallback, useContext, useMemo, useState } from "react"
 import { Button } from "react-bootstrap"
 import AUTHORIZATION_GROUPS_ICON from "resources/authorizationGroups.png"
 import LOCATIONS_ICON from "resources/locations.png"
@@ -81,7 +85,7 @@ const widgetPropsPosition = {
   addon: POSITIONS_ICON
 }
 
-const generateLocationFilters = filter => {
+const generateLocationFilters = (filter, _) => {
   if (!filter?.typeFilter) {
     return entityFilters
   } else {
@@ -129,6 +133,31 @@ const widgetPropsAuthorizationGroup = {
   addon: AUTHORIZATION_GROUPS_ICON
 }
 
+const generateAttachmentFilters = (_, currentUser) => {
+  return {
+    myAttachments: {
+      label: "My attachments",
+      queryVars: {
+        authorUuid: currentUser?.uuid
+      }
+    },
+    allAttachments: {
+      label: "All attachments",
+      queryVars: {}
+    }
+  }
+}
+
+const widgetPropsAttachment = {
+  objectType: Models.Attachment,
+  overlayRenderRow: AttachmentOverlayRow,
+  overlayColumns: ["Content", "Caption", "Uploaded"],
+  filterDefs: generateAttachmentFilters,
+  queryParams: { status: Model.STATUS.ACTIVE },
+  fields: Models.Attachment.autocompleteQuery,
+  addon: <Icon icon={IconNames.PAPERCLIP} />
+}
+
 export const ENTITY_TYPES = {
   REPORTS: Models.Report.resourceName,
   PEOPLE: Models.Person.resourceName,
@@ -136,7 +165,8 @@ export const ENTITY_TYPES = {
   POSITIONS: Models.Position.resourceName,
   LOCATIONS: Models.Location.resourceName,
   TASKS: Models.Task.resourceName,
-  AUTHORIZATION_GROUPS: Models.AuthorizationGroup.resourceName
+  AUTHORIZATION_GROUPS: Models.AuthorizationGroup.resourceName,
+  ATTACHMENTS: Models.Attachment.resourceName
 }
 
 const widgetTypeMapping = {
@@ -146,8 +176,14 @@ const widgetTypeMapping = {
   [ENTITY_TYPES.POSITIONS]: widgetPropsPosition,
   [ENTITY_TYPES.LOCATIONS]: widgetPropsLocation,
   [ENTITY_TYPES.TASKS]: widgetPropsTask,
-  [ENTITY_TYPES.AUTHORIZATION_GROUPS]: widgetPropsAuthorizationGroup
+  [ENTITY_TYPES.AUTHORIZATION_GROUPS]: widgetPropsAuthorizationGroup,
+  [ENTITY_TYPES.ATTACHMENTS]: widgetPropsAttachment
 }
+
+export const ALL_ENTITY_TYPES = Object.values(ENTITY_TYPES)
+export const COMMON_ENTITY_TYPES = ALL_ENTITY_TYPES.filter(
+  et => et !== ENTITY_TYPES.ATTACHMENTS
+)
 
 const MultiTypeAdvancedSelectComponent = ({
   fieldName,
@@ -160,9 +196,10 @@ const MultiTypeAdvancedSelectComponent = ({
   filters,
   className
 }) => {
+  const { currentUser } = useContext(AppContext)
   const [entityType, setEntityType] = useState(
     objectType ||
-      Object.values(ENTITY_TYPES).find(et => entityTypes.includes(et)) ||
+      ALL_ENTITY_TYPES.find(et => entityTypes.includes(et)) ||
       ENTITY_TYPES.REPORTS
   )
   const [advancedSelectProps, setAdvancedSelectProps] = useState(
@@ -182,12 +219,10 @@ const MultiTypeAdvancedSelectComponent = ({
   const SelectComponent = isMultiSelect
     ? AdvancedMultiSelect
     : AdvancedSingleSelect
-  const extraSelectProps = isMultiSelect
-    ? {}
-    : { valueKey, showRemoveButton: false }
+  const extraSelectProps = isMultiSelect ? {} : { showRemoveButton: false }
   const filterDefs =
     typeof advancedSelectProps.filterDefs === "function"
-      ? advancedSelectProps.filterDefs(filters[0]?.[entityType])
+      ? advancedSelectProps.filterDefs(filters[0]?.[entityType], currentUser)
       : advancedSelectProps.filterDefs
 
   return (
@@ -222,6 +257,7 @@ const MultiTypeAdvancedSelectComponent = ({
         fieldLabel="Search in ANET:"
         placeholder={searchPlaceholder}
         value={value}
+        valueKey={valueKey}
         showEmbedded
         keepSearchText={entityTypes.length > 1}
         overlayColumns={advancedSelectProps.overlayColumns}
@@ -251,7 +287,7 @@ MultiTypeAdvancedSelectComponent.propTypes = {
 }
 MultiTypeAdvancedSelectComponent.defaultProps = {
   fieldName: "entitySelect",
-  entityTypes: Object.values(ENTITY_TYPES),
+  entityTypes: COMMON_ENTITY_TYPES,
   isMultiSelect: false,
   filters: []
 }

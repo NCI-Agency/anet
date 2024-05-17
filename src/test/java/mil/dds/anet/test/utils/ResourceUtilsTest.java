@@ -190,7 +190,7 @@ class ResourceUtilsTest {
 
   @Test
   void shouldPassWithoutExceptionForExistingClassification() {
-    assertThatNoException().isThrownBy(() -> assertAllowedClassification("undefined"));
+    assertThatNoException().isThrownBy(() -> assertAllowedClassification("public"));
   }
 
   @Test

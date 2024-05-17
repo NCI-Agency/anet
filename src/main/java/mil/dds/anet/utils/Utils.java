@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.imageio.ImageIO;
@@ -98,13 +99,13 @@ public class Utils {
    * newElements, it will call removeFunc. For each element that is in both oldElements and
    * newElements, it will call updateFunc (if set).
    */
-  public static <T extends AbstractAnetBean> void updateElementsByUuid(List<T> oldElements,
-      List<T> newElements, Consumer<T> addFunc, Consumer<String> removeFunc,
+  public static <T extends AbstractAnetBean> void updateElementsByKey(List<T> oldElements,
+      List<T> newElements, Function<T, String> getKey, Consumer<T> addFunc, Consumer<T> removeFunc,
       Consumer<T> updateFunc) {
-    final Set<String> existingUuids =
-        oldElements.stream().map(p -> p.getUuid()).collect(Collectors.toSet());
+    final Map<String, T> existingElementsByKey =
+        oldElements.stream().collect(Collectors.toMap(getKey, Function.identity()));
     for (final T newElement : newElements) {
-      if (existingUuids.remove(newElement.getUuid())) {
+      if (existingElementsByKey.remove(getKey.apply(newElement)) != null) {
         // Update existing element (optional)
         if (updateFunc != null) {
           updateFunc.accept(newElement);
@@ -116,13 +117,18 @@ public class Utils {
     }
 
     // Finally remove all items remaining in existingUuids
-    for (final String uuid : existingUuids) {
-      removeFunc.accept(uuid);
+    for (final T oldElement : existingElementsByKey.values()) {
+      removeFunc.accept(oldElement);
     }
   }
 
+  public static <T extends AbstractAnetBean> void updateElementsByUuid(List<T> oldElements,
+      List<T> newElements, Consumer<T> addFunc, Consumer<T> removeFunc, Consumer<T> updateFunc) {
+    updateElementsByKey(oldElements, newElements, T::getUuid, addFunc, removeFunc, updateFunc);
+  }
+
   public static <T extends AbstractAnetBean> void addRemoveElementsByUuid(List<T> oldElements,
-      List<T> newElements, Consumer<T> addFunc, Consumer<String> removeFunc) {
+      List<T> newElements, Consumer<T> addFunc, Consumer<T> removeFunc) {
     updateElementsByUuid(oldElements, newElements, addFunc, removeFunc, null);
   }
 
@@ -528,7 +534,7 @@ public class Utils {
 
       Utils.addRemoveElementsByUuid(existingPlanningApprovalSteps, planningApprovalSteps,
           newStep -> engine.getApprovalStepDao().insert(newStep),
-          oldStepUuid -> engine.getApprovalStepDao().delete(oldStepUuid));
+          oldStep -> engine.getApprovalStepDao().delete(DaoUtils.getUuid(oldStep)));
 
       Utils.updateSteps(planningApprovalSteps, existingPlanningApprovalSteps);
     }
@@ -543,7 +549,7 @@ public class Utils {
 
       Utils.addRemoveElementsByUuid(existingApprovalSteps, approvalSteps,
           newStep -> engine.getApprovalStepDao().insert(newStep),
-          oldStepUuid -> engine.getApprovalStepDao().delete(oldStepUuid));
+          oldStep -> engine.getApprovalStepDao().delete(DaoUtils.getUuid(oldStep)));
 
       Utils.updateSteps(approvalSteps, existingApprovalSteps);
     }
@@ -560,7 +566,7 @@ public class Utils {
       Utils.addRemoveElementsByUuid(oldStep.loadApprovers(engine.getContext()).join(),
           newStep.getApprovers(),
           newPosition -> approvalStepDao.addApprover(newStep, DaoUtils.getUuid(newPosition)),
-          oldPositionUuid -> approvalStepDao.removeApprover(newStep, oldPositionUuid));
+          oldPosition -> approvalStepDao.removeApprover(newStep, DaoUtils.getUuid(oldPosition)));
     }
   }
 

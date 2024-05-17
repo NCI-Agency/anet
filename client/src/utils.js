@@ -325,7 +325,9 @@ export default {
   getAttachmentIconDetails: function(attachment, small) {
     let backgroundSize = small ? "50px" : "200px"
     let backgroundImage = binaryIcon
-    const contentMissing = attachment.contentLength < 0
+    const contentMissing =
+      attachment.contentLength < 0 ||
+      isNullOrUndefined(attachment.contentLength)
     if (contentMissing) {
       backgroundImage = absentIcon
     } else if (attachment.mimeType === "application/pdf") {

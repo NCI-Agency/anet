@@ -120,7 +120,7 @@ public class TaskResource {
       if (t.getResponsiblePositions() != null) {
         Utils.addRemoveElementsByUuid(existingResponsiblePositions, t.getResponsiblePositions(),
             newPos -> dao.addPositionToTask(newPos, t),
-            oldPosUuid -> dao.removePositionFromTask(oldPosUuid, t.getUuid()));
+            oldPos -> dao.removePositionFromTask(DaoUtils.getUuid(oldPos), t.getUuid()));
       }
 
       // Update tasked organizations:
@@ -129,7 +129,7 @@ public class TaskResource {
             dao.getTaskedOrganizationsForTask(engine.getContext(), t.getUuid()).join();
         Utils.addRemoveElementsByUuid(existingTaskedOrganizations, t.getTaskedOrganizations(),
             newOrg -> dao.addTaskedOrganizationsToTask(newOrg, t),
-            oldOrgUuid -> dao.removeTaskedOrganizationsFromTask(oldOrgUuid, t.getUuid()));
+            oldOrg -> dao.removeTaskedOrganizationsFromTask(DaoUtils.getUuid(oldOrg), t.getUuid()));
       }
 
       // Load the existing task, so we can check for differences.

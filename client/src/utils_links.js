@@ -15,7 +15,8 @@ export const RELATED_OBJECT_TYPE_TO_ENTITY_TYPE = {
   [Models.Location.relatedObjectType]: Models.Location.resourceName,
   [Models.Task.relatedObjectType]: Models.Task.resourceName,
   [Models.AuthorizationGroup.relatedObjectType]:
-    Models.AuthorizationGroup.resourceName
+    Models.AuthorizationGroup.resourceName,
+  [Models.Attachment.relatedObjectType]: Models.Attachment.resourceName
 }
 
 const flip = data =>

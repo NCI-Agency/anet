@@ -162,6 +162,11 @@ public abstract class AbstractSearchQueryBuilder<B, T extends AbstractSearchQuer
     }
   }
 
+  public final void addIsNullOrEmptyClause(String fieldName) {
+    // Clever PostgreSQL construct for "string is null or empty"
+    whereClauses.add(String.format("(%s = '') IS NOT FALSE", fieldName));
+  }
+
   public final void addIsNotNullOrEmptyClause(String fieldName) {
     // Clever PostgreSQL construct for "string is not null and not empty"
     whereClauses.add(String.format("%s != ''", fieldName));

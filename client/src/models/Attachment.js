@@ -1,4 +1,5 @@
 import Model from "components/Model"
+import utils from "utils"
 import * as yup from "yup"
 
 export default class Attachment extends Model {
@@ -29,12 +30,17 @@ export default class Attachment extends Model {
   })
 
   static basicFieldsQuery =
-    "uuid fileName caption description classification mimeType contentLength"
+    "uuid fileName caption description classification mimeType contentLength createdAt"
 
   static autocompleteQuery = Attachment.basicFieldsQuery
 
   constructor(props) {
     super(Model.fillObject(props, Attachment.yupSchema))
+  }
+
+  iconUrl() {
+    const { backgroundImage } = utils.getAttachmentIconDetails(this, true)
+    return backgroundImage
   }
 
   static FILTERED_CLIENT_SIDE_FIELDS = []
