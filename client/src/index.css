@@ -540,6 +540,32 @@ table hr.attendee-divider {
   clear: both;
 }
 
+/* Colours for marker clusters */
+.marker-cluster div {
+  color: white;
+}
+/* less than 10 markers */
+.marker-cluster-small {
+  background-color: rgba(255, 91, 53, 0.6);
+}
+.marker-cluster-small div {
+  background-color: rgba(255, 78, 43, 0.6);
+}
+/* from 10 to 99 markers */
+.marker-cluster-medium {
+  background-color: rgba(250, 65, 33, 0.6);
+}
+.marker-cluster-medium div {
+  background-color: rgba(237, 51, 23, 0.6);
+}
+/* 100 markers or more */
+.marker-cluster-large {
+  background-color: rgba(224, 35, 12, 0.6);
+}
+.marker-cluster-large div {
+  background-color: rgba(211, 12, 1, 0.6);
+}
+
 /* Colour indication of reports in the ReportSummary */
 .report-draft {
   width: 1.5rem;
