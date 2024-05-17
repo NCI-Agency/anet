@@ -65,7 +65,9 @@ public class DailyRollupEmail implements AnetEmailAction {
     query.setEngagementDateStart(engagementDateStart);
     query.setSortBy(ReportSearchSortBy.ENGAGEMENT_DATE);
     query.setSortOrder(SortOrder.DESC);
-    query.setOrgUuid(orgUuid);
+    if (orgUuid != null) {
+      query.setOrgUuid(List.of(orgUuid));
+    }
     query.setOrgRecurseStrategy(RecurseStrategy.CHILDREN);
 
     List<Report> reports = AnetObjectEngine.getInstance().getReportDao().search(query).getList();

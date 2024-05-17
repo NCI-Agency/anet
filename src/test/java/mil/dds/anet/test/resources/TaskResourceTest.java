@@ -116,7 +116,7 @@ class TaskResourceTest extends AbstractResourceTest {
 
     // Fetch the tasks of the organization
     final TaskSearchQueryInput queryTasks =
-        TaskSearchQueryInput.builder().withTaskedOrgUuid(ef8.getUuid()).build();
+        TaskSearchQueryInput.builder().withTaskedOrgUuid(List.of(ef8.getUuid())).build();
     final AnetBeanList_Task tasks =
         withCredentials(jackUser, t -> queryExecutor.taskList(getListFields(FIELDS), queryTasks));
     assertThat(tasks.getList()).anyMatch(t -> t.getUuid().equals(returnedA.getUuid()));
@@ -153,7 +153,7 @@ class TaskResourceTest extends AbstractResourceTest {
     assertThat(ef2).isNotNull();
 
     query1.setText(null);
-    query1.setTaskedOrgUuid(ef2.getUuid());
+    query1.setTaskedOrgUuid(List.of(ef2.getUuid()));
     final AnetBeanList_Task searchObjects2 =
         withCredentials(jackUser, t -> queryExecutor.taskList(getListFields(FIELDS), query1));
     assertThat(searchObjects2).isNotNull();

@@ -11,6 +11,7 @@ import mil.dds.anet.database.TaskDao;
 import mil.dds.anet.database.mappers.TaskMapper;
 import mil.dds.anet.search.AbstractSearchQueryBuilder.Comparison;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.Utils;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSearchQuery>
@@ -45,7 +46,7 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
           AnetObjectEngine.getInstance().getTaskDao().getSubscriptionUpdate(null)));
     }
 
-    if (query.getTaskedOrgUuid() != null) {
+    if (!Utils.isEmptyOrNull(query.getTaskedOrgUuid())) {
       addTaskedOrgUuidQuery(query);
     }
 
@@ -117,7 +118,7 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
           "parent_orgs", "organizations", "\"parentOrgUuid\"", "orgUuid", query.getTaskedOrgUuid(),
           RecurseStrategy.CHILDREN.equals(query.getOrgRecurseStrategy()));
     } else {
-      qb.addStringEqualsClause("orgUuid", "\"taskTaskedOrganizations\".\"organizationUuid\"",
+      qb.addInListClause("orgUuid", "\"taskTaskedOrganizations\".\"organizationUuid\"",
           query.getTaskedOrgUuid());
     }
   }

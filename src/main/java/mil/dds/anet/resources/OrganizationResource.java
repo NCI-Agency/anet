@@ -63,6 +63,11 @@ public class OrganizationResource {
     return org;
   }
 
+  @GraphQLQuery(name = "organizations")
+  public List<Organization> getByUuids(@GraphQLArgument(name = "uuids") List<String> uuids) {
+    return dao.getByIds(uuids);
+  }
+
   @GraphQLMutation(name = "createOrganization")
   public Organization createOrganization(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "organization") Organization org) {

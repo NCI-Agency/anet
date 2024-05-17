@@ -15,7 +15,7 @@ public class TaskSearchQuery extends SubscribableObjectSearchQuery<TaskSearchSor
   private Boolean isAssigned;
   @GraphQLQuery
   @GraphQLInputField
-  private String taskedOrgUuid;
+  private List<String> taskedOrgUuid;
   @GraphQLQuery
   @GraphQLInputField
   private RecurseStrategy orgRecurseStrategy;
@@ -64,11 +64,11 @@ public class TaskSearchQuery extends SubscribableObjectSearchQuery<TaskSearchSor
     this.isAssigned = isAssigned;
   }
 
-  public String getTaskedOrgUuid() {
+  public List<String> getTaskedOrgUuid() {
     return taskedOrgUuid;
   }
 
-  public void setTaskedOrgUuid(String taskedOrgUuid) {
+  public void setTaskedOrgUuid(List<String> taskedOrgUuid) {
     this.taskedOrgUuid = taskedOrgUuid;
   }
 
@@ -184,6 +184,9 @@ public class TaskSearchQuery extends SubscribableObjectSearchQuery<TaskSearchSor
     final TaskSearchQuery clone = (TaskSearchQuery) super.clone();
     if (parentTaskUuid != null) {
       clone.setParentTaskUuid(new ArrayList<>(parentTaskUuid));
+    }
+    if (taskedOrgUuid != null) {
+      clone.setTaskedOrgUuid(new ArrayList<>(taskedOrgUuid));
     }
     return clone;
   }

@@ -219,7 +219,7 @@ public class PersonResourceTest extends AbstractResourceTest {
         .filter(o -> o.getShortName().equalsIgnoreCase("EF 1.1")).findFirst().get();
 
     query1.setText(null);
-    query1.setOrgUuid(org.getUuid());
+    query1.setOrgUuid(List.of(org.getUuid()));
     searchResults =
         withCredentials(jackUser, t -> queryExecutor.personList(getListFields(FIELDS), query1));
     assertThat(searchResults.getList()).isNotEmpty();
@@ -237,7 +237,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     org = orgs.getList().stream().filter(o -> o.getShortName().equalsIgnoreCase("EF 1")).findFirst()
         .get();
     query1.setStatus(null);
-    query1.setOrgUuid(org.getUuid());
+    query1.setOrgUuid(List.of(org.getUuid()));
     // First don't include child orgs and then increase the scope and verify results increase.
     final AnetBeanList_Person parentOnlyResults =
         withCredentials(jackUser, t -> queryExecutor.personList(getListFields(FIELDS), query1));

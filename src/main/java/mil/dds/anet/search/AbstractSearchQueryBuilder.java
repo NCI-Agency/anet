@@ -256,7 +256,7 @@ public abstract class AbstractSearchQueryBuilder<B, T extends AbstractSearchQuer
         findChildren ? "parent_uuid" : "uuid"));
   }
 
-  private final void addRecursiveClause(AbstractSearchQueryBuilder<B, T> outerQb, String tableName,
+  public final void addRecursiveClause(AbstractSearchQueryBuilder<B, T> outerQb, String tableName,
       String[] foreignKeys, String withTableName, String recursiveTableName,
       String recursiveForeignKey, String paramName, List<String> fieldValues,
       boolean findChildren) {

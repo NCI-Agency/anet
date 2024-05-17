@@ -34,6 +34,7 @@ import {
   SearchQueryPropType
 } from "components/SearchFilters"
 import { Field, Form, Formik } from "formik"
+import _isEmpty from "lodash/isEmpty"
 import { Report, RollupGraph } from "models"
 import moment from "moment"
 import pluralize from "pluralize"
@@ -139,7 +140,7 @@ const Chart = ({
     }
     return generateChartDataFromAllReports(
       data.reportList.list,
-      queryParams.orgUuid
+      !_isEmpty(queryParams.orgUuid)
     )
   }, [data, queryParams.orgUuid])
 
@@ -273,13 +274,13 @@ const updateOrgReports = (
   return elem
 }
 
-const generateChartDataFromAllReports = (allReports, orgFilterUuid) => {
+const generateChartDataFromAllReports = (allReports, forFilteredOrg) => {
   return allReports.reduce(
     (acc, r) => {
       if (r.advisorOrg) {
         const topLevelAdvisorOrg = r.advisorOrg.ascendantOrgs[0]
         // If reports are not filtered for organization show reports under the top level organization
-        const displayedAdvisorOrg = orgFilterUuid
+        const displayedAdvisorOrg = forFilteredOrg
           ? r.advisorOrg
           : topLevelAdvisorOrg
         updateOrgReports(
@@ -291,7 +292,7 @@ const generateChartDataFromAllReports = (allReports, orgFilterUuid) => {
       }
       if (r.interlocutorOrg) {
         const topLevelInterlocutorOrg = r.interlocutorOrg.ascendantOrgs[0]
-        const displayedInterlocutorOrg = orgFilterUuid
+        const displayedInterlocutorOrg = forFilteredOrg
           ? r.interlocutorOrg
           : topLevelInterlocutorOrg
         updateOrgReports(
