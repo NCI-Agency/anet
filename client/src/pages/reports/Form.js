@@ -249,18 +249,10 @@ const ReportForm = ({
   let recentTasksVarUser
   if (currentUser.isAdmin()) {
     recentTasksVarUser = recentTasksVarCommon
-  } else if (currentUser.position?.organization) {
-    recentTasksVarUser = {
-      ...recentTasksVarCommon,
-      inMyReports: true,
-      taskedOrgUuid: currentUser.position?.organization?.uuid,
-      orgRecurseStrategy: RECURSE_STRATEGY.PARENTS
-    }
   } else {
     recentTasksVarUser = {
-      pageSize: 1,
-      status: Model.STATUS.ACTIVE,
-      text: "__should_not_match_anything__" // TODO: Do this more gracefully
+      ...recentTasksVarCommon,
+      inMyReports: true
     }
   }
   const { loading, error, data } = API.useApiQuery(GQL_GET_RECENTS, {
