@@ -74,7 +74,7 @@
 }
 
 .editor-link-chooser {
-  z-index: 1300;
+  z-index: 1300 !important;
 }
 
 /* 
