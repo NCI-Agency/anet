@@ -5,7 +5,6 @@ import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
 import { OrganizationSimpleOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
-import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 import { customFieldsJSONString } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
 import LinkTo from "components/LinkTo"
@@ -127,65 +126,21 @@ const MergeOrganizations = ({ pageDispatchers }) => {
                 <br />- Required fields are:
                 <ul>
                   <li>{Settings.fields.organization.shortName?.label}</li>
-                  <li>{Settings.fields.organization.status?.label}</li>
-                  {!Settings.fields.organization.longName?.exclude &&
-                    !Settings.fields.organization.longName?.optional && (
-                      <li>{Settings.fields.organization.longName?.label}</li>
-                  )}
-                  {!Settings.fields.organization.identificationCode
-                    ?.optional && (
-                    <li>
-                      {Settings.fields.organization.identificationCode?.label}
-                    </li>
-                  )}
                 </ul>
               </Callout>
             </div>
           )}
           {areAllSet(organization1, organization2, mergedOrganization) && (
             <fieldset>
-              <MergeField
-                label="Avatar"
-                value={
-                  <AvatarDisplayComponent
-                    avatarUuid={mergedOrganization.avatarUuid}
-                    height={128}
-                    width={128}
-                    style={{
-                      maxWidth: "100%",
-                      display: "block",
-                      margin: "0 auto"
-                    }}
-                  />
-                }
-                align={ALIGN_OPTIONS.CENTER}
-                action={getClearButton(() =>
-                  dispatchMergeActions(
-                    setAMergedField("avatarUuid", null, null)
-                  )
-                )}
-                fieldName="avatarUuid"
-                mergeState={mergeState}
-                dispatchMergeActions={dispatchMergeActions}
-              />
-              <MergeField
-                label="Name"
-                value={mergedOrganization.shortName}
-                align={ALIGN_OPTIONS.CENTER}
-                action={getInfoButton("Name is required.")}
-                fieldName="shortName"
-                mergeState={mergeState}
-                dispatchMergeActions={dispatchMergeActions}
-              />
               <DictionaryField
                 wrappedComponent={MergeField}
-                dictProps={Settings.fields.organization.identificationCode}
-                value={mergedOrganization.identificationCode}
+                dictProps={Settings.fields.organization.shortName}
+                value={mergedOrganization.shortName}
                 align={ALIGN_OPTIONS.CENTER}
                 action={getInfoButton(
-                  `${Settings.fields.organization.identificationCode?.label} is required.`
+                  `${Settings.fields.organization.shortName?.label} is required.`
                 )}
-                fieldName="identificationCode"
+                fieldName="shortName"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
@@ -203,13 +158,15 @@ const MergeOrganizations = ({ pageDispatchers }) => {
               />
               <DictionaryField
                 wrappedComponent={MergeField}
-                dictProps={Settings.fields.organization.type}
-                value={mergedOrganization.type}
+                dictProps={Settings.fields.organization.identificationCode}
+                value={mergedOrganization.identificationCode}
                 align={ALIGN_OPTIONS.CENTER}
                 action={getClearButton(() =>
-                  dispatchMergeActions(setAMergedField("type", "", null))
+                  dispatchMergeActions(
+                    setAMergedField("identificationCode", "", null)
+                  )
                 )}
-                fieldName="type"
+                fieldName="identificationCode"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
@@ -423,97 +380,71 @@ const OrganizationColumn = ({
       </Form.Group>
       {areAllSet(organization) && (
         <fieldset>
-          <MergeField
-            label="Avatar"
-            fieldName="avatarUuid"
-            value={
-              <AvatarDisplayComponent
-                avatarUuid={organization.avatarUuid}
-                height={128}
-                width={128}
-                style={{
-                  maxWidth: "100%",
-                  display: "block",
-                  margin: "0 auto"
-                }}
-              />
-            }
-            align={align}
-            action={getActionButton(
-              () => {
-                dispatchMergeActions(
-                  setAMergedField("avatarUuid", organization.avatarUuid, align)
-                )
-              },
-              align,
-              mergeState,
-              "avatarUuid"
-            )}
-            mergeState={mergeState}
-            dispatchMergeActions={dispatchMergeActions}
-          />
-          <MergeField
-            label={Settings.fields.organization.shortName?.label}
+          <DictionaryField
+            wrappedComponent={MergeField}
+            dictProps={Settings.fields.organization.shortName}
             fieldName="shortName"
             value={organization.shortName}
             align={align}
             action={getActionButton(
               () => {
                 dispatchMergeActions(
-                  setAMergedField("shortName", organization.shortName, align)
-                )
-                dispatchMergeActions(
                   setAMergedField("uuid", organization.uuid, align)
                 )
                 dispatchMergeActions(
-                  setAMergedField(
-                    "pendingVerification",
-                    organization.pendingVerification,
-                    align
-                  )
+                  setAMergedField("shortName", organization.shortName, align)
                 )
               },
               align,
               mergeState,
-              "name"
+              "shortName"
             )}
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
           />
-          <MergeField
-            label={Settings.fields.organization.parentOrg?.label}
-            fieldName="parentOrg"
-            value={organization.parentOrg.shortName}
+          <DictionaryField
+            wrappedComponent={MergeField}
+            dictProps={Settings.fields.organization.longName}
+            fieldName="longName"
+            value={organization.longName}
             align={align}
             action={getActionButton(
               () => {
                 dispatchMergeActions(
-                  setAMergedField(
-                    "parentOrg",
-                    organization.parentOrg.uuid,
-                    align
-                  )
-                )
-                dispatchMergeActions(
-                  setAMergedField("uuid", organization.uuid, align)
-                )
-                dispatchMergeActions(
-                  setAMergedField(
-                    "pendingVerification",
-                    organization.pendingVerification,
-                    align
-                  )
+                  setAMergedField("longName", organization.longName, align)
                 )
               },
               align,
               mergeState,
-              "parent"
+              "longName"
             )}
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
           />
-          <MergeField
-            label={Settings.fields.organization.status?.label}
+          <DictionaryField
+            wrappedComponent={MergeField}
+            dictProps={Settings.fields.organization.parentOrg}
+            fieldName="parentOrg"
+            value={
+              <LinkTo modelType="Organization" model={organization.parentOrg} />
+            }
+            align={align}
+            action={getActionButton(
+              () => {
+                dispatchMergeActions(
+                  setAMergedField("parentOrg", organization.parentOrg, align)
+                )
+              },
+              align,
+              mergeState,
+              "parentOrg"
+            )}
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
+          />
+          <DictionaryField
+            wrappedComponent={MergeField}
+            dictProps={Settings.fields.organization.status}
             fieldName="status"
             value={organization.status}
             align={align}
@@ -521,16 +452,6 @@ const OrganizationColumn = ({
               () => {
                 dispatchMergeActions(
                   setAMergedField("status", organization.status, align)
-                )
-                dispatchMergeActions(
-                  setAMergedField("uuid", organization.uuid, align)
-                )
-                dispatchMergeActions(
-                  setAMergedField(
-                    "pendingVerification",
-                    organization.pendingVerification,
-                    align
-                  )
                 )
               },
               align,
@@ -540,8 +461,9 @@ const OrganizationColumn = ({
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
           />
-          <MergeField
-            label={Settings.fields.organization.identificationCode?.label}
+          <DictionaryField
+            wrappedComponent={MergeField}
+            dictProps={Settings.fields.organization.identificationCode}
             fieldName="identificationCode"
             value={organization.identificationCode}
             align={align}
@@ -551,16 +473,6 @@ const OrganizationColumn = ({
                   setAMergedField(
                     "identificationCode",
                     organization.identificationCode,
-                    align
-                  )
-                )
-                dispatchMergeActions(
-                  setAMergedField("uuid", organization.uuid, align)
-                )
-                dispatchMergeActions(
-                  setAMergedField(
-                    "pendingVerification",
-                    organization.pendingVerification,
                     align
                   )
                 )
