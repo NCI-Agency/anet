@@ -32,7 +32,7 @@ describe("Merge organizations page", () => {
     await MergeOrganizations.waitForColumnToChange(
       EXAMPLE_ORGANIZATIONS.validLeft.shortName,
       "left",
-      "Organization"
+      "Name"
     )
     expect(
       await (
@@ -59,10 +59,6 @@ describe("Merge organizations page", () => {
     ).waitForDisplayed()
   })
   it("Should display fields values of the right organization", async() => {
-    await MergeOrganizations.open()
-    await (await MergeOrganizations.getTitle()).waitForExist()
-    await (await MergeOrganizations.getTitle()).waitForDisplayed()
-
     await (
       await MergeOrganizations.getRightOrganizationField()
     ).setValue(EXAMPLE_ORGANIZATIONS.validRight.search)
@@ -74,7 +70,7 @@ describe("Merge organizations page", () => {
     await MergeOrganizations.waitForColumnToChange(
       EXAMPLE_ORGANIZATIONS.validRight.shortName,
       "right",
-      "Organization"
+      "Name"
     )
     expect(
       await (

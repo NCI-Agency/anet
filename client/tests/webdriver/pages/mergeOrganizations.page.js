@@ -34,7 +34,9 @@ class MergeOrganizations extends Page {
   }
 
   async getColumnContent(side, text) {
-    return browser.$(`//div[@id="organization-popover"]//th[text()="${text}"]`)
+    return browser.$(
+      `//div[@id="${side}-merge-org-col"]//div[text()="${text}"]/following-sibling::div`
+    )
   }
 
   async getMergeOrganizationsButton() {
