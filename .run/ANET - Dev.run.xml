@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="ANET - Dev" type="CompoundRunConfigurationType">
+    <toRun name="ANET [run] (Dev)" type="GradleRunConfiguration" />
+    <toRun name="ANET - localhost:8080 (Dev Env)" type="JavascriptDebugType" />
+    <method v="2" />
+  </configuration>
+</component>
