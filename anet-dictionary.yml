@@ -408,6 +408,9 @@ fields:
           filter:
             orgUuid: 70193ee9-05b4-4aac-80b5-75609825db9f
     customFields:
+      gridLocation:
+        type: geo_location
+        label: Grid location
       relatedReport:
         type: anet_object
         label: Related report

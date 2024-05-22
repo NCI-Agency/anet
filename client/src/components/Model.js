@@ -180,6 +180,7 @@ export const CUSTOM_FIELD_TYPE = {
   DATE: "date",
   DATETIME: "datetime",
   JSON: "json",
+  GEO_LOCATION: "geo_location",
   ENUM: "enum",
   ENUMSET: "enumset",
   ARRAY_OF_OBJECTS: "array_of_objects",
@@ -194,6 +195,7 @@ export const CUSTOM_FIELD_TYPE_DEFAULTS = {
   [CUSTOM_FIELD_TYPE.DATE]: null,
   [CUSTOM_FIELD_TYPE.DATETIME]: null,
   [CUSTOM_FIELD_TYPE.JSON]: null,
+  [CUSTOM_FIELD_TYPE.GEO_LOCATION]: {},
   [CUSTOM_FIELD_TYPE.ENUM]: "",
   [CUSTOM_FIELD_TYPE.ENUMSET]: [],
   [CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS]: [],
@@ -230,6 +232,10 @@ const CUSTOM_FIELD_TYPE_SCHEMA = {
         : testContext.createError({ message: "Invalid JSON" })
     )
     .default(CUSTOM_FIELD_TYPE_DEFAULTS[CUSTOM_FIELD_TYPE.JSON]),
+  [CUSTOM_FIELD_TYPE.GEO_LOCATION]: yup
+    .object()
+    .nullable()
+    .default(CUSTOM_FIELD_TYPE_DEFAULTS[CUSTOM_FIELD_TYPE.GEO_LOCATION]),
   [CUSTOM_FIELD_TYPE.ENUM]: yup
     .string()
     .nullable()

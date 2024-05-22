@@ -31,11 +31,12 @@ const DEFAULT_COORDINATES = {
   displayedCoordinate: null
 }
 
-const GeoLocation = props => {
+const GeoLocation = ({ labels, ...props }) => {
   const [locationFormat, setLocationFormat] = useState(Location.locationFormat)
-  const label = Location.LOCATION_FORMAT_LABELS[locationFormat]
+  const label = labels[locationFormat]
   return (
     <BaseGeoLocation
+      labels={labels}
       locationFormat={locationFormat}
       setLocationFormat={setLocationFormat}
       label={label}
@@ -43,11 +44,19 @@ const GeoLocation = props => {
     />
   )
 }
+GeoLocation.propTypes = {
+  labels: PropTypes.object
+}
+GeoLocation.defaultProps = {
+  labels: Location.LOCATION_FORMAT_LABELS
+}
 
 export const BaseGeoLocation = ({
+  labels,
   locationFormat,
   setLocationFormat,
   label,
+  name,
   coordinates,
   editable,
   setFieldValue,
@@ -63,10 +72,14 @@ export const BaseGeoLocation = ({
   if (!editable) {
     const humanValue = (
       <ReadonlyGeoLocation>
-        <CoordinatesFormField coordinates={coordinates} />
-        <AllFormatsInfo
+        <CoordinatesFormField
+          name={name}
+          labels={labels}
           coordinates={coordinates}
-          locationFormat={locationFormat}
+        />
+        <AllFormatsInfo
+          name={name}
+          coordinates={coordinates}
           setLocationFormat={setLocationFormat}
         />
       </ReadonlyGeoLocation>
@@ -75,7 +88,7 @@ export const BaseGeoLocation = ({
     if (displayType === GEO_LOCATION_DISPLAY_TYPE.FORM_FIELD) {
       return (
         <Field
-          name="location"
+          name={name || "location"}
           label={label}
           component={FieldHelper.ReadonlyField}
           humanValue={humanValue}
@@ -88,8 +101,10 @@ export const BaseGeoLocation = ({
   }
 
   return (
-    <div id="fg-geoLocation">
+    <div id={`fg-${name || "geoLocation"}`}>
       <CoordinatesFormField
+        name={name}
+        labels={labels}
         coordinates={coordinates}
         editable
         setFieldValue={setFieldValue}
@@ -121,10 +136,12 @@ export const CoordinatesPropType = PropTypes.shape({
 })
 
 BaseGeoLocation.propTypes = {
+  labels: PropTypes.object,
   locationFormat: PropTypes.oneOf(Object.keys(Location.LOCATION_FORMATS))
     .isRequired,
   setLocationFormat: PropTypes.func.isRequired,
   label: PropTypes.string,
+  name: PropTypes.string,
   coordinates: CoordinatesPropType,
   editable: PropTypes.bool,
   setFieldValue: utils.fnRequiredWhen.bind(null, "editable"),
@@ -137,6 +154,7 @@ BaseGeoLocation.propTypes = {
 }
 
 BaseGeoLocation.defaultProps = {
+  labels: Location.LOCATION_FORMAT_LABELS,
   coordinates: DEFAULT_COORDINATES,
   editable: false,
   isSubmitting: false,
@@ -145,14 +163,20 @@ BaseGeoLocation.defaultProps = {
 
 export default GeoLocation
 
+function getQualifiedFieldName(name, fieldName) {
+  return name ? `${name}.${fieldName}` : fieldName
+}
+
 /* =========================== MGRSFormField ================================ */
 
 const MGRSFormField = ({
+  name,
   coordinates,
   editable,
   setFieldValue,
   setFieldTouched,
   isSubmitting,
+  labels,
   locationFormat,
   setLocationFormat
 }) => {
@@ -164,14 +188,14 @@ const MGRSFormField = ({
   return (
     <Row style={{ marginBottom: "1rem" }}>
       <Col sm={2} as={Form.Label} htmlFor="displayedCoordinate">
-        {Location.LOCATION_FORMAT_LABELS[locationFormat]}
+        {labels[locationFormat]}
       </Col>
 
       <Col sm={7}>
         <Row>
           <Col sm={4}>
             <Field
-              name="displayedCoordinate"
+              name={getQualifiedFieldName(name, "displayedCoordinate")}
               component={FieldHelper.InputFieldNoLabel}
               onChange={e => updateCoordinatesOnChange(e.target.value)}
               onBlur={e => {
@@ -180,16 +204,24 @@ const MGRSFormField = ({
             />
           </Col>
           <CoordinateActionButtons
+            name={name}
             coordinates={coordinates}
             isSubmitting={isSubmitting}
             disabled={!displayedCoordinate}
             onClear={() => {
-              setFieldTouched("displayedCoordinate", false, false)
-              setFieldValue("displayedCoordinate", null, false)
-              setFieldValue("lat", null, false)
-              setFieldValue("lng", null, false)
+              setFieldTouched(
+                getQualifiedFieldName(name, "displayedCoordinate"),
+                false,
+                false
+              )
+              setFieldValue(
+                getQualifiedFieldName(name, "displayedCoordinate"),
+                null,
+                false
+              )
+              setFieldValue(getQualifiedFieldName(name, "lat"), null, false)
+              setFieldValue(getQualifiedFieldName(name, "lng"), null, false)
             }}
-            locationFormat={locationFormat}
             setLocationFormat={setLocationFormat}
           />
         </Row>
@@ -198,30 +230,33 @@ const MGRSFormField = ({
   )
   // Lat-Lng fields are read only, no need to validate in onChange or onBlur
   function updateCoordinatesOnChange(val) {
-    setFieldValue("displayedCoordinate", val)
+    setFieldValue(getQualifiedFieldName(name, "displayedCoordinate"), val)
     const newLatLng = convertMGRSToLatLng(val)
-    setFieldValue("lat", newLatLng[0], false)
-    setFieldValue("lng", newLatLng[1], false)
+    setFieldValue(getQualifiedFieldName(name, "lat"), newLatLng[0], false)
+    setFieldValue(getQualifiedFieldName(name, "lng"), newLatLng[1], false)
   }
   function updateCoordinatesOnBlur(val) {
-    setFieldTouched("displayedCoordinate", true)
+    setFieldTouched(getQualifiedFieldName(name, "displayedCoordinate"), true)
     const newLatLng = convertMGRSToLatLng(val)
-    setFieldValue("lat", newLatLng[0], false)
-    setFieldValue("lng", newLatLng[1], false)
+    setFieldValue(getQualifiedFieldName(name, "lat"), newLatLng[0], false)
+    setFieldValue(getQualifiedFieldName(name, "lng"), newLatLng[1], false)
   }
 }
 
 MGRSFormField.propTypes = {
+  name: PropTypes.string,
   coordinates: CoordinatesPropType,
   editable: PropTypes.bool,
   setFieldValue: utils.fnRequiredWhen.bind(null, "editable"),
   setFieldTouched: utils.fnRequiredWhen.bind(null, "editable"),
   isSubmitting: PropTypes.bool,
+  labels: PropTypes.object,
   locationFormat: PropTypes.string,
   setLocationFormat: PropTypes.func
 }
 
 MGRSFormField.defaultProps = {
+  labels: Location.LOCATION_FORMAT_LABELS,
   coordinates: DEFAULT_COORDINATES,
   editable: false,
   isSubmitting: false
@@ -230,11 +265,13 @@ MGRSFormField.defaultProps = {
 /* ========================= LatLonFormField ================================ */
 
 const LatLonFormField = ({
+  name,
   coordinates,
   editable,
   setFieldValue,
   setFieldTouched,
   isSubmitting,
+  labels,
   locationFormat,
   setLocationFormat
 }) => {
@@ -250,15 +287,15 @@ const LatLonFormField = ({
   }
   return (
     <Row style={{ marginBottom: "1rem" }}>
-      <Col sm={2} as={Form.Label} htmlFor="lat">
-        {Location.LOCATION_FORMAT_LABELS[locationFormat]}
+      <Col sm={2} as={Form.Label} htmlFor={getQualifiedFieldName(name, "lat")}>
+        {labels[locationFormat]}
       </Col>
 
       <Col sm={7}>
         <Row>
           <Col sm={3} style={{ marginRight: "8px" }}>
             <Field
-              name="lat"
+              name={getQualifiedFieldName(name, "lat")}
               component={FieldHelper.InputFieldNoLabel}
               onChange={e => setLatOnChange(e.target.value)}
               onBlur={e => {
@@ -268,7 +305,7 @@ const LatLonFormField = ({
           </Col>
           <Col sm={3}>
             <Field
-              name="lng"
+              name={getQualifiedFieldName(name, "lng")}
               component={FieldHelper.InputFieldNoLabel}
               onChange={e => setLngOnChange(e.target.value)}
               onBlur={e => {
@@ -277,18 +314,21 @@ const LatLonFormField = ({
             />
           </Col>
           <CoordinateActionButtons
+            name={name}
             coordinates={coordinates}
             isSubmitting={isSubmitting}
             disabled={!utils.isNumeric(lat) && !utils.isNumeric(lng)}
             onClear={() => {
               // setting second param to false prevents validation since lat, lng can be null together
-              setFieldTouched("lat", false, false)
-              setFieldTouched("lng", false, false)
-              setFieldValue("displayedCoordinate", null)
-              setFieldValue("lat", null)
-              setFieldValue("lng", null)
+              setFieldTouched(getQualifiedFieldName(name, "lat"), false, false)
+              setFieldTouched(getQualifiedFieldName(name, "lng"), false, false)
+              setFieldValue(
+                getQualifiedFieldName(name, "displayedCoordinate"),
+                null
+              )
+              setFieldValue(getQualifiedFieldName(name, "lat"), null)
+              setFieldValue(getQualifiedFieldName(name, "lng"), null)
             }}
-            locationFormat={locationFormat}
             setLocationFormat={setLocationFormat}
           />
         </Row>
@@ -299,39 +339,58 @@ const LatLonFormField = ({
   // Don't parse in onChange, it limits user
   // displayedCoordinate is in read-only field, no need to validate
   function setLatOnChange(val) {
-    setFieldValue("lat", val)
-    setFieldValue("displayedCoordinate", convertLatLngToMGRS(val, lng), false)
+    setFieldValue(getQualifiedFieldName(name, "lat"), val)
+    setFieldValue(
+      getQualifiedFieldName(name, "displayedCoordinate"),
+      convertLatLngToMGRS(val, lng),
+      false
+    )
   }
 
   function setLngOnChange(val) {
-    setFieldValue("lng", val)
-    setFieldValue("displayedCoordinate", convertLatLngToMGRS(lat, val), false)
+    setFieldValue(getQualifiedFieldName(name, "lng"), val)
+    setFieldValue(
+      getQualifiedFieldName(name, "displayedCoordinate"),
+      convertLatLngToMGRS(lat, val),
+      false
+    )
   }
 
   function setParsedLatOnBlur(val) {
-    setFieldValue("displayedCoordinate", convertLatLngToMGRS(val, lng), false)
-    setFieldTouched("lat", true)
-    setFieldValue("lat", parseCoordinate(val))
+    setFieldValue(
+      getQualifiedFieldName(name, "displayedCoordinate"),
+      convertLatLngToMGRS(val, lng),
+      false
+    )
+    setFieldTouched(getQualifiedFieldName(name, "lat"), true)
+    setFieldValue(getQualifiedFieldName(name, "lat"), parseCoordinate(val))
   }
 
   function setParsedLngOnBlur(val) {
-    setFieldValue("displayedCoordinate", convertLatLngToMGRS(lat, val), false)
-    setFieldTouched("lng", true)
-    setFieldValue("lng", parseCoordinate(val))
+    setFieldValue(
+      getQualifiedFieldName(name, "displayedCoordinate"),
+      convertLatLngToMGRS(lat, val),
+      false
+    )
+    setFieldTouched(getQualifiedFieldName(name, "lng"), true)
+    setFieldValue(getQualifiedFieldName(name, "lng"), parseCoordinate(val))
   }
 }
 
 LatLonFormField.propTypes = {
+  name: PropTypes.string,
   coordinates: CoordinatesPropType,
   editable: PropTypes.bool,
   setFieldValue: utils.fnRequiredWhen.bind(null, "editable"),
   setFieldTouched: utils.fnRequiredWhen.bind(null, "editable"),
   isSubmitting: PropTypes.bool,
+  labels: PropTypes.object,
   locationFormat: PropTypes.string,
   setLocationFormat: PropTypes.func
 }
 
 LatLonFormField.defaultProps = {
+  labels: Location.LOCATION_FORMAT_LABELS,
   coordinates: DEFAULT_COORDINATES,
   editable: false,
   isSubmitting: false
@@ -340,11 +399,11 @@ LatLonFormField.defaultProps = {
 /* ======================= CoordinateActionButtons ============================ */
 
 const CoordinateActionButtons = ({
+  name,
   coordinates,
   onClear,
   isSubmitting,
   disabled,
-  locationFormat,
   setLocationFormat
 }) => {
   return (
@@ -359,8 +418,8 @@ const CoordinateActionButtons = ({
         </Button>
       </Tooltip>
       <AllFormatsInfo
+        name={name}
         coordinates={coordinates}
-        locationFormat={locationFormat}
         setLocationFormat={setLocationFormat}
         inForm
       />
@@ -369,11 +428,11 @@ const CoordinateActionButtons = ({
 }
 
 CoordinateActionButtons.propTypes = {
+  name: PropTypes.string,
   coordinates: CoordinatesPropType,
   onClear: PropTypes.func.isRequired,
   isSubmitting: PropTypes.bool.isRequired,
   disabled: PropTypes.bool,
-  locationFormat: PropTypes.string.isRequired,
   setLocationFormat: PropTypes.func.isRequired
 }
 
@@ -384,12 +443,7 @@ CoordinateActionButtons.defaultProps = {
 
 /* ======================= AllFormatsInfo ============================ */
 
-const AllFormatsInfo = ({
-  coordinates,
-  locationFormat,
-  setLocationFormat,
-  inForm
-}) => {
+const AllFormatsInfo = ({ name, coordinates, setLocationFormat, inForm }) => {
   const { lat, lng } = coordinates
   if (!inForm && (!utils.isNumeric(lat) || !utils.isNumeric(lng))) {
     return null
@@ -415,7 +469,7 @@ const AllFormatsInfo = ({
               <tr>
                 <td style={{ whiteSpace: "nowrap" }}>
                   <Button
-                    name="location"
+                    name={name}
                     onClick={() =>
                       setLocationFormat(Location.LOCATION_FORMATS.LAT_LON)}
                     variant="outline-secondary"
@@ -428,13 +482,13 @@ const AllFormatsInfo = ({
                   </Button>
                 </td>
                 <td>
-                  <LatLonFormField coordinates={coordinates} />
+                  <LatLonFormField name={name} coordinates={coordinates} />
                 </td>
               </tr>
               <tr>
                 <td style={{ whiteSpace: "nowrap" }}>
                   <Button
-                    name="location"
+                    name={name}
                     onClick={() =>
                       setLocationFormat(Location.LOCATION_FORMATS.MGRS)}
                     variant="outline-secondary"
@@ -447,7 +501,7 @@ const AllFormatsInfo = ({
                   </Button>
                 </td>
                 <td>
-                  <MGRSFormField coordinates={coordinates} />
+                  <MGRSFormField name={name} coordinates={coordinates} />
                 </td>
               </tr>
             </tbody>
@@ -473,8 +527,8 @@ const AllFormatsInfo = ({
 }
 
 AllFormatsInfo.propTypes = {
+  name: PropTypes.string,
   coordinates: CoordinatesPropType,
-  locationFormat: PropTypes.string.isRequired,
   setLocationFormat: PropTypes.func.isRequired,
   inForm: PropTypes.bool
 }

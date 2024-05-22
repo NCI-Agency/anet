@@ -144,7 +144,19 @@ $defs:
       type:
         title: value type field
         type: string
-        enum: [text, number, date, datetime, json, enum, enumset, array_of_objects, anet_object, array_of_anet_objects, special_field]
+        enum:
+          - text
+          - number
+          - date
+          - datetime
+          - json
+          - geo_location
+          - enum
+          - enumset
+          - array_of_objects
+          - anet_object
+          - array_of_anet_objects
+          - special_field
       typeError:
         title: custom value for type error
         type: string
@@ -200,7 +212,7 @@ $defs:
         oneOf:
         - properties:
             type:
-              enum: [text, number, date, datetime, json]
+              enum: [text, number, date, datetime, json, geo_location]
         - properties:
             type:
               enum: [enum, enumset]
