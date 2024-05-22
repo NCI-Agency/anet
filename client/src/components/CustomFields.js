@@ -5,7 +5,9 @@ import CustomDateInput from "components/CustomDateInput"
 import LinkAnetEntity from "components/editor/LinkAnetEntity"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
+import GeoLocation, { GEO_LOCATION_DISPLAY_TYPE } from "components/GeoLocation"
 import LikertScale from "components/graphs/LikertScale"
+import Leaflet from "components/Leaflet"
 import Model, {
   createYupObjectShape,
   CUSTOM_FIELD_TYPE,
@@ -18,6 +20,7 @@ import Model, {
 import RemoveButton from "components/RemoveButton"
 import RichTextEditor from "components/RichTextEditor"
 import { FastField, FieldArray } from "formik"
+import { convertLatLngToMGRS, parseCoordinate } from "geoUtils"
 import { JSONPath } from "jsonpath-plus"
 import _cloneDeep from "lodash/cloneDeep"
 import _get from "lodash/get"
@@ -25,10 +28,11 @@ import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
 import _set from "lodash/set"
 import _upperFirst from "lodash/upperFirst"
+import { Location } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useEffect, useMemo } from "react"
-import { Badge, Button, Form, Table } from "react-bootstrap"
+import { Badge, Button, Col, Form, Row, Table } from "react-bootstrap"
 import Settings from "settings"
 import { useDebouncedCallback } from "use-debounce"
 import utils from "utils"
@@ -271,6 +275,95 @@ ReadonlyJsonField.propTypes = {
   extraColElem: PropTypes.object,
   labelColumnWidth: PropTypes.number,
   className: PropTypes.string
+}
+
+const GeoLocationField = fieldProps => {
+  const { name, label, editable, formikProps, ...otherFieldProps } = fieldProps
+  const fieldValue = Object.get(formikProps.values, name) || {}
+  const coordinates = {
+    lat: fieldValue?.lat,
+    lng: fieldValue?.lng,
+    displayedCoordinate:
+      fieldValue?.displayedCoordinate ||
+      convertLatLngToMGRS(fieldValue?.lat, fieldValue?.lng)
+  }
+  const labels = {
+    [Location.LOCATION_FORMATS.LAT_LON]: `${label} (Lat/Lon)`,
+    [Location.LOCATION_FORMATS.MGRS]: `${label} (MGRS)`
+  }
+  const marker = {}
+  const leafletProps = {}
+  if (editable) {
+    Object.assign(marker, {
+      draggable: true,
+      autoPan: true,
+      onMove: (event, map) =>
+        updateCoordinateFields(map.wrapLatLng(event.target.getLatLng()))
+    })
+    Object.assign(leafletProps, {
+      onMapClick: (event, map) =>
+        updateCoordinateFields(map.wrapLatLng(event.latlng))
+    })
+  }
+  if (Location.hasCoordinates(coordinates)) {
+    Object.assign(marker, {
+      lat: parseFloat(coordinates.lat),
+      lng: parseFloat(coordinates.lng)
+    })
+  }
+  return (
+    <>
+      <GeoLocation
+        name={name}
+        labels={labels}
+        coordinates={coordinates}
+        displayType={GEO_LOCATION_DISPLAY_TYPE.FORM_FIELD}
+        editable={editable}
+        {...formikProps}
+        {...otherFieldProps}
+      />
+      <Row style={{ marginTop: "-1rem" }}>
+        <Col sm={2} />
+        <Col sm={7}>
+          <Leaflet markers={[marker]} mapId={name} {...leafletProps} />
+        </Col>
+      </Row>
+    </>
+  )
+
+  function updateCoordinateFields(latLng) {
+    const parsedLat = parseCoordinate(latLng.lat)
+    const parsedLng = parseCoordinate(latLng.lng)
+    formikProps.setFieldValue(`${name}.lat`, parsedLat)
+    formikProps.setFieldValue(`${name}.lng`, parsedLng)
+    formikProps.setFieldValue(
+      `${name}.displayedCoordinate`,
+      convertLatLngToMGRS(parsedLat, parsedLng)
+    )
+  }
+}
+GeoLocationField.propTypes = {
+  name: PropTypes.string.isRequired,
+  editable: PropTypes.bool
+}
+GeoLocationField.defaultProps = {
+  editable: true
+}
+
+const ReadonlyGeoLocationField = fieldProps => {
+  const { name, values, ...otherFieldProps } = fieldProps
+  return (
+    <GeoLocationField
+      name={name}
+      editable={false}
+      formikProps={{ values }}
+      {...otherFieldProps}
+    />
+  )
+}
+ReadonlyGeoLocationField.propTypes = {
+  name: PropTypes.string.isRequired,
+  values: PropTypes.object.isRequired
 }
 
 const EnumField = fieldProps => {
@@ -776,6 +869,7 @@ const FIELD_COMPONENTS = {
   [CUSTOM_FIELD_TYPE.DATE]: DateField,
   [CUSTOM_FIELD_TYPE.DATETIME]: DateTimeField,
   [CUSTOM_FIELD_TYPE.JSON]: JsonField,
+  [CUSTOM_FIELD_TYPE.GEO_LOCATION]: GeoLocationField,
   [CUSTOM_FIELD_TYPE.ENUM]: EnumField,
   [CUSTOM_FIELD_TYPE.ENUMSET]: EnumSetField,
   [CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS]: ArrayOfObjectsField,
@@ -986,6 +1080,11 @@ const CustomField = ({
   const FieldComponent = FIELD_COMPONENTS[type]
   const extraProps = useMemo(() => {
     switch (type) {
+      case CUSTOM_FIELD_TYPE.GEO_LOCATION:
+        return {
+          formikProps
+        }
+      case CUSTOM_FIELD_TYPE.JSON:
       case CUSTOM_FIELD_TYPE.SPECIAL_FIELD:
         return {
           fieldConfig,
@@ -996,11 +1095,6 @@ const CustomField = ({
           fieldConfig,
           formikProps,
           invisibleFields
-        }
-      case CUSTOM_FIELD_TYPE.JSON:
-        return {
-          fieldConfig,
-          formikProps
         }
       case CUSTOM_FIELD_TYPE.ANET_OBJECT:
       case CUSTOM_FIELD_TYPE.ARRAY_OF_ANET_OBJECTS:
@@ -1090,6 +1184,7 @@ const READONLY_FIELD_COMPONENTS = {
   [CUSTOM_FIELD_TYPE.DATE]: ReadonlyDateField,
   [CUSTOM_FIELD_TYPE.DATETIME]: ReadonlyDateTimeField,
   [CUSTOM_FIELD_TYPE.JSON]: ReadonlyJsonField,
+  [CUSTOM_FIELD_TYPE.GEO_LOCATION]: ReadonlyGeoLocationField,
   [CUSTOM_FIELD_TYPE.ENUM]: ReadonlyEnumField,
   [CUSTOM_FIELD_TYPE.ENUMSET]: ReadonlyEnumField,
   [CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS]: ReadonlyArrayOfObjectsField,
