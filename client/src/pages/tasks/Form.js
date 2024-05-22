@@ -429,7 +429,7 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
       navigate(Task.pathForEdit(task), { replace: true })
     }
     navigate(Task.pathFor(task), {
-      state: { success: "Task saved" }
+      state: { success: `${Settings.fields.task.shortLabel} saved` }
     })
   }
 
