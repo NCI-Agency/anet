@@ -1051,6 +1051,7 @@ input ReportSearchQueryInput {
   authorUuid: String
   authorizationGroupUuid: [String]
   cancelledReason: ReportCancelledReason
+  classification: String
   createdAtEnd: Instant
   createdAtStart: Instant
   emailNetwork: String
