@@ -145,7 +145,7 @@ dependencies {
 	// The graphql-java-client-runtime module aggregates all dependencies for the generated code,
 	// including the plugin runtime
 	testImplementation 'com.graphql-java-generator:graphql-java-client-runtime:2.5'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test:2.7.18'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test:3.3.0'
 	// We use some extended scalars in `generateClientCodeConf` below
 	testImplementation 'com.graphql-java:graphql-java-extended-scalars:21.0'
 
