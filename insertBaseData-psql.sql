@@ -10,8 +10,6 @@ TRUNCATE TABLE "comments" CASCADE;
 TRUNCATE TABLE "customSensitiveInformation" CASCADE;
 TRUNCATE TABLE "emailAddresses" CASCADE;
 TRUNCATE TABLE "jobHistory" CASCADE;
--- Countries are inserted by the migrations!
-DELETE FROM "locations" WHERE type != 'PAC';
 TRUNCATE TABLE "noteRelatedObjects" CASCADE;
 TRUNCATE TABLE "notes" CASCADE;
 TRUNCATE TABLE "organizationAdministrativePositions" CASCADE;
@@ -34,6 +32,9 @@ TRUNCATE TABLE "taskResponsiblePositions" CASCADE;
 TRUNCATE TABLE "taskTaskedOrganizations" CASCADE;
 TRUNCATE TABLE "tasks" CASCADE;
 TRUNCATE TABLE "userActivities" CASCADE;
+
+-- Countries are inserted by the migrations!
+DELETE FROM "locations" WHERE type != 'PAC';
 
 -- Create people
 INSERT INTO people (uuid, name, status, "phoneNumber", rank, biography, "user", "domainUsername", "openIdSubject", "countryUuid", gender, "endOfTourDate", "createdAt", "updatedAt") VALUES
