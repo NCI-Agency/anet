@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from "@testing-library/react"
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { Form, Formik } from "formik"
 import React from "react"
 import GeoLocation from "../../../src/components/GeoLocation"
@@ -30,15 +30,16 @@ const GeoLocationTest = () => {
 
 describe("In the location form", () => {
   it("We should be able to see Latitude, Longitude label and input field", () => {
-    render(GeoLocationTest())
+    render(<GeoLocationTest />)
     // LAT_LON is default
     const latLngLabel = screen.getByText(/Latitude, Longitude/)
     expect(latLngLabel).toBeInTheDocument()
     const latLngInput = screen.getByLabelText(/Latitude, Longitude/)
     expect(latLngInput).toBeInTheDocument()
+    cleanup()
   })
   it("We should be able to see MGRS label and input field", () => {
-    render(GeoLocationTest())
+    render(<GeoLocationTest />)
     const infoButton = screen.getByTestId("info-button")
     expect(infoButton).toBeInTheDocument()
     act(() => {
@@ -59,5 +60,6 @@ describe("In the location form", () => {
       /Military Grid Reference System \(MGRS\)/
     )
     expect(mrgsInput).toBeInTheDocument()
+    cleanup()
   })
 })
