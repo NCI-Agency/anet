@@ -128,6 +128,18 @@ public final class BatchingUtils {
                 () -> engine.getEmailAddressDao().getEmailAddressesForRelatedObjects(foreignKeys),
                 dispatcherService),
             dataLoaderOptions));
+    dataLoaderRegistry.register(FkDataLoaderKey.LOCATION_CHILDREN_LOCATIONS.toString(),
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, List<Location>>) foreignKeys -> CompletableFuture.supplyAsync(
+                () -> engine.getLocationDao().getChildrenLocationsForLocation(foreignKeys),
+                dispatcherService),
+            dataLoaderOptions));
+    dataLoaderRegistry.register(FkDataLoaderKey.LOCATION_PARENT_LOCATIONS.toString(),
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, List<Location>>) foreignKeys -> CompletableFuture.supplyAsync(
+                () -> engine.getLocationDao().getParentLocationsForLocation(foreignKeys),
+                dispatcherService),
+            dataLoaderOptions));
     dataLoaderRegistry.register(IdDataLoaderKey.LOCATIONS.toString(),
         DataLoaderFactory.newDataLoader(
             (BatchLoader<String, Location>) keys -> CompletableFuture

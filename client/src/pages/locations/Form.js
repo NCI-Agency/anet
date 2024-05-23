@@ -2,6 +2,8 @@ import { gql } from "@apollo/client"
 import { Icon, IconSize, Intent } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import API from "api"
+import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
+import { LocationOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AppContext from "components/AppContext"
 import ApprovalsDefinition from "components/approvals/ApprovalsDefinition"
 import UploadAttachment from "components/Attachment/UploadAttachment"
@@ -14,6 +16,7 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import GeoLocation from "components/GeoLocation"
 import Leaflet from "components/Leaflet"
+import LocationTable from "components/LocationTable"
 import Messages from "components/Messages"
 import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
@@ -29,8 +32,10 @@ import PropTypes from "prop-types"
 import React, { useContext, useEffect, useState } from "react"
 import { Button, FormSelect } from "react-bootstrap"
 import { useNavigate } from "react-router-dom"
+import LOCATIONS_ICON from "resources/locations.png"
 import Settings from "settings"
 import { useDebouncedCallback } from "use-debounce"
+import utils from "utils"
 
 const GQL_CREATE_LOCATION = gql`
   mutation ($location: LocationInput!) {
@@ -69,6 +74,14 @@ const LOCATION_TYPES_SUPERUSER =
 
 const LOCATION_TYPES_REGULARUSER =
   Settings?.fields?.location?.regularuserTypeOptions
+
+const locationFilters = {
+  allLocations: {
+    label: "All locations",
+    queryVars: {}
+  }
+}
+const locationSearchQuery = { status: Model.STATUS.ACTIVE }
 
 const LocationForm = ({
   edit,
@@ -290,6 +303,38 @@ const LocationForm = ({
                   </>
                 )}
 
+                <Field
+                  name="parentLocations"
+                  label="Parent locations"
+                  component={FieldHelper.SpecialField}
+                  onChange={value => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("parentLocations", true, false) // onBlur doesn't work when selecting an option
+                    setFieldValue("parentLocations", value)
+                  }}
+                  widget={
+                    <AdvancedMultiSelect
+                      fieldName="parentLocations"
+                      placeholder="Select parent locations…"
+                      value={values.parentLocations}
+                      renderSelected={
+                        <LocationTable
+                          id="location-parentLocations"
+                          locations={values.parentLocations}
+                          showDelete
+                        />
+                      }
+                      overlayColumns={["Name"]}
+                      overlayRenderRow={LocationOverlayRow}
+                      filterDefs={locationFilters}
+                      objectType={Location}
+                      queryParams={locationSearchQuery}
+                      fields={Location.autocompleteQuery}
+                      addon={LOCATIONS_ICON}
+                    />
+                  }
+                />
+
                 <DictionaryField
                   wrappedComponent={FastField}
                   dictProps={Settings.fields.location.description}
@@ -488,6 +533,10 @@ const LocationForm = ({
 
   function save(values) {
     const location = new Location(values).filterClientSideFields("customFields")
+    // strip unnecessary fields
+    location.parentLocations = values.parentLocations?.map(l =>
+      utils.getReference(l)
+    )
     location.customFields = customFieldsJSONString(values)
     return API.mutation(edit ? GQL_UPDATE_LOCATION : GQL_CREATE_LOCATION, {
       location

@@ -6,6 +6,7 @@ import {
   PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
+import RemoveButton from "components/RemoveButton"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _get from "lodash/get"
 import { Location } from "models"
@@ -115,6 +116,7 @@ const BaseLocationTable = ({
             <tr>
               <th>Name</th>
               <th>Type</th>
+              {showDelete && <th />}
             </tr>
           </thead>
           <tbody>
@@ -124,6 +126,14 @@ const BaseLocationTable = ({
                   <LinkTo modelType="Location" model={loc} />
                 </td>
                 <td>{Location.humanNameOfType(loc.type)}</td>
+                {showDelete && (
+                  <td id={"locationDelete_" + loc.uuid}>
+                    <RemoveButton
+                      title="Remove location"
+                      onClick={() => onDelete(loc)}
+                    />
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>

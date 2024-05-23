@@ -119,6 +119,8 @@ export default class Location extends Model {
           }
         })
         .default(null),
+      parentLocations: yup.array().nullable().default([]),
+      childrenLocations: yup.array().nullable().default([]),
       // FIXME: resolve code duplication in yup schema for approval steps
       planningApprovalSteps: yup
         .array()
@@ -211,6 +213,16 @@ export default class Location extends Model {
         }
       }
     }
+    parentLocations {
+      uuid
+      name
+      type
+    }
+    childrenLocations {
+      uuid
+      name
+      type
+    }
     customFields
     ${GRAPHQL_NOTES_FIELDS}
   `
@@ -280,7 +292,10 @@ export default class Location extends Model {
     return this.name
   }
 
-  static FILTERED_CLIENT_SIDE_FIELDS = ["displayedCoordinate"]
+  static FILTERED_CLIENT_SIDE_FIELDS = [
+    "childrenLocations",
+    "displayedCoordinate"
+  ]
 
   static filterClientSideFields(obj, ...additionalFields) {
     return Model.filterClientSideFields(

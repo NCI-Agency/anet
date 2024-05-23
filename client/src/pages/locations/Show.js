@@ -11,6 +11,7 @@ import Fieldset from "components/Fieldset"
 import GeoLocation, { GEO_LOCATION_DISPLAY_TYPE } from "components/GeoLocation"
 import Leaflet from "components/Leaflet"
 import LinkTo from "components/LinkTo"
+import LocationTable from "components/LocationTable"
 import Messages from "components/Messages"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
@@ -27,6 +28,7 @@ import RichTextEditor from "components/RichTextEditor"
 import { Field, Form, Formik } from "formik"
 import { convertLatLngToMGRS } from "geoUtils"
 import _escape from "lodash/escape"
+import _isEmpty from "lodash/isEmpty"
 import { Attachment, Location } from "models"
 import React, { useContext, useState } from "react"
 import { connect } from "react-redux"
@@ -198,14 +200,42 @@ const LocationShow = ({ pageDispatchers }) => {
                   </>
                 )}
 
-                {values.description && (
+                {!_isEmpty(location.parentLocations) && (
+                  <Field
+                    name="parentLocations"
+                    label="Parent locations"
+                    component={FieldHelper.ReadonlyField}
+                    humanValue={
+                      <LocationTable
+                        id="location-parentLocations"
+                        locations={values.parentLocations}
+                      />
+                    }
+                  />
+                )}
+
+                {!_isEmpty(location.childrenLocations) && (
+                  <Field
+                    name="childrenLocations"
+                    label="Child locations"
+                    component={FieldHelper.ReadonlyField}
+                    humanValue={
+                      <LocationTable
+                        id="location-childrenLocations"
+                        locations={values.childrenLocations}
+                      />
+                    }
+                  />
+                )}
+
+                {location.description && (
                   <DictionaryField
                     wrappedComponent={Field}
                     dictProps={Settings.fields.location.description}
                     name="description"
                     component={FieldHelper.ReadonlyField}
                     humanValue={
-                      <RichTextEditor readOnly value={values.description} />
+                      <RichTextEditor readOnly value={location.description} />
                     }
                   />
                 )}

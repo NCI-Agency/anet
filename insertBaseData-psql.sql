@@ -10,6 +10,7 @@ TRUNCATE TABLE "comments" CASCADE;
 TRUNCATE TABLE "customSensitiveInformation" CASCADE;
 TRUNCATE TABLE "emailAddresses" CASCADE;
 TRUNCATE TABLE "jobHistory" CASCADE;
+TRUNCATE TABLE "locationRelationships" CASCADE;
 TRUNCATE TABLE "noteRelatedObjects" CASCADE;
 TRUNCATE TABLE "notes" CASCADE;
 TRUNCATE TABLE "organizationAdministrativePositions" CASCADE;
@@ -153,36 +154,67 @@ INSERT INTO "emailAddresses" (network, address, "relatedObjectType", "relatedObj
 
 -- Create locations
 INSERT INTO locations (uuid, type, name, lat, lng, "createdAt", "updatedAt") VALUES
-  (N'e5b3a4b9-acf7-4c79-8224-f248b9a7215d', 'PA', 'Antarctica', -90, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', 'PP', 'St Johns Airport', 47.613442, -52.740936, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'8c138750-91ce-41bf-9b4c-9f0ddc73608b', 'PP', 'Murray''s Hotel', 47.561517, -52.708760, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'9c982685-5946-4dad-a7ee-0f5a12f5e170', 'PP', 'Wishingwells Park', 47.560040, -52.736962, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'0855fb0a-995e-4a79-a132-4024ee2983ff', 'PP', 'General Hospital', 47.571772, -52.741935, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'95446f93-249b-4aa9-b98a-7bd2c4680718', 'PP', 'Portugal Cove Ferry Terminal', 47.626718, -52.857241, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'c8fdb53f-6f93-46fc-b0fa-f005c7b49667', 'PP', 'Cabot Tower', 47.570010, -52.681770, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'c7a9f420-457a-490c-a810-b504c022cf1e', 'PP', 'Fort Amherst', 47.563763, -52.680590, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'7339f9e3-99d1-497a-9e3b-1269c4c287fe', 'PP', 'Harbour Grace Police Station', 47.705133, -53.214422, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'f2207d9b-204b-4cb5-874d-3fe6bc6f8acd', 'PP', 'Conception Bay South Police Station', 47.526784, -52.954739, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  ('e5b3a4b9-acf7-4c79-8224-f248b9a7215d', 'PA', 'Antarctica', -90, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', 'PP', 'St Johns Airport', 47.613442, -52.740936, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('8c138750-91ce-41bf-9b4c-9f0ddc73608b', 'PP', 'Murray''s Hotel', 47.561517, -52.708760, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('9c982685-5946-4dad-a7ee-0f5a12f5e170', 'PP', 'Wishingwells Park', 47.560040, -52.736962, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('0855fb0a-995e-4a79-a132-4024ee2983ff', 'PP', 'General Hospital', 47.571772, -52.741935, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('95446f93-249b-4aa9-b98a-7bd2c4680718', 'PP', 'Portugal Cove Ferry Terminal', 47.626718, -52.857241, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('c8fdb53f-6f93-46fc-b0fa-f005c7b49667', 'PP', 'Cabot Tower', 47.570010, -52.681770, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('c7a9f420-457a-490c-a810-b504c022cf1e', 'PP', 'Fort Amherst', 47.563763, -52.680590, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('7339f9e3-99d1-497a-9e3b-1269c4c287fe', 'PP', 'Harbour Grace Police Station', 47.705133, -53.214422, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('f2207d9b-204b-4cb5-874d-3fe6bc6f8acd', 'PP', 'Conception Bay South Police Station', 47.526784, -52.954739, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO locations (uuid, type, name, "createdAt", "updatedAt") VALUES
-  (N'283797ec-7077-49b2-87b8-9afd5499b6f3', 'V', 'VTC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'e0ff0d6c-e663-4639-a44d-b075bf1e690d', 'PP', 'MoD Headquarters Kabul', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'5046a870-6c2a-40a7-9681-61a1d6eeaa07', 'PP', 'MoI Headquarters Kabul', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'c15eb29e-2965-401e-9f36-6ac8b9cc3842', 'PP', 'President''s Palace', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'0585f158-5121-46a2-b099-799fe980aa9c', 'PP', 'Kabul Police Academy', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'053ab2ad-132a-4a62-8cbb-20827f50ec34', 'PP', 'Police HQ Training Facility', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'e87f145b-32e9-47ec-a0f4-e0dcf18e8a8c', 'PP', 'Kabul Hospital', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'6465dd40-9fec-41db-a3b9-652fa52c7d21', 'PP', 'MoD Army Training Base 123', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'2a59dd78-0c29-4b3f-bc94-7c98ff80b197', 'PP', 'MoD Location the Second', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'18c9be38-bf68-40e2-80d8-aac47f5ff7cf', 'PP', 'MoI Office Building ABC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'8a34768c-aa15-41e4-ab79-6cf2740d555e', 'PP', 'MoI Training Center', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'9f364c59-953e-4c17-919c-648ea3a74e36', 'PP', 'MoI Adminstrative Office', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'dfc3918d-c2e3-4308-b161-2445cde77b3f', 'PP', 'MoI Senior Executive Suite', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'3652e114-ad16-43f0-b179-cc1bce6958d5', 'PP', 'MoI Coffee Shop', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'5ac4078d-d445-416a-a93e-5941562359bb', 'PP', 'MoI Herat Office', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'22b0137c-4d89-43eb-ac95-a9f68aba884f', 'PP', 'MoI Jalalabad Office', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'60f4084f-3304-4cd5-89df-353edef07d18', 'PP', 'MoI Kandahar Office', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'c136bf89-cc24-43a5-8f51-0f41dfc9ab77', 'PP', 'MoI Mazar-i-Sharif', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'b0979678-0ed0-4b42-9b26-9976fcfa1b81', 'PP', 'MoI Office Building ABC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  ('283797ec-7077-49b2-87b8-9afd5499b6f3', 'V', 'VTC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('e0ff0d6c-e663-4639-a44d-b075bf1e690d', 'PP', 'MoD Headquarters Kabul', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('5046a870-6c2a-40a7-9681-61a1d6eeaa07', 'PP', 'MoI Headquarters Kabul', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('c15eb29e-2965-401e-9f36-6ac8b9cc3842', 'PP', 'President''s Palace', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('0585f158-5121-46a2-b099-799fe980aa9c', 'PP', 'Kabul Police Academy', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('053ab2ad-132a-4a62-8cbb-20827f50ec34', 'PP', 'Police HQ Training Facility', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('e87f145b-32e9-47ec-a0f4-e0dcf18e8a8c', 'PP', 'Kabul Hospital', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('6465dd40-9fec-41db-a3b9-652fa52c7d21', 'PP', 'MoD Army Training Base 123', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('2a59dd78-0c29-4b3f-bc94-7c98ff80b197', 'PP', 'MoD Location the Second', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('18c9be38-bf68-40e2-80d8-aac47f5ff7cf', 'PP', 'MoD Office Building', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('8a34768c-aa15-41e4-ab79-6cf2740d555e', 'PP', 'MoI Training Center', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('9f364c59-953e-4c17-919c-648ea3a74e36', 'PP', 'MoI Adminstrative Office', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('dfc3918d-c2e3-4308-b161-2445cde77b3f', 'PP', 'MoI Senior Executive Suite', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('3652e114-ad16-43f0-b179-cc1bce6958d5', 'PP', 'MoI Coffee Shop', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('5ac4078d-d445-416a-a93e-5941562359bb', 'PP', 'MoI Herat Office', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('22b0137c-4d89-43eb-ac95-a9f68aba884f', 'PP', 'MoI Jalalabad Office', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('60f4084f-3304-4cd5-89df-353edef07d18', 'PP', 'MoI Kandahar Office', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('c136bf89-cc24-43a5-8f51-0f41dfc9ab77', 'PP', 'MoI Mazar-i-Sharif', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('b0979678-0ed0-4b42-9b26-9976fcfa1b81', 'PP', 'MoI Office Building ABC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+-- Set up locationRelationships
+INSERT INTO "locationRelationships" ("childLocationUuid", "parentLocationUuid") VALUES
+  ('e5b3a4b9-acf7-4c79-8224-f248b9a7215d', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Antarctica')),
+  ('cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Canada')),
+  ('8c138750-91ce-41bf-9b4c-9f0ddc73608b', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Canada')),
+  ('9c982685-5946-4dad-a7ee-0f5a12f5e170', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Canada')),
+  ('0855fb0a-995e-4a79-a132-4024ee2983ff', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Canada')),
+  ('95446f93-249b-4aa9-b98a-7bd2c4680718', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Canada')),
+  ('c8fdb53f-6f93-46fc-b0fa-f005c7b49667', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Canada')),
+  ('c7a9f420-457a-490c-a810-b504c022cf1e', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Canada')),
+  ('7339f9e3-99d1-497a-9e3b-1269c4c287fe', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Canada')),
+  ('f2207d9b-204b-4cb5-874d-3fe6bc6f8acd', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Canada')),
+  ('e0ff0d6c-e663-4639-a44d-b075bf1e690d', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Afghanistan')),
+  ('5046a870-6c2a-40a7-9681-61a1d6eeaa07', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Afghanistan')),
+  ('c15eb29e-2965-401e-9f36-6ac8b9cc3842', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Afghanistan')),
+  ('0585f158-5121-46a2-b099-799fe980aa9c', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Afghanistan')),
+  ('053ab2ad-132a-4a62-8cbb-20827f50ec34', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Afghanistan')),
+  ('e87f145b-32e9-47ec-a0f4-e0dcf18e8a8c', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Afghanistan')),
+  ('6465dd40-9fec-41db-a3b9-652fa52c7d21', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Afghanistan')),
+  ('2a59dd78-0c29-4b3f-bc94-7c98ff80b197', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Afghanistan')),
+  ('18c9be38-bf68-40e2-80d8-aac47f5ff7cf', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Afghanistan')),
+  ('8a34768c-aa15-41e4-ab79-6cf2740d555e', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Afghanistan')),
+  ('9f364c59-953e-4c17-919c-648ea3a74e36', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Afghanistan')),
+  ('dfc3918d-c2e3-4308-b161-2445cde77b3f', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Afghanistan')),
+  ('3652e114-ad16-43f0-b179-cc1bce6958d5', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Afghanistan')),
+  ('5ac4078d-d445-416a-a93e-5941562359bb', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Afghanistan')),
+  ('22b0137c-4d89-43eb-ac95-a9f68aba884f', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Afghanistan')),
+  ('60f4084f-3304-4cd5-89df-353edef07d18', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Afghanistan')),
+  ('c136bf89-cc24-43a5-8f51-0f41dfc9ab77', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Afghanistan')),
+  ('b0979678-0ed0-4b42-9b26-9976fcfa1b81', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Afghanistan'));
 
 UPDATE locations
 SET "customFields"='{"invisibleCustomFields":["formCustomFields.textareaFieldName","formCustomFields.numberFieldName"],"arrayFieldName":[],"nlt_dt":null,"nlt":null,"colourOptions":"","inputFieldName":"consectetur adipisici elit","multipleButtons":[]}'

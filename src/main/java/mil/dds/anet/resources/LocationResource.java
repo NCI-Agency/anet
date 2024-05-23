@@ -97,6 +97,13 @@ public class LocationResource {
       }
     }
 
+    // Update parent locations:
+    if (l.getParentLocations() != null) {
+      for (final Location parentLocation : l.getParentLocations()) {
+        dao.addLocationRelationship(parentLocation, l);
+      }
+    }
+
     DaoUtils.saveCustomSensitiveInformation(user, LocationDao.TABLE_NAME, created.getUuid(),
         l.getCustomSensitiveInformation());
 
@@ -119,12 +126,23 @@ public class LocationResource {
 
     // Load the existing location, so we can check for differences.
     final Location existing = dao.getByUuid(l.getUuid());
+
+    // Update approval steps:
     final List<ApprovalStep> existingPlanningApprovalSteps =
         existing.loadPlanningApprovalSteps(engine.getContext()).join();
     final List<ApprovalStep> existingApprovalSteps =
         existing.loadApprovalSteps(engine.getContext()).join();
     Utils.updateApprovalSteps(l, l.getPlanningApprovalSteps(), existingPlanningApprovalSteps,
         l.getApprovalSteps(), existingApprovalSteps);
+
+    // Update parent locations:
+    if (l.getParentLocations() != null) {
+      final List<Location> existingParentLocations =
+          existing.loadParentLocations(engine.getContext()).join();
+      Utils.addRemoveElementsByUuid(existingParentLocations, l.getParentLocations(),
+          newParentLocation -> dao.addLocationRelationship(newParentLocation, l),
+          oldParentLocation -> dao.removeLocationRelationship(oldParentLocation, l));
+    }
 
     DaoUtils.saveCustomSensitiveInformation(user, LocationDao.TABLE_NAME, l.getUuid(),
         l.getCustomSensitiveInformation());

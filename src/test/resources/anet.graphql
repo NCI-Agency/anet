@@ -373,6 +373,7 @@ scalar Instant
 type Location {
   approvalSteps: [ApprovalStep]
   attachments: [Attachment]
+  childrenLocations: [Location]
   createdAt: Instant
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformation]
@@ -383,6 +384,7 @@ type Location {
   lng: Float
   name: String
   notes: [Note]
+  parentLocations: [Location]
   planningApprovalSteps: [ApprovalStep]
   status: Status
   trigram: String
@@ -402,6 +404,7 @@ input LocationInput {
   lat: Float
   lng: Float
   name: String
+  parentLocations: [LocationInput]
   planningApprovalSteps: [ApprovalStepInput]
   status: Status
   trigram: String

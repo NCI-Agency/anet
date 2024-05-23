@@ -5778,4 +5778,48 @@
 		/>
 	</changeSet>
 
+	<changeSet id="add-locations-to-locations-m2m" author="gjvoosten">
+		<createTable tableName="locationRelationships">
+			<column name="parentLocationUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="childLocationUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addUniqueConstraint
+				tableName="locationRelationships"
+				columnNames="parentLocationUuid, childLocationUuid"
+				constraintName="UQ_uniqueLocationRelationships"
+		/>
+		<addForeignKeyConstraint
+				constraintName="FK_locationRelationships_parentLocation"
+				baseTableName="locationRelationships"
+				baseColumnNames="parentLocationUuid"
+				referencedTableName="locations"
+				referencedColumnNames="uuid"
+				onDelete="NO ACTION" onUpdate="NO ACTION"
+		/>
+		<addForeignKeyConstraint
+				constraintName="FK_locationRelationships_childLocation"
+				baseTableName="locationRelationships"
+				baseColumnNames="childLocationUuid"
+				referencedTableName="locations"
+				referencedColumnNames="uuid"
+				onDelete="NO ACTION" onUpdate="NO ACTION"
+		/>
+		<createIndex
+				indexName="IDX_locationRelationships_parentLocationUuid"
+				tableName="locationRelationships"
+		>
+			<column name="parentLocationUuid" />
+		</createIndex>
+		<createIndex
+				indexName="IDX_locationRelationships_childLocationUuid"
+				tableName="locationRelationships"
+		>
+			<column name="childLocationUuid" />
+		</createIndex>
+	</changeSet>
+
 </databaseChangeLog>

@@ -82,6 +82,10 @@ public class Location extends AbstractCustomizableAnetBean
   List<ApprovalStep> planningApprovalSteps; /* Planning approval process for this Task */
   // annotated below
   List<ApprovalStep> approvalSteps; /* Approval process for this Task */
+  // annotated below
+  List<Location> childrenLocations;
+  // annotated below
+  List<Location> parentLocations;
 
   @Override
   @AllowUnverifiedUsers
@@ -201,6 +205,45 @@ public class Location extends AbstractCustomizableAnetBean
   @GraphQLInputField(name = "approvalSteps")
   public void setApprovalSteps(List<ApprovalStep> steps) {
     this.approvalSteps = steps;
+  }
+
+  @GraphQLQuery(name = "childrenLocations")
+  public CompletableFuture<List<Location>> loadChildrenLocations(
+      @GraphQLRootContext Map<String, Object> context) {
+    if (childrenLocations != null) {
+      return CompletableFuture.completedFuture(childrenLocations);
+    }
+    return AnetObjectEngine.getInstance().getLocationDao().getChildrenLocations(context, uuid)
+        .thenApply(o -> {
+          childrenLocations = o;
+          return o;
+        });
+  }
+
+  public List<Location> getChildrenLocations() {
+    return childrenLocations;
+  }
+
+  @GraphQLQuery(name = "parentLocations")
+  public CompletableFuture<List<Location>> loadParentLocations(
+      @GraphQLRootContext Map<String, Object> context) {
+    if (parentLocations != null) {
+      return CompletableFuture.completedFuture(parentLocations);
+    }
+    return AnetObjectEngine.getInstance().getLocationDao().getParentLocations(context, uuid)
+        .thenApply(o -> {
+          parentLocations = o;
+          return o;
+        });
+  }
+
+  public List<Location> getParentLocations() {
+    return parentLocations;
+  }
+
+  @GraphQLInputField(name = "parentLocations")
+  public void setParentLocations(List<Location> parentLocations) {
+    this.parentLocations = parentLocations;
   }
 
   @Override
