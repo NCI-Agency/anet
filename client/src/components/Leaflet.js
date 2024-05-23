@@ -1,4 +1,13 @@
-import { Control, CRS, Icon, Map, Marker, TileLayer } from "leaflet"
+import {
+  Control,
+  CRS,
+  FeatureGroup,
+  geoJSON,
+  Icon,
+  Map,
+  Marker,
+  TileLayer
+} from "leaflet"
 import "leaflet-defaulticon-compatibility"
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css"
 import {
@@ -122,6 +131,7 @@ const Leaflet = ({
   height,
   marginBottom,
   markers,
+  shapes,
   mapId: initialMapId,
   onMapClick
 }) => {
@@ -142,6 +152,7 @@ const Leaflet = ({
   const [markerLayer, setMarkerLayer] = useState(null)
   const [doInitializeMarkerLayer, setDoInitializeMarkerLayer] = useState(false)
   const prevMarkersRef = useRef()
+  const shapeGroupLayerRef = useRef(new FeatureGroup())
 
   const updateMarkerLayer = useCallback(
     (newMarkers = [], maxZoom = 15) => {
@@ -202,6 +213,7 @@ const Leaflet = ({
     }
     const layerControl = new Control.Layers({}, {}, { collapsed: false })
     layerControl.addTo(newMap)
+    shapeGroupLayerRef.current.addTo(newMap)
     addLayers(newMap, layerControl)
 
     setMap(newMap)
@@ -278,6 +290,22 @@ const Leaflet = ({
     widthPropUnchanged
   ])
 
+  /**
+   * Handle assigned shapes (GeoJSON strings)
+   */
+  useEffect(() => {
+    const groupLayer = shapeGroupLayerRef.current
+    if (shapes && map) {
+      shapes.forEach(shape => {
+        const geoJsonObject = JSON.parse(shape)
+        const geoJsonLayer = geoJSON(geoJsonObject)
+        geoJsonLayer.addTo(groupLayer)
+      })
+      // Set map bounds (navigate) to include all shapes
+      map.fitBounds(groupLayer.getBounds())
+    }
+  }, [shapes, map])
+
   return <div id={mapId} style={style} />
 }
 Leaflet.propTypes = {
@@ -285,6 +313,7 @@ Leaflet.propTypes = {
   height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   marginBottom: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   markers: PropTypes.array,
+  shapes: PropTypes.array,
   mapId: PropTypes.string, // pass this when you have more than one map on a page
   onMapClick: PropTypes.func
 }

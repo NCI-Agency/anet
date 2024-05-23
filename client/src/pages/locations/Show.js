@@ -241,6 +241,8 @@ const LocationShow = ({ pageDispatchers }) => {
               {Location.hasCoordinates(location) && (
                 <Leaflet markers={[marker]} />
               )}
+
+              {location.geoShape && <Leaflet shapes={[location.geoShape]} />}
             </Form>
 
             <Approvals relatedObject={location} />
