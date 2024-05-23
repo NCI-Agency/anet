@@ -469,7 +469,7 @@ const AllFormatsInfo = ({ name, coordinates, setLocationFormat, inForm }) => {
               <tr>
                 <td style={{ whiteSpace: "nowrap" }}>
                   <Button
-                    name={name}
+                    name={`${name}.${Location.LOCATION_FORMATS.LAT_LON}`}
                     onClick={() =>
                       setLocationFormat(Location.LOCATION_FORMATS.LAT_LON)}
                     variant="outline-secondary"
@@ -488,7 +488,7 @@ const AllFormatsInfo = ({ name, coordinates, setLocationFormat, inForm }) => {
               <tr>
                 <td style={{ whiteSpace: "nowrap" }}>
                   <Button
-                    name={name}
+                    name={`${name}.${Location.LOCATION_FORMATS.MGRS}`}
                     onClick={() =>
                       setLocationFormat(Location.LOCATION_FORMATS.MGRS)}
                     variant="outline-secondary"

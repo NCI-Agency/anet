@@ -2,6 +2,7 @@ import Page from "./page"
 
 const PAGE_URL = "/reports/new"
 
+const GRID_LOCATION_ID = "formCustomFields.gridLocation"
 const RELATED_REPORT_ID = "formCustomFields.relatedReport"
 const ADDITIONAL_ENGAGEMENTS_ID = "formCustomFields.additionalEngagementNeeded"
 const ENGAGEMENT_TYPES_ID = "formCustomFields.multipleButtons"
@@ -50,6 +51,32 @@ export class CreateReport extends Page {
 
   async getEngagementInformationTitle() {
     return browser.$('//span[text()="Engagement information"]')
+  }
+
+  async getGridLocationLatField() {
+    return browser.$(`input[id="${GRID_LOCATION_ID}.lat"]`)
+  }
+
+  async getGridLocationLngField() {
+    return browser.$(`input[id="${GRID_LOCATION_ID}.lng"]`)
+  }
+
+  async getGridLocationDisplayedCoordinateField() {
+    return browser.$(`input[id="${GRID_LOCATION_ID}.displayedCoordinate"]`)
+  }
+
+  async getGridLocationInfoButton() {
+    return browser
+      .$(`div[id="fg-${GRID_LOCATION_ID}"]`)
+      .$('button[data-testid="info-button"]')
+  }
+
+  async getGridLocationLatLonButton() {
+    return browser.$(`button[name="${GRID_LOCATION_ID}.LAT_LON"]`)
+  }
+
+  async getGridLocationMgrsButton() {
+    return browser.$(`button[name="${GRID_LOCATION_ID}.MGRS"]`)
   }
 
   async getTestReferenceFieldFormGroup() {
