@@ -7,6 +7,7 @@ import { OrganizationSimpleOverlayRow } from "components/advancedSelectWidget/Ad
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import { customFieldsJSONString } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
+import EmailAddressTable from "components/EmailAddressTable"
 import LinkTo from "components/LinkTo"
 import MergeField from "components/MergeField"
 import Messages from "components/Messages"
@@ -212,6 +213,18 @@ const MergeOrganizations = ({ pageDispatchers }) => {
               />
               <DictionaryField
                 wrappedComponent={MergeField}
+                dictProps={Settings.fields.organization.profile}
+                value={mergedOrganization.profile}
+                align={ALIGN_OPTIONS.CENTER}
+                action={getClearButton(() =>
+                  dispatchMergeActions(setAMergedField("profile", {}, null))
+                )}
+                fieldName="profile"
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
+              <DictionaryField
+                wrappedComponent={MergeField}
                 dictProps={Settings.fields.organization.location}
                 value={
                   <LinkTo
@@ -224,6 +237,115 @@ const MergeOrganizations = ({ pageDispatchers }) => {
                   dispatchMergeActions(setAMergedField("location", {}, null))
                 )}
                 fieldName="location"
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
+              <DictionaryField
+                wrappedComponent={MergeField}
+                dictProps={Settings.fields.organization.emailAddresses}
+                value={
+                  <EmailAddressTable
+                    label={Settings.fields.organization.emailAddresses.label}
+                    emailAddresses={mergedOrganization.emailAddresses}
+                  />
+                }
+                align={ALIGN_OPTIONS.CENTER}
+                action={getClearButton(() =>
+                  dispatchMergeActions(
+                    setAMergedField("emailAddresses", [], null)
+                  )
+                )}
+                fieldName="emailAddresses"
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
+              <DictionaryField
+                wrappedComponent={MergeField}
+                dictProps={Settings.fields.organization.app6context}
+                value={
+                  Settings.fields.organization.app6context.choices[
+                    mergedOrganization.app6context
+                  ]
+                }
+                align={ALIGN_OPTIONS.CENTER}
+                action={getClearButton(() =>
+                  dispatchMergeActions(setAMergedField("app6context", [], null))
+                )}
+                fieldName="app6context"
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
+
+              <DictionaryField
+                wrappedComponent={MergeField}
+                dictProps={Settings.fields.organization.app6standardIdentity}
+                value={
+                  Settings.fields.organization.app6standardIdentity.choices[
+                    [mergedOrganization.app6standardIdentity]
+                  ]
+                }
+                align={ALIGN_OPTIONS.CENTER}
+                action={getClearButton(() =>
+                  dispatchMergeActions(
+                    setAMergedField("app6standardIdentity", [], null)
+                  )
+                )}
+                fieldName="app6standardIdentity"
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
+
+              <DictionaryField
+                wrappedComponent={MergeField}
+                dictProps={Settings.fields.organization.app6symbolSet}
+                value={
+                  Settings.fields.organization.app6symbolSet.choices[
+                    mergedOrganization.app6symbolSet
+                  ]
+                }
+                align={ALIGN_OPTIONS.CENTER}
+                action={getClearButton(() =>
+                  dispatchMergeActions(
+                    setAMergedField("app6symbolSet", [], null)
+                  )
+                )}
+                fieldName="app6symbolSet"
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
+
+              <DictionaryField
+                wrappedComponent={MergeField}
+                dictProps={Settings.fields.organization.app6hq}
+                value={
+                  Settings.fields.organization.app6hq.choices[
+                    mergedOrganization.app6hq
+                  ]
+                }
+                align={ALIGN_OPTIONS.CENTER}
+                action={getClearButton(() =>
+                  dispatchMergeActions(setAMergedField("app6hq", [], null))
+                )}
+                fieldName="app6hq"
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
+
+              <DictionaryField
+                wrappedComponent={MergeField}
+                dictProps={Settings.fields.organization.app6amplifier}
+                value={
+                  Settings.fields.organization.app6amplifier.choices[
+                    mergedOrganization.app6amplifier
+                  ]
+                }
+                align={ALIGN_OPTIONS.CENTER}
+                action={getClearButton(() =>
+                  dispatchMergeActions(
+                    setAMergedField("app6amplifier", [], null)
+                  )
+                )}
+                fieldName="app6amplifier"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
@@ -444,6 +566,25 @@ const OrganizationColumn = ({
           />
           <DictionaryField
             wrappedComponent={MergeField}
+            dictProps={Settings.fields.organization.profile}
+            fieldName="profile"
+            value={organization.profile}
+            align={align}
+            action={getActionButton(
+              () => {
+                dispatchMergeActions(
+                  setAMergedField("profile", organization.profile, align)
+                )
+              },
+              align,
+              mergeState,
+              "profile"
+            )}
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
+          />
+          <DictionaryField
+            wrappedComponent={MergeField}
             dictProps={Settings.fields.organization.status}
             fieldName="status"
             value={organization.status}
@@ -480,6 +621,166 @@ const OrganizationColumn = ({
               align,
               mergeState,
               "identificationCode"
+            )}
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
+          />
+          <DictionaryField
+            wrappedComponent={MergeField}
+            dictProps={Settings.fields.organization.emailAddresses}
+            fieldName="emailAddresses"
+            value={
+              <EmailAddressTable
+                label={Settings.fields.organization.emailAddresses.label}
+                emailAddresses={organization.emailAddresses}
+              />
+            }
+            align={align}
+            action={getActionButton(
+              () => {
+                dispatchMergeActions(
+                  setAMergedField(
+                    "emailAddresses",
+                    organization.emailAddresses,
+                    align
+                  )
+                )
+              },
+              align,
+              mergeState,
+              "emailAddresses"
+            )}
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
+          />
+          <DictionaryField
+            wrappedComponent={MergeField}
+            dictProps={Settings.fields.organization.app6context}
+            fieldName="app6context"
+            value={
+              Settings.fields.organization.app6context.choices[
+                organization.app6context
+              ]
+            }
+            align={align}
+            action={getActionButton(
+              () => {
+                dispatchMergeActions(
+                  setAMergedField(
+                    "app6context",
+                    organization.app6context,
+                    align
+                  )
+                )
+              },
+              align,
+              mergeState,
+              "app6context"
+            )}
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
+          />
+          <DictionaryField
+            wrappedComponent={MergeField}
+            dictProps={Settings.fields.organization.app6standardIdentity}
+            fieldName="app6standardIdentity"
+            value={
+              Settings.fields.organization.app6standardIdentity.choices[
+                [organization.app6standardIdentity]
+              ]
+            }
+            align={align}
+            action={getActionButton(
+              () => {
+                dispatchMergeActions(
+                  setAMergedField(
+                    "app6standardIdentity",
+                    organization.app6standardIdentity,
+                    align
+                  )
+                )
+              },
+              align,
+              mergeState,
+              "app6standardIdentity"
+            )}
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
+          />
+
+          <DictionaryField
+            wrappedComponent={MergeField}
+            dictProps={Settings.fields.organization.app6symbolSet}
+            fieldName="app6symbolSet"
+            value={
+              Settings.fields.organization.app6symbolSet.choices[
+                organization.app6symbolSet
+              ]
+            }
+            align={align}
+            action={getActionButton(
+              () => {
+                dispatchMergeActions(
+                  setAMergedField(
+                    "app6symbolSet",
+                    organization.app6symbolSet,
+                    align
+                  )
+                )
+              },
+              align,
+              mergeState,
+              "app6symbolSet"
+            )}
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
+          />
+
+          <DictionaryField
+            wrappedComponent={MergeField}
+            dictProps={Settings.fields.organization.app6hq}
+            fieldName="app6hq"
+            value={
+              Settings.fields.organization.app6hq.choices[organization.app6hq]
+            }
+            align={align}
+            action={getActionButton(
+              () => {
+                dispatchMergeActions(
+                  setAMergedField("app6hq", organization.app6hq, align)
+                )
+              },
+              align,
+              mergeState,
+              "app6hq"
+            )}
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
+          />
+
+          <DictionaryField
+            wrappedComponent={MergeField}
+            dictProps={Settings.fields.organization.app6amplifier}
+            fieldName="app6amplifier"
+            value={
+              Settings.fields.organization.app6amplifier.choices[
+                organization.app6amplifier
+              ]
+            }
+            align={align}
+            action={getActionButton(
+              () => {
+                dispatchMergeActions(
+                  setAMergedField(
+                    "app6amplifier",
+                    organization.app6amplifier,
+                    align
+                  )
+                )
+              },
+              align,
+              mergeState,
+              "app6amplifier"
             )}
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
