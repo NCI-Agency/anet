@@ -70,6 +70,7 @@ const OrganizationFilter = ({
   const AdvancedSelectComponent = multi
     ? AdvancedMultiSelect
     : AdvancedSingleSelect
+  const valueKey = multi ? "uuid" : "shortName"
   return !asFormField ? (
     <>
       {multi
@@ -87,7 +88,7 @@ const OrganizationFilter = ({
       overlayColumns={["Name"]}
       overlayRenderRow={OrganizationOverlayRow}
       objectType={Organization}
-      valueKey="shortName"
+      valueKey={valueKey}
       fields={Organization.autocompleteQuery}
       placeholder="Filter by organization..."
       addon={ORGANIZATIONS_ICON}
