@@ -48,7 +48,7 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
     qb.addSelectClause(getTableFields(subFields));
     qb.addFromClause("people");
 
-    if (query.getOrgUuid() != null || query.getLocationUuid() != null
+    if (!Utils.isEmptyOrNull(query.getOrgUuid()) || query.getLocationUuid() != null
         || query.getMatchPositionName() || !Utils.isEmptyOrNull(query.getPositionType())) {
       qb.addFromClause("LEFT JOIN positions ON people.uuid = positions.\"currentPersonUuid\"");
     }
