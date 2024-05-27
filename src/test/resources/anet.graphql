@@ -417,6 +417,8 @@ input LocationInput {
 input LocationSearchQueryInput {
   emailNetwork: String
   inMyReports: Boolean
+  locationRecurseStrategy: RecurseStrategy
+  locationUuid: [String]
   pageNum: Int
   pageSize: Int
   sortBy: LocationSearchSortBy

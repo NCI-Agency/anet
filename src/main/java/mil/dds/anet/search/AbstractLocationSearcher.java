@@ -3,11 +3,13 @@ package mil.dds.anet.search;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.lists.AnetBeanList;
+import mil.dds.anet.beans.search.ISearchQuery;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.LocationSearchQuery;
 import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.database.mappers.LocationMapper;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.Utils;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public abstract class AbstractLocationSearcher
@@ -35,6 +37,10 @@ public abstract class AbstractLocationSearcher
       addTextQuery(query);
     }
 
+    if (!Utils.isEmptyOrNull(query.getLocationUuid())) {
+      addLocationUuidQuery(query);
+    }
+
     if (query.getUser() != null && query.getSubscribed()) {
       qb.addWhereClause(Searcher.getSubscriptionReferences(query.getUser(), qb.getSqlArgs(),
           AnetObjectEngine.getInstance().getLocationDao().getSubscriptionUpdate(null)));
@@ -58,6 +64,18 @@ public abstract class AbstractLocationSearcher
     }
 
     addOrderByClauses(qb, query);
+  }
+
+  protected void addLocationUuidQuery(LocationSearchQuery query) {
+    if (ISearchQuery.RecurseStrategy.CHILDREN.equals(query.getLocationRecurseStrategy())
+        || ISearchQuery.RecurseStrategy.PARENTS.equals(query.getLocationRecurseStrategy())) {
+      qb.addRecursiveClause(null, "locations", new String[] {"uuid"}, "parent_locations",
+          "\"locationRelationships\"", "\"childLocationUuid\"", "\"parentLocationUuid\"",
+          "locationUuid", query.getLocationUuid(),
+          ISearchQuery.RecurseStrategy.CHILDREN.equals(query.getLocationRecurseStrategy()), true);
+    } else {
+      qb.addInListClause("locationUuid", "locations.uuid", query.getLocationUuid());
+    }
   }
 
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, LocationSearchQuery query) {

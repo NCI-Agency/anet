@@ -231,15 +231,15 @@ public abstract class AbstractSearchQueryBuilder<B, T extends AbstractSearchQuer
       String foreignKey, String withTableName, String recursiveTableName,
       String recursiveForeignKey, String paramName, String fieldValue, boolean findChildren) {
     addRecursiveClause(outerQb, tableName, new String[] {foreignKey}, withTableName,
-        recursiveTableName, recursiveForeignKey, paramName, Collections.singletonList(fieldValue),
-        findChildren);
+        recursiveTableName, "uuid", recursiveForeignKey, paramName,
+        Collections.singletonList(fieldValue), findChildren, false);
   }
 
   public final void addRecursiveClause(AbstractSearchQueryBuilder<B, T> outerQb, String tableName,
       String[] foreignKeys, String withTableName, String recursiveTableName,
       String recursiveForeignKey, String paramName, String fieldValue, boolean findChildren) {
-    addRecursiveClause(outerQb, tableName, foreignKeys, withTableName, recursiveTableName,
-        recursiveForeignKey, paramName, Collections.singletonList(fieldValue), findChildren);
+    addRecursiveClause(outerQb, tableName, foreignKeys, withTableName, recursiveTableName, "uuid",
+        recursiveForeignKey, paramName, Collections.singletonList(fieldValue), findChildren, false);
   }
 
   public final void addRecursiveClause(AbstractSearchQueryBuilder<B, T> outerQb, String tableName,
@@ -247,7 +247,8 @@ public abstract class AbstractSearchQueryBuilder<B, T extends AbstractSearchQuer
       String recursiveForeignKey, String paramName, List<String> fieldValues,
       boolean findChildren) {
     addRecursiveClause(outerQb, tableName, new String[] {foreignKey}, withTableName,
-        recursiveTableName, recursiveForeignKey, paramName, fieldValues, findChildren);
+        recursiveTableName, "uuid", recursiveForeignKey, paramName, fieldValues, findChildren,
+        false);
   }
 
   public final void addRecursiveBatchClause(AbstractSearchQueryBuilder<B, T> outerQb,
@@ -255,38 +256,47 @@ public abstract class AbstractSearchQueryBuilder<B, T extends AbstractSearchQuer
       String recursiveForeignKey, String paramName, List<String> fieldValues,
       RecurseStrategy recurseStrategy) {
     final boolean findChildren = RecurseStrategy.CHILDREN.equals(recurseStrategy);
-    addRecursiveClause(outerQb, tableName, foreignKeys, withTableName, recursiveTableName,
-        recursiveForeignKey, paramName, fieldValues, findChildren);
+    addRecursiveClause(outerQb, tableName, foreignKeys, withTableName, recursiveTableName, "uuid",
+        recursiveForeignKey, paramName, fieldValues, findChildren, false);
     addSelectClause(String.format("%1$s.%2$s AS \"batchUuid\"", withTableName,
         findChildren ? "parent_uuid" : "uuid"));
   }
 
   public final void addRecursiveClause(AbstractSearchQueryBuilder<B, T> outerQb, String tableName,
-      String[] foreignKeys, String withTableName, String recursiveTableName,
-      String recursiveForeignKey, String paramName, List<String> fieldValues,
-      boolean findChildren) {
-    createWithClause(outerQb, withTableName, recursiveTableName, recursiveForeignKey, true);
+      String[] foreignKeys, String withTableName, String recursiveTableName, String baseKey,
+      String recursiveForeignKey, String paramName, List<String> fieldValues, boolean findChildren,
+      boolean includeSelf) {
+    createWithClause(outerQb, withTableName, recursiveTableName, baseKey, recursiveForeignKey,
+        true);
     final List<String> orClauses = new ArrayList<>();
     for (final String foreignKey : foreignKeys) {
       orClauses.add(String.format("%1$s.%2$s = %3$s.%4$s", tableName, foreignKey, withTableName,
           findChildren ? "uuid" : "parent_uuid"));
     }
-    addWhereClause(
+    final var recursiveWhereClauses = new ArrayList<>();
+    recursiveWhereClauses.add(
         String.format("( (%1$s) AND %2$s.%3$s IN ( <%4$s> ) )", Joiner.on(" OR ").join(orClauses),
             withTableName, findChildren ? "parent_uuid" : "uuid", paramName));
+    if (includeSelf) {
+      for (final String foreignKey : foreignKeys) {
+        recursiveWhereClauses
+            .add(String.format("(%1$s.%2$s IN ( <%3$s> ))", tableName, foreignKey, paramName));
+      }
+    }
+    addWhereClause(String.format("(%1$s)", Joiner.on(" OR ").join(recursiveWhereClauses)));
     addListArg(paramName, fieldValues);
   }
 
   public void createWithClause(AbstractSearchQueryBuilder<B, T> outerQb, String withTableName,
-      String recursiveTableName, String recursiveForeignKey, boolean addFrom) {
+      String recursiveTableName, String baseKey, String recursiveForeignKey, boolean addFrom) {
     if (outerQb == null) {
       outerQb = this;
     }
     outerQb.addWithClause(String.format(
-        "%1$s(uuid, parent_uuid) AS (SELECT uuid, uuid as parent_uuid FROM %2$s UNION ALL"
-            + " SELECT pt.uuid, bt.%3$s FROM %2$s bt INNER JOIN"
-            + " %1$s pt ON bt.uuid = pt.parent_uuid)",
-        withTableName, recursiveTableName, recursiveForeignKey));
+        "%1$s(uuid, parent_uuid) AS (SELECT %3$s AS uuid, %3$s AS parent_uuid FROM %2$s UNION ALL"
+            + " SELECT pt.uuid, bt.%4$s FROM %2$s bt INNER JOIN"
+            + " %1$s pt ON bt.%3$s = pt.parent_uuid)",
+        withTableName, recursiveTableName, baseKey, recursiveForeignKey));
     if (addFrom) {
       addAdditionalFromClause(withTableName);
     }

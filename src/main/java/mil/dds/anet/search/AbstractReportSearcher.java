@@ -353,8 +353,9 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
         || RecurseStrategy.PARENTS.equals(query.getOrgRecurseStrategy())) {
       qb.addRecursiveClause(outerQb, "reports",
           new String[] {"\"advisorOrganizationUuid\"", "\"interlocutorOrganizationUuid\""},
-          "parent_orgs", "organizations", "\"parentOrgUuid\"", "orgUuid", query.getOrgUuid(),
-          RecurseStrategy.CHILDREN.equals(query.getOrgRecurseStrategy()));
+          "parent_orgs", "organizations", "uuid", "\"parentOrgUuid\"", "orgUuid",
+          query.getOrgUuid(), RecurseStrategy.CHILDREN.equals(query.getOrgRecurseStrategy()),
+          false);
     } else {
       qb.addWhereClause("(reports.\"advisorOrganizationUuid\" IN ( <orgUuid> )"
           + " OR reports.\"interlocutorOrganizationUuid\" IN ( <orgUuid> ))");

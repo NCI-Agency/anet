@@ -11,6 +11,10 @@ import DateRangeFilter, {
   deserialize as deserializeDateRangeFilter
 } from "components/advancedSearch/DateRangeFilter"
 import {
+  deserializeMulti as deserializeLocationMultiFilter,
+  LocationMultiFilter
+} from "components/advancedSearch/LocationFilter"
+import {
   deserializeMulti as deserializeOrganizationMultiFilter,
   OrganizationMultiFilter
 } from "components/advancedSearch/OrganizationFilter"
@@ -587,6 +591,15 @@ export const searchFilters = function(includeAdminFilters) {
           queryKey: "type",
           options: locationTypeOptions,
           labels: locationTypeOptions.map(lt => Location.humanNameOfType(lt))
+        }
+      },
+      "Within Location": {
+        component: LocationMultiFilter,
+        deserializer: deserializeLocationMultiFilter,
+        props: {
+          queryKey: "locationUuid",
+          queryRecurseStrategyKey: "locationRecurseStrategy",
+          fixedRecurseStrategy: RECURSE_STRATEGY.CHILDREN
         }
       }
     }
