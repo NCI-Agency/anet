@@ -539,15 +539,14 @@ export const searchFilters = function(includeAdminFilters) {
           fixedRecurseStrategy: RECURSE_STRATEGY.CHILDREN
         }
       },
-      Location: {
-        component: AdvancedSelectFilter,
-        dictProps: Settings.fields.position.location,
-        deserializer: deserializeAdvancedSelectFilter,
-        props: Object.assign({}, advancedSelectFilterLocationProps, {
-          filterDefs: positionLocationWidgetFilters,
-          placeholder: "Filter by location...",
-          queryKey: "locationUuid"
-        })
+      "Within Location": {
+        component: LocationMultiFilter,
+        deserializer: deserializeLocationMultiFilter,
+        props: {
+          queryKey: "locationUuid",
+          queryRecurseStrategyKey: "locationRecurseStrategy",
+          fixedRecurseStrategy: RECURSE_STRATEGY.CHILDREN
+        }
       },
       "Is Filled?": {
         component: RadioButtonFilter,

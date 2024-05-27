@@ -8,6 +8,7 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AbstractBatchParams;
+import mil.dds.anet.beans.search.ISearchQuery;
 import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.PositionSearchQuery;
@@ -100,7 +101,10 @@ public abstract class AbstractPositionSearcher
       }
     }
 
-    qb.addStringEqualsClause("locationUuid", "positions.\"locationUuid\"", query.getLocationUuid());
+    if (!Utils.isEmptyOrNull(query.getLocationUuid())) {
+      addLocationUuidQuery(query);
+    }
+
     qb.addEnumEqualsClause("status", "positions.status", query.getStatus());
 
     if (query.getAuthorizationGroupUuid() != null) {
@@ -131,6 +135,18 @@ public abstract class AbstractPositionSearcher
     }
 
     addOrderByClauses(qb, query);
+  }
+
+  protected void addLocationUuidQuery(PositionSearchQuery query) {
+    if (ISearchQuery.RecurseStrategy.CHILDREN.equals(query.getLocationRecurseStrategy())
+        || ISearchQuery.RecurseStrategy.PARENTS.equals(query.getLocationRecurseStrategy())) {
+      qb.addRecursiveClause(null, "positions", new String[] {"\"locationUuid\""},
+          "parent_locations", "\"locationRelationships\"", "\"childLocationUuid\"",
+          "\"parentLocationUuid\"", "locationUuid", query.getLocationUuid(),
+          ISearchQuery.RecurseStrategy.CHILDREN.equals(query.getLocationRecurseStrategy()), true);
+    } else {
+      qb.addInListClause("locationUuid", "positions.\"locationUuid\"", query.getLocationUuid());
+    }
   }
 
   @SuppressWarnings("unchecked")

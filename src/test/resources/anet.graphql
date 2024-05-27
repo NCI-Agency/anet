@@ -799,7 +799,8 @@ input PositionSearchQueryInput {
   hasPendingAssessments: Boolean
   inMyReports: Boolean
   isFilled: Boolean
-  locationUuid: String
+  locationRecurseStrategy: RecurseStrategy
+  locationUuid: [String]
   matchPersonName: Boolean
   orgRecurseStrategy: RecurseStrategy
   organizationUuid: [String]
