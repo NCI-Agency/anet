@@ -205,7 +205,7 @@ test.beforeEach(t => {
 
   // For debugging purposes.
   t.context.waitForever = async() => {
-    console.log("Waiting forever so you can debug...")
+    console.log("Waiting forever so you can debug…")
     await t.context.driver.wait(() => {})
   }
 

@@ -28,7 +28,7 @@ describe("My tasks page", () => {
     await MyTasks.open()
   })
 
-  afterEach("On the my tasks page...", async() => {
+  afterEach("On the my tasks page…", async() => {
     await MyTasks.logout()
   })
 

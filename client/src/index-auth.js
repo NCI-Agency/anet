@@ -17,7 +17,7 @@ import { initOptions, keycloak } from "keycloak"
   try {
     const authenticated = await keycloak.init({ onLoad: initOptions.onLoad })
     if (!authenticated) {
-      console.info("Keycloak client not authenticated, reloading page...")
+      console.info("Keycloak client not authenticated, reloading page…")
       window.location.reload()
       return
     }

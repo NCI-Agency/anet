@@ -13,7 +13,7 @@ describe("My Organization page", () => {
     await MyOrg.openAsAdminUser(myOrgUrl)
   })
 
-  afterEach("On the My Organization page...", async() => {
+  afterEach("On the My Organization page…", async() => {
     await MyOrg.logout()
   })
 

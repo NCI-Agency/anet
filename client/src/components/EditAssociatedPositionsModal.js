@@ -117,7 +117,7 @@ const EditAssociatedPositionsModal = ({
                       widget={
                         <AdvancedMultiSelect
                           fieldName="associatedPositions"
-                          placeholder={`Search for a ${assignedRole} position...`}
+                          placeholder={`Search for a ${assignedRole} position…`}
                           value={values.associatedPositions}
                           renderSelected={
                             <AssociatedPositionsTable

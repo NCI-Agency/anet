@@ -214,7 +214,7 @@ export const searchFilters = function(includeAdminFilters) {
         deserializer: deserializeAdvancedSelectFilter,
         props: Object.assign({}, advancedSelectFilterPersonProps, {
           filterDefs: authorWidgetFilters,
-          placeholder: "Filter reports by author...",
+          placeholder: "Filter reports by author…",
           queryKey: "authorUuid"
         })
       },
@@ -223,7 +223,7 @@ export const searchFilters = function(includeAdminFilters) {
         deserializer: deserializeAdvancedSelectFilter,
         props: Object.assign({}, advancedSelectFilterPersonProps, {
           filterDefs: attendeeWidgetFilters,
-          placeholder: "Filter reports by attendee...",
+          placeholder: "Filter reports by attendee…",
           queryKey: "attendeeUuid"
         })
       },
@@ -232,7 +232,7 @@ export const searchFilters = function(includeAdminFilters) {
         deserializer: deserializeAdvancedSelectFilter,
         props: Object.assign({}, advancedSelectFilterPersonProps, {
           filterDefs: pendingApprovalOfWidgetFilters,
-          placeholder: "Filter reports pending approval of...",
+          placeholder: "Filter reports pending approval of…",
           queryKey: "pendingApprovalOf"
         })
       },
@@ -241,7 +241,7 @@ export const searchFilters = function(includeAdminFilters) {
         deserializer: deserializeAdvancedSelectFilter,
         props: Object.assign({}, advancedSelectFilterPositionProps, {
           filterDefs: authorPositionWidgetFilters,
-          placeholder: "Filter reports by author position...",
+          placeholder: "Filter reports by author position…",
           queryKey: "authorPositionUuid"
         })
       },
@@ -250,7 +250,7 @@ export const searchFilters = function(includeAdminFilters) {
         deserializer: deserializeAdvancedSelectFilter,
         props: Object.assign({}, advancedSelectFilterPositionProps, {
           filterDefs: attendeePositionWidgetFilters,
-          placeholder: "Filter reports by attendee position...",
+          placeholder: "Filter reports by attendee position…",
           queryKey: "attendeePositionUuid"
         })
       },
@@ -376,7 +376,7 @@ export const searchFilters = function(includeAdminFilters) {
       deserializer: deserializeAdvancedSelectFilter,
       props: Object.assign({}, advancedSelectFilterTaskProps, {
         filterDefs: taskWidgetFilters,
-        placeholder: `Filter reports by ${taskShortLabel}...`,
+        placeholder: `Filter reports by ${taskShortLabel}…`,
         queryKey: "taskUuid"
       })
     }
@@ -420,7 +420,7 @@ export const searchFilters = function(includeAdminFilters) {
         deserializer: deserializeAdvancedSelectFilter,
         props: Object.assign({}, advancedSelectFilterCountryProps, {
           filterDefs: countryWidgetFilters,
-          placeholder: "Filter by country...",
+          placeholder: "Filter by country…",
           queryKey: "countryUuid"
         })
       },
@@ -668,7 +668,7 @@ export const searchFilters = function(includeAdminFilters) {
         props: {
           ...advancedSelectFilterPersonProps,
           filterDefs: authorWidgetFilters,
-          placeholder: "Filter attachments by owner...",
+          placeholder: "Filter attachments by owner…",
           queryKey: "authorUuid"
         }
       }

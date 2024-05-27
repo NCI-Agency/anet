@@ -39,13 +39,13 @@ const simulate = async args => {
     if (!defaultScenario) {
       console.log(
         colors.red(
-          "No scenario name given, and no default scenario found. Aborting..."
+          "No scenario name given, and no default scenario found. Aborting…"
         )
       )
       return
     }
     console.log(
-      colors.yellow("No scenario name given, using default scenario...")
+      colors.yellow("No scenario name given, using default scenario…")
     )
     scenario = defaultScenario
   } else {
@@ -56,13 +56,13 @@ const simulate = async args => {
         colors.red(
           `Scenario with name ${givenScenarioName} not found; possible scenarios are: ${Object.keys(
             scenarioMapping
-          )}. Aborting...`
+          )}. Aborting…`
         )
       )
       return
     }
     console.log(
-      colors.green(`Reading from scenario with name "${givenScenarioName}"...`)
+      colors.green(`Reading from scenario with name "${givenScenarioName}"…`)
     )
     scenario = givenScenario
   }

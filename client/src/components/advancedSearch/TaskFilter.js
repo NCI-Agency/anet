@@ -78,7 +78,7 @@ const TaskFilter = ({
       valueFunc={(v, k) =>
         getBreadcrumbTrailAsText(v, v?.ascendantTasks, parentKey, k)}
       fields={Task.autocompleteQuery}
-      placeholder="Filter by task..."
+      placeholder="Filter by task…"
       addon={TASKS_ICON}
       onChange={handleChangeTask}
       value={value.value}

@@ -25,7 +25,7 @@ describe("Home page", () => {
 })
 
 describe("My counterparts page", () => {
-  afterEach("On the my counterparts page...", async() => {
+  afterEach("On the my counterparts page…", async() => {
     await MyCounterparts.logout()
   })
 

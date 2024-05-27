@@ -544,7 +544,7 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                             fieldName="tasks"
                             placeholder={`Search for ${pluralize(
                               Settings.fields.task.shortLabel
-                            )}...`}
+                            )}…`}
                             value={values.tasks}
                             renderSelected={
                               <NoPaginationTaskTable
