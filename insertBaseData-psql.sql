@@ -628,13 +628,13 @@ INSERT INTO approvers ("approvalStepUuid", "positionUuid") VALUES
   ((SELECT uuid from "approvalSteps" where name = 'Location approval'), (SELECT uuid from positions where name = 'ANET Administrator'));
 
 -- Top-level organizations
-INSERT INTO organizations (uuid, "shortName", "longName", "identificationCode", app6context, "app6standardIdentity", "app6symbolSet", "createdAt", "updatedAt") VALUES
-  (uuid_generate_v4(), 'MoD', 'Ministry of Defense', 'Z12345', '0', '4', '11', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'MoI', 'Ministry of Interior', 'P12345', '0', '4', '11', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO organizations (uuid, "shortName", "longName", "identificationCode", "locationUuid", app6context, "app6standardIdentity", "app6symbolSet", "createdAt", "updatedAt") VALUES
+  (uuid_generate_v4(), 'MoD', 'Ministry of Defense', 'Z12345', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Afghanistan'), '0', '4', '11', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'MoI', 'Ministry of Interior', 'P12345', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Afghanistan'), '0', '4', '11', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Sub-organizations
-INSERT INTO organizations (uuid, "shortName", "longName", "parentOrgUuid", "identificationCode", "app6symbolSet", "createdAt", "updatedAt") VALUES
-  (uuid_generate_v4(), 'MOD-F', 'Ministry of Defense Finances', (SELECT uuid from organizations where "shortName" = 'MoD'), NULL, '11', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO organizations (uuid, "shortName", "longName", "parentOrgUuid", "identificationCode", "locationUuid", "app6symbolSet", "createdAt", "updatedAt") VALUES
+  (uuid_generate_v4(), 'MOD-F', 'Ministry of Defense Finances', (SELECT uuid from organizations where "shortName" = 'MoD'), NULL, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Afghanistan'), '11', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Assign responsible positions for organizations
 INSERT INTO "organizationAdministrativePositions" ("organizationUuid", "positionUuid") VALUES

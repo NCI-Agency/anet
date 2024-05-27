@@ -384,7 +384,7 @@ class OrganizationResourceTest extends AbstractResourceTest {
         .isEqualTo(1);
 
     // Search by location
-    query.setLocationUuid(getGeneralHospital().getUuid());
+    query.setLocationUuid(List.of(getGeneralHospital().getUuid()));
     orgs = withCredentials(jackUser,
         t -> queryExecutor.organizationList(getListFields(FIELDS), query));
     assertThat(orgs.getList()).isEmpty(); // Should be empty!

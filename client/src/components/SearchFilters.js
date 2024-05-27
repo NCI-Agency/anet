@@ -205,7 +205,6 @@ export const searchFilters = function(includeAdminFilters) {
     }
   }
   const positionLocationWidgetFilters = Location.getPositionLocationFilters()
-  const organizationLocationFilters = Location.getOrganizationLocationFilters()
   const classificationOptions = Object.keys(Settings.classification.choices)
   const classificationLabels = Object.values(Settings.classification.choices)
   // Allow explicit search for "no classification"
@@ -489,15 +488,14 @@ export const searchFilters = function(includeAdminFilters) {
           fixedRecurseStrategy: RECURSE_STRATEGY.CHILDREN
         }
       },
-      Location: {
-        component: AdvancedSelectFilter,
-        dictProps: Settings.fields.organization.location,
-        deserializer: deserializeAdvancedSelectFilter,
-        props: Object.assign({}, advancedSelectFilterLocationProps, {
-          filterDefs: organizationLocationFilters,
-          placeholder: "Filter by location...",
-          queryKey: "locationUuid"
-        })
+      "Within Location": {
+        component: LocationMultiFilter,
+        deserializer: deserializeLocationMultiFilter,
+        props: {
+          queryKey: "locationUuid",
+          queryRecurseStrategyKey: "locationRecurseStrategy",
+          fixedRecurseStrategy: RECURSE_STRATEGY.CHILDREN
+        }
       },
       [`Has ${Settings.fields.organization.profile?.label}?`]: {
         component: RadioButtonFilter,

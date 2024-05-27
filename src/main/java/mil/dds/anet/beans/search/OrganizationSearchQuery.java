@@ -17,13 +17,15 @@ public class OrganizationSearchQuery
   @GraphQLQuery
   @GraphQLInputField
   private List<String> parentOrgUuid;
-  //
-  @GraphQLQuery
-  @GraphQLInputField
-  String locationUuid;
   @GraphQLQuery
   @GraphQLInputField
   private RecurseStrategy orgRecurseStrategy;
+  @GraphQLQuery
+  @GraphQLInputField
+  private List<String> locationUuid;
+  @GraphQLQuery
+  @GraphQLInputField
+  private RecurseStrategy locationRecurseStrategy;
   // Find organizations who (don't) have the profile filled in
   @GraphQLQuery
   @GraphQLInputField
@@ -49,21 +51,28 @@ public class OrganizationSearchQuery
     this.parentOrgUuid = parentOrgUuid;
   }
 
-  public String getLocationUuid() {
-    return locationUuid;
-  }
-
-  public void setLocationUuid(String locationUuid) {
-    this.locationUuid = locationUuid;
-  }
-
-
   public RecurseStrategy getOrgRecurseStrategy() {
     return orgRecurseStrategy;
   }
 
   public void setOrgRecurseStrategy(RecurseStrategy orgRecurseStrategy) {
     this.orgRecurseStrategy = orgRecurseStrategy;
+  }
+
+  public List<String> getLocationUuid() {
+    return locationUuid;
+  }
+
+  public void setLocationUuid(List<String> locationUuid) {
+    this.locationUuid = locationUuid;
+  }
+
+  public RecurseStrategy getLocationRecurseStrategy() {
+    return locationRecurseStrategy;
+  }
+
+  public void setLocationRecurseStrategy(RecurseStrategy locationRecurseStrategy) {
+    this.locationRecurseStrategy = locationRecurseStrategy;
   }
 
   public Boolean getHasProfile() {
@@ -88,8 +97,10 @@ public class OrganizationSearchQuery
     final OrganizationSearchQuery other = (OrganizationSearchQuery) obj;
     return super.equals(obj) && Objects.equals(getHasParentOrg(), other.getHasParentOrg())
         && Objects.equals(getParentOrgUuid(), other.getParentOrgUuid())
-        && Objects.equals(getHasProfile(), other.getHasProfile())
-        && Objects.equals(getOrgRecurseStrategy(), other.getOrgRecurseStrategy());
+        && Objects.equals(getOrgRecurseStrategy(), other.getOrgRecurseStrategy())
+        && Objects.equals(getLocationUuid(), other.getLocationUuid())
+        && Objects.equals(getLocationRecurseStrategy(), other.getLocationRecurseStrategy())
+        && Objects.equals(getHasProfile(), other.getHasProfile());
   }
 
   @Override
@@ -97,6 +108,9 @@ public class OrganizationSearchQuery
     final OrganizationSearchQuery clone = (OrganizationSearchQuery) super.clone();
     if (parentOrgUuid != null) {
       clone.setParentOrgUuid(new ArrayList<>(parentOrgUuid));
+    }
+    if (locationUuid != null) {
+      clone.setLocationUuid(new ArrayList<>(locationUuid));
     }
     return clone;
   }

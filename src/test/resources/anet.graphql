@@ -603,7 +603,8 @@ input OrganizationSearchQueryInput {
   hasParentOrg: Boolean
   hasProfile: Boolean
   inMyReports: Boolean
-  locationUuid: String
+  locationRecurseStrategy: RecurseStrategy
+  locationUuid: [String]
   orgRecurseStrategy: RecurseStrategy
   pageNum: Int
   pageSize: Int
