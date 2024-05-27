@@ -22,6 +22,7 @@ import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.WithStatus;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AbstractBatchParams;
+import mil.dds.anet.beans.search.ISearchQuery;
 import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.ReportSearchQuery;
@@ -186,13 +187,8 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
       addOrgUuidQuery(query);
     }
 
-    if (query.getLocationUuid() != null) {
-      if (Location.DUMMY_LOCATION_UUID.equals(query.getLocationUuid())) {
-        qb.addWhereClause("reports.\"locationUuid\" IS NULL");
-      } else {
-        qb.addStringEqualsClause("locationUuid", "reports.\"locationUuid\"",
-            query.getLocationUuid());
-      }
+    if (!Utils.isEmptyOrNull(query.getLocationUuid())) {
+      addLocationUuidQuery(query);
     }
 
     if (query.getPendingApprovalOf() != null) {
@@ -360,6 +356,25 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
       qb.addWhereClause("(reports.\"advisorOrganizationUuid\" IN ( <orgUuid> )"
           + " OR reports.\"interlocutorOrganizationUuid\" IN ( <orgUuid> ))");
       qb.addListArg("orgUuid", query.getOrgUuid());
+    }
+  }
+
+
+  protected abstract void addLocationUuidQuery(ReportSearchQuery query);
+
+  protected void addLocationUuidQuery(AbstractSearchQueryBuilder<Report, ReportSearchQuery> outerQb,
+      ReportSearchQuery query) {
+    if (query.getLocationUuid().size() == 1
+        && Location.DUMMY_LOCATION_UUID.equals(query.getLocationUuid().get(0))) {
+      qb.addWhereClause("reports.\"locationUuid\" IS NULL");
+    } else if (ISearchQuery.RecurseStrategy.CHILDREN.equals(query.getLocationRecurseStrategy())
+        || ISearchQuery.RecurseStrategy.PARENTS.equals(query.getLocationRecurseStrategy())) {
+      qb.addRecursiveClause(outerQb, "reports", new String[] {"\"locationUuid\""},
+          "parent_locations", "\"locationRelationships\"", "\"childLocationUuid\"",
+          "\"parentLocationUuid\"", "locationUuid", query.getLocationUuid(),
+          ISearchQuery.RecurseStrategy.CHILDREN.equals(query.getLocationRecurseStrategy()), true);
+    } else {
+      qb.addInListClause("locationUuid", "reports.\"locationUuid\"", query.getLocationUuid());
     }
   }
 

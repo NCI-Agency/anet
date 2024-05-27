@@ -204,7 +204,6 @@ export const searchFilters = function(includeAdminFilters) {
       queryVars: { type: Location.LOCATION_TYPES.COUNTRY }
     }
   }
-  const reportLocationWidgetFilters = Location.getReportLocationFilters()
   const positionLocationWidgetFilters = Location.getPositionLocationFilters()
   const organizationLocationFilters = Location.getOrganizationLocationFilters()
   const classificationOptions = Object.keys(Settings.classification.choices)
@@ -305,15 +304,14 @@ export const searchFilters = function(includeAdminFilters) {
           queryKey: "updatedAt"
         }
       },
-      Location: {
-        component: AdvancedSelectFilter,
-        dictProps: Settings.fields.report.location,
-        deserializer: deserializeAdvancedSelectFilter,
-        props: Object.assign({}, advancedSelectFilterLocationProps, {
-          filterDefs: reportLocationWidgetFilters,
-          placeholder: "Filter reports by location...",
-          queryKey: "locationUuid"
-        })
+      "Within Location": {
+        component: LocationMultiFilter,
+        deserializer: deserializeLocationMultiFilter,
+        props: {
+          queryKey: "locationUuid",
+          queryRecurseStrategyKey: "locationRecurseStrategy",
+          fixedRecurseStrategy: RECURSE_STRATEGY.CHILDREN
+        }
       },
       State: {
         component: ReportStateFilter,

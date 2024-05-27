@@ -1346,8 +1346,9 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(locSearchResults.getList()).isNotEmpty();
     Location cabot = locSearchResults.getList().get(0);
 
-    final ReportSearchQueryInput query3 = ReportSearchQueryInput.builder()
-        .withState(List.of(ReportState.values())).withLocationUuid(cabot.getUuid()).build();
+    final ReportSearchQueryInput query3 =
+        ReportSearchQueryInput.builder().withState(List.of(ReportState.values()))
+            .withLocationUuid(List.of(cabot.getUuid())).build();
     searchResults =
         withCredentials(jackUser, t -> queryExecutor.reportList(getListFields(FIELDS), query3));
     assertThat(searchResults.getList()).isNotEmpty();

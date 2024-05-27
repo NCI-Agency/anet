@@ -1067,7 +1067,8 @@ input ReportSearchQueryInput {
   inMyReports: Boolean
   includeAllDrafts: Boolean
   includeEngagementDayOfWeek: Boolean
-  locationUuid: String
+  locationRecurseStrategy: RecurseStrategy
+  locationUuid: [String]
   orgRecurseStrategy: RecurseStrategy
   orgUuid: [String]
   pageNum: Int
