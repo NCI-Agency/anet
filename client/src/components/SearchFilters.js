@@ -32,7 +32,6 @@ import TaskFilter, {
 } from "components/advancedSearch/TaskFilter"
 import {
   CountryOverlayRow,
-  LocationOverlayRow,
   PersonDetailedOverlayRow,
   PositionOverlayRow,
   TaskOverlayRow
@@ -46,7 +45,6 @@ import _pickBy from "lodash/pickBy"
 import { Location, Person, Position, Report, Task } from "models"
 import PropTypes from "prop-types"
 import React, { useContext } from "react"
-import LOCATIONS_ICON from "resources/locations.png"
 import PEOPLE_ICON from "resources/people.png"
 import POSITIONS_ICON from "resources/positions.png"
 import TASKS_ICON from "resources/tasks.png"
@@ -143,14 +141,6 @@ const advancedSelectFilterPositionProps = {
   fields: Position.autocompleteQuery,
   addon: POSITIONS_ICON
 }
-const advancedSelectFilterLocationProps = {
-  overlayColumns: ["Name"],
-  overlayRenderRow: LocationOverlayRow,
-  objectType: Location,
-  valueKey: "name",
-  fields: Location.autocompleteQuery,
-  addon: LOCATIONS_ICON
-}
 const advancedSelectFilterTaskProps = {
   overlayColumns: ["Name"],
   overlayRenderRow: TaskOverlayRow,
@@ -204,7 +194,6 @@ export const searchFilters = function(includeAdminFilters) {
       queryVars: { type: Location.LOCATION_TYPES.COUNTRY }
     }
   }
-  const positionLocationWidgetFilters = Location.getPositionLocationFilters()
   const classificationOptions = Object.keys(Settings.classification.choices)
   const classificationLabels = Object.values(Settings.classification.choices)
   // Allow explicit search for "no classification"
@@ -406,14 +395,14 @@ export const searchFilters = function(includeAdminFilters) {
           fixedRecurseStrategy: RECURSE_STRATEGY.CHILDREN
         }
       },
-      Location: {
-        component: AdvancedSelectFilter,
-        deserializer: deserializeAdvancedSelectFilter,
-        props: Object.assign({}, advancedSelectFilterLocationProps, {
-          filterDefs: positionLocationWidgetFilters,
-          placeholder: "Filter by location...",
-          queryKey: "locationUuid"
-        })
+      "Within Location": {
+        component: LocationMultiFilter,
+        deserializer: deserializeLocationMultiFilter,
+        props: {
+          queryKey: "locationUuid",
+          queryRecurseStrategyKey: "locationRecurseStrategy",
+          fixedRecurseStrategy: RECURSE_STRATEGY.CHILDREN
+        }
       },
       Rank: {
         component: SelectFilter,

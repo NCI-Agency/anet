@@ -31,7 +31,10 @@ public class PersonSearchQuery extends SubscribableObjectSearchQuery<PersonSearc
   // Filter to people in positions at a certain location
   @GraphQLQuery
   @GraphQLInputField
-  String locationUuid;
+  private List<String> locationUuid;
+  @GraphQLQuery
+  @GraphQLInputField
+  private RecurseStrategy locationRecurseStrategy;
 
   // Also match on positions whose name or code matches text.
   @GraphQLQuery
@@ -91,12 +94,20 @@ public class PersonSearchQuery extends SubscribableObjectSearchQuery<PersonSearc
     this.countryUuid = countryUuid;
   }
 
-  public String getLocationUuid() {
+  public List<String> getLocationUuid() {
     return locationUuid;
   }
 
-  public void setLocationUuid(String locationUuid) {
+  public void setLocationUuid(List<String> locationUuid) {
     this.locationUuid = locationUuid;
+  }
+
+  public RecurseStrategy getLocationRecurseStrategy() {
+    return locationRecurseStrategy;
+  }
+
+  public void setLocationRecurseStrategy(RecurseStrategy locationRecurseStrategy) {
+    this.locationRecurseStrategy = locationRecurseStrategy;
   }
 
   public boolean getMatchPositionName() {
@@ -152,6 +163,9 @@ public class PersonSearchQuery extends SubscribableObjectSearchQuery<PersonSearc
     final PersonSearchQuery clone = (PersonSearchQuery) super.clone();
     if (orgUuid != null) {
       clone.setOrgUuid(new ArrayList<>(orgUuid));
+    }
+    if (locationUuid != null) {
+      clone.setLocationUuid(new ArrayList<>(locationUuid));
     }
     return clone;
   }

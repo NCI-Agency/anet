@@ -6,6 +6,7 @@ import java.util.Set;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
+import mil.dds.anet.beans.search.ISearchQuery;
 import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.PersonSearchQuery;
@@ -48,7 +49,7 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
     qb.addSelectClause(getTableFields(subFields));
     qb.addFromClause("people");
 
-    if (!Utils.isEmptyOrNull(query.getOrgUuid()) || query.getLocationUuid() != null
+    if (!Utils.isEmptyOrNull(query.getOrgUuid()) || !Utils.isEmptyOrNull(query.getLocationUuid())
         || query.getMatchPositionName() || !Utils.isEmptyOrNull(query.getPositionType())) {
       qb.addFromClause("LEFT JOIN positions ON people.uuid = positions.\"currentPersonUuid\"");
     }
@@ -82,7 +83,9 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
       }
     }
 
-    qb.addStringEqualsClause("locationUuid", "positions.\"locationUuid\"", query.getLocationUuid());
+    if (!Utils.isEmptyOrNull(query.getLocationUuid())) {
+      addLocationUuidQuery(query);
+    }
 
     if (query.getHasBiography() != null) {
       if (query.getHasBiography()) {
@@ -118,6 +121,18 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
     }
 
     addOrderByClauses(qb, query);
+  }
+
+  protected void addLocationUuidQuery(PersonSearchQuery query) {
+    if (ISearchQuery.RecurseStrategy.CHILDREN.equals(query.getLocationRecurseStrategy())
+        || ISearchQuery.RecurseStrategy.PARENTS.equals(query.getLocationRecurseStrategy())) {
+      qb.addRecursiveClause(null, "positions", new String[] {"\"locationUuid\""},
+          "parent_locations", "\"locationRelationships\"", "\"childLocationUuid\"",
+          "\"parentLocationUuid\"", "locationUuid", query.getLocationUuid(),
+          ISearchQuery.RecurseStrategy.CHILDREN.equals(query.getLocationRecurseStrategy()), true);
+    } else {
+      qb.addInListClause("locationUuid", "positions.\"locationUuid\"", query.getLocationUuid());
+    }
   }
 
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, PersonSearchQuery query) {
