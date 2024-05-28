@@ -8,6 +8,8 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response.Status;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Location;
@@ -119,6 +121,19 @@ public class LocationResource {
         Utils.isEmptyHtml(l.getDescription()) ? null : Utils.sanitizeHtml(l.getDescription()));
     final Person user = DaoUtils.getUserFromContext(context);
     assertPermission(user, DaoUtils.getUuid(l));
+
+    // Check for loops in the hierarchy
+    if (!Utils.isEmptyOrNull(l.getParentLocations())) {
+      final Set<String> parentLocationUuids =
+          l.getParentLocations().stream().map(Location::getUuid).collect(Collectors.toSet());
+      final Map<String, Set<String>> children =
+          AnetObjectEngine.getInstance().buildLocationHash(DaoUtils.getUuid(l), true);
+      children.keySet().retainAll(parentLocationUuids);
+      if (!children.isEmpty()) {
+        throw new WebApplicationException("Location can not be its own (grand…)parent");
+      }
+    }
+
     final int numRows = dao.update(l);
     if (numRows == 0) {
       throw new WebApplicationException("Couldn't process location update", Status.NOT_FOUND);

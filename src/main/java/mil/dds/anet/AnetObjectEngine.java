@@ -13,11 +13,13 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import mil.dds.anet.beans.ApprovalStep;
+import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
+import mil.dds.anet.beans.search.LocationSearchQuery;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.config.AnetConfiguration;
@@ -404,6 +406,21 @@ public class AnetObjectEngine {
     query.setPageSize(0);
     final List<Task> taskList = taskDao.search(query).getList();
     return Utils.buildParentTaskMapping(taskList, parentTaskUuid);
+  }
+
+  /**
+   * Helper function to build a map of location UUIDs to their top parent capped at a certain point
+   * in the hierarchy. The locationUuid will map to parentLocation, and all children will map to the
+   * highest parent that is NOT the locationUuid.
+   */
+  public Map<String, Set<String>> buildLocationHash(String locationUuid, boolean findChildren) {
+    final LocationSearchQuery query = new LocationSearchQuery();
+    query.setLocationUuid(List.of(locationUuid));
+    query.setLocationRecurseStrategy(
+        findChildren ? RecurseStrategy.CHILDREN : RecurseStrategy.PARENTS);
+    query.setPageSize(0);
+    final List<Location> locationList = locationDao.search(query).getList();
+    return Utils.buildParentLocationMapping(locationList, locationUuid);
   }
 
   public static AnetObjectEngine getInstance() {

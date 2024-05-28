@@ -37,6 +37,7 @@ import javax.imageio.ImageIO;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
+import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.database.ApprovalStepDao;
@@ -210,6 +211,72 @@ public class Utils {
           uuidToParentUuidMap.get(parentUuid), seenUuids);
     }
     return uuid;
+  }
+
+  /**
+   * Given a list of locations and a topParentUuid, this function maps all of the locations to their
+   * highest parent within this list excluding the topParent. This can be used to check for loops.
+   */
+  public static Map<String, Set<String>> buildParentLocationMapping(List<Location> locations,
+      @Nullable String topParentUuid) {
+    // Can't use Collectors.toMap as parents may be null
+    final Map<String, Set<String>> locationMap =
+        locations.stream().collect(HashMap::new, (m, v) -> {
+          if (Utils.isEmptyOrNull(v.getParentLocations())) {
+            m.put(v.getUuid(), null);
+          } else {
+            m.put(v.getUuid(),
+                v.getParentLocations().stream().map(Location::getUuid).collect(Collectors.toSet()));
+          }
+        }, HashMap::putAll);
+    return buildParentsMapping(locationMap, topParentUuid);
+  }
+
+  private static Map<String, Set<String>> buildParentsMapping(
+      Map<String, Set<String>> uuidToParentUuidsMap, @Nullable String topParentUuid) {
+    final Map<String, Set<String>> result = new HashMap<>();
+
+    for (final Map.Entry<String, Set<String>> e : uuidToParentUuidsMap.entrySet()) {
+      final Set<String> seenUuids = new HashSet<>();
+      seenUuids.add(e.getKey());
+      final Set<String> topLevelParents = recursivelyDetermineParentsFromSet(uuidToParentUuidsMap,
+          topParentUuid, e.getKey(), e.getValue(), seenUuids).stream()
+          .map(uuidToParentUuidsMap::get).flatMap(Collection::stream).collect(Collectors.toSet());
+      result.put(e.getKey(), topLevelParents);
+    }
+
+    return result;
+  }
+
+  private static Set<String> recursivelyDetermineParentsFromSet(
+      Map<String, Set<String>> uuidToParentUuidsMap, @Nullable String topParentUuid, String uuid,
+      Set<String> parentUuids, Set<String> seenUuids) {
+    if (Utils.isEmptyOrNull(parentUuids)) {
+      return Set.of();
+    } else {
+      return parentUuids.stream()
+          .map(parentUuid -> recursivelyDetermineParentsFromUuid(uuidToParentUuidsMap,
+              topParentUuid, uuid, parentUuid, seenUuids))
+          .flatMap(Collection::stream).collect(Collectors.toSet());
+    }
+  }
+
+  private static Set<String> recursivelyDetermineParentsFromUuid(
+      Map<String, Set<String>> uuidToParentUuidsMap, @Nullable String topParentUuid, String uuid,
+      String parentUuid, Set<String> seenUuids) {
+    if (!Objects.equals(parentUuid, topParentUuid)
+        && uuidToParentUuidsMap.containsKey(parentUuid)) {
+      if (seenUuids.contains(parentUuid)) {
+        final String errorMsg = String
+            .format("Loop detected in hierarchy: %1$s is its own (grand…)parent!", parentUuid);
+        logger.error(errorMsg);
+        throw new IllegalArgumentException(errorMsg);
+      }
+      seenUuids.add(parentUuid);
+      return recursivelyDetermineParentsFromSet(uuidToParentUuidsMap, topParentUuid, parentUuid,
+          uuidToParentUuidsMap.get(parentUuid), seenUuids);
+    }
+    return Set.of(uuid);
   }
 
   public static final PolicyFactory HTML_POLICY_DEFINITION = new HtmlPolicyBuilder()
