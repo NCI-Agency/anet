@@ -146,70 +146,70 @@ public class Utils {
    * loops, or to generate graphs/tables that bubble things up to their highest parent. This is used
    * in the daily rollup graphs.
    */
-  public static Map<String, Organization> buildParentOrgMapping(List<Organization> orgs,
+  public static Map<String, String> buildParentOrgMapping(List<Organization> orgs,
       @Nullable String topParentUuid) {
-    final Map<String, Organization> result = new HashMap<>();
-    final Map<String, Organization> orgMap = new HashMap<>();
+    // Can't use Collectors.toMap as parent may be null
+    final Map<String, String> orgMap = orgs.stream().collect(HashMap::new,
+        (m, v) -> m.put(v.getUuid(), v.getParentOrgUuid()), HashMap::putAll);
+    return buildParentMapping(orgMap, topParentUuid);
+  }
 
-    for (final Organization o : orgs) {
-      orgMap.put(o.getUuid(), o);
-    }
-
-    for (final Organization o : orgs) {
-      final Set<String> seenUuids = new HashSet<>();
-      String curr = o.getUuid();
-      seenUuids.add(curr);
-      String parentUuid = o.getParentOrgUuid();
-      while (!Objects.equals(parentUuid, topParentUuid) && orgMap.containsKey(parentUuid)) {
-        curr = parentUuid;
-        if (seenUuids.contains(curr)) {
-          final String errorMsg = String.format(
-              "Loop detected in organization hierarchy: %1$s is its own (grand…)parent!", curr);
-          logger.error(errorMsg);
-          throw new IllegalArgumentException(errorMsg);
-        }
-        seenUuids.add(curr);
-        parentUuid = orgMap.get(parentUuid).getParentOrgUuid();
-      }
-      result.put(o.getUuid(), orgMap.get(curr));
-    }
-
-    return result;
+  public static Map<String, Organization> buildOrgToParentOrgMapping(List<Organization> orgs,
+      @Nullable String topParentUuid) {
+    final Map<String, Organization> orgToOrgMap =
+        orgs.stream().collect(Collectors.toMap(Organization::getUuid, Function.identity()));
+    // Can't use Collectors.toMap as parent may be null
+    final Map<String, String> orgMap = orgs.stream().collect(HashMap::new,
+        (m, v) -> m.put(v.getUuid(), v.getParentOrgUuid()), HashMap::putAll);
+    final Map<String, String> orgParentMap = buildParentMapping(orgMap, topParentUuid);
+    // Can't use Collectors.toMap as parent may be null
+    return orgs.stream().collect(HashMap::new,
+        (m, v) -> m.put(v.getUuid(), orgToOrgMap.get(orgParentMap.get(v.getUuid()))),
+        HashMap::putAll);
   }
 
   /**
    * Given a list of tasks and a topParentUuid, this function maps all of the tasks to their highest
    * parent within this list excluding the topParent. This can be used to check for loops.
    */
-  public static Map<String, Task> buildParentTaskMapping(List<Task> tasks,
+  public static Map<String, String> buildParentTaskMapping(List<Task> tasks,
       @Nullable String topParentUuid) {
-    final Map<String, Task> result = new HashMap<>();
-    final Map<String, Task> taskMap = new HashMap<>();
+    // Can't use Collectors.toMap as parent may be null
+    final Map<String, String> taskMap = tasks.stream().collect(HashMap::new,
+        (m, v) -> m.put(v.getUuid(), v.getParentTaskUuid()), HashMap::putAll);
+    return buildParentMapping(taskMap, topParentUuid);
+  }
 
-    for (final Task t : tasks) {
-      taskMap.put(t.getUuid(), t);
-    }
+  private static Map<String, String> buildParentMapping(Map<String, String> uuidToParentUuidMap,
+      @Nullable String topParentUuid) {
+    final Map<String, String> result = new HashMap<>();
 
-    for (final Task t : tasks) {
+    for (final Map.Entry<String, String> e : uuidToParentUuidMap.entrySet()) {
       final Set<String> seenUuids = new HashSet<>();
-      String curr = t.getUuid();
-      seenUuids.add(curr);
-      String parentUuid = t.getParentTaskUuid();
-      while (!Objects.equals(parentUuid, topParentUuid) && taskMap.containsKey(parentUuid)) {
-        curr = parentUuid;
-        if (seenUuids.contains(curr)) {
-          final String errorMsg = String
-              .format("Loop detected in task hierarchy: %1$s is its own (grand…)parent!", curr);
-          logger.error(errorMsg);
-          throw new IllegalArgumentException(errorMsg);
-        }
-        seenUuids.add(curr);
-        parentUuid = taskMap.get(parentUuid).getParentTaskUuid();
-      }
-      result.put(t.getUuid(), taskMap.get(curr));
+      seenUuids.add(e.getKey());
+      final String topLevelParent =
+          uuidToParentUuidMap.get(recursivelyDetermineParent(uuidToParentUuidMap, topParentUuid,
+              e.getKey(), e.getValue(), seenUuids));
+      result.put(e.getKey(), topLevelParent);
     }
 
     return result;
+  }
+
+  private static String recursivelyDetermineParent(Map<String, String> uuidToParentUuidMap,
+      @Nullable String topParentUuid, String uuid, String parentUuid, Set<String> seenUuids) {
+    if (!Objects.equals(parentUuid, topParentUuid) && uuidToParentUuidMap.containsKey(parentUuid)) {
+      if (seenUuids.contains(parentUuid)) {
+        final String errorMsg = String
+            .format("Loop detected in hierarchy: %1$s is its own (grand…)parent!", parentUuid);
+        logger.error(errorMsg);
+        throw new IllegalArgumentException(errorMsg);
+      }
+      seenUuids.add(parentUuid);
+      return recursivelyDetermineParent(uuidToParentUuidMap, topParentUuid, parentUuid,
+          uuidToParentUuidMap.get(parentUuid), seenUuids);
+    }
+    return uuid;
   }
 
   public static final PolicyFactory HTML_POLICY_DEFINITION = new HtmlPolicyBuilder()

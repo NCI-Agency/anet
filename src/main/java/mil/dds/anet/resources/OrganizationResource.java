@@ -135,10 +135,12 @@ public class OrganizationResource {
     final Organization existing = dao.getByUuid(org.getUuid());
 
     // Check for loops in the hierarchy
-    final Map<String, Organization> children =
-        AnetObjectEngine.getInstance().buildTopLevelOrgHash(DaoUtils.getUuid(org));
-    if (org.getParentOrgUuid() != null && children.containsKey(org.getParentOrgUuid())) {
-      throw new WebApplicationException("Organization can not be its own (grand…)parent");
+    if (org.getParentOrgUuid() != null) {
+      final Map<String, String> children =
+          AnetObjectEngine.getInstance().buildTopLevelOrgHash(DaoUtils.getUuid(org));
+      if (children.containsKey(org.getParentOrgUuid())) {
+        throw new WebApplicationException("Organization can not be its own (grand…)parent");
+      }
     }
 
     if (!AuthUtils.isAdmin(user)) {

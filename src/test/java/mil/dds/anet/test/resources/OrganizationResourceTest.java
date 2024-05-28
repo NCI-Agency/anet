@@ -532,6 +532,44 @@ class OrganizationResourceTest extends AbstractResourceTest {
   }
 
   @Test
+  void illegalParentOrganizationTest() {
+    final String testTopOrgUuid = "9a35caa7-a095-4963-ac7b-b784fde4d583"; // EF 1
+    final Organization topOrg =
+        withCredentials(adminUser, t -> queryExecutor.organization(FIELDS, testTopOrgUuid));
+    assertThat(topOrg).isNotNull();
+    assertThat(topOrg.getUuid()).isEqualTo(testTopOrgUuid);
+
+    final String testSubOrgUuid = "04614b0f-7e8e-4bf1-8bc5-13abaffeab8a"; // EF 1.1
+    final Organization subOrg =
+        withCredentials(adminUser, t -> queryExecutor.organization(FIELDS, testSubOrgUuid));
+    assertThat(subOrg).isNotNull();
+    assertThat(subOrg.getUuid()).isEqualTo(testSubOrgUuid);
+
+    // Set self as parent
+    final OrganizationInput topOrgInput = getOrganizationInput(topOrg);
+    final OrganizationInput parentTopOrgInput = getOrganizationInput(topOrg);
+    topOrgInput.setParentOrg(parentTopOrgInput);
+    try {
+      // Should fail, as it would create a loop
+      withCredentials(adminUser, t -> mutationExecutor.updateOrganization("", topOrgInput));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      // OK
+    }
+
+    // Set subOrg as parent
+    final OrganizationInput parentSubOrgInput = getOrganizationInput(subOrg);
+    topOrgInput.setParentOrg(parentSubOrgInput);
+    try {
+      // Should fail, as it would create a loop
+      withCredentials(adminUser, t -> mutationExecutor.updateOrganization("", topOrgInput));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      // OK
+    }
+  }
+
+  @Test
   void organizationCreateRegularUserPermissionTest() {
     final OrganizationInput orgInput =
         OrganizationInput.builder().withShortName("Regular User Test")

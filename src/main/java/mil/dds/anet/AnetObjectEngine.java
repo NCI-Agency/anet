@@ -3,7 +3,6 @@ package mil.dds.anet;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Injector;
 import io.dropwizard.core.Application;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -367,31 +366,40 @@ public class AnetObjectEngine {
     orgQuery.setPageSize(0);
     List<Organization> orgs = getOrganizationDao().search(orgQuery).getList();
 
-    return Utils.buildParentOrgMapping(orgs, null);
+    return Utils.buildOrgToParentOrgMapping(orgs, null);
   }
 
   /**
    * Helper function to build a map of organization UUIDs to their top parent capped at a certain
-   * point in the hierarchy. parentOrg will map to parentOrg, and all children will map to the
-   * highest parent that is NOT the parentOrgUuid.
+   * point in the hierarchy. The parentOrgUuid will map to parentOrg, and all children will map to
+   * the highest parent that is NOT the parentOrgUuid.
    */
-  public Map<String, Organization> buildTopLevelOrgHash(String parentOrgUuid) {
+  public Map<String, String> buildTopLevelOrgHash(String parentOrgUuid) {
     final OrganizationSearchQuery query = new OrganizationSearchQuery();
-    query.setParentOrgUuid(Collections.singletonList(parentOrgUuid));
+    query.setParentOrgUuid(List.of(parentOrgUuid));
     query.setOrgRecurseStrategy(RecurseStrategy.CHILDREN);
     query.setPageSize(0);
     final List<Organization> orgList = orgDao.search(query).getList();
     return Utils.buildParentOrgMapping(orgList, parentOrgUuid);
   }
 
+  public Map<String, Organization> buildTopLevelOrgToOrgHash(String parentOrgUuid) {
+    final OrganizationSearchQuery query = new OrganizationSearchQuery();
+    query.setParentOrgUuid(List.of(parentOrgUuid));
+    query.setOrgRecurseStrategy(RecurseStrategy.CHILDREN);
+    query.setPageSize(0);
+    final List<Organization> orgList = orgDao.search(query).getList();
+    return Utils.buildOrgToParentOrgMapping(orgList, parentOrgUuid);
+  }
+
   /**
    * Helper function to build a map of task UUIDs to their top parent capped at a certain point in
-   * the hierarchy. parentTask will map to parentTask, and all children will map to the highest
-   * parent that is NOT the parentTaskUuid.
+   * the hierarchy. The parentTaskUuid will map to parentTask, and all children will map to the
+   * highest parent that is NOT the parentTaskUuid.
    */
-  public Map<String, Task> buildTopLevelTaskHash(String parentTaskUuid) {
+  public Map<String, String> buildTopLevelTaskHash(String parentTaskUuid) {
     final TaskSearchQuery query = new TaskSearchQuery();
-    query.setParentTaskUuid(Collections.singletonList(parentTaskUuid));
+    query.setParentTaskUuid(List.of(parentTaskUuid));
     query.setParentTaskRecurseStrategy(RecurseStrategy.CHILDREN);
     query.setPageSize(0);
     final List<Task> taskList = taskDao.search(query).getList();

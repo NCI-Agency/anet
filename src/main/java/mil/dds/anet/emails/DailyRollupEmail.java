@@ -136,7 +136,7 @@ public class DailyRollupEmail implements AnetEmailAction {
     public List<ReportGrouping> getGroupingForParent(String parentOrgUuid,
         RollupGraphType orgType) {
       final Map<String, Organization> orgUuidToTopOrg =
-          AnetObjectEngine.getInstance().buildTopLevelOrgHash(parentOrgUuid);
+          AnetObjectEngine.getInstance().buildTopLevelOrgToOrgHash(parentOrgUuid);
       return groupReports(orgUuidToTopOrg, orgType);
     }
 
