@@ -261,6 +261,7 @@ const CompactReportView = ({ pageDispatchers }) => {
   if (!data) {
     report = new Report()
   } else {
+    data.report.cancelled = !!data.report.cancelledReason
     data.report.tasks = Task.fromArray(data.report.tasks)
     data.report.attendees = Person.fromArray(data.report.attendees)
     data.report.to = ""
@@ -338,13 +339,13 @@ const CompactReportView = ({ pageDispatchers }) => {
                     <DictionaryField
                       wrappedComponent={CompactRow}
                       dictProps={Settings.fields.report.atmosphere}
-                      value={utils.sentenceCase(report.atmosphere)}
+                      content={utils.sentenceCase(report.atmosphere)}
                       className="reportField"
                     />
                     <DictionaryField
                       wrappedComponent={CompactRow}
                       dictProps={Settings.fields.report.atmosphereDetails}
-                      value={report.atmosphereDetails}
+                      content={report.atmosphereDetails}
                       className="reportField"
                     />
                   </>
