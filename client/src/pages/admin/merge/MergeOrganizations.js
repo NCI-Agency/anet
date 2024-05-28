@@ -23,6 +23,7 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
+import PositionTable from "components/PositionTable"
 import useMergeObjects, {
   ALIGN_OPTIONS,
   areAllSet,
@@ -72,6 +73,7 @@ const MergeOrganizations = ({ pageDispatchers }) => {
   const organization1 = mergeState[MERGE_SIDES.LEFT]
   const organization2 = mergeState[MERGE_SIDES.RIGHT]
   const mergedOrganization = mergeState.merged
+  const orgSettings = Settings.fields.regular.org
 
   return (
     <Container fluid>
@@ -349,6 +351,27 @@ const MergeOrganizations = ({ pageDispatchers }) => {
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
+              <DictionaryField
+                  wrappedComponent={MergeField}
+                  dictProps={orgSettings.administratingPositions}
+                  value={
+                    <PositionTable
+                        label={utils.sentenceCase(
+                            orgSettings.administratingPositions.label
+                        )}
+                        positions={mergedOrganization.administratingPositions}
+                    />
+                  }
+                  align={ALIGN_OPTIONS.CENTER}
+                  action={getClearButton(() =>
+                      dispatchMergeActions(
+                          setAMergedField("administratingPositions", [], null)
+                      )
+                  )}
+                  fieldName="administratingPositions"
+                  mergeState={mergeState}
+                  dispatchMergeActions={dispatchMergeActions}
+              />
               {Settings.fields.organization.customFields &&
                 Object.entries(Settings.fields.organization.customFields).map(
                   ([fieldName, fieldConfig]) => {
@@ -469,6 +492,7 @@ const OrganizationColumn = ({
 }) => {
   const organization = mergeState[align]
   const idForOrganization = label.replace(/\s+/g, "")
+  const orgSettings = Settings.fields.regular.org
 
   return (
     <OrganizationCol>
@@ -781,6 +805,37 @@ const OrganizationColumn = ({
               align,
               mergeState,
               "app6amplifier"
+            )}
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
+          />
+          <DictionaryField
+            wrappedComponent={MergeField}
+            dictProps={orgSettings.administratingPositions}
+            fieldName="administratingPositions"
+            value={
+              <PositionTable
+                label={utils.sentenceCase(
+                  orgSettings.administratingPositions.label
+                )}
+                positions={organization.administratingPositions}
+                showOrganizationsAdministrated
+              />
+            }
+            align={align}
+            action={getActionButton(
+              () => {
+                dispatchMergeActions(
+                  setAMergedField(
+                    "administratingPositions",
+                    organization.administratingPositions,
+                    align
+                  )
+                )
+              },
+              align,
+              mergeState,
+              "administratingPositions"
             )}
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}

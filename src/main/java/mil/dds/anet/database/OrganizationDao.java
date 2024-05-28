@@ -237,6 +237,8 @@ public class OrganizationDao
     updateForMerge("positions", "organizationUuid", winnerOrganizationUuid, loserOrganizationUuid);
     updateForMerge("authorizationGroupRelatedObjects", "relatedObjectUuid", winnerOrganizationUuid,
         loserOrganizationUuid);
+    updateForMerge("organizationAdministrativePositions", "organizationUuid",
+        winnerOrganizationUuid, loserOrganizationUuid);
     return deleteForMerge("organizations", "uuid", loserOrganizationUuid);
   }
 }
