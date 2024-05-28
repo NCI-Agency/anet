@@ -95,6 +95,7 @@ const BaseOrganizationTable = ({
   showDelete,
   onDelete,
   organizations,
+  noOrganizationsMessage,
   pageSize,
   pageNum,
   totalCount,
@@ -107,7 +108,7 @@ const BaseOrganizationTable = ({
   toggleSelection
 }) => {
   if (_get(organizations, "length", 0) === 0) {
-    return <em>No organizations found</em>
+    return <em>{noOrganizationsMessage}</em>
   }
 
   return (
@@ -190,6 +191,7 @@ BaseOrganizationTable.propTypes = {
   onDelete: PropTypes.func,
   // list of organizations:
   organizations: PropTypes.array,
+  noOrganizationsMessage: PropTypes.string,
   // fill these when pagination wanted:
   totalCount: PropTypes.number,
   pageNum: PropTypes.number,
@@ -202,6 +204,10 @@ BaseOrganizationTable.propTypes = {
   toggleAll: PropTypes.func,
   isSelected: PropTypes.func,
   toggleSelection: PropTypes.func
+}
+
+BaseOrganizationTable.defaultProps = {
+  noOrganizationsMessage: "No organizations found"
 }
 
 export default connect(null, mapPageDispatchersToProps)(OrganizationTable)

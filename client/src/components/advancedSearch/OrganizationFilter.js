@@ -95,7 +95,11 @@ const OrganizationFilter = ({
       onChange={handleChangeOrg}
       value={value.value}
       renderSelected={
-        <OrganizationTable organizations={value.value} showDelete />
+        <OrganizationTable
+          organizations={value.value}
+          noOrganizationsMessage="No organizations selected"
+          showDelete
+        />
       }
     />
   )

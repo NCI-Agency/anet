@@ -321,6 +321,7 @@ const LocationForm = ({
                         <LocationTable
                           id="location-parentLocations"
                           locations={values.parentLocations}
+                          noLocationsMessage="No locations selected"
                           showDelete
                         />
                       }

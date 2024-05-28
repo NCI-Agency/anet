@@ -92,13 +92,14 @@ const BaseLocationTable = ({
   showDelete,
   onDelete,
   locations,
+  noLocationsMessage,
   pageSize,
   pageNum,
   totalCount,
   goToPage
 }) => {
   if (_get(locations, "length", 0) === 0) {
-    return <em>No locations found</em>
+    return <em>{noLocationsMessage}</em>
   }
 
   return (
@@ -149,11 +150,16 @@ BaseLocationTable.propTypes = {
   onDelete: PropTypes.func,
   // list of locations:
   locations: PropTypes.array.isRequired,
+  noLocationsMessage: PropTypes.string,
   // fill these when pagination wanted:
   totalCount: PropTypes.number,
   pageNum: PropTypes.number,
   pageSize: PropTypes.number,
   goToPage: PropTypes.func
+}
+
+BaseLocationTable.defaultProps = {
+  noLocationsMessage: "No locations found"
 }
 
 export default connect(null, mapPageDispatchersToProps)(LocationTable)
