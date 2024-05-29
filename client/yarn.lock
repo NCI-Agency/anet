@@ -4865,7 +4865,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/eslint@npm:*, @types/eslint@npm:^8.56.5":
+"@types/eslint@npm:*, @types/eslint@npm:^8.56.10":
   version: 8.56.10
   resolution: "@types/eslint@npm:8.56.10"
   dependencies:
@@ -6356,10 +6356,10 @@ __metadata:
     eslint-plugin-import: "npm:2.29.1"
     eslint-plugin-jsx-a11y: "npm:6.8.0"
     eslint-plugin-n: "npm:16.6.2"
-    eslint-plugin-promise: "npm:6.1.1"
-    eslint-plugin-react: "npm:7.34.1"
+    eslint-plugin-promise: "npm:6.2.0"
+    eslint-plugin-react: "npm:7.34.2"
     eslint-plugin-react-hooks: "npm:4.6.2"
-    eslint-webpack-plugin: "npm:4.1.0"
+    eslint-webpack-plugin: "npm:4.2.0"
     express-session: "npm:1.18.0"
     file-saver: "npm:2.0.5"
     formik: "npm:2.4.6"
@@ -6653,7 +6653,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"array-includes@npm:^3.1.6, array-includes@npm:^3.1.7":
+"array-includes@npm:^3.1.6, array-includes@npm:^3.1.7, array-includes@npm:^3.1.8":
   version: 3.1.8
   resolution: "array-includes@npm:3.1.8"
   dependencies:
@@ -6690,7 +6690,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"array.prototype.findlast@npm:^1.2.4":
+"array.prototype.findlast@npm:^1.2.5":
   version: 1.2.5
   resolution: "array.prototype.findlast@npm:1.2.5"
   dependencies:
@@ -10030,7 +10030,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"es-iterator-helpers@npm:^1.0.15, es-iterator-helpers@npm:^1.0.17":
+"es-iterator-helpers@npm:^1.0.15, es-iterator-helpers@npm:^1.0.19":
   version: 1.0.19
   resolution: "es-iterator-helpers@npm:1.0.19"
   dependencies:
@@ -10377,12 +10377,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-promise@npm:6.1.1":
-  version: 6.1.1
-  resolution: "eslint-plugin-promise@npm:6.1.1"
+"eslint-plugin-promise@npm:6.2.0":
+  version: 6.2.0
+  resolution: "eslint-plugin-promise@npm:6.2.0"
   peerDependencies:
-    eslint: ^7.0.0 || ^8.0.0
-  checksum: 10c0/ec705741c110cd1cb4d702776e1c7f7fe60b671b71f706c88054ab443cf2767aae5a663928fb426373ba1095eaeda312a740a4f880546631f0e0727f298b3393
+    eslint: ^7.0.0 || ^8.0.0 || ^9.0.0
+  checksum: 10c0/5f42ee774023c089453ecb792076c64c6d0739ea6e9d6cdc9d6a63da5ba928c776e349d01cc110548f2c67045ec55343136aa7eb8b486e4ab145ac016c06a492
   languageName: node
   linkType: hard
 
@@ -10395,31 +10395,31 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-react@npm:7.34.1, eslint-plugin-react@npm:^7.27.1":
-  version: 7.34.1
-  resolution: "eslint-plugin-react@npm:7.34.1"
+"eslint-plugin-react@npm:7.34.2, eslint-plugin-react@npm:^7.27.1":
+  version: 7.34.2
+  resolution: "eslint-plugin-react@npm:7.34.2"
   dependencies:
-    array-includes: "npm:^3.1.7"
-    array.prototype.findlast: "npm:^1.2.4"
+    array-includes: "npm:^3.1.8"
+    array.prototype.findlast: "npm:^1.2.5"
     array.prototype.flatmap: "npm:^1.3.2"
     array.prototype.toreversed: "npm:^1.1.2"
     array.prototype.tosorted: "npm:^1.1.3"
     doctrine: "npm:^2.1.0"
-    es-iterator-helpers: "npm:^1.0.17"
+    es-iterator-helpers: "npm:^1.0.19"
     estraverse: "npm:^5.3.0"
     jsx-ast-utils: "npm:^2.4.1 || ^3.0.0"
     minimatch: "npm:^3.1.2"
-    object.entries: "npm:^1.1.7"
-    object.fromentries: "npm:^2.0.7"
-    object.hasown: "npm:^1.1.3"
-    object.values: "npm:^1.1.7"
+    object.entries: "npm:^1.1.8"
+    object.fromentries: "npm:^2.0.8"
+    object.hasown: "npm:^1.1.4"
+    object.values: "npm:^1.2.0"
     prop-types: "npm:^15.8.1"
     resolve: "npm:^2.0.0-next.5"
     semver: "npm:^6.3.1"
-    string.prototype.matchall: "npm:^4.0.10"
+    string.prototype.matchall: "npm:^4.0.11"
   peerDependencies:
     eslint: ^3 || ^4 || ^5 || ^6 || ^7 || ^8
-  checksum: 10c0/7c61b1314d37a4ac2f2474f9571f801f1a1a5d81dcd4abbb5d07145406518722fb792367267757ee116bde254be9753242d6b93c9619110398b3fe1746e4848c
+  checksum: 10c0/37dc04424da8626f20a071466e7238d53ed111c53e5e5398d813ac2cf76a2078f00d91f7833fe5b2f0fc98f2688a75b36e78e9ada9f1068705d23c7031094316
   languageName: node
   linkType: hard
 
@@ -10468,19 +10468,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-webpack-plugin@npm:4.1.0":
-  version: 4.1.0
-  resolution: "eslint-webpack-plugin@npm:4.1.0"
+"eslint-webpack-plugin@npm:4.2.0":
+  version: 4.2.0
+  resolution: "eslint-webpack-plugin@npm:4.2.0"
   dependencies:
-    "@types/eslint": "npm:^8.56.5"
+    "@types/eslint": "npm:^8.56.10"
     jest-worker: "npm:^29.7.0"
     micromatch: "npm:^4.0.5"
     normalize-path: "npm:^3.0.0"
     schema-utils: "npm:^4.2.0"
   peerDependencies:
-    eslint: ^8.0.0
+    eslint: ^8.0.0 || ^9.0.0
     webpack: ^5.0.0
-  checksum: 10c0/29ccc75ac50d765a254336e073342f33bac0b230512753c763ac783c6d3f15e36a9266371a31547253c5cf0d630be290f54268f99f37c8acbebc88304f5678b9
+  checksum: 10c0/cf5c9b7afa3c025fffadb3e1451e7a55d914c3070614bb4d57f887774d164ca4298bb777f7c3afa16f47af9869174a19d6aebb4d1ca719bc2cc49f2eccd71a3b
   languageName: node
   linkType: hard
 
@@ -15582,7 +15582,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"object.entries@npm:^1.1.7":
+"object.entries@npm:^1.1.7, object.entries@npm:^1.1.8":
   version: 1.1.8
   resolution: "object.entries@npm:1.1.8"
   dependencies:
@@ -15593,7 +15593,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"object.fromentries@npm:^2.0.7":
+"object.fromentries@npm:^2.0.7, object.fromentries@npm:^2.0.8":
   version: 2.0.8
   resolution: "object.fromentries@npm:2.0.8"
   dependencies:
@@ -15616,7 +15616,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"object.hasown@npm:^1.1.3":
+"object.hasown@npm:^1.1.4":
   version: 1.1.4
   resolution: "object.hasown@npm:1.1.4"
   dependencies:
@@ -15627,7 +15627,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"object.values@npm:^1.1.6, object.values@npm:^1.1.7":
+"object.values@npm:^1.1.6, object.values@npm:^1.1.7, object.values@npm:^1.2.0":
   version: 1.2.0
   resolution: "object.values@npm:1.2.0"
   dependencies:
@@ -18783,7 +18783,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"string.prototype.matchall@npm:^4.0.10":
+"string.prototype.matchall@npm:^4.0.11":
   version: 4.0.11
   resolution: "string.prototype.matchall@npm:4.0.11"
   dependencies:
