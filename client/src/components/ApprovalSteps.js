@@ -26,7 +26,11 @@ function ApprovalSteps({ approvalSteps }) {
               return (
                 <tr key={pos.uuid}>
                   <td>
-                    <LinkTo modelType="Person" model={pos.person} />
+                    <LinkTo
+                      modelType="Person"
+                      model={pos.person}
+                      whenUnspecified="Unfilled"
+                    />
                   </td>
                   <td>
                     <LinkTo modelType="Position" model={pos} />

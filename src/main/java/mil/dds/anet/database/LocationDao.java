@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.MergedEntity;
 import mil.dds.anet.beans.lists.AnetBeanList;
@@ -79,14 +80,30 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
   public int mergeLocations(Location loserLocation, Location winnerLocation) {
     final String loserLocationUuid = loserLocation.getUuid();
     final String winnerLocationUuid = winnerLocation.getUuid();
+    final Location existingLoserLoc = getByUuid(loserLocationUuid);
     final Location existingWinnerLoc = getByUuid(winnerLocationUuid);
     final Map<String, Object> context = AnetObjectEngine.getInstance().getContext();
 
     // Update location
     update(winnerLocation);
 
-    // Update approvalSteps
-    updateForMerge("approvalSteps", "relatedObjectUuid", winnerLocationUuid, loserLocationUuid);
+    // Update approvalSteps (note that this may fail if reports are currently pending at one of the
+    // approvalSteps that are going to be deleted):
+    // - delete approvalSteps of loser
+    final List<ApprovalStep> existingLoserPlanningApprovalSteps =
+        existingLoserLoc.loadPlanningApprovalSteps(context).join();
+    final List<ApprovalStep> existingLoserApprovalSteps =
+        existingLoserLoc.loadApprovalSteps(context).join();
+    Utils.updateApprovalSteps(loserLocation, List.of(), existingLoserPlanningApprovalSteps,
+        List.of(), existingLoserApprovalSteps);
+    // - update approvalSteps of winner
+    final List<ApprovalStep> existingWinnerPlanningApprovalSteps =
+        existingWinnerLoc.loadPlanningApprovalSteps(context).join();
+    final List<ApprovalStep> existingWinnerApprovalSteps =
+        existingWinnerLoc.loadApprovalSteps(context).join();
+    Utils.updateApprovalSteps(winnerLocation, winnerLocation.getPlanningApprovalSteps(),
+        existingWinnerPlanningApprovalSteps, winnerLocation.getApprovalSteps(),
+        existingWinnerApprovalSteps);
 
     // Update reports
     updateForMerge("reports", "locationUuid", winnerLocationUuid, loserLocationUuid);
