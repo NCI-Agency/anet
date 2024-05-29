@@ -154,6 +154,8 @@ INSERT INTO "emailAddresses" (network, address, "relatedObjectType", "relatedObj
 
 -- Create locations
 INSERT INTO locations (uuid, type, name, lat, lng, "createdAt", "updatedAt") VALUES
+  ('64795e03-ba83-4bc3-b647-d37fcb1c0694', 'PP', 'Merge Location Winner', 38.58809, -28.71611, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('4694bb3c-275a-4e74-9197-033e8e9c53ed', 'PP', 'Merge Location Loser', -46.4035948, 51.69093, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('e5b3a4b9-acf7-4c79-8224-f248b9a7215d', 'PA', 'Antarctica', -90, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', 'PP', 'St Johns Airport', 47.613442, -52.740936, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('8c138750-91ce-41bf-9b4c-9f0ddc73608b', 'PP', 'Murray''s Hotel', 47.561517, -52.708760, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
@@ -187,6 +189,8 @@ INSERT INTO locations (uuid, type, name, "createdAt", "updatedAt") VALUES
 
 -- Set up locationRelationships
 INSERT INTO "locationRelationships" ("childLocationUuid", "parentLocationUuid") VALUES
+  ('64795e03-ba83-4bc3-b647-d37fcb1c0694', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Portugal')),
+  ('4694bb3c-275a-4e74-9197-033e8e9c53ed', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'French Southern Territories')),
   ('e5b3a4b9-acf7-4c79-8224-f248b9a7215d', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Antarctica')),
   ('cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Canada')),
   ('8c138750-91ce-41bf-9b4c-9f0ddc73608b', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Canada')),
@@ -621,11 +625,31 @@ INSERT INTO approvers ("approvalStepUuid", "positionUuid")
   WHERE "approvalSteps".name = 'Task Owner approval'
   AND "approvalSteps".type = 1;
 
--- Create a location approval process for a location
+-- Create a location approval process for some locations
 INSERT INTO "approvalSteps" (uuid, "relatedObjectUuid", name, type)
   SELECT uuid_generate_v4(), (SELECT uuid FROM locations WHERE name = 'Portugal Cove Ferry Terminal'), 'Location approval', 1;
 INSERT INTO approvers ("approvalStepUuid", "positionUuid") VALUES
   ((SELECT uuid from "approvalSteps" where name = 'Location approval'), (SELECT uuid from positions where name = 'ANET Administrator'));
+
+INSERT INTO "approvalSteps" (uuid, "relatedObjectUuid", name, type)
+  SELECT uuid_generate_v4(), '64795e03-ba83-4bc3-b647-d37fcb1c0694', 'Location planning approval for merge winner', 0;
+INSERT INTO approvers ("approvalStepUuid", "positionUuid") VALUES
+  ((SELECT uuid from "approvalSteps" where name = 'Location planning approval for merge winner'), (SELECT uuid from positions where name = 'EF 1.1 Advisor A'));
+
+INSERT INTO "approvalSteps" (uuid, "relatedObjectUuid", name, type)
+  SELECT uuid_generate_v4(), '64795e03-ba83-4bc3-b647-d37fcb1c0694', 'Location publication approval for merge winner', 1;
+INSERT INTO approvers ("approvalStepUuid", "positionUuid") VALUES
+  ((SELECT uuid from "approvalSteps" where name = 'Location publication approval for merge winner'), (SELECT uuid from positions where name = 'EF 1.1 Advisor B'));
+
+INSERT INTO "approvalSteps" (uuid, "relatedObjectUuid", name, type)
+  SELECT uuid_generate_v4(), '4694bb3c-275a-4e74-9197-033e8e9c53ed', 'Location planning approval for merge loser', 0;
+INSERT INTO approvers ("approvalStepUuid", "positionUuid") VALUES
+  ((SELECT uuid from "approvalSteps" where name = 'Location planning approval for merge loser'), (SELECT uuid from positions where name = 'EF 2.2 Advisor C'));
+
+INSERT INTO "approvalSteps" (uuid, "relatedObjectUuid", name, type)
+  SELECT uuid_generate_v4(), '4694bb3c-275a-4e74-9197-033e8e9c53ed', 'Location publication approval for merge loser', 1;
+INSERT INTO approvers ("approvalStepUuid", "positionUuid") VALUES
+  ((SELECT uuid from "approvalSteps" where name = 'Location publication approval for merge loser'), (SELECT uuid from positions where name = 'EF 2.2 Advisor D'));
 
 -- Top-level organizations
 INSERT INTO organizations (uuid, "shortName", "longName", "identificationCode", "locationUuid", app6context, "app6standardIdentity", "app6symbolSet", "createdAt", "updatedAt") VALUES

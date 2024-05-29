@@ -42,10 +42,12 @@ class MergeLocations extends Page {
     return browser.$(`#mid-merge-loc-col ${button} > button`)
   }
 
-  async getColumnLocationName(side) {
-    return browser.$(
-      `//div[@id="${side}-merge-loc-col"]//div[text()="Name"]/following-sibling::div`
+  async getSelectButton(side, text) {
+    const buttonDiv = await browser.$(
+      `//div[@id="${side}-merge-loc-col"]//div[text()="${text}"]`
     )
+    const button = await (await buttonDiv.$("..")).$("..")
+    return button.$("small > button")
   }
 
   async waitForAdvancedSelectLoading(compareStr) {
@@ -65,8 +67,14 @@ class MergeLocations extends Page {
     )
   }
 
-  async waitForColumnToChange(compareStr, side) {
-    const field = await this.getColumnLocationName(side)
+  async getColumnContent(side, text) {
+    return browser.$(
+      `//div[@id="${side}-merge-loc-col"]//div[text()="${text}"]/following-sibling::div`
+    )
+  }
+
+  async waitForColumnToChange(compareStr, side, text) {
+    const field = await this.getColumnContent(side, text)
 
     await browser.waitUntil(
       async() => {
@@ -92,6 +100,14 @@ class MergeLocations extends Page {
         timeoutMsg: "Couldn't see the success alert in time"
       }
     )
+  }
+
+  async getField(fieldName) {
+    return browser.$(`div[id="${fieldName}"]`)
+  }
+
+  async getFieldset(fieldName) {
+    return (await this.getField(fieldName)).$("fieldset")
   }
 }
 
