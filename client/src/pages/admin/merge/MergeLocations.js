@@ -9,6 +9,7 @@ import ApprovalSteps from "components/ApprovalSteps"
 import { customFieldsJSONString } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
 import BaseGeoLocation from "components/GeoLocation"
+import LocationTable from "components/LocationTable"
 import MergeField from "components/MergeField"
 import Messages from "components/Messages"
 import {
@@ -212,6 +213,23 @@ const MergeLocations = ({ pageDispatchers }) => {
                       )
                     ),
                   Location.getInstanceName
+                )}
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
+              <MergeField
+                label="Parent locations"
+                fieldName="parentLocations"
+                value={
+                  <LocationTable
+                    locations={mergedLocation.parentLocations || []}
+                  />
+                }
+                align={ALIGN_OPTIONS.CENTER}
+                action={getClearButton(() =>
+                  dispatchMergeActions(
+                    setAMergedField("parentLocations", [], null)
+                  )
                 )}
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
@@ -508,6 +526,27 @@ const LocationColumn = ({
               align,
               mergeState,
               "status"
+            )}
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
+          />
+          <MergeField
+            label="Parent locations"
+            fieldName="parentLocations"
+            value={<LocationTable locations={location.parentLocations || []} />}
+            align={align}
+            action={getActionButton(
+              () =>
+                dispatchMergeActions(
+                  setAMergedField(
+                    "parentLocations",
+                    location.parentLocations,
+                    align
+                  )
+                ),
+              align,
+              mergeState,
+              "parentLocations"
             )}
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}

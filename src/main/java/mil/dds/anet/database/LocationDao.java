@@ -13,6 +13,7 @@ import mil.dds.anet.beans.search.LocationSearchQuery;
 import mil.dds.anet.database.mappers.LocationMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
+import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
@@ -78,6 +79,8 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
   public int mergeLocations(Location loserLocation, Location winnerLocation) {
     final String loserLocationUuid = loserLocation.getUuid();
     final String winnerLocationUuid = winnerLocation.getUuid();
+    final Location existingWinnerLoc = getByUuid(winnerLocationUuid);
+    final Map<String, Object> context = AnetObjectEngine.getInstance().getContext();
 
     // Update location
     update(winnerLocation);
@@ -104,6 +107,18 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
     // Update attachments
     updateM2mForMerge("attachmentRelatedObjects", "attachmentUuid", "relatedObjectUuid",
         winnerLocationUuid, loserLocationUuid);
+
+    // Update parentLocations:
+    // - delete locationRelationships where loser was the child
+    deleteForMerge("locationRelationships", "childLocationUuid", loserLocationUuid);
+    // - update the winner's parents from the input
+    Utils.addRemoveElementsByUuid(existingWinnerLoc.loadParentLocations(context).join(),
+        Utils.orIfNull(winnerLocation.getParentLocations(), List.of()),
+        newOrg -> addLocationRelationship(newOrg, winnerLocation),
+        oldOrg -> removeLocationRelationship(oldOrg, winnerLocation));
+    // - update the loser's children to the winner
+    updateForMerge("locationRelationships", "parentLocationUuid", winnerLocationUuid,
+        loserLocationUuid);
 
     // Update customSensitiveInformation for winner
     DaoUtils.saveCustomSensitiveInformation(null, LocationDao.TABLE_NAME, winnerLocationUuid,
