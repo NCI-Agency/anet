@@ -5,6 +5,7 @@ import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
 import { OrganizationSimpleOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
+import ApprovalSteps from "components/ApprovalSteps"
 import { customFieldsJSONString } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
 import EmailAddressTable from "components/EmailAddressTable"
@@ -352,25 +353,49 @@ const MergeOrganizations = ({ pageDispatchers }) => {
                 dispatchMergeActions={dispatchMergeActions}
               />
               <DictionaryField
-                  wrappedComponent={MergeField}
-                  dictProps={orgSettings.administratingPositions}
-                  value={
-                    <PositionTable
-                        label={utils.sentenceCase(
-                            orgSettings.administratingPositions.label
-                        )}
-                        positions={mergedOrganization.administratingPositions}
-                    />
-                  }
-                  align={ALIGN_OPTIONS.CENTER}
-                  action={getClearButton(() =>
-                      dispatchMergeActions(
-                          setAMergedField("administratingPositions", [], null)
-                      )
-                  )}
-                  fieldName="administratingPositions"
-                  mergeState={mergeState}
-                  dispatchMergeActions={dispatchMergeActions}
+                wrappedComponent={MergeField}
+                dictProps={orgSettings.administratingPositions}
+                value={
+                  <PositionTable
+                    label={utils.sentenceCase(
+                      orgSettings.administratingPositions.label
+                    )}
+                    positions={mergedOrganization.administratingPositions}
+                  />
+                }
+                align={ALIGN_OPTIONS.CENTER}
+                action={getClearButton(() =>
+                  dispatchMergeActions(
+                    setAMergedField("administratingPositions", [], null)
+                  )
+                )}
+                fieldName="administratingPositions"
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
+              <MergeField
+                label="Planning Approval Steps"
+                fieldName="planningApprovalSteps"
+                value={
+                  <ApprovalSteps
+                    approvalSteps={mergedOrganization.planningApprovalSteps}
+                  />
+                }
+                align={ALIGN_OPTIONS.CENTER}
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
+              <MergeField
+                label="Approval Steps"
+                fieldName="approvalSteps"
+                value={
+                  <ApprovalSteps
+                    approvalSteps={mergedOrganization.approvalSteps}
+                  />
+                }
+                align={ALIGN_OPTIONS.CENTER}
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
               />
               {Settings.fields.organization.customFields &&
                 Object.entries(Settings.fields.organization.customFields).map(
@@ -840,6 +865,84 @@ const OrganizationColumn = ({
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
           />
+          <MergeField
+            label="Planning Approval Steps"
+            fieldName="planningApprovalSteps"
+            value={
+              <ApprovalSteps
+                approvalSteps={organization.planningApprovalSteps}
+              />
+            }
+            align={align}
+            action={getActionButton(
+              () =>
+                dispatchMergeActions(
+                  setAMergedField(
+                    "planningApprovalSteps",
+                    organization.planningApprovalSteps,
+                    align
+                  )
+                ),
+              align,
+              mergeState,
+              "planningApprovalSteps"
+            )}
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
+          />
+          <MergeField
+            label="Approval Steps"
+            fieldName="approvalSteps"
+            value={<ApprovalSteps approvalSteps={organization.approvalSteps} />}
+            align={align}
+            action={getActionButton(
+              () =>
+                dispatchMergeActions(
+                  setAMergedField(
+                    "approvalSteps",
+                    organization.approvalSteps,
+                    align
+                  )
+                ),
+              align,
+              mergeState,
+              "approvalSteps"
+            )}
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
+          />
+          {Settings.fields.organization.customFields &&
+            Object.entries(Settings.fields.organization.customFields).map(
+              ([fieldName, fieldConfig]) => {
+                const fieldValue =
+                  organization[DEFAULT_CUSTOM_FIELDS_PARENT][fieldName]
+                return (
+                  <MergeField
+                    key={fieldName}
+                    fieldName={`${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`}
+                    label={fieldConfig.label || fieldName}
+                    // To be able to see arrays and objects
+                    value={JSON.stringify(fieldValue)}
+                    align={align}
+                    action={getActionButton(
+                      () =>
+                        dispatchMergeActions(
+                          setAMergedField(
+                            `${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`,
+                            fieldValue,
+                            align
+                          )
+                        ),
+                      align,
+                      mergeState,
+                      `${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`
+                    )}
+                    mergeState={mergeState}
+                    dispatchMergeActions={dispatchMergeActions}
+                  />
+                )
+              }
+            )}
         </fieldset>
       )}
     </OrganizationCol>
