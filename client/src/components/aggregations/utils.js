@@ -114,7 +114,7 @@ export const numbersListAggregation = (fieldName, fieldConfig, data) => {
   return { values: numberValues }
 }
 
-const noTaskMessage = `No ${Settings.fields.task.subLevel.shortLabel}`
+const noTaskMessage = `No ${Settings.fields.task.shortLabel}`
 const noTask = {
   uuid: "-1",
   shortName: noTaskMessage,

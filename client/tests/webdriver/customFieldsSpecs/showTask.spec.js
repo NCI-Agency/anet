@@ -12,10 +12,10 @@ describe("Show task page", () => {
   describe("When on the show page of a task with assessments", () => {
     it("We should see a table of assessments related to the current task", async() => {
       await (
-        await ShowTask.getAssessmentResults("subTaskOnceReport", "monthly")
+        await ShowTask.getAssessmentResults("taskOnceReport", "monthly")
       ).waitForDisplayed()
       const question1AssessmentMonthly = await (
-        await ShowTask.getAssessmentResults("subTaskOnceReport", "monthly")
+        await ShowTask.getAssessmentResults("taskOnceReport", "monthly")
       ).$("[id*=question1-assessment]")
       // eslint-disable-next-line no-unused-expressions
       expect(await question1AssessmentMonthly.isExisting()).to.be.true

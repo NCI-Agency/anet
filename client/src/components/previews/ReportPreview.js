@@ -120,7 +120,7 @@ const ReportPreview = ({ className, uuid }) => {
   )
   report = new Report(data.report)
   const reportType = report.isFuture() ? "planned engagement" : "report"
-  const tasksLabel = pluralize(Settings.fields.task.subLevel.shortLabel)
+  const tasksLabel = pluralize(Settings.fields.task.shortLabel)
 
   // Get initial tasks/people instant assessments values
   const hasAssessments = report.engagementDate && !report.isFuture()
@@ -309,7 +309,7 @@ const ReportPreview = ({ className, uuid }) => {
           </div>
         </>
       )}
-      <h4>{Settings.fields.task.subLevel.longLabel}</h4>
+      <h4>{Settings.fields.task.longLabel}</h4>
       <div className="preview-section">
         <NoPaginationTaskTable
           tasks={report.tasks}

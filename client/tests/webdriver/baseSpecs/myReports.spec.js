@@ -119,7 +119,7 @@ describe("Show My Reports page", () => {
         await (
           await MyReports.getReportsSummarySpan(reportNoAttachments, 8, 1)
         ).getText()
-      ).to.equal("Efforts: EF 1 » EF 1.2 » 1.2.AEF 1 » EF 1.2 » 1.2.B")
+      ).to.equal("Objectives: EF 1 » EF 1.2 » 1.2.AEF 1 » EF 1.2 » 1.2.B")
       // eslint-disable-next-line no-unused-expressions
       expect(
         await (

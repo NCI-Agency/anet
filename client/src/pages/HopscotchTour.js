@@ -4,8 +4,6 @@ import Settings from "settings"
 
 const taskShortLabelSingular = Settings.fields.task.shortLabel
 const taskShortLabelPlural = pluralize(taskShortLabelSingular)
-const subLevelTaskShortLabelSingular = Settings.fields.task.subLevel.shortLabel
-const subLevelTaskShortLabelPlural = pluralize(subLevelTaskShortLabelSingular)
 const personSingular = Settings.fields.regular.person.name
 const advisorSingular = Settings.fields.advisor.person.name
 const advisorPlural = pluralize(advisorSingular)
@@ -163,7 +161,7 @@ const reportTour = (currentUser, navigate) => {
       },
       {
         title: "Recents",
-        content: `If you've written reports in the past, your recent selections of attendees, ${subLevelTaskShortLabelPlural}, and locations will display to the right in a section called "Recents". You can click on one of the shortcuts to quickly add it to your report.`,
+        content: `If you've written reports in the past, your recent selections of attendees, ${taskShortLabelPlural}, and locations will display to the right in a section called "Recents". You can click on one of the shortcuts to quickly add it to your report.`,
         target: "#attendees",
         placement: "bottom"
       },
@@ -174,8 +172,8 @@ const reportTour = (currentUser, navigate) => {
         placement: "bottom"
       },
       {
-        title: subLevelTaskShortLabelPlural,
-        content: `Search for the ${subLevelTaskShortLabelPlural} that apply to this engagement. You can search for ${subLevelTaskShortLabelPlural} in any organization, including your organization and its sub-organizations. ${subLevelTaskShortLabelPlural} are required.`,
+        title: taskShortLabelPlural,
+        content: `Search for the ${taskShortLabelPlural} that apply to this engagement. You can search for ${taskShortLabelPlural} in any organization, including your organization and its sub-organizations. ${taskShortLabelPlural} are required.`,
         target: "#tasks",
         placement: "right"
       },

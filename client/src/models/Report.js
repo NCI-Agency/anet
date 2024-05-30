@@ -200,7 +200,7 @@ export default class Report extends Model {
         .test("tasks", "tasks error", (tasks, testContext) =>
           _isEmpty(tasks)
             ? testContext.createError({
-              message: `You must provide at least one ${Settings.fields.task.subLevel.shortLabel}`
+              message: `You must provide at least one ${Settings.fields.task.shortLabel}`
             })
             : true
         )

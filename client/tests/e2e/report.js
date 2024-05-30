@@ -139,7 +139,7 @@ test.serial("Draft and submit a report", async t => {
   )
 
   const $tasksTitle = await t.context.driver.findElement(
-    By.xpath('//h4/span[text()="Efforts"]')
+    By.xpath('//h4/span[text()="Objectives"]')
   )
   await $tasksTitle.click()
 

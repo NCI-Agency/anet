@@ -145,7 +145,7 @@ a {
     <div class="row">
         <div class="col-xs-12">
             <#-- <a href="${serverUrl}/tasks/${task.uuid}"> -->
-                <strong>${fields.task.subLevel.shortLabel}:</strong> ${(task.shortName)!} ${(task.longName)!}
+                <strong>${fields.task.shortLabel}:</strong> ${(task.shortName)!} ${(task.longName)!}
             <#-- </a> -->
         </div>
     </div>

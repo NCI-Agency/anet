@@ -15,20 +15,20 @@ describe("Show report page", () => {
       await (
         await ShowReport.getTasksEngagementAssessments()
       ).waitForDisplayed()
-      // Both 1.2.A as 1.2.B tasks on the page have an svg type of assessment (LikertScale widgets)
+      // The tasks on the page have an svg type of assessment (LikertScale widgets)
       // and two other questions
       const svgAssessments = await (
         await ShowReport.getTasksEngagementAssessments()
       ).$$("svg")
-      expect(svgAssessments).to.have.length(2)
+      expect(svgAssessments).to.have.length(4)
       const question2Assessments = await (
         await ShowReport.getTasksEngagementAssessments()
       ).$$("[name*=question2]")
-      expect(question2Assessments).to.have.length(2)
+      expect(question2Assessments).to.have.length(4)
       const question3Assessments = await (
         await ShowReport.getTasksEngagementAssessments()
       ).$$("[name*=question3]")
-      expect(question3Assessments).to.have.length(2)
+      expect(question3Assessments).to.have.length(4)
     })
   })
   describe("When on the show page of a report with attachment(s)", () => {

@@ -188,8 +188,6 @@ const TaskShow = ({ pageDispatchers }) => {
     ? []
     : task.descendantTasks?.map(task => new Task(task))
 
-  const fieldSettings = task.fieldSettings()
-
   // Admins can edit tasks or users in positions related to the task
   const isAdmin = currentUser && currentUser.isAdmin()
   const canEdit =
@@ -245,7 +243,7 @@ const TaskShow = ({ pageDispatchers }) => {
                         persistent
                       />
                     }{" "}
-                    {fieldSettings.shortLabel} {task.shortName}
+                    {Settings.fields.task.shortLabel} {task.shortName}
                   </>
                 }
                 action={action}
@@ -261,7 +259,7 @@ const TaskShow = ({ pageDispatchers }) => {
                 <Fieldset style={{ flex: "1 1 0" }}>
                   <DictionaryField
                     wrappedComponent={Field}
-                    dictProps={fieldSettings.longName}
+                    dictProps={Settings.fields.task.longName}
                     name="longName"
                     component={FieldHelper.ReadonlyField}
                   />
@@ -307,7 +305,7 @@ const TaskShow = ({ pageDispatchers }) => {
                       <DictionaryField
                         wrappedComponent={Field}
                         dictProps={Settings.fields.task.childrenTasks}
-                        name="subEfforts"
+                        name="subTasks"
                         component={FieldHelper.ReadonlyField}
                         humanValue={
                           <ListGroup>
@@ -374,7 +372,7 @@ const TaskShow = ({ pageDispatchers }) => {
 
             {Settings.fields.task.customFields && (
               <Fieldset
-                title={`${fieldSettings.shortLabel} information`}
+                title={`${Settings.fields.task.shortLabel} information`}
                 id="custom-fields"
               >
                 <ReadonlyCustomFields
@@ -393,7 +391,9 @@ const TaskShow = ({ pageDispatchers }) => {
               relatedObject={task}
             />
 
-            <Fieldset title={`Reports for this ${fieldSettings.shortLabel}`}>
+            <Fieldset
+              title={`Reports for this ${Settings.fields.task.shortLabel}`}
+            >
               <ReportCollection
                 paginationKey={`r_${uuid}`}
                 queryParams={{

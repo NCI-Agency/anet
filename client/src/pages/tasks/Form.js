@@ -130,7 +130,6 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
       }) => {
         const isAdmin = currentUser && currentUser.isAdmin()
         const disabled = !isAdmin
-        const fieldSettings = values.fieldSettings()
         const action = (
           <>
             <Button
@@ -139,7 +138,7 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
               onClick={submitForm}
               disabled={isSubmitting}
             >
-              Save {fieldSettings.shortLabel}
+              Save {Settings.fields.task.shortLabel}
             </Button>
             {notesComponent}
           </>
@@ -153,7 +152,7 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
               <Fieldset>
                 <DictionaryField
                   wrappedComponent={Field}
-                  dictProps={fieldSettings.shortName}
+                  dictProps={Settings.fields.task.shortName}
                   name="shortName"
                   component={FieldHelper.InputField}
                   disabled={disabled}
@@ -161,7 +160,7 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
 
                 <DictionaryField
                   wrappedComponent={Field}
-                  dictProps={fieldSettings.longName}
+                  dictProps={Settings.fields.task.longName}
                   name="longName"
                   component={FieldHelper.InputField}
                 />
@@ -341,7 +340,7 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
 
               {Settings.fields.task.customFields && !disabled && (
                 <Fieldset
-                  title={`${fieldSettings.shortLabel} information`}
+                  title={`${Settings.fields.task.shortLabel} information`}
                   id="custom-fields"
                 >
                   <CustomFieldsContainer
@@ -391,7 +390,7 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
                     onClick={submitForm}
                     disabled={isSubmitting}
                   >
-                    Save {fieldSettings.shortLabel}
+                    Save {Settings.fields.task.shortLabel}
                   </Button>
                 </div>
               </div>

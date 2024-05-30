@@ -61,7 +61,7 @@ class Home extends Page {
   }
 
   async getMyTasksLink() {
-    return browser.$('//a//span[text()="My Objective / Efforts"]')
+    return browser.$('//a//span[text()="My Objectives"]')
   }
 
   async getMyCounterpartsLink() {

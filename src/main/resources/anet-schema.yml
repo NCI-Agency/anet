@@ -600,7 +600,7 @@ properties:
       task:
         type: object
         additionalProperties: false
-        required: [status, shortLabel, shortName, longLabel, longName, description, topLevel, subLevel,
+        required: [status, shortLabel, shortName, longLabel, longName, description,
                    projectedCompletion, plannedCompletion, parentTask, childrenTasks,
                    taskedOrganizations, responsiblePositions]
         properties:
@@ -620,25 +620,6 @@ properties:
             "$ref": "#/$defs/inputField"
           description:
             "$ref": "#/$defs/inputField"
-          topLevel:
-            type: object
-            additionalProperties: false
-            required: [shortLabel, shortName, longLabel, longName]
-            properties:
-              shortLabel:
-                "$ref": "#/properties/fields/properties/task/properties/shortLabel"
-              shortName:
-                "$ref": "#/properties/fields/properties/task/properties/shortName"
-              longLabel:
-                "$ref": "#/properties/fields/properties/task/properties/longLabel"
-              longName:
-                "$ref": "#/properties/fields/properties/task/properties/longName"
-              assessments:
-                type: object
-                additionalProperties:
-                  "$ref": "#/$defs/assessmentDef"
-          subLevel:
-            "$ref": "#/properties/fields/properties/task/properties/topLevel"
           projectedCompletion:
             "$ref": "#/$defs/excludableInputField"
           plannedCompletion:
@@ -651,6 +632,10 @@ properties:
             "$ref": "#/$defs/inputField"
           responsiblePositions:
             "$ref": "#/$defs/inputField"
+          assessments:
+            type: object
+            additionalProperties:
+              "$ref": "#/$defs/assessmentDef"
           customFields:
             type: object
             additionalProperties:

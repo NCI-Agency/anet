@@ -152,7 +152,7 @@ describe("In my tasks page", () => {
       await (await MyTasks.getMyPendingTasks()).waitForDisplayed()
       expect(
         await (await MyTasks.getMyPendingTasksContent()).getText()
-      ).to.equal("No Objective / Efforts found")
+      ).to.equal("No Objectives found")
       await MyTasks.logout()
     })
   })
@@ -169,14 +169,11 @@ describe("In my tasks page", () => {
     it("Should be able to add a monthly assessment with 2 questions for the task", async() => {
       await (await MyTasks.getMyPendingTask("2.B")).click()
       await (
-        await AssessmentsSection.getAssessmentsSection(
-          "subTaskMonthly",
-          "monthly"
-        )
+        await AssessmentsSection.getAssessmentsSection("taskMonthly", "monthly")
       ).waitForDisplayed()
       const newAssessmentButton =
         await AssessmentsSection.getNewAssessmentButton(
-          "subTaskMonthly",
+          "taskMonthly",
           "monthly"
         )
       await newAssessmentButton.waitForDisplayed()
@@ -207,16 +204,10 @@ describe("In my tasks page", () => {
     })
     it("Should be able to add a weekly assessment with 1 question for the task", async() => {
       await (
-        await AssessmentsSection.getAssessmentsSection(
-          "subTaskWeekly",
-          "weekly"
-        )
+        await AssessmentsSection.getAssessmentsSection("taskWeekly", "weekly")
       ).waitForDisplayed()
       const newAssessmentButton =
-        await AssessmentsSection.getNewAssessmentButton(
-          "subTaskWeekly",
-          "weekly"
-        )
+        await AssessmentsSection.getNewAssessmentButton("taskWeekly", "weekly")
       await newAssessmentButton.waitForDisplayed()
       await newAssessmentButton.click()
       await browser.pause(SHORT_WAIT_MS) // wait for the modal to slide in (transition is 300 ms)
@@ -275,7 +266,7 @@ describe("In new report page", () => {
       await browser.pause(SHORT_WAIT_MS) // wait for assessment questions to be updated
       await (await CreateReport.getTasksAssessments()).scrollIntoView()
       const taskAssessmentRows = await CreateReport.getTaskAssessmentRows()
-      expect(taskAssessmentRows).to.have.length(2)
+      expect(taskAssessmentRows).to.have.length(3) // a heading and two assessments
       for (let i = 0; i < 2; i += 2) {
         const task = taskAssessmentRows[i]
         const assessment = taskAssessmentRows[i + 1]

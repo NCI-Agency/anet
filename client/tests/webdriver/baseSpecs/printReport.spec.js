@@ -48,7 +48,7 @@ describe("Show print report page", () => {
         "Next steps",
         "Interlocutors",
         "Advisors",
-        "Efforts"
+        "Objectives"
       ]
       const fields = await ShowReport.getCompactReportFields()
       const fieldTexts = await fields.map(async field => await field.getText())

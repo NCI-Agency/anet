@@ -33,7 +33,6 @@ const NoPaginationTaskTable = ({
           </thead>
           <tbody>
             {Task.map(tasks, task => {
-              const fieldSettings = task.fieldSettings()
               return (
                 <tr key={task.uuid}>
                   <td className="taskName">
@@ -63,7 +62,7 @@ const NoPaginationTaskTable = ({
                   {showDelete && (
                     <td id={"taskDelete_" + task.uuid}>
                       <RemoveButton
-                        title={`Remove ${fieldSettings.shortLabel}`}
+                        title={`Remove ${Settings.fields.task.shortLabel}`}
                         onClick={() => onDelete(task)}
                       />
                     </td>

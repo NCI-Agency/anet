@@ -1240,7 +1240,7 @@ INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjec
 -- Add instant assessments to tasks related to reports
 SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
 INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
-  (:noteUuid, :authorUuid, 3, 'fields.task.subLevel.assessments.subTaskOnceReport', '{"__recurrence":"once","__relatedObjectType":"report","question1":4.462819020045945,"question2":"1","question3":"22"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  (:noteUuid, :authorUuid, 3, 'fields.task.assessments.taskOnceReport', '{"__recurrence":"once","__relatedObjectType":"report","question1":4.462819020045945,"question2":"1","question3":"22"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT :noteUuid, 'reports', r.uuid
   FROM reports r
@@ -1252,7 +1252,7 @@ INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjec
 
 SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
 INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
-  (:noteUuid, :authorUuid, 3, 'fields.task.subLevel.assessments.subTaskOnceReport', '{"__recurrence":"once","__relatedObjectType":"report","question1":3.141592653589793,"question2":"3","question3":"14"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  (:noteUuid, :authorUuid, 3, 'fields.task.assessments.taskOnceReport', '{"__recurrence":"once","__relatedObjectType":"report","question1":3.141592653589793,"question2":"3","question3":"14"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT :noteUuid, 'reports', r.uuid
   FROM reports r
@@ -1266,7 +1266,7 @@ INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjec
 SELECT ('''' || uuid || '''') AS "authorUuid" FROM people WHERE name = 'ANDERSON, Andrew' \gset
 SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
 INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
-  (:noteUuid, :authorUuid, 3, 'fields.task.subLevel.assessments.subTaskMonthly', '{"status":"GREEN","issues":"<ol><li>one</li><li>two</li><li>three</li></ol>","__recurrence":"monthly","__periodStart":"' || to_char(date_trunc('month', CURRENT_TIMESTAMP) + INTERVAL '-1 month', 'YYYY-MM-DD') || '"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  (:noteUuid, :authorUuid, 3, 'fields.task.assessments.taskMonthly', '{"status":"GREEN","issues":"<ol><li>one</li><li>two</li><li>three</li></ol>","__recurrence":"monthly","__periodStart":"' || to_char(date_trunc('month', CURRENT_TIMESTAMP) + INTERVAL '-1 month', 'YYYY-MM-DD') || '"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT :noteUuid, 'tasks', t.uuid
   FROM tasks t
