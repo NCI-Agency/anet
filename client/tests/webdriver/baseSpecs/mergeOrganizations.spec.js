@@ -5,11 +5,13 @@ const EXAMPLE_ORGANIZATIONS = {
   validLeft: {
     search: "Merge Org 1",
     shortName: "Merge Org 1",
+    displayedName: "Merge Org 1 | Long Merge 1 Name",
     parentOrg: "EF 1 | Planning Programming, Budgeting and Execution"
   },
   validRight: {
     search: "Merge Org 2",
     shortName: "Merge Org 2",
+    displayedName: "Merge Org 2 | Long Merge 2 Name",
     parentOrg: "EF 1 | Planning Programming, Budgeting and Execution"
   }
 }
@@ -25,7 +27,7 @@ describe("Merge organizations page", () => {
       await MergeOrganizations.getLeftOrganizationField()
     ).setValue(EXAMPLE_ORGANIZATIONS.validLeft.search)
     await MergeOrganizations.waitForAdvancedSelectLoading(
-      EXAMPLE_ORGANIZATIONS.validLeft.shortName
+      EXAMPLE_ORGANIZATIONS.validLeft.displayedName
     )
     await (await MergeOrganizations.getFirstItemFromAdvancedSelect()).click()
     await browser.pause(500)
@@ -50,7 +52,7 @@ describe("Merge organizations page", () => {
       await MergeOrganizations.getRightOrganizationField()
     ).setValue(EXAMPLE_ORGANIZATIONS.validLeft.search)
     await MergeOrganizations.waitForAdvancedSelectLoading(
-      EXAMPLE_ORGANIZATIONS.validLeft.shortName
+      EXAMPLE_ORGANIZATIONS.validLeft.displayedName
     )
     await (await MergeOrganizations.getFirstItemFromAdvancedSelect()).click()
 
