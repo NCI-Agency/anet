@@ -113,6 +113,11 @@ export default class Organization extends Model {
     shortName
     longName
     identificationCode
+    app6context
+    app6standardIdentity
+    app6symbolSet
+    app6hq
+    app6amplifier
     parentOrg {
       uuid
       shortName
