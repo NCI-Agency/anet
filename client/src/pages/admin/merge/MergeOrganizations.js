@@ -193,6 +193,18 @@ const MergeOrganizations = ({ pageDispatchers }) => {
               />
               <DictionaryField
                 wrappedComponent={MergeField}
+                dictProps={Settings.fields.organization.profile}
+                value={mergedOrganization.profile}
+                align={ALIGN_OPTIONS.CENTER}
+                action={getClearButton(() =>
+                  dispatchMergeActions(setAMergedField("profile", {}, null))
+                )}
+                fieldName="profile"
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
+              <DictionaryField
+                wrappedComponent={MergeField}
                 dictProps={Settings.fields.organization.status}
                 value={mergedOrganization.status}
                 align={ALIGN_OPTIONS.CENTER}
@@ -211,18 +223,6 @@ const MergeOrganizations = ({ pageDispatchers }) => {
                   Organization.getInstanceName
                 )}
                 fieldName="status"
-                mergeState={mergeState}
-                dispatchMergeActions={dispatchMergeActions}
-              />
-              <DictionaryField
-                wrappedComponent={MergeField}
-                dictProps={Settings.fields.organization.profile}
-                value={mergedOrganization.profile}
-                align={ALIGN_OPTIONS.CENTER}
-                action={getClearButton(() =>
-                  dispatchMergeActions(setAMergedField("profile", {}, null))
-                )}
-                fieldName="profile"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
@@ -647,6 +647,27 @@ const OrganizationColumn = ({
               align,
               mergeState,
               "status"
+            )}
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
+          />
+          <DictionaryField
+            wrappedComponent={MergeField}
+            dictProps={Settings.fields.organization.location}
+            fieldName="identificationCode"
+            value={
+              <LinkTo modelType="Organization" model={organization.location} />
+            }
+            align={align}
+            action={getActionButton(
+              () => {
+                dispatchMergeActions(
+                  setAMergedField("location", organization.location, align)
+                )
+              },
+              align,
+              mergeState,
+              "location"
             )}
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}

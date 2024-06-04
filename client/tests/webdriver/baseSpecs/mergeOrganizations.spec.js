@@ -61,6 +61,10 @@ describe("Merge organizations page", () => {
     ).waitForDisplayed()
   })
   it("Should display fields values of the right organization", async() => {
+    await (await MergeOrganizations.getTitle()).waitForExist()
+    await (await MergeOrganizations.getTitle()).waitForDisplayed()
+
+    await (await MergeOrganizations.getRightOrganizationField()).click()
     await (
       await MergeOrganizations.getRightOrganizationField()
     ).setValue(EXAMPLE_ORGANIZATIONS.validRight.search)

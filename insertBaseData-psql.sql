@@ -669,6 +669,15 @@ INSERT INTO organizations (uuid, "shortName", "longName", "identificationCode", 
   (uuid_generate_v4(), 'Merge Org 1', 'Long Merge 1 Name', 'Mg1', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 1'), '0', '4', '20', '2', '14', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'Merge Org 2', 'Long Merge 2 Name', 'Mg2', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 1'), '2', '2', '10', '5', '18', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
+INSERT INTO "approvalSteps" (uuid, "relatedObjectUuid", name, type) VALUES
+  (uuid_generate_v4(), (SELECT uuid from organizations where "shortName"='Merge Org 1'), 'Merge Org 1 Approvers', 1);
+INSERT INTO "approvalSteps" (uuid, "relatedObjectUuid", name, type) VALUES
+  (uuid_generate_v4(), (SELECT uuid from organizations where "shortName"='Merge Org 2'), 'Merge Org 2 Approvers', 1);
+INSERT INTO "approvalSteps" (uuid, "relatedObjectUuid", name, type) VALUES
+  (uuid_generate_v4(), (SELECT uuid from organizations where "shortName"='Merge Org 1'), 'Merge Org 1 Planning Approvers', 2);
+INSERT INTO "approvalSteps" (uuid, "relatedObjectUuid", name, type) VALUES
+  (uuid_generate_v4(), (SELECT uuid from organizations where "shortName"='Merge Org 2'), 'Merge Org 2 Planning Approvers', 2);
+
 -- Assign responsible positions for organizations
 INSERT INTO "organizationAdministrativePositions" ("organizationUuid", "positionUuid") VALUES
   ((SELECT uuid FROM organizations WHERE "shortName" = 'MoD'), (SELECT uuid FROM positions WHERE name = 'EF 1.1 Superuser')),

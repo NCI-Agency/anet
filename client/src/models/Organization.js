@@ -142,6 +142,12 @@ export default class Organization extends Model {
       network
       address
     }
+    approvalSteps {
+      name
+    }
+    planningApprovalSteps {
+      name
+    }
     customFields
     ${GRAPHQL_NOTES_FIELDS}
   `
