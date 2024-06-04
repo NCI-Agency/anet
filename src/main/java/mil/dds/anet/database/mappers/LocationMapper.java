@@ -22,6 +22,7 @@ public class LocationMapper implements RowMapper<Location> {
     l.setDigram(rs.getString("locations_digram"));
     l.setTrigram(rs.getString("locations_trigram"));
     l.setDescription(MapperUtils.getOptionalString(rs, "locations_description"));
+    l.setGeoShape(MapperUtils.getOptionalString(rs, "locations_geoShape"));
 
     if (MapperUtils.containsColumnNamed(rs, "totalCount")) {
       ctx.define("totalCount", rs.getInt("totalCount"));
