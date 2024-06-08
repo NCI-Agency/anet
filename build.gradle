@@ -92,7 +92,7 @@ dependencies {
 	implementation "org.jdbi:jdbi3-postgres:3.45.1"
 
 	implementation 'ru.vyarus.guicey:guicey-jdbi3:7.1.3'
-	implementation 'com.google.guava:guava:33.2.0-jre' // Pick the non-Android version of Guice
+	implementation 'com.google.guava:guava:33.2.1-jre' // Pick the non-Android version of Guice
 	implementation 'commons-collections:commons-collections:3.2.2'
 
 	// Supported database is PostgreSQL:
@@ -108,7 +108,7 @@ dependencies {
 	implementation 'javax.cache:cache-api:1.1.1'
 	implementation 'commons-beanutils:commons-beanutils:1.9.4'
 
-	implementation 'org.simplejavamail:simple-java-mail:8.10.1'
+	implementation 'org.simplejavamail:simple-java-mail:8.11.2'
 	implementation 'org.eclipse.angus:jakarta.mail:2.0.3'
 	implementation "ch.qos.logback:logback-classic:${logbackVersion}"
 	implementation "ch.qos.logback:logback-core:${logbackVersion}"
@@ -153,7 +153,7 @@ dependencies {
 	testImplementation "io.dropwizard:dropwizard-client:${dropwizardVersion}"
 	testImplementation 'org.apache.commons:commons-io:1.3.2'
 
-	testImplementation 'org.assertj:assertj-core:3.25.3'
+	testImplementation 'org.assertj:assertj-core:3.26.0'
 
 	testImplementation 'org.powermock:powermock-api-mockito2:2.0.9'
 	testImplementation 'org.powermock:powermock-module-junit4:2.0.9'
@@ -754,7 +754,7 @@ jar {
 //Configure the Java Checkstyle settings. Run with ./gradlew check
 checkstyle {
 	configFile = rootProject.file('config/google_checks.xml')
-	toolVersion = '10.16.0'
+	toolVersion = '10.17.0'
 }
 //Easiest way to avoid checking generated code
 checkstyleTest {
@@ -763,7 +763,7 @@ checkstyleTest {
 //Work-around for https://github.com/gradle/gradle/issues/27035
 configurations.checkstyle {
 	resolutionStrategy.capabilitiesResolution.withCapability('com.google.collections:google-collections') {
-		select('com.google.guava:guava:33.2.0-jre')
+		select('com.google.guava:guava:33.2.1-jre')
 	}
 }
 
