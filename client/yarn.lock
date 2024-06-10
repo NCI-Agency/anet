@@ -2391,9 +2391,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphiql/react@npm:^0.22.1":
-  version: 0.22.1
-  resolution: "@graphiql/react@npm:0.22.1"
+"@graphiql/react@npm:^0.22.2":
+  version: 0.22.2
+  resolution: "@graphiql/react@npm:0.22.2"
   dependencies:
     "@graphiql/toolkit": "npm:^0.9.1"
     "@headlessui/react": "npm:^1.7.15"
@@ -2404,17 +2404,17 @@ __metadata:
     "@types/codemirror": "npm:^5.60.8"
     clsx: "npm:^1.2.1"
     codemirror: "npm:^5.65.3"
-    codemirror-graphql: "npm:^2.0.11"
+    codemirror-graphql: "npm:^2.0.12"
     copy-to-clipboard: "npm:^3.2.0"
     framer-motion: "npm:^6.5.1"
-    graphql-language-service: "npm:^5.2.0"
+    graphql-language-service: "npm:^5.2.1"
     markdown-it: "npm:^14.1.0"
     set-value: "npm:^4.1.0"
   peerDependencies:
     graphql: ^15.5.0 || ^16.0.0
     react: ^16.8.0 || ^17 || ^18
     react-dom: ^16.8.0 || ^17 || ^18
-  checksum: 10c0/455c42d1fcb3e0f6f4f6eb2507251578d227dfafae02559e1bae311c2a50afe50c0cb0e8e61616f54a14c60e6c0a6e9648542ac0d2646fa135975a21a61b6c74
+  checksum: 10c0/2484383cb57e71eb17985fe2cf56e014052531f02ccab97d30bae6746f772f7dbde68a92aa0bc42aa5f9ff24672234deefd9cbc6df147c5d672a7fbff1d3f1db
   languageName: node
   linkType: hard
 
@@ -6154,12 +6154,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"advanced-cropper@npm:~0.18.0":
-  version: 0.18.0
-  resolution: "advanced-cropper@npm:0.18.0"
+"advanced-cropper@npm:~0.17.1":
+  version: 0.17.1
+  resolution: "advanced-cropper@npm:0.17.1"
   dependencies:
     tslib: "npm:^2.4.0"
-  checksum: 10c0/a162e2f2741649bd75640dec0703996ffdf7de35390e5c14e6b0a1c3875dccc314552e576193370486d12533d42a12be894f05b1cfb6bd0e5364d7bfff21a2dd
+  checksum: 10c0/6e32a7a8c29da96ed707ae5bb1d46b0e4368bd16f60e4d0ad02172fd28be20853122a45525351c5811fce0a3dee5f9015cc89ec6b36067b9aee4f82d3edeed0c
   languageName: node
   linkType: hard
 
@@ -6321,7 +6321,7 @@ __metadata:
     aigle: "npm:1.14.1"
     autoprefixer: "npm:10.4.19"
     ava: "npm:6.1.3"
-    axios: "npm:1.6.8"
+    axios: "npm:1.7.2"
     babel-jest: "npm:29.7.0"
     babel-loader: "npm:9.1.3"
     babel-preset-react-app: "npm:10.0.1"
@@ -6364,7 +6364,7 @@ __metadata:
     file-saver: "npm:2.0.5"
     formik: "npm:2.4.6"
     git-describe: "npm:4.1.1"
-    graphiql: "npm:3.2.2"
+    graphiql: "npm:3.2.3"
     graphql: "npm:16.8.1"
     handlebars: "npm:4.7.8"
     handlebars-loader: "npm:1.7.3"
@@ -6404,7 +6404,7 @@ __metadata:
     prop-types: "npm:15.8.1"
     querystring: "npm:0.2.1"
     react: "npm:18.2.0"
-    react-advanced-cropper: "npm:^0.19.4"
+    react-advanced-cropper: "npm:0.20.0"
     react-bootstrap: "npm:2.10.2"
     react-dom: "npm:18.2.0"
     react-is: "npm:18.3.1"
@@ -6434,7 +6434,7 @@ __metadata:
     thread-loader: "npm:4.0.2"
     title-case: "npm:4.3.1"
     ts-node: "npm:10.9.2"
-    use-debounce: "npm:10.0.0"
+    use-debounce: "npm:10.0.1"
     uuid: "npm:9.0.1"
     webdriverio: "npm:8.38.2"
     webpack: "npm:5.91.0"
@@ -6988,14 +6988,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:1.6.8":
-  version: 1.6.8
-  resolution: "axios@npm:1.6.8"
+"axios@npm:1.7.2":
+  version: 1.7.2
+  resolution: "axios@npm:1.7.2"
   dependencies:
     follow-redirects: "npm:^1.15.6"
     form-data: "npm:^4.0.0"
     proxy-from-env: "npm:^1.1.0"
-  checksum: 10c0/0f22da6f490335479a89878bc7d5a1419484fbb437b564a80c34888fc36759ae4f56ea28d55a191695e5ed327f0bad56e7ff60fb6770c14d1be6501505d47ab9
+  checksum: 10c0/cbd47ce380fe045313364e740bb03b936420b8b5558c7ea36a4563db1258c658f05e40feb5ddd41f6633fdd96d37ac2a76f884dad599c5b0224b4c451b3fa7ae
   languageName: node
   linkType: hard
 
@@ -8146,17 +8146,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"codemirror-graphql@npm:^2.0.11":
-  version: 2.0.11
-  resolution: "codemirror-graphql@npm:2.0.11"
+"codemirror-graphql@npm:^2.0.12":
+  version: 2.0.12
+  resolution: "codemirror-graphql@npm:2.0.12"
   dependencies:
     "@types/codemirror": "npm:^0.0.90"
-    graphql-language-service: "npm:5.2.0"
+    graphql-language-service: "npm:5.2.1"
   peerDependencies:
     "@codemirror/language": 6.0.0
     codemirror: ^5.65.3
     graphql: ^15.5.0 || ^16.0.0
-  checksum: 10c0/7d5dce5e7a7ae74f0962677fccb68828cd2574e3c12e5ed0dd0a3a03f8928a8493b2f93cb1831251321d73f90e7fea9fa260664eaccae19214ee9f4758e3021a
+  checksum: 10c0/e0ca37a78d9adf2c79cc8049c8c27ab1391e93c8bcdfcf6a51bc32b552f2ee78da48e33926c31e40800f52b10c8cc307848f2283393b6ebfc75c1fd7ba153fd1
   languageName: node
   linkType: hard
 
@@ -11817,19 +11817,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"graphiql@npm:3.2.2":
-  version: 3.2.2
-  resolution: "graphiql@npm:3.2.2"
+"graphiql@npm:3.2.3":
+  version: 3.2.3
+  resolution: "graphiql@npm:3.2.3"
   dependencies:
-    "@graphiql/react": "npm:^0.22.1"
+    "@graphiql/react": "npm:^0.22.2"
     "@graphiql/toolkit": "npm:^0.9.1"
-    graphql-language-service: "npm:^5.2.0"
+    graphql-language-service: "npm:^5.2.1"
     markdown-it: "npm:^14.1.0"
   peerDependencies:
     graphql: ^15.5.0 || ^16.0.0
     react: ^16.8.0 || ^17 || ^18
     react-dom: ^16.8.0 || ^17 || ^18
-  checksum: 10c0/ddf03c47d7e367bebc283fe4f5ded48f84ba260f34f4e97be11921ffbc4e95b9777e81e17b960465054dc475d3ba2c8187c2b0f8ca43c4b9ccd6b8c96b0eecfb
+  checksum: 10c0/3acaaf7260399047456fbf61d4dec82962b3ce283dcec7165724c56bbbb9d6cffeb4111e899b1adcc2a1d6ad34e40080fe7e686a8052a582a2599ed4f93f6912
   languageName: node
   linkType: hard
 
@@ -11867,9 +11867,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"graphql-language-service@npm:5.2.0, graphql-language-service@npm:^5.2.0":
-  version: 5.2.0
-  resolution: "graphql-language-service@npm:5.2.0"
+"graphql-language-service@npm:5.2.1, graphql-language-service@npm:^5.2.1":
+  version: 5.2.1
+  resolution: "graphql-language-service@npm:5.2.1"
   dependencies:
     nullthrows: "npm:^1.0.0"
     vscode-languageserver-types: "npm:^3.17.1"
@@ -11877,7 +11877,7 @@ __metadata:
     graphql: ^15.5.0 || ^16.0.0
   bin:
     graphql: dist/temp-bin.js
-  checksum: 10c0/2a865d6a7a7fa44bdce12768f7f3b2840a295f9cd684f30bb54db1f3def5f44ea8719c9605b6334fa76798d664f58ed025f17d78199f6c5bc431a67af50190fc
+  checksum: 10c0/f69e16b11dabe132751c0d5aa702f262de2ea27af4d92e04ac6149d11efe132cde6ced15144db8d043b8479abf1db7ba4bc04f8370b175b8ed92bdef943ee785
   languageName: node
   linkType: hard
 
@@ -16851,16 +16851,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-advanced-cropper@npm:^0.19.4":
-  version: 0.19.6
-  resolution: "react-advanced-cropper@npm:0.19.6"
+"react-advanced-cropper@npm:0.20.0":
+  version: 0.20.0
+  resolution: "react-advanced-cropper@npm:0.20.0"
   dependencies:
-    advanced-cropper: "npm:~0.18.0"
+    advanced-cropper: "npm:~0.17.1"
     classnames: "npm:^2.2.6"
     tslib: "npm:^2.4.0"
   peerDependencies:
     react: ^16.8.0 || ^17.0.0 || ^18.0.0
-  checksum: 10c0/3894d30d334fa7c692a28d457bddb63359c54eaf41788d16a6d279318fee941eb3dc07380b9908a5455496b1cc636718e9de30936ae1ab97c8a9c9155436220d
+  checksum: 10c0/372242ea2756612e1b2f5f9d0ffd77e24aba5ea2b5ae4fb100d89946f041823f78f3fc151e8637df9de2078a32e30dce88006c668e12d6e3b7858ef90d0ad6a2
   languageName: node
   linkType: hard
 
@@ -19911,12 +19911,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"use-debounce@npm:10.0.0":
-  version: 10.0.0
-  resolution: "use-debounce@npm:10.0.0"
+"use-debounce@npm:10.0.1":
+  version: 10.0.1
+  resolution: "use-debounce@npm:10.0.1"
   peerDependencies:
     react: ">=16.8.0"
-  checksum: 10c0/c1166cba52dedeab17e3e29275af89c57a3e8981b75f6e38ae2896ac36ecd4ed7d8fff5f882ba4b2f91eac7510d5ae0dd89fa4f7d081622ed436c3c89eda5cd1
+  checksum: 10c0/377a11814a708f5c392f465cbbe2d119a8a2635c8226cc5e30eba397c4436f8e8234385d069467b369d105ed0d3be733c6a08d8ae1004017c6d6f58f4d4c24d8
   languageName: node
   linkType: hard
 
