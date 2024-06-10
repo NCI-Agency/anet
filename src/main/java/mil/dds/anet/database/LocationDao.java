@@ -15,7 +15,8 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
   private static final String[] fields = {"uuid", "name", "status", "lat", "lng", "type", "digram",
       "trigram", "description", "createdAt", "updatedAt", "customFields"};
   public static final String TABLE_NAME = "locations";
-  public static final String LOCATION_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
+  public static final String LOCATION_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, true)
+      + ", ST_AsGeoJSON(\"locations\".\"geoShape\") AS \"locations_geoShape\"";
 
   @Override
   public Location getByUuid(String uuid) {
@@ -34,6 +35,7 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
 
   @Override
   public List<Location> getByIds(List<String> uuids) {
+    System.out.println("LOCATION_FIELDS\n" + LOCATION_FIELDS);
     final IdBatcher<Location> idBatcher =
         AnetObjectEngine.getInstance().getInjector().getInstance(SelfIdBatcher.class);
     return idBatcher.getByIds(uuids);
@@ -42,9 +44,9 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
   @Override
   public Location insertInternal(Location l) {
     getDbHandle().createUpdate(
-        "/* locationInsert */ INSERT INTO locations (uuid, name, type, description, status, lat, lng, digram, trigram, "
+        "/* locationInsert */ INSERT INTO locations (uuid, name, type, description, status, lat, lng, geoShape, digram, trigram, "
             + "\"createdAt\", \"updatedAt\", \"customFields\") VALUES (:uuid, :name, :type, :description, :status, "
-            + ":lat, :lng, :digram, :trigram, :createdAt, :updatedAt, :customFields)")
+            + ":lat, :lng, :geoShape, :digram, :trigram, :createdAt, :updatedAt, :customFields)")
         .bindBean(l).bind("createdAt", DaoUtils.asLocalDateTime(l.getCreatedAt()))
         .bind("updatedAt", DaoUtils.asLocalDateTime(l.getUpdatedAt()))
         .bind("status", DaoUtils.getEnumId(l.getStatus()))
@@ -56,7 +58,7 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
   public int updateInternal(Location l) {
     return getDbHandle().createUpdate("/* updateLocation */ UPDATE locations "
         + "SET name = :name, type = :type, description = :description, status = :status, lat = :lat, lng = :lng, "
-        + "digram = :digram, trigram = :trigram, "
+        + "geoShape = ST_GeomFromGeoJSON(:geoShape), " + "digram = :digram, trigram = :trigram, "
         + "\"updatedAt\" = :updatedAt, \"customFields\" = :customFields WHERE uuid = :uuid")
         .bindBean(l).bind("updatedAt", DaoUtils.asLocalDateTime(l.getUpdatedAt()))
         .bind("status", DaoUtils.getEnumId(l.getStatus()))

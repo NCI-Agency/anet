@@ -357,19 +357,18 @@ export function getActionButton(
 }
 
 export function getLeafletMap(mapId, location) {
-  return (
-    <Leaflet
-      mapId={mapId}
-      markers={[
-        {
-          id: "marker-" + mapId,
-          name: _escape(location?.name) || "", // escape HTML in location name!
-          lat: Location.hasCoordinates(location) ? location.lat : null,
-          lng: Location.hasCoordinates(location) ? location.lng : null
-        }
-      ]}
-    />
-  )
+  const markers = Location.hasCoordinates(location)
+    ? [
+      {
+        id: "marker-" + mapId,
+        name: _escape(location?.name) || "", // escape HTML in location name!
+        lat: location.lat,
+        lng: location.lng
+      }
+    ]
+    : []
+  const shapes = location.geoShape ? [location.geoShape] : []
+  return <Leaflet mapId={mapId} markers={markers} shapes={shapes} />
 }
 
 // Maps normal and custom field names to null for initialization

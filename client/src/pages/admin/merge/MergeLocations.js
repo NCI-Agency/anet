@@ -59,7 +59,7 @@ const MergeLocations = ({ pageDispatchers }) => {
   const [saveError, setSaveError] = useState(null)
   const [saveWarning, setSaveWarning] = useState(null)
   const [locationFormat, setLocationFormat] = useState(Location.locationFormat)
-  const locationFormatLabel = Location.LOCATION_FORMAT_LABELS[locationFormat]
+  const locationFormatLabel = "Geographic information"
   const [mergeState, dispatchMergeActions] = useMergeObjects(
     MODEL_TO_OBJECT_TYPE.Location
   )
@@ -187,6 +187,7 @@ const MergeLocations = ({ pageDispatchers }) => {
                   )
                   dispatchMergeActions(setAMergedField("lat", null, null))
                   dispatchMergeActions(setAMergedField("lng", null, null))
+                  dispatchMergeActions(setAMergedField("geoShape", null, null))
                 })}
                 align={ALIGN_OPTIONS.CENTER}
                 mergeState={mergeState}
