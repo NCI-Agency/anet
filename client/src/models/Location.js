@@ -224,6 +224,7 @@ export default class Location extends Model {
       type
     }
     customFields
+    geoShape
     ${GRAPHQL_NOTES_FIELDS}
   `
 
