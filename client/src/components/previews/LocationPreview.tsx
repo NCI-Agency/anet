@@ -25,6 +25,7 @@ const GQL_GET_LOCATION = gql`
       digram
       trigram
       description
+      geoShape
       ${GRAPHQL_ENTITY_AVATAR_FIELDS}
     }
   }
@@ -129,8 +130,12 @@ const LocationPreview = ({ className, uuid }: LocationPreviewProps) => {
         )}
       </div>
 
-      {Location.hasCoordinates(location) && (
+      {!location.geoShape && Location.hasCoordinates(location) && (
         <Leaflet markers={[marker]} mapId={`${uuid}`} />
+      )}
+
+      {location.geoShape && (
+        <Leaflet shapes={[location.geoShape]} mapId={`${uuid}`} />
       )}
     </div>
   )

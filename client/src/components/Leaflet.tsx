@@ -1,10 +1,12 @@
-import { gql } from "@apollo/client"
+import {gql} from "@apollo/client"
 import API from "api"
 import LinkTo from "components/LinkTo"
 import {
   Control,
   CRS,
   DivIcon,
+  FeatureGroup,
+  geoJSON,
   Icon,
   Map,
   Marker,
@@ -19,17 +21,17 @@ import {
   OpenStreetMapProvider
 } from "leaflet-geosearch"
 import "leaflet-geosearch/assets/css/leaflet.css"
-import { GestureHandling } from "leaflet-gesture-handling"
+import {GestureHandling} from "leaflet-gesture-handling"
 import "leaflet-gesture-handling/dist/leaflet-gesture-handling.css"
 import "leaflet.fullscreen"
 import "leaflet.fullscreen/Control.FullScreen.css"
-import { MarkerClusterGroup } from "leaflet.markercluster"
+import {MarkerClusterGroup} from "leaflet.markercluster"
 import "leaflet.markercluster/dist/MarkerCluster.css"
 import "leaflet.markercluster/dist/MarkerCluster.Default.css"
 import "leaflet/dist/leaflet.css"
-import { Location } from "models"
-import React, { useCallback, useEffect, useRef, useState } from "react"
-import { createPortal } from "react-dom"
+import {Location} from "models"
+import React, {useCallback, useEffect, useRef, useState} from "react"
+import {createPortal} from "react-dom"
 import MARKER_ICON_2X from "resources/leaflet/marker-icon-2x.png"
 import MARKER_ICON_AMBER_2X from "resources/leaflet/marker-icon-amber-2x.png"
 import MARKER_ICON_AMBER from "resources/leaflet/marker-icon-amber.png"
@@ -43,6 +45,7 @@ import MARKER_ICON_SEARCH from "resources/leaflet/marker-icon-search.svg"
 import MARKER_ICON from "resources/leaflet/marker-icon.png"
 import MARKER_SHADOW from "resources/leaflet/marker-shadow.png"
 import Settings from "settings"
+import {number, string} from "yup";
 
 export const DEFAULT_MAP_STYLE = {
   width: "100%",
@@ -66,7 +69,7 @@ class CustomUrlEsriProvider extends EsriProvider {
 const geoSearcherProviders = {
   ESRI: () => {
     return new CustomUrlEsriProvider(Settings.imagery.geoSearcher.url, {
-      params: { maxLocations: 5 }
+      params: {maxLocations: 5}
     })
   },
   OSM: () => {
@@ -168,7 +171,7 @@ function createMarker(
       style: "width: 200px;"
     })
     marker.bindPopup(() => {
-      setPopup?.({ container: popupDiv, contents: m.contents })
+      setPopup?.({container: popupDiv, contents: m.contents})
       return popupDiv
     })
   }
@@ -189,13 +192,14 @@ export interface MarkerPopupProps {
 }
 
 interface LeafletProps {
-  width?: number | string
-  height?: number | string
-  marginBottom?: number | string
-  markers?: any[]
-  setMarkerPopup?: (markerPopup: MarkerPopupProps) => void
-  mapId?: string
-  onMapClick?: (...args: unknown[]) => unknown // pass this when you have more than one map on a page
+  width?: number | string,
+  height?: number | string,
+  marginBottom?: number | string,
+  markers?: any[],
+  setMarkerPopup?: (markerPopup: MarkerPopupProps) => void,
+  mapId?: string,
+  onMapClick?: (...args: unknown[]) => unknown,
+  shapes?: string[]
 }
 
 const NEARBY_LOCATIONS_GQL = gql`
@@ -215,14 +219,15 @@ const NEARBY_LOCATIONS_GQL = gql`
 `
 
 const Leaflet = ({
-  width = DEFAULT_MAP_STYLE.width,
-  height = DEFAULT_MAP_STYLE.height,
-  marginBottom = DEFAULT_MAP_STYLE.marginBottom,
-  markers,
-  setMarkerPopup,
-  mapId: initialMapId,
-  onMapClick
-}: LeafletProps) => {
+                   width = DEFAULT_MAP_STYLE.width,
+                   height = DEFAULT_MAP_STYLE.height,
+                   marginBottom = DEFAULT_MAP_STYLE.marginBottom,
+                   markers,
+                   setMarkerPopup,
+                   shapes,
+                   mapId: initialMapId,
+                   onMapClick
+                 }: LeafletProps) => {
   const mapId = "map-" + (initialMapId || "default")
   const style = Object.assign({}, css, {
     width,
@@ -242,6 +247,7 @@ const Leaflet = ({
     useState<MarkerPopupProps>({})
   const [doInitializeMarkerLayer, setDoInitializeMarkerLayer] = useState(false)
   const prevMarkersRef = useRef(null)
+  const shapeGroupLayerRef = useRef(new FeatureGroup())
 
   const anetLocationsLayerRef = useRef(null)
   const [anetLocationsEnabled, setAnetLocationsEnabled] = useState(false)
@@ -258,7 +264,7 @@ const Leaflet = ({
 
       if (newMarkers.length > 0) {
         if (markerLayer.getBounds() && markerLayer.getBounds().isValid()) {
-          map.fitBounds(markerLayer.getBounds(), { maxZoom })
+          map.fitBounds(markerLayer.getBounds(), {maxZoom})
         }
       }
 
@@ -282,7 +288,7 @@ const Leaflet = ({
         gestureHandling: true,
         worldCopyJump: true,
         fullscreenControl: true,
-        fullscreenControlOptions: { position: "topleft" }
+        fullscreenControlOptions: {position: "topleft"}
       },
       Settings.imagery.mapOptions.leafletOptions,
       Settings.imagery.mapOptions.crs && {
@@ -308,8 +314,9 @@ const Leaflet = ({
       })
       gsc.addTo(newMap)
     }
-    const layerControl = new Control.Layers({}, {}, { collapsed: false })
+    const layerControl = new Control.Layers({}, {}, {collapsed: false})
     layerControl.addTo(newMap)
+    shapeGroupLayerRef.current.addTo(newMap)
     addLayers(newMap, layerControl)
 
     setMap(newMap)
@@ -351,7 +358,7 @@ const Leaflet = ({
       }
       // Make sure bounds are a valid rectangle; e.g. during resize bounds could be a line or even a point
       if (bounds.minLng !== bounds.maxLng && bounds.minLat !== bounds.maxLat) {
-        setAnetLocationsVars({ bounds })
+        setAnetLocationsVars({bounds})
       }
     }
 
@@ -435,7 +442,8 @@ const Leaflet = ({
           )
         })
       })
-      .catch(() => {})
+      .catch(() => {
+      })
   }, [
     anetLocationsEnabled,
     anetLocationsVars,
@@ -507,9 +515,26 @@ const Leaflet = ({
     widthPropUnchanged
   ])
 
+  /**
+   * Handle assigned shapes (GeoJSON strings)
+   */
+  useEffect(() => {
+    const groupLayer = shapeGroupLayerRef.current
+    groupLayer.clearLayers()
+    if (shapes && shapes.length > 0 && map) {
+      shapes.forEach(shape => {
+        const geoJsonObject = JSON.parse(shape)
+        const geoJsonLayer = geoJSON(geoJsonObject)
+        geoJsonLayer.addTo(groupLayer)
+      })
+      // Set map bounds (navigate) to include all shapes
+      map.fitBounds(groupLayer.getBounds())
+    }
+  }, [shapes, map])
+
   return (
     <>
-      <div id={mapId} style={style} />
+      <div id={mapId} style={style}/>
       {locationMarkerPopup.container &&
         createPortal(
           renderLocationMarkerPopupContents(locationMarkerPopup.contents),
@@ -522,7 +547,7 @@ const Leaflet = ({
     return (
       <LinkTo
         modelType="Location"
-        model={{ uuid: location?.uuid, name: location?.name }}
+        model={{uuid: location?.uuid, name: location?.name}}
       />
     )
   }

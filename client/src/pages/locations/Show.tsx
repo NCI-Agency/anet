@@ -99,7 +99,7 @@ const LocationShow = ({ pageDispatchers }: LocationShowProps) => {
     id: location.uuid || 0,
     name: _escape(location.name) || "" // escape HTML in location name!
   }
-  if (Location.hasCoordinates(location)) {
+  if (!location.geoShape && Location.hasCoordinates(location)) {
     Object.assign(marker, {
       lat: location.lat,
       lng: location.lng
@@ -300,6 +300,8 @@ const LocationShow = ({ pageDispatchers }: LocationShowProps) => {
         )}
 
         {Location.hasCoordinates(location) && <Leaflet markers={[marker]} />}
+
+        {location.geoShape && <Leaflet shapes={[location.geoShape]} />}
       </div>
 
       <Approvals

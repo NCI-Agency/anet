@@ -74,6 +74,9 @@ public class Location extends AbstractCustomizableAnetBean
   private Double lng;
   @GraphQLQuery
   @GraphQLInputField
+  private String geoShape;
+  @GraphQLQuery
+  @GraphQLInputField
   private LocationType type;
   @GraphQLQuery
   @GraphQLInputField
@@ -133,6 +136,14 @@ public class Location extends AbstractCustomizableAnetBean
 
   public void setLng(Double lng) {
     this.lng = lng;
+  }
+
+  public String getGeoShape() {
+    return geoShape;
+  }
+
+  public void setGeoShape(String geoShape) {
+    this.geoShape = geoShape;
   }
 
   @AllowUnverifiedUsers
