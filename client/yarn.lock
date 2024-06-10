@@ -6377,8 +6377,8 @@ __metadata:
     js-yaml: "npm:4.1.0"
     json-loader: "npm:0.5.7"
     jsonpath-plus: "npm:9.0.0"
-    keycloak-connect: "npm:24.0.4"
-    keycloak-js: "npm:24.0.4"
+    keycloak-connect: "npm:24.0.5"
+    keycloak-js: "npm:24.0.5"
     leaflet: "npm:1.9.4"
     leaflet-defaulticon-compatibility: "npm:0.1.2"
     leaflet-geosearch: "npm:4.0.0"
@@ -14100,26 +14100,26 @@ __metadata:
   languageName: node
   linkType: hard
 
-"keycloak-connect@npm:24.0.4":
-  version: 24.0.4
-  resolution: "keycloak-connect@npm:24.0.4"
+"keycloak-connect@npm:24.0.5":
+  version: 24.0.5
+  resolution: "keycloak-connect@npm:24.0.5"
   dependencies:
     chromedriver: "npm:latest"
     jwk-to-pem: "npm:^2.0.0"
   dependenciesMeta:
     chromedriver:
       optional: true
-  checksum: 10c0/5ababad1e439eb6fdbda027d4c739ce29c943fbe414acd97e5ba4c3a7f40958e0f07347060b2d229661851dbd235d0a6e966a5401af2d15fd2221899cd2e7939
+  checksum: 10c0/e05cb9a1ea9dd049317ad757e58bd9cb880bc0b465db7957527d1ceb8ec1406bf97045d84720a7b9442ef328ff7365de93da6f57dea9793f3dbd4d92000ca3bb
   languageName: node
   linkType: hard
 
-"keycloak-js@npm:24.0.4":
-  version: 24.0.4
-  resolution: "keycloak-js@npm:24.0.4"
+"keycloak-js@npm:24.0.5":
+  version: 24.0.5
+  resolution: "keycloak-js@npm:24.0.5"
   dependencies:
     js-sha256: "npm:^0.11.0"
     jwt-decode: "npm:^4.0.0"
-  checksum: 10c0/78aa2dd02324181430988ec450294f320acfbcc6f8e3b6a3ec6628dd9dfb1fdf0ba44e55f7cd1c5cdcca60dbf52fa5ed8492ebaed892c9fa1dbfce883fd7e4ea
+  checksum: 10c0/aa2d537dfce44f4efe3d2bba63a35c355d73145961b055281862a7f733fe1581b5e847e5a9ae0eab2f866de51349b2dc10a29a9f764527095a6ac5750d0dbf71
   languageName: node
   linkType: hard
 
