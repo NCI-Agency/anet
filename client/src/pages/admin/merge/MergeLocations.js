@@ -374,6 +374,10 @@ const MergeLocations = ({ pageDispatchers }) => {
 
   function mergeLocations() {
     const loser = mergedLocation.uuid === location1.uuid ? location2 : location1
+    if (mergedLocation.type !== Location.LOCATION_TYPES.COUNTRY) {
+      mergedLocation.digram = null
+      mergedLocation.trigram = null
+    }
     mergedLocation.customFields = customFieldsJSONString(mergedLocation)
 
     const winnerLocation = Location.filterClientSideFields(mergedLocation)

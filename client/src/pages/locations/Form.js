@@ -538,6 +538,10 @@ const LocationForm = ({
     location.parentLocations = values.parentLocations?.map(l =>
       utils.getReference(l)
     )
+    if (location.type !== Location.LOCATION_TYPES.COUNTRY) {
+      location.digram = null
+      location.trigram = null
+    }
     location.customFields = customFieldsJSONString(values)
     return API.mutation(edit ? GQL_UPDATE_LOCATION : GQL_CREATE_LOCATION, {
       location
