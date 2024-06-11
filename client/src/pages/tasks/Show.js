@@ -35,6 +35,7 @@ import { ListGroup, ListGroupItem } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
 import Settings from "settings"
+import utils from "utils"
 
 const GQL_GET_TASK = gql`
   query($uuid: String!) {
@@ -42,6 +43,7 @@ const GQL_GET_TASK = gql`
       uuid
       shortName
       longName
+      selectable
       description
       status
       isSubscribed
@@ -356,6 +358,13 @@ const TaskShow = ({ pageDispatchers }) => {
                     name="status"
                     component={FieldHelper.ReadonlyField}
                     humanValue={Task.humanNameOfStatus}
+                  />
+                  <DictionaryField
+                    wrappedComponent={Field}
+                    dictProps={Settings.fields.task.selectable}
+                    name="selectable"
+                    component={FieldHelper.ReadonlyField}
+                    humanValue={utils.formatBoolean}
                   />
                   <DictionaryField
                     wrappedComponent={Field}

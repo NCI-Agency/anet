@@ -19,6 +19,7 @@ public class TaskMapper implements RowMapper<Task> {
     p.setProjectedCompletion(MapperUtils.getInstantAsLocalDateTime(r, "tasks_projectedCompletion"));
     p.setStatus(MapperUtils.getEnumIdx(r, "tasks_status", Task.Status.class));
     p.setDescription(MapperUtils.getOptionalString(r, "tasks_description"));
+    p.setSelectable(MapperUtils.getOptionalBoolean(r, "tasks_selectable"));
     p.setParentTaskUuid(r.getString("tasks_parentTaskUuid"));
 
     if (MapperUtils.containsColumnNamed(r, "totalCount")) {

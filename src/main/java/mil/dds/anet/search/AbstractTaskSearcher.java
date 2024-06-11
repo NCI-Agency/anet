@@ -65,11 +65,11 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
         Comparison.AFTER, query.getProjectedCompletionStart(), "projectedCompletionEnd",
         "tasks.\"projectedCompletion\"", Comparison.BEFORE, query.getProjectedCompletionEnd());
 
-    if (query.getHasParentTask() != null) {
-      if (query.getHasParentTask()) {
-        qb.addWhereClause("tasks.\"parentTaskUuid\" IS NOT NULL");
+    if (query.getSelectable() != null) {
+      if (query.getSelectable()) {
+        qb.addWhereClause("tasks.selectable IS TRUE");
       } else {
-        qb.addWhereClause("tasks.\"parentTaskUuid\" IS NULL");
+        qb.addWhereClause("tasks.selectable IS NOT TRUE");
       }
     }
 

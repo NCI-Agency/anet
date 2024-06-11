@@ -241,7 +241,7 @@ const ReportForm = ({
   const recentTasksVarCommon = {
     pageSize: 6,
     status: Model.STATUS.ACTIVE,
-    hasParentTask: true,
+    selectable: true,
     sortBy: "RECENT",
     sortOrder: "DESC"
   }
@@ -401,8 +401,8 @@ const ReportForm = ({
             label: `Assigned to ${currentOrg.shortName}`,
             queryVars: {
               taskedOrgUuid: currentOrg.uuid,
-              hasParentTask: true,
-              orgRecurseStrategy: RECURSE_STRATEGY.PARENTS
+              orgRecurseStrategy: RECURSE_STRATEGY.PARENTS,
+              selectable: true
             }
           }
         }
@@ -420,21 +420,21 @@ const ReportForm = ({
             label: `Assigned to ${primaryAdvisor.position.organization.shortName}`,
             queryVars: {
               taskedOrgUuid: primaryAdvisor.position.organization.uuid,
-              hasParentTask: true,
-              orgRecurseStrategy: RECURSE_STRATEGY.PARENTS
+              orgRecurseStrategy: RECURSE_STRATEGY.PARENTS,
+              selectable: true
             }
           }
         }
 
         tasksFilters.allUnassignedTasks = {
           label: `All unassigned ${tasksLabel}`,
-          queryVars: { hasParentTask: true, isAssigned: false }
+          queryVars: { selectable: true, isAssigned: false }
         }
 
         if (currentUser.isAdmin()) {
           tasksFilters.allTasks = {
             label: `All ${tasksLabel}`,
-            queryVars: { hasParentTask: true }
+            queryVars: { selectable: true }
           }
         }
 

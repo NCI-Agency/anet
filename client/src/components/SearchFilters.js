@@ -591,6 +591,16 @@ export const searchFilters = function(includeAdminFilters) {
 
   filters[SEARCH_OBJECT_TYPES.TASKS] = {
     filters: {
+      "Is Selectable?": {
+        component: RadioButtonFilter,
+        deserializer: deserializeRadioButtonFilter,
+        labelClass: "pt-0",
+        props: {
+          queryKey: "selectable",
+          options: [true, false],
+          labels: ["Yes", "No"]
+        }
+      },
       "Is Assigned?": {
         component: RadioButtonFilter,
         deserializer: deserializeRadioButtonFilter,

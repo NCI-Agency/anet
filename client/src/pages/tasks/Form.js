@@ -271,6 +271,36 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
                   />
                 )}
 
+                {disabled ? (
+                  <DictionaryField
+                    wrappedComponent={FastField}
+                    dictProps={Settings.fields.task.selectable}
+                    name="selectable"
+                    component={FieldHelper.ReadonlyField}
+                    humanValue={utils.formatBoolean}
+                  />
+                ) : (
+                  <DictionaryField
+                    wrappedComponent={FastField}
+                    dictProps={Settings.fields.task.selectable}
+                    name="selectable"
+                    component={FieldHelper.RadioButtonToggleGroupField}
+                    buttons={[
+                      {
+                        id: "isSelectable",
+                        value: true,
+                        label: "Yes"
+                      },
+                      {
+                        id: "isNotSelectable",
+                        value: false,
+                        label: "No"
+                      }
+                    ]}
+                    onChange={value => setFieldValue("selectable", value)}
+                  />
+                )}
+
                 <DictionaryField
                   wrappedComponent={FastField}
                   dictProps={Settings.fields.task.description}

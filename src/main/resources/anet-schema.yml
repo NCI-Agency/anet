@@ -600,7 +600,7 @@ properties:
       task:
         type: object
         additionalProperties: false
-        required: [status, shortLabel, shortName, longLabel, longName, description,
+        required: [status, shortLabel, shortName, longLabel, longName, description, selectable,
                    projectedCompletion, plannedCompletion, parentTask, childrenTasks,
                    taskedOrganizations, responsiblePositions]
         properties:
@@ -620,6 +620,8 @@ properties:
             "$ref": "#/$defs/inputField"
           description:
             "$ref": "#/$defs/inputField"
+          selectable:
+            "$ref": "#/$defs/labeledField"
           projectedCompletion:
             "$ref": "#/$defs/excludableInputField"
           plannedCompletion:

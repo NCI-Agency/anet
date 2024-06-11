@@ -52,6 +52,10 @@ export default class Task extends Model {
         .nullable()
         .default("")
         .label(Settings.fields.task.longName?.label),
+      selectable: yup
+        .boolean()
+        .default(true)
+        .label(Settings.fields.task.selectable?.label),
       description: yup
         .string()
         .nullable()

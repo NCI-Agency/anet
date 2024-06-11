@@ -51,6 +51,9 @@ public class Task extends AbstractCustomizableAnetBean
   private Status status;
   @GraphQLQuery
   @GraphQLInputField
+  private Boolean selectable;
+  @GraphQLQuery
+  @GraphQLInputField
   private String description;
   // annotated below
   private List<Position> responsiblePositions;
@@ -141,6 +144,14 @@ public class Task extends AbstractCustomizableAnetBean
   @Override
   public void setStatus(Status status) {
     this.status = status;
+  }
+
+  public Boolean getSelectable() {
+    return selectable;
+  }
+
+  public void setSelectable(Boolean selectable) {
+    this.selectable = selectable;
   }
 
   public String getDescription() {
@@ -303,13 +314,14 @@ public class Task extends AbstractCustomizableAnetBean
         && Objects.equals(other.getCategory(), category)
         && Objects.equals(other.getParentTaskUuid(), getParentTaskUuid())
         && Objects.equals(other.getStatus(), status)
-        && Objects.equals(other.getDescription(), description);
+        && Objects.equals(other.getDescription(), description)
+        && Objects.equals(other.getSelectable(), selectable);
   }
 
   @Override
   public int hashCode() {
     return Objects.hash(super.hashCode(), uuid, shortName, longName, category, parentTask, status,
-        description);
+        description, selectable);
   }
 
   @Override

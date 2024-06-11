@@ -13,6 +13,7 @@ import PropTypes from "prop-types"
 import React from "react"
 import { ListGroup, ListGroupItem } from "react-bootstrap"
 import Settings from "settings"
+import utils from "utils"
 
 const GQL_GET_TASK = gql`
   query ($uuid: String!) {
@@ -20,6 +21,7 @@ const GQL_GET_TASK = gql`
       uuid
       shortName
       longName
+      selectable
       description
       status
       plannedCompletion
@@ -217,6 +219,12 @@ const TaskPreview = ({ className, uuid }) => {
           wrappedComponent={PreviewField}
           dictProps={Settings.fields.task.status}
           value={Task.humanNameOfStatus(task.status)}
+        />
+
+        <DictionaryField
+          wrappedComponent={PreviewField}
+          dictProps={Settings.fields.task.selectable}
+          value={utils.formatBoolean(task.selectable)}
         />
 
         {task.description && (

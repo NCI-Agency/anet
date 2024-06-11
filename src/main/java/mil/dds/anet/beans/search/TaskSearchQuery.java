@@ -34,10 +34,10 @@ public class TaskSearchQuery extends SubscribableObjectSearchQuery<TaskSearchSor
   @GraphQLQuery
   @GraphQLInputField
   private Instant projectedCompletionStart;
-  // Find tasks who (don't) have the parentTask filled in
+  // Find tasks that are (not) selectable
   @GraphQLQuery
   @GraphQLInputField
-  private Boolean hasParentTask;
+  private Boolean selectable;
   // Search for tasks with one of the given parent Task(s)
   @GraphQLQuery
   @GraphQLInputField
@@ -120,12 +120,12 @@ public class TaskSearchQuery extends SubscribableObjectSearchQuery<TaskSearchSor
     this.projectedCompletionStart = projectedCompletionStart;
   }
 
-  public Boolean getHasParentTask() {
-    return hasParentTask;
+  public Boolean getSelectable() {
+    return selectable;
   }
 
-  public void setHasParentTask(Boolean hasParentTask) {
-    this.hasParentTask = hasParentTask;
+  public void setSelectable(Boolean selectable) {
+    this.selectable = selectable;
   }
 
   public List<String> getParentTaskUuid() {

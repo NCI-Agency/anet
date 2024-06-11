@@ -62,6 +62,8 @@ fields:
       label: Long name
       placeholder: Full form name of objective
       asA: textarea
+    selectable:
+      label: Is selectable?
     description:
       label: Objective description
       placeholder: Description of this objective
