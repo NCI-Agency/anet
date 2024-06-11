@@ -5407,7 +5407,6 @@
 				(${uuid_function}, 'PAC', 0, 'Puerto Rico', 'RQ', 'PRI'),
 				(${uuid_function}, 'PAC', 0, 'Qatar', 'QA', 'QAT'),
 				(${uuid_function}, 'PAC', 0, 'Republic of China (Taiwan)', 'TW', 'TWN'),
-				(${uuid_function}, 'PAC', 0, 'Republic of Korea', NULL, 'KOR'),
 				(${uuid_function}, 'PAC', 0, 'Republic of Korea', 'KS', 'KOR'),
 				(${uuid_function}, 'PAC', 0, 'Republic of Moldova', 'MD', 'MDA'),
 				(${uuid_function}, 'PAC', 0, 'Republic of the Congo', 'CF', 'COG'),
