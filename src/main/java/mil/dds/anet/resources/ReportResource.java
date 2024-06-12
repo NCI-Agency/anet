@@ -92,6 +92,10 @@ public class ReportResource {
       return false;
     }
 
+    if (AuthUtils.isAdmin(user)) {
+      // Admins can do *anything*
+      return true;
+    }
     boolean isAuthor = report.isAuthor(user);
     return switch (report.getState()) {
       case DRAFT, REJECTED, APPROVED, CANCELLED ->
@@ -102,7 +106,7 @@ public class ReportResource {
         isAuthor || anetObjectEngine.canUserApproveStep(anetObjectEngine.getContext(),
             user.getUuid(), report.getApprovalStepUuid(), report.getAdvisorOrgUuid()).join();
       case PUBLISHED ->
-        // Published reports are immutable
+        // Must be admin
         false;
       default -> false;
     };
