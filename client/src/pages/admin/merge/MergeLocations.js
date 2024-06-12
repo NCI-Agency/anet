@@ -75,6 +75,8 @@ const MergeLocations = ({ pageDispatchers }) => {
   const location1 = mergeState[MERGE_SIDES.LEFT]
   const location2 = mergeState[MERGE_SIDES.RIGHT]
   const mergedLocation = mergeState.merged
+  const hideWhenEmpty =
+    !Location.hasCoordinates(location1) && !Location.hasCoordinates(location2)
 
   useEffect(() => {
     if (location1 && location2 && location1.type !== location2.type) {
@@ -193,7 +195,11 @@ const MergeLocations = ({ pageDispatchers }) => {
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
-              {getLeafletMap("merged-location-map", mergedLocation)}
+              {getLeafletMap(
+                "merged-location-map",
+                mergedLocation,
+                hideWhenEmpty
+              )}
               <DictionaryField
                 wrappedComponent={MergeField}
                 dictProps={Settings.fields.location.status}
@@ -434,6 +440,9 @@ const LocationColumn = ({
   locationFormatLabel
 }) => {
   const location = mergeState[align]
+  const hideWhenEmpty =
+    !Location.hasCoordinates(mergeState[MERGE_SIDES.LEFT]) &&
+    !Location.hasCoordinates(mergeState[MERGE_SIDES.RIGHT])
   const idForLocation = label.replace(/\s+/g, "")
   return (
     <div>
@@ -552,7 +561,11 @@ const LocationColumn = ({
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
           />
-          {getLeafletMap(`merge-location-map-${align}`, location)}
+          {getLeafletMap(
+            `merge-location-map-${align}`,
+            location,
+            hideWhenEmpty
+          )}
           <DictionaryField
             wrappedComponent={MergeField}
             dictProps={Settings.fields.location.status}

@@ -29,6 +29,12 @@ import MARKER_ICON from "resources/leaflet/marker-icon.png"
 import MARKER_SHADOW from "resources/leaflet/marker-shadow.png"
 import Settings from "settings"
 
+export const DEFAULT_MAP_STYLE = {
+  width: "100%",
+  height: "500px",
+  marginBottom: "18px"
+}
+
 const css = {
   zIndex: 1
 }
@@ -289,9 +295,7 @@ Leaflet.propTypes = {
   onMapClick: PropTypes.func
 }
 Leaflet.defaultProps = {
-  width: "100%",
-  height: "500px",
-  marginBottom: "18px"
+  ...DEFAULT_MAP_STYLE
 }
 
 export default Leaflet

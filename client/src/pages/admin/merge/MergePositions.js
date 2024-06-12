@@ -41,7 +41,7 @@ import useMergeObjects, {
   setMergeable,
   unassignedPerson
 } from "mergeUtils"
-import { Position } from "models"
+import { Location, Position } from "models"
 import OrganizationsAdministrated from "pages/positions/OrganizationsAdministrated"
 import PreviousPeople from "pages/positions/PreviousPeople"
 import PropTypes from "prop-types"
@@ -77,6 +77,9 @@ const MergePositions = ({ pageDispatchers }) => {
   const position1 = mergeState[MERGE_SIDES.LEFT]
   const position2 = mergeState[MERGE_SIDES.RIGHT]
   const mergedPosition = mergeState.merged
+  const hideWhenEmpty =
+    !Location.hasCoordinates(position1?.location) &&
+    !Location.hasCoordinates(position2?.location)
 
   return (
     <Container fluid>
@@ -388,7 +391,11 @@ const MergePositions = ({ pageDispatchers }) => {
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
-              {getLeafletMap("merged-location", mergedPosition.location)}
+              {getLeafletMap(
+                "merged-location",
+                mergedPosition.location,
+                hideWhenEmpty
+              )}
             </fieldset>
           )}
         </Col>
@@ -489,6 +496,9 @@ function getPositionFilters(mergeState, align) {
 
 const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
   const position = mergeState[align]
+  const hideWhenEmpty =
+    !Location.hasCoordinates(mergeState[MERGE_SIDES.LEFT]?.location) &&
+    !Location.hasCoordinates(mergeState[MERGE_SIDES.RIGHT]?.location)
   const idForPosition = label.replace(/\s+/g, "")
   return (
     <PositionCol>
@@ -795,7 +805,11 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
           />
-          {getLeafletMap(`merge-position-map-${align}`, position.location)}
+          {getLeafletMap(
+            `merge-position-map-${align}`,
+            position.location,
+            hideWhenEmpty
+          )}
         </fieldset>
       )}
     </PositionCol>
