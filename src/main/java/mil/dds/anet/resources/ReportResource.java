@@ -332,16 +332,15 @@ public class ReportResource {
     switch (report.getState()) {
       case DRAFT, REJECTED, APPROVED, CANCELLED:
         // Must be an author
-        if (!(isAuthor || AuthUtils.isAdmin(editor))) {
+        if (!isAuthor) {
           throw new WebApplicationException(permError + "Must be an author of this report.",
               Status.FORBIDDEN);
         }
         break;
       case PENDING_APPROVAL:
         // Must be an author or the approver
-        boolean canApprove =
-            AuthUtils.isAdmin(editor) || engine.canUserApproveStep(engine.getContext(),
-                editor.getUuid(), report.getApprovalStepUuid(), report.getAdvisorOrgUuid()).join();
+        final boolean canApprove = engine.canUserApproveStep(engine.getContext(), editor.getUuid(),
+            report.getApprovalStepUuid(), report.getAdvisorOrgUuid()).join();
         if (!isAuthor && !canApprove) {
           throw new WebApplicationException(
               permError + "Must be an author of this report or a current approver.",
@@ -349,12 +348,10 @@ public class ReportResource {
         }
         break;
       case PUBLISHED:
-        if (!AuthUtils.isAdmin(editor)) {
-          AnetAuditLogger.log("attempt to edit published report {} by editor {} was forbidden",
-              report.getUuid(), editor);
-          throw new WebApplicationException("Cannot edit a published report", Status.FORBIDDEN);
-        }
-        break;
+        // Must be an admin
+        AnetAuditLogger.log("attempt to edit published report {} by editor {} was forbidden",
+            report.getUuid(), editor);
+        throw new WebApplicationException("Cannot edit a published report", Status.FORBIDDEN);
       default:
         throw new WebApplicationException("Unknown report state", Status.FORBIDDEN);
     }
