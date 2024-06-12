@@ -103,6 +103,7 @@ async function runBuildup(scenario) {
           console.log(
             colors.red(`Buildup '${buildup.name}' iteration ${i} failed: ${e}`)
           )
+          process.exitCode = 1
         }
       }
     }
@@ -236,5 +237,6 @@ async function runStories(scenario, cycle, runningTime) {
     await simulate(process.argv.slice(3))
   } catch (e) {
     console.error(e)
+    process.exitCode = 1
   }
 })()
