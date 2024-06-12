@@ -226,8 +226,9 @@ public class ReportResource {
     ResourceUtils.assertAllowedClassification(r.getClassification());
 
     // State should not change when report is being edited by an approver
-    // State should change to draft when the report is being edited by one of the existing authors
-    if (isAuthor) {
+    // State should change to draft when the report is being edited by one of the existing authors,
+    // except when the editor is admin and is editing their own published report
+    if (isAuthor && !(AuthUtils.isAdmin(editor) && r.getState() == ReportState.PUBLISHED)) {
       r.setState(ReportState.DRAFT);
       r.setApprovalStep(null);
     }
