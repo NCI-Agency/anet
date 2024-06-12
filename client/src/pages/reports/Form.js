@@ -672,6 +672,7 @@ const ReportForm = ({
                   <DictionaryField
                     wrappedComponent={Field}
                     dictProps={Settings.fields.report.cancelledReason}
+                    name="cancelledReason"
                     component={FieldHelper.SpecialField}
                     onChange={event => {
                       // validation will be done by setFieldValue
