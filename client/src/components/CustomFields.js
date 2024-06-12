@@ -322,12 +322,14 @@ const GeoLocationField = fieldProps => {
         {...formikProps}
         {...otherFieldProps}
       />
-      <Row style={{ marginTop: "-1rem" }}>
-        <Col sm={2} />
-        <Col sm={7}>
-          <Leaflet markers={[marker]} mapId={name} {...leafletProps} />
-        </Col>
-      </Row>
+      {(editable || Location.hasCoordinates(coordinates)) && (
+        <Row style={{ marginTop: "-1rem" }}>
+          <Col sm={2} />
+          <Col sm={7}>
+            <Leaflet markers={[marker]} mapId={name} {...leafletProps} />
+          </Col>
+        </Row>
+      )}
     </>
   )
 
