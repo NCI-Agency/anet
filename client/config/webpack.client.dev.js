@@ -29,7 +29,19 @@ module.exports = merge.merge(common.clientConfig, {
         context: ["/graphql", "/api", "/assets", "/imagery", "/data"],
         target: process.env.SERVER_URL
       }
-    ]
+    ],
+    client: {
+      overlay: {
+        runtimeErrors: error => {
+          // ignore some sporadic, annoying, unimportant errors from ResizeObserver
+          return (
+            error.message !== "ResizeObserver loop limit exceeded" &&
+            error.message !==
+              "ResizeObserver loop completed with undelivered notifications."
+          )
+        }
+      }
+    }
   },
   plugins: [
     new webpack.DefinePlugin({
