@@ -6,6 +6,7 @@ import Approvals from "components/approvals/Approvals"
 import AssessmentResultsContainer from "components/assessments/AssessmentResultsContainer"
 import AttachmentCard from "components/Attachment/AttachmentCard"
 import AuthorizationGroupTable from "components/AuthorizationGroupTable"
+import EntityAvatarComponent from "components/avatar/EntityAvatarComponent"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
 import EmailAddressTable from "components/EmailAddressTable"
@@ -42,10 +43,13 @@ import React, { useContext, useState } from "react"
 import {
   Badge,
   Button,
+  Col,
   FormCheck,
+  FormGroup,
   ListGroup,
   ListGroupItem,
-  Nav
+  Nav,
+  Row
 } from "react-bootstrap"
 import { connect } from "react-redux"
 import { Link, useLocation, useParams } from "react-router-dom"
@@ -387,14 +391,50 @@ const OrganizationShow = ({ pageDispatchers }) => {
                 }
                 action={action}
               />
-              <Fieldset id="info">
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.organization.longName}
-                  name="longName"
-                  component={FieldHelper.ReadonlyField}
-                />
-
+              <Fieldset>
+                <Row>
+                  <Col sm={12} md={12} lg={4} xl={3} className="text-center">
+                    <EntityAvatarComponent
+                      entityUuid={organization.uuid}
+                      entityName={organization.shortName}
+                      editMode={false}
+                    />
+                  </Col>
+                  <Col
+                    lg={8}
+                    xl={9}
+                    className="d-flex flex-column justify-content-center"
+                  >
+                    <FormGroup>
+                      <Row style={{ marginBottom: "1rem" }}>
+                        <Col sm={7}>
+                          <Row>
+                            <Col>
+                              <DictionaryField
+                                wrappedComponent={Field}
+                                dictProps={
+                                  Settings.fields.organization.shortName
+                                }
+                                name="shortName"
+                                component={FieldHelper.ReadonlyField}
+                              />
+                              <DictionaryField
+                                wrappedComponent={Field}
+                                dictProps={
+                                  Settings.fields.organization.longName
+                                }
+                                name="longName"
+                                component={FieldHelper.ReadonlyField}
+                              />
+                            </Col>
+                          </Row>
+                        </Col>
+                      </Row>
+                    </FormGroup>
+                  </Col>
+                </Row>
+              </Fieldset>
+              <Fieldset id="info" title="Additional Information">
                 {organization.parentOrg && organization.parentOrg.uuid && (
                   <DictionaryField
                     wrappedComponent={Field}
