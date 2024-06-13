@@ -5868,6 +5868,37 @@
 		</addColumn>
 	</changeSet>
 
+    <changeSet id="add-entityAvatars-table" author="fdelcastillo">
+        <createTable tableName="entityAvatars">
+            <column name="entityUuid" type="${uuid_type}">
+                <constraints nullable="false" />
+            </column>
+            <column name="attachmentUuid" type="${uuid_type}">
+                <constraints nullable="false" />
+            </column>
+            <column name="cropLeft" type="number">
+                <constraints nullable="false" />
+            </column>
+            <column name="cropTop" type="number">
+                <constraints nullable="false" />
+            </column>
+            <column name="cropWidth" type="number">
+                <constraints nullable="false" />
+            </column>
+            <column name="cropHeight" type="number">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <addUniqueConstraint
+                tableName="entityAvatars"
+                columnNames="entityUuid"
+                constraintName="uniqueEntityAvatars"
+        />
+        <addForeignKeyConstraint baseColumnNames="attachmentUuid" baseTableName="entityAvatars"
+                                 constraintName="fk_entityAvatars_attachment" onDelete="CASCADE" onUpdate="NO ACTION"
+                                 referencedColumnNames="uuid" referencedTableName="attachments" />
+    </changeSet>
+
 	<!-- Keep this change set as the last one in the change log;
 	     it will be re-run whenever it changes. -->
 	<changeSet id="set-up-full-text-search" runOnChange="true" author="gjvoosten">
