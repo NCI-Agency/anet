@@ -162,3 +162,23 @@ jobs:
         name: ${{ matrix.client-tests }}-test-results for ${{ steps.strip-slashes.outputs.dictionary }}
         path: client/build/test-results/${{ matrix.client-tests }}-test-results.xml
       if: always()
+
+  test-sim:
+    needs: build
+    name: Test simulator
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - uses: ./.github/actions/build-cache
+    - run: ./gradlew dockerCreateDB dockerStartDB
+    - run: ./gradlew dockerConfigureKeycloak dockerStartKeycloak
+    - run: ./gradlew dbWait dbMigrate dbLoad
+    - run: |
+        ./gradlew run &
+        sleep 15
+    - run: ./gradlew yarn_run_sim
+      env:
+        TEST_RUN: true
