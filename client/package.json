@@ -211,7 +211,6 @@
     "sim": "NODE_ENV=development webpack --config config/webpack.sim.dev.js && ANET_CONFIG=../anet.yml ANET_DICTIONARY=../${ANET_DICTIONARY_NAME:-anet-dictionary.yml} SERVER_URL=${SERVER_URL:-'http://localhost:8080'} node build/anet.sim.dev.js"
   },
   "browserslist": [
-    "> 1%",
-    "IE 11"
+    "> 1%"
   ]
 }

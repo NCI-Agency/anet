@@ -38,10 +38,3 @@
 .bp5-dark a.btn:hover {
 	color: white;
 }
-
-@media screen and (-ms-high-contrast: active), screen and (-ms-high-contrast: none) {
-	/* IE10+ specific styles go here */
-	button.bp5-button > span.bp5-icon {
-		padding-top: 2px !important;
-	}
-}

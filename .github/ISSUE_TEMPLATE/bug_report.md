@@ -24,7 +24,7 @@ A clear and concise description of what you expected to happen.
 If applicable, add screenshots to help explain your problem.
 
 **Environment (please complete the following information):**
- - Browser [e.g. IE11, Edge, Safari...]
+ - Browser [e.g. Chrome, Edge, Firefox, Safari...]
 
 **Additional context**
 Add any other context about the problem here.
