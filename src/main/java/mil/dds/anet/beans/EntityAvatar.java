@@ -1,0 +1,85 @@
+package mil.dds.anet.beans;
+
+import io.leangen.graphql.annotations.GraphQLInputField;
+import io.leangen.graphql.annotations.GraphQLQuery;
+
+public class EntityAvatar {
+  @GraphQLQuery
+  @GraphQLInputField
+  private String entityUuid;
+  @GraphQLQuery
+  @GraphQLInputField
+  private String attachmentUuid;
+  @GraphQLQuery
+  @GraphQLInputField
+  private Integer cropLeft;
+  @GraphQLQuery
+  @GraphQLInputField
+  private Integer cropTop;
+  @GraphQLQuery
+  @GraphQLInputField
+  private Integer cropWidth;
+  @GraphQLQuery
+  @GraphQLInputField
+  private Integer cropHeight;
+
+  public EntityAvatar() {}
+
+  public EntityAvatar(final String entityUuid, final String attachmentUuid, final Integer cropLeft,
+      final Integer cropTop, final Integer cropWidth, Integer cropHeight) {
+    this.entityUuid = entityUuid;
+    this.attachmentUuid = attachmentUuid;
+    this.cropLeft = cropLeft;
+    this.cropTop = cropTop;
+    this.cropWidth = cropWidth;
+    this.cropHeight = cropHeight;
+  }
+
+  public String getEntityUuid() {
+    return entityUuid;
+  }
+
+  public void setEntityUuid(final String entityUuid) {
+    this.entityUuid = entityUuid;
+  }
+
+  public String getAttachmentUuid() {
+    return attachmentUuid;
+  }
+
+  public void setAttachmentUuid(final String attachmentUuid) {
+    this.attachmentUuid = attachmentUuid;
+  }
+
+  public Integer getCropLeft() {
+    return cropLeft;
+  }
+
+  public void setCropLeft(Integer cropLeft) {
+    this.cropLeft = cropLeft;
+  }
+
+  public Integer getCropTop() {
+    return cropTop;
+  }
+
+  public void setCropTop(Integer cropTop) {
+    this.cropTop = cropTop;
+  }
+
+  public Integer getCropWidth() {
+    return cropWidth;
+  }
+
+  public void setCropWidth(Integer cropWidth) {
+    this.cropWidth = cropWidth;
+  }
+
+  public Integer getCropHeight() {
+    return cropHeight;
+  }
+
+  public void setCropHeight(Integer cropHeight) {
+    this.cropHeight = cropHeight;
+  }
+}
