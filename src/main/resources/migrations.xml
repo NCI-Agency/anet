@@ -5848,4 +5848,17 @@
 		</sql>
 	</changeSet>
 
+	<changeSet id="migrate-custom-security-marking-to-report-classification" author="midmarch">
+		<sql>
+			<!-- Migrate report.customFields.securityMarking to report.classification -->
+			UPDATE reports
+			SET classification = "customFields"::jsonb->>'securityMarking';
+
+			<!-- Replace report.classification empty strings with NULL -->
+			UPDATE reports
+			SET classification = NULL
+			WHERE classification = '';
+		</sql>
+	</changeSet>
+
 </databaseChangeLog>
