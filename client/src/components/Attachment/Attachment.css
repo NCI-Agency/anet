@@ -101,11 +101,6 @@
   height: 100%;
   max-height: 450px;
   border-radius: 5px;
-  transition: transform .5s ease;
-}
-.img-hover-zoom:hover .attachment-image {
-  cursor: zoom-in;
-  transform: scale(1.5);
 }
 
 @media screen and (max-width: 768px) {
