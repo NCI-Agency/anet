@@ -139,7 +139,7 @@ CompactHeaderContent.propTypes = {
   sensitiveInformation: PropTypes.bool
 }
 
-export const CompactFooterContent = ({ object }) => {
+export const CompactFooterContent = ({ object, classification }) => {
   const location = useLocation()
   const { currentUser, appSettings } = useContext(AppContext)
   return (
@@ -150,7 +150,7 @@ export const CompactFooterContent = ({ object }) => {
           {object.uuid}
         </Link>
       </span>
-      <ClassificationBanner />
+      <ClassificationBanner classification={classification} />
       <PrintedByBoxS>
         <div>
           printed by{" "}
@@ -169,7 +169,8 @@ export const CompactFooterContent = ({ object }) => {
 }
 
 CompactFooterContent.propTypes = {
-  object: PropTypes.object
+  object: PropTypes.object,
+  classification: PropTypes.string
 }
 
 const SensitivityInformation = () => {

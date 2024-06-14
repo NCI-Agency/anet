@@ -409,7 +409,12 @@ const CompactReportView = ({ pageDispatchers }) => {
                 )}
               </FullColumn>
             </CompactTable>
-            <CompactFooterContent object={report} />
+            <CompactFooterContent
+              object={report}
+              classification={
+                Settings.classification.choices[report.classification]
+              }
+            />
           </CompactView>
         </>
       )}
