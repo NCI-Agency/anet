@@ -7,7 +7,7 @@ plugins {
 	id "com.bmuschko.docker-remote-api" version "9.4.0"
 	id "com.github.node-gradle.node" version "7.0.2"
 	id "com.diffplug.spotless" version "6.25.0"
-	id "com.graphql-java-generator.graphql-gradle-plugin3" version "2.5"
+	id "com.graphql-java-generator.graphql-gradle-plugin3" version "2.6"
 	id "org.beryx.runtime" version "1.13.1"
 	id "com.netflix.nebula.rpm" version "11.9.1"
 }
@@ -30,6 +30,9 @@ String dropwizardVersion = "4.0.7"
 String logbackVersion = "1.4.14"
 String log4jVersion = "2.23.1"
 String keycloakVersion = "24.0.5"
+String springBootVersion = "3.3.0"
+String springFrameworkVersion = "6.1.9"
+String springSecurityVersion = "6.3.0"
 String psqlPushDataPath = "/var/tmp"
 String keycloakContainerPath = "/opt/keycloak"
 String keycloakPushDataPath = "${keycloakContainerPath}/data"
@@ -144,8 +147,15 @@ dependencies {
 	implementation 'io.leangen.graphql:spqr:0.12.4'
 	// The graphql-java-client-runtime module aggregates all dependencies for the generated code,
 	// including the plugin runtime
-	testImplementation 'com.graphql-java-generator:graphql-java-client-runtime:2.5'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test:2.7.18'
+	testImplementation 'com.graphql-java-generator:graphql-java-client-runtime:2.6'
+	testImplementation "org.springframework.boot:spring-boot-starter-test:${springBootVersion}"
+	constraints {
+		// Force some transitive Spring dependencies to the expected version
+		testImplementation "org.springframework:spring-context:${springFrameworkVersion}"
+		testImplementation "org.springframework.security:spring-security-oauth2-client:${springSecurityVersion}"
+		testImplementation "org.springframework.boot:spring-boot-starter-security:${springBootVersion}"
+		testImplementation "org.springframework.boot:spring-boot-starter-webflux:${springBootVersion}"
+	}
 	// We use some extended scalars in `generateClientCodeConf` below
 	testImplementation 'com.graphql-java:graphql-java-extended-scalars:21.0'
 
