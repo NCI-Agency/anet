@@ -13,6 +13,8 @@ const ADVISORS = ["CIV DMIN, Arthur", "CIV GUIST, Lin"]
 
 const TASKS = ["EF 1 » EF 1.2 » 1.2.A", "EF 1 » EF 1.2 » 1.2.B"]
 
+const DEFAULT_REPORT_CLASSIFICATION = "DEMO USE ONLY"
+
 describe("Show print report page", () => {
   beforeEach("Open the show report page", async() => {
     await MyReports.open("arthur")
@@ -122,6 +124,48 @@ describe("Show print report page", () => {
       for (const task of TASKS) {
         expect(displayedTasks).to.contain(task)
       }
+    })
+  })
+  describe("When on the print page of a report without classification", () => {
+    it("We should see the default text for classification in the header and footer banners", async() => {
+      await (await ShowReport.getClassificationHeader()).waitForExist()
+      await (await ShowReport.getClassificationHeader()).waitForDisplayed()
+      expect(
+        await (await ShowReport.getClassificationHeader()).getText()
+      ).to.equal(DEFAULT_REPORT_CLASSIFICATION)
+      await (await ShowReport.getClassificationFooter()).waitForExist()
+      await (await ShowReport.getClassificationFooter()).waitForDisplayed()
+      expect(
+        await (await ShowReport.getClassificationFooter()).getText()
+      ).to.equal(DEFAULT_REPORT_CLASSIFICATION)
+    })
+  })
+})
+
+const REPORT_CLASSIFICATION = "NATO UNCLASSIFIED"
+describe("Show print report page with classification", () => {
+  beforeEach("Open the show report page", async() => {
+    await MyReports.open("arthur")
+    await MyReports.selectReport(
+      "A classified report from Arthur",
+      REPORT_STATES.DRAFT
+    )
+    await (await ShowReport.getCompactViewButton()).click()
+    await (await ShowReport.getCompactView()).waitForExist()
+    await (await ShowReport.getCompactView()).waitForDisplayed()
+  })
+  describe("When on the print page of a report with classification", () => {
+    it("We should see the classification in the header and footer banners", async() => {
+      await (await ShowReport.getClassificationHeader()).waitForExist()
+      await (await ShowReport.getClassificationHeader()).waitForDisplayed()
+      expect(
+        await (await ShowReport.getClassificationHeader()).getText()
+      ).to.equal(REPORT_CLASSIFICATION)
+      await (await ShowReport.getClassificationFooter()).waitForExist()
+      await (await ShowReport.getClassificationFooter()).waitForDisplayed()
+      expect(
+        await (await ShowReport.getClassificationFooter()).getText()
+      ).to.equal(REPORT_CLASSIFICATION)
     })
   })
 })
