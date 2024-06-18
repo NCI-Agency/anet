@@ -27,10 +27,10 @@ import mil.dds.anet.test.utils.UtilsTest;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
 
-class OrganizationResourceTest extends AbstractResourceTest {
+public class OrganizationResourceTest extends AbstractResourceTest {
 
   private static final String _EMAIL_ADDRESSES_FIELDS = "emailAddresses { network address }";
-  protected static final String FIELDS =
+  public static final String FIELDS =
       String.format("{ uuid shortName longName status identificationCode profile location"
           + " app6context app6standardIdentity app6symbolSet app6hq app6amplifier"
           + " customFields tasks { uuid } parentOrg { uuid }"

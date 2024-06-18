@@ -221,4 +221,22 @@ public class OrganizationDao
   public SubscriptionUpdateGroup getSubscriptionUpdate(Organization obj) {
     return getCommonSubscriptionUpdate(obj, TABLE_NAME, "organizations.uuid");
   }
+
+  @InTransaction
+  public int mergeOrganizations(final Organization loserOrganization,
+      final Organization winnerOrganization) {
+    final var loserOrganizationUuid = loserOrganization.getUuid();
+    final var winnerOrganizationUuid = winnerOrganization.getUuid();
+
+    update(winnerOrganization);
+
+    updateForMerge("approvalSteps", "relatedObjectUuid", winnerOrganizationUuid,
+        loserOrganizationUuid);
+    updateForMerge("taskTaskedOrganizations", "organizationUuid", winnerOrganizationUuid,
+        loserOrganizationUuid);
+    updateForMerge("positions", "organizationUuid", winnerOrganizationUuid, loserOrganizationUuid);
+    updateForMerge("authorizationGroupRelatedObjects", "relatedObjectUuid", winnerOrganizationUuid,
+        loserOrganizationUuid);
+    return deleteForMerge("organizations", "uuid", loserOrganizationUuid);
+  }
 }
