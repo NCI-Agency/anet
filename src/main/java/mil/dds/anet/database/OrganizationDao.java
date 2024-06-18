@@ -271,6 +271,12 @@ public class OrganizationDao
         newPos -> addPositionToOrganization(newPos, winnerOrganization),
         oldPos -> removePositionFromOrganization(DaoUtils.getUuid(oldPos), winnerOrganization));
 
+    // Update emailAddresses
+    final EmailAddressDao emailAddressDao = AnetObjectEngine.getInstance().getEmailAddressDao();
+    emailAddressDao.updateEmailAddresses(OrganizationDao.TABLE_NAME, loserOrganizationUuid, null);
+    emailAddressDao.updateEmailAddresses(OrganizationDao.TABLE_NAME, winnerOrganizationUuid,
+        winnerOrganization.getEmailAddresses());
+
     return deleteForMerge(OrganizationDao.TABLE_NAME, "uuid", loserOrganizationUuid);
   }
 }
