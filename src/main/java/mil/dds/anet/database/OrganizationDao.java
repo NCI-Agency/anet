@@ -2,6 +2,7 @@ package mil.dds.anet.database;
 
 import static org.jdbi.v3.sqlobject.customizer.BindList.EmptyHandling.NULL_STRING;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -261,8 +262,15 @@ public class OrganizationDao
     // Move authorizationGroups to the winner
     updateForMerge("authorizationGroupRelatedObjects", "relatedObjectUuid", winnerOrganizationUuid,
         loserOrganizationUuid);
-    updateForMerge("organizationAdministrativePositions", "organizationUuid",
-        winnerOrganizationUuid, loserOrganizationUuid);
+
+    // Update organizationAdministrativePositions
+    deleteForMerge("organizationAdministrativePositions", "organizationUuid",
+        loserOrganizationUuid);
+    Utils.addRemoveElementsByUuid(existingWinnerOrg.loadAdministratingPositions(context).join(),
+        Utils.orIfNull(winnerOrganization.getAdministratingPositions(), new ArrayList<>()),
+        newPos -> addPositionToOrganization(newPos, winnerOrganization),
+        oldPos -> removePositionFromOrganization(DaoUtils.getUuid(oldPos), winnerOrganization));
+
     return deleteForMerge(OrganizationDao.TABLE_NAME, "uuid", loserOrganizationUuid);
   }
 }
