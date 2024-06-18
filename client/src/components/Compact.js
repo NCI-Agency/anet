@@ -127,7 +127,10 @@ export const CompactHeaderContent = ({
     <HeaderContentS bgc={appSettings[SETTING_KEY_COLOR]}>
       <img src={anetLogo} alt="logo" width="50" height="12" />
       <ClassificationBoxS>
-        <ClassificationBanner classification={classification} />
+        <ClassificationBanner
+          classification={classification}
+          bannerId="header-banner"
+        />
         {sensitiveInformation && <SensitivityInformation />}
       </ClassificationBoxS>
     </HeaderContentS>
@@ -139,7 +142,7 @@ CompactHeaderContent.propTypes = {
   sensitiveInformation: PropTypes.bool
 }
 
-export const CompactFooterContent = ({ object }) => {
+export const CompactFooterContent = ({ object, classification }) => {
   const location = useLocation()
   const { currentUser, appSettings } = useContext(AppContext)
   return (
@@ -150,7 +153,10 @@ export const CompactFooterContent = ({ object }) => {
           {object.uuid}
         </Link>
       </span>
-      <ClassificationBanner />
+      <ClassificationBanner
+        classification={classification}
+        bannerId="footer-banner"
+      />
       <PrintedByBoxS>
         <div>
           printed by{" "}
@@ -169,7 +175,8 @@ export const CompactFooterContent = ({ object }) => {
 }
 
 CompactFooterContent.propTypes = {
-  object: PropTypes.object
+  object: PropTypes.object,
+  classification: PropTypes.string
 }
 
 const SensitivityInformation = () => {
@@ -269,16 +276,20 @@ const FooterContentS = styled.div`
   background-color: ${props => props.bgc} !important;
 `
 
-const ClassificationBanner = ({ classification }) => {
+const ClassificationBanner = ({ classification, bannerId }) => {
   return (
     <ClassificationBannerS>
-      <CompactSecurityBanner classification={classification} />
+      <CompactSecurityBanner
+        classification={classification}
+        bannerId={bannerId}
+      />
     </ClassificationBannerS>
   )
 }
 
 ClassificationBanner.propTypes = {
-  classification: PropTypes.string
+  classification: PropTypes.string,
+  bannerId: PropTypes.string
 }
 
 const ClassificationBannerS = styled.div`

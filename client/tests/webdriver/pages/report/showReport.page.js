@@ -211,6 +211,14 @@ class ShowReport extends Page {
       await fieldCheckbox.click()
     }
   }
+
+  async getClassificationHeader() {
+    return browser.$("#header-banner")
+  }
+
+  async getClassificationFooter() {
+    return browser.$("#footer-banner")
+  }
 }
 
 export default new ShowReport()
