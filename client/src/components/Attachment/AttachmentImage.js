@@ -1,4 +1,3 @@
-import classNames from "classnames"
 import PropTypes from "prop-types"
 import React from "react"
 
@@ -18,11 +17,7 @@ const AttachmentImage = ({
     />
   )
   return (
-    <div
-      className={classNames("img-container", {
-        "img-hover-zoom": !contentMissing
-      })}
-    >
+    <div className="img-container">
       {contentMissing ? (
         <>{image}</>
       ) : (
