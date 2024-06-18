@@ -142,11 +142,33 @@ export default class Organization extends Model {
       network
       address
     }
-    approvalSteps {
-      name
-    }
     planningApprovalSteps {
+      uuid
       name
+      approvers {
+        uuid
+        name
+        person {
+          uuid
+          name
+          rank
+          avatarUuid
+        }
+      }
+    }
+    approvalSteps {
+      uuid
+      name
+      approvers {
+        uuid
+        name
+        person {
+          uuid
+          name
+          rank
+          avatarUuid
+        }
+      }
     }
     customFields
     ${GRAPHQL_NOTES_FIELDS}
