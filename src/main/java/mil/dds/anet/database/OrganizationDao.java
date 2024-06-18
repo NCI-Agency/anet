@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AnetBeanList;
@@ -227,11 +228,30 @@ public class OrganizationDao
       final Organization winnerOrganization) {
     final var loserOrganizationUuid = loserOrganization.getUuid();
     final var winnerOrganizationUuid = winnerOrganization.getUuid();
+    final var existingLoserOrg = getByUuid(loserOrganizationUuid);
+    final var existingWinnerOrg = getByUuid(winnerOrganizationUuid);
+    final var context = AnetObjectEngine.getInstance().getContext();
 
     update(winnerOrganization);
 
-    updateForMerge("approvalSteps", "relatedObjectUuid", winnerOrganizationUuid,
-        loserOrganizationUuid);
+    // Update approvalSteps (note that this may fail if reports are currently pending at one of the
+    // approvalSteps that are going to be deleted):
+    // - delete approvalSteps of loser
+    final List<ApprovalStep> existingLoserPlanningApprovalSteps =
+        existingLoserOrg.loadPlanningApprovalSteps(context).join();
+    final List<ApprovalStep> existingLoserApprovalSteps =
+        existingLoserOrg.loadApprovalSteps(context).join();
+    Utils.updateApprovalSteps(loserOrganization, List.of(), existingLoserPlanningApprovalSteps,
+        List.of(), existingLoserApprovalSteps);
+    // - update approvalSteps of winner
+    final List<ApprovalStep> existingWinnerPlanningApprovalSteps =
+        existingWinnerOrg.loadPlanningApprovalSteps(context).join();
+    final List<ApprovalStep> existingWinnerApprovalSteps =
+        existingWinnerOrg.loadApprovalSteps(context).join();
+    Utils.updateApprovalSteps(winnerOrganization, winnerOrganization.getPlanningApprovalSteps(),
+        existingWinnerPlanningApprovalSteps, winnerOrganization.getApprovalSteps(),
+        existingWinnerApprovalSteps);
+
     updateForMerge("taskTaskedOrganizations", "organizationUuid", winnerOrganizationUuid,
         loserOrganizationUuid);
     updateForMerge("positions", "organizationUuid", winnerOrganizationUuid, loserOrganizationUuid);
