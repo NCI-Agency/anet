@@ -252,13 +252,17 @@ public class OrganizationDao
         existingWinnerPlanningApprovalSteps, winnerOrganization.getApprovalSteps(),
         existingWinnerApprovalSteps);
 
+    // Assign tasks to the winner
     updateForMerge("taskTaskedOrganizations", "organizationUuid", winnerOrganizationUuid,
         loserOrganizationUuid);
-    updateForMerge("positions", "organizationUuid", winnerOrganizationUuid, loserOrganizationUuid);
+    // Move positions to the winner
+    updateForMerge(PositionDao.TABLE_NAME, "organizationUuid", winnerOrganizationUuid,
+        loserOrganizationUuid);
+    // Move authorizationGroups to the winner
     updateForMerge("authorizationGroupRelatedObjects", "relatedObjectUuid", winnerOrganizationUuid,
         loserOrganizationUuid);
     updateForMerge("organizationAdministrativePositions", "organizationUuid",
         winnerOrganizationUuid, loserOrganizationUuid);
-    return deleteForMerge("organizations", "uuid", loserOrganizationUuid);
+    return deleteForMerge(OrganizationDao.TABLE_NAME, "uuid", loserOrganizationUuid);
   }
 }
