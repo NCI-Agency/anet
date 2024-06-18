@@ -21,6 +21,7 @@ import javax.cache.CacheManager;
 import javax.cache.Caching;
 import javax.cache.spi.CachingProvider;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.MergedEntity;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.beans.Position;
@@ -485,12 +486,16 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     deleteForMerge("customSensitiveInformation", "relatedObjectUuid", loserUuid);
 
     // Finally, delete loser
-    final int nr = deleteForMerge("people", "uuid", loserUuid);
+    final int nrDeleted = deleteForMerge(PersonDao.TABLE_NAME, "uuid", loserUuid);
+    if (nrDeleted > 0) {
+      AnetObjectEngine.getInstance().getAdminDao()
+          .insertMergedEntity(new MergedEntity(loserUuid, winnerUuid, Instant.now()));
+    }
 
     // E.g. positions may have been updated, so evict from the cache
     evictFromCache(winner);
     evictFromCache(loser);
-    return nr;
+    return nrDeleted;
   }
 
   public CompletableFuture<List<PersonPositionHistory>> getPositionHistory(

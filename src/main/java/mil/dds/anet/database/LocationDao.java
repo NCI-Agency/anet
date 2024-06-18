@@ -1,9 +1,11 @@
 package mil.dds.anet.database;
 
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Location;
+import mil.dds.anet.beans.MergedEntity;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.LocationSearchQuery;
 import mil.dds.anet.database.mappers.LocationMapper;
@@ -106,7 +108,12 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
     deleteForMerge("customSensitiveInformation", "relatedObjectUuid", loserLocationUuid);
 
     // Finally, delete the location
-    return deleteForMerge("locations", "uuid", loserLocationUuid);
+    final int nrDeleted = deleteForMerge(LocationDao.TABLE_NAME, "uuid", loserLocationUuid);
+    if (nrDeleted > 0) {
+      AnetObjectEngine.getInstance().getAdminDao().insertMergedEntity(
+          new MergedEntity(loserLocationUuid, winnerLocationUuid, Instant.now()));
+    }
+    return nrDeleted;
   }
 
   // TODO: Don't delete any location if any references exist.
