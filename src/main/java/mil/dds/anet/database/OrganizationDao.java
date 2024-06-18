@@ -262,6 +262,21 @@ public class OrganizationDao
     // Move authorizationGroups to the winner
     updateForMerge("authorizationGroupRelatedObjects", "relatedObjectUuid", winnerOrganizationUuid,
         loserOrganizationUuid);
+    // Update parentOrg (of all sub-organizations) to the winner
+    updateForMerge(OrganizationDao.TABLE_NAME, "parentOrgUuid", winnerOrganizationUuid,
+        loserOrganizationUuid);
+    // Update advisorOrganization of reports to the winner
+    updateForMerge(ReportDao.TABLE_NAME, "advisorOrganizationUuid", winnerOrganizationUuid,
+        loserOrganizationUuid);
+    // Update interlocutorOrganization of reports to the winner
+    updateForMerge(ReportDao.TABLE_NAME, "interlocutorOrganizationUuid", winnerOrganizationUuid,
+        loserOrganizationUuid);
+    // Move notes to the winner
+    updateM2mForMerge("noteRelatedObjects", "noteUuid", "relatedObjectUuid", winnerOrganizationUuid,
+        loserOrganizationUuid);
+    // Move attachments to the winner
+    updateM2mForMerge("attachmentRelatedObjects", "attachmentUuid", "relatedObjectUuid",
+        winnerOrganizationUuid, loserOrganizationUuid);
 
     // Update organizationAdministrativePositions
     deleteForMerge("organizationAdministrativePositions", "organizationUuid",
