@@ -382,6 +382,11 @@ const MergeOrganizations = ({ pageDispatchers }) => {
                   />
                 }
                 align={ALIGN_OPTIONS.CENTER}
+                action={getClearButton(() =>
+                  dispatchMergeActions(
+                    setAMergedField("planningApprovalSteps", [], null)
+                  )
+                )}
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
@@ -394,6 +399,11 @@ const MergeOrganizations = ({ pageDispatchers }) => {
                   />
                 }
                 align={ALIGN_OPTIONS.CENTER}
+                action={getClearButton(() =>
+                  dispatchMergeActions(
+                    setAMergedField("approvalSteps", [], null)
+                  )
+                )}
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
