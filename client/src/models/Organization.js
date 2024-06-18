@@ -170,6 +170,19 @@ export default class Organization extends Model {
         }
       }
     }
+    administratingPositions {
+      uuid
+      name
+      code
+      type
+      role
+      person {
+        uuid
+        name
+        rank
+        avatarUuid
+      }
+    }
     customFields
     ${GRAPHQL_NOTES_FIELDS}
   `

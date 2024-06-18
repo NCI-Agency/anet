@@ -360,7 +360,7 @@ const MergeOrganizations = ({ pageDispatchers }) => {
                     label={utils.sentenceCase(
                       orgSettings.administratingPositions.label
                     )}
-                    positions={mergedOrganization.administratingPositions}
+                    positions={mergedOrganization.administratingPositions || []}
                   />
                 }
                 align={ALIGN_OPTIONS.CENTER}
@@ -874,8 +874,7 @@ const OrganizationColumn = ({
                 label={utils.sentenceCase(
                   orgSettings.administratingPositions.label
                 )}
-                positions={organization.administratingPositions}
-                showOrganizationsAdministrated
+                positions={organization.administratingPositions || []}
               />
             }
             align={align}
