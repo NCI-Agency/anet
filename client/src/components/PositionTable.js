@@ -112,10 +112,12 @@ PaginatedPositions.propTypes = {
 const BasePositionTable = ({
   id,
   showLocation,
+  showOrganization,
+  showOrganizationsAdministrated,
+  showStatus,
   showDelete,
   onDelete,
   positions,
-  showOrganizationsAdministrated,
   pageSize,
   pageNum,
   totalCount,
@@ -157,10 +159,10 @@ const BasePositionTable = ({
               )}
               <th>Name</th>
               {showLocation && <th>Location</th>}
-              <th>Organization</th>
+              {showOrganization && <th>Organization</th>}
               {showOrganizationsAdministrated && <th>Superuser of</th>}
               <th>Current Occupant</th>
-              <th>Status</th>
+              {showStatus && <th>Status</th>}
               {showDelete && <th />}
             </tr>
           </thead>
@@ -202,14 +204,16 @@ const BasePositionTable = ({
                       <LinkTo modelType="Location" model={pos.location} />
                     </td>
                   )}
-                  <td>
-                    {pos.organization && (
-                      <LinkTo
-                        modelType="Organization"
-                        model={pos.organization}
-                      />
-                    )}
-                  </td>
+                  {showOrganization && (
+                    <td>
+                      {pos.organization && (
+                        <LinkTo
+                          modelType="Organization"
+                          model={pos.organization}
+                        />
+                      )}
+                    </td>
+                  )}
                   {showOrganizationsAdministrated && (
                     <td>
                       {pos.organizationsAdministrated?.map((o, i) => (
@@ -225,7 +229,7 @@ const BasePositionTable = ({
                       <LinkTo modelType="Person" model={pos.person} />
                     )}
                   </td>
-                  <td>{utils.sentenceCase(pos.status)}</td>
+                  {showStatus && <td>{utils.sentenceCase(pos.status)}</td>}
                   {showDelete && (
                     <td id={"positionDelete_" + pos.uuid}>
                       <RemoveButton
@@ -247,11 +251,13 @@ const BasePositionTable = ({
 BasePositionTable.propTypes = {
   id: PropTypes.string,
   showLocation: PropTypes.bool,
+  showOrganization: PropTypes.bool,
+  showOrganizationsAdministrated: PropTypes.bool,
+  showStatus: PropTypes.bool,
   showDelete: PropTypes.bool,
   onDelete: PropTypes.func,
   // list of positions:
   positions: PropTypes.array.isRequired,
-  showOrganizationsAdministrated: PropTypes.bool,
   // fill these when pagination wanted:
   totalCount: PropTypes.number,
   pageNum: PropTypes.number,
@@ -264,6 +270,11 @@ BasePositionTable.propTypes = {
   toggleAll: PropTypes.func,
   isSelected: PropTypes.func,
   toggleSelection: PropTypes.func
+}
+
+BasePositionTable.defaultProps = {
+  showOrganization: true,
+  showStatus: true
 }
 
 export default connect(null, mapPageDispatchersToProps)(PositionTable)

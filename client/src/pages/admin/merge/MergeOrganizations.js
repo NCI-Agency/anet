@@ -361,6 +361,8 @@ const MergeOrganizations = ({ pageDispatchers }) => {
                       orgSettings.administratingPositions.label
                     )}
                     positions={mergedOrganization.administratingPositions || []}
+                    showOrganization={false}
+                    showStatus={false}
                   />
                 }
                 align={ALIGN_OPTIONS.CENTER}
@@ -875,6 +877,8 @@ const OrganizationColumn = ({
                   orgSettings.administratingPositions.label
                 )}
                 positions={organization.administratingPositions || []}
+                showOrganization={false}
+                showStatus={false}
               />
             }
             align={align}
