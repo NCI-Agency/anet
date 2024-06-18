@@ -277,6 +277,12 @@ public class OrganizationDao
     emailAddressDao.updateEmailAddresses(OrganizationDao.TABLE_NAME, winnerOrganizationUuid,
         winnerOrganization.getEmailAddresses());
 
+    // Update customSensitiveInformation for winner
+    DaoUtils.saveCustomSensitiveInformation(null, OrganizationDao.TABLE_NAME,
+        winnerOrganizationUuid, winnerOrganization.getCustomSensitiveInformation());
+    // Delete customSensitiveInformation for loser
+    deleteForMerge("customSensitiveInformation", "relatedObjectUuid", loserOrganizationUuid);
+
     return deleteForMerge(OrganizationDao.TABLE_NAME, "uuid", loserOrganizationUuid);
   }
 }
