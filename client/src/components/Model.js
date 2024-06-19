@@ -10,7 +10,6 @@ import {
   RECURRENCE_TYPE
 } from "periodUtils"
 import PropTypes from "prop-types"
-import encodeQuery from "querystring/encode"
 import utils from "utils"
 import * as yup from "yup"
 
@@ -512,7 +511,7 @@ export default class Model {
     )
   }
 
-  static pathFor(instance, query, resourceOverride) {
+  static pathFor(instance, query) {
     if (!instance) {
       return console.error(
         `You didn't pass anything to ${this.name}.pathFor. If you want a new route, you can pass null.`
@@ -520,7 +519,7 @@ export default class Model {
     }
 
     if (process.env.NODE_ENV !== "production") {
-      if (!resourceOverride && !this.resourceName) {
+      if (!this.resourceName) {
         return console.error(
           `You must specify a resourceName on model ${this.name}.`
         )
@@ -529,33 +528,21 @@ export default class Model {
 
     const resourceName = utils.resourceize(this.resourceName)
     const uuid = instance.uuid
-    let url = ["", resourceOverride || resourceName, uuid].join("/")
-
-    if (query) {
-      url += "?" + encodeQuery(query)
-    }
-
+    let url = ["", resourceName, uuid].join("/")
+    url += utils.formatQueryString(query)
     return url
   }
 
-  static pathForNew(query, resourceOverride) {
+  static pathForNew(query) {
     const resourceName = utils.resourceize(this.resourceName)
-    let url = ["", resourceOverride || resourceName, "new"].join("/")
-
-    if (query) {
-      url += "?" + encodeQuery(query)
-    }
-
+    let url = ["", resourceName, "new"].join("/")
+    url += utils.formatQueryString(query)
     return url
   }
 
   static pathForEdit(instance, query) {
     let url = this.pathFor(instance) + "/edit"
-
-    if (query) {
-      url += "?" + encodeQuery(query)
-    }
-
+    url += utils.formatQueryString(query)
     return url
   }
 
