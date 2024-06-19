@@ -128,7 +128,7 @@ const MergePeople = ({ pageDispatchers }) => {
           {areAllSet(person1, person2, !mergedPerson) && (
             <div style={{ padding: "16px 5%" }}>
               <Callout intent="primary">
-                <br />- Required fields are:
+                Required fields are:
                 <ul>
                   <li>Name</li>
                   <li>{Settings.fields.person.user?.label}</li>

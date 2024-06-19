@@ -127,7 +127,7 @@ const MergeOrganizations = ({ pageDispatchers }) => {
           {areAllSet(organization1, organization2, !mergedOrganization) && (
             <div style={{ padding: "16px 5%" }}>
               <Callout intent="primary">
-                <br />- Required fields are:
+                Required fields are:
                 <ul>
                   <li>{Settings.fields.organization.shortName?.label}</li>
                 </ul>
