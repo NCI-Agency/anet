@@ -1,6 +1,12 @@
 import { expect } from "chai"
 import CreateReport from "../pages/createReport.page"
 
+const GRID_LOCATION = {
+  lat: "52.1178",
+  lng: "4.28",
+  displayedCoordinate: "31UET8764074913"
+}
+
 const REPORT = "Interior"
 const REPORT_VALUE = "Talk to the Interior about things"
 const REPORT_COMPLETE = `${REPORT_VALUE}`
@@ -39,6 +45,36 @@ describe("Create report form page", () => {
       await browser.pause(500) // wait for the page transition and rendering of custom fields
       await (await CreateReport.getForm()).waitForExist()
       await (await CreateReport.getForm()).waitForDisplayed()
+    })
+
+    it("Should be able to set the grid location", async() => {
+      await (
+        await CreateReport.getGridLocationLatField()
+      ).setValue(GRID_LOCATION.lat)
+      await (
+        await CreateReport.getGridLocationLngField()
+      ).setValue(GRID_LOCATION.lng)
+      await (await CreateReport.getGridLocationInfoButton()).click()
+      await (await CreateReport.getGridLocationMgrsButton()).waitForExist()
+      await (await CreateReport.getGridLocationMgrsButton()).waitForDisplayed()
+      await (await CreateReport.getGridLocationMgrsButton()).click()
+      expect(
+        await (
+          await CreateReport.getGridLocationDisplayedCoordinateField()
+        ).getValue()
+      ).to.equal(GRID_LOCATION.displayedCoordinate)
+      await (await CreateReport.getGridLocationInfoButton()).click()
+      await (await CreateReport.getGridLocationLatLonButton()).waitForExist()
+      await (
+        await CreateReport.getGridLocationLatLonButton()
+      ).waitForDisplayed()
+      await (await CreateReport.getGridLocationLatLonButton()).click()
+      expect(
+        await (await CreateReport.getGridLocationLatField()).getValue()
+      ).to.equal(GRID_LOCATION.lat)
+      expect(
+        await (await CreateReport.getGridLocationLngField()).getValue()
+      ).to.equal(GRID_LOCATION.lng)
     })
 
     it("Should be able to prevent invalid duration values", async() => {
