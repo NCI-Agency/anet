@@ -25,6 +25,7 @@ import {
   usePageTitle
 } from "components/Page"
 import PositionTable from "components/PositionTable"
+import RichTextEditor from "components/RichTextEditor"
 import useMergeObjects, {
   ALIGN_OPTIONS,
   areAllSet,
@@ -194,7 +195,9 @@ const MergeOrganizations = ({ pageDispatchers }) => {
               <DictionaryField
                 wrappedComponent={MergeField}
                 dictProps={Settings.fields.organization.profile}
-                value={mergedOrganization.profile}
+                value={
+                  <RichTextEditor readOnly value={mergedOrganization.profile} />
+                }
                 align={ALIGN_OPTIONS.CENTER}
                 action={getClearButton(() =>
                   dispatchMergeActions(setAMergedField("profile", "", null))
@@ -629,7 +632,7 @@ const OrganizationColumn = ({
             wrappedComponent={MergeField}
             dictProps={Settings.fields.organization.profile}
             fieldName="profile"
-            value={organization.profile}
+            value={<RichTextEditor readOnly value={organization.profile} />}
             align={align}
             action={getActionButton(
               () => {
