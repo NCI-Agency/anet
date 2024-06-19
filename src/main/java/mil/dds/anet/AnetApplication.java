@@ -59,6 +59,7 @@ import mil.dds.anet.threads.AccountDeactivationWorker;
 import mil.dds.anet.threads.AnetEmailWorker;
 import mil.dds.anet.threads.FutureEngagementWorker;
 import mil.dds.anet.threads.MaterializedViewRefreshWorker;
+import mil.dds.anet.threads.MergedEntityWorker;
 import mil.dds.anet.threads.PendingAssessmentsNotificationWorker;
 import mil.dds.anet.threads.ReportApprovalWorker;
 import mil.dds.anet.threads.ReportPublicationWorker;
@@ -344,31 +345,31 @@ public class AnetApplication extends Application<AnetConfiguration> {
       final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
       // Check for any reports that need to be published every 5 minutes.
-      // And run once in 5 seconds from boot-up. (give the server time to boot up).
+      // And run once 5 seconds from boot-up.
       final ReportPublicationWorker reportPublicationWorker =
           new ReportPublicationWorker(configuration, engine.getReportDao());
       scheduler.scheduleAtFixedRate(reportPublicationWorker, 5, 5, TimeUnit.MINUTES);
       scheduler.schedule(reportPublicationWorker, 5, TimeUnit.SECONDS);
 
       // Check for any emails that need to be sent every 5 minutes.
-      // And run once in 10 seconds from boot-up. (give the server time to boot up).
+      // And run once 10 seconds from boot-up.
       final AnetEmailWorker emailWorker = new AnetEmailWorker(configuration, engine.getEmailDao());
       scheduler.scheduleAtFixedRate(emailWorker, 5, 5, TimeUnit.MINUTES);
       scheduler.schedule(emailWorker, 10, TimeUnit.SECONDS);
 
       // Check for any future engagements every 3 hours.
-      // And run once in 15 seconds from boot-up. (give the server time to boot up).
+      // And run once 15 seconds from boot-up.
       final FutureEngagementWorker futureWorker =
           new FutureEngagementWorker(configuration, engine.getReportDao());
       scheduler.scheduleAtFixedRate(futureWorker, 0, 3, TimeUnit.HOURS);
       scheduler.schedule(futureWorker, 15, TimeUnit.SECONDS);
 
       // Check for any reports that need to be approved every 5 minutes.
-      // And run once in 20 seconds from boot-up. (give the server time to boot up).
+      // And run once 20 seconds from boot-up.
       final ReportApprovalWorker reportApprovalWorker =
           new ReportApprovalWorker(configuration, engine.getReportDao());
       scheduler.scheduleAtFixedRate(reportApprovalWorker, 5, 5, TimeUnit.MINUTES);
-      scheduler.schedule(reportApprovalWorker, 5, TimeUnit.SECONDS);
+      scheduler.schedule(reportApprovalWorker, 20, TimeUnit.SECONDS);
 
       runAccountDeactivationWorker(configuration, scheduler, engine);
 
@@ -384,6 +385,13 @@ public class AnetApplication extends Application<AnetConfiguration> {
       final MaterializedViewRefreshWorker materializedViewRefreshWorker =
           new MaterializedViewRefreshWorker(configuration, engine.getAdminDao());
       scheduler.scheduleWithFixedDelay(materializedViewRefreshWorker, 30, 60, TimeUnit.SECONDS);
+
+      // Check for merged entities that need to be updated every 5 minutes.
+      // And run once 60 seconds from boot-up.
+      final MergedEntityWorker mergedEntityWorker =
+          new MergedEntityWorker(configuration, engine.getAdminDao());
+      scheduler.scheduleAtFixedRate(mergedEntityWorker, 5, 5, TimeUnit.MINUTES);
+      scheduler.schedule(mergedEntityWorker, 60, TimeUnit.SECONDS);
     }
 
     // Create all of the HTTP Resources.

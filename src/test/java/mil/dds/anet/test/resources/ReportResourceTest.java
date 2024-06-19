@@ -78,7 +78,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class ReportResourceTest extends AbstractResourceTest {
+public class ReportResourceTest extends AbstractResourceTest {
 
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -109,7 +109,7 @@ class ReportResourceTest extends AbstractResourceTest {
   private static final String _TASK_FIELDS = "uuid shortName longName category";
   private static final String TASK_FIELDS =
       String.format("{ %1$s parentTask { %1$s } }", _TASK_FIELDS);
-  protected static final String FIELDS = String.format(
+  public static final String FIELDS = String.format(
       "{ %1$s advisorOrg %2$s interlocutorOrg %2$s authors %3$s attendees %3$s"
           + " reportPeople %3$s tasks %4$s approvalStep { uuid relatedObjectUuid } location %5$s"
           + " comments %6$s notes %7$s authorizationGroups { uuid name }"

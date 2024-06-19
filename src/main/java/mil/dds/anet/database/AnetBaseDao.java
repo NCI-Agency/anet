@@ -78,4 +78,10 @@ public abstract class AnetBaseDao<T extends AbstractAnetBean, S extends Abstract
     return getDbHandle().createUpdate(String.format(sqlDeleteFormat, tableName, fieldName))
         .bind("loserUuid", loserUuid).execute();
   }
+
+  // For testing purposes only!
+  @InTransaction
+  public int _deleteByUuid(String tableName, String fieldName, String uuid) {
+    return deleteForMerge(tableName, fieldName, uuid);
+  }
 }

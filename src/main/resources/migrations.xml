@@ -5759,4 +5759,23 @@
 		<!-- Rolling back is not useful anymore -->
 	</changeSet>
 
+	<changeSet id="add-mergedEntities" author="gjvoosten">
+		<createTable tableName="mergedEntities">
+			<column name="oldUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="newUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="createdAt" type="datetime" />
+		</createTable>
+
+		<!-- Entities can be merged only once -->
+		<addUniqueConstraint
+			tableName="mergedEntities"
+			columnNames="oldUuid, newUuid"
+			constraintName="UQ_MergedEntitiesOldUuidNewUuid"
+		/>
+	</changeSet>
+
 </databaseChangeLog>

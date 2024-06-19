@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.MergedEntity;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.beans.Position;
@@ -590,13 +591,17 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
     deleteForMerge("customSensitiveInformation", "relatedObjectUuid", loserUuid);
 
     // Finally, delete loser
-    final int nr = deleteForMerge("positions", "uuid", loserUuid);
+    final int nrDeleted = deleteForMerge(PositionDao.TABLE_NAME, "uuid", loserUuid);
+    if (nrDeleted > 0) {
+      AnetObjectEngine.getInstance().getAdminDao()
+          .insertMergedEntity(new MergedEntity(loserUuid, winnerUuid, Instant.now()));
+    }
 
     // Evict the persons (previously) holding these positions from the domain users cache
     final PersonDao personDao = engine.getPersonDao();
     personDao.evictFromCacheByPositionUuid(loserUuid);
     personDao.evictFromCacheByPositionUuid(winnerUuid);
-    return nr;
+    return nrDeleted;
   }
 
   @InTransaction
