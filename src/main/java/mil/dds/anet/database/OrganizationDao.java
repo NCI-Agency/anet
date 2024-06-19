@@ -2,6 +2,7 @@ package mil.dds.anet.database;
 
 import static org.jdbi.v3.sqlobject.customizer.BindList.EmptyHandling.NULL_STRING;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -10,6 +11,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalStep;
+import mil.dds.anet.beans.MergedEntity;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AnetBeanList;
@@ -298,6 +300,12 @@ public class OrganizationDao
     // Delete customSensitiveInformation for loser
     deleteForMerge("customSensitiveInformation", "relatedObjectUuid", loserOrganizationUuid);
 
-    return deleteForMerge(OrganizationDao.TABLE_NAME, "uuid", loserOrganizationUuid);
+    // Finally, delete loser
+    final int nrDeleted = deleteForMerge(OrganizationDao.TABLE_NAME, "uuid", loserOrganizationUuid);
+    if (nrDeleted > 0) {
+      AnetObjectEngine.getInstance().getAdminDao().insertMergedEntity(
+          new MergedEntity(loserOrganizationUuid, winnerOrganizationUuid, Instant.now()));
+    }
+    return nrDeleted;
   }
 }
