@@ -436,73 +436,92 @@ public class AttachmentResourceTest extends AbstractResourceTest {
         buildAttachment(ReportDao.TABLE_NAME, testReport.getUuid());
 
     // Test attachment create
-    final String createdAttachmentUuid = testCreateReportAttachment(testAttachmentInput);
+    final CreateReportAttachmentsResult result = testCreateReportAttachment(testAttachmentInput);
 
     // Check the report
     final Report report =
         withCredentials(jackUser, t -> queryExecutor.report(OBJECT_FIELDS, testReport.getUuid()));
-    assertThat(report.getAttachments()).hasSize(nrOfAttachments + 1);
+    assertThat(report.getAttachments()).hasSize(nrOfAttachments + 2);
     @SuppressWarnings("OptionalGetWithoutIsPresent")
-    final Attachment attachment = report.getAttachments().stream()
-        .filter(a -> createdAttachmentUuid.equals(a.getUuid())).findAny().get();
-    assertAttachmentDetails(createdAttachmentUuid, testAttachmentInput, attachment);
+    final Attachment authorAttachment = report.getAttachments().stream()
+        .filter(a -> result.authorAttachmentUuid().equals(a.getUuid())).findAny().get();
+    assertAttachmentDetails(result.authorAttachmentUuid(), testAttachmentInput, authorAttachment);
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    final Attachment adminAttachment = report.getAttachments().stream()
+        .filter(a -> result.adminAttachmentUuid().equals(a.getUuid())).findAny().get();
+    assertAttachmentDetails(result.adminAttachmentUuid(), testAttachmentInput, adminAttachment);
 
     // Test attachment update
-    testUpdateReportAttachment(report.getUuid(), report.getAttachments().size(), attachment);
+    testUpdateReportAttachment(report.getUuid(), report.getAttachments().size(), authorAttachment,
+        adminAttachment);
 
     // Test attachment delete
-    testDeleteReportAttachment(report.getUuid(), report.getAttachments().size(), attachment);
+    testDeleteReportAttachment(report.getUuid(), report.getAttachments().size(), authorAttachment,
+        adminAttachment);
 
     // Finally, delete the report
     withCredentials(jackUser, t -> mutationExecutor.deleteReport("", report.getUuid()));
   }
 
-  private String testCreateReportAttachment(final AttachmentInput testAttachmentInput) {
+  private CreateReportAttachmentsResult testCreateReportAttachment(
+      final AttachmentInput testAttachmentInput) {
     // F - create attachment as non-author
     failAttachmentCreate("erin", testAttachmentInput);
 
-    // F - create attachment as admin
-    failAttachmentCreate(adminUser, testAttachmentInput);
+    // S - create attachment as admin
+    final String adminAttachmentUuid = succeedAttachmentCreate(adminUser, testAttachmentInput);
 
     // S - create attachment as author
-    return succeedAttachmentCreate(jackUser, testAttachmentInput);
+    final String authorAttachmentUuid = succeedAttachmentCreate(jackUser, testAttachmentInput);
+
+    return new CreateReportAttachmentsResult(authorAttachmentUuid, adminAttachmentUuid);
   }
 
+  private record CreateReportAttachmentsResult(String authorAttachmentUuid,
+      String adminAttachmentUuid) {}
+
   private void testUpdateReportAttachment(final String reportUuid, final int nrOfAttachments,
-      final Attachment attachment) {
+      final Attachment authorAttachment, final Attachment adminAttachment) {
     // F - update attachment as non-author
-    attachment.setFileName("erinUpdatedAttachment.jpg");
-    failAttachmentUpdate("erin", getInput(attachment, AttachmentInput.class));
+    authorAttachment.setFileName("erinUpdatedAttachment.jpg");
+    failAttachmentUpdate("erin", getInput(authorAttachment, AttachmentInput.class));
 
-    // F - update attachment as admin
-    attachment.setFileName("adminUpdatedAttachment.jpg");
-    failAttachmentUpdate("erin", getInput(attachment, AttachmentInput.class));
-
-    // S - update attachment as author
-    attachment.setFileName("jackUpdatedAttachment.jpg");
-    succeedAttachmentUpdate(jackUser, getInput(attachment, AttachmentInput.class));
-    final Report report =
-        withCredentials(jackUser, t -> queryExecutor.report(OBJECT_FIELDS, reportUuid));
+    // S - update attachment as admin
+    authorAttachment.setFileName("adminUpdatedAttachment.jpg");
+    succeedAttachmentUpdate(adminUser, getInput(adminAttachment, AttachmentInput.class));
+    Report report =
+        withCredentials(adminUser, t -> queryExecutor.report(OBJECT_FIELDS, reportUuid));
     assertThat(report.getAttachments()).hasSize(nrOfAttachments);
     @SuppressWarnings("OptionalGetWithoutIsPresent")
-    final Attachment updatedAttachment = report.getAttachments().stream()
-        .filter(a -> attachment.getUuid().equals(a.getUuid())).findAny().get();
-    assertThat(updatedAttachment.getFileName()).isEqualTo(attachment.getFileName());
+    final Attachment updatedAdminAttachment = report.getAttachments().stream()
+        .filter(a -> adminAttachment.getUuid().equals(a.getUuid())).findAny().get();
+    assertThat(updatedAdminAttachment.getFileName()).isEqualTo(adminAttachment.getFileName());
+
+    // S - update attachment as author
+    authorAttachment.setFileName("jackUpdatedAttachment.jpg");
+    succeedAttachmentUpdate(jackUser, getInput(authorAttachment, AttachmentInput.class));
+    report = withCredentials(jackUser, t -> queryExecutor.report(OBJECT_FIELDS, reportUuid));
+    assertThat(report.getAttachments()).hasSize(nrOfAttachments);
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    final Attachment updatedAuthorAttachment = report.getAttachments().stream()
+        .filter(a -> authorAttachment.getUuid().equals(a.getUuid())).findAny().get();
+    assertThat(updatedAuthorAttachment.getFileName()).isEqualTo(authorAttachment.getFileName());
   }
 
   private void testDeleteReportAttachment(final String reportUuid, final int nrOfAttachments,
-      final Attachment attachment) {
+      final Attachment authorAttachment, final Attachment adminAttachment) {
     // F - delete attachment as non-author
-    failAttachmentDelete("erin", attachment.getUuid());
+    failAttachmentDelete("erin", authorAttachment.getUuid());
 
-    // F - delete attachment as admin
-    failAttachmentDelete(adminUser, attachment.getUuid());
+    // S - delete attachment as admin
+    succeedAttachmentDelete(adminUser, adminAttachment.getUuid());
+    Report report = withCredentials(jackUser, t -> queryExecutor.report(OBJECT_FIELDS, reportUuid));
+    assertThat(report.getAttachments()).hasSize(nrOfAttachments - 1);
 
     // S - delete attachment as author
-    succeedAttachmentDelete(jackUser, attachment.getUuid());
-    final Report report =
-        withCredentials(jackUser, t -> queryExecutor.report(OBJECT_FIELDS, reportUuid));
-    assertThat(report.getAttachments()).hasSize(nrOfAttachments - 1);
+    succeedAttachmentDelete(jackUser, authorAttachment.getUuid());
+    report = withCredentials(jackUser, t -> queryExecutor.report(OBJECT_FIELDS, reportUuid));
+    assertThat(report.getAttachments()).hasSize(nrOfAttachments - 2);
   }
 
   @Test
