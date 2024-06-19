@@ -231,7 +231,7 @@ const MergeOrganizations = ({ pageDispatchers }) => {
                 dictProps={Settings.fields.organization.location}
                 value={
                   <LinkTo
-                    modelType="Organization"
+                    modelType="Location"
                     model={mergedOrganization.location}
                   />
                 }
@@ -666,9 +666,9 @@ const OrganizationColumn = ({
           <DictionaryField
             wrappedComponent={MergeField}
             dictProps={Settings.fields.organization.location}
-            fieldName="identificationCode"
+            fieldName="location"
             value={
-              <LinkTo modelType="Organization" model={organization.location} />
+              <LinkTo modelType="Location" model={organization.location} />
             }
             align={align}
             action={getActionButton(
