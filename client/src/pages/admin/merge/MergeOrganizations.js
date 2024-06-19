@@ -197,7 +197,7 @@ const MergeOrganizations = ({ pageDispatchers }) => {
                 value={mergedOrganization.profile}
                 align={ALIGN_OPTIONS.CENTER}
                 action={getClearButton(() =>
-                  dispatchMergeActions(setAMergedField("profile", {}, null))
+                  dispatchMergeActions(setAMergedField("profile", "", null))
                 )}
                 fieldName="profile"
                 mergeState={mergeState}
@@ -272,7 +272,7 @@ const MergeOrganizations = ({ pageDispatchers }) => {
                 }
                 align={ALIGN_OPTIONS.CENTER}
                 action={getClearButton(() =>
-                  dispatchMergeActions(setAMergedField("app6context", [], null))
+                  dispatchMergeActions(setAMergedField("app6context", "", null))
                 )}
                 fieldName="app6context"
                 mergeState={mergeState}
@@ -290,7 +290,7 @@ const MergeOrganizations = ({ pageDispatchers }) => {
                 align={ALIGN_OPTIONS.CENTER}
                 action={getClearButton(() =>
                   dispatchMergeActions(
-                    setAMergedField("app6standardIdentity", [], null)
+                    setAMergedField("app6standardIdentity", "", null)
                   )
                 )}
                 fieldName="app6standardIdentity"
@@ -309,7 +309,7 @@ const MergeOrganizations = ({ pageDispatchers }) => {
                 align={ALIGN_OPTIONS.CENTER}
                 action={getClearButton(() =>
                   dispatchMergeActions(
-                    setAMergedField("app6symbolSet", [], null)
+                    setAMergedField("app6symbolSet", "", null)
                   )
                 )}
                 fieldName="app6symbolSet"
@@ -327,7 +327,7 @@ const MergeOrganizations = ({ pageDispatchers }) => {
                 }
                 align={ALIGN_OPTIONS.CENTER}
                 action={getClearButton(() =>
-                  dispatchMergeActions(setAMergedField("app6hq", [], null))
+                  dispatchMergeActions(setAMergedField("app6hq", "", null))
                 )}
                 fieldName="app6hq"
                 mergeState={mergeState}
@@ -345,7 +345,7 @@ const MergeOrganizations = ({ pageDispatchers }) => {
                 align={ALIGN_OPTIONS.CENTER}
                 action={getClearButton(() =>
                   dispatchMergeActions(
-                    setAMergedField("app6amplifier", [], null)
+                    setAMergedField("app6amplifier", "", null)
                   )
                 )}
                 fieldName="app6amplifier"
