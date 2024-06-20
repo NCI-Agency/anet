@@ -38,6 +38,7 @@ const CustomToggle = React.forwardRef(({ onClick, children }, ref) => (
     {children}
   </Button>
 ))
+CustomToggle.displayName = "CustomToggle"
 CustomToggle.propTypes = {
   onClick: PropTypes.func.isRequired,
   children: PropTypes.node
@@ -57,6 +58,7 @@ const CustomMenu = React.forwardRef(
     )
   }
 )
+CustomMenu.displayName = "CustomMenu"
 CustomMenu.propTypes = {
   style: PropTypes.object,
   className: PropTypes.string,
