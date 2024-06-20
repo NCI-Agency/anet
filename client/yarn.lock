@@ -6334,7 +6334,6 @@ __metadata:
     cross-spawn: "npm:7.0.3"
     css-loader: "npm:7.1.2"
     d3: "npm:7.9.0"
-    dagre: "npm:0.8.5"
     dotenv: "npm:16.4.5"
     email-addresses: "npm:5.0.0"
     encoding: "npm:0.1.13"
@@ -9072,7 +9071,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dagre@npm:0.8.5, dagre@npm:^0.8.5":
+"dagre@npm:^0.8.5":
   version: 0.8.5
   resolution: "dagre@npm:0.8.5"
   dependencies:
