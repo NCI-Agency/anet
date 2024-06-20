@@ -3,8 +3,9 @@ package mil.dds.anet.database;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
 import java.util.Optional;
-import mil.dds.anet.beans.*;
+import mil.dds.anet.beans.EntityAvatar;
 import org.jdbi.v3.core.Handle;
+import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public class EntityAvatarDao {
   @Inject
@@ -15,15 +16,17 @@ public class EntityAvatarDao {
   }
 
   /**
-   * Gets the existing avatar for this entity Uuid if any
+   * Gets the existing avatar for this relatedObjectUuid if any
    * 
-   * @param entityUuid the entity uuid
+   * @param relatedObjectUuid the relatedObjectUuid
    * @return optional with the avatar
    */
-  public Optional<EntityAvatar> getByEntityUuid(final String entityUuid) {
+  @InTransaction
+  public Optional<EntityAvatar> getByRelatedObjectUuid(final String relatedObjectUuid) {
     return getDbHandle()
-        .createQuery("SELECT * FROM \"entityAvatars\" WHERE \"entityUuid\" = :entityUuid")
-        .bind("entityUuid", entityUuid).mapToBean(EntityAvatar.class).findOne();
+        .createQuery(
+            "SELECT * FROM \"entityAvatars\" WHERE \"relatedObjectUuid\" = :relatedObjectUuid")
+        .bind("relatedObjectUuid", relatedObjectUuid).mapToBean(EntityAvatar.class).findOne();
   }
 
   /**
@@ -32,11 +35,13 @@ public class EntityAvatarDao {
    * @param entityAvatar the new entity avatar
    * @return number of rows inserted
    */
-  public int insertInternal(EntityAvatar entityAvatar) {
-    return getDbHandle().createUpdate("/* insertEntityAvatar */ "
-        + "INSERT INTO \"entityAvatars\" (\"entityUuid\", \"attachmentUuid\", \"cropLeft\", \"cropTop\", \"cropWidth\", \"cropHeight\")"
-        + "VALUES (:entityUuid, :attachmentUuid, :cropLeft, :cropTop, :cropWidth, :cropHeight)")
-        .bindBean(entityAvatar).execute();
+  @InTransaction
+  public int insert(EntityAvatar entityAvatar) {
+    return getDbHandle().createUpdate("/* insertEntityAvatar */ " + "INSERT INTO \"entityAvatars\" "
+        + "(\"relatedObjectType\", \"relatedObjectUuid\", \"attachmentUuid\", \"applyCrop\", "
+        + "\"cropLeft\", \"cropTop\", \"cropWidth\", \"cropHeight\")"
+        + "VALUES (:relatedObjectType, :relatedObjectUuid, :attachmentUuid, :applyCrop, "
+        + ":cropLeft, :cropTop, :cropWidth, :cropHeight)").bindBean(entityAvatar).execute();
   }
 
   /**
@@ -45,21 +50,24 @@ public class EntityAvatarDao {
    * @param entityAvatar the entity avatar to update
    * @return number of rows updated
    */
-  public int updateInternal(EntityAvatar entityAvatar) {
-    return getDbHandle().createUpdate(
-        "/* updateEntityAvatar */ UPDATE \"entityAvatars\" SET \"attachmentUuid\" = :attachmentUuid, \"cropLeft\" = :cropLeft, \"cropTop\" = :cropTop, \"cropWidth\" = :cropWidth, \"cropHeight\" = :cropHeight WHERE \"entityUuid\" = :entityUuid")
-        .bindBean(entityAvatar).execute();
+  @InTransaction
+  public int update(EntityAvatar entityAvatar) {
+    return getDbHandle().createUpdate("/* updateEntityAvatar */ UPDATE \"entityAvatars\" "
+        + "SET \"attachmentUuid\" = :attachmentUuid, \"cropLeft\" = :cropLeft, \"applyCrop\" = :applyCrop, "
+        + "\"cropTop\" = :cropTop, \"cropWidth\" = :cropWidth, \"cropHeight\" = :cropHeight "
+        + "WHERE \"relatedObjectUuid\" = :relatedObjectUuid").bindBean(entityAvatar).execute();
   }
 
   /**
    * Deletes the entity avatar in the database
    * 
-   * @param entityUuid the entity for which to delete the avatar
+   * @param relatedObjectUuid the relatedObjectUuid for which to delete the avatar
    * @return number of rows deleted
    */
-  public int deleteInternal(String entityUuid) {
+  @InTransaction
+  public int delete(String relatedObjectUuid) {
     return getDbHandle().createUpdate(
-        "/* deletEntityAvatar */ DELETE FROM \"entityAvatars\" WHERE \"entityUuid\" = :entityUuid")
-        .bind("entityUuid", entityUuid).execute();
+        "/* deletEntityAvatar */ DELETE FROM \"entityAvatars\" WHERE \"relatedObjectUuid\" = :relatedObjectUuid")
+        .bind("relatedObjectUuid", relatedObjectUuid).execute();
   }
 }

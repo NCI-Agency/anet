@@ -12,10 +12,15 @@ import { toast } from "react-toastify"
 import Settings from "settings"
 
 const GQL_GET_ENTITY_AVATAR = gql`
-  query ($entityUuid: String) {
-    entityAvatar(entityUuid: $entityUuid) {
-      entityUuid
+  query ($relatedObjectType: String, $relatedObjectUuid: String) {
+    entityAvatar(
+      relatedObjectType: $relatedObjectType
+      relatedObjectUuid: $relatedObjectUuid
+    ) {
+      relatedObjectType
+      relatedObjectUuid
       attachmentUuid
+      applyCrop
       cropLeft
       cropTop
       cropWidth
@@ -29,13 +34,17 @@ const GQL_CREATE_OR_UPDATE_ENTITY_AVATAR = gql`
   }
 `
 const GQL_DELETE_ENTITY_AVATAR = gql`
-  mutation ($entityUuid: String) {
-    deleteEntityAvatar(entityUuid: $entityUuid)
+  mutation ($relatedObjectType: String, $relatedObjectUuid: String) {
+    deleteEntityAvatar(
+      relatedObjectType: $relatedObjectType
+      relatedObjectUuid: $relatedObjectUuid
+    )
   }
 `
 export const EntityAvatarComponent = ({
-  entityUuid,
-  entityName,
+  relatedObjectType,
+  relatedObjectUuid,
+  relatedObjectName,
   editMode,
   imageAttachments
 }) => {
@@ -44,15 +53,16 @@ export const EntityAvatarComponent = ({
 
   // If the entityUUid changes get the entity avatar
   useEffect(() => {
-    getEntityAvatar(entityUuid)
+    getEntityAvatar(relatedObjectType, relatedObjectUuid)
       .then(response => setCurrentAvatar(response.entityAvatar))
       .catch()
-  }, [entityUuid, imageAttachments])
+  }, [relatedObjectType, relatedObjectUuid])
 
   // Also react to changes in image attachments as the one linked to the current avatar might have been deleted
   useEffect(() => {
     if (
       currentAvatar &&
+      imageAttachments &&
       !imageAttachments.some(a => a.uuid === currentAvatar.attachmentUuid)
     ) {
       setCurrentAvatar(null)
@@ -81,7 +91,7 @@ export const EntityAvatarComponent = ({
                   onConfirm={clearAvatar}
                   operation="clear"
                   objectType="the avatar"
-                  objectDisplay={`for ${entityName}`}
+                  objectDisplay={`for ${relatedObjectName}`}
                   title="Clear avatar"
                   variant="outline-danger"
                   buttonSize="xs"
@@ -102,55 +112,64 @@ export const EntityAvatarComponent = ({
     </>
   )
 
-  function getEntityAvatar(entityId) {
+  function getEntityAvatar(relatedObjectType, relatedObjectUuid) {
     return API.query(GQL_GET_ENTITY_AVATAR, {
-      entityUuid: entityId
+      relatedObjectType,
+      relatedObjectUuid
     })
   }
 
   async function onAvatarUpdate(attachmentUuid, coordinates) {
     // Build entity avatar object
     const entityAvatar = new EntityAvatar()
-    entityAvatar.entityUuid = entityUuid
+    entityAvatar.relatedObjectType = relatedObjectType
+    entityAvatar.relatedObjectUuid = relatedObjectUuid
     entityAvatar.attachmentUuid = attachmentUuid
-    entityAvatar.cropLeft = coordinates.left
-    entityAvatar.cropTop = coordinates.top
-    entityAvatar.cropWidth = coordinates.width
-    entityAvatar.cropHeight = coordinates.height
+    if (coordinates) {
+      entityAvatar.applyCrop = true
+      entityAvatar.cropLeft = coordinates.left
+      entityAvatar.cropTop = coordinates.top
+      entityAvatar.cropWidth = coordinates.width
+      entityAvatar.cropHeight = coordinates.height
+    } else {
+      entityAvatar.applyCrop = false
+    }
 
     await API.mutation(GQL_CREATE_OR_UPDATE_ENTITY_AVATAR, {
       entityAvatar
     })
       .then(() => {
-        toast.success(`Avatar for organization ${entityName} updated.`)
+        toast.success(`Avatar for entity ${relatedObjectName} updated.`)
         setCurrentAvatar(entityAvatar)
       })
       .catch(error =>
         toast.error(
-          `Failed to update avatar for organization ${entityName}: ${error.message}`
+          `Failed to update avatar for entity ${relatedObjectName}: ${error.message}`
         )
       )
   }
 
   async function clearAvatar() {
     await API.mutation(GQL_DELETE_ENTITY_AVATAR, {
-      entityUuid
+      relatedObjectType,
+      relatedObjectUuid
     })
       .then(() => {
-        toast.success(`Avatar for organization ${entityName} cleared.`)
+        toast.success(`Avatar for entity ${relatedObjectName} cleared.`)
         setCurrentAvatar(null)
       })
       .catch(error =>
         toast.error(
-          `Failed to clear avatar for organization ${entityName}: ${error.message}`
+          `Failed to clear avatar for entity ${relatedObjectName}: ${error.message}`
         )
       )
   }
 }
 
 EntityAvatarComponent.propTypes = {
-  entityUuid: PropTypes.string.isRequired,
-  entityName: PropTypes.string.isRequired,
+  relatedObjectType: PropTypes.string.isRequired,
+  relatedObjectUuid: PropTypes.string.isRequired,
+  relatedObjectName: PropTypes.string.isRequired,
   editMode: PropTypes.bool.isRequired,
   imageAttachments: PropTypes.array
 }

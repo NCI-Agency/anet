@@ -43,6 +43,7 @@ import mil.dds.anet.resources.AnetEmailResource;
 import mil.dds.anet.resources.ApprovalStepResource;
 import mil.dds.anet.resources.AttachmentResource;
 import mil.dds.anet.resources.AuthorizationGroupResource;
+import mil.dds.anet.resources.EntityAvatarResource;
 import mil.dds.anet.resources.GraphQlResource;
 import mil.dds.anet.resources.HomeResource;
 import mil.dds.anet.resources.LocationResource;

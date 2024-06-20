@@ -64,7 +64,7 @@ const AttachmentPreview = ({ className, uuid }) => {
               label="Owner"
               value={<LinkTo modelType="Person" model={attachment.author} />}
             />
-            <PreviewField label="Mime type" value={attachment.mimeType} />
+            <PreviewField label="MIME type" value={attachment.mimeType} />
             <PreviewField
               label="Content length"
               value={utils.humanReadableFileSize(attachment.contentLength)}

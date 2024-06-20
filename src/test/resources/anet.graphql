@@ -374,6 +374,30 @@ enum EngagementStatus {
 }
 
 """"""
+type EntityAvatar {
+  applyCrop: Boolean!
+  attachmentUuid: String
+  cropHeight: Int
+  cropLeft: Int
+  cropTop: Int
+  cropWidth: Int
+  relatedObjectType: String
+  relatedObjectUuid: String
+}
+
+""""""
+input EntityAvatarInput {
+  applyCrop: Boolean!
+  attachmentUuid: String
+  cropHeight: Int
+  cropLeft: Int
+  cropTop: Int
+  cropWidth: Int
+  relatedObjectType: String
+  relatedObjectUuid: String
+}
+
+""""""
 type GenericRelatedObject {
   objectUuid: String
   relatedObject: RelatableObject
@@ -484,8 +508,8 @@ type Mutation {
   createAuthorizationGroup(authorizationGroup: AuthorizationGroupInput): AuthorizationGroup
   createLocation(location: LocationInput): Location
   createNote(note: NoteInput): Note
-  createOrganization(organization: OrganizationInput): Organization
   createOrUpdateEntityAvatar(entityAvatar: EntityAvatarInput): Int
+  createOrganization(organization: OrganizationInput): Organization
   createPerson(person: PersonInput): Person
   createPosition(position: PositionInput): Position
   createReport(report: ReportInput): Report
@@ -493,7 +517,7 @@ type Mutation {
   createSubscription(subscription: SubscriptionInput): Subscription
   createTask(task: TaskInput): Task
   deleteAttachment(uuid: String): Int
-  deleteEntityAvatar(entityUuid: String): Int
+  deleteEntityAvatar(relatedObjectType: String, relatedObjectUuid: String): Int
   deleteNote(uuid: String): Int
   deleteObjectSubscription(uuid: String): Int
   deletePerson(uuid: String): Int
@@ -868,7 +892,7 @@ type Query {
   attachmentList(query: AttachmentSearchQueryInput): AnetBeanList_Attachment
   authorizationGroup(uuid: String): AuthorizationGroup
   authorizationGroupList(query: AuthorizationGroupSearchQueryInput): AnetBeanList_AuthorizationGroup
-  entityAvatar(entityUuid: String): EntityAvatar
+  entityAvatar(relatedObjectType: String, relatedObjectUuid: String): EntityAvatar
   location(uuid: String): Location
   locationList(query: LocationSearchQueryInput): AnetBeanList_Location
   me: Person
@@ -1402,24 +1426,4 @@ input UserActivitySearchQueryInput {
 enum UserActivitySearchSortBy {
   COUNT
   NONE
-}
-
-""""""
-input EntityAvatar {
-  entityUuid: String
-  attachmentUuid: String
-  cropLeft: Int
-  cropTop: Int
-  cropWidth: Int
-  cropHeight: Int
-}
-
-""""""
-input EntityAvatarInput {
-  entityUuid: String
-  attachmentUuid: String
-  cropLeft: Int
-  cropTop: Int
-  cropWidth: Int
-  cropHeight: Int
 }

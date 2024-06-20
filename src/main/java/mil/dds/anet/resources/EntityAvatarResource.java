@@ -4,13 +4,17 @@ import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 import java.util.Map;
 import java.util.Optional;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.EntityAvatar;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.database.*;
-import mil.dds.anet.utils.*;
+import mil.dds.anet.database.EntityAvatarDao;
+import mil.dds.anet.utils.AnetAuditLogger;
+import mil.dds.anet.utils.AuthUtils;
+import mil.dds.anet.utils.DaoUtils;
 
 public class EntityAvatarResource {
 
@@ -21,14 +25,19 @@ public class EntityAvatarResource {
   }
 
   /**
-   * Gets the avatar for this entityUUid, null if none existing
-   * 
-   * @param entityUuid the entityUuid
+   * Gets the avatar for this relatedObject type and uuid, null if none existing
+   *
+   * @param relatedObjectType the relatedObjectType
+   * @param relatedObjectUuid the relatedObjectUuid
    * @return the entity avatar
    */
   @GraphQLQuery(name = "entityAvatar")
-  public EntityAvatar getEntityAvatar(@GraphQLArgument(name = "entityUuid") String entityUuid) {
-    return entityAvatarDao.getByEntityUuid(entityUuid).orElse(null);
+  public EntityAvatar getEntityAvatar(@GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "relatedObjectType") String relatedObjectType,
+      @GraphQLArgument(name = "relatedObjectUuid") String relatedObjectUuid) {
+    // Check if user is authorized to manipulate avatars for this relatedObject
+    assertPermission(DaoUtils.getUserFromContext(context), relatedObjectType, relatedObjectUuid);
+    return entityAvatarDao.getByRelatedObjectUuid(relatedObjectUuid).orElse(null);
   }
 
   /**
@@ -41,18 +50,25 @@ public class EntityAvatarResource {
   @GraphQLMutation(name = "createOrUpdateEntityAvatar")
   public Integer createOrUpdateEntityAvatar(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "entityAvatar") EntityAvatar entityAvatar) {
-    int numRows;
+    final int numRows;
     final Person user = DaoUtils.getUserFromContext(context);
+
+    // Check if user is authorized to manipulate avatars for this relatedObjectUuid
+    assertPermission(user, entityAvatar.getRelatedObjectType(),
+        entityAvatar.getRelatedObjectUuid());
+
     // Do we have an avatar already for this entity?
     Optional<EntityAvatar> dbEntityAvatar =
-        entityAvatarDao.getByEntityUuid(entityAvatar.getEntityUuid());
+        entityAvatarDao.getByRelatedObjectUuid(entityAvatar.getRelatedObjectUuid());
+
     if (dbEntityAvatar.isEmpty()) {
-      numRows = entityAvatarDao.insertInternal(entityAvatar);
+      numRows = entityAvatarDao.insert(entityAvatar);
       AnetAuditLogger.log("Entity avatar created by {}", user);
     } else {
-      numRows = entityAvatarDao.updateInternal(entityAvatar);
+      numRows = entityAvatarDao.update(entityAvatar);
       AnetAuditLogger.log("Entity avatar updated by {}", user);
     }
+
     // GraphQL mutations *have* to return something, so we return the number of updated rows
     return numRows;
   }
@@ -61,16 +77,40 @@ public class EntityAvatarResource {
    * Deletes the entity avatar if any
    * 
    * @param context the context
-   * @param entityUuid the entityUuid
+   * @param relatedObjectType the relatedObjectType
+   * @param relatedObjectUuid the relatedObjectUuid
    * @return the number of rows deleted
    */
   @GraphQLMutation(name = "deleteEntityAvatar")
   public Integer deleteEntityAvatar(@GraphQLRootContext Map<String, Object> context,
-      @GraphQLArgument(name = "entityUuid") String entityUuid) {
+      @GraphQLArgument(name = "relatedObjectType") String relatedObjectType,
+      @GraphQLArgument(name = "relatedObjectUuid") String relatedObjectUuid) {
     final Person user = DaoUtils.getUserFromContext(context);
-    int numRows = entityAvatarDao.deleteInternal(entityUuid);
-    AnetAuditLogger.log("Entity avatar deleted by {}", user);
+
+    // Check if user is authorized to manipulate avatars for this relatedObjectUuid
+    assertPermission(user, relatedObjectType, relatedObjectUuid);
+
+    int numRows = entityAvatarDao.delete(relatedObjectUuid);
+    if (numRows > 1) {
+      AnetAuditLogger.log("Entity avatar deleted by {}", user);
+    }
+
     // GraphQL mutations *have* to return something, so we return the number of updated rows
     return numRows;
+  }
+
+  public static void assertPermission(final Person user, final String relatedObjectType,
+      final String relatedObjectUuid) {
+    if (!hasPermission(user, relatedObjectType, relatedObjectUuid)) {
+      throw new WebApplicationException(AuthUtils.UNAUTH_MESSAGE, Response.Status.FORBIDDEN);
+    }
+  }
+
+  public static boolean hasPermission(final Person user, final String relatedObjectType,
+      final String relatedObjectUuid) {
+    if (relatedObjectType.equals("organizations")) {
+      return AuthUtils.isAdmin(user) || AuthUtils.canAdministrateOrg(user, relatedObjectUuid);
+    }
+    return false;
   }
 }

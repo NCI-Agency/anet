@@ -6,7 +6,13 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 public class EntityAvatar {
   @GraphQLQuery
   @GraphQLInputField
-  private String entityUuid;
+  private String relatedObjectType;
+  @GraphQLQuery
+  @GraphQLInputField
+  private String relatedObjectUuid;
+  @GraphQLQuery
+  @GraphQLInputField
+  private boolean applyCrop;
   @GraphQLQuery
   @GraphQLInputField
   private String attachmentUuid;
@@ -25,9 +31,11 @@ public class EntityAvatar {
 
   public EntityAvatar() {}
 
-  public EntityAvatar(final String entityUuid, final String attachmentUuid, final Integer cropLeft,
-      final Integer cropTop, final Integer cropWidth, Integer cropHeight) {
-    this.entityUuid = entityUuid;
+  public EntityAvatar(final String relatedObjectType, final String relatedObjectUuid,
+      final String attachmentUuid, final Integer cropLeft, final Integer cropTop,
+      final Integer cropWidth, Integer cropHeight) {
+    this.relatedObjectType = relatedObjectType;
+    this.relatedObjectUuid = relatedObjectUuid;
     this.attachmentUuid = attachmentUuid;
     this.cropLeft = cropLeft;
     this.cropTop = cropTop;
@@ -35,12 +43,20 @@ public class EntityAvatar {
     this.cropHeight = cropHeight;
   }
 
-  public String getEntityUuid() {
-    return entityUuid;
+  public String getRelatedObjectType() {
+    return relatedObjectType;
   }
 
-  public void setEntityUuid(final String entityUuid) {
-    this.entityUuid = entityUuid;
+  public void setRelatedObjectType(String relatedObjectType) {
+    this.relatedObjectType = relatedObjectType;
+  }
+
+  public String getRelatedObjectUuid() {
+    return relatedObjectUuid;
+  }
+
+  public void setRelatedObjectUuid(String relatedObjectUuid) {
+    this.relatedObjectUuid = relatedObjectUuid;
   }
 
   public String getAttachmentUuid() {
@@ -49,6 +65,14 @@ public class EntityAvatar {
 
   public void setAttachmentUuid(final String attachmentUuid) {
     this.attachmentUuid = attachmentUuid;
+  }
+
+  public boolean isApplyCrop() {
+    return applyCrop;
+  }
+
+  public void setApplyCrop(boolean applyCrop) {
+    this.applyCrop = applyCrop;
   }
 
   public Integer getCropLeft() {

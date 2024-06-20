@@ -677,10 +677,12 @@ export const searchFilters = function(includeAdminFilters) {
 
   filters[SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS] = { filters: {} }
 
-  const mimeTypes = Settings.fields.attachment.mimeTypes
+  const mimeTypes = Settings.fields.attachment.mimeTypes?.map(
+    mimeType => mimeType.name
+  )
   filters[SEARCH_OBJECT_TYPES.ATTACHMENTS] = {
     filters: {
-      "Mime Type": {
+      "MIME Type": {
         component: SelectFilter,
         deserializer: deserializeSelectFilter,
         props: {
