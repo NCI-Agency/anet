@@ -6390,7 +6390,6 @@ __metadata:
     pluralize: "npm:8.0.0"
     postcss: "npm:8.4.38"
     postcss-calc: "npm:10.0.0"
-    postcss-flexbugs-fixes: "npm:5.0.2"
     postcss-loader: "npm:8.1.1"
     prettier: "npm:3.3.2"
     prettier-eslint-cli: "npm:8.0.1"
@@ -16279,15 +16278,6 @@ __metadata:
   peerDependencies:
     postcss: ^8.4.38
   checksum: 10c0/d4d529f2f71b49f17441eed74a7564ccd2779c72ed8648d4bb2530261a27c0ca01fe6a07260e7bf57e55f46dd68dea07e52fd1a6b538db7bc13015124be258a5
-  languageName: node
-  linkType: hard
-
-"postcss-flexbugs-fixes@npm:5.0.2":
-  version: 5.0.2
-  resolution: "postcss-flexbugs-fixes@npm:5.0.2"
-  peerDependencies:
-    postcss: ^8.1.4
-  checksum: 10c0/b413f73cc3c005f33479df95e1357467c28183e62ba8b25e06b8590b2a69e60d624f07824c0ff85fb1dfdd5bb7dfa321dad0885d42ec3c8f000669960b30894f
   languageName: node
   linkType: hard
 
