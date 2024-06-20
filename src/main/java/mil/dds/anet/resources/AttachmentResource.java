@@ -23,9 +23,14 @@ import jakarta.ws.rs.core.Response.ResponseBuilder;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.StreamingOutput;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.invoke.MethodHandles;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -242,16 +247,15 @@ public class AttachmentResource {
     assertAttachmentEnabled();
     try {
       final Attachment attachment = getAttachment(attachmentUuid);
-      ByteArrayOutputStream output = new ByteArrayOutputStream();
+      final ByteArrayOutputStream output = new ByteArrayOutputStream();
       dao.streamContentBlob(attachmentUuid, output);
-      BufferedImage image = ImageIO.read(new ByteArrayInputStream(output.toByteArray()));
+      final BufferedImage image = ImageIO.read(new ByteArrayInputStream(output.toByteArray()));
+      if (image == null) {
+        throw new WebApplicationException("Could not crop the given attachment, not valid format.");
+      }
       // Crop
-      BufferedImage croppedImage = image.getSubimage(left, // x coordinate of the upper-left corner
-          top, // y coordinate of the upper-left corner
-          width, // widht
-          height // height
-      );
-      String imageFormat = attachment.getMimeType().replace("image/", "");
+      final BufferedImage croppedImage = image.getSubimage(left, top, width, height);
+      final String imageFormat = attachment.getMimeType().replace("image/", "");
       final ResponseBuilder response =
           Response.ok(streamContentImage(croppedImage, imageFormat)).type(attachment.getMimeType())
               .header("Content-Disposition", getContentDisposition("inline", attachment));
@@ -358,6 +362,10 @@ public class AttachmentResource {
 
   @SuppressWarnings("unchecked")
   public static List<String> getAllowedMimeTypes() {
-    return (List<String>) getAttachmentSettings().get("mimeTypes");
+    // Get the allowed mime Types from dictionary
+    List<Object> mimeTypes = (List<Object>) getAttachmentSettings().get("mimeTypes");
+    // Extract names
+    return mimeTypes.stream().map(element -> (String) ((HashMap<?, ?>) element).get("name"))
+        .toList();
   }
 }

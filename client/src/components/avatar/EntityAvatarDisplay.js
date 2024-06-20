@@ -10,10 +10,19 @@ export const EntityAvatarDisplay = ({ avatar, width, height }) => {
     margin: "0 auto",
     marginBottom: "10px"
   }
+
+  function getAvatarLink() {
+    if (avatar.applyCrop) {
+      return `/api/attachment/view-cropped/${avatar.attachmentUuid}/${avatar.cropLeft}/${avatar.cropTop}/${avatar.cropWidth}/${avatar.cropHeight}`
+    } else {
+      return `/api/attachment/view/${avatar.attachmentUuid}`
+    }
+  }
+
   return (
     <>
       <img
-        src={`/api/attachment/view-cropped/${avatar.attachmentUuid}/${avatar.cropLeft}/${avatar.cropTop}/${avatar.cropWidth}/${avatar.cropHeight}`}
+        src={getAvatarLink()}
         height={height}
         width={width}
         alt="Avatar"
