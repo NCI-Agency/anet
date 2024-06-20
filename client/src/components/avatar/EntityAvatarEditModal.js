@@ -4,8 +4,13 @@ import PropTypes from "prop-types"
 import React, { useEffect, useRef, useState } from "react"
 import { Cropper, RectangleStencil } from "react-advanced-cropper"
 import { Button, Modal } from "react-bootstrap"
+import Settings from "settings"
 
 const EntityAvatarEditModal = ({ title, avatar, images, onAvatarUpdate }) => {
+  const avatarCroppeableMimeTypes = Settings.fields.attachment.mimeTypes
+    .filter(mimeType => mimeType.avatar && mimeType.crop)
+    .map(mimeType => mimeType.name)
+
   const [showModal, setShowModal] = useState(false)
   const [chosenImageUuid, setChosenImageUuid] = useState(null)
   const [cropperCoordinates, setCropperCoordinates] = useState(null)
@@ -48,6 +53,7 @@ const EntityAvatarEditModal = ({ title, avatar, images, onAvatarUpdate }) => {
           <>
             {chosenImageUuid && (
               <Cropper
+                aspectRatio={1}
                 defaultCoordinates={cropperCoordinates}
                 ref={cropperRef}
                 className="custom-cropper"
@@ -87,7 +93,12 @@ const EntityAvatarEditModal = ({ title, avatar, images, onAvatarUpdate }) => {
 
   function setChosenImage(image) {
     setChosenImageUuid(image.uuid)
-    setCropperCoordinates(null)
+    if (avatarCroppeableMimeTypes.includes(image.mimeType)) {
+      setCropperCoordinates(null)
+    } else {
+      // If the user chooses an image that can not be cropped just save
+      save(image.uuid, null)
+    }
   }
 
   function onClick() {

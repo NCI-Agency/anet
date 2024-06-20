@@ -395,8 +395,9 @@ const OrganizationShow = ({ pageDispatchers }) => {
                 <Row>
                   <Col sm={12} md={12} lg={4} xl={3} className="text-center">
                     <EntityAvatarComponent
-                      entityUuid={organization.uuid}
-                      entityName={organization.shortName}
+                      relatedObjectType="organizations"
+                      relatedObjectUuid={organization.uuid}
+                      relatedObjectName={organization.shortName}
                       editMode={false}
                     />
                   </Col>

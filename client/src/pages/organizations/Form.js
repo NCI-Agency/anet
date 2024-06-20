@@ -74,6 +74,9 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
   initialValues.emailAddresses = initializeEmailAddresses(
     initialValues.emailAddresses
   )
+  const avatarMimeTypes = Settings.fields.attachment.mimeTypes
+    .filter(mimeType => mimeType.avatar)
+    .map(mimeType => mimeType.name)
   const statusButtons = [
     {
       id: "statusActiveButton",
@@ -180,9 +183,8 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
             }
           }
         }
-
         const imageAttachments = attachmentList?.filter(a =>
-          a.mimeType?.startsWith("image/")
+          avatarMimeTypes.includes(a.mimeType)
         )
 
         return (
@@ -195,8 +197,9 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                 <Row>
                   <Col sm={12} md={12} lg={4} xl={4} className="text-center">
                     <EntityAvatarComponent
-                      entityUuid={initialValues.uuid}
-                      entityName={initialValues.shortName}
+                      relatedObjectType="organizations"
+                      relatedObjectUuid={initialValues.uuid}
+                      relatedObjectName={initialValues.shortName}
                       editMode
                       imageAttachments={imageAttachments}
                     />
