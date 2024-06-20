@@ -232,7 +232,7 @@ async function runStories(scenario, cycle, runningTime) {
   )
 }
 
-;(async() => {
+(async() => {
   try {
     await simulate(process.argv.slice(3))
   } catch (e) {

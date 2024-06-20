@@ -3,11 +3,13 @@ module.exports = {
     browser: true,
     commonjs: true,
     es6: true,
+    "jest/globals": true,
     jquery: true
   },
   extends: [
+    "eslint:recommended",
     "plugin:chai-expect/recommended",
-    "react-app",
+    "plugin:react/recommended",
     "standard",
     "standard-jsx",
     "standard-react"
@@ -18,8 +20,8 @@ module.exports = {
   parser: "@babel/eslint-parser",
   plugins: [
     "chai-expect",
-    "flowtype",
     "import",
+    "jest",
     "jsx-a11y",
     "n",
     "promise",

@@ -1,10 +1,13 @@
 module.exports = {
   env: {
+    prod: {
+      plugins: ["babel-plugin-transform-react-remove-prop-types"]
+    },
     test: {
       plugins: ["@babel/plugin-transform-modules-commonjs"]
     }
   },
-  presets: ["react-app"],
+  presets: ["@babel/preset-env", "@babel/preset-react"],
   plugins: [
     [
       "@babel/plugin-proposal-decorators",
@@ -12,30 +15,27 @@ module.exports = {
         legacy: true
       }
     ],
-    "@babel/plugin-transform-proto-to-assign",
-    "@babel/plugin-syntax-dynamic-import",
-    "@babel/plugin-syntax-import-meta",
-    [
-      "@babel/plugin-proposal-class-properties",
-      {
-        loose: true
-      }
-    ],
-    "@babel/plugin-proposal-json-strings",
-    "@babel/plugin-proposal-function-sent",
-    "@babel/plugin-proposal-export-namespace-from",
-    "@babel/plugin-proposal-numeric-separator",
-    "@babel/plugin-proposal-throw-expressions",
+    "@babel/plugin-proposal-do-expressions",
     "@babel/plugin-proposal-export-default-from",
-    "@babel/plugin-proposal-logical-assignment-operators",
-    "@babel/plugin-proposal-optional-chaining",
+    "@babel/plugin-proposal-function-sent",
     [
       "@babel/plugin-proposal-pipeline-operator",
       {
         proposal: "minimal"
       }
     ],
-    "@babel/plugin-proposal-nullish-coalescing-operator",
-    "@babel/plugin-proposal-do-expressions"
+    "@babel/plugin-proposal-throw-expressions",
+    "@babel/plugin-syntax-dynamic-import",
+    "@babel/plugin-syntax-import-meta",
+    "@babel/plugin-transform-class-properties",
+    "@babel/plugin-transform-export-namespace-from",
+    "@babel/plugin-transform-json-strings",
+    "@babel/plugin-transform-logical-assignment-operators",
+    "@babel/plugin-transform-nullish-coalescing-operator",
+    "@babel/plugin-transform-numeric-separator",
+    "@babel/plugin-transform-optional-chaining",
+    "@babel/plugin-transform-private-property-in-object",
+    "@babel/plugin-transform-proto-to-assign",
+    "@babel/plugin-transform-runtime"
   ]
 }

@@ -52,12 +52,6 @@ const commonConfig = {
               babelrc: false,
               configFile: false,
               compact: false,
-              presets: [
-                [
-                  require.resolve("babel-preset-react-app/dependencies"),
-                  { helpers: true }
-                ]
-              ],
               cacheDirectory: true,
               // see https://github.com/facebook/create-react-app/issues/6846
               cacheCompression: false
