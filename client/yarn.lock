@@ -6395,7 +6395,6 @@ __metadata:
     prettier: "npm:3.3.2"
     prettier-eslint-cli: "npm:8.0.1"
     prop-types: "npm:15.8.1"
-    querystring: "npm:0.2.1"
     react: "npm:18.2.0"
     react-advanced-cropper: "npm:0.20.0"
     react-bootstrap: "npm:2.10.2"
@@ -16753,13 +16752,6 @@ __metadata:
   version: 1.0.1
   resolution: "query-selector-shadow-dom@npm:1.0.1"
   checksum: 10c0/f36de03f170ff1da69c3eecfa7f8b01e450a46dd266c921e17f36076ec59862eee00179489f30cb17c118bb56e868436578c01ea66f671fb358750d6ae474125
-  languageName: node
-  linkType: hard
-
-"querystring@npm:0.2.1":
-  version: 0.2.1
-  resolution: "querystring@npm:0.2.1"
-  checksum: 10c0/6841b32bec4f16ffe7f5b5e4373b47ad451f079cde3a7f45e63e550f0ecfd8f8189ef81fb50079413b3fc1c59b06146e4c98192cb74ed7981aca72090466cd94
   languageName: node
   linkType: hard
 

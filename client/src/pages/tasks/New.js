@@ -33,10 +33,10 @@ const TaskNew = ({ pageDispatchers }) => {
   const taskShortLabel = Settings.fields.task.shortLabel
   usePageTitle(`New ${taskShortLabel}`)
   const qs = utils.parseQueryString(routerLocation.search)
-  if (qs.taskedOrgUuid) {
+  if (qs.get("taskedOrgUuid")) {
     return (
       <TaskNewFetchTaskedOrg
-        taskedOrgUuid={qs.taskedOrgUuid}
+        taskedOrgUuid={qs.get("taskedOrgUuid")}
         pageDispatchers={pageDispatchers}
       />
     )

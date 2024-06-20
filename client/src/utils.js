@@ -5,8 +5,6 @@ import * as d3 from "d3"
 import parseAddressList from "email-addresses"
 import _isEmpty from "lodash/isEmpty"
 import pluralize from "pluralize"
-import decodeQuery from "querystring/decode"
-import encodeQuery from "querystring/encode"
 import React, { useCallback, useEffect } from "react"
 import absentIcon from "resources/icons/absent.svg"
 import binaryIcon from "resources/icons/binary.svg"
@@ -160,16 +158,16 @@ export default {
 
   parseQueryString: function(queryString) {
     if (!queryString) {
-      return {}
+      return new URLSearchParams()
     }
-    return decodeQuery(queryString.slice(1)) || {}
+    return new URLSearchParams(queryString.slice(1))
   },
 
   formatQueryString: function(queryParams) {
     if (!queryParams) {
       return ""
     }
-    return "?" + encodeQuery(queryParams)
+    return `?${new URLSearchParams(queryParams).toString()}`
   },
 
   formatBoolean: function(b, emptyForNullOrUndefined) {

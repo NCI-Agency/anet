@@ -153,7 +153,6 @@
     "paths-js": "0.4.11",
     "pluralize": "8.0.0",
     "prop-types": "15.8.1",
-    "querystring": "0.2.1",
     "react": "18.2.0",
     "react-advanced-cropper": "0.20.0",
     "react-bootstrap": "2.10.2",

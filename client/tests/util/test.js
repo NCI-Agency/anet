@@ -147,8 +147,6 @@ test.beforeEach(t => {
   }
 
   // This method is a helper so we don't have to keep repeating the hostname.
-  // Passing the authentication through the querystring is a hack so we can
-  // pass the information along via window.fetch.
   t.context.get = async(pathname, userPw) => {
     const credentials = userPw || "erin"
     const urlToGet = `${process.env.SERVER_URL}${pathname}`

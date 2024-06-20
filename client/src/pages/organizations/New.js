@@ -40,10 +40,10 @@ const OrganizationNew = ({ pageDispatchers }) => {
   const routerLocation = useLocation()
   usePageTitle("New Organization")
   const qs = utils.parseQueryString(routerLocation.search)
-  if (qs.parentOrgUuid) {
+  if (qs.get("parentOrgUuid")) {
     return (
       <OrganizationNewFetchParentOrg
-        orgUuid={qs.parentOrgUuid}
+        orgUuid={qs.get("parentOrgUuid")}
         pageDispatchers={pageDispatchers}
       />
     )

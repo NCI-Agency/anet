@@ -32,10 +32,10 @@ const PositionNew = ({ pageDispatchers }) => {
   const routerLocation = useLocation()
   usePageTitle("New Position")
   const qs = utils.parseQueryString(routerLocation.search)
-  if (qs.organizationUuid) {
+  if (qs.get("organizationUuid")) {
     return (
       <PositionNewFetchOrg
-        orgUuid={qs.organizationUuid}
+        orgUuid={qs.get("organizationUuid")}
         pageDispatchers={pageDispatchers}
       />
     )
