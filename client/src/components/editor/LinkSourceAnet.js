@@ -76,10 +76,12 @@ const LinkSourceAnet = ({ editor, showModal, setShowModal, external }) => {
             objectType={value?.objectType}
             entityTypes={ALL_ENTITY_TYPES}
             value={value?.object}
-            valueKey={value?.object && "uuid"}
+            valueKey="uuid"
             onConfirm={(value, objectType) => {
-              const anetLinkNode = createAnetLinkNode(objectType, value.uuid)
-              insertAnetLink(anetLinkNode)
+              if (value?.uuid) {
+                const anetLinkNode = createAnetLinkNode(objectType, value.uuid)
+                insertAnetLink(anetLinkNode)
+              }
             }}
           />
         )}
