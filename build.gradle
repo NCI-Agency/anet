@@ -143,7 +143,7 @@ dependencies {
 	implementation 'net.coobird:thumbnailator:0.4.20'
 
 	// GraphQL dependencies
-	implementation 'com.graphql-java:graphql-java:21.3'
+	implementation 'com.graphql-java:graphql-java:21.5'
 	implementation 'com.graphql-java:java-dataloader:3.3.0'
 	implementation 'io.leangen.graphql:spqr:0.12.4'
 	// The graphql-java-client-runtime module aggregates all dependencies for the generated code,
