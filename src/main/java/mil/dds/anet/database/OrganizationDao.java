@@ -235,6 +235,14 @@ public class OrganizationDao
     final var existingWinnerOrg = getByUuid(winnerOrganizationUuid);
     final var context = AnetObjectEngine.getInstance().getContext();
 
+    // Clear loser's identificationCode to prevent update conflicts (identificationCode must be
+    // unique)
+    getDbHandle()
+        .createUpdate("/* clearOrganizationIdentificationCode */ UPDATE organizations"
+            + " SET \"identificationCode\" = NULL WHERE uuid = :loserOrganizationUuid")
+        .bind("loserOrganizationUuid", loserOrganizationUuid).execute();
+
+    // Update the winner's fields
     update(winnerOrganization);
 
     // Update approvalSteps (note that this may fail if reports are currently pending at one of the
