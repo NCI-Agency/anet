@@ -147,7 +147,7 @@ dependencies {
 	implementation 'io.leangen.graphql:spqr:0.12.4'
 	// The graphql-java-client-runtime module aggregates all dependencies for the generated code,
 	// including the plugin runtime
-	testImplementation 'com.graphql-java-generator:graphql-java-client-runtime:2.6'
+	testImplementation 'com.graphql-java-generator:graphql-java-client-runtime:2.7'
 	testImplementation "org.springframework.boot:spring-boot-starter-test:${springBootVersion}"
 	constraints {
 		// Force some transitive Spring dependencies to the expected version
