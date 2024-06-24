@@ -124,16 +124,15 @@ const TaskPreview = ({ className, uuid }) => {
   }
   const task = new Task(data.task ? data.task : {})
 
-  const fieldSettings = task.fieldSettings()
   return (
     <div className={`${className} preview-content-scroll`}>
       <div className="preview-sticky-title">
-        <h4 className="ellipsized-text">{`${fieldSettings.shortLabel} ${task.shortName}`}</h4>
+        <h4 className="ellipsized-text">{`${Settings.fields.task.shortLabel} ${task.shortName}`}</h4>
       </div>
       <div className="preview-section">
         <DictionaryField
           wrappedComponent={PreviewField}
-          dictProps={fieldSettings.longName}
+          dictProps={Settings.fields.task.longName}
           value={task.longName}
         />
         <DictionaryField

@@ -354,7 +354,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
   const isAttending = report.reportPeople?.some(rp =>
     Person.isEqual(currentUser, rp)
   )
-  const tasksLabel = pluralize(Settings.fields.task.subLevel.shortLabel)
+  const tasksLabel = pluralize(Settings.fields.task.shortLabel)
 
   // User can approve when admin,
   // or if report is pending approval and user is one of the approvers in the current approval step
@@ -716,7 +716,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
               >
                 <ReportPeople report={report} disabled />
               </Fieldset>
-              <Fieldset title={Settings.fields.task.subLevel.longLabel}>
+              <Fieldset title={Settings.fields.task.longLabel}>
                 <NoPaginationTaskTable
                   tasks={report.tasks}
                   noTasksMessage={`No ${tasksLabel} selected`}
@@ -781,7 +781,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                   </Fieldset>
 
                   <Fieldset
-                    title={`${Settings.fields.task.subLevel.longLabel} engagement assessments`}
+                    title={`${Settings.fields.task.longLabel} engagement assessments`}
                     id="tasks-engagement-assessments"
                   >
                     <InstantAssessmentsContainerField

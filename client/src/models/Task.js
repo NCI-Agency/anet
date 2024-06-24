@@ -3,7 +3,6 @@ import Model, {
   GRAPHQL_NOTES_FIELDS,
   yupDate
 } from "components/Model"
-import _isEmpty from "lodash/isEmpty"
 import TASKS_ICON from "resources/tasks.png"
 import Settings from "settings"
 import utils from "utils"
@@ -33,8 +32,7 @@ export default class Task extends Model {
     REPORT_APPROVAL: "REPORT_APPROVAL"
   }
 
-  static topLevelAssessmentDictionaryPath = "fields.task.topLevel.assessments"
-  static subLevelAssessmentDictionaryPath = "fields.task.subLevel.assessments"
+  static assessmentDictionaryPath = "fields.task.assessments"
 
   // create yup schema for the customFields, based on the customFields config
   static customFieldsSchema = createCustomFieldsSchema(
@@ -148,20 +146,8 @@ export default class Task extends Model {
     super(Model.fillObject(props, Task.yupSchema))
   }
 
-  isTopLevelTask() {
-    return _isEmpty(this.parentTask)
-  }
-
-  fieldSettings() {
-    return this.isTopLevelTask()
-      ? Settings.fields.task.topLevel
-      : Settings.fields.task.subLevel
-  }
-
   getAssessmentDictionaryPath() {
-    return this.isTopLevelTask()
-      ? Task.topLevelAssessmentDictionaryPath
-      : Task.subLevelAssessmentDictionaryPath
+    return Task.assessmentDictionaryPath
   }
 
   iconUrl() {
@@ -173,7 +159,7 @@ export default class Task extends Model {
   }
 
   getAssessmentsConfig() {
-    return this.fieldSettings().assessments || {}
+    return Settings.fields.task.assessments || {}
   }
 
   static FILTERED_CLIENT_SIDE_FIELDS = ["ascendantTasks"]

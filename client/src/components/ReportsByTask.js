@@ -143,9 +143,9 @@ Map.propTypes = {
  */
 const ReportsByTask = ({ pageDispatchers, queryParams, style }) => {
   const [focusedSelection, setFocusedSelection] = useState(null)
-  usePageTitle(`Reports by ${Settings.fields.task.subLevel.shortLabel}`)
+  usePageTitle(`Reports by ${Settings.fields.task.shortLabel}`)
 
-  const taskShortLabel = Settings.fields.task.subLevel.shortLabel
+  const taskShortLabel = Settings.fields.task.shortLabel
   const chartId = "reports_by_task"
   const selectedBarClass = "selected-bar"
   const VISUALIZATIONS = [

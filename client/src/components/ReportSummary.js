@@ -352,9 +352,7 @@ const ReportSummaryRow = ({ report }) => {
         <Col md={12}>
           {report.tasks.length > 0 && (
             <span>
-              <strong>
-                {pluralize(Settings.fields.task.subLevel.shortLabel)}:
-              </strong>{" "}
+              <strong>{pluralize(Settings.fields.task.shortLabel)}:</strong>{" "}
               {report.tasks.map((task, i) => (
                 <React.Fragment key={task.uuid}>
                   {i > 0 && (

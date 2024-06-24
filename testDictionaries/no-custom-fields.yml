@@ -51,245 +51,228 @@ classification:
 fields:
 
   task:
+    shortLabel: Objective
+    longLabel: Objectives
     status:
       label: Status
-    shortLabel: Objective / Effort
     shortName:
-      label: Objective / Effort number
-      placeholder: Enter an objective / effort name, example …
-    longLabel: Objectives and Efforts
+      label: Short name
+      placeholder: Primary name or abbreviation
     longName:
-      label: Objective / Effort long name
-      placeholder: Enter an objective / effort long name, example …
+      label: Long name
+      placeholder: Full form name of objective
+      asA: textarea
     description:
-      label: Objective / Effort description
-      placeholder: Fill in the description of this objective / effort
-    topLevel:
-      shortLabel: Objective
-      shortName:
-        label: Name of this Objective
-        placeholder: Enter a Name for this Objective name, example …
-      longLabel: Objectives
-      longName:
-        label: Long Name of this Objective
-        placeholder: Enter a long name for this Objective, example …
-      assessments:
-        topTaskOnceReport:
-          label: Engagement assessment of objective
-          recurrence: once
-          relatedObjectType: report
-          authorizationGroupUuids:
-            read: ['c21e7321-7ec5-4837-8805-a302f9575754']
-            write: ['39a78d51-c351-452c-9206-4305ec8dd76d']
-          questions:
-            question1:
-              type: special_field
-              widget: likertScale
-              label: Instant assessment Question 1
-              helpText: Please provide assessment for something important
-              levels:
-                - color: red
-                  endValue: 2
-                  label: test
-                - color: "#FFBF00"
-                  endValue: 8
-                  label: mid
-                - color: green
-                  endValue: 10
-                  label: high
-              aggregation:
-                widget: likertScale
-            question2:
-              type: number
-              label: Instant assessment Question 2
-            question3:
-              type: number
-              label: Instant assessment Question 3
-        topTaskSemiannually:
-          label: Semi-annual assessment of objective
-          recurrence: semiannually
-          test: $.subject[?(@property === "shortName" && @.match(/^EF/i))]
-          authorizationGroupUuids:
-            read: ['c21e7321-7ec5-4837-8805-a302f9575754']
-            write: ['39a78d51-c351-452c-9206-4305ec8dd76d']
-          questions:
-            issues:
-              type: special_field
-              label: Top 3 issues
-              placeholder: Enter the top 3 issues
-              widget: richTextEditor
-              style:
-                height: 300px
-              validations:
-                - type: required
-                  params: [You must provide the Top 3 issues]
-        topTaskSemiannuallyNoWrite:
-          label: Semi-annual assessment of objective, no write
-          recurrence: semiannually
-          test: $.subject[?(@property === "noSuchProperty" && @.match(/^willNeverMatch/i))]
-          authorizationGroupUuids:
-            write: []
-          questions:
-            question1:
-              type: number
-              label: Test Question 1
-        topTaskOnceReportNoWrite:
-          label: Engagement assessment of objective, no write
-          recurrence: once
-          relatedObjectType: report
-          test: $.subject[?(@property === "noSuchProperty" && @.match(/^willNeverMatch/i))]
-          authorizationGroupUuids:
-            write: []
-          questions:
-            question1:
-              type: number
-              label: Test Question 1
+      label: Objective description
+      placeholder: Description of this objective
 
-    subLevel:
-      shortLabel: Effort
-      shortName:
-        label: Effort name
-        placeholder: Enter an effort name, example …
-      longLabel: Efforts
-      longName:
-        label: Effort Long Name
-        placeholder: Enter an effort Long Name, example …
-      assessments:
-        subTaskMonthly:
-          label: Monthly assessment of effort
-          recurrence: monthly
-          allowFutureAssessments: true
-          questions:
-            requiredButFilteredOutQuestion:
-              test: $.subject[?(@property === "noSuchProperty" && @.match(/^willNeverMatch/i))]
-              type: text
-              label: This question is required but will be filtered out
-              validations:
-                - type: required
-                  params: [You must provide the answer to subTaskMonthly.requiredButFilteredOutQuestion]
-            questionFor11B:
-              test: $.subject[?(@property === "shortName" && @ === "1.1.B")]
-              type: text
-              label: This question applies only to 1.1.B
-              validations:
-                - type: required
-                  params: [You must provide the answer to subTaskMonthly.questionFor11B]
-            issues:
-              type: special_field
-              label: Top 3 issues
-              placeholder: Enter the top 3 issues
-              widget: richTextEditor
-              style:
-                height: 300px
-              validations:
-                - type: required
-                  params: [You must provide the Top 3 issues]
-            status:
-              type: enum
-              label: Project status
-              helpText: Select an assessment status for objective
-              choices:
-                GREEN:
-                  label: Green
-                  color: '#c2ffb3'
-                AMBER:
-                  label: Amber
-                  color: '#ffe396'
-                RED:
-                  label: Red
-                  color: '#ff8279'
-              validations:
-                - type: required
-                  params: [You must provide the Project status]
-        subTaskWeekly:
-          label: Weekly assessment of effort
-          recurrence: weekly
-          questions:
-            issues:
-              type: special_field
-              label: Top 3 issues
-              placeholder: Enter the top 3 issues
-              widget: richTextEditor
-              style:
-                height: 300px
-              validations:
-                - type: required
-                  params: [You must provide the Top 3 issues]
-        subTaskOnceReport:
-          label: Engagement assessment of effort
-          recurrence: once
-          relatedObjectType: report
-          questions:
-            requiredButFilteredOutQuestion:
-              test: $.subject[?(@property === "noSuchProperty" && @.match(/^willNeverMatch/i))]
-              type: text
-              label: This question is required but will be filtered out
-              validations:
-                - type: required
-                  params: [You must provide the answer to subTaskOnceReport.requiredButFilteredOutQuestion]
-            questionFor11B:
-              test: $.subject[?(@property === "shortName" && @ === "1.1.B")]
-              type: text
-              label: This question applies only to 1.1.B
-              validations:
-                - type: required
-                  params: [You must provide the answer to subTaskOnceReport.questionFor11B]
-            questionForNegative:
-              test: $.relatedObject[?(@property === "atmosphere" && @ === "NEGATIVE")]
-              type: text
-              label: This question applies only to Negative engagements
-              validations:
-                - type: required
-                  params: [You must provide the answer to subTaskOnceReport.questionForNegative]
-            question1:
-              type: special_field
+    assessments:
+      taskOnceReportRestricted:
+        label: Engagement assessment of objective
+        recurrence: once
+        relatedObjectType: report
+        authorizationGroupUuids:
+          read: ['c21e7321-7ec5-4837-8805-a302f9575754']
+          write: ['39a78d51-c351-452c-9206-4305ec8dd76d']
+        questions:
+          question1:
+            type: special_field
+            widget: likertScale
+            label: Instant assessment Question 1
+            helpText: Please provide assessment for something important
+            levels:
+              - color: red
+                endValue: 2
+                label: test
+              - color: "#FFBF00"
+                endValue: 8
+                label: mid
+              - color: green
+                endValue: 10
+                label: high
+            aggregation:
               widget: likertScale
-              label: Instant assessment Question 1
-              helpText: Please provide assessment for something important
-              levels:
-                - color: red
-                  endValue: 2
-                  label: test
-                - color: "#FFBF00"
-                  endValue: 8
-                  label: mid
-                - color: green
-                  endValue: 10
-                  label: high
-              aggregation:
-                widget: likertScale
-            question2:
-              type: number
-              label: Instant assessment Question 2
-            question3:
-              type: number
-              label: Instant assessment Question 3
-        subTask11COnceReport:
-          label: Engagement assessment of effort 1.1.C
-          recurrence: once
-          relatedObjectType: report
-          test: $.subject[?(@property === "shortName" && @ === "1.1.C")]
-          questions:
-            requiredButFilteredOutQuestion:
-              test: $.subject[?(@property === "noSuchProperty" && @.match(/^willNeverMatch/i))]
-              type: text
-              label: This question is required but will be filtered out
-              validations:
-                - type: required
-                  params: [You must provide the answer to subTask11COnceReport.requiredButFilteredOutQuestion]
-            requiredQuestion:
-              type: text
-              label: This question is required
-              validations:
-                - type: required
-                  params: [You must provide the answer to subTask11COnceReport.requiredQuestion]
-            questionForNegative:
-              test: $.relatedObject[?(@property === "atmosphere" && @ === "NEGATIVE")]
-              type: text
-              label: This question applies only to Negative engagements
-              validations:
-                - type: required
-                  params: [You must provide the answer to subTask11COnceReport.questionForNegative]
+          question2:
+            type: number
+            label: Instant assessment Question 2
+          question3:
+            type: number
+            label: Instant assessment Question 3
+      taskSemiannuallyRestricted:
+        label: Semi-annual assessment of objective
+        recurrence: semiannually
+        test: $.subject[?(@property === "shortName" && @.match(/^EF/i))]
+        authorizationGroupUuids:
+          read: ['c21e7321-7ec5-4837-8805-a302f9575754']
+          write: ['39a78d51-c351-452c-9206-4305ec8dd76d']
+        questions:
+          issues:
+            type: special_field
+            label: Top 3 issues
+            placeholder: Enter the top 3 issues
+            widget: richTextEditor
+            style:
+              height: 300px
+            validations:
+              - type: required
+                params: [You must provide the Top 3 issues]
+      taskSemiannuallyNoWrite:
+        label: Semi-annual assessment of objective, no write
+        recurrence: semiannually
+        test: $.subject[?(@property === "noSuchProperty" && @.match(/^willNeverMatch/i))]
+        authorizationGroupUuids:
+          write: []
+        questions:
+          question1:
+            type: number
+            label: Test Question 1
+      taskOnceReportNoWrite:
+        label: Engagement assessment of objective, no write
+        recurrence: once
+        relatedObjectType: report
+        test: $.subject[?(@property === "noSuchProperty" && @.match(/^willNeverMatch/i))]
+        authorizationGroupUuids:
+          write: []
+        questions:
+          question1:
+            type: number
+            label: Test Question 1
+
+      taskMonthly:
+        label: Monthly assessment of objective
+        recurrence: monthly
+        allowFutureAssessments: true
+        questions:
+          requiredButFilteredOutQuestion:
+            test: $.subject[?(@property === "noSuchProperty" && @.match(/^willNeverMatch/i))]
+            type: text
+            label: This question is required but will be filtered out
+            validations:
+              - type: required
+                params: [You must provide the answer to taskMonthly.requiredButFilteredOutQuestion]
+          questionFor11B:
+            test: $.subject[?(@property === "shortName" && @ === "1.1.B")]
+            type: text
+            label: This question applies only to 1.1.B
+            validations:
+              - type: required
+                params: [You must provide the answer to taskMonthly.questionFor11B]
+          issues:
+            type: special_field
+            label: Top 3 issues
+            placeholder: Enter the top 3 issues
+            widget: richTextEditor
+            style:
+              height: 300px
+            validations:
+              - type: required
+                params: [You must provide the Top 3 issues]
+          status:
+            type: enum
+            label: Project status
+            helpText: Select an assessment status for objective
+            choices:
+              GREEN:
+                label: Green
+                color: '#c2ffb3'
+              AMBER:
+                label: Amber
+                color: '#ffe396'
+              RED:
+                label: Red
+                color: '#ff8279'
+            validations:
+              - type: required
+                params: [You must provide the Project status]
+      taskWeekly:
+        label: Weekly assessment of objective
+        recurrence: weekly
+        questions:
+          issues:
+            type: special_field
+            label: Top 3 issues
+            placeholder: Enter the top 3 issues
+            widget: richTextEditor
+            style:
+              height: 300px
+            validations:
+              - type: required
+                params: [You must provide the Top 3 issues]
+      taskOnceReport:
+        label: Engagement assessment of objective
+        recurrence: once
+        relatedObjectType: report
+        questions:
+          requiredButFilteredOutQuestion:
+            test: $.subject[?(@property === "noSuchProperty" && @.match(/^willNeverMatch/i))]
+            type: text
+            label: This question is required but will be filtered out
+            validations:
+              - type: required
+                params: [You must provide the answer to taskOnceReport.requiredButFilteredOutQuestion]
+          questionFor11B:
+            test: $.subject[?(@property === "shortName" && @ === "1.1.B")]
+            type: text
+            label: This question applies only to 1.1.B
+            validations:
+              - type: required
+                params: [You must provide the answer to taskOnceReport.questionFor11B]
+          questionForNegative:
+            test: $.relatedObject[?(@property === "atmosphere" && @ === "NEGATIVE")]
+            type: text
+            label: This question applies only to Negative engagements
+            validations:
+              - type: required
+                params: [You must provide the answer to taskOnceReport.questionForNegative]
+          question1:
+            type: special_field
+            widget: likertScale
+            label: Instant assessment Question 1
+            helpText: Please provide assessment for something important
+            levels:
+              - color: red
+                endValue: 2
+                label: test
+              - color: "#FFBF00"
+                endValue: 8
+                label: mid
+              - color: green
+                endValue: 10
+                label: high
+            aggregation:
+              widget: likertScale
+          question2:
+            type: number
+            label: Instant assessment Question 2
+          question3:
+            type: number
+            label: Instant assessment Question 3
+      task11COnceReport:
+        label: Engagement assessment of objective 1.1.C
+        recurrence: once
+        relatedObjectType: report
+        test: $.subject[?(@property === "shortName" && @ === "1.1.C")]
+        questions:
+          requiredButFilteredOutQuestion:
+            test: $.subject[?(@property === "noSuchProperty" && @.match(/^willNeverMatch/i))]
+            type: text
+            label: This question is required but will be filtered out
+            validations:
+              - type: required
+                params: [You must provide the answer to task11COnceReport.requiredButFilteredOutQuestion]
+          requiredQuestion:
+            type: text
+            label: This question is required
+            validations:
+              - type: required
+                params: [You must provide the answer to task11COnceReport.requiredQuestion]
+          questionForNegative:
+            test: $.relatedObject[?(@property === "atmosphere" && @ === "NEGATIVE")]
+            type: text
+            label: This question applies only to Negative engagements
+            validations:
+              - type: required
+                params: [You must provide the answer to task11COnceReport.questionForNegative]
 
     projectedCompletion:
       label: Projected Completion
@@ -298,10 +281,10 @@ fields:
       label: Planned Completion
       exclude: true
     parentTask:
-      label: Parent objective / effort
-      placeholder: Start typing to search for a higher level objective / effort
+      label: Parent objective
+      placeholder: Start typing to search for a higher level objective
     childrenTasks:
-      label: Sub efforts
+      label: Sub objectives
     taskedOrganizations:
       label: Tasked organizations
       placeholder: Search for an organization…

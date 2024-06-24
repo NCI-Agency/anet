@@ -59,12 +59,12 @@ public class NoteResourceTest extends AbstractResourceTest {
 
   // The authorization groups defined in the dictionary give Erin read access and Jack write access;
   // these test objects can be used for the assessments authorization tests
-  // Top-level task EF 2
-  private static final String TEST_TOPTASK_UUID = "cd35abe7-a5c9-4b3e-885b-4c72bf564ed7";
-  // Sub-level task 2.B
-  private static final String TEST_SUBTASK_UUID = "2200a820-c4c7-4c9c-946c-f0c9c9e045c5";
-  // Sub-level task 1.2.A, Andrew is responsible
-  private static final String TEST_RESPONSIBLE_TASK_UUID = "953e0b0b-25e6-44b6-bc77-ef98251d046a";
+  // Task EF 2
+  private static final String TEST_TASK_EF2_UUID = "cd35abe7-a5c9-4b3e-885b-4c72bf564ed7";
+  // Task 2.B
+  private static final String TEST_TASK_2B_UUID = "2200a820-c4c7-4c9c-946c-f0c9c9e045c5";
+  // Task 1.2.A, Andrew is responsible
+  private static final String TEST_TASK_12A_UUID = "953e0b0b-25e6-44b6-bc77-ef98251d046a";
   // Person Christopf, Erin is counterpart
   private static final String TEST_COUNTERPART_PERSON_UUID = "237e8bf7-2ae4-4d49-b7c8-eca6a92d4767";
   // Report "Discuss improvements in Annual Budgeting process"
@@ -291,7 +291,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     invalidNoteInput.setAssessmentKey("unknown");
     failNoteCreate(jackUser, invalidNoteInput);
     // Assessment without text
-    invalidNoteInput.setAssessmentKey("fields.task.subLevel.assessments.subTaskOnceReport");
+    invalidNoteInput.setAssessmentKey("fields.task.assessments.taskOnceReport");
     failNoteCreate(jackUser, invalidNoteInput);
     // Assessment with different recurrence from dictionary key
     invalidNoteInput.setText(createAssessmentText("test", "ondemand"));
@@ -395,7 +395,7 @@ public class NoteResourceTest extends AbstractResourceTest {
   void testInstantPersonAssessments() {
     // Instant ('once') ASSESSMENT note tests for person through the NoteResource methods
     testInstantAssessments("testInstantPersonAssessments",
-        "fields.regular.person.assessments.personOnceReportLinguist", true, TEST_SUBTASK_UUID);
+        "fields.regular.person.assessments.personOnceReportLinguist", true, TEST_TASK_2B_UUID);
   }
 
   @Test
@@ -403,7 +403,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     // Instant ('once') ASSESSMENT note tests for person through the NoteResource methods, with
     // empty write authorization groups defined in the dictionary
     testInstantAssessmentsEmptyWriteAuthGroups("testInstantPersonAssessmentsNoAuthGroups",
-        "fields.regular.person.assessments.advisorOnceReportNoWrite", true, TEST_SUBTASK_UUID);
+        "fields.regular.person.assessments.advisorOnceReportNoWrite", true, TEST_TASK_2B_UUID);
   }
 
   @Test
@@ -411,7 +411,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     // Instant ('once') ASSESSMENT note tests for person through the NoteResource methods, with no
     // authorization groups defined in the dictionary
     testInstantAssessmentsNoAuthGroups("testInstantPersonAssessmentsNoAuthGroups",
-        "fields.regular.person.assessments.interlocutorOnceReport", true, TEST_SUBTASK_UUID);
+        "fields.regular.person.assessments.interlocutorOnceReport", true, TEST_TASK_2B_UUID);
   }
 
   @Test
@@ -419,7 +419,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     // Instant ('once') ASSESSMENT note tests for person through
     // ReportResource::updateReportAssessments
     testInstantAssessmentsViaReport("testInstantPersonAssessmentsViaReport",
-        "fields.regular.person.assessments.personOnceReportLinguist", true, TEST_SUBTASK_UUID);
+        "fields.regular.person.assessments.personOnceReportLinguist", true, TEST_TASK_2B_UUID);
   }
 
   @Test
@@ -428,7 +428,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     // ReportResource::updateReportAssessments, with empty write authorization groups defined in the
     // dictionary
     testInstantAssessmentsViaReportEmptyWriteAuthGroups("testInstantPersonAssessmentsNoAuthGroups",
-        "fields.regular.person.assessments.advisorOnceReportNoWrite", true, TEST_SUBTASK_UUID);
+        "fields.regular.person.assessments.advisorOnceReportNoWrite", true, TEST_TASK_2B_UUID);
   }
 
   @Test
@@ -437,14 +437,14 @@ public class NoteResourceTest extends AbstractResourceTest {
     // ReportResource::updateReportAssessments, with no authorization groups defined in the
     // dictionary
     testInstantAssessmentsViaReportNoAuthGroups("testInstantPersonAssessmentsNoAuthGroups",
-        "fields.regular.person.assessments.interlocutorOnceReport", true, TEST_SUBTASK_UUID);
+        "fields.regular.person.assessments.interlocutorOnceReport", true, TEST_TASK_2B_UUID);
   }
 
   @Test
   void testInstantTaskAssessments() {
     // Instant ('once') ASSESSMENT note tests for task through the NoteResource methods
     testInstantAssessments("testInstantTaskAssessments",
-        "fields.task.topLevel.assessments.topTaskOnceReport", false, TEST_TOPTASK_UUID);
+        "fields.task.assessments.taskOnceReportRestricted", false, TEST_TASK_EF2_UUID);
   }
 
   @Test
@@ -452,7 +452,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     // Instant ('once') ASSESSMENT note tests for task through the NoteResource methods, with empty
     // write authorization groups defined in the dictionary
     testInstantAssessmentsEmptyWriteAuthGroups("testInstantTaskAssessmentsNoAuthGroups",
-        "fields.task.topLevel.assessments.topTaskOnceReportNoWrite", false, TEST_SUBTASK_UUID);
+        "fields.task.assessments.taskOnceReportNoWrite", false, TEST_TASK_2B_UUID);
   }
 
   @Test
@@ -460,7 +460,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     // Instant ('once') ASSESSMENT note tests for task through the NoteResource methods, with no
     // authorization groups defined in the dictionary
     testInstantAssessmentsNoAuthGroups("testInstantTaskAssessmentsNoAuthGroups",
-        "fields.task.subLevel.assessments.subTaskOnceReport", false, TEST_SUBTASK_UUID);
+        "fields.task.assessments.taskOnceReport", false, TEST_TASK_2B_UUID);
   }
 
   @Test
@@ -468,7 +468,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     // Instant ('once') ASSESSMENT note tests for task through
     // ReportResource::updateReportAssessments
     testInstantAssessmentsViaReport("testInstantTaskAssessmentsViaReport",
-        "fields.task.topLevel.assessments.topTaskOnceReport", false, TEST_TOPTASK_UUID);
+        "fields.task.assessments.taskOnceReportRestricted", false, TEST_TASK_EF2_UUID);
   }
 
   @Test
@@ -478,7 +478,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     // dictionary
     testInstantAssessmentsViaReportEmptyWriteAuthGroups(
         "testInstantTaskAssessmentsViaReportNoAuthGroups",
-        "fields.task.topLevel.assessments.topTaskOnceReportNoWrite", false, TEST_SUBTASK_UUID);
+        "fields.task.assessments.taskOnceReportNoWrite", false, TEST_TASK_2B_UUID);
   }
 
   @Test
@@ -487,7 +487,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     // ReportResource::updateReportAssessments, with no authorization groups defined in the
     // dictionary
     testInstantAssessmentsViaReportNoAuthGroups("testInstantTaskAssessmentsViaReportNoAuthGroups",
-        "fields.task.subLevel.assessments.subTaskOnceReport", false, TEST_SUBTASK_UUID);
+        "fields.task.assessments.taskOnceReport", false, TEST_TASK_2B_UUID);
   }
 
   @Test
@@ -509,7 +509,7 @@ public class NoteResourceTest extends AbstractResourceTest {
 
     // - F: create for a task
     final GenericRelatedObjectInput testTaskNroInput =
-        createNoteRelatedObject(TaskDao.TABLE_NAME, TEST_SUBTASK_UUID);
+        createNoteRelatedObject(TaskDao.TABLE_NAME, TEST_TASK_2B_UUID);
     testNoteInputFail = createAssessment(assessmentKey, "test", recurrence, testTaskNroInput);
     failNoteCreate(jackUser, testNoteInputFail);
 
@@ -883,7 +883,7 @@ public class NoteResourceTest extends AbstractResourceTest {
   @Test
   void testPeriodicTaskAssessments() {
     // Periodic ASSESSMENT note tests for task
-    final String assessmentKey = "fields.task.topLevel.assessments.topTaskSemiannually";
+    final String assessmentKey = "fields.task.assessments.taskSemiannuallyRestricted";
     final String recurrence = "semiannually";
     final Person taskResponsible = getAndrewAnderson();
 
@@ -899,7 +899,7 @@ public class NoteResourceTest extends AbstractResourceTest {
 
     // - F: create for a report and a task
     final GenericRelatedObjectInput testTaskNroInput =
-        createNoteRelatedObject(TaskDao.TABLE_NAME, TEST_RESPONSIBLE_TASK_UUID);
+        createNoteRelatedObject(TaskDao.TABLE_NAME, TEST_TASK_12A_UUID);
     testNoteInputFail =
         createAssessment(assessmentKey, "test", recurrence, testReportNroInput, testTaskNroInput);
     failNoteCreate(taskResponsible.getDomainUsername(), testNoteInputFail);
@@ -928,17 +928,17 @@ public class NoteResourceTest extends AbstractResourceTest {
 
     // - F: read it as someone not in the read and write auth.groups
     final Task bobTask = withCredentials(getBobBobtown().getDomainUsername(),
-        t -> queryExecutor.task(TASK_FIELDS, TEST_RESPONSIBLE_TASK_UUID));
+        t -> queryExecutor.task(TASK_FIELDS, TEST_TASK_12A_UUID));
     assertNotes(bobTask.getNotes(), Collections.emptyList(), assessmentKey, 1);
 
     // - S: read it as someone in the read auth.groups
     final Task erinTask = withCredentials(getRegularUser().getDomainUsername(),
-        t -> queryExecutor.task(TASK_FIELDS, TEST_RESPONSIBLE_TASK_UUID));
+        t -> queryExecutor.task(TASK_FIELDS, TEST_TASK_12A_UUID));
     assertNotes(erinTask.getNotes(), testNoteInputs, assessmentKey, 1);
 
     // - S: read it as admin
-    final Task adminTask = withCredentials(adminUser,
-        t -> queryExecutor.task(TASK_FIELDS, TEST_RESPONSIBLE_TASK_UUID));
+    final Task adminTask =
+        withCredentials(adminUser, t -> queryExecutor.task(TASK_FIELDS, TEST_TASK_12A_UUID));
     assertNotes(adminTask.getNotes(), testNoteInputs, assessmentKey, 1);
 
     // - S: update it as someone with task permission not in the write auth.groups
@@ -974,7 +974,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     assertThat(updatedNotesInput.remove(updatedNoteInput)).isTrue();
     assertNotes(
         withCredentials(getRegularUser().getDomainUsername(),
-            t -> queryExecutor.task(TASK_FIELDS, TEST_RESPONSIBLE_TASK_UUID)).getNotes(),
+            t -> queryExecutor.task(TASK_FIELDS, TEST_TASK_12A_UUID)).getNotes(),
         updatedNotesInput, assessmentKey, 1);
 
     // - S: delete it as someone without task permission in the write auth.groups
@@ -983,7 +983,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     assertThat(updatedNotesInput.remove(updatedNoteInputAdmin)).isTrue();
     assertNotes(
         withCredentials(getRegularUser().getDomainUsername(),
-            t -> queryExecutor.task(TASK_FIELDS, TEST_RESPONSIBLE_TASK_UUID)).getNotes(),
+            t -> queryExecutor.task(TASK_FIELDS, TEST_TASK_12A_UUID)).getNotes(),
         updatedNotesInput, assessmentKey, 1);
 
     // - S: delete it as admin
@@ -991,7 +991,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     assertThat(updatedNotesInput.remove(updatedNoteInputJack)).isTrue();
     assertNotes(
         withCredentials(getRegularUser().getDomainUsername(),
-            t -> queryExecutor.task(TASK_FIELDS, TEST_RESPONSIBLE_TASK_UUID)).getNotes(),
+            t -> queryExecutor.task(TASK_FIELDS, TEST_TASK_12A_UUID)).getNotes(),
         updatedNotesInput, assessmentKey, 1);
   }
 
@@ -999,14 +999,14 @@ public class NoteResourceTest extends AbstractResourceTest {
   void testPeriodicTaskAssessmentsEmptyWriteAuthGroups() {
     // Periodic ASSESSMENT note tests for task, with empty write authorization groups defined in the
     // dictionary
-    final String assessmentKey = "fields.task.topLevel.assessments.topTaskSemiannuallyNoWrite";
+    final String assessmentKey = "fields.task.assessments.taskSemiannuallyNoWrite";
     final String recurrence = "semiannually";
     final Person taskResponsible = getAndrewAnderson();
 
     // - F: create for a task as someone without task permission and empty write auth.groups defined
     // in the dictionary
     final GenericRelatedObjectInput testTaskNroInput =
-        createNoteRelatedObject(TaskDao.TABLE_NAME, TEST_RESPONSIBLE_TASK_UUID);
+        createNoteRelatedObject(TaskDao.TABLE_NAME, TEST_TASK_12A_UUID);
     final NoteInput testNoteInputFail =
         createAssessment(assessmentKey, "erin", recurrence, testTaskNroInput);
     failNoteCreate("erin", testNoteInputFail);
@@ -1020,7 +1020,7 @@ public class NoteResourceTest extends AbstractResourceTest {
 
     // - S: read it with no read auth.groups defined in the dictionary
     final Task erinTask = withCredentials(getRegularUser().getDomainUsername(),
-        t -> queryExecutor.task(TASK_FIELDS, TEST_RESPONSIBLE_TASK_UUID));
+        t -> queryExecutor.task(TASK_FIELDS, TEST_TASK_12A_UUID));
     assertNotes(erinTask.getNotes(), testNoteInputs, assessmentKey, 1);
 
     // - F: update it as someone without task permission and with empty write auth.groups defined in
@@ -1047,7 +1047,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     assertThat(updatedNotesInput.remove(updatedNoteInput)).isTrue();
     assertNotes(
         withCredentials(getRegularUser().getDomainUsername(),
-            t -> queryExecutor.task(TASK_FIELDS, TEST_RESPONSIBLE_TASK_UUID)).getNotes(),
+            t -> queryExecutor.task(TASK_FIELDS, TEST_TASK_12A_UUID)).getNotes(),
         updatedNotesInput, assessmentKey, 1);
   }
 
@@ -1055,13 +1055,13 @@ public class NoteResourceTest extends AbstractResourceTest {
   void testPeriodicTaskAssessmentsNoAuthGroups() {
     // Periodic ASSESSMENT note tests for task, with no authorization groups defined in the
     // dictionary
-    final String assessmentKey = "fields.task.subLevel.assessments.subTaskMonthly";
+    final String assessmentKey = "fields.task.assessments.taskMonthly";
     final String recurrence = "monthly";
 
     // - S: create for a task as someone without task permission and no auth.groups defined in
     // the dictionary
     final GenericRelatedObjectInput testTaskNroInput =
-        createNoteRelatedObject(TaskDao.TABLE_NAME, TEST_RESPONSIBLE_TASK_UUID);
+        createNoteRelatedObject(TaskDao.TABLE_NAME, TEST_TASK_12A_UUID);
     final NoteInput testNoteInput =
         createAssessment(assessmentKey, "erin", recurrence, testTaskNroInput);
     final List<NoteInput> testNoteInputs = Lists.newArrayList(testNoteInput);
@@ -1069,7 +1069,7 @@ public class NoteResourceTest extends AbstractResourceTest {
 
     // - S: read it with no auth.groups defined in the dictionary
     final Task erinTask = withCredentials(getRegularUser().getDomainUsername(),
-        t -> queryExecutor.task(TASK_FIELDS, TEST_RESPONSIBLE_TASK_UUID));
+        t -> queryExecutor.task(TASK_FIELDS, TEST_TASK_12A_UUID));
     assertNotes(erinTask.getNotes(), testNoteInputs, assessmentKey, 1);
 
     // - S: update it as someone without task permission and with no auth.groups defined in
@@ -1086,7 +1086,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     assertThat(updatedNotesInput.remove(updatedNoteInput)).isTrue();
     assertNotes(
         withCredentials(getRegularUser().getDomainUsername(),
-            t -> queryExecutor.task(TASK_FIELDS, TEST_RESPONSIBLE_TASK_UUID)).getNotes(),
+            t -> queryExecutor.task(TASK_FIELDS, TEST_TASK_12A_UUID)).getNotes(),
         updatedNotesInput, assessmentKey, 1);
   }
 

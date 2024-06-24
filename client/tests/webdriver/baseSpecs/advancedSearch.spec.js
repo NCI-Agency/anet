@@ -19,7 +19,7 @@ const ANET_OBJECT_TYPES = {
   Locations: {
     sampleFilters: ["Type"]
   },
-  "Objective / Efforts": {
+  Objectives: {
     sampleFilters: ["Within Organization"]
   },
   "Authorization Groups": {

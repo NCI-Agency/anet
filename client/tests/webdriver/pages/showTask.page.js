@@ -24,15 +24,15 @@ class ShowTask extends Page {
   }
 
   async getChildrenTasks() {
-    return browser.$('div[id="subEfforts"]')
+    return browser.$('div[id="subTasks"]')
   }
 
   async getChildrenTasksField() {
-    return browser.$("#fg-subEfforts")
+    return browser.$("#fg-subTasks")
   }
 
   async getFirstItemFromChildrenTasks() {
-    return browser.$("#subEfforts > .list-group .list-group-item:first-child")
+    return browser.$("#subTasks > .list-group .list-group-item:first-child")
   }
 
   async getAssessmentResults(assessmentKey, recurrence) {

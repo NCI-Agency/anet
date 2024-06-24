@@ -138,7 +138,7 @@ class CreateReport extends cr.CreateReport {
 
   async getAllUnassignedTasksFilterButton() {
     return (await this.getTaskSearchFilters()).$(
-      ".btn-link=All unassigned Efforts"
+      ".btn-link=All unassigned Objectives"
     )
   }
 

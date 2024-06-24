@@ -370,7 +370,7 @@ const CompactReportView = ({ pageDispatchers }) => {
                 />
                 <CompactRow
                   id="tasks"
-                  label={Settings.fields.task.subLevel.longLabel}
+                  label={Settings.fields.task.longLabel}
                   content={getTasksAndAssessments()}
                   className="reportField"
                 />

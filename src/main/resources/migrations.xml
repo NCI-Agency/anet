@@ -5822,4 +5822,17 @@
 		</createIndex>
 	</changeSet>
 
+	<changeSet id="update-task-assessmentKey" author="gjvoosten">
+		<sql>
+			UPDATE notes
+			SET "assessmentKey" = regexp_replace("assessmentKey", '\.topLevel\.', '.')
+			WHERE "assessmentKey" LIKE 'fields.task.topLevel.assessments.%';
+
+			UPDATE notes
+			SET "assessmentKey" = regexp_replace("assessmentKey", '\.subLevel\.', '.')
+			WHERE "assessmentKey" LIKE 'fields.task.subLevel.assessments.%';
+		</sql>
+		<!-- Rolling back is not useful anymore -->
+	</changeSet>
+
 </databaseChangeLog>

@@ -31,20 +31,20 @@ describe("For the periodic task assessments", () => {
 
     it("Should allow advisor to successfully add an assessment", async() => {
       await (
-        await ShowTask.getAssessmentsTable("subTaskMonthly", "monthly")
+        await ShowTask.getAssessmentsTable("taskMonthly", "monthly")
       ).waitForExist()
       await (
-        await ShowTask.getAssessmentsTable("subTaskMonthly", "monthly")
+        await ShowTask.getAssessmentsTable("taskMonthly", "monthly")
       ).waitForDisplayed()
       await (
-        await ShowTask.getAddAssessmentButton("subTaskMonthly", "monthly")
+        await ShowTask.getAddAssessmentButton("taskMonthly", "monthly")
       ).click()
       await ShowTask.waitForAssessmentModalForm()
 
       // NOTE: assuming assessment question content here, may change in future
       await ShowTask.fillAssessmentQuestion(ADVISOR_1_TASK_CREATE_DETAILS)
       await ShowTask.saveAssessmentAndWaitForModalClose(
-        "subTaskMonthly",
+        "taskMonthly",
         "monthly",
         ADVISOR_1_TASK_CREATE_DETAILS[0]
       )
@@ -52,7 +52,7 @@ describe("For the periodic task assessments", () => {
 
     it("Should show the same assessment details with the details just created", async() => {
       await assertAssessmentDetails(
-        "subTaskMonthly",
+        "taskMonthly",
         "monthly",
         ADVISOR_1_TASK_CREATE_DETAILS
       )
@@ -60,13 +60,13 @@ describe("For the periodic task assessments", () => {
 
     it("Should allow the author of the assessment to successfully edit it", async() => {
       await (
-        await ShowTask.getEditAssessmentButton("subTaskMonthly", "monthly")
+        await ShowTask.getEditAssessmentButton("taskMonthly", "monthly")
       ).waitForExist()
       await (
-        await ShowTask.getEditAssessmentButton("subTaskMonthly", "monthly")
+        await ShowTask.getEditAssessmentButton("taskMonthly", "monthly")
       ).waitForDisplayed()
       await (
-        await ShowTask.getEditAssessmentButton("subTaskMonthly", "monthly")
+        await ShowTask.getEditAssessmentButton("taskMonthly", "monthly")
       ).click()
       await ShowTask.waitForAssessmentModalForm()
 
@@ -75,7 +75,7 @@ describe("For the periodic task assessments", () => {
         ADVISOR_1_TASK_CREATE_DETAILS[0]
       )
       await ShowTask.saveAssessmentAndWaitForModalClose(
-        "subTaskMonthly",
+        "taskMonthly",
         "monthly",
         ADVISOR_1_TASK_EDIT_DETAILS[0]
       )
@@ -83,38 +83,36 @@ describe("For the periodic task assessments", () => {
 
     it("Should show the same assessment details with the details just edited", async() => {
       await assertAssessmentDetails(
-        "subTaskMonthly",
+        "taskMonthly",
         "monthly",
         ADVISOR_1_TASK_EDIT_DETAILS
       )
     })
 
-    it("Should see an add button for subTaskMonthly assessments in the future", async() => {
+    it("Should see an add button for taskMonthly assessments in the future", async() => {
       await (
-        await ShowTask.getNextPeriodButton("subTaskMonthly", "monthly")
+        await ShowTask.getNextPeriodButton("taskMonthly", "monthly")
       ).waitForExist()
 
       await (
-        await ShowTask.getNextPeriodButton("subTaskMonthly", "monthly")
+        await ShowTask.getNextPeriodButton("taskMonthly", "monthly")
       ).click()
 
       await (
-        await ShowTask.getFutureAddAssessmentButton("subTaskMonthly", "monthly")
+        await ShowTask.getFutureAddAssessmentButton("taskMonthly", "monthly")
       ).waitForExist()
     })
 
-    it("Should not see an add button for subTaskWeekly assessments in the future", async() => {
+    it("Should not see an add button for taskWeekly assessments in the future", async() => {
       await (
-        await ShowTask.getNextPeriodButton("subTaskWeekly", "weekly")
+        await ShowTask.getNextPeriodButton("taskWeekly", "weekly")
       ).waitForExist()
 
-      await (
-        await ShowTask.getNextPeriodButton("subTaskWeekly", "weekly")
-      ).click()
+      await (await ShowTask.getNextPeriodButton("taskWeekly", "weekly")).click()
 
       expect(
         await (
-          await ShowTask.getFutureAddAssessmentButton("subTaskWeekly", "weekly")
+          await ShowTask.getFutureAddAssessmentButton("taskWeekly", "weekly")
         ).isExisting()
       ).to.equal(false)
 
@@ -135,20 +133,20 @@ describe("For the periodic task assessments", () => {
     it("Should not show make assessment button when there is an assessment on that period", async() => {
       expect(
         await (
-          await ShowTask.getAddAssessmentButton("subTaskMonthly", "monthly")
+          await ShowTask.getAddAssessmentButton("taskMonthly", "monthly")
         ).isExisting()
       ).to.equal(false)
     })
 
     it("Should allow admins to successfully edit existing assessment", async() => {
       await (
-        await ShowTask.getAssessmentsTable("subTaskMonthly", "monthly")
+        await ShowTask.getAssessmentsTable("taskMonthly", "monthly")
       ).waitForExist()
       await (
-        await ShowTask.getAssessmentsTable("subTaskMonthly", "monthly")
+        await ShowTask.getAssessmentsTable("taskMonthly", "monthly")
       ).waitForDisplayed()
       await (
-        await ShowTask.getEditAssessmentButton("subTaskMonthly", "monthly")
+        await ShowTask.getEditAssessmentButton("taskMonthly", "monthly")
       ).click()
       await ShowTask.waitForAssessmentModalForm()
 
@@ -158,7 +156,7 @@ describe("For the periodic task assessments", () => {
         ADVISOR_1_TASK_EDIT_DETAILS[0]
       )
       await ShowTask.saveAssessmentAndWaitForModalClose(
-        "subTaskMonthly",
+        "taskMonthly",
         "monthly",
         ADMIN_TASK_EDIT_DETAILS[0]
       )
@@ -166,7 +164,7 @@ describe("For the periodic task assessments", () => {
 
     it("Should show the same assessment details with the details just edited", async() => {
       await assertAssessmentDetails(
-        "subTaskMonthly",
+        "taskMonthly",
         "monthly",
         ADMIN_TASK_EDIT_DETAILS
       )
@@ -187,20 +185,20 @@ describe("For the periodic task assessments", () => {
     it("Should not show make assessment button when there is an assessment on that period", async() => {
       expect(
         await (
-          await ShowTask.getAddAssessmentButton("subTaskMonthly", "monthly")
+          await ShowTask.getAddAssessmentButton("taskMonthly", "monthly")
         ).isExisting()
       ).to.equal(false)
     })
 
     it("Should allow the other advisor to successfully edit existing assessment", async() => {
       await (
-        await ShowTask.getAssessmentsTable("subTaskMonthly", "monthly")
+        await ShowTask.getAssessmentsTable("taskMonthly", "monthly")
       ).waitForExist()
       await (
-        await ShowTask.getAssessmentsTable("subTaskMonthly", "monthly")
+        await ShowTask.getAssessmentsTable("taskMonthly", "monthly")
       ).waitForDisplayed()
       await (
-        await ShowTask.getEditAssessmentButton("subTaskMonthly", "monthly")
+        await ShowTask.getEditAssessmentButton("taskMonthly", "monthly")
       ).click()
       await ShowTask.waitForAssessmentModalForm()
 
@@ -210,7 +208,7 @@ describe("For the periodic task assessments", () => {
         ADMIN_TASK_EDIT_DETAILS[0]
       )
       await ShowTask.saveAssessmentAndWaitForModalClose(
-        "subTaskMonthly",
+        "taskMonthly",
         "monthly",
         ADVISOR_2_TASK_EDIT_DETAILS[0]
       )
@@ -218,7 +216,7 @@ describe("For the periodic task assessments", () => {
 
     it("Should show the same assessment details with the details just edited", async() => {
       await assertAssessmentDetails(
-        "subTaskMonthly",
+        "taskMonthly",
         "monthly",
         ADVISOR_2_TASK_EDIT_DETAILS
       )
@@ -228,7 +226,7 @@ describe("For the periodic task assessments", () => {
       await (await ShowTask.getDeleteAssessmentButton()).click()
       await ShowTask.confirmDelete()
       await ShowTask.waitForDeletedAssessmentToDisappear(
-        "subTaskMonthly",
+        "taskMonthly",
         "monthly"
       )
       await ShowTask.logout()

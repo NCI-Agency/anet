@@ -23,7 +23,7 @@ describe("When creating an task", () => {
     await CreateTask.submitForm()
     await ShowTask.waitForAlertSuccessToLoad()
     expect(await (await ShowTask.getAlertSuccess()).getText()).to.equal(
-      "Objective / Effort saved"
+      "Objective saved"
     )
   })
 

@@ -211,8 +211,7 @@ public class PendingAssessmentsHelper {
 
   // Dictionary lookup keys we use
   public static final String PERSON_ASSESSMENTS = "fields.regular.person.assessments";
-  public static final String TASK_SUB_LEVEL_ASSESSMENTS = "fields.task.subLevel.assessments";
-  public static final String TASK_TOP_LEVEL_ASSESSMENTS = "fields.task.topLevel.assessments";
+  public static final String TASK_ASSESSMENTS = "fields.task.assessments";
   public static final String ASSESSMENT_RECURRENCE = "recurrence";
   // JSON fields in note.text we use
   public static final String NOTE_RECURRENCE = "__recurrence";
@@ -244,8 +243,7 @@ public class PendingAssessmentsHelper {
 
     // Look up periodic assessment definitions for all tasks
     final Map<Task, Set<Recurrence>> taskAssessmentRecurrence = new HashMap<>();
-    addTaskDefinitions(recurrenceSet, taskAssessmentRecurrence, true);
-    addTaskDefinitions(recurrenceSet, taskAssessmentRecurrence, false);
+    addTaskDefinitions(recurrenceSet, taskAssessmentRecurrence);
     logger.trace("taskAssessmentRecurrence={}", taskAssessmentRecurrence);
 
     // Prepare maps of positions and tasks linked to active advisor positions
@@ -334,14 +332,14 @@ public class PendingAssessmentsHelper {
   }
 
   private void addTaskDefinitions(final Set<Recurrence> recurrenceSet,
-      final Map<Task, Set<Recurrence>> taskAssessmentRecurrence, boolean topLevel) {
+      final Map<Task, Set<Recurrence>> taskAssessmentRecurrence) {
     // Look up periodic assessment definitions for all tasks in the dictionary
-    final Set<Recurrence> assessmentRecurrence = getAssessmentRecurrence(recurrenceSet,
-        topLevel ? TASK_TOP_LEVEL_ASSESSMENTS : TASK_SUB_LEVEL_ASSESSMENTS);
+    final Set<Recurrence> assessmentRecurrence =
+        getAssessmentRecurrence(recurrenceSet, TASK_ASSESSMENTS);
 
     if (!assessmentRecurrence.isEmpty()) {
       // Look up periodic assessment definitions for each active task
-      final List<Task> tasks = getActiveTasks(topLevel);
+      final List<Task> tasks = getActiveTasks();
       tasks.forEach(t ->
       // Add all recurrence definitions for this task
       taskAssessmentRecurrence.computeIfAbsent(t, task -> new HashSet<>(assessmentRecurrence)));
@@ -413,12 +411,11 @@ public class PendingAssessmentsHelper {
     return positionDao.search(psq).getList();
   }
 
-  private List<Task> getActiveTasks(boolean topLevel) {
+  private List<Task> getActiveTasks() {
     // Get all active tasks with a non-empty customFields
     final TaskSearchQuery tsq = new TaskSearchQuery();
     tsq.setPageSize(0);
     tsq.setStatus(Position.Status.ACTIVE);
-    tsq.setHasParentTask(!topLevel);
     return taskDao.search(tsq).getList();
   }
 

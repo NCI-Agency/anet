@@ -267,7 +267,7 @@ const ReportForm = ({
     return result
   }
   const submitText = "Save Report"
-  const tasksLabel = pluralize(Settings.fields.task.subLevel.shortLabel)
+  const tasksLabel = pluralize(Settings.fields.task.shortLabel)
   const showAssignedPositionWarning = !currentUser.hasAssignedPosition()
   const showActivePositionWarning =
     currentUser.hasAssignedPosition() && !currentUser.hasActivePosition()
@@ -778,12 +778,12 @@ const ReportForm = ({
 
               {!_isEmpty(tasksFilters) && (
                 <Fieldset
-                  title={Settings.fields.task.subLevel.longLabel}
+                  title={Settings.fields.task.longLabel}
                   className="tasks-selector"
                 >
                   <Field
                     name="tasks"
-                    label={Settings.fields.task.subLevel.longLabel}
+                    label={Settings.fields.task.longLabel}
                     component={FieldHelper.SpecialField}
                     onChange={value => {
                       // validation will be done by setFieldValue
@@ -802,12 +802,10 @@ const ReportForm = ({
                             tasks={values.tasks}
                             showDelete
                             showDescription
-                            noTasksMessage={`No ${tasksLabel} selected; click in the efforts box to view your organization's efforts`}
+                            noTasksMessage={`No ${tasksLabel} selected; click in the ${tasksLabel} box to view your organization's ${tasksLabel}`}
                           />
                         }
-                        overlayColumns={[
-                          Settings.fields.task.subLevel.shortLabel
-                        ]}
+                        overlayColumns={[Settings.fields.task.shortLabel]}
                         overlayRenderRow={TaskOverlayRow}
                         filterDefs={tasksFilters}
                         objectType={Task}
@@ -1153,7 +1151,7 @@ const ReportForm = ({
                   </Fieldset>
 
                   <Fieldset
-                    title={`${Settings.fields.task.subLevel.longLabel} engagement assessments`}
+                    title={`${Settings.fields.task.longLabel} engagement assessments`}
                     id="tasks-engagement-assessments"
                   >
                     <InstantAssessmentsContainerField

@@ -417,7 +417,7 @@ ${sender.name} sent you a report from ANET:
     <#assign tasks = report.getTasks()>
     <div>
       <h2 class="legend">
-        <span class="title-text">${fields.task.subLevel.longLabel}</span>
+        <span class="title-text">${fields.task.longLabel}</span>
       </h2>
       <fieldset>
         <table class="table">

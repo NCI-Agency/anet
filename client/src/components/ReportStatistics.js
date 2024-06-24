@@ -65,7 +65,7 @@ const REPORT_FIELDS_FOR_STATISTICS = {
       aggregationType: AGGREGATION_TYPE.REPORTS_BY_TASK,
       widget: AGGREGATION_WIDGET_TYPE.REPORTS_BY_TASK
     },
-    label: pluralize(Settings.fields.task.subLevel.shortLabel)
+    label: pluralize(Settings.fields.task.shortLabel)
   },
   atmosphere: {
     type: CUSTOM_FIELD_TYPE.ENUM,
