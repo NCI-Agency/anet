@@ -5,12 +5,14 @@ const EXAMPLE_ORGANIZATIONS = {
   validLeft: {
     search: "Merge Org 1",
     shortName: "Merge Org 1",
+    status: "ACTIVE",
     displayedName: "Merge Org 1 | Long Merge 1 Name",
     parentOrg: "EF 1 | Planning Programming, Budgeting and Execution"
   },
   validRight: {
     search: "Merge Org 2",
     shortName: "Merge Org 2",
+    status: "ACTIVE",
     displayedName: "Merge Org 2 | Long Merge 2 Name",
     parentOrg: "EF 1 | Planning Programming, Budgeting and Execution"
   }
@@ -61,9 +63,6 @@ describe("Merge organizations page", () => {
     ).waitForDisplayed()
   })
   it("Should display field values of the right organization", async() => {
-    await (await MergeOrganizations.getTitle()).waitForExist()
-    await (await MergeOrganizations.getTitle()).waitForDisplayed()
-
     await (await MergeOrganizations.getRightOrganizationField()).click()
     await (
       await MergeOrganizations.getRightOrganizationField()
@@ -129,6 +128,16 @@ describe("Merge organizations page", () => {
     ).to.eq(EXAMPLE_ORGANIZATIONS.validRight.parentOrg)
   })
   it("Should be able to select from both left and right side.", async() => {
+    await (await MergeOrganizations.getLeftOrganizationField()).click()
+    await (
+      await MergeOrganizations.getLeftOrganizationField()
+    ).setValue(EXAMPLE_ORGANIZATIONS.validLeft.search)
+    await MergeOrganizations.waitForAdvancedSelectLoading(
+      EXAMPLE_ORGANIZATIONS.validLeft.displayedName
+    )
+    await (await MergeOrganizations.getFirstItemFromAdvancedSelect()).click()
+    await browser.pause(500)
+
     await (await MergeOrganizations.getSelectButton("left", "Name")).click()
     await MergeOrganizations.waitForColumnToChange(
       EXAMPLE_ORGANIZATIONS.validLeft.shortName,
@@ -138,6 +147,19 @@ describe("Merge organizations page", () => {
     expect(
       await (await MergeOrganizations.getColumnContent("mid", "Name")).getText()
     ).to.eq(EXAMPLE_ORGANIZATIONS.validLeft.shortName)
+
+    await (await MergeOrganizations.getSelectButton("left", "Status")).click()
+    await MergeOrganizations.waitForColumnToChange(
+      EXAMPLE_ORGANIZATIONS.validLeft.status,
+      "mid",
+      "Status"
+    )
+    expect(
+      await (
+        await MergeOrganizations.getColumnContent("mid", "Status")
+      ).getText()
+    ).to.eq(EXAMPLE_ORGANIZATIONS.validLeft.status)
+
     await (
       await MergeOrganizations.getSelectButton("right", "Parent Organization")
     ).click()
@@ -160,13 +182,23 @@ describe("Merge organizations page", () => {
       ).isClickable()
     ).to.be.false
   })
-  it("Should be able to merge both organizations when winner is left organization", async() => {
-    const checkboxes = await await MergeOrganizations.getCheckboxes()
+  it("Should be able to click merge button when checkbox is checked for empty fields", async() => {
+    const checkboxes = await MergeOrganizations.getCheckboxes()
     // eslint-disable-next-line no-unused-expressions
     expect(checkboxes).not.to.be.empty
     for (const checkbox of checkboxes) {
       await checkbox.click()
     }
+    // eslint-disable-next-line no-unused-expressions
+    expect(
+      await (
+        await MergeOrganizations.getMergeOrganizationsButton()
+      ).isClickable()
+    ).to.be.true
+  })
+  it("Should be able to merge both organizations when winner is left organization", async() => {
+    await (await MergeOrganizations.getUseAllButton("left")).click()
+    await browser.pause(500)
     await (await MergeOrganizations.getMergeOrganizationsButton()).click()
     await MergeOrganizations.waitForSuccessAlert()
   })
