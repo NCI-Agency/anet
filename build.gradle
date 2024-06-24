@@ -32,6 +32,7 @@ String log4jVersion = "2.23.1"
 String keycloakVersion = "24.0.5"
 String springBootVersion = "3.3.0"
 String springFrameworkVersion = "6.1.10"
+String springGraphqlVersion = "1.2.7"
 String springSecurityVersion = "6.3.1"
 String psqlPushDataPath = "/var/tmp"
 String keycloakContainerPath = "/opt/keycloak"
@@ -152,6 +153,7 @@ dependencies {
 	constraints {
 		// Force some transitive Spring dependencies to the expected version
 		testImplementation "org.springframework:spring-context:${springFrameworkVersion}"
+		testImplementation "org.springframework.graphql:spring-graphql:${springGraphqlVersion}"
 		testImplementation "org.springframework.security:spring-security-oauth2-client:${springSecurityVersion}"
 		testImplementation "org.springframework.boot:spring-boot-starter-security:${springBootVersion}"
 		testImplementation "org.springframework.boot:spring-boot-starter-webflux:${springBootVersion}"

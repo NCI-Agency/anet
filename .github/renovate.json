@@ -62,7 +62,8 @@
         "react-router-dom",
         "com.graphql-java:graphql-java",
         "com.graphql-java:graphql-java-extended-scalars",
-        "io.leangen.graphql:spqr"
+        "io.leangen.graphql:spqr",
+        "org.springframework.graphql:spring-graphql"
       ],
       "enabled": false
     },
