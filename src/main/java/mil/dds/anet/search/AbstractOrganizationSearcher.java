@@ -4,6 +4,7 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AbstractBatchParams;
+import mil.dds.anet.beans.search.ISearchQuery;
 import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
@@ -46,8 +47,6 @@ public abstract class AbstractOrganizationSearcher extends
     }
 
     qb.addEnumEqualsClause("status", "organizations.status", query.getStatus());
-    qb.addStringEqualsClause("locationUuid", "organizations.\"locationUuid\"",
-        query.getLocationUuid());
 
     if (query.getHasParentOrg() != null) {
       if (query.getHasParentOrg()) {
@@ -67,6 +66,10 @@ public abstract class AbstractOrganizationSearcher extends
 
     if (!Utils.isEmptyOrNull(query.getParentOrgUuid())) {
       addParentOrgUuidQuery(query);
+    }
+
+    if (!Utils.isEmptyOrNull(query.getLocationUuid())) {
+      addLocationUuidQuery(query);
     }
 
     if (query.getEmailNetwork() != null) {
@@ -95,6 +98,18 @@ public abstract class AbstractOrganizationSearcher extends
     } else {
       qb.addInListClause("parentOrgUuid", "organizations.\"parentOrgUuid\"",
           query.getParentOrgUuid());
+    }
+  }
+
+  protected void addLocationUuidQuery(OrganizationSearchQuery query) {
+    if (ISearchQuery.RecurseStrategy.CHILDREN.equals(query.getLocationRecurseStrategy())
+        || ISearchQuery.RecurseStrategy.PARENTS.equals(query.getLocationRecurseStrategy())) {
+      qb.addRecursiveClause(null, "organizations", new String[] {"\"locationUuid\""},
+          "parent_locations", "\"locationRelationships\"", "\"childLocationUuid\"",
+          "\"parentLocationUuid\"", "locationUuid", query.getLocationUuid(),
+          ISearchQuery.RecurseStrategy.CHILDREN.equals(query.getLocationRecurseStrategy()), true);
+    } else {
+      qb.addInListClause("locationUuid", "organizations.\"locationUuid\"", query.getLocationUuid());
     }
   }
 

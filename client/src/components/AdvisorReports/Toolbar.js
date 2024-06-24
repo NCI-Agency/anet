@@ -13,7 +13,7 @@ const Toolbar = ({ onFilterTextInput, onExportButtonClick }) => (
           className="form-control"
           id="advisorSearch"
           type="text"
-          placeholder="Search organizations..."
+          placeholder="Search organizations…"
           onChange={e => onFilterTextInput(e.target.value)}
         />
       </div>

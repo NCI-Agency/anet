@@ -26,7 +26,10 @@ public class PositionSearchQuery extends SubscribableObjectSearchQuery<PositionS
   Boolean isFilled;
   @GraphQLQuery
   @GraphQLInputField
-  String locationUuid;
+  private List<String> locationUuid;
+  @GraphQLQuery
+  @GraphQLInputField
+  private RecurseStrategy locationRecurseStrategy;
   @GraphQLQuery
   @GraphQLInputField
   private String authorizationGroupUuid;
@@ -82,12 +85,20 @@ public class PositionSearchQuery extends SubscribableObjectSearchQuery<PositionS
     this.isFilled = isFilled;
   }
 
-  public String getLocationUuid() {
+  public List<String> getLocationUuid() {
     return locationUuid;
   }
 
-  public void setLocationUuid(String locationUuid) {
+  public void setLocationUuid(List<String> locationUuid) {
     this.locationUuid = locationUuid;
+  }
+
+  public RecurseStrategy getLocationRecurseStrategy() {
+    return locationRecurseStrategy;
+  }
+
+  public void setLocationRecurseStrategy(RecurseStrategy locationRecurseStrategy) {
+    this.locationRecurseStrategy = locationRecurseStrategy;
   }
 
   public String getAuthorizationGroupUuid() {
@@ -133,6 +144,7 @@ public class PositionSearchQuery extends SubscribableObjectSearchQuery<PositionS
         && Objects.equals(getType(), other.getType())
         && Objects.equals(getIsFilled(), other.getIsFilled())
         && Objects.equals(getLocationUuid(), other.getLocationUuid())
+        && Objects.equals(getLocationRecurseStrategy(), other.getLocationRecurseStrategy())
         && Objects.equals(getAuthorizationGroupUuid(), other.getAuthorizationGroupUuid())
         && Objects.equals(getHasCounterparts(), other.getHasCounterparts())
         && Objects.equals(getHasPendingAssessments(), other.getHasPendingAssessments());
@@ -146,6 +158,9 @@ public class PositionSearchQuery extends SubscribableObjectSearchQuery<PositionS
     }
     if (organizationUuid != null) {
       clone.setOrganizationUuid(new ArrayList<>(organizationUuid));
+    }
+    if (locationUuid != null) {
+      clone.setLocationUuid(new ArrayList<>(locationUuid));
     }
     return clone;
   }

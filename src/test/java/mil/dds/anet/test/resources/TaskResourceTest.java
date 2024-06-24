@@ -281,17 +281,36 @@ class TaskResourceTest extends AbstractResourceTest {
 
   @Test
   void illegalParentTaskTest() {
-    final String testTopTaskUuid = "cd35abe7-a5c9-4b3e-885b-4c72bf564ed7";
-    final Task task = withCredentials(adminUser, t -> queryExecutor.task(FIELDS, testTopTaskUuid));
-    assertThat(task).isNotNull();
-    assertThat(task.getUuid()).isEqualTo(testTopTaskUuid);
+    final String testTopTaskUuid = "cd35abe7-a5c9-4b3e-885b-4c72bf564ed7"; // EF 1
+    final Task topTask =
+        withCredentials(adminUser, t -> queryExecutor.task(FIELDS, testTopTaskUuid));
+    assertThat(topTask).isNotNull();
+    assertThat(topTask.getUuid()).isEqualTo(testTopTaskUuid);
+
+    final String testSubTaskUuid = "cd35abe7-a5c9-4b3e-885b-4c72bf564ed7"; // 1.1
+    final Task subTask =
+        withCredentials(adminUser, t -> queryExecutor.task(FIELDS, testSubTaskUuid));
+    assertThat(subTask).isNotNull();
+    assertThat(subTask.getUuid()).isEqualTo(testSubTaskUuid);
+
     // Set self as parent
-    final TaskInput taskInput = getTaskInput(task);
-    final TaskInput parentTaskInput = getTaskInput(task);
-    taskInput.setParentTask(parentTaskInput);
+    final TaskInput topTaskInput = getTaskInput(topTask);
+    final TaskInput parentTopTaskInput = getTaskInput(topTask);
+    topTaskInput.setParentTask(parentTopTaskInput);
     try {
       // Should fail, as it would create a loop
-      withCredentials(adminUser, t -> mutationExecutor.updateTask("", taskInput));
+      withCredentials(adminUser, t -> mutationExecutor.updateTask("", topTaskInput));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      // OK
+    }
+
+    // Set subTask as parent
+    final TaskInput parentSubTaskInput = getTaskInput(subTask);
+    topTaskInput.setParentTask(parentSubTaskInput);
+    try {
+      // Should fail, as it would create a loop
+      withCredentials(adminUser, t -> mutationExecutor.updateTask("", topTaskInput));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
       // OK

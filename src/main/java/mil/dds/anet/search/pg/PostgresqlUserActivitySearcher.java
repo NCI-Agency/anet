@@ -78,7 +78,8 @@ public class PostgresqlUserActivitySearcher extends AbstractUserActivitySearcher
 
   private void queryByTopLevelOrganization(final UserActivitySearchQuery query,
       final PostgresqlSearchQueryBuilder<UserActivity, UserActivitySearchQuery> withQb) {
-    withQb.createWithClause(null, "parent_orgs", "organizations", "\"parentOrgUuid\"", false);
+    withQb.createWithClause(null, "parent_orgs", "organizations", "uuid", "\"parentOrgUuid\"",
+        false);
     switch (query.getAggregationType()) {
       case BY_OBJECT:
         withQb.addSelectClause(

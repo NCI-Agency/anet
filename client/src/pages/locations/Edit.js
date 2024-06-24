@@ -9,9 +9,7 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
-import RelatedObjectNotes, {
-  GRAPHQL_NOTES_FIELDS
-} from "components/RelatedObjectNotes"
+import RelatedObjectNotes from "components/RelatedObjectNotes"
 import { Attachment, Location } from "models"
 import React from "react"
 import { connect } from "react-redux"
@@ -23,48 +21,10 @@ import LocationForm from "./Form"
 const GQL_GET_LOCATION = gql`
   query($uuid: String!) {
     location(uuid: $uuid) {
-      uuid
-      name
-      digram
-      trigram
-      description
-      status
-      type
-      lat
-      lng
-      planningApprovalSteps {
-        uuid
-        name
-        approvers {
-          uuid
-          name
-          person {
-            uuid
-            name
-            rank
-            avatarUuid
-          }
-        }
-      }
-      approvalSteps {
-        uuid
-        name
-        approvers {
-          uuid
-          name
-          person {
-            uuid
-            name
-            rank
-            avatarUuid
-          }
-        }
-      }
+      ${Location.allFieldsQuery}
       attachments {
         ${Attachment.basicFieldsQuery}
       }
-      customFields
-      ${GRAPHQL_NOTES_FIELDS}
     }
   }
 `

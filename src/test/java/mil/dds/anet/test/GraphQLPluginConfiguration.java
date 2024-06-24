@@ -18,6 +18,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.ClientRequest;
+import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 
 /**
@@ -85,6 +86,11 @@ public class GraphQLPluginConfiguration {
     return WebClient.builder().baseUrl(graphqlEndpoint)
         .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
         .defaultUriVariables(Map.of("url", graphqlEndpoint))
+        .exchangeStrategies(ExchangeStrategies.builder()
+            // Some GraphQL responses are larger than the allowed default of 256KB
+            // (e.g. the one for introspection used in one of the tests)
+            // Override this to allow unlimited responses:
+            .codecs(codecs -> codecs.defaultCodecs().maxInMemorySize(-1)).build())
         .filter((request, next) -> next.exchange(
             ClientRequest.from(request).headers(authenticationInjector::setBasicAuth).build()))
         .build();

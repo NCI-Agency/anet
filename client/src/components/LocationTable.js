@@ -6,6 +6,7 @@ import {
   PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
+import RemoveButton from "components/RemoveButton"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _get from "lodash/get"
 import { Location } from "models"
@@ -91,13 +92,14 @@ const BaseLocationTable = ({
   showDelete,
   onDelete,
   locations,
+  noLocationsMessage,
   pageSize,
   pageNum,
   totalCount,
   goToPage
 }) => {
   if (_get(locations, "length", 0) === 0) {
-    return <em>No locations found</em>
+    return <em>{noLocationsMessage}</em>
   }
 
   return (
@@ -115,6 +117,7 @@ const BaseLocationTable = ({
             <tr>
               <th>Name</th>
               <th>Type</th>
+              {showDelete && <th />}
             </tr>
           </thead>
           <tbody>
@@ -124,6 +127,14 @@ const BaseLocationTable = ({
                   <LinkTo modelType="Location" model={loc} />
                 </td>
                 <td>{Location.humanNameOfType(loc.type)}</td>
+                {showDelete && (
+                  <td id={"locationDelete_" + loc.uuid}>
+                    <RemoveButton
+                      title="Remove location"
+                      onClick={() => onDelete(loc)}
+                    />
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
@@ -139,11 +150,16 @@ BaseLocationTable.propTypes = {
   onDelete: PropTypes.func,
   // list of locations:
   locations: PropTypes.array.isRequired,
+  noLocationsMessage: PropTypes.string,
   // fill these when pagination wanted:
   totalCount: PropTypes.number,
   pageNum: PropTypes.number,
   pageSize: PropTypes.number,
   goToPage: PropTypes.func
+}
+
+BaseLocationTable.defaultProps = {
+  noLocationsMessage: "No locations found"
 }
 
 export default connect(null, mapPageDispatchersToProps)(LocationTable)

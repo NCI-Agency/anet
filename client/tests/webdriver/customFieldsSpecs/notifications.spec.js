@@ -4,7 +4,7 @@ import Home from "../pages/home.page"
 
 describe("Home page", () => {
   describe("When checking the notification numbers", () => {
-    afterEach("Should logout...", async() => {
+    afterEach("Should logout…", async() => {
       await Home.logout()
     })
 

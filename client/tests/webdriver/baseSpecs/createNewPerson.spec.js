@@ -24,13 +24,13 @@ const SIMILAR_PERSON_ADVISOR = {
 
 describe("Create new Person form page", () => {
   describe("When creating a non-user", () => {
-    beforeEach("On the create person page...", async() => {
+    beforeEach("On the create person page…", async() => {
       await CreatePerson.openAsSuperuser()
       await (await CreatePerson.getForm()).waitForExist()
       await (await CreatePerson.getForm()).waitForDisplayed()
     })
 
-    afterEach("On the create person page...", async() => {
+    afterEach("On the create person page…", async() => {
       await CreatePerson.logout()
     })
 

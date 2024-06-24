@@ -67,6 +67,11 @@ public class PostgresqlReportSearcher extends AbstractReportSearcher {
   }
 
   @Override
+  protected void addLocationUuidQuery(ReportSearchQuery query) {
+    addLocationUuidQuery(qb, query);
+  }
+
+  @Override
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, ReportSearchQuery query) {
     if (hasTextQuery(query) && !query.isSortByPresent()) {
       // We're doing a full-text search without an explicit sort order,

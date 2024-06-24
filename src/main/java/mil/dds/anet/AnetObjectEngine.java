@@ -3,7 +3,6 @@ package mil.dds.anet;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Injector;
 import io.dropwizard.core.Application;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -14,11 +13,13 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import mil.dds.anet.beans.ApprovalStep;
+import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
+import mil.dds.anet.beans.search.LocationSearchQuery;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.config.AnetConfiguration;
@@ -367,35 +368,59 @@ public class AnetObjectEngine {
     orgQuery.setPageSize(0);
     List<Organization> orgs = getOrganizationDao().search(orgQuery).getList();
 
-    return Utils.buildParentOrgMapping(orgs, null);
+    return Utils.buildOrgToParentOrgMapping(orgs, null);
   }
 
   /**
    * Helper function to build a map of organization UUIDs to their top parent capped at a certain
-   * point in the hierarchy. parentOrg will map to parentOrg, and all children will map to the
-   * highest parent that is NOT the parentOrgUuid.
+   * point in the hierarchy. The parentOrgUuid will map to parentOrg, and all children will map to
+   * the highest parent that is NOT the parentOrgUuid.
    */
-  public Map<String, Organization> buildTopLevelOrgHash(String parentOrgUuid) {
+  public Map<String, String> buildTopLevelOrgHash(String parentOrgUuid) {
     final OrganizationSearchQuery query = new OrganizationSearchQuery();
-    query.setParentOrgUuid(Collections.singletonList(parentOrgUuid));
+    query.setParentOrgUuid(List.of(parentOrgUuid));
     query.setOrgRecurseStrategy(RecurseStrategy.CHILDREN);
     query.setPageSize(0);
     final List<Organization> orgList = orgDao.search(query).getList();
     return Utils.buildParentOrgMapping(orgList, parentOrgUuid);
   }
 
+  public Map<String, Organization> buildTopLevelOrgToOrgHash(String parentOrgUuid) {
+    final OrganizationSearchQuery query = new OrganizationSearchQuery();
+    query.setParentOrgUuid(List.of(parentOrgUuid));
+    query.setOrgRecurseStrategy(RecurseStrategy.CHILDREN);
+    query.setPageSize(0);
+    final List<Organization> orgList = orgDao.search(query).getList();
+    return Utils.buildOrgToParentOrgMapping(orgList, parentOrgUuid);
+  }
+
   /**
    * Helper function to build a map of task UUIDs to their top parent capped at a certain point in
-   * the hierarchy. parentTask will map to parentTask, and all children will map to the highest
-   * parent that is NOT the parentTaskUuid.
+   * the hierarchy. The parentTaskUuid will map to parentTask, and all children will map to the
+   * highest parent that is NOT the parentTaskUuid.
    */
-  public Map<String, Task> buildTopLevelTaskHash(String parentTaskUuid) {
+  public Map<String, String> buildTopLevelTaskHash(String parentTaskUuid) {
     final TaskSearchQuery query = new TaskSearchQuery();
-    query.setParentTaskUuid(Collections.singletonList(parentTaskUuid));
+    query.setParentTaskUuid(List.of(parentTaskUuid));
     query.setParentTaskRecurseStrategy(RecurseStrategy.CHILDREN);
     query.setPageSize(0);
     final List<Task> taskList = taskDao.search(query).getList();
     return Utils.buildParentTaskMapping(taskList, parentTaskUuid);
+  }
+
+  /**
+   * Helper function to build a map of location UUIDs to their top parent capped at a certain point
+   * in the hierarchy. The locationUuid will map to parentLocation, and all children will map to the
+   * highest parent that is NOT the locationUuid.
+   */
+  public Map<String, Set<String>> buildLocationHash(String locationUuid, boolean findChildren) {
+    final LocationSearchQuery query = new LocationSearchQuery();
+    query.setLocationUuid(List.of(locationUuid));
+    query.setLocationRecurseStrategy(
+        findChildren ? RecurseStrategy.CHILDREN : RecurseStrategy.PARENTS);
+    query.setPageSize(0);
+    final List<Location> locationList = locationDao.search(query).getList();
+    return Utils.buildParentLocationMapping(locationList, locationUuid);
   }
 
   public static AnetObjectEngine getInstance() {

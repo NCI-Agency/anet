@@ -1,6 +1,6 @@
 import { Icon, Intent, Tooltip } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
-import Leaflet from "components/Leaflet"
+import Leaflet, { DEFAULT_MAP_STYLE } from "components/Leaflet"
 import {
   DEFAULT_CUSTOM_FIELDS_PARENT,
   MODEL_TO_OBJECT_TYPE
@@ -356,8 +356,10 @@ export function getActionButton(
   )
 }
 
-export function getLeafletMap(mapId, location) {
-  return (
+const HIDDEN_STYLE = { visibility: "hidden" }
+
+export function getLeafletMap(mapId, location, hideWhenEmpty) {
+  return Location.hasCoordinates(location) ? (
     <Leaflet
       mapId={mapId}
       markers={[
@@ -369,6 +371,8 @@ export function getLeafletMap(mapId, location) {
         }
       ]}
     />
+  ) : (
+    <div style={hideWhenEmpty ? HIDDEN_STYLE : DEFAULT_MAP_STYLE} />
   )
 }
 

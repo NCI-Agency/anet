@@ -61,7 +61,10 @@ public class ReportSearchQuery extends SubscribableObjectSearchQuery<ReportSearc
   private RecurseStrategy orgRecurseStrategy;
   @GraphQLQuery
   @GraphQLInputField
-  String locationUuid;
+  private List<String> locationUuid;
+  @GraphQLQuery
+  @GraphQLInputField
+  private RecurseStrategy locationRecurseStrategy;
   @GraphQLQuery
   @GraphQLInputField
   String taskUuid;
@@ -224,12 +227,20 @@ public class ReportSearchQuery extends SubscribableObjectSearchQuery<ReportSearc
     this.orgRecurseStrategy = orgRecurseStrategy;
   }
 
-  public String getLocationUuid() {
+  public List<String> getLocationUuid() {
     return locationUuid;
   }
 
-  public void setLocationUuid(String locationUuid) {
+  public void setLocationUuid(List<String> locationUuid) {
     this.locationUuid = locationUuid;
+  }
+
+  public RecurseStrategy getLocationRecurseStrategy() {
+    return locationRecurseStrategy;
+  }
+
+  public void setLocationRecurseStrategy(RecurseStrategy locationRecurseStrategy) {
+    this.locationRecurseStrategy = locationRecurseStrategy;
   }
 
   public String getTaskUuid() {
@@ -333,9 +344,10 @@ public class ReportSearchQuery extends SubscribableObjectSearchQuery<ReportSearc
     return Objects.hash(super.hashCode(), authorUuid, engagementDateStart, engagementDateEnd,
         engagementDayOfWeek, includeEngagementDayOfWeek, createdAtStart, createdAtEnd,
         updatedAtStart, updatedAtEnd, releasedAtStart, releasedAtEnd, attendeeUuid, atmosphere,
-        orgUuid, orgRecurseStrategy, locationUuid, taskUuid, pendingApprovalOf, state,
-        includeAllDrafts, engagementStatus, cancelledReason, authorPositionUuid,
-        attendeePositionUuid, authorizationGroupUuid, sensitiveInfo, classification, systemSearch);
+        orgUuid, orgRecurseStrategy, locationUuid, locationRecurseStrategy, taskUuid,
+        pendingApprovalOf, state, includeAllDrafts, engagementStatus, cancelledReason,
+        authorPositionUuid, attendeePositionUuid, authorizationGroupUuid, sensitiveInfo,
+        classification, systemSearch);
   }
 
   @Override
@@ -360,6 +372,7 @@ public class ReportSearchQuery extends SubscribableObjectSearchQuery<ReportSearc
         && Objects.equals(getOrgUuid(), other.getOrgUuid())
         && Objects.equals(getOrgRecurseStrategy(), other.getOrgRecurseStrategy())
         && Objects.equals(getLocationUuid(), other.getLocationUuid())
+        && Objects.equals(getLocationRecurseStrategy(), other.getLocationRecurseStrategy())
         && Objects.equals(getTaskUuid(), other.getTaskUuid())
         && Objects.equals(getPendingApprovalOf(), other.getPendingApprovalOf())
         && Objects.equals(getState(), other.getState())
@@ -388,6 +401,9 @@ public class ReportSearchQuery extends SubscribableObjectSearchQuery<ReportSearc
     }
     if (orgUuid != null) {
       clone.setOrgUuid(new ArrayList<>(orgUuid));
+    }
+    if (locationUuid != null) {
+      clone.setLocationUuid(new ArrayList<>(locationUuid));
     }
     return clone;
   }

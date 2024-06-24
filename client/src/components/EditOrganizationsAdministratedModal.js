@@ -91,6 +91,7 @@ const EditOrganizationsAdministratedModal = ({
                                 organizations={
                                   values.organizationsAdministrated || []
                                 }
+                                noOrganizationsMessage="No organizations selected"
                                 showDelete
                               />
                             }

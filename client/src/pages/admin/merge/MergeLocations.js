@@ -9,6 +9,7 @@ import ApprovalSteps from "components/ApprovalSteps"
 import { customFieldsJSONString } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
 import BaseGeoLocation from "components/GeoLocation"
+import LocationTable from "components/LocationTable"
 import MergeField from "components/MergeField"
 import Messages from "components/Messages"
 import {
@@ -74,6 +75,8 @@ const MergeLocations = ({ pageDispatchers }) => {
   const location1 = mergeState[MERGE_SIDES.LEFT]
   const location2 = mergeState[MERGE_SIDES.RIGHT]
   const mergedLocation = mergeState.merged
+  const hideWhenEmpty =
+    !Location.hasCoordinates(location1) && !Location.hasCoordinates(location2)
 
   useEffect(() => {
     if (location1 && location2 && location1.type !== location2.type) {
@@ -192,7 +195,11 @@ const MergeLocations = ({ pageDispatchers }) => {
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
-              {getLeafletMap("merged-location-map", mergedLocation)}
+              {getLeafletMap(
+                "merged-location-map",
+                mergedLocation,
+                hideWhenEmpty
+              )}
               <DictionaryField
                 wrappedComponent={MergeField}
                 dictProps={Settings.fields.location.status}
@@ -216,6 +223,23 @@ const MergeLocations = ({ pageDispatchers }) => {
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
+              <MergeField
+                label="Parent locations"
+                fieldName="parentLocations"
+                value={
+                  <LocationTable
+                    locations={mergedLocation.parentLocations || []}
+                  />
+                }
+                align={ALIGN_OPTIONS.CENTER}
+                action={getClearButton(() =>
+                  dispatchMergeActions(
+                    setAMergedField("parentLocations", [], null)
+                  )
+                )}
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
               <DictionaryField
                 wrappedComponent={MergeField}
                 dictProps={Settings.fields.location.description}
@@ -230,6 +254,34 @@ const MergeLocations = ({ pageDispatchers }) => {
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
+              {mergeState?.merged?.type === Location.LOCATION_TYPES.COUNTRY && (
+                <>
+                  <DictionaryField
+                    wrappedComponent={MergeField}
+                    dictProps={Settings.fields.location.digram}
+                    value={mergedLocation.digram}
+                    align={ALIGN_OPTIONS.CENTER}
+                    action={getClearButton(() =>
+                      dispatchMergeActions(setAMergedField("digram", "", null))
+                    )}
+                    fieldName="digram"
+                    mergeState={mergeState}
+                    dispatchMergeActions={dispatchMergeActions}
+                  />
+                  <DictionaryField
+                    wrappedComponent={MergeField}
+                    dictProps={Settings.fields.location.trigram}
+                    value={mergedLocation.trigram}
+                    align={ALIGN_OPTIONS.CENTER}
+                    action={getClearButton(() =>
+                      dispatchMergeActions(setAMergedField("trigram", "", null))
+                    )}
+                    fieldName="trigram"
+                    mergeState={mergeState}
+                    dispatchMergeActions={dispatchMergeActions}
+                  />
+                </>
+              )}
               <MergeField
                 label="Planning Approval Steps"
                 fieldName="planningApprovalSteps"
@@ -239,6 +291,11 @@ const MergeLocations = ({ pageDispatchers }) => {
                   />
                 }
                 align={ALIGN_OPTIONS.CENTER}
+                action={getClearButton(() =>
+                  dispatchMergeActions(
+                    setAMergedField("planningApprovalSteps", [], null)
+                  )
+                )}
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
@@ -249,6 +306,11 @@ const MergeLocations = ({ pageDispatchers }) => {
                   <ApprovalSteps approvalSteps={mergedLocation.approvalSteps} />
                 }
                 align={ALIGN_OPTIONS.CENTER}
+                action={getClearButton(() =>
+                  dispatchMergeActions(
+                    setAMergedField("approvalSteps", [], null)
+                  )
+                )}
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
@@ -318,6 +380,10 @@ const MergeLocations = ({ pageDispatchers }) => {
 
   function mergeLocations() {
     const loser = mergedLocation.uuid === location1.uuid ? location2 : location1
+    if (mergedLocation.type !== Location.LOCATION_TYPES.COUNTRY) {
+      mergedLocation.digram = null
+      mergedLocation.trigram = null
+    }
     mergedLocation.customFields = customFieldsJSONString(mergedLocation)
 
     const winnerLocation = Location.filterClientSideFields(mergedLocation)
@@ -374,6 +440,9 @@ const LocationColumn = ({
   locationFormatLabel
 }) => {
   const location = mergeState[align]
+  const hideWhenEmpty =
+    !Location.hasCoordinates(mergeState[MERGE_SIDES.LEFT]) &&
+    !Location.hasCoordinates(mergeState[MERGE_SIDES.RIGHT])
   const idForLocation = label.replace(/\s+/g, "")
   return (
     <div>
@@ -492,7 +561,11 @@ const LocationColumn = ({
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
           />
-          {getLeafletMap(`merge-location-map-${align}`, location)}
+          {getLeafletMap(
+            `merge-location-map-${align}`,
+            location,
+            hideWhenEmpty
+          )}
           <DictionaryField
             wrappedComponent={MergeField}
             dictProps={Settings.fields.location.status}
@@ -508,6 +581,27 @@ const LocationColumn = ({
               align,
               mergeState,
               "status"
+            )}
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
+          />
+          <MergeField
+            label="Parent locations"
+            fieldName="parentLocations"
+            value={<LocationTable locations={location.parentLocations || []} />}
+            align={align}
+            action={getActionButton(
+              () =>
+                dispatchMergeActions(
+                  setAMergedField(
+                    "parentLocations",
+                    location.parentLocations,
+                    align
+                  )
+                ),
+              align,
+              mergeState,
+              "parentLocations"
             )}
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
@@ -531,6 +625,48 @@ const LocationColumn = ({
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
           />
+          {mergeState?.merged?.type === Location.LOCATION_TYPES.COUNTRY && (
+            <>
+              <DictionaryField
+                wrappedComponent={MergeField}
+                dictProps={Settings.fields.location.digram}
+                fieldName="digram"
+                value={location.digram}
+                align={align}
+                action={getActionButton(
+                  () => {
+                    dispatchMergeActions(
+                      setAMergedField("digram", location.digram, align)
+                    )
+                  },
+                  align,
+                  mergeState,
+                  "digram"
+                )}
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
+              <DictionaryField
+                wrappedComponent={MergeField}
+                dictProps={Settings.fields.location.trigram}
+                fieldName="trigram"
+                value={location.trigram}
+                align={align}
+                action={getActionButton(
+                  () => {
+                    dispatchMergeActions(
+                      setAMergedField("trigram", location.trigram, align)
+                    )
+                  },
+                  align,
+                  mergeState,
+                  "trigram"
+                )}
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
+            </>
+          )}
           <MergeField
             label="Planning Approval Steps"
             fieldName="planningApprovalSteps"

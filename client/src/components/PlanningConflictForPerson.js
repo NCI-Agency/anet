@@ -50,7 +50,7 @@ const BasePlanningConflictForPerson = ({ person, report, iconOnly }) => {
 
   if (loading) {
     return (
-      <Tooltip content="Checking for planning conflicts...">
+      <Tooltip content="Checking for planning conflicts…">
         <Spinner intent={Intent.WARNING} size={20} />
       </Tooltip>
     )

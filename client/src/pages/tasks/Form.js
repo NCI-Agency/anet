@@ -183,6 +183,7 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
                       renderSelected={
                         <OrganizationTable
                           organizations={values.taskedOrganizations}
+                          noOrganizationsMessage="No organizations selected"
                           showDelete
                         />
                       }

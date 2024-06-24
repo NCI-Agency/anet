@@ -3,13 +3,19 @@ package mil.dds.anet.database;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.MergedEntity;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.LocationSearchQuery;
 import mil.dds.anet.database.mappers.LocationMapper;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.FkDataLoaderKey;
+import mil.dds.anet.utils.Utils;
+import mil.dds.anet.views.ForeignKeyFetcher;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSearchQuery> {
@@ -74,12 +80,30 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
   public int mergeLocations(Location loserLocation, Location winnerLocation) {
     final String loserLocationUuid = loserLocation.getUuid();
     final String winnerLocationUuid = winnerLocation.getUuid();
+    final Location existingLoserLoc = getByUuid(loserLocationUuid);
+    final Location existingWinnerLoc = getByUuid(winnerLocationUuid);
+    final Map<String, Object> context = AnetObjectEngine.getInstance().getContext();
 
     // Update location
     update(winnerLocation);
 
-    // Update approvalSteps
-    updateForMerge("approvalSteps", "relatedObjectUuid", winnerLocationUuid, loserLocationUuid);
+    // Update approvalSteps (note that this may fail if reports are currently pending at one of the
+    // approvalSteps that are going to be deleted):
+    // - delete approvalSteps of loser
+    final List<ApprovalStep> existingLoserPlanningApprovalSteps =
+        existingLoserLoc.loadPlanningApprovalSteps(context).join();
+    final List<ApprovalStep> existingLoserApprovalSteps =
+        existingLoserLoc.loadApprovalSteps(context).join();
+    Utils.updateApprovalSteps(loserLocation, List.of(), existingLoserPlanningApprovalSteps,
+        List.of(), existingLoserApprovalSteps);
+    // - update approvalSteps of winner
+    final List<ApprovalStep> existingWinnerPlanningApprovalSteps =
+        existingWinnerLoc.loadPlanningApprovalSteps(context).join();
+    final List<ApprovalStep> existingWinnerApprovalSteps =
+        existingWinnerLoc.loadApprovalSteps(context).join();
+    Utils.updateApprovalSteps(winnerLocation, winnerLocation.getPlanningApprovalSteps(),
+        existingWinnerPlanningApprovalSteps, winnerLocation.getApprovalSteps(),
+        existingWinnerApprovalSteps);
 
     // Update reports
     updateForMerge("reports", "locationUuid", winnerLocationUuid, loserLocationUuid);
@@ -101,6 +125,18 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
     updateM2mForMerge("attachmentRelatedObjects", "attachmentUuid", "relatedObjectUuid",
         winnerLocationUuid, loserLocationUuid);
 
+    // Update parentLocations:
+    // - delete locationRelationships where loser was the child
+    deleteForMerge("locationRelationships", "childLocationUuid", loserLocationUuid);
+    // - update the winner's parents from the input
+    Utils.addRemoveElementsByUuid(existingWinnerLoc.loadParentLocations(context).join(),
+        Utils.orIfNull(winnerLocation.getParentLocations(), List.of()),
+        newOrg -> addLocationRelationship(newOrg, winnerLocation),
+        oldOrg -> removeLocationRelationship(oldOrg, winnerLocation));
+    // - update the loser's children to the winner
+    updateForMerge("locationRelationships", "parentLocationUuid", winnerLocationUuid,
+        loserLocationUuid);
+
     // Update customSensitiveInformation for winner
     DaoUtils.saveCustomSensitiveInformation(null, LocationDao.TABLE_NAME, winnerLocationUuid,
         winnerLocation.getCustomSensitiveInformation());
@@ -121,5 +157,75 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
   @Override
   public SubscriptionUpdateGroup getSubscriptionUpdate(Location obj) {
     return getCommonSubscriptionUpdate(obj, TABLE_NAME, "locations.uuid");
+  }
+
+  public CompletableFuture<List<Location>> getChildrenLocations(Map<String, Object> context,
+      String parentLocationUuid) {
+    return new ForeignKeyFetcher<Location>().load(context,
+        FkDataLoaderKey.LOCATION_CHILDREN_LOCATIONS, parentLocationUuid);
+  }
+
+  static class ChildrenLocationsBatcher extends ForeignKeyBatcher<Location> {
+    private static final String sql = "/* batch.getChildrenLocationsForLocation */ SELECT "
+        + LOCATION_FIELDS + ", \"locationRelationships\".\"parentLocationUuid\" "
+        + "FROM locations, \"locationRelationships\" "
+        + "WHERE locations.uuid = \"locationRelationships\".\"childLocationUuid\" "
+        + "  AND \"locationRelationships\".\"parentLocationUuid\" IN ( <foreignKeys> ) "
+        + "ORDER BY locations.name, locations.uuid";
+
+    public ChildrenLocationsBatcher() {
+      super(sql, "foreignKeys", new LocationMapper(), "parentLocationUuid");
+    }
+  }
+
+  public List<List<Location>> getChildrenLocationsForLocation(List<String> foreignKeys) {
+    final ForeignKeyBatcher<Location> childrenLocationsBatcher =
+        AnetObjectEngine.getInstance().getInjector().getInstance(ChildrenLocationsBatcher.class);
+    return childrenLocationsBatcher.getByForeignKeys(foreignKeys);
+  }
+
+  public CompletableFuture<List<Location>> getParentLocations(Map<String, Object> context,
+      String parentLocationUuid) {
+    return new ForeignKeyFetcher<Location>().load(context,
+        FkDataLoaderKey.LOCATION_PARENT_LOCATIONS, parentLocationUuid);
+  }
+
+  static class ParentLocationsBatcher extends ForeignKeyBatcher<Location> {
+    private static final String sql = "/* batch.getParentLocationsForLocation */ SELECT "
+        + LOCATION_FIELDS + ", \"locationRelationships\".\"childLocationUuid\" "
+        + "FROM locations, \"locationRelationships\" "
+        + "WHERE locations.uuid = \"locationRelationships\".\"parentLocationUuid\" "
+        + "  AND \"locationRelationships\".\"childLocationUuid\" IN ( <foreignKeys> ) "
+        + "ORDER BY locations.name, locations.uuid";
+
+    public ParentLocationsBatcher() {
+      super(sql, "foreignKeys", new LocationMapper(), "childLocationUuid");
+    }
+  }
+
+  public List<List<Location>> getParentLocationsForLocation(List<String> foreignKeys) {
+    final ForeignKeyBatcher<Location> parentLocationsBatcher =
+        AnetObjectEngine.getInstance().getInjector().getInstance(ParentLocationsBatcher.class);
+    return parentLocationsBatcher.getByForeignKeys(foreignKeys);
+  }
+
+  @InTransaction
+  public int addLocationRelationship(Location parentLocation, Location childLocation) {
+    return getDbHandle()
+        .createUpdate("/* addLocationRelationship */ INSERT INTO \"locationRelationships\""
+            + " (\"parentLocationUuid\", \"childLocationUuid\") "
+            + "VALUES (:parentLocationUuid, :childLocationUuid)")
+        .bind("parentLocationUuid", parentLocation.getUuid())
+        .bind("childLocationUuid", childLocation.getUuid()).execute();
+  }
+
+  @InTransaction
+  public int removeLocationRelationship(Location parentLocation, Location childLocation) {
+    return getDbHandle()
+        .createUpdate("/* removeLocationRelationship*/ DELETE FROM \"locationRelationships\" "
+            + "WHERE \"parentLocationUuid\" = :parentLocationUuid "
+            + "AND \"childLocationUuid\" = :childLocationUuid")
+        .bind("parentLocationUuid", parentLocation.getUuid())
+        .bind("childLocationUuid", childLocation.getUuid()).execute();
   }
 }

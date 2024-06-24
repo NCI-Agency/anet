@@ -2,37 +2,35 @@ import { gql } from "@apollo/client"
 import API from "api"
 import useSearchFilter from "components/advancedSearch/hooks"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
-import { OrganizationOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
+import { LocationOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
-import OrganizationTable from "components/OrganizationTable"
-import { Organization } from "models"
+import LocationTable from "components/LocationTable"
+import { Location } from "models"
 import PropTypes from "prop-types"
 import React from "react"
-import ORGANIZATIONS_ICON from "resources/organizations.png"
+import LOCATIONS_ICON from "resources/locations.png"
 
-const GQL_GET_ORGANIZATION = gql`
+const GQL_GET_LOCATION = gql`
   query ($uuid: String!) {
-    organization(uuid: $uuid) {
+    location(uuid: $uuid) {
       uuid
-      shortName
-      longName
-      identificationCode
+      name
+      type
     }
   }
 `
 
-const GQL_GET_ORGANIZATIONS = gql`
+const GQL_GET_LOCATIONS = gql`
   query ($uuids: [String]) {
-    organizations(uuids: $uuids) {
+    locations(uuids: $uuids) {
       uuid
-      shortName
-      longName
-      identificationCode
+      name
+      type
     }
   }
 `
 
-const OrganizationFilter = ({
+const LocationFilter = ({
   asFormField,
   queryKey,
   queryRecurseStrategyKey,
@@ -40,7 +38,7 @@ const OrganizationFilter = ({
   value: inputValue,
   multi,
   onChange,
-  orgFilterQueryParams,
+  locFilterQueryParams,
   ...advancedSelectProps
 }) => {
   const defaultValue = {
@@ -63,19 +61,17 @@ const OrganizationFilter = ({
   const advancedSelectFilters = {
     all: {
       label: "All",
-      queryVars: orgFilterQueryParams
+      queryVars: locFilterQueryParams
     }
   }
 
   const AdvancedSelectComponent = multi
     ? AdvancedMultiSelect
     : AdvancedSingleSelect
-  const valueKey = multi ? "uuid" : "shortName"
+  const valueKey = multi ? "uuid" : "name"
   return !asFormField ? (
     <>
-      {multi
-        ? value.value?.map(v => v.shortName).join(" or ")
-        : value.value?.shortName}
+      {multi ? value.value?.map(v => v.name).join(" or ") : value.value?.name}
     </>
   ) : (
     <AdvancedSelectComponent
@@ -86,25 +82,25 @@ const OrganizationFilter = ({
       showRemoveButton={false}
       filterDefs={advancedSelectFilters}
       overlayColumns={["Name"]}
-      overlayRenderRow={OrganizationOverlayRow}
-      objectType={Organization}
+      overlayRenderRow={LocationOverlayRow}
+      objectType={Location}
       valueKey={valueKey}
-      fields={Organization.autocompleteQuery}
-      placeholder="Filter by organization…"
-      addon={ORGANIZATIONS_ICON}
-      onChange={handleChangeOrg}
+      fields={Location.autocompleteQuery}
+      placeholder="Filter by location…"
+      addon={LOCATIONS_ICON}
+      onChange={handleChangeLoc}
       value={value.value}
       renderSelected={
-        <OrganizationTable
-          organizations={value.value}
-          noOrganizationsMessage="No organizations selected"
+        <LocationTable
+          locations={value.value}
+          noLocationsMessage="No locations selected"
           showDelete
         />
       }
     />
   )
 
-  function handleChangeOrg(event) {
+  function handleChangeLoc(event) {
     if (typeof event === "object" || Array.isArray(event)) {
       setValue(prevValue => ({
         ...prevValue,
@@ -113,34 +109,34 @@ const OrganizationFilter = ({
     }
   }
 }
-OrganizationFilter.propTypes = {
+LocationFilter.propTypes = {
   queryKey: PropTypes.string.isRequired,
   queryRecurseStrategyKey: PropTypes.string.isRequired,
   fixedRecurseStrategy: PropTypes.string.isRequired,
   value: PropTypes.any,
   multi: PropTypes.bool,
   onChange: PropTypes.func,
-  orgFilterQueryParams: PropTypes.object,
+  locFilterQueryParams: PropTypes.object,
   asFormField: PropTypes.bool
 }
-OrganizationFilter.defaultProps = {
+LocationFilter.defaultProps = {
   asFormField: true
 }
 
-export const OrganizationMultiFilter = ({ ...props }) => (
-  <OrganizationFilter {...props} multi />
+export const LocationMultiFilter = ({ ...props }) => (
+  <LocationFilter {...props} multi />
 )
 
 export const deserialize = ({ queryKey }, query, key) => {
   if (query[queryKey]) {
-    return API.query(GQL_GET_ORGANIZATION, {
+    return API.query(GQL_GET_LOCATION, {
       uuid: query[queryKey]
     }).then(data => {
-      if (data.organization) {
+      if (data.location) {
         return {
           key,
           value: {
-            value: data.organization,
+            value: data.location,
             toQuery: { ...query }
           }
         }
@@ -154,14 +150,14 @@ export const deserialize = ({ queryKey }, query, key) => {
 
 export const deserializeMulti = ({ queryKey }, query, key) => {
   if (query[queryKey]) {
-    return API.query(GQL_GET_ORGANIZATIONS, {
+    return API.query(GQL_GET_LOCATIONS, {
       uuids: query[queryKey]
     }).then(data => {
-      if (data.organizations) {
+      if (data.locations) {
         return {
           key,
           value: {
-            value: data.organizations,
+            value: data.locations,
             toQuery: { ...query }
           }
         }
@@ -173,4 +169,4 @@ export const deserializeMulti = ({ queryKey }, query, key) => {
   return null
 }
 
-export default OrganizationFilter
+export default LocationFilter

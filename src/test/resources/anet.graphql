@@ -373,6 +373,7 @@ scalar Instant
 type Location {
   approvalSteps: [ApprovalStep]
   attachments: [Attachment]
+  childrenLocations: [Location]
   createdAt: Instant
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformation]
@@ -383,6 +384,7 @@ type Location {
   lng: Float
   name: String
   notes: [Note]
+  parentLocations: [Location]
   planningApprovalSteps: [ApprovalStep]
   status: Status
   trigram: String
@@ -402,6 +404,7 @@ input LocationInput {
   lat: Float
   lng: Float
   name: String
+  parentLocations: [LocationInput]
   planningApprovalSteps: [ApprovalStepInput]
   status: Status
   trigram: String
@@ -414,6 +417,8 @@ input LocationInput {
 input LocationSearchQueryInput {
   emailNetwork: String
   inMyReports: Boolean
+  locationRecurseStrategy: RecurseStrategy
+  locationUuid: [String]
   pageNum: Int
   pageSize: Int
   sortBy: LocationSearchSortBy
@@ -598,7 +603,8 @@ input OrganizationSearchQueryInput {
   hasParentOrg: Boolean
   hasProfile: Boolean
   inMyReports: Boolean
-  locationUuid: String
+  locationRecurseStrategy: RecurseStrategy
+  locationUuid: [String]
   orgRecurseStrategy: RecurseStrategy
   pageNum: Int
   pageSize: Int
@@ -705,7 +711,8 @@ input PersonSearchQueryInput {
   endOfTourDateStart: Instant
   hasBiography: Boolean
   inMyReports: Boolean
-  locationUuid: String
+  locationRecurseStrategy: RecurseStrategy
+  locationUuid: [String]
   matchPositionName: Boolean
   orgRecurseStrategy: RecurseStrategy
   orgUuid: [String]
@@ -793,7 +800,8 @@ input PositionSearchQueryInput {
   hasPendingAssessments: Boolean
   inMyReports: Boolean
   isFilled: Boolean
-  locationUuid: String
+  locationRecurseStrategy: RecurseStrategy
+  locationUuid: [String]
   matchPersonName: Boolean
   orgRecurseStrategy: RecurseStrategy
   organizationUuid: [String]
@@ -1062,7 +1070,8 @@ input ReportSearchQueryInput {
   inMyReports: Boolean
   includeAllDrafts: Boolean
   includeEngagementDayOfWeek: Boolean
-  locationUuid: String
+  locationRecurseStrategy: RecurseStrategy
+  locationUuid: [String]
   orgRecurseStrategy: RecurseStrategy
   orgUuid: [String]
   pageNum: Int

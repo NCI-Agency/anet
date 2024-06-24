@@ -198,7 +198,7 @@ const ApprovalsDefinition = ({
           widget={
             <AdvancedMultiSelect
               fieldName={`${fieldName}.${index}.approvers`}
-              placeholder="Search for the approver's position..."
+              placeholder="Search for the approver's position…"
               value={approvers}
               renderSelected={<ApproverTable approvers={approvers} />}
               overlayColumns={["Name", "Position"]}

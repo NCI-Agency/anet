@@ -453,7 +453,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
         throw new WebApplicationException("No such organization with uuid " + parentOrgUuid,
             Status.NOT_FOUND);
       }
-      orgMap = Utils.buildParentOrgMapping(orgList, parentOrgUuid);
+      orgMap = Utils.buildOrgToParentOrgMapping(orgList, parentOrgUuid);
     } else {
       orgMap = new HashMap<>(); // guaranteed to match no orgs!
     }

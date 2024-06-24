@@ -714,7 +714,7 @@ const ReportForm = ({
                   widget={
                     <AdvancedMultiSelect
                       fieldName="reportPeople"
-                      placeholder="Search for people involved in this engagement..."
+                      placeholder="Search for people involved in this engagement…"
                       value={values.reportPeople}
                       renderSelected={
                         <ReportPeople
@@ -794,7 +794,7 @@ const ReportForm = ({
                     widget={
                       <AdvancedMultiSelect
                         fieldName="tasks"
-                        placeholder={`Search for ${tasksLabel}...`}
+                        placeholder={`Search for ${tasksLabel}…`}
                         value={values.tasks}
                         renderSelected={
                           <NoPaginationTaskTable
@@ -1055,7 +1055,7 @@ const ReportForm = ({
                         widget={
                           <AdvancedMultiSelect
                             fieldName="authorizationGroups"
-                            placeholder="Search for authorization groups..."
+                            placeholder="Search for authorization groups…"
                             value={values.authorizationGroups}
                             renderSelected={
                               <AuthorizationGroupTable

@@ -432,6 +432,7 @@ const PositionShow = ({ pageDispatchers }) => {
                 >
                   <OrganizationTable
                     organizations={position.organizationsAdministrated}
+                    noOrganizationsMessage="No organizations selected"
                   />
                   <EditOrganizationsAdministratedModal
                     position={position}

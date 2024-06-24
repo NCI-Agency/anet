@@ -7,7 +7,7 @@ describe("Preview rollup page", () => {
     await (await Rollup.getRollup()).waitForDisplayed()
   })
 
-  afterEach("On the rollup page...", async() => {
+  afterEach("On the rollup page…", async() => {
     await Rollup.logout()
   })
 
