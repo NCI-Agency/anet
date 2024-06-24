@@ -26,6 +26,7 @@ const GQL_GET_TASK = gql`
       uuid
       shortName
       longName
+      selectable
       description
       status
       plannedCompletion

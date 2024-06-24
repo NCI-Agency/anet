@@ -5835,4 +5835,17 @@
 		<!-- Rolling back is not useful anymore -->
 	</changeSet>
 
+	<changeSet id="add-tasks-selectable" author="gjvoosten">
+		<addColumn tableName="tasks">
+			<column name="selectable" type="boolean" defaultValue="true" />
+		</addColumn>
+
+		<sql>
+			<!-- For backwards compatibility, set the top-level tasks to non-selectable -->
+			UPDATE tasks
+			SET selectable = FALSE
+			WHERE "parentTaskUuid" IS NULL;
+		</sql>
+	</changeSet>
+
 </databaseChangeLog>

@@ -1277,6 +1277,7 @@ type Task {
   projectedCompletion: Instant
   reports(query: ReportSearchQueryInput): [Report]
   responsiblePositions: [Position]
+  selectable: Boolean
   shortName: String
   status: Status
   taskedOrganizations: [Organization]
@@ -1298,6 +1299,7 @@ input TaskInput {
   planningApprovalSteps: [ApprovalStepInput]
   projectedCompletion: Instant
   responsiblePositions: [PositionInput]
+  selectable: Boolean
   shortName: String
   status: Status
   taskedOrganizations: [OrganizationInput]
@@ -1309,7 +1311,6 @@ input TaskInput {
 input TaskSearchQueryInput {
   category: String
   emailNetwork: String
-  hasParentTask: Boolean
   inMyReports: Boolean
   isAssigned: Boolean
   orgRecurseStrategy: RecurseStrategy
@@ -1322,6 +1323,7 @@ input TaskSearchQueryInput {
   projectedCompletionEnd: Instant
   projectedCompletionStart: Instant
   responsiblePositionUuid: String
+  selectable: Boolean
   sortBy: TaskSearchSortBy
   sortOrder: SortOrder
   status: Status
