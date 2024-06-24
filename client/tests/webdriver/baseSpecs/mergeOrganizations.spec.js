@@ -60,7 +60,7 @@ describe("Merge organizations page", () => {
       await MergeOrganizations.getSameOrganizationsToast()
     ).waitForDisplayed()
   })
-  it("Should display fields values of the right organization", async() => {
+  it("Should display field values of the right organization", async() => {
     await (await MergeOrganizations.getTitle()).waitForExist()
     await (await MergeOrganizations.getTitle()).waitForDisplayed()
 
@@ -69,7 +69,7 @@ describe("Merge organizations page", () => {
       await MergeOrganizations.getRightOrganizationField()
     ).setValue(EXAMPLE_ORGANIZATIONS.validRight.search)
     await MergeOrganizations.waitForAdvancedSelectLoading(
-      EXAMPLE_ORGANIZATIONS.validRight.search
+      EXAMPLE_ORGANIZATIONS.validRight.displayedName
     )
     await (await MergeOrganizations.getFirstItemFromAdvancedSelect()).click()
     await browser.pause(500)
@@ -152,7 +152,21 @@ describe("Merge organizations page", () => {
       ).getText()
     ).to.equal(EXAMPLE_ORGANIZATIONS.validRight.parentOrg)
   })
+  it("Should not be able to click merge button when some fields are empty", async() => {
+    // eslint-disable-next-line no-unused-expressions
+    expect(
+      await (
+        await MergeOrganizations.getMergeOrganizationsButton()
+      ).isClickable()
+    ).to.be.false
+  })
   it("Should be able to merge both organizations when winner is left organization", async() => {
+    const checkboxes = await await MergeOrganizations.getCheckboxes()
+    // eslint-disable-next-line no-unused-expressions
+    expect(checkboxes).not.to.be.empty
+    for (const checkbox of checkboxes) {
+      await checkbox.click()
+    }
     await (await MergeOrganizations.getMergeOrganizationsButton()).click()
     await MergeOrganizations.waitForSuccessAlert()
   })

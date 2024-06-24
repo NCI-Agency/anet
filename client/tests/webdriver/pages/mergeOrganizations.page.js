@@ -39,6 +39,10 @@ class MergeOrganizations extends Page {
     )
   }
 
+  async getCheckboxes() {
+    return browser.$$("#mid-merge-org-col input.checkbox")
+  }
+
   async getMergeOrganizationsButton() {
     return browser.$('//button[text()="Merge Organizations"]')
   }

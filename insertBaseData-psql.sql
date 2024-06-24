@@ -677,6 +677,14 @@ INSERT INTO "approvalSteps" (uuid, "relatedObjectUuid", name, type) VALUES
   (uuid_generate_v4(), (SELECT uuid from organizations where "shortName"='Merge Org 1'), 'Merge Org 1 Planning Approvers', 2);
 INSERT INTO "approvalSteps" (uuid, "relatedObjectUuid", name, type) VALUES
   (uuid_generate_v4(), (SELECT uuid from organizations where "shortName"='Merge Org 2'), 'Merge Org 2 Planning Approvers', 2);
+INSERT INTO approvers ("approvalStepUuid", "positionUuid") VALUES
+    ((SELECT uuid from "approvalSteps" WHERE name='Merge Org 1 Approvers'), (SELECT uuid from positions where name = 'EF 1.1 Superuser'));
+INSERT INTO approvers ("approvalStepUuid", "positionUuid") VALUES
+    ((SELECT uuid from "approvalSteps" WHERE name='Merge Org 2 Approvers'), (SELECT uuid from positions where name = 'EF 2.1 Superuser'));
+INSERT INTO approvers ("approvalStepUuid", "positionUuid") VALUES
+    ((SELECT uuid from "approvalSteps" WHERE name='Merge Org 1 Planning Approvers'), (SELECT uuid from positions where name = 'EF 1.1 Superuser'));
+INSERT INTO approvers ("approvalStepUuid", "positionUuid") VALUES
+    ((SELECT uuid from "approvalSteps" WHERE name='Merge Org 2 Planning Approvers'), (SELECT uuid from positions where name = 'EF 2.1 Superuser'));
 
 -- Assign responsible positions for organizations
 INSERT INTO "organizationAdministrativePositions" ("organizationUuid", "positionUuid") VALUES
