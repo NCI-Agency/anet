@@ -1,7 +1,14 @@
 import styled from "@emotion/styled"
-import { ALIGN_OPTIONS, setHeightOfAField } from "mergeUtils"
+import _get from "lodash/get"
+import _isEqual from "lodash/isEqual"
+import {
+  ALIGN_OPTIONS,
+  getActionButton,
+  MERGE_SIDES,
+  setHeightOfAField
+} from "mergeUtils"
 import PropTypes from "prop-types"
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useMemo, useRef, useState } from "react"
 
 const MergeField = ({
   label,
@@ -10,6 +17,7 @@ const MergeField = ({
   align,
   action,
   mergeState,
+  autoMerge,
   dispatchMergeActions,
   className
 }) => {
@@ -33,9 +41,37 @@ const MergeField = ({
     return () => {}
   }, [fieldName, mergeState, dispatchMergeActions])
 
+  // automatically merge when allowed and both sides are equal
+  const canAutoMerge = useMemo(
+    () =>
+      autoMerge &&
+      _isEqual(
+        _get(mergeState[MERGE_SIDES.LEFT], fieldName),
+        _get(mergeState[MERGE_SIDES.RIGHT], fieldName)
+      ),
+    [autoMerge, fieldName, mergeState]
+  )
+  useEffect(() => {
+    if (canAutoMerge && !mergeState.selectedMap[fieldName]) {
+      action?.()
+    }
+  }, [canAutoMerge, action, fieldName, mergeState])
+
+  // show an action button for fields that need to be merged manually
+  const actionButton = useMemo(
+    () =>
+      !canAutoMerge &&
+      action &&
+      getActionButton(action, align, mergeState, fieldName),
+    [canAutoMerge, action, align, fieldName, mergeState]
+  )
+
+  // get selected side (has side effect!)
   const selectedSide = mergeState.getSelectedSide(fieldName)
+
+  // show an orange background for center fields that haven't been merged yet
   const bgColor =
-    selectedSide || align !== ALIGN_OPTIONS.CENTER ? null : "#fed8b1"
+    align === ALIGN_OPTIONS.CENTER && !selectedSide ? "#fed8b1" : null
 
   return (
     <MergeFieldBox
@@ -53,7 +89,7 @@ const MergeField = ({
           {value}
         </ValueBox>
       </div>
-      {action}
+      {actionButton}
     </MergeFieldBox>
   )
 }
@@ -102,8 +138,9 @@ MergeField.propTypes = {
   fieldName: PropTypes.string.isRequired,
   value: PropTypes.node,
   align: PropTypes.oneOf(Object.values(ALIGN_OPTIONS)).isRequired,
-  action: PropTypes.node,
+  action: PropTypes.func,
   mergeState: PropTypes.object,
+  autoMerge: PropTypes.bool,
   dispatchMergeActions: PropTypes.func,
   className: PropTypes.string
 }

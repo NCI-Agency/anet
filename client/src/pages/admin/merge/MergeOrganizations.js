@@ -468,19 +468,14 @@ const OrganizationColumn = ({
             fieldName="shortName"
             value={organization.shortName}
             align={align}
-            action={getActionButton(
-              () => {
-                dispatchMergeActions(
-                  setAMergedField("uuid", organization.uuid, align)
-                )
-                dispatchMergeActions(
-                  setAMergedField("shortName", organization.shortName, align)
-                )
-              },
-              align,
-              mergeState,
-              "shortName"
-            )}
+            action={() => {
+              dispatchMergeActions(
+                setAMergedField("uuid", organization.uuid, align)
+              )
+              dispatchMergeActions(
+                setAMergedField("shortName", organization.shortName, align)
+              )
+            }}
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
           />
@@ -490,17 +485,13 @@ const OrganizationColumn = ({
             fieldName="longName"
             value={organization.longName}
             align={align}
-            action={getActionButton(
-              () => {
-                dispatchMergeActions(
-                  setAMergedField("longName", organization.longName, align)
-                )
-              },
-              align,
-              mergeState,
-              "longName"
-            )}
+            action={() => {
+              dispatchMergeActions(
+                setAMergedField("longName", organization.longName, align)
+              )
+            }}
             mergeState={mergeState}
+            autoMerge
             dispatchMergeActions={dispatchMergeActions}
           />
           <DictionaryField
@@ -511,17 +502,13 @@ const OrganizationColumn = ({
               <LinkTo modelType="Organization" model={organization.parentOrg} />
             }
             align={align}
-            action={getActionButton(
-              () => {
-                dispatchMergeActions(
-                  setAMergedField("parentOrg", organization.parentOrg, align)
-                )
-              },
-              align,
-              mergeState,
-              "parentOrg"
-            )}
+            action={() => {
+              dispatchMergeActions(
+                setAMergedField("parentOrg", organization.parentOrg, align)
+              )
+            }}
             mergeState={mergeState}
+            autoMerge
             dispatchMergeActions={dispatchMergeActions}
           />
           <DictionaryField
@@ -530,17 +517,13 @@ const OrganizationColumn = ({
             fieldName="profile"
             value={<RichTextEditor readOnly value={organization.profile} />}
             align={align}
-            action={getActionButton(
-              () => {
-                dispatchMergeActions(
-                  setAMergedField("profile", organization.profile, align)
-                )
-              },
-              align,
-              mergeState,
-              "profile"
-            )}
+            action={() => {
+              dispatchMergeActions(
+                setAMergedField("profile", organization.profile, align)
+              )
+            }}
             mergeState={mergeState}
+            autoMerge
             dispatchMergeActions={dispatchMergeActions}
           />
           <DictionaryField
@@ -549,17 +532,13 @@ const OrganizationColumn = ({
             fieldName="status"
             value={organization.status}
             align={align}
-            action={getActionButton(
-              () => {
-                dispatchMergeActions(
-                  setAMergedField("status", organization.status, align)
-                )
-              },
-              align,
-              mergeState,
-              "status"
-            )}
+            action={() => {
+              dispatchMergeActions(
+                setAMergedField("status", organization.status, align)
+              )
+            }}
             mergeState={mergeState}
+            autoMerge
             dispatchMergeActions={dispatchMergeActions}
           />
           <DictionaryField
@@ -570,17 +549,13 @@ const OrganizationColumn = ({
               <LinkTo modelType="Location" model={organization.location} />
             }
             align={align}
-            action={getActionButton(
-              () => {
-                dispatchMergeActions(
-                  setAMergedField("location", organization.location, align)
-                )
-              },
-              align,
-              mergeState,
-              "location"
-            )}
+            action={() => {
+              dispatchMergeActions(
+                setAMergedField("location", organization.location, align)
+              )
+            }}
             mergeState={mergeState}
+            autoMerge
             dispatchMergeActions={dispatchMergeActions}
           />
           <DictionaryField
@@ -589,21 +564,17 @@ const OrganizationColumn = ({
             fieldName="identificationCode"
             value={organization.identificationCode}
             align={align}
-            action={getActionButton(
-              () => {
-                dispatchMergeActions(
-                  setAMergedField(
-                    "identificationCode",
-                    organization.identificationCode,
-                    align
-                  )
+            action={() => {
+              dispatchMergeActions(
+                setAMergedField(
+                  "identificationCode",
+                  organization.identificationCode,
+                  align
                 )
-              },
-              align,
-              mergeState,
-              "identificationCode"
-            )}
+              )
+            }}
             mergeState={mergeState}
+            autoMerge
             dispatchMergeActions={dispatchMergeActions}
           />
           <DictionaryField
@@ -617,21 +588,17 @@ const OrganizationColumn = ({
               />
             }
             align={align}
-            action={getActionButton(
-              () => {
-                dispatchMergeActions(
-                  setAMergedField(
-                    "emailAddresses",
-                    organization.emailAddresses,
-                    align
-                  )
+            action={() => {
+              dispatchMergeActions(
+                setAMergedField(
+                  "emailAddresses",
+                  organization.emailAddresses,
+                  align
                 )
-              },
-              align,
-              mergeState,
-              "emailAddresses"
-            )}
+              )
+            }}
             mergeState={mergeState}
+            autoMerge
             dispatchMergeActions={dispatchMergeActions}
           />
           <DictionaryField
@@ -644,21 +611,13 @@ const OrganizationColumn = ({
               ]
             }
             align={align}
-            action={getActionButton(
-              () => {
-                dispatchMergeActions(
-                  setAMergedField(
-                    "app6context",
-                    organization.app6context,
-                    align
-                  )
-                )
-              },
-              align,
-              mergeState,
-              "app6context"
-            )}
+            action={() => {
+              dispatchMergeActions(
+                setAMergedField("app6context", organization.app6context, align)
+              )
+            }}
             mergeState={mergeState}
+            autoMerge
             dispatchMergeActions={dispatchMergeActions}
           />
           <DictionaryField
@@ -671,21 +630,17 @@ const OrganizationColumn = ({
               ]
             }
             align={align}
-            action={getActionButton(
-              () => {
-                dispatchMergeActions(
-                  setAMergedField(
-                    "app6standardIdentity",
-                    organization.app6standardIdentity,
-                    align
-                  )
+            action={() => {
+              dispatchMergeActions(
+                setAMergedField(
+                  "app6standardIdentity",
+                  organization.app6standardIdentity,
+                  align
                 )
-              },
-              align,
-              mergeState,
-              "app6standardIdentity"
-            )}
+              )
+            }}
             mergeState={mergeState}
+            autoMerge
             dispatchMergeActions={dispatchMergeActions}
           />
 
@@ -699,21 +654,17 @@ const OrganizationColumn = ({
               ]
             }
             align={align}
-            action={getActionButton(
-              () => {
-                dispatchMergeActions(
-                  setAMergedField(
-                    "app6symbolSet",
-                    organization.app6symbolSet,
-                    align
-                  )
+            action={() => {
+              dispatchMergeActions(
+                setAMergedField(
+                  "app6symbolSet",
+                  organization.app6symbolSet,
+                  align
                 )
-              },
-              align,
-              mergeState,
-              "app6symbolSet"
-            )}
+              )
+            }}
             mergeState={mergeState}
+            autoMerge
             dispatchMergeActions={dispatchMergeActions}
           />
 
@@ -725,17 +676,13 @@ const OrganizationColumn = ({
               Settings.fields.organization.app6hq.choices[organization.app6hq]
             }
             align={align}
-            action={getActionButton(
-              () => {
-                dispatchMergeActions(
-                  setAMergedField("app6hq", organization.app6hq, align)
-                )
-              },
-              align,
-              mergeState,
-              "app6hq"
-            )}
+            action={() => {
+              dispatchMergeActions(
+                setAMergedField("app6hq", organization.app6hq, align)
+              )
+            }}
             mergeState={mergeState}
+            autoMerge
             dispatchMergeActions={dispatchMergeActions}
           />
 
@@ -749,21 +696,17 @@ const OrganizationColumn = ({
               ]
             }
             align={align}
-            action={getActionButton(
-              () => {
-                dispatchMergeActions(
-                  setAMergedField(
-                    "app6amplifier",
-                    organization.app6amplifier,
-                    align
-                  )
+            action={() => {
+              dispatchMergeActions(
+                setAMergedField(
+                  "app6amplifier",
+                  organization.app6amplifier,
+                  align
                 )
-              },
-              align,
-              mergeState,
-              "app6amplifier"
-            )}
+              )
+            }}
             mergeState={mergeState}
+            autoMerge
             dispatchMergeActions={dispatchMergeActions}
           />
           <DictionaryField
@@ -781,21 +724,17 @@ const OrganizationColumn = ({
               />
             }
             align={align}
-            action={getActionButton(
-              () => {
-                dispatchMergeActions(
-                  setAMergedField(
-                    "administratingPositions",
-                    organization.administratingPositions,
-                    align
-                  )
+            action={() => {
+              dispatchMergeActions(
+                setAMergedField(
+                  "administratingPositions",
+                  organization.administratingPositions,
+                  align
                 )
-              },
-              align,
-              mergeState,
-              "administratingPositions"
-            )}
+              )
+            }}
             mergeState={mergeState}
+            autoMerge
             dispatchMergeActions={dispatchMergeActions}
           />
           <MergeField
@@ -807,20 +746,16 @@ const OrganizationColumn = ({
               />
             }
             align={align}
-            action={getActionButton(
-              () =>
-                dispatchMergeActions(
-                  setAMergedField(
-                    "planningApprovalSteps",
-                    organization.planningApprovalSteps,
-                    align
-                  )
-                ),
-              align,
-              mergeState,
-              "planningApprovalSteps"
-            )}
+            action={() =>
+              dispatchMergeActions(
+                setAMergedField(
+                  "planningApprovalSteps",
+                  organization.planningApprovalSteps,
+                  align
+                )
+              )}
             mergeState={mergeState}
+            autoMerge
             dispatchMergeActions={dispatchMergeActions}
           />
           <MergeField
@@ -828,20 +763,16 @@ const OrganizationColumn = ({
             fieldName="approvalSteps"
             value={<ApprovalSteps approvalSteps={organization.approvalSteps} />}
             align={align}
-            action={getActionButton(
-              () =>
-                dispatchMergeActions(
-                  setAMergedField(
-                    "approvalSteps",
-                    organization.approvalSteps,
-                    align
-                  )
-                ),
-              align,
-              mergeState,
-              "approvalSteps"
-            )}
+            action={() =>
+              dispatchMergeActions(
+                setAMergedField(
+                  "approvalSteps",
+                  organization.approvalSteps,
+                  align
+                )
+              )}
             mergeState={mergeState}
+            autoMerge
             dispatchMergeActions={dispatchMergeActions}
           />
           {Settings.fields.organization.customFields &&
@@ -857,20 +788,16 @@ const OrganizationColumn = ({
                     // To be able to see arrays and objects
                     value={JSON.stringify(fieldValue)}
                     align={align}
-                    action={getActionButton(
-                      () =>
-                        dispatchMergeActions(
-                          setAMergedField(
-                            `${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`,
-                            fieldValue,
-                            align
-                          )
-                        ),
-                      align,
-                      mergeState,
-                      `${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`
-                    )}
+                    action={() =>
+                      dispatchMergeActions(
+                        setAMergedField(
+                          `${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`,
+                          fieldValue,
+                          align
+                        )
+                      )}
                     mergeState={mergeState}
+                    autoMerge
                     dispatchMergeActions={dispatchMergeActions}
                   />
                 )

@@ -215,7 +215,7 @@ const MergePositions = ({ pageDispatchers }) => {
                           setAMergedField(
                             "associatedPositions",
                             mergedAssociatedPositions,
-                            null
+                            "mid"
                           )
                         )}
                       initialMergedAssociatedPositions={
@@ -249,7 +249,7 @@ const MergePositions = ({ pageDispatchers }) => {
                       mainTitle="Pick and Choose people and dates for People History"
                       setHistory={history =>
                         dispatchMergeActions(
-                          setAMergedField("previousPeople", history, null)
+                          setAMergedField("previousPeople", history, "mid")
                         )}
                     />
                   </>
@@ -449,22 +449,17 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
             fieldName="name"
             value={position.name}
             align={align}
-            action={getActionButton(
-              () => {
-                dispatchMergeActions(
-                  setAMergedField("name", position.name, align)
-                )
-                dispatchMergeActions(
-                  setAMergedField("organization", position.organization, align)
-                )
-                dispatchMergeActions(
-                  setAMergedField("type", position.type, align)
-                )
-              },
-              align,
-              mergeState,
-              "name"
-            )}
+            action={() => {
+              dispatchMergeActions(
+                setAMergedField("name", position.name, align)
+              )
+              dispatchMergeActions(
+                setAMergedField("organization", position.organization, align)
+              )
+              dispatchMergeActions(
+                setAMergedField("type", position.type, align)
+              )
+            }}
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
           />
@@ -494,16 +489,12 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
             fieldName="role"
             value={position.humanNameOfRole()}
             align={align}
-            action={getActionButton(
-              () =>
-                dispatchMergeActions(
-                  setAMergedField("role", position.role, align)
-                ),
-              align,
-              mergeState,
-              "role"
-            )}
+            action={() =>
+              dispatchMergeActions(
+                setAMergedField("role", position.role, align)
+              )}
             mergeState={mergeState}
+            autoMerge
             dispatchMergeActions={dispatchMergeActions}
           />
           <DictionaryField
@@ -512,16 +503,12 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
             fieldName="code"
             value={position.code}
             align={align}
-            action={getActionButton(
-              () =>
-                dispatchMergeActions(
-                  setAMergedField("code", position.code, align)
-                ),
-              align,
-              mergeState,
-              "code"
-            )}
+            action={() =>
+              dispatchMergeActions(
+                setAMergedField("code", position.code, align)
+              )}
             mergeState={mergeState}
+            autoMerge
             dispatchMergeActions={dispatchMergeActions}
           />
           <DictionaryField
@@ -530,16 +517,12 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
             fieldName="status"
             value={position.status}
             align={align}
-            action={getActionButton(
-              () =>
-                dispatchMergeActions(
-                  setAMergedField("status", position.status, align)
-                ),
-              align,
-              mergeState,
-              "status"
-            )}
+            action={() =>
+              dispatchMergeActions(
+                setAMergedField("status", position.status, align)
+              )}
             mergeState={mergeState}
+            autoMerge
             dispatchMergeActions={dispatchMergeActions}
           />
           <DictionaryField
@@ -553,21 +536,17 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
               />
             }
             align={align}
-            action={getActionButton(
-              () => {
-                dispatchMergeActions(
-                  setAMergedField(
-                    "emailAddresses",
-                    position.emailAddresses,
-                    align
-                  )
+            action={() => {
+              dispatchMergeActions(
+                setAMergedField(
+                  "emailAddresses",
+                  position.emailAddresses,
+                  align
                 )
-              },
-              align,
-              mergeState,
-              "emailAddresses"
-            )}
+              )
+            }}
             mergeState={mergeState}
+            autoMerge
             dispatchMergeActions={dispatchMergeActions}
           />
           <MergeField
@@ -579,19 +558,14 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
               />
             }
             align={align}
-            action={getActionButton(
-              () =>
-                dispatchMergeActions(
-                  setAMergedField(
-                    "associatedPositions",
-                    position.associatedPositions,
-                    align
-                  )
-                ),
-              align,
-              mergeState,
-              "associatedPositions"
-            )}
+            action={() =>
+              dispatchMergeActions(
+                setAMergedField(
+                  "associatedPositions",
+                  position.associatedPositions,
+                  align
+                )
+              )}
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
           />
@@ -600,19 +574,14 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
             fieldName="previousPeople"
             value={<PreviousPeople history={position.previousPeople} />}
             align={align}
-            action={getActionButton(
-              () =>
-                dispatchMergeActions(
-                  setAMergedField(
-                    "previousPeople",
-                    position.previousPeople,
-                    align
-                  )
-                ),
-              align,
-              mergeState,
-              "previousPeople"
-            )}
+            action={() =>
+              dispatchMergeActions(
+                setAMergedField(
+                  "previousPeople",
+                  position.previousPeople,
+                  align
+                )
+              )}
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
           />
@@ -621,21 +590,17 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
             fieldName="person"
             value={<LinkTo modelType="Person" model={position.person} />}
             align={align}
-            action={getActionButton(
-              () => {
-                dispatchMergeActions(
-                  setAMergedField("person", position.person, align)
-                )
-                // setting person should also set uuid so we select the position's uuid with person assigned
-                dispatchMergeActions(
-                  setAMergedField("uuid", position.uuid, align)
-                )
-              },
-              align,
-              mergeState,
-              "person"
-            )}
+            action={() => {
+              dispatchMergeActions(
+                setAMergedField("person", position.person, align)
+              )
+              // setting person should also set uuid so we select the position's uuid with person assigned
+              dispatchMergeActions(
+                setAMergedField("uuid", position.uuid, align)
+              )
+            }}
             mergeState={mergeState}
+            autoMerge
             dispatchMergeActions={dispatchMergeActions}
           />
           {position.type === Position.TYPE.SUPERUSER && (
@@ -648,20 +613,16 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
                 />
               }
               align={align}
-              action={getActionButton(
-                () =>
-                  dispatchMergeActions(
-                    setAMergedField(
-                      "organizationsAdministrated",
-                      position.organizationsAdministrated,
-                      align
-                    )
-                  ),
-                align,
-                mergeState,
-                "organizationsAdministrated"
-              )}
+              action={() =>
+                dispatchMergeActions(
+                  setAMergedField(
+                    "organizationsAdministrated",
+                    position.organizationsAdministrated,
+                    align
+                  )
+                )}
               mergeState={mergeState}
+              autoMerge
               dispatchMergeActions={dispatchMergeActions}
             />
           )}
@@ -679,20 +640,16 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
                     // To be able to see arrays and objects
                     value={JSON.stringify(fieldValue)}
                     align={align}
-                    action={getActionButton(
-                      () =>
-                        dispatchMergeActions(
-                          setAMergedField(
-                            `${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`,
-                            fieldValue,
-                            align
-                          )
-                        ),
-                      align,
-                      mergeState,
-                      `${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`
-                    )}
+                    action={() =>
+                      dispatchMergeActions(
+                        setAMergedField(
+                          `${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`,
+                          fieldValue,
+                          align
+                        )
+                      )}
                     mergeState={mergeState}
+                    autoMerge
                     dispatchMergeActions={dispatchMergeActions}
                   />
                 )
@@ -704,16 +661,12 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
             fieldName="location"
             value={<LinkTo modelType="Location" model={position.location} />}
             align={align}
-            action={getActionButton(
-              () =>
-                dispatchMergeActions(
-                  setAMergedField("location", position.location, align)
-                ),
-              align,
-              mergeState,
-              "location"
-            )}
+            action={() =>
+              dispatchMergeActions(
+                setAMergedField("location", position.location, align)
+              )}
             mergeState={mergeState}
+            autoMerge
             dispatchMergeActions={dispatchMergeActions}
           />
           {getLeafletMap(
