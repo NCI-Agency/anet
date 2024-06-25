@@ -15,7 +15,6 @@ import LinkTo from "components/LinkTo"
 import MergeField from "components/MergeField"
 import Messages from "components/Messages"
 import {
-  CUSTOM_FIELD_TYPE_DEFAULTS,
   DEFAULT_CUSTOM_FIELDS_PARENT,
   MODEL_TO_OBJECT_TYPE
 } from "components/Model"
@@ -30,9 +29,6 @@ import useMergeObjects, {
   ALIGN_OPTIONS,
   areAllSet,
   getActionButton,
-  getActivationButton,
-  getClearButton,
-  getInfoButton,
   getLeafletMap,
   getOtherSide,
   MERGE_SIDES,
@@ -129,16 +125,6 @@ const MergePositions = ({ pageDispatchers }) => {
               </Callout>
             </div>
           )}
-          {areAllSet(position1, position2, !mergedPosition) && (
-            <div style={{ padding: "16px 5%" }}>
-              <Callout intent={Intent.PRIMARY}>
-                - You must choose a <strong>name</strong> field. It
-                automatically fills organization and type
-                <br />- You also need to select the person from the filled
-                position
-              </Callout>
-            </div>
-          )}
           {areAllSet(position1, position2, mergedPosition) && (
             <fieldset>
               <DictionaryField
@@ -146,7 +132,6 @@ const MergePositions = ({ pageDispatchers }) => {
                 dictProps={Settings.fields.position.name}
                 value={mergedPosition.name}
                 align={ALIGN_OPTIONS.CENTER}
-                action={getInfoButton("Name is required.")}
                 fieldName="name"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
@@ -161,7 +146,6 @@ const MergePositions = ({ pageDispatchers }) => {
                   />
                 }
                 align={ALIGN_OPTIONS.CENTER}
-                action={getInfoButton("Organization is required.")}
                 fieldName="organization"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
@@ -171,7 +155,6 @@ const MergePositions = ({ pageDispatchers }) => {
                 dictProps={Settings.fields.position.type}
                 value={mergedPosition.type}
                 align={ALIGN_OPTIONS.CENTER}
-                action={getInfoButton("Type is required.")}
                 fieldName="type"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
@@ -181,9 +164,6 @@ const MergePositions = ({ pageDispatchers }) => {
                 dictProps={Settings.fields.position.role}
                 value={Position.humanNameOfRole(mergedPosition.role)}
                 align={ALIGN_OPTIONS.CENTER}
-                action={getInfoButton(
-                  `${Settings.fields.position.role?.label} is required.`
-                )}
                 fieldName="role"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
@@ -193,9 +173,6 @@ const MergePositions = ({ pageDispatchers }) => {
                 dictProps={Settings.fields.position.code}
                 value={mergedPosition.code}
                 align={ALIGN_OPTIONS.CENTER}
-                action={getClearButton(() =>
-                  dispatchMergeActions(setAMergedField("code", "", null))
-                )}
                 fieldName="code"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
@@ -205,20 +182,6 @@ const MergePositions = ({ pageDispatchers }) => {
                 dictProps={Settings.fields.position.status}
                 value={mergedPosition.status}
                 align={ALIGN_OPTIONS.CENTER}
-                action={getActivationButton(
-                  Position.isActive(mergedPosition),
-                  () =>
-                    dispatchMergeActions(
-                      setAMergedField(
-                        "status",
-                        Position.isActive(mergedPosition)
-                          ? Position.STATUS.INACTIVE
-                          : Position.STATUS.ACTIVE,
-                        null
-                      )
-                    ),
-                  Position.getInstanceName
-                )}
                 fieldName="status"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
@@ -233,11 +196,6 @@ const MergePositions = ({ pageDispatchers }) => {
                   />
                 }
                 align={ALIGN_OPTIONS.CENTER}
-                action={getClearButton(() =>
-                  dispatchMergeActions(
-                    setAMergedField("emailAddresses", [], null)
-                  )
-                )}
                 fieldName="emailAddresses"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
@@ -267,11 +225,6 @@ const MergePositions = ({ pageDispatchers }) => {
                   </>
                 }
                 align={ALIGN_OPTIONS.CENTER}
-                action={getClearButton(() =>
-                  dispatchMergeActions(
-                    setAMergedField("associatedPositions", [], null)
-                  )
-                )}
                 fieldName="associatedPositions"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
@@ -302,11 +255,6 @@ const MergePositions = ({ pageDispatchers }) => {
                   </>
                 }
                 align={ALIGN_OPTIONS.CENTER}
-                action={getClearButton(() =>
-                  dispatchMergeActions(
-                    setAMergedField("previousPeople", [], null)
-                  )
-                )}
                 fieldName="previousPeople"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
@@ -317,9 +265,6 @@ const MergePositions = ({ pageDispatchers }) => {
                   <LinkTo modelType="Person" model={mergedPosition.person} />
                 }
                 align={ALIGN_OPTIONS.CENTER}
-                action={getClearButton(() =>
-                  dispatchMergeActions(setAMergedField("person", "", null))
-                )}
                 fieldName="person"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
@@ -336,11 +281,6 @@ const MergePositions = ({ pageDispatchers }) => {
                     />
                   }
                   align={ALIGN_OPTIONS.CENTER}
-                  action={getClearButton(() =>
-                    dispatchMergeActions(
-                      setAMergedField("organizationsAdministrated", [], null)
-                    )
-                  )}
                   mergeState={mergeState}
                   dispatchMergeActions={dispatchMergeActions}
                 />
@@ -358,15 +298,6 @@ const MergePositions = ({ pageDispatchers }) => {
                         label={fieldConfig.label || fieldName}
                         value={JSON.stringify(fieldValue)}
                         align={ALIGN_OPTIONS.CENTER}
-                        action={getClearButton(() =>
-                          dispatchMergeActions(
-                            setAMergedField(
-                              `${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`,
-                              CUSTOM_FIELD_TYPE_DEFAULTS[fieldConfig.type],
-                              null
-                            )
-                          )
-                        )}
                         fieldName={`${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`}
                         mergeState={mergeState}
                         dispatchMergeActions={dispatchMergeActions}
@@ -384,9 +315,6 @@ const MergePositions = ({ pageDispatchers }) => {
                   />
                 }
                 align={ALIGN_OPTIONS.CENTER}
-                action={getClearButton(() =>
-                  dispatchMergeActions(setAMergedField("location", "", null))
-                )}
                 fieldName="location"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
@@ -413,16 +341,7 @@ const MergePositions = ({ pageDispatchers }) => {
           style={{ width: "98%", margin: "16px 1%" }}
           variant="primary"
           onClick={mergePositions}
-          disabled={
-            !areAllSet(
-              position1,
-              position2,
-              mergedPosition?.name,
-              mergedPosition?.type,
-              mergedPosition?.role,
-              mergedPosition?.status
-            )
-          }
+          disabled={mergeState.notAllSet()}
         >
           Merge Positions
         </Button>
@@ -434,15 +353,7 @@ const MergePositions = ({ pageDispatchers }) => {
     if (unassignedPerson(position1, position2, mergedPosition)) {
       return
     }
-    let loser
-    if (mergedPosition.uuid) {
-      // uuid only gets set by person field, loser must be the position with different uuid
-      loser = mergedPosition.uuid === position1.uuid ? position2 : position1
-    } else {
-      // if not set, means no person in both positions, doesn't matter which one is loser
-      mergedPosition.uuid = position1.uuid
-      loser = position2
-    }
+    const loser = mergedPosition.uuid === position1.uuid ? position2 : position1
     // serialize form custom fields before query, and remove unserialized field
     mergedPosition.customFields = customFieldsJSONString(mergedPosition)
 

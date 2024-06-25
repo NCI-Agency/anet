@@ -1,8 +1,7 @@
-import { Icon, Intent, Tooltip } from "@blueprintjs/core"
+import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import Leaflet, { DEFAULT_MAP_STYLE } from "components/Leaflet"
 import { MODEL_TO_OBJECT_TYPE } from "components/Model"
-import RemoveButton from "components/RemoveButton"
 import _cloneDeep from "lodash/cloneDeep"
 import _escape from "lodash/escape"
 import _get from "lodash/get"
@@ -323,43 +322,6 @@ export function areAllSet(...args) {
     }
     return !_isEmpty(item)
   })
-}
-
-export function getInfoButton(infoText) {
-  return (
-    <Tooltip content={infoText} intent={Intent.PRIMARY}>
-      <Button variant="default">
-        <Icon icon={IconNames.INFO_SIGN} intent={Intent.PRIMARY} />
-      </Button>
-    </Tooltip>
-  )
-}
-
-export function getClearButton(onClear) {
-  return (
-    <Tooltip content="Clear field value" intent={Intent.DANGER}>
-      <RemoveButton onClick={onClear} />
-    </Tooltip>
-  )
-}
-
-export function getActivationButton(isActive, onClickAction, instanceName) {
-  return (
-    <Tooltip
-      content={
-        isActive ? `Deactivate ${instanceName}` : `Activate ${instanceName}`
-      }
-      intent={isActive ? Intent.DANGER : Intent.SUCCESS}
-    >
-      <Button
-        variant={isActive ? "outline-danger" : "outline-success"}
-        onClick={onClickAction}
-        className="activate-field-button"
-      >
-        <Icon icon={isActive ? IconNames.STOP : IconNames.PLAY} />
-      </Button>
-    </Tooltip>
-  )
 }
 
 export function getActionButton(

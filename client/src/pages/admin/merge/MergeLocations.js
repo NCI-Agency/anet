@@ -13,7 +13,6 @@ import LocationTable from "components/LocationTable"
 import MergeField from "components/MergeField"
 import Messages from "components/Messages"
 import {
-  CUSTOM_FIELD_TYPE_DEFAULTS,
   DEFAULT_CUSTOM_FIELDS_PARENT,
   MODEL_TO_OBJECT_TYPE
 } from "components/Model"
@@ -30,9 +29,6 @@ import useMergeObjects, {
   ALIGN_OPTIONS,
   areAllSet,
   getActionButton,
-  getActivationButton,
-  getClearButton,
-  getInfoButton,
   getLeafletMap,
   MERGE_SIDES,
   selectAllFields,
@@ -147,9 +143,6 @@ const MergeLocations = ({ pageDispatchers }) => {
                 dictProps={Settings.fields.location.name}
                 value={mergedLocation.name}
                 align={ALIGN_OPTIONS.CENTER}
-                action={getInfoButton(
-                  `${Settings.fields.location.name?.label} is required.`
-                )}
                 fieldName="name"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
@@ -160,9 +153,6 @@ const MergeLocations = ({ pageDispatchers }) => {
                 dictProps={Settings.fields.location.type}
                 value={Location.humanNameOfType(mergedLocation.type)}
                 align={ALIGN_OPTIONS.CENTER}
-                action={getInfoButton(
-                  `${Settings.fields.location.type?.label} is required.`
-                )}
                 fieldName="type"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
@@ -184,13 +174,6 @@ const MergeLocations = ({ pageDispatchers }) => {
                     }}
                   />
                 }
-                action={getClearButton(() => {
-                  dispatchMergeActions(
-                    setAMergedField("displayedCoordinate", null, null)
-                  )
-                  dispatchMergeActions(setAMergedField("lat", null, null))
-                  dispatchMergeActions(setAMergedField("lng", null, null))
-                })}
                 align={ALIGN_OPTIONS.CENTER}
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
@@ -206,20 +189,6 @@ const MergeLocations = ({ pageDispatchers }) => {
                 fieldName="status"
                 value={mergedLocation.status}
                 align={ALIGN_OPTIONS.CENTER}
-                action={getActivationButton(
-                  Location.isActive(mergedLocation),
-                  () =>
-                    dispatchMergeActions(
-                      setAMergedField(
-                        "status",
-                        Location.isActive(mergedLocation)
-                          ? Location.STATUS.INACTIVE
-                          : Location.STATUS.ACTIVE,
-                        null
-                      )
-                    ),
-                  Location.getInstanceName
-                )}
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
@@ -232,11 +201,6 @@ const MergeLocations = ({ pageDispatchers }) => {
                   />
                 }
                 align={ALIGN_OPTIONS.CENTER}
-                action={getClearButton(() =>
-                  dispatchMergeActions(
-                    setAMergedField("parentLocations", [], null)
-                  )
-                )}
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
@@ -247,9 +211,6 @@ const MergeLocations = ({ pageDispatchers }) => {
                   <RichTextEditor readOnly value={mergedLocation.description} />
                 }
                 align={ALIGN_OPTIONS.CENTER}
-                action={getClearButton(() =>
-                  dispatchMergeActions(setAMergedField("description", "", null))
-                )}
                 fieldName="description"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
@@ -261,9 +222,6 @@ const MergeLocations = ({ pageDispatchers }) => {
                     dictProps={Settings.fields.location.digram}
                     value={mergedLocation.digram}
                     align={ALIGN_OPTIONS.CENTER}
-                    action={getClearButton(() =>
-                      dispatchMergeActions(setAMergedField("digram", "", null))
-                    )}
                     fieldName="digram"
                     mergeState={mergeState}
                     dispatchMergeActions={dispatchMergeActions}
@@ -273,9 +231,6 @@ const MergeLocations = ({ pageDispatchers }) => {
                     dictProps={Settings.fields.location.trigram}
                     value={mergedLocation.trigram}
                     align={ALIGN_OPTIONS.CENTER}
-                    action={getClearButton(() =>
-                      dispatchMergeActions(setAMergedField("trigram", "", null))
-                    )}
                     fieldName="trigram"
                     mergeState={mergeState}
                     dispatchMergeActions={dispatchMergeActions}
@@ -291,11 +246,6 @@ const MergeLocations = ({ pageDispatchers }) => {
                   />
                 }
                 align={ALIGN_OPTIONS.CENTER}
-                action={getClearButton(() =>
-                  dispatchMergeActions(
-                    setAMergedField("planningApprovalSteps", [], null)
-                  )
-                )}
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
@@ -306,11 +256,6 @@ const MergeLocations = ({ pageDispatchers }) => {
                   <ApprovalSteps approvalSteps={mergedLocation.approvalSteps} />
                 }
                 align={ALIGN_OPTIONS.CENTER}
-                action={getClearButton(() =>
-                  dispatchMergeActions(
-                    setAMergedField("approvalSteps", [], null)
-                  )
-                )}
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
@@ -327,15 +272,6 @@ const MergeLocations = ({ pageDispatchers }) => {
                         label={fieldConfig.label || fieldName}
                         value={JSON.stringify(fieldValue)}
                         align={ALIGN_OPTIONS.CENTER}
-                        action={getClearButton(() =>
-                          dispatchMergeActions(
-                            setAMergedField(
-                              `${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`,
-                              CUSTOM_FIELD_TYPE_DEFAULTS[fieldConfig.type],
-                              null
-                            )
-                          )
-                        )}
                         fieldName={`${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`}
                         mergeState={mergeState}
                         dispatchMergeActions={dispatchMergeActions}
@@ -363,14 +299,7 @@ const MergeLocations = ({ pageDispatchers }) => {
           style={{ width: "98%", margin: "16px 1%" }}
           variant="primary"
           onClick={mergeLocations}
-          disabled={
-            !areAllSet(
-              location1,
-              location2,
-              mergedLocation?.name,
-              mergedLocation?.type
-            )
-          }
+          disabled={mergeState.notAllSet()}
         >
           Merge Locations
         </Button>
