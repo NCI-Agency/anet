@@ -1,10 +1,13 @@
 import LinkTo from "components/LinkTo"
+import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
 import React from "react"
 import { Table } from "react-bootstrap"
 
 function ApprovalSteps({ approvalSteps }) {
-  return (
+  return _isEmpty(approvalSteps) ? (
+    <em>No approval steps found</em>
+  ) : (
     <div style={{ display: "flex", flexFlow: "column" }}>
       {approvalSteps.map((step, idx) => renderApprovalSteps(step, idx))}
     </div>

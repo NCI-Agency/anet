@@ -1,4 +1,5 @@
 import LinkTo from "components/LinkTo"
+import _isEmpty from "lodash/isEmpty"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React from "react"
@@ -6,7 +7,9 @@ import { Table } from "react-bootstrap"
 import Settings from "settings"
 
 function PreviousPeople({ history: previousPeople, action }) {
-  return (
+  return _isEmpty(previousPeople) ? (
+    <em>No people found</em>
+  ) : (
     <Table striped hover responsive>
       <thead>
         <tr>

@@ -1,4 +1,5 @@
 import LinkTo from "components/LinkTo"
+import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
 import React from "react"
 import { Table } from "react-bootstrap"
@@ -9,7 +10,9 @@ const ACTION_SIDES = {
 }
 
 const AssociatedPositions = ({ associatedPositions, action, actionSide }) => {
-  return (
+  return _isEmpty(associatedPositions) ? (
+    <em>No positions found</em>
+  ) : (
     <Table striped hover responsive>
       <thead>
         <tr>
