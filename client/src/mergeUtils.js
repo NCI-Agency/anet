@@ -1,23 +1,18 @@
 import { Icon, Intent, Tooltip } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import Leaflet, { DEFAULT_MAP_STYLE } from "components/Leaflet"
-import {
-  DEFAULT_CUSTOM_FIELDS_PARENT,
-  MODEL_TO_OBJECT_TYPE
-} from "components/Model"
+import { MODEL_TO_OBJECT_TYPE } from "components/Model"
 import RemoveButton from "components/RemoveButton"
 import _cloneDeep from "lodash/cloneDeep"
 import _escape from "lodash/escape"
 import _get from "lodash/get"
 import _isEmpty from "lodash/isEmpty"
 import _set from "lodash/set"
-import _unset from "lodash/unset"
 import { Location } from "models"
 import React, { useCallback, useReducer } from "react"
 import { Button } from "react-bootstrap"
 import { toast } from "react-toastify"
 import Settings from "settings"
-import utils from "utils"
 
 export const MERGE_SIDES = {
   LEFT: "left",
@@ -37,9 +32,7 @@ const ACTIONS = {
   SET_MERGEABLE: 1,
   SELECT_ALL_FIELDS: 2,
   SET_A_MERGED_FIELD: 3,
-  CLEAR_A_MERGED_FIELD: 4,
-  SET_HEIGHT_OF_A_FIELD: 5,
-  TOGGLE_BLANK_MERGED_FIELD: 6
+  SET_HEIGHT_OF_A_FIELD: 4
 }
 
 export function setMergeable(data, side) {
@@ -73,15 +66,6 @@ export function setAMergedField(fieldName, data, side) {
   }
 }
 
-export function clearAMergedField(fieldName) {
-  return {
-    type: ACTIONS.CLEAR_A_MERGED_FIELD,
-    payload: {
-      fieldName
-    }
-  }
-}
-
 export function setHeightOfAField(fieldName, data) {
   return {
     type: ACTIONS.SET_HEIGHT_OF_A_FIELD,
@@ -92,41 +76,27 @@ export function setHeightOfAField(fieldName, data) {
   }
 }
 
-export function toggleBlankMergedField(fieldName) {
-  return {
-    type: ACTIONS.TOGGLE_BLANK_MERGED_FIELD,
-    payload: {
-      fieldName
-    }
-  }
-}
-
 const INITIAL_STATE = {
   [MERGE_SIDES.LEFT]: null, // initial value of left mergeable
   [MERGE_SIDES.RIGHT]: null,
   merged: null,
   heightMap: null, // keep track of fields height, maximum heighted field of 2 columns wins
   selectedMap: {}, // keep track of which col field selected, [fieldName]: "left", "right" or none can be selected
-  blankState: {}, // keep track of which fields have been explicitly set to leave blank
-  // callbacks to handle blankState
-  getBlankState: function(fieldName) {
-    if (!Object.hasOwn(this.blankState, fieldName)) {
-      this.blankState[fieldName] = false
+  // callbacks to handle selectedMap
+  getSelectedSide: function(fieldName) {
+    if (!Object.hasOwn(this.selectedMap, fieldName)) {
+      this.selectedMap[fieldName] = null
     }
-    return this.blankState[fieldName]
+    return this.selectedMap[fieldName]
   },
-  isUnset: function(fieldName) {
-    // has field been explicitly selected from either side?
-    return !this.selectedMap[fieldName]
-  },
-  notAllSetOrBlank: function(...requiredFields) {
+  notAllSet: function() {
     return (
-      requiredFields.some(fieldName =>
-        utils.isNullOrUndefined(_get(this.merged, fieldName))
-      ) ||
-      Object.keys(this.blankState).find(
-        fieldName => this.isUnset(fieldName) && !this.blankState[fieldName]
-      )
+      !areAllSet(
+        this.merged,
+        this[MERGE_SIDES.LEFT],
+        this[MERGE_SIDES.RIGHT],
+        this.selectedMap
+      ) || Object.values(this.selectedMap).some(side => !side)
     )
   }
 }
@@ -138,18 +108,18 @@ function reducer(state, action) {
       const newState = { ...state, [action.payload.side]: action.payload.data }
       // if a mergeable changes, we want to clear the merged as well
       newState.merged = null
-      newState.selectedMap = getInitialMapOfFieldNames(
-        action.payload.data ?? {}
-      )
-      newState.blankState = {}
+      Object.keys(state.selectedMap).forEach(fieldName => {
+        newState.selectedMap[fieldName] = null
+      })
       return newState
     }
     case ACTIONS.SELECT_ALL_FIELDS: {
-      const newState = { ...state, merged: action.payload.data }
+      const newState = { ...state, merged: { uuid: action.payload.data.uuid } }
       // Since we selected everything from one side, selectedMap should point to that side
       Object.keys(state.selectedMap).forEach(fieldName => {
+        const fieldValue = _get(action.payload.data, fieldName)
+        _set(newState.merged, fieldName, fieldValue)
         newState.selectedMap[fieldName] = action.payload.side
-        newState.blankState[fieldName] = false
       })
       return newState
     }
@@ -161,24 +131,6 @@ function reducer(state, action) {
         ...state.selectedMap,
         [action.payload.fieldName]: action.payload.side
       }
-      newState.blankState = {
-        ...state.blankState,
-        [action.payload.fieldName]: false
-      }
-      return newState
-    }
-    case ACTIONS.CLEAR_A_MERGED_FIELD: {
-      const newState = { ...state }
-      newState.merged = { ..._cloneDeep(state.merged) }
-      _unset(newState.merged, action.payload.fieldName)
-      newState.selectedMap = {
-        ...state.selectedMap,
-        [action.payload.fieldName]: null
-      }
-      newState.blankState = {
-        ...state.blankState,
-        [action.payload.fieldName]: false
-      }
       return newState
     }
     case ACTIONS.SET_HEIGHT_OF_A_FIELD: {
@@ -187,16 +139,6 @@ function reducer(state, action) {
         heightMap: {
           ...state.heightMap,
           [action.payload.fieldName]: action.payload.data
-        }
-      }
-    }
-    case ACTIONS.TOGGLE_BLANK_MERGED_FIELD: {
-      return {
-        ...state,
-        blankState: {
-          ...state.blankState,
-          [action.payload.fieldName]:
-            !state.blankState[action.payload.fieldName]
         }
       }
     }
@@ -464,32 +406,6 @@ export function getLeafletMap(mapId, location, hideWhenEmpty) {
   ) : (
     <div style={hideWhenEmpty ? HIDDEN_STYLE : DEFAULT_MAP_STYLE} />
   )
-}
-
-// Maps normal and custom field names to null for initialization
-function getInitialMapOfFieldNames(obj) {
-  // let's first map non-custom fields
-  const map = Object.keys(obj).reduce((accum, fieldName) => {
-    if (fieldName === DEFAULT_CUSTOM_FIELDS_PARENT) {
-      return accum
-    } else {
-      accum[fieldName] = null
-      return accum
-    }
-  }, {})
-
-  // if it has custom fields, we should initialize those as well
-  if (obj[DEFAULT_CUSTOM_FIELDS_PARENT]) {
-    Object.keys(obj[DEFAULT_CUSTOM_FIELDS_PARENT]).reduce(
-      (accum, fieldName) => {
-        const combinedFieldName = `${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`
-        accum[combinedFieldName] = null
-        return accum
-      },
-      map
-    )
-  }
-  return map
 }
 
 export default useMergeObjects

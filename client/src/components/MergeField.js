@@ -1,10 +1,5 @@
 import styled from "@emotion/styled"
-import Checkbox from "components/Checkbox"
-import {
-  ALIGN_OPTIONS,
-  setHeightOfAField,
-  toggleBlankMergedField
-} from "mergeUtils"
+import { ALIGN_OPTIONS, setHeightOfAField } from "mergeUtils"
 import PropTypes from "prop-types"
 import React, { useEffect, useRef, useState } from "react"
 
@@ -15,7 +10,6 @@ const MergeField = ({
   align,
   action,
   mergeState,
-  showBlankStateToggle,
   dispatchMergeActions,
   className
 }) => {
@@ -39,6 +33,10 @@ const MergeField = ({
     return () => {}
   }, [fieldName, mergeState, dispatchMergeActions])
 
+  const selectedSide = mergeState.getSelectedSide(fieldName)
+  const bgColor =
+    selectedSide || align !== ALIGN_OPTIONS.CENTER ? null : "#fed8b1"
+
   return (
     <MergeFieldBox
       align={align}
@@ -46,21 +44,14 @@ const MergeField = ({
       /* We first let its height be auto to get the natural height */
       /* If it is bigger than already existing one's height in the other column */
       /* we set other field to this height in useEffect */
-      fieldHeight={`${height}`}
+      fieldHeight={height}
+      bgColor={bgColor}
     >
       <div style={{ flex: "1 1 auto" }}>
         <LabelBox align={align}>{label}</LabelBox>
         <ValueBox className={className} align={align}>
           {value}
         </ValueBox>
-        {showBlankStateToggle && (
-          <Checkbox
-            label="Intentionally left blank"
-            checked={mergeState.getBlankState(fieldName)}
-            onChange={() =>
-              dispatchMergeActions(toggleBlankMergedField(fieldName))}
-          />
-        )}
       </div>
       {action}
     </MergeFieldBox>
@@ -86,6 +77,7 @@ const MergeFieldBox = styled.div`
   align-items: center;
   padding: 8px 0;
   height: ${props => props.fieldHeight};
+  background-color: ${props => props.bgColor};
 `
 
 const LabelBox = styled.div`
@@ -112,7 +104,6 @@ MergeField.propTypes = {
   align: PropTypes.oneOf(Object.values(ALIGN_OPTIONS)).isRequired,
   action: PropTypes.node,
   mergeState: PropTypes.object,
-  showBlankStateToggle: PropTypes.bool,
   dispatchMergeActions: PropTypes.func,
   className: PropTypes.string
 }

@@ -25,14 +25,10 @@ import {
 } from "components/Page"
 import PositionTable from "components/PositionTable"
 import RichTextEditor from "components/RichTextEditor"
-import _isEmpty from "lodash/isEmpty"
 import useMergeObjects, {
   ALIGN_OPTIONS,
   areAllSet,
-  clearAMergedField,
   getActionButton,
-  getClearButton,
-  getInfoButton,
   MERGE_SIDES,
   mergedOrganizationIsValid,
   selectAllFields,
@@ -125,24 +121,6 @@ const MergeOrganizations = ({ pageDispatchers }) => {
               </Callout>
             </div>
           )}
-          {areAllSet(organization1, organization2, !mergedOrganization) && (
-            <div style={{ padding: "16px 5%" }}>
-              <Callout intent="primary">
-                Required fields are:
-                <ul>
-                  <li>{Settings.fields.organization.shortName?.label}</li>
-                </ul>
-              </Callout>
-            </div>
-          )}
-          {mergeState.notAllSetOrBlank() && (
-            <div style={{ padding: "16px 5%" }}>
-              <Callout intent="primary">
-                Empty fields should have the checkbox checked if you want to
-                leave them empty.
-              </Callout>
-            </div>
-          )}
           {areAllSet(organization1, organization2, mergedOrganization) && (
             <fieldset>
               <DictionaryField
@@ -150,9 +128,6 @@ const MergeOrganizations = ({ pageDispatchers }) => {
                 dictProps={Settings.fields.organization.shortName}
                 value={mergedOrganization.shortName}
                 align={ALIGN_OPTIONS.CENTER}
-                action={getInfoButton(
-                  `${Settings.fields.organization.shortName?.label} is required.`
-                )}
                 fieldName="shortName"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
@@ -162,26 +137,18 @@ const MergeOrganizations = ({ pageDispatchers }) => {
                 dictProps={Settings.fields.organization.longName}
                 value={mergedOrganization.longName}
                 align={ALIGN_OPTIONS.CENTER}
-                action={getClearButton(() =>
-                  dispatchMergeActions(clearAMergedField("longName"))
-                )}
                 fieldName="longName"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
-                showBlankStateToggle={mergeState.isUnset("longName")}
               />
               <DictionaryField
                 wrappedComponent={MergeField}
                 dictProps={Settings.fields.organization.identificationCode}
                 value={mergedOrganization.identificationCode}
                 align={ALIGN_OPTIONS.CENTER}
-                action={getClearButton(() =>
-                  dispatchMergeActions(clearAMergedField("identificationCode"))
-                )}
                 fieldName="identificationCode"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
-                showBlankStateToggle={mergeState.isUnset("identificationCode")}
               />
               <DictionaryField
                 wrappedComponent={MergeField}
@@ -193,13 +160,9 @@ const MergeOrganizations = ({ pageDispatchers }) => {
                   />
                 }
                 align={ALIGN_OPTIONS.CENTER}
-                action={getClearButton(() =>
-                  dispatchMergeActions(clearAMergedField("parentOrg"))
-                )}
                 fieldName="parentOrg"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
-                showBlankStateToggle={mergeState.isUnset("parentOrg")}
               />
               <DictionaryField
                 wrappedComponent={MergeField}
@@ -208,22 +171,15 @@ const MergeOrganizations = ({ pageDispatchers }) => {
                   <RichTextEditor readOnly value={mergedOrganization.profile} />
                 }
                 align={ALIGN_OPTIONS.CENTER}
-                action={getClearButton(() =>
-                  dispatchMergeActions(clearAMergedField("profile"))
-                )}
                 fieldName="profile"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
-                showBlankStateToggle={mergeState.isUnset("profile")}
               />
               <DictionaryField
                 wrappedComponent={MergeField}
                 dictProps={Settings.fields.organization.status}
                 value={mergedOrganization.status}
                 align={ALIGN_OPTIONS.CENTER}
-                action={getInfoButton(
-                  `${Settings.fields.organization.status?.label} is required.`
-                )}
                 fieldName="status"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
@@ -238,13 +194,9 @@ const MergeOrganizations = ({ pageDispatchers }) => {
                   />
                 }
                 align={ALIGN_OPTIONS.CENTER}
-                action={getClearButton(() =>
-                  dispatchMergeActions(clearAMergedField("location"))
-                )}
                 fieldName="location"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
-                showBlankStateToggle={mergeState.isUnset("location")}
               />
               <DictionaryField
                 wrappedComponent={MergeField}
@@ -256,13 +208,9 @@ const MergeOrganizations = ({ pageDispatchers }) => {
                   />
                 }
                 align={ALIGN_OPTIONS.CENTER}
-                action={getClearButton(() =>
-                  dispatchMergeActions(clearAMergedField("emailAddresses"))
-                )}
                 fieldName="emailAddresses"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
-                showBlankStateToggle={mergeState.isUnset("emailAddresses")}
               />
               <DictionaryField
                 wrappedComponent={MergeField}
@@ -273,13 +221,9 @@ const MergeOrganizations = ({ pageDispatchers }) => {
                   ]
                 }
                 align={ALIGN_OPTIONS.CENTER}
-                action={getClearButton(() =>
-                  dispatchMergeActions(clearAMergedField("app6context"))
-                )}
                 fieldName="app6context"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
-                showBlankStateToggle={mergeState.isUnset("app6context")}
               />
 
               <DictionaryField
@@ -291,17 +235,9 @@ const MergeOrganizations = ({ pageDispatchers }) => {
                   ]
                 }
                 align={ALIGN_OPTIONS.CENTER}
-                action={getClearButton(() =>
-                  dispatchMergeActions(
-                    clearAMergedField("app6standardIdentity")
-                  )
-                )}
                 fieldName="app6standardIdentity"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
-                showBlankStateToggle={mergeState.isUnset(
-                  "app6standardIdentity"
-                )}
               />
 
               <DictionaryField
@@ -313,13 +249,9 @@ const MergeOrganizations = ({ pageDispatchers }) => {
                   ]
                 }
                 align={ALIGN_OPTIONS.CENTER}
-                action={getClearButton(() =>
-                  dispatchMergeActions(clearAMergedField("app6symbolSet"))
-                )}
                 fieldName="app6symbolSet"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
-                showBlankStateToggle={mergeState.isUnset("app6symbolSet")}
               />
 
               <DictionaryField
@@ -331,13 +263,9 @@ const MergeOrganizations = ({ pageDispatchers }) => {
                   ]
                 }
                 align={ALIGN_OPTIONS.CENTER}
-                action={getClearButton(() =>
-                  dispatchMergeActions(clearAMergedField("app6hq"))
-                )}
                 fieldName="app6hq"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
-                showBlankStateToggle={mergeState.isUnset("app6hq")}
               />
 
               <DictionaryField
@@ -349,13 +277,9 @@ const MergeOrganizations = ({ pageDispatchers }) => {
                   ]
                 }
                 align={ALIGN_OPTIONS.CENTER}
-                action={getClearButton(() =>
-                  dispatchMergeActions(clearAMergedField("app6amplifier"))
-                )}
                 fieldName="app6amplifier"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
-                showBlankStateToggle={mergeState.isUnset("app6amplifier")}
               />
               <DictionaryField
                 wrappedComponent={MergeField}
@@ -371,17 +295,9 @@ const MergeOrganizations = ({ pageDispatchers }) => {
                   />
                 }
                 align={ALIGN_OPTIONS.CENTER}
-                action={getClearButton(() =>
-                  dispatchMergeActions(
-                    clearAMergedField("administratingPositions")
-                  )
-                )}
                 fieldName="administratingPositions"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
-                showBlankStateToggle={mergeState.isUnset(
-                  "administratingPositions"
-                )}
               />
               <MergeField
                 label="Planning Approval Steps"
@@ -392,16 +308,8 @@ const MergeOrganizations = ({ pageDispatchers }) => {
                   />
                 }
                 align={ALIGN_OPTIONS.CENTER}
-                action={getClearButton(() =>
-                  dispatchMergeActions(
-                    clearAMergedField("planningApprovalSteps")
-                  )
-                )}
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
-                showBlankStateToggle={mergeState.isUnset(
-                  "planningApprovalSteps"
-                )}
               />
               <MergeField
                 label="Approval Steps"
@@ -412,12 +320,8 @@ const MergeOrganizations = ({ pageDispatchers }) => {
                   />
                 }
                 align={ALIGN_OPTIONS.CENTER}
-                action={getClearButton(() =>
-                  dispatchMergeActions(clearAMergedField("approvalSteps"))
-                )}
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
-                showBlankStateToggle={mergeState.isUnset("approvalSteps")}
               />
               {Settings.fields.organization.customFields &&
                 Object.entries(Settings.fields.organization.customFields).map(
@@ -432,19 +336,9 @@ const MergeOrganizations = ({ pageDispatchers }) => {
                         label={fieldConfig.label || fieldName}
                         value={JSON.stringify(fieldValue)}
                         align={ALIGN_OPTIONS.CENTER}
-                        action={getClearButton(() =>
-                          dispatchMergeActions(
-                            clearAMergedField(
-                              `${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`
-                            )
-                          )
-                        )}
                         fieldName={`${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`}
                         mergeState={mergeState}
                         dispatchMergeActions={dispatchMergeActions}
-                        showBlankStateToggle={mergeState.isUnset(
-                          `${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`
-                        )}
                       />
                     )
                   }
@@ -466,10 +360,7 @@ const MergeOrganizations = ({ pageDispatchers }) => {
           style={{ width: "98%", margin: "16px 1%" }}
           intent="primary"
           onClick={mergeOrganizations}
-          disabled={
-            _isEmpty(mergedOrganization) ||
-            mergeState.notAllSetOrBlank("shortName", "status")
-          }
+          disabled={mergeState.notAllSet()}
         >
           Merge Organizations
         </Button>
