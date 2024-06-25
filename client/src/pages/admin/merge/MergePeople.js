@@ -654,7 +654,7 @@ const PersonColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
               },
               align,
               mergeState,
-              "domainUsername"
+              "user"
             )}
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
