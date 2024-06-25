@@ -110,6 +110,7 @@ function EditHistory({
       )}
       <Modal
         centered
+        size="xl"
         show={showModal}
         onHide={onHide}
         dialogClassName={`edit-history-dialog ${history2 && "merge"}`}

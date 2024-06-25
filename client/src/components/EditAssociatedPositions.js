@@ -33,6 +33,7 @@ const EditAssociatedPositions = ({
       </Button>
       <Modal
         centered
+        size="xl"
         show={showModal}
         onHide={onHide}
         dialogClassName="edit-associated-positions-dialog"
@@ -105,12 +106,12 @@ const EditAssociatedPositions = ({
   }
 
   function isInMerged(item) {
-    return finalAssociatedPositions.find(ap => ap.uuid === item.uuid)
+    return finalAssociatedPositions?.find(ap => ap.uuid === item.uuid)
   }
 
   function removeItem(item) {
     setFinalAssociatedPositions(
-      finalAssociatedPositions.filter(ap => ap.uuid !== item.uuid)
+      finalAssociatedPositions?.filter(ap => ap.uuid !== item.uuid)
     )
   }
 
