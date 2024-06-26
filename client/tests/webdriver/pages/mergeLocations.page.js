@@ -3,7 +3,7 @@ import Page from "./page"
 const PATH = "/admin/merge/locations"
 
 class MergeLocations extends Page {
-  async open() {
+  async openPage() {
     await super.openAsAdminUser(PATH)
   }
 
