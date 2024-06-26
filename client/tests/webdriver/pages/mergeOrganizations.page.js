@@ -3,12 +3,8 @@ import Page from "./page"
 const PATH = "/admin/merge/organizations"
 
 class MergeOrganizations extends Page {
-  async open() {
+  async openPage() {
     await super.openAsAdminUser(PATH)
-  }
-
-  async openPage(path) {
-    await super.openAsAdminUser(path)
   }
 
   async getTitle() {
@@ -37,10 +33,6 @@ class MergeOrganizations extends Page {
     return browser.$(
       `//div[@id="${side}-merge-org-col"]//div[text()="${text}"]/following-sibling::div`
     )
-  }
-
-  async getCheckboxes() {
-    return browser.$$("#mid-merge-org-col input.checkbox")
   }
 
   async getMergeOrganizationsButton() {
