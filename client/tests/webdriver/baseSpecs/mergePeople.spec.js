@@ -75,7 +75,7 @@ const EXAMPLE_PEOPLE = {
 describe("Merge people who are both non-users", () => {
   it("Should display fields values of the left person", async() => {
     // Open merge people page.
-    await MergePeople.open()
+    await MergePeople.openPage()
     await (await MergePeople.getTitle()).waitForExist()
     await (await MergePeople.getTitle()).waitForDisplayed()
 
@@ -135,6 +135,7 @@ describe("Merge people who are both non-users", () => {
       await (await MergePeople.getColumnContent("left", "Biography")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.biography)
   })
+
   it("Should not allow to select the same people", async() => {
     await (
       await MergePeople.getRightPersonField()
@@ -146,6 +147,7 @@ describe("Merge people who are both non-users", () => {
 
     await (await MergePeople.getSamePositionsToast()).waitForDisplayed()
   })
+
   it("Should display fields values of the right person", async() => {
     // Search and select a person from right person field.
     await (
@@ -203,6 +205,30 @@ describe("Merge people who are both non-users", () => {
       await (await MergePeople.getColumnContent("left", "Biography")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.biography)
   })
+
+  it("Should autoMerge some identical fields from both persons", async() => {
+    expect(
+      await (await MergePeople.getColumnContent("mid", "Status")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validLeft.status)
+    expect(
+      await (await MergePeople.getColumnContent("mid", "Status")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validRight.status)
+
+    expect(
+      await (await MergePeople.getColumnContent("mid", "ANET user")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validLeft.user)
+    expect(
+      await (await MergePeople.getColumnContent("mid", "ANET user")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validRight.user)
+
+    expect(
+      await (await MergePeople.getColumnContent("mid", "Nationality")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validLeft.nationality)
+    expect(
+      await (await MergePeople.getColumnContent("mid", "Nationality")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validRight.nationality)
+  })
+
   it("Should be able to select all fields from left person", async() => {
     await (await MergePeople.getUseAllButton("left")).click()
     await browser.pause(500) // wait for the rendering of custom fields
@@ -250,6 +276,7 @@ describe("Merge people who are both non-users", () => {
       await (await MergePeople.getColumnContent("mid", "Biography")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.biography)
   })
+
   it("Should be able to select all fields from right person", async() => {
     await (await MergePeople.getUseAllButton("right")).click()
     await browser.pause(500) // wait for the rendering of custom fields
@@ -297,7 +324,8 @@ describe("Merge people who are both non-users", () => {
       await (await MergePeople.getColumnContent("mid", "Biography")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validRight.biography)
   })
-  it("Should be able to select from both left and right side.", async() => {
+
+  it("Should be able to select from both left and right side", async() => {
     await (await MergePeople.getSelectButton("left", "Name")).click()
     await MergePeople.waitForColumnToChange(
       EXAMPLE_PEOPLE.validLeft.name,
@@ -307,16 +335,6 @@ describe("Merge people who are both non-users", () => {
     expect(
       await (await MergePeople.getColumnContent("mid", "Name")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.name)
-
-    await (await MergePeople.getSelectButton("left", "ANET user")).click()
-    await MergePeople.waitForColumnToChange(
-      EXAMPLE_PEOPLE.validLeft.user,
-      "mid",
-      "ANET user"
-    )
-    expect(
-      await (await MergePeople.getColumnContent("mid", "ANET user")).getText()
-    ).to.equal(EXAMPLE_PEOPLE.validLeft.user)
 
     await (
       await MergePeople.getSelectButton("left", "Current Position")
@@ -331,16 +349,6 @@ describe("Merge people who are both non-users", () => {
         await MergePeople.getColumnContent("mid", "Current Position")
       ).getText()
     ).to.equal(EXAMPLE_PEOPLE.validLeft.position)
-
-    await (await MergePeople.getSelectButton("left", "Status")).click()
-    await MergePeople.waitForColumnToChange(
-      EXAMPLE_PEOPLE.validLeft.status,
-      "mid",
-      "Status"
-    )
-    expect(
-      await (await MergePeople.getColumnContent("mid", "Status")).getText()
-    ).to.equal(EXAMPLE_PEOPLE.validLeft.status)
 
     await (await MergePeople.getSelectButton("left", "Email addresses")).click()
     await MergePeople.waitForColumnToChange(
@@ -396,16 +404,6 @@ describe("Merge people who are both non-users", () => {
       await (await MergePeople.getColumnContent("mid", "Gender")).getText()
     ).to.equal(EXAMPLE_PEOPLE.validLeft.gender)
 
-    await (await MergePeople.getSelectButton("left", "Nationality")).click()
-    await MergePeople.waitForColumnToChange(
-      EXAMPLE_PEOPLE.validLeft.nationality,
-      "mid",
-      "Nationality"
-    )
-    expect(
-      await (await MergePeople.getColumnContent("mid", "Nationality")).getText()
-    ).to.equal(EXAMPLE_PEOPLE.validLeft.nationality)
-
     await (await MergePeople.getSelectButton("left", "Biography")).click()
     await MergePeople.waitForColumnToChange(
       EXAMPLE_PEOPLE.validLeft.biography,
@@ -423,11 +421,13 @@ describe("Merge people who are both non-users", () => {
       EXAMPLE_PEOPLE.validLeft.previousPositions
     )
   })
+
   it("Should be able to merge both people when winner is left person", async() => {
     await (await MergePeople.getMergePeopleButton()).click()
     await MergePeople.waitForSuccessAlert()
   })
-  it("Should merge notes of the both people", async() => {
+
+  it("Should have merged notes of the both people", async() => {
     await (await MergePeople.getShowNotesButton()).click()
     // Wait for offcanvas to open
     await browser.pause(100)
@@ -438,14 +438,16 @@ describe("Merge people who are both non-users", () => {
       ])
     ).to.eq(true)
   })
-  it("Should be able to delete the loser person", async() => {
+
+  it("Should have deleted the loser person", async() => {
     await MergePeople.openPage(`/people/${EXAMPLE_PEOPLE.validRight.perUuid}`)
     await (await MergePeople.getErrorTitle()).waitForExist()
     expect(await (await MergePeople.getErrorTitle()).getText()).to.equal(
       `User #${EXAMPLE_PEOPLE.validRight.perUuid} not found.`
     )
   })
-  it("Should remove the loser from its position and position history", async() => {
+
+  it("Should have removed the loser from its position and position history", async() => {
     await MergePeople.openPage(
       `/positions/${EXAMPLE_PEOPLE.validRight.posUuid}`
     )
@@ -458,7 +460,7 @@ describe("Merge people who are both non-users", () => {
 describe("Merge user with non-user", () => {
   it("Should select a non-user for the left side", async() => {
     // Open merge people page.
-    await MergePeople.open()
+    await MergePeople.openPage()
     await (await MergePeople.getTitle()).waitForExist()
     await (await MergePeople.getTitle()).waitForDisplayed()
     // Search and select a person from left person field.
@@ -476,6 +478,7 @@ describe("Merge user with non-user", () => {
       "Name"
     )
   })
+
   it("Should select a user for the right side", async() => {
     await (
       await MergePeople.getRightPersonField()
@@ -491,6 +494,30 @@ describe("Merge user with non-user", () => {
       "Name"
     )
   })
+
+  it("Should autoMerge some identical fields from both persons", async() => {
+    expect(
+      await (await MergePeople.getColumnContent("mid", "Status")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validLeft.status)
+    expect(
+      await (await MergePeople.getColumnContent("mid", "Status")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.userRight.status)
+
+    expect(
+      await (await MergePeople.getColumnContent("mid", "Rank")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validLeft.rank)
+    expect(
+      await (await MergePeople.getColumnContent("mid", "Rank")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.userRight.rank)
+
+    expect(
+      await (await MergePeople.getColumnContent("mid", "Gender")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validLeft.gender)
+    expect(
+      await (await MergePeople.getColumnContent("mid", "Gender")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.userRight.gender)
+  })
+
   it("Should be able to select all fields from left person", async() => {
     await (await MergePeople.getUseAllButton("left")).click()
     await browser.pause(500) // wait for the rendering of custom fields
@@ -537,6 +564,7 @@ describe("Merge user with non-user", () => {
       await (await MergePeople.getColumnContent("mid", "Biography")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.biography)
   })
+
   it("Should be able to select all fields from right person", async() => {
     await (await MergePeople.getUseAllButton("right")).click()
     await browser.pause(500) // wait for the rendering of custom fields
@@ -583,25 +611,17 @@ describe("Merge user with non-user", () => {
       await (await MergePeople.getColumnContent("mid", "Biography")).getText()
     ).to.eq(EXAMPLE_PEOPLE.userRight.biography)
   })
-  it("Should still display clear field buttons on the middle column", async() => {
-    const allSelectButtons = await MergePeople.getAllSelectButtons("right")
-    const clearValueButtons = await MergePeople.getClearValueButtons()
-    const activateFieldButtons = await MergePeople.getActivateFieldButtons()
-    const infoButtons = await MergePeople.getInfoButtons()
-    expect(
-      clearValueButtons.length +
-        activateFieldButtons.length +
-        infoButtons.length
-    ).to.eq(allSelectButtons.length)
-  })
+
   it("Should still display edit history button on the middle column", async() => {
     await (await MergePeople.getEditHistoryButton()).waitForDisplayed()
   })
+
   it("Should be able to merge both people when winner is right person", async() => {
     await (await MergePeople.getMergePeopleButton()).click()
     await MergePeople.waitForSuccessAlert()
   })
-  it("Should merge notes of the both people", async() => {
+
+  it("Should have merged notes of the both people", async() => {
     await (await MergePeople.getShowNotesButton()).click()
     // Wait for offcanvas to open
     await browser.pause(100)
@@ -614,7 +634,8 @@ describe("Merge user with non-user", () => {
       ])
     ).to.eq(true)
   })
-  it("Should be able to delete the loser person", async() => {
+
+  it("Should have deleted the loser person", async() => {
     await MergePeople.openPage(`/people/${EXAMPLE_PEOPLE.validLeft.perUuid}`)
     await (await MergePeople.getErrorTitle()).waitForExist()
     expect(await (await MergePeople.getErrorTitle()).getText()).to.equal(

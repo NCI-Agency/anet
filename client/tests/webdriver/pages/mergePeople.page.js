@@ -3,11 +3,7 @@ import Page from "./page"
 const PATH = "/admin/merge/people"
 
 class MergePeople extends Page {
-  async open() {
-    await super.openAsAdminUser(PATH)
-  }
-
-  async openPage(path) {
+  async openPage(path = PATH) {
     await super.openAsAdminUser(path)
   }
 
@@ -59,24 +55,6 @@ class MergePeople extends Page {
     return browser.$$(".offcanvas .card")
   }
 
-  async getClearValueButtons() {
-    return browser.$$(
-      "//div[@id=\"mid-merge-per-col\"]//button[contains(@class, 'remove-button')]"
-    )
-  }
-
-  async getActivateFieldButtons() {
-    return browser.$$(
-      "//div[@id=\"mid-merge-per-col\"]//button[contains(@class, 'activate-field-button')]"
-    )
-  }
-
-  async getInfoButtons() {
-    return browser.$$(
-      "//div[@id=\"mid-merge-per-col\"]//button[contains(@class, 'btn-default')]"
-    )
-  }
-
   async getEditHistoryButton() {
     return browser.$('//button[text()="Edit History Manually"]')
   }
@@ -92,10 +70,6 @@ class MergePeople extends Page {
     )
     const button = await (await buttonDiv.$("..")).$("..")
     return button.$("small > button")
-  }
-
-  async getAllSelectButtons(side) {
-    return browser.$$(`//div[@id="${side}-merge-per-col"]//small/button`)
   }
 
   async getColumnContent(side, text) {
@@ -177,21 +151,6 @@ class MergePeople extends Page {
       }
     }
     return areExist
-  }
-
-  async waitForDifferentRolesAlert() {
-    await browser.waitUntil(
-      async() => {
-        return (
-          (await (await browser.$(".alert-warning")).getText()) ===
-          "People on each side has different roles."
-        )
-      },
-      {
-        timeout: 5000,
-        timeoutMsg: "Couldn't see the success alert in time"
-      }
-    )
   }
 }
 
