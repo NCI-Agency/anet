@@ -52,7 +52,7 @@ const EXAMPLE_POSITIONS = {
 describe("Merge positions page", () => {
   it("Should display fields values of the left position", async() => {
     // Open merge positions page.
-    await MergePositions.open()
+    await MergePositions.openPage()
     await (await MergePositions.getTitle()).waitForExist()
     await (await MergePositions.getTitle()).waitForDisplayed()
 
@@ -107,6 +107,7 @@ describe("Merge positions page", () => {
       EXAMPLE_POSITIONS.validLeft.previousPeople
     )
   })
+
   it("Should not allow to select the same positions", async() => {
     await (
       await MergePositions.getRightPositionField()
@@ -118,6 +119,7 @@ describe("Merge positions page", () => {
 
     await (await MergePositions.getSamePositionsToast()).waitForDisplayed()
   })
+
   it("Should not allow to select two occupied positions", async() => {
     await (
       await MergePositions.getRightPositionField()
@@ -129,6 +131,7 @@ describe("Merge positions page", () => {
 
     await (await MergePositions.getOccupiedPositionsToast()).waitForDisplayed()
   })
+
   it("Should display fields values of the right position", async() => {
     // Search and select a position from right position field.
     await (
@@ -181,6 +184,23 @@ describe("Merge positions page", () => {
       EXAMPLE_POSITIONS.validRight.previousPeople
     )
   })
+
+  it("Should autoMerge some identical fields from both positions", async() => {
+    expect(
+      await (await MergePositions.getColumnContent("mid", "Status")).getText()
+    ).to.eq(EXAMPLE_POSITIONS.validLeft.status)
+    expect(
+      await (await MergePositions.getColumnContent("mid", "Status")).getText()
+    ).to.eq(EXAMPLE_POSITIONS.validRight.status)
+
+    expect(
+      await (await MergePositions.getColumnContent("mid", "Location")).getText()
+    ).to.eq(EXAMPLE_POSITIONS.validLeft.location)
+    expect(
+      await (await MergePositions.getColumnContent("mid", "Location")).getText()
+    ).to.eq(EXAMPLE_POSITIONS.validRight.location)
+  })
+
   it("Should be able to select all fields from left position", async() => {
     await (await MergePositions.getUseAllButton("left")).click()
     await browser.pause(500) // wait for the rendering of custom fields
@@ -229,6 +249,7 @@ describe("Merge positions page", () => {
       await (await MergePositions.getColumnContent("mid", "Location")).getText()
     ).to.eq(EXAMPLE_POSITIONS.validLeft.location)
   })
+
   it("Should be able to select all fields from right position", async() => {
     await (await MergePositions.getUseAllButton("right")).click()
     await browser.pause(500) // wait for the rendering of custom fields
@@ -277,7 +298,8 @@ describe("Merge positions page", () => {
       await (await MergePositions.getColumnContent("mid", "Location")).getText()
     ).to.eq(EXAMPLE_POSITIONS.validRight.location)
   })
-  it("Should be able to select from both left and right side.", async() => {
+
+  it("Should be able to select from both left and right side", async() => {
     await (
       await MergePositions.getSelectButton("left", "Position Name")
     ).click()
@@ -320,6 +342,7 @@ describe("Merge positions page", () => {
       EXAMPLE_POSITIONS.validLeft.previousPeople
     )
   })
+
   it("Should display correct values on the left column", async() => {
     await (await MergePositions.getUseAllButton("left")).click()
     await browser.pause(500) // wait for the rendering of custom fields
@@ -336,16 +359,19 @@ describe("Merge positions page", () => {
       EXAMPLE_POSITIONS.validLeft.associatedPositions
     )
   })
+
   it("Should display correct values on the right column", async() => {
     expect(await MergePositions.getAssociatedPositionsInModal("right")).to.eql(
       EXAMPLE_POSITIONS.validRight.associatedPositions
     )
   })
+
   it("Should display left column values on the middle column", async() => {
     expect(await MergePositions.getAssociatedPositionsInModal("mid")).to.eql(
       await MergePositions.getAssociatedPositionsInModal("left")
     )
   })
+
   it("Should be able to remove items from the middle column", async() => {
     const index = 0
     const afterFirstRemove = [
@@ -371,6 +397,7 @@ describe("Merge positions page", () => {
       afterSecondRemove
     )
   })
+
   it("Should be able to select items from right and left and save", async() => {
     const leftItemIndex = 0
     const rightItemIndex = 1
@@ -398,11 +425,13 @@ describe("Merge positions page", () => {
       afterPicked
     )
   })
+
   it("Should be able to merge both positions when winner is left position", async() => {
     await (await MergePositions.getMergePositionsButton()).click()
     await MergePositions.waitForSuccessAlert()
   })
-  it("Should merge positions when winner's associated positions are a combination from both positions", async() => {
+
+  it("Should have merged positions when winner's associated positions are a combination from both positions", async() => {
     const winnerApsAfterMerge = [
       { person: "Unfilled", position: "EF 1.1 Advisor B" },
       { person: "Unfilled", position: "EF 1.1 Advisor D" }
@@ -411,7 +440,8 @@ describe("Merge positions page", () => {
       winnerApsAfterMerge
     )
   })
-  it("Should merge notes of the both positions", async() => {
+
+  it("Should have merged notes of the both positions", async() => {
     await (await MergePositions.getShowNotesButton()).click()
     // Wait for offcanvas to open
     await browser.pause(100)
@@ -422,7 +452,8 @@ describe("Merge positions page", () => {
       ])
     ).to.eq(true)
   })
-  it("Should be able to delete the loser position", async() => {
+
+  it("Should have deleted the loser position", async() => {
     await MergePositions.openPage(
       `/positions/${EXAMPLE_POSITIONS.validRight.posUuid}`
     )
