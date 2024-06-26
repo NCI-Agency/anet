@@ -1,5 +1,10 @@
 import styled from "@emotion/styled"
-import { ALIGN_OPTIONS, setHeightOfAField } from "mergeUtils"
+import Checkbox from "components/Checkbox"
+import {
+  ALIGN_OPTIONS,
+  setHeightOfAField,
+  toggleBlankMergedField
+} from "mergeUtils"
 import PropTypes from "prop-types"
 import React, { useEffect, useRef, useState } from "react"
 
@@ -10,6 +15,7 @@ const MergeField = ({
   align,
   action,
   mergeState,
+  showBlankStateToggle,
   dispatchMergeActions,
   className
 }) => {
@@ -17,7 +23,7 @@ const MergeField = ({
   const [height, setSetHeight] = useState("auto")
 
   useEffect(() => {
-    // We have more than one columns of fields, each field should have same height
+    // We have more than one column of fields, each field should have same height
     // if a column has bigger height, that height wins
     if (fieldRef.current) {
       const currentHeight = fieldRef.current.clientHeight
@@ -47,6 +53,14 @@ const MergeField = ({
         <ValueBox className={className} align={align}>
           {value}
         </ValueBox>
+        {showBlankStateToggle && (
+          <Checkbox
+            label="Intentionally left blank"
+            checked={mergeState.getBlankState(fieldName)}
+            onChange={() =>
+              dispatchMergeActions(toggleBlankMergedField(fieldName))}
+          />
+        )}
       </div>
       {action}
     </MergeFieldBox>
@@ -98,6 +112,7 @@ MergeField.propTypes = {
   align: PropTypes.oneOf(Object.values(ALIGN_OPTIONS)).isRequired,
   action: PropTypes.node,
   mergeState: PropTypes.object,
+  showBlankStateToggle: PropTypes.bool,
   dispatchMergeActions: PropTypes.func,
   className: PropTypes.string
 }

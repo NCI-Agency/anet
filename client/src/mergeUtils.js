@@ -8,13 +8,16 @@ import {
 import RemoveButton from "components/RemoveButton"
 import _cloneDeep from "lodash/cloneDeep"
 import _escape from "lodash/escape"
+import _get from "lodash/get"
 import _isEmpty from "lodash/isEmpty"
 import _set from "lodash/set"
+import _unset from "lodash/unset"
 import { Location } from "models"
 import React, { useCallback, useReducer } from "react"
 import { Button } from "react-bootstrap"
 import { toast } from "react-toastify"
 import Settings from "settings"
+import utils from "utils"
 
 export const MERGE_SIDES = {
   LEFT: "left",
@@ -34,7 +37,9 @@ const ACTIONS = {
   SET_MERGEABLE: 1,
   SELECT_ALL_FIELDS: 2,
   SET_A_MERGED_FIELD: 3,
-  SET_HEIGHT_OF_A_FIELD: 4
+  CLEAR_A_MERGED_FIELD: 4,
+  SET_HEIGHT_OF_A_FIELD: 5,
+  TOGGLE_BLANK_MERGED_FIELD: 6
 }
 
 export function setMergeable(data, side) {
@@ -68,6 +73,15 @@ export function setAMergedField(fieldName, data, side) {
   }
 }
 
+export function clearAMergedField(fieldName) {
+  return {
+    type: ACTIONS.CLEAR_A_MERGED_FIELD,
+    payload: {
+      fieldName
+    }
+  }
+}
+
 export function setHeightOfAField(fieldName, data) {
   return {
     type: ACTIONS.SET_HEIGHT_OF_A_FIELD,
@@ -78,12 +92,43 @@ export function setHeightOfAField(fieldName, data) {
   }
 }
 
+export function toggleBlankMergedField(fieldName) {
+  return {
+    type: ACTIONS.TOGGLE_BLANK_MERGED_FIELD,
+    payload: {
+      fieldName
+    }
+  }
+}
+
 const INITIAL_STATE = {
   [MERGE_SIDES.LEFT]: null, // initial value of left mergeable
   [MERGE_SIDES.RIGHT]: null,
   merged: null,
   heightMap: null, // keep track of fields height, maximum heighted field of 2 columns wins
-  selectedMap: null // keep track of which col field selected, [fieldName]: "left", "right" or none can be selected
+  selectedMap: {}, // keep track of which col field selected, [fieldName]: "left", "right" or none can be selected
+  blankState: {}, // keep track of which fields have been explicitly set to leave blank
+  // callbacks to handle blankState
+  getBlankState: function(fieldName) {
+    if (!Object.hasOwn(this.blankState, fieldName)) {
+      this.blankState[fieldName] = false
+    }
+    return this.blankState[fieldName]
+  },
+  isUnset: function(fieldName) {
+    // has field been explicitly selected from either side?
+    return !this.selectedMap[fieldName]
+  },
+  notAllSetOrBlank: function(...requiredFields) {
+    return (
+      requiredFields.some(fieldName =>
+        utils.isNullOrUndefined(_get(this.merged, fieldName))
+      ) ||
+      Object.keys(this.blankState).find(
+        fieldName => this.isUnset(fieldName) && !this.blankState[fieldName]
+      )
+    )
+  }
 }
 
 function reducer(state, action) {
@@ -91,30 +136,21 @@ function reducer(state, action) {
     case ACTIONS.SET_MERGEABLE: {
       // Which side it is coming from, set that
       const newState = { ...state, [action.payload.side]: action.payload.data }
-      // lets fill the selectedMap with field names when an object gets picked
-      // Each field name + each custom field name gets a key
-      if (!state.selectedMap) {
-        newState.selectedMap = getInitialMapOfFieldNames(action.payload.data)
-      }
-      // Also, if a mergeable is cleared, we should set to initial state
-      if (!action.payload.data) {
-        newState.selectedMap = getClearedMapOfFieldNames(newState.selectedMap)
-      }
       // if a mergeable changes, we want to clear the merged as well
       newState.merged = null
+      newState.selectedMap = getInitialMapOfFieldNames(
+        action.payload.data ?? {}
+      )
+      newState.blankState = {}
       return newState
     }
     case ACTIONS.SELECT_ALL_FIELDS: {
       const newState = { ...state, merged: action.payload.data }
-      if (state.selectedMap) {
-        // Since we selected everything from one side, selectedMap should point to that side
-        Object.keys(state.selectedMap).forEach(fieldName => {
-          newState.selectedMap[fieldName] = action.payload.side
-        })
-      } else {
-        throw new Error("Selected map should've been initialized")
-      }
-
+      // Since we selected everything from one side, selectedMap should point to that side
+      Object.keys(state.selectedMap).forEach(fieldName => {
+        newState.selectedMap[fieldName] = action.payload.side
+        newState.blankState[fieldName] = false
+      })
       return newState
     }
     case ACTIONS.SET_A_MERGED_FIELD: {
@@ -125,18 +161,44 @@ function reducer(state, action) {
         ...state.selectedMap,
         [action.payload.fieldName]: action.payload.side
       }
+      newState.blankState = {
+        ...state.blankState,
+        [action.payload.fieldName]: false
+      }
+      return newState
+    }
+    case ACTIONS.CLEAR_A_MERGED_FIELD: {
+      const newState = { ...state }
+      newState.merged = { ..._cloneDeep(state.merged) }
+      _unset(newState.merged, action.payload.fieldName)
+      newState.selectedMap = {
+        ...state.selectedMap,
+        [action.payload.fieldName]: null
+      }
+      newState.blankState = {
+        ...state.blankState,
+        [action.payload.fieldName]: false
+      }
       return newState
     }
     case ACTIONS.SET_HEIGHT_OF_A_FIELD: {
-      const newState = {
+      return {
         ...state,
         heightMap: {
           ...state.heightMap,
           [action.payload.fieldName]: action.payload.data
         }
       }
-
-      return newState
+    }
+    case ACTIONS.TOGGLE_BLANK_MERGED_FIELD: {
+      return {
+        ...state,
+        blankState: {
+          ...state.blankState,
+          [action.payload.fieldName]:
+            !state.blankState[action.payload.fieldName]
+        }
+      }
     }
     default:
       return state
@@ -176,6 +238,7 @@ const useMergeObjects = mergeableType => {
 
   return [mergeState, dispatchWrapper]
 }
+
 // FIXME: Fill when ready
 const OBJECT_TYPE_TO_VALIDATOR = {
   [MODEL_TO_OBJECT_TYPE.AuthorizationGroup]: null,
@@ -405,7 +468,7 @@ export function getLeafletMap(mapId, location, hideWhenEmpty) {
 
 // Maps normal and custom field names to null for initialization
 function getInitialMapOfFieldNames(obj) {
-  // lets first map non-custom fields
+  // let's first map non-custom fields
   const map = Object.keys(obj).reduce((accum, fieldName) => {
     if (fieldName === DEFAULT_CUSTOM_FIELDS_PARENT) {
       return accum
@@ -427,13 +490,6 @@ function getInitialMapOfFieldNames(obj) {
     )
   }
   return map
-}
-
-function getClearedMapOfFieldNames(map) {
-  return Object.keys(map).reduce((accum, fieldName) => {
-    accum[fieldName] = null
-    return accum
-  }, {})
 }
 
 export default useMergeObjects
