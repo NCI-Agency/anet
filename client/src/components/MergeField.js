@@ -114,6 +114,9 @@ const MergeFieldBox = styled.div`
   padding: 8px 0;
   min-height: ${props => props.fieldHeight};
   background-color: ${props => props.bgColor};
+  &:not(:first-of-type) {
+    border-top: 1px solid #cccccc;
+  }
 `
 
 const LabelBox = styled.div`
