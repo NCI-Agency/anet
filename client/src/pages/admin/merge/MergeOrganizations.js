@@ -29,13 +29,14 @@ import useMergeObjects, {
   ALIGN_OPTIONS,
   areAllSet,
   getActionButton,
+  getLeafletMap,
   MERGE_SIDES,
   mergedOrganizationIsValid,
   selectAllFields,
   setAMergedField,
   setMergeable
 } from "mergeUtils"
-import { Organization } from "models"
+import { Location, Organization } from "models"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, Col, Container, Form, Row } from "react-bootstrap"
@@ -71,7 +72,9 @@ const MergeOrganizations = ({ pageDispatchers }) => {
   const organization1 = mergeState[MERGE_SIDES.LEFT]
   const organization2 = mergeState[MERGE_SIDES.RIGHT]
   const mergedOrganization = mergeState.merged
-  const orgSettings = Settings.fields.regular.org
+  const hideWhenEmpty =
+    !Location.hasCoordinates(organization1?.location) &&
+    !Location.hasCoordinates(organization2?.location)
 
   return (
     <Container fluid>
@@ -188,10 +191,17 @@ const MergeOrganizations = ({ pageDispatchers }) => {
                 wrappedComponent={MergeField}
                 dictProps={Settings.fields.organization.location}
                 value={
-                  <LinkTo
-                    modelType="Location"
-                    model={mergedOrganization.location}
-                  />
+                  <>
+                    <LinkTo
+                      modelType="Location"
+                      model={mergedOrganization.location}
+                    />
+                    {getLeafletMap(
+                      "merged-organization",
+                      mergedOrganization.location,
+                      hideWhenEmpty
+                    )}
+                  </>
                 }
                 align={ALIGN_OPTIONS.CENTER}
                 fieldName="location"
@@ -283,11 +293,11 @@ const MergeOrganizations = ({ pageDispatchers }) => {
               />
               <DictionaryField
                 wrappedComponent={MergeField}
-                dictProps={orgSettings.administratingPositions}
+                dictProps={Settings.fields.regular.org.administratingPositions}
                 value={
                   <PositionTable
                     label={utils.sentenceCase(
-                      orgSettings.administratingPositions.label
+                      Settings.fields.regular.org.administratingPositions.label
                     )}
                     positions={mergedOrganization.administratingPositions || []}
                     showOrganization={false}
@@ -427,8 +437,10 @@ const OrganizationColumn = ({
   dispatchMergeActions
 }) => {
   const organization = mergeState[align]
+  const hideWhenEmpty =
+    !Location.hasCoordinates(mergeState[MERGE_SIDES.LEFT]?.location) &&
+    !Location.hasCoordinates(mergeState[MERGE_SIDES.RIGHT]?.location)
   const idForOrganization = label.replace(/\s+/g, "")
-  const orgSettings = Settings.fields.regular.org
 
   return (
     <OrganizationCol>
@@ -546,7 +558,14 @@ const OrganizationColumn = ({
             dictProps={Settings.fields.organization.location}
             fieldName="location"
             value={
-              <LinkTo modelType="Location" model={organization.location} />
+              <>
+                <LinkTo modelType="Location" model={organization.location} />
+                {getLeafletMap(
+                  `merge-organization-map-${align}`,
+                  organization.location,
+                  hideWhenEmpty
+                )}
+              </>
             }
             align={align}
             action={() => {
@@ -711,12 +730,12 @@ const OrganizationColumn = ({
           />
           <DictionaryField
             wrappedComponent={MergeField}
-            dictProps={orgSettings.administratingPositions}
+            dictProps={Settings.fields.regular.org.administratingPositions}
             fieldName="administratingPositions"
             value={
               <PositionTable
                 label={utils.sentenceCase(
-                  orgSettings.administratingPositions.label
+                  Settings.fields.regular.org.administratingPositions.label
                 )}
                 positions={organization.administratingPositions || []}
                 showOrganization={false}
