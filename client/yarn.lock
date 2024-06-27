@@ -22,9 +22,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@apollo/client@npm:3.10.4":
-  version: 3.10.4
-  resolution: "@apollo/client@npm:3.10.4"
+"@apollo/client@npm:3.10.7":
+  version: 3.10.7
+  resolution: "@apollo/client@npm:3.10.7"
   dependencies:
     "@graphql-typed-document-node/core": "npm:^3.1.1"
     "@wry/caches": "npm:^1.0.0"
@@ -55,7 +55,7 @@ __metadata:
       optional: true
     subscriptions-transport-ws:
       optional: true
-  checksum: 10c0/057af5534db5e454957b2922fa973ccaa1b159d4cb39964b0a7fdbaeb07c779ca14eb680caa9579dfdbd85554ca7c5e9981d79ad1e6924ccef57e4acf6c67988
+  checksum: 10c0/25bf271370533943f71f97101e97ec80e7408dde5bec5a743b065ba810bf55bf90269c38264badee2c6ba952f650b642e5be3e6aac8792554c904071e6b5cfdf
   languageName: node
   linkType: hard
 
@@ -2271,9 +2271,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphiql/react@npm:^0.22.2":
-  version: 0.22.2
-  resolution: "@graphiql/react@npm:0.22.2"
+"@graphiql/react@npm:^0.22.3":
+  version: 0.22.3
+  resolution: "@graphiql/react@npm:0.22.3"
   dependencies:
     "@graphiql/toolkit": "npm:^0.9.1"
     "@headlessui/react": "npm:^1.7.15"
@@ -2294,7 +2294,7 @@ __metadata:
     graphql: ^15.5.0 || ^16.0.0
     react: ^16.8.0 || ^17 || ^18
     react-dom: ^16.8.0 || ^17 || ^18
-  checksum: 10c0/2484383cb57e71eb17985fe2cf56e014052531f02ccab97d30bae6746f772f7dbde68a92aa0bc42aa5f9ff24672234deefd9cbc6df147c5d672a7fbff1d3f1db
+  checksum: 10c0/75259f488675625cd9d2ae7544c383a0d00106a1d44a443030a7ba8355f3836bc53d91fa375cc4a431f3de265d820d5482ef1dba8ecba2c924d166316824558a
   languageName: node
   linkType: hard
 
@@ -6054,7 +6054,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "anet@workspace:."
   dependencies:
-    "@apollo/client": "npm:3.10.4"
+    "@apollo/client": "npm:3.10.7"
     "@babel/core": "npm:7.24.7"
     "@babel/eslint-parser": "npm:7.24.7"
     "@babel/plugin-proposal-decorators": "npm:7.24.7"
@@ -6150,8 +6150,8 @@ __metadata:
     file-saver: "npm:2.0.5"
     formik: "npm:2.4.6"
     git-describe: "npm:4.1.1"
-    graphiql: "npm:3.2.3"
-    graphql: "npm:16.8.1"
+    graphiql: "npm:3.3.1"
+    graphql: "npm:16.9.0"
     handlebars: "npm:4.7.8"
     handlebars-loader: "npm:1.7.3"
     hopscotch: "npm:0.3.1"
@@ -6175,7 +6175,7 @@ __metadata:
     lodash: "npm:4.17.21"
     mgrs: "npm:1.0.0"
     milsymbol: "npm:2.2.0"
-    ml-matrix: "npm:6.11.0"
+    ml-matrix: "npm:6.11.1"
     moment: "npm:2.30.1"
     moment-timezone: "npm:0.5.45"
     pathfinding: "npm:0.4.18"
@@ -11574,11 +11574,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"graphiql@npm:3.2.3":
-  version: 3.2.3
-  resolution: "graphiql@npm:3.2.3"
+"graphiql@npm:3.3.1":
+  version: 3.3.1
+  resolution: "graphiql@npm:3.3.1"
   dependencies:
-    "@graphiql/react": "npm:^0.22.2"
+    "@graphiql/react": "npm:^0.22.3"
     "@graphiql/toolkit": "npm:^0.9.1"
     graphql-language-service: "npm:^5.2.1"
     markdown-it: "npm:^14.1.0"
@@ -11586,7 +11586,7 @@ __metadata:
     graphql: ^15.5.0 || ^16.0.0
     react: ^16.8.0 || ^17 || ^18
     react-dom: ^16.8.0 || ^17 || ^18
-  checksum: 10c0/3acaaf7260399047456fbf61d4dec82962b3ce283dcec7165724c56bbbb9d6cffeb4111e899b1adcc2a1d6ad34e40080fe7e686a8052a582a2599ed4f93f6912
+  checksum: 10c0/8b4e90180dd0448c16cbbda979a219e7ffcc66d6fb34ed044e688184b8cfec72f7ace571d0165ab9c9eccea5e5fd96a181e478830c34ca5bc352540ef36a4aa9
   languageName: node
   linkType: hard
 
@@ -11670,10 +11670,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"graphql@npm:16.8.1":
-  version: 16.8.1
-  resolution: "graphql@npm:16.8.1"
-  checksum: 10c0/129c318156b466f440914de80dbf7bc67d17f776f2a088a40cb0da611d19a97c224b1c6d2b13cbcbc6e5776e45ed7468b8432f9c3536724e079b44f1a3d57a8a
+"graphql@npm:16.9.0":
+  version: 16.9.0
+  resolution: "graphql@npm:16.9.0"
+  checksum: 10c0/a8850f077ff767377237d1f8b1da2ec70aeb7623cdf1dfc9e1c7ae93accc0c8149c85abe68923be9871a2934b1bce5a2496f846d4d56e1cfb03eaaa7ddba9b6a
   languageName: node
   linkType: hard
 
@@ -14924,13 +14924,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ml-matrix@npm:6.11.0":
-  version: 6.11.0
-  resolution: "ml-matrix@npm:6.11.0"
+"ml-matrix@npm:6.11.1":
+  version: 6.11.1
+  resolution: "ml-matrix@npm:6.11.1"
   dependencies:
     is-any-array: "npm:^2.0.1"
     ml-array-rescale: "npm:^1.3.7"
-  checksum: 10c0/bf64bc5037568d8b2fddc3b2d90cb927868ed5f7894208b3e88b178645411c19ce25351a02f08dbf071a7a8a6c81370410c2692f0f800341be38670c23853df5
+  checksum: 10c0/5c2d60f7b162a2b74f7973ce64603081f05ad6169884925eccb14badef0ebb49582e5cbdc85c05d81ddf89f8cddc3eaf67efaed6f3929ff4911ae2e905d1a325
   languageName: node
   linkType: hard
 

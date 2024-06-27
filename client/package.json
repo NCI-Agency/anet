@@ -108,7 +108,7 @@
     "xhr2": "0.2.1"
   },
   "dependencies": {
-    "@apollo/client": "3.10.4",
+    "@apollo/client": "3.10.7",
     "@blueprintjs/core": "5.10.3",
     "@blueprintjs/datetime2": "2.3.5",
     "@emotion/react": "11.11.4",
@@ -131,8 +131,8 @@
     "escape-html": "1.0.3",
     "file-saver": "2.0.5",
     "formik": "2.4.6",
-    "graphiql": "3.2.3",
-    "graphql": "16.8.1",
+    "graphiql": "3.3.1",
+    "graphql": "16.9.0",
     "hopscotch": "0.3.1",
     "jsonpath-plus": "9.0.0",
     "keycloak-js": "24.0.5",
@@ -146,7 +146,7 @@
     "lodash": "4.17.21",
     "mgrs": "1.0.0",
     "milsymbol": "2.2.0",
-    "ml-matrix": "6.11.0",
+    "ml-matrix": "6.11.1",
     "moment": "2.30.1",
     "pathfinding": "0.4.18",
     "paths-js": "0.4.11",
