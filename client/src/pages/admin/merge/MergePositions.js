@@ -309,21 +309,23 @@ const MergePositions = ({ pageDispatchers }) => {
                 wrappedComponent={MergeField}
                 dictProps={Settings.fields.position.location}
                 value={
-                  <LinkTo
-                    modelType="Location"
-                    model={mergedPosition.location}
-                  />
+                  <>
+                    <LinkTo
+                      modelType="Location"
+                      model={mergedPosition.location}
+                    />
+                    {getLeafletMap(
+                      "merged-location",
+                      mergedPosition.location,
+                      hideWhenEmpty
+                    )}
+                  </>
                 }
                 align={ALIGN_OPTIONS.CENTER}
                 fieldName="location"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
-              {getLeafletMap(
-                "merged-location",
-                mergedPosition.location,
-                hideWhenEmpty
-              )}
             </fieldset>
           )}
         </Col>
@@ -659,7 +661,16 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
             wrappedComponent={MergeField}
             dictProps={Settings.fields.position.location}
             fieldName="location"
-            value={<LinkTo modelType="Location" model={position.location} />}
+            value={
+              <>
+                <LinkTo modelType="Location" model={position.location} />
+                {getLeafletMap(
+                  `merge-position-map-${align}`,
+                  position.location,
+                  hideWhenEmpty
+                )}
+              </>
+            }
             align={align}
             action={() =>
               dispatchMergeActions(
@@ -669,11 +680,6 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
             autoMerge
             dispatchMergeActions={dispatchMergeActions}
           />
-          {getLeafletMap(
-            `merge-position-map-${align}`,
-            position.location,
-            hideWhenEmpty
-          )}
         </fieldset>
       )}
     </PositionCol>

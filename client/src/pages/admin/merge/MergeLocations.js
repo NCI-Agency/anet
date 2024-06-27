@@ -162,27 +162,29 @@ const MergeLocations = ({ pageDispatchers }) => {
                 label={locationFormatLabel}
                 fieldName="displayedCoordinate"
                 value={
-                  <BaseGeoLocation
-                    locationFormat={locationFormat}
-                    setLocationFormat={setLocationFormat}
-                    label={locationFormatLabel}
-                    editable={false}
-                    coordinates={{
-                      lat: mergedLocation.lat,
-                      lng: mergedLocation.lng,
-                      displayedCoordinate: mergedLocation.displayedCoordinate
-                    }}
-                  />
+                  <>
+                    <BaseGeoLocation
+                      locationFormat={locationFormat}
+                      setLocationFormat={setLocationFormat}
+                      label={locationFormatLabel}
+                      editable={false}
+                      coordinates={{
+                        lat: mergedLocation.lat,
+                        lng: mergedLocation.lng,
+                        displayedCoordinate: mergedLocation.displayedCoordinate
+                      }}
+                    />
+                    {getLeafletMap(
+                      "merged-location-map",
+                      mergedLocation,
+                      hideWhenEmpty
+                    )}
+                  </>
                 }
                 align={ALIGN_OPTIONS.CENTER}
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
-              {getLeafletMap(
-                "merged-location-map",
-                mergedLocation,
-                hideWhenEmpty
-              )}
               <DictionaryField
                 wrappedComponent={MergeField}
                 dictProps={Settings.fields.location.status}
@@ -446,16 +448,23 @@ const LocationColumn = ({
             label={locationFormatLabel}
             fieldName="displayedCoordinate"
             value={
-              <BaseGeoLocation
-                locationFormat={locationFormat}
-                setLocationFormat={setLocationFormat}
-                label={locationFormatLabel}
-                coordinates={{
-                  lat: location.lat,
-                  lng: location.lng,
-                  displayedCoordinate: location.displayedCoordinate
-                }}
-              />
+              <>
+                <BaseGeoLocation
+                  locationFormat={locationFormat}
+                  setLocationFormat={setLocationFormat}
+                  label={locationFormatLabel}
+                  coordinates={{
+                    lat: location.lat,
+                    lng: location.lng,
+                    displayedCoordinate: location.displayedCoordinate
+                  }}
+                />
+                {getLeafletMap(
+                  `merge-location-map-${align}`,
+                  location,
+                  hideWhenEmpty
+                )}
+              </>
             }
             align={align}
             action={() => {
@@ -473,11 +482,6 @@ const LocationColumn = ({
             autoMerge
             dispatchMergeActions={dispatchMergeActions}
           />
-          {getLeafletMap(
-            `merge-location-map-${align}`,
-            location,
-            hideWhenEmpty
-          )}
           <DictionaryField
             wrappedComponent={MergeField}
             dictProps={Settings.fields.location.status}
