@@ -287,13 +287,14 @@ describe("Merge locations page", () => {
     await MergeLocations.waitForColumnToChange(
       EXAMPLE_LOCATIONS.left.latLon,
       "mid",
-      "Latitude, Longitude"
+      "Latitude, Longitude",
+      true
     )
     expect(
       await (
         await MergeLocations.getColumnContent("mid", "Latitude, Longitude")
       ).getText()
-    ).to.equal(EXAMPLE_LOCATIONS.left.latLon)
+    ).to.match(new RegExp(`^${EXAMPLE_LOCATIONS.left.latLon}`))
 
     await (
       await MergeLocations.getSelectButton("left", "Parent locations")

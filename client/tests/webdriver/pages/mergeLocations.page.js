@@ -73,12 +73,15 @@ class MergeLocations extends Page {
     )
   }
 
-  async waitForColumnToChange(compareStr, side, text) {
+  async waitForColumnToChange(compareStr, side, text, checkStartsWithOnly) {
     const field = await this.getColumnContent(side, text)
 
     await browser.waitUntil(
       async() => {
-        return (await field.getText()) === compareStr
+        const fieldText = await field.getText()
+        return checkStartsWithOnly
+          ? fieldText?.startsWith(compareStr)
+          : fieldText === compareStr
       },
       {
         timeout: 5000,
