@@ -1,6 +1,3 @@
-"""Indicates an Input Object is a OneOf Input Object."""
-directive @oneOf on INPUT_OBJECT
-
 """"""
 enum ActionType {
   APPROVE
@@ -866,7 +863,7 @@ type Query {
   attachmentList(query: AttachmentSearchQueryInput): AnetBeanList_Attachment
   authorizationGroup(uuid: String): AuthorizationGroup
   authorizationGroupList(query: AuthorizationGroupSearchQueryInput): AnetBeanList_AuthorizationGroup
-  entityAvatar(relatedObjectType: String, relatedObjectUuid: String): EntityAvatar
+  entityAvatar(relatedObjectUuid: String): EntityAvatar
   location(uuid: String): Location
   locationList(query: LocationSearchQueryInput): AnetBeanList_Location
   me: Person

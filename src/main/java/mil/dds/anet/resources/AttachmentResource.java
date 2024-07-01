@@ -22,19 +22,14 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.StreamingOutput;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.lang.invoke.MethodHandles;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import javax.imageio.ImageIO;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Attachment;
 import mil.dds.anet.beans.GenericRelatedObject;
@@ -226,45 +221,6 @@ public class AttachmentResource {
     return response.build();
   }
 
-  /**
-   * Gets an image attachment cropped by the given coordinates
-   * 
-   * @param user the user calling the operation
-   * @param attachmentUuid the attachment uid
-   * @param left crop left coordinate
-   * @param top crop top coordinate
-   * @param width crop width coordinate
-   * @param height crop height coordinate
-   * @return the cropped image
-   */
-  @GET
-  @Path("/view-cropped/{attachmentUuid}/{left}/{top}/{width}/{height}")
-  public Response viewAttachmentCropped(final @Auth Person user,
-      @PathParam("attachmentUuid") String attachmentUuid, @PathParam("left") int left,
-      @PathParam("top") int top, @PathParam("width") int width, @PathParam("height") int height
-
-  ) {
-    assertAttachmentEnabled();
-    try {
-      final Attachment attachment = getAttachment(attachmentUuid);
-      final ByteArrayOutputStream output = new ByteArrayOutputStream();
-      dao.streamContentBlob(attachmentUuid, output);
-      final BufferedImage image = ImageIO.read(new ByteArrayInputStream(output.toByteArray()));
-      if (image == null) {
-        throw new WebApplicationException("Could not crop the given attachment, not valid format.");
-      }
-      // Crop
-      final BufferedImage croppedImage = image.getSubimage(left, top, width, height);
-      final String imageFormat = attachment.getMimeType().replace("image/", "");
-      final ResponseBuilder response =
-          Response.ok(streamContentImage(croppedImage, imageFormat)).type(attachment.getMimeType())
-              .header("Content-Disposition", getContentDisposition("inline", attachment));
-      return response.build();
-    } catch (IOException e) {
-      throw new WebApplicationException("Could not crop the given attachment", e);
-    }
-  }
-
   private Attachment getAttachment(final String uuid) {
     final Attachment attachment = dao.getByUuid(uuid);
     if (attachment == null) {
@@ -275,16 +231,6 @@ public class AttachmentResource {
 
   private StreamingOutput streamContentBlob(final String uuid) {
     return output -> dao.streamContentBlob(uuid, output);
-  }
-
-  private StreamingOutput streamContentImage(BufferedImage croppedImage, String imageFormat) {
-    return output -> createStreamContentImage(croppedImage, imageFormat, output);
-  }
-
-  private void createStreamContentImage(BufferedImage croppedImage, String imageFormat,
-      OutputStream output) throws IOException {
-    ImageIO.write(croppedImage, imageFormat, output);
-    output.flush();
   }
 
   private static String getContentDisposition(String disposition, Attachment attachment) {
@@ -363,7 +309,7 @@ public class AttachmentResource {
   @SuppressWarnings("unchecked")
   public static List<String> getAllowedMimeTypes() {
     // Get the allowed mime Types from dictionary
-    List<Object> mimeTypes = (List<Object>) getAttachmentSettings().get("mimeTypes");
+    final List<Object> mimeTypes = (List<Object>) getAttachmentSettings().get("mimeTypes");
     // Extract names
     return mimeTypes.stream().map(element -> (String) ((HashMap<?, ?>) element).get("name"))
         .toList();
