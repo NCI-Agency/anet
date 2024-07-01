@@ -1,5 +1,6 @@
 import { gql } from "@apollo/client"
-import { Callout } from "@blueprintjs/core"
+import { Callout, Icon, Intent, Tooltip } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import styled from "@emotion/styled"
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
@@ -16,7 +17,8 @@ import MergeField from "components/MergeField"
 import Messages from "components/Messages"
 import {
   DEFAULT_CUSTOM_FIELDS_PARENT,
-  MODEL_TO_OBJECT_TYPE
+  MODEL_TO_OBJECT_TYPE,
+  SENSITIVE_CUSTOM_FIELDS_PARENT
 } from "components/Model"
 import {
   jumpToTop,
@@ -336,6 +338,41 @@ const MergePeople = ({ pageDispatchers }) => {
                     )
                   }
                 )}
+              {Settings.fields.person.customSensitiveInformation &&
+                Object.entries(
+                  Settings.fields.person.customSensitiveInformation
+                ).map(([fieldName, fieldConfig]) => {
+                  const fieldValue =
+                    mergedPerson?.[SENSITIVE_CUSTOM_FIELDS_PARENT]?.[fieldName]
+                  return (
+                    <MergeField
+                      key={fieldName}
+                      label={fieldConfig.label || fieldName}
+                      value={
+                        <>
+                          {JSON.stringify(fieldValue)}
+                          {mergeState.selectedMap?.[
+                            `${SENSITIVE_CUSTOM_FIELDS_PARENT}.${fieldName}`
+                          ] && (
+                            <Tooltip
+                              content={fieldConfig.tooltipText}
+                              intent={Intent.WARNING}
+                            >
+                              <Icon
+                                icon={IconNames.INFO_SIGN}
+                                intent={Intent.PRIMARY}
+                              />
+                            </Tooltip>
+                          )}
+                        </>
+                      }
+                      align={ALIGN_OPTIONS.CENTER}
+                      fieldName={`${SENSITIVE_CUSTOM_FIELDS_PARENT}.${fieldName}`}
+                      mergeState={mergeState}
+                      dispatchMergeActions={dispatchMergeActions}
+                    />
+                  )
+                })}
             </fieldset>
           )}
         </Col>
@@ -437,6 +474,10 @@ const PersonColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
               newValue[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
                 value.customFields
               )
+            }
+            if (newValue?.customSensitiveInformation) {
+              newValue[SENSITIVE_CUSTOM_FIELDS_PARENT] =
+                utils.parseSensitiveFields(value.customSensitiveInformation)
             }
             dispatchMergeActions(setMergeable(value, align))
           }}
@@ -725,7 +766,6 @@ const PersonColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
               ([fieldName, fieldConfig]) => {
                 const fieldValue =
                   person[DEFAULT_CUSTOM_FIELDS_PARENT][fieldName]
-
                 return (
                   <MergeField
                     key={fieldName}
@@ -749,6 +789,46 @@ const PersonColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
                 )
               }
             )}
+          {Settings.fields.person.customSensitiveInformation &&
+            Object.entries(
+              Settings.fields.person.customSensitiveInformation
+            ).map(([fieldName, fieldConfig]) => {
+              const fieldValue =
+                person[SENSITIVE_CUSTOM_FIELDS_PARENT][fieldName]
+              return (
+                <MergeField
+                  key={fieldName}
+                  fieldName={`${SENSITIVE_CUSTOM_FIELDS_PARENT}.${fieldName}`}
+                  label={fieldConfig.label || fieldName}
+                  value={
+                    <>
+                      {JSON.stringify(fieldValue)}
+                      <Tooltip
+                        content={fieldConfig.tooltipText}
+                        intent={Intent.WARNING}
+                      >
+                        <Icon
+                          icon={IconNames.INFO_SIGN}
+                          intent={Intent.PRIMARY}
+                        />
+                      </Tooltip>
+                    </>
+                  }
+                  align={align}
+                  action={() =>
+                    dispatchMergeActions(
+                      setAMergedField(
+                        `${SENSITIVE_CUSTOM_FIELDS_PARENT}.${fieldName}`,
+                        fieldValue,
+                        align
+                      )
+                    )}
+                  mergeState={mergeState}
+                  autoMerge
+                  dispatchMergeActions={dispatchMergeActions}
+                />
+              )
+            })}
         </fieldset>
       )}
     </PersonCol>
