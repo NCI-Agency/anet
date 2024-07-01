@@ -12,11 +12,8 @@ import { toast } from "react-toastify"
 import Settings from "settings"
 
 const GQL_GET_ENTITY_AVATAR = gql`
-  query ($relatedObjectType: String, $relatedObjectUuid: String) {
-    entityAvatar(
-      relatedObjectType: $relatedObjectType
-      relatedObjectUuid: $relatedObjectUuid
-    ) {
+  query ($relatedObjectUuid: String) {
+    entityAvatar(relatedObjectUuid: $relatedObjectUuid) {
       relatedObjectType
       relatedObjectUuid
       attachmentUuid
@@ -53,10 +50,10 @@ export const EntityAvatarComponent = ({
 
   // If the entityUUid changes get the entity avatar
   useEffect(() => {
-    getEntityAvatar(relatedObjectType, relatedObjectUuid)
+    getEntityAvatar(relatedObjectUuid)
       .then(response => setCurrentAvatar(response.entityAvatar))
       .catch()
-  }, [relatedObjectType, relatedObjectUuid])
+  }, [relatedObjectUuid])
 
   // Also react to changes in image attachments as the one linked to the current avatar might have been deleted
   useEffect(() => {
@@ -112,9 +109,8 @@ export const EntityAvatarComponent = ({
     </>
   )
 
-  function getEntityAvatar(relatedObjectType, relatedObjectUuid) {
+  function getEntityAvatar(relatedObjectUuid) {
     return API.query(GQL_GET_ENTITY_AVATAR, {
-      relatedObjectType,
       relatedObjectUuid
     })
   }

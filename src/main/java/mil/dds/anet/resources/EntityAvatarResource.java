@@ -25,18 +25,14 @@ public class EntityAvatarResource {
   }
 
   /**
-   * Gets the avatar for this relatedObject type and uuid, null if none existing
+   * Gets the avatar for this relatedObject uuid, null if none existing
    *
-   * @param relatedObjectType the relatedObjectType
    * @param relatedObjectUuid the relatedObjectUuid
    * @return the entity avatar
    */
   @GraphQLQuery(name = "entityAvatar")
   public EntityAvatar getEntityAvatar(@GraphQLRootContext Map<String, Object> context,
-      @GraphQLArgument(name = "relatedObjectType") String relatedObjectType,
       @GraphQLArgument(name = "relatedObjectUuid") String relatedObjectUuid) {
-    // Check if user is authorized to manipulate avatars for this relatedObject
-    assertPermission(DaoUtils.getUserFromContext(context), relatedObjectType, relatedObjectUuid);
     return entityAvatarDao.getByRelatedObjectUuid(relatedObjectUuid).orElse(null);
   }
 
@@ -58,7 +54,7 @@ public class EntityAvatarResource {
         entityAvatar.getRelatedObjectUuid());
 
     // Do we have an avatar already for this entity?
-    Optional<EntityAvatar> dbEntityAvatar =
+    final Optional<EntityAvatar> dbEntityAvatar =
         entityAvatarDao.getByRelatedObjectUuid(entityAvatar.getRelatedObjectUuid());
 
     if (dbEntityAvatar.isEmpty()) {

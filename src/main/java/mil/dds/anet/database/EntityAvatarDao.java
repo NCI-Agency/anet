@@ -39,7 +39,7 @@ public class EntityAvatarDao {
   public int insert(EntityAvatar entityAvatar) {
     return getDbHandle().createUpdate("/* insertEntityAvatar */ " + "INSERT INTO \"entityAvatars\" "
         + "(\"relatedObjectType\", \"relatedObjectUuid\", \"attachmentUuid\", \"applyCrop\", "
-        + "\"cropLeft\", \"cropTop\", \"cropWidth\", \"cropHeight\")"
+        + "\"cropLeft\", \"cropTop\", \"cropWidth\", \"cropHeight\") "
         + "VALUES (:relatedObjectType, :relatedObjectUuid, :attachmentUuid, :applyCrop, "
         + ":cropLeft, :cropTop, :cropWidth, :cropHeight)").bindBean(entityAvatar).execute();
   }
