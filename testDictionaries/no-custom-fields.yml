@@ -306,14 +306,28 @@ fields:
       label: Description
       placeholder: Enter a description of this attachment
     mimeTypes:
-      - application/pdf
-      - image/avif
-      - image/gif
-      - image/jpeg
-      - image/png
-      - image/svg+xml
-      - image/webp
-      - text/plain
+      - name: application/pdf
+        avatar: false
+      - name: image/avif
+        avatar: true
+        crop: false
+      - name: image/gif
+        avatar: true
+        crop: true
+      - name: image/jpeg
+        avatar: true
+        crop: true
+      - name: image/png
+        avatar: true
+        crop: true
+      - name: image/svg+xml
+        avatar: true
+        crop: false
+      - name: image/webp
+        avatar: true
+        crop: false
+      - name: text/plain
+        avatar: false
 
   authorizationGroup:
     status:
