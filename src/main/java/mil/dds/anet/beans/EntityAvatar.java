@@ -31,18 +31,6 @@ public class EntityAvatar {
 
   public EntityAvatar() {}
 
-  public EntityAvatar(final String relatedObjectType, final String relatedObjectUuid,
-      final String attachmentUuid, final Integer cropLeft, final Integer cropTop,
-      final Integer cropWidth, Integer cropHeight) {
-    this.relatedObjectType = relatedObjectType;
-    this.relatedObjectUuid = relatedObjectUuid;
-    this.attachmentUuid = attachmentUuid;
-    this.cropLeft = cropLeft;
-    this.cropTop = cropTop;
-    this.cropWidth = cropWidth;
-    this.cropHeight = cropHeight;
-  }
-
   public String getRelatedObjectType() {
     return relatedObjectType;
   }
