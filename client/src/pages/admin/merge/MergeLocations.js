@@ -38,7 +38,7 @@ import useMergeObjects, {
 import { Location } from "models"
 import PropTypes from "prop-types"
 import React, { useEffect, useState } from "react"
-import { Button, Col, Container, FormGroup, Row } from "react-bootstrap"
+import { Button, Col, Container, Form, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import LOCATIONS_ICON from "resources/locations.png"
@@ -353,6 +353,10 @@ const MidColTitle = styled.div`
   align-items: center;
 `
 
+const ColTitle = styled(Form.Group)`
+  height: 39px;
+`
+
 function getLocationFilters() {
   return {
     activeLocations: {
@@ -378,7 +382,7 @@ const LocationColumn = ({
   return (
     <div>
       <label htmlFor={idForLocation}>{label}</label>
-      <FormGroup controlId={idForLocation}>
+      <ColTitle controlId={idForLocation}>
         <AdvancedSingleSelect
           fieldName="location"
           fieldLabel="Select a location"
@@ -407,7 +411,7 @@ const LocationColumn = ({
           addon={LOCATIONS_ICON}
           vertical
         />
-      </FormGroup>
+      </ColTitle>
       {areAllSet(location) && (
         <fieldset>
           <DictionaryField

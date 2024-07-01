@@ -28,7 +28,9 @@ const MergeField = ({
     // We have more than one column of fields, each field should have same height
     // if a column has bigger height, that height wins
     if (fieldRef.current) {
-      const currentHeight = fieldRef.current.clientHeight
+      const currentHeight =
+        fieldRef.current.getBoundingClientRect?.()?.height ??
+        fieldRef.current.clientHeight
       const savedHeight = mergeState.heightMap?.[fieldName] || 0
       if (savedHeight < currentHeight) {
         dispatchMergeActions(setHeightOfAField(fieldName, currentHeight))

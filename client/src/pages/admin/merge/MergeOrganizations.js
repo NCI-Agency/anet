@@ -424,6 +424,10 @@ const MidColTitle = styled.div`
   align-items: center;
 `
 
+const ColTitle = styled(Form.Group)`
+  height: 39px;
+`
+
 const organizationsFilters = {
   allOrganizations: {
     label: "All"
@@ -447,7 +451,7 @@ const OrganizationColumn = ({
       <label htmlFor={idForOrganization} style={{ textAlign: align }}>
         {label}
       </label>
-      <Form.Group controlId={idForOrganization}>
+      <ColTitle controlId={idForOrganization}>
         <AdvancedSingleSelect
           fieldName="organization"
           fieldLabel="Select an organization"
@@ -471,7 +475,7 @@ const OrganizationColumn = ({
           addon={ORGANIZATIONS_ICON}
           vertical
         />
-      </Form.Group>
+      </ColTitle>
       {areAllSet(organization) && (
         <fieldset>
           <DictionaryField

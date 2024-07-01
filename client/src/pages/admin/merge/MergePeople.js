@@ -400,6 +400,10 @@ const MidColTitle = styled.div`
   align-items: center;
 `
 
+const ColTitle = styled(Form.Group)`
+  height: 39px;
+`
+
 const peopleFilters = {
   allPersons: {
     label: "All",
@@ -418,7 +422,7 @@ const PersonColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
       <label htmlFor={idForPerson} style={{ textAlign: align }}>
         {label}
       </label>
-      <Form.Group controlId={idForPerson}>
+      <ColTitle controlId={idForPerson}>
         <AdvancedSingleSelect
           fieldName="person"
           fieldLabel="Select a person"
@@ -442,7 +446,7 @@ const PersonColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
           addon={PEOPLE_ICON}
           vertical
         />
-      </Form.Group>
+      </ColTitle>
       {areAllSet(person) && (
         <fieldset>
           <MergeField

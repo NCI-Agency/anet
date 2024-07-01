@@ -42,7 +42,7 @@ import OrganizationsAdministrated from "pages/positions/OrganizationsAdministrat
 import PreviousPeople from "pages/positions/PreviousPeople"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
-import { Button, Col, Container, FormGroup, Row } from "react-bootstrap"
+import { Button, Col, Container, Form, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import POSITIONS_ICON from "resources/positions.png"
@@ -394,6 +394,10 @@ const MidColTitle = styled.div`
   align-items: center;
 `
 
+const ColTitle = styled(Form.Group)`
+  height: 39px;
+`
+
 function getPositionFilters(mergeState, align) {
   return {
     allPositions: {
@@ -418,7 +422,7 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
       <label htmlFor={idForPosition} style={{ textAlign: align }}>
         {label}
       </label>
-      <FormGroup controlId={idForPosition}>
+      <ColTitle controlId={idForPosition}>
         <AdvancedSingleSelect
           fieldName="position"
           fieldLabel="Select a position"
@@ -442,7 +446,7 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
           addon={POSITIONS_ICON}
           vertical
         />
-      </FormGroup>
+      </ColTitle>
       {areAllSet(position) && (
         <fieldset>
           <DictionaryField
