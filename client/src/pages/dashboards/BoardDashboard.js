@@ -14,7 +14,9 @@ import {
   SelectionBoxLayerFactory
 } from "@projectstorm/react-diagrams"
 import { DEFAULT_PAGE_PROPS } from "actions"
-import MultiTypeAdvancedSelectComponent from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
+import MultiTypeAdvancedSelectComponent, {
+  ALL_ENTITY_TYPES
+} from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
 import LinkTo from "components/LinkTo"
 import {
   mapPageDispatchersToProps,
@@ -65,7 +67,7 @@ const createEngine = options => {
 }
 
 const PrototypeNode = ({ name, model, onClick }) => (
-  <Badge style={{ margin: 10, background: "white", color: "#106ba3" }}>
+  <Badge style={{ margin: 10 }}>
     <div
       draggable
       onClick={onClick}
@@ -281,7 +283,7 @@ const BoardDashboard = ({ pageDispatchers }) => {
                   const instance = new Model()
                   const modelName = instance.constructor.resourceName
                   return (
-                    instance.iconUrl() && (
+                    instance.iconUrl && (
                       <PrototypeNode
                         key={`palette-${modelName}`}
                         model={instance}
@@ -340,6 +342,7 @@ const BoardDashboard = ({ pageDispatchers }) => {
                       setSelectingEntity(false)
                     }}
                     objectType={editedNode?.options.anetObjectType}
+                    entityTypes={ALL_ENTITY_TYPES}
                   />
                 </Modal.Body>
               </Modal>
