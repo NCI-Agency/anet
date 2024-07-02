@@ -46,6 +46,11 @@ export default class Location extends Model {
     VIRTUAL_LOCATION: "VIRTUAL_LOCATION"
   }
 
+  static pathForMerge(winnerUuid) {
+    const resourceName = utils.resourceize(this.resourceName)
+    return ["..", "..", "..", "admin", "merge", resourceName].join("/")
+  }
+
   static yupSchema = yup
     .object()
     .shape({

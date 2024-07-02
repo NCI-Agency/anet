@@ -44,7 +44,7 @@ import PropTypes from "prop-types"
 import React, { useEffect, useState } from "react"
 import { Button, Col, Container, FormGroup, Row } from "react-bootstrap"
 import { connect } from "react-redux"
-import { useNavigate } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import LOCATIONS_ICON from "resources/locations.png"
 import Settings from "settings"
 import utils from "utils"
@@ -57,6 +57,8 @@ const GQL_MERGE_LOCATION = gql`
 
 const MergeLocations = ({ pageDispatchers }) => {
   const navigate = useNavigate()
+  const { state } = useLocation()
+  const winnerUuid = state?.winnerUuid
   const [saveError, setSaveError] = useState(null)
   const [saveWarning, setSaveWarning] = useState(null)
   const [locationFormat, setLocationFormat] = useState(Location.locationFormat)

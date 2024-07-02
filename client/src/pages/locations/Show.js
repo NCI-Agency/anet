@@ -32,7 +32,7 @@ import _isEmpty from "lodash/isEmpty"
 import { Attachment, Location } from "models"
 import React, { useContext, useState } from "react"
 import { connect } from "react-redux"
-import { useLocation, useParams } from "react-router-dom"
+import { Link, useLocation, useParams } from "react-router-dom"
 import Settings from "settings"
 import utils from "utils"
 
@@ -116,6 +116,13 @@ const LocationShow = ({ pageDispatchers }) => {
                 }
               }
             />
+            <Link
+              to="/admin/merge/locations"
+              state={{ winnerUuid: location.uuid }}
+              button
+            >
+              Merge with other Location
+            </Link>
           </>
         )
         return (
