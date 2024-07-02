@@ -1,6 +1,9 @@
 import { expect } from "chai"
 import moment from "moment"
+import Settings from "../../../platform/node/settings"
 import MergePeople from "../pages/mergePeople.page"
+
+const hasCustomFields = !!Settings?.fields?.person?.customFields
 
 const EXAMPLE_PEOPLE = {
   validLeft: {
@@ -24,7 +27,11 @@ const EXAMPLE_PEOPLE = {
     biography: "Winner is a test person who will be merged",
     notes: ["Merge one person note", "A really nice person to work with"],
     perUuid: "3cb2076c-5317-47fe-86ad-76f298993917",
-    posUuid: "885dd6bf-4647-4ef7-9bc4-4dd2826064bb"
+    posUuid: "885dd6bf-4647-4ef7-9bc4-4dd2826064bb",
+    colourOptions: '"RED"',
+    numberFieldName: '"5"',
+    birthday: '"2003-01-31T23:00:00.000Z"',
+    politicalPosition: '"MIDDLE"'
   },
   validRight: {
     search: "loser",
@@ -47,7 +54,11 @@ const EXAMPLE_PEOPLE = {
     biography: "Loser is a test person who will be merged",
     notes: ["Merge two person note"],
     perUuid: "c725aef3-cdd1-4baf-ac72-f28219b234e9",
-    posUuid: "4dc40a27-19ae-4e03-a4f3-55b2c768725f"
+    posUuid: "4dc40a27-19ae-4e03-a4f3-55b2c768725f",
+    colourOptions: '"RED"',
+    numberFieldName: '"6"',
+    birthday: '"2010-11-11T23:00:00.000Z"',
+    politicalPosition: '"MIDDLE"'
   },
   userRight: {
     search: "andrew",
@@ -68,7 +79,11 @@ const EXAMPLE_PEOPLE = {
       }
     ],
     biography: "Andrew is the EF 1 Manager",
-    notes: ["A really nice person to work with"]
+    notes: ["A really nice person to work with"],
+    colourOptions: '""',
+    numberFieldName: "null",
+    birthday: "",
+    politicalPosition: ""
   }
 }
 
@@ -227,6 +242,36 @@ describe("Merge people who are both non-users", () => {
     expect(
       await (await MergePeople.getColumnContent("mid", "Nationality")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validRight.nationality)
+
+    if (hasCustomFields) {
+      expect(
+        await (
+          await MergePeople.getColumnContent("mid", "Choose one of the colours")
+        ).getText()
+      ).to.eq(EXAMPLE_PEOPLE.validLeft.colourOptions)
+      expect(
+        await (
+          await MergePeople.getColumnContent("mid", "Choose one of the colours")
+        ).getText()
+      ).to.eq(EXAMPLE_PEOPLE.validRight.colourOptions)
+    }
+
+    expect(
+      await (
+        await MergePeople.getColumnContent(
+          "mid",
+          "Position on the political spectrum"
+        )
+      ).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validLeft.politicalPosition)
+    expect(
+      await (
+        await MergePeople.getColumnContent(
+          "mid",
+          "Position on the political spectrum"
+        )
+      ).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validRight.politicalPosition)
   })
 
   it("Should be able to select all fields from left person", async() => {
@@ -275,6 +320,18 @@ describe("Merge people who are both non-users", () => {
     expect(
       await (await MergePeople.getColumnContent("mid", "Biography")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.biography)
+    if (hasCustomFields) {
+      expect(
+        await (
+          await MergePeople.getColumnContent("mid", "Number field")
+        ).getText()
+      ).to.eq(EXAMPLE_PEOPLE.validLeft.numberFieldName)
+    }
+    expect(
+      await (
+        await MergePeople.getColumnContent("mid", "Date of birth")
+      ).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validLeft.birthday)
   })
 
   it("Should be able to select all fields from right person", async() => {
@@ -323,6 +380,18 @@ describe("Merge people who are both non-users", () => {
     expect(
       await (await MergePeople.getColumnContent("mid", "Biography")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validRight.biography)
+    if (hasCustomFields) {
+      expect(
+        await (
+          await MergePeople.getColumnContent("mid", "Number field")
+        ).getText()
+      ).to.eq(EXAMPLE_PEOPLE.validRight.numberFieldName)
+    }
+    expect(
+      await (
+        await MergePeople.getColumnContent("mid", "Date of birth")
+      ).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validRight.birthday)
   })
 
   it("Should be able to select from both left and right side", async() => {
@@ -420,6 +489,32 @@ describe("Merge people who are both non-users", () => {
     expect(await MergePeople.getPreviousPositions("mid")).to.eql(
       EXAMPLE_PEOPLE.validLeft.previousPositions
     )
+
+    if (hasCustomFields) {
+      await (await MergePeople.getSelectButton("left", "Number field")).click()
+      await MergePeople.waitForColumnToChange(
+        EXAMPLE_PEOPLE.validLeft.numberFieldName,
+        "mid",
+        "Number field"
+      )
+      expect(
+        await (
+          await MergePeople.getColumnContent("mid", "Number field")
+        ).getText()
+      ).to.equal(EXAMPLE_PEOPLE.validLeft.numberFieldName)
+    }
+
+    await (await MergePeople.getSelectButton("left", "Date of birth")).click()
+    await MergePeople.waitForColumnToChange(
+      EXAMPLE_PEOPLE.validLeft.birthday,
+      "mid",
+      "Date of birth"
+    )
+    expect(
+      await (
+        await MergePeople.getColumnContent("mid", "Date of birth")
+      ).getText()
+    ).to.equal(EXAMPLE_PEOPLE.validLeft.birthday)
   })
 
   it("Should be able to merge both people when winner is left person", async() => {
@@ -563,6 +658,31 @@ describe("Merge user with non-user", () => {
     expect(
       await (await MergePeople.getColumnContent("mid", "Biography")).getText()
     ).to.eq(EXAMPLE_PEOPLE.validLeft.biography)
+    if (hasCustomFields) {
+      expect(
+        await (
+          await MergePeople.getColumnContent("mid", "Choose one of the colours")
+        ).getText()
+      ).to.eq(EXAMPLE_PEOPLE.validLeft.colourOptions)
+      expect(
+        await (
+          await MergePeople.getColumnContent("mid", "Number field")
+        ).getText()
+      ).to.eq(EXAMPLE_PEOPLE.validLeft.numberFieldName)
+    }
+    expect(
+      await (
+        await MergePeople.getColumnContent("mid", "Date of birth")
+      ).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validLeft.birthday)
+    expect(
+      await (
+        await MergePeople.getColumnContent(
+          "mid",
+          "Position on the political spectrum"
+        )
+      ).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validLeft.politicalPosition)
   })
 
   it("Should be able to select all fields from right person", async() => {
@@ -610,6 +730,31 @@ describe("Merge user with non-user", () => {
     expect(
       await (await MergePeople.getColumnContent("mid", "Biography")).getText()
     ).to.eq(EXAMPLE_PEOPLE.userRight.biography)
+    if (hasCustomFields) {
+      expect(
+        await (
+          await MergePeople.getColumnContent("mid", "Choose one of the colours")
+        ).getText()
+      ).to.eq(EXAMPLE_PEOPLE.userRight.colourOptions)
+      expect(
+        await (
+          await MergePeople.getColumnContent("mid", "Number field")
+        ).getText()
+      ).to.eq(EXAMPLE_PEOPLE.userRight.numberFieldName)
+    }
+    expect(
+      await (
+        await MergePeople.getColumnContent("mid", "Date of birth")
+      ).getText()
+    ).to.eq(EXAMPLE_PEOPLE.userRight.birthday)
+    expect(
+      await (
+        await MergePeople.getColumnContent(
+          "mid",
+          "Position on the political spectrum"
+        )
+      ).getText()
+    ).to.eq(EXAMPLE_PEOPLE.userRight.politicalPosition)
   })
 
   it("Should still display edit history button on the middle column", async() => {

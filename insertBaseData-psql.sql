@@ -85,6 +85,14 @@ UPDATE people
 SET "customFields"='{"invisibleCustomFields":["formCustomFields.textareaFieldName","formCustomFields.numberFieldName"],"arrayFieldName":[],"nlt_dt":null,"nlt":null,"colourOptions":"","inputFieldName":"Lorem ipsum dolor sit amet","multipleButtons":[],"placeOfResidence":null,"placeOfBirth":null}'
 WHERE name='DMIN, Arthur';
 
+UPDATE people
+SET "customFields"='{"invisibleCustomFields":["formCustomFields.textareaFieldName"],"arrayFieldName":[],"nlt_dt":null,"nlt":null,"numberFieldName":"5","colourOptions":"RED","inputFieldName":"","multipleButtons":[],"placeOfResidence":null,"placeOfBirth":null}'
+WHERE name='MERGED, Duplicate Winner';
+
+UPDATE people
+SET "customFields"='{"invisibleCustomFields":["formCustomFields.textareaFieldName"],"arrayFieldName":[],"nlt_dt":null,"nlt":null,"numberFieldName":"6","colourOptions":"RED","inputFieldName":"","multipleButtons":[],"placeOfResidence":null,"placeOfBirth":null}'
+WHERE name='MERGED, Duplicate Loser';
+
 -- Email addresses for people
 INSERT INTO "emailAddresses" (network, address, "relatedObjectType", "relatedObjectUuid") VALUES
 -- Advisors
@@ -1186,11 +1194,17 @@ INSERT INTO "reportAuthorizationGroups" ("reportUuid", "authorizationGroupUuid")
 -- Create "customSensitiveInformation" for some interlocutors
 INSERT INTO "customSensitiveInformation" (uuid, "customFieldName", "customFieldValue", "relatedObjectType", "relatedObjectUuid", "createdAt", "updatedAt") VALUES
   -- Steve
-  (N'4263793a-18bc-4cef-a535-0116615301e1', 'birthday', '{"birthday":"1999-09-09T00:00:00.000Z"}', 'people', '90fa5784-9e63-4353-8119-357bcd88e287', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'c9ca5fd9-699e-4643-8025-91a2f2e0cd77', 'politicalPosition', '{"politicalPosition":"LEFT"}', 'people', '90fa5784-9e63-4353-8119-357bcd88e287', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('4263793a-18bc-4cef-a535-0116615301e1', 'birthday', '{"birthday":"1999-09-09T00:00:00.000Z"}', 'people', '90fa5784-9e63-4353-8119-357bcd88e287', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('c9ca5fd9-699e-4643-8025-91a2f2e0cd77', 'politicalPosition', '{"politicalPosition":"LEFT"}', 'people', '90fa5784-9e63-4353-8119-357bcd88e287', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   -- Roger
-  (N'84b46418-4350-4b52-8789-2b292fc0ab60', 'birthday', '{"birthday":"2001-01-01T00:00:00.000Z"}', 'people', '6866ce4d-1f8c-4f78-bdc2-4767e9a859b0', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'810cf44b-91f6-474a-b522-5ba822ccfc1c', 'politicalPosition', '{"politicalPosition":"RIGHT"}', 'people', '6866ce4d-1f8c-4f78-bdc2-4767e9a859b0', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  ('84b46418-4350-4b52-8789-2b292fc0ab60', 'birthday', '{"birthday":"2001-01-01T00:00:00.000Z"}', 'people', '6866ce4d-1f8c-4f78-bdc2-4767e9a859b0', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('810cf44b-91f6-474a-b522-5ba822ccfc1c', 'politicalPosition', '{"politicalPosition":"RIGHT"}', 'people', '6866ce4d-1f8c-4f78-bdc2-4767e9a859b0', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  -- MERGED, Duplicate Winner
+  ('efae3b21-f9da-4e05-b646-06f05037ef84', 'birthday', '{"birthday":"2003-01-31T23:00:00.000Z"}', 'people', '3cb2076c-5317-47fe-86ad-76f298993917', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('c7ccac90-02cb-4908-84b3-0c9d0dc99223', 'politicalPosition', '{"politicalPosition":"MIDDLE"}', 'people', '3cb2076c-5317-47fe-86ad-76f298993917', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  -- MERGED, Duplicate Loser
+  ('f53cebc8-0516-4ba3-8866-8f78c417d26b', 'birthday', '{"birthday":"2010-11-11T23:00:00.000Z"}', 'people', 'c725aef3-cdd1-4baf-ac72-f28219b234e9', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('a7a03d68-7e9a-4697-afec-5b3ca6f17fad', 'politicalPosition', '{"politicalPosition":"MIDDLE"}', 'people', 'c725aef3-cdd1-4baf-ac72-f28219b234e9', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Add some notes and link them to the objects they relate to
 SELECT ('''' || uuid || '''') AS "authorUuid" FROM people WHERE name = 'BECCABON, Rebecca' \gset

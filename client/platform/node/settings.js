@@ -1,12 +1,13 @@
 import fs from "fs"
 import jsyaml from "js-yaml"
 
-console.log("Using config file " + process.env.ANET_CONFIG)
-const anetConfig = jsyaml.load(fs.readFileSync(process.env.ANET_CONFIG, "utf8"))
-console.log("Using dictionary file " + process.env.ANET_DICTIONARY)
-const anetDictionary = jsyaml.load(
-  fs.readFileSync(process.env.ANET_DICTIONARY, "utf8")
-)
+const anetConfigFile = process.env.ANET_CONFIG || "../anet.yml"
+console.log(`Using config file ${anetConfigFile}`)
+const anetConfig = jsyaml.load(fs.readFileSync(anetConfigFile, "utf8"))
+const anetDictionaryFile =
+  process.env.ANET_DICTIONARY || "../anet-dictionary.yml"
+console.log(`Using dictionary file ${anetDictionaryFile}`)
+const anetDictionary = jsyaml.load(fs.readFileSync(anetDictionaryFile, "utf8"))
 const Settings = anetDictionary
 const {
   realm,
