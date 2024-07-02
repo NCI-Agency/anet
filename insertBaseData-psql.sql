@@ -11,6 +11,7 @@ TRUNCATE TABLE "customSensitiveInformation" CASCADE;
 TRUNCATE TABLE "emailAddresses" CASCADE;
 TRUNCATE TABLE "jobHistory" CASCADE;
 TRUNCATE TABLE "locationRelationships" CASCADE;
+TRUNCATE TABLE "mergedEntities" CASCADE;
 TRUNCATE TABLE "noteRelatedObjects" CASCADE;
 TRUNCATE TABLE "notes" CASCADE;
 TRUNCATE TABLE "organizationAdministrativePositions" CASCADE;
