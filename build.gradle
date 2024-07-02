@@ -163,7 +163,6 @@ dependencies {
 
 	testImplementation "io.dropwizard:dropwizard-testing:${dropwizardVersion}"
 	testImplementation "io.dropwizard:dropwizard-client:${dropwizardVersion}"
-	testImplementation 'org.apache.commons:commons-io:1.3.2'
 
 	testImplementation 'org.assertj:assertj-core:3.26.0'
 
