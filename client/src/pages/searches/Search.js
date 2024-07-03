@@ -102,6 +102,10 @@ const GQL_GET_ORGANIZATION_LIST = gql`
         longName
         identificationCode
         ${GQL_EMAIL_ADDRESSES}
+        location {
+          uuid
+          name
+        }
       }
     }
   }
@@ -372,6 +376,7 @@ const Organizations = ({
   return (
     <OrganizationTable
       organizations={organizations}
+      showLocation
       pageSize={pageSize}
       pageNum={curPage}
       totalCount={totalCount}

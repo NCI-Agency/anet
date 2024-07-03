@@ -30,6 +30,10 @@ const GQL_GET_ORGANIZATION_LIST = gql`
         shortName
         longName
         identificationCode
+        location {
+          uuid
+          name
+        }
       }
     }
   }
@@ -92,6 +96,7 @@ PaginatedOrganizations.propTypes = {
 
 const BaseOrganizationTable = ({
   id,
+  showLocation,
   showDelete,
   onDelete,
   organizations,
@@ -136,6 +141,7 @@ const BaseOrganizationTable = ({
                 </>
               )}
               <th>Name</th>
+              {showLocation && <th>Location</th>}
               {showDelete && <th />}
             </tr>
           </thead>
@@ -168,6 +174,11 @@ const BaseOrganizationTable = ({
                 <td>
                   <LinkTo modelType="Organization" model={org} />
                 </td>
+                {showLocation && (
+                  <td>
+                    <LinkTo modelType="Location" model={org.location} />
+                  </td>
+                )}
                 {showDelete && (
                   <td id={"organizationDelete_" + org.uuid}>
                     <RemoveButton
@@ -187,6 +198,7 @@ const BaseOrganizationTable = ({
 
 BaseOrganizationTable.propTypes = {
   id: PropTypes.string,
+  showLocation: PropTypes.bool,
   showDelete: PropTypes.bool,
   onDelete: PropTypes.func,
   // list of organizations:
