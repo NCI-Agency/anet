@@ -49,11 +49,27 @@ import LOCATIONS_ICON from "resources/locations.png"
 import Settings from "settings"
 import utils from "utils"
 
+const GQL_GET_LOCATION = gql`
+  query ($uuid: String!) {
+    location(uuid: $uuid) {
+      uuid
+      name
+      type
+    }
+  }
+`
+
 const GQL_MERGE_LOCATION = gql`
   mutation ($loserUuid: String!, $winnerLocation: LocationInput!) {
     mergeLocations(loserUuid: $loserUuid, winnerLocation: $winnerLocation)
   }
 `
+
+const fetchLocation = locationUuid => {
+  return API.query(GQL_GET_LOCATION, {
+    uuid: locationUuid
+  })
+}
 
 const MergeLocations = ({ pageDispatchers }) => {
   const navigate = useNavigate()
@@ -61,6 +77,7 @@ const MergeLocations = ({ pageDispatchers }) => {
   const winnerUuid = state?.winnerUuid
   const [saveError, setSaveError] = useState(null)
   const [saveWarning, setSaveWarning] = useState(null)
+  const [preselectedLocation, setPreselectedLocation] = useState(null)
   const [locationFormat, setLocationFormat] = useState(Location.locationFormat)
   const locationFormatLabel = Location.LOCATION_FORMAT_LABELS[locationFormat]
   const [mergeState, dispatchMergeActions] = useMergeObjects(
@@ -91,6 +108,14 @@ const MergeLocations = ({ pageDispatchers }) => {
     }
   }, [location1, location2])
 
+  useEffect(() => {
+    if (winnerUuid) {
+      fetchLocation(winnerUuid).then(data => {
+        setPreselectedLocation({ ...data })
+      })
+    }
+  }, [winnerUuid, fetchLocation, setPreselectedLocation])
+
   return (
     <Container fluid>
       <Row>
@@ -107,6 +132,7 @@ const MergeLocations = ({ pageDispatchers }) => {
             locationFormat={locationFormat}
             setLocationFormat={setLocationFormat}
             locationFormatLabel={locationFormatLabel}
+            preselectedLocation={preselectedLocation}
           />
         </Col>
         <Col md={4} id="mid-merge-loc-col">
@@ -439,7 +465,8 @@ const LocationColumn = ({
   dispatchMergeActions,
   locationFormat,
   setLocationFormat,
-  locationFormatLabel
+  locationFormatLabel,
+  preselectedLocation
 }) => {
   const location = mergeState[align]
   const hideWhenEmpty =
@@ -454,7 +481,7 @@ const LocationColumn = ({
           fieldName="location"
           fieldLabel="Select a location"
           placeholder="Select a location to merge"
-          value={location}
+          value={preselectedLocation || location}
           overlayColumns={["Name"]}
           overlayRenderRow={LocationOverlayRow}
           filterDefs={getLocationFilters()}
@@ -474,6 +501,7 @@ const LocationColumn = ({
           }}
           objectType={Location}
           valueKey="name"
+          valueFunc={(value, valueKey) => value.location[valueKey]}
           fields={Location.allFieldsQuery}
           addon={LOCATIONS_ICON}
           vertical
@@ -759,7 +787,8 @@ LocationColumn.propTypes = {
   locationFormat: PropTypes.oneOf(Object.keys(Location.LOCATION_FORMATS))
     .isRequired,
   setLocationFormat: PropTypes.func.isRequired,
-  locationFormatLabel: PropTypes.string.isRequired
+  locationFormatLabel: PropTypes.string.isRequired,
+  preselectedLocation: PropTypes.object
 }
 
 export default connect(null, mapPageDispatchersToProps)(MergeLocations)
