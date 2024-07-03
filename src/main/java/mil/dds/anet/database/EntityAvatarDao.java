@@ -16,17 +16,19 @@ public class EntityAvatarDao {
   }
 
   /**
-   * Gets the existing avatar for this relatedObjectUuid if any
-   * 
+   * Gets the existing avatar for this relatedObject if any
+   *
+   * @param relatedObjectType the relatedObjectType
    * @param relatedObjectUuid the relatedObjectUuid
    * @return optional with the avatar
    */
   @InTransaction
-  public Optional<EntityAvatar> getByRelatedObjectUuid(final String relatedObjectUuid) {
-    return getDbHandle()
-        .createQuery(
-            "SELECT * FROM \"entityAvatars\" WHERE \"relatedObjectUuid\" = :relatedObjectUuid")
-        .bind("relatedObjectUuid", relatedObjectUuid).mapToBean(EntityAvatar.class).findOne();
+  public Optional<EntityAvatar> getByRelatedObject(final String relatedObjectType,
+      final String relatedObjectUuid) {
+    return getDbHandle().createQuery(
+        "SELECT * FROM \"entityAvatars\" WHERE \"relatedObjectType\" = :relatedObjectType AND \"relatedObjectUuid\" = :relatedObjectUuid")
+        .bind("relatedObjectType", relatedObjectType).bind("relatedObjectUuid", relatedObjectUuid)
+        .mapToBean(EntityAvatar.class).findOne();
   }
 
   /**
@@ -36,7 +38,7 @@ public class EntityAvatarDao {
    * @return number of rows inserted
    */
   @InTransaction
-  public int insert(EntityAvatar entityAvatar) {
+  public int insert(final EntityAvatar entityAvatar) {
     return getDbHandle().createUpdate("/* insertEntityAvatar */ " + "INSERT INTO \"entityAvatars\" "
         + "(\"relatedObjectType\", \"relatedObjectUuid\", \"attachmentUuid\", \"applyCrop\", "
         + "\"cropLeft\", \"cropTop\", \"cropWidth\", \"cropHeight\") "
@@ -51,23 +53,26 @@ public class EntityAvatarDao {
    * @return number of rows updated
    */
   @InTransaction
-  public int update(EntityAvatar entityAvatar) {
+  public int update(final EntityAvatar entityAvatar) {
     return getDbHandle().createUpdate("/* updateEntityAvatar */ UPDATE \"entityAvatars\" "
         + "SET \"attachmentUuid\" = :attachmentUuid, \"cropLeft\" = :cropLeft, \"applyCrop\" = :applyCrop, "
         + "\"cropTop\" = :cropTop, \"cropWidth\" = :cropWidth, \"cropHeight\" = :cropHeight "
-        + "WHERE \"relatedObjectUuid\" = :relatedObjectUuid").bindBean(entityAvatar).execute();
+        + "WHERE \"relatedObjectType\" = :relatedObjectType AND \"relatedObjectUuid\" = :relatedObjectUuid")
+        .bindBean(entityAvatar).execute();
   }
 
   /**
    * Deletes the entity avatar in the database
-   * 
+   *
+   * @param relatedObjectType the relatedObjectType for which to delete the avatar
    * @param relatedObjectUuid the relatedObjectUuid for which to delete the avatar
    * @return number of rows deleted
    */
   @InTransaction
-  public int delete(String relatedObjectUuid) {
+  public int delete(final String relatedObjectType, final String relatedObjectUuid) {
     return getDbHandle().createUpdate(
-        "/* deletEntityAvatar */ DELETE FROM \"entityAvatars\" WHERE \"relatedObjectUuid\" = :relatedObjectUuid")
-        .bind("relatedObjectUuid", relatedObjectUuid).execute();
+        "/* deletEntityAvatar */ DELETE FROM \"entityAvatars\" WHERE \"relatedObjectType\" = :relatedObjectType AND \"relatedObjectUuid\" = :relatedObjectUuid")
+        .bind("relatedObjectType", relatedObjectType).bind("relatedObjectUuid", relatedObjectUuid)
+        .execute();
   }
 }

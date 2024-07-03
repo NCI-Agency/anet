@@ -9,6 +9,7 @@ TRUNCATE TABLE "authorizationGroups" CASCADE;
 TRUNCATE TABLE "comments" CASCADE;
 TRUNCATE TABLE "customSensitiveInformation" CASCADE;
 TRUNCATE TABLE "emailAddresses" CASCADE;
+TRUNCATE TABLE "entityAvatars" CASCADE;
 TRUNCATE TABLE "jobHistory" CASCADE;
 TRUNCATE TABLE "locationRelationships" CASCADE;
 TRUNCATE TABLE "mergedEntities" CASCADE;
@@ -1436,6 +1437,10 @@ INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "
   SELECT '13318e42-a0a3-438f-8ed5-dc16b1ef17bc', 'people', p.uuid
   FROM people p
   WHERE p."domainUsername" = 'erin';
+
+-- Add entity avatar for organization EF 2.2
+INSERT INTO "entityAvatars" ("relatedObjectType", "relatedObjectUuid", "attachmentUuid", "applyCrop", "cropLeft", "cropTop", "cropWidth", "cropHeight")
+VALUES ('organizations', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b', '9ac41246-25ac-457c-b7d6-946c5f625f1f', TRUE, 0, 0, 200, 200);
 
 -- Update the link-text indexes
 REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_lts_attachments";

@@ -12,6 +12,7 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.EntityAvatar;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.database.EntityAvatarDao;
+import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
@@ -32,8 +33,9 @@ public class EntityAvatarResource {
    */
   @GraphQLQuery(name = "entityAvatar")
   public EntityAvatar getEntityAvatar(@GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "relatedObjectType") String relatedObjectType,
       @GraphQLArgument(name = "relatedObjectUuid") String relatedObjectUuid) {
-    return entityAvatarDao.getByRelatedObjectUuid(relatedObjectUuid).orElse(null);
+    return entityAvatarDao.getByRelatedObject(relatedObjectType, relatedObjectUuid).orElse(null);
   }
 
   /**
@@ -54,15 +56,17 @@ public class EntityAvatarResource {
         entityAvatar.getRelatedObjectUuid());
 
     // Do we have an avatar already for this entity?
-    final Optional<EntityAvatar> dbEntityAvatar =
-        entityAvatarDao.getByRelatedObjectUuid(entityAvatar.getRelatedObjectUuid());
+    final Optional<EntityAvatar> dbEntityAvatar = entityAvatarDao.getByRelatedObject(
+        entityAvatar.getRelatedObjectType(), entityAvatar.getRelatedObjectUuid());
 
     if (dbEntityAvatar.isEmpty()) {
       numRows = entityAvatarDao.insert(entityAvatar);
-      AnetAuditLogger.log("Entity avatar created by {}", user);
+      AnetAuditLogger.log("Avatar for entity {} of type {} created by {}",
+          entityAvatar.getRelatedObjectUuid(), entityAvatar.getRelatedObjectType(), user);
     } else {
       numRows = entityAvatarDao.update(entityAvatar);
-      AnetAuditLogger.log("Entity avatar updated by {}", user);
+      AnetAuditLogger.log("Avatar for entity {} of type {} updated by {}",
+          entityAvatar.getRelatedObjectUuid(), entityAvatar.getRelatedObjectType(), user);
     }
 
     // GraphQL mutations *have* to return something, so we return the number of updated rows
@@ -86,9 +90,10 @@ public class EntityAvatarResource {
     // Check if user is authorized to manipulate avatars for this relatedObjectUuid
     assertPermission(user, relatedObjectType, relatedObjectUuid);
 
-    int numRows = entityAvatarDao.delete(relatedObjectUuid);
+    int numRows = entityAvatarDao.delete(relatedObjectType, relatedObjectUuid);
     if (numRows > 1) {
-      AnetAuditLogger.log("Entity avatar deleted by {}", user);
+      AnetAuditLogger.log("Avatar for entity {} of type {} deleted by {}", relatedObjectUuid,
+          relatedObjectType, user);
     }
 
     // GraphQL mutations *have* to return something, so we return the number of updated rows
@@ -104,8 +109,8 @@ public class EntityAvatarResource {
 
   public static boolean hasPermission(final Person user, final String relatedObjectType,
       final String relatedObjectUuid) {
-    if (relatedObjectType.equals("organizations")) {
-      return AuthUtils.isAdmin(user) || AuthUtils.canAdministrateOrg(user, relatedObjectUuid);
+    if (OrganizationDao.TABLE_NAME.equals(relatedObjectType)) {
+      return OrganizationResource.hasPermission(user, relatedObjectUuid);
     }
     return false;
   }

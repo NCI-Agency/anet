@@ -7,7 +7,7 @@ import { Button, Modal } from "react-bootstrap"
 import Settings from "settings"
 
 const EntityAvatarEditModal = ({ title, avatar, images, onAvatarUpdate }) => {
-  const avatarCroppeableMimeTypes = Settings.fields.attachment.mimeTypes
+  const croppeableMimeTypes = Settings.fields.attachment.mimeTypes
     .filter(mimeType => mimeType.avatar && mimeType.crop)
     .map(mimeType => mimeType.name)
 
@@ -93,7 +93,7 @@ const EntityAvatarEditModal = ({ title, avatar, images, onAvatarUpdate }) => {
 
   function setChosenImage(image) {
     setChosenImageUuid(image.uuid)
-    if (avatarCroppeableMimeTypes.includes(image.mimeType)) {
+    if (croppeableMimeTypes.includes(image.mimeType)) {
       setCropperCoordinates(null)
     } else {
       // If the user chooses an image that can not be cropped just save
@@ -117,7 +117,7 @@ const EntityAvatarEditModal = ({ title, avatar, images, onAvatarUpdate }) => {
     setShowModal(false)
   }
 
-  async function save(imageUuid, coordinates) {
+  function save(imageUuid, coordinates) {
     onAvatarUpdate(imageUuid, coordinates)
     close()
   }

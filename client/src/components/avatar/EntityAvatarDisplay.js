@@ -1,15 +1,8 @@
+import styled from "@emotion/styled"
 import PropTypes from "prop-types"
 import React, { useEffect } from "react"
 
 export const EntityAvatarDisplay = ({ avatar, width, height }) => {
-  const avatarStyle = {
-    width: `${width}px`,
-    height: `${height}px`,
-    maxWidth: "100%",
-    display: "block",
-    margin: "0 auto",
-    marginBottom: "10px"
-  }
   useEffect(() => {
     if (avatar.applyCrop) {
       const canvas = document.getElementById("avatar")
@@ -33,30 +26,25 @@ export const EntityAvatarDisplay = ({ avatar, width, height }) => {
   }, [avatar, width, height])
 
   return (
-    <>
+    <EntityAvatarStyledDiv>
       {avatar.applyCrop ? (
-        <>
-          <canvas
-            id="avatar"
-            width={width}
-            height={height}
-            style={avatarStyle}
-          />
-        </>
+        <canvas id="avatar" width={width} height={height} />
       ) : (
-        <>
-          <img
-            src={`/api/attachment/view/${avatar.attachmentUuid}`}
-            height={height}
-            width={width}
-            alt="Avatar"
-            style={avatarStyle}
-          />
-        </>
+        <img
+          src={`/api/attachment/view/${avatar.attachmentUuid}`}
+          height={height}
+          width={width}
+          alt="Avatar"
+        />
       )}
-    </>
+    </EntityAvatarStyledDiv>
   )
 }
+const EntityAvatarStyledDiv = styled.div`
+  display: block;
+  margin: 0 auto 10px;
+  max-width: 100%;
+`
 
 EntityAvatarDisplay.propTypes = {
   avatar: PropTypes.object,

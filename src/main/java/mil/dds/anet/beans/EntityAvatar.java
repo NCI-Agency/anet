@@ -29,8 +29,6 @@ public class EntityAvatar {
   @GraphQLInputField
   private Integer cropHeight;
 
-  public EntityAvatar() {}
-
   public String getRelatedObjectType() {
     return relatedObjectType;
   }
