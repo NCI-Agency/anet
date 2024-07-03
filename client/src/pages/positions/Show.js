@@ -110,9 +110,6 @@ const PositionShow = ({ pageDispatchers }) => {
   const position = new Position(data ? data.position : {})
 
   const isSuperuser = position.type === Position.TYPE.SUPERUSER
-  const assignedRole = Settings.fields.regular.person.name
-  const positionSettings = Settings.fields.regular.position
-
   const canEdit =
     // Admins can edit anybody
     currentUser.isAdmin() ||
@@ -353,7 +350,7 @@ const PositionShow = ({ pageDispatchers }) => {
               </Fieldset>
 
               <Fieldset
-                title={`Assigned ${assignedRole}`}
+                title={`Assigned ${Settings.fields.regular.person.name}`}
                 id="assigned-counterpart"
                 action={
                   canEdit && (
@@ -361,7 +358,7 @@ const PositionShow = ({ pageDispatchers }) => {
                       onClick={() => setShowAssociatedPositionsModal(true)}
                       variant="outline-secondary"
                     >
-                      Change assigned {assignedRole}
+                      Change assigned {Settings.fields.regular.person.name}
                     </Button>
                   )
                 }
@@ -371,7 +368,8 @@ const PositionShow = ({ pageDispatchers }) => {
                 />
                 {position.associatedPositions.length === 0 && (
                   <em>
-                    {position.name} has no associated {assignedRole}
+                    {position.name} has no associated{" "}
+                    {Settings.fields.regular.person.name}
                   </em>
                 )}
 
@@ -413,7 +411,7 @@ const PositionShow = ({ pageDispatchers }) => {
                 <Fieldset
                   id="organizationsAdministrated"
                   title={utils.sentenceCase(
-                    positionSettings.organizationsAdministrated.label
+                    Settings.fields.position.organizationsAdministrated.label
                   )}
                   action={
                     currentUser.isAdmin() && (
@@ -424,7 +422,8 @@ const PositionShow = ({ pageDispatchers }) => {
                       >
                         Edit{" "}
                         {utils.noCase(
-                          positionSettings.organizationsAdministrated.label
+                          Settings.fields.position.organizationsAdministrated
+                            .label
                         )}
                       </Button>
                     )

@@ -727,7 +727,7 @@ properties:
                   items:
                     type: string
                     enum:
-                      [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, POINT_LOCATION]
+                      [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, COUNTRY, POINT_LOCATION]
           reportPeople:
             required: [optionalAttendingAuthor, optionalPrimaryAdvisor, optionalPrimaryPrincipal]
             properties:
@@ -867,7 +867,7 @@ properties:
       position:
         type: object
         additionalProperties: false
-        required: [status, name, type, code, organization, role, emailAddresses, authorizationGroups]
+        required: [status, name, type, code, organization, location, organizationsAdministrated, role, emailAddresses, authorizationGroups]
         properties:
           status:
             "$ref": "#/$defs/labeledField"
@@ -880,7 +880,19 @@ properties:
           organization:
             "$ref": "#/$defs/inputField"
           location:
-            "$ref": "#/$defs/optionableInputField"
+            required: [filter]
+            allOf:
+            - "$ref": "#/$defs/extensibleInputField"
+            - properties:
+                filter:
+                  type: array
+                  uniqueItems: true
+                  items:
+                    type: string
+                    enum:
+                      [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, COUNTRY, POINT_LOCATION]
+          organizationsAdministrated:
+            "$ref": "#/$defs/inputField"
           emailAddresses:
             "$ref": "#/$defs/restrictableLabeledField"
           authorizationGroups:
@@ -917,7 +929,7 @@ properties:
         type: object
         additionalProperties: false
         required: [status, shortName, longName, identificationCode, type, parentOrg, childrenOrgs,
-                   location, profile, app6context, app6standardIdentity, app6symbolSet, app6hq,
+                   location, administratingPositions, profile, app6context, app6standardIdentity, app6symbolSet, app6hq,
                    app6amplifier, emailAddresses, authorizationGroups]
         properties:
           status:
@@ -935,6 +947,18 @@ properties:
           childrenOrgs:
             "$ref": "#/$defs/labeledField"
           location:
+            required: [filter]
+            allOf:
+            - "$ref": "#/$defs/extensibleInputField"
+            - properties:
+                filter:
+                  type: array
+                  uniqueItems: true
+                  items:
+                    type: string
+                    enum:
+                      [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, COUNTRY, POINT_LOCATION]
+          administratingPositions:
             "$ref": "#/$defs/inputField"
           profile:
             "$ref": "#/$defs/inputField"
@@ -1068,7 +1092,7 @@ properties:
           position:
             type: object
             additionalProperties: false
-            required: [name, type, location, organizationsAdministrated]
+            required: [name, type]
             properties:
               name:
                 type: string
@@ -1078,25 +1102,11 @@ properties:
                 type: string
                 title: The permissions type of this field
                 description: Used in the UI for the type/permissions of a position.
-              location:
-                type: object
-                additionalProperties: false
-                required: [filter]
-                properties:
-                  filter:
-                    type: array
-                    uniqueItems: true
-                    items:
-                      type: string
-                      enum:
-                        [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, POINT_LOCATION]
-              organizationsAdministrated:
-                "$ref": "#/$defs/inputField"
 
           org:
             type: object
             additionalProperties: false
-            required: [name, allOrgName, location, administratingPositions]
+            required: [name, allOrgName]
             properties:
               name:
                 type: string
@@ -1106,20 +1116,6 @@ properties:
                 type: string
                 title: The name used to represent 'all organizations'
                 description: Used in the UI to refer to all organizations collectively.
-              location:
-                type: object
-                additionalProperties: false
-                required: [filter]
-                properties:
-                  filter:
-                    type: array
-                    uniqueItems: true
-                    items:
-                      type: string
-                      enum:
-                        [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, COUNTRY, POINT_LOCATION]
-              administratingPositions:
-                "$ref": "#/$defs/inputField"
 
       superuser:
         type: object

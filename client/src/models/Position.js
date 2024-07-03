@@ -8,10 +8,6 @@ import Settings from "settings"
 import utils from "utils"
 import * as yup from "yup"
 
-export const regularPosition = Settings.fields.regular.position
-export const administratorPosition = Settings.fields.administrator.position
-export const superuserPosition = Settings.fields.superuser.position
-
 export class PositionRole {
   // Static enumerations
   static MEMBER = new PositionRole("MEMBER", "member")
@@ -186,11 +182,11 @@ export default class Position extends Model {
 
   static humanNameOfType(type) {
     if (type === Position.TYPE.REGULAR) {
-      return regularPosition.type
+      return Settings.fields.regular.position.type
     } else if (type === Position.TYPE.SUPERUSER) {
-      return superuserPosition.type
+      return Settings.fields.superuser.position.type
     } else if (type === Position.TYPE.ADMINISTRATOR) {
-      return administratorPosition.type
+      return Settings.fields.administrator.position.type
     }
   }
 

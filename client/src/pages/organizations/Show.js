@@ -228,7 +228,6 @@ const OrganizationShow = ({ pageDispatchers }) => {
   const canAdministrateOrg =
     currentUser &&
     currentUser.hasAdministrativePermissionsForOrganization(organization)
-  const orgSettings = Settings.fields.regular.org
   const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
   const { parentContext, parentStandardIdentity } =
     Organization.getApp6ParentFields(organization, organization)
@@ -254,7 +253,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
         </Nav.Item>
         <Nav.Item>
           <AnchorNavItem to="administratingPositions">
-            {orgSettings.administratingPositions.label}
+            {Settings.fields.organization.administratingPositions.label}
           </AnchorNavItem>
         </Nav.Item>
         <Nav.Item>

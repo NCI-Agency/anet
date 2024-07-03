@@ -51,7 +51,6 @@ const EditAdministratingPositionsModal = ({
   return (
     <Formik enableReinitialize onSubmit={onSubmit} initialValues={organization}>
       {({ setFieldValue, values, submitForm, setFieldTouched }) => {
-        const orgSettings = Settings.fields.regular.org
         return (
           <Modal
             centered
@@ -61,7 +60,10 @@ const EditAdministratingPositionsModal = ({
           >
             <Modal.Header closeButton>
               <Modal.Title>
-                Edit {utils.noCase(orgSettings.administratingPositions.label)}
+                Edit{" "}
+                {utils.noCase(
+                  Settings.fields.organization.administratingPositions.label
+                )}
               </Modal.Title>
             </Modal.Header>
             <Modal.Body>
@@ -72,7 +74,9 @@ const EditAdministratingPositionsModal = ({
                     <Col md={12}>
                       <DictionaryField
                         wrappedComponent={FastField}
-                        dictProps={orgSettings.administratingPositions}
+                        dictProps={
+                          Settings.fields.organization.administratingPositions
+                        }
                         name="administratingPositions"
                         component={FieldHelper.SpecialField}
                         onChange={value => {
