@@ -22,9 +22,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@apollo/client@npm:3.10.7":
-  version: 3.10.7
-  resolution: "@apollo/client@npm:3.10.7"
+"@apollo/client@npm:3.10.8":
+  version: 3.10.8
+  resolution: "@apollo/client@npm:3.10.8"
   dependencies:
     "@graphql-typed-document-node/core": "npm:^3.1.1"
     "@wry/caches": "npm:^1.0.0"
@@ -55,7 +55,7 @@ __metadata:
       optional: true
     subscriptions-transport-ws:
       optional: true
-  checksum: 10c0/25bf271370533943f71f97101e97ec80e7408dde5bec5a743b065ba810bf55bf90269c38264badee2c6ba952f650b642e5be3e6aac8792554c904071e6b5cfdf
+  checksum: 10c0/38f69040c8bbed78dc3b7c18de8ede1aacdf0501e5a7340171d95d4c339b72857c6ef3cb233038cc3e69bc44f1917c4c1a01cfaae3a130285eafbf89f96b290a
   languageName: node
   linkType: hard
 
@@ -2270,9 +2270,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphiql/react@npm:^0.22.3":
-  version: 0.22.3
-  resolution: "@graphiql/react@npm:0.22.3"
+"@graphiql/react@npm:^0.22.4":
+  version: 0.22.4
+  resolution: "@graphiql/react@npm:0.22.4"
   dependencies:
     "@graphiql/toolkit": "npm:^0.9.1"
     "@headlessui/react": "npm:^1.7.15"
@@ -2293,7 +2293,7 @@ __metadata:
     graphql: ^15.5.0 || ^16.0.0
     react: ^16.8.0 || ^17 || ^18
     react-dom: ^16.8.0 || ^17 || ^18
-  checksum: 10c0/75259f488675625cd9d2ae7544c383a0d00106a1d44a443030a7ba8355f3836bc53d91fa375cc4a431f3de265d820d5482ef1dba8ecba2c924d166316824558a
+  checksum: 10c0/5f70f29cb9929fb11f5cbbf3f7deb6d66f2423170ca92730931034de07957994a95f459c0b40189c5739bbea07a098ac663ba9a1e7607a3fcd0d2b0b0be1f611
   languageName: node
   linkType: hard
 
@@ -6053,7 +6053,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "anet@workspace:."
   dependencies:
-    "@apollo/client": "npm:3.10.7"
+    "@apollo/client": "npm:3.10.8"
     "@babel/core": "npm:7.24.7"
     "@babel/eslint-parser": "npm:7.24.7"
     "@babel/plugin-proposal-decorators": "npm:7.24.7"
@@ -6149,7 +6149,7 @@ __metadata:
     file-saver: "npm:2.0.5"
     formik: "npm:2.4.6"
     git-describe: "npm:4.1.1"
-    graphiql: "npm:3.3.1"
+    graphiql: "npm:3.3.2"
     graphql: "npm:16.9.0"
     handlebars: "npm:4.7.8"
     handlebars-loader: "npm:1.7.3"
@@ -6196,7 +6196,7 @@ __metadata:
     react-redux: "npm:9.1.2"
     react-redux-loading-bar: "npm:5.0.8"
     react-resize-detector: "npm:11.0.1"
-    react-router-bootstrap: "npm:0.26.2"
+    react-router-bootstrap: "npm:0.26.3"
     react-router-dom: "npm:6.3.0"
     react-scroll: "npm:1.9.0"
     react-test-renderer: "npm:18.3.1"
@@ -11573,11 +11573,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"graphiql@npm:3.3.1":
-  version: 3.3.1
-  resolution: "graphiql@npm:3.3.1"
+"graphiql@npm:3.3.2":
+  version: 3.3.2
+  resolution: "graphiql@npm:3.3.2"
   dependencies:
-    "@graphiql/react": "npm:^0.22.3"
+    "@graphiql/react": "npm:^0.22.4"
     "@graphiql/toolkit": "npm:^0.9.1"
     graphql-language-service: "npm:^5.2.1"
     markdown-it: "npm:^14.1.0"
@@ -11585,7 +11585,7 @@ __metadata:
     graphql: ^15.5.0 || ^16.0.0
     react: ^16.8.0 || ^17 || ^18
     react-dom: ^16.8.0 || ^17 || ^18
-  checksum: 10c0/8b4e90180dd0448c16cbbda979a219e7ffcc66d6fb34ed044e688184b8cfec72f7ace571d0165ab9c9eccea5e5fd96a181e478830c34ca5bc352540ef36a4aa9
+  checksum: 10c0/e40dba94925eaa00fd8f1d06164c419889ea6e27afc3051e8c26547d91400abdcd0b55bab9f034878b9412555b459b29a9f28bb23cc2e760f236694dd74ff0a4
   languageName: node
   linkType: hard
 
@@ -16924,15 +16924,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-router-bootstrap@npm:0.26.2":
-  version: 0.26.2
-  resolution: "react-router-bootstrap@npm:0.26.2"
+"react-router-bootstrap@npm:0.26.3":
+  version: 0.26.3
+  resolution: "react-router-bootstrap@npm:0.26.3"
   dependencies:
     prop-types: "npm:^15.7.2"
   peerDependencies:
     react: ">=16.13.1"
     react-router-dom: ">=6.0.0"
-  checksum: 10c0/f4ec95df2ee509f427fa3271d017b8adcf14f00ae6bacef41e6f2f1787f08affcf0dfbea8c616a9407afb85646925e76581ff87fb41cb3d1d86c57998befd535
+  checksum: 10c0/875d44af42aba565ed8047fb2622ff2cc63731be6ae116bf61925ece1f7aa1cd8de138285083309ac5d97c06d0896735b1fd2b0cfa2c7c86f8f34ebf65730efe
   languageName: node
   linkType: hard
 
