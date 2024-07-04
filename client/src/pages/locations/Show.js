@@ -53,10 +53,8 @@ const LocationShow = ({ pageDispatchers }) => {
   const { currentUser } = useContext(AppContext)
   const { uuid } = useParams()
   const routerLocation = useLocation()
-  const stateSuccess = routerLocation.state && routerLocation.state.success
-  const [stateError, setStateError] = useState(
-    routerLocation.state && routerLocation.state.error
-  )
+  const stateSuccess = routerLocation.state?.success
+  const [stateError, setStateError] = useState(routerLocation.state?.error)
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_LOCATION, {
     uuid
   })
