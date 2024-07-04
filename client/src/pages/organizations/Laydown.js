@@ -56,8 +56,6 @@ const OrganizationLaydown = ({ organization, refetch, readOnly }) => {
   )
   const allAdministratingPositions = getAllAdministratingPositions(organization)
 
-  const orgSettings = Settings.fields.regular.org
-
   return (
     <>
       <Fieldset id="orgChart" title="Organization Diagram">
@@ -116,7 +114,9 @@ const OrganizationLaydown = ({ organization, refetch, readOnly }) => {
       </Fieldset>
       <Fieldset
         id="administratingPositions"
-        title={utils.sentenceCase(orgSettings.administratingPositions.label)}
+        title={utils.sentenceCase(
+          Settings.fields.organization.administratingPositions.label
+        )}
         action={
           !readOnly &&
           isAdmin && (
@@ -124,7 +124,10 @@ const OrganizationLaydown = ({ organization, refetch, readOnly }) => {
               onClick={() => setShowAdministratingPositionsModal(true)}
               variant="outline-secondary"
             >
-              Edit {utils.noCase(orgSettings.administratingPositions.label)}
+              Edit{" "}
+              {utils.noCase(
+                Settings.fields.organization.administratingPositions.label
+              )}
             </Button>
           )
         }

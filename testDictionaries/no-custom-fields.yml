@@ -537,6 +537,10 @@ fields:
       label: Location
       placeholder: Search for the location where this Position will operate from…
       optional: false
+      filter: [POINT_LOCATION]
+    organizationsAdministrated:
+      label: Organizations administrated
+      placeholder: Search for an organization…
     role:
       label: Position Role
       types:
@@ -572,6 +576,10 @@ fields:
     location:
       label: Location
       placeholder: Search for the location where this Organization will operate from…
+      filter: [POINT_LOCATION, COUNTRY]
+    administratingPositions:
+      label: Assigned Superusers
+      placeholder: Search for a position…
     profile:
       label: Profile
       placeholder: Fill in the profile of this organization
@@ -1446,20 +1454,10 @@ fields:
     position:
       name: Regular
       type: Regular position
-      location:
-        filter: [POINT_LOCATION]
-      organizationsAdministrated:
-        label: Organizations administrated
-        placeholder: Search for an organization…
 
     org:
       name: Organization
       allOrgName: Top-level Organizations
-      location:
-        filter: [POINT_LOCATION, COUNTRY]
-      administratingPositions:
-        label: Assigned Superusers
-        placeholder: Search for a position…
 
 pinned_ORGs: [Key Leader Engagement]
 non_reporting_ORGs: [ANET Administrators]

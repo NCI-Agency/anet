@@ -257,13 +257,13 @@ export default class Location extends Model {
 
   static getOrganizationLocationFilters() {
     return Location.getLocationFilters(
-      Settings?.fields.regular?.org?.location?.filter
+      Settings?.fields?.organization?.location?.filter
     )
   }
 
   static getPositionLocationFilters() {
     return Location.getLocationFilters(
-      Settings?.fields.regular?.position?.location?.filter
+      Settings?.fields?.position?.location?.filter
     )
   }
 
