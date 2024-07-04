@@ -47,7 +47,7 @@ import {
   Nav
 } from "react-bootstrap"
 import { connect } from "react-redux"
-import { useLocation, useParams } from "react-router-dom"
+import { Link, useLocation, useParams } from "react-router-dom"
 import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
 import utils from "utils"
@@ -225,9 +225,9 @@ const OrganizationShow = ({ pageDispatchers }) => {
   }
   const organization = new Organization(data ? data.organization : {})
 
+  const isAdmin = currentUser?.isAdmin()
   const canAdministrateOrg =
-    currentUser &&
-    currentUser.hasAdministrativePermissionsForOrganization(organization)
+    currentUser?.hasAdministrativePermissionsForOrganization(organization)
   const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
   const { parentContext, parentStandardIdentity } =
     Organization.getApp6ParentFields(organization, organization)
@@ -287,6 +287,15 @@ const OrganizationShow = ({ pageDispatchers }) => {
       {({ values }) => {
         const action = (
           <>
+            {isAdmin && (
+              <Link
+                to="/admin/merge/organizations"
+                state={{ initialLeftUuid: organization.uuid }}
+                className="btn btn-outline-secondary"
+              >
+                Merge with other organization
+              </Link>
+            )}
             {canAdministrateOrg && (
               <LinkTo
                 modelType="Organization"

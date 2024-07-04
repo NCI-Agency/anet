@@ -34,7 +34,7 @@ import _isEmpty from "lodash/isEmpty"
 import { Attachment, Location } from "models"
 import React, { useContext, useState } from "react"
 import { connect } from "react-redux"
-import { useLocation, useParams } from "react-router-dom"
+import { Link, useLocation, useParams } from "react-router-dom"
 import Settings from "settings"
 import utils from "utils"
 
@@ -77,7 +77,8 @@ const LocationShow = ({ pageDispatchers }) => {
     )
   }
   const location = new Location(data ? data.location : {})
-  const canEdit = currentUser.isSuperuser()
+  const isAdmin = currentUser?.isAdmin()
+  const canEdit = currentUser?.isSuperuser()
   const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
 
   return (
@@ -95,6 +96,15 @@ const LocationShow = ({ pageDispatchers }) => {
         }
         const action = (
           <>
+            {isAdmin && (
+              <Link
+                to="/admin/merge/locations"
+                state={{ initialLeftUuid: location.uuid }}
+                className="btn btn-outline-secondary"
+              >
+                Merge with other location
+              </Link>
+            )}
             {canEdit && (
               <LinkTo
                 modelType="Location"

@@ -45,10 +45,18 @@ import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, Col, Container, Form, Row } from "react-bootstrap"
 import { connect } from "react-redux"
-import { useNavigate } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import PEOPLE_ICON from "resources/people.png"
 import Settings from "settings"
 import utils from "utils"
+
+const GQL_GET_PERSON = gql`
+  query($uuid: String!) {
+    person(uuid: $uuid) {
+      ${Person.allFieldsQuery}
+    }
+  }
+`
 
 const GQL_MERGE_PERSON = gql`
   mutation ($loserUuid: String!, $winnerPerson: PersonInput!) {
@@ -58,6 +66,8 @@ const GQL_MERGE_PERSON = gql`
 
 const MergePeople = ({ pageDispatchers }) => {
   const navigate = useNavigate()
+  const { state } = useLocation()
+  const initialLeftUuid = state?.initialLeftUuid
   const [saveError, setSaveError] = useState(null)
   const [showHistoryModal, setShowHistoryModal] = useState(false)
   const [mergeState, dispatchMergeActions] = useMergeObjects(
@@ -71,6 +81,15 @@ const MergePeople = ({ pageDispatchers }) => {
   })
   usePageTitle("Merge People")
 
+  if (!mergeState[MERGE_SIDES.LEFT] && initialLeftUuid) {
+    API.query(GQL_GET_PERSON, {
+      uuid: initialLeftUuid
+    }).then(data => {
+      const person = new Person(data.person)
+      person.fixupFields()
+      dispatchMergeActions(setMergeable(person, MERGE_SIDES.LEFT))
+    })
+  }
   const person1 = mergeState[MERGE_SIDES.LEFT]
   const person2 = mergeState[MERGE_SIDES.RIGHT]
   const mergedPerson = mergeState.merged
@@ -469,16 +488,7 @@ const PersonColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
           overlayRenderRow={PersonSimpleOverlayRow}
           filterDefs={peopleFilters}
           onChange={value => {
-            const newValue = value
-            if (newValue?.customFields) {
-              newValue[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
-                value.customFields
-              )
-            }
-            if (newValue?.customSensitiveInformation) {
-              newValue[SENSITIVE_CUSTOM_FIELDS_PARENT] =
-                utils.parseSensitiveFields(value.customSensitiveInformation)
-            }
+            value?.fixupFields()
             dispatchMergeActions(setMergeable(value, align))
           }}
           objectType={Person}
@@ -765,7 +775,7 @@ const PersonColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
             Object.entries(Settings.fields.person.customFields).map(
               ([fieldName, fieldConfig]) => {
                 const fieldValue =
-                  person[DEFAULT_CUSTOM_FIELDS_PARENT][fieldName]
+                  person?.[DEFAULT_CUSTOM_FIELDS_PARENT]?.[fieldName]
                 return (
                   <MergeField
                     key={fieldName}
@@ -794,7 +804,7 @@ const PersonColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
               Settings.fields.person.customSensitiveInformation
             ).map(([fieldName, fieldConfig]) => {
               const fieldValue =
-                person[SENSITIVE_CUSTOM_FIELDS_PARENT][fieldName]
+                person?.[SENSITIVE_CUSTOM_FIELDS_PARENT]?.[fieldName]
               return (
                 <MergeField
                   key={fieldName}

@@ -484,6 +484,15 @@ export default class Person extends Model {
     return Person.filterClientSideFields(this, ...additionalFields)
   }
 
+  fixupFields() {
+    super.fixupFields()
+    if (this.customSensitiveInformation) {
+      this[SENSITIVE_CUSTOM_FIELDS_PARENT] = utils.parseSensitiveFields(
+        this.customSensitiveInformation
+      )
+    }
+  }
+
   static isAuthorized(user, customSensitiveInformationField, position) {
     if (Model.isAuthorized(user, customSensitiveInformationField)) {
       return true

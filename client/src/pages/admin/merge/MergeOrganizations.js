@@ -41,10 +41,18 @@ import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, Col, Container, Form, Row } from "react-bootstrap"
 import { connect } from "react-redux"
-import { useNavigate } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
 import Settings from "settings"
 import utils from "utils"
+
+const GQL_GET_ORGANIZATION = gql`
+  query ($uuid: String!) {
+    organization(uuid: $uuid) {
+      ${Organization.allFieldsQuery}
+    }
+  }
+`
 
 const GQL_MERGE_ORGANIZATION = gql`
   mutation ($loserUuid: String!, $winnerOrganization: OrganizationInput!) {
@@ -57,6 +65,8 @@ const GQL_MERGE_ORGANIZATION = gql`
 
 const MergeOrganizations = ({ pageDispatchers }) => {
   const navigate = useNavigate()
+  const { state } = useLocation()
+  const initialLeftUuid = state?.initialLeftUuid
   const [saveError, setSaveError] = useState(null)
   const [mergeState, dispatchMergeActions] = useMergeObjects(
     MODEL_TO_OBJECT_TYPE.Organization
@@ -69,6 +79,15 @@ const MergeOrganizations = ({ pageDispatchers }) => {
   })
   usePageTitle("Merge Organizations")
 
+  if (!mergeState[MERGE_SIDES.LEFT] && initialLeftUuid) {
+    API.query(GQL_GET_ORGANIZATION, {
+      uuid: initialLeftUuid
+    }).then(data => {
+      const organization = new Organization(data.organization)
+      organization.fixupFields()
+      dispatchMergeActions(setMergeable(organization, MERGE_SIDES.LEFT))
+    })
+  }
   const organization1 = mergeState[MERGE_SIDES.LEFT]
   const organization2 = mergeState[MERGE_SIDES.RIGHT]
   const mergedOrganization = mergeState.merged
@@ -461,12 +480,7 @@ const OrganizationColumn = ({
           overlayRenderRow={OrganizationSimpleOverlayRow}
           filterDefs={organizationsFilters}
           onChange={value => {
-            const newValue = value
-            if (newValue?.customFields) {
-              newValue[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
-                value.customFields
-              )
-            }
+            value?.fixupFields()
             dispatchMergeActions(setMergeable(value, align))
           }}
           objectType={Organization}
@@ -802,7 +816,7 @@ const OrganizationColumn = ({
             Object.entries(Settings.fields.organization.customFields).map(
               ([fieldName, fieldConfig]) => {
                 const fieldValue =
-                  organization[DEFAULT_CUSTOM_FIELDS_PARENT][fieldName]
+                  organization?.[DEFAULT_CUSTOM_FIELDS_PARENT]?.[fieldName]
                 return (
                   <MergeField
                     key={fieldName}

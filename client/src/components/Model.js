@@ -971,6 +971,14 @@ export default class Model {
     return Model.filterClientSideFields(this, ...additionalFields)
   }
 
+  fixupFields() {
+    if (this.customFields) {
+      this[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
+        this.customFields
+      )
+    }
+  }
+
   static isAuthorized(user, customSensitiveInformationField) {
     // Admins are always allowed
     if (user?.isAdmin()) {

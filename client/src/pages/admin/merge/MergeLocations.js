@@ -40,10 +40,17 @@ import PropTypes from "prop-types"
 import React, { useEffect, useState } from "react"
 import { Button, Col, Container, Form, Row } from "react-bootstrap"
 import { connect } from "react-redux"
-import { useNavigate } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import LOCATIONS_ICON from "resources/locations.png"
 import Settings from "settings"
-import utils from "utils"
+
+const GQL_GET_LOCATION = gql`
+  query ($uuid: String!) {
+    location(uuid: $uuid) {
+      ${Location.allFieldsQuery}
+    }
+  }
+`
 
 const GQL_MERGE_LOCATION = gql`
   mutation ($loserUuid: String!, $winnerLocation: LocationInput!) {
@@ -53,6 +60,8 @@ const GQL_MERGE_LOCATION = gql`
 
 const MergeLocations = ({ pageDispatchers }) => {
   const navigate = useNavigate()
+  const { state } = useLocation()
+  const initialLeftUuid = state?.initialLeftUuid
   const [saveError, setSaveError] = useState(null)
   const [saveWarning, setSaveWarning] = useState(null)
   const [locationFormat, setLocationFormat] = useState(Location.locationFormat)
@@ -68,6 +77,15 @@ const MergeLocations = ({ pageDispatchers }) => {
   })
   usePageTitle("Merge Locations")
 
+  if (!mergeState[MERGE_SIDES.LEFT] && initialLeftUuid) {
+    API.query(GQL_GET_LOCATION, {
+      uuid: initialLeftUuid
+    }).then(data => {
+      const location = new Location(data.location)
+      location.fixupFields()
+      dispatchMergeActions(setMergeable(location, MERGE_SIDES.LEFT))
+    })
+  }
   const location1 = mergeState[MERGE_SIDES.LEFT]
   const location2 = mergeState[MERGE_SIDES.RIGHT]
   const mergedLocation = mergeState.merged
@@ -392,17 +410,7 @@ const LocationColumn = ({
           overlayRenderRow={LocationOverlayRow}
           filterDefs={getLocationFilters()}
           onChange={value => {
-            if (value?.customFields) {
-              value[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
-                value.customFields
-              )
-            }
-            if (value) {
-              value.displayedCoordinate = convertLatLngToMGRS(
-                value.lat,
-                value.lng
-              )
-            }
+            value?.fixupFields()
             dispatchMergeActions(setMergeable(value, align))
           }}
           objectType={Location}
@@ -603,7 +611,7 @@ const LocationColumn = ({
             Object.entries(Settings.fields.location.customFields).map(
               ([fieldName, fieldConfig]) => {
                 const fieldValue =
-                  location[DEFAULT_CUSTOM_FIELDS_PARENT][fieldName]
+                  location?.[DEFAULT_CUSTOM_FIELDS_PARENT]?.[fieldName]
                 return (
                   <MergeField
                     key={fieldName}

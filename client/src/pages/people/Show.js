@@ -56,7 +56,7 @@ import {
   Tooltip
 } from "react-bootstrap"
 import { connect } from "react-redux"
-import { useLocation, useNavigate, useParams } from "react-router-dom"
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom"
 import Settings from "settings"
 import utils from "utils"
 import PersonAvatar from "./Avatar"
@@ -196,8 +196,8 @@ const PersonShow = ({ pageDispatchers }) => {
   // User can always edit themselves
   // Admins can always edit anybody
   // Superusers can edit people in their org, their descendant orgs, or un-positioned people.
-  const isAdmin = currentUser && currentUser.isAdmin()
-  const hasPosition = position && position.uuid
+  const isAdmin = currentUser?.isAdmin()
+  const hasPosition = position?.uuid
   const canEdit =
     Person.isEqual(currentUser, person) ||
     isAdmin ||
@@ -220,6 +220,15 @@ const PersonShow = ({ pageDispatchers }) => {
 
   const action = (
     <>
+      {isAdmin && (
+        <Link
+          to="/admin/merge/people"
+          state={{ initialLeftUuid: person.uuid }}
+          className="btn btn-outline-secondary"
+        >
+          Merge with other person
+        </Link>
+      )}
       <Button value="compactView" variant="primary" onClick={onCompactClick}>
         Summary / Print
       </Button>
