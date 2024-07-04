@@ -293,11 +293,11 @@ const MergeOrganizations = ({ pageDispatchers }) => {
               />
               <DictionaryField
                 wrappedComponent={MergeField}
-                dictProps={Settings.fields.regular.org.administratingPositions}
+                dictProps={Settings.fields.organization.administratingPositions}
                 value={
                   <PositionTable
                     label={utils.sentenceCase(
-                      Settings.fields.regular.org.administratingPositions.label
+                      Settings.fields.organization.administratingPositions.label
                     )}
                     positions={mergedOrganization.administratingPositions || []}
                     showOrganization={false}
@@ -734,12 +734,12 @@ const OrganizationColumn = ({
           />
           <DictionaryField
             wrappedComponent={MergeField}
-            dictProps={Settings.fields.regular.org.administratingPositions}
+            dictProps={Settings.fields.organization.administratingPositions}
             fieldName="administratingPositions"
             value={
               <PositionTable
                 label={utils.sentenceCase(
-                  Settings.fields.regular.org.administratingPositions.label
+                  Settings.fields.organization.administratingPositions.label
                 )}
                 positions={organization.administratingPositions || []}
                 showOrganization={false}
