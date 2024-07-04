@@ -6,7 +6,7 @@ import axios from "axios"
 import Messages from "components/Messages"
 import { Attachment } from "models"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { toast } from "react-toastify"
 import Settings from "settings"
 import utils from "utils"
@@ -27,9 +27,7 @@ export const attachmentSave = async(
   caption,
   file,
   relatedObjectType,
-  relatedObjectUuid,
-  attachments,
-  updateAttachments
+  relatedObjectUuid
 ) => {
   const attachment = Attachment.filterClientSideFields(
     new Attachment({
@@ -77,7 +75,6 @@ export const attachmentSave = async(
         )
         .then(() => {
           toast.done(toastId)
-          updateAttachments([...attachments, attachment])
           toast.success(
             `Your attachment ${attachment.fileName} has been uploaded`
           )
@@ -86,7 +83,6 @@ export const attachmentSave = async(
         .catch(error => {
           toast.dismiss(toastId)
           attachment.contentLength = -1
-          updateAttachments([...attachments, attachment])
           toast.error(
             `Attachment content upload failed for ${attachment.fileName}: ${
               error.response?.data?.error || error.message
@@ -111,48 +107,69 @@ const UploadAttachment = ({
   saveRelatedObject
 }) => {
   const [error, setError] = useState(null)
+  const [allAttachments, setAllAttachments] = useState(attachments)
+  const [objectUuid, setObjectUuid] = useState(relatedObjectUuid)
+  useEffect(
+    () => updateAttachments(allAttachments),
+    [allAttachments, updateAttachments]
+  )
 
   const handleFileEvent = async e => {
-    const file = e.target?.files?.[0]
-    if (!file) {
-      // No file was selected, just return
-      return
-    }
-    const caption = utils.stripExtension(file.name)
-    if (relatedObjectUuid) {
-      await attachmentSave(
-        file.name,
-        file.type,
-        file.size,
-        caption,
-        file,
-        relatedObjectType,
-        relatedObjectUuid,
-        attachments,
-        updateAttachments
-      )
-    } else {
-      // Save the related object first
-      saveRelatedObject()
-        .then(
-          async response =>
-            await attachmentSave(
+    // Must keep a copy of this state here, as it is not updated while this function runs
+    let currentAttachments = [...allAttachments]
+    let currentObjectUuid = objectUuid
+    for (const file of e.target?.files || []) {
+      if (!file) {
+        // No file was selected, just continue
+        continue
+      }
+      if (!Settings.fields.attachment.mimeTypes?.includes(file.type)) {
+        toast.error(
+          `Attaching "${file.name}" failed; files of type "${file.type}" are not allowed`
+        )
+        continue
+      }
+      const caption = utils.stripExtension(file.name)
+      if (currentObjectUuid) {
+        const newAttachment = await attachmentSave(
+          file.name,
+          file.type,
+          file.size,
+          caption,
+          file,
+          relatedObjectType,
+          currentObjectUuid
+        )
+        if (newAttachment) {
+          currentAttachments = [...currentAttachments, newAttachment]
+          setAllAttachments(currentAttachments)
+        }
+      } else {
+        // Save the related object first
+        await saveRelatedObject()
+          .then(async response => {
+            currentObjectUuid = response.uuid
+            setObjectUuid(currentObjectUuid)
+            const newAttachment = await attachmentSave(
               file.name,
               file.type,
               file.size,
               caption,
               file,
               relatedObjectType,
-              response.uuid,
-              attachments,
-              updateAttachments
+              currentObjectUuid
             )
-        )
-        .catch(() =>
-          toast.error(
-            `Attaching the file failed; there was an error saving the ${RELATED_OBJECT_TYPE_TO_ENTITY_TYPE[relatedObjectType]}`
+            if (newAttachment) {
+              currentAttachments = [...currentAttachments, newAttachment]
+              setAllAttachments(currentAttachments)
+            }
+          })
+          .catch(() =>
+            toast.error(
+              `Attaching "${file.name}" failed; there was an error saving the ${RELATED_OBJECT_TYPE_TO_ENTITY_TYPE[relatedObjectType]}`
+            )
           )
-        )
+      }
     }
   }
 
@@ -173,6 +190,7 @@ const UploadAttachment = ({
           className="form-field"
           id="fileUpload"
           type="file"
+          multiple
           accept={Settings.fields.attachment.mimeTypes}
           onChange={handleFileEvent}
         />
@@ -180,14 +198,14 @@ const UploadAttachment = ({
 
       {/** **** Show uploaded files in here **** **/}
       <div className="attachment-card-list">
-        {attachments.map(attachment => (
+        {allAttachments.map(attachment => (
           <AttachmentCard
             key={attachment.uuid}
             attachment={attachment}
             edit
             setError={setError}
-            uploadedList={attachments}
-            setUploadedList={updateAttachments}
+            uploadedList={allAttachments}
+            setUploadedList={setAllAttachments}
           />
         ))}
       </div>
