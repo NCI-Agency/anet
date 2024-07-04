@@ -181,7 +181,8 @@
     "yup": "1.4.0"
   },
   "resolutions": {
-    "chromedriver": "link:./node_modules/.cache/null"
+    "chromedriver": "link:./node_modules/.cache/null",
+    "react": "18.2.0"
   },
   "packageManager": "yarn@4.3.1",
   "scripts": {
