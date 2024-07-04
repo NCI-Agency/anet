@@ -607,6 +607,7 @@ const Positions = ({
   return (
     <PositionTable
       positions={positions}
+      showLocation
       pageSize={pageSize}
       pageNum={curPage}
       totalCount={totalCount}

@@ -99,6 +99,7 @@ const EditAdministratingPositionsModal = ({
                             renderSelected={
                               <PositionTable
                                 positions={values.administratingPositions || []}
+                                showLocation
                                 showDelete
                               />
                             }

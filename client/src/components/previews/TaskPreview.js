@@ -238,7 +238,7 @@ const TaskPreview = ({ className, uuid }) => {
 
       <h4>{Settings.fields.task.responsiblePositions?.label}</h4>
       <div className="preview-section">
-        <PositionTable positions={task.responsiblePositions} />
+        <PositionTable positions={task.responsiblePositions} showLocation />
       </div>
     </div>
   )

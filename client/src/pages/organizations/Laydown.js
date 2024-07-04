@@ -135,6 +135,7 @@ const OrganizationLaydown = ({ organization, refetch, readOnly }) => {
         <PositionTable
           id="superuser-table"
           positions={allAdministratingPositions}
+          showLocation
           showOrganizationsAdministrated
         />
         <EditAdministratingPositionsModal

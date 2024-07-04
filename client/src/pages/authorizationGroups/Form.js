@@ -157,6 +157,7 @@ const AuthorizationGroupForm = ({ edit, title, initialValues }) => {
                       renderSelected={
                         <PositionTable
                           positions={values.administrativePositions}
+                          showLocation
                           showDelete={currentUser?.isAdmin()}
                         />
                       }
