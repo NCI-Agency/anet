@@ -29,6 +29,8 @@ import mil.dds.anet.database.CustomSensitiveInformationDao;
 import mil.dds.anet.database.EmailAddressDao;
 import mil.dds.anet.database.EmailDao;
 import mil.dds.anet.database.EntityAvatarDao;
+import mil.dds.anet.database.EventDao;
+import mil.dds.anet.database.EventSeriesDao;
 import mil.dds.anet.database.JobHistoryDao;
 import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.database.NoteDao;
@@ -146,6 +148,14 @@ public class AnetObjectEngine {
 
   public EntityAvatarDao getEntityAvatarDao() {
     return ApplicationContextProvider.getBean(EntityAvatarDao.class);
+  }
+
+  public EventSeriesDao getEventSeriesDao() {
+    return ApplicationContextProvider.getBean(EventSeriesDao.class);
+  }
+
+  public EventDao getEventDao() {
+    return ApplicationContextProvider.getBean(EventDao.class);
   }
 
   public CompletableFuture<Boolean> canUserApproveStep(GraphQLContext context, String userUuid,

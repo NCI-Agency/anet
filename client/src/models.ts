@@ -2,6 +2,8 @@ import Attachment from "models/Attachment"
 import AuthorizationGroup from "models/AuthorizationGroup"
 import Comment from "models/Comment"
 import EntityAvatar from "models/EntityAvatar"
+import Event from "models/Event"
+import EventSeries from "models/EventSeries"
 import Location from "models/Location"
 import Organization from "models/Organization"
 import Person from "models/Person"
@@ -15,6 +17,8 @@ export {
   AuthorizationGroup,
   Comment,
   EntityAvatar,
+  Event,
+  EventSeries,
   Location,
   Organization,
   Person,
