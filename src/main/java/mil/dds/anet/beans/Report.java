@@ -47,8 +47,6 @@ public class Report extends AbstractCustomizableAnetBean
     NO_REASON_GIVEN, CANCELLED_DUE_TO_AVAILABILITY_OF_INTERPRETERS, CANCELLED_DUE_TO_NETWORK_ISSUES
   }
 
-  // annotated below
-  private ForeignObjectHolder<ApprovalStep> approvalStep = new ForeignObjectHolder<>();
   @GraphQLQuery
   @GraphQLInputField
   ReportState state;
@@ -64,8 +62,6 @@ public class Report extends AbstractCustomizableAnetBean
   @GraphQLQuery
   @GraphQLInputField
   private Integer duration;
-  // annotated below
-  private ForeignObjectHolder<Location> location = new ForeignObjectHolder<>();
   @GraphQLQuery
   @GraphQLInputField
   String intent;
@@ -92,11 +88,16 @@ public class Report extends AbstractCustomizableAnetBean
   @GraphQLQuery
   @GraphQLInputField
   String reportText;
-
   @GraphQLQuery
   @GraphQLInputField
   private String classification;
 
+  // annotated below
+  private ForeignObjectHolder<ApprovalStep> approvalStep = new ForeignObjectHolder<>();
+  // annotated below
+  private ForeignObjectHolder<Location> location = new ForeignObjectHolder<>();
+  // annotated below
+  private ForeignObjectHolder<Event> event = new ForeignObjectHolder<>();
   // annotated below
   private List<ReportPerson> reportPeople;
   // annotated below
@@ -793,6 +794,37 @@ public class Report extends AbstractCustomizableAnetBean
         .anyMatch(p -> Objects.equals(p.getUuid(), user.getUuid()));
   }
 
+  @GraphQLQuery(name = "event")
+  public CompletableFuture<Event> loadEvent(@GraphQLRootContext Map<String, Object> context) {
+    if (event.hasForeignObject()) {
+      return CompletableFuture.completedFuture(event.getForeignObject());
+    }
+    return new UuidFetcher<Event>().load(context, IdDataLoaderKey.EVENTS, event.getForeignUuid())
+        .thenApply(o -> {
+          event.setForeignObject(o);
+          return o;
+        });
+  }
+
+  @JsonIgnore
+  public void setEventUuid(String eventUuid) {
+    this.event = new ForeignObjectHolder<>(eventUuid);
+  }
+
+  @JsonIgnore
+  public String getEventUuid() {
+    return event.getForeignUuid();
+  }
+
+  @GraphQLInputField(name = "event")
+  public void setEvent(Event event) {
+    this.event = new ForeignObjectHolder<>(event);
+  }
+
+  public Event getEvent() {
+    return event.getForeignObject();
+  }
+
   @Override
   public boolean equals(Object o) {
     if (!(o instanceof final Report r)) {
@@ -814,7 +846,8 @@ public class Report extends AbstractCustomizableAnetBean
         && Objects.equals(r.getReportText(), reportText)
         && Objects.equals(r.getNextSteps(), nextSteps) && Objects.equals(r.getComments(), comments)
         && Objects.equals(r.getReportSensitiveInformation(), reportSensitiveInformation)
-        && Objects.equals(r.getAuthorizationGroups(), authorizationGroups);
+        && Objects.equals(r.getAuthorizationGroups(), authorizationGroups)
+        && Objects.equals(r.getEvent(), event);
   }
 
   @Override
@@ -822,7 +855,7 @@ public class Report extends AbstractCustomizableAnetBean
     return Objects.hash(super.hashCode(), uuid, state, approvalStep, createdAt, updatedAt, location,
         intent, exsum, reportPeople, tasks, reportText, nextSteps, comments, atmosphere,
         atmosphereDetails, engagementDate, duration, reportSensitiveInformation,
-        authorizationGroups);
+        authorizationGroups, event);
   }
 
   public static Report createWithUuid(String uuid) {

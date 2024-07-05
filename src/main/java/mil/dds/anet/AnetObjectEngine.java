@@ -32,6 +32,8 @@ import mil.dds.anet.database.CommentDao;
 import mil.dds.anet.database.CustomSensitiveInformationDao;
 import mil.dds.anet.database.EmailAddressDao;
 import mil.dds.anet.database.EmailDao;
+import mil.dds.anet.database.EventDao;
+import mil.dds.anet.database.EventSeriesDao;
 import mil.dds.anet.database.JobHistoryDao;
 import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.database.NoteDao;
@@ -80,6 +82,8 @@ public class AnetObjectEngine {
   private final SubscriptionUpdateDao subscriptionUpdateDao;
   private final UserActivityDao userActivityDao;
   private final EmailAddressDao emailAddressDao;
+  private final EventSeriesDao eventSeriesDao;
+  private final EventDao eventDao;
   private final MetricRegistry metricRegistry;
   private ThreadLocal<Map<String, Object>> context;
 
@@ -117,6 +121,8 @@ public class AnetObjectEngine {
     subscriptionUpdateDao = injector.getInstance(SubscriptionUpdateDao.class);
     userActivityDao = injector.getInstance(UserActivityDao.class);
     emailAddressDao = injector.getInstance(EmailAddressDao.class);
+    eventSeriesDao = injector.getInstance(EventSeriesDao.class);
+    eventDao = injector.getInstance(EventDao.class);
     this.metricRegistry = metricRegistry;
     searcher = Searcher.getSearcher(injector);
     configuration = config;
@@ -217,6 +223,14 @@ public class AnetObjectEngine {
 
   public EmailDao getEmailDao() {
     return emailDao;
+  }
+
+  public EventSeriesDao getEventSeriesDao() {
+    return eventSeriesDao;
+  }
+
+  public EventDao getEventDao() {
+    return eventDao;
   }
 
   public MetricRegistry getMetricRegistry() {

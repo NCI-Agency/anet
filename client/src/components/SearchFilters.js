@@ -42,7 +42,7 @@ import DictionaryField from "components/DictionaryField"
 import Model from "components/Model"
 import _isEmpty from "lodash/isEmpty"
 import _pickBy from "lodash/pickBy"
-import { Location, Person, Position, Report, Task } from "models"
+import { Event, Location, Person, Position, Report, Task } from "models"
 import PropTypes from "prop-types"
 import React, { useContext } from "react"
 import PEOPLE_ICON from "resources/people.png"
@@ -50,6 +50,9 @@ import POSITIONS_ICON from "resources/positions.png"
 import TASKS_ICON from "resources/tasks.png"
 import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
+import EventSeriesFilter, {
+  deserialize as deserializeEventSeriesFilter
+} from "./advancedSearch/EventSeriesFilter"
 
 export const SearchQueryPropType = PropTypes.shape({
   text: PropTypes.string,
@@ -680,6 +683,48 @@ export const searchFilters = function(includeAdminFilters) {
           filterDefs: authorWidgetFilters,
           placeholder: "Filter attachments by owner…",
           queryKey: "authorUuid"
+        }
+      }
+    }
+  }
+  const eventTypeOptions = [
+    Event.EVENT_TYPES.EXERCISE,
+    Event.EVENT_TYPES.CONFERENCE,
+    Event.EVENT_TYPES.VISIT_BAN,
+    Event.EVENT_TYPES.OTHER
+  ]
+
+  filters[SEARCH_OBJECT_TYPES.EVENTS] = {
+    filters: {
+      "Event Type": {
+        component: SelectFilter,
+        dictProps: Settings.fields.event.type,
+        deserializer: deserializeSelectFilter,
+        props: {
+          queryKey: "type",
+          options: eventTypeOptions,
+          labels: eventTypeOptions.map(lt => Event.humanNameOfType(lt))
+        }
+      },
+      "Event Series": {
+        component: EventSeriesFilter,
+        deserializer: deserializeEventSeriesFilter,
+        props: {
+          queryKey: "eventSeriesUuid"
+        }
+      },
+      "Within Organization": {
+        component: OrganizationMultiFilter,
+        deserializer: deserializeOrganizationMultiFilter,
+        props: {
+          queryKey: "hostOrgUuid"
+        }
+      },
+      "Within Location": {
+        component: LocationMultiFilter,
+        deserializer: deserializeLocationMultiFilter,
+        props: {
+          queryKey: "locationUuid"
         }
       }
     }

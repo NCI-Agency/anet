@@ -9,6 +9,7 @@ import AuthorizationGroupTable from "components/AuthorizationGroupTable"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
 import EmailAddressTable from "components/EmailAddressTable"
+import EventCollection from "components/EventCollection"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
@@ -267,6 +268,9 @@ const OrganizationShow = ({ pageDispatchers }) => {
           </Nav.Item>
         )}
         <Nav.Item>
+          <AnchorNavItem to="events">Events</AnchorNavItem>
+        </Nav.Item>
+        <Nav.Item>
           <AnchorNavItem to="reports">Reports</AnchorNavItem>
         </Nav.Item>
       </span>
@@ -274,6 +278,9 @@ const OrganizationShow = ({ pageDispatchers }) => {
   )
   const reportQueryParams = {
     orgUuid: uuid
+  }
+  const eventQueryParams = {
+    hostOrgUuid: uuid
   }
   if (filterPendingApproval) {
     reportQueryParams.state = Report.STATE.PENDING_APPROVAL
@@ -627,7 +634,16 @@ const OrganizationShow = ({ pageDispatchers }) => {
                   }}
                 />
               )}
-
+              <Fieldset
+                id="events"
+                title={`Events hosted by ${organization.shortName}`}
+              >
+                <EventCollection
+                  paginationKey={`e_${uuid}`}
+                  queryParams={eventQueryParams}
+                  mapId="events"
+                />
+              </Fieldset>
               <Fieldset
                 id="reports"
                 title={`Reports from ${organization.shortName}`}

@@ -6,6 +6,7 @@ import Approvals from "components/approvals/Approvals"
 import AttachmentCard from "components/Attachment/AttachmentCard"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
+import EventCollection from "components/EventCollection"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import GeoLocation, { GEO_LOCATION_DISPLAY_TYPE } from "components/GeoLocation"
@@ -288,6 +289,13 @@ const LocationShow = ({ pageDispatchers }) => {
                 paginationKey={`r_${uuid}`}
                 queryParams={{ locationUuid: uuid }}
                 mapId="reports"
+              />
+            </Fieldset>
+            <Fieldset title="Events at this Location">
+              <EventCollection
+                paginationKey={`e_${uuid}`}
+                queryParams={{ locationUuid: uuid }}
+                mapId="events"
               />
             </Fieldset>
           </div>

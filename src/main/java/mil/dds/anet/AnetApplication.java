@@ -42,6 +42,8 @@ import mil.dds.anet.resources.AdminResource;
 import mil.dds.anet.resources.ApprovalStepResource;
 import mil.dds.anet.resources.AttachmentResource;
 import mil.dds.anet.resources.AuthorizationGroupResource;
+import mil.dds.anet.resources.EventResource;
+import mil.dds.anet.resources.EventSeriesResource;
 import mil.dds.anet.resources.GraphQlResource;
 import mil.dds.anet.resources.HomeResource;
 import mil.dds.anet.resources.LocationResource;
@@ -414,11 +416,13 @@ public class AnetApplication extends Application<AnetConfiguration> {
         new SubscriptionUpdateResource(engine);
     final AttachmentResource attachmentResource = new AttachmentResource(engine);
     final GraphQlResource graphQlResource = injector.getInstance(GraphQlResource.class);
+    final EventSeriesResource eventSeriesResource = new EventSeriesResource(engine);
+    final EventResource eventResource = new EventResource(engine);
     graphQlResource.initialise(engine, configuration,
         List.of(reportResource, personResource, positionResource, locationResource, orgResource,
             taskResource, adminResource, savedSearchResource, authorizationGroupResource,
             noteResource, approvalStepResource, subscriptionResource, subscriptionUpdateResource,
-            attachmentResource),
+            attachmentResource, eventSeriesResource, eventResource),
         metricRegistry);
 
     // Register all of the HTTP Resources
@@ -427,6 +431,8 @@ public class AnetApplication extends Application<AnetConfiguration> {
     environment.jersey().register(homeResource);
     environment.jersey().register(graphQlResource);
     environment.jersey().register(attachmentResource);
+    environment.jersey().register(eventSeriesResource);
+    environment.jersey().register(eventResource);
     environment.jersey().register(new RequestLoggingFilter(engine));
     environment.jersey().register(ViewRequestFilter.class);
     environment.jersey().register(ViewResponseFilter.class);
