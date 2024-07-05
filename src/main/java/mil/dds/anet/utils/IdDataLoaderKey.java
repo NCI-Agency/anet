@@ -6,6 +6,8 @@ import mil.dds.anet.database.ApprovalStepDao;
 import mil.dds.anet.database.AuthorizationGroupDao;
 import mil.dds.anet.database.CommentDao;
 import mil.dds.anet.database.EntityAvatarDao;
+import mil.dds.anet.database.EventDao;
+import mil.dds.anet.database.EventSeriesDao;
 import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
@@ -20,6 +22,8 @@ public enum IdDataLoaderKey {
   AUTHORIZATION_GROUPS(AuthorizationGroupDao.TABLE_NAME), // -
   COMMENTS(CommentDao.TABLE_NAME), // -
   ENTITY_AVATAR(EntityAvatarDao.TABLE_NAME), // -
+  EVENTS(EventDao.TABLE_NAME), // -
+  EVENT_SERIES(EventSeriesDao.TABLE_NAME), // -
   LOCATIONS(LocationDao.TABLE_NAME), // -
   ORGANIZATIONS(OrganizationDao.TABLE_NAME), // -
   PEOPLE(PersonDao.TABLE_NAME), // -
