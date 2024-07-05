@@ -24,4 +24,7 @@ public interface ISearcher {
 
   public IAttachmentSearcher getAttachmentSearcher();
 
+  public IEventSeriesSearcher getEventSeriesSearcher();
+
+  public IEventSearcher getEventSearcher();
 }

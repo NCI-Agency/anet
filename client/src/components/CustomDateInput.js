@@ -27,6 +27,7 @@ const CustomDateInput = ({
   className,
   disabled,
   showIcon,
+  minDate,
   maxDate,
   placement,
   withTime,
@@ -73,8 +74,10 @@ const CustomDateInput = ({
         return dt.isValid() ? dt.toDate() : false
       }}
       placeholder={inputFormat}
-      maxDate={maxDate}
-      minDate={moment().subtract(100, "years").startOf("year").toDate()}
+      maxDate={maxDate || moment().add(20, "years").endOf("year").toDate()}
+      minDate={
+        minDate || moment().subtract(100, "years").startOf("year").toDate()
+      }
       canClearSelection={canClearSelection}
       showActionsBar
       closeOnSelection={!withTime}
@@ -92,6 +95,7 @@ CustomDateInput.propTypes = {
   disabled: PropTypes.bool,
   showIcon: PropTypes.bool,
   maxDate: PropTypes.instanceOf(Date),
+  minDate: PropTypes.instanceOf(Date),
   placement: PropTypes.string,
   withTime: PropTypes.bool,
   value: PropTypes.oneOfType([
@@ -107,6 +111,7 @@ CustomDateInput.defaultProps = {
   disabled: false,
   showIcon: true,
   maxDate: moment().add(20, "years").endOf("year").toDate(),
+  minDate: moment().subtract(100, "years").startOf("year").toDate(),
   placement: "auto",
   withTime: false,
   canClearSelection: false

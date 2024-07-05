@@ -31,7 +31,7 @@ AdvancedSelectTarget.propTypes = {
 
 const FilterAsNav = ({ items, currentFilter, handleOnClick }) =>
   hasMultipleItems(items) && (
-    <Col md={3} className="d-none d-md-block">
+    <Col md={4} className="d-none d-md-block">
       <ul className="advanced-select-filters" style={{ paddingInlineStart: 0 }}>
         {Object.entries(items).map(([filterType, filter]) => (
           <li
@@ -326,7 +326,7 @@ const AdvancedSelect = ({
                           handleOnChange={handleOnChangeSelect}
                         />
 
-                        <Col md={hasMultipleItems(filterDefs) ? 9 : 12}>
+                        <Col md={hasMultipleItems(filterDefs) ? 8 : 11}>
                           <OverlayTable
                             fieldName={fieldName}
                             items={items}

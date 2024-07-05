@@ -233,6 +233,11 @@ const GQL_GET_REPORT = gql`
       attachments {
         ${Attachment.basicFieldsQuery}
       }
+      event {
+        uuid
+        name
+        description
+      }
       customFields
       ${GRAPHQL_NOTES_FIELDS}
     }
@@ -646,6 +651,18 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                       modelType="Organization"
                       model={report.interlocutorOrg}
                     />
+                  }
+                />
+
+                <DictionaryField
+                  wrappedComponent={Field}
+                  dictProps={Settings.fields.report.event}
+                  name="event"
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={
+                    report.event && (
+                      <LinkTo modelType="Event" model={report.event} />
+                    )
                   }
                 />
 

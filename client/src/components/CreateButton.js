@@ -6,7 +6,13 @@ import { useNavigate } from "react-router-dom"
 
 const DEFAULT_ACTIONS = [Models.Report]
 
-const SUPERUSER_ACTIONS = [Models.Person, Models.Position, Models.Location]
+const SUPERUSER_ACTIONS = [
+  Models.Person,
+  Models.Position,
+  Models.Location,
+  Models.Event,
+  Models.EventSeries
+]
 
 const ADMIN_ACTIONS = [
   Models.Organization,

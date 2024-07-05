@@ -156,6 +156,7 @@ const Navigation = ({ allOrganizations, resetPages, clearSearchQuery }) => {
   const inInsights = path.startsWith("/insights")
   const inDashboards = path.startsWith("/dashboards")
   const inMySavedSearches = path.startsWith("/search/mine")
+  const inMyEvents = path.startsWith("/events/mine")
 
   const allOrganizationUuids = allOrganizations.map(o => o.uuid)
 
@@ -169,7 +170,8 @@ const Navigation = ({ allOrganizations, resetPages, clearSearchQuery }) => {
       inMyTasks ||
       inMyAuthorizationGroups ||
       inMySubscriptions ||
-      inMySavedSearches
+      inMySavedSearches ||
+      inMyEvents
     ) {
       setIsMenuLinksOpened(true)
     }
@@ -180,7 +182,8 @@ const Navigation = ({ allOrganizations, resetPages, clearSearchQuery }) => {
     inMyTasks,
     inMyAuthorizationGroups,
     inMySubscriptions,
-    inMySavedSearches
+    inMySavedSearches,
+    inMyEvents
   ])
 
   return (
@@ -299,6 +302,15 @@ const Navigation = ({ allOrganizations, resetPages, clearSearchQuery }) => {
               handleOnClick={resetPages}
             >
               My Authorization Groups
+            </SidebarLink>
+          )}
+          {!_isEmpty(currentUser?.position?.organizationsAdministrated) && (
+            <SidebarLink
+              id="my-events"
+              linkTo={{ pathname: "/events/mine" }}
+              handleOnClick={resetPages}
+            >
+              My Events
             </SidebarLink>
           )}
         </div>

@@ -80,7 +80,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
           "engagementDate", "releasedAt", "state", "classification"};
   public static final String[] additionalFields = {"duration", "intent", "exsum", "locationUuid",
       "interlocutorOrganizationUuid", "atmosphere", "cancelledReason", "atmosphereDetails", "text",
-      "keyOutcomes", "nextSteps", "customFields"};
+      "keyOutcomes", "nextSteps", "customFields", "eventUuid"};
   public static final String[] allFields =
       ObjectArrays.concat(minimalFields, additionalFields, String.class);
   public static final String TABLE_NAME = "reports";
@@ -107,11 +107,11 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
         + "text, \"keyOutcomes\", \"nextSteps\", "
         + "\"engagementDate\", \"releasedAt\", duration, atmosphere, \"cancelledReason\", "
         + "\"atmosphereDetails\", \"advisorOrganizationUuid\", "
-        + "\"interlocutorOrganizationUuid\", \"customFields\", \"classification\") VALUES "
+        + "\"interlocutorOrganizationUuid\", \"customFields\", \"classification\", \"eventUuid\") VALUES "
         + "(:uuid, :state, :createdAt, :updatedAt, :locationUuid, :intent, "
         + ":exsum, :reportText, :keyOutcomes, :nextSteps, :engagementDate, :releasedAt, "
         + ":duration, :atmosphere, :cancelledReason, :atmosphereDetails, :advisorOrgUuid, "
-        + ":interlocutorOrgUuid, :customFields, :classification)";
+        + ":interlocutorOrgUuid, :customFields, :classification, :eventUuid)";
 
     getDbHandle().createUpdate(sql).bindBean(r)
         .bind("createdAt", DaoUtils.asLocalDateTime(r.getCreatedAt()))
@@ -226,8 +226,9 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
         + "\"atmosphereDetails\" = :atmosphereDetails, "
         + "\"cancelledReason\" = :cancelledReason, "
         + "\"interlocutorOrganizationUuid\" = :interlocutorOrgUuid, "
-        + "\"advisorOrganizationUuid\" = :advisorOrgUuid, " + "\"customFields\" = :customFields, "
-        + "\"classification\" = :classification WHERE uuid = :uuid";
+        + "\"advisorOrganizationUuid\" = :advisorOrgUuid, \"customFields\" = :customFields, "
+        + "\"classification\" = :classification, \"eventUuid\" = :eventUuid "
+        + "WHERE uuid = :uuid";
 
     return getDbHandle().createUpdate(sql).bindBean(r)
         .bind("updatedAt", DaoUtils.asLocalDateTime(r.getUpdatedAt()))

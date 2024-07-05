@@ -82,6 +82,22 @@ type AnetBeanList_AuthorizationGroup {
 }
 
 """"""
+type AnetBeanList_Event {
+  list: [Event]
+  pageNum: Int
+  pageSize: Int
+  totalCount: Int
+}
+
+""""""
+type AnetBeanList_EventSeries {
+  list: [EventSeries]
+  pageNum: Int
+  pageSize: Int
+  totalCount: Int
+}
+
+""""""
 type AnetBeanList_Location {
   list: [Location]
   pageNum: Int
@@ -368,6 +384,124 @@ enum EngagementStatus {
 }
 
 """"""
+type Event {
+  adminOrg: Organization
+  attachments: [Attachment]
+  createdAt: Instant
+  customFields: String
+  customSensitiveInformation: [CustomSensitiveInformation]
+  description: String
+  endDate: Instant
+  eventSeries: EventSeries
+  hostOrg: Organization
+  isSubscribed: Boolean
+  location: Location
+  name: String
+  notes: [Note]
+  outcomes: String
+  startDate: Instant
+  status: Status
+  tasks: [Task]
+  type: String
+  updatedAt: Instant
+  uuid: String
+}
+
+""""""
+input EventInput {
+  adminOrg: OrganizationInput
+  createdAt: Instant
+  customFields: String
+  customSensitiveInformation: [CustomSensitiveInformationInput]
+  description: String
+  endDate: Instant
+  eventSeries: EventSeriesInput
+  hostOrg: OrganizationInput
+  location: LocationInput
+  name: String
+  outcomes: String
+  startDate: Instant
+  status: Status
+  tasks: [TaskInput]
+  type: String
+  updatedAt: Instant
+  uuid: String
+}
+
+""""""
+input EventSearchQueryInput {
+  adminOrgUuid: [String]
+  emailNetwork: String
+  endDate: Instant
+  eventSeriesUuid: String
+  hostOrgUuid: [String]
+  inMyReports: Boolean
+  includeDate: Instant
+  locationUuid: [String]
+  pageNum: Int
+  pageSize: Int
+  sortBy: EventSeriesSearchSortBy
+  sortOrder: SortOrder
+  startDate: Instant
+  status: Status
+  subscribed: Boolean
+  taskUuid: String
+  text: String
+  type: String
+}
+
+""""""
+type EventSeries {
+  adminOrg: Organization
+  attachments: [Attachment]
+  createdAt: Instant
+  customFields: String
+  customSensitiveInformation: [CustomSensitiveInformation]
+  description: String
+  hostOrg: Organization
+  isSubscribed: Boolean
+  name: String
+  notes: [Note]
+  status: Status
+  updatedAt: Instant
+  uuid: String
+}
+
+""""""
+input EventSeriesInput {
+  adminOrg: OrganizationInput
+  createdAt: Instant
+  customFields: String
+  customSensitiveInformation: [CustomSensitiveInformationInput]
+  description: String
+  hostOrg: OrganizationInput
+  name: String
+  status: Status
+  updatedAt: Instant
+  uuid: String
+}
+
+""""""
+input EventSeriesSearchQueryInput {
+  adminOrgUuid: [String]
+  emailNetwork: String
+  hostOrgUuid: [String]
+  inMyReports: Boolean
+  pageNum: Int
+  pageSize: Int
+  sortBy: EventSeriesSearchSortBy
+  sortOrder: SortOrder
+  status: Status
+  subscribed: Boolean
+  text: String
+}
+
+""""""
+enum EventSeriesSearchSortBy {
+  NAME
+}
+
+""""""
 type GenericRelatedObject {
   objectUuid: String
   relatedObject: RelatableObject
@@ -473,6 +607,8 @@ type Mutation {
   clearCache: String
   createAttachment(attachment: AttachmentInput): String
   createAuthorizationGroup(authorizationGroup: AuthorizationGroupInput): AuthorizationGroup
+  createEvent(event: EventInput): Event
+  createEventSeries(eventSeries: EventSeriesInput): EventSeries
   createLocation(location: LocationInput): Location
   createNote(note: NoteInput): Note
   createOrganization(organization: OrganizationInput): Organization
@@ -507,6 +643,8 @@ type Mutation {
   updateAssociatedPosition(position: PositionInput): Int
   updateAttachment(attachment: AttachmentInput): String
   updateAuthorizationGroup(authorizationGroup: AuthorizationGroupInput): Int
+  updateEvent(event: EventInput): Int
+  updateEventSeries(eventSeries: EventSeriesInput): Int
   updateLocation(location: LocationInput): Int
   updateMe(person: PersonInput): Int
   updateNote(note: NoteInput): Note
@@ -855,6 +993,10 @@ type Query {
   attachmentList(query: AttachmentSearchQueryInput): AnetBeanList_Attachment
   authorizationGroup(uuid: String): AuthorizationGroup
   authorizationGroupList(query: AuthorizationGroupSearchQueryInput): AnetBeanList_AuthorizationGroup
+  event(uuid: String): Event
+  eventList(query: EventSearchQueryInput): AnetBeanList_Event
+  eventSeries(uuid: String): EventSeries
+  eventSeriesList(query: EventSeriesSearchQueryInput): AnetBeanList_EventSeries
   location(uuid: String): Location
   locationList(query: LocationSearchQueryInput): AnetBeanList_Location
   me: Person
@@ -900,7 +1042,7 @@ enum RecurseStrategy {
 }
 
 """"""
-union RelatableObject = AuthorizationGroup | Location | Organization | Person | Position | Report | ReportPerson | Task
+union RelatableObject = AuthorizationGroup | Event | EventSeries | Location | Organization | Person | Position | Report | ReportPerson | Task
 
 """"""
 type Report {
@@ -922,6 +1064,7 @@ type Report {
   engagementDate: Instant
   engagementDayOfWeek: Int
   engagementStatus: [EngagementStatus]
+  event: Event
   exsum: String
   intent: String
   interlocutorOrg: Organization
@@ -983,6 +1126,7 @@ input ReportInput {
   duration: Int
   engagementDate: Instant
   engagementDayOfWeek: Int
+  event: EventInput
   exsum: String
   intent: String
   interlocutorOrg: OrganizationInput
@@ -1084,6 +1228,7 @@ input ReportSearchQueryInput {
   engagementDateStart: Instant
   engagementDayOfWeek: Int
   engagementStatus: [EngagementStatus]
+  eventUuid: String
   inMyReports: Boolean
   includeAllDrafts: Boolean
   includeEngagementDayOfWeek: Boolean
@@ -1180,6 +1325,9 @@ input SavedSearchInput {
 
 """"""
 enum SearchObjectType {
+  ATTACHMENTS
+  AUTHORIZATION_GROUPS
+  EVENTS
   LOCATIONS
   ORGANIZATIONS
   PEOPLE
@@ -1208,7 +1356,7 @@ enum Status {
 }
 
 """"""
-union SubscribableObject = AuthorizationGroup | Location | Organization | Person | Position | Report | ReportPerson | Task
+union SubscribableObject = AuthorizationGroup | Event | EventSeries | Location | Organization | Person | Position | Report | ReportPerson | Task
 
 """"""
 type Subscription {

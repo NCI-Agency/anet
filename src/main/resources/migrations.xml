@@ -5868,4 +5868,145 @@
 		</addColumn>
 	</changeSet>
 
+	<changeSet id="add-eventSeries-table" author="fdelcastillo">
+		<createTable tableName="eventSeries">
+			<column name="uuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="status" type="int">
+				<constraints nullable="false" />
+			</column>
+			<column name="hostOrgUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="adminOrgUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="name" type="varchar(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="description" type="text">
+				<constraints nullable="false" />
+			</column>
+			<column name="createdAt" type="timestamp">
+				<constraints nullable="false" />
+			</column>
+			<column name="updatedAt" type="timestamp">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addUniqueConstraint
+				tableName="eventSeries"
+				columnNames="uuid"
+				constraintName="uniqueEventSeries"
+		/>
+		<addForeignKeyConstraint
+				baseColumnNames="hostOrgUuid" baseTableName="eventSeries"
+				constraintName="fk_eventSeries_host_organization" onDelete="CASCADE" onUpdate="NO ACTION"
+				referencedColumnNames="uuid" referencedTableName="organizations"
+		/>
+		<addForeignKeyConstraint
+				baseColumnNames="adminOrgUuid" baseTableName="eventSeries"
+				constraintName="fk_eventSeries_admin_organization" onDelete="CASCADE" onUpdate="NO ACTION"
+				referencedColumnNames="uuid" referencedTableName="organizations"
+		/>
+	</changeSet>
+
+	<changeSet id="add-event-table" author="fdelcastillo">
+		<createTable tableName="events">
+			<column name="uuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="status" type="int">
+				<constraints nullable="false" />
+			</column>
+			<column name="type" type="varchar(64)">
+			</column>
+			<column name="name" type="varchar(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="description" type="text">
+				<constraints nullable="false" />
+			</column>
+			<column name="startDate" type="timestamp">
+				<constraints nullable="false" />
+			</column>
+			<column name="endDate" type="timestamp">
+				<constraints nullable="false" />
+			</column>
+			<column name="outcomes" type="text">
+			</column>
+			<column name="hostOrgUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="adminOrgUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="eventSeriesUuid" type="${uuid_type}">
+			</column>
+			<column name="locationUuid" type="${uuid_type}">
+			</column>
+			<column name="createdAt" type="timestamp">
+				<constraints nullable="false" />
+			</column>
+			<column name="updatedAt" type="timestamp">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addUniqueConstraint
+				tableName="events"
+				columnNames="uuid"
+				constraintName="uniqueEvent"
+		/>
+		<addForeignKeyConstraint
+				baseColumnNames="hostOrgUuid" baseTableName="events"
+				constraintName="fk_event_host_organization" onDelete="CASCADE" onUpdate="NO ACTION"
+				referencedColumnNames="uuid" referencedTableName="organizations"
+		/>
+		<addForeignKeyConstraint
+				baseColumnNames="adminOrgUuid" baseTableName="events"
+				constraintName="fk_event_admin_organization" onDelete="CASCADE" onUpdate="NO ACTION"
+				referencedColumnNames="uuid" referencedTableName="organizations"
+		/>
+		<addForeignKeyConstraint
+				baseColumnNames="eventSeriesUuid" baseTableName="events"
+				constraintName="fk_event_eventSeries" onDelete="CASCADE" onUpdate="NO ACTION"
+				referencedColumnNames="uuid" referencedTableName="eventSeries"
+		/>
+		<addForeignKeyConstraint
+				baseColumnNames="locationUuid" baseTableName="events"
+				constraintName="fk_event_location" onDelete="CASCADE" onUpdate="NO ACTION"
+				referencedColumnNames="uuid" referencedTableName="locations"
+		/>
+	</changeSet>
+
+	<changeSet id="add-event-to-report-table" author="fdelcastillo">
+		<sql>
+			ALTER TABLE reports add column "eventUuid" ${uuid_type};
+		</sql>
+		<addForeignKeyConstraint
+				baseColumnNames="eventUuid" baseTableName="reports"
+				constraintName="fk_report_event" onDelete="NO ACTION" onUpdate="NO ACTION"
+				referencedColumnNames="uuid" referencedTableName="events"
+		/>
+	</changeSet>
+
+	<changeSet id="add-event-tasks-table" author="fdelcastillo">
+		<createTable tableName="eventTasks" >
+			<column name="eventUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="taskUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addUniqueConstraint tableName="eventTasks" columnNames="eventUuid, taskUuid" constraintName="uniqueEventTask" />
+		<addForeignKeyConstraint baseColumnNames="taskUuid" baseTableName="eventTasks"
+								 constraintName="fk_eventTasks_task" onDelete="NO ACTION" onUpdate="NO ACTION"
+								 referencedColumnNames="uuid" referencedTableName="tasks" />
+		<addForeignKeyConstraint baseColumnNames="eventUuid" baseTableName="eventTasks"
+								 constraintName="fk_eventTasks_event" onDelete="NO ACTION" onUpdate="NO ACTION"
+								 referencedColumnNames="uuid" referencedTableName="events" />
+	</changeSet>
+
 </databaseChangeLog>
