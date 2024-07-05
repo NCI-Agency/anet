@@ -172,6 +172,7 @@ const Navigation = ({
   const inInsights = path.startsWith("/insights")
   const inDashboards = path.startsWith("/dashboards")
   const inMySavedSearches = path.startsWith("/search/mine")
+  const inMyEvents = path.startsWith("/events/mine")
 
   const allOrganizationUuids = allOrganizations.map(o => o.uuid)
 
@@ -185,7 +186,8 @@ const Navigation = ({
       inMyTasks ||
       inMyAuthorizationGroups ||
       inMySubscriptions ||
-      inMySavedSearches
+      inMySavedSearches ||
+      inMyEvents
     ) {
       setIsMenuLinksOpened(true)
     }
@@ -196,7 +198,8 @@ const Navigation = ({
     inMyTasks,
     inMyAuthorizationGroups,
     inMySubscriptions,
-    inMySavedSearches
+    inMySavedSearches,
+    inMyEvents
   ])
 
   return (
@@ -316,6 +319,16 @@ const Navigation = ({
               handleOnClick={resetPages}
             >
               My Authorization Groups
+            </SidebarLink>
+          )}
+          {(currentUser.isAdmin() ||
+            !_isEmpty(currentUser?.position?.organizationsAdministrated)) && (
+            <SidebarLink
+              id="my-events"
+              linkTo={{ pathname: "/events/mine" }}
+              handleOnClick={resetPages}
+            >
+              My Events
             </SidebarLink>
           )}
         </div>
