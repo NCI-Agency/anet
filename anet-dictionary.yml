@@ -5,6 +5,7 @@ SUPPORT_EMAIL_ADDR: support@example.com
 
 regularUsersCanCreateLocations: true
 engagementsIncludeTimeAndDuration: true
+eventsIncludeStartAndEndTime: true
 
 calendarOptions:
   attendeesType: advisor
@@ -359,6 +360,61 @@ fields:
     authorizationGroupRelatedObjects:
       label: Members
 
+  eventSeries:
+    hostOrg:
+      label: Host Organization
+      placeholder: Search for the organization hosting the event series...
+    adminOrg:
+      label: Admin Organization
+      placeholder: Search for the organization that will manage the event series in ANET...
+    name:
+      label: Name
+      placeholder: The name of the event series
+    description:
+      label: Description
+      placeholder: The description of the event series
+
+  event:
+    eventSeries:
+      label: Event Series this event belongs to
+      placeholder: Search for an event series
+    hostOrg:
+      label: Host Organization
+      placeholder: Search for the organization hosting the event...
+    adminOrg:
+      label: Admin Organization
+      placeholder: Search for the organization that will manage the event in ANET...
+    location:
+      label: Location where the event takes place
+      placeholder: Search for a location…
+    type:
+      label: Type
+      placeholder: The type of the event
+    name:
+      label: Name
+      placeholder: The name of the event
+    description:
+      label: Description
+      placeholder: The description of the event
+    startDate:
+      label: Start Date
+      placeholder: The start date of the event
+    endDate:
+      label: End Date
+      placeholder: The end date of the event
+    outcomes:
+      label: Outcomes
+      placeholder: The outcomes of the event
+    organizations:
+      label: Organizations attending
+      placeholder: Organizations attending the event
+    people:
+      label: People attending
+      placeholder: People attending the event
+    tasks:
+      label: Objectives
+      placeholder: Objectives of the event
+
   report:
     canUnpublishReports: true
     intent:
@@ -406,6 +462,10 @@ fields:
         - label: Linguists
           filter:
             orgUuid: 70193ee9-05b4-4aac-80b5-75609825db9f
+    event:
+      label: Event
+      placeholder: Was the engagement part of an event?
+      filter: [CONFERENCE, EXERCISE, VISIT_BAN, OTHER]
     customFields:
       gridLocation:
         type: geo_location

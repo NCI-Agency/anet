@@ -143,6 +143,11 @@ const GQL_GET_REPORT = gql`
       attachments {
         ${Attachment.basicFieldsQuery}
       }
+      event {
+        uuid
+        name
+        description
+      }
       customFields
       ${GRAPHQL_NOTES_FIELDS}
     }

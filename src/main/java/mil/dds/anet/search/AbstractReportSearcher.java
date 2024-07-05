@@ -42,7 +42,8 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
       "location", "locationUuid", // -
       "approvalStep", "approvalStepUuid", // -
       "advisorOrg", "advisorOrganizationUuid", // -
-      "interlocutorOrg", "interlocutorOrganizationUuid");
+      "interlocutorOrg", "interlocutorOrganizationUuid", // -
+      "event", "eventUuid");
 
   protected AbstractReportSearcher(DatabaseHandler databaseHandler,
       AbstractSearchQueryBuilder<Report, ReportSearchQuery> qb) {
@@ -190,6 +191,11 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
 
     if (!Utils.isEmptyOrNull(query.getLocationUuid())) {
       addLocationUuidQuery(query);
+    }
+
+    if (!Utils.isEmptyOrNull(query.getEventUuid())) {
+      qb.addWhereClause("reports.\"eventUuid\" = :eventUuid");
+      qb.addSqlArg("eventUuid", query.getEventUuid());
     }
 
     if (query.getPendingApprovalOf() != null) {
