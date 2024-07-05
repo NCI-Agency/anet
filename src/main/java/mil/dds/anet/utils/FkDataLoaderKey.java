@@ -8,6 +8,9 @@ public enum FkDataLoaderKey {
   AUTHORIZATION_GROUP_ADMINISTRATIVE_POSITIONS, // authorizationGroup.administrativePositions
   AUTHORIZATION_GROUP_AUTHORIZATION_GROUP_RELATED_OBJECTS, // authorizationGroup.authorizationGroupRelatedObjects
   EMAIL_ADDRESSES_FOR_RELATED_OBJECT, // <relatedObject>.emailAddresses
+  EVENT_TASKS, // event.tasks
+  EVENT_ORGANIZATIONS, // event.organizations
+  EVENT_PEOPLE, // event.people
   LOCATION_CHILDREN_LOCATIONS, // location.childrenLocations
   LOCATION_PARENT_LOCATIONS, // location.parentLocations
   NOTE_NOTE_RELATED_OBJECTS, // note.noteRelatedObjects

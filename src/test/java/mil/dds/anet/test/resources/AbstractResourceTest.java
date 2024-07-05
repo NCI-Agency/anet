@@ -22,6 +22,10 @@ import mil.dds.anet.test.client.ApprovalStep;
 import mil.dds.anet.test.client.ApprovalStepInput;
 import mil.dds.anet.test.client.AuthorizationGroup;
 import mil.dds.anet.test.client.AuthorizationGroupInput;
+import mil.dds.anet.test.client.Event;
+import mil.dds.anet.test.client.EventInput;
+import mil.dds.anet.test.client.EventSeries;
+import mil.dds.anet.test.client.EventSeriesInput;
 import mil.dds.anet.test.client.Location;
 import mil.dds.anet.test.client.LocationInput;
 import mil.dds.anet.test.client.Note;
@@ -343,6 +347,14 @@ public abstract class AbstractResourceTest {
 
   protected static PositionInput getPositionInput(final Position position) {
     return getInput(position, PositionInput.class);
+  }
+
+  protected static EventInput getEventInput(final Event event) {
+    return getInput(event, EventInput.class);
+  }
+
+  protected static EventSeriesInput getEventSeriesInput(final EventSeries eventSeries) {
+    return getInput(eventSeries, EventSeriesInput.class);
   }
 
   protected static List<PositionInput> getPositionsInput(final List<Position> positions) {

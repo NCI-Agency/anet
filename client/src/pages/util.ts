@@ -20,5 +20,7 @@ export const PAGE_URLS = {
   DASHBOARDS: "/dashboards",
   ONBOARDING: "/onboarding",
   SUBSCRIPTIONS: "/subscriptions",
+  EVENTS: "/events",
+  EVENT_SERIES: "/eventSeries",
   MISSING: "*"
 }

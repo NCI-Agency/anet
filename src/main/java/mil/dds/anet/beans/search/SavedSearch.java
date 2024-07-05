@@ -16,7 +16,8 @@ import mil.dds.anet.views.UuidFetcher;
 public class SavedSearch extends AbstractAnetBean {
 
   public enum SearchObjectType {
-    REPORTS, PEOPLE, TASKS, POSITIONS, ORGANIZATIONS, LOCATIONS
+    REPORTS, PEOPLE, TASKS, POSITIONS, ORGANIZATIONS, LOCATIONS, AUTHORIZATION_GROUPS, ATTACHMENTS,
+    EVENTS
   }
 
   @GraphQLQuery

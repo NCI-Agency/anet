@@ -5946,6 +5946,230 @@
 		</addColumn>
 	</changeSet>
 
+	<changeSet id="add-eventSeries-table" author="fdelcastillo">
+		<createTable tableName="eventSeries">
+			<column name="uuid" type="${uuid_type}">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="status" type="int">
+				<constraints nullable="false" />
+			</column>
+			<column name="hostOrgUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="adminOrgUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="name" type="varchar(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="description" type="text">
+				<constraints nullable="false" />
+			</column>
+			<column name="createdAt" type="timestamp">
+				<constraints nullable="false" />
+			</column>
+			<column name="updatedAt" type="timestamp" />
+		</createTable>
+		<addForeignKeyConstraint
+			constraintName="FK_eventSeries_hostOrganization"
+			baseTableName="eventSeries"
+			baseColumnNames="hostOrgUuid"
+			referencedTableName="organizations"
+			referencedColumnNames="uuid"
+			onDelete="CASCADE" onUpdate="NO ACTION"
+		/>
+		<addForeignKeyConstraint
+			constraintName="FK_eventSeries_adminOrganization"
+			baseTableName="eventSeries"
+			baseColumnNames="adminOrgUuid"
+			referencedTableName="organizations"
+			referencedColumnNames="uuid"
+			onDelete="CASCADE" onUpdate="NO ACTION"
+		/>
+	</changeSet>
+
+	<changeSet id="add-event-table" author="fdelcastillo">
+		<createTable tableName="events">
+			<column name="uuid" type="${uuid_type}">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="status" type="int">
+				<constraints nullable="false" />
+			</column>
+			<column name="name" type="varchar(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="type" type="varchar(64)">
+				<constraints nullable="false" />
+			</column>
+			<column name="description" type="text">
+				<constraints nullable="false" />
+			</column>
+			<column name="startDate" type="timestamp">
+				<constraints nullable="false" />
+			</column>
+			<column name="endDate" type="timestamp">
+				<constraints nullable="false" />
+			</column>
+			<column name="hostOrgUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="adminOrgUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="eventSeriesUuid" type="${uuid_type}" />
+			<column name="locationUuid" type="${uuid_type}" />
+			<column name="outcomes" type="text" />
+			<column name="createdAt" type="timestamp">
+				<constraints nullable="false" />
+			</column>
+			<column name="updatedAt" type="timestamp" />
+		</createTable>
+		<addForeignKeyConstraint
+			constraintName="FK_events_hostOrganization"
+			baseTableName="events"
+			baseColumnNames="hostOrgUuid"
+			referencedTableName="organizations"
+			referencedColumnNames="uuid"
+			onDelete="CASCADE" onUpdate="NO ACTION"
+		/>
+		<addForeignKeyConstraint
+			constraintName="FK_events_adminOrganization"
+			baseTableName="events"
+			baseColumnNames="adminOrgUuid"
+			onDelete="CASCADE" onUpdate="NO ACTION"
+			referencedColumnNames="uuid"
+			referencedTableName="organizations"
+		/>
+		<addForeignKeyConstraint
+			constraintName="FK_events_eventSeries"
+			baseTableName="events"
+			baseColumnNames="eventSeriesUuid"
+			referencedTableName="eventSeries"
+			referencedColumnNames="uuid"
+			onDelete="CASCADE" onUpdate="NO ACTION"
+		/>
+		<addForeignKeyConstraint
+			constraintName="FK_events_location"
+			baseTableName="events"
+			baseColumnNames="locationUuid"
+			referencedTableName="locations"
+			referencedColumnNames="uuid"
+			onDelete="CASCADE" onUpdate="NO ACTION"
+		/>
+	</changeSet>
+
+	<changeSet id="add-event-to-report-table" author="fdelcastillo">
+		<addColumn tableName="reports">
+			<column name="eventUuid" type="${uuid_type}" />
+		</addColumn>
+		<addForeignKeyConstraint
+			constraintName="FK_reports_event"
+			baseTableName="reports"
+			baseColumnNames="eventUuid"
+			referencedTableName="events"
+			referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION"
+		/>
+	</changeSet>
+
+	<changeSet id="add-event-tasks-table" author="fdelcastillo">
+		<createTable tableName="eventTasks">
+			<column name="eventUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="taskUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addUniqueConstraint
+			constraintName="UQ_EventTasksEventTask"
+			tableName="eventTasks"
+			columnNames="eventUuid, taskUuid"
+		/>
+		<addForeignKeyConstraint
+			constraintName="FK_eventTasks_task"
+			baseTableName="eventTasks"
+			baseColumnNames="taskUuid"
+			referencedTableName="tasks"
+			referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION"
+		/>
+		<addForeignKeyConstraint
+			constraintName="FK_eventTasks_event"
+			baseTableName="eventTasks"
+			baseColumnNames="eventUuid"
+			referencedTableName="events"
+			referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION"
+		/>
+	</changeSet>
+
+	<changeSet id="add-event-organizations-table" author="fdelcastillo">
+		<createTable tableName="eventOrganizations">
+			<column name="eventUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="organizationUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addUniqueConstraint
+			constraintName="UQ_EventOrganizationsEventOrganization"
+			tableName="eventOrganizations"
+			columnNames="eventUuid, organizationUuid"
+		/>
+		<addForeignKeyConstraint
+			constraintName="FK_eventOrganizations_organization"
+			baseTableName="eventOrganizations"
+			baseColumnNames="organizationUuid"
+			referencedTableName="organizations"
+			referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION"
+		/>
+		<addForeignKeyConstraint
+			constraintName="FK_eventOrganizations_event"
+			baseTableName="eventOrganizations"
+			baseColumnNames="eventUuid"
+			referencedTableName="events"
+			referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION"
+		/>
+	</changeSet>
+
+	<changeSet id="add-event-people-table" author="fdelcastillo">
+		<createTable tableName="eventPeople">
+			<column name="eventUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="personUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addUniqueConstraint
+			constraintName="UQ_EventPeopleEventPerson"
+			tableName="eventPeople"
+			columnNames="eventUuid, personUuid"
+		/>
+		<addForeignKeyConstraint
+			constraintName="FK_eventPeople_person"
+			baseTableName="eventPeople"
+			baseColumnNames="personUuid"
+			referencedTableName="people"
+			referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION"
+		/>
+		<addForeignKeyConstraint
+			constraintName="FK_eventPeople_event"
+			baseTableName="eventPeople"
+			baseColumnNames="eventUuid"
+			referencedTableName="events"
+			referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION"
+		/>
+	</changeSet>
+
 	<!-- Keep this change set as the last one in the change log;
 	     it will be re-run whenever it changes. -->
 	<changeSet id="set-up-full-text-search" runOnChange="true" author="gjvoosten">
@@ -5958,6 +6182,8 @@
 			<!-- Drop materialized views -->
 			DROP MATERIALIZED VIEW IF EXISTS mv_fts_attachments;
 			DROP MATERIALIZED VIEW IF EXISTS "mv_fts_authorizationGroups";
+			DROP MATERIALIZED VIEW IF EXISTS mv_fts_events;
+			DROP MATERIALIZED VIEW IF EXISTS "mv_fts_eventSeries";
 			DROP MATERIALIZED VIEW IF EXISTS mv_fts_locations;
 			DROP MATERIALIZED VIEW IF EXISTS mv_fts_organizations;
 			DROP MATERIALIZED VIEW IF EXISTS mv_fts_people;
@@ -5968,6 +6194,8 @@
 			<!-- Drop materialized views for links -->
 			DROP MATERIALIZED VIEW IF EXISTS mv_lts_attachments;
 			<!-- note: authorizationGroups currently have no links -->
+			DROP MATERIALIZED VIEW IF EXISTS mv_lts_events;
+			DROP MATERIALIZED VIEW IF EXISTS "mv_lts_eventSeries";
 			DROP MATERIALIZED VIEW IF EXISTS mv_lts_locations;
 			DROP MATERIALIZED VIEW IF EXISTS mv_lts_organizations;
 			DROP MATERIALIZED VIEW IF EXISTS mv_lts_people;
@@ -5977,6 +6205,8 @@
 
 			<!-- Drop full_text columns -->
 			ALTER TABLE attachments DROP COLUMN IF EXISTS full_text;
+			ALTER TABLE events DROP COLUMN IF EXISTS full_text;
+			ALTER TABLE "eventSeries" DROP COLUMN IF EXISTS full_text;
 			ALTER TABLE "authorizationGroups" DROP COLUMN IF EXISTS full_text;
 			ALTER TABLE "emailAddresses" DROP COLUMN IF EXISTS full_text;
 			ALTER TABLE locations DROP COLUMN IF EXISTS full_text;
@@ -5991,6 +6221,8 @@
 			ALTER TABLE attachments DROP COLUMN IF EXISTS core_text;
 			ALTER TABLE "authorizationGroups" DROP COLUMN IF EXISTS core_text;
 			ALTER TABLE "emailAddresses" DROP COLUMN IF EXISTS core_text;
+			ALTER TABLE events DROP COLUMN IF EXISTS core_text;
+			ALTER TABLE "eventSeries" DROP COLUMN IF EXISTS core_text;
 			ALTER TABLE locations DROP COLUMN IF EXISTS core_text;
 			ALTER TABLE notes DROP COLUMN IF EXISTS core_text;
 			ALTER TABLE organizations DROP COLUMN IF EXISTS core_text;
@@ -6002,6 +6234,8 @@
 			<!-- Drop more_text columns -->
 			ALTER TABLE attachments DROP COLUMN IF EXISTS more_text;
 			ALTER TABLE "authorizationGroups" DROP COLUMN IF EXISTS more_text;
+			ALTER TABLE events DROP COLUMN IF EXISTS more_text;
+			ALTER TABLE "eventSeries" DROP COLUMN IF EXISTS more_text;
 			ALTER TABLE locations DROP COLUMN IF EXISTS more_text;
 			ALTER TABLE organizations DROP COLUMN IF EXISTS more_text;
 			ALTER TABLE people DROP COLUMN IF EXISTS more_text;
@@ -6102,7 +6336,7 @@
 			BEGIN
 				RETURN QUERY EXECUTE format(
 					''WITH links AS ('' ||
-					''  SELECT uuid, regexp_matches(%I, ''''"urn:anet:(attachments|authorizationGroups|locations|organizations|people|positions|reports|tasks):([^"]*)"'''', ''''g'''') AS arr FROM public.%I'' ||
+					''  SELECT uuid, regexp_matches(%I, ''''"urn:anet:(attachments|authorizationGroups|events|eventSeries|locations|organizations|people|positions|reports|tasks):([^"]*)"'''', ''''g'''') AS arr FROM public.%I'' ||
 					'')'' ||
 					''  SELECT uuid, arr[1], arr[2] FROM links'',
 					column_name, table_name
@@ -6119,13 +6353,15 @@
 			BEGIN
 				RETURN QUERY EXECUTE format(
 					''WITH links AS ('' ||
-					''  SELECT uuid, regexp_matches(%I, ''''\\"urn:anet:(attachments|authorizationGroups|locations|organizations|people|positions|reports|tasks):([^\\]*)\\"|{"type":"(Attachment|AuthorizationGroup|Location|Organization|Person|Position|Report|Task)","uuid":"([^"]*)"}'''', ''''g'''') AS arr FROM public.%I'' ||
+					''  SELECT uuid, regexp_matches(%I, ''''\\"urn:anet:(attachments|authorizationGroups|events|eventSeries|locations|organizations|people|positions|reports|tasks):([^\\]*)\\"|{"type":"(Attachment|AuthorizationGroup|Event|EventSeries|Location|Organization|Person|Position|Report|Task)","uuid":"([^"]*)"}'''', ''''g'''') AS arr FROM public.%I'' ||
 					'')'' ||
 					''  SELECT uuid,'' ||
 					''  CASE WHEN arr[1] IS NOT NULL THEN arr[1] ELSE'' ||
 					''    CASE'' ||
 					''      WHEN arr[3] = ''''Attachment'''' THEN ''''attachments'''' '' ||
 					''      WHEN arr[3] = ''''AuthorizationGroup'''' THEN ''''authorizationGroups'''' '' ||
+					''      WHEN arr[3] = ''''Event'''' THEN ''''events'''' '' ||
+					''      WHEN arr[3] = ''''EventSeries'''' THEN ''''eventSeries'''' '' ||
 					''      WHEN arr[3] = ''''Location'''' THEN ''''locations'''' '' ||
 					''      WHEN arr[3] = ''''Organization'''' THEN ''''organizations'''' '' ||
 					''      WHEN arr[3] = ''''Person'''' THEN ''''people'''' '' ||
@@ -6163,6 +6399,18 @@
 					setweight(to_tsvector('simple', translate(coalesce("emailAddresses".address, ''), '@', ' ')), ${fts_lower}) ||
 					setweight(to_tsvector('simple', translate(coalesce("emailAddresses".address, ''), '@.', '  ')), ${fts_lower})
 				) STORED;
+
+			ALTER TABLE events
+				ADD COLUMN core_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, coalesce(events.name, ''))
+						|| to_tsvector('simple', coalesce(events.name, '')), ${fts_high})
+					) STORED;
+
+			ALTER TABLE "eventSeries"
+				ADD COLUMN core_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, coalesce("eventSeries".name, ''))
+						|| to_tsvector('simple', coalesce("eventSeries".name, '')), ${fts_high})
+					) STORED;
 
 			ALTER TABLE locations
 				ADD COLUMN core_text tsvector GENERATED ALWAYS AS (
@@ -6226,6 +6474,18 @@
 					setweight(to_tsvector(${fts_config}, coalesce("authorizationGroups".description, ''))
 						|| to_tsvector('simple', coalesce("authorizationGroups".description, '')), ${fts_low})
 				) STORED;
+
+			ALTER TABLE events
+				ADD COLUMN more_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, coalesce(events.description, ''))
+						|| to_tsvector('simple', coalesce(events.description, '')), ${fts_low})
+					) STORED;
+
+			ALTER TABLE "eventSeries"
+				ADD COLUMN more_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, coalesce("eventSeries".description, ''))
+						|| to_tsvector('simple', coalesce("eventSeries".description, '')), ${fts_low})
+					) STORED;
 
 			ALTER TABLE locations
 				ADD COLUMN more_text tsvector GENERATED ALWAYS AS (
@@ -6294,6 +6554,32 @@
 			GROUP BY attachments.uuid
 			WITH DATA;
 			CREATE UNIQUE INDEX "UQ_mv_lts_attachments_uuid" ON mv_lts_attachments(uuid);
+
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_lts_events(uuid, link_text) AS
+			WITH rt_links AS (
+				SELECT * FROM get_rt_referenced_objects('events', 'description')
+			)
+			SELECT
+				events.uuid,
+				setweight(coalesce(tsvector_agg(get_core_text(rt_links.object_table, rt_links.object_uuid)), ''::tsvector), ${fts_low})
+			FROM events
+			LEFT JOIN rt_links ON rt_links.uuid = events.uuid
+			GROUP BY events.uuid
+			WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_lts_events_uuid" ON mv_lts_events(uuid);
+
+			CREATE MATERIALIZED VIEW IF NOT EXISTS "mv_lts_eventSeries"(uuid, link_text) AS
+			WITH rt_links AS (
+				SELECT * FROM get_rt_referenced_objects('eventSeries', 'description')
+			)
+			SELECT
+				"eventSeries".uuid,
+				setweight(coalesce(tsvector_agg(get_core_text(rt_links.object_table, rt_links.object_uuid)), ''::tsvector), ${fts_low})
+			FROM "eventSeries"
+			LEFT JOIN rt_links ON rt_links.uuid = "eventSeries".uuid
+			GROUP BY "eventSeries".uuid
+			WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_lts_eventSeries_uuid" ON "mv_lts_eventSeries"(uuid);
 
 			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_lts_locations(uuid, link_text) AS
 			WITH rt_links AS (
@@ -6497,6 +6783,32 @@
 			CREATE UNIQUE INDEX "UQ_mv_fts_authorizationGroups_uuid" ON "mv_fts_authorizationGroups"(uuid);
 			CREATE INDEX "FT_mv_fts_authorizationGroups" ON "mv_fts_authorizationGroups" USING gin(full_text);
 			CREATE INDEX "TR_authorizationGroups_uuid" ON "mv_fts_authorizationGroups" USING gin(uuid gin_trgm_ops);
+
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_events(uuid, full_text) AS
+			SELECT
+				events.uuid,
+				events.core_text || events.more_text
+					|| coalesce(tsvector_agg(mv_lts_events.link_text), ''::tsvector)
+			FROM events
+			LEFT JOIN mv_lts_events ON events.uuid = mv_lts_events.uuid
+			GROUP BY events.uuid
+			WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_events_uuid" ON mv_fts_events(uuid);
+			CREATE INDEX "FT_mv_fts_events" ON mv_fts_events USING gin(full_text);
+			CREATE INDEX "TR_events_uuid" ON mv_fts_events USING gin(uuid gin_trgm_ops);
+
+			CREATE MATERIALIZED VIEW IF NOT EXISTS "mv_fts_eventSeries"(uuid, full_text) AS
+			SELECT
+				"eventSeries".uuid,
+				"eventSeries".core_text || "eventSeries".more_text
+					|| coalesce(tsvector_agg("mv_lts_eventSeries".link_text), ''::tsvector)
+			FROM "eventSeries"
+			LEFT JOIN "mv_lts_eventSeries" ON "eventSeries".uuid = "mv_lts_eventSeries".uuid
+			GROUP BY "eventSeries".uuid
+			WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_eventSeries_uuid" ON "mv_fts_eventSeries"(uuid);
+			CREATE INDEX "FT_mv_fts_eventSeries" ON "mv_fts_eventSeries" USING gin(full_text);
+			CREATE INDEX "TR_eventSeries_uuid" ON "mv_fts_eventSeries" USING gin(uuid gin_trgm_ops);
 
 			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_locations(uuid, full_text) AS
 			SELECT

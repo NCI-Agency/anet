@@ -1,0 +1,63 @@
+import API from "api"
+import EventsMapWidget from "components/aggregations/EventsMapWidget"
+import {
+  mapPageDispatchersToProps,
+  PageDispatchersPropType,
+  useBoilerplate
+} from "components/Page"
+import { Event } from "models"
+import React, { useEffect } from "react"
+import { connect } from "react-redux"
+
+interface EventMapProps {
+  pageDispatchers?: PageDispatchersPropType
+  queryParams?: any
+  setTotalCount?: (...args: unknown[]) => unknown
+  // pass mapId explicitly when you have more than one map on a page (else the default is fine):
+  mapId: string
+  width?: number | string
+  height?: number | string
+  marginBottom?: number | string
+}
+
+const EventMap = ({
+  pageDispatchers,
+  queryParams,
+  setTotalCount,
+  mapId = "events",
+  width,
+  height,
+  marginBottom
+}: EventMapProps) => {
+  const eventQuery = Object.assign({}, queryParams, { pageSize: 0 })
+  const { loading, error, data } = API.useApiQuery(Event.getEventListQuery, {
+    eventQuery
+  })
+  const { done, result } = useBoilerplate({
+    loading,
+    error,
+    pageDispatchers
+  })
+  // Update the total count
+  const totalCount = done ? null : data?.eventList?.totalCount
+  useEffect(
+    () => setTotalCount && setTotalCount(totalCount),
+    [setTotalCount, totalCount]
+  )
+  if (done) {
+    return result
+  }
+  const events = data ? data.eventList.list : []
+  return (
+    <EventsMapWidget
+      values={events}
+      widgetId={mapId}
+      width={width}
+      height={height}
+      marginBottom={marginBottom}
+      whenUnspecified={<em>No events with a location found</em>}
+    />
+  )
+}
+
+export default connect(null, mapPageDispatchersToProps)(EventMap)

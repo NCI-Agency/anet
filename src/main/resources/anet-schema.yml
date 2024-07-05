@@ -453,6 +453,12 @@ properties:
     title: Whether engagements also include a time and a duration
     description: Used for report engagements; if set to `true`, you might also want to supply dateFormats.forms.inputWithTime and dateFormats.forms.longWithTime
 
+  eventsIncludeStartAndEndTime:
+    type: boolean
+    default: false
+    title: Whether events also include a time and a duration
+    description: Used for events; if set to `true`, you might also want to supply dateFormats.forms.inputWithTime and dateFormats.forms.longWithTime
+
   dateFormats:
     type: object
     additionalProperties: false
@@ -710,6 +716,51 @@ properties:
           authorizationGroupRelatedObjects:
             "$ref": "#/$defs/labeledField"
 
+      eventSeries:
+        type: object
+        additionalProperties: false
+        required: [name, description, hostOrg, adminOrg]
+        properties:
+          name:
+            "$ref": "#/$defs/inputField"
+          description:
+            "$ref": "#/$defs/inputField"
+          hostOrg:
+            "$ref": "#/$defs/inputField"
+          adminOrg:
+            "$ref": "#/$defs/inputField"
+      event:
+        type: object
+        additionalProperties: false
+        required: [name, description, startDate, endDate, hostOrg, adminOrg]
+        properties:
+          name:
+            "$ref": "#/$defs/inputField"
+          type:
+            "$ref": "#/$defs/inputField"
+          description:
+            "$ref": "#/$defs/inputField"
+          startDate:
+            "$ref": "#/$defs/inputField"
+          endDate:
+            "$ref": "#/$defs/inputField"
+          outcomes:
+            "$ref": "#/$defs/inputField"
+          hostOrg:
+            "$ref": "#/$defs/inputField"
+          adminOrg:
+            "$ref": "#/$defs/inputField"
+          eventSeries:
+            "$ref": "#/$defs/inputField"
+          location:
+            "$ref": "#/$defs/inputField"
+          organizations:
+            "$ref": "#/$defs/inputField"
+          people:
+            "$ref": "#/$defs/inputField"
+          tasks:
+            "$ref": "#/$defs/inputField"
+
       report:
         type: object
         additionalProperties: false
@@ -787,6 +838,18 @@ properties:
                         orgUuid:
                           type: string
                           title: UUID of organisation membership to form
+          event:
+            required: [filter]
+            allOf:
+              - "$ref": "#/$defs/extensibleInputField"
+              - properties:
+                  filter:
+                    type: array
+                    uniqueItems: true
+                    items:
+                      type: string
+                      enum:
+                        [CONFERENCE, EXERCISE, VISIT_BAN, OTHER]
           customFields:
             type: object
             additionalProperties:

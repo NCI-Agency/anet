@@ -13,6 +13,9 @@ import CheckboxFilter, {
 import DateRangeFilter, {
   deserialize as deserializeDateRangeFilter
 } from "components/advancedSearch/DateRangeFilter"
+import EventSeriesFilter, {
+  deserialize as deserializeEventSeriesFilter
+} from "components/advancedSearch/EventSeriesFilter"
 import {
   deserializeMulti as deserializeLocationMultiFilter,
   LocationMultiFilter
@@ -45,7 +48,7 @@ import DictionaryField from "components/DictionaryField"
 import Model from "components/Model"
 import _isEmpty from "lodash/isEmpty"
 import _pickBy from "lodash/pickBy"
-import { Location, Person, Position, Report, Task } from "models"
+import { Event, Location, Person, Position, Report, Task } from "models"
 import React, { useContext } from "react"
 import PEOPLE_ICON from "resources/people.png"
 import POSITIONS_ICON from "resources/positions.png"
@@ -708,6 +711,55 @@ export const searchFilters = function(includeAdminFilters) {
           filterDefs: authorWidgetFilters,
           placeholder: "Filter attachments by owner…",
           queryKey: "authorUuid"
+        }
+      }
+    }
+  }
+  const eventTypeOptions = [
+    Event.EVENT_TYPES.EXERCISE,
+    Event.EVENT_TYPES.CONFERENCE,
+    Event.EVENT_TYPES.VISIT_BAN,
+    Event.EVENT_TYPES.OTHER
+  ]
+
+  filters[SEARCH_OBJECT_TYPES.EVENTS] = {
+    filters: {
+      "Event Type": {
+        component: SelectFilter,
+        dictProps: Settings.fields.event.type,
+        deserializer: deserializeSelectFilter,
+        props: {
+          queryKey: "type",
+          options: eventTypeOptions,
+          labels: eventTypeOptions.map(lt => Event.humanNameOfType(lt))
+        }
+      },
+      "Event Series": {
+        component: EventSeriesFilter,
+        deserializer: deserializeEventSeriesFilter,
+        props: {
+          queryKey: "eventSeriesUuid"
+        }
+      },
+      "Within Host Organization": {
+        component: OrganizationMultiFilter,
+        deserializer: deserializeOrganizationMultiFilter,
+        props: {
+          queryKey: "hostOrgUuid"
+        }
+      },
+      "Within Admin Organization": {
+        component: OrganizationMultiFilter,
+        deserializer: deserializeOrganizationMultiFilter,
+        props: {
+          queryKey: "adminOrgUuid"
+        }
+      },
+      "Within Location": {
+        component: LocationMultiFilter,
+        deserializer: deserializeLocationMultiFilter,
+        props: {
+          queryKey: "locationUuid"
         }
       }
     }
