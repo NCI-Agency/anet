@@ -41,7 +41,7 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
   private static final Map<String, String> FIELD_MAPPING = ImmutableMap.<String, String>builder()
       .put("reportText", "text").put("location", "locationUuid")
       .put("approvalStep", "approvalStepUuid").put("advisorOrg", "advisorOrganizationUuid")
-      .put("interlocutorOrg", "interlocutorOrganizationUuid").build();
+      .put("interlocutorOrg", "interlocutorOrganizationUuid").put("event", "eventUuid").build();
 
   public AbstractReportSearcher(AbstractSearchQueryBuilder<Report, ReportSearchQuery> qb) {
     super(qb);
@@ -189,6 +189,11 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
 
     if (!Utils.isEmptyOrNull(query.getLocationUuid())) {
       addLocationUuidQuery(query);
+    }
+
+    if (!Utils.isEmptyOrNull(query.getEventUuid())) {
+      qb.addWhereClause("reports.\"eventUuid\" = :eventUuid");
+      qb.addSqlArg("eventUuid", query.getEventUuid());
     }
 
     if (query.getPendingApprovalOf() != null) {
