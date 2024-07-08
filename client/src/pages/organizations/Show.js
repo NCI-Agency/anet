@@ -289,6 +289,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
           <>
             {isAdmin && (
               <Link
+                id="mergeWithOther"
                 to="/admin/merge/organizations"
                 state={{ initialLeftUuid: organization.uuid }}
                 className="btn btn-outline-secondary"

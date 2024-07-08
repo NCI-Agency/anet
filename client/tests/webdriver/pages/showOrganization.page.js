@@ -7,6 +7,10 @@ class ShowOrganization extends Page {
     await super.open(PAGE_URL.replace(":uuid", uuid))
   }
 
+  async openAsAdminUser(uuid) {
+    await super.openAsAdminUser(PAGE_URL.replace(":uuid", uuid))
+  }
+
   async getCreateSubOrganizationButton() {
     return browser.$('//a[text()="Create sub-organization"]')
   }

@@ -7,6 +7,10 @@ class ShowPosition extends Page {
     await super.open(PAGE_URL.replace(":uuid", uuid))
   }
 
+  async openAsAdminUser(uuid) {
+    await super.openAsAdminUser(PAGE_URL.replace(":uuid", uuid))
+  }
+
   async getAuthorizationGroupsTable() {
     return browser.$("#authorizationGroups table")
   }

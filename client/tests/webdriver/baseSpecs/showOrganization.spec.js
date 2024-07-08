@@ -1,5 +1,6 @@
 import { expect } from "chai"
 import Home from "../pages/home.page"
+import MergeOrganizations from "../pages/mergeOrganizations.page"
 import Search from "../pages/search.page"
 import ShowOrganization from "../pages/showOrganization.page"
 
@@ -140,6 +141,21 @@ describe("Show organization page", () => {
       await expect(await browser.getUrl()).to.include(
         "/attachments/9ac41246-25ac-457c-b7d6-946c5f625f1f"
       )
+
+      await ShowOrganization.logout()
+    })
+  })
+
+  describe("When on the show page of an organization as admin", () => {
+    it("We can select to merge it with another organization", async() => {
+      await ShowOrganization.openAsAdminUser(ORGANIZATION_UUID)
+      await (await ShowOrganization.getMergeButton()).click()
+      await browser.pause(500) // wait for the merge page to render and load data
+      // eslint-disable-next-line no-unused-expressions
+      expect(await MergeOrganizations.getTitle()).to.exist
+      expect(
+        await (await MergeOrganizations.getLeftOrganizationField()).getValue()
+      ).to.contain("EF 2.2")
     })
   })
 })

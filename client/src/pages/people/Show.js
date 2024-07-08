@@ -222,6 +222,7 @@ const PersonShow = ({ pageDispatchers }) => {
     <>
       {isAdmin && (
         <Link
+          id="mergeWithOther"
           to="/admin/merge/people"
           state={{ initialLeftUuid: person.uuid }}
           className="btn btn-outline-secondary"

@@ -219,6 +219,10 @@ class Page {
       await this.deleteText(await (await inputField).getValue())
     }
   }
+
+  async getMergeButton() {
+    return browser.$('a[id="mergeWithOther"]')
+  }
 }
 
 export default Page

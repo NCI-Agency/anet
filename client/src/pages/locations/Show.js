@@ -98,6 +98,7 @@ const LocationShow = ({ pageDispatchers }) => {
           <>
             {isAdmin && (
               <Link
+                id="mergeWithOther"
                 to="/admin/merge/locations"
                 state={{ initialLeftUuid: location.uuid }}
                 className="btn btn-outline-secondary"
