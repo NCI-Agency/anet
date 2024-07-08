@@ -2,7 +2,6 @@ package mil.dds.anet.resources;
 
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLMutation;
-import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
@@ -23,19 +22,6 @@ public class EntityAvatarResource {
 
   public EntityAvatarResource(AnetObjectEngine engine) {
     this.entityAvatarDao = engine.getEntityAvatarDao();
-  }
-
-  /**
-   * Gets the avatar for this relatedObject uuid, null if none existing
-   *
-   * @param relatedObjectUuid the relatedObjectUuid
-   * @return the entity avatar
-   */
-  @GraphQLQuery(name = "entityAvatar")
-  public EntityAvatar getEntityAvatar(@GraphQLRootContext Map<String, Object> context,
-      @GraphQLArgument(name = "relatedObjectType") String relatedObjectType,
-      @GraphQLArgument(name = "relatedObjectUuid") String relatedObjectUuid) {
-    return entityAvatarDao.getByRelatedObject(relatedObjectType, relatedObjectUuid).orElse(null);
   }
 
   /**

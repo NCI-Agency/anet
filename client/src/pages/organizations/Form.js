@@ -195,15 +195,18 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
               <Fieldset title={title} action={action} />
               <Fieldset>
                 <Row>
-                  <Col sm={12} md={12} lg={4} xl={4} className="text-center">
-                    <EntityAvatarComponent
-                      relatedObjectType="organizations"
-                      relatedObjectUuid={initialValues.uuid}
-                      relatedObjectName={initialValues.shortName}
-                      editMode
-                      imageAttachments={imageAttachments}
-                    />
-                  </Col>
+                  {edit && (
+                    <Col sm={12} md={12} lg={4} xl={4} className="text-center">
+                      <EntityAvatarComponent
+                        initialAvatar={initialValues.entityAvatar}
+                        relatedObjectType="organizations"
+                        relatedObjectUuid={initialValues.uuid}
+                        relatedObjectName={initialValues.shortName}
+                        editMode
+                        imageAttachments={imageAttachments}
+                      />
+                    </Col>
+                  )}
                   <Col
                     lg={8}
                     xl={8}

@@ -606,6 +606,7 @@ type Organization {
   customSensitiveInformation: [CustomSensitiveInformation]
   descendantOrgs(query: OrganizationSearchQueryInput): [Organization]
   emailAddresses(network: String): [EmailAddress]
+  entityAvatar: EntityAvatar
   identificationCode: String
   isSubscribed: Boolean
   location: Location
@@ -635,6 +636,7 @@ input OrganizationInput {
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformationInput]
   emailAddresses: [EmailAddressInput]
+  entityAvatar: EntityAvatarInput
   identificationCode: String
   location: LocationInput
   longName: String
@@ -892,7 +894,6 @@ type Query {
   attachmentList(query: AttachmentSearchQueryInput): AnetBeanList_Attachment
   authorizationGroup(uuid: String): AuthorizationGroup
   authorizationGroupList(query: AuthorizationGroupSearchQueryInput): AnetBeanList_AuthorizationGroup
-  entityAvatar(relatedObjectType: String, relatedObjectUuid: String): EntityAvatar
   location(uuid: String): Location
   locationList(query: LocationSearchQueryInput): AnetBeanList_Location
   me: Person

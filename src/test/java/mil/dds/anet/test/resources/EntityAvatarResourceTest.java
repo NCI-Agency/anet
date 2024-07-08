@@ -9,10 +9,12 @@ import mil.dds.anet.test.client.EntityAvatarInput;
 import mil.dds.anet.test.client.Organization;
 import org.junit.jupiter.api.Test;
 
-public class EntityAvatarResourceTest extends AbstractResourceTest {
+class EntityAvatarResourceTest extends AbstractResourceTest {
 
   private static final String _ENTITY_AVATAR_FIELDS =
       "{ relatedObjectType relatedObjectUuid applyCrop attachmentUuid cropLeft cropTop cropWidth cropHeight }";
+  protected static final String ORGANIZATION_FIELDS =
+      String.format("{ uuid entityAvatar %s }", _ENTITY_AVATAR_FIELDS);
   private static final String EF22_ORGANIZATION_UUID = "ccbee4bb-08b8-42df-8cb5-65e8172f657b";
   private static final String EF22_ORGANIZATION_ATTACHMENT_UUID =
       "9ac41246-25ac-457c-b7d6-946c5f625f1f";
@@ -40,10 +42,10 @@ public class EntityAvatarResourceTest extends AbstractResourceTest {
         t -> mutationExecutor.createOrUpdateEntityAvatar("", newEntityAvatarInput));
     assertThat(numRows).isEqualTo(1);
 
-    // Get the entity avatar
-    EntityAvatar entityAvatar =
-        withCredentials(adminUser, t -> queryExecutor.entityAvatar(_ENTITY_AVATAR_FIELDS,
-            OrganizationDao.TABLE_NAME, "ccbee4bb-08b8-42df-8cb5-65e8172f657b"));
+    // Get the entity avatar via the organization
+    Organization organization = withCredentials(adminUser,
+        t -> queryExecutor.organization(ORGANIZATION_FIELDS, EF22_ORGANIZATION_UUID));
+    EntityAvatar entityAvatar = organization.getEntityAvatar();
     assertThat(entityAvatar).isNotNull();
     assertThat(entityAvatar.getRelatedObjectUuid()).isEqualTo(EF22_ORGANIZATION_UUID);
     assertThat(entityAvatar.getAttachmentUuid()).isEqualTo(EF22_ORGANIZATION_ATTACHMENT_UUID);
@@ -58,8 +60,9 @@ public class EntityAvatarResourceTest extends AbstractResourceTest {
     numRows = withCredentials(adminUser,
         t -> mutationExecutor.createOrUpdateEntityAvatar("", newEntityAvatarInput));
     assertThat(numRows).isEqualTo(1);
-    entityAvatar = withCredentials(adminUser, t -> queryExecutor.entityAvatar(_ENTITY_AVATAR_FIELDS,
-        OrganizationDao.TABLE_NAME, "ccbee4bb-08b8-42df-8cb5-65e8172f657b"));
+    organization = withCredentials(adminUser,
+        t -> queryExecutor.organization(ORGANIZATION_FIELDS, EF22_ORGANIZATION_UUID));
+    entityAvatar = organization.getEntityAvatar();
     assertThat(entityAvatar).isNotNull();
     assertThat(entityAvatar.getCropHeight()).isEqualTo(10);
 
@@ -67,8 +70,9 @@ public class EntityAvatarResourceTest extends AbstractResourceTest {
     numRows = withCredentials(adminUser, t -> mutationExecutor.deleteEntityAvatar("",
         OrganizationDao.TABLE_NAME, EF22_ORGANIZATION_UUID));
     assertThat(numRows).isEqualTo(1);
-    entityAvatar = withCredentials(adminUser, t -> queryExecutor.entityAvatar(_ENTITY_AVATAR_FIELDS,
-        OrganizationDao.TABLE_NAME, "ccbee4bb-08b8-42df-8cb5-65e8172f657b"));
+    organization = withCredentials(adminUser,
+        t -> queryExecutor.organization(ORGANIZATION_FIELDS, EF22_ORGANIZATION_UUID));
+    entityAvatar = organization.getEntityAvatar();
     assertThat(entityAvatar).isNull();
   }
 }
