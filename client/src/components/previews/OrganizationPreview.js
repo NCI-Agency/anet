@@ -5,7 +5,7 @@ import DictionaryField from "components/DictionaryField"
 import EmailAddressTable from "components/EmailAddressTable"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
-import Model from "components/Model"
+import Model, { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import RichTextEditor from "components/RichTextEditor"
 import _isEmpty from "lodash/isEmpty"
 import { Location, Organization } from "models"
@@ -33,14 +33,7 @@ const GQL_ORGANIZATION_FIELDS = `
     shortName
     longName
     identificationCode
-    entityAvatar {
-      attachmentUuid
-      applyCrop
-      cropLeft
-      cropTop
-      cropWidth
-      cropHeight
-    }
+    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
   }
 `
 const GQL_PERSON_FIELDS = `

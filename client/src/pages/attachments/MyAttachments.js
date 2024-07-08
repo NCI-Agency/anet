@@ -3,6 +3,7 @@ import API from "api"
 import AppContext from "components/AppContext"
 import AttachmentTable from "components/Attachment/AttachmentTable"
 import Fieldset from "components/Fieldset"
+import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -39,6 +40,7 @@ const GQL_GET_ATTACHMENT_LIST = gql`
               shortName
               longName
               identificationCode
+              ${GRAPHQL_ENTITY_AVATAR_FIELDS}
             }
             ... on Person {
               name
