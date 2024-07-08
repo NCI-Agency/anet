@@ -1667,9 +1667,10 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(r.getUuid()).isNotNull();
 
     // Attach attachment to test report
-    final List<Object> allowedMimeTypesObjects = (List<Object>) attachmentSettings.get("mimeTypes");
+    @SuppressWarnings("unchecked")
+    final var allowedMimeTypesObjects = (List<Map<String, ?>>) attachmentSettings.get("mimeTypes");
     final var allowedMimeTypes = (List<String>) allowedMimeTypesObjects.stream()
-        .map(element -> (String) ((HashMap<?, ?>) element).get("name")).toList();
+        .map(element -> (String) element.get("name")).toList();
     final String mimeType = allowedMimeTypes.get(0);
 
     final GenericRelatedObjectInput testAroInput = GenericRelatedObjectInput.builder()
