@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -306,10 +305,10 @@ public class AttachmentResource {
     return (Map<String, Object>) getConfiguration().getDictionaryEntry("fields.attachment");
   }
 
-  @SuppressWarnings("unchecked")
   public static List<String> getAllowedMimeTypes() {
     // Get the allowed mime types from dictionary
-    final var mimeTypes = (List<HashMap<String, ?>>) getAttachmentSettings().get("mimeTypes");
+    @SuppressWarnings("unchecked")
+    final var mimeTypes = (List<Map<String, ?>>) getAttachmentSettings().get("mimeTypes");
     // Extract names
     return mimeTypes.stream().map(element -> (String) element.get("name")).toList();
   }
