@@ -11,23 +11,6 @@ import { Alert } from "react-bootstrap"
 import { toast } from "react-toastify"
 import Settings from "settings"
 
-const GQL_GET_ENTITY_AVATAR = gql`
-  query ($relatedObjectType: String, $relatedObjectUuid: String) {
-    entityAvatar(
-      relatedObjectType: $relatedObjectType
-      relatedObjectUuid: $relatedObjectUuid
-    ) {
-      relatedObjectType
-      relatedObjectUuid
-      attachmentUuid
-      applyCrop
-      cropLeft
-      cropTop
-      cropWidth
-      cropHeight
-    }
-  }
-`
 const GQL_CREATE_OR_UPDATE_ENTITY_AVATAR = gql`
   mutation ($entityAvatar: EntityAvatarInput!) {
     createOrUpdateEntityAvatar(entityAvatar: $entityAvatar)
@@ -42,6 +25,7 @@ const GQL_DELETE_ENTITY_AVATAR = gql`
   }
 `
 export const EntityAvatarComponent = ({
+  initialAvatar,
   relatedObjectType,
   relatedObjectUuid,
   relatedObjectName,
@@ -49,14 +33,7 @@ export const EntityAvatarComponent = ({
   imageAttachments
 }) => {
   const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
-  const [currentAvatar, setCurrentAvatar] = useState(null)
-
-  // If the entityUUid changes get the entity avatar
-  useEffect(() => {
-    getEntityAvatar(relatedObjectType, relatedObjectUuid)
-      .then(response => setCurrentAvatar(response.entityAvatar))
-      .catch()
-  }, [relatedObjectType, relatedObjectUuid])
+  const [currentAvatar, setCurrentAvatar] = useState(initialAvatar)
 
   // Also react to changes in image attachments as the one linked to the current avatar might have been deleted
   useEffect(() => {
@@ -71,11 +48,7 @@ export const EntityAvatarComponent = ({
 
   return (
     <>
-      {currentAvatar && (
-        <>
-          <EntityAvatarDisplay avatar={currentAvatar} />
-        </>
-      )}
+      {currentAvatar && <EntityAvatarDisplay avatar={currentAvatar} />}
       {attachmentsEnabled && editMode && (
         <>
           {(_isEmpty(imageAttachments) && (
@@ -111,13 +84,6 @@ export const EntityAvatarComponent = ({
       )}
     </>
   )
-
-  function getEntityAvatar(relatedObjectType, relatedObjectUuid) {
-    return API.query(GQL_GET_ENTITY_AVATAR, {
-      relatedObjectType,
-      relatedObjectUuid
-    })
-  }
 
   async function onAvatarUpdate(attachmentUuid, coordinates) {
     // Build entity avatar object
@@ -167,6 +133,7 @@ export const EntityAvatarComponent = ({
 }
 
 EntityAvatarComponent.propTypes = {
+  initialAvatar: PropTypes.object,
   relatedObjectType: PropTypes.string.isRequired,
   relatedObjectUuid: PropTypes.string.isRequired,
   relatedObjectName: PropTypes.string.isRequired,
