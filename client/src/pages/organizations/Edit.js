@@ -2,7 +2,10 @@ import { gql } from "@apollo/client"
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
 import { initInvisibleFields } from "components/CustomFields"
-import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
+import {
+  DEFAULT_CUSTOM_FIELDS_PARENT,
+  GRAPHQL_ENTITY_AVATAR_FIELDS
+} from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -27,14 +30,7 @@ const GQL_GET_ORGANIZATION = gql`
       shortName
       longName
       identificationCode
-      entityAvatar {
-        attachmentUuid
-        applyCrop
-        cropLeft
-        cropTop
-        cropWidth
-        cropHeight
-      }
+      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       status
       profile
       app6context
