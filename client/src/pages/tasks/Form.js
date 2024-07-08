@@ -350,6 +350,7 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
                       renderSelected={
                         <PositionTable
                           positions={values.responsiblePositions}
+                          showLocation
                           showDelete
                         />
                       }

@@ -447,6 +447,10 @@ INSERT INTO organizations(uuid, "shortName", "longName", "parentOrgUuid", "app6s
   (uuid_generate_v4(), 'EF 6.2', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 6'), '10', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 UPDATE organizations
+SET "locationUuid"='9c982685-5946-4dad-a7ee-0f5a12f5e170'
+WHERE "shortName" LIKE 'EF 4%';
+
+UPDATE organizations
 SET "customFields"='{"invisibleCustomFields":["formCustomFields.textareaFieldName","formCustomFields.numberFieldName"],"arrayFieldName":[],"nlt_dt":null,"nlt":null,"colourOptions":"","inputFieldName":"quis nostrud exercitation ullamco laboris","multipleButtons":[]}'
 WHERE "shortName"='LNG';
 

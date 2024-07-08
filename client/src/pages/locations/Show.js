@@ -14,6 +14,7 @@ import LinkTo from "components/LinkTo"
 import LocationTable from "components/LocationTable"
 import Messages from "components/Messages"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
+import OrganizationTable from "components/OrganizationTable"
 import {
   jumpToTop,
   mapPageDispatchersToProps,
@@ -22,6 +23,7 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
+import PositionTable from "components/PositionTable"
 import RelatedObjectNotes from "components/RelatedObjectNotes"
 import ReportCollection from "components/ReportCollection"
 import RichTextEditor from "components/RichTextEditor"
@@ -51,10 +53,8 @@ const LocationShow = ({ pageDispatchers }) => {
   const { currentUser } = useContext(AppContext)
   const { uuid } = useParams()
   const routerLocation = useLocation()
-  const stateSuccess = routerLocation.state && routerLocation.state.success
-  const [stateError, setStateError] = useState(
-    routerLocation.state && routerLocation.state.error
-  )
+  const stateSuccess = routerLocation.state?.success
+  const [stateError, setStateError] = useState(routerLocation.state?.error)
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_LOCATION, {
     uuid
   })
@@ -274,6 +274,14 @@ const LocationShow = ({ pageDispatchers }) => {
             </Form>
 
             <Approvals relatedObject={location} />
+
+            <Fieldset title="Organizations at this Location">
+              <OrganizationTable queryParams={{ locationUuid: uuid }} />
+            </Fieldset>
+
+            <Fieldset title="Positions at this Location">
+              <PositionTable queryParams={{ locationUuid: uuid }} />
+            </Fieldset>
 
             <Fieldset title="Reports at this Location">
               <ReportCollection

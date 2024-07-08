@@ -116,7 +116,10 @@ const AuthorizationGroupPreview = ({ className, uuid }) => {
         {Settings.fields.authorizationGroup.administrativePositions?.label}
       </h4>
       <div className="preview-section">
-        <PositionTable positions={authorizationGroup.administrativePositions} />
+        <PositionTable
+          positions={authorizationGroup.administrativePositions}
+          showLocation
+        />
       </div>
 
       <h4>

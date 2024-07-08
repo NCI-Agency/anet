@@ -1,12 +1,15 @@
 import { expect } from "chai"
 import ShowLocation from "../pages/location/showLocation.page"
 
-const LOCATION_UUID = "e5b3a4b9-acf7-4c79-8224-f248b9a7215d"
+const LOCATION_WITH_ATTACHMENTS_UUID = "e5b3a4b9-acf7-4c79-8224-f248b9a7215d" // Antarctica
+const LOCATION_WITH_ORGANIZATIONS_UUID = "9c982685-5946-4dad-a7ee-0f5a12f5e170" // Wishingwells Park
+const LOCATION_WITH_POSITIONS_UUID = "cc49bb27-4d8f-47a8-a9ee-af2b68b992ac" // St Johns Airport
+const LOCATION_WITH_REPORTS_UUID = "0855fb0a-995e-4a79-a132-4024ee2983ff" // General Hospital
 
 describe("Show location page", () => {
   describe("When on the show page of a location with attachment(s)", () => {
     it("We should see a container for Attachment List", async() => {
-      await ShowLocation.open(LOCATION_UUID)
+      await ShowLocation.open(LOCATION_WITH_ATTACHMENTS_UUID)
       await (await ShowLocation.getAttachments()).waitForExist()
       await (await ShowLocation.getAttachments()).waitForDisplayed()
     })
@@ -20,6 +23,39 @@ describe("Show location page", () => {
       await expect(await browser.getUrl()).to.include(
         "/attachments/f7cd5b02-ef73-4ee8-814b-c5a7a916685d"
       )
+    })
+  })
+
+  describe("When on the show page of a location with organizations", () => {
+    it("We should see rows in the organizations table", async() => {
+      await ShowLocation.open(LOCATION_WITH_ORGANIZATIONS_UUID)
+      await (await ShowLocation.getTable("organizations_table")).waitForExist()
+      await (
+        await ShowLocation.getTable("organizations_table")
+      ).waitForDisplayed()
+      expect(
+        await ShowLocation.getTableRows("organizations_table")
+      ).to.have.lengthOf.above(0)
+    })
+  })
+
+  describe("When on the show page of a location with positions", () => {
+    it("We should see rows in the positions table", async() => {
+      await ShowLocation.open(LOCATION_WITH_POSITIONS_UUID)
+      await (await ShowLocation.getTable("positions_table")).waitForExist()
+      await (await ShowLocation.getTable("positions_table")).waitForDisplayed()
+      expect(
+        await ShowLocation.getTableRows("positions_table")
+      ).to.have.lengthOf.above(0)
+    })
+  })
+
+  describe("When on the show page of a location with reports", () => {
+    it("We should see rows in the reports table", async() => {
+      await ShowLocation.open(LOCATION_WITH_REPORTS_UUID)
+      await (await ShowLocation.getReportCollection()).waitForExist()
+      await (await ShowLocation.getReportCollection()).waitForDisplayed()
+      expect(await ShowLocation.getReportSummaries()).to.have.lengthOf.above(0)
     })
   })
 })

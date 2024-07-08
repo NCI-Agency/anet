@@ -111,6 +111,7 @@ PaginatedPositions.propTypes = {
 
 const BasePositionTable = ({
   id,
+  showLocation,
   showDelete,
   onDelete,
   positions,
@@ -155,7 +156,7 @@ const BasePositionTable = ({
                 </>
               )}
               <th>Name</th>
-              <th>Location</th>
+              {showLocation && <th>Location</th>}
               <th>Organization</th>
               {showOrganizationsAdministrated && <th>Superuser of</th>}
               <th>Current Occupant</th>
@@ -196,9 +197,11 @@ const BasePositionTable = ({
                       {nameComponents.join(" - ")}
                     </LinkTo>
                   </td>
-                  <td>
-                    <LinkTo modelType="Location" model={pos.location} />
-                  </td>
+                  {showLocation && (
+                    <td>
+                      <LinkTo modelType="Location" model={pos.location} />
+                    </td>
+                  )}
                   <td>
                     {pos.organization && (
                       <LinkTo
@@ -243,6 +246,7 @@ const BasePositionTable = ({
 
 BasePositionTable.propTypes = {
   id: PropTypes.string,
+  showLocation: PropTypes.bool,
   showDelete: PropTypes.bool,
   onDelete: PropTypes.func,
   // list of positions:

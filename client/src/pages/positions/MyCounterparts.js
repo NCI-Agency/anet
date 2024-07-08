@@ -26,13 +26,19 @@ const MyCounterparts = ({ pageDispatchers }) => {
   return (
     <div>
       <Fieldset id="my-counterparts" title="My Counterparts">
-        <PositionTable positions={currentUser.position.associatedPositions} />
+        <PositionTable
+          positions={currentUser.position.associatedPositions}
+          showLocation
+        />
       </Fieldset>
       <Fieldset
         id="my-counterparts-with-pending-assessments"
         title="My Counterparts that have pending assessments"
       >
-        <PositionTable positions={counterpartsWithPendingAssessments} />
+        <PositionTable
+          positions={counterpartsWithPendingAssessments}
+          showLocation
+        />
       </Fieldset>
     </div>
   )

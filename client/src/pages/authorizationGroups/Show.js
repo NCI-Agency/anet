@@ -190,6 +190,7 @@ const AuthorizationGroupShow = ({ pageDispatchers }) => {
               >
                 <PositionTable
                   positions={authorizationGroup.administrativePositions}
+                  showLocation
                 />
               </Fieldset>
 

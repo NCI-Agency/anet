@@ -22,5 +22,21 @@ class ShowLocation extends Page {
   async getLngField() {
     return browser.$('div[name="location"] span:nth-child(3)')
   }
+
+  async getTable(tableName) {
+    return browser.$(`table.${tableName}`)
+  }
+
+  async getTableRows(tableName) {
+    return (await this.getTable(tableName)).$$("tbody tr")
+  }
+
+  async getReportCollection() {
+    return browser.$("div.report-collection")
+  }
+
+  async getReportSummaries() {
+    return (await this.getReportCollection()).$$("div.report-summary")
+  }
 }
 export default new ShowLocation()
