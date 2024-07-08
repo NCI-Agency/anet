@@ -23,6 +23,7 @@ import Messages from "components/Messages"
 import {
   DEFAULT_CUSTOM_FIELDS_PARENT,
   GRAPHQL_CUSTOM_SENSITIVE_INFORMATION_FIELDS,
+  GRAPHQL_ENTITY_AVATAR_FIELDS,
   SENSITIVE_CUSTOM_FIELDS_PARENT
 } from "components/Model"
 import {
@@ -100,6 +101,7 @@ const GQL_GET_PERSON = gql`
           shortName
           longName
           identificationCode
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         associatedPositions {
           uuid
@@ -117,6 +119,7 @@ const GQL_GET_PERSON = gql`
             shortName
             longName
             identificationCode
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
         }
       }

@@ -2,6 +2,7 @@ import API from "api"
 import Model, {
   createCustomFieldsSchema,
   GRAPHQL_CUSTOM_SENSITIVE_INFORMATION_FIELDS,
+  GRAPHQL_ENTITY_AVATAR_FIELDS,
   GRAPHQL_NOTES_FIELDS,
   SENSITIVE_CUSTOM_FIELDS_PARENT,
   yupDate,
@@ -162,7 +163,10 @@ export default class Person extends Model {
     .concat(Model.yupSchema)
 
   static autocompleteQuery =
-    "uuid name rank status user endOfTourDate avatarUuid position { uuid name type role code status organization { uuid shortName longName identificationCode } location { uuid name } }"
+    "uuid name rank status user endOfTourDate avatarUuid" +
+    " position { uuid name type role code status" +
+    ` organization { uuid shortName longName identificationCode ${GRAPHQL_ENTITY_AVATAR_FIELDS} }` +
+    " location { uuid name } }"
 
   static allFieldsQuery = `
     uuid
@@ -198,6 +202,7 @@ export default class Person extends Model {
         shortName
         longName
         identificationCode
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
       associatedPositions {
         uuid
@@ -215,6 +220,7 @@ export default class Person extends Model {
           shortName
           longName
           identificationCode
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
       }
     }

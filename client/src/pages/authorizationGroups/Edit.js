@@ -1,6 +1,7 @@
 import { gql } from "@apollo/client"
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
+import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -36,6 +37,7 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
           shortName
           longName
           identificationCode
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         person {
           uuid
@@ -53,6 +55,7 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
             shortName
             longName
             identificationCode
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
           ... on Person {
             uuid

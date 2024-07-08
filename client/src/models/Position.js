@@ -1,5 +1,6 @@
 import Model, {
   createCustomFieldsSchema,
+  GRAPHQL_ENTITY_AVATAR_FIELDS,
   GRAPHQL_NOTES_FIELDS,
   yupEmailAddresses
 } from "components/Model"
@@ -95,7 +96,9 @@ export default class Position extends Model {
     .concat(Model.yupSchema)
 
   static autocompleteQuery =
-    "uuid name code type role status location { uuid name } organization { uuid shortName longName identificationCode } person { uuid name rank avatarUuid }"
+    "uuid name code type role status location { uuid name }" +
+    ` organization { uuid shortName longName identificationCode ${GRAPHQL_ENTITY_AVATAR_FIELDS} }` +
+    " person { uuid name rank avatarUuid }"
 
   static autocompleteQueryWithNotes = `${this.autocompleteQuery} ${GRAPHQL_NOTES_FIELDS}`
 
@@ -117,6 +120,7 @@ export default class Position extends Model {
       shortName
       longName
       identificationCode
+      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
     }
     person {
       uuid
@@ -140,6 +144,7 @@ export default class Position extends Model {
         shortName
         longName
         identificationCode
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
     }
     previousPeople {
@@ -164,6 +169,7 @@ export default class Position extends Model {
       shortName
       longName
       identificationCode
+      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
     }
     location {
       uuid

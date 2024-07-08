@@ -3,6 +3,7 @@ import API from "api"
 import Checkbox from "components/Checkbox"
 import EmailAddressList from "components/EmailAddressList"
 import LinkTo from "components/LinkTo"
+import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -47,6 +48,7 @@ const GQL_GET_PERSON_LIST = gql`
             shortName
             longName
             identificationCode
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
         }
       }

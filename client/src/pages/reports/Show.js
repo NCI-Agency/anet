@@ -17,7 +17,10 @@ import Fieldset from "components/Fieldset"
 import FindObjectsButton from "components/FindObjectsButton"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
+import {
+  DEFAULT_CUSTOM_FIELDS_PARENT,
+  GRAPHQL_ENTITY_AVATAR_FIELDS
+} from "components/Model"
 import NoPaginationTaskTable from "components/NoPaginationTaskTable"
 import {
   AnchorLink,
@@ -90,6 +93,7 @@ const GQL_GET_REPORT = gql`
             shortName
             longName
             identificationCode
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
             approvalSteps {
               uuid
               name
@@ -130,6 +134,7 @@ const GQL_GET_REPORT = gql`
             shortName
             longName
             identificationCode
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
           location {
             uuid
@@ -183,12 +188,14 @@ const GQL_GET_REPORT = gql`
         shortName
         longName
         identificationCode
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
       advisorOrg {
         uuid
         shortName
         longName
         identificationCode
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
       workflow {
         type

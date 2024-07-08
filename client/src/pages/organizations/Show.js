@@ -16,7 +16,10 @@ import FindObjectsButton from "components/FindObjectsButton"
 import GuidedTour from "components/GuidedTour"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
+import Model, {
+  DEFAULT_CUSTOM_FIELDS_PARENT,
+  GRAPHQL_ENTITY_AVATAR_FIELDS
+} from "components/Model"
 import { AnchorNavItem } from "components/Nav"
 import {
   jumpToTop,
@@ -72,14 +75,7 @@ const GQL_ORGANIZATION_FIELDS = `
     shortName
     longName
     identificationCode
-    entityAvatar {
-      attachmentUuid
-      applyCrop
-      cropLeft
-      cropTop
-      cropWidth
-      cropHeight
-    }
+    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
   }
 `
 const GQL_PERSON_FIELDS = `

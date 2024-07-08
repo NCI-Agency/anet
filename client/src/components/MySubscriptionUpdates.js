@@ -3,6 +3,7 @@ import API from "api"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
+import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -40,6 +41,7 @@ const GQL_GET_MY_SUBSCRIPTION_UPDATES = gql`
             shortName
             longName
             identificationCode
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
           ... on Person {
             name
@@ -76,6 +78,7 @@ const GQL_GET_MY_SUBSCRIPTION_UPDATES = gql`
               shortName
               longName
               identificationCode
+              ${GRAPHQL_ENTITY_AVATAR_FIELDS}
             }
             ... on Person {
               name
