@@ -103,7 +103,9 @@ export default class Organization extends Model {
     .concat(Organization.customFieldsSchema)
     .concat(Model.yupSchema)
 
-  static autocompleteQuery = "uuid shortName longName identificationCode"
+  static autocompleteQuery =
+    "uuid shortName longName identificationCode" +
+    " entityAvatar { attachmentUuid applyCrop cropLeft cropTop cropWidth cropHeight }"
 
   static autocompleteQueryWithNotes = `${this.autocompleteQuery} ${GRAPHQL_NOTES_FIELDS}`
 

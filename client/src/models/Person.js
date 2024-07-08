@@ -162,7 +162,11 @@ export default class Person extends Model {
     .concat(Model.yupSchema)
 
   static autocompleteQuery =
-    "uuid name rank status user endOfTourDate avatarUuid position { uuid name type role code status organization { uuid shortName longName identificationCode } location { uuid name } }"
+    "uuid name rank status user endOfTourDate avatarUuid" +
+    " position { uuid name type role code status" +
+    " organization { uuid shortName longName identificationCode" +
+    " entityAvatar { attachmentUuid applyCrop cropLeft cropTop cropWidth cropHeight } }" +
+    " location { uuid name } }"
 
   static allFieldsQuery = `
     uuid
@@ -198,6 +202,14 @@ export default class Person extends Model {
         shortName
         longName
         identificationCode
+        entityAvatar {
+          attachmentUuid
+          applyCrop
+          cropLeft
+          cropTop
+          cropWidth
+          cropHeight
+        }
       }
       associatedPositions {
         uuid
@@ -215,6 +227,14 @@ export default class Person extends Model {
           shortName
           longName
           identificationCode
+          entityAvatar {
+            attachmentUuid
+            applyCrop
+            cropLeft
+            cropTop
+            cropWidth
+            cropHeight
+          }
         }
       }
     }

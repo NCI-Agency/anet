@@ -53,6 +53,14 @@ const GQL_GET_PERSON = gql`
           shortName
           longName
           identificationCode
+          entityAvatar {
+            attachmentUuid
+            applyCrop
+            cropLeft
+            cropTop
+            cropWidth
+            cropHeight
+          }
         }
         associatedPositions {
           uuid
@@ -70,6 +78,14 @@ const GQL_GET_PERSON = gql`
             shortName
             longName
             identificationCode
+            entityAvatar {
+              attachmentUuid
+              applyCrop
+              cropLeft
+              cropTop
+              cropWidth
+              cropHeight
+            }
           }
         }
       }

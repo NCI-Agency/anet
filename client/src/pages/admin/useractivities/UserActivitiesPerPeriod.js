@@ -44,6 +44,14 @@ const GQL_GET_USER_ACTIVITY_LIST_BY_ORGANIZATION = gql`
           shortName
           longName
           identificationCode
+          entityAvatar {
+            attachmentUuid
+            applyCrop
+            cropLeft
+            cropTop
+            cropWidth
+            cropHeight
+          }
         }
         visitedAt
         count

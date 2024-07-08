@@ -31,6 +31,14 @@ const GQL_GET_TASK = gql`
         shortName
         longName
         identificationCode
+        entityAvatar {
+          attachmentUuid
+          applyCrop
+          cropLeft
+          cropTop
+          cropWidth
+          cropHeight
+        }
       }
       parentTask {
         uuid
@@ -66,6 +74,14 @@ const GQL_GET_TASK = gql`
           shortName
           longName
           identificationCode
+          entityAvatar {
+            attachmentUuid
+            applyCrop
+            cropLeft
+            cropTop
+            cropWidth
+            cropHeight
+          }
         }
         person {
           uuid

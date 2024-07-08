@@ -57,7 +57,26 @@ const GQL_GET_REPORT = gql`
           uuid
           name
           type
-          role
+          code
+          status
+          organization {
+            uuid
+            shortName
+            longName
+            identificationCode
+            entityAvatar {
+              attachmentUuid
+              applyCrop
+              cropLeft
+              cropTop
+              cropWidth
+              cropHeight
+            }
+          }
+          location {
+            uuid
+            name
+          }
         }
       }
       tasks {
@@ -88,12 +107,28 @@ const GQL_GET_REPORT = gql`
         shortName
         longName
         identificationCode
+        entityAvatar {
+          attachmentUuid
+          applyCrop
+          cropLeft
+          cropTop
+          cropWidth
+          cropHeight
+        }
       }
       advisorOrg {
         uuid
         shortName
         longName
         identificationCode
+        entityAvatar {
+          attachmentUuid
+          applyCrop
+          cropLeft
+          cropTop
+          cropWidth
+          cropHeight
+        }
       }
     }
   }

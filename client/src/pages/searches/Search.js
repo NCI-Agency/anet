@@ -101,6 +101,14 @@ const GQL_GET_ORGANIZATION_LIST = gql`
         shortName
         longName
         identificationCode
+        entityAvatar {
+          attachmentUuid
+          applyCrop
+          cropLeft
+          cropTop
+          cropWidth
+          cropHeight
+        }
         ${GQL_EMAIL_ADDRESSES}
         location {
           uuid
@@ -137,6 +145,14 @@ const GQL_GET_PERSON_LIST = gql`
             shortName
             longName
             identificationCode
+            entityAvatar {
+              attachmentUuid
+              applyCrop
+              cropLeft
+              cropTop
+              cropWidth
+              cropHeight
+            }
           }
         }
       }
@@ -166,6 +182,14 @@ const GQL_GET_POSITION_LIST = gql`
           shortName
           longName
           identificationCode
+          entityAvatar {
+            attachmentUuid
+            applyCrop
+            cropLeft
+            cropTop
+            cropWidth
+            cropHeight
+          }
         }
         person {
           uuid
@@ -245,7 +269,6 @@ const GQL_GET_AUTHORIZATION_GROUP_LIST = gql`
               uuid
               name
               rank
-              avatarUuid
               ${GQL_EMAIL_ADDRESSES}
             }
             ... on Position {
@@ -286,6 +309,14 @@ const GQL_GET_ATTACHMENT_LIST = gql`
               shortName
               longName
               identificationCode
+              entityAvatar {
+                attachmentUuid
+                applyCrop
+                cropLeft
+                cropTop
+                cropWidth
+                cropHeight
+              }
             }
             ... on Person {
               name

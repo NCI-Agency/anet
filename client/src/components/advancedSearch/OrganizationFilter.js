@@ -17,6 +17,14 @@ const GQL_GET_ORGANIZATION = gql`
       shortName
       longName
       identificationCode
+      entityAvatar {
+        attachmentUuid
+        applyCrop
+        cropLeft
+        cropTop
+        cropWidth
+        cropHeight
+      }
     }
   }
 `
@@ -28,6 +36,14 @@ const GQL_GET_ORGANIZATIONS = gql`
       shortName
       longName
       identificationCode
+      entityAvatar {
+        attachmentUuid
+        applyCrop
+        cropLeft
+        cropTop
+        cropWidth
+        cropHeight
+      }
     }
   }
 `
