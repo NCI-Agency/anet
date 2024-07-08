@@ -71,6 +71,14 @@ const GQL_ORGANIZATION_FIELDS = `
     shortName
     longName
     identificationCode
+    entityAvatar {
+      attachmentUuid
+      applyCrop
+      cropLeft
+      cropTop
+      cropWidth
+      cropHeight
+    }
   }
 `
 const GQL_PERSON_FIELDS = `
@@ -374,6 +382,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
                 <Row>
                   <Col sm={12} md={12} lg={4} xl={3} className="text-center">
                     <EntityAvatarComponent
+                      initialAvatar={organization.entityAvatar}
                       relatedObjectType="organizations"
                       relatedObjectUuid={organization.uuid}
                       relatedObjectName={organization.shortName}
