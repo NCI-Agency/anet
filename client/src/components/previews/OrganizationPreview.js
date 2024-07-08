@@ -1,5 +1,6 @@
 import { gql } from "@apollo/client"
 import API from "api"
+import EntityAvatarComponent from "components/avatar/EntityAvatarComponent"
 import DictionaryField from "components/DictionaryField"
 import EmailAddressTable from "components/EmailAddressTable"
 import { PreviewField } from "components/FieldHelper"
@@ -32,6 +33,14 @@ const GQL_ORGANIZATION_FIELDS = `
     shortName
     longName
     identificationCode
+    entityAvatar {
+      attachmentUuid
+      applyCrop
+      cropLeft
+      cropTop
+      cropWidth
+      cropHeight
+    }
   }
 `
 const GQL_PERSON_FIELDS = `
@@ -145,6 +154,16 @@ const OrganizationPreview = ({ className, uuid }) => {
         <h4 className="ellipsized-text">{`Organization ${organization.shortName}`}</h4>
       </div>
       <div className="preview-section">
+        <div className="text-center">
+          <EntityAvatarComponent
+            initialAvatar={organization.entityAvatar}
+            relatedObjectType="organizations"
+            relatedObjectUuid={organization.uuid}
+            relatedObjectName={organization.shortName}
+            editMode={false}
+          />
+        </div>
+
         <DictionaryField
           wrappedComponent={PreviewField}
           dictProps={Settings.fields.organization.longName}
