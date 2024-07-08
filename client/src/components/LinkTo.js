@@ -1,4 +1,5 @@
 import { PopoverInteractionKind } from "@blueprintjs/core"
+import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 import { OBJECT_TYPE_TO_MODEL } from "components/Model"
 import ModelTooltip from "components/ModelTooltip"
@@ -61,16 +62,29 @@ const LinkTo = ({
   )
 
   // Avatar
-  const avatarComponent = showAvatar &&
-    !button &&
-    Object.hasOwn(model, "avatarUuid") && (
-      <AvatarDisplayComponent
-        avatarUuid={modelInstance.avatarUuid}
-        height={32}
-        width={32}
-        style={{ marginLeft: 5, marginRight: 5 }}
-      />
-  )
+  let avatarComponent = null
+  if (showAvatar && !button) {
+    if (Object.hasOwn(model, "avatarUuid")) {
+      avatarComponent = (
+        <AvatarDisplayComponent
+          avatarUuid={modelInstance.avatarUuid}
+          height={32}
+          width={32}
+          style={{ marginLeft: 5, marginRight: 5 }}
+        />
+      )
+    }
+    if (Object.hasOwn(model, "entityAvatar")) {
+      avatarComponent = (
+        <EntityAvatarDisplay
+          avatar={modelInstance.entityAvatar}
+          height={32}
+          width={32}
+          style={{ marginLeft: 5, marginRight: 5 }}
+        />
+      )
+    }
+  }
 
   if (!isLink) {
     return (
