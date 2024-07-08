@@ -43,10 +43,6 @@ class Page {
     return browser.$(".image-preview")
   }
 
-  async getEntityAvatar() {
-    return browser.$("#avatar")
-  }
-
   async loginFormSubmit() {
     await (await this.getLoginFormSubmitButton()).click()
   }

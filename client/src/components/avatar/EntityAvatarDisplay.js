@@ -1,14 +1,15 @@
 import styled from "@emotion/styled"
 import PropTypes from "prop-types"
-import React, { useEffect } from "react"
+import React, { useEffect, useRef } from "react"
 
 export const EntityAvatarDisplay = ({ avatar, width, height }) => {
+  const canvasRef = useRef()
   useEffect(() => {
-    if (avatar.applyCrop) {
-      const canvas = document.getElementById("avatar")
-      const context = canvas.getContext("2d")
+    if (avatar?.applyCrop) {
+      const canvas = canvasRef.current
+      const context = canvas.getContext("2d", { desynchronized: true })
+      context.clearRect(0, 0, canvas.width, canvas.height)
       const image = new Image()
-      image.src = `/api/attachment/view/${avatar.attachmentUuid}`
       image.onload = function() {
         context.drawImage(
           image,
@@ -22,13 +23,18 @@ export const EntityAvatarDisplay = ({ avatar, width, height }) => {
           height
         )
       }
+      image.src = `/api/attachment/view/${avatar.attachmentUuid}`
     }
   }, [avatar, width, height])
+
+  if (!avatar) {
+    return null
+  }
 
   return (
     <EntityAvatarStyledDiv>
       {avatar.applyCrop ? (
-        <canvas id="avatar" width={width} height={height} />
+        <canvas ref={canvasRef} width={width} height={height} />
       ) : (
         <img
           src={`/api/attachment/view/${avatar.attachmentUuid}`}
@@ -41,8 +47,8 @@ export const EntityAvatarDisplay = ({ avatar, width, height }) => {
   )
 }
 const EntityAvatarStyledDiv = styled.div`
-  display: block;
-  margin: 0 auto 10px;
+  display: inline-block;
+  vertical-align: middle;
   max-width: 100%;
 `
 
