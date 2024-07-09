@@ -1,9 +1,14 @@
 package mil.dds.anet.beans;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.leangen.graphql.annotations.GraphQLIgnore;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
+import jakarta.ws.rs.WebApplicationException;
+import java.time.Instant;
+import mil.dds.anet.views.AbstractAnetBean;
 
-public class EntityAvatar {
+public class EntityAvatar extends AbstractAnetBean {
   @GraphQLQuery
   @GraphQLInputField
   private String relatedObjectType;
@@ -28,6 +33,42 @@ public class EntityAvatar {
   @GraphQLQuery
   @GraphQLInputField
   private Integer cropHeight;
+
+  @Override
+  @JsonIgnore
+  @GraphQLIgnore
+  public String getUuid() {
+    return getRelatedObjectUuid();
+  }
+
+  @Override
+  public void setUuid(String uuid) {
+    setRelatedObjectUuid(uuid);
+  }
+
+  @Override
+  @JsonIgnore
+  @GraphQLIgnore
+  public Instant getCreatedAt() {
+    throw new WebApplicationException("no createdAt field on EntityAvatar");
+  }
+
+  @Override
+  public void setCreatedAt(Instant createdAt) {
+    // just ignore
+  }
+
+  @Override
+  @JsonIgnore
+  @GraphQLIgnore
+  public Instant getUpdatedAt() {
+    throw new WebApplicationException("no updatedAt field on EntityAvatar");
+  }
+
+  @Override
+  public void setUpdatedAt(Instant updatedAt) {
+    // just ignore
+  }
 
   public String getRelatedObjectType() {
     return relatedObjectType;

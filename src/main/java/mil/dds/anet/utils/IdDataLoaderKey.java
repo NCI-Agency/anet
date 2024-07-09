@@ -5,6 +5,7 @@ import java.util.Map;
 import mil.dds.anet.database.ApprovalStepDao;
 import mil.dds.anet.database.AuthorizationGroupDao;
 import mil.dds.anet.database.CommentDao;
+import mil.dds.anet.database.EntityAvatarDao;
 import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
@@ -18,6 +19,7 @@ public enum IdDataLoaderKey {
   APPROVAL_STEPS(ApprovalStepDao.TABLE_NAME), // -
   AUTHORIZATION_GROUPS(AuthorizationGroupDao.TABLE_NAME), // -
   COMMENTS(CommentDao.TABLE_NAME), // -
+  ENTITY_AVATAR(EntityAvatarDao.TABLE_NAME), // -
   LOCATIONS(LocationDao.TABLE_NAME), // -
   ORGANIZATIONS(OrganizationDao.TABLE_NAME), // -
   PEOPLE(PersonDao.TABLE_NAME), // -
