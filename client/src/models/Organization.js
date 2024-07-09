@@ -114,7 +114,16 @@ export default class Organization extends Model {
     status
     shortName
     longName
+    profile
     identificationCode
+    entityAvatar {
+      attachmentUuid
+      applyCrop
+      cropLeft
+      cropTop
+      cropWidth
+      cropHeight
+    }
     app6context
     app6standardIdentity
     app6symbolSet
@@ -125,6 +134,14 @@ export default class Organization extends Model {
       shortName
       longName
       identificationCode
+      entityAvatar {
+        attachmentUuid
+        applyCrop
+        cropLeft
+        cropTop
+        cropWidth
+        cropHeight
+      }
     }
     childrenOrgs {
       uuid
@@ -139,7 +156,6 @@ export default class Organization extends Model {
       lng
       type
     }
-    profile
     emailAddresses {
       network
       address
