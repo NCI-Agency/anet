@@ -72,6 +72,9 @@ describe("Show location page", () => {
       expect(
         await (await MergeLocations.getLeftLocationField()).getValue()
       ).to.contain("Antarctica")
+      // eslint-disable-next-line no-unused-expressions
+      expect(await (await MergeLocations.getLeftLocationField()).isEnabled()).to
+        .be.false
     })
   })
 })

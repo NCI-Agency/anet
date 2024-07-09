@@ -36,6 +36,9 @@ describe("Show position page", () => {
       expect(
         await (await MergePositions.getLeftPositionField()).getValue()
       ).to.contain("EF 5.1 Advisor Quality Assurance")
+      // eslint-disable-next-line no-unused-expressions
+      expect(await (await MergePositions.getLeftPositionField()).isEnabled()).to
+        .be.false
     })
   })
 })

@@ -108,6 +108,7 @@ const MergePositions = ({ pageDispatchers }) => {
             dispatchMergeActions={dispatchMergeActions}
             align={ALIGN_OPTIONS.LEFT}
             label="Position 1"
+            disabled={!!initialLeftUuid}
           />
         </Col>
         <Col md={4} id="mid-merge-pos-col">
@@ -429,7 +430,13 @@ function getPositionFilters(mergeState, align) {
   }
 }
 
-const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
+const PositionColumn = ({
+  align,
+  label,
+  disabled,
+  mergeState,
+  dispatchMergeActions
+}) => {
   const position = mergeState[align]
   const hideWhenEmpty =
     !Location.hasCoordinates(mergeState[MERGE_SIDES.LEFT]?.location) &&
@@ -458,6 +465,8 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
           fields={Position.allFieldsQuery}
           addon={POSITIONS_ICON}
           vertical
+          disabled={disabled}
+          showRemoveButton={!disabled}
         />
       </ColTitle>
       {areAllSet(position) && (
@@ -712,6 +721,7 @@ const PositionCol = styled.div`
 PositionColumn.propTypes = {
   align: PropTypes.oneOf(["left", "right"]).isRequired,
   label: PropTypes.string.isRequired,
+  disabled: PropTypes.bool,
   mergeState: PropTypes.object,
   dispatchMergeActions: PropTypes.func
 }

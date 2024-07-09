@@ -54,6 +54,9 @@ describe("Show person page", () => {
       expect(
         await (await MergePeople.getLeftPersonField()).getValue()
       ).to.contain("BRATTON, Creed")
+      // eslint-disable-next-line no-unused-expressions
+      expect(await (await MergePeople.getLeftPersonField()).isEnabled()).to.be
+        .false
     })
   })
 })

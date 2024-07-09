@@ -107,6 +107,7 @@ const MergePeople = ({ pageDispatchers }) => {
             dispatchMergeActions={dispatchMergeActions}
             align={ALIGN_OPTIONS.LEFT}
             label="Person 1"
+            disabled={!!initialLeftUuid}
           />
         </Col>
         <Col md={4} id="mid-merge-per-col">
@@ -469,7 +470,13 @@ const peopleFilters = {
   }
 }
 
-const PersonColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
+const PersonColumn = ({
+  align,
+  label,
+  disabled,
+  mergeState,
+  dispatchMergeActions
+}) => {
   const person = mergeState[align]
   const idForPerson = label.replace(/\s+/g, "")
 
@@ -496,6 +503,8 @@ const PersonColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
           fields={Person.allFieldsQuery}
           addon={PEOPLE_ICON}
           vertical
+          disabled={disabled}
+          showRemoveButton={!disabled}
         />
       </ColTitle>
       {areAllSet(person) && (
@@ -855,6 +864,7 @@ const PersonCol = styled.div`
 PersonColumn.propTypes = {
   align: PropTypes.oneOf(["left", "right"]).isRequired,
   label: PropTypes.string.isRequired,
+  disabled: PropTypes.bool,
   mergeState: PropTypes.object,
   dispatchMergeActions: PropTypes.func
 }

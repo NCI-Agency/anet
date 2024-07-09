@@ -119,6 +119,7 @@ const MergeLocations = ({ pageDispatchers }) => {
             locationFormat={locationFormat}
             setLocationFormat={setLocationFormat}
             locationFormatLabel={locationFormatLabel}
+            disabled={!!initialLeftUuid}
           />
         </Col>
         <Col md={4} id="mid-merge-loc-col">
@@ -386,6 +387,7 @@ function getLocationFilters() {
 const LocationColumn = ({
   align,
   label,
+  disabled,
   mergeState,
   dispatchMergeActions,
   locationFormat,
@@ -418,6 +420,8 @@ const LocationColumn = ({
           fields={Location.allFieldsQuery}
           addon={LOCATIONS_ICON}
           vertical
+          disabled={disabled}
+          showRemoveButton={!disabled}
         />
       </ColTitle>
       {areAllSet(location) && (
@@ -644,6 +648,7 @@ const LocationColumn = ({
 LocationColumn.propTypes = {
   align: PropTypes.oneOf(["left", "right"]).isRequired,
   label: PropTypes.string.isRequired,
+  disabled: PropTypes.bool,
   mergeState: PropTypes.object,
   dispatchMergeActions: PropTypes.func,
   locationFormat: PropTypes.oneOf(Object.keys(Location.LOCATION_FORMATS))

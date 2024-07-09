@@ -156,6 +156,10 @@ describe("Show organization page", () => {
       expect(
         await (await MergeOrganizations.getLeftOrganizationField()).getValue()
       ).to.contain("EF 2.2")
+      // eslint-disable-next-line no-unused-expressions
+      expect(
+        await (await MergeOrganizations.getLeftOrganizationField()).isEnabled()
+      ).to.be.false
     })
   })
 })

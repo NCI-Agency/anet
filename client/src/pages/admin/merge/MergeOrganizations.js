@@ -108,6 +108,7 @@ const MergeOrganizations = ({ pageDispatchers }) => {
             dispatchMergeActions={dispatchMergeActions}
             align={ALIGN_OPTIONS.LEFT}
             label="Organization 1"
+            disabled={!!initialLeftUuid}
           />
         </Col>
         <Col md={4} id="mid-merge-org-col">
@@ -456,6 +457,7 @@ const organizationsFilters = {
 const OrganizationColumn = ({
   align,
   label,
+  disabled,
   mergeState,
   dispatchMergeActions
 }) => {
@@ -488,6 +490,8 @@ const OrganizationColumn = ({
           fields={Organization.allFieldsQuery}
           addon={ORGANIZATIONS_ICON}
           vertical
+          disabled={disabled}
+          showRemoveButton={!disabled}
         />
       </ColTitle>
       {areAllSet(organization) && (
@@ -856,6 +860,7 @@ const OrganizationCol = styled.div`
 OrganizationColumn.propTypes = {
   align: PropTypes.oneOf(["left", "right"]).isRequired,
   label: PropTypes.string.isRequired,
+  disabled: PropTypes.bool,
   mergeState: PropTypes.object,
   dispatchMergeActions: PropTypes.func
 }
