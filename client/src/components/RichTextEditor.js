@@ -111,7 +111,7 @@ const RichTextEditor = ({
   const previousValue = usePrevious(value)
 
   useEffect(() => {
-    if (readOnly && previousValue !== undefined && previousValue !== value) {
+    if (readOnly && previousValue !== value) {
       // Only update editor when a new value comes in
       // (different from the one used for slateValue above)
       editor.children = createSlateValue(value)

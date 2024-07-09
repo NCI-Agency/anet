@@ -479,6 +479,7 @@ type Mutation {
   emailReport(email: AnetEmailInput, uuid: String): Int
   emailRollup(email: AnetEmailInput, endDate: Instant, orgType: RollupGraphType, orgUuid: String, startDate: Instant): Int
   mergeLocations(loserUuid: String, winnerLocation: LocationInput): Int
+  mergeOrganizations(loserUuid: String, winnerOrganization: OrganizationInput): Int
   mergePeople(loserUuid: String, winnerPerson: PersonInput): Int
   mergePositions(loserUuid: String, winnerPosition: PositionInput): Int
   publishReport(uuid: String): Int!

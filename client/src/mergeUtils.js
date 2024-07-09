@@ -1,13 +1,10 @@
-import { Icon, Intent, Tooltip } from "@blueprintjs/core"
+import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import Leaflet, { DEFAULT_MAP_STYLE } from "components/Leaflet"
-import {
-  DEFAULT_CUSTOM_FIELDS_PARENT,
-  MODEL_TO_OBJECT_TYPE
-} from "components/Model"
-import RemoveButton from "components/RemoveButton"
+import { MODEL_TO_OBJECT_TYPE } from "components/Model"
 import _cloneDeep from "lodash/cloneDeep"
 import _escape from "lodash/escape"
+import _get from "lodash/get"
 import _isEmpty from "lodash/isEmpty"
 import _set from "lodash/set"
 import { Location } from "models"
@@ -83,7 +80,24 @@ const INITIAL_STATE = {
   [MERGE_SIDES.RIGHT]: null,
   merged: null,
   heightMap: null, // keep track of fields height, maximum heighted field of 2 columns wins
-  selectedMap: null // keep track of which col field selected, [fieldName]: "left", "right" or none can be selected
+  selectedMap: {}, // keep track of which col field selected, [fieldName]: "left", "right" or none can be selected
+  // callbacks to handle selectedMap
+  getSelectedSide: function(fieldName) {
+    if (!Object.hasOwn(this.selectedMap, fieldName)) {
+      this.selectedMap[fieldName] = null
+    }
+    return this.selectedMap[fieldName]
+  },
+  notAllSet: function() {
+    return (
+      !areAllSet(
+        this.merged,
+        this[MERGE_SIDES.LEFT],
+        this[MERGE_SIDES.RIGHT],
+        this.selectedMap
+      ) || Object.values(this.selectedMap).some(side => !side)
+    )
+  }
 }
 
 function reducer(state, action) {
@@ -91,30 +105,21 @@ function reducer(state, action) {
     case ACTIONS.SET_MERGEABLE: {
       // Which side it is coming from, set that
       const newState = { ...state, [action.payload.side]: action.payload.data }
-      // lets fill the selectedMap with field names when an object gets picked
-      // Each field name + each custom field name gets a key
-      if (!state.selectedMap) {
-        newState.selectedMap = getInitialMapOfFieldNames(action.payload.data)
-      }
-      // Also, if a mergeable is cleared, we should set to initial state
-      if (!action.payload.data) {
-        newState.selectedMap = getClearedMapOfFieldNames(newState.selectedMap)
-      }
       // if a mergeable changes, we want to clear the merged as well
       newState.merged = null
+      Object.keys(state.selectedMap).forEach(fieldName => {
+        newState.selectedMap[fieldName] = null
+      })
       return newState
     }
     case ACTIONS.SELECT_ALL_FIELDS: {
-      const newState = { ...state, merged: action.payload.data }
-      if (state.selectedMap) {
-        // Since we selected everything from one side, selectedMap should point to that side
-        Object.keys(state.selectedMap).forEach(fieldName => {
-          newState.selectedMap[fieldName] = action.payload.side
-        })
-      } else {
-        throw new Error("Selected map should've been initialized")
-      }
-
+      const newState = { ...state, merged: { uuid: action.payload.data.uuid } }
+      // Since we selected everything from one side, selectedMap should point to that side
+      Object.keys(state.selectedMap).forEach(fieldName => {
+        const fieldValue = _get(action.payload.data, fieldName)
+        _set(newState.merged, fieldName, fieldValue)
+        newState.selectedMap[fieldName] = action.payload.side
+      })
       return newState
     }
     case ACTIONS.SET_A_MERGED_FIELD: {
@@ -128,15 +133,13 @@ function reducer(state, action) {
       return newState
     }
     case ACTIONS.SET_HEIGHT_OF_A_FIELD: {
-      const newState = {
+      return {
         ...state,
         heightMap: {
           ...state.heightMap,
           [action.payload.fieldName]: action.payload.data
         }
       }
-
-      return newState
     }
     default:
       return state
@@ -176,11 +179,12 @@ const useMergeObjects = mergeableType => {
 
   return [mergeState, dispatchWrapper]
 }
+
 // FIXME: Fill when ready
 const OBJECT_TYPE_TO_VALIDATOR = {
   [MODEL_TO_OBJECT_TYPE.AuthorizationGroup]: null,
   [MODEL_TO_OBJECT_TYPE.Location]: validForGeneral,
-  [MODEL_TO_OBJECT_TYPE.Organization]: null,
+  [MODEL_TO_OBJECT_TYPE.Organization]: validForGeneral,
   [MODEL_TO_OBJECT_TYPE.Person]: validForGeneral,
   [MODEL_TO_OBJECT_TYPE.Position]: validPositions,
   [MODEL_TO_OBJECT_TYPE.Report]: null,
@@ -284,6 +288,33 @@ export function mergedPersonIsValid(mergedPerson) {
   }
 }
 
+export function mergedOrganizationIsValid(mergedOrganization) {
+  const msg = []
+  if (!mergedOrganization.status) {
+    msg.push(Settings.fields.organization.status?.label)
+  }
+  if (!mergedOrganization.shortName) {
+    msg.push(Settings.fields.organization.shortName?.label)
+  }
+
+  if (_isEmpty(msg)) {
+    return true
+  } else {
+    const msgContainer = (
+      <div>
+        <div>It is required to fill the following fields:</div>
+        <ul>
+          {msg.map((m, index) => (
+            <li key={index}>{m}</li>
+          ))}
+        </ul>
+      </div>
+    )
+    toast.warning(msgContainer)
+    return false
+  }
+}
+
 export function areAllSet(...args) {
   return args.every(item => {
     if (typeof item !== "object") {
@@ -291,43 +322,6 @@ export function areAllSet(...args) {
     }
     return !_isEmpty(item)
   })
-}
-
-export function getInfoButton(infoText) {
-  return (
-    <Tooltip content={infoText} intent={Intent.PRIMARY}>
-      <Button variant="default">
-        <Icon icon={IconNames.INFO_SIGN} intent={Intent.PRIMARY} />
-      </Button>
-    </Tooltip>
-  )
-}
-
-export function getClearButton(onClear) {
-  return (
-    <Tooltip content="Clear field value" intent={Intent.DANGER}>
-      <RemoveButton onClick={onClear} />
-    </Tooltip>
-  )
-}
-
-export function getActivationButton(isActive, onClickAction, instanceName) {
-  return (
-    <Tooltip
-      content={
-        isActive ? `Deactivate ${instanceName}` : `Activate ${instanceName}`
-      }
-      intent={isActive ? Intent.DANGER : Intent.SUCCESS}
-    >
-      <Button
-        variant={isActive ? "outline-danger" : "outline-success"}
-        onClick={onClickAction}
-        className="activate-field-button"
-      >
-        <Icon icon={isActive ? IconNames.STOP : IconNames.PLAY} />
-      </Button>
-    </Tooltip>
-  )
 }
 
 export function getActionButton(
@@ -374,39 +368,6 @@ export function getLeafletMap(mapId, location, hideWhenEmpty) {
   ) : (
     <div style={hideWhenEmpty ? HIDDEN_STYLE : DEFAULT_MAP_STYLE} />
   )
-}
-
-// Maps normal and custom field names to null for initialization
-function getInitialMapOfFieldNames(obj) {
-  // lets first map non-custom fields
-  const map = Object.keys(obj).reduce((accum, fieldName) => {
-    if (fieldName === DEFAULT_CUSTOM_FIELDS_PARENT) {
-      return accum
-    } else {
-      accum[fieldName] = null
-      return accum
-    }
-  }, {})
-
-  // if it has custom fields, we should initialize those as well
-  if (obj[DEFAULT_CUSTOM_FIELDS_PARENT]) {
-    Object.keys(obj[DEFAULT_CUSTOM_FIELDS_PARENT]).reduce(
-      (accum, fieldName) => {
-        const combinedFieldName = `${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`
-        accum[combinedFieldName] = null
-        return accum
-      },
-      map
-    )
-  }
-  return map
-}
-
-function getClearedMapOfFieldNames(map) {
-  return Object.keys(map).reduce((accum, fieldName) => {
-    accum[fieldName] = null
-    return accum
-  }, {})
 }
 
 export default useMergeObjects

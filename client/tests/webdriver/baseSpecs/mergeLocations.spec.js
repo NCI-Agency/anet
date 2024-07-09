@@ -8,6 +8,7 @@ const EXAMPLE_LOCATIONS = {
     type: "Point location",
     fullName: "Merge Location Winner 38.58809,-28.71611",
     latLon: "38.58809, -28.71611",
+    status: "ACTIVE",
     parentLocations: "Name Type\nPortugal Country",
     planningApprovalSteps:
       "Location planning approval for merge winner\nPerson Position\nOF-2 ELIZAWELL, Elizabeth EF 1.1 Advisor A",
@@ -20,6 +21,7 @@ const EXAMPLE_LOCATIONS = {
     type: "Country",
     fullName: "Andorra",
     latLon: "",
+    status: "ACTIVE",
     parentLocations: "No locations found",
     digram: "AN",
     trigram: "AND",
@@ -32,6 +34,7 @@ const EXAMPLE_LOCATIONS = {
     name: "Merge Location Loser",
     fullName: "Merge Location Loser -46.4035948,51.69093",
     latLon: "-46.4035948, 51.69093",
+    status: "ACTIVE",
     parentLocations: "Name Type\nFrench Southern Territories Country",
     planningApprovalSteps:
       "Location planning approval for merge loser\nPerson Position\nCIV REINTON, Reina EF 2.2 Advisor C",
@@ -42,7 +45,7 @@ const EXAMPLE_LOCATIONS = {
 
 describe("Merge locations page", () => {
   it("Should be able to select to incompatible locations to merge", async() => {
-    await MergeLocations.open()
+    await MergeLocations.openPage()
     await (await MergeLocations.getTitle()).waitForExist()
     await (await MergeLocations.getTitle()).waitForDisplayed()
 
@@ -95,6 +98,17 @@ describe("Merge locations page", () => {
     )
   })
 
+  it("Should autoMerge some identical fields from both locations", async() => {
+    expect(
+      await (await MergeLocations.getColumnContent("mid", "Status")).getText()
+    ).to.eq(EXAMPLE_LOCATIONS.left.status)
+    expect(
+      await (
+        await MergeLocations.getColumnContent("mid", "Status")
+      ).getText(MergeLocations)
+    ).to.eq(EXAMPLE_LOCATIONS.right.status)
+  })
+
   it("Should be able to select all fields from left location", async() => {
     await (await MergeLocations.getUseAllButton("left")).click()
     await browser.pause(500) // wait for the rendering of custom fields
@@ -110,7 +124,8 @@ describe("Merge locations page", () => {
     expect(
       await (await MergeLocations.getColumnContent("mid", "Type")).getText()
     ).to.eq(EXAMPLE_LOCATIONS.leftCountry.type)
-    // the digram and trigram fields should now be visible, and selected for the merged location
+
+    // the digram and trigram fields should now be visible
     expect(
       await (
         await MergeLocations.getColumnContent("left", "Alpha-2 code")
@@ -121,16 +136,33 @@ describe("Merge locations page", () => {
         await MergeLocations.getColumnContent("left", "Alpha-3 code")
       ).getText()
     ).to.eq(EXAMPLE_LOCATIONS.leftCountry.trigram)
+
+    // and should be selectable for the merged location
+    await (await MergeLocations.getSelectButton("left", "Alpha-2 code")).click()
+    await MergeLocations.waitForColumnToChange(
+      EXAMPLE_LOCATIONS.leftCountry.digram,
+      "mid",
+      "Alpha-2 code"
+    )
     expect(
       await (
         await MergeLocations.getColumnContent("mid", "Alpha-2 code")
       ).getText()
     ).to.eq(EXAMPLE_LOCATIONS.leftCountry.digram)
+
+    await (await MergeLocations.getSelectButton("left", "Alpha-3 code")).click()
+    await MergeLocations.waitForColumnToChange(
+      EXAMPLE_LOCATIONS.leftCountry.trigram,
+      "mid",
+      "Alpha-3 code"
+    )
     expect(
       await (
         await MergeLocations.getColumnContent("mid", "Alpha-3 code")
       ).getText()
     ).to.eq(EXAMPLE_LOCATIONS.leftCountry.trigram)
+
+    // on the right side they should be empty
     expect(
       await (
         await MergeLocations.getColumnContent("right", "Alpha-2 code")
@@ -220,7 +252,25 @@ describe("Merge locations page", () => {
       .false
   })
 
-  it("Should be able to select from both left and right side.", async() => {
+  it("Should autoMerge some identical fields from both locations", async() => {
+    expect(
+      await (await MergeLocations.getColumnContent("mid", "Type")).getText()
+    ).to.eq(EXAMPLE_LOCATIONS.left.type)
+    expect(
+      await (await MergeLocations.getColumnContent("mid", "Type")).getText()
+    ).to.eq(EXAMPLE_LOCATIONS.right.type)
+
+    expect(
+      await (await MergeLocations.getColumnContent("mid", "Status")).getText()
+    ).to.eq(EXAMPLE_LOCATIONS.left.status)
+    expect(
+      await (
+        await MergeLocations.getColumnContent("mid", "Status")
+      ).getText(MergeLocations)
+    ).to.eq(EXAMPLE_LOCATIONS.right.status)
+  })
+
+  it("Should be able to select from both left and right side", async() => {
     await (await MergeLocations.getSelectButton("left", "Name")).click()
     await MergeLocations.waitForColumnToChange(
       EXAMPLE_LOCATIONS.left.name,
@@ -237,13 +287,14 @@ describe("Merge locations page", () => {
     await MergeLocations.waitForColumnToChange(
       EXAMPLE_LOCATIONS.left.latLon,
       "mid",
-      "Latitude, Longitude"
+      "Latitude, Longitude",
+      true
     )
     expect(
       await (
         await MergeLocations.getColumnContent("mid", "Latitude, Longitude")
       ).getText()
-    ).to.equal(EXAMPLE_LOCATIONS.left.latLon)
+    ).to.match(new RegExp(`^${EXAMPLE_LOCATIONS.left.latLon}`))
 
     await (
       await MergeLocations.getSelectButton("left", "Parent locations")

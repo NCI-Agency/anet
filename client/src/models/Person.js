@@ -1,6 +1,7 @@
 import API from "api"
 import Model, {
   createCustomFieldsSchema,
+  GRAPHQL_CUSTOM_SENSITIVE_INFORMATION_FIELDS,
   GRAPHQL_NOTES_FIELDS,
   SENSITIVE_CUSTOM_FIELDS_PARENT,
   yupDate,
@@ -233,6 +234,7 @@ export default class Person extends Model {
       }
     }
     customFields
+    ${GRAPHQL_CUSTOM_SENSITIVE_INFORMATION_FIELDS}
     ${GRAPHQL_NOTES_FIELDS}
   `
 

@@ -107,6 +107,86 @@ export default class Organization extends Model {
 
   static autocompleteQueryWithNotes = `${this.autocompleteQuery} ${GRAPHQL_NOTES_FIELDS}`
 
+  static allFieldsQuery = `
+    uuid
+    status
+    shortName
+    longName
+    identificationCode
+    app6context
+    app6standardIdentity
+    app6symbolSet
+    app6hq
+    app6amplifier
+    parentOrg {
+      uuid
+      shortName
+      longName
+      identificationCode
+    }
+    childrenOrgs {
+      uuid
+      shortName
+      longName
+      identificationCode
+    }
+    location {
+      uuid
+      name
+      lat
+      lng
+      type
+    }
+    profile
+    emailAddresses {
+      network
+      address
+    }
+    planningApprovalSteps {
+      uuid
+      name
+      approvers {
+        uuid
+        name
+        person {
+          uuid
+          name
+          rank
+          avatarUuid
+        }
+      }
+    }
+    approvalSteps {
+      uuid
+      name
+      approvers {
+        uuid
+        name
+        person {
+          uuid
+          name
+          rank
+          avatarUuid
+        }
+      }
+    }
+    administratingPositions {
+      uuid
+      name
+      code
+      type
+      role
+      person {
+        uuid
+        name
+        rank
+        avatarUuid
+      }
+    }
+    customFields
+    ${GRAPHQL_NOTES_FIELDS}
+  `
+
   static humanNameOfStatus(status) {
     return utils.sentenceCase(status)
   }

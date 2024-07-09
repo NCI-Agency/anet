@@ -13,7 +13,7 @@ const Checkbox = ({ checked, onChange, label }) => {
 
   return (
     <div className="checkbox">
-      <label className="d-flex align-items-center">
+      <label className="d-flex align-items-center column-gap-1">
         <input
           className="checkbox"
           type="checkbox"

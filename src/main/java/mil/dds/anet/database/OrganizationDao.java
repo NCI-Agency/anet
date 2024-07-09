@@ -2,12 +2,16 @@ package mil.dds.anet.database;
 
 import static org.jdbi.v3.sqlobject.customizer.BindList.EmptyHandling.NULL_STRING;
 
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.ApprovalStep;
+import mil.dds.anet.beans.MergedEntity;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AnetBeanList;
@@ -220,5 +224,96 @@ public class OrganizationDao
   @Override
   public SubscriptionUpdateGroup getSubscriptionUpdate(Organization obj) {
     return getCommonSubscriptionUpdate(obj, TABLE_NAME, "organizations.uuid");
+  }
+
+  @InTransaction
+  public int mergeOrganizations(final Organization loserOrganization,
+      final Organization winnerOrganization) {
+    final var loserOrganizationUuid = loserOrganization.getUuid();
+    final var winnerOrganizationUuid = winnerOrganization.getUuid();
+    final var existingLoserOrg = getByUuid(loserOrganizationUuid);
+    final var existingWinnerOrg = getByUuid(winnerOrganizationUuid);
+    final var context = AnetObjectEngine.getInstance().getContext();
+
+    // Clear loser's identificationCode to prevent update conflicts (identificationCode must be
+    // unique)
+    getDbHandle()
+        .createUpdate("/* clearOrganizationIdentificationCode */ UPDATE organizations"
+            + " SET \"identificationCode\" = NULL WHERE uuid = :loserOrganizationUuid")
+        .bind("loserOrganizationUuid", loserOrganizationUuid).execute();
+
+    // Update the winner's fields
+    update(winnerOrganization);
+
+    // Update approvalSteps (note that this may fail if reports are currently pending at one of the
+    // approvalSteps that are going to be deleted):
+    // - delete approvalSteps of loser
+    final List<ApprovalStep> existingLoserPlanningApprovalSteps =
+        existingLoserOrg.loadPlanningApprovalSteps(context).join();
+    final List<ApprovalStep> existingLoserApprovalSteps =
+        existingLoserOrg.loadApprovalSteps(context).join();
+    Utils.updateApprovalSteps(loserOrganization, List.of(), existingLoserPlanningApprovalSteps,
+        List.of(), existingLoserApprovalSteps);
+    // - update approvalSteps of winner
+    final List<ApprovalStep> existingWinnerPlanningApprovalSteps =
+        existingWinnerOrg.loadPlanningApprovalSteps(context).join();
+    final List<ApprovalStep> existingWinnerApprovalSteps =
+        existingWinnerOrg.loadApprovalSteps(context).join();
+    Utils.updateApprovalSteps(winnerOrganization, winnerOrganization.getPlanningApprovalSteps(),
+        existingWinnerPlanningApprovalSteps, winnerOrganization.getApprovalSteps(),
+        existingWinnerApprovalSteps);
+
+    // Assign tasks to the winner
+    updateForMerge("taskTaskedOrganizations", "organizationUuid", winnerOrganizationUuid,
+        loserOrganizationUuid);
+    // Move positions to the winner
+    updateForMerge(PositionDao.TABLE_NAME, "organizationUuid", winnerOrganizationUuid,
+        loserOrganizationUuid);
+    // Move authorizationGroups to the winner
+    updateForMerge("authorizationGroupRelatedObjects", "relatedObjectUuid", winnerOrganizationUuid,
+        loserOrganizationUuid);
+    // Update parentOrg (of all sub-organizations) to the winner
+    updateForMerge(OrganizationDao.TABLE_NAME, "parentOrgUuid", winnerOrganizationUuid,
+        loserOrganizationUuid);
+    // Update advisorOrganization of reports to the winner
+    updateForMerge(ReportDao.TABLE_NAME, "advisorOrganizationUuid", winnerOrganizationUuid,
+        loserOrganizationUuid);
+    // Update interlocutorOrganization of reports to the winner
+    updateForMerge(ReportDao.TABLE_NAME, "interlocutorOrganizationUuid", winnerOrganizationUuid,
+        loserOrganizationUuid);
+    // Move notes to the winner
+    updateM2mForMerge("noteRelatedObjects", "noteUuid", "relatedObjectUuid", winnerOrganizationUuid,
+        loserOrganizationUuid);
+    // Move attachments to the winner
+    updateM2mForMerge("attachmentRelatedObjects", "attachmentUuid", "relatedObjectUuid",
+        winnerOrganizationUuid, loserOrganizationUuid);
+
+    // Update organizationAdministrativePositions
+    deleteForMerge("organizationAdministrativePositions", "organizationUuid",
+        loserOrganizationUuid);
+    Utils.addRemoveElementsByUuid(existingWinnerOrg.loadAdministratingPositions(context).join(),
+        Utils.orIfNull(winnerOrganization.getAdministratingPositions(), new ArrayList<>()),
+        newPos -> addPositionToOrganization(newPos, winnerOrganization),
+        oldPos -> removePositionFromOrganization(DaoUtils.getUuid(oldPos), winnerOrganization));
+
+    // Update emailAddresses
+    final EmailAddressDao emailAddressDao = AnetObjectEngine.getInstance().getEmailAddressDao();
+    emailAddressDao.updateEmailAddresses(OrganizationDao.TABLE_NAME, loserOrganizationUuid, null);
+    emailAddressDao.updateEmailAddresses(OrganizationDao.TABLE_NAME, winnerOrganizationUuid,
+        winnerOrganization.getEmailAddresses());
+
+    // Update customSensitiveInformation for winner
+    DaoUtils.saveCustomSensitiveInformation(null, OrganizationDao.TABLE_NAME,
+        winnerOrganizationUuid, winnerOrganization.getCustomSensitiveInformation());
+    // Delete customSensitiveInformation for loser
+    deleteForMerge("customSensitiveInformation", "relatedObjectUuid", loserOrganizationUuid);
+
+    // Finally, delete loser
+    final int nrDeleted = deleteForMerge(OrganizationDao.TABLE_NAME, "uuid", loserOrganizationUuid);
+    if (nrDeleted > 0) {
+      AnetObjectEngine.getInstance().getAdminDao().insertMergedEntity(
+          new MergedEntity(loserOrganizationUuid, winnerOrganizationUuid, Instant.now()));
+    }
+    return nrDeleted;
   }
 }

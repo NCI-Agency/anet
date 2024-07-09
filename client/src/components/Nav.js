@@ -23,7 +23,8 @@ import utils from "utils"
 const MERGE_OPTIONS = [
   { key: "people", label: "Merge people" },
   { key: "positions", label: "Merge positions" },
-  { key: "locations", label: "Merge locations" }
+  { key: "locations", label: "Merge locations" },
+  { key: "organizations", label: "Merge organizations" }
 ]
 
 const USER_ACTIVITY_OPTIONS = [

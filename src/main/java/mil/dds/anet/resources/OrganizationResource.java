@@ -118,8 +118,6 @@ public class OrganizationResource {
     return created;
   }
 
-
-
   @GraphQLMutation(name = "updateOrganization")
   public Integer updateOrganization(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "organization") Organization org) {
@@ -215,6 +213,34 @@ public class OrganizationResource {
       @GraphQLArgument(name = "query") OrganizationSearchQuery query) {
     query.setUser(DaoUtils.getUserFromContext(context));
     return dao.search(query);
+  }
+
+  @GraphQLMutation(name = "mergeOrganizations")
+  public Integer mergeOrganizations(@GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "loserUuid") String loserUuid,
+      @GraphQLArgument(name = "winnerOrganization") Organization winnerOrganization) {
+    final Person user = DaoUtils.getUserFromContext(context);
+    AuthUtils.assertAdministrator(user);
+
+    final var loserOrganization = dao.getByUuid(loserUuid);
+    checkWhetherOrganizationsAreMergeable(winnerOrganization, loserOrganization);
+    final var numberOfAffectedRows = dao.mergeOrganizations(loserOrganization, winnerOrganization);
+    if (numberOfAffectedRows == 0) {
+      throw new WebApplicationException(
+          "Couldn't process merge operation, error occurred while updating merged organization relation information.",
+          Status.NOT_FOUND);
+    }
+    AnetAuditLogger.log("Organization {} merged into {} by {}", loserOrganization,
+        winnerOrganization, user);
+    return numberOfAffectedRows;
+  }
+
+  private void checkWhetherOrganizationsAreMergeable(final Organization winnerOrganization,
+      final Organization loserOrganization) {
+    if (Objects.equals(DaoUtils.getUuid(loserOrganization), DaoUtils.getUuid(winnerOrganization))) {
+      throw new WebApplicationException("Cannot merge identical organizations.",
+          Status.BAD_REQUEST);
+    }
   }
 
 }

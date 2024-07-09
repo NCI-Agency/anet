@@ -2,6 +2,7 @@ import AppContext from "components/AppContext"
 import _isEmpty from "lodash/isEmpty"
 import AdminIndex from "pages/admin/Index"
 import MergeLocations from "pages/admin/merge/MergeLocations"
+import MergeOrganizations from "pages/admin/merge/MergeOrganizations"
 import MergePeople from "pages/admin/merge/MergePeople"
 import MergePositions from "pages/admin/merge/MergePositions"
 import UserActivitiesOverTime from "pages/admin/useractivities/UserActivitiesOverTime"
@@ -162,6 +163,7 @@ const Routing = () => {
             <Route path="people" element={<MergePeople />} />
             <Route path="positions" element={<MergePositions />} />
             <Route path="locations" element={<MergeLocations />} />
+            <Route path="organizations" element={<MergeOrganizations />} />
           </Route>
           <Route path="userActivities">
             <Route path="perPeriod" element={<UserActivitiesPerPeriod />} />

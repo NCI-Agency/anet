@@ -1,7 +1,14 @@
 import styled from "@emotion/styled"
-import { ALIGN_OPTIONS, setHeightOfAField } from "mergeUtils"
+import _get from "lodash/get"
+import _isEqual from "lodash/isEqual"
+import {
+  ALIGN_OPTIONS,
+  getActionButton,
+  MERGE_SIDES,
+  setHeightOfAField
+} from "mergeUtils"
 import PropTypes from "prop-types"
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useMemo, useRef, useState } from "react"
 
 const MergeField = ({
   label,
@@ -10,28 +17,63 @@ const MergeField = ({
   align,
   action,
   mergeState,
+  autoMerge,
   dispatchMergeActions,
   className
 }) => {
   const fieldRef = useRef(null)
-  const [height, setSetHeight] = useState("auto")
+  const [height, setHeight] = useState("auto")
 
   useEffect(() => {
-    // We have more than one columns of fields, each field should have same height
+    // We have more than one column of fields, each field should have same height
     // if a column has bigger height, that height wins
     if (fieldRef.current) {
-      const currentHeight = fieldRef.current.clientHeight
+      const currentHeight =
+        fieldRef.current.getBoundingClientRect?.()?.height ??
+        fieldRef.current.clientHeight
       const savedHeight = mergeState.heightMap?.[fieldName] || 0
       if (savedHeight < currentHeight) {
         dispatchMergeActions(setHeightOfAField(fieldName, currentHeight))
-        setSetHeight("auto")
+        setHeight("auto")
       } else if (savedHeight > currentHeight) {
         // if some other column field height is bigger, we update small ui
-        setSetHeight(`${savedHeight}px`)
+        setHeight(`${savedHeight}px`)
       }
     }
     return () => {}
   }, [fieldName, mergeState, dispatchMergeActions])
+
+  // automatically merge when allowed and both sides are equal
+  const canAutoMerge = useMemo(
+    () =>
+      autoMerge &&
+      _isEqual(
+        _get(mergeState[MERGE_SIDES.LEFT], fieldName),
+        _get(mergeState[MERGE_SIDES.RIGHT], fieldName)
+      ),
+    [autoMerge, fieldName, mergeState]
+  )
+  useEffect(() => {
+    if (canAutoMerge && !mergeState.selectedMap[fieldName]) {
+      action?.()
+    }
+  }, [canAutoMerge, action, fieldName, mergeState])
+
+  // show an action button for fields that need to be merged manually
+  const actionButton = useMemo(
+    () =>
+      !canAutoMerge &&
+      action &&
+      getActionButton(action, align, mergeState, fieldName),
+    [canAutoMerge, action, align, fieldName, mergeState]
+  )
+
+  // get selected side (has side effect!)
+  const selectedSide = mergeState.getSelectedSide(fieldName)
+
+  // show an orange background for center fields that haven't been merged yet
+  const bgColor =
+    align === ALIGN_OPTIONS.CENTER && !selectedSide ? "#fed8b1" : null
 
   return (
     <MergeFieldBox
@@ -40,7 +82,8 @@ const MergeField = ({
       /* We first let its height be auto to get the natural height */
       /* If it is bigger than already existing one's height in the other column */
       /* we set other field to this height in useEffect */
-      fieldHeight={`${height}`}
+      fieldHeight={height}
+      bgColor={bgColor}
     >
       <div style={{ flex: "1 1 auto" }}>
         <LabelBox align={align}>{label}</LabelBox>
@@ -48,7 +91,7 @@ const MergeField = ({
           {value}
         </ValueBox>
       </div>
-      {action}
+      {actionButton}
     </MergeFieldBox>
   )
 }
@@ -71,7 +114,11 @@ const MergeFieldBox = styled.div`
   justify-content: space-between;
   align-items: center;
   padding: 8px 0;
-  height: ${props => props.fieldHeight};
+  min-height: ${props => props.fieldHeight};
+  background-color: ${props => props.bgColor};
+  &:not(:first-of-type) {
+    border-top: 1px solid #cccccc;
+  }
 `
 
 const LabelBox = styled.div`
@@ -96,8 +143,9 @@ MergeField.propTypes = {
   fieldName: PropTypes.string.isRequired,
   value: PropTypes.node,
   align: PropTypes.oneOf(Object.values(ALIGN_OPTIONS)).isRequired,
-  action: PropTypes.node,
+  action: PropTypes.func,
   mergeState: PropTypes.object,
+  autoMerge: PropTypes.bool,
   dispatchMergeActions: PropTypes.func,
   className: PropTypes.string
 }
