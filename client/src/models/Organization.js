@@ -113,6 +113,7 @@ export default class Organization extends Model {
     status
     shortName
     longName
+    profile
     identificationCode
     ${GRAPHQL_ENTITY_AVATAR_FIELDS}
     app6context
@@ -140,7 +141,6 @@ export default class Organization extends Model {
       lng
       type
     }
-    profile
     emailAddresses {
       network
       address
