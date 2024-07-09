@@ -6,7 +6,6 @@ import io.leangen.graphql.annotations.GraphQLRootContext;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import java.util.Map;
-import java.util.Optional;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.EntityAvatar;
 import mil.dds.anet.beans.Person;
@@ -42,10 +41,10 @@ public class EntityAvatarResource {
         entityAvatar.getRelatedObjectUuid());
 
     // Do we have an avatar already for this entity?
-    final Optional<EntityAvatar> dbEntityAvatar = entityAvatarDao.getByRelatedObject(
-        entityAvatar.getRelatedObjectType(), entityAvatar.getRelatedObjectUuid());
+    final EntityAvatar dbEntityAvatar =
+        entityAvatarDao.getByRelatedObjectUuid(entityAvatar.getRelatedObjectUuid());
 
-    if (dbEntityAvatar.isEmpty()) {
+    if (dbEntityAvatar == null) {
       numRows = entityAvatarDao.insert(entityAvatar);
       AnetAuditLogger.log("Avatar for entity {} of type {} created by {}",
           entityAvatar.getRelatedObjectUuid(), entityAvatar.getRelatedObjectType(), user);
