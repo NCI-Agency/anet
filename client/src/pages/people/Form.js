@@ -870,11 +870,10 @@ const PersonForm = ({
       initialValues.name,
       new Blob([data], { type: mimeType }),
       Person.relatedObjectType,
-      initialValues.uuid,
-      attachmentList,
-      setAttachmentList
+      initialValues.uuid
     )
     if (newAvatar?.uuid) {
+      setAttachmentList([...attachmentList, newAvatar])
       await updateAvatar(newAvatar?.uuid)
     }
   }

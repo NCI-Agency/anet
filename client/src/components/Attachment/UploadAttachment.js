@@ -6,7 +6,7 @@ import axios from "axios"
 import Messages from "components/Messages"
 import { Attachment } from "models"
 import PropTypes from "prop-types"
-import React, { useEffect, useState } from "react"
+import React, { useState } from "react"
 import { toast } from "react-toastify"
 import Settings from "settings"
 import utils from "utils"
@@ -107,16 +107,11 @@ const UploadAttachment = ({
   saveRelatedObject
 }) => {
   const [error, setError] = useState(null)
-  const [allAttachments, setAllAttachments] = useState(attachments)
   const [objectUuid, setObjectUuid] = useState(relatedObjectUuid)
-  useEffect(
-    () => updateAttachments(allAttachments),
-    [allAttachments, updateAttachments]
-  )
 
   const handleFileEvent = async e => {
     // Must keep a copy of this state here, as it is not updated while this function runs
-    let currentAttachments = [...allAttachments]
+    let currentAttachments = [...attachments]
     let currentObjectUuid = objectUuid
     for (const file of e.target?.files || []) {
       if (!file) {
@@ -142,7 +137,7 @@ const UploadAttachment = ({
         )
         if (newAttachment) {
           currentAttachments = [...currentAttachments, newAttachment]
-          setAllAttachments(currentAttachments)
+          updateAttachments(currentAttachments)
         }
       } else {
         // Save the related object first
@@ -161,7 +156,7 @@ const UploadAttachment = ({
             )
             if (newAttachment) {
               currentAttachments = [...currentAttachments, newAttachment]
-              setAllAttachments(currentAttachments)
+              updateAttachments(currentAttachments)
             }
           })
           .catch(() =>
@@ -198,14 +193,14 @@ const UploadAttachment = ({
 
       {/** **** Show uploaded files in here **** **/}
       <div className="attachment-card-list">
-        {allAttachments.map(attachment => (
+        {attachments.map(attachment => (
           <AttachmentCard
             key={attachment.uuid}
             attachment={attachment}
             edit
             setError={setError}
-            uploadedList={allAttachments}
-            setUploadedList={setAllAttachments}
+            uploadedList={attachments}
+            setUploadedList={updateAttachments}
           />
         ))}
       </div>
