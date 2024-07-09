@@ -2,12 +2,17 @@ package mil.dds.anet.database;
 
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
-import java.util.Optional;
+import java.util.Arrays;
+import java.util.List;
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.EntityAvatar;
+import mil.dds.anet.database.mappers.EntityAvatarMapper;
 import org.jdbi.v3.core.Handle;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public class EntityAvatarDao {
+  public static final String TABLE_NAME = "entityAvatars";
+
   @Inject
   private Provider<Handle> handle;
 
@@ -15,20 +20,23 @@ public class EntityAvatarDao {
     return handle.get();
   }
 
-  /**
-   * Gets the existing avatar for this relatedObject if any
-   *
-   * @param relatedObjectType the relatedObjectType
-   * @param relatedObjectUuid the relatedObjectUuid
-   * @return optional with the avatar
-   */
-  @InTransaction
-  public Optional<EntityAvatar> getByRelatedObject(final String relatedObjectType,
-      final String relatedObjectUuid) {
-    return getDbHandle().createQuery(
-        "SELECT * FROM \"entityAvatars\" WHERE \"relatedObjectType\" = :relatedObjectType AND \"relatedObjectUuid\" = :relatedObjectUuid")
-        .bind("relatedObjectType", relatedObjectType).bind("relatedObjectUuid", relatedObjectUuid)
-        .mapToBean(EntityAvatar.class).findOne();
+  public EntityAvatar getByRelatedObjectUuid(String relatedObjectUuid) {
+    return getByIds(Arrays.asList(relatedObjectUuid)).get(0);
+  }
+
+  static class SelfIdBatcher extends IdBatcher<EntityAvatar> {
+    private static final String sql = "/* batch.getEntityAvatarForRelatedObject */ "
+        + "SELECT * FROM \"entityAvatars\" WHERE \"relatedObjectUuid\" IN ( <relatedObjectUuids> )";
+
+    public SelfIdBatcher() {
+      super(sql, "relatedObjectUuids", new EntityAvatarMapper());
+    }
+  }
+
+  public List<EntityAvatar> getByIds(List<String> relatedObjectUuids) {
+    final IdBatcher<EntityAvatar> idBatcher =
+        AnetObjectEngine.getInstance().getInjector().getInstance(SelfIdBatcher.class);
+    return idBatcher.getByIds(relatedObjectUuids);
   }
 
   /**
