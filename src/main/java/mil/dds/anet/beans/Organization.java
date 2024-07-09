@@ -227,12 +227,16 @@ public class Organization extends AbstractEmailableAnetBean
   }
 
   @GraphQLQuery(name = "entityAvatar")
-  public EntityAvatar loadEntityAvatar(@GraphQLRootContext Map<String, Object> context) {
-    if (entityAvatar == null) {
-      entityAvatar = AnetObjectEngine.getInstance().getEntityAvatarDao()
-          .getByRelatedObject(OrganizationDao.TABLE_NAME, uuid).orElse(null);
+  public CompletableFuture<EntityAvatar> loadEntityAvatar(
+      @GraphQLRootContext Map<String, Object> context) {
+    if (entityAvatar != null) {
+      return CompletableFuture.completedFuture(entityAvatar);
     }
-    return entityAvatar;
+    return new UuidFetcher<EntityAvatar>().load(context, IdDataLoaderKey.ENTITY_AVATAR, uuid)
+        .thenApply(o -> {
+          entityAvatar = o;
+          return o;
+        });
   }
 
   @GraphQLInputField(name = "entityAvatar")
