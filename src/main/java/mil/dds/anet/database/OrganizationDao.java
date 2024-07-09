@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalStep;
+import mil.dds.anet.beans.EntityAvatar;
 import mil.dds.anet.beans.MergedEntity;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Position;
@@ -287,6 +288,16 @@ public class OrganizationDao
     // Move attachments to the winner
     updateM2mForMerge("attachmentRelatedObjects", "attachmentUuid", "relatedObjectUuid",
         winnerOrganizationUuid, loserOrganizationUuid);
+    // And update the avatar
+    final EntityAvatarDao entityAvatarDao = AnetObjectEngine.getInstance().getEntityAvatarDao();
+    entityAvatarDao.delete(OrganizationDao.TABLE_NAME, winnerOrganizationUuid);
+    entityAvatarDao.delete(OrganizationDao.TABLE_NAME, loserOrganizationUuid);
+    final EntityAvatar winnerEntityAvatar = winnerOrganization.getEntityAvatar();
+    if (winnerEntityAvatar != null) {
+      winnerEntityAvatar.setRelatedObjectType(OrganizationDao.TABLE_NAME);
+      winnerEntityAvatar.setRelatedObjectUuid(winnerOrganizationUuid);
+      entityAvatarDao.insert(winnerEntityAvatar);
+    }
 
     // Update organizationAdministrativePositions
     deleteForMerge("organizationAdministrativePositions", "organizationUuid",

@@ -30,10 +30,16 @@ export const EntityAvatarComponent = ({
   relatedObjectUuid,
   relatedObjectName,
   editMode,
+  width,
+  height,
+  style,
   imageAttachments
 }) => {
   const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
-  const [currentAvatar, setCurrentAvatar] = useState(initialAvatar)
+  const [currentAvatar, setCurrentAvatar] = useState(null)
+  useEffect(() => {
+    setCurrentAvatar(initialAvatar)
+  }, [initialAvatar])
 
   // Also react to changes in image attachments as the one linked to the current avatar might have been deleted
   useEffect(() => {
@@ -48,7 +54,14 @@ export const EntityAvatarComponent = ({
 
   return (
     <>
-      {currentAvatar && <EntityAvatarDisplay avatar={currentAvatar} />}
+      {currentAvatar && (
+        <EntityAvatarDisplay
+          avatar={currentAvatar}
+          width={width}
+          height={height}
+          style={style}
+        />
+      )}
       {attachmentsEnabled && editMode && (
         <>
           {(_isEmpty(imageAttachments) && (
@@ -138,6 +151,9 @@ EntityAvatarComponent.propTypes = {
   relatedObjectUuid: PropTypes.string.isRequired,
   relatedObjectName: PropTypes.string.isRequired,
   editMode: PropTypes.bool.isRequired,
+  height: PropTypes.number,
+  width: PropTypes.number,
+  style: PropTypes.object,
   imageAttachments: PropTypes.array
 }
 

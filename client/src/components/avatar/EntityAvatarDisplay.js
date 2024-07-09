@@ -2,7 +2,7 @@ import styled from "@emotion/styled"
 import PropTypes from "prop-types"
 import React, { useEffect, useRef } from "react"
 
-export const EntityAvatarDisplay = ({ avatar, width, height }) => {
+export const EntityAvatarDisplay = ({ avatar, width, height, style }) => {
   const canvasRef = useRef()
   useEffect(() => {
     if (avatar?.applyCrop) {
@@ -32,7 +32,7 @@ export const EntityAvatarDisplay = ({ avatar, width, height }) => {
   }
 
   return (
-    <EntityAvatarStyledDiv>
+    <EntityAvatarStyledDiv style={style}>
       {avatar.applyCrop ? (
         <canvas ref={canvasRef} width={width} height={height} />
       ) : (
@@ -55,7 +55,8 @@ const EntityAvatarStyledDiv = styled.div`
 EntityAvatarDisplay.propTypes = {
   avatar: PropTypes.object,
   height: PropTypes.number,
-  width: PropTypes.number
+  width: PropTypes.number,
+  style: PropTypes.object
 }
 
 EntityAvatarDisplay.defaultProps = {
