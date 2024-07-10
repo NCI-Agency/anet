@@ -186,7 +186,8 @@ const Leaflet = ({
         zoomControl: true,
         gestureHandling: true,
         fullscreenControl: true,
-        fullscreenControlOptions: { position: "topleft" }
+        fullscreenControlOptions: { position: "topleft" },
+        maxZoom: 16
       },
       Settings.imagery.mapOptions.leafletOptions,
       Settings.imagery.mapOptions.crs && {
