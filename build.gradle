@@ -127,7 +127,7 @@ dependencies {
 	// Used for converting GraphQL request output to XML:
 	implementation 'com.github.javadev:underscore-lodash:1.26'
 	// For JSON schema validation, supports detailed error reporting
-	implementation 'com.networknt:json-schema-validator:1.4.3'
+	implementation 'com.networknt:json-schema-validator:1.5.0'
 
 	// used for writing Excel documents
 	implementation 'org.apache.poi:poi:5.3.0'
@@ -136,7 +136,7 @@ dependencies {
 	implementation 'org.apache.tika:tika-core:2.9.2'
 
 	// For parsing HTML to check for 'empty' input
-	implementation 'org.jsoup:jsoup:1.17.2'
+	implementation 'org.jsoup:jsoup:1.18.1'
 
 	// For fast and simple image scaling
 	implementation 'net.coobird:thumbnailator:0.4.20'
@@ -163,7 +163,7 @@ dependencies {
 	testImplementation "io.dropwizard:dropwizard-testing:${dropwizardVersion}"
 	testImplementation "io.dropwizard:dropwizard-client:${dropwizardVersion}"
 
-	testImplementation 'org.assertj:assertj-core:3.26.0'
+	testImplementation 'org.assertj:assertj-core:3.26.3'
 
 	testImplementation 'org.powermock:powermock-api-mockito2:2.0.9'
 	testImplementation 'org.powermock:powermock-module-junit4:2.0.9'
