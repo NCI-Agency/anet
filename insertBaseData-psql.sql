@@ -676,8 +676,8 @@ INSERT INTO organizations (uuid, "shortName", "longName", "parentOrgUuid", "iden
 
 -- Test for Merging
 INSERT INTO organizations (uuid, "shortName", "longName", "identificationCode", "parentOrgUuid", "locationUuid", app6context, "app6standardIdentity", "app6symbolSet", "app6hq", "app6amplifier", "createdAt", "updatedAt") VALUES
-  (uuid_generate_v4(), 'Merge Org 1', 'Long Merge 1 Name', 'Mg1', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 1'), 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', '0', '4', '20', '2', '14', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'Merge Org 2', 'Long Merge 2 Name', 'Mg2', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 1'), '95446f93-249b-4aa9-b98a-7bd2c4680718', '2', '2', '10', '5', '18', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  ('381d5435-8852-45d2-91b1-530560ca9d8c', 'Merge Org 1', 'Long Merge 1 Name', 'Mg1', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 1'), 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', '0', '4', '20', '2', '14', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('e706f443-7d4d-4356-82bc-1456f55e3d75', 'Merge Org 2', 'Long Merge 2 Name', 'Mg2', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 1'), '95446f93-249b-4aa9-b98a-7bd2c4680718', '2', '2', '10', '5', '18', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 INSERT INTO "approvalSteps" (uuid, "relatedObjectUuid", name, type) VALUES
   (uuid_generate_v4(), (SELECT uuid from organizations where "shortName"='Merge Org 1'), 'Merge Org 1 Approvers', 1);
@@ -1408,7 +1408,7 @@ INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjec
 -- Add attachments for reports
 SELECT ('''' || uuid || '''') AS "authorUuid" FROM people WHERE name = 'DMIN, Arthur' \gset
 INSERT INTO attachments (uuid, "authorUuid", "fileName", "caption", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt")
-	VALUES ('f076406f-1a9b-4fc9-8ab2-cd2a138ec26d', :authorUuid, 'attachReport.png', 'Arthur''s test report', 'image/png', lo_import('/var/tmp/default_avatar.png'), 12316, 'We can add attachments to a report', 'NU', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES ('f076406f-1a9b-4fc9-8ab2-cd2a138ec26d', :authorUuid, 'attachReport.png', 'Arthur''s test report', 'image/png', lo_import('/var/tmp/assets/default_avatar.png'), 12316, 'We can add attachments to a report', 'NU', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT 'f076406f-1a9b-4fc9-8ab2-cd2a138ec26d', 'reports', r.uuid
   FROM reports r
@@ -1416,31 +1416,35 @@ INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "
 
 -- Add attachments for locations
 INSERT INTO attachments (uuid, "authorUuid", "fileName", "caption", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt")
-	VALUES ('f7cd5b02-ef73-4ee8-814b-c5a7a916685d', :authorUuid, 'attachLocation.png', 'Antarctica', 'image/png', lo_import('/var/tmp/default_avatar.png'), 12316, 'We can add attachments to a location', 'NU_rel_EU', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES ('f7cd5b02-ef73-4ee8-814b-c5a7a916685d', :authorUuid, 'attachLocation.png', 'Antarctica', 'image/png', lo_import('/var/tmp/assets/default_avatar.png'), 12316, 'We can add attachments to a location', 'NU_rel_EU', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT 'f7cd5b02-ef73-4ee8-814b-c5a7a916685d', 'locations', loc.uuid
   FROM locations loc
   WHERE loc.name = 'Antarctica';
 
 -- Add attachments for organizations
-INSERT INTO attachments (uuid, "authorUuid", "fileName", "caption", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt")
-	VALUES ('9ac41246-25ac-457c-b7d6-946c5f625f1f', :authorUuid, 'attachOrganization.png', 'EF 2.2', 'image/png', lo_import('/var/tmp/default_avatar.png'), 12316, 'We can add attachments to an organization', 'public', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "relatedObjectUuid")
-  SELECT '9ac41246-25ac-457c-b7d6-946c5f625f1f', 'organizations', org.uuid
-  FROM organizations org
-  WHERE org."shortName" = 'EF 2.2';
+INSERT INTO attachments (uuid, "authorUuid", "fileName", "caption", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt") VALUES
+  ('9ac41246-25ac-457c-b7d6-946c5f625f1f', :authorUuid, 'attachOrganization.png', 'EF 2.2', 'image/png', lo_import('/var/tmp/assets/default_avatar.png'), 12316, 'We can add attachments to an organization', 'public', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('e32b6c9d-45d5-41db-b45a-123ed1975602', :authorUuid, 'avatar', 'Merge Org 1', 'image/svg+xml', lo_import('/var/tmp/assets/organization_avatar1.svg'), 2736, NULL, 'public', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('5408075e-9126-4201-a631-f72ffe8b54e5', :authorUuid, 'avatar', 'Merge Org 2', 'image/svg+xml', lo_import('/var/tmp/assets/organization_avatar2.svg'), 2928, NULL, 'public', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "relatedObjectUuid") VALUES
+  ('9ac41246-25ac-457c-b7d6-946c5f625f1f', 'organizations', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b'),
+  ('e32b6c9d-45d5-41db-b45a-123ed1975602', 'organizations', '381d5435-8852-45d2-91b1-530560ca9d8c'),
+  ('5408075e-9126-4201-a631-f72ffe8b54e5', 'organizations', 'e706f443-7d4d-4356-82bc-1456f55e3d75');
+
+-- Add entity avatars for organizations
+INSERT INTO "entityAvatars" ("relatedObjectType", "relatedObjectUuid", "attachmentUuid", "applyCrop", "cropLeft", "cropTop", "cropWidth", "cropHeight") VALUES
+  ('organizations', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b', '9ac41246-25ac-457c-b7d6-946c5f625f1f', TRUE, 0, 0, 200, 200),
+  ('organizations', '381d5435-8852-45d2-91b1-530560ca9d8c', 'e32b6c9d-45d5-41db-b45a-123ed1975602', FALSE, 0, 0, 0, 0),
+  ('organizations', 'e706f443-7d4d-4356-82bc-1456f55e3d75', '5408075e-9126-4201-a631-f72ffe8b54e5', FALSE, 0, 0, 0, 0);
 
 -- Add attachments for people
 INSERT INTO attachments (uuid, "authorUuid", "fileName", "caption", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt")
-	VALUES ('13318e42-a0a3-438f-8ed5-dc16b1ef17bc', :authorUuid, 'attachPerson.png', 'Erin', 'image/png', lo_import('/var/tmp/default_avatar.png'), 12316, 'We can add attachments to a person', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES ('13318e42-a0a3-438f-8ed5-dc16b1ef17bc', :authorUuid, 'attachPerson.png', 'Erin', 'image/png', lo_import('/var/tmp/assets/default_avatar.png'), 12316, 'We can add attachments to a person', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT '13318e42-a0a3-438f-8ed5-dc16b1ef17bc', 'people', p.uuid
   FROM people p
   WHERE p."domainUsername" = 'erin';
-
--- Add entity avatar for organization EF 2.2
-INSERT INTO "entityAvatars" ("relatedObjectType", "relatedObjectUuid", "attachmentUuid", "applyCrop", "cropLeft", "cropTop", "cropWidth", "cropHeight")
-VALUES ('organizations', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b', '9ac41246-25ac-457c-b7d6-946c5f625f1f', TRUE, 0, 0, 200, 200);
 
 -- Update the link-text indexes
 REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_lts_attachments";

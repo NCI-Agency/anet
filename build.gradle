@@ -430,7 +430,7 @@ task pushPsqlImageData(type: DockerCopyFileToContainer) {
 	group = "database runtime"
 	description = "Push SQL base data to PostgreSQL"
 	containerId = dbContainerName
-	hostPath = "${projectDir}/src/test/resources/assets/default_avatar.png"
+	hostPath = "${projectDir}/src/test/resources/assets/"
 	remotePath = psqlPushDataPath
 }
 pushPsqlImageData.mustRunAfter('dockerStartDB')
