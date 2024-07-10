@@ -296,7 +296,7 @@ public class OrganizationDao
     if (winnerEntityAvatar != null) {
       winnerEntityAvatar.setRelatedObjectType(OrganizationDao.TABLE_NAME);
       winnerEntityAvatar.setRelatedObjectUuid(winnerOrganizationUuid);
-      entityAvatarDao.insert(winnerEntityAvatar);
+      entityAvatarDao.upsert(winnerEntityAvatar);
     }
 
     // Update organizationAdministrativePositions
