@@ -1,6 +1,7 @@
 import { expect } from "chai"
 import MergeOrganizations from "../pages/mergeOrganizations.page"
 
+const IMG_PATH = "/api/attachment/view"
 const EXAMPLE_ORGANIZATIONS = {
   validLeft: {
     search: "Merge Org 1",
@@ -8,6 +9,7 @@ const EXAMPLE_ORGANIZATIONS = {
     longName: "Long Merge 1 Name",
     status: "ACTIVE",
     displayedName: "Merge Org 1 | Long Merge 1 Name",
+    avatarImg: `${IMG_PATH}/e32b6c9d-45d5-41db-b45a-123ed1975602`,
     parentOrg: "EF 1 | Planning Programming, Budgeting and Execution"
   },
   validRight: {
@@ -16,6 +18,7 @@ const EXAMPLE_ORGANIZATIONS = {
     longName: "Long Merge 2 Name",
     status: "ACTIVE",
     displayedName: "Merge Org 2 | Long Merge 2 Name",
+    avatarImg: `${IMG_PATH}/5408075e-9126-4201-a631-f72ffe8b54e5`,
     parentOrg: "EF 1 | Planning Programming, Budgeting and Execution"
   }
 }
@@ -45,6 +48,12 @@ describe("Merge organizations page", () => {
         await MergeOrganizations.getColumnContent("left", "Name")
       ).getText()
     ).to.eq(EXAMPLE_ORGANIZATIONS.validLeft.shortName)
+    const avatarImg = await (
+      await MergeOrganizations.getColumnContent("left", "Avatar")
+    ).$("img")
+    expect(await avatarImg.getAttribute("src")).to.eq(
+      EXAMPLE_ORGANIZATIONS.validLeft.avatarImg
+    )
     expect(
       await (
         await MergeOrganizations.getColumnContent("left", "Parent Organization")
@@ -86,6 +95,12 @@ describe("Merge organizations page", () => {
         await MergeOrganizations.getColumnContent("right", "Name")
       ).getText()
     ).to.eq(EXAMPLE_ORGANIZATIONS.validRight.shortName)
+    const avatarImg = await (
+      await MergeOrganizations.getColumnContent("right", "Avatar")
+    ).$("img")
+    expect(await avatarImg.getAttribute("src")).to.eq(
+      EXAMPLE_ORGANIZATIONS.validRight.avatarImg
+    )
     expect(
       await (
         await MergeOrganizations.getColumnContent(
@@ -132,6 +147,12 @@ describe("Merge organizations page", () => {
     expect(
       await (await MergeOrganizations.getColumnContent("mid", "Name")).getText()
     ).to.eq(EXAMPLE_ORGANIZATIONS.validLeft.shortName)
+    const avatarImg = await (
+      await MergeOrganizations.getColumnContent("mid", "Avatar")
+    ).$("img")
+    expect(await avatarImg.getAttribute("src")).to.eq(
+      EXAMPLE_ORGANIZATIONS.validLeft.avatarImg
+    )
   })
 
   it("Should be able to select all fields from right organization", async() => {
@@ -146,6 +167,12 @@ describe("Merge organizations page", () => {
     expect(
       await (await MergeOrganizations.getColumnContent("mid", "Name")).getText()
     ).to.eq(EXAMPLE_ORGANIZATIONS.validRight.shortName)
+    const avatarImg = await (
+      await MergeOrganizations.getColumnContent("mid", "Avatar")
+    ).$("img")
+    expect(await avatarImg.getAttribute("src")).to.eq(
+      EXAMPLE_ORGANIZATIONS.validRight.avatarImg
+    )
   })
 
   it("Should be able to select from both left and right side", async() => {
@@ -169,6 +196,14 @@ describe("Merge organizations page", () => {
       await (await MergeOrganizations.getColumnContent("mid", "Name")).getText()
     ).to.eq(EXAMPLE_ORGANIZATIONS.validLeft.shortName)
 
+    await (await MergeOrganizations.getSelectButton("left", "Avatar")).click()
+    await MergeOrganizations.waitForColumnToChange("", "mid", "Avatar")
+    const avatarImg = await (
+      await MergeOrganizations.getColumnContent("mid", "Avatar")
+    ).$("img")
+    expect(await avatarImg.getAttribute("src")).to.eq(
+      EXAMPLE_ORGANIZATIONS.validLeft.avatarImg
+    )
     await (
       await MergeOrganizations.getSelectButton("right", "Description")
     ).click()
