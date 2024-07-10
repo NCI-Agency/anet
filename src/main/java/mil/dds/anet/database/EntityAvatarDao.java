@@ -40,32 +40,21 @@ public class EntityAvatarDao {
   }
 
   /**
-   * Inserts avatar in the database
-   * 
-   * @param entityAvatar the new entity avatar
-   * @return number of rows inserted
+   * Inserts or updates avatar in the database
+   *
+   * @param entityAvatar the entity avatar
+   * @return number of rows inserted/updated
    */
   @InTransaction
-  public int insert(final EntityAvatar entityAvatar) {
-    return getDbHandle().createUpdate("/* insertEntityAvatar */ " + "INSERT INTO \"entityAvatars\" "
+  public int upsert(final EntityAvatar entityAvatar) {
+    return getDbHandle().createUpdate("/* upsertEntityAvatar */ INSERT INTO \"entityAvatars\" "
         + "(\"relatedObjectType\", \"relatedObjectUuid\", \"attachmentUuid\", \"applyCrop\", "
         + "\"cropLeft\", \"cropTop\", \"cropWidth\", \"cropHeight\") "
         + "VALUES (:relatedObjectType, :relatedObjectUuid, :attachmentUuid, :applyCrop, "
-        + ":cropLeft, :cropTop, :cropWidth, :cropHeight)").bindBean(entityAvatar).execute();
-  }
-
-  /**
-   * Updates avatar in the database
-   * 
-   * @param entityAvatar the entity avatar to update
-   * @return number of rows updated
-   */
-  @InTransaction
-  public int update(final EntityAvatar entityAvatar) {
-    return getDbHandle().createUpdate("/* updateEntityAvatar */ UPDATE \"entityAvatars\" "
+        + ":cropLeft, :cropTop, :cropWidth, :cropHeight) "
+        + "ON CONFLICT (\"relatedObjectType\", \"relatedObjectUuid\") DO UPDATE "
         + "SET \"attachmentUuid\" = :attachmentUuid, \"cropLeft\" = :cropLeft, \"applyCrop\" = :applyCrop, "
-        + "\"cropTop\" = :cropTop, \"cropWidth\" = :cropWidth, \"cropHeight\" = :cropHeight "
-        + "WHERE \"relatedObjectType\" = :relatedObjectType AND \"relatedObjectUuid\" = :relatedObjectUuid")
+        + "\"cropTop\" = :cropTop, \"cropWidth\" = :cropWidth, \"cropHeight\" = :cropHeight")
         .bindBean(entityAvatar).execute();
   }
 
@@ -78,8 +67,8 @@ public class EntityAvatarDao {
    */
   @InTransaction
   public int delete(final String relatedObjectType, final String relatedObjectUuid) {
-    return getDbHandle().createUpdate(
-        "/* deletEntityAvatar */ DELETE FROM \"entityAvatars\" WHERE \"relatedObjectType\" = :relatedObjectType AND \"relatedObjectUuid\" = :relatedObjectUuid")
+    return getDbHandle().createUpdate("/* deletEntityAvatar */ DELETE FROM \"entityAvatars\" "
+        + "WHERE \"relatedObjectType\" = :relatedObjectType AND \"relatedObjectUuid\" = :relatedObjectUuid")
         .bind("relatedObjectType", relatedObjectType).bind("relatedObjectUuid", relatedObjectUuid)
         .execute();
   }

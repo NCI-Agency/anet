@@ -33,24 +33,15 @@ public class EntityAvatarResource {
   @GraphQLMutation(name = "createOrUpdateEntityAvatar")
   public Integer createOrUpdateEntityAvatar(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "entityAvatar") EntityAvatar entityAvatar) {
-    final int numRows;
     final Person user = DaoUtils.getUserFromContext(context);
 
     // Check if user is authorized to manipulate avatars for this relatedObjectUuid
     assertPermission(user, entityAvatar.getRelatedObjectType(),
         entityAvatar.getRelatedObjectUuid());
 
-    // Do we have an avatar already for this entity?
-    final EntityAvatar dbEntityAvatar =
-        entityAvatarDao.getByRelatedObjectUuid(entityAvatar.getRelatedObjectUuid());
-
-    if (dbEntityAvatar == null) {
-      numRows = entityAvatarDao.insert(entityAvatar);
-      AnetAuditLogger.log("Avatar for entity {} of type {} created by {}",
-          entityAvatar.getRelatedObjectUuid(), entityAvatar.getRelatedObjectType(), user);
-    } else {
-      numRows = entityAvatarDao.update(entityAvatar);
-      AnetAuditLogger.log("Avatar for entity {} of type {} updated by {}",
+    final int numRows = entityAvatarDao.upsert(entityAvatar);
+    if (numRows > 0) {
+      AnetAuditLogger.log("Avatar for entity {} of type {} created or updated by {}",
           entityAvatar.getRelatedObjectUuid(), entityAvatar.getRelatedObjectType(), user);
     }
 
