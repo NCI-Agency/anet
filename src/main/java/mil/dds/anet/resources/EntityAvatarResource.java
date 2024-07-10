@@ -76,7 +76,7 @@ public class EntityAvatarResource {
     assertPermission(user, relatedObjectType, relatedObjectUuid);
 
     int numRows = entityAvatarDao.delete(relatedObjectType, relatedObjectUuid);
-    if (numRows > 1) {
+    if (numRows > 0) {
       AnetAuditLogger.log("Avatar for entity {} of type {} deleted by {}", relatedObjectUuid,
           relatedObjectType, user);
     }
