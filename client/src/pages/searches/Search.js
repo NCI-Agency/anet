@@ -1158,10 +1158,11 @@ const Search = ({
   const reportsSearchQueryParams = useMemo(
     () => ({
       ...searchQueryParams,
+      pageSize,
       sortBy: "ENGAGEMENT_DATE",
       sortOrder: "DESC"
     }),
-    [searchQueryParams]
+    [searchQueryParams, pageSize]
   )
   const exportMaxResults = currentUser?.authorizationGroups
     ?.map(ag => ag.uuid)
