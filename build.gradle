@@ -1,8 +1,22 @@
 import com.bmuschko.gradle.docker.tasks.container.*
 import com.bmuschko.gradle.docker.tasks.image.*
 
+buildscript {
+  repositories {
+    mavenCentral()
+    gradlePluginPortal()
+    // for remark, used by org.kordamp.gradle:markdown-gradle-plugin:2.2.0
+    flatDir { dirs 'lib' }
+  }
+  dependencies {
+    classpath("org.kordamp.gradle:markdown-gradle-plugin:2.2.0") {
+      exclude group: 'com.overzealous', module: 'remark'
+    }
+    classpath('LOCAL:remark:1.1.0-LOCAL')
+  }
+}
+
 plugins {
-	id "org.kordamp.gradle.markdown" version "2.2.0"
 	// https://github.com/bmuschko/gradle-docker-plugin
 	id "com.bmuschko.docker-remote-api" version "9.4.0"
 	id "com.github.node-gradle.node" version "7.0.2"
@@ -19,6 +33,7 @@ apply plugin: 'application'
 apply plugin: 'jacoco'
 apply plugin: 'checkstyle'
 apply plugin: 'project-report' // adds dependencyReport and htmlDependencyReport tasks
+apply plugin: 'org.kordamp.gradle.markdown'
 
 java {
   sourceCompatibility = 17
