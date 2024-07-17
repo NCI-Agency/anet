@@ -2,7 +2,6 @@ import com.bmuschko.gradle.docker.tasks.container.*
 import com.bmuschko.gradle.docker.tasks.image.*
 
 plugins {
-	id "org.kordamp.gradle.markdown" version "2.2.0"
 	// https://github.com/bmuschko/gradle-docker-plugin
 	id "com.bmuschko.docker-remote-api" version "9.4.0"
 	id "com.github.node-gradle.node" version "7.0.2"
@@ -793,7 +792,6 @@ distributions {
 			into('docs/') {
 				from('anet.yml') { rename('anet.yml', 'anet.yml.template') }
 				from('anet-dictionary.yml') { rename('anet-dictionary.yml', 'anet-dictionary.yml.template') }
-				from(markdownToHtml)
 				from('prepare-psql.sql')
 			}
 		}
@@ -807,13 +805,6 @@ startScripts {
 		unixScript.text = unixScript.text.replace('MY_APP_HOME', '\$APP_HOME')
 		windowsScript.text = windowsScript.text.replace('MY_APP_HOME', '%APP_HOME%')
 	}
-}
-
-//Configure Markdown plugin
-allprojects {
-	markdownToHtml.sourceDir = file("docs")
-	markdownToHtml.outputDir = file("$buildDir/documentation")
-	markdownToHtml.hardwraps = true
 }
 
 node {
@@ -837,7 +828,6 @@ task distRpm(dependsOn: "jpackageImage", type: Rpm) {
 	into('anet/docs/') {
 		from('anet.yml') { rename('anet.yml', 'anet.yml.template') }
 		from('anet-dictionary.yml') { rename('anet-dictionary.yml', 'anet-dictionary.yml.template') }
-		from(markdownToHtml)
 		from('prepare-psql.sql')
 	}
 }
