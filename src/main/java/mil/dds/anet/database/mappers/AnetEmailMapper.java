@@ -29,6 +29,7 @@ public class AnetEmailMapper implements RowMapper<AnetEmail> {
 
       email.setId(rs.getInt("id"));
       email.setCreatedAt(MapperUtils.getInstantAsLocalDateTime(rs, "createdAt"));
+      email.setErrorMessage(rs.getString("errorMessage"));
       return email;
     } catch (Exception e) {
       logger.error("Error mapping email", e);

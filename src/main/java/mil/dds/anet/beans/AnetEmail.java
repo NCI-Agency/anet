@@ -1,5 +1,6 @@
 package mil.dds.anet.beans;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import java.time.Instant;
@@ -8,6 +9,7 @@ import java.util.List;
 import mil.dds.anet.emails.AnetEmailAction;
 
 public class AnetEmail {
+  @GraphQLQuery
   private Integer id;
   private AnetEmailAction action;
   @GraphQLQuery
@@ -19,6 +21,8 @@ public class AnetEmail {
   @GraphQLQuery
   @GraphQLInputField
   private String comment;
+  @GraphQLQuery
+  private String errorMessage;
 
   public Integer getId() {
     return id;
@@ -46,7 +50,7 @@ public class AnetEmail {
 
   public void addToAddress(String toAddress) {
     if (toAddresses == null) {
-      toAddresses = new LinkedList<String>();
+      toAddresses = new LinkedList<>();
     }
     toAddresses.add(toAddress);
   }
@@ -65,5 +69,20 @@ public class AnetEmail {
 
   public void setComment(String comment) {
     this.comment = comment;
+  }
+
+  @JsonIgnore
+  public String getErrorMessage() {
+    return errorMessage;
+  }
+
+  public void setErrorMessage(final String errorMessage) {
+    this.errorMessage = errorMessage;
+  }
+
+  @JsonIgnore
+  @GraphQLQuery(name = "type")
+  public String getType() {
+    return action == null ? "" : action.getClass().getSimpleName();
   }
 }

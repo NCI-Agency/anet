@@ -39,6 +39,7 @@ import mil.dds.anet.database.EmailAddressDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.StatementLogger;
 import mil.dds.anet.resources.AdminResource;
+import mil.dds.anet.resources.AnetEmailResource;
 import mil.dds.anet.resources.ApprovalStepResource;
 import mil.dds.anet.resources.AttachmentResource;
 import mil.dds.anet.resources.AuthorizationGroupResource;
@@ -114,7 +115,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
     bootstrap.addCommand(new WaitForDbCommand());
 
     // Add the db migration commands
-    bootstrap.addBundle(new MigrationsBundle<AnetConfiguration>() {
+    bootstrap.addBundle(new MigrationsBundle<>() {
       @Override
       public DataSourceFactory getDataSourceFactory(AnetConfiguration configuration) {
         logger.info("datasource url: {}", configuration.getDataSourceFactory().getUrl());
@@ -137,7 +138,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
         "index.html"));
 
     // Use Freemarker to handle rendering TEXT_HTML views.
-    bootstrap.addBundle(new ViewBundle<AnetConfiguration>() {
+    bootstrap.addBundle(new ViewBundle<>() {
       @Override
       public Map<String, Map<String, String>> getViewConfiguration(
           AnetConfiguration configuration) {
@@ -164,7 +165,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
       @Override
       protected AbstractKeycloakAuthenticator<Person> createAuthenticator(
           KeycloakConfiguration configuration) {
-        return new AbstractKeycloakAuthenticator<Person>(configuration) {
+        return new AbstractKeycloakAuthenticator<>(configuration) {
           @Override
           protected Person prepareAuthentication(KeycloakSecurityContext securityContext,
               HttpServletRequest request, KeycloakConfiguration keycloakConfiguration) {
@@ -413,12 +414,13 @@ public class AnetApplication extends Application<AnetConfiguration> {
     final SubscriptionUpdateResource subscriptionUpdateResource =
         new SubscriptionUpdateResource(engine);
     final AttachmentResource attachmentResource = new AttachmentResource(engine);
+    final var emailResource = new AnetEmailResource(engine);
     final GraphQlResource graphQlResource = injector.getInstance(GraphQlResource.class);
     graphQlResource.initialise(engine, configuration,
         List.of(reportResource, personResource, positionResource, locationResource, orgResource,
             taskResource, adminResource, savedSearchResource, authorizationGroupResource,
             noteResource, approvalStepResource, subscriptionResource, subscriptionUpdateResource,
-            attachmentResource),
+            attachmentResource, emailResource),
         metricRegistry);
 
     // Register all of the HTTP Resources

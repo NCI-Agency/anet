@@ -1,5 +1,8 @@
 package mil.dds.anet.threads;
 
+import static java.util.stream.Collectors.joining;
+import static org.apache.commons.lang3.exception.ExceptionUtils.getThrowableList;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import freemarker.template.Template;
@@ -78,7 +81,7 @@ public class AnetEmailWorker extends AbstractWorker {
     final List<AnetEmail> emails = dao.getAll();
 
     // Send the emails!
-    final List<Integer> processedEmails = new LinkedList<Integer>();
+    final List<Integer> processedEmails = new LinkedList<>();
     for (final AnetEmail email : emails) {
       Map<String, Object> emailContext = null;
 
@@ -94,7 +97,10 @@ public class AnetEmailWorker extends AbstractWorker {
         }
         processedEmails.add(email.getId());
       } catch (Throwable t) {
-        logger.error("Error sending email", t);
+        logger.error("Error sending email #{}", email.getId(), t);
+
+        dao.setErrorMessage(email.getId(), getThrowableList(t).stream().limit(2)
+            .map(Throwable::getMessage).collect(joining(": ")));
 
         // Process stale emails
         if (smtpConfig.getNbOfHoursForStaleEmails() != null) {
@@ -184,7 +190,6 @@ public class AnetEmailWorker extends AbstractWorker {
     } catch (MailException e) {
       // The server rejected this... we'll log it and then not try again.
       logger.error("Send failed", e);
-      return;
     }
     // Other errors are intentionally thrown, as we want ANET to try again.
   }
