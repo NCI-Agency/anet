@@ -89,6 +89,14 @@ const GQL_GET_REPORT = gql`
             shortName
             longName
             identificationCode
+            entityAvatar {
+              attachmentUuid
+              applyCrop
+              cropLeft
+              cropTop
+              cropWidth
+              cropHeight
+            }
             approvalSteps {
               uuid
               name
@@ -129,6 +137,14 @@ const GQL_GET_REPORT = gql`
             shortName
             longName
             identificationCode
+            entityAvatar {
+              attachmentUuid
+              applyCrop
+              cropLeft
+              cropTop
+              cropWidth
+              cropHeight
+            }
           }
           location {
             uuid
@@ -182,12 +198,28 @@ const GQL_GET_REPORT = gql`
         shortName
         longName
         identificationCode
+        entityAvatar {
+          attachmentUuid
+          applyCrop
+          cropLeft
+          cropTop
+          cropWidth
+          cropHeight
+        }
       }
       advisorOrg {
         uuid
         shortName
         longName
         identificationCode
+        entityAvatar {
+          attachmentUuid
+          applyCrop
+          cropLeft
+          cropTop
+          cropWidth
+          cropHeight
+        }
       }
       workflow {
         type

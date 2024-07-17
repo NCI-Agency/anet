@@ -305,8 +305,11 @@ public class AttachmentResource {
     return (Map<String, Object>) getConfiguration().getDictionaryEntry("fields.attachment");
   }
 
-  @SuppressWarnings("unchecked")
   public static List<String> getAllowedMimeTypes() {
-    return (List<String>) getAttachmentSettings().get("mimeTypes");
+    // Get the allowed mime types from dictionary
+    @SuppressWarnings("unchecked")
+    final var mimeTypes = (List<Map<String, ?>>) getAttachmentSettings().get("mimeTypes");
+    // Extract names
+    return mimeTypes.stream().map(element -> (String) element.get("name")).toList();
   }
 }

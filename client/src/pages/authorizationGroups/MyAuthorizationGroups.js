@@ -31,6 +31,14 @@ const GQL_GET_MY_AUTHORIZATION_GROUPS = gql`
                 shortName
                 longName
                 identificationCode
+                entityAvatar {
+                  attachmentUuid
+                  applyCrop
+                  cropLeft
+                  cropTop
+                  cropWidth
+                  cropHeight
+                }
               }
               ... on Person {
                 uuid

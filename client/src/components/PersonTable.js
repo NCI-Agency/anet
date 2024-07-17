@@ -47,6 +47,14 @@ const GQL_GET_PERSON_LIST = gql`
             shortName
             longName
             identificationCode
+            entityAvatar {
+              attachmentUuid
+              applyCrop
+              cropLeft
+              cropTop
+              cropWidth
+              cropHeight
+            }
           }
         }
       }

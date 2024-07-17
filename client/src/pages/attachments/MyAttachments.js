@@ -39,6 +39,14 @@ const GQL_GET_ATTACHMENT_LIST = gql`
               shortName
               longName
               identificationCode
+              entityAvatar {
+                attachmentUuid
+                applyCrop
+                cropLeft
+                cropTop
+                cropWidth
+                cropHeight
+              }
             }
             ... on Person {
               name

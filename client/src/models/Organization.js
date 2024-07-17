@@ -103,7 +103,9 @@ export default class Organization extends Model {
     .concat(Organization.customFieldsSchema)
     .concat(Model.yupSchema)
 
-  static autocompleteQuery = "uuid shortName longName identificationCode"
+  static autocompleteQuery =
+    "uuid shortName longName identificationCode" +
+    " entityAvatar { attachmentUuid applyCrop cropLeft cropTop cropWidth cropHeight }"
 
   static autocompleteQueryWithNotes = `${this.autocompleteQuery} ${GRAPHQL_NOTES_FIELDS}`
 
@@ -112,7 +114,16 @@ export default class Organization extends Model {
     status
     shortName
     longName
+    profile
     identificationCode
+    entityAvatar {
+      attachmentUuid
+      applyCrop
+      cropLeft
+      cropTop
+      cropWidth
+      cropHeight
+    }
     app6context
     app6standardIdentity
     app6symbolSet
@@ -123,6 +134,14 @@ export default class Organization extends Model {
       shortName
       longName
       identificationCode
+      entityAvatar {
+        attachmentUuid
+        applyCrop
+        cropLeft
+        cropTop
+        cropWidth
+        cropHeight
+      }
     }
     childrenOrgs {
       uuid
@@ -137,7 +156,6 @@ export default class Organization extends Model {
       lng
       type
     }
-    profile
     emailAddresses {
       network
       address

@@ -55,6 +55,14 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
           shortName
           longName
           identificationCode
+          entityAvatar {
+            attachmentUuid
+            applyCrop
+            cropLeft
+            cropTop
+            cropWidth
+            cropHeight
+          }
         }
         person {
           uuid
@@ -72,6 +80,14 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
             shortName
             longName
             identificationCode
+            entityAvatar {
+              attachmentUuid
+              applyCrop
+              cropLeft
+              cropTop
+              cropWidth
+              cropHeight
+            }
             ${GQL_EMAIL_ADDRESSES}
           }
           ... on Person {

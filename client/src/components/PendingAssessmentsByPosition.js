@@ -38,6 +38,14 @@ const GQL_GET_POSITION_LIST = gql`
           shortName
           longName
           identificationCode
+          entityAvatar {
+            attachmentUuid
+            applyCrop
+            cropLeft
+            cropTop
+            cropWidth
+            cropHeight
+          }
         }
         location {
           uuid
@@ -61,6 +69,14 @@ const GQL_GET_POSITION_LIST = gql`
             shortName
             longName
             identificationCode
+            entityAvatar {
+              attachmentUuid
+              applyCrop
+              cropLeft
+              cropTop
+              cropWidth
+              cropHeight
+            }
           }
           location {
             uuid

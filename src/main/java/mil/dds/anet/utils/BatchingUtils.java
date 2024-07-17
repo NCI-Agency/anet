@@ -12,6 +12,7 @@ import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Comment;
 import mil.dds.anet.beans.CustomSensitiveInformation;
 import mil.dds.anet.beans.EmailAddress;
+import mil.dds.anet.beans.EntityAvatar;
 import mil.dds.anet.beans.GenericRelatedObject;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Note;
@@ -127,6 +128,11 @@ public final class BatchingUtils {
             (BatchLoader<String, List<EmailAddress>>) foreignKeys -> CompletableFuture.supplyAsync(
                 () -> engine.getEmailAddressDao().getEmailAddressesForRelatedObjects(foreignKeys),
                 dispatcherService),
+            dataLoaderOptions));
+    dataLoaderRegistry.register(IdDataLoaderKey.ENTITY_AVATAR.toString(),
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, EntityAvatar>) keys -> CompletableFuture
+                .supplyAsync(() -> engine.getEntityAvatarDao().getByIds(keys), dispatcherService),
             dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.LOCATION_CHILDREN_LOCATIONS.toString(),
         DataLoaderFactory.newDataLoader(

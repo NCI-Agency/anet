@@ -54,12 +54,28 @@ const GQL_GET_REPORT_LIST = gql`
           shortName
           longName
           identificationCode
+          entityAvatar {
+            attachmentUuid
+            applyCrop
+            cropLeft
+            cropTop
+            cropWidth
+            cropHeight
+          }
         }
         interlocutorOrg {
           uuid
           shortName
           longName
           identificationCode
+          entityAvatar {
+            attachmentUuid
+            applyCrop
+            cropLeft
+            cropTop
+            cropWidth
+            cropHeight
+          }
         }
         location {
           uuid

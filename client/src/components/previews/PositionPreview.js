@@ -29,6 +29,14 @@ const GQL_GET_POSITION = gql`
         shortName
         longName
         identificationCode
+        entityAvatar {
+          attachmentUuid
+          applyCrop
+          cropLeft
+          cropTop
+          cropWidth
+          cropHeight
+        }
       }
       person {
         uuid
@@ -51,6 +59,14 @@ const GQL_GET_POSITION = gql`
           shortName
           longName
           identificationCode
+          entityAvatar {
+            attachmentUuid
+            applyCrop
+            cropLeft
+            cropTop
+            cropWidth
+            cropHeight
+          }
         }
       }
       previousPeople {

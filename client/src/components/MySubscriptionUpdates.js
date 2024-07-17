@@ -40,6 +40,14 @@ const GQL_GET_MY_SUBSCRIPTION_UPDATES = gql`
             shortName
             longName
             identificationCode
+            entityAvatar {
+              attachmentUuid
+              applyCrop
+              cropLeft
+              cropTop
+              cropWidth
+              cropHeight
+            }
           }
           ... on Person {
             name
@@ -76,6 +84,14 @@ const GQL_GET_MY_SUBSCRIPTION_UPDATES = gql`
               shortName
               longName
               identificationCode
+              entityAvatar {
+                attachmentUuid
+                applyCrop
+                cropLeft
+                cropTop
+                cropWidth
+                cropHeight
+              }
             }
             ... on Person {
               name

@@ -54,6 +54,14 @@ export const GRAPHQL_NOTE_FIELDS = /* GraphQL */ `
         shortName
         longName
         identificationCode
+        entityAvatar {
+          attachmentUuid
+          applyCrop
+          cropLeft
+          cropTop
+          cropWidth
+          cropHeight
+        }
       }
       ... on Person {
         name
@@ -86,7 +94,9 @@ export const GRAPHQL_NOTES_FIELDS = /* GraphQL */ `
 export const GRAPHQL_ENTITY_FIELDS = {
   Report: "uuid intent engagementDate",
   Person: "uuid name avatarUuid",
-  Organization: "uuid shortName",
+  Organization:
+    "uuid shortName" +
+    " entityAvatar { attachmentUuid applyCrop cropLeft cropTop cropWidth cropHeight }",
   Position: "uuid name",
   Location: "uuid name",
   Task: "uuid shortName longName",

@@ -69,6 +69,14 @@ const GQL_GET_REPORT = gql`
             shortName
             longName
             identificationCode
+            entityAvatar {
+              attachmentUuid
+              applyCrop
+              cropLeft
+              cropTop
+              cropWidth
+              cropHeight
+            }
           }
           location {
             uuid
