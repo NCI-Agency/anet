@@ -78,7 +78,7 @@ public class AnetEmailWorker extends AbstractWorker {
     final List<AnetEmail> emails = dao.getAll();
 
     // Send the emails!
-    final List<Integer> processedEmails = new LinkedList<Integer>();
+    final List<Integer> processedEmails = new LinkedList<>();
     for (final AnetEmail email : emails) {
       Map<String, Object> emailContext = null;
 
@@ -95,6 +95,8 @@ public class AnetEmailWorker extends AbstractWorker {
         processedEmails.add(email.getId());
       } catch (Throwable t) {
         logger.error("Error sending email", t);
+
+        dao.setErrorMessage(email.getId(), t.getMessage());
 
         // Process stale emails
         if (smtpConfig.getNbOfHoursForStaleEmails() != null) {
@@ -184,7 +186,6 @@ public class AnetEmailWorker extends AbstractWorker {
     } catch (MailException e) {
       // The server rejected this... we'll log it and then not try again.
       logger.error("Send failed", e);
-      return;
     }
     // Other errors are intentionally thrown, as we want ANET to try again.
   }

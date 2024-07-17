@@ -8,6 +8,7 @@ import java.util.List;
 import mil.dds.anet.emails.AnetEmailAction;
 
 public class AnetEmail {
+  @GraphQLQuery
   private Integer id;
   private AnetEmailAction action;
   @GraphQLQuery
@@ -19,6 +20,8 @@ public class AnetEmail {
   @GraphQLQuery
   @GraphQLInputField
   private String comment;
+  @GraphQLQuery
+  private String errorMessage;
 
   public Integer getId() {
     return id;
@@ -65,5 +68,13 @@ public class AnetEmail {
 
   public void setComment(String comment) {
     this.comment = comment;
+  }
+
+  public String getErrorMessage() {
+    return errorMessage;
+  }
+
+  public void setErrorMessage(final String errorMessage) {
+    this.errorMessage = errorMessage;
   }
 }
