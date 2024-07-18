@@ -18,6 +18,7 @@ import AuthorizationGroupShow from "pages/authorizationGroups/Show"
 import BoardDashboard from "pages/dashboards/BoardDashboard"
 import DecisivesDashboard from "pages/dashboards/DecisivesDashboard"
 import KanbanDashboard from "pages/dashboards/KanbanDashboard"
+import EmailQueueShow from "pages/emails/Show"
 import GraphiQL from "pages/GraphiQL"
 import Help from "pages/Help"
 import Home from "pages/Home"
@@ -169,6 +170,7 @@ const Routing = () => {
             <Route path="perPeriod" element={<UserActivitiesPerPeriod />} />
             <Route path="overTime" element={<UserActivitiesOverTime />} />
           </Route>
+          <Route path="emails" element={<EmailQueueShow />} />
           <Route path="graphiql" element={<GraphiQL />} />
         </Route>
       )}
