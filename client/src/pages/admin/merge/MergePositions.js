@@ -44,10 +44,17 @@ import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, Col, Container, Form, Row } from "react-bootstrap"
 import { connect } from "react-redux"
-import { useNavigate } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import POSITIONS_ICON from "resources/positions.png"
 import Settings from "settings"
-import utils from "utils"
+
+const GQL_GET_POSITION = gql`
+  query($uuid: String!) {
+    position(uuid: $uuid) {
+      ${Position.allFieldsQuery}
+    }
+  }
+`
 
 const GQL_MERGE_POSITION = gql`
   mutation ($loserUuid: String!, $winnerPosition: PositionInput!) {
@@ -57,6 +64,8 @@ const GQL_MERGE_POSITION = gql`
 
 const MergePositions = ({ pageDispatchers }) => {
   const navigate = useNavigate()
+  const { state } = useLocation()
+  const initialLeftUuid = state?.initialLeftUuid
   const [saveError, setSaveError] = useState(null)
   const [showHistoryModal, setShowHistoryModal] = useState(false)
   const [mergeState, dispatchMergeActions] = useMergeObjects(
@@ -70,6 +79,15 @@ const MergePositions = ({ pageDispatchers }) => {
   })
   usePageTitle("Merge Positions")
 
+  if (!mergeState[MERGE_SIDES.LEFT] && initialLeftUuid) {
+    API.query(GQL_GET_POSITION, {
+      uuid: initialLeftUuid
+    }).then(data => {
+      const position = new Position(data.position)
+      position.fixupFields()
+      dispatchMergeActions(setMergeable(position, MERGE_SIDES.LEFT))
+    })
+  }
   const position1 = mergeState[MERGE_SIDES.LEFT]
   const position2 = mergeState[MERGE_SIDES.RIGHT]
   const mergedPosition = mergeState.merged
@@ -90,6 +108,7 @@ const MergePositions = ({ pageDispatchers }) => {
             dispatchMergeActions={dispatchMergeActions}
             align={ALIGN_OPTIONS.LEFT}
             label="Position 1"
+            disabled={!!initialLeftUuid}
           />
         </Col>
         <Col md={4} id="mid-merge-pos-col">
@@ -411,7 +430,13 @@ function getPositionFilters(mergeState, align) {
   }
 }
 
-const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
+const PositionColumn = ({
+  align,
+  label,
+  disabled,
+  mergeState,
+  dispatchMergeActions
+}) => {
   const position = mergeState[align]
   const hideWhenEmpty =
     !Location.hasCoordinates(mergeState[MERGE_SIDES.LEFT]?.location) &&
@@ -432,12 +457,7 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
           overlayRenderRow={PositionOverlayRow}
           filterDefs={getPositionFilters(mergeState, align)}
           onChange={value => {
-            const newValue = value
-            if (newValue?.customFields) {
-              newValue[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
-                value.customFields
-              )
-            }
+            value?.fixupFields()
             dispatchMergeActions(setMergeable(value, align))
           }}
           objectType={Position}
@@ -445,6 +465,8 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
           fields={Position.allFieldsQuery}
           addon={POSITIONS_ICON}
           vertical
+          disabled={disabled}
+          showRemoveButton={!disabled}
         />
       </ColTitle>
       {areAllSet(position) && (
@@ -636,7 +658,7 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
             Object.entries(Settings.fields.position.customFields).map(
               ([fieldName, fieldConfig]) => {
                 const fieldValue =
-                  position[DEFAULT_CUSTOM_FIELDS_PARENT][fieldName]
+                  position?.[DEFAULT_CUSTOM_FIELDS_PARENT]?.[fieldName]
 
                 return (
                   <MergeField
@@ -699,6 +721,7 @@ const PositionCol = styled.div`
 PositionColumn.propTypes = {
   align: PropTypes.oneOf(["left", "right"]).isRequired,
   label: PropTypes.string.isRequired,
+  disabled: PropTypes.bool,
   mergeState: PropTypes.object,
   dispatchMergeActions: PropTypes.func
 }

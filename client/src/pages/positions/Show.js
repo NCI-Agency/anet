@@ -34,7 +34,7 @@ import { positionTour } from "pages/HopscotchTour"
 import React, { useContext, useState } from "react"
 import { Badge, Button } from "react-bootstrap"
 import { connect } from "react-redux"
-import { useLocation, useNavigate, useParams } from "react-router-dom"
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom"
 import Settings from "settings"
 import utils from "utils"
 import PreviousPeople from "./PreviousPeople"
@@ -43,10 +43,6 @@ const GQL_GET_POSITION = gql`
   query($uuid: String!) {
     position(uuid: $uuid) {
       ${Position.allFieldsQuery}
-      emailAddresses {
-        network
-        address
-      }
       authorizationGroups {
         uuid
         name
@@ -110,16 +106,17 @@ const PositionShow = ({ pageDispatchers }) => {
   const position = new Position(data ? data.position : {})
 
   const isSuperuser = position.type === Position.TYPE.SUPERUSER
+  const isAdmin = currentUser?.isAdmin()
   const canEdit =
     // Admins can edit anybody
-    currentUser.isAdmin() ||
+    isAdmin ||
     // Superusers can edit positions if they have administrative permissions for the organization of the position
     (position?.organization?.uuid &&
       currentUser.hasAdministrativePermissionsForOrganization(
         position.organization
       ))
   const canDelete =
-    currentUser.isAdmin() &&
+    isAdmin &&
     position.status === Model.STATUS.INACTIVE &&
     position.uuid &&
     (!position.person || !position.person.uuid)
@@ -129,6 +126,16 @@ const PositionShow = ({ pageDispatchers }) => {
       {({ values }) => {
         const action = (
           <>
+            {isAdmin && (
+              <Link
+                id="mergeWithOther"
+                to="/admin/merge/positions"
+                state={{ initialLeftUuid: position.uuid }}
+                className="btn btn-outline-secondary"
+              >
+                Merge with other position
+              </Link>
+            )}
             {canEdit && (
               <LinkTo
                 modelType="Position"
@@ -414,7 +421,7 @@ const PositionShow = ({ pageDispatchers }) => {
                     Settings.fields.position.organizationsAdministrated.label
                   )}
                   action={
-                    currentUser.isAdmin() && (
+                    isAdmin && (
                       <Button
                         onClick={() =>
                           setShowOrganizationsAdministratedModal(true)}

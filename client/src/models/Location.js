@@ -308,4 +308,9 @@ export default class Location extends Model {
   filterClientSideFields(...additionalFields) {
     return Location.filterClientSideFields(this, ...additionalFields)
   }
+
+  fixupFields() {
+    super.fixupFields()
+    this.displayedCoordinate = convertLatLngToMGRS(this.lat, this.lng)
+  }
 }

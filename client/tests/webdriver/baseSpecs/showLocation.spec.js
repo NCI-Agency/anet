@@ -1,5 +1,6 @@
 import { expect } from "chai"
 import ShowLocation from "../pages/location/showLocation.page"
+import MergeLocations from "../pages/mergeLocations.page"
 
 const LOCATION_WITH_ATTACHMENTS_UUID = "e5b3a4b9-acf7-4c79-8224-f248b9a7215d" // Antarctica
 const LOCATION_WITH_ORGANIZATIONS_UUID = "9c982685-5946-4dad-a7ee-0f5a12f5e170" // Wishingwells Park
@@ -56,6 +57,24 @@ describe("Show location page", () => {
       await (await ShowLocation.getReportCollection()).waitForExist()
       await (await ShowLocation.getReportCollection()).waitForDisplayed()
       expect(await ShowLocation.getReportSummaries()).to.have.lengthOf.above(0)
+
+      await ShowLocation.logout()
+    })
+  })
+
+  describe("When on the show page of a location as admin", () => {
+    it("We can select to merge it with another location", async() => {
+      await ShowLocation.openAsAdminUser(LOCATION_WITH_ATTACHMENTS_UUID)
+      await (await ShowLocation.getMergeButton()).click()
+      await browser.pause(500) // wait for the merge page to render and load data
+      // eslint-disable-next-line no-unused-expressions
+      expect(await MergeLocations.getTitle()).to.exist
+      expect(
+        await (await MergeLocations.getLeftLocationField()).getValue()
+      ).to.contain("Antarctica")
+      // eslint-disable-next-line no-unused-expressions
+      expect(await (await MergeLocations.getLeftLocationField()).isEnabled()).to
+        .be.false
     })
   })
 })

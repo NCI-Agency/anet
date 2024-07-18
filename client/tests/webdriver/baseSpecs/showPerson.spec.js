@@ -1,4 +1,5 @@
 import { expect } from "chai"
+import MergePeople from "../pages/mergePeople.page"
 import ShowPerson from "../pages/showPerson.page"
 
 const PERSON_UUID = "df9c7381-56ac-4bc5-8e24-ec524bccd7e9"
@@ -38,6 +39,24 @@ describe("Show person page", () => {
       await expect(await browser.getUrl()).to.include(
         "/attachments/13318e42-a0a3-438f-8ed5-dc16b1ef17bc"
       )
+
+      await ShowPerson.logout()
+    })
+  })
+
+  describe("When on the show page of a person as admin", () => {
+    it("We can select to merge them with another person", async() => {
+      await ShowPerson.openAsAdminUser(PERSON_WITH_AG_UUID)
+      await (await ShowPerson.getMergeButton()).click()
+      await browser.pause(500) // wait for the merge page to render and load data
+      // eslint-disable-next-line no-unused-expressions
+      expect(await MergePeople.getTitle()).to.exist
+      expect(
+        await (await MergePeople.getLeftPersonField()).getValue()
+      ).to.contain("BRATTON, Creed")
+      // eslint-disable-next-line no-unused-expressions
+      expect(await (await MergePeople.getLeftPersonField()).isEnabled()).to.be
+        .false
     })
   })
 })
