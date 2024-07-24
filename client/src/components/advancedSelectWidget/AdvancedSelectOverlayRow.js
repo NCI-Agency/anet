@@ -86,6 +86,25 @@ export const CountryOverlayRow = item => (
     <td>{item.trigram}</td>
   </React.Fragment>
 )
+export const EventSeriesOverlayRow = item => (
+  <React.Fragment key={item.uuid}>
+    <td>
+      <span style={{ display: "inline-block" }}>
+        <AsLink modelType="EventSeries" model={item} />
+      </span>
+    </td>
+  </React.Fragment>
+)
+
+export const EventOverlayRow = item => (
+  <React.Fragment key={item.uuid}>
+    <td>
+      <span style={{ display: "inline-block" }}>
+        <AsLink modelType="Event" model={item} />
+      </span>
+    </td>
+  </React.Fragment>
+)
 
 export const LocationOverlayRow = item => (
   <React.Fragment key={item.uuid}>

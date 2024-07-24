@@ -12,6 +12,8 @@ import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Comment;
 import mil.dds.anet.beans.CustomSensitiveInformation;
 import mil.dds.anet.beans.EmailAddress;
+import mil.dds.anet.beans.Event;
+import mil.dds.anet.beans.EventSeries;
 import mil.dds.anet.beans.GenericRelatedObject;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Note;
@@ -127,6 +129,16 @@ public final class BatchingUtils {
             (BatchLoader<String, List<EmailAddress>>) foreignKeys -> CompletableFuture.supplyAsync(
                 () -> engine.getEmailAddressDao().getEmailAddressesForRelatedObjects(foreignKeys),
                 dispatcherService),
+            dataLoaderOptions));
+    dataLoaderRegistry.register(IdDataLoaderKey.EVENTS.toString(),
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, Event>) keys -> CompletableFuture
+                .supplyAsync(() -> engine.getEventDao().getByIds(keys), dispatcherService),
+            dataLoaderOptions));
+    dataLoaderRegistry.register(IdDataLoaderKey.EVENT_SERIES.toString(),
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, EventSeries>) keys -> CompletableFuture
+                .supplyAsync(() -> engine.getEventSeriesDao().getByIds(keys), dispatcherService),
             dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.LOCATION_CHILDREN_LOCATIONS.toString(),
         DataLoaderFactory.newDataLoader(
