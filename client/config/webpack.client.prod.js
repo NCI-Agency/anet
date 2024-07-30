@@ -189,7 +189,7 @@ const clientConfig = merge.merge(common.clientConfig, {
       publicUrl: "/assets/client/",
       inject: true,
       template: "public/index.hbs",
-      filename: path.resolve(paths.appBuild, "../../views/index.ftl"),
+      filename: path.resolve(paths.appBuild, "../../templates/index.ftlh"),
       minify: {
         removeComments: true,
         collapseWhitespace: true,

@@ -1,12 +1,12 @@
 package mil.dds.anet.emails;
 
+import graphql.GraphQLContext;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Task;
@@ -32,7 +32,7 @@ public class PendingAssessmentsNotificationEmail implements AnetEmailAction {
   @Override
   public Map<String, Object> buildContext(Map<String, Object> context) {
     @SuppressWarnings("unchecked")
-    final Map<String, Object> dbContext = (Map<String, Object>) context.get("context");
+    final GraphQLContext dbContext = (GraphQLContext) context.get("context");
 
     // Load positions and person & organization for each position
     final UuidFetcher<Position> positionFetcher = new UuidFetcher<Position>();
@@ -55,7 +55,7 @@ public class PendingAssessmentsNotificationEmail implements AnetEmailAction {
     CompletableFuture.allOf(allFutures.toArray(new CompletableFuture<?>[0])).join();
 
     // Fill email context
-    context.put("advisor", AnetObjectEngine.getInstance().getPersonDao().getByUuid(advisorUuid));
+    context.put("advisor", engine().getPersonDao().getByUuid(advisorUuid));
     context.put("positions", positions.stream().map(p -> p.join()).collect(Collectors.toList()));
     context.put("tasks", tasks.stream().map(p -> p.join()).collect(Collectors.toList()));
     return context;

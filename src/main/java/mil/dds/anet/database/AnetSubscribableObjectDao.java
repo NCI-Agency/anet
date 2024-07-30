@@ -6,34 +6,37 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.SubscribableObject;
 import mil.dds.anet.beans.search.AbstractSearchQuery;
 import mil.dds.anet.utils.DaoUtils;
-import mil.dds.anet.views.AbstractCustomizableAnetBean;
 import mil.dds.anet.views.AbstractSubscribableAnetBean;
-import ru.vyarus.guicey.jdbi3.tx.InTransaction;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
-@InTransaction
+@Component
 public abstract class AnetSubscribableObjectDao<T extends AbstractSubscribableAnetBean & SubscribableObject, S extends AbstractSearchQuery<?>>
     extends AnetBaseDao<T, S> {
 
+  protected AnetSubscribableObjectDao(DatabaseHandler databaseHandler) {
+    super(databaseHandler);
+  }
+
   public abstract SubscriptionUpdateGroup getSubscriptionUpdate(T obj);
 
-  @InTransaction
+  @Transactional
   @Override
   public int update(T obj) {
     DaoUtils.setUpdateFields(obj);
     final int numRows = updateInternal(obj);
     if (numRows > 0) {
       final SubscriptionUpdateGroup subscriptionUpdate = getSubscriptionUpdate(obj);
-      final SubscriptionDao subscriptionDao = AnetObjectEngine.getInstance().getSubscriptionDao();
+      final SubscriptionDao subscriptionDao = engine().getSubscriptionDao();
       subscriptionDao.updateSubscriptions(subscriptionUpdate);
     }
     return numRows;
   }
 
-  @InTransaction
+  @Transactional
   @Override
   public int delete(String uuid) {
     final T obj = getObjectForSubscriptionDelete(uuid);
@@ -42,7 +45,7 @@ public abstract class AnetSubscribableObjectDao<T extends AbstractSubscribableAn
       obj.setUuid(uuid);
       DaoUtils.setUpdateFields(obj);
       final SubscriptionUpdateGroup subscriptionUpdate = getSubscriptionUpdate(obj);
-      final SubscriptionDao subscriptionDao = AnetObjectEngine.getInstance().getSubscriptionDao();
+      final SubscriptionDao subscriptionDao = engine().getSubscriptionDao();
       subscriptionDao.updateSubscriptions(subscriptionUpdate);
     }
     return numRows;

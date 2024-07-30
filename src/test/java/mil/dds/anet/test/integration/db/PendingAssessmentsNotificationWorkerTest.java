@@ -4,23 +4,23 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
-import com.google.common.collect.ImmutableSet;
-import io.dropwizard.testing.junit5.DropwizardAppExtension;
 import java.lang.invoke.MethodHandles;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.beans.JobHistory;
-import mil.dds.anet.config.AnetConfiguration;
+import mil.dds.anet.config.AnetConfig;
+import mil.dds.anet.config.AnetDictionary;
+import mil.dds.anet.database.AdminDao;
 import mil.dds.anet.database.EmailDao;
 import mil.dds.anet.database.JobHistoryDao;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.TaskDao;
 import mil.dds.anet.emails.PendingAssessmentsNotificationEmail;
+import mil.dds.anet.test.SpringTestConfig;
 import mil.dds.anet.test.integration.config.AnetTestConfiguration;
 import mil.dds.anet.test.integration.utils.FakeSmtpServer;
 import mil.dds.anet.threads.AnetEmailWorker;
@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
+@SpringBootTest(classes = SpringTestConfig.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class PendingAssessmentsNotificationWorkerTest {
 
@@ -44,7 +44,25 @@ class PendingAssessmentsNotificationWorkerTest {
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   @Autowired
-  protected DropwizardAppExtension<AnetConfiguration> dropwizardApp;
+  protected AnetConfig config;
+
+  @Autowired
+  protected AnetDictionary dict;
+
+  @Autowired
+  private JobHistoryDao jobHistoryDao;
+
+  @Autowired
+  private AdminDao adminDao;
+
+  @Autowired
+  private EmailDao emailDao;
+
+  @Autowired
+  private PositionDao positionDao;
+
+  @Autowired
+  private TaskDao taskDao;
 
   private PendingAssessmentsNotificationWorker pendingAssessmentsNotificationWorker;
   private AnetEmailWorker emailWorker;
@@ -54,7 +72,7 @@ class PendingAssessmentsNotificationWorkerTest {
 
   @BeforeAll
   void setUpClass() throws Exception {
-    if (dropwizardApp.getConfiguration().getSmtp().isDisabled()) {
+    if (config.getSmtp().isDisabled()) {
       fail("'ANET_SMTP_DISABLE' system environment variable must have value 'false' to run test.");
     }
 
@@ -62,10 +80,9 @@ class PendingAssessmentsNotificationWorkerTest {
         AnetTestConfiguration.getConfiguration().get("emailServerTestsExecute").toString());
 
     pendingAssessmentsNotificationWorker =
-        new PendingAssessmentsNotificationWorker(dropwizardApp.getConfiguration());
-    emailWorker = new AnetEmailWorker(dropwizardApp.getConfiguration(),
-        AnetObjectEngine.getInstance().getEmailDao());
-    emailServer = new FakeSmtpServer(dropwizardApp.getConfiguration().getSmtp());
+        new PendingAssessmentsNotificationWorker(dict, jobHistoryDao);
+    emailWorker = new AnetEmailWorker(config, dict, jobHistoryDao, emailDao, adminDao);
+    emailServer = new FakeSmtpServer(config.getSmtp());
 
     // Flush all assessment notifications
     pendingAssessmentsNotificationWorker.run();
@@ -195,7 +212,6 @@ class PendingAssessmentsNotificationWorkerTest {
 
   @Test
   void testInitialDataAssessments() throws Exception {
-    final JobHistoryDao jobHistoryDao = AnetObjectEngine.getInstance().getJobHistoryDao();
     final JobHistory jobHistory =
         jobHistoryDao.getByJobName(pendingAssessmentsNotificationWorker.getClass().getSimpleName());
     if (jobHistory != null) {
@@ -215,36 +231,35 @@ class PendingAssessmentsNotificationWorkerTest {
       switch (to.split("@")[0]) {
         case "jack":
           // Jack should assess task 2.B
-          assertAssessments(action, Collections.emptySet(), ImmutableSet.of("2.B"));
+          assertAssessments(action, Collections.emptySet(), Set.of("2.B"));
           break;
         case "erin":
           // Erin should assess position Planning Captain
-          assertAssessments(action, ImmutableSet.of("Planning Captain"), Collections.emptySet());
+          assertAssessments(action, Set.of("Planning Captain"), Collections.emptySet());
           break;
         case "henry":
           // Henry should assess task 2.A
-          assertAssessments(action, Collections.emptySet(), ImmutableSet.of("2.A"));
+          assertAssessments(action, Collections.emptySet(), Set.of("2.A"));
           break;
         case "liz":
           // Elizabeth should assess position Cost Adder - MoD and task 1.1.A
-          assertAssessments(action, ImmutableSet.of("Cost Adder - MoD"), ImmutableSet.of("1.1.A"));
+          assertAssessments(action, Set.of("Cost Adder - MoD"), Set.of("1.1.A"));
           break;
         case "bob":
           // Bob should assess task 1.1
-          assertAssessments(action, Collections.emptySet(), ImmutableSet.of("1.1"));
+          assertAssessments(action, Collections.emptySet(), Set.of("1.1"));
           break;
         case "andrew":
           // Andrew should assess tasks 1.1.A, 1.2.A and 1.2.B
-          assertAssessments(action, Collections.emptySet(),
-              ImmutableSet.of("1.1.A", "1.2.A", "1.2.B"));
+          assertAssessments(action, Collections.emptySet(), Set.of("1.1.A", "1.2.A", "1.2.B"));
           break;
         case "kevin.malone":
           // Kevin should assess position Chief of Tests
-          assertAssessments(action, ImmutableSet.of("Chief of Tests"), Collections.emptySet());
+          assertAssessments(action, Set.of("Chief of Tests"), Collections.emptySet());
           break;
         case "creed.bratton":
           // Creed should assess position Director of Tests
-          assertAssessments(action, ImmutableSet.of("Director of Tests"), Collections.emptySet());
+          assertAssessments(action, Set.of("Director of Tests"), Collections.emptySet());
           break;
         default:
           fail("Unknown to address: " + to);
@@ -259,21 +274,18 @@ class PendingAssessmentsNotificationWorkerTest {
   private void assertAssessments(final PendingAssessmentsNotificationEmail action,
       final Set<String> expectedPositions, final Set<String> expectedTasks) {
     assertThat(action.getPositionUuidsToAssess()).hasSize(expectedPositions.size());
-    final PositionDao positionDao = AnetObjectEngine.getInstance().getPositionDao();
     final Set<String> actualPositions = action.getPositionUuidsToAssess().stream()
         .map(positionUuid -> positionDao.getByUuid(positionUuid).getName())
         .collect(Collectors.toSet());
     assertThat(actualPositions).isEqualTo(expectedPositions);
 
     assertThat(action.getTaskUuidsToAssess()).hasSize(expectedTasks.size());
-    final TaskDao taskDao = AnetObjectEngine.getInstance().getTaskDao();
     final Set<String> actualTasks = action.getTaskUuidsToAssess().stream()
         .map(taskUuid -> taskDao.getByUuid(taskUuid).getShortName()).collect(Collectors.toSet());
     assertThat(actualTasks).isEqualTo(expectedTasks);
   }
 
   private List<AnetEmail> testPendingAssessmentsNotificationWorker(final int expectedCount) {
-    final EmailDao emailDao = AnetObjectEngine.getInstance().getEmailDao();
     final int prevEmailSize = emailDao.getAll().size();
     pendingAssessmentsNotificationWorker.run();
     final List<AnetEmail> emails = emailDao.getAll();

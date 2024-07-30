@@ -1,7 +1,6 @@
 package mil.dds.anet.search;
 
 import com.google.common.base.Joiner;
-import com.google.inject.Injector;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
@@ -10,20 +9,9 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.database.SubscriptionUpdateGroup;
 import mil.dds.anet.database.SubscriptionUpdateStatement;
-import mil.dds.anet.search.pg.PostgresqlSearcher;
 import mil.dds.anet.utils.DaoUtils;
 
-public abstract class Searcher implements ISearcher {
-
-  protected final Injector injector;
-
-  protected Searcher(Injector injector) {
-    this.injector = injector;
-  }
-
-  public static Searcher getSearcher(Injector injector) {
-    return new PostgresqlSearcher(injector);
-  }
+public abstract class Searcher {
 
   public static String getSubscriptionReferences(Person user, Map<String, Object> args,
       SubscriptionUpdateGroup subscriptionUpdate) {

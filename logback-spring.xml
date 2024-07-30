@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration>
+<configuration debug="true">
+  <import class="ch.qos.logback.classic.encoder.PatternLayoutEncoder" />
+  <import class="ch.qos.logback.core.ConsoleAppender" />
+  <import class="ch.qos.logback.core.rolling.RollingFileAppender" />
+
+  <property name="LOG_DIR" value="./logs" />
+
+  <appender name="CONSOLE" class="ConsoleAppender">
+    <encoder class="PatternLayoutEncoder">
+      <pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS,UTC}] %p %c: %m%n</pattern>
+    </encoder>
+  </appender>
+
+  <appender name="ANET" class="RollingFileAppender">
+    <file>${LOG_DIR}/anet.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_DIR}/anet-%d.log.zip</fileNamePattern>
+      <maxHistory>2</maxHistory>
+    </rollingPolicy>
+    <encoder class="PatternLayoutEncoder">
+      <pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS,UTC}] %p %c: %m%n</pattern>
+    </encoder>
+  </appender>
+
+  <appender name="AUDIT" class="RollingFileAppender">
+    <file>${LOG_DIR}/auditLogger.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_DIR}/auditLogger-%d.log.zip</fileNamePattern>
+      <maxHistory>2</maxHistory>
+    </rollingPolicy>
+    <encoder class="PatternLayoutEncoder">
+      <pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS,UTC}] %p %c: %m%n</pattern>
+    </encoder>
+  </appender>
+
+  <appender name="CLIENT" class="RollingFileAppender">
+    <file>${LOG_DIR}/clientLog.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_DIR}/clientLog-%d.log.zip</fileNamePattern>
+      <maxHistory>2</maxHistory>
+    </rollingPolicy>
+    <encoder class="PatternLayoutEncoder">
+      <pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS,UTC}] %p %c: %m%n</pattern>
+    </encoder>
+  </appender>
+
+  <appender name="DB" class="RollingFileAppender">
+    <file>${LOG_DIR}/dbLog.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_DIR}/dbLog-%d.log.zip</fileNamePattern>
+      <maxHistory>2</maxHistory>
+    </rollingPolicy>
+    <encoder class="PatternLayoutEncoder">
+      <pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS,UTC}]\t%p\t%c:\t%m%n</pattern>
+    </encoder>
+  </appender>
+
+  <root level="INFO">
+    <appender-ref ref="CONSOLE" />
+  </root>
+
+  <logger name="mil.dds.anet" level="DEBUG">
+    <appender-ref ref="ANET" />
+  </logger>
+
+  <logger name="mil.dds.anet.utils.AnetAuditLogger" level="INFO">
+    <appender-ref ref="AUDIT" />
+  </logger>
+
+  <logger name="mil.dds.anet.resources.LoggingResource" level="TRACE">
+    <appender-ref ref="CLIENT" />
+  </logger>
+
+  <logger name="mil.dds.anet.utils.AnetDbLogger" level="TRACE">
+    <appender-ref ref="DB" />
+  </logger>
+</configuration>

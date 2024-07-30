@@ -1,6 +1,7 @@
 package mil.dds.anet.beans;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
@@ -10,11 +11,9 @@ import java.time.Instant;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.recentActivity.Activity;
 import mil.dds.anet.beans.search.ReportSearchQuery;
@@ -165,7 +164,7 @@ public class Person extends AbstractEmailableAnetBean
 
   @GraphQLQuery(name = "country")
   @AllowUnverifiedUsers
-  public CompletableFuture<Location> loadCountry(@GraphQLRootContext Map<String, Object> context) {
+  public CompletableFuture<Location> loadCountry(@GraphQLRootContext GraphQLContext context) {
     if (country.hasForeignObject()) {
       return CompletableFuture.completedFuture(country.getForeignObject());
     }
@@ -242,15 +241,14 @@ public class Person extends AbstractEmailableAnetBean
 
   @GraphQLQuery(name = "position")
   public CompletableFuture<Position> loadPositionBatched(
-      @GraphQLRootContext Map<String, Object> context) {
+      @GraphQLRootContext GraphQLContext context) {
     if (position != null) {
       return CompletableFuture.completedFuture(position);
     }
-    return AnetObjectEngine.getInstance().getPositionDao()
-        .getCurrentPositionForPerson(context, uuid).thenApply(o -> {
-          position = o;
-          return o;
-        });
+    return engine().getPositionDao().getCurrentPositionForPerson(context, uuid).thenApply(o -> {
+      position = o;
+      return o;
+    });
   }
 
   /* When loaded through means other than GraphQL */
@@ -258,7 +256,7 @@ public class Person extends AbstractEmailableAnetBean
     if (position != null) {
       return position;
     }
-    position = AnetObjectEngine.getInstance().getPositionDao().getCurrentPositionForPerson(uuid);
+    position = engine().getPositionDao().getCurrentPositionForPerson(uuid);
     return position;
   }
 
@@ -273,15 +271,14 @@ public class Person extends AbstractEmailableAnetBean
 
   @GraphQLQuery(name = "previousPositions")
   public CompletableFuture<List<PersonPositionHistory>> loadPreviousPositions(
-      @GraphQLRootContext Map<String, Object> context) {
+      @GraphQLRootContext GraphQLContext context) {
     if (previousPositions != null) {
       return CompletableFuture.completedFuture(previousPositions);
     }
-    return AnetObjectEngine.getInstance().getPersonDao().getPositionHistory(context, uuid)
-        .thenApply(o -> {
-          previousPositions = o;
-          return o;
-        });
+    return engine().getPersonDao().getPositionHistory(context, uuid).thenApply(o -> {
+      previousPositions = o;
+      return o;
+    });
   }
 
   public List<PersonPositionHistory> getPreviousPositions() {
@@ -296,33 +293,33 @@ public class Person extends AbstractEmailableAnetBean
   // TODO: batch load? (used in admin/MergePeople.js)
   @GraphQLQuery(name = "authoredReports")
   public CompletableFuture<AnetBeanList<Report>> loadAuthoredReports(
-      @GraphQLRootContext Map<String, Object> context,
+      @GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "query") ReportSearchQuery query) {
     if (query == null) {
       query = new ReportSearchQuery();
     }
     query.setAuthorUuid(uuid);
     query.setUser(DaoUtils.getUserFromContext(context));
-    return AnetObjectEngine.getInstance().getReportDao().search(context, query);
+    return engine().getReportDao().search(context, query);
   }
 
   // TODO: batch load? (used in admin/MergePeople.js)
   @GraphQLQuery(name = "attendedReports")
   public CompletableFuture<AnetBeanList<Report>> loadAttendedReports(
-      @GraphQLRootContext Map<String, Object> context,
+      @GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "query") ReportSearchQuery query) {
     if (query == null) {
       query = new ReportSearchQuery();
     }
     query.setAttendeeUuid(uuid);
     query.setUser(DaoUtils.getUserFromContext(context));
-    return AnetObjectEngine.getInstance().getReportDao().search(context, query);
+    return engine().getReportDao().search(context, query);
   }
 
   @JsonIgnore
   public Set<String> getAuthorizationGroupUuids() {
     if (authorizationGroupUuids == null) {
-      authorizationGroupUuids = AnetObjectEngine.getInstance().getAuthorizationGroupDao()
+      authorizationGroupUuids = engine().getAuthorizationGroupDao()
           .getAuthorizationGroupUuidsForRelatedObject(PersonDao.TABLE_NAME, uuid);
     }
     return authorizationGroupUuids;
@@ -333,8 +330,8 @@ public class Person extends AbstractEmailableAnetBean
     if (authorizationGroups == null) {
       final Set<String> agUuids = getAuthorizationGroupUuids();
       if (agUuids != null) {
-        authorizationGroups = AnetObjectEngine.getInstance().getAuthorizationGroupDao()
-            .getByIds(agUuids.stream().toList());
+        authorizationGroups =
+            engine().getAuthorizationGroupDao().getByIds(agUuids.stream().toList());
       }
     }
     return authorizationGroups;
@@ -376,7 +373,7 @@ public class Person extends AbstractEmailableAnetBean
   @RestrictToAuthorizationGroups(
       authorizationGroupSetting = "fields.person.emailAddresses.authorizationGroupUuids")
   public CompletableFuture<List<EmailAddress>> loadEmailAddresses(
-      @GraphQLRootContext Map<String, Object> context,
+      @GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "network") String network) {
     return super.loadEmailAddresses(context, network);
   }

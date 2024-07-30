@@ -1,7 +1,6 @@
 package mil.dds.anet.emails;
 
 import java.util.Map;
-import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 
 public class AccountDeactivationEmail implements AnetEmailAction {
@@ -20,7 +19,7 @@ public class AccountDeactivationEmail implements AnetEmailAction {
 
   @Override
   public Map<String, Object> buildContext(Map<String, Object> context) {
-    Person p = AnetObjectEngine.getInstance().getPersonDao().getByUuid(person.getUuid());
+    Person p = engine().getPersonDao().getByUuid(person.getUuid());
     context.put("person", p);
 
     return context;

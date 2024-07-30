@@ -1,34 +1,44 @@
 package mil.dds.anet.search.pg;
 
-import java.util.Map;
+import graphql.GraphQLContext;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.ReportSearchQuery;
+import mil.dds.anet.database.DatabaseHandler;
 import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.search.AbstractReportSearcher;
 import mil.dds.anet.search.AbstractSearchQueryBuilder;
-import ru.vyarus.guicey.jdbi3.tx.InTransaction;
+import org.jdbi.v3.core.Handle;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
+@Component
 public class PostgresqlReportSearcher extends AbstractReportSearcher {
 
   private final String isoDowFormat;
 
-  public PostgresqlReportSearcher() {
-    super(new PostgresqlSearchQueryBuilder<Report, ReportSearchQuery>("PostgresqlReportSearch"));
+  public PostgresqlReportSearcher(DatabaseHandler databaseHandler) {
+    super(databaseHandler,
+        new PostgresqlSearchQueryBuilder<Report, ReportSearchQuery>("PostgresqlReportSearch"));
     this.isoDowFormat = "EXTRACT(DOW FROM %s)+1"; // We need Sunday=1, Monday=2, etc.
   }
 
-  @InTransaction
+  @Transactional
   @Override
-  public CompletableFuture<AnetBeanList<Report>> runSearch(Map<String, Object> context,
+  public CompletableFuture<AnetBeanList<Report>> runSearch(GraphQLContext context,
       Set<String> subFields, ReportSearchQuery query) {
-    final ReportSearchQuery modifiedQuery = getQueryForPostProcessing(query);
-    buildQuery(subFields, modifiedQuery);
-    return postProcessResults(context, query,
-        qb.buildAndRun(getDbHandle(), modifiedQuery, new ReportMapper()));
+    final Handle handle = getDbHandle();
+    try {
+      final ReportSearchQuery modifiedQuery = getQueryForPostProcessing(query);
+      buildQuery(subFields, modifiedQuery);
+      return postProcessResults(context, query,
+          qb.buildAndRun(handle, modifiedQuery, new ReportMapper()));
+    } finally {
+      closeDbHandle(handle);
+    }
   }
 
   @Override

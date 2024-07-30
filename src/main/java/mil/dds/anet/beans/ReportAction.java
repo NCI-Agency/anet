@@ -1,17 +1,18 @@
 package mil.dds.anet.beans;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLIgnore;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
-import jakarta.ws.rs.WebApplicationException;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.UuidFetcher;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 public class ReportAction extends AbstractAnetBean {
 
@@ -36,7 +37,8 @@ public class ReportAction extends AbstractAnetBean {
   @JsonIgnore
   @GraphQLIgnore
   public String getUuid() {
-    throw new WebApplicationException("no UUID field on ReportAction");
+    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+        "no UUID field on ReportAction");
   }
 
   @Override
@@ -45,7 +47,7 @@ public class ReportAction extends AbstractAnetBean {
   }
 
   @GraphQLQuery(name = "step")
-  public CompletableFuture<ApprovalStep> loadStep(@GraphQLRootContext Map<String, Object> context) {
+  public CompletableFuture<ApprovalStep> loadStep(@GraphQLRootContext GraphQLContext context) {
     if (step.hasForeignObject()) {
       return CompletableFuture.completedFuture(step.getForeignObject());
     }
@@ -76,7 +78,7 @@ public class ReportAction extends AbstractAnetBean {
   }
 
   @GraphQLQuery(name = "person")
-  public CompletableFuture<Person> loadPerson(@GraphQLRootContext Map<String, Object> context) {
+  public CompletableFuture<Person> loadPerson(@GraphQLRootContext GraphQLContext context) {
     if (person.hasForeignObject()) {
       return CompletableFuture.completedFuture(person.getForeignObject());
     }

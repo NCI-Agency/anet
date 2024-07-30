@@ -23,6 +23,10 @@ class Page {
     return browser.$("#kc-login")
   }
 
+  async getLogoutFormSubmitButton() {
+    return browser.$("#kc-logout")
+  }
+
   async getLogo() {
     return browser.$("#topbar .logo")
   }
@@ -66,6 +70,8 @@ class Page {
       await browser.pause(1000)
     }
     await browser.url("/api/logout")
+    await browser.pause(1000)
+    await (await this.getLogoutFormSubmitButton()).click()
   }
 
   async waitUntilLoaded() {

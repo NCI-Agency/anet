@@ -4,11 +4,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.leangen.graphql.annotations.GraphQLIgnore;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
-import jakarta.ws.rs.WebApplicationException;
 import java.time.Instant;
 import java.util.Objects;
 import mil.dds.anet.graphql.AllowUnverifiedUsers;
 import mil.dds.anet.views.AbstractAnetBean;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 public class EmailAddress extends AbstractAnetBean {
   @GraphQLQuery
@@ -32,7 +33,8 @@ public class EmailAddress extends AbstractAnetBean {
   @JsonIgnore
   @GraphQLIgnore
   public String getUuid() {
-    throw new WebApplicationException("no UUID field on EmailAddress");
+    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+        "no UUID field on EmailAddress");
   }
 
   @Override
@@ -44,7 +46,8 @@ public class EmailAddress extends AbstractAnetBean {
   @JsonIgnore
   @GraphQLIgnore
   public Instant getCreatedAt() {
-    throw new WebApplicationException("no createdAt field on EmailAddress");
+    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+        "no createdAt field on EmailAddress");
   }
 
   @Override
@@ -56,7 +59,8 @@ public class EmailAddress extends AbstractAnetBean {
   @JsonIgnore
   @GraphQLIgnore
   public Instant getUpdatedAt() {
-    throw new WebApplicationException("no updatedAt field on EmailAddress");
+    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+        "no updatedAt field on EmailAddress");
   }
 
   @Override

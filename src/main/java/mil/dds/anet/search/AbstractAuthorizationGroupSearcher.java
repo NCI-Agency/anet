@@ -1,29 +1,35 @@
 package mil.dds.anet.search;
 
-import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AuthorizationGroupSearchQuery;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.database.AuthorizationGroupDao;
+import mil.dds.anet.database.DatabaseHandler;
 import mil.dds.anet.database.mappers.AuthorizationGroupMapper;
 import mil.dds.anet.utils.DaoUtils;
-import ru.vyarus.guicey.jdbi3.tx.InTransaction;
+import org.jdbi.v3.core.Handle;
+import org.springframework.transaction.annotation.Transactional;
 
 public abstract class AbstractAuthorizationGroupSearcher
     extends AbstractSearcher<AuthorizationGroup, AuthorizationGroupSearchQuery>
     implements IAuthorizationGroupSearcher {
 
-  public AbstractAuthorizationGroupSearcher(
+  protected AbstractAuthorizationGroupSearcher(DatabaseHandler databaseHandler,
       AbstractSearchQueryBuilder<AuthorizationGroup, AuthorizationGroupSearchQuery> qb) {
-    super(qb);
+    super(databaseHandler, qb);
   }
 
-  @InTransaction
+  @Transactional
   @Override
   public AnetBeanList<AuthorizationGroup> runSearch(AuthorizationGroupSearchQuery query) {
-    buildQuery(query);
-    return qb.buildAndRun(getDbHandle(), query, new AuthorizationGroupMapper());
+    final Handle handle = getDbHandle();
+    try {
+      buildQuery(query);
+      return qb.buildAndRun(handle, query, new AuthorizationGroupMapper());
+    } finally {
+      closeDbHandle(handle);
+    }
   }
 
   @Override
@@ -39,7 +45,7 @@ public abstract class AbstractAuthorizationGroupSearcher
 
     if (query.getUser() != null && query.getSubscribed()) {
       qb.addWhereClause(Searcher.getSubscriptionReferences(query.getUser(), qb.getSqlArgs(),
-          AnetObjectEngine.getInstance().getAuthorizationGroupDao().getSubscriptionUpdate(null)));
+          engine().getAuthorizationGroupDao().getSubscriptionUpdate(null)));
     }
 
     if (Boolean.TRUE.equals(query.isInMyReports())) {

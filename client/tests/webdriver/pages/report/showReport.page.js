@@ -75,8 +75,8 @@ class ShowReport extends Page {
   }
 
   async getUuid() {
-    const url = await browser.getUrl()
-    return url.slice(url.lastIndexOf("/") + 1)
+    const url = new URL(await browser.getUrl())
+    return url.pathname.slice(url.pathname.lastIndexOf("/") + 1)
   }
 
   async getIntent() {
