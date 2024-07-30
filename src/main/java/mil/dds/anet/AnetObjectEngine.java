@@ -1,11 +1,8 @@
 package mil.dds.anet;
 
-import com.codahale.metrics.MetricRegistry;
-import com.google.inject.Injector;
-import io.dropwizard.core.Application;
+import graphql.GraphQLContext;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -22,9 +19,8 @@ import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
 import mil.dds.anet.beans.search.LocationSearchQuery;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.TaskSearchQuery;
-import mil.dds.anet.config.AnetConfiguration;
+import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.AdminDao;
-import mil.dds.anet.database.AdminDao.AdminSettingKeys;
 import mil.dds.anet.database.ApprovalStepDao;
 import mil.dds.anet.database.AttachmentDao;
 import mil.dds.anet.database.AuthorizationGroupDao;
@@ -47,242 +43,119 @@ import mil.dds.anet.database.SubscriptionDao;
 import mil.dds.anet.database.SubscriptionUpdateDao;
 import mil.dds.anet.database.TaskDao;
 import mil.dds.anet.database.UserActivityDao;
-import mil.dds.anet.search.ISearcher;
-import mil.dds.anet.search.Searcher;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.BatchingUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.UuidFetcher;
-import ru.vyarus.dropwizard.guice.injector.lookup.InjectorLookup;
+import org.springframework.stereotype.Component;
 
+@Component
 public class AnetObjectEngine {
 
-  private final PersonDao personDao;
-  private final TaskDao taskDao;
-  private final LocationDao locationDao;
-  private final OrganizationDao orgDao;
-  private final PositionDao positionDao;
-  private final ApprovalStepDao asDao;
-  private final AttachmentDao attachmentDao;
-  private final ReportActionDao reportActionDao;
-  private final ReportDao reportDao;
-  private final CommentDao commentDao;
-  private final AdminDao adminDao;
-  private final SavedSearchDao savedSearchDao;
-  private final EmailDao emailDao;
-  private final ReportSensitiveInformationDao reportSensitiveInformationDao;
-  private final CustomSensitiveInformationDao customSensitiveInformationDao;
-  private final AuthorizationGroupDao authorizationGroupDao;
-  private final NoteDao noteDao;
-  private final JobHistoryDao jobHistoryDao;
-  private final SubscriptionDao subscriptionDao;
-  private final SubscriptionUpdateDao subscriptionUpdateDao;
-  private final UserActivityDao userActivityDao;
-  private final EmailAddressDao emailAddressDao;
-  private final EntityAvatarDao entityAvatarDao;
-  private final MetricRegistry metricRegistry;
-  private ThreadLocal<Map<String, Object>> context;
-
-  ISearcher searcher;
-
-  private static AnetObjectEngine instance;
-  private static AnetConfiguration configuration;
-
-  private final String dbUrl;
-  private final Injector injector;
-
-  public AnetObjectEngine(String dbUrl, Application<?> application, AnetConfiguration config,
-      MetricRegistry metricRegistry) {
-    this.dbUrl = dbUrl;
-    injector = InjectorLookup.getInjector(application).get();
-    personDao = injector.getInstance(PersonDao.class);
-    taskDao = injector.getInstance(TaskDao.class);
-    locationDao = injector.getInstance(LocationDao.class);
-    orgDao = injector.getInstance(OrganizationDao.class);
-    positionDao = injector.getInstance(PositionDao.class);
-    asDao = injector.getInstance(ApprovalStepDao.class);
-    reportActionDao = injector.getInstance(ReportActionDao.class);
-    reportDao = injector.getInstance(ReportDao.class);
-    commentDao = injector.getInstance(CommentDao.class);
-    adminDao = injector.getInstance(AdminDao.class);
-    savedSearchDao = injector.getInstance(SavedSearchDao.class);
-    reportSensitiveInformationDao = injector.getInstance(ReportSensitiveInformationDao.class);
-    customSensitiveInformationDao = injector.getInstance(CustomSensitiveInformationDao.class);
-    emailDao = injector.getInstance(EmailDao.class);
-    authorizationGroupDao = injector.getInstance(AuthorizationGroupDao.class);
-    noteDao = injector.getInstance(NoteDao.class);
-    attachmentDao = injector.getInstance(AttachmentDao.class);
-    jobHistoryDao = injector.getInstance(JobHistoryDao.class);
-    subscriptionDao = injector.getInstance(SubscriptionDao.class);
-    subscriptionUpdateDao = injector.getInstance(SubscriptionUpdateDao.class);
-    userActivityDao = injector.getInstance(UserActivityDao.class);
-    emailAddressDao = injector.getInstance(EmailAddressDao.class);
-    entityAvatarDao = injector.getInstance(EntityAvatarDao.class);
-    this.metricRegistry = metricRegistry;
-    searcher = Searcher.getSearcher(injector);
-    configuration = config;
-    instance = this;
-  }
-
-  public String getDbUrl() {
-    return dbUrl;
-  }
-
-  public Injector getInjector() {
-    return injector;
-  }
+  private ThreadLocal<GraphQLContext> context;
 
   public PersonDao getPersonDao() {
-    return personDao;
+    return ApplicationContextProvider.getBean(PersonDao.class);
   }
 
   public TaskDao getTaskDao() {
-    return taskDao;
+    return ApplicationContextProvider.getBean(TaskDao.class);
   }
 
   public LocationDao getLocationDao() {
-    return locationDao;
+    return ApplicationContextProvider.getBean(LocationDao.class);
   }
 
   public OrganizationDao getOrganizationDao() {
-    return orgDao;
+    return ApplicationContextProvider.getBean(OrganizationDao.class);
   }
 
   public ReportActionDao getReportActionDao() {
-    return reportActionDao;
+    return ApplicationContextProvider.getBean(ReportActionDao.class);
   }
 
   public PositionDao getPositionDao() {
-    return positionDao;
+    return ApplicationContextProvider.getBean(PositionDao.class);
   }
 
   public ApprovalStepDao getApprovalStepDao() {
-    return asDao;
+    return ApplicationContextProvider.getBean(ApprovalStepDao.class);
   }
 
   public ReportDao getReportDao() {
-    return reportDao;
+    return ApplicationContextProvider.getBean(ReportDao.class);
   }
 
   public CommentDao getCommentDao() {
-    return commentDao;
+    return ApplicationContextProvider.getBean(CommentDao.class);
   }
 
   public AdminDao getAdminDao() {
-    return adminDao;
+    return ApplicationContextProvider.getBean(AdminDao.class);
   }
 
   public SavedSearchDao getSavedSearchDao() {
-    return savedSearchDao;
+    return ApplicationContextProvider.getBean(SavedSearchDao.class);
   }
 
   public ReportSensitiveInformationDao getReportSensitiveInformationDao() {
-    return reportSensitiveInformationDao;
+    return ApplicationContextProvider.getBean(ReportSensitiveInformationDao.class);
   }
 
   public CustomSensitiveInformationDao getCustomSensitiveInformationDao() {
-    return customSensitiveInformationDao;
+    return ApplicationContextProvider.getBean(CustomSensitiveInformationDao.class);
   }
 
   public AuthorizationGroupDao getAuthorizationGroupDao() {
-    return authorizationGroupDao;
+    return ApplicationContextProvider.getBean(AuthorizationGroupDao.class);
   }
 
   public NoteDao getNoteDao() {
-    return noteDao;
+    return ApplicationContextProvider.getBean(NoteDao.class);
   }
 
   public AttachmentDao getAttachmentDao() {
-    return attachmentDao;
+    return ApplicationContextProvider.getBean(AttachmentDao.class);
   }
 
   public JobHistoryDao getJobHistoryDao() {
-    return jobHistoryDao;
+    return ApplicationContextProvider.getBean(JobHistoryDao.class);
   }
 
   public SubscriptionDao getSubscriptionDao() {
-    return subscriptionDao;
+    return ApplicationContextProvider.getBean(SubscriptionDao.class);
   }
 
   public SubscriptionUpdateDao getSubscriptionUpdateDao() {
-    return subscriptionUpdateDao;
+    return ApplicationContextProvider.getBean(SubscriptionUpdateDao.class);
   }
 
   public UserActivityDao getUserActivityDao() {
-    return userActivityDao;
+    return ApplicationContextProvider.getBean(UserActivityDao.class);
   }
 
   public EmailAddressDao getEmailAddressDao() {
-    return emailAddressDao;
+    return ApplicationContextProvider.getBean(EmailAddressDao.class);
   }
 
   public EmailDao getEmailDao() {
-    return emailDao;
+    return ApplicationContextProvider.getBean(EmailDao.class);
   }
 
   public EntityAvatarDao getEntityAvatarDao() {
-    return entityAvatarDao;
+    return ApplicationContextProvider.getBean(EntityAvatarDao.class);
   }
 
-  public MetricRegistry getMetricRegistry() {
-    return metricRegistry;
-  }
-
-  public ISearcher getSearcher() {
-    return searcher;
-  }
-
-  public String getDefaultOrgUuid() {
-    return getAdminSetting(AdminSettingKeys.DEFAULT_APPROVAL_ORGANIZATION);
-  }
-
-  public CompletableFuture<Organization> getOrganizationForPerson(Map<String, Object> context,
-      String personUuid) {
-    if (personUuid == null) {
-      return CompletableFuture.completedFuture(null);
-    }
-    return orgDao.getOrganizationsForPerson(context, personUuid)
-        .thenApply(l -> l.isEmpty() ? null : l.get(0));
-  }
-
-  public CompletableFuture<List<ApprovalStep>> getPlanningApprovalStepsForRelatedObject(
-      Map<String, Object> context, String aoUuid) {
-    return asDao.getPlanningByRelatedObjectUuid(context, aoUuid)
-        .thenApply(unordered -> orderSteps(unordered));
-  }
-
-  public CompletableFuture<List<ApprovalStep>> getApprovalStepsForRelatedObject(
-      Map<String, Object> context, String aoUuid) {
-    return asDao.getByRelatedObjectUuid(context, aoUuid)
-        .thenApply(unordered -> orderSteps(unordered));
-  }
-
-  private List<ApprovalStep> orderSteps(List<ApprovalStep> unordered) {
-    int numSteps = unordered.size();
-    LinkedList<ApprovalStep> ordered = new LinkedList<ApprovalStep>();
-    String nextStep = null;
-    for (int i = 0; i < numSteps; i++) {
-      for (ApprovalStep as : unordered) {
-        if (Objects.equals(as.getNextStepUuid(), nextStep)) {
-          ordered.addFirst(as);
-          nextStep = as.getUuid();
-          break;
-        }
-      }
-    }
-    return ordered;
-  }
-
-  public CompletableFuture<Boolean> canUserApproveStep(Map<String, Object> context, String userUuid,
+  public CompletableFuture<Boolean> canUserApproveStep(GraphQLContext context, String userUuid,
       String approvalStepUuid, String advisorOrgUuid) {
     return new UuidFetcher<ApprovalStep>()
         .load(context, IdDataLoaderKey.APPROVAL_STEPS, approvalStepUuid).thenCompose(
             approvalStep -> canUserApproveStep(context, userUuid, approvalStep, advisorOrgUuid));
   }
 
-  public CompletableFuture<Boolean> canUserApproveStep(Map<String, Object> context, String userUuid,
+  public CompletableFuture<Boolean> canUserApproveStep(GraphQLContext context, String userUuid,
       ApprovalStep approvalStep, String advisorOrgUuid) {
     return getTaskedAdvisorOrgParentUuids(context, approvalStep, advisorOrgUuid)
         .thenCompose(taskedAdvisorOrgParentUuids -> approvalStep.loadApprovers(context)
@@ -304,7 +177,7 @@ public class AnetObjectEngine {
             }));
   }
 
-  private CompletableFuture<Boolean> checkApprovalStep(Map<String, Object> context, String userUuid,
+  private CompletableFuture<Boolean> checkApprovalStep(GraphQLContext context, String userUuid,
       ApprovalStep approvalStep, Set<String> taskedAdvisorOrgParentUuids,
       Position approverPosition) {
     if (!Objects.equals(userUuid, approverPosition.getPersonUuid())) {
@@ -322,14 +195,14 @@ public class AnetObjectEngine {
       }
       return approverOrg.loadAscendantOrgs(context, null).thenCompose(aos -> {
         final Set<String> matchingOrgs =
-            aos.stream().map(o -> DaoUtils.getUuid(o)).collect(Collectors.toSet());
+            aos.stream().map(DaoUtils::getUuid).collect(Collectors.toSet());
         matchingOrgs.retainAll(taskedAdvisorOrgParentUuids);
         return CompletableFuture.completedFuture(!matchingOrgs.isEmpty());
       });
     });
   }
 
-  private CompletableFuture<Set<String>> getTaskedAdvisorOrgParentUuids(Map<String, Object> context,
+  private CompletableFuture<Set<String>> getTaskedAdvisorOrgParentUuids(GraphQLContext context,
       ApprovalStep approvalStep, String advisorOrgUuid) {
     if (!approvalStep.isRestrictedApproval()) {
       return CompletableFuture.completedFuture(null);
@@ -344,17 +217,17 @@ public class AnetObjectEngine {
               }
               return task.loadTaskedOrganizations(context).thenCompose(tos -> {
                 final Set<String> taskedAdvisorOrgParentUuids =
-                    tos.stream().map(o -> DaoUtils.getUuid(o)).collect(Collectors.toSet());
+                    tos.stream().map(DaoUtils::getUuid).collect(Collectors.toSet());
                 return advisorOrg.loadAscendantOrgs(context, null).thenCompose(aaos -> {
-                  taskedAdvisorOrgParentUuids.retainAll(
-                      aaos.stream().map(o -> DaoUtils.getUuid(o)).collect(Collectors.toSet()));
+                  taskedAdvisorOrgParentUuids
+                      .retainAll(aaos.stream().map(DaoUtils::getUuid).collect(Collectors.toSet()));
                   return CompletableFuture.completedFuture(taskedAdvisorOrgParentUuids);
                 });
               });
             }));
   }
 
-  public CompletableFuture<Boolean> canUserRejectStep(Map<String, Object> context, String userUuid,
+  public CompletableFuture<Boolean> canUserRejectStep(GraphQLContext context, String userUuid,
       ApprovalStep approvalStep, String advisorOrgUuid) {
     return new UuidFetcher<Person>().load(context, IdDataLoaderKey.PEOPLE, userUuid)
         .thenCompose(p -> {
@@ -388,7 +261,7 @@ public class AnetObjectEngine {
     query.setParentOrgUuid(List.of(parentOrgUuid));
     query.setOrgRecurseStrategy(RecurseStrategy.CHILDREN);
     query.setPageSize(0);
-    final List<Organization> orgList = orgDao.search(query).getList();
+    final List<Organization> orgList = getOrganizationDao().search(query).getList();
     return Utils.buildParentOrgMapping(orgList, parentOrgUuid);
   }
 
@@ -397,7 +270,7 @@ public class AnetObjectEngine {
     query.setParentOrgUuid(List.of(parentOrgUuid));
     query.setOrgRecurseStrategy(RecurseStrategy.CHILDREN);
     query.setPageSize(0);
-    final List<Organization> orgList = orgDao.search(query).getList();
+    final List<Organization> orgList = getOrganizationDao().search(query).getList();
     return Utils.buildOrgToParentOrgMapping(orgList, parentOrgUuid);
   }
 
@@ -411,7 +284,7 @@ public class AnetObjectEngine {
     query.setParentTaskUuid(List.of(parentTaskUuid));
     query.setParentTaskRecurseStrategy(RecurseStrategy.CHILDREN);
     query.setPageSize(0);
-    final List<Task> taskList = taskDao.search(query).getList();
+    final List<Task> taskList = getTaskDao().search(query).getList();
     return Utils.buildParentTaskMapping(taskList, parentTaskUuid);
   }
 
@@ -426,29 +299,17 @@ public class AnetObjectEngine {
     query.setLocationRecurseStrategy(
         findChildren ? RecurseStrategy.CHILDREN : RecurseStrategy.PARENTS);
     query.setPageSize(0);
-    final List<Location> locationList = locationDao.search(query).getList();
+    final List<Location> locationList = getLocationDao().search(query).getList();
     return Utils.buildParentLocationMapping(locationList, locationUuid);
   }
 
-  public static AnetObjectEngine getInstance() {
-    return instance;
-  }
-
-  public static AnetConfiguration getConfiguration() {
-    return configuration;
-  }
-
-  public String getAdminSetting(AdminSettingKeys key) {
-    return adminDao.getSetting(key);
-  }
-
-  public Map<String, Object> getContext() {
+  public GraphQLContext getContext() {
     if (context == null) {
       final Map<String, Object> ctx = new HashMap<>();
-      // FIXME: create this per Jersey (non-GraphQL) request, and make it batch and cache?
+      // FIXME: create this per (non-GraphQL) request, and make it batch and cache?
       final BatchingUtils batchingUtils = new BatchingUtils(this, false, false);
       ctx.put("dataLoaderRegistry", batchingUtils.getDataLoaderRegistry());
-      context = ThreadLocal.withInitial(() -> ctx);
+      context = ThreadLocal.withInitial(() -> GraphQLContext.of(ctx));
     }
     return context.get();
   }

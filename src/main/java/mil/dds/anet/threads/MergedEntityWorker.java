@@ -1,12 +1,19 @@
 package mil.dds.anet.threads;
 
+import graphql.GraphQLContext;
 import java.time.Instant;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import mil.dds.anet.beans.JobHistory;
-import mil.dds.anet.config.AnetConfiguration;
+import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.database.AdminDao;
+import mil.dds.anet.database.JobHistoryDao;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
+@Component
+@ConditionalOnExpression("not ${anet.no-workers:false}")
 public class MergedEntityWorker extends AbstractWorker {
 
   private record FieldWithEntityReference(String tableName, String columnName) {}
@@ -31,13 +38,19 @@ public class MergedEntityWorker extends AbstractWorker {
 
   private final AdminDao dao;
 
-  public MergedEntityWorker(AnetConfiguration config, AdminDao dao) {
-    super(config, "Waking up to check for merged entities");
+  public MergedEntityWorker(AnetDictionary dict, JobHistoryDao jobHistoryDao, AdminDao dao) {
+    super(dict, jobHistoryDao, "Waking up to check for merged entities");
     this.dao = dao;
   }
 
+  @Scheduled(initialDelay = 60, fixedRate = 300, timeUnit = TimeUnit.SECONDS)
   @Override
-  protected void runInternal(Instant now, JobHistory jobHistory, Map<String, Object> context) {
+  public void run() {
+    super.run();
+  }
+
+  @Override
+  protected void runInternal(Instant now, JobHistory jobHistory, GraphQLContext context) {
     final var mergedEntities = dao.getMergedEntities();
     mergedEntities.forEach(mergedEntity -> {
       fieldsWithEntityReference.forEach(

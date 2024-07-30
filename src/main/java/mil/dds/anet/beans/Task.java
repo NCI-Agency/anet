@@ -1,22 +1,25 @@
 package mil.dds.anet.beans;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.time.Instant;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.search.FkBatchParams;
 import mil.dds.anet.beans.search.ISearchQuery;
 import mil.dds.anet.beans.search.M2mBatchParams;
 import mil.dds.anet.beans.search.RecursiveFkBatchParams;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.beans.search.TaskSearchQuery;
+import mil.dds.anet.config.ApplicationContextProvider;
+import mil.dds.anet.database.ApprovalStepDao;
+import mil.dds.anet.database.ReportDao;
+import mil.dds.anet.database.TaskDao;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
@@ -106,7 +109,7 @@ public class Task extends AbstractCustomizableAnetBean
   }
 
   @GraphQLQuery(name = "parentTask")
-  public CompletableFuture<Task> loadParentTask(@GraphQLRootContext Map<String, Object> context) {
+  public CompletableFuture<Task> loadParentTask(@GraphQLRootContext GraphQLContext context) {
     if (parentTask.hasForeignObject()) {
       return CompletableFuture.completedFuture(parentTask.getForeignObject());
     }
@@ -163,26 +166,26 @@ public class Task extends AbstractCustomizableAnetBean
   }
 
   @GraphQLQuery(name = "reports")
-  public CompletableFuture<List<Report>> loadReports(
-      @GraphQLRootContext Map<String, Object> context,
+  public CompletableFuture<List<Report>> loadReports(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "query") ReportSearchQuery query) {
     if (query == null) {
       query = new ReportSearchQuery();
     }
-    query.setBatchParams(new M2mBatchParams<Report, ReportSearchQuery>("reports", "\"reportTasks\"",
-        "\"reportUuid\"", "\"taskUuid\""));
+    query.setBatchParams(
+        new M2mBatchParams<>("reports", "\"reportTasks\"", "\"reportUuid\"", "\"taskUuid\""));
     query.setUser(DaoUtils.getUserFromContext(context));
-    return AnetObjectEngine.getInstance().getReportDao().getReportsBySearch(context, uuid, query);
+    return ApplicationContextProvider.getBean(ReportDao.class).getReportsBySearch(context, uuid,
+        query);
   }
 
   @GraphQLQuery(name = "responsiblePositions")
   public CompletableFuture<List<Position>> loadResponsiblePositions(
-      @GraphQLRootContext Map<String, Object> context) {
+      @GraphQLRootContext GraphQLContext context) {
     if (responsiblePositions != null) {
       return CompletableFuture.completedFuture(responsiblePositions);
     }
-    return AnetObjectEngine.getInstance().getTaskDao().getResponsiblePositionsForTask(context, uuid)
-        .thenApply(o -> {
+    return ApplicationContextProvider.getBean(TaskDao.class)
+        .getResponsiblePositionsForTask(context, uuid).thenApply(o -> {
           responsiblePositions = o;
           return o;
         });
@@ -199,12 +202,12 @@ public class Task extends AbstractCustomizableAnetBean
 
   @GraphQLQuery(name = "taskedOrganizations")
   public CompletableFuture<List<Organization>> loadTaskedOrganizations(
-      @GraphQLRootContext Map<String, Object> context) {
+      @GraphQLRootContext GraphQLContext context) {
     if (taskedOrganizations != null) {
       return CompletableFuture.completedFuture(taskedOrganizations);
     }
-    return AnetObjectEngine.getInstance().getTaskDao().getTaskedOrganizationsForTask(context, uuid)
-        .thenApply(o -> {
+    return ApplicationContextProvider.getBean(TaskDao.class)
+        .getTaskedOrganizationsForTask(context, uuid).thenApply(o -> {
           taskedOrganizations = o;
           return o;
         });
@@ -221,12 +224,12 @@ public class Task extends AbstractCustomizableAnetBean
 
   @GraphQLQuery(name = "planningApprovalSteps")
   public CompletableFuture<List<ApprovalStep>> loadPlanningApprovalSteps(
-      @GraphQLRootContext Map<String, Object> context) {
+      @GraphQLRootContext GraphQLContext context) {
     if (planningApprovalSteps != null) {
       return CompletableFuture.completedFuture(planningApprovalSteps);
     }
-    return AnetObjectEngine.getInstance().getPlanningApprovalStepsForRelatedObject(context, uuid)
-        .thenApply(o -> {
+    return ApplicationContextProvider.getBean(ApprovalStepDao.class)
+        .getPlanningApprovalStepsForRelatedObject(context, uuid).thenApply(o -> {
           planningApprovalSteps = o;
           return o;
         });
@@ -243,12 +246,12 @@ public class Task extends AbstractCustomizableAnetBean
 
   @GraphQLQuery(name = "approvalSteps")
   public CompletableFuture<List<ApprovalStep>> loadApprovalSteps(
-      @GraphQLRootContext Map<String, Object> context) {
+      @GraphQLRootContext GraphQLContext context) {
     if (approvalSteps != null) {
       return CompletableFuture.completedFuture(approvalSteps);
     }
-    return AnetObjectEngine.getInstance().getApprovalStepsForRelatedObject(context, uuid)
-        .thenApply(o -> {
+    return ApplicationContextProvider.getBean(ApprovalStepDao.class)
+        .getApprovalStepsForRelatedObject(context, uuid).thenApply(o -> {
           approvalSteps = o;
           return o;
         });
@@ -264,42 +267,40 @@ public class Task extends AbstractCustomizableAnetBean
   }
 
   @GraphQLQuery(name = "childrenTasks")
-  public CompletableFuture<List<Task>> loadChildrenTasks(
-      @GraphQLRootContext Map<String, Object> context,
+  public CompletableFuture<List<Task>> loadChildrenTasks(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "query") TaskSearchQuery query) {
     if (query == null) {
       query = new TaskSearchQuery();
     }
     // Note: no recursion, only direct children!
-    query.setBatchParams(new FkBatchParams<Task, TaskSearchQuery>("tasks", "\"parentTaskUuid\""));
-    return AnetObjectEngine.getInstance().getTaskDao().getTasksBySearch(context, uuid, query);
+    query.setBatchParams(new FkBatchParams<>("tasks", "\"parentTaskUuid\""));
+    return ApplicationContextProvider.getBean(TaskDao.class).getTasksBySearch(context, uuid, query);
   }
 
   @GraphQLQuery(name = "descendantTasks")
   public CompletableFuture<List<Task>> loadDescendantTasks(
-      @GraphQLRootContext Map<String, Object> context,
+      @GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "query") TaskSearchQuery query) {
     if (query == null) {
       query = new TaskSearchQuery();
     }
     // Note: recursion, includes transitive children!
-    query.setBatchParams(
-        new RecursiveFkBatchParams<Task, TaskSearchQuery>("tasks", "\"parentTaskUuid\"", "tasks",
-            "\"parentTaskUuid\"", ISearchQuery.RecurseStrategy.CHILDREN));
-    return AnetObjectEngine.getInstance().getTaskDao().getTasksBySearch(context, uuid, query);
+    query.setBatchParams(new RecursiveFkBatchParams<>("tasks", "\"parentTaskUuid\"", "tasks",
+        "\"parentTaskUuid\"", ISearchQuery.RecurseStrategy.CHILDREN));
+    return ApplicationContextProvider.getBean(TaskDao.class).getTasksBySearch(context, uuid, query);
   }
 
   @GraphQLQuery(name = "ascendantTasks")
   public CompletableFuture<List<Task>> loadAscendantTasks(
-      @GraphQLRootContext Map<String, Object> context,
+      @GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "query") TaskSearchQuery query) {
     if (query == null) {
       query = new TaskSearchQuery();
     }
     // Note: recursion, includes transitive parents!
-    query.setBatchParams(new RecursiveFkBatchParams<Task, TaskSearchQuery>("tasks", "uuid", "tasks",
+    query.setBatchParams(new RecursiveFkBatchParams<>("tasks", "uuid", "tasks",
         "\"parentTaskUuid\"", ISearchQuery.RecurseStrategy.PARENTS));
-    return AnetObjectEngine.getInstance().getTaskDao().getTasksBySearch(context, uuid, query);
+    return ApplicationContextProvider.getBean(TaskDao.class).getTasksBySearch(context, uuid, query);
   }
 
   @Override

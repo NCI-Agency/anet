@@ -1,14 +1,13 @@
 package mil.dds.anet.beans;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
@@ -64,7 +63,7 @@ public class Note extends AbstractAnetBean {
   }
 
   @GraphQLQuery(name = "author")
-  public CompletableFuture<Person> loadAuthor(@GraphQLRootContext Map<String, Object> context) {
+  public CompletableFuture<Person> loadAuthor(@GraphQLRootContext GraphQLContext context) {
     if (author.hasForeignObject()) {
       return CompletableFuture.completedFuture(author.getForeignObject());
     }
@@ -96,15 +95,14 @@ public class Note extends AbstractAnetBean {
 
   @GraphQLQuery(name = "noteRelatedObjects")
   public CompletableFuture<List<GenericRelatedObject>> loadNoteRelatedObjects(
-      @GraphQLRootContext Map<String, Object> context) {
+      @GraphQLRootContext GraphQLContext context) {
     if (noteRelatedObjects != null) {
       return CompletableFuture.completedFuture(noteRelatedObjects);
     }
-    return AnetObjectEngine.getInstance().getNoteDao().getRelatedObjects(context, this)
-        .thenApply(o -> {
-          noteRelatedObjects = o;
-          return o;
-        });
+    return engine().getNoteDao().getRelatedObjects(context, this).thenApply(o -> {
+      noteRelatedObjects = o;
+      return o;
+    });
   }
 
   @GraphQLInputField(name = "noteRelatedObjects")

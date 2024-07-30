@@ -1,6 +1,7 @@
 package mil.dds.anet.beans;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
@@ -10,12 +11,18 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.config.ApplicationContextProvider;
+import mil.dds.anet.database.AdminDao;
+import mil.dds.anet.database.ApprovalStepDao;
+import mil.dds.anet.database.CommentDao;
+import mil.dds.anet.database.ReportActionDao;
+import mil.dds.anet.database.ReportDao;
+import mil.dds.anet.database.ReportSensitiveInformationDao;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
@@ -122,7 +129,7 @@ public class Report extends AbstractCustomizableAnetBean
 
   @GraphQLQuery(name = "approvalStep")
   public CompletableFuture<ApprovalStep> loadApprovalStep(
-      @GraphQLRootContext Map<String, Object> context) {
+      @GraphQLRootContext GraphQLContext context) {
     if (approvalStep.hasForeignObject()) {
       return CompletableFuture.completedFuture(approvalStep.getForeignObject());
     }
@@ -208,7 +215,7 @@ public class Report extends AbstractCustomizableAnetBean
   }
 
   @GraphQLQuery(name = "location")
-  public CompletableFuture<Location> loadLocation(@GraphQLRootContext Map<String, Object> context) {
+  public CompletableFuture<Location> loadLocation(@GraphQLRootContext GraphQLContext context) {
     if (location.hasForeignObject()) {
       return CompletableFuture.completedFuture(location.getForeignObject());
     }
@@ -280,11 +287,11 @@ public class Report extends AbstractCustomizableAnetBean
 
   @GraphQLQuery(name = "reportPeople")
   public CompletableFuture<List<ReportPerson>> loadReportPeople(
-      @GraphQLRootContext Map<String, Object> context) {
+      @GraphQLRootContext GraphQLContext context) {
     if (reportPeople != null) {
       return CompletableFuture.completedFuture(reportPeople);
     }
-    return AnetObjectEngine.getInstance().getReportDao().getPeopleForReport(context, uuid)
+    return ApplicationContextProvider.getBean(ReportDao.class).getPeopleForReport(context, uuid)
         .thenApply(o -> {
           reportPeople = o;
           return o;
@@ -302,7 +309,7 @@ public class Report extends AbstractCustomizableAnetBean
 
   @GraphQLQuery(name = "attendees")
   public CompletableFuture<List<ReportPerson>> loadAttendees(
-      @GraphQLRootContext Map<String, Object> context) {
+      @GraphQLRootContext GraphQLContext context) {
     if (attendees != null) {
       return CompletableFuture.completedFuture(attendees);
     }
@@ -322,7 +329,7 @@ public class Report extends AbstractCustomizableAnetBean
 
   @GraphQLQuery(name = "primaryAdvisor")
   public CompletableFuture<ReportPerson> loadPrimaryAdvisor(
-      @GraphQLRootContext Map<String, Object> context) {
+      @GraphQLRootContext GraphQLContext context) {
     if (primaryAdvisor.hasForeignObject()) {
       return CompletableFuture.completedFuture(primaryAdvisor.getForeignObject());
     }
@@ -342,7 +349,7 @@ public class Report extends AbstractCustomizableAnetBean
 
   @GraphQLQuery(name = "primaryInterlocutor")
   public CompletableFuture<ReportPerson> loadPrimaryInterlocutor(
-      @GraphQLRootContext Map<String, Object> context) {
+      @GraphQLRootContext GraphQLContext context) {
     if (primaryInterlocutor.hasForeignObject()) {
       return CompletableFuture.completedFuture(primaryInterlocutor.getForeignObject());
     }
@@ -362,7 +369,7 @@ public class Report extends AbstractCustomizableAnetBean
 
   @GraphQLQuery(name = "authors")
   public CompletableFuture<List<ReportPerson>> loadAuthors(
-      @GraphQLRootContext Map<String, Object> context) {
+      @GraphQLRootContext GraphQLContext context) {
     if (authors != null) {
       return CompletableFuture.completedFuture(authors);
     }
@@ -381,11 +388,11 @@ public class Report extends AbstractCustomizableAnetBean
   }
 
   @GraphQLQuery(name = "tasks")
-  public CompletableFuture<List<Task>> loadTasks(@GraphQLRootContext Map<String, Object> context) {
+  public CompletableFuture<List<Task>> loadTasks(@GraphQLRootContext GraphQLContext context) {
     if (tasks != null) {
       return CompletableFuture.completedFuture(tasks);
     }
-    return AnetObjectEngine.getInstance().getReportDao().getTasksForReport(context, uuid)
+    return ApplicationContextProvider.getBean(ReportDao.class).getTasksForReport(context, uuid)
         .thenApply(o -> {
           tasks = o;
           return o;
@@ -427,7 +434,7 @@ public class Report extends AbstractCustomizableAnetBean
 
   @GraphQLQuery(name = "advisorOrg")
   public CompletableFuture<Organization> loadAdvisorOrg(
-      @GraphQLRootContext Map<String, Object> context) {
+      @GraphQLRootContext GraphQLContext context) {
     if (advisorOrg.hasForeignObject()) {
       return CompletableFuture.completedFuture(advisorOrg.getForeignObject());
     }
@@ -459,7 +466,7 @@ public class Report extends AbstractCustomizableAnetBean
 
   @GraphQLQuery(name = "interlocutorOrg")
   public CompletableFuture<Organization> loadInterlocutorOrg(
-      @GraphQLRootContext Map<String, Object> context) {
+      @GraphQLRootContext GraphQLContext context) {
     if (interlocutorOrg.hasForeignObject()) {
       return CompletableFuture.completedFuture(interlocutorOrg.getForeignObject());
     }
@@ -494,7 +501,7 @@ public class Report extends AbstractCustomizableAnetBean
   @GraphQLQuery(name = "comments")
   public synchronized List<Comment> loadComments() {
     if (comments == null) {
-      comments = AnetObjectEngine.getInstance().getCommentDao().getCommentsForReport(uuid);
+      comments = ApplicationContextProvider.getBean(CommentDao.class).getCommentsForReport(uuid);
     }
     return comments;
   }
@@ -508,13 +515,14 @@ public class Report extends AbstractCustomizableAnetBean
     return comments;
   }
 
-  public CompletableFuture<List<ApprovalStep>> computeApprovalSteps(Map<String, Object> context,
+  public CompletableFuture<List<ApprovalStep>> computeApprovalSteps(GraphQLContext context,
       AnetObjectEngine engine) {
     final String advisorOrgUuid = getAdvisorOrgUuid();
     // First organization workflow
     return getOrganizationWorkflow(context, engine, advisorOrgUuid).thenCompose(steps -> {
       if (Utils.isEmptyOrNull(steps)) {
-        final String defaultOrgUuid = engine.getDefaultOrgUuid();
+        final String defaultOrgUuid =
+            ApplicationContextProvider.getBean(AdminDao.class).getDefaultOrgUuid();
         if (advisorOrgUuid == null || !Objects.equals(advisorOrgUuid, defaultOrgUuid)) {
           return getDefaultOrganizationWorkflow(context, engine, defaultOrgUuid);
         }
@@ -572,26 +580,27 @@ public class Report extends AbstractCustomizableAnetBean
    */
   @GraphQLQuery(name = "workflow")
   public CompletableFuture<List<ReportAction>> loadWorkflow(
-      @GraphQLRootContext Map<String, Object> context) {
+      @GraphQLRootContext GraphQLContext context) {
     if (workflow != null) {
       return CompletableFuture.completedFuture(workflow);
     }
-    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
-    return engine.getReportActionDao().getActionsForReport(context, uuid).thenCompose(actions -> {
-      // For reports which are not approved or published, make sure there
-      // is a report action for each approval step.
-      if (state == ReportState.APPROVED || state == ReportState.PUBLISHED) {
-        workflow = actions;
-        return CompletableFuture.completedFuture(workflow);
-      } else {
-        return computeApprovalSteps(context, engine).thenCompose(steps -> {
-          final List<ReportAction> actionTail = getActionTail(actions);
-          actionTail.addAll(createApprovalStepsActions(actionTail, steps));
-          workflow = actionTail;
-          return CompletableFuture.completedFuture(workflow);
+    final AnetObjectEngine engine = engine();
+    return ApplicationContextProvider.getBean(ReportActionDao.class)
+        .getActionsForReport(context, uuid).thenCompose(actions -> {
+          // For reports which are not approved or published, make sure there
+          // is a report action for each approval step.
+          if (state == ReportState.APPROVED || state == ReportState.PUBLISHED) {
+            workflow = actions;
+            return CompletableFuture.completedFuture(workflow);
+          } else {
+            return computeApprovalSteps(context, engine).thenCompose(steps -> {
+              final List<ReportAction> actionTail = getActionTail(actions);
+              actionTail.addAll(createApprovalStepsActions(actionTail, steps));
+              workflow = actionTail;
+              return CompletableFuture.completedFuture(workflow);
+            });
+          }
         });
-      }
-    });
   }
 
   private List<ReportAction> getActionTail(List<ReportAction> actions) {
@@ -625,13 +634,13 @@ public class Report extends AbstractCustomizableAnetBean
     return existing.isPresent() ? null : step;
   }
 
-  private CompletableFuture<ApprovalStep> getFilteredStep(Map<String, Object> context,
+  private CompletableFuture<ApprovalStep> getFilteredStep(GraphQLContext context,
       ApprovalStep step) {
     if (!step.isRestrictedApproval()) {
       return CompletableFuture.completedFuture(step);
     }
     return step.loadApprovers(context).thenCompose(approvers -> {
-      final AnetObjectEngine engine = AnetObjectEngine.getInstance();
+      final AnetObjectEngine engine = engine();
       @SuppressWarnings("unchecked")
       final CompletableFuture<Boolean>[] allApprovers =
           (CompletableFuture<Boolean>[]) approvers.stream()
@@ -660,7 +669,7 @@ public class Report extends AbstractCustomizableAnetBean
     });
   }
 
-  private CompletableFuture<List<ApprovalStep>> getOrganizationWorkflow(Map<String, Object> context,
+  private CompletableFuture<List<ApprovalStep>> getOrganizationWorkflow(GraphQLContext context,
       AnetObjectEngine engine, String advisorOrgUuid) {
     if (advisorOrgUuid == null) {
       // No more parents, return empty steps
@@ -684,31 +693,32 @@ public class Report extends AbstractCustomizableAnetBean
   }
 
   private CompletableFuture<List<ApprovalStep>> getPlanningWorkflowForRelatedObject(
-      Map<String, Object> context, AnetObjectEngine engine, String relatedObjectUuid) {
+      GraphQLContext context, AnetObjectEngine engine, String relatedObjectUuid) {
     if (relatedObjectUuid == null) {
       return CompletableFuture.completedFuture(new ArrayList<>());
     }
-
-    return engine.getPlanningApprovalStepsForRelatedObject(context, relatedObjectUuid);
+    return ApplicationContextProvider.getBean(ApprovalStepDao.class)
+        .getPlanningApprovalStepsForRelatedObject(context, relatedObjectUuid);
   }
 
-  private CompletableFuture<List<ApprovalStep>> getWorkflowForRelatedObject(
-      Map<String, Object> context, AnetObjectEngine engine, String relatedObjectUuid) {
+  private CompletableFuture<List<ApprovalStep>> getWorkflowForRelatedObject(GraphQLContext context,
+      AnetObjectEngine engine, String relatedObjectUuid) {
     if (relatedObjectUuid == null) {
       return CompletableFuture.completedFuture(new ArrayList<>());
     }
 
-    return engine.getApprovalStepsForRelatedObject(context, relatedObjectUuid);
+    return ApplicationContextProvider.getBean(ApprovalStepDao.class)
+        .getApprovalStepsForRelatedObject(context, relatedObjectUuid);
   }
 
   private CompletableFuture<List<ApprovalStep>> getDefaultOrganizationWorkflow(
-      Map<String, Object> context, AnetObjectEngine engine, String defaultOrgUuid) {
+      GraphQLContext context, AnetObjectEngine engine, String defaultOrgUuid) {
     return isFutureEngagement()
         ? getPlanningWorkflowForRelatedObject(context, engine, defaultOrgUuid)
         : getWorkflowForRelatedObject(context, engine, defaultOrgUuid);
   }
 
-  private CompletableFuture<List<ApprovalStep>> getTaskWorkflow(Map<String, Object> context,
+  private CompletableFuture<List<ApprovalStep>> getTaskWorkflow(GraphQLContext context,
       AnetObjectEngine engine, Iterator<Task> taskIterator) {
     if (!taskIterator.hasNext()) {
       return CompletableFuture.completedFuture(new ArrayList<>());
@@ -725,7 +735,7 @@ public class Report extends AbstractCustomizableAnetBean
     }
   }
 
-  private CompletableFuture<List<ApprovalStep>> getLocationWorkflow(Map<String, Object> context,
+  private CompletableFuture<List<ApprovalStep>> getLocationWorkflow(GraphQLContext context,
       AnetObjectEngine engine, String locationUuid) {
     return isFutureEngagement() ? getPlanningWorkflowForRelatedObject(context, engine, locationUuid)
         : getWorkflowForRelatedObject(context, engine, locationUuid);
@@ -733,11 +743,11 @@ public class Report extends AbstractCustomizableAnetBean
 
   @GraphQLQuery(name = "reportSensitiveInformation")
   public CompletableFuture<ReportSensitiveInformation> loadReportSensitiveInformation(
-      @GraphQLRootContext Map<String, Object> context) {
+      @GraphQLRootContext GraphQLContext context) {
     if (reportSensitiveInformation != null) {
       return CompletableFuture.completedFuture(reportSensitiveInformation);
     }
-    return AnetObjectEngine.getInstance().getReportSensitiveInformationDao()
+    return ApplicationContextProvider.getBean(ReportSensitiveInformationDao.class)
         .getForReport(context, this, DaoUtils.getUserFromContext(context)).thenApply(o -> {
           reportSensitiveInformation = o;
           return o;
@@ -758,7 +768,7 @@ public class Report extends AbstractCustomizableAnetBean
   public synchronized List<AuthorizationGroup> loadAuthorizationGroups() {
     if (authorizationGroups == null && uuid != null) {
       authorizationGroups =
-          AnetObjectEngine.getInstance().getReportDao().getAuthorizationGroupsForReport(uuid);
+          ApplicationContextProvider.getBean(ReportDao.class).getAuthorizationGroupsForReport(uuid);
     }
     return authorizationGroups;
   }
@@ -789,7 +799,7 @@ public class Report extends AbstractCustomizableAnetBean
 
   @JsonIgnore
   public boolean isAuthor(Person user) {
-    return loadAuthors(AnetObjectEngine.getInstance().getContext()).join().stream()
+    return loadAuthors(engine().getContext()).join().stream()
         .anyMatch(p -> Objects.equals(p.getUuid(), user.getUuid()));
   }
 

@@ -5,13 +5,16 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import io.dropwizard.testing.junit5.DropwizardAppExtension;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import mil.dds.anet.beans.AnetEmail;
-import mil.dds.anet.config.AnetConfiguration;
+import mil.dds.anet.config.AnetConfig;
+import mil.dds.anet.config.AnetDictionary;
+import mil.dds.anet.database.AdminDao;
 import mil.dds.anet.database.EmailDao;
+import mil.dds.anet.database.JobHistoryDao;
+import mil.dds.anet.test.SpringTestConfig;
 import mil.dds.anet.test.integration.config.AnetTestConfiguration;
 import mil.dds.anet.test.integration.utils.EmailResponse;
 import mil.dds.anet.test.integration.utils.FakeSmtpServer;
@@ -24,12 +27,21 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
+@SpringBootTest(classes = SpringTestConfig.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AnetEmailWorkerTest {
 
   @Autowired
-  protected DropwizardAppExtension<AnetConfiguration> dropwizardApp;
+  protected AnetConfig config;
+
+  @Autowired
+  protected AnetDictionary dict;
+
+  @Autowired
+  private AdminDao adminDao;
+
+  @Autowired
+  private JobHistoryDao jobHistoryDao;
 
   private String allowedEmail;
   private EmailDao emailDao;
@@ -45,14 +57,12 @@ class AnetEmailWorkerTest {
     assumeTrue(executeEmailServerTests, "Email server tests configured to be skipped.");
 
     emailDao = mock(EmailDao.class, Mockito.RETURNS_DEEP_STUBS);
-    emailWorker = new AnetEmailWorker(dropwizardApp.getConfiguration(), emailDao);
+    emailWorker = new AnetEmailWorker(config, dict, jobHistoryDao, emailDao, adminDao);
 
-    allowedEmail =
-        "@" + ((List<String>) dropwizardApp.getConfiguration().getDictionaryEntry("domainNames"))
-            .get(0);
-    dropwizardApp.getConfiguration().setEmailFromAddr("test_from_address" + allowedEmail);
+    allowedEmail = "@" + ((List<String>) dict.getDictionaryEntry("domainNames")).get(0);
+    config.setEmailFromAddr("test_from_address" + allowedEmail);
 
-    emailServer = new FakeSmtpServer(dropwizardApp.getConfiguration().getSmtp());
+    emailServer = new FakeSmtpServer(config.getSmtp());
 
     // Clear the email server before starting test
     emailServer.clearEmailServer();

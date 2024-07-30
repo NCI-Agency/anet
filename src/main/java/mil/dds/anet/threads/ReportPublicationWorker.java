@@ -1,32 +1,46 @@
 package mil.dds.anet.threads;
 
+import graphql.GraphQLContext;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import mil.dds.anet.beans.JobHistory;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.search.ReportSearchQuery;
-import mil.dds.anet.config.AnetConfiguration;
+import mil.dds.anet.config.AnetDictionary;
+import mil.dds.anet.database.JobHistoryDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.utils.AnetAuditLogger;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
+@Component
+@ConditionalOnExpression("not ${anet.no-workers:false}")
 public class ReportPublicationWorker extends AbstractWorker {
 
   private final ReportDao dao;
 
-  public ReportPublicationWorker(AnetConfiguration config, ReportDao dao) {
-    super(config, "Report Publication Worker waking up to check for reports to be published");
+  public ReportPublicationWorker(AnetDictionary dict, JobHistoryDao jobHistoryDao, ReportDao dao) {
+    super(dict, jobHistoryDao,
+        "Report Publication Worker waking up to check for reports to be published");
     this.dao = dao;
   }
 
+  @Scheduled(initialDelay = 5, fixedRate = 300, timeUnit = TimeUnit.SECONDS)
   @Override
-  protected void runInternal(Instant now, JobHistory jobHistory, Map<String, Object> context) {
+  public void run() {
+    super.run();
+  }
+
+  @Override
+  protected void runInternal(Instant now, JobHistory jobHistory, GraphQLContext context) {
     final Instant quarantineApproval =
-        now.minus((Integer) config.getDictionaryEntry("reportWorkflow.nbOfHoursQuarantineApproved"),
+        now.minus((Integer) dict.getDictionaryEntry("reportWorkflow.nbOfHoursQuarantineApproved"),
             ChronoUnit.HOURS);
     // Get a list of all APPROVED reports
     final ReportSearchQuery query = new ReportSearchQuery();

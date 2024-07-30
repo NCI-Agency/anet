@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - include:
+      file: classpath:db-changelog.yml
+  - changeSet:
+      id: data
+      author: system
+      runOrder: last
+      runOnChange: true
+      # We need CURRENT_TIMESTAMP to always be different:
+      runInTransaction: false
+      changes:
+        sqlFile:
+          path: file:insertBaseData-psql.sql

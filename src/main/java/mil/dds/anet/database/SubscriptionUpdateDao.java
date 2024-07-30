@@ -1,12 +1,14 @@
 package mil.dds.anet.database;
 
-import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.SubscriptionUpdate;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.SubscriptionUpdateSearchQuery;
+import mil.dds.anet.search.pg.PostgresqlSubscriptionUpdateSearcher;
 import mil.dds.anet.utils.DaoUtils;
+import org.springframework.stereotype.Component;
 
+@Component
 public class SubscriptionUpdateDao {
 
   private static final String[] fields =
@@ -15,9 +17,14 @@ public class SubscriptionUpdateDao {
   public static final String SUBSCRIPTION_UPDATE_FIELDS =
       DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
 
+  private final DatabaseHandler databaseHandler;
+
+  public SubscriptionUpdateDao(DatabaseHandler databaseHandler) {
+    this.databaseHandler = databaseHandler;
+  }
+
   public AnetBeanList<SubscriptionUpdate> search(Person user, SubscriptionUpdateSearchQuery query) {
-    return AnetObjectEngine.getInstance().getSearcher().getSubscriptionUpdateSearcher()
-        .runSearch(query, user);
+    return new PostgresqlSubscriptionUpdateSearcher(databaseHandler).runSearch(query, user);
   }
 
 }

@@ -7,6 +7,10 @@ describe("Anet home page", () => {
     await (await Home.getBannerDropdown()).click()
     await (await Home.getLogoutButton()).waitForDisplayed()
     await (await Home.getLogoutButton()).click()
+    await browser.pause(1000)
+    if (await (await Home.getLogoutFormSubmitButton()).isExisting()) {
+      await (await Home.getLogoutFormSubmitButton()).click()
+    }
     const title = await browser.getTitle()
     expect(title).to.equal("ANET Sign Out")
     await (await Home.getLoginButton()).waitForDisplayed()

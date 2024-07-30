@@ -4,7 +4,7 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.lang.invoke.MethodHandles;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -15,7 +15,7 @@ import mil.dds.anet.utils.ResponseUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class XsltXmlTransformer implements Function<String, String> {
+public class XsltXmlTransformer implements UnaryOperator<String> {
 
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());

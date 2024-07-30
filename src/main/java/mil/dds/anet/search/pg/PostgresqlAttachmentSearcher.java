@@ -2,13 +2,16 @@ package mil.dds.anet.search.pg;
 
 import mil.dds.anet.beans.search.AttachmentSearchQuery;
 import mil.dds.anet.beans.search.ISearchQuery;
+import mil.dds.anet.database.DatabaseHandler;
 import mil.dds.anet.search.AbstractAttachmentSearcher;
 import mil.dds.anet.search.AbstractSearchQueryBuilder;
+import org.springframework.stereotype.Component;
 
+@Component
 public class PostgresqlAttachmentSearcher extends AbstractAttachmentSearcher {
 
-  public PostgresqlAttachmentSearcher() {
-    super(new PostgresqlSearchQueryBuilder<>("PostgresqlAttachmentSearch"));
+  public PostgresqlAttachmentSearcher(DatabaseHandler databaseHandler) {
+    super(databaseHandler, new PostgresqlSearchQueryBuilder<>("PostgresqlAttachmentSearch"));
   }
 
   @Override

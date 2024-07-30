@@ -12,7 +12,7 @@ This document covers the steps required to deploy ANET to a server environment.
     - Administration Privileges
     - Optional: A valid SSL certificate for the domain name of the application server
     - Users are required to have a modern web browser (Mozilla Firefox, Google Chrome, Microsoft Edge or other with good HTML5 support);
-      IE11 is no longer supported
+      IE11 is not supported
 - **Network Accessibility**
     - Users will access the Application Server over HTTPS (`443`)
     - The Application Server will access the PostgreSQL server over port `5432` (or whatever port you have it configured to)
@@ -27,7 +27,8 @@ You should have the following information on hand for the installation:
 
 - **A Build of ANET**. This comes in the form of a `anet-<version>.rpm` file. See [BUILD.md](BUILD.md) for details on how to create this file.
 - **PostgreSQL**:
-  - if you have just created a fresh postgres database, apply the content of `/opt/anet/doc/prepare-psql.sql`
+  - if you have just created a fresh postgres database, the migrations that are automatically run when starting the
+    server will also prepare the database
 - **SMTP Server**
     - hostname
     - username / password (if necessary)
@@ -38,21 +39,19 @@ You should have the following information on hand for the installation:
 ## Server Installation Procedures
 1. run `sudo yum localinstall anet-<version>.rpm`. This will create the following structure in `/opt/anet`:
     * _bin_: This contains the startup scripts to start/stop the ANET server.
-    * _lib_: This contains all of the dependencies and compiled resources. All ANET specific files are bundled in `lib/anet.jar`.
-    * _docs_: This is a copy of the [docs folder](../) from the git repository, so you'll have a copy of these documents during installation!
-2. Add an anet.yml and anet-dictionary.yml file with appropriate settings to the application folder (i.e. `/opt/anet`). Descriptions of each of the settings in `anet.yml` can be found in the ANET Configuration section below. Templates of that file can be found in the docs directory. `anet.yml.productionTemplate` has been tested on a production set-up.
-3. Modify anet.yml following the ANET Configuration section below. If SSL is required, follow the "How to enable SSL" section.
-4. Verify that your configuration file is valid with ```bin/anet check anet.yml```
-5. Install Database Schema: Run ```bin/anet db migrate anet.yml```
-6. Seed the Database: Run ```bin/anet init anet.yml```. This will show you which options this command expects; there are four values you need to supply:
+    * _lib_: This contains all dependencies and compiled resources. All ANET specific files are bundled in `lib/anet.jar`.
+1. Add an application.yml and anet-dictionary.yml file with appropriate settings to the application folder (i.e. `/opt/anet`). Descriptions of each of the settings in `application.yml` can be found in the ANET Configuration section below.
+1. Modify application.yml following the ANET Configuration section below.
+1. Verify that your configuration file is valid with ```bin/anet check```
+1. Seed the Database: Run ```bin/anet init```. This will show you which options this command expects; there are four values you need to supply:
     * `--adminOrgName ADMINORGNAME` i.e. _Name of Administrator Organization_: This is the name of the Organization that will be created for the Administrator. We recommend using something like `ANET Administrators`.
     * `--adminPosName ADMINPOSNAME` i.e. _Name of Administrator Position_: This is the name of the position that will be created for the Administrator. We recommend `ANET Administrator`.
     * `--adminFullName ADMINFULLNAME` i.e. _Your Name_: This is the name that will be given to the ANET Administrator, who you presumably are; please use the canonical form of your name: LAST NAME, First name(s)
     * `--adminDomainUsername ADMINDOMAINUSERNAME` i.e. _Your Domain Username_: This is the domain username that will be set on the ANET Administrator (who you presumably are). For production situations this will be your windows domain username. If you get this wrong here, when you first log in to ANET it will create a new user for you. You can either run this database init command again, or do manual SQL commands to fix the `people` table.
-7. If imagery/maps are needed, install them according to the "How to configure imagery" section
-8. To verify that ANET is functioning, manually launch the ANET Server: ```"bin/anet" server anet.yml```
-9. Visit `http://servername` or `https://servername` (depending on SSL configuration) and verify you can see a welcome screen. In case of a problem, please refer to [TROUBLESHOOT.md](TROUBLESHOOT.md)
-10. If you have opted to install ANET as a service:
+1. If imagery/maps are needed, install them according to the "How to configure imagery" section
+1. To verify that ANET is functioning, manually launch the ANET Server: ```bin/anet```
+1. Visit `http://servername` or `https://servername` (depending on SSL configuration) and verify you can see a welcome screen. In case of a problem, please refer to [TROUBLESHOOT.md](TROUBLESHOOT.md)
+1. If you have opted to install ANET as a service:
     * `sudo systemctl enable anet`
     * anet can be now started/stopped with `sudo systemctl start anet` and `sudo systemctl stop anet`
 
@@ -61,60 +60,77 @@ On the ANET server:
 - Stop the anet with `sudo systemctl stop anet`.
 - Take a complete backup of your SQL database
 - install the new rpm with `sudo yum localinstall anet-<version>.rpm`
-- Make any required changes or upgrades to your `anet.yml` file
-- Run `bin/anet check anet.yml` to verify that anet is configured correctly
-- Run `bin/anet db migrate anet.yml` to migrate your database
-- Start the server, if it has been installed as a service, run `sudo systemctl start anet`
+- Make any required changes or upgrades to your `application.yml` file
+- Run `bin/anet check` to verify that anet is configured correctly
+- Start the server, which will automatically run any pending database migrations; if it has been installed as a service, run `sudo systemctl start anet`
 - Run through verification testing to ensure there are no issues
 
 Alternatively, an experimental service update script is available in the `doc` folder.
 
 # ANET Configuration
-ANET is configured primarily through the `anet.yml` file. This file follows the [Dropwizard configuration format](https://www.dropwizard.io/en/latest/manual/configuration.html#man-configuration). If you want to run ANET behind a reverse proxy, also read [Running ANET and Keycloak behind a reverse proxy](reverse-proxy.md). Here is a description of the configuration options custom to ANET:
+ANET is configured primarily through the `application.yml` file. This is a Spring Boot configuration file. If you want to run ANET behind a reverse proxy, also read [Running ANET and Keycloak behind a reverse proxy](reverse-proxy.md). Here is a description of the configuration options custom to ANET:
 
-- **developmentMode**: This flag controls several options on the server that are helpful when developing
-    - account deactivation worker: When development mode is `true`, the account deactivation worker is run directly at start-up (as well as at the set interval).
-- **redirectToHttps**: If true, ANET will redirect all HTTP traffic to HTTPS. You must also configure the application to listen on an HTTP connection (ie port 80).
-- **smtp**: This section controls the configuration for how ANET sends emails.
-    - **hostname**: The Fully Qualified Domain Name of your SMTP Server
-    - **port**: The port to connect to your SMTP server on (default: 25)
-    - **username**: If your SMTP server requires authentication, provide the username here. Otherwise leave blank.
-    - **password**: Your password to your SMTP server.
-    - **startTLS**: Set to true if your SMTP server requires or provides TLS (Transport Level Security) encryption.
-    - **disabled**: Set to true to disable sending email completely; most useful in development context.
-    - **nbOfHoursForStaleEmails**: When defined, the number of hours it takes for a pending email to be treated as stale and discarded. When not defined, emails are never discarded
-- **emailFromAddr**: This is the email address that emails from ANET will be sent from.
-- **serverUrl**: The URL for the ANET server, e.g.: `"https://anet.example.com"`.
-- **keycloakConfiguration**: The configuration for [Keycloak](keycloak.md), i.e. the (federated) user authentication server for ANET.
-- **database**: The configuration for your database. ANET only supports [PostgreSQL](https://www.postgresql.org/). Additional instructions can be found [here](https://www.dropwizard.io/en/latest/manual/configuration.html#database) for avaiable configuration options for the database connection.
-    - **driverClass**: the java driver for the database. Use `org.postgresql.Driver` for PostgreSQL.
-    - **user**: The username with access to the database. Not needed when using a local database.
-    - **password**: The password to the database. Not needed when using a local database.
-    - **url**: the url to the database in the following format: `jdbc:postgresql://[server hostname]:5432/[database name]`.
+- **server**:
+    - **port**: The port at which the ANET server will listen.
 
-- **keycloakConfiguration**: ANET uses the open source Keycloak server to perform Authentication ( https://www.keycloak.org/ ). It can be configured to authenticate via Keycloak in the following manner:
+- **spring**:
+    - **datasource**:
+        - **url**:  The ANET database URL, e.g. `jdbc:postgresql://localhost:5432/anetdb`
+        - **username**: The username with which to connect to the database, e.g. `anetuser`
+        - **password**: The password with which to connect to the database, e.g. `anetpassword`
+        - **driver-class-name**: The database driver to use, should be: `org.postgresql.Driver`, as ANET only supports [PostgreSQL](https://www.postgresql.org/)
+        - **hikari**: You can tweak the database connection pool settings for your deployment environment:
+            - **minimum-idle**: 10
+            - **maximum-pool-size**: 80
+            - **connection-timeout**: 5000
 
-```
-keycloakConfiguration:
-  realm: ANET-Realm
-  auth-server-url: http://localhost:9080/auth  # for development; should point to the real Keycloak URL in production (can be relative if ANET and Keycloak and running on the same server, e.g. just /auth )
-  ssl-required: none  # for development; should be all in production
-  confidential-port: 443
-  disable-trust-manager: false  # set to true if e.g. you're using self-signed certificates (which you obviously shouldn't do in production)
-  register-node-at-startup: true
-  register-node-period: 600
-  resource: ANET-Client
-  show-logout-link: true  # for development; should be false in production when using SSO
-  enable-basic-auth: true  # for development; should be false in production
-  credentials:
-    secret: 12869b4c-74ac-43f9-b71e-ff74e07babf9
-```
+  - **security**: Security configuration through Keycloak
+      - **oauth2**:
+          - **resourceserver**:
+              - **jwt**:
+                  - **jwk-set-uri**: Where to get the JWK certificates, e.g. `http://localhost:9080/realms/ANET/protocol/openid-connect/certs`
+      - **client**:
+          - **registration**:
+              - **keycloak**:
+                  - **client-id**: The confidential ANET client as defined in Keycloak
+                  - **client-secret**: The secret set in Keycloak for this client
+        - **provider**:
+            - **keycloak**:
+                - **issuer-uri**: Where to get the certificate issuer, e.g. `http://localhost:9080/realms/ANET`
 
-ANET needs *two* clients under the Keycloak realm with the name given under the **realm** property, a *confidential* one with the name given under the **resource** property (and you should copy the **secret** from the *Credentials* tab under the client in the Keycloak realm) and a *public* one with the `-public` added at the end of the name (so for the `ANET-Client` given in the example above, it would be `ANET-Client-public`). See [Keycloak authentication server](keycloak.md) for some guidance.
+- **anet**:
+    - **redirect-to-https**: If true, ANET will redirect all HTTP traffic to HTTPS. You must also configure the application to listen on an HTTP connection (ie port 80).
 
-- **server**: See the Dropwizard documentation for all the details of how to use this section. This controls the protocols (http/https) and ports that ANET will use for client web traffic. Additionally if you configure SSL, you will provide the server private key in this section. The `adminConnector` section is used for performance checks and health testing, this endpoint does not need to be available to users.
+    - **graphql-request-timeout-ms**: Execution time limit for GraphQL requests in milliseconds; if you comment it out, there is *no* limit!
 
-- **logging**: See the Dropwizard documentation for all the details of how to use this section. This controls the classes that you want to collect logs from and where to send them. Set the `currentLogFilename` parameters to the location that you want the logs to appear.
+    - **automatically-inactivate-users**: Whether to periodically run the task that automatically inactivates users; further configuration for this is in the dictionary.
+
+    - **smtp**: This section controls the configuration for how ANET sends emails.
+        - **hostname**: The Fully Qualified Domain Name of your SMTP Server
+        - **port**: The port to connect to your SMTP server on (default: `25`)
+        - **username**: If your SMTP server requires authentication, provide the username here; otherwise leave blank.
+        - **password**: Your password to your SMTP server.
+        - **ssl-trust**: If set to `"*"`, all hosts are trusted. If set to a whitespace separated list of hosts, those hosts are trusted. Otherwise, trust depends on the certificate the server presents.
+        - **start-tls**: Set to true if your SMTP server requires or provides TLS (Transport Level Security) encryption.
+        - **disabled**: Set to true to disable sending email completely; most useful in development context.
+        - **nb-of-hours-for-stale-emails**: When defined, the number of hours it takes for a pending email to be treated as stale and discarded. When not defined, emails are never discarded
+
+    - **email-from-addr**: This is the email address that emails from ANET will be sent from.
+
+    - **server-url**: The URL that should be used for links in emails, e.g. `"https://anet.example.com"`; should not include an ending slash!
+
+    - **keycloak-configuration**:
+        - **realm**: ANET realm as defined in Keycloak
+        - **auth-server-url**: Base URL of Keycloak server
+        - **resource**: Public ANET client as defined in Keycloak
+        - **show-logout-link**: Whether to show a Logout link in ANET
+
+    - **anet-dictionary-name**: Path of dictionary to be loaded
+
+    - **imagery-path**: Path to (optional) local map imagery in the dictionary which is served via `/imagery/**`
+    - **dashboards-path**: Path to dashboards in the dictionary which are served via `/data/**`
+
+ANET uses the open source Keycloak server to perform Authentication ( https://www.keycloak.org/ ). It needs *two* clients under the Keycloak realm with the name given under the `anet.keycloak-configuration.realm` property, a *confidential* one with the name given under the `spring.security.client.registration.keycloak.client-id` property (and you should copy the `spring.security.client.registration.keycloak.client-secret` from the *Credentials* tab under the client in the Keycloak realm) and a *public* one under `anet.keycloak-configuration.resource`. See [Keycloak authentication server](keycloak.md) for some guidance.
 
 Finally, you can define a deployment-specific dictionary inside the `anet-dictionary.yml` file.
 Currently, the recognized entries in the dictionary (and suggested values for each of them) are available in the example dictionary:
@@ -123,25 +139,8 @@ Currently, the recognized entries in the dictionary (and suggested values for ea
 
 As can be seen from the example above, some entries are lists of values and others are simple key/value pairs.
 
-# How to enable SSL
-Below is a subset from the complete Dropwizard Documentation that can be found here: https://www.dropwizard.io/en/latest/manual/configuration.html#https
 
-SSL support is built into Dropwizard. You will need to provide your own Java keystore, which is outside the scope of this document (keytool is the command you need, and Jetty’s documentation can get you started). There is a test keystore you can use in the Dropwizard example project.
-
-```
-server:
-  applicationConnectors:
-    - type: https
-      port: 443
-      keyStorePath: PathToKeystore
-      keyStorePassword: password
-      trustStorePath: pathToCacerts
-      validateCerts: false
-```
-
-Administrator should request certificates.
-
-## Self signed certificates
+# Self-signed certificates for SSL
 If needed, self-signed certificates can be created and used as follows:
 
 1. Open a command line in `/opt/anet`
@@ -149,7 +148,7 @@ If needed, self-signed certificates can be created and used as follows:
 3. run `/opt/anet/lib/runtime/bin/keytool -export -alias anetkey -file anetkey.crt -keystore keystore.jks`
 4. cd to the directory with cacerts, usually `/opt/anet`
 5. run `/opt/anet/lib/runtime/bin/keytool -import -trustcacerts -alias selfsigned -file /opt/anet/anetkey.crt -keystore cacerts`
-6. update `anet.yml` with keyStore and trustStore information
+6. update `application.yml` with keyStore and trustStore information
 
 
 # How to configure imagery.
@@ -164,7 +163,7 @@ ANET uses [Leaflet](https://leafletjs.com/) as a map viewer. You can use any map
         zoomLevel: 10
 
 ```     
-Typically this is a choice between `EPSG3857` and `EPSG4326`. Please consult the specification of the maps you are about to consult. `homeView` defines the default starting location and zoom level of the map.
+Typically, this is a choice between `EPSG3857` and `EPSG4326`. Please consult the specification of the maps you are about to consult. `homeView` defines the default starting location and zoom level of the map.
 _hint:_ If you are planning to use a WMS service, in a browser you can inspect the results of `https://wmsURL?request=GetCapabilities&service=WMS` to determine the desired coordinate system
 
 CRS Description (courtesy of https://leafletjs.com/reference-1.3.0.html#crs)
@@ -177,7 +176,7 @@ CRS Description (courtesy of https://leafletjs.com/reference-1.3.0.html#crs)
 | Earth      | Serves as the base for CRS that are global such that they cover the earth. Can only be used as the base for other CRS and cannot be used directly, since it does not have a code, projection or transformation. distance() returns meters. |
 | Simple     | A simple CRS that maps longitude and latitude into x and y directly. May be used for maps of flat surfaces (e.g. game maps). Note that the y axis should still be inverted (going from bottom to top). distance() returns simple euclidean distance. |
 
-You can configure ANET to use tiled or WMS maps by adding to the `baseLayers` under `imagery` portion of `anet.yml`
+You can configure ANET to use tiled or WMS maps by adding to the `baseLayers` under `imagery` portion of `anet-dictionary.yml`
 
 for OSM-type providers:
 ```yaml
@@ -212,25 +211,25 @@ and for WMTS-type providers:
 If desired, you can also configure a local tiled imagery cache with a downloaded tile set. Your offline imagery set should be in the form of `{z}/{x}/{y}.png` or similar. If you download tiles from OpenStreetMaps, this is the format you'll get them in.
 
 1. In the ANET home directory (the same directory as `bin`, `lib` and `docs`) create a directory called `imagery`.
-```yaml
-assets:
-  overrides:
-    /imagery: imagery
-```
-2. Copy your imagery set into the `imagery` directory. You should end up with a file structure that looks like `imagery/street/{0,1,2,...}/{0,1,2...}/{0,1,2,3...}.png`
-3. To use this new tile source, add under `baseLayers`:
-```yaml
-      - name: OSM
-        default: true
-        type: tile
-        url: "/imagery/street/{z}/{x}/{y}.png"
-```
+    ```yaml
+    assets:
+      overrides:
+        /imagery: imagery
+    ```
+1. Copy your imagery set into the `imagery` directory. You should end up with a file structure that looks like `imagery/street/{0,1,2,...}/{0,1,2...}/{0,1,2,3...}.png`
+1. To use this new tile source, add under `baseLayers`:
+    ```yaml
+          - name: OSM
+            default: true
+            type: tile
+            url: "/imagery/street/{z}/{x}/{y}.png"
+    ```
 
 Maps should now magically work!  You can test this by going to the url `https://<your-anet-server>/imagery/street/0/0/0.png` and hopefully seeing a tile appear.
 
 # How to configure KML and NVG support
 
-Any system that can consume KML (Google Earth, Google Maps) through a service (a.k.a Network Link) can be configured to consume ANET data.
+Any system that can consume KML (Google Earth, Google Maps) through a service (a.k.a. Network Link) can be configured to consume ANET data.
 
 For example to consume all published reports, use the following endpoint:
 
@@ -245,7 +244,7 @@ http://<your-anet-server>/graphql?query=query{reportList(query:{state:PUBLISHED}
 
 # How to configure dashboards
 
-A system administrator can add an modify dashboards, by editing the following section in `anet.yml`
+A system administrator can add and modify dashboards, by editing the following section in `anet-dictionary.yml`
 
 ```yaml
   dashboards:
@@ -260,17 +259,10 @@ A system administrator can add an modify dashboards, by editing the following se
       type: decisives
 ```
 
-For each dashboard, a `label` must be provided which determines how the dashboard appears in the navigation structure, `type` determines the type of the dashboad (currently only `kanban` and `decisives` are supported as types).
-The `data` property, points to a file containing the configuration of the dashboard. The location of this directory can be specified in the `assets` section of `anet.yml` - in the example below pointing to a directory named `data` relative to the anet working directory.
+For each dashboard, a `label` must be provided which determines how the dashboard appears in the navigation structure, `type` determines the type of the dashboard (currently only `kanban` and `decisives` are supported as types).
+The `data` property, points to a file containing the configuration of the dashboard. The location of this directory can be specified in the `assets` section of `application.yml` - in the example below pointing to a directory named `data` relative to the anet working directory.
 
 Changing the content of dashboard files does not require an application restart, reloading the page in the browser will be sufficient for the dashboards to update.
-
-```yaml
-assets:
-  overrides:
-    /data: data
-```
-
 
 ## Kanban dashboards data file
 

@@ -1385,6 +1385,7 @@ const Search = ({
                       searchQueryParams,
                       queryTypes,
                       "xlsx",
+                      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                       exportMaxResults,
                       setError
                     )}
@@ -1397,6 +1398,7 @@ const Search = ({
                       searchQueryParams,
                       queryTypes,
                       "kml",
+                      "application/xml",
                       exportMaxResults,
                       setError
                     )}
@@ -1409,6 +1411,7 @@ const Search = ({
                       searchQueryParams,
                       queryTypes,
                       "nvg",
+                      "application/xml",
                       exportMaxResults,
                       setError
                     )}

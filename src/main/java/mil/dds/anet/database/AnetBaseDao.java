@@ -1,35 +1,39 @@
 package mil.dds.anet.database;
 
-import jakarta.inject.Inject;
-import jakarta.inject.Provider;
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AbstractSearchQuery;
+import mil.dds.anet.config.AnetDictionary;
+import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.views.AbstractAnetBean;
 import org.jdbi.v3.core.Handle;
-import ru.vyarus.guicey.jdbi3.tx.InTransaction;
+import org.springframework.transaction.annotation.Transactional;
 
 public abstract class AnetBaseDao<T extends AbstractAnetBean, S extends AbstractSearchQuery<?>>
     implements IAnetDao<T> {
 
-  @Inject
-  private Provider<Handle> handle;
+  protected final DatabaseHandler databaseHandler;
 
-  @InTransaction
+  protected AnetBaseDao(final DatabaseHandler databaseHandler) {
+    this.databaseHandler = databaseHandler;
+  }
+
+  @Transactional
   @Override
   public T insert(T obj) {
     DaoUtils.setInsertFields(obj);
     return insertInternal(obj);
   }
 
-  @InTransaction
+  @Transactional
   @Override
   public int update(T obj) {
     DaoUtils.setUpdateFields(obj);
     return updateInternal(obj);
   }
 
-  @InTransaction
+  @Transactional
   @Override
   public int delete(String uuid) {
     return deleteInternal(uuid);
@@ -41,7 +45,11 @@ public abstract class AnetBaseDao<T extends AbstractAnetBean, S extends Abstract
   }
 
   protected Handle getDbHandle() {
-    return handle.get();
+    return databaseHandler.getHandle();
+  }
+
+  protected void closeDbHandle(Handle handle) {
+    databaseHandler.closeHandle(handle);
   }
 
   public AnetBeanList<T> search(S query) {
@@ -52,36 +60,59 @@ public abstract class AnetBaseDao<T extends AbstractAnetBean, S extends Abstract
 
   protected void updateForMerge(String tableName, String fieldName, String winnerUuid,
       String loserUuid) {
-    final String sqlUpdateFormat =
-        "UPDATE \"%1$s\" SET \"%2$s\" = :winnerUuid WHERE \"%2$s\" = :loserUuid";
-    getDbHandle().createUpdate(String.format(sqlUpdateFormat, tableName, fieldName))
-        .bind("winnerUuid", winnerUuid).bind("loserUuid", loserUuid).execute();
+    final Handle handle = getDbHandle();
+    try {
+      final String sqlUpdateFormat =
+          "UPDATE \"%1$s\" SET \"%2$s\" = :winnerUuid WHERE \"%2$s\" = :loserUuid";
+      handle.createUpdate(String.format(sqlUpdateFormat, tableName, fieldName))
+          .bind("winnerUuid", winnerUuid).bind("loserUuid", loserUuid).execute();
+    } finally {
+      closeDbHandle(handle);
+    }
   }
 
   protected void updateM2mForMerge(String tableName, String mainObjectFieldName,
       String relatedObjectFieldName, String winnerUuid, String loserUuid) {
-    // update m2m objects where we don't already have the same object for the winnerUuid
-    final String sqlUpdateFormat = "UPDATE \"%1$s\" SET \"%3$s\" = :winnerUuid"
-        + " WHERE \"%3$s\" = :loserUuid AND \"%2$s\" NOT IN ("
-        + "SELECT \"%2$s\" FROM \"%1$s\" WHERE \"%3$s\" = :winnerUuid)";
-    getDbHandle()
-        .createUpdate(
-            String.format(sqlUpdateFormat, tableName, mainObjectFieldName, relatedObjectFieldName))
-        .bind("winnerUuid", winnerUuid).bind("loserUuid", loserUuid).execute();
+    final Handle handle = getDbHandle();
+    try {
+      // update m2m objects where we don't already have the same object for the winnerUuid
+      final String sqlUpdateFormat = "UPDATE \"%1$s\" SET \"%3$s\" = :winnerUuid"
+          + " WHERE \"%3$s\" = :loserUuid AND \"%2$s\" NOT IN ("
+          + "SELECT \"%2$s\" FROM \"%1$s\" WHERE \"%3$s\" = :winnerUuid)";
+      handle
+          .createUpdate(String.format(sqlUpdateFormat, tableName, mainObjectFieldName,
+              relatedObjectFieldName))
+          .bind("winnerUuid", winnerUuid).bind("loserUuid", loserUuid).execute();
 
-    // now delete obsolete m2m objects for the loserUuid
-    deleteForMerge(tableName, relatedObjectFieldName, loserUuid);
+      // now delete obsolete m2m objects for the loserUuid
+      deleteForMerge(tableName, relatedObjectFieldName, loserUuid);
+    } finally {
+      closeDbHandle(handle);
+    }
   }
 
   protected int deleteForMerge(String tableName, String fieldName, String loserUuid) {
     final String sqlDeleteFormat = "DELETE FROM \"%1$s\" WHERE \"%2$s\" = :loserUuid";
-    return getDbHandle().createUpdate(String.format(sqlDeleteFormat, tableName, fieldName))
-        .bind("loserUuid", loserUuid).execute();
+    final Handle handle = getDbHandle();
+    try {
+      return handle.createUpdate(String.format(sqlDeleteFormat, tableName, fieldName))
+          .bind("loserUuid", loserUuid).execute();
+    } finally {
+      closeDbHandle(handle);
+    }
   }
 
   // For testing purposes only!
-  @InTransaction
+  @Transactional
   public int _deleteByUuid(String tableName, String fieldName, String uuid) {
     return deleteForMerge(tableName, fieldName, uuid);
+  }
+
+  protected AnetDictionary dict() {
+    return ApplicationContextProvider.getDictionary();
+  }
+
+  protected AnetObjectEngine engine() {
+    return ApplicationContextProvider.getEngine();
   }
 }

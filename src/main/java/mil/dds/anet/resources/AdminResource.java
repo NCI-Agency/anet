@@ -1,14 +1,11 @@
 package mil.dds.anet.resources;
 
-import com.codahale.metrics.annotation.Timed;
+import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.MediaType;
+import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,7 +13,6 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import javax.cache.Cache;
-import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AdminSetting;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.UserActivity;
@@ -25,7 +21,9 @@ import mil.dds.anet.beans.recentActivity.Activity;
 import mil.dds.anet.beans.recentActivity.RecentActivities;
 import mil.dds.anet.beans.recentActivity.RecentUserActivity;
 import mil.dds.anet.beans.search.UserActivitySearchQuery;
-import mil.dds.anet.config.AnetConfiguration;
+import mil.dds.anet.config.AnetConfig;
+import mil.dds.anet.config.AnetDictionary;
+import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.AdminDao;
 import mil.dds.anet.database.UserActivityDao;
 import mil.dds.anet.graphql.AllowUnverifiedUsers;
@@ -34,47 +32,57 @@ import mil.dds.anet.utils.AnetConstants;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@Path("/api/admin")
+@RestController
+@RequestMapping(AdminResource.ADMIN_RESOURCE_PATH)
+@GraphQLApi
 public class AdminResource {
 
-  private final AdminDao dao;
-  private final UserActivityDao userActivityDao;
-  private final AnetConfiguration config;
+  public static final String ADMIN_RESOURCE_PATH = "/api/admin";
+  public static final String DICTIONARY_PATH = "/dictionary";
+  public static final String ADMIN_DICTIONARY_RESOURCE_PATH = ADMIN_RESOURCE_PATH + DICTIONARY_PATH;
 
-  public AdminResource(AnetObjectEngine engine, AnetConfiguration config) {
-    this.dao = engine.getAdminDao();
-    this.userActivityDao = engine.getUserActivityDao();
+  private final AnetConfig config;
+  private final AnetDictionary dict;
+  private final AdminDao adminDao;
+  private final UserActivityDao userActivityDao;
+
+  public AdminResource(AnetConfig config, AnetDictionary dict, AdminDao adminDao,
+      UserActivityDao userActivityDao) {
     this.config = config;
+    this.dict = dict;
+    this.adminDao = adminDao;
+    this.userActivityDao = userActivityDao;
   }
 
   @GraphQLQuery(name = "adminSettings")
   @AllowUnverifiedUsers
   public List<AdminSetting> getAll() {
-    return dao.getAllSettings();
+    return adminDao.getAllSettings();
   }
 
   @GraphQLMutation(name = "saveAdminSettings")
-  public Integer saveAdminSettings(@GraphQLRootContext Map<String, Object> context,
+  public Integer saveAdminSettings(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "settings") List<AdminSetting> settings) {
     final Person user = DaoUtils.getUserFromContext(context);
     AuthUtils.assertAdministrator(user);
     int numRows = 0;
     for (AdminSetting setting : settings) {
-      numRows += dao.saveSetting(setting);
+      numRows += adminDao.saveSetting(setting);
     }
     AnetAuditLogger.log("Admin settings updated by {}", user);
     return numRows;
   }
 
-  @GET
-  @Timed
-  @Path("/dictionary")
-  @Produces(MediaType.APPLICATION_JSON)
+  @GetMapping(path = DICTIONARY_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
   // The dictionary should be public, as it contains information needed for the client-side
   // authentication
   public Map<String, Object> getDictionary() {
-    return config.getDictionary();
+    return dict.getDictionary();
   }
 
   /**
@@ -82,11 +90,10 @@ public class AdminResource {
    * be used to reload the dictionary with new values without restarting the server
    */
   @GraphQLMutation(name = "reloadDictionary")
-  public String reloadDictionary(@GraphQLRootContext Map<String, Object> context)
-      throws IOException {
+  public String reloadDictionary(@GraphQLRootContext GraphQLContext context) throws IOException {
     final Person user = DaoUtils.getUserFromContext(context);
     AuthUtils.assertAdministrator(user);
-    config.loadDictionary();
+    dict.loadDictionary();
     AnetAuditLogger.log("Dictionary updated by {}", user);
     return AnetConstants.DICTIONARY_RELOAD_MESSAGE;
   }
@@ -94,7 +101,7 @@ public class AdminResource {
   /**
    * Returns the project version which is saved during project build (See project.version definition
    * in build.gradle file) Right after project information is written into version.properties file
-   * on startup,it is read and set with AnetConfiguration loadVersion method
+   * on startup,it is read and set with AnetConfig getVersion method
    */
   @GraphQLQuery(name = "projectVersion")
   @AllowUnverifiedUsers
@@ -106,17 +113,17 @@ public class AdminResource {
    * Clears Domain Users Cache
    */
   @GraphQLMutation(name = "clearCache")
-  public String clearCache(@GraphQLRootContext Map<String, Object> context) {
+  public String clearCache(@GraphQLRootContext GraphQLContext context) {
     final Person user = DaoUtils.getUserFromContext(context);
     AuthUtils.assertAdministrator(user);
-    return AnetObjectEngine.getInstance().getPersonDao().clearCache();
+    return ApplicationContextProvider.getEngine().getPersonDao().clearCache();
   }
 
   /**
    * Returns recent user activities in descending order of time
    */
   @GraphQLQuery(name = "recentActivities")
-  public RecentActivities recentActivities(@GraphQLRootContext Map<String, Object> context) {
+  public RecentActivities recentActivities(@GraphQLRootContext GraphQLContext context) {
     final Person user = DaoUtils.getUserFromContext(context);
     AuthUtils.assertAdministrator(user);
 
@@ -124,15 +131,13 @@ public class AdminResource {
     final List<RecentUserActivity> byUser = new ArrayList<>();
 
     final Cache<String, Person> domainUsersCache =
-        AnetObjectEngine.getInstance().getPersonDao().getDomainUsersCache();
+        ApplicationContextProvider.getEngine().getPersonDao().getDomainUsersCache();
     for (final Cache.Entry<String, Person> entry : domainUsersCache) {
       final Person person = entry.getValue();
       final Deque<Activity> activities = person.getRecentActivities();
       if (!Utils.isEmptyOrNull(activities)) {
         byUser.add(new RecentUserActivity(person, activities.getFirst()));
-        activities.forEach(activity -> {
-          byActivity.add(new RecentUserActivity(person, activity));
-        });
+        activities.forEach(activity -> byActivity.add(new RecentUserActivity(person, activity)));
       }
     }
 
@@ -146,7 +151,7 @@ public class AdminResource {
    * @return user activities aggregated for the time period given in the query
    */
   @GraphQLQuery(name = "userActivityList")
-  public AnetBeanList<UserActivity> search(@GraphQLRootContext final Map<String, Object> context,
+  public AnetBeanList<UserActivity> search(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "query") final UserActivitySearchQuery query) {
     final Person user = DaoUtils.getUserFromContext(context);
     AuthUtils.assertAdministrator(user);

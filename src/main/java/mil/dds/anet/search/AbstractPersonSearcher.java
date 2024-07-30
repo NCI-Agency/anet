@@ -3,19 +3,20 @@ package mil.dds.anet.search;
 import com.google.common.collect.Sets;
 import java.util.Map;
 import java.util.Set;
-import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery;
 import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.PersonSearchQuery;
+import mil.dds.anet.database.DatabaseHandler;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.search.AbstractSearchQueryBuilder.Comparison;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
-import ru.vyarus.guicey.jdbi3.tx.InTransaction;
+import org.jdbi.v3.core.Handle;
+import org.springframework.transaction.annotation.Transactional;
 
 public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, PersonSearchQuery>
     implements IPersonSearcher {
@@ -24,15 +25,21 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
   private static final Set<String> MINIMAL_FIELDS = Sets.newHashSet(PersonDao.minimalFields);
   private static final Map<String, String> FIELD_MAPPING = Map.of("country", "countryUuid");
 
-  public AbstractPersonSearcher(AbstractSearchQueryBuilder<Person, PersonSearchQuery> qb) {
-    super(qb);
+  protected AbstractPersonSearcher(DatabaseHandler databaseHandler,
+      AbstractSearchQueryBuilder<Person, PersonSearchQuery> qb) {
+    super(databaseHandler, qb);
   }
 
-  @InTransaction
+  @Transactional
   @Override
   public AnetBeanList<Person> runSearch(Set<String> subFields, PersonSearchQuery query) {
-    buildQuery(subFields, query);
-    return qb.buildAndRun(getDbHandle(), query, new PersonMapper());
+    final Handle handle = getDbHandle();
+    try {
+      buildQuery(subFields, query);
+      return qb.buildAndRun(handle, query, new PersonMapper());
+    } finally {
+      closeDbHandle(handle);
+    }
   }
 
   @Override
@@ -60,7 +67,7 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
 
     if (query.getUser() != null && query.getSubscribed()) {
       qb.addWhereClause(Searcher.getSubscriptionReferences(query.getUser(), qb.getSqlArgs(),
-          AnetObjectEngine.getInstance().getPersonDao().getSubscriptionUpdate(null)));
+          engine().getPersonDao().getSubscriptionUpdate(null)));
     }
 
     qb.addDateRangeClause("startDate", "people.\"endOfTourDate\"", Comparison.AFTER,

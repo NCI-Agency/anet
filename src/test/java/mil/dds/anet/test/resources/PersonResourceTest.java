@@ -3,7 +3,6 @@ package mil.dds.anet.test.resources;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
-import com.google.common.collect.ImmutableList;
 import java.text.Collator;
 import java.time.Instant;
 import java.time.ZonedDateTime;
@@ -16,7 +15,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.database.CustomSensitiveInformationDao;
 import mil.dds.anet.test.client.AnetBeanList_Organization;
 import mil.dds.anet.test.client.AnetBeanList_Person;
 import mil.dds.anet.test.client.AnetBeanList_Position;
@@ -44,6 +43,7 @@ import mil.dds.anet.utils.DaoUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class PersonResourceTest extends AbstractResourceTest {
 
@@ -67,6 +67,9 @@ public class PersonResourceTest extends AbstractResourceTest {
   public static final String FIELDS =
       String.format("{ %s position { %s } attachments %s %s }", _PERSON_FIELDS, _POSITION_FIELDS,
           AttachmentResourceTest.ATTACHMENT_FIELDS, _CUSTOM_SENSITIVE_INFORMATION_FIELDS);
+
+  @Autowired
+  private CustomSensitiveInformationDao customSensitiveInformationDao;
 
   @Test
   void testCreatePerson() {
@@ -577,9 +580,9 @@ public class PersonResourceTest extends AbstractResourceTest {
     final String steveUuid = getSteveSteveson().getUuid();
     // Elizabeth can read all sensitive data of her counterpart Steve
     checkSensitiveInformation(steveUuid, "elizabeth",
-        ImmutableList.of(BIRTHDAY_FIELD, POLITICAL_POSITION_FIELD));
+        List.of(BIRTHDAY_FIELD, POLITICAL_POSITION_FIELD));
     // Jim has no access to Steve's sensitive data
-    checkSensitiveInformation(steveUuid, "jim", ImmutableList.of());
+    checkSensitiveInformation(steveUuid, "jim", List.of());
   }
 
   @Test
@@ -588,12 +591,11 @@ public class PersonResourceTest extends AbstractResourceTest {
     final String christopfUuid = getChristopfTopferness().getUuid();
     // Admin has access to everything
     checkSensitiveInformationEdit(christopfUuid, adminUser,
-        ImmutableList.of(BIRTHDAY_FIELD, POLITICAL_POSITION_FIELD), true);
+        List.of(BIRTHDAY_FIELD, POLITICAL_POSITION_FIELD), true);
     // Henry has access to Christopf's birthday
-    checkSensitiveInformationEdit(christopfUuid, "henry", ImmutableList.of(BIRTHDAY_FIELD), true);
+    checkSensitiveInformationEdit(christopfUuid, "henry", List.of(BIRTHDAY_FIELD), true);
     // Bob has access to Christopf's politicalPosition
-    checkSensitiveInformationEdit(christopfUuid, "bob", ImmutableList.of(POLITICAL_POSITION_FIELD),
-        true);
+    checkSensitiveInformationEdit(christopfUuid, "bob", List.of(POLITICAL_POSITION_FIELD), true);
   }
 
   @Test
@@ -665,17 +667,16 @@ public class PersonResourceTest extends AbstractResourceTest {
     final String steveUuid = getSteveSteveson().getUuid();
     // Admin has access to everything
     checkSensitiveInformationEdit(steveUuid, adminUser,
-        ImmutableList.of(BIRTHDAY_FIELD, POLITICAL_POSITION_FIELD), false);
+        List.of(BIRTHDAY_FIELD, POLITICAL_POSITION_FIELD), false);
     // Henry has access to Steve's birthday
-    checkSensitiveInformationEdit(steveUuid, "henry", ImmutableList.of(BIRTHDAY_FIELD), false);
+    checkSensitiveInformationEdit(steveUuid, "henry", List.of(BIRTHDAY_FIELD), false);
     // Bob has access to Steve's politicalPosition
-    checkSensitiveInformationEdit(steveUuid, "bob", ImmutableList.of(POLITICAL_POSITION_FIELD),
-        false);
+    checkSensitiveInformationEdit(steveUuid, "bob", List.of(POLITICAL_POSITION_FIELD), false);
   }
 
   private Person checkSensitiveInformation(final String personUuid, final String user,
       // List should be in alphabetical order
-      final ImmutableList<String> customSensitiveFields) {
+      final List<String> customSensitiveFields) {
     final int size = customSensitiveFields.size();
 
     final Person person = withCredentials(user, t -> queryExecutor.person(FIELDS, personUuid));
@@ -689,9 +690,9 @@ public class PersonResourceTest extends AbstractResourceTest {
 
   private void checkSensitiveInformationEdit(final String personUuid, final String user,
       // List should be in alphabetical order
-      final ImmutableList<String> customSensitiveFields, final boolean doInsert) {
-    final Person person = checkSensitiveInformation(personUuid, user,
-        doInsert ? ImmutableList.of() : customSensitiveFields);
+      final List<String> customSensitiveFields, final boolean doInsert) {
+    final Person person =
+        checkSensitiveInformation(personUuid, user, doInsert ? List.of() : customSensitiveFields);
 
     final int size = customSensitiveFields.size();
 
@@ -700,7 +701,7 @@ public class PersonResourceTest extends AbstractResourceTest {
       final List<CustomSensitiveInformationInput> csiInput = customSensitiveFields.stream()
           .map(csf -> CustomSensitiveInformationInput.builder().withCustomFieldName(csf)
               .withCustomFieldValue(getCustomFieldValue(csf, UUID.randomUUID().toString())).build())
-          .collect(Collectors.toList());
+          .toList();
       personInput.setCustomSensitiveInformation(csiInput);
     } else {
       personInput.getCustomSensitiveInformation().forEach(csiInput -> csiInput.setCustomFieldValue(
@@ -728,8 +729,7 @@ public class PersonResourceTest extends AbstractResourceTest {
 
     if (doInsert) {
       // Delete customSensitiveInformation again
-      final int nrDeleted =
-          AnetObjectEngine.getInstance().getCustomSensitiveInformationDao().deleteFor(personUuid);
+      final int nrDeleted = customSensitiveInformationDao.deleteFor(personUuid);
       assertThat(nrDeleted).isEqualTo(size);
     } else {
       // Restore previous values
@@ -751,15 +751,14 @@ public class PersonResourceTest extends AbstractResourceTest {
     // Try to do some updates that are not allowed
     final String steveUuid = getSteveSteveson().getUuid();
     // Henry only has access to Steve's birthday
-    checkUnauthorizedSensitiveInformation(steveUuid, "henry",
-        ImmutableList.of(POLITICAL_POSITION_FIELD));
+    checkUnauthorizedSensitiveInformation(steveUuid, "henry", List.of(POLITICAL_POSITION_FIELD));
     // Bob only has access to Steve's politicalPosition
-    checkUnauthorizedSensitiveInformation(steveUuid, "bob", ImmutableList.of(BIRTHDAY_FIELD));
+    checkUnauthorizedSensitiveInformation(steveUuid, "bob", List.of(BIRTHDAY_FIELD));
   }
 
   private void checkUnauthorizedSensitiveInformation(final String personUuid, final String user,
       // List should be in alphabetical order
-      final ImmutableList<String> customSensitiveFields) {
+      final List<String> customSensitiveFields) {
 
     final Person person = withCredentials(user, t -> queryExecutor.person(FIELDS, personUuid));
     assertThat(person).isNotNull();
@@ -771,7 +770,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     final List<CustomSensitiveInformationInput> csiInput = customSensitiveFields.stream()
         .map(csf -> CustomSensitiveInformationInput.builder().withCustomFieldName(csf)
             .withCustomFieldValue(getCustomFieldValue(csf, customFieldValue)).build())
-        .collect(Collectors.toList());
+        .toList();
     personInput.setCustomSensitiveInformation(csiInput);
     final Instant beforeUpdate = Instant.now();
     final Integer nrUpdated =

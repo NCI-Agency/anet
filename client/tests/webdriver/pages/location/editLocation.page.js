@@ -15,7 +15,7 @@ class EditLocation extends Page {
     return browser.$("label*=Latitude")
   }
 
-  // Can't edit anet.yml to change location format, so can't test this for now
+  // Can't edit dictionary to change location format, so can't test this for now
   async getMgrsLabel() {
     return browser.$("label*=MGRS")
   }

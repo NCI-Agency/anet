@@ -1,25 +1,42 @@
 package mil.dds.anet;
 
-import com.google.common.collect.ImmutableMap;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.ext.ExceptionMapper;
-import org.eclipse.jetty.http.HttpStatus;
+import java.util.List;
+import java.util.Map;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.CannotGetJdbcConnectionException;
+import org.springframework.transaction.CannotCreateTransactionException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-public class WebExceptionMapper implements ExceptionMapper<WebApplicationException> {
-  @Override
-  public Response toResponse(final WebApplicationException e) {
-    // If the message did not come with a status, we'll default to an internal
-    // server error status.
-    int status = e.getResponse() == null ? 500 : e.getResponse().getStatus();
+@ControllerAdvice
+public class WebExceptionMapper extends ResponseEntityExceptionHandler {
 
-    // Get a nice human readable message for our status code if the exception
-    // doesn't already have a message
-    final String msg = e.getMessage() == null ? HttpStatus.getMessage(status) : e.getMessage();
-
-    // Create a JSON response with the provided hashmap
-    return Response.status(status).type(MediaType.APPLICATION_JSON_TYPE)
-        .entity(ImmutableMap.of("error", msg)).build();
+  @ExceptionHandler(value = ResponseStatusException.class)
+  protected ResponseEntity<Object> handleResponseStatusException(final ResponseStatusException e,
+      final WebRequest request) {
+    // Create a JSON response with the error
+    final String msg = e.getReason() == null ? e.getMessage() : e.getReason();
+    return ResponseEntity.status(e.getStatusCode()).contentType(MediaType.APPLICATION_JSON)
+        .body(getErrors(msg));
   }
+
+  @ExceptionHandler(
+      value = {CannotGetJdbcConnectionException.class, CannotCreateTransactionException.class})
+  protected ResponseEntity<Object> handleConnectionException(final RuntimeException e,
+      final WebRequest request) {
+    // Create a JSON response with the error
+    final String msg = String.format("Problem when getting connection: %s", e.getMessage());
+    return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+        .contentType(MediaType.APPLICATION_JSON).body(getErrors(msg));
+  }
+
+  private static Map<String, List<Map<String, String>>> getErrors(String msg) {
+    return Map.of("errors", List.of(Map.of("message", msg)));
+  }
+
 }

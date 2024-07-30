@@ -106,7 +106,7 @@ to:
 See [Keycloak documentation](https://www.keycloak.org/docs/latest/server_installation/#_setting-up-a-load-balancer-or-proxy) for background information.
 
 ### ANET configuration
-When running ANET behind a reverse proxy, some configuration needs to be done in `anet.yml`:
+When running ANET behind a reverse proxy, some configuration needs to be done in `application.yml`:
 
 ```
 # Configuration for the web servers HTTP connectors.

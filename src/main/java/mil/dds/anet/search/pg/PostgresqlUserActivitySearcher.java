@@ -2,13 +2,16 @@ package mil.dds.anet.search.pg;
 
 import mil.dds.anet.beans.UserActivity;
 import mil.dds.anet.beans.search.UserActivitySearchQuery;
+import mil.dds.anet.database.DatabaseHandler;
 import mil.dds.anet.search.AbstractSearchQueryBuilder;
 import mil.dds.anet.search.AbstractUserActivitySearcher;
+import org.springframework.stereotype.Component;
 
+@Component
 public class PostgresqlUserActivitySearcher extends AbstractUserActivitySearcher {
 
-  public PostgresqlUserActivitySearcher() {
-    super(new PostgresqlSearchQueryBuilder<>("PostgresqlUserActivitySearch"));
+  public PostgresqlUserActivitySearcher(DatabaseHandler databaseHandler) {
+    super(databaseHandler, new PostgresqlSearchQueryBuilder<>("PostgresqlUserActivitySearch"));
   }
 
   @Override

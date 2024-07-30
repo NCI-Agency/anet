@@ -1,13 +1,12 @@
 package mil.dds.anet.beans;
 
+import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractSubscribableAnetBean;
 
@@ -46,15 +45,14 @@ public class AuthorizationGroup extends AbstractSubscribableAnetBean
 
   @GraphQLQuery(name = "authorizationGroupRelatedObjects")
   public CompletableFuture<List<GenericRelatedObject>> loadAuthorizationGroupRelatedObjects(
-      @GraphQLRootContext Map<String, Object> context) {
+      @GraphQLRootContext GraphQLContext context) {
     if (authorizationGroupRelatedObjects != null) {
       return CompletableFuture.completedFuture(authorizationGroupRelatedObjects);
     }
-    return AnetObjectEngine.getInstance().getAuthorizationGroupDao()
-        .getRelatedObjects(context, this).thenApply(o -> {
-          authorizationGroupRelatedObjects = o;
-          return o;
-        });
+    return engine().getAuthorizationGroupDao().getRelatedObjects(context, this).thenApply(o -> {
+      authorizationGroupRelatedObjects = o;
+      return o;
+    });
   }
 
   @GraphQLInputField(name = "authorizationGroupRelatedObjects")
@@ -68,11 +66,11 @@ public class AuthorizationGroup extends AbstractSubscribableAnetBean
 
   @GraphQLQuery(name = "administrativePositions")
   public CompletableFuture<List<Position>> loadAdministrativePositions(
-      @GraphQLRootContext Map<String, Object> context) {
+      @GraphQLRootContext GraphQLContext context) {
     if (administrativePositions != null) {
       return CompletableFuture.completedFuture(administrativePositions);
     }
-    return AnetObjectEngine.getInstance().getAuthorizationGroupDao()
+    return engine().getAuthorizationGroupDao()
         .getAdministrativePositionsForAuthorizationGroup(context, uuid).thenApply(o -> {
           administrativePositions = o;
           return o;

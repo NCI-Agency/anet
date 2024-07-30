@@ -4,6 +4,7 @@ import {
   from,
   HttpLink,
   InMemoryCache,
+  NetworkStatus,
   useQuery
 } from "@apollo/client"
 import { RetryLink } from "@apollo/client/link/retry"
@@ -38,7 +39,7 @@ const retryLink = new RetryLink({
 })
 
 const API = {
-  _fetch(url, data, accept) {
+  _fetch(url, data, accept = "application/json", output = undefined) {
     const [authHeaderName, authHeaderValue] = API._getAuthHeader()
     const params = {
       method: "POST",
@@ -46,20 +47,22 @@ const API = {
       credentials: "same-origin",
       headers: {
         "Content-Type": "application/json",
-        Accept: accept || "application/json",
+        Accept: accept,
         [authHeaderName]: authHeaderValue
       }
     }
 
-    return window.fetch(url, params)
+    const fullUrl = output ? `${url}?output=${encodeURIComponent(output)}` : url
+    return window.fetch(fullUrl, params)
   },
 
-  queryExport(query, variables, output) {
+  queryExport(query, variables, output, accept = "application/octet-stream") {
     // Can't use client here as the response is not JSON
     return API._fetch(
       GRAPHQL_ENDPOINT,
-      { query: query.loc.source.body, variables, output },
-      "*/*"
+      { query: query.loc.source.body, variables },
+      accept,
+      output
     ).then(response => response.blob())
   },
 
@@ -141,7 +144,9 @@ const API = {
 
   useApiQuery(query, variables, others) {
     const results = useQuery(query, { variables, ...others })
-    results.error = results.error && API._handleError(results.error)
+    if (!results.loading && results.networkStatus === NetworkStatus.error) {
+      results.error = results.error && API._handleError(results.error)
+    }
     return results
   },
 

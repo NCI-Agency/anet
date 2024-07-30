@@ -4,24 +4,31 @@ import mil.dds.anet.beans.UserActivity;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.UserActivitySearchQuery;
+import mil.dds.anet.database.DatabaseHandler;
 import mil.dds.anet.database.mappers.UserActivityMapper;
-import ru.vyarus.guicey.jdbi3.tx.InTransaction;
+import org.jdbi.v3.core.Handle;
+import org.springframework.transaction.annotation.Transactional;
 
 public abstract class AbstractUserActivitySearcher extends
     AbstractSearcher<UserActivity, UserActivitySearchQuery> implements IUserActivitySearcher {
 
   protected static final String WITH_CLAUSE_NAME = "ua";
 
-  protected AbstractUserActivitySearcher(
-      final AbstractSearchQueryBuilder<UserActivity, UserActivitySearchQuery> qb) {
-    super(qb);
+  protected AbstractUserActivitySearcher(DatabaseHandler databaseHandler,
+      AbstractSearchQueryBuilder<UserActivity, UserActivitySearchQuery> qb) {
+    super(databaseHandler, qb);
   }
 
-  @InTransaction
+  @Transactional
   @Override
   public AnetBeanList<UserActivity> runSearch(final UserActivitySearchQuery query) {
-    buildQuery(query);
-    return qb.buildAndRun(getDbHandle(), query, new UserActivityMapper());
+    final Handle handle = getDbHandle();
+    try {
+      buildQuery(query);
+      return qb.buildAndRun(handle, query, new UserActivityMapper());
+    } finally {
+      closeDbHandle(handle);
+    }
   }
 
   @Override

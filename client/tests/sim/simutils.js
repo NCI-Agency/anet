@@ -8,14 +8,24 @@ export const sleep = seconds => {
 }
 
 async function runGQL(user, query) {
+  // Fetch a bearer token for the user
+  const authResponse = await fetch(
+    "http://localhost:9080/realms/ANET/protocol/openid-connect/token",
+    {
+      method: "POST",
+      body: `client_id=ANET-Client-public&username=${user.name}&password=${user.password}&grant_type=password`,
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      }
+    }
+  )
+  const authJson = await authResponse.json()
   const result = await fetch(`${process.env.SERVER_URL}/graphql`, {
     method: "POST",
     headers: {
       Accept: "application/json",
       "Content-Type": "application/json",
-      Authorization:
-        "Basic " +
-        Buffer.from(`${user.name}:${user.password}`).toString("base64")
+      Authorization: `Bearer ${authJson.access_token}`
     },
     body: JSON.stringify(query)
   })

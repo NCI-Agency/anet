@@ -92,7 +92,9 @@ test.beforeEach(t => {
     const chrome = require("selenium-webdriver/chrome")
     const options = new chrome.Options(capabilities).addArguments([
       "--headless=old",
-      "--disable-search-engine-choice-screen"
+      "--disable-gpu",
+      "--disable-search-engine-choice-screen",
+      "--window-size=1600,1200"
     ])
     builder = builder
       .forBrowser(webdriver.Browser.CHROME)
@@ -204,6 +206,9 @@ test.beforeEach(t => {
     const urlToGet = `${process.env.SERVER_URL}/api/logout`
     debugLog("Logging out via URL", urlToGet)
     await t.context.driver.get(urlToGet)
+    await t.context.driver.sleep(t.context.shortWaitMs)
+    const $logoutFormSubmitButton = await t.context.$("#kc-logout")
+    await $logoutFormSubmitButton.click()
   }
 
   // For debugging purposes.

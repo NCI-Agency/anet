@@ -1,0 +1,52 @@
+logging:
+  config: file:logback-spring.xml
+
+spring:
+  servlet:
+    # Allow upload of large files
+    multipart:
+      max-file-size: -1
+      max-request-size: -1
+
+  jpa:
+    open-in-view: true
+    hibernate:
+      ddl-auto: none
+
+  liquibase:
+    change-log: classpath:db-changelog.yml
+
+  # Security through Keycloak
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            authorization-grant-type: authorization_code
+            scope: openid
+
+  shell:
+    history:
+      enabled: false
+
+  task:
+    scheduling:
+      pool:
+        # Allow our worker threads to run concurrently
+        size: 10
+
+# GraphQL integration through SPQR
+graphql:
+  spqr:
+    base-packages: mil.dds.anet
+    abstract-input-type-resolution: false
+    http:
+      # We register our own controller under /graphql
+      enabled: false
+      endpoint: /graphql-unused
+    relay:
+      enabled: false
+    ws:
+      enabled: false
+    gui:
+      enabled: false

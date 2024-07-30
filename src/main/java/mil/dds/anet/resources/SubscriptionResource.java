@@ -1,14 +1,11 @@
 package mil.dds.anet.resources;
 
+import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
-import jakarta.annotation.security.PermitAll;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response.Status;
-import java.util.Map;
-import mil.dds.anet.AnetObjectEngine;
+import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Subscription;
@@ -20,18 +17,22 @@ import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.ResponseUtils;
 import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 
-@PermitAll
+@Component
+@GraphQLApi
 public class SubscriptionResource {
 
-  private SubscriptionDao dao;
+  private final SubscriptionDao dao;
 
-  public SubscriptionResource(AnetObjectEngine engine) {
-    this.dao = engine.getSubscriptionDao();
+  public SubscriptionResource(SubscriptionDao dao) {
+    this.dao = dao;
   }
 
   @GraphQLMutation(name = "createSubscription")
-  public Subscription createSubscription(@GraphQLRootContext Map<String, Object> context,
+  public Subscription createSubscription(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "subscription") Subscription s) {
     final Person user = DaoUtils.getUserFromContext(context);
     final Position position = DaoUtils.getPosition(user);
@@ -47,17 +48,18 @@ public class SubscriptionResource {
   }
 
   @GraphQLMutation(name = "deleteSubscription")
-  public Integer deleteSubscription(@GraphQLRootContext Map<String, Object> context,
+  public Integer deleteSubscription(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "uuid") String subscriptionUuid) {
     final Subscription s = dao.getByUuid(subscriptionUuid);
     if (s == null) {
-      throw new WebApplicationException("Subscription not found", Status.NOT_FOUND);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Subscription not found");
     }
     final Person user = DaoUtils.getUserFromContext(context);
     checkPermission(s, user);
     final int numRows = dao.delete(subscriptionUuid);
     if (numRows == 0) {
-      throw new WebApplicationException("Couldn't process subscription delete", Status.NOT_FOUND);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+          "Couldn't process subscription delete");
     }
     AnetAuditLogger.log("Subscription {} deleted by {}", s, user);
     // GraphQL mutations *have* to return something, so we return the number of deleted rows
@@ -65,12 +67,13 @@ public class SubscriptionResource {
   }
 
   @GraphQLMutation(name = "deleteObjectSubscription")
-  public Integer deleteObjectSubscription(@GraphQLRootContext Map<String, Object> context,
+  public Integer deleteObjectSubscription(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "uuid") String subscribedObjectUuid) {
     final Person user = DaoUtils.getUserFromContext(context);
     final int numRows = dao.deleteObjectSubscription(user, subscribedObjectUuid);
     if (numRows == 0) {
-      throw new WebApplicationException("Couldn't process subscription delete", Status.NOT_FOUND);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+          "Couldn't process subscription delete");
     }
     AnetAuditLogger.log("Subscription to {} deleted by {}", subscribedObjectUuid, user);
     // GraphQL mutations *have* to return something, so we return the number of deleted rows
@@ -78,8 +81,7 @@ public class SubscriptionResource {
   }
 
   @GraphQLQuery(name = "mySubscriptions")
-  public AnetBeanList<Subscription> getMySubscriptions(
-      @GraphQLRootContext Map<String, Object> context,
+  public AnetBeanList<Subscription> getMySubscriptions(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "query") SubscriptionSearchQuery query) {
     return dao.search(DaoUtils.getUserFromContext(context), query);
   }
@@ -87,15 +89,15 @@ public class SubscriptionResource {
   private void checkPermission(Subscription s, Person user) {
     final Position position = DaoUtils.getPosition(user);
     if (!s.getSubscriberUuid().equals(DaoUtils.getUuid(position)) && !AuthUtils.isAdmin(user)) {
-      throw new WebApplicationException("Only the subscriber or an admin can do this",
-          Status.FORBIDDEN);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          "Only the subscriber or an admin can do this");
     }
   }
 
   private void checkSubscriber(Position position) {
     if (DaoUtils.getUuid(position) == null) {
-      throw new WebApplicationException("User must have a current position to subscribe",
-          Status.BAD_REQUEST);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "User must have a current position to subscribe");
     }
   }
 

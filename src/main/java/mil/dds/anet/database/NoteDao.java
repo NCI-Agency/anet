@@ -5,6 +5,7 @@ import static mil.dds.anet.utils.PendingAssessmentsHelper.NOTE_RECURRENCE;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
@@ -37,13 +38,20 @@ import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.ForeignKeyFetcher;
+import org.jdbi.v3.core.Handle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.vyarus.guicey.jdbi3.tx.InTransaction;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
+@Component
 public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
 
   public static final String TABLE_NAME = "notes";
+
+  public NoteDao(DatabaseHandler databaseHandler) {
+    super(databaseHandler);
+  }
 
   public enum UpdateType {
     CREATE, READ, UPDATE, DELETE
@@ -57,23 +65,21 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
     return getByIds(Arrays.asList(uuid)).get(0);
   }
 
-  static class SelfIdBatcher extends IdBatcher<Note> {
+  class SelfIdBatcher extends IdBatcher<Note> {
     private static final String SQL =
         "/* batch.getNotesByUuids */ SELECT * FROM notes WHERE uuid IN ( <uuids> )";
 
     public SelfIdBatcher() {
-      super(SQL, "uuids", new NoteMapper());
+      super(databaseHandler, SQL, "uuids", new NoteMapper());
     }
   }
 
   @Override
   public List<Note> getByIds(List<String> uuids) {
-    final IdBatcher<Note> idBatcher =
-        AnetObjectEngine.getInstance().getInjector().getInstance(SelfIdBatcher.class);
-    return idBatcher.getByIds(uuids);
+    return new SelfIdBatcher().getByIds(uuids);
   }
 
-  @InTransaction
+  @Transactional
   @Override
   public Note insert(Note obj) {
     DaoUtils.setInsertFields(obj);
@@ -84,19 +90,23 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
 
   @Override
   public Note insertInternal(Note n) {
-    getDbHandle()
-        .createUpdate("/* insertNote */ INSERT INTO notes"
-            + " (uuid, \"authorUuid\", type, \"assessmentKey\", text, \"createdAt\", \"updatedAt\")"
-            + " VALUES (:uuid, :authorUuid, :type, :assessmentKey, :text, :createdAt, :updatedAt)")
-        .bindBean(n).bind("createdAt", DaoUtils.asLocalDateTime(n.getCreatedAt()))
-        .bind("updatedAt", DaoUtils.asLocalDateTime(n.getUpdatedAt()))
-        .bind("authorUuid", n.getAuthorUuid()).bind("type", DaoUtils.getEnumId(n.getType()))
-        .execute();
-    insertNoteRelatedObjects(DaoUtils.getUuid(n), n.getNoteRelatedObjects());
-    return n;
+    final Handle handle = getDbHandle();
+    try {
+      handle.createUpdate("/* insertNote */ INSERT INTO notes"
+          + " (uuid, \"authorUuid\", type, \"assessmentKey\", text, \"createdAt\", \"updatedAt\")"
+          + " VALUES (:uuid, :authorUuid, :type, :assessmentKey, :text, :createdAt, :updatedAt)")
+          .bindBean(n).bind("createdAt", DaoUtils.asLocalDateTime(n.getCreatedAt()))
+          .bind("updatedAt", DaoUtils.asLocalDateTime(n.getUpdatedAt()))
+          .bind("authorUuid", n.getAuthorUuid()).bind("type", DaoUtils.getEnumId(n.getType()))
+          .execute();
+      insertNoteRelatedObjects(DaoUtils.getUuid(n), n.getNoteRelatedObjects());
+      return n;
+    } finally {
+      closeDbHandle(handle);
+    }
   }
 
-  @InTransaction
+  @Transactional
   @Override
   public int update(Note obj) {
     DaoUtils.setUpdateFields(obj);
@@ -107,29 +117,39 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
 
   @Override
   public int updateInternal(Note n) {
-    deleteNoteRelatedObjects(DaoUtils.getUuid(n)); // seems the easiest thing to do
-    insertNoteRelatedObjects(DaoUtils.getUuid(n), n.getNoteRelatedObjects());
-    // We don't update the type and assessmentKey!
-    return getDbHandle()
-        .createUpdate("/* updateNote */ UPDATE notes "
-            + "SET text = :text, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
-        .bindBean(n).bind("updatedAt", DaoUtils.asLocalDateTime(n.getUpdatedAt())).execute();
+    final Handle handle = getDbHandle();
+    try {
+      deleteNoteRelatedObjects(DaoUtils.getUuid(n)); // seems the easiest thing to do
+      insertNoteRelatedObjects(DaoUtils.getUuid(n), n.getNoteRelatedObjects());
+      // We don't update the type and assessmentKey!
+      return handle
+          .createUpdate("/* updateNote */ UPDATE notes "
+              + "SET text = :text, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
+          .bindBean(n).bind("updatedAt", DaoUtils.asLocalDateTime(n.getUpdatedAt())).execute();
+    } finally {
+      closeDbHandle(handle);
+    }
   }
 
-  @InTransaction
+  @Transactional
   @Deprecated
   public int updateNoteTypeAndText(Note n) {
-    return getDbHandle()
-        .createUpdate(
-            "/* updateNote */ UPDATE notes SET type = :type, text = :text WHERE uuid = :uuid")
-        .bindBean(n).bind("type", DaoUtils.getEnumId(n.getType())).execute();
+    final Handle handle = getDbHandle();
+    try {
+      return handle
+          .createUpdate(
+              "/* updateNote */ UPDATE notes SET type = :type, text = :text WHERE uuid = :uuid")
+          .bindBean(n).bind("type", DaoUtils.getEnumId(n.getType())).execute();
+    } finally {
+      closeDbHandle(handle);
+    }
   }
 
-  @InTransaction
+  @Transactional
   @Override
   public int delete(String uuid) {
     final Note note = getByUuid(uuid);
-    note.loadNoteRelatedObjects(AnetObjectEngine.getInstance().getContext()).join();
+    note.loadNoteRelatedObjects(engine().getContext()).join();
     DaoUtils.setUpdateFields(note);
     updateSubscriptions(1, note);
     return deleteInternal(uuid);
@@ -137,13 +157,18 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
 
   @Override
   public int deleteInternal(String uuid) {
-    deleteNoteRelatedObjects(uuid);
-    return getDbHandle().createUpdate("/* deleteNote */ DELETE FROM notes where uuid = :uuid")
-        .bind("uuid", uuid).execute();
+    final Handle handle = getDbHandle();
+    try {
+      deleteNoteRelatedObjects(uuid);
+      return handle.createUpdate("/* deleteNote */ DELETE FROM notes where uuid = :uuid")
+          .bind("uuid", uuid).execute();
+    } finally {
+      closeDbHandle(handle);
+    }
   }
 
   public CompletableFuture<List<Note>> getNotesForRelatedObject(
-      @GraphQLRootContext Map<String, Object> context, String relatedObjectUuid) {
+      @GraphQLRootContext GraphQLContext context, String relatedObjectUuid) {
     final Person user = DaoUtils.getUserFromContext(context);
     final Set<String> authorizationGroupUuids = DaoUtils.getAuthorizationGroupUuids(user);
     return new ForeignKeyFetcher<Note>()
@@ -159,7 +184,7 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
         }).toList());
   }
 
-  static class NotesBatcher extends ForeignKeyBatcher<Note> {
+  class NotesBatcher extends ForeignKeyBatcher<Note> {
     private static final String SQL =
         "/* batch.getNotesForRelatedObject */ SELECT * FROM \"noteRelatedObjects\" "
             + "INNER JOIN notes ON \"noteRelatedObjects\".\"noteUuid\" = notes.uuid "
@@ -167,55 +192,62 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
             + "ORDER BY notes.\"updatedAt\" DESC";
 
     public NotesBatcher() {
-      super(SQL, "foreignKeys", new NoteMapper(), "relatedObjectUuid");
+      super(databaseHandler, SQL, "foreignKeys", new NoteMapper(), "relatedObjectUuid");
     }
   }
 
   public List<List<Note>> getNotes(List<String> foreignKeys) {
-    final ForeignKeyBatcher<Note> notesBatcher =
-        AnetObjectEngine.getInstance().getInjector().getInstance(NotesBatcher.class);
-    return notesBatcher.getByForeignKeys(foreignKeys);
+    return new NotesBatcher().getByForeignKeys(foreignKeys);
   }
 
-  static class NoteRelatedObjectsBatcher extends ForeignKeyBatcher<GenericRelatedObject> {
+  class NoteRelatedObjectsBatcher extends ForeignKeyBatcher<GenericRelatedObject> {
     private static final String SQL =
         "/* batch.getNoteRelatedObjects */ SELECT * FROM \"noteRelatedObjects\" "
             + "WHERE \"noteUuid\" IN ( <foreignKeys> ) ORDER BY \"relatedObjectType\", \"relatedObjectUuid\" ASC";
 
     public NoteRelatedObjectsBatcher() {
-      super(SQL, "foreignKeys", new GenericRelatedObjectMapper("noteUuid"), "noteUuid");
+      super(databaseHandler, SQL, "foreignKeys", new GenericRelatedObjectMapper("noteUuid"),
+          "noteUuid");
     }
   }
 
   public List<List<GenericRelatedObject>> getNoteRelatedObjects(List<String> foreignKeys) {
-    final ForeignKeyBatcher<GenericRelatedObject> noteRelatedObjectsBatcher =
-        AnetObjectEngine.getInstance().getInjector().getInstance(NoteRelatedObjectsBatcher.class);
-    return noteRelatedObjectsBatcher.getByForeignKeys(foreignKeys);
+    return new NoteRelatedObjectsBatcher().getByForeignKeys(foreignKeys);
   }
 
-  public CompletableFuture<List<GenericRelatedObject>> getRelatedObjects(
-      Map<String, Object> context, Note note) {
+  public CompletableFuture<List<GenericRelatedObject>> getRelatedObjects(GraphQLContext context,
+      Note note) {
     return new ForeignKeyFetcher<GenericRelatedObject>().load(context,
         FkDataLoaderKey.NOTE_NOTE_RELATED_OBJECTS, note.getUuid());
   }
 
   private void insertNoteRelatedObjects(String uuid,
       List<GenericRelatedObject> noteRelatedObjects) {
-    for (final GenericRelatedObject nro : noteRelatedObjects) {
-      getDbHandle().createUpdate(
-          "/* insertNoteRelatedObject */ INSERT INTO \"noteRelatedObjects\" (\"noteUuid\", \"relatedObjectType\", \"relatedObjectUuid\") "
-              + "VALUES (:noteUuid, :relatedObjectType, :relatedObjectUuid)")
-          .bindBean(nro).bind("noteUuid", uuid).execute();
+    final Handle handle = getDbHandle();
+    try {
+      for (final GenericRelatedObject nro : noteRelatedObjects) {
+        handle.createUpdate(
+            "/* insertNoteRelatedObject */ INSERT INTO \"noteRelatedObjects\" (\"noteUuid\", \"relatedObjectType\", \"relatedObjectUuid\") "
+                + "VALUES (:noteUuid, :relatedObjectType, :relatedObjectUuid)")
+            .bindBean(nro).bind("noteUuid", uuid).execute();
+      }
+    } finally {
+      closeDbHandle(handle);
     }
   }
 
   private void deleteNoteRelatedObjects(String uuid) {
-    getDbHandle().execute(
-        "/* deleteNoteRelatedObjects */ DELETE FROM \"noteRelatedObjects\" WHERE \"noteUuid\" = ?",
-        uuid);
+    final Handle handle = getDbHandle();
+    try {
+      handle.execute(
+          "/* deleteNoteRelatedObjects */ DELETE FROM \"noteRelatedObjects\" WHERE \"noteUuid\" = ?",
+          uuid);
+    } finally {
+      closeDbHandle(handle);
+    }
   }
 
-  @InTransaction
+  @Transactional
   public void deleteDanglingNotes() {
     // 1. for report assessments, their noteRelatedObjects can be deleted
     // if the report they point to has been deleted
@@ -237,46 +269,65 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
   }
 
   public int deleteAssessments(String tableName, String uuid) {
-    final String notExists = String.format("NOT EXISTS (SELECT uuid FROM \"%1$s\""
-        + " WHERE uuid = \"nro_%1$s\".\"relatedObjectUuid\")", tableName);
-    final String equals = String.format("\"nro_%1$s\".\"relatedObjectUuid\" = ?", tableName);
-    final String sql = String.format(
-        "/* deleteDanglingNoteRelatedObjectsFor_%1$sAssessments */"
-            + "DELETE FROM \"noteRelatedObjects\" WHERE \"noteUuid\" IN ("
-            + " SELECT n.uuid FROM notes n WHERE n.type = ? AND EXISTS ("
-            + "  SELECT \"nro_%1$s\".\"noteUuid\" FROM \"noteRelatedObjects\" \"nro_%1$s\""
-            + "  WHERE \"nro_%1$s\".\"relatedObjectType\" = ?"
-            + "  AND \"nro_%1$s\".\"noteUuid\" = n.uuid AND %2$s))",
-        tableName, uuid == null ? notExists : equals);
-    return uuid == null
-        ? getDbHandle().execute(sql, DaoUtils.getEnumId(Note.NoteType.ASSESSMENT), tableName)
-        : getDbHandle().execute(sql, DaoUtils.getEnumId(Note.NoteType.ASSESSMENT), tableName, uuid);
+    final Handle handle = getDbHandle();
+    try {
+      final String notExists = String.format("NOT EXISTS (SELECT uuid FROM \"%1$s\""
+          + " WHERE uuid = \"nro_%1$s\".\"relatedObjectUuid\")", tableName);
+      final String equals = String.format("\"nro_%1$s\".\"relatedObjectUuid\" = ?", tableName);
+      final String sql = String.format(
+          "/* deleteDanglingNoteRelatedObjectsFor_%1$sAssessments */"
+              + "DELETE FROM \"noteRelatedObjects\" WHERE \"noteUuid\" IN ("
+              + " SELECT n.uuid FROM notes n WHERE n.type = ? AND EXISTS ("
+              + "  SELECT \"nro_%1$s\".\"noteUuid\" FROM \"noteRelatedObjects\" \"nro_%1$s\""
+              + "  WHERE \"nro_%1$s\".\"relatedObjectType\" = ?"
+              + "  AND \"nro_%1$s\".\"noteUuid\" = n.uuid AND %2$s))",
+          tableName, uuid == null ? notExists : equals);
+      return uuid == null
+          ? handle.execute(sql, DaoUtils.getEnumId(Note.NoteType.ASSESSMENT), tableName)
+          : handle.execute(sql, DaoUtils.getEnumId(Note.NoteType.ASSESSMENT), tableName, uuid);
+    } finally {
+      closeDbHandle(handle);
+    }
   }
 
   public int deleteNoteRelatedObjects(String tableName, String uuid) {
-    final String notIn =
-        String.format("\"relatedObjectUuid\" NOT IN ( SELECT uuid FROM \"%1$s\" )", tableName);
-    final String equals = "\"relatedObjectUuid\" = ?";
-    final String sql = String.format(
-        "/* deleteDanglingNoteRelatedObjectsFor_%1$s */ DELETE FROM \"noteRelatedObjects\""
-            + " WHERE \"relatedObjectType\" = ? AND %2$s",
-        tableName, uuid == null ? notIn : equals);
-    return uuid == null ? getDbHandle().execute(sql, tableName)
-        : getDbHandle().execute(sql, tableName, uuid);
+    final Handle handle = getDbHandle();
+    try {
+      final String notIn =
+          String.format("\"relatedObjectUuid\" NOT IN ( SELECT uuid FROM \"%1$s\" )", tableName);
+      final String equals = "\"relatedObjectUuid\" = ?";
+      final String sql = String.format(
+          "/* deleteDanglingNoteRelatedObjectsFor_%1$s */ DELETE FROM \"noteRelatedObjects\""
+              + " WHERE \"relatedObjectType\" = ? AND %2$s",
+          tableName, uuid == null ? notIn : equals);
+      return uuid == null ? handle.execute(sql, tableName) : handle.execute(sql, tableName, uuid);
+    } finally {
+      closeDbHandle(handle);
+    }
   }
 
   public int deleteOrphanNotes() {
-    return getDbHandle().execute("/* deleteDanglingNotes */ DELETE FROM notes"
-        + " WHERE uuid NOT IN ( SELECT \"noteUuid\" FROM \"noteRelatedObjects\" )");
+    final Handle handle = getDbHandle();
+    try {
+      return handle.execute("/* deleteDanglingNotes */ DELETE FROM notes"
+          + " WHERE uuid NOT IN ( SELECT \"noteUuid\" FROM \"noteRelatedObjects\" )");
+    } finally {
+      closeDbHandle(handle);
+    }
   }
 
-  @InTransaction
+  @Transactional
   public List<Note> getNotesByType(NoteType type) {
-    return getDbHandle().createQuery("/* getNotesByType*/ SELECT * FROM notes WHERE type = :type")
-        .bind("type", DaoUtils.getEnumId(type)).map(new NoteMapper()).list();
+    final Handle handle = getDbHandle();
+    try {
+      return handle.createQuery("/* getNotesByType*/ SELECT * FROM notes WHERE type = :type")
+          .bind("type", DaoUtils.getEnumId(type)).map(new NoteMapper()).list();
+    } finally {
+      closeDbHandle(handle);
+    }
   }
 
-  @InTransaction
+  @Transactional
   public boolean hasNotePermission(final Person user, final Set<String> authorizationGroupUuids,
       final Note note, final String authorUuid, final UpdateType updateType) {
     // Admins always have access
@@ -332,7 +383,7 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
       final Set<String> authorizationGroupUuids, final Note note, final UpdateType updateType) {
     final String recurrenceString = checkAssessmentPreconditions(note);
 
-    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
+    final AnetObjectEngine engine = engine();
     final List<GenericRelatedObject> noteRelatedObjects =
         note.loadNoteRelatedObjects(engine.getContext()).join();
     if (Utils.isEmptyOrNull(noteRelatedObjects)) {
@@ -370,8 +421,8 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
     }
 
     @SuppressWarnings("unchecked")
-    final Map<String, Object> assessmentDefinition = (Map<String, Object>) AnetObjectEngine
-        .getConfiguration().getDictionaryEntry(note.getAssessmentKey());
+    final Map<String, Object> assessmentDefinition =
+        (Map<String, Object>) dict().getDictionaryEntry(note.getAssessmentKey());
     if (assessmentDefinition == null) {
       throw new IllegalArgumentException("Assessment key not found in dictionary");
     }
@@ -520,7 +571,7 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
     final TaskSearchQuery tsq = new TaskSearchQuery();
     tsq.setStatus(Task.Status.ACTIVE);
     final List<Task> responsibleTasks =
-        position.loadResponsibleTasks(AnetObjectEngine.getInstance().getContext(), tsq).join();
+        position.loadResponsibleTasks(engine().getContext(), tsq).join();
     return responsibleTasks.stream().map(AbstractAnetBean::getUuid).collect(Collectors.toSet());
   }
 
@@ -530,7 +581,7 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
       return Collections.emptySet();
     }
     final List<Position> associatedPositions =
-        position.loadAssociatedPositions(AnetObjectEngine.getInstance().getContext()).join();
+        position.loadAssociatedPositions(engine().getContext()).join();
     return associatedPositions.stream().map(AbstractAnetBean::getUuid).collect(Collectors.toSet());
   }
 
@@ -540,7 +591,7 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
       return Collections.emptySet();
     }
     final List<Organization> organizationAdministrated =
-        position.loadOrganizationsAdministrated(AnetObjectEngine.getInstance().getContext()).join();
+        position.loadOrganizationsAdministrated(engine().getContext()).join();
     return organizationAdministrated.stream().map(AbstractAnetBean::getUuid)
         .collect(Collectors.toSet());
   }
@@ -548,7 +599,7 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
   private void updateSubscriptions(int numRows, Note obj) {
     if (numRows > 0) {
       final List<SubscriptionUpdateGroup> subscriptionUpdates = getSubscriptionUpdates(obj);
-      final SubscriptionDao subscriptionDao = AnetObjectEngine.getInstance().getSubscriptionDao();
+      final SubscriptionDao subscriptionDao = engine().getSubscriptionDao();
       for (final SubscriptionUpdateGroup subscriptionUpdate : subscriptionUpdates) {
         subscriptionDao.updateSubscriptions(subscriptionUpdate);
       }

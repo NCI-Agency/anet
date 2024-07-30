@@ -32,7 +32,8 @@ public class AnetDbLogger implements SqlLogger {
   @Override
   public void logAfterExecution(StatementContext context) {
     final String renderedSql = context.getRenderedSql();
-    if (logger.isDebugEnabled() && !renderedSql.startsWith("INSERT INTO \"userActivities\"")) {
+    if (logger.isDebugEnabled() && renderedSql != null
+        && !renderedSql.startsWith("INSERT INTO \"userActivities\"")) {
       final String msg =
           renderedSql.replace(AttachmentDao.ATTACHMENT_FIELDS, " <ATTACHMENT_FIELDS> ")
               .replace(AuthorizationGroupDao.AUTHORIZATION_GROUP_FIELDS,
@@ -50,7 +51,6 @@ public class AnetDbLogger implements SqlLogger {
               .replace(SubscriptionUpdateDao.SUBSCRIPTION_UPDATE_FIELDS,
                   " <SUBSCRIPTION_UPDATE_FIELDS> ")
               .replace(TaskDao.TASK_FIELDS, " <TASK_FIELDS> ")
-              .replaceAll("LEFT JOIN (CONTAINS|FREETEXT)TABLE[^=]*= (\\S+)\\.\\[Key\\]", "<$1_$2>")
               .replaceFirst("LEFT JOIN (mv_fts_\\S+) ON \\S+\\s*=\\s*\\S+", "<$1>")
               .replaceFirst("\\(?(EXP|ISNULL|CASE|ts_rank).* AS (search_rank)", "<$2>");
       logger.debug("{}\t{}", context.getElapsedTime(ChronoUnit.MILLIS), msg);

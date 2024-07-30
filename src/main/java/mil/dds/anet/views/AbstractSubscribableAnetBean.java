@@ -1,10 +1,9 @@
 package mil.dds.anet.views;
 
+import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
-import java.util.Map;
 import java.util.Objects;
-import mil.dds.anet.AnetObjectEngine;
 
 public abstract class AbstractSubscribableAnetBean extends AbstractAnetBean {
 
@@ -12,10 +11,9 @@ public abstract class AbstractSubscribableAnetBean extends AbstractAnetBean {
   private Boolean isSubscribed;
 
   @GraphQLQuery(name = "isSubscribed")
-  public synchronized Boolean isSubscribed(@GraphQLRootContext Map<String, Object> context) {
+  public synchronized Boolean isSubscribed(@GraphQLRootContext GraphQLContext context) {
     if (isSubscribed == null) {
-      isSubscribed =
-          AnetObjectEngine.getInstance().getSubscriptionDao().isSubscribedObject(context, uuid);
+      isSubscribed = engine().getSubscriptionDao().isSubscribedObject(context, uuid);
     }
     return isSubscribed;
   }

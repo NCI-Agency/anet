@@ -3,11 +3,9 @@ package mil.dds.anet.test.integration.db;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.dropwizard.testing.junit5.DropwizardAppExtension;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
-import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Attachment;
 import mil.dds.anet.beans.CustomSensitiveInformation;
 import mil.dds.anet.beans.Location;
@@ -18,10 +16,10 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.WithStatus;
-import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.database.AdminDao;
 import mil.dds.anet.database.AttachmentDao;
 import mil.dds.anet.database.CustomSensitiveInformationDao;
+import mil.dds.anet.database.JobHistoryDao;
 import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.database.NoteDao;
 import mil.dds.anet.database.OrganizationDao;
@@ -29,6 +27,7 @@ import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.TaskDao;
+import mil.dds.anet.test.SpringTestConfig;
 import mil.dds.anet.test.client.Atmosphere;
 import mil.dds.anet.test.client.Report;
 import mil.dds.anet.test.client.ReportInput;
@@ -42,22 +41,47 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
+@SpringBootTest(classes = SpringTestConfig.class,
+    useMainMethod = SpringBootTest.UseMainMethod.ALWAYS,
+    webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class MergedEntityWorkerTest extends AbstractResourceTest {
 
   @Autowired
-  protected DropwizardAppExtension<AnetConfiguration> dropwizardApp;
+  private JobHistoryDao jobHistoryDao;
 
-  private AnetObjectEngine engine;
+  @Autowired
   private AdminDao adminDao;
+
+  @Autowired
+  private AttachmentDao attachmentDao;
+
+  @Autowired
+  private CustomSensitiveInformationDao customSensitiveInformationDao;
+
+  @Autowired
+  private LocationDao locationDao;
+
+  @Autowired
+  private NoteDao noteDao;
+
+  @Autowired
+  private OrganizationDao organizationDao;
+
+  @Autowired
+  private PersonDao personDao;
+
+  @Autowired
+  private PositionDao positionDao;
+
+  @Autowired
+  private TaskDao taskDao;
+
   private MergedEntityWorker mergedEntityWorker;
 
   @BeforeAll
   void setUpClass() {
-    engine = AnetObjectEngine.getInstance();
-    adminDao = engine.getAdminDao();
-    mergedEntityWorker = new MergedEntityWorker(dropwizardApp.getConfiguration(), adminDao);
+    mergedEntityWorker = new MergedEntityWorker(dict, jobHistoryDao, adminDao);
 
     // Flush all merged entities from previous tests
     mergedEntityWorker.run();
@@ -67,32 +91,30 @@ class MergedEntityWorkerTest extends AbstractResourceTest {
   void testAttachment() {
     final String testOldUuid = UUID.randomUUID().toString();
     final String testNewUuid = UUID.randomUUID().toString();
-    final AttachmentDao dao = engine.getAttachmentDao();
 
     // set things up
     final Attachment input = new Attachment();
     input.setAuthor(getRegularUserBean());
     input.setDescription(getRichText(AttachmentDao.TABLE_NAME, testOldUuid));
-    final Attachment created = dao.insert(input);
+    final Attachment created = attachmentDao.insert(input);
     assertContains(created.getDescription(), testOldUuid);
 
     // run the worker
     runMergedEntityWorker(testOldUuid, testNewUuid);
 
     // assert that the entity refs have been updated
-    final Attachment updated = dao.getByUuid(created.getUuid());
+    final Attachment updated = attachmentDao.getByUuid(created.getUuid());
     assertDoesNotContain(updated.getDescription(), testOldUuid);
     assertContains(updated.getDescription(), testNewUuid);
 
     // clean up
-    dao.delete(updated.getUuid());
+    attachmentDao.delete(updated.getUuid());
   }
 
   @Test
   void testCustomSensitiveInformation() {
     final String testOldUuid = UUID.randomUUID().toString();
     final String testNewUuid = UUID.randomUUID().toString();
-    final CustomSensitiveInformationDao dao = engine.getCustomSensitiveInformationDao();
 
     // set things up
     final CustomSensitiveInformation input = new CustomSensitiveInformation();
@@ -101,26 +123,26 @@ class MergedEntityWorkerTest extends AbstractResourceTest {
     input.setRelatedObjectUuid(relatedObjectUuid);
     input.setCustomFieldName("testCustomField");
     input.setCustomFieldValue(getRichText(PersonDao.TABLE_NAME, testOldUuid));
-    final CustomSensitiveInformation created = dao.insert(input);
+    final CustomSensitiveInformation created = customSensitiveInformationDao.insert(input);
     assertContains(created.getCustomFieldValue(), testOldUuid);
 
     // run the worker
     runMergedEntityWorker(testOldUuid, testNewUuid);
 
     // assert that the entity refs have been updated
-    final CustomSensitiveInformation updated = dao.getByUuid(created.getUuid());
+    final CustomSensitiveInformation updated =
+        customSensitiveInformationDao.getByUuid(created.getUuid());
     assertDoesNotContain(updated.getCustomFieldValue(), testOldUuid);
     assertContains(updated.getCustomFieldValue(), testNewUuid);
 
     // clean up
-    dao.deleteFor(relatedObjectUuid);
+    customSensitiveInformationDao.deleteFor(relatedObjectUuid);
   }
 
   @Test
   void testLocation() {
     final String testOldUuid = UUID.randomUUID().toString();
     final String testNewUuid = UUID.randomUUID().toString();
-    final LocationDao dao = engine.getLocationDao();
 
     // set things up
     final Location input = new Location();
@@ -129,7 +151,7 @@ class MergedEntityWorkerTest extends AbstractResourceTest {
     input.setName("testLocation");
     input.setDescription(getRichText(LocationDao.TABLE_NAME, testOldUuid));
     input.setCustomFields(getJsonString(LocationDao.TABLE_NAME, testOldUuid));
-    final Location created = dao.insert(input);
+    final Location created = locationDao.insert(input);
     assertContains(created.getDescription(), testOldUuid);
     assertContains(created.getCustomFields(), testOldUuid);
 
@@ -137,21 +159,20 @@ class MergedEntityWorkerTest extends AbstractResourceTest {
     runMergedEntityWorker(testOldUuid, testNewUuid);
 
     // assert that the entity refs have been updated
-    final Location updated = dao.getByUuid(created.getUuid());
+    final Location updated = locationDao.getByUuid(created.getUuid());
     assertDoesNotContain(updated.getDescription(), testOldUuid);
     assertDoesNotContain(updated.getCustomFields(), testOldUuid);
     assertContains(updated.getDescription(), testNewUuid);
     assertContains(updated.getCustomFields(), testNewUuid);
 
     // clean up (through internal method)
-    dao._deleteByUuid(LocationDao.TABLE_NAME, "uuid", updated.getUuid());
+    locationDao._deleteByUuid(LocationDao.TABLE_NAME, "uuid", updated.getUuid());
   }
 
   @Test
   void testNote() {
     final String testOldUuid = UUID.randomUUID().toString();
     final String testNewUuid = UUID.randomUUID().toString();
-    final NoteDao dao = engine.getNoteDao();
 
     // set things up
     final Note input = new Note();
@@ -159,26 +180,25 @@ class MergedEntityWorkerTest extends AbstractResourceTest {
     input.setAuthor(getRegularUserBean());
     input.setText(getRichText(NoteDao.TABLE_NAME, testOldUuid));
     input.setNoteRelatedObjects(List.of());
-    final Note created = dao.insert(input);
+    final Note created = noteDao.insert(input);
     assertContains(created.getText(), testOldUuid);
 
     // run the worker
     runMergedEntityWorker(testOldUuid, testNewUuid);
 
     // assert that the entity refs have been updated
-    final Note updated = dao.getByUuid(created.getUuid());
+    final Note updated = noteDao.getByUuid(created.getUuid());
     assertDoesNotContain(updated.getText(), testOldUuid);
     assertContains(updated.getText(), testNewUuid);
 
     // clean up
-    dao.delete(updated.getUuid());
+    noteDao.delete(updated.getUuid());
   }
 
   @Test
   void testOrganization() {
     final String testOldUuid = UUID.randomUUID().toString();
     final String testNewUuid = UUID.randomUUID().toString();
-    final OrganizationDao dao = engine.getOrganizationDao();
 
     // set things up
     final Organization input = new Organization();
@@ -186,7 +206,7 @@ class MergedEntityWorkerTest extends AbstractResourceTest {
     input.setShortName("testOrganization");
     input.setProfile(getRichText(OrganizationDao.TABLE_NAME, testOldUuid));
     input.setCustomFields(getJsonString(OrganizationDao.TABLE_NAME, testOldUuid));
-    final Organization created = dao.insert(input);
+    final Organization created = organizationDao.insert(input);
     assertContains(created.getProfile(), testOldUuid);
     assertContains(created.getCustomFields(), testOldUuid);
 
@@ -194,21 +214,20 @@ class MergedEntityWorkerTest extends AbstractResourceTest {
     runMergedEntityWorker(testOldUuid, testNewUuid);
 
     // assert that the entity refs have been updated
-    final Organization updated = dao.getByUuid(created.getUuid());
+    final Organization updated = organizationDao.getByUuid(created.getUuid());
     assertDoesNotContain(updated.getProfile(), testOldUuid);
     assertDoesNotContain(updated.getCustomFields(), testOldUuid);
     assertContains(updated.getProfile(), testNewUuid);
     assertContains(updated.getCustomFields(), testNewUuid);
 
     // clean up (through internal method)
-    dao._deleteByUuid(OrganizationDao.TABLE_NAME, "uuid", updated.getUuid());
+    organizationDao._deleteByUuid(OrganizationDao.TABLE_NAME, "uuid", updated.getUuid());
   }
 
   @Test
   void testPerson() {
     final String testOldUuid = UUID.randomUUID().toString();
     final String testNewUuid = UUID.randomUUID().toString();
-    final PersonDao dao = engine.getPersonDao();
 
     // set things up
     final Person input = new Person();
@@ -216,7 +235,7 @@ class MergedEntityWorkerTest extends AbstractResourceTest {
     input.setName("testPerson");
     input.setBiography(getRichText(PersonDao.TABLE_NAME, testOldUuid));
     input.setCustomFields(getJsonString(PersonDao.TABLE_NAME, testOldUuid));
-    final Person created = dao.insert(input);
+    final Person created = personDao.insert(input);
     assertContains(created.getBiography(), testOldUuid);
     assertContains(created.getCustomFields(), testOldUuid);
 
@@ -224,21 +243,20 @@ class MergedEntityWorkerTest extends AbstractResourceTest {
     runMergedEntityWorker(testOldUuid, testNewUuid);
 
     // assert that the entity refs have been updated
-    final Person updated = dao.getByUuid(created.getUuid());
+    final Person updated = personDao.getByUuid(created.getUuid());
     assertDoesNotContain(updated.getBiography(), testOldUuid);
     assertDoesNotContain(updated.getCustomFields(), testOldUuid);
     assertContains(updated.getBiography(), testNewUuid);
     assertContains(updated.getCustomFields(), testNewUuid);
 
     // clean up
-    dao.delete(updated.getUuid());
+    personDao.delete(updated.getUuid());
   }
 
   @Test
   void testPosition() {
     final String testOldUuid = UUID.randomUUID().toString();
     final String testNewUuid = UUID.randomUUID().toString();
-    final PositionDao dao = engine.getPositionDao();
 
     // set things up
     final Position input = new Position();
@@ -247,19 +265,19 @@ class MergedEntityWorkerTest extends AbstractResourceTest {
     input.setRole(Position.PositionRole.MEMBER);
     input.setName("testPosition");
     input.setCustomFields(getJsonString(PositionDao.TABLE_NAME, testOldUuid));
-    final Position created = dao.insert(input);
+    final Position created = positionDao.insert(input);
     assertContains(created.getCustomFields(), testOldUuid);
 
     // run the worker
     runMergedEntityWorker(testOldUuid, testNewUuid);
 
     // assert that the entity refs have been updated
-    final Position updated = dao.getByUuid(created.getUuid());
+    final Position updated = positionDao.getByUuid(created.getUuid());
     assertDoesNotContain(updated.getCustomFields(), testOldUuid);
     assertContains(updated.getCustomFields(), testNewUuid);
 
     // clean up
-    dao.delete(updated.getUuid());
+    positionDao.delete(updated.getUuid());
   }
 
   @Test
@@ -305,7 +323,6 @@ class MergedEntityWorkerTest extends AbstractResourceTest {
   void testTask() {
     final String testOldUuid = UUID.randomUUID().toString();
     final String testNewUuid = UUID.randomUUID().toString();
-    final TaskDao dao = engine.getTaskDao();
 
     // set things up
     final Task input = new Task();
@@ -313,7 +330,7 @@ class MergedEntityWorkerTest extends AbstractResourceTest {
     input.setShortName("testTask");
     input.setDescription(getRichText(TaskDao.TABLE_NAME, testOldUuid));
     input.setCustomFields(getJsonString(TaskDao.TABLE_NAME, testOldUuid));
-    final Task created = dao.insert(input);
+    final Task created = taskDao.insert(input);
     assertContains(created.getDescription(), testOldUuid);
     assertContains(created.getCustomFields(), testOldUuid);
 
@@ -321,14 +338,14 @@ class MergedEntityWorkerTest extends AbstractResourceTest {
     runMergedEntityWorker(testOldUuid, testNewUuid);
 
     // assert that the entity refs have been updated
-    final Task updated = dao.getByUuid(created.getUuid());
+    final Task updated = taskDao.getByUuid(created.getUuid());
     assertDoesNotContain(updated.getDescription(), testOldUuid);
     assertDoesNotContain(updated.getCustomFields(), testOldUuid);
     assertContains(updated.getDescription(), testNewUuid);
     assertContains(updated.getCustomFields(), testNewUuid);
 
     // clean up (through internal method)
-    dao._deleteByUuid(TaskDao.TABLE_NAME, "uuid", updated.getUuid());
+    taskDao._deleteByUuid(TaskDao.TABLE_NAME, "uuid", updated.getUuid());
   }
 
   private void assertContains(String field, String uuid) {

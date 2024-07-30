@@ -27,8 +27,7 @@ The frontend is run with [`yarn`](https://yarnpkg.com/).  We recommend running t
     1. This step is not needed unless want to use other settings and passwords than the default ones (see `build.gradle` for the defaults). You can define custom settings in a local settings file as follows:
     1. Open a command line in the `anet` directory that was retrieved from GitHub.
     1. Create a new empty file at `localSettings.gradle`. (`touch localSettings.gradle` on linux/mac).  This will be a file for all of your local settings and passwords that should not be checked into GitHub.
-1. Update the settings in `anet.yml` for your environment.  See the [ANET Configuration documentation](INSTALL.md#anet-configuration) for more details on these configuration options. You are most likely to change:
-    1. `emailFromAddr` - use your own email address for testing.
+1. Update the settings in `application.yml` for your environment.  See the [ANET Configuration documentation](INSTALL.md#anet-configuration) for more details on these configuration options.
 
 
 ## Set Up Docker
@@ -87,13 +86,11 @@ context you want to connect to.
 
 1. Create the DB Docker container and the initial database: `./gradlew dockerCreateDB`
 1. Start the DB Docker container: `./gradlew dockerStartDB`
-1. Wait until the container is fully started, then run `./gradlew dbMigrate` to build and migrate the database.
+1. Run `./gradlew run` to download all dependencies (including client dependencies like nodejs and yarn), build the project, and start the server.
+    When starting the server, database migrations are run automatically, and the initial data is loaded.
     1. The database schema is stored in [`src/main/resources/migrations.xml`](../src/main/resources/migrations.xml).
-1. Seed the initial data:
-    1. If you're using the Docker container for the database (and you should), you can load the data with: `./gradlew dbLoad`. Otherwise, you'll need to manually connect to the database instance and load the data.
-1. Run `./gradlew run` to download all dependencies (including client dependencies like Node.js and Yarn) and build the project
-
-_Note_: it will also start the back-end but at this step we are not interested in that.
+    1. The initial data is stored in [`insertBaseData-psql.sql`](../insertBaseData-psql.sql).
+    1. If for some reason you want to re-load the initial data, run: `./gradlew dbLoad`.
 
 ### The Base Data Set
 Provided with the ANET source code is the file `insertBaseData-psql.sql`.  This file contains a series of raw SQL commands that insert some sample data into the database that is both required in order to pass all the unit tests, and also helpful for quickly developing and testing new features.  The Base Data Set includes a set of fake users, organizations, locations, and reports.  Here are some of the accounts that you can use to log in and test with:
@@ -111,16 +108,12 @@ Provided with the ANET source code is the file `insertBaseData-psql.sql`.  This 
 To log in as one of the base data users, when prompted for a username and password, enter their username as both the username and the password. See [Users defined locally in the realm](keycloak.md#dev-users) for other possible users.
 
 ### Developing
-1. Run `./gradlew dbMigrate` whenever you pull new changes to migrate the database.
+1. When starting the server, database migrations are run automatically.
     For background info on some of these Liquibase commands, see: https://www.dropwizard.io/en/latest/manual/migrations.html
-    1. Before applying migrations, you can try them out with a dry-run: `./gradlew dbMigrate -Pdry-run`; this shows you the SQL commands that would be executed without actually applying the migrations
-    1. You can apply new migrations and test if they can be rolled back successfully with: `./gradlew dbTest`
-    1. You can try out rolling back the very last one of the successfully applied migrations with a dry-run: `./gradlew dbRollback -Pdry-run`; this shows you the SQL commands that would be executed
-    1. You can roll back the very last one of the applied migrations with: `./gradlew dbRollback`
-    1. You may need to occasionally destroy, re-migrate, and re-seed your database if it has fallen too far out of sync; you can do this with `./gradlew dbDrop dbMigrate dbLoad` -- BE CAREFUL, this **will** drop and re-populate your database unconditionally!
+    1. You may need to occasionally destroy, re-migrate, and re-seed your database if it has fallen too far out of sync; you can do this with `env ANET_DB_DROP=true ./gradlew run` -- BE CAREFUL, this **will** drop and re-populate your database unconditionally!
 1. Make sure the [Keycloak authentication server](keycloak.md#dev) is started (in a Docker container) in your local development environment: `./gradlew dockerConfigureKeycloak dockerStartKeycloak`
 1. Run `./gradlew run` to run the server via Gradle
-    1. If you have set **smtp: disabled** to **true** in `anet.yml`, you're good to go; otherwise, you can start an SMTP server (in a Docker container) in your local development environment: `./gradlew dockerCreateFakeSmtpServer dockerStartFakeSmtpServer`
+    1. If you have set **smtp: disabled** to **true** in `application.yml`, you're good to go; otherwise, you can start an SMTP server (in a Docker container) in your local development environment: `./gradlew dockerCreateFakeSmtpServer dockerStartFakeSmtpServer`
     1. The following output indicates that the server is ready:
         ```
         INFO  [2017-02-10 16:44:59,902] org.eclipse.jetty.server.Server: Started @4098ms
@@ -147,8 +140,6 @@ The following instructions initialize a database for testing purposes, within th
 Use the `-PtestEnv` property to access the test environment settings in `gradle`.
 1. Create the PostgreSQL Docker container and test database `./gradlew -PtestEnv dockerCreateDB`
 1. Start the PostgreSQL Docker container: `./gradlew -PtestEnv dockerStartDB`
-1. Wait until the container is fully started (can be done automatically with `./gradlew -PtestEnv dbWait`), then run `./gradlew -PtestEnv dbMigrate`
-1. Seed initial data - PostgreSQL: `./gradlew -PtestEnv dbLoad`.
 1. Run `./gradlew -PtestEnv build` to download all dependencies and build the project.
 
 #### Override Default Gradle Settings
@@ -157,7 +148,7 @@ Override the default gradle settings if you want to run your tests on a differen
 1. Create a new empty file at `localTestSettings.gradle`. (`touch localTestSettings.gradle` on linux/mac).  This will be a file for all of your local test settings and passwords that should not be checked into GitHub.
 
 ### Server side tests
-1. Start with a clean test-database when running tests: `./gradlew -PtestEnv dbDrop dbMigrate dbLoad`
+1. The tests always start with a clean test-database
 1. Make sure the Keycloak authentication server is started (in a Docker container) in your local development environment: `./gradlew dockerConfigureKeycloak dockerStartKeycloak`
 1. Start a test SMTP server (in a Docker container) in your local development environment: `./gradlew -PtestEnv dockerCreateFakeSmtpServer dockerStartFakeSmtpServer`
 1. Run the server side tests with a clean build: `./gradlew -PtestEnv cleanTest test`
@@ -179,7 +170,7 @@ This driver can either run the tests locally on your system, or remotely via [Br
 The tests are reliant on the data looking pretty similar to what you'd get after a fresh run of `insertBaseData-psql.sql`. If the tests crash and do not complete, they could leave the data set in a state which would cause future test runs to fail. Make sure you start with a clean test-database.
 
 #### Prerequisites
-1. Start with a clean test-database when running tests: `./gradlew -PtestEnv dbDrop dbMigrate dbLoad`
+1. The tests always start with a clean test-database
 1. Start a test SMTP server (in a Docker container) in your local development environment: `./gradlew -PtestEnv dockerCreateFakeSmtpServer dockerStartFakeSmtpServer`
 1. In order to run the client-side tests you must start a server using the test-database: `./gradlew -PtestEnv run`
 1. Optionally, make sure you have the proper Node.js and Yarn in your path (see the [React Frontend](#react-frontend) instructions).
@@ -282,7 +273,4 @@ All the frontend code is in the `client/` directory.
 NB: You only need node.js and the npm dependencies for developing. When we deploy for production, everything is compiled to static files. No javascript dependencies are necessary on the server.
 
 ## Development Mode
-In the `anet.yml` file there is a flag for `developmentMode`.  The only thing this flag currently does is:
-1. Run the account deactivation worker once on startup.
-
 To simulate a "new user" in development mode, create a new user in the Keycloak realm, then log on to ANET as that user. This will start the new user workflow (onboarding). Note: if you enter an unknown username, ANET will reject you.

@@ -1,15 +1,23 @@
 package mil.dds.anet;
 
+// spotless:off
+/*
+import io.dropwizard.core.Configuration;
 import io.dropwizard.core.cli.ConfiguredCommand;
 import io.dropwizard.core.setup.Bootstrap;
-import io.dropwizard.core.setup.Environment;
-import io.dropwizard.jdbi3.JdbiFactory;
-import mil.dds.anet.config.AnetConfiguration;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 import org.jdbi.v3.core.Jdbi;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-public class WaitForDbCommand extends ConfiguredCommand<AnetConfiguration> {
+@Component
+*/
+public class WaitForDbCommand /* extends ConfiguredCommand<Configuration> */ {
+
+/*
+  @Autowired
+  private Jdbi jdbi;
 
   public WaitForDbCommand() {
     super("waitForDB", "Waits until DB is ready for connection");
@@ -27,14 +35,8 @@ public class WaitForDbCommand extends ConfiguredCommand<AnetConfiguration> {
   }
 
   @Override
-  protected void run(Bootstrap<AnetConfiguration> bootstrap, Namespace namespace,
-      AnetConfiguration configuration) throws Exception {
-    final JdbiFactory factory = new JdbiFactory();
-    final Environment environment = new Environment(bootstrap.getApplication().getName(),
-        bootstrap.getObjectMapper(), bootstrap.getValidatorFactory(), bootstrap.getMetricRegistry(),
-        bootstrap.getClassLoader(), bootstrap.getHealthCheckRegistry(), configuration);
-    final Jdbi jdbi = factory.build(environment, configuration.getDataSourceFactory(), "psql");
-
+  protected void run(Bootstrap<Configuration> bootstrap, Namespace namespace,
+      Configuration configuration) throws Exception {
     // We want to possibly wait for the database to be ready, and keep trying to connect
     int remainingTries = namespace.getInt("dbConnectionNbAttempts").intValue();
     final int delay = namespace.getInt("dbConnectionDelay").intValue();
@@ -54,4 +56,6 @@ public class WaitForDbCommand extends ConfiguredCommand<AnetConfiguration> {
       }
     }
   }
+*/
 }
+// spotless:on

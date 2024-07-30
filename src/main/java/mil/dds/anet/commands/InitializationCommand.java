@@ -1,83 +1,84 @@
-package mil.dds.anet;
+package mil.dds.anet.commands;
 
-import io.dropwizard.core.Application;
-import io.dropwizard.core.cli.EnvironmentCommand;
-import io.dropwizard.core.setup.Environment;
+import static mil.dds.anet.beans.Position.PositionType.ADMINISTRATOR;
+
 import java.util.List;
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AdminSetting;
 import mil.dds.anet.beans.ApprovalStep;
-import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
-import mil.dds.anet.beans.Position.PositionType;
+import mil.dds.anet.beans.WithStatus.Status;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.beans.search.PositionSearchQuery;
-import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
-import net.sourceforge.argparse4j.impl.Arguments;
-import net.sourceforge.argparse4j.inf.Namespace;
-import net.sourceforge.argparse4j.inf.Subparser;
+import org.springframework.context.ApplicationContext;
+import org.springframework.shell.command.annotation.Command;
+import org.springframework.shell.command.annotation.Option;
+import org.springframework.shell.context.InteractionMode;
+import org.springframework.shell.standard.ShellComponent;
 
-public class InitializationCommand extends EnvironmentCommand<AnetConfiguration> {
+@ShellComponent
+@Command(group = "ANET commands")
+public class InitializationCommand {
 
-  protected InitializationCommand(Application<AnetConfiguration> application) {
-    super(application, "init", "Initializes the ANET Database");
+  public static final String DB_SHOULD_BE_EMPTY =
+      "\tThis task can only be run on an otherwise empty database";
+
+  private final ApplicationContext applicationContext;
+  private final AnetObjectEngine engine;
+
+  public InitializationCommand(ApplicationContext applicationContext, AnetObjectEngine engine) {
+    this.applicationContext = applicationContext;
+    this.engine = engine;
   }
 
-  @Override
-  public void configure(Subparser subparser) {
-    subparser.addArgument("--adminOrgName").action(Arguments.store()).required(true)
-        .help("set administrative organization name");
-    subparser.addArgument("--adminPosName").action(Arguments.store()).required(true)
-        .help("set administrative position name");
-    subparser.addArgument("--adminFullName").action(Arguments.store()).required(true)
-        .help("set administrator's full name; use format: LASTNAME, Firstname");
-    subparser.addArgument("--adminDomainUsername").action(Arguments.store()).required(true)
-        .help("set administrator's domain username");
-
-    super.configure(subparser);
+  @Command(command = "init", description = "Initializes the ANET database",
+      interactionMode = InteractionMode.NONINTERACTIVE)
+  public void init(
+      @Option(longNames = "adminOrgName", description = "set administrative organization name",
+          required = true) String adminOrgName,
+      @Option(longNames = "adminPosName", description = "set administrative position name",
+          required = true) String adminPosName,
+      @Option(longNames = "adminFullName",
+          description = "set administrator's full name; use format: LASTNAME, Firstname",
+          required = true) String adminFullName,
+      @Option(longNames = "adminDomainUsername",
+          description = "set administrator's domain username",
+          required = true) String adminDomainUsername) {
+    checkPreconditions();
+    final String defaultApprovalOrgUuid =
+        createInitialAdministrator(adminOrgName, adminPosName, adminFullName, adminDomainUsername);
+    saveAdminSettings(defaultApprovalOrgUuid);
+    Utils.exit(applicationContext, 0);
   }
 
-  @Override
-  protected void run(Environment environment, Namespace namespace, AnetConfiguration configuration)
-      throws Exception {
-    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
-
-    checkPreconditions(engine);
-    final String defaultApprovalOrgUuid = createInitialAdministrator(namespace, engine);
-    saveAdminSettings(engine, defaultApprovalOrgUuid);
-
-    System.exit(0);
-  }
-
-  private void checkPreconditions(final AnetObjectEngine engine) {
+  private void checkPreconditions() {
     try {
-      checkOrganizations(engine);
-      checkPositions(engine);
-      checkPeople(engine);
+      checkOrganizations();
+      checkPositions();
+      checkPeople();
     } catch (Exception e) {
       exitWithError("ERROR: Could not query database: " + e.getMessage(),
           "\tDid you run all migrations?");
     }
   }
 
-  private void checkOrganizations(final AnetObjectEngine engine) {
+  private void checkOrganizations() {
     if (!engine.getOrganizationDao().search(new OrganizationSearchQuery()).getList().isEmpty()) {
-      exitWithError("ERROR: Existing organizations detected in database",
-          "\tThis task can only be run on an otherwise empty database");
+      exitWithError("ERROR: Existing organizations detected in database", DB_SHOULD_BE_EMPTY);
     }
   }
 
-  private void checkPositions(final AnetObjectEngine engine) {
+  private void checkPositions() {
     if (!engine.getPositionDao().search(new PositionSearchQuery()).getList().isEmpty()) {
-      exitWithError("ERROR: Existing positions detected in database",
-          "\tThis task can only be run on an otherwise empty database");
+      exitWithError("ERROR: Existing positions detected in database", DB_SHOULD_BE_EMPTY);
     }
   }
 
-  private void checkPeople(final AnetObjectEngine engine) {
+  private void checkPeople() {
     final List<Person> currPeople = engine.getPersonDao().search(new PersonSearchQuery()).getList();
     if (currPeople.isEmpty()) {
       exitWithError("ERROR: ANET Importer missing from database",
@@ -86,36 +87,37 @@ public class InitializationCommand extends EnvironmentCommand<AnetConfiguration>
     // Only person should be "ANET Importer"
     if (currPeople.size() != 1 || !"ANET Importer".equals(currPeople.get(0).getName())) {
       exitWithError("ERROR: Other people besides ANET Importer detected in database",
-          "\tThis task can only be run on an otherwise empty database");
+          DB_SHOULD_BE_EMPTY);
     }
   }
 
   private void exitWithError(final String errorMessage, final String userHint) {
     System.err.println(errorMessage);
     System.err.println(userHint);
-    System.exit(1);
+    Utils.exit(applicationContext, 1);
   }
 
-  private String createInitialAdministrator(Namespace namespace, AnetObjectEngine engine) {
+  private String createInitialAdministrator(String adminOrgName, String adminPosName,
+      String adminFullName, String adminDomainUsername) {
     // Create admin organization
     Organization adminOrg = new Organization();
-    adminOrg.setShortName(namespace.getString("adminOrgName"));
-    adminOrg.setStatus(Organization.Status.ACTIVE);
+    adminOrg.setShortName(adminOrgName);
+    adminOrg.setStatus(Status.ACTIVE);
     adminOrg = engine.getOrganizationDao().insert(adminOrg);
 
     // Create admin position
     Position adminPos = new Position();
-    adminPos.setType(PositionType.ADMINISTRATOR);
+    adminPos.setType(ADMINISTRATOR);
     adminPos.setOrganizationUuid(adminOrg.getUuid());
-    adminPos.setName(namespace.getString("adminPosName"));
-    adminPos.setStatus(Position.Status.ACTIVE);
+    adminPos.setName(adminPosName);
+    adminPos.setStatus(Status.ACTIVE);
     adminPos.setRole(Position.PositionRole.MEMBER);
     adminPos = engine.getPositionDao().insert(adminPos);
 
     // Create admin user
     Person admin = new Person();
-    admin.setName(namespace.getString("adminFullName"));
-    admin.setDomainUsername(namespace.getString("adminDomainUsername"));
+    admin.setName(adminFullName);
+    admin.setDomainUsername(adminDomainUsername);
     admin.setUser(true);
     admin = engine.getPersonDao().insert(admin);
     engine.getPositionDao().setPersonInPosition(admin.getUuid(), adminPos.getUuid());
@@ -123,7 +125,7 @@ public class InitializationCommand extends EnvironmentCommand<AnetConfiguration>
     // Create default approval workflow
     final ApprovalStep defaultStep = new ApprovalStep();
     defaultStep.setName("Default Approver");
-    defaultStep.setType(ApprovalStepType.REPORT_APPROVAL);
+    defaultStep.setType(ApprovalStep.ApprovalStepType.REPORT_APPROVAL);
     defaultStep.setRelatedObjectUuid(adminOrg.getUuid());
     defaultStep.setApprovers(List.of(adminPos));
     engine.getApprovalStepDao().insert(defaultStep);
@@ -131,8 +133,7 @@ public class InitializationCommand extends EnvironmentCommand<AnetConfiguration>
     return adminOrg.getUuid();
   }
 
-  private void saveAdminSettings(final AnetObjectEngine engine,
-      final String defaultApprovalOrgUuid) {
+  private void saveAdminSettings(final String defaultApprovalOrgUuid) {
     // Set Default Approval Chain.
     saveAdminSetting(engine, AdminSettingKeys.DEFAULT_APPROVAL_ORGANIZATION,
         defaultApprovalOrgUuid);
@@ -151,7 +152,7 @@ public class InitializationCommand extends EnvironmentCommand<AnetConfiguration>
     saveAdminSetting(engine, AdminSettingKeys.CONTACT_EMAIL, "team-anet@example.com");
 
     // Set help link url as default
-    saveAdminSetting(engine, AdminSettingKeys.HELP_LINK_URL, "http://google.com");
+    saveAdminSetting(engine, AdminSettingKeys.HELP_LINK_URL, "https://google.com");
 
     // Set empty external documentation link text
     saveAdminSetting(engine, AdminSettingKeys.EXTERNAL_DOCUMENTATION_LINK_TEXT, "");

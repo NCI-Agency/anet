@@ -7,7 +7,6 @@ import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import jakarta.ws.rs.WebApplicationException;
 import java.lang.invoke.MethodHandles;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -16,13 +15,15 @@ import java.util.List;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.beans.Position;
+import mil.dds.anet.test.SpringTestConfig;
 import mil.dds.anet.utils.ResourceUtils;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.web.server.ResponseStatusException;
 
-@SpringBootTest
+@SpringBootTest(classes = SpringTestConfig.class)
 class ResourceUtilsTest {
 
   protected static final Logger logger =
@@ -169,11 +170,11 @@ class ResourceUtilsTest {
       try {
         ResourceUtils.validateHistoryInput(uuid, hist, checkPerson, relationUuid);
         if (!isValid) {
-          fail("Expected a WebApplicationException");
+          fail("Expected a ResponseStatusException");
         }
-      } catch (WebApplicationException e) {
+      } catch (ResponseStatusException e) {
         if (isValid) {
-          fail("Unexpected WebApplicationException: " + e);
+          fail("Unexpected ResponseStatusException: " + e);
         }
       }
     }
@@ -194,8 +195,9 @@ class ResourceUtilsTest {
   }
 
   @Test
-  void shouldThrowWebApplicationExceptionForUnknownClassification() {
+  void shouldThrowResponseStatusExceptionForUnknownClassification() {
     assertThatThrownBy(() -> assertAllowedClassification("Totally public"))
-        .isInstanceOf(WebApplicationException.class).hasMessage("Classification is not allowed");
+        .isInstanceOf(ResponseStatusException.class)
+        .hasMessage("400 BAD_REQUEST \"Classification is not allowed\"");
   }
 }

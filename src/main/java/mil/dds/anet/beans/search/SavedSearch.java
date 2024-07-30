@@ -2,10 +2,10 @@ package mil.dds.anet.beans.search;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Objects;
+import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.beans.ForeignObjectHolder;
 import mil.dds.anet.beans.Person;
@@ -40,7 +40,7 @@ public class SavedSearch extends AbstractAnetBean {
   }
 
   @GraphQLQuery(name = "owner")
-  public CompletableFuture<Person> loadOwner(@GraphQLRootContext Map<String, Object> context) {
+  public CompletableFuture<Person> loadOwner(@GraphQLRootContext GraphQLContext context) {
     if (owner.hasForeignObject()) {
       return CompletableFuture.completedFuture(owner.getForeignObject());
     }

@@ -4,8 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 import java.util.List;
-import java.util.stream.Collectors;
-import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.test.client.AdminSetting;
 import mil.dds.anet.test.client.AdminSettingInput;
 import mil.dds.anet.test.client.Person;
@@ -14,8 +13,12 @@ import mil.dds.anet.test.client.PositionType;
 import mil.dds.anet.test.client.RecentActivities;
 import mil.dds.anet.utils.AnetConstants;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 class AdminResourceTest extends AbstractResourceTest {
+
+  @Autowired
+  private PersonDao personDao;
 
   @Test
   void saveAdminPermissionTest() {
@@ -81,7 +84,7 @@ class AdminResourceTest extends AbstractResourceTest {
     final List<AdminSettingInput> input = settings.stream()
         .map(
             as -> AdminSettingInput.builder().withKey(as.getKey()).withValue(as.getValue()).build())
-        .collect(Collectors.toList());
+        .toList();
 
     try {
       final Integer nrUpdated = withCredentials(user.getDomainUsername(),
@@ -99,11 +102,10 @@ class AdminResourceTest extends AbstractResourceTest {
   }
 
   private void clearCache(Person user) {
-    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final boolean isAdmin = user.getPosition().getType() == PositionType.ADMINISTRATOR;
 
     // Cache a person
-    engine.getPersonDao().findByOpenIdSubject(user.getOpenIdSubject(), true);
+    personDao.findByOpenIdSubject(user.getOpenIdSubject(), true);
 
     try {
       final String result =

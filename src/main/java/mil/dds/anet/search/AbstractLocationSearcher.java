@@ -1,29 +1,36 @@
 package mil.dds.anet.search;
 
-import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.LocationSearchQuery;
+import mil.dds.anet.database.DatabaseHandler;
 import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.database.mappers.LocationMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
-import ru.vyarus.guicey.jdbi3.tx.InTransaction;
+import org.jdbi.v3.core.Handle;
+import org.springframework.transaction.annotation.Transactional;
 
 public abstract class AbstractLocationSearcher
     extends AbstractSearcher<Location, LocationSearchQuery> implements ILocationSearcher {
 
-  public AbstractLocationSearcher(AbstractSearchQueryBuilder<Location, LocationSearchQuery> qb) {
-    super(qb);
+  protected AbstractLocationSearcher(DatabaseHandler databaseHandler,
+      AbstractSearchQueryBuilder<Location, LocationSearchQuery> qb) {
+    super(databaseHandler, qb);
   }
 
-  @InTransaction
+  @Transactional
   @Override
   public AnetBeanList<Location> runSearch(LocationSearchQuery query) {
-    buildQuery(query);
-    return qb.buildAndRun(getDbHandle(), query, new LocationMapper());
+    final Handle handle = getDbHandle();
+    try {
+      buildQuery(query);
+      return qb.buildAndRun(handle, query, new LocationMapper());
+    } finally {
+      closeDbHandle(handle);
+    }
   }
 
   @Override
@@ -43,7 +50,7 @@ public abstract class AbstractLocationSearcher
 
     if (query.getUser() != null && query.getSubscribed()) {
       qb.addWhereClause(Searcher.getSubscriptionReferences(query.getUser(), qb.getSqlArgs(),
-          AnetObjectEngine.getInstance().getLocationDao().getSubscriptionUpdate(null)));
+          engine().getLocationDao().getSubscriptionUpdate(null)));
     }
 
     if (Boolean.TRUE.equals(query.isInMyReports())) {
