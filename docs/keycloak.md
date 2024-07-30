@@ -21,7 +21,7 @@ To access the container
 ### Confidential client definition (used by the server-side)
 ![Confidential client definition](images/keycloak-dev-client.png)
 
-The credentials (to be used in [anet.yml](../anet.yml)):
+The credentials (to be used in [application.yml](../application.yml)):
 ![Confidential client credentials](images/keycloak-dev-client-creds.png)
 
 ### Public client definition (used by the client-side)
@@ -43,7 +43,7 @@ A Keycloak container running on e.g. a Red Hat platform (where you would define 
 ### Confidential client definition (used by the server-side)
 ![Confidential client definition](images/keycloak-rh-client.png)
 
-The credentials to be used in `anet.yml` can be found under the **Credentials** tab.
+The credentials to be used in `application.yml` can be found under the **Credentials** tab.
 
 ### Public client definition (used by the client-side)
 ![Public client definition](images/keycloak-rh-client-public.png)
@@ -71,7 +71,7 @@ To get newly on-boarded user's first names correctly mapped from AD to the realm
 ### Confidential client definition (used by the server-side)
 ![Confidential client definition](images/keycloak-ad-client.png)
 
-The credentials to be used in `anet.yml` can be found under the **Credentials** tab.
+The credentials to be used in `application.yml` can be found under the **Credentials** tab.
 
 ### Public client definition (used by the client-side)
 ![Public client definition](images/keycloak-ad-client-public.png)

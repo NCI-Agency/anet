@@ -1,22 +1,21 @@
 package mil.dds.anet.resources;
 
-import com.codahale.metrics.annotation.Timed;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.dropwizard.auth.Auth;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.MediaType;
 import java.lang.invoke.MethodHandles;
+import java.security.Principal;
 import java.util.List;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.utils.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-
-@Path("/api/logging")
+@RestController
+@RequestMapping("/api/logging")
 public class LoggingResource {
 
   private static final Logger logger =
@@ -40,16 +39,14 @@ public class LoggingResource {
   /**
    * Create a log entry based on the input.
    * 
-   * @param requestContext the HTTP request context (used for getting the remote address)
-   * @param user the authenticated user logging the messages
+   * @param principal the authenticated user logging the messages
    * @param logEntries a list of log entries
+   * @param requestContext the HTTP request context (used for getting the remote address)
    */
-  @POST
-  @Timed
-  @Path("/log")
-  @Consumes(MediaType.APPLICATION_JSON)
-  public void logMessage(final @Context HttpServletRequest requestContext, final @Auth Person user,
+  @PostMapping(path = "/log", consumes = MediaType.APPLICATION_JSON_VALUE)
+  public void logMessage(final Principal principal, final HttpServletRequest requestContext,
       final List<LogEntry> logEntries) {
+    final Person user = SecurityUtils.getPersonFromPrincipal(principal);
     for (final LogEntry logEntry : logEntries) {
 
       final String message = String.format("%1$s %2$s %3$s %4$s %5$s", user,
@@ -59,15 +56,13 @@ public class LoggingResource {
         case "DEBUG":
           logger.debug(message);
           break;
-        case "FATAL":
-          logger.error(message);
-          break;
         case "INFO":
           logger.info(message);
           break;
         case "WARN":
           logger.warn(message);
           break;
+        case "FATAL":
         default:
           logger.error(message);
       }

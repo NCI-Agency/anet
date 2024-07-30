@@ -1,15 +1,17 @@
 package mil.dds.anet.search.pg;
 
-import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.PersonSearchQuery;
+import mil.dds.anet.database.DatabaseHandler;
 import mil.dds.anet.search.AbstractPersonSearcher;
 import mil.dds.anet.search.AbstractSearchQueryBuilder;
+import org.springframework.stereotype.Component;
 
+@Component
 public class PostgresqlPersonSearcher extends AbstractPersonSearcher {
 
-  public PostgresqlPersonSearcher() {
-    super(new PostgresqlSearchQueryBuilder<Person, PersonSearchQuery>("PostgresqlPersonSearch"));
+  public PostgresqlPersonSearcher(DatabaseHandler databaseHandler) {
+    super(databaseHandler, new PostgresqlSearchQueryBuilder<>("PostgresqlPersonSearch"));
   }
 
   @Override

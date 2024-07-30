@@ -1,6 +1,5 @@
 package mil.dds.anet.search;
 
-import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AbstractBatchParams;
@@ -8,24 +7,31 @@ import mil.dds.anet.beans.search.ISearchQuery;
 import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
+import mil.dds.anet.database.DatabaseHandler;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.mappers.OrganizationMapper;
 import mil.dds.anet.utils.Utils;
-import ru.vyarus.guicey.jdbi3.tx.InTransaction;
+import org.jdbi.v3.core.Handle;
+import org.springframework.transaction.annotation.Transactional;
 
 public abstract class AbstractOrganizationSearcher extends
     AbstractSearcher<Organization, OrganizationSearchQuery> implements IOrganizationSearcher {
 
-  public AbstractOrganizationSearcher(
+  protected AbstractOrganizationSearcher(DatabaseHandler databaseHandler,
       AbstractSearchQueryBuilder<Organization, OrganizationSearchQuery> qb) {
-    super(qb);
+    super(databaseHandler, qb);
   }
 
-  @InTransaction
+  @Transactional
   @Override
   public AnetBeanList<Organization> runSearch(OrganizationSearchQuery query) {
-    buildQuery(query);
-    return qb.buildAndRun(getDbHandle(), query, new OrganizationMapper());
+    final Handle handle = getDbHandle();
+    try {
+      buildQuery(query);
+      return qb.buildAndRun(handle, query, new OrganizationMapper());
+    } finally {
+      closeDbHandle(handle);
+    }
   }
 
   @Override
@@ -43,7 +49,7 @@ public abstract class AbstractOrganizationSearcher extends
 
     if (query.getUser() != null && query.getSubscribed()) {
       qb.addWhereClause(Searcher.getSubscriptionReferences(query.getUser(), qb.getSqlArgs(),
-          AnetObjectEngine.getInstance().getOrganizationDao().getSubscriptionUpdate(null)));
+          engine().getOrganizationDao().getSubscriptionUpdate(null)));
     }
 
     qb.addEnumEqualsClause("status", "organizations.status", query.getStatus());

@@ -1,11 +1,11 @@
 package mil.dds.anet.resources;
 
+import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response.Status;
+import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -17,7 +17,8 @@ import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.TaskSearchQuery;
-import mil.dds.anet.config.AnetConfiguration;
+import mil.dds.anet.config.AnetDictionary;
+import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.TaskDao;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
@@ -25,30 +26,35 @@ import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.ResponseUtils;
 import mil.dds.anet.utils.Utils;
 import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 
+@Component
+@GraphQLApi
 public class TaskResource {
 
+  private final AnetDictionary dict;
   private final AnetObjectEngine engine;
   private final TaskDao dao;
-  private final AnetConfiguration config;
 
-  public TaskResource(AnetObjectEngine engine, AnetConfiguration config) {
-    this.engine = engine;
-    this.dao = engine.getTaskDao();
-    this.config = config;
+  public TaskResource(AnetDictionary dict, AnetObjectEngine anetObjectEngine, TaskDao dao) {
+    this.dict = dict;
+    this.engine = anetObjectEngine;
+    this.dao = dao;
   }
 
   @GraphQLQuery(name = "task")
   public Task getByUuid(@GraphQLArgument(name = "uuid") String uuid) {
     Task p = dao.getByUuid(uuid);
     if (p == null) {
-      throw new WebApplicationException("Task not found", Status.NOT_FOUND);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found");
     }
     return p;
   }
 
   @GraphQLMutation(name = "createTask")
-  public Task createTask(@GraphQLRootContext Map<String, Object> context,
+  public Task createTask(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "task") Task t) {
     t.checkAndFixCustomFields();
     t.setDescription(
@@ -86,7 +92,7 @@ public class TaskResource {
   }
 
   @GraphQLMutation(name = "updateTask")
-  public Integer updateTask(@GraphQLRootContext Map<String, Object> context,
+  public Integer updateTask(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "task") Task t) {
     t.checkAndFixCustomFields();
     t.setDescription(
@@ -100,23 +106,24 @@ public class TaskResource {
       final boolean canUpdate = existingResponsiblePositions.stream()
           .anyMatch(p -> Objects.equals(DaoUtils.getUuid(p), DaoUtils.getUuid(userPosition)));
       if (!canUpdate) {
-        throw new WebApplicationException(AuthUtils.UNAUTH_MESSAGE, Status.FORBIDDEN);
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, AuthUtils.UNAUTH_MESSAGE);
       }
     }
 
     // Check for loops in the hierarchy
     if (t.getParentTaskUuid() != null) {
       final Map<String, String> children =
-          AnetObjectEngine.getInstance().buildTopLevelTaskHash(DaoUtils.getUuid(t));
+          ApplicationContextProvider.getEngine().buildTopLevelTaskHash(DaoUtils.getUuid(t));
       if (children.containsKey(t.getParentTaskUuid())) {
-        throw new WebApplicationException("Task can not be its own (grand…)parent");
+        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+            "Task can not be its own (grand…)parent");
       }
     }
 
     try {
       final int numRows = dao.update(t);
       if (numRows == 0) {
-        throw new WebApplicationException("Couldn't process task update", Status.NOT_FOUND);
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't process task update");
       }
       // Update positions:
       if (t.getResponsiblePositions() != null) {
@@ -156,15 +163,15 @@ public class TaskResource {
   }
 
   @GraphQLQuery(name = "taskList")
-  public AnetBeanList<Task> search(@GraphQLRootContext Map<String, Object> context,
+  public AnetBeanList<Task> search(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "query") TaskSearchQuery query) {
     query.setUser(DaoUtils.getUserFromContext(context));
     return dao.search(query);
   }
 
-  private WebApplicationException createDuplicateException(UnableToExecuteStatementException e,
+  private ResponseStatusException createDuplicateException(UnableToExecuteStatementException e,
       String shortName, String parentTaskUuid) {
-    final String taskShortLabel = (String) config.getDictionaryEntry("fields.task.shortName.label");
+    final String taskShortLabel = (String) dict.getDictionaryEntry("fields.task.shortName.label");
     final String msg =
         parentTaskUuid == null ? String.format("Duplicate %s \"%s\"", taskShortLabel, shortName)
             : String.format("Duplicate %s \"%s\" for parent #%s", taskShortLabel, shortName,

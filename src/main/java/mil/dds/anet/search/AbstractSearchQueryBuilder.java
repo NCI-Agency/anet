@@ -374,7 +374,7 @@ public abstract class AbstractSearchQueryBuilder<B, T extends AbstractSearchQuer
   }
 
   /**
-   * Prepares text to be used in a LIKE or CONTAINS query in SQL. Removes quotes and wildcards.
+   * Prepares text to be used in a LIKE query in SQL. Removes quotes and wildcards.
    */
   protected String stripWildcards(String text) {
     return text.trim().replaceAll("[\"*]", "");

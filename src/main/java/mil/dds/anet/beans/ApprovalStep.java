@@ -1,13 +1,12 @@
 package mil.dds.anet.beans;
 
+import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 
@@ -36,15 +35,14 @@ public class ApprovalStep extends AbstractAnetBean {
 
   @GraphQLQuery(name = "approvers")
   public CompletableFuture<List<Position>> loadApprovers(
-      @GraphQLRootContext Map<String, Object> context) {
+      @GraphQLRootContext GraphQLContext context) {
     if (approvers != null) {
       return CompletableFuture.completedFuture(approvers);
     }
-    return AnetObjectEngine.getInstance().getApprovalStepDao().getApproversForStep(context, uuid)
-        .thenApply(o -> {
-          approvers = o;
-          return o;
-        });
+    return engine().getApprovalStepDao().getApproversForStep(context, uuid).thenApply(o -> {
+      approvers = o;
+      return o;
+    });
   }
 
   public List<Position> getApprovers() {

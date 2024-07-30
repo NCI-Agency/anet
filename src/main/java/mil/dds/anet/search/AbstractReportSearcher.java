@@ -1,8 +1,8 @@
 package mil.dds.anet.search;
 
 import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
+import graphql.GraphQLContext;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.EngagementStatus;
@@ -26,6 +25,7 @@ import mil.dds.anet.beans.search.ISearchQuery;
 import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.ReportSearchQuery;
+import mil.dds.anet.database.DatabaseHandler;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.search.AbstractSearchQueryBuilder.Comparison;
@@ -38,13 +38,15 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
 
   private static final Set<String> ALL_FIELDS = Sets.newHashSet(ReportDao.allFields);
   private static final Set<String> MINIMAL_FIELDS = Sets.newHashSet(ReportDao.minimalFields);
-  private static final Map<String, String> FIELD_MAPPING = ImmutableMap.<String, String>builder()
-      .put("reportText", "text").put("location", "locationUuid")
-      .put("approvalStep", "approvalStepUuid").put("advisorOrg", "advisorOrganizationUuid")
-      .put("interlocutorOrg", "interlocutorOrganizationUuid").build();
+  private static final Map<String, String> FIELD_MAPPING = Map.of("reportText", "text", // -
+      "location", "locationUuid", // -
+      "approvalStep", "approvalStepUuid", // -
+      "advisorOrg", "advisorOrganizationUuid", // -
+      "interlocutorOrg", "interlocutorOrganizationUuid");
 
-  public AbstractReportSearcher(AbstractSearchQueryBuilder<Report, ReportSearchQuery> qb) {
-    super(qb);
+  protected AbstractReportSearcher(DatabaseHandler databaseHandler,
+      AbstractSearchQueryBuilder<Report, ReportSearchQuery> qb) {
+    super(databaseHandler, qb);
   }
 
   protected ReportSearchQuery getQueryForPostProcessing(ReportSearchQuery query) {
@@ -61,19 +63,18 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
     }
   }
 
-  protected CompletableFuture<AnetBeanList<Report>> postProcessResults(Map<String, Object> context,
+  protected CompletableFuture<AnetBeanList<Report>> postProcessResults(GraphQLContext context,
       ReportSearchQuery query, AnetBeanList<Report> result) {
     if (query.getPendingApprovalOf() == null) {
       return CompletableFuture.completedFuture(result);
     }
     // Post-process results to filter out the reports that can't be approved
-    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final List<Report> list = result.getList();
     @SuppressWarnings({"unchecked"})
     final CompletableFuture<Boolean>[] allReports = (CompletableFuture<Boolean>[]) list.stream()
         .map(r -> (r.getApprovalStepUuid() == null || r.getAdvisorOrgUuid() == null)
             ? CompletableFuture.completedFuture(false)
-            : engine.canUserApproveStep(context, query.getPendingApprovalOf(),
+            : engine().canUserApproveStep(context, query.getPendingApprovalOf(),
                 r.getApprovalStepUuid(), r.getAdvisorOrgUuid()))
         .toArray(CompletableFuture<?>[]::new);
     return CompletableFuture.allOf(allReports).thenCompose(v -> {
@@ -127,7 +128,7 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
 
     if (query.getUser() != null && query.getSubscribed()) {
       qb.addWhereClause(Searcher.getSubscriptionReferences(query.getUser(), qb.getSqlArgs(),
-          AnetObjectEngine.getInstance().getReportDao().getSubscriptionUpdate(null)));
+          engine().getReportDao().getSubscriptionUpdate(null)));
     }
 
     // We do not store status in reports as we consider them all ACTIVE. Hence, we want to return
@@ -217,7 +218,7 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
     if (query.getEngagementStatus() != null) {
       final List<String> engagementStatusClauses = new ArrayList<>();
       List<EngagementStatus> esValues = query.getEngagementStatus();
-      esValues.stream().forEach(es -> {
+      esValues.forEach(es -> {
         switch (es) {
           case HAPPENED:
             engagementStatusClauses.add(" reports.\"engagementDate\" <= :endOfHappened");

@@ -1,0 +1,121 @@
+# logging is defined in logback-spring.xml
+
+server:
+  port: ${ANET_PORT:8080}
+
+spring:
+  datasource:
+    url: jdbc:postgresql://${ANET_DB_SERVER:localhost}:${ANET_DB_EXPOSED_PORT:5432}/${ANET_DB_NAME}
+    username: ${ANET_DB_USERNAME}
+    password: ${ANET_DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    # You can tweak the database connection pool settings for your deployment environment:
+    hikari:
+      minimum-idle: 10
+      maximum-pool-size: 80
+      connection-timeout: 5000
+
+  # Security through Keycloak
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://${ANET_KEYCLOAK_SERVER:localhost}:${ANET_KEYCLOAK_PORT:9080}/realms/${ANET_KEYCLOAK_REALM:ANET}/protocol/openid-connect/certs
+      client:
+        registration:
+          keycloak:
+            client-id: ${ANET_KEYCLOAK_CLIENT:ANET-Client}
+            client-secret: ${ANET_KEYCLOAK_CLIENT_SECRET:12869b4c-74ac-43f9-b71e-ff74e07babf9}
+        provider:
+          keycloak:
+            issuer-uri: http://${ANET_KEYCLOAK_SERVER:localhost}:${ANET_KEYCLOAK_PORT:9080}/realms/${ANET_KEYCLOAK_REALM:ANET}
+
+anet:
+  # Flag to tell the server to redirect all HTTP traffic to HTTPS
+  redirect-to-https: false
+
+  # Execution time limit for GraphQL requests in milliseconds;
+  # if you comment it out, there is *no* limit!
+  graphql-request-timeout-ms: 15000
+
+  # Whether to periodically run the task that automatically inactivates users;
+  # further configuration for this is in the dictionary
+  automatically-inactivate-users: true
+
+  # Settings for the SMTP server to send email
+  smtp:
+    hostname: ${ANET_SMTP_SERVER:localhost}
+    port: ${ANET_SMTP_PORT:587}
+    username: ${ANET_SMTP_USERNAME}
+    password: ${ANET_SMTP_PASSWORD}
+    ssl-trust: ${ANET_SMTP_SSLTRUST}
+    start-tls: ${ANET_SMTP_STARTTLS:false}
+    disabled: ${ANET_SMTP_DISABLE:true}
+    nb-of-hours-for-stale-emails: 72
+
+  # The email address that all automated emails should come from.
+  # ex: "ANET <anet@example.com>"
+  email-from-addr: "Anet Testing <anet+testing@example.com>"
+
+  # The URL that should be used for links in emails
+  # ex:  "http://anet.yourdomain"
+  # Should not include an ending slash!
+  server-url: "http://localhost:3000"
+
+  keycloak-configuration:
+    realm: ${ANET_KEYCLOAK_REALM:ANET}
+    auth-server-url: http://${ANET_KEYCLOAK_SERVER:localhost}:${ANET_KEYCLOAK_PORT:9080}
+    resource: ${ANET_KEYCLOAK_CLIENT_PUBLIC:ANET-Client-public}
+    show-logout-link: true
+
+  # Set path of dictionary to be loaded
+  # If you want to place the dictionary file under a subfolder of main application folder,
+  # please do not forget to update this parameter!
+  # For example: If you wish to place dictionary file under a folder named as "config" then update it as:
+  # anet-dictionary-name: "config/anet-dictionary.yml"
+  anet-dictionary-name: ${ANET_DICTIONARY_NAME:anet-dictionary.yml}
+
+  # Path to (optional) local map imagery in the dictionary which is served via /imagery/**
+  imagery-path: ./imagery
+  # Path to dashboards in the dictionary which are served via /data/**
+  dashboards-path: ./data
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: "dev | test | prod"
+
+  liquibase:
+    # Allow override of defaults
+    enabled: ${ANET_DB_MIGRATE:true}
+    drop-first: ${ANET_DB_DROP:false}
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: "dev | test"
+
+  liquibase:
+    # Load development data
+    change-log: file:db-changelog-dev.yml
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: "test"
+
+anet:
+  # Don't start the workers in the test profile
+  no-workers: true
+
+# Not actually used by us, but needed for the default configuration bean used for testing
+graphql:
+  endpoint:
+    url: ""
+

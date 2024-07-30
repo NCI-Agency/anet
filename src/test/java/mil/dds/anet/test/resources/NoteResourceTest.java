@@ -5,20 +5,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 import com.google.common.collect.Lists;
-import com.google.inject.Injector;
 import graphql.com.google.common.collect.Iterables;
-import jakarta.inject.Inject;
-import jakarta.inject.Provider;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.TaskDao;
+import mil.dds.anet.test.NoteCounterDao;
 import mil.dds.anet.test.client.AnetBeanList_Task;
 import mil.dds.anet.test.client.GenericRelatedObjectInput;
 import mil.dds.anet.test.client.Note;
@@ -36,13 +32,8 @@ import mil.dds.anet.test.client.Status;
 import mil.dds.anet.test.client.Task;
 import mil.dds.anet.test.client.TaskInput;
 import mil.dds.anet.test.client.TaskSearchQueryInput;
-import org.jdbi.v3.core.Handle;
-import org.jdbi.v3.core.mapper.MapMapper;
-import org.jdbi.v3.core.statement.Query;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import ru.vyarus.dropwizard.guice.injector.lookup.InjectorLookup;
-import ru.vyarus.guicey.jdbi3.tx.InTransaction;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class NoteResourceTest extends AbstractResourceTest {
 
@@ -70,13 +61,8 @@ public class NoteResourceTest extends AbstractResourceTest {
   // Report "Discuss improvements in Annual Budgeting process"
   private static final String TEST_REPORT_UUID = "9bb1861c-1f55-4a1b-bd3d-3c1f56d739b5";
 
-  private static NoteCounterDao noteCounterDao;
-
-  @BeforeAll
-  void setUpDao() {
-    final Injector injector = InjectorLookup.getInjector(dropwizardApp.getApplication()).get();
-    noteCounterDao = injector.getInstance(NoteCounterDao.class);
-  }
+  @Autowired
+  private NoteCounterDao noteCounterDao;
 
   @Test
   void testDeleteDanglingReportNote() {
@@ -1830,18 +1816,6 @@ public class NoteResourceTest extends AbstractResourceTest {
 
   private int countNotes() {
     return noteCounterDao.countNotes();
-  }
-
-  static class NoteCounterDao {
-    @Inject
-    private Provider<Handle> handle;
-
-    @InTransaction
-    public int countNotes() {
-      final Query q = handle.get().createQuery("SELECT COUNT(*) as ct FROM notes");
-      final Optional<Map<String, Object>> result = q.map(new MapMapper(false)).findFirst();
-      return ((Number) result.get().get("ct")).intValue();
-    }
   }
 
 }

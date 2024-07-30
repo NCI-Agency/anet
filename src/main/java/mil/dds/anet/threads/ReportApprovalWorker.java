@@ -1,35 +1,49 @@
 package mil.dds.anet.threads;
 
+import graphql.GraphQLContext;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.JobHistory;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.ReportAction;
 import mil.dds.anet.beans.search.ReportSearchQuery;
-import mil.dds.anet.config.AnetConfiguration;
+import mil.dds.anet.config.AnetDictionary;
+import mil.dds.anet.database.JobHistoryDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.DaoUtils;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
+@Component
+@ConditionalOnExpression("not ${anet.no-workers:false}")
 public class ReportApprovalWorker extends AbstractWorker {
 
   private final ReportDao dao;
 
-  public ReportApprovalWorker(AnetConfiguration config, ReportDao dao) {
-    super(config, "Report Approval Worker waking up to check for reports to be approved");
+  public ReportApprovalWorker(AnetDictionary dict, JobHistoryDao jobHistoryDao, ReportDao dao) {
+    super(dict, jobHistoryDao,
+        "Report Approval Worker waking up to check for reports to be approved");
     this.dao = dao;
   }
 
+  @Scheduled(initialDelay = 20, fixedRate = 300, timeUnit = TimeUnit.SECONDS)
   @Override
-  protected void runInternal(Instant now, JobHistory jobHistory, Map<String, Object> context) {
+  public void run() {
+    super.run();
+  }
+
+  @Override
+  protected void runInternal(Instant now, JobHistory jobHistory, GraphQLContext context) {
     final Instant approvalTimeout =
-        now.minus((Integer) config.getDictionaryEntry("reportWorkflow.nbOfHoursApprovalTimeout"),
+        now.minus((Integer) dict.getDictionaryEntry("reportWorkflow.nbOfHoursApprovalTimeout"),
             ChronoUnit.HOURS);
     // Get a list of all PENDING_APPROVAL reports
     final ReportSearchQuery query = new ReportSearchQuery();

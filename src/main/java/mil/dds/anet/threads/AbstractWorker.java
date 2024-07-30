@@ -1,47 +1,45 @@
 package mil.dds.anet.threads;
 
-import java.lang.invoke.MethodHandles;
+import graphql.GraphQLContext;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.JobHistory;
-import mil.dds.anet.config.AnetConfiguration;
+import mil.dds.anet.config.AnetDictionary;
+import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.JobHistoryDao;
 import mil.dds.anet.utils.BatchingUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
-public abstract class AbstractWorker implements Runnable {
+@EnableScheduling
+public abstract class AbstractWorker {
 
-  protected static final Logger logger =
-      LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-  protected final AnetConfiguration config;
+  protected final AnetDictionary dict;
+  private final JobHistoryDao jobHistoryDao;
   private final String startMessage;
-  private JobHistoryDao jobHistoryDao;
 
-  public AbstractWorker(AnetConfiguration config, String startMessage) {
-    this.config = config;
+  protected AbstractWorker(AnetDictionary dict, JobHistoryDao jobHistoryDao, String startMessage) {
+    this.dict = dict;
+    this.jobHistoryDao = jobHistoryDao;
     this.startMessage = startMessage;
-    this.jobHistoryDao = AnetObjectEngine.getInstance().getJobHistoryDao();
   }
 
-  protected abstract void runInternal(Instant now, JobHistory jobHistory,
-      Map<String, Object> context);
+  protected abstract void runInternal(Instant now, JobHistory jobHistory, GraphQLContext context);
 
-  @Override
-  public final void run() {
+  public void run() {
     final String className = this.getClass().getSimpleName();
     logger.debug("Starting {}: {}", className, startMessage);
     final RunStatus runStatus = new RunStatus();
     BatchingUtils batchingUtils = null;
     try {
       batchingUtils = startDispatcher(runStatus);
-      final Map<String, Object> context = new HashMap<>();
-      context.put("dataLoaderRegistry", batchingUtils.getDataLoaderRegistry());
+      final GraphQLContext context = GraphQLContext.newContext()
+          .of("dataLoaderRegistry", batchingUtils.getDataLoaderRegistry()).build();
       jobHistoryDao.runInTransaction(className,
           (now, jobHistory) -> runInternal(now, jobHistory, context));
     } catch (Throwable e) {
@@ -50,8 +48,6 @@ public abstract class AbstractWorker implements Runnable {
     } finally {
       runStatus.setDone(true);
       if (batchingUtils != null) {
-        batchingUtils.updateStats(AnetObjectEngine.getInstance().getMetricRegistry(),
-            batchingUtils.getDataLoaderRegistry());
         batchingUtils.shutdown();
       }
     }
@@ -76,8 +72,7 @@ public abstract class AbstractWorker implements Runnable {
   }
 
   private BatchingUtils startDispatcher(final RunStatus runStatus) {
-    final BatchingUtils batchingUtils =
-        new BatchingUtils(AnetObjectEngine.getInstance(), true, true);
+    final BatchingUtils batchingUtils = new BatchingUtils(engine(), true, true);
     final Runnable dispatcher = () -> {
       while (!runStatus.isDone()) {
         // Wait a while, giving other threads the chance to do some work
@@ -101,6 +96,10 @@ public abstract class AbstractWorker implements Runnable {
     };
     Executors.newSingleThreadExecutor().execute(dispatcher);
     return batchingUtils;
+  }
+
+  protected AnetObjectEngine engine() {
+    return ApplicationContextProvider.getEngine();
   }
 
 }

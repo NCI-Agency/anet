@@ -7,17 +7,16 @@ import static org.assertj.core.api.Assertions.fail;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.dropwizard.testing.junit5.DropwizardAppExtension;
-import jakarta.ws.rs.client.Client;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.config.AnetConfiguration;
+import mil.dds.anet.config.AnetConfig;
+import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.database.AdminDao;
 import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.test.GraphQLPluginConfiguration;
+import mil.dds.anet.test.SpringTestConfig;
 import mil.dds.anet.test.client.AnetBeanList_Person;
 import mil.dds.anet.test.client.ApprovalStep;
 import mil.dds.anet.test.client.ApprovalStepInput;
@@ -55,15 +54,15 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
+@SpringBootTest(classes = SpringTestConfig.class,
+    useMainMethod = SpringBootTest.UseMainMethod.ALWAYS,
+    webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public abstract class AbstractResourceTest {
 
-  @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired
   protected QueryExecutor queryExecutor;
 
-  @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired
   protected MutationExecutor mutationExecutor;
 
@@ -71,13 +70,13 @@ public abstract class AbstractResourceTest {
   protected GraphQLPluginConfiguration.AuthenticationInjector authenticationInjector;
 
   @Autowired
-  protected DropwizardAppExtension<AnetConfiguration> dropwizardApp;
+  protected AnetConfig config;
 
   @Autowired
-  protected Client testClient;
+  protected AnetDictionary dict;
 
   @Autowired
-  protected String graphqlEndpoint;
+  protected AdminDao adminDao;
 
   protected static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -103,11 +102,10 @@ public abstract class AbstractResourceTest {
     admin = findOrPutPersonInDb(Person.builder().withDomainUsername(adminUser).build());
   }
 
-  private static void refreshMaterializedViews() {
+  private void refreshMaterializedViews() {
     final String[] allMaterializedViews =
         ArrayUtils.addAll(MaterializedViewForLinksRefreshWorker.materializedViews,
             MaterializedViewRefreshWorker.materializedViews);
-    final AdminDao adminDao = AnetObjectEngine.getInstance().getAdminDao();
     for (final String materializedView : allMaterializedViews) {
       try {
         adminDao.updateMaterializedView(materializedView);
@@ -295,8 +293,7 @@ public abstract class AbstractResourceTest {
 
   protected static List<ApprovalStepInput> getApprovalStepsInput(
       final List<ApprovalStep> approvalSteps) {
-    return approvalSteps.stream().map(AbstractResourceTest::getApprovalStepInput)
-        .collect(Collectors.toList());
+    return approvalSteps.stream().map(AbstractResourceTest::getApprovalStepInput).toList();
   }
 
   protected static AuthorizationGroupInput getAuthorizationGroupInput(
@@ -313,6 +310,7 @@ public abstract class AbstractResourceTest {
   }
 
   protected static List<NoteInput> getNotesInput(final List<Note> notes) {
+    // List should be mutable, as it gets reversed during the tests!
     return notes.stream().map(AbstractResourceTest::getNoteInput).collect(Collectors.toList());
   }
 
@@ -322,13 +320,12 @@ public abstract class AbstractResourceTest {
 
   protected static List<OrganizationInput> getOrganizationsInput(
       final List<Organization> organizations) {
-    return organizations.stream().map(AbstractResourceTest::getOrganizationInput)
-        .collect(Collectors.toList());
+    return organizations.stream().map(AbstractResourceTest::getOrganizationInput).toList();
   }
 
   protected static List<PersonInput> getPeopleInput(
       final List<mil.dds.anet.test.client.Person> people) {
-    return people.stream().map(AbstractResourceTest::getPersonInput).collect(Collectors.toList());
+    return people.stream().map(AbstractResourceTest::getPersonInput).toList();
   }
 
   protected static PersonInput getPersonInput(final mil.dds.anet.test.client.Person person) {
@@ -337,8 +334,7 @@ public abstract class AbstractResourceTest {
 
   protected static List<ReportPersonInput> getReportPeopleInput(
       final List<ReportPerson> reportPeople) {
-    return reportPeople.stream().map(AbstractResourceTest::getReportPersonInput)
-        .collect(Collectors.toList());
+    return reportPeople.stream().map(AbstractResourceTest::getReportPersonInput).toList();
   }
 
   protected static ReportPersonInput getReportPersonInput(final ReportPerson reportPerson) {
@@ -350,8 +346,7 @@ public abstract class AbstractResourceTest {
   }
 
   protected static List<PositionInput> getPositionsInput(final List<Position> positions) {
-    return positions.stream().map(AbstractResourceTest::getPositionInput)
-        .collect(Collectors.toList());
+    return positions.stream().map(AbstractResourceTest::getPositionInput).toList();
   }
 
   protected static PersonPositionHistoryInput getPersonPositionHistoryInput(
@@ -361,8 +356,7 @@ public abstract class AbstractResourceTest {
 
   protected static List<PersonPositionHistoryInput> getPersonPositionHistoryInput(
       final List<PersonPositionHistory> history) {
-    return history.stream().map(AbstractResourceTest::getPersonPositionHistoryInput)
-        .collect(Collectors.toList());
+    return history.stream().map(AbstractResourceTest::getPersonPositionHistoryInput).toList();
   }
 
   protected static TaskInput getTaskInput(final Task task) {
