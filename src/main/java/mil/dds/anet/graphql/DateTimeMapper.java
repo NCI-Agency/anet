@@ -21,7 +21,7 @@ public class DateTimeMapper extends CachingMapper<GraphQLScalarType, GraphQLScal
   @Override
   protected GraphQLScalarType toGraphQLInputType(String typeName, AnnotatedType javaType,
       TypeMappingEnvironment env) {
-    return toGraphQLInputType(typeName, javaType, env);
+    return toGraphQLType(typeName, javaType, env);
   }
 
   @Override
