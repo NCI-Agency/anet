@@ -32,9 +32,9 @@ import mil.dds.anet.database.EmailDao;
 import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
-import org.simplejavamail.MailException;
 import org.simplejavamail.api.email.Email;
 import org.simplejavamail.email.EmailBuilder;
+import org.simplejavamail.mailer.MailValidationException;
 import org.simplejavamail.mailer.MailerBuilder;
 
 public class AnetEmailWorker extends AbstractWorker {
@@ -123,7 +123,7 @@ public class AnetEmailWorker extends AbstractWorker {
   private Map<String, Object> buildContext(final Map<String, Object> context,
       final AnetEmail email) {
     AnetObjectEngine engine = AnetObjectEngine.getInstance();
-    Map<String, Object> emailContext = new HashMap<String, Object>();
+    Map<String, Object> emailContext = new HashMap<>();
     emailContext.put("context", context);
     emailContext.put("serverUrl", serverUrl);
     emailContext.put(AdminSettingKeys.SECURITY_BANNER_CLASSIFICATION.name(),
@@ -140,8 +140,8 @@ public class AnetEmailWorker extends AbstractWorker {
         DateTimeFormatter
             .ofPattern((String) config.getDictionaryEntry("dateFormats.email.withTime"))
             .withZone(DaoUtils.getServerLocalZoneId()));
-    final boolean engagementsIncludeTimeAndDuration = Boolean.TRUE
-        .equals((Boolean) config.getDictionaryEntry("engagementsIncludeTimeAndDuration"));
+    final boolean engagementsIncludeTimeAndDuration =
+        Boolean.TRUE.equals(config.getDictionaryEntry("engagementsIncludeTimeAndDuration"));
     emailContext.put("engagementsIncludeTimeAndDuration", engagementsIncludeTimeAndDuration);
     final String edtfPattern = (String) config
         .getDictionaryEntry(engagementsIncludeTimeAndDuration ? "dateFormats.email.withTime"
@@ -163,7 +163,7 @@ public class AnetEmailWorker extends AbstractWorker {
     email.getToAddresses().removeIf(s -> Objects.equals(s, null));
     email.getToAddresses()
         .removeIf(emailAddress -> !Utils.isEmailAllowed(emailAddress, activeDomainNames));
-    if (email.getToAddresses().size() == 0) {
+    if (email.getToAddresses().isEmpty()) {
       // This email will never get sent... just kill it off
       // log.error("Unable to send email of subject {}, because there are no valid
       // to email addresses");
@@ -183,7 +183,7 @@ public class AnetEmailWorker extends AbstractWorker {
 
     try {
       MailerBuilder.usingSession(session).buildMailer().sendMail(mail);
-    } catch (MailException e) {
+    } catch (MailValidationException e) {
       // The server rejected this... we'll log it and then not try again.
       logger.error("Send failed", e);
     }
@@ -234,6 +234,6 @@ public class AnetEmailWorker extends AbstractWorker {
   }
 
   private boolean hasUsername(SmtpConfiguration smtpConfig) {
-    return smtpConfig.getUsername() != null && smtpConfig.getUsername().trim().length() > 0;
+    return smtpConfig.getUsername() != null && !smtpConfig.getUsername().trim().isEmpty();
   }
 }
