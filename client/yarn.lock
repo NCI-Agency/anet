@@ -2472,16 +2472,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphql-codegen/schema-ast@npm:4.0.2, @graphql-codegen/schema-ast@npm:^4.0.2":
-  version: 4.0.2
-  resolution: "@graphql-codegen/schema-ast@npm:4.0.2"
+"@graphql-codegen/schema-ast@npm:4.1.0, @graphql-codegen/schema-ast@npm:^4.0.2":
+  version: 4.1.0
+  resolution: "@graphql-codegen/schema-ast@npm:4.1.0"
   dependencies:
     "@graphql-codegen/plugin-helpers": "npm:^5.0.3"
     "@graphql-tools/utils": "npm:^10.0.0"
     tslib: "npm:~2.6.0"
   peerDependencies:
     graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
-  checksum: 10c0/533b1bfa6c01d02ff2ec688a478e8daeb9bda1d69d63b1bca8adf9ab606a4a315da4e0f45444836646b8e539e8c76891af536afd9fb3a7e36d40f8bd04218748
+  checksum: 10c0/ff7ab73f46f1ae4882eda0af8c3f78d37e904108aba37d52288028ee34e9bc56236b6a032a1e2fe1283030ba5f6a5f75224285af12b3f56a76e90843e1eff0e0
   languageName: node
   linkType: hard
 
@@ -2530,7 +2530,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphql-codegen/visitor-plugin-common@npm:5.2.0, @graphql-codegen/visitor-plugin-common@npm:^5.2.0":
+"@graphql-codegen/visitor-plugin-common@npm:5.2.0":
   version: 5.2.0
   resolution: "@graphql-codegen/visitor-plugin-common@npm:5.2.0"
   dependencies:
@@ -2547,6 +2547,26 @@ __metadata:
   peerDependencies:
     graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
   checksum: 10c0/86ca3f7dd68e308b014040534dff7393122974c32e14d8453ff9cf52449b168aac49fcf65c42b5788b9571528b1b948c593f16d48d0513fea9da44c2c841e9be
+  languageName: node
+  linkType: hard
+
+"@graphql-codegen/visitor-plugin-common@npm:5.3.1, @graphql-codegen/visitor-plugin-common@npm:^5.2.0":
+  version: 5.3.1
+  resolution: "@graphql-codegen/visitor-plugin-common@npm:5.3.1"
+  dependencies:
+    "@graphql-codegen/plugin-helpers": "npm:^5.0.4"
+    "@graphql-tools/optimize": "npm:^2.0.0"
+    "@graphql-tools/relay-operation-optimizer": "npm:^7.0.0"
+    "@graphql-tools/utils": "npm:^10.0.0"
+    auto-bind: "npm:~4.0.0"
+    change-case-all: "npm:1.0.15"
+    dependency-graph: "npm:^0.11.0"
+    graphql-tag: "npm:^2.11.0"
+    parse-filepath: "npm:^1.0.2"
+    tslib: "npm:~2.6.0"
+  peerDependencies:
+    graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
+  checksum: 10c0/c6d642445149ef9adb473e0a47019a2008e4e1b69a700d7ff6b2e4d2ba3f3118a4296f6d370fd1c45c84f91dd3580cea63db896a47bd102a0dd7b28bb409a0e6
   languageName: node
   linkType: hard
 
@@ -6084,8 +6104,8 @@ __metadata:
     "@fullcalendar/react": "npm:6.1.15"
     "@fullcalendar/timegrid": "npm:6.1.15"
     "@graphql-codegen/cli": "npm:5.0.2"
-    "@graphql-codegen/schema-ast": "npm:4.0.2"
-    "@graphql-codegen/visitor-plugin-common": "npm:5.2.0"
+    "@graphql-codegen/schema-ast": "npm:4.1.0"
+    "@graphql-codegen/visitor-plugin-common": "npm:5.3.1"
     "@projectstorm/react-diagrams": "npm:7.0.4"
     "@testing-library/dom": "npm:10.4.0"
     "@testing-library/jest-dom": "npm:6.4.8"
