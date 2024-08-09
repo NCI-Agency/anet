@@ -51,4 +51,12 @@ public class EmailDao {
         .bind("jobSpec", jobSpec).bind("createdAt", DaoUtils.asLocalDateTime(Instant.now()))
         .execute();
   }
+
+  @InTransaction
+  public void setErrorMessage(final int id, final String errorMessage) {
+    getDbHandle()
+        .createUpdate(
+            "UPDATE \"pendingEmails\" SET \"errorMessage\" = :errorMessage WHERE \"id\" = :id")
+        .bind("errorMessage", errorMessage).bind("id", id).execute();
+  }
 }

@@ -5861,4 +5861,10 @@
 		</sql>
 	</changeSet>
 
+	<changeSet id="add-column-error-log-to-pending-emails" author="chessray">
+		<addColumn tableName="pendingEmails">
+			<column name="errorMessage" type="varchar(512)"/>
+		</addColumn>
+	</changeSet>
+
 </databaseChangeLog>
