@@ -120,7 +120,7 @@
     "@fullcalendar/react": "6.1.15",
     "@fullcalendar/timegrid": "6.1.15",
     "@projectstorm/react-diagrams": "7.0.4",
-    "axios": "1.7.3",
+    "axios": "1.7.4",
     "bootstrap": "5.3.3",
     "change-case": "5.4.4",
     "classnames": "2.5.1",
