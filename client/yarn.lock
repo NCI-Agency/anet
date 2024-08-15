@@ -2295,11 +2295,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphiql/react@npm:^0.24.0":
-  version: 0.24.0
-  resolution: "@graphiql/react@npm:0.24.0"
+"@graphiql/react@npm:^0.25.0":
+  version: 0.25.0
+  resolution: "@graphiql/react@npm:0.25.0"
   dependencies:
-    "@graphiql/toolkit": "npm:^0.9.2"
+    "@graphiql/toolkit": "npm:^0.10.0"
     "@headlessui/react": "npm:^1.7.15"
     "@radix-ui/react-dialog": "npm:^1.0.4"
     "@radix-ui/react-dropdown-menu": "npm:^2.0.5"
@@ -2308,33 +2308,34 @@ __metadata:
     "@types/codemirror": "npm:^5.60.8"
     clsx: "npm:^1.2.1"
     codemirror: "npm:^5.65.3"
-    codemirror-graphql: "npm:^2.0.13"
+    codemirror-graphql: "npm:^2.1.0"
     copy-to-clipboard: "npm:^3.2.0"
-    framer-motion: "npm:^10.0.0"
-    graphql-language-service: "npm:^5.2.2"
+    framer-motion: "npm:^6.5.1"
+    get-value: "npm:^3.0.1"
+    graphql-language-service: "npm:^5.3.0"
     markdown-it: "npm:^14.1.0"
     set-value: "npm:^4.1.0"
   peerDependencies:
-    graphql: ^15.5.0 || ^16.0.0
+    graphql: ^15.5.0 || ^16.0.0 || ^17.0.0-alpha.2
     react: ^16.8.0 || ^17 || ^18
     react-dom: ^16.8.0 || ^17 || ^18
-  checksum: 10c0/f17c48284dac42e5ceb9e6e8cb5dec823c69360975a6442b239c7f0b2f8334474999fa31b8719622745ed0fbc34dbace565b04d149ef0039a28bd2d1e149f61c
+  checksum: 10c0/1b50fee297db58ada0684d28e569967dfd33df445066e0b66f4ca227ea0da414fd6dcdc2e1c70ed52045493e2ddae7f68d7975524a26f0d1ea3614cfc913c77e
   languageName: node
   linkType: hard
 
-"@graphiql/toolkit@npm:^0.9.2":
-  version: 0.9.2
-  resolution: "@graphiql/toolkit@npm:0.9.2"
+"@graphiql/toolkit@npm:^0.10.0":
+  version: 0.10.0
+  resolution: "@graphiql/toolkit@npm:0.10.0"
   dependencies:
     "@n1ru4l/push-pull-async-iterable-iterator": "npm:^3.1.0"
     meros: "npm:^1.1.4"
   peerDependencies:
-    graphql: ^15.5.0 || ^16.0.0
+    graphql: ^15.5.0 || ^16.0.0 || ^17.0.0-alpha.2
     graphql-ws: ">= 4.5.0"
   peerDependenciesMeta:
     graphql-ws:
       optional: true
-  checksum: 10c0/c4224b48aabe7756760d1ed06199431ee993b7d36d180cc7965147a8da218a6c71b7ee1dab24924e702e9a5417dd1539780f99d7ef489e801e3ff4806a9a92c3
+  checksum: 10c0/d3386ce3bf5d578c1b77248e154f8f33184c3877c121b1beed8944ec7dfbba2235aec179e548a5abfd3467725cb408ca492ad0d6a719a9e3576a76fd93972460
   languageName: node
   linkType: hard
 
@@ -3433,6 +3434,71 @@ __metadata:
   dependencies:
     make-plural: "npm:^7.0.0"
   checksum: 10c0/a236279da66a138f7860d4a190070b00d752cc5b5aed877ec3b0f6dce708e7e3bd5b290e4f4ec30b97a4213f069fb70dbda9af49f849a106da227d41a9e19581
+  languageName: node
+  linkType: hard
+
+"@motionone/animation@npm:^10.12.0":
+  version: 10.18.0
+  resolution: "@motionone/animation@npm:10.18.0"
+  dependencies:
+    "@motionone/easing": "npm:^10.18.0"
+    "@motionone/types": "npm:^10.17.1"
+    "@motionone/utils": "npm:^10.18.0"
+    tslib: "npm:^2.3.1"
+  checksum: 10c0/83c01ab8ecf5fae221e5012116c4c49d4473ba88ba22197e1d8c1e39364c5c6b9c5271e57ae716fd21f92314d15c63788c48d0a30872ee8d72337e1d98b46834
+  languageName: node
+  linkType: hard
+
+"@motionone/dom@npm:10.12.0":
+  version: 10.12.0
+  resolution: "@motionone/dom@npm:10.12.0"
+  dependencies:
+    "@motionone/animation": "npm:^10.12.0"
+    "@motionone/generators": "npm:^10.12.0"
+    "@motionone/types": "npm:^10.12.0"
+    "@motionone/utils": "npm:^10.12.0"
+    hey-listen: "npm:^1.0.8"
+    tslib: "npm:^2.3.1"
+  checksum: 10c0/1af6cd8d8518ebbd90d74f15443ad94d7d03bf9e7e1455a5cb6768a53ba8dac6906ca121e9c1f42b8d53a8ab7c19d14e4731c10231b5dc7102628f32659faea2
+  languageName: node
+  linkType: hard
+
+"@motionone/easing@npm:^10.18.0":
+  version: 10.18.0
+  resolution: "@motionone/easing@npm:10.18.0"
+  dependencies:
+    "@motionone/utils": "npm:^10.18.0"
+    tslib: "npm:^2.3.1"
+  checksum: 10c0/0adf9b7086b0f569d28886890cc0725a489285f2debfcaf27c1c15dfef5736c9f4207cfda14c71b3275f8163777320cb7ff48ad263c7f4ccd31e12a5afc1a952
+  languageName: node
+  linkType: hard
+
+"@motionone/generators@npm:^10.12.0":
+  version: 10.18.0
+  resolution: "@motionone/generators@npm:10.18.0"
+  dependencies:
+    "@motionone/types": "npm:^10.17.1"
+    "@motionone/utils": "npm:^10.18.0"
+    tslib: "npm:^2.3.1"
+  checksum: 10c0/7ed7dda5ac58cd3e8dd347b5539d242d96e02ee16fef921c8d14295a806e6bc429a15291461ec078977bd5f6162677225addd707ca79f808e65bc3599c45c0e9
+  languageName: node
+  linkType: hard
+
+"@motionone/types@npm:^10.12.0, @motionone/types@npm:^10.17.1":
+  version: 10.17.1
+  resolution: "@motionone/types@npm:10.17.1"
+  checksum: 10c0/f7b16cd4f0feda0beac10173afa6de7384722f9f24767f78b7aa90f15b8a89d584073a64387b015a8e015a962fa4b47a8ce23621f47708a08676b12bb0d43bbb
+  languageName: node
+  linkType: hard
+
+"@motionone/utils@npm:^10.12.0, @motionone/utils@npm:^10.18.0":
+  version: 10.18.0
+  resolution: "@motionone/utils@npm:10.18.0"
+  dependencies:
+    "@motionone/types": "npm:^10.17.1"
+    hey-listen: "npm:^1.0.8"
+    tslib: "npm:^2.3.1"
+  checksum: 10c0/db57dbb6a131fab36dc1eb4e1f3a4575ca97563221663adce54c138de1e1a9eaf4a4a51ddf99fdab0341112159e0190b35cdeddfdbd08ba3ad1e35886a5324bb
   languageName: node
   linkType: hard
 
@@ -6076,7 +6142,7 @@ __metadata:
     file-saver: "npm:2.0.5"
     formik: "npm:2.4.6"
     git-describe: "npm:4.1.1"
-    graphiql: "npm:3.5.0"
+    graphiql: "npm:3.6.0"
     graphql: "npm:16.9.0"
     handlebars: "npm:4.7.8"
     handlebars-loader: "npm:1.7.3"
@@ -7830,17 +7896,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"codemirror-graphql@npm:^2.0.13":
-  version: 2.0.13
-  resolution: "codemirror-graphql@npm:2.0.13"
+"codemirror-graphql@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "codemirror-graphql@npm:2.1.0"
   dependencies:
     "@types/codemirror": "npm:^0.0.90"
-    graphql-language-service: "npm:5.2.2"
+    graphql-language-service: "npm:5.3.0"
   peerDependencies:
     "@codemirror/language": 6.0.0
     codemirror: ^5.65.3
-    graphql: ^15.5.0 || ^16.0.0
-  checksum: 10c0/e6f1e08355765526ee71982b108b797949b43409f95835f1e4a7f8edb3de575cccea86d94d9a4c437e2a5106e9c233c7575127131250902bd057a825a6b96592
+    graphql: ^15.5.0 || ^16.0.0 || ^17.0.0-alpha.2
+  checksum: 10c0/77ef877c6c0aed68b9ba3f2ec8d0ab68ecde61b0433120faae071d061e69dd0919cec1acf72ab3df4c985e2ecb919b08e7581ad188fc951d86334a2995d0ade8
   languageName: node
   linkType: hard
 
@@ -10946,24 +11012,33 @@ __metadata:
   languageName: node
   linkType: hard
 
-"framer-motion@npm:^10.0.0":
-  version: 10.18.0
-  resolution: "framer-motion@npm:10.18.0"
+"framer-motion@npm:^6.5.1":
+  version: 6.5.1
+  resolution: "framer-motion@npm:6.5.1"
   dependencies:
     "@emotion/is-prop-valid": "npm:^0.8.2"
-    tslib: "npm:^2.4.0"
+    "@motionone/dom": "npm:10.12.0"
+    framesync: "npm:6.0.1"
+    hey-listen: "npm:^1.0.8"
+    popmotion: "npm:11.0.3"
+    style-value-types: "npm:5.0.0"
+    tslib: "npm:^2.1.0"
   peerDependencies:
-    react: ^18.0.0
-    react-dom: ^18.0.0
+    react: ">=16.8 || ^17.0.0 || ^18.0.0"
+    react-dom: ">=16.8 || ^17.0.0 || ^18.0.0"
   dependenciesMeta:
     "@emotion/is-prop-valid":
       optional: true
-  peerDependenciesMeta:
-    react:
-      optional: true
-    react-dom:
-      optional: true
-  checksum: 10c0/0aea1b3dc5cf06687e31f3b6c0b6b1a2cd070afdd4a9d38ebf15715c662ca1d6d1c25e6778695e5ebff37a6ce92b031d036c02570370e6057e66aa9de9f9370f
+  checksum: 10c0/69d64f7ac878eb5a0d90f1ccbaaee76f7731b276c4369fdce7d283fa92cca35ea05c42ad2da0c6c0ab4bb180b7fa4f511b6928bdb43818f6feaf245531d3df5a
+  languageName: node
+  linkType: hard
+
+"framesync@npm:6.0.1":
+  version: 6.0.1
+  resolution: "framesync@npm:6.0.1"
+  dependencies:
+    tslib: "npm:^2.1.0"
+  checksum: 10c0/ce84ce548a8612be070204b9cf3ce7258acead2d51df05586995340e501d1439dfc1f9402ede921a9c0dde854d80fd46e97c699a3657f8d7abd5bc705553bf2b
   languageName: node
   linkType: hard
 
@@ -11242,6 +11317,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"get-value@npm:^3.0.1":
+  version: 3.0.1
+  resolution: "get-value@npm:3.0.1"
+  dependencies:
+    isobject: "npm:^3.0.1"
+  checksum: 10c0/38cca1618ffe9a07a8b105a352c4de27bea36032d4916d21a0636ab5ff3bf1aa3bf200c6875f59f55cd4fb3f5156244dec838fbaf2ba580332d13ac51a25fabd
+  languageName: node
+  linkType: hard
+
 "git-describe@npm:4.1.1":
   version: 4.1.1
   resolution: "git-describe@npm:4.1.1"
@@ -11480,16 +11564,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"graphiql@npm:3.5.0":
-  version: 3.5.0
-  resolution: "graphiql@npm:3.5.0"
+"graphiql@npm:3.6.0":
+  version: 3.6.0
+  resolution: "graphiql@npm:3.6.0"
   dependencies:
-    "@graphiql/react": "npm:^0.24.0"
+    "@graphiql/react": "npm:^0.25.0"
   peerDependencies:
     graphql: ^15.5.0 || ^16.0.0 || ^17.0.0-alpha.2
     react: ^16.8.0 || ^17 || ^18
     react-dom: ^16.8.0 || ^17 || ^18
-  checksum: 10c0/8d8f37c6eb9ff8c5f70bf8c516882786673dacdd71421f79e96e8648649a84dcb0ff24d1c436bfb004848f695589b598981ae3b5f4bee1137bb30e8317287c39
+  checksum: 10c0/76f85dc45747c7a676f1829b0193464f9b079a2b8ab98e96324f6ad4b08009a29df53fab6b5dcd5f250515b76ae7efef13fc4b1920bafe7b2e1ec3fdaad45c28
   languageName: node
   linkType: hard
 
@@ -11527,18 +11611,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"graphql-language-service@npm:5.2.2, graphql-language-service@npm:^5.2.2":
-  version: 5.2.2
-  resolution: "graphql-language-service@npm:5.2.2"
+"graphql-language-service@npm:5.3.0, graphql-language-service@npm:^5.3.0":
+  version: 5.3.0
+  resolution: "graphql-language-service@npm:5.3.0"
   dependencies:
     debounce-promise: "npm:^3.1.2"
     nullthrows: "npm:^1.0.0"
     vscode-languageserver-types: "npm:^3.17.1"
   peerDependencies:
-    graphql: ^15.5.0 || ^16.0.0
+    graphql: ^15.5.0 || ^16.0.0 || ^17.0.0-alpha.2
   bin:
     graphql: dist/temp-bin.js
-  checksum: 10c0/da8767aa8b701d1c4bc73014d48384a169af5158e9398c8c2d67afde2f56486e6966dd8d13d8daf0f05aeeec97810f4a10e6a36144b41ad0d7a9cc26a601eee3
+  checksum: 10c0/93bf543a6561c22ff4067fae00f7b3f30365fcf8d123ba9ca623693dc28272682df89c87bda74772cab353c906fb0a6942344a5809fd223df9ea3505a341065c
   languageName: node
   linkType: hard
 
@@ -11738,6 +11822,13 @@ __metadata:
   version: 0.2.5
   resolution: "heap@npm:0.2.5"
   checksum: 10c0/6992caceff57ea3aaa6671506a2ff74ca60af38c72cc722606a7365ebcb8ea536f37efff35a78368f90497083eba7a8161db13abb9193c6e67fedcc3d488de77
+  languageName: node
+  linkType: hard
+
+"hey-listen@npm:^1.0.8":
+  version: 1.0.8
+  resolution: "hey-listen@npm:1.0.8"
+  checksum: 10c0/38db3028b4756f3d536c0f6a92da53bad577ab649b06dddfd0a4d953f9a46bbc6a7f693c8c5b466a538d6d23dbc469260c848427f0de14198a2bbecbac37b39e
   languageName: node
   linkType: hard
 
@@ -15914,6 +16005,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"popmotion@npm:11.0.3":
+  version: 11.0.3
+  resolution: "popmotion@npm:11.0.3"
+  dependencies:
+    framesync: "npm:6.0.1"
+    hey-listen: "npm:^1.0.8"
+    style-value-types: "npm:5.0.0"
+    tslib: "npm:^2.1.0"
+  checksum: 10c0/ed196cf034c199a2ab6095f047924b38e24f386c33a182970ad6e1769002b72adff34a72ba7ab2cf34ff5bbfd711ef4caf2e9843ebb7a5c9cafa27c50e525f70
+  languageName: node
+  linkType: hard
+
 "possible-typed-array-names@npm:^1.0.0":
   version: 1.0.0
   resolution: "possible-typed-array-names@npm:1.0.0"
@@ -18550,6 +18653,16 @@ __metadata:
   peerDependencies:
     webpack: ^5.27.0
   checksum: 10c0/214bc0f3b018f8c374f79b9fa16da43df78c7fef2261e9a99e36c2f8387601fad10ac75a171aa8edba75903db214bc46952ae08b94a1f8544bd146c2c8d07d27
+  languageName: node
+  linkType: hard
+
+"style-value-types@npm:5.0.0":
+  version: 5.0.0
+  resolution: "style-value-types@npm:5.0.0"
+  dependencies:
+    hey-listen: "npm:^1.0.8"
+    tslib: "npm:^2.1.0"
+  checksum: 10c0/a7b693269d48c0cab73da6c88eade845e71b5f330541a9ccb6a065468739d9bafdeb34f94fb89581931371275846da53e35989218cbc0c2d1a38f127e4d765fd
   languageName: node
   linkType: hard
 
