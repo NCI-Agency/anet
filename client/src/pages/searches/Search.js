@@ -12,6 +12,7 @@ import API from "api"
 import AppContext from "components/AppContext"
 import AttachmentTable from "components/Attachment/AttachmentTable"
 import AuthorizationGroupTable from "components/AuthorizationGroupTable"
+import EventTable from "components/EventTable"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LocationTable from "components/LocationTable"
@@ -39,7 +40,7 @@ import { exportResults } from "exportUtils"
 import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
-import { Attachment } from "models"
+import { Attachment, Event } from "models"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react"
@@ -61,6 +62,7 @@ import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
 import AUTHORIZATION_GROUPS_ICON from "resources/authorizationGroups.png"
 import DOWNLOAD_ICON from "resources/download.png"
+import EVENTS_ICON from "resources/events.png"
 import LOCATIONS_ICON from "resources/locations.png"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
 import PEOPLE_ICON from "resources/people.png"
@@ -1016,6 +1018,78 @@ Attachments.propTypes = {
   setPagination: PropTypes.func.isRequired
 }
 
+const Events = ({
+  pageDispatchers,
+  queryParams,
+  setTotalCount,
+  paginationKey,
+  pagination,
+  setPagination
+}) => {
+  // (Re)set pageNum to 0 if the queryParams change, and make sure we retrieve page 0 in that case
+  const latestQueryParams = useRef(queryParams)
+  const queryParamsUnchanged = _isEqual(latestQueryParams.current, queryParams)
+  const [pageNum, setPageNum] = useState(
+    queryParamsUnchanged && pagination[paginationKey]
+      ? pagination[paginationKey].pageNum
+      : 0
+  )
+  useEffect(() => {
+    if (!queryParamsUnchanged) {
+      latestQueryParams.current = queryParams
+      setPagination(paginationKey, 0)
+      setPageNum(0)
+    }
+  }, [queryParams, setPagination, paginationKey, queryParamsUnchanged])
+  const eventQuery = {
+    ...queryParams,
+    pageNum: queryParamsUnchanged ? pageNum : 0,
+    pageSize: queryParams.pageSize || DEFAULT_PAGESIZE
+  }
+  const { loading, error, data } = API.useApiQuery(Event.getEventListQuery, {
+    eventQuery
+  })
+  const { done, result } = useBoilerplate({
+    loading,
+    error,
+    pageDispatchers
+  })
+  // Update the total count
+  const totalCount = done ? null : data?.eventList?.totalCount
+  useEffect(() => setTotalCount?.(totalCount), [setTotalCount, totalCount])
+  if (done) {
+    return result
+  }
+
+  const paginatedEvents = data ? data.eventList : []
+  const { pageSize, pageNum: curPage, list: events } = paginatedEvents
+
+  return (
+    <EventTable
+      events={events}
+      pageSize={pageSize}
+      pageNum={curPage}
+      totalCount={totalCount}
+      goToPage={setPage}
+      id="events-search-results"
+    />
+  )
+
+  function setPage(pageNum) {
+    setPagination(paginationKey, pageNum)
+    setPageNum(pageNum)
+  }
+}
+
+Events.propTypes = {
+  pageDispatchers: PageDispatchersPropType,
+  queryParams: PropTypes.object,
+  setTotalCount: PropTypes.func,
+  paginationKey: PropTypes.string.isRequired,
+  pagination: PropTypes.object.isRequired,
+  setPagination: PropTypes.func.isRequired
+}
+
 const sum = (...args) => {
   return args.reduce((prev, curr) => (curr === null ? prev : prev + curr))
 }
@@ -1115,6 +1189,7 @@ const Search = ({
   const [numReports, setNumReports] = useState(null)
   const [numAuthorizationGroups, setNumAuthorizationGroups] = useState(null)
   const [numAttachments, setNumAttachments] = useState(null)
+  const [numEvents, setNumEvents] = useState(null)
   const [recipients, setRecipients] = useState({ ...DEFAULT_RECIPIENTS })
   usePageTitle("Search")
   const numResultsThatCanBeEmailed = sum(
@@ -1128,7 +1203,8 @@ const Search = ({
     numTasks,
     numLocations,
     numReports,
-    numAttachments
+    numAttachments,
+    numEvents
   )
   const taskShortLabel = Settings.fields.task.shortLabel
   // Memo'ize the search query parameters we use to prevent unnecessary re-renders
@@ -1152,6 +1228,15 @@ const Search = ({
       pageSize,
       sortBy: "CREATED_AT",
       sortOrder: "DESC"
+    }),
+    [searchQueryParams, pageSize]
+  )
+  const eventSearchQueryParams = useMemo(
+    () => ({
+      ...searchQueryParams,
+      pageSize,
+      sortBy: "NAME",
+      sortOrder: "ASC"
     }),
     [searchQueryParams, pageSize]
   )
@@ -1187,6 +1272,7 @@ const Search = ({
       latestQuery.current = { queryTypes, searchQueryParams }
       setNumAttachments(0)
       setNumAuthorizationGroups(0)
+      setNumEvents(0)
       setNumLocations(0)
       setNumOrganizations(0)
       setNumPeople(0)
@@ -1202,6 +1288,7 @@ const Search = ({
     setRecipients,
     setNumAttachments,
     setNumAuthorizationGroups,
+    setNumEvents,
     setNumLocations,
     setNumOrganizations,
     setNumPeople,
@@ -1227,6 +1314,8 @@ const Search = ({
     numAuthorizationGroups > 0
   const hasAttachmentsResults =
     queryTypes.includes(SEARCH_OBJECT_TYPES.ATTACHMENTS) && numAttachments > 0
+  const hasEventsResults =
+    queryTypes.includes(SEARCH_OBJECT_TYPES.EVENTS) && numEvents > 0
   useBoilerplate({
     pageProps: DEFAULT_PAGE_PROPS,
     searchProps: DEFAULT_SEARCH_PROPS,
@@ -1333,6 +1422,16 @@ const Search = ({
                 {hasAttachmentsResults && (
                   <Badge pill bg="secondary" className="float-end">
                     {numAttachments}
+                  </Badge>
+                )}
+              </AnchorNavItem>
+
+              <AnchorNavItem to="events" disabled={!hasEventsResults}>
+                <img src={EVENTS_ICON} alt="" />{" "}
+                {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.EVENTS]}{" "}
+                {hasEventsResults && (
+                  <Badge pill bg="secondary" className="float-end">
+                    {numEvents}
                   </Badge>
                 )}
               </AnchorNavItem>
@@ -1646,6 +1745,30 @@ const Search = ({
             queryParams={attachmentSearchQueryParams}
             setTotalCount={setNumAttachments}
             paginationKey="SEARCH_attachments"
+            pagination={pagination}
+            setPagination={setPagination}
+          />
+        </Fieldset>
+      )}
+      {queryTypes.includes(SEARCH_OBJECT_TYPES.EVENTS) && (
+        <Fieldset
+          id="events"
+          title={
+            <>
+              Events
+              {hasEventsResults && (
+                <Badge pill bg="secondary" className="ms-1">
+                  {numEvents}
+                </Badge>
+              )}
+            </>
+          }
+        >
+          <Events
+            pageDispatchers={pageDispatchers}
+            queryParams={eventSearchQueryParams}
+            setTotalCount={setNumEvents}
+            paginationKey="SEARCH_events"
             pagination={pagination}
             setPagination={setPagination}
           />

@@ -38,6 +38,8 @@ public class ReportMapper implements RowMapper<Report> {
     r.setAdvisorOrgUuid(getOptionalString(rs, "reports_advisorOrganizationUuid"));
     r.setInterlocutorOrgUuid(getOptionalString(rs, "reports_interlocutorOrganizationUuid"));
 
+    r.setEventUuid(getOptionalString(rs, "reports_eventUuid"));
+
     if (MapperUtils.containsColumnNamed(rs, "totalCount")) {
       ctx.define("totalCount", rs.getInt("totalCount"));
     }

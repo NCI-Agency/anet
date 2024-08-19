@@ -3,6 +3,8 @@ package mil.dds.anet.search.pg;
 import com.google.inject.Injector;
 import mil.dds.anet.search.IAttachmentSearcher;
 import mil.dds.anet.search.IAuthorizationGroupSearcher;
+import mil.dds.anet.search.IEventSearcher;
+import mil.dds.anet.search.IEventSeriesSearcher;
 import mil.dds.anet.search.ILocationSearcher;
 import mil.dds.anet.search.IOrganizationSearcher;
 import mil.dds.anet.search.IPersonSearcher;
@@ -73,6 +75,16 @@ public class PostgresqlSearcher extends Searcher {
   @Override
   public IAttachmentSearcher getAttachmentSearcher() {
     return injector.getInstance(PostgresqlAttachmentSearcher.class);
+  }
+
+  @Override
+  public IEventSearcher getEventSearcher() {
+    return injector.getInstance(PostgresqlEventSearcher.class);
+  }
+
+  @Override
+  public IEventSeriesSearcher getEventSeriesSearcher() {
+    return injector.getInstance(PostgresqlEventSeriesSearcher.class);
   }
 
 }
