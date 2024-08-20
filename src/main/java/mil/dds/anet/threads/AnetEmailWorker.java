@@ -1,8 +1,5 @@
 package mil.dds.anet.threads;
 
-import static java.util.stream.Collectors.joining;
-import static org.apache.commons.lang3.exception.ExceptionUtils.getThrowableList;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import freemarker.template.Template;
@@ -35,6 +32,7 @@ import mil.dds.anet.database.EmailDao;
 import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.simplejavamail.api.email.Email;
 import org.simplejavamail.email.EmailBuilder;
 import org.simplejavamail.mailer.MailValidationException;
@@ -99,8 +97,8 @@ public class AnetEmailWorker extends AbstractWorker {
       } catch (Throwable t) {
         logger.error("Error sending email #{}", email.getId(), t);
 
-        dao.setErrorMessage(email.getId(), getThrowableList(t).stream().limit(2)
-            .map(Throwable::getMessage).collect(joining(": ")));
+        dao.setErrorMessage(email.getId(), ExceptionUtils.getThrowableList(t).stream().limit(2)
+            .map(Throwable::getMessage).collect(Collectors.joining(": ")));
 
         // Process stale emails
         if (smtpConfig.getNbOfHoursForStaleEmails() != null) {

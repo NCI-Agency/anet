@@ -25,11 +25,16 @@ public class AnetEmailMapper implements RowMapper<AnetEmail> {
   public AnetEmail map(ResultSet rs, StatementContext ctx) throws SQLException {
     String jobSpec = rs.getString("jobSpec");
     try {
-      AnetEmail email = mapper.readValue(jobSpec, AnetEmail.class);
+      final AnetEmail email = mapper.readValue(jobSpec, AnetEmail.class);
 
       email.setId(rs.getInt("id"));
       email.setCreatedAt(MapperUtils.getInstantAsLocalDateTime(rs, "createdAt"));
       email.setErrorMessage(rs.getString("errorMessage"));
+
+      if (MapperUtils.containsColumnNamed(rs, "totalCount")) {
+        ctx.define("totalCount", rs.getInt("totalCount"));
+      }
+
       return email;
     } catch (Exception e) {
       logger.error("Error mapping email", e);

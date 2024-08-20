@@ -385,10 +385,10 @@ const Navigation = ({ allOrganizations, resetPages, clearSearchQuery }) => {
                 </NavDropdown>
                 <SidebarLink
                   id="email-queue"
-                  linkTo="/admin/emails"
+                  linkTo="/admin/pendingEmails"
                   handleOnClick={resetPages}
                 >
-                  Email queue
+                  Pending emails
                 </SidebarLink>
                 <SidebarLink
                   id="graphQL-nav"

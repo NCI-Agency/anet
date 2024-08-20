@@ -5,6 +5,7 @@ import MergeLocations from "pages/admin/merge/MergeLocations"
 import MergeOrganizations from "pages/admin/merge/MergeOrganizations"
 import MergePeople from "pages/admin/merge/MergePeople"
 import MergePositions from "pages/admin/merge/MergePositions"
+import PendingEmailsShow from "pages/admin/pendingEmails/Show"
 import UserActivitiesOverTime from "pages/admin/useractivities/UserActivitiesOverTime"
 import UserActivitiesPerPeriod from "pages/admin/useractivities/UserActivitiesPerPeriod"
 import UsersPendingVerification from "pages/admin/UsersPendingVerification"
@@ -18,7 +19,6 @@ import AuthorizationGroupShow from "pages/authorizationGroups/Show"
 import BoardDashboard from "pages/dashboards/BoardDashboard"
 import DecisivesDashboard from "pages/dashboards/DecisivesDashboard"
 import KanbanDashboard from "pages/dashboards/KanbanDashboard"
-import EmailQueueShow from "pages/emails/Show"
 import GraphiQL from "pages/GraphiQL"
 import Help from "pages/Help"
 import Home from "pages/Home"
@@ -170,7 +170,7 @@ const Routing = () => {
             <Route path="perPeriod" element={<UserActivitiesPerPeriod />} />
             <Route path="overTime" element={<UserActivitiesOverTime />} />
           </Route>
-          <Route path="emails" element={<EmailQueueShow />} />
+          <Route path="pendingEmails" element={<PendingEmailsShow />} />
           <Route path="graphiql" element={<GraphiQL />} />
         </Route>
       )}

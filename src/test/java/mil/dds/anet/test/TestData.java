@@ -1,8 +1,7 @@
 package mil.dds.anet.test;
 
-import static java.time.temporal.ChronoUnit.DAYS;
-
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 import mil.dds.anet.beans.Organization;
@@ -48,7 +47,7 @@ public class TestData {
   public static AnetEmailInput createAnetEmailInput() {
     return AnetEmailInput.builder().withToAddresses(List.of("geronimo@example.com"))
         .withComment("This is just a helpful test comment")
-        .withCreatedAt(Instant.now().minus(1, DAYS)).build();
+        .withCreatedAt(Instant.now().minus(1, ChronoUnit.DAYS)).build();
   }
 
   public static OrganizationInput createAdvisorOrganizationInput(

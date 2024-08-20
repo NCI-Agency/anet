@@ -58,6 +58,14 @@ enum AggregationType {
 }
 
 """"""
+type AnetBeanList_AnetEmail {
+  list: [AnetEmail]
+  pageNum: Int
+  pageSize: Int
+  totalCount: Int
+}
+
+""""""
 type AnetBeanList_Attachment {
   list: [Attachment]
   pageNum: Int
@@ -856,7 +864,7 @@ type Query {
   organization(uuid: String): Organization
   organizationList(query: OrganizationSearchQueryInput): AnetBeanList_Organization
   organizations(uuids: [String]): [Organization]
-  pendingEmails: [AnetEmail]
+  pendingEmails(pageNum: Int = 0, pageSize: Int = 0): AnetBeanList_AnetEmail
   person(uuid: String): Person
   personList(query: PersonSearchQueryInput): AnetBeanList_Person
   position(uuid: String): Position

@@ -52,9 +52,10 @@ class AnetEmailResourceTest extends AbstractResourceTest {
         withCredentials(adminUser, t -> mutationExecutor.emailReport("", input, reportUuid));
     assertThat(mutationResult).isEqualTo(1);
 
-    final var pendingEmails = withCredentials(adminUser,
-        t -> queryExecutor.pendingEmails("{ id toAddresses createdAt comment errorMessage type }"));
-    assertThat(pendingEmails).hasSize(1)
+    final var pendingEmails = withCredentials(adminUser, t -> queryExecutor.pendingEmails(
+        getListFields("{ id toAddresses createdAt comment errorMessage type }"), 0, 0));
+    assertThat(pendingEmails.getTotalCount()).isOne();
+    assertThat(pendingEmails.getList()).hasSize(1)
         .allSatisfy(pendingEmail -> assertThat(pendingEmail).usingRecursiveComparison()
             .comparingOnlyFields("toAddresses", "comment").isEqualTo(input))
         .allSatisfy(pendingEmail -> assertThat(pendingEmail.getErrorMessage()).isNullOrEmpty())
