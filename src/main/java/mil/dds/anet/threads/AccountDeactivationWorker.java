@@ -47,12 +47,11 @@ public class AccountDeactivationWorker extends AbstractWorker {
             ? new ArrayList<>(0)
             : daysTillEndOfTourWarnings;
 
-    // Sort in descending order so largest value is first (so there is no need to make multiple
-    // queries)
-    Collections.sort(warningDays, Collections.reverseOrder());
+    // Sort in ascending order (latest value first), so we don't send multiple emails
+    Collections.sort(warningDays);
 
-    // Pick the earliest warning
-    final int daysBeforeLatestWarning = warningDays.get(0);
+    // Pick the earliest warning (i.e. largest value, so there is no need to make multiple queries)
+    final int daysBeforeLatestWarning = warningDays.get(warningDays.size() - 1);
 
     // Get a list of all active people with an end of tour coming up using the earliest warning date
     final PersonSearchQuery query = new PersonSearchQuery();
@@ -72,10 +71,13 @@ public class AccountDeactivationWorker extends AbstractWorker {
     persons.forEach(p -> {
       for (int i = 0; i < warningDays.size(); i++) {
         final Integer warning = warningDays.get(i);
-        final Integer nextWarning = i == warningDays.size() - 1 ? null : warningDays.get(i + 1);
-        checkDeactivationStatus(p, warning, nextWarning, now,
+        final Integer nextWarning = i == 0 ? null : warningDays.get(i - 1);
+        if (checkDeactivationStatus(p, warning, nextWarning, now,
             jobHistory == null ? null : jobHistory.getLastRun(), ignoredDomainNames,
-            warningIntervalInSecs);
+            warningIntervalInSecs)) {
+          // We're done for this person
+          break;
+        }
       }
     });
   }
@@ -95,20 +97,20 @@ public class AccountDeactivationWorker extends AbstractWorker {
         : domainNamesToIgnore.stream().map(x -> x.trim()).collect(Collectors.toList());
   }
 
-  private void checkDeactivationStatus(final Person person, final Integer daysBeforeWarning,
+  private boolean checkDeactivationStatus(final Person person, final Integer daysBeforeWarning,
       final Integer nextWarning, final Instant now, final Instant lastRun,
       final List<String> ignoredDomainNames, final Integer warningIntervalInSecs) {
     if (Utils.isEmailIgnored(
         person.getNotificationEmailAddress().map(EmailAddress::getAddress).orElse(null),
         ignoredDomainNames)) {
       // Skip users from ignored domains
-      return;
+      return true;
     }
 
     if (person.getEndOfTourDate().isBefore(now)) {
       // Deactivate account as end-of-tour date has been reached
       deactivateAccount(person);
-      return;
+      return true;
     }
 
     final Instant warningDate = now.plus(daysBeforeWarning, ChronoUnit.DAYS);
@@ -121,7 +123,10 @@ public class AccountDeactivationWorker extends AbstractWorker {
       final Instant nextReminder =
           nextWarning == null ? null : now.plus(nextWarning, ChronoUnit.DAYS);
       sendDeactivationWarningEmail(person, nextReminder);
+      return true;
     }
+
+    return false;
   }
 
   private void deactivateAccount(Person p) {

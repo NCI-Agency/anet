@@ -1,6 +1,3 @@
-"""Indicates an Input Object is a OneOf Input Object."""
-directive @oneOf on INPUT_OBJECT
-
 """"""
 enum ActionType {
   APPROVE
@@ -58,6 +55,14 @@ enum AggregationPeriod {
 enum AggregationType {
   BY_OBJECT
   OVER_TIME
+}
+
+""""""
+type AnetBeanList_AnetEmail {
+  list: [AnetEmail]
+  pageNum: Int
+  pageSize: Int
+  totalCount: Int
 }
 
 """"""
@@ -146,6 +151,16 @@ type AnetBeanList_UserActivity {
   pageNum: Int
   pageSize: Int
   totalCount: Int
+}
+
+""""""
+type AnetEmail {
+  comment: String
+  createdAt: Instant
+  errorMessage: String
+  id: Int
+  toAddresses: [String]
+  type: String
 }
 
 """"""
@@ -849,6 +864,7 @@ type Query {
   organization(uuid: String): Organization
   organizationList(query: OrganizationSearchQueryInput): AnetBeanList_Organization
   organizations(uuids: [String]): [Organization]
+  pendingEmails(pageNum: Int = 0, pageSize: Int = 0): AnetBeanList_AnetEmail
   person(uuid: String): Person
   personList(query: PersonSearchQueryInput): AnetBeanList_Person
   position(uuid: String): Position

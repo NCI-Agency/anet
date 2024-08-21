@@ -1,9 +1,12 @@
 package mil.dds.anet.test;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.RollupGraph;
+import mil.dds.anet.test.client.AnetEmailInput;
 import mil.dds.anet.test.client.CommentInput;
 import mil.dds.anet.test.client.LocationInput;
 import mil.dds.anet.test.client.LocationType;
@@ -39,6 +42,12 @@ public class TestData {
     b.setRole(PositionRole.MEMBER);
     b.setStatus(Status.ACTIVE);
     return b;
+  }
+
+  public static AnetEmailInput createAnetEmailInput() {
+    return AnetEmailInput.builder().withToAddresses(List.of("geronimo@example.com"))
+        .withComment("This is just a helpful test comment")
+        .withCreatedAt(Instant.now().minus(1, ChronoUnit.DAYS)).build();
   }
 
   public static OrganizationInput createAdvisorOrganizationInput(

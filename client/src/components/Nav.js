@@ -384,6 +384,13 @@ const Navigation = ({ allOrganizations, resetPages, clearSearchQuery }) => {
                   ))}
                 </NavDropdown>
                 <SidebarLink
+                  id="email-queue"
+                  linkTo="/admin/pendingEmails"
+                  handleOnClick={resetPages}
+                >
+                  Pending emails
+                </SidebarLink>
+                <SidebarLink
                   id="graphQL-nav"
                   linkTo="/admin/graphiql"
                   handleOnClick={resetPages}

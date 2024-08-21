@@ -5,6 +5,7 @@ import MergeLocations from "pages/admin/merge/MergeLocations"
 import MergeOrganizations from "pages/admin/merge/MergeOrganizations"
 import MergePeople from "pages/admin/merge/MergePeople"
 import MergePositions from "pages/admin/merge/MergePositions"
+import PendingEmailsShow from "pages/admin/pendingEmails/Show"
 import UserActivitiesOverTime from "pages/admin/useractivities/UserActivitiesOverTime"
 import UserActivitiesPerPeriod from "pages/admin/useractivities/UserActivitiesPerPeriod"
 import UsersPendingVerification from "pages/admin/UsersPendingVerification"
@@ -169,6 +170,7 @@ const Routing = () => {
             <Route path="perPeriod" element={<UserActivitiesPerPeriod />} />
             <Route path="overTime" element={<UserActivitiesOverTime />} />
           </Route>
+          <Route path="pendingEmails" element={<PendingEmailsShow />} />
           <Route path="graphiql" element={<GraphiQL />} />
         </Route>
       )}
