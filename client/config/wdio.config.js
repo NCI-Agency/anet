@@ -1,3 +1,5 @@
+const path = require("path")
+
 const config = {
   //
   // ====================
@@ -70,7 +72,15 @@ const config = {
         // Note: it is important to have a big window height as otherwise
         // while scrolling some form fields might go under the header and
         // therefore we would get failing tests related to these fields.
-        args: ["--headless", "--disable-gpu", "--window-size=1600,1200"]
+        args: [
+          "--headless=old",
+          "--disable-gpu",
+          "--disable-search-engine-choice-screen",
+          "--window-size=1600,1200"
+        ],
+        prefs: {
+          "download.default_directory": path.dirname(__dirname)
+        }
       }
       // If outputDir is provided WebdriverIO can capture driver session logs
       // it is possible to configure which logTypes to include/exclude.
