@@ -54,11 +54,10 @@ test.serial("Draft and submit a report", async t => {
       "topferness, christopf"
     )
 
-  const $attendeesTitle = await t.context.driver.findElement(
-    // if future "People who will be involved in this planned engagement"
-    By.xpath('//h4/span[text()="People involved in this engagement"]')
+  const $newReportTitle = await t.context.driver.findElement(
+    By.xpath('//h4/span[text()="Create a new Report"]')
   )
-  await $attendeesTitle.click()
+  await $newReportTitle.click()
 
   t.is(
     await $attendeesAdvancedSelect1.getAttribute("value"),
@@ -96,7 +95,7 @@ test.serial("Draft and submit a report", async t => {
       "#reportPeople",
       "steveson, steve"
     )
-  await $attendeesTitle.click()
+  await $newReportTitle.click()
 
   t.is(
     await $attendeesAdvancedSelect2.getAttribute("value"),

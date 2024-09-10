@@ -90,7 +90,10 @@ test.beforeEach(t => {
   let builder = new webdriver.Builder()
   if (testEnv === "local") {
     const chrome = require("selenium-webdriver/chrome")
-    const options = new chrome.Options(capabilities).addArguments("--headless")
+    const options = new chrome.Options(capabilities).addArguments([
+      "--headless=old",
+      "--disable-search-engine-choice-screen"
+    ])
     builder = builder
       .forBrowser(webdriver.Browser.CHROME)
       .setChromeOptions(options)
