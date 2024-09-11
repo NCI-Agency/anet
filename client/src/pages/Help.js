@@ -155,7 +155,7 @@ const HelpConditional = ({
         </p>
         <img
           src={TOUR_SCREENSHOT}
-          alt={'Screenshot of "Guided Tour" link'}
+          alt='Screenshot of "Guided Tour" link'
           style={screenshotCss}
         />
 
