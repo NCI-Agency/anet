@@ -111,7 +111,7 @@
     "@apollo/client": "3.11.8",
     "@blueprintjs/core": "5.11.0",
     "@blueprintjs/datetime2": "2.3.8",
-    "@emotion/react": "11.13.0",
+    "@emotion/react": "11.13.3",
     "@emotion/styled": "11.13.0",
     "@fullcalendar/core": "6.1.15",
     "@fullcalendar/daygrid": "6.1.15",
