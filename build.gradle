@@ -25,11 +25,11 @@ java {
 }
 
 boolean isTestEnv = project.hasProperty("testEnv")
-String dropwizardVersion = "4.0.7"
+String dropwizardVersion = "4.0.8"
 String logbackVersion = "1.4.14"
-String log4jVersion = "2.23.1"
+String log4jVersion = "2.24.0"
 String keycloakVersion = "24.0.5"
-String springBootVersion = "3.3.2"
+String springBootVersion = "3.3.3"
 String springFrameworkVersion = "6.1.12"
 String springGraphqlVersion = "1.2.7"
 String springSecurityVersion = "6.3.3"
@@ -98,8 +98,8 @@ dependencies {
 	implementation 'com.google.guava:guava:33.3.0-jre' // Pick the non-Android version of Guice
 
 	// Supported database is PostgreSQL:
-	implementation 'org.postgresql:postgresql:42.7.3'
-	implementation 'org.liquibase:liquibase-core:4.29.1'
+	implementation 'org.postgresql:postgresql:42.7.4'
+	implementation 'org.liquibase:liquibase-core:4.29.2'
 
 	// For caching domain users (used in every request in the AuthenticationFilter)
 	implementation('org.ehcache:ehcache:3.10.8') {
@@ -763,7 +763,7 @@ jar {
 //Configure the Java Checkstyle settings. Run with ./gradlew check
 checkstyle {
 	configFile = rootProject.file('config/google_checks.xml')
-	toolVersion = '10.17.0'
+	toolVersion = '10.18.1'
 }
 //Easiest way to avoid checking generated code
 checkstyleTest {
