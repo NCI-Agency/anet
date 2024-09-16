@@ -6215,7 +6215,7 @@ __metadata:
     style-loader: "npm:4.0.0"
     tap-xunit: "npm:2.4.1"
     thread-loader: "npm:4.0.2"
-    title-case: "npm:4.3.1"
+    title-case: "npm:4.3.2"
     ts-node: "npm:10.9.2"
     use-debounce: "npm:10.0.3"
     uuid: "npm:10.0.0"
@@ -19018,10 +19018,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"title-case@npm:4.3.1":
-  version: 4.3.1
-  resolution: "title-case@npm:4.3.1"
-  checksum: 10c0/10bb67f3ae5cf4043b4050f5c4b3ae7fdaeef6c55bcb646d08a3567d4233f02d10f3ea55add7d8dbf55e1a320b49b79cb0b5d4ce39701a500de62cc8860d9bc8
+"title-case@npm:4.3.2":
+  version: 4.3.2
+  resolution: "title-case@npm:4.3.2"
+  checksum: 10c0/f040c5b0586e3a4ac5881e59ac060ebfa56dae611b0d513ad211fa7f92597d418395fa902fe9d7ee49f98e557e88421e274680b22a3b04dd1ce1c577225444d3
   languageName: node
   linkType: hard
 
