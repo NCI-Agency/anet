@@ -202,11 +202,11 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
       // When not otherwise specified, restrict search to specific report states
       final List<ReportState> reportStates;
       if (Utils.isEmptyOrNull(query.getEngagementStatus())) {
-        // just published
-        reportStates = List.of(ReportState.PUBLISHED);
+        // approved or published
+        reportStates = List.of(ReportState.APPROVED, ReportState.PUBLISHED);
       } else {
-        // published or cancelled
-        reportStates = List.of(ReportState.PUBLISHED, ReportState.CANCELLED);
+        // approved, published or cancelled
+        reportStates = List.of(ReportState.APPROVED, ReportState.PUBLISHED, ReportState.CANCELLED);
       }
       qb.addInClause("states", "reports.state", reportStates);
     } else {

@@ -30,7 +30,7 @@ const ReportStateFilter = ({
     return val.state.length === 1 && val.state[0] === Report.STATE.CANCELLED
   }
   const defaultValue = {
-    state: inputValue.state || [Report.STATE.PUBLISHED],
+    state: inputValue.state || [Report.STATE.APPROVED, Report.STATE.PUBLISHED],
     cancelledReason: inputValue.cancelledReason || ""
   }
   const toQuery = val => {
