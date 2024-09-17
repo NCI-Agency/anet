@@ -46,7 +46,7 @@ function randomOrganization() {
     identificationCode: () => faker.helpers.replaceSymbols("??????"),
     parentOrg: identity,
     status: () => faker.helpers.objectValue(Organization.STATUS),
-    profile: () => createHtmlParagraphs()
+    profile: async() => await createHtmlParagraphs()
   }
 
   // approvalSteps: [],
@@ -123,7 +123,7 @@ async function createHierarchy(user, grow, args) {
     org.shortName = (shortName + " " + path.join(".")).trim()
     org.identificationCode = faker.helpers.replaceSymbols("??????")
     org.status = status
-    org.profile = createHtmlParagraphs()
+    org.profile = await createHtmlParagraphs()
     if (fuzzy.withProbability(0.5)) {
       const orgSlug = org.shortName.replace(/[ .]/g, "")
       org.emailAddresses = createEmailAddresses(
@@ -204,13 +204,13 @@ const createOrganization = async function(user, parentOrg, path) {
   }
   randomOrg.status = Model.STATUS.ACTIVE
 
-  populate(org, randomOrg)
-    .shortName.always()
-    .longName.always()
-    .identificationCode.always()
-    .parentOrg.always()
-    .status.always()
-    .profile.always()
+  const orgGenerator = await populate(org, randomOrg)
+  await orgGenerator.shortName.always()
+  await orgGenerator.longName.always()
+  await orgGenerator.identificationCode.always()
+  await orgGenerator.parentOrg.always()
+  await orgGenerator.status.always()
+  await orgGenerator.profile.always()
 
   if (path.length === 1 && org.longName) {
     path[0] = abbreviateCompanyName(org.longName)

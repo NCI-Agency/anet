@@ -1,112 +1,33 @@
-import { faker } from "@faker-js/faker"
 import { NOTE_TYPE } from "components/Model"
-import _isEmpty from "lodash/isEmpty"
-import { createHtmlParagraphs, populate, runGQL } from "../simutils"
+import {
+  createHtmlParagraphs,
+  getRandomObject,
+  populate,
+  runGQL
+} from "../simutils"
 
-function getListEndpoint(type) {
-  switch (type) {
-    case "authorizationGroups":
-      return ["authorizationGroupList", "AuthorizationGroupSearchQueryInput"]
-    case "locations":
-      return ["locationList", "LocationSearchQueryInput"]
-    case "organizations":
-      return ["organizationList", "OrganizationSearchQueryInput"]
-    case "people":
-      return ["personList", "PersonSearchQueryInput"]
-    case "positions":
-      return ["positionList", "PositionSearchQueryInput"]
-    case "reports":
-      return ["reportList", "ReportSearchQueryInput"]
-    case "tasks":
-      return ["taskList", "TaskSearchQueryInput"]
-    default:
-      return null
-  }
-}
-
-export async function getRandomObject(
-  user,
-  type,
-  variables,
-  fields = "uuid",
-  ignoreCallback = randomObject => false
-) {
-  const [listEndpoint, queryType] = getListEndpoint(type)
-  const objectQuery = Object.assign({}, variables, {
-    pageNum: 0,
-    pageSize: 1
-  })
-  const totalCount = (
-    await runGQL(user, {
-      query: `
-      query ($objectQuery: ${queryType}) {
-        ${listEndpoint}(query: $objectQuery) {
-          totalCount
-        }
-      }
-    `,
-      variables: {
-        objectQuery
-      }
-    })
-  ).data[listEndpoint].totalCount
-  if (totalCount === 0) {
-    return null
-  }
-  let attempt = 0
-  while (attempt < 10) {
-    objectQuery.pageNum = faker.number.int({ max: totalCount - 1 })
-    const list = (
-      await runGQL(user, {
-        query: `
-          query ($objectQuery: ${queryType}) {
-            ${listEndpoint}(query: $objectQuery) {
-              list {
-                ${fields}
-              }
-            }
-          }
-        `,
-        variables: {
-          objectQuery
-        }
-      })
-    ).data[listEndpoint].list
-    if (_isEmpty(list)) {
-      return null
-    }
-    const randomObject = list[0]
-    if (ignoreCallback(randomObject)) {
-      attempt++
-    } else {
-      return randomObject
-    }
-  }
-  return null
-}
-
-async function populateNote(note, user, relatedObjectType) {
-  const obj = await getRandomObject(user, relatedObjectType)
+async function populateNote(note, relatedObjectType) {
+  const obj = await getRandomObject(relatedObjectType)
   const relatedObject =
     obj && obj.uuid ? { relatedObjectType, relatedObjectUuid: obj.uuid } : null
-  const author = await getRandomObject(user, "people")
+  const author = await getRandomObject("people")
   const template = {
     author: () => author,
     type: () => NOTE_TYPE.FREE_TEXT,
     noteRelatedObjects: () => [relatedObject],
-    text: () => createHtmlParagraphs()
+    text: async() => await createHtmlParagraphs()
   }
-  populate(note, template)
-    .author.always()
-    .type.always()
-    .noteRelatedObjects.always()
-    .text.always()
+  const noteGenerator = await populate(note, template)
+  await noteGenerator.author.always()
+  await noteGenerator.type.always()
+  await noteGenerator.noteRelatedObjects.always()
+  await noteGenerator.text.always()
   return note
 }
 
 const _createNote = async function(user, relatedObjectType) {
   const note = {}
-  if (await populateNote(note, user, relatedObjectType)) {
+  if (await populateNote(note, relatedObjectType)) {
     console.debug(
       `Creating ${
         NOTE_TYPE.FREE_TEXT.toLowerCase().green

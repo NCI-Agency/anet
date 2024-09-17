@@ -5,12 +5,12 @@ import { Location, Position } from "models"
 import {
   createEmailAddresses,
   fuzzy,
+  getRandomObject,
   identity,
   populate,
   runGQL,
   specialUser
 } from "../simutils"
-import { getRandomObject } from "./NoteStories"
 
 /**
  * Gets all informative attributes for of a position given its uuid
@@ -160,13 +160,11 @@ const _createPosition = async function(user) {
   const position = Position.filterClientSideFields(new Position())
   const code = faker.lorem.slug()
   const organization = await getRandomObject(
-    user,
     "organizations",
     {},
     "uuid emailAddresses { network address }"
   )
   const person = await getRandomObject(
-    user,
     "people",
     {},
     "uuid domainUsername",
@@ -174,7 +172,7 @@ const _createPosition = async function(user) {
       randomObject?.uuid === user.uuid ||
       randomObject?.domainUsername === specialUser.name
   )
-  const location = await getRandomObject(user, "locations", {
+  const location = await getRandomObject("locations", {
     type: Location.LOCATION_TYPES.POINT_LOCATION
   })
   let emailAddresses
@@ -198,15 +196,15 @@ const _createPosition = async function(user) {
     emailAddresses
   }
 
-  populate(position, template)
-    .name.always()
-    .code.sometimes()
-    .type.always()
-    .status.always()
-    .person.always()
-    .organization.always()
-    .location.always()
-    .emailAddresses.always()
+  const positionGenerator = await populate(position, template)
+  await positionGenerator.name.always()
+  await positionGenerator.code.sometimes()
+  await positionGenerator.type.always()
+  await positionGenerator.status.always()
+  await positionGenerator.person.always()
+  await positionGenerator.organization.always()
+  await positionGenerator.location.always()
+  await positionGenerator.emailAddresses.always()
 
   console.debug(`Creating position ${position.name.green}`)
   return (
@@ -375,12 +373,15 @@ const updatePosition = async function(user) {
       })
     ).data.position
 
-    populate(position, randomPositionTemplate(organizations))
-      .name.sometimes()
-      .status.often()
-      .type.never()
-      .organization.rarely()
-      .code.sometimes()
+    const positionGenerator = await populate(
+      position,
+      randomPositionTemplate(organizations)
+    )
+    await positionGenerator.name.sometimes()
+    await positionGenerator.status.often()
+    await positionGenerator.type.never()
+    await positionGenerator.organization.rarely()
+    await positionGenerator.code.sometimes()
 
     return (
       await runGQL(user, {
