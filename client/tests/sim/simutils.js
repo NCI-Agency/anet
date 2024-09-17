@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker"
 import fetch from "cross-fetch"
+import _isEmpty from "lodash/isEmpty"
 import Settings from "settings"
 
 export const sleep = seconds => {
@@ -195,7 +196,7 @@ function normalPPF(mean, stddev) {
  * @param {*} scheme    The scheme with methods that compute values for properties of the instance
  * @param {*} context   A context object passed with the instance object to the scheme methods
  */
-function populate(instance, scheme, context) {
+async function populate(instance, scheme, context) {
   const populator = {
     __queue: []
   }
@@ -204,16 +205,16 @@ function populate(instance, scheme, context) {
   // for each property in the scheme create an object with probability functions to execute the
   // scheme property function
   Object.keys(scheme).forEach(key => {
-    const applyWithProbability = function(probability) {
+    const applyWithProbability = async function(probability) {
       if (fuzzy.withProbability(probability)) {
         populator.__queue.push(key)
-        populator.__queue.forEach(key => {
+        for await (const key of populator.__queue) {
           const val = scheme[key]
           instance[key] =
             typeof val === "function"
-              ? val(instance[key], instance, context)
+              ? await val(instance[key], instance, context)
               : val
-        })
+        }
       }
       populator.__queue.length = 0
       return populator
@@ -268,14 +269,121 @@ function createEmailAddresses(onNs, email, orgEmailAddresses) {
   return null
 }
 
-function createHtmlParagraphs(min = 3, max = 10) {
+function getListEndpoint(type) {
+  switch (type) {
+    case "attachments":
+      return ["attachmentList", "AttachmentSearchQueryInput"]
+    case "authorizationGroups":
+      return ["authorizationGroupList", "AuthorizationGroupSearchQueryInput"]
+    case "locations":
+      return ["locationList", "LocationSearchQueryInput"]
+    case "organizations":
+      return ["organizationList", "OrganizationSearchQueryInput"]
+    case "people":
+      return ["personList", "PersonSearchQueryInput"]
+    case "positions":
+      return ["positionList", "PositionSearchQueryInput"]
+    case "reports":
+      return ["reportList", "ReportSearchQueryInput"]
+    case "tasks":
+      return ["taskList", "TaskSearchQueryInput"]
+    default:
+      return null
+  }
+}
+
+export async function getRandomObject(
+  type,
+  variables,
+  fields = "uuid",
+  ignoreCallback = randomObject => false
+) {
+  const [listEndpoint, queryType] = getListEndpoint(type)
+  const objectQuery = Object.assign({}, variables, {
+    pageNum: 0,
+    pageSize: 1
+  })
+  const totalCount = (
+    await runGQL(specialUser, {
+      query: `
+      query ($objectQuery: ${queryType}) {
+        ${listEndpoint}(query: $objectQuery) {
+          totalCount
+        }
+      }
+    `,
+      variables: {
+        objectQuery
+      }
+    })
+  ).data[listEndpoint].totalCount
+  if (totalCount === 0) {
+    return null
+  }
+  let attempt = 0
+  while (attempt < 10) {
+    objectQuery.pageNum = faker.number.int({ max: totalCount - 1 })
+    const list = (
+      await runGQL(specialUser, {
+        query: `
+          query ($objectQuery: ${queryType}) {
+            ${listEndpoint}(query: $objectQuery) {
+              list {
+                ${fields}
+              }
+            }
+          }
+        `,
+        variables: {
+          objectQuery
+        }
+      })
+    ).data[listEndpoint].list
+    if (_isEmpty(list)) {
+      return null
+    }
+    const randomObject = list[0]
+    if (ignoreCallback(randomObject)) {
+      attempt++
+    } else {
+      return randomObject
+    }
+  }
+  return null
+}
+
+async function createAnetLinks(min = 3, max = 10) {
+  const linkableObjects = [
+    { type: "attachments", label: "Attachment" },
+    { type: "authorizationGroups", label: "AuthorizationGroup" },
+    { type: "locations", label: "Location" },
+    { type: "organizations", label: "Organization" },
+    { type: "people", label: "Person" },
+    { type: "positions", label: "Position" },
+    { type: "reports", label: "Report" },
+    { type: "tasks", label: "Task" }
+  ]
+  let anetLinks = "<ul>"
+  const nrLinks = faker.number.int({ min, max })
+  for (let i = 0; i < nrLinks; i++) {
+    const objectType = faker.helpers.arrayElement(linkableObjects)
+    const object = await getRandomObject(objectType.type)
+    const sampleLink = `<li><a href="urn:anet:${objectType.type}:${object.uuid}" rel="nofollow">${objectType.label}:${object.uuid}</a></li>`
+    anetLinks += sampleLink
+  }
+  anetLinks += "</ul>"
+  return anetLinks
+}
+
+async function createHtmlParagraphs(min = 3, max = 10) {
+  const anetLinks = await createAnetLinks(min, max)
   return `<p>${faker.lorem.paragraphs(
     {
       min,
       max
     },
     "</p><p>"
-  )}</p>`
+  )}</p>${anetLinks}`
 }
 
 // Our initial admin, should always be there

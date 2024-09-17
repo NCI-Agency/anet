@@ -1,71 +1,35 @@
 import { faker } from "@faker-js/faker"
-import Model from "components/Model"
-import _isEmpty from "lodash/isEmpty"
-import { Position } from "models"
-import { runGQL, specialUser } from "../../simutils"
 
-async function getRandomUser(user, variables) {
-  const positionsQuery = Object.assign({}, variables, {
-    pageNum: 0,
-    pageSize: 1
-  })
-  const totalCount = (
-    await runGQL(user, {
-      query: `
-        query ($positionsQuery: PositionSearchQueryInput) {
-          positionList(query: $positionsQuery) {
-            totalCount
-          }
-        }
-      `,
-      variables: {
-        positionsQuery
-      }
-    })
-  ).data.positionList.totalCount
-  if (totalCount === 0) {
-    return null
-  }
-  let person
-  for (let i = 0; i < Math.max(totalCount, 10); i++) {
-    positionsQuery.pageNum = faker.number.int({ max: totalCount - 1 })
-    const positions = (
-      await runGQL(specialUser, {
-        query: `
-          query ($positionsQuery: PositionSearchQueryInput) {
-            positionList(query: $positionsQuery) {
-              list {
-                uuid
-                type
-                person {
-                  uuid
-                  name
-                  domainUsername
-                }
-              }
-            }
-          }
-        `,
-        variables: {
-          positionsQuery
-        }
-      })
-    ).data.positionList.list.filter(p => p.person.domainUsername)
-    person = !_isEmpty(positions) && positions[0].person
-    if (person) {
-      break
-    }
-  }
-  if (!person) {
-    return null
-  }
-  return {
-    name: person.domainUsername,
-    password: person.domainUsername,
-    person
-  }
-}
-
+// These are the users configured in Keycloak, which can be used to execute GQL requests
+const admins = ["arthur", "michael"]
+const superusers = [
+  ...admins,
+  "andrew",
+  "bob",
+  "dwight",
+  "henry",
+  "jacob",
+  "jim",
+  "rebecca"
+]
+const advisors = [
+  ...superusers,
+  "advisor",
+  "bonny",
+  "creed",
+  "elizabeth",
+  "erin",
+  "inter",
+  "jack",
+  "kevin",
+  "lin",
+  "nick",
+  "reina",
+  "reportgirl",
+  "reportguy",
+  "selena",
+  "yoshie"
+]
 const userTypes = [
   {
     name: "newUser",
@@ -79,33 +43,24 @@ const userTypes = [
     name: "existingAdvisor",
     frequency: 1,
     userFunction: async function(value) {
-      return getRandomUser(specialUser, {
-        status: Model.STATUS.ACTIVE,
-        isFilled: true,
-        type: [Position.TYPE.ADVISOR]
-      })
+      const username = faker.helpers.arrayElement(advisors)
+      return { name: username, password: username }
     }
   },
   {
     name: "existingSuperuser",
     frequency: 1,
     userFunction: async function(value) {
-      return getRandomUser(specialUser, {
-        status: Model.STATUS.ACTIVE,
-        isFilled: true,
-        type: [Position.TYPE.SUPERUSER, Position.TYPE.ADMINISTRATOR]
-      })
+      const username = faker.helpers.arrayElement(superusers)
+      return { name: username, password: username }
     }
   },
   {
     name: "existingAdmin",
     frequency: 1,
     userFunction: async function(value) {
-      return getRandomUser(specialUser, {
-        status: Model.STATUS.ACTIVE,
-        isFilled: true,
-        type: [Position.TYPE.ADMINISTRATOR]
-      })
+      const username = faker.helpers.arrayElement(admins)
+      return { name: username, password: username }
     }
   }
 ]

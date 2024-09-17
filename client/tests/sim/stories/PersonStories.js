@@ -7,13 +7,13 @@ import {
   createEmailAddresses,
   createHtmlParagraphs,
   fuzzy,
+  getRandomObject,
   identity,
   populate,
   runGQL
 } from "../simutils"
 import afghanFirstNames from "./afghanFirstNames"
 import afghanSurnames from "./afghanSurnames"
-import { getRandomObject } from "./NoteStories"
 
 const availableLocales = Object.keys(allLocales)
 const availableRanks = Settings.fields.person.ranks.map(r => r.value)
@@ -39,7 +39,7 @@ function personName(gender, locale) {
   }
 }
 
-async function randomPerson(user, isUser, status) {
+async function randomPerson(isUser, status) {
   const gender = fuzzy.withProbability(0.1)
     ? "NOT SPECIFIED"
     : fuzzy.withProbability(0.5)
@@ -47,7 +47,6 @@ async function randomPerson(user, isUser, status) {
       : "FEMALE"
   const defaultLangCode = "en"
   const country = await getRandomObject(
-    user,
     "locations",
     { type: Location.LOCATION_TYPES.COUNTRY },
     "uuid name digram"
@@ -100,7 +99,7 @@ async function randomPerson(user, isUser, status) {
     gender: () => gender,
     phoneNumber: () => faker.phone.phoneNumber(),
     endOfTourDate: () => faker.date.future(),
-    biography: () => createHtmlParagraphs(),
+    biography: async() => await createHtmlParagraphs(),
     user: () => isUser,
     domainUsername: () => domainUsername,
     emailAddresses: () => createEmailAddresses(isUser, email)
@@ -117,7 +116,7 @@ function modifiedPerson() {
     gender: identity,
     phoneNumber: () => faker.phone.phoneNumber(),
     endOfTourDate: () => faker.date.future(),
-    biography: () => createHtmlParagraphs(),
+    biography: async() => await createHtmlParagraphs(),
     user: identity,
     emailAddresses: (value, instance) => {
       const name = Person.parseFullName(instance.name)
@@ -132,17 +131,20 @@ function modifiedPerson() {
 
 const _createPerson = async function(user, isUser, status) {
   const person = Person.filterClientSideFields(new Person())
-  populate(person, await randomPerson(user, isUser, status))
-    .name.always()
-    .status.always()
-    .rank.always()
-    .user.always()
-    .domainUsername.always()
-    .country.always()
-    .gender.always()
-    .endOfTourDate.always()
-    .biography.always()
-    .emailAddresses.always()
+  const personGenerator = await populate(
+    person,
+    await randomPerson(isUser, status)
+  )
+  await personGenerator.name.always()
+  await personGenerator.status.always()
+  await personGenerator.rank.always()
+  await personGenerator.user.always()
+  await personGenerator.domainUsername.always()
+  await personGenerator.country.always()
+  await personGenerator.gender.always()
+  await personGenerator.endOfTourDate.always()
+  await personGenerator.biography.always()
+  await personGenerator.emailAddresses.always()
 
   console.debug(
     `Creating ${person.user ? "user " : ""}${
@@ -226,16 +228,16 @@ const updatePerson = async function(user) {
     })
   ).data.person
 
-  populate(person, modifiedPerson())
-    .name.rarely()
-    .domainUsername.never()
-    .phoneNumber.sometimes()
-    .rank.sometimes()
-    .country.never()
-    .gender.never()
-    .endOfTourDate.sometimes()
-    .biography.often()
-    .emailAddresses.rarely()
+  const personGenerator = await populate(person, modifiedPerson())
+  await personGenerator.name.rarely()
+  await personGenerator.domainUsername.never()
+  await personGenerator.phoneNumber.sometimes()
+  await personGenerator.rank.sometimes()
+  await personGenerator.country.never()
+  await personGenerator.gender.never()
+  await personGenerator.endOfTourDate.sometimes()
+  await personGenerator.biography.often()
+  await personGenerator.emailAddresses.rarely()
 
   return (
     await runGQL(user, {

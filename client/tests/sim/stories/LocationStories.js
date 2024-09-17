@@ -3,7 +3,7 @@ import Model from "components/Model"
 import { Location } from "models"
 import { createHtmlParagraphs, fuzzy, populate, runGQL } from "../simutils"
 
-async function populateLocation(location, user) {
+async function populateLocation(location) {
   const template = {
     status: () => Model.STATUS.ACTIVE,
     type: () =>
@@ -27,21 +27,21 @@ async function populateLocation(location, user) {
           precision: 10
         })
       ),
-    description: () => createHtmlParagraphs()
+    description: async() => await createHtmlParagraphs()
   }
-  populate(location, template)
-    .status.always()
-    .type.always()
-    .name.always()
-    .lat.always()
-    .lng.always()
-    .description.always()
+  const locationGenerator = await populate(location, template)
+  await locationGenerator.status.always()
+  await locationGenerator.type.always()
+  await locationGenerator.name.always()
+  await locationGenerator.lat.always()
+  await locationGenerator.lng.always()
+  await locationGenerator.description.always()
   return location
 }
 
 const _createLocation = async function(user) {
   const location = Location.filterClientSideFields(new Location())
-  if (await populateLocation(location, user)) {
+  if (await populateLocation(location)) {
     console.debug(`Creating location ${location.name}`)
 
     return (
