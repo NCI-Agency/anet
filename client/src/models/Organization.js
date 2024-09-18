@@ -241,7 +241,10 @@ export default class Organization extends Model {
     const parentStandardIdentity = organizationValues.app6standardIdentity
       ? undefined
       : utils.determineApp6field(ascendantOrgs, "app6standardIdentity")
-    return { parentContext, parentStandardIdentity }
+    const parentSymbolSet = organizationValues.app6symbolSet
+      ? undefined
+      : utils.determineApp6field(ascendantOrgs, "app6symbolSet")
+    return { parentContext, parentStandardIdentity, parentSymbolSet }
   }
 
   static FILTERED_CLIENT_SIDE_FIELDS = [

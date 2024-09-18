@@ -52,6 +52,7 @@ const GQL_GET_CHART_DATA = gql`
         uuid
         app6context
         app6standardIdentity
+        app6symbolSet
         parentOrg {
           uuid
         }
@@ -128,7 +129,11 @@ const determineSymbol = (org, allAscendantOrgs) => {
     "app6standardIdentity",
     "1"
   )
-  const symbolSet = org?.app6symbolSet || "00"
+  const symbolSet = utils.determineApp6field(
+    ascendantOrgs,
+    "app6symbolSet",
+    "00"
+  )
   const hq = org?.app6hq || "0"
   const amplifier = org?.app6amplifier || "00"
   const version = "14" // APP-6E

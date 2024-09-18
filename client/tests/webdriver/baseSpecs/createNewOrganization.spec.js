@@ -112,12 +112,10 @@ describe("When creating an organization", () => {
         await CreateOrganization.getApp6standardIdentityExtraColumn()
       ).getText()
     ).to.equal(`${topLevelOrg.app6standardIdentity} (inherited from parent)`)
-    /* eslint-disable no-unused-expressions */
     expect(
-      await (
-        await CreateOrganization.getApp6symbolSetExtraColumn()
-      ).isExisting()
-    ).to.be.false
+      await (await CreateOrganization.getApp6symbolSetExtraColumn()).getText()
+    ).to.equal(`${topLevelOrg.app6symbolSet} (inherited from parent)`)
+    /* eslint-disable no-unused-expressions */
     expect(await (await CreateOrganization.getApp6hqExtraColumn()).isExisting())
       .to.be.false
     expect(
@@ -185,12 +183,10 @@ describe("When creating an organization", () => {
         await CreateOrganization.getApp6standardIdentityExtraColumn()
       ).getText()
     ).to.equal(`${secondLevelOrg.app6standardIdentity} (inherited from parent)`)
-    /* eslint-disable no-unused-expressions */
     expect(
-      await (
-        await CreateOrganization.getApp6symbolSetExtraColumn()
-      ).isExisting()
-    ).to.be.false
+      await (await CreateOrganization.getApp6symbolSetExtraColumn()).getText()
+    ).to.equal(`${secondLevelOrg.app6symbolSet} (inherited from parent)`)
+    /* eslint-disable no-unused-expressions */
     expect(await (await CreateOrganization.getApp6hqExtraColumn()).isExisting())
       .to.be.false
     expect(
@@ -228,6 +224,9 @@ describe("When creating an organization", () => {
         await CreateOrganization.getApp6standardIdentityExtraColumn()
       ).getText()
     ).to.equal(`${secondLevelOrg.app6standardIdentity} (inherited from parent)`)
+    expect(
+      await (await CreateOrganization.getApp6symbolSetExtraColumn()).getText()
+    ).to.equal(`${secondLevelOrg.app6symbolSet} (inherited from parent)`)
 
     await CreateOrganization.submitForm()
     await ShowOrganization.waitForAlertSuccessToLoad()
@@ -255,9 +254,10 @@ describe("When creating an organization", () => {
     ).to.equal(
       `${testOrgs.secondLevel.app6standardIdentity} (inherited from parent)`
     )
+    expect(
+      await (await ShowOrganization.getApp6symbolSet()).getText()
+    ).to.equal(`${testOrgs.secondLevel.app6symbolSet} (inherited from parent)`)
     /* eslint-disable no-unused-expressions */
-    expect(await (await ShowOrganization.getApp6symbolSet()).getText()).to.be
-      .empty
     expect(await (await ShowOrganization.getApp6hq()).getText()).to.be.empty
     expect(await (await ShowOrganization.getApp6amplifier()).getText()).to.be
       .empty
