@@ -8,6 +8,7 @@ import { ReadonlyCustomFields } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
+import FindObjectsButton from "components/FindObjectsButton"
 import GeoLocation, { GEO_LOCATION_DISPLAY_TYPE } from "components/GeoLocation"
 import Leaflet from "components/Leaflet"
 import LinkTo from "components/LinkTo"
@@ -94,6 +95,11 @@ const LocationShow = ({ pageDispatchers }) => {
             lng: location.lng
           })
         }
+        const searchText = [
+          location.name,
+          location.digram,
+          location.trigram
+        ].join(" ")
         const action = (
           <>
             {isAdmin && (
@@ -117,6 +123,7 @@ const LocationShow = ({ pageDispatchers }) => {
                 Edit
               </LinkTo>
             )}
+            <FindObjectsButton objectLabel="Location" searchText={searchText} />
             <RelatedObjectNotes
               notes={location.notes}
               relatedObject={

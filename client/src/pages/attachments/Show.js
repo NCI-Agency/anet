@@ -8,6 +8,7 @@ import AttachmentRelatedObjectsTable from "components/Attachment/AttachmentRelat
 import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
+import FindObjectsButton from "components/FindObjectsButton"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import {
@@ -105,6 +106,7 @@ const AttachmentShow = ({ pageDispatchers }) => {
   return (
     <Formik enableReinitialize initialValues={attachment}>
       {({ values }) => {
+        const searchText = [attachment.caption, attachment.fileName].join(" ")
         const action = (
           <>
             <Button variant="primary" disabled={contentMissing}>
@@ -124,12 +126,15 @@ const AttachmentShow = ({ pageDispatchers }) => {
                 modelType="Attachment"
                 model={attachment}
                 edit
-                style={{ marginLeft: "10px" }}
                 button="primary"
               >
                 Edit
               </LinkTo>
             )}
+            <FindObjectsButton
+              objectLabel="Attachment"
+              searchText={searchText}
+            />
           </>
         )
         return (

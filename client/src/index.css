@@ -79,7 +79,7 @@ h4.legend {
 }
 
 h4.legend span.limit-title-text {
-  max-width: calc(100% - 400px);
+  max-width: calc(100% - 450px);
   min-width: 20rem;
 }
 

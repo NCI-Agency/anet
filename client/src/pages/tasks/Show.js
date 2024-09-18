@@ -9,6 +9,7 @@ import { ReadonlyCustomFields } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
+import FindObjectsButton from "components/FindObjectsButton"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import Model from "components/Model"
@@ -205,6 +206,7 @@ const TaskShow = ({ pageDispatchers }) => {
   return (
     <Formik enableReinitialize initialValues={task}>
       {({ values }) => {
+        const searchText = [task.shortName, task.longName].join(" ")
         const action = (
           <>
             {canEdit && (
@@ -212,6 +214,10 @@ const TaskShow = ({ pageDispatchers }) => {
                 Edit
               </LinkTo>
             )}
+            <FindObjectsButton
+              objectLabel={`${Settings.fields.task.shortLabel}`}
+              searchText={searchText}
+            />
             <RelatedObjectNotes
               notes={task.notes}
               relatedObject={

@@ -16,6 +16,7 @@ import EditHistory from "components/EditHistory"
 import EmailAddressTable from "components/EmailAddressTable"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
+import FindObjectsButton from "components/FindObjectsButton"
 import GuidedTour from "components/GuidedTour"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
@@ -218,6 +219,7 @@ const PersonShow = ({ pageDispatchers }) => {
   const canAddOndemandAssessment = isAdmin
   const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
 
+  const searchText = [person.name, person.code].join(" ")
   const action = (
     <>
       {isAdmin && (
@@ -244,6 +246,7 @@ const PersonShow = ({ pageDispatchers }) => {
           Edit
         </LinkTo>
       )}
+      <FindObjectsButton objectLabel="Person" searchText={searchText} />
       <RelatedObjectNotes
         notes={person.notes}
         relatedObject={

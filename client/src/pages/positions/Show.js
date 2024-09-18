@@ -14,6 +14,7 @@ import EditOrganizationsAdministratedModal from "components/EditOrganizationsAdm
 import EmailAddressTable from "components/EmailAddressTable"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
+import FindObjectsButton from "components/FindObjectsButton"
 import GuidedTour from "components/GuidedTour"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
@@ -124,6 +125,7 @@ const PositionShow = ({ pageDispatchers }) => {
   return (
     <Formik enableReinitialize initialValues={position}>
       {({ values }) => {
+        const searchText = [position.name, position.code].join(" ")
         const action = (
           <>
             {isAdmin && (
@@ -147,6 +149,7 @@ const PositionShow = ({ pageDispatchers }) => {
                 Edit
               </LinkTo>
             )}
+            <FindObjectsButton objectLabel="Position" searchText={searchText} />
             <RelatedObjectNotes
               notes={position.notes}
               relatedObject={
