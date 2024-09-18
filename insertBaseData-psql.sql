@@ -1364,6 +1364,16 @@ INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "
   FROM people p
   WHERE p."domainUsername" = 'erin';
 
+-- Update the link-text indexes
+REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_lts_attachments";
+-- authorizationGroups currently have no links
+REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_lts_locations";
+REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_lts_organizations";
+REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_lts_people";
+REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_lts_positions";
+REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_lts_reports";
+REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_lts_tasks";
+
 -- Update the full-text indexes
 REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_fts_attachments";
 REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_fts_authorizationGroups";

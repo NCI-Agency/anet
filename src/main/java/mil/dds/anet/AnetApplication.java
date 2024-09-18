@@ -59,6 +59,7 @@ import mil.dds.anet.resources.TaskResource;
 import mil.dds.anet.threads.AccountDeactivationWorker;
 import mil.dds.anet.threads.AnetEmailWorker;
 import mil.dds.anet.threads.FutureEngagementWorker;
+import mil.dds.anet.threads.MaterializedViewForLinksRefreshWorker;
 import mil.dds.anet.threads.MaterializedViewRefreshWorker;
 import mil.dds.anet.threads.MergedEntityWorker;
 import mil.dds.anet.threads.PendingAssessmentsNotificationWorker;
@@ -342,8 +343,9 @@ public class AnetApplication extends Application<AnetConfiguration> {
       logger.info("AnetApplication is in testMode, skipping scheduled workers");
     } else {
       logger.info("AnetApplication is starting scheduled workers");
-      // Schedule any tasks that need to run on an ongoing basis.
-      final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+      // Schedule any tasks that need to run on an ongoing basis;
+      // use a large'ish pool so tasks can run concurrently.
+      final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(10);
 
       // Check for any reports that need to be published every 5 minutes.
       // And run once 5 seconds from boot-up.
@@ -386,6 +388,12 @@ public class AnetApplication extends Application<AnetConfiguration> {
       final MaterializedViewRefreshWorker materializedViewRefreshWorker =
           new MaterializedViewRefreshWorker(configuration, engine.getAdminDao());
       scheduler.scheduleWithFixedDelay(materializedViewRefreshWorker, 30, 60, TimeUnit.SECONDS);
+
+      // Update the PostgreSQL materialized view for links to ANET objects every 15 minutes,
+      // starting 5 minutes after boot-up.
+      final MaterializedViewForLinksRefreshWorker materializedViewForLinksRefreshWorker =
+          new MaterializedViewForLinksRefreshWorker(configuration, engine.getAdminDao());
+      scheduler.scheduleAtFixedRate(materializedViewForLinksRefreshWorker, 5, 15, TimeUnit.MINUTES);
 
       // Check for merged entities that need to be updated every 5 minutes.
       // And run once 60 seconds from boot-up.

@@ -44,6 +44,9 @@ import mil.dds.anet.test.client.Task;
 import mil.dds.anet.test.client.TaskInput;
 import mil.dds.anet.test.client.util.MutationExecutor;
 import mil.dds.anet.test.client.util.QueryExecutor;
+import mil.dds.anet.threads.MaterializedViewForLinksRefreshWorker;
+import mil.dds.anet.threads.MaterializedViewRefreshWorker;
+import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
 import org.slf4j.Logger;
@@ -101,11 +104,11 @@ public abstract class AbstractResourceTest {
   }
 
   private static void refreshMaterializedViews() {
-    final String[] materializedViews = {"mv_fts_attachments", "mv_fts_authorizationGroups",
-        "mv_fts_locations", "mv_fts_organizations", "mv_fts_people", "mv_fts_positions",
-        "mv_fts_reports", "mv_fts_tasks"};
+    final String[] allMaterializedViews =
+        ArrayUtils.addAll(MaterializedViewForLinksRefreshWorker.materializedViews,
+            MaterializedViewRefreshWorker.materializedViews);
     final AdminDao adminDao = AnetObjectEngine.getInstance().getAdminDao();
-    for (final String materializedView : materializedViews) {
+    for (final String materializedView : allMaterializedViews) {
       try {
         adminDao.updateMaterializedView(materializedView);
       } catch (Throwable e) {
