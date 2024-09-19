@@ -1364,6 +1364,7 @@ INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "
   WHERE p."domainUsername" = 'erin';
 
 -- Update the full-text indexes
+REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_fts_attachments";
 REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_fts_authorizationGroups";
 REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_fts_locations";
 REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_fts_organizations";
