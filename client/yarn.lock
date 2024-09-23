@@ -2193,10 +2193,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@faker-js/faker@npm:9.0.1":
-  version: 9.0.1
-  resolution: "@faker-js/faker@npm:9.0.1"
-  checksum: 10c0/ca800e49857e42b95ab5a94c64d13de17bb188d0c9b43243b7afec2eb11d47b76af2211ec371ff7a1dd1c855e12403d071569c3eb82d15e7b8f5124007826763
+"@faker-js/faker@npm:9.0.2":
+  version: 9.0.2
+  resolution: "@faker-js/faker@npm:9.0.2"
+  checksum: 10c0/9b8a8ec3065d975c6f050e0235e9f29bf3b9dcfb055df26af7aee5dff26beaaad9ea34761431a31b64b3fc3f9814f0b2df4a6fa796a9099630bafeaf875fbf50
   languageName: node
   linkType: hard
 
@@ -6048,7 +6048,7 @@ __metadata:
     "@colors/colors": "npm:1.6.0"
     "@emotion/react": "npm:11.13.3"
     "@emotion/styled": "npm:11.13.0"
-    "@faker-js/faker": "npm:9.0.1"
+    "@faker-js/faker": "npm:9.0.2"
     "@fullcalendar/core": "npm:6.1.15"
     "@fullcalendar/daygrid": "npm:6.1.15"
     "@fullcalendar/interaction": "npm:6.1.15"
@@ -6171,7 +6171,7 @@ __metadata:
     redux-persist: "npm:6.0.0"
     resize-observer-polyfill: "npm:1.5.1"
     scroll-into-view-if-needed: "npm:3.1.0"
-    selenium-webdriver: "npm:4.24.1"
+    selenium-webdriver: "npm:4.25.0"
     slate: "npm:0.103.0"
     slate-history: "npm:0.109.0"
     slate-hyperscript: "npm:0.100.0"
@@ -17670,15 +17670,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"selenium-webdriver@npm:4.24.1":
-  version: 4.24.1
-  resolution: "selenium-webdriver@npm:4.24.1"
+"selenium-webdriver@npm:4.25.0":
+  version: 4.25.0
+  resolution: "selenium-webdriver@npm:4.25.0"
   dependencies:
     "@bazel/runfiles": "npm:^5.8.1"
     jszip: "npm:^3.10.1"
     tmp: "npm:^0.2.3"
     ws: "npm:^8.18.0"
-  checksum: 10c0/803b15c6584deb00f924892fcd61f296fdf15b5f4a0ad00ca6bf0206e54de5eff873338568d46a4bb1ced5f1c7bf3726c1a2ee41640601e8cd4b49a7894e22cd
+  checksum: 10c0/4d085a702aff85bf8779e7111b33c8186b36d71f7ffd3e7105ec9468930e74756b5890c6ba8e0958b0ebcbff90aa42042b3adf05f75cdbd0b50501756d899b36
   languageName: node
   linkType: hard
 
