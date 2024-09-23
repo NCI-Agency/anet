@@ -95,7 +95,7 @@ dependencies {
 	implementation "org.jdbi:jdbi3-postgres:3.45.4"
 
 	implementation 'ru.vyarus.guicey:guicey-jdbi3:7.1.4'
-	implementation 'com.google.guava:guava:33.3.0-jre' // Pick the non-Android version of Guice
+	implementation 'com.google.guava:guava:33.3.1-jre' // Pick the non-Android version of Guice
 
 	// Supported database is PostgreSQL:
 	implementation 'org.postgresql:postgresql:42.7.4'
@@ -126,7 +126,7 @@ dependencies {
 	// Used for converting GraphQL request output to XML:
 	implementation 'com.github.javadev:underscore-lodash:1.26'
 	// For JSON schema validation, supports detailed error reporting
-	implementation 'com.networknt:json-schema-validator:1.5.1'
+	implementation 'com.networknt:json-schema-validator:1.5.2'
 
 	// used for writing Excel documents
 	implementation 'org.apache.poi:poi:5.3.0'
@@ -772,7 +772,7 @@ checkstyleTest {
 //Work-around for https://github.com/gradle/gradle/issues/27035
 configurations.checkstyle {
 	resolutionStrategy.capabilitiesResolution.withCapability('com.google.collections:google-collections') {
-		select('com.google.guava:guava:33.3.0-jre')
+		select('com.google.guava:guava:33.3.1-jre')
 	}
 }
 
