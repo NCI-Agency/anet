@@ -264,9 +264,11 @@ function EditHistory({
                                     label={null}
                                     value={values.history[idx].startTime}
                                     onChange={value => {
+                                      const startTime =
+                                        value && moment(value).valueOf()
                                       setFieldValue(
                                         startTimeFieldName,
-                                        value?.valueOf()
+                                        startTime
                                       )
                                       setFinalHistory(
                                         sortHistory(
@@ -275,7 +277,7 @@ function EditHistory({
                                             index === idx
                                               ? {
                                                 ...item,
-                                                startTime: value?.valueOf()
+                                                startTime
                                               }
                                               : item
                                           ),
@@ -302,7 +304,7 @@ function EditHistory({
                                       onChange={value =>
                                         setFieldValue(
                                           endTimeFieldName,
-                                          value?.valueOf()
+                                          value && moment(value).valueOf()
                                         )}
                                       component={FieldHelper.SpecialField}
                                       widget={
