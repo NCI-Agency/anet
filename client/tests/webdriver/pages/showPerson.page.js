@@ -69,6 +69,30 @@ class ShowPerson extends Page {
     return (await this.getCompactView()).$$(".left-table > tr")
   }
 
+  async getEditHistoryButton() {
+    return browser.$("button.edit-history")
+  }
+
+  async getEditHistoryDialog() {
+    return browser.$("div.edit-history-dialog")
+  }
+
+  async getEditHistoryStartDate(i) {
+    return browser.$(`input[id="history[${i}].startTime"]`)
+  }
+
+  async getEditHistoryEndDate(i) {
+    return browser.$(`input[id="history[${i}].endTime"]`)
+  }
+
+  async getEditHistorySubmitButton() {
+    return browser.$("button#editHistoryModalSubmitButton")
+  }
+
+  async getPreviousPositionLink(i) {
+    return browser.$(`tr#previousPosition_${i} a`)
+  }
+
   async getAssessmentsTable(assessmentKey, recurrence) {
     return (await this.getAssessmentContainer(assessmentKey, recurrence)).$(
       "table.assessments-table"

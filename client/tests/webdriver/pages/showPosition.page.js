@@ -19,6 +19,10 @@ class ShowPosition extends Page {
     const agTable = await this.getAuthorizationGroupsTable()
     return agTable.$(`tbody tr:nth-child(${i}) td:first-child a`)
   }
+
+  async getEditHistoryButton() {
+    return browser.$("div.edit-history button")
+  }
 }
 
 export default new ShowPosition()
