@@ -453,7 +453,7 @@ public class ReportResource {
     }
 
     // Verify that this user can approve for this step.
-    final boolean canApprove = engine
+    final boolean canApprove = AuthUtils.isAdmin(approver) || engine
         .canUserApproveStep(engine.getContext(), approver.getUuid(), step, r.getAdvisorOrgUuid())
         .join();
     if (!canApprove) {
