@@ -129,7 +129,7 @@ const LocationForm = ({
       }
     }
   }
-  if (currentUser.position) {
+  if (currentUser.position?.organization?.uuid) {
     approversFilters.myColleagues = {
       label: "My colleagues",
       queryVars: {
