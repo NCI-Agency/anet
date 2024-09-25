@@ -16,6 +16,7 @@ const ACTION_TYPE_DETAILS = {
   UNPUBLISH: { text: "Unpublished", cssClass: "btn-danger unpublished" },
   null: { text: "Pending", cssClass: "btn-pending default" }
 }
+const SYSTEM_USER = "system"
 
 const ApprovalStepModalStatus = ({ action }) => {
   if (action.type) {
@@ -27,7 +28,7 @@ const ApprovalStepModalStatus = ({ action }) => {
         <LinkTo
           modelType="Person"
           model={action.person}
-          whenUnspecified="system"
+          whenUnspecified={SYSTEM_USER}
           isLink={false}
         />{" "}
         on
@@ -109,7 +110,12 @@ export const ActionButton = ({ action }) => {
       disabled
     >
       <span>
-        <LinkTo modelType="Person" model={action.person} isLink={false} />
+        <LinkTo
+          modelType="Person"
+          model={action.person}
+          whenUnspecified={SYSTEM_USER}
+          isLink={false}
+        />
       </span>
     </Button>
   )
@@ -127,7 +133,7 @@ const ActionDetails = ({ action }) => {
           <LinkTo
             modelType="Person"
             model={action.person}
-            whenUnspecified="system"
+            whenUnspecified={SYSTEM_USER}
           />
         </span>
         <br />
