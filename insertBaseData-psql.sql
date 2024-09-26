@@ -320,15 +320,16 @@ UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domai
 
 -- Rotate advisors through billets ending up with Dvisor in the EF 2.2 Advisor Sewing Facilities Billet and Selena in the EF 1.2 Advisor Billet
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
+  ((SELECT uuid from positions where name = 'EF 1.2 Advisor'), (SELECT uuid from people where "domainUsername" = 'advisor'), CURRENT_TIMESTAMP);
+INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
   ((SELECT uuid from positions where name = 'EF 2.2 Advisor Sewing Facilities'), (SELECT uuid from people where "domainUsername" = 'selena'), CURRENT_TIMESTAMP);
+
+UPDATE "peoplePositions" SET "endedAt" = CURRENT_TIMESTAMP + INTERVAL '1 millisecond' WHERE "positionUuid" = (SELECT uuid from positions where name = 'EF 1.2 Advisor');
 UPDATE "peoplePositions" SET "endedAt" = CURRENT_TIMESTAMP + INTERVAL '1 millisecond' WHERE "positionUuid" = (SELECT uuid from positions where name = 'EF 2.2 Advisor Sewing Facilities');
+
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
   ((SELECT uuid from positions where name = 'EF 2.2 Advisor Sewing Facilities'), (SELECT uuid from people where "domainUsername" = 'advisor'), CURRENT_TIMESTAMP + INTERVAL '1 millisecond');
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'advisor') WHERE name = 'EF 2.2 Advisor Sewing Facilities';
-
-INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 1.2 Advisor'), (SELECT uuid from people where "domainUsername" = 'advisor'), CURRENT_TIMESTAMP);
-UPDATE "peoplePositions" SET "endedAt" = CURRENT_TIMESTAMP + INTERVAL '1 millisecond' WHERE "positionUuid" = (SELECT uuid from positions where name = 'EF 1.2 Advisor');
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
   ((SELECT uuid from positions where name = 'EF 1.2 Advisor'), (SELECT uuid from people where "domainUsername" = 'selena'), CURRENT_TIMESTAMP + INTERVAL '1 millisecond');
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'selena') WHERE name = 'EF 1.2 Advisor';
