@@ -5195,6 +5195,7 @@
 						WHEN chu."user" THEN '3'
 					END AS "app6standardIdentity",
 					CASE
+						WHEN org."parentOrgUuid" IS NOT NULL THEN NULL
 						WHEN chu."user" THEN '10'
 					END AS "app6symbolSet"
 				FROM organizations org

@@ -440,21 +440,21 @@ INSERT INTO organizations(uuid, "shortName", "longName", app6context, "app6stand
   (uuid_generate_v4(), 'TAAC Air', '', '0', NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Sub-organizations
-INSERT INTO organizations(uuid, "shortName", "longName", "parentOrgUuid", "app6symbolSet", "createdAt", "updatedAt") VALUES
-  ('04614b0f-7e8e-4bf1-8bc5-13abaffeab8a', 'EF 1.1', '', (SELECT uuid from organizations WHERE "shortName" ='EF 1'), '10', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 1.2', '', (SELECT uuid from organizations WHERE "shortName" ='EF 1'), '10', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 2.1', '', (SELECT uuid from organizations WHERE "shortName" ='EF 2'), '10', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'EF 2.2', '', (SELECT uuid from organizations WHERE "shortName" ='EF 2'), '10', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 4.1', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 4'), '11', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 4.2', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 4'), '11', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 4.3', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 4'), '11', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 4.4', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 4'), '11', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (N'7f939a44-b9e4-48e0-98f5-7d0ea38a6ecf', 'EF 5.1', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 5'), '10', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 5.2', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 5'), '10', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 5.3', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 5'), '10', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 5.4', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 5'), '10', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 6.1', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 6'), '10', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 6.2', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 6'), '10', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO organizations(uuid, "shortName", "longName", "parentOrgUuid", "createdAt", "updatedAt") VALUES
+  ('04614b0f-7e8e-4bf1-8bc5-13abaffeab8a', 'EF 1.1', '', (SELECT uuid from organizations WHERE "shortName" ='EF 1'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'EF 1.2', '', (SELECT uuid from organizations WHERE "shortName" ='EF 1'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'EF 2.1', '', (SELECT uuid from organizations WHERE "shortName" ='EF 2'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'EF 2.2', '', (SELECT uuid from organizations WHERE "shortName" ='EF 2'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'EF 4.1', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 4'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'EF 4.2', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 4'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'EF 4.3', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 4'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'EF 4.4', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 4'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (N'7f939a44-b9e4-48e0-98f5-7d0ea38a6ecf', 'EF 5.1', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 5'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'EF 5.2', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 5'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'EF 5.3', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 5'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'EF 5.4', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 5'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'EF 6.1', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 6'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'EF 6.2', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 6'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 UPDATE organizations
 SET "locationUuid"='9c982685-5946-4dad-a7ee-0f5a12f5e170'
@@ -671,8 +671,8 @@ INSERT INTO organizations (uuid, "shortName", "longName", "identificationCode", 
   (uuid_generate_v4(), 'MoI', 'Ministry of Interior', 'P12345', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Afghanistan'), '0', '4', '11', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Sub-organizations
-INSERT INTO organizations (uuid, "shortName", "longName", "parentOrgUuid", "identificationCode", "locationUuid", "app6symbolSet", "createdAt", "updatedAt") VALUES
-  (uuid_generate_v4(), 'MOD-F', 'Ministry of Defense Finances', (SELECT uuid from organizations where "shortName" = 'MoD'), NULL, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Afghanistan'), '11', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO organizations (uuid, "shortName", "longName", "parentOrgUuid", "identificationCode", "locationUuid", "createdAt", "updatedAt") VALUES
+  (uuid_generate_v4(), 'MOD-F', 'Ministry of Defense Finances', (SELECT uuid from organizations where "shortName" = 'MoD'), NULL, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Afghanistan'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Test for Merging
 INSERT INTO organizations (uuid, "shortName", "longName", "identificationCode", "parentOrgUuid", "locationUuid", app6context, "app6standardIdentity", "app6symbolSet", "app6hq", "app6amplifier", "createdAt", "updatedAt") VALUES

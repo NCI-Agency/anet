@@ -120,6 +120,7 @@ const GQL_GET_ORGANIZATION = gql`
         ...organizationFields
         app6context
         app6standardIdentity
+        app6symbolSet
         parentOrg {
           uuid
         }
@@ -229,7 +230,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
   const canAdministrateOrg =
     currentUser?.hasAdministrativePermissionsForOrganization(organization)
   const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
-  const { parentContext, parentStandardIdentity } =
+  const { parentContext, parentStandardIdentity, parentSymbolSet } =
     Organization.getApp6ParentFields(organization, organization)
 
   const myOrg =
@@ -582,6 +583,16 @@ const OrganizationShow = ({ pageDispatchers }) => {
                   name="app6symbolSet"
                   component={FieldHelper.ReadonlyField}
                   humanValue={
+                    (parentSymbolSet && (
+                      <em>
+                        {
+                          Settings.fields.organization.app6symbolSet.choices[
+                            parentSymbolSet
+                          ]
+                        }{" "}
+                        (inherited from parent)
+                      </em>
+                    )) ||
                     Settings.fields.organization.app6symbolSet.choices[
                       organization.app6symbolSet
                     ]

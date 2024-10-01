@@ -57,7 +57,7 @@ const GQL_UPDATE_ORGANIZATION = gql`
   }
 `
 
-const autocompleteQuery = `${Organization.autocompleteQuery} ascendantOrgs { uuid app6context app6standardIdentity parentOrg { uuid } }`
+const autocompleteQuery = `${Organization.autocompleteQuery} ascendantOrgs { uuid app6context app6standardIdentity app6symbolSet parentOrg { uuid } }`
 
 const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
   const { loadAppData, currentUser } = useContext(AppContext)
@@ -124,7 +124,7 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
           ]
           orgSearchQuery.orgRecurseStrategy = RECURSE_STRATEGY.CHILDREN
         }
-        const { parentContext, parentStandardIdentity } =
+        const { parentContext, parentStandardIdentity, parentSymbolSet } =
           Organization.getApp6ParentFields(values.parentOrg, values)
         const action = canAdministrateOrg && (
           <>
@@ -476,6 +476,20 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                     Settings.fields.organization.app6symbolSet.choices
                   )}
                   onChange={value => setFieldValue("app6symbolSet", value)}
+                  extraColElem={
+                    parentSymbolSet && (
+                      <div style={{ paddingTop: "9px" }}>
+                        <em>
+                          {
+                            Settings.fields.organization.app6symbolSet.choices[
+                              parentSymbolSet
+                            ]
+                          }{" "}
+                          (inherited from parent)
+                        </em>
+                      </div>
+                    )
+                  }
                 />
                 <DictionaryField
                   wrappedComponent={Field}

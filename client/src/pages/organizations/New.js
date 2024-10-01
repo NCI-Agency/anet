@@ -28,6 +28,7 @@ const GQL_GET_ORGANIZATION = gql`
         uuid
         app6context
         app6standardIdentity
+        app6symbolSet
         parentOrg {
           uuid
         }
