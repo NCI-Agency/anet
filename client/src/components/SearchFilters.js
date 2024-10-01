@@ -465,6 +465,14 @@ export const searchFilters = function(includeAdminFilters) {
           defaultOption: false,
           labels: ["Yes", "No"]
         }
+      },
+      Assessment: {
+        component: AssessmentFilter,
+        deserializer: deserializeAssessmentFilter,
+        props: {
+          queryKey: "assessment",
+          objectType: "regular.person"
+        }
       }
     }
   }
@@ -654,6 +662,14 @@ export const searchFilters = function(includeAdminFilters) {
         deserializer: deserializeDateRangeFilter,
         props: {
           queryKey: "plannedCompletion"
+        }
+      },
+      Assessment: {
+        component: AssessmentFilter,
+        deserializer: deserializeAssessmentFilter,
+        props: {
+          queryKey: "assessment",
+          objectType: "task"
         }
       }
     }

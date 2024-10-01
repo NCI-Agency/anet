@@ -731,6 +731,7 @@ input PersonPositionHistoryInput {
 
 """"""
 input PersonSearchQueryInput {
+  assessment: AssessmentSearchQueryInput
   countryUuid: String
   emailNetwork: String
   endOfTourDateEnd: Instant
@@ -1336,6 +1337,7 @@ input TaskInput {
 
 """"""
 input TaskSearchQueryInput {
+  assessment: AssessmentSearchQueryInput
   category: String
   emailNetwork: String
   inMyReports: Boolean
