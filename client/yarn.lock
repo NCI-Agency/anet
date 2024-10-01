@@ -6152,7 +6152,7 @@ __metadata:
     prop-types: "npm:15.8.1"
     react: "npm:18.2.0"
     react-advanced-cropper: "npm:0.20.0"
-    react-bootstrap: "npm:2.10.4"
+    react-bootstrap: "npm:2.10.5"
     react-dom: "npm:18.2.0"
     react-is: "npm:18.3.1"
     react-moment-proptypes: "npm:1.8.1"
@@ -16491,9 +16491,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-bootstrap@npm:2.10.4":
-  version: 2.10.4
-  resolution: "react-bootstrap@npm:2.10.4"
+"react-bootstrap@npm:2.10.5":
+  version: 2.10.5
+  resolution: "react-bootstrap@npm:2.10.5"
   dependencies:
     "@babel/runtime": "npm:^7.24.7"
     "@restart/hooks": "npm:^0.4.9"
@@ -16514,7 +16514,7 @@ __metadata:
   peerDependenciesMeta:
     "@types/react":
       optional: true
-  checksum: 10c0/83e62ee90aee99b81ec0d3c002bd5b757f1749c536e55f3ae801e3748d0df854c224e6a6b38d93a6044360531d92ace6acd1dee72503180b29775d2e5fb0d6c9
+  checksum: 10c0/7bc56941674adf49416b74a4ea0a34d787792f67e2d4b32a40f497a80dda86fcac4b7c1627796f5b54626de5eb7c8bbfca192dd885e638e78c54d1431d6fe97c
   languageName: node
   linkType: hard
 
