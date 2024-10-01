@@ -1165,10 +1165,14 @@ fields:
       organizationOndemand:
         label: Ondemand assessment of organization
         recurrence: ondemand
+        onDemandAssessmentExpirationDays: 180
         questions:
           assessmentDate:
             type: date
             label: Assessment date
+          expirationDate:
+            type: date
+            label: Expiration date
           question1:
             type: special_field
             label: General remarks
