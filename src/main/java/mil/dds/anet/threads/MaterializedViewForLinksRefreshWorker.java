@@ -6,16 +6,16 @@ import mil.dds.anet.beans.JobHistory;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.database.AdminDao;
 
-public class MaterializedViewRefreshWorker extends AbstractWorker {
+public class MaterializedViewForLinksRefreshWorker extends AbstractWorker {
 
-  public static final String[] materializedViews = {"mv_fts_attachments",
-      "mv_fts_authorizationGroups", "mv_fts_locations", "mv_fts_organizations", "mv_fts_people",
-      "mv_fts_positions", "mv_fts_reports", "mv_fts_tasks"};
+  public static final String[] materializedViews =
+      {"mv_lts_attachments", "mv_lts_locations", "mv_lts_organizations", "mv_lts_people",
+          "mv_lts_positions", "mv_lts_reports", "mv_lts_tasks"};
 
   private final AdminDao dao;
 
-  public MaterializedViewRefreshWorker(AnetConfiguration config, AdminDao dao) {
-    super(config, "Refreshing materialized views");
+  public MaterializedViewForLinksRefreshWorker(AnetConfiguration config, AdminDao dao) {
+    super(config, "Refreshing materialized views for links to ANET objects");
     this.dao = dao;
   }
 

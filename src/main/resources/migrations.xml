@@ -5868,4 +5868,657 @@
 		</addColumn>
 	</changeSet>
 
+	<changeSet id="set-up-full-text-search" runOnChange="true" author="gjvoosten">
+		<sql>
+			<!--
+			  Fully self-contained migration for the complete full-text indexing set-up;
+			  can be run multiple times, and will be run every time it changes (runOnchange).
+			-->
+
+			<!-- Drop materialized views -->
+			DROP MATERIALIZED VIEW IF EXISTS mv_fts_attachments;
+			DROP MATERIALIZED VIEW IF EXISTS "mv_fts_authorizationGroups";
+			DROP MATERIALIZED VIEW IF EXISTS mv_fts_locations;
+			DROP MATERIALIZED VIEW IF EXISTS mv_fts_organizations;
+			DROP MATERIALIZED VIEW IF EXISTS mv_fts_people;
+			DROP MATERIALIZED VIEW IF EXISTS mv_fts_positions;
+			DROP MATERIALIZED VIEW IF EXISTS mv_fts_reports;
+			DROP MATERIALIZED VIEW IF EXISTS mv_fts_tasks;
+
+			<!-- Drop materialized views for links -->
+			DROP MATERIALIZED VIEW IF EXISTS mv_lts_attachments;
+			<!-- note: authorizationGroups currently have no links -->
+			DROP MATERIALIZED VIEW IF EXISTS mv_lts_locations;
+			DROP MATERIALIZED VIEW IF EXISTS mv_lts_organizations;
+			DROP MATERIALIZED VIEW IF EXISTS mv_lts_people;
+			DROP MATERIALIZED VIEW IF EXISTS mv_lts_positions;
+			DROP MATERIALIZED VIEW IF EXISTS mv_lts_reports;
+			DROP MATERIALIZED VIEW IF EXISTS mv_lts_tasks;
+
+			<!-- Drop full_text columns -->
+			ALTER TABLE attachments DROP COLUMN IF EXISTS full_text;
+			ALTER TABLE "authorizationGroups" DROP COLUMN IF EXISTS full_text;
+			ALTER TABLE "emailAddresses" DROP COLUMN IF EXISTS full_text;
+			ALTER TABLE locations DROP COLUMN IF EXISTS full_text;
+			ALTER TABLE notes DROP COLUMN IF EXISTS full_text;
+			ALTER TABLE organizations DROP COLUMN IF EXISTS full_text;
+			ALTER TABLE people DROP COLUMN IF EXISTS full_text;
+			ALTER TABLE positions DROP COLUMN IF EXISTS full_text;
+			ALTER TABLE reports DROP COLUMN IF EXISTS full_text;
+			ALTER TABLE tasks DROP COLUMN IF EXISTS full_text;
+
+			<!-- Drop core_text columns -->
+			ALTER TABLE attachments DROP COLUMN IF EXISTS core_text;
+			ALTER TABLE "authorizationGroups" DROP COLUMN IF EXISTS core_text;
+			ALTER TABLE "emailAddresses" DROP COLUMN IF EXISTS core_text;
+			ALTER TABLE locations DROP COLUMN IF EXISTS core_text;
+			ALTER TABLE notes DROP COLUMN IF EXISTS core_text;
+			ALTER TABLE organizations DROP COLUMN IF EXISTS core_text;
+			ALTER TABLE people DROP COLUMN IF EXISTS core_text;
+			ALTER TABLE positions DROP COLUMN IF EXISTS core_text;
+			ALTER TABLE reports DROP COLUMN IF EXISTS core_text;
+			ALTER TABLE tasks DROP COLUMN IF EXISTS core_text;
+
+			<!-- Drop more_text columns -->
+			ALTER TABLE attachments DROP COLUMN IF EXISTS more_text;
+			ALTER TABLE "authorizationGroups" DROP COLUMN IF EXISTS more_text;
+			ALTER TABLE locations DROP COLUMN IF EXISTS more_text;
+			ALTER TABLE organizations DROP COLUMN IF EXISTS more_text;
+			ALTER TABLE people DROP COLUMN IF EXISTS more_text;
+			ALTER TABLE positions DROP COLUMN IF EXISTS more_text;
+			ALTER TABLE reports DROP COLUMN IF EXISTS more_text;
+			ALTER TABLE tasks DROP COLUMN IF EXISTS more_text;
+
+			<!-- Drop functions for aggregating JSON values recursively -->
+			DROP FUNCTION IF EXISTS jsonb_array_value_agg;
+			DROP FUNCTION IF EXISTS jsonb_object_value_agg;
+			DROP FUNCTION IF EXISTS jsonb_value_agg;
+
+			<!-- Drop functions used for the materialized view for links -->
+			DROP FUNCTION IF EXISTS get_core_text;
+			DROP FUNCTION IF EXISTS get_rt_referenced_objects;
+			DROP FUNCTION IF EXISTS get_cf_referenced_objects;
+
+			<!-- Define functions for aggregating JSON values recursively -->
+			CREATE OR REPLACE FUNCTION jsonb_value_agg(p_json jsonb, ignore_key text default 'invisibleCustomFields')
+				RETURNS text
+			AS
+			'
+			BEGIN
+				RETURN CASE
+					WHEN jsonb_typeof(p_json) = ''array'' THEN coalesce(public.jsonb_array_value_agg(p_json, ignore_key), '''')
+					WHEN jsonb_typeof(p_json) = ''object'' THEN coalesce(public.jsonb_object_value_agg(p_json, ignore_key), '''')
+					WHEN jsonb_typeof(p_json) = ''string''
+						AND p_json #>> ''{}'' !~ ''^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{1,3}Z$''
+						THEN coalesce(p_json #>> ''{}'', '''')
+					ELSE ''''
+				END;
+			EXCEPTION
+				WHEN OTHERS THEN
+				RETURN NULL;
+			END;
+			'
+			LANGUAGE plpgsql
+			IMMUTABLE;
+
+			CREATE OR REPLACE FUNCTION jsonb_array_value_agg(p_json jsonb, ignore_key text default 'invisibleCustomFields')
+				RETURNS text
+			AS
+			'
+			BEGIN
+				RETURN string_agg(public.jsonb_value_agg(value, ignore_key), '' '')
+				FROM jsonb_array_elements(p_json);
+			EXCEPTION
+				WHEN OTHERS THEN
+				RETURN NULL;
+			END;
+			'
+			LANGUAGE plpgsql
+			IMMUTABLE;
+
+			CREATE OR REPLACE FUNCTION jsonb_object_value_agg(p_json jsonb, ignore_key text default 'invisibleCustomFields')
+				RETURNS text
+			AS
+			'
+			BEGIN
+				RETURN string_agg(public.jsonb_value_agg(value, ignore_key), '' '')
+				FROM jsonb_each(p_json)
+				WHERE key != ignore_key;
+			EXCEPTION
+				WHEN OTHERS THEN
+				RETURN NULL;
+			END;
+			'
+			LANGUAGE plpgsql
+			IMMUTABLE;
+
+			<!-- Create functions used for the materialized view for links -->
+			CREATE OR REPLACE FUNCTION get_core_text(object_table text, object_uuid ${uuid_type})
+				RETURNS tsvector
+			AS
+			'
+			DECLARE
+				result tsvector;
+			BEGIN
+				IF object_table IS NULL OR object_uuid IS NULL THEN
+					return NULL;
+				END IF;
+				EXECUTE format(
+					''SELECT core_text FROM public.%I WHERE uuid = $1'',
+					object_table
+				)
+				INTO result
+				USING object_uuid;
+				RETURN result;
+			END;
+			'
+			LANGUAGE plpgsql
+			IMMUTABLE;
+
+			CREATE OR REPLACE FUNCTION get_rt_referenced_objects(table_name text, column_name text)
+				RETURNS table(uuid varchar(36), object_table text, object_uuid text)
+			AS
+			'
+			BEGIN
+				RETURN QUERY EXECUTE format(
+					''WITH links AS ('' ||
+					''  SELECT uuid, regexp_matches(%I, ''''"urn:anet:([^:]*):([^"]*)"'''', ''''g'''') AS arr FROM public.%I'' ||
+					'')'' ||
+					''  SELECT uuid, arr[1], arr[2] FROM links'',
+					column_name, table_name
+				);
+			END;
+			'
+			LANGUAGE plpgsql
+			IMMUTABLE;
+
+			CREATE OR REPLACE FUNCTION get_cf_referenced_objects(table_name text, column_name text)
+				RETURNS table(uuid varchar(36), object_table text, object_uuid text)
+			AS
+			'
+			BEGIN
+				RETURN QUERY EXECUTE format(
+					''WITH links AS ('' ||
+					''  SELECT uuid, regexp_matches(%I, ''''\\"urn:anet:([^:]*):([^\\]*)\\"|{"type":"([^"]*)","uuid":"([^"]*)"}'''', ''''g'''') AS arr FROM public.%I'' ||
+					'')'' ||
+					''  SELECT uuid,'' ||
+					''  CASE WHEN arr[1] IS NOT NULL THEN arr[1] ELSE'' ||
+					''    CASE'' ||
+					''      WHEN arr[3] = ''''Attachment'''' THEN ''''attachments'''' '' ||
+					''      WHEN arr[3] = ''''AuthorizationGroup'''' THEN ''''authorizationGroups'''' '' ||
+					''      WHEN arr[3] = ''''Location'''' THEN ''''locations'''' '' ||
+					''      WHEN arr[3] = ''''Organization'''' THEN ''''organizations'''' '' ||
+					''      WHEN arr[3] = ''''Person'''' THEN ''''people'''' '' ||
+					''      WHEN arr[3] = ''''Position'''' THEN ''''positions'''' '' ||
+					''      WHEN arr[3] = ''''Report'''' THEN ''''reports'''' '' ||
+					''      WHEN arr[3] = ''''Task'''' THEN ''''tasks'''' '' ||
+					''    END'' ||
+					''  END,'' ||
+					''  CASE WHEN arr[2] IS NOT NULL THEN arr[2] ELSE arr[4] END'' ||
+					''  FROM links'',
+					column_name, table_name
+				);
+			END;
+			'
+			LANGUAGE plpgsql
+			IMMUTABLE;
+
+			<!-- Add generated core_text columns -->
+			ALTER TABLE attachments
+				ADD COLUMN core_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, coalesce(attachments.caption, ''))
+						|| to_tsvector('simple', coalesce(attachments.caption, '')), ${fts_high}) ||
+					setweight(to_tsvector('simple', coalesce(attachments."fileName", '')), ${fts_high})
+				) STORED;
+
+			ALTER TABLE "authorizationGroups"
+				ADD COLUMN core_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, coalesce("authorizationGroups".name, ''))
+						|| to_tsvector('simple', coalesce("authorizationGroups".name, '')), ${fts_high})
+				) STORED;
+
+			ALTER TABLE "emailAddresses"
+				ADD COLUMN core_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector('simple', coalesce("emailAddresses".address, '')), ${fts_low}) ||
+					setweight(to_tsvector('simple', translate(coalesce("emailAddresses".address, ''), '@', ' ')), ${fts_lower}) ||
+					setweight(to_tsvector('simple', translate(coalesce("emailAddresses".address, ''), '@.', '  ')), ${fts_lower})
+				) STORED;
+
+			ALTER TABLE locations
+				ADD COLUMN core_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, coalesce(locations.name, ''))
+						|| to_tsvector('simple', coalesce(locations.name, '')), ${fts_high}) ||
+					setweight(to_tsvector(${fts_config}, coalesce(locations.digram, ''))
+						|| to_tsvector('simple', coalesce(locations.digram, '')), ${fts_low}) ||
+					setweight(to_tsvector(${fts_config}, coalesce(locations.trigram, ''))
+						|| to_tsvector('simple', coalesce(locations.trigram, '')), ${fts_low})
+				) STORED;
+
+			ALTER TABLE notes
+				ADD COLUMN core_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, coalesce(notes.text, ''))
+						|| to_tsvector('simple', coalesce(notes.text, '')), ${fts_low})
+				) STORED;
+
+			ALTER TABLE organizations
+				ADD COLUMN core_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector('simple', coalesce(organizations."identificationCode", '')), ${fts_high}) ||
+					setweight(to_tsvector('simple', coalesce(organizations."shortName", '')), ${fts_high}) ||
+					setweight(to_tsvector(${fts_config}, coalesce(organizations."longName", ''))
+						|| to_tsvector('simple', coalesce(organizations."longName", '')), ${fts_low})
+				) STORED;
+
+			ALTER TABLE people
+				ADD COLUMN core_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector('simple', coalesce(people.name, '')), ${fts_high}) ||
+					setweight(to_tsvector('simple', coalesce(people.code, '')), ${fts_high})
+				) STORED;
+
+			ALTER TABLE positions
+				ADD COLUMN core_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector('simple', coalesce(positions.code, '')), ${fts_high}) ||
+					setweight(to_tsvector(${fts_config}, coalesce(positions.name, ''))
+						|| to_tsvector('simple', coalesce(positions.name, '')), ${fts_high})
+				) STORED;
+
+			ALTER TABLE reports
+				ADD COLUMN core_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, coalesce(reports.intent, ''))
+						|| to_tsvector('simple', coalesce(reports.intent, '')), ${fts_high})
+				) STORED;
+
+			ALTER TABLE tasks
+				ADD COLUMN core_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector('simple', coalesce(tasks."shortName", '')), ${fts_high}) ||
+					setweight(to_tsvector(${fts_config}, coalesce(tasks."longName", ''))
+						|| to_tsvector('simple', coalesce(tasks."longName", '')), ${fts_high})
+				) STORED;
+
+			<!-- Add generated more_text columns -->
+			ALTER TABLE attachments
+				ADD COLUMN more_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, coalesce(attachments.description, ''))
+						|| to_tsvector('simple', coalesce(attachments.description, '')), ${fts_low})
+				) STORED;
+
+			ALTER TABLE "authorizationGroups"
+				ADD COLUMN more_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, coalesce("authorizationGroups".description, ''))
+						|| to_tsvector('simple', coalesce("authorizationGroups".description, '')), ${fts_low})
+				) STORED;
+
+			ALTER TABLE locations
+				ADD COLUMN more_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, coalesce(locations.description, ''))
+						|| to_tsvector('simple', coalesce(locations.description, '')), ${fts_low}) ||
+					setweight(to_tsvector(${fts_config}, jsonb_value_agg(locations."customFields"::jsonb))
+						|| to_tsvector('simple', jsonb_value_agg(locations."customFields"::jsonb)), ${fts_lower})
+				) STORED;
+
+			ALTER TABLE organizations
+				ADD COLUMN more_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, coalesce(organizations.profile, ''))
+						|| to_tsvector('simple', coalesce(organizations.profile, '')), ${fts_low}) ||
+					setweight(to_tsvector(${fts_config}, jsonb_value_agg(organizations."customFields"::jsonb))
+						|| to_tsvector('simple', jsonb_value_agg(organizations."customFields"::jsonb)), ${fts_lower})
+				) STORED;
+
+			ALTER TABLE people
+				ADD COLUMN more_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector('simple', coalesce(people."domainUsername", '')), ${fts_high}) ||
+					setweight(to_tsvector('simple', coalesce(people."phoneNumber", '')), ${fts_high}) ||
+					setweight(to_tsvector(${fts_config}, coalesce(people.biography, ''))
+						|| to_tsvector('simple', coalesce(people.biography, '')), ${fts_low}) ||
+					setweight(to_tsvector(${fts_config}, jsonb_value_agg(people."customFields"::jsonb))
+						|| to_tsvector('simple', jsonb_value_agg(people."customFields"::jsonb)), ${fts_lower})
+				) STORED;
+
+			ALTER TABLE positions
+				ADD COLUMN more_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, jsonb_value_agg(positions."customFields"::jsonb))
+						|| to_tsvector('simple', jsonb_value_agg(positions."customFields"::jsonb)), ${fts_lower})
+				) STORED;
+
+			ALTER TABLE reports
+				ADD COLUMN more_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, coalesce(reports."keyOutcomes", ''))
+						|| to_tsvector('simple', coalesce(reports."keyOutcomes", '')), ${fts_high}) ||
+					setweight(to_tsvector(${fts_config}, coalesce(reports."nextSteps", ''))
+						|| to_tsvector('simple', coalesce(reports."nextSteps", '')), ${fts_high}) ||
+					setweight(to_tsvector(${fts_config}, coalesce(reports.text, ''))
+						|| to_tsvector('simple', coalesce(reports.text, '')), ${fts_low}) ||
+					setweight(to_tsvector(${fts_config}, jsonb_value_agg(reports."customFields"::jsonb))
+						|| to_tsvector('simple', jsonb_value_agg(reports."customFields"::jsonb)), ${fts_lower})
+				) STORED;
+
+			ALTER TABLE tasks
+				ADD COLUMN more_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, coalesce(tasks.description, ''))
+						|| to_tsvector('simple', coalesce(tasks.description, '')), ${fts_low}) ||
+					setweight(to_tsvector(${fts_config}, jsonb_value_agg(tasks."customFields"::jsonb))
+						|| to_tsvector('simple', jsonb_value_agg(tasks."customFields"::jsonb)), ${fts_lower})
+				) STORED;
+
+			<!-- Create materialized views for links -->
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_lts_attachments(uuid, link_text) AS
+			WITH rt_links AS (
+				SELECT * FROM get_rt_referenced_objects('attachments', 'description')
+			)
+			SELECT
+				attachments.uuid,
+				setweight(coalesce(tsvector_agg(get_core_text(rt_links.object_table, rt_links.object_uuid)), ''::tsvector), ${fts_low})
+			FROM attachments
+			LEFT JOIN rt_links ON rt_links.uuid = attachments.uuid
+			GROUP BY attachments.uuid
+			WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_lts_attachments_uuid" ON mv_lts_attachments(uuid);
+
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_lts_locations(uuid, link_text) AS
+			WITH rt_links AS (
+				SELECT * FROM get_rt_referenced_objects('locations', 'description')
+			),
+			cf_links AS (
+				SELECT * FROM get_cf_referenced_objects('locations', 'customFields')
+			)
+			SELECT
+				uuid,
+				setweight(coalesce(tsvector_agg(agg), ''::tsvector), ${fts_low})
+			FROM (
+				SELECT
+					locations.uuid,
+					coalesce(tsvector_agg(get_core_text(rt_links.object_table, rt_links.object_uuid)), ''::tsvector) AS agg
+				FROM locations
+				LEFT JOIN rt_links ON rt_links.uuid = locations.uuid
+				GROUP BY locations.uuid
+			UNION ALL
+				SELECT
+					locations.uuid,
+					coalesce(tsvector_agg(get_core_text(cf_links.object_table, cf_links.object_uuid)), ''::tsvector) AS agg
+				FROM locations
+				LEFT JOIN cf_links ON cf_links.uuid = locations.uuid
+				GROUP BY locations.uuid
+			)
+			GROUP BY uuid
+			WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_lts_locations_uuid" ON mv_lts_locations(uuid);
+
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_lts_organizations(uuid, link_text) AS
+			WITH rt_links AS (
+				SELECT * FROM get_rt_referenced_objects('organizations', 'profile')
+			),
+			cf_links AS (
+				SELECT * FROM get_cf_referenced_objects('organizations', 'customFields')
+			)
+			SELECT
+				uuid,
+				setweight(coalesce(tsvector_agg(agg), ''::tsvector), ${fts_low})
+			FROM (
+				SELECT
+					organizations.uuid,
+					coalesce(tsvector_agg(get_core_text(rt_links.object_table, rt_links.object_uuid)), ''::tsvector) AS agg
+				FROM organizations
+				LEFT JOIN rt_links ON rt_links.uuid = organizations.uuid
+				GROUP BY organizations.uuid
+			UNION ALL
+				SELECT
+					organizations.uuid,
+					coalesce(tsvector_agg(get_core_text(cf_links.object_table, cf_links.object_uuid)), ''::tsvector) AS agg
+				FROM organizations
+				LEFT JOIN cf_links ON cf_links.uuid = organizations.uuid
+				GROUP BY organizations.uuid
+			)
+			GROUP BY uuid
+			WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_lts_organizations_uuid" ON mv_lts_organizations(uuid);
+
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_lts_people(uuid, link_text) AS
+			WITH rt_links AS (
+				SELECT * FROM get_rt_referenced_objects('people', 'biography')
+			),
+			cf_links AS (
+				SELECT * FROM get_cf_referenced_objects('people', 'customFields')
+			)
+			SELECT
+				uuid,
+				setweight(coalesce(tsvector_agg(agg), ''::tsvector), ${fts_low})
+			FROM (
+				SELECT
+					people.uuid,
+					coalesce(tsvector_agg(get_core_text(rt_links.object_table, rt_links.object_uuid)), ''::tsvector) AS agg
+				FROM people
+				LEFT JOIN rt_links ON rt_links.uuid = people.uuid
+				GROUP BY people.uuid
+			UNION ALL
+				SELECT
+					people.uuid,
+					coalesce(tsvector_agg(get_core_text(cf_links.object_table, cf_links.object_uuid)), ''::tsvector) AS agg
+				FROM people
+				LEFT JOIN cf_links ON cf_links.uuid = people.uuid
+				GROUP BY people.uuid
+			)
+			GROUP BY uuid
+			WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_lts_people_uuid" ON mv_lts_people(uuid);
+
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_lts_positions(uuid, link_text) AS
+			WITH cf_links AS (
+				SELECT * FROM get_cf_referenced_objects('positions', 'customFields')
+			)
+			SELECT
+				positions.uuid,
+				setweight(coalesce(tsvector_agg(get_core_text(cf_links.object_table, cf_links.object_uuid)), ''::tsvector), ${fts_low})
+			FROM positions
+			LEFT JOIN cf_links ON cf_links.uuid = positions.uuid
+			GROUP BY positions.uuid
+			WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_lts_positions_uuid" ON mv_lts_positions(uuid);
+
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_lts_reports(uuid, link_text) AS
+			WITH rt_links AS (
+				SELECT * FROM get_rt_referenced_objects('reports', 'text')
+			),
+			cf_links AS (
+				SELECT * FROM get_cf_referenced_objects('reports', 'customFields')
+			)
+			SELECT
+				uuid,
+				setweight(coalesce(tsvector_agg(agg), ''::tsvector), ${fts_low})
+			FROM (
+				SELECT
+					reports.uuid,
+					coalesce(tsvector_agg(get_core_text(rt_links.object_table, rt_links.object_uuid)), ''::tsvector) AS agg
+				FROM reports
+				LEFT JOIN rt_links ON rt_links.uuid = reports.uuid
+				GROUP BY reports.uuid
+			UNION ALL
+				SELECT
+					reports.uuid,
+					coalesce(tsvector_agg(get_core_text(cf_links.object_table, cf_links.object_uuid)), ''::tsvector) AS agg
+				FROM reports
+				LEFT JOIN cf_links ON cf_links.uuid = reports.uuid
+				GROUP BY reports.uuid
+			)
+			GROUP BY uuid
+			WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_lts_reports_uuid" ON mv_lts_reports(uuid);
+
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_lts_tasks(uuid, link_text) AS
+			WITH rt_links AS (
+				SELECT * FROM get_rt_referenced_objects('tasks', 'description')
+			),
+			cf_links AS (
+				SELECT * FROM get_cf_referenced_objects('tasks', 'customFields')
+			)
+			SELECT
+				uuid,
+				setweight(coalesce(tsvector_agg(agg), ''::tsvector), ${fts_low})
+			FROM (
+				SELECT
+					tasks.uuid,
+					coalesce(tsvector_agg(get_core_text(rt_links.object_table, rt_links.object_uuid)), ''::tsvector) AS agg
+				FROM tasks
+				LEFT JOIN rt_links ON rt_links.uuid = tasks.uuid
+				GROUP BY tasks.uuid
+			UNION ALL
+				SELECT
+					tasks.uuid,
+					coalesce(tsvector_agg(get_core_text(cf_links.object_table, cf_links.object_uuid)), ''::tsvector) AS agg
+				FROM tasks
+				LEFT JOIN cf_links ON cf_links.uuid = tasks.uuid
+				GROUP BY tasks.uuid
+			)
+			GROUP BY uuid
+			WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_lts_tasks" ON mv_lts_tasks(uuid);
+
+			<!-- Create materialized views and indexes for full-text search -->
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_attachments(uuid, full_text) AS
+			SELECT
+				attachments.uuid,
+				attachments.core_text || attachments.more_text
+					|| coalesce(tsvector_agg(mv_lts_attachments.link_text), ''::tsvector)
+			FROM attachments
+			LEFT JOIN mv_lts_attachments ON attachments.uuid = mv_lts_attachments.uuid
+			GROUP BY attachments.uuid
+			WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_attachments_uuid" ON mv_fts_attachments(uuid);
+			CREATE INDEX "FT_mv_fts_attachments" ON mv_fts_attachments USING gin(full_text);
+			CREATE INDEX "TR_attachments_uuid" ON mv_fts_attachments USING gin(uuid gin_trgm_ops);
+
+			CREATE MATERIALIZED VIEW IF NOT EXISTS "mv_fts_authorizationGroups"(uuid, full_text) AS
+			SELECT
+				"authorizationGroups".uuid,
+				"authorizationGroups".core_text || "authorizationGroups".more_text
+					|| coalesce(tsvector_agg(notes.core_text), ''::tsvector)
+			FROM "authorizationGroups"
+			LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'authorizationGroups'
+				AND "noteRelatedObjects"."relatedObjectUuid" = "authorizationGroups".uuid
+			LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
+			GROUP BY "authorizationGroups".uuid
+			WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_authorizationGroups_uuid" ON "mv_fts_authorizationGroups"(uuid);
+			CREATE INDEX "FT_mv_fts_authorizationGroups" ON "mv_fts_authorizationGroups" USING gin(full_text);
+			CREATE INDEX "TR_authorizationGroups_uuid" ON "mv_fts_authorizationGroups" USING gin(uuid gin_trgm_ops);
+
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_locations(uuid, full_text) AS
+			SELECT
+				locations.uuid,
+				locations.core_text || locations.more_text
+					|| coalesce(tsvector_agg(mv_lts_locations.link_text), ''::tsvector)
+					|| coalesce(tsvector_agg(notes.core_text), ''::tsvector)
+			FROM locations
+			LEFT JOIN mv_lts_locations ON locations.uuid = mv_lts_locations.uuid
+			LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'locations'
+				AND "noteRelatedObjects"."relatedObjectUuid" = locations.uuid
+			LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
+			GROUP BY locations.uuid
+			WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_locations_uuid" ON mv_fts_locations(uuid);
+			CREATE INDEX "FT_mv_fts_locations" ON mv_fts_locations USING gin(full_text);
+			CREATE INDEX "TR_locations_uuid" ON mv_fts_locations USING gin(uuid gin_trgm_ops);
+
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_organizations(uuid, full_text) AS
+			SELECT
+				organizations.uuid,
+				organizations.core_text || organizations.more_text
+					|| coalesce(tsvector_agg(mv_lts_organizations.link_text), ''::tsvector)
+					|| coalesce(tsvector_agg(notes.core_text), ''::tsvector)
+					|| coalesce(tsvector_agg("emailAddresses".core_text), ''::tsvector)
+			FROM organizations
+			LEFT JOIN mv_lts_organizations ON organizations.uuid = mv_lts_organizations.uuid
+			LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'organizations'
+				AND "noteRelatedObjects"."relatedObjectUuid" = organizations.uuid
+			LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
+			LEFT JOIN "emailAddresses" ON "emailAddresses"."relatedObjectType" = 'organizations'
+				AND "emailAddresses"."relatedObjectUuid" = organizations.uuid
+			GROUP BY organizations.uuid
+				WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_organizations_uuid" ON mv_fts_organizations(uuid);
+			CREATE INDEX "FT_mv_fts_organizations" ON mv_fts_organizations USING gin(full_text);
+			CREATE INDEX "TR_organizations_uuid" ON mv_fts_organizations USING gin(uuid gin_trgm_ops);
+
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_people(uuid, full_text) AS
+			SELECT
+				people.uuid,
+				people.core_text || people.more_text
+					|| coalesce(tsvector_agg(mv_lts_people.link_text), ''::tsvector)
+					|| coalesce(tsvector_agg(positions.core_text), ''::tsvector)
+					|| coalesce(tsvector_agg(organizations.core_text), ''::tsvector)
+					|| coalesce(tsvector_agg(notes.core_text), ''::tsvector)
+					|| coalesce(tsvector_agg("emailAddresses".core_text), ''::tsvector)
+			FROM people
+			LEFT JOIN mv_lts_people ON people.uuid = mv_lts_people.uuid
+			LEFT JOIN positions ON positions."currentPersonUuid" = people.uuid
+			LEFT JOIN organizations ON organizations.uuid = positions."organizationUuid"
+			LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'people'
+				AND "noteRelatedObjects"."relatedObjectUuid" = people.uuid
+			LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
+			LEFT JOIN "emailAddresses" ON "emailAddresses"."relatedObjectType" = 'people'
+				AND "emailAddresses"."relatedObjectUuid" = people.uuid
+			GROUP BY people.uuid
+			WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_people_uuid" ON mv_fts_people(uuid);
+			CREATE INDEX "FT_mv_fts_people" ON mv_fts_people USING gin(full_text);
+			CREATE INDEX "TR_people_uuid" ON mv_fts_people USING gin(uuid gin_trgm_ops);
+
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_positions(uuid, full_text) AS
+			SELECT
+				positions.uuid,
+				positions.core_text || positions.more_text
+					|| coalesce(tsvector_agg(mv_lts_positions.link_text), ''::tsvector)
+					|| coalesce(tsvector_agg(people.core_text), ''::tsvector)
+					|| coalesce(tsvector_agg(organizations.core_text), ''::tsvector)
+					|| coalesce(tsvector_agg(notes.core_text), ''::tsvector)
+					|| coalesce(tsvector_agg("emailAddresses".core_text), ''::tsvector)
+			FROM positions
+			LEFT JOIN mv_lts_positions ON positions.uuid = mv_lts_positions.uuid
+			LEFT JOIN people ON people.uuid = positions."currentPersonUuid"
+			LEFT JOIN organizations ON organizations.uuid = positions."organizationUuid"
+			LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'positions'
+				AND "noteRelatedObjects"."relatedObjectUuid" = positions.uuid
+			LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
+			LEFT JOIN "emailAddresses" ON "emailAddresses"."relatedObjectType" = 'positions'
+				AND "emailAddresses"."relatedObjectUuid" = positions.uuid
+			GROUP BY positions.uuid
+			WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_positions" ON mv_fts_positions(uuid);
+			CREATE INDEX "FT_mv_fts_positions" ON mv_fts_positions USING gin(full_text);
+			CREATE INDEX "TR_positions_uuid" ON mv_fts_positions USING gin(uuid gin_trgm_ops);
+
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_reports(uuid, full_text) AS
+			SELECT
+				reports.uuid,
+				reports.core_text || reports.more_text
+					|| coalesce(tsvector_agg(mv_lts_reports.link_text), ''::tsvector)
+					|| coalesce(tsvector_agg(notes.core_text), ''::tsvector)
+			FROM reports
+			LEFT JOIN mv_lts_reports ON reports.uuid = mv_lts_reports.uuid
+			LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'reports'
+				AND "noteRelatedObjects"."relatedObjectUuid" = reports.uuid
+			LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
+			GROUP BY reports.uuid
+			WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_reports_uuid" ON mv_fts_reports(uuid);
+			CREATE INDEX "FT_mv_fts_reports" ON mv_fts_reports USING gin(full_text);
+			CREATE INDEX "TR_reports_uuid" ON mv_fts_reports USING gin(uuid gin_trgm_ops);
+
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_tasks(uuid, full_text) AS
+			SELECT
+				tasks.uuid,
+				tasks.core_text || tasks.more_text
+					|| coalesce(tsvector_agg(mv_lts_tasks.link_text), ''::tsvector)
+					|| coalesce(tsvector_agg(notes.core_text), ''::tsvector)
+			FROM tasks
+			LEFT JOIN mv_lts_tasks ON tasks.uuid = mv_lts_tasks.uuid
+			LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'tasks'
+				AND "noteRelatedObjects"."relatedObjectUuid" = tasks.uuid
+			LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
+			GROUP BY tasks.uuid
+			WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_tasks" ON mv_fts_tasks(uuid);
+			CREATE INDEX "FT_mv_fts_tasks" ON mv_fts_tasks USING gin(full_text);
+			CREATE INDEX "TR_tasks_uuid" ON mv_fts_tasks USING gin(uuid gin_trgm_ops);
+		</sql>
+	</changeSet>
+
 </databaseChangeLog>

@@ -14,6 +14,7 @@ import { ReadonlyCustomFields } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
+import FindObjectsButton from "components/FindObjectsButton"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
@@ -402,6 +403,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
       initialValues={report}
     >
       {({ isValid, setFieldValue, values }) => {
+        const searchText = report.intent ?? report.uuid
         const action = (
           <>
             {canEmail && (
@@ -422,6 +424,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
               </LinkTo>
             )}
             {canSubmit && renderSubmitButton(!isValid)}
+            <FindObjectsButton objectLabel="Report" searchText={searchText} />
             <RelatedObjectNotes
               notes={report.notes}
               relatedObject={

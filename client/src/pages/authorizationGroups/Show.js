@@ -6,6 +6,7 @@ import AuthorizationGroupMembersTable from "components/AuthorizationGroupMembers
 import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
+import FindObjectsButton from "components/FindObjectsButton"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import {
@@ -129,15 +130,24 @@ const AuthorizationGroupShow = ({ pageDispatchers }) => {
   return (
     <Formik enableReinitialize initialValues={authorizationGroup}>
       {({ values }) => {
-        const action = canEdit && (
-          <LinkTo
-            modelType="AuthorizationGroup"
-            model={authorizationGroup}
-            edit
-            button="primary"
-          >
-            Edit
-          </LinkTo>
+        const searchText = authorizationGroup.name
+        const action = (
+          <>
+            {canEdit && (
+              <LinkTo
+                modelType="AuthorizationGroup"
+                model={authorizationGroup}
+                edit
+                button="primary"
+              >
+                Edit
+              </LinkTo>
+            )}
+            <FindObjectsButton
+              objectLabel="Authorization Group"
+              searchText={searchText}
+            />
+          </>
         )
         return (
           <div>

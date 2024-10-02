@@ -11,6 +11,7 @@ import DictionaryField from "components/DictionaryField"
 import EmailAddressTable from "components/EmailAddressTable"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
+import FindObjectsButton from "components/FindObjectsButton"
 import GuidedTour from "components/GuidedTour"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
@@ -286,6 +287,11 @@ const OrganizationShow = ({ pageDispatchers }) => {
   return (
     <Formik enableReinitialize initialValues={organization}>
       {({ values }) => {
+        const searchText = [
+          organization.shortName,
+          organization.longName,
+          organization.identificationCode
+        ].join(" ")
         const action = (
           <>
             {isAdmin && (
@@ -321,6 +327,10 @@ const OrganizationShow = ({ pageDispatchers }) => {
                 Edit
               </LinkTo>
             )}
+            <FindObjectsButton
+              objectLabel="Organization"
+              searchText={searchText}
+            />
             <RelatedObjectNotes
               notes={organization.notes}
               relatedObject={
