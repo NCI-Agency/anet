@@ -136,16 +136,16 @@ public abstract class AbstractSearcher<B, T extends AbstractSearchQuery<?>> {
         final var filterType = configuration.getDictionaryEntry(String.format("%s.type", keyParam));
         if ("enum".equals(filterType)) {
           qb.addWhereClause(
-              String.format("assessments.text::jsonb->>:%1$s = :%2$s", keyParam, valueParam));
+              String.format("assessments.text::jsonb->>:%1$s IN (<%2$s>)", keyParam, valueParam));
         } else if ("enumset".equals(filterType)) {
-          qb.addWhereClause(
-              String.format("assessments.text::jsonb->:%1$s ?? :%2$s", keyParam, valueParam));
+          qb.addWhereClause(String.format("assessments.text::jsonb->:%1$s ??| array[<%2$s>]",
+              keyParam, valueParam));
         } else {
           // Can't handle this filter type, just skip
           return;
         }
         qb.addSqlArg(keyParam, k);
-        qb.addSqlArg(valueParam, v);
+        qb.addListArg(valueParam, (List<?>) v);
       });
     }
   }

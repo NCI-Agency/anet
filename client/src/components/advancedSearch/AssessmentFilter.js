@@ -1,6 +1,7 @@
 import useSearchFilter from "components/advancedSearch/hooks"
 import _get from "lodash/get"
 import _isEmpty from "lodash/isEmpty"
+import _map from "lodash/map"
 import PropTypes from "prop-types"
 import React from "react"
 import { Form } from "react-bootstrap"
@@ -80,8 +81,8 @@ const AssessmentFilter = ({
                 name={k}
                 value={value[FILTERS]?.[k]}
                 onChange={handleFilterChange}
+                multiple
               >
-                <option value="" />
                 {Object.entries(v?.choices ?? []).map(
                   ([optionKey, optionValue]) => (
                     <option key={optionKey} value={optionKey}>
@@ -106,13 +107,13 @@ const AssessmentFilter = ({
         if (!matchingFilter) {
           return null
         }
-        const matchingValue = Object.entries(matchingFilter.choices || {}).find(
-          ([adc, _]) => v === adc
-        )?.[1]
-        if (!matchingValue) {
+        const matchingValues = Object.entries(
+          matchingFilter.choices || {}
+        ).filter(([adc, _]) => v.includes(adc))
+        if (_isEmpty(matchingValues)) {
           return null
         }
-        return `${matchingFilter.label} = ${matchingValue.label}`
+        return `${matchingFilter.label} in (${matchingValues.map(v => v[1].label).join(", ")})`
       }
     )
     if (!_isEmpty(filtersDisplay)) {
@@ -127,7 +128,7 @@ const AssessmentFilter = ({
   }
 
   function handleFilterChange(event) {
-    if (_isEmpty(event.target.value)) {
+    if (_isEmpty(event.target.selectedOptions)) {
       // remove the filter
       setValue(prevValue => {
         const filters = prevValue?.[FILTERS]
@@ -138,12 +139,12 @@ const AssessmentFilter = ({
         }
       })
     } else {
-      // add the filter
+      // update the filter
       setValue(prevValue => ({
         ...prevValue,
         [FILTERS]: {
           ...prevValue?.[FILTERS],
-          [event.target.name]: event.target.value
+          [event.target.name]: _map(event.target.selectedOptions, o => o.value)
         }
       }))
     }
