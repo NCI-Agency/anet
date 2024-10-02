@@ -1242,6 +1242,25 @@ fields:
             widget: richTextEditor
             style:
               height: 70px
+          enumset:
+            type: enumset
+            label: Enumset
+            choices:
+              t1:
+                label: T1
+                color: '#f50525'
+              t2:
+                label: T2
+                color: '#f59d05'
+              t3:
+                label: T3
+                color: '#f5e505'
+              t4:
+                label: T4
+                color: '#ffffff'
+              t5:
+                label: T5
+                color: '#aaaaaa'
     customFields:
       multipleButtons:
         type: enumset
