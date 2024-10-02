@@ -1279,6 +1279,80 @@ INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjec
   FROM reports r
   WHERE r.text LIKE 'Today%';
 
+-- Add ondemand assessments to MOD-F
+SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
+INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
+  (:noteUuid, :authorUuid, 3, 'fields.organization.assessments.interactionPlan', '{"exercises":null,"interaction":"<p>Keep in constant contact</p>","plan":"<p>Organise a face to face meeting</p>","relation":"","priority":"","assessmentDate":"2021-01-01","__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
+  SELECT :noteUuid, 'organizations', o.uuid
+  FROM organizations o
+  WHERE o."shortName" = 'MOD-F';
+
+SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
+INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
+  (:noteUuid, :authorUuid, 3, 'fields.organization.assessments.interactionPlan', '{"exercises":null,"interaction":"<p>In constant contact</p>","plan":null,"relation":"maintain","priority":"t1","assessmentDate":"2022-01-01","__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
+  SELECT :noteUuid, 'organizations', o.uuid
+  FROM organizations o
+  WHERE o."shortName" = 'MOD-F';
+
+SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
+INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
+  (:noteUuid, :authorUuid, 3, 'fields.organization.assessments.interactionPlan', '{"exercises":null,"interaction":"<p>Some interaction took place</p>","plan":"<p>Maintain relationship</p>","relation":"","priority":"t2","assessmentDate":"2023-01-01","__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
+  SELECT :noteUuid, 'organizations', o.uuid
+  FROM organizations o
+  WHERE o."shortName" = 'MOD-F';
+
+SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
+INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
+  (:noteUuid, :authorUuid, 3, 'fields.organization.assessments.organizationOndemand', '{"question1":"<p>First time</p>","enumset":[],"assessmentDate":"2023-09-30","expirationDate":null,"__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
+  SELECT :noteUuid, 'organizations', o.uuid
+  FROM organizations o
+  WHERE o."shortName" = 'MOD-F';
+
+SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
+INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
+  (:noteUuid, :authorUuid, 3, 'fields.organization.assessments.organizationOndemand', '{"question1":"<p>Second time</p>","enumset":["t4"],"assessmentDate":"2023-10-01","expirationDate":null,"__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
+  SELECT :noteUuid, 'organizations', o.uuid
+  FROM organizations o
+  WHERE o."shortName" = 'MOD-F';
+
+SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
+INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
+  (:noteUuid, :authorUuid, 3, 'fields.organization.assessments.organizationOndemand', '{"question1":"<p>Third time</p>","enumset":["t1","t2","t3","t5"],"assessmentDate":"2023-10-02","expirationDate":"2037-12-31","__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
+  SELECT :noteUuid, 'organizations', o.uuid
+  FROM organizations o
+  WHERE o."shortName" = 'MOD-F';
+
+-- Add ondemand assessments to Christopf
+SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
+INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
+  (:noteUuid, :authorUuid, 3, 'fields.regular.person.assessments.interlocutorOndemandScreeningAndVetting', '{"question2":null,"question1":"fail3","expirationDate":"2024-10-31","assessmentDate":"2024-09-28","questionForChristopf":"c","__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
+  SELECT :noteUuid, 'people', p.uuid
+  FROM people p
+  WHERE p.name = 'TOPFERNESS, Christopf';
+
+SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
+INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
+  (:noteUuid, :authorUuid, 3, 'fields.regular.person.assessments.interlocutorOndemandScreeningAndVetting', '{"question2":null,"question1":"fail2","expirationDate":null,"assessmentDate":"2024-09-30","questionForChristopf":"b","__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
+  SELECT :noteUuid, 'people', p.uuid
+  FROM people p
+  WHERE p.name = 'TOPFERNESS, Christopf';
+
+SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
+INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
+  (:noteUuid, :authorUuid, 3, 'fields.regular.person.assessments.interlocutorOndemandScreeningAndVetting', '{"question2":null,"question1":"fail1","expirationDate":"2024-10-02","assessmentDate":"2024-10-01","questionForChristopf":"a","__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
+  SELECT :noteUuid, 'people', p.uuid
+  FROM people p
+  WHERE p.name = 'TOPFERNESS, Christopf';
+
 -- Add instant assessments to tasks related to reports
 SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
 INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
