@@ -203,6 +203,12 @@ enum ApprovalStepType {
 }
 
 """"""
+input AssessmentSearchQueryInput {
+  filters: Map_String_ObjectScalar
+  key: String
+}
+
+""""""
 enum Atmosphere {
   NEGATIVE
   NEUTRAL
@@ -465,6 +471,9 @@ enum LocationType {
 """A 64-bit signed integer"""
 scalar Long
 
+"""Built-in scalar for map-like structures"""
+scalar Map_String_ObjectScalar
+
 """Mutation root"""
 type Mutation {
   addComment(comment: CommentInput, uuid: String): Comment
@@ -615,6 +624,7 @@ input OrganizationInput {
 
 """"""
 input OrganizationSearchQueryInput {
+  assessment: AssessmentSearchQueryInput
   emailNetwork: String
   hasParentOrg: Boolean
   hasProfile: Boolean

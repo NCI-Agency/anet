@@ -3,6 +3,7 @@ package mil.dds.anet.beans.search;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
@@ -30,6 +31,9 @@ public class OrganizationSearchQuery
   @GraphQLQuery
   @GraphQLInputField
   private Boolean hasProfile;
+  @GraphQLQuery
+  @GraphQLInputField
+  private AssessmentSearchQuery assessment;
 
   public OrganizationSearchQuery() {
     super(OrganizationSearchSortBy.NAME);
@@ -83,10 +87,18 @@ public class OrganizationSearchQuery
     this.hasProfile = hasProfile;
   }
 
+  public AssessmentSearchQuery getAssessment() {
+    return assessment;
+  }
+
+  public void setAssessment(AssessmentSearchQuery assessment) {
+    this.assessment = assessment;
+  }
+
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), hasParentOrg, parentOrgUuid, locationUuid,
-        orgRecurseStrategy);
+    return Objects.hash(super.hashCode(), hasParentOrg, parentOrgUuid, orgRecurseStrategy,
+        locationUuid, locationRecurseStrategy, hasProfile, assessment);
   }
 
   @Override
@@ -100,7 +112,8 @@ public class OrganizationSearchQuery
         && Objects.equals(getOrgRecurseStrategy(), other.getOrgRecurseStrategy())
         && Objects.equals(getLocationUuid(), other.getLocationUuid())
         && Objects.equals(getLocationRecurseStrategy(), other.getLocationRecurseStrategy())
-        && Objects.equals(getHasProfile(), other.getHasProfile());
+        && Objects.equals(getHasProfile(), other.getHasProfile())
+        && Objects.equals(getAssessment(), other.getAssessment());
   }
 
   @Override
@@ -111,6 +124,10 @@ public class OrganizationSearchQuery
     }
     if (locationUuid != null) {
       clone.setLocationUuid(new ArrayList<>(locationUuid));
+    }
+    if (assessment != null) {
+      clone.setAssessment(
+          new AssessmentSearchQuery(assessment.key(), new HashMap<>(assessment.filters())));
     }
     return clone;
   }
