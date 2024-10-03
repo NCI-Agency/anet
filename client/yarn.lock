@@ -5388,14 +5388,14 @@ __metadata:
   linkType: hard
 
 "@wdio/logger@npm:^9.0.0":
-  version: 9.0.8
-  resolution: "@wdio/logger@npm:9.0.8"
+  version: 9.1.0
+  resolution: "@wdio/logger@npm:9.1.0"
   dependencies:
     chalk: "npm:^5.1.2"
     loglevel: "npm:^1.6.0"
     loglevel-plugin-prefix: "npm:^0.8.4"
     strip-ansi: "npm:^7.1.0"
-  checksum: 10c0/2f6d3d2ab5c896257ce504179fc530dfa8bf4798e2b059b82062f8be6e9ad080185702c2f50af919ae3840238ed97620810f776f7a9ed5ee3f9feeb0eaa00879
+  checksum: 10c0/1e6466457b6c014c3b15c1385691dbd79fd53112a30a4ac2e8d2b901c9c296dc1893040cec33f27173f548415cb41c46877d3d84f568469d3dc46c7b286cda2e
   languageName: node
   linkType: hard
 
