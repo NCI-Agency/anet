@@ -1838,9 +1838,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@blueprintjs/core@npm:5.13.0, @blueprintjs/core@npm:^5.13.0":
-  version: 5.13.0
-  resolution: "@blueprintjs/core@npm:5.13.0"
+"@blueprintjs/core@npm:5.13.1, @blueprintjs/core@npm:^5.13.1":
+  version: 5.13.1
+  resolution: "@blueprintjs/core@npm:5.13.1"
   dependencies:
     "@blueprintjs/colors": "npm:^5.1.2"
     "@blueprintjs/icons": "npm:^5.13.0"
@@ -1862,16 +1862,16 @@ __metadata:
   bin:
     upgrade-blueprint-2.0.0-rename: scripts/upgrade-blueprint-2.0.0-rename.sh
     upgrade-blueprint-3.0.0-rename: scripts/upgrade-blueprint-3.0.0-rename.sh
-  checksum: 10c0/e11369fcd1ddb541a09242c8e9522ef2002301fe8df2089dab94d5f45ebb14f3d43d452b779943cebe367e38cc4a6280de4a16b144b8bcdfcbff4a43b8ff1280
+  checksum: 10c0/38e70ed0666d8d22e76baf244441ef223e5f1862a825f6a0ee4c555b60f0342e9a147d4ff5f0460ed8fb34ea4632bf522af030b8319f418d690cd437067f07c6
   languageName: node
   linkType: hard
 
-"@blueprintjs/datetime2@npm:2.3.10":
-  version: 2.3.10
-  resolution: "@blueprintjs/datetime2@npm:2.3.10"
+"@blueprintjs/datetime2@npm:2.3.11":
+  version: 2.3.11
+  resolution: "@blueprintjs/datetime2@npm:2.3.11"
   dependencies:
-    "@blueprintjs/core": "npm:^5.13.0"
-    "@blueprintjs/datetime": "npm:^5.3.10"
+    "@blueprintjs/core": "npm:^5.13.1"
+    "@blueprintjs/datetime": "npm:^5.3.11"
     "@blueprintjs/icons": "npm:^5.13.0"
     classnames: "npm:^2.3.1"
     date-fns: "npm:^2.28.0"
@@ -1885,17 +1885,17 @@ __metadata:
   peerDependenciesMeta:
     "@types/react":
       optional: true
-  checksum: 10c0/50cd7d1dcc92b04701d7c3a692e12d067c8910b74b9eb33f827d489f8e60f9a40564cb73e983401ffaea7ced29ef25021be62180a77cb65e40b415502997dd1b
+  checksum: 10c0/c85d1672d3ad1156810b1f82cfa9f461932de2f6f04f6d242f2190636d1d08e83814bfaa6616b9bfd88e4551b6b6ff03e6307c89b0bd74607a85e750b0c82b17
   languageName: node
   linkType: hard
 
-"@blueprintjs/datetime@npm:^5.3.10":
-  version: 5.3.10
-  resolution: "@blueprintjs/datetime@npm:5.3.10"
+"@blueprintjs/datetime@npm:^5.3.11":
+  version: 5.3.11
+  resolution: "@blueprintjs/datetime@npm:5.3.11"
   dependencies:
-    "@blueprintjs/core": "npm:^5.13.0"
+    "@blueprintjs/core": "npm:^5.13.1"
     "@blueprintjs/icons": "npm:^5.13.0"
-    "@blueprintjs/select": "npm:^5.2.4"
+    "@blueprintjs/select": "npm:^5.2.5"
     classnames: "npm:^2.3.1"
     date-fns: "npm:^2.28.0"
     date-fns-tz: "npm:^2.0.0"
@@ -1908,7 +1908,7 @@ __metadata:
   peerDependenciesMeta:
     "@types/react":
       optional: true
-  checksum: 10c0/c6a5d0c636956cc5397de82b6701e9b0df0bb7ede27e3491951a59b82909b6a51d9f8adbf14ecb575e07291df73c0c9649b8804a5fc064f4037da0df605db566
+  checksum: 10c0/2bb30b9542e8c97a4fd6a12aa81dcea02387c1c8ccab8efac26cc10019bcd67bddca3d836beb58f5a8afda90049bba81ba509643166844a6cebba72725cfb50c
   languageName: node
   linkType: hard
 
@@ -1930,11 +1930,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@blueprintjs/select@npm:^5.2.4":
-  version: 5.2.4
-  resolution: "@blueprintjs/select@npm:5.2.4"
+"@blueprintjs/select@npm:^5.2.5":
+  version: 5.2.5
+  resolution: "@blueprintjs/select@npm:5.2.5"
   dependencies:
-    "@blueprintjs/core": "npm:^5.13.0"
+    "@blueprintjs/core": "npm:^5.13.1"
     "@blueprintjs/icons": "npm:^5.13.0"
     classnames: "npm:^2.3.1"
     tslib: "npm:~2.6.2"
@@ -1945,7 +1945,7 @@ __metadata:
   peerDependenciesMeta:
     "@types/react":
       optional: true
-  checksum: 10c0/6b0e9cbda440c6701bfff4e0b67bb4d764c61c866b3d9a576c8d91bcd5059e829dbc4d8a2479bcce1b1a41a6ed39dc888d6126369853914f6a09cbe4e44496fe
+  checksum: 10c0/0f5ceacb7eaa668f3401f6daa1b0000fe1a6c8fe1d71bd16b21ba0b5fb8a4a36118accf48b8583faa8929420c6a14452dca77be88777241490696c998f0a17de
   languageName: node
   linkType: hard
 
@@ -6036,8 +6036,8 @@ __metadata:
     "@babel/preset-react": "npm:7.25.7"
     "@babel/register": "npm:7.25.7"
     "@babel/runtime": "npm:7.25.7"
-    "@blueprintjs/core": "npm:5.13.0"
-    "@blueprintjs/datetime2": "npm:2.3.10"
+    "@blueprintjs/core": "npm:5.13.1"
+    "@blueprintjs/datetime2": "npm:2.3.11"
     "@colors/colors": "npm:1.6.0"
     "@emotion/react": "npm:11.13.3"
     "@emotion/styled": "npm:11.13.0"
