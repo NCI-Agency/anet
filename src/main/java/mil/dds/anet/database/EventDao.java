@@ -10,6 +10,8 @@ import mil.dds.anet.beans.*;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.EventSearchQuery;
 import mil.dds.anet.database.mappers.EventMapper;
+import mil.dds.anet.database.mappers.OrganizationMapper;
+import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.database.mappers.TaskMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
@@ -52,10 +54,44 @@ public class EventDao extends AnetSubscribableObjectDao<Event, EventSearchQuery>
     }
   }
 
+  static class OrganizationsBatcher extends ForeignKeyBatcher<Organization> {
+    private static final String sql =
+        "/* batch.getOrganizationsForEvent */ SELECT " + OrganizationDao.ORGANIZATION_FIELDS
+            + ", \"eventOrganizations\".\"eventUuid\" FROM organizations, \"eventOrganizations\" "
+            + "WHERE \"eventOrganizations\".\"eventUuid\" IN ( <foreignKeys> ) "
+            + "AND \"eventOrganizations\".\"organizationUuid\" = organizations.uuid ORDER BY uuid";
+
+    public OrganizationsBatcher() {
+      super(sql, "foreignKeys", new OrganizationMapper(), "eventUuid");
+    }
+  }
+  static class PeopleBatcher extends ForeignKeyBatcher<Person> {
+    private static final String sql = "/* batch.getPeopleForEvent */ SELECT "
+        + PersonDao.PERSON_FIELDS + ", \"eventPeople\".\"eventUuid\" FROM people, \"eventPeople\" "
+        + "WHERE \"eventPeople\".\"eventUuid\" IN ( <foreignKeys> ) "
+        + "AND \"eventPeople\".\"personUuid\" = people.uuid ORDER BY uuid";
+
+    public PeopleBatcher() {
+      super(sql, "foreignKeys", new PersonMapper(), "eventUuid");
+    }
+  }
+
   public List<List<Task>> getTasks(List<String> foreignKeys) {
     final ForeignKeyBatcher<Task> tasksBatcher =
         AnetObjectEngine.getInstance().getInjector().getInstance(EventDao.TasksBatcher.class);
     return tasksBatcher.getByForeignKeys(foreignKeys);
+  }
+
+  public List<List<Organization>> getOrganizations(List<String> foreignKeys) {
+    final ForeignKeyBatcher<Organization> organizationsBatcher = AnetObjectEngine.getInstance()
+        .getInjector().getInstance(EventDao.OrganizationsBatcher.class);
+    return organizationsBatcher.getByForeignKeys(foreignKeys);
+  }
+
+  public List<List<Person>> getPeople(List<String> foreignKeys) {
+    final ForeignKeyBatcher<Person> organizationsBatcher =
+        AnetObjectEngine.getInstance().getInjector().getInstance(EventDao.PeopleBatcher.class);
+    return organizationsBatcher.getByForeignKeys(foreignKeys);
   }
 
   @Override
@@ -90,12 +126,27 @@ public class EventDao extends AnetSubscribableObjectDao<Event, EventSearchQuery>
       rb.insertEventTasks(event.getUuid(), event.getTasks());
     }
 
+    if (event.getOrganizations() != null) {
+      rb.insertEventOrganizations(event.getUuid(), event.getOrganizations());
+    }
+
+    if (event.getPeople() != null) {
+      rb.insertEventPeople(event.getUuid(), event.getPeople());
+    }
+
     return event;
   }
 
   public interface EventBatch {
     @SqlBatch("INSERT INTO \"eventTasks\" (\"eventUuid\", \"taskUuid\") VALUES (:eventUuid, :uuid)")
     void insertEventTasks(@Bind("eventUuid") String eventUuid, @BindBean List<Task> tasks);
+
+    @SqlBatch("INSERT INTO \"eventOrganizations\" (\"eventUuid\", \"organizationUuid\") VALUES (:eventUuid, :uuid)")
+    void insertEventOrganizations(@Bind("eventUuid") String eventUuid,
+        @BindBean List<Organization> organizations);
+
+    @SqlBatch("INSERT INTO \"eventPeople\" (\"eventUuid\", \"personUuid\") VALUES (:eventUuid, :uuid)")
+    void insertEventPeople(@Bind("eventUuid") String eventUuid, @BindBean List<Person> people);
   }
 
   @Override
@@ -117,12 +168,29 @@ public class EventDao extends AnetSubscribableObjectDao<Event, EventSearchQuery>
   }
 
   @InTransaction
-  public int addTaskToEvent(Task p, Event e) {
+  public int addTaskToEvent(Task t, Event e) {
     return getDbHandle()
         .createUpdate(
             "/* addTaskToEvent */ INSERT INTO \"eventTasks\" (\"taskUuid\", \"eventUuid\") "
                 + "VALUES (:taskUuid, :eventUuid)")
-        .bind("eventUuid", e.getUuid()).bind("taskUuid", p.getUuid()).execute();
+        .bind("eventUuid", e.getUuid()).bind("taskUuid", t.getUuid()).execute();
+  }
+
+  @InTransaction
+  public int addOrganizationToEvent(Organization o, Event e) {
+    return getDbHandle().createUpdate(
+        "/* addOrganizationToEvent */ INSERT INTO \"eventOrganizations\" (\"organizationUuid\", \"eventUuid\") "
+            + "VALUES (:organizationUuid, :eventUuid)")
+        .bind("eventUuid", e.getUuid()).bind("organizationUuid", o.getUuid()).execute();
+  }
+
+  @InTransaction
+  public int addPersonToEvent(Person p, Event e) {
+    return getDbHandle()
+        .createUpdate(
+            "/* addPersonToEvent */ INSERT INTO \"eventPeople\" (\"personUuid\", \"eventUuid\") "
+                + "VALUES (:personUuid, :eventUuid)")
+        .bind("eventUuid", e.getUuid()).bind("personUuid", p.getUuid()).execute();
   }
 
   @InTransaction
@@ -133,10 +201,38 @@ public class EventDao extends AnetSubscribableObjectDao<Event, EventSearchQuery>
         .bind("eventUuid", e.getUuid()).bind("taskUuid", taskUuid).execute();
   }
 
+  @InTransaction
+  public int removeOrganizationFromEvent(String organizationUuid, Event e) {
+    return getDbHandle()
+        .createUpdate("/* removeOrganizationFromEvent*/ DELETE FROM \"eventOrganizations\" "
+            + "WHERE \"eventUuid\" = :eventUuid AND \"organizationUuid\" = :organizationUuid")
+        .bind("eventUuid", e.getUuid()).bind("organizationUuid", organizationUuid).execute();
+  }
+
+  @InTransaction
+  public int removePersonFromEvent(String personUuid, Event e) {
+    return getDbHandle()
+        .createUpdate("/* removePersonFromEvent*/ DELETE FROM \"eventPeople\" "
+            + "WHERE \"eventUuid\" = :eventUuid AND \"personUuid\" = :personUuid")
+        .bind("eventUuid", e.getUuid()).bind("personUuid", personUuid).execute();
+  }
+
   public CompletableFuture<List<Task>> getTasksForEvent(
       @GraphQLRootContext Map<String, Object> context, String eventUuid) {
     return new ForeignKeyFetcher<Task>().load(context, FkDataLoaderKey.EVENT_TASKS, eventUuid);
   }
+
+  public CompletableFuture<List<Organization>> getOrganizationsForEvent(
+      @GraphQLRootContext Map<String, Object> context, String eventUuid) {
+    return new ForeignKeyFetcher<Organization>().load(context, FkDataLoaderKey.EVENT_ORGANIZATIONS,
+        eventUuid);
+  }
+
+  public CompletableFuture<List<Person>> getPeopleForEvent(
+      @GraphQLRootContext Map<String, Object> context, String eventUuid) {
+    return new ForeignKeyFetcher<Person>().load(context, FkDataLoaderKey.EVENT_PEOPLE, eventUuid);
+  }
+
 
   @Override
   public AnetBeanList<Event> search(EventSearchQuery query) {

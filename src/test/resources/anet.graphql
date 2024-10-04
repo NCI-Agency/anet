@@ -398,7 +398,9 @@ type Event {
   location: Location
   name: String
   notes: [Note]
+  organizations: [Organization]
   outcomes: String
+  people: [Person]
   startDate: Instant
   status: Status
   tasks: [Task]
@@ -419,7 +421,9 @@ input EventInput {
   hostOrg: OrganizationInput
   location: LocationInput
   name: String
+  organizations: [OrganizationInput]
   outcomes: String
+  people: [PersonInput]
   startDate: Instant
   status: Status
   tasks: [TaskInput]

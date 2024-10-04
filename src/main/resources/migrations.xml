@@ -6009,4 +6009,40 @@
 								 referencedColumnNames="uuid" referencedTableName="events" />
 	</changeSet>
 
+	<changeSet id="add-event-organizations-table" author="fdelcastillo">
+		<createTable tableName="eventOrganizations" >
+			<column name="eventUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="organizationUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addUniqueConstraint tableName="eventOrganizations" columnNames="eventUuid, organizationUuid" constraintName="uniqueEventOrganization" />
+		<addForeignKeyConstraint baseColumnNames="organizationUuid" baseTableName="eventOrganizations"
+								 constraintName="fk_eventOrganizations_organization" onDelete="NO ACTION" onUpdate="NO ACTION"
+								 referencedColumnNames="uuid" referencedTableName="organizations" />
+		<addForeignKeyConstraint baseColumnNames="eventUuid" baseTableName="eventOrganizations"
+								 constraintName="fk_eventOrganizations_event" onDelete="NO ACTION" onUpdate="NO ACTION"
+								 referencedColumnNames="uuid" referencedTableName="events" />
+	</changeSet>
+
+	<changeSet id="add-event-people-table" author="fdelcastillo">
+		<createTable tableName="eventPeople" >
+			<column name="eventUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="personUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addUniqueConstraint tableName="eventPeople" columnNames="eventUuid, personUuid" constraintName="uniqueEventPerson" />
+		<addForeignKeyConstraint baseColumnNames="personUuid" baseTableName="eventPeople"
+								 constraintName="fk_eventPeople_person" onDelete="NO ACTION" onUpdate="NO ACTION"
+								 referencedColumnNames="uuid" referencedTableName="people" />
+		<addForeignKeyConstraint baseColumnNames="eventUuid" baseTableName="eventPeople"
+								 constraintName="fk_eventPeople_event" onDelete="NO ACTION" onUpdate="NO ACTION"
+								 referencedColumnNames="uuid" referencedTableName="events" />
+	</changeSet>
+
 </databaseChangeLog>

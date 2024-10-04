@@ -140,6 +140,16 @@ public final class BatchingUtils {
             (BatchLoader<String, List<Task>>) foreignKeys -> CompletableFuture
                 .supplyAsync(() -> engine.getEventDao().getTasks(foreignKeys), dispatcherService),
             dataLoaderOptions));
+    dataLoaderRegistry.register(FkDataLoaderKey.EVENT_ORGANIZATIONS.toString(),
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, List<Organization>>) foreignKeys -> CompletableFuture.supplyAsync(
+                () -> engine.getEventDao().getOrganizations(foreignKeys), dispatcherService),
+            dataLoaderOptions));
+    dataLoaderRegistry.register(FkDataLoaderKey.EVENT_PEOPLE.toString(),
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, List<Person>>) foreignKeys -> CompletableFuture
+                .supplyAsync(() -> engine.getEventDao().getPeople(foreignKeys), dispatcherService),
+            dataLoaderOptions));
     dataLoaderRegistry.register(IdDataLoaderKey.EVENT_SERIES.toString(),
         DataLoaderFactory.newDataLoader(
             (BatchLoader<String, EventSeries>) keys -> CompletableFuture

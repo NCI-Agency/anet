@@ -6,6 +6,7 @@ import { Event } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React from "react"
+import { ListGroup, ListGroupItem } from "react-bootstrap"
 import Settings from "settings"
 
 const EventPreview = ({ className, uuid }) => {
@@ -21,7 +22,6 @@ const EventPreview = ({ className, uuid }) => {
   }
 
   const event = new Event(data.event)
-
   const eventTitle = event.name || `#${event.uuid}`
   return (
     <div className={`report-preview preview-content-scroll ${className || ""}`}>
@@ -49,19 +49,16 @@ const EventPreview = ({ className, uuid }) => {
             Event.getEventDateFormat()
           )}
         />
-
         <PreviewField
           extraColForValue
           label={Settings.fields.event.hostOrg.label}
           value={<LinkTo modelType="Organization" model={event.hostOrg} />}
         />
-
         <PreviewField
           extraColForValue
           label={Settings.fields.event.adminOrg.label}
           value={<LinkTo modelType="Organization" model={event.adminOrg} />}
         />
-
         <DictionaryField
           wrappedComponent={PreviewField}
           dictProps={Settings.fields.event.location}
@@ -72,6 +69,51 @@ const EventPreview = ({ className, uuid }) => {
             )
           }
         />
+        {event?.organizations?.length > 0 && (
+          <DictionaryField
+            wrappedComponent={PreviewField}
+            dictProps={Settings.fields.event.organizations}
+            value={
+              <ListGroup>
+                {event.organizations.map(org => (
+                  <ListGroupItem key={org.uuid}>
+                    <LinkTo modelType="Organization" model={org} />
+                  </ListGroupItem>
+                ))}
+              </ListGroup>
+            }
+          />
+        )}
+        {event?.people?.length > 0 && (
+          <DictionaryField
+            wrappedComponent={PreviewField}
+            dictProps={Settings.fields.event.people}
+            value={
+              <ListGroup>
+                {event.people.map(person => (
+                  <ListGroupItem key={person.uuid}>
+                    <LinkTo modelType="Person" model={person} />
+                  </ListGroupItem>
+                ))}
+              </ListGroup>
+            }
+          />
+        )}
+        {event?.tasks?.length > 0 && (
+          <DictionaryField
+            wrappedComponent={PreviewField}
+            dictProps={Settings.fields.event.tasks}
+            value={
+              <ListGroup>
+                {event.tasks.map(task => (
+                  <ListGroupItem key={task.uuid}>
+                    <LinkTo modelType="Task" model={task} />
+                  </ListGroupItem>
+                ))}
+              </ListGroup>
+            }
+          />
+        )}
       </div>
     </div>
   )

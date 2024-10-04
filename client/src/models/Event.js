@@ -57,7 +57,9 @@ export default class Event extends Model {
       .default({}),
     eventSeries: yup.object().nullable().default({}),
     location: yup.object().nullable().default({}),
-    tasks: yup.array().nullable().default([])
+    tasks: yup.array().nullable().default([]),
+    organizations: yup.array().nullable().default([]),
+    people: yup.array().nullable().default([])
   })
 
   static autocompleteQuery = `
@@ -105,11 +107,20 @@ export default class Event extends Model {
           identificationCode
         }
         customFields
-  }
+    }
+    organizations {
+        uuid
+        shortName
+        longName
+    }
+    people {
+        uuid
+        name
+    }
    `
 
   static basicFieldsQuery =
-    "uuid type name description hostOrg adminOrg eventSeries location startDate endDate outcomes tasks"
+    "uuid type name description hostOrg adminOrg eventSeries location startDate endDate outcomes tasks organizations people"
 
   static getEventQueryNoIsSubscribed = gql`
     query ($uuid: String) {
@@ -166,6 +177,15 @@ export default class Event extends Model {
             identificationCode
           }
           customFields
+        }
+        organizations {
+          uuid
+          shortName
+          longName
+        }
+        people {
+          uuid
+          name
         }
       }
     }
@@ -228,6 +248,37 @@ export default class Event extends Model {
           }
           customFields
         }
+        organizations {
+          uuid
+          shortName
+          longName
+        }
+        people {
+          uuid
+          name
+          rank
+          avatarUuid
+          status
+          user
+          endOfTourDate
+          position {
+            uuid
+            name
+            type
+            code
+            status
+            organization {
+              uuid
+              shortName
+              longName
+              identificationCode
+            }
+            location {
+              uuid
+              name
+            }
+          }
+        }
       }
     }
   `
@@ -266,6 +317,38 @@ export default class Event extends Model {
             name
             lat
             lng
+          }
+          tasks {
+            uuid
+            shortName
+            longName
+            parentTask {
+              uuid
+              shortName
+            }
+            ascendantTasks {
+              uuid
+              shortName
+              parentTask {
+                uuid
+              }
+            }
+            taskedOrganizations {
+              uuid
+              shortName
+              longName
+              identificationCode
+            }
+            customFields
+          }
+          organizations {
+            uuid
+            shortName
+            longName
+          }
+          people {
+            uuid
+            name
           }
           updatedAt
         }

@@ -106,6 +106,25 @@ public class EventResource {
           oldTask -> dao.removeTaskFromEvent(DaoUtils.getUuid(oldTask), event));
     }
 
+    // Update Organizations:
+    if (event.getOrganizations() != null) {
+      final List<Organization> existingOrganizations =
+          dao.getOrganizationsForEvent(engine.getContext(), event.getUuid()).join();
+      Utils.addRemoveElementsByUuid(existingOrganizations, event.getOrganizations(),
+          newOrganization -> dao.addOrganizationToEvent(newOrganization, event),
+          oldOrganization -> dao.removeOrganizationFromEvent(DaoUtils.getUuid(oldOrganization),
+              event));
+    }
+
+    // Update People:
+    if (event.getPeople() != null) {
+      final List<Person> existingPeople =
+          dao.getPeopleForEvent(engine.getContext(), event.getUuid()).join();
+      Utils.addRemoveElementsByUuid(existingPeople, event.getPeople(),
+          newPerson -> dao.addPersonToEvent(newPerson, event),
+          oldPerson -> dao.removePersonFromEvent(DaoUtils.getUuid(oldPerson), event));
+    }
+
     return numRows;
   }
 

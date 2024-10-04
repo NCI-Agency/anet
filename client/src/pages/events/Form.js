@@ -4,7 +4,8 @@ import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSe
 import {
   EventSeriesOverlayRow,
   LocationOverlayRow,
-  OrganizationOverlayRow
+  OrganizationOverlayRow,
+  PersonSimpleOverlayRow
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
@@ -15,6 +16,8 @@ import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
 import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
+import NoPaginationOrganizationTable from "components/NoPaginationOrganizationTable"
+import NoPaginationPersonTable from "components/NoPaginationPersonTable"
 import NoPaginationTaskTable from "components/NoPaginationTaskTable"
 import {
   jumpToTop,
@@ -26,7 +29,14 @@ import RichTextEditor from "components/RichTextEditor"
 import { FastField, Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
-import { Event, EventSeries, Location, Organization, Task } from "models"
+import {
+  Event,
+  EventSeries,
+  Location,
+  Organization,
+  Person,
+  Task
+} from "models"
 import CreateNewLocation from "pages/locations/CreateNewLocation"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
@@ -36,6 +46,7 @@ import { connect } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import LOCATIONS_ICON from "resources/locations.png"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
+import PEOPLE_ICON from "resources/people.png"
 import TASKS_ICON from "resources/tasks.png"
 import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
@@ -185,6 +196,13 @@ const EventForm = ({
         const organizationFilters = {
           allOrganizations: {
             label: "All organizations",
+            queryVars: {}
+          }
+        }
+
+        const peopleFilters = {
+          allOrganizations: {
+            label: "All people",
             queryVars: {}
           }
         }
@@ -339,68 +357,6 @@ const EventForm = ({
                     />
                   }
                 />
-                {!_isEmpty(tasksFilters) && (
-                  <Fieldset
-                    title={Settings.fields.task.longLabel}
-                    className="tasks-selector"
-                  >
-                    <Field
-                      name="tasks"
-                      label={Settings.fields.task.longLabel}
-                      component={FieldHelper.SpecialField}
-                      onChange={value => {
-                        // validation will be done by setFieldValue
-                        setFieldTouched("tasks", true, false) // onBlur doesn't work when selecting an option
-                        setFieldValue("tasks", value, true)
-                      }}
-                      widget={
-                        <AdvancedMultiSelect
-                          fieldName="tasks"
-                          placeholder={`Search for ${tasksLabel}…`}
-                          value={values.tasks}
-                          renderSelected={
-                            <NoPaginationTaskTable
-                              id="tasks-tasks"
-                              tasks={values.tasks}
-                              showDelete
-                              showDescription
-                              noTasksMessage={`No ${tasksLabel} selected; click in the ${tasksLabel} box to view your organization's ${tasksLabel}`}
-                            />
-                          }
-                          overlayColumns={[Settings.fields.task.shortLabel]}
-                          overlayRenderRow={TaskOverlayRow}
-                          filterDefs={tasksFilters}
-                          objectType={Task}
-                          queryParams={{ status: Model.STATUS.ACTIVE }}
-                          fields={Task.autocompleteQuery}
-                          addon={TASKS_ICON}
-                        />
-                      }
-                      extraColElem={
-                        <>
-                          <FieldHelper.FieldShortcuts
-                            title={`Recent ${tasksLabel}`}
-                            shortcuts={recents.tasks.filter(
-                              rt =>
-                                !values.tasks?.find(
-                                  task => task.uuid === rt.uuid
-                                )
-                            )}
-                            fieldName="tasks"
-                            objectType={Task}
-                            curValue={values.tasks}
-                            onChange={value => {
-                              // validation will be done by setFieldValue
-                              setFieldTouched("tasks", true, false) // onBlur doesn't work when selecting an option
-                              setFieldValue("tasks", value, true)
-                            }}
-                            handleAddItem={FieldHelper.handleMultiSelectAddItem}
-                          />
-                        </>
-                      }
-                    />
-                  </Fieldset>
-                )}
                 <DictionaryField
                   wrappedComponent={FastField}
                   dictProps={Settings.fields.event.type}
@@ -489,6 +445,126 @@ const EventForm = ({
                     />
                   }
                 />
+                <Field
+                  name="organizations"
+                  label="Organizations attending"
+                  component={FieldHelper.SpecialField}
+                  onChange={value => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("organizations", true, false) // onBlur doesn't work when selecting an option
+                    setFieldValue("organizations", value, true)
+                  }}
+                  widget={
+                    <AdvancedMultiSelect
+                      fieldName="organizations"
+                      placeholder="Search for organizations…"
+                      value={values.organizations}
+                      renderSelected={
+                        <NoPaginationOrganizationTable
+                          id="events-organizations"
+                          organizations={values.organizations}
+                          showDelete
+                          noOrganizationsMessage="No Organizations currently assigned to this event. Click in the Organizations attending box to select organizations."
+                        />
+                      }
+                      overlayColumns={[Settings.fields.organization.shortLabel]}
+                      overlayRenderRow={OrganizationOverlayRow}
+                      filterDefs={organizationFilters}
+                      objectType={Organization}
+                      queryParams={{ status: Model.STATUS.ACTIVE }}
+                      fields={Organization.autocompleteQuery}
+                      addon={ORGANIZATIONS_ICON}
+                    />
+                  }
+                />
+                <Field
+                  name="people"
+                  label="People attending"
+                  component={FieldHelper.SpecialField}
+                  onChange={value => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("people", true, false) // onBlur doesn't work when selecting an option
+                    setFieldValue("people", value, true)
+                  }}
+                  widget={
+                    <AdvancedMultiSelect
+                      fieldName="people"
+                      placeholder="Search for people…"
+                      value={values.people}
+                      renderSelected={
+                        <NoPaginationPersonTable
+                          id="events-people"
+                          people={values.people}
+                          showDelete
+                          noPeopleMessage="No People currently assigned to this event. Click in the People attending box to select organizations."
+                        />
+                      }
+                      overlayColumns={[Settings.fields.person.shortLabel]}
+                      overlayRenderRow={PersonSimpleOverlayRow}
+                      filterDefs={peopleFilters}
+                      objectType={Person}
+                      queryParams={{ status: Model.STATUS.ACTIVE }}
+                      fields={Person.autocompleteQuery}
+                      addon={PEOPLE_ICON}
+                    />
+                  }
+                />
+                {!_isEmpty(tasksFilters) && (
+                  <Field
+                    name="tasks"
+                    label={Settings.fields.task.longLabel}
+                    component={FieldHelper.SpecialField}
+                    onChange={value => {
+                      // validation will be done by setFieldValue
+                      setFieldTouched("tasks", true, false) // onBlur doesn't work when selecting an option
+                      setFieldValue("tasks", value, true)
+                    }}
+                    widget={
+                      <AdvancedMultiSelect
+                        fieldName="tasks"
+                        placeholder={`Search for ${tasksLabel}…`}
+                        value={values.tasks}
+                        renderSelected={
+                          <NoPaginationTaskTable
+                            id="events-tasks"
+                            tasks={values.tasks}
+                            showDelete
+                            showOrganization
+                            showDescription
+                            noTasksMessage={`No ${tasksLabel} selected; click in the ${tasksLabel} box to view your organization's ${tasksLabel}`}
+                          />
+                        }
+                        overlayColumns={[Settings.fields.task.shortLabel]}
+                        overlayRenderRow={TaskOverlayRow}
+                        filterDefs={tasksFilters}
+                        objectType={Task}
+                        queryParams={{ status: Model.STATUS.ACTIVE }}
+                        fields={Task.autocompleteQuery}
+                        addon={TASKS_ICON}
+                      />
+                    }
+                    extraColElem={
+                      <>
+                        <FieldHelper.FieldShortcuts
+                          title={`Recent ${tasksLabel}`}
+                          shortcuts={recents.tasks.filter(
+                            rt =>
+                              !values.tasks?.find(task => task.uuid === rt.uuid)
+                          )}
+                          fieldName="tasks"
+                          objectType={Task}
+                          curValue={values.tasks}
+                          onChange={value => {
+                            // validation will be done by setFieldValue
+                            setFieldTouched("tasks", true, false) // onBlur doesn't work when selecting an option
+                            setFieldValue("tasks", value, true)
+                          }}
+                          handleAddItem={FieldHelper.handleMultiSelectAddItem}
+                        />
+                      </>
+                    }
+                  />
+                )}
                 <DictionaryField
                   wrappedComponent={FastField}
                   dictProps={Settings.fields.event.outcomes}
@@ -573,6 +649,10 @@ const EventForm = ({
     const event = Event.filterClientSideFields(new Event(values))
     // strip tasks fields not in data model
     event.tasks = values.tasks.map(t => utils.getReference(t))
+    // strip organization fields not in data model
+    event.organizations = values.organizations.map(t => utils.getReference(t))
+    // strip person fields not in data model
+    event.people = values.people.map(t => utils.getReference(t))
     event.hostOrg = utils.getReference(event.hostOrg)
     event.adminOrg = utils.getReference(event.adminOrg)
     event.location = utils.getReference(event.location)

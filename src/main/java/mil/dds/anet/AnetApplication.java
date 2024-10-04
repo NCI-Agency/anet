@@ -424,7 +424,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
         List.of(reportResource, personResource, positionResource, locationResource, orgResource,
             taskResource, adminResource, savedSearchResource, authorizationGroupResource,
             noteResource, approvalStepResource, subscriptionResource, subscriptionUpdateResource,
-            attachmentResource, emailResource),
+            attachmentResource, emailResource, eventSeriesResource, eventResource),
         metricRegistry);
 
     // Register all of the HTTP Resources

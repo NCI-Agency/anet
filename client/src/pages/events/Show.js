@@ -6,6 +6,8 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
+import NoPaginationOrganizationTable from "components/NoPaginationOrganizationTable"
+import NoPaginationPersonTable from "components/NoPaginationPersonTable"
 import NoPaginationTaskTable from "components/NoPaginationTaskTable"
 import {
   jumpToTop,
@@ -199,24 +201,52 @@ const EventShow = ({ pageDispatchers }) => {
                   }
                 />
               </Fieldset>
-              <Fieldset title={Settings.fields.task.longLabel}>
-                <NoPaginationTaskTable
-                  tasks={event.tasks}
-                  noTasksMessage={`No ${tasksLabel} selected`}
-                />
-              </Fieldset>
               <Fieldset
                 title={Settings.fields.event.description?.label}
                 id="report-text"
               >
                 <RichTextEditor readOnly value={event.description} />
               </Fieldset>
-              <Fieldset
-                title={Settings.fields.event.outcomes?.label}
-                id="report-text"
-              >
-                <RichTextEditor readOnly value={event.outcomes} />
-              </Fieldset>
+              {event.organizations.length > 0 && (
+                <Fieldset
+                  id="eventOrganizations"
+                  title="Organizations attending"
+                >
+                  <NoPaginationOrganizationTable
+                    id="events-organizations"
+                    organizations={values.organizations}
+                    noOrganizationsMessage="No Organizations currently assigned to this event. Click in the Organizations attending box to select organizations."
+                  />
+                </Fieldset>
+              )}
+              {event.people.length > 0 && (
+                <Fieldset id="eventPeople" title="People attending">
+                  <NoPaginationPersonTable
+                    id="events-people"
+                    people={values.people}
+                    noPeopleMessage="No People currently assigned to this event. Click in the People attending box to select organizations."
+                  />
+                </Fieldset>
+              )}
+              {event.tasks.length > 0 && (
+                <Fieldset title={Settings.fields.task.longLabel}>
+                  <NoPaginationTaskTable
+                    id="events-tasks"
+                    tasks={values.tasks}
+                    showOrganization
+                    showDescription
+                    noTasksMessage={`No ${tasksLabel} selected; click in the ${tasksLabel} box to view your organization's ${tasksLabel}`}
+                  />
+                </Fieldset>
+              )}
+              {event.outcomes && (
+                <Fieldset
+                  title={Settings.fields.event.outcomes?.label}
+                  id="report-text"
+                >
+                  <RichTextEditor readOnly value={event.outcomes} />
+                </Fieldset>
+              )}
               <Fieldset
                 id="reports"
                 title={`Reports for ${event.name}`}

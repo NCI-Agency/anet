@@ -374,6 +374,15 @@ fields:
     outcomes:
       label: Outcomes
       placeholder: The outcomes of the event
+    organizations:
+      label: Organizations attending
+      placeholder: Organizations attending the event
+    people:
+      label: People attending
+      placeholder: People attending the event
+    tasks:
+      label: Objectives
+      placeholder: Objectives of the event
 
   report:
     canUnpublishReports: true

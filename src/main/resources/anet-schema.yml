@@ -723,6 +723,12 @@ properties:
             "$ref": "#/$defs/inputField"
           location:
             "$ref": "#/$defs/inputField"
+          organizations:
+            "$ref": "#/$defs/inputField"
+          people:
+            "$ref": "#/$defs/inputField"
+          tasks:
+            "$ref": "#/$defs/inputField"
 
       report:
         type: object

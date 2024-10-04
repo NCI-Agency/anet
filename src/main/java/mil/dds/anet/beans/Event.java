@@ -31,6 +31,14 @@ public class Event extends EventSeries {
   // annotated below
   List<Task> tasks;
 
+  // Lazy Loaded
+  // annotated below
+  List<Organization> organizations;
+
+  // Lazy Loaded
+  // annotated below
+  List<Person> people;
+
   private ForeignObjectHolder<EventSeries> eventSeries = new ForeignObjectHolder<>();
   private ForeignObjectHolder<Location> location = new ForeignObjectHolder<>();
 
@@ -109,6 +117,32 @@ public class Event extends EventSeries {
         });
   }
 
+  @GraphQLQuery(name = "organizations")
+  public CompletableFuture<List<Organization>> loadOrganizations(
+      @GraphQLRootContext Map<String, Object> context) {
+    if (organizations != null) {
+      return CompletableFuture.completedFuture(organizations);
+    }
+    return AnetObjectEngine.getInstance().getEventDao().getOrganizationsForEvent(context, uuid)
+        .thenApply(o -> {
+          organizations = o;
+          return o;
+        });
+  }
+
+  @GraphQLQuery(name = "people")
+  public CompletableFuture<List<Person>> loadPeople(
+      @GraphQLRootContext Map<String, Object> context) {
+    if (people != null) {
+      return CompletableFuture.completedFuture(people);
+    }
+    return AnetObjectEngine.getInstance().getEventDao().getPeopleForEvent(context, uuid)
+        .thenApply(o -> {
+          people = o;
+          return o;
+        });
+  }
+
   @GraphQLInputField(name = "tasks")
   public void setTasks(List<Task> tasks) {
     this.tasks = tasks;
@@ -116,6 +150,24 @@ public class Event extends EventSeries {
 
   public List<Task> getTasks() {
     return tasks;
+  }
+
+  @GraphQLInputField(name = "organizations")
+  public void setOrganizations(List<Organization> organizations) {
+    this.organizations = organizations;
+  }
+
+  public List<Organization> getOrganizations() {
+    return organizations;
+  }
+
+  @GraphQLInputField(name = "people")
+  public void setPeople(List<Person> people) {
+    this.people = people;
+  }
+
+  public List<Person> getPeople() {
+    return people;
   }
 
   public String getType() {
@@ -161,13 +213,14 @@ public class Event extends EventSeries {
     Event event = (Event) o;
     return Objects.equals(type, event.type) && Objects.equals(startDate, event.startDate)
         && Objects.equals(endDate, event.endDate) && Objects.equals(outcomes, event.outcomes)
-        && Objects.equals(tasks, event.tasks) && Objects.equals(eventSeries, event.eventSeries)
+        && Objects.equals(tasks, event.tasks) && Objects.equals(organizations, event.organizations)
+        && Objects.equals(people, event.people) && Objects.equals(eventSeries, event.eventSeries)
         && Objects.equals(location, event.location);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), type, startDate, endDate, outcomes, tasks, eventSeries,
-        location);
+    return Objects.hash(super.hashCode(), type, startDate, endDate, outcomes, tasks, organizations,
+        people, eventSeries, location);
   }
 }

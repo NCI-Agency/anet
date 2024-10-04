@@ -1,4 +1,5 @@
 import API from "api"
+import { BreadcrumbTrail } from "components/BreadcrumbTrail"
 import LinkTo from "components/LinkTo"
 import { PageDispatchersPropType, useBoilerplate } from "components/Page"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
@@ -7,9 +8,13 @@ import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
 import { Event, Location } from "models"
 import moment from "moment"
+import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useEffect, useRef, useState } from "react"
 import { Badge, Col, Container, Row } from "react-bootstrap"
+import ORGANIZATIONS_ICON from "resources/organizations.png"
+import PEOPLE_ICON from "resources/people.png"
+import TASKS_ICON from "resources/tasks.png"
 import Settings from "settings"
 
 const DEFAULT_PAGESIZE = 10
@@ -174,6 +179,66 @@ const EventSummaryRow = ({ event }) => {
               <Badge bg="secondary">
                 {Location.humanNameOfType(event.location.type)}
               </Badge>
+            </span>
+          </Col>
+        </Row>
+      )}
+      {!_isEmpty(event.tasks) && (
+        <Row>
+          <Col md={12}>
+            <span>
+              <strong>{pluralize(Settings.fields.event.tasks)}:</strong>{" "}
+              {event.tasks.map((task, i) => (
+                <React.Fragment key={task.uuid}>
+                  {i > 0 && (
+                    <img src={TASKS_ICON} alt="★" className="ms-1 me-1" />
+                  )}
+                  <BreadcrumbTrail
+                    modelType="Task"
+                    leaf={task}
+                    ascendantObjects={task.ascendantTasks}
+                    parentField="parentTask"
+                  />
+                </React.Fragment>
+              ))}
+            </span>
+          </Col>
+        </Row>
+      )}
+      {!_isEmpty(event.organizations) && (
+        <Row>
+          <Col md={12}>
+            <span>
+              <strong>{pluralize(Settings.fields.event.organizations)}:</strong>{" "}
+              {event.organizations.map((organization, i) => (
+                <React.Fragment key={organization.uuid}>
+                  {i > 0 && (
+                    <img
+                      src={ORGANIZATIONS_ICON}
+                      alt="★"
+                      className="ms-1 me-1"
+                    />
+                  )}
+                  <LinkTo modelType="Organization" model={organization} />
+                </React.Fragment>
+              ))}
+            </span>
+          </Col>
+        </Row>
+      )}
+      {!_isEmpty(event.people) && (
+        <Row>
+          <Col md={12}>
+            <span>
+              <strong>{pluralize(Settings.fields.event.people)}:</strong>{" "}
+              {event.people.map((person, i) => (
+                <React.Fragment key={person.uuid}>
+                  {i > 0 && (
+                    <img src={PEOPLE_ICON} alt="★" className="ms-1 me-1" />
+                  )}
+                  <LinkTo modelType="Person" model={person} />
+                </React.Fragment>
+              ))}
             </span>
           </Col>
         </Row>
