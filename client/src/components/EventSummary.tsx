@@ -8,7 +8,6 @@ import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
 import { Event, Location } from "models"
 import moment from "moment"
-import pluralize from "pluralize"
 import React, { useEffect, useRef, useState } from "react"
 import { Badge, Col, Container, Row } from "react-bootstrap"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
@@ -190,7 +189,7 @@ const EventSummaryRow = ({ event }: EventSummaryRowProps) => {
         <Row>
           <Col md={12}>
             <span>
-              <strong>{pluralize(Settings.fields.event.tasks)}:</strong>{" "}
+              <strong>{Settings.fields.event.tasks.label}:</strong>{" "}
               {event.tasks.map((task, i) => (
                 <React.Fragment key={task.uuid}>
                   {i > 0 && (
@@ -212,7 +211,7 @@ const EventSummaryRow = ({ event }: EventSummaryRowProps) => {
         <Row>
           <Col md={12}>
             <span>
-              <strong>{pluralize(Settings.fields.event.organizations)}:</strong>{" "}
+              <strong>{Settings.fields.event.organizations.label}:</strong>{" "}
               {event.organizations.map((organization, i) => (
                 <React.Fragment key={organization.uuid}>
                   {i > 0 && (
@@ -233,7 +232,7 @@ const EventSummaryRow = ({ event }: EventSummaryRowProps) => {
         <Row>
           <Col md={12}>
             <span>
-              <strong>{pluralize(Settings.fields.event.people)}:</strong>{" "}
+              <strong>{Settings.fields.event.people.label}:</strong>{" "}
               {event.people.map((person, i) => (
                 <React.Fragment key={person.uuid}>
                   {i > 0 && (
