@@ -377,6 +377,13 @@ $defs:
                 - assessmentDate: "#/$defs/customField"
                 - expirationDate: "#/$defs/customField"
               required: [assessmentDate]
+      onDemandAssessmentExpirationDays:
+        oneOf:
+        - properties:
+            questions:
+              properties:
+                expirationDate: "#/$defs/customField"
+              required: [expirationDate]
 
 # definition for custom sensitive information
   customSensitiveInformation:

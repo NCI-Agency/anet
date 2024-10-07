@@ -4,6 +4,9 @@ import { SEARCH_OBJECT_LABELS, SEARCH_OBJECT_TYPES } from "actions"
 import AdvancedSelectFilter, {
   deserialize as deserializeAdvancedSelectFilter
 } from "components/advancedSearch/AdvancedSelectFilter"
+import AssessmentFilter, {
+  deserialize as deserializeAssessmentFilter
+} from "components/advancedSearch/AssessmentFilter"
 import CheckboxFilter, {
   deserialize as deserializeCheckboxFilter
 } from "components/advancedSearch/CheckboxFilter"
@@ -462,6 +465,14 @@ export const searchFilters = function(includeAdminFilters) {
           defaultOption: false,
           labels: ["Yes", "No"]
         }
+      },
+      Assessment: {
+        component: AssessmentFilter,
+        deserializer: deserializeAssessmentFilter,
+        props: {
+          queryKey: "assessment",
+          objectType: "regular.person"
+        }
       }
     }
   }
@@ -494,6 +505,14 @@ export const searchFilters = function(includeAdminFilters) {
           queryKey: "hasProfile",
           options: [true, false],
           labels: ["Yes", "No"]
+        }
+      },
+      Assessment: {
+        component: AssessmentFilter,
+        deserializer: deserializeAssessmentFilter,
+        props: {
+          queryKey: "assessment",
+          objectType: "organization"
         }
       }
     }
@@ -643,6 +662,14 @@ export const searchFilters = function(includeAdminFilters) {
         deserializer: deserializeDateRangeFilter,
         props: {
           queryKey: "plannedCompletion"
+        }
+      },
+      Assessment: {
+        component: AssessmentFilter,
+        deserializer: deserializeAssessmentFilter,
+        props: {
+          queryKey: "assessment",
+          objectType: "task"
         }
       }
     }

@@ -72,6 +72,10 @@ public abstract class AbstractOrganizationSearcher extends
       addLocationUuidQuery(query);
     }
 
+    if (query.getAssessment() != null && query.getAssessment().key() != null) {
+      addAssessmentQuery(query.getAssessment(), OrganizationDao.TABLE_NAME, "organization");
+    }
+
     if (query.getEmailNetwork() != null) {
       qb.addFromClause("JOIN \"emailAddresses\" \"orgEmail\""
           + " ON \"orgEmail\".\"relatedObjectType\" = '" + OrganizationDao.TABLE_NAME + "'"

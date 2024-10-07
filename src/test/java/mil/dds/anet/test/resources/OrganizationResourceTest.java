@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.fail;
 import com.google.common.collect.ImmutableList;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -14,6 +15,7 @@ import mil.dds.anet.test.client.AnetBeanList_Organization;
 import mil.dds.anet.test.client.ApprovalStep;
 import mil.dds.anet.test.client.ApprovalStepInput;
 import mil.dds.anet.test.client.ApprovalStepType;
+import mil.dds.anet.test.client.AssessmentSearchQueryInput;
 import mil.dds.anet.test.client.Organization;
 import mil.dds.anet.test.client.OrganizationInput;
 import mil.dds.anet.test.client.OrganizationSearchQueryInput;
@@ -405,6 +407,46 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(listAll).isNotNull();
     assertThat(listAll.getTotalCount()).isEqualTo(list1.getTotalCount());
     assertThat(listAll.getTotalCount()).isEqualTo(listAll.getList().size());
+  }
+
+  @Test
+  void searchAssessmentsTestForInteractionPlan() {
+    final String assessmentKey = "interactionPlan";
+    final String matchingShortName = "MOD-F";
+    searchForAssessments(assessmentKey, null, matchingShortName);
+    searchForAssessments(assessmentKey, Map.of("priority", List.of("t2")), matchingShortName);
+    searchForAssessments(assessmentKey, Map.of("priority", List.of("t1", "t2", "t3", "t4", "t5")),
+        matchingShortName);
+    searchForAssessments(assessmentKey, Map.of("priority", List.of("t4")), null);
+    searchForAssessments(assessmentKey,
+        Map.of("priority", List.of("t1"), "relation", List.of("maintain")), null);
+  }
+
+  @Test
+  void searchAssessmentsTestForOrganizationOndemand() {
+    final String assessmentKey = "organizationOndemand";
+    final String matchingShortName = "MOD-F";
+    searchForAssessments(assessmentKey, null, matchingShortName);
+    searchForAssessments(assessmentKey, Map.of("enumset", List.of("t2")), matchingShortName);
+    searchForAssessments(assessmentKey, Map.of("enumset", List.of("t1", "t2", "t3", "t4", "t5")),
+        matchingShortName);
+    searchForAssessments(assessmentKey, Map.of("enumset", List.of("t4")), null);
+  }
+
+  private void searchForAssessments(final String key, final Map<?, ?> filters,
+      final String matchingShortName) {
+    final AssessmentSearchQueryInput aq = AssessmentSearchQueryInput.builder().withKey(key)
+        .withFilters(filters == null ? null : new HashMap<>(filters)).build();
+    final OrganizationSearchQueryInput q =
+        OrganizationSearchQueryInput.builder().withAssessment(aq).build();
+    final AnetBeanList_Organization result =
+        withCredentials(jackUser, t -> queryExecutor.organizationList(getListFields(FIELDS), q));
+    if (matchingShortName == null) {
+      assertThat(result.getList()).isEmpty();
+    } else {
+      assertThat(result.getList()).isNotEmpty()
+          .anyMatch(o -> matchingShortName.equals(o.getShortName()));
+    }
   }
 
   @Test

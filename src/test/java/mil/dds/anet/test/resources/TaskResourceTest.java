@@ -4,12 +4,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.client.AnetBeanList_Organization;
 import mil.dds.anet.test.client.AnetBeanList_Task;
+import mil.dds.anet.test.client.AssessmentSearchQueryInput;
 import mil.dds.anet.test.client.Organization;
 import mil.dds.anet.test.client.OrganizationSearchQueryInput;
 import mil.dds.anet.test.client.Person;
@@ -221,6 +224,32 @@ class TaskResourceTest extends AbstractResourceTest {
     final var searchResults = searchObjects.getList();
     assertThat(searchResults).isNotEmpty()
         .allSatisfy(result -> assertThat(result.getTaskedOrganizations()).isNullOrEmpty());
+  }
+
+  @Test
+  void searchAssessmentsTestForTaskMonthly() {
+    final String assessmentKey = "taskMonthly";
+    final String matchingShortName = "1.1.A";
+    searchForAssessments(assessmentKey, null, matchingShortName);
+    searchForAssessments(assessmentKey, Map.of("status", List.of("GREEN")), matchingShortName);
+    searchForAssessments(assessmentKey, Map.of("status", List.of("GREEN", "AMBER", "RED")),
+        matchingShortName);
+    searchForAssessments(assessmentKey, Map.of("status", List.of("RED")), null);
+  }
+
+  private void searchForAssessments(final String key, final Map<?, ?> filters,
+      final String matchingShortName) {
+    final AssessmentSearchQueryInput aq = AssessmentSearchQueryInput.builder().withKey(key)
+        .withFilters(filters == null ? null : new HashMap<>(filters)).build();
+    final TaskSearchQueryInput q = TaskSearchQueryInput.builder().withAssessment(aq).build();
+    final AnetBeanList_Task result =
+        withCredentials(jackUser, t -> queryExecutor.taskList(getListFields(FIELDS), q));
+    if (matchingShortName == null) {
+      assertThat(result.getList()).isEmpty();
+    } else {
+      assertThat(result.getList()).isNotEmpty()
+          .anyMatch(o -> matchingShortName.equals(o.getShortName()));
+    }
   }
 
   @Test

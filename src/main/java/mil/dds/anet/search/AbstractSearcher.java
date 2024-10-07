@@ -9,8 +9,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.Note.NoteType;
 import mil.dds.anet.beans.search.AbstractSearchQuery;
+import mil.dds.anet.beans.search.AssessmentSearchQuery;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
+import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.utils.DaoUtils;
 import org.jdbi.v3.core.Handle;
 
@@ -102,6 +106,101 @@ public abstract class AbstractSearcher<B, T extends AbstractSearchQuery<?>> {
       clauses.add(String.format("\"%1$s\" %2$s", column, sortOrder));
     }
     return clauses;
+  }
+
+  protected void addAssessmentQuery(AssessmentSearchQuery query, String tableName,
+      String fieldsType) {
+    final var assessmentKey =
+        String.format("fields.%1$s.assessments.%2$s", fieldsType, query.key());
+    final var configuration = AnetObjectEngine.getConfiguration();
+    final var isOndemand = "ondemand"
+        .equals(configuration.getDictionaryEntry(String.format("%s.recurrence", assessmentKey)));
+    qb.addWithClause(
+        String.format("assessments AS (%s)", getWithAssessmentsClause(tableName, isOndemand)));
+    qb.addFromClause(String
+        .format("JOIN assessments ON \"%s\".uuid = assessments.\"relatedObjectUuid\"", tableName));
+    qb.addSqlArg("noteTypeAssessment", DaoUtils.getEnumId(NoteType.ASSESSMENT));
+    qb.addSqlArg("assessmentKey", assessmentKey);
+    if (isOndemand) {
+      final var expirationClause =
+          getOndemandAssessmentExpirationClause(configuration, assessmentKey);
+      if (!expirationClause.isEmpty()) {
+        qb.addWhereClause(expirationClause);
+      }
+    }
+    final var filters = query.filters();
+    if (filters != null && !filters.isEmpty()) {
+      filters.forEach((k, v) -> {
+        final var keyParam = String.format("%1$s.questions.%2$s", assessmentKey, k);
+        final var valueParam = String.format("%s.value", keyParam);
+        final var filterType = configuration.getDictionaryEntry(String.format("%s.type", keyParam));
+        if ("enum".equals(filterType)) {
+          qb.addWhereClause(
+              String.format("assessments.text::jsonb->>:%1$s IN (<%2$s>)", keyParam, valueParam));
+        } else if ("enumset".equals(filterType)) {
+          qb.addWhereClause(String.format("assessments.text::jsonb->:%1$s ??| array[<%2$s>]",
+              keyParam, valueParam));
+        } else {
+          // Can't handle this filter type, just skip
+          return;
+        }
+        qb.addSqlArg(keyParam, k);
+        qb.addListArg(valueParam, (List<?>) v);
+      });
+    }
+  }
+
+  private String getWithAssessmentsClause(String tableName, boolean isOndemand) {
+    final var withAssessments =
+        new StringBuilder(String.format("SELECT asmnt_nro.\"relatedObjectUuid\", asmnt.text"
+            + " FROM \"noteRelatedObjects\" asmnt_nro"
+            + " JOIN notes asmnt ON asmnt.uuid = asmnt_nro.\"noteUuid\""
+            + " WHERE asmnt_nro.\"relatedObjectType\" = '%s'"
+            + " AND asmnt.type = :noteTypeAssessment"
+            + " AND asmnt.\"assessmentKey\" = :assessmentKey", tableName));
+    if (isOndemand) {
+      // If it is an ondemand assessment, it will have an assessmentDate,
+      // only the most recent one will be valid.
+      withAssessments.append(" ORDER BY (asmnt.text::jsonb->>'assessmentDate')::date DESC LIMIT 1");
+    }
+    return withAssessments.toString();
+  }
+
+  private String getOndemandAssessmentExpirationClause(AnetConfiguration configuration,
+      String assessmentKey) {
+    final var leftClauses = new ArrayList<>();
+    final var rightClauses = new ArrayList<>();
+
+    // If it is an ondemand assessment, it may be expired, which can happen because:
+    // - the assessment has an expirationDate that has passed
+    // - the assessment does not have an expirationDate, but it does have
+    // onDemandAssessmentExpirationDays that have passed
+    final var hasExpirationDate = configuration
+        .getDictionaryEntry(String.format("%s.questions.expirationDate", assessmentKey)) != null;
+    if (hasExpirationDate) {
+      leftClauses.add("assessments.text::jsonb->>'expirationDate' IS NULL");
+      rightClauses.add("(assessments.text::jsonb->>'expirationDate')::date > CURRENT_DATE");
+    }
+
+    final Integer expirationDays = (Integer) configuration
+        .getDictionaryEntry(String.format("%s.onDemandAssessmentExpirationDays", assessmentKey));
+    if (expirationDays != null) {
+      leftClauses.add(String.format(
+          "(assessments.text::jsonb->>'assessmentDate')::date + INTERVAL '%d days' > CURRENT_DATE",
+          expirationDays));
+    }
+
+    final var expirationClause = new StringBuilder();
+    if (!leftClauses.isEmpty()) {
+      expirationClause.append(String.format("(%s)", Joiner.on(" AND ").join(leftClauses)));
+    }
+    if (!rightClauses.isEmpty()) {
+      if (!expirationClause.isEmpty()) {
+        expirationClause.append(" OR ");
+      }
+      expirationClause.append(String.format("(%s)", Joiner.on(" AND ").join(rightClauses)));
+    }
+    return expirationClause.isEmpty() ? "" : String.format("(%s)", expirationClause);
   }
 
 }

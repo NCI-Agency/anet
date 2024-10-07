@@ -4,6 +4,7 @@ import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
@@ -51,6 +52,9 @@ public class TaskSearchQuery extends SubscribableObjectSearchQuery<TaskSearchSor
   @GraphQLQuery
   @GraphQLInputField
   private String responsiblePositionUuid;
+  @GraphQLQuery
+  @GraphQLInputField
+  private AssessmentSearchQuery assessment;
 
   public TaskSearchQuery() {
     super(TaskSearchSortBy.NAME);
@@ -152,12 +156,20 @@ public class TaskSearchQuery extends SubscribableObjectSearchQuery<TaskSearchSor
     this.responsiblePositionUuid = responsiblePositionUuid;
   }
 
+  public AssessmentSearchQuery getAssessment() {
+    return assessment;
+  }
+
+  public void setAssessment(AssessmentSearchQuery assessment) {
+    this.assessment = assessment;
+  }
+
   @Override
   public int hashCode() {
     return Objects.hash(super.hashCode(), isAssigned, taskedOrgUuid, orgRecurseStrategy, category,
         plannedCompletionEnd, plannedCompletionStart, projectedCompletionEnd,
         projectedCompletionStart, parentTaskUuid, parentTaskRecurseStrategy,
-        responsiblePositionUuid);
+        responsiblePositionUuid, assessment);
   }
 
   @Override
@@ -176,7 +188,8 @@ public class TaskSearchQuery extends SubscribableObjectSearchQuery<TaskSearchSor
         && Objects.equals(getProjectedCompletionStart(), other.getProjectedCompletionStart())
         && Objects.equals(getParentTaskUuid(), other.getParentTaskUuid())
         && Objects.equals(getParentTaskRecurseStrategy(), other.getParentTaskRecurseStrategy())
-        && Objects.equals(getResponsiblePositionUuid(), other.getResponsiblePositionUuid());
+        && Objects.equals(getResponsiblePositionUuid(), other.getResponsiblePositionUuid())
+        && Objects.equals(getAssessment(), other.getAssessment());
   }
 
   @Override
@@ -187,6 +200,10 @@ public class TaskSearchQuery extends SubscribableObjectSearchQuery<TaskSearchSor
     }
     if (taskedOrgUuid != null) {
       clone.setTaskedOrgUuid(new ArrayList<>(taskedOrgUuid));
+    }
+    if (assessment != null) {
+      clone.setAssessment(
+          new AssessmentSearchQuery(assessment.key(), new HashMap<>(assessment.filters())));
     }
     return clone;
   }

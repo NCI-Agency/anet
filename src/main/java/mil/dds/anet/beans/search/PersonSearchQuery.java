@@ -4,6 +4,7 @@ import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import mil.dds.anet.beans.Position.PositionType;
 
@@ -27,6 +28,9 @@ public class PersonSearchQuery extends SubscribableObjectSearchQuery<PersonSearc
   @GraphQLQuery
   @GraphQLInputField
   Instant endOfTourDateEnd;
+  @GraphQLQuery
+  @GraphQLInputField
+  private AssessmentSearchQuery assessment;
 
   // Filter to people in positions at a certain location
   @GraphQLQuery
@@ -158,6 +162,14 @@ public class PersonSearchQuery extends SubscribableObjectSearchQuery<PersonSearc
     this.positionType = positionType;
   }
 
+  public AssessmentSearchQuery getAssessment() {
+    return assessment;
+  }
+
+  public void setAssessment(AssessmentSearchQuery assessment) {
+    this.assessment = assessment;
+  }
+
   @Override
   public PersonSearchQuery clone() throws CloneNotSupportedException {
     final PersonSearchQuery clone = (PersonSearchQuery) super.clone();
@@ -166,6 +178,10 @@ public class PersonSearchQuery extends SubscribableObjectSearchQuery<PersonSearc
     }
     if (locationUuid != null) {
       clone.setLocationUuid(new ArrayList<>(locationUuid));
+    }
+    if (assessment != null) {
+      clone.setAssessment(
+          new AssessmentSearchQuery(assessment.key(), new HashMap<>(assessment.filters())));
     }
     return clone;
   }

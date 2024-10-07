@@ -97,6 +97,10 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
 
     qb.addInClause("types", "positions.type", query.getPositionType());
 
+    if (query.getAssessment() != null && query.getAssessment().key() != null) {
+      addAssessmentQuery(query.getAssessment(), PersonDao.TABLE_NAME, "regular.person");
+    }
+
     if (Boolean.TRUE.equals(query.isInMyReports())) {
       qb.addSelectClause("\"inMyReports\".max AS \"inMyReports_max\"");
       qb.addFromClause("JOIN ("

@@ -690,7 +690,7 @@ fields:
       label: Authorization groups
     assessments:
       organizationAnnually:
-        label: Interaction Plan
+        label: Annual organization assessment
         recurrence: annually
         questions:
           question1:
@@ -746,19 +746,105 @@ fields:
             widget: richTextEditor
             style:
               height: 15px
-      organizationOndemand:
-        label: Ondemand assessment of organization
+      interactionPlan:
+        label: Interaction Plans
         recurrence: ondemand
         questions:
           assessmentDate:
             type: date
             label: Assessment date
+          priority:
+            type: enum
+            label: Priority
+            choices:
+              t1:
+                label: T1 # Critical relationship
+                color: '#f50525' # Red
+              t2:
+                label: T2 # Vital relation
+                color: '#f59d05' # Orange
+              t3:
+                label: T3  # Highly Desirable
+                color: '#f5e505' # Yellow
+              t4:
+                label: T4 #  Desirable relation
+                color: '#ffffff' # White
+              t5:
+                label: T5 # Dormant
+                color: '#aaaaaa' # Grey
+          relation:
+            type: enum
+            label: Relation
+            choices:
+              dormant:
+                label: Dormant   # Relationship is currently not active
+                color: '#999999' # Gray
+              initiate:
+                label: Initiate  # No relationship, need to find contact and build relationship
+                color: '#f50525' # Red
+              develop:
+                label: Develop   # No substantive Relationship, Effort required
+                color: '#f59d05' # Orange
+              improve:
+                label: Improve   # Good Relationship, additional opportunities to further liaison
+                color: '#f5e505' # Yellow
+              maintain:
+                label: Maintain  # Relationship is strong and stable
+                color: '#07b50a' # Green
+          plan:
+            type: special_field
+            label: Plan
+            widget: richTextEditor
+            style:
+              height: 15px
+          interaction:
+            type: special_field
+            label: Interaction
+            widget: richTextEditor
+            style:
+              height: 15px
+          exercises:
+            type: special_field
+            label: Exercises
+            widget: richTextEditor
+            style:
+              height: 15px
+      organizationOndemand:
+        label: Ondemand assessment of organization
+        recurrence: ondemand
+        onDemandAssessmentExpirationDays: 180
+        questions:
+          assessmentDate:
+            type: date
+            label: Assessment date
+          expirationDate:
+            type: date
+            label: Expiration date
           question1:
             type: special_field
             label: General remarks
             widget: richTextEditor
             style:
               height: 70px
+          enumset:
+            type: enumset
+            label: Enumset
+            choices:
+              t1:
+                label: T1
+                color: '#f50525'
+              t2:
+                label: T2
+                color: '#f59d05'
+              t3:
+                label: T3
+                color: '#f5e505'
+              t4:
+                label: T4
+                color: '#ffffff'
+              t5:
+                label: T5
+                color: '#aaaaaa'
 
   advisor:
     person:

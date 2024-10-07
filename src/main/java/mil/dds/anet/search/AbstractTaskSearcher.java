@@ -81,6 +81,10 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
       addResponsiblePositionUuidQuery(query);
     }
 
+    if (query.getAssessment() != null && query.getAssessment().key() != null) {
+      addAssessmentQuery(query.getAssessment(), TaskDao.TABLE_NAME, "task");
+    }
+
     if (Boolean.TRUE.equals(query.isInMyReports())) {
       qb.addSelectClause("\"inMyReports\".max AS \"inMyReports_max\"");
       qb.addFromClause("JOIN ("

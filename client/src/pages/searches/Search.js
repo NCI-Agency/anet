@@ -1413,30 +1413,32 @@ const Search = ({
                 </Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>
-            <span className="ms-2">
-              <Button
-                onClick={openSaveModal}
-                id="saveSearchButton"
-                variant="outline-secondary"
-              >
-                Save search
-              </Button>
-            </span>
-            <div className="ms-2">
-              Results per page:
-              <FormSelect
-                defaultValue={pageSize}
-                onChange={e =>
-                  setPageSize(parseInt(e.target.value, 10) || DEFAULT_PAGESIZE)}
-              >
-                {PAGESIZES.map(size => (
-                  <option key={size} value={size}>
-                    {size}
-                  </option>
-                ))}
-              </FormSelect>
-            </div>
           </>
+        )}
+        <span className="ms-2">
+          <Button
+            onClick={openSaveModal}
+            id="saveSearchButton"
+            variant="outline-secondary"
+          >
+            Save search
+          </Button>
+        </span>
+        {numResults > 0 && (
+          <div className="ms-2">
+            Results per page:
+            <FormSelect
+              defaultValue={pageSize}
+              onChange={e =>
+                setPageSize(parseInt(e.target.value, 10) || DEFAULT_PAGESIZE)}
+            >
+              {PAGESIZES.map(size => (
+                <option key={size} value={size}>
+                  {size}
+                </option>
+              ))}
+            </FormSelect>
+          </div>
         )}
       </div>
       <Messages error={error} /> {/* success is shown through toast */}
