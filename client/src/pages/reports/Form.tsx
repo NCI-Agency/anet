@@ -1,4 +1,6 @@
 import { gql } from "@apollo/client"
+import { Icon, IconSize, Intent } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import API from "api"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import {
@@ -186,6 +188,14 @@ const GQL_UPDATE_REPORT_ASSESSMENTS = gql`
     updateReportAssessments(reportUuid: $uuid, assessments: $notes)
   }
 `
+
+const GQL_GET_EVENT_COUNT = gql`
+  query ($eventQuery: EventSearchQueryInput) {
+    eventList(query: $eventQuery) {
+      totalCount
+    }
+  }
+`
 const AUTOSAVE_TIMEOUT = process.env.ANET_TEST_MODE === "true" ? 300 : 30
 
 interface ReportFormProps {
@@ -223,6 +233,14 @@ const ReportForm = ({
   // If this report is linked to an Event restrict the dates that can be selected for engagementDate
   const [minDate, setMinDate] = useState(initialValues.event?.startDate)
   const [maxDate, setMaxDate] = useState(initialValues.event?.endDate)
+  // To check if there is a visit ban in the location
+  const [locationUuid, setLocationUuid] = useState(
+    initialValues?.location?.uuid
+  )
+  const [engagementDate, setEngagementDate] = useState(
+    initialValues?.engagementDate
+  )
+  const [visitBan, setVisitBan] = useState(false)
   // some autosave settings
   const defaultTimeout = moment.duration(AUTOSAVE_TIMEOUT, "seconds")
   const autoSaveSettings = useRef({
@@ -240,6 +258,37 @@ const ReportForm = ({
       autoSaveActive.current = false
     }
   })
+
+  useEffect(() => {
+    async function checkPotentiallyUnavailableLocation(
+      engagementDate,
+      locationUuid
+    ) {
+      // When engagement date or location uuid changes we need to call the back-end to figure out if there is a VISIT BAN event
+      // that applies to the location in the engagement date. If so we need to warn the user.
+      if (engagementDate && locationUuid) {
+        const eventQuery = {
+          pageSize: 1,
+          type: Event.EVENT_TYPES.VISIT_BAN,
+          locationUuid,
+          includeDate: engagementDate
+        }
+        try {
+          const response = await API.query(GQL_GET_EVENT_COUNT, {
+            eventQuery
+          })
+          setVisitBan(response?.eventList.totalCount > 0)
+        } catch (error) {
+          setSaveError(error)
+          setVisitBan(false)
+          jumpToTop()
+        }
+      } else {
+        setVisitBan(false)
+      }
+    }
+    checkPotentiallyUnavailableLocation(engagementDate, locationUuid)
+  }, [engagementDate, locationUuid])
 
   const recentTasksVarCommon = {
     pageSize: 6,
@@ -552,6 +601,7 @@ const ReportForm = ({
                   onChange={value => {
                     setFieldTouched("engagementDate", true, false) // onBlur doesn't work when selecting a date
                     setFieldValue("engagementDate", value, true)
+                    setEngagementDate(value)
                   }}
                   onBlur={() => setFieldTouched("engagementDate")}
                   widget={
@@ -632,6 +682,7 @@ const ReportForm = ({
                     // validation will be done by setFieldValue
                     setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
                     setFieldValue("location", value, true)
+                    setLocationUuid(value.uuid)
                   }}
                   disabled={values.event?.uuid != null}
                   widget={
@@ -663,6 +714,18 @@ const ReportForm = ({
                   }
                   extraColElem={
                     <>
+                      {visitBan ? (
+                        <Button variant="outline-secondary">
+                          <Icon
+                            icon={IconNames.WARNING_SIGN}
+                            intent={Intent.WARNING}
+                            size={IconSize.STANDARD}
+                            style={{ margin: "0 6px" }}
+                          />
+                          This location might not be available at the engagement
+                          date due to a visit ban!
+                        </Button>
+                      ) : undefined}
                       <FieldHelper.FieldShortcuts
                         title="Recent Locations"
                         shortcuts={recents.locations.filter(
