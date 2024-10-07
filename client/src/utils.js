@@ -4,6 +4,7 @@ import * as changeCase from "change-case"
 import * as d3 from "d3"
 import parseAddressList from "email-addresses"
 import _isEmpty from "lodash/isEmpty"
+import moment from "moment/moment"
 import pluralize from "pluralize"
 import React, { useCallback, useEffect } from "react"
 import absentIcon from "resources/icons/absent.svg"
@@ -383,6 +384,16 @@ export default {
       }
     }
     return defaultValue
+  },
+
+  findPositionAtDate: function(person, date) {
+    if (!date) {
+      return person.position
+    }
+    const when = moment(date).valueOf()
+    return (person.previousPositions ?? []).find(p => {
+      return p.startTime <= when && (!p.endTime || p.endTime > when)
+    })?.position
   },
 
   getButtonsFromChoices: function(choices) {

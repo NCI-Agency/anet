@@ -6,14 +6,14 @@ import AppContext from "components/AppContext"
 import LinkTo from "components/LinkTo"
 import PlanningConflictForPerson from "components/PlanningConflictForPerson"
 import RemoveButton from "components/RemoveButton"
-import { Person } from "models"
-import Report from "models/Report"
+import { Person, Report } from "models"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useContext } from "react"
 import { Badge, Form, OverlayTrigger, Table, Tooltip } from "react-bootstrap"
 import { toast } from "react-toastify"
 import Settings from "settings"
+import utils from "utils"
 import "./ReportPeople.css"
 
 const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
@@ -78,6 +78,7 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
 
   function renderAttendeeRow(person) {
     const isCurrentEditor = Person.isEqual(person, currentUser)
+    const position = utils.findPositionAtDate(person, report.engagementDate)
     return (
       <tr key={person.uuid}>
         <td className="primary-attendee">
@@ -89,7 +90,7 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
               disabled={disabled}
             />
           )}
-          {/* // authors 0r non-attendees can't be interlocutors */}
+          {/* // authors or non-attendees can't be interlocutors */}
           {!person.author && person.attendee && (
             <ReportInterlocutorCheckbox
               person={person}
@@ -127,24 +128,20 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
           <LinkTo modelType="Person" model={person} showIcon={false} />
         </td>
         <td>
-          {person.position && person.position.uuid && (
-            <LinkTo modelType="Position" model={person.position} />
-          )}
-          {person.position && person.position.code
-            ? `, ${person.position.code}`
-            : ""}
+          {position?.uuid && <LinkTo modelType="Position" model={position} />}
+          {position?.code ? `, ${position.code}` : ""}
         </td>
         <td>
           <LinkTo
             modelType="Location"
-            model={person.position && person.position.location}
+            model={position?.location}
             whenUnspecified=""
           />
         </td>
         <td>
           <LinkTo
             modelType="Organization"
-            model={person.position && person.position.organization}
+            model={position?.organization}
             whenUnspecified=""
           />
         </td>
