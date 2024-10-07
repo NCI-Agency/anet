@@ -33,7 +33,7 @@ public abstract class AbstractEventSearcher extends AbstractSearcher<Event, Even
   protected void buildQuery(EventSearchQuery query) {
     qb.addSelectClause(EventDao.EVENT_FIELDS);
     qb.addFromClause("\"events\"");
-    qb.addEnumEqualsClause("status", "\"eventSeries\".status", query.getStatus());
+    qb.addEnumEqualsClause("status", "events.status", query.getStatus());
 
     if (hasTextQuery(query)) {
       addTextQuery(query);
