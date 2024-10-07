@@ -1,5 +1,7 @@
 package mil.dds.anet.search;
 
+import static mil.dds.anet.search.AbstractSearchQueryBuilder.Comparison;
+
 import mil.dds.anet.beans.Event;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Organization;
@@ -9,7 +11,6 @@ import mil.dds.anet.beans.search.ISearchQuery;
 import mil.dds.anet.database.DatabaseHandler;
 import mil.dds.anet.database.EventDao;
 import mil.dds.anet.database.mappers.EventMapper;
-import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,14 +60,11 @@ public abstract class AbstractEventSearcher extends AbstractSearcher<Event, Even
       qb.addWhereClause("events.type = :type");
       qb.addSqlArg("type", query.getType());
     }
-    if (query.getStartDate() != null) {
-      qb.addWhereClause("events.\"endDate\" >= :startDate");
-      DaoUtils.addInstantAsLocalDateTime(qb.sqlArgs, "startDate", query.getStartDate());
-    }
-    if (query.getEndDate() != null) {
-      qb.addWhereClause("events.\"startDate\" <= :endDate");
-      DaoUtils.addInstantAsLocalDateTime(qb.sqlArgs, "endDate", query.getEndDate());
-    }
+    qb.addDateRangeClause("includeDateStart", "events.\"endDate\"", Comparison.AFTER,
+        query.getIncludeDate(), "includeDateEnd", "events.\"startDate\"", Comparison.BEFORE,
+        query.getIncludeDate());
+    qb.addDateRangeClause("startDate", "events.\"endDate\"", Comparison.AFTER, query.getStartDate(),
+        "endDate", "events.\"startDate\"", Comparison.BEFORE, query.getEndDate());
     addOrderByClauses(qb, query);
   }
 
