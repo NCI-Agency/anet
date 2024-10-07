@@ -1252,4 +1252,8 @@ div[id*='fg-entityAssessment'] {
     padding-top: 15px;
     box-shadow: 0 1px 3px hsla(0, 0%, 0%, 0.15);
   }
+
+  table.event-matrix > :not(caption) > * > * {
+    padding: 0.5rem 0.0rem;
+  }
 }

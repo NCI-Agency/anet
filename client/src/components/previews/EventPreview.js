@@ -37,17 +37,13 @@ const EventPreview = ({ className, uuid }) => {
           wrappedComponent={PreviewField}
           dictProps={Settings.fields.event.startDate}
           extraColForValue
-          value={moment(event.engagementDate).format(
-            Event.getEventDateFormat()
-          )}
+          value={moment(event.startDate).format(Event.getEventDateFormat())}
         />
         <DictionaryField
           wrappedComponent={PreviewField}
           dictProps={Settings.fields.event.endDate}
           extraColForValue
-          value={moment(event.engagementDate).format(
-            Event.getEventDateFormat()
-          )}
+          value={moment(event.endDate).format(Event.getEventDateFormat())}
         />
         <PreviewField
           extraColForValue

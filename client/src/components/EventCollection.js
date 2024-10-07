@@ -2,6 +2,7 @@ import { setPagination } from "actions"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
 import EventCalendar from "components/EventCalendar"
 import EventMap from "components/EventMap"
+import EventMatrix from "components/EventMatrix"
 import EventSummary from "components/EventSummary"
 import EventTable from "components/EventTable"
 import {
@@ -17,6 +18,7 @@ export const FORMAT_CALENDAR = "calendar"
 export const FORMAT_MAP = "map"
 export const FORMAT_SUMMARY = "summary"
 export const FORMAT_TABLE = "table"
+export const FORMAT_MATRIX = "matrix"
 
 const EventCollection = ({
   pageDispatchers,
@@ -65,6 +67,11 @@ const EventCollection = ({
                       Map
                     </Button>
                   )}
+                  {viewFormats.includes(FORMAT_MATRIX) && (
+                    <Button value={FORMAT_MATRIX} variant="outline-secondary">
+                      Matrix
+                    </Button>
+                  )}
                 </ButtonToggleGroup>
               </>
             )}
@@ -110,6 +117,16 @@ const EventCollection = ({
               marginBottom={marginBottom}
             />
           )}
+          {viewFormat === FORMAT_MATRIX && (
+            <EventMatrix
+              pageDispatchers={pageDispatchers}
+              paginationKey={paginationKey}
+              pagination={pagination}
+              setPagination={setPagination}
+              queryParams={queryParams}
+              setTotalCount={setTotalCount}
+            />
+          )}
         </div>
       </div>
     </div>
@@ -131,7 +148,13 @@ EventCollection.propTypes = {
 }
 
 EventCollection.defaultProps = {
-  viewFormats: [FORMAT_TABLE, FORMAT_SUMMARY, FORMAT_CALENDAR, FORMAT_MAP]
+  viewFormats: [
+    FORMAT_TABLE,
+    FORMAT_SUMMARY,
+    FORMAT_CALENDAR,
+    FORMAT_MAP,
+    FORMAT_MATRIX
+  ]
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => {

@@ -31,6 +31,10 @@ public abstract class AbstractEventSearcher extends AbstractSearcher<Event, Even
     qb.addFromClause("\"events\"");
     qb.addWhereClause("TRUE");
 
+    if (query.isOnlyWithTasks()) {
+      qb.addFromClause("INNER JOIN \"eventTasks\" et ON et.\"eventUuid\" = events.uuid");
+    }
+
     if (!Utils.isEmptyOrNull(query.getAdminOrgUuid())) {
       addAdminOrgQuery(qb, query);
     }
@@ -53,11 +57,11 @@ public abstract class AbstractEventSearcher extends AbstractSearcher<Event, Even
       DaoUtils.addInstantAsLocalDateTime(qb.sqlArgs, "date", query.getIncludeDate());
     }
     if (query.getStartDate() != null) {
-      qb.addWhereClause("events.\"startDate\" >= :startDate");
+      qb.addWhereClause("(events.\"startDate\" >= :startDate OR events.\"endDate\" >= :startDate)");
       DaoUtils.addInstantAsLocalDateTime(qb.sqlArgs, "startDate", query.getStartDate());
     }
     if (query.getEndDate() != null) {
-      qb.addWhereClause("events.\"startDate\" <= :endDate");
+      qb.addWhereClause("(events.\"startDate\" <= :endDate OR events.\"endDate\" <= :endDate)");
       DaoUtils.addInstantAsLocalDateTime(qb.sqlArgs, "endDate", query.getEndDate());
     }
     qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "events_name"));
