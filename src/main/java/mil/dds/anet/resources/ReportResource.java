@@ -141,18 +141,19 @@ public class ReportResource {
 
     ResourceUtils.assertAllowedClassification(r.getClassification());
 
+    // Set advisor org
     Person primaryAdvisor = findPrimaryAttendee(r, false);
-    if (r.getAdvisorOrgUuid() == null && primaryAdvisor != null) {
-      logger.debug("Setting advisor org for new report based on {}", primaryAdvisor);
-      r.setAdvisorOrg(
-          engine.getOrganizationForPerson(engine.getContext(), primaryAdvisor.getUuid()).join());
-    }
+    logger.debug("Setting advisor org for new report {} based on {} at date {}", r, primaryAdvisor,
+        r.getEngagementDate());
+    r.setAdvisorOrg(engine.getOrganizationForPerson(engine.getContext(),
+        DaoUtils.getUuid(primaryAdvisor), r.getEngagementDate()).join());
+
+    // Set interlocutor org
     Person primaryInterlocutor = findPrimaryAttendee(r, true);
-    if (r.getInterlocutorOrgUuid() == null && primaryInterlocutor != null) {
-      logger.debug("Setting interlocutor org for new report based on {}", primaryInterlocutor);
-      r.setInterlocutorOrg(engine
-          .getOrganizationForPerson(engine.getContext(), primaryInterlocutor.getUuid()).join());
-    }
+    logger.debug("Setting interlocutor org for new report {} based on {} at date {}", r,
+        primaryInterlocutor, r.getEngagementDate());
+    r.setInterlocutorOrg(engine.getOrganizationForPerson(engine.getContext(),
+        DaoUtils.getUuid(primaryInterlocutor), r.getEngagementDate()).join());
 
     r.setReportText(
         Utils.isEmptyHtml(r.getReportText()) ? null : Utils.sanitizeHtml(r.getReportText()));
@@ -237,29 +238,19 @@ public class ReportResource {
       r.setApprovalStep(null);
     }
 
-    // If there is a change to the primary advisor, change the advisor Org.
+    // Update the advisor org
     final Person primaryAdvisor = findPrimaryAttendee(r, false);
-    final ReportPerson existingPrimaryAdvisor =
-        existing.loadPrimaryAdvisor(engine.getContext()).join();
-    if (!Utils.uuidEqual(primaryAdvisor, existingPrimaryAdvisor)
-        || existing.getAdvisorOrgUuid() == null) {
-      r.setAdvisorOrg(engine
-          .getOrganizationForPerson(engine.getContext(), DaoUtils.getUuid(primaryAdvisor)).join());
-    } else {
-      r.setAdvisorOrgUuid(existing.getAdvisorOrgUuid());
-    }
+    logger.debug("Updating advisor org for report {} based on {} at date {}", r, primaryAdvisor,
+        r.getEngagementDate());
+    r.setAdvisorOrg(engine.getOrganizationForPerson(engine.getContext(),
+        DaoUtils.getUuid(primaryAdvisor), r.getEngagementDate()).join());
 
+    // Update the interlocutor org
     final Person primaryInterlocutor = findPrimaryAttendee(r, true);
-    final ReportPerson existingPrimaryInterlocutor =
-        existing.loadPrimaryInterlocutor(engine.getContext()).join();
-    if (!Utils.uuidEqual(primaryInterlocutor, existingPrimaryInterlocutor)
-        || existing.getInterlocutorOrgUuid() == null) {
-      r.setInterlocutorOrg(engine
-          .getOrganizationForPerson(engine.getContext(), DaoUtils.getUuid(primaryInterlocutor))
-          .join());
-    } else {
-      r.setInterlocutorOrgUuid(existing.getInterlocutorOrgUuid());
-    }
+    logger.debug("Updating interlocutor org for report {} based on {} at date {}", r,
+        primaryInterlocutor, r.getEngagementDate());
+    r.setInterlocutorOrg(engine.getOrganizationForPerson(engine.getContext(),
+        DaoUtils.getUuid(primaryInterlocutor), r.getEngagementDate()).join());
 
     r.setReportText(
         Utils.isEmptyHtml(r.getReportText()) ? null : Utils.sanitizeHtml(r.getReportText()));
@@ -384,33 +375,29 @@ public class ReportResource {
           "Cannot submit report unless it is either Draft or Rejected", Status.BAD_REQUEST);
     }
 
-    if (r.getAdvisorOrgUuid() == null) {
-      final ReportPerson advisor = r.loadPrimaryAdvisor(engine.getContext()).join();
-      final Boolean optionalPrimaryAdvisor =
-          (Boolean) config.getDictionaryEntry("fields.report.reportPeople.optionalPrimaryAdvisor");
-      if (advisor == null) {
-        if (!Boolean.TRUE.equals(optionalPrimaryAdvisor)) {
-          throw new WebApplicationException("Report missing primary advisor", Status.BAD_REQUEST);
-        }
-      } else {
-        r.setAdvisorOrg(
-            engine.getOrganizationForPerson(engine.getContext(), advisor.getUuid()).join());
-      }
+    // Update advisor org
+    final ReportPerson advisor = r.loadPrimaryAdvisor(engine.getContext()).join();
+    final Boolean optionalPrimaryAdvisor =
+        (Boolean) config.getDictionaryEntry("fields.report.reportPeople.optionalPrimaryAdvisor");
+    if (advisor == null && !Boolean.TRUE.equals(optionalPrimaryAdvisor)) {
+      throw new WebApplicationException("Report missing primary advisor", Status.BAD_REQUEST);
     }
-    if (r.getInterlocutorOrgUuid() == null) {
-      final ReportPerson interlocutor = r.loadPrimaryInterlocutor(engine.getContext()).join();
-      final Boolean optionalPrimaryInterlocutor = (Boolean) config
-          .getDictionaryEntry("fields.report.reportPeople.optionalPrimaryPrincipal");
-      if (interlocutor == null) {
-        if (!Boolean.TRUE.equals(optionalPrimaryInterlocutor)) {
-          throw new WebApplicationException("Report missing primary interlocutor",
-              Status.BAD_REQUEST);
-        }
-      } else {
-        r.setInterlocutorOrg(
-            engine.getOrganizationForPerson(engine.getContext(), interlocutor.getUuid()).join());
-      }
+    logger.debug("Updating advisor org for report {} based on {} at date {}", r, advisor,
+        r.getEngagementDate());
+    r.setAdvisorOrg(engine.getOrganizationForPerson(engine.getContext(), DaoUtils.getUuid(advisor),
+        r.getEngagementDate()).join());
+
+    // Update interlocutor org
+    final ReportPerson interlocutor = r.loadPrimaryInterlocutor(engine.getContext()).join();
+    final Boolean optionalPrimaryInterlocutor =
+        (Boolean) config.getDictionaryEntry("fields.report.reportPeople.optionalPrimaryPrincipal");
+    if (interlocutor == null && !Boolean.TRUE.equals(optionalPrimaryInterlocutor)) {
+      throw new WebApplicationException("Report missing primary interlocutor", Status.BAD_REQUEST);
     }
+    logger.debug("Updating interlocutor org for report {} based on {} at date {}", r, interlocutor,
+        r.getEngagementDate());
+    r.setInterlocutorOrg(engine.getOrganizationForPerson(engine.getContext(),
+        DaoUtils.getUuid(interlocutor), r.getEngagementDate()).join());
 
     if (r.getEngagementDate() == null) {
       throw new WebApplicationException("Missing engagement date", Status.BAD_REQUEST);
