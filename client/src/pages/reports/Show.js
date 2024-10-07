@@ -127,6 +127,7 @@ const GQL_GET_REPORT = gql`
           uuid
           name
           type
+          role
           code
           status
           organization {
@@ -139,6 +140,26 @@ const GQL_GET_REPORT = gql`
           location {
             uuid
             name
+          }
+        }
+        previousPositions {
+          startTime
+          endTime
+          position {
+            uuid
+            name
+            code
+            organization {
+              uuid
+              shortName
+              longName
+              identificationCode
+              ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+            }
+            location {
+              uuid
+              name
+            }
           }
         }
       }
