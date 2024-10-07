@@ -72,6 +72,29 @@ import ReportPeople, {
   forceOnlyAttendingPersonPerRoleToPrimary
 } from "./ReportPeople"
 
+const reportPeopleAutocompleteQuery = `
+  ${Person.autocompleteQuery}
+  previousPositions {
+    startTime
+    endTime
+    position {
+      uuid
+      name
+      code
+      organization {
+        uuid
+        shortName
+        longName
+        identificationCode
+      }
+      location {
+        uuid
+        name
+      }
+    }
+  }
+`
+
 const GQL_GET_RECENTS = gql`
   query($taskQuery: TaskSearchQueryInput) {
     locationList(
@@ -97,7 +120,7 @@ const GQL_GET_RECENTS = gql`
       }
     ) {
       list {
-        ${Person.autocompleteQuery}
+        ${reportPeopleAutocompleteQuery}
       }
     }
     taskList(query: $taskQuery) {
@@ -737,14 +760,15 @@ const ReportForm = ({
                         "Location",
                         "Organization"
                       ]}
-                      overlayRenderRow={PersonDetailedOverlayRow}
+                      overlayRenderRow={item =>
+                        PersonDetailedOverlayRow(item, values.engagementDate)}
                       filterDefs={reportPeopleFilters}
                       objectType={Person}
                       queryParams={{
                         status: Model.STATUS.ACTIVE,
                         pendingVerification: false
                       }}
-                      fields={Person.autocompleteQuery}
+                      fields={reportPeopleAutocompleteQuery}
                       addon={PEOPLE_ICON}
                     />
                   }

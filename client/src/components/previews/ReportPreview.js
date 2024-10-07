@@ -58,6 +58,16 @@ const GQL_GET_REPORT = gql`
           name
           type
           role
+          code
+        }
+        previousPositions {
+          startTime
+          endTime
+          position {
+            uuid
+            name
+            code
+          }
         }
       }
       tasks {
