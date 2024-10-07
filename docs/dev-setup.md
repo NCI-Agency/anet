@@ -6,34 +6,69 @@ This section describes the recommended Developer Environment and how to set it u
 1. [git](https://git-scm.com/).  While this is not required, it is highly recommended if you will be doing active development on ANET.
 
 ## Download ANET source code
-1. Checkout the [source code](https://github.com/NCI-Agency/anet) from github.
-    ```
+1. Checkout the [source code](https://github.com/NCI-Agency/anet) from GitHub.
+    ```shell
     git clone git@github.com:NCI-Agency/anet.git
     ```
 1. Install the recommended git hooks
-    ```
+    ```shell
     cd anet
     git config core.hooksPath scripts/githooks
     ```
 
 ### Possible Problems
-- **You cannot access [the source code repo](https://github.com/NCI-Agency/anet).** Solution: Get someone who does have admin access to add you as a collaborator. Ensure that you have the correct public key installed to github. See [_Connecting to GitHub with SSH_](https://help.github.com/articles/connecting-to-github-with-ssh/) for more information on troubleshooting this step.
-- **The git clone command takes a long time, then fails.** Solution: Some networks block ssh. Try using the `https` URL from github to download the source code.
+- **You cannot access [the source code repo](https://github.com/NCI-Agency/anet).** Solution: Get someone who does have admin access to add you as a collaborator. Ensure that you have the correct public key installed to GitHub. See [_Connecting to GitHub with SSH_](https://help.github.com/articles/connecting-to-github-with-ssh/) for more information on troubleshooting this step.
+- **The git clone command takes a long time, then fails.** Solution: Some networks block ssh. Try using the `https` URL from GitHub to download the source code.
 
 ## Set Up Gradle
 The frontend is run with [`yarn`](https://yarnpkg.com/).  We recommend running the backend [`gradle`](https://gradle.org/) if you are only doing frontend development.
 
 1. Set up [Gradle](https://gradle.org/)
     1. This step is not needed unless want to use other settings and passwords than the default ones (see `build.gradle` for the defaults). You can define custom settings in a local settings file as follows:
-    1. Open a command line in the `anet` directory that was retrieved from github.
+    1. Open a command line in the `anet` directory that was retrieved from GitHub.
     1. Create a new empty file at `localSettings.gradle`. (`touch localSettings.gradle` on linux/mac).  This will be a file for all of your local settings and passwords that should not be checked into GitHub.
 1. Update the settings in `anet.yml` for your environment.  See the [ANET Configuration documentation](INSTALL.md#anet-configuration) for more details on these configuration options. You are most likely to change:
     1. `emailFromAddr` - use your own email address for testing.
 
-## Java Backend
 
-### Prerequisites
-1. Make sure you can [manage Docker as a non-root user](https://docs.docker.com/engine/install/linux-postinstall/#manage-docker-as-a-non-root-user).
+## Set Up Docker
+Several of the components used by the back-end run as Docker containers. Make sure you have at least [Docker Engine](https://docs.docker.com/engine/install/) (a.k.a. Docker CE) installed.
+Check that you can [manage Docker as a non-root user](https://docs.docker.com/engine/install/linux-postinstall/#manage-docker-as-a-non-root-user).
+
+You may opt to manage containers using a GUI like Docker Desktop, Rancher Desktop or Podman Desktop. Be aware that
+several of these use their own Docker context, which you can see with:
+```shell
+docker context ls
+```
+Output can be something like:
+```
+NAME              DESCRIPTION                               DOCKER ENDPOINT
+default *         Current DOCKER_HOST based configuration   unix:///var/run/docker.sock
+desktop-linux     Docker Desktop                            unix:///home/developer/.docker/desktop/docker.sock
+rancher-desktop   Rancher Desktop moby context              unix:///home/developer/.rd/docker.sock
+```
+You can always switch contexts with:
+```shell
+docker context use NAME
+```
+e.g.
+```shell
+docker context use default
+```
+If your container management GUI uses a different endpoint, make sure that the Gradle build and your GUI agree.
+You should add a small configuration section to your `localSettings.gradle` and `localTestSettings.gradle`:
+```groovy
+docker {
+  url = 'unix:///home/developer/.docker/desktop/docker.sock' // Use Docker Desktop context
+}
+```
+Copy the endpoint you want to use.
+
+If you also want to be able to manage the containers from your IDE, make sure to configure the same there too.
+E.g. for IntelliJ this would be under Services, then Docker, then Connections From Contexts, then double-click on the
+context you want to connect to.
+
+## Java Backend
 
 ### Development database backend configuration
 
@@ -41,7 +76,7 @@ The frontend is run with [`yarn`](https://yarnpkg.com/).  We recommend running t
    1. PostgreSQL
         1. This is the default, so you don't need to do anything special
         1. If you want to change any of the default database settings (see `build.gradle` for the defaults), you can paste them as following in your `localSettings.gradle` file (do it for the ones you want to change and with the correct values):
-            ```java
+            ```groovy
             run.environment("ANET_DB_USERNAME","username")
             run.environment("ANET_DB_PASSWORD", "password")
             run.environment("ANET_DB_SERVER", "db server hostname")
@@ -56,7 +91,7 @@ The frontend is run with [`yarn`](https://yarnpkg.com/).  We recommend running t
     1. The database schema is stored in [`src/main/resources/migrations.xml`](../src/main/resources/migrations.xml).
 1. Seed the initial data:
     1. If you're using the Docker container for the database (and you should), you can load the data with: `./gradlew dbLoad`. Otherwise, you'll need to manually connect to the database instance and load the data.
-1. Run `./gradlew run` to download all dependencies (including client dependencies like nodejs and yarn) and build the project
+1. Run `./gradlew run` to download all dependencies (including client dependencies like Node.js and Yarn) and build the project
 
 _Note_: it will also start the back-end but at this step we are not interested in that.
 
@@ -107,7 +142,7 @@ To log in as one of the base data users, when prompted for a username and passwo
 
 ## Testing
 ### Initial Setup Test Database
-First [configure the database backend](#database_backend_configuration).
+First [configure the database backend](#development-database-backend-configuration).
 The following instructions initialize a database for testing purposes, within the database container.
 Use the `-PtestEnv` property to access the test environment settings in `gradle`.
 1. Create the PostgreSQL Docker container and test database `./gradlew -PtestEnv dockerCreateDB`
@@ -118,7 +153,7 @@ Use the `-PtestEnv` property to access the test environment settings in `gradle`
 
 #### Override Default Gradle Settings
 Override the default gradle settings if you want to run your tests on a different database:
-1. Open a command line in the `anet` directory that was retrieved from github.
+1. Open a command line in the `anet` directory that was retrieved from GitHub.
 1. Create a new empty file at `localTestSettings.gradle`. (`touch localTestSettings.gradle` on linux/mac).  This will be a file for all of your local test settings and passwords that should not be checked into GitHub.
 
 ### Server side tests
@@ -147,7 +182,7 @@ The tests are reliant on the data looking pretty similar to what you'd get after
 1. Start with a clean test-database when running tests: `./gradlew -PtestEnv dbDrop dbMigrate dbLoad`
 1. Start a test SMTP server (in a Docker container) in your local development environment: `./gradlew -PtestEnv dockerCreateFakeSmtpServer dockerStartFakeSmtpServer`
 1. In order to run the client-side tests you must start a server using the test-database: `./gradlew -PtestEnv run`
-1. Optionally, make sure you have the proper nodejs and yarn in your path (see the [React Frontend](#react-frontend) instructions).
+1. Optionally, make sure you have the proper Node.js and Yarn in your path (see the [React Frontend](#react-frontend) instructions).
 
 Run `./gradlew yarn_run_lint:fix` to automatically fix some kinds of lint errors.
 Run `./gradlew yarn_run_prettier:format` to reformat the JavaScript code according to our style guide.
@@ -163,15 +198,15 @@ To run the tests locally, by having [`chromedriver`](https://www.npmjs.com/packa
 
 When writing browser tests, remember that when you take an action, you need to give the browser time to update in response before you start making assertions. Use the `driver.wait` method to do this.
 
-If the tests are failing and you don't know why, run them with env var `DEBUG_LOG=true`:
+If the tests are failing, and you don't know why, run them with env var `DEBUG_LOG=true`:
 
-```
-$ DEBUG_LOG=true ./gradlew yarn_run_test-e2e
+```shell
+DEBUG_LOG=true ./gradlew yarn_run_test-e2e
 ```
 
 You can also insert the following into your code to make the browser pause, allowing you to investigate what is currently happening:
 
-```js
+```javascript
 await t.context.waitForever()
 ```
 
@@ -189,7 +224,7 @@ Look up your settings and put them in `client/config/default.json`:
 }
 ```
 If you want step-by-step screenshots from your tests (_Visual Logs_ on BrowserStack) you can also add:
-```
+```json
   "browserstack_debug": "true"
 ```
 to your `default.json`.
@@ -198,26 +233,26 @@ Note that both the E2E and the wdio tests will automatically start (and stop) Br
 
 When all is set up, run the remote tests:
 1. Configure scripts with `TEST_ENV` environment variable for remote testing:
-    ```
-    $ export TEST_ENV=remote
+    ```shell
+    export TEST_ENV=remote
     ```
 1. Run;
     1.  the client side E2E tests:
-        ```
-        $ ./gradlew yarn_run_test-e2e
+        ```shell
+        ./gradlew yarn_run_test-e2e
         ```
     1. the client side wdio tests:
-        ```
-        $ ./gradlew yarn_run_test-wdio
+        ```shell
+        ./gradlew yarn_run_test-wdio
         ```
     1. the client side wdio-ie tests:
-        ```
-        $ ./gradlew yarn_run_test-wdio-ie
+        ```shell
+        ./gradlew yarn_run_test-wdio-ie
         ```
        **About IE tests:** Internet Explorer is not fully supported by ANET and all features are **NOT** guaranteed to work with IE. For that reason, a warning banner is displayed when IE detected. `test-wdio-ie` runs tests for this scenario and these tests run only on remote testing. When testing locally, they gracefully abort.
     1. all client side tests:
-        ```
-        $ ./gradlew yarn_run_test-all
+        ```shell
+        ./gradlew yarn_run_test-all
         ```
 1. You can view the progress and results on [BrowserStack](https://www.browserstack.com/automate).
 
@@ -227,17 +262,17 @@ ANET has a simulator that can exercise of the functions. It is located in 'clien
 The simulator can be started by running './gradlew yarn_run_sim'.
 
 ## React Frontend
-All of the frontend code is in the `client/` directory.
+All the frontend code is in the `client/` directory.
 
 ### Initial Setup
-1. You can run all client-side scripts via Yarn through Gradle. Otherwise, make sure you have the proper nodejs and yarn in your path; example:
-    ```
+1. You can run all client-side scripts via Yarn through Gradle. Otherwise, make sure you have the proper Node.js and Yarn in your path; example:
+    ```shell
     export YARN_HOME=<anet_root_path>/.gradle/yarn/yarn-v1.22.15
     export NODEJS_HOME=<anet_root_path>/.gradle/nodejs/node-v14.18.1-linux-x64
     export PATH="$YARN_HOME/bin:$NODEJS_HOME/bin:$PATH"
     cd client/
     ```
-    _Note_: nodejs and yarn versions might have changed in the meanwhile, check inside `<anet_root_path>/.gradle/nodejs/` and `<anet_root_path>/.gradle/yarn/` for which versions are being used and change the path accordingly.
+    _Note_: Node.js and Yarn versions might have changed in the meanwhile, check inside `<anet_root_path>/.gradle/nodejs/` and `<anet_root_path>/.gradle/yarn/` for which versions are being used and change the path accordingly.
 1. Run the server: `./gradlew yarn_run_start`
 1. Go to [http://localhost:3000/](http://localhost:3000/) in your browser.
     1. When prompted for credentials:
