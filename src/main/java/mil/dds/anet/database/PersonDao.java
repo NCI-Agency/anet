@@ -564,22 +564,20 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   public boolean hasHistoryConflict(final String uuid, final String loserUuid,
       final List<PersonPositionHistory> history, final boolean checkPerson) {
     if (!Utils.isEmptyOrNull(history)) {
+      final String countClause = "SELECT COUNT(*) AS count FROM \"peoplePositions\" WHERE ";
       final String personPositionClause = checkPerson
           ? "\"personUuid\" NOT IN ( :personUuid, :loserUuid ) AND \"positionUuid\" = :positionUuid"
           : "\"personUuid\" = :personUuid AND \"positionUuid\" NOT IN ( :positionUuid, :loserUuid )";
+      final String endClause =
+          " (\"endedAt\" IS NULL OR \"endedAt\" > :startTime) AND " + personPositionClause;
       for (final PersonPositionHistory pph : history) {
         final Query q;
         final Instant endTime = pph.getEndTime();
         if (endTime == null) {
-          q = getDbHandle().createQuery("SELECT COUNT(*) AS count FROM \"peoplePositions\"  WHERE ("
-              + " \"endedAt\" IS NULL OR (\"endedAt\" IS NOT NULL AND \"endedAt\" > :startTime)"
-              + ") AND " + personPositionClause);
+          q = getDbHandle().createQuery(countClause + endClause);
         } else {
-          q = getDbHandle().createQuery("SELECT COUNT(*) AS count FROM \"peoplePositions\" WHERE ("
-              + "(\"endedAt\" IS NULL AND \"createdAt\" < :endTime)"
-              + " OR (\"endedAt\" IS NOT NULL AND"
-              + " \"createdAt\" < :endTime AND \"endedAt\" > :startTime)) AND "
-              + personPositionClause).bind("endTime", DaoUtils.asLocalDateTime(endTime));
+          q = getDbHandle().createQuery(countClause + "\"createdAt\" < :endTime AND" + endClause)
+              .bind("endTime", DaoUtils.asLocalDateTime(endTime));
         }
         final String histUuid = checkPerson ? pph.getPositionUuid() : pph.getPersonUuid();
         final Number count =
