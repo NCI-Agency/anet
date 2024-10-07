@@ -1,6 +1,7 @@
 package mil.dds.anet.utils;
 
 import com.codahale.metrics.MetricRegistry;
+import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -183,6 +184,12 @@ public final class BatchingUtils {
         DataLoaderFactory.newDataLoader(
             (BatchLoader<String, List<Organization>>) foreignKeys -> CompletableFuture.supplyAsync(
                 () -> engine.getOrganizationDao().getOrganizations(foreignKeys), dispatcherService),
+            dataLoaderOptions));
+    dataLoaderRegistry.register(FkDataLoaderKey.PERSON_ORGANIZATIONS_WHEN.toString(),
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<ImmutablePair<String, Instant>, List<Organization>>) foreignKeys -> CompletableFuture
+                .supplyAsync(() -> engine.getOrganizationDao().getOrganizationsByDate(foreignKeys),
+                    dispatcherService),
             dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.PERSON_PERSON_POSITION_HISTORY.toString(),
         DataLoaderFactory.newDataLoader(
