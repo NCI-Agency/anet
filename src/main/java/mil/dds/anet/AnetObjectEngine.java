@@ -3,6 +3,7 @@ package mil.dds.anet;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Injector;
 import io.dropwizard.core.Application;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -232,11 +233,11 @@ public class AnetObjectEngine {
   }
 
   public CompletableFuture<Organization> getOrganizationForPerson(Map<String, Object> context,
-      String personUuid) {
+      String personUuid, Instant when) {
     if (personUuid == null) {
       return CompletableFuture.completedFuture(null);
     }
-    return orgDao.getOrganizationsForPerson(context, personUuid)
+    return orgDao.getOrganizationsForPerson(context, personUuid, when)
         .thenApply(l -> l.isEmpty() ? null : l.get(0));
   }
 
