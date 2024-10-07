@@ -43,30 +43,29 @@ public class ReportApprovalWorker extends AbstractWorker {
           logger.error("Couldn't process report approval for report {}, it has no workflow",
               r.getUuid());
         } else {
-          for (int i = workflow.size() - 1; i >= 0; i--) {
+          for (int i = workflow.size() - 1; i >= 1; i--) {
             final ReportAction reportAction = workflow.get(i);
-            if (reportAction.getCreatedAt() == null && i > 1) {
-              // Check previous action
-              final ReportAction previousAction = workflow.get(i - 1);
-              if (previousAction.getCreatedAt() != null
-                  && previousAction.getCreatedAt().isBefore(approvalTimeout)) {
-                // Approve the report
-                try {
-                  final ApprovalStep approvalStep = reportAction.getStep();
-                  final int numRows = dao.approve(r, null, approvalStep);
-                  if (numRows == 0) {
-                    logger.error("Couldn't process report approval for report {} step {}",
-                        r.getUuid(), DaoUtils.getUuid(approvalStep));
-                  } else {
-                    AnetAuditLogger.log(
-                        "report {} step {} automatically approved by the ReportApprovalWorker",
-                        r.getUuid(), DaoUtils.getUuid(approvalStep));
-                  }
-                } catch (Exception e) {
-                  logger.error("Exception when approving report", e);
+            final ReportAction previousAction = workflow.get(i - 1);
+            if (reportAction.getCreatedAt() == null
+                // Check previous action
+                && previousAction.getCreatedAt() != null
+                && previousAction.getCreatedAt().isBefore(approvalTimeout)) {
+              // Approve the report
+              try {
+                final ApprovalStep approvalStep = reportAction.getStep();
+                final int numRows = dao.approve(r, null, approvalStep);
+                if (numRows == 0) {
+                  logger.error("Couldn't process report approval for report {} step {}",
+                      r.getUuid(), DaoUtils.getUuid(approvalStep));
+                } else {
+                  AnetAuditLogger.log(
+                      "report {} step {} automatically approved by the ReportApprovalWorker",
+                      r.getUuid(), DaoUtils.getUuid(approvalStep));
                 }
-                break;
+              } catch (Exception e) {
+                logger.error("Exception when approving report", e);
               }
+              break;
             }
           }
         }
