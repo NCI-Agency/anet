@@ -246,8 +246,10 @@ export function reportsToEvents(reports, showInterlocutors) {
 export function eventsToCalendarEvents(events) {
   return events
     .map(event => {
-      // If no other data available title is the location name
-      const title = `${event.name}@${event.location.name}`
+      let title = `${event.name}`
+      if (event.location) {
+        title = `${title}@${event.location.name}`
+      }
       const start = new Date(event.startDate)
       start.setSeconds(0, 0) // truncate at the minute part
       const end = new Date(event.endDate)
