@@ -357,11 +357,11 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
   )
   const tasksLabel = pluralize(Settings.fields.task.shortLabel)
 
-  // User can approve when admin,
-  // or if report is pending approval and user is one of the approvers in the current approval step
+  // User can approve when report is pending approval,
+  // and user is admin or user is one of the approvers in the current approval step
   const canApprove =
-    isAdmin ||
-    (report.isPending() &&
+    report.isPending() &&
+    (isAdmin ||
       report.approvalStep?.approvers?.some(member =>
         Position.isEqual(member, currentUser?.position)
       ))
