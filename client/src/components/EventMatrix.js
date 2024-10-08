@@ -103,7 +103,13 @@ const EventMatrix = props => {
     const dateToCheck = new Date(weekDays[dayOfWeek])
     return (
       <>
-        <Table className="event-matrix" responsive hover id={dayOfWeek}>
+        <Table
+          responsive
+          borderless
+          hover
+          id={dayOfWeek}
+          className="event-matrix-cell mb-0"
+        >
           <tbody>
             {events
               .filter(
@@ -113,19 +119,10 @@ const EventMatrix = props => {
               .map(event => (
                 <tr key={event.uuid}>
                   {isEventIncluded(event, dateToCheck) && (
-                    <td
-                      height="55px"
-                      style={{
-                        backgroundColor: "var(--anet-blue)"
-                      }}
-                    >
+                    <td className="event-cell-color event-cell-height">
                       {showEventTitle(event, dateToCheck) && (
                         <LinkTo
-                          style={{
-                            marginLeft: "10px",
-                            backgroundColor: "var(--anet-blue)",
-                            color: "white"
-                          }}
+                          className="event-cell-color ms-2 text-white"
                           modelType="Event"
                           model={event}
                         />
@@ -133,7 +130,7 @@ const EventMatrix = props => {
                     </td>
                   )}
                   {!isEventIncluded(event, dateToCheck) && (
-                    <td height="55px" style={{ backgroundColor: "white" }} />
+                    <td className="event-cell-height bg-white" />
                   )}
                 </tr>
               ))}
@@ -152,15 +149,15 @@ const EventMatrix = props => {
   }
 
   return (
-    <div style={{ marginTop: "20px" }}>
+    <>
       <Messages error={error} />
-      <div style={{ float: "left" }}>
+      <div className="float-start">
         <div className="rollup-date-range-container">
           <Button
             id="previous-period"
             onClick={() => showPreviousPeriod()}
             variant="outline-secondary"
-            style={{ marginRight: 5 }}
+            className="me-1"
           >
             <Icon icon={IconNames.DOUBLE_CHEVRON_LEFT} />
           </Button>
@@ -169,7 +166,7 @@ const EventMatrix = props => {
             id="next-period"
             onClick={() => showNextPeriod()}
             variant="outline-secondary"
-            style={{ marginLeft: 5 }}
+            className="ms-1"
           >
             <Icon icon={IconNames.DOUBLE_CHEVRON_RIGHT} />
           </Button>
@@ -210,7 +207,7 @@ const EventMatrix = props => {
         </Table>
         {events.length === 0 && <em>No events in this week </em>}
       </div>
-    </div>
+    </>
   )
 }
 
