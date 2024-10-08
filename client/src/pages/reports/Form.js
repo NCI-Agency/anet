@@ -614,6 +614,7 @@ const ReportForm = ({
                   name="event"
                   component={FieldHelper.SpecialField}
                   onChange={value => {
+                    value = Event.filterClientSideFields(value)
                     // validation will be done by setFieldValue
                     setFieldTouched("event", true, false) // onBlur doesn't work when selecting an option
                     setFieldValue("event", value, true)

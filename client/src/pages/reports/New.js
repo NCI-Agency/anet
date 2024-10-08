@@ -84,9 +84,7 @@ const ReportNewConditional = ({
     const event = new Event(data.event)
     const tasks = []
     event.tasks.forEach(task => tasks.push(new Task(task)))
-    // We do not want tasks to go with event Probably there is a better way to do this?
-    event.tasks = []
-    report.event = event
+    report.event = Event.filterClientSideFields(event)
     report.location = event.location
     report.tasks = tasks
   }

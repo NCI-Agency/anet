@@ -371,7 +371,7 @@ export default class Event extends Model {
     super(Model.fillObject(props, Event.yupSchema))
   }
 
-  static FILTERED_CLIENT_SIDE_FIELDS = []
+  static FILTERED_CLIENT_SIDE_FIELDS = ["tasks", "organizations", "people"]
 
   static filterClientSideFields(obj, ...additionalFields) {
     return Model.filterClientSideFields(
