@@ -304,7 +304,7 @@ const Navigation = ({ allOrganizations, resetPages, clearSearchQuery }) => {
               My Authorization Groups
             </SidebarLink>
           )}
-          {!_isEmpty(currentUser?.position?.organizationsAdministrated) && (
+          {(currentUser.isAdmin() || !_isEmpty(currentUser?.position?.organizationsAdministrated)) && (
             <SidebarLink
               id="my-events"
               linkTo={{ pathname: "/events/mine" }}
