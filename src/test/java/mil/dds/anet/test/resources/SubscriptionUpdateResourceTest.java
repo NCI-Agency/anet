@@ -211,13 +211,10 @@ class SubscriptionUpdateResourceTest extends SubscriptionTestHelper {
         .withLocation(
             getLocationInput(getLocation(getSubscribedObjectUuid(LocationDao.TABLE_NAME))))
         .withCancelledReason(ReportCancelledReason.CANCELLED_BY_ADVISOR)
-        .withReportPeople(
-            getReportPeopleInput(List.of(personToPrimaryReportAuthor(getJackJackson()),
-                personToReportPerson(getPerson(getSubscribedObjectUuid(PersonDao.TABLE_NAME)),
-                    false),
-                personToPrimaryReportPerson(getChristopfTopferness(), true))))
-        .withAdvisorOrg(getOrganizationInput(
-            getOrganization(getSubscribedObjectUuid(OrganizationDao.TABLE_NAME))))
+        .withReportPeople(getReportPeopleInput(List.of(personToReportAuthor(getJackJackson()),
+            personToPrimaryReportPerson(getPerson(getSubscribedObjectUuid(PersonDao.TABLE_NAME)),
+                false),
+            personToReportPerson(getChristopfTopferness(), true))))
         .withTasks(List.of(getTaskInput(getTask(getSubscribedObjectUuid(TaskDao.TABLE_NAME)))))
         .withAuthorizationGroups(List.of(getAuthorizationGroupInput(
             getAuthorizationGroup(getSubscribedObjectUuid(AuthorizationGroupDao.TABLE_NAME)))))
