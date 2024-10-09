@@ -524,15 +524,13 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
     }
   }
 
-  public static String generateCurrentPositionFilter(String personJoinColumn,
+  public static String generatePositionFilterAtDate(String personJoinColumn,
       String dateFilterColumn, String placeholderName) {
-    // it is possible this would be better implemented using WHERE NOT EXISTS instead of the left
-    // join
     return String.format(
-        "JOIN \"peoplePositions\" pp ON pp.\"personUuid\" = %1$s  AND pp.\"createdAt\" <= %2$s "
-            + " LEFT JOIN \"peoplePositions\" maxPp ON"
-            + "   maxPp.\"positionUuid\" = pp.\"positionUuid\" AND maxPp.\"createdAt\" > pp.\"createdAt\" AND maxPp.\"createdAt\" <= %2$s "
-            + " WHERE pp.\"positionUuid\" = :%3$s AND maxPp.\"createdAt\" IS NULL ",
+        "JOIN \"peoplePositions\" pp ON pp.\"personUuid\" = %1$s"
+            + " WHERE pp.\"createdAt\" <= %2$s"
+            + " AND (pp.\"endedAt\" IS NULL OR pp.\"endedAt\" > %2$s)"
+            + " AND pp.\"positionUuid\" = :%3$s",
         personJoinColumn, dateFilterColumn, placeholderName);
   }
 
