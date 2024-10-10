@@ -216,7 +216,7 @@ describe("When creating a Report with conflicts", () => {
 
   it("Should delete the first report", async() => {
     await EditReport.open(firstReportUUID)
-    await EditReport.deleteReport(firstReportUUID)
+    await EditReport.deleteReport(firstReportUUID, true)
 
     expect(await (await EditReport.getAlertSuccess()).getText()).to.equal(
       "Report deleted"
@@ -225,7 +225,7 @@ describe("When creating a Report with conflicts", () => {
 
   it("Should delete the second report", async() => {
     await EditReport.open(secondReportUUID)
-    await EditReport.deleteReport(secondReportUUID)
+    await EditReport.deleteReport(secondReportUUID, true)
 
     expect(await (await EditReport.getAlertSuccess()).getText()).to.equal(
       "Report deleted"

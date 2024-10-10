@@ -70,6 +70,12 @@ class CreateReport extends cr.CreateReport {
     return browser.$("#fg-reportText .editable")
   }
 
+  async getAttendeeColumns(name) {
+    return browser.$$(
+      `//div[@id="reportPeopleContainer"]//tr[td[@class="reportPeopleName" and .//a[text()="${name}"]]]/td`
+    )
+  }
+
   async getPersonByName(name) {
     const personRow = await browser.$$(
       `//div[@id="reportPeopleContainer"]//tr[td[@class="reportPeopleName" and .//a[text()="${name}"]]]/td[@class="primary-attendee" or @class="conflictButton" or @class="reportPeopleName"]`
@@ -98,7 +104,8 @@ class CreateReport extends cr.CreateReport {
     if (
       (await searchTerm.startsWith("CIV")) ||
       (await searchTerm.startsWith("OF-4")) ||
-      (await searchTerm.startsWith("OF-3"))
+      (await searchTerm.startsWith("OF-3")) ||
+      (await searchTerm.startsWith("OF-2"))
     ) {
       searchTerm = name.substr(name.indexOf(" ") + 1)
     }
@@ -191,6 +198,14 @@ class CreateReport extends cr.CreateReport {
     }
   }
 
+  async setEngagementDate(engagementDate) {
+    await (await this.getEngagementDate()).waitForClickable()
+    await (await this.getEngagementDate()).click()
+    await (await this.getTodayButton()).waitForDisplayed()
+    await this.deleteInput(this.getEngagementDate())
+    await browser.keys(engagementDate.format("DD-MM-YYYY HH:mm"))
+  }
+
   async fillForm(fields) {
     await (await this.getForm()).waitForClickable()
 
@@ -200,11 +215,7 @@ class CreateReport extends cr.CreateReport {
     }
 
     if (moment.isMoment(fields.engagementDate)) {
-      await (await this.getEngagementDate()).waitForClickable()
-      await (await this.getEngagementDate()).click()
-      await (await this.getTodayButton()).waitForDisplayed()
-      await browser.keys(fields.engagementDate.format("DD-MM-YYYY HH:mm"))
-
+      await this.setEngagementDate(fields.engagementDate)
       await (await this.getTitle()).click()
       await (
         await this.getDatepicker()
