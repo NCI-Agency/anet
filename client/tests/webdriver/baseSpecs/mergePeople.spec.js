@@ -21,7 +21,7 @@ const EXAMPLE_PEOPLE = {
     previousPositions: [
       {
         name: "Chief of Merge People Test 1",
-        date: `${moment().format("D MMMM YYYY")} -  `
+        date: `${moment("2020-01-01").format("D MMMM YYYY")} -  `
       }
     ],
     biography: "Winner is a test person who will be merged",
@@ -48,7 +48,7 @@ const EXAMPLE_PEOPLE = {
     previousPositions: [
       {
         name: "Chief of Merge People Test 2",
-        date: `${moment().format("D MMMM YYYY")} -  `
+        date: `${moment("2020-01-01").format("D MMMM YYYY")} -  `
       }
     ],
     biography: "Loser is a test person who will be merged",
@@ -75,7 +75,7 @@ const EXAMPLE_PEOPLE = {
     previousPositions: [
       {
         name: "EF 1 Manager",
-        date: `${moment().format("D MMMM YYYY")} -  `
+        date: `${moment("2020-01-01").format("D MMMM YYYY")} -  `
       }
     ],
     biography: "Andrew is the EF 1 Manager",

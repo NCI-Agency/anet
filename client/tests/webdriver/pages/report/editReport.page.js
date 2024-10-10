@@ -7,9 +7,9 @@ class EditReport extends Page {
     return browser.$("#formBottomSubmit")
   }
 
-  async getDeleteButton() {
+  async getDeleteButton(planned) {
     return browser.$(
-      "//div[@class='submit-buttons']//button[text()='Delete this planned engagement']"
+      `//div[@class='submit-buttons']//button[text()='Delete this ${planned ? "planned engagement" : "report"}']`
     )
   }
 
@@ -33,8 +33,8 @@ class EditReport extends Page {
     return browser.$('//button[text()="Yes, I am sure"]')
   }
 
-  async deleteReport(uuid) {
-    await (await this.getDeleteButton()).click()
+  async deleteReport(uuid, planned) {
+    await (await this.getDeleteButton(planned)).click()
     await browser.pause(300) // wait for modal animation to finish
     await (await this.confirmDeleteButton(uuid)).waitForExist()
     await (await this.confirmDeleteButton(uuid)).waitForDisplayed()

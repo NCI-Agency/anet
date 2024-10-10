@@ -38,14 +38,6 @@ class CreateFutureReport extends CreateReport {
     return (await this.getAttendeesFieldValue()).$(`tbody tr:nth-child(${n})`)
   }
 
-  async getAttendeesAssessments() {
-    return browser.$("#attendees-engagement-assessments")
-  }
-
-  async getAttendeeAssessment(name) {
-    return (await this.getAttendeesAssessments()).$(`//td//a[text()="${name}"]`)
-  }
-
   async getTasksFieldFormGroup() {
     return browser.$(`div[id="fg-${tskId}"]`)
   }
@@ -72,16 +64,6 @@ class CreateFutureReport extends CreateReport {
 
   async getTasksFieldValueRow(n) {
     return (await this.getTasksFieldValue()).$(`tbody tr:nth-child(${n})`)
-  }
-
-  async getTasksAssessments() {
-    return browser.$("#tasks-engagement-assessments")
-  }
-
-  async getTaskAssessment(shortName) {
-    return (await this.getTasksAssessments()).$(
-      `//td//a[text()="${shortName}"]`
-    )
   }
 
   async getDeleteButton() {
