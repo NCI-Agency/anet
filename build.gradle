@@ -858,7 +858,7 @@ task distInDocker {
 			executable "docker"
 			args "exec", rh8ContainerName, "sh", "-c", "groupadd -g ${GID} anetgroup ; useradd -u ${UID} -g ${GID} anetuser"
 		}
-		// install git,yum and "Development Tools"
+		// install git, yum and "Development Tools"
 		exec {
 			executable "docker"
 			args "exec", rh8ContainerName, "sh", "-c", "microdnf -y install git yum ; yum -y groupinstall \"Development Tools\""
@@ -866,7 +866,7 @@ task distInDocker {
 		// clean and build zip & rpm in docker
 		exec {
 			executable "docker"
-			args "exec", "-u", "anetuser", rh8ContainerName, "sh", "-c", "cd /source/anet ;  rm -rf client/node_modules/ ;" +
+			args "exec", "-u", "anetuser", rh8ContainerName, "sh", "-c", "cd /source/anet ; rm -rf client/node_modules/ ;" +
 					" env YARN_CACHE_FOLDER=${cacheDir} ./gradlew ${gradleOptions} clean distZip distRpm"
 		}
 		// test rpm in docker
@@ -874,6 +874,29 @@ task distInDocker {
 			executable "docker"
 			args "exec", rh8ContainerName, "sh", "-c", "rpm -i /source/anet/build/distributions/anet*.rpm ;" +
 					" cd /opt/anet ; bin/anet --help"
+		}
+		// add PGAdmin4 repo
+		exec {
+			executable "docker"
+			args "exec", rh8ContainerName, "sh", "-c", "rpm -i --force https://ftp.postgresql.org/pub/pgadmin/pgadmin4/yum/pgadmin4-redhat-repo-2-1.noarch.rpm"
+		}
+		// download PGAdmin4 packages
+		exec {
+			executable "docker"
+			args "exec", rh8ContainerName, "sh", "-c", "yum -y --disablerepo='*' --enablerepo=pgAdmin4" +
+				" download --destdir /tmp/pgadmin4 pgadmin4-server pgadmin4-web"
+		}
+		// copy PGAdmin4 packages
+		exec {
+			executable "docker"
+			args "exec", "-u", "anetuser", rh8ContainerName, "sh", "-c", "mkdir -p /source/anet/build/distributions ; cd /source/anet/build/distributions ;" +
+				" cp -p /tmp/pgadmin4/* ."
+		}
+		// download Keycloak
+		exec {
+			executable "docker"
+			args "exec", "-u", "anetuser", rh8ContainerName, "sh", "-c", "cd /source/anet/build/distributions ;" +
+				" curl -sLO https://github.com/keycloak/keycloak/releases/download/${keycloakVersion}/keycloak-${keycloakVersion}.zip"
 		}
 		// list build
 		exec {
