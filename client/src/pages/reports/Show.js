@@ -630,7 +630,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
 
                 <Field
                   name="advisorOrg"
-                  label={Settings.fields.regular.org.name}
+                  label={Settings.fields.advisor.org.name}
                   component={FieldHelper.ReadonlyField}
                   humanValue={
                     <LinkTo

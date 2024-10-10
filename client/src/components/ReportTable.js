@@ -12,6 +12,7 @@ import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useEffect, useRef, useState } from "react"
 import { Table } from "react-bootstrap"
+import Settings from "settings"
 
 const GQL_GET_REPORT_LIST = gql`
   query ($reportQuery: ReportSearchQueryInput) {
@@ -147,10 +148,10 @@ const ReportTable = ({
           <thead>
             <tr>
               <th>Authors</th>
-              <th>Organization</th>
-              <th>Summary</th>
-              {showStatus && <th>Status</th>}
-              <th>Engagement Date</th>
+              <th>{Settings.fields.advisor.org.name}</th>
+              <th>{Settings.fields.report.intent?.label}</th>
+              {showStatus && <th>State</th>}
+              <th>{Settings.fields.report.engagementDate?.label}</th>
               <th title="Does the report have attachments?">
                 <Icon icon={IconNames.PAPERCLIP} />
               </th>
