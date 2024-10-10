@@ -119,6 +119,14 @@ class ShowReport extends Page {
     return (await browser.$("div[name='authors']")).getText()
   }
 
+  async getAdvisorOrg() {
+    return (await browser.$("div[name='advisorOrg']")).getText()
+  }
+
+  async getInterlocutorOrg() {
+    return (await browser.$("div[name='interlocutorOrg']")).getText()
+  }
+
   async getSubmitButton() {
     return browser.$('//button[text()="Submit report"]')
   }
