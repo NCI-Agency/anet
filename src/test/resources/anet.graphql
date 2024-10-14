@@ -693,6 +693,7 @@ type Person {
   domainUsername: String
   emailAddresses(network: String): [EmailAddress]
   endOfTourDate: Instant
+  entityAvatar: EntityAvatar
   gender: String
   isSubscribed: Boolean
   name: String
@@ -722,6 +723,7 @@ input PersonInput {
   domainUsername: String
   emailAddresses: [EmailAddressInput]
   endOfTourDate: Instant
+  entityAvatar: EntityAvatarInput
   gender: String
   name: String
   obsoleteCountry: String
@@ -1056,6 +1058,7 @@ type ReportPerson {
   domainUsername: String
   emailAddresses(network: String): [EmailAddress]
   endOfTourDate: Instant
+  entityAvatar: EntityAvatar
   gender: String
   interlocutor: Boolean!
   isSubscribed: Boolean
@@ -1089,6 +1092,7 @@ input ReportPersonInput {
   domainUsername: String
   emailAddresses: [EmailAddressInput]
   endOfTourDate: Instant
+  entityAvatar: EntityAvatarInput
   gender: String
   interlocutor: Boolean!
   name: String
