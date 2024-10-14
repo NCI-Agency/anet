@@ -75,6 +75,7 @@ const GQL_GET_ORGANIZATION = gql`
             name
             rank
             avatarUuid
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
         }
       }
@@ -100,6 +101,7 @@ const GQL_GET_ORGANIZATION = gql`
           name
           rank
           avatarUuid
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
       }
       approvalSteps {
@@ -113,6 +115,7 @@ const GQL_GET_ORGANIZATION = gql`
             name
             rank
             avatarUuid
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
         }
       }

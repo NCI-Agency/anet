@@ -156,6 +156,7 @@ export default class Organization extends Model {
           name
           rank
           avatarUuid
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
       }
     }
@@ -170,6 +171,7 @@ export default class Organization extends Model {
           name
           rank
           avatarUuid
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
       }
     }
@@ -184,6 +186,7 @@ export default class Organization extends Model {
         name
         rank
         avatarUuid
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
     }
     customFields

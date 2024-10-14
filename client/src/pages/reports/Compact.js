@@ -21,7 +21,10 @@ import { ReadonlyCustomFields } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
-import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
+import {
+  DEFAULT_CUSTOM_FIELDS_PARENT,
+  GRAPHQL_ENTITY_AVATAR_FIELDS
+} from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -71,6 +74,7 @@ const GQL_GET_REPORT = gql`
         name
         rank
         avatarUuid
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         position {
           uuid
           organization {
@@ -89,6 +93,7 @@ const GQL_GET_REPORT = gql`
                   name
                   rank
                   avatarUuid
+                  ${GRAPHQL_ENTITY_AVATAR_FIELDS}
                 }
               }
             }
@@ -100,6 +105,7 @@ const GQL_GET_REPORT = gql`
         name
         rank
         avatarUuid
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         status
         primary
         author
@@ -131,12 +137,14 @@ const GQL_GET_REPORT = gql`
         name
         rank
         avatarUuid
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
       primaryInterlocutor {
         uuid
         name
         rank
         avatarUuid
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
       tasks {
         uuid
@@ -171,6 +179,7 @@ const GQL_GET_REPORT = gql`
           name
           rank
           avatarUuid
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
       }
       interlocutorOrg {
@@ -199,6 +208,7 @@ const GQL_GET_REPORT = gql`
               name
               rank
               avatarUuid
+              ${GRAPHQL_ENTITY_AVATAR_FIELDS}
             }
           }
         }
@@ -207,6 +217,7 @@ const GQL_GET_REPORT = gql`
           name
           rank
           avatarUuid
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
       }
       approvalStep {

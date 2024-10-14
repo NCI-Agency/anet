@@ -15,10 +15,14 @@ import AggregationWidgetContainer, {
   AGGREGATION_WIDGET_TYPE,
   getAggregationWidget
 } from "components/aggregations/AggregationWidgetContainer"
-import AvatarDisplayComponent from "components/AvatarDisplayComponent"
+import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import { SPECIAL_WIDGET_TYPES } from "components/CustomFields"
 import LinkTo from "components/LinkTo"
-import { CUSTOM_FIELD_TYPE, GRAPHQL_ENTITY_FIELDS } from "components/Model"
+import {
+  CUSTOM_FIELD_TYPE,
+  GRAPHQL_ENTITY_AVATAR_FIELDS,
+  GRAPHQL_ENTITY_FIELDS
+} from "components/Model"
 import { GRAPHQL_NOTES_FIELDS } from "components/RelatedObjectNotes"
 import _isEmpty from "lodash/isEmpty"
 import * as Models from "models"
@@ -29,7 +33,7 @@ import * as React from "react"
 
 const ENTITY_GQL_FIELDS = {
   Report: GRAPHQL_ENTITY_FIELDS.Report,
-  Person: `uuid name avatarUuid ${GRAPHQL_NOTES_FIELDS}`,
+  Person: `uuid name avatarUuid ${GRAPHQL_ENTITY_AVATAR_FIELDS} ${GRAPHQL_NOTES_FIELDS}`,
   Organization: GRAPHQL_ENTITY_FIELDS.Organization,
   Position: GRAPHQL_ENTITY_FIELDS.Position,
   Location: GRAPHQL_ENTITY_FIELDS.Location,
@@ -144,9 +148,9 @@ export const DiagramNodeWidget = ({ size, node, engine }) => {
         backgroundColor: node.isSelected() ? "rgba(0, 0, 255, 0.3)" : null
       }}
     >
-      {modelInstance && Object.hasOwn(modelInstance, "avatarUuid") ? (
-        <AvatarDisplayComponent
-          avatarUuid={modelInstance.avatarUuid}
+      {modelInstance && Object.hasOwn(modelInstance, "entityAvatar") ? (
+        <EntityAvatarDisplay
+          avatar={modelInstance.entityAvatar}
           height={64}
           width={64}
           style={{ pointerEvents: "none" }}

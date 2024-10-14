@@ -86,6 +86,7 @@ const GQL_GET_REPORT = gql`
         name
         rank
         avatarUuid
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         position {
           uuid
           organization {
@@ -105,6 +106,7 @@ const GQL_GET_REPORT = gql`
                   name
                   rank
                   avatarUuid
+                  ${GRAPHQL_ENTITY_AVATAR_FIELDS}
                 }
               }
             }
@@ -116,6 +118,7 @@ const GQL_GET_REPORT = gql`
         name
         rank
         avatarUuid
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         status
         author
         primary
@@ -181,6 +184,7 @@ const GQL_GET_REPORT = gql`
           name
           rank
           avatarUuid
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
       }
       interlocutorOrg {
@@ -211,6 +215,7 @@ const GQL_GET_REPORT = gql`
               name
               rank
               avatarUuid
+              ${GRAPHQL_ENTITY_AVATAR_FIELDS}
             }
           }
         }
@@ -219,6 +224,7 @@ const GQL_GET_REPORT = gql`
           name
           rank
           avatarUuid
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
       }
       approvalStep {

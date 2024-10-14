@@ -2,6 +2,7 @@ import { gql } from "@apollo/client"
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_MIN_HEAD } from "actions"
 import API from "api"
 import AppContext from "components/AppContext"
+import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import CountryDisplay from "components/CountryDisplay"
 import DictionaryField from "components/DictionaryField"
 import EmailAddressTable from "components/EmailAddressTable"
@@ -23,7 +24,6 @@ import { Alert, Col, Container, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { Link, useLocation } from "react-router-dom"
 import Settings from "settings"
-import PersonAvatar from "../people/Avatar"
 
 const GQL_GET_SELF = gql`
   query {
@@ -114,7 +114,7 @@ const OnboardingShow = ({ pageDispatchers }) => {
             <Container fluid>
               <Row>
                 <Col md={6}>
-                  <PersonAvatar />
+                  <EntityAvatarDisplay />
                   {leftColumnUnderAvatar}
                 </Col>
                 <Col md={6}>{rightColumn}</Col>

@@ -37,18 +37,21 @@ const GQL_GET_REPORT_LIST = gql`
           name
           rank
           avatarUuid
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         primaryAdvisor {
           uuid
           name
           rank
           avatarUuid
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         primaryInterlocutor {
           uuid
           name
           rank
           avatarUuid
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         advisorOrg {
           uuid

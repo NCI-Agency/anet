@@ -1,5 +1,6 @@
 import Model, {
   createCustomFieldsSchema,
+  GRAPHQL_ENTITY_AVATAR_FIELDS,
   GRAPHQL_NOTES_FIELDS
 } from "components/Model"
 import { convertLatLngToMGRS, convertMGRSToLatLng } from "geoUtils"
@@ -196,6 +197,7 @@ export default class Location extends Model {
           name
           rank
           avatarUuid
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
       }
     }
@@ -210,6 +212,7 @@ export default class Location extends Model {
           name
           rank
           avatarUuid
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
       }
     }

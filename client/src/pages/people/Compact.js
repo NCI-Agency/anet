@@ -3,6 +3,7 @@ import styled from "@emotion/styled"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
 import AppContext from "components/AppContext"
+import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import CompactTable, {
   CompactFooterContent,
   CompactHeaderContent,
@@ -44,7 +45,6 @@ import { connect } from "react-redux"
 import { useNavigate, useParams } from "react-router-dom"
 import Settings from "settings"
 import utils from "utils"
-import PersonAvatar from "./Avatar"
 
 const GQL_GET_PERSON = gql`
   query($uuid: String!) {
@@ -53,6 +53,7 @@ const GQL_GET_PERSON = gql`
       name
       rank
       avatarUuid
+      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       status
       pendingVerification
       phoneNumber
@@ -94,6 +95,7 @@ const GQL_GET_PERSON = gql`
             name
             rank
             avatarUuid
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
           organization {
             uuid
@@ -265,8 +267,8 @@ const CompactPersonView = ({ pageDispatchers }) => {
       <CompactRow
         key="avatar"
         content={
-          <PersonAvatar
-            avatarUuid={person.avatarUuid}
+          <EntityAvatarDisplay
+            avatar={person.entityAvatar}
             width={pageSize.avatarSize}
             height={pageSize.avatarSize}
           />

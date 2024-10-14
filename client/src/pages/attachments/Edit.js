@@ -36,6 +36,7 @@ const GQL_GET_ATTACHMENT = gql`
             name
             rank
             avatarUuid
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
           ... on Position {
             type
@@ -57,6 +58,7 @@ const GQL_GET_ATTACHMENT = gql`
         name
         rank
         avatarUuid
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
     }
   }

@@ -2,6 +2,7 @@ import { gql } from "@apollo/client"
 import API from "api"
 import AppContext from "components/AppContext"
 import Messages from "components/Messages"
+import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -33,6 +34,7 @@ const GQL_GET_APP_DATA = gql`
       name
       rank
       avatarUuid
+      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       status
       pendingVerification
       code
@@ -89,6 +91,7 @@ const GQL_GET_APP_DATA = gql`
             name
             rank
             avatarUuid
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
             position {
               uuid
               name

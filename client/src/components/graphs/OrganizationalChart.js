@@ -1,6 +1,7 @@
 import { gql } from "@apollo/client"
 import API from "api"
 import SVGCanvas from "components/graphs/SVGCanvas"
+import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -46,6 +47,7 @@ const GQL_GET_CHART_DATA = gql`
           rank
           user
           avatarUuid
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
       }
       ascendantOrgs {
@@ -89,6 +91,7 @@ const GQL_GET_CHART_DATA = gql`
             rank
             user
             avatarUuid
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
         }
       }

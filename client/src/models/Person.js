@@ -163,7 +163,7 @@ export default class Person extends Model {
     .concat(Model.yupSchema)
 
   static autocompleteQuery =
-    "uuid name rank status user endOfTourDate avatarUuid" +
+    `uuid name rank status user endOfTourDate avatarUuid ${GRAPHQL_ENTITY_AVATAR_FIELDS}` +
     " position { uuid name type role code status" +
     ` organization { uuid shortName longName identificationCode ${GRAPHQL_ENTITY_AVATAR_FIELDS} }` +
     " location { uuid name } }"
@@ -173,6 +173,7 @@ export default class Person extends Model {
     name
     rank
     avatarUuid
+    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
     status
     pendingVerification
     phoneNumber
@@ -214,6 +215,7 @@ export default class Person extends Model {
           name
           rank
           avatarUuid
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         organization {
           uuid

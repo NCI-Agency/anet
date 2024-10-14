@@ -6,7 +6,7 @@ import AppContext from "components/AppContext"
 import * as FieldHelper from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import Model from "components/Model"
+import Model, { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import RemoveButton from "components/RemoveButton"
 import { FastField, Form, Formik } from "formik"
 import { Person, Position } from "models"
@@ -132,7 +132,7 @@ const EditAssociatedPositionsModal = ({
                           overlayRenderRow={PositionOverlayRow}
                           filterDefs={positionsFilters}
                           objectType={Position}
-                          fields="uuid name code type person { uuid name rank avatarUuid } organization { uuid shortName longName identificationCode }"
+                          fields={`uuid name code type person { uuid name rank avatarUuid ${GRAPHQL_ENTITY_AVATAR_FIELDS} } organization { uuid shortName longName identificationCode }`}
                           addon={POSITIONS_ICON}
                         />
                       }
