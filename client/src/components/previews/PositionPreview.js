@@ -37,6 +37,7 @@ const GQL_GET_POSITION = gql`
         name
         rank
         avatarUuid
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
       associatedPositions {
         uuid
@@ -47,6 +48,7 @@ const GQL_GET_POSITION = gql`
           name
           rank
           avatarUuid
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         organization {
           uuid
@@ -64,6 +66,7 @@ const GQL_GET_POSITION = gql`
           name
           rank
           avatarUuid
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
       }
       location {

@@ -3,6 +3,7 @@ import API from "api"
 import DictionaryField from "components/DictionaryField"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
+import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import RichTextEditor from "components/RichTextEditor"
 import { Attachment } from "models"
 import PropTypes from "prop-types"
@@ -20,6 +21,7 @@ const GQL_GET_ATTACHMENT = gql`
         name
         rank
         avatarUuid
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
     }
   }

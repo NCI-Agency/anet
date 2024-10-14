@@ -74,6 +74,7 @@ const GQL_GET_TASK = gql`
           name
           rank
           avatarUuid
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
       }
       planningApprovalSteps {
@@ -88,6 +89,7 @@ const GQL_GET_TASK = gql`
             name
             rank
             avatarUuid
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
         }
       }
@@ -103,6 +105,7 @@ const GQL_GET_TASK = gql`
             name
             rank
             avatarUuid
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
         }
       }

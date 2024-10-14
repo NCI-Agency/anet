@@ -6,7 +6,7 @@ import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
 import { PersonSimpleOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
-import AvatarDisplayComponent from "components/AvatarDisplayComponent"
+import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import CountryDisplay from "components/CountryDisplay"
 import { customFieldsJSONString } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
@@ -148,8 +148,8 @@ const MergePeople = ({ pageDispatchers }) => {
               <MergeField
                 label="Avatar"
                 value={
-                  <AvatarDisplayComponent
-                    avatarUuid={mergedPerson.avatarUuid}
+                  <EntityAvatarDisplay
+                    avatar={mergedPerson.entityAvatar}
                     height={128}
                     width={128}
                     style={{
@@ -160,7 +160,7 @@ const MergePeople = ({ pageDispatchers }) => {
                   />
                 }
                 align={ALIGN_OPTIONS.CENTER}
-                fieldName="avatarUuid"
+                fieldName="entityAvatar"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
@@ -511,10 +511,10 @@ const PersonColumn = ({
         <fieldset>
           <MergeField
             label="Avatar"
-            fieldName="avatarUuid"
+            fieldName="entityAvatar"
             value={
-              <AvatarDisplayComponent
-                avatarUuid={person.avatarUuid}
+              <EntityAvatarDisplay
+                avatar={person.entityAvatar}
                 height={128}
                 width={128}
                 style={{
@@ -527,11 +527,10 @@ const PersonColumn = ({
             align={align}
             action={() => {
               dispatchMergeActions(
-                setAMergedField("avatarUuid", person.avatarUuid, align)
+                setAMergedField("entityAvatar", person.entityAvatar, align)
               )
             }}
             mergeState={mergeState}
-            autoMerge
             dispatchMergeActions={dispatchMergeActions}
           />
           <MergeField

@@ -1,7 +1,7 @@
 import { gql } from "@apollo/client"
 import API from "api"
 import AppContext from "components/AppContext"
-import AvatarDisplayComponent from "components/AvatarDisplayComponent"
+import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import CountryDisplay from "components/CountryDisplay"
 import DictionaryField from "components/DictionaryField"
 import EmailAddressTable from "components/EmailAddressTable"
@@ -28,6 +28,7 @@ const GQL_GET_PERSON = gql`
       name
       rank
       avatarUuid
+      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       status
       pendingVerification
       phoneNumber
@@ -68,6 +69,7 @@ const GQL_GET_PERSON = gql`
             name
             rank
             avatarUuid
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
           organization {
             uuid
@@ -129,11 +131,8 @@ const PersonPreview = ({ className, uuid }) => {
       <div className="preview-section">
         <Row>
           <Col>
-            <div className="preview-avatar-container">
-              <AvatarDisplayComponent
-                avatarUuid={person.avatarUuid}
-                className="medium-person-avatar"
-              />
+            <div className="text-center">
+              <EntityAvatarDisplay avatar={person.entityAvatar} />
             </div>
 
             <DictionaryField
