@@ -29,6 +29,7 @@ const GQL_GET_PERSON_LIST = gql`
         name
         rank
         avatarUuid
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         emailAddresses {
           network
           address

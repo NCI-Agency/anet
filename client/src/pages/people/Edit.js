@@ -6,6 +6,7 @@ import { initInvisibleFields } from "components/CustomFields"
 import {
   DEFAULT_CUSTOM_FIELDS_PARENT,
   GRAPHQL_CUSTOM_SENSITIVE_INFORMATION_FIELDS,
+  GRAPHQL_ENTITY_AVATAR_FIELDS,
   SENSITIVE_CUSTOM_FIELDS_PARENT
 } from "components/Model"
 import {
@@ -33,6 +34,7 @@ const GQL_GET_PERSON = gql`
       name
       rank
       avatarUuid
+      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       status
       phoneNumber
       pendingVerification

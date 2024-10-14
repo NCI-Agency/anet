@@ -123,6 +123,7 @@ const GQL_GET_PERSON_LIST = gql`
         name
         rank
         avatarUuid
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         ${GQL_EMAIL_ADDRESSES}
         position {
           uuid
@@ -176,6 +177,7 @@ const GQL_GET_POSITION_LIST = gql`
           name
           rank
           avatarUuid
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
       }
     }
@@ -276,6 +278,7 @@ const GQL_GET_ATTACHMENT_LIST = gql`
           name
           rank
           avatarUuid
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         attachmentRelatedObjects {
           relatedObject {
@@ -295,6 +298,7 @@ const GQL_GET_ATTACHMENT_LIST = gql`
               name
               rank
               avatarUuid
+              ${GRAPHQL_ENTITY_AVATAR_FIELDS}
             }
             ... on Position {
               type

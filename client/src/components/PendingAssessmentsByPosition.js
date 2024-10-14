@@ -50,6 +50,7 @@ const GQL_GET_POSITION_LIST = gql`
           name
           rank
           avatarUuid
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         associatedPositions {
           uuid
@@ -74,6 +75,7 @@ const GQL_GET_POSITION_LIST = gql`
             name
             rank
             avatarUuid
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
             ${GRAPHQL_NOTIFICATIONS_NOTE_FIELDS}
           }
         }

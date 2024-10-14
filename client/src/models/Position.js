@@ -98,7 +98,7 @@ export default class Position extends Model {
   static autocompleteQuery =
     "uuid name code type role status location { uuid name }" +
     ` organization { uuid shortName longName identificationCode ${GRAPHQL_ENTITY_AVATAR_FIELDS} }` +
-    " person { uuid name rank avatarUuid }"
+    ` person { uuid name rank avatarUuid ${GRAPHQL_ENTITY_AVATAR_FIELDS} }`
 
   static autocompleteQueryWithNotes = `${this.autocompleteQuery} ${GRAPHQL_NOTES_FIELDS}`
 
@@ -127,6 +127,7 @@ export default class Position extends Model {
       name
       rank
       avatarUuid
+      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
     }
     associatedPositions {
       uuid
@@ -138,6 +139,7 @@ export default class Position extends Model {
         name
         rank
         avatarUuid
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
       organization {
         uuid
@@ -155,6 +157,7 @@ export default class Position extends Model {
         name
         rank
         avatarUuid
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         previousPositions {
           startTime
           endTime

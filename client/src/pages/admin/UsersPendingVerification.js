@@ -4,6 +4,7 @@ import API from "api"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
+import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import {
   jumpToTop,
   mapPageDispatchersToProps,
@@ -27,6 +28,7 @@ const GQL_GET_USERS_PENDING_VERIFICATION = gql`
         name
         rank
         avatarUuid
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         pendingVerification
         emailAddresses {
           network

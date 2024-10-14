@@ -8,6 +8,7 @@ import AssessmentResultsContainer from "components/assessments/AssessmentResults
 import AssignPositionModal from "components/AssignPositionModal"
 import AttachmentCard from "components/Attachment/AttachmentCard"
 import AuthorizationGroupTable from "components/AuthorizationGroupTable"
+import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import CountryDisplay from "components/CountryDisplay"
 import { mapReadonlyCustomFieldsToComps } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
@@ -61,7 +62,6 @@ import { connect } from "react-redux"
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom"
 import Settings from "settings"
 import utils from "utils"
-import PersonAvatar from "./Avatar"
 
 const GQL_GET_PERSON = gql`
   query($uuid: String!) {
@@ -70,6 +70,7 @@ const GQL_GET_PERSON = gql`
       name
       rank
       avatarUuid
+      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       status
       pendingVerification
       isSubscribed
@@ -113,6 +114,7 @@ const GQL_GET_PERSON = gql`
             name
             rank
             avatarUuid
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
           organization {
             uuid
@@ -282,12 +284,6 @@ const PersonShow = ({ pageDispatchers }) => {
     })
     .map(field => cloneField(field, 4))
 
-  const currentAvatar = person?.attachments?.find(
-    a => a.uuid === person?.avatarUuid
-  )
-  const otherAttachments = person?.attachments?.filter(
-    a => a.uuid !== person?.avatarUuid
-  )
   const numberOfFieldsUnderAvatar = person.getNumberOfFieldsInLeftColumn() || 6
   const leftColumnUnderAvatar = orderedFields.slice(
     0,
@@ -338,11 +334,8 @@ const PersonShow = ({ pageDispatchers }) => {
               <Fieldset>
                 <Container fluid>
                   <Row>
-                    <Col md={6}>
-                      <PersonAvatar
-                        avatar={currentAvatar}
-                        avatarUuid={currentAvatar?.uuid}
-                      />
+                    <Col md={6} className="text-center">
+                      <EntityAvatarDisplay avatar={person.entityAvatar} />
                       {leftColumnUnderAvatar}
                     </Col>
                     <Col md={6}>{rightColumn}</Col>
@@ -359,7 +352,7 @@ const PersonShow = ({ pageDispatchers }) => {
                     component={FieldHelper.ReadonlyField}
                     humanValue={
                       <div className="attachment-card-list">
-                        {otherAttachments?.map(attachment => (
+                        {person.attachments.map(attachment => (
                           <AttachmentCard
                             key={attachment.uuid}
                             attachment={attachment}

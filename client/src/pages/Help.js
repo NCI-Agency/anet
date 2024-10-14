@@ -4,6 +4,7 @@ import API from "api"
 import AppContext from "components/AppContext"
 import EmailAddressTable from "components/EmailAddressTable"
 import Fieldset from "components/Fieldset"
+import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -29,6 +30,7 @@ const GQL_GET_ORGANIZATION = gql`
             name
             rank
             avatarUuid
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
             emailAddresses {
               network
               address
