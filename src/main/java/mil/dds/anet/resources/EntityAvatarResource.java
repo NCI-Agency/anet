@@ -11,6 +11,7 @@ import mil.dds.anet.beans.EntityAvatar;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.database.EntityAvatarDao;
 import mil.dds.anet.database.OrganizationDao;
+import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
@@ -85,9 +86,13 @@ public class EntityAvatarResource {
 
   public static boolean hasPermission(final Person user, final String relatedObjectType,
       final String relatedObjectUuid) {
-    if (OrganizationDao.TABLE_NAME.equals(relatedObjectType)) {
-      return OrganizationResource.hasPermission(user, relatedObjectUuid);
-    }
-    return false;
+    // Check whether the user is allowed to link to the related object!
+    return switch (relatedObjectType) {
+      case OrganizationDao.TABLE_NAME ->
+        OrganizationResource.hasPermission(user, relatedObjectUuid);
+      case PersonDao.TABLE_NAME -> PersonResource.hasPermission(user, relatedObjectUuid);
+      // TODO: add other object types if and when entity avatars for them are allowed
+      default -> false;
+    };
   }
 }

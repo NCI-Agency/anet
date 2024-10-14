@@ -84,6 +84,8 @@ public class Person extends AbstractEmailableAnetBean
   @GraphQLQuery
   @GraphQLInputField
   private String code;
+  // annotated below
+  private EntityAvatar entityAvatar;
 
   // non-GraphQL
   private Deque<Activity> recentActivities;
@@ -346,6 +348,28 @@ public class Person extends AbstractEmailableAnetBean
 
   public void setAvatarUuid(String avatarUuid) {
     this.avatarUuid = avatarUuid;
+  }
+
+  @GraphQLQuery(name = "entityAvatar")
+  public CompletableFuture<EntityAvatar> loadEntityAvatar(
+      @GraphQLRootContext Map<String, Object> context) {
+    if (entityAvatar != null) {
+      return CompletableFuture.completedFuture(entityAvatar);
+    }
+    return new UuidFetcher<EntityAvatar>().load(context, IdDataLoaderKey.ENTITY_AVATAR, uuid)
+        .thenApply(o -> {
+          entityAvatar = o;
+          return o;
+        });
+  }
+
+  @GraphQLInputField(name = "entityAvatar")
+  public void setEntityAvatar(EntityAvatar entityAvatar) {
+    this.entityAvatar = entityAvatar;
+  }
+
+  public EntityAvatar getEntityAvatar() {
+    return this.entityAvatar;
   }
 
   @AllowUnverifiedUsers
