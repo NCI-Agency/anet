@@ -6,7 +6,7 @@ import Approvals from "components/approvals/Approvals"
 import AssessmentResultsContainer from "components/assessments/AssessmentResultsContainer"
 import AttachmentCard from "components/Attachment/AttachmentCard"
 import AuthorizationGroupTable from "components/AuthorizationGroupTable"
-import EntityAvatarComponent from "components/avatar/EntityAvatarComponent"
+import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
 import EmailAddressTable from "components/EmailAddressTable"
@@ -398,13 +398,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
               <Fieldset>
                 <Row>
                   <Col sm={12} md={12} lg={4} xl={3} className="text-center">
-                    <EntityAvatarComponent
-                      initialAvatar={organization.entityAvatar}
-                      relatedObjectType="organizations"
-                      relatedObjectUuid={organization.uuid}
-                      relatedObjectName={organization.shortName}
-                      editMode={false}
-                    />
+                    <EntityAvatarDisplay avatar={organization.entityAvatar} />
                   </Col>
                   <Col
                     lg={8}

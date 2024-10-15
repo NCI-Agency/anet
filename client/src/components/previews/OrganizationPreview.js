@@ -1,6 +1,6 @@
 import { gql } from "@apollo/client"
 import API from "api"
-import EntityAvatarComponent from "components/avatar/EntityAvatarComponent"
+import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import DictionaryField from "components/DictionaryField"
 import EmailAddressTable from "components/EmailAddressTable"
 import { PreviewField } from "components/FieldHelper"
@@ -148,13 +148,7 @@ const OrganizationPreview = ({ className, uuid }) => {
       </div>
       <div className="preview-section">
         <div className="text-center">
-          <EntityAvatarComponent
-            initialAvatar={organization.entityAvatar}
-            relatedObjectType="organizations"
-            relatedObjectUuid={organization.uuid}
-            relatedObjectName={organization.shortName}
-            editMode={false}
-          />
+          <EntityAvatarDisplay avatar={organization.entityAvatar} />
         </div>
 
         <DictionaryField
