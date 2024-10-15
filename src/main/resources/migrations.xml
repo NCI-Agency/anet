@@ -5900,6 +5900,33 @@
 		/>
 	</changeSet>
 
+	<changeSet id="migrate-old-people-avatars" author="gjvoosten">
+		<sql>
+			INSERT INTO "entityAvatars" (
+				"relatedObjectType",
+				"relatedObjectUuid",
+				"attachmentUuid",
+				"applyCrop",
+				"cropLeft",
+				"cropTop",
+				"cropWidth",
+				"cropHeight"
+			)
+			SELECT
+				'people',
+				p.uuid,
+				p."avatarUuid",
+				FALSE,
+				0,
+				0,
+				0,
+				0
+			FROM people p
+			WHERE p."avatarUuid" IS NOT NULL;
+		</sql>
+		<dropColumn tableName="people" columnName="avatarUuid" />
+	</changeSet>
+
 	<!-- Keep this change set as the last one in the change log;
 	     it will be re-run whenever it changes. -->
 	<changeSet id="set-up-full-text-search" runOnChange="true" author="gjvoosten">
