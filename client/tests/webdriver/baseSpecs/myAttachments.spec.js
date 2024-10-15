@@ -23,8 +23,8 @@ describe("My Attachments page", () => {
       const myAttachments = await (
         await MyAttachments.getMyAttachments()
       ).$$("table.attachments_table > tbody > tr")
-      // table has a header and 6 attachment rows
-      expect(myAttachments).to.have.length(6)
+      // table has a header and 7 attachment rows
+      expect(myAttachments).to.have.length(7)
       await MyAttachments.logout()
     })
   })
