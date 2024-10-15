@@ -46,7 +46,6 @@ const GQL_GET_MY_SUBSCRIPTION_UPDATES = gql`
           ... on Person {
             name
             rank
-            avatarUuid
             ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
           ... on Position {
@@ -84,7 +83,6 @@ const GQL_GET_MY_SUBSCRIPTION_UPDATES = gql`
             ... on Person {
               name
               rank
-              avatarUuid
               ${GRAPHQL_ENTITY_AVATAR_FIELDS}
             }
             ... on Position {

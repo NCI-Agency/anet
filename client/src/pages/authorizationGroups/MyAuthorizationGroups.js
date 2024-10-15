@@ -38,7 +38,6 @@ const GQL_GET_MY_AUTHORIZATION_GROUPS = gql`
                 uuid
                 name
                 rank
-                avatarUuid
                 ${GRAPHQL_ENTITY_AVATAR_FIELDS}
               }
               ... on Position {

@@ -85,7 +85,6 @@ const GQL_GET_REPORT = gql`
         uuid
         name
         rank
-        avatarUuid
         ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         position {
           uuid
@@ -105,7 +104,6 @@ const GQL_GET_REPORT = gql`
                   uuid
                   name
                   rank
-                  avatarUuid
                   ${GRAPHQL_ENTITY_AVATAR_FIELDS}
                 }
               }
@@ -117,7 +115,6 @@ const GQL_GET_REPORT = gql`
         uuid
         name
         rank
-        avatarUuid
         ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         status
         author
@@ -183,7 +180,6 @@ const GQL_GET_REPORT = gql`
           uuid
           name
           rank
-          avatarUuid
           ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
       }
@@ -214,7 +210,6 @@ const GQL_GET_REPORT = gql`
               uuid
               name
               rank
-              avatarUuid
               ${GRAPHQL_ENTITY_AVATAR_FIELDS}
             }
           }
@@ -223,7 +218,6 @@ const GQL_GET_REPORT = gql`
           uuid
           name
           rank
-          avatarUuid
           ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
       }

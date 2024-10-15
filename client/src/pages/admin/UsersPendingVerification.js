@@ -27,7 +27,6 @@ const GQL_GET_USERS_PENDING_VERIFICATION = gql`
         uuid
         name
         rank
-        avatarUuid
         ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         pendingVerification
         emailAddresses {

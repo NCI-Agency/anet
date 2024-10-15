@@ -18,11 +18,7 @@ import AggregationWidgetContainer, {
 import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import { SPECIAL_WIDGET_TYPES } from "components/CustomFields"
 import LinkTo from "components/LinkTo"
-import {
-  CUSTOM_FIELD_TYPE,
-  GRAPHQL_ENTITY_AVATAR_FIELDS,
-  GRAPHQL_ENTITY_FIELDS
-} from "components/Model"
+import { CUSTOM_FIELD_TYPE, GRAPHQL_ENTITY_FIELDS } from "components/Model"
 import { GRAPHQL_NOTES_FIELDS } from "components/RelatedObjectNotes"
 import _isEmpty from "lodash/isEmpty"
 import * as Models from "models"
@@ -33,7 +29,7 @@ import * as React from "react"
 
 const ENTITY_GQL_FIELDS = {
   Report: GRAPHQL_ENTITY_FIELDS.Report,
-  Person: `uuid name avatarUuid ${GRAPHQL_ENTITY_AVATAR_FIELDS} ${GRAPHQL_NOTES_FIELDS}`,
+  Person: `${GRAPHQL_ENTITY_FIELDS.Person} ${GRAPHQL_NOTES_FIELDS}`,
   Organization: GRAPHQL_ENTITY_FIELDS.Organization,
   Position: GRAPHQL_ENTITY_FIELDS.Position,
   Location: GRAPHQL_ENTITY_FIELDS.Location,

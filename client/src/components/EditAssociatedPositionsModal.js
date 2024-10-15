@@ -132,7 +132,7 @@ const EditAssociatedPositionsModal = ({
                           overlayRenderRow={PositionOverlayRow}
                           filterDefs={positionsFilters}
                           objectType={Position}
-                          fields={`uuid name code type person { uuid name rank avatarUuid ${GRAPHQL_ENTITY_AVATAR_FIELDS} } organization { uuid shortName longName identificationCode }`}
+                          fields={`uuid name code type person { uuid name rank ${GRAPHQL_ENTITY_AVATAR_FIELDS} } organization { uuid shortName longName identificationCode }`}
                           addon={POSITIONS_ICON}
                         />
                       }

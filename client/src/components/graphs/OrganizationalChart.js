@@ -46,7 +46,6 @@ const GQL_GET_CHART_DATA = gql`
           name
           rank
           user
-          avatarUuid
           ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
       }
@@ -90,7 +89,6 @@ const GQL_GET_CHART_DATA = gql`
             name
             rank
             user
-            avatarUuid
             ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
         }
@@ -379,8 +377,8 @@ const OrganizationalChart = ({
       .attr("height", d => getRoleValue(d, 26, 13))
       .attr("y", d => getRoleValue(d, -15, -10))
       .attr("href", d =>
-        attachmentsEnabled && d?.person?.avatarUuid
-          ? `/api/attachment/view/${d.person.avatarUuid}`
+        attachmentsEnabled && d?.person?.entityAvatar?.attachmentUuid
+          ? `/api/attachment/view/${d.person.entityAvatar.attachmentUuid}`
           : DEFAULT_AVATAR
       )
 
