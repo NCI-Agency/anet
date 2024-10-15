@@ -147,6 +147,7 @@ export const DiagramNodeWidget = ({ size, node, engine }) => {
       {modelInstance && Object.hasOwn(modelInstance, "entityAvatar") ? (
         <EntityAvatarDisplay
           avatar={modelInstance.entityAvatar}
+          defaultAvatar={ModelClass.relatedObjectType}
           height={64}
           width={64}
           style={{ pointerEvents: "none" }}

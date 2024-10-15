@@ -1,7 +1,7 @@
 import PropTypes from "prop-types"
 import React, { useRef } from "react"
 import { Button } from "react-bootstrap"
-import DEFAULT_AVATAR from "resources/default_avatar.svg?inline"
+import DEFAULT_PERSON_AVATAR from "resources/default-person-avatar.svg?inline"
 import DOWNLOAD_ICON from "resources/download.png"
 
 const SVGCanvas = ({
@@ -77,7 +77,7 @@ const SVGCanvas = ({
         // Replace image with its Base64-encoded data
         const promise = toDataUrl(image.getAttribute("href"))
           .then(dataUrl => image.setAttribute("href", dataUrl))
-          .catch(() => image.setAttribute("href", DEFAULT_AVATAR))
+          .catch(() => image.setAttribute("href", DEFAULT_PERSON_AVATAR))
         allPromises.push(promise)
       }
     }

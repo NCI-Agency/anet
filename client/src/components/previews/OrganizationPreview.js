@@ -148,7 +148,10 @@ const OrganizationPreview = ({ className, uuid }) => {
       </div>
       <div className="preview-section">
         <div className="text-center">
-          <EntityAvatarDisplay avatar={organization.entityAvatar} />
+          <EntityAvatarDisplay
+            avatar={organization.entityAvatar}
+            defaultAvatar={Organization.relatedObjectType}
+          />
         </div>
 
         <DictionaryField

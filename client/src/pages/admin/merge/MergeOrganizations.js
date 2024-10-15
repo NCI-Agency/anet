@@ -152,6 +152,7 @@ const MergeOrganizations = ({ pageDispatchers }) => {
                 value={
                   <EntityAvatarDisplay
                     avatar={mergedOrganization.entityAvatar}
+                    defaultAvatar={Organization.relatedObjectType}
                     height={128}
                     width={128}
                     style={{
@@ -522,6 +523,7 @@ const OrganizationColumn = ({
             value={
               <EntityAvatarDisplay
                 avatar={organization.entityAvatar}
+                defaultAvatar={Organization.relatedObjectType}
                 height={128}
                 width={128}
                 style={{

@@ -16,7 +16,7 @@ import PropTypes from "prop-types"
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { connect } from "react-redux"
 import { useNavigate } from "react-router-dom"
-import DEFAULT_AVATAR from "resources/default_avatar.svg?inline"
+import DEFAULT_PERSON_AVATAR from "resources/default-person-avatar.svg?inline"
 import COLLAPSE_ICON from "resources/organizations.png?inline"
 import EXPAND_ICON from "resources/plus.png?inline"
 import Settings from "settings"
@@ -379,7 +379,7 @@ const OrganizationalChart = ({
       .attr("href", d =>
         attachmentsEnabled && d?.person?.entityAvatar?.attachmentUuid
           ? `/api/attachment/view/${d.person.entityAvatar.attachmentUuid}`
-          : DEFAULT_AVATAR
+          : DEFAULT_PERSON_AVATAR
       )
 
     headGenter

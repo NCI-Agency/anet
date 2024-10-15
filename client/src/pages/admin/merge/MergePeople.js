@@ -150,6 +150,7 @@ const MergePeople = ({ pageDispatchers }) => {
                 value={
                   <EntityAvatarDisplay
                     avatar={mergedPerson.entityAvatar}
+                    defaultAvatar={Person.relatedObjectType}
                     height={128}
                     width={128}
                     style={{
@@ -515,6 +516,7 @@ const PersonColumn = ({
             value={
               <EntityAvatarDisplay
                 avatar={person.entityAvatar}
+                defaultAvatar={Person.relatedObjectType}
                 height={128}
                 width={128}
                 style={{
