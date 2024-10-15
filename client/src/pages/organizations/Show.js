@@ -398,7 +398,10 @@ const OrganizationShow = ({ pageDispatchers }) => {
               <Fieldset>
                 <Row>
                   <Col sm={12} md={12} lg={4} xl={3} className="text-center">
-                    <EntityAvatarDisplay avatar={organization.entityAvatar} />
+                    <EntityAvatarDisplay
+                      avatar={organization.entityAvatar}
+                      defaultAvatar={Organization.relatedObjectType}
+                    />
                   </Col>
                   <Col
                     lg={8}

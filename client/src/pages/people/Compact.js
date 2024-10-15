@@ -267,6 +267,7 @@ const CompactPersonView = ({ pageDispatchers }) => {
         content={
           <EntityAvatarDisplay
             avatar={person.entityAvatar}
+            defaultAvatar={Person.relatedObjectType}
             width={pageSize.avatarSize}
             height={pageSize.avatarSize}
           />

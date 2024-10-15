@@ -333,7 +333,10 @@ const PersonShow = ({ pageDispatchers }) => {
                 <Container fluid>
                   <Row>
                     <Col md={6} className="text-center">
-                      <EntityAvatarDisplay avatar={person.entityAvatar} />
+                      <EntityAvatarDisplay
+                        avatar={person.entityAvatar}
+                        defaultAvatar={Person.relatedObjectType}
+                      />
                       {leftColumnUnderAvatar}
                     </Col>
                     <Col md={6}>{rightColumn}</Col>
