@@ -130,7 +130,10 @@ const PersonPreview = ({ className, uuid }) => {
         <Row>
           <Col>
             <div className="text-center">
-              <EntityAvatarDisplay avatar={person.entityAvatar} />
+              <EntityAvatarDisplay
+                avatar={person.entityAvatar}
+                defaultAvatar={Person.relatedObjectType}
+              />
             </div>
 
             <DictionaryField

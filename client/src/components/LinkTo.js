@@ -67,6 +67,7 @@ const LinkTo = ({
       avatarComponent = (
         <EntityAvatarDisplay
           avatar={modelInstance.entityAvatar}
+          defaultAvatar={ModelClass.relatedObjectType}
           height={32}
           width={32}
           style={{ marginLeft: 5, marginRight: 5 }}

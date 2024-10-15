@@ -54,14 +54,13 @@ export const EntityAvatarComponent = ({
 
   return (
     <>
-      {currentAvatar && (
-        <EntityAvatarDisplay
-          avatar={currentAvatar}
-          width={width}
-          height={height}
-          style={style}
-        />
-      )}
+      <EntityAvatarDisplay
+        avatar={currentAvatar}
+        defaultAvatar={relatedObjectType}
+        width={width}
+        height={height}
+        style={style}
+      />
       {attachmentsEnabled && editMode && (
         <>
           {(_isEmpty(imageAttachments) && (

@@ -114,7 +114,9 @@ const OnboardingShow = ({ pageDispatchers }) => {
             <Container fluid>
               <Row>
                 <Col md={6}>
-                  <EntityAvatarDisplay />
+                  <EntityAvatarDisplay
+                    defaultAvatar={Person.relatedObjectType}
+                  />
                   {leftColumnUnderAvatar}
                 </Col>
                 <Col md={6}>{rightColumn}</Col>
