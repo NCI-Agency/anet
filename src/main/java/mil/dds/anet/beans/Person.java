@@ -80,9 +80,6 @@ public class Person extends AbstractEmailableAnetBean
   private List<AuthorizationGroup> authorizationGroups;
   @GraphQLQuery
   @GraphQLInputField
-  private String avatarUuid;
-  @GraphQLQuery
-  @GraphQLInputField
   private String code;
   // annotated below
   private EntityAvatar entityAvatar;
@@ -342,14 +339,6 @@ public class Person extends AbstractEmailableAnetBean
     return authorizationGroups;
   }
 
-  public String getAvatarUuid() {
-    return avatarUuid;
-  }
-
-  public void setAvatarUuid(String avatarUuid) {
-    this.avatarUuid = avatarUuid;
-  }
-
   @GraphQLQuery(name = "entityAvatar")
   public CompletableFuture<EntityAvatar> loadEntityAvatar(
       @GraphQLRootContext Map<String, Object> context) {
@@ -425,7 +414,6 @@ public class Person extends AbstractEmailableAnetBean
         && Objects.equals(other.getDomainUsername(), domainUsername)
         && Objects.equals(other.getOpenIdSubject(), openIdSubject)
         && Objects.equals(other.getPendingVerification(), pendingVerification)
-        && Objects.equals(other.getAvatarUuid(), avatarUuid)
         && Objects.equals(other.getCode(), code)
         && (createdAt != null ? createdAt.equals(other.getCreatedAt())
             : (other.getCreatedAt() == null && updatedAt != null)
@@ -436,7 +424,7 @@ public class Person extends AbstractEmailableAnetBean
   @Override
   public int hashCode() {
     return Objects.hash(super.hashCode(), uuid, name, status, user, phoneNumber, rank, biography,
-        domainUsername, openIdSubject, pendingVerification, avatarUuid, code, createdAt, updatedAt);
+        domainUsername, openIdSubject, pendingVerification, code, createdAt, updatedAt);
   }
 
   @Override
