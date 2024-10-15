@@ -33,7 +33,6 @@ const GQL_GET_APP_DATA = gql`
       uuid
       name
       rank
-      avatarUuid
       ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       status
       pendingVerification
@@ -90,7 +89,6 @@ const GQL_GET_APP_DATA = gql`
             uuid
             name
             rank
-            avatarUuid
             ${GRAPHQL_ENTITY_AVATAR_FIELDS}
             position {
               uuid

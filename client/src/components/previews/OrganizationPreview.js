@@ -41,7 +41,6 @@ const GQL_PERSON_FIELDS = `
     uuid
     name
     rank
-    avatarUuid
     ${GRAPHQL_ENTITY_AVATAR_FIELDS}
     status
   }

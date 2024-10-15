@@ -209,7 +209,7 @@ const ApprovalsDefinition = ({
                 status: Model.STATUS.ACTIVE,
                 matchPersonName: true
               }}
-              fields={`uuid name code type person { uuid name rank avatarUuid ${GRAPHQL_ENTITY_AVATAR_FIELDS} }`}
+              fields={`uuid name code type person { uuid name rank ${GRAPHQL_ENTITY_AVATAR_FIELDS} }`}
               addon={POSITIONS_ICON}
             />
           }

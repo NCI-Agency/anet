@@ -49,7 +49,6 @@ const GQL_GET_POSITION_LIST = gql`
           uuid
           name
           rank
-          avatarUuid
           ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
       }

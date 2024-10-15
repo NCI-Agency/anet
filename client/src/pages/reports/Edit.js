@@ -46,14 +46,12 @@ const GQL_GET_REPORT = gql`
         uuid
         name
         rank
-        avatarUuid
         ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
       reportPeople {
         uuid
         name
         rank
-        avatarUuid
         ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         status
         author

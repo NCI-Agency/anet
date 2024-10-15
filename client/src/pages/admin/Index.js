@@ -78,7 +78,6 @@ const RECENT_ACTIVITIES = gql`
       uuid
       name
       rank
-      avatarUuid
       ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       user
       domainUsername

@@ -66,7 +66,6 @@ const GQL_GET_USER_ACTIVITY_LIST_BY_PERSON = gql`
           uuid
           name
           rank
-          avatarUuid
           ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           user
           domainUsername

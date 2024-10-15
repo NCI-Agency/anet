@@ -196,7 +196,6 @@ export default class Location extends Model {
           uuid
           name
           rank
-          avatarUuid
           ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
       }
@@ -211,7 +210,6 @@ export default class Location extends Model {
           uuid
           name
           rank
-          avatarUuid
           ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
       }

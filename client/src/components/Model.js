@@ -47,7 +47,6 @@ export const GRAPHQL_NOTE_FIELDS = /* GraphQL */ `
     uuid
     name
     rank
-    avatarUuid
     ${GRAPHQL_ENTITY_AVATAR_FIELDS}
   }
   noteRelatedObjects {
@@ -70,7 +69,6 @@ export const GRAPHQL_NOTE_FIELDS = /* GraphQL */ `
       ... on Person {
         name
         rank
-        avatarUuid
         ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
       ... on Position {
@@ -98,7 +96,7 @@ export const GRAPHQL_NOTES_FIELDS = /* GraphQL */ `
 // Entity type --> GQL query
 export const GRAPHQL_ENTITY_FIELDS = {
   Report: "uuid intent engagementDate",
-  Person: `uuid name avatarUuid ${GRAPHQL_ENTITY_AVATAR_FIELDS}`,
+  Person: `uuid name ${GRAPHQL_ENTITY_AVATAR_FIELDS}`,
   Organization: `uuid shortName ${GRAPHQL_ENTITY_AVATAR_FIELDS}`,
   Position: "uuid name",
   Location: "uuid name",
