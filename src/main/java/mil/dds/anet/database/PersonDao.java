@@ -21,6 +21,7 @@ import javax.cache.CacheManager;
 import javax.cache.Caching;
 import javax.cache.spi.CachingProvider;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.EntityAvatar;
 import mil.dds.anet.beans.MergedEntity;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.PersonPositionHistory;
@@ -394,8 +395,6 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
 
     // Update the winner's fields
     update(winner);
-    // Update the winner's avatar
-    updateAvatar(winner);
 
     // For reports where both winner and loser are in the reportPeople:
     // 1. set winner's isPrimary, isAttendee, isAuthor and isInterlocutor flags to the logical OR of
@@ -472,6 +471,16 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     // Update attachments
     updateM2mForMerge("attachmentRelatedObjects", "attachmentUuid", "relatedObjectUuid", winnerUuid,
         loserUuid);
+    // And update the avatar
+    final EntityAvatarDao entityAvatarDao = AnetObjectEngine.getInstance().getEntityAvatarDao();
+    entityAvatarDao.delete(PersonDao.TABLE_NAME, winnerUuid);
+    entityAvatarDao.delete(PersonDao.TABLE_NAME, loserUuid);
+    final EntityAvatar winnerEntityAvatar = winner.getEntityAvatar();
+    if (winnerEntityAvatar != null) {
+      winnerEntityAvatar.setRelatedObjectType(PersonDao.TABLE_NAME);
+      winnerEntityAvatar.setRelatedObjectUuid(winnerUuid);
+      entityAvatarDao.upsert(winnerEntityAvatar);
+    }
 
     // Update emailAddresses
     final EmailAddressDao emailAddressDao = AnetObjectEngine.getInstance().getEmailAddressDao();
