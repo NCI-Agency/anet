@@ -47,7 +47,14 @@ task(uuid: "${taskUuid}") {
         uuid
         name
         rank
-        avatarUuid
+        entityAvatar {
+          attachmentUuid
+          applyCrop
+          cropLeft
+          cropTop
+          cropWidth
+          cropHeight
+        }
       }
       noteRelatedObjects {
         objectUuid
@@ -68,7 +75,14 @@ task(uuid: "${taskUuid}") {
           ... on Person {
             name
             rank
-            avatarUuid
+            entityAvatar {
+              attachmentUuid
+              applyCrop
+              cropLeft
+              cropTop
+              cropWidth
+              cropHeight
+            }
           }
           ... on Position {
             type
@@ -103,7 +117,14 @@ task(uuid: "${taskUuid}") {
       uuid
       name
       rank
-      avatarUuid
+      entityAvatar {
+        attachmentUuid
+        applyCrop
+        cropLeft
+        cropTop
+        cropWidth
+        cropHeight
+      }
     }
   }
   planningApprovalSteps {
@@ -117,7 +138,14 @@ task(uuid: "${taskUuid}") {
         uuid
         name
         rank
-        avatarUuid
+        entityAvatar {
+          attachmentUuid
+          applyCrop
+          cropLeft
+          cropTop
+          cropWidth
+          cropHeight
+        }
       }
     }
   }
@@ -132,7 +160,14 @@ task(uuid: "${taskUuid}") {
         uuid
         name
         rank
-        avatarUuid
+        entityAvatar {
+          attachmentUuid
+          applyCrop
+          cropLeft
+          cropTop
+          cropWidth
+          cropHeight
+        }
       }
     }
   }
@@ -148,7 +183,14 @@ task(uuid: "${taskUuid}") {
       uuid
       name
       rank
-      avatarUuid
+      entityAvatar {
+        attachmentUuid
+        applyCrop
+        cropLeft
+        cropTop
+        cropWidth
+        cropHeight
+      }
     }
     noteRelatedObjects {
       objectUuid
@@ -169,7 +211,14 @@ task(uuid: "${taskUuid}") {
         ... on Person {
           name
           rank
-          avatarUuid
+          entityAvatar {
+            attachmentUuid
+            applyCrop
+            cropLeft
+            cropTop
+            cropWidth
+            cropHeight
+          }
         }
         ... on Position {
           type
