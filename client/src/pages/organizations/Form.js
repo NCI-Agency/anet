@@ -202,7 +202,7 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                         relatedObjectType="organizations"
                         relatedObjectUuid={initialValues.uuid}
                         relatedObjectName={initialValues.shortName}
-                        editMode
+                        editMode={attachmentEditEnabled}
                         imageAttachments={imageAttachments}
                       />
                     </Col>

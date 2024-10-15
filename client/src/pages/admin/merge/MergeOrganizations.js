@@ -6,7 +6,7 @@ import API from "api"
 import { OrganizationSimpleOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import ApprovalSteps from "components/ApprovalSteps"
-import EntityAvatarComponent from "components/avatar/EntityAvatarComponent"
+import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import { customFieldsJSONString } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
 import EmailAddressTable from "components/EmailAddressTable"
@@ -150,12 +150,8 @@ const MergeOrganizations = ({ pageDispatchers }) => {
               <MergeField
                 label="Avatar"
                 value={
-                  <EntityAvatarComponent
-                    initialAvatar={mergedOrganization.entityAvatar}
-                    relatedObjectType="organizations"
-                    relatedObjectUuid={mergedOrganization.uuid ?? ""}
-                    relatedObjectName={mergedOrganization.shortName ?? ""}
-                    editMode={false}
+                  <EntityAvatarDisplay
+                    avatar={mergedOrganization.entityAvatar}
                     height={128}
                     width={128}
                     style={{
@@ -521,15 +517,11 @@ const OrganizationColumn = ({
       {areAllSet(organization) && (
         <fieldset>
           <MergeField
-            fieldName="entityAvatar"
             label="Avatar"
+            fieldName="entityAvatar"
             value={
-              <EntityAvatarComponent
-                initialAvatar={organization.entityAvatar}
-                relatedObjectType="organizations"
-                relatedObjectUuid={organization.uuid}
-                relatedObjectName={organization.shortName}
-                editMode={false}
+              <EntityAvatarDisplay
+                avatar={organization.entityAvatar}
                 height={128}
                 width={128}
                 style={{
