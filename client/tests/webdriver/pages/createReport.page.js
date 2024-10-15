@@ -132,6 +132,12 @@ export class CreateReport extends Page {
     )
   }
 
+  async getTestMultiReferenceFieldIcon() {
+    return (await this.getCustomFieldFormGroup(ADDITIONAL_ENGAGEMENTS_ID)).$(
+      "span.input-group-text"
+    )
+  }
+
   async getTestMultiReferenceFieldHelpText() {
     return (await this.getTestMultiReferenceFieldFormGroup()).$("div.form-text")
   }
