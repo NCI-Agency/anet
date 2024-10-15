@@ -20,7 +20,14 @@ taskList(query: {pageSize: 0}) {
         uuid
         name
         rank
-        avatarUuid
+        entityAvatar {
+          attachmentUuid
+          applyCrop
+          cropLeft
+          cropTop
+          cropWidth
+          cropHeight
+        }
       }
     }
     customFields

@@ -28,7 +28,14 @@ organization(uuid:"${orgUuid}") {
       uuid
       name
       rank
-      avatarUuid
+      entityAvatar {
+        attachmentUuid
+        applyCrop
+        cropLeft
+        cropTop
+        cropWidth
+        cropHeight
+      }
       status
     }
     associatedPositions {
@@ -41,7 +48,14 @@ organization(uuid:"${orgUuid}") {
         uuid
         name
         rank
-        avatarUuid
+        entityAvatar {
+          attachmentUuid
+          applyCrop
+          cropLeft
+          cropTop
+          cropWidth
+          cropHeight
+        }
         status
       }
     }
@@ -56,7 +70,14 @@ organization(uuid:"${orgUuid}") {
         uuid
         name
         rank
-        avatarUuid
+        entityAvatar {
+          attachmentUuid
+          applyCrop
+          cropLeft
+          cropTop
+          cropWidth
+          cropHeight
+        }
       }
     }
   }
@@ -70,7 +91,14 @@ organization(uuid:"${orgUuid}") {
         uuid
         name
         rank
-        avatarUuid
+        entityAvatar {
+          attachmentUuid
+          applyCrop
+          cropLeft
+          cropTop
+          cropWidth
+          cropHeight
+        }
       }
     }
   }
@@ -85,7 +113,14 @@ organization(uuid:"${orgUuid}") {
       uuid
       name
       rank
-      avatarUuid
+      entityAvatar {
+        attachmentUuid
+        applyCrop
+        cropLeft
+        cropTop
+        cropWidth
+        cropHeight
+      }
     }
     noteRelatedObjects {
       objectUuid
@@ -106,7 +141,14 @@ organization(uuid:"${orgUuid}") {
         ... on Person {
           name
           rank
-          avatarUuid
+          entityAvatar {
+            attachmentUuid
+            applyCrop
+            cropLeft
+            cropTop
+            cropWidth
+            cropHeight
+          }
         }
         ... on Position {
           type

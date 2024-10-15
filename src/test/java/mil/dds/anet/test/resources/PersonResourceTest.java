@@ -56,7 +56,7 @@ public class PersonResourceTest extends AbstractResourceTest {
   private static final String _POSITION_FIELDS = String.format(
       "uuid name code type role status organization { uuid } %1$s", _EMAIL_ADDRESSES_FIELDS);
   private static final String _PERSON_FIELDS = String.format(
-      "uuid name status user phoneNumber rank biography obsoleteCountry country { uuid name } avatarUuid code"
+      "uuid name status user phoneNumber rank biography obsoleteCountry country { uuid name } code"
           + " gender endOfTourDate domainUsername openIdSubject pendingVerification createdAt updatedAt"
           + " customFields %1$s",
       _EMAIL_ADDRESSES_FIELDS);

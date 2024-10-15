@@ -2,7 +2,14 @@ me {
   uuid
   name
   rank
-  avatarUuid
+  entityAvatar {
+    attachmentUuid
+    applyCrop
+    cropLeft
+    cropTop
+    cropWidth
+    cropHeight
+  }
   status
   emailAddresses {
     network
@@ -53,7 +60,14 @@ me {
         uuid
         name
         rank
-        avatarUuid
+        entityAvatar {
+          attachmentUuid
+          applyCrop
+          cropLeft
+          cropTop
+          cropWidth
+          cropHeight
+        }
         position {
           uuid
           name

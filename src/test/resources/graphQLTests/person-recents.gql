@@ -3,7 +3,14 @@ personList(query: {status: ACTIVE, inMyReports: true, sortBy: RECENT, sortOrder:
     uuid
     name
     rank
-    avatarUuid
+    entityAvatar {
+      attachmentUuid
+      applyCrop
+      cropLeft
+      cropTop
+      cropWidth
+      cropHeight
+    }
     status
     endOfTourDate
     position {

@@ -15,19 +15,40 @@ reportList (query:{text:"${searchQuery}",pageSize:0}) {
       uuid
       name
       rank
-      avatarUuid
+      entityAvatar {
+        attachmentUuid
+        applyCrop
+        cropLeft
+        cropTop
+        cropWidth
+        cropHeight
+      }
     }
     primaryAdvisor {
       uuid
       name
       rank
-      avatarUuid
+      entityAvatar {
+        attachmentUuid
+        applyCrop
+        cropLeft
+        cropTop
+        cropWidth
+        cropHeight
+      }
     }
     primaryInterlocutor {
       uuid
       name
       rank
-      avatarUuid
+      entityAvatar {
+        attachmentUuid
+        applyCrop
+        cropLeft
+        cropTop
+        cropWidth
+        cropHeight
+      }
     }
     advisorOrg {
       uuid
@@ -64,7 +85,14 @@ reportList (query:{text:"${searchQuery}",pageSize:0}) {
             uuid
             name
             rank
-            avatarUuid
+            entityAvatar {
+              attachmentUuid
+              applyCrop
+              cropLeft
+              cropTop
+              cropWidth
+              cropHeight
+            }
           }
         }
       }
@@ -72,7 +100,14 @@ reportList (query:{text:"${searchQuery}",pageSize:0}) {
         uuid
         name
         rank
-        avatarUuid
+        entityAvatar {
+          attachmentUuid
+          applyCrop
+          cropLeft
+          cropTop
+          cropWidth
+          cropHeight
+        }
       }
     }
     updatedAt
@@ -85,7 +120,14 @@ personList (query:{text:"${searchQuery}",pageSize:0}) {
     uuid
     name
     rank
-    avatarUuid
+    entityAvatar {
+      attachmentUuid
+      applyCrop
+      cropLeft
+      cropTop
+      cropWidth
+      cropHeight
+    }
     emailAddresses {
       network
       address
@@ -131,7 +173,14 @@ positionList (query:{text:"${searchQuery}",pageSize:0}) {
       uuid
       name
       rank
-      avatarUuid
+      entityAvatar {
+        attachmentUuid
+        applyCrop
+        cropLeft
+        cropTop
+        cropWidth
+        cropHeight
+      }
     }
   }
 }
