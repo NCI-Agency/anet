@@ -150,7 +150,7 @@ EntityAvatarComponent.propTypes = {
   relatedObjectType: PropTypes.string.isRequired,
   relatedObjectUuid: PropTypes.string.isRequired,
   relatedObjectName: PropTypes.string.isRequired,
-  editMode: PropTypes.bool.isRequired,
+  editMode: PropTypes.bool,
   height: PropTypes.number,
   width: PropTypes.number,
   style: PropTypes.object,
