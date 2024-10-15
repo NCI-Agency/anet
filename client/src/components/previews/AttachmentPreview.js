@@ -20,7 +20,6 @@ const GQL_GET_ATTACHMENT = gql`
         uuid
         name
         rank
-        avatarUuid
         ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
     }

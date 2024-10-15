@@ -26,7 +26,6 @@ const GQL_GET_ATTACHMENT_LIST = gql`
           uuid
           name
           rank
-          avatarUuid
           ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         attachmentRelatedObjects {
@@ -46,7 +45,6 @@ const GQL_GET_ATTACHMENT_LIST = gql`
             ... on Person {
               name
               rank
-              avatarUuid
               ${GRAPHQL_ENTITY_AVATAR_FIELDS}
             }
             ... on Position {

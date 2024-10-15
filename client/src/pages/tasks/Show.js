@@ -115,7 +115,6 @@ const GQL_GET_TASK = gql`
           uuid
           name
           rank
-          avatarUuid
           ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
       }
@@ -130,7 +129,6 @@ const GQL_GET_TASK = gql`
             uuid
             name
             rank
-            avatarUuid
             ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
         }
@@ -146,7 +144,6 @@ const GQL_GET_TASK = gql`
             uuid
             name
             rank
-            avatarUuid
             ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
         }
