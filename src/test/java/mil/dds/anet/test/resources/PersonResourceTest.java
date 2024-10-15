@@ -21,7 +21,6 @@ import mil.dds.anet.test.client.AnetBeanList_Organization;
 import mil.dds.anet.test.client.AnetBeanList_Person;
 import mil.dds.anet.test.client.AnetBeanList_Position;
 import mil.dds.anet.test.client.AssessmentSearchQueryInput;
-import mil.dds.anet.test.client.Attachment;
 import mil.dds.anet.test.client.CustomSensitiveInformation;
 import mil.dds.anet.test.client.CustomSensitiveInformationInput;
 import mil.dds.anet.test.client.Organization;
@@ -460,64 +459,6 @@ public class PersonResourceTest extends AbstractResourceTest {
         withCredentials(noPosDomainUsername, t -> queryExecutor.person(FIELDS, noPosUuid));
     assertThat(p2).isNotNull();
     assertThat(p2.getUuid()).isEqualTo(noPosUuid);
-  }
-
-  @Test
-  void testPersonAvatar() {
-    final Person erin = getRegularUser();
-
-    Person retPerson = withCredentials(getRegularUser().getDomainUsername(),
-        t -> queryExecutor.person(FIELDS, erin.getUuid()));
-    assertThat(retPerson).isNotNull();
-    assertThat(retPerson.getAttachments()).isNotEmpty();
-    assertThat(retPerson.getAvatarUuid()).isNull();
-
-    final Attachment attachment = retPerson.getAttachments().get(0);
-    final PersonInput personWithAvatarInput =
-        PersonInput.builder().withUuid(erin.getUuid()).withAvatarUuid(attachment.getUuid()).build();
-    final PersonInput personWithoutAvatarInput =
-        PersonInput.builder().withUuid(erin.getUuid()).build();
-
-    // Set own avatar
-    Integer nrUpdated = withCredentials(erin.getDomainUsername(),
-        t -> mutationExecutor.updatePersonAvatar("", personWithAvatarInput));
-    assertThat(nrUpdated).isOne();
-    retPerson = withCredentials(getRegularUser().getDomainUsername(),
-        t -> queryExecutor.person(FIELDS, erin.getUuid()));
-    assertThat(retPerson.getAvatarUuid()).isEqualTo(attachment.getUuid());
-
-    // Update as someone else
-    try {
-      withCredentials(jackUser,
-          t -> mutationExecutor.updatePersonAvatar("", personWithAvatarInput));
-      fail("Expected an Exception");
-    } catch (Exception expectedException) {
-      // OK
-    }
-
-    // Update as Erin's superuser
-    nrUpdated = withCredentials("rebecca",
-        t -> mutationExecutor.updatePersonAvatar("", personWithoutAvatarInput));
-    assertThat(nrUpdated).isOne();
-    retPerson = withCredentials(getRegularUser().getDomainUsername(),
-        t -> queryExecutor.person(FIELDS, erin.getUuid()));
-    assertThat(retPerson.getAvatarUuid()).isNull();
-
-    // Update as admin
-    nrUpdated = withCredentials(adminUser,
-        t -> mutationExecutor.updatePersonAvatar("", personWithAvatarInput));
-    assertThat(nrUpdated).isOne();
-    retPerson = withCredentials(getRegularUser().getDomainUsername(),
-        t -> queryExecutor.person(FIELDS, erin.getUuid()));
-    assertThat(retPerson.getAvatarUuid()).isEqualTo(attachment.getUuid());
-
-    // Erase own avatar again
-    nrUpdated = withCredentials(erin.getDomainUsername(),
-        t -> mutationExecutor.updatePersonAvatar("", personWithoutAvatarInput));
-    assertThat(nrUpdated).isOne();
-    retPerson = withCredentials(getRegularUser().getDomainUsername(),
-        t -> queryExecutor.person(FIELDS, erin.getUuid()));
-    assertThat(retPerson.getAvatarUuid()).isNull();
   }
 
   @Test

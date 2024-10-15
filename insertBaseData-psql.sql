@@ -1439,12 +1439,16 @@ INSERT INTO "entityAvatars" ("relatedObjectType", "relatedObjectUuid", "attachme
   ('organizations', 'e706f443-7d4d-4356-82bc-1456f55e3d75', '5408075e-9126-4201-a631-f72ffe8b54e5', FALSE, 0, 0, 0, 0);
 
 -- Add attachments for people
-INSERT INTO attachments (uuid, "authorUuid", "fileName", "caption", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt")
-	VALUES ('13318e42-a0a3-438f-8ed5-dc16b1ef17bc', :authorUuid, 'attachPerson.png', 'Erin', 'image/png', lo_import('/var/tmp/assets/default_avatar.png'), 12316, 'We can add attachments to a person', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "relatedObjectUuid")
-  SELECT '13318e42-a0a3-438f-8ed5-dc16b1ef17bc', 'people', p.uuid
-  FROM people p
-  WHERE p."domainUsername" = 'erin';
+INSERT INTO attachments (uuid, "authorUuid", "fileName", "caption", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt") VALUES
+  ('3187ad8a-6130-4ec0-bffc-9ebfad4dee39', :authorUuid, 'attachPerson.png', 'Michael', 'image/png', lo_import('/var/tmp/assets/default_avatar.png'), 12316, 'We can add attachments to a person', 'public', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('13318e42-a0a3-438f-8ed5-dc16b1ef17bc', :authorUuid, 'attachPerson.png', 'Erin', 'image/png', lo_import('/var/tmp/assets/default_avatar.png'), 12316, 'We can add attachments to a person', 'public', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "relatedObjectUuid") VALUES
+  ('3187ad8a-6130-4ec0-bffc-9ebfad4dee39', 'people', '46ba6a73-0cd7-4efb-8e99-215e98cc5987'),
+  ('13318e42-a0a3-438f-8ed5-dc16b1ef17bc', 'people', 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9');
+
+-- Add entity avatars for people
+INSERT INTO "entityAvatars" ("relatedObjectType", "relatedObjectUuid", "attachmentUuid", "applyCrop", "cropLeft", "cropTop", "cropWidth", "cropHeight") VALUES
+  ('people', '46ba6a73-0cd7-4efb-8e99-215e98cc5987', '3187ad8a-6130-4ec0-bffc-9ebfad4dee39', TRUE, 0, 0, 200, 200);
 
 -- Update the link-text indexes
 REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_lts_attachments";
