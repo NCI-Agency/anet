@@ -6024,7 +6024,7 @@
 			BEGIN
 				RETURN QUERY EXECUTE format(
 					''WITH links AS ('' ||
-					''  SELECT uuid, regexp_matches(%I, ''''"urn:anet:([^:]*):([^"]*)"'''', ''''g'''') AS arr FROM public.%I'' ||
+					''  SELECT uuid, regexp_matches(%I, ''''"urn:anet:(attachments|authorizationGroups|locations|organizations|people|positions|reports|tasks):([^"]*)"'''', ''''g'''') AS arr FROM public.%I'' ||
 					'')'' ||
 					''  SELECT uuid, arr[1], arr[2] FROM links'',
 					column_name, table_name
@@ -6041,7 +6041,7 @@
 			BEGIN
 				RETURN QUERY EXECUTE format(
 					''WITH links AS ('' ||
-					''  SELECT uuid, regexp_matches(%I, ''''\\"urn:anet:([^:]*):([^\\]*)\\"|{"type":"([^"]*)","uuid":"([^"]*)"}'''', ''''g'''') AS arr FROM public.%I'' ||
+					''  SELECT uuid, regexp_matches(%I, ''''\\"urn:anet:(attachments|authorizationGroups|locations|organizations|people|positions|reports|tasks):([^\\]*)\\"|{"type":"(Attachment|AuthorizationGroup|Location|Organization|Person|Position|Report|Task)","uuid":"([^"]*)"}'''', ''''g'''') AS arr FROM public.%I'' ||
 					'')'' ||
 					''  SELECT uuid,'' ||
 					''  CASE WHEN arr[1] IS NOT NULL THEN arr[1] ELSE'' ||
