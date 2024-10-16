@@ -2,14 +2,20 @@ import { preventZoom } from "advanced-cropper/extensions/prevent-zoom"
 import AttachmentCard from "components/Attachment/AttachmentCard"
 import PropTypes from "prop-types"
 import React, { useEffect, useRef, useState } from "react"
-import { Cropper, RectangleStencil } from "react-advanced-cropper"
+import { Cropper } from "react-advanced-cropper"
 import "react-advanced-cropper/dist/style.css"
 import "react-advanced-cropper/dist/themes/compact.css"
 import { Button, Modal } from "react-bootstrap"
 import Settings from "settings"
 import "./EntityAvatarComponent.css"
 
-const EntityAvatarEditModal = ({ title, avatar, images, onAvatarUpdate }) => {
+const EntityAvatarEditModal = ({
+  title,
+  avatar,
+  stencil,
+  images,
+  onAvatarUpdate
+}) => {
   const croppeableMimeTypes = Settings.fields.attachment.mimeTypes
     .filter(mimeType => mimeType.avatar && mimeType.crop)
     .map(mimeType => mimeType.name)
@@ -61,7 +67,7 @@ const EntityAvatarEditModal = ({ title, avatar, images, onAvatarUpdate }) => {
                 ref={cropperRef}
                 className="custom-cropper"
                 src={`/api/attachment/view/${chosenImageUuid}`}
-                stencilComponent={RectangleStencil}
+                stencilComponent={stencil}
                 backgroundWrapperProps={{
                   scaleImage: false
                 }}
@@ -129,6 +135,7 @@ const EntityAvatarEditModal = ({ title, avatar, images, onAvatarUpdate }) => {
 EntityAvatarEditModal.propTypes = {
   title: PropTypes.string.isRequired,
   avatar: PropTypes.object,
+  stencil: PropTypes.object,
   images: PropTypes.array.isRequired,
   onAvatarUpdate: PropTypes.func.isRequired
 }

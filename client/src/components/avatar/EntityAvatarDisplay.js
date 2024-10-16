@@ -2,12 +2,21 @@ import styled from "@emotion/styled"
 import { Organization, Person } from "models"
 import PropTypes from "prop-types"
 import React, { useEffect, useRef } from "react"
+import { CircleStencil, RectangleStencil } from "react-advanced-cropper"
 import DEFAULT_ORGANIZATION_AVATAR from "resources/default-organization-avatar.svg"
 import DEFAULT_PERSON_AVATAR from "resources/default-person-avatar.svg"
 
-const DEFAULT_AVATARS = {
-  [Organization.relatedObjectType]: DEFAULT_ORGANIZATION_AVATAR,
-  [Person.relatedObjectType]: DEFAULT_PERSON_AVATAR
+export const AVATAR_SETTINGS = {
+  [Organization.relatedObjectType]: {
+    default: DEFAULT_ORGANIZATION_AVATAR,
+    stencil: RectangleStencil,
+    rounded: false
+  },
+  [Person.relatedObjectType]: {
+    default: DEFAULT_PERSON_AVATAR,
+    stencil: CircleStencil,
+    rounded: true
+  }
 }
 
 export const EntityAvatarDisplay = ({
@@ -18,9 +27,10 @@ export const EntityAvatarDisplay = ({
   style
 }) => {
   const canvasRef = useRef()
+  const avatarSettings = AVATAR_SETTINGS[defaultAvatar]
   const attachmentUrl = avatar?.attachmentUuid
     ? `/api/attachment/view/${avatar.attachmentUuid}`
-    : DEFAULT_AVATARS[defaultAvatar]
+    : avatarSettings?.default
   useEffect(() => {
     if (avatar?.applyCrop) {
       const canvas = canvasRef.current
@@ -49,7 +59,11 @@ export const EntityAvatarDisplay = ({
   }
 
   return (
-    <EntityAvatarStyledDiv style={style}>
+    <EntityAvatarStyledDiv
+      imgHeight={height}
+      rounded={avatarSettings?.rounded}
+      style={style}
+    >
       {avatar?.applyCrop ? (
         <canvas ref={canvasRef} width={width} height={height} />
       ) : (
@@ -58,10 +72,14 @@ export const EntityAvatarDisplay = ({
     </EntityAvatarStyledDiv>
   )
 }
+
 const EntityAvatarStyledDiv = styled.div`
   display: inline-block;
   vertical-align: middle;
   max-width: 100%;
+  height: ${p => p.imgHeight}px;
+  border-radius: ${p => p.rounded && "50%"};
+  overflow: hidden;
 `
 
 EntityAvatarDisplay.propTypes = {

@@ -10,6 +10,7 @@ import React, { useEffect, useState } from "react"
 import { Alert } from "react-bootstrap"
 import { toast } from "react-toastify"
 import Settings from "settings"
+import { AVATAR_SETTINGS } from "./EntityAvatarDisplay"
 
 const GQL_CREATE_OR_UPDATE_ENTITY_AVATAR = gql`
   mutation ($entityAvatar: EntityAvatarInput!) {
@@ -87,6 +88,7 @@ export const EntityAvatarComponent = ({
               <EntityAvatarEditModal
                 title={currentAvatar ? "Set a new avatar" : "Set an avatar"}
                 avatar={currentAvatar}
+                stencil={AVATAR_SETTINGS[relatedObjectType]?.stencil}
                 images={imageAttachments}
                 onAvatarUpdate={onAvatarUpdate}
               />
