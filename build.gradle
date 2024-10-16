@@ -47,6 +47,7 @@ if (!isTestEnv && file('localSettings.gradle').exists()) {
 
 // Defaults for development variables
 run.environment("DB_DRIVER", run.environment["DB_DRIVER"] ?: "postgresql")
+run.environment("DB_VERSION", run.environment["DB_VERSION"] ?: "latest")
 run.environment("ANET_DB_SERVER", run.environment["ANET_DB_SERVER"] ?: "localhost")
 run.environment("ANET_DB_NAME", run.environment["ANET_DB_NAME"] ?: isTestEnv ? "testAnet" : "devAnet")
 run.environment("ANET_DB_USERNAME", run.environment["ANET_DB_USERNAME"] ?: isTestEnv ? "anetTestUser" : "anetDevUser")
@@ -507,7 +508,7 @@ task dockerPushImage(type: DockerPushImage) {
 
 task dockerPullDB(type: DockerPullImage) {
 	group = "database container"
-	image = "postgres:latest"
+	image = "postgres:${run.environment['DB_VERSION']}"
 	description = "Pulls a docker image for the ANET DB from ${image}."
 }
 
