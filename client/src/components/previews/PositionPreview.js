@@ -4,6 +4,7 @@ import DictionaryField from "components/DictionaryField"
 import EmailAddressTable from "components/EmailAddressTable"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
+import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import { Location, Position } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
@@ -29,12 +30,13 @@ const GQL_GET_POSITION = gql`
         shortName
         longName
         identificationCode
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
       person {
         uuid
         name
         rank
-        avatarUuid
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
       associatedPositions {
         uuid
@@ -44,13 +46,14 @@ const GQL_GET_POSITION = gql`
           uuid
           name
           rank
-          avatarUuid
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         organization {
           uuid
           shortName
           longName
           identificationCode
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
       }
       previousPeople {
@@ -60,7 +63,7 @@ const GQL_GET_POSITION = gql`
           uuid
           name
           rank
-          avatarUuid
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
       }
       location {

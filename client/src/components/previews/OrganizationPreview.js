@@ -1,10 +1,11 @@
 import { gql } from "@apollo/client"
 import API from "api"
+import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import DictionaryField from "components/DictionaryField"
 import EmailAddressTable from "components/EmailAddressTable"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
-import Model from "components/Model"
+import Model, { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import RichTextEditor from "components/RichTextEditor"
 import _isEmpty from "lodash/isEmpty"
 import { Location, Organization } from "models"
@@ -32,6 +33,7 @@ const GQL_ORGANIZATION_FIELDS = `
     shortName
     longName
     identificationCode
+    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
   }
 `
 const GQL_PERSON_FIELDS = `
@@ -39,7 +41,7 @@ const GQL_PERSON_FIELDS = `
     uuid
     name
     rank
-    avatarUuid
+    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
     status
   }
 `
@@ -145,6 +147,13 @@ const OrganizationPreview = ({ className, uuid }) => {
         <h4 className="ellipsized-text">{`Organization ${organization.shortName}`}</h4>
       </div>
       <div className="preview-section">
+        <div className="text-center">
+          <EntityAvatarDisplay
+            avatar={organization.entityAvatar}
+            defaultAvatar={Organization.relatedObjectType}
+          />
+        </div>
+
         <DictionaryField
           wrappedComponent={PreviewField}
           dictProps={Settings.fields.organization.longName}

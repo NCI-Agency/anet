@@ -2,6 +2,7 @@ import API from "api"
 import Model, {
   createCustomFieldsSchema,
   GRAPHQL_CUSTOM_SENSITIVE_INFORMATION_FIELDS,
+  GRAPHQL_ENTITY_AVATAR_FIELDS,
   GRAPHQL_NOTES_FIELDS,
   SENSITIVE_CUSTOM_FIELDS_PARENT,
   yupDate,
@@ -110,7 +111,6 @@ export default class Person extends Model {
         )
         .default("")
         .label(Settings.fields.person.rank?.label),
-      avatarUuid: yup.string().nullable().default(null),
       gender: yup
         .string()
         .nullable()
@@ -162,13 +162,16 @@ export default class Person extends Model {
     .concat(Model.yupSchema)
 
   static autocompleteQuery =
-    "uuid name rank status user endOfTourDate avatarUuid position { uuid name type role code status organization { uuid shortName longName identificationCode } location { uuid name } }"
+    `uuid name rank status user endOfTourDate ${GRAPHQL_ENTITY_AVATAR_FIELDS}` +
+    " position { uuid name type role code status" +
+    ` organization { uuid shortName longName identificationCode ${GRAPHQL_ENTITY_AVATAR_FIELDS} }` +
+    " location { uuid name } }"
 
   static allFieldsQuery = `
     uuid
     name
     rank
-    avatarUuid
+    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
     status
     pendingVerification
     phoneNumber
@@ -198,6 +201,7 @@ export default class Person extends Model {
         shortName
         longName
         identificationCode
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
       associatedPositions {
         uuid
@@ -208,13 +212,14 @@ export default class Person extends Model {
           uuid
           name
           rank
-          avatarUuid
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         organization {
           uuid
           shortName
           longName
           identificationCode
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
       }
     }

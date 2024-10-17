@@ -18,6 +18,16 @@ import * as yup from "yup"
 export const REPORT_RELATED_OBJECT_TYPE = "reports"
 export const REPORT_STATE_PUBLISHED = "PUBLISHED"
 
+export const GRAPHQL_ENTITY_AVATAR_FIELDS = `
+  entityAvatar {
+    attachmentUuid
+    applyCrop
+    cropLeft
+    cropTop
+    cropWidth
+    cropHeight
+  }
+`
 export const GRAPHQL_CUSTOM_SENSITIVE_INFORMATION_FIELDS = /* GraphQL */ `
   customSensitiveInformation {
     uuid
@@ -37,7 +47,7 @@ export const GRAPHQL_NOTE_FIELDS = /* GraphQL */ `
     uuid
     name
     rank
-    avatarUuid
+    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
   }
   noteRelatedObjects {
     objectUuid
@@ -54,11 +64,12 @@ export const GRAPHQL_NOTE_FIELDS = /* GraphQL */ `
         shortName
         longName
         identificationCode
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
       ... on Person {
         name
         rank
-        avatarUuid
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
       ... on Position {
         type
@@ -85,8 +96,8 @@ export const GRAPHQL_NOTES_FIELDS = /* GraphQL */ `
 // Entity type --> GQL query
 export const GRAPHQL_ENTITY_FIELDS = {
   Report: "uuid intent engagementDate",
-  Person: "uuid name avatarUuid",
-  Organization: "uuid shortName",
+  Person: `uuid name ${GRAPHQL_ENTITY_AVATAR_FIELDS}`,
+  Organization: `uuid shortName ${GRAPHQL_ENTITY_AVATAR_FIELDS}`,
   Position: "uuid name",
   Location: "uuid name",
   Task: "uuid shortName longName",

@@ -10,6 +10,7 @@ import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingle
 import AppContext from "components/AppContext"
 import ApprovalsDefinition from "components/approvals/ApprovalsDefinition"
 import UploadAttachment from "components/Attachment/UploadAttachment"
+import EntityAvatarComponent from "components/avatar/EntityAvatarComponent"
 import {
   CustomFieldsContainer,
   customFieldsJSONString
@@ -35,7 +36,7 @@ import { Location, Organization, Task } from "models"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
-import { Badge, Button } from "react-bootstrap"
+import { Badge, Button, Col, FormGroup, Row } from "react-bootstrap"
 import { useNavigate } from "react-router-dom"
 import LOCATIONS_ICON from "resources/locations.png"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
@@ -73,6 +74,9 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
   initialValues.emailAddresses = initializeEmailAddresses(
     initialValues.emailAddresses
   )
+  const avatarMimeTypes = Settings.fields.attachment.fileTypes
+    .filter(fileType => fileType.avatar)
+    .map(fileType => fileType.mimeType)
   const statusButtons = [
     {
       id: "statusActiveButton",
@@ -179,6 +183,9 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
             }
           }
         }
+        const imageAttachments = attachmentList?.filter(a =>
+          avatarMimeTypes.includes(a.mimeType)
+        )
 
         return (
           <div>
@@ -187,20 +194,82 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
               <Fieldset>
+                <Row>
+                  {edit && (
+                    <Col sm={12} md={12} lg={4} xl={4} className="text-center">
+                      <EntityAvatarComponent
+                        initialAvatar={initialValues.entityAvatar}
+                        relatedObjectType="organizations"
+                        relatedObjectUuid={initialValues.uuid}
+                        relatedObjectName={initialValues.shortName}
+                        editMode={attachmentEditEnabled}
+                        imageAttachments={imageAttachments}
+                      />
+                    </Col>
+                  )}
+                  <Col
+                    lg={8}
+                    xl={8}
+                    className="d-flex flex-column justify-content-center"
+                  >
+                    <FormGroup>
+                      <Row style={{ marginBottom: "1rem" }}>
+                        <Col sm={7}>
+                          <Row>
+                            <Col>
+                              {!canAdministrateOrg ? (
+                                <>
+                                  <DictionaryField
+                                    wrappedComponent={FastField}
+                                    dictProps={
+                                      Settings.fields.organization.shortName
+                                    }
+                                    name="shortName"
+                                    component={FieldHelper.ReadonlyField}
+                                  />
+                                  <DictionaryField
+                                    wrappedComponent={FastField}
+                                    dictProps={
+                                      Settings.fields.organization.longName
+                                    }
+                                    name="longName"
+                                    component={FieldHelper.ReadonlyField}
+                                  />
+                                </>
+                              ) : (
+                                <>
+                                  <DictionaryField
+                                    wrappedComponent={FastField}
+                                    dictProps={
+                                      Settings.fields.organization.shortName
+                                    }
+                                    name="shortName"
+                                    component={FieldHelper.InputField}
+                                  />
+                                  <DictionaryField
+                                    wrappedComponent={FastField}
+                                    dictProps={
+                                      Settings.fields.organization.longName
+                                    }
+                                    name="longName"
+                                    component={FieldHelper.InputField}
+                                  />
+                                </>
+                              )}
+                            </Col>
+                          </Row>
+                        </Col>
+                      </Row>
+                    </FormGroup>
+                  </Col>
+                </Row>
+              </Fieldset>
+              <Fieldset
+                title="Additional Information"
+                id="additional-information"
+              >
                 {!canAdministrateOrg ? (
                   <>
-                    <DictionaryField
-                      wrappedComponent={FastField}
-                      dictProps={Settings.fields.organization.shortName}
-                      name="shortName"
-                      component={FieldHelper.ReadonlyField}
-                    />
-                    <DictionaryField
-                      wrappedComponent={FastField}
-                      dictProps={Settings.fields.organization.longName}
-                      name="longName"
-                      component={FieldHelper.ReadonlyField}
-                    />
                     <DictionaryField
                       wrappedComponent={FastField}
                       dictProps={Settings.fields.organization.parentOrg}
@@ -275,18 +344,6 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                   </>
                 ) : (
                   <>
-                    <DictionaryField
-                      wrappedComponent={FastField}
-                      dictProps={Settings.fields.organization.shortName}
-                      name="shortName"
-                      component={FieldHelper.InputField}
-                    />
-                    <DictionaryField
-                      wrappedComponent={FastField}
-                      dictProps={Settings.fields.organization.longName}
-                      name="longName"
-                      component={FieldHelper.InputField}
-                    />
                     <DictionaryField
                       wrappedComponent={Field}
                       dictProps={Settings.fields.organization.parentOrg}

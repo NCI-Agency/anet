@@ -32,6 +32,7 @@ import mil.dds.anet.database.CommentDao;
 import mil.dds.anet.database.CustomSensitiveInformationDao;
 import mil.dds.anet.database.EmailAddressDao;
 import mil.dds.anet.database.EmailDao;
+import mil.dds.anet.database.EntityAvatarDao;
 import mil.dds.anet.database.JobHistoryDao;
 import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.database.NoteDao;
@@ -80,6 +81,7 @@ public class AnetObjectEngine {
   private final SubscriptionUpdateDao subscriptionUpdateDao;
   private final UserActivityDao userActivityDao;
   private final EmailAddressDao emailAddressDao;
+  private final EntityAvatarDao entityAvatarDao;
   private final MetricRegistry metricRegistry;
   private ThreadLocal<Map<String, Object>> context;
 
@@ -117,6 +119,7 @@ public class AnetObjectEngine {
     subscriptionUpdateDao = injector.getInstance(SubscriptionUpdateDao.class);
     userActivityDao = injector.getInstance(UserActivityDao.class);
     emailAddressDao = injector.getInstance(EmailAddressDao.class);
+    entityAvatarDao = injector.getInstance(EntityAvatarDao.class);
     this.metricRegistry = metricRegistry;
     searcher = Searcher.getSearcher(injector);
     configuration = config;
@@ -217,6 +220,10 @@ public class AnetObjectEngine {
 
   public EmailDao getEmailDao() {
     return emailDao;
+  }
+
+  public EntityAvatarDao getEntityAvatarDao() {
+    return entityAvatarDao;
   }
 
   public MetricRegistry getMetricRegistry() {

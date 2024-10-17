@@ -6,6 +6,7 @@ import Approvals from "components/approvals/Approvals"
 import AssessmentResultsContainer from "components/assessments/AssessmentResultsContainer"
 import AttachmentCard from "components/Attachment/AttachmentCard"
 import AuthorizationGroupTable from "components/AuthorizationGroupTable"
+import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
 import EmailAddressTable from "components/EmailAddressTable"
@@ -15,7 +16,10 @@ import FindObjectsButton from "components/FindObjectsButton"
 import GuidedTour from "components/GuidedTour"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
+import Model, {
+  DEFAULT_CUSTOM_FIELDS_PARENT,
+  GRAPHQL_ENTITY_AVATAR_FIELDS
+} from "components/Model"
 import { AnchorNavItem } from "components/Nav"
 import {
   jumpToTop,
@@ -42,10 +46,13 @@ import React, { useContext, useState } from "react"
 import {
   Badge,
   Button,
+  Col,
   FormCheck,
+  FormGroup,
   ListGroup,
   ListGroupItem,
-  Nav
+  Nav,
+  Row
 } from "react-bootstrap"
 import { connect } from "react-redux"
 import { Link, useLocation, useParams } from "react-router-dom"
@@ -68,6 +75,7 @@ const GQL_ORGANIZATION_FIELDS = `
     shortName
     longName
     identificationCode
+    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
   }
 `
 const GQL_PERSON_FIELDS = `
@@ -75,7 +83,7 @@ const GQL_PERSON_FIELDS = `
     uuid
     name
     rank
-    avatarUuid
+    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
     status
   }
 `
@@ -387,14 +395,49 @@ const OrganizationShow = ({ pageDispatchers }) => {
                 }
                 action={action}
               />
-              <Fieldset id="info">
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.organization.longName}
-                  name="longName"
-                  component={FieldHelper.ReadonlyField}
-                />
-
+              <Fieldset>
+                <Row>
+                  <Col sm={12} md={12} lg={4} xl={3} className="text-center">
+                    <EntityAvatarDisplay
+                      avatar={organization.entityAvatar}
+                      defaultAvatar={Organization.relatedObjectType}
+                    />
+                  </Col>
+                  <Col
+                    lg={8}
+                    xl={9}
+                    className="d-flex flex-column justify-content-center"
+                  >
+                    <FormGroup>
+                      <Row style={{ marginBottom: "1rem" }}>
+                        <Col sm={7}>
+                          <Row>
+                            <Col>
+                              <DictionaryField
+                                wrappedComponent={Field}
+                                dictProps={
+                                  Settings.fields.organization.shortName
+                                }
+                                name="shortName"
+                                component={FieldHelper.ReadonlyField}
+                              />
+                              <DictionaryField
+                                wrappedComponent={Field}
+                                dictProps={
+                                  Settings.fields.organization.longName
+                                }
+                                name="longName"
+                                component={FieldHelper.ReadonlyField}
+                              />
+                            </Col>
+                          </Row>
+                        </Col>
+                      </Row>
+                    </FormGroup>
+                  </Col>
+                </Row>
+              </Fieldset>
+              <Fieldset id="info" title="Additional Information">
                 {organization.parentOrg && organization.parentOrg.uuid && (
                   <DictionaryField
                     wrappedComponent={Field}

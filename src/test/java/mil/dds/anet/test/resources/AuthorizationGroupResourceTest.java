@@ -22,11 +22,10 @@ class AuthorizationGroupResourceTest extends AbstractResourceTest {
   protected static final String FIELDS = "{ uuid name description status"
       + " administrativePositions { uuid name code type role status location { uuid name }"
       + " organization { uuid shortName longName identificationCode }"
-      + " person { uuid name rank avatarUuid } }"
+      + " person { uuid name rank } }"
       + " authorizationGroupRelatedObjects { relatedObjectType relatedObjectUuid"
       + " relatedObject { " + "... on Organization { uuid shortName longName identificationCode }"
-      + " ... on Person { uuid name rank avatarUuid }"
-      + " ... on Position { uuid type name } } } }";
+      + " ... on Person { uuid name rank }" + " ... on Position { uuid type name } } } }";
 
   @Test
   void searchTest() {

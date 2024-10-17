@@ -5,11 +5,8 @@ import API from "api"
 import { CountryOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
-import UploadAttachment, {
-  attachmentSave
-} from "components/Attachment/UploadAttachment"
-import AvatarEditModal from "components/AvatarEditModal"
-import ConfirmDestructive from "components/ConfirmDestructive"
+import UploadAttachment from "components/Attachment/UploadAttachment"
+import EntityAvatarComponent from "components/avatar/EntityAvatarComponent"
 import CustomDateInput from "components/CustomDateInput"
 import {
   CustomFieldsContainer,
@@ -53,7 +50,6 @@ import { toast } from "react-toastify"
 import Settings from "settings"
 import { useDebouncedCallback } from "use-debounce"
 import utils from "utils"
-import PersonAvatar from "./Avatar"
 
 const GQL_CREATE_PERSON = gql`
   mutation ($person: PersonInput!) {
@@ -70,11 +66,6 @@ const GQL_UPDATE_SELF = gql`
 const GQL_UPDATE_PERSON = gql`
   mutation ($person: PersonInput!) {
     updatePerson(person: $person)
-  }
-`
-const GQL_UPDATE_PERSON_AVATAR = gql`
-  mutation ($person: PersonInput!) {
-    updatePersonAvatar(person: $person)
   }
 `
 const GQL_GET_PERSON_COUNT = gql`
@@ -99,9 +90,6 @@ const PersonForm = ({
   const navigate = useNavigate()
   const confirmHasReplacementButton = useRef(null)
   const [error, setError] = useState(null)
-  const [currentAvatarUuid, setCurrentAvatarUuid] = useState(
-    initialValues?.avatarUuid
-  )
   const [attachmentList, setAttachmentList] = useState(
     initialValues?.attachments
   )
@@ -121,6 +109,9 @@ const PersonForm = ({
   const attachmentEditEnabled =
     attachmentsEnabled &&
     (!Settings.fields.attachment.restrictToAdmins || currentUser.isAdmin())
+  const avatarMimeTypes = Settings.fields.attachment.fileTypes
+    .filter(fileType => fileType.avatar)
+    .map(fileType => fileType.mimeType)
   initialValues.emailAddresses = initializeEmailAddresses(
     initialValues.emailAddresses
   )
@@ -220,14 +211,8 @@ const PersonForm = ({
           (initialValues.status === Model.STATUS.INACTIVE && !isAdmin) ||
           isPendingVerification ||
           isSelf
-        const currentAvatar = attachmentList?.find(
-          a => a.uuid === currentAvatarUuid
-        )
-        const otherAttachments = attachmentList?.filter(
-          a => a.uuid !== currentAvatarUuid
-        )
         const imageAttachments = attachmentList?.filter(a =>
-          a.mimeType?.startsWith("image/")
+          avatarMimeTypes.includes(a.mimeType)
         )
         const fullName = Person.fullName(Person.parseFullName(values.name))
         const nameMessage = "This is not " + (isSelf ? "me" : fullName)
@@ -262,46 +247,14 @@ const PersonForm = ({
                   {edit && (
                     /* Col contains the avatar and edit button */
                     <Col sm={12} md={12} lg={4} xl={3} className="text-center">
-                      <PersonAvatar
-                        avatar={currentAvatar}
-                        avatarUuid={currentAvatar?.uuid}
+                      <EntityAvatarComponent
+                        initialAvatar={initialValues.entityAvatar}
+                        relatedObjectType="people"
+                        relatedObjectUuid={initialValues.uuid}
+                        relatedObjectName={initialValues.name}
+                        editMode={attachmentEditEnabled}
+                        imageAttachments={imageAttachments}
                       />
-                      {(attachmentsEnabled && _isEmpty(imageAttachments) && (
-                        <span>
-                          <em>
-                            Upload some image attachments first before setting
-                            an avatar
-                          </em>
-                        </span>
-                      )) || (
-                        <div className="d-flex justify-content-around mt-3">
-                          {currentAvatar && (
-                            <ConfirmDestructive
-                              onConfirm={updateAvatar}
-                              operation="clear"
-                              objectType="the avatar"
-                              objectDisplay={`for ${values.name}`}
-                              title="Clear avatar"
-                              variant="outline-danger"
-                              buttonSize="xs"
-                            >
-                              Clear avatar
-                            </ConfirmDestructive>
-                          )}
-                          {attachmentEditEnabled && (
-                            <AvatarEditModal
-                              title={
-                                currentAvatar
-                                  ? "Set a new avatar"
-                                  : "Set an avatar"
-                              }
-                              currentAvatar={currentAvatar}
-                              images={imageAttachments}
-                              onAvatarUpdate={onAvatarUpdate}
-                            />
-                          )}
-                        </div>
-                      )}
                     </Col>
                   )}
                   {/* Col contains the rest of the fields for the first FieldSet */}
@@ -764,11 +717,8 @@ const PersonForm = ({
                     component={FieldHelper.SpecialField}
                     widget={
                       <UploadAttachment
-                        attachments={otherAttachments}
-                        updateAttachments={a =>
-                          setAttachmentList(
-                            currentAvatar ? [currentAvatar, ...a] : a
-                          )}
+                        attachments={attachmentList}
+                        updateAttachments={setAttachmentList}
                         relatedObjectType={Person.relatedObjectType}
                         relatedObjectUuid={values.uuid}
                       />
@@ -842,42 +792,6 @@ const PersonForm = ({
     </Formik>
   )
 
-  async function updateAvatar(newAvatarUuid) {
-    await API.mutation(GQL_UPDATE_PERSON_AVATAR, {
-      person: { uuid: initialValues.uuid, avatarUuid: newAvatarUuid }
-    })
-      .then(() => {
-        toast.success(`Avatar ${newAvatarUuid ? "updated" : "deleted"}`)
-        setCurrentAvatarUuid(newAvatarUuid)
-        loadAppData() // avatar was changed!
-      })
-      .catch(error =>
-        toast.error(
-          `Avatar ${newAvatarUuid ? "update" : "delete"} failed: ${
-            error.message
-          }`
-        )
-      )
-  }
-
-  async function onAvatarUpdate(chosenImage, data) {
-    const mimeType = "image/png"
-    const baseName = utils.stripExtension(chosenImage.fileName)
-    const newAvatar = await attachmentSave(
-      `${baseName}.png`,
-      mimeType,
-      data.length,
-      initialValues.name,
-      new Blob([data], { type: mimeType }),
-      Person.relatedObjectType,
-      initialValues.uuid
-    )
-    if (newAvatar?.uuid) {
-      setAttachmentList([...attachmentList, newAvatar])
-      await updateAvatar(newAvatar?.uuid)
-    }
-  }
-
   function handleLastNameOnKeyDown(event) {
     // adding a "," to the last name results in jumping to the end of the first name
     if (event.key === ",") {
@@ -936,7 +850,6 @@ const PersonForm = ({
   }
 
   function save(values, form) {
-    values.avatarUuid = currentAvatarUuid
     const person = Person.filterClientSideFields(new Person(values))
     if (values.pendingVerification && Settings.automaticallyAllowAllNewUsers) {
       person.pendingVerification = false

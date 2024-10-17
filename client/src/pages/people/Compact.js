@@ -3,6 +3,7 @@ import styled from "@emotion/styled"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
 import AppContext from "components/AppContext"
+import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import CompactTable, {
   CompactFooterContent,
   CompactHeaderContent,
@@ -21,6 +22,7 @@ import LinkTo from "components/LinkTo"
 import {
   DEFAULT_CUSTOM_FIELDS_PARENT,
   GRAPHQL_CUSTOM_SENSITIVE_INFORMATION_FIELDS,
+  GRAPHQL_ENTITY_AVATAR_FIELDS,
   SENSITIVE_CUSTOM_FIELDS_PARENT
 } from "components/Model"
 import {
@@ -43,7 +45,6 @@ import { connect } from "react-redux"
 import { useNavigate, useParams } from "react-router-dom"
 import Settings from "settings"
 import utils from "utils"
-import PersonAvatar from "./Avatar"
 
 const GQL_GET_PERSON = gql`
   query($uuid: String!) {
@@ -51,7 +52,7 @@ const GQL_GET_PERSON = gql`
       uuid
       name
       rank
-      avatarUuid
+      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       status
       pendingVerification
       phoneNumber
@@ -81,6 +82,7 @@ const GQL_GET_PERSON = gql`
           shortName
           longName
           identificationCode
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         associatedPositions {
           uuid
@@ -91,13 +93,14 @@ const GQL_GET_PERSON = gql`
             uuid
             name
             rank
-            avatarUuid
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
           organization {
             uuid
             shortName
             longName
             identificationCode
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
         }
       }
@@ -262,8 +265,9 @@ const CompactPersonView = ({ pageDispatchers }) => {
       <CompactRow
         key="avatar"
         content={
-          <PersonAvatar
-            avatarUuid={person.avatarUuid}
+          <EntityAvatarDisplay
+            avatar={person.entityAvatar}
+            defaultAvatar={Person.relatedObjectType}
             width={pageSize.avatarSize}
             height={pageSize.avatarSize}
           />
