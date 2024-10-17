@@ -1668,9 +1668,9 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     // Attach attachment to test report
     @SuppressWarnings("unchecked")
-    final var allowedMimeTypesObjects = (List<Map<String, ?>>) attachmentSettings.get("mimeTypes");
-    final var allowedMimeTypes = (List<String>) allowedMimeTypesObjects.stream()
-        .map(element -> (String) element.get("name")).toList();
+    final var allowedFileTypes = (List<Map<String, ?>>) attachmentSettings.get("fileTypes");
+    final var allowedMimeTypes = (List<String>) allowedFileTypes.stream()
+        .map(element -> (String) element.get("mimeType")).toList();
     final String mimeType = allowedMimeTypes.get(0);
 
     final GenericRelatedObjectInput testAroInput = GenericRelatedObjectInput.builder()

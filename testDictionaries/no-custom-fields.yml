@@ -305,28 +305,28 @@ fields:
     description:
       label: Description
       placeholder: Enter a description of this attachment
-    mimeTypes:
-      - name: application/pdf
+    fileTypes:
+      - mimeType: application/pdf
         avatar: false
-      - name: image/avif
+      - mimeType: image/avif
         avatar: true
         crop: false
-      - name: image/gif
+      - mimeType: image/gif
         avatar: true
         crop: true
-      - name: image/jpeg
+      - mimeType: image/jpeg
         avatar: true
         crop: true
-      - name: image/png
+      - mimeType: image/png
         avatar: true
         crop: true
-      - name: image/svg+xml
+      - mimeType: image/svg+xml
         avatar: true
         crop: false
-      - name: image/webp
+      - mimeType: image/webp
         avatar: true
         crop: false
-      - name: text/plain
+      - mimeType: text/plain
         avatar: false
 
   authorizationGroup:
