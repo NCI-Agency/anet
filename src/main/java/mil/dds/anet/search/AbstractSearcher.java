@@ -115,17 +115,16 @@ public abstract class AbstractSearcher<B, T extends AbstractSearchQuery<?>> {
     final var configuration = AnetObjectEngine.getConfiguration();
     final var isOndemand = "ondemand"
         .equals(configuration.getDictionaryEntry(String.format("%s.recurrence", assessmentKey)));
-    qb.addWithClause(
-        String.format("assessments AS (%s)", getWithAssessmentsClause(tableName, isOndemand)));
-    qb.addFromClause(String
-        .format("JOIN assessments ON \"%s\".uuid = assessments.\"relatedObjectUuid\"", tableName));
+    final var fromAssessmentsClause = getFromAssessmentsClause(tableName, isOndemand);
     qb.addSqlArg("noteTypeAssessment", DaoUtils.getEnumId(NoteType.ASSESSMENT));
     qb.addSqlArg("assessmentKey", assessmentKey);
+    final var filterClauses = new ArrayList<>();
     if (isOndemand) {
+      // If it is an ondemand assessment, it may be expired.
       final var expirationClause =
           getOndemandAssessmentExpirationClause(configuration, assessmentKey);
       if (!expirationClause.isEmpty()) {
-        qb.addWhereClause(expirationClause);
+        filterClauses.add(expirationClause);
       }
     }
     final var filters = query.filters();
@@ -135,10 +134,10 @@ public abstract class AbstractSearcher<B, T extends AbstractSearchQuery<?>> {
         final var valueParam = String.format("%s.value", keyParam);
         final var filterType = configuration.getDictionaryEntry(String.format("%s.type", keyParam));
         if ("enum".equals(filterType)) {
-          qb.addWhereClause(
+          filterClauses.add(
               String.format("assessments.text::jsonb->>:%1$s IN (<%2$s>)", keyParam, valueParam));
         } else if ("enumset".equals(filterType)) {
-          qb.addWhereClause(String.format("assessments.text::jsonb->:%1$s ??| array[<%2$s>]",
+          filterClauses.add(String.format("assessments.text::jsonb->:%1$s ??| array[<%2$s>]",
               keyParam, valueParam));
         } else {
           // Can't handle this filter type, just skip
@@ -148,22 +147,30 @@ public abstract class AbstractSearcher<B, T extends AbstractSearchQuery<?>> {
         qb.addListArg(valueParam, (List<?>) v);
       });
     }
+    final var inAssessmentsClause = new StringBuilder(String.format(
+        "SELECT assessments.\"relatedObjectUuid\" FROM (%s) assessments", fromAssessmentsClause));
+    if (!filterClauses.isEmpty()) {
+      inAssessmentsClause
+          .append(String.format(" WHERE %s", Joiner.on(" AND ").join(filterClauses)));
+    }
+    qb.addWhereClause(String.format("\"%1$s\".uuid IN (%2$s)", tableName, inAssessmentsClause));
   }
 
-  private String getWithAssessmentsClause(String tableName, boolean isOndemand) {
-    final var withAssessments =
-        new StringBuilder(String.format("SELECT asmnt_nro.\"relatedObjectUuid\", asmnt.text"
+  private String getFromAssessmentsClause(String tableName, boolean isOndemand) {
+    final var fromAssessments = new StringBuilder(String.format(
+        "SELECT asmnt_nro.\"relatedObjectUuid\", asmnt.text"
             + " FROM \"noteRelatedObjects\" asmnt_nro"
             + " JOIN notes asmnt ON asmnt.uuid = asmnt_nro.\"noteUuid\""
-            + " WHERE asmnt_nro.\"relatedObjectType\" = '%s'"
-            + " AND asmnt.type = :noteTypeAssessment"
-            + " AND asmnt.\"assessmentKey\" = :assessmentKey", tableName));
+            + " WHERE asmnt_nro.\"relatedObjectType\" = '%1$s'"
+            + " AND asmnt_nro.\"relatedObjectUuid\" = \"%1$s\".uuid"
+            + " AND asmnt.type = :noteTypeAssessment AND asmnt.\"assessmentKey\" = :assessmentKey",
+        tableName));
     if (isOndemand) {
       // If it is an ondemand assessment, it will have an assessmentDate,
       // only the most recent one will be valid.
-      withAssessments.append(" ORDER BY (asmnt.text::jsonb->>'assessmentDate')::date DESC LIMIT 1");
+      fromAssessments.append(" ORDER BY (asmnt.text::jsonb->>'assessmentDate')::date DESC LIMIT 1");
     }
-    return withAssessments.toString();
+    return fromAssessments.toString();
   }
 
   private String getOndemandAssessmentExpirationClause(AnetConfiguration configuration,
