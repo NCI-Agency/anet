@@ -306,10 +306,10 @@ public class AttachmentResource {
   }
 
   public static List<String> getAllowedMimeTypes() {
-    // Get the allowed mime types from dictionary
+    // Get the allowed file types from dictionary
     @SuppressWarnings("unchecked")
-    final var mimeTypes = (List<Map<String, ?>>) getAttachmentSettings().get("mimeTypes");
-    // Extract names
-    return mimeTypes.stream().map(element -> (String) element.get("name")).toList();
+    final var fileTypes = (List<Map<String, ?>>) getAttachmentSettings().get("fileTypes");
+    // Extract MIME type
+    return fileTypes.stream().map(element -> (String) element.get("mimeType")).toList();
   }
 }

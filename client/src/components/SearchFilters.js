@@ -677,8 +677,8 @@ export const searchFilters = function(includeAdminFilters) {
 
   filters[SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS] = { filters: {} }
 
-  const mimeTypes = Settings.fields.attachment.mimeTypes?.map(
-    mimeType => mimeType.name
+  const mimeTypes = Settings.fields.attachment.fileTypes?.map(
+    fileType => fileType.mimeType
   )
   filters[SEARCH_OBJECT_TYPES.ATTACHMENTS] = {
     filters: {

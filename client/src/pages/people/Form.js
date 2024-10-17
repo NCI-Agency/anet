@@ -109,9 +109,9 @@ const PersonForm = ({
   const attachmentEditEnabled =
     attachmentsEnabled &&
     (!Settings.fields.attachment.restrictToAdmins || currentUser.isAdmin())
-  const avatarMimeTypes = Settings.fields.attachment.mimeTypes
-    .filter(mimeType => mimeType.avatar)
-    .map(mimeType => mimeType.name)
+  const avatarMimeTypes = Settings.fields.attachment.fileTypes
+    .filter(fileType => fileType.avatar)
+    .map(fileType => fileType.mimeType)
   initialValues.emailAddresses = initializeEmailAddresses(
     initialValues.emailAddresses
   )
