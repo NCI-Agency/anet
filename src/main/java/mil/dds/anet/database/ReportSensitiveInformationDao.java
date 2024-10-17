@@ -1,11 +1,10 @@
 package mil.dds.anet.database;
 
+import graphql.GraphQLContext;
 import java.time.Instant;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.ReportSensitiveInformation;
@@ -17,8 +16,11 @@ import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.ForeignKeyFetcher;
-import ru.vyarus.guicey.jdbi3.tx.InTransaction;
+import org.jdbi.v3.core.Handle;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
+@Component
 public class ReportSensitiveInformationDao
     extends AnetBaseDao<ReportSensitiveInformation, AbstractSearchQuery<?>> {
 
@@ -26,6 +28,10 @@ public class ReportSensitiveInformationDao
   public static final String TABLE_NAME = "reportsSensitiveInformation";
   public static final String REPORT_SENSITIVE_INFORMATION_FIELDS =
       DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
+
+  public ReportSensitiveInformationDao(DatabaseHandler databaseHandler) {
+    super(databaseHandler);
+  }
 
   @Override
   public ReportSensitiveInformation getByUuid(String uuid) {
@@ -37,24 +43,21 @@ public class ReportSensitiveInformationDao
     throw new UnsupportedOperationException();
   }
 
-  static class ReportsSensitiveInformationBatcher
-      extends ForeignKeyBatcher<ReportSensitiveInformation> {
-    private static final String sql =
+  class ReportsSensitiveInformationBatcher extends ForeignKeyBatcher<ReportSensitiveInformation> {
+    private static final String SQL =
         "/* batch.getReportSensitiveInformationsByReportUuids */ SELECT "
             + REPORT_SENSITIVE_INFORMATION_FIELDS + " FROM \"" + TABLE_NAME + "\""
             + " WHERE \"reportUuid\" IN ( <foreignKeys> )";
 
     public ReportsSensitiveInformationBatcher() {
-      super(sql, "foreignKeys", new ReportSensitiveInformationMapper(),
+      super(databaseHandler, SQL, "foreignKeys", new ReportSensitiveInformationMapper(),
           "reportsSensitiveInformation_reportUuid");
     }
   }
 
   public List<List<ReportSensitiveInformation>> getReportSensitiveInformation(
       List<String> foreignKeys) {
-    final ForeignKeyBatcher<ReportSensitiveInformation> reportIdBatcher = AnetObjectEngine
-        .getInstance().getInjector().getInstance(ReportsSensitiveInformationBatcher.class);
-    return reportIdBatcher.getByForeignKeys(foreignKeys);
+    return new ReportsSensitiveInformationBatcher().getByForeignKeys(foreignKeys);
   }
 
   @Override
@@ -62,22 +65,27 @@ public class ReportSensitiveInformationDao
     throw new UnsupportedOperationException();
   }
 
-  @InTransaction
+  @Transactional
   public ReportSensitiveInformation insert(ReportSensitiveInformation rsi, Person user,
       Report report) {
-    if (rsi == null || !isAuthorized(user, report) || Utils.isEmptyHtml(rsi.getText())) {
-      return null;
+    final Handle handle = getDbHandle();
+    try {
+      if (rsi == null || !isAuthorized(user, report) || Utils.isEmptyHtml(rsi.getText())) {
+        return null;
+      }
+      DaoUtils.setInsertFields(rsi);
+      handle
+          .createUpdate("/* insertReportsSensitiveInformation */ INSERT INTO \"" + TABLE_NAME
+              + "\" " + " (uuid, text, \"reportUuid\", \"createdAt\", \"updatedAt\") "
+              + "VALUES (:uuid, :text, :reportUuid, :createdAt, :updatedAt)")
+          .bindBean(rsi).bind("createdAt", DaoUtils.asLocalDateTime(rsi.getCreatedAt()))
+          .bind("updatedAt", DaoUtils.asLocalDateTime(rsi.getUpdatedAt()))
+          .bind("reportUuid", report.getUuid()).execute();
+      AnetAuditLogger.log("ReportSensitiveInformation {} created by {} ", rsi, user);
+      return rsi;
+    } finally {
+      closeDbHandle(handle);
     }
-    DaoUtils.setInsertFields(rsi);
-    getDbHandle()
-        .createUpdate("/* insertReportsSensitiveInformation */ INSERT INTO \"" + TABLE_NAME + "\" "
-            + " (uuid, text, \"reportUuid\", \"createdAt\", \"updatedAt\") "
-            + "VALUES (:uuid, :text, :reportUuid, :createdAt, :updatedAt)")
-        .bindBean(rsi).bind("createdAt", DaoUtils.asLocalDateTime(rsi.getCreatedAt()))
-        .bind("updatedAt", DaoUtils.asLocalDateTime(rsi.getUpdatedAt()))
-        .bind("reportUuid", report.getUuid()).execute();
-    AnetAuditLogger.log("ReportSensitiveInformation {} created by {} ", rsi, user);
-    return rsi;
   }
 
   @Override
@@ -85,34 +93,40 @@ public class ReportSensitiveInformationDao
     throw new UnsupportedOperationException();
   }
 
-  @InTransaction
+  @Transactional
   public int update(ReportSensitiveInformation rsi, Person user, Report report) {
-    if (rsi == null || !isAuthorized(user, report)) {
-      return 0;
+    final Handle handle = getDbHandle();
+    try {
+      if (rsi == null || !isAuthorized(user, report)) {
+        return 0;
+      }
+      final int numRows;
+      if (Utils.isEmptyHtml(rsi.getText())) {
+        numRows = handle.createUpdate("/* deleteReportsSensitiveInformation */ DELETE FROM \""
+            + TABLE_NAME + "\" WHERE uuid = :uuid").bind("uuid", rsi.getUuid()).execute();
+        AnetAuditLogger.log("Empty ReportSensitiveInformation {} deleted by {} ", rsi, user);
+      } else {
+        // Update relevant fields, but do not allow the reportUuid to be updated by the query!
+        rsi.setUpdatedAt(Instant.now());
+        numRows = handle
+            .createUpdate("/* updateReportsSensitiveInformation */ UPDATE \"" + TABLE_NAME + "\""
+                + " SET text = :text, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
+            .bindBean(rsi).bind("updatedAt", DaoUtils.asLocalDateTime(rsi.getUpdatedAt()))
+            .execute();
+        AnetAuditLogger.log("ReportSensitiveInformation {} updated by {} ", rsi, user);
+      }
+      return numRows;
+    } finally {
+      closeDbHandle(handle);
     }
-    final int numRows;
-    if (Utils.isEmptyHtml(rsi.getText())) {
-      numRows = getDbHandle().createUpdate("/* deleteReportsSensitiveInformation */ DELETE FROM \""
-          + TABLE_NAME + "\" WHERE uuid = :uuid").bind("uuid", rsi.getUuid()).execute();
-      AnetAuditLogger.log("Empty ReportSensitiveInformation {} deleted by {} ", rsi, user);
-    } else {
-      // Update relevant fields, but do not allow the reportUuid to be updated by the query!
-      rsi.setUpdatedAt(Instant.now());
-      numRows = getDbHandle()
-          .createUpdate("/* updateReportsSensitiveInformation */ UPDATE \"" + TABLE_NAME + "\""
-              + " SET text = :text, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
-          .bindBean(rsi).bind("updatedAt", DaoUtils.asLocalDateTime(rsi.getUpdatedAt())).execute();
-      AnetAuditLogger.log("ReportSensitiveInformation {} updated by {} ", rsi, user);
-    }
-    return numRows;
   }
 
   public Object insertOrUpdate(ReportSensitiveInformation rsi, Person user, Report report) {
     return (DaoUtils.getUuid(rsi) == null) ? insert(rsi, user, report) : update(rsi, user, report);
   }
 
-  @InTransaction
-  public CompletableFuture<ReportSensitiveInformation> getForReport(Map<String, Object> context,
+  @Transactional
+  public CompletableFuture<ReportSensitiveInformation> getForReport(GraphQLContext context,
       Report report, Person user) {
     if (!isAuthorized(user, report)) {
       return CompletableFuture.completedFuture(null);
@@ -152,7 +166,7 @@ public class ReportSensitiveInformationDao
     }
 
     // Check authorization groups
-    final ReportDao reportDao = AnetObjectEngine.getInstance().getReportDao();
+    final ReportDao reportDao = engine().getReportDao();
     final List<String> authorizationGroupUuids =
         reportDao.getAuthorizationGroupsForReport(reportUuid).stream()
             .map(AbstractAnetBean::getUuid).toList();

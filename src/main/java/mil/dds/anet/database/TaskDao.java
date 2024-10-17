@@ -1,29 +1,33 @@
 package mil.dds.anet.database;
 
+import graphql.GraphQLContext;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.TaskSearchQuery;
+import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.mappers.OrganizationMapper;
 import mil.dds.anet.database.mappers.PositionMapper;
 import mil.dds.anet.database.mappers.TaskMapper;
+import mil.dds.anet.search.pg.PostgresqlTaskSearcher;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.utils.SqDataLoaderKey;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import mil.dds.anet.views.SearchQueryFetcher;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
 import org.jdbi.v3.sqlobject.statement.SqlBatch;
-import ru.vyarus.guicey.jdbi3.tx.InTransaction;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
+@Component
 public class TaskDao extends AnetSubscribableObjectDao<Task, TaskSearchQuery> {
 
   private static final String[] fields = {"uuid", "shortName", "longName", "status", "description",
@@ -32,46 +36,46 @@ public class TaskDao extends AnetSubscribableObjectDao<Task, TaskSearchQuery> {
   public static final String TABLE_NAME = "tasks";
   public static final String TASK_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
 
+  public TaskDao(DatabaseHandler databaseHandler) {
+    super(databaseHandler);
+  }
+
   @Override
   public Task getByUuid(String uuid) {
     return getByIds(Arrays.asList(uuid)).get(0);
   }
 
-  static class SelfIdBatcher extends IdBatcher<Task> {
-    private static final String sql = "/* batch.getTasksByUuids */ SELECT " + TASK_FIELDS
+  class SelfIdBatcher extends IdBatcher<Task> {
+    private static final String SQL = "/* batch.getTasksByUuids */ SELECT " + TASK_FIELDS
         + " FROM tasks WHERE uuid IN ( <uuids> )";
 
     public SelfIdBatcher() {
-      super(sql, "uuids", new TaskMapper());
+      super(databaseHandler, SQL, "uuids", new TaskMapper());
     }
   }
 
   @Override
   public List<Task> getByIds(List<String> uuids) {
-    final IdBatcher<Task> idBatcher =
-        AnetObjectEngine.getInstance().getInjector().getInstance(SelfIdBatcher.class);
-    return idBatcher.getByIds(uuids);
+    return new SelfIdBatcher().getByIds(uuids);
   }
 
-  static class ResponsiblePositionsBatcher extends ForeignKeyBatcher<Position> {
-    private static final String sql =
+  class ResponsiblePositionsBatcher extends ForeignKeyBatcher<Position> {
+    private static final String SQL =
         "/* batch.getResponsiblePositionsForTask */ SELECT \"taskUuid\", "
             + PositionDao.POSITION_FIELDS + " FROM positions, \"taskResponsiblePositions\" "
             + "WHERE \"taskResponsiblePositions\".\"taskUuid\" IN ( <foreignKeys> ) "
             + "AND \"taskResponsiblePositions\".\"positionUuid\" = positions.uuid";
 
     public ResponsiblePositionsBatcher() {
-      super(sql, "foreignKeys", new PositionMapper(), "taskUuid");
+      super(databaseHandler, SQL, "foreignKeys", new PositionMapper(), "taskUuid");
     }
   }
 
   public List<List<Position>> getResponsiblePositions(List<String> foreignKeys) {
-    final ForeignKeyBatcher<Position> responsiblePositionsBatcher =
-        AnetObjectEngine.getInstance().getInjector().getInstance(ResponsiblePositionsBatcher.class);
-    return responsiblePositionsBatcher.getByForeignKeys(foreignKeys);
+    return new ResponsiblePositionsBatcher().getByForeignKeys(foreignKeys);
   }
 
-  static class TaskedOrganizationsBatcher extends ForeignKeyBatcher<Organization> {
+  class TaskedOrganizationsBatcher extends ForeignKeyBatcher<Organization> {
     private static final String sql =
         "/* batch.getTaskedOrganizationsForTask */ SELECT \"taskUuid\", "
             + OrganizationDao.ORGANIZATION_FIELDS
@@ -80,30 +84,26 @@ public class TaskDao extends AnetSubscribableObjectDao<Task, TaskSearchQuery> {
             + "AND \"taskTaskedOrganizations\".\"organizationUuid\" = organizations.uuid";
 
     public TaskedOrganizationsBatcher() {
-      super(sql, "foreignKeys", new OrganizationMapper(), "taskUuid");
+      super(databaseHandler, sql, "foreignKeys", new OrganizationMapper(), "taskUuid");
     }
   }
 
   public List<List<Organization>> getTaskedOrganizations(List<String> foreignKeys) {
-    final ForeignKeyBatcher<Organization> taskedOrganizationsBatcher =
-        AnetObjectEngine.getInstance().getInjector().getInstance(TaskedOrganizationsBatcher.class);
-    return taskedOrganizationsBatcher.getByForeignKeys(foreignKeys);
+    return new TaskedOrganizationsBatcher().getByForeignKeys(foreignKeys);
   }
 
   static class TaskSearchBatcher extends SearchQueryBatcher<Task, TaskSearchQuery> {
     public TaskSearchBatcher() {
-      super(AnetObjectEngine.getInstance().getTaskDao());
+      super(ApplicationContextProvider.getEngine().getTaskDao());
     }
   }
 
   public List<List<Task>> getTasksBySearch(
       List<ImmutablePair<String, TaskSearchQuery>> foreignKeys) {
-    final TaskSearchBatcher instance =
-        AnetObjectEngine.getInstance().getInjector().getInstance(TaskSearchBatcher.class);
-    return instance.getByForeignKeys(foreignKeys);
+    return new TaskSearchBatcher().getByForeignKeys(foreignKeys);
   }
 
-  public CompletableFuture<List<Task>> getTasksBySearch(Map<String, Object> context, String uuid,
+  public CompletableFuture<List<Task>> getTasksBySearch(GraphQLContext context, String uuid,
       TaskSearchQuery query) {
     return new SearchQueryFetcher<Task, TaskSearchQuery>().load(context,
         SqDataLoaderKey.TASKS_SEARCH, new ImmutablePair<>(uuid, query));
@@ -111,27 +111,32 @@ public class TaskDao extends AnetSubscribableObjectDao<Task, TaskSearchQuery> {
 
   @Override
   public Task insertInternal(Task p) {
-    getDbHandle()
-        .createUpdate("/* insertTask */ INSERT INTO tasks "
-            + "(uuid, \"longName\", \"shortName\", category, \"parentTaskUuid\", \"createdAt\", "
-            + "\"updatedAt\", status, selectable, description, "
-            + "\"plannedCompletion\", \"projectedCompletion\", \"customFields\") "
-            + "VALUES (:uuid, :longName, :shortName, :category, :parentTaskUuid, :createdAt, "
-            + ":updatedAt, :status, :selectable, :description, "
-            + ":plannedCompletion, :projectedCompletion, :customFields)")
-        .bindBean(p).bind("createdAt", DaoUtils.asLocalDateTime(p.getCreatedAt()))
-        .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
-        .bind("plannedCompletion", DaoUtils.asLocalDateTime(p.getPlannedCompletion()))
-        .bind("projectedCompletion", DaoUtils.asLocalDateTime(p.getProjectedCompletion()))
-        .bind("status", DaoUtils.getEnumId(p.getStatus())).execute();
-    final TaskBatch tb = getDbHandle().attach(TaskBatch.class);
-    if (p.getTaskedOrganizations() != null) {
-      tb.inserttaskTaskedOrganizations(p.getUuid(), p.getTaskedOrganizations());
+    final Handle handle = getDbHandle();
+    try {
+      handle
+          .createUpdate("/* insertTask */ INSERT INTO tasks "
+              + "(uuid, \"longName\", \"shortName\", category, \"parentTaskUuid\", \"createdAt\", "
+              + "\"updatedAt\", status, selectable, description, "
+              + "\"plannedCompletion\", \"projectedCompletion\", \"customFields\") "
+              + "VALUES (:uuid, :longName, :shortName, :category, :parentTaskUuid, :createdAt, "
+              + ":updatedAt, :status, :selectable, :description, "
+              + ":plannedCompletion, :projectedCompletion, :customFields)")
+          .bindBean(p).bind("createdAt", DaoUtils.asLocalDateTime(p.getCreatedAt()))
+          .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
+          .bind("plannedCompletion", DaoUtils.asLocalDateTime(p.getPlannedCompletion()))
+          .bind("projectedCompletion", DaoUtils.asLocalDateTime(p.getProjectedCompletion()))
+          .bind("status", DaoUtils.getEnumId(p.getStatus())).execute();
+      final TaskBatch tb = handle.attach(TaskBatch.class);
+      if (p.getTaskedOrganizations() != null) {
+        tb.inserttaskTaskedOrganizations(p.getUuid(), p.getTaskedOrganizations());
+      }
+      if (p.getResponsiblePositions() != null) {
+        tb.inserttaskResponsiblePositions(p.getUuid(), p.getResponsiblePositions());
+      }
+      return p;
+    } finally {
+      closeDbHandle(handle);
     }
-    if (p.getResponsiblePositions() != null) {
-      tb.inserttaskResponsiblePositions(p.getUuid(), p.getResponsiblePositions());
-    }
-    return p;
   }
 
   public interface TaskBatch {
@@ -146,67 +151,92 @@ public class TaskDao extends AnetSubscribableObjectDao<Task, TaskSearchQuery> {
 
   @Override
   public int updateInternal(Task p) {
-    return getDbHandle().createUpdate(
-        "/* updateTask */ UPDATE tasks set \"longName\" = :longName, \"shortName\" = :shortName, "
-            + "category = :category, \"parentTaskUuid\" = :parentTaskUuid, "
-            + "\"updatedAt\" = :updatedAt, status = :status, selectable = :selectable, "
-            + "description = :description, \"plannedCompletion\" = :plannedCompletion, "
-            + "\"projectedCompletion\" = :projectedCompletion, \"customFields\" = :customFields "
-            + "WHERE uuid = :uuid")
-        .bindBean(p).bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
-        .bind("plannedCompletion", DaoUtils.asLocalDateTime(p.getPlannedCompletion()))
-        .bind("projectedCompletion", DaoUtils.asLocalDateTime(p.getProjectedCompletion()))
-        .bind("status", DaoUtils.getEnumId(p.getStatus())).execute();
+    final Handle handle = getDbHandle();
+    try {
+      return handle.createUpdate(
+          "/* updateTask */ UPDATE tasks set \"longName\" = :longName, \"shortName\" = :shortName, "
+              + "category = :category, \"parentTaskUuid\" = :parentTaskUuid, "
+              + "\"updatedAt\" = :updatedAt, status = :status, selectable = :selectable, "
+              + "description = :description, \"plannedCompletion\" = :plannedCompletion, "
+              + "\"projectedCompletion\" = :projectedCompletion, \"customFields\" = :customFields "
+              + "WHERE uuid = :uuid")
+          .bindBean(p).bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
+          .bind("plannedCompletion", DaoUtils.asLocalDateTime(p.getPlannedCompletion()))
+          .bind("projectedCompletion", DaoUtils.asLocalDateTime(p.getProjectedCompletion()))
+          .bind("status", DaoUtils.getEnumId(p.getStatus())).execute();
+    } finally {
+      closeDbHandle(handle);
+    }
   }
 
-  @InTransaction
+  @Transactional
   public int addPositionToTask(Position p, Task t) {
-    return getDbHandle().createUpdate(
-        "/* addPositionToTask */ INSERT INTO \"taskResponsiblePositions\" (\"taskUuid\", \"positionUuid\") "
-            + "VALUES (:taskUuid, :positionUuid)")
-        .bind("taskUuid", t.getUuid()).bind("positionUuid", p.getUuid()).execute();
+    final Handle handle = getDbHandle();
+    try {
+      return handle.createUpdate(
+          "/* addPositionToTask */ INSERT INTO \"taskResponsiblePositions\" (\"taskUuid\", \"positionUuid\") "
+              + "VALUES (:taskUuid, :positionUuid)")
+          .bind("taskUuid", t.getUuid()).bind("positionUuid", p.getUuid()).execute();
+    } finally {
+      closeDbHandle(handle);
+    }
   }
 
-  @InTransaction
+  @Transactional
   public int removePositionFromTask(String positionUuid, String taskUuid) {
-    return getDbHandle()
-        .createUpdate("/* removePositionFromTask*/ DELETE FROM \"taskResponsiblePositions\" "
-            + "WHERE \"taskUuid\" = :taskUuid AND \"positionUuid\" = :positionUuid")
-        .bind("taskUuid", taskUuid).bind("positionUuid", positionUuid).execute();
+    final Handle handle = getDbHandle();
+    try {
+      return handle
+          .createUpdate("/* removePositionFromTask*/ DELETE FROM \"taskResponsiblePositions\" "
+              + "WHERE \"taskUuid\" = :taskUuid AND \"positionUuid\" = :positionUuid")
+          .bind("taskUuid", taskUuid).bind("positionUuid", positionUuid).execute();
+    } finally {
+      closeDbHandle(handle);
+    }
   }
 
-  public CompletableFuture<List<Position>> getResponsiblePositionsForTask(
-      Map<String, Object> context, String taskUuid) {
+  public CompletableFuture<List<Position>> getResponsiblePositionsForTask(GraphQLContext context,
+      String taskUuid) {
     return new ForeignKeyFetcher<Position>().load(context,
         FkDataLoaderKey.TASK_RESPONSIBLE_POSITIONS, taskUuid);
   }
 
-  @InTransaction
+  @Transactional
   public int addTaskedOrganizationsToTask(Organization o, Task t) {
-    return getDbHandle().createUpdate(
-        "/* addTaskedOrganizationsToTask */ INSERT INTO \"taskTaskedOrganizations\" (\"taskUuid\", \"organizationUuid\") "
-            + "VALUES (:taskUuid, :organizationUuid)")
-        .bind("taskUuid", t.getUuid()).bind("organizationUuid", o.getUuid()).execute();
+    final Handle handle = getDbHandle();
+    try {
+      return handle.createUpdate(
+          "/* addTaskedOrganizationsToTask */ INSERT INTO \"taskTaskedOrganizations\" (\"taskUuid\", \"organizationUuid\") "
+              + "VALUES (:taskUuid, :organizationUuid)")
+          .bind("taskUuid", t.getUuid()).bind("organizationUuid", o.getUuid()).execute();
+    } finally {
+      closeDbHandle(handle);
+    }
   }
 
-  @InTransaction
+  @Transactional
   public int removeTaskedOrganizationsFromTask(String organizationUuid, String taskUuid) {
-    return getDbHandle()
-        .createUpdate(
-            "/* removeTaskedOrganizationsFromTask*/ DELETE FROM \"taskTaskedOrganizations\" "
-                + "WHERE \"taskUuid\" = :taskUuid AND \"organizationUuid\" = :organizationUuid")
-        .bind("taskUuid", taskUuid).bind("organizationUuid", organizationUuid).execute();
+    final Handle handle = getDbHandle();
+    try {
+      return handle
+          .createUpdate(
+              "/* removeTaskedOrganizationsFromTask*/ DELETE FROM \"taskTaskedOrganizations\" "
+                  + "WHERE \"taskUuid\" = :taskUuid AND \"organizationUuid\" = :organizationUuid")
+          .bind("taskUuid", taskUuid).bind("organizationUuid", organizationUuid).execute();
+    } finally {
+      closeDbHandle(handle);
+    }
   }
 
-  public CompletableFuture<List<Organization>> getTaskedOrganizationsForTask(
-      Map<String, Object> context, String taskUuid) {
+  public CompletableFuture<List<Organization>> getTaskedOrganizationsForTask(GraphQLContext context,
+      String taskUuid) {
     return new ForeignKeyFetcher<Organization>().load(context,
         FkDataLoaderKey.TASK_TASKED_ORGANIZATIONS, taskUuid);
   }
 
   @Override
   public AnetBeanList<Task> search(TaskSearchQuery query) {
-    return AnetObjectEngine.getInstance().getSearcher().getTaskSearcher().runSearch(query);
+    return new PostgresqlTaskSearcher(databaseHandler).runSearch(query);
   }
 
   @Override

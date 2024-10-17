@@ -1,18 +1,18 @@
 package mil.dds.anet.utils;
 
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response.Status;
+import graphql.GraphQLContext;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
-import java.util.Map;
-import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionType;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
+import mil.dds.anet.config.ApplicationContextProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 public class AuthUtils {
 
@@ -28,7 +28,7 @@ public class AuthUtils {
     if (isAdmin(user)) {
       return;
     }
-    throw new WebApplicationException(UNAUTH_MESSAGE, Status.FORBIDDEN);
+    throw new ResponseStatusException(HttpStatus.FORBIDDEN, UNAUTH_MESSAGE);
   }
 
   public static boolean canAdministrateOrg(final Person user, final String organizationUuid) {
@@ -52,7 +52,7 @@ public class AuthUtils {
     }
 
     // Check the responsible organizations.
-    final Map<String, Object> context = AnetObjectEngine.getInstance().getContext();
+    final GraphQLContext context = ApplicationContextProvider.getEngine().getContext();
     final List<Organization> administratedOrgs =
         position.loadOrganizationsAdministrated(context).join();
     if (administratedOrgs.stream().anyMatch(o -> o.getUuid().equals(organizationUuid))) {
@@ -77,13 +77,13 @@ public class AuthUtils {
     if (canAdministrateOrg(user, organizationUuid)) {
       return;
     }
-    throw new WebApplicationException(UNAUTH_MESSAGE, Status.FORBIDDEN);
+    throw new ResponseStatusException(HttpStatus.FORBIDDEN, UNAUTH_MESSAGE);
   }
 
   public static void assertSuperuser(Person user) {
     logger.debug("Asserting superuser position for {}", user);
     if (!isSuperuser(user)) {
-      throw new WebApplicationException(UNAUTH_MESSAGE, Status.FORBIDDEN);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, UNAUTH_MESSAGE);
     }
   }
 

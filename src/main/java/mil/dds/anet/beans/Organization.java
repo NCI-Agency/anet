@@ -1,16 +1,15 @@
 package mil.dds.anet.beans;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.search.FkBatchParams;
 import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
 import mil.dds.anet.beans.search.M2mBatchParams;
@@ -18,6 +17,8 @@ import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.PositionSearchQuery;
 import mil.dds.anet.beans.search.RecursiveFkBatchParams;
 import mil.dds.anet.beans.search.TaskSearchQuery;
+import mil.dds.anet.config.ApplicationContextProvider;
+import mil.dds.anet.database.ApprovalStepDao;
 import mil.dds.anet.database.AuthorizationGroupDao;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.graphql.AllowUnverifiedUsers;
@@ -80,7 +81,7 @@ public class Organization extends AbstractEmailableAnetBean
   private List<AuthorizationGroup> authorizationGroups;
 
   @GraphQLQuery(name = "location")
-  public CompletableFuture<Location> loadLocation(@GraphQLRootContext Map<String, Object> context) {
+  public CompletableFuture<Location> loadLocation(@GraphQLRootContext GraphQLContext context) {
     if (location.hasForeignObject()) {
       return CompletableFuture.completedFuture(location.getForeignObject());
     }
@@ -193,8 +194,7 @@ public class Organization extends AbstractEmailableAnetBean
   }
 
   @GraphQLQuery(name = "parentOrg")
-  public CompletableFuture<Organization> loadParentOrg(
-      @GraphQLRootContext Map<String, Object> context) {
+  public CompletableFuture<Organization> loadParentOrg(@GraphQLRootContext GraphQLContext context) {
     if (parentOrg.hasForeignObject()) {
       return CompletableFuture.completedFuture(parentOrg.getForeignObject());
     }
@@ -225,8 +225,7 @@ public class Organization extends AbstractEmailableAnetBean
   }
 
   @GraphQLQuery(name = "positions")
-  public CompletableFuture<List<Position>> loadPositions(
-      @GraphQLRootContext Map<String, Object> context,
+  public CompletableFuture<List<Position>> loadPositions(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "query") PositionSearchQuery query) {
     if (query == null) {
       query = new PositionSearchQuery();
@@ -234,18 +233,17 @@ public class Organization extends AbstractEmailableAnetBean
     // Note: no recursion, only direct children!
     query.setBatchParams(
         new FkBatchParams<Position, PositionSearchQuery>("positions", "\"organizationUuid\""));
-    return AnetObjectEngine.getInstance().getPositionDao().getPositionsBySearch(context, uuid,
-        query);
+    return engine().getPositionDao().getPositionsBySearch(context, uuid, query);
   }
 
   @GraphQLQuery(name = "planningApprovalSteps")
   public CompletableFuture<List<ApprovalStep>> loadPlanningApprovalSteps(
-      @GraphQLRootContext Map<String, Object> context) {
+      @GraphQLRootContext GraphQLContext context) {
     if (planningApprovalSteps != null) {
       return CompletableFuture.completedFuture(planningApprovalSteps);
     }
-    return AnetObjectEngine.getInstance().getPlanningApprovalStepsForRelatedObject(context, uuid)
-        .thenApply(o -> {
+    return ApplicationContextProvider.getBean(ApprovalStepDao.class)
+        .getPlanningApprovalStepsForRelatedObject(context, uuid).thenApply(o -> {
           planningApprovalSteps = o;
           return o;
         });
@@ -262,12 +260,12 @@ public class Organization extends AbstractEmailableAnetBean
 
   @GraphQLQuery(name = "approvalSteps")
   public CompletableFuture<List<ApprovalStep>> loadApprovalSteps(
-      @GraphQLRootContext Map<String, Object> context) {
+      @GraphQLRootContext GraphQLContext context) {
     if (approvalSteps != null) {
       return CompletableFuture.completedFuture(approvalSteps);
     }
-    return AnetObjectEngine.getInstance().getApprovalStepsForRelatedObject(context, uuid)
-        .thenApply(o -> {
+    return ApplicationContextProvider.getBean(ApprovalStepDao.class)
+        .getApprovalStepsForRelatedObject(context, uuid).thenApply(o -> {
           approvalSteps = o;
           return o;
         });
@@ -284,7 +282,7 @@ public class Organization extends AbstractEmailableAnetBean
 
   @GraphQLQuery(name = "childrenOrgs")
   public CompletableFuture<List<Organization>> loadChildrenOrgs(
-      @GraphQLRootContext Map<String, Object> context,
+      @GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "query") OrganizationSearchQuery query) {
     if (query == null) {
       query = new OrganizationSearchQuery();
@@ -292,13 +290,12 @@ public class Organization extends AbstractEmailableAnetBean
     // Note: no recursion, only direct children!
     query.setBatchParams(new FkBatchParams<Organization, OrganizationSearchQuery>("organizations",
         "\"parentOrgUuid\""));
-    return AnetObjectEngine.getInstance().getOrganizationDao().getOrganizationsBySearch(context,
-        uuid, query);
+    return engine().getOrganizationDao().getOrganizationsBySearch(context, uuid, query);
   }
 
   @GraphQLQuery(name = "descendantOrgs")
   public CompletableFuture<List<Organization>> loadDescendantOrgs(
-      @GraphQLRootContext Map<String, Object> context,
+      @GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "query") OrganizationSearchQuery query) {
     if (query == null) {
       query = new OrganizationSearchQuery();
@@ -307,13 +304,12 @@ public class Organization extends AbstractEmailableAnetBean
     query.setBatchParams(
         new RecursiveFkBatchParams<Organization, OrganizationSearchQuery>("organizations",
             "\"parentOrgUuid\"", "organizations", "\"parentOrgUuid\"", RecurseStrategy.CHILDREN));
-    return AnetObjectEngine.getInstance().getOrganizationDao().getOrganizationsBySearch(context,
-        uuid, query);
+    return engine().getOrganizationDao().getOrganizationsBySearch(context, uuid, query);
   }
 
   @GraphQLQuery(name = "ascendantOrgs")
   public CompletableFuture<List<Organization>> loadAscendantOrgs(
-      @GraphQLRootContext Map<String, Object> context,
+      @GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "query") OrganizationSearchQuery query) {
     if (query == null) {
       query = new OrganizationSearchQuery();
@@ -321,23 +317,21 @@ public class Organization extends AbstractEmailableAnetBean
     // Note: recursion, includes transitive parents!
     query.setBatchParams(new RecursiveFkBatchParams<Organization, OrganizationSearchQuery>(
         "organizations", "uuid", "organizations", "\"parentOrgUuid\"", RecurseStrategy.PARENTS));
-    return AnetObjectEngine.getInstance().getOrganizationDao().getOrganizationsBySearch(context,
-        uuid, query);
+    return engine().getOrganizationDao().getOrganizationsBySearch(context, uuid, query);
   }
 
   @GraphQLQuery(name = "tasks")
-  public CompletableFuture<List<Task>> loadTasks(@GraphQLRootContext Map<String, Object> context) {
+  public CompletableFuture<List<Task>> loadTasks(@GraphQLRootContext GraphQLContext context) {
     if (tasks != null) {
       return CompletableFuture.completedFuture(tasks);
     }
     final TaskSearchQuery query = new TaskSearchQuery();
     query.setBatchParams(new M2mBatchParams<Task, TaskSearchQuery>("tasks",
         "\"taskTaskedOrganizations\"", "\"taskUuid\"", "\"organizationUuid\""));
-    return AnetObjectEngine.getInstance().getTaskDao().getTasksBySearch(context, uuid, query)
-        .thenApply(o -> {
-          tasks = o;
-          return o;
-        });
+    return engine().getTaskDao().getTasksBySearch(context, uuid, query).thenApply(o -> {
+      tasks = o;
+      return o;
+    });
   }
 
   public List<Task> getTasks() {
@@ -351,12 +345,12 @@ public class Organization extends AbstractEmailableAnetBean
 
   @GraphQLQuery(name = "administratingPositions")
   public CompletableFuture<List<Position>> loadAdministratingPositions(
-      @GraphQLRootContext Map<String, Object> context) {
+      @GraphQLRootContext GraphQLContext context) {
     if (administratingPositions != null) {
       return CompletableFuture.completedFuture(administratingPositions);
     }
-    return AnetObjectEngine.getInstance().getOrganizationDao()
-        .getAdministratingPositionsForOrganization(context, uuid).thenApply(o -> {
+    return engine().getOrganizationDao().getAdministratingPositionsForOrganization(context, uuid)
+        .thenApply(o -> {
           administratingPositions = o;
           return o;
         });
@@ -374,13 +368,12 @@ public class Organization extends AbstractEmailableAnetBean
   @GraphQLQuery(name = "authorizationGroups")
   public List<AuthorizationGroup> loadAuthorizationGroups() {
     if (authorizationGroups == null) {
-      AuthorizationGroupDao authorizationGroupDao =
-          AnetObjectEngine.getInstance().getAuthorizationGroupDao();
+      AuthorizationGroupDao authorizationGroupDao = engine().getAuthorizationGroupDao();
       final Set<String> authorizationGroupUuids = authorizationGroupDao
           .getAuthorizationGroupUuidsForRelatedObject(OrganizationDao.TABLE_NAME, uuid);
       if (authorizationGroupUuids != null) {
-        authorizationGroups = AnetObjectEngine.getInstance().getAuthorizationGroupDao()
-            .getByIds(authorizationGroupUuids.stream().toList());
+        authorizationGroups =
+            engine().getAuthorizationGroupDao().getByIds(authorizationGroupUuids.stream().toList());
       }
     }
     return authorizationGroups;
@@ -392,7 +385,7 @@ public class Organization extends AbstractEmailableAnetBean
   @RestrictToAuthorizationGroups(
       authorizationGroupSetting = "fields.organization.emailAddresses.authorizationGroupUuids")
   public CompletableFuture<List<EmailAddress>> loadEmailAddresses(
-      @GraphQLRootContext Map<String, Object> context,
+      @GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "network") String network) {
     return super.loadEmailAddresses(context, network);
   }

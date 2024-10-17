@@ -25,7 +25,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
-import mil.dds.anet.config.AnetConfiguration.SmtpConfiguration;
+import mil.dds.anet.config.AnetConfig;
 import mil.dds.anet.test.integration.config.AnetTestConfiguration;
 import mil.dds.anet.utils.Utils;
 import org.apache.commons.io.IOUtils;
@@ -49,7 +49,7 @@ public class FakeSmtpServer {
 
   private final String serverQuery;
 
-  public FakeSmtpServer(final SmtpConfiguration smtpConfig) throws Exception {
+  public FakeSmtpServer(final AnetConfig.SmtpConfiguration smtpConfig) throws Exception {
     smtpIP = smtpConfig.getHostname();
     smtpPort = Integer.toString(smtpConfig.getPort());
     smtpUsername = smtpConfig.getUsername();

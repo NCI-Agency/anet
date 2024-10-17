@@ -1,16 +1,17 @@
 package mil.dds.anet.search.pg;
 
-import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
+import mil.dds.anet.database.DatabaseHandler;
 import mil.dds.anet.search.AbstractOrganizationSearcher;
 import mil.dds.anet.search.AbstractSearchQueryBuilder;
+import org.springframework.stereotype.Component;
 
+@Component
 public class PostgresqlOrganizationSearcher extends AbstractOrganizationSearcher {
 
-  public PostgresqlOrganizationSearcher() {
-    super(new PostgresqlSearchQueryBuilder<Organization, OrganizationSearchQuery>(
-        "PostgresqlOrganizationSearch"));
+  public PostgresqlOrganizationSearcher(DatabaseHandler databaseHandler) {
+    super(databaseHandler, new PostgresqlSearchQueryBuilder<>("PostgresqlOrganizationSearch"));
   }
 
   @Override

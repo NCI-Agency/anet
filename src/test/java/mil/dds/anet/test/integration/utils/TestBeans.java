@@ -1,6 +1,5 @@
 package mil.dds.anet.test.integration.utils;
 
-import com.google.common.collect.ImmutableList;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -41,7 +40,7 @@ public class TestBeans {
   public static ApprovalStep getTestApprovalStep(Organization organization) {
     ApprovalStep as = new ApprovalStep();
     as.setRelatedObjectUuid(organization.getUuid());
-    as.setApprovers(ImmutableList.of());
+    as.setApprovers(List.of());
     as.setType(ApprovalStepType.REPORT_APPROVAL);
     return as;
   }

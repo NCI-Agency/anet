@@ -100,7 +100,7 @@ Check that you can resolve your hostnames from DNS on the Keycloak server:
 Create a [Keycloak realm with LDAP/Kerberos federation](keycloak.md#ad), using the copied keytab (check ownership/permissions!). See [Keycloak documentation](https://www.keycloak.org/docs/latest/server_admin/index.html#_kerberos) for additional guidance.
 
 ## Configure ANET
-Add the correct `keycloakConfiguration` to `anet.yml`.
+Add the correct `keycloak-configuration` to `application.yml`.
 
 ## Configure browsers
 Log on as an AD user on your client computer, then set up Internet Options (for Internet Explorer, Edge and Chrome) and Firefox (about:config) according to e.g. [these instructions](https://active-directory-wp.com/docs/Networking/Single_Sign_On/Configure_browsers_to_use_Kerberos.html).

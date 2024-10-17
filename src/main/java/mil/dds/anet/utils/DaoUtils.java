@@ -1,6 +1,7 @@
 package mil.dds.anet.utils;
 
 import com.google.common.base.Joiner;
+import graphql.GraphQLContext;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -14,11 +15,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.CustomSensitiveInformation;
 import mil.dds.anet.beans.Note;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
+import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.views.AbstractAnetBean;
 
 public class DaoUtils {
@@ -72,19 +73,12 @@ public class DaoUtils {
     return " " + Joiner.on(", ").join(fieldAliases) + " ";
   }
 
-  public static Person getUser(Map<String, Object> context, Person user) {
-    if (context != null && context.containsKey("user")) {
-      user = getUserFromContext(context);
-    }
-    return user;
-  }
-
-  public static Person getUserFromContext(Map<String, Object> context) {
+  public static Person getUserFromContext(GraphQLContext context) {
     if (context == null) {
       // Called from e.g. merge
       return null;
     }
-    return (Person) context.get("user");
+    return context.get("user");
   }
 
   public static Position getPosition(final Person user) {
@@ -93,7 +87,7 @@ public class DaoUtils {
 
   public static void saveCustomSensitiveInformation(final Person user, final String tableName,
       final String uuid, final List<CustomSensitiveInformation> customSensitiveInformation) {
-    AnetObjectEngine.getInstance().getCustomSensitiveInformationDao()
+    ApplicationContextProvider.getEngine().getCustomSensitiveInformationDao()
         .insertOrUpdateCustomSensitiveInformation(user, getAuthorizationGroupUuids(user), tableName,
             uuid, customSensitiveInformation);
   }
@@ -153,7 +147,7 @@ public class DaoUtils {
       final String accessType) {
     final String keyPath =
         String.format("%1$s.authorizationGroupUuids.%2$s", assessmentKey, accessType);
-    return (List<String>) AnetObjectEngine.getConfiguration().getDictionaryEntry(keyPath);
+    return (List<String>) ApplicationContextProvider.getDictionary().getDictionaryEntry(keyPath);
   }
 
   public static boolean isInAuthorizationGroup(final Set<String> userAuthorizationGroupUuids,

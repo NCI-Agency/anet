@@ -1,10 +1,10 @@
 package mil.dds.anet.database;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
@@ -21,67 +21,86 @@ import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
-import ru.vyarus.guicey.jdbi3.tx.InTransaction;
+import org.jdbi.v3.core.Handle;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
+@Component
 public class CustomSensitiveInformationDao
     extends AnetBaseDao<CustomSensitiveInformation, AbstractSearchQuery<?>> {
+
+  public CustomSensitiveInformationDao(DatabaseHandler databaseHandler) {
+    super(databaseHandler);
+  }
 
   @Override
   public CustomSensitiveInformation getByUuid(String uuid) {
     return getByIds(Arrays.asList(uuid)).get(0);
   }
 
-  static class SelfIdBatcher extends IdBatcher<CustomSensitiveInformation> {
-    private static final String sql = "/* batch.getCustomSensitiveInformationByUuids */ "
+  class SelfIdBatcher extends IdBatcher<CustomSensitiveInformation> {
+    private static final String SQL = "/* batch.getCustomSensitiveInformationByUuids */ "
         + "SELECT * FROM \"customSensitiveInformation\" WHERE uuid IN ( <uuids> )";
 
     public SelfIdBatcher() {
-      super(sql, "uuids", new CustomSensitiveInformationMapper());
+      super(databaseHandler, SQL, "uuids", new CustomSensitiveInformationMapper());
     }
   }
 
   @Override
   public List<CustomSensitiveInformation> getByIds(List<String> uuids) {
-    final IdBatcher<CustomSensitiveInformation> idBatcher =
-        AnetObjectEngine.getInstance().getInjector().getInstance(SelfIdBatcher.class);
-    return idBatcher.getByIds(uuids);
+    return new SelfIdBatcher().getByIds(uuids);
   }
 
   @Override
   public CustomSensitiveInformation insertInternal(CustomSensitiveInformation csi) {
-    getDbHandle()
-        .createUpdate("/* insertCustomSensitiveInformation */ "
-            + "INSERT INTO \"customSensitiveInformation\" (uuid, \"customFieldName\", "
-            + "\"customFieldValue\", \"relatedObjectType\", \"relatedObjectUuid\", \"createdAt\", "
-            + "\"updatedAt\") VALUES (:uuid, :customFieldName, :customFieldValue, "
-            + ":relatedObjectType, :relatedObjectUuid, :createdAt, :updatedAt)")
-        .bindBean(csi).bind("createdAt", DaoUtils.asLocalDateTime(csi.getCreatedAt()))
-        .bind("updatedAt", DaoUtils.asLocalDateTime(csi.getUpdatedAt())).execute();
-    return csi;
+    final Handle handle = getDbHandle();
+    try {
+      handle.createUpdate("/* insertCustomSensitiveInformation */ "
+          + "INSERT INTO \"customSensitiveInformation\" (uuid, \"customFieldName\", "
+          + "\"customFieldValue\", \"relatedObjectType\", \"relatedObjectUuid\", \"createdAt\", "
+          + "\"updatedAt\") VALUES (:uuid, :customFieldName, :customFieldValue, "
+          + ":relatedObjectType, :relatedObjectUuid, :createdAt, :updatedAt)").bindBean(csi)
+          .bind("createdAt", DaoUtils.asLocalDateTime(csi.getCreatedAt()))
+          .bind("updatedAt", DaoUtils.asLocalDateTime(csi.getUpdatedAt())).execute();
+      return csi;
+    } finally {
+      closeDbHandle(handle);
+    }
   }
 
   @Override
   public int updateInternal(CustomSensitiveInformation csi) {
-    return getDbHandle()
-        .createUpdate("/* updateCustomSensitiveInformation */ "
-            + "UPDATE \"customSensitiveInformation\" SET \"customFieldName\" = :customFieldName, "
-            + "\"customFieldValue\" = :customFieldValue, "
-            + "\"relatedObjectType\" = :relatedObjectType, "
-            + "\"relatedObjectUuid\" = :relatedObjectUuid, \"updatedAt\" = :updatedAt "
-            + "WHERE uuid = :uuid")
-        .bindBean(csi).bind("updatedAt", DaoUtils.asLocalDateTime(csi.getUpdatedAt())).execute();
+    final Handle handle = getDbHandle();
+    try {
+      return handle
+          .createUpdate("/* updateCustomSensitiveInformation */ "
+              + "UPDATE \"customSensitiveInformation\" SET \"customFieldName\" = :customFieldName, "
+              + "\"customFieldValue\" = :customFieldValue, "
+              + "\"relatedObjectType\" = :relatedObjectType, "
+              + "\"relatedObjectUuid\" = :relatedObjectUuid, \"updatedAt\" = :updatedAt "
+              + "WHERE uuid = :uuid")
+          .bindBean(csi).bind("updatedAt", DaoUtils.asLocalDateTime(csi.getUpdatedAt())).execute();
+    } finally {
+      closeDbHandle(handle);
+    }
   }
 
-  @InTransaction
+  @Transactional
   public int deleteFor(String relatedObjectUuid) {
-    return getDbHandle().execute(
-        "/* deleteCustomSensitiveInformation */ "
-            + "DELETE FROM \"customSensitiveInformation\" WHERE \"relatedObjectUuid\" = ?",
-        relatedObjectUuid);
+    final Handle handle = getDbHandle();
+    try {
+      return handle.execute(
+          "/* deleteCustomSensitiveInformation */ "
+              + "DELETE FROM \"customSensitiveInformation\" WHERE \"relatedObjectUuid\" = ?",
+          relatedObjectUuid);
+    } finally {
+      closeDbHandle(handle);
+    }
   }
 
   public CompletableFuture<List<CustomSensitiveInformation>> getCustomSensitiveInformationForRelatedObject(
-      @GraphQLRootContext Map<String, Object> context, String relatedObjectUuid) {
+      @GraphQLRootContext GraphQLContext context, String relatedObjectUuid) {
     final Person user = DaoUtils.getUserFromContext(context);
     final Set<String> authorizationGroupUuids = DaoUtils.getAuthorizationGroupUuids(user);
     return new ForeignKeyFetcher<CustomSensitiveInformation>()
@@ -92,22 +111,21 @@ public class CustomSensitiveInformationDao
             .toList());
   }
 
-  static class SensitiveInformationBatcher extends ForeignKeyBatcher<CustomSensitiveInformation> {
-    private static final String sql = "/* batch.getCustomSensitiveInformationForRelatedObject */ "
+  class SensitiveInformationBatcher extends ForeignKeyBatcher<CustomSensitiveInformation> {
+    private static final String SQL = "/* batch.getCustomSensitiveInformationForRelatedObject */ "
         + "SELECT * FROM \"customSensitiveInformation\" "
         + "WHERE \"customSensitiveInformation\".\"relatedObjectUuid\" IN ( <foreignKeys> ) "
         + "ORDER BY \"customSensitiveInformation\".\"customFieldName\"";
 
     public SensitiveInformationBatcher() {
-      super(sql, "foreignKeys", new CustomSensitiveInformationMapper(), "relatedObjectUuid");
+      super(databaseHandler, SQL, "foreignKeys", new CustomSensitiveInformationMapper(),
+          "relatedObjectUuid");
     }
   }
 
   public List<List<CustomSensitiveInformation>> getCustomSensitiveInformation(
       List<String> foreignKeys) {
-    final ForeignKeyBatcher<CustomSensitiveInformation> notesBatcher =
-        AnetObjectEngine.getInstance().getInjector().getInstance(SensitiveInformationBatcher.class);
-    return notesBatcher.getByForeignKeys(foreignKeys);
+    return new SensitiveInformationBatcher().getByForeignKeys(foreignKeys);
   }
 
   public void insertOrUpdateCustomSensitiveInformation(final Person user,
@@ -185,7 +203,7 @@ public class CustomSensitiveInformationDao
     }
   }
 
-  @InTransaction
+  @Transactional
   public boolean hasCustomSensitiveInformationAuthorization(final Person user,
       final Set<String> userAuthorizationGroupUuids, final CustomSensitiveInformation csi) {
     // Admins always have access
@@ -198,7 +216,7 @@ public class CustomSensitiveInformationDao
     final boolean isForPosition = PositionDao.TABLE_NAME.equals(csi.getRelatedObjectType());
     final boolean isForPerson = PersonDao.TABLE_NAME.equals(csi.getRelatedObjectType());
     if (isForPosition || isForPerson) {
-      final AnetObjectEngine engine = AnetObjectEngine.getInstance();
+      final AnetObjectEngine engine = engine();
       final Position currentPosition = DaoUtils.getPosition(user);
       if (currentPosition != null) {
         final List<Position> associatedPositions =
@@ -214,7 +232,7 @@ public class CustomSensitiveInformationDao
 
     // If this is for a report, check whether the user is an author
     if (ReportDao.TABLE_NAME.equals(csi.getRelatedObjectType())) {
-      final AnetObjectEngine engine = AnetObjectEngine.getInstance();
+      final AnetObjectEngine engine = engine();
       final Report report = engine.getReportDao().getByUuid(csi.getRelatedObjectUuid());
       if (report != null) {
         final List<ReportPerson> authors = report.loadAuthors(engine.getContext()).join();
@@ -242,7 +260,7 @@ public class CustomSensitiveInformationDao
     final String keyPath =
         String.format("fields.%1$s.customSensitiveInformation.%2$s.authorizationGroupUuids",
             getObjectType(tableName), fieldName);
-    return (List<String>) AnetObjectEngine.getConfiguration().getDictionaryEntry(keyPath);
+    return (List<String>) dict().getDictionaryEntry(keyPath);
   }
 
   private String getObjectType(final String tableName) {

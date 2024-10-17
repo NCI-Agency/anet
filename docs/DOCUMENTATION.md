@@ -37,7 +37,7 @@ ANET2 is built primarily using Open Source languages, frameworks, and libraries 
 
 - **Database**: ANET2 Requires at least a Microsoft SQL Server 2014 Database. 
 
-- **Backup**: Backups should be taken daily from the SQL Database and transferred to a seperate file server for safe keeping. Database backups can be taken through any means that capture the full state of the database.  The `anet.yml` configuration file and audit logs should be backed up from the Web-Application Server.
+- **Backup**: Backups should be taken daily from the SQL Database and transferred to a seperate file server for safe keeping. Database backups can be taken through any means that capture the full state of the database.  The `application.yml` configuration file and audit logs should be backed up from the Web-Application Server.
 
 - **Authentication**: User Authentication in production is done via Windows Domain Authentication.
 
@@ -87,5 +87,5 @@ Documentation for Developers is kept in README.md in the github repository.
 ## The Object Model
 ## How To's
 ## ANET Configuration 
-ANET is configured primarily through the `anet.yml` file.  A description of the file format can be found in INSTALL.md 
+ANET is configured primarily through the `application.yml` file.  A description of the file format can be found in INSTALL.md 
 # User Permissions

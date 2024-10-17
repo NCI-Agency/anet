@@ -1,9 +1,9 @@
 package mil.dds.anet.beans;
 
+import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.time.Instant;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.views.UuidFetcher;
@@ -35,7 +35,7 @@ public class UserActivity {
 
   @GraphQLQuery(name = "organization")
   public CompletableFuture<Organization> getOrganization(
-      @GraphQLRootContext final Map<String, Object> context) {
+      @GraphQLRootContext GraphQLContext context) {
     return new UuidFetcher<Organization>().load(context, IdDataLoaderKey.ORGANIZATIONS,
         getOrganizationUuid());
   }
@@ -50,8 +50,7 @@ public class UserActivity {
   }
 
   @GraphQLQuery(name = "person")
-  public CompletableFuture<Person> getPerson(
-      @GraphQLRootContext final Map<String, Object> context) {
+  public CompletableFuture<Person> getPerson(@GraphQLRootContext GraphQLContext context) {
     return new UuidFetcher<Person>().load(context, IdDataLoaderKey.PEOPLE, getPersonUuid());
   }
 

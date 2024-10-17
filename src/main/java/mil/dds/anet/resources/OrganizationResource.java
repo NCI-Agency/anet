@@ -1,11 +1,11 @@
 package mil.dds.anet.resources;
 
+import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response.Status;
+import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.Map;
@@ -26,18 +26,23 @@ import mil.dds.anet.utils.Utils;
 import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 
+@Component
+@GraphQLApi
 public class OrganizationResource {
 
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  private final OrganizationDao dao;
   private final AnetObjectEngine engine;
+  private final OrganizationDao dao;
 
-  public OrganizationResource(AnetObjectEngine engine) {
-    this.dao = engine.getOrganizationDao();
-    this.engine = engine;
+  public OrganizationResource(AnetObjectEngine anetObjectEngine, OrganizationDao dao) {
+    this.engine = anetObjectEngine;
+    this.dao = dao;
   }
 
   public static boolean hasPermission(final Person user, final String organizationUuid) {
@@ -50,7 +55,7 @@ public class OrganizationResource {
 
   public static void assertPermission(final Person user, final String organizationUuid) {
     if (!hasPermission(user, organizationUuid)) {
-      throw new WebApplicationException(AuthUtils.UNAUTH_MESSAGE, Status.FORBIDDEN);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, AuthUtils.UNAUTH_MESSAGE);
     }
   }
 
@@ -58,7 +63,7 @@ public class OrganizationResource {
   public Organization getByUuid(@GraphQLArgument(name = "uuid") String uuid) {
     Organization org = dao.getByUuid(uuid);
     if (org == null) {
-      throw new WebApplicationException("Organization not found", Status.NOT_FOUND);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Organization not found");
     }
     return org;
   }
@@ -69,7 +74,7 @@ public class OrganizationResource {
   }
 
   @GraphQLMutation(name = "createOrganization")
-  public Organization createOrganization(@GraphQLRootContext Map<String, Object> context,
+  public Organization createOrganization(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "organization") Organization org) {
     org.checkAndFixCustomFields();
     org.setProfile(
@@ -119,7 +124,7 @@ public class OrganizationResource {
   }
 
   @GraphQLMutation(name = "updateOrganization")
-  public Integer updateOrganization(@GraphQLRootContext Map<String, Object> context,
+  public Integer updateOrganization(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "organization") Organization org) {
     org.checkAndFixCustomFields();
     org.setProfile(
@@ -134,10 +139,10 @@ public class OrganizationResource {
 
     // Check for loops in the hierarchy
     if (org.getParentOrgUuid() != null) {
-      final Map<String, String> children =
-          AnetObjectEngine.getInstance().buildTopLevelOrgHash(DaoUtils.getUuid(org));
+      final Map<String, String> children = engine.buildTopLevelOrgHash(DaoUtils.getUuid(org));
       if (children.containsKey(org.getParentOrgUuid())) {
-        throw new WebApplicationException("Organization can not be its own (grand…)parent");
+        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+            "Organization can not be its own (grand…)parent");
       }
     }
 
@@ -174,7 +179,8 @@ public class OrganizationResource {
     }
 
     if (numRows == 0) {
-      throw new WebApplicationException("Couldn't process organization update", Status.NOT_FOUND);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+          "Couldn't process organization update");
     }
 
     if (org.getTasks() != null) {
@@ -209,14 +215,14 @@ public class OrganizationResource {
   }
 
   @GraphQLQuery(name = "organizationList")
-  public AnetBeanList<Organization> search(@GraphQLRootContext Map<String, Object> context,
+  public AnetBeanList<Organization> search(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "query") OrganizationSearchQuery query) {
     query.setUser(DaoUtils.getUserFromContext(context));
     return dao.search(query);
   }
 
   @GraphQLMutation(name = "mergeOrganizations")
-  public Integer mergeOrganizations(@GraphQLRootContext Map<String, Object> context,
+  public Integer mergeOrganizations(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "loserUuid") String loserUuid,
       @GraphQLArgument(name = "winnerOrganization") Organization winnerOrganization) {
     final Person user = DaoUtils.getUserFromContext(context);
@@ -226,9 +232,8 @@ public class OrganizationResource {
     checkWhetherOrganizationsAreMergeable(winnerOrganization, loserOrganization);
     final var numberOfAffectedRows = dao.mergeOrganizations(loserOrganization, winnerOrganization);
     if (numberOfAffectedRows == 0) {
-      throw new WebApplicationException(
-          "Couldn't process merge operation, error occurred while updating merged organization relation information.",
-          Status.NOT_FOUND);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+          "Couldn't process merge operation, error occurred while updating merged organization relation information.");
     }
     AnetAuditLogger.log("Organization {} merged into {} by {}", loserOrganization,
         winnerOrganization, user);
@@ -238,8 +243,8 @@ public class OrganizationResource {
   private void checkWhetherOrganizationsAreMergeable(final Organization winnerOrganization,
       final Organization loserOrganization) {
     if (Objects.equals(DaoUtils.getUuid(loserOrganization), DaoUtils.getUuid(winnerOrganization))) {
-      throw new WebApplicationException("Cannot merge identical organizations.",
-          Status.BAD_REQUEST);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Cannot merge identical organizations.");
     }
   }
 
