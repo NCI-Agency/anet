@@ -1279,14 +1279,14 @@ INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjec
   FROM reports r
   WHERE r.text LIKE 'Today%';
 
--- Add ondemand assessments to MOD-F
+-- Add ondemand assessments to MOD-F and EF 6.2
 SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
 INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
   (:noteUuid, :authorUuid, 3, 'fields.organization.assessments.interactionPlan', '{"exercises":null,"interaction":"<p>Keep in constant contact</p>","plan":"<p>Organise a face to face meeting</p>","relation":"","priority":"","assessmentDate":"2021-01-01","__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT :noteUuid, 'organizations', o.uuid
   FROM organizations o
-  WHERE o."shortName" = 'MOD-F';
+  WHERE o."shortName" IN ('MOD-F', 'EF 6.2');
 
 SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
 INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
@@ -1294,7 +1294,7 @@ INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt",
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT :noteUuid, 'organizations', o.uuid
   FROM organizations o
-  WHERE o."shortName" = 'MOD-F';
+  WHERE o."shortName" IN ('MOD-F', 'EF 6.2');
 
 SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
 INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
@@ -1302,7 +1302,7 @@ INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt",
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT :noteUuid, 'organizations', o.uuid
   FROM organizations o
-  WHERE o."shortName" = 'MOD-F';
+  WHERE o."shortName" IN ('MOD-F', 'EF 6.2');
 
 SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
 INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
@@ -1310,7 +1310,7 @@ INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt",
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT :noteUuid, 'organizations', o.uuid
   FROM organizations o
-  WHERE o."shortName" = 'MOD-F';
+  WHERE o."shortName" IN ('MOD-F', 'EF 6.2');
 
 SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
 INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
@@ -1318,7 +1318,7 @@ INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt",
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT :noteUuid, 'organizations', o.uuid
   FROM organizations o
-  WHERE o."shortName" = 'MOD-F';
+  WHERE o."shortName" IN ('MOD-F', 'EF 6.2');
 
 SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
 INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
@@ -1326,7 +1326,7 @@ INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt",
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT :noteUuid, 'organizations', o.uuid
   FROM organizations o
-  WHERE o."shortName" = 'MOD-F';
+  WHERE o."shortName" IN ('MOD-F', 'EF 6.2');
 
 -- Add ondemand assessments to Christopf
 SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
