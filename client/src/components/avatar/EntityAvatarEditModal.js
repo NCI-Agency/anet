@@ -16,9 +16,9 @@ const EntityAvatarEditModal = ({
   images,
   onAvatarUpdate
 }) => {
-  const croppeableMimeTypes = Settings.fields.attachment.mimeTypes
-    .filter(mimeType => mimeType.avatar && mimeType.crop)
-    .map(mimeType => mimeType.name)
+  const croppeableMimeTypes = Settings.fields.attachment.fileTypes
+    .filter(fileType => fileType.avatar && fileType.crop)
+    .map(fileType => fileType.mimeType)
 
   const [showModal, setShowModal] = useState(false)
   const [chosenImageUuid, setChosenImageUuid] = useState(null)

@@ -108,8 +108,8 @@ const UploadAttachment = ({
 }) => {
   const [error, setError] = useState(null)
   const [objectUuid, setObjectUuid] = useState(relatedObjectUuid)
-  const mimeTypes = Settings.fields.attachment.mimeTypes?.map(
-    mimeType => mimeType.name
+  const mimeTypes = Settings.fields.attachment.fileTypes?.map(
+    fileType => fileType.mimeType
   )
 
   const handleFileEvent = async e => {
