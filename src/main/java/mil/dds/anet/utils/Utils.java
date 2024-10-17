@@ -14,10 +14,6 @@ import io.leangen.graphql.execution.ResolutionEnvironment;
 import jakarta.annotation.Nullable;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response.Status;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -33,7 +29,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import javax.imageio.ImageIO;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
@@ -43,7 +38,6 @@ import mil.dds.anet.beans.Task;
 import mil.dds.anet.database.ApprovalStepDao;
 import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.views.AbstractAnetBean;
-import net.coobird.thumbnailator.Thumbnails;
 import org.jsoup.Jsoup;
 import org.owasp.html.HtmlPolicyBuilder;
 import org.owasp.html.PolicyFactory;
@@ -79,15 +73,6 @@ public class Utils {
       return false;
     }
     return Objects.equals(a.getUuid(), b.getUuid());
-  }
-
-  public static boolean containsByUuid(List<AbstractAnetBean> list, String uuid) {
-    for (AbstractAnetBean el : list) {
-      if (el.getUuid().equals(uuid)) {
-        return true;
-      }
-    }
-    return false;
   }
 
   public static <T extends AbstractAnetBean> T getByUuid(List<T> list, String uuid) {
@@ -528,62 +513,6 @@ public class Utils {
     final String regex = domain.replace(".", "[.]") // replace dots
         .replace(wildcard, ".*?"); // replace wildcards
     return Pattern.compile("^" + regex + "$");
-  }
-
-  /**
-   * Resizes an image.
-   * 
-   * @param imageBytes The image as a byte-array
-   * @param width The desired output width
-   * @param height The desired output height
-   * @param imageFormatName The desired output format (png, jpg)
-   * @return The resized image as a byte-array
-   * @throws Exception When the binary data cannot be converted to an image string representation
-   */
-  public static byte[] resizeImage(byte[] imageBytes, int width, int height, String imageFormatName)
-      throws Exception {
-    if (imageBytes == null) {
-      return null;
-    }
-    // From byte-array to BufferedImage
-    final BufferedImage imageBinary = convert(imageBytes);
-
-    if (imageBinary == null) {
-      throw new Exception("Cannot interpret image binary data.");
-    }
-
-    // Resizing
-    final ByteArrayOutputStream os = new ByteArrayOutputStream();
-    Thumbnails.of(imageBinary).size(width, height).outputFormat(imageFormatName).outputQuality(1.0f)
-        .toOutputStream(os);
-    return os.toByteArray();
-  }
-
-  /**
-   * Converts an image represented as a byte-array into a BufferedImage.
-   * 
-   * @param imageBytes The image as a byte-array
-   * @return The BufferedImage object
-   * @throws IOException When an error occurs while reading the string
-   */
-  public static BufferedImage convert(byte[] imageBytes) throws IOException {
-    final ByteArrayInputStream is = new ByteArrayInputStream(imageBytes);
-    return ImageIO.read(is);
-  }
-
-  /**
-   * Converts a BufferedImage representing an image into a byte-array.
-   * 
-   * @param imageBytes The image as bytes
-   * @param imageFormatName The desired output format
-   * @return The image as byte-array
-   * @throws IOException When an error occurs while writing the string
-   */
-  public static byte[] convert(BufferedImage imageBytes, String imageFormatName)
-      throws IOException {
-    final ByteArrayOutputStream os = new ByteArrayOutputStream();
-    ImageIO.write(imageBytes, imageFormatName, os);
-    return os.toByteArray();
   }
 
   public static void updateApprovalSteps(AbstractAnetBean entity,
