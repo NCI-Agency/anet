@@ -376,10 +376,10 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
   // Non-attending authors can only edit if it is future
   let canEdit =
     isAuthor && !report.isPublished() && (report.isFuture() || isAttending)
-  // Approvers can also edit
-  canEdit = canEdit || canApprove
-  // Authors and approvers can always read assessments
-  const canReadAssessments = isAuthor || canApprove
+  // Approvers and admins can also edit
+  canEdit = canEdit || canApprove || isAdmin
+  // Authors, approvers and admins can always read assessments
+  const canReadAssessments = isAuthor || canApprove || isAdmin
 
   // Only an admin or an author can submit when report is in draft or rejected AND author has an active position
   const hasActivePosition = currentUser.hasActivePosition()
@@ -630,7 +630,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
 
                 <Field
                   name="advisorOrg"
-                  label={Settings.fields.regular.org.name}
+                  label={Settings.fields.advisor.org.name}
                   component={FieldHelper.ReadonlyField}
                   humanValue={
                     <LinkTo

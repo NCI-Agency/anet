@@ -339,24 +339,20 @@ public class PersonResourceTest extends AbstractResourceTest {
   void searchAssessmentsTestForInterlocutorOndemandScreeningAndVetting() {
     // These have all expired!
     final String assessmentKey = "interlocutorOndemandScreeningAndVetting";
-    searchForAssessments(assessmentKey, null, null);
-    searchForAssessments(assessmentKey, Map.of("question1", List.of("fail1")), null);
-    searchForAssessments(assessmentKey, Map.of("question1", List.of("fail2")), null);
-    searchForAssessments(assessmentKey, Map.of("question1", List.of("fail3")), null);
+    searchForAssessments(assessmentKey, null, List.of());
+    searchForAssessments(assessmentKey, Map.of("question1", List.of("fail1")), List.of());
+    searchForAssessments(assessmentKey, Map.of("question1", List.of("fail2")), List.of());
+    searchForAssessments(assessmentKey, Map.of("question1", List.of("fail3")), List.of());
   }
 
   private void searchForAssessments(final String key, final Map<?, ?> filters,
-      final String matchingName) {
+      final List<String> matchingNames) {
     final AssessmentSearchQueryInput aq = AssessmentSearchQueryInput.builder().withKey(key)
         .withFilters(filters == null ? null : new HashMap<>(filters)).build();
     final PersonSearchQueryInput q = PersonSearchQueryInput.builder().withAssessment(aq).build();
     final AnetBeanList_Person results =
         withCredentials(jackUser, t -> queryExecutor.personList(getListFields(FIELDS), q));
-    if (matchingName == null) {
-      assertThat(results.getList()).isEmpty();
-    } else {
-      assertThat(results.getList()).isNotEmpty().anyMatch(p -> matchingName.equals(p.getName()));
-    }
+    assertThat(results.getList()).map(Person::getName).hasSameElementsAs(matchingNames);
   }
 
   @Test

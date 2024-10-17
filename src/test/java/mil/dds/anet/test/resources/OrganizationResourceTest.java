@@ -412,41 +412,37 @@ public class OrganizationResourceTest extends AbstractResourceTest {
   @Test
   void searchAssessmentsTestForInteractionPlan() {
     final String assessmentKey = "interactionPlan";
-    final String matchingShortName = "MOD-F";
-    searchForAssessments(assessmentKey, null, matchingShortName);
-    searchForAssessments(assessmentKey, Map.of("priority", List.of("t2")), matchingShortName);
+    final List<String> matchingShortNames = List.of("EF 6.2", "MOD-F");
+    searchForAssessments(assessmentKey, null, matchingShortNames);
+    searchForAssessments(assessmentKey, Map.of("priority", List.of("t2")), matchingShortNames);
     searchForAssessments(assessmentKey, Map.of("priority", List.of("t1", "t2", "t3", "t4", "t5")),
-        matchingShortName);
-    searchForAssessments(assessmentKey, Map.of("priority", List.of("t4")), null);
+        matchingShortNames);
+    searchForAssessments(assessmentKey, Map.of("priority", List.of("t4")), List.of());
     searchForAssessments(assessmentKey,
-        Map.of("priority", List.of("t1"), "relation", List.of("maintain")), null);
+        Map.of("priority", List.of("t1"), "relation", List.of("maintain")), List.of());
   }
 
   @Test
   void searchAssessmentsTestForOrganizationOndemand() {
     final String assessmentKey = "organizationOndemand";
-    final String matchingShortName = "MOD-F";
-    searchForAssessments(assessmentKey, null, matchingShortName);
-    searchForAssessments(assessmentKey, Map.of("enumset", List.of("t2")), matchingShortName);
+    final List<String> matchingShortNames = List.of("EF 6.2", "MOD-F");
+    searchForAssessments(assessmentKey, null, matchingShortNames);
+    searchForAssessments(assessmentKey, Map.of("enumset", List.of("t2")), matchingShortNames);
     searchForAssessments(assessmentKey, Map.of("enumset", List.of("t1", "t2", "t3", "t4", "t5")),
-        matchingShortName);
-    searchForAssessments(assessmentKey, Map.of("enumset", List.of("t4")), null);
+        matchingShortNames);
+    searchForAssessments(assessmentKey, Map.of("enumset", List.of("t4")), List.of());
   }
 
   private void searchForAssessments(final String key, final Map<?, ?> filters,
-      final String matchingShortName) {
+      final List<String> matchingShortNames) {
     final AssessmentSearchQueryInput aq = AssessmentSearchQueryInput.builder().withKey(key)
         .withFilters(filters == null ? null : new HashMap<>(filters)).build();
     final OrganizationSearchQueryInput q =
         OrganizationSearchQueryInput.builder().withAssessment(aq).build();
     final AnetBeanList_Organization result =
         withCredentials(jackUser, t -> queryExecutor.organizationList(getListFields(FIELDS), q));
-    if (matchingShortName == null) {
-      assertThat(result.getList()).isEmpty();
-    } else {
-      assertThat(result.getList()).isNotEmpty()
-          .anyMatch(o -> matchingShortName.equals(o.getShortName()));
-    }
+    assertThat(result.getList()).map(Organization::getShortName)
+        .hasSameElementsAs(matchingShortNames);
   }
 
   @Test

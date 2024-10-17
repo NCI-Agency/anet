@@ -5868,6 +5868,8 @@
 		</addColumn>
 	</changeSet>
 
+	<!-- Keep this change set as the last one in the change log;
+	     it will be re-run whenever it changes. -->
 	<changeSet id="set-up-full-text-search" runOnChange="true" author="gjvoosten">
 		<sql>
 			<!--
@@ -6022,7 +6024,7 @@
 			BEGIN
 				RETURN QUERY EXECUTE format(
 					''WITH links AS ('' ||
-					''  SELECT uuid, regexp_matches(%I, ''''"urn:anet:([^:]*):([^"]*)"'''', ''''g'''') AS arr FROM public.%I'' ||
+					''  SELECT uuid, regexp_matches(%I, ''''"urn:anet:(attachments|authorizationGroups|locations|organizations|people|positions|reports|tasks):([^"]*)"'''', ''''g'''') AS arr FROM public.%I'' ||
 					'')'' ||
 					''  SELECT uuid, arr[1], arr[2] FROM links'',
 					column_name, table_name
@@ -6039,7 +6041,7 @@
 			BEGIN
 				RETURN QUERY EXECUTE format(
 					''WITH links AS ('' ||
-					''  SELECT uuid, regexp_matches(%I, ''''\\"urn:anet:([^:]*):([^\\]*)\\"|{"type":"([^"]*)","uuid":"([^"]*)"}'''', ''''g'''') AS arr FROM public.%I'' ||
+					''  SELECT uuid, regexp_matches(%I, ''''\\"urn:anet:(attachments|authorizationGroups|locations|organizations|people|positions|reports|tasks):([^\\]*)\\"|{"type":"(Attachment|AuthorizationGroup|Location|Organization|Person|Position|Report|Task)","uuid":"([^"]*)"}'''', ''''g'''') AS arr FROM public.%I'' ||
 					'')'' ||
 					''  SELECT uuid,'' ||
 					''  CASE WHEN arr[1] IS NOT NULL THEN arr[1] ELSE'' ||
@@ -6221,8 +6223,8 @@
 				SELECT * FROM get_cf_referenced_objects('locations', 'customFields')
 			)
 			SELECT
-				uuid,
-				setweight(coalesce(tsvector_agg(agg), ''::tsvector), ${fts_low})
+				links.uuid,
+				setweight(coalesce(tsvector_agg(links.agg), ''::tsvector), ${fts_low})
 			FROM (
 				SELECT
 					locations.uuid,
@@ -6237,8 +6239,8 @@
 				FROM locations
 				LEFT JOIN cf_links ON cf_links.uuid = locations.uuid
 				GROUP BY locations.uuid
-			)
-			GROUP BY uuid
+			) AS links
+			GROUP BY links.uuid
 			WITH DATA;
 			CREATE UNIQUE INDEX "UQ_mv_lts_locations_uuid" ON mv_lts_locations(uuid);
 
@@ -6250,8 +6252,8 @@
 				SELECT * FROM get_cf_referenced_objects('organizations', 'customFields')
 			)
 			SELECT
-				uuid,
-				setweight(coalesce(tsvector_agg(agg), ''::tsvector), ${fts_low})
+				links.uuid,
+				setweight(coalesce(tsvector_agg(links.agg), ''::tsvector), ${fts_low})
 			FROM (
 				SELECT
 					organizations.uuid,
@@ -6266,8 +6268,8 @@
 				FROM organizations
 				LEFT JOIN cf_links ON cf_links.uuid = organizations.uuid
 				GROUP BY organizations.uuid
-			)
-			GROUP BY uuid
+			) AS links
+			GROUP BY links.uuid
 			WITH DATA;
 			CREATE UNIQUE INDEX "UQ_mv_lts_organizations_uuid" ON mv_lts_organizations(uuid);
 
@@ -6279,8 +6281,8 @@
 				SELECT * FROM get_cf_referenced_objects('people', 'customFields')
 			)
 			SELECT
-				uuid,
-				setweight(coalesce(tsvector_agg(agg), ''::tsvector), ${fts_low})
+				links.uuid,
+				setweight(coalesce(tsvector_agg(links.agg), ''::tsvector), ${fts_low})
 			FROM (
 				SELECT
 					people.uuid,
@@ -6295,8 +6297,8 @@
 				FROM people
 				LEFT JOIN cf_links ON cf_links.uuid = people.uuid
 				GROUP BY people.uuid
-			)
-			GROUP BY uuid
+			) AS links
+			GROUP BY links.uuid
 			WITH DATA;
 			CREATE UNIQUE INDEX "UQ_mv_lts_people_uuid" ON mv_lts_people(uuid);
 
@@ -6321,8 +6323,8 @@
 				SELECT * FROM get_cf_referenced_objects('reports', 'customFields')
 			)
 			SELECT
-				uuid,
-				setweight(coalesce(tsvector_agg(agg), ''::tsvector), ${fts_low})
+				links.uuid,
+				setweight(coalesce(tsvector_agg(links.agg), ''::tsvector), ${fts_low})
 			FROM (
 				SELECT
 					reports.uuid,
@@ -6337,8 +6339,8 @@
 				FROM reports
 				LEFT JOIN cf_links ON cf_links.uuid = reports.uuid
 				GROUP BY reports.uuid
-			)
-			GROUP BY uuid
+			) AS links
+			GROUP BY links.uuid
 			WITH DATA;
 			CREATE UNIQUE INDEX "UQ_mv_lts_reports_uuid" ON mv_lts_reports(uuid);
 
@@ -6350,8 +6352,8 @@
 				SELECT * FROM get_cf_referenced_objects('tasks', 'customFields')
 			)
 			SELECT
-				uuid,
-				setweight(coalesce(tsvector_agg(agg), ''::tsvector), ${fts_low})
+				links.uuid,
+				setweight(coalesce(tsvector_agg(links.agg), ''::tsvector), ${fts_low})
 			FROM (
 				SELECT
 					tasks.uuid,
@@ -6366,8 +6368,8 @@
 				FROM tasks
 				LEFT JOIN cf_links ON cf_links.uuid = tasks.uuid
 				GROUP BY tasks.uuid
-			)
-			GROUP BY uuid
+			) AS links
+			GROUP BY links.uuid
 			WITH DATA;
 			CREATE UNIQUE INDEX "UQ_mv_lts_tasks" ON mv_lts_tasks(uuid);
 
