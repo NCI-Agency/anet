@@ -194,6 +194,18 @@ const updatePerson = async function(user) {
         }) {
           list {
             uuid
+            biography
+            country {
+              uuid
+            }
+            endOfTourDate
+            gender
+            name
+            domainUsername
+            phoneNumber
+            rank
+            role
+            status
           }
         }
       }
@@ -202,32 +214,7 @@ const updatePerson = async function(user) {
     })
   ).data.personList.list
 
-  let person = people && people[0]
-  person = (
-    await runGQL(user, {
-      query: `
-      query {
-        person (uuid:"${person.uuid}") {
-          uuid
-          biography
-          country {
-            uuid
-          }
-          endOfTourDate
-          gender
-          name
-          domainUsername
-          phoneNumber
-          rank
-          role
-          status
-        }
-      }
-    `,
-      variables: {}
-    })
-  ).data.person
-
+  const person = people && people[0]
   const personGenerator = await populate(person, modifiedPerson())
   await personGenerator.name.rarely()
   await personGenerator.domainUsername.never()
@@ -268,7 +255,7 @@ const _deletePerson = async function(user) {
   if (totalCount === 0) {
     return null
   }
-  let person0
+  let person
   for (let i = 0; i < Math.max(totalCount, 10); i++) {
     const random = faker.number.int({ max: totalCount - 1 })
     const people = (
@@ -283,6 +270,15 @@ const _deletePerson = async function(user) {
           list {
             uuid
             name
+            biography
+            country {
+              uuid
+            }
+            endOfTourDate
+            gender
+            phoneNumber
+            rank
+            status
             position {
               uuid
             }
@@ -293,34 +289,12 @@ const _deletePerson = async function(user) {
         variables: {}
       })
     ).data.personList.list.filter(p => !p.position)
-    person0 = people && people[0]
-    if (person0) {
+    person = people && people[0]
+    if (person) {
       break
     }
   }
-  if (person0) {
-    const person = (
-      await runGQL(user, {
-        query: `
-        query {
-          person(uuid: "${person0.uuid}") {
-              biography
-              country {
-                uuid
-              }
-              endOfTourDate
-              gender
-              name
-              phoneNumber
-              rank
-              status
-              uuid
-          }
-        }
-      `,
-        variables: {}
-      })
-    ).data.person
+  if (person) {
     person.status = Model.STATUS.INACTIVE
 
     console.debug(`Deleting/Deactivating ${person.name.green}`)
