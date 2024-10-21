@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker"
 import fetch from "cross-fetch"
-import _isEmpty from "lodash/isEmpty"
+import moment from "moment"
 import Settings from "settings"
 
 export const sleep = seconds => {
@@ -292,57 +292,64 @@ function getListEndpoint(type) {
   }
 }
 
+const CACHE_TIME_IN_SECONDS = 90
+const randomObjectCache = {}
+
+function getCache(cacheObject, key) {
+  if (!cacheObject[key]) {
+    cacheObject[key] = {}
+  }
+  return cacheObject[key]
+}
+
 export async function getRandomObject(
   type,
   variables,
   fields = "uuid",
   ignoreCallback = randomObject => false
 ) {
-  const [listEndpoint, queryType] = getListEndpoint(type)
-  const objectQuery = Object.assign({}, variables, {
-    pageNum: 0,
-    pageSize: 1
-  })
-  const totalCount = (
-    await runGQL(specialUser, {
-      query: `
+  const cachedData = getCache(
+    getCache(getCache(randomObjectCache, type), JSON.stringify(variables)),
+    fields
+  )
+  const now = moment()
+  if (
+    !cachedData.timestamp ||
+    moment(cachedData.timestamp)
+      .add(CACHE_TIME_IN_SECONDS, "seconds")
+      .isBefore(now)
+  ) {
+    const [listEndpoint, queryType] = getListEndpoint(type)
+    const objectQuery = Object.assign({}, variables, {
+      pageSize: 0
+    })
+    cachedData.cache = (
+      await runGQL(specialUser, {
+        query: `
       query ($objectQuery: ${queryType}) {
         ${listEndpoint}(query: $objectQuery) {
           totalCount
+          list {
+            ${fields}
+          }
         }
       }
     `,
-      variables: {
-        objectQuery
-      }
-    })
-  ).data[listEndpoint].totalCount
-  if (totalCount === 0) {
-    return null
-  }
-  let attempt = 0
-  while (attempt < 10) {
-    objectQuery.pageNum = faker.number.int({ max: totalCount - 1 })
-    const list = (
-      await runGQL(specialUser, {
-        query: `
-          query ($objectQuery: ${queryType}) {
-            ${listEndpoint}(query: $objectQuery) {
-              list {
-                ${fields}
-              }
-            }
-          }
-        `,
         variables: {
           objectQuery
         }
       })
-    ).data[listEndpoint].list
-    if (_isEmpty(list)) {
-      return null
-    }
-    const randomObject = list[0]
+    ).data[listEndpoint]
+    cachedData.timestamp = now
+  }
+  const data = cachedData.cache
+  if (data.totalCount === 0) {
+    return null
+  }
+  let attempt = 0
+  while (attempt < 10) {
+    const i = faker.number.int({ max: data.totalCount - 1 })
+    const randomObject = data.list[i]
     if (ignoreCallback(randomObject)) {
       attempt++
     } else {
