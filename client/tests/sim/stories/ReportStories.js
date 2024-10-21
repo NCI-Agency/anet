@@ -36,38 +36,38 @@ async function populateReport(report, args) {
       : Location.LOCATION_TYPES.VIRTUAL_LOCATION
   })
   async function getAttendees() {
-    const reportPeople = []
+    let reportPeople = []
     const nbOfAdvisors = faker.number.int({ min: 1, max: 5 })
-    let primary = true
     for (let i = 0; i < nbOfAdvisors; i++) {
-      const advisor = await getRandomPerson(primary)
+      const advisor = await getRandomPerson(i === 0)
       if (advisor) {
-        advisor.primary = primary
-        advisor.attendee = true
-        advisor.interlocutor = false
-        // Set the first random advisor attendee as author
-        advisor.author = i === 0
-        primary = false
-        reportPeople.push(advisor)
+        reportPeople.push({
+          ...advisor,
+          primary: false,
+          attendee: true,
+          interlocutor: false,
+          author: false
+        })
       }
     }
 
     const nbOfInterlocutors = faker.number.int({ min: 1, max: 5 })
-    primary = true
     for (let i = 0; i < nbOfInterlocutors; i++) {
-      const interlocutor = await getRandomPerson(primary)
+      const interlocutor = await getRandomPerson(i === 0)
       if (interlocutor) {
-        interlocutor.primary = primary
-        interlocutor.attendee = true
-        interlocutor.interlocutor = true
-        interlocutor.author = false
-        primary = false
-        reportPeople.push(interlocutor)
+        reportPeople.push({
+          ...interlocutor,
+          primary: false,
+          attendee: true,
+          interlocutor: true,
+          author: false
+        })
       }
     }
 
+    // Make sure attendees are unique
     const seenUuids = []
-    return reportPeople.filter(a => {
+    reportPeople = reportPeople.filter(a => {
       if (seenUuids.includes(a.uuid)) {
         return false
       } else {
@@ -75,6 +75,23 @@ async function populateReport(report, args) {
         return true
       }
     })
+
+    // Make sure we have primaries and an author
+    const firstAdvisor = reportPeople.find(a => !a.interlocutor)
+    if (firstAdvisor) {
+      firstAdvisor.primary = true
+      firstAdvisor.author = true
+    }
+    const firstInterlocutor = reportPeople.find(a => a.interlocutor)
+    if (firstInterlocutor) {
+      firstInterlocutor.primary = true
+      if (!firstAdvisor) {
+        // Make this an author and advisor
+        firstInterlocutor.author = true
+        firstInterlocutor.interlocutor = false
+      }
+    }
+    return reportPeople
   }
   const reportPeople = await getAttendees()
   async function getTasks() {
@@ -220,6 +237,7 @@ const updateDraftReport = async function(user) {
               uuid
               author
               primary
+              interlocutor
               attendee
             }
           }
