@@ -54,10 +54,18 @@ const buildupLotsOfData = [
     }
   },
   {
-    name: "Create position",
-    number: TEST_RUN ? 1 : 20000,
+    name: "Create position #1",
+    number: TEST_RUN ? 1 : 10000,
     runnable: createPosition,
-    preDelay: TEST_RUN ? 3 : 300,
+    preDelay: TEST_RUN ? 1 : 100,
+    userTypes: ["existingAdmin"],
+    arguments: {}
+  },
+  {
+    name: "Create position #2",
+    number: TEST_RUN ? 1 : 10000,
+    runnable: createPosition,
+    preDelay: TEST_RUN ? 2 : 200,
     userTypes: ["existingAdmin"],
     arguments: {}
   },
@@ -65,7 +73,7 @@ const buildupLotsOfData = [
     name: "Create published report #1",
     number: TEST_RUN ? 1 : 25000,
     runnable: createReport,
-    preDelay: TEST_RUN ? 6 : 600,
+    preDelay: TEST_RUN ? 3 : 300,
     userTypes: ["existingAdmin"],
     arguments: { state: Report.STATE.PUBLISHED }
   },
@@ -73,7 +81,7 @@ const buildupLotsOfData = [
     name: "Create published report #2",
     number: TEST_RUN ? 1 : 25000,
     runnable: createReport,
-    preDelay: TEST_RUN ? 6 : 600,
+    preDelay: TEST_RUN ? 4 : 400,
     userTypes: ["existingAdmin"],
     arguments: { state: Report.STATE.PUBLISHED }
   },
@@ -81,7 +89,7 @@ const buildupLotsOfData = [
     name: "Create published report #3",
     number: TEST_RUN ? 1 : 25000,
     runnable: createReport,
-    preDelay: TEST_RUN ? 6 : 600,
+    preDelay: TEST_RUN ? 5 : 500,
     userTypes: ["existingAdmin"],
     arguments: { state: Report.STATE.PUBLISHED }
   },
@@ -97,7 +105,7 @@ const buildupLotsOfData = [
     name: "Create published report #5",
     number: TEST_RUN ? 1 : 25000,
     runnable: createReport,
-    preDelay: TEST_RUN ? 6 : 600,
+    preDelay: TEST_RUN ? 7 : 700,
     userTypes: ["existingAdmin"],
     arguments: { state: Report.STATE.PUBLISHED }
   },
@@ -105,7 +113,7 @@ const buildupLotsOfData = [
     name: "Create published report #6",
     number: TEST_RUN ? 1 : 25000,
     runnable: createReport,
-    preDelay: TEST_RUN ? 6 : 600,
+    preDelay: TEST_RUN ? 8 : 800,
     userTypes: ["existingAdmin"],
     arguments: { state: Report.STATE.PUBLISHED }
   },
@@ -113,7 +121,7 @@ const buildupLotsOfData = [
     name: "Create published report #7",
     number: TEST_RUN ? 1 : 25000,
     runnable: createReport,
-    preDelay: TEST_RUN ? 6 : 600,
+    preDelay: TEST_RUN ? 9 : 900,
     userTypes: ["existingAdmin"],
     arguments: { state: Report.STATE.PUBLISHED }
   },
@@ -121,7 +129,7 @@ const buildupLotsOfData = [
     name: "Create published report #8",
     number: TEST_RUN ? 1 : 25000,
     runnable: createReport,
-    preDelay: TEST_RUN ? 6 : 600,
+    preDelay: TEST_RUN ? 10 : 1000,
     userTypes: ["existingAdmin"],
     arguments: { state: Report.STATE.PUBLISHED }
   },
