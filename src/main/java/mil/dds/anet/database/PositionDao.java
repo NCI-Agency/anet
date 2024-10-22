@@ -44,7 +44,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
 
   public static final String[] fields =
       {"uuid", "name", "code", "createdAt", "updatedAt", "organizationUuid", "currentPersonUuid",
-          "type", "status", "locationUuid", "customFields", "role"};
+          "type", "status", "locationUuid", "customFields", "role", "description"};
   public static final String TABLE_NAME = "positions";
   public static final String POSITION_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
   public static final String DUPLICATE_POSITION_CODE =
@@ -67,8 +67,9 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
       try {
         handle.createUpdate("/* positionInsert */ INSERT INTO positions (uuid, name, code, type, "
             + "status, \"organizationUuid\", \"locationUuid\", \"createdAt\", \"updatedAt\", "
-            + "\"customFields\", \"role\") VALUES (:uuid, :name, :code, :type, :status, :organizationUuid, "
-            + ":locationUuid, :createdAt, :updatedAt, :customFields, :role)").bindBean(p)
+            + "\"customFields\", role, description) VALUES (:uuid, :name, :code, :type, :status, "
+            + ":organizationUuid, :locationUuid, :createdAt, :updatedAt, :customFields, :role, "
+            + ":description)").bindBean(p)
             .bind("createdAt", DaoUtils.asLocalDateTime(p.getCreatedAt()))
             .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
             .bind("type", DaoUtils.getEnumId(p.getType()))
@@ -167,7 +168,8 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
             .createUpdate("/* positionUpdate */ UPDATE positions SET name = :name, code = :code, "
                 + "\"organizationUuid\" = :organizationUuid, type = :type, status = :status, "
                 + "\"locationUuid\" = :locationUuid, \"updatedAt\" = :updatedAt, "
-                + "\"customFields\" = :customFields, \"role\" = :role WHERE uuid = :uuid")
+                + "\"customFields\" = :customFields, role = :role, description = :description "
+                + "WHERE uuid = :uuid")
             .bindBean(p).bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
             .bind("type", DaoUtils.getEnumId(p.getType()))
             .bind("status", DaoUtils.getEnumId(p.getStatus()))

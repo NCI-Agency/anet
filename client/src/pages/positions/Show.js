@@ -29,6 +29,7 @@ import {
   usePageTitle
 } from "components/Page"
 import RelatedObjectNotes from "components/RelatedObjectNotes"
+import RichTextEditor from "components/RichTextEditor"
 import { Field, Form, Formik } from "formik"
 import { Location, Position } from "models"
 import { positionTour } from "pages/HopscotchTour"
@@ -292,6 +293,16 @@ const PositionShow = ({ pageDispatchers }) => {
                   name="role"
                   component={FieldHelper.ReadonlyField}
                   humanValue={Position.humanNameOfRole}
+                />
+
+                <DictionaryField
+                  wrappedComponent={Field}
+                  dictProps={Settings.fields.position.description}
+                  name="description"
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={
+                    <RichTextEditor readOnly value={position.description} />
+                  }
                 />
               </Fieldset>
 

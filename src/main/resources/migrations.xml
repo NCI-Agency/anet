@@ -5940,6 +5940,12 @@
 		/>
 	</changeSet>
 
+	<changeSet id="add-description-field-to-positions" author="gjvoosten">
+		<addColumn tableName="positions">
+			<column name="description" type="text"/>
+		</addColumn>
+	</changeSet>
+
 	<!-- Keep this change set as the last one in the change log;
 	     it will be re-run whenever it changes. -->
 	<changeSet id="set-up-full-text-search" runOnChange="true" author="gjvoosten">
@@ -6249,6 +6255,8 @@
 
 			ALTER TABLE positions
 				ADD COLUMN more_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, coalesce(positions.description, ''))
+						|| to_tsvector('simple', coalesce(positions.description, '')), ${fts_low}) ||
 					setweight(to_tsvector(${fts_config}, jsonb_value_agg(positions."customFields"::jsonb))
 						|| to_tsvector('simple', jsonb_value_agg(positions."customFields"::jsonb)), ${fts_lower})
 				) STORED;
@@ -6375,15 +6383,31 @@
 			CREATE UNIQUE INDEX "UQ_mv_lts_people_uuid" ON mv_lts_people(uuid);
 
 			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_lts_positions(uuid, link_text) AS
-			WITH cf_links AS (
+			WITH rt_links AS (
+				SELECT * FROM get_rt_referenced_objects('positions', 'description')
+			),
+			cf_links AS (
 				SELECT * FROM get_cf_referenced_objects('positions', 'customFields')
 			)
 			SELECT
-				positions.uuid,
-				setweight(coalesce(tsvector_agg(get_core_text(cf_links.object_table, cf_links.object_uuid)), ''::tsvector), ${fts_low})
-			FROM positions
-			LEFT JOIN cf_links ON cf_links.uuid = positions.uuid
-			GROUP BY positions.uuid
+				links.uuid,
+				setweight(coalesce(tsvector_agg(links.agg), ''::tsvector), ${fts_low})
+			FROM (
+				SELECT
+					positions.uuid,
+					coalesce(tsvector_agg(get_core_text(rt_links.object_table, rt_links.object_uuid)), ''::tsvector) AS agg
+				FROM positions
+				LEFT JOIN rt_links ON rt_links.uuid = positions.uuid
+				GROUP BY positions.uuid
+			UNION ALL
+				SELECT
+					positions.uuid,
+					coalesce(tsvector_agg(get_core_text(cf_links.object_table, cf_links.object_uuid)), ''::tsvector) AS agg
+				FROM positions
+				LEFT JOIN cf_links ON cf_links.uuid = positions.uuid
+				GROUP BY positions.uuid
+			) AS links
+			GROUP BY links.uuid
 			WITH DATA;
 			CREATE UNIQUE INDEX "UQ_mv_lts_positions_uuid" ON mv_lts_positions(uuid);
 

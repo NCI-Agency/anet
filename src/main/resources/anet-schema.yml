@@ -890,7 +890,7 @@ properties:
       position:
         type: object
         additionalProperties: false
-        required: [status, name, type, code, organization, location, organizationsAdministrated, role, emailAddresses, authorizationGroups]
+        required: [status, name, type, code, organization, location, organizationsAdministrated, role, description, emailAddresses, authorizationGroups]
         properties:
           status:
             "$ref": "#/$defs/labeledField"
@@ -943,6 +943,8 @@ properties:
                       leader:
                         type: string
                         description: UI label of leader position
+          description:
+            "$ref": "#/$defs/inputField"
           customFields:
             type: object
             additionalProperties:

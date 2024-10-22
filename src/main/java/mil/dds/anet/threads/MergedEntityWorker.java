@@ -28,6 +28,7 @@ public class MergedEntityWorker extends AbstractWorker {
       new FieldWithEntityReference("organizations", "customFields"), // -
       new FieldWithEntityReference("people", "biography"), // -
       new FieldWithEntityReference("people", "customFields"), // -
+      new FieldWithEntityReference("positions", "description"), // -
       new FieldWithEntityReference("positions", "customFields"), // -
       new FieldWithEntityReference("reports", "text"), // -
       new FieldWithEntityReference("reports", "customFields"), // -

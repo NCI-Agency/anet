@@ -69,6 +69,7 @@ export default class Position extends Model {
         .string()
         .required()
         .default(() => PositionRole.MEMBER.toString()),
+      description: yup.string().nullable().default(""),
       associatedPositions: yup.array().nullable().default([]),
       previousPeople: yup.array().nullable().default([]),
       organization: yup
@@ -111,6 +112,7 @@ export default class Position extends Model {
     isSubscribed
     updatedAt
     code
+    description
     emailAddresses {
       network
       address
