@@ -80,6 +80,8 @@ public class PositionResource {
   public Position createPosition(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "position") Position pos) {
     pos.checkAndFixCustomFields();
+    pos.setDescription(
+        Utils.isEmptyHtml(pos.getDescription()) ? null : Utils.sanitizeHtml(pos.getDescription()));
     final Person user = DaoUtils.getUserFromContext(context);
     assertPermission(user, pos);
     validatePosition(user, pos);
@@ -131,6 +133,8 @@ public class PositionResource {
   public Integer updatePosition(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "position") Position pos) {
     pos.checkAndFixCustomFields();
+    pos.setDescription(
+        Utils.isEmptyHtml(pos.getDescription()) ? null : Utils.sanitizeHtml(pos.getDescription()));
     final Person user = DaoUtils.getUserFromContext(context);
     assertPermission(user, pos);
     validatePosition(user, pos);

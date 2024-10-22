@@ -264,8 +264,10 @@ class MergedEntityWorkerTest extends AbstractResourceTest {
     input.setType(Position.PositionType.REGULAR);
     input.setRole(Position.PositionRole.MEMBER);
     input.setName("testPosition");
+    input.setDescription(getRichText(PositionDao.TABLE_NAME, testOldUuid));
     input.setCustomFields(getJsonString(PositionDao.TABLE_NAME, testOldUuid));
     final Position created = positionDao.insert(input);
+    assertContains(created.getDescription(), testOldUuid);
     assertContains(created.getCustomFields(), testOldUuid);
 
     // run the worker
@@ -273,7 +275,9 @@ class MergedEntityWorkerTest extends AbstractResourceTest {
 
     // assert that the entity refs have been updated
     final Position updated = positionDao.getByUuid(created.getUuid());
+    assertDoesNotContain(updated.getDescription(), testOldUuid);
     assertDoesNotContain(updated.getCustomFields(), testOldUuid);
+    assertContains(updated.getDescription(), testNewUuid);
     assertContains(updated.getCustomFields(), testNewUuid);
 
     // clean up

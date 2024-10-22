@@ -25,6 +25,7 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
+import RichTextEditor from "components/RichTextEditor"
 import useMergeObjects, {
   ALIGN_OPTIONS,
   areAllSet,
@@ -193,6 +194,17 @@ const MergePositions = ({ pageDispatchers }) => {
                 value={mergedPosition.code}
                 align={ALIGN_OPTIONS.CENTER}
                 fieldName="code"
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
+              <DictionaryField
+                wrappedComponent={MergeField}
+                dictProps={Settings.fields.position.description}
+                value={
+                  <RichTextEditor readOnly value={mergedPosition.description} />
+                }
+                align={ALIGN_OPTIONS.CENTER}
+                fieldName="description"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
@@ -535,6 +547,21 @@ const PositionColumn = ({
               dispatchMergeActions(
                 setAMergedField("code", position.code, align)
               )}
+            mergeState={mergeState}
+            autoMerge
+            dispatchMergeActions={dispatchMergeActions}
+          />
+          <DictionaryField
+            wrappedComponent={MergeField}
+            dictProps={Settings.fields.position.description}
+            fieldName="description"
+            value={<RichTextEditor readOnly value={position.description} />}
+            align={align}
+            action={() => {
+              dispatchMergeActions(
+                setAMergedField("description", position.description, align)
+              )
+            }}
             mergeState={mergeState}
             autoMerge
             dispatchMergeActions={dispatchMergeActions}

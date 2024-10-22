@@ -51,6 +51,9 @@ public class Position extends AbstractEmailableAnetBean
   @GraphQLQuery
   @GraphQLInputField
   private PositionRole role;
+  @GraphQLQuery
+  @GraphQLInputField
+  private String description;
   // Lazy Loaded
   // annotated below
   private ForeignObjectHolder<Organization> organization = new ForeignObjectHolder<>();
@@ -102,6 +105,11 @@ public class Position extends AbstractEmailableAnetBean
     return status;
   }
 
+  @Override
+  public void setStatus(Status status) {
+    this.status = status;
+  }
+
   public PositionRole getRole() {
     return role;
   }
@@ -110,9 +118,12 @@ public class Position extends AbstractEmailableAnetBean
     this.role = role;
   }
 
-  @Override
-  public void setStatus(Status status) {
-    this.status = status;
+  public String getDescription() {
+    return description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
   }
 
   @GraphQLQuery(name = "organization")
@@ -358,12 +369,15 @@ public class Position extends AbstractEmailableAnetBean
     return super.equals(o) && Objects.equals(uuid, other.getUuid())
         && Objects.equals(name, other.getName()) && Objects.equals(code, other.getCode())
         && Objects.equals(type, other.getType()) && Objects.equals(status, other.getStatus())
+        && Objects.equals(role, other.getRole())
+        && Objects.equals(description, other.getDescription())
         && Objects.equals(getOrganizationUuid(), other.getOrganizationUuid());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), uuid, name, code, type, status, organization);
+    return Objects.hash(super.hashCode(), uuid, name, code, type, status, role, organization,
+        description);
   }
 
   @Override

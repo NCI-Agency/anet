@@ -39,8 +39,8 @@ public class PositionResourceTest extends AbstractResourceTest {
       String.format("uuid shortName %1$s", _EMAIL_ADDRESSES_FIELDS);
   private static final String _PERSON_FIELDS =
       String.format("uuid name %1$s", _EMAIL_ADDRESSES_FIELDS);
-  private static final String _POSITION_FIELDS =
-      String.format("uuid name code type role status customFields %1$s", _EMAIL_ADDRESSES_FIELDS);
+  private static final String _POSITION_FIELDS = String.format(
+      "uuid name code type role status description customFields %1$s", _EMAIL_ADDRESSES_FIELDS);
   public static final String ORGANIZATION_FIELDS =
       String.format("{ %1$s positions { %2$s organization { uuid } location { uuid } } }",
           _ORGANIZATION_FIELDS, _POSITION_FIELDS);
@@ -510,12 +510,14 @@ public class PositionResourceTest extends AbstractResourceTest {
     final PositionInput newbPositionInput = PositionInput.builder()
         .withName("PositionTest Position for Newb").withType(PositionType.REGULAR)
         .withRole(PositionRole.MEMBER).withOrganization(getOrganizationInput(orgs.getList().get(0)))
-        .withStatus(Status.ACTIVE).withPerson(getPersonInput(newb1)).withCode(positionCode).build();
+        .withStatus(Status.ACTIVE).withPerson(getPersonInput(newb1)).withCode(positionCode)
+        .withDescription("<p>This position has no description.</p>").build();
 
     final Position newbPosition =
         withCredentials(adminUser, t -> mutationExecutor.createPosition(FIELDS, newbPositionInput));
     assertThat(newbPosition).isNotNull();
     assertThat(newbPosition.getUuid()).isNotNull();
+    assertThat(newbPositionInput.getDescription()).isEqualTo(newbPosition.getDescription());
     // Ensure that the position contains the person
     final Person returnedPerson = newbPosition.getPerson();
     assertThat(returnedPerson).isNotNull();

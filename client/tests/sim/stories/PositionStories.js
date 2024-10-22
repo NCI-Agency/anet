@@ -2,8 +2,10 @@ import { faker } from "@faker-js/faker"
 import Model from "components/Model"
 import _isEmpty from "lodash/isEmpty"
 import { Location, Position } from "models"
+import { PositionRole } from "models/Position"
 import {
   createEmailAddresses,
+  createHtmlParagraphs,
   fuzzy,
   getRandomObject,
   identity,
@@ -138,7 +140,9 @@ function randomPositionTemplate(organizations) {
     organization: () => faker.helpers.arrayElement(organizations),
     name: () => faker.person.jobTitle(),
     location: identity,
+    role: () => getPositionRole(),
     code: identity,
+    description: async() => await createHtmlParagraphs(),
     associatedPositions: identity
   }
 }
@@ -149,6 +153,14 @@ function getPositionType() {
     : fuzzy.withProbability(0.9)
       ? Position.TYPE.SUPERUSER
       : Position.TYPE.ADMINISTRATOR
+}
+
+function getPositionRole() {
+  return fuzzy.withProbability(0.9)
+    ? PositionRole.MEMBER.toString()
+    : fuzzy.withProbability(0.9)
+      ? PositionRole.DEPUTY.toString()
+      : PositionRole.LEADER.toString()
 }
 
 /**
@@ -193,6 +205,8 @@ const _createPosition = async function(user) {
     organization,
     person,
     location,
+    role: () => getPositionRole(),
+    description: async() => await createHtmlParagraphs(),
     emailAddresses
   }
 
@@ -204,6 +218,8 @@ const _createPosition = async function(user) {
   await positionGenerator.person.always()
   await positionGenerator.organization.always()
   await positionGenerator.location.always()
+  await positionGenerator.role.always()
+  await positionGenerator.description.always()
   await positionGenerator.emailAddresses.always()
 
   console.debug(`Creating position ${position.name.green}`)

@@ -4,6 +4,7 @@ import DictionaryField from "components/DictionaryField"
 import EmailAddressTable from "components/EmailAddressTable"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
+import RichTextEditor from "components/RichTextEditor"
 import { Location, Position } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
@@ -20,6 +21,7 @@ const GQL_GET_POSITION = gql`
       role
       status
       code
+      description
       emailAddresses {
         network
         address
@@ -154,6 +156,14 @@ const PositionPreview = ({ className, uuid }) => {
           dictProps={Settings.fields.position.role}
           value={Position.humanNameOfRole(position.role)}
         />
+
+        {position.description && (
+          <DictionaryField
+            wrappedComponent={PreviewField}
+            dictProps={Settings.fields.position.description}
+            value={<RichTextEditor readOnly value={position.description} />}
+          />
+        )}
       </div>
 
       <h4>Current assigned person</h4>
