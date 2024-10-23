@@ -286,7 +286,7 @@ const LocationShow = ({ pageDispatchers }) => {
                 </Fieldset>
               )}
 
-              {Location.hasCoordinates(location) && (
+              {!location.geoShape && Location.hasCoordinates(location) && (
                 <Leaflet markers={[marker]} />
               )}
 

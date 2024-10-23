@@ -361,7 +361,7 @@ export function getLeafletMap(mapId, location, hideWhenEmpty) {
       lat: Location.hasCoordinates(location) ? location.lat : null,
       lng: Location.hasCoordinates(location) ? location.lng : null
     }
-  ] : [];
+  ] : []
   return [shapes.length + markers.length] > 0 ? (
     <Leaflet
       mapId={mapId}

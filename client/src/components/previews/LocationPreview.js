@@ -116,7 +116,7 @@ const LocationPreview = ({ className, uuid }) => {
         )}
       </div>
 
-      {Location.hasCoordinates(location) && (
+      {!location.geoShape && Location.hasCoordinates(location) && (
         <Leaflet markers={[marker]} mapId={`${uuid}`} />
       )}
 
