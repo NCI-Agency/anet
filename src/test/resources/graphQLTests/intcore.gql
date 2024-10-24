@@ -16,19 +16,40 @@ reportList(query: {releasedAtStart: -259200000, pageSize: 3, sortBy: RELEASED_AT
       uuid
       name
       rank
-      avatarUuid
+      entityAvatar {
+        attachmentUuid
+        applyCrop
+        cropLeft
+        cropTop
+        cropWidth
+        cropHeight
+      }
     }
     primaryAdvisor {
       uuid
       name
       rank
-      avatarUuid
+      entityAvatar {
+        attachmentUuid
+        applyCrop
+        cropLeft
+        cropTop
+        cropWidth
+        cropHeight
+      }
     }
     primaryInterlocutor {
       uuid
       name
       rank
-      avatarUuid
+      entityAvatar {
+        attachmentUuid
+        applyCrop
+        cropLeft
+        cropTop
+        cropWidth
+        cropHeight
+      }
     }
     advisorOrg {
       uuid
@@ -65,7 +86,14 @@ reportList(query: {releasedAtStart: -259200000, pageSize: 3, sortBy: RELEASED_AT
             uuid
             name
             rank
-            avatarUuid
+            entityAvatar {
+              attachmentUuid
+              applyCrop
+              cropLeft
+              cropTop
+              cropWidth
+              cropHeight
+            }
           }
         }
       }
@@ -73,7 +101,14 @@ reportList(query: {releasedAtStart: -259200000, pageSize: 3, sortBy: RELEASED_AT
         uuid
         name
         rank
-        avatarUuid
+        entityAvatar {
+          attachmentUuid
+          applyCrop
+          cropLeft
+          cropTop
+          cropWidth
+          cropHeight
+        }
       }
     }
     updatedAt

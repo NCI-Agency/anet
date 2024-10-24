@@ -108,6 +108,9 @@ const UploadAttachment = ({
 }) => {
   const [error, setError] = useState(null)
   const [objectUuid, setObjectUuid] = useState(relatedObjectUuid)
+  const mimeTypes = Settings.fields.attachment.fileTypes?.map(
+    fileType => fileType.mimeType
+  )
 
   const handleFileEvent = async e => {
     // Must keep a copy of this state here, as it is not updated while this function runs
@@ -118,7 +121,7 @@ const UploadAttachment = ({
         // No file was selected, just continue
         continue
       }
-      if (!Settings.fields.attachment.mimeTypes?.includes(file.type)) {
+      if (!mimeTypes?.includes(file.type)) {
         toast.error(
           `Attaching "${file.name}" failed; files of type "${file.type}" are not allowed`
         )
@@ -186,7 +189,7 @@ const UploadAttachment = ({
           id="fileUpload"
           type="file"
           multiple
-          accept={Settings.fields.attachment.mimeTypes}
+          accept={mimeTypes}
           onChange={handleFileEvent}
         />
       </section>

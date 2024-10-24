@@ -6,7 +6,7 @@ import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingle
 import CustomDateInput from "components/CustomDateInput"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
-import Model from "components/Model"
+import Model, { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import RemoveButton from "components/RemoveButton"
 import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
@@ -35,8 +35,7 @@ const PERSON_SINGLE_SELECT_PARAMETERS = {
     cb(newEntry)
   },
   objectType: Person,
-  fields:
-    "uuid name rank avatarUuid position { uuid name type organization {uuid} } previousPositions { startTime endTime position { uuid }}",
+  fields: `uuid name rank ${GRAPHQL_ENTITY_AVATAR_FIELDS} position { uuid name type organization {uuid} } previousPositions { startTime endTime position { uuid }}`,
   addon: PEOPLE_ICON
 }
 
@@ -54,8 +53,7 @@ const POSITION_SINGLE_SELECT_PARAMETERS = {
     cb(newEntry)
   },
   objectType: Position,
-  fields:
-    "uuid name code type organization { uuid shortName longName identificationCode} person { uuid name rank avatarUuid } previousPeople { startTime endTime person {uuid} }",
+  fields: `uuid name code type organization { uuid shortName longName identificationCode } person { uuid name rank ${GRAPHQL_ENTITY_AVATAR_FIELDS} } previousPeople { startTime endTime person {uuid} }`,
   addon: POSITIONS_ICON
 }
 

@@ -4,6 +4,7 @@ import useSearchFilter from "components/advancedSearch/hooks"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import { OrganizationOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
+import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import OrganizationTable from "components/OrganizationTable"
 import { Organization } from "models"
 import PropTypes from "prop-types"
@@ -17,6 +18,7 @@ const GQL_GET_ORGANIZATION = gql`
       shortName
       longName
       identificationCode
+      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
     }
   }
 `
@@ -28,6 +30,7 @@ const GQL_GET_ORGANIZATIONS = gql`
       shortName
       longName
       identificationCode
+      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
     }
   }
 `

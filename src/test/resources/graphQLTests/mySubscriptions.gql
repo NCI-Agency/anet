@@ -20,7 +20,14 @@ mySubscriptions(query: {pageSize:0}) {
       ... on Person {
         name
         rank
-        avatarUuid
+        entityAvatar {
+          attachmentUuid
+          applyCrop
+          cropLeft
+          cropTop
+          cropWidth
+          cropHeight
+        }
       }
       ... on Position {
         type

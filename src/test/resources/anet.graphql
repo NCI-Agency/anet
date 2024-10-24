@@ -374,6 +374,30 @@ enum EngagementStatus {
 }
 
 """"""
+type EntityAvatar {
+  applyCrop: Boolean!
+  attachmentUuid: String
+  cropHeight: Int
+  cropLeft: Int
+  cropTop: Int
+  cropWidth: Int
+  relatedObjectType: String
+  relatedObjectUuid: String
+}
+
+""""""
+input EntityAvatarInput {
+  applyCrop: Boolean!
+  attachmentUuid: String
+  cropHeight: Int
+  cropLeft: Int
+  cropTop: Int
+  cropWidth: Int
+  relatedObjectType: String
+  relatedObjectUuid: String
+}
+
+""""""
 type GenericRelatedObject {
   objectUuid: String
   relatedObject: RelatableObject
@@ -484,6 +508,7 @@ type Mutation {
   createAuthorizationGroup(authorizationGroup: AuthorizationGroupInput): AuthorizationGroup
   createLocation(location: LocationInput): Location
   createNote(note: NoteInput): Note
+  createOrUpdateEntityAvatar(entityAvatar: EntityAvatarInput): Int
   createOrganization(organization: OrganizationInput): Organization
   createPerson(person: PersonInput): Person
   createPosition(position: PositionInput): Position
@@ -492,6 +517,7 @@ type Mutation {
   createSubscription(subscription: SubscriptionInput): Subscription
   createTask(task: TaskInput): Task
   deleteAttachment(uuid: String): Int
+  deleteEntityAvatar(relatedObjectType: String, relatedObjectUuid: String): Int
   deleteNote(uuid: String): Int
   deleteObjectSubscription(uuid: String): Int
   deletePerson(uuid: String): Int
@@ -521,7 +547,6 @@ type Mutation {
   updateNote(note: NoteInput): Note
   updateOrganization(organization: OrganizationInput): Int
   updatePerson(person: PersonInput): Int
-  updatePersonAvatar(person: PersonInput): Int!
   updatePersonHistory(person: PersonInput): Int!
   updatePosition(position: PositionInput): Int
   updatePositionHistory(position: PositionInput): Int!
@@ -580,6 +605,7 @@ type Organization {
   customSensitiveInformation: [CustomSensitiveInformation]
   descendantOrgs(query: OrganizationSearchQueryInput): [Organization]
   emailAddresses(network: String): [EmailAddress]
+  entityAvatar: EntityAvatar
   identificationCode: String
   isSubscribed: Boolean
   location: Location
@@ -609,6 +635,7 @@ input OrganizationInput {
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformationInput]
   emailAddresses: [EmailAddressInput]
+  entityAvatar: EntityAvatarInput
   identificationCode: String
   location: LocationInput
   longName: String
@@ -655,7 +682,6 @@ type Person {
   attendedReports(query: ReportSearchQueryInput): AnetBeanList_Report
   authoredReports(query: ReportSearchQueryInput): AnetBeanList_Report
   authorizationGroups: [AuthorizationGroup]
-  avatarUuid: String
   biography: String
   code: String
   country: Location
@@ -665,6 +691,7 @@ type Person {
   domainUsername: String
   emailAddresses(network: String): [EmailAddress]
   endOfTourDate: Instant
+  entityAvatar: EntityAvatar
   gender: String
   isSubscribed: Boolean
   name: String
@@ -684,7 +711,6 @@ type Person {
 
 """"""
 input PersonInput {
-  avatarUuid: String
   biography: String
   code: String
   country: LocationInput
@@ -694,6 +720,7 @@ input PersonInput {
   domainUsername: String
   emailAddresses: [EmailAddressInput]
   endOfTourDate: Instant
+  entityAvatar: EntityAvatarInput
   gender: String
   name: String
   obsoleteCountry: String
@@ -1018,7 +1045,6 @@ type ReportPerson {
   author: Boolean!
   authoredReports(query: ReportSearchQueryInput): AnetBeanList_Report
   authorizationGroups: [AuthorizationGroup]
-  avatarUuid: String
   biography: String
   code: String
   country: Location
@@ -1028,6 +1054,7 @@ type ReportPerson {
   domainUsername: String
   emailAddresses(network: String): [EmailAddress]
   endOfTourDate: Instant
+  entityAvatar: EntityAvatar
   gender: String
   interlocutor: Boolean!
   isSubscribed: Boolean
@@ -1051,7 +1078,6 @@ type ReportPerson {
 input ReportPersonInput {
   attendee: Boolean!
   author: Boolean!
-  avatarUuid: String
   biography: String
   code: String
   country: LocationInput
@@ -1061,6 +1087,7 @@ input ReportPersonInput {
   domainUsername: String
   emailAddresses: [EmailAddressInput]
   endOfTourDate: Instant
+  entityAvatar: EntityAvatarInput
   gender: String
   interlocutor: Boolean!
   name: String

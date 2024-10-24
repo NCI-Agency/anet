@@ -4,7 +4,7 @@ import { BreadcrumbTrail } from "components/BreadcrumbTrail"
 import DictionaryField from "components/DictionaryField"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
-import Model from "components/Model"
+import Model, { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import PositionTable from "components/PositionTable"
 import RichTextEditor from "components/RichTextEditor"
 import { Task } from "models"
@@ -31,6 +31,7 @@ const GQL_GET_TASK = gql`
         shortName
         longName
         identificationCode
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
       parentTask {
         uuid
@@ -66,12 +67,13 @@ const GQL_GET_TASK = gql`
           shortName
           longName
           identificationCode
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         person {
           uuid
           name
           rank
-          avatarUuid
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
       }
       planningApprovalSteps {
@@ -85,7 +87,7 @@ const GQL_GET_TASK = gql`
             uuid
             name
             rank
-            avatarUuid
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
         }
       }
@@ -100,7 +102,7 @@ const GQL_GET_TASK = gql`
             uuid
             name
             rank
-            avatarUuid
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
         }
       }

@@ -3,7 +3,14 @@ personList(query: {pageSize: ${maxResults}, status: ACTIVE, inMyReports: true, s
     uuid
     name
     rank
-    avatarUuid
+    entityAvatar {
+      attachmentUuid
+      applyCrop
+      cropLeft
+      cropTop
+      cropWidth
+      cropHeight
+    }
     status
     endOfTourDate
     position {

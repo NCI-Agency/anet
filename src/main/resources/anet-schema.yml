@@ -669,10 +669,26 @@ properties:
             "$ref": "#/$defs/inputField"
           description:
             "$ref": "#/$defs/inputField"
-          mimeTypes:
+          fileTypes:
             type: array
-            title: The allowed MIME types for uploading attachments
+            title: List of file types allowed for uploading attachments
             description: Used for restricting the types of attachments that can be uploaded
+            items:
+              title: File type description
+              type: object
+              required: [mimeType]
+              properties:
+                mimeType:
+                  type: string
+                  title: MIME type
+                avatar:
+                  type: boolean
+                  title: True if file type may be used as an avatar
+                  default: false
+                crop:
+                  type: boolean
+                  title: Should be true if the file type is an image which can be cropped
+                  default: false
             uniqueItems: true
             minItems: 1
 

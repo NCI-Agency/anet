@@ -80,10 +80,9 @@ public class Person extends AbstractEmailableAnetBean
   private List<AuthorizationGroup> authorizationGroups;
   @GraphQLQuery
   @GraphQLInputField
-  private String avatarUuid;
-  @GraphQLQuery
-  @GraphQLInputField
   private String code;
+  // annotated below
+  private EntityAvatar entityAvatar;
 
   // non-GraphQL
   private Deque<Activity> recentActivities;
@@ -340,12 +339,26 @@ public class Person extends AbstractEmailableAnetBean
     return authorizationGroups;
   }
 
-  public String getAvatarUuid() {
-    return avatarUuid;
+  @GraphQLQuery(name = "entityAvatar")
+  public CompletableFuture<EntityAvatar> loadEntityAvatar(
+      @GraphQLRootContext Map<String, Object> context) {
+    if (entityAvatar != null) {
+      return CompletableFuture.completedFuture(entityAvatar);
+    }
+    return new UuidFetcher<EntityAvatar>().load(context, IdDataLoaderKey.ENTITY_AVATAR, uuid)
+        .thenApply(o -> {
+          entityAvatar = o;
+          return o;
+        });
   }
 
-  public void setAvatarUuid(String avatarUuid) {
-    this.avatarUuid = avatarUuid;
+  @GraphQLInputField(name = "entityAvatar")
+  public void setEntityAvatar(EntityAvatar entityAvatar) {
+    this.entityAvatar = entityAvatar;
+  }
+
+  public EntityAvatar getEntityAvatar() {
+    return this.entityAvatar;
   }
 
   @AllowUnverifiedUsers
@@ -401,7 +414,6 @@ public class Person extends AbstractEmailableAnetBean
         && Objects.equals(other.getDomainUsername(), domainUsername)
         && Objects.equals(other.getOpenIdSubject(), openIdSubject)
         && Objects.equals(other.getPendingVerification(), pendingVerification)
-        && Objects.equals(other.getAvatarUuid(), avatarUuid)
         && Objects.equals(other.getCode(), code)
         && (createdAt != null ? createdAt.equals(other.getCreatedAt())
             : (other.getCreatedAt() == null && updatedAt != null)
@@ -412,7 +424,7 @@ public class Person extends AbstractEmailableAnetBean
   @Override
   public int hashCode() {
     return Objects.hash(super.hashCode(), uuid, name, status, user, phoneNumber, rank, biography,
-        domainUsername, openIdSubject, pendingVerification, avatarUuid, code, createdAt, updatedAt);
+        domainUsername, openIdSubject, pendingVerification, code, createdAt, updatedAt);
   }
 
   @Override

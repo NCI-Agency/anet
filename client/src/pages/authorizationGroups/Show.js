@@ -9,6 +9,7 @@ import Fieldset from "components/Fieldset"
 import FindObjectsButton from "components/FindObjectsButton"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
+import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import {
   jumpToTop,
   mapPageDispatchersToProps,
@@ -56,12 +57,13 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
           shortName
           longName
           identificationCode
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         person {
           uuid
           name
           rank
-          avatarUuid
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
       }
       authorizationGroupRelatedObjects {
@@ -73,13 +75,14 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
             shortName
             longName
             identificationCode
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
             ${GQL_EMAIL_ADDRESSES}
           }
           ... on Person {
             uuid
             name
             rank
-            avatarUuid
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
             ${GQL_EMAIL_ADDRESSES}
           }
           ... on Position {

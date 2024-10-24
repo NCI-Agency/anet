@@ -21,7 +21,14 @@ report(uuid:"${reportUuid}") {
     uuid
     name
     rank
-    avatarUuid
+    entityAvatar {
+      attachmentUuid
+      applyCrop
+      cropLeft
+      cropTop
+      cropWidth
+      cropHeight
+    }
     position {
       uuid
       organization {
@@ -39,7 +46,14 @@ report(uuid:"${reportUuid}") {
               uuid
               name
               rank
-              avatarUuid
+              entityAvatar {
+                attachmentUuid
+                applyCrop
+                cropLeft
+                cropTop
+                cropWidth
+                cropHeight
+              }
             }
           }
         }
@@ -50,7 +64,14 @@ report(uuid:"${reportUuid}") {
     uuid
     name
     rank
-    avatarUuid
+    entityAvatar {
+      attachmentUuid
+      applyCrop
+      cropLeft
+      cropTop
+      cropWidth
+      cropHeight
+    }
     status
     primary
     endOfTourDate
@@ -98,7 +119,14 @@ report(uuid:"${reportUuid}") {
       uuid
       name
       rank
-      avatarUuid
+      entityAvatar {
+        attachmentUuid
+        applyCrop
+        cropLeft
+        cropTop
+        cropWidth
+        cropHeight
+      }
     }
   }
   interlocutorOrg {
@@ -126,7 +154,14 @@ report(uuid:"${reportUuid}") {
           uuid
           name
           rank
-          avatarUuid
+          entityAvatar {
+            attachmentUuid
+            applyCrop
+            cropLeft
+            cropTop
+            cropWidth
+            cropHeight
+          }
         }
       }
     }
@@ -134,7 +169,14 @@ report(uuid:"${reportUuid}") {
       uuid
       name
       rank
-      avatarUuid
+      entityAvatar {
+        attachmentUuid
+        applyCrop
+        cropLeft
+        cropTop
+        cropWidth
+        cropHeight
+      }
     }
   }
   approvalStep {
@@ -165,7 +207,14 @@ report(uuid:"${reportUuid}") {
       uuid
       name
       rank
-      avatarUuid
+      entityAvatar {
+        attachmentUuid
+        applyCrop
+        cropLeft
+        cropTop
+        cropWidth
+        cropHeight
+      }
     }
     noteRelatedObjects {
       objectUuid
@@ -186,7 +235,14 @@ report(uuid:"${reportUuid}") {
         ... on Person {
           name
           rank
-          avatarUuid
+          entityAvatar {
+            attachmentUuid
+            applyCrop
+            cropLeft
+            cropTop
+            cropWidth
+            cropHeight
+          }
         }
         ... on Position {
           type

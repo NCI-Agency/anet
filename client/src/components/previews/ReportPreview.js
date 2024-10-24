@@ -3,6 +3,7 @@ import API from "api"
 import DictionaryField from "components/DictionaryField"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
+import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import NoPaginationTaskTable from "components/NoPaginationTaskTable"
 import PlanningConflictForReport from "components/PlanningConflictForReport"
 import RichTextEditor from "components/RichTextEditor"
@@ -41,13 +42,13 @@ const GQL_GET_REPORT = gql`
         uuid
         name
         rank
-        avatarUuid
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
       reportPeople {
         uuid
         name
         rank
-        avatarUuid
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         status
         author
         primary
@@ -57,7 +58,19 @@ const GQL_GET_REPORT = gql`
           uuid
           name
           type
-          role
+          code
+          status
+          organization {
+            uuid
+            shortName
+            longName
+            identificationCode
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          }
+          location {
+            uuid
+            name
+          }
         }
       }
       tasks {
@@ -88,12 +101,14 @@ const GQL_GET_REPORT = gql`
         shortName
         longName
         identificationCode
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
       advisorOrg {
         uuid
         shortName
         longName
         identificationCode
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
     }
   }

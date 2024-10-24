@@ -3,6 +3,7 @@ import API from "api"
 import { BreadcrumbTrail } from "components/BreadcrumbTrail"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
+import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import {
   PageDispatchersPropType,
   useBoilerplate,
@@ -38,6 +39,7 @@ const GQL_GET_POSITION_LIST = gql`
           shortName
           longName
           identificationCode
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         location {
           uuid
@@ -47,7 +49,7 @@ const GQL_GET_POSITION_LIST = gql`
           uuid
           name
           rank
-          avatarUuid
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         associatedPositions {
           uuid
@@ -61,6 +63,7 @@ const GQL_GET_POSITION_LIST = gql`
             shortName
             longName
             identificationCode
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
           location {
             uuid
@@ -70,7 +73,7 @@ const GQL_GET_POSITION_LIST = gql`
             uuid
             name
             rank
-            avatarUuid
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
             ${GRAPHQL_NOTIFICATIONS_NOTE_FIELDS}
           }
         }
