@@ -12,8 +12,6 @@ import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapperBuilder;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import jakarta.annotation.Nullable;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response.Status;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -40,6 +38,7 @@ import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Task;
+import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.ApprovalStepDao;
 import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.views.AbstractAnetBean;
@@ -49,6 +48,8 @@ import org.owasp.html.HtmlPolicyBuilder;
 import org.owasp.html.PolicyFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 public class Utils {
 
@@ -589,7 +590,7 @@ public class Utils {
   public static void updateApprovalSteps(AbstractAnetBean entity,
       List<ApprovalStep> planningApprovalSteps, List<ApprovalStep> existingPlanningApprovalSteps,
       List<ApprovalStep> approvalSteps, List<ApprovalStep> existingApprovalSteps) {
-    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
+    final AnetObjectEngine engine = ApplicationContextProvider.getEngine();
 
     if (planningApprovalSteps != null) {
       logger.debug("Editing planning approval steps for {}", entity);
@@ -624,7 +625,7 @@ public class Utils {
 
   // Helper method that diffs the name/members of an approvalStep
   private static void updateStep(ApprovalStep newStep, ApprovalStep oldStep) {
-    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
+    final AnetObjectEngine engine = ApplicationContextProvider.getEngine();
     final ApprovalStepDao approvalStepDao = engine.getApprovalStepDao();
     newStep.setUuid(oldStep.getUuid()); // Always want to make changes to the existing step
     approvalStepDao.update(newStep);
@@ -639,7 +640,7 @@ public class Utils {
 
   // Helper method that updates a list of approval steps
   private static void updateSteps(List<ApprovalStep> steps, List<ApprovalStep> existingSteps) {
-    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
+    final AnetObjectEngine engine = ApplicationContextProvider.getEngine();
     final ApprovalStepDao approvalStepDao = engine.getApprovalStepDao();
     for (int i = 0; i < steps.size(); i++) {
       ApprovalStep curr = steps.get(i);
@@ -659,12 +660,12 @@ public class Utils {
 
   public static void validateApprovalStep(ApprovalStep step) {
     if (Utils.isEmptyOrNull(step.getName())) {
-      throw new WebApplicationException("A name is required for every approval step",
-          Status.BAD_REQUEST);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "A name is required for every approval step");
     }
     if (Utils.isEmptyOrNull(step.getApprovers())) {
-      throw new WebApplicationException("An approver is required for every approval step",
-          Status.BAD_REQUEST);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "An approver is required for every approval step");
     }
   }
 
@@ -686,7 +687,7 @@ public class Utils {
   }
 
   public static String getEmailNetworkForNotifications() {
-    return (String) AnetObjectEngine.getConfiguration()
+    return (String) ApplicationContextProvider.getDictionary()
         .getDictionaryEntry("emailNetworkForNotifications");
   }
 }

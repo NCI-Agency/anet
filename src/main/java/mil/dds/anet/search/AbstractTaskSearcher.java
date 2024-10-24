@@ -1,31 +1,38 @@
 package mil.dds.anet.search;
 
-import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AbstractBatchParams;
 import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.TaskSearchQuery;
+import mil.dds.anet.database.DatabaseHandler;
 import mil.dds.anet.database.TaskDao;
 import mil.dds.anet.database.mappers.TaskMapper;
 import mil.dds.anet.search.AbstractSearchQueryBuilder.Comparison;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
-import ru.vyarus.guicey.jdbi3.tx.InTransaction;
+import org.jdbi.v3.core.Handle;
+import org.springframework.transaction.annotation.Transactional;
 
 public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSearchQuery>
     implements ITaskSearcher {
 
-  public AbstractTaskSearcher(AbstractSearchQueryBuilder<Task, TaskSearchQuery> qb) {
-    super(qb);
+  protected AbstractTaskSearcher(DatabaseHandler databaseHandler,
+      AbstractSearchQueryBuilder<Task, TaskSearchQuery> qb) {
+    super(databaseHandler, qb);
   }
 
-  @InTransaction
+  @Transactional
   @Override
   public AnetBeanList<Task> runSearch(TaskSearchQuery query) {
-    buildQuery(query);
-    return qb.buildAndRun(getDbHandle(), query, new TaskMapper());
+    final Handle handle = getDbHandle();
+    try {
+      buildQuery(query);
+      return qb.buildAndRun(handle, query, new TaskMapper());
+    } finally {
+      closeDbHandle(handle);
+    }
   }
 
   @Override
@@ -43,7 +50,7 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
 
     if (query.getUser() != null && query.getSubscribed()) {
       qb.addWhereClause(Searcher.getSubscriptionReferences(query.getUser(), qb.getSqlArgs(),
-          AnetObjectEngine.getInstance().getTaskDao().getSubscriptionUpdate(null)));
+          engine().getTaskDao().getSubscriptionUpdate(null)));
     }
 
     if (!Utils.isEmptyOrNull(query.getTaskedOrgUuid())) {

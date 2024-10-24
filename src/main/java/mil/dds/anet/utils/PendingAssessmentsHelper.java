@@ -2,6 +2,7 @@ package mil.dds.anet.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import graphql.GraphQLContext;
 import java.lang.invoke.MethodHandles;
 import java.time.DayOfWeek;
 import java.time.Instant;
@@ -24,7 +25,6 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.beans.EmailAddress;
 import mil.dds.anet.beans.Note.NoteType;
@@ -33,7 +33,8 @@ import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.search.PositionSearchQuery;
 import mil.dds.anet.beans.search.TaskSearchQuery;
-import mil.dds.anet.config.AnetConfiguration;
+import mil.dds.anet.config.AnetDictionary;
+import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.TaskDao;
 import mil.dds.anet.emails.PendingAssessmentsNotificationEmail;
@@ -217,19 +218,18 @@ public class PendingAssessmentsHelper {
   public static final String NOTE_RECURRENCE = "__recurrence";
   public static final String NOTE_PERIOD_START = "__periodStart";
 
-  private final AnetConfiguration config;
+  private final AnetDictionary dict;
   private final PositionDao positionDao;
   private final TaskDao taskDao;
 
-  public PendingAssessmentsHelper(final AnetConfiguration config) {
-    this.config = config;
-    this.positionDao = AnetObjectEngine.getInstance().getPositionDao();
-    this.taskDao = AnetObjectEngine.getInstance().getTaskDao();
+  public PendingAssessmentsHelper(final AnetDictionary dict) {
+    this.dict = dict;
+    this.positionDao = ApplicationContextProvider.getEngine().getPositionDao();
+    this.taskDao = ApplicationContextProvider.getEngine().getTaskDao();
   }
 
-  public CompletableFuture<Map<Position, ObjectsToAssess>> loadAll(
-      final Map<String, Object> context, final Instant now, final Instant lastRun,
-      final boolean sendEmail) {
+  public CompletableFuture<Map<Position, ObjectsToAssess>> loadAll(final GraphQLContext context,
+      final Instant now, final Instant lastRun, final boolean sendEmail) {
     final Set<Recurrence> recurrenceSet = getRecurrenceSet(now, lastRun);
     if (recurrenceSet.isEmpty()) {
       logger.debug("Nothing to do, now new recurrences since last run");
@@ -311,7 +311,7 @@ public class PendingAssessmentsHelper {
     final Set<Recurrence> assessmentRecurrence = new HashSet<>();
     @SuppressWarnings("unchecked")
     final Map<String, Map<String, Object>> assessmentDefinitions =
-        (Map<String, Map<String, Object>>) config.getDictionaryEntry(keyPath);
+        (Map<String, Map<String, Object>>) dict.getDictionaryEntry(keyPath);
     if (assessmentDefinitions != null) {
       assessmentDefinitions.values().forEach(pad -> {
         // TODO: in principle, there can be more than one assessment definition for each recurrence,
@@ -347,7 +347,7 @@ public class PendingAssessmentsHelper {
   }
 
   private CompletableFuture<Map<Position, Set<Recurrence>>> preparePositionAssessmentMap(
-      final Map<String, Object> context, final Set<Recurrence> positionAssessmentRecurrence,
+      final GraphQLContext context, final Set<Recurrence> positionAssessmentRecurrence,
       final Map<Position, ObjectsToAssess> objectsToAssessByPosition) {
     final Map<Position, Set<Recurrence>> allPositionsToAssess = new HashMap<>();
     final CompletableFuture<?>[] allFutures = getActivePositions(true).stream()
@@ -367,7 +367,7 @@ public class PendingAssessmentsHelper {
   }
 
   private CompletableFuture<Map<Task, Set<Recurrence>>> prepareTaskAssessmentMap(
-      final Map<String, Object> context, final Map<Task, Set<Recurrence>> taskAssessmentRecurrence,
+      final GraphQLContext context, final Map<Task, Set<Recurrence>> taskAssessmentRecurrence,
       final Map<Position, ObjectsToAssess> objectsToAssessByPosition) {
     final List<Position> activeAdvisors = getActivePositions(false);
     final Map<Task, Set<Recurrence>> allTasksToAssess = new HashMap<>();
@@ -419,7 +419,7 @@ public class PendingAssessmentsHelper {
     return taskDao.search(tsq).getList();
   }
 
-  private CompletableFuture<Set<Position>> getPositionsToAssess(final Map<String, Object> context,
+  private CompletableFuture<Set<Position>> getPositionsToAssess(final GraphQLContext context,
       final Position position, final Set<Recurrence> personAssessmentRecurrence) {
     if (position == null || personAssessmentRecurrence.isEmpty()) {
       return CompletableFuture.completedFuture(Collections.emptySet());
@@ -429,8 +429,7 @@ public class PendingAssessmentsHelper {
     }
   }
 
-  private CompletableFuture<Boolean> filterPositionsToAssessOnPerson(
-      final Map<String, Object> context,
+  private CompletableFuture<Boolean> filterPositionsToAssessOnPerson(final GraphQLContext context,
       final Map<Position, Set<Recurrence>> allPositionsToAssess) {
     // Load person for each position
     final CompletableFuture<?>[] allFutures = allPositionsToAssess.keySet().stream()
@@ -444,7 +443,7 @@ public class PendingAssessmentsHelper {
     });
   }
 
-  private CompletableFuture<Boolean> processExistingAssessments(final Map<String, Object> context,
+  private CompletableFuture<Boolean> processExistingAssessments(final GraphQLContext context,
       final Instant now, final Set<Recurrence> recurrenceSet,
       final Map<? extends AbstractCustomizableAnetBean, Set<Recurrence>> objectsToAssess) {
     final CompletableFuture<?>[] allFutures = objectsToAssess.entrySet().stream().map(e -> {
@@ -530,8 +529,7 @@ public class PendingAssessmentsHelper {
   }
 
   private CompletableFuture<Map<Position, ObjectsToAssess>> loadPeopleToBeIncluded(
-      final Map<String, Object> context,
-      final Map<Position, ObjectsToAssess> objectsToAssessByPosition,
+      final GraphQLContext context, final Map<Position, ObjectsToAssess> objectsToAssessByPosition,
       final Map<Position, Set<Recurrence>> allPositionsToAssess,
       final Map<Task, Set<Recurrence>> allTasksToAssess, final boolean sendEmail) {
     final Map<Position, ObjectsToAssess> includedObjectsToAssessByPosition = new HashMap<>();

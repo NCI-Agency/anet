@@ -1,59 +1,62 @@
 package mil.dds.anet.resources;
 
+import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response.Status;
+import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AuthorizationGroupSearchQuery;
+import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.AuthorizationGroupDao;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 
+@Component
+@GraphQLApi
 public class AuthorizationGroupResource {
 
   private final AuthorizationGroupDao dao;
 
-  public AuthorizationGroupResource(AnetObjectEngine engine) {
-    this.dao = engine.getAuthorizationGroupDao();
+  public AuthorizationGroupResource(AuthorizationGroupDao dao) {
+    this.dao = dao;
   }
 
   @GraphQLQuery(name = "authorizationGroup")
   public AuthorizationGroup getByUuid(@GraphQLArgument(name = "uuid") String uuid) {
     final AuthorizationGroup t = dao.getByUuid(uuid);
     if (t == null) {
-      throw new WebApplicationException("Authorization group not found", Status.NOT_FOUND);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Authorization group not found");
     }
     return t;
   }
 
   @GraphQLQuery(name = "authorizationGroupList")
-  public AnetBeanList<AuthorizationGroup> search(@GraphQLRootContext Map<String, Object> context,
+  public AnetBeanList<AuthorizationGroup> search(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "query") AuthorizationGroupSearchQuery query) {
     query.setUser(DaoUtils.getUserFromContext(context));
     return dao.search(query);
   }
 
   @GraphQLMutation(name = "createAuthorizationGroup")
-  public AuthorizationGroup createAuthorizationGroup(
-      @GraphQLRootContext Map<String, Object> context,
+  public AuthorizationGroup createAuthorizationGroup(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "authorizationGroup") AuthorizationGroup a) {
     final Person user = DaoUtils.getUserFromContext(context);
     AuthUtils.assertAdministrator(user);
     if (a.getName() == null || a.getName().trim().isEmpty()) {
-      throw new WebApplicationException("Authorization group name must not be empty",
-          Status.BAD_REQUEST);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Authorization group name must not be empty");
     }
     a = dao.insert(a);
 
@@ -65,26 +68,26 @@ public class AuthorizationGroupResource {
   }
 
   @GraphQLMutation(name = "updateAuthorizationGroup")
-  public Integer updateAuthorizationGroup(@GraphQLRootContext Map<String, Object> context,
+  public Integer updateAuthorizationGroup(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "authorizationGroup") AuthorizationGroup a) {
     final Person user = DaoUtils.getUserFromContext(context);
     final List<Position> existingAdministrativePositions =
         dao.getAdministrativePositionsForAuthorizationGroup(
-            AnetObjectEngine.getInstance().getContext(), DaoUtils.getUuid(a)).join();
+            ApplicationContextProvider.getEngine().getContext(), DaoUtils.getUuid(a)).join();
     // User has to be admin or must hold an administrative position for the authorizationGroup
     if (!AuthUtils.isAdmin(user)) {
       final Position userPosition = DaoUtils.getPosition(user);
       final boolean canUpdate = existingAdministrativePositions.stream()
           .anyMatch(p -> Objects.equals(DaoUtils.getUuid(p), DaoUtils.getUuid(userPosition)));
       if (!canUpdate) {
-        throw new WebApplicationException(AuthUtils.UNAUTH_MESSAGE, Status.FORBIDDEN);
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, AuthUtils.UNAUTH_MESSAGE);
       }
     }
 
     final int numRows = dao.update(a);
     if (numRows == 0) {
-      throw new WebApplicationException("Couldn't process authorization group update",
-          Status.NOT_FOUND);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+          "Couldn't process authorization group update");
     }
 
     // Update administrative positions

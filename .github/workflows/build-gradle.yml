@@ -28,7 +28,7 @@ jobs:
     - run: ./gradlew check -x test
     - run: ./gradlew prettierCheck
     - run: ./gradlew yarn_run_lint
-    - run: ./gradlew jar
+    - run: ./gradlew jar buildClient
 
   test-init:
     needs: build
@@ -40,7 +40,6 @@ jobs:
       ANET_ADMIN_POS_NAME: "The ANET admin"
       ANET_ADMIN_FULL_NAME: "DOE, John"
       ANET_ADMIN_DOMAIN_USERNAME: "johndoe"
-      ANET_CONFIG: "anet-test.yml"
 
     steps:
       - uses: actions/checkout@v4
@@ -48,21 +47,22 @@ jobs:
           fetch-depth: 0
       - uses: ./.github/actions/build-cache
       - run: ./gradlew -PtestEnv dockerCreateDB dockerStartDB
-      - run: |
-          echo "testMode: true" |
-          cat - anet.yml > ${ANET_CONFIG}
-      - run: ./gradlew -PtestEnv dbWait
+      - run: ./gradlew -PtestEnv dockerConfigureKeycloak dockerStartKeycloak
       # This step should fail:
       - name: Run ANET init on empty database
         id: init-on-empty-db
         run: ./gradlew -PtestEnv dbInit
+        env:
+          ANET_DB_MIGRATE: false
         continue-on-error: true
       - run: exit 1
         if: ${{ steps.init-on-empty-db.outcome != 'failure' }}
       # This step should succeed:
       - name: Run ANET init on clean database
         id: init-on-clean-db
-        run: ./gradlew -PtestEnv dbMigrate dbInit
+        run: ./gradlew -PtestEnv dbInit
+        env:
+          SPRING_PROFILES_ACTIVE: prod
       # This step should fail:
       - name: Run ANET init on filled database
         id: init-on-filled-db
@@ -94,7 +94,6 @@ jobs:
     - run: ./gradlew -PtestEnv dockerCreateDB dockerStartDB
     - run: ./gradlew -PtestEnv dockerConfigureKeycloak dockerStartKeycloak
     - run: ./gradlew -PtestEnv dockerCreateFakeSmtpServer dockerStartFakeSmtpServer
-    - run: ./gradlew -PtestEnv dbWait dbMigrate dbLoad
     - run: ./gradlew -PtestEnv test jacocoTestReport
     - run: ./gradlew yarn_run_server-junit-merge
     - name: Strip slashes from dictionary name
@@ -136,7 +135,7 @@ jobs:
     - run: ./gradlew -PtestEnv dockerCreateDB dockerStartDB
     - run: ./gradlew -PtestEnv dockerConfigureKeycloak dockerStartKeycloak
     - run: ./gradlew -PtestEnv dockerCreateFakeSmtpServer dockerStartFakeSmtpServer
-    - run: ./gradlew -PtestEnv dbWait dbMigrate dbLoad
+    - run: ./gradlew -PtestEnv checkConfig
     - run: |
         ./gradlew -PtestEnv run &
         sleep 15
@@ -151,11 +150,16 @@ jobs:
         BROWSERSTACK_LOCAL_IDENTIFIER: ${{ steps.browserstack-local.outputs.identifier }}
         BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
         BROWSERSTACK_USER: ${{ secrets.BROWSERSTACK_USER }}
-    - run: head -1000 logs/clientLog.log
-      if: always()
     - name: Strip slashes from dictionary name
       id: strip-slashes
       run: echo "dictionary=${ANET_DICTIONARY_NAME//\//_}" >> $GITHUB_OUTPUT
+      if: always()
+    - name: Upload client log
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.client-tests }}-client-log for ${{ steps.strip-slashes.outputs.dictionary }}
+        path: logs/clientLog.log
+        if-no-files-found: ignore
       if: always()
     - name: Upload test results
       uses: actions/upload-artifact@v4
@@ -176,7 +180,7 @@ jobs:
     - uses: ./.github/actions/build-cache
     - run: ./gradlew dockerCreateDB dockerStartDB
     - run: ./gradlew dockerConfigureKeycloak dockerStartKeycloak
-    - run: ./gradlew dbWait dbMigrate dbLoad
+    - run: ./gradlew checkConfig
     - run: |
         ./gradlew run &
         sleep 15

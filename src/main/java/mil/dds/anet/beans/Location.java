@@ -1,5 +1,6 @@
 package mil.dds.anet.beans;
 
+import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
@@ -8,7 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.config.ApplicationContextProvider;
+import mil.dds.anet.database.ApprovalStepDao;
+import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.graphql.AllowUnverifiedUsers;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractCustomizableAnetBean;
@@ -165,12 +168,12 @@ public class Location extends AbstractCustomizableAnetBean
 
   @GraphQLQuery(name = "planningApprovalSteps")
   public CompletableFuture<List<ApprovalStep>> loadPlanningApprovalSteps(
-      @GraphQLRootContext Map<String, Object> context) {
+      @GraphQLRootContext GraphQLContext context) {
     if (planningApprovalSteps != null) {
       return CompletableFuture.completedFuture(planningApprovalSteps);
     }
-    return AnetObjectEngine.getInstance().getPlanningApprovalStepsForRelatedObject(context, uuid)
-        .thenApply(o -> {
+    return ApplicationContextProvider.getBean(ApprovalStepDao.class)
+        .getPlanningApprovalStepsForRelatedObject(context, uuid).thenApply(o -> {
           planningApprovalSteps = o;
           return o;
         });
@@ -187,12 +190,12 @@ public class Location extends AbstractCustomizableAnetBean
 
   @GraphQLQuery(name = "approvalSteps")
   public CompletableFuture<List<ApprovalStep>> loadApprovalSteps(
-      @GraphQLRootContext Map<String, Object> context) {
+      @GraphQLRootContext GraphQLContext context) {
     if (approvalSteps != null) {
       return CompletableFuture.completedFuture(approvalSteps);
     }
-    return AnetObjectEngine.getInstance().getApprovalStepsForRelatedObject(context, uuid)
-        .thenApply(o -> {
+    return ApplicationContextProvider.getBean(ApprovalStepDao.class)
+        .getApprovalStepsForRelatedObject(context, uuid).thenApply(o -> {
           approvalSteps = o;
           return o;
         });
@@ -209,11 +212,11 @@ public class Location extends AbstractCustomizableAnetBean
 
   @GraphQLQuery(name = "childrenLocations")
   public CompletableFuture<List<Location>> loadChildrenLocations(
-      @GraphQLRootContext Map<String, Object> context) {
+      @GraphQLRootContext GraphQLContext context) {
     if (childrenLocations != null) {
       return CompletableFuture.completedFuture(childrenLocations);
     }
-    return AnetObjectEngine.getInstance().getLocationDao().getChildrenLocations(context, uuid)
+    return ApplicationContextProvider.getBean(LocationDao.class).getChildrenLocations(context, uuid)
         .thenApply(o -> {
           childrenLocations = o;
           return o;
@@ -226,11 +229,11 @@ public class Location extends AbstractCustomizableAnetBean
 
   @GraphQLQuery(name = "parentLocations")
   public CompletableFuture<List<Location>> loadParentLocations(
-      @GraphQLRootContext Map<String, Object> context) {
+      @GraphQLRootContext GraphQLContext context) {
     if (parentLocations != null) {
       return CompletableFuture.completedFuture(parentLocations);
     }
-    return AnetObjectEngine.getInstance().getLocationDao().getParentLocations(context, uuid)
+    return ApplicationContextProvider.getBean(LocationDao.class).getParentLocations(context, uuid)
         .thenApply(o -> {
           parentLocations = o;
           return o;

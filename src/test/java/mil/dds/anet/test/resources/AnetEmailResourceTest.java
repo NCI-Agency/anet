@@ -2,9 +2,8 @@ package mil.dds.anet.test.resources;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.dropwizard.testing.junit5.DropwizardAppExtension;
-import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.config.AnetConfiguration;
+import mil.dds.anet.database.EmailDao;
+import mil.dds.anet.database.JobHistoryDao;
 import mil.dds.anet.emails.ReportEmail;
 import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.client.AnetBeanList_Report;
@@ -13,21 +12,21 @@ import mil.dds.anet.threads.AnetEmailWorker;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AnetEmailResourceTest extends AbstractResourceTest {
+
   @Autowired
-  protected DropwizardAppExtension<AnetConfiguration> dropwizardApp;
+  private JobHistoryDao jobHistoryDao;
+
+  @Autowired
+  private EmailDao emailDao;
+
   private AnetEmailWorker emailWorker;
 
   @BeforeAll
   void setUpClass() {
-    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
-    emailWorker = new AnetEmailWorker(dropwizardApp.getConfiguration(), engine.getEmailDao());
+    emailWorker = new AnetEmailWorker(config, dict, jobHistoryDao, emailDao, adminDao);
     emailWorker.run();
   }
 
@@ -62,4 +61,5 @@ class AnetEmailResourceTest extends AbstractResourceTest {
         .allSatisfy(pendingEmail -> assertThat(pendingEmail.getType())
             .isEqualTo(ReportEmail.class.getSimpleName()));
   }
+
 }

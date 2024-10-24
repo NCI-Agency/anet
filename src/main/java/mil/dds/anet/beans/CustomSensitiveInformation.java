@@ -1,9 +1,9 @@
 package mil.dds.anet.beans;
 
+import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.views.AbstractAnetBean;
@@ -60,7 +60,7 @@ public class CustomSensitiveInformation extends AbstractAnetBean {
 
   @GraphQLQuery(name = "relatedObject")
   public CompletableFuture<RelatableObject> loadRelatedObject(
-      @GraphQLRootContext Map<String, Object> context) {
+      @GraphQLRootContext GraphQLContext context) {
     if (relatedObject != null) {
       return CompletableFuture.completedFuture(relatedObject);
     }

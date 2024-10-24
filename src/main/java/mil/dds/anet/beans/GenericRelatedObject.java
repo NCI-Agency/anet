@@ -1,18 +1,19 @@
 package mil.dds.anet.beans;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLIgnore;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
-import jakarta.ws.rs.WebApplicationException;
 import java.time.Instant;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.UuidFetcher;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 public class GenericRelatedObject extends AbstractAnetBean {
 
@@ -32,7 +33,8 @@ public class GenericRelatedObject extends AbstractAnetBean {
   @JsonIgnore
   @GraphQLIgnore
   public String getUuid() {
-    throw new WebApplicationException("no UUID field on GenericRelatedObject");
+    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+        "no UUID field on GenericRelatedObject");
   }
 
   @Override
@@ -44,7 +46,8 @@ public class GenericRelatedObject extends AbstractAnetBean {
   @JsonIgnore
   @GraphQLIgnore
   public Instant getCreatedAt() {
-    throw new WebApplicationException("no createdAt field on GenericRelatedObject");
+    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+        "no createdAt field on GenericRelatedObject");
   }
 
   @Override
@@ -56,7 +59,8 @@ public class GenericRelatedObject extends AbstractAnetBean {
   @JsonIgnore
   @GraphQLIgnore
   public Instant getUpdatedAt() {
-    throw new WebApplicationException("no updatedAt field on GenericRelatedObject");
+    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+        "no updatedAt field on GenericRelatedObject");
   }
 
   @Override
@@ -90,7 +94,7 @@ public class GenericRelatedObject extends AbstractAnetBean {
 
   @GraphQLQuery(name = "relatedObject")
   public CompletableFuture<RelatableObject> loadRelatedObject(
-      @GraphQLRootContext Map<String, Object> context) {
+      @GraphQLRootContext GraphQLContext context) {
     if (relatedObject != null) {
       return CompletableFuture.completedFuture(relatedObject);
     }

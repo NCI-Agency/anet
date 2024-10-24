@@ -6,24 +6,31 @@ import mil.dds.anet.beans.Subscription;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.SubscriptionSearchQuery;
+import mil.dds.anet.database.DatabaseHandler;
 import mil.dds.anet.database.SubscriptionDao;
 import mil.dds.anet.database.mappers.SubscriptionMapper;
 import mil.dds.anet.utils.DaoUtils;
-import ru.vyarus.guicey.jdbi3.tx.InTransaction;
+import org.jdbi.v3.core.Handle;
+import org.springframework.transaction.annotation.Transactional;
 
 public abstract class AbstractSubscriptionSearcher extends
     AbstractSearcher<Subscription, SubscriptionSearchQuery> implements ISubscriptionSearcher {
 
-  public AbstractSubscriptionSearcher(
+  protected AbstractSubscriptionSearcher(DatabaseHandler databaseHandler,
       AbstractSearchQueryBuilder<Subscription, SubscriptionSearchQuery> qb) {
-    super(qb);
+    super(databaseHandler, qb);
   }
 
-  @InTransaction
+  @Transactional
   @Override
   public AnetBeanList<Subscription> runSearch(SubscriptionSearchQuery query, Person user) {
-    buildQuery(query, user);
-    return qb.buildAndRun(getDbHandle(), query, new SubscriptionMapper());
+    final Handle handle = getDbHandle();
+    try {
+      buildQuery(query, user);
+      return qb.buildAndRun(handle, query, new SubscriptionMapper());
+    } finally {
+      closeDbHandle(handle);
+    }
   }
 
   @Override

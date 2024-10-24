@@ -2,7 +2,6 @@ package mil.dds.anet.beans.search;
 
 import java.util.List;
 import mil.dds.anet.search.AbstractSearchQueryBuilder;
-import mil.dds.anet.views.AbstractAnetBean;
 
 public abstract class AbstractBatchParams<B, T extends AbstractSearchQuery<?>>
     implements Cloneable {

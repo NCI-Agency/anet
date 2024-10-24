@@ -1,11 +1,18 @@
 package mil.dds.anet.threads;
 
+import graphql.GraphQLContext;
 import java.time.Instant;
-import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import mil.dds.anet.beans.JobHistory;
-import mil.dds.anet.config.AnetConfiguration;
+import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.database.AdminDao;
+import mil.dds.anet.database.JobHistoryDao;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
+@Component
+@ConditionalOnExpression("not ${anet.no-workers:false}")
 public class MaterializedViewForLinksRefreshWorker extends AbstractWorker {
 
   public static final String[] materializedViews =
@@ -14,13 +21,20 @@ public class MaterializedViewForLinksRefreshWorker extends AbstractWorker {
 
   private final AdminDao dao;
 
-  public MaterializedViewForLinksRefreshWorker(AnetConfiguration config, AdminDao dao) {
-    super(config, "Refreshing materialized views for links to ANET objects");
+  public MaterializedViewForLinksRefreshWorker(AnetDictionary dict, JobHistoryDao jobHistoryDao,
+      AdminDao dao) {
+    super(dict, jobHistoryDao, "Refreshing materialized views");
     this.dao = dao;
   }
 
+  @Scheduled(initialDelay = 5, fixedDelay = 15, timeUnit = TimeUnit.MINUTES)
   @Override
-  protected void runInternal(Instant now, JobHistory jobHistory, Map<String, Object> context) {
+  public void run() {
+    super.run();
+  }
+
+  @Override
+  protected void runInternal(Instant now, JobHistory jobHistory, GraphQLContext context) {
     for (final String materializedView : materializedViews) {
       try {
         dao.updateMaterializedView(materializedView);
