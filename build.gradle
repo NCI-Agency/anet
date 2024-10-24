@@ -25,14 +25,14 @@ java {
 }
 
 boolean isTestEnv = project.hasProperty("testEnv")
-String dropwizardVersion = "4.0.8"
+String dropwizardVersion = "4.0.10"
 String logbackVersion = "1.4.14"
 String log4jVersion = "2.24.1"
 String keycloakVersion = "24.0.5"
-String springBootVersion = "3.3.4"
-String springFrameworkVersion = "6.1.13"
+String springBootVersion = "3.3.5"
+String springFrameworkVersion = "6.1.14"
 String springGraphqlVersion = "1.2.8"
-String springSecurityVersion = "6.3.3"
+String springSecurityVersion = "6.3.4"
 String psqlPushDataPath = "/var/tmp"
 String keycloakContainerPath = "/opt/keycloak"
 String keycloakPushDataPath = "${keycloakContainerPath}/data"
@@ -93,7 +93,7 @@ dependencies {
 	implementation "io.dropwizard:dropwizard-auth:${dropwizardVersion}"
 	implementation "io.dropwizard:dropwizard-views-freemarker:${dropwizardVersion}"
 	implementation "io.dropwizard:dropwizard-forms:${dropwizardVersion}"
-	implementation "org.jdbi:jdbi3-postgres:3.45.4"
+	implementation "org.jdbi:jdbi3-postgres:3.46.0"
 
 	implementation 'ru.vyarus.guicey:guicey-jdbi3:7.1.4'
 	implementation 'com.google.guava:guava:33.3.1-jre' // Pick the non-Android version of Guice
@@ -111,7 +111,7 @@ dependencies {
 	implementation 'javax.cache:cache-api:1.1.1'
 	implementation 'commons-beanutils:commons-beanutils:1.9.4'
 
-	implementation 'org.simplejavamail:simple-java-mail:8.12.0'
+	implementation 'org.simplejavamail:simple-java-mail:8.12.2'
 	implementation 'org.eclipse.angus:jakarta.mail:2.0.3'
 	implementation "ch.qos.logback:logback-classic:${logbackVersion}"
 	implementation "ch.qos.logback:logback-core:${logbackVersion}"
@@ -169,9 +169,9 @@ dependencies {
 	testImplementation 'org.powermock:powermock-module-junit4:2.0.9'
 	testImplementation 'org.powermock:powermock-module-junit4-rule:2.0.9'
 
-	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.11.1'
-	testImplementation 'org.junit.jupiter:junit-jupiter-params:5.11.1'
-	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.11.1'
+	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.11.3'
+	testImplementation 'org.junit.jupiter:junit-jupiter-params:5.11.3'
+	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.11.3'
 
 	// Avoid "ERROR StatusLogger Log4j2 could not find a logging implementation.
 	// Please add log4j-core to the classpath. Using SimpleLogger to log to the console..."
