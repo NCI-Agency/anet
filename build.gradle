@@ -670,6 +670,10 @@ task dbMaintenance(dependsOn: 'compileJava', type: JavaExec) {
 	args cmdline
 }
 
+compileJava {
+	options.encoding = "UTF-8"
+}
+
 // Execute the GraphQL plugin before Java compile, so that all test (re)sources are generated on time
 compileTestJava.dependsOn generateClientCode
 processTestResources.dependsOn generateClientCode
