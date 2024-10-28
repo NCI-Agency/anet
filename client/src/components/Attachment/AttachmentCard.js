@@ -20,7 +20,6 @@ const GQL_DELETE_ATTACHMENT = gql`
 const AttachmentCard = ({
   attachment,
   onClick,
-  previewStyle,
   captionStyle,
   edit,
   setError,
@@ -42,8 +41,7 @@ const AttachmentCard = ({
           className="image-preview info-show card-image"
           style={{
             backgroundSize,
-            backgroundImage: `url(${backgroundImage})`,
-            ...previewStyle
+            backgroundImage: `url(${backgroundImage})`
           }}
           onClick={() => onClick?.(attachment)}
         >
@@ -117,16 +115,11 @@ const AttachmentCard = ({
 AttachmentCard.propTypes = {
   attachment: PropTypes.object,
   onClick: PropTypes.func,
-  previewStyle: PropTypes.object,
   captionStyle: PropTypes.object,
   edit: PropTypes.bool,
   setError: PropTypes.func,
   uploadedList: PropTypes.array,
   setUploadedList: PropTypes.func
-}
-
-AttachmentCard.defaultProps = {
-  previewStyle: { maxHeight: "155px" }
 }
 
 export default AttachmentCard

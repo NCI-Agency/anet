@@ -335,7 +335,7 @@ export default {
     } else if (attachment.mimeType.startsWith("video/")) {
       backgroundImage = videoIcon
     } else if (attachment.mimeType.startsWith("image/")) {
-      backgroundSize = "cover"
+      backgroundSize = "contain"
       backgroundImage = `/api/attachment/view/${attachment.uuid}`
     }
     return { backgroundSize, backgroundImage, contentMissing }
