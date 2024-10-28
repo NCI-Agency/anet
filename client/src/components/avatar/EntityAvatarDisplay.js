@@ -67,7 +67,13 @@ export const EntityAvatarDisplay = ({
       {avatar?.applyCrop ? (
         <canvas ref={canvasRef} width={width} height={height} />
       ) : (
-        <img src={attachmentUrl} height={height} width={width} alt="Avatar" />
+        <img
+          src={attachmentUrl}
+          height={height}
+          width={width}
+          style={{ objectFit: "contain" }}
+          alt="Avatar"
+        />
       )}
     </EntityAvatarStyledDiv>
   )
