@@ -1,6 +1,7 @@
 import { allFakers, allLocales, faker } from "@faker-js/faker"
 import Model from "components/Model"
 import { countries, getCountryCode } from "countries-list"
+import _isEmpty from "lodash/isEmpty"
 import { Location, Person } from "models"
 import Settings from "settings"
 import {
@@ -65,9 +66,9 @@ async function randomPerson(isUser, status) {
   }
   const langCode =
     fakerHacks[countryCode] ||
-    (countryByCode
-      ? faker.helpers.arrayElement(countryByCode.languages)
-      : defaultLangCode)
+    (_isEmpty(countryByCode?.languages)
+      ? defaultLangCode
+      : faker.helpers.arrayElement(countryByCode.languages))
   const locale = availableLocales.includes(langCode)
     ? langCode
     : defaultLangCode
