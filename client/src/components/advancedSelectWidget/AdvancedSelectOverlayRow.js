@@ -42,7 +42,7 @@ AsLink.propTypes = {
 }
 
 export const AttachmentOverlayRow = item => {
-  const { backgroundSize, backgroundImage, contentMissing } =
+  const { iconSize, iconImage, contentMissing } =
     utils.getAttachmentIconDetails(item, true)
   return (
     <React.Fragment key={item.uuid}>
@@ -50,9 +50,10 @@ export const AttachmentOverlayRow = item => {
         <div style={{ width: "50px", height: "50px" }}>
           <AttachmentImage
             uuid={item.uuid}
+            caption={item.caption}
             contentMissing={contentMissing}
-            backgroundSize={backgroundSize}
-            backgroundImage={backgroundImage}
+            iconSize={iconSize}
+            iconImage={iconImage}
           />
         </div>
       </td>

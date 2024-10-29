@@ -39,8 +39,8 @@ export default class Attachment extends Model {
   }
 
   iconUrl() {
-    const { backgroundImage } = utils.getAttachmentIconDetails(this, true)
-    return backgroundImage
+    const { iconImage } = utils.getAttachmentIconDetails(this, true)
+    return iconImage
   }
 
   static FILTERED_CLIENT_SIDE_FIELDS = []

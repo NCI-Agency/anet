@@ -71,8 +71,7 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
         resetForm,
         submitForm
       }) => {
-        const { backgroundSize, backgroundImage } =
-          utils.getAttachmentIconDetails(values)
+        const { iconSize, iconImage } = utils.getAttachmentIconDetails(values)
         const action = (
           <Button
             key="submit"
@@ -93,12 +92,12 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
               <Fieldset>
                 <div className="attachment-show" style={{ display: "flex" }}>
                   <Col xs={12} sm={3} className="attachment-column label-align">
-                    <div
+                    <img
                       className="image-preview info-show card-image attachment-image"
-                      style={{
-                        backgroundSize,
-                        backgroundImage: `url(${backgroundImage})`
-                      }}
+                      src={iconImage}
+                      width={iconSize}
+                      height={iconSize}
+                      style={{ objectFit: "contain" }}
                     />
                   </Col>
                   <Col className="attachment-details" xs={12} sm={3} lg={10}>

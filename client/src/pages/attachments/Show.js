@@ -103,7 +103,7 @@ const AttachmentShow = ({ pageDispatchers }) => {
     currentUser.isAdmin() ||
     (!Settings.fields.attachment.restrictToAdmins &&
       currentUser.uuid === attachment.author.uuid)
-  const { backgroundSize, backgroundImage, contentMissing } =
+  const { iconSize, iconImage, contentMissing } =
     utils.getAttachmentIconDetails(attachment)
   return (
     <Formik enableReinitialize initialValues={attachment}>
@@ -152,9 +152,10 @@ const AttachmentShow = ({ pageDispatchers }) => {
                   <Col xs={12} sm={3} className="attachment-column label-align">
                     <AttachmentImage
                       uuid={attachment.uuid}
+                      caption={attachment.caption}
                       contentMissing={contentMissing}
-                      backgroundSize={backgroundSize}
-                      backgroundImage={backgroundImage}
+                      iconSize={iconSize}
+                      iconImage={iconImage}
                     />
                   </Col>
                   <Col className="attachment-details" xs={12} sm={3} lg={8}>
