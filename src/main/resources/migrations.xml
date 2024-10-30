@@ -5927,6 +5927,19 @@
 		<dropColumn tableName="people" columnName="avatarUuid" />
 	</changeSet>
 
+	<changeSet id="add-constraints-to-customSensitiveInformation" author="gjvoosten">
+		<addPrimaryKey
+			tableName="customSensitiveInformation"
+			columnNames="uuid"
+			constraintName="PK_customSensitiveInformation"
+		/>
+		<addUniqueConstraint
+			tableName="customSensitiveInformation"
+			columnNames="customFieldName, relatedObjectType, relatedObjectUuid"
+			constraintName="UQ_CustomSensitiveInformationCustomFieldNameRelatedObject"
+		/>
+	</changeSet>
+
 	<!-- Keep this change set as the last one in the change log;
 	     it will be re-run whenever it changes. -->
 	<changeSet id="set-up-full-text-search" runOnChange="true" author="gjvoosten">
