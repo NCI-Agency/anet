@@ -3,16 +3,13 @@
 This document assumes you have a complete development environment set up and working.
 You should always run all tests before generating a build!
 
-To build an ANET RPM distribution for Red Hat 8:
+Building an RPM for ANET should be done on a Red Hat 9 system, with:
 
 ```shell
-./gradlew distInDocker
+./gradlew distRpm
 ```
 
-The resulting rpm can be found in `build/distributions/anet-<version>-0.x86_64.rpm`
-(and it also builds a zip file in `build/distributions/anet-<version>.zip`).
-
-The build process is performed in a container to create the required context for Red Hat compatibility.
+The resulting rpm can be found in `build/distributions/anet-<version>-0.x86_64.rpm`.
 
 Other, informal, distribution formats may be generated with the following Gradle tasks:
 
