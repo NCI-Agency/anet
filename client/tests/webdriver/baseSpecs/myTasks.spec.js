@@ -38,8 +38,8 @@ describe("My tasks page", () => {
       const myOrgAssignedTasksItems = await (
         await MyTasks.getMyOrgAssignedTasks()
       ).$$("tr")
-      // table has a header and 5 task rows
-      expect(myOrgAssignedTasksItems).to.have.length(6)
+      // table has a header and 4 task rows
+      expect(myOrgAssignedTasksItems).to.have.length(5)
     })
     it("Should see a table of the tasks being the responsibility of the current user", async() => {
       await (await MyTasks.getMyResponsibleTasks()).waitForDisplayed()

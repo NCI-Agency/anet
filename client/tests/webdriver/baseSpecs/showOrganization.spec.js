@@ -7,6 +7,12 @@ import ShowOrganization from "../pages/showOrganization.page"
 const ORGANIZATION_UUID = "ccbee4bb-08b8-42df-8cb5-65e8172f657b" // EF 2.2
 const ORGANIZATION_WITH_AG_UUID = "7f939a44-b9e4-48e0-98f5-7d0ea38a6ecf" // EF 5.1
 const ORGANIZATION_EF2_SEARCH_STRING = "EF 2"
+const EF2_ASSIGNED_TASKS = [
+  "EF 2 » 2.A",
+  "EF 2 » 2.B",
+  "EF 2 » 2.C",
+  "EF 2 » 2.D"
+]
 const ORGANIZATION_EF22_SEARCH_STRING = "EF 2.2"
 const LEADER_POSITION_TEXT = "EF 2.2 Final Reviewer"
 const LEADER_PERSON_TEXT = "CTR BECCABON, Rebecca"
@@ -44,6 +50,30 @@ describe("Show organization page", () => {
       const deputyField = await ShowOrganization.getDeputies()
       // eslint-disable-next-line no-unused-expressions
       expect(await deputyField.isExisting()).to.be.false
+    })
+    it("Should see assigned tasks on the Show page", async() => {
+      const tasks = await ShowOrganization.getTasks()
+      await tasks.waitForExist()
+      await tasks.waitForDisplayed()
+      const assignedTasks = await ShowOrganization.getAssignedTasks()
+      const assignedTasksShortNames = await assignedTasks.map(
+        async at => await at.getText()
+      )
+      expect(assignedTasksShortNames).to.have.members(EF2_ASSIGNED_TASKS)
+    })
+    it("Should see assigned tasks on the Edit page", async() => {
+      await (await ShowOrganization.getEditOrganizationButton()).click()
+      const editableTasks = await ShowOrganization.getEditableTasks()
+      await editableTasks.waitForExist()
+      await editableTasks.waitForDisplayed()
+      const editableAssignedTasks =
+        await ShowOrganization.getEditableAssignedTasks()
+      const editableAssignedTasksShortNames = await editableAssignedTasks.map(
+        async at => await at.getText()
+      )
+      expect(editableAssignedTasksShortNames).to.have.members(
+        EF2_ASSIGNED_TASKS
+      )
 
       // Log out
       await ShowOrganization.logout()

@@ -116,6 +116,17 @@ const GQL_GET_ORGANIZATION = gql`
         uuid
         shortName
         longName
+        parentTask {
+          uuid
+          shortName
+        }
+        ascendantTasks {
+          uuid
+          shortName
+          parentTask {
+            uuid
+          }
+        }
       }
       attachments {
         ${Attachment.basicFieldsQuery}
