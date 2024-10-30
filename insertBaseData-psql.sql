@@ -589,7 +589,6 @@ INSERT INTO "taskTaskedOrganizations" ("taskUuid", "organizationUuid") VALUES
   -- ((SELECT uuid from tasks where "shortName" = '1.3.A'), (SELECT uuid from organizations where "shortName"='EF 1.3')),
   -- ((SELECT uuid from tasks where "shortName" = '1.3.B'), (SELECT uuid from organizations where "shortName"='EF 1.3')),
   -- ((SELECT uuid from tasks where "shortName" = '1.3.C'), (SELECT uuid from organizations where "shortName"='EF 1.3')),
-  ((SELECT uuid from tasks where "shortName" = 'EF 2'), (SELECT uuid from organizations where "shortName"='EF 2')),
   ((SELECT uuid from tasks where "shortName" = '2.A'), (SELECT uuid from organizations where "shortName"='EF 2')),
   ((SELECT uuid from tasks where "shortName" = '2.B'), (SELECT uuid from organizations where "shortName"='EF 2')),
   ((SELECT uuid from tasks where "shortName" = '2.C'), (SELECT uuid from organizations where "shortName"='EF 2')),

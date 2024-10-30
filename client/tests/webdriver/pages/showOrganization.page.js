@@ -75,6 +75,26 @@ class ShowOrganization extends Page {
     return browser.$("div#Deputies span:nth-child(2)")
   }
 
+  async getTasks() {
+    return browser.$('div[id="tasks"]')
+  }
+
+  async getAssignedTasks() {
+    return (await this.getTasks()).$$("table tr td:first-child")
+  }
+
+  async getEditOrganizationButton() {
+    return browser.$("//a[text()='Edit']")
+  }
+
+  async getEditableTasks() {
+    return browser.$('div[id="fg-tasks"]')
+  }
+
+  async getEditableAssignedTasks() {
+    return (await this.getEditableTasks()).$$("table tr td:first-child")
+  }
+
   async waitForAlertSuccessToLoad() {
     if (!(await (await this.getAlertSuccess()).isDisplayed())) {
       await (await this.getAlertSuccess()).waitForExist()
