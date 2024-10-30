@@ -29,6 +29,17 @@ const GQL_GET_TASK_LIST = gql`
         uuid
         shortName
         longName
+        parentTask {
+          uuid
+          shortName
+        }
+        ascendantTasks {
+          uuid
+          shortName
+          parentTask {
+            uuid
+          }
+        }
       }
     }
   }
