@@ -133,7 +133,7 @@ dependencies {
 	implementation 'org.apache.poi:poi:5.3.0'
 	implementation 'org.apache.poi:poi-ooxml:5.3.0'
 	// For inferring MIME types of attachments
-	implementation 'org.apache.tika:tika-core:2.9.2'
+	implementation 'org.apache.tika:tika-core:3.0.0'
 
 	// For parsing HTML to check for 'empty' input
 	implementation 'org.jsoup:jsoup:1.18.1'
