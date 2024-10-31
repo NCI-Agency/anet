@@ -658,17 +658,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/plugin-syntax-dynamic-import@npm:7.8.3":
-  version: 7.8.3
-  resolution: "@babel/plugin-syntax-dynamic-import@npm:7.8.3"
-  dependencies:
-    "@babel/helper-plugin-utils": "npm:^7.8.0"
-  peerDependencies:
-    "@babel/core": ^7.0.0-0
-  checksum: 10c0/9c50927bf71adf63f60c75370e2335879402648f468d0172bc912e303c6a3876927d8eb35807331b57f415392732ed05ab9b42c68ac30a936813ab549e0246c5
-  languageName: node
-  linkType: hard
-
 "@babel/plugin-syntax-flow@npm:^7.0.0, @babel/plugin-syntax-flow@npm:^7.25.7":
   version: 7.25.7
   resolution: "@babel/plugin-syntax-flow@npm:7.25.7"
@@ -702,7 +691,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/plugin-syntax-import-meta@npm:7.10.4, @babel/plugin-syntax-import-meta@npm:^7.10.4":
+"@babel/plugin-syntax-import-meta@npm:^7.10.4":
   version: 7.10.4
   resolution: "@babel/plugin-syntax-import-meta@npm:7.10.4"
   dependencies:
@@ -5905,8 +5894,6 @@ __metadata:
     "@babel/plugin-proposal-function-sent": "npm:7.25.9"
     "@babel/plugin-proposal-pipeline-operator": "npm:7.25.9"
     "@babel/plugin-proposal-throw-expressions": "npm:7.25.9"
-    "@babel/plugin-syntax-dynamic-import": "npm:7.8.3"
-    "@babel/plugin-syntax-import-meta": "npm:7.10.4"
     "@babel/plugin-transform-class-properties": "npm:7.25.9"
     "@babel/plugin-transform-export-namespace-from": "npm:7.25.9"
     "@babel/plugin-transform-json-strings": "npm:7.25.9"
