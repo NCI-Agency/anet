@@ -6136,10 +6136,10 @@ __metadata:
     resize-observer-polyfill: "npm:1.5.1"
     scroll-into-view-if-needed: "npm:3.1.0"
     selenium-webdriver: "npm:4.26.0"
-    slate: "npm:0.103.0"
-    slate-history: "npm:0.109.0"
+    slate: "npm:0.110.2"
+    slate-history: "npm:0.110.3"
     slate-hyperscript: "npm:0.100.0"
-    slate-react: "npm:0.110.1"
+    slate-react: "npm:0.110.3"
     style-loader: "npm:4.0.0"
     tap-xunit: "npm:2.4.1"
     thread-loader: "npm:4.0.4"
@@ -17841,14 +17841,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"slate-history@npm:0.109.0":
-  version: 0.109.0
-  resolution: "slate-history@npm:0.109.0"
+"slate-history@npm:0.110.3":
+  version: 0.110.3
+  resolution: "slate-history@npm:0.110.3"
   dependencies:
     is-plain-object: "npm:^5.0.0"
   peerDependencies:
     slate: ">=0.65.3"
-  checksum: 10c0/70c97de22100307211ca9d647bc4f775899388d1cbab800a26557ef91be4d894bbe51ddd2542e57137713e95a360e41f05af61d90ef9e14b920e19fc2cf7a72d
+  checksum: 10c0/cd427263daa257840598118d9f2e7a5d239640505f30a0024b61f0491b0a70a41209a27662bf1adb65f60b4aa482c00d44356f89f0360ba5ed63a37e17534a6f
   languageName: node
   linkType: hard
 
@@ -17863,9 +17863,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"slate-react@npm:0.110.1":
-  version: 0.110.1
-  resolution: "slate-react@npm:0.110.1"
+"slate-react@npm:0.110.3":
+  version: 0.110.3
+  resolution: "slate-react@npm:0.110.3"
   dependencies:
     "@juggle/resize-observer": "npm:^3.4.0"
     direction: "npm:^1.0.4"
@@ -17878,18 +17878,18 @@ __metadata:
     react: ">=18.2.0"
     react-dom: ">=18.2.0"
     slate: ">=0.99.0"
-  checksum: 10c0/270ac3068f65f2c5e12e209a8ea8b73048c1d8a7a879c9fcd94e917a773332e845a56f036e1c4cea516a5334bacebdd0a73422209d4fb0ef4110ae5226da5cf4
+  checksum: 10c0/6cacff8af339ffbe501fb9010b6597516188d698a961bb24aa7a5671e248584254a66c5d364b000ba4e629300a3df8fa83a3171848e8cc95f80984f71613688a
   languageName: node
   linkType: hard
 
-"slate@npm:0.103.0":
-  version: 0.103.0
-  resolution: "slate@npm:0.103.0"
+"slate@npm:0.110.2":
+  version: 0.110.2
+  resolution: "slate@npm:0.110.2"
   dependencies:
     immer: "npm:^10.0.3"
     is-plain-object: "npm:^5.0.0"
     tiny-warning: "npm:^1.0.3"
-  checksum: 10c0/5cde24650d71fb449382305c082310404560a73135510fc3d83bae680c5fc6e1db18347a58186f63efbc3342fd4ff4e447c134301f48683cdef312c87988ce0c
+  checksum: 10c0/90ed1b3c92898ccd4b3cb33216797acfb6eacbc2e60c7b8d8af4f02305195c3832a8cddb4651b10c4beb1da122bfaa42bb748e6464d75c8bfd545f017297041c
   languageName: node
   linkType: hard
 
