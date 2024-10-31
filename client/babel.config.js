@@ -25,8 +25,6 @@ module.exports = {
       }
     ],
     "@babel/plugin-proposal-throw-expressions",
-    "@babel/plugin-syntax-dynamic-import",
-    "@babel/plugin-syntax-import-meta",
     "@babel/plugin-transform-class-properties",
     "@babel/plugin-transform-export-namespace-from",
     "@babel/plugin-transform-json-strings",
