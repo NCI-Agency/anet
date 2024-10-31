@@ -79,7 +79,7 @@ async function randomPerson(isUser, status) {
   const rank = faker.helpers.arrayElement(availableRanks)
   let domainUsername
   if (isUser) {
-    domainUsername = faker.internet.userName({
+    domainUsername = faker.internet.username({
       firstName: name.firstName,
       lastName: name.lastName
     })

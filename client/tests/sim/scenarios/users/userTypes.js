@@ -35,7 +35,7 @@ const userTypes = [
     name: "newUser",
     frequency: 1,
     userFunction: async function(value) {
-      const username = faker.internet.userName()
+      const username = faker.internet.username()
       return { name: username, password: username }
     }
   },
