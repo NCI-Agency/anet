@@ -201,22 +201,6 @@ public class PersonResource {
     return numRows;
   }
 
-  @GraphQLMutation(name = "updatePersonAvatar")
-  public int updatePersonAvatar(@GraphQLRootContext Map<String, Object> context,
-      @GraphQLArgument(name = "person") Person p) {
-    final Person user = DaoUtils.getUserFromContext(context);
-    final Person existing = dao.getByUuid(p.getUuid());
-    assertCanUpdatePerson(user, existing);
-    final int numRows = dao.updateAvatar(p);
-    if (numRows == 0) {
-      throw new WebApplicationException("Couldn't process person avatar update", Status.NOT_FOUND);
-    }
-
-    AnetAuditLogger.log("Person {} avatar updated by {}", p, user);
-    // GraphQL mutations *have* to return something, so we return the number of updated rows
-    return numRows;
-  }
-
   @GraphQLMutation(name = "updatePersonHistory")
   public int updatePersonHistory(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "person") Person p) {

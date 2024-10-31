@@ -3,6 +3,7 @@ import API from "api"
 import AuthorizationGroupMembersTable from "components/AuthorizationGroupMembersTable"
 import DictionaryField from "components/DictionaryField"
 import { PreviewField } from "components/FieldHelper"
+import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import PositionTable from "components/PositionTable"
 import { AuthorizationGroup } from "models"
 import PropTypes from "prop-types"
@@ -38,12 +39,13 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
           shortName
           longName
           identificationCode
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         person {
           uuid
           name
           rank
-          avatarUuid
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
       }
       authorizationGroupRelatedObjects {
@@ -55,13 +57,14 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
             shortName
             longName
             identificationCode
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
             ${GQL_EMAIL_ADDRESSES}
           }
           ... on Person {
             uuid
             name
             rank
-            avatarUuid
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
             ${GQL_EMAIL_ADDRESSES}
           }
           ... on Position {

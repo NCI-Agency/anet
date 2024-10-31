@@ -3,17 +3,19 @@ import React from "react"
 
 const AttachmentImage = ({
   uuid,
-  backgroundSize,
-  backgroundImage,
+  caption,
+  iconSize,
+  iconImage,
   contentMissing
 }) => {
   const image = (
-    <div
+    <img
       className="image-preview info-show card-image attachment-image"
-      style={{
-        backgroundSize,
-        backgroundImage: `url(${backgroundImage})`
-      }}
+      src={iconImage}
+      alt={caption}
+      width={iconSize}
+      height={iconSize}
+      style={{ objectFit: "contain" }}
     />
   )
   return (
@@ -31,8 +33,9 @@ const AttachmentImage = ({
 
 AttachmentImage.propTypes = {
   uuid: PropTypes.string.isRequired,
-  backgroundSize: PropTypes.string.isRequired,
-  backgroundImage: PropTypes.string.isRequired,
+  caption: PropTypes.string,
+  iconSize: PropTypes.string.isRequired,
+  iconImage: PropTypes.string.isRequired,
   contentMissing: PropTypes.bool.isRequired
 }
 

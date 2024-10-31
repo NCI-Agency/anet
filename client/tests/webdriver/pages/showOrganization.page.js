@@ -232,6 +232,10 @@ class ShowOrganization extends Page {
     const agTable = await this.getAuthorizationGroupsTable()
     return agTable.$(`tbody tr:nth-child(${i}) td:first-child a`)
   }
+
+  async getEntityAvatar() {
+    return browser.$("fieldset div.row div.text-center canvas")
+  }
 }
 
 export default new ShowOrganization()

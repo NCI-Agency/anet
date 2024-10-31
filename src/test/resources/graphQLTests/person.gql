@@ -2,7 +2,14 @@ person(uuid:"${personUuid}") {
   uuid
   name
   rank
-  avatarUuid
+  entityAvatar {
+    attachmentUuid
+    applyCrop
+    cropLeft
+    cropTop
+    cropWidth
+    cropHeight
+  }
   status
   pendingVerification
   isSubscribed
@@ -40,7 +47,14 @@ person(uuid:"${personUuid}") {
         uuid
         name
         rank
-        avatarUuid
+        entityAvatar {
+          attachmentUuid
+          applyCrop
+          cropLeft
+          cropTop
+          cropWidth
+          cropHeight
+        }
       }
       organization {
         uuid
@@ -69,7 +83,14 @@ person(uuid:"${personUuid}") {
       uuid
       name
       rank
-      avatarUuid
+      entityAvatar {
+        attachmentUuid
+        applyCrop
+        cropLeft
+        cropTop
+        cropWidth
+        cropHeight
+      }
     }
     noteRelatedObjects {
       objectUuid
@@ -90,7 +111,14 @@ person(uuid:"${personUuid}") {
         ... on Person {
           name
           rank
-          avatarUuid
+          entityAvatar {
+            attachmentUuid
+            applyCrop
+            cropLeft
+            cropTop
+            cropWidth
+            cropHeight
+          }
         }
         ... on Position {
           type

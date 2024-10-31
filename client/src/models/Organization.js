@@ -1,5 +1,6 @@
 import Model, {
   createCustomFieldsSchema,
+  GRAPHQL_ENTITY_AVATAR_FIELDS,
   GRAPHQL_NOTES_FIELDS,
   yupEmailAddresses
 } from "components/Model"
@@ -103,7 +104,7 @@ export default class Organization extends Model {
     .concat(Organization.customFieldsSchema)
     .concat(Model.yupSchema)
 
-  static autocompleteQuery = "uuid shortName longName identificationCode"
+  static autocompleteQuery = `uuid shortName longName identificationCode ${GRAPHQL_ENTITY_AVATAR_FIELDS}`
 
   static autocompleteQueryWithNotes = `${this.autocompleteQuery} ${GRAPHQL_NOTES_FIELDS}`
 
@@ -112,7 +113,9 @@ export default class Organization extends Model {
     status
     shortName
     longName
+    profile
     identificationCode
+    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
     app6context
     app6standardIdentity
     app6symbolSet
@@ -123,6 +126,7 @@ export default class Organization extends Model {
       shortName
       longName
       identificationCode
+      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
     }
     childrenOrgs {
       uuid
@@ -137,7 +141,6 @@ export default class Organization extends Model {
       lng
       type
     }
-    profile
     emailAddresses {
       network
       address
@@ -152,7 +155,7 @@ export default class Organization extends Model {
           uuid
           name
           rank
-          avatarUuid
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
       }
     }
@@ -166,7 +169,7 @@ export default class Organization extends Model {
           uuid
           name
           rank
-          avatarUuid
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
       }
     }
@@ -180,7 +183,7 @@ export default class Organization extends Model {
         uuid
         name
         rank
-        avatarUuid
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
     }
     customFields

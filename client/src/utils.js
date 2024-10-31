@@ -321,24 +321,24 @@ export default {
   },
 
   getAttachmentIconDetails: function(attachment, small) {
-    let backgroundSize = small ? "50px" : "200px"
-    let backgroundImage = binaryIcon
+    let iconSize = small ? "50px" : "200px"
+    let iconImage = binaryIcon
     const contentMissing =
       attachment.contentLength < 0 ||
       isNullOrUndefined(attachment.contentLength)
     if (contentMissing) {
-      backgroundImage = absentIcon
+      iconImage = absentIcon
     } else if (attachment.mimeType === "application/pdf") {
-      backgroundImage = pdfIcon
+      iconImage = pdfIcon
     } else if (attachment.mimeType.startsWith("text/")) {
-      backgroundImage = textIcon
+      iconImage = textIcon
     } else if (attachment.mimeType.startsWith("video/")) {
-      backgroundImage = videoIcon
+      iconImage = videoIcon
     } else if (attachment.mimeType.startsWith("image/")) {
-      backgroundSize = "cover"
-      backgroundImage = `/api/attachment/view/${attachment.uuid}`
+      iconSize = null
+      iconImage = `/api/attachment/view/${attachment.uuid}`
     }
-    return { backgroundSize, backgroundImage, contentMissing }
+    return { iconSize, iconImage, contentMissing }
   },
 
   stripExtension: function(fileName) {

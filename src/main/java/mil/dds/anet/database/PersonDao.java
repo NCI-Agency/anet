@@ -21,6 +21,7 @@ import javax.cache.CacheManager;
 import javax.cache.Caching;
 import javax.cache.spi.CachingProvider;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.EntityAvatar;
 import mil.dds.anet.beans.MergedEntity;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.PersonPositionHistory;
@@ -51,8 +52,8 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
 
   // Must always retrieve these e.g. for ORDER BY
   public static final String[] minimalFields = {"uuid", "name", "rank", "createdAt"};
-  public static final String[] additionalFields = {"status", "user", "avatarUuid", "phoneNumber",
-      "biography", "obsoleteCountry", "countryUuid", "gender", "endOfTourDate", "domainUsername",
+  public static final String[] additionalFields = {"status", "user", "phoneNumber", "biography",
+      "obsoleteCountry", "countryUuid", "gender", "endOfTourDate", "domainUsername",
       "openIdSubject", "pendingVerification", "code", "updatedAt", "customFields"};
   public static final String[] allFields =
       ObjectArrays.concat(minimalFields, additionalFields, String.class);
@@ -173,18 +174,6 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
         .bind("endOfTourDate", DaoUtils.asLocalDateTime(p.getEndOfTourDate()))
         .bind("status", DaoUtils.getEnumId(p.getStatus())).execute();
     evictFromCache(p);
-    return nr;
-  }
-
-  @InTransaction
-  public int updateAvatar(Person p) {
-    DaoUtils.setUpdateFields(p);
-    final String sql = "/* personUpdateAvatar */ UPDATE people "
-        + "SET \"avatarUuid\" = :avatarUuid, \"updatedAt\" = :updatedAt WHERE uuid = :uuid";
-
-    final int nr = getDbHandle().createUpdate(sql).bindBean(p)
-        .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt())).execute();
-    evictFromCacheByPersonUuid(p.getUuid());
     return nr;
   }
 
@@ -394,8 +383,6 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
 
     // Update the winner's fields
     update(winner);
-    // Update the winner's avatar
-    updateAvatar(winner);
 
     // For reports where both winner and loser are in the reportPeople:
     // 1. set winner's isPrimary, isAttendee, isAuthor and isInterlocutor flags to the logical OR of
@@ -472,6 +459,16 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     // Update attachments
     updateM2mForMerge("attachmentRelatedObjects", "attachmentUuid", "relatedObjectUuid", winnerUuid,
         loserUuid);
+    // And update the avatar
+    final EntityAvatarDao entityAvatarDao = AnetObjectEngine.getInstance().getEntityAvatarDao();
+    entityAvatarDao.delete(PersonDao.TABLE_NAME, winnerUuid);
+    entityAvatarDao.delete(PersonDao.TABLE_NAME, loserUuid);
+    final EntityAvatar winnerEntityAvatar = winner.getEntityAvatar();
+    if (winnerEntityAvatar != null) {
+      winnerEntityAvatar.setRelatedObjectType(PersonDao.TABLE_NAME);
+      winnerEntityAvatar.setRelatedObjectUuid(winnerUuid);
+      entityAvatarDao.upsert(winnerEntityAvatar);
+    }
 
     // Update emailAddresses
     final EmailAddressDao emailAddressDao = AnetObjectEngine.getInstance().getEmailAddressDao();

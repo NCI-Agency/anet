@@ -47,7 +47,7 @@ const AttachmentTable = ({
           </thead>
           <tbody>
             {attachments.map(attachment => {
-              const { backgroundSize, backgroundImage, contentMissing } =
+              const { iconSize, iconImage, contentMissing } =
                 utils.getAttachmentIconDetails(attachment, true)
               return (
                 <tr key={attachment.uuid}>
@@ -55,9 +55,10 @@ const AttachmentTable = ({
                     <div style={{ width: "50px", height: "50px" }}>
                       <AttachmentImage
                         uuid={attachment.uuid}
+                        caption={attachment.caption}
                         contentMissing={contentMissing}
-                        backgroundSize={backgroundSize}
-                        backgroundImage={backgroundImage}
+                        iconSize={iconSize}
+                        iconImage={iconImage}
                       />
                     </div>
                   </td>

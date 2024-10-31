@@ -26,7 +26,7 @@ const ANET_OBJECT_TYPES = {
     sampleFilters: []
   },
   Attachments: {
-    sampleFilters: ["Mime Type"]
+    sampleFilters: ["MIME Type"]
   }
 }
 const COMMON_FILTER_TEXT = "Status"

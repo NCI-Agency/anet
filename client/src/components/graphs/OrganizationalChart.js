@@ -1,6 +1,7 @@
 import { gql } from "@apollo/client"
 import API from "api"
 import SVGCanvas from "components/graphs/SVGCanvas"
+import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -15,7 +16,7 @@ import PropTypes from "prop-types"
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { connect } from "react-redux"
 import { useNavigate } from "react-router-dom"
-import DEFAULT_AVATAR from "resources/default_avatar.svg?inline"
+import DEFAULT_PERSON_AVATAR from "resources/default-person-avatar.svg?inline"
 import COLLAPSE_ICON from "resources/organizations.png?inline"
 import EXPAND_ICON from "resources/plus.png?inline"
 import Settings from "settings"
@@ -45,7 +46,7 @@ const GQL_GET_CHART_DATA = gql`
           name
           rank
           user
-          avatarUuid
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
       }
       ascendantOrgs {
@@ -88,7 +89,7 @@ const GQL_GET_CHART_DATA = gql`
             name
             rank
             user
-            avatarUuid
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
         }
       }
@@ -376,9 +377,9 @@ const OrganizationalChart = ({
       .attr("height", d => getRoleValue(d, 26, 13))
       .attr("y", d => getRoleValue(d, -15, -10))
       .attr("href", d =>
-        attachmentsEnabled && d?.person?.avatarUuid
-          ? `/api/attachment/view/${d.person.avatarUuid}`
-          : DEFAULT_AVATAR
+        attachmentsEnabled && d?.person?.entityAvatar?.attachmentUuid
+          ? `/api/attachment/view/${d.person.entityAvatar.attachmentUuid}`
+          : DEFAULT_PERSON_AVATAR
       )
 
     headGenter

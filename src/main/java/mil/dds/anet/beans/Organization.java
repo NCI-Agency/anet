@@ -78,6 +78,8 @@ public class Organization extends AbstractEmailableAnetBean
   List<Position> administratingPositions;
   // annotated below
   private List<AuthorizationGroup> authorizationGroups;
+  // annotated below
+  private EntityAvatar entityAvatar;
 
   @GraphQLQuery(name = "location")
   public CompletableFuture<Location> loadLocation(@GraphQLRootContext Map<String, Object> context) {
@@ -222,6 +224,28 @@ public class Organization extends AbstractEmailableAnetBean
   @GraphQLInputField(name = "parentOrg")
   public void setParentOrg(Organization parentOrg) {
     this.parentOrg = new ForeignObjectHolder<>(parentOrg);
+  }
+
+  @GraphQLQuery(name = "entityAvatar")
+  public CompletableFuture<EntityAvatar> loadEntityAvatar(
+      @GraphQLRootContext Map<String, Object> context) {
+    if (entityAvatar != null) {
+      return CompletableFuture.completedFuture(entityAvatar);
+    }
+    return new UuidFetcher<EntityAvatar>().load(context, IdDataLoaderKey.ENTITY_AVATAR, uuid)
+        .thenApply(o -> {
+          entityAvatar = o;
+          return o;
+        });
+  }
+
+  @GraphQLInputField(name = "entityAvatar")
+  public void setEntityAvatar(EntityAvatar entityAvatar) {
+    this.entityAvatar = entityAvatar;
+  }
+
+  public EntityAvatar getEntityAvatar() {
+    return this.entityAvatar;
   }
 
   @GraphQLQuery(name = "positions")

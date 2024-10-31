@@ -5,7 +5,7 @@ import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingle
 import AppContext from "components/AppContext"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import Model from "components/Model"
+import Model, { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import _isEmpty from "lodash/isEmpty"
 import _isEqualWith from "lodash/isEqualWith"
 import { Person, Position } from "models"
@@ -269,7 +269,7 @@ const AssignPositionModal = ({ person, showModal, onCancel, onSuccess }) => {
                     onChange={value => setPosition(value)}
                     objectType={Position}
                     valueKey="name"
-                    fields="uuid name code type organization { uuid shortName longName identificationCode} person { uuid name rank avatarUuid }"
+                    fields={`uuid name code type organization { uuid shortName longName identificationCode} person { uuid name rank ${GRAPHQL_ENTITY_AVATAR_FIELDS} }`}
                     addon={POSITIONS_ICON}
                     vertical
                   />

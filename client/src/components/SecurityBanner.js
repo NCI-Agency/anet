@@ -1,7 +1,8 @@
 import styled from "@emotion/styled"
 import AppContext from "components/AppContext"
-import AvatarDisplayComponent from "components/AvatarDisplayComponent"
+import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import LinkTo from "components/LinkTo"
+import { Person } from "models"
 import PropTypes from "prop-types"
 import React, { useContext, useEffect, useRef, useState } from "react"
 import { ButtonGroup, Dropdown } from "react-bootstrap"
@@ -85,8 +86,9 @@ const SecurityBanner = ({ onLogout, handleSecurityBannerBottom }) => {
               variant="primary"
               showIcon={false}
             >
-              <AvatarDisplayComponent
-                avatarUuid={currentUser.avatarUuid}
+              <EntityAvatarDisplay
+                avatar={currentUser.entityAvatar}
+                defaultAvatar={Person.relatedObjectType}
                 width={25}
                 height={25}
               />{" "}

@@ -20,7 +20,6 @@ const GQL_DELETE_ATTACHMENT = gql`
 const AttachmentCard = ({
   attachment,
   onClick,
-  previewStyle,
   captionStyle,
   edit,
   setError,
@@ -30,35 +29,38 @@ const AttachmentCard = ({
   const computedCaptionStyle = captionStyle ?? {
     maxWidth: edit ? "201px" : "176px"
   }
-  const { backgroundSize, backgroundImage } = utils.getAttachmentIconDetails(
+  const { iconSize, iconImage } = utils.getAttachmentIconDetails(
     attachment,
     true
   )
 
+  const image = (
+    <img
+      className="image-preview info-show card-image"
+      src={iconImage}
+      alt={attachment.caption}
+      width={iconSize}
+      height={iconSize}
+      style={{ objectFit: "contain" }}
+    />
+  )
+  const divContents = onClick ? (
+    <>{image}</>
+  ) : (
+    <LinkTo
+      className="detail-btn"
+      modelType="Attachment"
+      model={attachment}
+      showIcon={false}
+    >
+      {image}
+    </LinkTo>
+  )
   return (
     <div className="attachment-card" key={attachment.uuid}>
       <Card>
-        <div
-          className="image-preview info-show card-image"
-          style={{
-            backgroundSize,
-            backgroundImage: `url(${backgroundImage})`,
-            ...previewStyle
-          }}
-          onClick={() => onClick?.(attachment)}
-        >
-          <div style={{ display: "grid" }}>
-            {!onClick && (
-              <LinkTo
-                className="detail-btn"
-                modelType="Attachment"
-                model={attachment}
-                showIcon={false}
-              >
-                {" "}
-              </LinkTo>
-            )}
-          </div>
+        <div style={{ display: "grid" }} onClick={() => onClick?.(attachment)}>
+          {divContents}
         </div>
         <Card.Body className="p-1 d-block">
           <Card.Title
@@ -117,16 +119,11 @@ const AttachmentCard = ({
 AttachmentCard.propTypes = {
   attachment: PropTypes.object,
   onClick: PropTypes.func,
-  previewStyle: PropTypes.object,
   captionStyle: PropTypes.object,
   edit: PropTypes.bool,
   setError: PropTypes.func,
   uploadedList: PropTypes.array,
   setUploadedList: PropTypes.func
-}
-
-AttachmentCard.defaultProps = {
-  previewStyle: { maxHeight: "155px" }
 }
 
 export default AttachmentCard

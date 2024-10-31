@@ -4,6 +4,7 @@ import { IconNames } from "@blueprintjs/icons"
 import API from "api"
 import { BreadcrumbTrail } from "components/BreadcrumbTrail"
 import LinkTo from "components/LinkTo"
+import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import { PageDispatchersPropType, useBoilerplate } from "components/Page"
 import { ReportCompactWorkflow } from "components/ReportWorkflow"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
@@ -41,25 +42,27 @@ const GQL_GET_REPORT_LIST = gql`
           uuid
           name
           rank
-          avatarUuid
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         primaryInterlocutor {
           uuid
           name
           rank
-          avatarUuid
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         advisorOrg {
           uuid
           shortName
           longName
           identificationCode
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         interlocutorOrg {
           uuid
           shortName
           longName
           identificationCode
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         location {
           uuid
@@ -96,7 +99,7 @@ const GQL_GET_REPORT_LIST = gql`
                 uuid
                 name
                 rank
-                avatarUuid
+                ${GRAPHQL_ENTITY_AVATAR_FIELDS}
               }
             }
           }
@@ -104,7 +107,7 @@ const GQL_GET_REPORT_LIST = gql`
             uuid
             name
             rank
-            avatarUuid
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
         }
         updatedAt

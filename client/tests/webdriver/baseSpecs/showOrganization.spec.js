@@ -192,4 +192,12 @@ describe("Show organization page", () => {
       ).to.be.false
     })
   })
+
+  describe("When on the show page of an organization with entity avatar", () => {
+    it("We should see the avatar", async() => {
+      await ShowOrganization.open(ORGANIZATION_UUID)
+      await (await ShowOrganization.getEntityAvatar()).waitForExist()
+      await (await ShowOrganization.getEntityAvatar()).waitForDisplayed()
+    })
+  })
 })

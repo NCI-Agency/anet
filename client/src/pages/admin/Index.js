@@ -16,7 +16,7 @@ import {
   GENERAL_BANNER_VISIBILITY
 } from "components/GeneralBanner"
 import Messages from "components/Messages"
-import Model from "components/Model"
+import Model, { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import {
   jumpToTop,
@@ -78,7 +78,7 @@ const RECENT_ACTIVITIES = gql`
       uuid
       name
       rank
-      avatarUuid
+      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       user
       domainUsername
     }

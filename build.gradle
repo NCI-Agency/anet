@@ -138,9 +138,6 @@ dependencies {
 	// For parsing HTML to check for 'empty' input
 	implementation 'org.jsoup:jsoup:1.18.1'
 
-	// For fast and simple image scaling
-	implementation 'net.coobird:thumbnailator:0.4.20'
-
 	// GraphQL dependencies
 	implementation 'com.graphql-java:graphql-java:21.5'
 	implementation 'com.graphql-java:java-dataloader:3.3.0'
@@ -430,7 +427,7 @@ task pushPsqlImageData(type: DockerCopyFileToContainer) {
 	group = "database runtime"
 	description = "Push SQL base data to PostgreSQL"
 	containerId = dbContainerName
-	hostPath = "${projectDir}/src/test/resources/assets/default_avatar.png"
+	hostPath = "${projectDir}/src/test/resources/assets/"
 	remotePath = psqlPushDataPath
 }
 pushPsqlImageData.mustRunAfter('dockerStartDB')

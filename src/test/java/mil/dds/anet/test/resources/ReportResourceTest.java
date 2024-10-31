@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -1666,7 +1667,10 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(r.getUuid()).isNotNull();
 
     // Attach attachment to test report
-    final var allowedMimeTypes = (List<String>) attachmentSettings.get("mimeTypes");
+    @SuppressWarnings("unchecked")
+    final var allowedFileTypes = (List<Map<String, ?>>) attachmentSettings.get("fileTypes");
+    final var allowedMimeTypes = (List<String>) allowedFileTypes.stream()
+        .map(element -> (String) element.get("mimeType")).toList();
     final String mimeType = allowedMimeTypes.get(0);
 
     final GenericRelatedObjectInput testAroInput = GenericRelatedObjectInput.builder()

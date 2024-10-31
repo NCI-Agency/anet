@@ -2,6 +2,7 @@ import { gql } from "@apollo/client"
 import API from "api"
 import { reportsToEvents } from "components/aggregations/utils"
 import Calendar from "components/Calendar"
+import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import { PageDispatchersPropType } from "components/Page"
 import _isEqual from "lodash/isEqual"
 import moment from "moment"
@@ -34,12 +35,14 @@ const GQL_GET_REPORT_LIST = gql`
           shortName
           longName
           identificationCode
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         interlocutorOrg {
           uuid
           shortName
           longName
           identificationCode
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         engagementDate
         duration

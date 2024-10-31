@@ -12,7 +12,7 @@ import Fieldset from "components/Fieldset"
 import FindObjectsButton from "components/FindObjectsButton"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import Model from "components/Model"
+import Model, { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import {
   jumpToTop,
   mapPageDispatchersToProps,
@@ -56,6 +56,7 @@ const GQL_GET_TASK = gql`
         shortName
         longName
         identificationCode
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
       parentTask {
         uuid
@@ -108,12 +109,13 @@ const GQL_GET_TASK = gql`
           shortName
           longName
           identificationCode
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         person {
           uuid
           name
           rank
-          avatarUuid
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
       }
       planningApprovalSteps {
@@ -127,7 +129,7 @@ const GQL_GET_TASK = gql`
             uuid
             name
             rank
-            avatarUuid
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
         }
       }
@@ -142,7 +144,7 @@ const GQL_GET_TASK = gql`
             uuid
             name
             rank
-            avatarUuid
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
         }
       }

@@ -12,6 +12,7 @@ import ButtonToggleGroup from "components/ButtonToggleGroup"
 import Checkbox from "components/Checkbox"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
+import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import MosaicLayout from "components/MosaicLayout"
 import {
   mapPageDispatchersToProps,
@@ -44,6 +45,7 @@ const GQL_GET_USER_ACTIVITY_LIST_BY_ORGANIZATION = gql`
           shortName
           longName
           identificationCode
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         visitedAt
         count
@@ -64,7 +66,7 @@ const GQL_GET_USER_ACTIVITY_LIST_BY_PERSON = gql`
           uuid
           name
           rank
-          avatarUuid
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           user
           domainUsername
         }

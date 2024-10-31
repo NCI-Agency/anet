@@ -4,7 +4,7 @@ import { PersonSimpleOverlayRow } from "components/advancedSelectWidget/Advanced
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import Model from "components/Model"
+import Model, { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import _isEmpty from "lodash/isEmpty"
 import _isEqualWith from "lodash/isEqualWith"
 import { Person, Position } from "models"
@@ -217,7 +217,7 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
                     onChange={value => setPerson(value)}
                     objectType={Person}
                     valueKey="name"
-                    fields="uuid name rank avatarUuid position { uuid name type organization {uuid} }"
+                    fields={`uuid name rank ${GRAPHQL_ENTITY_AVATAR_FIELDS} position { uuid name type organization {uuid} }`}
                     addon={PEOPLE_ICON}
                     vertical
                   />

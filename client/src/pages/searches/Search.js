@@ -16,6 +16,7 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LocationTable from "components/LocationTable"
 import Messages from "components/Messages"
+import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import { AnchorNavItem } from "components/Nav"
 import OrganizationTable from "components/OrganizationTable"
 import {
@@ -101,6 +102,7 @@ const GQL_GET_ORGANIZATION_LIST = gql`
         shortName
         longName
         identificationCode
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         ${GQL_EMAIL_ADDRESSES}
         location {
           uuid
@@ -120,7 +122,7 @@ const GQL_GET_PERSON_LIST = gql`
         uuid
         name
         rank
-        avatarUuid
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         ${GQL_EMAIL_ADDRESSES}
         position {
           uuid
@@ -137,6 +139,7 @@ const GQL_GET_PERSON_LIST = gql`
             shortName
             longName
             identificationCode
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
         }
       }
@@ -166,12 +169,13 @@ const GQL_GET_POSITION_LIST = gql`
           shortName
           longName
           identificationCode
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         person {
           uuid
           name
           rank
-          avatarUuid
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
       }
     }
@@ -245,7 +249,6 @@ const GQL_GET_AUTHORIZATION_GROUP_LIST = gql`
               uuid
               name
               rank
-              avatarUuid
               ${GQL_EMAIL_ADDRESSES}
             }
             ... on Position {
@@ -272,7 +275,7 @@ const GQL_GET_ATTACHMENT_LIST = gql`
           uuid
           name
           rank
-          avatarUuid
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         attachmentRelatedObjects {
           relatedObject {
@@ -286,11 +289,12 @@ const GQL_GET_ATTACHMENT_LIST = gql`
               shortName
               longName
               identificationCode
+              ${GRAPHQL_ENTITY_AVATAR_FIELDS}
             }
             ... on Person {
               name
               rank
-              avatarUuid
+              ${GRAPHQL_ENTITY_AVATAR_FIELDS}
             }
             ... on Position {
               type

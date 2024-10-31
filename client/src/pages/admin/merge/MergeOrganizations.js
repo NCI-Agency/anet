@@ -6,6 +6,7 @@ import API from "api"
 import { OrganizationSimpleOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import ApprovalSteps from "components/ApprovalSteps"
+import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import { customFieldsJSONString } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
 import EmailAddressTable from "components/EmailAddressTable"
@@ -146,6 +147,26 @@ const MergeOrganizations = ({ pageDispatchers }) => {
           )}
           {areAllSet(organization1, organization2, mergedOrganization) && (
             <fieldset>
+              <MergeField
+                label="Avatar"
+                value={
+                  <EntityAvatarDisplay
+                    avatar={mergedOrganization.entityAvatar}
+                    defaultAvatar={Organization.relatedObjectType}
+                    height={128}
+                    width={128}
+                    style={{
+                      maxWidth: "100%",
+                      display: "block",
+                      margin: "0 auto"
+                    }}
+                  />
+                }
+                align={ALIGN_OPTIONS.CENTER}
+                fieldName="entityAvatar"
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
               <DictionaryField
                 wrappedComponent={MergeField}
                 dictProps={Settings.fields.organization.shortName}
@@ -496,6 +517,35 @@ const OrganizationColumn = ({
       </ColTitle>
       {areAllSet(organization) && (
         <fieldset>
+          <MergeField
+            label="Avatar"
+            fieldName="entityAvatar"
+            value={
+              <EntityAvatarDisplay
+                avatar={organization.entityAvatar}
+                defaultAvatar={Organization.relatedObjectType}
+                height={128}
+                width={128}
+                style={{
+                  maxWidth: "100%",
+                  display: "block",
+                  margin: "0 auto"
+                }}
+              />
+            }
+            align={align}
+            action={() => {
+              dispatchMergeActions(
+                setAMergedField(
+                  "entityAvatar",
+                  organization.entityAvatar,
+                  align
+                )
+              )
+            }}
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
+          />
           <DictionaryField
             wrappedComponent={MergeField}
             dictProps={Settings.fields.organization.shortName}
