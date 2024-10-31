@@ -175,7 +175,7 @@
     "slate-react": "0.110.3",
     "title-case": "4.3.2",
     "use-debounce": "10.0.4",
-    "uuid": "10.0.0",
+    "uuid": "11.0.2",
     "yup": "1.4.0"
   },
   "resolutions": {
