@@ -6050,7 +6050,7 @@ __metadata:
     closest: "npm:0.0.1"
     config: "npm:3.3.12"
     copy-webpack-plugin: "npm:12.0.2"
-    core-js: "npm:3.38.1"
+    core-js: "npm:3.39.0"
     countries-list: "npm:3.1.1"
     cross-fetch: "npm:4.0.0"
     cross-spawn: "npm:7.0.3"
@@ -6089,7 +6089,7 @@ __metadata:
     jest-junit: "npm:16.0.0"
     js-yaml: "npm:4.1.0"
     json-loader: "npm:0.5.7"
-    jsonpath-plus: "npm:10.0.0"
+    jsonpath-plus: "npm:10.1.0"
     keycloak-connect: "npm:24.0.5"
     keycloak-js: "npm:24.0.5"
     leaflet: "npm:1.9.4"
@@ -6102,7 +6102,7 @@ __metadata:
     lodash: "npm:4.17.21"
     mgrs: "npm:1.0.0"
     milsymbol: "npm:2.2.0"
-    ml-matrix: "npm:6.11.1"
+    ml-matrix: "npm:6.12.0"
     moment: "npm:2.30.1"
     moment-timezone: "npm:0.5.46"
     pathfinding: "npm:0.4.18"
@@ -6128,7 +6128,7 @@ __metadata:
     react-router-dom: "npm:6.3.0"
     react-scroll: "npm:1.9.0"
     react-test-renderer: "npm:18.3.1"
-    react-toastify: "npm:10.0.5"
+    react-toastify: "npm:10.0.6"
     react-ultimate-pagination: "npm:1.3.2"
     reduce-css-calc: "npm:2.1.8"
     redux: "npm:5.0.1"
@@ -6145,7 +6145,7 @@ __metadata:
     thread-loader: "npm:4.0.4"
     title-case: "npm:4.3.2"
     ts-node: "npm:10.9.2"
-    use-debounce: "npm:10.0.3"
+    use-debounce: "npm:10.0.4"
     uuid: "npm:10.0.0"
     webdriverio: "npm:8.40.6"
     webpack: "npm:5.95.0"
@@ -8139,10 +8139,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"core-js@npm:3.38.1, core-js@npm:^3.33.0":
-  version: 3.38.1
-  resolution: "core-js@npm:3.38.1"
-  checksum: 10c0/7df063b6f13a54e46515817ac3e235c6c598a4d3de65cd188a061fc250642be313b895fb9fb2f36e1e31890a1bb4ef61d82666a340413f540b7ce3c65689739b
+"core-js@npm:3.39.0, core-js@npm:^3.33.0":
+  version: 3.39.0
+  resolution: "core-js@npm:3.39.0"
+  checksum: 10c0/f7602069b6afb2e3298eec612a5c1e0c3e6a458930fbfc7a4c5f9ac03426507f49ce395eecdd2d9bae9024f820e44582b67ffe16f2272395af26964f174eeb6b
   languageName: node
   linkType: hard
 
@@ -13698,9 +13698,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jsonpath-plus@npm:10.0.0":
-  version: 10.0.0
-  resolution: "jsonpath-plus@npm:10.0.0"
+"jsonpath-plus@npm:10.1.0":
+  version: 10.1.0
+  resolution: "jsonpath-plus@npm:10.1.0"
   dependencies:
     "@jsep-plugin/assignment": "npm:^1.2.1"
     "@jsep-plugin/regex": "npm:^1.0.3"
@@ -13708,7 +13708,7 @@ __metadata:
   bin:
     jsonpath: bin/jsonpath-cli.js
     jsonpath-plus: bin/jsonpath-cli.js
-  checksum: 10c0/0bd0ad79397f319c8543f090a944ea08c933c13d69ad5213f202f738ef4abd46de57c917844a83e2e89643cadbfc2e327a402c01eaf50bd1870882d50a4a8b95
+  checksum: 10c0/1ff0743f9113f7750b598563c7886e1b07c19f112c4a8d976165e6799ff9774279985d1f4a147e87eacc0b94eb27dbd6e3ab5cf0728d4ba947f00757bc6aebb4
   languageName: node
   linkType: hard
 
@@ -14800,13 +14800,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ml-matrix@npm:6.11.1":
-  version: 6.11.1
-  resolution: "ml-matrix@npm:6.11.1"
+"ml-matrix@npm:6.12.0":
+  version: 6.12.0
+  resolution: "ml-matrix@npm:6.12.0"
   dependencies:
     is-any-array: "npm:^2.0.1"
     ml-array-rescale: "npm:^1.3.7"
-  checksum: 10c0/5c2d60f7b162a2b74f7973ce64603081f05ad6169884925eccb14badef0ebb49582e5cbdc85c05d81ddf89f8cddc3eaf67efaed6f3929ff4911ae2e905d1a325
+  checksum: 10c0/7927c3ab18856fcdef75bd8bebf88c13c7291ef1a3b78b0e8c827abbaead4a489c634bc888ae05e4df962141448f758b6fb9dcaf876ff42b7fd35a018dacb8c8
   languageName: node
   linkType: hard
 
@@ -16827,15 +16827,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-toastify@npm:10.0.5":
-  version: 10.0.5
-  resolution: "react-toastify@npm:10.0.5"
+"react-toastify@npm:10.0.6":
+  version: 10.0.6
+  resolution: "react-toastify@npm:10.0.6"
   dependencies:
     clsx: "npm:^2.1.0"
   peerDependencies:
     react: ">=18"
     react-dom: ">=18"
-  checksum: 10c0/66c68ec3d6c017d9f32652d73bb925224921c6a80b629b9d481430d5b4fd504abb7a99995a64b9aef0fc31326c74f3cbe088b3287b978dd0c355079c4bbf4158
+  checksum: 10c0/4042b716d008295d0feab32488d1e88ec655a1b7a9176fa7d253c70387578a8a0c04aca0ff86d20e1722f3b4baadae8970f50f462940d67a90453c307dd350a9
   languageName: node
   linkType: hard
 
@@ -19473,12 +19473,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"use-debounce@npm:10.0.3":
-  version: 10.0.3
-  resolution: "use-debounce@npm:10.0.3"
+"use-debounce@npm:10.0.4":
+  version: 10.0.4
+  resolution: "use-debounce@npm:10.0.4"
   peerDependencies:
     react: "*"
-  checksum: 10c0/351b62c565d6dce5a21ecc21fe3e1f8db74f70c81c8f7d9dbdfc2da1cb82d883578589f6146e684d91dac534bc3c8b145ab1a36fbf4d44cbb4113827508b39aa
+  checksum: 10c0/73494fc44b2bd58a7ec799a528fc20077c45fe2e94fedff6dcd88d136f7a39f417d77f584d5613aac615ed32aeb2ea393797ae1f7d5b2645eab57cb497a6d0cb
   languageName: node
   linkType: hard
 
