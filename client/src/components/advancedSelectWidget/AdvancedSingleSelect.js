@@ -1,6 +1,4 @@
-import AdvancedSelect, {
-  propTypes as advancedSelectPropTypes
-} from "components/advancedSelectWidget/AdvancedSelect"
+import AdvancedSelect from "components/advancedSelectWidget/AdvancedSelect"
 import { AdvancedSingleSelectOverlayTable } from "components/advancedSelectWidget/AdvancedSelectOverlayTable"
 import * as FieldHelper from "components/FieldHelper"
 import _isEmpty from "lodash/isEmpty"
@@ -38,9 +36,8 @@ const AdvancedSingleSelect = props => {
   }
 }
 AdvancedSingleSelect.propTypes = {
-  ...advancedSelectPropTypes,
+  ...AdvancedSelect.propTypes,
   value: PropTypes.object,
-  valueKey: PropTypes.string,
   valueFunc: PropTypes.func
 }
 AdvancedSingleSelect.defaultProps = {

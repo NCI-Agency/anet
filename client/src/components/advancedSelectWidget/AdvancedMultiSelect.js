@@ -1,6 +1,4 @@
-import AdvancedSelect, {
-  propTypes as advancedSelectPropTypes
-} from "components/advancedSelectWidget/AdvancedSelect"
+import AdvancedSelect from "components/advancedSelectWidget/AdvancedSelect"
 import { AdvancedMultiSelectOverlayTable } from "components/advancedSelectWidget/AdvancedSelectOverlayTable"
 import * as FieldHelper from "components/FieldHelper"
 import PropTypes from "prop-types"
@@ -28,7 +26,7 @@ const AdvancedMultiSelect = props => {
   }
 }
 AdvancedMultiSelect.propTypes = {
-  ...advancedSelectPropTypes,
+  ...AdvancedSelect.propTypes,
   value: PropTypes.array.isRequired
 }
 AdvancedMultiSelect.defaultProps = {

@@ -495,7 +495,43 @@ const AdvancedSelect = ({
     setFetchType(FETCH_TYPE.NORMAL)
   }
 }
-AdvancedSelect.propTypes = propTypes
+AdvancedSelect.propTypes = {
+  fieldName: PropTypes.string.isRequired, // input field name
+  className: PropTypes.string,
+  placeholder: PropTypes.string, // input field placeholder
+  pageSize: PropTypes.number,
+  disabled: PropTypes.bool,
+  selectedValueAsString: PropTypes.string,
+  keepSearchText: PropTypes.bool,
+  addon: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.func,
+    PropTypes.object
+  ]),
+  extraAddon: PropTypes.object,
+  value: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
+  valueKey: PropTypes.string,
+  renderSelected: PropTypes.oneOfType([PropTypes.func, PropTypes.object]), // how to render the selected items
+  overlayTable: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.func,
+    PropTypes.object
+  ]), // search results component for in the overlay
+  overlayColumns: PropTypes.array.isRequired,
+  overlayRenderRow: PropTypes.func.isRequired,
+  closeOverlayOnAdd: PropTypes.bool, // set to true if you want the overlay to be closed after an add action
+  filterDefs: PropTypes.object.isRequired, // config of the search filters
+  onChange: PropTypes.func,
+  // Required: ANET Object Type (Person, Report, etc) to search for.
+  objectType: PropTypes.func.isRequired,
+  // Optional: Parameters to pass to all search filters.
+  queryParams: PropTypes.object,
+  // Optional: GraphQL string of fields to return from search.
+  fields: PropTypes.string,
+  handleAddItem: PropTypes.func,
+  handleRemoveItem: PropTypes.func,
+  createEntityComponent: PropTypes.func
+}
 AdvancedSelect.defaultProps = {
   pageSize: 5,
   disabled: false,
