@@ -1,11 +1,11 @@
 package mil.dds.anet.resources;
 
+import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response.Status;
+import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -16,24 +16,29 @@ import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.LocationSearchQuery;
-import mil.dds.anet.config.AnetConfiguration;
+import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.graphql.AllowUnverifiedUsers;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 
+@Component
+@GraphQLApi
 public class LocationResource {
 
-  private final AnetConfiguration config;
+  private final AnetDictionary dict;
   private final AnetObjectEngine engine;
   private final LocationDao dao;
 
-  public LocationResource(AnetObjectEngine engine, AnetConfiguration config) {
-    this.config = config;
-    this.engine = engine;
-    this.dao = engine.getLocationDao();
+  public LocationResource(AnetDictionary dict, AnetObjectEngine anetObjectEngine, LocationDao dao) {
+    this.dict = dict;
+    this.engine = anetObjectEngine;
+    this.dao = dao;
   }
 
   public static boolean hasPermission(final Person user, final String locationUuid) {
@@ -42,7 +47,7 @@ public class LocationResource {
 
   public static void assertPermission(final Person user, final String locationUuid) {
     if (!hasPermission(user, locationUuid)) {
-      throw new WebApplicationException(AuthUtils.UNAUTH_MESSAGE, Status.FORBIDDEN);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, AuthUtils.UNAUTH_MESSAGE);
     }
   }
 
@@ -50,14 +55,14 @@ public class LocationResource {
   public Location getByUuid(@GraphQLArgument(name = "uuid") String uuid) {
     Location loc = dao.getByUuid(uuid);
     if (loc == null) {
-      throw new WebApplicationException("Location not found", Status.NOT_FOUND);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Location not found");
     }
     return loc;
   }
 
   @GraphQLQuery(name = "locationList")
   @AllowUnverifiedUsers
-  public AnetBeanList<Location> search(@GraphQLRootContext Map<String, Object> context,
+  public AnetBeanList<Location> search(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "query") LocationSearchQuery query) {
     final Person user = DaoUtils.getUserFromContext(context);
     if (Boolean.TRUE.equals(user.getPendingVerification())) {
@@ -69,17 +74,17 @@ public class LocationResource {
   }
 
   @GraphQLMutation(name = "createLocation")
-  public Location createLocation(@GraphQLRootContext Map<String, Object> context,
+  public Location createLocation(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "location") Location l) {
     l.checkAndFixCustomFields();
     l.setDescription(
         Utils.isEmptyHtml(l.getDescription()) ? null : Utils.sanitizeHtml(l.getDescription()));
     final Person user = DaoUtils.getUserFromContext(context);
-    if (Boolean.FALSE.equals(config.getDictionaryEntry("regularUsersCanCreateLocations"))) {
+    if (Boolean.FALSE.equals(dict.getDictionaryEntry("regularUsersCanCreateLocations"))) {
       assertPermission(user, DaoUtils.getUuid(l));
     }
-    if (l.getName() == null || l.getName().trim().length() == 0) {
-      throw new WebApplicationException("Location name must not be empty", Status.BAD_REQUEST);
+    if (l.getName() == null || l.getName().trim().isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Location name must not be empty");
     }
     final Location created = dao.insert(l);
     if (l.getPlanningApprovalSteps() != null) {
@@ -114,7 +119,7 @@ public class LocationResource {
   }
 
   @GraphQLMutation(name = "updateLocation")
-  public Integer updateLocation(@GraphQLRootContext Map<String, Object> context,
+  public Integer updateLocation(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "location") Location l) {
     l.checkAndFixCustomFields();
     l.setDescription(
@@ -126,17 +131,17 @@ public class LocationResource {
     if (!Utils.isEmptyOrNull(l.getParentLocations())) {
       final Set<String> parentLocationUuids =
           l.getParentLocations().stream().map(Location::getUuid).collect(Collectors.toSet());
-      final Map<String, Set<String>> children =
-          AnetObjectEngine.getInstance().buildLocationHash(DaoUtils.getUuid(l), true);
+      final Map<String, Set<String>> children = engine.buildLocationHash(DaoUtils.getUuid(l), true);
       children.keySet().retainAll(parentLocationUuids);
       if (!children.isEmpty()) {
-        throw new WebApplicationException("Location can not be its own (grand…)parent");
+        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+            "Location can not be its own (grand…)parent");
       }
     }
 
     final int numRows = dao.update(l);
     if (numRows == 0) {
-      throw new WebApplicationException("Couldn't process location update", Status.NOT_FOUND);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't process location update");
     }
 
     // Load the existing location, so we can check for differences.
@@ -168,7 +173,7 @@ public class LocationResource {
   }
 
   @GraphQLMutation(name = "mergeLocations")
-  public Integer mergeLocations(@GraphQLRootContext Map<String, Object> context,
+  public Integer mergeLocations(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "loserUuid") String loserUuid,
       @GraphQLArgument(name = "winnerLocation") Location winnerLocation) {
     final Person user = DaoUtils.getUserFromContext(context);
@@ -181,23 +186,23 @@ public class LocationResource {
 
     int numRows = dao.mergeLocations(loserLocation, winnerLocation);
     if (numRows == 0) {
-      throw new WebApplicationException(
-          "Couldn't process merge operation, error occurred while updating merged location relation information.",
-          Status.NOT_FOUND);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+          "Couldn't process merge operation, error occurred while updating merged location relation information.");
     }
     AnetAuditLogger.log("Location {} merged into {} by {}", loserLocation, winnerLocation, user);
     return numRows;
   }
 
   private void validateLocation(Location winnerLocation) {
-    if (winnerLocation.getName() == null || winnerLocation.getName().trim().length() == 0) {
-      throw new WebApplicationException("Location Name must not be null", Status.BAD_REQUEST);
+    if (winnerLocation.getName() == null || winnerLocation.getName().trim().isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Location Name must not be null");
     }
   }
 
   private void areLocationsMergeable(Location winnerLocation, Location loserLocation) {
     if (loserLocation.getUuid().equals(winnerLocation.getUuid())) {
-      throw new WebApplicationException("Cannot merge identical locations.", Status.BAD_REQUEST);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Cannot merge identical locations.");
     }
   }
 

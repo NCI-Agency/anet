@@ -428,7 +428,7 @@ properties:
     type: object
     additionalProperties: true
     title: Client-side Keycloak configuration properties
-    description: Automatically defined based on the `keycloakConfiguration` settings in `anet.yml`
+    description: Automatically defined based on the `anet.keycloak-configuration` settings in `application.yml`
 
   CONNECTION_ERROR_MSG:
     type: string
@@ -1341,3 +1341,9 @@ properties:
         minimum: 0
         title: The checking interval expressed in seconds.
         description: Used in the application to set the interval at which the deactivation (warning) checks will occur.
+      initialDelayInSecs:
+        type: integer
+        minimum: 0
+        title: The optional initial delay before starting the account deactivation task expressed in seconds.
+        description: Used in the application to set the initial delay after which the first deactivation (warning) checks will occur;
+                     when not specified, it will use the checkIntervalInSecs setting.

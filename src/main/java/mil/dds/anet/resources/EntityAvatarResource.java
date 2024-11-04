@@ -1,12 +1,10 @@
 package mil.dds.anet.resources;
 
+import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLRootContext;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response;
-import java.util.Map;
-import mil.dds.anet.AnetObjectEngine;
+import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import mil.dds.anet.beans.EntityAvatar;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.database.EntityAvatarDao;
@@ -15,24 +13,29 @@ import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 
+@Component
+@GraphQLApi
 public class EntityAvatarResource {
 
   private final EntityAvatarDao entityAvatarDao;
 
-  public EntityAvatarResource(AnetObjectEngine engine) {
-    this.entityAvatarDao = engine.getEntityAvatarDao();
+  public EntityAvatarResource(EntityAvatarDao entityAvatarDao) {
+    this.entityAvatarDao = entityAvatarDao;
   }
 
   /**
    * Creates or updates an entity avatar
-   * 
+   *
    * @param context the context
    * @param entityAvatar the entity avatar
    * @return the entity avatar
    */
   @GraphQLMutation(name = "createOrUpdateEntityAvatar")
-  public Integer createOrUpdateEntityAvatar(@GraphQLRootContext Map<String, Object> context,
+  public Integer createOrUpdateEntityAvatar(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "entityAvatar") EntityAvatar entityAvatar) {
     final Person user = DaoUtils.getUserFromContext(context);
 
@@ -52,14 +55,14 @@ public class EntityAvatarResource {
 
   /**
    * Deletes the entity avatar if any
-   * 
+   *
    * @param context the context
    * @param relatedObjectType the relatedObjectType
    * @param relatedObjectUuid the relatedObjectUuid
    * @return the number of rows deleted
    */
   @GraphQLMutation(name = "deleteEntityAvatar")
-  public Integer deleteEntityAvatar(@GraphQLRootContext Map<String, Object> context,
+  public Integer deleteEntityAvatar(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "relatedObjectType") String relatedObjectType,
       @GraphQLArgument(name = "relatedObjectUuid") String relatedObjectUuid) {
     final Person user = DaoUtils.getUserFromContext(context);
@@ -80,7 +83,7 @@ public class EntityAvatarResource {
   public static void assertPermission(final Person user, final String relatedObjectType,
       final String relatedObjectUuid) {
     if (!hasPermission(user, relatedObjectType, relatedObjectUuid)) {
-      throw new WebApplicationException(AuthUtils.UNAUTH_MESSAGE, Response.Status.FORBIDDEN);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, AuthUtils.UNAUTH_MESSAGE);
     }
   }
 

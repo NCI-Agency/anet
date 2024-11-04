@@ -1,16 +1,17 @@
 package mil.dds.anet.search.pg;
 
-import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.PositionSearchQuery;
+import mil.dds.anet.database.DatabaseHandler;
 import mil.dds.anet.search.AbstractPositionSearcher;
 import mil.dds.anet.search.AbstractSearchQueryBuilder;
+import org.springframework.stereotype.Component;
 
+@Component
 public class PostgresqlPositionSearcher extends AbstractPositionSearcher {
 
-  public PostgresqlPositionSearcher() {
-    super(new PostgresqlSearchQueryBuilder<Position, PositionSearchQuery>(
-        "PostgresqlPositionSearch"));
+  public PostgresqlPositionSearcher(DatabaseHandler databaseHandler) {
+    super(databaseHandler, new PostgresqlSearchQueryBuilder<>("PostgresqlPositionSearch"));
   }
 
   @Override

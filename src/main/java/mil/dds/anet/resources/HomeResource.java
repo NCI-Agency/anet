@@ -1,37 +1,53 @@
 package mil.dds.anet.resources;
 
-import com.codahale.metrics.annotation.Timed;
-import io.dropwizard.auth.Auth;
-import jakarta.servlet.ServletException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.UriBuilder;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.beans.Person;
-import mil.dds.anet.config.AnetConfiguration;
-import mil.dds.anet.config.AnetKeycloakConfiguration;
+import java.security.Principal;
+import mil.dds.anet.config.AnetConfig;
+import mil.dds.anet.config.AnetDictionary;
+import mil.dds.anet.database.AdminDao;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
-import mil.dds.anet.views.IndexView;
+import mil.dds.anet.utils.SecurityUtils;
+import org.apache.commons.text.StringEscapeUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
-@Path("")
+@Controller
 public class HomeResource {
 
-  private final AnetConfiguration config;
-  private final AnetObjectEngine engine;
+  public static final String LOGOUT_PATH = "/api/logout";
+  public static final String LOGOUT_PAGE = "/assets/client/logout.html";
 
-  public HomeResource(AnetObjectEngine engine, AnetConfiguration config) {
-    this.engine = engine;
+  @Value("${spring.security.oauth2.client.provider.keycloak.issuer-uri}")
+  private String issuerUri;
+
+  @Value("${spring.security.oauth2.client.registration.keycloak.client-id}")
+  private String clientId;
+
+  @Value("${anet.keycloak-configuration.resource}")
+  private String publicClientId;
+
+  private final AnetConfig config;
+  private final AnetDictionary dict;
+  private final AdminDao adminDao;
+
+  public HomeResource(AnetConfig config, AnetDictionary dict, AdminDao adminDao) {
     this.config = config;
+    this.dict = dict;
+    this.adminDao = adminDao;
   }
 
   /**
@@ -40,46 +56,41 @@ public class HomeResource {
    * all other assets and starts the React engine. Note: This is only used in Production Mode. In
    * Development the node server handles serving the initial bundle.
    */
-  @GET
-  @Timed
-  @Path("{path: .*}")
-  @Produces(MediaType.TEXT_HTML)
-  public IndexView reactIndex(@Auth Person user) {
-    IndexView view = new IndexView("/views/index.ftl");
-    view.setCurrentUser(user);
-    view.setSecurityBannerClassification(
-        engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_CLASSIFICATION));
-    view.setSecurityBannerReleasability(
-        engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_RELEASABILITY));
-    view.setSecurityBannerColor(engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_COLOR));
-    view.setDictionary(config.getDictionary());
-    view.setProjectVersion(config.getVersion());
-    return view;
+  @GetMapping(path = "/**", produces = MediaType.TEXT_HTML_VALUE)
+  public String index(final Principal principal, Model model) throws JsonProcessingException {
+    model.addAttribute("currentUser", SecurityUtils.getPersonFromPrincipal(principal));
+    model.addAttribute("projectVersion", config.getVersion());
+    model.addAttribute("securityBannerClassification",
+        adminDao.getSetting(AdminSettingKeys.SECURITY_BANNER_CLASSIFICATION));
+    model.addAttribute("securityBannerReleasability",
+        adminDao.getSetting(AdminSettingKeys.SECURITY_BANNER_RELEASABILITY));
+    model.addAttribute("securityBannerColor",
+        adminDao.getSetting(AdminSettingKeys.SECURITY_BANNER_COLOR));
+    // TODO: should try to pass the dictionary to the client as literal JSON instead of serializing
+    // it to a string
+    final ObjectMapper jsonMapper = new ObjectMapper();
+    final String serializedDictionary =
+        StringEscapeUtils.escapeEcmaScript(jsonMapper.writeValueAsString(dict.getDictionary()));
+    model.addAttribute("serializedDictionary", serializedDictionary);
+    return "index";
   }
 
-  @GET
-  @Timed
-  @Path("/api/logout")
-  public void logout(@Context HttpServletRequest request, @Context HttpServletResponse response)
-      throws IOException, ServletException {
-    // Terminate the session
-    final HttpSession session = request.getSession(false);
-    if (session != null) {
-      session.invalidate();
-    }
-    request.logout(); // For completeness' sake
+  private final SecurityContextLogoutHandler logoutHandler = new SecurityContextLogoutHandler();
 
+  @GetMapping(path = LOGOUT_PATH)
+  public void logout(HttpServletRequest request, HttpServletResponse response,
+      Authentication authentication) throws IOException {
+    this.logoutHandler.logout(request, response, authentication);
     // Log out of Keycloak
-    final AnetKeycloakConfiguration keycloakConfiguration = config.getKeycloakConfiguration();
-    final URI requestlUrl = UriBuilder.fromUri(request.getRequestURL().toString()).build();
-    final String redirectUri =
-        URLEncoder.encode(getLogoutUrl(requestlUrl), StandardCharsets.UTF_8.toString());
+    final UriComponents requestUrl =
+        UriComponentsBuilder.fromUriString(request.getRequestURL().toString()).build();
+    final String redirectUri = URLEncoder.encode(getLogoutUrl(requestUrl), StandardCharsets.UTF_8);
     // Redirect to Keycloak to log out
+    final String idParam = (authentication instanceof OidcUser) ? clientId : publicClientId;
     // scan:ignore — false positive, we only let Keycloak redirect back to the original request URI
-    response.sendRedirect(String.format(
-        "%s/realms/%s/protocol/openid-connect/logout?post_logout_redirect_uri=%s&client_id=%s",
-        keycloakConfiguration.getAuthServerUrl(), keycloakConfiguration.getRealm(), redirectUri,
-        keycloakConfiguration.getResource()));
+    response.sendRedirect(
+        String.format("%s/protocol/openid-connect/logout?post_logout_redirect_uri=%s&client_id=%s",
+            issuerUri, redirectUri, idParam));
   }
 
   // Define these constants here
@@ -88,17 +99,16 @@ public class HomeResource {
   private static final String HTTPS_SCHEME = "https";
   private static final int HTTPS_DEFAULT_PORT = 443;
 
-  private String getLogoutUrl(URI requestUrl) {
+  private String getLogoutUrl(UriComponents requestUrl) {
     final String scheme = requestUrl.getScheme();
     final int port = requestUrl.getPort();
     final String host = requestUrl.getHost();
-    final String logoutPage = "/assets/client/logout.html";
     return (port == -1 // no port in the request URL
         // or using the default port of the scheme
         || HTTP_SCHEME.equals(scheme) && HTTP_DEFAULT_PORT == port
         || HTTPS_SCHEME.equals(scheme) && HTTPS_DEFAULT_PORT == port)
-            ? String.format("%s://%s%s", scheme, host, logoutPage)
-            : String.format("%s://%s:%s%s", scheme, host, port, logoutPage);
+            ? String.format("%s://%s%s", scheme, host, LOGOUT_PAGE)
+            : String.format("%s://%s:%s%s", scheme, host, port, LOGOUT_PAGE);
   }
 
 }

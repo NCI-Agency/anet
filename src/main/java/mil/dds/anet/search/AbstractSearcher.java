@@ -2,8 +2,6 @@ package mil.dds.anet.search;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
-import jakarta.inject.Inject;
-import jakarta.inject.Provider;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +12,9 @@ import mil.dds.anet.beans.Note.NoteType;
 import mil.dds.anet.beans.search.AbstractSearchQuery;
 import mil.dds.anet.beans.search.AssessmentSearchQuery;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
-import mil.dds.anet.config.AnetConfiguration;
+import mil.dds.anet.config.AnetDictionary;
+import mil.dds.anet.config.ApplicationContextProvider;
+import mil.dds.anet.database.DatabaseHandler;
 import mil.dds.anet.utils.DaoUtils;
 import org.jdbi.v3.core.Handle;
 
@@ -22,17 +22,20 @@ public abstract class AbstractSearcher<B, T extends AbstractSearchQuery<?>> {
 
   private static final int MIN_UUID_PREFIX = 4;
 
-  @Inject
-  private Provider<Handle> handle;
-
+  protected final DatabaseHandler databaseHandler;
   protected final AbstractSearchQueryBuilder<B, T> qb;
 
-  public AbstractSearcher(AbstractSearchQueryBuilder<B, T> qb) {
+  protected AbstractSearcher(DatabaseHandler databaseHandler, AbstractSearchQueryBuilder<B, T> qb) {
+    this.databaseHandler = databaseHandler;
     this.qb = qb;
   }
 
   protected Handle getDbHandle() {
-    return handle.get();
+    return databaseHandler.getHandle();
+  }
+
+  protected void closeDbHandle(Handle handle) {
+    databaseHandler.closeHandle(handle);
   }
 
   protected abstract void buildQuery(T query);
@@ -108,21 +111,24 @@ public abstract class AbstractSearcher<B, T extends AbstractSearchQuery<?>> {
     return clauses;
   }
 
+  protected AnetObjectEngine engine() {
+    return ApplicationContextProvider.getEngine();
+  }
+
   protected void addAssessmentQuery(AssessmentSearchQuery query, String tableName,
       String fieldsType) {
     final var assessmentKey =
         String.format("fields.%1$s.assessments.%2$s", fieldsType, query.key());
-    final var configuration = AnetObjectEngine.getConfiguration();
-    final var isOndemand = "ondemand"
-        .equals(configuration.getDictionaryEntry(String.format("%s.recurrence", assessmentKey)));
+    final var dict = ApplicationContextProvider.getDictionary();
+    final var isOndemand =
+        "ondemand".equals(dict.getDictionaryEntry(String.format("%s.recurrence", assessmentKey)));
     final var fromAssessmentsClause = getFromAssessmentsClause(tableName, isOndemand);
     qb.addSqlArg("noteTypeAssessment", DaoUtils.getEnumId(NoteType.ASSESSMENT));
     qb.addSqlArg("assessmentKey", assessmentKey);
     final var filterClauses = new ArrayList<>();
     if (isOndemand) {
       // If it is an ondemand assessment, it may be expired.
-      final var expirationClause =
-          getOndemandAssessmentExpirationClause(configuration, assessmentKey);
+      final var expirationClause = getOndemandAssessmentExpirationClause(dict, assessmentKey);
       if (!expirationClause.isEmpty()) {
         filterClauses.add(expirationClause);
       }
@@ -132,7 +138,7 @@ public abstract class AbstractSearcher<B, T extends AbstractSearchQuery<?>> {
       filters.forEach((k, v) -> {
         final var keyParam = String.format("%1$s.questions.%2$s", assessmentKey, k);
         final var valueParam = String.format("%s.value", keyParam);
-        final var filterType = configuration.getDictionaryEntry(String.format("%s.type", keyParam));
+        final var filterType = dict.getDictionaryEntry(String.format("%s.type", keyParam));
         if ("enum".equals(filterType)) {
           filterClauses.add(
               String.format("assessments.text::jsonb->>:%1$s IN (<%2$s>)", keyParam, valueParam));
@@ -173,8 +179,7 @@ public abstract class AbstractSearcher<B, T extends AbstractSearchQuery<?>> {
     return fromAssessments.toString();
   }
 
-  private String getOndemandAssessmentExpirationClause(AnetConfiguration configuration,
-      String assessmentKey) {
+  private String getOndemandAssessmentExpirationClause(AnetDictionary dict, String assessmentKey) {
     final var leftClauses = new ArrayList<>();
     final var rightClauses = new ArrayList<>();
 
@@ -182,14 +187,14 @@ public abstract class AbstractSearcher<B, T extends AbstractSearchQuery<?>> {
     // - the assessment has an expirationDate that has passed
     // - the assessment does not have an expirationDate, but it does have
     // onDemandAssessmentExpirationDays that have passed
-    final var hasExpirationDate = configuration
+    final var hasExpirationDate = dict
         .getDictionaryEntry(String.format("%s.questions.expirationDate", assessmentKey)) != null;
     if (hasExpirationDate) {
       leftClauses.add("assessments.text::jsonb->>'expirationDate' IS NULL");
       rightClauses.add("(assessments.text::jsonb->>'expirationDate')::date > CURRENT_DATE");
     }
 
-    final Integer expirationDays = (Integer) configuration
+    final Integer expirationDays = (Integer) dict
         .getDictionaryEntry(String.format("%s.onDemandAssessmentExpirationDays", assessmentKey));
     if (expirationDays != null) {
       leftClauses.add(String.format(

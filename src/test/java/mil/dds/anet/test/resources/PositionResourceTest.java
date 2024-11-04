@@ -3,7 +3,6 @@ package mil.dds.anet.test.resources;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
-import com.google.common.collect.ImmutableList;
 import java.text.Collator;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -200,8 +199,8 @@ public class PositionResourceTest extends AbstractResourceTest {
     assertThat(associatedPositions2).anyMatch(p -> p.getUuid().equals(tashkil.getUuid()));
 
     // delete the tashkil from this position
-    retPos1.setAssociatedPositions(associatedPositions2.stream()
-        .filter(p -> !p.getUuid().equals(tashkil.getUuid())).collect(Collectors.toList()));
+    retPos1.setAssociatedPositions(
+        associatedPositions2.stream().filter(p -> !p.getUuid().equals(tashkil.getUuid())).toList());
     nrUpdated = withCredentials(adminUser,
         t -> mutationExecutor.updateAssociatedPosition("", getPositionInput(retPos1)));
     assertThat(nrUpdated).isEqualTo(1);
@@ -332,23 +331,22 @@ public class PositionResourceTest extends AbstractResourceTest {
         withCredentials(jackUser, t -> queryExecutor.positionList(getListFields(FIELDS), query1))
             .getList();
     assertThat(searchResults).isNotEmpty();
-    assertThat(
-        searchResults.stream().filter(p -> (p.getPerson() == null)).collect(Collectors.toList()))
+    assertThat(searchResults.stream().filter(p -> (p.getPerson() == null)).toList())
         .hasSameElementsAs(searchResults);
 
     // Search by name and is filled and type
     query1.setIsFilled(true);
-    query1.setType(ImmutableList.of(PositionType.REGULAR));
+    query1.setType(List.of(PositionType.REGULAR));
     searchResults =
         withCredentials(jackUser, t -> queryExecutor.positionList(getListFields(FIELDS), query1))
             .getList();
     assertThat(searchResults).isNotEmpty();
     assertThat(searchResults.stream().filter(p -> (p.getPerson() != null))
-        .filter(p -> p.getType().equals(PositionType.REGULAR)).collect(Collectors.toList()))
+        .filter(p -> p.getType().equals(PositionType.REGULAR)).toList())
         .hasSameElementsAs(searchResults);
 
     // Search for text= advisor and type = admin should be empty.
-    query1.setType(ImmutableList.of(PositionType.ADMINISTRATOR));
+    query1.setType(List.of(PositionType.ADMINISTRATOR));
     searchResults =
         withCredentials(jackUser, t -> queryExecutor.positionList(getListFields(FIELDS), query1))
             .getList();
@@ -379,9 +377,8 @@ public class PositionResourceTest extends AbstractResourceTest {
     searchResults =
         withCredentials(jackUser, t -> queryExecutor.positionList(getListFields(FIELDS), query1))
             .getList();
-    assertThat(
-        searchResults.stream().filter(p -> p.getOrganization().getUuid().equals(ef1.getUuid()))
-            .collect(Collectors.toList()))
+    assertThat(searchResults.stream()
+        .filter(p -> p.getOrganization().getUuid().equals(ef1.getUuid())).toList())
         .hasSameElementsAs(searchResults);
 
     query1.setOrgRecurseStrategy(RecurseStrategy.CHILDREN);

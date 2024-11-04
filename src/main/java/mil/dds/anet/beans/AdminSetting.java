@@ -4,9 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.leangen.graphql.annotations.GraphQLIgnore;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
-import jakarta.ws.rs.WebApplicationException;
 import mil.dds.anet.graphql.AllowUnverifiedUsers;
 import mil.dds.anet.views.AbstractAnetBean;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 public class AdminSetting extends AbstractAnetBean {
 
@@ -21,7 +22,8 @@ public class AdminSetting extends AbstractAnetBean {
   @JsonIgnore
   @GraphQLIgnore
   public String getUuid() {
-    throw new WebApplicationException("no UUID field on AdminSetting");
+    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+        "no UUID field on AdminSetting");
   }
 
   @Override

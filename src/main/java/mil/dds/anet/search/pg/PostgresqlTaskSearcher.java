@@ -1,15 +1,17 @@
 package mil.dds.anet.search.pg;
 
-import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.TaskSearchQuery;
+import mil.dds.anet.database.DatabaseHandler;
 import mil.dds.anet.search.AbstractSearchQueryBuilder;
 import mil.dds.anet.search.AbstractTaskSearcher;
+import org.springframework.stereotype.Component;
 
+@Component
 public class PostgresqlTaskSearcher extends AbstractTaskSearcher {
 
-  public PostgresqlTaskSearcher() {
-    super(new PostgresqlSearchQueryBuilder<Task, TaskSearchQuery>("PostgresqlTaskSearch"));
+  public PostgresqlTaskSearcher(DatabaseHandler databaseHandler) {
+    super(databaseHandler, new PostgresqlSearchQueryBuilder<>("PostgresqlTaskSearch"));
   }
 
   @Override

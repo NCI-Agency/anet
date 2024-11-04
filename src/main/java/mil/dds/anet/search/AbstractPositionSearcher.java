@@ -1,10 +1,8 @@
 package mil.dds.anet.search;
 
+import graphql.GraphQLContext;
 import java.time.Instant;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
-import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AbstractBatchParams;
@@ -12,49 +10,62 @@ import mil.dds.anet.beans.search.ISearchQuery;
 import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.PositionSearchQuery;
+import mil.dds.anet.config.ApplicationContextProvider;
+import mil.dds.anet.database.DatabaseHandler;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.mappers.PositionMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.PendingAssessmentsHelper;
 import mil.dds.anet.utils.Utils;
+import mil.dds.anet.views.AbstractAnetBean;
 import org.jdbi.v3.core.Handle;
-import ru.vyarus.guicey.jdbi3.tx.InTransaction;
+import org.springframework.transaction.annotation.Transactional;
 
 public abstract class AbstractPositionSearcher
     extends AbstractSearcher<Position, PositionSearchQuery> implements IPositionSearcher {
 
-  public AbstractPositionSearcher(AbstractSearchQueryBuilder<Position, PositionSearchQuery> qb) {
-    super(qb);
+  protected AbstractPositionSearcher(DatabaseHandler databaseHandler,
+      AbstractSearchQueryBuilder<Position, PositionSearchQuery> qb) {
+    super(databaseHandler, qb);
   }
 
-  @InTransaction
+  @Transactional
   @Override
   public AnetBeanList<Position> runSearch(PositionSearchQuery query) {
-    buildQuery(query);
-    return qb.buildAndRun(getDbHandle(), query, new PositionMapper());
+    final Handle handle = getDbHandle();
+    try {
+      buildQuery(query);
+      return qb.buildAndRun(handle, query, new PositionMapper());
+    } finally {
+      closeDbHandle(handle);
+    }
   }
 
   @Override
-  public CompletableFuture<AnetBeanList<Position>> runSearch(Map<String, Object> context,
+  public CompletableFuture<AnetBeanList<Position>> runSearch(GraphQLContext context,
       PositionSearchQuery query) {
-    // Asynchronous version of search; should be wrapped in a transaction by the GraphQlResource
-    // handling the request
-    final Handle dbHandle = getDbHandle();
-    final PositionMapper mapper = new PositionMapper();
-    buildQuery(query);
-    if (!query.getHasPendingAssessments()) {
-      return CompletableFuture.completedFuture(qb.buildAndRun(dbHandle, query, mapper));
-    }
+    final Handle handle = getDbHandle();
+    try {
+      // Asynchronous version of search; should be wrapped in a transaction by the GraphQLResource
+      // handling the request
+      final PositionMapper mapper = new PositionMapper();
+      buildQuery(query);
+      if (!query.getHasPendingAssessments()) {
+        return CompletableFuture.completedFuture(qb.buildAndRun(handle, query, mapper));
+      }
 
-    // Filter to only the positions with pending assessments
-    final Instant now = Instant.now().atZone(DaoUtils.getServerNativeZoneId()).toInstant();
-    return new PendingAssessmentsHelper(AnetObjectEngine.getConfiguration())
-        .loadAll(context, now, null, false).thenApply(otaMap -> {
-          return otaMap.keySet().stream().map(p -> p.getUuid()).collect(Collectors.toList());
-        }).thenCompose(positionUuids -> {
-          qb.addInListClause("positionUuids", "positions.uuid", positionUuids);
-          return CompletableFuture.completedFuture(qb.buildAndRun(dbHandle, query, mapper));
-        });
+      // Filter to only the positions with pending assessments
+      final Instant now = Instant.now().atZone(DaoUtils.getServerNativeZoneId()).toInstant();
+      return new PendingAssessmentsHelper(ApplicationContextProvider.getDictionary())
+          .loadAll(context, now, null, false)
+          .thenApply(otaMap -> otaMap.keySet().stream().map(AbstractAnetBean::getUuid).toList())
+          .thenApply(positionUuids -> {
+            qb.addInListClause("positionUuids", "positions.uuid", positionUuids);
+            return qb.buildAndRun(handle, query, mapper);
+          });
+    } finally {
+      closeDbHandle(handle);
+    }
   }
 
   @Override
@@ -76,7 +87,7 @@ public abstract class AbstractPositionSearcher
 
     if (query.getUser() != null && query.getSubscribed()) {
       qb.addWhereClause(Searcher.getSubscriptionReferences(query.getUser(), qb.getSqlArgs(),
-          AnetObjectEngine.getInstance().getPositionDao().getSubscriptionUpdate(null)));
+          engine().getPositionDao().getSubscriptionUpdate(null)));
     }
 
     qb.addInClause("types", "positions.type", query.getType());

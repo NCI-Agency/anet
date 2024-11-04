@@ -1,10 +1,10 @@
 package mil.dds.anet.beans;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.utils.IdDataLoaderKey;
@@ -25,8 +25,7 @@ public class Subscription extends AbstractAnetBean {
   private SubscribableObject subscribedObject;
 
   @GraphQLQuery(name = "subscriber")
-  public CompletableFuture<Position> loadSubscriber(
-      @GraphQLRootContext Map<String, Object> context) {
+  public CompletableFuture<Position> loadSubscriber(@GraphQLRootContext GraphQLContext context) {
     if (subscriber.hasForeignObject()) {
       return CompletableFuture.completedFuture(subscriber.getForeignObject());
     }
@@ -74,7 +73,7 @@ public class Subscription extends AbstractAnetBean {
 
   @GraphQLQuery(name = "subscribedObject")
   public CompletableFuture<SubscribableObject> loadSubscribedObject(
-      @GraphQLRootContext Map<String, Object> context) {
+      @GraphQLRootContext GraphQLContext context) {
     if (subscribedObject != null) {
       return CompletableFuture.completedFuture(subscribedObject);
     }

@@ -1,14 +1,14 @@
 package mil.dds.anet.threads;
 
+import graphql.GraphQLContext;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.beans.EmailAddress;
 import mil.dds.anet.beans.JobHistory;
@@ -16,29 +16,43 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.WithStatus.Status;
 import mil.dds.anet.beans.search.PersonSearchQuery;
-import mil.dds.anet.config.AnetConfiguration;
+import mil.dds.anet.config.AnetDictionary;
+import mil.dds.anet.database.JobHistoryDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.emails.AccountDeactivationEmail;
 import mil.dds.anet.emails.AccountDeactivationWarningEmail;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
+@Component
+@ConditionalOnExpression("not ${anet.no-workers:false} and ${anet.automatically-inactivate-users:false}")
 public class AccountDeactivationWorker extends AbstractWorker {
 
   private final PersonDao dao;
-  private final int warningIntervalInSecs;
 
-  public AccountDeactivationWorker(AnetConfiguration config, PersonDao dao,
-      int warningIntervalInSecs) {
-    super(config,
+  public AccountDeactivationWorker(AnetDictionary dict, JobHistoryDao jobHistoryDao,
+      PersonDao dao) {
+    super(dict, jobHistoryDao,
         "Deactivation Warning Worker waking up to check for Future Account Deactivations");
     this.dao = dao;
-    this.warningIntervalInSecs = warningIntervalInSecs;
+  }
+
+  @Scheduled(
+      initialDelayString = "#{@anetDictionary.getDictionaryEntry('automaticallyInactivateUsers.initialDelayInSecs')"
+          + " ?: @anetDictionary.getDictionaryEntry('automaticallyInactivateUsers.checkIntervalInSecs')}",
+      fixedRateString = "#{@anetDictionary.getDictionaryEntry('automaticallyInactivateUsers.checkIntervalInSecs')}",
+      timeUnit = TimeUnit.SECONDS)
+  @Override
+  public void run() {
+    super.run();
   }
 
   @Override
-  protected void runInternal(Instant now, JobHistory jobHistory, Map<String, Object> context) {
+  protected void runInternal(Instant now, JobHistory jobHistory, GraphQLContext context) {
     // Make sure the mechanism will be triggered, so account deactivation checking can take place
     final List<String> ignoredDomainNames = getDomainNamesToIgnore();
     final List<Integer> daysTillEndOfTourWarnings = getDaysTillEndOfTourWarnings();
@@ -59,8 +73,7 @@ public class AccountDeactivationWorker extends AbstractWorker {
     query.setStatus(Status.ACTIVE);
     final Instant latestWarningDate = now.plus(daysBeforeLatestWarning, ChronoUnit.DAYS);
     query.setEndOfTourDateEnd(latestWarningDate);
-    final List<Person> persons =
-        AnetObjectEngine.getInstance().getPersonDao().search(query).getList();
+    final List<Person> persons = engine().getPersonDao().search(query).getList();
 
     // Make sure all email addresses are loaded
     CompletableFuture.allOf(persons.stream().map(p -> p.loadEmailAddresses(context, null))
@@ -68,6 +81,8 @@ public class AccountDeactivationWorker extends AbstractWorker {
 
     // Send emails to let users know their account will soon be deactivated or deactivate accounts
     // that reach the end-of-tour date
+    final int warningIntervalInSecs =
+        (int) dict.getDictionaryEntry("automaticallyInactivateUsers.checkIntervalInSecs");
     persons.forEach(p -> {
       for (int i = 0; i < warningDays.size(); i++) {
         final Integer warning = warningDays.get(i);
@@ -84,7 +99,7 @@ public class AccountDeactivationWorker extends AbstractWorker {
 
   private List<Integer> getDaysTillEndOfTourWarnings() {
     @SuppressWarnings("unchecked")
-    final List<Integer> daysTillWarning = (List<Integer>) config
+    final List<Integer> daysTillWarning = (List<Integer>) dict
         .getDictionaryEntry("automaticallyInactivateUsers.emailRemindersDaysPrior");
     return daysTillWarning.stream().filter(i -> i > 0).collect(Collectors.toList());
   }
@@ -92,7 +107,7 @@ public class AccountDeactivationWorker extends AbstractWorker {
   private List<String> getDomainNamesToIgnore() {
     @SuppressWarnings("unchecked")
     final List<String> domainNamesToIgnore =
-        (List<String>) config.getDictionaryEntry("automaticallyInactivateUsers.ignoredDomainNames");
+        (List<String>) dict.getDictionaryEntry("automaticallyInactivateUsers.ignoredDomainNames");
     return domainNamesToIgnore == null ? null
         : domainNamesToIgnore.stream().map(x -> x.trim()).collect(Collectors.toList());
   }
@@ -139,8 +154,7 @@ public class AccountDeactivationWorker extends AbstractWorker {
     if (existingPos != null) {
       AnetAuditLogger.log("Person {} removed from position by system because they are now inactive",
           p);
-      AnetObjectEngine.getInstance().getPositionDao()
-          .removePersonFromPosition(existingPos.getUuid());
+      engine().getPositionDao().removePersonFromPosition(existingPos.getUuid());
     }
 
     // Update

@@ -3,7 +3,6 @@ package mil.dds.anet.test.resources;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
-import com.google.common.collect.ImmutableList;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -129,7 +128,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(child.getUuid()).isNotNull();
 
     final OrganizationSearchQueryInput query = OrganizationSearchQueryInput.builder()
-        .withParentOrgUuid(ImmutableList.of(created.getUuid())).build();
+        .withParentOrgUuid(List.of(created.getUuid())).build();
     final AnetBeanList_Organization children = withCredentials(adminUser,
         t -> queryExecutor.organizationList(getListFields(FIELDS), query));
     assertThat(children.getList()).hasSize(1);
@@ -137,10 +136,10 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
     // Give this Org some Approval Steps
     final ApprovalStepInput step1Input = ApprovalStepInput.builder().withName("First Approvers")
-        .withType(ApprovalStepType.REPORT_APPROVAL)
-        .withApprovers(getPositionsInput(ImmutableList.of(b1))).build();
+        .withType(ApprovalStepType.REPORT_APPROVAL).withApprovers(getPositionsInput(List.of(b1)))
+        .build();
     final OrganizationInput childInput1 = getOrganizationInput(child);
-    childInput1.setApprovalSteps(ImmutableList.of(step1Input));
+    childInput1.setApprovalSteps(List.of(step1Input));
     nrUpdated =
         withCredentials(adminUser, t -> mutationExecutor.updateOrganization("", childInput1));
     assertThat(nrUpdated).isEqualTo(1);
@@ -166,7 +165,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(task.getUuid()).isNotNull();
 
     final OrganizationInput childInput2 = getOrganizationInput(updated);
-    childInput2.setTasks(ImmutableList.of(getTaskInput(task)));
+    childInput2.setTasks(List.of(getTaskInput(task)));
     childInput2.setApprovalSteps(null);
     nrUpdated =
         withCredentials(adminUser, t -> mutationExecutor.updateOrganization("", childInput2));
@@ -181,11 +180,11 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(tasks.get(0).getUuid()).isEqualTo(task.getUuid());
 
     // Change the approval steps.
-    step1Input.setApprovers(ImmutableList.of(getPositionInput(admin.getPosition())));
+    step1Input.setApprovers(List.of(getPositionInput(admin.getPosition())));
     final ApprovalStepInput step2Input = ApprovalStepInput.builder().withName("Final Reviewers")
-        .withType(ApprovalStepType.REPORT_APPROVAL)
-        .withApprovers(ImmutableList.of(getPositionInput(b1))).build();
-    childInput2.setApprovalSteps(ImmutableList.of(step1Input, step2Input));
+        .withType(ApprovalStepType.REPORT_APPROVAL).withApprovers(List.of(getPositionInput(b1)))
+        .build();
+    childInput2.setApprovalSteps(List.of(step1Input, step2Input));
     childInput2.setTasks(null);
     nrUpdated =
         withCredentials(adminUser, t -> mutationExecutor.updateOrganization("", childInput2));
@@ -204,8 +203,8 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
   private String getApp6Choice(final String app6field) {
     @SuppressWarnings("unchecked")
-    final Map<String, String> app6fieldChoices = (Map<String, String>) dropwizardApp
-        .getConfiguration().getDictionaryEntry("fields.organization." + app6field + ".choices");
+    final Map<String, String> app6fieldChoices = (Map<String, String>) dict
+        .getDictionaryEntry("fields.organization." + app6field + ".choices");
     return app6fieldChoices.keySet().stream().findFirst().orElse(null);
   }
 

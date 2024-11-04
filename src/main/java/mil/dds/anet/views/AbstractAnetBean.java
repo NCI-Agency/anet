@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import java.time.Instant;
+import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.config.ApplicationContextProvider;
 
 public abstract class AbstractAnetBean {
 
@@ -55,6 +57,10 @@ public abstract class AbstractAnetBean {
   @JsonIgnore
   public void setBatchUuid(String batchUuid) {
     this.batchUuid = batchUuid;
+  }
+
+  protected AnetObjectEngine engine() {
+    return ApplicationContextProvider.getEngine();
   }
 
 }

@@ -14,8 +14,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.config.AnetConfiguration;
+import mil.dds.anet.config.AnetConfig;
+import mil.dds.anet.config.AnetDictionary;
+import mil.dds.anet.database.AdminDao;
+import mil.dds.anet.database.EmailDao;
+import mil.dds.anet.database.JobHistoryDao;
 import mil.dds.anet.test.client.AnetBeanList_Person;
 import mil.dds.anet.test.client.AnetBeanList_Report;
 import mil.dds.anet.test.client.ApprovalStep;
@@ -46,9 +49,10 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class TaskApprovalTest extends AbstractResourceTest {
+class TaskApprovalTest extends AbstractResourceTest {
 
   private static final String EMAIL_ADDRESS_FIELDS = "{ network address }";
   private static final String ORGANIZATION_FIELDS =
@@ -90,18 +94,32 @@ public class TaskApprovalTest extends AbstractResourceTest {
   private static List<Position> savedApprovers;
   private static List<Organization> savedOrganizations;
 
+  @Autowired
+  protected AnetConfig config;
+
+  @Autowired
+  protected AnetDictionary dict;
+
+  @Autowired
+  private JobHistoryDao jobHistoryDao;
+
+  @Autowired
+  private AdminDao adminDao;
+
+  @Autowired
+  private EmailDao emailDao;
+
   @BeforeAll
   void setUpEmailServer() throws Exception {
-    final AnetConfiguration config = dropwizardApp.getConfiguration();
     if (config.getSmtp().isDisabled()) {
       fail("'ANET_SMTP_DISABLE' system environment variable must have value 'false' to run test.");
     }
-    final Map<String, Object> dict = new HashMap<>(config.getDictionary());
+    final Map<String, Object> newDict = new HashMap<>(dict.getDictionary());
     @SuppressWarnings("unchecked")
-    final List<String> activeDomainNames = (List<String>) dict.get("activeDomainNames");
+    final List<String> activeDomainNames = (List<String>) newDict.get("activeDomainNames");
     activeDomainNames.add("example.com");
-    config.setDictionary(dict);
-    emailWorker = new AnetEmailWorker(config, AnetObjectEngine.getInstance().getEmailDao());
+    dict.setDictionary(newDict);
+    emailWorker = new AnetEmailWorker(config, dict, jobHistoryDao, emailDao, adminDao);
     emailServer = new FakeSmtpServer(config.getSmtp());
   }
 

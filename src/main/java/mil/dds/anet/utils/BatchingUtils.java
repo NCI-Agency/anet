@@ -1,6 +1,5 @@
 package mil.dds.anet.utils;
 
-import com.codahale.metrics.MetricRegistry;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -36,7 +35,6 @@ import org.dataloader.DataLoaderFactory;
 import org.dataloader.DataLoaderOptions;
 import org.dataloader.DataLoaderRegistry;
 import org.dataloader.stats.SimpleStatisticsCollector;
-import org.dataloader.stats.Statistics;
 
 public final class BatchingUtils {
 
@@ -301,31 +299,6 @@ public final class BatchingUtils {
             (BatchLoader<String, List<Organization>>) foreignKeys -> CompletableFuture.supplyAsync(
                 () -> engine.getTaskDao().getTaskedOrganizations(foreignKeys), dispatcherService),
             dataLoaderOptions));
-  }
-
-  public void updateStats(MetricRegistry metricRegistry, DataLoaderRegistry dataLoaderRegistry) {
-    // Combined stats for all data loaders
-    updateStats(metricRegistry, "DataLoaderRegistry", dataLoaderRegistry.getStatistics());
-    for (final String key : dataLoaderRegistry.getKeys()) {
-      // Individual stats per data loader
-      updateStats(metricRegistry, key, dataLoaderRegistry.getDataLoader(key).getStatistics());
-    }
-  }
-
-  private void updateStats(MetricRegistry metricRegistry, String name, Statistics statistics) {
-    metricRegistry.counter(MetricRegistry.name(name, "BatchInvokeCount"))
-        .inc(statistics.getBatchInvokeCount());
-    metricRegistry.counter(MetricRegistry.name(name, "BatchLoadCount"))
-        .inc(statistics.getBatchLoadCount());
-    metricRegistry.counter(MetricRegistry.name(name, "BatchLoadExceptionCount"))
-        .inc(statistics.getBatchLoadExceptionCount());
-    metricRegistry.counter(MetricRegistry.name(name, "CacheHitCount"))
-        .inc(statistics.getCacheHitCount());
-    metricRegistry.counter(MetricRegistry.name(name, "CacheMissCount"))
-        .inc(statistics.getCacheMissCount());
-    metricRegistry.counter(MetricRegistry.name(name, "LoadCount")).inc(statistics.getLoadCount());
-    metricRegistry.counter(MetricRegistry.name(name, "LoadErrorCount"))
-        .inc(statistics.getLoadErrorCount());
   }
 
 }

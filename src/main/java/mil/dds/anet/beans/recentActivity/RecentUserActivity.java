@@ -45,7 +45,7 @@ public class RecentUserActivity implements Comparable<RecentUserActivity> {
 
   @Override
   public boolean equals(Object o) {
-    if (!(o instanceof Activity)) {
+    if (!(o instanceof RecentUserActivity)) {
       return false;
     }
     final RecentUserActivity other = (RecentUserActivity) o;

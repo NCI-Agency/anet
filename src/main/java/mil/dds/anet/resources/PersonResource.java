@@ -1,17 +1,15 @@
 package mil.dds.anet.resources;
 
+import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLEnvironment;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import io.leangen.graphql.execution.ResolutionEnvironment;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response.Status;
+import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.EmailAddress;
 import mil.dds.anet.beans.Person;
@@ -20,7 +18,8 @@ import mil.dds.anet.beans.Position.PositionType;
 import mil.dds.anet.beans.WithStatus;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PersonSearchQuery;
-import mil.dds.anet.config.AnetConfiguration;
+import mil.dds.anet.config.AnetDictionary;
+import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.graphql.AllowUnverifiedUsers;
 import mil.dds.anet.utils.AnetAuditLogger;
@@ -28,20 +27,27 @@ import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.ResourceUtils;
 import mil.dds.anet.utils.Utils;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 
+@Component
+@GraphQLApi
 public class PersonResource {
-  private final PersonDao dao;
-  private final AnetObjectEngine engine;
-  private final AnetConfiguration config;
 
-  public PersonResource(AnetObjectEngine engine, AnetConfiguration config) {
-    this.engine = engine;
-    this.dao = engine.getPersonDao();
-    this.config = config;
+  private final AnetDictionary dict;
+  private final AnetObjectEngine engine;
+  private final PersonDao dao;
+
+  public PersonResource(AnetDictionary dict, AnetObjectEngine anetObjectEngine, PersonDao dao) {
+    this.dict = dict;
+    this.engine = anetObjectEngine;
+    this.dao = dao;
   }
 
   public static boolean hasPermission(final Person user, final String personUuid) {
-    return hasPermission(user, AnetObjectEngine.getInstance().getPersonDao().getByUuid(personUuid));
+    return hasPermission(user,
+        ApplicationContextProvider.getEngine().getPersonDao().getByUuid(personUuid));
   }
 
   public static boolean hasPermission(final Person user, final Person person) {
@@ -55,25 +61,25 @@ public class PersonResource {
   public Person getByUuid(@GraphQLArgument(name = "uuid") String uuid) {
     Person p = dao.getByUuid(uuid);
     if (p == null) {
-      throw new WebApplicationException("Person not found", Status.NOT_FOUND);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Person not found");
     }
     return p;
   }
 
   @GraphQLMutation(name = "createPerson")
-  public Person createPerson(@GraphQLRootContext Map<String, Object> context,
+  public Person createPerson(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "person") Person p) {
     p.checkAndFixCustomFields();
     final Person user = DaoUtils.getUserFromContext(context);
     if (!canCreateOrUpdatePerson(user, p, true)) {
-      throw new WebApplicationException("You do not have permissions to create this person",
-          Status.FORBIDDEN);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          "You do not have permissions to create this person");
     }
 
     final String positionUuid = DaoUtils.getUuid(p.getPosition());
     if (positionUuid != null && engine.getPositionDao().getByUuid(positionUuid) == null) {
-      throw new WebApplicationException("Position " + p.getPosition() + " does not exist",
-          Status.BAD_REQUEST);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Position " + p.getPosition() + " does not exist");
     }
 
     if (Boolean.TRUE.equals(p.getUser()) && !Utils.isEmptyOrNull(p.getEmailAddresses())) {
@@ -112,9 +118,10 @@ public class PersonResource {
     }
     if (editorPos.getType() == PositionType.SUPERUSER) {
       // Ensure that the editor is the superuser for the subject's organization.
-      final Position subjectPos =
+      final Position subjectPos;
+      subjectPos =
           create
-              ? AnetObjectEngine.getInstance().getPositionDao()
+              ? ApplicationContextProvider.getEngine().getPositionDao()
                   .getByUuid(DaoUtils.getUuid(subject.getPosition()))
               : DaoUtils.getPosition(subject);
       if (subjectPos == null) {
@@ -127,7 +134,7 @@ public class PersonResource {
   }
 
   @GraphQLMutation(name = "updatePerson")
-  public Integer updatePerson(@GraphQLRootContext Map<String, Object> context,
+  public Integer updatePerson(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "person") Person p) {
     p.checkAndFixCustomFields();
     final Person user = DaoUtils.getUserFromContext(context);
@@ -187,7 +194,7 @@ public class PersonResource {
         Utils.isEmptyHtml(p.getBiography()) ? null : Utils.sanitizeHtml(p.getBiography()));
     final int numRows = dao.update(p);
     if (numRows == 0) {
-      throw new WebApplicationException("Couldn't process person update", Status.NOT_FOUND);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't process person update");
     }
 
     engine.getEmailAddressDao().updateEmailAddresses(PersonDao.TABLE_NAME, p.getUuid(),
@@ -202,7 +209,7 @@ public class PersonResource {
   }
 
   @GraphQLMutation(name = "updatePersonHistory")
-  public int updatePersonHistory(@GraphQLRootContext Map<String, Object> context,
+  public int updatePersonHistory(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "person") Person p) {
     final Person user = DaoUtils.getUserFromContext(context);
     final Person existing = dao.getByUuid(p.getUuid());
@@ -213,9 +220,8 @@ public class PersonResource {
         existingPositionUuid);
 
     if (dao.hasHistoryConflict(p.getUuid(), null, p.getPreviousPositions(), true)) {
-      throw new WebApplicationException(
-          "At least one of the positions in the history is occupied for the specified period.",
-          Status.CONFLICT);
+      throw new ResponseStatusException(HttpStatus.CONFLICT,
+          "At least one of the positions in the history is occupied for the specified period.");
     }
 
     final int numRows = dao.updatePersonHistory(p);
@@ -225,13 +231,13 @@ public class PersonResource {
 
   private void assertCanUpdatePerson(final Person user, final Person existing) {
     if (!canCreateOrUpdatePerson(user, existing, false)) {
-      throw new WebApplicationException("You do not have permissions to edit this person",
-          Status.FORBIDDEN);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          "You do not have permissions to edit this person");
     }
   }
 
   @GraphQLQuery(name = "personList")
-  public AnetBeanList<Person> search(@GraphQLRootContext Map<String, Object> context,
+  public AnetBeanList<Person> search(@GraphQLRootContext GraphQLContext context,
       @GraphQLEnvironment ResolutionEnvironment env,
       @GraphQLArgument(name = "query") PersonSearchQuery query) {
     query.setUser(DaoUtils.getUserFromContext(context));
@@ -239,35 +245,34 @@ public class PersonResource {
   }
 
   @GraphQLMutation(name = "approvePerson")
-  public Integer approvePerson(@GraphQLRootContext Map<String, Object> context,
+  public Integer approvePerson(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "uuid") String personUuid) {
     return approveOrDeletePerson(context, personUuid, true);
   }
 
   @GraphQLMutation(name = "deletePerson")
-  public Integer deletePerson(@GraphQLRootContext Map<String, Object> context,
+  public Integer deletePerson(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "uuid") String personUuid) {
     return approveOrDeletePerson(context, personUuid, false);
   }
 
-  public Integer approveOrDeletePerson(Map<String, Object> context, String personUuid,
+  public Integer approveOrDeletePerson(GraphQLContext context, String personUuid,
       boolean isApproved) {
     Person user = DaoUtils.getUserFromContext(context);
     final Person person = dao.getByUuid(personUuid);
     if (person == null) {
-      throw new WebApplicationException("Person not found", Status.NOT_FOUND);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Person not found");
     }
 
     AuthUtils.assertAdministrator(user);
     if (!Boolean.TRUE.equals(person.getPendingVerification())) {
-      throw new WebApplicationException("Person is not pending verification", Status.FORBIDDEN);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Person is not pending verification");
     }
 
     final int numRows = isApproved ? dao.approve(personUuid) : dao.delete(personUuid);
     if (numRows == 0) {
-      throw new WebApplicationException(
-          "Couldn't " + (isApproved ? "approve" : "delete") + " person",
-          Status.INTERNAL_SERVER_ERROR);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          "Couldn't " + (isApproved ? "approve" : "delete") + " person");
     }
 
     AnetAuditLogger.log("Person {} " + (isApproved ? "approved" : "deleted") + " by {}", person,
@@ -280,17 +285,17 @@ public class PersonResource {
    */
   @GraphQLQuery(name = "me")
   @AllowUnverifiedUsers
-  public Person getCurrentUser(@GraphQLRootContext Map<String, Object> context) {
+  public Person getCurrentUser(@GraphQLRootContext GraphQLContext context) {
     return DaoUtils.getUserFromContext(context);
   }
 
   @GraphQLMutation(name = "updateMe")
   @AllowUnverifiedUsers
-  public Integer updateCurrentUser(@GraphQLRootContext Map<String, Object> context,
+  public Integer updateCurrentUser(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "person") Person p) {
     final Person user = DaoUtils.getUserFromContext(context);
     if (!Objects.equals(DaoUtils.getUuid(user), p.getUuid())) {
-      throw new WebApplicationException("You can only update yourself", Status.FORBIDDEN);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only update yourself");
     }
 
     if (Boolean.TRUE.equals(p.getUser()) && !Utils.isEmptyOrNull(p.getEmailAddresses())) {
@@ -298,7 +303,7 @@ public class PersonResource {
     }
 
     final Boolean automaticallyAllowAllNewUsers =
-        (Boolean) this.config.getDictionaryEntry("automaticallyAllowAllNewUsers");
+        (Boolean) dict.getDictionaryEntry("automaticallyAllowAllNewUsers");
     if (Boolean.FALSE.equals(automaticallyAllowAllNewUsers)) {
       // Users can not verify their own account!
       final Person existing = dao.getByUuid(p.getUuid());
@@ -309,7 +314,7 @@ public class PersonResource {
         Utils.isEmptyHtml(p.getBiography()) ? null : Utils.sanitizeHtml(p.getBiography()));
     final int numRows = dao.update(p);
     if (numRows == 0) {
-      throw new WebApplicationException("Couldn't process person update", Status.NOT_FOUND);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't process person update");
     }
 
     engine.getEmailAddressDao().updateEmailAddresses(PersonDao.TABLE_NAME, p.getUuid(),
@@ -321,7 +326,7 @@ public class PersonResource {
   }
 
   @GraphQLMutation(name = "mergePeople")
-  public Integer mergePeople(@GraphQLRootContext Map<String, Object> context,
+  public Integer mergePeople(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "loserUuid") String loserUuid,
       @GraphQLArgument(name = "winnerPerson") Person winner) {
     final Person user = DaoUtils.getUserFromContext(context);
@@ -329,17 +334,18 @@ public class PersonResource {
 
     final String winnerUuid = DaoUtils.getUuid(winner);
     if (loserUuid.equals(winnerUuid)) {
-      throw new WebApplicationException("You selected the same person twice", Status.BAD_REQUEST);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "You selected the same person twice");
     }
 
     final Person existingWinner = dao.getByUuid(winnerUuid);
     if (existingWinner == null) {
-      throw new WebApplicationException("Winner not found", Status.NOT_FOUND);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Winner not found");
     }
 
     final Person loser = dao.getByUuid(loserUuid);
     if (loser == null) {
-      throw new WebApplicationException("Loser not found", Status.NOT_FOUND);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Loser not found");
     }
 
     // Do some additional sanity checks
@@ -348,16 +354,14 @@ public class PersonResource {
         winnerPositionUuid);
 
     if (dao.hasHistoryConflict(winnerUuid, loserUuid, winner.getPreviousPositions(), true)) {
-      throw new WebApplicationException(
-          "At least one of the positions in the history is occupied for the specified period.",
-          Status.CONFLICT);
+      throw new ResponseStatusException(HttpStatus.CONFLICT,
+          "At least one of the positions in the history is occupied for the specified period.");
     }
 
     int numRows = dao.mergePeople(winner, loser);
     if (numRows == 0) {
-      throw new WebApplicationException(
-          "Couldn't process merge operation, error occurred while updating merged person relation information.",
-          Status.NOT_FOUND);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+          "Couldn't process merge operation, error occurred while updating merged person relation information.");
     }
     AnetAuditLogger.log("Person {} merged into {} by {}", loser, winner, user);
 
@@ -376,22 +380,22 @@ public class PersonResource {
       return;
     }
     final String[] splittedEmail = emailInput.split("@");
-    if (splittedEmail.length < 2 || splittedEmail[1].length() == 0) {
-      throw new WebApplicationException("Please provide a valid email address", Status.BAD_REQUEST);
+    if (splittedEmail.length < 2 || splittedEmail[1].isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Please provide a valid email address");
     }
 
     @SuppressWarnings("unchecked")
-    final List<String> allowedDomainNames =
-        ((List<String>) this.config.getDictionaryEntry("domainNames")).stream()
-            .map(String::toLowerCase).collect(Collectors.toList());
+    final List<String> allowedDomainNames = ((List<String>) dict.getDictionaryEntry("domainNames"))
+        .stream().map(String::toLowerCase).toList();
 
     if (!Utils.isEmailAllowed(emailInput, allowedDomainNames)) {
-      throw new WebApplicationException(validateEmailErrorMessage(), Status.BAD_REQUEST);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, validateEmailErrorMessage());
     }
   }
 
   private String validateEmailErrorMessage() {
-    final String supportEmailAddr = (String) this.config.getDictionaryEntry("SUPPORT_EMAIL_ADDR");
+    final String supportEmailAddr = (String) dict.getDictionaryEntry("SUPPORT_EMAIL_ADDR");
     final String messageBody =
         "Only valid email domain names are allowed. If your email domain name is not in the list, please contact the support team";
     final String errorMessage = Utils.isEmptyOrNull(supportEmailAddr) ? messageBody

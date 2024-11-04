@@ -6012,8 +6012,8 @@ __metadata:
     js-yaml: "npm:4.1.0"
     json-loader: "npm:0.5.7"
     jsonpath-plus: "npm:10.1.0"
-    keycloak-connect: "npm:24.0.5"
-    keycloak-js: "npm:24.0.5"
+    keycloak-connect: "npm:26.0.5"
+    keycloak-js: "npm:26.0.5"
     leaflet: "npm:1.9.4"
     leaflet-defaulticon-compatibility: "npm:0.1.2"
     leaflet-geosearch: "npm:4.0.0"
@@ -6064,6 +6064,7 @@ __metadata:
     slate-hyperscript: "npm:0.100.0"
     slate-react: "npm:0.111.0"
     style-loader: "npm:4.0.0"
+    sync-fetch: "npm:0.5.2"
     tap-xunit: "npm:2.4.1"
     thread-loader: "npm:4.0.4"
     title-case: "npm:4.3.2"
@@ -13301,13 +13302,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"js-sha256@npm:^0.11.0":
-  version: 0.11.0
-  resolution: "js-sha256@npm:0.11.0"
-  checksum: 10c0/90980fe01ca01fbd166751fb16c4caa09c1ab997e8bf77c0764cc05c772c6044946f4c1b3bad266ce78357280d2131d3dc0cf2dd7646e78272996bd4d590aa4f
-  languageName: node
-  linkType: hard
-
 "js-string-escape@npm:^1.0.1":
   version: 1.0.1
   resolution: "js-string-escape@npm:1.0.1"
@@ -13582,33 +13576,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jwt-decode@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "jwt-decode@npm:4.0.0"
-  checksum: 10c0/de75bbf89220746c388cf6a7b71e56080437b77d2edb29bae1c2155048b02c6b8c59a3e5e8d6ccdfd54f0b8bda25226e491a4f1b55ac5f8da04cfbadec4e546c
-  languageName: node
-  linkType: hard
-
-"keycloak-connect@npm:24.0.5":
-  version: 24.0.5
-  resolution: "keycloak-connect@npm:24.0.5"
+"keycloak-connect@npm:26.0.5":
+  version: 26.0.5
+  resolution: "keycloak-connect@npm:26.0.5"
   dependencies:
     chromedriver: "npm:latest"
     jwk-to-pem: "npm:^2.0.0"
   dependenciesMeta:
     chromedriver:
       optional: true
-  checksum: 10c0/e05cb9a1ea9dd049317ad757e58bd9cb880bc0b465db7957527d1ceb8ec1406bf97045d84720a7b9442ef328ff7365de93da6f57dea9793f3dbd4d92000ca3bb
+  checksum: 10c0/b5a9f2916304adcf24236a03ff089ad42765e4894f005f8faae2b5c5d94528bfc5b80791815ff1cd478c5d149f359240736173f2acc928cb1dfd8d708feb66cd
   languageName: node
   linkType: hard
 
-"keycloak-js@npm:24.0.5":
-  version: 24.0.5
-  resolution: "keycloak-js@npm:24.0.5"
-  dependencies:
-    js-sha256: "npm:^0.11.0"
-    jwt-decode: "npm:^4.0.0"
-  checksum: 10c0/aa2d537dfce44f4efe3d2bba63a35c355d73145961b055281862a7f733fe1581b5e847e5a9ae0eab2f866de51349b2dc10a29a9f764527095a6ac5750d0dbf71
+"keycloak-js@npm:26.0.5":
+  version: 26.0.5
+  resolution: "keycloak-js@npm:26.0.5"
+  checksum: 10c0/1da1589b4d4ee87569f31c589c399a2f08ab7d5660a01b62bfb9eaa40f1540001cbd90f1452d600d55a17f3943676b1a6ba78dcf650ec00fc13f5ac61856c730
   languageName: node
   linkType: hard
 
@@ -18408,6 +18392,15 @@ __metadata:
   version: 3.2.4
   resolution: "symbol-tree@npm:3.2.4"
   checksum: 10c0/dfbe201ae09ac6053d163578778c53aa860a784147ecf95705de0cd23f42c851e1be7889241495e95c37cabb058edb1052f141387bef68f705afc8f9dd358509
+  languageName: node
+  linkType: hard
+
+"sync-fetch@npm:0.5.2":
+  version: 0.5.2
+  resolution: "sync-fetch@npm:0.5.2"
+  dependencies:
+    node-fetch: "npm:^2.6.1"
+  checksum: 10c0/2dd3e081171ddbee7f60f48b8ce44015367ea2a67f94521b301633bb0edc90a320415660e3e1ef6df75c2c1374de20a5006a7d8abdf7eb762d3a2687b56c928f
   languageName: node
   linkType: hard
 

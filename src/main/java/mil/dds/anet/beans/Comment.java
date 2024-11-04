@@ -1,10 +1,10 @@
 package mil.dds.anet.beans;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.utils.IdDataLoaderKey;
@@ -32,7 +32,7 @@ public class Comment extends AbstractAnetBean {
   }
 
   @GraphQLQuery(name = "author")
-  public CompletableFuture<Person> loadAuthor(@GraphQLRootContext Map<String, Object> context) {
+  public CompletableFuture<Person> loadAuthor(@GraphQLRootContext GraphQLContext context) {
     if (author.hasForeignObject()) {
       return CompletableFuture.completedFuture(author.getForeignObject());
     }
@@ -89,7 +89,7 @@ public class Comment extends AbstractAnetBean {
 
   @Override
   public String toString() {
-    return String.format("[%s] - [Author:%s,Report:%d] - (%s)", uuid, getAuthorUuid(), reportUuid,
+    return String.format("[%s] - [Author:%s,Report:%s] - (%s)", uuid, getAuthorUuid(), reportUuid,
         text);
   }
 

@@ -1,18 +1,19 @@
 package mil.dds.anet.beans;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLIgnore;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
-import jakarta.ws.rs.WebApplicationException;
 import java.time.Instant;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.UuidFetcher;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 public class SubscriptionUpdate extends AbstractAnetBean {
 
@@ -34,7 +35,8 @@ public class SubscriptionUpdate extends AbstractAnetBean {
   @JsonIgnore
   @GraphQLIgnore
   public String getUuid() {
-    throw new WebApplicationException("no UUID field on SubscriptionUpdate");
+    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+        "no UUID field on SubscriptionUpdate");
   }
 
   @Override
@@ -46,7 +48,8 @@ public class SubscriptionUpdate extends AbstractAnetBean {
   @JsonIgnore
   @GraphQLIgnore
   public Instant getUpdatedAt() {
-    throw new WebApplicationException("no updatedAt field on SubscriptionUpdate");
+    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+        "no updatedAt field on SubscriptionUpdate");
   }
 
   @Override
@@ -56,7 +59,7 @@ public class SubscriptionUpdate extends AbstractAnetBean {
 
   @GraphQLQuery(name = "subscription")
   public CompletableFuture<Subscription> loadSubscription(
-      @GraphQLRootContext Map<String, Object> context) {
+      @GraphQLRootContext GraphQLContext context) {
     if (subscription.hasForeignObject()) {
       return CompletableFuture.completedFuture(subscription.getForeignObject());
     }
@@ -104,7 +107,7 @@ public class SubscriptionUpdate extends AbstractAnetBean {
 
   @GraphQLQuery(name = "updatedObject")
   public CompletableFuture<SubscribableObject> loadUpdatedObject(
-      @GraphQLRootContext Map<String, Object> context) {
+      @GraphQLRootContext GraphQLContext context) {
     if (updatedObject != null) {
       return CompletableFuture.completedFuture(updatedObject);
     }

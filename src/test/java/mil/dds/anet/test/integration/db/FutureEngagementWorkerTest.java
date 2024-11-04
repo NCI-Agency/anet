@@ -4,9 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import io.dropwizard.testing.junit5.DropwizardAppExtension;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
@@ -22,10 +20,15 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.ReportPerson;
-import mil.dds.anet.config.AnetConfiguration;
+import mil.dds.anet.config.ApplicationContextProvider;
+import mil.dds.anet.database.ApprovalStepDao;
+import mil.dds.anet.database.EmailAddressDao;
 import mil.dds.anet.database.EmailDao;
+import mil.dds.anet.database.JobHistoryDao;
+import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.ReportDao;
+import mil.dds.anet.test.SpringTestConfig;
 import mil.dds.anet.test.integration.config.AnetTestConfiguration;
 import mil.dds.anet.test.integration.utils.EmailResponse;
 import mil.dds.anet.test.integration.utils.FakeSmtpServer;
@@ -41,15 +44,35 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
+@SpringBootTest(classes = SpringTestConfig.class,
+    useMainMethod = SpringBootTest.UseMainMethod.ALWAYS,
+    webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class FutureEngagementWorkerTest extends AbstractResourceTest {
 
-  @Autowired
-  protected DropwizardAppExtension<AnetConfiguration> dropwizardApp;
-
   private final List<String> expectedIds = new ArrayList<>();
   private final List<String> unexpectedIds = new ArrayList<>();
+
+  @Autowired
+  private JobHistoryDao jobHistoryDao;
+
+  @Autowired
+  private ApprovalStepDao approvalStepDao;
+
+  @Autowired
+  private EmailDao emailDao;
+
+  @Autowired
+  private EmailAddressDao emailAddressDao;
+
+  @Autowired
+  private OrganizationDao organizationDao;
+
+  @Autowired
+  private PersonDao personDao;
+
+  @Autowired
+  private ReportDao reportDao;
 
   private FutureEngagementWorker futureEngagementWorker;
   private FakeSmtpServer emailServer;
@@ -61,22 +84,18 @@ class FutureEngagementWorkerTest extends AbstractResourceTest {
   @BeforeAll
   @SuppressWarnings("unchecked")
   void setUpClass() throws Exception {
-    if (dropwizardApp.getConfiguration().getSmtp().isDisabled()) {
+    if (config.getSmtp().isDisabled()) {
       fail("'ANET_SMTP_DISABLE' system environment variable must have value 'false' to run test.");
     }
 
     executeEmailServerTests = Boolean.parseBoolean(
         AnetTestConfiguration.getConfiguration().get("emailServerTestsExecute").toString());
 
-    allowedEmail =
-        "@" + ((List<String>) dropwizardApp.getConfiguration().getDictionaryEntry("domainNames"))
-            .get(0);
+    allowedEmail = "@" + ((List<String>) dict.getDictionaryEntry("domainNames")).get(0);
 
-    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
-    emailWorker = new AnetEmailWorker(dropwizardApp.getConfiguration(), engine.getEmailDao());
-    futureEngagementWorker =
-        new FutureEngagementWorker(dropwizardApp.getConfiguration(), engine.getReportDao());
-    emailServer = new FakeSmtpServer(dropwizardApp.getConfiguration().getSmtp());
+    emailWorker = new AnetEmailWorker(config, dict, jobHistoryDao, emailDao, adminDao);
+    futureEngagementWorker = new FutureEngagementWorker(dict, jobHistoryDao, reportDao);
+    emailServer = new FakeSmtpServer(config.getSmtp());
 
     // Flush all reports from previous tests
     futureEngagementWorker.run();
@@ -105,13 +124,12 @@ class FutureEngagementWorkerTest extends AbstractResourceTest {
 
   @Test
   void reportsOK() {
-    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final Report report = createTestReport("reportsOK_1", true, true, true);
-    engine.getReportDao().update(report);
+    reportDao.update(report);
     final Report report2 = createTestReport("reportsOK_2", true, true, true);
-    engine.getReportDao().update(report2);
+    reportDao.update(report2);
     final Report report3 = createTestReport("reportsOK_3", true, true, true);
-    engine.getReportDao().update(report3);
+    reportDao.update(report3);
 
     expectedIds.add("reportsOK_1");
     expectedIds.add("reportsOK_2");
@@ -127,10 +145,9 @@ class FutureEngagementWorkerTest extends AbstractResourceTest {
 
   @Test
   void testReportDueInFuture() {
-    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final Report report = createTestReport("testReportDueInFuture_1", true, true, true);
     report.setEngagementDate(Instant.now().plus(Duration.ofDays(2L)));
-    engine.getReportDao().update(report);
+    reportDao.update(report);
 
     unexpectedIds.add("testReportDueInFuture_1");
 
@@ -139,10 +156,9 @@ class FutureEngagementWorkerTest extends AbstractResourceTest {
 
   @Test
   void testReportDueEndToday() {
-    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final Report report = createTestReport("testReportDueEndToday_1", true, true, true);
     report.setEngagementDate(Instant.now());
-    engine.getReportDao().update(report);
+    reportDao.update(report);
 
     expectedIds.add("testReportDueEndToday_1");
 
@@ -155,8 +171,6 @@ class FutureEngagementWorkerTest extends AbstractResourceTest {
   @Test
   void testGH3304() {
     // Create a draft report
-    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
-    final ReportDao reportDao = engine.getReportDao();
     final Person author = getRegularUserBean();
     final ReportPerson advisor = personToPrimaryReportAuthor(author);
     final ReportPerson interlocutor = personToPrimaryReportPerson(getSteveStevesonBean(), true);
@@ -215,12 +229,11 @@ class FutureEngagementWorkerTest extends AbstractResourceTest {
       unexpectedIds.add(fullId);
     }
 
-    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final Report report = createTestReport(fullId, false, false, isFuture);
     final ApprovalStep as = createApprovalStep(type);
     report.setApprovalStep(as);
     report.setAdvisorOrgUuid(as.getRelatedObjectUuid());
-    engine.getReportDao().update(report);
+    reportDao.update(report);
 
     testFutureEngagementWorker(isFuture ? 1 : 0);
 
@@ -249,10 +262,9 @@ class FutureEngagementWorkerTest extends AbstractResourceTest {
       unexpectedIds.add(fullId);
     }
 
-    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final Report report = createTestReport(fullId, true, true, true);
     report.setState(state);
-    engine.getReportDao().update(report);
+    reportDao.update(report);
 
     testFutureEngagementWorker(isExpected ? 1 : 0);
 
@@ -264,7 +276,7 @@ class FutureEngagementWorkerTest extends AbstractResourceTest {
 
   @Test
   void testApprovalStepReport() {
-    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
+    final AnetObjectEngine engine = ApplicationContextProvider.getEngine();
     final Report report = createTestReport("testApprovalStepReport_1", true, true, true);
 
     expectedIds.add("testApprovalStepReport_1");
@@ -277,8 +289,8 @@ class FutureEngagementWorkerTest extends AbstractResourceTest {
     final ApprovalStep step = createApprovalStep(ApprovalStepType.REPORT_APPROVAL);
     report.setApprovalStep(step);
     report.setAdvisorOrgUuid(step.getRelatedObjectUuid());
-    engine.getReportDao().update(report);
-    engine.getReportDao().submit(report, report.loadAuthors(engine.getContext()).join().get(0));
+    reportDao.update(report);
+    reportDao.submit(report, report.loadAuthors(engine.getContext()).join().get(0));
     testReportState(report.getUuid(), ReportState.PENDING_APPROVAL);
 
     testFutureEngagementWorker(0);
@@ -324,18 +336,16 @@ class FutureEngagementWorkerTest extends AbstractResourceTest {
   }
 
   private Report testReportState(final String uuid, final ReportState state) {
-    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
-    final Report updatedReport = engine.getReportDao().getByUuid(uuid);
+    final Report updatedReport = reportDao.getByUuid(uuid);
     assertThat(updatedReport.getState()).isEqualTo(state);
     return updatedReport;
   }
 
   // DB integration
   private void testFutureEngagementWorker(final int expectedCount) {
-    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
-    final int emailSize = engine.getEmailDao().getAll().size();
+    final int emailSize = emailDao.getAll().size();
     futureEngagementWorker.run();
-    assertThat(engine.getEmailDao().getAll()).hasSize(emailSize + expectedCount);
+    assertThat(emailDao.getAll()).hasSize(emailSize + expectedCount);
   }
 
   // Email integration
@@ -352,22 +362,17 @@ class FutureEngagementWorkerTest extends AbstractResourceTest {
   }
 
   private void setPastDate(final Report report) {
-    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
-    final ReportDao reportDao = engine.getReportDao();
     report.setEngagementDate(getPastDate());
     reportDao.update(report);
   }
 
   private Report createTestReport(final String toAddressId, final boolean addApprovalStep,
       final boolean approve, final boolean setPastDate) {
-    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
-    final ReportDao reportDao = engine.getReportDao();
-
     final ReportPerson author = personToReportAuthor(TestBeans.getTestPerson());
-    engine.getPersonDao().insert(author);
+    personDao.insert(author);
     final EmailAddress emailAddress =
         new EmailAddress(Utils.getEmailNetworkForNotifications(), toAddressId + allowedEmail);
-    engine.getEmailAddressDao().updateEmailAddresses(PersonDao.TABLE_NAME, author.getUuid(),
+    emailAddressDao.updateEmailAddresses(PersonDao.TABLE_NAME, author.getUuid(),
         List.of(emailAddress));
 
     ApprovalStep approvalStep = null;
@@ -375,8 +380,8 @@ class FutureEngagementWorkerTest extends AbstractResourceTest {
       approvalStep = createApprovalStep(ApprovalStepType.PLANNING_APPROVAL);
     }
 
-    final Report report = reportDao.insert(TestBeans.getTestReport(toAddressId, getFutureDate(),
-        approvalStep, ImmutableList.of(author)));
+    final Report report = reportDao.insert(
+        TestBeans.getTestReport(toAddressId, getFutureDate(), approvalStep, List.of(author)));
     // Submit this report
     reportDao.submit(report, author);
 
@@ -392,20 +397,15 @@ class FutureEngagementWorkerTest extends AbstractResourceTest {
   }
 
   private ApprovalStep createApprovalStep(final ApprovalStepType type) {
-    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final Organization organization = TestBeans.getTestOrganization();
-    engine.getOrganizationDao().insert(organization);
+    organizationDao.insert(organization);
     final ApprovalStep approvalStep = TestBeans.getTestApprovalStep(organization);
     approvalStep.setType(type);
-    engine.getApprovalStepDao().insertAtEnd(approvalStep);
+    approvalStepDao.insertAtEnd(approvalStep);
     return approvalStep;
   }
 
   private Report createPublishedTestReport(final String toAddressId) {
-    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
-    final ReportDao reportDao = engine.getReportDao();
-    final EmailDao emailDao = engine.getEmailDao();
-
     final Report report = createTestReport(toAddressId, true, true, false);
 
     // Publish this report

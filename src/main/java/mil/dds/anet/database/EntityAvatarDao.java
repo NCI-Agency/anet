@@ -1,42 +1,46 @@
 package mil.dds.anet.database;
 
-import jakarta.inject.Inject;
-import jakarta.inject.Provider;
 import java.util.Arrays;
 import java.util.List;
-import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.EntityAvatar;
 import mil.dds.anet.database.mappers.EntityAvatarMapper;
 import org.jdbi.v3.core.Handle;
-import ru.vyarus.guicey.jdbi3.tx.InTransaction;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
+@Component
 public class EntityAvatarDao {
   public static final String TABLE_NAME = "entityAvatars";
 
-  @Inject
-  private Provider<Handle> handle;
+  protected final DatabaseHandler databaseHandler;
+
+  public EntityAvatarDao(DatabaseHandler databaseHandler) {
+    this.databaseHandler = databaseHandler;
+  }
 
   protected Handle getDbHandle() {
-    return handle.get();
+    return databaseHandler.getHandle();
+  }
+
+  protected void closeDbHandle(Handle handle) {
+    databaseHandler.closeHandle(handle);
   }
 
   public EntityAvatar getByRelatedObjectUuid(String relatedObjectUuid) {
     return getByIds(Arrays.asList(relatedObjectUuid)).get(0);
   }
 
-  static class SelfIdBatcher extends IdBatcher<EntityAvatar> {
-    private static final String sql = "/* batch.getEntityAvatarForRelatedObject */ "
+  class SelfIdBatcher extends IdBatcher<EntityAvatar> {
+    private static final String SQL = "/* batch.getEntityAvatarForRelatedObject */ "
         + "SELECT * FROM \"entityAvatars\" WHERE \"relatedObjectUuid\" IN ( <relatedObjectUuids> )";
 
     public SelfIdBatcher() {
-      super(sql, "relatedObjectUuids", new EntityAvatarMapper());
+      super(databaseHandler, SQL, "relatedObjectUuids", new EntityAvatarMapper());
     }
   }
 
   public List<EntityAvatar> getByIds(List<String> relatedObjectUuids) {
-    final IdBatcher<EntityAvatar> idBatcher =
-        AnetObjectEngine.getInstance().getInjector().getInstance(SelfIdBatcher.class);
-    return idBatcher.getByIds(relatedObjectUuids);
+    return new SelfIdBatcher().getByIds(relatedObjectUuids);
   }
 
   /**
@@ -45,17 +49,22 @@ public class EntityAvatarDao {
    * @param entityAvatar the entity avatar
    * @return number of rows inserted/updated
    */
-  @InTransaction
+  @Transactional
   public int upsert(final EntityAvatar entityAvatar) {
-    return getDbHandle().createUpdate("/* upsertEntityAvatar */ INSERT INTO \"entityAvatars\" "
-        + "(\"relatedObjectType\", \"relatedObjectUuid\", \"attachmentUuid\", \"applyCrop\", "
-        + "\"cropLeft\", \"cropTop\", \"cropWidth\", \"cropHeight\") "
-        + "VALUES (:relatedObjectType, :relatedObjectUuid, :attachmentUuid, :applyCrop, "
-        + ":cropLeft, :cropTop, :cropWidth, :cropHeight) "
-        + "ON CONFLICT (\"relatedObjectType\", \"relatedObjectUuid\") DO UPDATE "
-        + "SET \"attachmentUuid\" = :attachmentUuid, \"cropLeft\" = :cropLeft, \"applyCrop\" = :applyCrop, "
-        + "\"cropTop\" = :cropTop, \"cropWidth\" = :cropWidth, \"cropHeight\" = :cropHeight")
-        .bindBean(entityAvatar).execute();
+    final Handle handle = getDbHandle();
+    try {
+      return handle.createUpdate("/* upsertEntityAvatar */ INSERT INTO \"entityAvatars\" "
+          + "(\"relatedObjectType\", \"relatedObjectUuid\", \"attachmentUuid\", \"applyCrop\", "
+          + "\"cropLeft\", \"cropTop\", \"cropWidth\", \"cropHeight\") "
+          + "VALUES (:relatedObjectType, :relatedObjectUuid, :attachmentUuid, :applyCrop, "
+          + ":cropLeft, :cropTop, :cropWidth, :cropHeight) "
+          + "ON CONFLICT (\"relatedObjectType\", \"relatedObjectUuid\") DO UPDATE "
+          + "SET \"attachmentUuid\" = :attachmentUuid, \"cropLeft\" = :cropLeft, \"applyCrop\" = :applyCrop, "
+          + "\"cropTop\" = :cropTop, \"cropWidth\" = :cropWidth, \"cropHeight\" = :cropHeight")
+          .bindBean(entityAvatar).execute();
+    } finally {
+      closeDbHandle(handle);
+    }
   }
 
   /**
@@ -65,11 +74,16 @@ public class EntityAvatarDao {
    * @param relatedObjectUuid the relatedObjectUuid for which to delete the avatar
    * @return number of rows deleted
    */
-  @InTransaction
+  @Transactional
   public int delete(final String relatedObjectType, final String relatedObjectUuid) {
-    return getDbHandle().createUpdate("/* deletEntityAvatar */ DELETE FROM \"entityAvatars\" "
-        + "WHERE \"relatedObjectType\" = :relatedObjectType AND \"relatedObjectUuid\" = :relatedObjectUuid")
-        .bind("relatedObjectType", relatedObjectType).bind("relatedObjectUuid", relatedObjectUuid)
-        .execute();
+    final Handle handle = getDbHandle();
+    try {
+      return handle.createUpdate("/* deletEntityAvatar */ DELETE FROM \"entityAvatars\" "
+          + "WHERE \"relatedObjectType\" = :relatedObjectType AND \"relatedObjectUuid\" = :relatedObjectUuid")
+          .bind("relatedObjectType", relatedObjectType).bind("relatedObjectUuid", relatedObjectUuid)
+          .execute();
+    } finally {
+      closeDbHandle(handle);
+    }
   }
 }

@@ -1,40 +1,27 @@
 package mil.dds.anet.resources;
 
-import static mil.dds.anet.AnetObjectEngine.getConfiguration;
-
-import com.codahale.metrics.annotation.Timed;
-import io.dropwizard.auth.Auth;
+import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
-import jakarta.mail.internet.ContentDisposition;
-import jakarta.mail.internet.ParameterList;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.ResponseBuilder;
-import jakarta.ws.rs.core.Response.Status;
-import jakarta.ws.rs.core.StreamingOutput;
+import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
 import java.nio.charset.StandardCharsets;
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Attachment;
 import mil.dds.anet.beans.GenericRelatedObject;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AttachmentSearchQuery;
+import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.AttachmentDao;
 import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.database.OrganizationDao;
@@ -44,43 +31,64 @@ import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.ResourceUtils;
+import mil.dds.anet.utils.SecurityUtils;
 import mil.dds.anet.utils.Utils;
 import org.apache.tika.Tika;
 import org.apache.tika.io.TikaInputStream;
-import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.CacheControl;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
-@Path("/api/attachment")
+@RestController
+@RequestMapping("/api/attachment")
+@GraphQLApi
 public class AttachmentResource {
 
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  private final AttachmentDao dao;
-  private final AnetObjectEngine engine;
+  // Attachment contents (for view/download) can safely be cached
+  private static final CacheControl cacheControl =
+      CacheControl.maxAge(72, TimeUnit.HOURS).cachePublic();
 
-  public AttachmentResource(AnetObjectEngine engine) {
-    this.dao = engine.getAttachmentDao();
-    this.engine = engine;
+  private final AnetObjectEngine engine;
+  private final AttachmentDao dao;
+
+  public AttachmentResource(AnetObjectEngine anetObjectEngine, AttachmentDao dao) {
+    this.engine = anetObjectEngine;
+    this.dao = dao;
   }
 
   @GraphQLQuery(name = "attachment")
-  public Attachment getByUuid(@GraphQLRootContext Map<String, Object> context,
+  public Attachment getByUuid(@GraphQLRootContext GraphQLContext ignoredContext,
       @GraphQLArgument(name = "uuid") String uuid) {
     assertAttachmentEnabled();
     return getAttachment(uuid);
   }
 
   @GraphQLQuery(name = "attachmentList")
-  public AnetBeanList<Attachment> search(@GraphQLRootContext Map<String, Object> context,
+  public AnetBeanList<Attachment> search(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "query") AttachmentSearchQuery query) {
     query.setUser(DaoUtils.getUserFromContext(context));
     return dao.search(query);
   }
 
   @GraphQLMutation(name = "createAttachment")
-  public String createAttachment(@GraphQLRootContext Map<String, Object> context,
+  public String createAttachment(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "attachment") Attachment attachment) {
     assertAttachmentEnabled();
     final Person user = DaoUtils.getUserFromContext(context);
@@ -95,22 +103,27 @@ public class AttachmentResource {
     return DaoUtils.getUuid(attachment);
   }
 
-  @POST
-  @Timed
-  @Path("/uploadAttachmentContent/{uuid}")
-  @Consumes(MediaType.MULTIPART_FORM_DATA)
-  public Response uploadAttachmentContent(final @Auth Person user, @PathParam("uuid") String uuid,
-      @FormDataParam("file") InputStream attachmentContent) {
+  @PostMapping(path = "/uploadAttachmentContent/{uuid}",
+      consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ResponseEntity<Void> uploadAttachmentContent(final Principal principal,
+      @PathVariable(name = "uuid") String uuid,
+      @RequestParam("file") MultipartFile attachmentContent) {
     assertAttachmentEnabled();
     final Attachment attachment = getAttachment(uuid);
+    final Person user = SecurityUtils.getPersonFromPrincipal(principal);
     assertAttachmentPermission(user, attachment,
         "You don't have permission to upload content for this attachment");
-    dao.saveContentBlob(uuid, checkMimeType(attachment, attachmentContent));
-    return Response.noContent().build();
+    try {
+      dao.saveContentBlob(uuid, checkMimeType(attachment, attachmentContent.getInputStream()));
+    } catch (IOException e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          "Saving attachment content failed", e);
+    }
+    return ResponseEntity.noContent().build();
   }
 
   private InputStream checkMimeType(final Attachment attachment,
-      final InputStream attachmentContent) {
+      final InputStream attachmentContent) throws ResponseStatusException {
     final TikaInputStream tikaInputStream = TikaInputStream.get(attachmentContent);
     final String detectedMimeType;
     try {
@@ -133,15 +146,15 @@ public class AttachmentResource {
                 + "stated mimeType \"{}\" differs from detected mimeType \"{}\"",
             attachment.getUuid(), attachment.getFileName(), attachment.getMimeType(),
             detectedMimeType);
-        throw new WebApplicationException("Attachment content does not match the MIME type",
-            Status.BAD_REQUEST);
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            "Attachment content does not match the MIME type");
       }
     }
     return tikaInputStream;
   }
 
   @GraphQLMutation(name = "updateAttachment")
-  public String updateAttachment(@GraphQLRootContext Map<String, Object> context,
+  public String updateAttachment(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "attachment") Attachment attachment) {
     assertAttachmentEnabled();
     final Person user = DaoUtils.getUserFromContext(context);
@@ -153,7 +166,7 @@ public class AttachmentResource {
 
     final int numRows = dao.update(attachment);
     if (numRows == 0) {
-      throw new WebApplicationException("Couldn't process attachment update", Status.NOT_FOUND);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't process attachment update");
     }
 
     if (attachment.getAttachmentRelatedObjects() != null) {
@@ -177,7 +190,7 @@ public class AttachmentResource {
   }
 
   @GraphQLMutation(name = "deleteAttachment")
-  public Integer deleteAttachment(@GraphQLRootContext Map<String, Object> context,
+  public Integer deleteAttachment(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "uuid") String attachmentUuid) {
     assertAttachmentEnabled();
     final Person user = DaoUtils.getUserFromContext(context);
@@ -189,53 +202,50 @@ public class AttachmentResource {
 
     final int numRows = dao.delete(attachmentUuid);
     if (numRows == 0) {
-      throw new WebApplicationException("Couldn't process attachment delete", Status.NOT_FOUND);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't process attachment delete");
     }
     AnetAuditLogger.log("Attachment {} deleted by {}", attachmentUuid, user);
     return numRows;
   }
 
-  @GET
-  @Timed
-  @Path("/download/{uuid}")
-  @Produces(MediaType.APPLICATION_OCTET_STREAM)
-  public Response downloadAttachment(final @Auth Person user, @PathParam("uuid") String uuid) {
+  @GetMapping(path = "/download/{uuid}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  public ResponseEntity<StreamingResponseBody> downloadAttachment(final Principal ignoredPrincipal,
+      @PathVariable(name = "uuid") String uuid) {
     assertAttachmentEnabled();
     final Attachment attachment = getAttachment(uuid);
-    final ResponseBuilder response =
-        Response.ok(streamContentBlob(uuid)).type(MediaType.APPLICATION_OCTET_STREAM)
-            .header("Content-Disposition", getContentDisposition("attachment", attachment));
-    return response.build();
+    final HttpHeaders headers = new HttpHeaders();
+    headers.setContentDisposition(getContentDisposition("attachment", attachment));
+    return ResponseEntity.ok().contentType(MediaType.APPLICATION_OCTET_STREAM).headers(headers)
+        .cacheControl(cacheControl).body(streamContentBlob(uuid));
   }
 
-  @GET
-  @Timed
-  @Path("/view/{uuid}")
-  public Response viewAttachment(final @Auth Person user, @PathParam("uuid") String uuid) {
+  @GetMapping(path = "/view/{uuid}")
+  public ResponseEntity<StreamingResponseBody> viewAttachment(final Principal ignoredPrincipal,
+      @PathVariable(name = "uuid") String uuid) {
     assertAttachmentEnabled();
     final Attachment attachment = getAttachment(uuid);
-    final ResponseBuilder response =
-        Response.ok(streamContentBlob(uuid)).type(attachment.getMimeType())
-            .header("Content-Disposition", getContentDisposition("inline", attachment));
-    return response.build();
+    final HttpHeaders headers = new HttpHeaders();
+    headers.setContentDisposition(getContentDisposition("inline", attachment));
+    return ResponseEntity.ok().contentType(MediaType.parseMediaType(attachment.getMimeType()))
+        .headers(headers).cacheControl(cacheControl).body(streamContentBlob(uuid));
   }
 
   private Attachment getAttachment(final String uuid) {
     final Attachment attachment = dao.getByUuid(uuid);
     if (attachment == null) {
-      throw new WebApplicationException("Attachment not found", Status.NOT_FOUND);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Attachment not found");
     }
     return attachment;
   }
 
-  private StreamingOutput streamContentBlob(final String uuid) {
+  private StreamingResponseBody streamContentBlob(final String uuid) {
     return output -> dao.streamContentBlob(uuid, output);
   }
 
-  private static String getContentDisposition(String disposition, Attachment attachment) {
-    final ParameterList parameterList = new ParameterList();
-    parameterList.set("filename", attachment.getFileName(), StandardCharsets.UTF_8.toString());
-    return new ContentDisposition(disposition, parameterList).toString();
+  private static ContentDisposition getContentDisposition(String disposition,
+      Attachment attachment) {
+    return ContentDisposition.builder(disposition)
+        .filename(attachment.getFileName(), StandardCharsets.UTF_8).build();
   }
 
   private void assertAllowedRelatedObjects(final Person user,
@@ -245,10 +255,10 @@ public class AttachmentResource {
     }
     relatedObjects.forEach(aro -> {
       if (!isAllowedRelatedObject(user, aro)) {
-        throw new WebApplicationException(String.format(
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(
             "You are not allowed to %1$s the attachment %2$s one of the requested objects [%3$s:%4$s]",
             forDelete ? "unlink" : "link", forDelete ? "from" : "to", aro.getRelatedObjectType(),
-            aro.getRelatedObjectUuid()), Status.BAD_REQUEST);
+            aro.getRelatedObjectUuid()));
       }
     });
   }
@@ -273,8 +283,8 @@ public class AttachmentResource {
   private void assertAllowedMimeType(final String mimeType) {
     final var allowedMimeTypes = getAllowedMimeTypes();
     if (!allowedMimeTypes.contains(mimeType)) {
-      throw new WebApplicationException(
-          String.format("Files of type \"%s\" are not allowed", mimeType), Status.BAD_REQUEST);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          String.format("Files of type \"%s\" are not allowed", mimeType));
     }
   }
 
@@ -282,7 +292,7 @@ public class AttachmentResource {
     final var attachmentSettings = getAttachmentSettings();
     final Boolean attachmentDisabled = (Boolean) attachmentSettings.get("featureDisabled");
     if (Boolean.TRUE.equals(attachmentDisabled)) {
-      throw new WebApplicationException("Attachment feature is disabled", Status.FORBIDDEN);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Attachment feature is disabled");
     }
   }
 
@@ -296,13 +306,14 @@ public class AttachmentResource {
     final boolean isAuthor =
         attachment == null || Objects.equals(attachment.getAuthorUuid(), DaoUtils.getUuid(user));
     if (Boolean.TRUE.equals(restrictToAdmins) || !isAuthor) {
-      throw new WebApplicationException(message, Status.FORBIDDEN);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, message);
     }
   }
 
   @SuppressWarnings("unchecked")
   public static Map<String, Object> getAttachmentSettings() {
-    return (Map<String, Object>) getConfiguration().getDictionaryEntry("fields.attachment");
+    return (Map<String, Object>) ApplicationContextProvider.getDictionary()
+        .getDictionaryEntry("fields.attachment");
   }
 
   public static List<String> getAllowedMimeTypes() {

@@ -7,17 +7,17 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.database.PersonDao;
-import org.junit.jupiter.api.BeforeAll;
+import mil.dds.anet.test.SpringTestConfig;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
+@SpringBootTest(classes = SpringTestConfig.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class PersonDaoTest {
 
@@ -120,12 +120,8 @@ class PersonDaoTest {
       // end
   };
 
+  @Autowired
   private PersonDao personDao;
-
-  @BeforeAll
-  void setUpClass() {
-    personDao = AnetObjectEngine.getInstance().getPersonDao();
-  }
 
   @Test
   void hasHistoryConflictForPersonTest() {

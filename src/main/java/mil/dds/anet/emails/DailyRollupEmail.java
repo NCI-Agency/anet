@@ -1,5 +1,6 @@
 package mil.dds.anet.emails;
 
+import graphql.GraphQLContext;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
@@ -7,7 +8,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.ReportCancelledReason;
@@ -16,9 +16,12 @@ import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchSortBy;
+import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
 import mil.dds.anet.utils.DaoUtils;
+import org.springframework.stereotype.Component;
 
+@Component
 public class DailyRollupEmail implements AnetEmailAction {
 
   public static String SHOW_REPORT_TEXT_FLAG = "showReportText";
@@ -37,9 +40,7 @@ public class DailyRollupEmail implements AnetEmailAction {
 
   @Override
   public String getSubject(Map<String, Object> context) {
-
-    DateTimeFormatter dtf = (DateTimeFormatter) context.get("dateFormatter");
-
+    final DateTimeFormatter dtf = (DateTimeFormatter) context.get("dateFormatter");
     if (startDate.atZone(DaoUtils.getServerNativeZoneId()).toLocalDate()
         .equals(endDate.atZone(DaoUtils.getServerNativeZoneId()).toLocalDate())) {
       return "Rollup for " + dtf.format(startDate);
@@ -51,8 +52,8 @@ public class DailyRollupEmail implements AnetEmailAction {
   @Override
   public Map<String, Object> buildContext(Map<String, Object> context)
       throws NumberFormatException {
-    String maxReportAgeStr = AnetObjectEngine.getInstance()
-        .getAdminSetting(AdminSettingKeys.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS);
+    String maxReportAgeStr =
+        engine().getAdminDao().getSetting(AdminSettingKeys.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS);
     long maxReportAge = Long.parseLong(maxReportAgeStr);
     Instant engagementDateStart =
         startDate.atZone(DaoUtils.getServerNativeZoneId()).minusDays(maxReportAge).toInstant();
@@ -70,7 +71,7 @@ public class DailyRollupEmail implements AnetEmailAction {
     }
     query.setOrgRecurseStrategy(RecurseStrategy.CHILDREN);
 
-    List<Report> reports = AnetObjectEngine.getInstance().getReportDao().search(query).getList();
+    List<Report> reports = engine().getReportDao().search(query).getList();
 
     ReportGrouping allReports = new ReportGrouping(reports);
 
@@ -78,21 +79,23 @@ public class DailyRollupEmail implements AnetEmailAction {
       chartOrgType = RollupGraphType.INTERLOCUTOR;
     }
 
-    context.put("reports", allReports);
-    context.put("cancelledReasons", ReportCancelledReason.values());
-    context.put("title", getSubject(context));
-    context.put("comment", comment);
+    final Map<String, Object> templateContext = new HashMap<>(context);
+
+    templateContext.put("reports", allReports);
+    templateContext.put("cancelledReasons", ReportCancelledReason.values());
+    templateContext.put("title", getSubject(context));
+    templateContext.put("comment", comment);
 
     final List<ReportGrouping> outerGrouping =
         (orgUuid == null) ? allReports.getByGrouping(chartOrgType)
             : allReports.getGroupingForParent(orgUuid, chartOrgType);
-    context.put("innerOrgType",
+    templateContext.put("innerOrgType",
         RollupGraphType.ADVISOR.equals(chartOrgType) ? RollupGraphType.INTERLOCUTOR
             : RollupGraphType.ADVISOR);
-    context.put("outerGrouping", outerGrouping);
-    context.put(SHOW_REPORT_TEXT_FLAG, false);
+    templateContext.put("outerGrouping", outerGrouping);
+    templateContext.put(SHOW_REPORT_TEXT_FLAG, false);
 
-    return context;
+    return templateContext;
   }
 
   public static class ReportGrouping {
@@ -129,21 +132,21 @@ public class DailyRollupEmail implements AnetEmailAction {
 
     public List<ReportGrouping> getByGrouping(RollupGraphType orgType) {
       final Map<String, Organization> orgUuidToTopOrg =
-          AnetObjectEngine.getInstance().buildTopLevelOrgHash();
+          ApplicationContextProvider.getEngine().buildTopLevelOrgHash();
       return groupReports(orgUuidToTopOrg, orgType);
     }
 
     public List<ReportGrouping> getGroupingForParent(String parentOrgUuid,
         RollupGraphType orgType) {
       final Map<String, Organization> orgUuidToTopOrg =
-          AnetObjectEngine.getInstance().buildTopLevelOrgToOrgHash(parentOrgUuid);
+          ApplicationContextProvider.getEngine().buildTopLevelOrgToOrgHash(parentOrgUuid);
       return groupReports(orgUuidToTopOrg, orgType);
     }
 
     private List<ReportGrouping> groupReports(Map<String, Organization> orgUuidToTopOrg,
         RollupGraphType orgType) {
       final Map<String, ReportGrouping> orgUuidToReports = new HashMap<>();
-      final Map<String, Object> context = AnetObjectEngine.getInstance().getContext();
+      final GraphQLContext context = ApplicationContextProvider.getEngine().getContext();
       for (Report r : reports) {
         final Organization reportOrg =
             RollupGraphType.ADVISOR.equals(orgType) ? r.loadAdvisorOrg(context).join()

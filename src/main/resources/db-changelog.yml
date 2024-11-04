@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: prepare
+      author: system
+      runOrder: first
+      runOnChange: true
+      changes:
+        sqlFile:
+          path: classpath:prepare-psql.sql
+  - include:
+      file: classpath:migrations.xml

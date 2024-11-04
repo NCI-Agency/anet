@@ -1,7 +1,6 @@
 package mil.dds.anet.emails;
 
 import java.util.Map;
-import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Report;
 import org.apache.commons.lang3.StringUtils;
@@ -22,13 +21,12 @@ public class ApprovalNeededEmail implements AnetEmailAction {
 
   @Override
   public Map<String, Object> buildContext(Map<String, Object> context) {
-    final Report r = AnetObjectEngine.getInstance().getReportDao().getByUuid(report.getUuid());
+    final Report r = engine().getReportDao().getByUuid(report.getUuid());
     if (r == null) {
       return null;
     }
 
-    final ApprovalStep step =
-        r.loadApprovalStep(AnetObjectEngine.getInstance().getContext()).join();
+    final ApprovalStep step = r.loadApprovalStep(engine().getContext()).join();
     context.put("report", r);
     context.put("reportIntent", StringUtils.abbreviate(r.getIntent(), MAX_REPORT_INTENT_LENGTH));
     context.put("approvalStepName", (step != null) ? step.getName() : "");

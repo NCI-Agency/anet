@@ -1,7 +1,6 @@
 package mil.dds.anet.emails;
 
 import java.util.Map;
-import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
 import org.apache.commons.lang3.StringUtils;
@@ -22,12 +21,12 @@ public class ReportEditedEmail implements AnetEmailAction {
 
   @Override
   public Map<String, Object> buildContext(Map<String, Object> context) {
-    Report r = AnetObjectEngine.getInstance().getReportDao().getByUuid(report.getUuid());
+    Report r = engine().getReportDao().getByUuid(report.getUuid());
     if (r == null) {
       return null;
     }
 
-    editor = AnetObjectEngine.getInstance().getPersonDao().getByUuid(editor.getUuid());
+    editor = engine().getPersonDao().getByUuid(editor.getUuid());
 
     context.put("report", r);
     context.put("reportIntent", StringUtils.abbreviate(r.getIntent(), MAX_REPORT_INTENT_LENGTH));

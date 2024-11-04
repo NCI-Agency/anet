@@ -1,29 +1,30 @@
 package mil.dds.anet.resources;
 
+import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
-import jakarta.annotation.security.PermitAll;
-import java.util.Map;
-import mil.dds.anet.AnetObjectEngine;
+import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import mil.dds.anet.beans.SubscriptionUpdate;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.SubscriptionUpdateSearchQuery;
 import mil.dds.anet.database.SubscriptionUpdateDao;
 import mil.dds.anet.utils.DaoUtils;
+import org.springframework.stereotype.Component;
 
-@PermitAll
+@Component
+@GraphQLApi
 public class SubscriptionUpdateResource {
 
-  private SubscriptionUpdateDao dao;
+  private final SubscriptionUpdateDao dao;
 
-  public SubscriptionUpdateResource(AnetObjectEngine engine) {
-    this.dao = engine.getSubscriptionUpdateDao();
+  public SubscriptionUpdateResource(SubscriptionUpdateDao dao) {
+    this.dao = dao;
   }
 
   @GraphQLQuery(name = "mySubscriptionUpdates")
   public AnetBeanList<SubscriptionUpdate> getMySubscriptionUpdates(
-      @GraphQLRootContext Map<String, Object> context,
+      @GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "query") SubscriptionUpdateSearchQuery query) {
     return dao.search(DaoUtils.getUserFromContext(context), query);
   }

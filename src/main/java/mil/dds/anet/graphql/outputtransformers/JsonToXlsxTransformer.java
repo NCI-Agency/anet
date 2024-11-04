@@ -1,11 +1,6 @@
 package mil.dds.anet.graphql.outputtransformers;
 
 import com.google.common.base.Joiner;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.StreamingOutput;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.lang.invoke.MethodHandles;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
@@ -13,9 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
-import mil.dds.anet.config.AnetConfiguration;
+import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.utils.Utils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.FillPatternType;
@@ -26,24 +20,19 @@ import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class JsonToXlsxTransformer implements Function<Map<String, Object>, StreamingOutput> {
+public class JsonToXlsxTransformer implements Function<Map<String, Object>, XSSFWorkbook> {
 
-  private static final Logger logger =
-      LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final String RESULT_KEY_DATA = "data";
 
-  private final AnetConfiguration config;
+  private final AnetDictionary dict;
 
-  public JsonToXlsxTransformer(final AnetConfiguration config) {
-    this.config = config;
+  public JsonToXlsxTransformer(final AnetDictionary dict) {
+    this.dict = dict;
   }
 
-  @Override
-  public StreamingOutput apply(final Map<String, Object> json) {
-    return new XssfWorkbookStreamingOutput(createWorkbook(json));
+  public XSSFWorkbook apply(final Map<String, Object> json) {
+    return createWorkbook(json);
   }
 
   /**
@@ -88,9 +77,8 @@ public class JsonToXlsxTransformer implements Function<Map<String, Object>, Stre
   }
 
   /**
-   * Create the sheet with the supplied name in the supplied workbook using the supplied data.
-   *
-   * TODO: This should end up in a converter type class, perhaps lookup by annotations.
+   * Create the sheet with the supplied name in the supplied workbook using the supplied data. TODO:
+   * This should end up in a converter type class, perhaps lookup by annotations.
    *
    * @param workbook the workbook
    * @param name the name for the sheet
@@ -118,7 +106,7 @@ public class JsonToXlsxTransformer implements Function<Map<String, Object>, Stre
     final CellStyle dateStyle = workbook.createCellStyle();
     final CreationHelper createHelper = workbook.getCreationHelper();
     final short dateFormat = createHelper.createDataFormat()
-        .getFormat((String) config.getDictionaryEntry("dateFormats.excel"));
+        .getFormat((String) dict.getDictionaryEntry("dateFormats.excel"));
     dateStyle.setDataFormat(dateFormat);
 
     final XSSFRow header = sheet.createRow(0);
@@ -176,13 +164,13 @@ public class JsonToXlsxTransformer implements Function<Map<String, Object>, Stre
 
       final Object repr = getValueRepr(entry.getValue());
       if (repr != null) {
-        if (repr instanceof Integer) {
-          cell.setCellValue((Integer) repr);
-        } else if (repr instanceof Date) {
-          cell.setCellValue((Date) repr);
+        if (repr instanceof Integer i) {
+          cell.setCellValue(i);
+        } else if (repr instanceof Date d) {
+          cell.setCellValue(d);
           cell.setCellStyle(dateStyle);
-        } else if (repr instanceof Number) {
-          cell.setCellValue(((Number) repr).doubleValue());
+        } else if (repr instanceof Number n) {
+          cell.setCellValue(n.doubleValue());
         } else {
           cell.setCellValue(String.valueOf(repr));
         }
@@ -195,17 +183,17 @@ public class JsonToXlsxTransformer implements Function<Map<String, Object>, Stre
   private static Object getValueRepr(final Object value) {
     if (value == null) {
       return null;
-    } else if (value instanceof List) {
-      return getListValueAsString((List<?>) value);
-    } else if (value instanceof Map) {
-      return getMapValueAsString((Map<?, ?>) value);
-    } else if (value instanceof Integer) {
-      return (Integer) value;
-    } else if (value instanceof Long) {
+    } else if (value instanceof List<?> l) {
+      return getListValueAsString(l);
+    } else if (value instanceof Map<?, ?> m) {
+      return getMapValueAsString(m);
+    } else if (value instanceof Integer i) {
+      return i;
+    } else if (value instanceof Long l) {
       // FIXME: For now, assume that this is really an Instant in disguise!
-      return Date.from(Instant.ofEpochMilli((Long) value));
-    } else if (value instanceof Number) {
-      return (Number) value;
+      return Date.from(Instant.ofEpochMilli(l));
+    } else if (value instanceof Number n) {
+      return n;
     } else {
       return String.valueOf(value);
     }
@@ -231,38 +219,6 @@ public class JsonToXlsxTransformer implements Function<Map<String, Object>, Stre
       }
     }
     return Joiner.on(", ").useForNull("").join(entriesAsString);
-  }
-
-  /**
-   * {@link StreamingOutput} implementation that uses a {@link XSSFWorkbook} as the source of the
-   * stream to be written.
-   */
-  public static class XssfWorkbookStreamingOutput implements StreamingOutput {
-
-    private final XSSFWorkbook workbook;
-
-    /**
-     * Creates an instance of this class using the supplied workbook.
-     * 
-     * @param workbook the workbook
-     */
-    public XssfWorkbookStreamingOutput(final XSSFWorkbook workbook) {
-      this.workbook = workbook;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void write(final OutputStream output) throws IOException, WebApplicationException {
-      try {
-        // TODO: The performance of this operation, specifically with large files, should be tested.
-        workbook.write(output);
-      } catch (Exception e) {
-        final Throwable rootCause = ExceptionUtils.getRootCause(e);
-        logger.error("Error writing XSSFWorkbook", rootCause == null ? e : rootCause);
-      }
-    }
   }
 
 }

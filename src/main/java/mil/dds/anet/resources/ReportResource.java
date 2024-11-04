@@ -1,14 +1,14 @@
 package mil.dds.anet.resources;
 
 import freemarker.template.Template;
+import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLEnvironment;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import io.leangen.graphql.execution.ResolutionEnvironment;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response.Status;
+import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import java.io.StringWriter;
 import java.lang.invoke.MethodHandles;
 import java.time.DayOfWeek;
@@ -47,11 +47,17 @@ import mil.dds.anet.beans.RollupGraph.RollupGraphType;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ReportSearchQuery;
-import mil.dds.anet.config.AnetConfiguration;
+import mil.dds.anet.config.AnetConfig;
+import mil.dds.anet.config.AnetDictionary;
+import mil.dds.anet.config.ApplicationContextProvider;
+import mil.dds.anet.database.AdminDao;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
+import mil.dds.anet.database.CommentDao;
 import mil.dds.anet.database.NoteDao;
 import mil.dds.anet.database.NoteDao.UpdateType;
+import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
+import mil.dds.anet.database.ReportActionDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.TaskDao;
 import mil.dds.anet.emails.DailyRollupEmail;
@@ -68,24 +74,43 @@ import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractCustomizableAnetBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 
+@Component
+@GraphQLApi
 public class ReportResource {
 
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  private final ReportDao dao;
+  private final AnetConfig config;
+  private final AnetDictionary dict;
   private final AnetObjectEngine engine;
-  private final AnetConfiguration config;
+  private final AdminDao adminDao;
+  private final CommentDao commentDao;
+  private final NoteDao noteDao;
+  private final OrganizationDao organizationDao;
+  private final ReportDao reportDao;
+  private final ReportActionDao reportActionDao;
 
-  public ReportResource(AnetObjectEngine engine, AnetConfiguration config) {
-    this.engine = engine;
-    this.dao = engine.getReportDao();
+  public ReportResource(AnetConfig config, AnetDictionary dict, AnetObjectEngine anetObjectEngine,
+      AdminDao adminDao, CommentDao commentDao, NoteDao noteDao, OrganizationDao organizationDao,
+      ReportDao reportDao, ReportActionDao reportActionDao) {
     this.config = config;
+    this.dict = dict;
+    this.engine = anetObjectEngine;
+    this.adminDao = adminDao;
+    this.commentDao = commentDao;
+    this.noteDao = noteDao;
+    this.organizationDao = organizationDao;
+    this.reportDao = reportDao;
+    this.reportActionDao = reportActionDao;
   }
 
   public static boolean hasPermission(final Person user, final String reportUuid) {
-    final AnetObjectEngine anetObjectEngine = AnetObjectEngine.getInstance();
+    final AnetObjectEngine anetObjectEngine = ApplicationContextProvider.getEngine();
     final ReportDao reportDao = anetObjectEngine.getReportDao();
     final Report report = reportDao.getByUuid(reportUuid);
     if (report == null) {
@@ -114,15 +139,15 @@ public class ReportResource {
 
   @GraphQLQuery(name = "report")
   public Report getByUuid(@GraphQLArgument(name = "uuid") String uuid) {
-    final Report r = dao.getByUuid(uuid);
+    final Report r = reportDao.getByUuid(uuid);
     if (r == null) {
-      throw new WebApplicationException("Report not found", Status.NOT_FOUND);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Report not found");
     }
     return r;
   }
 
   @GraphQLMutation(name = "createReport")
-  public Report createReport(@GraphQLRootContext Map<String, Object> context,
+  public Report createReport(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "report") Report r) {
     r.checkAndFixCustomFields();
     final Person author = DaoUtils.getUserFromContext(context);
@@ -131,12 +156,13 @@ public class ReportResource {
     }
     if (r.getReportPeople() == null
         || r.getReportPeople().stream().noneMatch(ReportPerson::isAuthor)) {
-      throw new WebApplicationException("Report must have at least one author", Status.BAD_REQUEST);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Report must have at least one author");
     }
 
     // FIXME: Eventually, also admins should no longer be allowed to create non-draft reports
     if (r.getState() != ReportState.DRAFT && !AuthUtils.isAdmin(author)) {
-      throw new WebApplicationException("Can only create Draft reports", Status.BAD_REQUEST);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Can only create Draft reports");
     }
 
     ResourceUtils.assertAllowedClassification(r.getClassification());
@@ -144,20 +170,20 @@ public class ReportResource {
     Person primaryAdvisor = findPrimaryAttendee(r, false);
     if (r.getAdvisorOrgUuid() == null && primaryAdvisor != null) {
       logger.debug("Setting advisor org for new report based on {}", primaryAdvisor);
-      r.setAdvisorOrg(
-          engine.getOrganizationForPerson(engine.getContext(), primaryAdvisor.getUuid()).join());
+      r.setAdvisorOrg(organizationDao
+          .getOrganizationForPerson(engine.getContext(), primaryAdvisor.getUuid()).join());
     }
     Person primaryInterlocutor = findPrimaryAttendee(r, true);
     if (r.getInterlocutorOrgUuid() == null && primaryInterlocutor != null) {
       logger.debug("Setting interlocutor org for new report based on {}", primaryInterlocutor);
-      r.setInterlocutorOrg(engine
+      r.setInterlocutorOrg(organizationDao
           .getOrganizationForPerson(engine.getContext(), primaryInterlocutor.getUuid()).join());
     }
 
     r.setReportText(
         Utils.isEmptyHtml(r.getReportText()) ? null : Utils.sanitizeHtml(r.getReportText()));
 
-    final Report created = dao.insert(r, author);
+    final Report created = reportDao.insert(r, author);
 
     DaoUtils.saveCustomSensitiveInformation(author, ReportDao.TABLE_NAME, created.getUuid(),
         r.getCustomSensitiveInformation());
@@ -167,7 +193,7 @@ public class ReportResource {
   }
 
   @GraphQLMutation(name = "updateReport")
-  public Report updateReport(@GraphQLRootContext Map<String, Object> context,
+  public Report updateReport(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "report") Report r,
       @GraphQLArgument(name = "sendEditEmail", defaultValue = "true") boolean sendEmail) {
     r.checkAndFixCustomFields();
@@ -211,14 +237,15 @@ public class ReportResource {
   private Report executeReportUpdates(Person editor, Report r) {
     // Verify this person has access to edit this report
     // Either they are an author, or an approver for the current step.
-    final Report existing = dao.getByUuid(r.getUuid());
+    final Report existing = reportDao.getByUuid(r.getUuid());
     if (existing == null) {
-      throw new WebApplicationException("Report not found", Status.NOT_FOUND);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Report not found");
     }
 
     if (r.getReportPeople() == null
         || r.getReportPeople().stream().noneMatch(ReportPerson::isAuthor)) {
-      throw new WebApplicationException("Report must have at least one author", Status.BAD_REQUEST);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Report must have at least one author");
     }
 
     // Certain properties may not be changed through an update request
@@ -243,7 +270,7 @@ public class ReportResource {
         existing.loadPrimaryAdvisor(engine.getContext()).join();
     if (!Utils.uuidEqual(primaryAdvisor, existingPrimaryAdvisor)
         || existing.getAdvisorOrgUuid() == null) {
-      r.setAdvisorOrg(engine
+      r.setAdvisorOrg(organizationDao
           .getOrganizationForPerson(engine.getContext(), DaoUtils.getUuid(primaryAdvisor)).join());
     } else {
       r.setAdvisorOrgUuid(existing.getAdvisorOrgUuid());
@@ -254,7 +281,7 @@ public class ReportResource {
         existing.loadPrimaryInterlocutor(engine.getContext()).join();
     if (!Utils.uuidEqual(primaryInterlocutor, existingPrimaryInterlocutor)
         || existing.getInterlocutorOrgUuid() == null) {
-      r.setInterlocutorOrg(engine
+      r.setInterlocutorOrg(organizationDao
           .getOrganizationForPerson(engine.getContext(), DaoUtils.getUuid(primaryInterlocutor))
           .join());
     } else {
@@ -265,16 +292,16 @@ public class ReportResource {
         Utils.isEmptyHtml(r.getReportText()) ? null : Utils.sanitizeHtml(r.getReportText()));
 
     // begin DB modifications
-    final int numRows = dao.update(r, editor);
+    final int numRows = reportDao.update(r, editor);
     if (numRows == 0) {
-      throw new WebApplicationException("Couldn't process report update", Status.NOT_FOUND);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't process report update");
     }
 
     // Update report people:
     if (r.getReportPeople() != null) {
       // Fetch the people associated with this report
       final List<ReportPerson> existingPeople =
-          dao.getPeopleForReport(engine.getContext(), r.getUuid()).join();
+          reportDao.getPeopleForReport(engine.getContext(), r.getUuid()).join();
       // Find any differences and fix them.
       for (ReportPerson rp : r.getReportPeople()) {
         Optional<ReportPerson> existingPerson =
@@ -284,35 +311,35 @@ public class ReportResource {
               || existingPerson.get().isAttendee() != rp.isAttendee()
               || existingPerson.get().isAuthor() != rp.isAuthor()
               || existingPerson.get().isInterlocutor() != rp.isInterlocutor()) {
-            dao.updatePersonOnReport(rp, r);
+            reportDao.updatePersonOnReport(rp, r);
           }
           existingPeople.remove(existingPerson.get());
         } else {
-          dao.addPersonToReport(rp, r);
+          reportDao.addPersonToReport(rp, r);
         }
       }
       // Any report people left in existingPeople needs to be removed.
       for (ReportPerson rp : existingPeople) {
-        dao.removePersonFromReport(rp, r);
+        reportDao.removePersonFromReport(rp, r);
       }
     }
 
     // Update Tasks:
     if (r.getTasks() != null) {
       final List<Task> existingTasks =
-          dao.getTasksForReport(engine.getContext(), r.getUuid()).join();
+          reportDao.getTasksForReport(engine.getContext(), r.getUuid()).join();
       Utils.addRemoveElementsByUuid(existingTasks, r.getTasks(),
-          newTask -> dao.addTaskToReport(newTask, r),
-          oldTask -> dao.removeTaskFromReport(DaoUtils.getUuid(oldTask), r));
+          newTask -> reportDao.addTaskToReport(newTask, r),
+          oldTask -> reportDao.removeTaskFromReport(DaoUtils.getUuid(oldTask), r));
     }
 
     // Update AuthorizationGroups:
     if (r.getAuthorizationGroups() != null) {
       final List<AuthorizationGroup> existingAuthorizationGroups =
-          dao.getAuthorizationGroupsForReport(r.getUuid());
+          reportDao.getAuthorizationGroupsForReport(r.getUuid());
       Utils.addRemoveElementsByUuid(existingAuthorizationGroups, r.getAuthorizationGroups(),
-          newAg -> dao.addAuthorizationGroupToReport(newAg, r),
-          oldAg -> dao.removeAuthorizationGroupFromReport(DaoUtils.getUuid(oldAg), r.getUuid()));
+          newAg -> reportDao.addAuthorizationGroupToReport(newAg, r), oldAg -> reportDao
+              .removeAuthorizationGroupFromReport(DaoUtils.getUuid(oldAg), r.getUuid()));
     }
 
     DaoUtils.saveCustomSensitiveInformation(editor, ReportDao.TABLE_NAME, r.getUuid(),
@@ -338,8 +365,8 @@ public class ReportResource {
       case DRAFT, REJECTED, APPROVED, CANCELLED:
         // Must be an author
         if (!isAuthor) {
-          throw new WebApplicationException(permError + "Must be an author of this report.",
-              Status.FORBIDDEN);
+          throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+              permError + "Must be an author of this report.");
         }
         break;
       case PENDING_APPROVAL:
@@ -347,78 +374,78 @@ public class ReportResource {
         final boolean canApprove = engine.canUserApproveStep(engine.getContext(), editor.getUuid(),
             report.getApprovalStepUuid(), report.getAdvisorOrgUuid()).join();
         if (!isAuthor && !canApprove) {
-          throw new WebApplicationException(
-              permError + "Must be an author of this report or a current approver.",
-              Status.FORBIDDEN);
+          throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+              permError + "Must be an author of this report or a current approver.");
         }
         break;
       case PUBLISHED:
         // Must be an admin
         AnetAuditLogger.log("attempt to edit published report {} by editor {} was forbidden",
             report.getUuid(), editor);
-        throw new WebApplicationException("Cannot edit a published report", Status.FORBIDDEN);
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot edit a published report");
       default:
-        throw new WebApplicationException("Unknown report state", Status.FORBIDDEN);
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Unknown report state");
     }
   }
 
   @GraphQLMutation(name = "submitReport")
-  public int submitReport(@GraphQLRootContext Map<String, Object> context,
+  public int submitReport(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "uuid") String uuid) {
     Person user = DaoUtils.getUserFromContext(context);
-    final Report r = dao.getByUuid(uuid);
+    final Report r = reportDao.getByUuid(uuid);
     if (r == null) {
-      throw new WebApplicationException("Report not found", Status.NOT_FOUND);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Report not found");
     }
     logger.debug("Attempting to submit report {}, which has advisor org {} and primary advisor {}",
         r, r.getAdvisorOrg(), r.getPrimaryAdvisor());
 
     final boolean isAuthor = r.isAuthor(user);
     if (!isAuthor && !AuthUtils.isAdmin(user)) {
-      throw new WebApplicationException(
-          "Cannot submit report unless you are a report's author, or an admin", Status.FORBIDDEN);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          "Cannot submit report unless you are a report's author, or an admin");
     }
 
     if (r.getState() != ReportState.DRAFT && r.getState() != ReportState.REJECTED) {
-      throw new WebApplicationException(
-          "Cannot submit report unless it is either Draft or Rejected", Status.BAD_REQUEST);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Cannot submit report unless it is either Draft or Rejected");
     }
 
     if (r.getAdvisorOrgUuid() == null) {
       final ReportPerson advisor = r.loadPrimaryAdvisor(engine.getContext()).join();
       final Boolean optionalPrimaryAdvisor =
-          (Boolean) config.getDictionaryEntry("fields.report.reportPeople.optionalPrimaryAdvisor");
+          (Boolean) dict.getDictionaryEntry("fields.report.reportPeople.optionalPrimaryAdvisor");
       if (advisor == null) {
         if (!Boolean.TRUE.equals(optionalPrimaryAdvisor)) {
-          throw new WebApplicationException("Report missing primary advisor", Status.BAD_REQUEST);
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+              "Report missing primary advisor");
         }
       } else {
-        r.setAdvisorOrg(
-            engine.getOrganizationForPerson(engine.getContext(), advisor.getUuid()).join());
+        r.setAdvisorOrg(organizationDao
+            .getOrganizationForPerson(engine.getContext(), advisor.getUuid()).join());
       }
     }
     if (r.getInterlocutorOrgUuid() == null) {
       final ReportPerson interlocutor = r.loadPrimaryInterlocutor(engine.getContext()).join();
-      final Boolean optionalPrimaryInterlocutor = (Boolean) config
-          .getDictionaryEntry("fields.report.reportPeople.optionalPrimaryPrincipal");
+      final Boolean optionalPrimaryInterlocutor =
+          (Boolean) dict.getDictionaryEntry("fields.report.reportPeople.optionalPrimaryPrincipal");
       if (interlocutor == null) {
         if (!Boolean.TRUE.equals(optionalPrimaryInterlocutor)) {
-          throw new WebApplicationException("Report missing primary interlocutor",
-              Status.BAD_REQUEST);
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+              "Report missing primary interlocutor");
         }
       } else {
-        r.setInterlocutorOrg(
-            engine.getOrganizationForPerson(engine.getContext(), interlocutor.getUuid()).join());
+        r.setInterlocutorOrg(organizationDao
+            .getOrganizationForPerson(engine.getContext(), interlocutor.getUuid()).join());
       }
     }
 
     if (r.getEngagementDate() == null) {
-      throw new WebApplicationException("Missing engagement date", Status.BAD_REQUEST);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing engagement date");
     }
 
-    final int numRows = dao.submit(r, user);
+    final int numRows = reportDao.submit(r, user);
     if (numRows == 0) {
-      throw new WebApplicationException("No records updated", Status.BAD_REQUEST);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No records updated");
     }
 
     AnetAuditLogger.log("report {} submitted by author {}", r.getUuid(), user.getUuid());
@@ -437,19 +464,20 @@ public class ReportResource {
   }
 
   @GraphQLMutation(name = "approveReport")
-  public int approveReport(@GraphQLRootContext Map<String, Object> context,
+  public int approveReport(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "uuid") String uuid,
       @GraphQLArgument(name = "comment") Comment comment) {
     Person approver = DaoUtils.getUserFromContext(context);
     ReportComment reportComment = new ReportComment(uuid, comment);
-    final Report r = dao.getByUuid(reportComment.uuid);
+    final Report r = reportDao.getByUuid(reportComment.uuid);
     if (r == null) {
-      throw new WebApplicationException("Report not found", Status.NOT_FOUND);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Report not found");
     }
     final ApprovalStep step = r.loadApprovalStep(engine.getContext()).join();
     if (step == null) {
       logger.info("Report UUID {} does not currently need an approval", r.getUuid());
-      throw new WebApplicationException("This report is not pending approval", Status.BAD_REQUEST);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "This report is not pending approval");
     }
 
     // Verify that this user can approve for this step.
@@ -459,12 +487,12 @@ public class ReportResource {
     if (!canApprove) {
       logger.info("User {} cannot approve report UUID {} for step UUID {}", approver, r.getUuid(),
           step.getUuid());
-      throw new WebApplicationException("User cannot approve report", Status.FORBIDDEN);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User cannot approve report");
     }
 
-    final int numRows = dao.approve(r, approver, step);
+    final int numRows = reportDao.approve(r, approver, step);
     if (numRows == 0) {
-      throw new WebApplicationException("Couldn't process report approval", Status.NOT_FOUND);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't process report approval");
     }
 
     // Add the comment
@@ -472,7 +500,7 @@ public class ReportResource {
     if (comment1 != null && comment1.getText() != null && !comment1.getText().trim().isEmpty()) {
       comment1.setReportUuid(r.getUuid());
       comment1.setAuthorUuid(approver.getUuid());
-      engine.getCommentDao().insert(comment1);
+      commentDao.insert(comment1);
     }
 
     AnetAuditLogger.log("Report {} approved by {}", r.getUuid(), approver);
@@ -481,21 +509,22 @@ public class ReportResource {
   }
 
   @GraphQLMutation(name = "rejectReport")
-  public int rejectReport(@GraphQLRootContext Map<String, Object> context,
+  public int rejectReport(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "uuid") String uuid,
       @GraphQLArgument(name = "comment") Comment reason) {
     Person approver = DaoUtils.getUserFromContext(context);
     ReportComment reportComment = new ReportComment(uuid, reason);
-    final Report r = dao.getByUuid(reportComment.uuid);
+    final Report r = reportDao.getByUuid(reportComment.uuid);
     if (r == null) {
-      throw new WebApplicationException("Report not found", Status.NOT_FOUND);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Report not found");
     }
     ApprovalStep step = r.loadApprovalStep(engine.getContext()).join();
     // Report can be rejected when pending approval or by an admin when pending approval or in
     // approved state
     if (step == null && !((r.getState() == ReportState.APPROVED) && AuthUtils.isAdmin(approver))) {
       logger.info("Report UUID {} does not currently need an approval", r.getUuid());
-      throw new WebApplicationException("This report is not pending approval", Status.BAD_REQUEST);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "This report is not pending approval");
     } else if (step != null) {
       // Verify that this user can reject for this step.
       final boolean canReject = engine
@@ -504,8 +533,8 @@ public class ReportResource {
       if (!canReject) {
         logger.info("User {} cannot request changes to report UUID {} for step UUID {}", approver,
             r.getUuid(), step.getUuid());
-        throw new WebApplicationException("User cannot request changes to report",
-            Status.FORBIDDEN);
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+            "User cannot request changes to report");
       }
     }
 
@@ -519,21 +548,22 @@ public class ReportResource {
     rejection.setPersonUuid(approver.getUuid());
     rejection.setType(ActionType.REJECT);
     rejection.setPlanned(ApprovalStep.isPlanningStep(step) || r.isFutureEngagement());
-    engine.getReportActionDao().insert(rejection);
+    reportActionDao.insert(rejection);
 
     // Update the report
     r.setApprovalStep(null);
     r.setState(ReportState.REJECTED);
-    final int numRows = dao.update(r, approver);
+    final int numRows = reportDao.update(r, approver);
     if (numRows == 0) {
-      throw new WebApplicationException("Couldn't process report change request", Status.NOT_FOUND);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+          "Couldn't process report change request");
     }
 
     // Add the comment
     final Comment reason1 = reportComment.comment;
     reason1.setReportUuid(r.getUuid());
     reason1.setAuthorUuid(approver.getUuid());
-    engine.getCommentDao().insert(reason1);
+    commentDao.insert(reason1);
 
     sendReportRejectEmail(r, approver, reason1);
     AnetAuditLogger.log("report {} has requested changes by {}", r.getUuid(), approver);
@@ -550,12 +580,12 @@ public class ReportResource {
   }
 
   @GraphQLMutation(name = "publishReport")
-  public int publishReport(@GraphQLRootContext Map<String, Object> context,
+  public int publishReport(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "uuid") String uuid) {
     Person user = DaoUtils.getUserFromContext(context);
-    final Report r = dao.getByUuid(uuid);
+    final Report r = reportDao.getByUuid(uuid);
     if (r == null) {
-      throw new WebApplicationException("Report not found", Status.NOT_FOUND);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Report not found");
     }
     logger.debug("Attempting to publish report {}, which has advisor org {} and primary advisor {}",
         r, r.getAdvisorOrg(), r.getPrimaryAdvisor());
@@ -563,12 +593,13 @@ public class ReportResource {
     // Only admin may publish a report
     if (!AuthUtils.isAdmin(user)) {
       logger.info("User {} cannot publish report UUID {}", user, r.getUuid());
-      throw new WebApplicationException("You cannot publish this report", Status.FORBIDDEN);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You cannot publish this report");
     }
 
-    final int numRows = dao.publish(r, user);
+    final int numRows = reportDao.publish(r, user);
     if (numRows == 0) {
-      throw new WebApplicationException("Couldn't process report publication", Status.NOT_FOUND);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+          "Couldn't process report publication");
     }
 
     AnetAuditLogger.log("report {} published by admin {}", r.getUuid(), user);
@@ -577,19 +608,19 @@ public class ReportResource {
   }
 
   @GraphQLMutation(name = "unpublishReport")
-  public Integer unpublishReport(@GraphQLRootContext Map<String, Object> context,
+  public Integer unpublishReport(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "uuid") String uuid) {
     // TODO: Do we need a reason here (like with rejectReport)?
     final Person unpublisher = DaoUtils.getUserFromContext(context);
     AuthUtils.assertAdministrator(unpublisher);
-    final Report r = dao.getByUuid(uuid);
+    final Report r = reportDao.getByUuid(uuid);
     if (r == null) {
-      throw new WebApplicationException("Report not found", Status.NOT_FOUND);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Report not found");
     }
 
     if (r.getState() != ReportState.PUBLISHED) {
       logger.info("Report UUID {} cannot be unpublished", r.getUuid());
-      throw new WebApplicationException("This report is not published", Status.BAD_REQUEST);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This report is not published");
     }
 
     // Write the unpublish action
@@ -598,12 +629,13 @@ public class ReportResource {
     unpublish.setPersonUuid(unpublisher.getUuid());
     unpublish.setType(ActionType.UNPUBLISH);
     unpublish.setPlanned(r.isFutureEngagement());
-    engine.getReportActionDao().insert(unpublish);
+    reportActionDao.insert(unpublish);
 
     // Update the report
-    final int numRows = dao.updateToDraftState(r);
+    final int numRows = reportDao.updateToDraftState(r);
     if (numRows == 0) {
-      throw new WebApplicationException("Couldn't process report unpublication", Status.NOT_FOUND);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+          "Couldn't process report unpublication");
     }
 
     // TODO: Do we need to send email?
@@ -613,19 +645,20 @@ public class ReportResource {
   }
 
   @GraphQLMutation(name = "addComment")
-  public Comment addComment(@GraphQLRootContext Map<String, Object> context,
+  public Comment addComment(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "uuid") String reportUuid,
       @GraphQLArgument(name = "comment") Comment comment) {
     Person author = DaoUtils.getUserFromContext(context);
     comment.setReportUuid(reportUuid);
     comment.setAuthorUuid(author.getUuid());
-    comment = engine.getCommentDao().insert(comment);
+    comment = commentDao.insert(comment);
     if (comment == null) {
-      throw new WebApplicationException("Couldn't process adding new comment");
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          "Couldn't process adding new comment");
     }
-    final Report r = dao.getByUuid(reportUuid);
+    final Report r = reportDao.getByUuid(reportUuid);
     if (r == null) {
-      throw new WebApplicationException("Report not found", Status.NOT_FOUND);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Report not found");
     }
     sendNewCommentEmail(r, comment);
     // GraphQL mutations *have* to return something
@@ -640,13 +673,13 @@ public class ReportResource {
   }
 
   @GraphQLMutation(name = "emailReport")
-  public Integer emailReport(@GraphQLRootContext Map<String, Object> context,
+  public Integer emailReport(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "uuid") String reportUuid,
       @GraphQLArgument(name = "email") AnetEmail email) {
     Person user = DaoUtils.getUserFromContext(context);
-    final Report r = dao.getByUuid(reportUuid);
+    final Report r = reportDao.getByUuid(reportUuid);
     if (r == null) {
-      throw new WebApplicationException("Report not found", Status.NOT_FOUND);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Report not found");
     }
 
     ReportEmail action = new ReportEmail();
@@ -660,18 +693,18 @@ public class ReportResource {
   }
 
   @GraphQLMutation(name = "deleteReport")
-  public Integer deleteReport(@GraphQLRootContext Map<String, Object> context,
+  public Integer deleteReport(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "uuid") String reportUuid) {
     Person user = DaoUtils.getUserFromContext(context);
-    final Report report = dao.getByUuid(reportUuid);
+    final Report report = reportDao.getByUuid(reportUuid);
     if (report == null) {
-      throw new WebApplicationException("Report not found", Status.NOT_FOUND);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Report not found");
     }
 
     assertCanDeleteReport(report, user);
     AnetAuditLogger.log("report {} deleted by {}", reportUuid, user);
 
-    return dao.delete(reportUuid);
+    return reportDao.delete(reportUuid);
   }
 
   private void assertCanDeleteReport(Report report, Person user) {
@@ -685,16 +718,15 @@ public class ReportResource {
         return;
       }
     }
-    throw new WebApplicationException("You cannot delete this report", Status.FORBIDDEN);
+    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You cannot delete this report");
   }
 
   @GraphQLQuery(name = "reportList")
-  public CompletableFuture<AnetBeanList<Report>> search(
-      @GraphQLRootContext Map<String, Object> context,
+  public CompletableFuture<AnetBeanList<Report>> search(@GraphQLRootContext GraphQLContext context,
       @GraphQLEnvironment ResolutionEnvironment env,
       @GraphQLArgument(name = "query") ReportSearchQuery query) {
     query.setUser(DaoUtils.getUserFromContext(context));
-    return dao.search(context, Utils.getSubFields(env), query);
+    return reportDao.search(context, Utils.getSubFields(env), query);
   }
 
   /**
@@ -714,13 +746,13 @@ public class ReportResource {
       @GraphQLArgument(name = "orgUuid") String orgUuid) {
     @SuppressWarnings("unchecked")
     final List<String> nonReportingOrgsShortNames =
-        (List<String>) config.getDictionaryEntry("non_reporting_ORGs");
+        (List<String>) dict.getDictionaryEntry("non_reporting_ORGs");
     final Map<String, Organization> nonReportingOrgs =
         getOrgsByShortNames(nonReportingOrgsShortNames);
 
     final List<RollupGraph> dailyRollupGraph =
-        (orgUuid == null) ? dao.getDailyRollupGraph(start, end, orgType, nonReportingOrgs)
-            : dao.getDailyRollupGraph(start, end, orgUuid, orgType, nonReportingOrgs);
+        (orgUuid == null) ? reportDao.getDailyRollupGraph(start, end, orgType, nonReportingOrgs)
+            : reportDao.getDailyRollupGraph(start, end, orgUuid, orgType, nonReportingOrgs);
 
     dailyRollupGraph.sort(getRollupGraphComparator());
 
@@ -758,27 +790,29 @@ public class ReportResource {
     action.setChartOrgType(orgType);
     action.setOrgUuid(orgUuid);
 
-    final Map<String, Object> context = new HashMap<>();
-    context.put("context", engine.getContext());
-    context.put("serverUrl", config.getServerUrl());
-    context.put(AdminSettingKeys.SECURITY_BANNER_CLASSIFICATION.name(),
-        engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_CLASSIFICATION).toUpperCase());
-    context.put(AdminSettingKeys.SECURITY_BANNER_RELEASABILITY.name(),
-        engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_RELEASABILITY));
-    context.put(AdminSettingKeys.SECURITY_BANNER_COLOR.name(),
-        engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_COLOR));
-    context.put(DailyRollupEmail.SHOW_REPORT_TEXT_FLAG, showReportText);
-    addConfigToContext(context);
+    final Map<String, Object> emailContext = new HashMap<>();
+    emailContext.put("context", engine.getContext());
+    emailContext.put("serverUrl", config.getServerUrl());
+    emailContext.put(AdminSettingKeys.SECURITY_BANNER_CLASSIFICATION.name(),
+        adminDao.getSetting(AdminSettingKeys.SECURITY_BANNER_CLASSIFICATION).toUpperCase());
+    emailContext.put(AdminSettingKeys.SECURITY_BANNER_RELEASABILITY.name(),
+        adminDao.getSetting(AdminSettingKeys.SECURITY_BANNER_RELEASABILITY));
+    emailContext.put(AdminSettingKeys.SECURITY_BANNER_COLOR.name(),
+        adminDao.getSetting(AdminSettingKeys.SECURITY_BANNER_COLOR));
+    emailContext.put(DailyRollupEmail.SHOW_REPORT_TEXT_FLAG, showReportText);
+    logger.error("GJ: context={}", emailContext);
+    addConfigToContext(emailContext);
 
     try {
       final Template temp =
           Utils.getFreemarkerConfig(this.getClass()).getTemplate(action.getTemplateName());
       final StringWriter writer = new StringWriter();
       // scan:ignore — false positive, we know which template we are processing
-      temp.process(action.buildContext(context), writer);
+      temp.process(action.buildContext(emailContext), writer);
       return writer.toString();
     } catch (Exception e) {
-      throw new WebApplicationException(e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error composing email",
+          e);
     }
   }
 
@@ -790,7 +824,7 @@ public class ReportResource {
    */
   @GraphQLQuery(name = "advisorReportInsights")
   public List<AdvisorReportsEntry> getAdvisorReportInsights(
-      @GraphQLRootContext Map<String, Object> context,
+      @GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "weeksAgo", defaultValue = "3") int weeksAgo,
       @GraphQLArgument(name = "orgUuid",
           defaultValue = Organization.DUMMY_ORG_UUID) String orgUuid) {
@@ -800,7 +834,7 @@ public class ReportResource {
     Instant startDate =
         weekStart.atZone(DaoUtils.getServerNativeZoneId()).minusWeeks(weeksAgo).toInstant();
     final List<Map<String, Object>> list =
-        dao.getAdvisorReportInsights(startDate, weekStart, orgUuid);
+        reportDao.getAdvisorReportInsights(startDate, weekStart, orgUuid);
 
     final String groupName = "stats";
     final String topLevelField;
@@ -839,8 +873,7 @@ public class ReportResource {
 
   private Map<String, Organization> getOrgsByShortNames(List<String> orgShortNames) {
     final Map<String, Organization> result = new HashMap<>();
-    for (final Organization organization : engine.getOrganizationDao()
-        .getOrgsByShortNames(orgShortNames)) {
+    for (final Organization organization : organizationDao.getOrgsByShortNames(orgShortNames)) {
       result.put(organization.getUuid(), organization);
     }
     return result;
@@ -906,21 +939,22 @@ public class ReportResource {
   }
 
   @GraphQLMutation(name = "updateReportAssessments")
-  public int updateReportAssessments(@GraphQLRootContext Map<String, Object> context,
+  public int updateReportAssessments(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "reportUuid") String reportUuid,
       @GraphQLArgument(name = "assessments") List<Note> assessments) {
     // Do some sanity checks
-    final Report r = dao.getByUuid(reportUuid);
+    final Report r = reportDao.getByUuid(reportUuid);
     if (r == null) {
-      throw new WebApplicationException("Report not found", Status.NOT_FOUND);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Report not found");
     }
     for (final Note assessment : assessments) {
       if (assessment.getType() != NoteType.ASSESSMENT) {
-        throw new WebApplicationException("Note must be of assessment type", Status.FORBIDDEN);
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Note must be of assessment type");
       }
       final List<GenericRelatedObject> noteRelatedObjects = assessment.getNoteRelatedObjects();
       if (noteRelatedObjects == null || noteRelatedObjects.size() != 2) {
-        throw new WebApplicationException("Note must have two related objects", Status.FORBIDDEN);
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+            "Note must have two related objects");
       }
       // Check that note refers to this report and an attendee or task
       final GenericRelatedObject nroReport;
@@ -933,22 +967,21 @@ public class ReportResource {
         nroPersonOrTask = noteRelatedObjects.get(0);
       }
       if (!checkReportPersonOrTask(r, nroReport, nroPersonOrTask)) {
-        throw new WebApplicationException("Note must link to report and person or task",
-            Status.FORBIDDEN);
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+            "Note must link to report and person or task");
       }
       ResourceUtils.checkAndFixNote(assessment);
     }
 
     // Load the existing assessments
     final List<Note> existingNotes = r.loadNotes(engine.getContext()).join();
-    final List<Note> existingAssessments = existingNotes.stream()
-        .filter(n -> n.getType().equals(NoteType.ASSESSMENT)).collect(Collectors.toList());
+    final List<Note> existingAssessments =
+        existingNotes.stream().filter(n -> n.getType().equals(NoteType.ASSESSMENT)).toList();
 
     // Process the assessments
     final Person user = DaoUtils.getUserFromContext(context);
     final String authorUuid = DaoUtils.getUuid(user);
     final Set<String> authorizationGroupUuids = DaoUtils.getAuthorizationGroupUuids(user);
-    final NoteDao noteDao = engine.getNoteDao();
     Utils.updateElementsByUuid(existingAssessments, assessments,
         // Create new assessments:
         newAssessment -> {
@@ -993,13 +1026,14 @@ public class ReportResource {
     // TODO: What about e.g. CANCELLED or PUBLISHED reports?
     // Check task uuid
     if (TaskDao.TABLE_NAME.equals(nroPersonOrTask.getRelatedObjectType())) {
-      return checkRelatedObject(r.loadTasks(AnetObjectEngine.getInstance().getContext()).join(),
-          nroPersonOrTask);
+      return checkRelatedObject(
+          r.loadTasks(ApplicationContextProvider.getEngine().getContext()).join(), nroPersonOrTask);
     }
     // Check person uuid
     if (PersonDao.TABLE_NAME.equals(nroPersonOrTask.getRelatedObjectType())) {
       return checkRelatedObject(
-          r.loadReportPeople(AnetObjectEngine.getInstance().getContext()).join(), nroPersonOrTask);
+          r.loadReportPeople(ApplicationContextProvider.getEngine().getContext()).join(),
+          nroPersonOrTask);
     }
     return false;
   }
@@ -1017,30 +1051,30 @@ public class ReportResource {
       final UpdateType updateType) {
     if (!noteDao.hasNotePermission(user, authorizationGroupUuids, note, authorUuid, updateType)) {
       // Don't provide too much information, just say it is "denied"
-      throw new WebApplicationException("Permission denied", Status.FORBIDDEN);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Permission denied");
     }
   }
 
   private void addConfigToContext(Map<String, Object> context) {
     context.put("dateFormatter",
-        DateTimeFormatter.ofPattern((String) config.getDictionaryEntry("dateFormats.email.date"))
+        DateTimeFormatter.ofPattern((String) dict.getDictionaryEntry("dateFormats.email.date"))
             .withZone(DaoUtils.getServerNativeZoneId()));
     context.put("engagementsIncludeTimeAndDuration",
-        Boolean.TRUE.equals(config.getDictionaryEntry("engagementsIncludeTimeAndDuration")));
-    final String edtfPattern = (String) config.getDictionaryEntry(
-        Boolean.TRUE.equals(config.getDictionaryEntry("engagementsIncludeTimeAndDuration"))
+        Boolean.TRUE.equals(dict.getDictionaryEntry("engagementsIncludeTimeAndDuration")));
+    final String edtfPattern = (String) dict.getDictionaryEntry(
+        Boolean.TRUE.equals(dict.getDictionaryEntry("engagementsIncludeTimeAndDuration"))
             ? "dateFormats.email.withTime"
             : "dateFormats.email.date");
     context.put("engagementDateFormatter",
         DateTimeFormatter.ofPattern(edtfPattern).withZone(DaoUtils.getServerNativeZoneId()));
     @SuppressWarnings("unchecked")
-    final Map<String, Object> fields = (Map<String, Object>) config.getDictionaryEntry("fields");
+    final Map<String, Object> fields = (Map<String, Object>) dict.getDictionaryEntry("fields");
     context.put("fields", fields);
   }
 
   private RollupGraphComparator getRollupGraphComparator() {
     @SuppressWarnings("unchecked")
-    final List<String> pinnedOrgNames = (List<String>) config.getDictionaryEntry("pinned_ORGs");
+    final List<String> pinnedOrgNames = (List<String>) dict.getDictionaryEntry("pinned_ORGs");
     return new RollupGraphComparator(pinnedOrgNames);
   }
 }

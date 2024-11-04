@@ -39,6 +39,9 @@ TRUNCATE TABLE "userActivities" CASCADE;
 -- Countries are inserted by the migrations!
 DELETE FROM "locations" WHERE type != 'PAC';
 
+-- Make sure everything is in UTC
+SET time zone 'UTC';
+
 -- Create people
 INSERT INTO people (uuid, name, status, "phoneNumber", rank, biography, "user", "domainUsername", "openIdSubject", "countryUuid", gender, "endOfTourDate", "createdAt", "updatedAt") VALUES
 -- Advisors
@@ -506,10 +509,9 @@ INSERT INTO approvers ("approvalStepUuid", "positionUuid") VALUES
   ((SELECT uuid from "approvalSteps" WHERE name='EF 1.1 Approvers'), (SELECT uuid from positions where name = 'EF 1.1 Superuser'));
 
 -- Create the EF 2.2 approval process
-SELECT ('''' || uuid_generate_v4() || '''') AS "approvalStepUuid" \gset
 INSERT INTO "approvalSteps" (uuid, name, "relatedObjectUuid", "nextStepUuid", type) VALUES
-  (:approvalStepUuid, 'EF 2.2 Secondary Reviewers', (SELECT uuid from organizations where "shortName"='EF 2.2'), NULL, 1),
-  (uuid_generate_v4(), 'EF 2.2 Initial Approvers', (SELECT uuid from organizations where "shortName"='EF 2.2'), :approvalStepUuid, 1);
+  ('db93e123-0aae-46c7-bc87-1adac9519de4', 'EF 2.2 Secondary Reviewers', (SELECT uuid from organizations where "shortName"='EF 2.2'), NULL, 1),
+  (uuid_generate_v4(), 'EF 2.2 Initial Approvers', (SELECT uuid from organizations where "shortName"='EF 2.2'), 'db93e123-0aae-46c7-bc87-1adac9519de4', 1);
 
 INSERT INTO approvers ("approvalStepUuid", "positionUuid") VALUES
   ((SELECT uuid from "approvalSteps" WHERE name='EF 2.2 Initial Approvers'), (SELECT uuid from positions where name = 'EF 2.2 Superuser')),
@@ -805,241 +807,222 @@ UPDATE positions SET "locationUuid" = (SELECT uuid from LOCATIONS where name = '
 
 -- Write a couple of reports!
 
-SELECT ('''' || N'9bb1861c-1f55-4a1b-bd3d-3c1f56d739b5' || '''') AS reportuuid \gset
 INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "nextSteps", state, "engagementDate", atmosphere, "advisorOrganizationUuid", "interlocutorOrganizationUuid") VALUES
-  (:reportuuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'Discuss improvements in Annual Budgeting process',
+  ('9bb1861c-1f55-4a1b-bd3d-3c1f56d739b5', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'Discuss improvements in Annual Budgeting process',
   'Today I met with this dude to tell him all the great things that he can do to improve his budgeting process. I hope he listened to me',
   'Meet with the dude again next week', 2, '2016-05-25', 0,
   (SELECT uuid FROM organizations where "shortName" = 'EF 2.1'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
-  ((SELECT uuid FROM people where name = 'STEVESON, Steve'), :reportuuid, TRUE, FALSE, TRUE),
-  ((SELECT uuid FROM people where "domainUsername" = 'jack'), :reportuuid, TRUE, TRUE, FALSE);
+  ((SELECT uuid FROM people where name = 'STEVESON, Steve'), '9bb1861c-1f55-4a1b-bd3d-3c1f56d739b5', TRUE, FALSE, TRUE),
+  ((SELECT uuid FROM people where "domainUsername" = 'jack'), '9bb1861c-1f55-4a1b-bd3d-3c1f56d739b5', TRUE, TRUE, FALSE);
 
-SELECT ('''' || uuid_generate_v4() || '''') AS reportuuid \gset
 INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "keyOutcomes", "nextSteps", state, "engagementDate", atmosphere, "advisorOrganizationUuid", "interlocutorOrganizationUuid") VALUES
-  (:reportuuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (select uuid from locations where name='General Hospital'), 'Run through FY2016 Numbers on tool usage',
+  ('86e4cf7e-c0ae-4bd9-b1ad-f2c65ca0f600', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (select uuid from locations where name='General Hospital'), 'Run through FY2016 Numbers on tool usage',
   'Today we discussed the fiscal details of how spreadsheets break down numbers into rows and columns and then text is used to fill up space on a web page, it was very interesting and other adjectives',
   'we read over the spreadsheets for the FY17 Budget',
   'meet with him again :(', 2, '2016-06-01', 0,
   (SELECT uuid FROM organizations where "shortName" = 'EF 2.1'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
-  ((SELECT uuid FROM people where name = 'STEVESON, Steve'), :reportuuid, TRUE, FALSE, TRUE),
-  ((SELECT uuid FROM people where name = 'ROGWELL, Roger'), :reportuuid, FALSE, FALSE, TRUE),
-  ((SELECT uuid FROM people where "domainUsername" = 'jack'), :reportuuid, TRUE, TRUE, FALSE);
+  ((SELECT uuid FROM people where name = 'STEVESON, Steve'), '86e4cf7e-c0ae-4bd9-b1ad-f2c65ca0f600', TRUE, FALSE, TRUE),
+  ((SELECT uuid FROM people where name = 'ROGWELL, Roger'), '86e4cf7e-c0ae-4bd9-b1ad-f2c65ca0f600', FALSE, FALSE, TRUE),
+  ((SELECT uuid FROM people where "domainUsername" = 'jack'), '86e4cf7e-c0ae-4bd9-b1ad-f2c65ca0f600', TRUE, TRUE, FALSE);
 INSERT INTO "reportTasks" ("taskUuid", "reportUuid") VALUES
-  ((SELECT uuid from tasks where "shortName" = '1.1.A'), :reportuuid),
-  ((SELECT uuid from tasks where "shortName" = '1.1.B'), :reportuuid);
+  ((SELECT uuid from tasks where "shortName" = '1.1.A'), '86e4cf7e-c0ae-4bd9-b1ad-f2c65ca0f600'),
+  ((SELECT uuid from tasks where "shortName" = '1.1.B'), '86e4cf7e-c0ae-4bd9-b1ad-f2c65ca0f600');
 
-SELECT ('''' || uuid_generate_v4() || '''') AS reportuuid \gset
 INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "keyOutcomes", "nextSteps", state, "engagementDate", atmosphere, "advisorOrganizationUuid", "interlocutorOrganizationUuid") VALUES
-  (:reportuuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (select uuid from locations where name='Kabul Hospital'), 'Looked at Hospital usage of Drugs',
+  ('3e717721-d675-4ff3-b687-533b50978f9e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (select uuid from locations where name='Kabul Hospital'), 'Looked at Hospital usage of Drugs',
   'This report needs to fill up more space',
   'putting something in the database to take up space',
   'to be more creative next time', 2, '2016-06-03', 0,
   (SELECT uuid FROM organizations where "shortName" = 'EF 2.1'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
-  ((SELECT uuid FROM people where name = 'STEVESON, Steve'), :reportuuid, TRUE, FALSE, TRUE),
-  ((SELECT uuid FROM people where "domainUsername" = 'jack'), :reportuuid, TRUE, TRUE, FALSE);
+  ((SELECT uuid FROM people where name = 'STEVESON, Steve'), '3e717721-d675-4ff3-b687-533b50978f9e', TRUE, FALSE, TRUE),
+  ((SELECT uuid FROM people where "domainUsername" = 'jack'), '3e717721-d675-4ff3-b687-533b50978f9e', TRUE, TRUE, FALSE);
 INSERT INTO "reportTasks" ("taskUuid", "reportUuid") VALUES
-  ((SELECT uuid from tasks where "shortName" = '1.1.C'), :reportuuid);
+  ((SELECT uuid from tasks where "shortName" = '1.1.C'), '3e717721-d675-4ff3-b687-533b50978f9e');
 
-SELECT ('''' || uuid_generate_v4() || '''') AS reportuuid \gset
 INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "keyOutcomes", "nextSteps", state, "engagementDate", atmosphere, "advisorOrganizationUuid", "interlocutorOrganizationUuid") VALUES
-  (:reportuuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (select uuid from locations where name='Kabul Hospital'), 'discuss enagement of Doctors with Patients',
+  ('5d11abd0-242b-41ef-8420-a931d19ee513', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (select uuid from locations where name='Kabul Hospital'), 'discuss enagement of Doctors with Patients',
   'Met with Nobody in this engagement and discussed no tasks, what a waste of time',
   'None',
   'Head over to the MoD Headquarters buildling for the next engagement', 2, '2016-06-10', 0,
   (SELECT uuid FROM organizations where "shortName" = 'EF 2.1'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
-  ((SELECT uuid FROM people where name = 'STEVESON, Steve'), :reportuuid, TRUE, FALSE, TRUE),
-  ((SELECT uuid FROM people where "domainUsername" = 'jack'), :reportuuid, TRUE, TRUE, FALSE);
+  ((SELECT uuid FROM people where name = 'STEVESON, Steve'), '5d11abd0-242b-41ef-8420-a931d19ee513', TRUE, FALSE, TRUE),
+  ((SELECT uuid FROM people where "domainUsername" = 'jack'), '5d11abd0-242b-41ef-8420-a931d19ee513', TRUE, TRUE, FALSE);
 INSERT INTO "reportTasks" ("taskUuid", "reportUuid") VALUES
-  ((SELECT uuid from tasks where "shortName" = '1.1.A'), :reportuuid);
+  ((SELECT uuid from tasks where "shortName" = '1.1.A'), '5d11abd0-242b-41ef-8420-a931d19ee513');
 
-SELECT ('''' || uuid_generate_v4() || '''') AS reportuuid \gset
 INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "nextSteps", state, "releasedAt", "engagementDate", atmosphere, "atmosphereDetails", "advisorOrganizationUuid", "interlocutorOrganizationUuid") VALUES
-  (:reportuuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (select uuid from locations where name='MoD Headquarters Kabul'), 'Meet with Leadership regarding monthly status update',
+  ('ee0fc732-e6ed-4c53-9d74-a8ac1d8f3ccd', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (select uuid from locations where name='MoD Headquarters Kabul'), 'Meet with Leadership regarding monthly status update',
   'This engagement was sooooo interesting',
   'Meet up with Roger next week to look at the numbers on the charts', 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 2, 'Guy was grumpy',
   (SELECT uuid FROM organizations where "shortName" = 'EF 2.1'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
-  ((SELECT uuid FROM people where name = 'STEVESON, Steve'), :reportuuid, TRUE, FALSE, TRUE),
-  ((SELECT uuid FROM people where "domainUsername" = 'bob'), :reportuuid, TRUE, FALSE, FALSE),
-  ((SELECT uuid FROM people where "domainUsername" = 'jack'), :reportuuid, FALSE, TRUE, FALSE);
+  ((SELECT uuid FROM people where name = 'STEVESON, Steve'), 'ee0fc732-e6ed-4c53-9d74-a8ac1d8f3ccd', TRUE, FALSE, TRUE),
+  ((SELECT uuid FROM people where "domainUsername" = 'bob'), 'ee0fc732-e6ed-4c53-9d74-a8ac1d8f3ccd', TRUE, FALSE, FALSE),
+  ((SELECT uuid FROM people where "domainUsername" = 'jack'), 'ee0fc732-e6ed-4c53-9d74-a8ac1d8f3ccd', FALSE, TRUE, FALSE);
 INSERT INTO "reportTasks" ("taskUuid", "reportUuid") VALUES
-  ((SELECT uuid from tasks where "shortName" = '1.1.B'), :reportuuid);
+  ((SELECT uuid from tasks where "shortName" = '1.1.B'), 'ee0fc732-e6ed-4c53-9d74-a8ac1d8f3ccd');
 
-SELECT ('''' || uuid_generate_v4() || '''') AS reportuuid \gset
 INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "keyOutcomes", "nextSteps", state, "releasedAt", "engagementDate", atmosphere, "atmosphereDetails", "advisorOrganizationUuid", "interlocutorOrganizationUuid") VALUES
-  (:reportuuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (select uuid from locations where name='Fort Amherst'), 'Inspect Ft Amherst Medical Budgeting Facility?',
+  ('c9884c73-31c5-441e-ad6b-350513e28b84', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (select uuid from locations where name='Fort Amherst'), 'Inspect Ft Amherst Medical Budgeting Facility?',
   'Went over to the fort to look at the beds and the spreadsheets and the numbers and the whiteboards and the planning and all of the budgets. It was GREAT!',
   'Seeing the whiteboards firsthand',
   'head to Cabot Tower and inspect their whiteboards next week', 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, 'Very good tea',
   (SELECT uuid FROM organizations where "shortName" = 'EF 2.1'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
-  ((SELECT uuid FROM people where name = 'ROGWELL, Roger'), :reportuuid, TRUE, FALSE, TRUE),
-  ((SELECT uuid FROM people where "domainUsername" = 'jack'), :reportuuid, TRUE, TRUE, FALSE);
+  ((SELECT uuid FROM people where name = 'ROGWELL, Roger'), 'c9884c73-31c5-441e-ad6b-350513e28b84', TRUE, FALSE, TRUE),
+  ((SELECT uuid FROM people where "domainUsername" = 'jack'), 'c9884c73-31c5-441e-ad6b-350513e28b84', TRUE, TRUE, FALSE);
 INSERT INTO "reportTasks" ("taskUuid", "reportUuid") VALUES
-  ((SELECT uuid from tasks where "shortName" = '1.1.A'), :reportuuid);
+  ((SELECT uuid from tasks where "shortName" = '1.1.A'), 'c9884c73-31c5-441e-ad6b-350513e28b84');
 
-SELECT ('''' || uuid_generate_v4() || '''') AS reportuuid \gset
 INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "nextSteps", state, "engagementDate", atmosphere, "advisorOrganizationUuid", "interlocutorOrganizationUuid") VALUES
-  (:reportuuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (select uuid from locations where name='Cabot Tower'), 'Inspect Cabot Tower Budgeting Facility',
+  ('5f681376-6eac-464d-8d46-02ff89d45071', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (select uuid from locations where name='Cabot Tower'), 'Inspect Cabot Tower Budgeting Facility',
   'Looked over the places around Cabot Tower for all of the things that people do when they need to do math.  There were calculators, and slide rules, and paper, and computers',
   'keep writing fake reports to fill the database!!!', 1, '2016-06-20', 1,
   (SELECT uuid FROM organizations where "shortName" = 'EF 2.1'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
-  ((SELECT uuid FROM people where name = 'STEVESON, Steve'), :reportuuid, TRUE, FALSE, TRUE),
-  ((SELECT uuid FROM people where "domainUsername" = 'jack'), :reportuuid, TRUE, TRUE, FALSE);
+  ((SELECT uuid FROM people where name = 'STEVESON, Steve'), '5f681376-6eac-464d-8d46-02ff89d45071', TRUE, FALSE, TRUE),
+  ((SELECT uuid FROM people where "domainUsername" = 'jack'), '5f681376-6eac-464d-8d46-02ff89d45071', TRUE, TRUE, FALSE);
 INSERT INTO "reportTasks" ("taskUuid", "reportUuid") VALUES
-  ((SELECT uuid from tasks where "shortName" = '1.1.C'), :reportuuid);
+  ((SELECT uuid from tasks where "shortName" = '1.1.C'), '5f681376-6eac-464d-8d46-02ff89d45071');
 
-SELECT ('''' || uuid_generate_v4() || '''') AS reportuuid \gset
 INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "nextSteps", state, "engagementDate", atmosphere, "advisorOrganizationUuid", "interlocutorOrganizationUuid") VALUES
-  (:reportuuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'Discuss discrepancies in monthly budgets',
+  ('5367a91a-9f70-469d-b0a4-69990ea8ac82', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'Discuss discrepancies in monthly budgets',
   'Back to the hospital this week to test the recent locations feature of ANET, and also to look at math and numbers and budgets and things',
   'Meet with the dude again next week', 1, '2016-06-25', 0,
   (SELECT uuid FROM organizations where "shortName" = 'EF 2.1'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
-  ((SELECT uuid FROM people where name = 'STEVESON, Steve'), :reportuuid, TRUE, FALSE, TRUE),
-  ((SELECT uuid FROM people where "domainUsername" = 'jack'), :reportuuid, TRUE, TRUE, FALSE);
+  ((SELECT uuid FROM people where name = 'STEVESON, Steve'), '5367a91a-9f70-469d-b0a4-69990ea8ac82', TRUE, FALSE, TRUE),
+  ((SELECT uuid FROM people where "domainUsername" = 'jack'), '5367a91a-9f70-469d-b0a4-69990ea8ac82', TRUE, TRUE, FALSE);
 INSERT INTO "reportTasks" ("taskUuid", "reportUuid") VALUES
-  ((SELECT uuid from tasks where "shortName" = '1.1.A'), :reportuuid);
+  ((SELECT uuid from tasks where "shortName" = '1.1.A'), '5367a91a-9f70-469d-b0a4-69990ea8ac82');
 
-SELECT ('''' || uuid_generate_v4() || '''') AS reportuuid \gset
 INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "nextSteps", state, "engagementDate", atmosphere, "advisorOrganizationUuid", "interlocutorOrganizationUuid") VALUES
-  (:reportuuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='St Johns Airport'), 'Inspect Air Operations Capabilities',
+  ('3e0ef6c9-68ed-43cf-8beb-d24c1c59c7a5', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='St Johns Airport'), 'Inspect Air Operations Capabilities',
   'We went to the Aiport and looked at the planes, and the hangers, and the other things that airports have. ',
   'Go over to the Airport next week to look at the helicopters', 2, '2016-05-20', 0,
   (SELECT uuid FROM organizations where "shortName" = 'EF 1.1'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
-  ((SELECT uuid FROM people where name = 'ROGWELL, Roger'), :reportuuid, TRUE, FALSE, TRUE),
-  ((SELECT uuid FROM people where "domainUsername" = 'elizabeth'), :reportuuid, TRUE, TRUE, FALSE);
+  ((SELECT uuid FROM people where name = 'ROGWELL, Roger'), '3e0ef6c9-68ed-43cf-8beb-d24c1c59c7a5', TRUE, FALSE, TRUE),
+  ((SELECT uuid FROM people where "domainUsername" = 'elizabeth'), '3e0ef6c9-68ed-43cf-8beb-d24c1c59c7a5', TRUE, TRUE, FALSE);
 INSERT INTO "reportTasks" ("taskUuid", "reportUuid") VALUES
-  ((SELECT uuid from tasks where "shortName" = '2.A'), :reportuuid);
+  ((SELECT uuid from tasks where "shortName" = '2.A'), '3e0ef6c9-68ed-43cf-8beb-d24c1c59c7a5');
 
-SELECT ('''' || uuid_generate_v4() || '''') AS reportuuid \gset
 INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "nextSteps", state, "engagementDate", atmosphere, "advisorOrganizationUuid", "interlocutorOrganizationUuid") VALUES
-  (:reportuuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='St Johns Airport'), 'Inspect Helicopter Capabilities',
+  ('e5319bc4-91f2-473b-92c7-e796bc84b169', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='St Johns Airport'), 'Inspect Helicopter Capabilities',
   'Today we looked at the helicopters at the aiport and talked in depth about how they were not in good condition and the AAF needed new equipment.  I expressed my concerns to the pilots and promised to see what we can do.',
   'Figure out what can be done about the helicopters', 2, '2016-05-22', 0,
   (SELECT uuid FROM organizations where "shortName" = 'EF 1.1'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
-  ((SELECT uuid FROM people where name = 'ROGWELL, Roger'), :reportuuid, TRUE, FALSE, TRUE),
-  ((SELECT uuid FROM people where "domainUsername" = 'elizabeth'), :reportuuid, TRUE, TRUE, FALSE);
+  ((SELECT uuid FROM people where name = 'ROGWELL, Roger'), 'e5319bc4-91f2-473b-92c7-e796bc84b169', TRUE, FALSE, TRUE),
+  ((SELECT uuid FROM people where "domainUsername" = 'elizabeth'), 'e5319bc4-91f2-473b-92c7-e796bc84b169', TRUE, TRUE, FALSE);
 INSERT INTO "reportTasks" ("taskUuid", "reportUuid") VALUES
-  ((SELECT uuid from tasks where "shortName" = '2.A'), :reportuuid);
+  ((SELECT uuid from tasks where "shortName" = '2.A'), 'e5319bc4-91f2-473b-92c7-e796bc84b169');
 
-SELECT ('''' || uuid_generate_v4() || '''') AS reportuuid \gset
 INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "nextSteps", "keyOutcomes", state, "engagementDate", atmosphere, "advisorOrganizationUuid", "interlocutorOrganizationUuid") VALUES
-  (:reportuuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'Look for Budget Controls',
+  ('a766b3f1-4705-43c1-b62a-ca4e3bb4dce3', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'Look for Budget Controls',
   'Goal of the meeting was to look for the word spreadsheet in a report and then return that in a search result about budget. Lets see what happens!!',
   'Searching for text', 'Test Cases are good', 2, '2017-01-14', 0,
   (SELECT uuid FROM organizations where "shortName" = 'EF 2.2'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
-  ((SELECT uuid FROM people where name = 'TOPFERNESS, Christopf'), :reportuuid, TRUE, FALSE, TRUE),
-  ((SELECT uuid FROM people where "domainUsername" = 'erin'), :reportuuid, TRUE, TRUE, FALSE),
-  ((SELECT uuid FROM people where "domainUsername" = 'reina'), :reportuuid, FALSE, FALSE, FALSE);
+  ((SELECT uuid FROM people where name = 'TOPFERNESS, Christopf'), 'a766b3f1-4705-43c1-b62a-ca4e3bb4dce3', TRUE, FALSE, TRUE),
+  ((SELECT uuid FROM people where "domainUsername" = 'erin'), 'a766b3f1-4705-43c1-b62a-ca4e3bb4dce3', TRUE, TRUE, FALSE),
+  ((SELECT uuid FROM people where "domainUsername" = 'reina'), 'a766b3f1-4705-43c1-b62a-ca4e3bb4dce3', FALSE, FALSE, FALSE);
 INSERT INTO "reportTasks" ("taskUuid", "reportUuid") VALUES
-  ((SELECT uuid from tasks where "shortName" = '1.1.B'), :reportuuid);
+  ((SELECT uuid from tasks where "shortName" = '1.1.B'), 'a766b3f1-4705-43c1-b62a-ca4e3bb4dce3');
 INSERT INTO "reportsSensitiveInformation" (uuid, "createdAt", "updatedAt", text, "reportUuid") VALUES
-  (uuid_generate_v4(), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Need to know only', :reportuuid);
+  (uuid_generate_v4(), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Need to know only', 'a766b3f1-4705-43c1-b62a-ca4e3bb4dce3');
 
-SELECT ('''' || uuid_generate_v4() || '''') AS reportuuid \gset
 INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "nextSteps", "keyOutcomes", state, "engagementDate", atmosphere, "advisorOrganizationUuid", "interlocutorOrganizationUuid") VALUES
-  (:reportuuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'Look for Budget Controls Again',
+  ('91cac8ff-dca5-4cf5-bf2c-dd72aa3685f8', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'Look for Budget Controls Again',
   'The search for the spreadsheet was doomed to be successful, so we needed to generate more data in order to get a more full test of the system that really is going to have much much larger reports in it one day.',
   'Mocking up test cases','Better test data is always better', 2, '2017-01-04', 0,
   (SELECT uuid FROM organizations where "shortName" = 'EF 2.2'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
-  ((SELECT uuid FROM people where name = 'TOPFERNESS, Christopf'), :reportuuid, TRUE, FALSE, TRUE),
-  ((SELECT uuid FROM people where "domainUsername" = 'erin'), :reportuuid, TRUE, TRUE, FALSE);
+  ((SELECT uuid FROM people where name = 'TOPFERNESS, Christopf'), '91cac8ff-dca5-4cf5-bf2c-dd72aa3685f8', TRUE, FALSE, TRUE),
+  ((SELECT uuid FROM people where "domainUsername" = 'erin'), '91cac8ff-dca5-4cf5-bf2c-dd72aa3685f8', TRUE, TRUE, FALSE);
 INSERT INTO "reportTasks" ("taskUuid", "reportUuid") VALUES
-  ((SELECT uuid from tasks where "shortName" = '1.1.B'), :reportuuid);
+  ((SELECT uuid from tasks where "shortName" = '1.1.B'), '91cac8ff-dca5-4cf5-bf2c-dd72aa3685f8');
 
-SELECT ('''' || uuid_generate_v4() || '''') AS reportuuid \gset
 INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "nextSteps", "keyOutcomes", state, "engagementDate", atmosphere, "advisorOrganizationUuid", "interlocutorOrganizationUuid") VALUES
-  (:reportuuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'Talk to the Interior about things',
+  ('3fa48376-0519-48ba-8d91-2fa18c7a040f', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'Talk to the Interior about things',
   'We know that we want to go to the house with the food and eat the food, but the words in the database need to be long enough to do something. What that is were not sure, but we know we cant use apostrophies or spell.  Wow, we really cant do much, right? It was decided that we would do more tomorrow.',
   'Mocking up test cases','Looking at the telescope with our eyes', 2, '2017-01-04', 0,
   (SELECT uuid FROM organizations where "shortName" = 'EF 2.2'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Interior'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
-  ((SELECT uuid FROM people where name = 'TOPFERNESS, Christopf'), :reportuuid, TRUE, FALSE, TRUE),
-  ((SELECT uuid FROM people where "domainUsername" = 'erin'), :reportuuid, TRUE, TRUE, FALSE);
+  ((SELECT uuid FROM people where name = 'TOPFERNESS, Christopf'), '3fa48376-0519-48ba-8d91-2fa18c7a040f', TRUE, FALSE, TRUE),
+  ((SELECT uuid FROM people where "domainUsername" = 'erin'), '3fa48376-0519-48ba-8d91-2fa18c7a040f', TRUE, TRUE, FALSE);
 INSERT INTO "reportTasks" ("taskUuid", "reportUuid") VALUES
-  ((SELECT uuid from tasks where "shortName" = '1.1.B'), :reportuuid);
+  ((SELECT uuid from tasks where "shortName" = '1.1.B'), '3fa48376-0519-48ba-8d91-2fa18c7a040f');
 
-SELECT ('''' || uuid_generate_v4() || '''') AS reportuuid \gset
 INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "nextSteps", "keyOutcomes", state, "engagementDate", atmosphere, "cancelledReason", "advisorOrganizationUuid", "interlocutorOrganizationUuid") VALUES
-  (:reportuuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'Weekly Checkin with MG Somebody',
+  ('a485a567-3e21-4219-9de7-2704c20a6f71', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'Weekly Checkin with MG Somebody',
   'Meeting got cancelled',
   'Reschedule Meeting','', 4, CURRENT_TIMESTAMP, 0, 1,
   (SELECT uuid FROM organizations where "shortName" = 'EF 2.2'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Interior'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
-  ((SELECT uuid FROM people where "domainUsername" = 'erin'), :reportuuid, TRUE, TRUE, FALSE);
+  ((SELECT uuid FROM people where "domainUsername" = 'erin'), 'a485a567-3e21-4219-9de7-2704c20a6f71', TRUE, TRUE, FALSE);
 
-SELECT ('''' || uuid_generate_v4() || '''') AS reportuuid \gset
 INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "nextSteps", "keyOutcomes", state, "engagementDate", atmosphere, "advisorOrganizationUuid", "interlocutorOrganizationUuid","customFields") VALUES
-  (:reportuuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'A test report from Arthur', '',
+  ('59be259b-30b9-4d04-9e21-e8ceb58cbe9c', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'A test report from Arthur', '',
   'keep on testing!','have reports in organizations', 2, CURRENT_TIMESTAMP + INTERVAL '1 minute', 0,
   (SELECT uuid FROM organizations where "shortName" = 'ANET Administrators'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Interior'),
    '{"invisibleCustomFields":["formCustomFields.trainingEvent","formCustomFields.numberTrained","formCustomFields.levelTrained","formCustomFields.trainingDate","formCustomFields.assetsUsed"],"itemsAgreed":[],"echelons":"Ut enim ad minim veniam","systemProcess":"","multipleButtons":["advise"],"additionalEngagementNeeded":[],"relatedObject":null,"relatedReport":null}');
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
-  ((SELECT uuid FROM people where "domainUsername" = 'arthur'), :reportuuid, TRUE, TRUE, FALSE),
-  ((SELECT uuid FROM people where name = 'SHARTON, Shardul'), :reportuuid, TRUE, FALSE, TRUE),
-  ((SELECT uuid FROM people where "domainUsername" = 'lin'), :reportuuid, FALSE, FALSE, FALSE),
-  ((SELECT uuid FROM people where name = 'KYLESON, Kyle'), :reportuuid, FALSE, FALSE, TRUE),
-  ((SELECT uuid FROM people where name = 'CHRISVILLE, Chris'), :reportuuid, FALSE, FALSE, TRUE);
+  ((SELECT uuid FROM people where "domainUsername" = 'arthur'), '59be259b-30b9-4d04-9e21-e8ceb58cbe9c', TRUE, TRUE, FALSE),
+  ((SELECT uuid FROM people where name = 'SHARTON, Shardul'), '59be259b-30b9-4d04-9e21-e8ceb58cbe9c', TRUE, FALSE, TRUE),
+  ((SELECT uuid FROM people where "domainUsername" = 'lin'), '59be259b-30b9-4d04-9e21-e8ceb58cbe9c', FALSE, FALSE, FALSE),
+  ((SELECT uuid FROM people where name = 'KYLESON, Kyle'), '59be259b-30b9-4d04-9e21-e8ceb58cbe9c', FALSE, FALSE, TRUE),
+  ((SELECT uuid FROM people where name = 'CHRISVILLE, Chris'), '59be259b-30b9-4d04-9e21-e8ceb58cbe9c', FALSE, FALSE, TRUE);
 INSERT INTO "reportTasks" ("taskUuid", "reportUuid") VALUES
-  ((SELECT uuid from tasks where "shortName" = '1.2.A'), :reportuuid),
-  ((SELECT uuid from tasks where "shortName" = '1.2.B'), :reportuuid);
+  ((SELECT uuid from tasks where "shortName" = '1.2.A'), '59be259b-30b9-4d04-9e21-e8ceb58cbe9c'),
+  ((SELECT uuid from tasks where "shortName" = '1.2.B'), '59be259b-30b9-4d04-9e21-e8ceb58cbe9c');
 
-SELECT ('''' || uuid_generate_v4() || '''') AS reportuuid \gset
 INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "nextSteps", "keyOutcomes", state, "engagementDate", atmosphere, "advisorOrganizationUuid", "interlocutorOrganizationUuid", "classification") VALUES
-  (:reportuuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'A classified report from Arthur', '',
+  ('c3008f90-6a27-4343-b278-827a0a0dc6bf', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'A classified report from Arthur', '',
   'keep on testing!', 'check the classification', 0, CURRENT_TIMESTAMP + INTERVAL '1 minute', 0,
   (SELECT uuid FROM organizations where "shortName" = 'ANET Administrators'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Interior'), 'NU');
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
-  ((SELECT uuid FROM people where "domainUsername" = 'arthur'), :reportuuid, TRUE, TRUE, FALSE),
-  ((SELECT uuid FROM people where name = 'SHARTON, Shardul'), :reportuuid, TRUE, FALSE, TRUE),
-  ((SELECT uuid FROM people where "domainUsername" = 'lin'), :reportuuid, FALSE, FALSE, FALSE),
-  ((SELECT uuid FROM people where name = 'KYLESON, Kyle'), :reportuuid, FALSE, FALSE, TRUE),
-  ((SELECT uuid FROM people where name = 'CHRISVILLE, Chris'), :reportuuid, FALSE, FALSE, TRUE);
+  ((SELECT uuid FROM people where "domainUsername" = 'arthur'), 'c3008f90-6a27-4343-b278-827a0a0dc6bf', TRUE, TRUE, FALSE),
+  ((SELECT uuid FROM people where name = 'SHARTON, Shardul'), 'c3008f90-6a27-4343-b278-827a0a0dc6bf', TRUE, FALSE, TRUE),
+  ((SELECT uuid FROM people where "domainUsername" = 'lin'), 'c3008f90-6a27-4343-b278-827a0a0dc6bf', FALSE, FALSE, FALSE),
+  ((SELECT uuid FROM people where name = 'KYLESON, Kyle'), 'c3008f90-6a27-4343-b278-827a0a0dc6bf', FALSE, FALSE, TRUE),
+  ((SELECT uuid FROM people where name = 'CHRISVILLE, Chris'), 'c3008f90-6a27-4343-b278-827a0a0dc6bf', FALSE, FALSE, TRUE);
 
-SELECT ('''' || uuid_generate_v4() || '''') AS reportuuid \gset
 INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "nextSteps", "keyOutcomes", state, "engagementDate", atmosphere, "advisorOrganizationUuid", "interlocutorOrganizationUuid") VALUES
-  (:reportuuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'A test report to be unpublished from Arthur', '',
+  ('bb9dad1a-1c6c-45de-91e8-aecda261d21e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'A test report to be unpublished from Arthur', '',
   'I need to edit this report so unpublish it please','have reports in organizations', 2, CURRENT_TIMESTAMP + INTERVAL '1 minute', 0,
   (SELECT uuid FROM organizations where "shortName" = 'ANET Administrators'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Interior'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
-  ((SELECT uuid FROM people where "domainUsername" = 'arthur'), :reportuuid, TRUE, TRUE, FALSE),
-  ((SELECT uuid FROM people where name = 'SHARTON, Shardul'), :reportuuid, TRUE, FALSE, TRUE);
+  ((SELECT uuid FROM people where "domainUsername" = 'arthur'), 'bb9dad1a-1c6c-45de-91e8-aecda261d21e', TRUE, TRUE, FALSE),
+  ((SELECT uuid FROM people where name = 'SHARTON, Shardul'), 'bb9dad1a-1c6c-45de-91e8-aecda261d21e', TRUE, FALSE, TRUE);
 INSERT INTO "reportTasks" ("taskUuid", "reportUuid") VALUES
-  ((SELECT uuid from tasks where "shortName" = '1.2.A'), :reportuuid),
-  ((SELECT uuid from tasks where "shortName" = '1.2.B'), :reportuuid);
+  ((SELECT uuid from tasks where "shortName" = '1.2.A'), 'bb9dad1a-1c6c-45de-91e8-aecda261d21e'),
+  ((SELECT uuid from tasks where "shortName" = '1.2.B'), 'bb9dad1a-1c6c-45de-91e8-aecda261d21e');
 
-SELECT ('''' || uuid_generate_v4() || '''') AS reportuuid \gset
 INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "nextSteps", state, "engagementDate", atmosphere, "advisorOrganizationUuid", "interlocutorOrganizationUuid") VALUES
-  (:reportuuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'Test report with rich text',
+  ('34265a98-7f82-4f16-b132-abcb60d307ad', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'Test report with rich text',
   '<h1>Heading 1</h1><h2>Heading 2</h2><h3>Heading 3</h3>Handle text without tags. <p>Handle the white space below</p> <p>'||chr(10)||'</p> <blockquote>Blockquote</blockquote><b>Bold</b> <i>Italic</i> <u>Underline</u> <strike>Strike</strike> <strike><b>BoldStrike</b></strike> <i><b>BoldItalic</b></i><ol><li>numbered list 1</li><li><p><b>numbered</b> list 2<p></li></ol><ul><li>bulleted list 1</li><li>bulleted list 2</li></ul>',
   'Keep testing', 0, '2022-08-25', 0,
   (SELECT uuid FROM organizations where "shortName" = 'EF 2.1'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
-  ((SELECT uuid FROM people where "domainUsername" = 'arthur'), :reportuuid, TRUE, TRUE, FALSE),
-  ((SELECT uuid FROM people where "domainUsername" = 'jack'), :reportuuid, FALSE, FALSE, FALSE);
+  ((SELECT uuid FROM people where "domainUsername" = 'arthur'), '34265a98-7f82-4f16-b132-abcb60d307ad', TRUE, TRUE, FALSE),
+  ((SELECT uuid FROM people where "domainUsername" = 'jack'), '34265a98-7f82-4f16-b132-abcb60d307ad', FALSE, FALSE, FALSE);
 
 -- Erin's Draft report
-SELECT ('''530b735e-1134-4daa-9e87-4491c888a4f7''') AS reportuuid \gset
 INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "nextSteps", "keyOutcomes", state, "engagementDate", atmosphere, "advisorOrganizationUuid", "interlocutorOrganizationUuid", "customFields") VALUES
-  (:reportuuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'Erin''s Draft report, ready for submission',
+  ('530b735e-1134-4daa-9e87-4491c888a4f7', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'Erin''s Draft report, ready for submission',
   'This is just a draft.', 'This is just a draft.', 'This is just a draft.', 0, '2023-05-25', 0,
   (SELECT uuid FROM organizations where "shortName" = 'EF 2.2'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'),
   '{"invisibleCustomFields":["formCustomFields.trainingEvent","formCustomFields.numberTrained","formCustomFields.levelTrained","formCustomFields.trainingDate","formCustomFields.systemProcess","formCustomFields.echelons","formCustomFields.itemsAgreed","formCustomFields.assetsUsed"],"multipleButtons":[],"additionalEngagementNeeded":[],"relatedObject":null,"relatedReport":null}');
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
-  ((SELECT uuid FROM people where name = 'TOPFERNESS, Christopf'), :reportuuid, TRUE, FALSE, TRUE),
-  ((SELECT uuid FROM people where "domainUsername" = 'erin'), :reportuuid, TRUE, TRUE, FALSE);
+  ((SELECT uuid FROM people where name = 'TOPFERNESS, Christopf'), '530b735e-1134-4daa-9e87-4491c888a4f7', TRUE, FALSE, TRUE),
+  ((SELECT uuid FROM people where "domainUsername" = 'erin'), '530b735e-1134-4daa-9e87-4491c888a4f7', TRUE, TRUE, FALSE);
 INSERT INTO "reportTasks" ("taskUuid", "reportUuid") VALUES
-  ((SELECT uuid from tasks where "shortName" = '2.A'), :reportuuid);
+  ((SELECT uuid from tasks where "shortName" = '2.A'), '530b735e-1134-4daa-9e87-4491c888a4f7');
 
 -- Release all of the reports right now, so they show up in the rollup.
 UPDATE reports SET "releasedAt" = reports."createdAt" WHERE state = 2 OR state = 4;
@@ -1079,66 +1062,59 @@ INSERT INTO "adminSettings" (key, value) VALUES
 
 -- System user, used when importing data that can't be linked to any specific user
 INSERT INTO PEOPLE (uuid, name, status, "createdAt", "updatedAt")
-  SELECT uuid_generate_v4(), 'ANET Importer', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+  SELECT 'a163cd6f-98ac-4a61-896c-9444dd1293af', 'ANET Importer', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
   WHERE NOT EXISTS (SELECT uuid FROM people WHERE name = 'ANET Importer');
 
-SELECT ('''' || uuid || '''') AS "authorUuid" FROM people WHERE name = 'ANET Importer' \gset
-
 -- Tag some reports
-SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
 INSERT INTO notes (uuid, "authorUuid", type, text, "createdAt", "updatedAt") VALUES
-  (:noteUuid, :authorUuid, 0,
+  ('0daa2cc7-29a3-4884-bb3a-1659d8a3962d', 'a163cd6f-98ac-4a61-896c-9444dd1293af', 0,
     'Previously tagged as bribery - Giving/Promising money or something valuable to corrupt the behavior of a public official',
     CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
-  SELECT :noteUuid, 'reports', r.uuid
+  SELECT '0daa2cc7-29a3-4884-bb3a-1659d8a3962d', 'reports', r.uuid
   FROM reports r
   WHERE SUBSTRING(r.uuid, 1, 1) IN ('0', '2', '4', '6', '8', 'a', 'c', 'e')
   AND r.state != 0;
 
-SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
 INSERT INTO notes (uuid, "authorUuid", type, text, "createdAt", "updatedAt") VALUES
-  (:noteUuid, :authorUuid, 0,
+  ('7adbc0d1-780d-4aeb-810e-6439d55373b3', 'a163cd6f-98ac-4a61-896c-9444dd1293af', 0,
     'Previously tagged as embezzlement - Steal or misappropriate money from the organization the person works for',
     CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
-  SELECT :noteUuid, 'reports', r.uuid
+  SELECT '7adbc0d1-780d-4aeb-810e-6439d55373b3', 'reports', r.uuid
   FROM reports r
   WHERE SUBSTRING(r.uuid, 1, 1) IN ('0', '3', '6', '9', 'c', 'f')
   AND r.state != 0;
 
-SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
 INSERT INTO notes (uuid, "authorUuid", type, text, "createdAt", "updatedAt") VALUES
-  (:noteUuid, :authorUuid, 0,
+  ('01463629-8670-475f-9e0a-a1bf594f9eda', 'a163cd6f-98ac-4a61-896c-9444dd1293af', 0,
     'Previously tagged as patronage - Leaders illegally appointing someone to a position',
     CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
-  SELECT :noteUuid, 'reports', r.uuid
+  SELECT '01463629-8670-475f-9e0a-a1bf594f9eda', 'reports', r.uuid
   FROM reports r
   WHERE SUBSTRING(r.uuid, 1, 1) IN ('1', '3', '5', '7', '9', 'b', 'd', 'f')
   AND r.state != 0;
 
-SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
 INSERT INTO notes (uuid, "authorUuid", type, text, "createdAt", "updatedAt") VALUES
-  (:noteUuid, :authorUuid, 0,
+  ('a6074894-4ad7-4aa4-ab0c-f9b4b2701a1a', 'a163cd6f-98ac-4a61-896c-9444dd1293af', 0,
     'Previously tagged as facilitation payment - Payment made to a government official that acts as an incentive to complete an action quickly',
     CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
-  SELECT :noteUuid, 'reports', r.uuid
+  SELECT 'a6074894-4ad7-4aa4-ab0c-f9b4b2701a1a', 'reports', r.uuid
   FROM reports r
   WHERE SUBSTRING(r.uuid, 1, 1) IN ('1', '4', '7', 'a', 'd')
   AND r.state != 0;
 
 -- Insert report with created at and updated at date for two days before current timestamp
-SELECT ('''' || uuid_generate_v4() || '''') AS reportuuid \gset
 INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "nextSteps", state, "engagementDate", atmosphere, "advisorOrganizationUuid", "interlocutorOrganizationUuid") VALUES
-  (:reportuuid, CURRENT_TIMESTAMP + INTERVAL '-2 day', CURRENT_TIMESTAMP + INTERVAL '-2 day', (SELECT uuid from locations where name='General Hospital'), 'Discuss further improvements in Annual Budgeting process',
+  ('8655bf58-4452-4ac0-9221-70b035d8eb7e', CURRENT_TIMESTAMP + INTERVAL '-2 day', CURRENT_TIMESTAMP + INTERVAL '-2 day', (SELECT uuid from locations where name='General Hospital'), 'Discuss further improvements in Annual Budgeting process',
   'Today I met with Edwin the dude to tell him all the great things that he can do to improve his budgeting process. I hope he listened to me',
   'Meet with the dude again next week', 2, '2016-05-25', 0,
   (SELECT uuid FROM organizations where "shortName" = 'EF 2.1'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
-  ((SELECT uuid FROM people where name = 'STEVESON, Steve'), :reportuuid, TRUE, FALSE, TRUE),
-  ((SELECT uuid FROM people where "domainUsername" = 'jack'), :reportuuid, TRUE, TRUE, FALSE);
+  ((SELECT uuid FROM people where name = 'STEVESON, Steve'), '8655bf58-4452-4ac0-9221-70b035d8eb7e', TRUE, FALSE, TRUE),
+  ((SELECT uuid FROM people where "domainUsername" = 'jack'), '8655bf58-4452-4ac0-9221-70b035d8eb7e', TRUE, TRUE, FALSE);
 
 -- Authorization groups
 INSERT INTO "authorizationGroups" (uuid, name, description, status, "createdAt", "updatedAt") VALUES
@@ -1209,206 +1185,179 @@ INSERT INTO "customSensitiveInformation" (uuid, "customFieldName", "customFieldV
   ('a7a03d68-7e9a-4697-afec-5b3ca6f17fad', 'politicalPosition', '{"politicalPosition":"MIDDLE"}', 'people', 'c725aef3-cdd1-4baf-ac72-f28219b234e9', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Add some notes and link them to the objects they relate to
-SELECT ('''' || uuid || '''') AS "authorUuid" FROM people WHERE name = 'BECCABON, Rebecca' \gset
-SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
 INSERT INTO notes (uuid, "authorUuid", type, text, "createdAt", "updatedAt") VALUES
-  (:noteUuid, :authorUuid, 0, 'A really nice person to work with', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  ('2c2272f9-a391-45b0-8b87-4660285a1aea', 'f683335a-91e3-4788-aa3f-9eed384f4ac1', 0, 'A really nice person to work with', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
-  SELECT :noteUuid, 'people', p.uuid
+  SELECT '2c2272f9-a391-45b0-8b87-4660285a1aea', 'people', p.uuid
   FROM people p
   WHERE p.rank = 'CIV';
 
-SELECT ('''' || uuid || '''') AS "authorUuid" FROM people WHERE name = 'DMIN, Arthur' \gset
-SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
 INSERT INTO notes (uuid, "authorUuid", type, text, "createdAt", "updatedAt") VALUES
-  (:noteUuid, :authorUuid, 0, '<em>This position should always be filled!</em>', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  ('d28cacfd-64b6-4c54-8e66-005669411803', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 0, '<em>This position should always be filled!</em>', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
-  SELECT :noteUuid, 'positions', p.uuid
+  SELECT 'd28cacfd-64b6-4c54-8e66-005669411803', 'positions', p.uuid
   FROM positions p
   WHERE p.type = 3;
 
 -- Add notes to the positions that will be merged
-SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
 INSERT INTO notes (uuid, "authorUuid", type, text, "createdAt", "updatedAt") VALUES
-  (:noteUuid, :authorUuid, 0, 'Merge one position note', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  ('209e3c8b-25c1-4020-80ca-0fe575fdb821', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 0, 'Merge one position note', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
-  SELECT :noteUuid, 'positions', p.uuid
+  SELECT '209e3c8b-25c1-4020-80ca-0fe575fdb821', 'positions', p.uuid
   FROM positions p
   WHERE p.uuid = '25fe500c-3503-4ba8-a9a4-09b29b50c1f1';
 
-SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
 INSERT INTO notes (uuid, "authorUuid", type, text, "createdAt", "updatedAt") VALUES
-  (:noteUuid, :authorUuid, 0, 'Merge two position note', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  ('0892f17b-24a5-4e23-a00a-2e2bc0af97fa', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 0, 'Merge two position note', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
-  SELECT :noteUuid, 'positions', p.uuid
+  SELECT '0892f17b-24a5-4e23-a00a-2e2bc0af97fa', 'positions', p.uuid
   FROM positions p
   WHERE p.uuid = 'e87f0f60-ad13-4c1c-96f7-672c595b81c7';
 
 -- Add notes to the people that will be merged
-SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
 INSERT INTO notes (uuid, "authorUuid", type, text, "createdAt", "updatedAt") VALUES
-  (:noteUuid, :authorUuid, 0, 'Merge one person note', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  ('990d3165-a5e9-4980-9a05-6658412bd6ec', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 0, 'Merge one person note', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
-  SELECT :noteUuid, 'people', p.uuid
+  SELECT '990d3165-a5e9-4980-9a05-6658412bd6ec', 'people', p.uuid
   FROM people p
   WHERE p.uuid = '3cb2076c-5317-47fe-86ad-76f298993917';
 
-SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
 INSERT INTO notes (uuid, "authorUuid", type, text, "createdAt", "updatedAt") VALUES
-  (:noteUuid, :authorUuid, 0, 'Merge two person note', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  ('b3546f3e-0af6-402c-91ce-09edb7fb1645', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 0, 'Merge two person note', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
-  SELECT :noteUuid, 'people', p.uuid
+  SELECT 'b3546f3e-0af6-402c-91ce-09edb7fb1645', 'people', p.uuid
   FROM people p
   WHERE p.uuid = 'c725aef3-cdd1-4baf-ac72-f28219b234e9';
 
-SELECT ('''' || uuid || '''') AS "authorUuid" FROM people WHERE name = 'ERINSON, Erin' \gset
-SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
 INSERT INTO notes (uuid, "authorUuid", type, text, "createdAt", "updatedAt") VALUES
-  (:noteUuid, :authorUuid, 0, 'Check out this report, it is really positive', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  ('dfcb475c-f7fb-4cbf-9cd0-e10b830fcfaf', 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 0, 'Check out this report, it is really positive', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
-  SELECT :noteUuid, 'reports', r.uuid
+  SELECT 'dfcb475c-f7fb-4cbf-9cd0-e10b830fcfaf', 'reports', r.uuid
   FROM reports r
   WHERE r.atmosphere = 0
   AND r.state != 0;
 
-SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
 INSERT INTO notes (uuid, "authorUuid", type, text, "createdAt", "updatedAt") VALUES
-  (:noteUuid, :authorUuid, 0, 'Report text contains some valuable information, especially for the next meeting', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  ('edceeb21-7587-456d-800d-b6f8b6058c19', 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 0, 'Report text contains some valuable information, especially for the next meeting', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
-  SELECT :noteUuid, 'reports', r.uuid
+  SELECT 'edceeb21-7587-456d-800d-b6f8b6058c19', 'reports', r.uuid
   FROM reports r
   WHERE r.text LIKE 'Today%';
 
 -- Add ondemand assessments to MOD-F and EF 6.2
-SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
 INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
-  (:noteUuid, :authorUuid, 3, 'fields.organization.assessments.interactionPlan', '{"exercises":null,"interaction":"<p>Keep in constant contact</p>","plan":"<p>Organise a face to face meeting</p>","relation":"","priority":"","assessmentDate":"2021-01-01","__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  ('41ed76fa-7446-462b-9dd2-01b710bda199', 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 3, 'fields.organization.assessments.interactionPlan', '{"exercises":null,"interaction":"<p>Keep in constant contact</p>","plan":"<p>Organise a face to face meeting</p>","relation":"","priority":"","assessmentDate":"2021-01-01","__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
-  SELECT :noteUuid, 'organizations', o.uuid
+  SELECT '41ed76fa-7446-462b-9dd2-01b710bda199', 'organizations', o.uuid
   FROM organizations o
   WHERE o."shortName" IN ('MOD-F', 'EF 6.2');
 
-SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
 INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
-  (:noteUuid, :authorUuid, 3, 'fields.organization.assessments.interactionPlan', '{"exercises":null,"interaction":"<p>In constant contact</p>","plan":null,"relation":"maintain","priority":"t1","assessmentDate":"2022-01-01","__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  ('da89afa6-2550-4443-b310-d1519583caa5', 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 3, 'fields.organization.assessments.interactionPlan', '{"exercises":null,"interaction":"<p>In constant contact</p>","plan":null,"relation":"maintain","priority":"t1","assessmentDate":"2022-01-01","__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
-  SELECT :noteUuid, 'organizations', o.uuid
+  SELECT 'da89afa6-2550-4443-b310-d1519583caa5', 'organizations', o.uuid
   FROM organizations o
   WHERE o."shortName" IN ('MOD-F', 'EF 6.2');
 
-SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
 INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
-  (:noteUuid, :authorUuid, 3, 'fields.organization.assessments.interactionPlan', '{"exercises":null,"interaction":"<p>Some interaction took place</p>","plan":"<p>Maintain relationship</p>","relation":"","priority":"t2","assessmentDate":"2023-01-01","__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  ('5e10b957-13b9-4725-977a-2fcdfca7b4ea', 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 3, 'fields.organization.assessments.interactionPlan', '{"exercises":null,"interaction":"<p>Some interaction took place</p>","plan":"<p>Maintain relationship</p>","relation":"","priority":"t2","assessmentDate":"2023-01-01","__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
-  SELECT :noteUuid, 'organizations', o.uuid
+  SELECT '5e10b957-13b9-4725-977a-2fcdfca7b4ea', 'organizations', o.uuid
   FROM organizations o
   WHERE o."shortName" IN ('MOD-F', 'EF 6.2');
 
-SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
 INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
-  (:noteUuid, :authorUuid, 3, 'fields.organization.assessments.organizationOndemand', '{"question1":"<p>First time</p>","enumset":[],"assessmentDate":"2023-09-30","expirationDate":null,"__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  ('566ab80f-c4ba-4d46-a9e3-fe2bf8a2396d', 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 3, 'fields.organization.assessments.organizationOndemand', '{"question1":"<p>First time</p>","enumset":[],"assessmentDate":"2023-09-30","expirationDate":null,"__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
-  SELECT :noteUuid, 'organizations', o.uuid
+  SELECT '566ab80f-c4ba-4d46-a9e3-fe2bf8a2396d', 'organizations', o.uuid
   FROM organizations o
   WHERE o."shortName" IN ('MOD-F', 'EF 6.2');
 
-SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
 INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
-  (:noteUuid, :authorUuid, 3, 'fields.organization.assessments.organizationOndemand', '{"question1":"<p>Second time</p>","enumset":["t4"],"assessmentDate":"2023-10-01","expirationDate":null,"__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  ('27f67faf-6c86-4c87-82cb-17509c16fb8a', 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 3, 'fields.organization.assessments.organizationOndemand', '{"question1":"<p>Second time</p>","enumset":["t4"],"assessmentDate":"2023-10-01","expirationDate":null,"__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
-  SELECT :noteUuid, 'organizations', o.uuid
+  SELECT '27f67faf-6c86-4c87-82cb-17509c16fb8a', 'organizations', o.uuid
   FROM organizations o
   WHERE o."shortName" IN ('MOD-F', 'EF 6.2');
 
-SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
 INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
-  (:noteUuid, :authorUuid, 3, 'fields.organization.assessments.organizationOndemand', '{"question1":"<p>Third time</p>","enumset":["t1","t2","t3","t5"],"assessmentDate":"2023-10-02","expirationDate":"2037-12-31","__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  ('fb2709ad-0fc6-4796-8946-df7dfc816c83', 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 3, 'fields.organization.assessments.organizationOndemand', '{"question1":"<p>Third time</p>","enumset":["t1","t2","t3","t5"],"assessmentDate":"2023-10-02","expirationDate":"2037-12-31","__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
-  SELECT :noteUuid, 'organizations', o.uuid
+  SELECT 'fb2709ad-0fc6-4796-8946-df7dfc816c83', 'organizations', o.uuid
   FROM organizations o
   WHERE o."shortName" IN ('MOD-F', 'EF 6.2');
 
 -- Add ondemand assessments to Christopf
-SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
 INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
-  (:noteUuid, :authorUuid, 3, 'fields.regular.person.assessments.interlocutorOndemandScreeningAndVetting', '{"question2":null,"question1":"fail3","expirationDate":"2024-10-31","assessmentDate":"2024-09-28","questionForChristopf":"c","__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  ('16942947-41c2-478c-93bd-aaf7192a0e77', 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 3, 'fields.regular.person.assessments.interlocutorOndemandScreeningAndVetting', '{"question2":null,"question1":"fail3","expirationDate":"2024-10-31","assessmentDate":"2024-09-28","questionForChristopf":"c","__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
-  SELECT :noteUuid, 'people', p.uuid
+  SELECT '16942947-41c2-478c-93bd-aaf7192a0e77', 'people', p.uuid
   FROM people p
   WHERE p.name = 'TOPFERNESS, Christopf';
 
-SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
 INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
-  (:noteUuid, :authorUuid, 3, 'fields.regular.person.assessments.interlocutorOndemandScreeningAndVetting', '{"question2":null,"question1":"fail2","expirationDate":null,"assessmentDate":"2024-09-30","questionForChristopf":"b","__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  ('252c76e3-979a-4e47-9fde-4683de7556e8', 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 3, 'fields.regular.person.assessments.interlocutorOndemandScreeningAndVetting', '{"question2":null,"question1":"fail2","expirationDate":null,"assessmentDate":"2024-09-30","questionForChristopf":"b","__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
-  SELECT :noteUuid, 'people', p.uuid
+  SELECT '252c76e3-979a-4e47-9fde-4683de7556e8', 'people', p.uuid
   FROM people p
   WHERE p.name = 'TOPFERNESS, Christopf';
 
-SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
 INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
-  (:noteUuid, :authorUuid, 3, 'fields.regular.person.assessments.interlocutorOndemandScreeningAndVetting', '{"question2":null,"question1":"fail1","expirationDate":"2024-10-02","assessmentDate":"2024-10-01","questionForChristopf":"a","__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  ('e910f029-8aef-4440-a870-2711b2d8ffc9', 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 3, 'fields.regular.person.assessments.interlocutorOndemandScreeningAndVetting', '{"question2":null,"question1":"fail1","expirationDate":"2024-10-02","assessmentDate":"2024-10-01","questionForChristopf":"a","__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
-  SELECT :noteUuid, 'people', p.uuid
+  SELECT 'e910f029-8aef-4440-a870-2711b2d8ffc9', 'people', p.uuid
   FROM people p
   WHERE p.name = 'TOPFERNESS, Christopf';
 
 -- Add instant assessments to tasks related to reports
-SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
 INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
-  (:noteUuid, :authorUuid, 3, 'fields.task.assessments.taskOnceReport', '{"__recurrence":"once","__relatedObjectType":"report","question1":4.462819020045945,"question2":"1","question3":"22"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  ('af6165ac-3823-42bf-9e58-a39872701057', 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 3, 'fields.task.assessments.taskOnceReport', '{"__recurrence":"once","__relatedObjectType":"report","question1":4.462819020045945,"question2":"1","question3":"22"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
-  SELECT :noteUuid, 'reports', r.uuid
+  SELECT 'af6165ac-3823-42bf-9e58-a39872701057', 'reports', r.uuid
   FROM reports r
   WHERE r.intent = 'A test report from Arthur';
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
-  SELECT :noteUuid, 'tasks', t.uuid
+  SELECT 'af6165ac-3823-42bf-9e58-a39872701057', 'tasks', t.uuid
   FROM tasks t
   WHERE t."shortName" = '1.2.A';
 
-SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
 INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
-  (:noteUuid, :authorUuid, 3, 'fields.task.assessments.taskOnceReport', '{"__recurrence":"once","__relatedObjectType":"report","question1":3.141592653589793,"question2":"3","question3":"14"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  ('d92e5f9c-b6b4-436f-917d-31bd66bdccf4', 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 3, 'fields.task.assessments.taskOnceReport', '{"__recurrence":"once","__relatedObjectType":"report","question1":3.141592653589793,"question2":"3","question3":"14"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
-  SELECT :noteUuid, 'reports', r.uuid
+  SELECT 'd92e5f9c-b6b4-436f-917d-31bd66bdccf4', 'reports', r.uuid
   FROM reports r
   WHERE r.intent = 'A test report from Arthur';
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
-  SELECT :noteUuid, 'tasks', t.uuid
+  SELECT 'd92e5f9c-b6b4-436f-917d-31bd66bdccf4', 'tasks', t.uuid
   FROM tasks t
   WHERE t."shortName" = '1.2.B';
 
 -- Add periodic assessment for a task
-SELECT ('''' || uuid || '''') AS "authorUuid" FROM people WHERE name = 'ANDERSON, Andrew' \gset
-SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
 INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
-  (:noteUuid, :authorUuid, 3, 'fields.task.assessments.taskMonthly', '{"status":"GREEN","issues":"<ol><li>one</li><li>two</li><li>three</li></ol>","__recurrence":"monthly","__periodStart":"' || to_char(date_trunc('month', CURRENT_TIMESTAMP) + INTERVAL '-1 month', 'YYYY-MM-DD') || '"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  ('be9fdb3c-2bc1-412a-aca9-cc009cbd3314', '1a557db0-5af5-4ea3-b926-28b5f2e88bf7', 3, 'fields.task.assessments.taskMonthly', '{"status":"GREEN","issues":"<ol><li>one</li><li>two</li><li>three</li></ol>","__recurrence":"monthly","__periodStart":"' || to_char(date_trunc('month', CURRENT_TIMESTAMP) + INTERVAL '-1 month', 'YYYY-MM-DD') || '"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
-  SELECT :noteUuid, 'tasks', t.uuid
+  SELECT 'be9fdb3c-2bc1-412a-aca9-cc009cbd3314', 'tasks', t.uuid
   FROM tasks t
   WHERE t."shortName" = '1.1.A';
 
 -- Add periodic assessments for a person
-SELECT ('''' || uuid || '''') AS "authorUuid" FROM people WHERE name = 'JACKSON, Jack' \gset
-SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
 INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
-  (:noteUuid, :authorUuid, 3, 'fields.regular.person.assessments.interlocutorQuarterly', '{"test3":"3","test2":"3","test1":"3","__recurrence":"quarterly","__periodStart":"' || to_char(date_trunc('quarter', CURRENT_TIMESTAMP) + INTERVAL '-3 month', 'YYYY-MM-DD') || '"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  ('995d37c0-1838-4405-996c-6a70ec3e9760', 'b5d495af-44d5-4c35-851a-1039352a8307', 3, 'fields.regular.person.assessments.interlocutorQuarterly', '{"test3":"3","test2":"3","test1":"3","__recurrence":"quarterly","__periodStart":"' || to_char(date_trunc('quarter', CURRENT_TIMESTAMP) + INTERVAL '-3 month', 'YYYY-MM-DD') || '"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
-  SELECT :noteUuid, 'people', p.uuid
+  SELECT '995d37c0-1838-4405-996c-6a70ec3e9760', 'people', p.uuid
   FROM people p
   WHERE p.name = 'ROGWELL, Roger';
-SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
+
 INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
-  (:noteUuid, :authorUuid, 3, 'fields.regular.person.assessments.interlocutorMonthly', '{"text":"sample text","__recurrence":"monthly","__periodStart":"' || to_char(date_trunc('month', CURRENT_TIMESTAMP) + INTERVAL '-1 month', 'YYYY-MM-DD') || '"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  ('4af97017-617d-41ee-93cf-4ab92ef15902', 'b5d495af-44d5-4c35-851a-1039352a8307', 3, 'fields.regular.person.assessments.interlocutorMonthly', '{"text":"sample text","__recurrence":"monthly","__periodStart":"' || to_char(date_trunc('month', CURRENT_TIMESTAMP) + INTERVAL '-1 month', 'YYYY-MM-DD') || '"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
-  SELECT :noteUuid, 'people', p.uuid
+  SELECT '4af97017-617d-41ee-93cf-4ab92ef15902', 'people', p.uuid
   FROM people p
   WHERE p.name = 'ROGWELL, Roger';
 
 -- Add attachments for reports
-SELECT ('''' || uuid || '''') AS "authorUuid" FROM people WHERE name = 'DMIN, Arthur' \gset
 INSERT INTO attachments (uuid, "authorUuid", "fileName", "caption", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt")
-	VALUES ('f076406f-1a9b-4fc9-8ab2-cd2a138ec26d', :authorUuid, 'attachReport.png', 'Arthur''s test report', 'image/png', lo_import('/var/tmp/assets/default_avatar.png'), 12316, 'We can add attachments to a report', 'NU', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES ('f076406f-1a9b-4fc9-8ab2-cd2a138ec26d', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'attachReport.png', 'Arthur''s test report', 'image/png', lo_import('/var/tmp/assets/default_avatar.png'), 12316, 'We can add attachments to a report', 'NU', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT 'f076406f-1a9b-4fc9-8ab2-cd2a138ec26d', 'reports', r.uuid
   FROM reports r
@@ -1416,7 +1365,7 @@ INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "
 
 -- Add attachments for locations
 INSERT INTO attachments (uuid, "authorUuid", "fileName", "caption", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt")
-	VALUES ('f7cd5b02-ef73-4ee8-814b-c5a7a916685d', :authorUuid, 'attachLocation.png', 'Antarctica', 'image/png', lo_import('/var/tmp/assets/default_avatar.png'), 12316, 'We can add attachments to a location', 'NU_rel_EU', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES ('f7cd5b02-ef73-4ee8-814b-c5a7a916685d', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'attachLocation.png', 'Antarctica', 'image/png', lo_import('/var/tmp/assets/default_avatar.png'), 12316, 'We can add attachments to a location', 'NU_rel_EU', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT 'f7cd5b02-ef73-4ee8-814b-c5a7a916685d', 'locations', loc.uuid
   FROM locations loc
@@ -1424,9 +1373,9 @@ INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "
 
 -- Add attachments for organizations
 INSERT INTO attachments (uuid, "authorUuid", "fileName", "caption", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt") VALUES
-  ('9ac41246-25ac-457c-b7d6-946c5f625f1f', :authorUuid, 'attachOrganization.png', 'EF 2.2', 'image/png', lo_import('/var/tmp/assets/default_avatar.png'), 12316, 'We can add attachments to an organization', 'public', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('e32b6c9d-45d5-41db-b45a-123ed1975602', :authorUuid, 'avatar', 'Merge Org 1', 'image/svg+xml', lo_import('/var/tmp/assets/organization_avatar1.svg'), 2736, NULL, 'public', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('5408075e-9126-4201-a631-f72ffe8b54e5', :authorUuid, 'avatar', 'Merge Org 2', 'image/svg+xml', lo_import('/var/tmp/assets/organization_avatar2.svg'), 2928, NULL, 'public', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  ('9ac41246-25ac-457c-b7d6-946c5f625f1f', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'attachOrganization.png', 'EF 2.2', 'image/png', lo_import('/var/tmp/assets/default_avatar.png'), 12316, 'We can add attachments to an organization', 'public', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('e32b6c9d-45d5-41db-b45a-123ed1975602', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'avatar', 'Merge Org 1', 'image/svg+xml', lo_import('/var/tmp/assets/organization_avatar1.svg'), 2736, NULL, 'public', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('5408075e-9126-4201-a631-f72ffe8b54e5', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'avatar', 'Merge Org 2', 'image/svg+xml', lo_import('/var/tmp/assets/organization_avatar2.svg'), 2928, NULL, 'public', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "relatedObjectUuid") VALUES
   ('9ac41246-25ac-457c-b7d6-946c5f625f1f', 'organizations', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b'),
   ('e32b6c9d-45d5-41db-b45a-123ed1975602', 'organizations', '381d5435-8852-45d2-91b1-530560ca9d8c'),
@@ -1440,8 +1389,8 @@ INSERT INTO "entityAvatars" ("relatedObjectType", "relatedObjectUuid", "attachme
 
 -- Add attachments for people
 INSERT INTO attachments (uuid, "authorUuid", "fileName", "caption", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt") VALUES
-  ('3187ad8a-6130-4ec0-bffc-9ebfad4dee39', :authorUuid, 'attachPerson.png', 'Michael', 'image/png', lo_import('/var/tmp/assets/default_avatar.png'), 12316, 'We can add attachments to a person', 'public', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('13318e42-a0a3-438f-8ed5-dc16b1ef17bc', :authorUuid, 'attachPerson.png', 'Erin', 'image/png', lo_import('/var/tmp/assets/default_avatar.png'), 12316, 'We can add attachments to a person', 'public', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  ('3187ad8a-6130-4ec0-bffc-9ebfad4dee39', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'attachPerson.png', 'Michael', 'image/png', lo_import('/var/tmp/assets/default_avatar.png'), 12316, 'We can add attachments to a person', 'public', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('13318e42-a0a3-438f-8ed5-dc16b1ef17bc', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'attachPerson.png', 'Erin', 'image/png', lo_import('/var/tmp/assets/default_avatar.png'), 12316, 'We can add attachments to a person', 'public', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "relatedObjectUuid") VALUES
   ('3187ad8a-6130-4ec0-bffc-9ebfad4dee39', 'people', '46ba6a73-0cd7-4efb-8e99-215e98cc5987'),
   ('13318e42-a0a3-438f-8ed5-dc16b1ef17bc', 'people', 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9');

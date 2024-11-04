@@ -1,13 +1,12 @@
 package mil.dds.anet.beans;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.UuidFetcher;
@@ -85,7 +84,7 @@ public class Attachment extends AbstractAnetBean {
   }
 
   @GraphQLQuery(name = "author")
-  public CompletableFuture<Person> loadAuthor(@GraphQLRootContext Map<String, Object> context) {
+  public CompletableFuture<Person> loadAuthor(@GraphQLRootContext GraphQLContext context) {
     if (author.hasForeignObject()) {
       return CompletableFuture.completedFuture(author.getForeignObject());
     }
@@ -125,15 +124,14 @@ public class Attachment extends AbstractAnetBean {
 
   @GraphQLQuery(name = "attachmentRelatedObjects")
   public CompletableFuture<List<GenericRelatedObject>> loadAttachmentRelatedObjects(
-      @GraphQLRootContext Map<String, Object> context) {
+      @GraphQLRootContext GraphQLContext context) {
     if (attachmentRelatedObjects != null) {
       return CompletableFuture.completedFuture(attachmentRelatedObjects);
     }
-    return AnetObjectEngine.getInstance().getAttachmentDao().getRelatedObjects(context, this)
-        .thenApply(o -> {
-          attachmentRelatedObjects = o;
-          return o;
-        });
+    return engine().getAttachmentDao().getRelatedObjects(context, this).thenApply(o -> {
+      attachmentRelatedObjects = o;
+      return o;
+    });
   }
 
   public List<GenericRelatedObject> getAttachmentRelatedObjects() {

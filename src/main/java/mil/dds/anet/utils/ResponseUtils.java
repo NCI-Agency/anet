@@ -1,18 +1,11 @@
 package mil.dds.anet.utils;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.net.HttpHeaders;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.container.ContainerRequestContext;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.lang.invoke.MethodHandles;
-import java.util.HashMap;
-import java.util.Map;
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -29,6 +22,8 @@ import javax.xml.xpath.XPathFactory;
 import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -131,30 +126,6 @@ public class ResponseUtils {
     return null;
   }
 
-  private static ObjectMapper mapper = new ObjectMapper();
-
-  public static Response withMsg(String msg, Status status) {
-    Map<String, Object> entity = new HashMap<String, Object>();
-    entity.put("msg", msg);
-    entity.put("status", status.getStatusCode());
-    return Response.status(status).entity(entity).build();
-  }
-
-  /*
-   * Tries to convert the parameters in an httpRequest into bean.
-   * 
-   * @throws IllegalArgumentException if conversion fails. see {ObjectMapper.convertValue}
-   */
-  public static <T> T convertParamsToBean(HttpServletRequest request, Class<T> beanClazz)
-      throws IllegalArgumentException {
-    Map<String, String[]> paramsRaw = request.getParameterMap();
-    Map<String, String> params = new HashMap<String, String>();
-    for (Map.Entry<String, String[]> entry : paramsRaw.entrySet()) {
-      params.put(entry.getKey(), entry.getValue()[0]);
-    }
-    return mapper.convertValue(params, beanClazz);
-  }
-
   public static String toPrettyString(String xml, int indent) {
     try {
       // Turn XML string into a document
@@ -196,7 +167,7 @@ public class ResponseUtils {
     }
   }
 
-  public static WebApplicationException handleSqlException(UnableToExecuteStatementException e,
+  public static ResponseStatusException handleSqlException(UnableToExecuteStatementException e,
       String userMessage) {
     // FIXME: Ugly way to handle unique index
     final Throwable cause = e.getCause();
@@ -207,11 +178,11 @@ public class ResponseUtils {
         logger.error("Duplicate found", e);
         logger.error("Caused by", cause);
         logger.error("With message: {}", message);
-        return new WebApplicationException(userMessage, Status.CONFLICT);
+        return new ResponseStatusException(HttpStatus.CONFLICT, userMessage);
       }
     }
     logger.error("Unexpected SQL exception raised", e);
-    return new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
+    return new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
   public static String getRemoteAddr(final HttpServletRequest request) {
@@ -219,13 +190,13 @@ public class ResponseUtils {
     return remoteAddr == null ? "-" : remoteAddr;
   }
 
-  public static String getReferer(final ContainerRequestContext requestContext) {
-    final String referer = requestContext.getHeaderString(HttpHeaders.REFERER);
-    return referer == null ? "-" : referer;
+  public static boolean ignoreActivity(final HttpServletRequest request) {
+    final String activityHeader = request.getHeader("x-activity");
+    return "ignore".equals(activityHeader);
   }
 
-  public static boolean ignoreActivity(final ContainerRequestContext requestContext) {
-    final String activityHeader = requestContext.getHeaderString("x-activity");
-    return "ignore".equals(activityHeader);
+  public static String getReferer(final HttpServletRequest request) {
+    final String referer = request.getHeader(HttpHeaders.REFERER);
+    return referer == null ? "-" : referer;
   }
 }

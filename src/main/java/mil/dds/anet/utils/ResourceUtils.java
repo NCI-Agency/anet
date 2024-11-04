@@ -1,17 +1,17 @@
 package mil.dds.anet.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response.Status;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.Map;
-import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Note;
 import mil.dds.anet.beans.Note.NoteType;
 import mil.dds.anet.beans.PersonPositionHistory;
+import mil.dds.anet.config.ApplicationContextProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 public class ResourceUtils {
 
@@ -23,12 +23,12 @@ public class ResourceUtils {
       final String relationUuid) {
     // Check if uuid is null
     if (uuid == null) {
-      throw new WebApplicationException("Uuid cannot be null.", Status.BAD_REQUEST);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Uuid cannot be null.");
     }
 
     if (Utils.isEmptyOrNull(previousPositions)) {
       if (relationUuid != null) {
-        throw new WebApplicationException("History should not be empty.", Status.BAD_REQUEST);
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "History should not be empty.");
       }
       return;
     }
@@ -37,19 +37,18 @@ public class ResourceUtils {
     for (final PersonPositionHistory pph : previousPositions) {
       // Check if start time is null
       if (pph.getStartTime() == null) {
-        throw new WebApplicationException("Start time cannot be empty.", Status.BAD_REQUEST);
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Start time cannot be empty.");
       }
 
       if (pph.getEndTime() == null) {
         // Check if end time is null more than once
         if (seenNullEndTime) {
-          throw new WebApplicationException(
-              "There cannot be more than one history entry without an end time.",
-              Status.BAD_REQUEST);
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+              "There cannot be more than one history entry without an end time.");
         }
         if (relationUuid == null) {
-          throw new WebApplicationException("History entry must have an end time.",
-              Status.BAD_REQUEST);
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+              "History entry must have an end time.");
         } else {
           final String uuidToCheck =
               DaoUtils.getUuid(checkPerson ? pph.getPosition() : pph.getPerson());
@@ -57,23 +56,23 @@ public class ResourceUtils {
               checkPerson ? "Last history entry must be identical to person's current position."
                   : "Last history entry must be identical to position's current person.";
           if (!relationUuid.equals(uuidToCheck)) {
-            throw new WebApplicationException(message, Status.BAD_REQUEST);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
           }
         }
         seenNullEndTime = true;
       } else {
         // Check if end time is before start time
         if (pph.getEndTime().isBefore(pph.getStartTime())) {
-          throw new WebApplicationException("End time cannot before start time.",
-              Status.BAD_REQUEST);
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+              "End time cannot before start time.");
         }
       }
     }
 
     // If has relation and there is no last entry in history
     if (relationUuid != null && !seenNullEndTime) {
-      throw new WebApplicationException("There should be a history entry without an end time.",
-          Status.BAD_REQUEST);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "There should be a history entry without an end time.");
     }
 
     // Check for conflicts
@@ -82,7 +81,8 @@ public class ResourceUtils {
       final PersonPositionHistory pph = previousPositions.get(i);
       for (int j = i + 1; j < historySize; j++) {
         if (overlap(pph, previousPositions.get(j))) {
-          throw new WebApplicationException("History entries should not overlap.", Status.CONFLICT);
+          throw new ResponseStatusException(HttpStatus.CONFLICT,
+              "History entries should not overlap.");
         }
       }
     }
@@ -107,7 +107,7 @@ public class ResourceUtils {
 
   private static void checkAndFixText(final Note n) {
     if (n.getText() == null || n.getText().trim().isEmpty()) {
-      throw new WebApplicationException("Note text must not be empty", Status.BAD_REQUEST);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Note text must not be empty");
     }
     sanitizeText(n);
   }
@@ -127,13 +127,13 @@ public class ResourceUtils {
 
   private static void checkNoteRelatedObjects(final Note n) {
     if (Utils.isEmptyOrNull(n.getNoteRelatedObjects())) {
-      throw new WebApplicationException("Note must have related objects", Status.BAD_REQUEST);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Note must have related objects");
     }
   }
 
   @SuppressWarnings("unchecked")
   public static Map<String, String> getAllowedClassifications() {
-    return (Map<String, String>) ((Map<String, Object>) AnetObjectEngine.getConfiguration()
+    return (Map<String, String>) ((Map<String, Object>) ApplicationContextProvider.getDictionary()
         .getDictionaryEntry("classification")).get("choices");
   }
 
@@ -142,7 +142,7 @@ public class ResourceUtils {
       // if the classification is set, check if it is valid
       final var allowedClassifications = getAllowedClassifications();
       if (!allowedClassifications.containsKey(classificationKey)) {
-        throw new WebApplicationException("Classification is not allowed", Status.BAD_REQUEST);
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Classification is not allowed");
       }
     }
   }

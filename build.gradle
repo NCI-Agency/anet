@@ -20,19 +20,22 @@ apply plugin: 'checkstyle'
 apply plugin: 'project-report' // adds dependencyReport and htmlDependencyReport tasks
 
 java {
-  sourceCompatibility = 17
-  targetCompatibility = 17
+	sourceCompatibility = 17
+	targetCompatibility = 17
 }
 
 boolean isTestEnv = project.hasProperty("testEnv")
-String dropwizardVersion = "4.0.8"
-String logbackVersion = "1.4.14"
-String log4jVersion = "2.24.1"
-String keycloakVersion = "24.0.5"
+String jdbi3Version = "3.45.4"
+String jupiterVersion = "5.11.1"
+String keycloakVersion = "26.0.5"
+String poiVersion = "5.3.0"
+String powermockVersion = "2.0.9"
+String simplejavamailVersion = "8.12.0"
 String springBootVersion = "3.3.4"
 String springFrameworkVersion = "6.1.13"
 String springGraphqlVersion = "1.2.8"
 String springSecurityVersion = "6.3.3"
+String springShellVersion = "3.3.2"
 String psqlPushDataPath = "/var/tmp"
 String keycloakContainerPath = "/opt/keycloak"
 String keycloakPushDataPath = "${keycloakContainerPath}/data"
@@ -52,9 +55,10 @@ run.environment("ANET_DB_SERVER", run.environment["ANET_DB_SERVER"] ?: "localhos
 run.environment("ANET_DB_NAME", run.environment["ANET_DB_NAME"] ?: isTestEnv ? "testAnet" : "devAnet")
 run.environment("ANET_DB_USERNAME", run.environment["ANET_DB_USERNAME"] ?: isTestEnv ? "anetTestUser" : "anetDevUser")
 run.environment("ANET_DB_PASSWORD", run.environment["ANET_DB_PASSWORD"] ?: isTestEnv ? "Test-P@ssw0rd" : "Dev-P@ssw0rd")
-run.environment("ANET_SA_PASSWORD", run.environment["ANET_SA_PASSWORD"] ?: "SA-P@ssw0rd")
 run.environment("ANET_DB_PORT", run.environment["ANET_DB_PORT"] ?: "5432")
-run.environment("ANET_DB_EXPOSED_PORT", run.environment["ANET_DB_EXPOSED_PORT"] ?: (isTestEnv ? "5433" : "5432"))
+run.environment("ANET_DB_EXPOSED_PORT", run.environment["ANET_DB_EXPOSED_PORT"] ?: isTestEnv ? "5433" : "5432")
+run.environment("ANET_DB_DROP", run.environment["ANET_DB_DROP"] ?: isTestEnv ? "true" : "false")
+run.environment("ANET_DB_MIGRATE", run.environment["ANET_DB_MIGRATE"] ?: "true")
 run.environment("ANET_PORT", run.environment["ANET_PORT"] ?: isTestEnv ? "8180" : "8080")
 run.environment("ANET_ADMIN_PORT", run.environment["ANET_ADMIN_PORT"] ?: isTestEnv ? "8181" : "8081")
 run.environment("ANET_SMTP_DISABLE", run.environment["ANET_SMTP_DISABLE"] ?: isTestEnv ? "false" : "true")
@@ -67,8 +71,8 @@ run.environment("ANET_SMTP_SSLTRUST", run.environment["ANET_SMTP_SSLTRUST"] ?: r
 run.environment("ANET_SMTP_HTTP_PORT", run.environment["ANET_SMTP_HTTP_PORT"] ?: isTestEnv ? 1180 : 1080)
 run.environment("ANET_DICTIONARY_NAME", run.environment["ANET_DICTIONARY_NAME"] ?: "anet-dictionary.yml")
 run.environment("ANET_TEST_MODE", run.environment["ANET_TEST_MODE"] ?: isTestEnv ? "true" : "false")
+run.environment("SPRING_PROFILES_ACTIVE", run.environment["SPRING_PROFILES_ACTIVE"] ?: isTestEnv ? "test" : "dev")
 
-String anetConfig = run.environment["ANET_CONFIG"] ?: "anet.yml"
 String adminOrgName = run.environment["ANET_ADMIN_ORG_NAME"] ?: "ANET Administrators"
 String adminPosName = run.environment["ANET_ADMIN_POS_NAME"] ?: "ANET Administrator"
 String adminFullName = run.environment["ANET_ADMIN_FULL_NAME"] ?: "DMIN, Arthur"
@@ -86,23 +90,14 @@ repositories {
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
-	// The production code uses the SLF4J logging API at compile time
-	implementation "io.dropwizard:dropwizard-core:${dropwizardVersion}"
-	implementation "io.dropwizard:dropwizard-jdbi3:${dropwizardVersion}"
-	implementation "io.dropwizard:dropwizard-migrations:${dropwizardVersion}"
-	implementation "io.dropwizard:dropwizard-auth:${dropwizardVersion}"
-	implementation "io.dropwizard:dropwizard-views-freemarker:${dropwizardVersion}"
-	implementation "io.dropwizard:dropwizard-forms:${dropwizardVersion}"
-	implementation "org.jdbi:jdbi3-postgres:3.45.4"
-
-	implementation 'ru.vyarus.guicey:guicey-jdbi3:7.1.4'
-	implementation 'com.google.guava:guava:33.3.1-jre' // Pick the non-Android version of Guice
-
 	// Supported database is PostgreSQL:
 	implementation 'org.postgresql:postgresql:42.7.4'
 	implementation 'org.liquibase:liquibase-core:4.29.2'
+	implementation "org.jdbi:jdbi3-postgres:${jdbi3Version}" // For the SqlObjectPlugin
+	implementation "org.jdbi:jdbi3-spring5:${jdbi3Version}"
+	implementation 'com.google.guava:guava:33.3.1-jre' // Pick the non-Android version
 
-	// For caching domain users (used in every request in the AuthenticationFilter)
+	// For caching domain users (used in every authenticated request)
 	implementation('org.ehcache:ehcache:3.10.8') {
 		capabilities {
 			requireCapability('org.ehcache:ehcache-jakarta')
@@ -111,18 +106,10 @@ dependencies {
 	implementation 'javax.cache:cache-api:1.1.1'
 	implementation 'commons-beanutils:commons-beanutils:1.9.4'
 
-	implementation 'org.simplejavamail:simple-java-mail:8.12.0'
+	implementation "org.simplejavamail:simple-java-mail:${simplejavamailVersion}"
 	implementation 'org.eclipse.angus:jakarta.mail:2.0.3'
-	implementation "ch.qos.logback:logback-classic:${logbackVersion}"
-	implementation "ch.qos.logback:logback-core:${logbackVersion}"
-	implementation "ch.qos.logback:logback-access:${logbackVersion}"
 	implementation 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20240325.1'
 	implementation 'com.mikesamuel:json-sanitizer:1.2.3'
-	// Authentication
-	implementation 'de.ahus1.keycloak.dropwizard:keycloak-dropwizard:3.0.0'
-	implementation "org.keycloak:keycloak-adapter-core:${keycloakVersion}"
-	implementation "org.keycloak:keycloak-jaxrs-oauth-client:${keycloakVersion}"
-	implementation "org.keycloak:keycloak-policy-enforcer:${keycloakVersion}"
 
 	// Used for converting GraphQL request output to XML:
 	implementation 'com.github.javadev:underscore-lodash:1.26'
@@ -130,8 +117,8 @@ dependencies {
 	implementation 'com.networknt:json-schema-validator:1.5.2'
 
 	// used for writing Excel documents
-	implementation 'org.apache.poi:poi:5.3.0'
-	implementation 'org.apache.poi:poi-ooxml:5.3.0'
+	implementation "org.apache.poi:poi:${poiVersion}"
+	implementation "org.apache.poi:poi-ooxml:${poiVersion}"
 	// For inferring MIME types of attachments
 	implementation 'org.apache.tika:tika-core:3.0.0'
 
@@ -141,39 +128,39 @@ dependencies {
 	// GraphQL dependencies
 	implementation 'com.graphql-java:graphql-java:21.5'
 	implementation 'com.graphql-java:java-dataloader:3.3.0'
-	implementation 'io.leangen.graphql:spqr:0.12.4'
+	// GraphQL/Spring integration
+	implementation 'io.leangen.graphql:graphql-spqr-spring-boot-starter:1.0.1'
+	// Spring dependencies
+	implementation "org.springframework.boot:spring-boot-starter-web:${springBootVersion}"
+	implementation "org.springframework.boot:spring-boot-starter-data-jpa:${springBootVersion}"
+	implementation "org.springframework.boot:spring-boot-starter-freemarker:${springBootVersion}"
+	implementation "org.springframework.boot:spring-boot-starter-oauth2-client:${springBootVersion}"
+	implementation "org.springframework.boot:spring-boot-starter-oauth2-resource-server:${springBootVersion}"
+	implementation "org.springframework.boot:spring-boot-starter-security:${springBootVersion}"
+	implementation "org.springframework.security:spring-security-config:${springSecurityVersion}"
+	implementation "org.springframework.shell:spring-shell-starter:${springShellVersion}"
+
 	// The graphql-java-client-runtime module aggregates all dependencies for the generated code,
 	// including the plugin runtime
 	testImplementation 'com.graphql-java-generator:graphql-java-client-runtime:2.8'
 	testImplementation "org.springframework.boot:spring-boot-starter-test:${springBootVersion}"
 	constraints {
 		// Force some transitive Spring dependencies to the expected version
-		testImplementation "org.springframework:spring-context:${springFrameworkVersion}"
 		testImplementation "org.springframework.graphql:spring-graphql:${springGraphqlVersion}"
-		testImplementation "org.springframework.security:spring-security-oauth2-client:${springSecurityVersion}"
-		testImplementation "org.springframework.boot:spring-boot-starter-security:${springBootVersion}"
 		testImplementation "org.springframework.boot:spring-boot-starter-webflux:${springBootVersion}"
 	}
 	// We use some extended scalars in `generateClientCodeConf` below
 	testImplementation 'com.graphql-java:graphql-java-extended-scalars:21.0'
 
-	testImplementation "io.dropwizard:dropwizard-testing:${dropwizardVersion}"
-	testImplementation "io.dropwizard:dropwizard-client:${dropwizardVersion}"
-
 	testImplementation 'org.assertj:assertj-core:3.26.3'
 
-	testImplementation 'org.powermock:powermock-api-mockito2:2.0.9'
-	testImplementation 'org.powermock:powermock-module-junit4:2.0.9'
-	testImplementation 'org.powermock:powermock-module-junit4-rule:2.0.9'
+	testImplementation "org.powermock:powermock-api-mockito2:${powermockVersion}"
+	testImplementation "org.powermock:powermock-module-junit4:${powermockVersion}"
+	testImplementation "org.powermock:powermock-module-junit4-rule:${powermockVersion}"
 
-	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.11.1'
-	testImplementation 'org.junit.jupiter:junit-jupiter-params:5.11.1'
-	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.11.1'
-
-	// Avoid "ERROR StatusLogger Log4j2 could not find a logging implementation.
-	// Please add log4j-core to the classpath. Using SimpleLogger to log to the console..."
-	implementation "org.apache.logging.log4j:log4j-api:${log4jVersion}"
-	implementation "org.apache.logging.log4j:log4j-to-slf4j:${log4jVersion}"
+	testImplementation "org.junit.jupiter:junit-jupiter-api:${jupiterVersion}"
+	testImplementation "org.junit.jupiter:junit-jupiter-params:${jupiterVersion}"
+	testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${jupiterVersion}"
 }
 
 configurations.all {
@@ -182,6 +169,8 @@ configurations.all {
 	// Also exclude XML API's to avoid (Eclipse) warnings like
 	//   "The package org.w3c.dom is accessible from more than one module: <unnamed>, java.xml"
 	exclude group: 'xml-apis'
+	// For Spring:
+	exclude module: 'commons-logging'
 }
 
 test {
@@ -189,8 +178,6 @@ test {
 	jacoco {
 		destinationFile = file("$buildDir/jacoco/test-${run.environment['DB_DRIVER']}.exec")
 	}
-        // Prevent java.lang.NoClassDefFoundError: org/slf4j/impl/StaticLoggerBinder from Spring Boot
-	systemProperty "org.springframework.boot.logging.LoggingSystem", "none"
 }
 
 jacoco {
@@ -231,7 +218,7 @@ runtime {
 	]
 
 	jpackage {
-	    appVersion = project.version.replace("-",".") // rpmbuild doesn't like versions with dashes
+		appVersion = project.version.replace("-",".") // rpmbuild doesn't like versions with dashes
 	}
 }
 
@@ -251,8 +238,8 @@ projectBranch = projectBranch.text.trim();
 project.group = "ncia"
 
 application {
-  mainClass = "mil.dds.anet.AnetApplication"
-  applicationDefaultJvmArgs = ["-Djava.library.path=MY_APP_HOME/lib"]
+	mainClass = "mil.dds.anet.AnetApplication"
+	applicationDefaultJvmArgs = ["-Djava.library.path=MY_APP_HOME/lib"]
 }
 
 String dbLoc = run.environment['ANET_DB_SERVER']
@@ -275,13 +262,11 @@ if (run.environment['DB_DRIVER'] == "sqlserver") {
 
 test.environment = run.environment
 
-run.args = ["server", anetConfig]
-
-task checkConfig(dependsOn: 'compileJava', type: JavaExec) {
+task checkConfig(type: JavaExec, dependsOn: 'compileJava') {
 	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
 	mainClass = application.mainClass
-	args = ["check", anetConfig]
+	args = ["check"]
 }
 
 task buildClient(dependsOn: 'yarn', type: YarnTask) {
@@ -297,16 +282,6 @@ task buildClient(dependsOn: 'yarn', type: YarnTask) {
 	args = ['run', 'build']
 }
 
-task dbWait(dependsOn: 'compileJava', type: JavaExec) {
-	group = "database runtime"
-	description = "Wait for the ANET database to become available."
-	classpath = sourceSets.main.runtimeClasspath
-	environment(run.environment)
-	mainClass = application.mainClass
-	args = ["waitForDB", anetConfig]
-}
-dbWait.mustRunAfter('dockerStartDB')
-
 // Create the task that runs the initialization command. Run with:
 //   ./gradlew dbInit
 // to use the defaults. You can override the defaults with environment variables:
@@ -314,12 +289,11 @@ dbWait.mustRunAfter('dockerStartDB')
 //       ANET_ADMIN_POS_NAME="The ANET admin" \
 //       ANET_ADMIN_FULL_NAME="DOE, John" \
 //       ANET_ADMIN_DOMAIN_USERNAME="johndoe" \
-//       ANET_CONFIG="anet.yml" \
 //       ./gradlew dbInit
 // To see all options, run:
 //   ./gradlew dbInit -Pargs="--help"
 // which will print the help.
-task dbInit(dependsOn: 'compileJava', type: JavaExec) {
+task dbInit(type: JavaExec, dependsOn: 'compileJava') {
 	group = "database runtime"
 	description = "Runs the ANET database initialization command."
 	classpath = sourceSets.main.runtimeClasspath
@@ -327,101 +301,24 @@ task dbInit(dependsOn: 'compileJava', type: JavaExec) {
 	mainClass = application.mainClass
 	def cmdline = ["init"]
 	if (project.hasProperty("args")) {
-		cmdline.add(project.args)
+		cmdline.addAll(project.args.split("\\s+"))
 	} else {
 		cmdline.addAll([
 			"--adminOrgName", adminOrgName,
 			"--adminPosName", adminPosName,
 			"--adminFullName", adminFullName,
-			"--adminDomainUsername", adminDomainUsername,
-			anetConfig
+			"--adminDomainUsername", adminDomainUsername
 		])
 	}
 	args cmdline
 }
 
-task dbStatus(dependsOn: 'compileJava', type: JavaExec) {
-	group = "database runtime"
-	description = "Runs the ANET database status (Liquibase) command."
-	classpath = sourceSets.main.runtimeClasspath
-	environment(run.environment)
-	mainClass = application.mainClass
-	args = ["db", "status", anetConfig]
-}
-
-task dbPrep(dependsOn: 'compileJava', type: JavaExec) {
-	group = "database runtime"
-	description = "Runs the ANET database preparation command."
-	classpath = sourceSets.main.runtimeClasspath
-	environment(run.environment)
-	mainClass = application.mainClass
-	args = ["dbScript", "-S", "prepare-psql.sql", anetConfig]
-}
-dbPrep.mustRunAfter('dbWait')
-
-task dbMigrate(dependsOn: dbPrep, type: JavaExec) {
-	group = "database runtime"
-	description = "Runs the ANET database migration (Liquibase) command."
-	classpath = sourceSets.main.runtimeClasspath
-	environment(run.environment)
-	mainClass = application.mainClass
-	args = ["db", "migrate", anetConfig]
-	if (project.hasProperty("dry-run")) {
-		args += "--dry-run"
-	}
-}
-dbMigrate.mustRunAfter('dbDrop')
-
-task dbTest(dependsOn: 'compileJava', type: JavaExec) {
-	group = "database runtime"
-	description = "Runs the ANET database migration test (Liquibase) command."
-	classpath = sourceSets.main.runtimeClasspath
-	environment(run.environment)
-	mainClass = application.mainClass
-	args = ["db", "test", anetConfig]
-}
-dbTest.mustRunAfter('dbWait')
-
-task dbRollback(dependsOn: 'compileJava', type: JavaExec) {
-	group = "database runtime"
-	description = "Runs the ANET database migration rollback (Liquibase) command."
-	classpath = sourceSets.main.runtimeClasspath
-	environment(run.environment)
-	mainClass = application.mainClass
-	args = ["db", "rollback", anetConfig, "--count", "1"]
-	if (project.hasProperty("dry-run")) {
-		args += "--dry-run"
-	}
-}
-dbRollback.mustRunAfter('dbWait')
-
-task dbDrop(dependsOn: 'compileJava', type: JavaExec) {
-	group = "database runtime"
-	description = "Runs the ANET database drop-all (Liquibase) command."
-	classpath = sourceSets.main.runtimeClasspath
-	environment(run.environment)
-	mainClass = application.mainClass
-	args = ["db", "drop-all", "--confirm-delete-everything", anetConfig]
-}
-dbDrop.mustRunAfter('dbWait')
-dbDrop.finalizedBy('dbDropLargeObjects')
-
 task dbDropLargeObjects(type: DockerExecContainer) {
 	group = "database runtime"
 	description = "Drop unreferenced large objects from the database"
 	containerId = dbContainerName
-	commands = [ ["vacuumlo", "-U", run.environment["ANET_DB_USERNAME"], run.environment["ANET_DB_NAME"]] as String[] ]
+	commands = [ ["vacuumlo", "-v", "-U", run.environment["ANET_DB_USERNAME"], run.environment["ANET_DB_NAME"]] as String[] ]
 }
-dbDropLargeObjects.mustRunAfter('dbDrop')
-
-task pushPsqlBaseData(type: DockerCopyFileToContainer) {
-	group = "database runtime"
-	description = "Push SQL base data to PostgreSQL"
-	containerId = dbContainerName
-	hostPath = "${projectDir}/insertBaseData-psql.sql"
-	remotePath = psqlPushDataPath
-}
-pushPsqlBaseData.mustRunAfter('dockerStartDB')
 
 task pushPsqlImageData(type: DockerCopyFileToContainer) {
 	group = "database runtime"
@@ -430,16 +327,18 @@ task pushPsqlImageData(type: DockerCopyFileToContainer) {
 	hostPath = "${projectDir}/src/test/resources/assets/"
 	remotePath = psqlPushDataPath
 }
-pushPsqlImageData.mustRunAfter('dockerStartDB')
 
-task dbLoad(dependsOn: [pushPsqlBaseData, pushPsqlImageData], type: DockerExecContainer) {
+task dbLoad(type: JavaExec, dependsOn: pushPsqlImageData) {
 	group = "database runtime"
 	description = "Runs the ANET database load command for PostgreSQL; loads demo data."
-	containerId = dbContainerName
-	commands = [ ["psql", "-b", "-v", "ON_ERROR_STOP=1", "-U", run.environment["ANET_DB_USERNAME"], "-d", run.environment["ANET_DB_NAME"], "-f", "${psqlPushDataPath}/insertBaseData-psql.sql"] as String[] ]
-	successOnExitCodes = [0]
+	classpath = sourceSets.main.runtimeClasspath
+	def dbLoadEnvironment = [*:run.environment]
+	dbLoadEnvironment["ANET_DB_DROP"] = "false"
+	dbLoadEnvironment["ANET_DB_MIGRATE"] = "false"
+	environment(dbLoadEnvironment)
+	mainClass = application.mainClass
+	args = ["dbScript", "-S", "insertBaseData-psql.sql"]
 }
-dbLoad.mustRunAfter('dbMigrate')
 
 task deleteDbDump(type: DockerExecContainer) {
 	group = "database runtime"
@@ -452,7 +351,7 @@ task dbDump(type: DockerExecContainer, dependsOn: deleteDbDump) {
 	group = "database runtime"
 	description = "Dumps the ANET database in the container"
 	containerId = dbContainerName
-	commands = [ ["pg_dump", "-U", run.environment["ANET_DB_USERNAME"], "-d", run.environment["ANET_DB_NAME"], "-f", "${psqlPushDataPath}/${run.environment["ANET_DB_NAME"]}-db-dump.sql"] as String[] ]
+	commands = [ ["pg_dump", "-c", "-U", run.environment["ANET_DB_USERNAME"], "-d", run.environment["ANET_DB_NAME"], "-f", "${psqlPushDataPath}/${run.environment["ANET_DB_NAME"]}-db-dump.sql"] as String[] ]
 }
 
 task extractDbDump(type: DockerCopyFileFromContainer, dependsOn: dbDump) {
@@ -471,12 +370,13 @@ task pushDbDump(type: DockerCopyFileToContainer) {
 	remotePath = psqlPushDataPath
 }
 
-task dbRestore(type: DockerExecContainer, dependsOn: [pushDbDump, dbDrop]) {
+task dbRestore(type: DockerExecContainer, dependsOn: pushDbDump) {
 	group = "database runtime"
 	description = "Restores the ANET database in the container"
 	containerId = dbContainerName
 	commands = [ ["psql", "-U", run.environment["ANET_DB_USERNAME"], "-d", run.environment["ANET_DB_NAME"], "-f", "${psqlPushDataPath}/${run.environment["ANET_DB_NAME"]}-db-dump.sql"] as String[] ]
 }
+dbRestore.finalizedBy('dbDropLargeObjects')
 
 task dockerBuildImage(dependsOn: installDist, type: DockerBuildImage) {
 	description = "Builds anet-app-server container image."
@@ -486,7 +386,7 @@ task dockerBuildImage(dependsOn: installDist, type: DockerBuildImage) {
 			into 'build/install'
 		}
 	}
-	inputDir =  project.file('build/install')
+	inputDir = project.file('build/install')
 	def resultTags = ["ncia/anet-app-server:${project.version}"]
 	if (projectBranch=="main")
 		resultTags << 'ncia/anet-app-server:latest'
@@ -530,7 +430,7 @@ task dockerCreateAdditionalDB(dependsOn: dockerPullDB, type: DockerExecContainer
 }
 
 // need to make this invoke dockerCreateDB if there is no ${dbContainerName} and possibly get newer image if available
-task dockerStartDB(type: DockerStartContainer) {
+task dockerStartDB(type: DockerStartContainer, dependsOn: pushPsqlImageData) {
 	group = "database container"
 	description = "Starts ${dbContainerName} container."
 	targetContainerId { dbContainerName }
@@ -584,11 +484,18 @@ task dockerStartKeycloak(type: DockerStartContainer) {
 	containerId = keycloakContainerName
 }
 
-task dockerExportKeycloakRealm(type: DockerExecContainer) {
+task dockerCopyKeycloakRealmH2DB(type: DockerExecContainer) {
 	group = "keycloak container"
-	description = "Epxorts ANET-Realm from ${keycloakContainerName} container."
+	description = "Copies ANET-Realm H2 DB inside ${keycloakContainerName} container."
 	containerId = keycloakContainerName
-	commands = [ ["/bin/bash", "${keycloakContainerPath}/bin/kc.sh", "export", "--dir", "${keycloakPushDataPath}/export", "--users", "realm_file"] as String[] ]
+	commands = [ ["/bin/cp", "-rp", "${keycloakContainerPath}/data/h2", "/tmp"] as String[] ]
+}
+
+task dockerExportKeycloakRealm(dependsOn: dockerCopyKeycloakRealmH2DB, type: DockerExecContainer) {
+	group = "keycloak container"
+	description = "Exports ANET-Realm from ${keycloakContainerName} container."
+	containerId = keycloakContainerName
+	commands = [ ["/bin/bash", "${keycloakContainerPath}/bin/kc.sh", "export", "--dir", "${keycloakPushDataPath}/export", "--users", "realm_file", "--db", "dev-file", "--db-url", "jdbc:h2:file:/tmp/h2/keycloakdb;NON_KEYWORDS=VALUE"] as String[] ]
 }
 
 task dockerGetKeycloakConfiguration(dependsOn: dockerExportKeycloakRealm, type: DockerCopyFileFromContainer) {
@@ -648,11 +555,11 @@ task dockerRemoveFakeSmtpServer(type: DockerRemoveContainer) {
 dockerRemoveFakeSmtpServer.mustRunAfter('dockerStopFakeSmtpServer')
 
 // Create the task that runs the maintenance command. Run e.g. with:
-//   ./gradlew dbMaintenance -Pargs="--clearEmptyBiographies"
+//   ./gradlew dbMaintenance -Pargs="clearEmptyBiographies"
 // To see all options, run just:
 //   ./gradlew dbMaintenance
 // which will print the help.
-task dbMaintenance(dependsOn: 'compileJava', type: JavaExec) {
+task dbMaintenance(type: JavaExec, dependsOn: 'compileJava') {
 	group = "database runtime"
 	description = "Runs the ANET database maintenance command."
 	classpath = sourceSets.main.runtimeClasspath
@@ -664,7 +571,6 @@ task dbMaintenance(dependsOn: 'compileJava', type: JavaExec) {
 	} else {
 		cmdline << "--help"
 	}
-	cmdline << anetConfig
 	args cmdline
 }
 
@@ -750,10 +656,11 @@ generateClientCodeConf {
 }
 
 jar.dependsOn buildClient
-run.dependsOn buildClient
+run.dependsOn(compileJava, buildClient, pushPsqlImageData)
+test.dependsOn(pushPsqlImageData)
 
-run.mustRunAfter('dbLoad', 'dockerStartKeycloak')
-test.mustRunAfter('dbLoad', 'dockerStartKeycloak', 'dockerStartFakeSmtpServer')
+run.mustRunAfter('dockerStartKeycloak')
+test.mustRunAfter('dockerStartKeycloak', 'dockerStartFakeSmtpServer')
 
 jar {
 	// Add classpath to manifest to prevent variables in startScripts getting too long
@@ -782,7 +689,7 @@ spotless {
 	java {
 		importOrderFile 'config/google.importorder'
 		eclipse().configFile('config/eclipse-java-google-style.xml')
-		//Exclude generated code
+		// Exclude generated code
 		targetExclude 'build/generated/**'
 	}
 }
@@ -792,9 +699,8 @@ distributions {
 	main {
 		contents {
 			into('docs/') {
-				from('anet.yml') { rename('anet.yml', 'anet.yml.template') }
+				from('application.yml') { rename('application.yml', 'application.yml.template') }
 				from('anet-dictionary.yml') { rename('anet-dictionary.yml', 'anet-dictionary.yml.template') }
-				from('prepare-psql.sql')
 			}
 		}
 	}
@@ -827,9 +733,11 @@ task distRpm(dependsOn: "jpackageImage", type: Rpm) {
 	os = LINUX
 	into '/opt'
 	from(jpackageImage.outputs.files)
+	into('anet/') {
+		from('logback-spring.xml')
+	}
 	into('anet/docs/') {
-		from('anet.yml') { rename('anet.yml', 'anet.yml.template') }
+		from('application.yml') { rename('application.yml', 'application.yml.template') }
 		from('anet-dictionary.yml') { rename('anet-dictionary.yml', 'anet-dictionary.yml.template') }
-		from('prepare-psql.sql')
 	}
 }

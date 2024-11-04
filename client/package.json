@@ -84,7 +84,7 @@
     "jest-junit": "16.0.0",
     "js-yaml": "4.1.0",
     "json-loader": "0.5.7",
-    "keycloak-connect": "24.0.5",
+    "keycloak-connect": "26.0.5",
     "moment-timezone": "0.5.46",
     "postcss": "8.4.47",
     "postcss-calc": "10.0.2",
@@ -95,6 +95,7 @@
     "react-test-renderer": "18.3.1",
     "selenium-webdriver": "4.26.0",
     "style-loader": "4.0.0",
+    "sync-fetch": "0.5.2",
     "tap-xunit": "2.4.1",
     "thread-loader": "4.0.4",
     "ts-node": "10.9.2",
@@ -133,7 +134,7 @@
     "graphql": "16.9.0",
     "hopscotch": "0.3.1",
     "jsonpath-plus": "10.1.0",
-    "keycloak-js": "24.0.5",
+    "keycloak-js": "26.0.5",
     "leaflet": "1.9.4",
     "leaflet-defaulticon-compatibility": "0.1.2",
     "leaflet-geosearch": "4.0.0",
@@ -194,8 +195,8 @@
     "test": "echo 'Run \"test-all\" to execute all client-side tests, or pick a specific test target: \"test-jest\", \"test-wdio\", \"test-e2e\".' ; exit 1",
     "test-all": "yarn run test-jest && yarn run test-wdio && yarn run test-e2e",
     "test-e2e": "SERVER_URL=${SERVER_URL:-'http://localhost:8180'} NODE_ENV=test ava --config ava.config.js",
-    "test-wdio": "SERVER_URL=${SERVER_URL:-'http://localhost:8180'} ANET_CONFIG=../anet.yml ANET_DICTIONARY=../${ANET_DICTIONARY_NAME:-anet-dictionary.yml} NODE_ENV=test wdio run ./config/wdio.config.js --suite base --suite ${TEST_WDIO_SUITE:-withCustomFields}",
-    "test-jest": "ANET_CONFIG=../anet.yml ANET_DICTIONARY=../${ANET_DICTIONARY_NAME:-anet-dictionary.yml} NODE_ENV=test jest --testPathPattern='tests/jest'",
+    "test-wdio": "SERVER_URL=${SERVER_URL:-'http://localhost:8180'} ANET_DICTIONARY=../${ANET_DICTIONARY_NAME:-anet-dictionary.yml} NODE_ENV=test wdio run ./config/wdio.config.js --suite base --suite ${TEST_WDIO_SUITE:-withCustomFields}",
+    "test-jest": "ANET_DICTIONARY=../${ANET_DICTIONARY_NAME:-anet-dictionary.yml} NODE_ENV=test jest --testPathPattern='tests/jest'",
     "test-all-noCF": "yarn run test-wdio-noCF",
     "test-wdio-noCF": "env TEST_WDIO_SUITE=noCustomFields ANET_DICTIONARY_NAME=testDictionaries/no-custom-fields.yml yarn run test-wdio",
     "test-junit-report": "yarn run test-jest && yarn run test-wdio-junit && yarn run test-e2e-junit",
@@ -205,8 +206,8 @@
     "test-wdio-noCF-junit": "yarn run test-wdio-noCF ; e=$? ; yarn run wdio-noCF-junit-merge ; exit $e",
     "wdio-noCF-junit-merge": "./combine-test-results.sh ./build/test-results/wdio/*.xml > ./build/test-results/wdio-noCF-junit-test-results.xml",
     "server-junit-merge": "./combine-test-results.sh ../build/test-results/test/*.xml > ./build/test-results/server-test-results.xml",
-    "generate-graphql-schema": "graphql-codegen -p anet",
-    "sim": "NODE_ENV=development webpack --config config/webpack.sim.dev.js && ANET_CONFIG=../anet.yml ANET_DICTIONARY=../${ANET_DICTIONARY_NAME:-anet-dictionary.yml} SERVER_URL=${SERVER_URL:-'http://localhost:8080'} node build/anet.sim.dev.js"
+    "generate-graphql-schema": "graphql-codegen -p anet -c .graphqlconfig.mjs",
+    "sim": "NODE_ENV=development webpack --config config/webpack.sim.dev.js && ANET_DICTIONARY=../${ANET_DICTIONARY_NAME:-anet-dictionary.yml} SERVER_URL=${SERVER_URL:-'http://localhost:8080'} node build/anet.sim.dev.js"
   },
   "browserslist": [
     "> 1%"

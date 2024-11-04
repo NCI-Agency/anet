@@ -18,7 +18,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.database.AdminDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.resources.AttachmentResource;
@@ -975,7 +974,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(r.getUuid()).isNotNull();
 
     // Test the situation where no default workflow has been defined
-    final String defaultOrgUuid = AnetObjectEngine.getInstance().getDefaultOrgUuid();
+    final String defaultOrgUuid = adminDao.getDefaultOrgUuid();
     final String defaultOrgSetting = AdminDao.AdminSettingKeys.DEFAULT_APPROVAL_ORGANIZATION.name();
 
     // Clear the defaultOrgUuid
@@ -1843,8 +1842,7 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     final Organization org = admin.getPosition().getOrganization();
     @SuppressWarnings("unchecked")
-    final List<String> nro =
-        (List<String>) dropwizardApp.getConfiguration().getDictionaryEntry("non_reporting_ORGs");
+    final List<String> nro = (List<String>) dict.getDictionaryEntry("non_reporting_ORGs");
     // Admin's organization should have one more report PUBLISHED only if it is not in the
     // non-reporting orgs
     final int diff = (nro == null || !nro.contains(org.getShortName())) ? 1 : 0;
@@ -1926,8 +1924,7 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     final Organization org = admin.getPosition().getOrganization();
     @SuppressWarnings("unchecked")
-    final List<String> nro =
-        (List<String>) dropwizardApp.getConfiguration().getDictionaryEntry("non_reporting_ORGs");
+    final List<String> nro = (List<String>) dict.getDictionaryEntry("non_reporting_ORGs");
     // Elizabeth's organization should have one more report PUBLISHED only if it is not in the
     // non-reporting orgs
     final int diff = (nro == null || !nro.contains(org.getShortName())) ? 1 : 0;

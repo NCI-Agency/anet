@@ -13,7 +13,10 @@ import mil.dds.anet.beans.EmailAddress;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AnetBeanList;
-import mil.dds.anet.config.AnetConfiguration;
+import mil.dds.anet.config.AnetConfig;
+import mil.dds.anet.config.AnetDictionary;
+import mil.dds.anet.config.ApplicationContextProvider;
+import mil.dds.anet.database.JobHistoryDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.emails.AccountDeactivationEmail;
@@ -32,30 +35,29 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({AnetEmailWorker.class, AnetObjectEngine.class, AnetConfiguration.class,
-    PersonDao.class, PositionDao.class, AccountDeactivationEmail.class,
-    AccountDeactivationWarningEmail.class})
+@PrepareForTest({AnetEmailWorker.class, AnetObjectEngine.class, AnetConfig.class, PersonDao.class,
+    PositionDao.class, AccountDeactivationEmail.class, AccountDeactivationWarningEmail.class})
 @PowerMockIgnore("jakarta.security.*")
 public class AccountDeactivationWorkerTest {
 
-  private AnetConfiguration config;
+  private JobHistoryDao jobHistoryDao;
+  private AnetDictionary dict;
   private PersonDao personDao;
   private PositionDao positionDao;
 
-  private static final int SCHEDULER_TIME_MS = 1 * 1000;
-
   @Before
   public void setup() throws Exception {
-    config = PowerMockito.mock(AnetConfiguration.class, Mockito.RETURNS_MOCKS);
+    jobHistoryDao = ApplicationContextProvider.getEngine().getJobHistoryDao();
+    dict = PowerMockito.mock(AnetDictionary.class, Mockito.RETURNS_MOCKS);
     personDao = PowerMockito.mock(PersonDao.class, Mockito.RETURNS_MOCKS);
     positionDao = PowerMockito.mock(PositionDao.class, Mockito.RETURNS_MOCKS);
     PowerMockito.mockStatic(AnetObjectEngine.class);
 
-    when(config.getDictionaryEntry("automaticallyInactivateUsers.emailRemindersDaysPrior"))
+    when(dict.getDictionaryEntry("automaticallyInactivateUsers.emailRemindersDaysPrior"))
         .thenReturn(Arrays.asList(15, 30, 45));
-    when(config.getDictionaryEntry("automaticallyInactivateUsers.ignoredDomainNames"))
+    when(dict.getDictionaryEntry("automaticallyInactivateUsers.ignoredDomainNames"))
         .thenReturn(Arrays.asList("ignored_domain", "*.ignored", "ignored.domain"));
-    when(config.getDictionaryEntry("automaticallyInactivateUsers.checkIntervalInSecs"))
+    when(dict.getDictionaryEntry("automaticallyInactivateUsers.checkIntervalInSecs"))
         .thenReturn("60");
 
     final AnetObjectEngine instance = PowerMockito.mock(AnetObjectEngine.class);
@@ -63,7 +65,7 @@ public class AccountDeactivationWorkerTest {
 
     when(positionDao.removePersonFromPosition(Mockito.any())).thenReturn(1);
     when(instance.getPositionDao()).thenReturn(positionDao);
-    when(AnetObjectEngine.getInstance()).thenReturn(instance);
+    when(ApplicationContextProvider.getEngine()).thenReturn(instance);
 
     PowerMockito.mockStatic(AnetEmailWorker.class);
     PowerMockito.doNothing().when(AnetEmailWorker.class, "sendEmailAsync", Mockito.any());
@@ -93,7 +95,7 @@ public class AccountDeactivationWorkerTest {
 
     // Send email(s)
     final AccountDeactivationWorker accountDeactivationWorker =
-        new AccountDeactivationWorker(config, personDao, SCHEDULER_TIME_MS);
+        new AccountDeactivationWorker(dict, jobHistoryDao, personDao);
     accountDeactivationWorker.run();
 
     // Verify
@@ -102,7 +104,7 @@ public class AccountDeactivationWorkerTest {
         captor.capture());
 
     final List<AnetEmail> emails = captor.getAllValues();
-    assertThat(emails.size()).isEqualTo(3);
+    assertThat(emails).hasSize(3);
 
     assertThat(
         emails.stream().anyMatch(e -> (e.getAction() instanceof AccountDeactivationWarningEmail)
@@ -133,7 +135,7 @@ public class AccountDeactivationWorkerTest {
 
     // Send email(s)
     final AccountDeactivationWorker accountDeactivationWorker =
-        new AccountDeactivationWorker(config, personDao, SCHEDULER_TIME_MS);
+        new AccountDeactivationWorker(dict, jobHistoryDao, personDao);
     accountDeactivationWorker.run();
 
     // Verify
@@ -142,7 +144,7 @@ public class AccountDeactivationWorkerTest {
         captor.capture());
 
     final List<AnetEmail> emails = captor.getAllValues();
-    assertThat(emails.size()).isEqualTo(1);
+    assertThat(emails).hasSize(1);
 
     assertThat(emails.stream().anyMatch(e -> (e.getAction() instanceof AccountDeactivationEmail)
         && e.getToAddresses().contains("test1_eot_acive@test.com"))).isTrue();

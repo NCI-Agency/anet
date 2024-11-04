@@ -300,6 +300,7 @@ export const exportResults = (
   searchQueryParams,
   queryTypes,
   exportType,
+  contentType,
   maxNumberResults,
   setError
 ) => {
@@ -381,7 +382,7 @@ export const exportResults = (
     authorizationGroupQuery,
     emailNetwork
   }
-  return API.queryExport(GQL_GET_DATA, variables, exportType)
+  return API.queryExport(GQL_GET_DATA, variables, exportType, contentType)
     .then(blob => {
       FileSaver.saveAs(blob, `anet_export.${exportType}`)
     })

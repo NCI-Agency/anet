@@ -5,22 +5,29 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AttachmentSearchQuery;
 import mil.dds.anet.beans.search.ISearchQuery;
 import mil.dds.anet.database.AttachmentDao;
+import mil.dds.anet.database.DatabaseHandler;
 import mil.dds.anet.database.mappers.AttachmentMapper;
-import ru.vyarus.guicey.jdbi3.tx.InTransaction;
+import org.jdbi.v3.core.Handle;
+import org.springframework.transaction.annotation.Transactional;
 
 public abstract class AbstractAttachmentSearcher
     extends AbstractSearcher<Attachment, AttachmentSearchQuery> implements IAttachmentSearcher {
 
-  public AbstractAttachmentSearcher(
+  protected AbstractAttachmentSearcher(DatabaseHandler databaseHandler,
       AbstractSearchQueryBuilder<Attachment, AttachmentSearchQuery> qb) {
-    super(qb);
+    super(databaseHandler, qb);
   }
 
-  @InTransaction
+  @Transactional
   @Override
   public AnetBeanList<Attachment> runSearch(AttachmentSearchQuery query) {
-    buildQuery(query);
-    return qb.buildAndRun(getDbHandle(), query, new AttachmentMapper());
+    final Handle handle = getDbHandle();
+    try {
+      buildQuery(query);
+      return qb.buildAndRun(handle, query, new AttachmentMapper());
+    } finally {
+      closeDbHandle(handle);
+    }
   }
 
   @Override

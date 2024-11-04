@@ -3,15 +3,13 @@ package mil.dds.anet.threads;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import freemarker.template.Template;
-import freemarker.template.TemplateException;
+import graphql.GraphQLContext;
 import jakarta.mail.Authenticator;
-import jakarta.mail.MessagingException;
 import jakarta.mail.PasswordAuthentication;
 import jakarta.mail.Session;
 import jakarta.mail.internet.InternetAddress;
-import jakarta.ws.rs.WebApplicationException;
-import java.io.IOException;
 import java.io.StringWriter;
+import java.lang.invoke.MethodHandles;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -21,14 +19,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.beans.JobHistory;
-import mil.dds.anet.config.AnetConfiguration;
-import mil.dds.anet.config.AnetConfiguration.SmtpConfiguration;
+import mil.dds.anet.config.AnetConfig;
+import mil.dds.anet.config.AnetConfig.SmtpConfiguration;
+import mil.dds.anet.config.AnetDictionary;
+import mil.dds.anet.database.AdminDao;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
 import mil.dds.anet.database.EmailDao;
+import mil.dds.anet.database.JobHistoryDao;
 import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
@@ -37,43 +38,56 @@ import org.simplejavamail.api.email.Email;
 import org.simplejavamail.email.EmailBuilder;
 import org.simplejavamail.mailer.MailValidationException;
 import org.simplejavamail.mailer.MailerBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 
+@Component
+@ConditionalOnExpression("not ${anet.no-workers:false}")
 public class AnetEmailWorker extends AbstractWorker {
 
   private static AnetEmailWorker instance;
 
+  private final AnetConfig config;
   private final EmailDao dao;
+  private final AdminDao adminDao;
   private final ObjectMapper mapper;
-  private final String fromAddr;
-  private final String serverUrl;
-  private final SmtpConfiguration smtpConfig;
-  private final Properties smtpProps;
-  private final Authenticator smtpAuth;
 
-  public AnetEmailWorker(AnetConfiguration config, EmailDao dao) {
-    super(config, "AnetEmailWorker waking up to send emails!");
+  public AnetEmailWorker(AnetConfig config, AnetDictionary dict, JobHistoryDao jobHistoryDao,
+      EmailDao dao, AdminDao adminDao) {
+    super(dict, jobHistoryDao, "AnetEmailWorker waking up to send emails!");
+    this.config = config;
     this.dao = dao;
+    this.adminDao = adminDao;
     this.mapper = MapperUtils.getDefaultMapper();
 
     setInstance(this);
-
-    this.fromAddr = config.getEmailFromAddr();
-    this.serverUrl = config.getServerUrl();
-    this.smtpConfig = config.getSmtp();
-    this.smtpProps = getSmtpProps(smtpConfig);
-    this.smtpAuth = getSmtpAuth(smtpConfig);
   }
 
   public static void setInstance(AnetEmailWorker instance) {
     AnetEmailWorker.instance = instance;
   }
 
+  @Scheduled(initialDelay = 10, fixedRate = 300, timeUnit = TimeUnit.SECONDS)
   @Override
-  protected void runInternal(Instant now, JobHistory jobHistory, Map<String, Object> context) {
+  public void run() {
+    super.run();
+  }
+
+  @Override
+  protected void runInternal(Instant now, JobHistory jobHistory, GraphQLContext context) {
+    final SmtpConfiguration smtpConfig = config.getSmtp();
+    final Properties smtpProps = getSmtpProps(smtpConfig);
+    final Authenticator smtpAuth = getSmtpAuth(smtpConfig);
+
     @SuppressWarnings("unchecked")
     final List<String> activeDomainNames =
-        ((List<String>) config.getDictionaryEntry("activeDomainNames")).stream()
-            .map(String::toLowerCase).collect(Collectors.toList());
+        ((List<String>) dict.getDictionaryEntry("activeDomainNames")).stream()
+            .map(String::toLowerCase).toList();
 
     // check the database for any emails we need to send.
     final List<AnetEmail> emails = dao.getAll();
@@ -84,7 +98,7 @@ public class AnetEmailWorker extends AbstractWorker {
       Map<String, Object> emailContext = null;
 
       try {
-        emailContext = buildContext(context, email);
+        emailContext = buildTemplateContext(context, email);
         if (emailContext != null) {
           logger.info("{} Sending email to {} re: {}", smtpConfig.isDisabled() ? "[Disabled] " : "",
               email.getToAddresses(), email.getAction().getSubject(emailContext));
@@ -122,36 +136,34 @@ public class AnetEmailWorker extends AbstractWorker {
     dao.deletePendingEmails(processedEmails);
   }
 
-  private Map<String, Object> buildContext(final Map<String, Object> context,
+  private Map<String, Object> buildTemplateContext(final GraphQLContext context,
       final AnetEmail email) {
-    AnetObjectEngine engine = AnetObjectEngine.getInstance();
-    Map<String, Object> emailContext = new HashMap<>();
+    final Map<String, Object> emailContext = new HashMap<>();
     emailContext.put("context", context);
-    emailContext.put("serverUrl", serverUrl);
+    emailContext.put("serverUrl", config.getServerUrl());
     emailContext.put(AdminSettingKeys.SECURITY_BANNER_CLASSIFICATION.name(),
-        engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_CLASSIFICATION));
+        adminDao.getSetting(AdminSettingKeys.SECURITY_BANNER_CLASSIFICATION));
     emailContext.put(AdminSettingKeys.SECURITY_BANNER_RELEASABILITY.name(),
-        engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_RELEASABILITY));
+        adminDao.getSetting(AdminSettingKeys.SECURITY_BANNER_RELEASABILITY));
     emailContext.put(AdminSettingKeys.SECURITY_BANNER_COLOR.name(),
-        engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_COLOR));
-    emailContext.put("SUPPORT_EMAIL_ADDR", config.getDictionaryEntry("SUPPORT_EMAIL_ADDR"));
+        adminDao.getSetting(AdminSettingKeys.SECURITY_BANNER_COLOR));
+    emailContext.put("SUPPORT_EMAIL_ADDR", dict.getDictionaryEntry("SUPPORT_EMAIL_ADDR"));
     emailContext.put("dateFormatter",
-        DateTimeFormatter.ofPattern((String) config.getDictionaryEntry("dateFormats.email.date"))
+        DateTimeFormatter.ofPattern((String) dict.getDictionaryEntry("dateFormats.email.date"))
             .withZone(DaoUtils.getServerLocalZoneId()));
     emailContext.put("dateTimeFormatter",
-        DateTimeFormatter
-            .ofPattern((String) config.getDictionaryEntry("dateFormats.email.withTime"))
+        DateTimeFormatter.ofPattern((String) dict.getDictionaryEntry("dateFormats.email.withTime"))
             .withZone(DaoUtils.getServerLocalZoneId()));
     final boolean engagementsIncludeTimeAndDuration =
-        Boolean.TRUE.equals(config.getDictionaryEntry("engagementsIncludeTimeAndDuration"));
+        Boolean.TRUE.equals(dict.getDictionaryEntry("engagementsIncludeTimeAndDuration"));
     emailContext.put("engagementsIncludeTimeAndDuration", engagementsIncludeTimeAndDuration);
-    final String edtfPattern = (String) config
+    final String edtfPattern = (String) dict
         .getDictionaryEntry(engagementsIncludeTimeAndDuration ? "dateFormats.email.withTime"
             : "dateFormats.email.date");
     emailContext.put("engagementDateFormatter",
         DateTimeFormatter.ofPattern(edtfPattern).withZone(DaoUtils.getServerLocalZoneId()));
     @SuppressWarnings("unchecked")
-    final Map<String, Object> fields = (Map<String, Object>) config.getDictionaryEntry("fields");
+    final Map<String, Object> fields = (Map<String, Object>) dict.getDictionaryEntry("fields");
     emailContext.put("fields", fields);
 
     return email.getAction().buildContext(emailContext);
@@ -159,16 +171,13 @@ public class AnetEmailWorker extends AbstractWorker {
 
   private void sendEmail(final AnetEmail email, final Map<String, Object> emailContext,
       final Properties smtpProps, final Authenticator smtpAuth,
-      final List<String> activeDomainNames)
-      throws MessagingException, IOException, TemplateException {
+      final List<String> activeDomainNames) throws Exception {
     // Remove any null email addresses
     email.getToAddresses().removeIf(s -> Objects.equals(s, null));
     email.getToAddresses()
         .removeIf(emailAddress -> !Utils.isEmailAllowed(emailAddress, activeDomainNames));
     if (email.getToAddresses().isEmpty()) {
       // This email will never get sent... just kill it off
-      // log.error("Unable to send email of subject {}, because there are no valid
-      // to email addresses");
       return;
     }
 
@@ -179,9 +188,10 @@ public class AnetEmailWorker extends AbstractWorker {
     temp.process(emailContext, writer);
 
     final Session session = Session.getInstance(smtpProps, smtpAuth);
-    final Email mail = EmailBuilder.startingBlank().from(new InternetAddress(fromAddr))
-        .toMultiple(email.getToAddresses()).withSubject(email.getAction().getSubject(emailContext))
-        .withHTMLText(writer.toString()).buildEmail();
+    final Email mail = EmailBuilder.startingBlank()
+        .from(new InternetAddress(config.getEmailFromAddr())).toMultiple(email.getToAddresses())
+        .withSubject(email.getAction().getSubject(emailContext)).withHTMLText(writer.toString())
+        .buildEmail();
 
     try {
       MailerBuilder.usingSession(session).buildMailer().sendMail(mail);
@@ -192,11 +202,14 @@ public class AnetEmailWorker extends AbstractWorker {
     // Other errors are intentionally thrown, as we want ANET to try again.
   }
 
+  private static final Logger noWorkerLogger =
+      LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
   public static void sendEmailAsync(AnetEmail email) {
     if (instance != null) {
       instance.internal_sendEmailAsync(email);
     } else {
-      logger.warn("No AnetEmailWorker has been created, so no email will be sent");
+      noWorkerLogger.warn("No AnetEmailWorker has been created, so no email will be sent");
     }
   }
 
@@ -207,7 +220,8 @@ public class AnetEmailWorker extends AbstractWorker {
       dao.createPendingEmail(jobSpec);
       // the worker thread will pick this up eventually.
     } catch (JsonProcessingException jsonError) {
-      throw new WebApplicationException(jsonError);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error sending email",
+          jsonError);
     }
   }
 

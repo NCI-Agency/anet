@@ -1,7 +1,7 @@
 package mil.dds.anet.database;
 
-import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ObjectArrays;
+import graphql.GraphQLContext;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
@@ -11,7 +11,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -20,7 +19,6 @@ import javax.cache.Cache.Entry;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
 import javax.cache.spi.CachingProvider;
-import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.EntityAvatar;
 import mil.dds.anet.beans.MergedEntity;
 import mil.dds.anet.beans.Person;
@@ -30,8 +28,10 @@ import mil.dds.anet.beans.WithStatus;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.recentActivity.Activity;
 import mil.dds.anet.beans.search.PersonSearchQuery;
+import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.database.mappers.PersonPositionHistoryMapper;
+import mil.dds.anet.search.pg.PostgresqlPersonSearcher;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AnetConstants;
 import mil.dds.anet.utils.DaoUtils;
@@ -39,12 +39,15 @@ import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import org.apache.commons.beanutils.PropertyUtils;
+import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.mapper.MapMapper;
 import org.jdbi.v3.core.statement.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.vyarus.guicey.jdbi3.tx.InTransaction;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
+@Component
 public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQuery> {
 
   private static final Logger logger =
@@ -67,7 +70,8 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
 
   private Cache<String, Person> domainUsersCache;
 
-  public PersonDao() {
+  public PersonDao(DatabaseHandler databaseHandler) {
+    super(databaseHandler);
     try {
       final CachingProvider cachingProvider = Caching.getCachingProvider();
       final CacheManager manager = cachingProvider.getCacheManager(
@@ -91,90 +95,101 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     return getByIds(Arrays.asList(uuid)).get(0);
   }
 
-  static class SelfIdBatcher extends IdBatcher<Person> {
-    private static final String sql = "/* batch.getPeopleByUuids */ SELECT " + PERSON_FIELDS
+  class SelfIdBatcher extends IdBatcher<Person> {
+    private static final String SQL = "/* batch.getPeopleByUuids */ SELECT " + PERSON_FIELDS
         + " FROM people WHERE uuid IN ( <uuids> )";
 
     public SelfIdBatcher() {
-      super(sql, "uuids", new PersonMapper());
+      super(databaseHandler, SQL, "uuids", new PersonMapper());
     }
   }
 
   @Override
   public List<Person> getByIds(List<String> uuids) {
-    final IdBatcher<Person> idBatcher =
-        AnetObjectEngine.getInstance().getInjector().getInstance(SelfIdBatcher.class);
-    return idBatcher.getByIds(uuids);
+    return new SelfIdBatcher().getByIds(uuids);
   }
 
-  static class PersonPositionHistoryBatcher extends ForeignKeyBatcher<PersonPositionHistory> {
-    private static final String sql =
+  class PersonPositionHistoryBatcher extends ForeignKeyBatcher<PersonPositionHistory> {
+    private static final String SQL =
         "/* batch.getPersonPositionHistory */ SELECT * FROM \"peoplePositions\" "
             + "WHERE \"personUuid\" IN ( <foreignKeys> ) ORDER BY \"createdAt\" ASC";
 
     public PersonPositionHistoryBatcher() {
-      super(sql, "foreignKeys", new PersonPositionHistoryMapper(), "personUuid");
+      super(databaseHandler, SQL, "foreignKeys", new PersonPositionHistoryMapper(), "personUuid");
     }
   }
 
   public List<List<PersonPositionHistory>> getPersonPositionHistory(List<String> foreignKeys) {
-    final ForeignKeyBatcher<PersonPositionHistory> personPositionHistoryBatcher = AnetObjectEngine
-        .getInstance().getInjector().getInstance(PersonPositionHistoryBatcher.class);
-    return personPositionHistoryBatcher.getByForeignKeys(foreignKeys);
+    return new PersonPositionHistoryBatcher().getByForeignKeys(foreignKeys);
   }
 
   @Override
   public Person insertInternal(Person p) {
-    final String sql = "/* personInsert */ INSERT INTO people "
-        + "(uuid, name, status, \"user\", \"phoneNumber\", rank, "
-        + "\"pendingVerification\", gender, \"countryUuid\", code, \"endOfTourDate\", biography, "
-        + "\"domainUsername\", \"openIdSubject\", \"createdAt\", \"updatedAt\", \"customFields\") "
-        + "VALUES (:uuid, :name, :status, :user, :phoneNumber, :rank, "
-        + ":pendingVerification, :gender, :countryUuid, :code, :endOfTourDate, :biography, "
-        + ":domainUsername, :openIdSubject, :createdAt, :updatedAt, :customFields)";
-    getDbHandle().createUpdate(sql).bindBean(p)
-        .bind("createdAt", DaoUtils.asLocalDateTime(p.getCreatedAt()))
-        .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
-        .bind("endOfTourDate", DaoUtils.asLocalDateTime(p.getEndOfTourDate()))
-        .bind("status", DaoUtils.getEnumId(p.getStatus())).execute();
-    evictFromCache(p);
-    return p;
+    final Handle handle = getDbHandle();
+    try {
+      final String sql = "/* personInsert */ INSERT INTO people "
+          + "(uuid, name, status, \"user\", \"phoneNumber\", rank, "
+          + "\"pendingVerification\", gender, \"countryUuid\", code, \"endOfTourDate\", biography, "
+          + "\"domainUsername\", \"openIdSubject\", \"createdAt\", \"updatedAt\", \"customFields\") "
+          + "VALUES (:uuid, :name, :status, :user, :phoneNumber, :rank, "
+          + ":pendingVerification, :gender, :countryUuid, :code, :endOfTourDate, :biography, "
+          + ":domainUsername, :openIdSubject, :createdAt, :updatedAt, :customFields)";
+      handle.createUpdate(sql).bindBean(p)
+          .bind("createdAt", DaoUtils.asLocalDateTime(p.getCreatedAt()))
+          .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
+          .bind("endOfTourDate", DaoUtils.asLocalDateTime(p.getEndOfTourDate()))
+          .bind("status", DaoUtils.getEnumId(p.getStatus())).execute();
+      evictFromCache(p);
+      return p;
+    } finally {
+      closeDbHandle(handle);
+    }
   }
 
-  @InTransaction
+  @Transactional
   public int updateAuthenticationDetails(Person p) {
-    DaoUtils.setUpdateFields(p);
-    final String sql = "/* personUpdateAuthenticationDetails */ UPDATE people "
-        + "SET \"openIdSubject\" = :openIdSubject , \"domainUsername\" = :domainUsername, "
-        + "status = :status, \"user\" = :user, \"pendingVerification\" = :pendingVerification, "
-        + "\"endOfTourDate\" = :endOfTourDate, \"updatedAt\" = :updatedAt WHERE uuid = :uuid";
-    final int nr = getDbHandle().createUpdate(sql).bindBean(p)
-        .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
-        .bind("endOfTourDate", DaoUtils.asLocalDateTime(p.getEndOfTourDate()))
-        .bind("status", DaoUtils.getEnumId(p.getStatus())).execute();
-    evictFromCache(p);
-    // The openIdSubject has changed, evict original person as well
-    evictFromCache(findInCache(p));
-    // No need to update subscriptions, this is an internal change
-    return nr;
+    final Handle handle = getDbHandle();
+    try {
+      DaoUtils.setUpdateFields(p);
+      final String sql = "/* personUpdateAuthenticationDetails */ UPDATE people "
+          + "SET \"openIdSubject\" = :openIdSubject , \"domainUsername\" = :domainUsername, "
+          + "status = :status, \"user\" = :user, \"pendingVerification\" = :pendingVerification, "
+          + "\"endOfTourDate\" = :endOfTourDate, \"updatedAt\" = :updatedAt WHERE uuid = :uuid";
+      final int nr = handle.createUpdate(sql).bindBean(p)
+          .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
+          .bind("endOfTourDate", DaoUtils.asLocalDateTime(p.getEndOfTourDate()))
+          .bind("status", DaoUtils.getEnumId(p.getStatus())).execute();
+      evictFromCache(p);
+      // The openIdSubject has changed, evict original person as well
+      evictFromCache(findInCache(p));
+      // No need to update subscriptions, this is an internal change
+      return nr;
+    } finally {
+      closeDbHandle(handle);
+    }
   }
 
   @Override
   public int updateInternal(Person p) {
-    final String sql = "/* personUpdate */ UPDATE people "
-        + "SET name = :name, status = :status, \"user\" = :user, gender = :gender, "
-        + "\"obsoleteCountry\" = :obsoleteCountry, \"countryUuid\" = :countryUuid, "
-        + "code = :code, \"phoneNumber\" = :phoneNumber, rank = :rank, biography = :biography, "
-        + "\"pendingVerification\" = :pendingVerification, \"domainUsername\" = :domainUsername, "
-        + "\"updatedAt\" = :updatedAt, \"customFields\" = :customFields, \"endOfTourDate\" = :endOfTourDate "
-        + "WHERE uuid = :uuid";
+    final Handle handle = getDbHandle();
+    try {
+      final String sql = "/* personUpdate */ UPDATE people "
+          + "SET name = :name, status = :status, \"user\" = :user, gender = :gender, "
+          + "\"obsoleteCountry\" = :obsoleteCountry, \"countryUuid\" = :countryUuid, "
+          + "code = :code, \"phoneNumber\" = :phoneNumber, rank = :rank, biography = :biography, "
+          + "\"pendingVerification\" = :pendingVerification, \"domainUsername\" = :domainUsername, "
+          + "\"updatedAt\" = :updatedAt, \"customFields\" = :customFields, \"endOfTourDate\" = :endOfTourDate "
+          + "WHERE uuid = :uuid";
 
-    final int nr = getDbHandle().createUpdate(sql).bindBean(p)
-        .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
-        .bind("endOfTourDate", DaoUtils.asLocalDateTime(p.getEndOfTourDate()))
-        .bind("status", DaoUtils.getEnumId(p.getStatus())).execute();
-    evictFromCache(p);
-    return nr;
+      final int nr = handle.createUpdate(sql).bindBean(p)
+          .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
+          .bind("endOfTourDate", DaoUtils.asLocalDateTime(p.getEndOfTourDate()))
+          .bind("status", DaoUtils.getEnumId(p.getStatus())).execute();
+      evictFromCache(p);
+      return nr;
+    } finally {
+      closeDbHandle(handle);
+    }
   }
 
   @Override
@@ -183,49 +198,58 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   }
 
   public AnetBeanList<Person> search(Set<String> subFields, PersonSearchQuery query) {
-    return AnetObjectEngine.getInstance().getSearcher().getPersonSearcher().runSearch(subFields,
-        query);
+    return new PostgresqlPersonSearcher(databaseHandler).runSearch(subFields, query);
   }
 
-  @InTransaction
+  @Transactional
   // Should only be used during authentication
   public List<Person> findByDomainUsername(String domainUsername) {
-    if (Utils.isEmptyOrNull(domainUsername)) {
-      return Collections.emptyList();
+    final Handle handle = getDbHandle();
+    try {
+      if (Utils.isEmptyOrNull(domainUsername)) {
+        return Collections.emptyList();
+      }
+      return handle
+          .createQuery("/* findByDomainUsername */ SELECT " + PERSON_FIELDS + ","
+              + PositionDao.POSITION_FIELDS
+              + "FROM people LEFT JOIN positions ON people.uuid = positions.\"currentPersonUuid\" "
+              + "WHERE people.\"domainUsername\" = :domainUsername")
+          .bind("domainUsername", domainUsername).map(new PersonMapper()).list();
+    } finally {
+      closeDbHandle(handle);
     }
-    return getDbHandle()
-        .createQuery("/* findByDomainUsername */ SELECT " + PERSON_FIELDS + ","
-            + PositionDao.POSITION_FIELDS
-            + "FROM people LEFT JOIN positions ON people.uuid = positions.\"currentPersonUuid\" "
-            + "WHERE people.\"domainUsername\" = :domainUsername")
-        .bind("domainUsername", domainUsername).map(new PersonMapper()).list();
   }
 
-  @InTransaction
+  @Transactional
   public List<Person> findByOpenIdSubject(String openIdSubject, boolean activeUser) {
-    if (Utils.isEmptyOrNull(openIdSubject)) {
-      return Collections.emptyList();
+    final Handle handle = getDbHandle();
+    try {
+      if (Utils.isEmptyOrNull(openIdSubject)) {
+        return Collections.emptyList();
+      }
+      final Person person = getFromCache(openIdSubject);
+      if (person != null) {
+        return Collections.singletonList(person);
+      }
+      final StringBuilder sql = new StringBuilder(
+          "/* findByOpenIdSubject */ SELECT " + PERSON_FIELDS + "," + PositionDao.POSITION_FIELDS
+              + "FROM people LEFT JOIN positions ON people.uuid = positions.\"currentPersonUuid\" "
+              + "WHERE people.\"openIdSubject\" = :openIdSubject");
+      if (activeUser) {
+        sql.append(" AND people.user = :user AND people.status != :inactiveStatus");
+      }
+      final Query query = handle.createQuery(sql.toString()).bind("openIdSubject", openIdSubject);
+      if (activeUser) {
+        query.bind("user", true).bind("inactiveStatus",
+            DaoUtils.getEnumId(WithStatus.Status.INACTIVE));
+      }
+      final List<Person> people = query.map(new PersonMapper()).list();
+      // There should be at most one match
+      people.forEach(this::putInCache);
+      return people;
+    } finally {
+      closeDbHandle(handle);
     }
-    final Person person = getFromCache(openIdSubject);
-    if (person != null) {
-      return Collections.singletonList(person);
-    }
-    String sql =
-        "/* findByOpenIdSubject */ SELECT " + PERSON_FIELDS + "," + PositionDao.POSITION_FIELDS
-            + "FROM people LEFT JOIN positions ON people.uuid = positions.\"currentPersonUuid\" "
-            + "WHERE people.\"openIdSubject\" = :openIdSubject";
-    if (activeUser) {
-      sql += " AND people.user = :user AND people.status != :inactiveStatus";
-    }
-    final Query query = getDbHandle().createQuery(sql).bind("openIdSubject", openIdSubject);
-    if (activeUser) {
-      query.bind("user", true).bind("inactiveStatus",
-          DaoUtils.getEnumId(WithStatus.Status.INACTIVE));
-    }
-    final List<Person> people = query.map(new PersonMapper()).list();
-    // There should at most one match
-    people.stream().forEach(p -> putInCache(p));
-    return people;
   }
 
   public void logActivitiesByOpenIdSubject(String openIdSubject, Activity activity) {
@@ -264,15 +288,6 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
       return null;
     }
     final Person person = domainUsersCache.get(openIdSubject);
-    final MetricRegistry metricRegistry = AnetObjectEngine.getInstance().getMetricRegistry();
-    if (metricRegistry != null) {
-      metricRegistry.counter(MetricRegistry.name(DOMAIN_USERS_CACHE, "LoadCount")).inc();
-      if (person == null) {
-        metricRegistry.counter(MetricRegistry.name(DOMAIN_USERS_CACHE, "CacheMissCount")).inc();
-      } else {
-        metricRegistry.counter(MetricRegistry.name(DOMAIN_USERS_CACHE, "CacheHitCount")).inc();
-      }
-    }
     // defensively copy the person we return from the cache
     return copyPerson(person);
   }
@@ -355,170 +370,191 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     return null;
   }
 
-  @InTransaction
+  @Transactional
   public int approve(String personUuid) {
-    final int nr = getDbHandle()
-        .createUpdate("UPDATE people SET \"pendingVerification\" = :pendingVerification"
-            + " WHERE uuid = :personUuid")
-        .bind("pendingVerification", false).bind("personUuid", personUuid).execute();
-    // Evict the person from the domain users cache
-    evictFromCacheByPersonUuid(personUuid);
-    return nr;
+    final Handle handle = getDbHandle();
+    try {
+      final int nr = handle
+          .createUpdate("UPDATE people SET \"pendingVerification\" = :pendingVerification"
+              + " WHERE uuid = :personUuid")
+          .bind("pendingVerification", false).bind("personUuid", personUuid).execute();
+      // Evict the person from the domain users cache
+      evictFromCacheByPersonUuid(personUuid);
+      return nr;
+    } finally {
+      closeDbHandle(handle);
+    }
   }
 
   @Override
   public int deleteInternal(String personUuid) {
-    // Just delete the person; if it fails, this means it still has relations
-    final int nr = getDbHandle().createUpdate("DELETE FROM people WHERE uuid = :personUuid")
-        .bind("personUuid", personUuid).execute();
-    // Evict the person from the domain users cache
-    evictFromCacheByPersonUuid(personUuid);
-    return nr;
+    final Handle handle = getDbHandle();
+    try {
+      // Just delete the person; if it fails, this means it still has relations
+      final int nr = handle.createUpdate("DELETE FROM people WHERE uuid = :personUuid")
+          .bind("personUuid", personUuid).execute();
+      // Evict the person from the domain users cache
+      evictFromCacheByPersonUuid(personUuid);
+      return nr;
+    } finally {
+      closeDbHandle(handle);
+    }
   }
 
-  @InTransaction
+  @Transactional
   public int mergePeople(Person winner, Person loser) {
-    final String winnerUuid = winner.getUuid();
-    final String loserUuid = loser.getUuid();
+    final Handle handle = getDbHandle();
+    try {
+      final String winnerUuid = winner.getUuid();
+      final String loserUuid = loser.getUuid();
 
-    // Update the winner's fields
-    update(winner);
+      // Update the winner's fields
+      update(winner);
 
-    // For reports where both winner and loser are in the reportPeople:
-    // 1. set winner's isPrimary, isAttendee, isAuthor and isInterlocutor flags to the logical OR of
-    // both
-    final String sqlUpd = "WITH dups AS ( SELECT"
-        + "  rpw.\"reportUuid\" AS wreportuuid, rpw.\"personUuid\" AS wpersonuuid,"
-        + "  rpw.\"isPrimary\" AS wprimary, rpl.\"isPrimary\" AS lprimary,"
-        + "  rpw.\"isAttendee\" AS wattendee, rpl.\"isAttendee\" AS lattendee,"
-        + "  rpw.\"isAuthor\" AS wauthor, rpl.\"isAuthor\" AS lauthor,"
-        + "  rpw.\"isInterlocutor\" AS winterlocutor, rpl.\"isInterlocutor\" AS linterlocutor"
-        + "  FROM \"reportPeople\" rpw"
-        + "  JOIN \"reportPeople\" rpl ON rpl.\"reportUuid\" = rpw.\"reportUuid\""
-        + "  WHERE rpw.\"personUuid\" = :winnerUuid AND rpl.\"personUuid\" = :loserUuid )"
-        + " UPDATE \"reportPeople\" SET \"isPrimary\" = (dups.wprimary OR dups.lprimary),"
-        + " \"isAttendee\" = (dups.wattendee OR dups.lattendee),"
-        + " \"isAuthor\" = (dups.wauthor OR dups.lauthor),"
-        + " \"isInterlocutor\" = (dups.winterlocutor OR dups.linterlocutor) FROM dups"
-        + " WHERE \"reportPeople\".\"reportUuid\" = dups.wreportuuid"
-        + " AND \"reportPeople\".\"personUuid\" = dups.wpersonuuid";
-    // MS SQL has no real booleans, so bitwise-or the 0/1 values in that case
-    getDbHandle().createUpdate(sqlUpd).bind("winnerUuid", winnerUuid).bind("loserUuid", loserUuid)
-        .execute();
-    // 2. delete the loser so we don't have duplicates
-    final String sqlDel = "WITH dups AS ( SELECT"
-        + "  rpl.\"reportUuid\" AS lreportuuid, rpl.\"personUuid\" AS lpersonuuid"
-        + "  FROM \"reportPeople\" rpw"
-        + "  JOIN \"reportPeople\" rpl ON rpl.\"reportUuid\" = rpw.\"reportUuid\""
-        + "  WHERE rpw.\"personUuid\" = :winnerUuid AND rpl.\"personUuid\" = :loserUuid )"
-        + " DELETE FROM \"reportPeople\" USING dups"
-        + " WHERE \"reportPeople\".\"reportUuid\" = dups.lreportuuid"
-        + " AND \"reportPeople\".\"personUuid\" = dups.lpersonuuid";
-    // MS SQL and PostgreSQL have slightly different DELETE syntax
-    getDbHandle().createUpdate(sqlDel).bind("winnerUuid", winnerUuid).bind("loserUuid", loserUuid)
-        .execute();
+      // For reports where both winner and loser are in the reportPeople:
+      // 1. set winner's isPrimary, isAttendee, isAuthor and isInterlocutor flags to the logical OR
+      // of
+      // both
+      final String sqlUpd = "WITH dups AS ( SELECT"
+          + "  rpw.\"reportUuid\" AS wreportuuid, rpw.\"personUuid\" AS wpersonuuid,"
+          + "  rpw.\"isPrimary\" AS wprimary, rpl.\"isPrimary\" AS lprimary,"
+          + "  rpw.\"isAttendee\" AS wattendee, rpl.\"isAttendee\" AS lattendee,"
+          + "  rpw.\"isAuthor\" AS wauthor, rpl.\"isAuthor\" AS lauthor,"
+          + "  rpw.\"isInterlocutor\" AS winterlocutor, rpl.\"isInterlocutor\" AS linterlocutor"
+          + "  FROM \"reportPeople\" rpw"
+          + "  JOIN \"reportPeople\" rpl ON rpl.\"reportUuid\" = rpw.\"reportUuid\""
+          + "  WHERE rpw.\"personUuid\" = :winnerUuid AND rpl.\"personUuid\" = :loserUuid )"
+          + " UPDATE \"reportPeople\" SET \"isPrimary\" = (dups.wprimary OR dups.lprimary),"
+          + " \"isAttendee\" = (dups.wattendee OR dups.lattendee),"
+          + " \"isAuthor\" = (dups.wauthor OR dups.lauthor),"
+          + " \"isInterlocutor\" = (dups.winterlocutor OR dups.linterlocutor) FROM dups"
+          + " WHERE \"reportPeople\".\"reportUuid\" = dups.wreportuuid"
+          + " AND \"reportPeople\".\"personUuid\" = dups.wpersonuuid";
+      // MS SQL has no real booleans, so bitwise-or the 0/1 values in that case
+      handle.createUpdate(sqlUpd).bind("winnerUuid", winnerUuid).bind("loserUuid", loserUuid)
+          .execute();
+      // 2. delete the loser so we don't have duplicates
+      final String sqlDel = "WITH dups AS ( SELECT"
+          + "  rpl.\"reportUuid\" AS lreportuuid, rpl.\"personUuid\" AS lpersonuuid"
+          + "  FROM \"reportPeople\" rpw"
+          + "  JOIN \"reportPeople\" rpl ON rpl.\"reportUuid\" = rpw.\"reportUuid\""
+          + "  WHERE rpw.\"personUuid\" = :winnerUuid AND rpl.\"personUuid\" = :loserUuid )"
+          + " DELETE FROM \"reportPeople\" USING dups"
+          + " WHERE \"reportPeople\".\"reportUuid\" = dups.lreportuuid"
+          + " AND \"reportPeople\".\"personUuid\" = dups.lpersonuuid";
+      // MS SQL and PostgreSQL have slightly different DELETE syntax
+      handle.createUpdate(sqlDel).bind("winnerUuid", winnerUuid).bind("loserUuid", loserUuid)
+          .execute();
 
-    // Update report people, should now be unique
-    updateForMerge("reportPeople", "personUuid", winnerUuid, loserUuid);
+      // Update report people, should now be unique
+      updateForMerge("reportPeople", "personUuid", winnerUuid, loserUuid);
 
-    // Update approvals this person might have done
-    updateForMerge("reportActions", "personUuid", winnerUuid, loserUuid);
+      // Update approvals this person might have done
+      updateForMerge("reportActions", "personUuid", winnerUuid, loserUuid);
 
-    // Update comment authors
-    updateForMerge("comments", "authorUuid", winnerUuid, loserUuid);
+      // Update comment authors
+      updateForMerge("comments", "authorUuid", winnerUuid, loserUuid);
 
-    // Update attachment authors
-    updateForMerge("attachments", "authorUuid", winnerUuid, loserUuid);
+      // Update attachment authors
+      updateForMerge("attachments", "authorUuid", winnerUuid, loserUuid);
 
-    // Remove winner and loser from (old) position
-    final LocalDateTime now = DaoUtils.asLocalDateTime(Instant.now());
-    getDbHandle()
-        .createUpdate("/* personMergePositionRemovePerson.update */ UPDATE positions "
-            + "SET \"currentPersonUuid\" = NULL, \"updatedAt\" = :updatedAt "
-            + "WHERE \"currentPersonUuid\" IN ( :winnerUuid, :loserUuid )")
-        .bind("updatedAt", now).bind("winnerUuid", winnerUuid).bind("loserUuid", loserUuid)
-        .execute();
-    // Set winner in (new) position
-    getDbHandle()
-        .createUpdate("/* personMergePositionAddPerson.update */ UPDATE positions "
-            + "SET \"currentPersonUuid\" = :personUuid, \"updatedAt\" = :updatedAt "
-            + "WHERE uuid = :positionUuid")
-        .bind("personUuid", winnerUuid).bind("updatedAt", now)
-        .bind("positionUuid", DaoUtils.getUuid(winner.getPosition())).execute();
-    // Remove loser from position history
-    deleteForMerge("peoplePositions", "personUuid", loserUuid);
-    // Update position history with given input on winner
-    updatePersonHistory(winner);
+      // Remove winner and loser from (old) position
+      final LocalDateTime now = DaoUtils.asLocalDateTime(Instant.now());
+      handle
+          .createUpdate("/* personMergePositionRemovePerson.update */ UPDATE positions "
+              + "SET \"currentPersonUuid\" = NULL, \"updatedAt\" = :updatedAt "
+              + "WHERE \"currentPersonUuid\" IN ( :winnerUuid, :loserUuid )")
+          .bind("updatedAt", now).bind("winnerUuid", winnerUuid).bind("loserUuid", loserUuid)
+          .execute();
+      // Set winner in (new) position
+      handle
+          .createUpdate("/* personMergePositionAddPerson.update */ UPDATE positions "
+              + "SET \"currentPersonUuid\" = :personUuid, \"updatedAt\" = :updatedAt "
+              + "WHERE uuid = :positionUuid")
+          .bind("personUuid", winnerUuid).bind("updatedAt", now)
+          .bind("positionUuid", DaoUtils.getUuid(winner.getPosition())).execute();
+      // Remove loser from position history
+      deleteForMerge("peoplePositions", "personUuid", loserUuid);
+      // Update position history with given input on winner
+      updatePersonHistory(winner);
 
-    // Update note authors
-    updateForMerge("notes", "authorUuid", winnerUuid, loserUuid);
+      // Update note authors
+      updateForMerge("notes", "authorUuid", winnerUuid, loserUuid);
 
-    // Update notes
-    updateM2mForMerge("noteRelatedObjects", "noteUuid", "relatedObjectUuid", winnerUuid, loserUuid);
+      // Update notes
+      updateM2mForMerge("noteRelatedObjects", "noteUuid", "relatedObjectUuid", winnerUuid,
+          loserUuid);
 
-    // Update attachments
-    updateM2mForMerge("attachmentRelatedObjects", "attachmentUuid", "relatedObjectUuid", winnerUuid,
-        loserUuid);
-    // And update the avatar
-    final EntityAvatarDao entityAvatarDao = AnetObjectEngine.getInstance().getEntityAvatarDao();
-    entityAvatarDao.delete(PersonDao.TABLE_NAME, winnerUuid);
-    entityAvatarDao.delete(PersonDao.TABLE_NAME, loserUuid);
-    final EntityAvatar winnerEntityAvatar = winner.getEntityAvatar();
-    if (winnerEntityAvatar != null) {
-      winnerEntityAvatar.setRelatedObjectType(PersonDao.TABLE_NAME);
-      winnerEntityAvatar.setRelatedObjectUuid(winnerUuid);
-      entityAvatarDao.upsert(winnerEntityAvatar);
+      // Update attachments
+      updateM2mForMerge("attachmentRelatedObjects", "attachmentUuid", "relatedObjectUuid",
+          winnerUuid, loserUuid);
+      // And update the avatar
+      final EntityAvatarDao entityAvatarDao = engine().getEntityAvatarDao();
+      entityAvatarDao.delete(PersonDao.TABLE_NAME, winnerUuid);
+      entityAvatarDao.delete(PersonDao.TABLE_NAME, loserUuid);
+      final EntityAvatar winnerEntityAvatar = winner.getEntityAvatar();
+      if (winnerEntityAvatar != null) {
+        winnerEntityAvatar.setRelatedObjectType(PersonDao.TABLE_NAME);
+        winnerEntityAvatar.setRelatedObjectUuid(winnerUuid);
+        entityAvatarDao.upsert(winnerEntityAvatar);
+      }
+
+      // Update emailAddresses
+      final EmailAddressDao emailAddressDao = engine().getEmailAddressDao();
+      emailAddressDao.updateEmailAddresses(PersonDao.TABLE_NAME, loserUuid, null);
+      emailAddressDao.updateEmailAddresses(PersonDao.TABLE_NAME, winnerUuid,
+          winner.getEmailAddresses());
+
+      // Update customSensitiveInformation for winner
+      DaoUtils.saveCustomSensitiveInformation(null, PersonDao.TABLE_NAME, winnerUuid,
+          winner.getCustomSensitiveInformation());
+      // Delete customSensitiveInformation for loser
+      deleteForMerge("customSensitiveInformation", "relatedObjectUuid", loserUuid);
+
+      // Finally, delete loser
+      final int nrDeleted = deleteForMerge(PersonDao.TABLE_NAME, "uuid", loserUuid);
+      if (nrDeleted > 0) {
+        engine().getAdminDao()
+            .insertMergedEntity(new MergedEntity(loserUuid, winnerUuid, Instant.now()));
+      }
+
+      // E.g. positions may have been updated, so evict from the cache
+      evictFromCache(winner);
+      evictFromCache(loser);
+      return nrDeleted;
+    } finally {
+      closeDbHandle(handle);
     }
-
-    // Update emailAddresses
-    final EmailAddressDao emailAddressDao = AnetObjectEngine.getInstance().getEmailAddressDao();
-    emailAddressDao.updateEmailAddresses(PersonDao.TABLE_NAME, loserUuid, null);
-    emailAddressDao.updateEmailAddresses(PersonDao.TABLE_NAME, winnerUuid,
-        winner.getEmailAddresses());
-
-    // Update customSensitiveInformation for winner
-    DaoUtils.saveCustomSensitiveInformation(null, PersonDao.TABLE_NAME, winnerUuid,
-        winner.getCustomSensitiveInformation());
-    // Delete customSensitiveInformation for loser
-    deleteForMerge("customSensitiveInformation", "relatedObjectUuid", loserUuid);
-
-    // Finally, delete loser
-    final int nrDeleted = deleteForMerge(PersonDao.TABLE_NAME, "uuid", loserUuid);
-    if (nrDeleted > 0) {
-      AnetObjectEngine.getInstance().getAdminDao()
-          .insertMergedEntity(new MergedEntity(loserUuid, winnerUuid, Instant.now()));
-    }
-
-    // E.g. positions may have been updated, so evict from the cache
-    evictFromCache(winner);
-    evictFromCache(loser);
-    return nrDeleted;
   }
 
-  public CompletableFuture<List<PersonPositionHistory>> getPositionHistory(
-      Map<String, Object> context, String personUuid) {
+  public CompletableFuture<List<PersonPositionHistory>> getPositionHistory(GraphQLContext context,
+      String personUuid) {
     return new ForeignKeyFetcher<PersonPositionHistory>().load(context,
         FkDataLoaderKey.PERSON_PERSON_POSITION_HISTORY, personUuid);
   }
 
-  @InTransaction
+  @Transactional
   public void clearEmptyBiographies() {
-    // Search all people with a not null biography field
-    final PersonSearchQuery query = new PersonSearchQuery();
-    query.setPageSize(0);
-    query.setHasBiography(true);
-    final List<Person> persons = search(query).getList();
+    final Handle handle = getDbHandle();
+    try {
+      // Search all people with a not null biography field
+      final PersonSearchQuery query = new PersonSearchQuery();
+      query.setPageSize(0);
+      query.setHasBiography(true);
+      final List<Person> persons = search(query).getList();
 
-    // For each person with an empty html biography, set this one to null
-    for (final Person p : persons) {
-      if (Utils.isEmptyHtml(p.getBiography())) {
-        getDbHandle()
-            .createUpdate(
-                "/* updatePersonBiography */ UPDATE people SET biography = NULL WHERE uuid = :uuid")
-            .bind("uuid", p.getUuid()).execute();
-        AnetAuditLogger.log("Person {} has an empty html biography, set it to null", p);
-        evictFromCache(p);
+      // For each person with an empty html biography, set this one to null
+      for (final Person p : persons) {
+        if (Utils.isEmptyHtml(p.getBiography())) {
+          handle.createUpdate(
+              "/* updatePersonBiography */ UPDATE people SET biography = NULL WHERE uuid = :uuid")
+              .bind("uuid", p.getUuid()).execute();
+          AnetAuditLogger.log("Person {} has an empty html biography, set it to null", p);
+          evictFromCache(p);
+        }
       }
+    } finally {
+      closeDbHandle(handle);
     }
   }
 
@@ -539,72 +575,87 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     return AnetConstants.USERCACHE_EMPTY_MESSAGE;
   }
 
-  @InTransaction
+  @Transactional
   public int updatePersonHistory(Person p) {
-    final String personUuid = p.getUuid();
-    // Delete old history
-    final int numRows = getDbHandle()
-        .execute("DELETE FROM \"peoplePositions\"  WHERE \"personUuid\" = ?", personUuid);
-    if (Utils.isEmptyOrNull(p.getPreviousPositions())) {
-      updatePeoplePositions(DaoUtils.getUuid(p.getPosition()), personUuid, Instant.now(), null);
-    } else {
-      // Store the history as given
-      for (final PersonPositionHistory history : p.getPreviousPositions()) {
-        updatePeoplePositions(history.getPositionUuid(), personUuid, history.getStartTime(),
-            history.getEndTime());
+    final Handle handle = getDbHandle();
+    try {
+      final String personUuid = p.getUuid();
+      // Delete old history
+      final int numRows =
+          handle.execute("DELETE FROM \"peoplePositions\"  WHERE \"personUuid\" = ?", personUuid);
+      if (Utils.isEmptyOrNull(p.getPreviousPositions())) {
+        updatePeoplePositions(DaoUtils.getUuid(p.getPosition()), personUuid, Instant.now(), null);
+      } else {
+        // Store the history as given
+        for (final PersonPositionHistory history : p.getPreviousPositions()) {
+          updatePeoplePositions(history.getPositionUuid(), personUuid, history.getStartTime(),
+              history.getEndTime());
+        }
       }
+      return numRows;
+    } finally {
+      closeDbHandle(handle);
     }
-    return numRows;
   }
 
-  @InTransaction
+  @Transactional
   public boolean hasHistoryConflict(final String uuid, final String loserUuid,
       final List<PersonPositionHistory> history, final boolean checkPerson) {
-    if (!Utils.isEmptyOrNull(history)) {
-      final String personPositionClause = checkPerson
-          ? "\"personUuid\" NOT IN ( :personUuid, :loserUuid ) AND \"positionUuid\" = :positionUuid"
-          : "\"personUuid\" = :personUuid AND \"positionUuid\" NOT IN ( :positionUuid, :loserUuid )";
-      for (final PersonPositionHistory pph : history) {
-        final Query q;
-        final Instant endTime = pph.getEndTime();
-        if (endTime == null) {
-          q = getDbHandle().createQuery("SELECT COUNT(*) AS count FROM \"peoplePositions\"  WHERE ("
-              + " \"endedAt\" IS NULL OR (\"endedAt\" IS NOT NULL AND \"endedAt\" > :startTime)"
-              + ") AND " + personPositionClause);
-        } else {
-          q = getDbHandle().createQuery("SELECT COUNT(*) AS count FROM \"peoplePositions\" WHERE ("
-              + "(\"endedAt\" IS NULL AND \"createdAt\" < :endTime)"
-              + " OR (\"endedAt\" IS NOT NULL AND"
-              + " \"createdAt\" < :endTime AND \"endedAt\" > :startTime)) AND "
-              + personPositionClause).bind("endTime", DaoUtils.asLocalDateTime(endTime));
-        }
-        final String histUuid = checkPerson ? pph.getPositionUuid() : pph.getPersonUuid();
-        final Number count =
-            (Number) q.bind("startTime", DaoUtils.asLocalDateTime(pph.getStartTime()))
-                .bind("personUuid", checkPerson ? uuid : histUuid)
-                .bind("positionUuid", checkPerson ? histUuid : uuid)
-                .bind("loserUuid", Utils.orIfNull(loserUuid, "")).map(new MapMapper(false)).one()
-                .get("count");
+    final Handle handle = getDbHandle();
+    try {
+      if (!Utils.isEmptyOrNull(history)) {
+        final String personPositionClause = checkPerson
+            ? "\"personUuid\" NOT IN ( :personUuid, :loserUuid ) AND \"positionUuid\" = :positionUuid"
+            : "\"personUuid\" = :personUuid AND \"positionUuid\" NOT IN ( :positionUuid, :loserUuid )";
+        for (final PersonPositionHistory pph : history) {
+          final Query q;
+          final Instant endTime = pph.getEndTime();
+          if (endTime == null) {
+            q = handle.createQuery("SELECT COUNT(*) AS count FROM \"peoplePositions\"  WHERE ("
+                + " \"endedAt\" IS NULL OR (\"endedAt\" IS NOT NULL AND \"endedAt\" > :startTime)"
+                + ") AND " + personPositionClause);
+          } else {
+            q = handle.createQuery("SELECT COUNT(*) AS count FROM \"peoplePositions\" WHERE ("
+                + "(\"endedAt\" IS NULL AND \"createdAt\" < :endTime)"
+                + " OR (\"endedAt\" IS NOT NULL AND"
+                + " \"createdAt\" < :endTime AND \"endedAt\" > :startTime)) AND "
+                + personPositionClause).bind("endTime", DaoUtils.asLocalDateTime(endTime));
+          }
+          final String histUuid = checkPerson ? pph.getPositionUuid() : pph.getPersonUuid();
+          final Number count =
+              (Number) q.bind("startTime", DaoUtils.asLocalDateTime(pph.getStartTime()))
+                  .bind("personUuid", checkPerson ? uuid : histUuid)
+                  .bind("positionUuid", checkPerson ? histUuid : uuid)
+                  .bind("loserUuid", Utils.orIfNull(loserUuid, "")).map(new MapMapper()).one()
+                  .get("count");
 
-        if (count.longValue() > 0) {
-          return true;
+          if (count.longValue() > 0) {
+            return true;
+          }
         }
       }
+      return false;
+    } finally {
+      closeDbHandle(handle);
     }
-    return false;
   }
 
-  @InTransaction
+  @Transactional
   protected void updatePeoplePositions(final String positionUuid, final String personUuid,
       final Instant startTime, final Instant endTime) {
-    if (positionUuid != null && personUuid != null) {
-      getDbHandle()
-          .createUpdate("INSERT INTO \"peoplePositions\" "
-              + "(\"positionUuid\", \"personUuid\", \"createdAt\", \"endedAt\") "
-              + "VALUES (:positionUuid, :personUuid, :createdAt, :endedAt)")
-          .bind("positionUuid", positionUuid).bind("personUuid", personUuid)
-          .bind("createdAt", DaoUtils.asLocalDateTime(startTime))
-          .bind("endedAt", DaoUtils.asLocalDateTime(endTime)).execute();
+    final Handle handle = getDbHandle();
+    try {
+      if (positionUuid != null && personUuid != null) {
+        handle
+            .createUpdate("INSERT INTO \"peoplePositions\" "
+                + "(\"positionUuid\", \"personUuid\", \"createdAt\", \"endedAt\") "
+                + "VALUES (:positionUuid, :personUuid, :createdAt, :endedAt)")
+            .bind("positionUuid", positionUuid).bind("personUuid", personUuid)
+            .bind("createdAt", DaoUtils.asLocalDateTime(startTime))
+            .bind("endedAt", DaoUtils.asLocalDateTime(endTime)).execute();
+      }
+    } finally {
+      closeDbHandle(handle);
     }
   }
 }
