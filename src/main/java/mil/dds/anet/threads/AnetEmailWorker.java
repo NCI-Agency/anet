@@ -100,8 +100,9 @@ public class AnetEmailWorker extends AbstractWorker {
       try {
         emailContext = buildTemplateContext(context, email);
         if (emailContext != null) {
-          logger.info("{} Sending email to {} re: {}", smtpConfig.isDisabled() ? "[Disabled] " : "",
-              email.getToAddresses(), email.getAction().getSubject(emailContext));
+          logger.info("{}Processing email #{} re: \"{}\" to {}",
+              smtpConfig.isDisabled() ? "[Disabled] " : "", email.getId(),
+              getEmailSubject(email, emailContext), email.getToAddresses());
 
           if (!smtpConfig.isDisabled()) {
             sendEmail(email, emailContext, smtpProps, smtpAuth, activeDomainNames);
@@ -109,7 +110,7 @@ public class AnetEmailWorker extends AbstractWorker {
         }
         processedEmails.add(email.getId());
       } catch (Throwable t) {
-        logger.error("Error sending email #{}", email.getId(), t);
+        logger.error("Error sending email #{}:", email.getId(), t);
 
         dao.setErrorMessage(email.getId(), ExceptionUtils.getThrowableList(t).stream().limit(2)
             .map(Throwable::getMessage).collect(Collectors.joining(": ")));
@@ -119,14 +120,9 @@ public class AnetEmailWorker extends AbstractWorker {
           final Instant staleTime =
               now.minus(smtpConfig.getNbOfHoursForStaleEmails(), ChronoUnit.HOURS);
           if (email.getCreatedAt().isBefore(staleTime)) {
-            String message = "Purging stale email to ";
-            try {
-              message += email.getToAddresses();
-              message += email.getAction().getSubject(emailContext);
-            } finally {
-              logger.info(message);
-              processedEmails.add(email.getId());
-            }
+            logger.info("Purging stale email #{} re: \"{}\" to {}", email.getId(),
+                getEmailSubject(email, emailContext), email.getToAddresses());
+            processedEmails.add(email.getId());
           }
         }
       }
@@ -169,15 +165,25 @@ public class AnetEmailWorker extends AbstractWorker {
     return email.getAction().buildContext(emailContext);
   }
 
+  private String getEmailSubject(AnetEmail email, Map<String, Object> emailContext) {
+    return email.getAction() == null ? "<no subject>" : email.getAction().getSubject(emailContext);
+  }
+
   private void sendEmail(final AnetEmail email, final Map<String, Object> emailContext,
       final Properties smtpProps, final Authenticator smtpAuth,
       final List<String> activeDomainNames) throws Exception {
     // Remove any null email addresses
     email.getToAddresses().removeIf(s -> Objects.equals(s, null));
-    email.getToAddresses()
-        .removeIf(emailAddress -> !Utils.isEmailAllowed(emailAddress, activeDomainNames));
+    email.getToAddresses().removeIf(emailAddress -> {
+      final boolean isNotAllowed = !Utils.isEmailAllowed(emailAddress, activeDomainNames);
+      if (isNotAllowed) {
+        logger.info("Email #{} recipient {} is filtered out", email.getId(), emailAddress);
+      }
+      return isNotAllowed;
+    });
     if (email.getToAddresses().isEmpty()) {
       // This email will never get sent... just kill it off
+      logger.info("Email #{} has no recipients", email.getId());
       return;
     }
 
@@ -188,16 +194,18 @@ public class AnetEmailWorker extends AbstractWorker {
     temp.process(emailContext, writer);
 
     final Session session = Session.getInstance(smtpProps, smtpAuth);
-    final Email mail = EmailBuilder.startingBlank()
-        .from(new InternetAddress(config.getEmailFromAddr())).toMultiple(email.getToAddresses())
-        .withSubject(email.getAction().getSubject(emailContext)).withHTMLText(writer.toString())
-        .buildEmail();
+    final Email mail =
+        EmailBuilder.startingBlank().from(new InternetAddress(config.getEmailFromAddr()))
+            .toMultiple(email.getToAddresses()).withSubject(getEmailSubject(email, emailContext))
+            .withHTMLText(writer.toString()).buildEmail();
 
     try {
+      logger.info("Sending email #{} re: \"{}\" to {}", email.getId(),
+          getEmailSubject(email, emailContext), email.getToAddresses());
       MailerBuilder.usingSession(session).buildMailer().sendMail(mail);
     } catch (MailValidationException e) {
       // The server rejected this... we'll log it and then not try again.
-      logger.error("Send failed", e);
+      logger.error("Sending email #{} failed:", email.getId(), e);
     }
     // Other errors are intentionally thrown, as we want ANET to try again.
   }
