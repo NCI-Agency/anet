@@ -2,7 +2,7 @@ package mil.dds.anet.database;
 
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.Jdbi;
-import org.jdbi.v3.spring5.JdbiUtil;
+import org.jdbi.v3.spring.JdbiUtil;
 import org.springframework.stereotype.Component;
 
 @Component
