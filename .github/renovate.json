@@ -1,6 +1,6 @@
 {
   "extends": [
-    "config:base",
+    "config:recommended",
     "group:test",
     "group:linters"
   ],
@@ -15,8 +15,12 @@
   ],
   "packageRules": [
     {
-      "labels": ["devDependencies"],
-      "matchDepTypes": ["devDependencies"],
+      "labels": [
+        "devDependencies"
+      ],
+      "matchDepTypes": [
+        "devDependencies"
+      ],
       "matchUpdateTypes": [
         "minor",
         "patch"
@@ -25,7 +29,9 @@
       "groupSlug": "most-minor-dev-patch"
     },
     {
-      "matchDepTypes": ["dependencies"],
+      "matchDepTypes": [
+        "dependencies"
+      ],
       "matchUpdateTypes": [
         "minor",
         "patch"
@@ -34,8 +40,12 @@
       "groupSlug": "most-minor-patch"
     },
     {
-      "matchManagers": ["gradle"],
-      "matchDepTypes": ["dependencies"],
+      "matchManagers": [
+        "gradle"
+      ],
+      "matchDepTypes": [
+        "dependencies"
+      ],
       "matchUpdateTypes": [
         "minor",
         "patch"
@@ -44,9 +54,16 @@
       "groupSlug": "most-minor-gradle-patch"
     },
     {
-      "labels": ["devDependencies"],
-      "matchManagers": ["gradle"],
-      "matchDepTypes": ["devDependencies", "plugin"],
+      "labels": [
+        "devDependencies"
+      ],
+      "matchManagers": [
+        "gradle"
+      ],
+      "matchDepTypes": [
+        "devDependencies",
+        "plugin"
+      ],
       "matchUpdateTypes": [
         "minor",
         "patch"
@@ -68,59 +85,118 @@
       "enabled": false
     },
     {
-      "labels": ["devDependencies"],
+      "labels": [
+        "devDependencies"
+      ],
       "groupName": "NPM, dev-dependencies, Babel",
-      "matchManagers": ["npm"],
-      "matchDepTypes": ["devDependencies"],
-      "matchPackagePrefixes": ["@babel/"]
+      "matchManagers": [
+        "npm"
+      ],
+      "matchDepTypes": [
+        "devDependencies"
+      ],
+      "matchPackageNames": [
+        "@babel/{/,}**"
+      ]
     },
     {
-      "labels": ["devDependencies"],
+      "labels": [
+        "devDependencies"
+      ],
       "groupName": "NPM, dev-dependencies, GraphQL Code Generator",
-      "matchManagers": ["npm"],
-      "matchDepTypes": ["devDependencies"],
-      "matchPackagePrefixes": ["@graphql-codegen/"]
+      "matchManagers": [
+        "npm"
+      ],
+      "matchDepTypes": [
+        "devDependencies"
+      ],
+      "matchPackageNames": [
+        "@graphql-codegen/{/,}**"
+      ]
     },
     {
       "groupName": "NPM, dev-dependencies, WebdriverIO",
-      "matchManagers": ["npm"],
-      "matchDepTypes": ["devDependencies"],
-      "matchPackagePrefixes": ["@wdio/", "webdriverio"]
+      "matchManagers": [
+        "npm"
+      ],
+      "matchDepTypes": [
+        "devDependencies"
+      ],
+      "matchPackageNames": [
+        "@wdio/{/,}**",
+        "webdriverio{/,}**"
+      ]
     },
     {
       "groupName": "NPM, dependencies, Blueprint",
-      "matchManagers": ["npm"],
-      "matchDepTypes": ["dependencies"],
-      "matchPackagePrefixes": ["@blueprintjs/"]
+      "matchManagers": [
+        "npm"
+      ],
+      "matchDepTypes": [
+        "dependencies"
+      ],
+      "matchPackageNames": [
+        "@blueprintjs/{/,}**"
+      ]
     },
     {
       "groupName": "NPM, dependencies, Emotion",
-      "matchManagers": ["npm"],
-      "matchDepTypes": ["dependencies"],
-      "matchPackagePrefixes": ["@emotion/"]
+      "matchManagers": [
+        "npm"
+      ],
+      "matchDepTypes": [
+        "dependencies"
+      ],
+      "matchPackageNames": [
+        "@emotion/{/,}**"
+      ]
     },
     {
       "groupName": "NPM, dependencies, Fullcalendar",
-      "matchManagers": ["npm"],
-      "matchDepTypes": ["dependencies"],
-      "matchPackagePrefixes": ["@fullcalendar/"]
+      "matchManagers": [
+        "npm"
+      ],
+      "matchDepTypes": [
+        "dependencies"
+      ],
+      "matchPackageNames": [
+        "@fullcalendar/{/,}**"
+      ]
     },
     {
       "groupName": "NPM, dependencies, Slate",
-      "matchManagers": ["npm"],
-      "matchDepTypes": ["dependencies"],
-      "matchPackagePrefixes": ["slate"]
+      "matchManagers": [
+        "npm"
+      ],
+      "matchDepTypes": [
+        "dependencies"
+      ],
+      "matchPackageNames": [
+        "slate{/,}**"
+      ]
     },
     {
       "groupName": "NPM, dependencies, Bootstrap",
-      "matchManagers": ["npm"],
-      "matchDepTypes": ["dependencies"],
-      "matchPackageNames": ["bootstrap", "react-bootstrap"]
+      "matchManagers": [
+        "npm"
+      ],
+      "matchDepTypes": [
+        "dependencies"
+      ],
+      "matchPackageNames": [
+        "bootstrap",
+        "react-bootstrap"
+      ]
     },
     {
       "groupName": "Gradle/NPM, dependencies, Keycloak",
-      "matchManagers": ["gradle", "npm"],
-      "matchSourceUrlPrefixes": ["https://github.com/keycloak/"]
+      "matchManagers": [
+        "gradle",
+        "npm"
+      ],
+      "matchSourceUrls": [
+        "https://github.com/keycloak/{/,}**"
+      ]
     }
   ],
   "postUpdateOptions": [
