@@ -1,5 +1,5 @@
 import { gql } from "@apollo/client"
-import Model, { yupDate } from "components/Model"
+import Model, { GRAPHQL_ENTITY_AVATAR_FIELDS, yupDate } from "components/Model"
 import _isEmpty from "lodash/isEmpty"
 import Settings from "settings"
 import utils from "utils"
@@ -130,11 +130,15 @@ export default class Event extends Model {
           uuid
           shortName
           longName
+          identificationCode
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         adminOrg {
           uuid
           shortName
           longName
+          identificationCode
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         eventSeries {
           uuid
@@ -167,6 +171,7 @@ export default class Event extends Model {
             shortName
             longName
             identificationCode
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
           customFields
         }
@@ -174,10 +179,41 @@ export default class Event extends Model {
           uuid
           shortName
           longName
+          identificationCode
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          location {
+            uuid
+            name
+            lat
+            lng
+          }
         }
         people {
           uuid
           name
+          rank
+          status
+          user
+          endOfTourDate
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          position {
+            uuid
+            name
+            type
+            code
+            status
+            organization {
+              uuid
+              shortName
+              longName
+              identificationCode
+              ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+            }
+            location {
+              uuid
+              name
+            }
+          }
         }
       }
     }
@@ -200,11 +236,15 @@ export default class Event extends Model {
           uuid
           shortName
           longName
+          identificationCode
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         adminOrg {
           uuid
           shortName
           longName
+          identificationCode
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         eventSeries {
           uuid
@@ -237,6 +277,7 @@ export default class Event extends Model {
             shortName
             longName
             identificationCode
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
           customFields
         }
@@ -244,15 +285,23 @@ export default class Event extends Model {
           uuid
           shortName
           longName
+          identificationCode
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          location {
+            uuid
+            name
+            lat
+            lng
+          }
         }
         people {
           uuid
           name
           rank
-          avatarUuid
           status
           user
           endOfTourDate
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           position {
             uuid
             name
@@ -264,6 +313,7 @@ export default class Event extends Model {
               shortName
               longName
               identificationCode
+              ${GRAPHQL_ENTITY_AVATAR_FIELDS}
             }
             location {
               uuid
@@ -274,6 +324,7 @@ export default class Event extends Model {
       }
     }
   `
+
   static getEventListQuery = gql`
     query ($eventQuery: EventSearchQueryInput) {
       eventList(query: $eventQuery) {
@@ -293,12 +344,14 @@ export default class Event extends Model {
             shortName
             longName
             identificationCode
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
           adminOrg {
             uuid
             shortName
             longName
             identificationCode
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
           eventSeries {
             uuid
@@ -337,16 +390,24 @@ export default class Event extends Model {
             uuid
             shortName
             longName
+            identificationCode
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
           people {
             uuid
             name
+            rank
+            status
+            user
+            endOfTourDate
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
           updatedAt
         }
       }
     }
   `
+
   static getCreateEventMutation = gql`
     mutation ($event: EventInput!) {
       createEvent(event: $event) {
@@ -354,6 +415,7 @@ export default class Event extends Model {
       }
     }
   `
+
   static getUpdateEventMutation = gql`
     mutation ($event: EventInput!) {
       updateEvent(event: $event)
