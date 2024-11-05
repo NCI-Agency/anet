@@ -32,6 +32,11 @@ public abstract class AbstractEventSeriesSearcher
     qb.addFromClause("\"eventSeries\"");
     qb.addEnumEqualsClause("status", "\"eventSeries\".status", query.getStatus());
 
+    if (query.getEmailNetwork() != null) {
+      // Should never match
+      qb.addWhereClause("FALSE");
+    }
+
     if (hasTextQuery(query)) {
       addTextQuery(query);
     }
