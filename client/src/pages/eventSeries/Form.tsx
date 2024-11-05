@@ -53,7 +53,6 @@ const EventSeriesForm = ({
         setFieldValue,
         setFieldTouched,
         values,
-        validateForm,
         submitForm
       }) => {
         const isAdmin = currentUser?.isAdmin()
