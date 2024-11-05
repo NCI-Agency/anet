@@ -35,6 +35,11 @@ public abstract class AbstractEventSearcher extends AbstractSearcher<Event, Even
     qb.addFromClause("\"events\"");
     qb.addEnumEqualsClause("status", "events.status", query.getStatus());
 
+    if (query.getEmailNetwork() != null) {
+      // Should never match
+      qb.addWhereClause("FALSE");
+    }
+
     if (hasTextQuery(query)) {
       addTextQuery(query);
     }
