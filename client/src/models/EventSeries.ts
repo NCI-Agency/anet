@@ -1,5 +1,5 @@
 import { gql } from "@apollo/client"
-import Model from "components/Model"
+import Model, { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import _isEmpty from "lodash/isEmpty"
 import Settings from "settings"
 import * as yup from "yup"
@@ -53,10 +53,16 @@ export default class EventSeries extends Model {
     hostOrg {
       uuid
       shortName
+      longName
+      identificationCode
+      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
     }
     adminOrg {
       uuid
       shortName
+      longName
+      identificationCode
+      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
     }
    `
 
@@ -69,11 +75,15 @@ export default class EventSeries extends Model {
           uuid
           shortName
           longName
+          identificationCode
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         adminOrg {
           uuid
           shortName
           longName
+          identificationCode
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
       }
     }
@@ -91,11 +101,15 @@ export default class EventSeries extends Model {
           uuid
           shortName
           longName
+          identificationCode
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         adminOrg {
           uuid
           shortName
           longName
+          identificationCode
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
       }
     }
@@ -117,12 +131,14 @@ export default class EventSeries extends Model {
             shortName
             longName
             identificationCode
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
           adminOrg {
             uuid
             shortName
             longName
             identificationCode
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
           updatedAt
         }
