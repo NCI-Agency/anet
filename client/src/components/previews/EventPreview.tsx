@@ -1,4 +1,5 @@
 import API from "api"
+import { BreadcrumbTrail } from "components/BreadcrumbTrail"
 import DictionaryField from "components/DictionaryField"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
@@ -107,7 +108,12 @@ const EventPreview = ({ className, uuid }: EventPreviewProps) => {
               <ListGroup>
                 {event.tasks.map(task => (
                   <ListGroupItem key={task.uuid}>
-                    <LinkTo modelType="Task" model={task} />
+                    <BreadcrumbTrail
+                      modelType="Task"
+                      leaf={task}
+                      ascendantObjects={task.ascendantTasks}
+                      parentField="parentTask"
+                    />
                   </ListGroupItem>
                 ))}
               </ListGroup>

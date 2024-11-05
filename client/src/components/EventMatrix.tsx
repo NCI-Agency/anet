@@ -1,6 +1,7 @@
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import API from "api"
+import { BreadcrumbTrail } from "components/BreadcrumbTrail"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import { Event } from "models"
@@ -195,7 +196,12 @@ const EventMatrix = (props: EventMatrixProps) => {
             {tasks.map(task => (
               <tr key={task.uuid}>
                 <td>
-                  <LinkTo modelType="Task" model={task} />
+                  <BreadcrumbTrail
+                    modelType="Task"
+                    leaf={task}
+                    ascendantObjects={task.ascendantTasks}
+                    parentField="parentTask"
+                  />
                 </td>
                 <td>{getEvent(task, 0)}</td>
                 <td>{getEvent(task, 1)}</td>
