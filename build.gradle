@@ -49,10 +49,12 @@ if (!isTestEnv && file('localSettings.gradle').exists()) {
 }
 
 // Defaults for development variables
+String DEV_DB = "devAnet"
+String TEST_DB = "testAnet"
 run.environment("DB_DRIVER", run.environment["DB_DRIVER"] ?: "postgresql")
 run.environment("DB_VERSION", run.environment["DB_VERSION"] ?: "latest")
 run.environment("ANET_DB_SERVER", run.environment["ANET_DB_SERVER"] ?: "localhost")
-run.environment("ANET_DB_NAME", run.environment["ANET_DB_NAME"] ?: isTestEnv ? "testAnet" : "devAnet")
+run.environment("ANET_DB_NAME", run.environment["ANET_DB_NAME"] ?: isTestEnv ? TEST_DB : DEV_DB)
 run.environment("ANET_DB_USERNAME", run.environment["ANET_DB_USERNAME"] ?: isTestEnv ? "anetTestUser" : "anetDevUser")
 run.environment("ANET_DB_PASSWORD", run.environment["ANET_DB_PASSWORD"] ?: isTestEnv ? "Test-P@ssw0rd" : "Dev-P@ssw0rd")
 run.environment("ANET_DB_PORT", run.environment["ANET_DB_PORT"] ?: "5432")
@@ -71,7 +73,8 @@ run.environment("ANET_SMTP_SSLTRUST", run.environment["ANET_SMTP_SSLTRUST"] ?: r
 run.environment("ANET_SMTP_HTTP_PORT", run.environment["ANET_SMTP_HTTP_PORT"] ?: isTestEnv ? 1180 : 1080)
 run.environment("ANET_DICTIONARY_NAME", run.environment["ANET_DICTIONARY_NAME"] ?: "anet-dictionary.yml")
 run.environment("ANET_TEST_MODE", run.environment["ANET_TEST_MODE"] ?: isTestEnv ? "true" : "false")
-run.environment("SPRING_PROFILES_ACTIVE", run.environment["SPRING_PROFILES_ACTIVE"] ?: isTestEnv ? "test" : "dev")
+String NON_DEFAULT_DB_PROFILE = run.environment["ANET_DB_NAME"] in [DEV_DB, TEST_DB] ? "" : "prod"
+run.environment("SPRING_PROFILES_ACTIVE", run.environment["SPRING_PROFILES_ACTIVE"] ?: isTestEnv ? "test" : (NON_DEFAULT_DB_PROFILE ?: "dev"))
 
 String adminOrgName = run.environment["ANET_ADMIN_ORG_NAME"] ?: "ANET Administrators"
 String adminPosName = run.environment["ANET_ADMIN_POS_NAME"] ?: "ANET Administrator"
