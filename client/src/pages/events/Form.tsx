@@ -37,7 +37,6 @@ import CreateNewLocation from "pages/locations/CreateNewLocation"
 import pluralize from "pluralize"
 import React, { useContext, useState } from "react"
 import { Button, FormSelect } from "react-bootstrap"
-import { connect } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import LOCATIONS_ICON from "resources/locations.png"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
@@ -98,7 +97,6 @@ const EventForm = ({
         setFieldValue,
         setFieldTouched,
         values,
-        validateForm,
         submitForm
       }) => {
         const isAdmin = currentUser && currentUser.isAdmin()
