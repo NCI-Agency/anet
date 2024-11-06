@@ -28,6 +28,22 @@ module.exports = {
     "react",
     "react-hooks"
   ],
+  overrides: [
+    {
+      files: ["**/*.ts", "**/*.tsx"],
+      extends: ["plugin:@typescript-eslint/recommended"],
+      parser: "@typescript-eslint/parser",
+      plugins: ["@typescript-eslint"],
+      rules: {
+        "@typescript-eslint/no-explicit-any": "warn",
+        "@typescript-eslint/no-namespace": "warn",
+        "@typescript-eslint/no-unused-expressions": "warn",
+        "@typescript-eslint/no-unused-vars": "warn",
+        "prefer-spread": "warn",
+        "react/prop-types": "warn"
+      }
+    }
+  ],
   rules: {
     eqeqeq: ["error", "always", { null: "ignore" }],
     "import/no-anonymous-default-export": "off",

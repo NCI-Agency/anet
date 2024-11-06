@@ -1,6 +1,6 @@
 const merge = require("webpack-merge")
 const webpack = require("webpack")
-const common = require("./webpack.common.js")
+const common = require("./webpack.common")
 const paths = require("./paths")
 
 module.exports = merge.merge(common.simConfig, {

@@ -7,6 +7,16 @@ const webpack = require("webpack")
 const paths = require("./paths")
 
 const commonConfig = {
+  resolve: {
+    // Add `.ts` and `.tsx` as a resolvable extension.
+    extensions: [".ts", ".tsx", ".js"],
+    // Add support for TypeScripts fully qualified ESM imports.
+    extensionAlias: {
+      ".js": [".js", ".ts"],
+      ".cjs": [".cjs", ".cts"],
+      ".mjs": [".mjs", ".mts"]
+    }
+  },
   module: {
     rules: [
       {
@@ -18,12 +28,12 @@ const commonConfig = {
         loader: "ignore-loader"
       },
       {
-        test: /\.m?js$/,
-        include: /node_modules/,
-        resolve: {
-          fullySpecified: false
-        },
-        type: "javascript/auto"
+        test: /\.([cm]?ts|tsx)$/,
+        include: [paths.appSrc, paths.testSrc, paths.platforms],
+        loader: "ts-loader",
+        options: {
+          transpileOnly: true
+        }
       },
       {
         test: /\.(m?js|jsx)$/,
@@ -44,6 +54,10 @@ const commonConfig = {
         test: /\.m?js$/,
         // Based on https://github.com/facebook/create-react-app/blob/main/packages/react-scripts/config/webpack.config.js
         include: /node_modules/,
+        resolve: {
+          fullySpecified: false
+        },
+        type: "javascript/auto",
         use: [
           "thread-loader",
           {
@@ -59,7 +73,6 @@ const commonConfig = {
           }
         ]
       },
-
       {
         test: /\.css$/,
         use: [
@@ -91,7 +104,7 @@ module.exports = {
       alias: { vm: "vm-browserify" }
     },
     entry: {
-      anet: [require.resolve("./polyfills"), "./src/index-auth.js"]
+      anet: [require.resolve("./polyfills"), "./src/index-auth"]
     },
     output: {
       path: paths.appBuild
@@ -142,7 +155,7 @@ module.exports = {
       __dirname: true
     },
     entry: {
-      anet: [require.resolve("./polyfills_node"), "./tests/sim/Simulator.js"]
+      anet: [require.resolve("./polyfills_node"), "./tests/sim/Simulator"]
     }
   })
 }
