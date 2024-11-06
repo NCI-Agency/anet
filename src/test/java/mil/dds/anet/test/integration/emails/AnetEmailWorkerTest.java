@@ -72,9 +72,7 @@ class AnetEmailWorkerTest {
   void tearDown() throws Exception {
     // Clear the email server after test
     emailServer.clearEmailServer();
-
     emailWorker = null;
-    AnetEmailWorker.setInstance(null);
   }
 
   /**

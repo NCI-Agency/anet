@@ -112,9 +112,7 @@ class FutureEngagementWorkerTest extends AbstractResourceTest {
 
     // Clear the email server after testing
     emailServer.clearEmailServer();
-
     emailWorker = null;
-    AnetEmailWorker.setInstance(null);
   }
 
   @Test

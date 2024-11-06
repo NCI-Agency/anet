@@ -34,7 +34,6 @@ class AnetEmailResourceTest extends AbstractResourceTest {
   void tearDownClass() {
     emailWorker.run();
     emailWorker = null;
-    AnetEmailWorker.setInstance(null);
   }
 
   @Test

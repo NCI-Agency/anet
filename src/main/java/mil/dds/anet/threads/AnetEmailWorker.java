@@ -26,6 +26,7 @@ import mil.dds.anet.beans.JobHistory;
 import mil.dds.anet.config.AnetConfig;
 import mil.dds.anet.config.AnetConfig.SmtpConfiguration;
 import mil.dds.anet.config.AnetDictionary;
+import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.AdminDao;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
 import mil.dds.anet.database.EmailDao;
@@ -40,6 +41,7 @@ import org.simplejavamail.mailer.MailValidationException;
 import org.simplejavamail.mailer.MailerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -49,8 +51,6 @@ import org.springframework.web.server.ResponseStatusException;
 @Component
 @ConditionalOnExpression("not ${anet.no-workers:false}")
 public class AnetEmailWorker extends AbstractWorker {
-
-  private static AnetEmailWorker instance;
 
   private final AnetConfig config;
   private final EmailDao dao;
@@ -64,12 +64,6 @@ public class AnetEmailWorker extends AbstractWorker {
     this.dao = dao;
     this.adminDao = adminDao;
     this.mapper = MapperUtils.getDefaultMapper();
-
-    setInstance(this);
-  }
-
-  public static void setInstance(AnetEmailWorker instance) {
-    AnetEmailWorker.instance = instance;
   }
 
   @Scheduled(initialDelay = 10, fixedRate = 300, timeUnit = TimeUnit.SECONDS)
@@ -206,9 +200,9 @@ public class AnetEmailWorker extends AbstractWorker {
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   public static void sendEmailAsync(AnetEmail email) {
-    if (instance != null) {
-      instance.internal_sendEmailAsync(email);
-    } else {
+    try {
+      ApplicationContextProvider.getBean(AnetEmailWorker.class).internal_sendEmailAsync(email);
+    } catch (BeansException e) {
       noWorkerLogger.warn("No AnetEmailWorker has been created, so no email will be sent");
     }
   }

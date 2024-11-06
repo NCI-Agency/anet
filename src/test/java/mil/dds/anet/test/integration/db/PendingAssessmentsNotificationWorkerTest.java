@@ -94,9 +94,7 @@ class PendingAssessmentsNotificationWorkerTest {
   void tearDownClass() throws Exception {
     // Clear the email server after testing
     flushEmail();
-
     emailWorker = null;
-    AnetEmailWorker.setInstance(null);
   }
 
   @Test
