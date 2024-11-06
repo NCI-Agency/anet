@@ -26,25 +26,7 @@ import mil.dds.anet.beans.Position;
 import mil.dds.anet.graphql.AllowUnverifiedUsers;
 import mil.dds.anet.graphql.DateTimeMapper;
 import mil.dds.anet.graphql.RestrictToAuthorizationGroups;
-import mil.dds.anet.resources.AccessTokenResource;
-import mil.dds.anet.resources.AdminResource;
-import mil.dds.anet.resources.AnetEmailResource;
-import mil.dds.anet.resources.ApprovalStepResource;
-import mil.dds.anet.resources.AttachmentResource;
-import mil.dds.anet.resources.AuthorizationGroupResource;
-import mil.dds.anet.resources.EntityAvatarResource;
-import mil.dds.anet.resources.EventResource;
-import mil.dds.anet.resources.EventSeriesResource;
-import mil.dds.anet.resources.LocationResource;
-import mil.dds.anet.resources.NoteResource;
-import mil.dds.anet.resources.OrganizationResource;
-import mil.dds.anet.resources.PersonResource;
-import mil.dds.anet.resources.PositionResource;
-import mil.dds.anet.resources.ReportResource;
-import mil.dds.anet.resources.SavedSearchResource;
-import mil.dds.anet.resources.SubscriptionResource;
-import mil.dds.anet.resources.SubscriptionUpdateResource;
-import mil.dds.anet.resources.TaskResource;
+import mil.dds.anet.resources.*;
 import mil.dds.anet.utils.DaoUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
@@ -68,6 +50,7 @@ public class GraphQLConfig implements WebMvcConfigurer {
   private final EventResource eventResource;
   private final EventSeriesResource eventSeriesResource;
   private final LocationResource locationResource;
+  private final MartImportedReportsResource martImportedReportsResource;
   private final NoteResource noteResource;
   private final OrganizationResource organizationResource;
   private final PersonResource personResource;
@@ -83,10 +66,10 @@ public class GraphQLConfig implements WebMvcConfigurer {
       AttachmentResource attachmentResource, AuthorizationGroupResource authorizationGroupResource,
       EntityAvatarResource entityAvatarResource, EventResource eventResource,
       EventSeriesResource eventSeriesResource, LocationResource locationResource,
-      NoteResource noteResource, OrganizationResource organizationResource,
-      PersonResource personResource, PositionResource positionResource,
-      ReportResource reportResource, SavedSearchResource savedSearchResource,
-      SubscriptionResource subscriptionResource,
+      MartImportedReportsResource martImportedReportsResource, NoteResource noteResource,
+      OrganizationResource organizationResource, PersonResource personResource,
+      PositionResource positionResource, ReportResource reportResource,
+      SavedSearchResource savedSearchResource, SubscriptionResource subscriptionResource,
       SubscriptionUpdateResource subscriptionUpdateResource, TaskResource taskResource) {
     this.accessTokenResource = accessTokenResource;
     this.adminResource = adminResource;
@@ -98,6 +81,7 @@ public class GraphQLConfig implements WebMvcConfigurer {
     this.eventResource = eventResource;
     this.eventSeriesResource = eventSeriesResource;
     this.locationResource = locationResource;
+    this.martImportedReportsResource = martImportedReportsResource;
     this.noteResource = noteResource;
     this.organizationResource = organizationResource;
     this.personResource = personResource;
@@ -181,9 +165,9 @@ public class GraphQLConfig implements WebMvcConfigurer {
     // Create all GraphQL Resources
     return List.of(accessTokenResource, adminResource, anetEmailResource, approvalStepResource,
         attachmentResource, authorizationGroupResource, entityAvatarResource, eventResource,
-        eventSeriesResource, locationResource, noteResource, organizationResource, personResource,
-        positionResource, reportResource, savedSearchResource, subscriptionResource,
-        subscriptionUpdateResource, taskResource);
+        eventSeriesResource, locationResource, martImportedReportsResource, noteResource,
+        organizationResource, personResource, positionResource, reportResource, savedSearchResource,
+        subscriptionResource, subscriptionUpdateResource, taskResource);
   }
 
   public static class AuthorizationInterceptor implements ResolverInterceptor {

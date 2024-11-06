@@ -1446,3 +1446,8 @@ properties:
         title: The optional initial delay before starting the account deactivation task expressed in seconds.
         description: Used in the application to set the initial delay after which the first deactivation (warning) checks will occur;
                      when not specified, it will use the checkIntervalInSecs setting.
+
+  martIntegration:
+    type: boolean
+    title: MART integration.
+    description: Whether or not this ANET instance integrates with MART.

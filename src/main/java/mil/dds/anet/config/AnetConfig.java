@@ -47,6 +47,8 @@ public class AnetConfig {
 
   private KeycloakConfiguration keycloakConfiguration = new KeycloakConfiguration();
 
+  private MartExchangeConfiguration mart;
+
   public boolean getRedirectToHttps() {
     return redirectToHttps;
   }
@@ -105,6 +107,14 @@ public class AnetConfig {
 
   public String getAnetDictionaryName() {
     return anetDictionaryName;
+  }
+
+  public MartExchangeConfiguration getMart() {
+    return mart;
+  }
+
+  public void setMart(MartExchangeConfiguration mart) {
+    this.mart = mart;
   }
 
   /**
@@ -275,6 +285,90 @@ public class AnetConfig {
         }
       }
       return version;
+    }
+  }
+
+  public static class MartExchangeConfiguration {
+    String host;
+    String userName;
+    String password;
+    String emailAddress;
+    String trustedSender;
+    boolean disableCertificateValidation;
+    boolean markAsRead;
+    long mailPollingDelay;
+    int maxNumberEmailsPulled;
+
+    public String getUserName() {
+      return userName;
+    }
+
+    public void setUserName(String userName) {
+      this.userName = userName;
+    }
+
+    public String getPassword() {
+      return password;
+    }
+
+    public void setPassword(String password) {
+      this.password = password;
+    }
+
+    public String getEmailAddress() {
+      return emailAddress;
+    }
+
+    public void setEmailAddress(String emailAddress) {
+      this.emailAddress = emailAddress;
+    }
+
+    public String getHost() {
+      return host;
+    }
+
+    public void setHost(String host) {
+      this.host = host;
+    }
+
+    public String getTrustedSender() {
+      return trustedSender;
+    }
+
+    public void setTrustedSender(String trustedSender) {
+      this.trustedSender = trustedSender;
+    }
+
+    public boolean getDisableCertificateValidation() {
+      return disableCertificateValidation;
+    }
+
+    public void setDisableCertificateValidation(boolean disableCertificateValidation) {
+      this.disableCertificateValidation = disableCertificateValidation;
+    }
+
+    public boolean getMarkAsRead() {
+      return markAsRead;
+    }
+
+    public void setMarkAsRead(boolean markAsRead) {
+      this.markAsRead = markAsRead;
+    }
+
+    public long getMailPollingDelay() {
+      return mailPollingDelay;
+    }
+
+    public void setMailPollingDelay(long mailPollingDelay) {
+      this.mailPollingDelay = mailPollingDelay;
+    }
+
+    public int getMaxNumberEmailsPulled() {
+      return maxNumberEmailsPulled;
+    }
+
+    public void setMaxNumberEmailsPulled(int maxNumberEmailsPulled) {
+      this.maxNumberEmailsPulled = maxNumberEmailsPulled;
     }
   }
 }
