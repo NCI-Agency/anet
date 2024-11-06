@@ -21,18 +21,18 @@ a {
 <body>
 <p style="color:red; font-size:12px; font-weight: bold;" align="center"><i>Classification: ${SECURITY_BANNER_CLASSIFICATION}</i></p>
 
-Hi
+<p>Hi
 <#assign reportAuthors = (report.loadAuthors(context).get())!>
 <#list reportAuthors as reportAuthor>
   ${reportAuthor.name},
-</#list><br><br>
+</#list></p><br><br>
 
 <p>${editor.name} edited your report, <a href="${serverUrl}/reports/${report.uuid}"><em><strong>"${reportIntent}"</strong></em></a>. To review the changes, <a href="${serverUrl}/reports/${report.uuid}">click here</a>.</p>
 
-ANET Support Team
+<p>ANET Support Team
 <#if SUPPORT_EMAIL_ADDR??>
   <br><a href="mailto:${SUPPORT_EMAIL_ADDR}">${SUPPORT_EMAIL_ADDR}</a>
-</#if>
+</#if></p>
 
 </body>
 </html>

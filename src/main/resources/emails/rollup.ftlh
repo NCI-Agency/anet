@@ -174,3 +174,6 @@ a {
         Read full report
     </a>
 </#macro>
+
+</body>
+</html>
