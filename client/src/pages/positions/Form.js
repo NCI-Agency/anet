@@ -23,8 +23,10 @@ import Messages from "components/Messages"
 import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
+import RichTextEditor from "components/RichTextEditor"
 import SimilarObjectsModal from "components/SimilarObjectsModal"
 import { FastField, Field, Form, Formik } from "formik"
+import _isEqual from "lodash/isEqual"
 import { Location, Organization, Position } from "models"
 import { PositionRole } from "models/Position"
 import PropTypes from "prop-types"
@@ -369,6 +371,31 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
                   component={FieldHelper.RadioButtonToggleGroupField}
                   buttons={positionRoleButtons}
                   onChange={value => setFieldValue("role", value)}
+                />
+
+                <DictionaryField
+                  wrappedComponent={FastField}
+                  dictProps={Settings.fields.position.description}
+                  name="description"
+                  component={FieldHelper.SpecialField}
+                  onChange={value => {
+                    // prevent initial unnecessary render of RichTextEditor
+                    if (!_isEqual(values.description, value)) {
+                      setFieldValue("description", value, true)
+                    }
+                  }}
+                  onHandleBlur={() => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("description", true, false)
+                  }}
+                  widget={
+                    <RichTextEditor
+                      className="description"
+                      placeholder={
+                        Settings.fields.position.description?.placeholder
+                      }
+                    />
+                  }
                 />
               </Fieldset>
 

@@ -32,6 +32,7 @@ const GQL_GET_POSITION = gql`
       status
       type
       role
+      description
       emailAddresses {
         network
         address

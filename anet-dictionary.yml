@@ -898,6 +898,9 @@ fields:
         member: Member
         deputy: Deputy
         leader: Leader
+    description:
+      label: Description
+      placeholder: Fill in the description of this position
     emailAddresses:
       label: Email addresses
       authorizationGroupUuids: ['ab1a7d99-4529-44b1-a118-bdee3ca8296b']

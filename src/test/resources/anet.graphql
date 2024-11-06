@@ -800,6 +800,7 @@ type Position {
   createdAt: Instant
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformation]
+  description: String
   emailAddresses(network: String): [EmailAddress]
   isApprover: Boolean
   isSubscribed: Boolean
@@ -825,6 +826,7 @@ input PositionInput {
   createdAt: Instant
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformationInput]
+  description: String
   emailAddresses: [EmailAddressInput]
   location: LocationInput
   name: String
