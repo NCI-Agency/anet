@@ -1,4 +1,5 @@
 <html>
+<head>
 <style type="text/css">
 body {
 	font-family: Arial, Helvetica, SourceSansPro-Regular;
@@ -31,9 +32,10 @@ a {
 	padding:2px;
 }
 </style>
+</head>
 <body>
-
 <p style="color:red; font-size:12px; font-weight: bold;" align="center"><i>Classification: ${SECURITY_BANNER_CLASSIFICATION}</i></p>
+
 <h1 style="color: #000000;">${title}</h1>
 
 <#if comment??>
