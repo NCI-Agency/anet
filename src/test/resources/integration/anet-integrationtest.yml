@@ -1,8 +1,8 @@
 ##############################################################
-#### ANET IT Configuration 
+#### ANET IT Configuration
 ####
-#### This is the configuration file for the ANET integration tests. 
-#### 
+#### This is the configuration file for the ANET integration tests.
+####
 ##############################################################
 
 # The wait period before sending a command to the email server (in ms)
@@ -13,3 +13,6 @@ emailMaxWaitRetriesOnClear: 5
 
 # Whether to execute the tests involving the email server
 emailServerTestsExecute: true
+
+# Whether to execute the tests involving MART report importer
+martReportImporterTestsExecute: true

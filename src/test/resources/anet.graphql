@@ -90,6 +90,14 @@ type AnetBeanList_Location {
 }
 
 """"""
+type AnetBeanList_MartImportedReport {
+  list: [MartImportedReport]
+  pageNum: Int
+  pageSize: Int
+  totalCount: Int
+}
+
+""""""
 type AnetBeanList_Organization {
   list: [Organization]
   pageNum: Int
@@ -498,6 +506,15 @@ scalar Long
 """Built-in scalar for map-like structures"""
 scalar Map_String_ObjectScalar
 
+""""""
+type MartImportedReport {
+  createdAt: Instant
+  errors: String
+  person: Person
+  report: Report
+  success: Boolean!
+}
+
 """Mutation root"""
 type Mutation {
   addComment(comment: CommentInput, uuid: String): Comment
@@ -897,6 +914,7 @@ type Query {
   authorizationGroupList(query: AuthorizationGroupSearchQueryInput): AnetBeanList_AuthorizationGroup
   location(uuid: String): Location
   locationList(query: LocationSearchQueryInput): AnetBeanList_Location
+  martImportedReports(pageNum: Int = 0, pageSize: Int = 0): AnetBeanList_MartImportedReport
   me: Person
   mySearches: [SavedSearch]
   mySubscriptionUpdates(query: SubscriptionUpdateSearchQueryInput): AnetBeanList_SubscriptionUpdate
