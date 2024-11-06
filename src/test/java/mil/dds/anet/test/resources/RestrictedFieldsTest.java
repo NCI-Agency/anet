@@ -186,7 +186,9 @@ class RestrictedFieldsTest extends AbstractResourceTest {
     assertThat(results.getList()).filteredOn(p -> !Utils.isEmptyOrNull(p.getPhoneNumber()))
         .hasSize(expectedNrOfPhoneNumbers).map(Person::getPhoneNumber)
         .containsAll(expectedPhoneNumbers);
-    assertThat(results.getList()).filteredOn(p -> !Utils.isEmptyOrNull(p.getEmailAddresses()))
+    assertThat(results.getList())
+        .filteredOn(p -> (!Utils.isEmptyOrNull(p.getEmailAddresses()))
+            && (!p.getEmailAddresses().get(0).getAddress().equals("mart-user@kfor.nato.int")))
         .flatMap(Person::getEmailAddresses).hasSize(expectedNrOfEmailAddresses)
         .usingRecursiveFieldByFieldElementComparator().containsAll(
             expectedEmailAddresses.stream().map(a -> buildEmailAddress(emailNetwork, a)).toList());

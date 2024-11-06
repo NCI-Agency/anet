@@ -2,24 +2,14 @@ package mil.dds.anet.test;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.RollupGraph;
-import mil.dds.anet.test.client.AnetEmailInput;
-import mil.dds.anet.test.client.CommentInput;
-import mil.dds.anet.test.client.EventInput;
-import mil.dds.anet.test.client.EventSeriesInput;
-import mil.dds.anet.test.client.EventType;
-import mil.dds.anet.test.client.LocationInput;
-import mil.dds.anet.test.client.LocationType;
-import mil.dds.anet.test.client.OrganizationInput;
-import mil.dds.anet.test.client.Position;
-import mil.dds.anet.test.client.PositionInput;
-import mil.dds.anet.test.client.PositionRole;
-import mil.dds.anet.test.client.PositionType;
-import mil.dds.anet.test.client.Status;
-import mil.dds.anet.test.client.TaskInput;
+import mil.dds.anet.beans.mart.ReportDto;
+import mil.dds.anet.test.client.*;
 
 public class TestData {
 
@@ -107,5 +97,53 @@ public class TestData {
     return EventSeriesInput.builder().withName(name).withStatus(Status.ACTIVE)
         .withDescription(description).withOwnerOrg(ownerOrg).withHostOrg(hostOrg)
         .withAdminOrg(adminOrg).build();
+  }
+
+  public static ReportDto createGoodMartReport() {
+    ReportDto reportDto = new ReportDto();
+    // User Info
+    reportDto.setUuid(UUID.randomUUID().toString());
+    reportDto.setOrganizationUuid("9a35caa7-a095-4963-ac7b-b784fde4d583");
+    reportDto.setOrganizationName("Planning Programming, Budgeting and Execution");
+    reportDto.setRank("OF-6");
+    reportDto.setEmail("mart-user@kfor.nato.int");
+    reportDto.setFirstName("MART");
+    reportDto.setLastName("User");
+
+    // Report Info
+    reportDto.setCreatedAt(Instant.now());
+    reportDto.setIntent("Report Intent");
+    reportDto.setReportText("Report Text");
+    reportDto.setEngagementDate(Instant.now());
+    reportDto.setLocationUuid("0855fb0a-995e-4a79-a132-4024ee2983ff");
+    reportDto.setCountry("British");
+    reportDto.setPositionName("MART Team Member");
+    reportDto.setSubmittedAt(Instant.now());
+
+    // Custom fields
+    reportDto.setCustomFields(
+        "{\"attitude\":\"Positive\", \"contacts\":\"Contacts\", \"remarks\":\"Remarks\", \"rcAssessment\":\"rcAssessment\"}");
+
+    // Tasks
+    Map<String, String> tasks = new HashMap<>();
+    tasks.put("19364d81-3203-483d-a6bf-461d58888c76", "Intelligence");
+    tasks.put("does not exist", "does not exist");
+    reportDto.setTasks(tasks);
+
+    return reportDto;
+  }
+
+  public static ReportDto createMartReportWrongOrganization() {
+    ReportDto reportDto = new ReportDto();
+    reportDto.setOrganizationUuid("does not exist");
+    reportDto.setOrganizationName("does not exist");
+    return reportDto;
+  }
+
+  public static ReportDto createMartReportWrongLocation() {
+    ReportDto reportDto = new ReportDto();
+    reportDto.setOrganizationUuid("9a35caa7-a095-4963-ac7b-b784fde4d583");
+    reportDto.setLocationUuid("does not exist");
+    return reportDto;
   }
 }

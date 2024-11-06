@@ -1,55 +1,17 @@
 package mil.dds.anet;
 
 import graphql.GraphQLContext;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-import mil.dds.anet.beans.ApprovalStep;
-import mil.dds.anet.beans.Location;
-import mil.dds.anet.beans.Organization;
-import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.Position;
-import mil.dds.anet.beans.Task;
+import mil.dds.anet.beans.*;
 import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
 import mil.dds.anet.beans.search.LocationSearchQuery;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.config.ApplicationContextProvider;
-import mil.dds.anet.database.AdminDao;
-import mil.dds.anet.database.ApprovalStepDao;
-import mil.dds.anet.database.AttachmentDao;
-import mil.dds.anet.database.AuthorizationGroupDao;
-import mil.dds.anet.database.CommentDao;
-import mil.dds.anet.database.CustomSensitiveInformationDao;
-import mil.dds.anet.database.EmailAddressDao;
-import mil.dds.anet.database.EmailDao;
-import mil.dds.anet.database.EntityAvatarDao;
-import mil.dds.anet.database.EventDao;
-import mil.dds.anet.database.EventSeriesDao;
-import mil.dds.anet.database.JobHistoryDao;
-import mil.dds.anet.database.LocationDao;
-import mil.dds.anet.database.NoteDao;
-import mil.dds.anet.database.OrganizationDao;
-import mil.dds.anet.database.PersonDao;
-import mil.dds.anet.database.PositionDao;
-import mil.dds.anet.database.ReportActionDao;
-import mil.dds.anet.database.ReportDao;
-import mil.dds.anet.database.ReportSensitiveInformationDao;
-import mil.dds.anet.database.SavedSearchDao;
-import mil.dds.anet.database.SubscriptionDao;
-import mil.dds.anet.database.SubscriptionUpdateDao;
-import mil.dds.anet.database.TaskDao;
-import mil.dds.anet.database.UserActivityDao;
-import mil.dds.anet.utils.AuthUtils;
-import mil.dds.anet.utils.BatchingUtils;
-import mil.dds.anet.utils.DaoUtils;
-import mil.dds.anet.utils.IdDataLoaderKey;
-import mil.dds.anet.utils.Utils;
+import mil.dds.anet.database.*;
+import mil.dds.anet.utils.*;
 import mil.dds.anet.views.UuidFetcher;
 import org.springframework.stereotype.Component;
 
@@ -156,6 +118,10 @@ public class AnetObjectEngine {
 
   public EventDao getEventDao() {
     return ApplicationContextProvider.getBean(EventDao.class);
+  }
+
+  public MartImportedReportDao getMartImportedReportDao() {
+    return ApplicationContextProvider.getBean(MartImportedReportDao.class);
   }
 
   public CompletableFuture<Boolean> canUserApproveStep(GraphQLContext context, String userUuid,

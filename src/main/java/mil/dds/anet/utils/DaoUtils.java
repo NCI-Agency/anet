@@ -2,19 +2,9 @@ package mil.dds.anet.utils;
 
 import com.google.common.base.Joiner;
 import graphql.GraphQLContext;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.temporal.ChronoUnit;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import mil.dds.anet.beans.CustomSensitiveInformation;
 import mil.dds.anet.beans.Note;
 import mil.dds.anet.beans.Person;
@@ -203,7 +193,7 @@ public class DaoUtils {
     return millis < MILLIS_IN_YEAR;
   }
 
-  private static Instant handleRelativeDate(Instant input) {
+  public static Instant handleRelativeDate(Instant input) {
     if (isRelativeDate(input)) {
       final long now = Instant.now().toEpochMilli();
       return Instant.ofEpochMilli(now + input.toEpochMilli());

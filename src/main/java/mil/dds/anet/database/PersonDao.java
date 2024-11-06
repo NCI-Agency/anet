@@ -7,35 +7,21 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Deque;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import javax.cache.Cache;
 import javax.cache.Cache.Entry;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
 import javax.cache.spi.CachingProvider;
-import mil.dds.anet.beans.EntityAvatar;
-import mil.dds.anet.beans.MergedEntity;
-import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.PersonPositionHistory;
-import mil.dds.anet.beans.Position;
-import mil.dds.anet.beans.WithStatus;
+import mil.dds.anet.beans.*;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.recentActivity.Activity;
 import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.database.mappers.PersonPositionHistoryMapper;
 import mil.dds.anet.search.pg.PostgresqlPersonSearcher;
-import mil.dds.anet.utils.AnetAuditLogger;
-import mil.dds.anet.utils.AnetConstants;
-import mil.dds.anet.utils.DaoUtils;
-import mil.dds.anet.utils.FkDataLoaderKey;
-import mil.dds.anet.utils.Utils;
+import mil.dds.anet.utils.*;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.jdbi.v3.core.Handle;
@@ -215,6 +201,27 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
               + "FROM people LEFT JOIN positions ON people.uuid = positions.\"currentPersonUuid\" "
               + "WHERE people.\"domainUsername\" = :domainUsername")
           .bind("domainUsername", domainUsername).map(new PersonMapper()).list();
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
+  @Transactional
+  // Used by the MART IMPORT
+  public List<Person> findByEmailAddress(String emailAddress) {
+    final Handle handle = getDbHandle();
+    try {
+      if (Utils.isEmptyOrNull(emailAddress)) {
+        return Collections.emptyList();
+      }
+      return handle
+          .createQuery("/* findByEmailAddress */ SELECT " + PERSON_FIELDS + ","
+              + PositionDao.POSITION_FIELDS
+              + "FROM people LEFT JOIN positions ON people.uuid = positions.\"currentPersonUuid\" "
+              + "LEFT JOIN \"emailAddresses\" ON \"emailAddresses\".\"relatedObjectType\" = '"
+              + TABLE_NAME + "' AND people.uuid = \"emailAddresses\".\"relatedObjectUuid\" "
+              + "WHERE \"emailAddresses\".address = :emailAddress")
+          .bind("emailAddress", emailAddress).map(new PersonMapper()).list();
     } finally {
       closeDbHandle(handle);
     }

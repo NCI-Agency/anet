@@ -72,6 +72,12 @@ run.environment("ANET_SMTP_SSLTRUST", run.environment["ANET_SMTP_SSLTRUST"] ?: r
 run.environment("ANET_SMTP_HTTP_PORT", run.environment["ANET_SMTP_HTTP_PORT"] ?: isTestEnv ? 1180 : 1080)
 run.environment("ANET_DICTIONARY_NAME", run.environment["ANET_DICTIONARY_NAME"] ?: "anet-dictionary.yml")
 run.environment("ANET_TEST_MODE", run.environment["ANET_TEST_MODE"] ?: isTestEnv ? "true" : "false")
+run.environment("ANET_MART_EXCHANGE_HOST", run.environment["ANET_MART_EXCHANGE_HOST"] ?: "localhost")
+run.environment("ANET_MART_EXCHANGE_USERNAME", run.environment["ANET_MART_EXCHANGE_USERNAME"] ?: "")
+run.environment("ANET_MART_EXCHANGE_PASSWORD", run.environment["ANET_MART_EXCHANGE_PASSWORD"] ?: "")
+run.environment("ANET_SMTP_STARTTLS", run.environment["ANET_SMTP_STARTTLS"] ?: "true")
+run.environment("ANET_SMTP_SSLTRUST", run.environment["ANET_SMTP_SSLTRUST"] ?: run.environment["ANET_SMTP_SERVER"])
+run.environment("ANET_SMTP_HTTP_PORT", run.environment["ANET_SMTP_HTTP_PORT"] ?: isTestEnv ? 1180 : 1080)
 String NON_DEFAULT_DB_PROFILE = run.environment["ANET_DB_NAME"] in [DEV_DB, TEST_DB] ? "" : "prod"
 run.environment("SPRING_PROFILES_ACTIVE", run.environment["SPRING_PROFILES_ACTIVE"] ?: isTestEnv ? "test" : (NON_DEFAULT_DB_PROFILE ?: "dev"))
 
@@ -157,6 +163,10 @@ dependencies {
 
 	// Apache CXF dependencies required for NVG-WS
 	implementation "org.apache.cxf:cxf-spring-boot-starter-jaxws:${cxfVersion}"
+
+	// Dependencies for MART importer
+	implementation group: 'javax.xml.ws', name: 'jaxws-api', version: '2.2.11'
+	implementation group: 'com.microsoft.ews-java-api', name: 'ews-java-api', version: '2.0'
 
 	// The graphql-java-client-runtime module aggregates all dependencies for the generated code,
 	// including the plugin runtime
