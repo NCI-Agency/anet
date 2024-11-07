@@ -32,7 +32,7 @@ public class AnetDictionary {
 
   private static final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
   private static final JsonNodeReader jsonNodeReader =
-      JsonNodeReader.builder().yamlMapper(yamlMapper).build();
+      JsonNodeReader.builder().jsonMapper(yamlMapper).build();
   private static final ObjectMapper jsonMapper = new ObjectMapper();
 
   private final AnetConfig config;
