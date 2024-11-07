@@ -23,6 +23,7 @@ import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.utils.SqDataLoaderKey;
 import mil.dds.anet.utils.Utils;
+import mil.dds.anet.views.ForeignKeyByDateFetcher;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import mil.dds.anet.views.SearchQueryFetcher;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -92,6 +93,27 @@ public class OrganizationDao
     return new OrganizationsBatcher().getByForeignKeys(foreignKeys);
   }
 
+  class OrganizationsByDateBatcher extends ForeignKeyByDateBatcher<Organization> {
+    private static final String sql =
+        "/* batch.getOrganizationForPerson */ SELECT \"peoplePositions\".\"personUuid\" AS \"personUuid\", "
+            + ORGANIZATION_FIELDS + " FROM organizations, \"peoplePositions\", positions "
+            + "WHERE \"peoplePositions\".\"personUuid\" IN ( <foreignKeys> ) "
+            + "AND \"peoplePositions\".\"positionUuid\" = positions.uuid "
+            + "AND positions.\"organizationUuid\" = organizations.uuid "
+            + "AND \"peoplePositions\".\"createdAt\" <= :when "
+            + "AND (\"peoplePositions\".\"endedAt\" IS NULL"
+            + " OR \"peoplePositions\".\"endedAt\" > :when)";
+
+    public OrganizationsByDateBatcher() {
+      super(databaseHandler, sql, "foreignKeys", new OrganizationMapper(), "personUuid");
+    }
+  }
+
+  public List<List<Organization>> getOrganizationsByDate(
+      List<ImmutablePair<String, Instant>> foreignKeys) {
+    return new OrganizationsByDateBatcher().getByForeignKeys(foreignKeys);
+  }
+
   class OrganizationSearchBatcher
       extends SearchQueryBatcher<Organization, OrganizationSearchQuery> {
     public OrganizationSearchBatcher() {
@@ -111,17 +133,20 @@ public class OrganizationDao
   }
 
   public CompletableFuture<List<Organization>> getOrganizationsForPerson(GraphQLContext context,
-      String personUuid) {
-    return new ForeignKeyFetcher<Organization>().load(context, FkDataLoaderKey.PERSON_ORGANIZATIONS,
-        personUuid);
+      String personUuid, Instant when) {
+    return when == null
+        ? new ForeignKeyFetcher<Organization>().load(context, FkDataLoaderKey.PERSON_ORGANIZATIONS,
+            personUuid)
+        : new ForeignKeyByDateFetcher<Organization>().load(context,
+            FkDataLoaderKey.PERSON_ORGANIZATIONS_WHEN, new ImmutablePair<>(personUuid, when));
   }
 
   public CompletableFuture<Organization> getOrganizationForPerson(GraphQLContext context,
-      String personUuid) {
+      String personUuid, Instant when) {
     if (personUuid == null) {
       return CompletableFuture.completedFuture(null);
     }
-    return getOrganizationsForPerson(context, personUuid)
+    return getOrganizationsForPerson(context, personUuid, when)
         .thenApply(l -> l.isEmpty() ? null : l.get(0));
   }
 

@@ -252,7 +252,7 @@ export class CreateReport extends Page {
   }
 
   async getAttendeeAssessment(name) {
-    return (await this.getAttendeesAssessments()).$(`//td/a[text()="${name}"]`)
+    return (await this.getAttendeesAssessments()).$(`//td//a[text()="${name}"]`)
   }
 
   async getTasksAssessments() {
@@ -264,7 +264,9 @@ export class CreateReport extends Page {
   }
 
   async getTaskAssessment(shortName) {
-    return (await this.getTasksAssessments()).$(`//td/a[text()="${shortName}"]`)
+    return (await this.getTasksAssessments()).$(
+      `//td//a[text()="${shortName}"]`
+    )
   }
 
   async getSubmitButton() {

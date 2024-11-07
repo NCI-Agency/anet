@@ -604,29 +604,27 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     final Handle handle = getDbHandle();
     try {
       if (!Utils.isEmptyOrNull(history)) {
+        final String countClause = "SELECT COUNT(*) AS count FROM \"peoplePositions\" WHERE ";
         final String personPositionClause = checkPerson
             ? "\"personUuid\" NOT IN ( :personUuid, :loserUuid ) AND \"positionUuid\" = :positionUuid"
             : "\"personUuid\" = :personUuid AND \"positionUuid\" NOT IN ( :positionUuid, :loserUuid )";
+        final String endClause =
+            " (\"endedAt\" IS NULL OR \"endedAt\" > :startTime) AND " + personPositionClause;
         for (final PersonPositionHistory pph : history) {
           final Query q;
           final Instant endTime = pph.getEndTime();
           if (endTime == null) {
-            q = handle.createQuery("SELECT COUNT(*) AS count FROM \"peoplePositions\"  WHERE ("
-                + " \"endedAt\" IS NULL OR (\"endedAt\" IS NOT NULL AND \"endedAt\" > :startTime)"
-                + ") AND " + personPositionClause);
+            q = handle.createQuery(countClause + endClause);
           } else {
-            q = handle.createQuery("SELECT COUNT(*) AS count FROM \"peoplePositions\" WHERE ("
-                + "(\"endedAt\" IS NULL AND \"createdAt\" < :endTime)"
-                + " OR (\"endedAt\" IS NOT NULL AND"
-                + " \"createdAt\" < :endTime AND \"endedAt\" > :startTime)) AND "
-                + personPositionClause).bind("endTime", DaoUtils.asLocalDateTime(endTime));
+            q = handle.createQuery(countClause + "\"createdAt\" < :endTime AND" + endClause)
+                .bind("endTime", DaoUtils.asLocalDateTime(endTime));
           }
           final String histUuid = checkPerson ? pph.getPositionUuid() : pph.getPersonUuid();
           final Number count =
               (Number) q.bind("startTime", DaoUtils.asLocalDateTime(pph.getStartTime()))
                   .bind("personUuid", checkPerson ? uuid : histUuid)
                   .bind("positionUuid", checkPerson ? histUuid : uuid)
-                  .bind("loserUuid", Utils.orIfNull(loserUuid, "")).map(new MapMapper()).one()
+                  .bind("loserUuid", Utils.orIfNull(loserUuid, "")).map(new MapMapper(false)).one()
                   .get("count");
 
           if (count.longValue() > 0) {

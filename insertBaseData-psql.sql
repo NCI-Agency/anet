@@ -300,127 +300,127 @@ INSERT INTO "emailAddresses" (network, address, "relatedObjectType", "relatedObj
 
 -- Put Andrew in the EF 1 Manager Billet
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 1 Manager'), (SELECT uuid from people where "domainUsername" = 'andrew'), CURRENT_TIMESTAMP);
+  ((SELECT uuid from positions where name = 'EF 1 Manager'), (SELECT uuid from people where "domainUsername" = 'andrew'), '2020-01-01');
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'andrew') WHERE name = 'EF 1 Manager';
 
 -- Put Bob into the Superuser Billet in EF 1.1
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 1.1 Superuser'), (SELECT uuid from people where "domainUsername" = 'bob'), CURRENT_TIMESTAMP);
+  ((SELECT uuid from positions where name = 'EF 1.1 Superuser'), (SELECT uuid from people where "domainUsername" = 'bob'), '2020-01-01');
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'bob') WHERE name = 'EF 1.1 Superuser';
 
 -- Put Henry into the Superuser Billet in EF 2.1
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 2.1 Superuser'), (SELECT uuid from people where "domainUsername" = 'henry'), CURRENT_TIMESTAMP);
+  ((SELECT uuid from positions where name = 'EF 2.1 Superuser'), (SELECT uuid from people where "domainUsername" = 'henry'), '2020-01-01');
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'henry') WHERE name = 'EF 2.1 Superuser';
 
 -- Rotate an advisor through a billet ending up with Jack in the EF 2.1 Advisor B Billet
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 2.1 Advisor B'), (SELECT uuid from people where "domainUsername" = 'erin'), CURRENT_TIMESTAMP);
+  ((SELECT uuid from positions where name = 'EF 2.1 Advisor B'), (SELECT uuid from people where "domainUsername" = 'erin'), '2020-01-01');
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'erin') WHERE name = 'EF 2.1 Advisor B';
-UPDATE "peoplePositions" SET "endedAt" = CURRENT_TIMESTAMP + INTERVAL '1 millisecond' WHERE "positionUuid" = (SELECT uuid from positions where name = 'EF 2.1 Advisor B');
+UPDATE "peoplePositions" SET "endedAt" = '2021-01-01' WHERE "positionUuid" = (SELECT uuid from positions where name = 'EF 2.1 Advisor B');
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 2.1 Advisor B'), (SELECT uuid from people where "domainUsername" = 'jack'), CURRENT_TIMESTAMP + INTERVAL '1 millisecond');
+  ((SELECT uuid from positions where name = 'EF 2.1 Advisor B'), (SELECT uuid from people where "domainUsername" = 'jack'), '2021-01-01');
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'jack') WHERE name = 'EF 2.1 Advisor B';
 
 -- Rotate advisors through billets ending up with Dvisor in the EF 2.2 Advisor Sewing Facilities Billet and Selena in the EF 1.2 Advisor Billet
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 1.2 Advisor'), (SELECT uuid from people where "domainUsername" = 'advisor'), CURRENT_TIMESTAMP);
+  ((SELECT uuid from positions where name = 'EF 1.2 Advisor'), (SELECT uuid from people where "domainUsername" = 'advisor'), '2020-01-01');
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 2.2 Advisor Sewing Facilities'), (SELECT uuid from people where "domainUsername" = 'selena'), CURRENT_TIMESTAMP);
+  ((SELECT uuid from positions where name = 'EF 2.2 Advisor Sewing Facilities'), (SELECT uuid from people where "domainUsername" = 'selena'), '2020-01-01');
 
-UPDATE "peoplePositions" SET "endedAt" = CURRENT_TIMESTAMP + INTERVAL '1 millisecond' WHERE "positionUuid" = (SELECT uuid from positions where name = 'EF 1.2 Advisor');
-UPDATE "peoplePositions" SET "endedAt" = CURRENT_TIMESTAMP + INTERVAL '1 millisecond' WHERE "positionUuid" = (SELECT uuid from positions where name = 'EF 2.2 Advisor Sewing Facilities');
+UPDATE "peoplePositions" SET "endedAt" = '2021-01-01' WHERE "positionUuid" = (SELECT uuid from positions where name = 'EF 1.2 Advisor');
+UPDATE "peoplePositions" SET "endedAt" = '2021-01-01' WHERE "positionUuid" = (SELECT uuid from positions where name = 'EF 2.2 Advisor Sewing Facilities');
 
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 2.2 Advisor Sewing Facilities'), (SELECT uuid from people where "domainUsername" = 'advisor'), CURRENT_TIMESTAMP + INTERVAL '1 millisecond');
+  ((SELECT uuid from positions where name = 'EF 2.2 Advisor Sewing Facilities'), (SELECT uuid from people where "domainUsername" = 'advisor'), '2021-01-01');
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'advisor') WHERE name = 'EF 2.2 Advisor Sewing Facilities';
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 1.2 Advisor'), (SELECT uuid from people where "domainUsername" = 'selena'), CURRENT_TIMESTAMP + INTERVAL '1 millisecond');
+  ((SELECT uuid from positions where name = 'EF 1.2 Advisor'), (SELECT uuid from people where "domainUsername" = 'selena'), '2021-01-01');
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'selena') WHERE name = 'EF 1.2 Advisor';
 
 -- Put Elizabeth into the EF 1.1 Advisor A Billet
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 1.1 Advisor A'), (SELECT uuid from people where "domainUsername" = 'elizabeth'), CURRENT_TIMESTAMP);
+  ((SELECT uuid from positions where name = 'EF 1.1 Advisor A'), (SELECT uuid from people where "domainUsername" = 'elizabeth'), '2020-01-01');
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'elizabeth') WHERE name = 'EF 1.1 Advisor A';
 
 -- Put Reina into the EF 2.2 Advisor C Billet
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 2.2 Advisor C'), (SELECT uuid from people where "domainUsername" = 'reina'), CURRENT_TIMESTAMP);
+  ((SELECT uuid from positions where name = 'EF 2.2 Advisor C'), (SELECT uuid from people where "domainUsername" = 'reina'), '2020-01-01');
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'reina') WHERE name = 'EF 2.2 Advisor C';
 
 -- Put Erin into the EF 2.2 Advisor D Billet
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 2.2 Advisor D'), (SELECT uuid from people where "domainUsername" = 'erin'), CURRENT_TIMESTAMP);
+  ((SELECT uuid from positions where name = 'EF 2.2 Advisor D'), (SELECT uuid from people where "domainUsername" = 'erin'), '2020-01-01');
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'erin') WHERE name = 'EF 2.2 Advisor D';
 
 -- Put Jacob in the EF 2.2 Superuser Billet
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 2.2 Superuser'), (SELECT uuid from people where "domainUsername" = 'jacob'), CURRENT_TIMESTAMP);
+  ((SELECT uuid from positions where name = 'EF 2.2 Superuser'), (SELECT uuid from people where "domainUsername" = 'jacob'), '2020-01-01');
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'jacob') WHERE name = 'EF 2.2 Superuser';
 
 -- Put Rebecca in the EF 2.2 Final Reviewer Position
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 2.2 Final Reviewer'), (SELECT uuid from people where "domainUsername" = 'rebecca'), CURRENT_TIMESTAMP);
+  ((SELECT uuid from positions where name = 'EF 2.2 Final Reviewer'), (SELECT uuid from people where "domainUsername" = 'rebecca'), '2020-01-01');
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'rebecca') WHERE name = 'EF 2.2 Final Reviewer';
 
 -- Put Arthur into the Admin Billet
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'ANET Administrator'), (SELECT uuid from people where "domainUsername" = 'arthur'), CURRENT_TIMESTAMP);
+  ((SELECT uuid from positions where name = 'ANET Administrator'), (SELECT uuid from people where "domainUsername" = 'arthur'), '2020-01-01');
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'arthur') WHERE name = 'ANET Administrator';
 
 -- Put Creed into the EF 5.1 Quality Ensurance
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 5.1 Advisor Quality Assurance'), (SELECT uuid from people where "domainUsername" = 'creed'), CURRENT_TIMESTAMP);
+  ((SELECT uuid from positions where name = 'EF 5.1 Advisor Quality Assurance'), (SELECT uuid from people where "domainUsername" = 'creed'), '2020-01-01');
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'creed') WHERE name = 'EF 5.1 Advisor Quality Assurance';
 
 -- Put Kevin into the EF 5.1 Accounting
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 5.1 Advisor Accounting'), (SELECT uuid from people where "domainUsername" = 'kevin'), CURRENT_TIMESTAMP);
+  ((SELECT uuid from positions where name = 'EF 5.1 Advisor Accounting'), (SELECT uuid from people where "domainUsername" = 'kevin'), '2020-01-01');
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'kevin') WHERE name = 'EF 5.1 Advisor Accounting';
 
 -- Put Jim into the EF 5.1 Sales 1
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 5.1 Superuser Sales 1'), (SELECT uuid from people where "domainUsername" = 'jim'), CURRENT_TIMESTAMP);
+  ((SELECT uuid from positions where name = 'EF 5.1 Superuser Sales 1'), (SELECT uuid from people where "domainUsername" = 'jim'), '2020-01-01');
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'jim') WHERE name = 'EF 5.1 Superuser Sales 1';
 
 -- Put Dwight into the EF 5.1 Sales 2
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 5.1 Superuser Sales 2'), (SELECT uuid from people where "domainUsername" = 'dwight'), CURRENT_TIMESTAMP);
+  ((SELECT uuid from positions where name = 'EF 5.1 Superuser Sales 2'), (SELECT uuid from people where "domainUsername" = 'dwight'), '2020-01-01');
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'dwight') WHERE name = 'EF 5.1 Superuser Sales 2';
 
 -- Put Michael into the EF 5 Admin
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 5 Admin'), (SELECT uuid from people where "domainUsername" = 'michael'), CURRENT_TIMESTAMP);
+  ((SELECT uuid from positions where name = 'EF 5 Admin'), (SELECT uuid from people where "domainUsername" = 'michael'), '2020-01-01');
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'michael') WHERE name = 'EF 5 Admin';
 
 -- Put Kevin Rivers into the EF 6 Approver
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt")
-VALUES ((SELECT uuid from positions where name = 'EF 6 Approver'), (SELECT uuid from people where name = 'RIVERS, Kevin'), CURRENT_TIMESTAMP);
+VALUES ((SELECT uuid from positions where name = 'EF 6 Approver'), (SELECT uuid from people where name = 'RIVERS, Kevin'), '2020-01-01');
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where name = 'RIVERS, Kevin') WHERE name = 'EF 6 Approver';
 
 -- Put Ben Rogers into the EF 6.1 Advisor
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt")
-VALUES ((SELECT uuid from positions where name = 'EF 6.1 Advisor'), (SELECT uuid from people where name = 'ROGERS, Ben'), CURRENT_TIMESTAMP);
+VALUES ((SELECT uuid from positions where name = 'EF 6.1 Advisor'), (SELECT uuid from people where name = 'ROGERS, Ben'), '2020-01-01');
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where name = 'ROGERS, Ben') WHERE name = 'EF 6.1 Advisor';
 
 -- Put Nick into the EF 9 Advisor
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 9 Advisor'), (SELECT uuid from people where "domainUsername" = 'nick'), CURRENT_TIMESTAMP);
+  ((SELECT uuid from positions where name = 'EF 9 Advisor'), (SELECT uuid from people where "domainUsername" = 'nick'), '2020-01-01');
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'nick') WHERE name = 'EF 9 Advisor';
 
 -- Put Yoshie Beau into the EF 9 Approver
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'EF 9 Approver'), (SELECT uuid from people where "domainUsername" = 'yoshie'), CURRENT_TIMESTAMP);
+  ((SELECT uuid from positions where name = 'EF 9 Approver'), (SELECT uuid from people where "domainUsername" = 'yoshie'), '2020-01-01');
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'yoshie') WHERE name = 'EF 9 Approver';
 
 -- Put Lin into the LNG Advisor A
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'LNG Advisor A'), (SELECT uuid from people where "domainUsername" = 'lin'), CURRENT_TIMESTAMP);
+  ((SELECT uuid from positions where name = 'LNG Advisor A'), (SELECT uuid from people where "domainUsername" = 'lin'), '2020-01-01');
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'lin') WHERE name = 'LNG Advisor A';
 
 -- Put Inter into the LNG Advisor B
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'LNG Advisor B'), (SELECT uuid from people where "domainUsername" = 'inter'), CURRENT_TIMESTAMP);
+  ((SELECT uuid from positions where name = 'LNG Advisor B'), (SELECT uuid from people where "domainUsername" = 'inter'), '2020-01-01');
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'inter') WHERE name = 'LNG Advisor B';
 
 -- Top-level organizations
@@ -739,7 +739,7 @@ INSERT INTO "emailAddresses" (network, address, "relatedObjectType", "relatedObj
 
 -- Put Steve into a Tashkil and associate with the EF 1.1 Advisor A Billet
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'Cost Adder - MoD'), (SELECT uuid from people where name = 'STEVESON, Steve'), CURRENT_TIMESTAMP);
+  ((SELECT uuid from positions where name = 'Cost Adder - MoD'), (SELECT uuid from people where name = 'STEVESON, Steve'), '2020-01-01');
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where name = 'STEVESON, Steve') WHERE name = 'Cost Adder - MoD';
 INSERT INTO "positionRelationships" ("positionUuid_a", "positionUuid_b", "createdAt", "updatedAt", deleted) VALUES
   ((SELECT uuid from positions WHERE name ='EF 1.1 Advisor A'),
@@ -748,7 +748,7 @@ INSERT INTO "positionRelationships" ("positionUuid_a", "positionUuid_b", "create
 
 -- Put Roger in a Tashkil and associate with the EF 2.1 Advisor B Billet
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'Chief of Police'), (SELECT uuid from people where name = 'ROGWELL, Roger'), CURRENT_TIMESTAMP);
+  ((SELECT uuid from positions where name = 'Chief of Police'), (SELECT uuid from people where name = 'ROGWELL, Roger'), '2020-01-01');
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where name = 'ROGWELL, Roger') WHERE name = 'Chief of Police';
 INSERT INTO "positionRelationships" ("positionUuid_a", "positionUuid_b", "createdAt", "updatedAt", deleted) VALUES
   ((SELECT uuid FROM positions WHERE name='EF 2.1 Advisor B'),
@@ -757,7 +757,7 @@ INSERT INTO "positionRelationships" ("positionUuid_a", "positionUuid_b", "create
 
 -- Put Christopf in a Tashkil and associate with the EF 2.2 Advisor D Billet
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'Planning Captain'), (SELECT uuid from people where name = 'TOPFERNESS, Christopf'), CURRENT_TIMESTAMP);
+  ((SELECT uuid from positions where name = 'Planning Captain'), (SELECT uuid from people where name = 'TOPFERNESS, Christopf'), '2020-01-01');
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where name = 'TOPFERNESS, Christopf') WHERE name = 'Planning Captain';
 INSERT INTO "positionRelationships" ("positionUuid_a", "positionUuid_b", "createdAt", "updatedAt", deleted) VALUES
   ((SELECT uuid FROM positions WHERE name='EF 2.2 Advisor D'),
@@ -766,7 +766,7 @@ INSERT INTO "positionRelationships" ("positionUuid_a", "positionUuid_b", "create
 
 -- Put Chris in a Tashkil and associate with the EF 5.1 Advisor Accounting
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'Chief of Tests'), (SELECT uuid from people where name = 'CHRISVILLE, Chris'), CURRENT_TIMESTAMP);
+  ((SELECT uuid from positions where name = 'Chief of Tests'), (SELECT uuid from people where name = 'CHRISVILLE, Chris'), '2020-01-01');
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where name = 'CHRISVILLE, Chris') WHERE name = 'Chief of Tests';
 INSERT INTO "positionRelationships" ("positionUuid_a", "positionUuid_b", "createdAt", "updatedAt", deleted) VALUES
   ((SELECT uuid FROM positions WHERE name='EF 5.1 Advisor Accounting'),
@@ -775,7 +775,7 @@ INSERT INTO "positionRelationships" ("positionUuid_a", "positionUuid_b", "create
 
 -- Put Kyle in a Tashkil and associate with the EF 5.1 Advisor Quality Assurance
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'Director of Tests'), (SELECT uuid from people where name = 'KYLESON, Kyle'), CURRENT_TIMESTAMP);
+  ((SELECT uuid from positions where name = 'Director of Tests'), (SELECT uuid from people where name = 'KYLESON, Kyle'), '2020-01-01');
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where name = 'KYLESON, Kyle') WHERE name = 'Director of Tests';
 INSERT INTO "positionRelationships" ("positionUuid_a", "positionUuid_b", "createdAt", "updatedAt", deleted) VALUES
   ((SELECT uuid FROM positions WHERE name='EF 5.1 Advisor Quality Assurance'),
@@ -784,7 +784,7 @@ INSERT INTO "positionRelationships" ("positionUuid_a", "positionUuid_b", "create
 
 -- Put Myposwill in a Tashkil
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'Merge One'), (SELECT uuid from people where name = 'BEMERGED, Myposwill'), CURRENT_TIMESTAMP);
+  ((SELECT uuid from positions where name = 'Merge One'), (SELECT uuid from people where name = 'BEMERGED, Myposwill'), '2020-01-01');
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where name = 'BEMERGED, Myposwill') WHERE name = 'Merge One';
 -- Associate Merge One and Merge Two positions with some advisor positions to test merging
 INSERT INTO "positionRelationships" ("positionUuid_a", "positionUuid_b", "createdAt", "updatedAt", deleted) VALUES
@@ -795,11 +795,11 @@ INSERT INTO "positionRelationships" ("positionUuid_a", "positionUuid_b", "create
 
 -- Put Winner Duplicate in a Tashkil
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'Chief of Merge People Test 1'), (SELECT uuid from people where name = 'MERGED, Duplicate Winner'), CURRENT_TIMESTAMP);
+  ((SELECT uuid from positions where name = 'Chief of Merge People Test 1'), (SELECT uuid from people where name = 'MERGED, Duplicate Winner'), '2020-01-01');
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where name = 'MERGED, Duplicate Winner') WHERE name = 'Chief of Merge People Test 1';
 -- Put Loser Duplicate in a Tashkil
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
-  ((SELECT uuid from positions where name = 'Chief of Merge People Test 2'), (SELECT uuid from people where name = 'MERGED, Duplicate Loser'), CURRENT_TIMESTAMP);
+  ((SELECT uuid from positions where name = 'Chief of Merge People Test 2'), (SELECT uuid from people where name = 'MERGED, Duplicate Loser'), '2020-01-01');
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where name = 'MERGED, Duplicate Loser') WHERE name = 'Chief of Merge People Test 2';
 
 UPDATE positions SET "locationUuid" = (SELECT uuid from LOCATIONS where name = 'Kabul Police Academy') WHERE name = 'Chief of Police';
@@ -810,7 +810,7 @@ UPDATE positions SET "locationUuid" = (SELECT uuid from LOCATIONS where name = '
 INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "nextSteps", state, "engagementDate", atmosphere, "advisorOrganizationUuid", "interlocutorOrganizationUuid") VALUES
   ('9bb1861c-1f55-4a1b-bd3d-3c1f56d739b5', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'Discuss improvements in Annual Budgeting process',
   'Today I met with this dude to tell him all the great things that he can do to improve his budgeting process. I hope he listened to me',
-  'Meet with the dude again next week', 2, '2016-05-25', 0,
+  'Meet with the dude again next week', 2, '2020-05-25', 0,
   (SELECT uuid FROM organizations where "shortName" = 'EF 2.1'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
   ((SELECT uuid FROM people where name = 'STEVESON, Steve'), '9bb1861c-1f55-4a1b-bd3d-3c1f56d739b5', TRUE, FALSE, TRUE),
@@ -820,7 +820,7 @@ INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, tex
   ('86e4cf7e-c0ae-4bd9-b1ad-f2c65ca0f600', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (select uuid from locations where name='General Hospital'), 'Run through FY2016 Numbers on tool usage',
   'Today we discussed the fiscal details of how spreadsheets break down numbers into rows and columns and then text is used to fill up space on a web page, it was very interesting and other adjectives',
   'we read over the spreadsheets for the FY17 Budget',
-  'meet with him again :(', 2, '2016-06-01', 0,
+  'meet with him again :(', 2, '2020-06-01', 0,
   (SELECT uuid FROM organizations where "shortName" = 'EF 2.1'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
   ((SELECT uuid FROM people where name = 'STEVESON, Steve'), '86e4cf7e-c0ae-4bd9-b1ad-f2c65ca0f600', TRUE, FALSE, TRUE),
@@ -834,7 +834,7 @@ INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, tex
   ('3e717721-d675-4ff3-b687-533b50978f9e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (select uuid from locations where name='Kabul Hospital'), 'Looked at Hospital usage of Drugs',
   'This report needs to fill up more space',
   'putting something in the database to take up space',
-  'to be more creative next time', 2, '2016-06-03', 0,
+  'to be more creative next time', 2, '2020-06-03', 0,
   (SELECT uuid FROM organizations where "shortName" = 'EF 2.1'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
   ((SELECT uuid FROM people where name = 'STEVESON, Steve'), '3e717721-d675-4ff3-b687-533b50978f9e', TRUE, FALSE, TRUE),
@@ -846,7 +846,7 @@ INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, tex
   ('5d11abd0-242b-41ef-8420-a931d19ee513', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (select uuid from locations where name='Kabul Hospital'), 'discuss enagement of Doctors with Patients',
   'Met with Nobody in this engagement and discussed no tasks, what a waste of time',
   'None',
-  'Head over to the MoD Headquarters buildling for the next engagement', 2, '2016-06-10', 0,
+  'Head over to the MoD Headquarters buildling for the next engagement', 2, '2020-06-10', 0,
   (SELECT uuid FROM organizations where "shortName" = 'EF 2.1'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
   ((SELECT uuid FROM people where name = 'STEVESON, Steve'), '5d11abd0-242b-41ef-8420-a931d19ee513', TRUE, FALSE, TRUE),
@@ -881,7 +881,7 @@ INSERT INTO "reportTasks" ("taskUuid", "reportUuid") VALUES
 INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "nextSteps", state, "engagementDate", atmosphere, "advisorOrganizationUuid", "interlocutorOrganizationUuid") VALUES
   ('5f681376-6eac-464d-8d46-02ff89d45071', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (select uuid from locations where name='Cabot Tower'), 'Inspect Cabot Tower Budgeting Facility',
   'Looked over the places around Cabot Tower for all of the things that people do when they need to do math.  There were calculators, and slide rules, and paper, and computers',
-  'keep writing fake reports to fill the database!!!', 1, '2016-06-20', 1,
+  'keep writing fake reports to fill the database!!!', 1, '2020-06-20', 1,
   (SELECT uuid FROM organizations where "shortName" = 'EF 2.1'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
   ((SELECT uuid FROM people where name = 'STEVESON, Steve'), '5f681376-6eac-464d-8d46-02ff89d45071', TRUE, FALSE, TRUE),
@@ -892,7 +892,7 @@ INSERT INTO "reportTasks" ("taskUuid", "reportUuid") VALUES
 INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "nextSteps", state, "engagementDate", atmosphere, "advisorOrganizationUuid", "interlocutorOrganizationUuid") VALUES
   ('5367a91a-9f70-469d-b0a4-69990ea8ac82', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'Discuss discrepancies in monthly budgets',
   'Back to the hospital this week to test the recent locations feature of ANET, and also to look at math and numbers and budgets and things',
-  'Meet with the dude again next week', 1, '2016-06-25', 0,
+  'Meet with the dude again next week', 1, '2020-06-25', 0,
   (SELECT uuid FROM organizations where "shortName" = 'EF 2.1'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
   ((SELECT uuid FROM people where name = 'STEVESON, Steve'), '5367a91a-9f70-469d-b0a4-69990ea8ac82', TRUE, FALSE, TRUE),
@@ -903,7 +903,7 @@ INSERT INTO "reportTasks" ("taskUuid", "reportUuid") VALUES
 INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "nextSteps", state, "engagementDate", atmosphere, "advisorOrganizationUuid", "interlocutorOrganizationUuid") VALUES
   ('3e0ef6c9-68ed-43cf-8beb-d24c1c59c7a5', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='St Johns Airport'), 'Inspect Air Operations Capabilities',
   'We went to the Aiport and looked at the planes, and the hangers, and the other things that airports have. ',
-  'Go over to the Airport next week to look at the helicopters', 2, '2016-05-20', 0,
+  'Go over to the Airport next week to look at the helicopters', 2, '2020-05-20', 0,
   (SELECT uuid FROM organizations where "shortName" = 'EF 1.1'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
   ((SELECT uuid FROM people where name = 'ROGWELL, Roger'), '3e0ef6c9-68ed-43cf-8beb-d24c1c59c7a5', TRUE, FALSE, TRUE),
@@ -914,7 +914,7 @@ INSERT INTO "reportTasks" ("taskUuid", "reportUuid") VALUES
 INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "nextSteps", state, "engagementDate", atmosphere, "advisorOrganizationUuid", "interlocutorOrganizationUuid") VALUES
   ('e5319bc4-91f2-473b-92c7-e796bc84b169', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='St Johns Airport'), 'Inspect Helicopter Capabilities',
   'Today we looked at the helicopters at the aiport and talked in depth about how they were not in good condition and the AAF needed new equipment.  I expressed my concerns to the pilots and promised to see what we can do.',
-  'Figure out what can be done about the helicopters', 2, '2016-05-22', 0,
+  'Figure out what can be done about the helicopters', 2, '2020-05-22', 0,
   (SELECT uuid FROM organizations where "shortName" = 'EF 1.1'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
   ((SELECT uuid FROM people where name = 'ROGWELL, Roger'), 'e5319bc4-91f2-473b-92c7-e796bc84b169', TRUE, FALSE, TRUE),
@@ -925,7 +925,7 @@ INSERT INTO "reportTasks" ("taskUuid", "reportUuid") VALUES
 INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "nextSteps", "keyOutcomes", state, "engagementDate", atmosphere, "advisorOrganizationUuid", "interlocutorOrganizationUuid") VALUES
   ('a766b3f1-4705-43c1-b62a-ca4e3bb4dce3', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'Look for Budget Controls',
   'Goal of the meeting was to look for the word spreadsheet in a report and then return that in a search result about budget. Lets see what happens!!',
-  'Searching for text', 'Test Cases are good', 2, '2017-01-14', 0,
+  'Searching for text', 'Test Cases are good', 2, '2021-01-14', 0,
   (SELECT uuid FROM organizations where "shortName" = 'EF 2.2'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
   ((SELECT uuid FROM people where name = 'TOPFERNESS, Christopf'), 'a766b3f1-4705-43c1-b62a-ca4e3bb4dce3', TRUE, FALSE, TRUE),
@@ -939,7 +939,7 @@ INSERT INTO "reportsSensitiveInformation" (uuid, "createdAt", "updatedAt", text,
 INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "nextSteps", "keyOutcomes", state, "engagementDate", atmosphere, "advisorOrganizationUuid", "interlocutorOrganizationUuid") VALUES
   ('91cac8ff-dca5-4cf5-bf2c-dd72aa3685f8', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'Look for Budget Controls Again',
   'The search for the spreadsheet was doomed to be successful, so we needed to generate more data in order to get a more full test of the system that really is going to have much much larger reports in it one day.',
-  'Mocking up test cases','Better test data is always better', 2, '2017-01-04', 0,
+  'Mocking up test cases','Better test data is always better', 2, '2021-01-04', 0,
   (SELECT uuid FROM organizations where "shortName" = 'EF 2.2'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
   ((SELECT uuid FROM people where name = 'TOPFERNESS, Christopf'), '91cac8ff-dca5-4cf5-bf2c-dd72aa3685f8', TRUE, FALSE, TRUE),
@@ -950,7 +950,7 @@ INSERT INTO "reportTasks" ("taskUuid", "reportUuid") VALUES
 INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "nextSteps", "keyOutcomes", state, "engagementDate", atmosphere, "advisorOrganizationUuid", "interlocutorOrganizationUuid") VALUES
   ('3fa48376-0519-48ba-8d91-2fa18c7a040f', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'Talk to the Interior about things',
   'We know that we want to go to the house with the food and eat the food, but the words in the database need to be long enough to do something. What that is were not sure, but we know we cant use apostrophies or spell.  Wow, we really cant do much, right? It was decided that we would do more tomorrow.',
-  'Mocking up test cases','Looking at the telescope with our eyes', 2, '2017-01-04', 0,
+  'Mocking up test cases','Looking at the telescope with our eyes', 2, '2021-01-04', 0,
   (SELECT uuid FROM organizations where "shortName" = 'EF 2.2'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Interior'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
   ((SELECT uuid FROM people where name = 'TOPFERNESS, Christopf'), '3fa48376-0519-48ba-8d91-2fa18c7a040f', TRUE, FALSE, TRUE),
@@ -1110,7 +1110,7 @@ INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjec
 INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "nextSteps", state, "engagementDate", atmosphere, "advisorOrganizationUuid", "interlocutorOrganizationUuid") VALUES
   ('8655bf58-4452-4ac0-9221-70b035d8eb7e', CURRENT_TIMESTAMP + INTERVAL '-2 day', CURRENT_TIMESTAMP + INTERVAL '-2 day', (SELECT uuid from locations where name='General Hospital'), 'Discuss further improvements in Annual Budgeting process',
   'Today I met with Edwin the dude to tell him all the great things that he can do to improve his budgeting process. I hope he listened to me',
-  'Meet with the dude again next week', 2, '2016-05-25', 0,
+  'Meet with the dude again next week', 2, '2020-05-25', 0,
   (SELECT uuid FROM organizations where "shortName" = 'EF 2.1'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'));
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
   ((SELECT uuid FROM people where name = 'STEVESON, Steve'), '8655bf58-4452-4ac0-9221-70b035d8eb7e', TRUE, FALSE, TRUE),

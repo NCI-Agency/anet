@@ -254,7 +254,7 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
       // date
       qb.addWhereClause("reports.uuid IN (SELECT r.uuid FROM reports r"
           + " JOIN \"reportPeople\" rp ON rp.\"reportUuid\" = r.uuid "
-          + PositionDao.generateCurrentPositionFilter("rp.\"personUuid\"", "r.\"createdAt\"",
+          + PositionDao.generatePositionFilterAtDate("rp.\"personUuid\"", "r.\"createdAt\"",
               "authorPositionUuid")
           + " AND rp.\"isAuthor\" = :isAuthor)");
       qb.addSqlArg("isAuthor", true);
@@ -277,7 +277,7 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
       qb.addWhereClause(
           "reports.uuid IN (SELECT r.uuid FROM reports r"
               + " JOIN \"reportPeople\" rp ON rp.\"reportUuid\" = r.uuid "
-              + PositionDao.generateCurrentPositionFilter("rp.\"personUuid\"",
+              + PositionDao.generatePositionFilterAtDate("rp.\"personUuid\"",
                   "r.\"engagementDate\"", "attendeePositionUuid")
               + " AND rp.\"isAttendee\" = :isAttendee)");
       qb.addSqlArg("isAttendee", true);

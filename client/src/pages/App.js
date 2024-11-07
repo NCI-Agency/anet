@@ -142,6 +142,25 @@ const GQL_GET_APP_DATA = gql`
           uuid
         }
       }
+      previousPositions {
+        startTime
+        endTime
+        position {
+          uuid
+          name
+          code
+          organization {
+            uuid
+            shortName
+            longName
+            identificationCode
+          }
+          location {
+            uuid
+            name
+          }
+        }
+      }
     }
 
     adminSettings {

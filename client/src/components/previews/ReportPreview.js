@@ -72,6 +72,26 @@ const GQL_GET_REPORT = gql`
             name
           }
         }
+        previousPositions {
+          startTime
+          endTime
+          position {
+            uuid
+            name
+            code
+            organization {
+              uuid
+              shortName
+              longName
+              identificationCode
+              ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+            }
+            location {
+              uuid
+              name
+            }
+          }
+        }
       }
       tasks {
         uuid

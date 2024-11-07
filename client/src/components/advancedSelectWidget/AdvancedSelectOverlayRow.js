@@ -152,29 +152,32 @@ export const PersonSimpleOverlayRow = item => (
   </React.Fragment>
 )
 
-export const PersonDetailedOverlayRow = item => (
-  <React.Fragment key={item.uuid}>
-    <td>
-      <AsLink modelType="Person" model={item} />
-    </td>
-    <td>
-      <AsLink modelType="Position" model={item.position} />
-      {item.position && item.position.code ? `, ${item.position.code}` : ""}
-    </td>
-    <td>
-      <AsLink
-        modelType="Location"
-        model={item.position && item.position.location}
-        whenUnspecified=""
-      />
-    </td>
-    <td>
-      {item.position && item.position.organization && (
-        <AsLink modelType="Organization" model={item.position.organization} />
-      )}
-    </td>
-  </React.Fragment>
-)
+export const PersonDetailedOverlayRow = (item, date) => {
+  const position = utils.findPositionAtDate(item, date)
+  return (
+    <React.Fragment key={item.uuid}>
+      <td>
+        <AsLink modelType="Person" model={item} />
+      </td>
+      <td>
+        <AsLink modelType="Position" model={position} />
+        {position?.code ? `, ${position.code}` : ""}
+      </td>
+      <td>
+        <AsLink
+          modelType="Location"
+          model={position?.location}
+          whenUnspecified=""
+        />
+      </td>
+      <td>
+        {position?.organization && (
+          <AsLink modelType="Organization" model={position?.organization} />
+        )}
+      </td>
+    </React.Fragment>
+  )
+}
 
 export const ApproverOverlayRow = item => (
   <React.Fragment key={item.uuid}>

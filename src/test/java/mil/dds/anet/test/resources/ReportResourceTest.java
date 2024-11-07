@@ -99,7 +99,8 @@ public class ReportResourceTest extends AbstractResourceTest {
   private static final String REPORT_PEOPLE_FIELDS =
       String.format("{ %1$s primary author attendee interlocutor }", _PERSON_FIELDS);
   private static final String POSITION_FIELDS =
-      String.format("{ uuid isApprover person { uuid } %1$s }", _EMAIL_ADDRESSES_FIELDS);
+      String.format("{ uuid isApprover person { uuid } organization { %1$s } %2$s }",
+          _ORGANIZATION_FIELDS, _EMAIL_ADDRESSES_FIELDS);
   private static final String REPORT_FIELDS =
       "uuid intent exsum state cancelledReason atmosphere atmosphereDetails"
           + " engagementDate duration engagementDayOfWeek keyOutcomes nextSteps reportText"
@@ -265,7 +266,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     final ReportPerson nonAttendingAuthor = personToReportAuthor(getElizabethElizawell());
     nonAttendingAuthor.setAttendee(false);
     final List<ReportPerson> reportPeople =
-        List.of(interlocutor, personToReportAuthor(author), nonAttendingAuthor);
+        List.of(interlocutor, personToPrimaryReportAuthor(author), nonAttendingAuthor);
     final ReportInput rInput = ReportInput.builder().withEngagementDate(Instant.now())
         .withDuration(120).withReportPeople(getReportPeopleInput(reportPeople))
         .withTasks(List.of(getTaskInput(action))).withLocation(getLocationInput(loc))
@@ -276,9 +277,7 @@ public class ReportResourceTest extends AbstractResourceTest {
         // set JSON of customFields
         .withCustomFields(UtilsTest.getCombinedJsonTestCase().getInput())
         .withNextSteps("This is the next steps on a report")
-        .withKeyOutcomes("These are the key outcomes of this engagement")
-        .withAdvisorOrg(getOrganizationInput(advisorOrg))
-        .withInterlocutorOrg(getOrganizationInput(interlocutorOrg)).build();
+        .withKeyOutcomes("These are the key outcomes of this engagement").build();
     final Report created = withCredentials(author.getDomainUsername(),
         t -> mutationExecutor.createReport(FIELDS, rInput));
     assertThat(created).isNotNull();
@@ -287,7 +286,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     final Report check = withCredentials(author.getDomainUsername(),
         t -> queryExecutor.report(FIELDS, created.getUuid()));
     assertThat(check.getState()).isEqualTo(ReportState.DRAFT);
-    assertThat(check.getAdvisorOrg().getUuid()).isEqualTo(advisorOrg.getUuid());
+    assertThat(check.getAdvisorOrg().getUuid()).isEqualTo(authorBillet.getOrganization().getUuid());
     assertThat(check.getInterlocutorOrg().getUuid()).isEqualTo(interlocutorOrg.getUuid());
     // check that HTML of report text is sanitized after create
     assertThat(check.getReportText()).isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
@@ -364,20 +363,13 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(returned2.getTasks().stream().map(Task::getUuid).collect(Collectors.toSet()))
         .contains(action.getUuid());
 
-    // Verify this shows up on the approvers list of pending documents
+    // Verify this shows up on the approver's list of pending documents
     final ReportSearchQueryInput pendingQuery =
         ReportSearchQueryInput.builder().withPendingApprovalOf(approver1.getUuid()).build();
     AnetBeanList_Report pending = withCredentials(approver1.getDomainUsername(),
         t -> queryExecutor.reportList(getListFields(FIELDS), pendingQuery));
     assertThat(pending.getList().stream().map(Report::getUuid).collect(Collectors.toSet()))
         .contains(returned2.getUuid());
-
-    // Run a search for this user's pending approvals
-    final ReportSearchQueryInput searchQuery =
-        ReportSearchQueryInput.builder().withPendingApprovalOf(approver1.getUuid()).build();
-    pending = withCredentials(approver1.getDomainUsername(),
-        t -> queryExecutor.reportList(getListFields(FIELDS), searchQuery));
-    assertThat(pending.getList()).isNotEmpty();
 
     // Check on Report status for who needs to approve
     List<ReportAction> workflow = returned2.getWorkflow();
@@ -545,7 +537,7 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     // Create a person for the report
     final Person reportAttendeePerson = getJackJackson();
-    final ReportPerson reportAttendee = personToPrimaryReportPerson(reportAttendeePerson, false);
+    final ReportPerson reportAttendee = personToPrimaryReportPerson(reportAttendeePerson, true);
     final Position reportAttendeePosition = reportAttendeePerson.getPosition();
     assertThat(reportAttendeePosition).isNotNull();
     final Organization reportAttendeeOrg = reportAttendeePosition.getOrganization();
@@ -595,6 +587,18 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(approver2Pos.getUuid()).isNotNull();
     nrUpdated = withCredentials(adminUser, t -> mutationExecutor.putPersonInPosition("",
         getPersonInput(approver2), approver2Pos.getUuid()));
+    assertThat(nrUpdated).isEqualTo(1);
+
+    // Verify these users
+    final PersonInput approver1ActivateInput = getPersonInput(approver1);
+    approver1ActivateInput.setPendingVerification(false);
+    nrUpdated = withCredentials(approver1.getDomainUsername(),
+        t -> mutationExecutor.updateMe("", approver1ActivateInput));
+    assertThat(nrUpdated).isEqualTo(1);
+    final PersonInput approver2ActivateInput = getPersonInput(approver2);
+    approver2ActivateInput.setPendingVerification(false);
+    nrUpdated = withCredentials(approver2.getDomainUsername(),
+        t -> mutationExecutor.updateMe("", approver2ActivateInput));
     assertThat(nrUpdated).isEqualTo(1);
 
     // Create a billet for the author
@@ -676,7 +680,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     final ReportInput rInput =
         ReportInput.builder().withEngagementDate(Instant.now()).withDuration(120)
             .withReportPeople(
-                getReportPeopleInput(List.of(reportAttendee, personToReportAuthor(author))))
+                getReportPeopleInput(List.of(reportAttendee, personToPrimaryReportAuthor(author))))
             .withTasks(List.of(getTaskInput(action))).withLocation(getLocationInput(loc))
             .withAtmosphere(Atmosphere.POSITIVE).withAtmosphereDetails("Everybody was super nice!")
             .withIntent("A testing report to test that reporting reports")
@@ -686,8 +690,6 @@ public class ReportResourceTest extends AbstractResourceTest {
             .withCustomFields(UtilsTest.getCombinedJsonTestCase().getInput())
             .withNextSteps("This is the next steps on a report")
             .withKeyOutcomes("These are the key outcomes of this engagement")
-            .withAdvisorOrg(getOrganizationInput(advisorOrg))
-            .withInterlocutorOrg(getOrganizationInput(reportAttendeeOrg))
             .withClassification(getFirstClassification()).build();
     final Report created = withCredentials(author.getDomainUsername(),
         t -> mutationExecutor.createReport(FIELDS, rInput));
@@ -769,20 +771,13 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(returned2.getTasks().stream().map(Task::getUuid).collect(Collectors.toSet()))
         .contains(action.getUuid());
 
-    // Verify this shows up on the approvers list of pending documents
+    // Verify this shows up on the approver's list of pending documents
     final ReportSearchQueryInput pendingQuery =
         ReportSearchQueryInput.builder().withPendingApprovalOf(approver1.getUuid()).build();
     AnetBeanList_Report pending = withCredentials(approver1.getDomainUsername(),
         t -> queryExecutor.reportList(getListFields(FIELDS), pendingQuery));
     assertThat(pending.getList().stream().map(Report::getUuid).collect(Collectors.toSet()))
         .contains(returned2.getUuid());
-
-    // Run a search for this user's pending approvals
-    final ReportSearchQueryInput searchQuery =
-        ReportSearchQueryInput.builder().withPendingApprovalOf(approver1.getUuid()).build();
-    pending = withCredentials(approver1.getDomainUsername(),
-        t -> queryExecutor.reportList(getListFields(FIELDS), searchQuery));
-    assertThat(pending.getList()).isNotEmpty();
 
     // Check on Report status for who needs to approve
     List<ReportAction> workflow = returned2.getWorkflow();
@@ -1231,9 +1226,9 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     // Search by Author with Date Filtering
     query1.setEngagementDateStart(
-        ZonedDateTime.of(2016, 6, 1, 0, 0, 0, 0, DaoUtils.getServerNativeZoneId()).toInstant());
+        ZonedDateTime.of(2020, 6, 1, 0, 0, 0, 0, DaoUtils.getServerNativeZoneId()).toInstant());
     query1.setEngagementDateEnd(
-        ZonedDateTime.of(2016, 6, 15, 0, 0, 0, 0, DaoUtils.getServerNativeZoneId()).toInstant());
+        ZonedDateTime.of(2020, 6, 15, 0, 0, 0, 0, DaoUtils.getServerNativeZoneId()).toInstant());
     searchResults =
         withCredentials(jackUser, t -> queryExecutor.reportList(getListFields(FIELDS), query1));
     assertThat(searchResults.getList()).isNotEmpty();
@@ -2152,8 +2147,7 @@ public class ReportResourceTest extends AbstractResourceTest {
         .withNextSteps("Retrieve the advisor reports insight")
         .withLocation(getLocationInput(getLocation(author, "General Hospital")))
         .withEngagementDate(engagementDate)
-        .withReportPeople(getReportPeopleInput(List.of(reportPerson)))
-        .withAdvisorOrg(getOrganizationInput(advisorOrganization)).build();
+        .withReportPeople(getReportPeopleInput(List.of(reportPerson))).build();
     final Report created =
         withCredentials(adminUser, t -> mutationExecutor.createReport(FIELDS, rInput));
     assertThat(created).isNotNull();
