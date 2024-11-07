@@ -15,8 +15,8 @@ if (testEnv === "local") {
   capabilities = webdriver.Capabilities.chrome()
 } else {
   // Set capabilities for BrowserStack
-  require("./keep-alive.js")
-  capabilities = require("../../config/browserstack.config.js")
+  require("./keep-alive")
+  capabilities = require("../../config/browserstack.config")
 }
 
 // Webdriver's promise manager only made sense before Node had async/await support.
