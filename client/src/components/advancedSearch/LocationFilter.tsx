@@ -41,7 +41,7 @@ interface LocationFilterProps {
 }
 
 const LocationFilter = ({
-  asFormField,
+  asFormField = true,
   queryKey,
   queryRecurseStrategyKey,
   fixedRecurseStrategy,
@@ -118,9 +118,6 @@ const LocationFilter = ({
       }))
     }
   }
-}
-LocationFilter.defaultProps = {
-  asFormField: true
 }
 
 export const LocationMultiFilter = ({ ...props }) => (

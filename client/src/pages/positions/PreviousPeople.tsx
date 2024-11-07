@@ -11,7 +11,7 @@ interface PreviousPeopleProps {
 }
 
 function PreviousPeople({
-  history: previousPeople,
+  history: previousPeople = [],
   action
 }: PreviousPeopleProps) {
   return _isEmpty(previousPeople) ? (
@@ -47,10 +47,6 @@ function PreviousPeople({
       </tbody>
     </Table>
   )
-}
-
-PreviousPeople.defaultProps = {
-  history: []
 }
 
 export default PreviousPeople

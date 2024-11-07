@@ -19,7 +19,7 @@ interface SelectFilterProps {
 }
 
 const SelectFilter = ({
-  asFormField,
+  asFormField = true,
   queryKey,
   value: inputValue,
   onChange,
@@ -56,9 +56,6 @@ const SelectFilter = ({
   function handleChange(event) {
     setValue({ value: event.target.value })
   }
-}
-SelectFilter.defaultProps = {
-  asFormField: true
 }
 
 export const deserialize = ({ queryKey }, query, key) => {

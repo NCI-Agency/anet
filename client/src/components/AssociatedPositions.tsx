@@ -16,9 +16,9 @@ interface AssociatedPositionsProps {
 }
 
 const AssociatedPositions = ({
-  associatedPositions,
+  associatedPositions = [],
   action,
-  actionSide
+  actionSide = ACTION_SIDES.RIGHT
 }: AssociatedPositionsProps) => {
   return _isEmpty(associatedPositions) ? (
     <em>No positions found</em>
@@ -62,11 +62,6 @@ const AssociatedPositions = ({
       </tr>
     )
   }
-}
-
-AssociatedPositions.defaultProps = {
-  associatedPositions: [],
-  actionSide: ACTION_SIDES.RIGHT
 }
 
 export default AssociatedPositions

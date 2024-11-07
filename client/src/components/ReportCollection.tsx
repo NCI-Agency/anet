@@ -45,7 +45,13 @@ const ReportCollection = ({
   paginationKey,
   pagination,
   setPagination,
-  viewFormats,
+  viewFormats = [
+    FORMAT_SUMMARY,
+    FORMAT_TABLE,
+    FORMAT_CALENDAR,
+    FORMAT_MAP,
+    FORMAT_STATISTICS
+  ],
   reportsFilter,
   queryParams,
   setTotalCount,
@@ -193,16 +199,6 @@ const ReportCollection = ({
       </div>
     </div>
   )
-}
-
-ReportCollection.defaultProps = {
-  viewFormats: [
-    FORMAT_SUMMARY,
-    FORMAT_TABLE,
-    FORMAT_CALENDAR,
-    FORMAT_MAP,
-    FORMAT_STATISTICS
-  ]
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => {

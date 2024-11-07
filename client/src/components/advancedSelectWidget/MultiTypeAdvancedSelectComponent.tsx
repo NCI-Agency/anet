@@ -197,14 +197,14 @@ interface MultiTypeAdvancedSelectComponentProps {
 }
 
 const MultiTypeAdvancedSelectComponent = ({
-  fieldName,
+  fieldName = "entitySelect",
   onConfirm,
   objectType,
-  entityTypes,
+  entityTypes = COMMON_ENTITY_TYPES,
   value,
   valueKey,
-  isMultiSelect,
-  filters,
+  isMultiSelect = false,
+  filters = [],
   className
 }: MultiTypeAdvancedSelectComponentProps) => {
   const { currentUser } = useContext(AppContext)
@@ -284,12 +284,6 @@ const MultiTypeAdvancedSelectComponent = ({
       />
     </>
   )
-}
-MultiTypeAdvancedSelectComponent.defaultProps = {
-  fieldName: "entitySelect",
-  entityTypes: COMMON_ENTITY_TYPES,
-  isMultiSelect: false,
-  filters: []
 }
 
 export default MultiTypeAdvancedSelectComponent

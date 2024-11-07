@@ -20,11 +20,11 @@ interface NoPaginationTaskTableProps {
 const NoPaginationTaskTable = ({
   id,
   tasks,
-  showOrganization,
-  showDelete,
+  showOrganization = false,
+  showDelete = false,
   showDescription,
   onDelete,
-  noTasksMessage
+  noTasksMessage = `No ${Settings.fields.task.shortLabel} found`
 }: NoPaginationTaskTableProps) => {
   const tasksExist = _get(tasks, "length", 0) > 0
 
@@ -86,12 +86,6 @@ const NoPaginationTaskTable = ({
       )}
     </div>
   )
-}
-
-NoPaginationTaskTable.defaultProps = {
-  showDelete: false,
-  showOrganization: false,
-  noTasksMessage: `No ${Settings.fields.task.shortLabel} found`
 }
 
 export default NoPaginationTaskTable

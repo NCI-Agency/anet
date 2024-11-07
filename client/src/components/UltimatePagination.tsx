@@ -62,9 +62,9 @@ const UltimatePagination = ({
   Component,
   componentClassName,
   className,
-  pageNum,
-  pageSize,
-  totalCount,
+  pageNum = 0,
+  pageSize = 0,
+  totalCount = 0,
   goToPage
 }: UltimatePaginationProps) => {
   // We may have a pagination overshoot, so set the number of pages
@@ -91,12 +91,6 @@ const UltimatePagination = ({
       />
     </Component>
   )
-}
-
-UltimatePagination.defaultProps = {
-  pageNum: 0,
-  pageSize: 0,
-  totalCount: 0
 }
 
 export default UltimatePagination

@@ -19,10 +19,10 @@ interface IqrBoxPlotProps {
 
 const IqrBoxPlot = ({
   values,
-  levels,
-  width,
-  height,
-  whenUnspecified
+  levels = TRAFFIC_LIGHTS_LEVELS,
+  width = "100%",
+  height = "65",
+  whenUnspecified = null
 }: IqrBoxPlotProps) => {
   const cursorRef = useRef(null)
   const axisRef = useRef(null)
@@ -128,13 +128,6 @@ const IqrBoxPlot = ({
       <g ref={axisRef} transform={`translate(0 ${scaleYPosition})`} />
     </svg>
   )
-}
-
-IqrBoxPlot.defaultProps = {
-  levels: TRAFFIC_LIGHTS_LEVELS,
-  height: "65",
-  width: "100%",
-  whenUnspecified: null
 }
 
 export default IqrBoxPlot

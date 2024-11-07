@@ -35,18 +35,18 @@ interface BarChartProps {
 }
 
 const BarChart = ({
-  width,
+  width = "100%",
   height,
   chartId,
   data,
   xProp, // data property to use for the x-axis domain
   yProp, // data property to use for the y-axis domain
   xLabel, // data property to use for the x-axis ticks label
-  barClass,
+  barClass = "bars-group",
   onBarClick,
   tooltip,
-  selectedBarClass,
-  selectedBar
+  selectedBarClass = "selected-bar",
+  selectedBar = ""
 }: BarChartProps) => {
   const node = useRef(null)
   useEffect(() => {
@@ -209,13 +209,6 @@ const BarChart = ({
       </div>
     )) || <svg id={chartId} ref={node} width={width} height={height} />
   )
-}
-
-BarChart.defaultProps = {
-  width: "100%",
-  barClass: "bars-group",
-  selectedBarClass: "selected-bar",
-  selectedBar: ""
 }
 
 export default BarChart

@@ -167,8 +167,8 @@ const OrganizationalChart = ({
   pageDispatchers,
   org,
   exportTitle,
-  width,
-  height: initialHeight
+  width = 100,
+  height: initialHeight = 100
 }: OrganizationalChartProps) => {
   const [expanded, setExpanded] = useState([])
   const [personnelDepth, setPersonnelDepth] = useState(5)
@@ -443,11 +443,6 @@ const OrganizationalChart = ({
       </g>
     </SVGCanvas>
   )
-}
-
-OrganizationalChart.defaultProps = {
-  width: 100,
-  height: 100
 }
 
 export default connect(null, mapPageDispatchersToProps)(OrganizationalChart)

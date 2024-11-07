@@ -119,20 +119,20 @@ const AdvancedSelect = ({
   fieldName,
   className,
   placeholder,
-  pageSize,
-  disabled,
-  selectedValueAsString,
+  pageSize = 5,
+  disabled = false,
+  selectedValueAsString = "",
   keepSearchText,
   addon,
   extraAddon,
   value,
-  valueKey,
+  valueKey = "uuid",
   renderSelected,
   overlayTable: OverlayTable,
   overlayColumns,
   overlayRenderRow,
-  closeOverlayOnAdd,
-  filterDefs,
+  closeOverlayOnAdd = false,
+  filterDefs = {},
   onChange,
   objectType,
   queryParams,
@@ -493,14 +493,6 @@ const AdvancedSelect = ({
     setPageNum(pageNum)
     setFetchType(FETCH_TYPE.NORMAL)
   }
-}
-AdvancedSelect.defaultProps = {
-  pageSize: 5,
-  disabled: false,
-  filterDefs: {},
-  closeOverlayOnAdd: false,
-  selectedValueAsString: "",
-  valueKey: "uuid"
 }
 
 export default AdvancedSelect

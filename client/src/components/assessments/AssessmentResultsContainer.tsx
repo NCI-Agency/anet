@@ -24,8 +24,8 @@ const AssessmentResultsContainer = ({
   entity,
   entityType,
   subEntities,
-  canAddPeriodicAssessment,
-  canAddOndemandAssessment,
+  canAddPeriodicAssessment = false,
+  canAddOndemandAssessment = false,
   onUpdateAssessment
 }: AssessmentResultsContainerProps) => {
   const [numberOfPeriods, setNumberOfPeriods] = useState(3)
@@ -105,10 +105,6 @@ const AssessmentResultsContainer = ({
       })}
     </div>
   )
-}
-AssessmentResultsContainer.defaultProps = {
-  canAddPeriodicAssessment: false,
-  canAddOndemandAssessment: false
 }
 
 export default AssessmentResultsContainer

@@ -561,7 +561,7 @@ interface CompactReportViewHeaderProps {
 const CompactReportViewHeader = ({
   onPrintClick,
   returnToDefaultPage,
-  noReport,
+  noReport = false,
   optionalFields,
   setOptionalFields,
   setPageSize
@@ -605,10 +605,6 @@ const CompactReportViewHeader = ({
     </Buttons>
   </Header>
 )
-
-CompactReportViewHeader.defaultProps = {
-  noReport: false
-}
 
 const Header = styled.header`
   display: flex;

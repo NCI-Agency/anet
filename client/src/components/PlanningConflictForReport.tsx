@@ -36,7 +36,7 @@ interface PlanningConflictForReportProps {
 
 const PlanningConflictForReport = ({
   report,
-  text,
+  text = "",
   largeIcon
 }: PlanningConflictForReportProps) => {
   const { loading, error, data } = API.useApiQuery(
@@ -141,9 +141,5 @@ const ReportConflictTooltipContainer = styled.div`
     font-weight: bold;
   }
 `
-
-PlanningConflictForReport.defaultProps = {
-  text: ""
-}
 
 export default PlanningConflictForReport

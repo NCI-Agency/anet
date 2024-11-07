@@ -1,7 +1,4 @@
-import {
-  aggregationWidgetDefaultProps,
-  AggregationWidgetPropType
-} from "components/aggregations/utils"
+import { AggregationWidgetPropType } from "components/aggregations/utils"
 import BarChart from "components/BarChart"
 import _escape from "lodash/escape"
 import React from "react"
@@ -25,6 +22,5 @@ const ReportsByTaskWidget = ({
     />
   </div>
 )
-ReportsByTaskWidget.defaultProps = aggregationWidgetDefaultProps
 
 export default ReportsByTaskWidget

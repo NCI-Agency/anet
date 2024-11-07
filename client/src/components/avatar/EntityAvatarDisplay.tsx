@@ -29,8 +29,8 @@ interface EntityAvatarDisplayProps {
 export const EntityAvatarDisplay = ({
   avatar,
   defaultAvatar,
-  width,
-  height,
+  width = 256,
+  height = 256,
   style
 }: EntityAvatarDisplayProps) => {
   const canvasRef = useRef()
@@ -94,10 +94,5 @@ const EntityAvatarStyledDiv = styled.div`
   border-radius: ${p => p.rounded && "50%"};
   overflow: hidden;
 `
-
-EntityAvatarDisplay.defaultProps = {
-  height: 256,
-  width: 256
-}
 
 export default EntityAvatarDisplay

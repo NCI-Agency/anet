@@ -105,7 +105,7 @@ const BaseLocationTable = ({
   showDelete,
   onDelete,
   locations,
-  noLocationsMessage,
+  noLocationsMessage = "No locations found",
   pageSize,
   pageNum,
   totalCount,
@@ -155,10 +155,6 @@ const BaseLocationTable = ({
       </UltimatePaginationTopDown>
     </div>
   )
-}
-
-BaseLocationTable.defaultProps = {
-  noLocationsMessage: "No locations found"
 }
 
 export default connect(null, mapPageDispatchersToProps)(LocationTable)

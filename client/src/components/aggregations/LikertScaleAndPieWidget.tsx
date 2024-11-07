@@ -1,8 +1,5 @@
 import PieWidget from "components/aggregations/PieWidget"
-import {
-  aggregationWidgetDefaultProps,
-  AggregationWidgetPropType
-} from "components/aggregations/utils"
+import { AggregationWidgetPropType } from "components/aggregations/utils"
 import LikertScale from "components/graphs/LikertScale"
 import _isEmpty from "lodash/isEmpty"
 import React from "react"
@@ -43,6 +40,5 @@ const LikertScaleAndPieWidget = ({
     </div>
   )
 }
-LikertScaleAndPieWidget.defaultProps = aggregationWidgetDefaultProps
 
 export default LikertScaleAndPieWidget

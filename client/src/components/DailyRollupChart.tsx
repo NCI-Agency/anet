@@ -18,7 +18,7 @@ interface DailyRollupChartProps {
 }
 
 const DailyRollupChart = ({
-  width,
+  width = "100%",
   chartId,
   data,
   onBarClick,
@@ -194,10 +194,6 @@ const DailyRollupChart = ({
   }, [node, width, data, onBarClick, tooltip, barColors])
 
   return <svg id={chartId} ref={node} width={width} />
-}
-
-DailyRollupChart.defaultProps = {
-  width: "100%"
 }
 
 export default DailyRollupChart

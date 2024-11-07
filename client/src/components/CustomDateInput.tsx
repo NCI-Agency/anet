@@ -40,15 +40,15 @@ interface CustomDateInputProps {
 const CustomDateInput = ({
   id,
   className,
-  disabled,
-  showIcon,
-  maxDate,
-  placement,
-  withTime,
+  disabled = false,
+  showIcon = true,
+  maxDate = moment().add(20, "years").endOf("year").toDate(),
+  placement = "auto",
+  withTime = false,
   value,
   onChange,
   onBlur,
-  canClearSelection
+  canClearSelection = false
 }: CustomDateInputProps) => {
   const inputRef = useRef()
   const rightElement = showIcon && CalendarIcon(inputRef.current)
@@ -100,14 +100,6 @@ const CustomDateInput = ({
       disabled={disabled}
     />
   )
-}
-CustomDateInput.defaultProps = {
-  disabled: false,
-  showIcon: true,
-  maxDate: moment().add(20, "years").endOf("year").toDate(),
-  placement: "auto",
-  withTime: false,
-  canClearSelection: false
 }
 
 export default CustomDateInput

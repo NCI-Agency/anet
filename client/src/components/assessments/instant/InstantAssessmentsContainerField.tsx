@@ -118,13 +118,13 @@ interface InstantAssessmentsContainerFieldProps {
 
 const InstantAssessmentsContainerField = ({
   entityType,
-  entities,
+  entities = [],
   relatedObject,
   parentFieldName,
   formikProps,
-  canRead,
-  canWrite,
-  readonly,
+  canRead = false,
+  canWrite = false,
+  readonly = false,
   showEntitiesWithoutAssessments
 }: InstantAssessmentsContainerFieldProps) => {
   const { values } = formikProps
@@ -203,10 +203,5 @@ const InstantAssessmentsContainerField = ({
     </Table>
   )
 }
-InstantAssessmentsContainerField.defaultProps = {
-  entities: [],
-  canRead: false,
-  canWrite: false,
-  readonly: false
-}
+
 export default InstantAssessmentsContainerField

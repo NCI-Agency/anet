@@ -38,7 +38,7 @@ interface ReportStateFilterProps {
 }
 
 const ReportStateFilter = ({
-  asFormField,
+  asFormField = true,
   queryKey,
   value: inputValue,
   onChange
@@ -124,9 +124,6 @@ const ReportStateFilter = ({
     const reason = event.target.value // synthetic event outside async context
     setValue(prevValue => ({ ...prevValue, cancelledReason: reason }))
   }
-}
-ReportStateFilter.defaultProps = {
-  asFormField: true
 }
 
 export const deserialize = (props, query, key) => {

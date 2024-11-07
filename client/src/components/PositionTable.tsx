@@ -137,9 +137,9 @@ interface BasePositionTableProps {
 const BasePositionTable = ({
   id,
   showLocation,
-  showOrganization,
+  showOrganization = true,
   showOrganizationsAdministrated,
-  showStatus,
+  showStatus = true,
   showDelete,
   onDelete,
   positions,
@@ -271,11 +271,6 @@ const BasePositionTable = ({
       </UltimatePaginationTopDown>
     </div>
   )
-}
-
-BasePositionTable.defaultProps = {
-  showOrganization: true,
-  showStatus: true
 }
 
 export default connect(null, mapPageDispatchersToProps)(PositionTable)

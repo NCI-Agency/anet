@@ -287,8 +287,11 @@ interface GeoLocationFieldProps {
   editable?: boolean
 }
 
-const GeoLocationField = (fieldProps: GeoLocationFieldProps) => {
-  const { name, label, editable, formikProps, ...otherFieldProps } = fieldProps
+const GeoLocationField = ({
+  editable = true,
+  ...fieldProps
+}: GeoLocationFieldProps) => {
+  const { name, label, formikProps, ...otherFieldProps } = fieldProps
   const fieldValue = Object.get(formikProps.values, name) || {}
   const coordinates = {
     lat: fieldValue?.lat,
@@ -353,9 +356,6 @@ const GeoLocationField = (fieldProps: GeoLocationFieldProps) => {
       convertLatLngToMGRS(parsedLat, parsedLng)
     )
   }
-}
-GeoLocationField.defaultProps = {
-  editable: true
 }
 
 interface ReadonlyGeoLocationFieldProps {
@@ -989,14 +989,17 @@ const isFieldValueNotSet = value => {
 interface CustomFieldsContainerProps {
   fieldsConfig?: any
   formikProps?: any
-  parentFieldName: string
+  parentFieldName?: string
   setShowCustomFields?: (...args: unknown[]) => unknown
   vertical?: boolean
 }
 
-export const CustomFieldsContainer = (props: CustomFieldsContainerProps) => {
+export const CustomFieldsContainer = ({
+  parentFieldName = DEFAULT_CUSTOM_FIELDS_PARENT,
+  vertical = false,
+  ...props
+}: CustomFieldsContainerProps) => {
   const {
-    parentFieldName,
     formikProps: { values, setFieldValue },
     fieldsConfig,
     setShowCustomFields
@@ -1027,15 +1030,13 @@ export const CustomFieldsContainer = (props: CustomFieldsContainerProps) => {
     <>
       <CustomFields
         invisibleFields={invisibleFields}
+        parentFieldName={parentFieldName}
+        vertical={vertical}
         {...props}
         fieldsConfig={deprecatedFieldsFiltered}
       />
     </>
   )
-}
-CustomFieldsContainer.defaultProps = {
-  parentFieldName: DEFAULT_CUSTOM_FIELDS_PARENT,
-  vertical: false
 }
 
 export const getFieldPropsFromFieldConfig = fieldConfig => {
@@ -1163,7 +1164,7 @@ const CustomField = ({
 interface CustomFieldsProps {
   fieldsConfig?: any
   formikProps?: any
-  parentFieldName: string
+  parentFieldName?: string
   invisibleFields?: any[]
   vertical?: boolean
 }
@@ -1171,9 +1172,9 @@ interface CustomFieldsProps {
 const CustomFields = ({
   fieldsConfig,
   formikProps,
-  parentFieldName,
+  parentFieldName = DEFAULT_CUSTOM_FIELDS_PARENT,
   invisibleFields,
-  vertical
+  vertical = false
 }: CustomFieldsProps) => {
   return (
     <>
@@ -1193,10 +1194,6 @@ const CustomFields = ({
     </>
   )
 }
-CustomFields.defaultProps = {
-  parentFieldName: DEFAULT_CUSTOM_FIELDS_PARENT,
-  vertical: false
-}
 
 const READONLY_FIELD_COMPONENTS = {
   [CUSTOM_FIELD_TYPE.TEXT]: ReadonlyTextField,
@@ -1215,7 +1212,7 @@ const READONLY_FIELD_COMPONENTS = {
 
 interface ReadonlyCustomFieldsProps {
   fieldsConfig?: any
-  parentFieldName: string
+  parentFieldName?: string
   values: any
   vertical?: boolean
   isCompact?: boolean
@@ -1226,9 +1223,9 @@ interface ReadonlyCustomFieldsProps {
 
 export const ReadonlyCustomFields = ({
   fieldsConfig,
-  parentFieldName, // key path in the values object to get to the level of fields given by the fieldsConfig
+  parentFieldName = DEFAULT_CUSTOM_FIELDS_PARENT, // key path in the values object to get to the level of fields given by the fieldsConfig
   values,
-  vertical,
+  vertical = false,
   isCompact,
   extraColElem,
   labelColumnWidth,
@@ -1286,10 +1283,6 @@ export const ReadonlyCustomFields = ({
       })}
     </>
   )
-}
-ReadonlyCustomFields.defaultProps = {
-  parentFieldName: DEFAULT_CUSTOM_FIELDS_PARENT,
-  vertical: false
 }
 
 // To access ordered custom fields when showing in a page

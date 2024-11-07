@@ -19,15 +19,15 @@ interface SvgTextProps {
 }
 
 const SvgText = ({
-  x,
-  y,
-  dx,
-  dy,
+  x = 0,
+  y = 0,
+  dx = 0,
+  dy = 0,
   width,
-  lineHeight,
-  capHeight,
-  verticalAnchor,
-  textAnchor,
+  lineHeight = "1em",
+  capHeight = "0.71em", // Magic number from d3
+  verticalAnchor = "end",
+  textAnchor = "start",
   style,
   children,
   ...textProps
@@ -66,17 +66,6 @@ const SvgText = ({
       ))}
     </text>
   )
-}
-
-SvgText.defaultProps = {
-  x: 0,
-  y: 0,
-  dx: 0,
-  dy: 0,
-  lineHeight: "1em",
-  capHeight: "0.71em", // Magic number from d3
-  textAnchor: "start",
-  verticalAnchor: "end"
 }
 
 const getStartDy = (verticalAnchor, capHeight, wordsByLines, lineHeight) => {

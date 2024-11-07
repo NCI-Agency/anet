@@ -20,12 +20,13 @@ interface AdvancedSelectFilterProps {
 }
 
 const AdvancedSelectFilter = ({
-  asFormField,
+  asFormField = true,
   queryKey,
   value: inputValue,
   onChange,
   valueKey,
-  valueFunc,
+  valueFunc = (v, k) => v?.[k],
+  fields = "",
   ...advancedSelectProps
 }: AdvancedSelectFilterProps) => {
   const defaultValue = inputValue || {}
@@ -62,11 +63,6 @@ const AdvancedSelectFilter = ({
       setValue(event)
     }
   }
-}
-AdvancedSelectFilter.defaultProps = {
-  valueFunc: (v, k) => v?.[k],
-  fields: "",
-  asFormField: true
 }
 
 export const deserialize = ({ queryKey, objectType, fields }, query, key) => {

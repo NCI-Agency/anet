@@ -136,7 +136,7 @@ interface NavigationProps {
 }
 
 const Navigation = ({
-  allOrganizations,
+  allOrganizations = [],
   resetPages,
   clearSearchQuery
 }: NavigationProps) => {
@@ -467,10 +467,6 @@ const Navigation = ({
       )}
     </Nav>
   )
-}
-
-Navigation.defaultProps = {
-  allOrganizations: []
 }
 
 const mapDispatchToProps = (dispatch, ownProps) =>

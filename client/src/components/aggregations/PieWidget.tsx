@@ -1,7 +1,4 @@
-import {
-  aggregationWidgetDefaultProps,
-  AggregationWidgetPropType
-} from "components/aggregations/utils"
+import { AggregationWidgetPropType } from "components/aggregations/utils"
 import Pie from "components/graphs/Pie"
 import React from "react"
 import utils from "utils"
@@ -52,6 +49,5 @@ const PieWidget = ({
     </>
   )
 }
-PieWidget.defaultProps = aggregationWidgetDefaultProps
 
 export default PieWidget

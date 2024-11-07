@@ -1,7 +1,4 @@
-import {
-  aggregationWidgetDefaultProps,
-  AggregationWidgetPropType
-} from "components/aggregations/utils"
+import { AggregationWidgetPropType } from "components/aggregations/utils"
 import Leaflet, { ICON_TYPES } from "components/Leaflet"
 import _escape from "lodash/escape"
 import _isEmpty from "lodash/isEmpty"
@@ -24,11 +21,11 @@ interface ReportsMapWidgetProps extends AggregationWidgetPropType {
 }
 
 const ReportsMapWidget = ({
-  values,
+  values = [],
   widgetId,
   width,
   height,
-  whenUnspecified,
+  whenUnspecified = null,
   ...otherWidgetProps
 }: ReportsMapWidgetProps) => {
   const markers = useMemo(() => {
@@ -65,10 +62,6 @@ const ReportsMapWidget = ({
       />
     </div>
   )
-}
-ReportsMapWidget.defaultProps = {
-  values: [],
-  ...aggregationWidgetDefaultProps
 }
 
 export default ReportsMapWidget

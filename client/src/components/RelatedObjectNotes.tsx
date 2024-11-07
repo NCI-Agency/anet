@@ -43,9 +43,9 @@ interface NotificationBadgeProps {
 }
 
 const NotificationBadge = ({
-  pill,
-  bg,
-  text,
+  pill = true,
+  bg = "danger",
+  text = "light",
   children
 }: NotificationBadgeProps) => (
   <div style={{ position: "relative", width: "100%", height: "100%" }}>
@@ -70,11 +70,6 @@ const NotificationBadge = ({
     </Badge>
   </div>
 )
-NotificationBadge.defaultProps = {
-  pill: true,
-  bg: "danger",
-  text: "light"
-}
 
 interface RelatedObjectNotesProps {
   notesElemId: string
@@ -83,9 +78,9 @@ interface RelatedObjectNotesProps {
 }
 
 const RelatedObjectNotes = ({
-  notesElemId,
+  notesElemId = "notes-view",
   relatedObject,
-  notes: notesProp
+  notes: notesProp = []
 }: RelatedObjectNotesProps) => {
   const { currentUser } = useContext(AppContext)
   const { topbarOffset } = useContext(ResponsiveLayoutContext)
@@ -304,10 +299,6 @@ const RelatedObjectNotes = ({
         setError(error)
       })
   }
-}
-RelatedObjectNotes.defaultProps = {
-  notesElemId: "notes-view",
-  notes: []
 }
 
 export default RelatedObjectNotes

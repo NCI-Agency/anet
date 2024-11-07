@@ -46,8 +46,8 @@ interface AttachmentFormProps {
 }
 
 const AttachmentForm = ({
-  edit,
-  title,
+  edit = false,
+  title = "",
   initialValues
 }: AttachmentFormProps) => {
   const navigate = useNavigate()
@@ -299,11 +299,6 @@ const AttachmentForm = ({
       attachment
     })
   }
-}
-
-AttachmentForm.defaultProps = {
-  title: "",
-  edit: false
 }
 
 export default AttachmentForm

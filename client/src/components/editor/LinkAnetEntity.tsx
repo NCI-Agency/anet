@@ -13,7 +13,7 @@ interface LinkAnetEntityProps {
 const LinkAnetEntity = ({
   type,
   uuid,
-  displayCallback,
+  displayCallback = null,
   children
 }: LinkAnetEntityProps) => {
   const [entity, setEntity] = useState()
@@ -50,10 +50,6 @@ const LinkAnetEntity = ({
       {whenNotFound || children}
     </LinkTo>
   )
-}
-
-LinkAnetEntity.defaultProps = {
-  displayCallback: null
 }
 
 export default LinkAnetEntity

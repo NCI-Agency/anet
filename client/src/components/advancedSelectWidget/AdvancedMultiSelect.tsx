@@ -9,9 +9,15 @@ interface AdvancedMultiSelectProps extends AdvancedSelectProps {
   value: any[]
 }
 
-const AdvancedMultiSelect = (props: AdvancedMultiSelectProps) => {
+const AdvancedMultiSelect = ({
+  value = [],
+  overlayTable = AdvancedMultiSelectOverlayTable,
+  ...props
+}: AdvancedMultiSelectProps) => {
   return (
     <AdvancedSelect
+      value={value}
+      overlayTable={overlayTable}
       {...props}
       handleAddItem={handleAddItem}
       handleRemoveItem={handleRemoveItem}
@@ -19,20 +25,12 @@ const AdvancedMultiSelect = (props: AdvancedMultiSelectProps) => {
   )
 
   function handleAddItem(newItem) {
-    FieldHelper.handleMultiSelectAddItem(newItem, props.onChange, props.value)
+    FieldHelper.handleMultiSelectAddItem(newItem, props.onChange, value)
   }
 
   function handleRemoveItem(oldItem) {
-    FieldHelper.handleMultiSelectRemoveItem(
-      oldItem,
-      props.onChange,
-      props.value
-    )
+    FieldHelper.handleMultiSelectRemoveItem(oldItem, props.onChange, value)
   }
-}
-AdvancedMultiSelect.defaultProps = {
-  value: [],
-  overlayTable: AdvancedMultiSelectOverlayTable
 }
 
 export default AdvancedMultiSelect

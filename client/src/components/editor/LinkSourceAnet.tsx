@@ -22,7 +22,7 @@ const LinkSourceAnet = ({
   editor,
   showModal,
   setShowModal,
-  external
+  external = false
 }: LinkSourceAnetProps) => {
   const insertAnetLink = useCallback(
     node => {
@@ -101,10 +101,6 @@ const LinkSourceAnet = ({
   )
 }
 
-LinkSourceAnet.defaultProps = {
-  external: false
-}
-
 interface ExternalLinkFormProps {
   url?: string
   text?: string
@@ -113,8 +109,8 @@ interface ExternalLinkFormProps {
 }
 
 const ExternalLinkForm = ({
-  url,
-  text,
+  url = "",
+  text = "",
   onConfirm,
   onCancel
 }: ExternalLinkFormProps) => {
@@ -160,11 +156,6 @@ const ExternalLinkForm = ({
       }}
     </Formik>
   )
-}
-
-ExternalLinkForm.defaultProps = {
-  url: "",
-  text: ""
 }
 
 function createAnetLinkNode(entityType, entityUuid) {

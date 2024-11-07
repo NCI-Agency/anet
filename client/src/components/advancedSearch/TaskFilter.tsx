@@ -28,7 +28,7 @@ interface TaskFilterProps {
 }
 
 const TaskFilter = ({
-  asFormField,
+  asFormField = true,
   queryKey,
   queryRecurseStrategyKey,
   fixedRecurseStrategy,
@@ -102,9 +102,6 @@ const TaskFilter = ({
       }))
     }
   }
-}
-TaskFilter.defaultProps = {
-  asFormField: true
 }
 
 export const deserialize = ({ queryKey }, query, key) => {

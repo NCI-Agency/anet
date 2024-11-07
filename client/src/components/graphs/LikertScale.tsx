@@ -25,13 +25,13 @@ interface LikertScaleProps {
 
 const LikertScale = ({
   onChange,
-  value,
+  value = null,
   values,
-  levels,
-  width,
-  height,
-  editable,
-  whenUnspecified
+  levels = TRAFFIC_LIGHTS_LEVELS,
+  width = "100%",
+  height = "65",
+  editable = false,
+  whenUnspecified = null
 }: LikertScaleProps) => {
   const cursorRef = useRef(null)
   const axisRef = useRef(null)
@@ -258,15 +258,6 @@ const LikertScale = ({
       )}
     </svg>
   )
-}
-
-LikertScale.defaultProps = {
-  value: null,
-  levels: TRAFFIC_LIGHTS_LEVELS,
-  height: "65",
-  width: "100%",
-  editable: false,
-  whenUnspecified: null
 }
 
 export default LikertScale

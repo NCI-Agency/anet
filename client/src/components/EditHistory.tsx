@@ -77,19 +77,19 @@ interface EditHistoryProps {
 
 function EditHistory({
   history1,
-  history2,
-  initialHistory,
+  history2 = null,
+  initialHistory = null,
   setHistory,
-  historyEntityType,
+  historyEntityType = "person",
   parentEntityUuid1,
   parentEntityUuid2,
   historyComp: HistoryComp,
   showEditButton,
   showModal,
   setShowModal,
-  currentlyOccupyingEntity, // currentlyOccupyingEntity used to assert the last item in the history and end time
+  currentlyOccupyingEntity = null, // currentlyOccupyingEntity used to assert the last item in the history and end time
   midColTitle,
-  mainTitle
+  mainTitle = "Pick and Choose History Items"
 }: EditHistoryProps) {
   const getInitialState = useCallback(() => {
     return giveEachItemUuid(initialHistory || history1 || [])
@@ -420,14 +420,6 @@ function EditHistory({
     )
     setHistory(savedHistory)
   }
-}
-
-EditHistory.defaultProps = {
-  history2: null,
-  initialHistory: null,
-  historyEntityType: "person",
-  currentlyOccupyingEntity: null,
-  mainTitle: "Pick and Choose History Items"
 }
 
 export default EditHistory

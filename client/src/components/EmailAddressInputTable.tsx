@@ -20,7 +20,7 @@ interface EmailAddressInputTableProps {
 }
 
 const EmailAddressInputTable = ({
-  fieldArrayName,
+  fieldArrayName = "emailAddresses",
   emailAddresses
 }: EmailAddressInputTableProps) => {
   return (
@@ -74,10 +74,6 @@ const EmailAddressInputTable = ({
       form.setFieldTouched(fieldName)
     }
   }
-}
-
-EmailAddressInputTable.defaultProps = {
-  fieldArrayName: "emailAddresses"
 }
 
 export default EmailAddressInputTable

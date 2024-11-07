@@ -6,7 +6,7 @@ interface CheckboxProps {
   label?: string
 }
 
-const Checkbox = ({ checked, onChange, label }: CheckboxProps) => {
+const Checkbox = ({ checked = false, onChange, label = "" }: CheckboxProps) => {
   const inputRef = useRef(null)
   useEffect(() => {
     const input = inputRef.current
@@ -29,10 +29,6 @@ const Checkbox = ({ checked, onChange, label }: CheckboxProps) => {
       </label>
     </div>
   )
-}
-Checkbox.defaultProps = {
-  checked: false,
-  label: ""
 }
 
 export default Checkbox

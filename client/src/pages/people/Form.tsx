@@ -87,10 +87,10 @@ interface PersonFormProps {
 }
 
 const PersonForm = ({
-  edit,
-  forOnboarding,
-  title,
-  saveText,
+  edit = false,
+  forOnboarding = false,
+  title = "",
+  saveText = "Save Person",
   initialValues,
   notesComponent
 }: PersonFormProps) => {
@@ -923,13 +923,6 @@ const PersonForm = ({
       setShowSimilarPeopleMessage(false)
     }
   }
-}
-
-PersonForm.defaultProps = {
-  title: "",
-  edit: false,
-  forOnboarding: false,
-  saveText: "Save Person"
 }
 
 export default PersonForm

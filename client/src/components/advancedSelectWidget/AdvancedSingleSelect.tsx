@@ -13,21 +13,27 @@ interface AdvancedSingleSelectProps extends AdvancedSelectProps {
   showRemoveButton: boolean
 }
 
-const AdvancedSingleSelect = (props: AdvancedSingleSelectProps) => {
+const AdvancedSingleSelect = ({
+  value = {},
+  valueFunc = (v, k) => v?.[k],
+  overlayTable = AdvancedSingleSelectOverlayTable,
+  showRemoveButton = true,
+  ...props
+}: AdvancedSingleSelectProps) => {
   return (
     <AdvancedSelect
+      value={value}
+      valueFunc={valueFunc}
+      overlayTable={overlayTable}
       {...props}
       handleAddItem={handleAddItem}
       handleRemoveItem={handleRemoveItem}
-      createEntityComponent={props.createEntityComponent}
       closeOverlayOnAdd
       selectedValueAsString={
-        _isEmpty(props.value)
-          ? ""
-          : props.valueFunc(props.value, props.valueKey)
+        _isEmpty(value) ? "" : valueFunc(value, props.valueKey)
       }
       extraAddon={
-        props.showRemoveButton && !_isEmpty(props.value) ? (
+        showRemoveButton && !_isEmpty(value) ? (
           <RemoveButton title="Clear selection" onClick={handleRemoveItem} />
         ) : null
       }
@@ -41,12 +47,6 @@ const AdvancedSingleSelect = (props: AdvancedSingleSelectProps) => {
   function handleRemoveItem(oldItem) {
     FieldHelper.handleSingleSelectRemoveItem(oldItem, props.onChange)
   }
-}
-AdvancedSingleSelect.defaultProps = {
-  value: {},
-  valueFunc: (v, k) => v?.[k],
-  overlayTable: AdvancedSingleSelectOverlayTable,
-  showRemoveButton: true // whether to display a remove button in the input field to allow removing the selected value
 }
 
 export default AdvancedSingleSelect

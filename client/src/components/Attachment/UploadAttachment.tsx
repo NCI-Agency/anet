@@ -107,8 +107,8 @@ interface UploadAttachmentProps {
 }
 
 const UploadAttachment = ({
-  attachments,
-  updateAttachments,
+  attachments = [],
+  updateAttachments = () => {},
   relatedObjectType,
   relatedObjectUuid,
   saveRelatedObject
@@ -216,11 +216,6 @@ const UploadAttachment = ({
       </div>
     </div>
   )
-}
-
-UploadAttachment.defaultProps = {
-  attachments: [],
-  updateAttachments: () => {}
 }
 
 export default UploadAttachment

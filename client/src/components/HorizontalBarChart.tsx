@@ -19,13 +19,13 @@ interface HorizontalBarChartProps {
  * A bar chart component displaying horizontal bars, grouped per category
  */
 const HorizontalBarChart = ({
-  width,
+  width = "100%",
   chartId,
   data,
   onBarClick,
   tooltip,
-  selectedBarClass,
-  selectedBar
+  selectedBarClass = "selected-bar",
+  selectedBar = ""
 }: HorizontalBarChartProps) => {
   /*
    * Example for the data property structure when displaying number of
@@ -302,13 +302,6 @@ const HorizontalBarChart = ({
       element.on("click", (event, d) => onClickHandler(d))
     }
   }
-}
-
-HorizontalBarChart.defaultProps = {
-  width: "100%",
-  selectedBarClass: "selected-bar",
-  selectedBar: "",
-  updateChart: true
 }
 
 export default HorizontalBarChart

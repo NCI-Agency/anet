@@ -11,8 +11,8 @@ interface CheckboxFilterProps {
 }
 
 const CheckboxFilter = ({
-  msg,
-  asFormField,
+  msg = "Authorized for me",
+  asFormField = true,
   queryKey,
   onChange
 }: CheckboxFilterProps) => {
@@ -41,10 +41,6 @@ const CheckboxFilter = ({
       />
     </FormGroup>
   )
-}
-CheckboxFilter.defaultProps = {
-  msg: "Authorized for me",
-  asFormField: true
 }
 
 export const deserialize = ({ queryKey }, query, key) => {

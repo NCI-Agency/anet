@@ -132,9 +132,9 @@ interface LeafletProps {
 }
 
 const Leaflet = ({
-  width,
-  height,
-  marginBottom,
+  width = DEFAULT_MAP_STYLE.width,
+  height = DEFAULT_MAP_STYLE.height,
+  marginBottom = DEFAULT_MAP_STYLE.marginBottom,
   markers,
   mapId: initialMapId,
   onMapClick
@@ -293,9 +293,6 @@ const Leaflet = ({
   ])
 
   return <div id={mapId} style={style} />
-}
-Leaflet.defaultProps = {
-  ...DEFAULT_MAP_STYLE
 }
 
 export default Leaflet

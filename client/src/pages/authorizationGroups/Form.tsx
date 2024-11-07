@@ -42,8 +42,8 @@ interface AuthorizationGroupFormProps {
 }
 
 const AuthorizationGroupForm = ({
-  edit,
-  title,
+  edit = false,
+  title = "",
   initialValues
 }: AuthorizationGroupFormProps) => {
   const { currentUser } = useContext(AppContext)
@@ -289,11 +289,6 @@ const AuthorizationGroupForm = ({
       { authorizationGroup }
     )
   }
-}
-
-AuthorizationGroupForm.defaultProps = {
-  title: "",
-  edit: false
 }
 
 export default AuthorizationGroupForm

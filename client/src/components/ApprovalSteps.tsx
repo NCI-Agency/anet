@@ -7,7 +7,7 @@ interface ApprovalStepsProps {
   approvalSteps?: any[]
 }
 
-function ApprovalSteps({ approvalSteps }: ApprovalStepsProps) {
+function ApprovalSteps({ approvalSteps = [] }: ApprovalStepsProps) {
   return _isEmpty(approvalSteps) ? (
     <em>No approval steps found</em>
   ) : (
@@ -49,10 +49,6 @@ function ApprovalSteps({ approvalSteps }: ApprovalStepsProps) {
       </div>
     )
   }
-}
-
-ApprovalSteps.defaultProps = {
-  approvalSteps: []
 }
 
 export default ApprovalSteps

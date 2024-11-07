@@ -20,7 +20,7 @@ interface RadioButtonFilterProps {
 }
 
 const RadioButtonFilter = ({
-  asFormField,
+  asFormField = true,
   queryKey,
   value: inputValue,
   onChange,
@@ -61,9 +61,6 @@ const RadioButtonFilter = ({
       ))}
     </FormGroup>
   )
-}
-RadioButtonFilter.defaultProps = {
-  asFormField: true
 }
 
 export const deserialize = ({ queryKey }, query, key) => {

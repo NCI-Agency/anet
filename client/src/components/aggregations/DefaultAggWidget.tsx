@@ -1,7 +1,4 @@
-import {
-  aggregationWidgetDefaultProps,
-  AggregationWidgetPropType
-} from "components/aggregations/utils"
+import { AggregationWidgetPropType } from "components/aggregations/utils"
 import _isEmpty from "lodash/isEmpty"
 import React, { useState } from "react"
 import { Button, Collapse, Table } from "react-bootstrap"
@@ -9,7 +6,7 @@ import utils from "utils"
 
 const DefaultAggWidget = ({
   values,
-  whenUnspecified,
+  whenUnspecified = null,
   ...otherWidgetProps
 }: AggregationWidgetPropType) => {
   const [showValues, setShowValues] = useState(false)
@@ -43,6 +40,5 @@ const DefaultAggWidget = ({
     </div>
   )
 }
-DefaultAggWidget.defaultProps = aggregationWidgetDefaultProps
 
 export default DefaultAggWidget

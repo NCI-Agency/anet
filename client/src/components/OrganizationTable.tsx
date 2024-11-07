@@ -123,7 +123,7 @@ const BaseOrganizationTable = ({
   showDelete,
   onDelete,
   organizations,
-  noOrganizationsMessage,
+  noOrganizationsMessage = "No organizations found",
   pageSize,
   pageNum,
   totalCount,
@@ -217,10 +217,6 @@ const BaseOrganizationTable = ({
       </UltimatePaginationTopDown>
     </div>
   )
-}
-
-BaseOrganizationTable.defaultProps = {
-  noOrganizationsMessage: "No organizations found"
 }
 
 export default connect(null, mapPageDispatchersToProps)(OrganizationTable)

@@ -17,7 +17,7 @@ interface TextInputFilterProps {
 }
 
 const TextInputFilter = ({
-  asFormField,
+  asFormField = true,
   queryKey,
   value: inputValue,
   onChange
@@ -45,9 +45,6 @@ const TextInputFilter = ({
   function handleChange(event) {
     setValue({ value: event.target.value })
   }
-}
-TextInputFilter.defaultProps = {
-  asFormField: true
 }
 
 export const deserialize = ({ queryKey }, query, key) => {

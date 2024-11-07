@@ -232,10 +232,10 @@ interface ReportFormProps {
 
 const ReportForm = ({
   pageDispatchers,
-  edit,
-  title,
+  edit = false,
+  title = "",
   initialValues,
-  showSensitiveInfo: ssi,
+  showSensitiveInfo: ssi = false,
   notesComponent
 }: ReportFormProps) => {
   const { currentUser } = useContext(AppContext)
@@ -1580,12 +1580,6 @@ const ReportForm = ({
       return API.mutation(GQL_CREATE_REPORT, variables)
     }
   }
-}
-
-ReportForm.defaultProps = {
-  title: "",
-  edit: false,
-  showSensitiveInfo: false
 }
 
 const atmosphereButtons = [

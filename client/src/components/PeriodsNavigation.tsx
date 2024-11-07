@@ -11,10 +11,10 @@ interface PeriodsNavigationProps {
 }
 
 const PeriodsNavigation = ({
-  offset,
+  offset = 0,
   onChange,
-  disabledLeft,
-  disabledRight
+  disabledLeft = false,
+  disabledRight = false
 }: PeriodsNavigationProps) => (
   <div style={{ display: "flex", justifyContent: "space-between" }}>
     <Button
@@ -33,10 +33,5 @@ const PeriodsNavigation = ({
     </Button>
   </div>
 )
-PeriodsNavigation.defaultProps = {
-  offset: 0,
-  disabledLeft: false,
-  disabledRight: false
-}
 
 export default PeriodsNavigation

@@ -46,7 +46,7 @@ interface OrganizationFilterProps {
 }
 
 const OrganizationFilter = ({
-  asFormField,
+  asFormField = true,
   queryKey,
   queryRecurseStrategyKey,
   fixedRecurseStrategy,
@@ -125,9 +125,6 @@ const OrganizationFilter = ({
       }))
     }
   }
-}
-OrganizationFilter.defaultProps = {
-  asFormField: true
 }
 
 export const OrganizationMultiFilter = ({ ...props }) => (

@@ -142,8 +142,8 @@ const AggregationWidgetContainer = ({
   fieldConfig,
   fieldName,
   period,
-  vertical,
-  widget,
+  vertical = true,
+  widget = "",
   widgetId,
   ...otherWidgetProps
 }: AggregationWidgetContainerProps) => {
@@ -214,10 +214,6 @@ const AggregationWidgetContainer = ({
       </div>
     </FormGroup>
   )
-}
-AggregationWidgetContainer.defaultProps = {
-  vertical: true,
-  widget: ""
 }
 
 export default AggregationWidgetContainer

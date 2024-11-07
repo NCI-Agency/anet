@@ -25,7 +25,7 @@ const AdvancedSelectOverlayTable = ({
   items,
   valueKey,
   pageNum,
-  selectedItems,
+  selectedItems = [],
   handleAddItem,
   handleRemoveItem,
   columns,
@@ -67,9 +67,6 @@ const AdvancedSelectOverlayTable = ({
       </tbody>
     </Table>
   )
-}
-AdvancedSelectOverlayTable.defaultProps = {
-  selectedItems: []
 }
 
 interface AdvancedSingleSelectOverlayTableBaseProps {

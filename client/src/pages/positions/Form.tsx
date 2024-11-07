@@ -68,8 +68,8 @@ interface PositionFormProps {
 }
 
 const PositionForm = ({
-  edit,
-  title,
+  edit = false,
+  title = "",
   initialValues,
   notesComponent
 }: PositionFormProps) => {
@@ -532,11 +532,6 @@ const PositionForm = ({
       setShowSimilarPositionsMessage(false)
     }
   }
-}
-
-PositionForm.defaultProps = {
-  title: "",
-  edit: false
 }
 
 export default PositionForm

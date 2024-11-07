@@ -33,20 +33,20 @@ interface LinkToProps {
 }
 
 const LinkTo = ({
-  as: LinkToComponent,
+  as: LinkToComponent = Link,
   children,
-  edit,
-  button,
+  edit = false,
+  button = false,
   variant,
-  showIcon,
-  showAvatar,
-  isLink,
-  whenUnspecified,
+  showIcon = true,
+  showAvatar = true,
+  isLink = true,
+  whenUnspecified = "Unspecified",
   className,
-  modelType,
-  model,
+  modelType = null,
+  model = null,
   style,
-  displayCallback,
+  displayCallback = null,
   ...componentProps
 }: LinkToProps) => {
   const { level } = useContext(LinkToContext)
@@ -166,19 +166,6 @@ const LinkTo = ({
       {LinkComponent}
     </LinkToContext.Provider>
   )
-}
-
-LinkTo.defaultProps = {
-  as: Link,
-  showIcon: true,
-  showAvatar: true,
-  isLink: true,
-  edit: false,
-  button: false,
-  whenUnspecified: "Unspecified",
-  modelType: null,
-  displayCallback: null,
-  model: null
 }
 
 export default LinkTo

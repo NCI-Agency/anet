@@ -67,8 +67,8 @@ interface OrganizationFormProps {
 }
 
 const OrganizationForm = ({
-  edit,
-  title,
+  edit = false,
+  title = "",
   initialValues,
   notesComponent
 }: OrganizationFormProps) => {
@@ -735,11 +735,6 @@ const OrganizationForm = ({
       { organization }
     ).then()
   }
-}
-
-OrganizationForm.defaultProps = {
-  title: "",
-  edit: false
 }
 
 export default OrganizationForm

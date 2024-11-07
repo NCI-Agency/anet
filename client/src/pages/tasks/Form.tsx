@@ -57,8 +57,8 @@ interface TaskFormProps {
 }
 
 const TaskForm = ({
-  edit,
-  title,
+  edit = false,
+  title = "",
   initialValues,
   notesComponent
 }: TaskFormProps) => {
@@ -485,11 +485,6 @@ const TaskForm = ({
 
     return API.mutation(edit ? GQL_UPDATE_TASK : GQL_CREATE_TASK, { task })
   }
-}
-
-TaskForm.defaultProps = {
-  title: "",
-  edit: false
 }
 
 export default TaskForm

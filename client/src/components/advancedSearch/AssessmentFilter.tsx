@@ -29,7 +29,7 @@ interface AssessmentFilterProps {
 }
 
 const AssessmentFilter = ({
-  asFormField,
+  asFormField = true,
   queryKey,
   value: inputValue,
   onChange,
@@ -162,9 +162,6 @@ const AssessmentFilter = ({
       }))
     }
   }
-}
-AssessmentFilter.defaultProps = {
-  asFormField: true
 }
 
 export const deserialize = ({ queryKey }, query, key) => {

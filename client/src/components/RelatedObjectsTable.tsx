@@ -15,11 +15,11 @@ interface RelatedObjectsTableProps {
 }
 
 export const RelatedObjectsTable = ({
-  title,
+  title = "Linked Object",
   currentObject,
   relatedObjects,
-  setRelatedObjects,
-  showDelete
+  setRelatedObjects = () => {},
+  showDelete = false
 }: RelatedObjectsTableProps) => {
   return (
     <>
@@ -72,12 +72,6 @@ export const RelatedObjectsTable = ({
   )
 }
 
-RelatedObjectsTable.defaultProps = {
-  title: "Linked Object",
-  setRelatedObjects: () => {},
-  showDelete: false
-}
-
 interface RelatedObjectsTableInputProps {
   title?: string
   currentObject?: any
@@ -95,7 +89,7 @@ export const RelatedObjectsTableInput = ({
   objectType,
   entityTypes,
   setRelatedObjects,
-  showDelete
+  showDelete = false
 }: RelatedObjectsTableInputProps) => {
   const fieldValue = relatedObjects.map(nro => ({
     uuid: nro.relatedObjectUuid
@@ -140,8 +134,4 @@ export const RelatedObjectsTableInput = ({
       />
     </div>
   )
-}
-
-RelatedObjectsTableInput.defaultProps = {
-  showDelete: false
 }

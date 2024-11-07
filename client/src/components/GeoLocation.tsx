@@ -34,7 +34,10 @@ interface GeoLocationProps {
   labels?: any
 }
 
-const GeoLocation = ({ labels, ...props }: GeoLocationProps) => {
+const GeoLocation = ({
+  labels = Location.LOCATION_FORMAT_LABELS,
+  ...props
+}: GeoLocationProps) => {
   const [locationFormat, setLocationFormat] = useState(Location.locationFormat)
   const label = labels[locationFormat]
   return (
@@ -46,9 +49,6 @@ const GeoLocation = ({ labels, ...props }: GeoLocationProps) => {
       {...props}
     />
   )
-}
-GeoLocation.defaultProps = {
-  labels: Location.LOCATION_FORMAT_LABELS
 }
 
 export interface CoordinatesPropType {
@@ -78,17 +78,17 @@ interface BaseGeoLocationProps {
 }
 
 export const BaseGeoLocation = ({
-  labels,
+  labels = Location.LOCATION_FORMAT_LABELS,
   locationFormat,
   setLocationFormat,
   label,
   name,
-  coordinates,
-  editable,
+  coordinates = DEFAULT_COORDINATES,
+  editable = false,
   setFieldValue,
   setFieldTouched,
-  isSubmitting,
-  displayType
+  isSubmitting = false,
+  displayType = GEO_LOCATION_DISPLAY_TYPE.GENERIC
 }: BaseGeoLocationProps) => {
   const CoordinatesFormField =
     locationFormat === Location.LOCATION_FORMATS.MGRS
@@ -154,14 +154,6 @@ const ReadonlyGeoLocation = styled.div`
   }
 `
 
-BaseGeoLocation.defaultProps = {
-  labels: Location.LOCATION_FORMAT_LABELS,
-  coordinates: DEFAULT_COORDINATES,
-  editable: false,
-  isSubmitting: false,
-  displayType: GEO_LOCATION_DISPLAY_TYPE.GENERIC
-}
-
 export default GeoLocation
 
 function getQualifiedFieldName(name, fieldName) {
@@ -186,12 +178,12 @@ interface MGRSFormFieldProps {
 
 const MGRSFormField = ({
   name,
-  coordinates,
-  editable,
+  coordinates = DEFAULT_COORDINATES,
+  editable = false,
   setFieldValue,
   setFieldTouched,
-  isSubmitting,
-  labels,
+  isSubmitting = false,
+  labels = Location.LOCATION_FORMAT_LABELS,
   locationFormat,
   setLocationFormat
 }: MGRSFormFieldProps) => {
@@ -258,13 +250,6 @@ const MGRSFormField = ({
   }
 }
 
-MGRSFormField.defaultProps = {
-  labels: Location.LOCATION_FORMAT_LABELS,
-  coordinates: DEFAULT_COORDINATES,
-  editable: false,
-  isSubmitting: false
-}
-
 interface LatLonFormFieldProps {
   name?: string
   coordinates?: CoordinatesPropType
@@ -283,12 +268,12 @@ interface LatLonFormFieldProps {
 
 const LatLonFormField = ({
   name,
-  coordinates,
-  editable,
+  coordinates = DEFAULT_COORDINATES,
+  editable = false,
   setFieldValue,
   setFieldTouched,
-  isSubmitting,
-  labels,
+  isSubmitting = false,
+  labels = Location.LOCATION_FORMAT_LABELS,
   locationFormat,
   setLocationFormat
 }: LatLonFormFieldProps) => {
@@ -394,13 +379,6 @@ const LatLonFormField = ({
   }
 }
 
-LatLonFormField.defaultProps = {
-  labels: Location.LOCATION_FORMAT_LABELS,
-  coordinates: DEFAULT_COORDINATES,
-  editable: false,
-  isSubmitting: false
-}
-
 interface CoordinateActionButtonsProps {
   name?: string
   coordinates?: CoordinatesPropType
@@ -414,10 +392,10 @@ interface CoordinateActionButtonsProps {
 
 const CoordinateActionButtons = ({
   name,
-  coordinates,
+  coordinates = DEFAULT_COORDINATES,
   onClear,
   isSubmitting,
-  disabled,
+  disabled = true,
   setLocationFormat
 }: CoordinateActionButtonsProps) => {
   return (
@@ -441,11 +419,6 @@ const CoordinateActionButtons = ({
   )
 }
 
-CoordinateActionButtons.defaultProps = {
-  coordinates: DEFAULT_COORDINATES,
-  disabled: true
-}
-
 interface AllFormatsInfoProps {
   name?: string
   coordinates?: CoordinatesPropType
@@ -457,9 +430,9 @@ interface AllFormatsInfoProps {
 
 const AllFormatsInfo = ({
   name,
-  coordinates,
+  coordinates = DEFAULT_COORDINATES,
   setLocationFormat,
-  inForm
+  inForm = false
 }: AllFormatsInfoProps) => {
   const { lat, lng } = coordinates
   if (!inForm && (!utils.isNumeric(lat) || !utils.isNumeric(lng))) {
@@ -541,9 +514,4 @@ const AllFormatsInfo = ({
       </Tooltip>
     </Popover>
   )
-}
-
-AllFormatsInfo.defaultProps = {
-  coordinates: DEFAULT_COORDINATES,
-  inForm: false
 }

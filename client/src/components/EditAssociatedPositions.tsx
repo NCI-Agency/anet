@@ -16,7 +16,7 @@ interface EditAssociatedPositionsProps {
 const EditAssociatedPositions = ({
   associatedPositions1,
   associatedPositions2,
-  title,
+  title = "Edit Associated Positions",
   setAssociatedPositions,
   initialMergedAssociatedPositions
 }: EditAssociatedPositionsProps) => {
@@ -131,10 +131,6 @@ const EditAssociatedPositions = ({
     setAssociatedPositions(finalAssociatedPositions)
     setShowModal(false)
   }
-}
-
-EditAssociatedPositions.defaultProps = {
-  title: "Edit Associated Positions"
 }
 
 export default EditAssociatedPositions

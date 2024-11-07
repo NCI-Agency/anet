@@ -1,7 +1,4 @@
-import {
-  aggregationWidgetDefaultProps,
-  AggregationWidgetPropType
-} from "components/aggregations/utils"
+import { AggregationWidgetPropType } from "components/aggregations/utils"
 import _isEmpty from "lodash/isEmpty"
 import React, { useState } from "react"
 import { Button, Collapse, Table } from "react-bootstrap"
@@ -9,7 +6,7 @@ import utils from "utils"
 
 const RichTextWidget = ({
   values,
-  whenUnspecified,
+  whenUnspecified = null,
   ...otherWidgetProps
 }: AggregationWidgetPropType) => {
   const [showValues, setShowValues] = useState(false)
@@ -42,6 +39,5 @@ const RichTextWidget = ({
     </div>
   )
 }
-RichTextWidget.defaultProps = aggregationWidgetDefaultProps
 
 export default RichTextWidget

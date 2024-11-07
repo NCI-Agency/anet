@@ -92,9 +92,9 @@ interface LocationFormProps {
 }
 
 const LocationForm = ({
-  edit,
-  title,
-  initialValues,
+  edit = false,
+  title = "",
+  initialValues = new Location(),
   notesComponent,
   afterSaveActions,
   afterCancelActions
@@ -578,12 +578,6 @@ const LocationForm = ({
       setShowSimilarLocationsMessage(false)
     }
   }
-}
-
-LocationForm.defaultProps = {
-  initialValues: new Location(),
-  title: "",
-  edit: false
 }
 
 export default LocationForm

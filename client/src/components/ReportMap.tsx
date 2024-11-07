@@ -46,7 +46,7 @@ const ReportMap = ({
   pageDispatchers,
   queryParams,
   setTotalCount,
-  mapId,
+  mapId = "reports",
   width,
   height,
   marginBottom
@@ -82,7 +82,4 @@ const ReportMap = ({
   )
 }
 
-ReportMap.defaultProps = {
-  mapId: "reports"
-}
 export default connect(null, mapPageDispatchersToProps)(ReportMap)

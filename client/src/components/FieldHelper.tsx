@@ -107,10 +107,10 @@ const Field = ({
   children,
   extraColElem,
   addon,
-  vertical,
+  vertical = false, // default direction of label and input = horizontal
   isCompact,
   extraAddon,
-  labelColumnWidth,
+  labelColumnWidth = 2,
   className,
   style
 }: FieldProps) => {
@@ -184,10 +184,6 @@ const Field = ({
       )}
     </FormGroup>
   )
-}
-Field.defaultProps = {
-  vertical: false, // default direction of label and input = horizontal
-  labelColumnWidth: 2
 }
 
 interface InputFieldProps {
@@ -802,7 +798,7 @@ interface PreviewFieldProps {
 export const PreviewField = ({
   label,
   value,
-  extraColForValue
+  extraColForValue = false
 }: PreviewFieldProps) => {
   if (extraColForValue) {
     return (
@@ -825,7 +821,4 @@ export const PreviewField = ({
       </>
     )
   }
-}
-PreviewField.defaultProps = {
-  extraColForValue: false
 }

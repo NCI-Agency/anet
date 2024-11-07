@@ -35,11 +35,11 @@ interface DateRangeFilterProps {
 }
 
 const DateRangeFilter = ({
-  asFormField,
+  asFormField = true,
   queryKey,
   value: inputValue,
   onChange,
-  onlyBetween
+  onlyBetween = false
 }: DateRangeFilterProps) => {
   const defaultValue = inputValue || {
     relative: BETWEEN,
@@ -174,10 +174,6 @@ const DateRangeFilter = ({
       return { ...prevValue, relative: relativeVal }
     })
   }
-}
-DateRangeFilter.defaultProps = {
-  onlyBetween: false,
-  asFormField: true
 }
 
 export const deserialize = ({ queryKey }, query, key) => {

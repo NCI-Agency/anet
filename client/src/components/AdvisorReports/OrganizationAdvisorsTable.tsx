@@ -15,7 +15,7 @@ interface OrganizationAdvisorsTableProps {
 }
 
 const OrganizationAdvisorsTable = ({
-  data: dataProp,
+  data: dataProp = [],
   filterText,
   columnGroups,
   onRowSelection,
@@ -124,7 +124,4 @@ const OrganizationAdvisorsTable = ({
   }
 }
 
-OrganizationAdvisorsTable.defaultProps = {
-  data: []
-}
 export default OrganizationAdvisorsTable

@@ -22,7 +22,7 @@ interface TruncatedListProps {
 const TruncatedList = ({
   elementType,
   elements,
-  maxLines,
+  maxLines = 0,
   renderElement
 }: TruncatedListProps) => {
   const n = elements?.length ?? 0
@@ -43,10 +43,6 @@ const TruncatedList = ({
   }
   elems.push(<div key="more">… and {n - toShow} more</div>)
   return elems
-}
-
-TruncatedList.defaultProps = {
-  maxLines: 0
 }
 
 interface AuthorizationGroupTableProps {

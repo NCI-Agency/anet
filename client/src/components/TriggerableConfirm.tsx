@@ -26,11 +26,11 @@ const TriggerableConfirm = ({
   onCancel,
   title,
   body,
-  confirmText,
-  cancelText,
+  confirmText = "OK",
+  cancelText = "Cancel",
   variant,
-  showDialog,
-  renderTriggerButton,
+  showDialog = false,
+  renderTriggerButton = true,
   buttonLabel,
   buttonSize,
   buttonClassName,
@@ -105,12 +105,6 @@ const TriggerableConfirm = ({
       </Modal>
     </>
   )
-}
-TriggerableConfirm.defaultProps = {
-  confirmText: "OK",
-  cancelText: "Cancel",
-  showDialog: false,
-  renderTriggerButton: true
 }
 
 export default TriggerableConfirm

@@ -34,7 +34,7 @@ interface AssessmentModalProps {
 }
 
 const AssessmentModal = ({
-  showModal,
+  showModal = false,
   note,
   assessmentKey,
   assessment,
@@ -42,7 +42,7 @@ const AssessmentModal = ({
   assessmentConfig,
   assessmentPeriod,
   recurrence,
-  title,
+  title = "Assessment",
   onSuccess,
   onCancel,
   entity
@@ -192,10 +192,6 @@ const AssessmentModal = ({
       note: updatedNote
     })
   }
-}
-AssessmentModal.defaultProps = {
-  showModal: false,
-  title: "Assessment"
 }
 
 export default AssessmentModal

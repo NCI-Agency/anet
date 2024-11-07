@@ -18,9 +18,6 @@ export interface AggregationWidgetPropType {
   period?: AssessmentPeriodPropType | PeriodPropType
   whenUnspecified?: string | any
 }
-export const aggregationWidgetDefaultProps = {
-  whenUnspecified: null
-}
 
 export const countPerDateAggregation = (fieldName, fieldConfig, data) => {
   const values = data.reduce((counter, entity) => {

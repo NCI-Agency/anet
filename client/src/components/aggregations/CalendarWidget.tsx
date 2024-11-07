@@ -2,7 +2,6 @@
 import FullCalendar from "@fullcalendar/react"
 import dayGridPlugin from "@fullcalendar/daygrid"
 import {
-  aggregationWidgetDefaultProps,
   AggregationWidgetPropType,
   GET_CALENDAR_EVENTS_FROM
 } from "components/aggregations/utils"
@@ -21,8 +20,8 @@ const CalendarWidget = ({
   values,
   valueType,
   period,
-  whenUnspecified,
-  hasPrevNext
+  whenUnspecified = null,
+  hasPrevNext = false
 }: CalendarWidgetProps) => {
   const calendarComponentRef = useRef(null)
   const events = GET_CALENDAR_EVENTS_FROM[valueType]?.(values)
@@ -67,10 +66,6 @@ const CalendarWidget = ({
       eventOverlap
     />
   )
-}
-CalendarWidget.defaultProps = {
-  hasPrevNext: false,
-  ...aggregationWidgetDefaultProps
 }
 
 export default CalendarWidget

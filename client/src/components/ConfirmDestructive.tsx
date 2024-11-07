@@ -17,7 +17,7 @@ interface ConfirmDestructiveProps {
 
 const ConfirmDestructive = ({
   onConfirm,
-  operation,
+  operation = "delete",
   objectType,
   objectDisplay,
   variant,
@@ -50,9 +50,6 @@ const ConfirmDestructive = ({
       {children}
     </TriggerableConfirm>
   )
-}
-ConfirmDestructive.defaultProps = {
-  operation: "delete"
 }
 
 export default ConfirmDestructive

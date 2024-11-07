@@ -338,7 +338,7 @@ interface TableBodyProps {
 }
 
 const TableBody = ({
-  reportPeople,
+  reportPeople = [],
   handleAttendeeRow,
   filterCb,
   enableDivider,
@@ -351,9 +351,6 @@ const TableBody = ({
       {Person.map(peopleFiltered, person => handleAttendeeRow(person))}
     </tbody>
   )
-}
-TableBody.defaultProps = {
-  reportPeople: []
 }
 
 const getAttendeeType = person =>
