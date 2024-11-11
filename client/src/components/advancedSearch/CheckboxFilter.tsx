@@ -7,7 +7,7 @@ interface CheckboxFilterProps {
   msg?: string
   queryKey: string
   onChange?: (...args: unknown[]) => unknown
-  asFormField?: boolean // FIXME: XXXeslint-disable-line react/no-unused-prop-types
+  asFormField?: boolean
 }
 
 const CheckboxFilter = ({

@@ -13,7 +13,7 @@ interface AdvancedSelectFilterProps {
   objectType: (...args: unknown[]) => unknown
   value?: any
   onChange?: (...args: unknown[]) => unknown
-  valueKey: string // FIXME: XXXeslint-disable-line react/no-unused-prop-types
+  valueKey: string
   valueFunc?: (...args: unknown[]) => unknown
   fields?: string
   asFormField?: boolean

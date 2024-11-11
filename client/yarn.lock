@@ -6039,7 +6039,6 @@ __metadata:
     axios: "npm:1.7.7"
     babel-jest: "npm:29.7.0"
     babel-loader: "npm:9.2.1"
-    babel-plugin-transform-react-remove-prop-types: "npm:0.4.24"
     bootstrap: "npm:5.3.3"
     browserstack-local: "npm:1.5.5"
     chai: "npm:4.4.1"
@@ -6113,13 +6112,11 @@ __metadata:
     postcss-loader: "npm:8.1.1"
     prettier: "npm:3.3.3"
     prettier-eslint-cli: "npm:8.0.1"
-    prop-types: "npm:15.8.1"
     react: "npm:18.3.1"
     react-advanced-cropper: "npm:0.20.0"
     react-bootstrap: "npm:2.10.5"
     react-dom: "npm:18.3.1"
     react-is: "npm:18.3.1"
-    react-moment-proptypes: "npm:1.8.1"
     react-mosaic-component: "npm:6.1.0"
     react-redux: "npm:9.1.2"
     react-redux-loading-bar: "npm:5.0.8"
@@ -6810,13 +6807,6 @@ __metadata:
   version: 7.0.0-beta.0
   resolution: "babel-plugin-syntax-trailing-function-commas@npm:7.0.0-beta.0"
   checksum: 10c0/67e3d6a706637097526b2d3046d3124d3efd3aac28b47af940c2f8df01b8d7ffeb4cdf5648f3b5eac3f098f5b61c4845e306f34301c869e5e14db6ae8b77f699
-  languageName: node
-  linkType: hard
-
-"babel-plugin-transform-react-remove-prop-types@npm:0.4.24":
-  version: 0.4.24
-  resolution: "babel-plugin-transform-react-remove-prop-types@npm:0.4.24"
-  checksum: 10c0/713441fd9fb663cc95709cb52d9c2c6228ea6d5406092a8a50094c810bcb13c3c347f8fca703d45b20cc401782743a91d7272025950147f9247d53360267f107
   languageName: node
   linkType: hard
 
@@ -14748,7 +14738,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"moment@npm:2.30.1, moment@npm:>=1.6.0, moment@npm:^2.29.4":
+"moment@npm:2.30.1, moment@npm:^2.29.4":
   version: 2.30.1
   resolution: "moment@npm:2.30.1"
   checksum: 10c0/865e4279418c6de666fca7786607705fd0189d8a7b7624e2e56be99290ac846f90878a6f602e34b4e0455c549b85385b1baf9966845962b313699e7cb847543a
@@ -16093,7 +16083,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prop-types@npm:15.8.1, prop-types@npm:^15.0.0, prop-types@npm:^15.6.2, prop-types@npm:^15.7.2, prop-types@npm:^15.8.1":
+"prop-types@npm:^15.0.0, prop-types@npm:^15.6.2, prop-types@npm:^15.7.2, prop-types@npm:^15.8.1":
   version: 15.8.1
   resolution: "prop-types@npm:15.8.1"
   dependencies:
@@ -16495,17 +16485,6 @@ __metadata:
   version: 3.0.4
   resolution: "react-lifecycles-compat@npm:3.0.4"
   checksum: 10c0/1d0df3c85af79df720524780f00c064d53a9dd1899d785eddb7264b378026979acbddb58a4b7e06e7d0d12aa1494fd5754562ee55d32907b15601068dae82c27
-  languageName: node
-  linkType: hard
-
-"react-moment-proptypes@npm:1.8.1":
-  version: 1.8.1
-  resolution: "react-moment-proptypes@npm:1.8.1"
-  dependencies:
-    moment: "npm:>=1.6.0"
-  peerDependencies:
-    moment: ">=1.6.0"
-  checksum: 10c0/eb4b8234954f713864a41f27d349288433768caa46810e39e94c97893996efe54ad8f9677bb570323b0238936785d78f2b1791ccf6fa57bb5dad91e291df7ab2
   languageName: node
   linkType: hard
 

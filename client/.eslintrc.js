@@ -39,8 +39,7 @@ module.exports = {
         "@typescript-eslint/no-namespace": "warn",
         "@typescript-eslint/no-unused-expressions": "warn",
         "@typescript-eslint/no-unused-vars": "warn",
-        "prefer-spread": "warn",
-        "react/prop-types": "warn"
+        "prefer-spread": "warn"
       }
     }
   ],

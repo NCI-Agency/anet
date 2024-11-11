@@ -13,7 +13,7 @@ interface TextInputFilterProps {
       }
   onChange?: (...args: unknown[]) => unknown
   // Passed by the SearchFilterDisplay row
-  asFormField?: boolean // FIXME: XXXeslint-disable-line react/no-unused-prop-types
+  asFormField?: boolean
 }
 
 const TextInputFilter = ({

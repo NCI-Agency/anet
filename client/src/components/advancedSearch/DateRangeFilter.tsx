@@ -29,7 +29,7 @@ interface DateRangeValueType {
 interface DateRangeFilterProps {
   queryKey: string
   onChange?: (...args: unknown[]) => unknown
-  onlyBetween?: boolean // FIXME: XXXeslint-disable-line react/no-unused-prop-types
+  onlyBetween?: boolean
   value?: DateRangeValueType | string
   asFormField?: boolean
 }

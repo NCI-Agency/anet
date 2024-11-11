@@ -15,7 +15,7 @@ interface SelectFilterProps {
         toQuery?: (...args: unknown[]) => unknown
       }
   onChange?: (...args: unknown[]) => unknown
-  asFormField?: boolean // FIXME: XXXeslint-disable-line react/no-unused-prop-types
+  asFormField?: boolean
 }
 
 const SelectFilter = ({
