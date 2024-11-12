@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:tns="https://tide.act.nato.int/wsdl/2012/nvg" xmlns:nvg="https://tide.act.nato.int/schemas/2012/10/nvg" targetNamespace="https://tide.act.nato.int/wsdl/2012/nvg">
+	<types>
+		<xsd:schema targetNamespace="https://tide.act.nato.int/wsdl/2012/nvg" elementFormDefault="qualified">
+			<xsd:import schemaLocation="nvg.2.0.xsd" namespace="https://tide.act.nato.int/schemas/2012/10/nvg"/>
+			<xsd:element name="GetNvg">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element ref="nvg:nvg_filter" minOccurs="0"/>
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="GetNvgResponse">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element ref="nvg:nvg"/>
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="GetCapabilities">
+				<xsd:complexType>
+					<xsd:sequence/>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="GetCapabilitiesResponse">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element ref="nvg:nvg_capabilities"/>
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+		</xsd:schema>
+	</types>
+	<message name="GetNvgRequest">
+		<part name="parameters" element="tns:GetNvg"/>
+	</message>
+	<message name="GetNvgResponse">
+		<part name="parameters" element="tns:GetNvgResponse"/>
+	</message>
+	<message name="GetCapabilitiesRequest">
+		<part name="parameters" element="tns:GetCapabilities"/>
+	</message>
+	<message name="GetCapabilitiesResponse">
+		<part name="parameters" element="tns:GetCapabilitiesResponse"/>
+	</message>
+	<portType name="NVGPortType2012">
+		<operation name="GetNvg">
+			<input message="tns:GetNvgRequest"/>
+			<output message="tns:GetNvgResponse"/>
+		</operation>
+		<operation name="GetCapabilities">
+			<input message="tns:GetCapabilitiesRequest"/>
+			<output message="tns:GetCapabilitiesResponse"/>
+		</operation>
+	</portType>
+</definitions>
