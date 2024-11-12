@@ -322,7 +322,7 @@ export default {
   },
 
   getAttachmentIconDetails: function(attachment, small) {
-    let iconSize = small ? "50px" : "200px"
+    const iconSize = small ? "50px" : "200px"
     let iconImage = binaryIcon
     const contentMissing =
       attachment.contentLength < 0 ||
@@ -336,7 +336,6 @@ export default {
     } else if (attachment.mimeType.startsWith("video/")) {
       iconImage = videoIcon
     } else if (attachment.mimeType.startsWith("image/")) {
-      iconSize = null
       iconImage = `/api/attachment/view/${attachment.uuid}`
     }
     return { iconSize, iconImage, contentMissing }
