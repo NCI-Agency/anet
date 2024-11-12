@@ -1,5 +1,6 @@
 import com.bmuschko.gradle.docker.tasks.container.*
 import com.bmuschko.gradle.docker.tasks.image.*
+import io.mateo.cxf.codegen.wsdl2java.Wsdl2Java
 
 plugins {
 	// https://github.com/bmuschko/gradle-docker-plugin
@@ -10,6 +11,7 @@ plugins {
 	id "org.beryx.runtime" version "1.13.1"
 	id "com.netflix.nebula.rpm" version "11.10.1"
 	id "org.springframework.boot" version "3.4.2" apply false
+	id 'io.mateo.cxf-codegen' version '2.4.0'
 }
 
 apply plugin: 'java'
@@ -27,6 +29,7 @@ java {
 }
 
 boolean isTestEnv = project.hasProperty("testEnv")
+String cxfVersion = "4.0.5"
 String jdbi3Version = "3.47.0"
 String jupiterVersion = "5.11.4"
 String keycloakVersion = "26.1.0"
@@ -82,6 +85,10 @@ String adminDomainUsername = run.environment["ANET_ADMIN_DOMAIN_USERNAME"] ?: "a
 String dbContainerName = isTestEnv ? "anet-psql-test-server" : "anet-psql-server"
 String fakeSmtpContainerName = isTestEnv ? "anet-fake-smtp-test-server" : "anet-fake-smtp-server"
 String keycloakContainerName = "anet-keycloak-server"
+
+String cxfSources = "build/generated/sources/cxf"
+
+sourceSets.main.java.srcDirs += file(cxfSources)
 
 // In this section you declare where to find the dependencies of your project
 repositories {
@@ -140,6 +147,7 @@ dependencies {
 	implementation 'io.leangen.graphql:graphql-spqr-spring-boot-starter:1.0.1'
 	// Spring dependencies
 	implementation "org.springframework.boot:spring-boot-starter-web"
+	implementation "org.springframework.boot:spring-boot-starter-web-services" // Required for NVG-WS
 	implementation "org.springframework.boot:spring-boot-starter-data-jpa"
 	implementation "org.springframework.boot:spring-boot-starter-freemarker"
 	implementation "org.springframework.boot:spring-boot-starter-oauth2-client"
@@ -147,6 +155,9 @@ dependencies {
 	implementation "org.springframework.boot:spring-boot-starter-security"
 	implementation "org.springframework.security:spring-security-config"
 	implementation "org.springframework.shell:spring-shell-starter:${springShellVersion}"
+
+	// Apache CXF dependencies required for NVG-WS
+	implementation "org.apache.cxf:cxf-spring-boot-starter-jaxws:${cxfVersion}"
 
 	// The graphql-java-client-runtime module aggregates all dependencies for the generated code,
 	// including the plugin runtime
@@ -265,6 +276,19 @@ if (run.environment['DB_DRIVER'] == "sqlserver") {
 }
 
 test.environment = run.environment
+
+cxfCodegen {
+	cxfVersion = "${cxfVersion}"
+}
+
+task cxfNvg20(type: Wsdl2Java) {
+	toolOptions {
+		wsdl.set("${projectDir}/src/main/resources/nato/common/nvg20/common-ws.nvg20.wsdl")
+		markGenerated.set(true)
+		outputDir.set(file(cxfSources))
+		packageNames.set(['nato.act.tide.wsdl.nvg20'])
+	}
+}
 
 task checkConfig(type: JavaExec, dependsOn: 'compileJava') {
 	classpath = sourceSets.main.runtimeClasspath
@@ -688,6 +712,9 @@ checkstyle {
 	toolVersion = '10.21.1'
 }
 //Easiest way to avoid checking generated code
+checkstyleMain {
+	source = fileTree('src/main/java')
+}
 checkstyleTest {
 	source = fileTree('src/test/java')
 }
