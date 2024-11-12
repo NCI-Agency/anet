@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- edited with XMLSpy v2010 rel. 3 (http://www.altova.com) by R. Howe (NC3A The Hague) -->
+<xsd:schema xmlns="https://tide.act.nato.int/schemas/2012/10/nvg" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="https://tide.act.nato.int/schemas/2012/10/nvg" elementFormDefault="qualified" attributeFormDefault="unqualified" version="2.0.0">
+	<xsd:include schemaLocation="nvg.types.2.0.xsd"/>
+	<xsd:attributeGroup name="simple-attributes">
+		<xsd:attribute name="id" type="IdentifierType" use="required">
+			<xsd:annotation>
+				<xsd:documentation>Element identifier suitable for html element id.</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="name" type="xsd:string" use="required">
+			<xsd:annotation>
+				<xsd:documentation>Element label suitable for human consumption.</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:attributeGroup>
+	<xsd:simpleType name="ColumnLabelType">
+		<xsd:list itemType="xsd:string"/>
+	</xsd:simpleType>
+	<xsd:complexType name="HelpType" mixed="false">
+		<xsd:annotation>
+			<xsd:documentation>
+				Provides information for user consumption.
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="text" type="xsd:string"/>
+		</xsd:sequence>
+		<xsd:attribute name="name" type="xsd:string" use="optional">
+			<xsd:annotation>
+				<xsd:documentation>
+					The name of the corresponding element.
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+	<xsd:complexType name="CapabilityItemType">
+		<xsd:annotation>
+			<xsd:documentation>
+				Base type for all filters.
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="help" type="HelpType" minOccurs="0"/>
+		</xsd:sequence>
+		<xsd:attributeGroup ref="simple-attributes"/>
+		<xsd:attribute name="required" type="xsd:boolean" use="optional" default="false">
+			<xsd:annotation>
+				<xsd:documentation>Identifies whether the element is required in the query			</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+	<xsd:complexType name="InputType" mixed="false">
+		<xsd:complexContent>
+			<xsd:extension base="CapabilityItemType">
+				<xsd:attribute name="type" type="InputType_type" use="required"/>
+				<xsd:attribute name="default" type="xsd:string" use="optional"/>
+				<xsd:attribute name="length" type="xsd:positiveInteger" use="optional"/>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:simpleType name="InputType_type">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="boolean"/>
+			<xsd:enumeration value="string"/>
+			<xsd:enumeration value="int"/>
+			<xsd:enumeration value="float"/>
+			<xsd:enumeration value="date"/>
+			<xsd:enumeration value="datetime"/>
+			<xsd:enumeration value="position"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:complexType name="SelectType">
+		<xsd:annotation>
+			<xsd:documentation>
+				A filter using a set of values.
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="CapabilityItemType">
+				<xsd:sequence>
+					<xsd:element name="values">
+						<xsd:annotation>
+							<xsd:documentation>The set of valid values.	</xsd:documentation>
+						</xsd:annotation>
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="SelectValueType" minOccurs="0" maxOccurs="unbounded"/>
+							</xsd:sequence>
+						</xsd:complexType>
+					</xsd:element>
+				</xsd:sequence>
+				<xsd:attribute name="multiple" type="xsd:boolean">
+					<xsd:annotation>
+						<xsd:documentation>Allow multiple selection from the list.</xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+				<xsd:attribute name="list" type="xsd:boolean">
+					<xsd:annotation>
+						<xsd:documentation>Presentation hint, list display of selector vs combo box display.</xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="CapabilityValueType" mixed="false">
+		<xsd:attributeGroup ref="simple-attributes"/>
+	</xsd:complexType>
+	<xsd:complexType name="SelectValueType">
+		<xsd:complexContent>
+			<xsd:extension base="CapabilityValueType">
+				<xsd:attribute name="selected" type="xsd:boolean" use="optional"/>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="TableType">
+		<xsd:annotation>
+			<xsd:documentation>
+				A filter using a table of values of varying type.
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="CapabilityItemType">
+				<xsd:sequence>
+					<xsd:element name="input" type="InputType" minOccurs="0" maxOccurs="unbounded"/>
+				</xsd:sequence>
+				<xsd:attribute name="column_labels" type="ColumnLabelType">
+					<xsd:annotation>
+						<xsd:documentation>Delimited list (based on XML Schema list separators) of column labels suitable for human consumption.</xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="MatrixType">
+		<xsd:annotation>
+			<xsd:documentation>
+				A filter using a matrix with a common set of values.
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="CapabilityItemType">
+				<xsd:sequence>
+					<xsd:element name="values">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="CapabilityValueType" maxOccurs="unbounded"/>
+							</xsd:sequence>
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="columns">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="column" type="MatrixColumnType" maxOccurs="unbounded"/>
+							</xsd:sequence>
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="rows">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="row" type="MatrixRowType" maxOccurs="unbounded"/>
+							</xsd:sequence>
+						</xsd:complexType>
+					</xsd:element>
+				</xsd:sequence>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="MatrixColumnType">
+		<xsd:complexContent>
+			<xsd:extension base="CapabilityValueType">
+				<xsd:attribute name="color" type="xsd:string" use="optional"/>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="MatrixRowType">
+		<xsd:complexContent>
+			<xsd:extension base="CapabilityValueType"/>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="NvgCapabilitiesType">
+		<xsd:sequence>
+			<xsd:choice minOccurs="0" maxOccurs="unbounded">
+				<xsd:element name="input" type="InputType"/>
+				<xsd:element name="select" type="SelectType"/>
+				<xsd:element name="table" type="TableType"/>
+				<xsd:element name="matrix" type="MatrixType"/>
+			</xsd:choice>
+		</xsd:sequence>
+		<xsd:attribute name="version" type="VersionType" use="required"/>
+		<xsd:anyAttribute namespace="##any" processContents="lax"/>
+	</xsd:complexType>
+	<xsd:element name="nvg_capabilities" type="NvgCapabilitiesType"/>
+</xsd:schema>

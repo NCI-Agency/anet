@@ -1,0 +1,675 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- edited with XMLSpy v2013 (x64) (http://www.altova.com) by David Dufour (NCIA) -->
+<xs:schema xmlns="https://tide.act.nato.int/schemas/2012/10/nvg" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:dcterms="http://purl.org/dc/terms/" targetNamespace="https://tide.act.nato.int/schemas/2012/10/nvg" elementFormDefault="qualified" attributeFormDefault="unqualified" version="2.0.2">
+	<!-- Includes -->
+	<xs:include schemaLocation="nvg.types.2.0.xsd"/>
+	<!-- <xs:import namespace="http://purl.org/dc/terms/" schemaLocation="metadata.xsd"/>-->
+	<xs:element name="nvg" type="NvgType"/>
+	<xs:complexType name="NvgType">
+		<xs:annotation>
+			<xs:documentation>The NATO Vector Graphics (NVG) Document Format.  See: https://tide.act.nato.int/tidepedia/index.php?title=NVG</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="Schema" type="SchemaType" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="metadata" minOccurs="0"/>
+			<xs:element name="ExtendedData" type="ExtendedDataType" minOccurs="0"/>
+			<xs:group ref="ContentGroup"/>
+			<xs:element name="extension" type="ExtensionType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Extension point for structured community of interest specific content.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute name="version" type="xs:string" use="required">
+			<xs:annotation>
+				<xs:documentation>NVG Document Format version identifier.</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:anyAttribute namespace="##any" processContents="lax">
+			<xs:annotation>
+				<xs:documentation>This is an intentional extension point in the NVG specification. System/Community Of Interest (COI) specific attributes are allowed here. However, these attributes should be fully qualified (i.e. with a namespace) to prevent conflict between extensions. Systems that transform or mediate NVG content are required to preserve these extensions for the use case where the information will be provided back to the originating System/COI for further processing.</xs:documentation>
+			</xs:annotation>
+		</xs:anyAttribute>
+	</xs:complexType>
+	<xs:group name="ShapeGroup">
+		<xs:sequence>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:element name="text" type="TextType"/>
+				<xs:element name="point" type="PointType"/>
+				<xs:element name="multipoint" type="MultiPointType"/>
+				<xs:element name="circle" type="CircleType"/>
+				<xs:element name="ellipse" type="EllipseType"/>
+				<xs:element name="rect" type="RectangleType"/>
+				<xs:element name="polyline" type="PolylineType"/>
+				<xs:element name="arrow" type="ArrowType"/>
+				<xs:element name="corridor" type="CorridorType"/>
+				<xs:element name="orbit" type="OrbitType"/>
+				<xs:element name="polygon" type="PolygonType"/>
+				<xs:element name="arc" type="ArcType"/>
+				<xs:element name="arcband" type="ArcbandType"/>
+				<xs:element name="content-item" type="SymbolizedContentType"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="ContentGroup">
+		<xs:sequence>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:element name="g" type="GroupType"/>
+				<xs:element name="composite" type="CompositeType"/>
+				<xs:group ref="ShapeGroup"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:complexType name="ExtensionType">
+		<xs:sequence>
+			<xs:any processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="ContentType">
+		<xs:annotation>
+			<xs:documentation>The base for most items in the Content substitutation group</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element ref="metadata" minOccurs="0"/>
+			<xs:element name="ExtendedData" type="ExtendedDataType" minOccurs="0"/>
+			<xs:element name="textInfo" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Additional human readlable text in addition to @label. Long text content should be placed here.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="TimeStamp" type="xs:dateTime" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>comparable point in time (DTG) to represent the last state change of this element</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="TimeSpan" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Define a show/hide period (based on strict DTG) for the shape as defined by KML on https://developers.google.com/kml/documentation/kmlreference#timespan</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="begin" type="xs:dateTime" minOccurs="0"/>
+						<xs:element name="end" type="xs:dateTime" minOccurs="0"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="extension" type="ExtensionType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Extension point for structured community of interest specific content.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute name="uri" type="xs:anyURI" use="required">
+			<xs:annotation>
+				<xs:documentation>The unique identifier for the content. The URI is immutable and shall remain constant across documents produced by the same source. Furthermore, the URI shall remain constant as the document is transferred through a mediation service/process.</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="href" type="xs:anyURI" use="optional">
+			<xs:annotation>
+				<xs:documentation>A URL to human readable content providing more information about the ContentType. Typically the NVG document will contain just a small amount of metadata required to render the content.  The URL allows the user to drill-down (click through) to the full content.</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="label" type="LabelType" use="optional">
+			<xs:annotation>
+				<xs:documentation>A short text label describing the content. Long text should be placed in the text element.</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="style" type="StyleType">
+			<xs:annotation>
+				<xs:documentation>A text string (inline CSS string) that defines how objects should be rendered graphically.</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:anyAttribute namespace="##any" processContents="lax">
+			<xs:annotation>
+				<xs:documentation>This is an intentional extension point in the NVG specification.  System/Community Of Interest (COI) specific attributes are allowed here. However, these attributes should be fully qualified (i.e.  with a namespace) to prevent conflict between extensions.  Systems that transform or mediate NVG content are required to preserve these extensions for the use case where the information will be provided back to the originating System/COI for further processing.</xs:documentation>
+			</xs:annotation>
+		</xs:anyAttribute>
+	</xs:complexType>
+	<xs:complexType name="GroupType">
+		<xs:annotation>
+			<xs:documentation>Content grouping</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="ContentType">
+				<xs:sequence>
+					<xs:group ref="ContentGroup"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="CompositeType">
+		<xs:annotation>
+			<xs:documentation>Content unbreakable composition made of basic shapes (no recursion)</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="SymbolizedContentType">
+				<xs:sequence>
+					<xs:group ref="ShapeGroup"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="SymbolizedContentType">
+		<xs:annotation>
+			<xs:documentation>Symbolized content, including unknown (default rendering).</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="ContentType">
+				<xs:attribute name="symbol" type="SymbolCodeType" use="optional" default="unknown:unknown">
+					<xs:annotation>
+						<xs:documentation>Symbolology attribute that binds the content to a specific symbol scheme and code. Format: &lt;scheme&gt;:&lt;code&gt;</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="modifiers" type="ModifiersType">
+					<xs:annotation>
+						<xs:documentation>The modifiers attribute is used to associate additional information with the the symbol attribute</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="PointType">
+		<xs:complexContent>
+			<xs:extension base="SymbolizedContentType">
+				<xs:attribute name="x" type="LongitudeType" use="required">
+					<xs:annotation>
+						<xs:documentation>Longitude in decimal degrees (WGS84)</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="y" type="LatitudeType" use="required">
+					<xs:annotation>
+						<xs:documentation>Latitude in decimal degrees (WGS84)</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="z" type="AltitudeDepthType" use="optional" default="0">
+					<xs:annotation>
+						<xs:documentation>Measure of altitude distances are expressed in meters relative (positive or negative) to the datum surface of WGS-84</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="speed" type="SpeedType" use="optional">
+					<xs:annotation>
+						<xs:documentation>Speed in kilometers per hour (&gt;= 0)</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="course" type="CourseType" use="optional">
+					<xs:annotation>
+						<xs:documentation>Course in degrees (0 = north)</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="rotation" type="RotationType" use="optional" default="0">
+					<xs:annotation>
+						<xs:documentation>Rotation of the symbol in degrees. The default value is 0.0 degrees rotation</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="TextType">
+		<xs:complexContent>
+			<xs:extension base="ContentType">
+				<xs:sequence>
+					<xs:element name="content" type="xs:string"/>
+				</xs:sequence>
+				<xs:attribute name="x" type="LongitudeType" use="required">
+					<xs:annotation>
+						<xs:documentation>Longitude in decimal degrees (WGS84)</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="y" type="LatitudeType" use="required">
+					<xs:annotation>
+						<xs:documentation>Latitude in decimal degrees (WGS84)</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="rotation" type="RotationType" use="optional" default="0">
+					<xs:annotation>
+						<xs:documentation>Rotation of the text in degrees (0 = horizontal text)</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="MultiPointType">
+		<xs:complexContent>
+			<xs:extension base="SymbolizedContentType">
+				<xs:attribute name="points" type="ListOfLongLatType" use="required">
+					<xs:annotation>
+						<xs:documentation>Reference points</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="LinearRingType">
+		<xs:attribute name="points" type="ListOfLongLatType" use="required">
+			<xs:annotation>
+				<xs:documentation>Reference points</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="leg-type" type="LegType" use="optional" default="great-circle">
+			<xs:annotation>
+				<xs:documentation>Interpolation algorithm for determining points between stated reference points.</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+	<xs:complexType name="CircularRingType">
+		<xs:attribute name="cx" type="LongitudeType" use="required">
+			<xs:annotation>
+				<xs:documentation>Center longitude in decimal degrees (WGS84)</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="cy" type="LatitudeType" use="required">
+			<xs:annotation>
+				<xs:documentation>Center latitude in decimal degrees (WGS84)</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="r" type="RadiusType" use="required">
+			<xs:annotation>
+				<xs:documentation>Radius of the circle in meters.</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+	<xs:complexType name="EllipticRingType">
+		<xs:attribute name="cx" type="LongitudeType" use="required">
+			<xs:annotation>
+				<xs:documentation>Center longitude in decimal degrees (WGS84)</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="cy" type="LatitudeType" use="required">
+			<xs:annotation>
+				<xs:documentation>Center latitude in decimal degrees (WGS84)</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="rx" type="RadiusType" use="required">
+			<xs:annotation>
+				<xs:documentation>The radius of the ellipse along the X axis (East/West) prior to rotation, in meters. This number should be positive.</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="ry" type="RadiusType" use="required">
+			<xs:annotation>
+				<xs:documentation>The radius of the ellipse along the Y axis (North/South) prior to rotation, in meters. This number should be positive.</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="rotation" type="RotationType" use="optional" default="0">
+			<xs:annotation>
+				<xs:documentation>Rotation in the counter-clockwise direction around the center point (cx, cy).  The default value is 0.0 degrees rotation.</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+	<xs:complexType name="RectangularRingType">
+		<xs:attribute name="cx" type="LongitudeType" use="required">
+			<xs:annotation>
+				<xs:documentation>Center longitude in decimal degrees (WGS84)</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="cy" type="LatitudeType" use="required">
+			<xs:annotation>
+				<xs:documentation>Center latitude in decimal degrees (WGS84)</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="rx" type="RadiusType" use="required">
+			<xs:annotation>
+				<xs:documentation>The half length of the rectangle from the center point along the X axis (East/West) prior to rotation, in meters. This number should be positive.</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="ry" type="RadiusType" use="required">
+			<xs:annotation>
+				<xs:documentation>The half length of the rectangle from the center point along the Y axis (North/South) prior to rotation, in meters. This number should be positive.</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="rotation" type="RotationType" use="optional" default="0">
+			<xs:annotation>
+				<xs:documentation>Rotation in the counter-clockwise direction around the center point (cx, cy).  The default value is 0.0 degrees rotation.</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+	<xs:complexType name="ArcbandRingType">
+		<xs:attribute name="cx" type="LongitudeType" use="required">
+			<xs:annotation>
+				<xs:documentation>The x-axis (longitude) coordinate of the center point.</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="cy" type="LatitudeType" use="required">
+			<xs:annotation>
+				<xs:documentation>The y-axis (latitude) coordinate of the center point</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="minr" type="RadiusType" use="required">
+			<xs:annotation>
+				<xs:documentation>The radius of the smaller circle, in meters. This number should be positive.</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="maxr" type="RadiusType" use="required">
+			<xs:annotation>
+				<xs:documentation>The radius of the larger circle, in meters. This number should be positive.</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="startangle" type="AngleType" use="required">
+			<xs:annotation>
+				<xs:documentation>The angle of the first radial.</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="endangle" type="AngleType" use="required">
+			<xs:annotation>
+				<xs:documentation>The angle of the second radial.</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+	<xs:complexType name="ExclusionType">
+		<xs:sequence>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:element name="linear-ring" type="LinearRingType"/>
+				<xs:element name="circular-ring" type="CircularRingType"/>
+				<xs:element name="elliptic-ring" type="EllipticRingType"/>
+				<xs:element name="arcband-ring" type="ArcbandRingType"/>
+				<xs:element name="rect-ring" type="RectangularRingType"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="AreaContentType" abstract="true">
+		<xs:complexContent>
+			<xs:extension base="SymbolizedContentType">
+				<xs:sequence>
+					<xs:element name="exclude" type="ExclusionType" minOccurs="0"/>
+				</xs:sequence>
+				<xs:attribute name="minaltitude" type="AltitudeDepthType" use="optional">
+					<xs:annotation>
+						<xs:documentation>Minimum altitude over the datum surface (WGS-84) expressed in meters</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="maxaltitude" type="AltitudeDepthType" use="optional">
+					<xs:annotation>
+						<xs:documentation>Maximum altitude over the datum surface (WGS-84) expressed in meters</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="PolylineType">
+		<xs:complexContent>
+			<xs:extension base="SymbolizedContentType">
+				<xs:attribute name="points" type="ListOfLongLatType" use="required">
+					<xs:annotation>
+						<xs:documentation>Reference points</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="leg-type" type="LegType" use="optional" default="great-circle">
+					<xs:annotation>
+						<xs:documentation>Interpolation algorithm for determining points between stated reference points.</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="PolygonType">
+		<xs:complexContent>
+			<xs:extension base="AreaContentType">
+				<xs:attribute name="points" type="ListOfLongLatType" use="required">
+					<xs:annotation>
+						<xs:documentation>Reference points</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="leg-type" type="LegType" use="optional" default="great-circle">
+					<xs:annotation>
+						<xs:documentation>Interpolation algorithm for determining points between stated reference points.</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="CircleType">
+		<xs:complexContent>
+			<xs:extension base="AreaContentType">
+				<xs:attribute name="cx" type="LongitudeType" use="required">
+					<xs:annotation>
+						<xs:documentation>Center longitude in decimal degrees (WGS84)</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="cy" type="LatitudeType" use="required">
+					<xs:annotation>
+						<xs:documentation>Center latitude in decimal degrees (WGS84)</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="r" type="RadiusType" use="required">
+					<xs:annotation>
+						<xs:documentation>Radius of the circle in meters.</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="EllipseType">
+		<xs:complexContent>
+			<xs:extension base="AreaContentType">
+				<xs:attribute name="cx" type="LongitudeType" use="required">
+					<xs:annotation>
+						<xs:documentation>Center longitude in decimal degrees (WGS84)</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="cy" type="LatitudeType" use="required">
+					<xs:annotation>
+						<xs:documentation>Center latitude in decimal degrees (WGS84)</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="rx" type="RadiusType" use="required">
+					<xs:annotation>
+						<xs:documentation>The radius of the ellipse along the X axis (East/West) prior to rotation, in meters. This number should be positive.</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="ry" type="RadiusType" use="required">
+					<xs:annotation>
+						<xs:documentation>The radius of the ellipse along the Y axis (North/South) prior to rotation, in meters. This number should be positive.</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="rotation" type="RotationType" use="optional" default="0">
+					<xs:annotation>
+						<xs:documentation>Rotation in the counter-clockwise direction around the center point (cx, cy).  The default value is 0.0 degrees rotation.</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="RectangleType">
+		<xs:annotation>
+			<xs:documentation>Rectangle with true ground measurement (identical ground distance for opposite sides of the rectangle)</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="AreaContentType">
+				<xs:attribute name="cx" type="LongitudeType" use="required">
+					<xs:annotation>
+						<xs:documentation>Center longitude in decimal degrees (WGS84)</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="cy" type="LatitudeType" use="required">
+					<xs:annotation>
+						<xs:documentation>Center latitude in decimal degrees (WGS84)</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="rx" type="RadiusType" use="required">
+					<xs:annotation>
+						<xs:documentation>The half length of the rectangle from the center point along the X axis (East/West) prior to rotation, in meters. This number should be positive.</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="ry" type="RadiusType" use="required">
+					<xs:annotation>
+						<xs:documentation>The half length of the rectangle from the center point along the Y axis (North/South) prior to rotation, in meters. This number should be positive.</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="rotation" type="RotationType" use="optional" default="0">
+					<xs:annotation>
+						<xs:documentation>Rotation in the counter-clockwise direction around the center point (cx, cy).  The default value is 0.0 degrees rotation.</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="CorridorType">
+		<xs:complexContent>
+			<xs:extension base="SymbolizedContentType">
+				<xs:sequence/>
+				<xs:attribute name="width" type="WidthType" use="required">
+					<xs:annotation>
+						<xs:documentation>The width of the corridor in meters.</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="leg-type" type="LegType" default="great-circle">
+					<xs:annotation>
+						<xs:documentation>The line interpolation algorithm.</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="minaltitude" type="AltitudeDepthType">
+					<xs:annotation>
+						<xs:documentation>Minimum altitude for the corridor (meters).</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="maxaltitude" type="AltitudeDepthType">
+					<xs:annotation>
+						<xs:documentation>Maximum altitude for the corridor (meters).</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="points" type="ListOfLongLatType" use="required">
+					<xs:annotation>
+						<xs:documentation>The waypoints of the corridor.</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="OrbitType">
+		<xs:complexContent>
+			<xs:extension base="SymbolizedContentType">
+				<xs:attribute name="width" type="WidthType" use="required">
+					<xs:annotation>
+						<xs:documentation>The width of the orbit in meters.</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="minaltitude" type="AltitudeDepthType">
+					<xs:annotation>
+						<xs:documentation>Minimum altitude for the orbit (meters).</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="maxaltitude" type="AltitudeDepthType">
+					<xs:annotation>
+						<xs:documentation>Maximum altitude for the orbit (meters).</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="points" type="ListOfLongLatType" use="required">
+					<xs:annotation>
+						<xs:documentation>The waypoints of the orbit (limited to 2 points for the orbit)</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="ArrowType">
+		<xs:complexContent>
+			<xs:extension base="SymbolizedContentType">
+				<xs:attribute name="width" type="WidthType" use="required">
+					<xs:annotation>
+						<xs:documentation>The width of the body of the arrow in meters.</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="points" type="ListOfLongLatType" use="required">
+					<xs:annotation>
+						<xs:documentation>The waypoints of the centerline of the arrow (ending at the tip of the arrow)</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="leg-type" type="LegType" default="great-circle">
+					<xs:annotation>
+						<xs:documentation>The line interpolation algorithm.</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="ArcType">
+		<xs:complexContent>
+			<xs:extension base="SymbolizedContentType">
+				<xs:sequence/>
+				<xs:attribute name="cx" type="LongitudeType" use="required">
+					<xs:annotation>
+						<xs:documentation>The x-axis (longitude) coordinate of the ellipse center point</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="cy" type="LatitudeType" use="required">
+					<xs:annotation>
+						<xs:documentation>The y-axis (latitude) coordinate of the ellipse center point</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="rx" type="RadiusType" use="required">
+					<xs:annotation>
+						<xs:documentation>The radius of the ellipse along the X axis (East/West) prior to rotation, in meters. This number should be positive.</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="ry" type="RadiusType" use="required">
+					<xs:annotation>
+						<xs:documentation>The radius of the ellipse along the Y axis (North/South) prior to rotation, in meters. This number should be positive.</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="rotation" type="RotationType" default="0">
+					<xs:annotation>
+						<xs:documentation>The rotation in the counter-clockwise direction around the center point (cx, cy). The default value is 0.0 degrees rotation.
+                        </xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="startangle" type="AngleType" use="required">
+					<xs:annotation>
+						<xs:documentation>The start angle of the arc along an ellipse prior to rotation.</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="endangle" type="AngleType" use="required">
+					<xs:annotation>
+						<xs:documentation>The end angle of the arc along an ellipse prior to rotation</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="ArcbandType">
+		<xs:complexContent>
+			<xs:extension base="AreaContentType">
+				<xs:sequence/>
+				<xs:attribute name="cx" type="LongitudeType" use="required">
+					<xs:annotation>
+						<xs:documentation>The x-axis (longitude) coordinate of the center point.</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="cy" type="LatitudeType" use="required">
+					<xs:annotation>
+						<xs:documentation>The y-axis (latitude) coordinate of the center point</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="minr" type="RadiusType" use="required">
+					<xs:annotation>
+						<xs:documentation>The radius of the smaller circle, in meters. This number should be positive.</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="maxr" type="RadiusType" use="required">
+					<xs:annotation>
+						<xs:documentation>The radius of the larger circle, in meters. This number should be positive.</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="startangle" type="AngleType" use="required">
+					<xs:annotation>
+						<xs:documentation>The angle of the first radial.</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="endangle" type="AngleType" use="required">
+					<xs:annotation>
+						<xs:documentation>The angle of the second radial. When the End-angle is equivalent to the start-angle (modulo 360), it is assumed that the arcband is closed as a ring</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="BindingInformation" type="ExtensionType">
+		<xs:annotation>
+			<xs:documentation>named container for XML Security Labels to be used in the nvg extension block</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="metadata" type="ExtensionType">
+		<xs:annotation>
+			<xs:documentation>named container for NDMS / Dublin Core defined metadata</xs:documentation>
+		</xs:annotation>
+		<!-- type="dcterms:Metadata_Container" -->
+	</xs:element>
+</xs:schema>
