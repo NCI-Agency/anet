@@ -107,7 +107,7 @@
     "xhr2": "0.2.1"
   },
   "dependencies": {
-    "@apollo/client": "3.11.8",
+    "@apollo/client": "3.11.10",
     "@blueprintjs/core": "5.14.0",
     "@blueprintjs/datetime2": "2.3.13",
     "@emotion/react": "11.13.3",
@@ -130,7 +130,7 @@
     "escape-html": "1.0.3",
     "file-saver": "2.0.5",
     "formik": "2.4.6",
-    "graphiql": "3.7.1",
+    "graphiql": "3.7.2",
     "graphql": "16.9.0",
     "hopscotch": "0.3.1",
     "jsonpath-plus": "10.1.0",
@@ -177,7 +177,7 @@
     "slate-react": "0.111.0",
     "title-case": "4.3.2",
     "use-debounce": "10.0.4",
-    "uuid": "11.0.2",
+    "uuid": "11.0.3",
     "yup": "1.4.0"
   },
   "resolutions": {
