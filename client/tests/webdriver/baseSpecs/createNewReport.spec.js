@@ -82,9 +82,13 @@ const EXPECTED_DATA = {
 
 async function validateAttendee(name, expectedData, attendeeType) {
   const cols = await CreateReport.getAttendeeColumns(name)
-  expect(await cols[3].getText()).to.equal(expectedData.positions[attendeeType])
-  expect(await cols[4].getText()).to.equal(expectedData.locations[attendeeType])
-  expect(await cols[5].getText()).to.equal(
+  expect(await (await cols)[3].getText()).to.equal(
+    expectedData.positions[attendeeType]
+  )
+  expect(await (await cols)[4].getText()).to.equal(
+    expectedData.locations[attendeeType]
+  )
+  expect(await (await cols)[5].getText()).to.equal(
     expectedData.organizations[attendeeType]
   )
 }
@@ -95,7 +99,7 @@ describe("When creating a report", () => {
     await CreateReport.open()
     await browser.pause(500) // wait for the page transition and rendering of custom fields
     await CreateReport.fillForm(REPORT_FIELDS)
-    await browser.pause(500)
+    await browser.pause(1000)
     // Validate the attendees
     await validateAttendee(AUTHOR, EXPECTED_DATA.now, "author")
     await validateAttendee(ADVISOR, EXPECTED_DATA.now, "advisor")
@@ -103,7 +107,7 @@ describe("When creating a report", () => {
   })
   it("Should show report with advisor and interlocutor organizations at engagement date = now", async() => {
     await CreateReport.submitForm()
-    await browser.pause(500)
+    await browser.pause(1000)
     reportUuid = await ShowReport.getUuid()
     expect(reportUuid.length).to.equal(36)
     // Validate the attendees
@@ -124,7 +128,7 @@ describe("When creating a report", () => {
     await (await ShowReport.getEditReportButton()).click()
     // Change the engagement date
     await CreateReport.setEngagementDate(moment("2020-07-01"))
-    await browser.pause(500)
+    await browser.pause(1000)
     // Validate the attendees
     await validateAttendee(AUTHOR, EXPECTED_DATA.in_2020, "author")
     await validateAttendee(ADVISOR, EXPECTED_DATA.in_2020, "advisor")
@@ -133,7 +137,7 @@ describe("When creating a report", () => {
 
   it("Should show report with advisor and interlocutor organizations at engagement date in 2020", async() => {
     await CreateReport.submitForm()
-    await browser.pause(500)
+    await browser.pause(1000)
     // Validate the attendees
     await validateAttendee(AUTHOR, EXPECTED_DATA.in_2020, "author")
     await validateAttendee(ADVISOR, EXPECTED_DATA.in_2020, "advisor")
@@ -152,7 +156,7 @@ describe("When creating a report", () => {
     await (await ShowReport.getEditReportButton()).click()
     // Change the engagement date
     await CreateReport.setEngagementDate(moment("2019-07-01"))
-    await browser.pause(500)
+    await browser.pause(1000)
     // Validate the attendees
     await validateAttendee(AUTHOR, EXPECTED_DATA.in_2019, "author")
     await validateAttendee(ADVISOR, EXPECTED_DATA.in_2019, "advisor")
@@ -161,7 +165,7 @@ describe("When creating a report", () => {
 
   it("Should show report with advisor and interlocutor organizations at engagement date in 2019", async() => {
     await CreateReport.submitForm()
-    await browser.pause(500)
+    await browser.pause(1000)
     // Validate the attendees
     await validateAttendee(AUTHOR, EXPECTED_DATA.in_2019, "author")
     await validateAttendee(ADVISOR, EXPECTED_DATA.in_2019, "advisor")
