@@ -22,9 +22,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@apollo/client@npm:3.11.8":
-  version: 3.11.8
-  resolution: "@apollo/client@npm:3.11.8"
+"@apollo/client@npm:3.11.10":
+  version: 3.11.10
+  resolution: "@apollo/client@npm:3.11.10"
   dependencies:
     "@graphql-typed-document-node/core": "npm:^3.1.1"
     "@wry/caches": "npm:^1.0.0"
@@ -55,7 +55,7 @@ __metadata:
       optional: true
     subscriptions-transport-ws:
       optional: true
-  checksum: 10c0/a9b697460aa6a5d7e59685132509871675995af14b5fc69213ca22f973600cfe3391b27b7b871579c5b4e18a0d6755ffd1076a2d8dd970a54a43973feaa99ffa
+  checksum: 10c0/27bb910d347e7bb88ae48a39c6e328d8389bfe679cd4529889878bffcc73d00b1122b9fc3501f079d35835622bd33d9848a4e7bad579aa2a2d1f5dee824c5586
   languageName: node
   linkType: hard
 
@@ -2200,9 +2200,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphiql/react@npm:^0.26.2":
-  version: 0.26.2
-  resolution: "@graphiql/react@npm:0.26.2"
+"@graphiql/react@npm:^0.27.0":
+  version: 0.27.0
+  resolution: "@graphiql/react@npm:0.27.0"
   dependencies:
     "@graphiql/toolkit": "npm:^0.11.0"
     "@headlessui/react": "npm:^1.7.15"
@@ -2221,10 +2221,10 @@ __metadata:
     markdown-it: "npm:^14.1.0"
     set-value: "npm:^4.1.0"
   peerDependencies:
-    graphql: ^15.5.0 || ^16.0.0 || ^17.0.0-alpha.2
+    graphql: ^15.5.0 || ^16.0.0 || ^17.0.0
     react: ^16.8.0 || ^17 || ^18
     react-dom: ^16.8.0 || ^17 || ^18
-  checksum: 10c0/365797d16b7eb6479718699b5ff0565c6549ae78ef554cbf8d7eb31df2223e0bc5ba467574439c3010e41ba376b7ec6df5988ae3e00c387900b81d05747e9fdf
+  checksum: 10c0/420523cbde4332145f4709a0fe8cce79fff667eec3cb1af633cb83eef08e4427a5ac013040c0bb7cd49187d35ca15338811c622545a0000856b77c2c778c6b0a
   languageName: node
   linkType: hard
 
@@ -5905,7 +5905,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "anet@workspace:."
   dependencies:
-    "@apollo/client": "npm:3.11.8"
+    "@apollo/client": "npm:3.11.10"
     "@babel/core": "npm:7.26.0"
     "@babel/eslint-parser": "npm:7.25.9"
     "@babel/plugin-proposal-decorators": "npm:7.25.9"
@@ -5999,7 +5999,7 @@ __metadata:
     file-saver: "npm:2.0.5"
     formik: "npm:2.4.6"
     git-describe: "npm:4.1.1"
-    graphiql: "npm:3.7.1"
+    graphiql: "npm:3.7.2"
     graphql: "npm:16.9.0"
     handlebars: "npm:4.7.8"
     handlebars-loader: "npm:1.7.3"
@@ -6070,7 +6070,7 @@ __metadata:
     title-case: "npm:4.3.2"
     ts-node: "npm:10.9.2"
     use-debounce: "npm:10.0.4"
-    uuid: "npm:11.0.2"
+    uuid: "npm:11.0.3"
     webdriverio: "npm:8.40.6"
     webpack: "npm:5.96.1"
     webpack-cli: "npm:5.1.4"
@@ -11317,16 +11317,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"graphiql@npm:3.7.1":
-  version: 3.7.1
-  resolution: "graphiql@npm:3.7.1"
+"graphiql@npm:3.7.2":
+  version: 3.7.2
+  resolution: "graphiql@npm:3.7.2"
   dependencies:
-    "@graphiql/react": "npm:^0.26.2"
+    "@graphiql/react": "npm:^0.27.0"
   peerDependencies:
-    graphql: ^15.5.0 || ^16.0.0 || ^17.0.0-alpha.2
+    graphql: ^15.5.0 || ^16.0.0 || ^17.0.0
     react: ^16.8.0 || ^17 || ^18
     react-dom: ^16.8.0 || ^17 || ^18
-  checksum: 10c0/7251fc5664d99ec7048333af1a8e5d2dff1b1df4f362f53c1c7abf47f63b307382024713371e9acd2bd2dd1f89db4c08cff30cea0ad12b16ad19781654d092c0
+  checksum: 10c0/7cf045415d209a7400a8c5c09c2e8cbfdde1368e416c209a4b7a71a933c7400d49a62e2fbcf412460f0be3662785384af706393a96b52db67b3520ebf1c0da55
   languageName: node
   linkType: hard
 
@@ -19343,12 +19343,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"uuid@npm:11.0.2":
-  version: 11.0.2
-  resolution: "uuid@npm:11.0.2"
+"uuid@npm:11.0.3":
+  version: 11.0.3
+  resolution: "uuid@npm:11.0.3"
   bin:
     uuid: dist/esm/bin/uuid
-  checksum: 10c0/bd0670a0d6f77f1932da7544c51c32ceb467f3835382df2265f3275c4981d32c136a08a4369fb027ecfffd0b2ae48f19a28266ef636c7347264d5720e85d5ba0
+  checksum: 10c0/cee762fc76d949a2ff9205770334699e0043d52bb766472593a25f150077c9deed821230251ea3d6ab3943a5ea137d2826678797f1d5f6754c7ce5ce27e9f7a6
   languageName: node
   linkType: hard
 
