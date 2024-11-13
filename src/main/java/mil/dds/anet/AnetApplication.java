@@ -11,6 +11,11 @@ public class AnetApplication {
   public static final freemarker.template.Version FREEMARKER_VERSION =
       freemarker.template.Configuration.VERSION_2_3_33;
 
+  static {
+    // Disable Liquibase analytics!
+    System.setProperty("liquibase.analytics.enabled", "false");
+  }
+
   public static void main(String[] args) {
     SpringApplication.run(AnetApplication.class, args);
   }
