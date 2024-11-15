@@ -50,3 +50,8 @@ graphql:
       enabled: false
     gui:
       enabled: false
+
+# Apache CXF Servlet
+cxf:
+  # Ensures that CXF directly handles requests to /*
+  path: /cxf
