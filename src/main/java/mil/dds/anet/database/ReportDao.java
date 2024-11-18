@@ -1,5 +1,6 @@
 package mil.dds.anet.database;
 
+import static mil.dds.anet.database.LocationDao.LOCATION_FIELDS;
 import static org.jdbi.v3.core.statement.EmptyHandling.NULL_KEYWORD;
 
 import com.google.common.collect.ObjectArrays;
@@ -25,6 +26,7 @@ import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.EmailAddress;
+import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
@@ -44,6 +46,7 @@ import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
 import mil.dds.anet.database.mappers.AuthorizationGroupMapper;
+import mil.dds.anet.database.mappers.LocationMapper;
 import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.database.mappers.ReportPersonMapper;
 import mil.dds.anet.database.mappers.TaskMapper;
@@ -62,6 +65,7 @@ import mil.dds.anet.views.SearchQueryFetcher;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.mapper.MapMapper;
+import org.jdbi.v3.core.result.ResultIterable;
 import org.jdbi.v3.core.statement.Query;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
@@ -199,6 +203,41 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
           .createQuery("/* " + queryDescriptor + " */ SELECT " + REPORT_FIELDS + "FROM reports "
               + "WHERE reports.\"" + keyField + "\" = :key")
           .bind("key", key).map(new ReportMapper()).findFirst().orElse(null);
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
+  @Transactional
+  public List<Report> getReportByPeriod(Instant start, Instant end) {
+    final Handle handle = getDbHandle();
+    try {
+      /* Check whether uuid is purely numerical, and if so, query on legacyId */
+      Query query = handle
+          .createQuery("/* getReportByUuid */ SELECT " + REPORT_FIELDS + "," + LOCATION_FIELDS
+              + " FROM reports "
+              + "INNER JOIN locations ON reports.\"locationUuid\"=locations.uuid "
+              + "WHERE reports.\"engagementDate\" >= :start AND reports.\"engagementDate\" <= :end "
+              + "AND state IN (:approved, :published)") // Approved or Published
+          .bind("start", start).bind("end", end).bind("approved", ReportState.APPROVED.ordinal())
+          .bind("published", ReportState.PUBLISHED.ordinal());
+
+      List<Report> reports = query.map(new ReportMapper()).list();
+      List<Location> locations = query.map(new LocationMapper()).list();
+
+      // Ensure the lists are of the same size
+      if (reports.size() != locations.size()) {
+        throw new IllegalStateException(
+            "Mismatched sizes: reports and locations must have the same number of elements.");
+      }
+
+      // Link the location to the corresponding report
+      for (int i = 0; i < reports.size(); i++) {
+        reports.get(i).setLocation(locations.get(i));
+      }
+
+      return reports;
+
     } finally {
       closeDbHandle(handle);
     }
