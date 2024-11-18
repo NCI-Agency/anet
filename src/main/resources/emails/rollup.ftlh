@@ -34,7 +34,7 @@ a {
 </style>
 </head>
 <body>
-<p style="color:red; font-size:12px; font-weight: bold;" align="center"><i>Classification: ${SECURITY_BANNER_CLASSIFICATION}</i></p>
+<p style="color:red; font-size:12px; font-weight: bold;"><i>Classification: ${SECURITY_BANNER_CLASSIFICATION}</i></p>
 
 <h1 style="color: #000000;">${title}</h1>
 
