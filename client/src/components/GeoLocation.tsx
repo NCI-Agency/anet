@@ -450,7 +450,7 @@ const AllFormatsInfo = ({
           <Table style={{ margin: 0 }}>
             <thead>
               <tr>
-                <th colSpan="2" className="text-center">
+                <th colSpan={2} className="text-center">
                   All coordinate formats (click to change format)
                 </th>
               </tr>

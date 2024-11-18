@@ -316,7 +316,7 @@ const CompactTable = ({ className, children }: CompactTableProps) => {
     <CompactTableS className={className}>
       <thead>
         <tr>
-          <EmptySpaceTdS colSpan="2" />
+          <EmptySpaceTdS colSpan={2} />
         </tr>
       </thead>
       <tbody>
@@ -328,7 +328,7 @@ const CompactTable = ({ className, children }: CompactTableProps) => {
       </tbody>
       <tfoot>
         <tr>
-          <EmptySpaceTdS colSpan="2" />
+          <EmptySpaceTdS colSpan={2} />
         </tr>
       </tfoot>
     </CompactTableS>
@@ -433,7 +433,7 @@ interface CompactTitleProps {
 export const CompactTitle = ({ label }: CompactTitleProps) => {
   return (
     <CompactTitleS>
-      <RowLabelS colSpan="2">{label}</RowLabelS>
+      <RowLabelS colSpan={2}>{label}</RowLabelS>
     </CompactTitleS>
   )
 }
@@ -455,7 +455,7 @@ interface CompactSubTitleProps {
 export const CompactSubTitle = ({ label }: CompactSubTitleProps) => {
   return (
     <CompactSubTitleS>
-      <RowLabelS colSpan="2">{label}</RowLabelS>
+      <RowLabelS colSpan={2}>{label}</RowLabelS>
     </CompactSubTitleS>
   )
 }

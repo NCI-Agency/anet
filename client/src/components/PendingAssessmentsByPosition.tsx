@@ -186,13 +186,13 @@ const PositionList = ({
         <Table striped hover responsive className="positions_table">
           <thead>
             <tr>
-              <th colSpan="3" style={borderStyle}>
+              <th colSpan={3} style={borderStyle}>
                 {Settings.fields.advisor.person.name}
               </th>
-              <th colSpan="3" style={borderStyle}>
+              <th colSpan={3} style={borderStyle}>
                 {Settings.fields.regular.person.name} to assess
               </th>
-              <th colSpan="1">{Settings.fields.task.shortLabel} to assess</th>
+              <th colSpan={1}>{Settings.fields.task.shortLabel} to assess</th>
             </tr>
             <tr>
               <th style={{ width: "20%" }}>Name</th>
@@ -230,14 +230,14 @@ const PositionList = ({
                       />
                     )}
                   </td>
-                  <td colSpan="3" style={borderStyle}>
+                  <td colSpan={3} style={borderStyle}>
                     <InterlocutorList
                       positions={
                         notifications.counterpartsWithPendingAssessments
                       }
                     />
                   </td>
-                  <td colSpan="1">
+                  <td colSpan={1}>
                     <TaskList
                       tasks={notifications.tasksWithPendingAssessments}
                     />

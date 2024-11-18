@@ -17,7 +17,7 @@ const AdvisorReportsTableHead = (props: AdvisorReportsTableHeadProps) => {
     const keySubmitted = `s-${week}`
     const keyAttended = `a-${week}`
     weekHeadings.push(
-      <th colSpan="2" key={keyWeek}>
+      <th colSpan={2} key={keyWeek}>
         Week {week}
       </th>
     )
@@ -29,14 +29,14 @@ const AdvisorReportsTableHead = (props: AdvisorReportsTableHeadProps) => {
     <thead>
       <tr key="advisor-heading">
         {props.onSelectAllRows && (
-          <th rowSpan="2">
+          <th rowSpan={2}>
             <Checkbox
               checked={props.selectAllRows}
               onChange={props.onSelectAllRows}
             />
           </th>
         )}
-        <th rowSpan="2">{props.title}</th>
+        <th rowSpan={2}>{props.title}</th>
         {weekHeadings}
       </tr>
       <tr key="week-columns">{weekCols}</tr>

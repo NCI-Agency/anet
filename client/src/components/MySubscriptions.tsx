@@ -141,7 +141,7 @@ const MySubscriptions = ({
             <tbody>
               {(_get(subscriptions, "length", 0) === 0 && (
                 <tr>
-                  <td colSpan="3">nothing to show…</td>
+                  <td colSpan={3}>nothing to show…</td>
                 </tr>
               )) ||
                 subscriptions.map(subscription => {

@@ -176,7 +176,7 @@ const MySubscriptionUpdates = ({
             <tbody>
               {(_get(subscriptionUpdates, "length", 0) === 0 && (
                 <tr>
-                  <td colSpan="4">nothing to show…</td>
+                  <td colSpan={4}>nothing to show…</td>
                 </tr>
               )) ||
                 subscriptionUpdates.map(subscriptionUpdate => {

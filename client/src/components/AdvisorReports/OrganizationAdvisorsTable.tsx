@@ -112,7 +112,7 @@ const OrganizationAdvisorsTable = ({
   function filterRows(rows, filterText) {
     const nothingFound = (
       <tr className="nothing-found">
-        <td colSpan="8">No organizations found…</td>
+        <td colSpan={8}>No organizations found…</td>
       </tr>
     )
     const filterResult = rows.filter(element => {

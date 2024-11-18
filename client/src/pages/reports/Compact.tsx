@@ -639,7 +639,7 @@ interface CompactWorkflowRowProps {
 export const CompactWorkflowRow = ({ content }: CompactWorkflowRowProps) => {
   return (
     <CompactWorkflowRowS>
-      <CompactRowContentS colSpan="2">{content}</CompactRowContentS>
+      <CompactRowContentS colSpan={2}>{content}</CompactRowContentS>
     </CompactWorkflowRowS>
   )
 }
