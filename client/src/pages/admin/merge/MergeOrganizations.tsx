@@ -503,7 +503,6 @@ const OrganizationColumn = ({
       <ColTitle controlId={idForOrganization}>
         <AdvancedSingleSelect
           fieldName="organization"
-          fieldLabel="Select an organization"
           placeholder="Select an organization to merge"
           value={organization}
           overlayColumns={["Organization"]}

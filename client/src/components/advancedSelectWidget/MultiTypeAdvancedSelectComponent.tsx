@@ -265,7 +265,6 @@ const MultiTypeAdvancedSelectComponent = ({
       <SelectComponent
         autofocus="true"
         fieldName={fieldName}
-        fieldLabel="Search in ANET:"
         placeholder={searchPlaceholder}
         value={value}
         valueKey={valueKey}

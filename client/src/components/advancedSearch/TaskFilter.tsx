@@ -76,7 +76,6 @@ const TaskFilter = ({
     <AdvancedSingleSelect
       {...advancedSelectProps}
       fieldName={queryKey}
-      fieldLabel={null}
       vertical
       showRemoveButton={false}
       filterDefs={advancedSelectFilters}

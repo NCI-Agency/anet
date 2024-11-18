@@ -219,7 +219,6 @@ const AssignPersonModal = ({
                 <FormGroup controlId="person" required>
                   <AdvancedSingleSelect
                     fieldName="person"
-                    fieldLabel="Select a person"
                     placeholder="Select a person for this position"
                     value={person}
                     overlayColumns={["Name"]}

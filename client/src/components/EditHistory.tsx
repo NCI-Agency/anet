@@ -206,7 +206,6 @@ function EditHistory({
                         {!history2 && (
                           <AdvancedSingleSelect
                             fieldName={singleSelectParameters.fieldName}
-                            fieldLabel="Select a person"
                             placeholder={singleSelectParameters.placeholder}
                             overlayColumns={
                               singleSelectParameters.overlayColumns

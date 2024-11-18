@@ -416,7 +416,6 @@ const LocationColumn = ({
       <ColTitle controlId={idForLocation}>
         <AdvancedSingleSelect
           fieldName="location"
-          fieldLabel="Select a location"
           placeholder="Select a location to merge"
           value={location}
           overlayColumns={["Name"]}
