@@ -281,7 +281,6 @@ const AssignPositionModal = ({
                     valueKey="name"
                     fields={`uuid name code type organization { uuid shortName longName identificationCode} person { uuid name rank ${GRAPHQL_ENTITY_AVATAR_FIELDS} }`}
                     addon={POSITIONS_ICON}
-                    vertical
                   />
                 </FormGroup>
               </Col>

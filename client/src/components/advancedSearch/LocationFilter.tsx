@@ -87,7 +87,6 @@ const LocationFilter = ({
     <AdvancedSelectComponent
       {...advancedSelectProps}
       fieldName={queryKey}
-      vertical
       showRemoveButton={false}
       filterDefs={advancedSelectFilters}
       overlayColumns={["Name"]}

@@ -429,7 +429,6 @@ const LocationColumn = ({
           valueKey="name"
           fields={Location.allFieldsQuery}
           addon={LOCATIONS_ICON}
-          vertical
           disabled={disabled}
           showRemoveButton={!disabled}
         />

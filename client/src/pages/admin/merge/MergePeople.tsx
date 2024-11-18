@@ -509,7 +509,6 @@ const PersonColumn = ({
           valueKey="name"
           fields={Person.allFieldsQuery}
           addon={PEOPLE_ICON}
-          vertical
           disabled={disabled}
           showRemoveButton={!disabled}
         />

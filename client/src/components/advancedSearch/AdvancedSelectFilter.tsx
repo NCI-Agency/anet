@@ -47,7 +47,6 @@ const AdvancedSelectFilter = ({
     <AdvancedSingleSelect
       {...advancedSelectProps}
       fieldName={queryKey}
-      vertical
       showRemoveButton={false}
       onChange={handleChange}
       value={value}

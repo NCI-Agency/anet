@@ -482,7 +482,6 @@ const PositionColumn = ({
           valueKey="name"
           fields={Position.allFieldsQuery}
           addon={POSITIONS_ICON}
-          vertical
           disabled={disabled}
           showRemoveButton={!disabled}
         />

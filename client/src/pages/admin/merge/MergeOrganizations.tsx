@@ -516,7 +516,6 @@ const OrganizationColumn = ({
           valueKey="shortName"
           fields={Organization.allFieldsQuery}
           addon={ORGANIZATIONS_ICON}
-          vertical
           disabled={disabled}
           showRemoveButton={!disabled}
         />

@@ -94,7 +94,6 @@ const OrganizationFilter = ({
     <AdvancedSelectComponent
       {...advancedSelectProps}
       fieldName={queryKey}
-      vertical
       showRemoveButton={false}
       filterDefs={advancedSelectFilters}
       overlayColumns={["Name"]}

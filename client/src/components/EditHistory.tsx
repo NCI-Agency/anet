@@ -220,7 +220,6 @@ function EditHistory({
                             valueKey="name"
                             fields={singleSelectParameters.fields}
                             addon={singleSelectParameters.addon}
-                            vertical
                           />
                         )}
                         {values.history.map((item, idx) => {
