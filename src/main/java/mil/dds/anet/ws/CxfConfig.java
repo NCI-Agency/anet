@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 public class CxfConfig {
 
   private final Bus bus;
-  public final Nvg20WebService nvg20WebService;
+  private final Nvg20WebService nvg20WebService;
 
   public CxfConfig(Bus bus, Nvg20WebService nvg20WebService) {
     this.bus = bus;
