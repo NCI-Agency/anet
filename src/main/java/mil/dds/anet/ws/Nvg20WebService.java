@@ -1,15 +1,24 @@
 package mil.dds.anet.ws;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.leangen.graphql.spqr.spring.web.dto.GraphQLRequest;
 import jakarta.jws.WebService;
 import jakarta.xml.ws.WebServiceException;
 import java.math.BigInteger;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Report;
+import mil.dds.anet.beans.lists.AnetBeanList;
+import mil.dds.anet.beans.search.ISearchQuery;
+import mil.dds.anet.beans.search.ReportSearchSortBy;
 import mil.dds.anet.config.AnetConfig;
-import mil.dds.anet.database.ReportDao;
+import mil.dds.anet.database.mappers.MapperUtils;
+import mil.dds.anet.resources.GraphQLResource;
 import nato.act.tide.wsdl.nvg20.CapabilityItemType;
 import nato.act.tide.wsdl.nvg20.ContentType;
 import nato.act.tide.wsdl.nvg20.GetCapabilities;
@@ -46,12 +55,28 @@ public class Nvg20WebService implements NVGPortType2012 {
   // Affiliation: friendly
   private static final String ACTIVITY_MEETING = "130340000013100000000000000000";
 
-  private final AnetConfig config;
-  private final ReportDao reportDao;
+  private static final String REPORT_QUERY = "query ($reportQuery: ReportSearchQueryInput) {" // -
+      + " reportList(query: $reportQuery) {" // -
+      + " pageNum pageSize totalCount list {" // -
+      + " uuid intent engagementDate duration keyOutcomes nextSteps cancelledReason atmosphere atmosphereDetails state" // -
+      + " primaryAdvisor { uuid name rank }" // -
+      + " primaryInterlocutor { uuid name rank }" // -
+      + " advisorOrg { uuid shortName longName identificationCode }" // -
+      + " interlocutorOrg { uuid shortName longName identificationCode }" // -
+      + " location { uuid name lat lng type }" // -
+      + " } } }";
+  private static final Map<String, Object> DEFAULT_REPORT_QUERY_VARIABLES = Map.of( // -
+      "state", new Report.ReportState[] {Report.ReportState.APPROVED, Report.ReportState.PUBLISHED}, // -
+      "pageSize", 0, // -
+      "sortBy", ReportSearchSortBy.ENGAGEMENT_DATE, // -
+      "sortOrder", ISearchQuery.SortOrder.DESC);
 
-  public Nvg20WebService(AnetConfig config, ReportDao reportDao) {
+  private final AnetConfig config;
+  private final GraphQLResource graphQLResource;
+
+  public Nvg20WebService(AnetConfig config, GraphQLResource graphQLResource) {
     this.config = config;
-    this.reportDao = reportDao;
+    this.graphQLResource = graphQLResource;
   }
 
   @Override
@@ -102,7 +127,7 @@ public class Nvg20WebService implements NVGPortType2012 {
     // Calculate start of period
     final Instant oneWeekAgo = now.minus(pastDays, ChronoUnit.DAYS);
 
-    final List<Report> reports = reportDao.getReportsByPeriod(oneWeekAgo, now);
+    final List<Report> reports = getReportsByPeriod(oneWeekAgo, now);
     contentTypeList.addAll(reports.stream()
         // .filter(report -> report.getLocation() != null)
         .map(this::reportToNvgPoint).toList());
@@ -149,6 +174,22 @@ public class Nvg20WebService implements NVGPortType2012 {
     helpType.setText("Period over which you want to retrieve engagements");
     inputType.setHelp(helpType);
     return inputType;
+  }
+
+  public List<Report> getReportsByPeriod(final Instant start, final Instant end) {
+    final Map<String, Object> reportQuery = new HashMap<>(DEFAULT_REPORT_QUERY_VARIABLES);
+    reportQuery.put("engagementDateStart", start.toEpochMilli());
+    reportQuery.put("engagementDateEnd", end.toEpochMilli());
+    final GraphQLRequest graphQLRequest =
+        new GraphQLRequest("nvgData", REPORT_QUERY, null, Map.of("reportQuery", reportQuery));
+    final Map<String, Object> result = graphQLResource.graphql(null, graphQLRequest, null);
+    @SuppressWarnings("unchecked")
+    final Map<String, Object> data = (Map<String, Object>) result.get("data");
+    final TypeReference<AnetBeanList<Report>> typeRef = new TypeReference<>() {};
+    final ObjectMapper defaultMapper = MapperUtils.getDefaultMapper();
+    final AnetBeanList<Report> anetBeanList =
+        defaultMapper.convertValue(data.get("reportList"), typeRef);
+    return anetBeanList.getList();
   }
 
 }

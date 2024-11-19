@@ -1,6 +1,5 @@
 package mil.dds.anet.database;
 
-import static mil.dds.anet.database.LocationDao.LOCATION_FIELDS;
 import static org.jdbi.v3.core.statement.EmptyHandling.NULL_KEYWORD;
 
 import com.google.common.collect.ObjectArrays;
@@ -26,7 +25,6 @@ import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.EmailAddress;
-import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
@@ -46,7 +44,6 @@ import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
 import mil.dds.anet.database.mappers.AuthorizationGroupMapper;
-import mil.dds.anet.database.mappers.LocationMapper;
 import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.database.mappers.ReportPersonMapper;
 import mil.dds.anet.database.mappers.TaskMapper;
@@ -843,40 +840,6 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
       ReportSearchQuery query) {
     return new SearchQueryFetcher<Report, ReportSearchQuery>().load(context,
         SqDataLoaderKey.REPORTS_SEARCH, new ImmutablePair<>(uuid, query));
-  }
-
-  @Transactional
-  public List<Report> getReportsByPeriod(Instant start, Instant end) {
-    final Handle handle = getDbHandle();
-    try {
-      /* Check whether uuid is purely numerical, and if so, query on legacyId */
-      final Query query = handle
-          .createQuery("/* getReportByUuid */ SELECT " + REPORT_FIELDS + "," + LOCATION_FIELDS
-              + " FROM reports "
-              + "INNER JOIN locations ON reports.\"locationUuid\"=locations.uuid "
-              + "WHERE reports.\"engagementDate\" >= :start AND reports.\"engagementDate\" <= :end "
-              + "AND state IN (:approved, :published)") // Approved or Published
-          .bind("start", start).bind("end", end).bind("approved", ReportState.APPROVED.ordinal())
-          .bind("published", ReportState.PUBLISHED.ordinal());
-
-      final List<Report> reports = query.map(new ReportMapper()).list();
-      final List<Location> locations = query.map(new LocationMapper()).list();
-
-      // Ensure the lists are of the same size
-      if (reports.size() != locations.size()) {
-        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-            "Mismatched sizes: reports and locations must have the same number of elements.");
-      }
-
-      // Link the location to the corresponding report
-      for (int i = 0; i < reports.size(); i++) {
-        reports.get(i).setLocation(locations.get(i));
-      }
-
-      return reports;
-    } finally {
-      closeDbHandle(handle);
-    }
   }
 
   public void sendApprovalNeededEmail(Report r, ApprovalStep approvalStep) {
