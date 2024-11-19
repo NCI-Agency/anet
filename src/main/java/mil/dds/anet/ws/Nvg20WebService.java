@@ -8,10 +8,14 @@ import jakarta.xml.ws.WebServiceException;
 import java.math.BigInteger;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.xml.datatype.DatatypeFactory;
 import mil.dds.anet.beans.Location;
+import mil.dds.anet.beans.Organization;
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery;
@@ -47,18 +51,23 @@ public class Nvg20WebService implements NVGPortType2012 {
   private static final String SYMBOL_PREFIX_APP6D = "app6d";
   private static final int DEFAULT_PAST_PERIOD_IN_DAYS = 7;
 
-  // APP6D:
-  // Type: Entity Type
-  // Entity: Operation
-  // Symbol Set Code: 40
-  // Code: 131000
-  // Affiliation: friendly
+  // 13 = version: APP-6D
+  // 0 = context: Reality
+  // 3 = standard identity: Friend
+  // 40 = symbol set: Activity/Event
+  // 0 = status: Present
+  // 0 = hq: Not Applicable
+  // 00 = echelon: Not Applicable
+  // 131000 = main icon: Operation - Meeting
+  // 00 = modifier 1: Unspecified
+  // 00 = modifier 2: Unspecified
+  // 0000000000 = more defaults
   private static final String ACTIVITY_MEETING = "130340000013100000000000000000";
 
   private static final String REPORT_QUERY = "query ($reportQuery: ReportSearchQueryInput) {" // -
       + " reportList(query: $reportQuery) {" // -
-      + " pageNum pageSize totalCount list {" // -
-      + " uuid intent engagementDate duration keyOutcomes nextSteps cancelledReason atmosphere atmosphereDetails state" // -
+      + " totalCount list {" // -
+      + " uuid intent engagementDate duration keyOutcomes nextSteps" // -
       + " primaryAdvisor { uuid name rank }" // -
       + " primaryInterlocutor { uuid name rank }" // -
       + " advisorOrg { uuid shortName longName identificationCode }" // -
@@ -138,14 +147,55 @@ public class Nvg20WebService implements NVGPortType2012 {
   private PointType reportToNvgPoint(Report report) {
     final PointType nvgPoint = new PointType();
     nvgPoint.setLabel(report.getIntent());
+    nvgPoint.setUri(String.format("urn:anet:reports:%1$s", report.getUuid()));
+    setTimeStamp(report, nvgPoint);
+    setLocation(report, nvgPoint);
+    nvgPoint.setSymbol(String.format("%s:%s", SYMBOL_PREFIX_APP6D, ACTIVITY_MEETING));
+    nvgPoint.setHref(String.format("%s/reports/%s", config.getServerUrl(), report.getUuid()));
+    setTextInfo(report, nvgPoint);
+    return nvgPoint;
+  }
+
+  private void setTimeStamp(Report report, PointType nvgPoint) {
+    try {
+      final GregorianCalendar gc = new GregorianCalendar();
+      // TODO: Should we be using `updatedAt` here?
+      gc.setTimeInMillis(report.getEngagementDate().toEpochMilli());
+      nvgPoint.setTimeStamp(DatatypeFactory.newInstance().newXMLGregorianCalendar(gc));
+    } catch (Exception ignored) {
+      // We don't set the timeStamp
+    }
+  }
+
+  private void setLocation(Report report, PointType nvgPoint) {
     final Location location = report.getLocation();
     if (location != null && location.getLng() != null && location.getLat() != null) {
       nvgPoint.setX(location.getLng());
       nvgPoint.setY(location.getLat());
     }
-    nvgPoint.setSymbol(String.format("%s:%s", SYMBOL_PREFIX_APP6D, ACTIVITY_MEETING));
-    nvgPoint.setHref(String.format("%s/reports/%s", config.getServerUrl(), report.getUuid()));
-    return nvgPoint;
+  }
+
+  private void setTextInfo(Report report, PointType nvgPoint) {
+    nvgPoint.setTextInfo(String.format(
+        "Engagement between primary advisor %1$s @ %2$s and primary interlocutor %3$s @ %4$s"
+            + "%5$s%6$s",
+        getPersonName(report.getPrimaryAdvisor()), getOrganizationName(report.getAdvisorOrg()),
+        getPersonName(report.getPrimaryInterlocutor()),
+        getOrganizationName(report.getInterlocutorOrg()),
+        getOptionalText("\n\nwith key outcomes: \n%s", report.getKeyOutcomes()),
+        getOptionalText("\n\nwith next steps: \n%s", report.getNextSteps())));
+  }
+
+  private String getPersonName(Person person) {
+    return person == null ? "<Unknown>" : person.getName();
+  }
+
+  private String getOrganizationName(Organization organization) {
+    return organization == null ? "<Unknown>" : organization.getShortName();
+  }
+
+  private Object getOptionalText(String format, String text) {
+    return (text == null) ? "" : String.format(format, text);
   }
 
   public static InputType makeAccessTokenType() {
