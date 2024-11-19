@@ -50,6 +50,7 @@ public class Nvg20WebService implements NVGPortType2012 {
   private static final String PAST_PERIOD_IN_DAY_ID = "pastDays";
   private static final String SYMBOL_PREFIX_APP6D = "app6d";
   private static final int DEFAULT_PAST_PERIOD_IN_DAYS = 7;
+  private static final String NVG_VERSION = "2.0.2";
 
   // 13 = version: APP-6D
   // 0 = context: Reality
@@ -129,6 +130,7 @@ public class Nvg20WebService implements NVGPortType2012 {
 
   private NvgType makeNvg(int pastDays) {
     final NvgType nvgType = new NvgType();
+    nvgType.setVersion(NVG_VERSION);
     final List<ContentType> contentTypeList = nvgType.getGOrCompositeOrText();
     // Get the current instant
     final Instant now = Instant.now();
