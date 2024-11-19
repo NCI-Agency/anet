@@ -86,6 +86,7 @@ String dbContainerName = isTestEnv ? "anet-psql-test-server" : "anet-psql-server
 String fakeSmtpContainerName = isTestEnv ? "anet-fake-smtp-test-server" : "anet-fake-smtp-server"
 String keycloakContainerName = "anet-keycloak-server"
 
+String mainWsdl = "nato/common/nvg20/common-ws.nvg20.wsdl"
 String cxfSources = "build/generated/sources/cxf"
 
 sourceSets.main.java.srcDirs += file(cxfSources)
@@ -283,7 +284,8 @@ cxfCodegen {
 
 task cxfNvg20(type: Wsdl2Java) {
 	toolOptions {
-		wsdl.set("${projectDir}/src/main/resources/nato/common/nvg20/common-ws.nvg20.wsdl")
+		wsdl.set("${projectDir}/src/main/resources/${mainWsdl}")
+		wsdlLocation.set("classpath:${mainWsdl}")
 		markGenerated.set(true)
 		outputDir.set(file(cxfSources))
 		packageNames.set(['nato.act.tide.wsdl.nvg20'])
