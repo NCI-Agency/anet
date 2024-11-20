@@ -64,7 +64,7 @@ anet:
   # The URL that should be used for links in emails
   # ex:  "http://anet.yourdomain"
   # Should not include an ending slash!
-  server-url: "http://localhost:3000"
+  server-url: "http://localhost:8080"
 
   keycloak-configuration:
     realm: ${ANET_KEYCLOAK_REALM:ANET}
