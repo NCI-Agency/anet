@@ -3,6 +3,7 @@ import Model from "components/Model"
 import _isEmpty from "lodash/isEmpty"
 import { Location, Position } from "models"
 import { PositionRole } from "models/Position"
+import moment from "moment"
 import {
   createEmailAddresses,
   createHtmlParagraphs,
@@ -29,46 +30,17 @@ async function getPosition(user, uuid) {
         position(uuid: "${uuid}") {
           uuid
           name
-          type
-          role
-          status
-          code
-          organization {
-            uuid
-            shortName
-            longName
-            identificationCode
-          }
-          person {
-            uuid
-            name
-            rank
-          }
-          associatedPositions {
-            uuid
-            name
-            person {
-              uuid
-              name
-              rank
-            }
-            organization {
-              uuid
-              shortName
-            }
-          }
           previousPeople {
             startTime
             endTime
             person {
               uuid
               name
-              rank
+              previousPositions {
+                startTime
+                endTime
+              }
             }
-          }
-          location {
-            uuid
-            name
           }
         }
       }
@@ -223,20 +195,42 @@ const _createPosition = async function(user) {
   await positionGenerator.emailAddresses.always()
 
   console.debug(`Creating position ${position.name.green}`)
-  return (
+  const createdPositionUuid = (
     await runGQL(user, {
       query: `
-      mutation ($position: PositionInput!) {
-        createPosition(position: $position) {
-          uuid
+        mutation ($position: PositionInput!) {
+          createPosition(position: $position) {
+            uuid
+          }
         }
-      }
-    `,
+      `,
       variables: {
         position
       }
     })
-  ).data.createPosition
+  ).data.createPosition.uuid
+  const createdPosition = await getPosition(user, createdPositionUuid)
+  const firstHistoryItem = createdPosition.previousPeople[0]
+  if (firstHistoryItem.person.previousPositions.length <= 1) {
+    // Set startTime back by a year
+    firstHistoryItem.startTime = moment(firstHistoryItem.startTime).subtract(
+      1,
+      "year"
+    )
+    // This next mutation could fail because of history conflicts, but we don't care (much)
+    console.debug(`Updating position history for ${position.name.green}`)
+    await runGQL(user, {
+      query: `
+        mutation ($position: PositionInput!) {
+          updatePositionHistory(position: $position)
+        }
+      `,
+      variables: {
+        position: createdPosition
+      }
+    })
+  }
+  return createdPosition
 }
 
 /**
