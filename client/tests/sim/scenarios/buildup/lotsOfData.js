@@ -55,7 +55,7 @@ const buildupLotsOfData = [
   },
   {
     name: "Create position #1",
-    number: TEST_RUN ? 1 : 10000,
+    number: TEST_RUN ? 1 : 5000,
     runnable: createPosition,
     preDelay: TEST_RUN ? 1 : 100,
     userTypes: ["existingAdmin"],
@@ -63,7 +63,23 @@ const buildupLotsOfData = [
   },
   {
     name: "Create position #2",
-    number: TEST_RUN ? 1 : 10000,
+    number: TEST_RUN ? 1 : 5000,
+    runnable: createPosition,
+    preDelay: TEST_RUN ? 2 : 200,
+    userTypes: ["existingAdmin"],
+    arguments: {}
+  },
+  {
+    name: "Create position #3",
+    number: TEST_RUN ? 1 : 5000,
+    runnable: createPosition,
+    preDelay: TEST_RUN ? 2 : 200,
+    userTypes: ["existingAdmin"],
+    arguments: {}
+  },
+  {
+    name: "Create position #4",
+    number: TEST_RUN ? 1 : 5000,
     runnable: createPosition,
     preDelay: TEST_RUN ? 2 : 200,
     userTypes: ["existingAdmin"],
