@@ -729,23 +729,29 @@ async function countPositions(user) {
 }
 
 const createPosition = async function(user, grow) {
-  const count = await countPositions(user)
-  if (grow(count)) {
-    return _createPosition(user)
-  } else {
-    console.debug("Skipping create position")
-    return "(skipped)"
+  if (grow) {
+    const count = await countPositions(user)
+    if (!grow(count)) {
+      console.debug(
+        `Skipping create position (currently ${count} positions exist)`
+      )
+      return "(skipped)"
+    }
   }
+  return _createPosition(user)
 }
 
 const deletePosition = async function(user, grow) {
-  const count = await countPositions(user)
-  if (!grow(count)) {
-    return _deactivatePosition(user)
-  } else {
-    console.debug("Skipping delete position")
-    return "(skipped)"
+  if (grow) {
+    const count = await countPositions(user)
+    if (grow(count)) {
+      console.debug(
+        `Skipping delete position (currently ${count} positions exist)`
+      )
+      return "(skipped)"
+    }
   }
+  return _deactivatePosition(user)
 }
 
 async function getRandomPosition(user, variables) {
