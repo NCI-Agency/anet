@@ -12,6 +12,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.xml.datatype.DatatypeFactory;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Organization;
@@ -38,6 +39,8 @@ import nato.act.tide.wsdl.nvg20.NvgCapabilitiesType;
 import nato.act.tide.wsdl.nvg20.NvgFilterType;
 import nato.act.tide.wsdl.nvg20.NvgType;
 import nato.act.tide.wsdl.nvg20.PointType;
+import nato.act.tide.wsdl.nvg20.SelectType;
+import nato.act.tide.wsdl.nvg20.SelectValueType;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -47,27 +50,74 @@ public class Nvg20WebService implements NVGPortType2012 {
 
   private static final String NVG_VERSION = "2.0.2";
 
+  static final class App6Symbology {
+    static final String SYMBOL_PREFIX_APP6B = "app6b";
+    // APP-6 symbol to use:
+    // - S = version: APP-6B
+    // - F = affiliation: Friend
+    // - G = battle dimension / surface: Ground
+    // - %1$s = status: P for Present, A for Anticipated/Planned
+    // - U = symbol indicator: Unit
+    // - ------- = more defaults
+    private static final String ACTIVITY_MEETING_APP6B = "SFG%1$sU-------";
+    private static final String ACTIVITY_STATUS_PRESENT_APP6B = "P";
+    private static final String ACTIVITY_STATUS_PLANNED_APP6B = "A";
+
+    static final String SYMBOL_PREFIX_APP6D = "app6d";
+    // APP-6 symbol to use:
+    // - 13 = version: APP-6D
+    // - 0 = context: Reality
+    // - 3 = standard identity: Friend
+    // - 40 = symbol set: Activity/Event
+    // - %1$s = status: 0 for Present, 1 for Planned/Anticipated
+    // - 0 = hq: Not Applicable
+    // - 00 = echelon: Not Applicable
+    // - 131000 = main icon: Operation - Meeting
+    // - 00 = modifier 1: Unspecified
+    // - 00 = modifier 2: Unspecified
+    // - 0000000000 = more defaults
+    private static final String ACTIVITY_MEETING_APP6D = "1303400%1$s0013100000000000000000";
+    private static final String ACTIVITY_STATUS_PRESENT_APP6D = "0";
+    private static final String ACTIVITY_STATUS_PLANNED_APP6D = "1";
+
+    private static final String SYMBOL_FORMAT = "symbolFormat";
+    private static final String STATUS_PRESENT = "statusPresent";
+    private static final String STATUS_PLANNED = "statusPlanned";
+    private static final Map<String, Map<String, String>> APP6_SETTINGS = Map.of( // -
+        SYMBOL_PREFIX_APP6B, Map.of(SYMBOL_FORMAT, ACTIVITY_MEETING_APP6B, // -
+            STATUS_PRESENT, ACTIVITY_STATUS_PRESENT_APP6B, // -
+            STATUS_PLANNED, ACTIVITY_STATUS_PLANNED_APP6B),
+        SYMBOL_PREFIX_APP6D, Map.of(SYMBOL_FORMAT, ACTIVITY_MEETING_APP6D, // -
+            STATUS_PRESENT, ACTIVITY_STATUS_PRESENT_APP6D, // -
+            STATUS_PLANNED, ACTIVITY_STATUS_PLANNED_APP6D));
+
+    static final String DEFAULT_APP6_VERSION = SYMBOL_PREFIX_APP6D;
+    static final Set<String> VALID_APP6_VERSIONS = Set.of(SYMBOL_PREFIX_APP6B, SYMBOL_PREFIX_APP6D);
+
+    private App6Symbology() {}
+
+    static boolean isValidApp6Version(String app6Version) {
+      return VALID_APP6_VERSIONS.contains(app6Version);
+    }
+
+    static String getApp6Symbol(String app6Version, boolean isPlanned) {
+      final Map<String, String> app6Settings =
+          APP6_SETTINGS.getOrDefault(app6Version, APP6_SETTINGS.get(DEFAULT_APP6_VERSION));
+      final String app6Status =
+          isPlanned ? app6Settings.get(STATUS_PLANNED) : app6Settings.get(STATUS_PRESENT);
+      final String app6Symbol = String.format(app6Settings.get(SYMBOL_FORMAT), app6Status);
+      return String.format("%1$s:%2$s", app6Version, app6Symbol);
+    }
+  }
+
   private static final String ACCESS_TOKEN_ID = "accessToken";
   private static final int ACCESS_TOKEN_LENGTH = 32;
+  private static final String APP6_VERSION_ID = "app6Version";
+  private static final String DEFAULT_APP6_VERSION = App6Symbology.DEFAULT_APP6_VERSION;
   private static final String PAST_PERIOD_IN_DAYS_ID = "pastDays";
   private static final int DEFAULT_PAST_PERIOD_IN_DAYS = 7;
   private static final String FUTURE_PERIOD_IN_DAYS_ID = "futureDays";
   private static final int DEFAULT_FUTURE_PERIOD_IN_DAYS = 0;
-
-  private static final String SYMBOL_PREFIX_APP6D = "app6d";
-  // APP-6 symbol to use:
-  // - 13 = version: APP-6D
-  // - 0 = context: Reality
-  // - 3 = standard identity: Friend
-  // - 40 = symbol set: Activity/Event
-  // - 0 = status: Present
-  // - 0 = hq: Not Applicable
-  // - 00 = echelon: Not Applicable
-  // - 131000 = main icon: Operation - Meeting
-  // - 00 = modifier 1: Unspecified
-  // - 00 = modifier 2: Unspecified
-  // - 0000000000 = more defaults
-  private static final String ACTIVITY_MEETING = "130340000013100000000000000000";
 
   private static final String REPORT_QUERY = "query ($reportQuery: ReportSearchQueryInput) {" // -
       + " reportList(query: $reportQuery) {" // -
@@ -100,6 +150,7 @@ public class Nvg20WebService implements NVGPortType2012 {
     final List<CapabilityItemType> capabilityItemTypeList =
         nvgCapabilitiesType.getInputOrSelectOrTable();
     capabilityItemTypeList.add(makeAccessTokenType());
+    capabilityItemTypeList.add(makeApp6VersionType());
     capabilityItemTypeList.add(makePastPeriodInDays());
     capabilityItemTypeList.add(makeFuturePeriodInDays());
     response.setNvgCapabilities(nvgCapabilitiesType);
@@ -114,12 +165,15 @@ public class Nvg20WebService implements NVGPortType2012 {
       final List<Object> nvgQueryList =
           nvgFilter.getInputResponseOrSelectResponseOrMatrixResponse();
       String accessToken = null;
+      String app6Version = DEFAULT_APP6_VERSION;
       int pastDays = DEFAULT_PAST_PERIOD_IN_DAYS;
       int futureDays = DEFAULT_FUTURE_PERIOD_IN_DAYS;
       for (final Object object : nvgQueryList) {
         if (object instanceof InputResponseType inputResponse) {
           if (ACCESS_TOKEN_ID.equals(inputResponse.getRefid())) {
             accessToken = inputResponse.getValue();
+          } else if (APP6_VERSION_ID.equals(inputResponse.getRefid())) {
+            app6Version = inputResponse.getValue();
           } else if (PAST_PERIOD_IN_DAYS_ID.equals(inputResponse.getRefid())) {
             pastDays = Integer.parseInt(inputResponse.getValue());
           } else if (FUTURE_PERIOD_IN_DAYS_ID.equals(inputResponse.getRefid())) {
@@ -127,15 +181,18 @@ public class Nvg20WebService implements NVGPortType2012 {
           }
         }
       }
+      if (!App6Symbology.isValidApp6Version(app6Version)) {
+        throw new WebServiceException("Invalid APP-6 version");
+      }
       if (accessToken != null && accessToken.length() == 32) {
-        response.setNvg(makeNvg(pastDays, futureDays));
+        response.setNvg(makeNvg(app6Version, pastDays, futureDays));
         return response;
       }
     }
     throw new WebServiceException("Must provide a Service Access Token");
   }
 
-  private NvgType makeNvg(int pastDays, int futureDays) {
+  private NvgType makeNvg(String app6Version, int pastDays, int futureDays) {
     final NvgType nvgType = new NvgType();
     nvgType.setVersion(NVG_VERSION);
     final List<ContentType> contentTypeList = nvgType.getGOrCompositeOrText();
@@ -148,23 +205,28 @@ public class Nvg20WebService implements NVGPortType2012 {
     final Instant end = now.plus(futureDays, ChronoUnit.DAYS);
 
     final List<Report> reports = getReportsByPeriod(start, end);
-    contentTypeList.addAll(reports.stream()
-        // .filter(report -> report.getLocation() != null)
-        .map(this::reportToNvgPoint).toList());
+    contentTypeList
+        .addAll(reports.stream().map(r -> reportToNvgPoint(app6Version, now, r)).toList());
 
     return nvgType;
   }
 
-  private PointType reportToNvgPoint(Report report) {
+  private PointType reportToNvgPoint(String app6Version, Instant reportingTime, Report report) {
     final PointType nvgPoint = new PointType();
     nvgPoint.setLabel(report.getIntent());
     nvgPoint.setUri(String.format("urn:anet:reports:%1$s", report.getUuid()));
     setTimeStamp(report, nvgPoint);
     setLocation(report, nvgPoint);
-    nvgPoint.setSymbol(String.format("%s:%s", SYMBOL_PREFIX_APP6D, ACTIVITY_MEETING));
+    setSymbol(app6Version, reportingTime, report, nvgPoint);
     nvgPoint.setHref(String.format("%s/reports/%s", config.getServerUrl(), report.getUuid()));
     setTextInfo(report, nvgPoint);
     return nvgPoint;
+  }
+
+  private void setSymbol(String app6Version, Instant reportingTime, Report report,
+      PointType nvgPoint) {
+    nvgPoint.setSymbol(App6Symbology.getApp6Symbol(app6Version,
+        report.getEngagementDate() != null && report.getEngagementDate().isAfter(reportingTime)));
   }
 
   private void setTimeStamp(Report report, PointType nvgPoint) {
@@ -209,7 +271,7 @@ public class Nvg20WebService implements NVGPortType2012 {
     return (text == null) ? "" : String.format(format, text);
   }
 
-  public static InputType makeAccessTokenType() {
+  private InputType makeAccessTokenType() {
     final InputType inputType = new InputType();
     inputType.setId(ACCESS_TOKEN_ID);
     inputType.setRequired(true);
@@ -218,12 +280,35 @@ public class Nvg20WebService implements NVGPortType2012 {
     inputType.setLength(BigInteger.valueOf(ACCESS_TOKEN_LENGTH));
     final HelpType helpType = new HelpType();
     helpType.setText(
-        "The access token required for authentication. The token can be provided by the ANET administrator");
+        "The access token required for authentication; the token can be provided by the ANET administrator");
     inputType.setHelp(helpType);
     return inputType;
   }
 
-  public static InputType makePastPeriodInDays() {
+  private SelectType makeApp6VersionType() {
+    final SelectType selectType = new SelectType();
+    selectType.setId(APP6_VERSION_ID);
+    selectType.setRequired(false);
+    selectType.setName("APP-6 version");
+    final SelectType.Values values = new SelectType.Values();
+    values.getValue().add(getSelectValueType(App6Symbology.SYMBOL_PREFIX_APP6B, "APP-6(B)", false));
+    values.getValue().add(getSelectValueType(App6Symbology.SYMBOL_PREFIX_APP6D, "APP-6(D)", true));
+    selectType.setValues(values);
+    final HelpType helpType = new HelpType();
+    helpType.setText("The APP-6 version to use for the symbology");
+    selectType.setHelp(helpType);
+    return selectType;
+  }
+
+  private SelectValueType getSelectValueType(String id, String value, boolean selected) {
+    final SelectValueType selectValueType = new SelectValueType();
+    selectValueType.setId(id);
+    selectValueType.setName(value);
+    selectValueType.setSelected(selected);
+    return selectValueType;
+  }
+
+  private InputType makePastPeriodInDays() {
     final InputType inputType = new InputType();
     inputType.setId(PAST_PERIOD_IN_DAYS_ID);
     inputType.setRequired(false);
@@ -236,7 +321,7 @@ public class Nvg20WebService implements NVGPortType2012 {
     return inputType;
   }
 
-  public static InputType makeFuturePeriodInDays() {
+  private InputType makeFuturePeriodInDays() {
     final InputType inputType = new InputType();
     inputType.setId(FUTURE_PERIOD_IN_DAYS_ID);
     inputType.setRequired(false);
@@ -249,7 +334,7 @@ public class Nvg20WebService implements NVGPortType2012 {
     return inputType;
   }
 
-  public List<Report> getReportsByPeriod(final Instant start, final Instant end) {
+  private List<Report> getReportsByPeriod(final Instant start, final Instant end) {
     final Map<String, Object> reportQuery = new HashMap<>(DEFAULT_REPORT_QUERY_VARIABLES);
     reportQuery.put("engagementDateStart", start.toEpochMilli());
     reportQuery.put("engagementDateEnd", end.toEpochMilli());
