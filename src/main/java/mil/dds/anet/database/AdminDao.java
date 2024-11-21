@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
-public class AdminDao implements InitializingBean {
+public class AdminDao extends AbstractDao implements InitializingBean {
 
   public enum AdminSettingKeys {
     SECURITY_BANNER_CLASSIFICATION, SECURITY_BANNER_RELEASABILITY, SECURITY_BANNER_COLOR,
@@ -23,21 +23,11 @@ public class AdminDao implements InitializingBean {
     GENERAL_BANNER_TEXT, GENERAL_BANNER_VISIBILITY, UNLIMITED_EXPORTS_AUTHORIZATION_GROUP
   }
 
-  protected final DatabaseHandler databaseHandler;
-
   private Map<String, String> cachedSettings = null;
   private static final Object cachedSettingsLock = new Object();
 
   public AdminDao(final DatabaseHandler databaseHandler) {
-    this.databaseHandler = databaseHandler;
-  }
-
-  protected Handle getDbHandle() {
-    return databaseHandler.getHandle();
-  }
-
-  protected void closeDbHandle(Handle handle) {
-    databaseHandler.closeHandle(handle);
+    super(databaseHandler);
   }
 
   @Override

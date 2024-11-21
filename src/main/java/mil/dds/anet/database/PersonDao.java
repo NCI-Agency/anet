@@ -28,7 +28,6 @@ import mil.dds.anet.beans.WithStatus;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.recentActivity.Activity;
 import mil.dds.anet.beans.search.PersonSearchQuery;
-import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.database.mappers.PersonPositionHistoryMapper;
 import mil.dds.anet.search.pg.PostgresqlPersonSearcher;
@@ -100,7 +99,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
         + " FROM people WHERE uuid IN ( <uuids> )";
 
     public SelfIdBatcher() {
-      super(databaseHandler, SQL, "uuids", new PersonMapper());
+      super(PersonDao.this.databaseHandler, SQL, "uuids", new PersonMapper());
     }
   }
 
@@ -115,7 +114,8 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
             + "WHERE \"personUuid\" IN ( <foreignKeys> ) ORDER BY \"createdAt\" ASC";
 
     public PersonPositionHistoryBatcher() {
-      super(databaseHandler, SQL, "foreignKeys", new PersonPositionHistoryMapper(), "personUuid");
+      super(PersonDao.this.databaseHandler, SQL, "foreignKeys", new PersonPositionHistoryMapper(),
+          "personUuid");
     }
   }
 

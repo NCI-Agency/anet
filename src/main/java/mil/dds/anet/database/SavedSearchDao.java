@@ -30,7 +30,7 @@ public class SavedSearchDao extends AnetBaseDao<SavedSearch, AbstractSearchQuery
         "/* batch.getSavedSearchesByUuids */ SELECT * from \"savedSearches\" where uuid IN ( <uuids> )";
 
     public SelfIdBatcher() {
-      super(databaseHandler, SQL, "uuids", new SavedSearchMapper());
+      super(SavedSearchDao.this.databaseHandler, SQL, "uuids", new SavedSearchMapper());
     }
   }
 

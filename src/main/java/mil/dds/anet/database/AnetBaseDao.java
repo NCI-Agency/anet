@@ -7,16 +7,15 @@ import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.views.AbstractAnetBean;
+import org.apache.poi.ss.formula.functions.T;
 import org.jdbi.v3.core.Handle;
 import org.springframework.transaction.annotation.Transactional;
 
 public abstract class AnetBaseDao<T extends AbstractAnetBean, S extends AbstractSearchQuery<?>>
-    implements IAnetDao<T> {
-
-  protected final DatabaseHandler databaseHandler;
+    extends AbstractDao implements IAnetDao<T> {
 
   protected AnetBaseDao(final DatabaseHandler databaseHandler) {
-    this.databaseHandler = databaseHandler;
+    super(databaseHandler);
   }
 
   @Transactional
@@ -42,14 +41,6 @@ public abstract class AnetBaseDao<T extends AbstractAnetBean, S extends Abstract
   @Override
   public int deleteInternal(String uuid) {
     throw new UnsupportedOperationException();
-  }
-
-  protected Handle getDbHandle() {
-    return databaseHandler.getHandle();
-  }
-
-  protected void closeDbHandle(Handle handle) {
-    databaseHandler.closeHandle(handle);
   }
 
   public AnetBeanList<T> search(S query) {

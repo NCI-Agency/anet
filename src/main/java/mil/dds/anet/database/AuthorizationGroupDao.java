@@ -53,7 +53,8 @@ public class AuthorizationGroupDao
         + AUTHORIZATION_GROUP_FIELDS + " FROM \"authorizationGroups\" WHERE uuid IN ( <uuids> )";
 
     public SelfIdBatcher() {
-      super(databaseHandler, SQL, "uuids", new AuthorizationGroupMapper());
+      super(AuthorizationGroupDao.this.databaseHandler, SQL, "uuids",
+          new AuthorizationGroupMapper());
     }
   }
 
@@ -72,7 +73,8 @@ public class AuthorizationGroupDao
             + "AND \"authorizationGroupRelatedObjects\".\"relatedObjectUuid\" = positions.uuid";
 
     public PositionsBatcher() {
-      super(databaseHandler, SQL, "foreignKeys", new PositionMapper(), "authorizationGroupUuid");
+      super(AuthorizationGroupDao.this.databaseHandler, SQL, "foreignKeys", new PositionMapper(),
+          "authorizationGroupUuid");
     }
   }
 
@@ -183,7 +185,7 @@ public class AuthorizationGroupDao
             + "WHERE \"authorizationGroupUuid\" IN ( <foreignKeys> ) ORDER BY \"relatedObjectType\", \"relatedObjectUuid\" ASC";
 
     public AuthorizationGroupRelatedObjectsBatcher() {
-      super(databaseHandler, SQL, "foreignKeys",
+      super(AuthorizationGroupDao.this.databaseHandler, SQL, "foreignKeys",
           new GenericRelatedObjectMapper("authorizationGroupUuid"), "authorizationGroupUuid");
     }
   }
@@ -208,7 +210,8 @@ public class AuthorizationGroupDao
         + " WHERE \"authorizationGroupAdministrativePositions\".\"authorizationGroupUuid\" IN ( <foreignKeys> )";
 
     public AuthorizationGroupAdministrativePositionsBatcher() {
-      super(databaseHandler, SQL, "foreignKeys", new PositionMapper(), "authorizationGroupUuid");
+      super(AuthorizationGroupDao.this.databaseHandler, SQL, "foreignKeys", new PositionMapper(),
+          "authorizationGroupUuid");
     }
   }
 

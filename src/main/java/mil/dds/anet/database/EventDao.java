@@ -48,7 +48,7 @@ public class EventDao extends AnetSubscribableObjectDao<Event, EventSearchQuery>
         + " from events where uuid IN ( <uuids> )";
 
     public SelfIdBatcher() {
-      super(databaseHandler, sql, "uuids", new EventMapper());
+      super(EventDao.this.databaseHandler, sql, "uuids", new EventMapper());
     }
   }
 
@@ -59,7 +59,7 @@ public class EventDao extends AnetSubscribableObjectDao<Event, EventSearchQuery>
         + "AND \"eventTasks\".\"taskUuid\" = tasks.uuid ORDER BY uuid";
 
     public TasksBatcher() {
-      super(databaseHandler, sql, "foreignKeys", new TaskMapper(), "eventUuid");
+      super(EventDao.this.databaseHandler, sql, "foreignKeys", new TaskMapper(), "eventUuid");
     }
   }
 
@@ -71,7 +71,8 @@ public class EventDao extends AnetSubscribableObjectDao<Event, EventSearchQuery>
             + "AND \"eventOrganizations\".\"organizationUuid\" = organizations.uuid ORDER BY uuid";
 
     public OrganizationsBatcher() {
-      super(databaseHandler, sql, "foreignKeys", new OrganizationMapper(), "eventUuid");
+      super(EventDao.this.databaseHandler, sql, "foreignKeys", new OrganizationMapper(),
+          "eventUuid");
     }
   }
 
@@ -82,7 +83,7 @@ public class EventDao extends AnetSubscribableObjectDao<Event, EventSearchQuery>
         + "AND \"eventPeople\".\"personUuid\" = people.uuid ORDER BY uuid";
 
     public PeopleBatcher() {
-      super(databaseHandler, sql, "foreignKeys", new PersonMapper(), "eventUuid");
+      super(EventDao.this.databaseHandler, sql, "foreignKeys", new PersonMapper(), "eventUuid");
     }
   }
 

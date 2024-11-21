@@ -63,7 +63,7 @@ public class SubscriptionDao extends AnetBaseDao<Subscription, AbstractSearchQue
         + SUBSCRIPTION_FIELDS + " FROM subscriptions WHERE uuid IN ( <uuids> )";
 
     public SelfIdBatcher() {
-      super(databaseHandler, SQL, "uuids", new SubscriptionMapper());
+      super(SubscriptionDao.this.databaseHandler, SQL, "uuids", new SubscriptionMapper());
     }
   }
 

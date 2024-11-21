@@ -34,7 +34,7 @@ public class EventSeriesDao extends AnetSubscribableObjectDao<EventSeries, Event
         + EVENT_SERIES_FIELDS + " from \"eventSeries\" where uuid IN ( <uuids> )";
 
     public SelfIdBatcher() {
-      super(databaseHandler, sql, "uuids", new EventSeriesMapper());
+      super(EventSeriesDao.this.databaseHandler, sql, "uuids", new EventSeriesMapper());
     }
   }
 

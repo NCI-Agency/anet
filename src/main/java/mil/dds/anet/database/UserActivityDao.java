@@ -10,20 +10,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
-public class UserActivityDao {
-
-  protected final DatabaseHandler databaseHandler;
+public class UserActivityDao extends AbstractDao {
 
   public UserActivityDao(DatabaseHandler databaseHandler) {
-    this.databaseHandler = databaseHandler;
-  }
-
-  protected Handle getDbHandle() {
-    return databaseHandler.getHandle();
-  }
-
-  protected void closeDbHandle(Handle handle) {
-    databaseHandler.closeHandle(handle);
+    super(databaseHandler);
   }
 
   @Transactional

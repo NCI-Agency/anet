@@ -55,7 +55,7 @@ public class ApprovalStepDao extends AnetBaseDao<ApprovalStep, AbstractSearchQue
         "/* batch.getApprovalStepsByUuids */ SELECT * from \"approvalSteps\" where uuid IN ( <uuids> )";
 
     public SelfIdBatcher() {
-      super(databaseHandler, SQL, "uuids", new ApprovalStepMapper());
+      super(ApprovalStepDao.this.databaseHandler, SQL, "uuids", new ApprovalStepMapper());
     }
   }
 
@@ -72,7 +72,8 @@ public class ApprovalStepDao extends AnetBaseDao<ApprovalStep, AbstractSearchQue
             + "WHERE \"approvalStepUuid\" IN ( <foreignKeys> )";
 
     public PositionsBatcher() {
-      super(databaseHandler, SQL, "foreignKeys", new PositionMapper(), "approvalStepUuid");
+      super(ApprovalStepDao.this.databaseHandler, SQL, "foreignKeys", new PositionMapper(),
+          "approvalStepUuid");
     }
   }
 
@@ -91,8 +92,8 @@ public class ApprovalStepDao extends AnetBaseDao<ApprovalStep, AbstractSearchQue
     }
 
     public PlanningApprovalStepsBatcher() {
-      super(databaseHandler, SQL, "foreignKeys", new ApprovalStepMapper(), "relatedObjectUuid",
-          additionalParams);
+      super(ApprovalStepDao.this.databaseHandler, SQL, "foreignKeys", new ApprovalStepMapper(),
+          "relatedObjectUuid", additionalParams);
     }
   }
 
@@ -107,8 +108,8 @@ public class ApprovalStepDao extends AnetBaseDao<ApprovalStep, AbstractSearchQue
     }
 
     public ApprovalStepsBatcher() {
-      super(databaseHandler, SQL, "foreignKeys", new ApprovalStepMapper(), "relatedObjectUuid",
-          additionalParams);
+      super(ApprovalStepDao.this.databaseHandler, SQL, "foreignKeys", new ApprovalStepMapper(),
+          "relatedObjectUuid", additionalParams);
     }
   }
 

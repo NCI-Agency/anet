@@ -68,7 +68,7 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AttachmentSearchQuery
         + " FROM \"attachments\" WHERE uuid IN ( <uuids> )";
 
     public SelfIdBatcher() {
-      super(databaseHandler, SQL, "uuids", new AttachmentMapper());
+      super(AttachmentDao.this.databaseHandler, SQL, "uuids", new AttachmentMapper());
     }
   }
 
@@ -209,7 +209,8 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AttachmentSearchQuery
         + "ORDER BY attachments.\"fileName\" DESC";
 
     public AttachmentBatcher() {
-      super(databaseHandler, SQL, "foreignKeys", new AttachmentMapper(), "relatedObjectUuid");
+      super(AttachmentDao.this.databaseHandler, SQL, "foreignKeys", new AttachmentMapper(),
+          "relatedObjectUuid");
     }
   }
 
@@ -223,8 +224,8 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AttachmentSearchQuery
             + "WHERE \"attachmentUuid\" IN ( <foreignKeys> ) ORDER BY \"relatedObjectType\", \"relatedObjectUuid\" ASC";
 
     public AttachmentRelatedObjectsBatcher() {
-      super(databaseHandler, SQL, "foreignKeys", new GenericRelatedObjectMapper("attachmentUuid"),
-          "attachmentUuid");
+      super(AttachmentDao.this.databaseHandler, SQL, "foreignKeys",
+          new GenericRelatedObjectMapper("attachmentUuid"), "attachmentUuid");
     }
   }
 

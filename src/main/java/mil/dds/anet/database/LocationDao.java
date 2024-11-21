@@ -43,7 +43,7 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
         + " FROM locations WHERE uuid IN ( <uuids> )";
 
     public SelfIdBatcher() {
-      super(databaseHandler, SQL, "uuids", new LocationMapper());
+      super(LocationDao.this.databaseHandler, SQL, "uuids", new LocationMapper());
     }
   }
 
@@ -189,7 +189,8 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
         + "ORDER BY locations.name, locations.uuid";
 
     public ChildrenLocationsBatcher() {
-      super(databaseHandler, SQL, "foreignKeys", new LocationMapper(), "parentLocationUuid");
+      super(LocationDao.this.databaseHandler, SQL, "foreignKeys", new LocationMapper(),
+          "parentLocationUuid");
     }
   }
 
@@ -212,7 +213,8 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
         + "ORDER BY locations.name, locations.uuid";
 
     public ParentLocationsBatcher() {
-      super(databaseHandler, SQL, "foreignKeys", new LocationMapper(), "childLocationUuid");
+      super(LocationDao.this.databaseHandler, SQL, "foreignKeys", new LocationMapper(),
+          "childLocationUuid");
     }
   }
 
