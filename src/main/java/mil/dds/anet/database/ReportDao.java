@@ -781,7 +781,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
         + "FROM reports WHERE reports.uuid IN ( <uuids> )";
 
     public SelfIdBatcher() {
-      super(databaseHandler, SQL, "uuids", new ReportMapper());
+      super(ReportDao.this.databaseHandler, SQL, "uuids", new ReportMapper());
     }
   }
 
@@ -801,7 +801,8 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
             + "ORDER BY people.name, people.uuid";
 
     public ReportPeopleBatcher() {
-      super(databaseHandler, SQL, "foreignKeys", new ReportPersonMapper(), "reportUuid");
+      super(ReportDao.this.databaseHandler, SQL, "foreignKeys", new ReportPersonMapper(),
+          "reportUuid");
     }
   }
 
@@ -816,7 +817,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
         + "AND \"reportTasks\".\"taskUuid\" = tasks.uuid ORDER BY uuid";
 
     public TasksBatcher() {
-      super(databaseHandler, SQL, "foreignKeys", new TaskMapper(), "reportUuid");
+      super(ReportDao.this.databaseHandler, SQL, "foreignKeys", new TaskMapper(), "reportUuid");
     }
   }
 

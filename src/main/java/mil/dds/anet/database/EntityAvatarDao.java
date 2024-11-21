@@ -9,21 +9,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
-public class EntityAvatarDao {
+public class EntityAvatarDao extends AbstractDao {
   public static final String TABLE_NAME = "entityAvatars";
 
-  protected final DatabaseHandler databaseHandler;
-
   public EntityAvatarDao(DatabaseHandler databaseHandler) {
-    this.databaseHandler = databaseHandler;
-  }
-
-  protected Handle getDbHandle() {
-    return databaseHandler.getHandle();
-  }
-
-  protected void closeDbHandle(Handle handle) {
-    databaseHandler.closeHandle(handle);
+    super(databaseHandler);
   }
 
   public EntityAvatar getByRelatedObjectUuid(String relatedObjectUuid) {
@@ -35,7 +25,8 @@ public class EntityAvatarDao {
         + "SELECT * FROM \"entityAvatars\" WHERE \"relatedObjectUuid\" IN ( <relatedObjectUuids> )";
 
     public SelfIdBatcher() {
-      super(databaseHandler, SQL, "relatedObjectUuids", new EntityAvatarMapper());
+      super(EntityAvatarDao.this.databaseHandler, SQL, "relatedObjectUuids",
+          new EntityAvatarMapper());
     }
   }
 

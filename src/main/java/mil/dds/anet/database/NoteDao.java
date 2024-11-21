@@ -70,7 +70,7 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
         "/* batch.getNotesByUuids */ SELECT * FROM notes WHERE uuid IN ( <uuids> )";
 
     public SelfIdBatcher() {
-      super(databaseHandler, SQL, "uuids", new NoteMapper());
+      super(NoteDao.this.databaseHandler, SQL, "uuids", new NoteMapper());
     }
   }
 
@@ -192,7 +192,8 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
             + "ORDER BY notes.\"updatedAt\" DESC";
 
     public NotesBatcher() {
-      super(databaseHandler, SQL, "foreignKeys", new NoteMapper(), "relatedObjectUuid");
+      super(NoteDao.this.databaseHandler, SQL, "foreignKeys", new NoteMapper(),
+          "relatedObjectUuid");
     }
   }
 
@@ -206,8 +207,8 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
             + "WHERE \"noteUuid\" IN ( <foreignKeys> ) ORDER BY \"relatedObjectType\", \"relatedObjectUuid\" ASC";
 
     public NoteRelatedObjectsBatcher() {
-      super(databaseHandler, SQL, "foreignKeys", new GenericRelatedObjectMapper("noteUuid"),
-          "noteUuid");
+      super(NoteDao.this.databaseHandler, SQL, "foreignKeys",
+          new GenericRelatedObjectMapper("noteUuid"), "noteUuid");
     }
   }
 
