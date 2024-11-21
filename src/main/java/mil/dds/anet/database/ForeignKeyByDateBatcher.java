@@ -18,11 +18,10 @@ import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.Query;
 import org.springframework.transaction.annotation.Transactional;
 
-public class ForeignKeyByDateBatcher<T extends AbstractAnetBean> {
+public class ForeignKeyByDateBatcher<T extends AbstractAnetBean> extends AbstractDao {
 
   private static final List<String> defaultIfEmpty = Arrays.asList("-1");
 
-  private final DatabaseHandler databaseHandler;
   private final String sql;
   private final String paramName;
   private final RowMapper<T> objectMapper;
@@ -31,7 +30,7 @@ public class ForeignKeyByDateBatcher<T extends AbstractAnetBean> {
 
   public ForeignKeyByDateBatcher(DatabaseHandler databaseHandler, String sql, String paramName,
       RowMapper<T> objectMapper, String foreignKeyName, Map<String, Object> additionalParams) {
-    this.databaseHandler = databaseHandler;
+    super(databaseHandler);
     this.sql = sql;
     this.paramName = paramName;
     this.objectMapper = objectMapper;
@@ -42,14 +41,6 @@ public class ForeignKeyByDateBatcher<T extends AbstractAnetBean> {
   public ForeignKeyByDateBatcher(DatabaseHandler databaseHandler, String sql, String paramName,
       RowMapper<T> objectMapper, String foreignKeyName) {
     this(databaseHandler, sql, paramName, objectMapper, foreignKeyName, null);
-  }
-
-  protected Handle getDbHandle() {
-    return databaseHandler.getHandle();
-  }
-
-  protected void closeDbHandle(Handle handle) {
-    databaseHandler.closeHandle(handle);
   }
 
   @Transactional

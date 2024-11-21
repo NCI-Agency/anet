@@ -32,7 +32,7 @@ public class CommentDao extends AnetBaseDao<Comment, AbstractSearchQuery<?>> {
         + "FROM comments WHERE comments.uuid IN ( <uuids> )";
 
     public SelfIdBatcher() {
-      super(databaseHandler, SQL, "uuids", new CommentMapper());
+      super(CommentDao.this.databaseHandler, SQL, "uuids", new CommentMapper());
     }
   }
 
