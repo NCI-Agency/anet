@@ -3,7 +3,7 @@ import Model from "components/Model"
 import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
 import _uniqWith from "lodash/uniqWith"
-import { Location, Report } from "models"
+import { Location, Position, Report } from "models"
 import {
   createHtmlParagraphs,
   fuzzy,
@@ -12,20 +12,12 @@ import {
   runGQL
 } from "../simutils"
 
-const getRandomPerson = async function(hasPosition) {
-  if (hasPosition) {
-    const position = await getRandomObject(
-      "positions",
-      {
-        status: Model.STATUS.ACTIVE,
-        isFilled: true
-      },
-      "uuid person { uuid name }"
-    )
-    return position === null ? null : position.person
-  } else {
-    return await getRandomObject("people", {}, "uuid name")
-  }
+const getRandomPerson = async function() {
+  return await getRandomObject(
+    "people",
+    { positionType: Object.values(Position.TYPE) },
+    "uuid name"
+  )
 }
 
 async function populateReport(report, args) {
@@ -39,7 +31,7 @@ async function populateReport(report, args) {
     let reportPeople = []
     const nbOfAdvisors = faker.number.int({ min: 1, max: 5 })
     for (let i = 0; i < nbOfAdvisors; i++) {
-      const advisor = await getRandomPerson(i === 0)
+      const advisor = await getRandomPerson()
       if (advisor) {
         reportPeople.push({
           ...advisor,
@@ -53,7 +45,7 @@ async function populateReport(report, args) {
 
     const nbOfInterlocutors = faker.number.int({ min: 1, max: 5 })
     for (let i = 0; i < nbOfInterlocutors; i++) {
-      const interlocutor = await getRandomPerson(i === 0)
+      const interlocutor = await getRandomPerson()
       if (interlocutor) {
         reportPeople.push({
           ...interlocutor,

@@ -93,12 +93,10 @@ async function runBuildup(scenario) {
     const userType = scenario.userTypes.find(d => d.name === userTypeName)
     if (userType) {
       const user = await userType.userFunction()
-      const grow = () => 100 // Probability = 100 (always execute)
-
       await sleep(buildup.preDelay)
       for (let i = 0; i < buildup.number; i++) {
         try {
-          await buildup.runnable(user, grow, buildup.arguments)
+          await buildup.runnable(user, null, buildup.arguments)
         } catch (e) {
           console.log(
             colors.red(`Buildup '${buildup.name}' iteration ${i} failed: ${e}`)
