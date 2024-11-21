@@ -45,24 +45,28 @@ import org.springframework.stereotype.Component;
     portName = "NvgPort20", endpointInterface = "nato.act.tide.wsdl.nvg20.NVGPortType2012")
 public class Nvg20WebService implements NVGPortType2012 {
 
-  private static final int ACCESS_TOKEN_LENGTH = 32;
-  private static final String ACCESS_TOKEN_ID = "accessToken";
-  private static final String PAST_PERIOD_IN_DAY_ID = "pastDays";
-  private static final String SYMBOL_PREFIX_APP6D = "app6d";
-  private static final int DEFAULT_PAST_PERIOD_IN_DAYS = 7;
   private static final String NVG_VERSION = "2.0.2";
 
-  // 13 = version: APP-6D
-  // 0 = context: Reality
-  // 3 = standard identity: Friend
-  // 40 = symbol set: Activity/Event
-  // 0 = status: Present
-  // 0 = hq: Not Applicable
-  // 00 = echelon: Not Applicable
-  // 131000 = main icon: Operation - Meeting
-  // 00 = modifier 1: Unspecified
-  // 00 = modifier 2: Unspecified
-  // 0000000000 = more defaults
+  private static final String ACCESS_TOKEN_ID = "accessToken";
+  private static final int ACCESS_TOKEN_LENGTH = 32;
+  private static final String PAST_PERIOD_IN_DAYS_ID = "pastDays";
+  private static final int DEFAULT_PAST_PERIOD_IN_DAYS = 7;
+  private static final String FUTURE_PERIOD_IN_DAYS_ID = "futureDays";
+  private static final int DEFAULT_FUTURE_PERIOD_IN_DAYS = 0;
+
+  private static final String SYMBOL_PREFIX_APP6D = "app6d";
+  // APP-6 symbol to use:
+  // - 13 = version: APP-6D
+  // - 0 = context: Reality
+  // - 3 = standard identity: Friend
+  // - 40 = symbol set: Activity/Event
+  // - 0 = status: Present
+  // - 0 = hq: Not Applicable
+  // - 00 = echelon: Not Applicable
+  // - 131000 = main icon: Operation - Meeting
+  // - 00 = modifier 1: Unspecified
+  // - 00 = modifier 2: Unspecified
+  // - 0000000000 = more defaults
   private static final String ACTIVITY_MEETING = "130340000013100000000000000000";
 
   private static final String REPORT_QUERY = "query ($reportQuery: ReportSearchQueryInput) {" // -
@@ -97,6 +101,7 @@ public class Nvg20WebService implements NVGPortType2012 {
         nvgCapabilitiesType.getInputOrSelectOrTable();
     capabilityItemTypeList.add(makeAccessTokenType());
     capabilityItemTypeList.add(makePastPeriodInDays());
+    capabilityItemTypeList.add(makeFuturePeriodInDays());
     response.setNvgCapabilities(nvgCapabilitiesType);
     return response;
   }
@@ -110,35 +115,39 @@ public class Nvg20WebService implements NVGPortType2012 {
           nvgFilter.getInputResponseOrSelectResponseOrMatrixResponse();
       String accessToken = null;
       int pastDays = DEFAULT_PAST_PERIOD_IN_DAYS;
-      for (Object object : nvgQueryList) {
+      int futureDays = DEFAULT_FUTURE_PERIOD_IN_DAYS;
+      for (final Object object : nvgQueryList) {
         if (object instanceof InputResponseType inputResponse) {
           if (ACCESS_TOKEN_ID.equals(inputResponse.getRefid())) {
             accessToken = inputResponse.getValue();
-          }
-          if (PAST_PERIOD_IN_DAY_ID.equals(inputResponse.getRefid())) {
+          } else if (PAST_PERIOD_IN_DAYS_ID.equals(inputResponse.getRefid())) {
             pastDays = Integer.parseInt(inputResponse.getValue());
+          } else if (FUTURE_PERIOD_IN_DAYS_ID.equals(inputResponse.getRefid())) {
+            futureDays = Integer.parseInt(inputResponse.getValue());
           }
         }
       }
       if (accessToken != null && accessToken.length() == 32) {
-        response.setNvg(makeNvg(pastDays));
+        response.setNvg(makeNvg(pastDays, futureDays));
         return response;
       }
     }
     throw new WebServiceException("Must provide a Service Access Token");
   }
 
-  private NvgType makeNvg(int pastDays) {
+  private NvgType makeNvg(int pastDays, int futureDays) {
     final NvgType nvgType = new NvgType();
     nvgType.setVersion(NVG_VERSION);
     final List<ContentType> contentTypeList = nvgType.getGOrCompositeOrText();
+
     // Get the current instant
     final Instant now = Instant.now();
-
     // Calculate start of period
-    final Instant oneWeekAgo = now.minus(pastDays, ChronoUnit.DAYS);
+    final Instant start = now.minus(pastDays, ChronoUnit.DAYS);
+    // Calculate end of period
+    final Instant end = now.plus(futureDays, ChronoUnit.DAYS);
 
-    final List<Report> reports = getReportsByPeriod(oneWeekAgo, now);
+    final List<Report> reports = getReportsByPeriod(start, end);
     contentTypeList.addAll(reports.stream()
         // .filter(report -> report.getLocation() != null)
         .map(this::reportToNvgPoint).toList());
@@ -216,14 +225,26 @@ public class Nvg20WebService implements NVGPortType2012 {
 
   public static InputType makePastPeriodInDays() {
     final InputType inputType = new InputType();
-    inputType.setId(PAST_PERIOD_IN_DAY_ID);
-    inputType.setRequired(true);
+    inputType.setId(PAST_PERIOD_IN_DAYS_ID);
+    inputType.setRequired(false);
     inputType.setType(InputTypeType.INT);
     inputType.setName("Past engagement period in days");
-    inputType.setRequired(false);
     inputType.setDefault(String.valueOf(DEFAULT_PAST_PERIOD_IN_DAYS));
     final HelpType helpType = new HelpType();
-    helpType.setText("Period over which you want to retrieve engagements");
+    helpType.setText("Past period over which you want to retrieve engagements");
+    inputType.setHelp(helpType);
+    return inputType;
+  }
+
+  public static InputType makeFuturePeriodInDays() {
+    final InputType inputType = new InputType();
+    inputType.setId(FUTURE_PERIOD_IN_DAYS_ID);
+    inputType.setRequired(false);
+    inputType.setType(InputTypeType.INT);
+    inputType.setName("Future engagement period in days");
+    inputType.setDefault(String.valueOf(DEFAULT_FUTURE_PERIOD_IN_DAYS));
+    final HelpType helpType = new HelpType();
+    helpType.setText("Future period over which you want to retrieve engagements");
     inputType.setHelp(helpType);
     return inputType;
   }
