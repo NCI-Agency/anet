@@ -70,7 +70,8 @@ public class ReportActionDao extends AnetBaseDao<ReportAction, AbstractSearchQue
             + "WHERE \"reportUuid\" IN ( <foreignKeys> ) ORDER BY \"createdAt\" ASC";
 
     public ReportActionsBatcher() {
-      super(databaseHandler, SQL, "foreignKeys", new ReportActionMapper(), "reportUuid");
+      super(ReportActionDao.this.databaseHandler, SQL, "foreignKeys", new ReportActionMapper(),
+          "reportUuid");
     }
   }
 

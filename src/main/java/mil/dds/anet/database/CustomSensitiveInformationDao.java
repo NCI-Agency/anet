@@ -43,7 +43,8 @@ public class CustomSensitiveInformationDao
         + "SELECT * FROM \"customSensitiveInformation\" WHERE uuid IN ( <uuids> )";
 
     public SelfIdBatcher() {
-      super(databaseHandler, SQL, "uuids", new CustomSensitiveInformationMapper());
+      super(CustomSensitiveInformationDao.this.databaseHandler, SQL, "uuids",
+          new CustomSensitiveInformationMapper());
     }
   }
 
@@ -118,8 +119,8 @@ public class CustomSensitiveInformationDao
         + "ORDER BY \"customSensitiveInformation\".\"customFieldName\"";
 
     public SensitiveInformationBatcher() {
-      super(databaseHandler, SQL, "foreignKeys", new CustomSensitiveInformationMapper(),
-          "relatedObjectUuid");
+      super(CustomSensitiveInformationDao.this.databaseHandler, SQL, "foreignKeys",
+          new CustomSensitiveInformationMapper(), "relatedObjectUuid");
     }
   }
 

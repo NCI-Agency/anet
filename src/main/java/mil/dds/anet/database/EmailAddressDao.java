@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
-public class EmailAddressDao {
+public class EmailAddressDao extends AbstractDao {
 
   public static final String[] fields =
       {"network", "address", "relatedObjectType", "relatedObjectUuid"};
@@ -27,18 +27,8 @@ public class EmailAddressDao {
   public static final String EMAIL_ADDRESS_FIELDS =
       DaoUtils.buildFieldAliases(TABLE_NAME, fields, false);
 
-  protected final DatabaseHandler databaseHandler;
-
   public EmailAddressDao(DatabaseHandler databaseHandler) {
-    this.databaseHandler = databaseHandler;
-  }
-
-  protected Handle getDbHandle() {
-    return databaseHandler.getHandle();
-  }
-
-  protected void closeDbHandle(Handle handle) {
-    databaseHandler.closeHandle(handle);
+    super(databaseHandler);
   }
 
   class EmailAddressesForRelatedObjectsBatcher extends ForeignKeyBatcher<EmailAddress> {
@@ -48,7 +38,8 @@ public class EmailAddressDao {
             + " ORDER BY \"relatedObjectType\", \"relatedObjectUuid\", \"network\", \"address\"";
 
     public EmailAddressesForRelatedObjectsBatcher() {
-      super(databaseHandler, SQL, "foreignKeys", new EmailAddressMapper(), "relatedObjectUuid");
+      super(EmailAddressDao.this.databaseHandler, SQL, "foreignKeys", new EmailAddressMapper(),
+          "relatedObjectUuid");
     }
   }
 
