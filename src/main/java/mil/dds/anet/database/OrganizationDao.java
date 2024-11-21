@@ -69,7 +69,7 @@ public class OrganizationDao
         + " from organizations where uuid IN ( <uuids> )";
 
     public SelfIdBatcher() {
-      super(databaseHandler, SQL, "uuids", new OrganizationMapper());
+      super(OrganizationDao.this.databaseHandler, SQL, "uuids", new OrganizationMapper());
     }
   }
 
@@ -85,7 +85,8 @@ public class OrganizationDao
             + "positions.\"currentPersonUuid\" IN ( <foreignKeys> ) AND positions.\"organizationUuid\" = organizations.uuid";
 
     public OrganizationsBatcher() {
-      super(databaseHandler, SQL, "foreignKeys", new OrganizationMapper(), "personUuid");
+      super(OrganizationDao.this.databaseHandler, SQL, "foreignKeys", new OrganizationMapper(),
+          "personUuid");
     }
   }
 
@@ -105,7 +106,8 @@ public class OrganizationDao
             + " OR \"peoplePositions\".\"endedAt\" > :when)";
 
     public OrganizationsByDateBatcher() {
-      super(databaseHandler, sql, "foreignKeys", new OrganizationMapper(), "personUuid");
+      super(OrganizationDao.this.databaseHandler, sql, "foreignKeys", new OrganizationMapper(),
+          "personUuid");
     }
   }
 
@@ -158,7 +160,8 @@ public class OrganizationDao
             + "WHERE \"organizationAdministrativePositions\".\"organizationUuid\" IN ( <foreignKeys> ) ";
 
     public AdministratingPositionsBatcher() {
-      super(databaseHandler, SQL, "foreignKeys", new PositionMapper(), "organizationUuid");
+      super(OrganizationDao.this.databaseHandler, SQL, "foreignKeys", new PositionMapper(),
+          "organizationUuid");
     }
   }
 

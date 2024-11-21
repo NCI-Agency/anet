@@ -11,29 +11,20 @@ import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.springframework.transaction.annotation.Transactional;
 
-public class IdBatcher<T extends AbstractAnetBean> {
+public class IdBatcher<T extends AbstractAnetBean> extends AbstractDao {
 
   private static final List<String> defaultIfEmpty = Arrays.asList("-1");
 
-  private final DatabaseHandler databaseHandler;
   private final String sql;
   private final String paramName;
   private final RowMapper<T> mapper;
 
   public IdBatcher(DatabaseHandler databaseHandler, String sql, String paramName,
       RowMapper<T> mapper) {
-    this.databaseHandler = databaseHandler;
+    super(databaseHandler);
     this.sql = sql;
     this.paramName = paramName;
     this.mapper = mapper;
-  }
-
-  protected Handle getDbHandle() {
-    return databaseHandler.getHandle();
-  }
-
-  protected void closeDbHandle(Handle handle) {
-    databaseHandler.closeHandle(handle);
   }
 
   @Transactional
