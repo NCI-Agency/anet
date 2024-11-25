@@ -224,7 +224,7 @@ td {
 
 </head>
 <body>
-<p style="color: red; font-size: 12px; font-weight: bold;"><i>Classification: ${SECURITY_BANNER_CLASSIFICATION}</i></p>
+<p style="font-size: 12px; font-weight: bold;"><i>Classification: ${SECURITY_BANNER_CLASSIFICATION}</i></p>
 
 <p>Hi,</p><br><br>
 
