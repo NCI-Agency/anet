@@ -30,11 +30,11 @@ String jupiterVersion = "5.11.3"
 String keycloakVersion = "26.0.5"
 String poiVersion = "5.3.0"
 String powermockVersion = "2.0.9"
-String simplejavamailVersion = "8.12.2"
-String springBootVersion = "3.3.5"
+String simplejavamailVersion = "8.12.3"
+String springBootVersion = "3.4.0"
 String springFrameworkVersion = "6.1.13"
 String springGraphqlVersion = "1.2.8"
-String springSecurityVersion = "6.3.4"
+String springSecurityVersion = "6.4.1"
 String springShellVersion = "3.3.3"
 String psqlPushDataPath = "/var/tmp"
 String keycloakContainerPath = "/opt/keycloak"
@@ -117,7 +117,7 @@ dependencies {
 	// Used for converting GraphQL request output to XML:
 	implementation 'com.github.javadev:underscore-lodash:1.26'
 	// For JSON schema validation, supports detailed error reporting
-	implementation 'com.networknt:json-schema-validator:1.5.3'
+	implementation 'com.networknt:json-schema-validator:1.5.4'
 
 	// used for writing Excel documents
 	implementation "org.apache.poi:poi:${poiVersion}"
