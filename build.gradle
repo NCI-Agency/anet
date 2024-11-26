@@ -27,7 +27,7 @@ java {
 boolean isTestEnv = project.hasProperty("testEnv")
 String jdbi3Version = "3.47.0"
 String jupiterVersion = "5.11.3"
-String keycloakVersion = "26.0.5"
+String keycloakVersion = "26.0.6"
 String poiVersion = "5.3.0"
 String powermockVersion = "2.0.9"
 String simplejavamailVersion = "8.12.3"
