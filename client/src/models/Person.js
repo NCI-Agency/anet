@@ -325,10 +325,11 @@ export default class Person extends Model {
   }
 
   toString() {
+    const militaryName = utils.toMilitaryName(this.name)
     if (this.rank) {
-      return this.rank + " " + this.name
+      return this.rank + " " + militaryName
     } else {
-      return this.name || this.domainUsername || this.uuid
+      return militaryName || this.domainUsername || this.uuid
     }
   }
 
