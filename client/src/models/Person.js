@@ -64,7 +64,6 @@ export default class Person extends Model {
       lastName: yup
         .string()
         .nullable()
-        .uppercase()
         .required(
           `You must provide the ${Settings.fields.person.lastName?.label}`
         )
@@ -346,7 +345,7 @@ export default class Person extends Model {
   }
 
   static formattedLastName(lastName, doTrim) {
-    let r = lastName.toUpperCase()
+    let r = lastName
     if (doTrim) {
       r = r.trim()
     }
@@ -372,7 +371,7 @@ export default class Person extends Model {
     }
 
     return {
-      lastName: lastName.trim().toUpperCase(),
+      lastName: lastName.trim(),
       firstName: firstName.trim()
     }
   }
