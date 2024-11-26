@@ -3,7 +3,7 @@ import moment from "moment"
 import CreateReport from "../pages/report/createReport.page"
 import ShowReport from "../pages/report/showReport.page"
 
-const AUTHOR_NAME = "ERINSON, Erin"
+const AUTHOR_NAME = "Erinson, Erin"
 const AUTHOR = `CIV ${AUTHOR_NAME}`
 const ADVISOR_NAME = "DVISOR, A"
 const ADVISOR = `OF-2 ${ADVISOR_NAME}`

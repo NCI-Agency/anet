@@ -162,7 +162,7 @@ class TaskApprovalTest extends AbstractResourceTest {
   void testNoSteps() {
     final TaskInput taskInput = getTaskInput(clearTaskApprovalSteps(TEST_TASK_UUID));
 
-    final Report report = submitReport("testNoSteps", getPersonFromDb("ERINSON, Erin"), null,
+    final Report report = submitReport("testNoSteps", getPersonFromDb("Erinson, Erin"), null,
         taskInput, false, ReportState.PENDING_APPROVAL);
     assertWorkflowSize(report, taskInput.getUuid(), 0);
 
@@ -191,7 +191,7 @@ class TaskApprovalTest extends AbstractResourceTest {
     final TaskInput updatedTaskInput =
         getTaskInput(updateTaskApprovalSteps(taskInput, approver, isPlanned, false));
 
-    final Report report = submitReport(text, getPersonFromDb("ERINSON, Erin"), null,
+    final Report report = submitReport(text, getPersonFromDb("Erinson, Erin"), null,
         updatedTaskInput, isPlanned, ReportState.PENDING_APPROVAL);
     assertWorkflowSize(report, updatedTaskInput.getUuid(), 1);
 
@@ -229,7 +229,7 @@ class TaskApprovalTest extends AbstractResourceTest {
     final TaskInput updatedTaskInput =
         getTaskInput(updateTaskApprovalSteps(taskInput, approver, isPlanned, false));
 
-    final Report report = submitReport(text, getPersonFromDb("ERINSON, Erin"), null,
+    final Report report = submitReport(text, getPersonFromDb("Erinson, Erin"), null,
         updatedTaskInput, isPlanned, ReportState.PENDING_APPROVAL);
     assertWorkflowSize(report, updatedTaskInput.getUuid(), 1);
 
@@ -267,7 +267,7 @@ class TaskApprovalTest extends AbstractResourceTest {
     final TaskInput updatedTaskInput =
         getTaskInput(updateTaskApprovalSteps(taskInput, approver, isPlanned, true));
 
-    final Person author = getPersonFromDb("ERINSON, Erin");
+    final Person author = getPersonFromDb("Erinson, Erin");
     final Report report = submitReport(text, author, null, updatedTaskInput, isPlanned,
         isPlanned ? ReportState.APPROVED : ReportState.PENDING_APPROVAL);
     assertWorkflowSize(report, updatedTaskInput.getUuid(), 0);
@@ -306,7 +306,7 @@ class TaskApprovalTest extends AbstractResourceTest {
     final TaskInput updatedTaskInput =
         getTaskInput(updateTaskApprovalSteps(taskInput, approver, isPlanned, true));
 
-    final Report report = submitReport(text, getPersonFromDb("ERINSON, Erin"), null,
+    final Report report = submitReport(text, getPersonFromDb("Erinson, Erin"), null,
         updatedTaskInput, isPlanned, ReportState.PENDING_APPROVAL);
     assertWorkflowSize(report, updatedTaskInput.getUuid(), 1);
 
@@ -348,7 +348,7 @@ class TaskApprovalTest extends AbstractResourceTest {
     final TaskInput updatedTaskInput =
         getTaskInput(updateTaskApprovalSteps(taskInput, approver, isPlanned, true));
 
-    final Person author = getPersonFromDb("ERINSON, Erin");
+    final Person author = getPersonFromDb("Erinson, Erin");
     final Report report =
         submitReport(text, author, null, updatedTaskInput, isPlanned, ReportState.PENDING_APPROVAL);
     assertWorkflowSize(report, updatedTaskInput.getUuid(), 1);
@@ -427,7 +427,7 @@ class TaskApprovalTest extends AbstractResourceTest {
     }
     final TaskInput updatedTaskInput = getTaskInput(updateTask(taskInput));
 
-    final Report report = submitReport(text, getPersonFromDb("ERINSON, Erin"), null,
+    final Report report = submitReport(text, getPersonFromDb("Erinson, Erin"), null,
         updatedTaskInput, isPlanned, ReportState.PENDING_APPROVAL);
     assertWorkflowSize(report, updatedTaskInput.getUuid(), 2);
 
@@ -466,7 +466,7 @@ class TaskApprovalTest extends AbstractResourceTest {
     final boolean isPlanned = false;
     final String text = "testTwoReports";
     final TaskInput taskInput = getTaskInput(clearTaskApprovalSteps(TEST_TASK_UUID));
-    final Person author = getPersonFromDb("ERINSON, Erin");
+    final Person author = getPersonFromDb("Erinson, Erin");
 
     final Person approver1 = getApprover(isPlanned);
     final TaskInput updatedTaskInput =

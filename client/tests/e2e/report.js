@@ -639,7 +639,7 @@ test.serial("Verify that validations work", async t => {
     "on",
     "Advisor primary attendee checkbox should be checked"
   )
-  await assertElementText(t, $advisorName, "CIV ERINSON, Erin")
+  await assertElementText(t, $advisorName, "CIV Erinson, Erin")
   await assertElementText(t, $advisorPosition, "EF 2.2 Advisor D")
   await assertElementText(t, $advisorOrg, "EF 2.2")
 

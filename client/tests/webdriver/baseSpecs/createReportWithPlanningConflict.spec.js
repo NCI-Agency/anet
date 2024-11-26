@@ -46,8 +46,8 @@ describe("When creating a Report with conflicts", () => {
     expect(await (await CreateReport.getDuration()).getValue()).to.equal(
       report01.duration
     )
-    const advisor01 = await CreateReport.getPersonByName("CIV ERINSON, Erin")
-    expect(advisor01.name).to.equal("CIV ERINSON, Erin")
+    const advisor01 = await CreateReport.getPersonByName("CIV Erinson, Erin")
+    expect(advisor01.name).to.equal("CIV Erinson, Erin")
     expect(await advisor01.conflictButton.isExisting()).to.equal(false)
 
     const advisor02 = await CreateReport.getPersonByName(report01.advisors[0])
@@ -86,8 +86,8 @@ describe("When creating a Report with conflicts", () => {
     expect(await (await CreateReport.getDuration()).getValue()).to.equal(
       report02.duration
     )
-    const advisor01 = await CreateReport.getPersonByName("CIV ERINSON, Erin")
-    expect(advisor01.name).to.equal("CIV ERINSON, Erin")
+    const advisor01 = await CreateReport.getPersonByName("CIV Erinson, Erin")
+    expect(advisor01.name).to.equal("CIV Erinson, Erin")
     expect(await advisor01.conflictButton.isExisting()).to.equal(true)
 
     const advisor02 = await CreateReport.getPersonByName(report02.advisors[0])
@@ -145,10 +145,10 @@ describe("When creating a Report with conflicts", () => {
 
     expect(await ShowReport.getDuration()).to.equal(report01.duration)
     expect(await ShowReport.getLocation()).to.equal("Unspecified")
-    expect(await ShowReport.getAuthors()).to.match(/CIV ERINSON, Erin/)
+    expect(await ShowReport.getAuthors()).to.match(/CIV Erinson, Erin/)
 
-    const advisor01 = await ShowReport.getAttendeeByName("CIV ERINSON, Erin")
-    expect(advisor01.name).to.equal("CIV ERINSON, Erin")
+    const advisor01 = await ShowReport.getAttendeeByName("CIV Erinson, Erin")
+    expect(advisor01.name).to.equal("CIV Erinson, Erin")
     expect(await advisor01.conflictButton.isExisting()).to.equal(true)
     expect(await advisor01.conflictButton.getText()).to.match(/conflict/)
 
@@ -189,10 +189,10 @@ describe("When creating a Report with conflicts", () => {
 
     expect(await ShowReport.getDuration()).to.equal(report02.duration)
     expect(await ShowReport.getLocation()).to.equal("Unspecified")
-    expect(await ShowReport.getAuthors()).to.match(/CIV ERINSON, Erin/)
+    expect(await ShowReport.getAuthors()).to.match(/CIV Erinson, Erin/)
 
-    const advisor01 = await ShowReport.getAttendeeByName("CIV ERINSON, Erin")
-    expect(advisor01.name).to.equal("CIV ERINSON, Erin")
+    const advisor01 = await ShowReport.getAttendeeByName("CIV Erinson, Erin")
+    expect(advisor01.name).to.equal("CIV Erinson, Erin")
     expect(await advisor01.conflictButton.isExisting()).to.equal(true)
     expect(await advisor01.conflictButton.getText()).to.match(/conflict/)
 

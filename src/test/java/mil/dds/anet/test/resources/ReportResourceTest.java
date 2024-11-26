@@ -1987,7 +1987,7 @@ public class ReportResourceTest extends AbstractResourceTest {
         t -> queryExecutor.personList(getListFields(PERSON_FIELDS), erinQuery));
     assertThat(erinSearchResults.getTotalCount()).isPositive();
     final Optional<Person> erinResult = erinSearchResults.getList().stream()
-        .filter(p -> p.getName().equals("ERINSON, Erin")).findFirst();
+        .filter(p -> p.getName().equals("Erinson, Erin")).findFirst();
     assertThat(erinResult).isNotEmpty();
 
     final ReportSearchQueryInput reportQuery =

@@ -39,7 +39,7 @@ const EXAMPLE_LOCATIONS = {
     planningApprovalSteps:
       "Location planning approval for merge loser\nPerson Position\nCIV REINTON, Reina EF 2.2 Advisor C",
     approvalSteps:
-      "Location publication approval for merge loser\nPerson Position\nCIV ERINSON, Erin EF 2.2 Advisor D"
+      "Location publication approval for merge loser\nPerson Position\nCIV Erinson, Erin EF 2.2 Advisor D"
   }
 }
 

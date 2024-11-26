@@ -18,7 +18,7 @@ const NOT_SIMILAR_PERSON_ADVISOR = {
 }
 
 const SIMILAR_PERSON_ADVISOR = {
-  lastName: "ERINSON",
+  lastName: "Erinson",
   firstName: "Erin"
 }
 
@@ -194,7 +194,7 @@ describe("Create new Person form page", () => {
       await (
         await CreatePerson.getModalContent()
       ).waitForDisplayed({ reverse: true })
-      expect(similar).to.equal("CIV ERINSON, Erin")
+      expect(similar).to.equal("CIV Erinson, Erin")
     })
     it("Should display a warning message specific for duplicate accounts", async() => {
       // Only admin users can create an advisor user

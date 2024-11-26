@@ -38,7 +38,7 @@ describe("Anet default user login", () => {
   it("Default user is logged in", async() => {
     await Home.open()
     const bannerUser = await (await Home.getBannerUser()).getText()
-    const defaultUserValue = "ERINSON, Erin"
+    const defaultUserValue = "Erinson, Erin"
     expect(bannerUser).to.equal(defaultUserValue)
     await Home.logout()
   })
