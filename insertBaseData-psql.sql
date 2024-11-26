@@ -1,4 +1,5 @@
 -- Do a cascading TRUNCATE of all tables created for ANET
+TRUNCATE TABLE "accessTokens" CASCADE;
 TRUNCATE TABLE "adminSettings" CASCADE;
 TRUNCATE TABLE "approvalSteps" CASCADE;
 TRUNCATE TABLE "approvers" CASCADE;
@@ -1398,6 +1399,13 @@ INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "
 -- Add entity avatars for people
 INSERT INTO "entityAvatars" ("relatedObjectType", "relatedObjectUuid", "attachmentUuid", "applyCrop", "cropLeft", "cropTop", "cropWidth", "cropHeight") VALUES
   ('people', '46ba6a73-0cd7-4efb-8e99-215e98cc5987', '3187ad8a-6130-4ec0-bffc-9ebfad4dee39', TRUE, 0, 0, 200, 200);
+
+-- Insert a sample access token
+INSERT INTO "accessTokens" (uuid, name, description, "tokenHash", "createdAt", "expiresAt") VALUES
+  -- token value is 'XfayXIGGC4vKu5j9UEgAAbZYj50v88Zv'
+  -- you can generate new tokens with e.g.:
+  -- dd if=/dev/urandom bs=24 count=1 | base64 | ( read r; echo -ne "Token value = $r\nToken hash = " >&2; echo -n $r ) | openssl dgst -binary -sha256 | openssl base64
+  ('2e45aef0-b9de-4818-be95-b0cc2aececfc', 'Sample Access Token', 'A sample access token for the NVG Web Service', 'AaEge0eLJTP25aRAA5jIZxyzvejJBxPk+kAJDpv+5nc=', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '10 years');
 
 -- Update the link-text indexes
 REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_lts_attachments";
