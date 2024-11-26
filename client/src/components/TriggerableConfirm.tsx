@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { Button, Col, Modal } from "react-bootstrap"
+import { Button, Col, Modal, OverlayTrigger, Tooltip } from "react-bootstrap"
 import "./TriggerableConfirm.css"
 
 interface TriggerableConfirmProps {
@@ -14,6 +14,7 @@ interface TriggerableConfirmProps {
   renderTriggerButton?: boolean
   buttonLabel?: string
   buttonSize?: string
+  buttonTitle?: string
   buttonClassName?: string
   buttonDisabled?: boolean
   buttonId?: string
@@ -33,6 +34,7 @@ const TriggerableConfirm = ({
   renderTriggerButton = true,
   buttonLabel,
   buttonSize,
+  buttonTitle,
   buttonClassName,
   buttonDisabled,
   buttonId,
@@ -47,23 +49,31 @@ const TriggerableConfirm = ({
     }
   }
   const handleShow = () => setShow(true)
+  const ButtonElement = (
+    <Button
+      variant={variant}
+      onClick={handleShow}
+      size={buttonSize}
+      className={buttonClassName}
+      disabled={buttonDisabled}
+      id={buttonId}
+      ref={buttonRef}
+    >
+      {buttonLabel}
+      {children}
+    </Button>
+  )
+  const ButtonWithOptionalTooltip = buttonTitle ? (
+    <OverlayTrigger placement="top" overlay={<Tooltip>{buttonTitle}</Tooltip>}>
+      {ButtonElement}
+    </OverlayTrigger>
+  ) : (
+    ButtonElement
+  )
 
   return (
     <>
-      {renderTriggerButton && (
-        <Button
-          variant={variant}
-          onClick={handleShow}
-          size={buttonSize}
-          className={buttonClassName}
-          disabled={buttonDisabled}
-          id={buttonId}
-          ref={buttonRef}
-        >
-          {buttonLabel}
-          {children}
-        </Button>
-      )}
+      {renderTriggerButton && ButtonWithOptionalTooltip}
 
       <Modal
         centered
