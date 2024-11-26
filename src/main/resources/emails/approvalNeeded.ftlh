@@ -1,4 +1,5 @@
 <html>
+<head>
 <style type="text/css">
   body {
     font-family: Arial, Helvetica, SourceSansPro-Regular;
@@ -15,11 +16,11 @@
     color:#0072BD;
   }
 </style>
-
+</head>
 <body>
+<p style="font-size:12px; font-weight: bold;"><i>Classification: ${SECURITY_BANNER_CLASSIFICATION}</i></p>
 
-<p style="color:red; font-size:12px; font-weight: bold;" align="center"><i>Classification: ${SECURITY_BANNER_CLASSIFICATION}</i></p>
-Dear ${approvalStepName},
+<p>Dear ${approvalStepName},</p>
 <br><br>
 <div>
   This report, <a href="${serverUrl}/reports/${report.uuid}"><em><strong>"${reportIntent}"</strong></em></a>,
@@ -141,10 +142,10 @@ Dear ${approvalStepName},
   </div>
 </div>
 
-ANET Support Team
+<p>ANET Support Team
 <#if SUPPORT_EMAIL_ADDR??>
   <br><a href="mailto:${SUPPORT_EMAIL_ADDR}">${SUPPORT_EMAIL_ADDR}</a>
-</#if>
+</#if></p>
 
 </body>
 </html>

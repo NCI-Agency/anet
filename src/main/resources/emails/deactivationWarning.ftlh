@@ -1,4 +1,5 @@
 <html>
+<head>
 <style type="text/css">
 body {
 	font-family: Arial, Helvetica, SourceSansPro-Regular;
@@ -16,12 +17,13 @@ a {
 	color:#0072BD;
 }
 </style>
+</head>
 <body>
-<p style="color:red; font-size:12px; font-weight: bold;" align="center"><i>Classification: ${SECURITY_BANNER_CLASSIFICATION}</i></p>
+<p style="font-size:12px; font-weight: bold;"><i>Classification: ${SECURITY_BANNER_CLASSIFICATION}</i></p>
 
 <#assign rank = person.getRank()>
 <#assign name = person.getName()>
-${rank} ${name},
+<p>${rank} ${name},</p>
 
 <#assign endDate = person.getEndOfTourDate()>
 Your ANET end of tour date is ${(dateFormatter.format(endDate))!}. On this date, your ANET profile will be inactivated and you will no longer be able to use ANET.
@@ -40,10 +42,10 @@ Instructions for updating your end of tour date:
 </ol>
 
 ${nextEmailRemainder}
-ANET Support Team
+<p>ANET Support Team
 <#if SUPPORT_EMAIL_ADDR??>
   <br><a href="mailto:${SUPPORT_EMAIL_ADDR}">${SUPPORT_EMAIL_ADDR}</a>
-</#if>
+</#if></p>
 
 </body>
 </html>
