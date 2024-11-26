@@ -400,20 +400,6 @@ export default {
       value,
       label
     }))
-  },
-
-  toMilitaryName: function(name) {
-    const delimiter = name.indexOf(",")
-    let lastName = name
-    let firstName = ""
-
-    if (delimiter > -1) {
-      lastName = name.substring(0, delimiter)
-      firstName = name.substring(delimiter + 1, name.length)
-      return `${lastName.toUpperCase()}, ${firstName}`
-    }
-
-    return lastName.toUpperCase()
   }
 }
 

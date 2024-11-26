@@ -324,7 +324,7 @@ const PersonShow = ({ pageDispatchers }) => {
                         persistent
                       />
                     }{" "}
-                    {person.rank} {utils.toMilitaryName(person.name)}
+                    {person.rank} {Person.formattedMilitaryName(person.name)}
                   </>
                 }
                 action={action}
