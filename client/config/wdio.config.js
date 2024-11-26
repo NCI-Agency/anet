@@ -333,7 +333,7 @@ const config = {
 const testEnv =
   (process.env.GIT_TAG_NAME && "remote") || process.env.TEST_ENV || "local"
 if (testEnv !== "local") {
-  const capabilities = require("./browserstack.config.js")
+  const capabilities = require("./browserstack.config")
   const bsOptions = capabilities["bstack:options"]
   config.services = [
     [

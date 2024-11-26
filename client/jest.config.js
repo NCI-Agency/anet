@@ -17,9 +17,18 @@ module.exports = {
       }
     ]
   ],
-  setupFiles: ["<rootDir>/config/polyfills.js"],
-  setupFilesAfterEnv: ["<rootDir>/jest-setup.js"],
+  setupFiles: ["<rootDir>/config/polyfills"],
+  setupFilesAfterEnv: ["<rootDir>/jest-setup"],
   testEnvironment: "jsdom",
+  transform: {
+    "^.+\\.(js|jsx)$": "babel-jest",
+    "^.+\\.(ts|tsx)?$": [
+      "ts-jest",
+      {
+        isolatedModules: true
+      }
+    ]
+  },
   transformIgnorePatterns: [
     "<rootDir>/node_modules/(?!(change-case|jsonpath-plus|title-case)/)"
   ]

@@ -1,8 +1,5 @@
 module.exports = {
   env: {
-    prod: {
-      plugins: ["babel-plugin-transform-react-remove-prop-types"]
-    },
     test: {
       plugins: ["@babel/plugin-transform-modules-commonjs"]
     }

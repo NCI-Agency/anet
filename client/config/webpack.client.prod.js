@@ -5,7 +5,7 @@ const HtmlWebpackPlugin = require("html-webpack-plugin")
 const webpack = require("webpack")
 const { CleanWebpackPlugin } = require("clean-webpack-plugin")
 const paths = require("./paths")
-const common = require("./webpack.common.js")
+const common = require("./webpack.common")
 
 const clientConfig = merge.merge(common.clientConfig, {
   mode: "production",
