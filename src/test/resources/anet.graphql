@@ -1,4 +1,24 @@
 """"""
+type AccessToken {
+  createdAt: Instant
+  description: String
+  expiresAt: Instant
+  name: String
+  tokenHash: String
+  uuid: String
+}
+
+""""""
+input AccessTokenInput {
+  createdAt: Instant
+  description: String
+  expiresAt: Instant
+  name: String
+  tokenHash: String
+  uuid: String
+}
+
+""""""
 enum ActionType {
   APPROVE
   PUBLISH
@@ -658,6 +678,7 @@ type Mutation {
   approvePerson(uuid: String): Int
   approveReport(comment: CommentInput, uuid: String): Int!
   clearCache: String
+  createAccessToken(accessToken: AccessTokenInput): Int
   createAttachment(attachment: AttachmentInput): String
   createAuthorizationGroup(authorizationGroup: AuthorizationGroupInput): AuthorizationGroup
   createEvent(event: EventInput): Event
@@ -672,6 +693,7 @@ type Mutation {
   createSavedSearch(savedSearch: SavedSearchInput): SavedSearch
   createSubscription(subscription: SubscriptionInput): Subscription
   createTask(task: TaskInput): Task
+  deleteAccessToken(accessToken: AccessTokenInput): Int
   deleteAttachment(uuid: String): Int
   deleteEntityAvatar(relatedObjectType: String, relatedObjectUuid: String): Int
   deleteNote(uuid: String): Int
@@ -695,6 +717,7 @@ type Mutation {
   saveAdminSettings(settings: [AdminSettingInput]): Int
   submitReport(uuid: String): Int!
   unpublishReport(uuid: String): Int
+  updateAccessToken(accessToken: AccessTokenInput): Int
   updateAssociatedPosition(position: PositionInput): Int
   updateAttachment(attachment: AttachmentInput): String
   updateAuthorizationGroup(authorizationGroup: AuthorizationGroupInput): Int
@@ -1046,6 +1069,7 @@ enum PositionType {
 
 """Query root"""
 type Query {
+  accessTokenList: [AccessToken]
   adminSettings: [AdminSetting]
   advisorReportInsights(orgUuid: String = "-1", weeksAgo: Int = 3): [AdvisorReportsEntry]
   approvalStepInUse(uuid: String): Boolean!

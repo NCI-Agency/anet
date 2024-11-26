@@ -1,5 +1,6 @@
 import AppContext from "components/AppContext"
 import _isEmpty from "lodash/isEmpty"
+import AccessTokensList from "pages/admin/accessTokens/Index"
 import AdminIndex from "pages/admin/Index"
 import MergeLocations from "pages/admin/merge/MergeLocations"
 import MergeOrganizations from "pages/admin/merge/MergeOrganizations"
@@ -178,6 +179,7 @@ const Routing = () => {
             <Route path="overTime" element={<UserActivitiesOverTime />} />
           </Route>
           <Route path="pendingEmails" element={<PendingEmailsShow />} />
+          <Route path="accessTokens" element={<AccessTokensList />} />
           <Route path="graphiql" element={<GraphiQL />} />
         </Route>
       )}

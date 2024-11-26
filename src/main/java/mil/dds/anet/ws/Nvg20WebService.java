@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.leangen.graphql.spqr.spring.web.dto.GraphQLRequest;
 import jakarta.jws.WebService;
-import jakarta.xml.ws.WebServiceException;
 import java.math.BigInteger;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -14,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.xml.datatype.DatatypeFactory;
+import mil.dds.anet.beans.AccessToken;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
@@ -22,6 +22,7 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery;
 import mil.dds.anet.beans.search.ReportSearchSortBy;
 import mil.dds.anet.config.AnetConfig;
+import mil.dds.anet.database.AccessTokenDao;
 import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.resources.GraphQLResource;
 import nato.act.tide.wsdl.nvg20.CapabilityItemType;
@@ -41,7 +42,9 @@ import nato.act.tide.wsdl.nvg20.NvgType;
 import nato.act.tide.wsdl.nvg20.PointType;
 import nato.act.tide.wsdl.nvg20.SelectType;
 import nato.act.tide.wsdl.nvg20.SelectValueType;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 
 @Component
 @WebService(serviceName = "NvgService", targetNamespace = "urn:nato:common:wsdl:nvg20",
@@ -137,10 +140,13 @@ public class Nvg20WebService implements NVGPortType2012 {
 
   private final AnetConfig config;
   private final GraphQLResource graphQLResource;
+  private final AccessTokenDao accessTokenDao;
 
-  public Nvg20WebService(AnetConfig config, GraphQLResource graphQLResource) {
+  public Nvg20WebService(AnetConfig config, GraphQLResource graphQLResource,
+      AccessTokenDao accessTokenDao) {
     this.config = config;
     this.graphQLResource = graphQLResource;
+    this.accessTokenDao = accessTokenDao;
   }
 
   @Override
@@ -159,7 +165,6 @@ public class Nvg20WebService implements NVGPortType2012 {
 
   @Override
   public GetNvgResponse getNvg(GetNvg parameters) {
-    final GetNvgResponse response = new GetNvgResponse();
     final NvgFilterType nvgFilter = parameters.getNvgFilter();
     if (nvgFilter != null) {
       final List<Object> nvgQueryList =
@@ -181,15 +186,21 @@ public class Nvg20WebService implements NVGPortType2012 {
           }
         }
       }
-      if (!App6Symbology.isValidApp6Version(app6Version)) {
-        throw new WebServiceException("Invalid APP-6 version");
-      }
-      if (accessToken != null && accessToken.length() == 32) {
-        response.setNvg(makeNvg(app6Version, pastDays, futureDays));
-        return response;
+      if (accessToken != null && accessToken.length() == ACCESS_TOKEN_LENGTH) {
+        final AccessToken at = accessTokenDao.getByTokenValue(accessToken);
+        if (at != null && at.isValid()) {
+          if (!App6Symbology.isValidApp6Version(app6Version)) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                "Invalid APP-6 version");
+          }
+          final GetNvgResponse response = new GetNvgResponse();
+          response.setNvg(makeNvg(app6Version, pastDays, futureDays));
+          return response;
+        }
       }
     }
-    throw new WebServiceException("Must provide a Service Access Token");
+    throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+        "Must provide a valid Service Access Token");
   }
 
   private NvgType makeNvg(String app6Version, int pastDays, int futureDays) {

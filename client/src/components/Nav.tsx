@@ -421,6 +421,13 @@ const Navigation = ({
                   Pending emails
                 </SidebarLink>
                 <SidebarLink
+                  id="access-tokens"
+                  linkTo="/admin/accessTokens"
+                  handleOnClick={resetPages}
+                >
+                  Access tokens
+                </SidebarLink>
+                <SidebarLink
                   id="graphQL-nav"
                   linkTo="/admin/graphiql"
                   handleOnClick={resetPages}
