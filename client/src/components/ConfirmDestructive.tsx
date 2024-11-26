@@ -9,6 +9,7 @@ interface ConfirmDestructiveProps {
   variant?: string
   buttonLabel?: string
   buttonSize?: string
+  buttonTitle?: string
   buttonClassName?: string
   buttonDisabled?: boolean
   buttonId?: string
@@ -23,6 +24,7 @@ const ConfirmDestructive = ({
   variant,
   buttonLabel,
   buttonSize,
+  buttonTitle,
   buttonClassName,
   buttonDisabled,
   buttonId,
@@ -43,6 +45,7 @@ const ConfirmDestructive = ({
       variant={variant}
       buttonLabel={buttonLabel}
       buttonSize={buttonSize}
+      buttonTitle={buttonTitle}
       buttonClassName={buttonClassName}
       buttonDisabled={buttonDisabled}
       buttonId={buttonId}
