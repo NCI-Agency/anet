@@ -18,6 +18,7 @@ import {
 } from "components/Page"
 import { FastField, Form, Formik } from "formik"
 import _get from "lodash/get"
+import { clone } from "lodash/lang"
 import moment from "moment"
 import React, { useState } from "react"
 import {
@@ -73,6 +74,62 @@ const yupSchema = yup.object().shape({
     .required("You must give an access token an expiration")
     .default(null)
 })
+
+function createShortcut(label: string, date: Date, includeTime: boolean) {
+  return { date, includeTime, label }
+}
+
+function createExpirationShortcuts(withTime: boolean) {
+  const now = new Date()
+  const makeDate = (action: (d: Date) => void) => {
+    const date = clone(now)
+    action(date)
+    return date
+  }
+
+  return [
+    createShortcut(
+      "1 week",
+      makeDate((d: Date) => d.setDate(d.getDate() + 7)),
+      withTime
+    ),
+    createShortcut(
+      "1 month",
+      makeDate((d: Date) => d.setMonth(d.getMonth() + 1)),
+      withTime
+    ),
+    createShortcut(
+      "3 months",
+      makeDate((d: Date) => d.setMonth(d.getMonth() + 3)),
+      withTime
+    ),
+    createShortcut(
+      "6 months",
+      makeDate((d: Date) => d.setMonth(d.getMonth() + 6)),
+      withTime
+    ),
+    createShortcut(
+      "1 year",
+      makeDate((d: Date) => d.setFullYear(d.getFullYear() + 1)),
+      withTime
+    ),
+    createShortcut(
+      "2 years",
+      makeDate((d: Date) => d.setFullYear(d.getFullYear() + 2)),
+      withTime
+    ),
+    createShortcut(
+      "5 years",
+      makeDate((d: Date) => d.setFullYear(d.getFullYear() + 5)),
+      withTime
+    ),
+    createShortcut(
+      "10 years",
+      makeDate((d: Date) => d.setFullYear(d.getFullYear() + 10)),
+      withTime
+    )
+  ]
+}
 
 interface AccessTokensTableProps {
   accessTokens?: any[]
@@ -242,7 +299,13 @@ const AccessTokenModal = ({
                       setFieldValue("expiresAt", value, true)
                     }}
                     onBlur={() => setFieldTouched("expiresAt")}
-                    widget={<CustomDateInput id="expiresAt" withTime />}
+                    widget={
+                      <CustomDateInput
+                        id="expiresAt"
+                        withTime
+                        shortcuts={createExpirationShortcuts(true)}
+                      />
+                    }
                   />
                   {isNew && (
                     <FastField
