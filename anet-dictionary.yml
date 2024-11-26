@@ -1463,7 +1463,7 @@ fields:
                 - type: required
                   params: [You must provide the answer to advisorOnceReportLinguist.questionForNegative]
             questionForLin:
-              test: $.subject[?(@property === "name" && @ === "GUIST, Lin")]
+              test: $.subject[?(@property === "name" && @ === "Guist, Lin")]
               type: text
               label: This question applies only to Lin
               validations:
@@ -1778,10 +1778,10 @@ fields:
                   style:
                     height: 100px
         personOnceReportLinguistLin:
-          label: Engagement assessment of linguist GUIST, Lin
+          label: Engagement assessment of linguist Guist, Lin
           recurrence: once
           relatedObjectType: report
-          test: $.subject[?(@property === "name" && @ === "GUIST, Lin")]
+          test: $.subject[?(@property === "name" && @ === "Guist, Lin")]
           questions:
             requiredButFilteredOutQuestion:
               test: $.subject[?(@property === "noSuchProperty" && @.match(/^willNeverMatch/i))]
@@ -1844,7 +1844,7 @@ fields:
                 - type: required
                   params: [You must provide the answer to interlocutorMonthly.requiredButFilteredOutQuestion]
             questionForChristopf:
-              test: $.subject[?(@property === "name" && @ === "TOPFERNESS, Christopf")]
+              test: $.subject[?(@property === "name" && @ === "Topferness, Christopf")]
               type: text
               label: This question applies only to Christopf
               validations:
@@ -1988,7 +1988,7 @@ fields:
                 - type: required
                   params: [You must provide the answer to interlocutorOndemandScreeningAndVetting.requiredButFilteredOutQuestion]
             questionForChristopf:
-              test: $.subject[?(@property === "name" && @ === "TOPFERNESS, Christopf")]
+              test: $.subject[?(@property === "name" && @ === "Topferness, Christopf")]
               type: text
               label: This question applies only to Christopf
               validations:

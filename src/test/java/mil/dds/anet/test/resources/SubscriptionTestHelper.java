@@ -41,7 +41,7 @@ public abstract class SubscriptionTestHelper extends AbstractResourceTest {
       LocationDao.TABLE_NAME, "e5b3a4b9-acf7-4c79-8224-f248b9a7215d",
       // Organization: EF 5.1 (Creed's position's organization)
       OrganizationDao.TABLE_NAME, "7f939a44-b9e4-48e0-98f5-7d0ea38a6ecf",
-      // Person: BRATTON, Creed
+      // Person: Bratton, Creed
       PersonDao.TABLE_NAME, "31cba227-f6c6-49e9-9483-fce441bea624",
       // Position: EF 5.1 Advisor Quality Assurance (Creed's position)
       PositionDao.TABLE_NAME, "05c42ce0-34a0-4391-8b2f-c4cd85ee6b47",

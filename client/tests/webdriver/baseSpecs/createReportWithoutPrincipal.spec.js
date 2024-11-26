@@ -12,7 +12,7 @@ const REPORT_FIELDS = {
   duration: "60",
   location: "Cabot Tower",
   atmosphere: "Positive",
-  advisors: ["CIV REPORTGUY, Ima"],
+  advisors: ["CIV Reportguy, Ima"],
   tasks: ["2.A"],
   keyOutcomes: "Primary interlocutor attendee is not required",
   nextSteps: "Test steps",

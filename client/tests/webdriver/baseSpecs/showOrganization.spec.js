@@ -15,9 +15,9 @@ const EF2_ASSIGNED_TASKS = [
 ]
 const ORGANIZATION_EF22_SEARCH_STRING = "EF 2.2"
 const LEADER_POSITION_TEXT = "EF 2.2 Final Reviewer"
-const LEADER_PERSON_TEXT = "CTR BECCABON, Rebecca"
+const LEADER_PERSON_TEXT = "CTR Beccabon, Rebecca"
 const DEPUTY_POSITION_TEXT = "EF 2.2 Superuser"
-const DEPUTY_PERSON_TEXT = "CIV JACOBSON, Jacob"
+const DEPUTY_PERSON_TEXT = "CIV Jacobson, Jacob"
 
 describe("Show organization page", () => {
   describe("As an admin", () => {

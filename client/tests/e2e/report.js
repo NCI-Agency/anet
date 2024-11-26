@@ -82,7 +82,7 @@ test.serial("Draft and submit a report", async t => {
     "Interlocutor primary attendee checkbox should be checked"
   )
 
-  await assertElementText(t, $interlocutorName1, "CIV TOPFERNESS, Christopf")
+  await assertElementText(t, $interlocutorName1, "CIV Topferness, Christopf")
   await assertElementText(
     t,
     $interlocutorPosition1,
@@ -113,7 +113,7 @@ test.serial("Draft and submit a report", async t => {
     $interlocutorOrg2 /* eslint-enable no-unused-vars */
   ] = await $$(".interlocutorAttendeesTable tbody tr:last-child td")
 
-  await assertElementText(t, $interlocutorName2, "OF-4 STEVESON, Steve")
+  await assertElementText(t, $interlocutorName2, "OF-4 Steveson, Steve")
   const $interlocutorPrimaryInput2 = await $interlocutorControls2.findElement(
     By.css("[name = 'primaryAttendeeINTERLOCUTOR']")
   )

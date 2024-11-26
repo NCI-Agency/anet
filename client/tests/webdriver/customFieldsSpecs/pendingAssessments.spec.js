@@ -21,7 +21,7 @@ describe("In my counterparts page", () => {
     it("Should be able to add a quarterly assessment with 4 questions for the counterpart", async() => {
       await (
         await MyCounterparts.getMyPendingCounterpart(
-          "CIV TOPFERNESS, Christopf"
+          "CIV Topferness, Christopf"
         )
       ).click()
       await (
@@ -88,7 +88,7 @@ describe("In my counterparts page", () => {
     })
     it("Should be able to add a quarterly assessment with 1 question for the counterpart", async() => {
       await (
-        await MyCounterparts.getMyCounterpart("OF-3 ROGWELL, Roger")
+        await MyCounterparts.getMyCounterpart("OF-3 Rogwell, Roger")
       ).click()
       await (
         await AssessmentsSection.getAssessmentsSection(
@@ -293,9 +293,9 @@ describe("In new report page", () => {
     it("Should be able to add instant assessments for attendees", async() => {
       const report = {
         interlocutors: [
-          "OF-3 ROGWELL, Roger",
-          "OF-4 STEVESON, Steve",
-          "CIV HUNTMAN, Hunter"
+          "OF-3 Rogwell, Roger",
+          "OF-4 Steveson, Steve",
+          "CIV Huntman, Hunter"
         ]
       }
       await CreateReport.fillForm(report)
@@ -309,19 +309,19 @@ describe("In new report page", () => {
         const assessment = attendeeAssessmentRows[i + 1]
         const questions = await assessment.$$("td > div")
         switch (await attendee.getText()) {
-          case "OF-3 ROGWELL, Roger":
+          case "OF-3 Rogwell, Roger":
             expect(questions).to.have.length(2)
             expect(await questions[1].getAttribute("id")).to.match(
               /\.question2$/
             )
             break
-          case "OF-4 STEVESON, Steve":
+          case "OF-4 Steveson, Steve":
             expect(questions).to.have.length(2)
             expect(await questions[1].getAttribute("id")).to.match(
               /\.question3$/
             )
             break
-          case "CIV HUNTMAN, Hunter":
+          case "CIV Huntman, Hunter":
             expect(questions).to.have.length(1)
             break
           default:
@@ -343,13 +343,13 @@ describe("In new report page", () => {
         const assessment = attendeeAssessmentRows[i + 1]
         const questions = await assessment.$$("td > div")
         switch (await attendee.getText()) {
-          case "OF-3 ROGWELL, Roger":
+          case "OF-3 Rogwell, Roger":
             expect(questions).to.have.length(3)
             break
-          case "OF-4 STEVESON, Steve":
+          case "OF-4 Steveson, Steve":
             expect(questions).to.have.length(3)
             break
-          case "CIV HUNTMAN, Hunter":
+          case "CIV Huntman, Hunter":
             expect(questions).to.have.length(2)
             break
           default:
