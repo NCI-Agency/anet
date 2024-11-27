@@ -113,7 +113,7 @@ const PersonEdit = ({ pageDispatchers }) => {
     }
   }
   const person = new Person(data ? data.person : {})
-  const personName = Person.formattedMilitaryName(person.name)
+  const personName = Person.militaryName(person.name)
   const isPending =
     person.isPendingVerification() && Person.isEqual(currentUser, person)
   const legendText = isPending ? "Create your account" : `Edit ${personName}`

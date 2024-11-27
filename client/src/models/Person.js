@@ -324,7 +324,7 @@ export default class Person extends Model {
   }
 
   toString() {
-    const militaryName = Person.formattedMilitaryName(this.name)
+    const militaryName = Person.militaryName(this.name)
     if (this.rank) {
       return this.rank + " " + militaryName
     } else {
@@ -352,6 +352,14 @@ export default class Person extends Model {
     return r
   }
 
+  static militaryName(name) {
+    const parsedName = Person.parseFullName(name)
+    if (parsedName.lastName) {
+      parsedName.lastName = parsedName.lastName.toUpperCase()
+    }
+    return Person.fullName(parsedName)
+  }
+
   static formattedFirstName(firstName, doTrim) {
     let r = firstName
     if (doTrim) {
@@ -374,20 +382,6 @@ export default class Person extends Model {
       lastName: lastName.trim(),
       firstName: firstName.trim()
     }
-  }
-
-  static formattedMilitaryName(name) {
-    const delimiter = name.indexOf(Person.delimiter)
-    let lastName = name
-    let firstName = ""
-
-    if (delimiter > -1) {
-      lastName = name.substring(0, delimiter)
-      firstName = name.substring(delimiter + 1, name.length)
-      return `${lastName.toUpperCase()}, ${firstName}`
-    }
-
-    return lastName.toUpperCase()
   }
 
   getNumberOfFieldsInLeftColumn() {
