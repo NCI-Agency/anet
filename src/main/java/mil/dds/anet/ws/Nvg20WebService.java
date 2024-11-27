@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import javax.xml.datatype.DatatypeFactory;
 import mil.dds.anet.beans.AccessToken;
 import mil.dds.anet.beans.Location;
@@ -25,6 +26,7 @@ import mil.dds.anet.config.AnetConfig;
 import mil.dds.anet.database.AccessTokenDao;
 import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.resources.GraphQLResource;
+import mil.dds.anet.utils.DaoUtils;
 import nato.act.tide.wsdl.nvg20.CapabilityItemType;
 import nato.act.tide.wsdl.nvg20.ContentType;
 import nato.act.tide.wsdl.nvg20.GetCapabilities;
@@ -39,6 +41,7 @@ import nato.act.tide.wsdl.nvg20.NVGPortType2012;
 import nato.act.tide.wsdl.nvg20.NvgCapabilitiesType;
 import nato.act.tide.wsdl.nvg20.NvgFilterType;
 import nato.act.tide.wsdl.nvg20.NvgType;
+import nato.act.tide.wsdl.nvg20.ObjectFactory;
 import nato.act.tide.wsdl.nvg20.PointType;
 import nato.act.tide.wsdl.nvg20.SelectType;
 import nato.act.tide.wsdl.nvg20.SelectValueType;
@@ -52,6 +55,8 @@ import org.springframework.web.server.ResponseStatusException;
 public class Nvg20WebService implements NVGPortType2012 {
 
   private static final String NVG_VERSION = "2.0.2";
+  private static final ObjectFactory NVG_OF = new ObjectFactory();
+  private static final TimeZone TZ_UTC = TimeZone.getTimeZone(DaoUtils.getServerNativeZoneId());
 
   static final class App6Symbology {
     static final String SYMBOL_PREFIX_APP6B = "app6b";
@@ -151,8 +156,8 @@ public class Nvg20WebService implements NVGPortType2012 {
 
   @Override
   public GetCapabilitiesResponse getCapabilities(GetCapabilities parameters) {
-    final GetCapabilitiesResponse response = new GetCapabilitiesResponse();
-    final NvgCapabilitiesType nvgCapabilitiesType = new NvgCapabilitiesType();
+    final GetCapabilitiesResponse response = NVG_OF.createGetCapabilitiesResponse();
+    final NvgCapabilitiesType nvgCapabilitiesType = NVG_OF.createNvgCapabilitiesType();
     final List<CapabilityItemType> capabilityItemTypeList =
         nvgCapabilitiesType.getInputOrSelectOrTable();
     capabilityItemTypeList.add(makeAccessTokenType());
@@ -193,7 +198,7 @@ public class Nvg20WebService implements NVGPortType2012 {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                 "Invalid APP-6 version");
           }
-          final GetNvgResponse response = new GetNvgResponse();
+          final GetNvgResponse response = NVG_OF.createGetNvgResponse();
           response.setNvg(makeNvg(app6Version, pastDays, futureDays));
           return response;
         }
@@ -204,7 +209,7 @@ public class Nvg20WebService implements NVGPortType2012 {
   }
 
   private NvgType makeNvg(String app6Version, int pastDays, int futureDays) {
-    final NvgType nvgType = new NvgType();
+    final NvgType nvgType = NVG_OF.createNvgType();
     nvgType.setVersion(NVG_VERSION);
     final List<ContentType> contentTypeList = nvgType.getGOrCompositeOrText();
 
@@ -223,7 +228,7 @@ public class Nvg20WebService implements NVGPortType2012 {
   }
 
   private PointType reportToNvgPoint(String app6Version, Instant reportingTime, Report report) {
-    final PointType nvgPoint = new PointType();
+    final PointType nvgPoint = NVG_OF.createPointType();
     nvgPoint.setLabel(report.getIntent());
     nvgPoint.setUri(String.format("urn:anet:reports:%1$s", report.getUuid()));
     setTimeStamp(report, nvgPoint);
@@ -242,7 +247,7 @@ public class Nvg20WebService implements NVGPortType2012 {
 
   private void setTimeStamp(Report report, PointType nvgPoint) {
     try {
-      final GregorianCalendar gc = new GregorianCalendar();
+      final GregorianCalendar gc = new GregorianCalendar(TZ_UTC);
       // TODO: Should we be using `updatedAt` here?
       gc.setTimeInMillis(report.getEngagementDate().toEpochMilli());
       nvgPoint.setTimeStamp(DatatypeFactory.newInstance().newXMLGregorianCalendar(gc));
@@ -283,13 +288,13 @@ public class Nvg20WebService implements NVGPortType2012 {
   }
 
   private InputType makeAccessTokenType() {
-    final InputType inputType = new InputType();
+    final InputType inputType = NVG_OF.createInputType();
     inputType.setId(ACCESS_TOKEN_ID);
     inputType.setRequired(true);
     inputType.setType(InputTypeType.STRING);
     inputType.setName("Service Access Token");
     inputType.setLength(BigInteger.valueOf(ACCESS_TOKEN_LENGTH));
-    final HelpType helpType = new HelpType();
+    final HelpType helpType = NVG_OF.createHelpType();
     helpType.setText(
         "The access token required for authentication; the token can be provided by the ANET administrator");
     inputType.setHelp(helpType);
@@ -297,22 +302,22 @@ public class Nvg20WebService implements NVGPortType2012 {
   }
 
   private SelectType makeApp6VersionType() {
-    final SelectType selectType = new SelectType();
+    final SelectType selectType = NVG_OF.createSelectType();
     selectType.setId(APP6_VERSION_ID);
     selectType.setRequired(false);
     selectType.setName("APP-6 version");
-    final SelectType.Values values = new SelectType.Values();
+    final SelectType.Values values = NVG_OF.createSelectTypeValues();
     values.getValue().add(getSelectValueType(App6Symbology.SYMBOL_PREFIX_APP6B, "APP-6(B)", false));
     values.getValue().add(getSelectValueType(App6Symbology.SYMBOL_PREFIX_APP6D, "APP-6(D)", true));
     selectType.setValues(values);
-    final HelpType helpType = new HelpType();
+    final HelpType helpType = NVG_OF.createHelpType();
     helpType.setText("The APP-6 version to use for the symbology");
     selectType.setHelp(helpType);
     return selectType;
   }
 
   private SelectValueType getSelectValueType(String id, String value, boolean selected) {
-    final SelectValueType selectValueType = new SelectValueType();
+    final SelectValueType selectValueType = NVG_OF.createSelectValueType();
     selectValueType.setId(id);
     selectValueType.setName(value);
     selectValueType.setSelected(selected);
@@ -320,26 +325,26 @@ public class Nvg20WebService implements NVGPortType2012 {
   }
 
   private InputType makePastPeriodInDays() {
-    final InputType inputType = new InputType();
+    final InputType inputType = NVG_OF.createInputType();
     inputType.setId(PAST_PERIOD_IN_DAYS_ID);
     inputType.setRequired(false);
     inputType.setType(InputTypeType.INT);
     inputType.setName("Past engagement period in days");
     inputType.setDefault(String.valueOf(DEFAULT_PAST_PERIOD_IN_DAYS));
-    final HelpType helpType = new HelpType();
+    final HelpType helpType = NVG_OF.createHelpType();
     helpType.setText("Past period over which you want to retrieve engagements");
     inputType.setHelp(helpType);
     return inputType;
   }
 
   private InputType makeFuturePeriodInDays() {
-    final InputType inputType = new InputType();
+    final InputType inputType = NVG_OF.createInputType();
     inputType.setId(FUTURE_PERIOD_IN_DAYS_ID);
     inputType.setRequired(false);
     inputType.setType(InputTypeType.INT);
     inputType.setName("Future engagement period in days");
     inputType.setDefault(String.valueOf(DEFAULT_FUTURE_PERIOD_IN_DAYS));
-    final HelpType helpType = new HelpType();
+    final HelpType helpType = NVG_OF.createHelpType();
     helpType.setText("Future period over which you want to retrieve engagements");
     inputType.setHelp(helpType);
     return inputType;
