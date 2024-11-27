@@ -1,5 +1,5 @@
 import { gql } from "@apollo/client"
-import { Icon } from "@blueprintjs/core"
+import { Icon, Intent } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
@@ -173,6 +173,18 @@ const AccessTokensTable = ({
                 )}
               </td>
               <td>
+                {moment(at.expiresAt).isBefore(moment()) && (
+                  <OverlayTrigger
+                    placement="top"
+                    overlay={<Tooltip>Access token has expired!</Tooltip>}
+                  >
+                    <Icon
+                      icon={IconNames.WARNING_SIGN}
+                      intent={Intent.WARNING}
+                      className="me-1"
+                    />
+                  </OverlayTrigger>
+                )}
                 {moment(at.expiresAt).format(
                   Settings.dateFormats.forms.displayShort.withTime
                 )}
