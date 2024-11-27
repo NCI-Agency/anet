@@ -297,7 +297,8 @@ const AdminIndex = ({ pageDispatchers }: AdminIndexProps) => {
                       setFieldTouched,
                       setFieldValue
                     )
-                    return <Field {...fieldProps} />
+                    const { key: fieldKey, ...otherProps } = fieldProps
+                    return <Field key={fieldKey} {...otherProps} />
                   })}
                 </Fieldset>
                 <div className="submit-buttons">
