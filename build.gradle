@@ -288,7 +288,12 @@ task cxfNvg20(type: Wsdl2Java) {
 		wsdlLocation.set("classpath:${mainWsdl}")
 		markGenerated.set(true)
 		outputDir.set(file(cxfSources))
-		packageNames.set(['nato.act.tide.wsdl.nvg20'])
+		packageNames.set([
+			'https://tide.act.nato.int/schemas/2012/10/nvg=nato.act.tide.wsdl.nvg20',
+			'https://tide.act.nato.int/wsdl/2012/nvg=nato.act.tide.wsdl.nvg20',
+			'urn:nato:common:wsdl:nvg20=nato.act.tide.wsdl.nvg20',
+			'urn:nato:stanag:4774:confidentialitymetadatalabel:1:0=nato.stanag4774.confidentialitymetadatalabel10'
+		])
 	}
 }
 
