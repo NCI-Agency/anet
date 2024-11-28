@@ -48,7 +48,7 @@ describe("Anet superuser login", () => {
   it("Superuser is logged in", async() => {
     await Home.openAsSuperuser()
     const bannerUser = await (await Home.getBannerUser()).getText()
-    const superuserValue = "Beccabon, Rebecca"
+    const superuserValue = "BECCABON, Rebecca"
     expect(bannerUser).to.equal(superuserValue)
     await Home.logout()
   })
@@ -58,7 +58,7 @@ describe("Anet admin user login", () => {
   it("Admin user is logged in", async() => {
     await Home.openAsAdminUser()
     const bannerUser = await (await Home.getBannerUser()).getText()
-    const adminUserValue = "Dmin, Arthur"
+    const adminUserValue = "DMIN, Arthur"
     expect(bannerUser).to.equal(adminUserValue)
     await Home.logout()
   })

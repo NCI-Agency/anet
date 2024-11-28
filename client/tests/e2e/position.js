@@ -22,7 +22,7 @@ test.serial("Move someone in and out of a position", async t => {
 
   const positionName = "EF 2.2 Advisor C"
   const positionRole = "Member"
-  const person = "Reinton, Reina"
+  const person = "REINTON, Reina"
   const rank = "CIV"
   const personName = rank + " " + person
 
@@ -222,33 +222,33 @@ test.serial("Update permissions while changing positions", async t => {
   const testUsers = [
     {
       positionName: "EF 5 Admin",
-      person: "Scott, Michael",
+      person: "SCOTT, Michael",
       rank: "CIV",
-      personName: "CIV Scott, Michael"
+      personName: "CIV SCOTT, Michael"
     },
     {
       positionName: "EF 5.1 Advisor Quality Assurance",
-      person: "Bratton, Creed",
+      person: "BRATTON, Creed",
       rank: "CIV",
-      personName: "CIV Bratton, Creed"
+      personName: "CIV BRATTON, Creed"
     },
     {
       positionName: "EF 5.1 Advisor Accounting",
-      person: "Malone, Kevin",
+      person: "MALONE, Kevin",
       rank: "CIV",
-      personName: "CIV Malone, Kevin"
+      personName: "CIV MALONE, Kevin"
     },
     {
       positionName: "EF 5.1 Superuser Sales 1",
-      person: "Halpert, Jim",
+      person: "HALPERT, Jim",
       rank: "CIV",
-      personName: "CIV Halpert, Jim"
+      personName: "CIV HALPERT, Jim"
     },
     {
       positionName: "EF 5.1 Superuser Sales 2",
-      person: "Schrute, Dwight",
+      person: "SCHRUTE, Dwight",
       rank: "CIV",
-      personName: "CIV Schrute, Dwight"
+      personName: "CIV SCHRUTE, Dwight"
     }
   ]
 

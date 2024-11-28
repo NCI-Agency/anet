@@ -11,14 +11,14 @@ const EXAMPLE_POSITIONS = {
     role: "Deputy",
     status: "ACTIVE",
     email: "Network Address\nInternet mergeOne@mod.example.com",
-    person: "CIV Bemerged, Myposwill",
+    person: "CIV BEMERGED, Myposwill",
     associatedPositions: [
       { person: "Unfilled", position: "EF 1.1 Advisor B" },
       { person: "Unfilled", position: "EF 1.1 Advisor C" }
     ],
     previousPeople: [
       {
-        name: "CIV Bemerged, Myposwill",
+        name: "CIV BEMERGED, Myposwill",
         date: `${moment("2020-01-01").format("D MMMM YYYY")} -  `
       }
     ],

@@ -16,8 +16,8 @@ describe("When creating a Report with conflicts", () => {
       .seconds(0)
       .milliseconds(0),
     duration: "60",
-    advisors: ["CIV Reportguy, Ima"],
-    interlocutors: ["CIV Kyleson, Kyle"]
+    advisors: ["CIV REPORTGUY, Ima"],
+    interlocutors: ["CIV KYLESON, Kyle"]
   }
   const report02 = {
     intent: "2222222222",
@@ -28,8 +28,8 @@ describe("When creating a Report with conflicts", () => {
       .seconds(0)
       .milliseconds(0),
     duration: "10",
-    advisors: ["CIV Reportguy, Ima", "CIV Reportgirl, Ima"],
-    interlocutors: ["CIV Kyleson, Kyle", "OF-3 Chrisville, Chris"]
+    advisors: ["CIV REPORTGUY, Ima", "CIV REPORTGIRL, Ima"],
+    interlocutors: ["CIV KYLESON, Kyle", "OF-3 CHRISVILLE, Chris"]
   }
 
   it("Should create first draft report without any conflicts", async() => {
@@ -196,20 +196,20 @@ describe("When creating a Report with conflicts", () => {
     expect(await advisor01.conflictButton.isExisting()).to.equal(true)
     expect(await advisor01.conflictButton.getText()).to.match(/conflict/)
 
-    const advisor02 = await ShowReport.getAttendeeByName("CIV Reportgirl, Ima")
+    const advisor02 = await ShowReport.getAttendeeByName("CIV REPORTGIRL, Ima")
     expect(await advisor02.conflictButton.isExisting()).to.equal(false)
 
-    const advisor03 = await ShowReport.getAttendeeByName("CIV Reportguy, Ima")
+    const advisor03 = await ShowReport.getAttendeeByName("CIV REPORTGUY, Ima")
     expect(await advisor03.conflictButton.isExisting()).to.equal(true)
     expect(await advisor03.conflictButton.getText()).to.match(/conflict/)
 
     const interlocutor01 =
-      await ShowReport.getAttendeeByName("CIV Kyleson, Kyle")
+      await ShowReport.getAttendeeByName("CIV KYLESON, Kyle")
     expect(await interlocutor01.conflictButton.isExisting()).to.equal(true)
     expect(await interlocutor01.conflictButton.getText()).to.match(/conflict/)
 
     const interlocutor02 = await ShowReport.getAttendeeByName(
-      "OF-3 Chrisville, Chris"
+      "OF-3 CHRISVILLE, Chris"
     )
     expect(await interlocutor02.conflictButton.isExisting()).to.equal(false)
   })

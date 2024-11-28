@@ -5,9 +5,9 @@ import ShowReport from "../pages/report/showReport.page"
 
 const AUTHOR_NAME = "Erinson, Erin"
 const AUTHOR = `CIV ${AUTHOR_NAME}`
-const ADVISOR_NAME = "Dvisor, A"
+const ADVISOR_NAME = "DVISOR, A"
 const ADVISOR = `OF-2 ${ADVISOR_NAME}`
-const INTERLOCUTOR_NAME = "Solenoid, Selena"
+const INTERLOCUTOR_NAME = "SOLENOID, Selena"
 const INTERLOCUTOR = `CIV ${INTERLOCUTOR_NAME}`
 const REPORT_FIELDS = {
   intent: "Show attendee positions based on engagement date",

@@ -8,8 +8,8 @@ const hasCustomFields = !!Settings?.fields?.person?.customFields
 const EXAMPLE_PEOPLE = {
   validLeft: {
     search: "winner",
-    fullName: "CIV Merged, Duplicate Winner",
-    name: "Merged, Duplicate Winner",
+    fullName: "CIV MERGED, Duplicate Winner",
+    name: "MERGED, Duplicate Winner",
     user: "No",
     position: "Chief of Merge People Test 1",
     status: "ACTIVE",
@@ -35,8 +35,8 @@ const EXAMPLE_PEOPLE = {
   },
   validRight: {
     search: "loser",
-    fullName: "CTR Merged, Duplicate Loser",
-    name: "Merged, Duplicate Loser",
+    fullName: "CTR MERGED, Duplicate Loser",
+    name: "MERGED, Duplicate Loser",
     user: "No",
     position: "Chief of Merge People Test 2",
     status: "ACTIVE",
@@ -62,8 +62,8 @@ const EXAMPLE_PEOPLE = {
   },
   userRight: {
     search: "andrew",
-    fullName: "CIV Anderson, Andrew",
-    name: "Anderson, Andrew",
+    fullName: "CIV ANDERSON, Andrew",
+    name: "ANDERSON, Andrew",
     user: "Yes",
     position: "EF 1 Manager",
     status: "ACTIVE",

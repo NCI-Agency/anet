@@ -37,7 +37,7 @@ test.serial("checking superuser permissions", async t => {
 
   const $rebeccaLink = await findSuperuserLink(
     t,
-    "CTR Beccabon, Rebecca",
+    "CTR BECCABON, Rebecca",
     "EF 2.2"
   )
 
@@ -55,7 +55,7 @@ test.serial("checking superuser permissions", async t => {
   await t.context.get("/", "rebecca")
   await pageHelpers.clickMenuLinksButton()
   await pageHelpers.clickMyOrgLink()
-  const $jacobLink = await findSuperuserLink(t, "CIV Jacobson, Jacob", "EF 2.2")
+  const $jacobLink = await findSuperuserLink(t, "CIV JACOBSON, Jacob", "EF 2.2")
   await $jacobLink.click()
   await t.context.driver.wait(t.context.untilStalenessOf($jacobLink))
 
@@ -133,11 +133,11 @@ test.serial("checking superuser permissions", async t => {
   // Check that Andrew is (also) superuser of EF 1.1
   await findSuperuserLink(
     t,
-    "CIV Anderson, Andrew",
+    "CIV ANDERSON, Andrew",
     "EF 1 | Planning Programming, Budgeting and Execution"
   )
   await pageHelpers.clickPersonNameFromSupportedPositionsFieldset(
-    "OF-2 Elizawell, Elizabeth"
+    "OF-2 ELIZAWELL, Elizabeth"
   )
   await t.context.driver.sleep(shortWaitMs) // wait for transition
   await validateUserCanEditUserForCurrentPage(t, true)
@@ -152,9 +152,9 @@ test.serial("checking superuser permissions", async t => {
   )
   await $modLink.click()
   // Check that Bob is (also) superuser of MoD
-  await findSuperuserLink(t, "CIV Bobtown, Bob", "MoD | Ministry of Defense")
+  await findSuperuserLink(t, "CIV BOBTOWN, Bob", "MoD | Ministry of Defense")
   await pageHelpers.clickPersonNameFromSupportedPositionsFieldset(
-    "CIV Kyleson, Kyle"
+    "CIV KYLESON, Kyle"
   )
   await t.context.driver.sleep(shortWaitMs) // wait for transition
   await validateUserCanEditUserForCurrentPage(t, true)
@@ -182,7 +182,7 @@ validateUserCannotEditOtherUser(
   "superuser cannot edit administrator",
   "rebecca",
   "arthur",
-  "CIV Dmin, Arthur",
+  "CIV DMIN, Arthur",
   "ANET Administrator"
 )
 
@@ -190,7 +190,7 @@ validateUserCannotEditOtherUser(
   "superuser cannot edit people from the organizations their position is not administrating",
   "jacob",
   "andrew",
-  "CIV Anderson, Andrew",
+  "CIV ANDERSON, Andrew",
   "EF 1 Manager"
 )
 
@@ -203,7 +203,7 @@ test.serial("checking regular user permissions", async t => {
   await pageHelpers.clickMenuLinksButton()
   await pageHelpers.clickMyOrgLink()
   await pageHelpers.clickPersonNameFromSupportedPositionsFieldset(
-    "OF-9 Jackson, Jack"
+    "OF-9 JACKSON, Jack"
   )
   await t.context.driver.sleep(shortWaitMs) // wait for transition
 
@@ -225,7 +225,7 @@ validateUserCannotEditOtherUser(
   "Regular user cannot edit superuser people or positions",
   "jack",
   "rebecca",
-  "CTR Beccabon, Rebecca",
+  "CTR BECCABON, Rebecca",
   "EF 2.2 Final Reviewer"
 )
 
@@ -233,7 +233,7 @@ validateUserCannotEditOtherUser(
   "Regular user cannot edit admin people or positions",
   "jack",
   "arthur",
-  "CIV Dmin, Arthur",
+  "CIV DMIN, Arthur",
   "ANET Administrator"
 )
 
@@ -271,7 +271,7 @@ test.serial("checking admin permissions", async t => {
   await t.context.pageHelpers.clickMyOrgLink()
 
   const element = await t.context.driver.findElement(
-    By.linkText("CIV Dmin, Arthur")
+    By.linkText("CIV DMIN, Arthur")
   )
   await element.click()
 
@@ -308,7 +308,7 @@ test.serial("admins can edit superusers and their positions", async t => {
   const $rebeccaPersonLink = await getFromSearchResults(
     t,
     "rebecca",
-    "CTR Beccabon, Rebecca",
+    "CTR BECCABON, Rebecca",
     "people"
   )
   await $rebeccaPersonLink.click()

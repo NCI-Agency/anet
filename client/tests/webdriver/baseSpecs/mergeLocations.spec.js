@@ -11,7 +11,7 @@ const EXAMPLE_LOCATIONS = {
     status: "ACTIVE",
     parentLocations: "Name Type\nPortugal Country",
     planningApprovalSteps:
-      "Location planning approval for merge winner\nPerson Position\nOF-2 Elizawell, Elizabeth EF 1.1 Advisor A",
+      "Location planning approval for merge winner\nPerson Position\nOF-2 ELIZAWELL, Elizabeth EF 1.1 Advisor A",
     approvalSteps:
       "Location publication approval for merge winner\nPerson Position\nUnfilled EF 1.1 Advisor B"
   },
@@ -37,7 +37,7 @@ const EXAMPLE_LOCATIONS = {
     status: "ACTIVE",
     parentLocations: "Name Type\nFrench Southern Territories Country",
     planningApprovalSteps:
-      "Location planning approval for merge loser\nPerson Position\nCIV Reinton, Reina EF 2.2 Advisor C",
+      "Location planning approval for merge loser\nPerson Position\nCIV REINTON, Reina EF 2.2 Advisor C",
     approvalSteps:
       "Location publication approval for merge loser\nPerson Position\nCIV Erinson, Erin EF 2.2 Advisor D"
   }
