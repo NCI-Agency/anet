@@ -41,8 +41,8 @@ binding metadata to data objects.
       defined in the NATO Core Metadata Specification NCMS)) to data objects.
     </xs:documentation>
   </xs:annotation>
-  <xs:import namespace="http://www.w3.org/2000/09/xmldsig#" schemaLocation="http://www.w3.org/2000/09/xmldsig#"/>
-  <xs:import namespace="http://www.w3.org/2005/05/xmlmime" schemaLocation="http://www.w3.org/2005/05/xmlmime"/>
+  <xs:import namespace="http://www.w3.org/2000/09/xmldsig#" schemaLocation="../../../w3/xmldsig-core-schema.xsd"/>
+  <xs:import namespace="http://www.w3.org/2005/05/xmlmime" schemaLocation="../../../w3/xmlmime.xsd"/>
   <xs:element name="BindingInformation" type="mb:BindingInformationType"/>
   <xs:complexType name="BindingInformationType" id="bindingInformationType">
     <xs:annotation>
