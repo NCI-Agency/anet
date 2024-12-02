@@ -4,15 +4,18 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.leangen.graphql.spqr.spring.web.dto.GraphQLRequest;
 import jakarta.jws.WebService;
+import jakarta.xml.bind.JAXBElement;
 import java.math.BigInteger;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.regex.Pattern;
 import javax.xml.datatype.DatatypeFactory;
 import mil.dds.anet.beans.AccessToken;
 import mil.dds.anet.beans.Location;
@@ -23,12 +26,16 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery;
 import mil.dds.anet.beans.search.ReportSearchSortBy;
 import mil.dds.anet.config.AnetConfig;
+import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.database.AccessTokenDao;
+import mil.dds.anet.database.AdminDao;
 import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.resources.GraphQLResource;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.Utils;
 import nato.act.tide.wsdl.nvg20.CapabilityItemType;
 import nato.act.tide.wsdl.nvg20.ContentType;
+import nato.act.tide.wsdl.nvg20.ExtensionType;
 import nato.act.tide.wsdl.nvg20.GetCapabilities;
 import nato.act.tide.wsdl.nvg20.GetCapabilitiesResponse;
 import nato.act.tide.wsdl.nvg20.GetNvg;
@@ -41,10 +48,19 @@ import nato.act.tide.wsdl.nvg20.NVGPortType2012;
 import nato.act.tide.wsdl.nvg20.NvgCapabilitiesType;
 import nato.act.tide.wsdl.nvg20.NvgFilterType;
 import nato.act.tide.wsdl.nvg20.NvgType;
-import nato.act.tide.wsdl.nvg20.ObjectFactory;
 import nato.act.tide.wsdl.nvg20.PointType;
 import nato.act.tide.wsdl.nvg20.SelectType;
 import nato.act.tide.wsdl.nvg20.SelectValueType;
+import nato.stanag4774.confidentialitymetadatalabel10.CategoryType;
+import nato.stanag4774.confidentialitymetadatalabel10.ClassificationType;
+import nato.stanag4774.confidentialitymetadatalabel10.ConfidentialityInformationType;
+import nato.stanag4774.confidentialitymetadatalabel10.ConfidentialityLabelType;
+import nato.stanag4774.confidentialitymetadatalabel10.PolicyIdentifierType;
+import nato.stanag4778.bindinginformation10.BindingInformationType;
+import nato.stanag4778.bindinginformation10.MetadataBindingContainerType;
+import nato.stanag4778.bindinginformation10.MetadataBindingType;
+import nato.stanag4778.bindinginformation10.MetadataType;
+import org.apache.commons.lang3.RegExUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
@@ -55,7 +71,12 @@ import org.springframework.web.server.ResponseStatusException;
 public class Nvg20WebService implements NVGPortType2012 {
 
   private static final String NVG_VERSION = "2.0.2";
-  private static final ObjectFactory NVG_OF = new ObjectFactory();
+  private static final nato.act.tide.wsdl.nvg20.ObjectFactory NVG_OF =
+      new nato.act.tide.wsdl.nvg20.ObjectFactory();
+  private static final nato.stanag4774.confidentialitymetadatalabel10.ObjectFactory CML_OF =
+      new nato.stanag4774.confidentialitymetadatalabel10.ObjectFactory();
+  private static final nato.stanag4778.bindinginformation10.ObjectFactory BI_OF =
+      new nato.stanag4778.bindinginformation10.ObjectFactory();
   private static final TimeZone TZ_UTC = TimeZone.getTimeZone(DaoUtils.getServerNativeZoneId());
 
   static final class App6Symbology {
@@ -126,11 +147,17 @@ public class Nvg20WebService implements NVGPortType2012 {
   private static final int DEFAULT_PAST_PERIOD_IN_DAYS = 7;
   private static final String FUTURE_PERIOD_IN_DAYS_ID = "futureDays";
   private static final int DEFAULT_FUTURE_PERIOD_IN_DAYS = 0;
+  private static final String INCLUDE_DOCUMENT_CONFIDENTIALITY_LABEL =
+      "includeDocumentConfidentialityLabel";
+  private static final boolean DEFAULT_INCLUDE_DOCUMENT_CONFIDENTIALITY_LABEL = false;
+  private static final String INCLUDE_ELEMENT_CONFIDENTIALITY_LABELS =
+      "includeElementConfidentialityLabels";
+  private static final boolean DEFAULT_INCLUDE_ELEMENT_CONFIDENTIALITY_LABELS = false;
 
   private static final String REPORT_QUERY = "query ($reportQuery: ReportSearchQueryInput) {" // -
       + " reportList(query: $reportQuery) {" // -
       + " totalCount list {" // -
-      + " uuid intent engagementDate duration keyOutcomes nextSteps" // -
+      + " uuid intent engagementDate duration keyOutcomes nextSteps classification" // -
       + " primaryAdvisor { uuid name rank }" // -
       + " primaryInterlocutor { uuid name rank }" // -
       + " advisorOrg { uuid shortName longName identificationCode }" // -
@@ -144,14 +171,18 @@ public class Nvg20WebService implements NVGPortType2012 {
       "sortOrder", ISearchQuery.SortOrder.DESC);
 
   private final AnetConfig config;
+  private final AnetDictionary dict;
   private final GraphQLResource graphQLResource;
   private final AccessTokenDao accessTokenDao;
+  private final AdminDao adminDao;
 
-  public Nvg20WebService(AnetConfig config, GraphQLResource graphQLResource,
-      AccessTokenDao accessTokenDao) {
+  public Nvg20WebService(AnetConfig config, AnetDictionary dict, GraphQLResource graphQLResource,
+      AccessTokenDao accessTokenDao, AdminDao adminDao) {
     this.config = config;
+    this.dict = dict;
     this.graphQLResource = graphQLResource;
     this.accessTokenDao = accessTokenDao;
+    this.adminDao = adminDao;
   }
 
   @Override
@@ -164,6 +195,8 @@ public class Nvg20WebService implements NVGPortType2012 {
     capabilityItemTypeList.add(makeApp6VersionType());
     capabilityItemTypeList.add(makePastPeriodInDays());
     capabilityItemTypeList.add(makeFuturePeriodInDays());
+    capabilityItemTypeList.add(makeIncludeDocumentConfidentialityLabel());
+    capabilityItemTypeList.add(makeIncludeElementConfidentialityLabels());
     response.setNvgCapabilities(nvgCapabilitiesType);
     return response;
   }
@@ -178,6 +211,8 @@ public class Nvg20WebService implements NVGPortType2012 {
       String app6Version = DEFAULT_APP6_VERSION;
       int pastDays = DEFAULT_PAST_PERIOD_IN_DAYS;
       int futureDays = DEFAULT_FUTURE_PERIOD_IN_DAYS;
+      boolean includeDocumentConfidentialityLabel = DEFAULT_INCLUDE_DOCUMENT_CONFIDENTIALITY_LABEL;
+      boolean includeElementConfidentialityLabels = DEFAULT_INCLUDE_ELEMENT_CONFIDENTIALITY_LABELS;
       for (final Object object : nvgQueryList) {
         if (object instanceof InputResponseType inputResponse) {
           if (ACCESS_TOKEN_ID.equals(inputResponse.getRefid())) {
@@ -188,6 +223,10 @@ public class Nvg20WebService implements NVGPortType2012 {
             pastDays = Integer.parseInt(inputResponse.getValue());
           } else if (FUTURE_PERIOD_IN_DAYS_ID.equals(inputResponse.getRefid())) {
             futureDays = Integer.parseInt(inputResponse.getValue());
+          } else if (INCLUDE_DOCUMENT_CONFIDENTIALITY_LABEL.equals(inputResponse.getRefid())) {
+            includeDocumentConfidentialityLabel = Boolean.parseBoolean(inputResponse.getValue());
+          } else if (INCLUDE_ELEMENT_CONFIDENTIALITY_LABELS.equals(inputResponse.getRefid())) {
+            includeElementConfidentialityLabels = Boolean.parseBoolean(inputResponse.getValue());
           }
         }
       }
@@ -199,7 +238,8 @@ public class Nvg20WebService implements NVGPortType2012 {
                 "Invalid APP-6 version");
           }
           final GetNvgResponse response = NVG_OF.createGetNvgResponse();
-          response.setNvg(makeNvg(app6Version, pastDays, futureDays));
+          response.setNvg(makeNvg(app6Version, pastDays, futureDays,
+              includeDocumentConfidentialityLabel, includeElementConfidentialityLabels));
           return response;
         }
       }
@@ -208,7 +248,8 @@ public class Nvg20WebService implements NVGPortType2012 {
         "Must provide a valid Service Access Token");
   }
 
-  private NvgType makeNvg(String app6Version, int pastDays, int futureDays) {
+  private NvgType makeNvg(String app6Version, int pastDays, int futureDays,
+      boolean includeDocumentConfidentialityLabel, boolean includeElementConfidentialityLabels) {
     final NvgType nvgType = NVG_OF.createNvgType();
     nvgType.setVersion(NVG_VERSION);
     final List<ContentType> contentTypeList = nvgType.getGOrCompositeOrText();
@@ -220,14 +261,25 @@ public class Nvg20WebService implements NVGPortType2012 {
     // Calculate end of period
     final Instant end = now.plus(futureDays, ChronoUnit.DAYS);
 
+    final ConfidentialityRecord defaultConfidentiality = ConfidentialityRecord.create(
+        adminDao.getSetting(AdminDao.AdminSettingKeys.SECURITY_BANNER_CLASSIFICATION),
+        adminDao.getSetting(AdminDao.AdminSettingKeys.SECURITY_BANNER_RELEASABILITY));
+    if (includeDocumentConfidentialityLabel) {
+      final ExtensionType extensionType = NVG_OF.createExtensionType();
+      extensionType.getAny().add(getBindingInformation(defaultConfidentiality));
+      nvgType.setExtension(extensionType);
+    }
+
     final List<Report> reports = getReportsByPeriod(start, end);
-    contentTypeList
-        .addAll(reports.stream().map(r -> reportToNvgPoint(app6Version, now, r)).toList());
+    contentTypeList.addAll(reports.stream().map(r -> reportToNvgPoint(app6Version,
+        includeElementConfidentialityLabels, defaultConfidentiality, now, r)).toList());
 
     return nvgType;
   }
 
-  private PointType reportToNvgPoint(String app6Version, Instant reportingTime, Report report) {
+  private PointType reportToNvgPoint(String app6Version,
+      boolean includeElementConfidentialityLabels, ConfidentialityRecord defaultConfidentiality,
+      Instant reportingTime, Report report) {
     final PointType nvgPoint = NVG_OF.createPointType();
     nvgPoint.setLabel(report.getIntent());
     nvgPoint.setUri(String.format("urn:anet:reports:%1$s", report.getUuid()));
@@ -236,7 +288,70 @@ public class Nvg20WebService implements NVGPortType2012 {
     setSymbol(app6Version, reportingTime, report, nvgPoint);
     nvgPoint.setHref(String.format("%s/reports/%s", config.getServerUrl(), report.getUuid()));
     setTextInfo(report, nvgPoint);
+    if (includeElementConfidentialityLabels) {
+      setConfidentialityInformation(determineConfidentiality(defaultConfidentiality, report),
+          nvgPoint);
+    }
     return nvgPoint;
+  }
+
+  private void setConfidentialityInformation(ConfidentialityRecord confidentiality,
+      PointType nvgPoint) {
+    if (!Utils.isEmptyOrNull(confidentiality.policy())) {
+      final ExtensionType extensionType = NVG_OF.createExtensionType();
+      extensionType.getAny().add(getBindingInformation(confidentiality));
+      nvgPoint.setExtension(extensionType);
+    }
+  }
+
+  private JAXBElement<ConfidentialityLabelType> getOriginatorConfidentialityLabel(
+      ConfidentialityRecord confidentiality) {
+    final ConfidentialityInformationType confidentialityInformationType =
+        CML_OF.createConfidentialityInformationType();
+    final PolicyIdentifierType policyIdentifierType = CML_OF.createPolicyIdentifierType();
+    policyIdentifierType.setValue(confidentiality.policy());
+    confidentialityInformationType.setPolicyIdentifier(policyIdentifierType);
+
+    if (!Utils.isEmptyOrNull(confidentiality.classification())) {
+      final ClassificationType classificationType = CML_OF.createClassificationType();
+      classificationType.setValue(confidentiality.classification());
+      confidentialityInformationType.setClassification(classificationType);
+    }
+
+    if (!Utils.isEmptyOrNull(confidentiality.releasableTo())) {
+      final CategoryType categoryType = CML_OF.createCategoryType();
+      categoryType.setTagName("Releasable to");
+      categoryType.setType("PERMISSIVE");
+      categoryType.getCategoryValue()
+          .addAll(confidentiality.releasableTo().stream().map(CML_OF::createGenericValue).toList());
+      confidentialityInformationType.getCategory().add(categoryType);
+    }
+
+    final ConfidentialityLabelType confidentialityLabelType =
+        CML_OF.createConfidentialityLabelType();
+    confidentialityLabelType.setConfidentialityInformation(confidentialityInformationType);
+    return CML_OF.createOriginatorConfidentialityLabel(confidentialityLabelType);
+  }
+
+  private JAXBElement<BindingInformationType> getBindingInformation(
+      ConfidentialityRecord confidentiality) {
+    final JAXBElement<ConfidentialityLabelType> originatorConfidentialityLabel =
+        getOriginatorConfidentialityLabel(confidentiality);
+    return getBindingInformation(originatorConfidentialityLabel);
+  }
+
+  private JAXBElement<BindingInformationType> getBindingInformation(
+      JAXBElement<ConfidentialityLabelType> confidentialityLabel) {
+    final MetadataType metadataType = BI_OF.createMetadataType();
+    metadataType.getContent().add(confidentialityLabel);
+    final MetadataBindingType metadataBindingType = BI_OF.createMetadataBindingType();
+    metadataBindingType.getMetadataOrMetadataReference().add(metadataType);
+    final MetadataBindingContainerType metadataBindingContainerType =
+        BI_OF.createMetadataBindingContainerType();
+    metadataBindingContainerType.getMetadataBinding().add(metadataBindingType);
+    final BindingInformationType bindingInformationType = BI_OF.createBindingInformationType();
+    bindingInformationType.getMetadataBindingContainer().add(metadataBindingContainerType);
+    return BI_OF.createBindingInformation(bindingInformationType);
   }
 
   private void setSymbol(String app6Version, Instant reportingTime, Report report,
@@ -350,6 +465,32 @@ public class Nvg20WebService implements NVGPortType2012 {
     return inputType;
   }
 
+  private InputType makeIncludeDocumentConfidentialityLabel() {
+    final InputType inputType = NVG_OF.createInputType();
+    inputType.setId(INCLUDE_DOCUMENT_CONFIDENTIALITY_LABEL);
+    inputType.setRequired(false);
+    inputType.setType(InputTypeType.BOOLEAN);
+    inputType.setName("Include document confidentiality label");
+    inputType.setDefault(String.valueOf(DEFAULT_INCLUDE_DOCUMENT_CONFIDENTIALITY_LABEL));
+    final HelpType helpType = NVG_OF.createHelpType();
+    helpType.setText("Whether the document will have a confidentiality label or not");
+    inputType.setHelp(helpType);
+    return inputType;
+  }
+
+  private InputType makeIncludeElementConfidentialityLabels() {
+    final InputType inputType = NVG_OF.createInputType();
+    inputType.setId(INCLUDE_ELEMENT_CONFIDENTIALITY_LABELS);
+    inputType.setRequired(false);
+    inputType.setType(InputTypeType.BOOLEAN);
+    inputType.setName("Include point confidentiality labels");
+    inputType.setDefault(String.valueOf(DEFAULT_INCLUDE_ELEMENT_CONFIDENTIALITY_LABELS));
+    final HelpType helpType = NVG_OF.createHelpType();
+    helpType.setText("Whether each point will have a confidentiality label or not");
+    inputType.setHelp(helpType);
+    return inputType;
+  }
+
   private List<Report> getReportsByPeriod(final Instant start, final Instant end) {
     final Map<String, Object> reportQuery = new HashMap<>(DEFAULT_REPORT_QUERY_VARIABLES);
     reportQuery.put("engagementDateStart", start.toEpochMilli());
@@ -364,6 +505,69 @@ public class Nvg20WebService implements NVGPortType2012 {
     final AnetBeanList<Report> anetBeanList =
         defaultMapper.convertValue(data.get("reportList"), typeRef);
     return anetBeanList.getList();
+  }
+
+  private ConfidentialityRecord determineConfidentiality(
+      ConfidentialityRecord defaultConfidentiality, Report report) {
+    @SuppressWarnings("unchecked")
+    final Map<String, String> classificationChoices =
+        (Map<String, String>) dict.getDictionaryEntry("classification.choices");
+    final String reportClassification = classificationChoices.get(report.getClassification());
+    return reportClassification == null ? defaultConfidentiality
+        : ConfidentialityRecord.create(reportClassification);
+  }
+
+  private record ConfidentialityRecord(String policy, String classification, List<String> releasableTo) {
+
+    static ConfidentialityRecord create(
+        String siteClassification, String siteReleasability) {
+      // Try to split site classification
+      final String[] policyAndClassification = siteClassification.trim().split("\\s+", 2);
+      final List<String> releasableTo;
+      if ( Utils.isEmptyOrNull(siteReleasability)) {
+        releasableTo = null;
+      } else {
+        releasableTo = getReleasableTo(siteReleasability);
+      }
+      return new ConfidentialityRecord(
+          toUpper(policyAndClassification[0]), toUpper(policyAndClassification[1]), toUpper(releasableTo));
+    }
+
+    static ConfidentialityRecord create(String reportClassification) {
+      // Try to split report classification
+      final String[] policyAndRest = reportClassification.trim().split("\\s+", 2);
+      final String classification;
+      final List<String> releasableTo;
+      if (policyAndRest.length < 2) {
+        classification = null;
+        releasableTo = null;
+      } else {
+        final String[] classificationAndReleasability = policyAndRest[1].split("\\s+", 2);
+        classification = classificationAndReleasability[0];
+        if (classificationAndReleasability.length < 2) {
+          releasableTo = null;
+        } else {
+          releasableTo = getReleasableTo(classificationAndReleasability[1]);
+        }
+      }
+      return new ConfidentialityRecord(toUpper(policyAndRest[0]), toUpper(classification), toUpper(releasableTo));
+    }
+
+    private static List<String> getReleasableTo(String releasability) {
+      // Try to strip off "releasable to"
+      final String releasableTo = RegExUtils.removeFirst(
+          releasability, Pattern.compile("^releasable to\\s+", Pattern.CASE_INSENSITIVE));
+      return Arrays.asList(releasableTo.split(",\\s*"));
+    }
+
+    private static String toUpper(String s) {
+      return s == null ? null : s.toUpperCase();
+    }
+
+    private static List<String> toUpper(List<String> s) {
+      return s == null ? null : s.stream().map(String::toUpperCase).toList();
+    }
+
   }
 
 }
