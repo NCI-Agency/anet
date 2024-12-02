@@ -227,6 +227,9 @@ public class Nvg20WebService implements NVGPortType2012 {
             includeDocumentConfidentialityLabel = Boolean.parseBoolean(inputResponse.getValue());
           } else if (INCLUDE_ELEMENT_CONFIDENTIALITY_LABELS.equals(inputResponse.getRefid())) {
             includeElementConfidentialityLabels = Boolean.parseBoolean(inputResponse.getValue());
+          } else {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                "Unrecognized input_response: " + inputResponse.getRefid());
           }
         }
       }
