@@ -7,6 +7,7 @@
 						 targetNamespace="urn:nato:common:wsdl:nvg20">
 	<import namespace="https://tide.act.nato.int/wsdl/2012/nvg" location="nvg2012.wsdl"/>
 	<import namespace="urn:nato:stanag:4774:confidentialitymetadatalabel:1:0" location="../stanag4774/confidentialitymetadatalabel.xsd"/>
+	<import namespace="urn:nato:stanag:4778:bindinginformation:1:0" location="../stanag4778/bindinginformation.xsd"/>
 	<types/>
 	<binding name="NVGBinding2012" type="nvgwsdl:NVGPortType2012">
 		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
