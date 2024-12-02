@@ -1280,12 +1280,10 @@ const ReportForm = ({
       // Make sure field is 'controlled' by defining a value
       rp.primary = rp.primary ?? false
 
-      // Only when users are ANET users
-      if (rp.user !== true) {
-        // Set default interlocutor flag to true unless set
-        // Make sure field is 'controlled' by defining a value
-        rp.interlocutor = rp.interlocutor ?? true
-      }
+      // Set default interlocutor flag to true if not an ANET user (or false if it is an ANET user),
+      // unless it has explicitly been set.
+      // Make sure field is 'controlled' by defining a value
+      rp.interlocutor = rp.interlocutor ?? !rp.user
     })
 
     // if no one else is primary, set that person primary if attending
