@@ -345,12 +345,14 @@ fields:
       label: Members
 
   eventSeries:
+    status:
+      label: Status
     hostOrg:
       label: Host Organization
-      placeholder: Search for the organization hosting the event series...
+      placeholder: Search for the organization hosting the event series…
     adminOrg:
       label: Admin Organization
-      placeholder: Search for the organization that will manage the event series in ANET...
+      placeholder: Search for the organization that will manage the event series in ANET…
     name:
       label: Name
       placeholder: The name of the event series
@@ -359,15 +361,17 @@ fields:
       placeholder: The description of the event series
 
   event:
+    status:
+      label: Status
     eventSeries:
       label: Event Series this event belongs to
-      placeholder: Search for an event series
+      placeholder: Search for an event series…
     hostOrg:
       label: Host Organization
-      placeholder: Search for the organization hosting the event...
+      placeholder: Search for the organization hosting the event…
     adminOrg:
       label: Admin Organization
-      placeholder: Search for the organization that will manage the event in ANET...
+      placeholder: Search for the organization that will manage the event in ANET…
     location:
       label: Location where the event takes place
       placeholder: Search for a location…
