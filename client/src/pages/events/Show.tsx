@@ -115,6 +115,22 @@ const EventShow = ({ pageDispatchers }: EventShowProps) => {
                 action={action}
               />
               <Fieldset id="info" tile="Info">
+                {event.eventSeries?.uuid && (
+                  <DictionaryField
+                    wrappedComponent={Field}
+                    dictProps={Settings.fields.event.eventSeries}
+                    name="eventSeries"
+                    component={FieldHelper.ReadonlyField}
+                    humanValue={
+                      event.eventSeries && (
+                        <LinkTo
+                          modelType="EventSeries"
+                          model={event.eventSeries}
+                        />
+                      )
+                    }
+                  />
+                )}
                 <DictionaryField
                   wrappedComponent={Field}
                   dictProps={Settings.fields.event.hostOrg}
@@ -137,22 +153,6 @@ const EventShow = ({ pageDispatchers }: EventShowProps) => {
                     )
                   }
                 />
-                {event.eventSeries?.uuid && (
-                  <DictionaryField
-                    wrappedComponent={Field}
-                    dictProps={Settings.fields.event.eventSeries}
-                    name="eventSeries"
-                    component={FieldHelper.ReadonlyField}
-                    humanValue={
-                      event.eventSeries && (
-                        <LinkTo
-                          modelType="EventSeries"
-                          model={event.eventSeries}
-                        />
-                      )
-                    }
-                  />
-                )}
                 {event.location?.uuid && (
                   <DictionaryField
                     wrappedComponent={Field}
@@ -200,6 +200,13 @@ const EventShow = ({ pageDispatchers }: EventShowProps) => {
                         )}
                     </>
                   }
+                />
+                <DictionaryField
+                  wrappedComponent={Field}
+                  dictProps={Settings.fields.event.status}
+                  name="status"
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={Event.humanNameOfStatus}
                 />
               </Fieldset>
               <Fieldset

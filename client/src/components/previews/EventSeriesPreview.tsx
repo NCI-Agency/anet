@@ -1,4 +1,5 @@
 import API from "api"
+import DictionaryField from "components/DictionaryField"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import { EventSeries } from "models"
@@ -29,19 +30,24 @@ const EventSeriesPreview = ({ className, uuid }: EventSeriesPreviewProps) => {
     <div className={`report-preview preview-content-scroll ${className || ""}`}>
       <h4 className="ellipsized-text">Event Series {eventSeriesTitle}</h4>
       <div className="preview-section">
-        <PreviewField
-          extraColForValue
-          label={Settings.fields.eventSeries.hostOrg.label}
+        <DictionaryField
+          wrappedComponent={PreviewField}
+          dictProps={Settings.fields.eventSeries.hostOrg}
           value={
             <LinkTo modelType="Organization" model={eventSeries.hostOrg} />
           }
         />
-        <PreviewField
-          extraColForValue
-          label={Settings.fields.eventSeries.adminOrg.label}
+        <DictionaryField
+          wrappedComponent={PreviewField}
+          dictProps={Settings.fields.eventSeries.adminOrg}
           value={
             <LinkTo modelType="Organization" model={eventSeries.adminOrg} />
           }
+        />
+        <DictionaryField
+          wrappedComponent={PreviewField}
+          dictProps={Settings.fields.eventSeries.status}
+          value={EventSeries.humanNameOfStatus(eventSeries.status)}
         />
       </div>
     </div>
