@@ -31,6 +31,7 @@ interface EventCollectionProps {
   width?: number | string
   height?: number | string
   marginBottom?: number | string
+  showEventSeries?: boolean
 }
 
 const EventCollection = ({
@@ -50,7 +51,8 @@ const EventCollection = ({
   mapId,
   width,
   height,
-  marginBottom
+  marginBottom,
+  showEventSeries
 }: EventCollectionProps) => {
   const [viewFormat, setViewFormat] = useState(viewFormats[0])
   const showHeader = viewFormats.length > 1
@@ -106,6 +108,7 @@ const EventCollection = ({
               setPagination={setPagination}
               queryParams={queryParams}
               setTotalCount={setTotalCount}
+              showEventSeries={showEventSeries}
             />
           )}
           {viewFormat === FORMAT_SUMMARY && (
@@ -116,6 +119,7 @@ const EventCollection = ({
               setPagination={setPagination}
               queryParams={queryParams}
               setTotalCount={setTotalCount}
+              showEventSeries={showEventSeries}
             />
           )}
           {viewFormat === FORMAT_CALENDAR && (

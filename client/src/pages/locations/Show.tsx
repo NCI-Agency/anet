@@ -318,6 +318,7 @@ const LocationShow = ({ pageDispatchers }: LocationShowProps) => {
                 paginationKey={`e_${uuid}`}
                 queryParams={{ locationUuid: uuid }}
                 mapId="events"
+                showEventSeries
               />
             </Fieldset>
           </div>

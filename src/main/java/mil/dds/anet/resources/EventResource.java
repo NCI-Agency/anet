@@ -142,15 +142,14 @@ public class EventResource {
   }
 
   private void validateEvent(final Person user, final Event event) {
-    if (event.getType() == null || event.getType().name().trim().isEmpty()) {
+    if (event.getStatus() == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Event status must not be empty");
+    }
+    if (event.getType() == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Event type must not be empty");
     }
     if (event.getName() == null || event.getName().trim().isEmpty()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Event name must not be empty");
-    }
-    if (event.getDescription() == null || event.getDescription().trim().isEmpty()) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "Event description must not be empty");
     }
     if (event.getStartDate() == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -159,7 +158,7 @@ public class EventResource {
     if (event.getEndDate() == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Event end date must not be empty");
     }
-    if (event.getHostOrgUuid() == null || event.getHostOrgUuid().trim().isEmpty()) {
+    if (event.getHostOrg() == null || event.getHostOrgUuid().trim().isEmpty()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           "Event Host Organization must not be empty");
     }

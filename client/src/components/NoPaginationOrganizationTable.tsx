@@ -29,7 +29,6 @@ const NoPaginationOrganizationTable = ({
           <thead>
             <tr>
               <th>Name</th>
-              <th>Description</th>
               <th>Location</th>
               {showDelete && <th />}
             </tr>
@@ -41,7 +40,6 @@ const NoPaginationOrganizationTable = ({
                   <td>
                     <LinkTo modelType="Organization" model={organization} />
                   </td>
-                  <td>{organization.description}</td>
                   <td>
                     <LinkTo
                       modelType="Location"

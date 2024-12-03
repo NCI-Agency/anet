@@ -94,13 +94,13 @@ public class EventSeriesResource {
   }
 
   private void validateEventSeries(final Person user, final EventSeries eventSeries) {
+    if (eventSeries.getStatus() == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Event series status must not be empty");
+    }
     if (eventSeries.getName() == null || eventSeries.getName().trim().isEmpty()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           "Event Series name must not be empty");
-    }
-    if (eventSeries.getDescription() == null || eventSeries.getDescription().trim().isEmpty()) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "Event Series description must not be empty");
     }
     if (eventSeries.getHostOrgUuid() == null || eventSeries.getHostOrgUuid().trim().isEmpty()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,

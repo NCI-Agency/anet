@@ -1083,6 +1083,7 @@ const Events = ({
       pageNum={curPage}
       totalCount={totalCount}
       goToPage={setPage}
+      showEventSeries
       id="events-search-results"
     />
   )
@@ -1765,7 +1766,7 @@ const Search = ({
           />
         </Fieldset>
       )}
-      {queryTypes.includes(SEARCH_OBJECT_TYPES.EVENTS) && (
+      {queryTypes.includes(SEARCH_OBJECT_TYPES.EVENTS) && !withEmail && (
         <Fieldset
           id="events"
           title={

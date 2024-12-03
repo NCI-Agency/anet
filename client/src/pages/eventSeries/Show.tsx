@@ -139,7 +139,7 @@ const EventSeriesShow = ({ pageDispatchers }: EventSeriesShowProps) => {
               </Fieldset>
               <Fieldset
                 title={Settings.fields.eventSeries.description?.label}
-                id="report-text"
+                id="description"
               >
                 <RichTextEditor readOnly value={eventSeries.description} />
               </Fieldset>

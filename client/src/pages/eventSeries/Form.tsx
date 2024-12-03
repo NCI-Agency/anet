@@ -80,7 +80,7 @@ const EventSeriesForm = ({
         const organizationFilters = {
           allOrganizations: {
             label: "All organizations",
-            queryVars: {}
+            queryVars: { status: Model.STATUS.ACTIVE }
           }
         }
 
