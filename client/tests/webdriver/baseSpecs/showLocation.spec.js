@@ -77,4 +77,21 @@ describe("Show location page", () => {
         .be.false
     })
   })
+
+  describe("When on the show page of a location with events", () => {
+    it("We should see a table with events", async() => {
+      await ShowLocation.open(LOCATION_WITH_REPORTS_UUID)
+      await (await ShowLocation.getEventsTable()).waitForExist()
+      await (await ShowLocation.getEventsTable()).waitForDisplayed()
+      expect(await (await ShowLocation.getEventsTable()).getText()).to.contain(
+        "NMI PDT 2024-01"
+      )
+    })
+    it("We can go to the show page of event", async() => {
+      await (await ShowLocation.getEvent(1)).click()
+      await expect(await browser.getUrl()).to.include(
+        "/events/e850846e-9741-40e8-bc51-4dccc30cf47f"
+      )
+    })
+  })
 })

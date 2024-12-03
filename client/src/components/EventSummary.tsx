@@ -24,6 +24,7 @@ interface EventSummaryProps {
   paginationKey: string
   setPagination: (...args: unknown[]) => unknown
   pagination: any
+  showEventSeries?: boolean
 }
 
 const EventSummary = ({
@@ -32,7 +33,8 @@ const EventSummary = ({
   setTotalCount,
   paginationKey,
   pagination,
-  setPagination
+  setPagination,
+  showEventSeries
 }: EventSummaryProps) => {
   // (Re)set pageNum to 0 if the queryParams change, and make sure we retrieve page 0 in that case
   const latestQueryParams = useRef(queryParams)
@@ -88,7 +90,11 @@ const EventSummary = ({
         goToPage={setPage}
       >
         {events.map(event => (
-          <EventSummaryRow event={event} key={event.uuid} />
+          <EventSummaryRow
+            event={event}
+            key={event.uuid}
+            showEventSeries={showEventSeries}
+          />
         ))}
       </UltimatePaginationTopDown>
     </div>
@@ -102,13 +108,14 @@ const EventSummary = ({
 
 interface EventSummaryRowProps {
   event: any
+  showEventSeries?: boolean
 }
 
-const EventSummaryRow = ({ event }: EventSummaryRowProps) => {
+const EventSummaryRow = ({ event, showEventSeries }: EventSummaryRowProps) => {
   event = new Event(event)
 
   return (
-    <Container fluid className="report-summary">
+    <Container fluid className="event-summary">
       <Row>
         <Col md={12}>
           <span>
@@ -161,7 +168,7 @@ const EventSummaryRow = ({ event }: EventSummaryRowProps) => {
           </Col>
         </Row>
       )}
-      {!_isEmpty(event.eventSeries) && (
+      {showEventSeries && !_isEmpty(event.eventSeries) && (
         <Row>
           <Col md={12}>
             <span>
