@@ -78,6 +78,7 @@ interface BaseEventTableProps {
   pageNum?: number
   pageSize?: number
   goToPage?: (...args: unknown[]) => unknown
+  showEventSeries?: boolean
 }
 
 const BaseEventTable = ({
@@ -87,7 +88,8 @@ const BaseEventTable = ({
   pageSize,
   pageNum,
   totalCount,
-  goToPage
+  goToPage,
+  showEventSeries
 }: BaseEventTableProps) => {
   if (_get(events, "length", 0) === 0) {
     return <em>{noEventsMessage}</em>
@@ -107,7 +109,7 @@ const BaseEventTable = ({
           <thead>
             <tr>
               <th>Name</th>
-              <th>Series</th>
+              {showEventSeries && <th>Series</th>}
               <th>Host Organization</th>
               <th>Location</th>
               <th>Start Date</th>
@@ -120,9 +122,11 @@ const BaseEventTable = ({
                 <td>
                   <LinkTo modelType="Event" model={event} />
                 </td>
-                <td>
-                  <LinkTo modelType="EventSeries" model={event.eventSeries} />
-                </td>
+                {showEventSeries && (
+                  <td>
+                    <LinkTo modelType="EventSeries" model={event.eventSeries} />
+                  </td>
+                )}
                 <td>
                   <LinkTo modelType="Organization" model={event.hostOrg} />
                 </td>

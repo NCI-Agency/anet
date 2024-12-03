@@ -69,7 +69,7 @@ const MyEvents = ({ pageDispatchers, searchQuery }: MyEventsProps) => {
 
   function renderEventSeriesSection() {
     return (
-      <Fieldset title="Event Series" id="event-series">
+      <Fieldset title="Event Series" id="my-event-series">
         <EventSeriesCollection
           paginationKey={`e_eventSeries_${currentUser.uuid}`}
           queryParams={eventSearchQueryParams}
@@ -81,11 +81,12 @@ const MyEvents = ({ pageDispatchers, searchQuery }: MyEventsProps) => {
 
   function renderEventsSection() {
     return (
-      <Fieldset title="Events" id="events">
+      <Fieldset title="Events" id="my-events">
         <EventCollection
           paginationKey={`e_event_${currentUser.uuid}`}
           queryParams={eventSearchQueryParams}
           mapId="event"
+          showEventSeries
         />
       </Fieldset>
     )
