@@ -7,8 +7,8 @@ const AUTHOR_NAME = "ERINSON, Erin"
 const AUTHOR = `CIV ${AUTHOR_NAME}`
 const ADVISOR_NAME = "DVISOR, A"
 const ADVISOR = `OF-2 ${ADVISOR_NAME}`
-const INTERLOCUTOR_NAME = "SOLENOID, Selena"
-const INTERLOCUTOR = `CIV ${INTERLOCUTOR_NAME}`
+const INTERLOCUTOR_NAME = "STEVESON, Steve"
+const INTERLOCUTOR = `OF-4 ${INTERLOCUTOR_NAME}`
 const REPORT_FIELDS = {
   intent: "Show attendee positions based on engagement date",
   engagementDate: moment().subtract(1, "day"),
@@ -31,34 +31,34 @@ const EXPECTED_DATA = {
     positions: {
       author: "EF 2.2 Advisor D",
       advisor: "EF 2.2 Advisor Sewing Facilities",
-      interlocutor: "EF 1.2 Advisor"
+      interlocutor: "Cost Adder - MoD, MOD-Bud-00003"
     },
     locations: {
       author: "Murray's Hotel",
       advisor: "Murray's Hotel",
-      interlocutor: "St Johns Airport"
+      interlocutor: "MoD Headquarters Kabul"
     },
     organizations: {
       author: "EF 2.2",
       advisor: "EF 2.2",
-      interlocutor: "EF 1.2"
+      interlocutor: "MoD | Ministry of Defense"
     }
   },
   in_2020: {
     positions: {
       author: "EF 2.1 Advisor B",
       advisor: "EF 1.2 Advisor",
-      interlocutor: "EF 2.2 Advisor Sewing Facilities"
+      interlocutor: "Cost Adder - MoD, MOD-Bud-00003"
     },
     locations: {
       author: "Murray's Hotel",
       advisor: "St Johns Airport",
-      interlocutor: "Murray's Hotel"
+      interlocutor: "MoD Headquarters Kabul"
     },
     organizations: {
       author: "EF 2.1",
       advisor: "EF 1.2",
-      interlocutor: "EF 2.2"
+      interlocutor: "MoD | Ministry of Defense"
     }
   },
   in_2019: {
@@ -105,6 +105,27 @@ describe("When creating a report", () => {
     await validateAttendee(ADVISOR, EXPECTED_DATA.now, "advisor")
     await validateAttendee(INTERLOCUTOR, EXPECTED_DATA.now, "interlocutor")
   })
+
+  it("Should switch an attendee between an advisor and interlocutor", async() => {
+    const advisor = await CreateReport.getPersonByName(ADVISOR)
+    // change attendee to interlocutor
+    expect(await advisor.advisorCheckbox.isExisting()).to.equal(true)
+    expect(await advisor.advisorCheckbox.isSelected()).to.equal(false)
+    advisor.advisorCheckbox.click()
+    // wait for the attendee to be moved to the other section
+    await browser.pause(500)
+    // change attendee to advisor
+    expect(await advisor.advisorCheckbox.isExisting()).to.equal(false)
+    expect(await advisor.interlocutorCheckbox.isExisting()).to.equal(true)
+    expect(await advisor.interlocutorCheckbox.isSelected()).to.equal(true)
+    advisor.interlocutorCheckbox.click()
+    // wait for the attendee to be moved to the other section
+    await browser.pause(500)
+    expect(await advisor.interlocutorCheckbox.isExisting()).to.equal(false)
+    expect(await advisor.advisorCheckbox.isExisting()).to.equal(true)
+    expect(await advisor.advisorCheckbox.isSelected()).to.equal(false)
+  })
+
   it("Should show report with advisor and interlocutor organizations at engagement date = now", async() => {
     await CreateReport.submitForm()
     await browser.pause(1000)

@@ -96,7 +96,7 @@ class CreateReport extends cr.CreateReport {
     }
   }
 
-  async selectAttendeeByName(name, interlocutor) {
+  async selectAttendeeByName(name) {
     await (await this.getReportPeople()).click()
     // wait for reportPeople table loader to disappear
     await (await this.getReportPeopleTable()).waitForDisplayed()
@@ -121,10 +121,6 @@ class CreateReport extends cr.CreateReport {
     await (
       await this.getReportPeopleTable()
     ).waitForExist({ reverse: true, timeout: 3000 })
-    if (!interlocutor) {
-      const { interlocutorCheckbox } = await this.getPersonByName(name)
-      await interlocutorCheckbox.click()
-    }
   }
 
   async getTasks() {
@@ -236,13 +232,13 @@ class CreateReport extends cr.CreateReport {
 
     if (Array.isArray(fields.advisors) && fields.advisors.length) {
       for (const at of fields.advisors) {
-        await this.selectAttendeeByName(at, false)
+        await this.selectAttendeeByName(at)
       }
     }
 
     if (Array.isArray(fields.interlocutors) && fields.interlocutors.length) {
       for (const at of fields.interlocutors) {
-        await this.selectAttendeeByName(at, true)
+        await this.selectAttendeeByName(at)
       }
     }
 
