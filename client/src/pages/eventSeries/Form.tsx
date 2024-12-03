@@ -21,8 +21,6 @@ import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
 import utils from "utils"
 
-const organizationAutocompleteQuery = `${Organization.autocompleteQuery} ascendantOrgs { uuid app6context app6standardIdentity parentOrg { uuid } }`
-
 interface EventSeriesFormProps {
   initialValues: any
   title?: string
@@ -130,7 +128,7 @@ const EventSeriesForm = ({
                       overlayRenderRow={OrganizationOverlayRow}
                       filterDefs={organizationFilters}
                       objectType={Organization}
-                      fields={organizationAutocompleteQuery}
+                      fields={Organization.autocompleteQuery}
                       queryParams={hostOrgSearchQuery}
                       valueKey="shortName"
                       addon={ORGANIZATIONS_ICON}
@@ -158,7 +156,7 @@ const EventSeriesForm = ({
                       overlayRenderRow={OrganizationOverlayRow}
                       filterDefs={organizationFilters}
                       objectType={Organization}
-                      fields={organizationAutocompleteQuery}
+                      fields={Organization.autocompleteQuery}
                       queryParams={adminOrgSearchQuery}
                       valueKey="shortName"
                       addon={ORGANIZATIONS_ICON}
