@@ -31,7 +31,7 @@ export default class Event extends Model {
       .default(() => Model.STATUS.ACTIVE),
     type: yup.string().required().default(""),
     name: yup.string().required().default(""),
-    description: yup.string().required().default(""),
+    description: yup.string().default(""),
     startDate: yupDate.required().default(null),
     endDate: yupDate.required().default(null),
     outcomes: yup.string().default(""),

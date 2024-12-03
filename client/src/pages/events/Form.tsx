@@ -122,10 +122,6 @@ const EventForm = ({
             ...orgsAdministratedUuids
           ]
         }
-
-        const currentOrg =
-          currentUser.position && currentUser.position.organization
-
         const locationFilters = Location.getReportLocationFilters()
 
         const action = (
@@ -139,7 +135,7 @@ const EventForm = ({
         const organizationFilters = {
           allOrganizations: {
             label: "All organizations",
-            queryVars: {}
+            queryVars: { status: Model.STATUS.ACTIVE }
           }
         }
 
@@ -163,20 +159,31 @@ const EventForm = ({
 
         const tasksFilters = {}
 
-        if (currentOrg) {
-          tasksFilters.assignedToMyOrg = {
-            label: `Assigned to ${currentOrg.shortName}`,
+        tasksFilters.allTasks = {
+          label: `All ${tasksLabel}`,
+          queryVars: { selectable: true }
+        }
+
+        if (values.hostOrg) {
+          tasksFilters.assignedToHostOrg = {
+            label: `Assigned to ${values.hostOrg.shortName}`,
             queryVars: {
-              taskedOrgUuid: currentOrg.uuid,
+              taskedOrgUuid: values.hostOrg.uuid,
               orgRecurseStrategy: RECURSE_STRATEGY.PARENTS,
               selectable: true
             }
           }
         }
 
-        tasksFilters.allUnassignedTasks = {
-          label: `All unassigned ${tasksLabel}`,
-          queryVars: { selectable: true, isAssigned: false }
+        if (values.adminOrg && values.adminOrg.uuid !== values.hostOrg?.uuid) {
+          tasksFilters.assignedToAdminOrg = {
+            label: `Assigned to ${values.adminOrg.shortName}`,
+            queryVars: {
+              taskedOrgUuid: values.adminOrg.uuid,
+              orgRecurseStrategy: RECURSE_STRATEGY.PARENTS,
+              selectable: true
+            }
+          }
         }
 
         return (

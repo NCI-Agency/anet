@@ -720,6 +720,7 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
                   paginationKey={`e_${uuid}`}
                   queryParams={eventQueryParams}
                   mapId="events"
+                  showEventSeries
                 />
               </Fieldset>
               <Fieldset

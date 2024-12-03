@@ -22,7 +22,7 @@ export default class EventSeries extends Model {
       .required()
       .default(() => Model.STATUS.ACTIVE),
     name: yup.string().required().default(""),
-    description: yup.string().required().default(""),
+    description: yup.string().default(""),
     hostOrg: yup
       .object()
       .test("hostOrg", "host org error", (hostOrg, testContext) =>

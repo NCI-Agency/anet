@@ -42,5 +42,14 @@ class ShowLocation extends Page {
   async getReportSummaries() {
     return (await this.getReportCollection()).$$("div.report-summary")
   }
+
+  async getEventsTable() {
+    return browser.$(".event-collection")
+  }
+
+  async getEvent(i) {
+    const eventsTable = await this.getEventsTable()
+    return eventsTable.$(`tbody tr:nth-child(${i}) td:first-child a`)
+  }
 }
 export default new ShowLocation()
