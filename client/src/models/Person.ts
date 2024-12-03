@@ -360,6 +360,14 @@ export default class Person extends Model {
     return r
   }
 
+  static militaryName(name) {
+    const parsedName = Person.parseFullName(name)
+    if (parsedName.lastName) {
+      parsedName.lastName = parsedName.lastName.toUpperCase()
+    }
+    return Person.fullName(parsedName)
+  }
+
   static parseFullName(name) {
     const delimiter = name.indexOf(Person.nameDelimiter)
     let lastName = name
