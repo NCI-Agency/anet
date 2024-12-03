@@ -53,9 +53,6 @@ const EVENT_TYPES = [
   Event.EVENT_TYPES.OTHER
 ]
 
-const organizationAutocompleteQuery = `${Organization.autocompleteQuery} ascendantOrgs { uuid app6context app6standardIdentity parentOrg { uuid } }`
-const eventSeriesAutocompleteQuery = EventSeries.autocompleteQuery
-
 interface EventFormProps {
   initialValues: any
   title?: string
@@ -234,7 +231,7 @@ const EventForm = ({
                       overlayRenderRow={EventSeriesOverlayRow}
                       filterDefs={eventSeriesFilters}
                       objectType={EventSeries}
-                      fields={eventSeriesAutocompleteQuery}
+                      fields={EventSeries.autocompleteQuery}
                       queryParams={eventSeriesSearchQuery}
                       valueKey="name"
                     />
@@ -259,7 +256,7 @@ const EventForm = ({
                       overlayRenderRow={OrganizationOverlayRow}
                       filterDefs={organizationFilters}
                       objectType={Organization}
-                      fields={organizationAutocompleteQuery}
+                      fields={Organization.autocompleteQuery}
                       queryParams={hostOrgSearchQuery}
                       valueKey="shortName"
                       addon={ORGANIZATIONS_ICON}
@@ -285,7 +282,7 @@ const EventForm = ({
                       overlayRenderRow={OrganizationOverlayRow}
                       filterDefs={organizationFilters}
                       objectType={Organization}
-                      fields={organizationAutocompleteQuery}
+                      fields={Organization.autocompleteQuery}
                       queryParams={adminOrgSearchQuery}
                       valueKey="shortName"
                       addon={ORGANIZATIONS_ICON}
