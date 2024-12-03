@@ -548,7 +548,7 @@ fields:
       placeholder: First name(s) - Lower-case except for the first letter of each name
     lastName:
       label: Last name
-      placeholder: LAST NAME
+      placeholder: Last name
     user:
       label: ANET user
     domainUsername:

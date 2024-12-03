@@ -23,7 +23,6 @@ test.serial("Move someone in and out of a position", async t => {
   const positionName = "EF 2.2 Advisor C"
   const positionRole = "Member"
   const person = "Reinton, Reina"
-  const rank = "CIV"
   const personName = "CIV REINTON, Reina"
 
   await t.context.pageHelpers.clickPersonNameFromSupportedPositionsFieldset(
