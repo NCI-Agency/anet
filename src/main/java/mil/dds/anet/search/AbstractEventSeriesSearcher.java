@@ -1,10 +1,11 @@
 package mil.dds.anet.search;
 
+import static mil.dds.anet.beans.search.ISearchQuery.SortOrder;
+
 import mil.dds.anet.beans.EventSeries;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.EventSeriesSearchQuery;
-import mil.dds.anet.beans.search.ISearchQuery;
 import mil.dds.anet.database.DatabaseHandler;
 import mil.dds.anet.database.EventSeriesDao;
 import mil.dds.anet.database.mappers.EventSeriesMapper;
@@ -41,19 +42,17 @@ public abstract class AbstractEventSeriesSearcher
       addTextQuery(query);
     }
     if (!Utils.isEmptyOrNull(query.getAdminOrgUuid())) {
-      addAdminOrgQuery(qb, query);
+      addAdminOrgQuery(query);
     }
     addOrderByClauses(qb, query);
   }
 
-  protected void addAdminOrgQuery(
-      AbstractSearchQueryBuilder<EventSeries, EventSeriesSearchQuery> outerQb,
-      EventSeriesSearchQuery query) {
+  protected void addAdminOrgQuery(EventSeriesSearchQuery query) {
     if (query.getAdminOrgUuid().size() == 1
         && Organization.DUMMY_ORG_UUID.equals(query.getAdminOrgUuid().get(0))) {
       qb.addWhereClause("\"eventSeries\".\"adminOrgUuid\" IS NULL");
     } else {
-      qb.addRecursiveClause(outerQb, "\"eventSeries\"", new String[] {"\"adminOrgUuid\""},
+      qb.addRecursiveClause(null, "\"eventSeries\"", new String[] {"\"adminOrgUuid\""},
           "parent_orgs", "organizations", "uuid", "\"parentOrgUuid\"", "orgUuid",
           query.getAdminOrgUuid(), true, true);
     }
@@ -70,6 +69,6 @@ public abstract class AbstractEventSeriesSearcher
         qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "eventSeries_name"));
         break;
     }
-    qb.addAllOrderByClauses(getOrderBy(ISearchQuery.SortOrder.ASC, "eventSeries_uuid"));
+    qb.addAllOrderByClauses(getOrderBy(SortOrder.ASC, "eventSeries_uuid"));
   }
 }
