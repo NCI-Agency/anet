@@ -717,8 +717,10 @@ properties:
       eventSeries:
         type: object
         additionalProperties: false
-        required: [name, description, hostOrg, adminOrg]
+        required: [status, name, description, hostOrg, adminOrg]
         properties:
+          status:
+            "$ref": "#/$defs/labeledField"
           name:
             "$ref": "#/$defs/inputField"
           description:
@@ -730,8 +732,10 @@ properties:
       event:
         type: object
         additionalProperties: false
-        required: [name, description, startDate, endDate, hostOrg, adminOrg]
+        required: [status, name, description, startDate, endDate, hostOrg, adminOrg]
         properties:
+          status:
+            "$ref": "#/$defs/labeledField"
           name:
             "$ref": "#/$defs/inputField"
           type:

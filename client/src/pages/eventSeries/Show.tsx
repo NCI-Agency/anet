@@ -136,6 +136,13 @@ const EventSeriesShow = ({ pageDispatchers }: EventSeriesShowProps) => {
                     )
                   }
                 />
+                <DictionaryField
+                  wrappedComponent={Field}
+                  dictProps={Settings.fields.eventSeries.status}
+                  name="status"
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={EventSeries.humanNameOfStatus}
+                />
               </Fieldset>
               <Fieldset
                 title={Settings.fields.eventSeries.description?.label}

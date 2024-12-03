@@ -39,6 +39,18 @@ const EventSeriesForm = ({
   const { loadAppData, currentUser } = useContext(AppContext)
   const navigate = useNavigate()
   const [error, setError] = useState(null)
+  const statusButtons = [
+    {
+      id: "statusActiveButton",
+      value: Model.STATUS.ACTIVE,
+      label: "Active"
+    },
+    {
+      id: "statusInactiveButton",
+      value: Model.STATUS.INACTIVE,
+      label: "Inactive"
+    }
+  ]
 
   return (
     <Formik
@@ -98,30 +110,6 @@ const EventSeriesForm = ({
                   component={FieldHelper.InputField}
                 />
                 <DictionaryField
-                  wrappedComponent={FastField}
-                  dictProps={Settings.fields.eventSeries.description}
-                  name="description"
-                  component={FieldHelper.SpecialField}
-                  onChange={value => {
-                    // prevent initial unnecessary render of RichTextEditor
-                    if (!_isEqual(values.description, value)) {
-                      setFieldValue("description", value, true)
-                    }
-                  }}
-                  onHandleBlur={() => {
-                    // validation will be done by setFieldValue
-                    setFieldTouched("description", true, false)
-                  }}
-                  widget={
-                    <RichTextEditor
-                      className="reportTextField"
-                      placeholder={
-                        Settings.fields.eventSeries.description?.placeholder
-                      }
-                    />
-                  }
-                />
-                <DictionaryField
                   wrappedComponent={Field}
                   dictProps={Settings.fields.eventSeries.hostOrg}
                   name="hostOrg"
@@ -174,6 +162,38 @@ const EventSeriesForm = ({
                       queryParams={adminOrgSearchQuery}
                       valueKey="shortName"
                       addon={ORGANIZATIONS_ICON}
+                    />
+                  }
+                />
+                <DictionaryField
+                  wrappedComponent={FastField}
+                  dictProps={Settings.fields.eventSeries.status}
+                  name="status"
+                  component={FieldHelper.RadioButtonToggleGroupField}
+                  buttons={statusButtons}
+                  onChange={value => setFieldValue("status", value)}
+                />
+                <DictionaryField
+                  wrappedComponent={FastField}
+                  dictProps={Settings.fields.eventSeries.description}
+                  name="description"
+                  component={FieldHelper.SpecialField}
+                  onChange={value => {
+                    // prevent initial unnecessary render of RichTextEditor
+                    if (!_isEqual(values.description, value)) {
+                      setFieldValue("description", value, true)
+                    }
+                  }}
+                  onHandleBlur={() => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("description", true, false)
+                  }}
+                  widget={
+                    <RichTextEditor
+                      className="reportTextField"
+                      placeholder={
+                        Settings.fields.eventSeries.description?.placeholder
+                      }
                     />
                   }
                 />
