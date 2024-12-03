@@ -72,6 +72,10 @@ class Home extends Page {
     return browser.$('//a//span[text()="My Attachments"]')
   }
 
+  async getMyEventsLink() {
+    return browser.$('//a//span[text()="My Events"]')
+  }
+
   async getMyCounterpartsNotifications() {
     return (await this.getMyCounterpartsLink()).$("span.badge")
   }

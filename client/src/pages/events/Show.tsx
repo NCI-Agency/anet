@@ -17,7 +17,7 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
-import ReportCollection from "components/ReportCollection"
+import ReportCollection, { FORMAT_TABLE } from "components/ReportCollection"
 import RichTextEditor from "components/RichTextEditor"
 import { Field, Form, Formik } from "formik"
 import { Event, Report, Task } from "models"
@@ -204,7 +204,7 @@ const EventShow = ({ pageDispatchers }: EventShowProps) => {
               </Fieldset>
               <Fieldset
                 title={Settings.fields.event.description?.label}
-                id="report-text"
+                id="description"
               >
                 <RichTextEditor readOnly value={event.description} />
               </Fieldset>
@@ -230,11 +230,13 @@ const EventShow = ({ pageDispatchers }: EventShowProps) => {
                 </Fieldset>
               )}
               {event.tasks.length > 0 && (
-                <Fieldset title={Settings.fields.task.longLabel}>
+                <Fieldset
+                  id="eventTasks"
+                  title={Settings.fields.task.longLabel}
+                >
                   <NoPaginationTaskTable
                     id="events-tasks"
                     tasks={values.tasks}
-                    showOrganization
                     showDescription
                     noTasksMessage={`No ${tasksLabel} selected; click in the ${tasksLabel} box to view your organization's ${tasksLabel}`}
                   />
@@ -243,13 +245,13 @@ const EventShow = ({ pageDispatchers }: EventShowProps) => {
               {event.outcomes && (
                 <Fieldset
                   title={Settings.fields.event.outcomes?.label}
-                  id="report-text"
+                  id="outcomes"
                 >
                   <RichTextEditor readOnly value={event.outcomes} />
                 </Fieldset>
               )}
               <Fieldset
-                id="reports"
+                id="eventReports"
                 title={`Reports for ${event.name}`}
                 action={
                   <LinkTo
@@ -267,6 +269,7 @@ const EventShow = ({ pageDispatchers }: EventShowProps) => {
                   paginationKey={`r_${uuid}`}
                   queryParams={reportQueryParams}
                   mapId="reports"
+                  viewFormats={[FORMAT_TABLE]}
                 />
               </Fieldset>
             </Form>
