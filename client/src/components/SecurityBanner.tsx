@@ -87,7 +87,7 @@ const SecurityBanner = ({
           <Dropdown as={ButtonGroup}>
             <LinkTo
               modelType="Person"
-              model={currentUser}
+              model={Person.militaryName(currentUser.name)}
               button
               className="shadow-none"
               variant="primary"

@@ -64,7 +64,6 @@ export default class Person extends Model {
       lastName: yup
         .string()
         .nullable()
-        .uppercase()
         .required(
           `You must provide the ${Settings.fields.person.lastName?.label}`
         )
@@ -325,10 +324,11 @@ export default class Person extends Model {
   }
 
   toString() {
+    const militaryName = Person.militaryName(this.name)
     if (this.rank) {
-      return this.rank + " " + this.name
+      return this.rank + " " + militaryName
     } else {
-      return this.name || this.domainUsername || this.uuid
+      return militaryName || this.domainUsername || this.uuid
     }
   }
 
@@ -345,7 +345,7 @@ export default class Person extends Model {
   }
 
   static formattedLastName(lastName, doTrim) {
-    let r = lastName.toUpperCase()
+    let r = lastName
     if (doTrim) {
       r = r.trim()
     }
@@ -379,7 +379,7 @@ export default class Person extends Model {
     }
 
     return {
-      lastName: lastName.trim().toUpperCase(),
+      lastName: lastName.trim(),
       firstName: firstName.trim()
     }
   }

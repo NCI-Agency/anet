@@ -497,12 +497,19 @@ const PersonColumn = ({
         <AdvancedSingleSelect
           fieldName="person"
           placeholder="Select a person to merge"
-          value={person}
+          value={
+            person
+              ? { ...person, name: Person.militaryName(person.name) }
+              : person
+          }
           overlayColumns={["name"]}
           overlayRenderRow={PersonSimpleOverlayRow}
           filterDefs={peopleFilters}
           onChange={value => {
-            value?.fixupFields()
+            if (value) {
+              value.name = Person.militaryName(value.name)
+              value.fixupFields()
+            }
             dispatchMergeActions(setMergeable(value, align))
           }}
           objectType={Person}
@@ -543,10 +550,12 @@ const PersonColumn = ({
           <MergeField
             label="Name"
             fieldName="name"
-            value={person.name}
+            value={Person.militaryName(person.name)}
             align={align}
             action={() => {
-              dispatchMergeActions(setAMergedField("name", person.name, align))
+              dispatchMergeActions(
+                setAMergedField("name", Person.militaryName(person.name), align)
+              )
               dispatchMergeActions(setAMergedField("uuid", person.uuid, align))
               dispatchMergeActions(
                 setAMergedField(
