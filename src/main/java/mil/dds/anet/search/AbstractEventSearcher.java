@@ -1,5 +1,6 @@
 package mil.dds.anet.search;
 
+import static mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import static mil.dds.anet.search.AbstractSearchQueryBuilder.Comparison;
 
 import mil.dds.anet.beans.Event;
@@ -7,7 +8,6 @@ import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.EventSearchQuery;
-import mil.dds.anet.beans.search.ISearchQuery;
 import mil.dds.anet.database.DatabaseHandler;
 import mil.dds.anet.database.EventDao;
 import mil.dds.anet.database.mappers.EventMapper;
@@ -44,26 +44,24 @@ public abstract class AbstractEventSearcher extends AbstractSearcher<Event, Even
       addTextQuery(query);
     }
 
+    if (!Utils.isEmptyOrNull(query.getEventSeriesUuid())) {
+      qb.addStringEqualsClause("eventSeriesUuid", "events.\"eventSeriesUuid\"",
+          query.getEventSeriesUuid());
+    }
+    if (!Utils.isEmptyOrNull(query.getAdminOrgUuid())) {
+      addAdminOrgQuery(query);
+    }
+    if (!Utils.isEmptyOrNull(query.getHostOrgUuid())) {
+      addHostOrgQuery(query);
+    }
+    if (!Utils.isEmptyOrNull(query.getLocationUuid())) {
+      addLocationQuery(query);
+    }
     if (query.isOnlyWithTasks()) {
       qb.addFromClause("INNER JOIN \"eventTasks\" et ON et.\"eventUuid\" = events.uuid");
     }
-
-    if (!Utils.isEmptyOrNull(query.getAdminOrgUuid())) {
-      addAdminOrgQuery(qb, query);
-    }
-    if (!Utils.isEmptyOrNull(query.getEventSeriesUuid())) {
-      qb.addWhereClause("events.\"eventSeriesUuid\" = :eventSeriesUuid");
-      qb.addSqlArg("eventSeriesUuid", query.getEventSeriesUuid());
-    }
-    if (!Utils.isEmptyOrNull(query.getHostOrgUuid())) {
-      addHostOrgQuery(qb, query);
-    }
-    if (!Utils.isEmptyOrNull(query.getLocationUuid())) {
-      addLocationQuery(qb, query);
-    }
     if (!Utils.isEmptyOrNull(query.getType())) {
-      qb.addWhereClause("events.type = :type");
-      qb.addSqlArg("type", query.getType());
+      qb.addStringEqualsClause("type", "events.type", query.getType());
     }
     qb.addDateRangeClause("includeDateStart", "events.\"endDate\"", Comparison.AFTER,
         query.getIncludeDate(), "includeDateEnd", "events.\"startDate\"", Comparison.BEFORE,
@@ -73,39 +71,36 @@ public abstract class AbstractEventSearcher extends AbstractSearcher<Event, Even
     addOrderByClauses(qb, query);
   }
 
-  protected void addLocationQuery(AbstractSearchQueryBuilder<Event, EventSearchQuery> outerQb,
-      EventSearchQuery query) {
+  protected void addLocationQuery(EventSearchQuery query) {
     if (query.getLocationUuid().size() == 1
         && Location.DUMMY_LOCATION_UUID.equals(query.getLocationUuid().get(0))) {
       qb.addWhereClause("events.\"locationUuid\" IS NULL");
     } else {
-      qb.addRecursiveClause(outerQb, "events", new String[] {"\"locationUuid\""},
-          "parent_locations", "\"locationRelationships\"", "\"childLocationUuid\"",
-          "\"parentLocationUuid\"", "locationUuid", query.getLocationUuid(), true, true);
+      qb.addRecursiveClause(null, "events", new String[] {"\"locationUuid\""}, "parent_locations",
+          "\"locationRelationships\"", "\"childLocationUuid\"", "\"parentLocationUuid\"",
+          "locationUuid", query.getLocationUuid(), true, true);
     }
   }
 
-  protected void addHostOrgQuery(AbstractSearchQueryBuilder<Event, EventSearchQuery> outerQb,
-      EventSearchQuery query) {
+  protected void addHostOrgQuery(EventSearchQuery query) {
     if (query.getHostOrgUuid().size() == 1
         && Organization.DUMMY_ORG_UUID.equals(query.getHostOrgUuid().get(0))) {
       qb.addWhereClause("events.\"hostOrgUuid\" IS NULL");
     } else {
-      qb.addRecursiveClause(outerQb, "events", new String[] {"\"hostOrgUuid\""}, "parent_orgs",
-          "organizations", "uuid", "\"parentOrgUuid\"", "orgUuid", query.getHostOrgUuid(), true,
+      qb.addRecursiveClause(null, "events", new String[] {"\"hostOrgUuid\""}, "parent_host_orgs",
+          "organizations", "uuid", "\"parentOrgUuid\"", "hostOrgUuid", query.getHostOrgUuid(), true,
           true);
     }
   }
 
-  protected void addAdminOrgQuery(AbstractSearchQueryBuilder<Event, EventSearchQuery> outerQb,
-      EventSearchQuery query) {
+  protected void addAdminOrgQuery(EventSearchQuery query) {
     if (query.getAdminOrgUuid().size() == 1
         && Organization.DUMMY_ORG_UUID.equals(query.getAdminOrgUuid().get(0))) {
       qb.addWhereClause("events.\"adminOrgUuid\" IS NULL");
     } else {
-      qb.addRecursiveClause(outerQb, "events", new String[] {"\"adminOrgUuid\""}, "parent_orgs",
-          "organizations", "uuid", "\"parentOrgUuid\"", "orgUuid", query.getAdminOrgUuid(), true,
-          true);
+      qb.addRecursiveClause(null, "events", new String[] {"\"adminOrgUuid\""}, "parent_admin_orgs",
+          "organizations", "uuid", "\"parentOrgUuid\"", "adminOrgUuid", query.getAdminOrgUuid(),
+          true, true);
     }
   }
 
@@ -119,6 +114,6 @@ public abstract class AbstractEventSearcher extends AbstractSearcher<Event, Even
         qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "events_name"));
         break;
     }
-    qb.addAllOrderByClauses(getOrderBy(ISearchQuery.SortOrder.ASC, "events_uuid"));
+    qb.addAllOrderByClauses(getOrderBy(SortOrder.ASC, "events_uuid"));
   }
 }
