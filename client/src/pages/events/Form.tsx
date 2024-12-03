@@ -83,6 +83,18 @@ const EventForm = ({
       : moment().add(20, "years").endOf("year").toDate()
   )
   const tasksLabel = pluralize(Settings.fields.task.shortLabel)
+  const statusButtons = [
+    {
+      id: "statusActiveButton",
+      value: Model.STATUS.ACTIVE,
+      label: "Active"
+    },
+    {
+      id: "statusInactiveButton",
+      value: Model.STATUS.INACTIVE,
+      label: "Inactive"
+    }
+  ]
 
   return (
     <Formik
@@ -193,6 +205,12 @@ const EventForm = ({
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
               <Fieldset>
+                <DictionaryField
+                  wrappedComponent={FastField}
+                  dictProps={Settings.fields.event.name}
+                  name="name"
+                  component={FieldHelper.InputField}
+                />
                 <DictionaryField
                   wrappedComponent={Field}
                   dictProps={Settings.fields.event.eventSeries}
@@ -332,36 +350,6 @@ const EventForm = ({
                   }
                 />
                 <DictionaryField
-                  wrappedComponent={FastField}
-                  dictProps={Settings.fields.event.name}
-                  name="name"
-                  component={FieldHelper.InputField}
-                />
-                <DictionaryField
-                  wrappedComponent={FastField}
-                  dictProps={Settings.fields.event.description}
-                  name="description"
-                  component={FieldHelper.SpecialField}
-                  onChange={value => {
-                    // prevent initial unnecessary render of RichTextEditor
-                    if (!_isEqual(values.description, value)) {
-                      setFieldValue("description", value, true)
-                    }
-                  }}
-                  onHandleBlur={() => {
-                    // validation will be done by setFieldValue
-                    setFieldTouched("description", true, false)
-                  }}
-                  widget={
-                    <RichTextEditor
-                      className="reportTextField"
-                      placeholder={
-                        Settings.fields.event.description?.placeholder
-                      }
-                    />
-                  }
-                />
-                <DictionaryField
                   wrappedComponent={Field}
                   dictProps={Settings.fields.event.startDate}
                   name="startDate"
@@ -396,6 +384,38 @@ const EventForm = ({
                       id="endDate"
                       withTime={Settings.eventsIncludeTimeAndDuration}
                       minDate={minDate}
+                    />
+                  }
+                />
+                <DictionaryField
+                  wrappedComponent={FastField}
+                  dictProps={Settings.fields.event.status}
+                  name="status"
+                  component={FieldHelper.RadioButtonToggleGroupField}
+                  buttons={statusButtons}
+                  onChange={value => setFieldValue("status", value)}
+                />
+                <DictionaryField
+                  wrappedComponent={FastField}
+                  dictProps={Settings.fields.event.description}
+                  name="description"
+                  component={FieldHelper.SpecialField}
+                  onChange={value => {
+                    // prevent initial unnecessary render of RichTextEditor
+                    if (!_isEqual(values.description, value)) {
+                      setFieldValue("description", value, true)
+                    }
+                  }}
+                  onHandleBlur={() => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("description", true, false)
+                  }}
+                  widget={
+                    <RichTextEditor
+                      className="reportTextField"
+                      placeholder={
+                        Settings.fields.event.description?.placeholder
+                      }
                     />
                   }
                 />

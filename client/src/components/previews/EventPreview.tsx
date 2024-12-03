@@ -34,41 +34,47 @@ const EventPreview = ({ className, uuid }: EventPreviewProps) => {
       <div className="preview-section">
         <DictionaryField
           wrappedComponent={PreviewField}
-          dictProps={Settings.fields.event.type}
-          extraColForValue
-          value={Event.humanNameOfType(event.type)}
+          dictProps={Settings.fields.event.eventSeries}
+          value={<LinkTo modelType="EventSeries" model={event.eventSeries} />}
         />
         <DictionaryField
           wrappedComponent={PreviewField}
-          dictProps={Settings.fields.event.startDate}
-          extraColForValue
-          value={moment(event.startDate).format(Event.getEventDateFormat())}
-        />
-        <DictionaryField
-          wrappedComponent={PreviewField}
-          dictProps={Settings.fields.event.endDate}
-          extraColForValue
-          value={moment(event.endDate).format(Event.getEventDateFormat())}
-        />
-        <PreviewField
-          extraColForValue
-          label={Settings.fields.event.hostOrg.label}
+          dictProps={Settings.fields.event.hostOrg}
           value={<LinkTo modelType="Organization" model={event.hostOrg} />}
         />
-        <PreviewField
-          extraColForValue
-          label={Settings.fields.event.adminOrg.label}
+        <DictionaryField
+          wrappedComponent={PreviewField}
+          dictProps={Settings.fields.event.adminOrg}
           value={<LinkTo modelType="Organization" model={event.adminOrg} />}
         />
         <DictionaryField
           wrappedComponent={PreviewField}
           dictProps={Settings.fields.event.location}
-          extraColForValue
           value={
             event.location && (
               <LinkTo modelType="Location" model={event.location} />
             )
           }
+        />
+        <DictionaryField
+          wrappedComponent={PreviewField}
+          dictProps={Settings.fields.event.type}
+          value={Event.humanNameOfType(event.type)}
+        />
+        <DictionaryField
+          wrappedComponent={PreviewField}
+          dictProps={Settings.fields.event.startDate}
+          value={moment(event.startDate).format(Event.getEventDateFormat())}
+        />
+        <DictionaryField
+          wrappedComponent={PreviewField}
+          dictProps={Settings.fields.event.endDate}
+          value={moment(event.endDate).format(Event.getEventDateFormat())}
+        />
+        <DictionaryField
+          wrappedComponent={PreviewField}
+          dictProps={Settings.fields.event.status}
+          value={Event.humanNameOfStatus(event.status)}
         />
         {event?.organizations?.length > 0 && (
           <DictionaryField

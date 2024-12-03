@@ -5,7 +5,6 @@ import static mil.dds.anet.database.mappers.MapperUtils.getInstantAsLocalDateTim
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import mil.dds.anet.beans.Event;
-import mil.dds.anet.beans.Location;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
 
@@ -17,6 +16,7 @@ public class EventMapper implements RowMapper<Event> {
     MapperUtils.setCustomizableBeanFields(event, r, "events");
     event.setType(Event.EventType.valueOfCode(r.getString("events_type")));
     event.setName(r.getString("events_name"));
+    event.setStatus(MapperUtils.getEnumIdx(r, "events_status", Event.Status.class));
     event.setDescription(r.getString("events_description"));
     event.setStartDate(getInstantAsLocalDateTime(r, "events_startDate"));
     event.setEndDate(getInstantAsLocalDateTime(r, "events_endDate"));
