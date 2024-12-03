@@ -8,7 +8,6 @@ import { Event } from "models"
 import moment from "moment/moment"
 import React, { useEffect, useState } from "react"
 import { Button, Table } from "react-bootstrap"
-import { connect } from "react-redux"
 import Settings from "settings"
 
 const dayNames = [
@@ -89,8 +88,8 @@ const EventMatrix = (props: EventMatrixProps) => {
 
   function isEventIncluded(event, dateToCheck) {
     return (
-      dateToCheck.getTime() >= event.startDate &&
-      dateToCheck.getTime() <= event.endDate
+      moment(event.startDate).startOf("day").isBefore(dateToCheck) &&
+      moment(event.endDate).endOf("day").isAfter(dateToCheck)
     )
   }
 
@@ -116,10 +115,7 @@ const EventMatrix = (props: EventMatrixProps) => {
         >
           <tbody>
             {events
-              .filter(
-                event =>
-                  event.tasks.filter(t => t.uuid === task.uuid).length > 0
-              )
+              .filter(event => event.tasks?.find(t => t.uuid === task.uuid))
               .map(event => (
                 <tr key={event.uuid}>
                   {isEventIncluded(event, dateToCheck) && (
