@@ -179,6 +179,9 @@ public class PersonSearchQuery extends SubscribableObjectSearchQuery<PersonSearc
     if (locationUuid != null) {
       clone.setLocationUuid(new ArrayList<>(locationUuid));
     }
+    if (positionType != null) {
+      clone.setPositionType(new ArrayList<>(positionType));
+    }
     if (assessment != null) {
       clone.setAssessment(
           new AssessmentSearchQuery(assessment.key(), new HashMap<>(assessment.filters())));

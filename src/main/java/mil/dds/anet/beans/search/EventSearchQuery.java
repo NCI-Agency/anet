@@ -3,6 +3,7 @@ package mil.dds.anet.beans.search;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -125,6 +126,10 @@ public class EventSearchQuery extends EventSeriesSearchQuery {
 
   @Override
   public EventSearchQuery clone() throws CloneNotSupportedException {
-    return (EventSearchQuery) super.clone();
+    final EventSearchQuery clone = (EventSearchQuery) super.clone();
+    if (locationUuid != null) {
+      clone.setLocationUuid(new ArrayList<>(locationUuid));
+    }
+    return clone;
   }
 }
