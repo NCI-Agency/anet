@@ -2,6 +2,7 @@ package mil.dds.anet.beans.search;
 
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -50,6 +51,13 @@ public class EventSeriesSearchQuery extends SubscribableObjectSearchQuery<EventS
 
   @Override
   public EventSeriesSearchQuery clone() throws CloneNotSupportedException {
-    return (EventSeriesSearchQuery) super.clone();
+    final EventSeriesSearchQuery clone = (EventSeriesSearchQuery) super.clone();
+    if (hostOrgUuid != null) {
+      clone.setHostOrgUuid(new ArrayList<>(hostOrgUuid));
+    }
+    if (adminOrgUuid != null) {
+      clone.setAdminOrgUuid(new ArrayList<>(adminOrgUuid));
+    }
+    return clone;
   }
 }
