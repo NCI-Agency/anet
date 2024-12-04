@@ -212,7 +212,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     AnetBeanList_Person searchResults =
         withCredentials(jackUser, t -> queryExecutor.personList(getListFields(FIELDS), query1));
     assertThat(searchResults.getTotalCount()).isPositive();
-    assertThat(searchResults.getList().stream().filter(p -> p.getName().equals("BOBTOWN, Bob"))
+    assertThat(searchResults.getList().stream().filter(p -> p.getName().equals("Bobtown, Bob"))
         .findFirst()).isNotEmpty();
 
     final OrganizationSearchQueryInput queryOrgs =
@@ -289,7 +289,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     searchResults =
         withCredentials(jackUser, t -> queryExecutor.personList(getListFields(FIELDS), query2));
     long matchCount =
-        searchResults.getList().stream().filter(p -> p.getName().equals("DVISOR, A")).count();
+        searchResults.getList().stream().filter(p -> p.getName().equals("Dvisor, A")).count();
     assertThat(matchCount).isEqualTo(1);
 
     // Search for same person from an autocomplete box.
@@ -297,7 +297,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     searchResults =
         withCredentials(jackUser, t -> queryExecutor.personList(getListFields(FIELDS), query2));
     matchCount =
-        searchResults.getList().stream().filter(p -> p.getName().equals("DVISOR, A")).count();
+        searchResults.getList().stream().filter(p -> p.getName().equals("Dvisor, A")).count();
     assertThat(matchCount).isEqualTo(1);
 
 

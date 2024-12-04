@@ -24,11 +24,11 @@ class PersonDaoTest {
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  // DVISOR, A
+  // Dvisor, A
   private static final String DVISOR_UUID = "39d02d26-49eb-43b5-9cec-344777213a67";
-  // SOLENOID, Selena
+  // Solenoid, Selena
   private static final String SELENA_UUID = "00b19ebf-0d4d-4b0f-93c8-9023ccb59c49";
-  // STEVESON, Steve for loser person
+  // Steveson, Steve for loser person
   private static final String STEVESON_STEVE = "90fa5784-9e63-4353-8119-357bcd88e287";
   // EF 2.2 Advisor Sewing Facilities
   private static final String EF22_ASF_UUID = "2b7d86a9-3ed4-4843-ab4e-136c3ab109bf";

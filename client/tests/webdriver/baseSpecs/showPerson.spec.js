@@ -3,7 +3,7 @@ import MergePeople from "../pages/mergePeople.page"
 import ShowPerson from "../pages/showPerson.page"
 
 const PERSON_UUID = "df9c7381-56ac-4bc5-8e24-ec524bccd7e9"
-const PERSON_WITH_AG_UUID = "31cba227-f6c6-49e9-9483-fce441bea624" // CIV BRATTON, Creed
+const PERSON_WITH_AG_UUID = "31cba227-f6c6-49e9-9483-fce441bea624" // CIV Bratton, Creed
 
 describe("Show person page", () => {
   describe("When on the show page of a person with authorizationGroup(s)", () => {
@@ -53,7 +53,7 @@ describe("Show person page", () => {
       expect(await MergePeople.getTitle()).to.exist
       expect(
         await (await MergePeople.getLeftPersonField()).getValue()
-      ).to.contain("BRATTON, Creed")
+      ).to.contain("Bratton, Creed")
       // eslint-disable-next-line no-unused-expressions
       expect(await (await MergePeople.getLeftPersonField()).isEnabled()).to.be
         .false
