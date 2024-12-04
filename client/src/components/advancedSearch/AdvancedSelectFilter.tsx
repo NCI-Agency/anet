@@ -52,6 +52,7 @@ const AdvancedSelectFilter = ({
       value={value}
       valueKey={valueKey}
       valueFunc={valueFunc}
+      fields={fields}
       smallOverlay
     />
   )
