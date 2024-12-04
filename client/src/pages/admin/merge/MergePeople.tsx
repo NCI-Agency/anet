@@ -170,7 +170,7 @@ const MergePeople = ({ pageDispatchers }: MergePeopleProps) => {
               />
               <MergeField
                 label="Name"
-                value={mergedPerson.name}
+                value={Person.militaryName(mergedPerson.name)}
                 align={ALIGN_OPTIONS.CENTER}
                 fieldName="name"
                 mergeState={mergeState}
@@ -507,13 +507,14 @@ const PersonColumn = ({
           filterDefs={peopleFilters}
           onChange={value => {
             if (value) {
-              value.name = Person.militaryName(value.name)
               value.fixupFields()
             }
             dispatchMergeActions(setMergeable(value, align))
           }}
           objectType={Person}
           valueKey="name"
+          valueFunc={(v, k) =>
+            k === "name" ? Person.militaryName(v?.[k]) : v?.[k]}
           fields={Person.allFieldsQuery}
           addon={PEOPLE_ICON}
           disabled={disabled}
@@ -553,9 +554,7 @@ const PersonColumn = ({
             value={Person.militaryName(person.name)}
             align={align}
             action={() => {
-              dispatchMergeActions(
-                setAMergedField("name", Person.militaryName(person.name), align)
-              )
+              dispatchMergeActions(setAMergedField("name", person.name, align))
               dispatchMergeActions(setAMergedField("uuid", person.uuid, align))
               dispatchMergeActions(
                 setAMergedField(

@@ -87,7 +87,7 @@ const SecurityBanner = ({
           <Dropdown as={ButtonGroup}>
             <LinkTo
               modelType="Person"
-              model={Person.militaryName(currentUser.name)}
+              model={currentUser}
               button
               className="shadow-none"
               variant="primary"
@@ -99,7 +99,7 @@ const SecurityBanner = ({
                 width={25}
                 height={25}
               />{" "}
-              {currentUser.name}
+              {Person.militaryName(currentUser.name)}
             </LinkTo>
             {Settings.keycloakConfiguration.showLogoutLink && (
               <Dropdown.Toggle

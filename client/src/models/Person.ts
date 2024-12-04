@@ -369,8 +369,8 @@ export default class Person extends Model {
   }
 
   static parseFullName(name) {
-    const delimiter = name.indexOf(Person.nameDelimiter)
-    let lastName = name
+    const delimiter = name?.indexOf(Person.nameDelimiter)
+    let lastName = name ?? ""
     let firstName = ""
 
     if (delimiter > -1) {

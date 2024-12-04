@@ -76,9 +76,9 @@ class TaskApprovalTest extends AbstractResourceTest {
 
   // Test report approval scenarios for tasks mostly use the following data:
   // - report task 2.A (which has tasked org EF 2)
-  // - task 2.A has approver for planning OF-9 JACKSON, Jack (from org EF 2.1)
-  // - task 2.A has approver for publication OF-6 HENDERSON, Henry (from org EF 2.1)
-  // - report primary advisor CIV REINTON, Reina (from org EF 2.2)
+  // - task 2.A has approver for planning OF-9 Jackson, Jack (from org EF 2.1)
+  // - task 2.A has approver for publication OF-6 Henderson, Henry (from org EF 2.1)
+  // - report primary advisor CIV Reinton, Reina (from org EF 2.2)
 
   // Task 2.A
   private static final String TEST_TASK_UUID = "75d4009d-7c79-42e0-aa2f-d79d158ec8d6";
@@ -162,7 +162,7 @@ class TaskApprovalTest extends AbstractResourceTest {
   void testNoSteps() {
     final TaskInput taskInput = getTaskInput(clearTaskApprovalSteps(TEST_TASK_UUID));
 
-    final Report report = submitReport("testNoSteps", getPersonFromDb("ERINSON, Erin"), null,
+    final Report report = submitReport("testNoSteps", getPersonFromDb("Erinson, Erin"), null,
         taskInput, false, ReportState.PENDING_APPROVAL);
     assertWorkflowSize(report, taskInput.getUuid(), 0);
 
@@ -191,7 +191,7 @@ class TaskApprovalTest extends AbstractResourceTest {
     final TaskInput updatedTaskInput =
         getTaskInput(updateTaskApprovalSteps(taskInput, approver, isPlanned, false));
 
-    final Report report = submitReport(text, getPersonFromDb("ERINSON, Erin"), null,
+    final Report report = submitReport(text, getPersonFromDb("Erinson, Erin"), null,
         updatedTaskInput, isPlanned, ReportState.PENDING_APPROVAL);
     assertWorkflowSize(report, updatedTaskInput.getUuid(), 1);
 
@@ -225,11 +225,11 @@ class TaskApprovalTest extends AbstractResourceTest {
     final TaskInput taskInput = getTaskInput(clearTaskApprovalSteps(TEST_TASK_UUID));
 
     // Someone from EF 1.1
-    final Person approver = getPersonFromDb("ELIZAWELL, Elizabeth");
+    final Person approver = getPersonFromDb("Elizawell, Elizabeth");
     final TaskInput updatedTaskInput =
         getTaskInput(updateTaskApprovalSteps(taskInput, approver, isPlanned, false));
 
-    final Report report = submitReport(text, getPersonFromDb("ERINSON, Erin"), null,
+    final Report report = submitReport(text, getPersonFromDb("Erinson, Erin"), null,
         updatedTaskInput, isPlanned, ReportState.PENDING_APPROVAL);
     assertWorkflowSize(report, updatedTaskInput.getUuid(), 1);
 
@@ -263,11 +263,11 @@ class TaskApprovalTest extends AbstractResourceTest {
     final TaskInput taskInput = getTaskInput(clearTaskApprovalSteps(TEST_TASK_UUID));
 
     // Someone from EF 1.1
-    final Person approver = getPersonFromDb("ELIZAWELL, Elizabeth");
+    final Person approver = getPersonFromDb("Elizawell, Elizabeth");
     final TaskInput updatedTaskInput =
         getTaskInput(updateTaskApprovalSteps(taskInput, approver, isPlanned, true));
 
-    final Person author = getPersonFromDb("ERINSON, Erin");
+    final Person author = getPersonFromDb("Erinson, Erin");
     final Report report = submitReport(text, author, null, updatedTaskInput, isPlanned,
         isPlanned ? ReportState.APPROVED : ReportState.PENDING_APPROVAL);
     assertWorkflowSize(report, updatedTaskInput.getUuid(), 0);
@@ -306,7 +306,7 @@ class TaskApprovalTest extends AbstractResourceTest {
     final TaskInput updatedTaskInput =
         getTaskInput(updateTaskApprovalSteps(taskInput, approver, isPlanned, true));
 
-    final Report report = submitReport(text, getPersonFromDb("ERINSON, Erin"), null,
+    final Report report = submitReport(text, getPersonFromDb("Erinson, Erin"), null,
         updatedTaskInput, isPlanned, ReportState.PENDING_APPROVAL);
     assertWorkflowSize(report, updatedTaskInput.getUuid(), 1);
 
@@ -348,7 +348,7 @@ class TaskApprovalTest extends AbstractResourceTest {
     final TaskInput updatedTaskInput =
         getTaskInput(updateTaskApprovalSteps(taskInput, approver, isPlanned, true));
 
-    final Person author = getPersonFromDb("ERINSON, Erin");
+    final Person author = getPersonFromDb("Erinson, Erin");
     final Report report =
         submitReport(text, author, null, updatedTaskInput, isPlanned, ReportState.PENDING_APPROVAL);
     assertWorkflowSize(report, updatedTaskInput.getUuid(), 1);
@@ -361,7 +361,7 @@ class TaskApprovalTest extends AbstractResourceTest {
 
     // Replace the approver from the approval step
     final Task replacedTask = replaceApproversFromTaskApprovalSteps(updatedTaskInput,
-        getPersonFromDb("ELIZAWELL, Elizabeth"), isPlanned);
+        getPersonFromDb("Elizawell, Elizabeth"), isPlanned);
 
     // Check that approval step has no approvers
     final Report report2 = getReport(author, report.getUuid());
@@ -413,7 +413,7 @@ class TaskApprovalTest extends AbstractResourceTest {
 
     // A restricted step from a non-matching org
     // Someone from EF 1.1
-    final Person approverStep2 = getPersonFromDb("ELIZAWELL, Elizabeth");
+    final Person approverStep2 = getPersonFromDb("Elizawell, Elizabeth");
     final ApprovalStepInput as2Input = getApprovalStepInput(approverStep2, isPlanned, true);
 
     // A restricted step from a matching org
@@ -427,7 +427,7 @@ class TaskApprovalTest extends AbstractResourceTest {
     }
     final TaskInput updatedTaskInput = getTaskInput(updateTask(taskInput));
 
-    final Report report = submitReport(text, getPersonFromDb("ERINSON, Erin"), null,
+    final Report report = submitReport(text, getPersonFromDb("Erinson, Erin"), null,
         updatedTaskInput, isPlanned, ReportState.PENDING_APPROVAL);
     assertWorkflowSize(report, updatedTaskInput.getUuid(), 2);
 
@@ -466,7 +466,7 @@ class TaskApprovalTest extends AbstractResourceTest {
     final boolean isPlanned = false;
     final String text = "testTwoReports";
     final TaskInput taskInput = getTaskInput(clearTaskApprovalSteps(TEST_TASK_UUID));
-    final Person author = getPersonFromDb("ERINSON, Erin");
+    final Person author = getPersonFromDb("Erinson, Erin");
 
     final Person approver1 = getApprover(isPlanned);
     final TaskInput updatedTaskInput =
@@ -485,7 +485,7 @@ class TaskApprovalTest extends AbstractResourceTest {
     checkPendingApproval(approver1, report2, 1, true, null);
 
     // Someone from EF 1.1
-    final Person approver2 = getPersonFromDb("ELIZAWELL, Elizabeth");
+    final Person approver2 = getPersonFromDb("Elizawell, Elizabeth");
     final List<ApprovalStepInput> approvalStepsInput =
         new ArrayList<>(updatedTaskInput.getApprovalSteps());
     approvalStepsInput.add(getApprovalStepInput(approver2, isPlanned, true));
@@ -498,7 +498,7 @@ class TaskApprovalTest extends AbstractResourceTest {
     final Report report3 = submitReport(text + "3", author, approver2, updatedTask2Input, isPlanned,
         ReportState.PENDING_APPROVAL);
     assertWorkflowSize(report3, updatedTask2Input.getUuid(), 1);
-    final Person org2Approver = getPersonFromDb("BOBTOWN, Bob");
+    final Person org2Approver = getPersonFromDb("Bobtown, Bob");
     assertEmails(1, org2Approver);
     approveReport(report3, org2Approver, false);
     checkPendingApproval(approver2, report3, 1, true, null);
@@ -575,7 +575,7 @@ class TaskApprovalTest extends AbstractResourceTest {
 
   private ApprovalStepInput getApprovalStepInput(Person approver, boolean isPlanned,
       boolean restrictedApproval) {
-    final Person unrelatedApprover = getPersonFromDb("ANDERSON, Andrew");
+    final Person unrelatedApprover = getPersonFromDb("Anderson, Andrew");
     return ApprovalStepInput.builder().withName("Task approval by " + approver.getName())
         .withType(isPlanned ? ApprovalStepType.PLANNING_APPROVAL : ApprovalStepType.REPORT_APPROVAL)
         .withRestrictedApproval(restrictedApproval).withApprovers(getPositionsInput(
@@ -585,7 +585,7 @@ class TaskApprovalTest extends AbstractResourceTest {
 
   private Person getApprover(boolean isPlanned) {
     // Both from EF 2.1
-    return getPersonFromDb(isPlanned ? "JACKSON, Jack" : "HENDERSON, Henry");
+    return getPersonFromDb(isPlanned ? "Jackson, Jack" : "Henderson, Henry");
   }
 
   private Task replaceApproversFromTaskApprovalSteps(TaskInput taskInput, Person approver,
@@ -603,11 +603,11 @@ class TaskApprovalTest extends AbstractResourceTest {
   private void organizationalApproval(Report report, boolean isPlanned) {
     // No organizational workflow for planned engagements
     if (!isPlanned) {
-      final Person jacob = getPersonFromDb("JACOBSON, Jacob");
+      final Person jacob = getPersonFromDb("Jacobson, Jacob");
       // jacob should have received email
       assertEmails(1, jacob);
       approveReport(report, jacob, false);
-      final Person rebecca = getPersonFromDb("BECCABON, Rebecca");
+      final Person rebecca = getPersonFromDb("Beccabon, Rebecca");
       // rebecca should have received email
       assertEmails(1, rebecca);
       approveReport(report, rebecca, false);
@@ -655,11 +655,11 @@ class TaskApprovalTest extends AbstractResourceTest {
   private Report submitReport(String text, Person author, Person reportAdvisor, TaskInput taskInput,
       boolean isPlanned, ReportState expectedState) {
     if (reportAdvisor == null) {
-      reportAdvisor = getPersonFromDb("REINTON, Reina");
+      reportAdvisor = getPersonFromDb("Reinton, Reina");
     }
     final ReportPerson advisor = personToPrimaryReportPerson(reportAdvisor, false);
     final ReportPerson interlocutor =
-        personToPrimaryReportPerson(getPersonFromDb("STEVESON, Steve"), true);
+        personToPrimaryReportPerson(getPersonFromDb("Steveson, Steve"), true);
     final String testText = String.format("Test report for task approval workflow — %1$s", text);
     final ReportInput reportInput = ReportInput.builder()
         .withEngagementDate(Instant.now().plus(isPlanned ? 14 : -14, ChronoUnit.DAYS))
