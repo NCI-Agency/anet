@@ -104,6 +104,38 @@ const EventMatrix = ({
     return new Date(today.setDate(diff))
   }
 
+  function isReportIncluded(report, dateToCheck, task?, event?) {
+    if (
+      !(
+        moment(report.engagementDate).startOf("day").isBefore(dateToCheck) &&
+        moment(report.engagementDate).endOf("day").isAfter(dateToCheck)
+      )
+    ) {
+      // Out of range
+      return false
+    }
+    if (!task) {
+      // Not related to any task
+      return true
+    }
+    if (!report.tasks?.find(t => t.uuid === task.uuid)) {
+      // Not related to the current task
+      return false
+    }
+    if (!event) {
+      // Not related to an event
+      return true
+    }
+    if (
+      isEventIncluded(event, dateToCheck) &&
+      event.tasks?.find(t => t.uuid === task.uuid)
+    ) {
+      // Already shown under the event
+      return false
+    }
+    return true
+  }
+
   function isEventIncluded(event, dateToCheck) {
     return (
       moment(event.startDate).startOf("day").isBefore(dateToCheck) &&
@@ -119,7 +151,7 @@ const EventMatrix = ({
     )
   }
 
-  function getEvent(events, dayOfWeek) {
+  function getEvent(events, dayOfWeek, task?) {
     // Get the date
     const dateToCheck = new Date(weekDays[dayOfWeek])
     return (
@@ -136,17 +168,39 @@ const EventMatrix = ({
               <tr key={event.uuid}>
                 {(isEventIncluded(event, dateToCheck) && (
                   <td className="event-cell-color event-cell-height">
-                    {showEventTitle(event, dateToCheck) && (
+                    {(showEventTitle(event, dateToCheck) && (
                       <LinkTo
-                        className="event-cell-color ms-2 text-white"
+                        className="event-cell-color ms-2 text-white fw-bolder"
                         modelType="Event"
                         model={event}
                       />
+                    )) || <span>&nbsp;</span>}
+                    {event.reports?.map(
+                      report =>
+                        isReportIncluded(report, dateToCheck, task) && (
+                          <div key={report.uuid} className="clearfix">
+                            <LinkTo
+                              className="text-white"
+                              modelType="Report"
+                              model={report}
+                            />
+                          </div>
+                        )
                     )}
                   </td>
                 )) || <td className="event-cell-height bg-white" />}
               </tr>
             ))}
+            {task?.reports?.map(
+              report =>
+                isReportIncluded(report, dateToCheck, task, report.event) && (
+                  <tr key={report.uuid}>
+                    <td>
+                      <LinkTo modelType="Report" model={report} />
+                    </td>
+                  </tr>
+                )
+            )}
           </tbody>
         </Table>
       </>
@@ -256,13 +310,13 @@ const EventMatrix = ({
                         parentField="parentTask"
                       />
                     </td>
-                    <td>{getEvent(taskEvents, 0)}</td>
-                    <td>{getEvent(taskEvents, 1)}</td>
-                    <td>{getEvent(taskEvents, 2)}</td>
-                    <td>{getEvent(taskEvents, 3)}</td>
-                    <td>{getEvent(taskEvents, 4)}</td>
-                    <td>{getEvent(taskEvents, 5)}</td>
-                    <td>{getEvent(taskEvents, 6)}</td>
+                    <td>{getEvent(taskEvents, 0, task)}</td>
+                    <td>{getEvent(taskEvents, 1, task)}</td>
+                    <td>{getEvent(taskEvents, 2, task)}</td>
+                    <td>{getEvent(taskEvents, 3, task)}</td>
+                    <td>{getEvent(taskEvents, 4, task)}</td>
+                    <td>{getEvent(taskEvents, 5, task)}</td>
+                    <td>{getEvent(taskEvents, 6, task)}</td>
                   </tr>
                 )
               })}

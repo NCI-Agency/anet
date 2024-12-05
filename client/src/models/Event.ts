@@ -363,6 +363,14 @@ export default class Event extends Model {
             lat
             lng
           }
+          reports {
+            uuid
+            intent
+            engagementDate
+            tasks {
+              uuid
+            }
+          }
           tasks {
             uuid
             shortName

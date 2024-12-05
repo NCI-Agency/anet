@@ -97,7 +97,41 @@ const GQL_GET_TASK = gql`
           }
         }
         customFields
+        reports {
+          uuid
+          intent
+          engagementDate
+          event {
+            uuid
+            name
+            startDate
+            endDate
+            tasks {
+              uuid
+            }
+          }
+          tasks {
+            uuid
+          }
+        }
         ${GRAPHQL_NOTES_FIELDS}
+      }
+      reports {
+        uuid
+        intent
+        engagementDate
+        event {
+          uuid
+          name
+          startDate
+          endDate
+          tasks {
+            uuid
+          }
+        }
+        tasks {
+          uuid
+        }
       }
       responsiblePositions {
         uuid
