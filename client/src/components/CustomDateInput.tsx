@@ -30,6 +30,7 @@ interface CustomDateInputProps {
   showIcon?: boolean
   maxDate?: Date
   minDate?: Date
+  initialMonth?: Date
   placement?: Placement
   withTime?: boolean
   value?: string | number | Date
@@ -45,6 +46,7 @@ const CustomDateInput = ({
   showIcon = true,
   maxDate = moment().add(20, "years").endOf("year").toDate(),
   minDate = moment().subtract(100, "years").startOf("year").toDate(),
+  initialMonth,
   placement = "auto",
   withTime = false,
   value,
@@ -69,6 +71,7 @@ const CustomDateInput = ({
       // see https://github.com/palantir/blueprint/issues/3474
       // showArrowButtons: true
     }
+  const inputValue = value ? moment(value).toISOString() : null
   return (
     <DateInput3
       inputProps={{
@@ -79,7 +82,8 @@ const CustomDateInput = ({
       }}
       className={className}
       rightElement={rightElement}
-      value={value && moment(value).toISOString()}
+      value={inputValue}
+      initialMonth={initialMonth}
       onChange={onChange}
       formatDate={date => {
         const dt = moment(date)

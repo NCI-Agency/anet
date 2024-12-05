@@ -195,6 +195,12 @@ const EventForm = ({
           }
         }
 
+        const initialMonthForStartDate = moment(
+          values.startDate ?? values.endDate ?? new Date()
+        ).toDate()
+        const initialMonthForEndDate = moment(
+          values.endDate ?? values.startDate ?? new Date()
+        ).toDate()
         return (
           <div>
             <NavigationWarning isBlocking={dirty && !isSubmitting} />
@@ -362,6 +368,7 @@ const EventForm = ({
                       id="startDate"
                       withTime={Settings.eventsIncludeTimeAndDuration}
                       maxDate={maxDate}
+                      initialMonth={initialMonthForStartDate}
                     />
                   }
                 />
@@ -381,6 +388,7 @@ const EventForm = ({
                       id="endDate"
                       withTime={Settings.eventsIncludeTimeAndDuration}
                       minDate={minDate}
+                      initialMonth={initialMonthForEndDate}
                     />
                   }
                 />
