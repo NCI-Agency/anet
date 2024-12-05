@@ -6,6 +6,7 @@ import static mil.dds.anet.search.AbstractSearchQueryBuilder.Comparison;
 import mil.dds.anet.beans.Event;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Organization;
+import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.EventSearchQuery;
 import mil.dds.anet.database.DatabaseHandler;
@@ -57,8 +58,11 @@ public abstract class AbstractEventSearcher extends AbstractSearcher<Event, Even
     if (!Utils.isEmptyOrNull(query.getLocationUuid())) {
       addLocationQuery(query);
     }
-    if (query.isOnlyWithTasks()) {
+    if (query.isOnlyWithTasks() || !Utils.isEmptyOrNull(query.getTaskUuid())) {
       qb.addFromClause("INNER JOIN \"eventTasks\" et ON et.\"eventUuid\" = events.uuid");
+    }
+    if (!Utils.isEmptyOrNull(query.getTaskUuid())) {
+      addTaskQuery(query);
     }
     if (!Utils.isEmptyOrNull(query.getType())) {
       qb.addStringEqualsClause("type", "events.type", query.getType());
@@ -101,6 +105,15 @@ public abstract class AbstractEventSearcher extends AbstractSearcher<Event, Even
       qb.addRecursiveClause(null, "events", new String[] {"\"adminOrgUuid\""}, "parent_admin_orgs",
           "organizations", "uuid", "\"parentOrgUuid\"", "adminOrgUuid", query.getAdminOrgUuid(),
           true, true);
+    }
+  }
+
+  protected void addTaskQuery(EventSearchQuery query) {
+    if (Task.DUMMY_TASK_UUID.equals(query.getTaskUuid())) {
+      qb.addWhereClause("et.\"taskUuid\" IS NULL");
+    } else {
+      qb.addRecursiveClause(null, "et", "\"taskUuid\"", "parent_tasks", "tasks",
+          "\"parentTaskUuid\"", "parentTaskUuid", query.getTaskUuid(), true);
     }
   }
 
