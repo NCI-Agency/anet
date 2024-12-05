@@ -19,6 +19,13 @@ import AuthorizationGroupShow from "pages/authorizationGroups/Show"
 import BoardDashboard from "pages/dashboards/BoardDashboard"
 import DecisivesDashboard from "pages/dashboards/DecisivesDashboard"
 import KanbanDashboard from "pages/dashboards/KanbanDashboard"
+import EventEdit from "pages/events/Edit"
+import MyEvents from "pages/events/MyEvents"
+import EventNew from "pages/events/New"
+import EventShow from "pages/events/Show"
+import EventSeriesEdit from "pages/eventSeries/Edit"
+import EventSeriesNew from "pages/eventSeries/New"
+import EventSeriesShow from "pages/eventSeries/Show"
 import GraphiQL from "pages/GraphiQL"
 import Help from "pages/Help"
 import Home from "pages/Home"
@@ -209,6 +216,21 @@ const Routing = () => {
         <Route path="mine" element={<MySubscriptions />} />
       </Route>
       <Route path={PAGE_URLS.MISSING} element={<PageMissing />} />
+      <Route path={PAGE_URLS.EVENT_SERIES}>
+        <Route path="new" element={<EventSeriesNew />} />
+        <Route path=":uuid">
+          <Route index element={<EventSeriesShow />} />
+          <Route path="edit" element={<EventSeriesEdit />} />
+        </Route>
+      </Route>
+      <Route path={PAGE_URLS.EVENTS}>
+        <Route path="mine" element={<MyEvents />} />
+        <Route path="new" element={<EventNew />} />
+        <Route path=":uuid">
+          <Route index element={<EventShow />} />
+          <Route path="edit" element={<EventEdit />} />
+        </Route>
+      </Route>
     </Routes>
   )
 }
