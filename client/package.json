@@ -115,7 +115,7 @@
     "xhr2": "0.2.1"
   },
   "dependencies": {
-    "@apollo/client": "3.11.10",
+    "@apollo/client": "3.12.2",
     "@blueprintjs/core": "5.15.0",
     "@blueprintjs/datetime2": "2.3.16",
     "@emotion/react": "11.13.5",
@@ -127,7 +127,7 @@
     "@fullcalendar/react": "6.1.15",
     "@fullcalendar/timegrid": "6.1.15",
     "@projectstorm/react-diagrams": "7.0.4",
-    "axios": "1.7.7",
+    "axios": "1.7.9",
     "bootstrap": "5.3.3",
     "change-case": "5.4.4",
     "classnames": "2.5.1",
@@ -184,7 +184,7 @@
     "title-case": "4.3.2",
     "use-debounce": "10.0.4",
     "uuid": "11.0.3",
-    "yup": "1.4.0"
+    "yup": "1.5.0"
   },
   "resolutions": {
     "chromedriver": "link:./node_modules/.cache/null"
