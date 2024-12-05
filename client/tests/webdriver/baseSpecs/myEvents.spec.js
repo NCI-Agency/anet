@@ -101,11 +101,5 @@ describe("My events page", () => {
     it("Should see a map of events", async() => {
       await MyEvents.selectEventsMap()
     })
-    it("Should see a matrix of events with one row with objective", async() => {
-      await MyEvents.selectEventsMatrix()
-      const myEventsItems = await (await MyEvents.getMyEvents()).$$("tr")
-      // table has a header and 1 objective
-      expect(myEventsItems).to.have.length(2)
-    })
   })
 })

@@ -62,27 +62,13 @@ class MyEvents extends Page {
   }
 
   async selectEventsMap() {
-    const matrixTab = await browser.$(
+    const mapTab = await browser.$(
       "#my-events .event-collection div header div button[value='map']"
     )
-    await matrixTab.waitForExist()
-    await matrixTab.waitForDisplayed()
-    await matrixTab.click()
+    await mapTab.waitForExist()
+    await mapTab.waitForDisplayed()
+    await mapTab.click()
     await super.waitUntilLoaded()
-  }
-
-  async selectEventsMatrix() {
-    const matrixTab = await browser.$(
-      "#my-events .event-collection div header div button[value='matrix']"
-    )
-    await matrixTab.waitForExist()
-    await matrixTab.waitForDisplayed()
-    await matrixTab.click()
-    await super.waitUntilLoaded()
-  }
-
-  async getEventsMatrixItem(summaryItem) {
-    return browser.$("#my-events .event-collection .event-matrix")
   }
 }
 

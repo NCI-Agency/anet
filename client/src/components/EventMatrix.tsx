@@ -4,10 +4,17 @@ import API from "api"
 import { BreadcrumbTrail } from "components/BreadcrumbTrail"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import { Event } from "models"
+import {
+  mapPageDispatchersToProps,
+  PageDispatchersPropType,
+  useBoilerplate
+} from "components/Page"
+import _isEmpty from "lodash/isEmpty"
+import { Event, EventSeries } from "models"
 import moment from "moment/moment"
 import React, { useEffect, useState } from "react"
 import { Button, Table } from "react-bootstrap"
+import { connect } from "react-redux"
 import Settings from "settings"
 
 const dayNames = [
@@ -21,17 +28,32 @@ const dayNames = [
 ]
 
 interface EventMatrixProps {
+  pageDispatchers?: PageDispatchersPropType
   // query variables for events, when query & pagination wanted:
-  queryParams?: any
+  queryParams: any
+  tasks: any[]
 }
 
-const EventMatrix = (props: EventMatrixProps) => {
+const EventMatrix = ({
+  pageDispatchers,
+  queryParams,
+  tasks
+}: EventMatrixProps) => {
   const [weekNumber, setWeekNumber] = useState(null)
   const [startDay, setStartDay] = useState(getFirstDayOfCurrentWeek())
   const [events, setEvents] = useState([])
-  const [tasks, setTasks] = useState([])
   const [weekDays, setWeekDays] = useState([])
-  const [error, setError] = useState(null)
+  const [fetchError, setFetchError] = useState(null)
+
+  useEffect(() => {
+    // Determine date range
+    const week = []
+    for (let i = 0; i <= 6; i++) {
+      week.push(moment(startDay).add(i, "days").toDate())
+    }
+    setWeekDays(week)
+    setWeekNumber(moment(startDay).week())
+  }, [startDay])
 
   useEffect(() => {
     async function fetchEvents(eventQuery) {
@@ -40,44 +62,40 @@ const EventMatrix = (props: EventMatrixProps) => {
           eventQuery
         })
       } catch (error) {
-        setError(error)
+        setFetchError(error)
       }
     }
 
-    // Determine date range
-    const week = []
-    for (let i = 0; i <= 6; i++) {
-      week.push(moment(startDay).add(i, "days").toDate())
-    }
-    setWeekDays(week)
-    setWeekNumber(moment(startDay).week())
-
     // Get the events
-    const eventQuery = Object.assign({}, props.queryParams)
-    eventQuery.startDate = week[0]
-    eventQuery.endDate = week[6]
-    eventQuery.onlyWithTasks = true
+    const eventQuery = {
+      ...queryParams,
+      pageSize: 0,
+      startDate: weekDays[0],
+      endDate: weekDays[6]
+    }
     fetchEvents(eventQuery).then(response =>
       setEvents(response?.eventList?.list)
     )
-  }, [startDay, props.queryParams])
+  }, [weekDays, queryParams])
 
-  useEffect(() => {
-    const tasksSet = new Set()
-    const tasksArray = []
-    events
-      .map(event => event.tasks)
-      .flat()
-      .forEach(task => {
-        if (!tasksSet.has(task.uuid)) {
-          tasksSet.add(task.uuid)
-          tasksArray.push(task)
-        }
-        tasksSet.add(task)
-      })
-    tasksArray.sort((a, b) => a.shortName.localeCompare(b.shortName))
-    setTasks(tasksArray)
-  }, [events])
+  const eventSeriesQuery = {
+    pageSize: 0
+  }
+  const { loading, error, data } = API.useApiQuery(
+    EventSeries.getEventSeriesListQuery,
+    {
+      eventSeriesQuery
+    }
+  )
+  const { done, result } = useBoilerplate({
+    loading,
+    error,
+    pageDispatchers
+  })
+  if (done) {
+    return result
+  }
+  const eventSeries = data.eventSeriesList?.list
 
   function getFirstDayOfCurrentWeek() {
     const today = new Date()
@@ -101,7 +119,7 @@ const EventMatrix = (props: EventMatrixProps) => {
     )
   }
 
-  function getEvent(task, dayOfWeek) {
+  function getEvent(events, dayOfWeek) {
     // Get the date
     const dateToCheck = new Date(weekDays[dayOfWeek])
     return (
@@ -114,26 +132,21 @@ const EventMatrix = (props: EventMatrixProps) => {
           className="event-matrix-cell mb-0"
         >
           <tbody>
-            {events
-              .filter(event => event.tasks?.find(t => t.uuid === task.uuid))
-              .map(event => (
-                <tr key={event.uuid}>
-                  {isEventIncluded(event, dateToCheck) && (
-                    <td className="event-cell-color event-cell-height">
-                      {showEventTitle(event, dateToCheck) && (
-                        <LinkTo
-                          className="event-cell-color ms-2 text-white"
-                          modelType="Event"
-                          model={event}
-                        />
-                      )}
-                    </td>
-                  )}
-                  {!isEventIncluded(event, dateToCheck) && (
-                    <td className="event-cell-height bg-white" />
-                  )}
-                </tr>
-              ))}
+            {events.map(event => (
+              <tr key={event.uuid}>
+                {(isEventIncluded(event, dateToCheck) && (
+                  <td className="event-cell-color event-cell-height">
+                    {showEventTitle(event, dateToCheck) && (
+                      <LinkTo
+                        className="event-cell-color ms-2 text-white"
+                        modelType="Event"
+                        model={event}
+                      />
+                    )}
+                  </td>
+                )) || <td className="event-cell-height bg-white" />}
+              </tr>
+            ))}
           </tbody>
         </Table>
       </>
@@ -150,7 +163,7 @@ const EventMatrix = (props: EventMatrixProps) => {
 
   return (
     <>
-      <Messages error={error} />
+      <Messages error={fetchError} />
       <div className="float-start">
         <div className="rollup-date-range-container">
           <Button
@@ -170,50 +183,94 @@ const EventMatrix = (props: EventMatrixProps) => {
           >
             <Icon icon={IconNames.DOUBLE_CHEVRON_RIGHT} />
           </Button>
+          {_isEmpty(events) && (
+            <em className="ms-2 text-info">No events in this week </em>
+          )}
         </div>
       </div>
       <div>
         <Table className="event-matrix" responsive hover id="events-matrix">
-          <thead>
-            <tr>
-              <th />
+          <tbody>
+            <tr className="table-primary">
+              <th>Event Series</th>
               {weekDays.map(weekDay => (
-                <th key={weekDay}>{weekDay.toISOString().slice(0, 10)}</th>
+                <th key={weekDay}>
+                  {weekDay.toISOString().slice(0, 10)}
+                  <br />
+                  {dayNames[weekDay.getDay()]}
+                </th>
               ))}
             </tr>
-            <tr>
+            {(_isEmpty(eventSeries) && (
+              <tr>
+                <td colSpan={8}>No matching Event Series</td>
+              </tr>
+            )) ||
+              eventSeries.map(eventSerie => {
+                const eventSeriesEvents = events.filter(
+                  e => e.eventSeries?.uuid === eventSerie.uuid
+                )
+                return (
+                  <tr key={eventSerie.uuid}>
+                    <td>
+                      <LinkTo modelType="EventSeries" model={eventSerie} />
+                    </td>
+                    <td>{getEvent(eventSeriesEvents, 0)}</td>
+                    <td>{getEvent(eventSeriesEvents, 1)}</td>
+                    <td>{getEvent(eventSeriesEvents, 2)}</td>
+                    <td>{getEvent(eventSeriesEvents, 3)}</td>
+                    <td>{getEvent(eventSeriesEvents, 4)}</td>
+                    <td>{getEvent(eventSeriesEvents, 5)}</td>
+                    <td>{getEvent(eventSeriesEvents, 6)}</td>
+                  </tr>
+                )
+              })}
+            <tr className="table-primary">
               <th>{Settings.fields.task.shortLabel}</th>
               {weekDays.map(weekDay => (
-                <th key={weekDay}>{dayNames[weekDay.getDay()]}</th>
+                <th key={weekDay}>
+                  {weekDay.toISOString().slice(0, 10)}
+                  <br />
+                  {dayNames[weekDay.getDay()]}
+                </th>
               ))}
             </tr>
-          </thead>
-          <tbody>
-            {tasks.map(task => (
-              <tr key={task.uuid}>
-                <td>
-                  <BreadcrumbTrail
-                    modelType="Task"
-                    leaf={task}
-                    ascendantObjects={task.ascendantTasks}
-                    parentField="parentTask"
-                  />
+            {(_isEmpty(tasks) && (
+              <tr>
+                <td colSpan={8}>
+                  No matching {Settings.fields.task.shortLabel}
                 </td>
-                <td>{getEvent(task, 0)}</td>
-                <td>{getEvent(task, 1)}</td>
-                <td>{getEvent(task, 2)}</td>
-                <td>{getEvent(task, 3)}</td>
-                <td>{getEvent(task, 4)}</td>
-                <td>{getEvent(task, 5)}</td>
-                <td>{getEvent(task, 6)}</td>
               </tr>
-            ))}
+            )) ||
+              tasks.map(task => {
+                const taskEvents = events.filter(e =>
+                  e.tasks?.find(t => t.uuid === task.uuid)
+                )
+                return (
+                  <tr key={task.uuid}>
+                    <td>
+                      <BreadcrumbTrail
+                        modelType="Task"
+                        leaf={task}
+                        ascendantObjects={task.ascendantTasks}
+                        parentField="parentTask"
+                      />
+                    </td>
+                    <td>{getEvent(taskEvents, 0)}</td>
+                    <td>{getEvent(taskEvents, 1)}</td>
+                    <td>{getEvent(taskEvents, 2)}</td>
+                    <td>{getEvent(taskEvents, 3)}</td>
+                    <td>{getEvent(taskEvents, 4)}</td>
+                    <td>{getEvent(taskEvents, 5)}</td>
+                    <td>{getEvent(taskEvents, 6)}</td>
+                  </tr>
+                )
+              })}
           </tbody>
         </Table>
-        {events.length === 0 && <em>No events in this week </em>}
       </div>
     </>
   )
 }
 
-export default EventMatrix
+export default connect(null, mapPageDispatchersToProps)(EventMatrix)

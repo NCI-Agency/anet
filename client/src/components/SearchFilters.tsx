@@ -761,6 +761,13 @@ export const searchFilters = function(includeAdminFilters) {
         props: {
           queryKey: "locationUuid"
         }
+      },
+      [`Within ${Settings.fields.task.shortLabel}`]: {
+        component: TaskFilter,
+        deserializer: deserializeTaskFilter,
+        props: {
+          queryKey: "taskUuid"
+        }
       }
     }
   }
