@@ -2,7 +2,6 @@ import { setPagination } from "actions"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
 import EventCalendar from "components/EventCalendar"
 import EventMap from "components/EventMap"
-import EventMatrix from "components/EventMatrix"
 import EventSummary from "components/EventSummary"
 import EventTable from "components/EventTable"
 import {
@@ -17,7 +16,6 @@ export const FORMAT_CALENDAR = "calendar"
 export const FORMAT_MAP = "map"
 export const FORMAT_SUMMARY = "summary"
 export const FORMAT_TABLE = "table"
-export const FORMAT_MATRIX = "matrix"
 
 interface EventCollectionProps {
   pageDispatchers?: PageDispatchersPropType
@@ -39,13 +37,7 @@ const EventCollection = ({
   paginationKey,
   pagination,
   setPagination,
-  viewFormats = [
-    FORMAT_TABLE,
-    FORMAT_SUMMARY,
-    FORMAT_CALENDAR,
-    FORMAT_MAP,
-    FORMAT_MATRIX
-  ],
+  viewFormats = [FORMAT_TABLE, FORMAT_SUMMARY, FORMAT_CALENDAR, FORMAT_MAP],
   queryParams,
   setTotalCount,
   mapId,
@@ -86,11 +78,6 @@ const EventCollection = ({
                   {viewFormats.includes(FORMAT_MAP) && (
                     <Button value={FORMAT_MAP} variant="outline-secondary">
                       Map
-                    </Button>
-                  )}
-                  {viewFormats.includes(FORMAT_MATRIX) && (
-                    <Button value={FORMAT_MATRIX} variant="outline-secondary">
-                      Matrix
                     </Button>
                   )}
                 </ButtonToggleGroup>
@@ -138,16 +125,6 @@ const EventCollection = ({
               width={width}
               height={height}
               marginBottom={marginBottom}
-            />
-          )}
-          {viewFormat === FORMAT_MATRIX && (
-            <EventMatrix
-              pageDispatchers={pageDispatchers}
-              paginationKey={paginationKey}
-              pagination={pagination}
-              setPagination={setPagination}
-              queryParams={queryParams}
-              setTotalCount={setTotalCount}
             />
           )}
         </div>

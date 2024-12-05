@@ -4,9 +4,14 @@ import API from "api"
 import AppContext from "components/AppContext"
 import Approvals from "components/approvals/Approvals"
 import AssessmentResultsContainer from "components/assessments/AssessmentResultsContainer"
-import { BreadcrumbTrail } from "components/BreadcrumbTrail"
+import {
+  BreadcrumbTrail,
+  getBreadcrumbTrailAsText
+} from "components/BreadcrumbTrail"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
+import EventCollection from "components/EventCollection"
+import EventMatrix from "components/EventMatrix"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import FindObjectsButton from "components/FindObjectsButton"
@@ -79,6 +84,7 @@ const GQL_GET_TASK = gql`
       descendantTasks {
         uuid
         shortName
+        selectable
         parentTask {
           uuid
           shortName
@@ -209,6 +215,12 @@ const TaskShow = ({ pageDispatchers }: TaskShowProps) => {
       ))
   const canAddPeriodicAssessment = canEdit
   const canAddOndemandAssessment = isAdmin
+  const tasksForMatrix = [task]
+    .concat(task.descendantTasks)
+    .filter(t => t.selectable)
+  const eventQueryParams = {
+    taskUuid: uuid
+  }
   return (
     <Formik enableReinitialize initialValues={task}>
       {({ values }) => {
@@ -414,6 +426,28 @@ const TaskShow = ({ pageDispatchers }: TaskShowProps) => {
               restrictedApprovalLabel="Restrict to approvers descending from the same tasked organization as the report's primary advisor"
               relatedObject={task}
             />
+
+            <Fieldset
+              id="syncMatrix"
+              title={`Sync Matrix for ${getBreadcrumbTrailAsText(task, task?.ascendantTasks, "parentTask", "shortName")}`}
+            >
+              <EventMatrix
+                queryParams={eventQueryParams}
+                tasks={tasksForMatrix}
+              />
+            </Fieldset>
+
+            <Fieldset
+              id="events"
+              title={`Events for ${getBreadcrumbTrailAsText(task, task?.ascendantTasks, "parentTask", "shortName")}`}
+            >
+              <EventCollection
+                paginationKey={`e_${uuid}`}
+                queryParams={eventQueryParams}
+                mapId="events"
+                showEventSeries
+              />
+            </Fieldset>
 
             <Fieldset
               title={`Reports for this ${Settings.fields.task.shortLabel}`}
