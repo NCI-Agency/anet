@@ -264,7 +264,8 @@ const GQL_GET_REPORT = gql`
       event {
         uuid
         name
-        description
+        startDate
+        endDate
       }
       customFields
       ${GRAPHQL_NOTES_FIELDS}

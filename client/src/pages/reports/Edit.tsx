@@ -15,7 +15,7 @@ import {
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
 } from "components/RelatedObjectNotes"
-import { Attachment, Person, Report, Task } from "models"
+import { Attachment, Event, Person, Report, Task } from "models"
 import React from "react"
 import { connect } from "react-redux"
 import { useParams } from "react-router-dom"
@@ -146,7 +146,8 @@ const GQL_GET_REPORT = gql`
       event {
         uuid
         name
-        description
+        startDate
+        endDate
       }
       customFields
       ${GRAPHQL_NOTES_FIELDS}
@@ -187,6 +188,7 @@ const ReportEdit = ({ pageDispatchers }: ReportEditProps) => {
     data.report.reportPeople = Report.sortReportPeople(
       Person.fromArray(data.report.reportPeople)
     )
+    data.report.event = data.report.event ? new Event(data.report.event) : null
   }
   const report = new Report(data ? data.report : {})
   const reportInitialValues = Object.assign(
