@@ -70,7 +70,7 @@ const EventShow = ({ pageDispatchers }: EventShowProps) => {
     currentUser?.hasAdministrativePermissionsForOrganization(event.adminOrg)
 
   const reportQueryParams = {
-    state: [Report.STATE.PUBLISHED],
+    state: [Report.STATE.APPROVED, Report.STATE.PUBLISHED],
     eventUuid: uuid
   }
 
