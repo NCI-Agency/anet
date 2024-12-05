@@ -170,7 +170,7 @@ const MergePeople = ({ pageDispatchers }: MergePeopleProps) => {
               />
               <MergeField
                 label="Name"
-                value={mergedPerson.name}
+                value={Person.militaryName(mergedPerson.name)}
                 align={ALIGN_OPTIONS.CENTER}
                 fieldName="name"
                 mergeState={mergeState}
@@ -497,16 +497,24 @@ const PersonColumn = ({
         <AdvancedSingleSelect
           fieldName="person"
           placeholder="Select a person to merge"
-          value={person}
+          value={
+            person
+              ? { ...person, name: Person.militaryName(person.name) }
+              : person
+          }
           overlayColumns={["name"]}
           overlayRenderRow={PersonSimpleOverlayRow}
           filterDefs={peopleFilters}
           onChange={value => {
-            value?.fixupFields()
+            if (value) {
+              value.fixupFields()
+            }
             dispatchMergeActions(setMergeable(value, align))
           }}
           objectType={Person}
           valueKey="name"
+          valueFunc={(v, k) =>
+            k === "name" ? Person.militaryName(v?.[k]) : v?.[k]}
           fields={Person.allFieldsQuery}
           addon={PEOPLE_ICON}
           disabled={disabled}
@@ -543,7 +551,7 @@ const PersonColumn = ({
           <MergeField
             label="Name"
             fieldName="name"
-            value={person.name}
+            value={Person.militaryName(person.name)}
             align={align}
             action={() => {
               dispatchMergeActions(setAMergedField("name", person.name, align))

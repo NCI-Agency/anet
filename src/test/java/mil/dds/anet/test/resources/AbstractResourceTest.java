@@ -199,28 +199,28 @@ public abstract class AbstractResourceTest {
   }
 
   public Person getBenRogers() {
-    return findOrPutPersonInDb(Person.builder().withName("ROGERS, Ben").build());
+    return findOrPutPersonInDb(Person.builder().withName("Rogers, Ben").build());
   }
 
   // Interlocutors in the test database
   public Person getChristopfTopferness() {
-    return findOrPutPersonInDb(Person.builder().withName("TOPFERNESS, Christopf").build());
+    return findOrPutPersonInDb(Person.builder().withName("Topferness, Christopf").build());
   }
 
   public Person getHunterHuntman() {
-    return findOrPutPersonInDb(Person.builder().withName("HUNTMAN, Hunter").build());
+    return findOrPutPersonInDb(Person.builder().withName("Huntman, Hunter").build());
   }
 
   public Person getRogerRogwell() {
-    return findOrPutPersonInDb(Person.builder().withName("ROGWELL, Roger").build());
+    return findOrPutPersonInDb(Person.builder().withName("Rogwell, Roger").build());
   }
 
   public Person getShardulSharton() {
-    return findOrPutPersonInDb(Person.builder().withName("SHARTON, Shardul").build());
+    return findOrPutPersonInDb(Person.builder().withName("Sharton, Shardul").build());
   }
 
   public Person getSteveSteveson() {
-    return findOrPutPersonInDb(Person.builder().withName("STEVESON, Steve").build());
+    return findOrPutPersonInDb(Person.builder().withName("Steveson, Steve").build());
   }
 
   // Getting the above as a normal bean
