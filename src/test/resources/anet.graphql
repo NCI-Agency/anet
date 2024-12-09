@@ -431,6 +431,7 @@ type Event {
   organizations: [Organization]
   outcomes: String
   people: [Person]
+  reports(query: ReportSearchQueryInput): [Report]
   startDate: Instant
   status: Status
   tasks: [Task]
