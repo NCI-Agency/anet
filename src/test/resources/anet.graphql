@@ -473,7 +473,6 @@ input EventSearchQueryInput {
   inMyReports: Boolean
   includeDate: Instant
   locationUuid: [String]
-  onlyWithTasks: Boolean
   pageNum: Int
   pageSize: Int
   sortBy: EventSeriesSearchSortBy

@@ -58,9 +58,6 @@ public abstract class AbstractEventSearcher extends AbstractSearcher<Event, Even
     if (!Utils.isEmptyOrNull(query.getLocationUuid())) {
       addLocationQuery(query);
     }
-    if (query.isOnlyWithTasks() || !Utils.isEmptyOrNull(query.getTaskUuid())) {
-      qb.addFromClause("INNER JOIN \"eventTasks\" et ON et.\"eventUuid\" = events.uuid");
-    }
     if (!Utils.isEmptyOrNull(query.getTaskUuid())) {
       addTaskQuery(query);
     }
@@ -109,6 +106,7 @@ public abstract class AbstractEventSearcher extends AbstractSearcher<Event, Even
   }
 
   protected void addTaskQuery(EventSearchQuery query) {
+    qb.addFromClause("INNER JOIN \"eventTasks\" et ON et.\"eventUuid\" = events.uuid");
     if (Task.DUMMY_TASK_UUID.equals(query.getTaskUuid())) {
       qb.addWhereClause("et.\"taskUuid\" IS NULL");
     } else {
