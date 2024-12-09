@@ -376,7 +376,7 @@ export const searchFilters = function(includeAdminFilters) {
         queryKey: "sensitiveInfo"
       }
     },
-    [taskShortLabel]: {
+    [`Within ${Settings.fields.task.shortLabel}`]: {
       component: AdvancedSelectFilter,
       deserializer: deserializeAdvancedSelectFilter,
       props: Object.assign({}, advancedSelectFilterTaskProps, {

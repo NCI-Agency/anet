@@ -1205,6 +1205,10 @@ div[id*='fg-entityAssessment'] {
   height: 55px;
 }
 
+table.event-matrix {
+  table-layout: fixed;
+}
+
 table.event-matrix > :not(caption) > * > * {
   padding: 0.5rem 0.0rem;
 }
@@ -1218,6 +1222,7 @@ table.event-matrix thead > *:not(:last-child), table.event-matrix thead > *:not(
 }
 
 table.event-matrix-cell {
+  table-layout: fixed;
   border-collapse: separate;
   border-spacing: 0 0.25rem;
 }
