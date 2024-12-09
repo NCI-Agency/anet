@@ -442,7 +442,6 @@ const TaskShow = ({ pageDispatchers }: TaskShowProps) => {
               title={`Events for ${getBreadcrumbTrailAsText(task, task?.ascendantTasks, "parentTask", "shortName")}`}
             >
               <EventCollection
-                paginationKey={`e_${uuid}`}
                 queryParams={eventQueryParams}
                 mapId="events"
                 showEventSeries
