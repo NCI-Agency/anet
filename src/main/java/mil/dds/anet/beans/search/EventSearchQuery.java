@@ -29,9 +29,6 @@ public class EventSearchQuery extends EventSeriesSearchQuery {
   @GraphQLQuery
   @GraphQLInputField
   String type;
-  @GraphQLQuery
-  @GraphQLInputField
-  Boolean onlyWithTasks;
 
   public EventSearchQuery() {
     super();
@@ -93,18 +90,10 @@ public class EventSearchQuery extends EventSeriesSearchQuery {
     this.type = type;
   }
 
-  public boolean isOnlyWithTasks() {
-    return Boolean.TRUE.equals(onlyWithTasks);
-  }
-
-  public void setOnlyWithTasks(Boolean onlyWithTasks) {
-    this.onlyWithTasks = onlyWithTasks;
-  }
-
   @Override
   public int hashCode() {
     return Objects.hash(super.hashCode(), getHostOrgUuid(), getAdminOrgUuid(), eventSeriesUuid,
-        locationUuid, taskUuid, includeDate, startDate, endDate, type, onlyWithTasks);
+        locationUuid, taskUuid, includeDate, startDate, endDate, type);
   }
 
   @Override
@@ -120,8 +109,7 @@ public class EventSearchQuery extends EventSeriesSearchQuery {
         && Objects.equals(getIncludeDate(), other.getIncludeDate())
         && Objects.equals(getStartDate(), other.getStartDate())
         && Objects.equals(getEndDate(), other.getEndDate())
-        && Objects.equals(getType(), other.getType())
-        && Objects.equals(isOnlyWithTasks(), other.isOnlyWithTasks());
+        && Objects.equals(getType(), other.getType());
   }
 
   @Override
