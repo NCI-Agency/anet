@@ -1,51 +1,28 @@
 import API from "api"
 import LinkTo from "components/LinkTo"
-import { PageDispatchersPropType, useBoilerplate } from "components/Page"
+import {
+  mapPageDispatchersToProps,
+  PageDispatchersPropType,
+  useBoilerplate
+} from "components/Page"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _get from "lodash/get"
-import _isEqual from "lodash/isEqual"
 import { EventSeries } from "models"
-import React, { useEffect, useRef, useState } from "react"
+import React, { useState } from "react"
 import { Table } from "react-bootstrap"
-
-const DEFAULT_PAGESIZE = 10
+import { connect } from "react-redux"
 
 interface EventSeriesTableProps {
   pageDispatchers?: PageDispatchersPropType
   queryParams?: any
-  setTotalCount?: (...args: unknown[]) => unknown
-  paginationKey: string
-  pagination: any
-  setPagination: (...args: unknown[]) => unknown
 }
 
 const EventSeriesTable = ({
   pageDispatchers,
-  queryParams,
-  setTotalCount,
-  paginationKey,
-  pagination,
-  setPagination
+  queryParams
 }: EventSeriesTableProps) => {
-  // (Re)set pageNum to 0 if the queryParams change, and make sure we retrieve page 0 in that case
-  const latestQueryParams = useRef(queryParams)
-  const queryParamsUnchanged = _isEqual(latestQueryParams.current, queryParams)
-  const [pageNum, setPageNum] = useState(
-    queryParamsUnchanged && pagination[paginationKey]
-      ? pagination[paginationKey].pageNum
-      : 0
-  )
-  useEffect(() => {
-    if (!queryParamsUnchanged) {
-      latestQueryParams.current = queryParams
-      setPagination(paginationKey, 0)
-      setPageNum(0)
-    }
-  }, [queryParams, setPagination, paginationKey, queryParamsUnchanged])
-  const eventSeriesQuery = Object.assign({}, queryParams, {
-    pageNum: queryParamsUnchanged ? pageNum : 0,
-    pageSize: queryParams.pageSize || DEFAULT_PAGESIZE
-  })
+  const [pageNum, setPageNum] = useState(0)
+  const eventSeriesQuery = { ...queryParams, pageNum }
   const { loading, error, data } = API.useApiQuery(
     EventSeries.getEventSeriesListQuery,
     {
@@ -57,12 +34,6 @@ const EventSeriesTable = ({
     error,
     pageDispatchers
   })
-  // Update the total count
-  const totalCount = done ? null : data?.eventSeriesList?.totalCount
-  useEffect(
-    () => setTotalCount && setTotalCount(totalCount),
-    [setTotalCount, totalCount]
-  )
   if (done) {
     return result
   }
@@ -74,16 +45,16 @@ const EventSeriesTable = ({
     return <em>No event series found</em>
   }
 
-  const { pageSize } = data.eventSeriesList
+  const { pageSize, pageNum: curPage, totalCount } = data.eventSeriesList
 
   return (
     <div>
       <UltimatePaginationTopDown
         className="float-end"
-        pageNum={pageNum}
+        pageNum={curPage}
         pageSize={pageSize}
         totalCount={totalCount}
-        goToPage={setPage}
+        goToPage={setPageNum}
       >
         <Table striped hover responsive>
           <thead>
@@ -118,11 +89,6 @@ const EventSeriesTable = ({
       </UltimatePaginationTopDown>
     </div>
   )
-
-  function setPage(pageNum) {
-    setPagination(paginationKey, pageNum)
-    setPageNum(pageNum)
-  }
 }
 
-export default EventSeriesTable
+export default connect(null, mapPageDispatchersToProps)(EventSeriesTable)
