@@ -2,6 +2,7 @@ package mil.dds.anet.beans;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import graphql.GraphQLContext;
+import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
@@ -11,6 +12,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import mil.dds.anet.beans.search.FkBatchParams;
+import mil.dds.anet.beans.search.ReportSearchQuery;
+import mil.dds.anet.config.ApplicationContextProvider;
+import mil.dds.anet.database.ReportDao;
+import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.views.UuidFetcher;
 
@@ -226,6 +232,18 @@ public class Event extends EventSeries {
 
   public void setOutcomes(String outcomes) {
     this.outcomes = outcomes;
+  }
+
+  @GraphQLQuery(name = "reports")
+  public CompletableFuture<List<Report>> loadReports(@GraphQLRootContext GraphQLContext context,
+      @GraphQLArgument(name = "query") ReportSearchQuery query) {
+    if (query == null) {
+      query = new ReportSearchQuery();
+    }
+    query.setBatchParams(new FkBatchParams<>("reports", "\"eventUuid\""));
+    query.setUser(DaoUtils.getUserFromContext(context));
+    return ApplicationContextProvider.getBean(ReportDao.class).getReportsBySearch(context, uuid,
+        query);
   }
 
   @Override

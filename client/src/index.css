@@ -1201,12 +1201,16 @@ div[id*='fg-entityAssessment'] {
   background-color: var(--anet-blue) !important;
 }
 
-.event-cell-height {
-  height: 55px;
+.report-cell-color {
+  background-color: khaki !important;
+}
+
+table.event-matrix {
+  table-layout: fixed;
 }
 
 table.event-matrix > :not(caption) > * > * {
-  padding: 0.5rem 0.0rem;
+  padding: 0;
 }
 
 table.event-matrix thead > *, table.event-matrix thead > * > * {
@@ -1218,6 +1222,7 @@ table.event-matrix thead > *:not(:last-child), table.event-matrix thead > *:not(
 }
 
 table.event-matrix-cell {
+  table-layout: fixed;
   border-collapse: separate;
   border-spacing: 0 0.25rem;
 }
