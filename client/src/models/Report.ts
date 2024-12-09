@@ -261,7 +261,8 @@ export default class Report extends Model {
         .nullable()
         .default({ uuid: null, text: null }),
       authorizationGroups: yup.array().nullable().default([]),
-      classification: yup.string().nullable().default(null)
+      classification: yup.string().nullable().default(null),
+      event: yup.object().nullable()
     })
     // not actually in the database, the database contains the JSON customFields
     .concat(Report.customFieldsSchema)

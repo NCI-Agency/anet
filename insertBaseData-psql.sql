@@ -1399,6 +1399,50 @@ INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "
 INSERT INTO "entityAvatars" ("relatedObjectType", "relatedObjectUuid", "attachmentUuid", "applyCrop", "cropLeft", "cropTop", "cropWidth", "cropHeight") VALUES
   ('people', '46ba6a73-0cd7-4efb-8e99-215e98cc5987', '3187ad8a-6130-4ec0-bffc-9ebfad4dee39', TRUE, 0, 0, 200, 200);
 
+-- Add event series
+INSERT INTO "eventSeries" (uuid, name, description, status, "createdAt", "updatedAt", "adminOrgUuid", "hostOrgUuid")
+VALUES
+    ('b7b70191-54e4-462f-8e40-679dd2e71ec4', 'NMI PDT', 'NMI pre-deployment training', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP,
+     'ccbee4bb-08b8-42df-8cb5-65e8172f657b',
+     'ccbee4bb-08b8-42df-8cb5-65e8172f657b'
+    );
+
+-- Add event
+INSERT INTO events (uuid, name, description, status, "createdAt", "updatedAt", "locationUuid", "eventSeriesUuid", "adminOrgUuid", "hostOrgUuid", "startDate", "endDate", type)
+VALUES
+    ('e850846e-9741-40e8-bc51-4dccc30cf47f', 'NMI PDT 2024-01', 'NMI pre-deployment training 2024 January', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP,
+     '0855fb0a-995e-4a79-a132-4024ee2983ff',
+     'b7b70191-54e4-462f-8e40-679dd2e71ec4',
+     'ccbee4bb-08b8-42df-8cb5-65e8172f657b',
+     'ccbee4bb-08b8-42df-8cb5-65e8172f657b',
+     CURRENT_TIMESTAMP,
+     CURRENT_TIMESTAMP,
+     'CONFERENCE'
+    );
+
+-- Add tasks, organizations and people to the event
+INSERT INTO "eventTasks" ("eventUuid", "taskUuid")
+VALUES
+    (
+     (select uuid from events where name = 'NMI PDT 2024-01'),
+     '9d3da7f4-8266-47af-b518-995f587250c9'
+    );
+INSERT INTO "eventOrganizations" ("eventUuid", "organizationUuid")
+VALUES
+    (
+        (select uuid from events where name = 'NMI PDT 2024-01'),
+        'ccbee4bb-08b8-42df-8cb5-65e8172f657b'
+    );
+INSERT INTO "eventPeople" ("eventUuid", "personUuid")
+VALUES
+    (
+        (select uuid from events where name = 'NMI PDT 2024-01'),
+        'df9c7381-56ac-4bc5-8e24-ec524bccd7e9'
+    );
+
+-- Assign existing report to event
+UPDATE reports SET "eventUuid" = 'e850846e-9741-40e8-bc51-4dccc30cf47f' WHERE uuid = '86e4cf7e-c0ae-4bd9-b1ad-f2c65ca0f600';
+
 -- Update the link-text indexes
 REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_lts_attachments";
 -- authorizationGroups currently have no links
