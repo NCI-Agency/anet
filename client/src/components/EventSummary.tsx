@@ -1,60 +1,40 @@
 import API from "api"
 import { BreadcrumbTrail } from "components/BreadcrumbTrail"
 import LinkTo from "components/LinkTo"
-import { PageDispatchersPropType, useBoilerplate } from "components/Page"
+import {
+  mapPageDispatchersToProps,
+  PageDispatchersPropType,
+  useBoilerplate
+} from "components/Page"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _get from "lodash/get"
 import _isEmpty from "lodash/isEmpty"
-import _isEqual from "lodash/isEqual"
 import { Event, Location } from "models"
 import moment from "moment"
-import React, { useEffect, useRef, useState } from "react"
+import React, { useState } from "react"
 import { Badge, Col, Container, Row } from "react-bootstrap"
+import { connect } from "react-redux"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
 import PEOPLE_ICON from "resources/people.png"
 import TASKS_ICON from "resources/tasks.png"
 import Settings from "settings"
 
-const DEFAULT_PAGESIZE = 10
-
 interface EventSummaryProps {
   pageDispatchers?: PageDispatchersPropType
   queryParams?: any
-  setTotalCount?: (...args: unknown[]) => unknown
-  paginationKey: string
-  setPagination: (...args: unknown[]) => unknown
-  pagination: any
   showEventSeries?: boolean
 }
 
 const EventSummary = ({
   pageDispatchers,
   queryParams,
-  setTotalCount,
-  paginationKey,
-  pagination,
-  setPagination,
   showEventSeries
 }: EventSummaryProps) => {
-  // (Re)set pageNum to 0 if the queryParams change, and make sure we retrieve page 0 in that case
-  const latestQueryParams = useRef(queryParams)
-  const queryParamsUnchanged = _isEqual(latestQueryParams.current, queryParams)
-  const [pageNum, setPageNum] = useState(
-    queryParamsUnchanged && pagination[paginationKey]
-      ? pagination[paginationKey].pageNum
-      : 0
-  )
-  useEffect(() => {
-    if (!queryParamsUnchanged) {
-      latestQueryParams.current = queryParams
-      setPagination(paginationKey, 0)
-      setPageNum(0)
-    }
-  }, [queryParams, setPagination, paginationKey, queryParamsUnchanged])
-  const eventQuery = Object.assign({}, queryParams, {
-    pageNum: queryParamsUnchanged ? pageNum : 0,
-    pageSize: queryParams.pageSize || DEFAULT_PAGESIZE
-  })
+  const [pageNum, setPageNum] = useState(0)
+  const eventQuery = {
+    ...queryParams,
+    pageNum
+  }
   const { loading, error, data } = API.useApiQuery(Event.getEventListQuery, {
     eventQuery
   })
@@ -63,17 +43,11 @@ const EventSummary = ({
     error,
     pageDispatchers
   })
-  // Update the total count
-  const totalCount = done ? null : data?.eventList?.totalCount
-  useEffect(
-    () => setTotalCount && setTotalCount(totalCount),
-    [setTotalCount, totalCount]
-  )
   if (done) {
     return result
   }
 
-  const events = data ? data.eventList.list : []
+  const { totalCount = 0, list: events = [] } = data.eventList
   if (_get(events, "length", 0) === 0) {
     return <em>No events found</em>
   }
@@ -87,7 +61,7 @@ const EventSummary = ({
         pageNum={pageNum}
         pageSize={pageSize}
         totalCount={totalCount}
-        goToPage={setPage}
+        goToPage={setPageNum}
       >
         {events.map(event => (
           <EventSummaryRow
@@ -99,11 +73,6 @@ const EventSummary = ({
       </UltimatePaginationTopDown>
     </div>
   )
-
-  function setPage(pageNum) {
-    setPagination(paginationKey, pageNum)
-    setPageNum(pageNum)
-  }
 }
 
 interface EventSummaryRowProps {
@@ -268,4 +237,4 @@ const EventSummaryRow = ({ event, showEventSeries }: EventSummaryRowProps) => {
   )
 }
 
-export default EventSummary
+export default connect(null, mapPageDispatchersToProps)(EventSummary)

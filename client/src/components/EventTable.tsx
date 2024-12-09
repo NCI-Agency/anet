@@ -31,12 +31,12 @@ interface PaginatedEventsProps {
 }
 
 const PaginatedEvents = ({
-  queryParams,
   pageDispatchers,
+  queryParams,
   ...otherProps
 }: PaginatedEventsProps) => {
   const [pageNum, setPageNum] = useState(0)
-  const eventQuery = Object.assign({}, queryParams, { pageNum })
+  const eventQuery = { ...queryParams, pageNum }
   const { loading, error, data } = API.useApiQuery(Event.getEventListQuery, {
     eventQuery
   })
