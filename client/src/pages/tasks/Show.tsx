@@ -215,12 +215,6 @@ const TaskShow = ({ pageDispatchers }: TaskShowProps) => {
       ))
   const canAddPeriodicAssessment = canEdit
   const canAddOndemandAssessment = isAdmin
-  const tasksForMatrix = [task]
-    .concat(task.descendantTasks)
-    .filter(t => t.selectable)
-  const eventQueryParams = {
-    taskUuid: uuid
-  }
   return (
     <Formik enableReinitialize initialValues={task}>
       {({ values }) => {
@@ -431,10 +425,7 @@ const TaskShow = ({ pageDispatchers }: TaskShowProps) => {
               id="syncMatrix"
               title={`Sync Matrix for ${getBreadcrumbTrailAsText(task, task?.ascendantTasks, "parentTask", "shortName")}`}
             >
-              <EventMatrix
-                queryParams={eventQueryParams}
-                tasks={tasksForMatrix}
-              />
+              <EventMatrix taskUuid={task?.uuid} />
             </Fieldset>
 
             <Fieldset
@@ -442,7 +433,7 @@ const TaskShow = ({ pageDispatchers }: TaskShowProps) => {
               title={`Events for ${getBreadcrumbTrailAsText(task, task?.ascendantTasks, "parentTask", "shortName")}`}
             >
               <EventCollection
-                queryParams={eventQueryParams}
+                queryParams={{ taskUuid: task?.uuid }}
                 mapId="events"
                 showEventSeries
               />
