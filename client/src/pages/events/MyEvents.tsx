@@ -1,7 +1,7 @@
 import { DEFAULT_PAGE_PROPS } from "actions"
 import AppContext from "components/AppContext"
 import EventCollection from "components/EventCollection"
-import EventSeriesCollection from "components/EventSeriesCollection"
+import EventSeriesTable from "components/EventSeriesTable"
 import Fieldset from "components/Fieldset"
 import { AnchorNavItem } from "components/Nav"
 import {
@@ -70,11 +70,7 @@ const MyEvents = ({ pageDispatchers, searchQuery }: MyEventsProps) => {
   function renderEventSeriesSection() {
     return (
       <Fieldset title="Event Series" id="my-event-series">
-        <EventSeriesCollection
-          paginationKey={`e_eventSeries_${currentUser.uuid}`}
-          queryParams={eventSearchQueryParams}
-          mapId="eventSeries"
-        />
+        <EventSeriesTable queryParams={eventSearchQueryParams} />
       </Fieldset>
     )
   }
