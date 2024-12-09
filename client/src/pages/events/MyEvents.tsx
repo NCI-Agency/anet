@@ -36,14 +36,14 @@ const MyEvents = ({ pageDispatchers, searchQuery }: MyEventsProps) => {
     [searchQuery]
   )
   const eventSearchQueryParams = useMemo(
-    () =>
-      Object.assign({}, searchQueryParams, {
-        sortBy: "NAME",
-        sortOrder: "ASC",
-        adminOrgUuid: currentUser.position.organizationsAdministrated.map(
-          org => org.uuid
-        )
-      }),
+    () => ({
+      ...searchQueryParams,
+      sortBy: "NAME",
+      sortOrder: "ASC",
+      adminOrgUuid: currentUser.position.organizationsAdministrated.map(
+        org => org.uuid
+      )
+    }),
     [currentUser, searchQueryParams]
   )
 
@@ -79,7 +79,6 @@ const MyEvents = ({ pageDispatchers, searchQuery }: MyEventsProps) => {
     return (
       <Fieldset title="Events" id="my-events">
         <EventCollection
-          paginationKey={`e_event_${currentUser.uuid}`}
           queryParams={eventSearchQueryParams}
           mapId="event"
           showEventSeries
