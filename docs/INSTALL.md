@@ -46,7 +46,7 @@ You should have the following information on hand for the installation:
 1. Seed the Database: Run ```bin/anet init```. This will show you which options this command expects; there are four values you need to supply:
     * `--adminOrgName ADMINORGNAME` i.e. _Name of Administrator Organization_: This is the name of the Organization that will be created for the Administrator. We recommend using something like `ANET Administrators`.
     * `--adminPosName ADMINPOSNAME` i.e. _Name of Administrator Position_: This is the name of the position that will be created for the Administrator. We recommend `ANET Administrator`.
-    * `--adminFullName ADMINFULLNAME` i.e. _Your Name_: This is the name that will be given to the ANET Administrator, who you presumably are; please use the canonical form of your name: LAST NAME, First name(s)
+    * `--adminFullName ADMINFULLNAME` i.e. _Your Name_: This is the name that will be given to the ANET Administrator, who you presumably are; please use the canonical form of your name: Last name, First name(s)
     * `--adminDomainUsername ADMINDOMAINUSERNAME` i.e. _Your Domain Username_: This is the domain username that will be set on the ANET Administrator (who you presumably are). For production situations this will be your windows domain username. If you get this wrong here, when you first log in to ANET it will create a new user for you. You can either run this database init command again, or do manual SQL commands to fix the `people` table.
 1. If imagery/maps are needed, install them according to the "How to configure imagery" section
 1. To verify that ANET is functioning, manually launch the ANET Server: ```bin/anet```

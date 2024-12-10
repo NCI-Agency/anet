@@ -9,7 +9,7 @@ const EXAMPLE_PEOPLE = {
   validLeft: {
     search: "winner",
     fullName: "CIV MERGED, Duplicate Winner",
-    name: "MERGED, Duplicate Winner",
+    name: "Merged, Duplicate Winner",
     user: "No",
     position: "Chief of Merge People Test 1",
     status: "ACTIVE",
@@ -36,7 +36,7 @@ const EXAMPLE_PEOPLE = {
   validRight: {
     search: "loser",
     fullName: "CTR MERGED, Duplicate Loser",
-    name: "MERGED, Duplicate Loser",
+    name: "Merged, Duplicate Loser",
     user: "No",
     position: "Chief of Merge People Test 2",
     status: "ACTIVE",
@@ -63,7 +63,7 @@ const EXAMPLE_PEOPLE = {
   userRight: {
     search: "andrew",
     fullName: "CIV ANDERSON, Andrew",
-    name: "ANDERSON, Andrew",
+    name: "Anderson, Andrew",
     user: "Yes",
     position: "EF 1 Manager",
     status: "ACTIVE",

@@ -147,7 +147,7 @@ class AuthorizationGroupResourceTest extends AbstractResourceTest {
     final String expectedAuthorizationGroupUuid = "ab1a7d99-4529-44b1-a118-bdee3ca8296b";
     final String fields = "{ uuid authorizationGroups { uuid } }";
 
-    // CIV BRATTON, Creed
+    // CIV Bratton, Creed
     final Person person = withCredentials(jackUser,
         t -> queryExecutor.person(fields, "31cba227-f6c6-49e9-9483-fce441bea624"));
     assertThat(person).isNotNull();

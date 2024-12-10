@@ -119,7 +119,9 @@ const PersonEdit = ({ pageDispatchers }: PersonEditProps) => {
   const person = new Person(data ? data.person : {})
   const isPending =
     person.isPendingVerification() && Person.isEqual(currentUser, person)
-  const legendText = isPending ? "Create your account" : `Edit ${person.name}`
+  const legendText = isPending
+    ? "Create your account"
+    : `Edit ${Person.militaryName(person.name)}`
   const saveText = isPending ? "Update profile" : "Save Person"
 
   // mutates the object

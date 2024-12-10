@@ -1987,7 +1987,7 @@ public class ReportResourceTest extends AbstractResourceTest {
         t -> queryExecutor.personList(getListFields(PERSON_FIELDS), erinQuery));
     assertThat(erinSearchResults.getTotalCount()).isPositive();
     final Optional<Person> erinResult = erinSearchResults.getList().stream()
-        .filter(p -> p.getName().equals("ERINSON, Erin")).findFirst();
+        .filter(p -> p.getName().equals("Erinson, Erin")).findFirst();
     assertThat(erinResult).isNotEmpty();
 
     final ReportSearchQueryInput reportQuery =
@@ -2012,7 +2012,7 @@ public class ReportResourceTest extends AbstractResourceTest {
         t -> queryExecutor.personList(getListFields(PERSON_FIELDS), reinaQuery));
     assertThat(searchResults.getTotalCount()).isPositive();
     final Optional<Person> reinaResult = searchResults.getList().stream()
-        .filter(p -> p.getName().equals("REINTON, Reina")).findFirst();
+        .filter(p -> p.getName().equals("Reinton, Reina")).findFirst();
     assertThat(reinaResult).isNotEmpty();
 
     final AnetBeanList_Report reportSearchResults2 =
@@ -2032,7 +2032,7 @@ public class ReportResourceTest extends AbstractResourceTest {
         t -> queryExecutor.personList(getListFields(PERSON_FIELDS), elizabethQuery));
     assertThat(searchResults3.getTotalCount()).isPositive();
     final Optional<Person> elizabethResult3 = searchResults3.getList().stream()
-        .filter(p -> p.getName().equals("ELIZAWELL, Elizabeth")).findFirst();
+        .filter(p -> p.getName().equals("Elizawell, Elizabeth")).findFirst();
     assertThat(elizabethResult3).isNotEmpty();
 
     final AnetBeanList_Report reportSearchResults3 = withCredentials("elizabeth",
