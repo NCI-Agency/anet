@@ -448,6 +448,16 @@ const ReportForm = ({
 
         const tasksFilters = {}
 
+        if (values.event?.uuid) {
+          tasksFilters.assignedToEvent = {
+            label: `Assigned to event ${values.event.name}`,
+            queryVars: {
+              eventUuid: values.event.uuid,
+              selectable: true
+            }
+          }
+        }
+
         if (currentOrg) {
           tasksFilters.assignedToMyOrg = {
             label: `Assigned to ${currentOrg.shortName}`,

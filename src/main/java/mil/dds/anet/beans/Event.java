@@ -21,6 +21,10 @@ import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.views.UuidFetcher;
 
 public class Event extends EventSeries {
+
+  /** Pseudo uuid to represent 'no event'. */
+  public static final String DUMMY_EVENT_UUID = "-1";
+
   public enum EventType {
     CONFERENCE("CONFERENCE"), // -
     EXERCISE("EXERCISE"), // -
