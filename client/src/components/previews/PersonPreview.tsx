@@ -270,10 +270,7 @@ const PersonPreview = ({ className, uuid }: PersonPreviewProps) => {
             className="position-name"
           />{" "}
           (
-          <LinkTo
-            modelType="Organization"
-            model={position.organization}
-          />)
+          <LinkTo modelType="Organization" model={position.organization} />)
         </h4>
       </div>
     )
