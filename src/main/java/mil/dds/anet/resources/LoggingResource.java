@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,7 +22,7 @@ public class LoggingResource {
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  static class LogEntry {
+  public static class LogEntry {
     /** one of 'DEBUG','ERROR','FATAL','INFO','WARN'. */
     @JsonProperty
     String severity;
@@ -45,7 +46,7 @@ public class LoggingResource {
    */
   @PostMapping(path = "/log", consumes = MediaType.APPLICATION_JSON_VALUE)
   public void logMessage(final Principal principal, final HttpServletRequest requestContext,
-      final List<LogEntry> logEntries) {
+      @RequestBody final List<LogEntry> logEntries) {
     final Person user = SecurityUtils.getPersonFromPrincipal(principal);
     for (final LogEntry logEntry : logEntries) {
 
