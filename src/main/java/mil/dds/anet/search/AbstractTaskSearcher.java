@@ -1,5 +1,6 @@
 package mil.dds.anet.search;
 
+import mil.dds.anet.beans.Event;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AbstractBatchParams;
@@ -92,6 +93,10 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
       addAssessmentQuery(query.getAssessment(), TaskDao.TABLE_NAME, "task");
     }
 
+    if (!Utils.isEmptyOrNull(query.getEventUuid())) {
+      addEventQuery(query);
+    }
+
     if (Boolean.TRUE.equals(query.isInMyReports())) {
       qb.addSelectClause("\"inMyReports\".max AS \"inMyReports_max\"");
       qb.addFromClause("JOIN ("
@@ -151,6 +156,15 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
 
     qb.addStringEqualsClause("responsiblePositionUuid",
         "\"taskResponsiblePositions\".\"positionUuid\"", query.getResponsiblePositionUuid());
+  }
+
+  protected void addEventQuery(TaskSearchQuery query) {
+    qb.addFromClause("INNER JOIN \"eventTasks\" et ON et.\"taskUuid\" = tasks.uuid");
+    if (Event.DUMMY_EVENT_UUID.equals(query.getEventUuid())) {
+      qb.addWhereClause("et.\"eventUuid\" IS NULL");
+    } else {
+      qb.addStringEqualsClause("eventUuid", "et.\"eventUuid\"", query.getEventUuid());
+    }
   }
 
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, TaskSearchQuery query) {

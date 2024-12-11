@@ -82,27 +82,26 @@ export default class Event extends Model {
       name
     }
     tasks {
+      uuid
+      shortName
+      longName
+      parentTask {
+        uuid
+        shortName
+      }
+      ascendantTasks {
+        uuid
+        shortName
+        parentTask {
+          uuid
+        }
+      }
+      taskedOrganizations {
         uuid
         shortName
         longName
-        parentTask {
-          uuid
-          shortName
-        }
-        ascendantTasks {
-          uuid
-          shortName
-          parentTask {
-            uuid
-          }
-        }
-        taskedOrganizations {
-          uuid
-          shortName
-          longName
-          identificationCode
-        }
-        customFields
+        identificationCode
+      }
     }
     organizations {
       uuid
@@ -173,7 +172,6 @@ export default class Event extends Model {
             identificationCode
             ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
-          customFields
         }
         organizations {
           uuid
@@ -279,7 +277,6 @@ export default class Event extends Model {
             identificationCode
             ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
-          customFields
         }
         organizations {
           uuid
@@ -384,7 +381,6 @@ export default class Event extends Model {
               longName
               identificationCode
             }
-            customFields
           }
           organizations {
             uuid

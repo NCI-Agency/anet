@@ -55,6 +55,10 @@ public class TaskSearchQuery extends SubscribableObjectSearchQuery<TaskSearchSor
   @GraphQLQuery
   @GraphQLInputField
   private AssessmentSearchQuery assessment;
+  // Search for tasks belonging to an event
+  @GraphQLQuery
+  @GraphQLInputField
+  private String eventUuid;
 
   public TaskSearchQuery() {
     super(TaskSearchSortBy.NAME);
@@ -164,12 +168,20 @@ public class TaskSearchQuery extends SubscribableObjectSearchQuery<TaskSearchSor
     this.assessment = assessment;
   }
 
+  public String getEventUuid() {
+    return eventUuid;
+  }
+
+  public void setEventUuid(String eventUuid) {
+    this.eventUuid = eventUuid;
+  }
+
   @Override
   public int hashCode() {
     return Objects.hash(super.hashCode(), isAssigned, taskedOrgUuid, orgRecurseStrategy, category,
         plannedCompletionEnd, plannedCompletionStart, projectedCompletionEnd,
         projectedCompletionStart, parentTaskUuid, parentTaskRecurseStrategy,
-        responsiblePositionUuid, assessment);
+        responsiblePositionUuid, assessment, eventUuid);
   }
 
   @Override
@@ -189,7 +201,8 @@ public class TaskSearchQuery extends SubscribableObjectSearchQuery<TaskSearchSor
         && Objects.equals(getParentTaskUuid(), other.getParentTaskUuid())
         && Objects.equals(getParentTaskRecurseStrategy(), other.getParentTaskRecurseStrategy())
         && Objects.equals(getResponsiblePositionUuid(), other.getResponsiblePositionUuid())
-        && Objects.equals(getAssessment(), other.getAssessment());
+        && Objects.equals(getAssessment(), other.getAssessment())
+        && Objects.equals(getEventUuid(), other.getEventUuid());
   }
 
   @Override
