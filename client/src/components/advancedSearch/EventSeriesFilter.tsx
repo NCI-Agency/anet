@@ -1,3 +1,4 @@
+import { gql } from "@apollo/client"
 import API from "api"
 import useSearchFilter from "components/advancedSearch/hooks"
 import { EventSeriesOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
@@ -5,6 +6,15 @@ import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingle
 import { EventSeries } from "models"
 import React from "react"
 import EVENTS_ICON from "resources/events.png"
+
+const GQL_GET_EVENTSERIES = gql`
+  query ($uuid: String) {
+    eventSeries(uuid: $uuid) {
+      uuid
+      name
+    }
+  }
+`
 
 interface EventSeriesFilterProps {
   queryKey: string
@@ -79,7 +89,7 @@ const EventSeriesFilter = ({
 
 export const deserialize = ({ queryKey }, query, key) => {
   if (query[queryKey]) {
-    return API.query(EventSeries.getEventSeriesQuery, {
+    return API.query(GQL_GET_EVENTSERIES, {
       uuid: query[queryKey]
     }).then(data => {
       if (data.eventSeries) {

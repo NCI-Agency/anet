@@ -1,3 +1,4 @@
+import { gql } from "@apollo/client"
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
 import { initInvisibleFields } from "components/CustomFields"
@@ -14,6 +15,14 @@ import { useLocation } from "react-router-dom"
 import Settings from "settings"
 import utils from "utils"
 import EventForm from "./Form"
+
+const GQL_GET_EVENTSERIES = gql`
+  query ($uuid: String) {
+    eventSeries(uuid: $uuid) {
+      ${EventSeries.autocompleteQuery}
+    }
+  }
+`
 
 interface EventNewProps {
   pageDispatchers?: PageDispatchersPropType
@@ -49,7 +58,7 @@ const EventNewFetchEventSeries = ({
   eventSeriesUuid,
   pageDispatchers
 }: EventNewFetchEventSeriesProps) => {
-  const queryResult = API.useApiQuery(EventSeries.getEventSeriesQueryMin, {
+  const queryResult = API.useApiQuery(GQL_GET_EVENTSERIES, {
     uuid: eventSeriesUuid
   })
   return (
