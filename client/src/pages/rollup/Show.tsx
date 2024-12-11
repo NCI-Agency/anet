@@ -175,7 +175,7 @@ const Chart = ({
   const CHART_ID = "reports_by_organization"
   const barColors = {
     cancelled: "#ec971f",
-    published: "#75eb75",
+    past: "#75eb75",
     planned: "#2965cc"
   }
   const legendCss = {
@@ -183,8 +183,8 @@ const Chart = ({
     height: "14px",
     display: "inline-block"
   }
-  const publishedLabel = "Published engagement reports"
-  const plannedLabel = "Approved planned engagements"
+  const pastLabel = "Past engagements"
+  const plannedLabel = "Planned engagements"
   const cancelledLabel = "Cancelled engagements"
   return (
     <div ref={ref} className="scrollable-y">
@@ -206,7 +206,7 @@ const Chart = ({
         onBarClick={setOrg}
         tooltip={d => `
             <h4>${d.org.shortName}</h4>
-            <p>${publishedLabel}: ${d.published}</p>
+            <p>${pastLabel}: ${d.past}</p>
             <p>${plannedLabel}: ${d.planned}</p>
             <p>${cancelledLabel}: ${d.cancelled}</p>
             <p>Click to view details</p>
@@ -217,11 +217,11 @@ const Chart = ({
       <div className="graph-legend">
         <div
           className="me-1"
-          style={{ ...legendCss, background: barColors.published }}
+          style={{ ...legendCss, background: barColors.past }}
         />
-        {publishedLabel}:
+        {pastLabel}:
         <strong className="ms-1">
-          {displayedGraphData.reduce((acc, org) => acc + org.published, 0)}
+          {displayedGraphData.reduce((acc, org) => acc + org.past, 0)}
         </strong>
       </div>
       <div className="graph-legend">
@@ -257,15 +257,15 @@ const updateOrgReports = (
   // Initialize the organization object if it is the first report belongs to the organization
   const elem = (orgReports[displayedOrg.uuid] ??= {
     org: displayedOrg,
-    published: 0,
+    past: 0,
     planned: 0,
     cancelled: 0
   })
-  if (reportState === Report.STATE.PUBLISHED) {
+  if ([Report.STATE.APPROVED, Report.STATE.PUBLISHED].includes(reportState)) {
     if (Report.isFuture(engagementDate)) {
       elem.planned++
     } else {
-      elem.published++
+      elem.past++
     }
   } else if (reportState === Report.STATE.CANCELLED) {
     elem.cancelled++
@@ -623,7 +623,11 @@ const RollupShow = ({
 
   function setRollupDefaultSearchQuery() {
     const queryParams = {
-      state: [Report.STATE.PUBLISHED, Report.STATE.CANCELLED],
+      state: [
+        Report.STATE.APPROVED,
+        Report.STATE.PUBLISHED,
+        Report.STATE.CANCELLED
+      ],
       engagementDateStart: moment().startOf("day"),
       engagementDateEnd: moment().endOf("day")
     }

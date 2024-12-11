@@ -187,7 +187,7 @@ const ReportsByTask = ({
     second: VISUALIZATIONS[2].id
   }
   const DESCRIPTION = `The reports are grouped by ${taskShortLabel}.
-    In order to see the list of published reports for a ${taskShortLabel},
+    In order to see the list of reports for a ${taskShortLabel},
     click on the bar corresponding to the ${taskShortLabel}.`
 
   return (
