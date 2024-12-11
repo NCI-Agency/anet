@@ -177,8 +177,8 @@ interface ReportsByDayOfWeekProps {
 }
 
 /*
- * Component displaying a chart with number of reports published within a certain
- * period. The counting is done grouped by day of the week.
+ * Component displaying a chart with number of reports within a certain period.
+ * The counting is done grouped by day of the week.
  */
 const ReportsByDayOfWeek = ({
   pageDispatchers,
@@ -220,7 +220,7 @@ const ReportsByDayOfWeek = ({
     second: VISUALIZATIONS[2].id
   }
   const DESCRIPTION = `The reports are grouped by day of the week.
-    In order to see the list of published reports for a day of the week,
+    In order to see the list of reports for a day of the week,
     click on the bar corresponding to the day of the week.`
 
   return (
