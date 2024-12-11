@@ -74,8 +74,15 @@ const API = {
    * - message: The error/log message
    */
   logOnServer(severity, url, lineNr, message) {
-    // Can't use client here as we need to send to a different endpoint
-    API._fetch(LOGGING_ENDPOINT, [{ severity, url, lineNr, message }])
+    // ignore some sporadic, annoying, unimportant errors from ResizeObserver
+    if (
+      message !== "ResizeObserver loop limit exceeded" &&
+      message !==
+        "ResizeObserver loop completed with undelivered notifications."
+    ) {
+      // Can't use client here as we need to send to a different endpoint
+      API._fetch(LOGGING_ENDPOINT, [{ severity, url, lineNr, message }])
+    }
   },
 
   _handleSuccess(response) {
