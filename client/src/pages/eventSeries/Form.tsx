@@ -1,3 +1,4 @@
+import { gql } from "@apollo/client"
 import API from "api"
 import { OrganizationOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
@@ -20,6 +21,20 @@ import ORGANIZATIONS_ICON from "resources/organizations.png"
 import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
 import utils from "utils"
+
+const GQL_CREATE_EVENTSERIES = gql`
+  mutation ($eventSeries: EventSeriesInput!) {
+    createEventSeries(eventSeries: $eventSeries) {
+      uuid
+    }
+  }
+`
+
+const GQL_UPDATE_EVENTSERIES = gql`
+  mutation ($eventSeries: EventSeriesInput!) {
+    updateEventSeries(eventSeries: $eventSeries)
+  }
+`
 
 interface EventSeriesFormProps {
   initialValues: any
@@ -261,9 +276,7 @@ const EventSeriesForm = ({
     eventSeries.hostOrg = utils.getReference(eventSeries.hostOrg)
     eventSeries.adminOrg = utils.getReference(eventSeries.adminOrg)
     return API.mutation(
-      edit
-        ? EventSeries.getUpdateEventSeriesMutation
-        : EventSeries.getCreateEventSeriesMutation,
+      edit ? GQL_UPDATE_EVENTSERIES : GQL_CREATE_EVENTSERIES,
       { eventSeries }
     )
   }

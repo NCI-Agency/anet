@@ -1,5 +1,7 @@
+import { gql } from "@apollo/client"
 import API from "api"
 import LinkTo from "components/LinkTo"
+import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -12,6 +14,34 @@ import React, { useState } from "react"
 import { Table } from "react-bootstrap"
 import { connect } from "react-redux"
 
+const GQL_GET_EVENTSERIES_LIST = gql`
+  query ($eventSeriesQuery: EventSeriesSearchQueryInput) {
+    eventSeriesList(query: $eventSeriesQuery) {
+      pageNum
+      pageSize
+      totalCount
+      list {
+        uuid
+        name
+        hostOrg {
+          uuid
+          shortName
+          longName
+          identificationCode
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        }
+        adminOrg {
+          uuid
+          shortName
+          longName
+          identificationCode
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        }
+      }
+    }
+  }
+`
+
 interface EventSeriesTableProps {
   pageDispatchers?: PageDispatchersPropType
   queryParams?: any
@@ -23,12 +53,9 @@ const EventSeriesTable = ({
 }: EventSeriesTableProps) => {
   const [pageNum, setPageNum] = useState(0)
   const eventSeriesQuery = { ...queryParams, pageNum }
-  const { loading, error, data } = API.useApiQuery(
-    EventSeries.getEventSeriesListQuery,
-    {
-      eventSeriesQuery
-    }
-  )
+  const { loading, error, data } = API.useApiQuery(GQL_GET_EVENTSERIES_LIST, {
+    eventSeriesQuery
+  })
   const { done, result } = useBoilerplate({
     loading,
     error,
