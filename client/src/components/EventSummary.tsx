@@ -1,6 +1,8 @@
+import { gql } from "@apollo/client"
 import API from "api"
 import { BreadcrumbTrail } from "components/BreadcrumbTrail"
 import LinkTo from "components/LinkTo"
+import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -19,6 +21,76 @@ import PEOPLE_ICON from "resources/people.png"
 import TASKS_ICON from "resources/tasks.png"
 import Settings from "settings"
 
+const GQL_GET_EVENT_LIST = gql`
+  query ($eventQuery: EventSearchQueryInput) {
+    eventList(query: $eventQuery) {
+      pageNum
+      pageSize
+      totalCount
+      list {
+        uuid
+        type
+        name
+        startDate
+        endDate
+        status
+        hostOrg {
+          uuid
+          shortName
+          longName
+          identificationCode
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        }
+        adminOrg {
+          uuid
+          shortName
+          longName
+          identificationCode
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        }
+        eventSeries {
+          uuid
+          name
+        }
+        location {
+          uuid
+          name
+          lat
+          lng
+        }
+        tasks {
+          uuid
+          shortName
+          parentTask {
+            uuid
+            shortName
+          }
+          ascendantTasks {
+            uuid
+            shortName
+            parentTask {
+              uuid
+            }
+          }
+        }
+        organizations {
+          uuid
+          shortName
+          longName
+          identificationCode
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        }
+        people {
+          uuid
+          name
+          rank
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        }
+      }
+    }
+  }
+`
+
 interface EventSummaryProps {
   pageDispatchers?: PageDispatchersPropType
   queryParams?: any
@@ -35,7 +107,7 @@ const EventSummary = ({
     ...queryParams,
     pageNum
   }
-  const { loading, error, data } = API.useApiQuery(Event.getEventListQuery, {
+  const { loading, error, data } = API.useApiQuery(GQL_GET_EVENT_LIST, {
     eventQuery
   })
   const { done, result } = useBoilerplate({
