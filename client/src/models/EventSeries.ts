@@ -48,9 +48,7 @@ export default class EventSeries extends Model {
 
   static autocompleteQuery = `
     uuid
-    status
     name
-    description
     hostOrg {
       uuid
       shortName
@@ -65,38 +63,15 @@ export default class EventSeries extends Model {
       identificationCode
       ${GRAPHQL_ENTITY_AVATAR_FIELDS}
     }
-   `
-
-  static getEventSeriesQueryMin = gql`
-    query ($uuid: String) {
-      eventSeries(uuid: $uuid) {
-        uuid
-        name
-        hostOrg {
-          uuid
-          shortName
-          longName
-          identificationCode
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-        }
-        adminOrg {
-          uuid
-          shortName
-          longName
-          identificationCode
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-        }
-      }
-    }
   `
 
   static getEventSeriesQuery = gql`
     query ($uuid: String) {
       eventSeries(uuid: $uuid) {
         uuid
+        status
         name
         description
-        updatedAt
         isSubscribed
         hostOrg {
           uuid
@@ -116,50 +91,6 @@ export default class EventSeries extends Model {
     }
   `
 
-  static getEventSeriesListQuery = gql`
-    query ($eventSeriesQuery: EventSeriesSearchQueryInput) {
-      eventSeriesList(query: $eventSeriesQuery) {
-        pageNum
-        pageSize
-        totalCount
-        list {
-          uuid
-          name
-          description
-          isSubscribed
-          hostOrg {
-            uuid
-            shortName
-            longName
-            identificationCode
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          }
-          adminOrg {
-            uuid
-            shortName
-            longName
-            identificationCode
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          }
-          updatedAt
-        }
-      }
-    }
-  `
-
-  static getCreateEventSeriesMutation = gql`
-    mutation ($eventSeries: EventSeriesInput!) {
-      createEventSeries(eventSeries: $eventSeries) {
-        uuid
-      }
-    }
-  `
-
-  static getUpdateEventSeriesMutation = gql`
-    mutation ($eventSeries: EventSeriesInput!) {
-      updateEventSeries(eventSeries: $eventSeries)
-    }
-  `
   constructor(props) {
     super(Model.fillObject(props, EventSeries.yupSchema))
   }
