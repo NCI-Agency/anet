@@ -9,7 +9,7 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
-import { Event, Person, Report, Task } from "models"
+import { Event, Person, Report } from "models"
 import { reportTour } from "pages/GuidedTour"
 import React, { useContext } from "react"
 import { connect } from "react-redux"
@@ -23,7 +23,6 @@ interface ReportNewProps {
 }
 
 const ReportNew = ({ pageDispatchers }: ReportNewProps) => {
-  const { currentUser } = useContext(AppContext)
   const routerLocation = useLocation()
   useBoilerplate({
     pageProps: PAGE_PROPS_NO_NAV,
@@ -97,11 +96,8 @@ const ReportNewConditional = ({
   const report = new Report()
   if (data) {
     const event = new Event(data.event)
-    const tasks = []
-    event.tasks.forEach(task => tasks.push(new Task(task)))
-    report.event = Event.filterClientSideFields(event)
+    report.event = event
     report.location = event.location
-    report.tasks = tasks
   }
   // mutates the object
   initInvisibleFields(report, Settings.fields.report.customFields)

@@ -1531,6 +1531,7 @@ input TaskSearchQueryInput {
   assessment: AssessmentSearchQueryInput
   category: String
   emailNetwork: String
+  eventUuid: String
   inMyReports: Boolean
   isAssigned: Boolean
   orgRecurseStrategy: RecurseStrategy

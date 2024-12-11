@@ -448,6 +448,16 @@ const ReportForm = ({
 
         const tasksFilters = {}
 
+        if (values.event?.uuid) {
+          tasksFilters.assignedToEvent = {
+            label: `Assigned to event ${values.event.name}`,
+            queryVars: {
+              eventUuid: values.event.uuid,
+              selectable: true
+            }
+          }
+        }
+
         if (currentOrg) {
           tasksFilters.assignedToMyOrg = {
             label: `Assigned to ${currentOrg.shortName}`,
@@ -649,7 +659,6 @@ const ReportForm = ({
                   name="event"
                   component={FieldHelper.SpecialField}
                   onChange={value => {
-                    value = Event.filterClientSideFields(value)
                     // validation will be done by setFieldValue
                     setFieldTouched("event", true, false) // onBlur doesn't work when selecting an option
                     setFieldValue("event", value, true)
@@ -728,9 +737,12 @@ const ReportForm = ({
                       ) : undefined}
                       <FieldHelper.FieldShortcuts
                         title="Recent Locations"
-                        shortcuts={recents.locations.filter(
-                          l => values.location?.uuid !== l.uuid
-                        )}
+                        shortcuts={
+                          !values.event?.uuid &&
+                          recents.locations.filter(
+                            l => values.location?.uuid !== l.uuid
+                          )
+                        }
                         fieldName="location"
                         objectType={Location}
                         curValue={values.location}
