@@ -1,3 +1,4 @@
+import { gql } from "@apollo/client"
 import API from "api"
 import EventsMapWidget from "components/aggregations/EventsMapWidget"
 import {
@@ -5,9 +6,31 @@ import {
   PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
-import { Event } from "models"
 import React from "react"
 import { connect } from "react-redux"
+
+const GQL_GET_EVENT_LIST = gql`
+  query ($eventQuery: EventSearchQueryInput) {
+    eventList(query: $eventQuery) {
+      pageNum
+      pageSize
+      totalCount
+      list {
+        uuid
+        type
+        name
+        startDate
+        endDate
+        location {
+          uuid
+          name
+          lat
+          lng
+        }
+      }
+    }
+  }
+`
 
 interface EventMapProps {
   pageDispatchers?: PageDispatchersPropType
@@ -28,7 +51,7 @@ const EventMap = ({
   marginBottom
 }: EventMapProps) => {
   const eventQuery = { ...queryParams, pageSize: 0 }
-  const { loading, error, data } = API.useApiQuery(Event.getEventListQuery, {
+  const { loading, error, data } = API.useApiQuery(GQL_GET_EVENT_LIST, {
     eventQuery
   })
   const { done, result } = useBoilerplate({

@@ -18,12 +18,9 @@ interface EventEditProps {
 
 const EventEdit = ({ pageDispatchers }: EventEditProps) => {
   const { uuid } = useParams()
-  const { loading, error, data } = API.useApiQuery(
-    Event.getEventQueryNoIsSubscribed,
-    {
-      uuid
-    }
-  )
+  const { loading, error, data } = API.useApiQuery(Event.getEventQuery, {
+    uuid
+  })
   const { done, result } = useBoilerplate({
     loading,
     error,

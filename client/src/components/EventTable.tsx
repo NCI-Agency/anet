@@ -1,5 +1,7 @@
+import { gql } from "@apollo/client"
 import API from "api"
 import LinkTo from "components/LinkTo"
+import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -12,6 +14,47 @@ import moment from "moment/moment"
 import React, { useState } from "react"
 import { Table } from "react-bootstrap"
 import { connect } from "react-redux"
+
+const GQL_GET_EVENT_LIST = gql`
+  query ($eventQuery: EventSearchQueryInput) {
+    eventList(query: $eventQuery) {
+      pageNum
+      pageSize
+      totalCount
+      list {
+        uuid
+        type
+        name
+        startDate
+        endDate
+        hostOrg {
+          uuid
+          shortName
+          longName
+          identificationCode
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        }
+        adminOrg {
+          uuid
+          shortName
+          longName
+          identificationCode
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        }
+        eventSeries {
+          uuid
+          name
+        }
+        location {
+          uuid
+          name
+          lat
+          lng
+        }
+      }
+    }
+  }
+`
 
 interface EventTableProps {
   // query variables for events, when query & pagination wanted:
@@ -37,7 +80,7 @@ const PaginatedEvents = ({
 }: PaginatedEventsProps) => {
   const [pageNum, setPageNum] = useState(0)
   const eventQuery = { ...queryParams, pageNum }
-  const { loading, error, data } = API.useApiQuery(Event.getEventListQuery, {
+  const { loading, error, data } = API.useApiQuery(GQL_GET_EVENT_LIST, {
     eventQuery
   })
   const { done, result } = useBoilerplate({

@@ -64,158 +64,15 @@ export default class Event extends Model {
 
   static autocompleteQuery = `
     uuid
+    type
     name
-    description
     startDate
     endDate
-    outcomes
-    hostOrg {
-      uuid
-      shortName
-    }
-    adminOrg {
-      uuid
-      shortName
-    }
     location {
       uuid
       name
     }
-    tasks {
-      uuid
-      shortName
-      longName
-      parentTask {
-        uuid
-        shortName
-      }
-      ascendantTasks {
-        uuid
-        shortName
-        parentTask {
-          uuid
-        }
-      }
-      taskedOrganizations {
-        uuid
-        shortName
-        longName
-        identificationCode
-      }
-    }
-    organizations {
-      uuid
-      shortName
-    }
-    people {
-      uuid
-      name
-    }
    `
-
-  static getEventQueryNoIsSubscribed = gql`
-    query ($uuid: String) {
-      event(uuid: $uuid) {
-        uuid
-        status
-        type
-        name
-        description
-        startDate
-        endDate
-        outcomes
-        updatedAt
-        hostOrg {
-          uuid
-          shortName
-          longName
-          identificationCode
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-        }
-        adminOrg {
-          uuid
-          shortName
-          longName
-          identificationCode
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-        }
-        eventSeries {
-          uuid
-          name
-          description
-        }
-        location {
-          uuid
-          name
-          lat
-          lng
-        }
-        tasks {
-          uuid
-          shortName
-          longName
-          parentTask {
-            uuid
-            shortName
-          }
-          ascendantTasks {
-            uuid
-            shortName
-            parentTask {
-              uuid
-            }
-          }
-          taskedOrganizations {
-            uuid
-            shortName
-            longName
-            identificationCode
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          }
-        }
-        organizations {
-          uuid
-          shortName
-          longName
-          identificationCode
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          location {
-            uuid
-            name
-            lat
-            lng
-          }
-        }
-        people {
-          uuid
-          name
-          rank
-          status
-          user
-          endOfTourDate
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          position {
-            uuid
-            name
-            type
-            code
-            status
-            organization {
-              uuid
-              shortName
-              longName
-              identificationCode
-              ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-            }
-            location {
-              uuid
-              name
-            }
-          }
-        }
-      }
-    }
-  `
 
   static getEventQuery = gql`
     query ($uuid: String) {
@@ -247,7 +104,6 @@ export default class Event extends Model {
         eventSeries {
           uuid
           name
-          description
         }
         location {
           uuid
@@ -270,13 +126,6 @@ export default class Event extends Model {
               uuid
             }
           }
-          taskedOrganizations {
-            uuid
-            shortName
-            longName
-            identificationCode
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          }
         }
         organizations {
           uuid
@@ -295,16 +144,12 @@ export default class Event extends Model {
           uuid
           name
           rank
-          status
-          user
-          endOfTourDate
           ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           position {
             uuid
             name
             type
             code
-            status
             organization {
               uuid
               shortName
@@ -315,6 +160,8 @@ export default class Event extends Model {
             location {
               uuid
               name
+              lat
+              lng
             }
           }
         }
@@ -322,101 +169,6 @@ export default class Event extends Model {
     }
   `
 
-  static getEventListQuery = gql`
-    query ($eventQuery: EventSearchQueryInput) {
-      eventList(query: $eventQuery) {
-        pageNum
-        pageSize
-        totalCount
-        list {
-          uuid
-          status
-          type
-          name
-          description
-          startDate
-          endDate
-          hostOrg {
-            uuid
-            shortName
-            longName
-            identificationCode
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          }
-          adminOrg {
-            uuid
-            shortName
-            longName
-            identificationCode
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          }
-          eventSeries {
-            uuid
-            name
-          }
-          location {
-            uuid
-            name
-            lat
-            lng
-          }
-          tasks {
-            uuid
-            shortName
-            longName
-            parentTask {
-              uuid
-              shortName
-            }
-            ascendantTasks {
-              uuid
-              shortName
-              parentTask {
-                uuid
-              }
-            }
-            taskedOrganizations {
-              uuid
-              shortName
-              longName
-              identificationCode
-            }
-          }
-          organizations {
-            uuid
-            shortName
-            longName
-            identificationCode
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          }
-          people {
-            uuid
-            name
-            rank
-            status
-            user
-            endOfTourDate
-            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          }
-          updatedAt
-        }
-      }
-    }
-  `
-
-  static getCreateEventMutation = gql`
-    mutation ($event: EventInput!) {
-      createEvent(event: $event) {
-        uuid
-      }
-    }
-  `
-
-  static getUpdateEventMutation = gql`
-    mutation ($event: EventInput!) {
-      updateEvent(event: $event)
-    }
-  `
   constructor(props) {
     super(Model.fillObject(props, Event.yupSchema))
   }

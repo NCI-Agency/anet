@@ -41,7 +41,7 @@ import { exportResults } from "exportUtils"
 import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
-import { Attachment, Event } from "models"
+import { Attachment } from "models"
 import pluralize from "pluralize"
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react"
 import {
@@ -311,6 +311,46 @@ const GQL_GET_ATTACHMENT_LIST = gql`
           }
           relatedObjectUuid
           relatedObjectType
+        }
+      }
+    }
+  }
+`
+
+const GQL_GET_EVENT_LIST = gql`
+  query ($eventQuery: EventSearchQueryInput) {
+    eventList(query: $eventQuery) {
+      pageNum
+      pageSize
+      totalCount
+      list {
+        uuid
+        name
+        startDate
+        endDate
+        hostOrg {
+          uuid
+          shortName
+          longName
+          identificationCode
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        }
+        adminOrg {
+          uuid
+          shortName
+          longName
+          identificationCode
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        }
+        eventSeries {
+          uuid
+          name
+        }
+        location {
+          uuid
+          name
+          lat
+          lng
         }
       }
     }
@@ -1058,7 +1098,7 @@ const Events = ({
     pageNum: queryParamsUnchanged ? pageNum : 0,
     pageSize: queryParams.pageSize || DEFAULT_PAGESIZE
   }
-  const { loading, error, data } = API.useApiQuery(Event.getEventListQuery, {
+  const { loading, error, data } = API.useApiQuery(GQL_GET_EVENT_LIST, {
     eventQuery
   })
   const { done, result } = useBoilerplate({
