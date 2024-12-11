@@ -163,7 +163,7 @@
     "react-bootstrap": "2.10.6",
     "react-dom": "18.3.1",
     "react-mosaic-component": "6.1.0",
-    "react-redux": "9.1.2",
+    "react-redux": "9.2.0",
     "react-redux-loading-bar": "5.0.8",
     "react-resize-detector": "11.0.1",
     "react-router-bootstrap": "0.26.3",
