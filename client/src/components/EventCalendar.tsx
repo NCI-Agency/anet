@@ -1,3 +1,4 @@
+import { gql } from "@apollo/client"
 import API from "api"
 import { eventsToCalendarEvents } from "components/aggregations/utils"
 import Calendar from "components/Calendar"
@@ -7,11 +8,33 @@ import {
   PageDispatchersPropType
 } from "components/Page"
 import _isEqual from "lodash/isEqual"
-import { Event } from "models"
 import moment from "moment"
 import React, { useRef } from "react"
 import { connect } from "react-redux"
 import { useNavigate } from "react-router-dom"
+
+const GQL_GET_EVENT_LIST = gql`
+  query ($eventQuery: EventSearchQueryInput) {
+    eventList(query: $eventQuery) {
+      pageNum
+      pageSize
+      totalCount
+      list {
+        uuid
+        type
+        name
+        startDate
+        endDate
+        location {
+          uuid
+          name
+          lat
+          lng
+        }
+      }
+    }
+  }
+`
 
 interface EventCalendarProps {
   pageDispatchers?: PageDispatchersPropType
@@ -53,7 +76,7 @@ const EventCalendar = ({
     prevEventQuery.current = eventQuery
     // Store API promise to use in optimised case
     showLoading()
-    apiPromise.current = API.query(Event.getEventListQuery, {
+    apiPromise.current = API.query(GQL_GET_EVENT_LIST, {
       eventQuery
     }).then(data => {
       const events = data ? data.eventList.list : []

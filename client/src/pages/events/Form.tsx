@@ -1,3 +1,4 @@
+import { gql } from "@apollo/client"
 import API from "api"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import {
@@ -45,6 +46,20 @@ import TASKS_ICON from "resources/tasks.png"
 import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
 import utils from "utils"
+
+const GQL_CREATE_EVENT = gql`
+  mutation ($event: EventInput!) {
+    createEvent(event: $event) {
+      uuid
+    }
+  }
+`
+
+const GQL_UPDATE_EVENT = gql`
+  mutation ($event: EventInput!) {
+    updateEvent(event: $event)
+  }
+`
 
 const EVENT_TYPES = [
   Event.EVENT_TYPES.CONFERENCE,
@@ -508,7 +523,6 @@ const EventForm = ({
                             id="events-tasks"
                             tasks={values.tasks}
                             showDelete
-                            showOrganization
                             showDescription
                             noTasksMessage={`No ${tasksLabel} selected; click in the ${tasksLabel} box to view your organization's ${tasksLabel}`}
                           />
@@ -615,12 +629,9 @@ const EventForm = ({
     event.hostOrg = utils.getReference(event.hostOrg)
     event.adminOrg = utils.getReference(event.adminOrg)
     event.location = utils.getReference(event.location)
-    return API.mutation(
-      edit ? Event.getUpdateEventMutation : Event.getCreateEventMutation,
-      {
-        event
-      }
-    )
+    return API.mutation(edit ? GQL_UPDATE_EVENT : GQL_CREATE_EVENT, {
+      event
+    })
   }
 }
 

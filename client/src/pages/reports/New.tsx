@@ -1,3 +1,4 @@
+import { gql } from "@apollo/client"
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
 import AppContext from "components/AppContext"
@@ -17,6 +18,14 @@ import { useLocation } from "react-router-dom"
 import Settings from "settings"
 import utils from "utils"
 import ReportForm from "./Form"
+
+const GQL_GET_EVENT = gql`
+  query ($uuid: String) {
+    event(uuid: $uuid) {
+      ${Event.autocompleteQuery}
+    }
+  }
+`
 
 interface ReportNewProps {
   pageDispatchers?: PageDispatchersPropType
@@ -52,7 +61,7 @@ const ReportNewFetchEvent = ({
   eventUuid,
   pageDispatchers
 }: ReportNewFetchEventProps) => {
-  const queryResult = API.useApiQuery(Event.getEventQueryNoIsSubscribed, {
+  const queryResult = API.useApiQuery(GQL_GET_EVENT, {
     uuid: eventUuid
   })
   return (
