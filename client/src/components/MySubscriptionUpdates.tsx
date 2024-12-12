@@ -3,7 +3,10 @@ import API from "api"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
+import {
+  GRAPHQL_ENTITY_AVATAR_FIELDS,
+  OBJECT_TYPE_TO_MODEL
+} from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -12,9 +15,7 @@ import {
 } from "components/Page"
 import UltimatePagination from "components/UltimatePagination"
 import _get from "lodash/get"
-import _upperFirst from "lodash/upperFirst"
 import moment from "moment"
-import pluralize from "pluralize"
 import React, { useEffect, useState } from "react"
 import { Table } from "react-bootstrap"
 import { connect } from "react-redux"
@@ -31,6 +32,12 @@ const GQL_GET_MY_SUBSCRIPTION_UPDATES = gql`
         updatedObjectUuid
         updatedObject {
           ... on AuthorizationGroup {
+            name
+          }
+          ... on Event {
+            name
+          }
+          ... on EventSeries {
             name
           }
           ... on Location {
@@ -68,6 +75,12 @@ const GQL_GET_MY_SUBSCRIPTION_UPDATES = gql`
           subscribedObjectUuid
           subscribedObject {
             ... on AuthorizationGroup {
+              name
+            }
+            ... on Event {
+              name
+            }
+            ... on EventSeries {
               name
             }
             ... on Location {
@@ -181,9 +194,8 @@ const MySubscriptionUpdates = ({
               )) ||
                 subscriptionUpdates.map(subscriptionUpdate => {
                   const subscription = subscriptionUpdate.subscription
-                  const subscribedObjectType = _upperFirst(
-                    pluralize.singular(subscription.subscribedObjectType)
-                  )
+                  const subscribedObjectType =
+                    OBJECT_TYPE_TO_MODEL[subscription.subscribedObjectType]
                   let linkToSubscription
                   if (subscription.subscribedObject) {
                     linkToSubscription = (
@@ -208,9 +220,8 @@ const MySubscriptionUpdates = ({
                       </LinkTo>
                     )
                   }
-                  const updatedObjectType = _upperFirst(
-                    pluralize.singular(subscriptionUpdate.updatedObjectType)
-                  )
+                  const updatedObjectType =
+                    OBJECT_TYPE_TO_MODEL[subscription.subscribedObjectType]
                   let linkToUpdatedObject
                   if (subscriptionUpdate.updatedObject) {
                     linkToUpdatedObject = (

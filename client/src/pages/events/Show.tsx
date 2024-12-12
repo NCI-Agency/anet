@@ -97,7 +97,7 @@ const EventShow = ({ pageDispatchers }: EventShowProps) => {
                   <>
                     {
                       <SubscriptionIcon
-                        subscribedObjectType="event"
+                        subscribedObjectType="events"
                         subscribedObjectUuid={event.uuid}
                         isSubscribed={event.isSubscribed}
                         updatedAt={event.updatedAt}
