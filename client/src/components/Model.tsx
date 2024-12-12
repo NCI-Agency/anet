@@ -122,6 +122,8 @@ export const GQL_UPDATE_NOTE = gql`
 export const MODEL_TO_OBJECT_TYPE = {
   Attachment: "attachments",
   AuthorizationGroup: "authorizationGroups",
+  Event: "events",
+  EventSeries: "eventSeries",
   Location: "locations",
   Organization: "organizations",
   Person: "people",
