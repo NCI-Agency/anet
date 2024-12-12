@@ -13,9 +13,6 @@ import CheckboxFilter, {
 import DateRangeFilter, {
   deserialize as deserializeDateRangeFilter
 } from "components/advancedSearch/DateRangeFilter"
-import EventSeriesFilter, {
-  deserialize as deserializeEventSeriesFilter
-} from "components/advancedSearch/EventSeriesFilter"
 import {
   deserializeMulti as deserializeLocationMultiFilter,
   LocationMultiFilter
@@ -38,6 +35,7 @@ import TaskFilter, {
 } from "components/advancedSearch/TaskFilter"
 import {
   CountryOverlayRow,
+  EventSeriesOverlayRow,
   PersonDetailedOverlayRow,
   PositionOverlayRow,
   TaskOverlayRow
@@ -48,8 +46,17 @@ import DictionaryField from "components/DictionaryField"
 import Model from "components/Model"
 import _isEmpty from "lodash/isEmpty"
 import _pickBy from "lodash/pickBy"
-import { Event, Location, Person, Position, Report, Task } from "models"
+import {
+  Event,
+  EventSeries,
+  Location,
+  Person,
+  Position,
+  Report,
+  Task
+} from "models"
 import React, { useContext } from "react"
+import EVENTS_ICON from "resources/events.png"
 import PEOPLE_ICON from "resources/people.png"
 import POSITIONS_ICON from "resources/positions.png"
 import TASKS_ICON from "resources/tasks.png"
@@ -156,6 +163,14 @@ const advancedSelectFilterTaskProps = {
   fields: Task.autocompleteQuery,
   addon: TASKS_ICON
 }
+const advancedSelectFilterEventSeriesProps = {
+  overlayColumns: ["Name"],
+  overlayRenderRow: EventSeriesOverlayRow,
+  objectType: EventSeries,
+  valueKey: "name",
+  fields: EventSeries.autocompleteQuery,
+  addon: EVENTS_ICON
+}
 
 export const searchFilters = function(includeAdminFilters) {
   const filters = {}
@@ -206,6 +221,13 @@ export const searchFilters = function(includeAdminFilters) {
   classificationLabels.unshift("<none>")
 
   const taskWidgetFilters = {
+    all: {
+      label: "All",
+      queryVars: {}
+    }
+  }
+
+  const eventSeriesFilters = {
     all: {
       label: "All",
       queryVars: {}
@@ -735,9 +757,12 @@ export const searchFilters = function(includeAdminFilters) {
         }
       },
       "Event Series": {
-        component: EventSeriesFilter,
-        deserializer: deserializeEventSeriesFilter,
+        component: AdvancedSelectFilter,
+        deserializer: deserializeAdvancedSelectFilter,
         props: {
+          ...advancedSelectFilterEventSeriesProps,
+          filterDefs: eventSeriesFilters,
+          placeholder: "Filter by event series…",
           queryKey: "eventSeriesUuid"
         }
       },
