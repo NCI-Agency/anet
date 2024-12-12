@@ -239,7 +239,7 @@ $defs:
               uniqueItems: true
               items:
                 type: string
-                enum: [Attachment, AuthorizationGroup, Location, Organization, Person, Position, Report, Task]
+                enum: [Attachment, AuthorizationGroup, Event, Location, Organization, Person, Position, Report, Task]
           required: [types]
         - properties:
             type:

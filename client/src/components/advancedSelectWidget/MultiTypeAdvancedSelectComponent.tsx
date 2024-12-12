@@ -5,6 +5,7 @@ import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSe
 import {
   AttachmentOverlayRow,
   AuthorizationGroupOverlayRow,
+  EventOverlayRow,
   LocationOverlayRow,
   OrganizationOverlayRow,
   PersonDetailedOverlayRow,
@@ -20,6 +21,7 @@ import * as Models from "models"
 import React, { useCallback, useContext, useMemo, useState } from "react"
 import { Button } from "react-bootstrap"
 import AUTHORIZATION_GROUPS_ICON from "resources/authorizationGroups.png"
+import EVENTS_ICON from "resources/events.png"
 import LOCATIONS_ICON from "resources/locations.png"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
 import PEOPLE_ICON from "resources/people.png"
@@ -157,6 +159,16 @@ const widgetPropsAttachment = {
   addon: <Icon icon={IconNames.PAPERCLIP} />
 }
 
+const widgetPropsEvent = {
+  objectType: Models.Event,
+  overlayRenderRow: EventOverlayRow,
+  overlayColumns: ["Name"],
+  filterDefs: entityFilters,
+  queryParams: { status: Model.STATUS.ACTIVE },
+  fields: Models.Event.autocompleteQuery,
+  addon: EVENTS_ICON
+}
+
 export const ENTITY_TYPES = {
   REPORTS: Models.Report.resourceName,
   PEOPLE: Models.Person.resourceName,
@@ -165,7 +177,8 @@ export const ENTITY_TYPES = {
   LOCATIONS: Models.Location.resourceName,
   TASKS: Models.Task.resourceName,
   AUTHORIZATION_GROUPS: Models.AuthorizationGroup.resourceName,
-  ATTACHMENTS: Models.Attachment.resourceName
+  ATTACHMENTS: Models.Attachment.resourceName,
+  EVENTS: Models.Event.resourceName
 }
 
 const widgetTypeMapping = {
@@ -176,7 +189,8 @@ const widgetTypeMapping = {
   [ENTITY_TYPES.LOCATIONS]: widgetPropsLocation,
   [ENTITY_TYPES.TASKS]: widgetPropsTask,
   [ENTITY_TYPES.AUTHORIZATION_GROUPS]: widgetPropsAuthorizationGroup,
-  [ENTITY_TYPES.ATTACHMENTS]: widgetPropsAttachment
+  [ENTITY_TYPES.ATTACHMENTS]: widgetPropsAttachment,
+  [ENTITY_TYPES.EVENTS]: widgetPropsEvent
 }
 
 export const ALL_ENTITY_TYPES = Object.values(ENTITY_TYPES)

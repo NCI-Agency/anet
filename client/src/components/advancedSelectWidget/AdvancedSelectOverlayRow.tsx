@@ -92,6 +92,7 @@ export const CountryOverlayRow = (item: any) => (
     <td>{item.trigram}</td>
   </React.Fragment>
 )
+
 export const EventSeriesOverlayRow = item => (
   <React.Fragment key={item.uuid}>
     <td>
