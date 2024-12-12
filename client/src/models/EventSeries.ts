@@ -8,8 +8,8 @@ import * as yup from "yup"
 export default class EventSeries extends Model {
   static resourceName = "EventSeries"
   static listName = "eventSeriesList"
-  static getInstanceName = "Event Series"
-  static relatedObjectType = "Event Series"
+  static getInstanceName = "eventSeries"
+  static relatedObjectType = "eventSeries"
 
   static displayName() {
     return "Event Series"
