@@ -102,7 +102,8 @@ export const GRAPHQL_ENTITY_FIELDS = {
   Task: "uuid shortName longName",
   AuthorizationGroup: "uuid name description",
   Attachment: "uuid caption mimeType contentLength",
-  Event: "uuid name"
+  Event: "uuid name",
+  EventSeries: "uuid name"
 }
 
 export const GQL_CREATE_NOTE = gql`

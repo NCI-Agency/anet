@@ -6,6 +6,7 @@ import {
   AttachmentOverlayRow,
   AuthorizationGroupOverlayRow,
   EventOverlayRow,
+  EventSeriesOverlayRow,
   LocationOverlayRow,
   OrganizationOverlayRow,
   PersonDetailedOverlayRow,
@@ -22,6 +23,7 @@ import React, { useCallback, useContext, useMemo, useState } from "react"
 import { Button } from "react-bootstrap"
 import AUTHORIZATION_GROUPS_ICON from "resources/authorizationGroups.png"
 import EVENTS_ICON from "resources/events.png"
+import EVENT_SERIES_ICON from "resources/eventSeries.png"
 import LOCATIONS_ICON from "resources/locations.png"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
 import PEOPLE_ICON from "resources/people.png"
@@ -169,6 +171,16 @@ const widgetPropsEvent = {
   addon: EVENTS_ICON
 }
 
+const widgetPropsEventSeries = {
+  objectType: Models.EventSeries,
+  overlayRenderRow: EventSeriesOverlayRow,
+  overlayColumns: ["Name"],
+  filterDefs: entityFilters,
+  queryParams: { status: Model.STATUS.ACTIVE },
+  fields: Models.EventSeries.autocompleteQuery,
+  addon: EVENT_SERIES_ICON
+}
+
 export const ENTITY_TYPES = {
   REPORTS: Models.Report.resourceName,
   PEOPLE: Models.Person.resourceName,
@@ -178,7 +190,8 @@ export const ENTITY_TYPES = {
   TASKS: Models.Task.resourceName,
   AUTHORIZATION_GROUPS: Models.AuthorizationGroup.resourceName,
   ATTACHMENTS: Models.Attachment.resourceName,
-  EVENTS: Models.Event.resourceName
+  EVENTS: Models.Event.resourceName,
+  EVENT_SERIES: Models.EventSeries.resourceName
 }
 
 const widgetTypeMapping = {
@@ -190,7 +203,8 @@ const widgetTypeMapping = {
   [ENTITY_TYPES.TASKS]: widgetPropsTask,
   [ENTITY_TYPES.AUTHORIZATION_GROUPS]: widgetPropsAuthorizationGroup,
   [ENTITY_TYPES.ATTACHMENTS]: widgetPropsAttachment,
-  [ENTITY_TYPES.EVENTS]: widgetPropsEvent
+  [ENTITY_TYPES.EVENTS]: widgetPropsEvent,
+  [ENTITY_TYPES.EVENT_SERIES]: widgetPropsEventSeries
 }
 
 export const ALL_ENTITY_TYPES = Object.values(ENTITY_TYPES)
