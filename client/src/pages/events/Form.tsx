@@ -39,6 +39,7 @@ import pluralize from "pluralize"
 import React, { useContext, useState } from "react"
 import { Button, FormSelect } from "react-bootstrap"
 import { useNavigate } from "react-router-dom"
+import EVENT_SERIES_ICON from "resources/eventSeries.png"
 import LOCATIONS_ICON from "resources/locations.png"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
 import PEOPLE_ICON from "resources/people.png"
@@ -255,6 +256,7 @@ const EventForm = ({
                       fields={EventSeries.autocompleteQuery}
                       queryParams={eventSeriesSearchQuery}
                       valueKey="name"
+                      addon={EVENT_SERIES_ICON}
                     />
                   }
                 />
