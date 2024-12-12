@@ -46,7 +46,7 @@ export const BreadcrumbTrail = ({
           <LinkTo
             modelType={modelType}
             model={node}
-            showIcon={false}
+            showIcon={i === 0}
             isLink={isLink}
             style={style}
           />
