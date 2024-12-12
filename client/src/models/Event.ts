@@ -1,6 +1,7 @@
 import { gql } from "@apollo/client"
 import Model, { GRAPHQL_ENTITY_AVATAR_FIELDS, yupDate } from "components/Model"
 import _isEmpty from "lodash/isEmpty"
+import EVENTS_ICON from "resources/events.png"
 import Settings from "settings"
 import utils from "utils"
 import * as yup from "yup"
@@ -171,6 +172,14 @@ export default class Event extends Model {
 
   constructor(props) {
     super(Model.fillObject(props, Event.yupSchema))
+  }
+
+  iconUrl() {
+    return EVENTS_ICON
+  }
+
+  toString() {
+    return this.name
   }
 
   static FILTERED_CLIENT_SIDE_FIELDS = ["tasks", "organizations", "people"]
