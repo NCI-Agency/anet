@@ -17,7 +17,7 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
-import ReportCollection, { FORMAT_TABLE } from "components/ReportCollection"
+import ReportCollection from "components/ReportCollection"
 import RichTextEditor from "components/RichTextEditor"
 import { Field, Form, Formik } from "formik"
 import { Event, Report, Task } from "models"
@@ -276,7 +276,6 @@ const EventShow = ({ pageDispatchers }: EventShowProps) => {
                   paginationKey={`r_${uuid}`}
                   queryParams={reportQueryParams}
                   mapId="reports"
-                  viewFormats={[FORMAT_TABLE]}
                 />
               </Fieldset>
             </Form>
