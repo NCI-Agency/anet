@@ -56,7 +56,7 @@ import {
   Task
 } from "models"
 import React, { useContext } from "react"
-import EVENTS_ICON from "resources/events.png"
+import EVENT_SERIES_ICON from "resources/eventSeries.png"
 import PEOPLE_ICON from "resources/people.png"
 import POSITIONS_ICON from "resources/positions.png"
 import TASKS_ICON from "resources/tasks.png"
@@ -169,7 +169,7 @@ const advancedSelectFilterEventSeriesProps = {
   objectType: EventSeries,
   valueKey: "name",
   fields: EventSeries.autocompleteQuery,
-  addon: EVENTS_ICON
+  addon: EVENT_SERIES_ICON
 }
 
 export const searchFilters = function(includeAdminFilters) {
