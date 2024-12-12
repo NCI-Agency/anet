@@ -1114,6 +1114,9 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
             + " WHERE \"reportUuid\" = " + paramOrJoin("reports.uuid", isParam),
         // param is already added above
         Collections.emptyMap()));
+    // update event
+    update.stmts.add(getCommonSubscriptionUpdateStatement(isParam,
+        isParam ? obj.getEventUuid() : null, "events", "reports.eventUuid"));
 
     return update;
   }
