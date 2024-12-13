@@ -139,7 +139,7 @@ public class SecurityUtils {
     final String fn =
         Utils.trimStringReturnNull((String) claims.get(StandardClaimNames.FAMILY_NAME));
     if (!Utils.isEmptyOrNull(fn)) {
-      combinedName.append(fn.toUpperCase());
+      combinedName.append(fn);
       final String gn =
           Utils.trimStringReturnNull((String) claims.get(StandardClaimNames.GIVEN_NAME));
       if (!Utils.isEmptyOrNull(gn)) {
