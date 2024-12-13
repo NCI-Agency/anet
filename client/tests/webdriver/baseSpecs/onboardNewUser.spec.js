@@ -3,7 +3,7 @@ import moment from "moment"
 import OnboardPage from "../pages/onboard.page"
 
 const ONBOARD_USER = {
-  lastName: "BONNSDOTTIR",
+  lastName: "Bonnsdottir",
   firstName: "Bonny",
   emailAddresses: ["", "bonny@example.com"]
 }
