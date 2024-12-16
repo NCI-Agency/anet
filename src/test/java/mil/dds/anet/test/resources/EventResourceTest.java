@@ -18,19 +18,20 @@ import org.junit.jupiter.api.Test;
 
 public class EventResourceTest extends AbstractResourceTest {
 
-  private static final String _ORGANIZATION_FIELDS = "{uuid shortName}";
-  protected static final String _TASK_FIELDS =
-      "{ uuid shortName longName description category parentTask { uuid } taskedOrganizations { uuid } status customFields }";
-  public static final String _EVENT_SERIES_FIELDS =
-      "{ uuid name description adminOrg hostOrg status }";
-  public static final String _EVENT_FIELDS =
-      "{ uuid name description eventSeries adminOrg hostOrg startDate endDate type status organizations people tasks}";
+  private static final String ORGANIZATION_FIELDS = "{ uuid shortName }";
+  private static final String TASK_FIELDS =
+      "{ uuid shortName longName description category status customFields }";
+  private static final String EVENT_SERIES_FIELDS =
+      "{ uuid status name description adminOrg { uuid } hostOrg { uuid } }";
+  public static final String FIELDS =
+      "{ uuid status name description eventSeries { uuid } adminOrg { uuid } hostOrg { uuid }"
+          + " startDate endDate type organizations { uuid } people { uuid } tasks { uuid } }";
 
   @Test
   void eventTestGraphQL() {
     // Create
     final Organization org = withCredentials(adminUser, t -> mutationExecutor
-        .createOrganization(_ORGANIZATION_FIELDS, TestData.createAdvisorOrganizationInput(true)));
+        .createOrganization(ORGANIZATION_FIELDS, TestData.createAdvisorOrganizationInput(true)));
     final EventInput eInput = TestData.createEventInput("NMI PDT", "Training",
         getOrganizationInput(org), getOrganizationInput(org));
     final Event created = succeedCreateEvent(eInput);
@@ -40,19 +41,19 @@ public class EventResourceTest extends AbstractResourceTest {
     Integer nrUpdated =
         withCredentials(adminUser, t -> mutationExecutor.updateEvent("", getEventInput(created)));
     assertThat(nrUpdated).isEqualTo(1);
-    Event updated =
-        withCredentials(adminUser, t -> queryExecutor.event(_EVENT_FIELDS, created.getUuid()));
+    Event updated = withCredentials(adminUser, t -> queryExecutor.event(FIELDS, created.getUuid()));
+    assertThat(updated.getStatus()).isEqualTo(created.getStatus());
     assertThat(updated.getName()).isEqualTo(created.getName());
 
     // Add entities to event
     created.setEventSeries(withCredentials(adminUser,
-        t -> mutationExecutor.createEventSeries(_EVENT_SERIES_FIELDS,
+        t -> mutationExecutor.createEventSeries(EVENT_SERIES_FIELDS,
             TestData.createEventSeriesInput("Event Series", "Event Series Description",
                 getOrganizationInput(org), getOrganizationInput(org)))));
     created.setOrganizations(Collections.singletonList(org));
     created.setPeople(Collections.singletonList(getJackJackson()));
     created.setTasks(Collections.singletonList(withCredentials(adminUser,
-        t -> mutationExecutor.createTask(_TASK_FIELDS,
+        t -> mutationExecutor.createTask(TASK_FIELDS,
             TestData.createTaskInput("The New Task for the NMI PDT Event",
                 "The New Task for the NMI PDT Event", "The New Task for the NMI PDT Event",
                 UtilsTest.getCombinedJsonTestCase().getInput())))));
@@ -60,8 +61,7 @@ public class EventResourceTest extends AbstractResourceTest {
         withCredentials(adminUser, t -> mutationExecutor.updateEvent("", getEventInput(created)));
     assertThat(nrUpdated).isEqualTo(1);
 
-    updated =
-        withCredentials(adminUser, t -> queryExecutor.event(_EVENT_FIELDS, created.getUuid()));
+    updated = withCredentials(adminUser, t -> queryExecutor.event(FIELDS, created.getUuid()));
     assertThat(updated.getEventSeries()).isNotNull();
     assertThat(updated.getOrganizations().size()).isEqualTo(1);
     assertThat(updated.getPeople().size()).isEqualTo(1);
@@ -70,11 +70,10 @@ public class EventResourceTest extends AbstractResourceTest {
     // Search
     final EventSearchQueryInput query =
         EventSearchQueryInput.builder().withText("NMI PDT 2024-01").build();
-    final AnetBeanList_Event searchObjects = withCredentials(adminUser,
-        t -> queryExecutor.eventList(getListFields(_EVENT_FIELDS), query));
+    final AnetBeanList_Event searchObjects =
+        withCredentials(adminUser, t -> queryExecutor.eventList(getListFields(FIELDS), query));
     assertThat(searchObjects).isNotNull();
     assertThat(searchObjects.getList()).isNotEmpty();
-
   }
 
   @Test
@@ -91,7 +90,7 @@ public class EventResourceTest extends AbstractResourceTest {
     failCreateEvent(eventInput);
     eventInput.setEndDate(Instant.now());
     final Organization org = withCredentials(adminUser, t -> mutationExecutor
-        .createOrganization(_ORGANIZATION_FIELDS, TestData.createAdvisorOrganizationInput(true)));
+        .createOrganization(ORGANIZATION_FIELDS, TestData.createAdvisorOrganizationInput(true)));
     eventInput.setAdminOrg(getOrganizationInput(org));
     failCreateEvent(eventInput);
     eventInput.setHostOrg(getOrganizationInput(org));
@@ -101,7 +100,7 @@ public class EventResourceTest extends AbstractResourceTest {
   @Test
   void eventCreateUpdateRegularUserPermissionTest() {
     final Organization org = withCredentials(adminUser, t -> mutationExecutor
-        .createOrganization(_ORGANIZATION_FIELDS, TestData.createAdvisorOrganizationInput(true)));
+        .createOrganization(ORGANIZATION_FIELDS, TestData.createAdvisorOrganizationInput(true)));
     // Jack is not an admin of this new organization, will fail
     final EventInput eInput = TestData.createEventInput("NMI PDT", "Training",
         getOrganizationInput(org), getOrganizationInput(org));
@@ -111,7 +110,7 @@ public class EventResourceTest extends AbstractResourceTest {
 
   private void failCreateEvent(final EventInput eventInput) {
     try {
-      withCredentials(jackUser, t -> mutationExecutor.createEvent(_EVENT_FIELDS, eventInput));
+      withCredentials(jackUser, t -> mutationExecutor.createEvent(FIELDS, eventInput));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
       // OK
@@ -129,9 +128,10 @@ public class EventResourceTest extends AbstractResourceTest {
 
   private Event succeedCreateEvent(final EventInput eventInput) {
     final Event createdEvent =
-        withCredentials(adminUser, t -> mutationExecutor.createEvent(_EVENT_FIELDS, eventInput));
+        withCredentials(adminUser, t -> mutationExecutor.createEvent(FIELDS, eventInput));
     assertThat(createdEvent).isNotNull();
     assertThat(createdEvent.getUuid()).isNotNull();
+    assertThat(createdEvent.getStatus()).isEqualTo(eventInput.getStatus());
     assertThat(createdEvent.getName()).isEqualTo(eventInput.getName());
     return createdEvent;
   }
