@@ -380,8 +380,8 @@ const RollupShow = ({
   } else {
     queryParams = getSearchQuery(searchQuery)
   }
-  const startDate = moment(queryParams.releasedAtStart)
-  const endDate = moment(queryParams.releasedAtEnd)
+  const startDate = moment(queryParams.engagementDateStart)
+  const endDate = moment(queryParams.engagementDateEnd)
   const { orgUuid } = queryParams
   useBoilerplate({
     pageProps: DEFAULT_PAGE_PROPS,
@@ -542,13 +542,13 @@ const RollupShow = ({
     let periodEnd
     if (nextPeriod === HALF_YEAR) {
       // No built-in logic in Moment.js
-      periodStart = moment(queryParams.releasedAtStart)
-        .add((queryParams.releasedAtStart.quarter() % 2) - 1, QUARTER)
+      periodStart = moment(queryParams.engagementDateStart)
+        .add((queryParams.engagementDateStart.quarter() % 2) - 1, QUARTER)
         .add(delta * 2, QUARTER)
         .startOf(QUARTER)
       periodEnd = moment(periodStart).add(1, QUARTER).endOf(QUARTER)
     } else {
-      periodStart = moment(queryParams.releasedAtStart)
+      periodStart = moment(queryParams.engagementDateStart)
         .add(delta, nextPeriod)
         .startOf(nextPeriod)
       periodEnd = moment(periodStart).endOf(nextPeriod)
@@ -560,8 +560,8 @@ const RollupShow = ({
     const { periodStart, periodEnd } = calculatePeriodBounds(1, nextPeriod)
     const newQueryParams = {
       ...queryParams,
-      releasedAtStart: periodStart,
-      releasedAtEnd: periodEnd
+      engagementDateStart: periodStart,
+      engagementDateEnd: periodEnd
     }
     deserializeQueryParams(
       REPORT_SEARCH_PROPS.searchObjectTypes[0],
@@ -574,8 +574,8 @@ const RollupShow = ({
     const { periodStart, periodEnd } = calculatePeriodBounds(-1, nextPeriod)
     const newQueryParams = {
       ...queryParams,
-      releasedAtStart: periodStart,
-      releasedAtEnd: periodEnd
+      engagementDateStart: periodStart,
+      engagementDateEnd: periodEnd
     }
     deserializeQueryParams(
       REPORT_SEARCH_PROPS.searchObjectTypes[0],
@@ -588,8 +588,8 @@ const RollupShow = ({
     const { periodStart, periodEnd } = calculatePeriodBounds(0, nextPeriod)
     const newQueryParams = {
       ...queryParams,
-      releasedAtStart: periodStart,
-      releasedAtEnd: periodEnd
+      engagementDateStart: periodStart,
+      engagementDateEnd: periodEnd
     }
     deserializeQueryParams(
       REPORT_SEARCH_PROPS.searchObjectTypes[0],
@@ -624,8 +624,8 @@ const RollupShow = ({
   function setRollupDefaultSearchQuery() {
     const queryParams = {
       state: [Report.STATE.PUBLISHED, Report.STATE.CANCELLED],
-      releasedAtStart: moment().startOf("day"),
-      releasedAtEnd: moment().endOf("day")
+      engagementDateStart: moment().startOf("day"),
+      engagementDateEnd: moment().endOf("day")
     }
     deserializeQueryParams(
       REPORT_SEARCH_PROPS.searchObjectTypes[0],

@@ -162,16 +162,20 @@ const InsightsShow = ({
     [CANCELLED_REPORTS]: {
       state: [Report.STATE.CANCELLED],
       cancelledReason: null,
-      releasedAtStart: defaultPastDates.referenceDate.startOf("day").valueOf()
+      engagementDateStart: defaultPastDates.referenceDate
+        .startOf("day")
+        .valueOf()
     },
     [REPORTS_BY_TASK]: {
       state: [Report.STATE.PUBLISHED],
-      releasedAtStart: defaultPastDates.referenceDate.startOf("day").valueOf()
+      engagementDateStart: defaultPastDates.referenceDate
+        .startOf("day")
+        .valueOf()
     },
     [REPORTS_BY_DAY_OF_WEEK]: {
       state: [Report.STATE.PUBLISHED],
-      releasedAtStart: defaultPastDates.startDate.startOf("day").valueOf(),
-      releasedAtEnd: defaultPastDates.endDate.endOf("day").valueOf(),
+      engagementDateStart: defaultPastDates.startDate.startOf("day").valueOf(),
+      engagementDateEnd: defaultPastDates.endDate.endOf("day").valueOf(),
       includeEngagementDayOfWeek: true
     },
     [FUTURE_ENGAGEMENTS_BY_LOCATION]: {
