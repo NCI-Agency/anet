@@ -135,7 +135,7 @@ public class SecurityUtils {
 
   private static String getCombinedName(Map<String, Object> claims) {
     final StringBuilder combinedName = new StringBuilder();
-    // Try to combine FAMILYNAME, GivenName MiddleName
+    // Try to combine FamilyName, GivenName MiddleName
     final String fn =
         Utils.trimStringReturnNull((String) claims.get(StandardClaimNames.FAMILY_NAME));
     if (!Utils.isEmptyOrNull(fn)) {
