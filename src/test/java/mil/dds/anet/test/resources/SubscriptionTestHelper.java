@@ -5,8 +5,8 @@ import static org.assertj.core.api.Assertions.fail;
 
 import java.time.Instant;
 import java.util.Map;
-import java.util.UUID;
 import mil.dds.anet.database.AuthorizationGroupDao;
+import mil.dds.anet.database.EventDao;
 import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
@@ -15,6 +15,7 @@ import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.TaskDao;
 import mil.dds.anet.test.client.AnetBeanList_Subscription;
 import mil.dds.anet.test.client.AuthorizationGroup;
+import mil.dds.anet.test.client.Event;
 import mil.dds.anet.test.client.Location;
 import mil.dds.anet.test.client.Organization;
 import mil.dds.anet.test.client.Person;
@@ -32,7 +33,8 @@ public abstract class SubscriptionTestHelper extends AbstractResourceTest {
   protected static final String SUBSCRIPTION_FIELDS =
       "{ uuid createdAt updatedAt subscriber { uuid }"
           + " subscribedObjectType subscribedObjectUuid subscribedObject {"
-          + " ... on AuthorizationGroup { uuid } ... on Location { uuid } ... on Organization { uuid }"
+          + " ... on AuthorizationGroup { uuid } ... on Event { uuid }"
+          + " ... on Location { uuid } ... on Organization { uuid }"
           + " ... on Person { uuid } ... on Position { uuid }"
           + " ... on Report { uuid } ... on Task { uuid } } }";
 
@@ -50,7 +52,9 @@ public abstract class SubscriptionTestHelper extends AbstractResourceTest {
       // Task: EF 5
       TaskDao.TABLE_NAME, "242efaa3-d5de-4970-996d-50ca90ef6480",
       // AuthorizationGroup: Inactive positions
-      AuthorizationGroupDao.TABLE_NAME, "90a5196d-acf3-4a81-8ff9-3a8c7acabdf3");
+      AuthorizationGroupDao.TABLE_NAME, "90a5196d-acf3-4a81-8ff9-3a8c7acabdf3",
+      // Event: NMI PDT 2024-01
+      EventDao.TABLE_NAME, "e850846e-9741-40e8-bc51-4dccc30cf47f");
 
   public static String getSubscribedObjectUuid(final String subscribedObjectType) {
     return SUBSCRIPTION_TESTS.get(subscribedObjectType);
@@ -62,7 +66,7 @@ public abstract class SubscriptionTestHelper extends AbstractResourceTest {
     try {
       final SubscriptionInput subscriptionInput = SubscriptionInput.builder()
           .withSubscribedObjectType(subscribedObjectType)
-          .withSubscribedObjectUuid(subscribedObjectUuid).withUuid(UUID.randomUUID().toString())
+          .withSubscribedObjectUuid(subscribedObjectUuid)
           .withCreatedAt(Instant.ofEpochSecond(12345)).withUpdatedAt(Instant.ofEpochSecond(67890))
           .withSubscriber(PositionInput.builder().withUuid(subscriberUuid).build()).build();
       final Subscription subscription = withCredentials(username,
@@ -124,8 +128,11 @@ public abstract class SubscriptionTestHelper extends AbstractResourceTest {
       assertThat(subscription.getSubscribedObjectType())
           .isEqualTo(AuthorizationGroupDao.TABLE_NAME);
       assertThat(subscription.getSubscribedObjectUuid()).isEqualTo(authorizationGroup.getUuid());
+    } else if (subscribedObject instanceof Event event) {
+      assertThat(subscription.getSubscribedObjectType()).isEqualTo(EventDao.TABLE_NAME);
+      assertThat(subscription.getSubscribedObjectUuid()).isEqualTo(event.getUuid());
     } else {
-      fail("Unknown subscribedObjectType: {}", subscribedObject);
+      fail("Unknown subscribedObjectType: %1$s", subscribedObject);
     }
   }
 
