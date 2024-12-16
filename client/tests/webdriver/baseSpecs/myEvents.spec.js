@@ -34,12 +34,12 @@ describe("My events page", () => {
 
   describe("When checking the content of the page", () => {
     it("Should see a table of the event series for the user", async() => {
-      expect(
-        await (await MyEvents.getMyEventSeries(1, 1, 1)).getText()
-      ).to.contains("NMI PDT")
+      expect(await (await MyEvents.getMyEventSeries()).getText()).to.include(
+        "NMI PDT"
+      )
     })
     it("Should see a table of the events for the user", async() => {
-      expect(await (await MyEvents.getMyEvents(1, 1, 1)).getText()).to.contains(
+      expect(await (await MyEvents.getMyEvents()).getText()).to.include(
         "NMI PDT 2024-01"
       )
     })
@@ -54,46 +54,27 @@ describe("My events page", () => {
       ).to.equal("Type: Conference")
       expect(
         await (await MyEvents.getEventSummarySpan(1, 5, 1)).getText()
-      ).to.contains("Host Organization")
-      expect(
-        await (await MyEvents.getEventSummarySpan(1, 5, 1)).getText()
-      ).to.contains("EF 2.2")
+      ).to.equal("Host Organization: EF 2.2")
       expect(
         await (await MyEvents.getEventSummarySpan(1, 6, 1)).getText()
-      ).to.contains("Admin Organization")
-      expect(
-        await (await MyEvents.getEventSummarySpan(1, 6, 1)).getText()
-      ).to.contains("EF 2.2")
+      ).to.equal("Admin Organization: EF 2.2")
       expect(
         await (await MyEvents.getEventSummarySpan(1, 7, 1)).getText()
-      ).to.contains("Event Series this event belongs to")
-      expect(
-        await (await MyEvents.getEventSummarySpan(1, 7, 1)).getText()
-      ).to.contains("NMI PDT")
+      ).to.equal("Event Series this event belongs to: NMI PDT")
       expect(
         await (await MyEvents.getEventSummarySpan(1, 8, 1)).getText()
-      ).to.contains("Location where the event takes place:")
-      expect(
-        await (await MyEvents.getEventSummarySpan(1, 8, 1)).getText()
-      ).to.contains("General Hospital")
-      expect(
-        await (await MyEvents.getEventSummarySpan(1, 9, 1)).getText()
-      ).to.contains("Objectives:")
+      ).to.equal(
+        "Location where the event takes place: General Hospital 47.571772,-52.741935"
+      )
       expect(
         await (await MyEvents.getEventSummarySpan(1, 9, 1)).getText()
-      ).to.contains("1.2.B")
+      ).to.equal("Objectives: EF 1 » EF 1.2 » 1.2.B")
       expect(
         await (await MyEvents.getEventSummarySpan(1, 10, 1)).getText()
-      ).to.contains("Organizations attending:")
-      expect(
-        await (await MyEvents.getEventSummarySpan(1, 10, 1)).getText()
-      ).to.contains("EF 2.2")
+      ).to.equal("Organizations attending: EF 2.2")
       expect(
         await (await MyEvents.getEventSummarySpan(1, 11, 1)).getText()
-      ).to.contains("People attending:")
-      expect(
-        await (await MyEvents.getEventSummarySpan(1, 11, 1)).getText()
-      ).to.contains("ERINSON")
+      ).to.equal("People attending: CIV ERINSON, Erin")
     })
     it("Should see a calendar of events", async() => {
       await MyEvents.selectEventsCalendar()
