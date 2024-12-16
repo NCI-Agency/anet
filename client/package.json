@@ -115,7 +115,7 @@
     "xhr2": "0.2.1"
   },
   "dependencies": {
-    "@apollo/client": "3.12.2",
+    "@apollo/client": "3.12.3",
     "@blueprintjs/core": "5.16.1",
     "@blueprintjs/datetime2": "2.3.18",
     "@emotion/react": "11.14.0",
@@ -138,8 +138,8 @@
     "escape-html": "1.0.3",
     "file-saver": "2.0.5",
     "formik": "2.4.6",
-    "graphiql": "3.7.2",
-    "graphql": "16.9.0",
+    "graphiql": "3.8.1",
+    "graphql": "16.10.0",
     "hopscotch": "0.3.1",
     "jsonpath-plus": "10.2.0",
     "keycloak-js": "26.0.7",
@@ -184,7 +184,7 @@
     "title-case": "4.3.2",
     "use-debounce": "10.0.4",
     "uuid": "11.0.3",
-    "yup": "1.5.0"
+    "yup": "1.6.0"
   },
   "resolutions": {
     "chromedriver": "link:./node_modules/.cache/null"

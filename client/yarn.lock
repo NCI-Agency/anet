@@ -22,9 +22,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@apollo/client@npm:3.12.2":
-  version: 3.12.2
-  resolution: "@apollo/client@npm:3.12.2"
+"@apollo/client@npm:3.12.3":
+  version: 3.12.3
+  resolution: "@apollo/client@npm:3.12.3"
   dependencies:
     "@graphql-typed-document-node/core": "npm:^3.1.1"
     "@wry/caches": "npm:^1.0.0"
@@ -55,7 +55,7 @@ __metadata:
       optional: true
     subscriptions-transport-ws:
       optional: true
-  checksum: 10c0/c2c0c3a7ff0bed78c150ede12e927a6e94c5816db824ff247bb76154c25edde4836db777c626777cbdb44ffccf9c1aa0a3e30b34f3c019a1322dff1d099305b0
+  checksum: 10c0/fea18d712de44f46898f8ee39ce5e80b7c3c0a3caa69285971133dbdfc21970f35c156ad1e4e4fcb2da5e72f57d3719cfabefc9d41b55957ff9a70a6bc867fdc
   languageName: node
   linkType: hard
 
@@ -2102,9 +2102,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphiql/react@npm:^0.27.0":
-  version: 0.27.0
-  resolution: "@graphiql/react@npm:0.27.0"
+"@graphiql/react@npm:^0.28.0":
+  version: 0.28.1
+  resolution: "@graphiql/react@npm:0.28.1"
   dependencies:
     "@graphiql/toolkit": "npm:^0.11.0"
     "@headlessui/react": "npm:^1.7.15"
@@ -2115,18 +2115,19 @@ __metadata:
     "@types/codemirror": "npm:^5.60.8"
     clsx: "npm:^1.2.1"
     codemirror: "npm:^5.65.3"
-    codemirror-graphql: "npm:^2.1.1"
+    codemirror-graphql: "npm:^2.2.0"
     copy-to-clipboard: "npm:^3.2.0"
     framer-motion: "npm:^6.5.1"
     get-value: "npm:^3.0.1"
     graphql-language-service: "npm:^5.3.0"
     markdown-it: "npm:^14.1.0"
+    react-compiler-runtime: "npm:19.0.0-beta-37ed2a7-20241206"
     set-value: "npm:^4.1.0"
   peerDependencies:
     graphql: ^15.5.0 || ^16.0.0 || ^17.0.0
     react: ^16.8.0 || ^17 || ^18
     react-dom: ^16.8.0 || ^17 || ^18
-  checksum: 10c0/420523cbde4332145f4709a0fe8cce79fff667eec3cb1af633cb83eef08e4427a5ac013040c0bb7cd49187d35ca15338811c622545a0000856b77c2c778c6b0a
+  checksum: 10c0/40c5294dc6eae85929f8d53746838cdcad785b43975f992243562b03c20021242f00116e2c6c822c5a5d52658214e90ed09d5ee187e3b5fc5d82c1cdde6654ef
   languageName: node
   linkType: hard
 
@@ -5892,7 +5893,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "anet@workspace:."
   dependencies:
-    "@apollo/client": "npm:3.12.2"
+    "@apollo/client": "npm:3.12.3"
     "@babel/core": "npm:7.26.0"
     "@babel/eslint-parser": "npm:7.25.9"
     "@babel/plugin-proposal-decorators": "npm:7.25.9"
@@ -5991,8 +5992,8 @@ __metadata:
     file-saver: "npm:2.0.5"
     formik: "npm:2.4.6"
     git-describe: "npm:4.1.1"
-    graphiql: "npm:3.7.2"
-    graphql: "npm:16.9.0"
+    graphiql: "npm:3.8.1"
+    graphql: "npm:16.10.0"
     handlebars: "npm:4.7.8"
     handlebars-loader: "npm:1.7.3"
     hopscotch: "npm:0.3.1"
@@ -6070,7 +6071,7 @@ __metadata:
     webpack-dev-server: "npm:5.1.0"
     webpack-merge: "npm:5.10.0"
     xhr2: "npm:0.2.1"
-    yup: "npm:1.5.0"
+    yup: "npm:1.6.0"
   languageName: unknown
   linkType: soft
 
@@ -7695,17 +7696,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"codemirror-graphql@npm:^2.1.1":
-  version: 2.1.1
-  resolution: "codemirror-graphql@npm:2.1.1"
+"codemirror-graphql@npm:^2.2.0":
+  version: 2.2.0
+  resolution: "codemirror-graphql@npm:2.2.0"
   dependencies:
     "@types/codemirror": "npm:^0.0.90"
     graphql-language-service: "npm:5.3.0"
   peerDependencies:
     "@codemirror/language": 6.0.0
     codemirror: ^5.65.3
-    graphql: ^15.5.0 || ^16.0.0 || ^17.0.0-alpha.2
-  checksum: 10c0/7fc617cea5d4882764fa22cea2b4e30683870e04317ceece55761f76ca5f77d9f0e4260511fbcede880420f849cb54d961cb6f31c818c8b483423f77dc32fc85
+    graphql: ^15.5.0 || ^16.0.0 || ^17.0.0
+  checksum: 10c0/2e1db81fd2afe2ae4db5a925d9f1e2473ec472ef072e1fac516869796544971c648f73e78bef042d42b58d3f59005809ea5be1405eedbe49fcf817e4407b85fd
   languageName: node
   linkType: hard
 
@@ -11319,16 +11320,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"graphiql@npm:3.7.2":
-  version: 3.7.2
-  resolution: "graphiql@npm:3.7.2"
+"graphiql@npm:3.8.1":
+  version: 3.8.1
+  resolution: "graphiql@npm:3.8.1"
   dependencies:
-    "@graphiql/react": "npm:^0.27.0"
+    "@graphiql/react": "npm:^0.28.0"
   peerDependencies:
     graphql: ^15.5.0 || ^16.0.0 || ^17.0.0
     react: ^16.8.0 || ^17 || ^18
     react-dom: ^16.8.0 || ^17 || ^18
-  checksum: 10c0/7cf045415d209a7400a8c5c09c2e8cbfdde1368e416c209a4b7a71a933c7400d49a62e2fbcf412460f0be3662785384af706393a96b52db67b3520ebf1c0da55
+  checksum: 10c0/2953cc3d8a900e2c890b40892e63c89526e2e7a1181ae9f8e9e84bd5fcb72abf90160a24494c227e3a7bded70cc5ef737a60fcc0ce063b646c0a549aae69acfd
   languageName: node
   linkType: hard
 
@@ -11413,10 +11414,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"graphql@npm:16.9.0":
-  version: 16.9.0
-  resolution: "graphql@npm:16.9.0"
-  checksum: 10c0/a8850f077ff767377237d1f8b1da2ec70aeb7623cdf1dfc9e1c7ae93accc0c8149c85abe68923be9871a2934b1bce5a2496f846d4d56e1cfb03eaaa7ddba9b6a
+"graphql@npm:16.10.0":
+  version: 16.10.0
+  resolution: "graphql@npm:16.10.0"
+  checksum: 10c0/303730675538c8bd6c76b447dc6f03e61242e2d2596b408c34759666ec4877409e5593a7a0467d590ac5407b8c663b093b599556a77f24f281abea69ddc53de6
   languageName: node
   linkType: hard
 
@@ -16247,6 +16248,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-compiler-runtime@npm:19.0.0-beta-37ed2a7-20241206":
+  version: 19.0.0-beta-37ed2a7-20241206
+  resolution: "react-compiler-runtime@npm:19.0.0-beta-37ed2a7-20241206"
+  peerDependencies:
+    react: ^17.0.0 || ^18.0.0 || ^19.0.0
+  checksum: 10c0/92bd9e73ca238fc92e9a482c0e1678aaebcea06bf33605c0a38c490b061237a6c2829ad7b811ce8eb93684768418eebcd7087035d7cc9bd494d6e59c222f999a
+  languageName: node
+  linkType: hard
+
 "react-day-picker@npm:7.4.9":
   version: 7.4.9
   resolution: "react-day-picker@npm:7.4.9"
@@ -20296,15 +20306,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yup@npm:1.5.0":
-  version: 1.5.0
-  resolution: "yup@npm:1.5.0"
+"yup@npm:1.6.0":
+  version: 1.6.0
+  resolution: "yup@npm:1.6.0"
   dependencies:
     property-expr: "npm:^2.0.5"
     tiny-case: "npm:^1.0.3"
     toposort: "npm:^2.0.2"
     type-fest: "npm:^2.19.0"
-  checksum: 10c0/bbbfe078b987e49b826c222b654512161860d3488409e76d29baa937d71e5be64e0933b572997894e31527b6a3b3a95aa997945c00885f68fda04f4ca5522206
+  checksum: 10c0/e7178373fcfb0a2cd884378f8056ecf73e5d37977e58d4b23568171a687b9607eda4b07273015574b9b9d5547ae26c9129177bd2f0bb3aa4cb736852fe071bb5
   languageName: node
   linkType: hard
 
