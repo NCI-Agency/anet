@@ -1217,6 +1217,15 @@ properties:
       title: The list of possible (email) domain names
       description: Valid email domain names for this ANET instance; may contain wildcards.
 
+  allowedDomainNames:
+    type: array
+    uniqueItems: true
+    minItems: 1
+    items:
+      type: string
+      title: The list of possible (email) domain names
+      description: Valid email domain names for this ANET instance; may contain wildcards.
+
   activeDomainNames:
     type: array
     uniqueItems: true

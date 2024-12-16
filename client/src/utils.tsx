@@ -18,6 +18,10 @@ import { titleCase } from "title-case"
 const WILDCARD = "*"
 const domainNames = Settings.domainNames.map(d => d.toLowerCase())
 const wildcardDomains = domainNames.filter(domain => domain[0] === WILDCARD)
+const allowedDomainNames = Settings.allowedDomainNames.map(d => d.toLowerCase())
+const wildcardAllowedDomains = allowedDomainNames.filter(
+  domain => domain[0] === WILDCARD
+)
 
 // Support null input like change-case v3 did…
 const wrappedChangeCase = {
@@ -88,6 +92,25 @@ export default {
     }
   },
 
+  handleDialogEmailValidation: function(value, shouldValidate) {
+    if (!shouldValidate) {
+      return { isValid: true, message: null }
+    }
+    try {
+      const isValid = this.validateEmail(
+        value,
+        allowedDomainNames,
+        wildcardAllowedDomains
+      )
+      const message = isValid
+        ? null
+        : this.emailErrorMessage(allowedDomainNames)
+      return { isValid, message }
+    } catch (e) {
+      return { isValid: false, message: <div>{e.message}</div> }
+    }
+  },
+
   validateEmail: function(emailValue, domainNames, wildcardDomains) {
     if (!emailValue) {
       return true
@@ -143,7 +166,7 @@ export default {
     }
     const toAddresses = addrs.addresses.map(a => a.address)
     for (let i = 0; i < toAddresses.length; i++) {
-      const r = this.handleEmailValidation(toAddresses[i], true)
+      const r = this.handleDialogEmailValidation(toAddresses[i], true)
       if (r.isValid === false) {
         return r
       }
