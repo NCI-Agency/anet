@@ -592,6 +592,7 @@ properties:
 
   classification:
     type: object
+    additionalProperties: false
     properties:
       label:
         type: string
@@ -676,6 +677,7 @@ properties:
             items:
               title: File type description
               type: object
+              additionalProperties: false
               required: [mimeType]
               properties:
                 mimeType:
@@ -930,9 +932,9 @@ properties:
               - properties:
                   types:
                     type: object
+                    additionalProperties: false
                     description: Enumeration of position role types
                     required: [member, deputy, leader]
-                    additionalProperties: false
                     properties:
                       member:
                         type: string
@@ -1251,13 +1253,13 @@ properties:
             type: string
           homeView:
             type: object
+            additionalProperties: false
             required: [location, zoomLevel]
             properties:
               location:
                 type: array
               zoomLevel:
                 type: number
-            additionalProperties: false
           leafletOptions:
             type: object
             additionalProperties: true
@@ -1320,8 +1322,8 @@ properties:
 
   automaticallyInactivateUsers:
     type: object
-    required: [emailRemindersDaysPrior, checkIntervalInSecs]
     additionalProperties: false
+    required: [emailRemindersDaysPrior, checkIntervalInSecs]
     title: Auto account deactivation and email warnings.
     description: Automatically deactivate accounts which reach the end of tour date, and warn users in intervals prior to inactivation.
     properties:
