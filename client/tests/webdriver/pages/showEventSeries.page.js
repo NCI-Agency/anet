@@ -12,11 +12,15 @@ class ShowEventSeries extends Page {
   }
 
   async getHostOrganization() {
-    return browser.$('div[id="fg-hostOrg"]')
+    return browser.$('div[id="hostOrg"]')
   }
 
   async getAdminOrganization() {
-    return browser.$('div[id="fg-adminOrg"]')
+    return browser.$('div[id="adminOrg"]')
+  }
+
+  async getStatus() {
+    return browser.$('div[id="status"]')
   }
 
   async getDescription() {

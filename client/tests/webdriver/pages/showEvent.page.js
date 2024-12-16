@@ -12,19 +12,19 @@ class ShowEvent extends Page {
   }
 
   async getHostOrganization() {
-    return browser.$('div[id="fg-hostOrg"]')
+    return browser.$('div[id="hostOrg"]')
   }
 
   async getAdminOrganization() {
-    return browser.$('div[id="fg-adminOrg"]')
+    return browser.$('div[id="adminOrg"]')
   }
 
   async getEventSeries() {
-    return browser.$('div[id="fg-eventSeries"]')
+    return browser.$('div[id="eventSeries"]')
   }
 
   async getLocation() {
-    return browser.$('div[id="fg-location"]')
+    return browser.$('div[id="location"]')
   }
 
   async getType() {
@@ -32,11 +32,15 @@ class ShowEvent extends Page {
   }
 
   async getStartDate() {
-    return browser.$('div[id="fg-startDate"]')
+    return browser.$('div[id="startDate"]')
   }
 
   async getEndDate() {
-    return browser.$('div[id="fg-endDate"]')
+    return browser.$('div[id="endDate"]')
+  }
+
+  async getStatus() {
+    return browser.$('div[id="status"]')
   }
 
   async getDescription() {

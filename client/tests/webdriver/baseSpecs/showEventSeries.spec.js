@@ -8,19 +8,36 @@ describe("Show event series page", () => {
     await ShowEventSeries.openAsAdminUser(EVENT_SERIES_UUID)
     await (await ShowEventSeries.getTitle()).waitForExist()
     await (await ShowEventSeries.getTitle()).waitForDisplayed()
+    expect(await (await ShowEventSeries.getTitle()).getText()).to.equal(
+      "Event Series NMI PDT"
+    )
     await (await ShowEventSeries.getHostOrganization()).waitForExist()
     await (await ShowEventSeries.getHostOrganization()).waitForDisplayed()
+    expect(
+      await (await ShowEventSeries.getHostOrganization()).getText()
+    ).to.equal("EF 2.2")
     await (await ShowEventSeries.getAdminOrganization()).waitForExist()
     await (await ShowEventSeries.getAdminOrganization()).waitForDisplayed()
+    expect(
+      await (await ShowEventSeries.getAdminOrganization()).getText()
+    ).to.equal("EF 2.2")
+    await (await ShowEventSeries.getStatus()).waitForExist()
+    await (await ShowEventSeries.getStatus()).waitForDisplayed()
+    expect(await (await ShowEventSeries.getStatus()).getText()).to.equal(
+      "Active"
+    )
     await (await ShowEventSeries.getDescription()).waitForExist()
     await (await ShowEventSeries.getDescription()).waitForDisplayed()
+    expect(await (await ShowEventSeries.getDescription()).getText()).to.include(
+      "NMI pre-deployment training"
+    )
     await (await ShowEventSeries.getEventsTable()).waitForExist()
     await (await ShowEventSeries.getEventsTable()).waitForDisplayed()
-    expect(await (await ShowEventSeries.getEventsTable()).getText()).to.contain(
+    expect(await (await ShowEventSeries.getEventsTable()).getText()).to.include(
       "NMI PDT 2024-01"
     )
     await (await ShowEventSeries.getEvent(1)).click()
-    await expect(await browser.getUrl()).to.include(
+    expect(await browser.getUrl()).to.include(
       "/events/e850846e-9741-40e8-bc51-4dccc30cf47f"
     )
   })
