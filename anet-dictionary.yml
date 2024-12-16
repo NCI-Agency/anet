@@ -2078,7 +2078,6 @@ pinned_ORGs: [Key Leader Engagement]
 non_reporting_ORGs: [ANET Administrators]
 tasking_ORGs: [E 1.1, EF 1.2, EF 2, EF 4, EF 9]
 domainNames: [example.com, example.ns, cmil.mil, mission.ita, nato.int, "*.isaf.nato.int"]
-allowedDomainNames: [example.com, example.ns, cmil.mil, mission.ita, nato.int, "*.isaf.nato.int"]
 activeDomainNames: [example.com, example.ns, cmil.mil, mission.ita, nato.int, "*.isaf.nato.int"]
 emailNetworks:
   - Internet

@@ -18,8 +18,8 @@ import { titleCase } from "title-case"
 const WILDCARD = "*"
 const domainNames = Settings.domainNames.map(d => d.toLowerCase())
 const wildcardDomains = domainNames.filter(domain => domain[0] === WILDCARD)
-const allowedDomainNames = Settings.allowedDomainNames.map(d => d.toLowerCase())
-const wildcardAllowedDomains = allowedDomainNames.filter(
+const activeDomainNames = Settings.activeDomainNames.map(d => d.toLowerCase())
+const wildcardActiveDomains = activeDomainNames.filter(
   domain => domain[0] === WILDCARD
 )
 
@@ -78,37 +78,44 @@ export default {
   resourceize: function(string) {
     return pluralize(wrappedChangeCase.camelCase(string))
   },
-
-  handleEmailValidation: function(value, shouldValidate) {
-    if (!shouldValidate) {
-      return { isValid: true, message: null }
-    }
-    try {
-      const isValid = this.validateEmail(value, domainNames, wildcardDomains)
-      const message = isValid ? null : this.emailErrorMessage(domainNames)
-      return { isValid, message }
-    } catch (e) {
-      return { isValid: false, message: <div>{e.message}</div> }
-    }
-  },
-
-  handleDialogEmailValidation: function(value, shouldValidate) {
+  _handleEmailValidation: function(
+    value,
+    validDomains,
+    validWildcardDomains,
+    shouldValidate
+  ) {
     if (!shouldValidate) {
       return { isValid: true, message: null }
     }
     try {
       const isValid = this.validateEmail(
         value,
-        allowedDomainNames,
-        wildcardAllowedDomains
+        validDomains,
+        validWildcardDomains
       )
-      const message = isValid
-        ? null
-        : this.emailErrorMessage(allowedDomainNames)
+      const message = isValid ? null : this.emailErrorMessage(validDomains)
       return { isValid, message }
     } catch (e) {
       return { isValid: false, message: <div>{e.message}</div> }
     }
+  },
+
+  handleEmailValidation: function(value, shouldValidate) {
+    return this._handleEmailValidation(
+      value,
+      domainNames,
+      wildcardDomains,
+      shouldValidate
+    )
+  },
+
+  handleDialogEmailValidation: function(value, shouldValidate) {
+    return this._handleEmailValidation(
+      value,
+      activeDomainNames,
+      wildcardActiveDomains,
+      shouldValidate
+    )
   },
 
   validateEmail: function(emailValue, domainNames, wildcardDomains) {
