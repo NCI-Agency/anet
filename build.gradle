@@ -28,11 +28,11 @@ java {
 
 boolean isTestEnv = project.hasProperty("testEnv")
 String jdbi3Version = "3.47.0"
-String jupiterVersion = "5.11.3"
+String jupiterVersion = "5.11.4"
 String keycloakVersion = "26.0.7"
 String poiVersion = "5.3.0"
 String powermockVersion = "2.0.9"
-String simplejavamailVersion = "8.12.3"
+String simplejavamailVersion = "8.12.4"
 String springShellVersion = "3.4.0"
 String psqlPushDataPath = "/var/tmp"
 String keycloakContainerPath = "/opt/keycloak"
@@ -103,7 +103,7 @@ dependencies {
 	implementation 'org.liquibase:liquibase-core:4.30.0'
 	implementation "org.jdbi:jdbi3-postgres:${jdbi3Version}" // For the SqlObjectPlugin
 	implementation "org.jdbi:jdbi3-spring:${jdbi3Version}"
-	implementation 'com.google.guava:guava:33.3.1-jre' // Pick the non-Android version
+	implementation 'com.google.guava:guava:33.4.0-jre' // Pick the non-Android version
 
 	// For caching domain users (used in every authenticated request)
 	implementation('org.ehcache:ehcache:3.10.8') {
@@ -135,7 +135,7 @@ dependencies {
 
 	// GraphQL dependencies
 	implementation 'com.graphql-java:graphql-java:21.5'
-	implementation 'com.graphql-java:java-dataloader:3.3.0'
+	implementation 'com.graphql-java:java-dataloader:3.4.0'
 	// GraphQL/Spring integration
 	implementation 'io.leangen.graphql:graphql-spqr-spring-boot-starter:1.0.1'
 	// Spring dependencies
@@ -675,7 +675,7 @@ jar {
 //Configure the Java Checkstyle settings. Run with ./gradlew check
 checkstyle {
 	configFile = rootProject.file('config/google_checks.xml')
-	toolVersion = '10.20.2'
+	toolVersion = '10.21.0'
 }
 //Easiest way to avoid checking generated code
 checkstyleTest {
@@ -684,7 +684,7 @@ checkstyleTest {
 //Work-around for https://github.com/gradle/gradle/issues/27035
 configurations.checkstyle {
 	resolutionStrategy.capabilitiesResolution.withCapability('com.google.collections:google-collections') {
-		select('com.google.guava:guava:33.3.1-jre')
+		select('com.google.guava:guava:33.4.0-jre')
 	}
 }
 
