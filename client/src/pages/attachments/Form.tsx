@@ -55,12 +55,7 @@ const AttachmentForm = ({
   const [error, setError] = useState(null)
   const canEdit =
     currentUser.isAdmin() || currentUser.uuid === initialValues.author.uuid
-  const classificationButtons = Object.entries(
-    Settings.classification.choices
-  ).map(([value, label]) => ({
-    value,
-    label
-  }))
+  const classificationButtons = utils.getConfidentialityLabelChoices()
 
   return (
     <Formik
@@ -140,7 +135,7 @@ const AttachmentForm = ({
                     {canEdit ? (
                       <DictionaryField
                         wrappedComponent={FastField}
-                        dictProps={Settings.classification}
+                        dictProps={Settings.confidentialityLabel}
                         name="classification"
                         component={FieldHelper.RadioButtonToggleGroupField}
                         buttons={classificationButtons}
@@ -151,7 +146,7 @@ const AttachmentForm = ({
                     ) : (
                       <DictionaryField
                         wrappedComponent={FastField}
-                        dictProps={Settings.classification}
+                        dictProps={Settings.confidentialityLabel}
                         name="classification"
                         component={FieldHelper.ReadonlyField}
                       />
