@@ -43,12 +43,19 @@ reportWorkflow:
 
 maxTextFieldLength: 250
 
-classification:
+confidentialityLabel:
   label: Security Marking
   choices:
-    public: Public
-    NU: NATO UNCLASSIFIED
-    NU_rel_EU: NATO UNCLASSIFIED Releasable to EU
+    public:
+      policy: Public
+    NU:
+      policy: NATO
+      classification: UNCLASSIFIED
+    NU_rel_EU:
+      policy: NATO
+      classification: UNCLASSIFIED
+      releasableTo:
+        - EU
 
 fields:
 

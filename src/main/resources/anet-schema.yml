@@ -413,7 +413,7 @@ required:
   - calendarOptions
   - reportWorkflow
   - maxTextFieldLength
-  - classification
+  - confidentialityLabel
   - fields
   - pinned_ORGs
   - non_reporting_ORGs
@@ -596,14 +596,29 @@ properties:
     title: The maximum number of characters allowed in selected text fields
     description: Used in the UI for report intent, report key outcomes, report next steps, authorization group description
 
-  classification:
+  confidentialityLabel:
     type: object
+    required: [label, choices]
     additionalProperties: false
     properties:
       label:
         type: string
       choices:
         type: object
+        additionalProperties:
+          type: object
+          required: [policy]
+          additionalProperties: false
+          properties:
+            policy:
+              type: string
+            classification:
+              type: string
+            releasableTo:
+              type: array
+              uniqueItems: true
+              items:
+                type: string
 
   fields:
     type: object

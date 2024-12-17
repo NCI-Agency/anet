@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import mil.dds.anet.beans.Note;
 import mil.dds.anet.beans.Note.NoteType;
 import mil.dds.anet.beans.PersonPositionHistory;
@@ -132,16 +133,16 @@ public class ResourceUtils {
   }
 
   @SuppressWarnings("unchecked")
-  public static Map<String, String> getAllowedClassifications() {
-    return (Map<String, String>) ((Map<String, Object>) ApplicationContextProvider.getDictionary()
-        .getDictionaryEntry("classification")).get("choices");
+  public static Set<String> getAllowedClassifications() {
+    return ((Map<String, Object>) ApplicationContextProvider.getDictionary()
+        .getDictionaryEntry("confidentialityLabel.choices")).keySet();
   }
 
   public static void assertAllowedClassification(final String classificationKey) {
     if (classificationKey != null) {
       // if the classification is set, check if it is valid
       final var allowedClassifications = getAllowedClassifications();
-      if (!allowedClassifications.containsKey(classificationKey)) {
+      if (!allowedClassifications.contains(classificationKey)) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Classification is not allowed");
       }
     }

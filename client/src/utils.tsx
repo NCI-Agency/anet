@@ -440,6 +440,28 @@ export default {
       value,
       label
     }))
+  },
+
+  getConfidentialityLabelForChoice: function(choice) {
+    let label
+    const props = Settings.confidentialityLabel.choices[choice]
+    if (props) {
+      label = props.policy
+      if (props.classification) {
+        label = `${label} ${props.classification}`
+      }
+      if (props.releasableTo) {
+        label = `${label} Releasable to ${props.releasableTo.join(", ")}`
+      }
+    }
+    return label
+  },
+
+  getConfidentialityLabelChoices: function() {
+    return Object.keys(Settings.confidentialityLabel.choices).map(choice => ({
+      value: choice,
+      label: this.getConfidentialityLabelForChoice(choice)
+    }))
   }
 }
 

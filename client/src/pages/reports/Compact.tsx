@@ -314,9 +314,9 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
             backgroundText={backgroundText}
           >
             <CompactHeaderContent
-              classification={
-                Settings.classification.choices[report.classification]
-              }
+              classification={utils.getConfidentialityLabelForChoice(
+                report.classification
+              )}
             />
             <CompactTable>
               <FullColumn>
@@ -417,9 +417,9 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
             </CompactTable>
             <CompactFooterContent
               object={report}
-              classification={
-                Settings.classification.choices[report.classification]
-              }
+              classification={utils.getConfidentialityLabelForChoice(
+                report.classification
+              )}
             />
           </CompactView>
         </>
