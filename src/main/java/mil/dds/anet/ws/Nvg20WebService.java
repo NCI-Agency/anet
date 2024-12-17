@@ -513,9 +513,10 @@ public class Nvg20WebService implements NVGPortType2012 {
   private ConfidentialityRecord determineConfidentiality(
       ConfidentialityRecord defaultConfidentiality, Report report) {
     @SuppressWarnings("unchecked")
-    final Map<String, String> classificationChoices =
-        (Map<String, String>) dict.getDictionaryEntry("classification.choices");
-    final String reportClassification = classificationChoices.get(report.getClassification());
+    final Map<String, Map<String, Object>> classificationChoices =
+        (Map<String, Map<String, Object>>) dict.getDictionaryEntry("confidentialityLabel.choices");
+    final Map<String, Object> reportClassification =
+        classificationChoices.get(report.getClassification());
     return reportClassification == null ? defaultConfidentiality
         : ConfidentialityRecord.create(reportClassification);
   }
@@ -536,24 +537,12 @@ public class Nvg20WebService implements NVGPortType2012 {
           toUpper(policyAndClassification[0]), toUpper(policyAndClassification[1]), toUpper(releasableTo));
     }
 
-    static ConfidentialityRecord create(String reportClassification) {
-      // Try to split report classification
-      final String[] policyAndRest = reportClassification.trim().split("\\s+", 2);
-      final String classification;
-      final List<String> releasableTo;
-      if (policyAndRest.length < 2) {
-        classification = null;
-        releasableTo = null;
-      } else {
-        final String[] classificationAndReleasability = policyAndRest[1].split("\\s+", 2);
-        classification = classificationAndReleasability[0];
-        if (classificationAndReleasability.length < 2) {
-          releasableTo = null;
-        } else {
-          releasableTo = getReleasableTo(classificationAndReleasability[1]);
-        }
-      }
-      return new ConfidentialityRecord(toUpper(policyAndRest[0]), toUpper(classification), toUpper(releasableTo));
+    static ConfidentialityRecord create(Map<String, Object> reportClassification) {
+      final var policy = (String) reportClassification.get("policy");
+      final var classification = (String) reportClassification.get("classification");
+      @SuppressWarnings("unchecked")
+      final var releasableTo = (List<String>) reportClassification.get("releasableTo");
+      return new ConfidentialityRecord(toUpper(policy), toUpper(classification), toUpper(releasableTo));
     }
 
     private static List<String> getReleasableTo(String releasability) {
