@@ -4154,9 +4154,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@restart/ui@npm:^1.9.0":
-  version: 1.9.1
-  resolution: "@restart/ui@npm:1.9.1"
+"@restart/ui@npm:^1.9.2":
+  version: 1.9.2
+  resolution: "@restart/ui@npm:1.9.2"
   dependencies:
     "@babel/runtime": "npm:^7.26.0"
     "@popperjs/core": "npm:^2.11.8"
@@ -4170,7 +4170,7 @@ __metadata:
   peerDependencies:
     react: ">=16.14.0"
     react-dom: ">=16.14.0"
-  checksum: 10c0/0a582635625fd1dfc056791d3096f1f5ee20551633ade419037003f6ed9336477df69a5d73861b62293fecd3c4c302f345c387e4fd1970848849d9969ce45004
+  checksum: 10c0/2c8c6ebbda11ac918ca1d580573897887854dd246e925f2432e95b45d8f77b9c88c9a9d2a9610c536ee5d649afe13c4cd4ed44e52f8cc1f9861af1755c93006b
   languageName: node
   linkType: hard
 
@@ -4758,10 +4758,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/prop-types@npm:*":
-  version: 15.7.13
-  resolution: "@types/prop-types@npm:15.7.13"
-  checksum: 10c0/1b20fc67281902c6743379960247bc161f3f0406ffc0df8e7058745a85ea1538612109db0406290512947f9632fe9e10e7337bf0ce6338a91d6c948df16a7c61
+"@types/prop-types@npm:*, @types/prop-types@npm:^15.7.12":
+  version: 15.7.14
+  resolution: "@types/prop-types@npm:15.7.14"
+  checksum: 10c0/1ec775160bfab90b67a782d735952158c7e702ca4502968aa82565bd8e452c2de8601c8dfe349733073c31179116cf7340710160d3836aa8a1ef76d1532893b1
   languageName: node
   linkType: hard
 
@@ -6029,7 +6029,7 @@ __metadata:
     prettier-eslint-cli: "npm:8.0.1"
     react: "npm:18.3.1"
     react-advanced-cropper: "npm:0.20.0"
-    react-bootstrap: "npm:2.10.6"
+    react-bootstrap: "npm:2.10.7"
     react-dom: "npm:18.3.1"
     react-is: "npm:18.3.1"
     react-mosaic-component: "npm:6.1.0"
@@ -16213,13 +16213,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-bootstrap@npm:2.10.6":
-  version: 2.10.6
-  resolution: "react-bootstrap@npm:2.10.6"
+"react-bootstrap@npm:2.10.7":
+  version: 2.10.7
+  resolution: "react-bootstrap@npm:2.10.7"
   dependencies:
     "@babel/runtime": "npm:^7.24.7"
     "@restart/hooks": "npm:^0.4.9"
-    "@restart/ui": "npm:^1.9.0"
+    "@restart/ui": "npm:^1.9.2"
+    "@types/prop-types": "npm:^15.7.12"
     "@types/react-transition-group": "npm:^4.4.6"
     classnames: "npm:^2.3.2"
     dom-helpers: "npm:^5.2.1"
@@ -16236,7 +16237,7 @@ __metadata:
   peerDependenciesMeta:
     "@types/react":
       optional: true
-  checksum: 10c0/27bdafb917787b07c8c7d63ad2b5c116ce664efca866ccf43c607b9c4a8ef785c1913ad780e086e42c474b4a8bdb142d97356e3c438328214f95bb641b39f746
+  checksum: 10c0/3b0b447bd0501cb66a9de05313bc840b1cc799d28a912370e1daaea7134749d8df1948a04c08c693f3fc496417cb6ffc3fdd8d651ee21b46f90eebd068018123
   languageName: node
   linkType: hard
 
