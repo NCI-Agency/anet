@@ -25,7 +25,17 @@ module.exports = merge.merge(common.clientConfig, {
     port: process.env.DEV_PORT,
     proxy: [
       {
-        context: ["/graphql", "/api", "/assets", "/imagery", "/data"],
+        context: [
+          // For ANET data:
+          "/graphql",
+          "/api",
+          "/assets",
+          "/imagery",
+          "/data",
+          // For Keycloak authentication:
+          "/login",
+          "/oauth2"
+        ],
         target: process.env.SERVER_URL
       }
     ],
