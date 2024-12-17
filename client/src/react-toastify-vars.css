@@ -1,0 +1,7 @@
+:root {
+  /* Override react-toastify colors with bootstrap 5 colors */
+  --toastify-color-success: #198754;
+  --toastify-color-warning: #ffc107;
+  --toastify-color-error: #dc3545;
+  --toastify-color-info: #325ed7;
+}

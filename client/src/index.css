@@ -4,6 +4,7 @@
 @import "BlueprintOverrides.css";
 @import "bootstrapOverrides.css";
 @import "fullcalendar-vars.css";
+@import "react-toastify-vars.css";
 
 html {
   height: 100%;
