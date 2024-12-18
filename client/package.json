@@ -138,7 +138,7 @@
     "escape-html": "1.0.3",
     "file-saver": "2.0.5",
     "formik": "2.4.6",
-    "graphiql": "3.8.1",
+    "graphiql": "3.8.3",
     "graphql": "16.10.0",
     "hopscotch": "0.3.1",
     "jsonpath-plus": "10.2.0",
@@ -184,7 +184,7 @@
     "title-case": "4.3.2",
     "use-debounce": "10.0.4",
     "uuid": "11.0.3",
-    "yup": "1.6.0"
+    "yup": "1.6.1"
   },
   "resolutions": {
     "chromedriver": "link:./node_modules/.cache/null"

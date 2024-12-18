@@ -2102,9 +2102,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphiql/react@npm:^0.28.0":
-  version: 0.28.1
-  resolution: "@graphiql/react@npm:0.28.1"
+"@graphiql/react@npm:^0.28.2":
+  version: 0.28.2
+  resolution: "@graphiql/react@npm:0.28.2"
   dependencies:
     "@graphiql/toolkit": "npm:^0.11.0"
     "@headlessui/react": "npm:^1.7.15"
@@ -2127,7 +2127,7 @@ __metadata:
     graphql: ^15.5.0 || ^16.0.0 || ^17.0.0
     react: ^16.8.0 || ^17 || ^18
     react-dom: ^16.8.0 || ^17 || ^18
-  checksum: 10c0/40c5294dc6eae85929f8d53746838cdcad785b43975f992243562b03c20021242f00116e2c6c822c5a5d52658214e90ed09d5ee187e3b5fc5d82c1cdde6654ef
+  checksum: 10c0/05287068df1410736b4dd0e16d451eae11ccdc279b6dbc899759b6c58dbbf705e59e375c81e387c78b6b0c9379c99f822488fc82ae24012f3cc219e86e93c12a
   languageName: node
   linkType: hard
 
@@ -5992,7 +5992,7 @@ __metadata:
     file-saver: "npm:2.0.5"
     formik: "npm:2.4.6"
     git-describe: "npm:4.1.1"
-    graphiql: "npm:3.8.1"
+    graphiql: "npm:3.8.3"
     graphql: "npm:16.10.0"
     handlebars: "npm:4.7.8"
     handlebars-loader: "npm:1.7.3"
@@ -6071,7 +6071,7 @@ __metadata:
     webpack-dev-server: "npm:5.2.0"
     webpack-merge: "npm:5.10.0"
     xhr2: "npm:0.2.1"
-    yup: "npm:1.6.0"
+    yup: "npm:1.6.1"
   languageName: unknown
   linkType: soft
 
@@ -11320,16 +11320,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"graphiql@npm:3.8.1":
-  version: 3.8.1
-  resolution: "graphiql@npm:3.8.1"
+"graphiql@npm:3.8.3":
+  version: 3.8.3
+  resolution: "graphiql@npm:3.8.3"
   dependencies:
-    "@graphiql/react": "npm:^0.28.0"
+    "@graphiql/react": "npm:^0.28.2"
   peerDependencies:
     graphql: ^15.5.0 || ^16.0.0 || ^17.0.0
     react: ^16.8.0 || ^17 || ^18
     react-dom: ^16.8.0 || ^17 || ^18
-  checksum: 10c0/2953cc3d8a900e2c890b40892e63c89526e2e7a1181ae9f8e9e84bd5fcb72abf90160a24494c227e3a7bded70cc5ef737a60fcc0ce063b646c0a549aae69acfd
+  checksum: 10c0/1c59416342410bdb634464310c19a1c09ea301a2381cfe7e0c51f3a840209e10a76c03db45355b8b96adbc1ed4b4c7821fbaffc033af6e85148ffe05cc50cf02
   languageName: node
   linkType: hard
 
@@ -20299,15 +20299,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yup@npm:1.6.0":
-  version: 1.6.0
-  resolution: "yup@npm:1.6.0"
+"yup@npm:1.6.1":
+  version: 1.6.1
+  resolution: "yup@npm:1.6.1"
   dependencies:
     property-expr: "npm:^2.0.5"
     tiny-case: "npm:^1.0.3"
     toposort: "npm:^2.0.2"
     type-fest: "npm:^2.19.0"
-  checksum: 10c0/e7178373fcfb0a2cd884378f8056ecf73e5d37977e58d4b23568171a687b9607eda4b07273015574b9b9d5547ae26c9129177bd2f0bb3aa4cb736852fe071bb5
+  checksum: 10c0/84c2b53996e8001041239cf2719851719f67063ec7cd843067df73562353216f5ad4f8a222319696882d5a6058e528fade1e463c59d70cbffb41b99cd0d7571b
   languageName: node
   linkType: hard
 
