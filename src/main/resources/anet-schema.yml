@@ -414,6 +414,7 @@ required:
   - reportWorkflow
   - maxTextFieldLength
   - confidentialityLabel
+  - siteClassification
   - fields
   - pinned_ORGs
   - non_reporting_ORGs
@@ -607,9 +608,11 @@ properties:
         type: object
         additionalProperties:
           type: object
-          required: [policy]
+          required: [color, policy]
           additionalProperties: false
           properties:
+            color:
+              type: string
             policy:
               type: string
             classification:
@@ -619,6 +622,9 @@ properties:
               uniqueItems: true
               items:
                 type: string
+
+  siteClassification:
+    type: string
 
   fields:
     type: object

@@ -487,10 +487,13 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
               <div
                 style={{ width: "100%", fontSize: "18px", textAlign: "center" }}
               >
-                <span style={{ fontWeight: "bold" }} id="report-classification">
-                  {utils.getConfidentialityLabelForChoice(
+                <span className="fw-bold me-1" id="report-classification">
+                  {utils.getPolicyAndClassificationForChoice(
                     report.classification
                   )}
+                </span>
+                <span>
+                  {utils.getReleasableToForChoice(report.classification)}
                 </span>
               </div>
             )}

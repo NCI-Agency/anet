@@ -442,7 +442,11 @@ export default {
     }))
   },
 
-  getConfidentialityLabelForChoice: function(choice) {
+  getColorForChoice: function(choice) {
+    return Settings.confidentialityLabel.choices[choice]?.color
+  },
+
+  getPolicyAndClassificationForChoice: function(choice) {
     let label
     const props = Settings.confidentialityLabel.choices[choice]
     if (props) {
@@ -450,18 +454,40 @@ export default {
       if (props.classification) {
         label = `${label} ${props.classification}`
       }
-      if (props.releasableTo) {
-        label = `${label} Releasable to ${props.releasableTo.join(", ")}`
+    }
+    return label
+  },
+
+  getReleasableToForChoice: function(choice) {
+    const props = Settings.confidentialityLabel.choices[choice]
+    if (props?.releasableTo) {
+      return `Releasable to ${props.releasableTo.join(", ")}`
+    }
+    return undefined
+  },
+
+  getConfidentialityLabelForChoice: function(choice) {
+    let label
+    const policyAndClassification =
+      this.getPolicyAndClassificationForChoice(choice)
+    if (policyAndClassification) {
+      label = policyAndClassification
+      const releasableTo = this.getReleasableToForChoice(choice)
+      if (releasableTo) {
+        label = `${label} ${releasableTo}`
       }
     }
     return label
   },
 
   getConfidentialityLabelChoices: function() {
-    return Object.keys(Settings.confidentialityLabel.choices).map(choice => ({
-      value: choice,
-      label: this.getConfidentialityLabelForChoice(choice)
-    }))
+    return Object.entries(Settings.confidentialityLabel.choices).map(
+      ([choice, props]) => ({
+        value: choice,
+        label: this.getConfidentialityLabelForChoice(choice),
+        color: props?.color
+      })
+    )
   }
 }
 

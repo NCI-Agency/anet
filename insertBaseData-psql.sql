@@ -1047,9 +1047,6 @@ WHERE "approvalStepUuid" IS NULL AND reports.state = 1);
 
 --Set the Admin Settings
 INSERT INTO "adminSettings" (key, value) VALUES
-  ('SECURITY_BANNER_CLASSIFICATION', 'demo use only'),
-  ('SECURITY_BANNER_RELEASABILITY', 'releasable to DEMO MISSION'),
-  ('SECURITY_BANNER_COLOR', 'green'),
   ('DEFAULT_APPROVAL_ORGANIZATION', (select uuid from organizations where "shortName"='ANET Administrators')),
   ('HELP_LINK_URL', 'http://google.com'),
   ('CONTACT_EMAIL', 'team-anet@example.com'),

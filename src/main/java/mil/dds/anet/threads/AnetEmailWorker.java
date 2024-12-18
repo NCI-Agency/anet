@@ -22,12 +22,11 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import mil.dds.anet.beans.AnetEmail;
+import mil.dds.anet.beans.ConfidentialityRecord;
 import mil.dds.anet.beans.JobHistory;
 import mil.dds.anet.config.AnetConfig;
 import mil.dds.anet.config.AnetConfig.SmtpConfiguration;
 import mil.dds.anet.config.AnetDictionary;
-import mil.dds.anet.database.AdminDao;
-import mil.dds.anet.database.AdminDao.AdminSettingKeys;
 import mil.dds.anet.database.EmailDao;
 import mil.dds.anet.database.JobHistoryDao;
 import mil.dds.anet.database.mappers.MapperUtils;
@@ -54,15 +53,13 @@ public class AnetEmailWorker extends AbstractWorker {
 
   private final AnetConfig config;
   private final EmailDao dao;
-  private final AdminDao adminDao;
   private final ObjectMapper mapper;
 
   public AnetEmailWorker(AnetConfig config, AnetDictionary dict, JobHistoryDao jobHistoryDao,
-      EmailDao dao, AdminDao adminDao) {
+      EmailDao dao) {
     super(dict, jobHistoryDao, "AnetEmailWorker waking up to send emails!");
     this.config = config;
     this.dao = dao;
-    this.adminDao = adminDao;
     this.mapper = MapperUtils.getDefaultMapper();
 
     setInstance(this);
@@ -137,12 +134,11 @@ public class AnetEmailWorker extends AbstractWorker {
     final Map<String, Object> emailContext = new HashMap<>();
     emailContext.put("context", context);
     emailContext.put("serverUrl", config.getServerUrl());
-    emailContext.put(AdminSettingKeys.SECURITY_BANNER_CLASSIFICATION.name(),
-        adminDao.getSetting(AdminSettingKeys.SECURITY_BANNER_CLASSIFICATION));
-    emailContext.put(AdminSettingKeys.SECURITY_BANNER_RELEASABILITY.name(),
-        adminDao.getSetting(AdminSettingKeys.SECURITY_BANNER_RELEASABILITY));
-    emailContext.put(AdminSettingKeys.SECURITY_BANNER_COLOR.name(),
-        adminDao.getSetting(AdminSettingKeys.SECURITY_BANNER_COLOR));
+    final var siteClassification = ConfidentialityRecord.getConfidentialityLabelForChoice(dict,
+        (String) dict.getDictionaryEntry("siteClassification"));
+    emailContext.put("SECURITY_BANNER_CLASSIFICATION",
+        ConfidentialityRecord.create(siteClassification).toString());
+    emailContext.put("SECURITY_BANNER_COLOR", siteClassification.get("color"));
     emailContext.put("SUPPORT_EMAIL_ADDR", dict.getDictionaryEntry("SUPPORT_EMAIL_ADDR"));
     emailContext.put("dateFormatter",
         DateTimeFormatter.ofPattern((String) dict.getDictionaryEntry("dateFormats.email.date"))

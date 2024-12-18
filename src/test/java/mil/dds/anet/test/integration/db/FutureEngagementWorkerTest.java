@@ -93,7 +93,7 @@ class FutureEngagementWorkerTest extends AbstractResourceTest {
 
     allowedEmail = "@" + ((List<String>) dict.getDictionaryEntry("domainNames")).get(0);
 
-    emailWorker = new AnetEmailWorker(config, dict, jobHistoryDao, emailDao, adminDao);
+    emailWorker = new AnetEmailWorker(config, dict, jobHistoryDao, emailDao);
     futureEngagementWorker = new FutureEngagementWorker(dict, jobHistoryDao, reportDao);
     emailServer = new FakeSmtpServer(config.getSmtp());
 
