@@ -18,6 +18,10 @@ import { titleCase } from "title-case"
 const WILDCARD = "*"
 const domainNames = Settings.domainNames.map(d => d.toLowerCase())
 const wildcardDomains = domainNames.filter(domain => domain[0] === WILDCARD)
+const activeDomainNames = Settings.activeDomainNames.map(d => d.toLowerCase())
+const wildcardActiveDomains = activeDomainNames.filter(
+  domain => domain[0] === WILDCARD
+)
 
 // Support null input like change-case v3 did…
 const wrappedChangeCase = {
@@ -74,18 +78,44 @@ export default {
   resourceize: function(string) {
     return pluralize(wrappedChangeCase.camelCase(string))
   },
-
-  handleEmailValidation: function(value, shouldValidate) {
+  _handleEmailValidation: function(
+    value,
+    validDomains,
+    validWildcardDomains,
+    shouldValidate
+  ) {
     if (!shouldValidate) {
       return { isValid: true, message: null }
     }
     try {
-      const isValid = this.validateEmail(value, domainNames, wildcardDomains)
-      const message = isValid ? null : this.emailErrorMessage(domainNames)
+      const isValid = this.validateEmail(
+        value,
+        validDomains,
+        validWildcardDomains
+      )
+      const message = isValid ? null : this.emailErrorMessage(validDomains)
       return { isValid, message }
     } catch (e) {
       return { isValid: false, message: <div>{e.message}</div> }
     }
+  },
+
+  handleEmailValidation: function(value, shouldValidate) {
+    return this._handleEmailValidation(
+      value,
+      domainNames,
+      wildcardDomains,
+      shouldValidate
+    )
+  },
+
+  handleDialogEmailValidation: function(value, shouldValidate) {
+    return this._handleEmailValidation(
+      value,
+      activeDomainNames,
+      wildcardActiveDomains,
+      shouldValidate
+    )
   },
 
   validateEmail: function(emailValue, domainNames, wildcardDomains) {
@@ -143,7 +173,7 @@ export default {
     }
     const toAddresses = addrs.addresses.map(a => a.address)
     for (let i = 0; i < toAddresses.length; i++) {
-      const r = this.handleEmailValidation(toAddresses[i], true)
+      const r = this.handleDialogEmailValidation(toAddresses[i], true)
       if (r.isValid === false) {
         return r
       }

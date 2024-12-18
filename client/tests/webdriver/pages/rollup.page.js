@@ -15,6 +15,30 @@ class Rollup extends Page {
     return browser.$("a#preview-rollup-email")
   }
 
+  async getEmailRollupButton() {
+    return browser.$("button#email-rollup")
+  }
+
+  async getEmailTo() {
+    return browser.$("#to")
+  }
+
+  async getSendEmailButton() {
+    return browser.$("button#send-rollup-email")
+  }
+
+  async getInvalidFeedbackLabel() {
+    return browser.$(".invalid-feedback > div > p")
+  }
+
+  async getInvalidFeedbackLabelEmailList() {
+    return browser.$$(".invalid-feedback > div > ul > li")
+  }
+
+  async getSuccessMessage() {
+    return browser.$(".alert-success.show")
+  }
+
   async open() {
     await super.open(PAGE_URL)
   }
