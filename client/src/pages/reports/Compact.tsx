@@ -314,7 +314,11 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
             backgroundText={backgroundText}
           >
             <CompactHeaderContent
-              classification={utils.getConfidentialityLabelForChoice(
+              color={utils.getColorForChoice(report.classification)}
+              policyAndClassification={utils.getPolicyAndClassificationForChoice(
+                report.classification
+              )}
+              releasableTo={utils.getReleasableToForChoice(
                 report.classification
               )}
             />
@@ -417,7 +421,8 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
             </CompactTable>
             <CompactFooterContent
               object={report}
-              classification={utils.getConfidentialityLabelForChoice(
+              color={utils.getColorForChoice(report.classification)}
+              policyAndClassification={utils.getPolicyAndClassificationForChoice(
                 report.classification
               )}
             />

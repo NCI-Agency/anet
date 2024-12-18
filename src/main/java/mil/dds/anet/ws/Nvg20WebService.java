@@ -8,16 +8,15 @@ import jakarta.xml.bind.JAXBElement;
 import java.math.BigInteger;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
-import java.util.regex.Pattern;
 import javax.xml.datatype.DatatypeFactory;
 import mil.dds.anet.beans.AccessToken;
+import mil.dds.anet.beans.ConfidentialityRecord;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
@@ -60,7 +59,6 @@ import nato.stanag4778.bindinginformation10.BindingInformationType;
 import nato.stanag4778.bindinginformation10.MetadataBindingContainerType;
 import nato.stanag4778.bindinginformation10.MetadataBindingType;
 import nato.stanag4778.bindinginformation10.MetadataType;
-import org.apache.commons.lang3.RegExUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
@@ -264,9 +262,8 @@ public class Nvg20WebService implements NVGPortType2012 {
     // Calculate end of period
     final Instant end = now.plus(futureDays, ChronoUnit.DAYS);
 
-    final ConfidentialityRecord defaultConfidentiality = ConfidentialityRecord.create(
-        adminDao.getSetting(AdminDao.AdminSettingKeys.SECURITY_BANNER_CLASSIFICATION),
-        adminDao.getSetting(AdminDao.AdminSettingKeys.SECURITY_BANNER_RELEASABILITY));
+    final ConfidentialityRecord defaultConfidentiality =
+        ConfidentialityRecord.create(dict, (String) dict.getDictionaryEntry("siteClassification"));
     if (includeDocumentConfidentialityLabel) {
       final ExtensionType extensionType = NVG_OF.createExtensionType();
       extensionType.getAny().add(getBindingInformation(defaultConfidentiality));
@@ -292,8 +289,8 @@ public class Nvg20WebService implements NVGPortType2012 {
     nvgPoint.setHref(String.format("%s/reports/%s", config.getServerUrl(), report.getUuid()));
     setTextInfo(report, nvgPoint);
     if (includeElementConfidentialityLabels) {
-      setConfidentialityInformation(determineConfidentiality(defaultConfidentiality, report),
-          nvgPoint);
+      setConfidentialityInformation(
+          ConfidentialityRecord.create(dict, defaultConfidentiality, report), nvgPoint);
     }
     return nvgPoint;
   }
@@ -508,58 +505,6 @@ public class Nvg20WebService implements NVGPortType2012 {
     final AnetBeanList<Report> anetBeanList =
         defaultMapper.convertValue(data.get("reportList"), typeRef);
     return anetBeanList.getList();
-  }
-
-  private ConfidentialityRecord determineConfidentiality(
-      ConfidentialityRecord defaultConfidentiality, Report report) {
-    @SuppressWarnings("unchecked")
-    final Map<String, Map<String, Object>> classificationChoices =
-        (Map<String, Map<String, Object>>) dict.getDictionaryEntry("confidentialityLabel.choices");
-    final Map<String, Object> reportClassification =
-        classificationChoices.get(report.getClassification());
-    return reportClassification == null ? defaultConfidentiality
-        : ConfidentialityRecord.create(reportClassification);
-  }
-
-  private record ConfidentialityRecord(String policy, String classification, List<String> releasableTo) {
-
-    static ConfidentialityRecord create(
-        String siteClassification, String siteReleasability) {
-      // Try to split site classification
-      final String[] policyAndClassification = siteClassification.trim().split("\\s+", 2);
-      final List<String> releasableTo;
-      if ( Utils.isEmptyOrNull(siteReleasability)) {
-        releasableTo = null;
-      } else {
-        releasableTo = getReleasableTo(siteReleasability);
-      }
-      return new ConfidentialityRecord(
-          toUpper(policyAndClassification[0]), toUpper(policyAndClassification[1]), toUpper(releasableTo));
-    }
-
-    static ConfidentialityRecord create(Map<String, Object> reportClassification) {
-      final var policy = (String) reportClassification.get("policy");
-      final var classification = (String) reportClassification.get("classification");
-      @SuppressWarnings("unchecked")
-      final var releasableTo = (List<String>) reportClassification.get("releasableTo");
-      return new ConfidentialityRecord(toUpper(policy), toUpper(classification), toUpper(releasableTo));
-    }
-
-    private static List<String> getReleasableTo(String releasability) {
-      // Try to strip off "releasable to"
-      final String releasableTo = RegExUtils.removeFirst(
-          releasability, Pattern.compile("^releasable to\\s+", Pattern.CASE_INSENSITIVE));
-      return Arrays.asList(releasableTo.split(",\\s*"));
-    }
-
-    private static String toUpper(String s) {
-      return s == null ? null : s.toUpperCase();
-    }
-
-    private static List<String> toUpper(List<String> s) {
-      return s == null ? null : s.stream().map(String::toUpperCase).toList();
-    }
-
   }
 
 }

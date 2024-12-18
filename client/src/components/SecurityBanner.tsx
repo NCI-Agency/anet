@@ -9,10 +9,6 @@ import Settings from "settings"
 import utils from "utils"
 import Version from "version"
 
-export const SETTING_KEY_CLASSIFICATION = "SECURITY_BANNER_CLASSIFICATION"
-export const SETTING_KEY_RELEASABILITY = "SECURITY_BANNER_RELEASABILITY"
-export const SETTING_KEY_COLOR = "SECURITY_BANNER_COLOR"
-
 const CONNECTION_INFO_COLORS = {
   newVersion: "black",
   error: "red"
@@ -33,8 +29,7 @@ const SecurityBanner = ({
   onLogout,
   handleSecurityBannerBottom
 }: SecurityBannerProps) => {
-  const { appSettings, currentUser, connection } = useContext(AppContext)
-  const background = appSettings[SETTING_KEY_COLOR]
+  const { currentUser, connection } = useContext(AppContext)
   const securityTextRef = useRef(null)
   const [bannerSideHeight, setBannerSideHeight] = useState(0)
   const securityTextHeight = securityTextRef.current?.clientHeight || 0
@@ -73,14 +68,16 @@ const SecurityBanner = ({
         <SecurityTextContainer
           id="bannerSecurityText"
           ref={securityTextRef}
-          bgc={background}
+          bgc={utils.getColorForChoice(Settings.siteClassification)}
           sideHeight={bannerSideHeight}
         >
-          <span className="classificationText">
-            {appSettings[SETTING_KEY_CLASSIFICATION]?.toUpperCase() || ""}
-          </span>{" "}
-          <span className="releasabilityText">
-            {utils.titleCase(appSettings[SETTING_KEY_RELEASABILITY] || "")}
+          <span className="fw-bold me-1">
+            {utils.getPolicyAndClassificationForChoice(
+              Settings.siteClassification
+            )}
+          </span>
+          <span>
+            {utils.getReleasableToForChoice(Settings.siteClassification)}
           </span>
         </SecurityTextContainer>
         <UserBox id="bannerUser">
@@ -150,9 +147,6 @@ const SecurityTextContainer = styled.div`
   align-self: start;
   text-align: center;
   position: relative;
-  & > span.classificationText {
-    font-weight: bold;
-  }
   &:before {
     content: "";
     border-right: ${props => `20px solid ${props.bgc}`};
@@ -161,6 +155,7 @@ const SecurityTextContainer = styled.div`
     left: -20px;
     top: 0;
   }
+
   &:after {
     content: "";
     border-left: ${props => `20px solid ${props.bgc}`};
@@ -213,39 +208,30 @@ const ConnectionBanner = ({ connection }: ConnectionBannerProps) => {
 }
 
 interface CompactSecurityBannerProps {
-  classification?: string
+  color: string
+  policyAndClassification: string
+  releasableTo: string
   bannerId?: string
 }
 
 export const CompactSecurityBanner = ({
-  classification,
+  color,
+  policyAndClassification,
+  releasableTo,
   bannerId
 }: CompactSecurityBannerProps) => {
-  const { appSettings } = useContext(AppContext)
   return (
-    <CompactBannerS className="banner" bgc={appSettings[SETTING_KEY_COLOR]}>
-      {(classification && (
-        <span className="classificationText" id={bannerId}>
-          {classification}
-        </span>
-      )) || (
-        <>
-          <span className="classificationText" id={bannerId}>
-            {appSettings[SETTING_KEY_CLASSIFICATION]?.toUpperCase() || ""}
-          </span>{" "}
-          <span className="releasabilityText">
-            {utils.titleCase(appSettings[SETTING_KEY_RELEASABILITY] || "")}
-          </span>
-        </>
-      )}
+    <CompactBannerS className="banner" bgc={color}>
+      <span className="fw-bold me-1" id={bannerId}>
+        {policyAndClassification}
+      </span>
+      <span>{releasableTo}</span>
     </CompactBannerS>
   )
 }
 
 const CompactBannerS = styled.div`
-  & > span.classificationText {
-    font-weight: bold;
-  }
+  background: ${props => props.bgc};
 `
 
 export default SecurityBanner
