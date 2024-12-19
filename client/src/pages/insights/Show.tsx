@@ -167,13 +167,13 @@ const InsightsShow = ({
         .valueOf()
     },
     [REPORTS_BY_TASK]: {
-      state: [Report.STATE.PUBLISHED],
+      state: [Report.STATE.APPROVED, Report.STATE.PUBLISHED],
       engagementDateStart: defaultPastDates.referenceDate
         .startOf("day")
         .valueOf()
     },
     [REPORTS_BY_DAY_OF_WEEK]: {
-      state: [Report.STATE.PUBLISHED],
+      state: [Report.STATE.APPROVED, Report.STATE.PUBLISHED],
       engagementDateStart: defaultPastDates.startDate.startOf("day").valueOf(),
       engagementDateEnd: defaultPastDates.endDate.endOf("day").valueOf(),
       includeEngagementDayOfWeek: true
