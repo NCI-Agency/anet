@@ -1228,11 +1228,6 @@ div[id*='fg-entityAssessment'] {
     width: 33%;
   }
 
-  /* hide guide tour on small screen as it is broken */
-  .persistent-tour-launcher {
-    display: none;
-  }
-
   fieldset {
     padding: 1em;
   }
