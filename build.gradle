@@ -155,7 +155,7 @@ dependencies {
 	// We use some extended scalars in `generateClientCodeConf` below
 	testImplementation 'com.graphql-java:graphql-java-extended-scalars:21.0'
 
-	testImplementation 'org.assertj:assertj-core:3.26.3'
+	testImplementation 'org.assertj:assertj-core:3.27.0'
 
 	testImplementation "org.powermock:powermock-api-mockito2:${powermockVersion}"
 	testImplementation "org.powermock:powermock-module-junit4:${powermockVersion}"
