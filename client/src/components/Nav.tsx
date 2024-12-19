@@ -89,7 +89,7 @@ const SidebarLink = ({
     }}
   >
     <LinkContainer to={linkTo} isActive={isActive}>
-      <Nav.Link eventKey={id} active={false}>
+      <Nav.Link id={id} eventKey={id} active={false}>
         <span>{children}</span>
       </Nav.Link>
     </LinkContainer>
@@ -213,12 +213,12 @@ const Navigation = ({
       <Nav id="search-nav" />
 
       <Nav.Item
-        id={isMenuLinksOpened ? "nav-links-opened" : ""}
+        id={isMenuLinksOpened ? "nav-links-opened" : null}
         active={isMenuLinksOpened ? 1 : 0}
         style={{ paddingTop: "2px" }}
         onClick={() => setIsMenuLinksOpened(!isMenuLinksOpened)}
       >
-        <Nav.Link>
+        <Nav.Link id="my-work">
           {Settings?.menuOptions?.menuLinksDropdownTitle ?? "My Work"}
           <span
             className={
@@ -285,6 +285,7 @@ const Navigation = ({
               <small>{myOrg.shortName}</small>
             </SidebarLink>
           )}
+          <Nav id="myorg-nav" style={{ lineHeight: "10px" }} />
           <SidebarLink
             id="my-attachments-nav"
             linkTo={{ pathname: "/attachments/mine" }}

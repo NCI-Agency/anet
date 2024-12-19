@@ -367,8 +367,9 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
                   title="Take a guided tour of this organization's page."
                   tour={orgTour}
                   autostart={
-                    localStorage.newUser === "true" &&
-                    localStorage.hasSeenOrgTour !== "true"
+                    (localStorage.newUser === "true" &&
+                      localStorage.hasSeenOrgTour !== "true") ||
+                    routerLocation?.state?.showGuidedTour === true
                   }
                   onEnd={() => (localStorage.hasSeenOrgTour = "true")}
                 />
