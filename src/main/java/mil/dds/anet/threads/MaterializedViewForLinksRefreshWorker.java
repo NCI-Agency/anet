@@ -15,9 +15,9 @@ import org.springframework.stereotype.Component;
 @ConditionalOnExpression("not ${anet.no-workers:false}")
 public class MaterializedViewForLinksRefreshWorker extends AbstractWorker {
 
-  public static final String[] materializedViews =
-      {"mv_lts_attachments", "mv_lts_locations", "mv_lts_organizations", "mv_lts_people",
-          "mv_lts_positions", "mv_lts_reports", "mv_lts_tasks"};
+  public static final String[] materializedViews = {"mv_lts_attachments", "mv_lts_events",
+      "mv_lts_eventSeries", "mv_lts_locations", "mv_lts_organizations", "mv_lts_people",
+      "mv_lts_positions", "mv_lts_reports", "mv_lts_tasks"};
 
   private final AdminDao dao;
 

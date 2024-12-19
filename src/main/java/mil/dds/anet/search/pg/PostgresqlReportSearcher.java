@@ -72,6 +72,11 @@ public class PostgresqlReportSearcher extends AbstractReportSearcher {
   }
 
   @Override
+  protected void addTaskUuidQuery(ReportSearchQuery query) {
+    addTaskUuidQuery(qb, query);
+  }
+
+  @Override
   protected void addOrgUuidQuery(ReportSearchQuery query) {
     addOrgUuidQuery(qb, query);
   }

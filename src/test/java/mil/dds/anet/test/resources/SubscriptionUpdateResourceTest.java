@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import mil.dds.anet.database.AuthorizationGroupDao;
+import mil.dds.anet.database.EventDao;
 import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
@@ -19,6 +20,8 @@ import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.TaskDao;
 import mil.dds.anet.test.client.AnetBeanList_SubscriptionUpdate;
 import mil.dds.anet.test.client.AuthorizationGroup;
+import mil.dds.anet.test.client.Event;
+import mil.dds.anet.test.client.EventInput;
 import mil.dds.anet.test.client.GenericRelatedObjectInput;
 import mil.dds.anet.test.client.Location;
 import mil.dds.anet.test.client.Note;
@@ -42,8 +45,9 @@ class SubscriptionUpdateResourceTest extends SubscriptionTestHelper {
       "{ createdAt isNote updatedObjectType updatedObjectUuid updatedObject {"
           + " ... on Location { uuid } ... on Organization { uuid }"
           + " ... on Person { uuid } ... on Position { uuid }"
-          + " ... on Report { uuid } ... on Task { uuid } } subscription " + SUBSCRIPTION_FIELDS
-          + " }";
+          + " ... on Report { uuid } ... on Task { uuid }"
+          + " ... on AuthorizationGroup { uuid } ... on Event { uuid } } subscription "
+          + SUBSCRIPTION_FIELDS + " }";
 
   private final Map<String, Consumer<String>> UPDATERS = Map.of( //
       LocationDao.TABLE_NAME, this::updateLocation, //
@@ -52,7 +56,8 @@ class SubscriptionUpdateResourceTest extends SubscriptionTestHelper {
       PositionDao.TABLE_NAME, this::updatePosition, //
       ReportDao.TABLE_NAME, this::updateReport, //
       TaskDao.TABLE_NAME, this::updateTask, //
-      AuthorizationGroupDao.TABLE_NAME, this::updateAuthorizationGroup);
+      AuthorizationGroupDao.TABLE_NAME, this::updateAuthorizationGroup, //
+      EventDao.TABLE_NAME, this::updateEvent);
 
   @Test
   void testSubscriptionUpdate() {
@@ -218,6 +223,7 @@ class SubscriptionUpdateResourceTest extends SubscriptionTestHelper {
         .withTasks(List.of(getTaskInput(getTask(getSubscribedObjectUuid(TaskDao.TABLE_NAME)))))
         .withAuthorizationGroups(List.of(getAuthorizationGroupInput(
             getAuthorizationGroup(getSubscribedObjectUuid(AuthorizationGroupDao.TABLE_NAME)))))
+        .withEvent(getEventInput(getEvent(getSubscribedObjectUuid(EventDao.TABLE_NAME))))
         .withNextSteps("<p>Test report next steps for subscription updates</p>")
         .withReportText("<p>Test report intent for subscription updates</p>").build();
     final String reportUuid = withCredentials(jackUser,
@@ -299,5 +305,16 @@ class SubscriptionUpdateResourceTest extends SubscriptionTestHelper {
   private AuthorizationGroup getAuthorizationGroup(final String subscribedObjectUuid) {
     return withCredentials(adminUser, t -> queryExecutor
         .authorizationGroup(AuthorizationGroupResourceTest.FIELDS, subscribedObjectUuid));
+  }
+
+  private void updateEvent(final String subscribedObjectUuid) {
+    final Event subscribedObject = getEvent(subscribedObjectUuid);
+    withCredentials(adminUser,
+        t -> mutationExecutor.updateEvent("", getEventInput(subscribedObject)));
+  }
+
+  private Event getEvent(final String subscribedObjectUuid) {
+    return withCredentials(adminUser,
+        t -> queryExecutor.event(EventResourceTest.FIELDS, subscribedObjectUuid));
   }
 }

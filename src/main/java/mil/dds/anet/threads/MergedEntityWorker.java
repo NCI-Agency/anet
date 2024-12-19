@@ -20,6 +20,8 @@ public class MergedEntityWorker extends AbstractWorker {
 
   private static final List<FieldWithEntityReference> fieldsWithEntityReference = List.of(// -
       new FieldWithEntityReference("attachments", "description"), // -
+      new FieldWithEntityReference("events", "description"), // -
+      new FieldWithEntityReference("eventSeries", "description"), // -
       new FieldWithEntityReference("customSensitiveInformation", "customFieldValue"), // -
       new FieldWithEntityReference("locations", "description"),
       new FieldWithEntityReference("locations", "customFields"), // -

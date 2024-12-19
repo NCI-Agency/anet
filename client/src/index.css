@@ -1184,6 +1184,56 @@ div[id*='fg-entityAssessment'] {
   margin-bottom: 1rem;
 }
 
+.event-collection header {
+  margin-bottom: 18px;
+}
+
+.event-collection footer {
+  margin-top: 18px;
+}
+
+.event-summary {
+  margin-top: 25px;
+  padding-top: 15px;
+  box-shadow: 0 1px 3px hsla(0, 0%, 0%, 0.15);
+}
+
+td.event-cell {
+  background-color: var(--anet-blue) !important;
+}
+
+div.event-report-cell {
+  background-color: lightblue !important;
+  margin-top: 4px !important;
+}
+
+td.task-report-cell {
+  background-color: #e1ebee !important;
+  padding: 0.25rem 0.5rem !important;
+}
+
+table.event-matrix {
+  table-layout: fixed;
+}
+
+table.event-matrix > :not(caption) > * > * {
+  padding: 0;
+}
+
+table.event-matrix thead > *, table.event-matrix thead > * > * {
+  border-top-style: none;
+}
+
+table.event-matrix thead > *:not(:last-child), table.event-matrix thead > *:not(:last-child) > * {
+  border-bottom-style: none;
+}
+
+table.event-matrix-cell {
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0 0.25rem;
+}
+
 @media screen and (max-width: 768px) {
   #main-viewport {
     padding-top: 8px;
