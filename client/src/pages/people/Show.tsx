@@ -312,6 +312,7 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
             <Messages error={stateError} success={stateSuccess} />
             <Form className="form-horizontal" method="post">
               <Fieldset
+                id="info"
                 title={
                   <>
                     {

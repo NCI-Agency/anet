@@ -1,18 +1,13 @@
 import AppContext from "components/AppContext"
-import hopscotch from "hopscotch"
-import "hopscotch/dist/css/hopscotch.css"
-import React, { useCallback, useContext, useEffect, useState } from "react"
+import React, { useContext, useMemo, useState } from "react"
 import { Button } from "react-bootstrap"
+import Joyride, { ACTIONS, EVENTS, STATUS } from "react-joyride"
 import { useNavigate } from "react-router-dom"
 import TOUR_ICON from "resources/tour-icon.png"
 
 const iconCss = {
   width: "20px",
   marginLeft: "8px"
-}
-
-const HOPSCOTCH_CONFIG = {
-  bubbleWidth: 400
 }
 
 interface GuidedTourProps {
@@ -25,49 +20,61 @@ interface GuidedTourProps {
 const GuidedTour = ({ autostart, title, tour, onEnd }: GuidedTourProps) => {
   const { currentUser } = useContext(AppContext)
   const navigate = useNavigate()
-  const [runningTour, setRunningTour] = useState(false)
-  const startTour = useCallback(() => {
-    // I don't know why hopscotch requires itself to be reconfigured
-    // EVERY TIME you start a tour, but it does. so this does that.
-    hopscotch.configure(HOPSCOTCH_CONFIG)
-    hopscotch.startTour(tour(currentUser, navigate))
-    setRunningTour(true)
-  }, [currentUser, tour, navigate])
-  useEffect(() => {
-    hopscotch.listen("end", handleOnEnd)
-    hopscotch.listen("close", handleOnEnd)
-    if (!runningTour && autostart && currentUser.uuid) {
-      startTour()
-    }
-
-    return () => {
-      hopscotch.unlisten("end", handleOnEnd)
-      hopscotch.unlisten("close", handleOnEnd)
-      if (runningTour) {
-        hopscotch.endTour()
-        handleOnEnd()
-        setRunningTour(false)
-      }
-    }
-
-    function handleOnEnd() {
-      if (onEnd) {
-        onEnd()
-      }
-    }
-  }, [autostart, currentUser.uuid, onEnd, runningTour, startTour])
-
+  const currentTour = useMemo(
+    () => tour(currentUser, navigate),
+    [currentUser, tour, navigate]
+  )
+  const [runningTour, setRunningTour] = useState(autostart && currentUser.uuid)
+  const [stepIndex, setStepIndex] = useState(0)
   const titleText = title || "New to ANET? Take a guided tour"
   return (
-    <Button
-      variant="link"
-      onClick={startTour}
-      className="persistent-tour-launcher"
-    >
-      {titleText}
-      <img src={TOUR_ICON} className="tour-icon" alt="" style={iconCss} />
-    </Button>
+    <>
+      <Button
+        variant="link"
+        onClick={() => setRunningTour(true)}
+        className="persistent-tour-launcher"
+      >
+        {titleText}
+        <img src={TOUR_ICON} className="tour-icon" alt="" style={iconCss} />
+      </Button>
+      <Joyride
+        steps={currentTour.steps}
+        stepIndex={stepIndex}
+        run={runningTour}
+        callback={handleCallback}
+        continuous
+        scrollToFirstStep
+        showSkipButton
+        showProgress
+        disableScrollParentFix
+        styles={{
+          options: {
+            zIndex: 10000
+          }
+        }}
+      />
+    </>
   )
+
+  function handleCallback(data) {
+    const { action, status, step, type } = data
+    if ([STATUS.FINISHED, STATUS.SKIPPED].includes(status)) {
+      if (step.multipage) {
+        step.onNext()
+      } else {
+        setRunningTour(false)
+        setStepIndex(0)
+        if (onEnd) {
+          onEnd()
+        }
+      }
+    } else if (ACTIONS.CLOSE === action) {
+      setRunningTour(false)
+      setStepIndex(0)
+    } else if ([EVENTS.STEP_AFTER, EVENTS.TARGET_NOT_FOUND].includes(type)) {
+      setStepIndex(stepIndex + (ACTIONS.PREV === action ? -1 : 1))
+    }
+  }
 }
 
 export default GuidedTour

@@ -184,6 +184,7 @@ const PositionShow = ({ pageDispatchers }: PositionShowProps) => {
             <Messages success={stateSuccess} error={stateError} />
             <Form className="form-horizontal" method="post">
               <Fieldset
+                id="info"
                 title={
                   <>
                     {
