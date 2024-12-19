@@ -1,13 +1,17 @@
 package mil.dds.anet.config;
 
+import jakarta.servlet.http.HttpServletMapping;
 import mil.dds.anet.resources.AdminResource;
 import mil.dds.anet.resources.HomeResource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -30,8 +34,33 @@ public class SecurityConfig {
   @Value("${anet.redirect-to-https}")
   boolean redirectToHttps;
 
+  /**
+   * SOAP endpoints (stateless) filter chain used by NVG Endpoint
+   */
   @Bean
-  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+  @Order(10) // SecurityFilterChain filter sequence
+  public SecurityFilterChain soapSecurityFilterChain(HttpSecurity http) throws Exception {
+    http.securityMatcher(req -> {
+      // Only applies to request routed to the Apache CXF Servlet, handling SOAP Web Services
+      HttpServletMapping httpServletMapping = req.getHttpServletMapping();
+      return httpServletMapping != null
+          && "cxfServletRegistration".equals(httpServletMapping.getServletName());
+    }).authorizeHttpRequests(authorize ->
+    // Allow all SOAP service requests
+    authorize.anyRequest().permitAll());
+
+    // Stateless for SOAP, disable session management
+    http.sessionManagement(
+        session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+    // Disable CSRF
+    http.csrf(AbstractHttpConfigurer::disable);
+
+    return http.build();
+  }
+
+  @Bean
+  @Order(20)
+  public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
     http.authorizeHttpRequests(authorize -> authorize
         // These are public
         .requestMatchers(AdminResource.ADMIN_DICTIONARY_RESOURCE_PATH, HomeResource.LOGOUT_PATH,

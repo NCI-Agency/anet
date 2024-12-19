@@ -28,7 +28,8 @@ describe("Anet home page", () => {
   it("should have the right security marking", async() => {
     await Home.open()
     const securityMarking = await (await Home.getBannerSecurityText()).getText()
-    const defaultSecurityMarking = "DEMO USE ONLY Releasable to DEMO MISSION"
+    const defaultSecurityMarking =
+      "DEMO USE ONLY" + "Releasable to DEMO MISSION"
     expect(securityMarking).to.equal(defaultSecurityMarking)
     await Home.logout()
   })

@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xsd:schema xmlns="https://tide.act.nato.int/schemas/2012/10/nvg" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="https://tide.act.nato.int/schemas/2012/10/nvg" elementFormDefault="qualified" attributeFormDefault="unqualified" version="2.0.0">
+	<xsd:include schemaLocation="nvg.types.2.0.xsd"/>
+	<xsd:element name="nvg_filter" type="NvgFilterType"/>
+	<xsd:complexType name="NvgFilterType">
+		<xsd:annotation>
+			<xsd:documentation>The filter value
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:choice minOccurs="0" maxOccurs="unbounded">
+				<xsd:element name="input_response" type="InputResponseType"/>
+				<xsd:element name="select_response" type="SelectResponseType"/>
+				<xsd:element name="matrix_response" type="MatrixResponseType"/>
+			</xsd:choice>
+		</xsd:sequence>
+		<xsd:attribute name="version" type="VersionType" use="required"/>
+		<xsd:anyAttribute namespace="##any" processContents="lax"/>
+	</xsd:complexType>
+	<xsd:complexType name="InputResponseType">
+		<xsd:simpleContent>
+			<xsd:extension base="AllowedInputResponseTypes">
+				<xsd:attributeGroup ref="FilterItemResponseAttGroup"/>
+			</xsd:extension>
+		</xsd:simpleContent>
+	</xsd:complexType>
+	<xsd:simpleType name="AllowedInputResponseTypes">
+		<xsd:union memberTypes="xsd:string xsd:boolean xsd:date xsd:dateTime LongLatType xsd:integer xsd:float"/>
+	</xsd:simpleType>
+	<xsd:complexType name="FilterItemType">
+		<xsd:attributeGroup ref="FilterItemResponseAttGroup"/>
+	</xsd:complexType>
+	<xsd:attributeGroup name="FilterItemResponseAttGroup">
+		<xsd:attribute name="refid" type="IdentifierType" use="required"/>
+	</xsd:attributeGroup>
+	<xsd:complexType name="SelectResponseType">
+		<xsd:complexContent>
+			<xsd:extension base="FilterItemType">
+				<xsd:sequence>
+					<xsd:element name="selected" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
+				</xsd:sequence>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="MatrixResponseType">
+		<xsd:complexContent>
+			<xsd:extension base="FilterItemType">
+				<xsd:sequence>
+					<xsd:element name="row" maxOccurs="unbounded">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="cell" type="MatrixCellResponseType" maxOccurs="unbounded"/>
+							</xsd:sequence>
+							<xsd:attribute name="row-id" type="IdentifierType" use="required"/>
+						</xsd:complexType>
+					</xsd:element>
+				</xsd:sequence>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="MatrixCellResponseType">
+		<xsd:simpleContent>
+			<xsd:extension base="xsd:string">
+				<xsd:attribute name="col-id" type="IdentifierType" use="required"/>
+			</xsd:extension>
+		</xsd:simpleContent>
+	</xsd:complexType>
+	<xsd:complexType name="BooleanInputResponseType">
+		<xsd:simpleContent>
+			<xsd:restriction base="InputResponseType">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:boolean"/>
+				</xsd:simpleType>
+			</xsd:restriction>
+		</xsd:simpleContent>
+	</xsd:complexType>
+	<xsd:complexType name="PositionInputResponsetype">
+		<xsd:simpleContent>
+			<xsd:restriction base="InputResponseType">
+				<xsd:simpleType>
+					<xsd:restriction base="LongLatType"/>
+				</xsd:simpleType>
+			</xsd:restriction>
+		</xsd:simpleContent>
+	</xsd:complexType>
+	<xsd:complexType name="IntegerInputResponsetype">
+		<xsd:simpleContent>
+			<xsd:restriction base="InputResponseType">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:integer"/>
+				</xsd:simpleType>
+			</xsd:restriction>
+		</xsd:simpleContent>
+	</xsd:complexType>
+	<xsd:complexType name="FloatInputResponsetype">
+		<xsd:simpleContent>
+			<xsd:restriction base="InputResponseType">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:float"/>
+				</xsd:simpleType>
+			</xsd:restriction>
+		</xsd:simpleContent>
+	</xsd:complexType>
+	<xsd:complexType name="DateInputResponsetype">
+		<xsd:simpleContent>
+			<xsd:restriction base="InputResponseType">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:date"/>
+				</xsd:simpleType>
+			</xsd:restriction>
+		</xsd:simpleContent>
+	</xsd:complexType>
+	<xsd:complexType name="DatetimeInputResponsetype">
+		<xsd:simpleContent>
+			<xsd:restriction base="InputResponseType">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:dateTime"/>
+				</xsd:simpleType>
+			</xsd:restriction>
+		</xsd:simpleContent>
+	</xsd:complexType>
+</xsd:schema>

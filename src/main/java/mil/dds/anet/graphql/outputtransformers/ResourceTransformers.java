@@ -78,19 +78,6 @@ public class ResourceTransformers {
         }
       };
 
-  public static final ResourceTransformer<String> nvgTransformer =
-      new ResourceTransformer<>("nvg", MediaType.APPLICATION_XML) {
-        final JsonToXmlTransformer jsonToXmlTransformer = new JsonToXmlTransformer();
-        final XsltXmlTransformer xsltXmlTransformer = new XsltXmlTransformer(
-            GraphQLResource.class.getResourceAsStream("/stylesheets/nvg.xslt"));
-
-        @Override
-        public ResponseEntity<String> apply(final Map<String, Object> json) {
-          return ResponseEntity.ok().contentType(this.mediaType)
-              .body(xsltXmlTransformer.apply(jsonToXmlTransformer.apply(json)));
-        }
-      };
-
   public static final ResourceTransformer<String> kmlTransformer =
       new ResourceTransformer<>("kml", MediaType.APPLICATION_XML) {
         final JsonToXmlTransformer jsonToXmlTransformer = new JsonToXmlTransformer();
@@ -105,6 +92,6 @@ public class ResourceTransformers {
       };
 
   public static final List<ResourceTransformer<String>> xmlTransformers =
-      List.of(xmlTransformer, nvgTransformer, kmlTransformer);
+      List.of(xmlTransformer, kmlTransformer);
 
 }

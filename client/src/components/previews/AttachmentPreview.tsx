@@ -76,8 +76,10 @@ const AttachmentPreview = ({ className, uuid }: AttachmentPreviewProps) => {
             />
             <DictionaryField
               wrappedComponent={PreviewField}
-              dictProps={Settings.classification}
-              value={Settings.classification.choices[attachment.classification]}
+              dictProps={Settings.confidentialityLabel}
+              value={utils.getConfidentialityLabelForChoice(
+                attachment.classification
+              )}
             />
           </Col>
         </Row>
