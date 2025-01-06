@@ -166,8 +166,9 @@ dependencies {
 	implementation "org.apache.cxf:cxf-spring-boot-starter-jaxws:${cxfVersion}"
 
 	// Dependencies for MART importer
-	implementation group: 'javax.xml.ws', name: 'jaxws-api', version: '2.2.11'
-	implementation group: 'com.microsoft.ews-java-api', name: 'ews-java-api', version: '2.0'
+	implementation 'com.microsoft.ews-java-api:ews-java-api:2.0'
+	// For EWS (uses javax.xml.ws.http.HTTPException)
+	implementation 'javax.xml.ws:jaxws-api:2.3.1'
 
 	// The graphql-java-client-runtime module aggregates all dependencies for the generated code,
 	// including the plugin runtime
