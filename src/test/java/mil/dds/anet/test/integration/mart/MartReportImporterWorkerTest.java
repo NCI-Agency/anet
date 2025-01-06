@@ -139,8 +139,9 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
     List<MartImportedReport> martImportedReports = martImportedReportDao.getAll();
 
     assertThat(martImportedReports.stream()
-        .filter(martImportedReport -> !martImportedReport.isSuccess() && martImportedReport
-            .getErrors().equals("Can not find report location: does not exist")))
+        .filter(
+            martImportedReport -> !martImportedReport.isSuccess() && martImportedReport.getErrors()
+                .equals("Can not find report location: 'does not exist' with uuid: does not exist"))
         .hasSize(1);
 
     assertThat(martImportedReports.stream()
