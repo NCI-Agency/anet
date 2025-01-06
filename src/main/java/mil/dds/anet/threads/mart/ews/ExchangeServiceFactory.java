@@ -18,7 +18,7 @@ public class ExchangeServiceFactory {
   private final boolean disableCertificateCheck;
 
   public ExchangeServiceFactory(AnetConfig.MartExchangeConfiguration mailClientConfiguration) {
-    this.disableCertificateCheck = mailClientConfiguration.getDisableCertificateValidation();
+    this.disableCertificateCheck = mailClientConfiguration.isDisableCertificateValidation();
     this.mailClientConfiguration = mailClientConfiguration;
   }
 
@@ -33,7 +33,7 @@ public class ExchangeServiceFactory {
     ExchangeCredentials credentials = new WebCredentials(this.mailClientConfiguration.getUserName(),
         mailClientConfiguration.getPassword());
     service.setCredentials(credentials);
-    final URI ewsUrl = makeEwsUrl(mailClientConfiguration.getHost());
+    final URI ewsUrl = makeEwsUrl(mailClientConfiguration.getHostname());
     logger.info("EWS-URL {}", ewsUrl);
     service.setUrl(ewsUrl);
     return service;

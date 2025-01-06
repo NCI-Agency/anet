@@ -42,10 +42,6 @@ anet:
   # further configuration for this is in the dictionary
   automatically-inactivate-users: true
 
-  # Whether to periodically run the task that automatically inactivates users;
-  # further configuration for this is in the dictionary
-  import-mart-reports: true
-
   # Settings for the SMTP server to send email
   smtp:
     hostname: ${ANET_SMTP_SERVER:localhost}
@@ -78,14 +74,15 @@ anet:
 
   # Settings for the Exchange server to receive MART reports
   mart:
-    host: mail.nsf.kfor.nato.int
-    username: mart.server@nsf.kfor.nato.int
-    password: 123
-    trustedSender: mart.server@nsf.kfor.nato.int
-    disableCertificateValidation: true
-    markAsRead: true
-    mailPollingDelay: 10000
-    maxNumberEmailsPulled: 40
+    hostname: ${ANET_MART_EXCHANGE_SERVER:localhost}
+    username: ${ANET_MART_EXCHANGE_USERNAME}
+    password: ${ANET_MART_EXCHANGE_PASSWORD}
+    trusted-sender: ${ANET_MART_TRUSTED_SENDER}
+    disable-certificate-validation: ${ANET_MART_DISABLE_CERTIFICATE_VALIDATION:false}
+    mark-as-read: ${ANET_MART_MARK_AS_READ:true}
+    disabled: ${ANET_MART_DISABLE:true}
+    mail-polling-delay-in-seconds: 10
+    max-number-emails-pulled: 40
 
   # Set path of dictionary to be loaded
   # If you want to place the dictionary file under a subfolder of main application folder,
@@ -137,3 +134,4 @@ anet:
 graphql:
   endpoint:
     url: ""
+
