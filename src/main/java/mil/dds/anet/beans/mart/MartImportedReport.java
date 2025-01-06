@@ -2,7 +2,6 @@ package mil.dds.anet.beans.mart;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import graphql.GraphQLContext;
-import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.time.Instant;
@@ -15,10 +14,8 @@ import mil.dds.anet.views.UuidFetcher;
 
 public class MartImportedReport {
   @GraphQLQuery
-  @GraphQLInputField
   private Instant createdAt;
   @GraphQLQuery
-  @GraphQLInputField
   private boolean success;
   @GraphQLQuery
   private String errors;
@@ -74,7 +71,6 @@ public class MartImportedReport {
     return person.getForeignUuid();
   }
 
-  @GraphQLInputField(name = "person")
   public void setPerson(Person p) {
     this.person = new ForeignObjectHolder<>(p);
   }
@@ -105,7 +101,6 @@ public class MartImportedReport {
     return report.getForeignUuid();
   }
 
-  @GraphQLInputField(name = "report")
   public void setReport(Report r) {
     this.report = new ForeignObjectHolder<>(r);
   }
