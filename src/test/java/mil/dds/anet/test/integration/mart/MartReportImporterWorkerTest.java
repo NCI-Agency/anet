@@ -17,9 +17,17 @@ import mil.dds.anet.beans.mart.MartImportedReport;
 import mil.dds.anet.beans.mart.ReportDto;
 import mil.dds.anet.config.AnetConfig;
 import mil.dds.anet.config.AnetDictionary;
-import mil.dds.anet.database.*;
+import mil.dds.anet.database.AttachmentDao;
+import mil.dds.anet.database.EmailAddressDao;
+import mil.dds.anet.database.JobHistoryDao;
+import mil.dds.anet.database.LocationDao;
+import mil.dds.anet.database.MartImportedReportDao;
+import mil.dds.anet.database.OrganizationDao;
+import mil.dds.anet.database.PersonDao;
+import mil.dds.anet.database.PositionDao;
+import mil.dds.anet.database.ReportDao;
+import mil.dds.anet.database.TaskDao;
 import mil.dds.anet.database.mappers.MapperUtils;
-import mil.dds.anet.test.SpringTestConfig;
 import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.client.AnetBeanList_Person;
 import mil.dds.anet.test.client.Person;
@@ -35,7 +43,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.DirtiesContext;
 
 class MartReportImporterWorkerTest extends AbstractResourceTest {
   private static final String ATTACHMENT_NAME = "default_avatar.png";

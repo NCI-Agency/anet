@@ -9,7 +9,20 @@ import java.util.UUID;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.RollupGraph;
 import mil.dds.anet.beans.mart.ReportDto;
-import mil.dds.anet.test.client.*;
+import mil.dds.anet.test.client.AnetEmailInput;
+import mil.dds.anet.test.client.CommentInput;
+import mil.dds.anet.test.client.EventInput;
+import mil.dds.anet.test.client.EventSeriesInput;
+import mil.dds.anet.test.client.EventType;
+import mil.dds.anet.test.client.LocationInput;
+import mil.dds.anet.test.client.LocationType;
+import mil.dds.anet.test.client.OrganizationInput;
+import mil.dds.anet.test.client.Position;
+import mil.dds.anet.test.client.PositionInput;
+import mil.dds.anet.test.client.PositionRole;
+import mil.dds.anet.test.client.PositionType;
+import mil.dds.anet.test.client.Status;
+import mil.dds.anet.test.client.TaskInput;
 
 public class TestData {
 
