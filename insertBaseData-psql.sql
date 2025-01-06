@@ -12,6 +12,7 @@ TRUNCATE TABLE "emailAddresses" CASCADE;
 TRUNCATE TABLE "entityAvatars" CASCADE;
 TRUNCATE TABLE "jobHistory" CASCADE;
 TRUNCATE TABLE "locationRelationships" CASCADE;
+TRUNCATE TABLE "martImportedReports" CASCADE;
 TRUNCATE TABLE "mergedEntities" CASCADE;
 TRUNCATE TABLE "noteRelatedObjects" CASCADE;
 TRUNCATE TABLE "notes" CASCADE;
