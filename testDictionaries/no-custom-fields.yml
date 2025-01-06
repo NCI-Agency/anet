@@ -1710,5 +1710,3 @@ dashboards:
   - label: process board
     type: board
     data: /data/dashboards/process.json
-
-martIntegration: true
