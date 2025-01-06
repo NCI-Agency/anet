@@ -1,8 +1,11 @@
 import { gql } from "@apollo/client"
+import { Icon } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
+import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -28,6 +31,7 @@ const GQL_GET_MART_REPORTS_IMPORTED = gql`
           uuid
           name
           rank
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         report {
           uuid
@@ -74,10 +78,6 @@ const MartImportedReportsShow = ({
   const { totalCount = 0, list: martImportedReports = [] } =
     data.martImportedReports
 
-  function getErrors(martImportedReport) {
-    return { __html: martImportedReport.errors }
-  }
-
   return (
     <Fieldset
       title="MART reports imported"
@@ -102,7 +102,6 @@ const MartImportedReportsShow = ({
         <em>No mart reports imported found</em>
       ) : (
         <UltimatePaginationTopDown
-          Component="header"
           componentClassName="searchPagination"
           className="float-end"
           pageNum={pageNum}
@@ -116,7 +115,7 @@ const MartImportedReportsShow = ({
                 <th>Author</th>
                 <th>Report</th>
                 <th>Insert Date</th>
-                <th>Success</th>
+                <th>Success?</th>
                 <th>Errors</th>
               </tr>
             </thead>
@@ -125,15 +124,10 @@ const MartImportedReportsShow = ({
                 return (
                   <tr key={index}>
                     <td>
-                      <div>
-                        <h4 className="assigned-person-name">
-                          <LinkTo
-                            modelType="Person"
-                            model={martImportedReport.person}
-                          />
-                        </h4>
-                        <p />
-                      </div>
+                      <LinkTo
+                        modelType="Person"
+                        model={martImportedReport.person}
+                      />
                     </td>
                     <td>
                       {martImportedReport.report && (
@@ -148,10 +142,25 @@ const MartImportedReportsShow = ({
                         Settings.dateFormats.forms.displayLong.withTime
                       )}
                     </td>
-                    <td>{martImportedReport.success && "true"}</td>
+                    <td>
+                      <Icon
+                        icon={
+                          martImportedReport.success
+                            ? IconNames.TICK
+                            : IconNames.CROSS
+                        }
+                        className={
+                          martImportedReport.success
+                            ? "text-success"
+                            : "text-danger"
+                        }
+                      />
+                    </td>
                     <td>
                       <div
-                        dangerouslySetInnerHTML={getErrors(martImportedReport)}
+                        dangerouslySetInnerHTML={{
+                          __html: martImportedReport.errors
+                        }}
                       />
                     </td>
                   </tr>
