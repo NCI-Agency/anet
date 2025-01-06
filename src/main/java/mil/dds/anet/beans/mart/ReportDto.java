@@ -4,7 +4,6 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
-
 public class ReportDto {
 
   // User Info
@@ -25,6 +24,7 @@ public class ReportDto {
   private Instant engagementDate;
   private String intent;
   private String locationUuid;
+  private String locationName;
   private String reportText;
 
   private String customFields;
@@ -136,6 +136,14 @@ public class ReportDto {
     this.locationUuid = locationUuid;
   }
 
+  public String getLocationName() {
+    return locationName;
+  }
+
+  public void setLocationName(String locationName) {
+    this.locationName = locationName;
+  }
+
   public String getReportText() {
     return reportText;
   }
@@ -175,4 +183,5 @@ public class ReportDto {
   public void setRank(String rank) {
     this.rank = rank;
   }
+
 }

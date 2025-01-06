@@ -113,7 +113,7 @@ public class TestData {
   }
 
   public static ReportDto createGoodMartReport() {
-    ReportDto reportDto = new ReportDto();
+    final ReportDto reportDto = new ReportDto();
     // User Info
     reportDto.setUuid(UUID.randomUUID().toString());
     reportDto.setOrganizationUuid("9a35caa7-a095-4963-ac7b-b784fde4d583");
@@ -138,7 +138,7 @@ public class TestData {
         "{\"attitude\":\"Positive\", \"contacts\":\"Contacts\", \"remarks\":\"Remarks\", \"rcAssessment\":\"rcAssessment\"}");
 
     // Tasks
-    Map<String, String> tasks = new HashMap<>();
+    final Map<String, String> tasks = new HashMap<>();
     tasks.put("19364d81-3203-483d-a6bf-461d58888c76", "Intelligence");
     tasks.put("does not exist", "does not exist");
     reportDto.setTasks(tasks);
@@ -147,16 +147,17 @@ public class TestData {
   }
 
   public static ReportDto createMartReportWrongOrganization() {
-    ReportDto reportDto = new ReportDto();
+    final ReportDto reportDto = new ReportDto();
     reportDto.setOrganizationUuid("does not exist");
     reportDto.setOrganizationName("does not exist");
     return reportDto;
   }
 
   public static ReportDto createMartReportWrongLocation() {
-    ReportDto reportDto = new ReportDto();
+    final ReportDto reportDto = new ReportDto();
     reportDto.setOrganizationUuid("9a35caa7-a095-4963-ac7b-b784fde4d583");
     reportDto.setLocationUuid("does not exist");
+    reportDto.setLocationName("does not exist");
     return reportDto;
   }
 }

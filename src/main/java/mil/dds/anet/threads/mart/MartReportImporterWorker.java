@@ -223,7 +223,9 @@ public class MartReportImporterWorker extends AbstractWorker {
     // Validate report location, it not valid finish
     final Location location = locationDao.getByUuid(martReport.getLocationUuid());
     if (location == null) {
-      errors.append("Can not find report location: ").append(martReport.getLocationUuid());
+      errors.append("Can not find report location: ").append(martReport.getLocationName());
+          .append("' with uuid: ")
+          .append(martReport.getLocationUuid());
       return null;
     }
 
