@@ -11,6 +11,7 @@ class MartImportedReportsResourceTest extends AbstractResourceTest {
 
   @Test
   void getMartImportedReports() {
+    testMartImportedReports(admin);
     testMartImportedReports(getSuperuser());
     testMartImportedReports(getRegularUser());
   }
@@ -20,9 +21,13 @@ class MartImportedReportsResourceTest extends AbstractResourceTest {
 
     try {
       final var martImportedReports =
-          withCredentials(adminUser, t -> queryExecutor.martImportedReports(
-              getListFields("{ personUuid reportUuid createdAt success errors }"), 0, 0));
-
+          withCredentials(user.getDomainUsername(),
+              t -> queryExecutor.martImportedReports(
+                  getListFields("{ person { uuid } report { uuid } createdAt success errors }"), 0,
+                  0));
+      if (!isAdmin) {
+        fail("Expected an Exception");
+      }
       assertThat(martImportedReports.getTotalCount()).isOne();
       assertThat(martImportedReports.getList()).hasSize(1);
     } catch (Exception expectedException) {
