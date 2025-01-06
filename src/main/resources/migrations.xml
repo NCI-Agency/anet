@@ -6216,14 +6216,25 @@
 		<createTable tableName="martImportedReports">
 			<column name="personUuid" type="${uuid_type}" />
 			<column name="reportUuid" type="${uuid_type}" />
-			<column name="success" type="bool" />
+			<column name="success" type="boolean" />
 			<column name="createdAt" type="datetime" />
 			<column name="errors" type="text" />
 		</createTable>
 		<addForeignKeyConstraint
-				baseColumnNames="personUuid" baseTableName="martImportedReports"
-				constraintName="fk_martImportedReports_person" onDelete="CASCADE" onUpdate="NO ACTION"
-				referencedColumnNames="uuid" referencedTableName="people"
+			constraintName="fk_martImportedReports_person"
+			baseTableName="martImportedReports"
+			baseColumnNames="personUuid"
+			referencedTableName="people"
+			referencedColumnNames="uuid"
+			onDelete="CASCADE" onUpdate="NO ACTION"
+		/>
+		<addForeignKeyConstraint
+			constraintName="fk_martImportedReports_report"
+			baseTableName="martImportedReports"
+			baseColumnNames="reportUuid"
+			referencedTableName="reports"
+			referencedColumnNames="uuid"
+			onDelete="CASCADE" onUpdate="NO ACTION"
 		/>
 	</changeSet>
 
