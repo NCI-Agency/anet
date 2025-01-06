@@ -22,7 +22,7 @@ public class ExchangeServiceFactory {
     this.mailClientConfiguration = mailClientConfiguration;
   }
 
-  public ExchangeService getExchangeService() throws Exception {
+  public ExchangeService getExchangeService() {
     if (disableCertificateCheck) {
       logger.warn(
           "Security warning: EWS SSL X.509 certificate check has been disabled! Do not use this option in production / operations / on high side.");
@@ -33,20 +33,9 @@ public class ExchangeServiceFactory {
     ExchangeCredentials credentials = new WebCredentials(this.mailClientConfiguration.getUserName(),
         mailClientConfiguration.getPassword());
     service.setCredentials(credentials);
-    if (mailClientConfiguration.getHost() == null) {
-      try {
-        service.autodiscoverUrl(this.mailClientConfiguration.getEmailAddress());
-      } catch (Exception e) {
-        logger.error("Autodiscover service for {} failed",
-            this.mailClientConfiguration.getEmailAddress());
-        service.close();
-        throw e;
-      }
-    } else {
-      final URI ewsUrl = makeEwsUrl(mailClientConfiguration.getHost());
-      logger.info("EWS-URL {}", ewsUrl);
-      service.setUrl(ewsUrl);
-    }
+    final URI ewsUrl = makeEwsUrl(mailClientConfiguration.getHost());
+    logger.info("EWS-URL {}", ewsUrl);
+    service.setUrl(ewsUrl);
     return service;
   }
 
