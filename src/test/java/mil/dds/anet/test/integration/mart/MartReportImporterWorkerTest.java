@@ -173,7 +173,7 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
       AttachmentCollection attachmentCollection = new AttachmentCollection();
       attachmentCollection.addFileAttachment(ATTACHMENT_NAME,
           IOUtils.toByteArray(Objects.requireNonNull(
-              this.getClass().getClassLoader().getResourceAsStream("mart/default_avatar.png"))));
+              this.getClass().getClassLoader().getResourceAsStream("assets/default_avatar.png"))));
       when(emailMessageMock.getAttachments()).thenReturn(attachmentCollection);
     }
     return emailMessageMock;
