@@ -292,7 +292,6 @@ public class AnetConfig {
     String host;
     String userName;
     String password;
-    String emailAddress;
     String trustedSender;
     boolean disableCertificateValidation;
     boolean markAsRead;
@@ -313,14 +312,6 @@ public class AnetConfig {
 
     public void setPassword(String password) {
       this.password = password;
-    }
-
-    public String getEmailAddress() {
-      return emailAddress;
-    }
-
-    public void setEmailAddress(String emailAddress) {
-      this.emailAddress = emailAddress;
     }
 
     public String getHost() {

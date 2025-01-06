@@ -82,7 +82,6 @@ anet:
     username: mart.server@nsf.kfor.nato.int
     password: 123
     trustedSender: mart.server@nsf.kfor.nato.int
-    email: mart.server@nsf.kfor.nato.int
     disableCertificateValidation: true
     markAsRead: true
     mailPollingDelay: 10000
