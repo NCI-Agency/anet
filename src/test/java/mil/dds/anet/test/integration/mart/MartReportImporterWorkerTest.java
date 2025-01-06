@@ -91,11 +91,14 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
     EmailMessage emailMessage3 =
         createMockEmail(TestData.createMartReportWrongOrganization(), false);
     EmailMessage emailMessage4 = createMockEmail(TestData.createMartReportWrongLocation(), false);
+    EmailMessage emailMessage5 = createMockEmail(TestData.createMartReportCompletelyWrong(), false);
+    EmailMessage emailMessage6 =
+        createMockEmail(TestData.createGoodMartReportWithUnknownTask(), true);
 
     // Mock the mail exchange server
     IMailReceiver iMailReceiverMock = Mockito.mock();
-    when(iMailReceiverMock.downloadEmails())
-        .thenReturn(List.of(emailMessage1, emailMessage2, emailMessage3, emailMessage4));
+    when(iMailReceiverMock.downloadEmails()).thenReturn(List.of(emailMessage1, emailMessage2,
+        emailMessage3, emailMessage4, emailMessage5, emailMessage6));
 
     martReportImporterWorker = new MartReportImporterWorker(dict, jobHistoryDao, reportDao,
         personDao, positionDao, taskDao, organizationDao, locationDao, martImportedReportDao,
@@ -113,7 +116,7 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
     final PersonSearchQueryInput queryPerson =
         PersonSearchQueryInput.builder().withOrgUuid(List.of(reportDto.getOrganizationUuid()))
             .withEmailNetwork("Internet").withHasBiography(false).withRank("OF-6").build();
-    AnetBeanList_Person searchResults = withCredentials("arthur",
+    final AnetBeanList_Person searchResults = withCredentials("arthur",
         t -> queryExecutor.personList(getListFields(PersonResourceTest.FIELDS), queryPerson));
     assertThat(searchResults.getTotalCount()).isPositive();
     Person person = searchResults.getList().get(0);
@@ -134,44 +137,78 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
     assertThat(createdReport.getAttachments().get(0).getFileName()).isEqualTo(ATTACHMENT_NAME);
     assertThat(createdReport.getTasks().get(0).getLongName()).isEqualTo("Intelligence");
 
+    // Six new records in MartImportedReports, verify them
+    final List<MartImportedReport> martImportedReports = martImportedReportDao.getAll();
 
-    // Four new records in MartImportedReports, verify then
-    List<MartImportedReport> martImportedReports = martImportedReportDao.getAll();
-
-    assertThat(martImportedReports.stream()
-        .filter(
-            martImportedReport -> !martImportedReport.isSuccess() && martImportedReport.getErrors()
-                .equals("Can not find report location: 'does not exist' with uuid: does not exist"))
-        .hasSize(1);
-
-    assertThat(martImportedReports.stream()
-        .filter(martImportedReport -> !martImportedReport.isSuccess()
-            && martImportedReport.getErrors().equals(
-                "Can not find submitter organization: 'does not exist' with uuid: does not exist")))
-        .hasSize(1);
-
-    assertThat(martImportedReports.stream()
-        .filter(martImportedReport -> !martImportedReport.isSuccess() && martImportedReport
-            .getErrors().equals("Report with UUID already exists: " + reportDto.getUuid())))
-        .hasSize(1);
-
-    assertThat(martImportedReports.stream()
+    List<MartImportedReport> reportList = martImportedReports.stream()
         .filter(martImportedReport -> martImportedReport.isSuccess()
             && martImportedReport.getReportUuid().equals(reportDto.getUuid())
             && martImportedReport.getPersonUuid().equals(person.getUuid())
-            && martImportedReport.getErrors()
-                .equals("Can not find task: 'does not exist' with uuid: does not exist<br>")))
-        .hasSize(1);
+            && martImportedReport.getErrors() == null)
+        .toList();
+    assertThat(reportList).hasSize(1);
+    assertThat(martImportedReportDao.delete(reportList.get(0))).isOne();
+
+    reportList = martImportedReports.stream().filter(martImportedReport -> !martImportedReport
+        .isSuccess()
+        && martImportedReport.getErrors() != null
+        && martImportedReport.getErrors()
+            .equals("While importing report 231196f5-3b13-45ea-9d73-524d042b16e7:"
+                + "<ul><li>Report with UUID already exists: 231196f5-3b13-45ea-9d73-524d042b16e7</li></ul>"))
+        .toList();
+    assertThat(reportList).hasSize(1);
+    assertThat(martImportedReportDao.delete(reportList.get(0))).isOne();
+
+    reportList = martImportedReports.stream().filter(martImportedReport -> !martImportedReport
+        .isSuccess()
+        && martImportedReport.getErrors() != null
+        && martImportedReport.getErrors()
+            .equals("While importing report fb875171-2501-46c9-9246-60dafabb656d:"
+                + "<ul><li>Can not find submitter organization: 'does not exist' with uuid: does not exist</li></ul>"))
+        .toList();
+    assertThat(reportList).hasSize(1);
+    assertThat(martImportedReportDao.delete(reportList.get(0))).isOne();
+
+    reportList = martImportedReports.stream().filter(martImportedReport -> !martImportedReport
+        .isSuccess()
+        && martImportedReport.getErrors() != null
+        && martImportedReport.getErrors()
+            .equals("While importing report 2d6c7a19-d878-4792-bdaf-7a73dc3bfc83:"
+                + "<ul><li>Can not find report location: 'does not exist' with uuid: does not exist</li></ul>"))
+        .toList();
+    assertThat(reportList).hasSize(1);
+    assertThat(martImportedReportDao.delete(reportList.get(0))).isOne();
+
+    reportList = martImportedReports.stream().filter(martImportedReport -> !martImportedReport
+        .isSuccess()
+        && martImportedReport.getErrors() != null
+        && martImportedReport.getErrors()
+            .equals("While importing report 68077002-b766-4a79-bcf2-40b7dbffe6e6:"
+                + "<ul><li>Can not find submitter organization: 'does not exist' with uuid: does not exist</li>"
+                + "<li>Can not find report location: 'does not exist' with uuid: does not exist</li></ul>"))
+        .toList();
+    assertThat(reportList).hasSize(1);
+    assertThat(martImportedReportDao.delete(reportList.get(0))).isOne();
+
+    reportList = martImportedReports.stream().filter(martImportedReport -> martImportedReport
+        .isSuccess()
+        && martImportedReport.getErrors() != null
+        && martImportedReport.getErrors()
+            .equals("While importing report 34faac7c-8c85-4dec-8e9f-57d9254b5ae2:"
+                + "<ul><li>Can not find task: 'does not exist' with uuid: does not exist</li></ul>"))
+        .toList();
+    assertThat(reportList).hasSize(1);
+    assertThat(martImportedReportDao.delete(reportList.get(0))).isOne();
   }
 
   private EmailMessage createMockEmail(ReportDto reportDto, boolean withAttachment)
       throws ServiceLocalException, IOException {
-    EmailMessage emailMessageMock = Mockito.mock();
-    MessageBody messageBody = new MessageBody();
+    final EmailMessage emailMessageMock = Mockito.mock();
+    final MessageBody messageBody = new MessageBody();
     messageBody.setText(ignoringMapper.writeValueAsString(reportDto));
     when(emailMessageMock.getBody()).thenReturn(messageBody);
     if (withAttachment) {
-      AttachmentCollection attachmentCollection = new AttachmentCollection();
+      final AttachmentCollection attachmentCollection = new AttachmentCollection();
       attachmentCollection.addFileAttachment(ATTACHMENT_NAME,
           IOUtils.toByteArray(Objects.requireNonNull(
               this.getClass().getClassLoader().getResourceAsStream("assets/default_avatar.png"))));

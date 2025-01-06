@@ -108,13 +108,14 @@ public class MartReportImporterWorker extends AbstractWorker {
 
   private void processEmailMessage(EmailMessage email) {
     final MartImportedReport martImportedReport = new MartImportedReport();
-    final StringBuilder errors = new StringBuilder();
+    ReportDto reportDto = null;
+    final List<String> errors = new ArrayList<>();
     try {
       email.load();
       logger.debug("Processing e-mail sent on: {}", email.getDateTimeCreated());
       // Get the report JSON
-      final Report anetReport =
-          processReportInfo(getReportInfo(email.getBody().toString()), errors);
+      reportDto = getReportInfo(email.getBody().toString());
+      final Report anetReport = processReportInfo(reportDto, errors);
       if (anetReport != null) {
         processAttachments(email, anetReport, errors);
         martImportedReport.setSuccess(true);
@@ -122,14 +123,21 @@ public class MartReportImporterWorker extends AbstractWorker {
         martImportedReport.setPerson(anetReport.getReportPeople().get(0));
       }
     } catch (Exception e) {
-      errors.append("Could not process email").append(email.toString());
+      errors.add(String.format("Could not process email %s", email));
     }
-    martImportedReport.setErrors(errors.toString());
+    if (!errors.isEmpty()) {
+      final StringBuilder errorMsg = new StringBuilder();
+      if (reportDto != null) {
+        errorMsg.append(String.format("While importing report %s:", reportDto.getUuid()));
+      }
+      errorMsg.append(String.format("<ul><li>%s</li></ul>", String.join("</li><li>", errors)));
+      martImportedReport.setErrors(errorMsg.toString());
+    }
     martImportedReport.setCreatedAt(Instant.now());
     martImportedReportDao.insert(martImportedReport);
   }
 
-  private void processAttachments(EmailMessage email, Report anetReport, StringBuilder errors) {
+  private void processAttachments(EmailMessage email, Report anetReport, List<String> errors) {
     try {
       for (final microsoft.exchange.webservices.data.property.complex.Attachment attachment : email
           .getAttachments()) {
@@ -152,26 +160,27 @@ public class MartReportImporterWorker extends AbstractWorker {
             attachmentDao.saveContentBlob(anetAttachment.getUuid(),
                 TikaInputStream.get(fileAttachment.getContent()));
           } else {
-            errors.append("Attachment found in e-mail is not valid: ")
-                .append(fileAttachment.getName());
+            errors.add(String.format("Attachment found in e-mail is not valid: %s",
+                fileAttachment.getName()));
           }
         }
       }
     } catch (Exception e) {
-      errors.append("Could not process report attachments");
+      errors.add("Could not process report attachments");
     }
   }
 
-  private void getTasks(Map<String, String> martTasks, List<Task> tasks, StringBuilder errors) {
-    martTasks.keySet().forEach(martTask -> {
-      final Task task = taskDao.getByUuid(martTask);
+  private List<Task> getTasks(Map<String, String> martTasks, List<String> errors) {
+    final List<Task> tasks = new ArrayList<>();
+    martTasks.forEach((key, value) -> {
+      final Task task = taskDao.getByUuid(key);
       if (task != null) {
         tasks.add(task);
       } else {
-        errors.append("Can not find task: '").append(martTasks.get(martTask))
-            .append("' with uuid: ").append(martTask).append("<br>");
+        errors.add(String.format("Can not find task: '%s' with uuid: %s", value, key));
       }
     });
+    return tasks;
   }
 
   private boolean assertAllowedMimeType(final String mimeType) {
@@ -199,11 +208,11 @@ public class MartReportImporterWorker extends AbstractWorker {
     return report;
   }
 
-  private Report processReportInfo(ReportDto martReport, StringBuilder errors) {
+  private Report processReportInfo(ReportDto martReport, List<String> errors) {
     // Do we have this report already?
     if (reportDao.getByUuid(martReport.getUuid()) != null) {
       logger.info("Report with UUID={} already exists", martReport.getUuid());
-      errors.append("Report with UUID already exists: ").append(martReport.getUuid());
+      errors.add(String.format("Report with UUID already exists: %s", martReport.getUuid()));
       return null;
     }
 
@@ -211,21 +220,22 @@ public class MartReportImporterWorker extends AbstractWorker {
     final List<Person> matchingPersons = personDao.findByEmailAddress(martReport.getEmail());
     final List<ReportPerson> reportPeople = new ArrayList<>();
 
-    // Validate author organization, if not valid finish
+    // Validate author organization
     final Organization organization = organizationDao.getByUuid(martReport.getOrganizationUuid());
     if (organization == null) {
-      errors.append("Can not find submitter organization: '")
-          .append(martReport.getOrganizationName()).append("' with uuid: ")
-          .append(martReport.getOrganizationUuid());
-      return null;
+      errors.add(String.format("Can not find submitter organization: '%s' with uuid: %s",
+          martReport.getOrganizationName(), martReport.getOrganizationUuid()));
     }
 
-    // Validate report location, it not valid finish
+    // Validate report location
     final Location location = locationDao.getByUuid(martReport.getLocationUuid());
     if (location == null) {
-      errors.append("Can not find report location: ").append(martReport.getLocationName());
-          .append("' with uuid: ")
-          .append(martReport.getLocationUuid());
+      errors.add(String.format("Can not find report location: '%s' with uuid: %s",
+          martReport.getLocationName(), martReport.getLocationUuid()));
+    }
+
+    // Return early if there are errors
+    if (!errors.isEmpty()) {
       return null;
     }
 
@@ -285,8 +295,7 @@ public class MartReportImporterWorker extends AbstractWorker {
     anetReport.setAdvisorOrg(organization);
 
     // Report tasks
-    final List<Task> tasks = new ArrayList<>();
-    getTasks(martReport.getTasks(), tasks, errors);
+    final List<Task> tasks = getTasks(martReport.getTasks(), errors);
     anetReport.setTasks(tasks);
     // Custom fields
     anetReport.setCustomFields(martReport.getCustomFields());
@@ -298,7 +307,7 @@ public class MartReportImporterWorker extends AbstractWorker {
       anetReport = reportDao.insertWithExistingUuid(anetReport);
     } catch (Exception e) {
       logger.info("Report with UUID={} already exists", martReport.getUuid());
-      errors.append("Report with UUID already exists: ").append(martReport.getUuid());
+      errors.add(String.format("Report with UUID already exists: %s", martReport.getUuid()));
       return null;
     }
 
@@ -308,13 +317,12 @@ public class MartReportImporterWorker extends AbstractWorker {
     return anetReport;
   }
 
-  private void getPersonCountry(Person person, ReportDto martReport, StringBuilder errors) {
+  private void getPersonCountry(Person person, ReportDto martReport, List<String> errors) {
     final LocationSearchQuery searchQuery = new LocationSearchQuery();
     searchQuery.setText(martReport.getCountry());
     final List<Location> countries = locationDao.search(searchQuery).getList();
     if (countries.isEmpty()) {
-      errors.append("Can not find submitter country '").append(martReport.getCountry())
-          .append("<br>");
+      errors.add(String.format("Can not find submitter country '%s'", martReport.getCountry()));
     } else {
       person.setCountry(countries.get(0));
     }
