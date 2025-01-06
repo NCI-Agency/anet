@@ -203,7 +203,7 @@ public class DaoUtils {
     return millis < MILLIS_IN_YEAR;
   }
 
-  public static Instant handleRelativeDate(Instant input) {
+  private static Instant handleRelativeDate(Instant input) {
     if (isRelativeDate(input)) {
       final long now = Instant.now().toEpochMilli();
       return Instant.ofEpochMilli(now + input.toEpochMilli());

@@ -30,8 +30,8 @@ public class ExchangeServiceFactory {
     final ExchangeService service =
         disableCertificateCheck ? new TrustEveryoneExchangeService() : new ExchangeService();
 
-    ExchangeCredentials credentials = new WebCredentials(this.mailClientConfiguration.getUserName(),
-        mailClientConfiguration.getPassword());
+    final ExchangeCredentials credentials = new WebCredentials(
+        this.mailClientConfiguration.getUserName(), mailClientConfiguration.getPassword());
     service.setCredentials(credentials);
     final URI ewsUrl = makeEwsUrl(mailClientConfiguration.getHostname());
     logger.info("EWS-URL {}", ewsUrl);
