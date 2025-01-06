@@ -115,7 +115,7 @@ public class TestData {
   public static ReportDto createGoodMartReport() {
     final ReportDto reportDto = new ReportDto();
     // User Info
-    reportDto.setUuid(UUID.randomUUID().toString());
+    reportDto.setUuid("231196f5-3b13-45ea-9d73-524d042b16e7");
     reportDto.setOrganizationUuid("9a35caa7-a095-4963-ac7b-b784fde4d583");
     reportDto.setOrganizationName("Planning Programming, Budgeting and Execution");
     reportDto.setRank("OF-6");
@@ -129,6 +129,7 @@ public class TestData {
     reportDto.setReportText("Report Text");
     reportDto.setEngagementDate(Instant.now());
     reportDto.setLocationUuid("0855fb0a-995e-4a79-a132-4024ee2983ff");
+    reportDto.setLocationName("General Hospital");
     reportDto.setCountry("British");
     reportDto.setPositionName("MART Team Member");
     reportDto.setSubmittedAt(Instant.now());
@@ -140,24 +141,49 @@ public class TestData {
     // Tasks
     final Map<String, String> tasks = new HashMap<>();
     tasks.put("19364d81-3203-483d-a6bf-461d58888c76", "Intelligence");
-    tasks.put("does not exist", "does not exist");
     reportDto.setTasks(tasks);
 
     return reportDto;
   }
 
+  public static ReportDto createGoodMartReportWithUnknownTask() {
+    final ReportDto reportDto = createGoodMartReport();
+    reportDto.setUuid("34faac7c-8c85-4dec-8e9f-57d9254b5ae2");
+    reportDto.getTasks().put("does not exist", "does not exist");
+    return reportDto;
+  }
+
   public static ReportDto createMartReportWrongOrganization() {
     final ReportDto reportDto = new ReportDto();
+    reportDto.setUuid("fb875171-2501-46c9-9246-60dafabb656d");
     reportDto.setOrganizationUuid("does not exist");
     reportDto.setOrganizationName("does not exist");
+    reportDto.setLocationUuid("0855fb0a-995e-4a79-a132-4024ee2983ff");
+    reportDto.setLocationName("General Hospital");
     return reportDto;
   }
 
   public static ReportDto createMartReportWrongLocation() {
     final ReportDto reportDto = new ReportDto();
+    reportDto.setUuid("2d6c7a19-d878-4792-bdaf-7a73dc3bfc83");
     reportDto.setOrganizationUuid("9a35caa7-a095-4963-ac7b-b784fde4d583");
+    reportDto.setOrganizationName("Planning Programming, Budgeting and Execution");
     reportDto.setLocationUuid("does not exist");
     reportDto.setLocationName("does not exist");
+    return reportDto;
+  }
+
+  public static ReportDto createMartReportCompletelyWrong() {
+    final ReportDto reportDto = new ReportDto();
+    reportDto.setUuid("68077002-b766-4a79-bcf2-40b7dbffe6e6");
+    reportDto.setOrganizationUuid("does not exist");
+    reportDto.setOrganizationName("does not exist");
+    reportDto.setLocationUuid("does not exist");
+    reportDto.setLocationName("does not exist");
+    final Map<String, String> tasks = new HashMap<>();
+    tasks.put("19364d81-3203-483d-a6bf-461d58888c76", "Intelligence");
+    tasks.put("does not exist", "does not exist");
+    reportDto.setTasks(tasks);
     return reportDto;
   }
 }
