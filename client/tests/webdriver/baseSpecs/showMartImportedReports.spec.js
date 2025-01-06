@@ -1,5 +1,5 @@
 import { expect } from "chai"
-import ShowMartImportedReports from "../pages/location/showMartImportedReports.page"
+import ShowMartImportedReports from "../pages/showMartImportedReports.page"
 
 describe("Show Mart imported reports page", () => {
   describe("When on the Mart imported reports page we should see one imported report", () => {
