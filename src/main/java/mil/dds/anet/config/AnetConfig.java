@@ -289,14 +289,23 @@ public class AnetConfig {
   }
 
   public static class MartExchangeConfiguration {
-    String host;
-    String userName;
-    String password;
-    String trustedSender;
-    boolean disableCertificateValidation;
-    boolean markAsRead;
-    long mailPollingDelay;
-    int maxNumberEmailsPulled;
+    private String hostname;
+    private String userName;
+    private String password;
+    private String trustedSender;
+    private boolean disableCertificateValidation;
+    private boolean markAsRead;
+    private boolean disabled;
+    private long mailPollingDelayInSeconds;
+    private int maxNumberEmailsPulled;
+
+    public String getHostname() {
+      return hostname;
+    }
+
+    public void setHostname(String host) {
+      this.hostname = host;
+    }
 
     public String getUserName() {
       return userName;
@@ -314,14 +323,6 @@ public class AnetConfig {
       this.password = password;
     }
 
-    public String getHost() {
-      return host;
-    }
-
-    public void setHost(String host) {
-      this.host = host;
-    }
-
     public String getTrustedSender() {
       return trustedSender;
     }
@@ -330,7 +331,7 @@ public class AnetConfig {
       this.trustedSender = trustedSender;
     }
 
-    public boolean getDisableCertificateValidation() {
+    public boolean isDisableCertificateValidation() {
       return disableCertificateValidation;
     }
 
@@ -338,7 +339,7 @@ public class AnetConfig {
       this.disableCertificateValidation = disableCertificateValidation;
     }
 
-    public boolean getMarkAsRead() {
+    public boolean isMarkAsRead() {
       return markAsRead;
     }
 
@@ -346,12 +347,20 @@ public class AnetConfig {
       this.markAsRead = markAsRead;
     }
 
-    public long getMailPollingDelay() {
-      return mailPollingDelay;
+    public boolean isDisabled() {
+      return disabled;
     }
 
-    public void setMailPollingDelay(long mailPollingDelay) {
-      this.mailPollingDelay = mailPollingDelay;
+    public void setDisabled(boolean disabled) {
+      this.disabled = disabled;
+    }
+
+    public long getMailPollingDelayInSeconds() {
+      return mailPollingDelayInSeconds;
+    }
+
+    public void setMailPollingDelayInSeconds(long mailPollingDelay) {
+      this.mailPollingDelayInSeconds = mailPollingDelay;
     }
 
     public int getMaxNumberEmailsPulled() {

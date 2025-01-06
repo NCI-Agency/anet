@@ -53,7 +53,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConditionalOnExpression("not ${anet.no-workers:false} and ${anet.import-mart-reports:false}")
+@ConditionalOnExpression("not ${anet.no-workers:false} and not ${anet.mart.disabled:true}")
 public class MartReportImporterWorker extends AbstractWorker {
 
   private final ObjectMapper ignoringMapper = MapperUtils.getDefaultMapper()
@@ -76,7 +76,7 @@ public class MartReportImporterWorker extends AbstractWorker {
       OrganizationDao organizationDao, LocationDao locationDao,
       MartImportedReportDao martImportedReportDao, AttachmentDao attachmentDao,
       EmailAddressDao emailAddressDao, IMailReceiver iMailReceiver) {
-    super(dict, jobHistoryDao, "AnetMartImporter waking up to get MART reports!");
+    super(dict, jobHistoryDao, "MartReportImporterWorker waking up to get MART reports!");
     this.personDao = personDao;
     this.reportDao = reportDao;
     this.taskDao = taskDao;
@@ -89,7 +89,8 @@ public class MartReportImporterWorker extends AbstractWorker {
     this.iMailReceiver = iMailReceiver;
   }
 
-  @Scheduled(initialDelay = 1, fixedRate = 10, timeUnit = TimeUnit.SECONDS)
+  @Scheduled(initialDelay = 35, fixedRateString = "${anet.mart.mail-polling-delay-in-seconds:10}",
+      timeUnit = TimeUnit.SECONDS)
   @Override
   public void run() {
     super.run();
