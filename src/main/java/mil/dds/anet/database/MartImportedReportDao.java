@@ -4,6 +4,7 @@ import java.util.List;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.mart.MartImportedReport;
 import mil.dds.anet.database.mappers.MartImportedReportMapper;
+import mil.dds.anet.utils.DaoUtils;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.statement.Query;
 import org.springframework.stereotype.Component;
@@ -53,21 +54,16 @@ public class MartImportedReportDao {
     }
   }
 
-  /**
-   * Inserts martImportedReport in the database
-   *
-   * @param martImportedReport the mart imported report
-   * @return number of rows inserted/updated
-   */
   @Transactional
   public int insert(final MartImportedReport martImportedReport) {
     final Handle handle = getDbHandle();
     try {
       return handle
-          .createUpdate("/* upsertMartImportedReport */ INSERT INTO \"martImportedReports\" "
+          .createUpdate("/* insertMartImportedReport */ INSERT INTO \"martImportedReports\" "
               + "(\"personUuid\", \"reportUuid\", success, \"createdAt\", errors) "
               + "VALUES (:personUuid, :reportUuid, :success, :createdAt, :errors) ")
-          .bindBean(martImportedReport).execute();
+          .bindBean(martImportedReport)
+          .bind("createdAt", DaoUtils.asLocalDateTime(martImportedReport.getCreatedAt())).execute();
     } finally {
       closeDbHandle(handle);
     }
