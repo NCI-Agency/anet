@@ -1,7 +1,8 @@
 package mil.dds.anet.beans.mart;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class ReportDto {
