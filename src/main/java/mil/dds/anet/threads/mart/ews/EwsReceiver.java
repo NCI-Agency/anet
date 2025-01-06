@@ -62,7 +62,7 @@ public class EwsReceiver implements IMailReceiver {
         if (item instanceof EmailMessage emailMessage) {
           emailMessage.load(itemPropertySet);
           result.add(emailMessage);
-          if (mailClientConfiguration.getMarkAsRead()) {
+          if (mailClientConfiguration.isMarkAsRead()) {
             emailMessage.setIsRead(true);
             emailMessage.update(ConflictResolutionMode.AlwaysOverwrite);
           }
