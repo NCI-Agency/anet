@@ -32,7 +32,7 @@ public class EwsReceiver implements IMailReceiver {
   private final ExchangeService exchangeService;
   private final AnetConfig.MartExchangeConfiguration mailClientConfiguration;
 
-  public EwsReceiver(AnetConfig config) throws Exception {
+  public EwsReceiver(AnetConfig config) {
     final ExchangeServiceFactory exchangeServiceFactory =
         new ExchangeServiceFactory(config.getMart());
     this.exchangeService = exchangeServiceFactory.getExchangeService();
@@ -41,12 +41,12 @@ public class EwsReceiver implements IMailReceiver {
 
   public List<EmailMessage> downloadEmails() {
     try {
-      PropertySet itemPropertySet = new PropertySet(BasePropertySet.FirstClassProperties);
+      final PropertySet itemPropertySet = new PropertySet(BasePropertySet.FirstClassProperties);
       itemPropertySet.setRequestedBodyType(BodyType.Text);
 
       final ItemView view = new ItemView(mailClientConfiguration.getMaxNumberEmailsPulled());
       view.setPropertySet(itemPropertySet);
-      // Filter to only pull unread e-mails (to prevent un-parsable mails to be read over and over
+      // Filter to only pull unread e-mails (to prevent un-parsable mails to be read over and over)
       final SearchFilter filterUnreadEmails = new SearchFilter.SearchFilterCollection(
           LogicalOperator.And, new SearchFilter.IsEqualTo(EmailMessageSchema.IsRead, false),
           new SearchFilter.IsEqualTo(EmailMessageSchema.From,
@@ -54,10 +54,10 @@ public class EwsReceiver implements IMailReceiver {
 
       // Get oldest e-mails first, process in sequence
       view.getOrderBy().add(ItemSchema.DateTimeReceived, SortDirection.Ascending);
-      FindItemsResults<Item> findResults =
+      final FindItemsResults<Item> findResults =
           exchangeService.findItems(WellKnownFolderName.Inbox, filterUnreadEmails, view);
 
-      List<EmailMessage> result = new ArrayList<>();
+      final List<EmailMessage> result = new ArrayList<>();
       for (final Item item : findResults.getItems()) {
         if (item instanceof EmailMessage emailMessage) {
           emailMessage.load(itemPropertySet);

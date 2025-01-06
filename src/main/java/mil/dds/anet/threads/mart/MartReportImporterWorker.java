@@ -44,7 +44,6 @@ import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.resources.AttachmentResource;
 import mil.dds.anet.threads.AbstractWorker;
 import mil.dds.anet.threads.mart.ews.IMailReceiver;
-import mil.dds.anet.utils.DaoUtils;
 import org.apache.tika.Tika;
 import org.apache.tika.io.TikaInputStream;
 import org.springframework.beans.BeanUtils;
@@ -77,14 +76,14 @@ public class MartReportImporterWorker extends AbstractWorker {
       MartImportedReportDao martImportedReportDao, AttachmentDao attachmentDao,
       EmailAddressDao emailAddressDao, IMailReceiver iMailReceiver) {
     super(dict, jobHistoryDao, "MartReportImporterWorker waking up to get MART reports!");
-    this.personDao = personDao;
     this.reportDao = reportDao;
+    this.personDao = personDao;
+    this.positionDao = positionDao;
     this.taskDao = taskDao;
+    this.organizationDao = organizationDao;
     this.locationDao = locationDao;
     this.martImportedReportDao = martImportedReportDao;
     this.attachmentDao = attachmentDao;
-    this.organizationDao = organizationDao;
-    this.positionDao = positionDao;
     this.emailAddressDao = emailAddressDao;
     this.iMailReceiver = iMailReceiver;
   }
@@ -99,7 +98,7 @@ public class MartReportImporterWorker extends AbstractWorker {
   @Override
   protected void runInternal(Instant now, JobHistory jobHistory, GraphQLContext context) {
     try {
-      for (EmailMessage email : iMailReceiver.downloadEmails()) {
+      for (final EmailMessage email : iMailReceiver.downloadEmails()) {
         processEmailMessage(email);
       }
     } catch (Exception e) {
@@ -108,13 +107,14 @@ public class MartReportImporterWorker extends AbstractWorker {
   }
 
   private void processEmailMessage(EmailMessage email) {
-    MartImportedReport martImportedReport = new MartImportedReport();
-    StringBuffer errors = new StringBuffer();
+    final MartImportedReport martImportedReport = new MartImportedReport();
+    final StringBuilder errors = new StringBuilder();
     try {
       email.load();
       logger.debug("Processing e-mail sent on: {}", email.getDateTimeCreated());
       // Get the report JSON
-      Report anetReport = processReportInfo(getReportInfo(email.getBody().toString()), errors);
+      final Report anetReport =
+          processReportInfo(getReportInfo(email.getBody().toString()), errors);
       if (anetReport != null) {
         processAttachments(email, anetReport, errors);
         martImportedReport.setSuccess(true);
@@ -129,16 +129,16 @@ public class MartReportImporterWorker extends AbstractWorker {
     martImportedReportDao.insert(martImportedReport);
   }
 
-  private void processAttachments(EmailMessage email, Report anetReport, StringBuffer errors) {
+  private void processAttachments(EmailMessage email, Report anetReport, StringBuilder errors) {
     try {
-      for (microsoft.exchange.webservices.data.property.complex.Attachment attachment : email
+      for (final microsoft.exchange.webservices.data.property.complex.Attachment attachment : email
           .getAttachments()) {
         if (attachment instanceof FileAttachment fileAttachment) {
           final TikaInputStream tikaInputStream = TikaInputStream.get(fileAttachment.getContent());
           final String detectedMimeType =
               new Tika().detect(tikaInputStream, fileAttachment.getName());
           if (assertAllowedMimeType(detectedMimeType)) {
-            GenericRelatedObject genericRelatedObject = new GenericRelatedObject();
+            final GenericRelatedObject genericRelatedObject = new GenericRelatedObject();
             genericRelatedObject.setRelatedObjectType(ReportDao.TABLE_NAME);
             genericRelatedObject.setRelatedObjectUuid(anetReport.getUuid());
             Attachment anetAttachment = new Attachment();
@@ -162,9 +162,9 @@ public class MartReportImporterWorker extends AbstractWorker {
     }
   }
 
-  private void getTasks(Map<String, String> martTasks, List<Task> tasks, StringBuffer errors) {
+  private void getTasks(Map<String, String> martTasks, List<Task> tasks, StringBuilder errors) {
     martTasks.keySet().forEach(martTask -> {
-      Task task = taskDao.getByUuid(martTask);
+      final Task task = taskDao.getByUuid(martTask);
       if (task != null) {
         tasks.add(task);
       } else {
@@ -189,8 +189,8 @@ public class MartReportImporterWorker extends AbstractWorker {
         logger.info("Time between report send and reception: {} ms", transportDelay.toMillis());
       }
       logger.debug("Found report with UUID={}", report.getUuid());
-    } catch (JsonParseException jsonMappingException) {
-      logger.error("e-mail does not look like JSON", jsonMappingException);
+    } catch (JsonParseException jsonParseException) {
+      logger.error("e-mail does not look like JSON", jsonParseException);
     } catch (JsonMappingException jsonMappingException) {
       logger.error("Invalid JSON format", jsonMappingException);
     } catch (Exception e) {
@@ -199,7 +199,7 @@ public class MartReportImporterWorker extends AbstractWorker {
     return report;
   }
 
-  public Report processReportInfo(ReportDto martReport, StringBuffer errors) {
+  private Report processReportInfo(ReportDto martReport, StringBuilder errors) {
     // Do we have this report already?
     if (reportDao.getByUuid(martReport.getUuid()) != null) {
       logger.info("Report with UUID={} already exists", martReport.getUuid());
@@ -208,11 +208,11 @@ public class MartReportImporterWorker extends AbstractWorker {
     }
 
     // Try to find the person/s with the email
-    List<Person> matchingPersons = personDao.findByEmailAddress(martReport.getEmail());
-    List<ReportPerson> reportPeople = new ArrayList<>();
+    final List<Person> matchingPersons = personDao.findByEmailAddress(martReport.getEmail());
+    final List<ReportPerson> reportPeople = new ArrayList<>();
 
     // Validate author organization, if not valid finish
-    Organization organization = organizationDao.getByUuid(martReport.getOrganizationUuid());
+    final Organization organization = organizationDao.getByUuid(martReport.getOrganizationUuid());
     if (organization == null) {
       errors.append("Can not find submitter organization: '")
           .append(martReport.getOrganizationName()).append("' with uuid: ")
@@ -221,7 +221,7 @@ public class MartReportImporterWorker extends AbstractWorker {
     }
 
     // Validate report location, it not valid finish
-    Location location = locationDao.getByUuid(martReport.getLocationUuid());
+    final Location location = locationDao.getByUuid(martReport.getLocationUuid());
     if (location == null) {
       errors.append("Can not find report location: ").append(martReport.getLocationUuid());
       return null;
@@ -238,7 +238,7 @@ public class MartReportImporterWorker extends AbstractWorker {
       person = personDao.insert(person);
 
       // Update email address
-      EmailAddress emailAddress = new EmailAddress();
+      final EmailAddress emailAddress = new EmailAddress();
       emailAddress.setNetwork("Internet");
       emailAddress.setAddress(martReport.getEmail());
       emailAddressDao.updateEmailAddresses(PersonDao.TABLE_NAME, person.getUuid(),
@@ -275,7 +275,7 @@ public class MartReportImporterWorker extends AbstractWorker {
     anetReport.setUuid(martReport.getUuid());
     anetReport.setCreatedAt(martReport.getCreatedAt());
     anetReport.setIntent(martReport.getIntent());
-    anetReport.setEngagementDate(DaoUtils.handleRelativeDate(martReport.getEngagementDate()));
+    anetReport.setEngagementDate(martReport.getEngagementDate());
     anetReport.setReportText(martReport.getReportText());
     anetReport.setClassification("NKU");
 
@@ -283,7 +283,7 @@ public class MartReportImporterWorker extends AbstractWorker {
     anetReport.setAdvisorOrg(organization);
 
     // Report tasks
-    List<Task> tasks = new ArrayList<>();
+    final List<Task> tasks = new ArrayList<>();
     getTasks(martReport.getTasks(), tasks, errors);
     anetReport.setTasks(tasks);
     // Custom fields
@@ -300,17 +300,16 @@ public class MartReportImporterWorker extends AbstractWorker {
       return null;
     }
 
-
     // Submit the report
     reportDao.submit(anetReport, anetReport.getReportPeople().get(0));
 
     return anetReport;
   }
 
-  private void getPersonCountry(Person person, ReportDto martReport, StringBuffer errors) {
-    LocationSearchQuery searchQuery = new LocationSearchQuery();
+  private void getPersonCountry(Person person, ReportDto martReport, StringBuilder errors) {
+    final LocationSearchQuery searchQuery = new LocationSearchQuery();
     searchQuery.setText(martReport.getCountry());
-    List<Location> countries = locationDao.search(searchQuery).getList();
+    final List<Location> countries = locationDao.search(searchQuery).getList();
     if (countries.isEmpty()) {
       errors.append("Can not find submitter country '").append(martReport.getCountry())
           .append("<br>");
@@ -320,7 +319,7 @@ public class MartReportImporterWorker extends AbstractWorker {
   }
 
   private ReportPerson createReportPerson(Person person) {
-    ReportPerson rp = new ReportPerson();
+    final ReportPerson rp = new ReportPerson();
     rp.setAuthor(true);
     rp.setUser(true);
     rp.setAttendee(true);
