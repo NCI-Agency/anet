@@ -69,4 +69,24 @@ public class MartImportedReportDao {
     }
   }
 
+  @Transactional
+  public int delete(final MartImportedReport martImportedReport) {
+    final Handle handle = getDbHandle();
+    try {
+      final StringBuilder sql =
+          new StringBuilder("/* deleteMartImportedReport */ DELETE FROM \"martImportedReports\" "
+              + "WHERE success = :success AND \"createdAt\" = :createdAt");
+      sql.append(martImportedReport.getPersonUuid() == null ? " AND \"personUuid\" IS NULL"
+          : " AND \"personUuid\" = :personUuid");
+      sql.append(martImportedReport.getReportUuid() == null ? " AND \"reportUuid\" IS NULL"
+          : " AND \"reportUuid\" = :reportUuid");
+      sql.append(
+          martImportedReport.getErrors() == null ? " AND errors IS NULL" : " AND errors = :errors");
+      return handle.createUpdate(sql).bindBean(martImportedReport)
+          .bind("createdAt", DaoUtils.asLocalDateTime(martImportedReport.getCreatedAt())).execute();
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
 }
