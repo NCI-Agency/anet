@@ -354,6 +354,15 @@ const Navigation = ({
       <Nav id="all-org-nav" style={{ lineHeight: "10px" }} />
 
       <SidebarLink
+        id="top-tasks-nav"
+        linkTo="/top-tasks"
+        handleOnClick={resetPages}
+        setIsMenuLinksOpened={() => setIsMenuLinksOpened(false)}
+      >
+        {Settings.fields.regular.task.allTasksName}
+      </SidebarLink>
+
+      <SidebarLink
         id="daily-rollup-nav"
         linkTo="/rollup"
         handleOnClick={resetPages}
