@@ -1238,6 +1238,19 @@ properties:
                 type: string
                 title: The name used to represent 'all organizations'
                 description: Used in the UI to refer to all organizations collectively.
+          task:
+            type: object
+            additionalProperties: false
+            required: [ name, allTasksName ]
+            properties:
+              name:
+                type: string
+                title: The name of this field
+                description: Used in the UI where a task is shown.
+              allTasksName:
+                type: string
+                title: The name used to represent 'all tasks'
+                description: Used in the UI to refer to all tasks.
 
       superuser:
         type: object

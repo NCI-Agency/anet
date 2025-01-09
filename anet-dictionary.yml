@@ -2162,6 +2162,10 @@ fields:
       name: Organization
       allOrgName: Top-level Organizations
 
+    task:
+      name: Task
+      allTasksName: Top Tasks
+
 pinned_ORGs: [Key Leader Engagement]
 non_reporting_ORGs: [ANET Administrators]
 tasking_ORGs: [EF 1.1, EF 1.2, EF 2, EF 4, EF 9]
