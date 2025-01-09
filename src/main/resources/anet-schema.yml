@@ -1176,7 +1176,7 @@ properties:
       regular:
         type: object
         additionalProperties: false
-        required: [person, position, org]
+        required: [person, position, org, task]
         properties:
 
           person:
