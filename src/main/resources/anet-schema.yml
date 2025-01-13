@@ -608,7 +608,8 @@ properties:
   fields:
     type: object
     additionalProperties: false
-    required: [task, attachment, authorizationGroup, report, person, position, organization, advisor, interlocutor, regular, superuser, administrator]
+    required: [task, attachment, authorizationGroup, eventSeries, event, report, person,
+               position, organization, advisor, interlocutor, regular, superuser, administrator]
     properties:
 
       task:
@@ -731,10 +732,12 @@ properties:
             "$ref": "#/$defs/inputField"
           adminOrg:
             "$ref": "#/$defs/inputField"
+
       event:
         type: object
         additionalProperties: false
-        required: [status, name, description, startDate, endDate, hostOrg, adminOrg]
+        required: [status, name, type, description, startDate, endDate, outcomes, hostOrg, adminOrg,
+                   eventSeries, location, organizations, people, tasks]
         properties:
           status:
             "$ref": "#/$defs/labeledField"
@@ -769,7 +772,7 @@ properties:
         type: object
         additionalProperties: false
         required: [intent, engagementDate, duration, atmosphere, atmosphereDetails, cancelled,
-                   cancelledReason, nextSteps, keyOutcomes, reportText, location]
+                   cancelledReason, nextSteps, keyOutcomes, reportText, location, reportPeople, event]
         properties:
           canUnpublishReports:
             type: boolean
