@@ -39,23 +39,23 @@ test("Home Page", async t => {
 
   const $tourLauncher = await $(".persistent-tour-launcher")
   await $tourLauncher.click()
-  const $hopscotchTitle = await $("div.react-joyride__tooltip h1")
+  const $guidedTourTitle = await $("div.react-joyride__tooltip h1")
   await assertElementText(
     t,
-    $hopscotchTitle,
+    $guidedTourTitle,
     "Welcome",
-    "Clicking the hopscotch launch button starts the hopscotch tour"
+    "Clicking the launch button starts the Guided Tour"
   )
 
-  const $hopscotchNext = await $("div.react-joyride__tooltip > div > button")
-  await $hopscotchNext.click()
+  const $guidedTourNext = await $("div.react-joyride__tooltip > div > button")
+  await $guidedTourNext.click()
 
-  const $hopscotchOverlay = await $("div.react-joyride__spotlight")
-  await $hopscotchOverlay.click()
+  const $guidedTourOverlay = await $("div.react-joyride__spotlight")
+  await $guidedTourOverlay.click()
   await assertElementNotPresent(
     t,
     "div.react-joyride__tooltip",
-    "Clicking outside the dialog clears the hopscotch tour",
+    "Clicking outside the dialog clears the Guided Tour",
     shortWaitMs
   )
 

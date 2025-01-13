@@ -45,7 +45,7 @@ import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import { Attachment, Person, Position } from "models"
 import moment from "moment"
-import { personTour } from "pages/HopscotchTour"
+import { personTour } from "pages/GuidedTour"
 import React, { useContext, useState } from "react"
 import {
   Button,

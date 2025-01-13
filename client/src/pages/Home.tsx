@@ -21,7 +21,7 @@ import {
 import { deserializeQueryParams } from "components/SearchFilters"
 import { LAST_WEEK } from "dateUtils"
 import { Report } from "models"
-import { superuserTour, userTour } from "pages/HopscotchTour"
+import { superuserTour, userTour } from "pages/GuidedTour"
 import React, { useContext } from "react"
 import { Button, Col, Container, Row } from "react-bootstrap"
 import { connect } from "react-redux"
