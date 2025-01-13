@@ -237,6 +237,7 @@ const HomeTiles = ({
         orgRecurseStrategy: RECURSE_STRATEGY.NONE,
         createdAtStart: LAST_WEEK,
         state: [
+          Report.STATE.APPROVED,
           Report.STATE.PUBLISHED,
           Report.STATE.CANCELLED,
           Report.STATE.PENDING_APPROVAL
@@ -276,7 +277,10 @@ const HomeTiles = ({
   function mySensitiveInfo() {
     return {
       title: "Reports with sensitive information",
-      query: { state: [Report.STATE.PUBLISHED], sensitiveInfo: true }
+      query: {
+        state: [Report.STATE.APPROVED, Report.STATE.PUBLISHED],
+        sensitiveInfo: true
+      }
     }
   }
 }

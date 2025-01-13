@@ -12,7 +12,7 @@ interface DailyRollupChartProps {
   tooltip?: (...args: unknown[]) => unknown
   barColors: {
     cancelled: string
-    published: string
+    past: string
     planned: string
   }
 }
@@ -43,7 +43,7 @@ const DailyRollupChart = ({
     let chart = d3.select(node.current)
     const xLabels = [].concat.apply(
       [],
-      data.map(d => d.published + d.planned + d.cancelled)
+      data.map(d => d.past + d.planned + d.cancelled)
     )
     const yLabels = {}
     const yDomain = data.map(d => {
@@ -144,29 +144,29 @@ const DailyRollupChart = ({
 
     bar
       .append("rect")
-      .attr("width", d => d.published && xScale(d.published))
+      .attr("width", d => d.past && xScale(d.past))
       .attr("height", BAR_HEIGHT)
-      .attr("fill", barColors.published)
+      .attr("fill", barColors.past)
 
     bar
       .append("text")
-      .attr("x", d => xScale(d.published) - 6)
+      .attr("x", d => xScale(d.past) - 6)
       .attr("y", BAR_HEIGHT / 2)
       .attr("dy", ".35em")
       .style("text-anchor", "end")
-      .text(d => d.published || "")
-      .attr("fill", utils.getContrastYIQ(barColors.published))
+      .text(d => d.past || "")
+      .attr("fill", utils.getContrastYIQ(barColors.past))
 
     bar
       .append("rect")
-      .attr("x", d => d.published && xScale(d.published))
+      .attr("x", d => d.past && xScale(d.past))
       .attr("width", d => d.planned && xScale(d.planned))
       .attr("height", BAR_HEIGHT)
       .attr("fill", barColors.planned)
 
     bar
       .append("text")
-      .attr("x", d => xScale(d.published + d.planned) - 6)
+      .attr("x", d => xScale(d.past + d.planned) - 6)
       .attr("y", BAR_HEIGHT / 2)
       .attr("dy", ".35em")
       .style("text-anchor", "end")
@@ -175,17 +175,14 @@ const DailyRollupChart = ({
 
     bar
       .append("rect")
-      .attr(
-        "x",
-        d => (d.published || d.planned) && xScale(d.published + d.planned)
-      )
+      .attr("x", d => (d.past || d.planned) && xScale(d.past + d.planned))
       .attr("width", d => d.cancelled && xScale(d.cancelled))
       .attr("height", BAR_HEIGHT)
       .attr("fill", barColors.cancelled)
 
     bar
       .append("text")
-      .attr("x", d => xScale(d.published + d.planned + d.cancelled) - 6)
+      .attr("x", d => xScale(d.past + d.planned + d.cancelled) - 6)
       .attr("y", BAR_HEIGHT / 2)
       .attr("dy", ".35em")
       .style("text-anchor", "end")

@@ -26,7 +26,7 @@ const userTour = (currentUser, navigate) => {
       {
         title: "My ANET snapshot",
         content:
-          "This area shows you how many reports you've drafted but haven't submitted, the number of your reports waiting for approval from your organization's approval chain, and your organization's reports published in the last 7 days and planned engagements.",
+          "This area shows you how many reports you've drafted but haven't submitted, the number of your reports waiting for approval from your organization's approval chain, and your organization's reports in the last 7 days and planned engagements.",
         target: ".home-tile-row",
         placement: "bottom"
       },
