@@ -35,16 +35,7 @@ export default class EventSeries extends Model {
           : true
       )
       .default({}),
-    adminOrg: yup
-      .object()
-      .test("adminOrg", "admin org error", (adminOrg, testContext) =>
-        _isEmpty(adminOrg)
-          ? testContext.createError({
-            message: `You must provide the ${Settings.fields.eventSeries.adminOrg.label}`
-          })
-          : true
-      )
-      .default({})
+    adminOrg: yup.object().nullable().default(null)
   })
 
   static autocompleteQuery = `

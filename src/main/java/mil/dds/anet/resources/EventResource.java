@@ -36,8 +36,12 @@ public class EventResource {
     this.dao = engine.getEventDao();
   }
 
+  public static boolean hasPermission(final Person user, final String orgUuid) {
+    return AuthUtils.isAdmin(user) || AuthUtils.canAdministrateOrg(user, orgUuid);
+  }
+
   public static void assertPermission(final Person user, final String orgUuid) {
-    if (!AuthUtils.canAdministrateOrg(user, orgUuid)) {
+    if (!hasPermission(user, orgUuid)) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, AuthUtils.UNAUTH_MESSAGE);
     }
   }
@@ -161,10 +165,6 @@ public class EventResource {
     if (event.getHostOrg() == null || event.getHostOrgUuid().trim().isEmpty()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           "Event Host Organization must not be empty");
-    }
-    if (event.getAdminOrgUuid() == null || event.getAdminOrgUuid().trim().isEmpty()) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "Event Admin Organization must not be empty");
     }
     assertPermission(user, event.getAdminOrgUuid());
   }

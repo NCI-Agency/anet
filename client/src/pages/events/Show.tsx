@@ -67,6 +67,7 @@ const EventShow = ({ pageDispatchers }: EventShowProps) => {
   }
 
   const canAdministrateOrg =
+    currentUser?.isAdmin() ||
     currentUser?.hasAdministrativePermissionsForOrganization(event.adminOrg)
 
   const reportQueryParams = {
