@@ -27,9 +27,6 @@ describe("Create event page", () => {
         await (await CreateEvent.getHostOrgHelpBlock()).getText()
       ).to.equal("You must provide the Host Organization")
       expect(
-        await (await CreateEvent.getAdminOrgHelpBlock()).getText()
-      ).to.equal("You must provide the Admin Organization")
-      expect(
         await (await CreateEvent.getStartDateHelpBlock()).getText()
       ).to.equal("startDate is a required field")
       expect(

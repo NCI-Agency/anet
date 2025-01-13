@@ -46,16 +46,7 @@ export default class Event extends Model {
           : true
       )
       .default({}),
-    adminOrg: yup
-      .object()
-      .test("adminOrg", "admin org error", (adminOrg, testContext) =>
-        _isEmpty(adminOrg)
-          ? testContext.createError({
-            message: `You must provide the ${Settings.fields.eventSeries.adminOrg.label}`
-          })
-          : true
-      )
-      .default({}),
+    adminOrg: yup.object().nullable().default(null),
     eventSeries: yup.object().nullable().default({}),
     location: yup.object().nullable().default({}),
     tasks: yup.array().nullable().default([]),

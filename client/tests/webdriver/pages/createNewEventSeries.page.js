@@ -30,10 +30,6 @@ class CreateEventSeries extends Page {
     return browser.$("#adminOrg")
   }
 
-  async getAdminOrgHelpBlock() {
-    return browser.$("#fg-adminOrg div.invalid-feedback")
-  }
-
   async getAdminOrgAdvancedSelectFirstItem() {
     return browser.$(
       "#adminOrg-popover tbody tr:first-child td:nth-child(2) span"

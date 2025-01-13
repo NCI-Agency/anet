@@ -31,8 +31,12 @@ public class EventSeriesResource {
     this.dao = engine.getEventSeriesDao();
   }
 
+  public static boolean hasPermission(final Person user, final String orgUuid) {
+    return AuthUtils.isAdmin(user) || AuthUtils.canAdministrateOrg(user, orgUuid);
+  }
+
   public static void assertPermission(final Person user, final String orgUuid) {
-    if (!AuthUtils.canAdministrateOrg(user, orgUuid)) {
+    if (!hasPermission(user, orgUuid)) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, AuthUtils.UNAUTH_MESSAGE);
     }
   }
@@ -105,10 +109,6 @@ public class EventSeriesResource {
     if (eventSeries.getHostOrgUuid() == null || eventSeries.getHostOrgUuid().trim().isEmpty()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           "Event Series Host Organization must not be empty");
-    }
-    if (eventSeries.getAdminOrgUuid() == null || eventSeries.getAdminOrgUuid().trim().isEmpty()) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "Event Series Admin Organization must not be empty");
     }
     assertPermission(user, eventSeries.getAdminOrgUuid());
   }

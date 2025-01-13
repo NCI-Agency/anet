@@ -19,9 +19,6 @@ describe("Create event series page", () => {
       expect(
         await (await CreateEventSeries.getHostOrgHelpBlock()).getText()
       ).to.equal("You must provide the Host Organization")
-      expect(
-        await (await CreateEventSeries.getAdminOrgHelpBlock()).getText()
-      ).to.equal("You must provide the Admin Organization")
     })
 
     it("Should successfully create an event series when required fields are filled", async() => {

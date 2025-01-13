@@ -5957,9 +5957,7 @@
 			<column name="hostOrgUuid" type="${uuid_type}">
 				<constraints nullable="false" />
 			</column>
-			<column name="adminOrgUuid" type="${uuid_type}">
-				<constraints nullable="false" />
-			</column>
+			<column name="adminOrgUuid" type="${uuid_type}" />
 			<column name="name" type="varchar(255)">
 				<constraints nullable="false" />
 			</column>
@@ -6007,9 +6005,7 @@
 			<column name="hostOrgUuid" type="${uuid_type}">
 				<constraints nullable="false" />
 			</column>
-			<column name="adminOrgUuid" type="${uuid_type}">
-				<constraints nullable="false" />
-			</column>
+			<column name="adminOrgUuid" type="${uuid_type}" />
 			<column name="type" type="text"/>
 			<column name="description" type="text"/>
 			<column name="eventSeriesUuid" type="${uuid_type}" />
