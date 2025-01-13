@@ -9,7 +9,7 @@ import {
   usePageTitle
 } from "components/Page"
 import { Person, Report } from "models"
-import { reportTour } from "pages/HopscotchTour"
+import { reportTour } from "pages/GuidedTour"
 import React, { useContext } from "react"
 import { connect } from "react-redux"
 import Settings from "settings"

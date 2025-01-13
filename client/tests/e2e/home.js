@@ -39,26 +39,23 @@ test("Home Page", async t => {
 
   const $tourLauncher = await $(".persistent-tour-launcher")
   await $tourLauncher.click()
-  const $hopscotchTitle = await $(".hopscotch-title")
+  const $guidedTourTitle = await $("div.react-joyride__tooltip h1")
   await assertElementText(
     t,
-    $hopscotchTitle,
+    $guidedTourTitle,
     "Welcome",
-    "Clicking the hopscotch launch button starts the hopscotch tour"
+    "Clicking the launch button starts the Guided Tour"
   )
 
-  const $hopscotchNext = await $(".hopscotch-next")
-  await $hopscotchNext.click()
+  const $guidedTourNext = await $("div.react-joyride__tooltip > div > button")
+  await $guidedTourNext.click()
 
-  await t.context.pageHelpers.clickMenuLinksButton()
-  const $myReportsLink = await $('a[href*="/reports/mine"]')
-  await t.context.driver.wait(t.context.until.elementIsVisible($myReportsLink))
-  await $myReportsLink.click()
-  await t.context.driver.sleep(shortWaitMs) // wait for transition
+  const $guidedTourOverlay = await $("div.react-joyride__spotlight")
+  await $guidedTourOverlay.click()
   await assertElementNotPresent(
     t,
-    ".hopscotch-title",
-    "Navigating to a new page clears the hopscotch tour",
+    "div.react-joyride__tooltip",
+    "Clicking outside the dialog clears the Guided Tour",
     shortWaitMs
   )
 

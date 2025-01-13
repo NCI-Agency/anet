@@ -32,7 +32,7 @@ import RelatedObjectNotes from "components/RelatedObjectNotes"
 import RichTextEditor from "components/RichTextEditor"
 import { Field, Form, Formik } from "formik"
 import { Location, Position } from "models"
-import { positionTour } from "pages/HopscotchTour"
+import { positionTour } from "pages/GuidedTour"
 import React, { useContext, useState } from "react"
 import { Badge, Button } from "react-bootstrap"
 import { connect } from "react-redux"
@@ -184,6 +184,7 @@ const PositionShow = ({ pageDispatchers }: PositionShowProps) => {
             <Messages success={stateSuccess} error={stateError} />
             <Form className="form-horizontal" method="post">
               <Fieldset
+                id="info"
                 title={
                   <>
                     {

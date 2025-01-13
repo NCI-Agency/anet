@@ -39,7 +39,7 @@ import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import { Attachment, Location, Organization, Report } from "models"
 import { PositionRole } from "models/Position"
-import { orgTour } from "pages/HopscotchTour"
+import { orgTour } from "pages/GuidedTour"
 import pluralize from "pluralize"
 import { getPositionsForRole } from "positionUtil"
 import React, { useContext, useState } from "react"
@@ -367,8 +367,9 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
                   title="Take a guided tour of this organization's page."
                   tour={orgTour}
                   autostart={
-                    localStorage.newUser === "true" &&
-                    localStorage.hasSeenOrgTour !== "true"
+                    (localStorage.newUser === "true" &&
+                      localStorage.hasSeenOrgTour !== "true") ||
+                    routerLocation?.state?.showGuidedTour === true
                   }
                   onEnd={() => (localStorage.hasSeenOrgTour = "true")}
                 />
