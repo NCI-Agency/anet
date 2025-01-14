@@ -1,7 +1,6 @@
 import { expect } from "chai"
 import Home from "../pages/home.page"
 import MyEvents from "../pages/myEvents.page"
-import Page from "../pages/page"
 
 describe("Home page", () => {
   describe("When checking the navigation items", () => {
@@ -25,7 +24,7 @@ describe("Home page", () => {
 
 describe("My events page", () => {
   beforeEach("Open the my events page", async() => {
-    await MyEvents.openAs(Page.DEFAULT_CREDENTIALS.adminUser)
+    await MyEvents.openAsAdminUser()
   })
 
   afterEach("On the my events page…", async() => {
