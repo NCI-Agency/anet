@@ -324,7 +324,7 @@ const Navigation = ({
           {(currentUser.isAdmin() ||
             !_isEmpty(currentUser?.position?.organizationsAdministrated)) && (
             <SidebarLink
-              id="my-events"
+              id="my-events-nav"
               linkTo={{ pathname: "/events/mine" }}
               handleOnClick={resetPages}
             >

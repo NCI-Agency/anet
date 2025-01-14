@@ -7,20 +7,16 @@ class MyEvents extends Page {
     await super.open(PAGE_URL)
   }
 
-  async openAs(user) {
-    await super.open(PAGE_URL, user)
-  }
-
-  async openAsOnboardUser() {
-    await super.openAsOnboardUser(PAGE_URL)
+  async openAsAdminUser() {
+    await super.openAsAdminUser(PAGE_URL)
   }
 
   async getMyEventSeries() {
-    return browser.$("#my-event-series")
+    return browser.$("#my-event-series table tbody tr td:first-child")
   }
 
   async getMyEvents() {
-    return browser.$("#my-events")
+    return browser.$("#my-events table tbody tr td:first-child")
   }
 
   async selectEventsSummary() {
