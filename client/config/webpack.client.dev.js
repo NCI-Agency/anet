@@ -14,6 +14,7 @@ module.exports = merge.merge(common.clientConfig, {
   devtool: "cheap-module-source-map",
   output: {
     pathinfo: true,
+    path: paths.clientBuild,
     publicPath: "/",
     filename: "static/js/[name].js",
     chunkFilename: "static/js/[name].chunk.js"

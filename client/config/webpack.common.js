@@ -106,9 +106,6 @@ module.exports = {
     entry: {
       anet: [require.resolve("./polyfills"), "./src/index-auth"]
     },
-    output: {
-      path: paths.appBuild
-    },
     plugins: [
       new webpack.DefinePlugin({
         "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV),

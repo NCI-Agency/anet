@@ -15,6 +15,7 @@ const clientConfig = merge.merge(common.clientConfig, {
     modules: ["platform/web", paths.appSrc, "node_modules"]
   },
   output: {
+    path: paths.appBuild,
     publicPath: "/assets/client/",
     filename: "static/js/[name].[chunkhash:8].js",
     chunkFilename: "static/js/[name].[chunkhash:8].chunk.js"
