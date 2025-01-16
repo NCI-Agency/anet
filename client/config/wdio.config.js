@@ -73,7 +73,7 @@ const config = {
         // while scrolling some form fields might go under the header and
         // therefore we would get failing tests related to these fields.
         args: [
-          "--headless=old",
+          "--headless",
           "--disable-gpu",
           "--disable-search-engine-choice-screen",
           "--window-size=1600,1200"
