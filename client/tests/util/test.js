@@ -91,7 +91,7 @@ test.beforeEach(t => {
   if (testEnv === "local") {
     const chrome = require("selenium-webdriver/chrome")
     const options = new chrome.Options(capabilities).addArguments([
-      "--headless=old",
+      "--headless",
       "--disable-gpu",
       "--disable-search-engine-choice-screen",
       "--window-size=1600,1200"
