@@ -706,10 +706,13 @@ spotless {
 	}
 }
 
-//Configure extra files to include the distribution file
+//Configure extra files to include in the distribution file
 distributions {
 	main {
 		contents {
+			into('./') {
+				from('logback-spring.xml')
+			}
 			into('docs/') {
 				from('application.yml') { rename('application.yml', 'application.yml.template') }
 				from('anet-dictionary.yml') { rename('anet-dictionary.yml', 'anet-dictionary.yml.template') }
