@@ -314,9 +314,13 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
             backgroundText={backgroundText}
           >
             <CompactHeaderContent
-              classification={
-                Settings.classification.choices[report.classification]
-              }
+              color={utils.getColorForChoice(report.classification)}
+              policyAndClassification={utils.getPolicyAndClassificationForChoice(
+                report.classification
+              )}
+              releasableTo={utils.getReleasableToForChoice(
+                report.classification
+              )}
             />
             <CompactTable>
               <FullColumn>
@@ -417,9 +421,10 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
             </CompactTable>
             <CompactFooterContent
               object={report}
-              classification={
-                Settings.classification.choices[report.classification]
-              }
+              color={utils.getColorForChoice(report.classification)}
+              policyAndClassification={utils.getPolicyAndClassificationForChoice(
+                report.classification
+              )}
             />
           </CompactView>
         </>

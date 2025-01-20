@@ -14,7 +14,6 @@ import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.beans.JobHistory;
 import mil.dds.anet.config.AnetConfig;
 import mil.dds.anet.config.AnetDictionary;
-import mil.dds.anet.database.AdminDao;
 import mil.dds.anet.database.EmailDao;
 import mil.dds.anet.database.JobHistoryDao;
 import mil.dds.anet.database.PositionDao;
@@ -53,9 +52,6 @@ class PendingAssessmentsNotificationWorkerTest {
   private JobHistoryDao jobHistoryDao;
 
   @Autowired
-  private AdminDao adminDao;
-
-  @Autowired
   private EmailDao emailDao;
 
   @Autowired
@@ -81,7 +77,7 @@ class PendingAssessmentsNotificationWorkerTest {
 
     pendingAssessmentsNotificationWorker =
         new PendingAssessmentsNotificationWorker(dict, jobHistoryDao);
-    emailWorker = new AnetEmailWorker(config, dict, jobHistoryDao, emailDao, adminDao);
+    emailWorker = new AnetEmailWorker(config, dict, jobHistoryDao, emailDao);
     emailServer = new FakeSmtpServer(config.getSmtp());
 
     // Flush all assessment notifications

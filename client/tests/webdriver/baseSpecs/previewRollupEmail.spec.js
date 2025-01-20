@@ -37,7 +37,7 @@ describe("Preview rollup page", () => {
         async() => {
           return (
             (await $("p:nth-of-type(1) i").getText()) ===
-            "Classification: DEMO USE ONLY"
+            "Classification: DEMO USE ONLY Releasable to DEMO MISSION"
           )
         },
         { timeout: 3000, timeoutMsg: "Expected classification" }

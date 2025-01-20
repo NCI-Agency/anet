@@ -2,6 +2,7 @@ package mil.dds.anet.beans;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import graphql.GraphQLContext;
+import io.leangen.graphql.annotations.GraphQLIgnore;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
@@ -342,7 +343,12 @@ public class Report extends AbstractCustomizableAnetBean
         });
   }
 
-  @JsonIgnore
+  @GraphQLIgnore
+  public void setPrimaryAdvisor(ReportPerson primaryAdvisor) {
+    this.primaryAdvisor = new ForeignObjectHolder<>(primaryAdvisor);
+  }
+
+  @GraphQLIgnore
   public ReportPerson getPrimaryAdvisor() {
     return primaryAdvisor.getForeignObject();
   }
@@ -362,7 +368,12 @@ public class Report extends AbstractCustomizableAnetBean
         });
   }
 
-  @JsonIgnore
+  @GraphQLIgnore
+  public void setPrimaryInterlocutor(ReportPerson primaryInterlocutor) {
+    this.primaryInterlocutor = new ForeignObjectHolder<>(primaryInterlocutor);
+  }
+
+  @GraphQLIgnore
   public ReportPerson getPrimaryInterlocutor() {
     return primaryInterlocutor.getForeignObject();
   }

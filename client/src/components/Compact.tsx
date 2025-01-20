@@ -4,14 +4,12 @@ import { IconNames } from "@blueprintjs/icons"
 import styled from "@emotion/styled"
 import AppContext from "components/AppContext"
 import LinkTo from "components/LinkTo"
-import {
-  CompactSecurityBanner,
-  SETTING_KEY_COLOR
-} from "components/SecurityBanner"
+import { CompactSecurityBanner } from "components/SecurityBanner"
 import moment from "moment"
 import React, { useContext } from "react"
 import { Link, useLocation } from "react-router-dom"
 import Settings from "settings"
+import utils from "utils"
 import anetLogo from "../../public/favicon/logo.svg"
 
 export const PAGE_SIZES = {
@@ -118,21 +116,28 @@ const CompactViewS = styled.div`
 `
 
 interface CompactHeaderContentProps {
-  classification?: string
+  color?: string
+  policyAndClassification?: string
+  releasableTo?: string
   sensitiveInformation?: boolean
 }
 
 export const CompactHeaderContent = ({
-  classification,
+  color = utils.getColorForChoice(Settings.siteClassification),
+  policyAndClassification = utils.getPolicyAndClassificationForChoice(
+    Settings.siteClassification
+  ),
+  releasableTo = utils.getReleasableToForChoice(Settings.siteClassification),
   sensitiveInformation
 }: CompactHeaderContentProps) => {
-  const { appSettings } = useContext(AppContext)
   return (
-    <HeaderContentS bgc={appSettings[SETTING_KEY_COLOR]}>
+    <HeaderContentS bgc={color}>
       <img src={anetLogo} alt="logo" width="50" height="12" />
       <ClassificationBoxS>
         <ClassificationBanner
-          classification={classification}
+          color={color}
+          policyAndClassification={policyAndClassification}
+          releasableTo={releasableTo}
           bannerId="header-banner"
         />
         {sensitiveInformation && <SensitivityInformation />}
@@ -143,17 +148,23 @@ export const CompactHeaderContent = ({
 
 interface CompactFooterContentProps {
   object?: any
-  classification?: string
+  color?: string
+  policyAndClassification?: string
+  releasableTo?: string
 }
 
 export const CompactFooterContent = ({
   object,
-  classification
+  color = utils.getColorForChoice(Settings.siteClassification),
+  policyAndClassification = utils.getPolicyAndClassificationForChoice(
+    Settings.siteClassification
+  ),
+  releasableTo = utils.getReleasableToForChoice(Settings.siteClassification)
 }: CompactFooterContentProps) => {
   const location = useLocation()
-  const { currentUser, appSettings } = useContext(AppContext)
+  const { currentUser } = useContext(AppContext)
   return (
-    <FooterContentS bgc={appSettings[SETTING_KEY_COLOR]}>
+    <FooterContentS bgc={color}>
       <span style={{ fontSize: "10px" }}>
         uuid:{" "}
         <Link to={location.pathname} style={{ fontSize: "10px" }}>
@@ -161,7 +172,9 @@ export const CompactFooterContent = ({
         </Link>
       </span>
       <ClassificationBanner
-        classification={classification}
+        color={color}
+        policyAndClassification={policyAndClassification}
+        releasableTo={releasableTo}
         bannerId="footer-banner"
       />
       <PrintedByBoxS>
@@ -279,18 +292,24 @@ const FooterContentS = styled.div`
 `
 
 interface ClassificationBannerProps {
-  classification?: string
+  color: string
+  policyAndClassification: string
+  releasableTo: string
   bannerId?: string
 }
 
 const ClassificationBanner = ({
-  classification,
+  color,
+  policyAndClassification,
+  releasableTo,
   bannerId
 }: ClassificationBannerProps) => {
   return (
     <ClassificationBannerS>
       <CompactSecurityBanner
-        classification={classification}
+        color={color}
+        policyAndClassification={policyAndClassification}
+        releasableTo={releasableTo}
         bannerId={bannerId}
       />
     </ClassificationBannerS>

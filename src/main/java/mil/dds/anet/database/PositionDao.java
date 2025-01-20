@@ -96,7 +96,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
         + "FROM positions WHERE positions.uuid IN ( <uuids> )";
 
     public SelfIdBatcher() {
-      super(databaseHandler, SQL, "uuids", new PositionMapper());
+      super(PositionDao.this.databaseHandler, SQL, "uuids", new PositionMapper());
     }
   }
 
@@ -111,7 +111,8 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
             + "WHERE \"positionUuid\" IN ( <foreignKeys> ) ORDER BY \"createdAt\" ASC";
 
     public PersonPositionHistoryBatcher() {
-      super(databaseHandler, SQL, "foreignKeys", new PersonPositionHistoryMapper(), "positionUuid");
+      super(PositionDao.this.databaseHandler, SQL, "foreignKeys", new PersonPositionHistoryMapper(),
+          "positionUuid");
     }
   }
 
@@ -125,7 +126,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
             + "WHERE positions.\"currentPersonUuid\" IN ( <foreignKeys> )";
 
     public PositionsBatcher() {
-      super(databaseHandler, SQL, "foreignKeys", new PositionMapper(),
+      super(PositionDao.this.databaseHandler, SQL, "foreignKeys", new PositionMapper(),
           "positions_currentPersonUuid");
     }
   }
@@ -365,8 +366,8 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
     }
 
     public AssociatedPositionsBatcher() {
-      super(databaseHandler, SQL, "foreignKeys", new PositionMapper(), "associatedPositionUuid",
-          additionalParams);
+      super(PositionDao.this.databaseHandler, SQL, "foreignKeys", new PositionMapper(),
+          "associatedPositionUuid", additionalParams);
     }
   }
 

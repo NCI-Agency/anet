@@ -67,7 +67,7 @@ public class GraphQLResource {
     return ResourceTransformers.xlsxTransformer.apply(graphql(principal, requestBody, null));
   }
 
-  private Map<String, Object> graphql(final Principal principal, final GraphQLRequest requestBody,
+  public Map<String, Object> graphql(final Principal principal, final GraphQLRequest requestBody,
       final NativeWebRequest request) {
     return executor.execute(principal, this.graphQL, getExecutorParams(requestBody, request));
   }

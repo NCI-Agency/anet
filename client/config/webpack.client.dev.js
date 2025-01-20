@@ -33,6 +33,7 @@ module.exports = merge.merge(common.clientConfig, {
           "/assets",
           "/imagery",
           "/data",
+          "/cxf",
           // For Keycloak authentication:
           "/login",
           "/oauth2"

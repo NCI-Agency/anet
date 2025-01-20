@@ -50,7 +50,7 @@ public class TaskDao extends AnetSubscribableObjectDao<Task, TaskSearchQuery> {
         + " FROM tasks WHERE uuid IN ( <uuids> )";
 
     public SelfIdBatcher() {
-      super(databaseHandler, SQL, "uuids", new TaskMapper());
+      super(TaskDao.this.databaseHandler, SQL, "uuids", new TaskMapper());
     }
   }
 
@@ -67,7 +67,7 @@ public class TaskDao extends AnetSubscribableObjectDao<Task, TaskSearchQuery> {
             + "AND \"taskResponsiblePositions\".\"positionUuid\" = positions.uuid";
 
     public ResponsiblePositionsBatcher() {
-      super(databaseHandler, SQL, "foreignKeys", new PositionMapper(), "taskUuid");
+      super(TaskDao.this.databaseHandler, SQL, "foreignKeys", new PositionMapper(), "taskUuid");
     }
   }
 
@@ -84,7 +84,7 @@ public class TaskDao extends AnetSubscribableObjectDao<Task, TaskSearchQuery> {
             + "AND \"taskTaskedOrganizations\".\"organizationUuid\" = organizations.uuid";
 
     public TaskedOrganizationsBatcher() {
-      super(databaseHandler, sql, "foreignKeys", new OrganizationMapper(), "taskUuid");
+      super(TaskDao.this.databaseHandler, sql, "foreignKeys", new OrganizationMapper(), "taskUuid");
     }
   }
 
