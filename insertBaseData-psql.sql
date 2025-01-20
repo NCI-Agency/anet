@@ -12,6 +12,7 @@ TRUNCATE TABLE "emailAddresses" CASCADE;
 TRUNCATE TABLE "entityAvatars" CASCADE;
 TRUNCATE TABLE "jobHistory" CASCADE;
 TRUNCATE TABLE "locationRelationships" CASCADE;
+TRUNCATE TABLE "martImportedReports" CASCADE;
 TRUNCATE TABLE "mergedEntities" CASCADE;
 TRUNCATE TABLE "noteRelatedObjects" CASCADE;
 TRUNCATE TABLE "notes" CASCADE;
@@ -1398,6 +1399,10 @@ INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "
 -- Add entity avatars for people
 INSERT INTO "entityAvatars" ("relatedObjectType", "relatedObjectUuid", "attachmentUuid", "applyCrop", "cropLeft", "cropTop", "cropWidth", "cropHeight") VALUES
   ('people', '46ba6a73-0cd7-4efb-8e99-215e98cc5987', '3187ad8a-6130-4ec0-bffc-9ebfad4dee39', TRUE, 0, 0, 200, 200);
+
+-- Add mart imported reports for testing
+INSERT INTO "martImportedReports" ("personUuid", "reportUuid", "success", "createdAt", "errors") VALUES
+  ('87fdbc6a-3109-4e11-9702-a894d6ca31ef', '59be259b-30b9-4d04-9e21-e8ceb58cbe9c', TRUE, CURRENT_TIMESTAMP, NULL);
 
 -- Update the link-text indexes
 REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_lts_attachments";

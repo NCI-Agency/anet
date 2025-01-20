@@ -28,7 +28,6 @@ import mil.dds.anet.beans.WithStatus;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.recentActivity.Activity;
 import mil.dds.anet.beans.search.PersonSearchQuery;
-import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.database.mappers.PersonPositionHistoryMapper;
 import mil.dds.anet.search.pg.PostgresqlPersonSearcher;
@@ -215,6 +214,27 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
               + "FROM people LEFT JOIN positions ON people.uuid = positions.\"currentPersonUuid\" "
               + "WHERE people.\"domainUsername\" = :domainUsername")
           .bind("domainUsername", domainUsername).map(new PersonMapper()).list();
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
+  @Transactional
+  // Used by the MART IMPORT
+  public List<Person> findByEmailAddress(String emailAddress) {
+    final Handle handle = getDbHandle();
+    try {
+      if (Utils.isEmptyOrNull(emailAddress)) {
+        return Collections.emptyList();
+      }
+      return handle
+          .createQuery("/* findByEmailAddress */ SELECT " + PERSON_FIELDS + ","
+              + PositionDao.POSITION_FIELDS
+              + "FROM people LEFT JOIN positions ON people.uuid = positions.\"currentPersonUuid\" "
+              + "LEFT JOIN \"emailAddresses\" ON \"emailAddresses\".\"relatedObjectType\" = '"
+              + TABLE_NAME + "' AND people.uuid = \"emailAddresses\".\"relatedObjectUuid\" "
+              + "WHERE \"emailAddresses\".address = :emailAddress")
+          .bind("emailAddress", emailAddress).map(new PersonMapper()).list();
     } finally {
       closeDbHandle(handle);
     }
