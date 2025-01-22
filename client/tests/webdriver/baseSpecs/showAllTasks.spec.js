@@ -1,0 +1,74 @@
+import { expect } from "chai"
+import ShowAllTasks from "../pages/showAllTasks.page"
+
+const FIRST_TASK_NAME = "EF 1: Budget and Planning"
+const FIRST_TASK_DESCENDANT_NAME = "1.1: Budgeting in the MoD"
+const NO_DESCENDANTS_TASK_NAME = "EF 5: Force Sustainment (Logistics)"
+
+describe("Show All Tasks Page", () => {
+  beforeEach(async() => {
+    await ShowAllTasks.open()
+  })
+
+  it("Should display all top tasks", async() => {
+    const topTasks = await ShowAllTasks.getAllTasks()
+    expect(topTasks).to.have.lengthOf(16)
+    for (const task of topTasks) {
+      const isDisplayed = await task.isDisplayed()
+      expect(isDisplayed).to.equal(true)
+    }
+  })
+
+  it("Should expand a task to show its descendants", async() => {
+    const topTasks = await ShowAllTasks.getAllTasks()
+    const firstTask = topTasks[0]
+    const firstTaskText = await firstTask.getText()
+    expect(firstTaskText).to.equal(FIRST_TASK_NAME)
+
+    const caret = await firstTask.$(".bp5-tree-node-caret")
+    expect(caret).to.not.equal(null)
+    await caret.click()
+
+    const descendants = await ShowAllTasks.getAllDescendants(firstTask)
+    expect(descendants).to.have.lengthOf(3)
+    const firstDescendant = descendants[0]
+    const firstDescendantText = await firstDescendant.getText()
+    expect(firstDescendantText).to.equal(FIRST_TASK_DESCENDANT_NAME)
+  })
+
+  it("Should collapse a task to hide its descendants", async() => {
+    const topTasks = await ShowAllTasks.getAllTasks()
+    const firstTask = topTasks[0]
+
+    const caret = await firstTask.$(".bp5-tree-node-caret")
+    expect(caret).to.not.equal(null)
+    await caret.click()
+    const descendants = await ShowAllTasks.getAllDescendants(firstTask)
+    expect(descendants).to.have.lengthOf(3)
+
+    await caret.click()
+    const collapsedDescendants = await ShowAllTasks.getAllDescendants(
+      firstTask,
+      true
+    )
+    expect(collapsedDescendants).to.have.lengthOf(0)
+  })
+
+  it("Should not show a caret for tasks without descendants", async() => {
+    const topTasks = await ShowAllTasks.getAllTasks()
+    const noDescendantsTask = topTasks[4]
+
+    const noDescendantsTaskText = await noDescendantsTask.getText()
+    expect(noDescendantsTaskText).to.equal(NO_DESCENDANTS_TASK_NAME)
+
+    const caret = await noDescendantsTask.$(".bp5-tree-node-caret")
+    const caretExists = await caret.isExisting()
+    expect(caretExists).to.equal(false)
+
+    const descendants = await ShowAllTasks.getAllDescendants(noDescendantsTask)
+    expect(descendants).to.have.lengthOf(
+      0,
+      "No descendants should be present for EF 5"
+    )
+  })
+})
