@@ -130,6 +130,7 @@ const EventForm = ({
 
         const hostOrgSearchQuery = { status: Model.STATUS.ACTIVE }
         const adminOrgSearchQuery = { status: Model.STATUS.ACTIVE }
+        const ownerOrgSearchQuery = { status: Model.STATUS.ACTIVE }
         const eventSeriesSearchQuery = {}
 
         // Superusers can select parent organizations among the ones their position is administrating
@@ -211,6 +212,21 @@ const EventForm = ({
           }
         }
 
+        if (
+          values.ownerOrg &&
+          values.ownerOrg.uuid !== values.hostOrg?.uuid &&
+          values.ownerOrg.uuid !== values.adminOrg?.uuid
+        ) {
+          tasksFilters.assignedToOwnerOrg = {
+            label: `Assigned to ${values.ownerOrg.shortName}`,
+            queryVars: {
+              taskedOrgUuid: values.ownerOrg.uuid,
+              orgRecurseStrategy: RECURSE_STRATEGY.PARENTS,
+              selectable: true
+            }
+          }
+        }
+
         const initialMonthForStartDate = moment(
           values.startDate ?? values.endDate ?? new Date()
         ).toDate()
@@ -241,6 +257,7 @@ const EventForm = ({
                     setFieldValue("eventSeries", value)
                     setFieldValue("hostOrg", value?.hostOrg)
                     setFieldValue("adminOrg", value?.adminOrg)
+                    setFieldValue("ownerOrg", value?.ownerOrg)
                   }}
                   widget={
                     <AdvancedSingleSelect
@@ -307,6 +324,32 @@ const EventForm = ({
                       objectType={Organization}
                       fields={Organization.autocompleteQuery}
                       queryParams={adminOrgSearchQuery}
+                      valueKey="shortName"
+                      addon={ORGANIZATIONS_ICON}
+                    />
+                  }
+                />
+                <DictionaryField
+                  wrappedComponent={Field}
+                  dictProps={Settings.fields.event.ownerOrg}
+                  name="ownerOrg"
+                  component={FieldHelper.SpecialField}
+                  onChange={value => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("ownerOrg", true, false) // onBlur doesn't work when selecting an option
+                    setFieldValue("ownerOrg", value)
+                  }}
+                  widget={
+                    <AdvancedSingleSelect
+                      fieldName="ownerOrg"
+                      placeholder={Settings.fields.event.ownerOrg.placeholder}
+                      value={values.ownerOrg}
+                      overlayColumns={["Name"]}
+                      overlayRenderRow={OrganizationOverlayRow}
+                      filterDefs={organizationFilters}
+                      objectType={Organization}
+                      fields={Organization.autocompleteQuery}
+                      queryParams={ownerOrgSearchQuery}
                       valueKey="shortName"
                       addon={ORGANIZATIONS_ICON}
                     />
@@ -630,6 +673,7 @@ const EventForm = ({
     event.people = values.people.map(t => utils.getReference(t))
     event.hostOrg = utils.getReference(event.hostOrg)
     event.adminOrg = utils.getReference(event.adminOrg)
+    event.ownerOrg = utils.getReference(event.ownerOrg)
     event.location = utils.getReference(event.location)
     return API.mutation(edit ? GQL_UPDATE_EVENT : GQL_CREATE_EVENT, {
       event

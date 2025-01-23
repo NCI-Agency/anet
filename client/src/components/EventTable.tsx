@@ -14,6 +14,7 @@ import moment from "moment/moment"
 import React, { useState } from "react"
 import { Table } from "react-bootstrap"
 import { connect } from "react-redux"
+import Settings from "settings"
 
 const GQL_GET_EVENT_LIST = gql`
   query ($eventQuery: EventSearchQueryInput) {
@@ -28,13 +29,6 @@ const GQL_GET_EVENT_LIST = gql`
         startDate
         endDate
         hostOrg {
-          uuid
-          shortName
-          longName
-          identificationCode
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-        }
-        adminOrg {
           uuid
           shortName
           longName
@@ -151,12 +145,14 @@ const BaseEventTable = ({
         <Table responsive hover striped id={id}>
           <thead>
             <tr>
-              <th>Name</th>
-              {showEventSeries && <th>Series</th>}
-              <th>Host Organization</th>
-              <th>Location</th>
-              <th>Start Date</th>
-              <th>End Date</th>
+              <th>{Settings.fields.event.name.label}</th>
+              {showEventSeries && (
+                <th>{Settings.fields.event.eventSeries.label}</th>
+              )}
+              <th>{Settings.fields.event.hostOrg.label}</th>
+              <th>{Settings.fields.event.location.label}</th>
+              <th>{Settings.fields.event.startDate.label}</th>
+              <th>{Settings.fields.event.endDate.label}</th>
             </tr>
           </thead>
           <tbody>

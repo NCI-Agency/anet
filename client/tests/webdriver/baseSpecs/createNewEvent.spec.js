@@ -64,6 +64,14 @@ describe("Create event page", () => {
       ).to.include(ORG_COMPLETE)
       await (await CreateEvent.getAdminOrgAdvancedSelectFirstItem()).click()
 
+      await (await CreateEvent.getOwnerOrganizationInput()).click()
+      await (await CreateEvent.getOwnerOrganizationInput()).setValue(ORG)
+      await CreateEvent.waitForOwnerOrgAdvancedSelectToChange(ORG_COMPLETE)
+      expect(
+        await (await CreateEvent.getOwnerOrgAdvancedSelectFirstItem()).getText()
+      ).to.include(ORG_COMPLETE)
+      await (await CreateEvent.getOwnerOrgAdvancedSelectFirstItem()).click()
+
       await CreateEvent.submitForm()
       await CreateEvent.waitForAlertSuccessToLoad()
     })

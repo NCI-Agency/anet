@@ -21,6 +21,11 @@ describe("Show event series page", () => {
     expect(
       await (await ShowEventSeries.getAdminOrganization()).getText()
     ).to.equal("EF 2.2")
+    await (await ShowEventSeries.getOwnerOrganization()).waitForExist()
+    await (await ShowEventSeries.getOwnerOrganization()).waitForDisplayed()
+    expect(
+      await (await ShowEventSeries.getOwnerOrganization()).getText()
+    ).to.equal("EF 2.2")
     await (await ShowEventSeries.getStatus()).waitForExist()
     await (await ShowEventSeries.getStatus()).waitForDisplayed()
     expect(await (await ShowEventSeries.getStatus()).getText()).to.equal(

@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 public class EventSeriesDao extends AnetSubscribableObjectDao<EventSeries, EventSeriesSearchQuery> {
 
   private static final String[] fields = {"uuid", "status", "name", "description", "hostOrgUuid",
-      "adminOrgUuid", "createdAt", "updatedAt"};
+      "adminOrgUuid", "ownerOrgUuid", "createdAt", "updatedAt"};
   public static final String TABLE_NAME = "eventSeries";
   public static final String EVENT_SERIES_FIELDS =
       DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
@@ -49,14 +49,15 @@ public class EventSeriesDao extends AnetSubscribableObjectDao<EventSeries, Event
     try {
       handle.createUpdate(
           "/* insertEventSeries */ INSERT INTO \"eventSeries\" (uuid, status, name, description, "
-              + "\"hostOrgUuid\", \"adminOrgUuid\",  \"createdAt\", \"updatedAt\") "
+              + "\"hostOrgUuid\", \"adminOrgUuid\", \"ownerOrgUuid\", \"createdAt\", \"updatedAt\") "
               + "VALUES (:uuid, :status, :name, :description, :hostOrgUuid, :adminOrgUuid, "
-              + ":createdAt, :updatedAt)")
+              + ":ownerOrgUuid, :createdAt, :updatedAt)")
           .bindBean(eventSeries).bind("status", DaoUtils.getEnumId(eventSeries.getStatus()))
           .bind("createdAt", DaoUtils.asLocalDateTime(eventSeries.getCreatedAt()))
           .bind("updatedAt", DaoUtils.asLocalDateTime(eventSeries.getUpdatedAt()))
           .bind("hostOrgUuid", DaoUtils.getUuid(eventSeries.getHostOrg()))
-          .bind("adminOrgUuid", DaoUtils.getUuid(eventSeries.getAdminOrg())).execute();
+          .bind("adminOrgUuid", DaoUtils.getUuid(eventSeries.getAdminOrg()))
+          .bind("ownerOrgUuid", DaoUtils.getUuid(eventSeries.getOwnerOrg())).execute();
 
       return eventSeries;
     } finally {
@@ -68,14 +69,17 @@ public class EventSeriesDao extends AnetSubscribableObjectDao<EventSeries, Event
   public int updateInternal(EventSeries eventSeries) {
     final Handle handle = getDbHandle();
     try {
-      return handle.createUpdate("/* updateEventSeries */ UPDATE \"eventSeries\" "
-          + "SET name = :name, status = :status, description = :description, "
-          + "\"hostOrgUuid\" = :hostOrgUuid, \"adminOrgUuid\" = :adminOrgUuid, \"updatedAt\" = :updatedAt "
-          + " WHERE uuid = :uuid").bindBean(eventSeries)
-          .bind("status", DaoUtils.getEnumId(eventSeries.getStatus()))
+      return handle
+          .createUpdate("/* updateEventSeries */ UPDATE \"eventSeries\" "
+              + "SET name = :name, status = :status, description = :description, "
+              + "\"hostOrgUuid\" = :hostOrgUuid, \"adminOrgUuid\" = :adminOrgUuid, "
+              + "\"ownerOrgUuid\" = :ownerOrgUuid, \"updatedAt\" = :updatedAt "
+              + "WHERE uuid = :uuid")
+          .bindBean(eventSeries).bind("status", DaoUtils.getEnumId(eventSeries.getStatus()))
           .bind("updatedAt", DaoUtils.asLocalDateTime(eventSeries.getUpdatedAt()))
           .bind("hostOrgUuid", DaoUtils.getUuid(eventSeries.getHostOrg()))
-          .bind("adminOrgUuid", DaoUtils.getUuid(eventSeries.getAdminOrg())).execute();
+          .bind("adminOrgUuid", DaoUtils.getUuid(eventSeries.getAdminOrg()))
+          .bind("ownerOrgUuid", DaoUtils.getUuid(eventSeries.getOwnerOrg())).execute();
     } finally {
       closeDbHandle(handle);
     }

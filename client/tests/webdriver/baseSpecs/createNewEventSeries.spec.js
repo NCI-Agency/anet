@@ -58,6 +58,23 @@ describe("Create event series page", () => {
         await CreateEventSeries.getAdminOrgAdvancedSelectFirstItem()
       ).click()
 
+      await (
+        await CreateEventSeries.getOwnerOrganizationInput()
+      ).waitForDisplayed()
+      await (await CreateEventSeries.getOwnerOrganizationInput()).click()
+      await (await CreateEventSeries.getOwnerOrganizationInput()).setValue(ORG)
+      await CreateEventSeries.waitForOwnerOrgAdvancedSelectToChange(
+        ORG_COMPLETE
+      )
+      expect(
+        await (
+          await CreateEventSeries.getOwnerOrgAdvancedSelectFirstItem()
+        ).getText()
+      ).to.include(ORG_COMPLETE)
+      await (
+        await CreateEventSeries.getOwnerOrgAdvancedSelectFirstItem()
+      ).click()
+
       await CreateEventSeries.submitForm()
       await CreateEventSeries.waitForAlertSuccessToLoad()
     })

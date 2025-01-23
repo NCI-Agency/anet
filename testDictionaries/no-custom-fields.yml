@@ -353,6 +353,9 @@ fields:
     adminOrg:
       label: Admin Organization
       placeholder: Search for the organization that will manage the event series in ANET…
+    ownerOrg:
+      label: Owner Organization
+      placeholder: Search for the organization that owns the event series…
     name:
       label: Name
       placeholder: The name of the event series
@@ -372,6 +375,9 @@ fields:
     adminOrg:
       label: Admin Organization
       placeholder: Search for the organization that will manage the event in ANET…
+    ownerOrg:
+      label: Owner Organization
+      placeholder: Search for the organization that owns the event…
     location:
       label: Location where the event takes place
       placeholder: Search for a location…

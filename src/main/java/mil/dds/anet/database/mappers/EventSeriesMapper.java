@@ -18,6 +18,7 @@ public class EventSeriesMapper implements RowMapper<EventSeries> {
     eventSeries.setDescription(r.getString("eventSeries_description"));
     eventSeries.setHostOrgUuid(r.getString("eventSeries_hostOrgUuid"));
     eventSeries.setAdminOrgUuid(r.getString("eventSeries_adminOrgUuid"));
+    eventSeries.setOwnerOrgUuid(r.getString("eventSeries_ownerOrgUuid"));
 
     if (MapperUtils.containsColumnNamed(r, "totalCount")) {
       ctx.define("totalCount", r.getInt("totalCount"));

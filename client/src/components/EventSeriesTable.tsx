@@ -13,6 +13,7 @@ import { EventSeries } from "models"
 import React, { useState } from "react"
 import { Table } from "react-bootstrap"
 import { connect } from "react-redux"
+import Settings from "settings"
 
 const GQL_GET_EVENTSERIES_LIST = gql`
   query ($eventSeriesQuery: EventSeriesSearchQueryInput) {
@@ -31,6 +32,13 @@ const GQL_GET_EVENTSERIES_LIST = gql`
           ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         adminOrg {
+          uuid
+          shortName
+          longName
+          identificationCode
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        }
+        ownerOrg {
           uuid
           shortName
           longName
@@ -86,9 +94,10 @@ const EventSeriesTable = ({
         <Table striped hover responsive>
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Host Organization</th>
-              <th>Admin Organization</th>
+              <th>{Settings.fields.eventSeries.name.label}</th>
+              <th>{Settings.fields.eventSeries.hostOrg.label}</th>
+              <th>{Settings.fields.eventSeries.adminOrg.label}</th>
+              <th>{Settings.fields.eventSeries.ownerOrg.label}</th>
             </tr>
           </thead>
           <tbody>
@@ -107,6 +116,12 @@ const EventSeriesTable = ({
                   <LinkTo
                     modelType="Organization"
                     model={eventSeries.adminOrg}
+                  />
+                </td>
+                <td>
+                  <LinkTo
+                    modelType="Organization"
+                    model={eventSeries.ownerOrg}
                   />
                 </td>
               </tr>

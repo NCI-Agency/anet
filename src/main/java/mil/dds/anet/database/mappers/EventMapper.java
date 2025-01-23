@@ -23,6 +23,7 @@ public class EventMapper implements RowMapper<Event> {
     event.setOutcomes(r.getString("events_outcomes"));
     event.setHostOrgUuid(r.getString("events_hostOrgUuid"));
     event.setAdminOrgUuid(r.getString("events_adminOrgUuid"));
+    event.setOwnerOrgUuid(r.getString("events_ownerOrgUuid"));
     event.setEventSeriesUuid(r.getString("events_eventSeriesUuid"));
     event.setLocationUuid(r.getString("events_locationUuid"));
 

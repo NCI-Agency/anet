@@ -22,9 +22,9 @@ public class EventResourceTest extends AbstractResourceTest {
   private static final String TASK_FIELDS =
       "{ uuid shortName longName description category status customFields }";
   private static final String EVENT_SERIES_FIELDS =
-      "{ uuid status name description adminOrg { uuid } hostOrg { uuid } }";
+      "{ uuid status name description hostOrg { uuid } adminOrg { uuid } ownerOrg { uuid } }";
   public static final String FIELDS =
-      "{ uuid status name description eventSeries { uuid } adminOrg { uuid } hostOrg { uuid }"
+      "{ uuid status name description eventSeries { uuid } hostOrg { uuid } adminOrg { uuid } ownerOrg { uuid }"
           + " startDate endDate type organizations { uuid } people { uuid } tasks { uuid } }";
 
   @Test
@@ -33,7 +33,7 @@ public class EventResourceTest extends AbstractResourceTest {
     final Organization org = withCredentials(adminUser, t -> mutationExecutor
         .createOrganization(ORGANIZATION_FIELDS, TestData.createAdvisorOrganizationInput(true)));
     final EventInput eInput = TestData.createEventInput("NMI PDT", "Training",
-        getOrganizationInput(org), getOrganizationInput(org));
+        getOrganizationInput(org), getOrganizationInput(org), getOrganizationInput(org));
     final Event created = succeedCreateEvent(eInput);
 
     // Update an event field
@@ -49,7 +49,7 @@ public class EventResourceTest extends AbstractResourceTest {
     created.setEventSeries(withCredentials(adminUser,
         t -> mutationExecutor.createEventSeries(EVENT_SERIES_FIELDS,
             TestData.createEventSeriesInput("Event Series", "Event Series Description",
-                getOrganizationInput(org), getOrganizationInput(org)))));
+                getOrganizationInput(org), getOrganizationInput(org), getOrganizationInput(org)))));
     created.setOrganizations(Collections.singletonList(org));
     created.setPeople(Collections.singletonList(getJackJackson()));
     created.setTasks(Collections.singletonList(withCredentials(adminUser,
@@ -93,6 +93,8 @@ public class EventResourceTest extends AbstractResourceTest {
         .createOrganization(ORGANIZATION_FIELDS, TestData.createAdvisorOrganizationInput(true)));
     eventInput.setAdminOrg(getOrganizationInput(org));
     failCreateEvent(eventInput);
+    eventInput.setOwnerOrg(getOrganizationInput(org));
+    failCreateEvent(eventInput);
     eventInput.setHostOrg(getOrganizationInput(org));
     succeedCreateEvent(eventInput);
   }
@@ -103,7 +105,7 @@ public class EventResourceTest extends AbstractResourceTest {
         .createOrganization(ORGANIZATION_FIELDS, TestData.createAdvisorOrganizationInput(true)));
     // Jack is not an admin of this new organization, will fail
     final EventInput eInput = TestData.createEventInput("NMI PDT", "Training",
-        getOrganizationInput(org), getOrganizationInput(org));
+        getOrganizationInput(org), getOrganizationInput(org), getOrganizationInput(org));
     failCreateEvent(eInput);
     failUpdateEvent(eInput);
   }

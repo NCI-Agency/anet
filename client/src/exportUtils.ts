@@ -285,6 +285,12 @@ const GQL_GET_EVENT_LIST = gql`
           longName
           identificationCode
         }
+        ownerOrg {
+          uuid
+          shortName
+          longName
+          identificationCode
+        }
         eventSeries {
           uuid
           name

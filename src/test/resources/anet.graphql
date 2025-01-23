@@ -430,6 +430,7 @@ type Event {
   notes: [Note]
   organizations: [Organization]
   outcomes: String
+  ownerOrg: Organization
   people: [Person]
   reports(query: ReportSearchQueryInput): [Report]
   startDate: Instant
@@ -454,6 +455,7 @@ input EventInput {
   name: String
   organizations: [OrganizationInput]
   outcomes: String
+  ownerOrg: OrganizationInput
   people: [PersonInput]
   startDate: Instant
   status: Status
@@ -473,6 +475,7 @@ input EventSearchQueryInput {
   inMyReports: Boolean
   includeDate: Instant
   locationUuid: [String]
+  ownerOrgUuid: [String]
   pageNum: Int
   pageSize: Int
   sortBy: EventSeriesSearchSortBy
@@ -497,6 +500,7 @@ type EventSeries {
   isSubscribed: Boolean
   name: String
   notes: [Note]
+  ownerOrg: Organization
   status: Status
   updatedAt: Instant
   uuid: String
@@ -511,6 +515,7 @@ input EventSeriesInput {
   description: String
   hostOrg: OrganizationInput
   name: String
+  ownerOrg: OrganizationInput
   status: Status
   updatedAt: Instant
   uuid: String
@@ -522,6 +527,7 @@ input EventSeriesSearchQueryInput {
   emailNetwork: String
   hostOrgUuid: [String]
   inMyReports: Boolean
+  ownerOrgUuid: [String]
   pageNum: Int
   pageSize: Int
   sortBy: EventSeriesSearchSortBy

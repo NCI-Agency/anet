@@ -48,6 +48,13 @@ const GQL_GET_EVENT_LIST = gql`
           identificationCode
           ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
+        ownerOrg {
+          uuid
+          shortName
+          longName
+          identificationCode
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        }
         eventSeries {
           uuid
           name
@@ -205,6 +212,16 @@ const EventSummaryRow = ({ event, showEventSeries }: EventSummaryRowProps) => {
             <span>
               <strong>{Settings.fields.event.adminOrg.label}: </strong>
               <LinkTo modelType="Organization" model={event.adminOrg} />
+            </span>
+          </Col>
+        </Row>
+      )}
+      {!_isEmpty(event.ownerOrg) && (
+        <Row>
+          <Col md={12}>
+            <span>
+              <strong>{Settings.fields.event.ownerOrg.label}: </strong>
+              <LinkTo modelType="Organization" model={event.ownerOrg} />
             </span>
           </Col>
         </Row>

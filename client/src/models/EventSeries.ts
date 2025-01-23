@@ -35,7 +35,8 @@ export default class EventSeries extends Model {
           : true
       )
       .default({}),
-    adminOrg: yup.object().nullable().default(null)
+    adminOrg: yup.object().nullable().default(null),
+    ownerOrg: yup.object().nullable().default(null)
   })
 
   static autocompleteQuery = `
@@ -49,6 +50,13 @@ export default class EventSeries extends Model {
       ${GRAPHQL_ENTITY_AVATAR_FIELDS}
     }
     adminOrg {
+      uuid
+      shortName
+      longName
+      identificationCode
+      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+    }
+    ownerOrg {
       uuid
       shortName
       longName
@@ -73,6 +81,13 @@ export default class EventSeries extends Model {
           ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         adminOrg {
+          uuid
+          shortName
+          longName
+          identificationCode
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        }
+        ownerOrg {
           uuid
           shortName
           longName

@@ -19,6 +19,10 @@ class ShowEventSeries extends Page {
     return browser.$('div[id="adminOrg"]')
   }
 
+  async getOwnerOrganization() {
+    return browser.$('div[id="ownerOrg"]')
+  }
+
   async getStatus() {
     return browser.$('div[id="status"]')
   }

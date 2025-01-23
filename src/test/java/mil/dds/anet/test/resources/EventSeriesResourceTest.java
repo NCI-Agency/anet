@@ -14,7 +14,7 @@ public class EventSeriesResourceTest extends AbstractResourceTest {
 
   private static final String ORGANIZATION_FIELDS = "{ uuid shortName }";
   public static final String FIELDS =
-      "{ uuid status name description adminOrg { uuid } hostOrg { uuid } }";
+      "{ uuid status name description hostOrg { uuid } adminOrg { uuid } ownerOrg { uuid } }";
 
   @Test
   void eventTestSeriesGraphQL() {
@@ -22,7 +22,7 @@ public class EventSeriesResourceTest extends AbstractResourceTest {
     final Organization org = withCredentials(adminUser, t -> mutationExecutor
         .createOrganization(ORGANIZATION_FIELDS, TestData.createAdvisorOrganizationInput(true)));
     final EventSeriesInput eSeriesInput = TestData.createEventSeriesInput("NMI PDT", "Training",
-        getOrganizationInput(org), getOrganizationInput(org));
+        getOrganizationInput(org), getOrganizationInput(org), getOrganizationInput(org));
     final EventSeries created = succeedCreateEventSeries(eSeriesInput);
 
     // Update an event series field
@@ -48,6 +48,8 @@ public class EventSeriesResourceTest extends AbstractResourceTest {
         .createOrganization(ORGANIZATION_FIELDS, TestData.createAdvisorOrganizationInput(true)));
     eventSeriesInput.setAdminOrg(getOrganizationInput(org));
     failCreateEventSeries(eventSeriesInput);
+    eventSeriesInput.setOwnerOrg(getOrganizationInput(org));
+    failCreateEventSeries(eventSeriesInput);
     eventSeriesInput.setHostOrg(getOrganizationInput(org));
     succeedCreateEventSeries(eventSeriesInput);
   }
@@ -58,7 +60,7 @@ public class EventSeriesResourceTest extends AbstractResourceTest {
         .createOrganization(ORGANIZATION_FIELDS, TestData.createAdvisorOrganizationInput(true)));
     // Jack is not an admin of this new organization, will fail
     final EventSeriesInput eInput = TestData.createEventSeriesInput("NMI PDT", "Training",
-        getOrganizationInput(org), getOrganizationInput(org));
+        getOrganizationInput(org), getOrganizationInput(org), getOrganizationInput(org));
     failCreateEventSeries(eInput);
     failUpdateEventSeries(eInput);
   }

@@ -342,6 +342,13 @@ const GQL_GET_EVENT_LIST = gql`
           identificationCode
           ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
+        ownerOrg {
+          uuid
+          shortName
+          longName
+          identificationCode
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        }
         eventSeries {
           uuid
           name

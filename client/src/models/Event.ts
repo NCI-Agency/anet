@@ -47,6 +47,7 @@ export default class Event extends Model {
       )
       .default({}),
     adminOrg: yup.object().nullable().default(null),
+    ownerOrg: yup.object().nullable().default(null),
     eventSeries: yup.object().nullable().default({}),
     location: yup.object().nullable().default({}),
     tasks: yup.array().nullable().default([]),
@@ -87,6 +88,13 @@ export default class Event extends Model {
           ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         adminOrg {
+          uuid
+          shortName
+          longName
+          identificationCode
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        }
+        ownerOrg {
           uuid
           shortName
           longName

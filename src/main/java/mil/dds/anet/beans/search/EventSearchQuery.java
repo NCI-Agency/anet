@@ -92,8 +92,8 @@ public class EventSearchQuery extends EventSeriesSearchQuery {
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), getHostOrgUuid(), getAdminOrgUuid(), eventSeriesUuid,
-        locationUuid, taskUuid, includeDate, startDate, endDate, type);
+    return Objects.hash(super.hashCode(), eventSeriesUuid, locationUuid, taskUuid, includeDate,
+        startDate, endDate, type);
   }
 
   @Override
@@ -101,9 +101,7 @@ public class EventSearchQuery extends EventSeriesSearchQuery {
     if (!(obj instanceof EventSearchQuery other)) {
       return false;
     }
-    return super.equals(obj) && Objects.equals(getHostOrgUuid(), other.getHostOrgUuid())
-        && Objects.equals(getAdminOrgUuid(), other.getAdminOrgUuid())
-        && Objects.equals(getEventSeriesUuid(), other.getEventSeriesUuid())
+    return super.equals(obj) && Objects.equals(getEventSeriesUuid(), other.getEventSeriesUuid())
         && Objects.equals(getLocationUuid(), other.getLocationUuid())
         && Objects.equals(getTaskUuid(), other.getTaskUuid())
         && Objects.equals(getIncludeDate(), other.getIncludeDate())

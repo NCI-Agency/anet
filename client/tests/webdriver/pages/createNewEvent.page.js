@@ -30,6 +30,12 @@ class CreateEvent extends Page {
     return browser.$("#fg-hostOrg div.invalid-feedback")
   }
 
+  async getHostOrgAdvancedSelectFirstItem() {
+    return browser.$(
+      "#hostOrg-popover tbody tr:first-child td:nth-child(2) span"
+    )
+  }
+
   async getAdminOrganizationInput() {
     return browser.$("#adminOrg")
   }
@@ -44,9 +50,13 @@ class CreateEvent extends Page {
     )
   }
 
-  async getHostOrgAdvancedSelectFirstItem() {
+  async getOwnerOrganizationInput() {
+    return browser.$("#ownerOrg")
+  }
+
+  async getOwnerOrgAdvancedSelectFirstItem() {
     return browser.$(
-      "#hostOrg-popover tbody tr:first-child td:nth-child(2) span"
+      "#ownerOrg-popover tbody tr:first-child td:nth-child(2) span"
     )
   }
 
@@ -99,6 +109,26 @@ class CreateEvent extends Page {
         timeout: 5000,
         timeoutMsg:
           'Expected admin org advanced select input to contain "' +
+          value +
+          '" after 5s'
+      }
+    )
+  }
+
+  async waitForOwnerOrgAdvancedSelectToChange(value) {
+    await (await this.getOwnerOrgAdvancedSelectFirstItem()).waitForExist()
+    return browser.waitUntil(
+      async() => {
+        return (
+          (await (
+            await this.getOwnerOrgAdvancedSelectFirstItem()
+          ).getText()) === value
+        )
+      },
+      {
+        timeout: 5000,
+        timeoutMsg:
+          'Expected owner org advanced select input to contain "' +
           value +
           '" after 5s'
       }

@@ -23,6 +23,11 @@ describe("Show event page", () => {
     expect(await (await ShowEvent.getAdminOrganization()).getText()).to.equal(
       "EF 2.2"
     )
+    await (await ShowEvent.getOwnerOrganization()).waitForExist()
+    await (await ShowEvent.getOwnerOrganization()).waitForDisplayed()
+    expect(await (await ShowEvent.getOwnerOrganization()).getText()).to.equal(
+      "EF 2.2"
+    )
     await (await ShowEvent.getLocation()).waitForExist()
     await (await ShowEvent.getLocation()).waitForDisplayed()
     expect(await (await ShowEvent.getLocation()).getText()).to.equal(

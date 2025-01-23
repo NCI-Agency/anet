@@ -5958,6 +5958,7 @@
 				<constraints nullable="false" />
 			</column>
 			<column name="adminOrgUuid" type="${uuid_type}" />
+			<column name="ownerOrgUuid" type="${uuid_type}" />
 			<column name="name" type="varchar(255)">
 				<constraints nullable="false" />
 			</column>
@@ -5979,6 +5980,14 @@
 			constraintName="FK_eventSeries_adminOrganization"
 			baseTableName="eventSeries"
 			baseColumnNames="adminOrgUuid"
+			referencedTableName="organizations"
+			referencedColumnNames="uuid"
+			onDelete="CASCADE" onUpdate="NO ACTION"
+		/>
+		<addForeignKeyConstraint
+			constraintName="FK_eventSeries_ownerOrganization"
+			baseTableName="eventSeries"
+			baseColumnNames="ownerOrgUuid"
 			referencedTableName="organizations"
 			referencedColumnNames="uuid"
 			onDelete="CASCADE" onUpdate="NO ACTION"
@@ -6006,6 +6015,7 @@
 				<constraints nullable="false" />
 			</column>
 			<column name="adminOrgUuid" type="${uuid_type}" />
+			<column name="ownerOrgUuid" type="${uuid_type}" />
 			<column name="type" type="text"/>
 			<column name="description" type="text"/>
 			<column name="eventSeriesUuid" type="${uuid_type}" />
@@ -6028,6 +6038,14 @@
 			constraintName="FK_events_adminOrganization"
 			baseTableName="events"
 			baseColumnNames="adminOrgUuid"
+			onDelete="CASCADE" onUpdate="NO ACTION"
+			referencedColumnNames="uuid"
+			referencedTableName="organizations"
+		/>
+		<addForeignKeyConstraint
+			constraintName="FK_events_ownerOrganization"
+			baseTableName="events"
+			baseColumnNames="ownerOrgUuid"
 			onDelete="CASCADE" onUpdate="NO ACTION"
 			referencedColumnNames="uuid"
 			referencedTableName="organizations"
