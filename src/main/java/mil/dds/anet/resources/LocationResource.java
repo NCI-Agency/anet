@@ -128,16 +128,7 @@ public class LocationResource {
     assertPermission(user, DaoUtils.getUuid(l));
 
     // Check for loops in the hierarchy
-    if (!Utils.isEmptyOrNull(l.getParentLocations())) {
-      final Set<String> parentLocationUuids =
-          l.getParentLocations().stream().map(Location::getUuid).collect(Collectors.toSet());
-      final Map<String, Set<String>> children = engine.buildLocationHash(DaoUtils.getUuid(l), true);
-      children.keySet().retainAll(parentLocationUuids);
-      if (!children.isEmpty()) {
-        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-            "Location can not be its own (grand…)parent");
-      }
-    }
+    checkForLoops(l.getUuid(), l.getParentLocations());
 
     final int numRows = dao.update(l);
     if (numRows == 0) {
@@ -172,6 +163,19 @@ public class LocationResource {
     return numRows;
   }
 
+  private void checkForLoops(String locationUuid, List<Location> parentLocations) {
+    if (!Utils.isEmptyOrNull(parentLocations)) {
+      final Set<String> parentLocationUuids =
+          parentLocations.stream().map(Location::getUuid).collect(Collectors.toSet());
+      final Map<String, Set<String>> children = engine.buildLocationHash(locationUuid, true);
+      children.keySet().retainAll(parentLocationUuids);
+      if (!children.isEmpty()) {
+        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+            "Location can not be its own (grand…)parent");
+      }
+    }
+  }
+
   @GraphQLMutation(name = "mergeLocations")
   public Integer mergeLocations(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "loserUuid") String loserUuid,
@@ -183,6 +187,9 @@ public class LocationResource {
     // Check that given two locations can be merged
     areLocationsMergeable(winnerLocation, loserLocation);
     validateLocation(winnerLocation);
+    // Check for loops in the hierarchy
+    checkForLoops(winnerLocation.getUuid(), winnerLocation.getParentLocations());
+    checkForLoops(loserUuid, winnerLocation.getParentLocations());
 
     int numRows = dao.mergeLocations(loserLocation, winnerLocation);
     if (numRows == 0) {
@@ -195,7 +202,7 @@ public class LocationResource {
 
   private void validateLocation(Location winnerLocation) {
     if (winnerLocation.getName() == null || winnerLocation.getName().trim().isEmpty()) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Location Name must not be null");
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Location Name must not be empty");
     }
   }
 
