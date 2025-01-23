@@ -52,6 +52,10 @@ anet:
     start-tls: ${ANET_SMTP_STARTTLS:false}
     disabled: ${ANET_SMTP_DISABLE:true}
     nb-of-hours-for-stale-emails: 72
+    # Timeout in milliseconds when sending mail;
+    # defaults to 5000 when not specified;
+    # 0 means no timeout at all!
+    timeout: 5000
 
   # The email address that all automated emails should come from.
   # ex: "ANET <anet@example.com>"
