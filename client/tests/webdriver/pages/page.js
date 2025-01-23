@@ -151,6 +151,13 @@ class Page {
     return browser.$(".alert-danger")
   }
 
+  async waitForAlertDangerToLoad() {
+    if (!(await (await this.getAlertDanger()).isDisplayed())) {
+      await (await this.getAlertDanger()).waitForExist()
+      await (await this.getAlertDanger()).waitForDisplayed()
+    }
+  }
+
   async getRandomOption(select) {
     const options = await select.$$("option")
     // Ignore the first option, it is always the empty one

@@ -2,6 +2,16 @@ import { expect } from "chai"
 import MergeLocations from "../pages/mergeLocations.page"
 
 const EXAMPLE_LOCATIONS = {
+  childLeft: {
+    search: "Kabul Hospital",
+    name: "Kabul Hospital",
+    fullName: "Kabul Hospital"
+  },
+  parentRight: {
+    search: "Afghanistan",
+    name: "Afghanistan",
+    fullName: "Afghanistan"
+  },
   left: {
     search: "Location Winner",
     name: "Merge Location Winner",
@@ -42,6 +52,52 @@ const EXAMPLE_LOCATIONS = {
       "Location publication approval for merge loser\nPerson Position\nCIV ERINSON, Erin EF 2.2 Advisor D"
   }
 }
+
+describe("Merge locations error", () => {
+  it("Should show an error when merging locations would create a loop", async() => {
+    await MergeLocations.openPage()
+    await (await MergeLocations.getTitle()).waitForExist()
+    await (await MergeLocations.getTitle()).waitForDisplayed()
+
+    await (await MergeLocations.getLeftLocationField()).click()
+    await (
+      await MergeLocations.getLeftLocationField()
+    ).setValue(EXAMPLE_LOCATIONS.childLeft.search)
+    await MergeLocations.waitForAdvancedSelectLoading(
+      EXAMPLE_LOCATIONS.childLeft.fullName
+    )
+    await (await MergeLocations.getFirstItemFromAdvancedSelect()).click()
+    await browser.pause(500)
+    await MergeLocations.waitForColumnToChange(
+      EXAMPLE_LOCATIONS.childLeft.name,
+      "left",
+      "Name"
+    )
+
+    await (await MergeLocations.getRightLocationField()).click()
+    await (
+      await MergeLocations.getRightLocationField()
+    ).setValue(EXAMPLE_LOCATIONS.parentRight.search)
+    await MergeLocations.waitForAdvancedSelectLoading(
+      EXAMPLE_LOCATIONS.parentRight.fullName
+    )
+    await (await MergeLocations.getFirstItemFromAdvancedSelect()).click()
+    await browser.pause(500)
+    await MergeLocations.waitForColumnToChange(
+      EXAMPLE_LOCATIONS.parentRight.name,
+      "right",
+      "Name"
+    )
+
+    await (await MergeLocations.getUseAllButton("left")).click()
+    await browser.pause(500)
+    await (await MergeLocations.getMergeLocationsButton()).click()
+    await MergeLocations.waitForAlertDangerToLoad()
+    expect(await (await MergeLocations.getAlertDanger()).getText()).to.eq(
+      "Location can not be its own (grand…)parent"
+    )
+  })
+})
 
 describe("Merge locations page", () => {
   it("Should be able to select to incompatible locations to merge", async() => {

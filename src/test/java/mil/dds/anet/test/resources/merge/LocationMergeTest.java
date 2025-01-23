@@ -19,10 +19,28 @@ import org.junit.jupiter.api.Test;
 
 public class LocationMergeTest extends AbstractResourceTest {
 
-  public static final String FIELDS = String.format(
-      "{ uuid name type digram trigram description status lat lng customFields attachments %s }",
-      AttachmentResourceTest.ATTACHMENT_FIELDS);
+  public static final String FIELDS =
+      String.format(
+          "{ uuid name type digram trigram description status lat lng customFields"
+              + " attachments %s parentLocations { uuid } }",
+          AttachmentResourceTest.ATTACHMENT_FIELDS);
   private static final String PERSON_FIELDS = String.format("{ uuid country %s }", FIELDS);
+
+  @Test
+  void testMergeLoop() {
+    // MoD Headquarters Kabul
+    final Location childLocation = withCredentials(adminUser,
+        t -> queryExecutor.location(FIELDS, "e0ff0d6c-e663-4639-a44d-b075bf1e690d"));
+    // Afghanistan
+    final Location parentLocation = childLocation.getParentLocations().get(0);
+    try {
+      withCredentials(adminUser, t -> mutationExecutor.mergeLocations("", parentLocation.getUuid(),
+          getLocationInput(childLocation)));
+      fail("Expected an Exception");
+    } catch (Exception expectedException) {
+      // OK
+    }
+  }
 
   @Test
   void testMerge() {
