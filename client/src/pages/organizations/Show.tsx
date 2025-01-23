@@ -10,6 +10,7 @@ import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
 import EmailAddressTable from "components/EmailAddressTable"
+import EventCollection from "components/EventCollection"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import FindObjectsButton from "components/FindObjectsButton"
@@ -281,6 +282,9 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
           </Nav.Item>
         )}
         <Nav.Item>
+          <AnchorNavItem to="events">Events</AnchorNavItem>
+        </Nav.Item>
+        <Nav.Item>
           <AnchorNavItem to="reports">Reports</AnchorNavItem>
         </Nav.Item>
       </span>
@@ -288,6 +292,9 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
   )
   const reportQueryParams = {
     orgUuid: uuid
+  }
+  const eventQueryParams = {
+    hostOrgUuid: uuid
   }
   if (filterPendingApproval) {
     reportQueryParams.state = Report.STATE.PENDING_APPROVAL
@@ -706,7 +713,17 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
                   }}
                 />
               )}
-
+              <Fieldset
+                id="events"
+                title={`Events hosted by ${organization.shortName}`}
+              >
+                <EventCollection
+                  paginationKey={`e_${uuid}`}
+                  queryParams={eventQueryParams}
+                  mapId="events"
+                  showEventSeries
+                />
+              </Fieldset>
               <Fieldset
                 id="reports"
                 title={`Reports from ${organization.shortName}`}

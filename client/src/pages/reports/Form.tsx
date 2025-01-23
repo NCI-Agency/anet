@@ -1,8 +1,11 @@
 import { gql } from "@apollo/client"
+import { Icon, IconSize, Intent } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import API from "api"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import {
   AuthorizationGroupOverlayRow,
+  EventOverlayRow,
   LocationOverlayRow,
   PersonDetailedOverlayRow,
   TaskOverlayRow
@@ -15,8 +18,7 @@ import ConfirmDestructive from "components/ConfirmDestructive"
 import CustomDateInput from "components/CustomDateInput"
 import {
   CustomFieldsContainer,
-  customFieldsJSONString,
-  initInvisibleFields
+  customFieldsJSONString
 } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
@@ -45,6 +47,7 @@ import _isEqual from "lodash/isEqual"
 import _upperFirst from "lodash/upperFirst"
 import {
   AuthorizationGroup,
+  Event,
   Location,
   Person,
   Position,
@@ -52,7 +55,7 @@ import {
   Task
 } from "models"
 import moment from "moment"
-import LocationForm from "pages/locations/Form"
+import CreateNewLocation from "pages/locations/CreateNewLocation"
 import { RECURRENCE_TYPE } from "periodUtils"
 import pluralize from "pluralize"
 import React, { useContext, useEffect, useRef, useState } from "react"
@@ -61,6 +64,7 @@ import { connect } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
 import AUTHORIZATION_GROUPS_ICON from "resources/authorizationGroups.png"
+import EVENTS_ICON from "resources/events.png"
 import LOCATIONS_ICON from "resources/locations.png"
 import PEOPLE_ICON from "resources/people.png"
 import TASKS_ICON from "resources/tasks.png"
@@ -185,41 +189,14 @@ const GQL_UPDATE_REPORT_ASSESSMENTS = gql`
   }
 `
 
+const GQL_GET_EVENT_COUNT = gql`
+  query ($eventQuery: EventSearchQueryInput) {
+    eventList(query: $eventQuery) {
+      totalCount
+    }
+  }
+`
 const AUTOSAVE_TIMEOUT = process.env.ANET_TEST_MODE === "true" ? 300 : 30
-
-interface CreateNewLocationProps {
-  name?: string
-  setFieldTouched: (...args: unknown[]) => unknown
-  setFieldValue: (...args: unknown[]) => unknown
-  setDoReset: (...args: unknown[]) => unknown
-}
-
-const CreateNewLocation = ({
-  name,
-  setFieldTouched,
-  setFieldValue,
-  setDoReset
-}: CreateNewLocationProps) => {
-  const location = new Location({ name })
-  // mutates the object
-  initInvisibleFields(location, Settings.fields.location.customFields)
-  return (
-    <LocationForm
-      initialValues={location}
-      title="Create a new Location"
-      afterSaveActions={value => {
-        // validation will be done by setFieldValue
-        setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
-        setFieldValue("location", value, true)
-        setDoReset(true)
-        toast.success("The location has been saved")
-      }}
-      afterCancelActions={() => {
-        setDoReset(true)
-      }}
-    />
-  )
-}
 
 interface ReportFormProps {
   pageDispatchers?: PageDispatchersPropType
@@ -253,6 +230,17 @@ const ReportForm = ({
   const [showCustomFields, setShowCustomFields] = useState(
     !!Settings.fields.report.customFields
   )
+  // If this report is linked to an Event restrict the dates that can be selected for engagementDate
+  const [minDate, setMinDate] = useState(initialValues.event?.startDate)
+  const [maxDate, setMaxDate] = useState(initialValues.event?.endDate)
+  // To check if there is a visit ban in the location
+  const [locationUuid, setLocationUuid] = useState(
+    initialValues?.location?.uuid
+  )
+  const [engagementDate, setEngagementDate] = useState(
+    initialValues?.engagementDate
+  )
+  const [visitBan, setVisitBan] = useState(false)
   // some autosave settings
   const defaultTimeout = moment.duration(AUTOSAVE_TIMEOUT, "seconds")
   const autoSaveSettings = useRef({
@@ -270,6 +258,37 @@ const ReportForm = ({
       autoSaveActive.current = false
     }
   })
+
+  useEffect(() => {
+    async function checkPotentiallyUnavailableLocation(
+      engagementDate,
+      locationUuid
+    ) {
+      // When engagement date or location uuid changes we need to call the back-end to figure out if there is a VISIT BAN event
+      // that applies to the location in the engagement date. If so we need to warn the user.
+      if (engagementDate && locationUuid) {
+        const eventQuery = {
+          pageSize: 1,
+          type: Event.EVENT_TYPES.VISIT_BAN,
+          locationUuid,
+          includeDate: engagementDate
+        }
+        try {
+          const response = await API.query(GQL_GET_EVENT_COUNT, {
+            eventQuery
+          })
+          setVisitBan(response?.eventList.totalCount > 0)
+        } catch (error) {
+          setSaveError(error)
+          setVisitBan(false)
+          jumpToTop()
+        }
+      } else {
+        setVisitBan(false)
+      }
+    }
+    checkPotentiallyUnavailableLocation(engagementDate, locationUuid)
+  }, [engagementDate, locationUuid])
 
   const recentTasksVarCommon = {
     pageSize: 6,
@@ -429,6 +448,16 @@ const ReportForm = ({
 
         const tasksFilters = {}
 
+        if (values.event?.uuid) {
+          tasksFilters.assignedToEvent = {
+            label: `Assigned to event ${values.event.name}`,
+            queryVars: {
+              eventUuid: values.event.uuid,
+              selectable: true
+            }
+          }
+        }
+
         if (currentOrg) {
           tasksFilters.assignedToMyOrg = {
             label: `Assigned to ${currentOrg.shortName}`,
@@ -463,6 +492,8 @@ const ReportForm = ({
           label: `All unassigned ${tasksLabel}`,
           queryVars: { selectable: true, isAssigned: false }
         }
+
+        const eventFilters = Event.getReportEventFilters()
 
         if (currentUser.isAdmin()) {
           tasksFilters.allTasks = {
@@ -573,19 +604,22 @@ const ReportForm = ({
                 />
 
                 <DictionaryField
-                  wrappedComponent={FastField}
+                  wrappedComponent={Field}
                   dictProps={Settings.fields.report.engagementDate}
                   name="engagementDate"
                   component={FieldHelper.SpecialField}
                   onChange={value => {
                     setFieldTouched("engagementDate", true, false) // onBlur doesn't work when selecting a date
                     setFieldValue("engagementDate", value, true)
+                    setEngagementDate(value)
                   }}
                   onBlur={() => setFieldTouched("engagementDate")}
                   widget={
                     <CustomDateInput
                       id="engagementDate"
                       withTime={Settings.engagementsIncludeTimeAndDuration}
+                      minDate={minDate}
+                      maxDate={maxDate}
                     />
                   }
                 >
@@ -620,7 +654,36 @@ const ReportForm = ({
                 )}
 
                 <DictionaryField
-                  wrappedComponent={FastField}
+                  wrappedComponent={Field}
+                  dictProps={Settings.fields.report.event}
+                  name="event"
+                  component={FieldHelper.SpecialField}
+                  onChange={value => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("event", true, false) // onBlur doesn't work when selecting an option
+                    setFieldValue("event", value, true)
+                    setFieldValue("location", value?.location)
+                    setMinDate(value?.startDate)
+                    setMaxDate(value?.endDate)
+                  }}
+                  widget={
+                    <AdvancedSingleSelect
+                      fieldName="event"
+                      placeholder={Settings.fields.report.event.placeholder}
+                      value={values.event}
+                      overlayColumns={["Name"]}
+                      overlayRenderRow={EventOverlayRow}
+                      filterDefs={eventFilters}
+                      objectType={Event}
+                      fields={Event.autocompleteQuery}
+                      valueKey="name"
+                      addon={EVENTS_ICON}
+                    />
+                  }
+                />
+
+                <DictionaryField
+                  wrappedComponent={Field}
                   dictProps={Settings.fields.report.location}
                   name="location"
                   component={FieldHelper.SpecialField}
@@ -628,7 +691,9 @@ const ReportForm = ({
                     // validation will be done by setFieldValue
                     setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
                     setFieldValue("location", value, true)
+                    setLocationUuid(value.uuid)
                   }}
+                  disabled={values.event?.uuid != null}
                   widget={
                     <AdvancedSingleSelect
                       fieldName="location"
@@ -641,6 +706,7 @@ const ReportForm = ({
                       fields={Location.autocompleteQuery}
                       valueKey="name"
                       addon={LOCATIONS_ICON}
+                      showRemoveButton={values.event?.uuid == null}
                       createEntityComponent={
                         !canCreateLocation
                           ? null
@@ -657,11 +723,26 @@ const ReportForm = ({
                   }
                   extraColElem={
                     <>
+                      {visitBan ? (
+                        <Button variant="outline-secondary">
+                          <Icon
+                            icon={IconNames.WARNING_SIGN}
+                            intent={Intent.WARNING}
+                            size={IconSize.STANDARD}
+                            style={{ margin: "0 6px" }}
+                          />
+                          This location might not be available at the engagement
+                          date due to a visit ban!
+                        </Button>
+                      ) : undefined}
                       <FieldHelper.FieldShortcuts
                         title="Recent Locations"
-                        shortcuts={recents.locations.filter(
-                          l => values.location?.uuid !== l.uuid
-                        )}
+                        shortcuts={
+                          !values.event?.uuid &&
+                          recents.locations.filter(
+                            l => values.location?.uuid !== l.uuid
+                          )
+                        }
                         fieldName="location"
                         objectType={Location}
                         curValue={values.location}
@@ -1535,6 +1616,7 @@ const ReportForm = ({
     // strip tasks fields not in data model
     report.tasks = values.tasks.map(t => utils.getReference(t))
     report.location = utils.getReference(report.location)
+    report.event = utils.getReference(report.event)
     report.customFields = customFieldsJSONString(values)
     const edit = isEditMode(values)
     const operation = edit ? "updateReport" : "createReport"

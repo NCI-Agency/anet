@@ -43,6 +43,10 @@ class Search extends Page {
     )
   }
 
+  async getFoundEventTable() {
+    return browser.$("div#events #events-search-results")
+  }
+
   async linkOfPersonFound(name) {
     return (await this.getFoundPeopleTable()).$(
       `//tbody/tr//a[contains(text(), "${name}")]`
@@ -57,6 +61,12 @@ class Search extends Page {
 
   async linkOfOrganizationFound(name) {
     return (await this.getFoundOrganizationTable()).$(
+      `//tbody/tr//a[contains(text(), "${name}")]`
+    )
+  }
+
+  async linkOfEventFound(name) {
+    return (await this.getFoundEventTable()).$(
       `//tbody/tr//a[contains(text(), "${name}")]`
     )
   }

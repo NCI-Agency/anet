@@ -101,7 +101,9 @@ export const GRAPHQL_ENTITY_FIELDS = {
   Location: "uuid name",
   Task: "uuid shortName longName",
   AuthorizationGroup: "uuid name description",
-  Attachment: "uuid caption mimeType contentLength"
+  Attachment: "uuid caption mimeType contentLength",
+  Event: "uuid name",
+  EventSeries: "uuid name"
 }
 
 export const GQL_CREATE_NOTE = gql`
@@ -122,6 +124,8 @@ export const GQL_UPDATE_NOTE = gql`
 export const MODEL_TO_OBJECT_TYPE = {
   Attachment: "attachments",
   AuthorizationGroup: "authorizationGroups",
+  Event: "events",
+  EventSeries: "eventSeries",
   Location: "locations",
   Organization: "organizations",
   Person: "people",
