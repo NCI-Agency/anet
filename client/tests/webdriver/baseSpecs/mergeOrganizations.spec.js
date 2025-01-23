@@ -3,6 +3,16 @@ import MergeOrganizations from "../pages/mergeOrganizations.page"
 
 const IMG_PATH = "/api/attachment/view"
 const EXAMPLE_ORGANIZATIONS = {
+  childLeft: {
+    search: "EF 1.1",
+    shortName: "EF 1.1",
+    displayedName: "EF 1.1"
+  },
+  parentRight: {
+    search: "EF 1 Planning",
+    shortName: "EF 1",
+    displayedName: "EF 1 | Planning Programming, Budgeting and Execution"
+  },
   validLeft: {
     search: "Merge Org 1",
     shortName: "Merge Org 1",
@@ -22,6 +32,52 @@ const EXAMPLE_ORGANIZATIONS = {
     parentOrg: "EF 1 | Planning Programming, Budgeting and Execution"
   }
 }
+
+describe("Merge organizations error", () => {
+  it("Should show an error when merging organizations would create a loop", async() => {
+    await MergeOrganizations.openPage()
+    await (await MergeOrganizations.getTitle()).waitForExist()
+    await (await MergeOrganizations.getTitle()).waitForDisplayed()
+
+    await (await MergeOrganizations.getLeftOrganizationField()).click()
+    await (
+      await MergeOrganizations.getLeftOrganizationField()
+    ).setValue(EXAMPLE_ORGANIZATIONS.childLeft.search)
+    await MergeOrganizations.waitForAdvancedSelectLoading(
+      EXAMPLE_ORGANIZATIONS.childLeft.displayedName
+    )
+    await (await MergeOrganizations.getFirstItemFromAdvancedSelect()).click()
+    await browser.pause(500)
+    await MergeOrganizations.waitForColumnToChange(
+      EXAMPLE_ORGANIZATIONS.childLeft.shortName,
+      "left",
+      "Name"
+    )
+
+    await (await MergeOrganizations.getRightOrganizationField()).click()
+    await (
+      await MergeOrganizations.getRightOrganizationField()
+    ).setValue(EXAMPLE_ORGANIZATIONS.parentRight.search)
+    await MergeOrganizations.waitForAdvancedSelectLoading(
+      EXAMPLE_ORGANIZATIONS.parentRight.displayedName
+    )
+    await (await MergeOrganizations.getFirstItemFromAdvancedSelect()).click()
+    await browser.pause(500)
+    await MergeOrganizations.waitForColumnToChange(
+      EXAMPLE_ORGANIZATIONS.parentRight.shortName,
+      "right",
+      "Name"
+    )
+
+    await (await MergeOrganizations.getUseAllButton("left")).click()
+    await browser.pause(500)
+    await (await MergeOrganizations.getMergeOrganizationsButton()).click()
+    await MergeOrganizations.waitForAlertDangerToLoad()
+    expect(await (await MergeOrganizations.getAlertDanger()).getText()).to.eq(
+      "Organization can not be its own (grand…)parent"
+    )
+  })
+})
 
 describe("Merge organizations page", () => {
   it("Should display field values of the left organization", async() => {

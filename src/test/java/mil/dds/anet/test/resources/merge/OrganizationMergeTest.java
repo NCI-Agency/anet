@@ -13,6 +13,17 @@ import org.junit.jupiter.api.Test;
 
 class OrganizationMergeTest extends AbstractResourceTest {
   @Test
+  void testMergeLoop() {
+    // EF 1.1
+    final Organization childOrg = withCredentials(adminUser,
+        t -> queryExecutor.organization(FIELDS, "04614b0f-7e8e-4bf1-8bc5-13abaffeab8a"));
+    // EF 1
+    final Organization parentOrg = childOrg.getParentOrg();
+    assertThatThrownBy(() -> withCredentials(adminUser, t -> mutationExecutor.mergeOrganizations("",
+        parentOrg.getUuid(), getOrganizationInput(childOrg)))).isInstanceOf(Exception.class);
+  }
+
+  @Test
   void shouldMerge() {
     final var loserInput = OrganizationInput.builder().withShortName("LM1")
         .withLongName("Loser for Merge").withStatus(INACTIVE).build();
