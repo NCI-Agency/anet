@@ -293,7 +293,7 @@ public abstract class AbstractSearchQueryBuilder<B, T extends AbstractSearchQuer
       outerQb = this;
     }
     outerQb.addWithClause(String.format(
-        "%1$s(uuid, parent_uuid) AS (SELECT %3$s AS uuid, %3$s AS parent_uuid FROM %2$s UNION ALL"
+        "%1$s(uuid, parent_uuid) AS (SELECT %3$s AS uuid, %3$s AS parent_uuid FROM %2$s UNION"
             + " SELECT pt.uuid, bt.%4$s FROM %2$s bt INNER JOIN"
             + " %1$s pt ON bt.%3$s = pt.parent_uuid)",
         withTableName, recursiveTableName, baseKey, recursiveForeignKey));
