@@ -108,19 +108,35 @@ const ReadonlySpecialField = ({
         {...Object.without(otherFieldProps, "style")}
       />
     )
-  } else {
-    const WidgetComponent = SPECIAL_WIDGET_COMPONENTS[widget]
+  }
+  if (widget === SPECIAL_WIDGET_TYPES.LIKERT_SCALE && isCompact) {
     return (
       <FastField
         name={name}
         isCompact={isCompact}
-        component={FieldHelper.SpecialField}
-        widget={<WidgetComponent />}
-        readonly
+        component={FieldHelper.ReadonlyField}
+        humanValue={
+          <LevelTrained
+            name={name}
+            values={values}
+            levels={otherFieldProps.levels}
+          />
+        }
         {...otherFieldProps}
       />
     )
   }
+  const WidgetComponent = SPECIAL_WIDGET_COMPONENTS[widget]
+  return (
+    <FastField
+      name={name}
+      isCompact={isCompact}
+      component={FieldHelper.SpecialField}
+      widget={<WidgetComponent />}
+      readonly
+      {...otherFieldProps}
+    />
+  )
 }
 
 const TextField = fieldProps => {
@@ -877,6 +893,29 @@ const ReadonlyArrayOfAnetObjectsField = ({
       labelColumnWidth={labelColumnWidth}
       className={className}
     />
+  )
+}
+
+interface LevelTrainedProps {
+  name: string
+  values: any
+  levels: array
+}
+
+const LevelTrained = ({ name, values, levels }: LevelTrainedProps) => {
+  const fieldValue = Number(Object.get(values, name) || 0).toFixed(0)
+  const sortedLevels = levels.sort((a, b) => a.endValue - b.endValue)
+  const levelLabel =
+    sortedLevels.find(level => fieldValue <= level.endValue)?.label || null
+
+  return (
+    <>
+      {levelLabel ? (
+        <span>{`${fieldValue} - ${levelLabel}`}</span>
+      ) : (
+        <span>{fieldValue}</span>
+      )}
+    </>
   )
 }
 
