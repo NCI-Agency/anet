@@ -349,7 +349,11 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                     <DictionaryField
                       wrappedComponent={CompactRow}
                       dictProps={Settings.fields.report.atmosphere}
-                      content={!report.atmosphereDetails ? utils.sentenceCase(report.atmosphere) : `${utils.sentenceCase(report.atmosphere)} - ${report.atmosphereDetails}`}
+                      content={
+                        !report.atmosphereDetails
+                          ? utils.sentenceCase(report.atmosphere)
+                          : `${utils.sentenceCase(report.atmosphere)} - ${report.atmosphereDetails}`
+                      }
                       className="reportField"
                     />
                   </>
@@ -404,10 +408,12 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                   />
                 )}
                 {optionalFields.assessments.active && (
+                  <CompactReportViewS>
                     {getAttendeesAndAssessments(true, true)}
                     {getAttendeesAndAssessments(false, true)}
                     {getTasksAndAssessments(true)}
-                }
+                  </CompactReportViewS>
+                )}
                 {Settings.fields.report.customFields && (
                   <ReadonlyCustomFields
                     fieldsConfig={Settings.fields.report.customFields}
@@ -450,10 +456,19 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
         {report.primaryInterlocutor && (
           <>
             {" of "}
-            <LinkTo modelType="Person" showAvatar={false} model={report.primaryInterlocutor} />
+            <LinkTo
+              modelType="Person"
+              showAvatar={false}
+              model={report.primaryInterlocutor}
+            />
           </>
         )}{" "}
-        by <LinkTo modelType="Person" showAvatar={false} model={report.primaryAdvisor} />
+        by{" "}
+        <LinkTo
+          modelType="Person"
+          showAvatar={false}
+          model={report.primaryAdvisor}
+        />
         <br />
         on{" "}
         {moment(report.engagementDate).format(
@@ -461,7 +476,11 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
         )}{" "}
         at{" "}
         {report.location && (
-          <LinkTo modelType="Location" showAvatar={false} model={report.location} />
+          <LinkTo
+            modelType="Location"
+            showAvatar={false}
+            model={report.location}
+          />
         )}
       </>
     )
@@ -472,11 +491,11 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
       ? moment(report.updatedAt)
       : moment(report.releasedAt)
     return (
-      <div style={{"font-size": "12px", "margin-bottom": "20px"}}>
+      <div style={{ "font-size": "12px", "margin-bottom": "20px" }}>
         <div>
           Authored on{" "}
-          {timeToShow.format(Settings.dateFormats.forms.displayShort.withTime)} [
-          {Report.STATE_LABELS[report.state]}]
+          {timeToShow.format(Settings.dateFormats.forms.displayShort.withTime)}{" "}
+          [{Report.STATE_LABELS[report.state]}]
         </div>
         <div>
           <div>
@@ -485,9 +504,9 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
               modelType="Person"
               model={currentUser}
               showAvatar={false}
-              style={{"font-size": "12px"}}
-            />
-            {" "}on{" "}
+              style={{ "font-size": "12px" }}
+            />{" "}
+            on{" "}
             {moment().format(Settings.dateFormats.forms.displayLong.withTime)}
           </div>
         </div>
@@ -526,11 +545,14 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
     )
   }
 
-  function getAttendeesAndAssessments(interlocutor) {
+  function getAttendeesAndAssessments(
+    isInterlocutor,
+    displayAssessments = false
+  ) {
     const attendees = report.attendees.filter(
-      at => at.interlocutor === interlocutor
+      at => at.interlocutor === isInterlocutor
     )
-    return optionalFields.assessments.active ? (
+    return displayAssessments ? (
       <InstantAssessmentsContainerField
         entityType={Person}
         entities={attendees}
@@ -545,11 +567,52 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
       />
     ) : (
       attendees.map(attendee => (
-        <LinkTo key={attendee.uuid} modelType="Person" model={attendee} />
+        <LinkTo
+          key={attendee.uuid}
+          modelType="Person"
+          showAvatar={false}
+          model={attendee}
+        />
       ))
     )
   }
 }
+
+export const CompactReportViewS = styled.table`
+  .table {
+    & span.badge {
+      background-color: unset !important;
+      padding: 0px;
+      font-size: 12px !important;
+    }
+
+    & tr tr {
+      display: flex;
+      gap: 20px;
+
+      & th {
+        width: unset;
+        font-weight: normal;
+        white-space: nowrap;
+      }
+      & td {
+        padding: 0px;
+        font-weight: bold;
+      }
+    }
+
+    & h4 {
+      font-size: 16px;
+    }
+
+    & fieldset {
+      padding: 10px 16px !important;
+      background-color: unset;
+      border: 1px solid #d1d5db;
+      box-shadow: none;
+    }
+  }
+`
 
 const OPTIONAL_FIELDS_INIT = {
   assessments: {

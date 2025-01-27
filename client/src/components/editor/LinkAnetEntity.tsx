@@ -47,7 +47,12 @@ const LinkAnetEntity = ({
   }, [type, uuid])
 
   return (
-    <LinkTo modelType={type} model={entity} showAvatar={showAvatar} displayCallback={displayCallback}>
+    <LinkTo
+      modelType={type}
+      model={entity}
+      showAvatar={showAvatar}
+      displayCallback={displayCallback}
+    >
       {whenNotFound || children}
     </LinkTo>
   )

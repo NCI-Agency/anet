@@ -129,7 +129,10 @@ const RichTextEditor = ({
     }
   }, [editor, previousValue, readOnly, disableFullSize, value])
 
-  const renderElement = useCallback(props => <Element {...props} showAvatar={showAvatar} />, [])
+  const renderElement = useCallback(
+    props => <Element {...props} showAvatar={showAvatar} />,
+    []
+  )
   const renderLeaf = useCallback(props => <Leaf {...props} />, [])
 
   const handleFullSizeMode = isFullSize => setShowFullSize(isFullSize)
@@ -387,7 +390,14 @@ const displayCallback = modelInstance => {
   }
 }
 
-const getLink = (element, children, attributes, selected, focused, showAvatar) => {
+const getLink = (
+  element,
+  children,
+  attributes,
+  selected,
+  focused,
+  showAvatar
+) => {
   const reducedChildren = element.children.reduce(
     (acc, child) => acc + child.text,
     ""
@@ -431,7 +441,12 @@ interface ElementProps {
   element?: any
 }
 
-const Element = ({ attributes, children, element, showAvatar}: ElementProps) => {
+const Element = ({
+  attributes,
+  children,
+  element,
+  showAvatar
+}: ElementProps) => {
   const selected = useSelected()
   const focused = useFocused()
   switch (element.type) {
@@ -451,7 +466,14 @@ const Element = ({ attributes, children, element, showAvatar}: ElementProps) => 
       return <blockquote {...attributes}>{children}</blockquote>
     case ANET_LINK:
     case EXTERNAL_LINK:
-      return getLink(element, children, attributes, selected, focused, showAvatar)
+      return getLink(
+        element,
+        children,
+        attributes,
+        selected,
+        focused,
+        showAvatar
+      )
     default:
       return <p {...attributes}>{children}</p>
   }
