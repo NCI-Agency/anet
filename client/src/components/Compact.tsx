@@ -441,10 +441,10 @@ export const CompactTitle = ({ label }: CompactTitleProps) => {
 const CompactTitleS = styled(CompactRowS)`
   & > th {
     font-size: 18px;
-    font-style: normal;
-    color: black;
+    color: #223333;
     text-align: center;
-    font-weight: bold;
+    padding: 12px 16px;
+    border-bottom: 2px solid #d1d5db;
   }
 `
 
@@ -462,10 +462,9 @@ export const CompactSubTitle = ({ label }: CompactSubTitleProps) => {
 
 const CompactSubTitleS = styled(CompactRowS)`
   & > th {
-    font-style: italic;
-    color: black;
+    color: #404050;
     text-align: center;
-    font-weight: normal;
+    padding: 10px 14px;
   }
 `
 
