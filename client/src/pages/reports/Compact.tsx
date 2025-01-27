@@ -451,10 +451,10 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
         {report.primaryInterlocutor && (
           <>
             {" of "}
-            <LinkTo modelType="Person" model={report.primaryInterlocutor} />
+            <LinkTo modelType="Person" showAvatar={false} model={report.primaryInterlocutor} />
           </>
         )}{" "}
-        by <LinkTo modelType="Person" model={report.primaryAdvisor} />
+        by <LinkTo modelType="Person" showAvatar={false} model={report.primaryAdvisor} />
         <br />
         on{" "}
         {moment(report.engagementDate).format(
@@ -462,7 +462,7 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
         )}{" "}
         at{" "}
         {report.location && (
-          <LinkTo modelType="Location" model={report.location} />
+          <LinkTo modelType="Location" showAvatar={false} model={report.location} />
         )}
       </>
     )
