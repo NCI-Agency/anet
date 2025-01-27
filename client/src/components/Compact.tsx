@@ -164,32 +164,13 @@ export const CompactFooterContent = ({
   const location = useLocation()
   const { currentUser } = useContext(AppContext)
   return (
-    <FooterContentS bgc={color}>
-      <span style={{ fontSize: "10px" }}>
-        uuid:{" "}
-        <Link to={location.pathname} style={{ fontSize: "10px" }}>
-          {object.uuid}
-        </Link>
-      </span>
+    <FooterContentS bgc={"unset"}>
       <ClassificationBanner
         color={color}
         policyAndClassification={policyAndClassification}
         releasableTo={releasableTo}
         bannerId="footer-banner"
       />
-      <PrintedByBoxS>
-        <div>
-          printed by{" "}
-          <LinkTo
-            style={{ fontSize: "10px" }}
-            modelType="Person"
-            model={currentUser}
-          />
-        </div>
-        <div>
-          {moment().format(Settings.dateFormats.forms.displayLong.withTime)}
-        </div>
-      </PrintedByBoxS>
     </FooterContentS>
   )
 }

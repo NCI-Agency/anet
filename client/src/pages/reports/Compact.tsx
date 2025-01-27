@@ -473,11 +473,26 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
       ? moment(report.updatedAt)
       : moment(report.releasedAt)
     return (
-      <>
-        Authored on{" "}
-        {timeToShow.format(Settings.dateFormats.forms.displayShort.withTime)} [
-        {Report.STATE_LABELS[report.state]}]
-      </>
+      <div style={{"font-size": "12px", "margin-bottom": "20px"}}>
+        <div>
+          Authored on{" "}
+          {timeToShow.format(Settings.dateFormats.forms.displayShort.withTime)} [
+          {Report.STATE_LABELS[report.state]}]
+        </div>
+        <div>
+          <div>
+            Printed by{" "}
+            <LinkTo
+              modelType="Person"
+              model={currentUser}
+              showAvatar={false}
+              style={{"font-size": "12px"}}
+            />
+            {" "}on{" "}
+            {moment().format(Settings.dateFormats.forms.displayLong.withTime)}
+          </div>
+        </div>
+      </div>
     )
   }
 
