@@ -13,6 +13,7 @@ interface QuestionSetProps {
   questionSets?: any
   parentFieldName?: string
   formikProps?: any
+  isCompact?: boolean
   readonly?: boolean
   vertical?: boolean
 }
@@ -23,6 +24,7 @@ const QuestionSet = ({
   questionSets,
   parentFieldName,
   formikProps,
+  isCompact,
   readonly,
   vertical
 }: QuestionSetProps) => {
@@ -54,6 +56,8 @@ const QuestionSet = ({
                   parentFieldName={`${parentFieldName}.${set}.questions`}
                   fieldsConfig={filteredQuestionSets[set].questions}
                   values={values}
+                  isCompact={isCompact}
+                  hideIfEmpty={isCompact}
                   vertical={vertical}
                 />
               ) : (
@@ -61,6 +65,8 @@ const QuestionSet = ({
                   formikProps={formikProps}
                   fieldsConfig={filteredQuestionSets[set].questions}
                   parentFieldName={`${parentFieldName}.${set}.questions`}
+                  isCompact={isCompact}
+                  hideIfEmpty={isCompact}
                   vertical={vertical}
                 />
               ))}
@@ -71,6 +77,7 @@ const QuestionSet = ({
                 questionSets={filteredQuestionSets[set].questionSets}
                 parentFieldName={`${parentFieldName}.${set}.questionSets`}
                 formikProps={formikProps}
+                isCompact={isCompact}
                 readonly={readonly}
                 vertical={vertical}
               />
