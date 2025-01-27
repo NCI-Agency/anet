@@ -1216,6 +1216,7 @@ interface ReadonlyCustomFieldsProps {
   values: any
   vertical?: boolean
   isCompact?: boolean
+  hideIfEmpty?: boolean
   extraColElem?: any
   labelColumnWidth?: number
   setShowCustomFields?: (...args: unknown[]) => unknown
@@ -1226,7 +1227,8 @@ export const ReadonlyCustomFields = ({
   parentFieldName = DEFAULT_CUSTOM_FIELDS_PARENT, // key path in the values object to get to the level of fields given by the fieldsConfig
   values,
   vertical = false,
-  isCompact,
+  isCompact = false,
+  hideIfEmpty = false,
   extraColElem,
   labelColumnWidth,
   setShowCustomFields
@@ -1256,6 +1258,15 @@ export const ReadonlyCustomFields = ({
           }
         }
         const ReadonlyFieldComponent = READONLY_FIELD_COMPONENTS[type]
+        const value = Object.get(values, fieldName) || null
+        if (
+          hideIfEmpty &&
+          (value === "" ||
+            value == null ||
+            (value instanceof Object && !Object.keys(value).length))
+        ) {
+          return null
+        }
         return ReadonlyFieldComponent ? (
           <ReadonlyFieldComponent
             key={key}
