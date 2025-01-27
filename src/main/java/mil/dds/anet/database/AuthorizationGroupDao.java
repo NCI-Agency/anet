@@ -245,7 +245,7 @@ public class AuthorizationGroupDao
           new StringBuilder("/* getAuthorizationGroupUuidsForRelatedObject */");
       sql.append(" WITH RECURSIVE parent_orgs(uuid, parent_uuid) AS"
           + " (SELECT uuid, uuid as parent_uuid FROM organizations"
-          + " UNION ALL SELECT pt.uuid, bt.\"parentOrgUuid\" FROM organizations bt"
+          + " UNION SELECT pt.uuid, bt.\"parentOrgUuid\" FROM organizations bt"
           + " INNER JOIN parent_orgs pt ON bt.uuid = pt.parent_uuid) ");
 
       if (isForPerson(relatedObjectType)) {

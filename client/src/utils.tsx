@@ -395,7 +395,17 @@ export default {
       : ascendantObjects
     let uuid = leaf?.uuid
     const trail = []
+    const seenUuids = []
     while (uuid) {
+      if (seenUuids.includes(uuid)) {
+        // Loop detected! Break the loop and log an error…
+        parentMap[uuid][parentField] = null
+        const msg = `Loop detected for ${uuid}!`
+        console.error(msg)
+        window.onerror(msg, window.location?.toString(), 0, 0)
+        break
+      }
+      seenUuids.push(uuid)
       const node = parentMap[uuid]
       if (!node) {
         break
