@@ -686,6 +686,7 @@ interface AnetObjectFieldProps {
   name: string
   types?: string[]
   formikProps?: any
+  isCompact?: boolean
   children?: React.ReactNode
 }
 
@@ -693,6 +694,7 @@ const AnetObjectField = ({
   name,
   types,
   formikProps,
+  isCompact,
   children,
   ...otherFieldProps
 }: AnetObjectFieldProps) => {
@@ -722,7 +724,11 @@ const AnetObjectField = ({
           <tbody>
             <tr>
               <td>
-                <LinkAnetEntity type={fieldValue.type} uuid={fieldValue.uuid} />
+                <LinkAnetEntity
+                  type={fieldValue.type}
+                  uuid={fieldValue.uuid}
+                  showAvatar={!isCompact}
+                />
               </td>
               <td className="col-1">
                 <RemoveButton
@@ -771,7 +777,11 @@ const ReadonlyAnetObjectField = ({
             <tbody>
               <tr>
                 <td>
-                  <LinkAnetEntity type={type} uuid={uuid} />
+                  <LinkAnetEntity
+                    type={type}
+                    uuid={uuid}
+                    showAvatar={!isCompact}
+                  />
                 </td>
               </tr>
             </tbody>
@@ -789,6 +799,7 @@ interface ArrayOfAnetObjectsFieldProps {
   name: string
   types?: string[]
   formikProps?: any
+  isCompact?: boolean
   children?: React.ReactNode
 }
 
@@ -796,6 +807,7 @@ const ArrayOfAnetObjectsField = ({
   name,
   types,
   formikProps,
+  isCompact,
   children,
   ...otherFieldProps
 }: ArrayOfAnetObjectsFieldProps) => {
@@ -833,7 +845,11 @@ const ArrayOfAnetObjectsField = ({
             {fieldValue.map(entity => (
               <tr key={entity.uuid}>
                 <td>
-                  <LinkAnetEntity type={entity.type} uuid={entity.uuid} />
+                  <LinkAnetEntity
+                    type={entity.type}
+                    uuid={entity.uuid}
+                    showAvatar={!isCompact}
+                  />
                 </td>
                 <td className="col-1">
                   <RemoveButton
@@ -895,7 +911,11 @@ const ReadonlyArrayOfAnetObjectsField = ({
               {fieldValue.map(entity => (
                 <tr key={entity.uuid}>
                   <td>
-                    <LinkAnetEntity type={entity.type} uuid={entity.uuid} />
+                    <LinkAnetEntity
+                      type={entity.type}
+                      uuid={entity.uuid}
+                      showAvatar={!isCompact}
+                    />
                   </td>
                 </tr>
               ))}
@@ -1054,11 +1074,15 @@ interface CustomFieldsContainerProps {
   parentFieldName?: string
   setShowCustomFields?: (...args: unknown[]) => unknown
   vertical?: boolean
+  isCompact?: boolean
+  hideIfEmpty?: boolean
 }
 
 export const CustomFieldsContainer = ({
   parentFieldName = DEFAULT_CUSTOM_FIELDS_PARENT,
   vertical = false,
+  isCompact,
+  hideIfEmpty,
   ...props
 }: CustomFieldsContainerProps) => {
   const {
@@ -1094,6 +1118,8 @@ export const CustomFieldsContainer = ({
         invisibleFields={invisibleFields}
         parentFieldName={parentFieldName}
         vertical={vertical}
+        isCompact={isCompact}
+        hideIfEmpty={hideIfEmpty}
         {...props}
         fieldsConfig={deprecatedFieldsFiltered}
       />

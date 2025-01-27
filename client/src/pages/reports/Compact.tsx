@@ -402,7 +402,11 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                     wrappedComponent={CompactRow}
                     dictProps={Settings.fields.report.reportText}
                     content={
-                      <RichTextEditor readOnly value={report.reportText} />
+                      <RichTextEditor
+                        readOnly
+                        showAvatar={false}
+                        value={report.reportText}
+                      />
                     }
                     className="reportField"
                   />
@@ -420,6 +424,7 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                     values={report}
                     vertical
                     isCompact
+                    hideIfEmpty
                   />
                 )}
               </FullColumn>
@@ -526,6 +531,7 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
           formikProps={{
             values: report
           }}
+          isCompact
           canRead={canReadAssessments}
           readonly
         />
@@ -561,6 +567,7 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
         formikProps={{
           values: report
         }}
+        isCompact
         canRead={canReadAssessments}
         readonly
         showEntitiesWithoutAssessments
