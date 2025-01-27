@@ -14,7 +14,8 @@ const LinkAnetEntity = ({
   type,
   uuid,
   displayCallback = null,
-  children
+  children = null,
+  showAvatar = true
 }: LinkAnetEntityProps) => {
   const [entity, setEntity] = useState()
   const [whenNotFound, setWhenNotFound] = useState(null)
@@ -46,7 +47,7 @@ const LinkAnetEntity = ({
   }, [type, uuid])
 
   return (
-    <LinkTo modelType={type} model={entity} displayCallback={displayCallback}>
+    <LinkTo modelType={type} model={entity} showAvatar={showAvatar} displayCallback={displayCallback}>
       {whenNotFound || children}
     </LinkTo>
   )
