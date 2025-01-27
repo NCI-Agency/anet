@@ -349,13 +349,7 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                     <DictionaryField
                       wrappedComponent={CompactRow}
                       dictProps={Settings.fields.report.atmosphere}
-                      content={utils.sentenceCase(report.atmosphere)}
-                      className="reportField"
-                    />
-                    <DictionaryField
-                      wrappedComponent={CompactRow}
-                      dictProps={Settings.fields.report.atmosphereDetails}
-                      content={report.atmosphereDetails}
+                      content={!report.atmosphereDetails ? utils.sentenceCase(report.atmosphere) : `${utils.sentenceCase(report.atmosphere)} - ${report.atmosphereDetails}`}
                       className="reportField"
                     />
                   </>
