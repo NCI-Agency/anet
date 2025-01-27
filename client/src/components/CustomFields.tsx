@@ -301,10 +301,12 @@ const ReadonlyJsonField = ({
 interface GeoLocationFieldProps {
   name: string
   editable?: boolean
+  isCompact?: boolean
 }
 
 const GeoLocationField = ({
   editable = true,
+  isCompact = false,
   ...fieldProps
 }: GeoLocationFieldProps) => {
   const { name, label, formikProps, ...otherFieldProps } = fieldProps
@@ -342,16 +344,26 @@ const GeoLocationField = ({
   }
   return (
     <>
-      <GeoLocation
-        name={name}
-        labels={labels}
-        coordinates={coordinates}
-        displayType={GEO_LOCATION_DISPLAY_TYPE.FORM_FIELD}
-        editable={editable}
-        {...formikProps}
-        {...otherFieldProps}
-      />
-      {(editable || Location.hasCoordinates(coordinates)) && (
+      {!isCompact ? (
+        <GeoLocation
+          name={name}
+          labels={labels}
+          coordinates={coordinates}
+          displayType={GEO_LOCATION_DISPLAY_TYPE.FORM_FIELD}
+          editable={editable}
+          {...formikProps}
+          {...otherFieldProps}
+        />
+      ) : (
+        <FastField
+          name={label}
+          isCompact={isCompact}
+          component={FieldHelper.ReadonlyField}
+          humanValue={<CompactGeoLocation coordinates={coordinates} />}
+          {...Object.without(otherFieldProps, "style")}
+        />
+      )}
+      {!isCompact && (editable || Location.hasCoordinates(coordinates)) && (
         <Row style={{ marginTop: "-1rem" }}>
           <Col sm={2} />
           <Col sm={7}>
@@ -377,16 +389,18 @@ const GeoLocationField = ({
 interface ReadonlyGeoLocationFieldProps {
   name: string
   values: any
+  isCompact: boolean
 }
 
 const ReadonlyGeoLocationField = (
   fieldProps: ReadonlyGeoLocationFieldProps
 ) => {
-  const { name, values, ...otherFieldProps } = fieldProps
+  const { name, values, isCompact, ...otherFieldProps } = fieldProps
   return (
     <GeoLocationField
       name={name}
       editable={false}
+      isCompact={isCompact}
       formikProps={{ values }}
       {...otherFieldProps}
     />
@@ -917,6 +931,15 @@ const LevelTrained = ({ name, values, levels }: LevelTrainedProps) => {
       )}
     </>
   )
+}
+
+interface CompactGeoLocationProps {
+  coordinates: object
+}
+
+const CompactGeoLocation = ({ coordinates }: CompactGeoLocationProps) => {
+  const coords = `${coordinates.lat}, ${coordinates.lng} - ${coordinates.displayedCoordinate}`
+  return <>{coords}</>
 }
 
 const FIELD_COMPONENTS = {
