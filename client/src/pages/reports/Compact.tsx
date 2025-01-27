@@ -403,6 +403,11 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                     className="reportField"
                   />
                 )}
+                {optionalFields.assessments.active && (
+                    {getAttendeesAndAssessments(true, true)}
+                    {getAttendeesAndAssessments(false, true)}
+                    {getTasksAndAssessments(true)}
+                }
                 {Settings.fields.report.customFields && (
                   <ReadonlyCustomFields
                     fieldsConfig={Settings.fields.report.customFields}
@@ -490,10 +495,10 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
     )
   }
 
-  function getTasksAndAssessments() {
+  function getTasksAndAssessments(displayAssessments = false) {
     return (
       // return only name and objective if no assessment
-      optionalFields.assessments.active ? (
+      displayAssessments ? (
         <InstantAssessmentsContainerField
           entityType={Task}
           entities={report.tasks}
