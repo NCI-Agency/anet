@@ -30,7 +30,7 @@ boolean isTestEnv = project.hasProperty("testEnv")
 String jdbi3Version = "3.47.0"
 String jupiterVersion = "5.11.4"
 String keycloakVersion = "26.1.0"
-String poiVersion = "5.3.0"
+String poiVersion = "5.4.0"
 String powermockVersion = "2.0.9"
 String simplejavamailVersion = "8.12.4"
 String springShellVersion = "3.4.0"
@@ -99,8 +99,8 @@ dependencyManagement {
 // In this section you declare the dependencies for your production and test code
 dependencies {
 	// Supported database is PostgreSQL:
-	implementation 'org.postgresql:postgresql:42.7.4'
-	implementation 'org.liquibase:liquibase-core:4.30.0'
+	implementation 'org.postgresql:postgresql:42.7.5'
+	implementation 'org.liquibase:liquibase-core:4.31.0'
 	implementation "org.jdbi:jdbi3-postgres:${jdbi3Version}" // For the SqlObjectPlugin
 	implementation "org.jdbi:jdbi3-spring:${jdbi3Version}"
 	implementation 'com.google.guava:guava:33.4.0-jre' // Pick the non-Android version
@@ -112,7 +112,7 @@ dependencies {
 		}
 	}
 	implementation 'javax.cache:cache-api:1.1.1'
-	implementation 'commons-beanutils:commons-beanutils:1.9.4'
+	implementation 'commons-beanutils:commons-beanutils:1.10.0'
 
 	implementation "org.simplejavamail:simple-java-mail:${simplejavamailVersion}"
 	implementation 'org.eclipse.angus:jakarta.mail:2.0.3'
@@ -122,7 +122,7 @@ dependencies {
 	// Used for converting GraphQL request output to XML:
 	implementation 'com.github.javadev:underscore-lodash:1.26'
 	// For JSON schema validation, supports detailed error reporting
-	implementation 'com.networknt:json-schema-validator:1.5.4'
+	implementation 'com.networknt:json-schema-validator:1.5.5'
 
 	// used for writing Excel documents
 	implementation "org.apache.poi:poi:${poiVersion}"
@@ -155,7 +155,7 @@ dependencies {
 	// We use some extended scalars in `generateClientCodeConf` below
 	testImplementation 'com.graphql-java:graphql-java-extended-scalars:21.0'
 
-	testImplementation 'org.assertj:assertj-core:3.27.2'
+	testImplementation 'org.assertj:assertj-core:3.27.3'
 
 	testImplementation "org.powermock:powermock-api-mockito2:${powermockVersion}"
 	testImplementation "org.powermock:powermock-module-junit4:${powermockVersion}"
@@ -684,7 +684,7 @@ jar {
 //Configure the Java Checkstyle settings. Run with ./gradlew check
 checkstyle {
 	configFile = rootProject.file('config/google_checks.xml')
-	toolVersion = '10.21.1'
+	toolVersion = '10.21.2'
 }
 //Easiest way to avoid checking generated code
 checkstyleTest {
