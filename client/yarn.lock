@@ -22,9 +22,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@apollo/client@npm:3.12.4":
-  version: 3.12.4
-  resolution: "@apollo/client@npm:3.12.4"
+"@apollo/client@npm:3.12.8":
+  version: 3.12.8
+  resolution: "@apollo/client@npm:3.12.8"
   dependencies:
     "@graphql-typed-document-node/core": "npm:^3.1.1"
     "@wry/caches": "npm:^1.0.0"
@@ -35,7 +35,6 @@ __metadata:
     optimism: "npm:^0.18.0"
     prop-types: "npm:^15.7.2"
     rehackt: "npm:^0.1.0"
-    response-iterator: "npm:^0.2.6"
     symbol-observable: "npm:^4.0.0"
     ts-invariant: "npm:^0.10.3"
     tslib: "npm:^2.3.0"
@@ -55,7 +54,7 @@ __metadata:
       optional: true
     subscriptions-transport-ws:
       optional: true
-  checksum: 10c0/6b30b14d576230cb56b0bb9b328c81f33631640e3d97a1185a20ede7e200dfa79502d695c347920e8c930a36e50870a41f5244ae2167d0123ad56973642528e6
+  checksum: 10c0/3af203769fa82892dd5d4870eea2d8d2845b4197118a274779f483df154410601c45bd008afb017f03ef446902ce4ea9c32454e3525abe782286a65979a1f7d0
   languageName: node
   linkType: hard
 
@@ -5895,7 +5894,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "anet@workspace:."
   dependencies:
-    "@apollo/client": "npm:3.12.4"
+    "@apollo/client": "npm:3.12.8"
     "@babel/core": "npm:7.26.7"
     "@babel/eslint-parser": "npm:7.26.5"
     "@babel/plugin-proposal-decorators": "npm:7.25.9"
@@ -5967,7 +5966,7 @@ __metadata:
     closest: "npm:0.0.1"
     config: "npm:3.3.12"
     copy-webpack-plugin: "npm:12.0.2"
-    core-js: "npm:3.39.0"
+    core-js: "npm:3.40.0"
     countries-list: "npm:3.1.1"
     cross-fetch: "npm:4.1.0"
     cross-spawn: "npm:7.0.6"
@@ -6010,7 +6009,7 @@ __metadata:
     keycloak-js: "npm:26.1.0"
     leaflet: "npm:1.9.4"
     leaflet-defaulticon-compatibility: "npm:0.1.2"
-    leaflet-geosearch: "npm:4.0.0"
+    leaflet-geosearch: "npm:4.1.0"
     leaflet-gesture-handling: "npm:1.2.2"
     leaflet.fullscreen: "npm:3.0.2"
     leaflet.markercluster: "npm:1.5.3"
@@ -6043,7 +6042,7 @@ __metadata:
     react-router-dom: "npm:6.3.0"
     react-scroll: "npm:1.9.0"
     react-test-renderer: "npm:18.3.1"
-    react-toastify: "npm:11.0.2"
+    react-toastify: "npm:11.0.3"
     react-ultimate-pagination: "npm:1.3.2"
     reduce-css-calc: "npm:2.1.8"
     redux: "npm:5.0.1"
@@ -6066,7 +6065,7 @@ __metadata:
     ts-node: "npm:10.9.2"
     typescript: "npm:5.7.3"
     use-debounce: "npm:10.0.4"
-    uuid: "npm:11.0.4"
+    uuid: "npm:11.0.5"
     webdriverio: "npm:8.41.0"
     webpack: "npm:5.97.1"
     webpack-cli: "npm:6.0.1"
@@ -8088,10 +8087,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"core-js@npm:3.39.0, core-js@npm:^3.33.0":
-  version: 3.39.0
-  resolution: "core-js@npm:3.39.0"
-  checksum: 10c0/f7602069b6afb2e3298eec612a5c1e0c3e6a458930fbfc7a4c5f9ac03426507f49ce395eecdd2d9bae9024f820e44582b67ffe16f2272395af26964f174eeb6b
+"core-js@npm:3.40.0, core-js@npm:^3.33.0":
+  version: 3.40.0
+  resolution: "core-js@npm:3.40.0"
+  checksum: 10c0/db7946ada881e845d8b157061945b1187618fa45cf162f392a151e8a497962aed2da688c982eaa1d444c864be97a70f8be4d73385294b515d224dd164d19f1d4
   languageName: node
   linkType: hard
 
@@ -13804,9 +13803,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"leaflet-geosearch@npm:4.0.0":
-  version: 4.0.0
-  resolution: "leaflet-geosearch@npm:4.0.0"
+"leaflet-geosearch@npm:4.1.0":
+  version: 4.1.0
+  resolution: "leaflet-geosearch@npm:4.1.0"
   dependencies:
     "@googlemaps/js-api-loader": "npm:^1.16.6"
     leaflet: "npm:^1.6.0"
@@ -13815,7 +13814,7 @@ __metadata:
       optional: true
     leaflet:
       optional: true
-  checksum: 10c0/f80ffdd3de7711e8de5e1a57eed2a1ae832f87a55194b0b604db50063a72f7b73af4a11337fd544d076c822d3af1bf88156cf043306e1b91bf28060d95ff9cba
+  checksum: 10c0/8328f558e5a9849be1b1e2f7befbbcacb5dee155567fa0dc4b14981b7ecaa6775dcf477b65e06b5d003123c05579aaed5b309607e6cefe4f3ff35be3e1846d71
   languageName: node
   linkType: hard
 
@@ -16853,15 +16852,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-toastify@npm:11.0.2":
-  version: 11.0.2
-  resolution: "react-toastify@npm:11.0.2"
+"react-toastify@npm:11.0.3":
+  version: 11.0.3
+  resolution: "react-toastify@npm:11.0.3"
   dependencies:
     clsx: "npm:^2.1.1"
   peerDependencies:
     react: ^18 || ^19
     react-dom: ^18 || ^19
-  checksum: 10c0/e1ba01846782d47d0bf9cec7e2b4804f9af30e50a203786523f16db33691c1491f2382832e7ec4b69c583d3634ea0e3efb383da00ca9076bcf4bdd906a54a85f
+  checksum: 10c0/23b989c6080bc5bf0eb0c1f7ed17bd53d067d9beb33baf93c520119cd69cf75c9f2d1ee524dfe6c8a2a5d326029772b576de00e018b379d03a0e37630b83adea
   languageName: node
   linkType: hard
 
@@ -17363,13 +17362,6 @@ __metadata:
   bin:
     resolve: bin/resolve
   checksum: 10c0/78ad6edb8309a2bfb720c2c1898f7907a37f858866ce11a5974643af1203a6a6e05b2fa9c53d8064a673a447b83d42569260c306d43628bff5bb101969708355
-  languageName: node
-  linkType: hard
-
-"response-iterator@npm:^0.2.6":
-  version: 0.2.6
-  resolution: "response-iterator@npm:0.2.6"
-  checksum: 10c0/60e6b552cd610643269d5d916d270cc8a4bea978cbe4779d6ef8083ac6b89006795508034e4c4ebe204eded75ac32bf243589ba82c1184591dde0674f6db785e
   languageName: node
   linkType: hard
 
@@ -19759,12 +19751,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"uuid@npm:11.0.4":
-  version: 11.0.4
-  resolution: "uuid@npm:11.0.4"
+"uuid@npm:11.0.5":
+  version: 11.0.5
+  resolution: "uuid@npm:11.0.5"
   bin:
     uuid: dist/esm/bin/uuid
-  checksum: 10c0/3c13591c4dedaa3741f925e284df5974e3d6e0b1cb0f6f75f98c36f9c01d2a414350364fd067613ef600a21c6973dab0506530d4f499ff878f32a06f84569ead
+  checksum: 10c0/6f59f0c605e02c14515401084ca124b9cb462b4dcac866916a49862bcf831874508a308588c23a7718269226ad11a92da29b39d761ad2b86e736623e3a33b6e7
   languageName: node
   linkType: hard
 
