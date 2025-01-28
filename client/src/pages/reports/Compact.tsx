@@ -314,13 +314,13 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
             backgroundText={backgroundText}
           >
             <CompactHeaderContent
-              color={utils.getColorForChoice(report.classification)}
               policyAndClassification={utils.getPolicyAndClassificationForChoice(
                 report.classification
               )}
               releasableTo={utils.getReleasableToForChoice(
                 report.classification
               )}
+              useBgColor={false}
             />
             <CompactTable>
               <FullColumn>

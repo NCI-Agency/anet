@@ -120,6 +120,7 @@ interface CompactHeaderContentProps {
   policyAndClassification?: string
   releasableTo?: string
   sensitiveInformation?: boolean
+  useBgColor: boolean
 }
 
 export const CompactHeaderContent = ({
@@ -128,10 +129,11 @@ export const CompactHeaderContent = ({
     Settings.siteClassification
   ),
   releasableTo = utils.getReleasableToForChoice(Settings.siteClassification),
-  sensitiveInformation
+  sensitiveInformation,
+  useBgColor = true
 }: CompactHeaderContentProps) => {
   return (
-    <HeaderContentS bgc={color}>
+    <HeaderContentS bgc={useBgColor ? color : "unset"}>
       <img
         src={anetLogo}
         alt="logo"
@@ -145,7 +147,9 @@ export const CompactHeaderContent = ({
           releasableTo={releasableTo}
           bannerId="header-banner"
         />
-        {sensitiveInformation && <SensitivityInformation />}
+        {sensitiveInformation && (
+          <SensitivityInformation useBgColor={useBgColor} />
+        )}
       </ClassificationBoxS>
     </HeaderContentS>
   )
@@ -169,7 +173,7 @@ export const CompactFooterContent = ({
   const location = useLocation()
   const { currentUser } = useContext(AppContext)
   return (
-    <FooterContentS bgc={"unset"}>
+    <FooterContentS bgc="unset">
       <ClassificationBanner
         color={color}
         policyAndClassification={policyAndClassification}
