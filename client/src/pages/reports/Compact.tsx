@@ -337,12 +337,14 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                   dictProps={Settings.fields.report.intent}
                   content={report.intent}
                   className="reportField"
+                  hideIfEmpty
                 />
                 <DictionaryField
                   wrappedComponent={CompactRow}
                   dictProps={Settings.fields.report.keyOutcomes}
                   content={report.keyOutcomes}
                   className="reportField"
+                  hideIfEmpty
                 />
                 {!report.cancelled && (
                   <>
@@ -355,6 +357,7 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                           : `${utils.sentenceCase(report.atmosphere)} - ${report.atmosphereDetails}`
                       }
                       className="reportField"
+                      hideIfEmpty
                     />
                   </>
                 )}
@@ -363,24 +366,28 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                   dictProps={Settings.fields.report.nextSteps}
                   content={report.nextSteps}
                   className="reportField"
+                  hideIfEmpty
                 />
                 <CompactRow
                   id="interlocutors"
                   label="Interlocutors"
                   content={getAttendeesAndAssessments(true)}
                   className="reportField"
+                  hideIfEmpty
                 />
                 <CompactRow
                   id="advisors"
                   label="Advisors"
                   content={getAttendeesAndAssessments(false)}
                   className="reportField"
+                  hideIfEmpty
                 />
                 <CompactRow
                   id="tasks"
                   label={Settings.fields.task.longLabel}
                   content={getTasksAndAssessments()}
                   className="reportField"
+                  hideIfEmpty
                 />
                 {report.cancelled && (
                   <DictionaryField
@@ -388,6 +395,7 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                     dictProps={Settings.fields.report.cancelledReason}
                     content={utils.sentenceCase(report.cancelledReason)}
                     className="reportField"
+                    hideIfEmpty
                   />
                 )}
                 {optionalFields.workflow.active && report.showWorkflow() && report.workflow.length && (
@@ -409,6 +417,7 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                       />
                     }
                     className="reportField keyDetailsRow"
+                    hideIfEmpty
                   />
                 )}
                 {optionalFields.assessments.active && (
@@ -496,7 +505,7 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
       ? moment(report.updatedAt)
       : moment(report.releasedAt)
     return (
-      <div style={{ "font-size": "12px", "margin-bottom": "20px" }}>
+      <div style={{ "font-size": "12px", "margin-bottom": "10px" }}>
         <div>
           Authored on{" "}
           {timeToShow.format(Settings.dateFormats.forms.displayShort.withTime)}{" "}

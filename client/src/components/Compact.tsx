@@ -362,11 +362,13 @@ const EmptySpaceTdS = styled.td`
 interface CompactRowProps {
   label?: React.ReactNode
   content?: React.ReactNode
+  hideIfEmpty?: boolean
 }
 
 export const CompactRow = ({
   label,
   content,
+  hideIfEmpty = false,
   ...otherProps
 }: CompactRowProps) => {
   const { id, style, className } = otherProps
@@ -376,6 +378,14 @@ export const CompactRow = ({
     ${style};
   `
 
+  if (
+    hideIfEmpty &&
+    (content === "" ||
+      content == null ||
+      (content instanceof Object && !Object.keys(content).length))
+  ) {
+    return null
+  }
   return (
     <CustomStyled id={id} className={className}>
       {label && !isKeyDetailsRow && <RowLabelS>{label}</RowLabelS>}
