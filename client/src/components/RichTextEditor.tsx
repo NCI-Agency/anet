@@ -91,6 +91,7 @@ interface RichTextEditorProps {
   className?: string
   readOnly?: boolean
   disableFullSize?: boolean
+  showAvatar?: boolean
 }
 
 const RichTextEditor = ({
@@ -101,7 +102,7 @@ const RichTextEditor = ({
   className,
   readOnly,
   disableFullSize,
-  showAvatar = true
+  showAvatar
 }: RichTextEditorProps) => {
   const [showAnetLinksModal, setShowAnetLinksModal] = useState(false)
   const [showExternalLinksModal, setShowExternalLinksModal] = useState(false)
@@ -439,6 +440,7 @@ interface ElementProps {
   attributes: any
   children?: React.ReactNode
   element?: any
+  showAvatar?: boolean
 }
 
 const Element = ({

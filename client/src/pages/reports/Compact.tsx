@@ -398,12 +398,14 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                     hideIfEmpty
                   />
                 )}
-                {optionalFields.workflow.active && report.showWorkflow() && report.workflow.length && (
-                  <CompactRowReportWorkflow
-                    workflow={report.workflow}
-                    className="reportField"
-                    isCompact
-                  />
+                {optionalFields.workflow.active &&
+                  report.showWorkflow() &&
+                  !!report.workflow.length && (
+                    <CompactRowReportWorkflow
+                      workflow={report.workflow}
+                      className="reportField"
+                      isCompact
+                    />
                 )}
                 {report.reportText && (
                   <DictionaryField
@@ -422,8 +424,16 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                 )}
                 {optionalFields.assessments.active && (
                   <CompactReportViewS>
-                    {getAttendeesAndAssessments(true, true, "interlocutors-assessments")}
-                    {getAttendeesAndAssessments(false, true, "advisors-assessments")}
+                    {getAttendeesAndAssessments(
+                      true,
+                      true,
+                      "interlocutors-assessments"
+                    )}
+                    {getAttendeesAndAssessments(
+                      false,
+                      true,
+                      "advisors-assessments"
+                    )}
                     {getTasksAndAssessments(true, "tasks-assessments")}
                   </CompactReportViewS>
                 )}
@@ -755,7 +765,7 @@ const CompactWorkflowRowS = styled(CompactRowS)`
     text-align: center;
     & > div {
       position: relative;
-      margin-right: 18px;
+      margin-right: 12px;
     }
     & > div:not(:last-child):after {
       position: absolute;

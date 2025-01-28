@@ -375,7 +375,7 @@ export const CompactRow = ({
   // merge custom style
   const isKeyDetailsRow = className?.includes("keyDetailsRow")
   const CustomStyled = styled(CompactRowS)`
-    ${style};
+    ${style}
   `
 
   if (

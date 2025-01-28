@@ -234,8 +234,6 @@ const CompactBannerS = styled.div`
   background: ${props => props.bgc};
   display: flex;
   flex-direction: column;
-  font-weight: normal;
-  mix-blend-mode: difference;
 `
 
 export default SecurityBanner

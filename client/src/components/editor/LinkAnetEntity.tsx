@@ -8,6 +8,7 @@ interface LinkAnetEntityProps {
   uuid: string
   displayCallback?: (...args: unknown[]) => unknown
   children?: React.ReactNode
+  showAvatar?: boolean
 }
 
 const LinkAnetEntity = ({
@@ -15,7 +16,7 @@ const LinkAnetEntity = ({
   uuid,
   displayCallback = null,
   children = null,
-  showAvatar = true
+  showAvatar
 }: LinkAnetEntityProps) => {
   const [entity, setEntity] = useState()
   const [whenNotFound, setWhenNotFound] = useState(null)

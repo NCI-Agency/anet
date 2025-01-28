@@ -21,7 +21,8 @@ const DictionaryField = ({
     hideIfEmpty &&
     (otherProps.content === "" ||
       otherProps.content == null ||
-      (otherProps.content instanceof Object && !Object.keys(otherProps.content).length))
+      (otherProps.content instanceof Object &&
+        !Object.keys(otherProps.content).length))
   ) {
     return null
   }
