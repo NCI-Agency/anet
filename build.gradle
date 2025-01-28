@@ -281,6 +281,7 @@ task buildClient(dependsOn: 'yarn', type: YarnTask) {
 	inputs.dir("client/config").withPathSensitivity(PathSensitivity.RELATIVE)
 	inputs.dir("client/public").withPathSensitivity(PathSensitivity.RELATIVE)
 	outputs.dir("$buildDir/resources/main/assets/client")
+	outputs.file("$buildDir/resources/main/templates/index.ftlh")
 	outputs.cacheIf { true }
 	environment = [ "ANET_TEST_MODE": run.environment["ANET_TEST_MODE"] ]
 	args = ['run', 'build']
