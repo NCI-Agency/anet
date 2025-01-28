@@ -408,7 +408,7 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                         value={report.reportText}
                       />
                     }
-                    className="reportField"
+                    className="reportField keyDetailsRow"
                   />
                 )}
                 {optionalFields.assessments.active && (
@@ -431,10 +431,10 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
             </CompactTable>
             <CompactFooterContent
               object={report}
-              color={utils.getColorForChoice(report.classification)}
               policyAndClassification={utils.getPolicyAndClassificationForChoice(
                 report.classification
               )}
+              useBgColor={false}
             />
           </CompactView>
         </>
@@ -585,7 +585,7 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
   }
 }
 
-export const CompactReportViewS = styled.table`
+const CompactReportViewS = styled.table`
   .table {
     & span.badge {
       background-color: unset !important;

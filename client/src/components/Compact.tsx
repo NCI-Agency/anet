@@ -132,7 +132,12 @@ export const CompactHeaderContent = ({
 }: CompactHeaderContentProps) => {
   return (
     <HeaderContentS bgc={color}>
-      <img src={anetLogo} alt="logo" width="50" height="12" />
+      <img
+        src={anetLogo}
+        alt="logo"
+        width="120"
+        style={{ position: "absolute" }}
+      />
       <ClassificationBoxS>
         <ClassificationBanner
           color={color}
@@ -211,24 +216,8 @@ const ClassificationBoxS = styled.div`
   flex-direction: row;
   align-items: center;
   font-size: 18px;
-  min-width: 235px;
   text-align: center;
   margin: auto;
-`
-
-const PrintedByBoxS = styled.span`
-  align-self: flex-start;
-  width: auto;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  align-items: flex-end;
-  flex-wrap: wrap;
-  font-size: 10px;
-  & > span {
-    display: inline-block;
-    text-align: right;
-  }
 `
 
 // background color of banner makes reading blue links hard. Force white color
@@ -245,10 +234,6 @@ const HF_COMMON_STYLE = `
   padding: 1rem;
   -webkit-print-color-adjust: exact !important;
   color-adjust: exact !important;
-  img {
-    max-width: 50px !important;
-    max-height: 24px !important;
-  }
   & * {
     color: white !important;
   }
@@ -261,14 +246,13 @@ const HF_COMMON_STYLE = `
 const HeaderContentS = styled.div`
   ${HF_COMMON_STYLE};
   top: 0mm;
-  border-bottom: 1px solid black;
   background-color: ${props => props.bgc} !important;
 `
 
 const FooterContentS = styled.div`
   ${HF_COMMON_STYLE};
+  justify-content: center;
   bottom: 0mm;
-  border-top: 1px solid black;
   background-color: ${props => props.bgc} !important;
 `
 
@@ -360,6 +344,7 @@ const CompactTableS = styled.table`
   tr {
     width: 100% !important;
     background-color: transparent !important;
+    margin: 0px;
   }
   td {
     background-color: transparent !important;
@@ -382,48 +367,46 @@ export const CompactRow = ({
 }: CompactRowProps) => {
   const { id, style, className } = otherProps
   // merge custom style
+  const isKeyDetailsRow = className?.includes("keyDetailsRow")
   const CustomStyled = styled(CompactRowS)`
     ${style};
   `
 
-  // top level th have different width
-  const isHeaderRow = className === "reportField"
-
   return (
     <CustomStyled id={id} className={className}>
-      {label && <RowLabelS isHeaderRow={isHeaderRow}>{label}</RowLabelS>}
-      <CompactRowContentS colSpan={label ? 1 : 2}>{content}</CompactRowContentS>
+      {label && !isKeyDetailsRow && <RowLabelS>{label}</RowLabelS>}
+      <CompactRowContentS colSpan={!isKeyDetailsRow ? 1 : 2}>
+        {content}
+      </CompactRowContentS>
     </CustomStyled>
   )
 }
 
 export const CompactRowS = styled.tr`
-  vertical-align: top;
-  font-family: "Times New Roman", Times, serif;
+  vertical-align: middle;
+  font-family: "Arial", sans-serif;
   width: 100%;
+  border-bottom: 1px solid #d1d5db;
+  &:last-child {
+    border-bottom: none;
+    border-bottom: none;
+  }
 `
 
 const RowLabelS = styled.th`
-  padding: 4px 0;
-  font-style: italic;
-  color: grey;
-  max-width: 50%;
-  font-weight: 300;
-  width: ${props => (props.isHeaderRow ? "15%" : "auto")};
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: bold;
+  color: #445566;
+  width: 20%;
 `
 
 export const CompactRowContentS = styled.td`
-  padding: 4px 1rem;
-  & .form-control-plaintext {
-    margin-bottom: 0;
-    padding-top: 0;
-  }
-  & .bp5-icon-info-sign {
-    padding: 0 1rem;
-    @media print {
-      display: none;
-    }
-  }
+  padding: 8px 12px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #112222;
+  text-align: left;
 `
 
 interface CompactTitleProps {
