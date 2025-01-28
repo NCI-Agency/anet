@@ -390,7 +390,7 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                     className="reportField"
                   />
                 )}
-                {optionalFields.workflow.active && report.showWorkflow() && (
+                {optionalFields.workflow.active && report.showWorkflow() && report.workflow.length && (
                   <CompactRowReportWorkflow
                     workflow={report.workflow}
                     className="reportField"
@@ -794,9 +794,15 @@ interface CompactRowReportActionProps {
 
 const CompactRowReportAction = ({ action }: CompactRowReportActionProps) => {
   return (
-    <div className="workflow-action">
+    <CompactRowReportActionS className="workflow-action">
       <ActionStatus action={action} />
       <ActionButton action={action} />
-    </div>
+    </CompactRowReportActionS>
   )
 }
+
+const CompactRowReportActionS = styled.div`
+  & button {
+    background-color: #ddd !important;
+  }
+`
