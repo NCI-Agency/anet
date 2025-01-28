@@ -413,9 +413,9 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                 )}
                 {optionalFields.assessments.active && (
                   <CompactReportViewS>
-                    {getAttendeesAndAssessments(true, true)}
-                    {getAttendeesAndAssessments(false, true)}
-                    {getTasksAndAssessments(true)}
+                    {getAttendeesAndAssessments(true, true, "interlocutors-assessments")}
+                    {getAttendeesAndAssessments(false, true, "advisors-assessments")}
+                    {getTasksAndAssessments(true, "tasks-assessments")}
                   </CompactReportViewS>
                 )}
                 {Settings.fields.report.customFields && (
@@ -519,11 +519,12 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
     )
   }
 
-  function getTasksAndAssessments(displayAssessments = false) {
+  function getTasksAndAssessments(displayAssessments = false, id = null) {
     return (
       // return only name and objective if no assessment
       displayAssessments ? (
         <InstantAssessmentsContainerField
+          id={id}
           entityType={Task}
           entities={report.tasks}
           relatedObject={report}
@@ -553,13 +554,15 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
 
   function getAttendeesAndAssessments(
     isInterlocutor,
-    displayAssessments = false
+    displayAssessments = false,
+    id = null
   ) {
     const attendees = report.attendees.filter(
       at => at.interlocutor === isInterlocutor
     )
     return displayAssessments ? (
       <InstantAssessmentsContainerField
+        id={id}
         entityType={Person}
         entities={attendees}
         relatedObject={report}

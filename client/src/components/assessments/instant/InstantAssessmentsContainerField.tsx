@@ -122,6 +122,7 @@ interface InstantAssessmentsContainerFieldProps {
   canWrite?: boolean
   readonly?: boolean
   showEntitiesWithoutAssessments?: boolean
+  id?: string
 }
 
 const InstantAssessmentsContainerField = ({
@@ -134,7 +135,8 @@ const InstantAssessmentsContainerField = ({
   canRead = false,
   canWrite = false,
   readonly = false,
-  showEntitiesWithoutAssessments
+  showEntitiesWithoutAssessments,
+  id
 }: InstantAssessmentsContainerFieldProps) => {
   const { values } = formikProps
 
@@ -169,7 +171,7 @@ const InstantAssessmentsContainerField = ({
     ? entities.sort(sortEntries)
     : entities.filter(getEntitiesWithAssessments)
   return (
-    <Table>
+    <Table id={id || undefined}>
       <tbody>
         {filteredEntities.map(entity => {
           const entityInstantAssessments = entity.getInstantAssessments()

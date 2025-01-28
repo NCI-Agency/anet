@@ -202,7 +202,7 @@ class ShowReport extends Page {
 
   async getCompactViewElements(type, withAssessments) {
     const elements = await (withAssessments
-      ? browser.$$(`#${type} > td > table > tbody > tr > td > span`)
+      ? browser.$$(`#${type} > tbody > tr > td > span`)
       : browser.$$(`#${type} > td > span`))
     return await elements.map(async element => (await element).getText())
   }
