@@ -3,7 +3,7 @@ import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
 import AppContext from "components/AppContext"
 import Approvals from "components/approvals/Approvals"
-import AttachmentCard from "components/Attachment/AttachmentCard"
+import AttachmentsDetailView from "components/Attachment/AttachmentsDetailView"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
 import EventCollection from "components/EventCollection"
@@ -269,14 +269,7 @@ const LocationShow = ({ pageDispatchers }: LocationShowProps) => {
                     label="Attachments"
                     component={FieldHelper.ReadonlyField}
                     humanValue={
-                      <div className="attachment-card-list">
-                        {location.attachments.map(attachment => (
-                          <AttachmentCard
-                            key={attachment.uuid}
-                            attachment={attachment}
-                          />
-                        ))}
-                      </div>
+                      <AttachmentsDetailView attachments={location.attachments} />
                     }
                   />
                 )}
