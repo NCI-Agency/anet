@@ -6,7 +6,7 @@ import API from "api"
 import AppContext from "components/AppContext"
 import AssessmentResultsContainer from "components/assessments/AssessmentResultsContainer"
 import AssignPositionModal from "components/AssignPositionModal"
-import AttachmentCard from "components/Attachment/AttachmentCard"
+import AttachmentsDetailView from "components/Attachment/AttachmentsDetailView"
 import AuthorizationGroupTable from "components/AuthorizationGroupTable"
 import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import CountryDisplay from "components/CountryDisplay"
@@ -357,14 +357,7 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
                     label="Attachments"
                     component={FieldHelper.ReadonlyField}
                     humanValue={
-                      <div className="attachment-card-list">
-                        {person.attachments.map(attachment => (
-                          <AttachmentCard
-                            key={attachment.uuid}
-                            attachment={attachment}
-                          />
-                        ))}
-                      </div>
+                      <AttachmentsDetailView attachments={person.attachments} />
                     }
                   />
                 )}
