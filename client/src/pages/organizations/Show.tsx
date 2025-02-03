@@ -43,7 +43,7 @@ import { PositionRole } from "models/Position"
 import { orgTour } from "pages/GuidedTour"
 import pluralize from "pluralize"
 import { getPositionsForRole } from "positionUtil"
-import React, { useContext, useState } from "react"
+import React, { useContext, useEffect, useState } from "react"
 import {
   Badge,
   Button,
@@ -211,6 +211,7 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
   const [stateError, setStateError] = useState(
     routerLocation.state && routerLocation.state.error
   )
+  const [attachments, setAttachments] = useState([])
   const [filterPendingApproval, setFilterPendingApproval] = useState(false)
   const [includeChildrenOrgs, setIncludeChildrenOrgs] = useState(true)
   const { uuid } = useParams()
@@ -220,6 +221,12 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
       uuid
     }
   )
+  useEffect(() => {
+    if (data?.organization) {
+      const organization = new Organization(data ? data.organization : {})
+      setAttachments(organization.attachments || [])
+    }
+  }, [data])
   const { done, result } = useBoilerplate({
     loading,
     error,
@@ -301,6 +308,9 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
   }
   if (includeChildrenOrgs) {
     reportQueryParams.orgRecurseStrategy = RECURSE_STRATEGY.CHILDREN
+  }
+  const updateAttachments = newAttachments => {
+    setAttachments(newAttachments)
   }
 
   return (
@@ -585,7 +595,13 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
                     label="Attachments"
                     component={FieldHelper.ReadonlyField}
                     humanValue={
-                      <AttachmentsDetailView attachments={organization.attachments} />
+                      <AttachmentsDetailView
+                        attachments={attachments}
+                        updateAttachments={updateAttachments}
+                        relatedObjectType={Organization.relatedObjectType}
+                        relatedObjectUuid={values.uuid}
+                        allowEdit={canAdministrateOrg}
+                      />
                     }
                   />
                 )}

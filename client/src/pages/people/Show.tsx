@@ -46,7 +46,7 @@ import _isEmpty from "lodash/isEmpty"
 import { Attachment, Person, Position } from "models"
 import moment from "moment"
 import { personTour } from "pages/GuidedTour"
-import React, { useContext, useState } from "react"
+import React, { useContext, useEffect, useState } from "react"
 import {
   Button,
   Col,
@@ -164,6 +164,7 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
   const [stateError, setStateError] = useState(
     routerLocation.state && routerLocation.state.error
   )
+  const [attachments, setAttachments] = useState([])
   const [showAssignPositionModal, setShowAssignPositionModal] = useState(false)
   const [showAssociatedPositionsModal, setShowAssociatedPositionsModal] =
     useState(false)
@@ -172,6 +173,12 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_PERSON, {
     uuid
   })
+  useEffect(() => {
+    if (data?.person) {
+      const person = new Person(data ? data.person : {})
+      setAttachments(person.attachments || [])
+    }
+  }, [data])
   const { done, result } = useBoilerplate({
     loading,
     error,
@@ -292,6 +299,9 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
     numberOfFieldsUnderAvatar
   )
   const rightColumn = orderedFields.slice(numberOfFieldsUnderAvatar)
+  const updateAttachments = newAttachments => {
+    setAttachments(newAttachments)
+  }
 
   return (
     <Formik enableReinitialize initialValues={person}>
@@ -357,7 +367,13 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
                     label="Attachments"
                     component={FieldHelper.ReadonlyField}
                     humanValue={
-                      <AttachmentsDetailView attachments={person.attachments} />
+                      <AttachmentsDetailView
+                        attachments={attachments}
+                        updateAttachments={updateAttachments}
+                        relatedObjectType={Person.relatedObjectType}
+                        relatedObjectUuid={person.uuid}
+                        allowEdit={canEdit}
+                      />
                     }
                   />
                 )}
