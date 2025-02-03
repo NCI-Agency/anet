@@ -409,6 +409,7 @@ required:
   - CONNECTION_ERROR_MSG
   - VERSION_CHANGED_MSG
   - SUPPORT_EMAIL_ADDR
+  - featureMartGuiEnabled
   - dateFormats
   - calendarOptions
   - reportWorkflow
@@ -459,6 +460,12 @@ properties:
     default: false
     title: Whether events also include a time and a duration
     description: Used for events; if set to `true`, you might also want to supply dateFormats.forms.inputWithTime and dateFormats.forms.longWithTime
+
+  featureMartGuiEnabled:
+    type: boolean
+    default: false
+    title: Whether the MART reports import GUI is enabled in ANET
+    description: Used for MART; if set to `true`, ANET enables the MART reports import GUI
 
   dateFormats:
     type: object
