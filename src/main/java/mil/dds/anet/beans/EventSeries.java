@@ -24,10 +24,44 @@ public class EventSeries extends AbstractCustomizableAnetBean
   String description;
   // Lazy Loaded
   // annotated below
+  private ForeignObjectHolder<Organization> ownerOrg = new ForeignObjectHolder<>();
+  // Lazy Loaded
+  // annotated below
   private ForeignObjectHolder<Organization> hostOrg = new ForeignObjectHolder<>();
   // Lazy Loaded
   // annotated below
   private ForeignObjectHolder<Organization> adminOrg = new ForeignObjectHolder<>();
+
+  @GraphQLQuery(name = "ownerOrg")
+  public CompletableFuture<Organization> loadOwnerOrg(@GraphQLRootContext GraphQLContext context) {
+    if (ownerOrg.hasForeignObject()) {
+      return CompletableFuture.completedFuture(ownerOrg.getForeignObject());
+    }
+    return new UuidFetcher<Organization>()
+        .load(context, IdDataLoaderKey.ORGANIZATIONS, ownerOrg.getForeignUuid()).thenApply(o -> {
+          ownerOrg.setForeignObject(o);
+          return o;
+        });
+  }
+
+  @JsonIgnore
+  public void setOwnerOrgUuid(String ownerOrgUuid) {
+    this.ownerOrg = new ForeignObjectHolder<>(ownerOrgUuid);
+  }
+
+  @JsonIgnore
+  public String getOwnerOrgUuid() {
+    return ownerOrg.getForeignUuid();
+  }
+
+  @GraphQLInputField(name = "ownerOrg")
+  public void setOwnerOrg(Organization ownerOrg) {
+    this.ownerOrg = new ForeignObjectHolder<>(ownerOrg);
+  }
+
+  public Organization getOwnerOrg() {
+    return ownerOrg.getForeignObject();
+  }
 
   @GraphQLQuery(name = "hostOrg")
   public CompletableFuture<Organization> loadHostOrg(@GraphQLRootContext GraphQLContext context) {
@@ -127,12 +161,12 @@ public class EventSeries extends AbstractCustomizableAnetBean
       return false;
     EventSeries that = (EventSeries) o;
     return status == that.status && Objects.equals(name, that.name)
-        && Objects.equals(description, that.description) && Objects.equals(hostOrg, that.hostOrg)
-        && Objects.equals(adminOrg, that.adminOrg);
+        && Objects.equals(description, that.description) && Objects.equals(ownerOrg, that.ownerOrg)
+        && Objects.equals(hostOrg, that.hostOrg) && Objects.equals(adminOrg, that.adminOrg);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), status, name, description, hostOrg, adminOrg);
+    return Objects.hash(super.hashCode(), status, name, description, ownerOrg, hostOrg, adminOrg);
   }
 }

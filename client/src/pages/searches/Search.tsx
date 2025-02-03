@@ -316,7 +316,6 @@ const GQL_GET_ATTACHMENT_LIST = gql`
     }
   }
 `
-
 const GQL_GET_EVENT_LIST = gql`
   query ($eventQuery: EventSearchQueryInput) {
     eventList(query: $eventQuery) {
@@ -328,6 +327,13 @@ const GQL_GET_EVENT_LIST = gql`
         name
         startDate
         endDate
+        ownerOrg {
+          uuid
+          shortName
+          longName
+          identificationCode
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        }
         hostOrg {
           uuid
           shortName

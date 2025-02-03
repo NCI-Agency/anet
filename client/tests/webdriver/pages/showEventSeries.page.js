@@ -11,6 +11,10 @@ class ShowEventSeries extends Page {
     return browser.$(".title-text")
   }
 
+  async getOwnerOrganization() {
+    return browser.$('div[id="ownerOrg"]')
+  }
+
   async getHostOrganization() {
     return browser.$('div[id="hostOrg"]')
   }

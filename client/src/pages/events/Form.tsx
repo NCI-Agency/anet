@@ -128,6 +128,7 @@ const EventForm = ({
         const canCreateLocation =
           Settings.regularUsersCanCreateLocations || currentUser.isSuperuser()
 
+        const ownerOrgSearchQuery = { status: Model.STATUS.ACTIVE }
         const hostOrgSearchQuery = { status: Model.STATUS.ACTIVE }
         const adminOrgSearchQuery = { status: Model.STATUS.ACTIVE }
         const eventSeriesSearchQuery = {}
@@ -189,7 +190,18 @@ const EventForm = ({
           queryVars: { selectable: true }
         }
 
-        if (values.hostOrg) {
+        if (values.ownerOrg) {
+          tasksFilters.assignedToOwnerOrg = {
+            label: `Assigned to ${values.ownerOrg.shortName}`,
+            queryVars: {
+              taskedOrgUuid: values.ownerOrg.uuid,
+              orgRecurseStrategy: RECURSE_STRATEGY.PARENTS,
+              selectable: true
+            }
+          }
+        }
+
+        if (values.hostOrg && values.hostOrg.uuid !== values.ownerOrg?.uuid) {
           tasksFilters.assignedToHostOrg = {
             label: `Assigned to ${values.hostOrg.shortName}`,
             queryVars: {
@@ -200,7 +212,11 @@ const EventForm = ({
           }
         }
 
-        if (values.adminOrg && values.adminOrg.uuid !== values.hostOrg?.uuid) {
+        if (
+          values.adminOrg &&
+          values.adminOrg.uuid !== values.ownerOrg?.uuid &&
+          values.adminOrg.uuid !== values.hostOrg?.uuid
+        ) {
           tasksFilters.assignedToAdminOrg = {
             label: `Assigned to ${values.adminOrg.shortName}`,
             queryVars: {
@@ -239,6 +255,7 @@ const EventForm = ({
                     // validation will be done by setFieldValue
                     setFieldTouched("eventSeries", true, false) // onBlur doesn't work when selecting an option
                     setFieldValue("eventSeries", value)
+                    setFieldValue("ownerOrg", value?.ownerOrg)
                     setFieldValue("hostOrg", value?.hostOrg)
                     setFieldValue("adminOrg", value?.adminOrg)
                   }}
@@ -257,6 +274,32 @@ const EventForm = ({
                       queryParams={eventSeriesSearchQuery}
                       valueKey="name"
                       addon={EVENT_SERIES_ICON}
+                    />
+                  }
+                />
+                <DictionaryField
+                  wrappedComponent={Field}
+                  dictProps={Settings.fields.event.ownerOrg}
+                  name="ownerOrg"
+                  component={FieldHelper.SpecialField}
+                  onChange={value => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("ownerOrg", true, false) // onBlur doesn't work when selecting an option
+                    setFieldValue("ownerOrg", value)
+                  }}
+                  widget={
+                    <AdvancedSingleSelect
+                      fieldName="ownerOrg"
+                      placeholder={Settings.fields.event.ownerOrg.placeholder}
+                      value={values.ownerOrg}
+                      overlayColumns={["Name"]}
+                      overlayRenderRow={OrganizationOverlayRow}
+                      filterDefs={organizationFilters}
+                      objectType={Organization}
+                      fields={Organization.autocompleteQuery}
+                      queryParams={ownerOrgSearchQuery}
+                      valueKey="shortName"
+                      addon={ORGANIZATIONS_ICON}
                     />
                   }
                 />
@@ -628,6 +671,7 @@ const EventForm = ({
     event.organizations = values.organizations.map(t => utils.getReference(t))
     // strip person fields not in data model
     event.people = values.people.map(t => utils.getReference(t))
+    event.ownerOrg = utils.getReference(event.ownerOrg)
     event.hostOrg = utils.getReference(event.hostOrg)
     event.adminOrg = utils.getReference(event.adminOrg)
     event.location = utils.getReference(event.location)

@@ -5954,6 +5954,7 @@
 			<column name="status" type="int">
 				<constraints nullable="false" />
 			</column>
+			<column name="ownerOrgUuid" type="${uuid_type}" />
 			<column name="hostOrgUuid" type="${uuid_type}">
 				<constraints nullable="false" />
 			</column>
@@ -5967,6 +5968,14 @@
 			<column name="description" type="text"/>
 			<column name="updatedAt" type="timestamp" />
 		</createTable>
+		<addForeignKeyConstraint
+			constraintName="FK_eventSeries_ownerOrganization"
+			baseTableName="eventSeries"
+			baseColumnNames="ownerOrgUuid"
+			referencedTableName="organizations"
+			referencedColumnNames="uuid"
+			onDelete="CASCADE" onUpdate="NO ACTION"
+		/>
 		<addForeignKeyConstraint
 			constraintName="FK_eventSeries_hostOrganization"
 			baseTableName="eventSeries"
@@ -6002,6 +6011,7 @@
 			<column name="endDate" type="timestamp">
 				<constraints nullable="false" />
 			</column>
+			<column name="ownerOrgUuid" type="${uuid_type}" />
 			<column name="hostOrgUuid" type="${uuid_type}">
 				<constraints nullable="false" />
 			</column>
@@ -6016,6 +6026,14 @@
 			</column>
 			<column name="updatedAt" type="timestamp" />
 		</createTable>
+		<addForeignKeyConstraint
+			constraintName="FK_events_ownerOrganization"
+			baseTableName="events"
+			baseColumnNames="ownerOrgUuid"
+			onDelete="CASCADE" onUpdate="NO ACTION"
+			referencedColumnNames="uuid"
+			referencedTableName="organizations"
+		/>
 		<addForeignKeyConstraint
 			constraintName="FK_events_hostOrganization"
 			baseTableName="events"

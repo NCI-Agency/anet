@@ -134,6 +134,17 @@ const EventShow = ({ pageDispatchers }: EventShowProps) => {
                 )}
                 <DictionaryField
                   wrappedComponent={Field}
+                  dictProps={Settings.fields.event.ownerOrg}
+                  name="ownerOrg"
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={
+                    event.ownerOrg && (
+                      <LinkTo modelType="Organization" model={event.ownerOrg} />
+                    )
+                  }
+                />
+                <DictionaryField
+                  wrappedComponent={Field}
                   dictProps={Settings.fields.event.hostOrg}
                   name="hostOrg"
                   component={FieldHelper.ReadonlyField}

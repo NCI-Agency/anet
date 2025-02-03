@@ -39,6 +39,11 @@ const EventPreview = ({ className, uuid }: EventPreviewProps) => {
         />
         <DictionaryField
           wrappedComponent={PreviewField}
+          dictProps={Settings.fields.event.ownerOrg}
+          value={<LinkTo modelType="Organization" model={event.ownerOrg} />}
+        />
+        <DictionaryField
+          wrappedComponent={PreviewField}
           dictProps={Settings.fields.event.hostOrg}
           value={<LinkTo modelType="Organization" model={event.hostOrg} />}
         />

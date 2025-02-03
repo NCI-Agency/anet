@@ -25,6 +25,7 @@ export default class EventSeries extends Model {
       .default(() => Model.STATUS.ACTIVE),
     name: yup.string().required().default(""),
     description: yup.string().default(""),
+    ownerOrg: yup.object().nullable().default(null),
     hostOrg: yup
       .object()
       .test("hostOrg", "host org error", (hostOrg, testContext) =>
@@ -41,6 +42,13 @@ export default class EventSeries extends Model {
   static autocompleteQuery = `
     uuid
     name
+    ownerOrg {
+      uuid
+      shortName
+      longName
+      identificationCode
+      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+    }
     hostOrg {
       uuid
       shortName
@@ -65,6 +73,13 @@ export default class EventSeries extends Model {
         name
         description
         isSubscribed
+        ownerOrg {
+          uuid
+          shortName
+          longName
+          identificationCode
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        }
         hostOrg {
           uuid
           shortName

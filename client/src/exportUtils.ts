@@ -273,6 +273,12 @@ const GQL_GET_EVENT_LIST = gql`
         name
         startDate
         endDate
+        ownerOrg {
+          uuid
+          shortName
+          longName
+          identificationCode
+        }
         hostOrg {
           uuid
           shortName

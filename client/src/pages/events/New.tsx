@@ -101,6 +101,7 @@ const EventNewConditional = ({
   const event = new Event()
   if (data) {
     event.eventSeries = new EventSeries(data.eventSeries)
+    event.ownerOrg = data.eventSeries.ownerOrg
     event.hostOrg = data.eventSeries.hostOrg
     event.adminOrg = data.eventSeries.adminOrg
   }

@@ -95,16 +95,17 @@ public class TestData {
   }
 
   public static EventInput createEventInput(String name, String description,
-      OrganizationInput hostOrg, OrganizationInput adminOrg) {
+      OrganizationInput ownerOrg, OrganizationInput hostOrg, OrganizationInput adminOrg) {
     return EventInput.builder().withName(name).withStatus(Status.ACTIVE)
-        .withDescription(description).withAdminOrg(adminOrg).withHostOrg(hostOrg)
-        .withStartDate(Instant.now()).withEndDate(Instant.now()).withType(EventType.CONFERENCE)
-        .build();
+        .withDescription(description).withOwnerOrg(ownerOrg).withHostOrg(hostOrg)
+        .withAdminOrg(adminOrg).withStartDate(Instant.now()).withEndDate(Instant.now())
+        .withType(EventType.CONFERENCE).build();
   }
 
   public static EventSeriesInput createEventSeriesInput(String name, String description,
-      OrganizationInput hostOrg, OrganizationInput adminOrg) {
+      OrganizationInput ownerOrg, OrganizationInput hostOrg, OrganizationInput adminOrg) {
     return EventSeriesInput.builder().withName(name).withStatus(Status.ACTIVE)
-        .withDescription(description).withAdminOrg(adminOrg).withHostOrg(hostOrg).build();
+        .withDescription(description).withOwnerOrg(ownerOrg).withHostOrg(hostOrg)
+        .withAdminOrg(adminOrg).build();
   }
 }

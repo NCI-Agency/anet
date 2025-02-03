@@ -81,6 +81,7 @@ const EventSeriesForm = ({
         submitForm
       }) => {
         const isAdmin = currentUser?.isAdmin()
+        const ownerOrgSearchQuery = { status: Model.STATUS.ACTIVE }
         const hostOrgSearchQuery = { status: Model.STATUS.ACTIVE }
         const adminOrgSearchQuery = { status: Model.STATUS.ACTIVE }
         // Superusers can select parent organizations among the ones their position is administrating
@@ -121,6 +122,34 @@ const EventSeriesForm = ({
                   dictProps={Settings.fields.eventSeries.name}
                   name="name"
                   component={FieldHelper.InputField}
+                />
+                <DictionaryField
+                  wrappedComponent={Field}
+                  dictProps={Settings.fields.eventSeries.ownerOrg}
+                  name="ownerOrg"
+                  component={FieldHelper.SpecialField}
+                  onChange={value => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("ownerOrg", true, false) // onBlur doesn't work when selecting an option
+                    setFieldValue("ownerOrg", value)
+                  }}
+                  widget={
+                    <AdvancedSingleSelect
+                      fieldName="ownerOrg"
+                      placeholder={
+                        Settings.fields.eventSeries.ownerOrg.placeholder
+                      }
+                      value={values.ownerOrg}
+                      overlayColumns={["Name"]}
+                      overlayRenderRow={OrganizationOverlayRow}
+                      filterDefs={organizationFilters}
+                      objectType={Organization}
+                      fields={Organization.autocompleteQuery}
+                      queryParams={ownerOrgSearchQuery}
+                      valueKey="shortName"
+                      addon={ORGANIZATIONS_ICON}
+                    />
+                  }
                 />
                 <DictionaryField
                   wrappedComponent={Field}
@@ -273,6 +302,7 @@ const EventSeriesForm = ({
       new EventSeries(values)
     )
     // strip tasks fields not in data model
+    eventSeries.ownerOrg = utils.getReference(eventSeries.ownerOrg)
     eventSeries.hostOrg = utils.getReference(eventSeries.hostOrg)
     eventSeries.adminOrg = utils.getReference(eventSeries.adminOrg)
     return API.mutation(

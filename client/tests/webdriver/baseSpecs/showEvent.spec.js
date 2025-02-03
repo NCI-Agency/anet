@@ -13,6 +13,11 @@ describe("Show event page", () => {
     expect(await (await ShowEvent.getTitle()).getText()).to.equal(
       "Event NMI PDT 2024-01"
     )
+    await (await ShowEvent.getOwnerOrganization()).waitForExist()
+    await (await ShowEvent.getOwnerOrganization()).waitForDisplayed()
+    expect(await (await ShowEvent.getOwnerOrganization()).getText()).to.equal(
+      "EF 2.2"
+    )
     await (await ShowEvent.getHostOrganization()).waitForExist()
     await (await ShowEvent.getHostOrganization()).waitForDisplayed()
     expect(await (await ShowEvent.getHostOrganization()).getText()).to.equal(

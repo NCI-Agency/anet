@@ -49,11 +49,14 @@ public abstract class AbstractEventSearcher extends AbstractSearcher<Event, Even
       qb.addStringEqualsClause("eventSeriesUuid", "events.\"eventSeriesUuid\"",
           query.getEventSeriesUuid());
     }
-    if (!Utils.isEmptyOrNull(query.getAdminOrgUuid())) {
-      addAdminOrgQuery(query);
+    if (!Utils.isEmptyOrNull(query.getOwnerOrgUuid())) {
+      addOwnerOrgQuery(query);
     }
     if (!Utils.isEmptyOrNull(query.getHostOrgUuid())) {
       addHostOrgQuery(query);
+    }
+    if (!Utils.isEmptyOrNull(query.getAdminOrgUuid())) {
+      addAdminOrgQuery(query);
     }
     if (!Utils.isEmptyOrNull(query.getLocationUuid())) {
       addLocationQuery(query);
@@ -80,6 +83,17 @@ public abstract class AbstractEventSearcher extends AbstractSearcher<Event, Even
       qb.addRecursiveClause(null, "events", new String[] {"\"locationUuid\""}, "parent_locations",
           "\"locationRelationships\"", "\"childLocationUuid\"", "\"parentLocationUuid\"",
           "locationUuid", query.getLocationUuid(), true, true);
+    }
+  }
+
+  protected void addOwnerOrgQuery(EventSearchQuery query) {
+    if (query.getOwnerOrgUuid().size() == 1
+        && Organization.DUMMY_ORG_UUID.equals(query.getOwnerOrgUuid().get(0))) {
+      qb.addWhereClause("events.\"ownerOrgUuid\" IS NULL");
+    } else {
+      qb.addRecursiveClause(null, "events", new String[] {"\"ownerOrgUuid\""}, "parent_owner_orgs",
+          "organizations", "uuid", "\"parentOrgUuid\"", "ownerOrgUuid", query.getOwnerOrgUuid(),
+          true, true);
     }
   }
 

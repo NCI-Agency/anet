@@ -10,6 +10,9 @@ public class EventSeriesSearchQuery extends SubscribableObjectSearchQuery<EventS
 
   @GraphQLQuery
   @GraphQLInputField
+  private List<String> ownerOrgUuid;
+  @GraphQLQuery
+  @GraphQLInputField
   private List<String> hostOrgUuid;
   @GraphQLQuery
   @GraphQLInputField
@@ -17,6 +20,14 @@ public class EventSeriesSearchQuery extends SubscribableObjectSearchQuery<EventS
 
   public EventSeriesSearchQuery() {
     super(EventSeriesSearchSortBy.NAME);
+  }
+
+  public List<String> getOwnerOrgUuid() {
+    return ownerOrgUuid;
+  }
+
+  public void setOwnerOrgUuid(List<String> ownerOrgUuid) {
+    this.ownerOrgUuid = ownerOrgUuid;
   }
 
   public List<String> getHostOrgUuid() {
@@ -37,7 +48,7 @@ public class EventSeriesSearchQuery extends SubscribableObjectSearchQuery<EventS
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), hostOrgUuid, adminOrgUuid);
+    return Objects.hash(super.hashCode(), ownerOrgUuid, hostOrgUuid, adminOrgUuid);
   }
 
   @Override
@@ -45,13 +56,17 @@ public class EventSeriesSearchQuery extends SubscribableObjectSearchQuery<EventS
     if (!(obj instanceof EventSeriesSearchQuery other)) {
       return false;
     }
-    return super.equals(obj) && Objects.equals(getHostOrgUuid(), other.getHostOrgUuid())
+    return super.equals(obj) && Objects.equals(getOwnerOrgUuid(), other.getOwnerOrgUuid())
+        && Objects.equals(getHostOrgUuid(), other.getHostOrgUuid())
         && Objects.equals(getAdminOrgUuid(), other.getAdminOrgUuid());
   }
 
   @Override
   public EventSeriesSearchQuery clone() throws CloneNotSupportedException {
     final EventSeriesSearchQuery clone = (EventSeriesSearchQuery) super.clone();
+    if (ownerOrgUuid != null) {
+      clone.setOwnerOrgUuid(new ArrayList<>(ownerOrgUuid));
+    }
     if (hostOrgUuid != null) {
       clone.setHostOrgUuid(new ArrayList<>(hostOrgUuid));
     }

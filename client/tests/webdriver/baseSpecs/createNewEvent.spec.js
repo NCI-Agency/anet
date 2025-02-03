@@ -48,6 +48,14 @@ describe("Create event page", () => {
       await (await CreateEvent.getEndDateInput()).waitForDisplayed()
       await (await CreateEvent.getEndDateInput()).setValue("02-01-2025")
 
+      await (await CreateEvent.getOwnerOrganizationInput()).click()
+      await (await CreateEvent.getOwnerOrganizationInput()).setValue(ORG)
+      await CreateEvent.waitForOwnerOrgAdvancedSelectToChange(ORG_COMPLETE)
+      expect(
+        await (await CreateEvent.getOwnerOrgAdvancedSelectFirstItem()).getText()
+      ).to.include(ORG_COMPLETE)
+      await (await CreateEvent.getOwnerOrgAdvancedSelectFirstItem()).click()
+
       await (await CreateEvent.getHostOrganizationInput()).click()
       await (await CreateEvent.getHostOrganizationInput()).setValue(ORG)
       await CreateEvent.waitForHostOrgAdvancedSelectToChange(ORG_COMPLETE)

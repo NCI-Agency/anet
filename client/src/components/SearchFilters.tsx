@@ -746,7 +746,7 @@ export const searchFilters = function(includeAdminFilters) {
 
   filters[SEARCH_OBJECT_TYPES.EVENTS] = {
     filters: {
-      "Event Type": {
+      [Settings.fields.event.type.label]: {
         component: SelectFilter,
         dictProps: Settings.fields.event.type,
         deserializer: deserializeSelectFilter,
@@ -756,31 +756,38 @@ export const searchFilters = function(includeAdminFilters) {
           labels: eventTypeOptions.map(lt => Event.humanNameOfType(lt))
         }
       },
-      "Event Series": {
+      [Settings.fields.event.eventSeries.label]: {
         component: AdvancedSelectFilter,
         deserializer: deserializeAdvancedSelectFilter,
         props: {
           ...advancedSelectFilterEventSeriesProps,
           filterDefs: eventSeriesFilters,
-          placeholder: "Filter by event series…",
+          placeholder: `Filter by ${Settings.fields.event.eventSeries.label}…`,
           queryKey: "eventSeriesUuid"
         }
       },
-      "Within Host Organization": {
+      [`Within ${Settings.fields.event.ownerOrg.label}`]: {
+        component: OrganizationMultiFilter,
+        deserializer: deserializeOrganizationMultiFilter,
+        props: {
+          queryKey: "ownerOrgUuid"
+        }
+      },
+      [`Within ${Settings.fields.event.hostOrg.label}`]: {
         component: OrganizationMultiFilter,
         deserializer: deserializeOrganizationMultiFilter,
         props: {
           queryKey: "hostOrgUuid"
         }
       },
-      "Within Admin Organization": {
+      [`Within ${Settings.fields.event.adminOrg.label}`]: {
         component: OrganizationMultiFilter,
         deserializer: deserializeOrganizationMultiFilter,
         props: {
           queryKey: "adminOrgUuid"
         }
       },
-      "Within Location": {
+      [`Within ${Settings.fields.event.location.label}`]: {
         component: LocationMultiFilter,
         deserializer: deserializeLocationMultiFilter,
         props: {

@@ -36,6 +36,7 @@ export default class Event extends Model {
     startDate: yupDate.required().default(null),
     endDate: yupDate.required().default(null),
     outcomes: yup.string().default(""),
+    ownerOrg: yup.object().nullable().default(null),
     hostOrg: yup
       .object()
       .test("hostOrg", "host org error", (hostOrg, testContext) =>
@@ -79,6 +80,13 @@ export default class Event extends Model {
         outcomes
         isSubscribed
         updatedAt
+        ownerOrg {
+          uuid
+          shortName
+          longName
+          identificationCode
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        }
         hostOrg {
           uuid
           shortName

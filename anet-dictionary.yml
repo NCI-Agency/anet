@@ -363,6 +363,9 @@ fields:
   eventSeries:
     status:
       label: Status
+    ownerOrg:
+      label: Owner Organization
+      placeholder: Search for the organization that owns the event series…
     hostOrg:
       label: Host Organization
       placeholder: Search for the organization hosting the event series…
@@ -382,6 +385,9 @@ fields:
     eventSeries:
       label: Event Series this event belongs to
       placeholder: Search for an event series…
+    ownerOrg:
+      label: Owner Organization
+      placeholder: Search for the organization that owns the event…
     hostOrg:
       label: Host Organization
       placeholder: Search for the organization hosting the event…

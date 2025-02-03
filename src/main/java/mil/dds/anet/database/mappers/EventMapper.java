@@ -21,6 +21,7 @@ public class EventMapper implements RowMapper<Event> {
     event.setStartDate(getInstantAsLocalDateTime(r, "events_startDate"));
     event.setEndDate(getInstantAsLocalDateTime(r, "events_endDate"));
     event.setOutcomes(r.getString("events_outcomes"));
+    event.setOwnerOrgUuid(r.getString("events_ownerOrgUuid"));
     event.setHostOrgUuid(r.getString("events_hostOrgUuid"));
     event.setAdminOrgUuid(r.getString("events_adminOrgUuid"));
     event.setEventSeriesUuid(r.getString("events_eventSeriesUuid"));

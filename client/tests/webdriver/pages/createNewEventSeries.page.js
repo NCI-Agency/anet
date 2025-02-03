@@ -18,12 +18,28 @@ class CreateEventSeries extends Page {
     return browser.$("#fg-description .editable")
   }
 
+  async getOwnerOrganizationInput() {
+    return browser.$("#ownerOrg")
+  }
+
+  async getOwnerOrgAdvancedSelectFirstItem() {
+    return browser.$(
+      "#ownerOrg-popover tbody tr:first-child td:nth-child(2) span"
+    )
+  }
+
   async getHostOrganizationInput() {
     return browser.$("#hostOrg")
   }
 
   async getHostOrgHelpBlock() {
     return browser.$("#fg-hostOrg div.invalid-feedback")
+  }
+
+  async getHostOrgAdvancedSelectFirstItem() {
+    return browser.$(
+      "#hostOrg-popover tbody tr:first-child td:nth-child(2) span"
+    )
   }
 
   async getAdminOrganizationInput() {
@@ -33,12 +49,6 @@ class CreateEventSeries extends Page {
   async getAdminOrgAdvancedSelectFirstItem() {
     return browser.$(
       "#adminOrg-popover tbody tr:first-child td:nth-child(2) span"
-    )
-  }
-
-  async getHostOrgAdvancedSelectFirstItem() {
-    return browser.$(
-      "#hostOrg-popover tbody tr:first-child td:nth-child(2) span"
     )
   }
 
@@ -56,6 +66,26 @@ class CreateEventSeries extends Page {
 
   async openAsAdminUser() {
     await super.openAsAdminUser(PAGE_URL)
+  }
+
+  async waitForOwnerOrgAdvancedSelectToChange(value) {
+    await (await this.getOwnerOrgAdvancedSelectFirstItem()).waitForExist()
+    return browser.waitUntil(
+      async() => {
+        return (
+          (await (
+            await this.getOwnerOrgAdvancedSelectFirstItem()
+          ).getText()) === value
+        )
+      },
+      {
+        timeout: 5000,
+        timeoutMsg:
+          'Expected owner org advanced select input to contain "' +
+          value +
+          '" after 5s'
+      }
+    )
   }
 
   async waitForHostOrgAdvancedSelectToChange(value) {
