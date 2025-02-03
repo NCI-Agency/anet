@@ -1,8 +1,6 @@
 import { gql } from "@apollo/client"
 import Model, { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
-import _isEmpty from "lodash/isEmpty"
 import EVENT_SERIES_ICON from "resources/eventSeries.png"
-import Settings from "settings"
 import utils from "utils"
 import * as yup from "yup"
 
@@ -26,16 +24,7 @@ export default class EventSeries extends Model {
     name: yup.string().required().default(""),
     description: yup.string().default(""),
     ownerOrg: yup.object().nullable().default(null),
-    hostOrg: yup
-      .object()
-      .test("hostOrg", "host org error", (hostOrg, testContext) =>
-        _isEmpty(hostOrg)
-          ? testContext.createError({
-            message: `You must provide the ${Settings.fields.eventSeries.hostOrg.label}`
-          })
-          : true
-      )
-      .default({}),
+    hostOrg: yup.object().nullable().default(null),
     adminOrg: yup.object().nullable().default(null)
   })
 

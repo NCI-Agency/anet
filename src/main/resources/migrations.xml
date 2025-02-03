@@ -5955,9 +5955,7 @@
 				<constraints nullable="false" />
 			</column>
 			<column name="ownerOrgUuid" type="${uuid_type}" />
-			<column name="hostOrgUuid" type="${uuid_type}">
-				<constraints nullable="false" />
-			</column>
+			<column name="hostOrgUuid" type="${uuid_type}" />
 			<column name="adminOrgUuid" type="${uuid_type}" />
 			<column name="name" type="varchar(255)">
 				<constraints nullable="false" />
@@ -6012,9 +6010,7 @@
 				<constraints nullable="false" />
 			</column>
 			<column name="ownerOrgUuid" type="${uuid_type}" />
-			<column name="hostOrgUuid" type="${uuid_type}">
-				<constraints nullable="false" />
-			</column>
+			<column name="hostOrgUuid" type="${uuid_type}" />
 			<column name="adminOrgUuid" type="${uuid_type}" />
 			<column name="type" type="text"/>
 			<column name="description" type="text"/>

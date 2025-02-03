@@ -32,10 +32,6 @@ class CreateEventSeries extends Page {
     return browser.$("#hostOrg")
   }
 
-  async getHostOrgHelpBlock() {
-    return browser.$("#fg-hostOrg div.invalid-feedback")
-  }
-
   async getHostOrgAdvancedSelectFirstItem() {
     return browser.$(
       "#hostOrg-popover tbody tr:first-child td:nth-child(2) span"

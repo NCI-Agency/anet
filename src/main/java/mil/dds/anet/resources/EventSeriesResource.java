@@ -106,10 +106,6 @@ public class EventSeriesResource {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           "Event Series name must not be empty");
     }
-    if (eventSeries.getHostOrgUuid() == null || eventSeries.getHostOrgUuid().trim().isEmpty()) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "Event Series Host Organization must not be empty");
-    }
     assertPermission(user, eventSeries.getAdminOrgUuid());
   }
 

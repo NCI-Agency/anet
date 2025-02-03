@@ -1,6 +1,5 @@
 import { gql } from "@apollo/client"
 import Model, { GRAPHQL_ENTITY_AVATAR_FIELDS, yupDate } from "components/Model"
-import _isEmpty from "lodash/isEmpty"
 import EVENTS_ICON from "resources/events.png"
 import Settings from "settings"
 import utils from "utils"
@@ -37,16 +36,7 @@ export default class Event extends Model {
     endDate: yupDate.required().default(null),
     outcomes: yup.string().default(""),
     ownerOrg: yup.object().nullable().default(null),
-    hostOrg: yup
-      .object()
-      .test("hostOrg", "host org error", (hostOrg, testContext) =>
-        _isEmpty(hostOrg)
-          ? testContext.createError({
-            message: `You must provide the ${Settings.fields.eventSeries.hostOrg.label}`
-          })
-          : true
-      )
-      .default({}),
+    hostOrg: yup.object().nullable().default(null),
     adminOrg: yup.object().nullable().default(null),
     eventSeries: yup.object().nullable().default({}),
     location: yup.object().nullable().default({}),

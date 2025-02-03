@@ -162,10 +162,6 @@ public class EventResource {
     if (event.getEndDate() == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Event end date must not be empty");
     }
-    if (event.getHostOrg() == null || event.getHostOrgUuid().trim().isEmpty()) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "Event Host Organization must not be empty");
-    }
     assertPermission(user, event.getAdminOrgUuid());
   }
 
