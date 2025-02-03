@@ -448,7 +448,7 @@ INSERT INTO organizations(uuid, "shortName", "longName", app6context, "app6stand
 INSERT INTO organizations(uuid, "shortName", "longName", "parentOrgUuid", "createdAt", "updatedAt") VALUES
   ('04614b0f-7e8e-4bf1-8bc5-13abaffeab8a', 'EF 1.1', '', (SELECT uuid from organizations WHERE "shortName" ='EF 1'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 1.2', '', (SELECT uuid from organizations WHERE "shortName" ='EF 1'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 2.1', '', (SELECT uuid from organizations WHERE "shortName" ='EF 2'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('a267a964-e9a1-4dfd-baa4-0c57d35a6212', 'EF 2.1', '', (SELECT uuid from organizations WHERE "shortName" ='EF 2'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'EF 2.2', '', (SELECT uuid from organizations WHERE "shortName" ='EF 2'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 4.1', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 4'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 4.2', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 4'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
@@ -1030,7 +1030,7 @@ UPDATE reports SET "releasedAt" = reports."createdAt" WHERE state = 2 OR state =
 
 --Create the default Approval Step
 INSERT INTO "approvalSteps" (uuid, name, "relatedObjectUuid", type) VALUES
-  (uuid_generate_v4(), 'Default Approvers', (select uuid from organizations where "shortName"='ANET Administrators'), 1);
+  ('2489d0ec-cdb8-484e-be02-fda7f5e8ed8d', 'Default Approvers', (select uuid from organizations where "shortName"='ANET Administrators'), 1);
 INSERT INTO approvers ("approvalStepUuid", "positionUuid") VALUES
   ((SELECT uuid from "approvalSteps" where name = 'Default Approvers'), (SELECT uuid from positions where name = 'ANET Administrator'));
 
@@ -1426,6 +1426,120 @@ INSERT INTO "accessTokens" (uuid, name, description, "tokenHash", "createdAt", "
   -- you can generate new tokens with e.g.:
   -- dd if=/dev/urandom bs=24 count=1 | base64 | ( read r; echo -ne "Token value = $r\nToken hash = " >&2; echo -n $r ) | openssl dgst -binary -sha256 | openssl base64
   ('2e45aef0-b9de-4818-be95-b0cc2aececfc', 'Sample Web Service Access Token', 'A sample web service access token for the NVG Web Service', 'AaEge0eLJTP25aRAA5jIZxyzvejJBxPk+kAJDpv+5nc=', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '10 years');
+
+-- Test data for assessments
+
+-- Reports for task assessments
+INSERT INTO public.reports ("createdAt", "updatedAt", intent, exsum, text, "nextSteps", state, "engagementDate", atmosphere, "atmosphereDetails", "keyOutcomes", "cancelledReason", "releasedAt", uuid, "advisorOrganizationUuid", "approvalStepUuid", "locationUuid", "interlocutorOrganizationUuid", "legacyId", duration, "customFields", classification) VALUES
+  (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Test assessment taskOnceReport', NULL, '<p>test</p>', 'test', 2, CURRENT_TIMESTAMP, 1, '', 'test', NULL, CURRENT_TIMESTAMP, '4915d7b7-6857-4324-98eb-f7be5b0ed170', 'a267a964-e9a1-4dfd-baa4-0c57d35a6212', NULL, '0855fb0a-995e-4a79-a132-4024ee2983ff', NULL, NULL, NULL, '{"invisibleCustomFields":["formCustomFields.trainingEvent","formCustomFields.numberTrained","formCustomFields.levelTrained","formCustomFields.trainingDate","formCustomFields.systemProcess","formCustomFields.echelons","formCustomFields.itemsAgreed","formCustomFields.assetsUsed"],"multipleButtons":[],"additionalEngagementNeeded":[],"relatedObject":null,"relatedReport":null,"gridLocation":{}}', NULL),
+  (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Test assessment taskOnceReport with questionFor11B', NULL, '<p>test</p>', 'test', 2, CURRENT_TIMESTAMP, 1, '', 'test', NULL, CURRENT_TIMESTAMP, '7676b6ca-c0b2-46a2-9b92-0d255d2532eb', 'a267a964-e9a1-4dfd-baa4-0c57d35a6212', NULL, '0855fb0a-995e-4a79-a132-4024ee2983ff', NULL, NULL, NULL, '{"invisibleCustomFields":["formCustomFields.trainingEvent","formCustomFields.numberTrained","formCustomFields.levelTrained","formCustomFields.trainingDate","formCustomFields.systemProcess","formCustomFields.echelons","formCustomFields.itemsAgreed","formCustomFields.assetsUsed"],"multipleButtons":[],"additionalEngagementNeeded":[],"relatedObject":null,"relatedReport":null,"gridLocation":{}}', NULL),
+  (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Test assessment task11COnceReport with questionForNegative', NULL, '<p>test</p>', 'test', 2, CURRENT_TIMESTAMP, 2, '', 'test', NULL, CURRENT_TIMESTAMP, '17c518f6-4444-48d9-b63b-7da7e2023ecc', 'a267a964-e9a1-4dfd-baa4-0c57d35a6212', NULL, '0855fb0a-995e-4a79-a132-4024ee2983ff', NULL, NULL, NULL, '{"invisibleCustomFields":["formCustomFields.trainingEvent","formCustomFields.numberTrained","formCustomFields.levelTrained","formCustomFields.trainingDate","formCustomFields.systemProcess","formCustomFields.echelons","formCustomFields.itemsAgreed","formCustomFields.assetsUsed"],"multipleButtons":[],"additionalEngagementNeeded":[],"relatedObject":null,"relatedReport":null,"gridLocation":{}}', NULL),
+  (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Test assessment task11COnceReport', NULL, '<p>test</p>', 'test', 2, CURRENT_TIMESTAMP, 1, '', 'test', NULL, CURRENT_TIMESTAMP, '764a393a-a292-40c5-8f96-28263dc906c0', 'a267a964-e9a1-4dfd-baa4-0c57d35a6212', NULL, '0855fb0a-995e-4a79-a132-4024ee2983ff', NULL, NULL, NULL, '{"invisibleCustomFields":["formCustomFields.trainingEvent","formCustomFields.numberTrained","formCustomFields.levelTrained","formCustomFields.trainingDate","formCustomFields.systemProcess","formCustomFields.echelons","formCustomFields.itemsAgreed","formCustomFields.assetsUsed"],"multipleButtons":[],"additionalEngagementNeeded":[],"relatedObject":null,"relatedReport":null,"gridLocation":{}}', NULL),
+  (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Test assessment taskOnceReport with questionForNegative', NULL, '<p>test</p>', 'test', 2, CURRENT_TIMESTAMP, 2, '', 'test', NULL, CURRENT_TIMESTAMP, 'b0bea024-48bf-4d30-914a-a19d6c39d82c', 'a267a964-e9a1-4dfd-baa4-0c57d35a6212', NULL, '0855fb0a-995e-4a79-a132-4024ee2983ff', NULL, NULL, NULL, '{"invisibleCustomFields":["formCustomFields.trainingEvent","formCustomFields.numberTrained","formCustomFields.levelTrained","formCustomFields.trainingDate","formCustomFields.systemProcess","formCustomFields.echelons","formCustomFields.itemsAgreed","formCustomFields.assetsUsed"],"multipleButtons":[],"additionalEngagementNeeded":[],"relatedObject":null,"relatedReport":null,"gridLocation":{}}', NULL),
+  (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Test assessment taskOnceReportRestricted', NULL, '<p>test</p>', 'test', 2, CURRENT_TIMESTAMP, 1, '', 'test', NULL, CURRENT_TIMESTAMP, 'e4498f99-8473-4d42-a86c-557b495ebd6c', 'a267a964-e9a1-4dfd-baa4-0c57d35a6212', NULL, '0855fb0a-995e-4a79-a132-4024ee2983ff', NULL, NULL, NULL, '{"invisibleCustomFields":["formCustomFields.trainingEvent","formCustomFields.numberTrained","formCustomFields.levelTrained","formCustomFields.trainingDate","formCustomFields.systemProcess","formCustomFields.echelons","formCustomFields.itemsAgreed","formCustomFields.assetsUsed"],"multipleButtons":[],"additionalEngagementNeeded":[],"relatedObject":null,"relatedReport":null,"gridLocation":{}}', NULL);
+
+-- Report tasks for task assessments
+INSERT INTO public."reportTasks" ("reportUuid", "taskUuid") VALUES
+  ('e4498f99-8473-4d42-a86c-557b495ebd6c', '42afd501-1a2c-4758-9da5-f996b2c97156'),
+  ('7676b6ca-c0b2-46a2-9b92-0d255d2532eb', '1b5eb36b-456c-46b7-ae9e-1c89e9075292'),
+  ('b0bea024-48bf-4d30-914a-a19d6c39d82c', '0701a964-5d79-4090-8f35-a40856556675'),
+  ('764a393a-a292-40c5-8f96-28263dc906c0', '7fdef880-1bf3-4e56-8476-79166324023f'),
+  ('17c518f6-4444-48d9-b63b-7da7e2023ecc', '7fdef880-1bf3-4e56-8476-79166324023f'),
+  ('4915d7b7-6857-4324-98eb-f7be5b0ed170', '2200a820-c4c7-4c9c-946c-f0c9c9e045c5');
+
+-- Report people for task assessments
+INSERT INTO public."reportPeople" ("isPrimary", "personUuid", "reportUuid", "isAttendee", "isAuthor", "isInterlocutor") VALUES
+  (true, 'b5d495af-44d5-4c35-851a-1039352a8307', 'e4498f99-8473-4d42-a86c-557b495ebd6c', true, true, false),
+  (true, 'b5d495af-44d5-4c35-851a-1039352a8307', '4915d7b7-6857-4324-98eb-f7be5b0ed170', true, true, false),
+  (true, 'b5d495af-44d5-4c35-851a-1039352a8307', '7676b6ca-c0b2-46a2-9b92-0d255d2532eb', true, true, false),
+  (true, 'b5d495af-44d5-4c35-851a-1039352a8307', 'b0bea024-48bf-4d30-914a-a19d6c39d82c', true, true, false),
+  (true, 'b5d495af-44d5-4c35-851a-1039352a8307', '764a393a-a292-40c5-8f96-28263dc906c0', true, true, false),
+  (true, 'b5d495af-44d5-4c35-851a-1039352a8307', '17c518f6-4444-48d9-b63b-7da7e2023ecc', true, true, false);
+
+-- Report actions for task assessments
+INSERT INTO public."reportActions" ("createdAt", type, "approvalStepUuid", "personUuid", "reportUuid", planned) VALUES
+  (CURRENT_TIMESTAMP, 2, NULL, 'b5d495af-44d5-4c35-851a-1039352a8307', '4915d7b7-6857-4324-98eb-f7be5b0ed170', false),
+  (CURRENT_TIMESTAMP, 2, NULL, 'b5d495af-44d5-4c35-851a-1039352a8307', '17c518f6-4444-48d9-b63b-7da7e2023ecc', false),
+  (CURRENT_TIMESTAMP, 2, NULL, 'b5d495af-44d5-4c35-851a-1039352a8307', '764a393a-a292-40c5-8f96-28263dc906c0', false),
+  (CURRENT_TIMESTAMP, 2, NULL, 'b5d495af-44d5-4c35-851a-1039352a8307', 'b0bea024-48bf-4d30-914a-a19d6c39d82c', false),
+  (CURRENT_TIMESTAMP, 2, NULL, 'b5d495af-44d5-4c35-851a-1039352a8307', '7676b6ca-c0b2-46a2-9b92-0d255d2532eb', false),
+  (CURRENT_TIMESTAMP, 2, NULL, 'b5d495af-44d5-4c35-851a-1039352a8307', 'e4498f99-8473-4d42-a86c-557b495ebd6c', false),
+  (CURRENT_TIMESTAMP, 0, '2489d0ec-cdb8-484e-be02-fda7f5e8ed8d', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '4915d7b7-6857-4324-98eb-f7be5b0ed170', false),
+  (CURRENT_TIMESTAMP, 0, '2489d0ec-cdb8-484e-be02-fda7f5e8ed8d', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '17c518f6-4444-48d9-b63b-7da7e2023ecc', false),
+  (CURRENT_TIMESTAMP, 0, '2489d0ec-cdb8-484e-be02-fda7f5e8ed8d', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '764a393a-a292-40c5-8f96-28263dc906c0', false),
+  (CURRENT_TIMESTAMP, 0, '2489d0ec-cdb8-484e-be02-fda7f5e8ed8d', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'b0bea024-48bf-4d30-914a-a19d6c39d82c', false),
+  (CURRENT_TIMESTAMP, 0, '2489d0ec-cdb8-484e-be02-fda7f5e8ed8d', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '7676b6ca-c0b2-46a2-9b92-0d255d2532eb', false),
+  (CURRENT_TIMESTAMP, 0, '2489d0ec-cdb8-484e-be02-fda7f5e8ed8d', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'e4498f99-8473-4d42-a86c-557b495ebd6c', false),
+  (CURRENT_TIMESTAMP, 0, (SELECT uuid FROM "approvalSteps" WHERE "relatedObjectUuid" = '87fdbc6a-3109-4e11-9702-a894d6ca31ef'), '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '4915d7b7-6857-4324-98eb-f7be5b0ed170', false),
+  (CURRENT_TIMESTAMP, 0, (SELECT uuid FROM "approvalSteps" WHERE "relatedObjectUuid" = '7fdef880-1bf3-4e56-8476-79166324023f'), '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '17c518f6-4444-48d9-b63b-7da7e2023ecc', false),
+  (CURRENT_TIMESTAMP, 0, (SELECT uuid FROM "approvalSteps" WHERE "relatedObjectUuid" = '7fdef880-1bf3-4e56-8476-79166324023f'), '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '764a393a-a292-40c5-8f96-28263dc906c0', false),
+  (CURRENT_TIMESTAMP, 0, (SELECT uuid FROM "approvalSteps" WHERE "relatedObjectUuid" = '0701a964-5d79-4090-8f35-a40856556675'), '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'b0bea024-48bf-4d30-914a-a19d6c39d82c', false),
+  (CURRENT_TIMESTAMP, 0, (SELECT uuid FROM "approvalSteps" WHERE "relatedObjectUuid" = '1b5eb36b-456c-46b7-ae9e-1c89e9075292'), '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '7676b6ca-c0b2-46a2-9b92-0d255d2532eb', false),
+  (CURRENT_TIMESTAMP, 0, (SELECT uuid FROM "approvalSteps" WHERE "relatedObjectUuid" = '42afd501-1a2c-4758-9da5-f996b2c97156'), '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'e4498f99-8473-4d42-a86c-557b495ebd6c', false),
+  (CURRENT_TIMESTAMP, 3, NULL, '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '4915d7b7-6857-4324-98eb-f7be5b0ed170', false),
+  (CURRENT_TIMESTAMP, 3, NULL, '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '17c518f6-4444-48d9-b63b-7da7e2023ecc', false),
+  (CURRENT_TIMESTAMP, 3, NULL, '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '764a393a-a292-40c5-8f96-28263dc906c0', false),
+  (CURRENT_TIMESTAMP, 3, NULL, '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'b0bea024-48bf-4d30-914a-a19d6c39d82c', false),
+  (CURRENT_TIMESTAMP, 3, NULL, '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '7676b6ca-c0b2-46a2-9b92-0d255d2532eb', false),
+  (CURRENT_TIMESTAMP, 3, NULL, '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'e4498f99-8473-4d42-a86c-557b495ebd6c', false);
+
+-- Notes for task assessments
+INSERT INTO public.notes (uuid, "authorUuid", text, "createdAt", "updatedAt", type, "assessmentKey") VALUES
+  ('473f9fa0-ade9-4f59-aa1c-6c06890d9f49', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"issues":"<p>Test assessment taskSemiannuallyRestricted</p>","__recurrence":"semiannually","__periodStart":"' || to_char(date_trunc('quarter', CURRENT_TIMESTAMP) + INTERVAL '-12 month', 'YYYY-MM-DD') || '"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.task.assessments.taskSemiannuallyRestricted'),
+  ('3f22f63e-cd7b-4cbf-9fa7-66fb53fe4a4e', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '{"status":"GREEN","issues":"<p>Test assessment taskMonthly</p>","__recurrence":"monthly","__periodStart":"' || to_char(date_trunc('month', CURRENT_TIMESTAMP) + INTERVAL '-2 month', 'YYYY-MM-DD') || '"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.task.assessments.taskMonthly'),
+  ('b79c0643-6bdc-4813-b567-404313043d92', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '{"status":"AMBER","issues":"<p>Test assessment taskMonthly with questionFor11B</p>","questionFor11B":"Test assessment taskMonthly with questionFor11B","__recurrence":"monthly","__periodStart":"' || to_char(date_trunc('month', CURRENT_TIMESTAMP) + INTERVAL '-2 month', 'YYYY-MM-DD') || '"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.task.assessments.taskMonthly'),
+  ('def061d1-7047-492f-9b58-07e9828d7ea6', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '{"issues":"<p>Test assessment taskWeekly</p>","__recurrence":"weekly","__periodStart":"' || to_char(date_trunc('week', CURRENT_TIMESTAMP) + INTERVAL '-2 week', 'YYYY-MM-DD') || '"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.task.assessments.taskWeekly'),
+  ('4951ed20-631b-497d-8911-f0ed9d571555', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":2.8007648159316427,"question2":"3","question3":"4","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.task.assessments.taskOnceReport'),
+  ('49989d83-4be3-4b86-b4f5-1fa52f82391c', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":1.4358246447128453,"question2":"1","question3":"2","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.task.assessments.taskOnceReportRestricted'),
+  ('ce9b58c0-c8d7-40fc-a6b7-0ce89c0a856a', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":2.0391677638747776,"question2":"1","question3":"2","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.task.assessments.taskOnceReportRestricted'),
+  ('f975f8a8-0860-4fb5-8d2f-a79d08e03321', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":4.007451054255507,"question2":"3","question3":"4","questionForNegative":"Test assessment taskOnceReport with questionForNegative","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.task.assessments.taskOnceReport'),
+  ('4cf2263c-8206-48cb-896d-1b308e18a84a', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":3.582143609600375,"questionFor11B":"Test assessment taskOnceReport with questionFor11B","question2":"3","question3":"4","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.task.assessments.taskOnceReport'),
+  ('21b2d204-43cb-42a0-aec7-3edcaa26a6aa', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":1.7820051229205114,"question2":"1","question3":"2","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.task.assessments.taskOnceReportRestricted'),
+  ('82e506d8-278a-4752-8740-e5bb792ed27e', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":7.014275477413813,"question2":"3","question3":"4","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.task.assessments.taskOnceReport'),
+  ('a509cf48-889a-4482-b800-b25c842c5079', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":3.4733440307351082,"question2":"1","question3":"2","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.task.assessments.taskOnceReportRestricted'),
+  ('c5ac706d-7e2e-4e0f-9e33-ad72ce28b25d', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"requiredQuestion":"Test assessment task11COnceReport","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.task.assessments.task11COnceReport'),
+  ('21c422f3-6472-4b4b-ad2d-f5a7d6e2ebcd', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":5.026210445421216,"question2":"3","question3":"4","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.task.assessments.taskOnceReport'),
+  ('140ec8fe-29f5-4132-b565-4ad76c3a9acc', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":2.5238204333655103,"question2":"1","question3":"2","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.task.assessments.taskOnceReportRestricted'),
+  ('1e52fc19-9aaf-4125-aa90-f235e7c8cc5f', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":3.028254844468109,"question2":"1","question3":"2","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.task.assessments.taskOnceReportRestricted'),
+  ('d7de36ff-a8dd-4fa9-9449-1d3c75fe2261', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":5.965843171984881,"question2":"3","question3":"4","questionForNegative":"Test assessment taskOnceReport with questionForNegative","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.task.assessments.taskOnceReport'),
+  ('ef3bb6b5-6ab2-48ba-a9be-5515446fd0a3', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"requiredQuestion":"Test assessment task11COnceReport with questionForNegative","questionForNegative":"Test assessment task11COnceReport with questionForNegative","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.task.assessments.task11COnceReport');
+
+-- Note related objects for task assessments
+INSERT INTO public."noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid") VALUES
+  ('473f9fa0-ade9-4f59-aa1c-6c06890d9f49', 'tasks', '4831e09b-2bbb-4717-9bfa-91071e62260a'),
+  ('3f22f63e-cd7b-4cbf-9fa7-66fb53fe4a4e', 'tasks', '9b9f4205-0721-4893-abf8-69e020d4db23'),
+  ('b79c0643-6bdc-4813-b567-404313043d92', 'tasks', '1b5eb36b-456c-46b7-ae9e-1c89e9075292'),
+  ('def061d1-7047-492f-9b58-07e9828d7ea6', 'tasks', '19364d81-3203-483d-a6bf-461d58888c76'),
+  ('4951ed20-631b-497d-8911-f0ed9d571555', 'tasks', '42afd501-1a2c-4758-9da5-f996b2c97156'),
+  ('4951ed20-631b-497d-8911-f0ed9d571555', 'reports', 'e4498f99-8473-4d42-a86c-557b495ebd6c'),
+  ('49989d83-4be3-4b86-b4f5-1fa52f82391c', 'tasks', '42afd501-1a2c-4758-9da5-f996b2c97156'),
+  ('49989d83-4be3-4b86-b4f5-1fa52f82391c', 'reports', 'e4498f99-8473-4d42-a86c-557b495ebd6c'),
+  ('ce9b58c0-c8d7-40fc-a6b7-0ce89c0a856a', 'tasks', '0701a964-5d79-4090-8f35-a40856556675'),
+  ('ce9b58c0-c8d7-40fc-a6b7-0ce89c0a856a', 'reports', 'b0bea024-48bf-4d30-914a-a19d6c39d82c'),
+  ('f975f8a8-0860-4fb5-8d2f-a79d08e03321', 'tasks', '0701a964-5d79-4090-8f35-a40856556675'),
+  ('f975f8a8-0860-4fb5-8d2f-a79d08e03321', 'reports', 'b0bea024-48bf-4d30-914a-a19d6c39d82c'),
+  ('1e52fc19-9aaf-4125-aa90-f235e7c8cc5f', 'tasks', '7fdef880-1bf3-4e56-8476-79166324023f'),
+  ('1e52fc19-9aaf-4125-aa90-f235e7c8cc5f', 'reports', '17c518f6-4444-48d9-b63b-7da7e2023ecc'),
+  ('d7de36ff-a8dd-4fa9-9449-1d3c75fe2261', 'tasks', '7fdef880-1bf3-4e56-8476-79166324023f'),
+  ('d7de36ff-a8dd-4fa9-9449-1d3c75fe2261', 'reports', '17c518f6-4444-48d9-b63b-7da7e2023ecc'),
+  ('ef3bb6b5-6ab2-48ba-a9be-5515446fd0a3', 'tasks', '7fdef880-1bf3-4e56-8476-79166324023f'),
+  ('ef3bb6b5-6ab2-48ba-a9be-5515446fd0a3', 'reports', '17c518f6-4444-48d9-b63b-7da7e2023ecc'),
+  ('4cf2263c-8206-48cb-896d-1b308e18a84a', 'tasks', '1b5eb36b-456c-46b7-ae9e-1c89e9075292'),
+  ('4cf2263c-8206-48cb-896d-1b308e18a84a', 'reports', '7676b6ca-c0b2-46a2-9b92-0d255d2532eb'),
+  ('21b2d204-43cb-42a0-aec7-3edcaa26a6aa', 'tasks', '1b5eb36b-456c-46b7-ae9e-1c89e9075292'),
+  ('21b2d204-43cb-42a0-aec7-3edcaa26a6aa', 'reports', '7676b6ca-c0b2-46a2-9b92-0d255d2532eb'),
+  ('82e506d8-278a-4752-8740-e5bb792ed27e', 'tasks', '2200a820-c4c7-4c9c-946c-f0c9c9e045c5'),
+  ('82e506d8-278a-4752-8740-e5bb792ed27e', 'reports', '4915d7b7-6857-4324-98eb-f7be5b0ed170'),
+  ('a509cf48-889a-4482-b800-b25c842c5079', 'tasks', '2200a820-c4c7-4c9c-946c-f0c9c9e045c5'),
+  ('a509cf48-889a-4482-b800-b25c842c5079', 'reports', '4915d7b7-6857-4324-98eb-f7be5b0ed170'),
+  ('c5ac706d-7e2e-4e0f-9e33-ad72ce28b25d', 'tasks', '7fdef880-1bf3-4e56-8476-79166324023f'),
+  ('c5ac706d-7e2e-4e0f-9e33-ad72ce28b25d', 'reports', '764a393a-a292-40c5-8f96-28263dc906c0'),
+  ('21c422f3-6472-4b4b-ad2d-f5a7d6e2ebcd', 'tasks', '7fdef880-1bf3-4e56-8476-79166324023f'),
+  ('21c422f3-6472-4b4b-ad2d-f5a7d6e2ebcd', 'reports', '764a393a-a292-40c5-8f96-28263dc906c0'),
+  ('140ec8fe-29f5-4132-b565-4ad76c3a9acc', 'tasks', '7fdef880-1bf3-4e56-8476-79166324023f'),
+  ('140ec8fe-29f5-4132-b565-4ad76c3a9acc', 'reports', '764a393a-a292-40c5-8f96-28263dc906c0');
+
+-- End of test data for assessments
 
 -- Update the link-text indexes
 REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_lts_attachments";
