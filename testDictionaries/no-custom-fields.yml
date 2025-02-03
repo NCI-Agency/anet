@@ -5,6 +5,7 @@ SUPPORT_EMAIL_ADDR: support@example.com
 regularUsersCanCreateLocations: true
 engagementsIncludeTimeAndDuration: true
 eventsIncludeStartAndEndTime: true
+featureMartGuiEnabled: true
 
 calendarOptions:
   attendeesType: advisor

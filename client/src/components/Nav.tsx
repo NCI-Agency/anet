@@ -497,13 +497,15 @@ const Navigation = ({
                 >
                   Web service access tokens
                 </SidebarLink>
-                <SidebarLink
-                  id="mart-imported-reports"
-                  linkTo="/admin/martImportedReports"
-                  handleOnClick={resetPages}
-                >
-                  MART importer
-                </SidebarLink>
+                {Settings.featureMartGuiEnabled && (
+                  <SidebarLink
+                    id="mart-imported-reports"
+                    linkTo="/admin/martImportedReports"
+                    handleOnClick={resetPages}
+                  >
+                    MART importer
+                  </SidebarLink>
+                )}
                 <SidebarLink
                   id="graphQL-nav"
                   linkTo="/admin/graphiql"

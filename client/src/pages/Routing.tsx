@@ -181,10 +181,12 @@ const Routing = () => {
           </Route>
           <Route path="pendingEmails" element={<PendingEmailsShow />} />
           <Route path="accessTokens" element={<AccessTokensList />} />
-          <Route
-            path="martImportedReports"
-            element={<MartImportedReportsShow />}
-          />
+          {Settings.featureMartGuiEnabled && (
+            <Route
+              path="martImportedReports"
+              element={<MartImportedReportsShow />}
+            />
+          )}
           <Route path="graphiql" element={<GraphiQL />} />
         </Route>
       )}

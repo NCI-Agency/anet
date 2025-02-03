@@ -410,6 +410,7 @@ required:
   - VERSION_CHANGED_MSG
   - SUPPORT_EMAIL_ADDR
   - useISO8601
+  - featureMartGuiEnabled
   - dateFormats
   - calendarOptions
   - reportWorkflow
@@ -465,6 +466,12 @@ properties:
     type: boolean
     title: Use ISO 8601?
     description: Whether to use ISO 8601 (for weekdays and week numbering) or US format.
+
+  featureMartGuiEnabled:
+    type: boolean
+    default: false
+    title: Whether the MART reports import GUI is enabled in ANET
+    description: Used for MART; if set to `true`, ANET enables the MART reports import GUI
 
   dateFormats:
     type: object
