@@ -34,7 +34,7 @@ import { convertLatLngToMGRS } from "geoUtils"
 import _escape from "lodash/escape"
 import _isEmpty from "lodash/isEmpty"
 import { Attachment, Location } from "models"
-import React, { useContext, useState } from "react"
+import React, { useContext, useEffect, useState } from "react"
 import { connect } from "react-redux"
 import { Link, useLocation, useParams } from "react-router-dom"
 import Settings from "settings"
@@ -61,9 +61,16 @@ const LocationShow = ({ pageDispatchers }: LocationShowProps) => {
   const routerLocation = useLocation()
   const stateSuccess = routerLocation.state?.success
   const [stateError, setStateError] = useState(routerLocation.state?.error)
+  const [attachments, setAttachments] = useState([])
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_LOCATION, {
     uuid
   })
+  useEffect(() => {
+    if (data?.location) {
+      const location = new Location(data ? data.location : {})
+      setAttachments(location.attachments || [])
+    }
+  }, [data])
   const { done, result } = useBoilerplate({
     loading,
     error,
@@ -86,6 +93,9 @@ const LocationShow = ({ pageDispatchers }: LocationShowProps) => {
   const isAdmin = currentUser?.isAdmin()
   const canEdit = currentUser?.isSuperuser()
   const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
+  const updateAttachments = newAttachments => {
+    setAttachments(newAttachments)
+  }
 
   return (
     <Formik enableReinitialize initialValues={location}>
@@ -269,7 +279,13 @@ const LocationShow = ({ pageDispatchers }: LocationShowProps) => {
                     label="Attachments"
                     component={FieldHelper.ReadonlyField}
                     humanValue={
-                      <AttachmentsDetailView attachments={location.attachments} />
+                      <AttachmentsDetailView
+                        attachments={attachments}
+                        updateAttachments={updateAttachments}
+                        relatedObjectType={Location.relatedObjectType}
+                        relatedObjectUuid={values.uuid}
+                        allowEdit={canEdit}
+                      />
                     }
                   />
                 )}

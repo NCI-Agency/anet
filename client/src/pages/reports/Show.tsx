@@ -9,6 +9,7 @@ import API from "api"
 import AppContext from "components/AppContext"
 import InstantAssessmentsContainerField from "components/assessments/instant/InstantAssessmentsContainerField"
 import AttachmentsDetailView from "components/Attachment/AttachmentsDetailView"
+import UploadAttachment from "components/Attachment/UploadAttachment"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
@@ -46,7 +47,7 @@ import _upperFirst from "lodash/upperFirst"
 import { Attachment, Comment, Person, Position, Report, Task } from "models"
 import moment from "moment"
 import pluralize from "pluralize"
-import React, { useContext, useState } from "react"
+import React, { useContext, useEffect, useState } from "react"
 import { Alert, Button, Col, FormText, Modal } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useNavigate, useParams } from "react-router-dom"
@@ -329,10 +330,18 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
   const [showCustomFields, setShowCustomFields] = useState(
     !!Settings.fields.report.customFields
   )
+  const [attachments, setAttachments] = useState([])
   const { uuid } = useParams()
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_REPORT, {
     uuid
   })
+
+  useEffect(() => {
+    if (data?.report) {
+      const report = new Report(data.report)
+      setAttachments(report.attachments || [])
+    }
+  }, [data])
   const { done, result } = useBoilerplate({
     loading,
     error,
@@ -432,6 +441,9 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
   const hasAuthorizationGroups =
     report.authorizationGroups && report.authorizationGroups.length > 0
   const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
+  const updateAttachments = newAttachments => {
+    setAttachments(newAttachments)
+  }
 
   return (
     <Formik
@@ -753,7 +765,13 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
                     label="Attachments"
                     component={FieldHelper.ReadonlyField}
                     humanValue={
-                      <AttachmentsDetailView attachments={report.attachments} />
+                      <AttachmentsDetailView
+                        attachments={attachments}
+                        updateAttachments={updateAttachments}
+                        relatedObjectType={Report.relatedObjectType}
+                        relatedObjectUuid={values.uuid}
+                        allowEdit={canEdit}
+                      />
                     }
                   />
                 )}

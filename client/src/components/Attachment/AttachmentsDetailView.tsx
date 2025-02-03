@@ -1,5 +1,5 @@
 import UploadAttachment from "components/Attachment/UploadAttachment"
-import { useState } from "react"
+import React, { useState } from "react"
 import { Button } from "react-bootstrap"
 import AttachmentCard from "./AttachmentCard"
 
@@ -12,7 +12,7 @@ const AttachmentsList = ({ attachments }: AttachmentsListProps) => {
     return null
   }
   return (
-    <div className="attachment-card-list">
+    <div className="attachment-card-list" style={{ gap: "10px" }}>
       {attachments.map(attachment => (
         <AttachmentCard key={attachment.uuid} attachment={attachment} />
       ))}
