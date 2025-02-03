@@ -13,7 +13,7 @@ const REPORT_FIELDS = {
   location: "Cabot Tower",
   atmosphere: "Positive",
   advisors: ["CIV REPORTGUY, Ima"],
-  tasks: ["2.A"],
+  tasks: ["2.B"],
   keyOutcomes: "Primary interlocutor attendee is not required",
   nextSteps: "Test steps",
   reportText: "Test text"
@@ -79,7 +79,7 @@ describe("When creating a report without an interlocutor", () => {
     await ShowReport.logout()
   })
   it("Should show missing interlocutor warning to task owner", async() => {
-    await Home.open("/", "henry")
+    await Home.open("/", "jack")
     await (await Home.getReportsPendingMyApproval()).waitForDisplayed()
     await (await Home.getReportsPendingMyApproval()).click()
     await Search.selectReport(REPORT_FIELDS.intent)

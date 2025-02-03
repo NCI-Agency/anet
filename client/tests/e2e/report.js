@@ -134,7 +134,7 @@ test.serial("Draft and submit a report", async t => {
 
   const $tasksAdvancedSelect = await pageHelpers.chooseAdvancedSelectOption(
     "#tasks",
-    "2.A"
+    "2.B"
   )
 
   const $tasksTitle = await t.context.driver.findElement(
@@ -149,7 +149,7 @@ test.serial("Draft and submit a report", async t => {
   )
 
   const $newTaskRow = await $("#tasks-tasks table tbody tr td")
-  await assertElementText(t, $newTaskRow, "EF 2 » 2.A")
+  await assertElementText(t, $newTaskRow, "EF 2 » 2.B")
 
   await pageHelpers.writeInForm("#keyOutcomes", "key outcomes")
   await pageHelpers.writeInForm("#nextSteps", "next steps")
@@ -257,7 +257,7 @@ test.serial("Publish report chain", async t => {
   await approveReport(t, "jacob")
   await approveReport(t, "rebecca")
   // Then the task owner can approve the report
-  await approveReport(t, "henry")
+  await approveReport(t, "jack")
 
   // Admin user needs to publish the report
   await t.context.get("/", "arthur")
