@@ -7,6 +7,10 @@ class ShowTask extends Page {
     await super.openAsAdminUser(PAGE_URL.replace(":uuid", uuid))
   }
 
+  async getForm() {
+    return browser.$("form.form-horizontal")
+  }
+
   async getShortName() {
     return browser.$(".title-text")
   }
@@ -92,16 +96,21 @@ class ShowTask extends Page {
     return (await this.getAssessmentModalForm()).$('//button[text()="Save"]')
   }
 
-  async getShownAssessmentPanel(assessmentKey, recurrence) {
+  async getShownAssessmentPanel(assessmentKey, recurrence, row, column) {
     return (await this.getAssessmentsTable(assessmentKey, recurrence)).$(
-      "tbody tr:nth-child(2) td:first-child .card"
+      `tbody tr:nth-child(${row}) td:nth-child(${column}) .card`
     )
   }
 
-  async getShownAssessmentDetails(assessmentKey, recurrence) {
-    return (await this.getShownAssessmentPanel(assessmentKey, recurrence)).$$(
-      "div.card-body .form-control-plaintext"
-    )
+  async getShownAssessmentDetails(
+    assessmentKey,
+    recurrence,
+    row = 2,
+    column = 1
+  ) {
+    return (
+      await this.getShownAssessmentPanel(assessmentKey, recurrence, row, column)
+    ).$$("div.card-body .form-control-plaintext")
   }
 
   async waitForAssessmentModalForm(reverse = false) {
@@ -151,10 +160,15 @@ class ShowTask extends Page {
     await (await this.getDeleteConfirmButton()).click()
   }
 
-  async waitForDeletedAssessmentToDisappear(assessmentKey, recurrence) {
+  async waitForDeletedAssessmentToDisappear(
+    assessmentKey,
+    recurrence,
+    row = 2,
+    column = 1
+  ) {
     await browser.pause(500)
     await (
-      await this.getShownAssessmentPanel(assessmentKey, recurrence)
+      await this.getShownAssessmentPanel(assessmentKey, recurrence, row, column)
     ).waitForExist({
       reverse: true,
       timeout: 20000
