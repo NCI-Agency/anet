@@ -1,10 +1,12 @@
+import AppContext from "components/AppContext"
 import UploadAttachment from "components/Attachment/UploadAttachment"
-import React, { useState } from "react"
+import React, { useContext, useState } from "react"
 import { Button } from "react-bootstrap"
+import Settings from "settings"
 import AttachmentCard from "./AttachmentCard"
 
 interface AttachmentsListProps {
-  attachments: any
+  attachments: any[]
 }
 
 const AttachmentsList = ({ attachments }: AttachmentsListProps) => {
@@ -12,7 +14,7 @@ const AttachmentsList = ({ attachments }: AttachmentsListProps) => {
     return null
   }
   return (
-    <div className="attachment-card-list" style={{ gap: "10px" }}>
+    <div className="attachment-card-list">
       {attachments.map(attachment => (
         <AttachmentCard key={attachment.uuid} attachment={attachment} />
       ))}
@@ -21,10 +23,10 @@ const AttachmentsList = ({ attachments }: AttachmentsListProps) => {
 }
 
 interface AttachmentsDetailViewProps {
-  attachments: any
-  updateAttachments: any
-  relatedObjectType: any
-  relatedObjectUuid: any
+  attachments: any[]
+  updateAttachments: (attachments: any[]) => void
+  relatedObjectType: string
+  relatedObjectUuid: string
   allowEdit?: boolean
 }
 
@@ -37,24 +39,42 @@ const AttachmentsDetailView = ({
 }: AttachmentsDetailViewProps) => {
   const [editAttachments, setEditAttachments] = useState(false)
 
-  return allowEdit ? (
-    editAttachments ? (
-      <UploadAttachment
-        attachments={attachments}
-        updateAttachments={updateAttachments}
-        relatedObjectType={relatedObjectType}
-        relatedObjectUuid={relatedObjectUuid}
-      />
-    ) : (
-      <>
-        <AttachmentsList attachments={attachments} />
-        <Button variant="primary" onClick={() => setEditAttachments(true)}>
-          Edit attachments
-        </Button>
-      </>
+  const { currentUser } = useContext(AppContext)
+  const isAdmin = currentUser && currentUser.isAdmin()
+  const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
+  const attachmentEditEnabled =
+    attachmentsEnabled &&
+    (!Settings.fields.attachment.restrictToAdmins || isAdmin)
+  const canEditAttachments = attachmentEditEnabled && allowEdit
+
+  if (!canEditAttachments) {
+    return <AttachmentsList attachments={attachments} />
+  }
+
+  const renderButton = () => {
+    return (
+      <Button
+        variant="primary"
+        onClick={() => setEditAttachments(!editAttachments)}
+      >
+        {editAttachments ? "View" : "Edit"} attachments
+      </Button>
     )
-  ) : (
-    <AttachmentsList attachments={attachments} />
+  }
+  return (
+    <>
+      {editAttachments ? (
+        <UploadAttachment
+          attachments={attachments}
+          updateAttachments={updateAttachments}
+          relatedObjectType={relatedObjectType}
+          relatedObjectUuid={relatedObjectUuid}
+        />
+      ) : (
+        <AttachmentsList attachments={attachments} />
+      )}
+      {renderButton()}
+    </>
   )
 }
 

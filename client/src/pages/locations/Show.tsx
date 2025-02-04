@@ -65,12 +65,6 @@ const LocationShow = ({ pageDispatchers }: LocationShowProps) => {
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_LOCATION, {
     uuid
   })
-  useEffect(() => {
-    if (data?.location) {
-      const location = new Location(data ? data.location : {})
-      setAttachments(location.attachments || [])
-    }
-  }, [data])
   const { done, result } = useBoilerplate({
     loading,
     error,
@@ -81,6 +75,9 @@ const LocationShow = ({ pageDispatchers }: LocationShowProps) => {
     pageDispatchers
   })
   usePageTitle(data?.location?.name)
+  useEffect(() => {
+    setAttachments(data?.location?.attachments || [])
+  }, [data])
   if (done) {
     return result
   }
@@ -93,9 +90,6 @@ const LocationShow = ({ pageDispatchers }: LocationShowProps) => {
   const isAdmin = currentUser?.isAdmin()
   const canEdit = currentUser?.isSuperuser()
   const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
-  const updateAttachments = newAttachments => {
-    setAttachments(newAttachments)
-  }
 
   return (
     <Formik enableReinitialize initialValues={location}>
@@ -281,7 +275,7 @@ const LocationShow = ({ pageDispatchers }: LocationShowProps) => {
                     humanValue={
                       <AttachmentsDetailView
                         attachments={attachments}
-                        updateAttachments={updateAttachments}
+                        updateAttachments={setAttachments}
                         relatedObjectType={Location.relatedObjectType}
                         relatedObjectUuid={values.uuid}
                         allowEdit={canEdit}
