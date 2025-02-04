@@ -9,7 +9,6 @@ import API from "api"
 import AppContext from "components/AppContext"
 import InstantAssessmentsContainerField from "components/assessments/instant/InstantAssessmentsContainerField"
 import AttachmentsDetailView from "components/Attachment/AttachmentsDetailView"
-import UploadAttachment from "components/Attachment/UploadAttachment"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
@@ -335,13 +334,6 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_REPORT, {
     uuid
   })
-
-  useEffect(() => {
-    if (data?.report) {
-      const report = new Report(data.report)
-      setAttachments(report.attachments || [])
-    }
-  }, [data])
   const { done, result } = useBoilerplate({
     loading,
     error,
@@ -352,6 +344,9 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
     pageDispatchers
   })
   usePageTitle(data?.report?.intent || data?.report?.uuid)
+  useEffect(() => {
+    setAttachments(data?.report?.attachments || [])
+  }, [data])
   if (done) {
     return result
   }
@@ -441,9 +436,6 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
   const hasAuthorizationGroups =
     report.authorizationGroups && report.authorizationGroups.length > 0
   const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
-  const updateAttachments = newAttachments => {
-    setAttachments(newAttachments)
-  }
 
   return (
     <Formik
@@ -767,7 +759,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
                     humanValue={
                       <AttachmentsDetailView
                         attachments={attachments}
-                        updateAttachments={updateAttachments}
+                        updateAttachments={setAttachments}
                         relatedObjectType={Report.relatedObjectType}
                         relatedObjectUuid={values.uuid}
                         allowEdit={canEdit}

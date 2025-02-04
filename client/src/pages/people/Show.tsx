@@ -173,12 +173,6 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_PERSON, {
     uuid
   })
-  useEffect(() => {
-    if (data?.person) {
-      const person = new Person(data ? data.person : {})
-      setAttachments(person.attachments || [])
-    }
-  }, [data])
   const { done, result } = useBoilerplate({
     loading,
     error,
@@ -189,6 +183,9 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
     pageDispatchers
   })
   usePageTitle(data?.person && `${data.person.rank} ${data?.person.name}`)
+  useEffect(() => {
+    setAttachments(data?.person?.attachments || [])
+  }, [data])
   if (done) {
     return result
   }
@@ -299,9 +296,6 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
     numberOfFieldsUnderAvatar
   )
   const rightColumn = orderedFields.slice(numberOfFieldsUnderAvatar)
-  const updateAttachments = newAttachments => {
-    setAttachments(newAttachments)
-  }
 
   return (
     <Formik enableReinitialize initialValues={person}>
@@ -369,7 +363,7 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
                     humanValue={
                       <AttachmentsDetailView
                         attachments={attachments}
-                        updateAttachments={updateAttachments}
+                        updateAttachments={setAttachments}
                         relatedObjectType={Person.relatedObjectType}
                         relatedObjectUuid={person.uuid}
                         allowEdit={canEdit}

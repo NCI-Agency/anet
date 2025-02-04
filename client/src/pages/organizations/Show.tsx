@@ -221,12 +221,6 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
       uuid
     }
   )
-  useEffect(() => {
-    if (data?.organization) {
-      const organization = new Organization(data ? data.organization : {})
-      setAttachments(organization.attachments || [])
-    }
-  }, [data])
   const { done, result } = useBoilerplate({
     loading,
     error,
@@ -237,6 +231,9 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
     pageDispatchers
   })
   usePageTitle(data?.organization?.shortName)
+  useEffect(() => {
+    setAttachments(data?.organization?.attachments || [])
+  }, [data])
   if (done) {
     return result
   }
@@ -308,9 +305,6 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
   }
   if (includeChildrenOrgs) {
     reportQueryParams.orgRecurseStrategy = RECURSE_STRATEGY.CHILDREN
-  }
-  const updateAttachments = newAttachments => {
-    setAttachments(newAttachments)
   }
 
   return (
@@ -597,7 +591,7 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
                     humanValue={
                       <AttachmentsDetailView
                         attachments={attachments}
-                        updateAttachments={updateAttachments}
+                        updateAttachments={setAttachments}
                         relatedObjectType={Organization.relatedObjectType}
                         relatedObjectUuid={values.uuid}
                         allowEdit={canAdministrateOrg}
