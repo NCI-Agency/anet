@@ -61,7 +61,7 @@ class ShowPerson extends Page {
 
   async getSensitiveInformationWarning() {
     return (await this.getCompactView()).$(
-      '//span[text()="Sensitive Information"]'
+      './/span[text()="Sensitive Information"]'
     )
   }
 
@@ -127,7 +127,7 @@ class ShowPerson extends Page {
   }
 
   async getSaveAssessmentButton() {
-    return (await this.getAssessmentModalForm()).$('//button[text()="Save"]')
+    return (await this.getAssessmentModalForm()).$('.//button[text()="Save"]')
   }
 
   async getShownAssessmentPanel(assessmentKey, recurrence, i) {
@@ -176,7 +176,7 @@ class ShowPerson extends Page {
     const compactView = await this.getCompactView()
     for (const field of fields) {
       await (
-        await compactView.$(`//th[text()="${field}"]`)
+        await compactView.$(`.//th[text()="${field}"]`)
       ).waitForDisplayed({ reverse })
     }
   }

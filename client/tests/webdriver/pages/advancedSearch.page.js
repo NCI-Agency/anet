@@ -44,7 +44,7 @@ class AdvancedSearch {
   }
 
   async getSearchFilter(filter) {
-    return (await this.getAddFilterPopover()).$(`//a[text()="${filter}"]`)
+    return (await this.getAddFilterPopover()).$(`.//a[text()="${filter}"]`)
   }
 }
 

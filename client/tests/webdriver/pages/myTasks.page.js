@@ -37,7 +37,7 @@ class MyTasks extends Page {
 
   async getMyPendingTask(name) {
     return (await this.getMyPendingTasksBody()).$(
-      `//a[contains(text(), "${name}")]`
+      `.//a[contains(text(), "${name}")]`
     )
   }
 }

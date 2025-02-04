@@ -136,7 +136,7 @@ export class CreatePerson extends Page {
 
   async getNumberCustomFieldHelpText() {
     return (await this.getNumberCustomFieldContainer()).$(
-      '//div[contains(text(), "greater than")]'
+      './/div[contains(text(), "greater than")]'
     )
   }
 

@@ -74,7 +74,7 @@ class CreateTask extends Page {
   async getAssessmentFields() {
     // since only custom field is assessments
     return (await this.getCustomFieldsContainer()).$$(
-      '//div[starts-with(@id,"fg-formCustomFields")]'
+      './/div[starts-with(@id,"fg-formCustomFields")]'
     )
   }
 
@@ -92,7 +92,7 @@ class CreateTask extends Page {
 
   async getQuestionsFieldWarningText() {
     return (await this.getFirstQuestionsFieldContainer()).$(
-      '//div[contains(text(), "Invalid")]'
+      './/div[contains(text(), "Invalid")]'
     )
   }
 
