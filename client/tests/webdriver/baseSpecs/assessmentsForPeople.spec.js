@@ -24,6 +24,106 @@ const ERROR_MESSAGES = [
   "You must provide Test question 3"
 ]
 
+const ASSESSED_PEOPLE = [
+  {
+    name: "ANDERSON, Andrew",
+    visibleAssessments: [
+      {
+        key: "advisorPeriodic",
+        recurrence: "monthly",
+        details: ["Test assessment advisorPeriodic"]
+      },
+      {
+        key: "advisorOndemand",
+        recurrence: "ondemand",
+        details: ["1 January 2025", "Test assessment advisorOndemand"]
+      },
+      {
+        key: "advisorOndemandNoWrite",
+        recurrence: "ondemand",
+        details: ["1 January 2025", "1"]
+      }
+    ]
+  },
+  {
+    name: "KYLESON, Kyle",
+    visibleAssessments: [
+      {
+        key: "interlocutorMonthly",
+        recurrence: "monthly",
+        details: ["Test assessment interlocutorMonthly"]
+      },
+      {
+        key: "interlocutorQuarterly",
+        recurrence: "quarterly",
+        details: [
+          "one",
+          "Test assessment interlocutorQuarterly",
+          "three",
+          "one"
+        ]
+      },
+      { key: "interlocutorOnceReport", recurrence: "monthly" },
+      {
+        key: "interlocutorOndemandScreeningAndVetting",
+        recurrence: "ondemand",
+        details: [
+          "1 January 2025",
+          "1 February 2025",
+          "Pass 1",
+          "Test assessment interlocutorOndemandScreeningAndVetting"
+        ]
+      }
+    ]
+  },
+  {
+    name: "GUIST, Lin",
+    visibleAssessments: [
+      { key: "personOnceReportLinguist", recurrence: "monthly" },
+      { key: "personOnceReportLinguistLin", recurrence: "monthly" },
+      { key: "advisorPeriodic", recurrence: "monthly" },
+      { key: "advisorOndemand", recurrence: "ondemand" },
+      { key: "advisorOndemandNoWrite", recurrence: "ondemand" }
+    ]
+  },
+  {
+    name: "PRETER, Inter",
+    visibleAssessments: [
+      { key: "personOnceReportLinguist", recurrence: "monthly" },
+      { key: "advisorPeriodic", recurrence: "monthly" },
+      { key: "advisorOndemand", recurrence: "ondemand" },
+      { key: "advisorOndemandNoWrite", recurrence: "ondemand" }
+    ]
+  }
+]
+
+describe("As an admin", () => {
+  it("Should see the proper assessment sections for each person", async() => {
+    await Home.openAsAdminUser()
+    for (const p of ASSESSED_PEOPLE) {
+      await (await Home.getSearchBar()).setValue(p.name)
+      await (await Home.getSubmitSearch()).click()
+      await (
+        await Search.getFoundPeopleTable()
+      ).waitForExist({ timeout: 20000 })
+      await (await Search.getFoundPeopleTable()).waitForDisplayed()
+      await (await Search.linkOfPersonFound(p.name)).click()
+      await (await ShowPerson.getForm()).waitForDisplayed()
+
+      for (const a of p.visibleAssessments) {
+        expect(
+          await (
+            await ShowPerson.getAssessmentContainer(a.key, a.recurrence)
+          ).isExisting()
+        ).to.equal(true)
+        if (a.details) {
+          await assertAssessmentDetails(a.key, a.recurrence, a.details, 1, null)
+        }
+      }
+    }
+  })
+})
+
 describe("For the periodic person assessments", () => {
   describe("As an advisor who has a counterpart who needs to be assessed", () => {
     it("Should first search, find and open the person page", async() => {
@@ -181,19 +281,21 @@ describe("For the periodic person assessments", () => {
 const assertAssessmentDetails = async(
   assessmentKey,
   recurrence,
-  assessmentDetails
+  assessmentDetails,
+  i = 2,
+  valueToText = VALUE_TO_TEXT_FOR_PERSON
 ) => {
   const details = await ShowPerson.getShownAssessmentDetails(
     assessmentKey,
-    recurrence
+    recurrence,
+    i
   )
   for (const [index, detail] of await (await details).entries()) {
     const pre = `${index}-) `
     const det = await (await detail).getText()
     expect(`${pre}${det}`).to.equal(
       `${pre}${
-        VALUE_TO_TEXT_FOR_PERSON[assessmentDetails[index]] ||
-        assessmentDetails[index]
+        valueToText?.[assessmentDetails[index]] || assessmentDetails[index]
       }`
     )
   }
