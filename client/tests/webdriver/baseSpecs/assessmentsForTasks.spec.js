@@ -18,6 +18,122 @@ const VALUE_TO_TEXT_FOR_TASK = {
   AMBER: "Amber",
   RED: "Red"
 }
+
+const ASSESSED_TASKS = [
+  {
+    shortName: "1.1.B",
+    visibleAssessments: [
+      { key: "taskOnceReportRestricted", recurrence: "monthly" },
+      {
+        key: "taskMonthly",
+        recurrence: "monthly",
+        details: [
+          "Test assessment taskMonthly with questionFor11B",
+          "Test assessment taskMonthly with questionFor11B",
+          "Amber"
+        ]
+      },
+      { key: "taskWeekly", recurrence: "weekly" },
+      { key: "taskOnceReport", recurrence: "monthly" }
+    ]
+  },
+  {
+    shortName: "1.1.C",
+    visibleAssessments: [
+      { key: "taskOnceReportRestricted", recurrence: "monthly" },
+      { key: "taskMonthly", recurrence: "monthly" },
+      { key: "taskWeekly", recurrence: "weekly" },
+      { key: "taskOnceReport", recurrence: "monthly" },
+      { key: "task11COnceReport", recurrence: "monthly" }
+    ]
+  },
+  {
+    shortName: "1.3.A",
+    visibleAssessments: [
+      { key: "taskMonthly", recurrence: "monthly" },
+      { key: "taskWeekly", recurrence: "weekly" },
+      { key: "taskOnceReport", recurrence: "monthly" }
+    ]
+  },
+  {
+    shortName: "2.C",
+    visibleAssessments: [
+      { key: "taskOnceReportRestricted", recurrence: "monthly" },
+      { key: "taskMonthly", recurrence: "monthly" },
+      { key: "taskWeekly", recurrence: "weekly" },
+      { key: "taskOnceReport", recurrence: "monthly" }
+    ]
+  },
+  {
+    shortName: "EF7",
+    visibleAssessments: [
+      { key: "taskSemiannuallyRestricted", recurrence: "semiannually" },
+      { key: "taskMonthly", recurrence: "monthly" },
+      {
+        key: "taskWeekly",
+        recurrence: "weekly",
+        details: ["Test assessment taskWeekly"]
+      }
+    ]
+  },
+  {
+    shortName: "EF8",
+    visibleAssessments: [
+      { key: "taskSemiannuallyRestricted", recurrence: "semiannually" },
+      {
+        key: "taskMonthly",
+        recurrence: "monthly",
+        details: ["Test assessment taskMonthly", "Green"]
+      },
+      { key: "taskWeekly", recurrence: "weekly" }
+    ]
+  },
+  {
+    shortName: "EF9",
+    visibleAssessments: [
+      {
+        key: "taskSemiannuallyRestricted",
+        recurrence: "semiannually",
+        details: ["Test assessment taskSemiannuallyRestricted"]
+      },
+      { key: "taskMonthly", recurrence: "monthly" },
+      { key: "taskWeekly", recurrence: "weekly" }
+    ]
+  }
+]
+
+describe("As an admin", () => {
+  it("Should see the proper assessment sections for each task", async() => {
+    await Home.openAsAdminUser()
+    for (const t of ASSESSED_TASKS) {
+      await (await Home.getSearchBar()).setValue(t.shortName)
+      await (await Home.getSubmitSearch()).click()
+      await (await Search.getFoundTaskTable()).waitForExist({ timeout: 20000 })
+      await (await Search.getFoundTaskTable()).waitForDisplayed()
+      await (await Search.linkOfTaskFound(t.shortName)).click()
+      await (await ShowTask.getForm()).waitForDisplayed()
+
+      for (const a of t.visibleAssessments) {
+        expect(
+          await (
+            await ShowTask.getAssessmentResults(a.key, a.recurrence)
+          ).isExisting()
+        ).to.equal(true)
+        if (a.details) {
+          await assertAssessmentDetails(
+            a.key,
+            a.recurrence,
+            a.details,
+            2,
+            1,
+            null
+          )
+        }
+      }
+    }
+  })
+})
+
 describe("For the periodic task assessments", () => {
   describe("As an advisor who has tasks he is responsible for", () => {
     it("Should first search, find and open the task page", async() => {
@@ -237,19 +353,23 @@ describe("For the periodic task assessments", () => {
 const assertAssessmentDetails = async(
   assessmentKey,
   recurrence,
-  assessmentDetails
+  assessmentDetails,
+  row = 2,
+  column = 1,
+  valueToText = VALUE_TO_TEXT_FOR_TASK
 ) => {
   const details = await ShowTask.getShownAssessmentDetails(
     assessmentKey,
-    recurrence
+    recurrence,
+    row,
+    column
   )
   for (const [index, detail] of await (await details).entries()) {
     const pre = `${index}-) `
     const det = await (await detail).getText()
     expect(`${pre}${det}`).to.equal(
       `${pre}${
-        VALUE_TO_TEXT_FOR_TASK[assessmentDetails[index]] ||
-        assessmentDetails[index]
+        valueToText?.[assessmentDetails[index]] || assessmentDetails[index]
       }`
     )
   }
