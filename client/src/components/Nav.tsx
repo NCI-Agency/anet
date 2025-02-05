@@ -425,7 +425,7 @@ const Navigation = ({
                   linkTo="/admin/accessTokens"
                   handleOnClick={resetPages}
                 >
-                  Access tokens
+                  Web service access tokens
                 </SidebarLink>
                 <SidebarLink
                   id="graphQL-nav"

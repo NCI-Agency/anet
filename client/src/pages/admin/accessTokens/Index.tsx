@@ -66,12 +66,12 @@ const GQL_UPDATE_ACCESS_TOKEN = gql`
 const yupSchema = yup.object().shape({
   name: yup
     .string()
-    .required("You must give an access token a name")
+    .required("You must give a web service access token a name")
     .default(""),
   description: yup.string().nullable().default(""),
   expiresAt: yupDate
     .nullable()
-    .required("You must give an access token an expiration")
+    .required("You must give a web service access token an expiration")
     .default(null)
 })
 
@@ -147,7 +147,7 @@ const AccessTokensTable = ({
     useState(false)
 
   if (_get(accessTokens, "length", 0) === 0) {
-    return <em>No access tokens found</em>
+    return <em>No web service access tokens found</em>
   }
 
   return (
@@ -176,7 +176,9 @@ const AccessTokensTable = ({
                 {moment(at.expiresAt).isBefore(moment()) && (
                   <OverlayTrigger
                     placement="top"
-                    overlay={<Tooltip>Access token has expired!</Tooltip>}
+                    overlay={
+                      <Tooltip>Web service access token has expired!</Tooltip>
+                    }
                   >
                     <Icon
                       icon={IconNames.WARNING_SIGN}
@@ -192,17 +194,17 @@ const AccessTokensTable = ({
               <td style={{ verticalAlign: "middle" }}>
                 <ConfirmDestructive
                   onConfirm={() => onDelete(at)}
-                  objectType="access token"
+                  objectType="web service access token"
                   objectDisplay={at.name}
                   variant="outline-danger"
                   buttonSize="xs"
-                  buttonTitle="Delete access token"
+                  buttonTitle="Delete web service access token"
                 >
                   <Icon icon={IconNames.TRASH} />
                 </ConfirmDestructive>
                 <OverlayTrigger
                   placement="top"
-                  overlay={<Tooltip>Update access token</Tooltip>}
+                  overlay={<Tooltip>Update web service access token</Tooltip>}
                 >
                   <Button
                     variant="outline-info"
@@ -224,7 +226,7 @@ const AccessTokensTable = ({
 
       <AccessTokenModal
         accessToken={currentAccessToken}
-        title="Update access token"
+        title="Update web service access token"
         show={showUpdateAccessTokenDialog}
         setShow={setShowUpdateAccessTokenDialog}
         onConfirm={values => {
@@ -327,8 +329,8 @@ const AccessTokenModal = ({
                       disabled
                       addon={
                         <p>
-                          This is the new access token; make sure to copy it
-                          now. You won’t be able to see it again!
+                          This is the new web service access token; make sure to
+                          copy it now. You won’t be able to see it again!
                         </p>
                       }
                       extraColElem={
@@ -406,7 +408,7 @@ const AccessTokensList = ({ pageDispatchers }: AccessTokensListProps) => {
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
-  usePageTitle("Access Tokens")
+  usePageTitle("Web Service Access Tokens")
   if (done) {
     return result
   }
@@ -414,13 +416,13 @@ const AccessTokensList = ({ pageDispatchers }: AccessTokensListProps) => {
     <>
       <Fieldset
         id="accessTokens"
-        title="Access Tokens"
+        title="Web Service Access Tokens"
         action={
           <Button
             variant="primary"
             onClick={() => setShowCreateAccessTokenDialog(true)}
           >
-            New access token
+            New web service access token
           </Button>
         }
       >
@@ -434,7 +436,7 @@ const AccessTokensList = ({ pageDispatchers }: AccessTokensListProps) => {
 
       <AccessTokenModal
         isNew
-        title="Create new access token"
+        title="Create new web service access token"
         show={showCreateAccessTokenDialog}
         setShow={setShowCreateAccessTokenDialog}
         onConfirm={values => {
@@ -468,7 +470,7 @@ const AccessTokensList = ({ pageDispatchers }: AccessTokensListProps) => {
         accessToken.tokenHash = b64(digest)
         return API.mutation(GQL_CREATE_ACCESS_TOKEN, { accessToken })
           .then(() => {
-            setSuccess("Access token successfully created")
+            setSuccess("Web service access token successfully created")
             refetch()
           })
           .catch(error => {
@@ -477,14 +479,14 @@ const AccessTokensList = ({ pageDispatchers }: AccessTokensListProps) => {
           })
       })
       .catch(error => {
-        setError(`Can't generate new access token: ${error}`)
+        setError(`Can't generate new web service access token: ${error}`)
       })
   }
 
   function deleteAccessToken(accessToken) {
     return API.mutation(GQL_DELETE_ACCESS_TOKEN, { accessToken })
       .then(() => {
-        setSuccess("Access token successfully deleted")
+        setSuccess("Web service access token successfully deleted")
         refetch()
       })
       .catch(error => {
@@ -496,7 +498,7 @@ const AccessTokensList = ({ pageDispatchers }: AccessTokensListProps) => {
   function updateAccessToken(accessToken) {
     return API.mutation(GQL_UPDATE_ACCESS_TOKEN, { accessToken })
       .then(() => {
-        setSuccess("Access token successfully updated")
+        setSuccess("Web service access token successfully updated")
         refetch()
       })
       .catch(error => {

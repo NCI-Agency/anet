@@ -246,7 +246,7 @@ public class Nvg20WebService implements NVGPortType2012 {
       }
     }
     throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-        "Must provide a valid Service Access Token");
+        "Must provide a valid Web Service Access Token");
   }
 
   private NvgType makeNvg(String app6Version, int pastDays, int futureDays,
@@ -407,11 +407,11 @@ public class Nvg20WebService implements NVGPortType2012 {
     inputType.setId(ACCESS_TOKEN_ID);
     inputType.setRequired(true);
     inputType.setType(InputTypeType.STRING);
-    inputType.setName("Service Access Token");
+    inputType.setName("Web Service Access Token");
     inputType.setLength(BigInteger.valueOf(ACCESS_TOKEN_LENGTH));
     final HelpType helpType = NVG_OF.createHelpType();
     helpType.setText(
-        "The access token required for authentication; the token can be provided by the ANET administrator");
+        "The web service access token required for authentication; the token can be provided by the ANET administrator");
     inputType.setHelp(helpType);
     return inputType;
   }
