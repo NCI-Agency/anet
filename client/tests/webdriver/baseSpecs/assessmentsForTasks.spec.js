@@ -35,6 +35,10 @@ const ASSESSED_TASKS = [
       },
       { key: "taskWeekly", recurrence: "weekly" },
       { key: "taskOnceReport", recurrence: "monthly" }
+    ],
+    invisibleAssessments: [
+      { key: "taskSemiannuallyRestricted", recurrence: "semiannually" },
+      { key: "task11COnceReport", recurrence: "monthly" }
     ]
   },
   {
@@ -45,6 +49,9 @@ const ASSESSED_TASKS = [
       { key: "taskWeekly", recurrence: "weekly" },
       { key: "taskOnceReport", recurrence: "monthly" },
       { key: "task11COnceReport", recurrence: "monthly" }
+    ],
+    invisibleAssessments: [
+      { key: "taskSemiannuallyRestricted", recurrence: "semiannually" }
     ]
   },
   {
@@ -53,6 +60,11 @@ const ASSESSED_TASKS = [
       { key: "taskMonthly", recurrence: "monthly" },
       { key: "taskWeekly", recurrence: "weekly" },
       { key: "taskOnceReport", recurrence: "monthly" }
+    ],
+    invisibleAssessments: [
+      { key: "taskOnceReportRestricted", recurrence: "monthly" },
+      { key: "taskSemiannuallyRestricted", recurrence: "semiannually" },
+      { key: "task11COnceReport", recurrence: "monthly" }
     ]
   },
   {
@@ -62,6 +74,10 @@ const ASSESSED_TASKS = [
       { key: "taskMonthly", recurrence: "monthly" },
       { key: "taskWeekly", recurrence: "weekly" },
       { key: "taskOnceReport", recurrence: "monthly" }
+    ],
+    invisibleAssessments: [
+      { key: "taskSemiannuallyRestricted", recurrence: "semiannually" },
+      { key: "task11COnceReport", recurrence: "monthly" }
     ]
   },
   {
@@ -74,6 +90,11 @@ const ASSESSED_TASKS = [
         recurrence: "weekly",
         details: ["Test assessment taskWeekly"]
       }
+    ],
+    invisibleAssessments: [
+      { key: "taskOnceReportRestricted", recurrence: "monthly" },
+      { key: "taskOnceReport", recurrence: "monthly" },
+      { key: "task11COnceReport", recurrence: "monthly" }
     ]
   },
   {
@@ -86,6 +107,11 @@ const ASSESSED_TASKS = [
         details: ["Test assessment taskMonthly", "Green"]
       },
       { key: "taskWeekly", recurrence: "weekly" }
+    ],
+    invisibleAssessments: [
+      { key: "taskOnceReportRestricted", recurrence: "monthly" },
+      { key: "taskOnceReport", recurrence: "monthly" },
+      { key: "task11COnceReport", recurrence: "monthly" }
     ]
   },
   {
@@ -98,6 +124,11 @@ const ASSESSED_TASKS = [
       },
       { key: "taskMonthly", recurrence: "monthly" },
       { key: "taskWeekly", recurrence: "weekly" }
+    ],
+    invisibleAssessments: [
+      { key: "taskOnceReportRestricted", recurrence: "monthly" },
+      { key: "taskOnceReport", recurrence: "monthly" },
+      { key: "task11COnceReport", recurrence: "monthly" }
     ]
   }
 ]
@@ -129,6 +160,26 @@ describe("As an admin", () => {
             null
           )
         }
+      }
+    }
+  })
+
+  it("Should not see not-applicable assessment sections for each task", async() => {
+    await Home.openAsAdminUser()
+    for (const t of ASSESSED_TASKS) {
+      await (await Home.getSearchBar()).setValue(t.shortName)
+      await (await Home.getSubmitSearch()).click()
+      await (await Search.getFoundTaskTable()).waitForExist({ timeout: 20000 })
+      await (await Search.getFoundTaskTable()).waitForDisplayed()
+      await (await Search.linkOfTaskFound(t.shortName)).click()
+      await (await ShowTask.getForm()).waitForDisplayed()
+
+      for (const a of t.invisibleAssessments) {
+        expect(
+          await (
+            await ShowTask.getAssessmentResults(a.key, a.recurrence)
+          ).isExisting()
+        ).to.equal(false)
       }
     }
   })
