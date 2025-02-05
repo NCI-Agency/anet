@@ -132,19 +132,12 @@ public class OrganizationResource {
 
     final Person user = DaoUtils.getUserFromContext(context);
     // Verify correct Organization
-    assertPermission(user, DaoUtils.getUuid(org));
+    assertPermission(user, org.getUuid());
+    // Check for loops in the hierarchy
+    checkForLoops(org.getUuid(), org.getParentOrgUuid());
 
     // Load the existing organization, so we can check for differences.
     final Organization existing = dao.getByUuid(org.getUuid());
-
-    // Check for loops in the hierarchy
-    if (org.getParentOrgUuid() != null) {
-      final Map<String, String> children = engine.buildTopLevelOrgHash(DaoUtils.getUuid(org));
-      if (children.containsKey(org.getParentOrgUuid())) {
-        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-            "Organization can not be its own (grand…)parent");
-      }
-    }
 
     if (!AuthUtils.isAdmin(user)) {
       // Check if user has administrative permission for the organizations that will be
@@ -168,6 +161,16 @@ public class OrganizationResource {
 
     // GraphQL mutations *have* to return something, so we return the number of updated rows
     return numRows;
+  }
+
+  private void checkForLoops(String orgUuid, String parentOrgUuid) {
+    if (parentOrgUuid != null) {
+      final Map<String, String> children = engine.buildTopLevelOrgHash(orgUuid);
+      if (children.containsKey(parentOrgUuid)) {
+        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+            "Organization can not be its own (grand…)parent");
+      }
+    }
   }
 
   private int update(Person user, Organization org, Organization existing) {
@@ -230,6 +233,9 @@ public class OrganizationResource {
 
     final var loserOrganization = dao.getByUuid(loserUuid);
     checkWhetherOrganizationsAreMergeable(winnerOrganization, loserOrganization);
+    // Check for loops in the hierarchy
+    checkForLoops(winnerOrganization.getUuid(), winnerOrganization.getParentOrgUuid());
+    checkForLoops(loserUuid, winnerOrganization.getParentOrgUuid());
     final var numberOfAffectedRows = dao.mergeOrganizations(loserOrganization, winnerOrganization);
     if (numberOfAffectedRows == 0) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
