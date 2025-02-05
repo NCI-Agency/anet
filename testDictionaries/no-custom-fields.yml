@@ -1546,7 +1546,7 @@ fields:
               label: Report had POSITIVE atmosphere
               choices:
                 yes:
-                  label: 👍
+                  label: Nice!
                   color: '#0000ff'
         interlocutorOndemandScreeningAndVetting:
           label: Screening & Vetting of interlocutor from MoD
