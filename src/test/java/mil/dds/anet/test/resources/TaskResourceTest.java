@@ -455,4 +455,15 @@ class TaskResourceTest extends AbstractResourceTest {
     assertThat(searchObjects.getList()).allSatisfy(
         searchResult -> assertThat(searchResult.getCustomFields()).contains(searchText));
   }
+
+  @Test
+  void testTopLevelTasksSearch() {
+    final TaskSearchQueryInput query = TaskSearchQueryInput.builder()
+        .withParentTaskUuid(List.of(mil.dds.anet.beans.Task.DUMMY_TASK_UUID)).build();
+    final AnetBeanList_Task searchObjects =
+        withCredentials(jackUser, t -> queryExecutor.taskList(getListFields(FIELDS), query));
+    assertThat(searchObjects).isNotNull();
+    assertThat(searchObjects.getList()).isNotEmpty();
+    assertThat(searchObjects.getList()).allMatch(t -> t.getParentTask() == null);
+  }
 }
