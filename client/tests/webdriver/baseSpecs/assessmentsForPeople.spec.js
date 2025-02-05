@@ -43,6 +43,14 @@ const ASSESSED_PEOPLE = [
         recurrence: "ondemand",
         details: ["1 January 2025", "1"]
       }
+    ],
+    invisibleAssessments: [
+      { key: "personOnceReportLinguist", recurrence: "monthly" },
+      { key: "personOnceReportLinguistLin", recurrence: "monthly" },
+      { key: "interlocutorMonthly", recurrence: "monthly" },
+      { key: "interlocutorQuarterly", recurrence: "quarterly" },
+      { key: "interlocutorOnceReport", recurrence: "monthly" },
+      { key: "interlocutorOndemandScreeningAndVetting", recurrence: "ondemand" }
     ]
   },
   {
@@ -74,6 +82,13 @@ const ASSESSED_PEOPLE = [
           "Test assessment interlocutorOndemandScreeningAndVetting"
         ]
       }
+    ],
+    invisibleAssessments: [
+      { key: "personOnceReportLinguist", recurrence: "monthly" },
+      { key: "personOnceReportLinguistLin", recurrence: "monthly" },
+      { key: "advisorPeriodic", recurrence: "monthly" },
+      { key: "advisorOndemand", recurrence: "ondemand" },
+      { key: "advisorOndemandNoWrite", recurrence: "ondemand" }
     ]
   },
   {
@@ -84,6 +99,12 @@ const ASSESSED_PEOPLE = [
       { key: "advisorPeriodic", recurrence: "monthly" },
       { key: "advisorOndemand", recurrence: "ondemand" },
       { key: "advisorOndemandNoWrite", recurrence: "ondemand" }
+    ],
+    invisibleAssessments: [
+      { key: "interlocutorMonthly", recurrence: "monthly" },
+      { key: "interlocutorQuarterly", recurrence: "quarterly" },
+      { key: "interlocutorOnceReport", recurrence: "monthly" },
+      { key: "interlocutorOndemandScreeningAndVetting", recurrence: "ondemand" }
     ]
   },
   {
@@ -93,6 +114,13 @@ const ASSESSED_PEOPLE = [
       { key: "advisorPeriodic", recurrence: "monthly" },
       { key: "advisorOndemand", recurrence: "ondemand" },
       { key: "advisorOndemandNoWrite", recurrence: "ondemand" }
+    ],
+    invisibleAssessments: [
+      { key: "personOnceReportLinguistLin", recurrence: "monthly" },
+      { key: "interlocutorMonthly", recurrence: "monthly" },
+      { key: "interlocutorQuarterly", recurrence: "quarterly" },
+      { key: "interlocutorOnceReport", recurrence: "monthly" },
+      { key: "interlocutorOndemandScreeningAndVetting", recurrence: "ondemand" }
     ]
   }
 ]
@@ -119,6 +147,28 @@ describe("As an admin", () => {
         if (a.details) {
           await assertAssessmentDetails(a.key, a.recurrence, a.details, 1, null)
         }
+      }
+    }
+  })
+
+  it("Should not see not-applicable assessment sections for each person", async() => {
+    await Home.openAsAdminUser()
+    for (const p of ASSESSED_PEOPLE) {
+      await (await Home.getSearchBar()).setValue(p.name)
+      await (await Home.getSubmitSearch()).click()
+      await (
+        await Search.getFoundPeopleTable()
+      ).waitForExist({ timeout: 20000 })
+      await (await Search.getFoundPeopleTable()).waitForDisplayed()
+      await (await Search.linkOfPersonFound(p.name)).click()
+      await (await ShowPerson.getForm()).waitForDisplayed()
+
+      for (const a of p.invisibleAssessments) {
+        expect(
+          await (
+            await ShowPerson.getAssessmentContainer(a.key, a.recurrence)
+          ).isExisting()
+        ).to.equal(false)
       }
     }
   })
