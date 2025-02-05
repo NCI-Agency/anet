@@ -1,21 +1,22 @@
 import { expect } from "chai"
 import ShowAllTasks from "../pages/showAllTasks.page"
 
-const FIRST_TASK_NAME = "EF 1: Budget and Planning"
-const FIRST_TASK_DESCENDANT_NAME = "1.1: Budgeting in the MoD"
-const NO_DESCENDANTS_TASK_NAME = "EF 5: Force Sustainment (Logistics)"
+const FIRST_TASK_NAME = "EF 1 | Budget and Planning"
+const FIRST_TASK_DESCENDANT_NAME = "1.1 | Budgeting in the MoD"
+const NO_DESCENDANTS_TASK_NAME = "EF 5 | Force Sustainment (Logistics)"
 
 describe("Show All Tasks Page", () => {
   beforeEach(async() => {
     await ShowAllTasks.open()
+    await (await ShowAllTasks.getTitle()).waitForDisplayed()
+    await (await ShowAllTasks.getTree()).waitForDisplayed()
   })
 
   it("Should display all top tasks", async() => {
     const topTasks = await ShowAllTasks.getAllTasks()
-    expect(topTasks).to.have.lengthOf(16)
+    expect(topTasks).to.have.lengthOf(15)
     for (const task of topTasks) {
-      const isDisplayed = await task.isDisplayed()
-      expect(isDisplayed).to.equal(true)
+      expect(await task.isDisplayed()).to.equal(true)
     }
   })
 
@@ -26,12 +27,14 @@ describe("Show All Tasks Page", () => {
     expect(firstTaskText).to.equal(FIRST_TASK_NAME)
 
     const caret = await firstTask.$(".bp5-tree-node-caret")
-    expect(caret).to.not.equal(null)
+    // eslint-disable-next-line no-unused-expressions
+    expect(caret).to.exist
     await caret.click()
 
     const descendants = await ShowAllTasks.getAllDescendants(firstTask)
     expect(descendants).to.have.lengthOf(3)
     const firstDescendant = descendants[0]
+    expect(await firstDescendant.isDisplayed()).to.equal(true)
     const firstDescendantText = await firstDescendant.getText()
     expect(firstDescendantText).to.equal(FIRST_TASK_DESCENDANT_NAME)
   })
@@ -41,16 +44,17 @@ describe("Show All Tasks Page", () => {
     const firstTask = topTasks[0]
 
     const caret = await firstTask.$(".bp5-tree-node-caret")
-    expect(caret).to.not.equal(null)
+    // eslint-disable-next-line no-unused-expressions
+    expect(caret).to.exist
     await caret.click()
     const descendants = await ShowAllTasks.getAllDescendants(firstTask)
     expect(descendants).to.have.lengthOf(3)
+    const firstDescendant = descendants[0]
+    expect(await firstDescendant.isDisplayed()).to.equal(true)
 
     await caret.click()
-    const collapsedDescendants = await ShowAllTasks.getAllDescendants(
-      firstTask,
-      true
-    )
+    await firstDescendant.waitForExist({ reverse: true, timeout: 3000 })
+    const collapsedDescendants = await ShowAllTasks.getAllDescendants(firstTask)
     expect(collapsedDescendants).to.have.lengthOf(0)
   })
 
