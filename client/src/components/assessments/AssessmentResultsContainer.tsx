@@ -39,17 +39,18 @@ const AssessmentResultsContainer = ({
     <div ref={contRef}>
       {entityAssessments.map(([assessmentKey, entityAssessment]) => {
         if (
-          PERIOD_FACTORIES[entityAssessment.recurrence] ||
-          entityAssessment.recurrence === RECURRENCE_TYPE.ON_DEMAND
+          entityAssessment.recurrence === RECURRENCE_TYPE.ONCE &&
+          _isEmpty(entity.getInstantAssessmentResults(null, assessmentKey))
         ) {
-          // can only filter periodic and ondemand assessments
-          // (we lack sufficient context for filtering instant ['once'] assessments)
-          if (
-            _isEmpty(Model.filterAssessmentConfig(entityAssessment, entity))
-          ) {
-            // assessment does not apply
-            return null
-          }
+          // filter out empty instant assessments
+          return null
+        } else if (
+          (PERIOD_FACTORIES[entityAssessment.recurrence] ||
+            entityAssessment.recurrence === RECURRENCE_TYPE.ON_DEMAND) &&
+          _isEmpty(Model.filterAssessmentConfig(entityAssessment, entity))
+        ) {
+          // filter out non-applicable periodic and ondemand assessments
+          return null
         }
         let resultsTable
         if (entityAssessment.recurrence === RECURRENCE_TYPE.ONCE) {
