@@ -3,6 +3,8 @@ package mil.dds.anet.config;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
@@ -175,6 +177,7 @@ public class AnetConfig {
 
   public static class SmtpConfiguration {
     private String hostname;
+    @Positive
     private int port = 587;
     private String username;
     private String password;
@@ -182,6 +185,8 @@ public class AnetConfig {
     private boolean disabled;
     private Integer nbOfHoursForStaleEmails;
     private String sslTrust;
+    @PositiveOrZero
+    private int timeout = 5000;
 
     public String getHostname() {
       return hostname;
@@ -245,6 +250,14 @@ public class AnetConfig {
 
     public void setSslTrust(String sslTrust) {
       this.sslTrust = sslTrust;
+    }
+
+    public int getTimeout() {
+      return timeout;
+    }
+
+    public void setTimeout(int timeout) {
+      this.timeout = timeout;
     }
   }
 

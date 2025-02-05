@@ -242,6 +242,9 @@ public class AnetEmailWorker extends AbstractWorker {
     if (hasUsername(smtpConfig)) {
       props.put("mail.smtp.auth", "true");
     }
+    props.put("mail.smtp.connectiontimeout", smtpConfig.getTimeout());
+    props.put("mail.smtp.timeout", smtpConfig.getTimeout());
+    props.put("mail.smtp.writetimeout", smtpConfig.getTimeout());
     return props;
   }
 
