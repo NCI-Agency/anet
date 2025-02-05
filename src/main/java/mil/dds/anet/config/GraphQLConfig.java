@@ -32,6 +32,8 @@ import mil.dds.anet.resources.ApprovalStepResource;
 import mil.dds.anet.resources.AttachmentResource;
 import mil.dds.anet.resources.AuthorizationGroupResource;
 import mil.dds.anet.resources.EntityAvatarResource;
+import mil.dds.anet.resources.EventResource;
+import mil.dds.anet.resources.EventSeriesResource;
 import mil.dds.anet.resources.LocationResource;
 import mil.dds.anet.resources.NoteResource;
 import mil.dds.anet.resources.OrganizationResource;
@@ -61,6 +63,8 @@ public class GraphQLConfig implements WebMvcConfigurer {
   private final AttachmentResource attachmentResource;
   private final AuthorizationGroupResource authorizationGroupResource;
   private final EntityAvatarResource entityAvatarResource;
+  private final EventResource eventResource;
+  private final EventSeriesResource eventSeriesResource;
   private final LocationResource locationResource;
   private final NoteResource noteResource;
   private final OrganizationResource organizationResource;
@@ -75,7 +79,8 @@ public class GraphQLConfig implements WebMvcConfigurer {
   public GraphQLConfig(AdminResource adminResource, AnetEmailResource anetEmailResource,
       ApprovalStepResource approvalStepResource, AttachmentResource attachmentResource,
       AuthorizationGroupResource authorizationGroupResource,
-      EntityAvatarResource entityAvatarResource, LocationResource locationResource,
+      EntityAvatarResource entityAvatarResource, EventResource eventResource,
+      EventSeriesResource eventSeriesResource, LocationResource locationResource,
       NoteResource noteResource, OrganizationResource organizationResource,
       PersonResource personResource, PositionResource positionResource,
       ReportResource reportResource, SavedSearchResource savedSearchResource,
@@ -87,6 +92,8 @@ public class GraphQLConfig implements WebMvcConfigurer {
     this.attachmentResource = attachmentResource;
     this.authorizationGroupResource = authorizationGroupResource;
     this.entityAvatarResource = entityAvatarResource;
+    this.eventResource = eventResource;
+    this.eventSeriesResource = eventSeriesResource;
     this.locationResource = locationResource;
     this.noteResource = noteResource;
     this.organizationResource = organizationResource;
@@ -170,9 +177,10 @@ public class GraphQLConfig implements WebMvcConfigurer {
   private List<Object> getGraphQLResources() {
     // Create all GraphQL Resources
     return List.of(adminResource, anetEmailResource, approvalStepResource, attachmentResource,
-        authorizationGroupResource, entityAvatarResource, locationResource, noteResource,
-        organizationResource, personResource, positionResource, reportResource, savedSearchResource,
-        subscriptionResource, subscriptionUpdateResource, taskResource);
+        authorizationGroupResource, entityAvatarResource, eventResource, eventSeriesResource,
+        locationResource, noteResource, organizationResource, personResource, positionResource,
+        reportResource, savedSearchResource, subscriptionResource, subscriptionUpdateResource,
+        taskResource);
   }
 
   public static class AuthorizationInterceptor implements ResolverInterceptor {

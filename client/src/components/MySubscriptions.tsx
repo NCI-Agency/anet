@@ -3,7 +3,10 @@ import API from "api"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
+import {
+  GRAPHQL_ENTITY_AVATAR_FIELDS,
+  OBJECT_TYPE_TO_MODEL
+} from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -13,9 +16,7 @@ import {
 } from "components/Page"
 import UltimatePagination from "components/UltimatePagination"
 import _get from "lodash/get"
-import _upperFirst from "lodash/upperFirst"
 import moment from "moment"
-import pluralize from "pluralize"
 import React, { useEffect, useState } from "react"
 import { Table } from "react-bootstrap"
 import { connect } from "react-redux"
@@ -34,6 +35,12 @@ const GQL_GET_MY_SUBSCRIPTIONS = gql`
         subscribedObjectUuid
         subscribedObject {
           ... on AuthorizationGroup {
+            name
+          }
+          ... on Event {
+            name
+          }
+          ... on EventSeries {
             name
           }
           ... on Location {
@@ -146,9 +153,8 @@ const MySubscriptions = ({
               )) ||
                 subscriptions.map(subscription => {
                   const createdAt = moment(subscription.createdAt).fromNow()
-                  const objectType = _upperFirst(
-                    pluralize.singular(subscription.subscribedObjectType)
-                  )
+                  const objectType =
+                    OBJECT_TYPE_TO_MODEL[subscription.subscribedObjectType]
                   let linkTo
                   if (subscription.subscribedObject) {
                     linkTo = (

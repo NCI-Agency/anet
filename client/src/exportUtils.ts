@@ -261,6 +261,52 @@ const GQL_GET_AUTHORIZATION_GROUP_LIST = gql`
   }
 `
 
+const GQL_GET_EVENT_LIST = gql`
+  fragment events on Query {
+    events: eventList(query: $eventQuery) {
+      pageNum
+      pageSize
+      totalCount
+      list {
+        uuid
+        type
+        name
+        startDate
+        endDate
+        ownerOrg {
+          uuid
+          shortName
+          longName
+          identificationCode
+        }
+        hostOrg {
+          uuid
+          shortName
+          longName
+          identificationCode
+        }
+        adminOrg {
+          uuid
+          shortName
+          longName
+          identificationCode
+        }
+        eventSeries {
+          uuid
+          name
+        }
+        location {
+          uuid
+          name
+          lat
+          lng
+        }
+        updatedAt
+      }
+    }
+  }
+`
+
 const GQL_GET_DATA = gql`
   query (
     $includeOrganizations: Boolean!
@@ -277,6 +323,8 @@ const GQL_GET_DATA = gql`
     $reportQuery: ReportSearchQueryInput
     $includeAuthorizationGroups: Boolean!
     $authorizationGroupQuery: AuthorizationGroupSearchQueryInput
+    $includeEvents: Boolean!
+    $eventQuery: EventSearchQueryInput
     $emailNetwork: String
   ) {
     ...organizations @include(if: $includeOrganizations)
@@ -286,6 +334,7 @@ const GQL_GET_DATA = gql`
     ...locations @include(if: $includeLocations)
     ...reports @include(if: $includeReports)
     ...authorizationGroups @include(if: $includeAuthorizationGroups)
+    ...events @include(if: $includeEvents)
   }
 
   ${GQL_GET_ORGANIZATION_LIST}
@@ -295,6 +344,7 @@ const GQL_GET_DATA = gql`
   ${GQL_GET_LOCATION_LIST}
   ${GQL_GET_REPORT_LIST}
   ${GQL_GET_AUTHORIZATION_GROUP_LIST}
+  ${GQL_GET_EVENT_LIST}
 `
 export const exportResults = (
   searchQueryParams,
@@ -315,6 +365,7 @@ export const exportResults = (
   const includeAuthorizationGroups = queryTypes.includes(
     SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS
   )
+  const includeEvents = queryTypes.includes(SEARCH_OBJECT_TYPES.EVENTS)
   const organizationQuery = !includeOrganizations
     ? {}
     : Object.assign({}, searchQueryParams, {
@@ -364,6 +415,13 @@ export const exportResults = (
       sortBy: "NAME",
       sortOrder: "DESC"
     })
+  const eventQuery = !includeEvents
+    ? {}
+    : Object.assign({}, searchQueryParams, {
+      pageSize: maxNumberResults,
+      sortBy: "NAME",
+      sortOrder: "DESC"
+    })
   const { emailNetwork } = searchQueryParams
   const variables = {
     includeOrganizations,
@@ -377,9 +435,11 @@ export const exportResults = (
     includeLocations,
     locationQuery,
     includeReports,
+    includeEvents,
     reportQuery,
     includeAuthorizationGroups,
     authorizationGroupQuery,
+    eventQuery,
     emailNetwork
   }
   return API.queryExport(GQL_GET_DATA, variables, exportType, contentType)

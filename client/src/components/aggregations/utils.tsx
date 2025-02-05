@@ -2,7 +2,7 @@ import RichTextEditor from "components/RichTextEditor"
 import _clone from "lodash/clone"
 import _cloneDeep from "lodash/cloneDeep"
 import _isEmpty from "lodash/isEmpty"
-import { Person, Report } from "models"
+import { Event, Person, Report } from "models"
 import moment from "moment"
 import { AssessmentPeriodPropType, PeriodPropType } from "periodUtils"
 import React from "react"
@@ -240,5 +240,36 @@ export function reportsToEvents(reports, showInterlocutors) {
             r1.end - r2.end)) ||
         // and finally ascending by title
         r1.title.localeCompare(r2.title)
+    )
+}
+
+export function eventsToCalendarEvents(events) {
+  return events
+    .map(event => {
+      let title = `${event.name}`
+      if (event.location) {
+        title = `${title}@${event.location.name}`
+      }
+      const start = new Date(event.startDate)
+      start.setSeconds(0, 0) // truncate at the minute part
+      const end = new Date(event.endDate)
+      end.setSeconds(0, 0) // truncate at the minute part
+      return {
+        title,
+        start,
+        end,
+        url: Event.pathFor(event),
+        extendedProps: { ...event },
+        allDay: !Settings.eventsIncludeStartAndEndTime
+      }
+    })
+    .sort(
+      (e1, e2) =>
+        // ascending by start date
+        e1.start - e2.start ||
+        // ascending by end date
+        e1.end - e1.end ||
+        // and finally ascending by title
+        e1.title.localeCompare(e2.title)
     )
 }

@@ -30,6 +30,7 @@ interface LinkToProps {
   model?: typeof Model | string
   displayCallback?: (...args: unknown[]) => unknown
   style?: any
+  tooltipProps?: object
 }
 
 const LinkTo = ({
@@ -46,6 +47,7 @@ const LinkTo = ({
   modelType = null,
   model = null,
   style,
+  tooltipProps,
   displayCallback = null,
   ...componentProps
 }: LinkToProps) => {
@@ -102,6 +104,7 @@ const LinkTo = ({
           tooltipContent={
             <ModelPreview modelType={modelType} uuid={modelInstance.uuid} />
           }
+          targetProps={tooltipProps}
           popoverClassName="bp5-dark"
           hoverCloseDelay={400}
           hoverOpenDelay={HOVER_OPEN_DELAY}
@@ -148,6 +151,7 @@ const LinkTo = ({
           tooltipContent={
             <ModelPreview modelType={modelType} uuid={modelInstance.uuid} />
           }
+          targetProps={tooltipProps}
           popoverClassName="bp5-dark"
           hoverCloseDelay={400}
           hoverOpenDelay={HOVER_OPEN_DELAY}

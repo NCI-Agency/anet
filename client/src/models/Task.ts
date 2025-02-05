@@ -1,5 +1,6 @@
 import Model, {
   createCustomFieldsSchema,
+  GRAPHQL_ENTITY_AVATAR_FIELDS,
   GRAPHQL_NOTES_FIELDS,
   yupDate
 } from "components/Model"
@@ -138,7 +139,7 @@ export default class Task extends Model {
   static autocompleteQuery =
     "uuid shortName longName parentTask { uuid shortName }" +
     " ascendantTasks { uuid shortName parentTask { uuid } }" +
-    " taskedOrganizations { uuid shortName longName identificationCode } customFields"
+    ` taskedOrganizations { uuid shortName longName identificationCode ${GRAPHQL_ENTITY_AVATAR_FIELDS} } customFields`
 
   static autocompleteQueryWithNotes = `${this.autocompleteQuery} ${GRAPHQL_NOTES_FIELDS}`
 

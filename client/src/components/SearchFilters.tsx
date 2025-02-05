@@ -35,6 +35,7 @@ import TaskFilter, {
 } from "components/advancedSearch/TaskFilter"
 import {
   CountryOverlayRow,
+  EventSeriesOverlayRow,
   PersonDetailedOverlayRow,
   PositionOverlayRow,
   TaskOverlayRow
@@ -45,8 +46,17 @@ import DictionaryField from "components/DictionaryField"
 import Model from "components/Model"
 import _isEmpty from "lodash/isEmpty"
 import _pickBy from "lodash/pickBy"
-import { Location, Person, Position, Report, Task } from "models"
+import {
+  Event,
+  EventSeries,
+  Location,
+  Person,
+  Position,
+  Report,
+  Task
+} from "models"
 import React, { useContext } from "react"
+import EVENT_SERIES_ICON from "resources/eventSeries.png"
 import PEOPLE_ICON from "resources/people.png"
 import POSITIONS_ICON from "resources/positions.png"
 import TASKS_ICON from "resources/tasks.png"
@@ -153,6 +163,14 @@ const advancedSelectFilterTaskProps = {
   fields: Task.autocompleteQuery,
   addon: TASKS_ICON
 }
+const advancedSelectFilterEventSeriesProps = {
+  overlayColumns: ["Name"],
+  overlayRenderRow: EventSeriesOverlayRow,
+  objectType: EventSeries,
+  valueKey: "name",
+  fields: EventSeries.autocompleteQuery,
+  addon: EVENT_SERIES_ICON
+}
 
 export const searchFilters = function(includeAdminFilters) {
   const filters = {}
@@ -203,6 +221,13 @@ export const searchFilters = function(includeAdminFilters) {
   classificationLabels.unshift("<none>")
 
   const taskWidgetFilters = {
+    all: {
+      label: "All",
+      queryVars: {}
+    }
+  }
+
+  const eventSeriesFilters = {
     all: {
       label: "All",
       queryVars: {}
@@ -373,7 +398,7 @@ export const searchFilters = function(includeAdminFilters) {
         queryKey: "sensitiveInfo"
       }
     },
-    [taskShortLabel]: {
+    [`Within ${Settings.fields.task.shortLabel}`]: {
       component: AdvancedSelectFilter,
       deserializer: deserializeAdvancedSelectFilter,
       props: Object.assign({}, advancedSelectFilterTaskProps, {
@@ -708,6 +733,72 @@ export const searchFilters = function(includeAdminFilters) {
           filterDefs: authorWidgetFilters,
           placeholder: "Filter attachments by owner…",
           queryKey: "authorUuid"
+        }
+      }
+    }
+  }
+  const eventTypeOptions = [
+    Event.EVENT_TYPES.EXERCISE,
+    Event.EVENT_TYPES.CONFERENCE,
+    Event.EVENT_TYPES.VISIT_BAN,
+    Event.EVENT_TYPES.OTHER
+  ]
+
+  filters[SEARCH_OBJECT_TYPES.EVENTS] = {
+    filters: {
+      [Settings.fields.event.type.label]: {
+        component: SelectFilter,
+        dictProps: Settings.fields.event.type,
+        deserializer: deserializeSelectFilter,
+        props: {
+          queryKey: "type",
+          options: eventTypeOptions,
+          labels: eventTypeOptions.map(lt => Event.humanNameOfType(lt))
+        }
+      },
+      [Settings.fields.event.eventSeries.label]: {
+        component: AdvancedSelectFilter,
+        deserializer: deserializeAdvancedSelectFilter,
+        props: {
+          ...advancedSelectFilterEventSeriesProps,
+          filterDefs: eventSeriesFilters,
+          placeholder: `Filter by ${Settings.fields.event.eventSeries.label}…`,
+          queryKey: "eventSeriesUuid"
+        }
+      },
+      [`Within ${Settings.fields.event.ownerOrg.label}`]: {
+        component: OrganizationMultiFilter,
+        deserializer: deserializeOrganizationMultiFilter,
+        props: {
+          queryKey: "ownerOrgUuid"
+        }
+      },
+      [`Within ${Settings.fields.event.hostOrg.label}`]: {
+        component: OrganizationMultiFilter,
+        deserializer: deserializeOrganizationMultiFilter,
+        props: {
+          queryKey: "hostOrgUuid"
+        }
+      },
+      [`Within ${Settings.fields.event.adminOrg.label}`]: {
+        component: OrganizationMultiFilter,
+        deserializer: deserializeOrganizationMultiFilter,
+        props: {
+          queryKey: "adminOrgUuid"
+        }
+      },
+      [`Within ${Settings.fields.event.location.label}`]: {
+        component: LocationMultiFilter,
+        deserializer: deserializeLocationMultiFilter,
+        props: {
+          queryKey: "locationUuid"
+        }
+      },
+      [`Within ${Settings.fields.task.shortLabel}`]: {
+        component: TaskFilter,
+        deserializer: deserializeTaskFilter,
+        props: {
+          queryKey: "taskUuid"
         }
       }
     }

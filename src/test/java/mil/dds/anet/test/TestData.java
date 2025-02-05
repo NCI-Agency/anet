@@ -8,6 +8,9 @@ import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.RollupGraph;
 import mil.dds.anet.test.client.AnetEmailInput;
 import mil.dds.anet.test.client.CommentInput;
+import mil.dds.anet.test.client.EventInput;
+import mil.dds.anet.test.client.EventSeriesInput;
+import mil.dds.anet.test.client.EventType;
 import mil.dds.anet.test.client.LocationInput;
 import mil.dds.anet.test.client.LocationType;
 import mil.dds.anet.test.client.OrganizationInput;
@@ -91,4 +94,18 @@ public class TestData {
         .withTaskedOrganizations(taskedOrganizations).withStatus(status).build();
   }
 
+  public static EventInput createEventInput(String name, String description,
+      OrganizationInput ownerOrg, OrganizationInput hostOrg, OrganizationInput adminOrg) {
+    return EventInput.builder().withName(name).withStatus(Status.ACTIVE)
+        .withDescription(description).withOwnerOrg(ownerOrg).withHostOrg(hostOrg)
+        .withAdminOrg(adminOrg).withStartDate(Instant.now()).withEndDate(Instant.now())
+        .withType(EventType.CONFERENCE).build();
+  }
+
+  public static EventSeriesInput createEventSeriesInput(String name, String description,
+      OrganizationInput ownerOrg, OrganizationInput hostOrg, OrganizationInput adminOrg) {
+    return EventSeriesInput.builder().withName(name).withStatus(Status.ACTIVE)
+        .withDescription(description).withOwnerOrg(ownerOrg).withHostOrg(hostOrg)
+        .withAdminOrg(adminOrg).build();
+  }
 }

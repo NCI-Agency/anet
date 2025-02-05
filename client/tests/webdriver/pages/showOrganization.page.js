@@ -236,6 +236,15 @@ class ShowOrganization extends Page {
   async getEntityAvatar() {
     return browser.$("fieldset div.row div.text-center canvas")
   }
+
+  async getEventsTable() {
+    return browser.$(".event-collection")
+  }
+
+  async getEvent(i) {
+    const eventsTable = await this.getEventsTable()
+    return eventsTable.$(`tbody tr:nth-child(${i}) td:first-child a`)
+  }
 }
 
 export default new ShowOrganization()

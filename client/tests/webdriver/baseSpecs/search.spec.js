@@ -58,6 +58,13 @@ describe("When using search", () => {
     expect(
       await (await Search.getFoundAuthorizationGroupTable()).isExisting()
     ).to.equal(true)
+    // Events
+    expect(
+      parseInt(await (await Search.getFoundCounter("events")).getText())
+    ).to.be.greaterThan(0)
+    expect(await (await Search.getFoundEventTable()).isExisting()).to.equal(
+      true
+    )
   })
   it("Should not show results counters when searching in all entities and no results found", async() => {
     await Home.openAsSuperuser()

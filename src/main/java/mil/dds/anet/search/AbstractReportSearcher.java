@@ -42,7 +42,8 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
       "location", "locationUuid", // -
       "approvalStep", "approvalStepUuid", // -
       "advisorOrg", "advisorOrganizationUuid", // -
-      "interlocutorOrg", "interlocutorOrganizationUuid");
+      "interlocutorOrg", "interlocutorOrganizationUuid", // -
+      "event", "eventUuid");
 
   protected AbstractReportSearcher(DatabaseHandler databaseHandler,
       AbstractSearchQueryBuilder<Report, ReportSearchQuery> qb) {
@@ -173,15 +174,8 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
 
     qb.addEnumEqualsClause("atmosphere", "reports.atmosphere", query.getAtmosphere());
 
-    if (query.getTaskUuid() != null) {
-      if (Task.DUMMY_TASK_UUID.equals(query.getTaskUuid())) {
-        qb.addWhereClause(
-            "NOT EXISTS (SELECT \"taskUuid\" FROM \"reportTasks\" WHERE \"reportUuid\" = reports.uuid)");
-      } else {
-        qb.addWhereClause(
-            "reports.uuid IN (SELECT \"reportUuid\" FROM \"reportTasks\" WHERE \"taskUuid\" = :taskUuid)");
-        qb.addSqlArg("taskUuid", query.getTaskUuid());
-      }
+    if (!Utils.isEmptyOrNull(query.getTaskUuid())) {
+      addTaskUuidQuery(query);
     }
 
     if (!Utils.isEmptyOrNull(query.getOrgUuid())) {
@@ -190,6 +184,11 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
 
     if (!Utils.isEmptyOrNull(query.getLocationUuid())) {
       addLocationUuidQuery(query);
+    }
+
+    if (!Utils.isEmptyOrNull(query.getEventUuid())) {
+      qb.addWhereClause("reports.\"eventUuid\" = :eventUuid");
+      qb.addSqlArg("eventUuid", query.getEventUuid());
     }
 
     if (query.getPendingApprovalOf() != null) {
@@ -342,6 +341,19 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
 
   protected abstract void addEngagementDayOfWeekQuery(ReportSearchQuery query);
 
+  protected abstract void addTaskUuidQuery(ReportSearchQuery query);
+
+  protected void addTaskUuidQuery(AbstractSearchQueryBuilder<Report, ReportSearchQuery> outerQb,
+      ReportSearchQuery query) {
+    qb.addFromClause("INNER JOIN \"reportTasks\" rt ON rt.\"reportUuid\" = reports.uuid");
+    if (Task.DUMMY_TASK_UUID.equals(query.getTaskUuid())) {
+      qb.addWhereClause("rt.\"taskUuid\" IS NULL");
+    } else {
+      qb.addRecursiveClause(outerQb, "rt", "\"taskUuid\"", "parent_tasks", "tasks",
+          "\"parentTaskUuid\"", "parentTaskUuid", query.getTaskUuid(), true);
+    }
+  }
+
   protected abstract void addOrgUuidQuery(ReportSearchQuery query);
 
   protected void addOrgUuidQuery(AbstractSearchQueryBuilder<Report, ReportSearchQuery> outerQb,
@@ -359,7 +371,6 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
       qb.addListArg("orgUuid", query.getOrgUuid());
     }
   }
-
 
   protected abstract void addLocationUuidQuery(ReportSearchQuery query);
 

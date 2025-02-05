@@ -98,6 +98,9 @@ public class ReportSearchQuery extends SubscribableObjectSearchQuery<ReportSearc
   @GraphQLQuery
   @GraphQLInputField
   private String classification;
+  @GraphQLQuery
+  @GraphQLInputField
+  private String eventUuid;
   // internal search parameter:
   @JsonIgnore
   private boolean systemSearch;
@@ -331,6 +334,14 @@ public class ReportSearchQuery extends SubscribableObjectSearchQuery<ReportSearc
     return classification;
   }
 
+  public String getEventUuid() {
+    return eventUuid;
+  }
+
+  public void setEventUuid(String eventUuid) {
+    this.eventUuid = eventUuid;
+  }
+
   public boolean isSystemSearch() {
     return systemSearch;
   }
@@ -347,7 +358,7 @@ public class ReportSearchQuery extends SubscribableObjectSearchQuery<ReportSearc
         orgUuid, orgRecurseStrategy, locationUuid, locationRecurseStrategy, taskUuid,
         pendingApprovalOf, state, includeAllDrafts, engagementStatus, cancelledReason,
         authorPositionUuid, attendeePositionUuid, authorizationGroupUuid, sensitiveInfo,
-        classification, systemSearch);
+        classification, eventUuid, systemSearch);
   }
 
   @Override
@@ -384,6 +395,7 @@ public class ReportSearchQuery extends SubscribableObjectSearchQuery<ReportSearc
         && Objects.equals(getAuthorizationGroupUuid(), other.getAuthorizationGroupUuid())
         && Objects.equals(getSensitiveInfo(), other.getSensitiveInfo())
         && Objects.equals(getClassification(), other.getClassification())
+        && Objects.equals(getEventUuid(), other.getEventUuid())
         && Objects.equals(isSystemSearch(), other.isSystemSearch());
   }
 

@@ -200,4 +200,21 @@ describe("Show organization page", () => {
       await (await ShowOrganization.getEntityAvatar()).waitForDisplayed()
     })
   })
+
+  describe("When on the show page of an organization with events", () => {
+    it("We should see a table with events", async() => {
+      await ShowOrganization.open(ORGANIZATION_UUID)
+      await (await ShowOrganization.getEventsTable()).waitForExist()
+      await (await ShowOrganization.getEventsTable()).waitForDisplayed()
+      expect(
+        await (await ShowOrganization.getEventsTable()).getText()
+      ).to.contain("NMI PDT 2024-01")
+    })
+    it("We can go to the show page of event", async() => {
+      await (await ShowOrganization.getEvent(1)).click()
+      await expect(await browser.getUrl()).to.include(
+        "/events/e850846e-9741-40e8-bc51-4dccc30cf47f"
+      )
+    })
+  })
 })

@@ -7,6 +7,7 @@ import { getBreadcrumbTrailAsText } from "components/BreadcrumbTrail"
 import { Task } from "models"
 import React from "react"
 import TASKS_ICON from "resources/tasks.png"
+import Settings from "settings"
 
 const GQL_GET_TASK = gql`
   query ($uuid: String!) {
@@ -85,7 +86,7 @@ const TaskFilter = ({
       valueFunc={(v, k) =>
         getBreadcrumbTrailAsText(v, v?.ascendantTasks, parentKey, k)}
       fields={Task.autocompleteQuery}
-      placeholder="Filter by task…"
+      placeholder={`Filter by ${Settings.fields.task.shortLabel}…`}
       addon={TASKS_ICON}
       onChange={handleChangeTask}
       value={value.value}
