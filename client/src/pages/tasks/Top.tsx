@@ -1,18 +1,21 @@
 import { gql } from "@apollo/client"
-import { DEFAULT_PAGE_PROPS } from "actions"
+import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
+import Fieldset from "components/Fieldset"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
-  useBoilerplate
+  useBoilerplate,
+  usePageTitle
 } from "components/Page"
-import TaskTree from "pages/tasks/Tree"
-import React, { useEffect, useState } from "react"
+import TaskTree from "components/TaskTree"
+import React from "react"
 import { connect } from "react-redux"
+import Settings from "settings"
 
 const GQL_GET_TOP_LEVEL_TASKS = gql`
   query {
-    taskList(query: { pageSize: 0 }) {
+    taskList(query: { parentTaskUuid: "-1", pageSize: 0 }) {
       pageNum
       pageSize
       totalCount
@@ -22,9 +25,19 @@ const GQL_GET_TOP_LEVEL_TASKS = gql`
         longName
         parentTask {
           uuid
+          shortName
+          longName
+          parentTask {
+            uuid
+          }
         }
         descendantTasks {
           uuid
+          shortName
+          longName
+          parentTask {
+            uuid
+          }
         }
       }
     }
@@ -36,44 +49,26 @@ interface TopTasksProps {
 }
 
 const TopTasks = ({ pageDispatchers }: TopTasksProps) => {
-  useBoilerplate({
+  const { loading, error, data } = API.useApiQuery(GQL_GET_TOP_LEVEL_TASKS)
+  const { done, result } = useBoilerplate({
+    loading,
+    error,
     pageProps: DEFAULT_PAGE_PROPS,
+    searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
+  usePageTitle(Settings.fields.task.allTasksLabel)
 
-  const [topLevelTasks, setTopLevelTasks] = useState([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const fetchTopLevelTasks = async() => {
-      try {
-        const { data } = await API.client.query({
-          query: GQL_GET_TOP_LEVEL_TASKS
-        })
-        if (data?.taskList?.list) {
-          const tasks = data.taskList.list.filter(task => !task.parentTask)
-          setTopLevelTasks(tasks)
-        }
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchTopLevelTasks()
-  }, [])
-
-  if (loading) {
-    return <div>Loading tasks...</div>
-  }
-
-  if (topLevelTasks.length === 0) {
-    return <div>No to be displayed</div>
+  if (done) {
+    return result
   }
 
   return (
-    <div>
-      <TaskTree tasks={topLevelTasks} />
-    </div>
+    <Fieldset title={Settings.fields.task.allTasksLabel}>
+      {(!data?.taskList?.list?.length && (
+        <div>No {Settings.fields.task.allTasksLabel}</div>
+      )) || <TaskTree tasks={data.taskList.list} />}
+    </Fieldset>
   )
 }
 
