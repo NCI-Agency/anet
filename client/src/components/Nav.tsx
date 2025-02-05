@@ -359,7 +359,7 @@ const Navigation = ({
         handleOnClick={resetPages}
         setIsMenuLinksOpened={() => setIsMenuLinksOpened(false)}
       >
-        {Settings.fields.regular.task.allTasksName}
+        {Settings.fields.task.allTasksLabel}
       </SidebarLink>
 
       <SidebarLink

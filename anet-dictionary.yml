@@ -71,6 +71,7 @@ siteClassification: demo
 fields:
 
   task:
+    allTasksLabel: Objectives
     shortLabel: Objective
     longLabel: Objectives
     status:
@@ -2161,10 +2162,6 @@ fields:
     org:
       name: Organization
       allOrgName: Top-level Organizations
-
-    task:
-      name: Task
-      allTasksName: Top Tasks
 
 pinned_ORGs: [Key Leader Engagement]
 non_reporting_ORGs: [ANET Administrators]
