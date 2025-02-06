@@ -26,7 +26,7 @@ class AnetEmailResourceTest extends AbstractResourceTest {
 
   @BeforeAll
   void setUpClass() {
-    emailWorker = new AnetEmailWorker(config, dict, jobHistoryDao, emailDao, adminDao);
+    emailWorker = new AnetEmailWorker(config, dict, jobHistoryDao, emailDao);
     emailWorker.run();
   }
 

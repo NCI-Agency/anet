@@ -1,4 +1,5 @@
 -- Do a cascading TRUNCATE of all tables created for ANET
+TRUNCATE TABLE "accessTokens" CASCADE;
 TRUNCATE TABLE "adminSettings" CASCADE;
 TRUNCATE TABLE "approvalSteps" CASCADE;
 TRUNCATE TABLE "approvers" CASCADE;
@@ -1046,9 +1047,6 @@ WHERE "approvalStepUuid" IS NULL AND reports.state = 1);
 
 --Set the Admin Settings
 INSERT INTO "adminSettings" (key, value) VALUES
-  ('SECURITY_BANNER_CLASSIFICATION', 'demo use only'),
-  ('SECURITY_BANNER_RELEASABILITY', 'releasable to DEMO MISSION'),
-  ('SECURITY_BANNER_COLOR', 'green'),
   ('DEFAULT_APPROVAL_ORGANIZATION', (select uuid from organizations where "shortName"='ANET Administrators')),
   ('HELP_LINK_URL', 'http://google.com'),
   ('CONTACT_EMAIL', 'team-anet@example.com'),
@@ -1421,6 +1419,13 @@ INSERT INTO "eventPeople" ("eventUuid", "personUuid") VALUES
 
 -- Assign existing report to event
 UPDATE reports SET "eventUuid" = 'e850846e-9741-40e8-bc51-4dccc30cf47f' WHERE uuid = '86e4cf7e-c0ae-4bd9-b1ad-f2c65ca0f600';
+
+-- Insert a sample web service access token
+INSERT INTO "accessTokens" (uuid, name, description, "tokenHash", "createdAt", "expiresAt") VALUES
+  -- token value is 'XfayXIGGC4vKu5j9UEgAAbZYj50v88Zv'
+  -- you can generate new tokens with e.g.:
+  -- dd if=/dev/urandom bs=24 count=1 | base64 | ( read r; echo -ne "Token value = $r\nToken hash = " >&2; echo -n $r ) | openssl dgst -binary -sha256 | openssl base64
+  ('2e45aef0-b9de-4818-be95-b0cc2aececfc', 'Sample Web Service Access Token', 'A sample web service access token for the NVG Web Service', 'AaEge0eLJTP25aRAA5jIZxyzvejJBxPk+kAJDpv+5nc=', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '10 years');
 
 -- Update the link-text indexes
 REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_lts_attachments";

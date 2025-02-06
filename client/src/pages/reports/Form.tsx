@@ -332,12 +332,7 @@ const ReportForm = ({
     (!Settings.fields.attachment.restrictToAdmins || currentUser.isAdmin())
   const canCreateLocation =
     Settings.regularUsersCanCreateLocations || currentUser.isSuperuser()
-  const classificationButtons = Object.entries(
-    Settings.classification.choices
-  ).map(([value, label]) => ({
-    value,
-    label
-  }))
+  const classificationButtons = utils.getConfidentialityLabelChoices()
 
   let recents = []
   if (data) {
@@ -566,7 +561,7 @@ const ReportForm = ({
               <Fieldset>
                 <DictionaryField
                   wrappedComponent={FastField}
-                  dictProps={Settings.classification}
+                  dictProps={Settings.confidentialityLabel}
                   name="classification"
                   component={FieldHelper.RadioButtonToggleGroupField}
                   buttons={classificationButtons}

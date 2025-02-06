@@ -62,6 +62,7 @@ import POSITIONS_ICON from "resources/positions.png"
 import TASKS_ICON from "resources/tasks.png"
 import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
+import utils from "utils"
 
 export interface SearchQueryPropType {
   text?: string
@@ -214,8 +215,13 @@ export const searchFilters = function(includeAdminFilters) {
       queryVars: { type: Location.LOCATION_TYPES.COUNTRY }
     }
   }
-  const classificationOptions = Object.keys(Settings.classification.choices)
-  const classificationLabels = Object.values(Settings.classification.choices)
+  const classificationOptions = Object.keys(
+    Settings.confidentialityLabel.choices
+  )
+  const classificationLabels = Object.keys(
+    Settings.confidentialityLabel.choices
+  ).map(choice => utils.getConfidentialityLabelForChoice(choice))
+
   // Allow explicit search for "no classification"
   classificationOptions.unshift("")
   classificationLabels.unshift("<none>")
@@ -382,7 +388,7 @@ export const searchFilters = function(includeAdminFilters) {
     },
     Classifications: {
       component: SelectFilter,
-      dictProps: Settings.classification,
+      dictProps: Settings.confidentialityLabel,
       deserializer: deserializeSelectFilter,
       props: {
         queryKey: "classification",
@@ -717,7 +723,7 @@ export const searchFilters = function(includeAdminFilters) {
       },
       Classifications: {
         component: SelectFilter,
-        dictProps: Settings.classification,
+        dictProps: Settings.confidentialityLabel,
         deserializer: deserializeSelectFilter,
         props: {
           queryKey: "classification",

@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- edited with XMLSpy v2013 (x64) (http://www.altova.com) by david dufour (home) -->
+<xs:schema xmlns="https://tide.act.nato.int/schemas/2012/10/nvg" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="https://tide.act.nato.int/schemas/2012/10/nvg" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:simpleType name="SymbolCodeType">
+		<xs:annotation>
+			<xs:documentation>Any valid symbol code Type in the scheme "chars+number" : any valid characters. Format: (symbol scheme):(symbol code) Example: app6b:G*C*MGPI--*****</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:pattern value="[a-zA-Z0-9]+:(.)+"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="LongLatType">
+		<xs:annotation>
+			<xs:documentation>Restricted by patterns definition of a (Longitude,Latitude) couple based on a plane (x,y) representation of the map</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:pattern value="([+,\-])?((0)?[0-9])?[0-9](\.\d{1,20})?,([+,\-])?([0-8])?[0-9](\.\d{1,20})?"/>
+			<xs:pattern value="([+,\-])?1[0-7][0-9](\.\d{1,20})?,([+,\-])?([0-8])?[0-9](\.\d{1,20})?"/>
+			<xs:pattern value="([+,\-])?180(\.(0){1,20})?,([+,\-])?([0-8])?[0-9](\.\d{1,20})?"/>
+			<xs:pattern value="([+,\-])?((0)?[0-9])?[0-9](\.\d{1,20})?,([+,\-])?90(\.(0){1,20})?"/>
+			<xs:pattern value="([+,\-])?1[0-7][0-9](\.\d{1,20})?,([+,\-])?90(\.(0){1,20})?"/>
+			<xs:pattern value="([+,\-])?180(\.(0){1,20})?,([+,\-])?90(\.(0){1,20})?"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="ListOfLongLatType">
+		<xs:annotation>
+			<xs:documentation>Combined type for defining the list of lat,long geo point</xs:documentation>
+		</xs:annotation>
+		<xs:list itemType="LongLatType"/>
+	</xs:simpleType>
+	<xs:simpleType name="LongitudeType">
+		<xs:annotation>
+			<xs:documentation>Range for longitudes: in decimal degrees using WGS-84 datum, closed interval [-180.0 to 180.0].</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:double">
+			<xs:minInclusive value="-180"/>
+			<xs:maxInclusive value="180"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="LatitudeType">
+		<xs:annotation>
+			<xs:documentation>Range for latitudes:: in decimal degrees using WGS-84 datum, closed interval [-90.0 to 90.0].</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:double">
+			<xs:minInclusive value="-90"/>
+			<xs:maxInclusive value="90"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="AltitudeDepthType">
+		<xs:annotation>
+			<xs:documentation>Elevation in meters, 0 indicating WGS-84 geoid surface. Positive values indicate an altitude above the surface, negative values indicate a depth below the surface.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:double"/>
+	</xs:simpleType>
+	<xs:simpleType name="LegType">
+		<xs:annotation>
+			<xs:documentation>The leg-type attribute is available on select geometries and used to indicate the desired interpolation methodology.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="rhumb-line"/>
+			<xs:enumeration value="great-circle"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="WellKnownKeyTypeAttribute">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="duration"/>
+			<xs:enumeration value="dateTime"/>
+			<xs:enumeration value="time"/>
+			<xs:enumeration value="date"/>
+			<xs:enumeration value="gYearMonth"/>
+			<xs:enumeration value="gYear"/>
+			<xs:enumeration value="gMonthDay"/>
+			<xs:enumeration value="gMonth"/>
+			<xs:enumeration value="boolean"/>
+			<xs:enumeration value="string"/>
+			<xs:enumeration value="base64binary"/>
+			<xs:enumeration value="hexBinary"/>
+			<xs:enumeration value="float"/>
+			<xs:enumeration value="decimal"/>
+			<xs:enumeration value="integer"/>
+			<xs:enumeration value="long"/>
+			<xs:enumeration value="double"/>
+			<xs:enumeration value="anyURI"/>
+			<xs:enumeration value="QName"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="SimpleDataType">
+		<xs:simpleContent>
+			<xs:extension base="xs:string">
+				<xs:attribute name="key" type="xs:QName" use="required"/>
+				<xs:attribute name="unit" type="UnitOfMeasureType">
+					<xs:annotation>
+						<xs:documentation>Optionally, a data value can be in another measurement unit from the one defined in the schema</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:complexType name="SimpleFieldType">
+		<xs:attribute name="id" type="xs:QName" use="required"/>
+		<xs:attribute name="type" type="KeyTypeAttribute" use="required"/>
+		<xs:attribute name="label" type="xs:string" use="optional"/>
+		<xs:attribute name="description" type="xs:string" use="optional"/>
+		<xs:attribute name="unit" type="UnitOfMeasureType"/>
+	</xs:complexType>
+	<xs:complexType name="SchemaType">
+		<xs:sequence>
+			<xs:element name="SimpleField" type="SimpleFieldType" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="schemaId" type="xs:string" use="required"/>
+	</xs:complexType>
+	<xs:complexType name="ExtendedDataType">
+		<xs:sequence>
+			<xs:element name="SimpleData" type="SimpleDataType" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="Section" type="SimpleDataSectionType" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="schemaRef" type="xs:string" use="required"/>
+	</xs:complexType>
+	<xs:simpleType name="SpeedType">
+		<xs:annotation>
+			<xs:documentation>Speed in kilometers per hour (&gt;= 0)</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:double">
+			<xs:minInclusive value="0"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="CourseType">
+		<xs:annotation>
+			<xs:documentation>Course in degrees (0 = north). Clockwise</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:double">
+			<xs:maxInclusive value="360"/>
+			<xs:minInclusive value="0"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="RotationType">
+		<xs:annotation>
+			<xs:documentation>Rotation of the symbol in degrees (0 = north). Counterclockwise</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:double">
+			<xs:minInclusive value="0"/>
+			<xs:maxInclusive value="360"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="RadiusType">
+		<xs:annotation>
+			<xs:documentation>The radius or length expressed in meters. This number should be positive.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:double">
+			<xs:minInclusive value="0"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="LabelType">
+		<xs:annotation>
+			<xs:documentation>A short text label describing the content.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string"/>
+	</xs:simpleType>
+	<xs:simpleType name="WidthType">
+		<xs:annotation>
+			<xs:documentation>Width expressed in meters</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:double">
+			<xs:minInclusive value="0"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="AngleType">
+		<xs:annotation>
+			<xs:documentation>All angles are expressed in degrees with a range of [0.0 to 360.0] progressing from 0.0 to 360.0 in the clockwise direction. When the angle indicates direction 0.0 indicates North. If a value is not specified a value of 0.0 is implied.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:double">
+			<xs:minInclusive value="0"/>
+			<xs:maxInclusive value="360"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="StyleType">
+		<xs:annotation>
+			<xs:documentation>CSS based style description which indicates how this element should be rendered graphically.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string"/>
+	</xs:simpleType>
+	<xs:simpleType name="ModifiersType">
+		<xs:annotation>
+			<xs:documentation>Modifiers to the specified symbology, possibly including rendering hints.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string"/>
+	</xs:simpleType>
+	<xs:simpleType name="IdentifierType">
+		<xs:annotation>
+			<xs:documentation>Wrapper type for item identification inside a capabilities/filter document.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string"/>
+	</xs:simpleType>
+	<xs:simpleType name="VersionType">
+		<xs:annotation>
+			<xs:documentation>Version number composed of a major version number and a minor version number and revision number. ex: 2.0.0.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string"/>
+	</xs:simpleType>
+	<xs:complexType name="SimpleDataSectionType">
+		<xs:sequence>
+			<xs:element name="SimpleData" type="SimpleDataType" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="label" type="xs:string" use="required"/>
+		<xs:attribute name="schemaRef" type="xs:string" use="required"/>
+	</xs:complexType>
+	<xs:simpleType name="WellKnownUnitOfMeasure">
+		<xs:annotation>
+			<xs:documentation>list of well-known measure (distance, speed, mass, duration) to be primarly used. Other see http://en.wikipedia.org/wiki/SI_derived_units</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<!-- position / location-->
+			<xs:enumeration value="LatLongDEC"/>
+			<xs:enumeration value="LatLongDMS"/>
+			<xs:enumeration value="UTM"/>
+			<xs:enumeration value="MGRS"/>
+			<xs:enumeration value="GeoRef"/>
+			<xs:enumeration value="CGridRS"/>
+			<xs:enumeration value="CGeoRS"/>
+			<xs:enumeration value="GARS"/>
+			<xs:enumeration value="UPSNorth"/>
+			<xs:enumeration value="UPSSouth"/>
+			<!-- distance -->
+			<xs:enumeration value="ft"/>
+			<xs:enumeration value="meter"/>
+			<xs:enumeration value="kilometer"/>
+			<xs:enumeration value="mile"/>
+			<xs:enumeration value="nauticalmile"/>
+			<!-- angle -->
+			<xs:enumeration value="degree"/>
+			<xs:enumeration value="radian"/>
+			<!-- speed -->
+			<xs:enumeration value="kmh"/>
+			<xs:enumeration value="knot"/>
+			<xs:enumeration value="meterpersecond"/>
+			<!-- mass -->
+			<xs:enumeration value="gram"/>
+			<xs:enumeration value="kilogram"/>
+			<xs:enumeration value="tonne"/>
+			<xs:enumeration value="pound"/>
+			<!-- surface / volume -->
+			<xs:enumeration value="sqm"/>
+			<xs:enumeration value="sqkm"/>
+			<xs:enumeration value="sqft"/>
+			<xs:enumeration value="hectare"/>
+			<xs:enumeration value="liter"/>
+			<xs:enumeration value="cbm"/>
+			<xs:enumeration value="cft"/>
+			<!-- duration / time / frequency-->
+			<xs:enumeration value="second"/>
+			<xs:enumeration value="hour"/>
+			<xs:enumeration value="day"/>
+			<xs:enumeration value="week"/>
+			<xs:enumeration value="month"/>
+			<xs:enumeration value="year"/>
+			<xs:enumeration value="timestamp"/>
+			<xs:enumeration value="hertz"/>
+			<!-- temperature -->
+			<xs:enumeration value="Celcius"/>
+			<xs:enumeration value="Fahrenheit"/>
+			<xs:enumeration value="Kelvin"/>
+			<!-- pressure -->
+			<xs:enumeration value="Pascal"/>
+			<xs:enumeration value="bar"/>
+			<xs:enumeration value="mmHg"/>
+			<!-- other standard SI unit (see wikipedia) -->
+			<xs:enumeration value="Ampere"/>
+			<xs:enumeration value="candela"/>
+			<xs:enumeration value="mole"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="UnitOfMeasureType">
+		<xs:union memberTypes="xs:string WellKnownUnitOfMeasure"/>
+	</xs:simpleType>
+	<xs:simpleType name="KeyTypeAttribute">
+		<xs:union memberTypes="xs:QName WellKnownKeyTypeAttribute"/>
+	</xs:simpleType>
+</xs:schema>

@@ -14,30 +14,19 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
-public class AdminDao implements InitializingBean {
+public class AdminDao extends AbstractDao implements InitializingBean {
 
   public enum AdminSettingKeys {
-    SECURITY_BANNER_CLASSIFICATION, SECURITY_BANNER_RELEASABILITY, SECURITY_BANNER_COLOR,
     DEFAULT_APPROVAL_ORGANIZATION, HELP_LINK_URL, CONTACT_EMAIL, DAILY_ROLLUP_MAX_REPORT_AGE_DAYS,
     EXTERNAL_DOCUMENTATION_LINK_URL, EXTERNAL_DOCUMENTATION_LINK_TEXT, GENERAL_BANNER_LEVEL,
     GENERAL_BANNER_TEXT, GENERAL_BANNER_VISIBILITY, UNLIMITED_EXPORTS_AUTHORIZATION_GROUP
   }
 
-  protected final DatabaseHandler databaseHandler;
-
   private Map<String, String> cachedSettings = null;
   private static final Object cachedSettingsLock = new Object();
 
   public AdminDao(final DatabaseHandler databaseHandler) {
-    this.databaseHandler = databaseHandler;
-  }
-
-  protected Handle getDbHandle() {
-    return databaseHandler.getHandle();
-  }
-
-  protected void closeDbHandle(Handle handle) {
-    databaseHandler.closeHandle(handle);
+    super(databaseHandler);
   }
 
   @Override

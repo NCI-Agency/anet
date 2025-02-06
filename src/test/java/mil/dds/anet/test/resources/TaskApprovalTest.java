@@ -16,7 +16,6 @@ import java.util.Objects;
 import java.util.Optional;
 import mil.dds.anet.config.AnetConfig;
 import mil.dds.anet.config.AnetDictionary;
-import mil.dds.anet.database.AdminDao;
 import mil.dds.anet.database.EmailDao;
 import mil.dds.anet.database.JobHistoryDao;
 import mil.dds.anet.test.client.AnetBeanList_Person;
@@ -104,9 +103,6 @@ class TaskApprovalTest extends AbstractResourceTest {
   private JobHistoryDao jobHistoryDao;
 
   @Autowired
-  private AdminDao adminDao;
-
-  @Autowired
   private EmailDao emailDao;
 
   @BeforeAll
@@ -119,7 +115,7 @@ class TaskApprovalTest extends AbstractResourceTest {
     final List<String> activeDomainNames = (List<String>) newDict.get("activeDomainNames");
     activeDomainNames.add("example.com");
     dict.setDictionary(newDict);
-    emailWorker = new AnetEmailWorker(config, dict, jobHistoryDao, emailDao, adminDao);
+    emailWorker = new AnetEmailWorker(config, dict, jobHistoryDao, emailDao);
     emailServer = new FakeSmtpServer(config.getSmtp());
   }
 

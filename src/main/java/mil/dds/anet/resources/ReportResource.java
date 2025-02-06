@@ -32,6 +32,7 @@ import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Comment;
+import mil.dds.anet.beans.ConfidentialityRecord;
 import mil.dds.anet.beans.GenericRelatedObject;
 import mil.dds.anet.beans.Note;
 import mil.dds.anet.beans.Note.NoteType;
@@ -51,7 +52,6 @@ import mil.dds.anet.config.AnetConfig;
 import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.AdminDao;
-import mil.dds.anet.database.AdminDao.AdminSettingKeys;
 import mil.dds.anet.database.CommentDao;
 import mil.dds.anet.database.NoteDao;
 import mil.dds.anet.database.NoteDao.UpdateType;
@@ -780,12 +780,11 @@ public class ReportResource {
     final Map<String, Object> emailContext = new HashMap<>();
     emailContext.put("context", engine.getContext());
     emailContext.put("serverUrl", config.getServerUrl());
-    emailContext.put(AdminSettingKeys.SECURITY_BANNER_CLASSIFICATION.name(),
-        adminDao.getSetting(AdminSettingKeys.SECURITY_BANNER_CLASSIFICATION).toUpperCase());
-    emailContext.put(AdminSettingKeys.SECURITY_BANNER_RELEASABILITY.name(),
-        adminDao.getSetting(AdminSettingKeys.SECURITY_BANNER_RELEASABILITY));
-    emailContext.put(AdminSettingKeys.SECURITY_BANNER_COLOR.name(),
-        adminDao.getSetting(AdminSettingKeys.SECURITY_BANNER_COLOR));
+    final var siteClassification = ConfidentialityRecord.getConfidentialityLabelForChoice(dict,
+        (String) dict.getDictionaryEntry("siteClassification"));
+    emailContext.put("SECURITY_BANNER_CLASSIFICATION",
+        ConfidentialityRecord.create(siteClassification).toString());
+    emailContext.put("SECURITY_BANNER_COLOR", siteClassification.get("color"));
     emailContext.put(DailyRollupEmail.SHOW_REPORT_TEXT_FLAG, showReportText);
     logger.error("GJ: context={}", emailContext);
     addConfigToContext(emailContext);

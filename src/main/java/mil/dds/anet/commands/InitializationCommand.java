@@ -138,16 +138,6 @@ public class InitializationCommand {
     saveAdminSetting(engine, AdminSettingKeys.DEFAULT_APPROVAL_ORGANIZATION,
         defaultApprovalOrgUuid);
 
-    // Set Classification String as default
-    saveAdminSetting(engine, AdminSettingKeys.SECURITY_BANNER_CLASSIFICATION, "NATO UNCLASSIFIED");
-
-    // Set Releasablility String as default
-    saveAdminSetting(engine, AdminSettingKeys.SECURITY_BANNER_RELEASABILITY,
-        "releasable to Finland and Sweden");
-
-    // Set Classification Color as default
-    saveAdminSetting(engine, AdminSettingKeys.SECURITY_BANNER_COLOR, "GREEN");
-
     // Set contact email as default
     saveAdminSetting(engine, AdminSettingKeys.CONTACT_EMAIL, "team-anet@example.com");
 

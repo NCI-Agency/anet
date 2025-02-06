@@ -174,7 +174,7 @@ const ReportPreview = ({ className, uuid }: ReportPreviewProps) => {
       {report.classification && (
         <div style={{ width: "100%", fontSize: "18px", textAlign: "center" }}>
           <span style={{ fontWeight: "bold" }}>
-            {Settings.classification.choices[report.classification]}
+            {utils.getConfidentialityLabelForChoice(report.classification)}
           </span>
         </div>
       )}

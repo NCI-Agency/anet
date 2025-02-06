@@ -1,6 +1,6 @@
 import { Placement } from "@blueprintjs/core"
 import { TimePrecision } from "@blueprintjs/datetime"
-import { DateInput3 } from "@blueprintjs/datetime2"
+import { DateInput3, DatePickerShortcut } from "@blueprintjs/datetime2"
 import "@blueprintjs/datetime2/lib/css/blueprint-datetime2.css"
 import "@blueprintjs/datetime/lib/css/blueprint-datetime.css"
 import moment from "moment"
@@ -34,6 +34,7 @@ interface CustomDateInputProps {
   placement?: Placement
   withTime?: boolean
   value?: string | number | Date
+  shortcuts?: boolean | DatePickerShortcut[]
   onChange?: (...args: unknown[]) => unknown
   onBlur?: (...args: unknown[]) => unknown
   canClearSelection?: boolean
@@ -50,6 +51,7 @@ const CustomDateInput = ({
   placement = "auto",
   withTime = false,
   value,
+  shortcuts,
   onChange,
   onBlur,
   canClearSelection = false
@@ -104,6 +106,7 @@ const CustomDateInput = ({
       showTimezoneSelect={false}
       popoverProps={{ usePortal: false, placement }}
       disabled={disabled}
+      shortcuts={shortcuts}
     />
   )
 }

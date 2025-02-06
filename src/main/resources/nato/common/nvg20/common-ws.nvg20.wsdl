@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/"
+						 xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+						 xmlns:tns="urn:nato:common:wsdl:nvg20"
+						 xmlns:nvgwsdl="https://tide.act.nato.int/wsdl/2012/nvg"
+						 xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+						 targetNamespace="urn:nato:common:wsdl:nvg20">
+	<import namespace="https://tide.act.nato.int/wsdl/2012/nvg" location="nvg2012.wsdl"/>
+	<import namespace="urn:nato:stanag:4774:confidentialitymetadatalabel:1:0" location="../stanag4774/confidentialitymetadatalabel.xsd"/>
+	<import namespace="urn:nato:stanag:4778:bindinginformation:1:0" location="../stanag4778/bindinginformation.xsd"/>
+	<types/>
+	<binding name="NVGBinding2012" type="nvgwsdl:NVGPortType2012">
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<wsdl:operation name="GetCapabilities">
+			<soap:operation soapAction="https://tide.act.nato.int/wsdl/2012/nvg/GetCapabilities" style="document"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="GetNvg">
+			<soap:operation soapAction="https://tide.act.nato.int/wsdl/2012/nvg/GetNvg" style="document"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+	</binding>
+
+	<wsdl:service name="NvgService">
+		<wsdl:port name="NvgPort20" binding="tns:NVGBinding2012" />
+	</wsdl:service>
+</definitions>

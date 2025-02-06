@@ -6174,6 +6174,44 @@
 		/>
 	</changeSet>
 
+	<changeSet id="add-accessTokens-table" author="gjvoosten">
+		<createTable tableName="accessTokens">
+			<column name="uuid" type="${uuid_type}">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="name" type="varchar(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="description" type="text" />
+			<column name="tokenHash" type="varchar(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="createdAt" type="timestamp">
+				<constraints nullable="false" />
+			</column>
+			<column name="expiresAt" type="timestamp">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addUniqueConstraint
+			tableName="accessTokens"
+			columnNames="tokenHash"
+			constraintName="UQ_AccessTokensTokenHash"
+		/>
+	</changeSet>
+
+	<changeSet id="remove-adminSettings-classification" author="gjvoosten">
+		<delete tableName="adminSettings">
+			<where>key = 'SECURITY_BANNER_CLASSIFICATION'</where>
+		</delete>
+		<delete tableName="adminSettings">
+			<where>key = 'SECURITY_BANNER_RELEASABILITY'</where>
+		</delete>
+		<delete tableName="adminSettings">
+			<where>key = 'SECURITY_BANNER_COLOR'</where>
+		</delete>
+	</changeSet>
+
 	<!-- Keep this change set as the last one in the change log;
 	     it will be re-run whenever it changes. -->
 	<changeSet id="set-up-full-text-search" runOnChange="true" author="gjvoosten">

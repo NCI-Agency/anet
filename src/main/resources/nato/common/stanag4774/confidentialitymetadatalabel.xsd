@@ -1,0 +1,390 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+*********************************************************************
+NATO UNCLASSIFIED
+XML Schema for capturing the Confidentiality Label specification for
+confidentiality labels and their succession history.
+*********************************************************************
+-->
+<xs:schema
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:slab="urn:nato:stanag:4774:confidentialitymetadatalabel:1:0"
+    targetNamespace="urn:nato:stanag:4774:confidentialitymetadatalabel:1:0"
+    version="1.3"
+    elementFormDefault="qualified" attributeFormDefault="unqualified">
+  <xs:annotation>
+    <xs:appinfo>
+      <UniqueIdentifier>
+        urn:nato:stanag:4774:confidentialitymetadatalabel:1:0
+      </UniqueIdentifier>
+      <Name>Confidentiality Label Schema</Name>
+      <Definition>Schema for a confidentiality label</Definition>
+      <VersionIndicator>1.3</VersionIndicator>
+      <UsageGuidance>
+        Used within NATO for representing a confidentiality label.
+      </UsageGuidance>
+      <RestrictionType/>
+      <RestrictionValue/>
+      <ConfidentialityLabel ReviewDateTime="2019-04-01T09:00:00Z">
+        <ConfidentialityInformation>
+          <PolicyIdentifier>NATO</PolicyIdentifier>
+          <Classification>UNCLASSIFIED</Classification>
+          <Category Type="PERMISSIVE" TagName="Context">
+            <GenericValue>NATO</GenericValue>
+          </Category>
+        </ConfidentialityInformation>
+        <CreationDateTime>2014-04-01T09:00:00Z</CreationDateTime>
+      </ConfidentialityLabel>
+    </xs:appinfo>
+    <xs:documentation>
+      The schema can be used with the metadata binding schema to bind
+      confidentiality label metadata (such as those defined in the NATO Core Metadata
+      Specification NCMS)) to data objects.
+    </xs:documentation>
+  </xs:annotation>
+  <xs:complexType name="ConfidentialityLabelType" id="confidentialityLabelType">
+    <xs:annotation>
+      <xs:appinfo>
+        <UniqueIdentifier>
+          urn:nato:stanag:4774:confidentialitymetadatalabel:1:0:appinfo:confidentialityLabelType
+        </UniqueIdentifier>
+        <Name>Confidentiality Label Type</Name>
+        <Definition>
+          A type that is used as the base for the confidentiality label metadata elements.
+        </Definition>
+        <VersionIndicator>1.3</VersionIndicator>
+        <UsageGuidance></UsageGuidance>
+        <RestrictionType></RestrictionType>
+        <RestrictionValue></RestrictionValue>
+      </xs:appinfo>
+      <xs:documentation>
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="slab:ConfidentialityLabelBaseType">
+        <xs:attribute name="Id" type="xs:ID"/>
+        <xs:attribute name="ReviewDateTime" type="xs:dateTime"/>
+        <xs:anyAttribute processContents="lax"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <!-- For backwards compatibility only -->
+  <xs:element name="ConfidentialityLabel" type="slab:ConfidentialityLabelType"/>
+  <!-- Standard NCMS metadata -->
+  <xs:element name="originatorConfidentialityLabel"
+              type="slab:ConfidentialityLabelType"/>
+  <xs:element name="alternativeConfidentialityLabel"
+              type="slab:ConfidentialityLabelType"/>
+  <xs:element name="metadataConfidentialityLabel"
+              type="slab:ConfidentialityLabelType"/>
+  <xs:complexType name="ConfidentialityLabelBaseType"
+                  id="confidentialityLabelBaseType">
+    <xs:annotation>
+      <xs:appinfo>
+        <UniqueIdentifier>
+          urn:nato:stanag:4774:confidentialitymetadatalabel:1:0:appinfo:confidentialityLabelBaseType
+        </UniqueIdentifier>
+        <Name>Confidentiality Label Base Type</Name>
+        <Definition>
+          A type that is used as the base for the confidentiality label and successor
+          confidentiality label elements.
+        </Definition>
+        <VersionIndicator>1.3</VersionIndicator>
+        <UsageGuidance></UsageGuidance>
+        <RestrictionType></RestrictionType>
+        <RestrictionValue></RestrictionValue>
+      </xs:appinfo>
+      <xs:documentation>
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element ref="slab:ConfidentialityInformation"/>
+      <xs:element ref="slab:OriginatorID" minOccurs="0"/>
+      <xs:element ref="slab:CreationDateTime"/>
+      <xs:element ref="slab:SuccessionHandling" minOccurs="0"/>
+      <xs:any processContents="lax" namespace="##other" minOccurs="0"
+              maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ConfidentialityInformation"
+              type="slab:ConfidentialityInformationType"/>
+  <xs:complexType name="ConfidentialityInformationType"
+                  id="confidentialityInformationType">
+    <xs:annotation>
+      <xs:appinfo>
+        <UniqueIdentifier>
+          urn:nato:stanag:4774:confidentialitymetadatalabel:1:0:appinfo:confidentialityInformationType
+        </UniqueIdentifier>
+        <Name>Confidentiality Information Type</Name>
+        <Definition>
+          A type that describes the basic sensitivity information of policy, classification,
+          privacy mark and categories.
+        </Definition>
+        <VersionIndicator>1.2</VersionIndicator>
+        <UsageGuidance></UsageGuidance>
+        <RestrictionType></RestrictionType>
+        <RestrictionValue></RestrictionValue>
+      </xs:appinfo>
+      <xs:documentation>
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="PolicyIdentifier" type="slab:PolicyIdentifierType"/>
+      <xs:element name="Classification" type="slab:ClassificationType"/>
+      <xs:element name="PrivacyMark" type="slab:PrivacyMarkType" minOccurs="0"/>
+      <xs:element ref="slab:Category" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:any processContents="lax" namespace="##other" minOccurs="0"
+              maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="PolicyIdentifier" type="slab:PolicyIdentifierType"/>
+  <xs:complexType name="PolicyIdentifierType" id="policyIdentifierType">
+    <xs:annotation>
+      <xs:appinfo>
+        <UniqueIdentifier>
+          urn:nato:stanag:4774:confidentialitymetadatalabel:1:0:appinfo:policyIdentifierType
+        </UniqueIdentifier>
+        <Name>Policy Identifier Type</Name>
+        <Definition>
+          The Security Policy Authority, which in trun defines the value domain for the other
+          elements within the Confidentiality Information.
+        </Definition>
+        <VersionIndicator>1.2</VersionIndicator>
+        <UsageGuidance></UsageGuidance>
+        <RestrictionType></RestrictionType>
+        <RestrictionValue></RestrictionValue>
+      </xs:appinfo>
+      <xs:documentation>
+      </xs:documentation>
+    </xs:annotation>
+    <xs:simpleContent>
+      <xs:extension base="slab:RequiredToken">
+        <xs:attribute name="URI" type="xs:anyURI"/>
+        <xs:anyAttribute processContents="lax"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:simpleType name="RequiredToken" id="requiredToken">
+    <xs:restriction base="xs:token">
+      <xs:minLength value="1"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="Classification" type="slab:ClassificationType"/>
+  <xs:complexType name="ClassificationType" id="classificationType">
+    <xs:annotation>
+      <xs:appinfo>
+        <UniqueIdentifier>
+          urn:nato:stanag:4774:confidentialitymetadatalabel:1:0:appinfo:classificationType
+        </UniqueIdentifier>
+        <Name>Classification Type</Name>
+        <Definition>The basic hierarchical indication of sensitivity.</Definition>
+        <VersionIndicator>1.2</VersionIndicator>
+        <UsageGuidance></UsageGuidance>
+        <RestrictionType></RestrictionType>
+        <RestrictionValue></RestrictionValue>
+      </xs:appinfo>
+      <xs:documentation>
+        Annex A of Appendix 1 to
+        ADatP-4774
+        App 1-A5 Edition A Version 1
+      </xs:documentation>
+    </xs:annotation>
+    <xs:simpleContent>
+      <xs:extension base="slab:RequiredToken">
+        <xs:attribute name="URI" type="xs:anyURI"/>
+        <xs:anyAttribute processContents="lax"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:element name="PrivacyMark" type="slab:PrivacyMarkType"/>
+  <xs:simpleType name="PrivacyMarkType" id="privacyMarkType">
+    <xs:annotation>
+      <xs:appinfo>
+        <UniqueIdentifier>
+          urn:nato:stanag:4774:confidentialitymetadatalabel:1:0:appinfo:privacyMarkType
+        </UniqueIdentifier>
+        <Name>Privacy Mark Type</Name>
+        <Definition>
+          Additional information for the end user on the handling of the associated data
+          object.
+        </Definition>
+        <VersionIndicator>1.2</VersionIndicator>
+        <UsageGuidance></UsageGuidance>
+        <RestrictionType></RestrictionType>
+        <RestrictionValue></RestrictionValue>
+      </xs:appinfo>
+      <xs:documentation>
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string"/>
+  </xs:simpleType>
+  <xs:element name="Category" type="slab:CategoryType"/>
+  <xs:complexType name="CategoryType" id="categoryType">
+    <xs:annotation>
+      <xs:appinfo>
+        <UniqueIdentifier>
+          urn:nato:stanag:4774:confidentialitymetadatalabel:1:0:appinfo:categoryType
+        </UniqueIdentifier>
+        <Name>Category Type</Name>
+        <Definition>
+          The more granular indication of sensitivity, over and above the classification.
+        </Definition>
+        <VersionIndicator>1.2</VersionIndicator>
+        <UsageGuidance></UsageGuidance>
+        <RestrictionType></RestrictionType>
+        <RestrictionValue></RestrictionValue>
+      </xs:appinfo>
+      <xs:documentation>
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence minOccurs="0" maxOccurs="unbounded">
+      <xs:element ref="slab:CategoryValue"/>
+    </xs:sequence>
+    <xs:attribute name="Type" use="required">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="RESTRICTIVE"/>
+          <xs:enumeration value="PERMISSIVE"/>
+          <xs:enumeration value="INFORMATIVE"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute name="URI" type="xs:anyURI" use="optional"/>
+    <xs:attribute name="TagName" type="xs:string" use="required"/>
+    <xs:anyAttribute processContents="lax"/>
+  </xs:complexType>
+  <xs:element name="CategoryValue" type="slab:CategoryValueType" abstract="true"/>
+  <xs:simpleType name="CategoryValueType" id="categoryValueType">
+    <xs:restriction base="xs:string"/>
+  </xs:simpleType>
+  <xs:element name="GenericValue" type="slab:GenericValueType"
+              substitutionGroup="slab:CategoryValue"/>
+  <xs:simpleType name="GenericValueType" id="genericValueType">
+    <xs:restriction base="slab:CategoryValueType"/>
+  </xs:simpleType>
+  <xs:element name="IntegerValue" type="slab:IntegerValueType"
+              substitutionGroup="slab:CategoryValue"/>
+  <xs:simpleType name="IntegerValueType" id="integerValueType">
+    <xs:restriction base="slab:CategoryValueType">
+      <xs:pattern value="[0-9]+"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="BitStringValue" type="slab:BitStringValueType"
+              substitutionGroup="slab:CategoryValue"/>
+  <xs:simpleType name="BitStringValueType" id="bitStringValueType">
+    <xs:restriction base="slab:CategoryValueType">
+      <xs:pattern value="[0-1]+"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="OriginatorID" type="slab:OriginatorIDType"/>
+  <xs:complexType name="OriginatorIDType" id="originatorIDType">
+    <xs:annotation>
+      <xs:appinfo>
+        <UniqueIdentifier>
+          urn:nato:stanag:4774:confidentialitymetadatalabel:1:0:appinfo:originatorIDType
+        </UniqueIdentifier>
+        <Name>Originator ID Type</Name>
+        <Definition>
+          The originator of the confidentiality label, which may be different to the
+          originator of the data object.
+        </Definition>
+        <VersionIndicator>1.2</VersionIndicator>
+        <UsageGuidance></UsageGuidance>
+        <RestrictionType></RestrictionType>
+        <RestrictionValue></RestrictionValue>
+      </xs:appinfo>
+      <xs:documentation>
+      </xs:documentation>
+    </xs:annotation>
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="IDType" use="required">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="rfc822Name"/>
+              <xs:enumeration value="dNSName"/>
+              <xs:enumeration value="directoryName"/>
+              <xs:enumeration value="uniformResourceIdentifier"/>
+              <xs:enumeration value="iPAddress"/>
+              <xs:enumeration value="x400Address"/>
+              <xs:enumeration value="userPrincipalName"/>
+              <xs:enumeration value="jID"/>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+        <xs:anyAttribute processContents="lax"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:element name="CreationDateTime" type="slab:CreationDateTimeType"/>
+  <xs:simpleType name="CreationDateTimeType" id="creationDateTime">
+    <xs:annotation>
+      <xs:appinfo>
+        <UniqueIdentifier>
+          urn:nato:stanag:4774:confidentialitymetadatalabel:1:0:appinfo:creationDateType
+        </UniqueIdentifier>
+        <Name>Creation Date Time Type</Name>
+        <Definition>The time at which the confidentiality label was created, which
+          may be different to the time the data object was created.
+        </Definition>
+        <VersionIndicator>1.2</VersionIndicator>
+        <UsageGuidance></UsageGuidance>
+        <RestrictionType></RestrictionType>
+        <RestrictionValue></RestrictionValue>
+      </xs:appinfo>
+      <xs:documentation>
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:dateTime"/>
+  </xs:simpleType>
+  <xs:element name="SuccessionHandling" type="slab:SuccessionHandlingType"/>
+  <xs:complexType name="SuccessionHandlingType" id="successionHandlingType">
+    <xs:annotation>
+      <xs:appinfo>
+        <UniqueIdentifier>
+          urn:nato:stanag:4774:confidentialitymetadatalabel:1:0:appinfo:successionHandlingType
+        </UniqueIdentifier>
+        <Name>Classification Type</Name>
+        <Definition>
+          The proposed confidentiality label at a subsequent date.
+        </Definition>
+        <VersionIndicator>1.2</VersionIndicator>
+        <UsageGuidance></UsageGuidance>
+        <RestrictionType></RestrictionType>
+        <RestrictionValue></RestrictionValue>
+      </xs:appinfo>
+      <xs:documentation>
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element ref="slab:SuccessionDateTime"/>
+      <xs:element ref="slab:SuccessorConfidentialityLabel"/>
+      <xs:any namespace="##any" processContents="skip" minOccurs="0"
+              maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="SuccessionDateTime" type="slab:SuccessionDateTimeType"/>
+  <xs:simpleType name="SuccessionDateTimeType" id="successionDateTimeType">
+    <xs:annotation>
+      <xs:appinfo>
+        <UniqueIdentifier>
+          urn:nato:stanag:4774:confidentialitymetadatalabel:1:0:appinfo:successionDateTimeType
+        </UniqueIdentifier>
+        <Name>Succession Date Time Type</Name>
+        <Definition>
+          The proposed date at which a proposed successorConfidentialityLabel should come in
+          to force.
+        </Definition>
+        <VersionIndicator>1.2</VersionIndicator>
+        <UsageGuidance></UsageGuidance>
+        <RestrictionType></RestrictionType>
+        <RestrictionValue></RestrictionValue>
+      </xs:appinfo>
+      <xs:documentation>
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:dateTime"/>
+  </xs:simpleType>
+  <xs:element name="SuccessorConfidentialityLabel"
+              type="slab:ConfidentialityLabelBaseType"/>
+</xs:schema>

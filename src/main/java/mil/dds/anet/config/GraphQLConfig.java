@@ -26,6 +26,7 @@ import mil.dds.anet.beans.Position;
 import mil.dds.anet.graphql.AllowUnverifiedUsers;
 import mil.dds.anet.graphql.DateTimeMapper;
 import mil.dds.anet.graphql.RestrictToAuthorizationGroups;
+import mil.dds.anet.resources.AccessTokenResource;
 import mil.dds.anet.resources.AdminResource;
 import mil.dds.anet.resources.AnetEmailResource;
 import mil.dds.anet.resources.ApprovalStepResource;
@@ -57,6 +58,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @EnableWebMvc
 public class GraphQLConfig implements WebMvcConfigurer {
 
+  private final AccessTokenResource accessTokenResource;
   private final AdminResource adminResource;
   private final AnetEmailResource anetEmailResource;
   private final ApprovalStepResource approvalStepResource;
@@ -76,9 +78,9 @@ public class GraphQLConfig implements WebMvcConfigurer {
   private final SubscriptionUpdateResource subscriptionUpdateResource;
   private final TaskResource taskResource;
 
-  public GraphQLConfig(AdminResource adminResource, AnetEmailResource anetEmailResource,
-      ApprovalStepResource approvalStepResource, AttachmentResource attachmentResource,
-      AuthorizationGroupResource authorizationGroupResource,
+  public GraphQLConfig(AccessTokenResource accessTokenResource, AdminResource adminResource,
+      AnetEmailResource anetEmailResource, ApprovalStepResource approvalStepResource,
+      AttachmentResource attachmentResource, AuthorizationGroupResource authorizationGroupResource,
       EntityAvatarResource entityAvatarResource, EventResource eventResource,
       EventSeriesResource eventSeriesResource, LocationResource locationResource,
       NoteResource noteResource, OrganizationResource organizationResource,
@@ -86,6 +88,7 @@ public class GraphQLConfig implements WebMvcConfigurer {
       ReportResource reportResource, SavedSearchResource savedSearchResource,
       SubscriptionResource subscriptionResource,
       SubscriptionUpdateResource subscriptionUpdateResource, TaskResource taskResource) {
+    this.accessTokenResource = accessTokenResource;
     this.adminResource = adminResource;
     this.anetEmailResource = anetEmailResource;
     this.approvalStepResource = approvalStepResource;
@@ -176,11 +179,11 @@ public class GraphQLConfig implements WebMvcConfigurer {
 
   private List<Object> getGraphQLResources() {
     // Create all GraphQL Resources
-    return List.of(adminResource, anetEmailResource, approvalStepResource, attachmentResource,
-        authorizationGroupResource, entityAvatarResource, eventResource, eventSeriesResource,
-        locationResource, noteResource, organizationResource, personResource, positionResource,
-        reportResource, savedSearchResource, subscriptionResource, subscriptionUpdateResource,
-        taskResource);
+    return List.of(accessTokenResource, adminResource, anetEmailResource, approvalStepResource,
+        attachmentResource, authorizationGroupResource, entityAvatarResource, eventResource,
+        eventSeriesResource, locationResource, noteResource, organizationResource, personResource,
+        positionResource, reportResource, savedSearchResource, subscriptionResource,
+        subscriptionUpdateResource, taskResource);
   }
 
   public static class AuthorizationInterceptor implements ResolverInterceptor {

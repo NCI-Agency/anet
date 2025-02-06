@@ -1557,19 +1557,6 @@ const Search = ({
                 >
                   Google Earth (kml)
                 </Dropdown.Item>
-                <Dropdown.Item
-                  onClick={() =>
-                    exportResults(
-                      searchQueryParams,
-                      queryTypes,
-                      "nvg",
-                      "application/xml",
-                      exportMaxResults,
-                      setError
-                    )}
-                >
-                  NATO Vector Graphics (nvg)
-                </Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>
           </>

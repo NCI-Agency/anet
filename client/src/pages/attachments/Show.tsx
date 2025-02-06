@@ -189,14 +189,12 @@ const AttachmentShow = ({ pageDispatchers }: AttachmentShowProps) => {
                     />
                     <DictionaryField
                       wrappedComponent={Field}
-                      dictProps={Settings.classification}
+                      dictProps={Settings.confidentialityLabel}
                       name="classification"
                       component={FieldHelper.ReadonlyField}
-                      humanValue={
-                        Settings.classification.choices[
-                          attachment.classification
-                        ]
-                      }
+                      humanValue={utils.getConfidentialityLabelForChoice(
+                        attachment.classification
+                      )}
                     />
                     <Field
                       name="used in"

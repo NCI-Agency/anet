@@ -50,8 +50,8 @@ public class ReportSensitiveInformationDao
             + " WHERE \"reportUuid\" IN ( <foreignKeys> )";
 
     public ReportsSensitiveInformationBatcher() {
-      super(databaseHandler, SQL, "foreignKeys", new ReportSensitiveInformationMapper(),
-          "reportsSensitiveInformation_reportUuid");
+      super(ReportSensitiveInformationDao.this.databaseHandler, SQL, "foreignKeys",
+          new ReportSensitiveInformationMapper(), "reportsSensitiveInformation_reportUuid");
     }
   }
 

@@ -11,7 +11,6 @@ import java.security.Principal;
 import mil.dds.anet.config.AnetConfig;
 import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.database.AdminDao;
-import mil.dds.anet.database.AdminDao.AdminSettingKeys;
 import mil.dds.anet.utils.SecurityUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -60,12 +59,6 @@ public class HomeResource {
   public String index(final Principal principal, Model model) throws JsonProcessingException {
     model.addAttribute("currentUser", SecurityUtils.getPersonFromPrincipal(principal));
     model.addAttribute("projectVersion", config.getVersion());
-    model.addAttribute("securityBannerClassification",
-        adminDao.getSetting(AdminSettingKeys.SECURITY_BANNER_CLASSIFICATION));
-    model.addAttribute("securityBannerReleasability",
-        adminDao.getSetting(AdminSettingKeys.SECURITY_BANNER_RELEASABILITY));
-    model.addAttribute("securityBannerColor",
-        adminDao.getSetting(AdminSettingKeys.SECURITY_BANNER_COLOR));
     // TODO: should try to pass the dictionary to the client as literal JSON instead of serializing
     // it to a string
     final ObjectMapper jsonMapper = new ObjectMapper();

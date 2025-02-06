@@ -471,6 +471,6 @@ public abstract class AbstractResourceTest {
   }
 
   protected String getFirstClassification() {
-    return getAllowedClassifications().keySet().iterator().next();
+    return getAllowedClassifications().iterator().next();
   }
 }
