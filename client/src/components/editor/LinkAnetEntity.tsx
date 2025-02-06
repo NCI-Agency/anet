@@ -16,7 +16,7 @@ const LinkAnetEntity = ({
   uuid,
   displayCallback = null,
   children = null,
-  showAvatar
+  showAvatar = true
 }: LinkAnetEntityProps) => {
   const [entity, setEntity] = useState()
   const [whenNotFound, setWhenNotFound] = useState(null)

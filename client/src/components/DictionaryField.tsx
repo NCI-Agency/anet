@@ -10,20 +10,14 @@ interface DictionaryFieldProps {
 const DictionaryField = ({
   wrappedComponent: WrappedComponent,
   dictProps,
-  hideIfEmpty = false,
+  hideIfEmpty,
   ...otherProps
 }: DictionaryFieldProps) => {
   // Only display field if the dictProps are defined
   if (_isEmpty(dictProps) || dictProps?.exclude) {
     return null
   }
-  if (
-    hideIfEmpty &&
-    (otherProps.content === "" ||
-      otherProps.content == null ||
-      (otherProps.content instanceof Object &&
-        !Object.keys(otherProps.content).length))
-  ) {
+  if (hideIfEmpty && _isEmpty(otherProps.content)) {
     return null
   }
   return (

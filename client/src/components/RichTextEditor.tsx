@@ -102,7 +102,7 @@ const RichTextEditor = ({
   className,
   readOnly,
   disableFullSize,
-  showAvatar
+  showAvatar = true
 }: RichTextEditorProps) => {
   const [showAnetLinksModal, setShowAnetLinksModal] = useState(false)
   const [showExternalLinksModal, setShowExternalLinksModal] = useState(false)
@@ -132,7 +132,7 @@ const RichTextEditor = ({
 
   const renderElement = useCallback(
     props => <Element {...props} showAvatar={showAvatar} />,
-    []
+    [showAvatar]
   )
   const renderLeaf = useCallback(props => <Leaf {...props} />, [])
 

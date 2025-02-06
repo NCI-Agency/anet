@@ -2,12 +2,9 @@
 import { Icon, Intent, Tooltip } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import styled from "@emotion/styled"
-import AppContext from "components/AppContext"
-import LinkTo from "components/LinkTo"
 import { CompactSecurityBanner } from "components/SecurityBanner"
-import moment from "moment"
-import React, { useContext } from "react"
-import { Link, useLocation } from "react-router-dom"
+import _isEmpty from "lodash/isEmpty"
+import React from "react"
 import Settings from "settings"
 import utils from "utils"
 import anetLogo from "../../public/favicon/logo.svg"
@@ -120,7 +117,6 @@ interface CompactHeaderContentProps {
   policyAndClassification?: string
   releasableTo?: string
   sensitiveInformation?: boolean
-  useBgColor: boolean
 }
 
 export const CompactHeaderContent = ({
@@ -129,11 +125,10 @@ export const CompactHeaderContent = ({
     Settings.siteClassification
   ),
   releasableTo = utils.getReleasableToForChoice(Settings.siteClassification),
-  sensitiveInformation,
-  useBgColor = true
+  sensitiveInformation
 }: CompactHeaderContentProps) => {
   return (
-    <HeaderContentS bgc={useBgColor ? color : "unset"}>
+    <HeaderContentS bgc={color}>
       <img
         src={anetLogo}
         alt="logo"
@@ -147,37 +142,28 @@ export const CompactHeaderContent = ({
           releasableTo={releasableTo}
           bannerId="header-banner"
         />
-        {sensitiveInformation && (
-          <SensitivityInformation useBgColor={useBgColor} />
-        )}
+        {sensitiveInformation && <SensitivityInformation />}
       </ClassificationBoxS>
     </HeaderContentS>
   )
 }
 
 interface CompactFooterContentProps {
-  object?: any
   color?: string
   policyAndClassification?: string
-  releasableTo?: string
 }
 
 export const CompactFooterContent = ({
-  object,
   color = utils.getColorForChoice(Settings.siteClassification),
   policyAndClassification = utils.getPolicyAndClassificationForChoice(
     Settings.siteClassification
-  ),
-  releasableTo = utils.getReleasableToForChoice(Settings.siteClassification)
+  )
 }: CompactFooterContentProps) => {
-  const location = useLocation()
-  const { currentUser } = useContext(AppContext)
   return (
-    <FooterContentS bgc="unset">
+    <FooterContentS bgc={color}>
       <ClassificationBanner
         color={color}
         policyAndClassification={policyAndClassification}
-        releasableTo={releasableTo}
         bannerId="footer-banner"
       />
     </FooterContentS>
@@ -224,7 +210,6 @@ const ClassificationBoxS = styled.div`
   margin: auto;
 `
 
-// background color of banner makes reading blue links hard. Force white color
 const HF_COMMON_STYLE = `
   position: absolute;
   left: 0mm;
@@ -238,9 +223,6 @@ const HF_COMMON_STYLE = `
   padding: 1rem;
   -webkit-print-color-adjust: exact !important;
   color-adjust: exact !important;
-  & * {
-    color: white !important;
-  }
   @media print {
     position: fixed;
     max-height: 80px;
@@ -251,6 +233,11 @@ const HeaderContentS = styled.div`
   ${HF_COMMON_STYLE};
   top: 0mm;
   background-color: ${props => props.bgc} !important;
+  @media print {
+    .banner span {
+      display: block;
+    }
+  }
 `
 
 const FooterContentS = styled.div`
@@ -368,30 +355,22 @@ interface CompactRowProps {
 export const CompactRow = ({
   label,
   content,
-  hideIfEmpty = false,
+  hideIfEmpty,
   ...otherProps
 }: CompactRowProps) => {
   const { id, style, className } = otherProps
   // merge custom style
-  const isKeyDetailsRow = className?.includes("keyDetailsRow")
   const CustomStyled = styled(CompactRowS)`
     ${style}
   `
 
-  if (
-    hideIfEmpty &&
-    (content === "" ||
-      content == null ||
-      (content instanceof Object && !Object.keys(content).length))
-  ) {
+  if (hideIfEmpty && _isEmpty(content)) {
     return null
   }
   return (
     <CustomStyled id={id} className={className}>
-      {label && !isKeyDetailsRow && <RowLabelS>{label}</RowLabelS>}
-      <CompactRowContentS colSpan={!isKeyDetailsRow ? 1 : 2}>
-        {content}
-      </CompactRowContentS>
+      {label && <RowLabelS>{label}</RowLabelS>}
+      <CompactRowContentS colSpan={label ? 1 : 2}>{content}</CompactRowContentS>
     </CustomStyled>
   )
 }

@@ -310,11 +310,10 @@ export default {
    * Used to determine whether the text should be black or white
    * depending on the specified background color.
    * @param {string} color Hexadecimal color code or color name
+   * @param {string} defaultColor Optional default color, defaults to "white" if not specified
    * @returns Text color
    */
-  getContrastYIQ: function(color) {
-    // pick a default
-    const defaultColor = "white"
+  getContrastYIQ: function(color, defaultColor: string = "white") {
     if (!color) {
       return defaultColor
     }

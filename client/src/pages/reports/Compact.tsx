@@ -314,13 +314,13 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
             backgroundText={backgroundText}
           >
             <CompactHeaderContent
+              color={null}
               policyAndClassification={utils.getPolicyAndClassificationForChoice(
                 report.classification
               )}
               releasableTo={utils.getReleasableToForChoice(
                 report.classification
               )}
-              useBgColor={false}
             />
             <CompactTable>
               <FullColumn>
@@ -420,6 +420,7 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                     }
                     className="reportField keyDetailsRow"
                     hideIfEmpty
+                    label={null}
                   />
                 )}
                 {optionalFields.assessments.active && (
@@ -450,10 +451,10 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
             </CompactTable>
             <CompactFooterContent
               object={report}
+              color={null}
               policyAndClassification={utils.getPolicyAndClassificationForChoice(
                 report.classification
               )}
-              useBgColor={false}
             />
           </CompactView>
         </>
@@ -515,7 +516,7 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
       ? moment(report.updatedAt)
       : moment(report.releasedAt)
     return (
-      <div style={{ "font-size": "12px", "margin-bottom": "10px" }}>
+      <div style={{ fontSize: "12px", marginBottom: "10px" }}>
         <div>
           Authored on{" "}
           {timeToShow.format(Settings.dateFormats.forms.displayShort.withTime)}{" "}
@@ -528,7 +529,7 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
               modelType="Person"
               model={currentUser}
               showAvatar={false}
-              style={{ "font-size": "12px" }}
+              style={{ fontSize: "12px" }}
             />{" "}
             on{" "}
             {moment().format(Settings.dateFormats.forms.displayLong.withTime)}
@@ -538,7 +539,7 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
     )
   }
 
-  function getTasksAndAssessments(displayAssessments = false, id = null) {
+  function getTasksAndAssessments(displayAssessments?: boolean, id?: string) {
     return (
       // return only name and objective if no assessment
       displayAssessments ? (
@@ -572,12 +573,12 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
   }
 
   function getAttendeesAndAssessments(
-    isInterlocutor,
-    displayAssessments = false,
-    id = null
+    interlocutor: boolean,
+    displayAssessments?: boolean,
+    id?: string
   ) {
     const attendees = report.attendees.filter(
-      at => at.interlocutor === isInterlocutor
+      at => at.interlocutor === interlocutor
     )
     return displayAssessments ? (
       <InstantAssessmentsContainerField

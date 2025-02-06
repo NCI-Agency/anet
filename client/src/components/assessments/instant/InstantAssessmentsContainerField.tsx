@@ -107,6 +107,7 @@ const InstantAssessmentRow = ({
 }
 
 interface InstantAssessmentsContainerFieldProps {
+  id?: string
   entityType: (...args: unknown[]) => unknown
   entities?: any[]
   relatedObject?: any
@@ -122,21 +123,20 @@ interface InstantAssessmentsContainerFieldProps {
   canWrite?: boolean
   readonly?: boolean
   showEntitiesWithoutAssessments?: boolean
-  id?: string
 }
 
 const InstantAssessmentsContainerField = ({
+  id,
   entityType,
   entities = [],
   relatedObject,
   parentFieldName,
   formikProps,
-  isCompact = false,
+  isCompact,
   canRead = false,
   canWrite = false,
   readonly = false,
-  showEntitiesWithoutAssessments,
-  id
+  showEntitiesWithoutAssessments
 }: InstantAssessmentsContainerFieldProps) => {
   const { values } = formikProps
 
@@ -171,7 +171,7 @@ const InstantAssessmentsContainerField = ({
     ? entities.sort(sortEntries)
     : entities.filter(getEntitiesWithAssessments)
   return (
-    <Table id={id || undefined}>
+    <Table id={id}>
       <tbody>
         {filteredEntities.map(entity => {
           const entityInstantAssessments = entity.getInstantAssessments()

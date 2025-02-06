@@ -77,7 +77,7 @@ describe("Show print report page", () => {
       const bannerSecurityText = await (
         await Home.getBannerSecurityText()
       ).getText()
-      expect(compactBannerText.replace(/\n/g, " ")).to.equal(bannerSecurityText)
+      expect(compactBannerText.replace(/\n/g, "")).to.equal(bannerSecurityText)
     })
     it("Should display all attendees", async() => {
       const displayedInterlocutors =

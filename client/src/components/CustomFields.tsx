@@ -116,7 +116,7 @@ const ReadonlySpecialField = ({
         isCompact={isCompact}
         component={FieldHelper.ReadonlyField}
         humanValue={
-          <LevelTrained
+          <CompactLikertScale
             name={name}
             values={values}
             levels={otherFieldProps.levels}
@@ -306,7 +306,7 @@ interface GeoLocationFieldProps {
 
 const GeoLocationField = ({
   editable = true,
-  isCompact = false,
+  isCompact,
   ...fieldProps
 }: GeoLocationFieldProps) => {
   const { name, label, formikProps, ...otherFieldProps } = fieldProps
@@ -389,7 +389,7 @@ const GeoLocationField = ({
 interface ReadonlyGeoLocationFieldProps {
   name: string
   values: any
-  isCompact: boolean
+  isCompact?: boolean
 }
 
 const ReadonlyGeoLocationField = (
@@ -930,13 +930,17 @@ const ReadonlyArrayOfAnetObjectsField = ({
   )
 }
 
-interface LevelTrainedProps {
+interface CompactLikertScaleProps {
   name: string
   values: any
-  levels: array
+  levels: any[]
 }
 
-const LevelTrained = ({ name, values, levels }: LevelTrainedProps) => {
+const CompactLikertScale = ({
+  name,
+  values,
+  levels
+}: CompactLikertScaleProps) => {
   const fieldValue = Number(Object.get(values, name) || 0).toFixed(0)
   const sortedLevels = levels.sort((a, b) => a.endValue - b.endValue)
   const levelLabel =
@@ -1315,8 +1319,8 @@ export const ReadonlyCustomFields = ({
   parentFieldName = DEFAULT_CUSTOM_FIELDS_PARENT, // key path in the values object to get to the level of fields given by the fieldsConfig
   values,
   vertical = false,
-  isCompact = false,
-  hideIfEmpty = false,
+  isCompact,
+  hideIfEmpty,
   extraColElem,
   labelColumnWidth,
   setShowCustomFields
@@ -1347,12 +1351,7 @@ export const ReadonlyCustomFields = ({
         }
         const ReadonlyFieldComponent = READONLY_FIELD_COMPONENTS[type]
         const value = Object.get(values, fieldName) || null
-        if (
-          hideIfEmpty &&
-          (value === "" ||
-            value == null ||
-            (value instanceof Object && !Object.keys(value).length))
-        ) {
+        if (hideIfEmpty && _isEmpty(value)) {
           return null
         }
         return ReadonlyFieldComponent ? (
