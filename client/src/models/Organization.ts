@@ -218,7 +218,10 @@ export default class Organization extends Model {
     return ORGANIZATIONS_ICON
   }
 
-  toString() {
+  toString(displayCallback) {
+    if (typeof displayCallback === "function") {
+      return displayCallback(this)
+    }
     return [
       this.shortName,
       this.longName,
