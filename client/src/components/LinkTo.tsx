@@ -18,6 +18,7 @@ interface LinkToProps {
   className?: string
   showIcon?: boolean
   showAvatar?: boolean
+  showPreview?: boolean
   isLink?: boolean
   edit?: boolean
   // Configures this link to look like a button. Set it to true to make it a button,
@@ -41,6 +42,7 @@ const LinkTo = ({
   variant,
   showIcon = true,
   showAvatar = true,
+  showPreview = true,
   isLink = true,
   whenUnspecified = "Unspecified",
   className,
@@ -98,27 +100,36 @@ const LinkTo = ({
   }
 
   if (!isLink) {
+    if (showPreview) {
+      return (
+        <LinkToContext.Provider value={{ level: level + 1 }}>
+          <ModelTooltip
+            tooltipContent={
+              <ModelPreview modelType={modelType} uuid={modelInstance.uuid} />
+            }
+            targetProps={tooltipProps}
+            popoverClassName="bp5-dark"
+            hoverCloseDelay={400}
+            hoverOpenDelay={HOVER_OPEN_DELAY}
+            portalClassName="linkto-model-preview-portal"
+            interactionKind={PopoverInteractionKind.HOVER}
+            boundary="viewport"
+          >
+            <span style={{ cursor: "help", ...style }}>
+              {avatarComponent}
+              {modelInstance.toString(displayCallback)}
+              {children}
+            </span>
+          </ModelTooltip>
+        </LinkToContext.Provider>
+      )
+    }
     return (
-      <LinkToContext.Provider value={{ level: level + 1 }}>
-        <ModelTooltip
-          tooltipContent={
-            <ModelPreview modelType={modelType} uuid={modelInstance.uuid} />
-          }
-          targetProps={tooltipProps}
-          popoverClassName="bp5-dark"
-          hoverCloseDelay={400}
-          hoverOpenDelay={HOVER_OPEN_DELAY}
-          portalClassName="linkto-model-preview-portal"
-          interactionKind={PopoverInteractionKind.HOVER}
-          boundary="viewport"
-        >
-          <span style={{ cursor: "help", ...style }}>
-            {avatarComponent}
-            {modelInstance.toString(displayCallback)}
-            {children}
-          </span>
-        </ModelTooltip>
-      </LinkToContext.Provider>
+      <span>
+        {avatarComponent}
+        {modelInstance.toString(displayCallback)}
+        {children}
+      </span>
     )
   }
 
@@ -143,7 +154,7 @@ const LinkTo = ({
       </>
     </LinkToComponent>
   )
-  if (!button && level === TOP_LEVEL) {
+  if (showPreview && !button && level === TOP_LEVEL) {
     // Show popover when hovering over link
     return (
       <LinkToContext.Provider value={{ level: level + 1 }}>
