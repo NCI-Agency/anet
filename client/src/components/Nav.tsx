@@ -1,5 +1,7 @@
 import { clearSearchQuery, resetPages } from "actions"
+import ms from "milsymbol"
 import AppContext from "components/AppContext"
+import LinkTo from "components/LinkTo"
 import ResponsiveLayoutContext from "components/ResponsiveLayoutContext"
 import _isEmpty from "lodash/isEmpty"
 import { Organization } from "models"
@@ -30,6 +32,18 @@ const USER_ACTIVITY_OPTIONS = [
   { key: "overTime", label: "Over time" },
   { key: "perPeriod", label: "Per period" }
 ]
+
+const MS_FILL_COLOR = new ms.Symbol("14").getColors().fillColor
+const APP6_STANDARD_IDENTITIY_COLORS = [
+  /* 0 */ MS_FILL_COLOR.Unknown,
+  /* 1 */ MS_FILL_COLOR.Unknown,
+  /* 2 */ MS_FILL_COLOR.Friend,
+  /* 3 */ MS_FILL_COLOR.Friend,
+  /* 4 */ MS_FILL_COLOR.Neutral,
+  /* 5 */ MS_FILL_COLOR.Hostile,
+  /* 6 */ MS_FILL_COLOR.Hostile
+]
+const DEFAULT_APP6_STANDARD_IDENTITY = 1
 
 interface AnchorNavItemProps {
   to: string
@@ -101,13 +115,15 @@ interface SidebarContainerProps {
   children?: React.ReactNode
   handleOnClick?: (...args: unknown[]) => unknown
   setIsMenuLinksOpened?: (...args: unknown[]) => unknown
+  style?: any
 }
 
 const SidebarContainer = ({
   linkTo,
   children,
   handleOnClick,
-  setIsMenuLinksOpened
+  setIsMenuLinksOpened,
+  style = {}
 }: SidebarContainerProps) => {
   return (
     <LinkContainer
@@ -116,6 +132,7 @@ const SidebarContainer = ({
         handleOnClick?.()
         setIsMenuLinksOpened?.()
       }}
+      style={style}
     >
       <NavDropdown.Item>{children}</NavDropdown.Item>
     </LinkContainer>
@@ -201,6 +218,12 @@ const Navigation = ({
     inMySavedSearches,
     inMyEvents
   ])
+
+  const getOrganizationStyle = (org: Organization) => {
+    return {
+      "backgroundColor": APP6_STANDARD_IDENTITIY_COLORS[org.app6standardIdentity || DEFAULT_APP6_STANDARD_IDENTITY],
+    }
+  }
 
   return (
     <Nav variant="pills" id="leftNav" className="flex-column d-print-none">
@@ -345,8 +368,16 @@ const Navigation = ({
             linkTo={Organization.pathFor(org)}
             handleOnClick={clearSearchQuery}
             setIsMenuLinksOpened={() => setIsMenuLinksOpened(false)}
+            style={getOrganizationStyle(org)}
           >
-            {org.shortName}
+            {<LinkTo
+              modelType="Organization"
+              model={org}
+              isLink={false}
+              showIcon={false}
+              showPreview={false}
+              displayCallback={org => org.shortName}
+            />}
           </SidebarContainer>
         ))}
       </NavDropdown>

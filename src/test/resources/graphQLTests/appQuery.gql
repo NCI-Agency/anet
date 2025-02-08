@@ -145,5 +145,6 @@ topLevelOrgs: organizationList(
     shortName
     longName
     identificationCode
+    app6standardIdentity
   }
 }
