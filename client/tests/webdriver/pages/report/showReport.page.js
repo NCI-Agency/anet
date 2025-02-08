@@ -155,6 +155,10 @@ class ShowReport extends Page {
     return (await this.getReportModal()).$('//button[text()="Approve anyway"]')
   }
 
+  async getEditAttachmentsButton() {
+    return await browser.$("#edit-attachments")
+  }
+
   async getSuccessfullApprovalToast() {
     return browser.$('//div[text()="Successfully approved report."]')
   }

@@ -43,6 +43,22 @@ describe("Show report page", () => {
       await (await ShowReport.getCard()).waitForDisplayed()
       expect(await ShowReport.getCaption()).to.be.equal("Arthur's test report")
     })
+    it("We should be able to edit the attachments", async() => {
+      const editAttachmentsButton = await ShowReport.getEditAttachmentsButton()
+      expect(await editAttachmentsButton.getText()).to.be.equal(
+        "Edit attachments"
+      )
+      await editAttachmentsButton.click()
+      expect(await editAttachmentsButton.getText()).to.be.equal(
+        "View attachments"
+      )
+
+      const editButton = await browser.$(".attachment-card .button-line a")
+      await expect(await editButton.getAttribute("href")).to.include(
+        "/attachments/f076406f-1a9b-4fc9-8ab2-cd2a138ec26d/edit"
+      )
+      await editAttachmentsButton.click()
+    })
     it("We can go to the show page of Attachment", async() => {
       await (await ShowReport.getImageClick()).click()
       await expect(await browser.getUrl()).to.include(
