@@ -87,6 +87,10 @@ class ShowOrganization extends Page {
     return browser.$("//a[text()='Edit']")
   }
 
+  async getEditAttachmentsButton() {
+    return await browser.$("#edit-attachments")
+  }
+
   async getEditableTasks() {
     return browser.$('div[id="fg-tasks"]')
   }

@@ -56,6 +56,7 @@ const AttachmentsDetailView = ({
       <Button
         variant="primary"
         onClick={() => setEditAttachments(!editAttachments)}
+        id="edit-attachments"
       >
         {editAttachments ? "View" : "Edit"} attachments
       </Button>
