@@ -219,6 +219,28 @@ const Navigation = ({
     inMyEvents
   ])
 
+  const allSortedOrgs = allOrganizations.sort((a, b) => {
+    const aValue = a.app6standardIdentity || DEFAULT_APP6_STANDARD_IDENTITY
+    const bValue = b.app6standardIdentity || DEFAULT_APP6_STANDARD_IDENTITY
+
+    // Calculates the rank of the standard identity
+    const getRank = (value) => {
+      if (value === 2 || value === 3) return 1
+      if (value === 4) return 2
+      if (value === 5 || value === 6) return 3
+      return 4
+    }
+    const aRank = getRank(parseInt(aValue, 10))
+    const bRank = getRank(parseInt(bValue, 10))
+
+    if (aRank !== bRank) {
+      return aRank - bRank
+    }
+  
+    // If ranks are the same, sort alphabetically by shortName
+    return a.shortName.localeCompare(b.shortName)
+  })
+
   const getOrganizationStyle = (org: Organization) => {
     return {
       "backgroundColor": APP6_STANDARD_IDENTITIY_COLORS[org.app6standardIdentity || DEFAULT_APP6_STANDARD_IDENTITY],
@@ -362,7 +384,7 @@ const Navigation = ({
         id="all-organizations"
         active={inOrg && allOrganizationUuids.includes(orgUuid) && !inMyOrg}
       >
-        {Organization.map(allOrganizations, org => (
+        {Organization.map(allSortedOrgs, org => (
           <SidebarContainer
             key={org.uuid}
             linkTo={Organization.pathFor(org)}
