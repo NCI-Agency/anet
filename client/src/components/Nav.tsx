@@ -1,9 +1,9 @@
 import { clearSearchQuery, resetPages } from "actions"
-import ms from "milsymbol"
 import AppContext from "components/AppContext"
 import LinkTo from "components/LinkTo"
 import ResponsiveLayoutContext from "components/ResponsiveLayoutContext"
 import _isEmpty from "lodash/isEmpty"
+import ms from "milsymbol"
 import { Organization } from "models"
 import {
   INSIGHT_DETAILS,
@@ -34,7 +34,7 @@ const USER_ACTIVITY_OPTIONS = [
 ]
 
 const MS_FILL_COLOR = new ms.Symbol("14").getColors().fillColor
-const APP6_STANDARD_IDENTITIY_COLORS = [
+const APP6_STANDARD_IDENTITY_COLORS = [
   /* 0 */ MS_FILL_COLOR.Unknown,
   /* 1 */ MS_FILL_COLOR.Unknown,
   /* 2 */ MS_FILL_COLOR.Friend,
@@ -43,7 +43,42 @@ const APP6_STANDARD_IDENTITIY_COLORS = [
   /* 5 */ MS_FILL_COLOR.Hostile,
   /* 6 */ MS_FILL_COLOR.Hostile
 ]
-const DEFAULT_APP6_STANDARD_IDENTITY = 1
+const APP6_STANDARD_IDENTITY_DEFAULT_COLOR = MS_FILL_COLOR.Unknown
+
+function compareByApp6StandardIdentity(a: any, b: any) {
+  // Calculates the rank of the APP6 Standard Identity
+  const getRank = (app6standardIdentity: string) => {
+    const v = parseInt(app6standardIdentity, 10)
+    switch (v) {
+      case 2:
+      case 3:
+        return 1
+      case 4:
+        return 2
+      case 5:
+      case 6:
+        return 3
+      default:
+        return 4
+    }
+  }
+  return (
+    // first order by APP6 Standard Identity
+    getRank(a.app6standardIdentity) - getRank(b.app6standardIdentity) ||
+    // if those are the same, sort alphabetically
+    a.shortName.localeCompare(b.shortName)
+  )
+}
+
+function getApp6LinkStyle(org: any, selectedOrgUuid: string) {
+  return {
+    backgroundColor:
+      APP6_STANDARD_IDENTITY_COLORS[org.app6standardIdentity] ||
+      APP6_STANDARD_IDENTITY_DEFAULT_COLOR,
+    color: "inherit",
+    fontWeight: org.uuid === selectedOrgUuid ? "bold" : "normal"
+  }
+}
 
 interface AnchorNavItemProps {
   to: string
@@ -115,7 +150,7 @@ interface SidebarContainerProps {
   children?: React.ReactNode
   handleOnClick?: (...args: unknown[]) => unknown
   setIsMenuLinksOpened?: (...args: unknown[]) => unknown
-  style?: any
+  style?: object
 }
 
 const SidebarContainer = ({
@@ -123,7 +158,7 @@ const SidebarContainer = ({
   children,
   handleOnClick,
   setIsMenuLinksOpened,
-  style = {}
+  style
 }: SidebarContainerProps) => {
   return (
     <LinkContainer
@@ -192,6 +227,7 @@ const Navigation = ({
   const inMyEvents = path.startsWith("/events/mine")
 
   const allOrganizationUuids = allOrganizations.map(o => o.uuid)
+  const allOrgsSorted = allOrganizations.toSorted(compareByApp6StandardIdentity)
 
   const taskShortLabel = Settings.fields.task.shortLabel
 
@@ -218,34 +254,6 @@ const Navigation = ({
     inMySavedSearches,
     inMyEvents
   ])
-
-  const allSortedOrgs = allOrganizations.sort((a, b) => {
-    const aValue = a.app6standardIdentity || DEFAULT_APP6_STANDARD_IDENTITY
-    const bValue = b.app6standardIdentity || DEFAULT_APP6_STANDARD_IDENTITY
-
-    // Calculates the rank of the standard identity
-    const getRank = (value) => {
-      if (value === 2 || value === 3) return 1
-      if (value === 4) return 2
-      if (value === 5 || value === 6) return 3
-      return 4
-    }
-    const aRank = getRank(parseInt(aValue, 10))
-    const bRank = getRank(parseInt(bValue, 10))
-
-    if (aRank !== bRank) {
-      return aRank - bRank
-    }
-  
-    // If ranks are the same, sort alphabetically by shortName
-    return a.shortName.localeCompare(b.shortName)
-  })
-
-  const getOrganizationStyle = (org: Organization) => {
-    return {
-      "backgroundColor": APP6_STANDARD_IDENTITIY_COLORS[org.app6standardIdentity || DEFAULT_APP6_STANDARD_IDENTITY],
-    }
-  }
 
   return (
     <Nav variant="pills" id="leftNav" className="flex-column d-print-none">
@@ -384,22 +392,22 @@ const Navigation = ({
         id="all-organizations"
         active={inOrg && allOrganizationUuids.includes(orgUuid) && !inMyOrg}
       >
-        {Organization.map(allSortedOrgs, org => (
+        {Organization.map(allOrgsSorted, org => (
           <SidebarContainer
             key={org.uuid}
             linkTo={Organization.pathFor(org)}
             handleOnClick={clearSearchQuery}
             setIsMenuLinksOpened={() => setIsMenuLinksOpened(false)}
-            style={getOrganizationStyle(org)}
+            style={getApp6LinkStyle(org, orgUuid)}
           >
-            {<LinkTo
+            <LinkTo
               modelType="Organization"
               model={org}
               isLink={false}
               showIcon={false}
               showPreview={false}
               displayCallback={org => org.shortName}
-            />}
+            />
           </SidebarContainer>
         ))}
       </NavDropdown>
