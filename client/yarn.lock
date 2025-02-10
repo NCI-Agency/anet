@@ -6081,7 +6081,7 @@ __metadata:
     scroll-into-view-if-needed: "npm:3.1.0"
     selenium-webdriver: "npm:4.28.1"
     slate: "npm:0.112.0"
-    slate-dom: "npm:0.111.0"
+    slate-dom: "npm:0.112.2"
     slate-history: "npm:0.110.3"
     slate-hyperscript: "npm:0.100.0"
     slate-react: "npm:0.112.1"
@@ -18030,9 +18030,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"slate-dom@npm:0.111.0":
-  version: 0.111.0
-  resolution: "slate-dom@npm:0.111.0"
+"slate-dom@npm:0.112.2":
+  version: 0.112.2
+  resolution: "slate-dom@npm:0.112.2"
   dependencies:
     "@juggle/resize-observer": "npm:^3.4.0"
     direction: "npm:^1.0.4"
@@ -18043,7 +18043,7 @@ __metadata:
     tiny-invariant: "npm:1.3.1"
   peerDependencies:
     slate: ">=0.99.0"
-  checksum: 10c0/e803f154f89302b48bb344720560442f631e0a56468243c8d256ca909bdd10ea7afb1ad5637af8f775d0409d1e7c44faa4d0640ce8e30731a3657e52d3a9a55b
+  checksum: 10c0/e2f2df40468a9c025467d32d69916e427297e8bd8b192863ff03cb5747bec66d3bcf599afc0a07dc1c9225f92bfeb414b9607d4f8e229a6c6df4d806558af851
   languageName: node
   linkType: hard
 
