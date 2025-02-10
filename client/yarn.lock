@@ -4168,9 +4168,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@restart/ui@npm:^1.9.3":
-  version: 1.9.3
-  resolution: "@restart/ui@npm:1.9.3"
+"@restart/ui@npm:^1.9.4":
+  version: 1.9.4
+  resolution: "@restart/ui@npm:1.9.4"
   dependencies:
     "@babel/runtime": "npm:^7.26.0"
     "@popperjs/core": "npm:^2.11.8"
@@ -4184,7 +4184,7 @@ __metadata:
   peerDependencies:
     react: ">=16.14.0"
     react-dom: ">=16.14.0"
-  checksum: 10c0/75cba52bb8a63fc1bfe44fda773a35f93fa79159750a99bd48e0b43f10b533c084ba4e48786aa1499c6e0728ab051aa56b976f9e7e72d670ac0af116809fc173
+  checksum: 10c0/98370e9dc6af55810bd099963799dcbf371fe8518e815ff5066d424ad7ef93517b3fa3baf3d271d175600c40ca4bac06198a6fb85b09c20755af8e45027c51e3
   languageName: node
   linkType: hard
 
@@ -6060,7 +6060,7 @@ __metadata:
     prettier-eslint-cli: "npm:8.0.1"
     react: "npm:18.3.1"
     react-advanced-cropper: "npm:0.20.0"
-    react-bootstrap: "npm:2.10.8"
+    react-bootstrap: "npm:2.10.9"
     react-dom: "npm:18.3.1"
     react-is: "npm:18.3.1"
     react-joyride: "npm:2.9.3"
@@ -16448,13 +16448,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-bootstrap@npm:2.10.8":
-  version: 2.10.8
-  resolution: "react-bootstrap@npm:2.10.8"
+"react-bootstrap@npm:2.10.9":
+  version: 2.10.9
+  resolution: "react-bootstrap@npm:2.10.9"
   dependencies:
     "@babel/runtime": "npm:^7.24.7"
     "@restart/hooks": "npm:^0.4.9"
-    "@restart/ui": "npm:^1.9.3"
+    "@restart/ui": "npm:^1.9.4"
     "@types/prop-types": "npm:^15.7.12"
     "@types/react-transition-group": "npm:^4.4.6"
     classnames: "npm:^2.3.2"
@@ -16472,7 +16472,7 @@ __metadata:
   peerDependenciesMeta:
     "@types/react":
       optional: true
-  checksum: 10c0/1bd2672d58f9fbde629df5798d45cf9f566f6b1ea69bcc47adba7b18f602d242ab7e82b8b5a5fe023551cfc9d2b5e7337dfd4974b9e6ccb350ade582508e4edc
+  checksum: 10c0/96a198ee97fc6f8f1cbd68bd97daae3509561fd4613b53a55eeb170d138a8dd78cc336c679fee4adb146427d5cc92cd03256793099431984e8f91fd20210a8c8
   languageName: node
   linkType: hard
 
