@@ -352,25 +352,26 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
                   </Row>
                   <Row>
                     <Col md={12}>{fullWidthFields}</Col>
+                    {attachmentsEnabled && (
+                      <Col md={12}>
+                        <Field
+                          name="attachments"
+                          label="Attachments"
+                          component={FieldHelper.ReadonlyField}
+                          humanValue={
+                            <AttachmentsDetailView
+                              attachments={attachments}
+                              updateAttachments={setAttachments}
+                              relatedObjectType={Person.relatedObjectType}
+                              relatedObjectUuid={person.uuid}
+                              allowEdit={canEdit}
+                            />
+                          }
+                        />
+                      </Col>
+                    )}
                   </Row>
                 </Container>
-
-                {attachmentsEnabled && (
-                  <Field
-                    name="attachments"
-                    label="Attachments"
-                    component={FieldHelper.ReadonlyField}
-                    humanValue={
-                      <AttachmentsDetailView
-                        attachments={attachments}
-                        updateAttachments={setAttachments}
-                        relatedObjectType={Person.relatedObjectType}
-                        relatedObjectUuid={person.uuid}
-                        allowEdit={canEdit}
-                      />
-                    }
-                  />
-                )}
               </Fieldset>
 
               {canEdit && (
