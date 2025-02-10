@@ -11,7 +11,7 @@ interface AttachmentsListProps {
 
 const AttachmentsList = ({ attachments }: AttachmentsListProps) => {
   if (attachments.length === 0) {
-    return null
+    return <em>No attachments found</em>
   }
   return (
     <div className="attachment-card-list">
@@ -35,33 +35,19 @@ const AttachmentsDetailView = ({
   updateAttachments,
   relatedObjectType,
   relatedObjectUuid,
-  allowEdit = false
+  allowEdit
 }: AttachmentsDetailViewProps) => {
-  const [editAttachments, setEditAttachments] = useState(false)
-
   const { currentUser } = useContext(AppContext)
-  const isAdmin = currentUser && currentUser.isAdmin()
-  const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
-  const attachmentEditEnabled =
-    attachmentsEnabled &&
-    (!Settings.fields.attachment.restrictToAdmins || isAdmin)
-  const canEditAttachments = attachmentEditEnabled && allowEdit
+  const [editAttachments, setEditAttachments] = useState(false)
+  const canEditAttachments =
+    !Settings.fields.attachment.featureDisabled &&
+    (!Settings.fields.attachment.restrictToAdmins || currentUser?.isAdmin()) &&
+    allowEdit
 
   if (!canEditAttachments) {
     return <AttachmentsList attachments={attachments} />
   }
 
-  const renderButton = () => {
-    return (
-      <Button
-        variant="primary"
-        onClick={() => setEditAttachments(!editAttachments)}
-        id="edit-attachments"
-      >
-        {editAttachments ? "View" : "Edit"} attachments
-      </Button>
-    )
-  }
   return (
     <>
       {editAttachments ? (
@@ -74,7 +60,15 @@ const AttachmentsDetailView = ({
       ) : (
         <AttachmentsList attachments={attachments} />
       )}
-      {renderButton()}
+      <div className="clearfix">
+        <Button
+          variant="primary"
+          onClick={() => setEditAttachments(!editAttachments)}
+          id="edit-attachments"
+        >
+          {editAttachments ? "View" : "Edit"} attachments
+        </Button>
+      </div>
     </>
   )
 }

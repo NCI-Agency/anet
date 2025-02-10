@@ -1,6 +1,6 @@
 /******** FILE UPLOAD AREA ********/
 .file-upload-container {
-  margin: 10px 0;
+  margin: 0 0 10px 0;
   display: flex;
   position: relative;
   padding: 35px 20px;
