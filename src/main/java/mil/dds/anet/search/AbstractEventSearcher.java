@@ -45,6 +45,11 @@ public abstract class AbstractEventSearcher extends AbstractSearcher<Event, Even
       addTextQuery(query);
     }
 
+    if (query.getUser() != null && query.getSubscribed()) {
+      qb.addWhereClause(Searcher.getSubscriptionReferences(query.getUser(), qb.getSqlArgs(),
+          engine().getEventDao().getSubscriptionUpdate(null)));
+    }
+
     if (!Utils.isEmptyOrNull(query.getEventSeriesUuid())) {
       qb.addStringEqualsClause("eventSeriesUuid", "events.\"eventSeriesUuid\"",
           query.getEventSeriesUuid());
