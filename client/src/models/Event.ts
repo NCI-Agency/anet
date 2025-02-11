@@ -186,7 +186,7 @@ export default class Event extends Model {
   }
 
   static getEventDateFormat() {
-    return Settings.eventsIncludeTimeAndDuration
+    return Settings.eventsIncludeStartAndEndTime
       ? Settings.dateFormats.forms.displayLong.withTime
       : Settings.dateFormats.forms.displayLong.date
   }

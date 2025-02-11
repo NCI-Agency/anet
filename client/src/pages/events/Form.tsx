@@ -426,7 +426,7 @@ const EventForm = ({
                   widget={
                     <CustomDateInput
                       id="startDate"
-                      withTime={Settings.eventsIncludeTimeAndDuration}
+                      withTime={Settings.eventsIncludeStartAndEndTime}
                       maxDate={maxDate}
                       initialMonth={initialMonthForStartDate}
                     />
@@ -446,7 +446,7 @@ const EventForm = ({
                   widget={
                     <CustomDateInput
                       id="endDate"
-                      withTime={Settings.eventsIncludeTimeAndDuration}
+                      withTime={Settings.eventsIncludeStartAndEndTime}
                       minDate={minDate}
                       initialMonth={initialMonthForEndDate}
                     />
