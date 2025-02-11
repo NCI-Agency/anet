@@ -658,6 +658,7 @@ const ReportForm = ({
                     setFieldTouched("event", true, false) // onBlur doesn't work when selecting an option
                     setFieldValue("event", value, true)
                     setFieldValue("location", value?.location)
+                    setLocationUuid(value?.location?.uuid)
                     setMinDate(value?.startDate)
                     setMaxDate(value?.endDate)
                   }}
