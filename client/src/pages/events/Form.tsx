@@ -535,7 +535,7 @@ const EventForm = ({
                           id="events-people"
                           people={values.people}
                           showDelete
-                          noPeopleMessage="No People currently assigned to this event. Click in the People attending box to select organizations."
+                          noPeopleMessage="No People currently assigned to this event. Click in the People attending box to select people."
                         />
                       }
                       overlayColumns={[Settings.fields.person.shortLabel]}
@@ -569,7 +569,7 @@ const EventForm = ({
                             tasks={values.tasks}
                             showDelete
                             showDescription
-                            noTasksMessage={`No ${tasksLabel} selected; click in the ${tasksLabel} box to view your organization's ${tasksLabel}`}
+                            noTasksMessage={`No ${tasksLabel} selected; click in the ${tasksLabel} box to view ${tasksLabel}`}
                           />
                         }
                         overlayColumns={[Settings.fields.task.shortLabel]}
