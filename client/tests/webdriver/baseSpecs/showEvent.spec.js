@@ -3,7 +3,7 @@ import moment from "moment"
 import ShowEvent from "../pages/showEvent.page"
 
 const EVENT_UUID = "e850846e-9741-40e8-bc51-4dccc30cf47f" // NMI PDT 2024-01 event
-const DATE_FORMAT = "dddd, D MMMM YYYY"
+const DATE_FORMAT = "dddd, D MMMM YYYY @ HH:mm"
 
 describe("Show event page", () => {
   it("We should see the event data", async() => {
@@ -44,12 +44,12 @@ describe("Show event page", () => {
     await (await ShowEvent.getStartDate()).waitForExist()
     await (await ShowEvent.getStartDate()).waitForDisplayed()
     expect(await (await ShowEvent.getStartDate()).getText()).to.equal(
-      moment().format(DATE_FORMAT)
+      moment.utc("2024-01-08 07:00").local().format(DATE_FORMAT)
     )
     await (await ShowEvent.getEndDate()).waitForExist()
     await (await ShowEvent.getEndDate()).waitForDisplayed()
     expect(await (await ShowEvent.getEndDate()).getText()).to.equal(
-      moment().format(DATE_FORMAT)
+      moment.utc("2024-01-12 17:00").local().format(DATE_FORMAT)
     )
     await (await ShowEvent.getStatus()).waitForExist()
     await (await ShowEvent.getStatus()).waitForDisplayed()
