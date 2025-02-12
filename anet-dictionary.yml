@@ -446,6 +446,7 @@ fields:
 
   report:
     canUnpublishReports: true
+    titleMaxLength: 40
     intent:
       label: Engagement purpose
       placeholder: What is the engagement supposed to achieve?
