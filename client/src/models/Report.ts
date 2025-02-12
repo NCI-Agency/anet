@@ -411,6 +411,13 @@ export default class Report extends Model {
 
   toString(displayCallback) {
     if (typeof displayCallback === "function") {
+      const title = utils.ellipsizeOnWords(
+        this.intent || null,
+        Settings.fields.report.titleMaxLength
+      )
+      if (title?.length > 0) {
+        return title
+      }
       return displayCallback(this)
     }
     return this.intent || "None"
