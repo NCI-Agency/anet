@@ -1,12 +1,14 @@
 interface ListItemsProps {
-  value: string
+  value: string,
+  forceList?: boolean
 }
 
 const ListItems = ({
-  value
+  value,
+  forceList
 }: ListItemsProps) => {
   const items = value.split(/\r\n|\r|\n|\v|\f|\u2028|\u2029/)
-  if (items.length > 1) {
+  if (items.length > 1 || forceList) {
     return (
       <ul>
         {items.map((item, index) => (
