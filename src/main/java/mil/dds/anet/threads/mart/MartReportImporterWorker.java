@@ -44,6 +44,7 @@ import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.resources.AttachmentResource;
 import mil.dds.anet.threads.AbstractWorker;
 import mil.dds.anet.threads.mart.ews.IMailReceiver;
+import mil.dds.anet.utils.Utils;
 import org.apache.tika.Tika;
 import org.apache.tika.io.TikaInputStream;
 import org.springframework.beans.BeanUtils;
@@ -301,6 +302,11 @@ public class MartReportImporterWorker extends AbstractWorker {
     anetReport.setCustomFields(martReport.getCustomFields());
     // Set report to DRAFT
     anetReport.setState(Report.ReportState.DRAFT);
+
+    // Sanitize!
+    anetReport.checkAndFixCustomFields();
+    anetReport.setReportText(Utils.isEmptyHtml(anetReport.getReportText()) ? null
+        : Utils.sanitizeHtml(anetReport.getReportText()));
 
     // Insert report
     try {
