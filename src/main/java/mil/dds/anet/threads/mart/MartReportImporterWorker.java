@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import graphql.GraphQLContext;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -56,6 +57,7 @@ import org.springframework.stereotype.Component;
 @ConditionalOnExpression("not ${anet.no-workers:false} and not ${anet.mart.disabled:true}")
 public class MartReportImporterWorker extends AbstractWorker {
 
+  private static final String REPORT_JSON_ATTACHMENT = "report.json";
   private final ObjectMapper ignoringMapper = MapperUtils.getDefaultMapper()
       .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
       .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
@@ -114,8 +116,9 @@ public class MartReportImporterWorker extends AbstractWorker {
     try {
       email.load();
       logger.debug("Processing e-mail sent on: {}", email.getDateTimeCreated());
-      // Get the report JSON
-      reportDto = getReportInfo(email.getBody().toString());
+      // Get the report JSON from the attachment
+      reportDto = getReportInfoFromAttachment(email, errors);
+
       final Report anetReport = processReportInfo(reportDto, errors);
       if (anetReport != null) {
         processAttachments(email, anetReport, errors);
@@ -138,11 +141,32 @@ public class MartReportImporterWorker extends AbstractWorker {
     martImportedReportDao.insert(martImportedReport);
   }
 
+  private ReportDto getReportInfoFromAttachment(EmailMessage email, List<String> errors) {
+    ReportDto result = null;
+    // Check the message.json attachment is there
+    try {
+      for (final microsoft.exchange.webservices.data.property.complex.Attachment attachment : email
+          .getAttachments()) {
+        if (attachment instanceof FileAttachment fileAttachment
+            && fileAttachment.getName().equals(REPORT_JSON_ATTACHMENT)) {
+          fileAttachment.load();
+          result = getReportInfo(new String(fileAttachment.getContent(), StandardCharsets.UTF_8));
+        }
+      }
+    } catch (Exception e) {
+      logger.error("Problem processing email report attachment", e);
+      errors.add("Problem processing email report attachment");
+    }
+
+    return result;
+  }
+
   private void processAttachments(EmailMessage email, Report anetReport, List<String> errors) {
     try {
       for (final microsoft.exchange.webservices.data.property.complex.Attachment attachment : email
           .getAttachments()) {
         if (attachment instanceof FileAttachment fileAttachment) {
+          fileAttachment.load();
           final TikaInputStream tikaInputStream = TikaInputStream.get(fileAttachment.getContent());
           final String detectedMimeType =
               new Tika().detect(tikaInputStream, fileAttachment.getName());

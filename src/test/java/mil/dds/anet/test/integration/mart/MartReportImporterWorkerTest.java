@@ -7,12 +7,12 @@ import static org.powermock.api.mockito.PowerMockito.when;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
 import microsoft.exchange.webservices.data.core.exception.service.local.ServiceLocalException;
 import microsoft.exchange.webservices.data.core.service.item.EmailMessage;
 import microsoft.exchange.webservices.data.property.complex.AttachmentCollection;
-import microsoft.exchange.webservices.data.property.complex.MessageBody;
 import mil.dds.anet.beans.mart.MartImportedReport;
 import mil.dds.anet.beans.mart.ReportDto;
 import mil.dds.anet.config.AnetConfig;
@@ -46,6 +46,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 class MartReportImporterWorkerTest extends AbstractResourceTest {
   private static final String ATTACHMENT_NAME = "default_avatar.png";
+  private static final String ATTACHMENT_REPORT_JSON = "report.json";
+
   private static final ObjectMapper ignoringMapper = MapperUtils.getDefaultMapper()
       .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
@@ -203,17 +205,18 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
 
   private EmailMessage createMockEmail(ReportDto reportDto, boolean withAttachment)
       throws ServiceLocalException, IOException {
+    final AttachmentCollection attachmentCollection = new AttachmentCollection();
     final EmailMessage emailMessageMock = Mockito.mock();
-    final MessageBody messageBody = new MessageBody();
-    messageBody.setText(ignoringMapper.writeValueAsString(reportDto));
-    when(emailMessageMock.getBody()).thenReturn(messageBody);
+
+    attachmentCollection.addFileAttachment(ATTACHMENT_REPORT_JSON,
+        ignoringMapper.writeValueAsString(reportDto).getBytes(StandardCharsets.UTF_8));
+
     if (withAttachment) {
-      final AttachmentCollection attachmentCollection = new AttachmentCollection();
       attachmentCollection.addFileAttachment(ATTACHMENT_NAME,
           IOUtils.toByteArray(Objects.requireNonNull(
               this.getClass().getClassLoader().getResourceAsStream("assets/default_avatar.png"))));
-      when(emailMessageMock.getAttachments()).thenReturn(attachmentCollection);
     }
+    when(emailMessageMock.getAttachments()).thenReturn(attachmentCollection);
     return emailMessageMock;
   }
 }
