@@ -57,7 +57,7 @@ import org.springframework.stereotype.Component;
 @ConditionalOnExpression("not ${anet.no-workers:false} and not ${anet.mart.disabled:true}")
 public class MartReportImporterWorker extends AbstractWorker {
 
-  private static final String REPORT_JSON_ATTACHMENT = "report.json";
+  private static final String REPORT_JSON_ATTACHMENT = "mart_report.json";
   private final ObjectMapper ignoringMapper = MapperUtils.getDefaultMapper()
       .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
       .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
