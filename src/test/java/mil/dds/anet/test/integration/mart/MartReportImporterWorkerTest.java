@@ -46,7 +46,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 class MartReportImporterWorkerTest extends AbstractResourceTest {
   private static final String ATTACHMENT_NAME = "default_avatar.png";
-  private static final String ATTACHMENT_REPORT_JSON = "report.json";
+  private static final String ATTACHMENT_REPORT_JSON = "mart_report.json";
 
   private static final ObjectMapper ignoringMapper = MapperUtils.getDefaultMapper()
       .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
