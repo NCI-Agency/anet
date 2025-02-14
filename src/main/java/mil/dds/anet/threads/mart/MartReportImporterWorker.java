@@ -165,12 +165,22 @@ public class MartReportImporterWorker extends AbstractWorker {
     try {
       for (final microsoft.exchange.webservices.data.property.complex.Attachment attachment : email
           .getAttachments()) {
-        if (attachment instanceof FileAttachment fileAttachment) {
+        if (attachment instanceof FileAttachment fileAttachment
+            && !fileAttachment.getName().equals(REPORT_JSON_ATTACHMENT)) {
           fileAttachment.load();
           final TikaInputStream tikaInputStream = TikaInputStream.get(fileAttachment.getContent());
           final String detectedMimeType =
               new Tika().detect(tikaInputStream, fileAttachment.getName());
-          if (assertAllowedMimeType(detectedMimeType)) {
+
+          if (detectedMimeType.equalsIgnoreCase(fileAttachment.getContentType())) {
+            errors.add(String.format(
+                "Attachment with name %s found in e-mail has a different mime type: %s than specified: %s",
+                fileAttachment.getName(), detectedMimeType, fileAttachment.getContentType()));
+          } else if (assertAllowedMimeType(detectedMimeType)) {
+            errors.add(String.format(
+                "Attachment with name %s found in e-mail is a not allowed mime type: %s",
+                fileAttachment.getName(), fileAttachment.getContentType()));
+          } else {
             final GenericRelatedObject genericRelatedObject = new GenericRelatedObject();
             genericRelatedObject.setRelatedObjectType(ReportDao.TABLE_NAME);
             genericRelatedObject.setRelatedObjectUuid(anetReport.getUuid());
@@ -184,9 +194,6 @@ public class MartReportImporterWorker extends AbstractWorker {
             anetAttachment = attachmentDao.insert(anetAttachment);
             attachmentDao.saveContentBlob(anetAttachment.getUuid(),
                 TikaInputStream.get(fileAttachment.getContent()));
-          } else {
-            errors.add(String.format("Attachment found in e-mail is not valid: %s",
-                fileAttachment.getName()));
           }
         }
       }
