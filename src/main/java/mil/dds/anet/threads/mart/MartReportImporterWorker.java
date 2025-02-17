@@ -12,6 +12,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import microsoft.exchange.webservices.data.core.service.item.EmailMessage;
 import microsoft.exchange.webservices.data.property.complex.FileAttachment;
@@ -110,25 +111,49 @@ public class MartReportImporterWorker extends AbstractWorker {
   }
 
   private void processEmailMessage(EmailMessage email) {
+    final List<FileAttachment> attachments = new ArrayList<>();
     final MartImportedReport martImportedReport = new MartImportedReport();
-    ReportDto reportDto = null;
     final List<String> errors = new ArrayList<>();
+    ReportDto reportDto = null;
     try {
       email.load();
       logger.debug("Processing e-mail sent on: {}", email.getDateTimeCreated());
-      // Get the report JSON from the attachment
-      reportDto = getReportInfoFromAttachment(email, errors);
 
-      final Report anetReport = processReportInfo(reportDto, errors);
-      if (anetReport != null) {
-        processAttachments(email, anetReport, errors);
-        martImportedReport.setSuccess(true);
-        martImportedReport.setReport(anetReport);
-        martImportedReport.setPerson(anetReport.getReportPeople().get(0));
+      // Get all attachments
+      for (final microsoft.exchange.webservices.data.property.complex.Attachment attachment : email
+          .getAttachments()) {
+        if (attachment instanceof FileAttachment fileAttachment) {
+          attachments.add(fileAttachment);
+        }
+      }
+
+      Optional<FileAttachment> martReportAttachmentOpt = attachments.stream()
+          .filter(attachment -> attachment.getName().equalsIgnoreCase(REPORT_JSON_ATTACHMENT))
+          .findFirst();
+      if (martReportAttachmentOpt.isEmpty()) {
+        errors.add("The email is missing the mart_report.json!");
+      } else {
+        // Get the report JSON from the attachment
+        FileAttachment martReportAttachment = martReportAttachmentOpt.get();
+        martReportAttachment.load();
+        reportDto =
+            getReportInfo(new String(martReportAttachment.getContent(), StandardCharsets.UTF_8));
+        // Report attachment valid, process the report
+        final Report anetReport = processReportInfo(reportDto, errors);
+        if (anetReport != null) {
+          processAttachments(attachments.stream()
+              .filter(attachment -> !attachment.getName().equalsIgnoreCase(REPORT_JSON_ATTACHMENT))
+              .toList(), anetReport, errors);
+          martImportedReport.setSuccess(true);
+          martImportedReport.setReport(anetReport);
+          martImportedReport.setPerson(anetReport.getReportPeople().get(0));
+        }
       }
     } catch (Exception e) {
-      errors.add(String.format("Could not process email %s", email));
+      logger.error("Could not process report information from email", e);
+      errors.add(String.format("Could not process report information from email %s", email));
     }
+
     if (!errors.isEmpty()) {
       final StringBuilder errorMsg = new StringBuilder();
       if (reportDto != null) {
@@ -137,67 +162,46 @@ public class MartReportImporterWorker extends AbstractWorker {
       errorMsg.append(String.format("<ul><li>%s</li></ul>", String.join("</li><li>", errors)));
       martImportedReport.setErrors(errorMsg.toString());
     }
+
     martImportedReport.setCreatedAt(Instant.now());
     martImportedReportDao.insert(martImportedReport);
   }
 
-  private ReportDto getReportInfoFromAttachment(EmailMessage email, List<String> errors) {
-    ReportDto result = null;
-    // Check the message.json attachment is there
+  private void processAttachments(List<FileAttachment> attachments, Report anetReport,
+      List<String> errors) {
     try {
-      for (final microsoft.exchange.webservices.data.property.complex.Attachment attachment : email
-          .getAttachments()) {
-        if (attachment instanceof FileAttachment fileAttachment
-            && fileAttachment.getName().equals(REPORT_JSON_ATTACHMENT)) {
-          fileAttachment.load();
-          result = getReportInfo(new String(fileAttachment.getContent(), StandardCharsets.UTF_8));
+      for (FileAttachment fileAttachment : attachments) {
+        fileAttachment.load();
+        final TikaInputStream tikaInputStream = TikaInputStream.get(fileAttachment.getContent());
+        final String detectedMimeType =
+            new Tika().detect(tikaInputStream, fileAttachment.getName());
+
+        if (!detectedMimeType.equalsIgnoreCase(fileAttachment.getContentType())) {
+          errors.add(String.format(
+              "Attachment with name %s found in e-mail has a different mime type: %s than specified: %s",
+              fileAttachment.getName(), detectedMimeType, fileAttachment.getContentType()));
+        } else if (!assertAllowedMimeType(detectedMimeType)) {
+          errors.add(String.format(
+              "Attachment with name %s found in e-mail is a not allowed mime type: %s",
+              fileAttachment.getName(), fileAttachment.getContentType()));
+        } else {
+          final GenericRelatedObject genericRelatedObject = new GenericRelatedObject();
+          genericRelatedObject.setRelatedObjectType(ReportDao.TABLE_NAME);
+          genericRelatedObject.setRelatedObjectUuid(anetReport.getUuid());
+          Attachment anetAttachment = new Attachment();
+          anetAttachment.setAttachmentRelatedObjects(List.of(genericRelatedObject));
+          anetAttachment.setCaption(fileAttachment.getName());
+          anetAttachment.setFileName(fileAttachment.getName());
+          anetAttachment.setMimeType(detectedMimeType);
+          anetAttachment.setContentLength((long) fileAttachment.getContent().length);
+          anetAttachment.setAuthor(anetReport.getReportPeople().get(0));
+          anetAttachment = attachmentDao.insert(anetAttachment);
+          attachmentDao.saveContentBlob(anetAttachment.getUuid(),
+              TikaInputStream.get(fileAttachment.getContent()));
         }
       }
     } catch (Exception e) {
-      logger.error("Problem processing email report attachment", e);
-      errors.add("Problem processing email report attachment");
-    }
-
-    return result;
-  }
-
-  private void processAttachments(EmailMessage email, Report anetReport, List<String> errors) {
-    try {
-      for (final microsoft.exchange.webservices.data.property.complex.Attachment attachment : email
-          .getAttachments()) {
-        if (attachment instanceof FileAttachment fileAttachment
-            && !fileAttachment.getName().equals(REPORT_JSON_ATTACHMENT)) {
-          fileAttachment.load();
-          final TikaInputStream tikaInputStream = TikaInputStream.get(fileAttachment.getContent());
-          final String detectedMimeType =
-              new Tika().detect(tikaInputStream, fileAttachment.getName());
-
-          if (detectedMimeType.equalsIgnoreCase(fileAttachment.getContentType())) {
-            errors.add(String.format(
-                "Attachment with name %s found in e-mail has a different mime type: %s than specified: %s",
-                fileAttachment.getName(), detectedMimeType, fileAttachment.getContentType()));
-          } else if (assertAllowedMimeType(detectedMimeType)) {
-            errors.add(String.format(
-                "Attachment with name %s found in e-mail is a not allowed mime type: %s",
-                fileAttachment.getName(), fileAttachment.getContentType()));
-          } else {
-            final GenericRelatedObject genericRelatedObject = new GenericRelatedObject();
-            genericRelatedObject.setRelatedObjectType(ReportDao.TABLE_NAME);
-            genericRelatedObject.setRelatedObjectUuid(anetReport.getUuid());
-            Attachment anetAttachment = new Attachment();
-            anetAttachment.setAttachmentRelatedObjects(List.of(genericRelatedObject));
-            anetAttachment.setCaption(fileAttachment.getName());
-            anetAttachment.setFileName(fileAttachment.getName());
-            anetAttachment.setMimeType(detectedMimeType);
-            anetAttachment.setContentLength((long) fileAttachment.getContent().length);
-            anetAttachment.setAuthor(anetReport.getReportPeople().get(0));
-            anetAttachment = attachmentDao.insert(anetAttachment);
-            attachmentDao.saveContentBlob(anetAttachment.getUuid(),
-                TikaInputStream.get(fileAttachment.getContent()));
-          }
-        }
-      }
-    } catch (Exception e) {
+      logger.error("Could not process attachments from email", e);
       errors.add("Could not process report attachments");
     }
   }

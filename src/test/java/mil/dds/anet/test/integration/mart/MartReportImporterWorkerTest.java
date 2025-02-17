@@ -8,11 +8,15 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import microsoft.exchange.webservices.data.core.exception.service.local.ServiceLocalException;
 import microsoft.exchange.webservices.data.core.service.item.EmailMessage;
+import microsoft.exchange.webservices.data.core.service.item.Item;
+import microsoft.exchange.webservices.data.property.complex.Attachment;
 import microsoft.exchange.webservices.data.property.complex.AttachmentCollection;
+import microsoft.exchange.webservices.data.property.complex.FileAttachment;
 import mil.dds.anet.beans.mart.MartImportedReport;
 import mil.dds.anet.beans.mart.ReportDto;
 import mil.dds.anet.config.AnetConfig;
@@ -45,9 +49,8 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 
 class MartReportImporterWorkerTest extends AbstractResourceTest {
-  private static final String ATTACHMENT_NAME = "default_avatar.png";
   private static final String ATTACHMENT_REPORT_JSON = "mart_report.json";
-
+  private static final String ATTACHMENT_NAME = "default_avatar.png";
   private static final ObjectMapper ignoringMapper = MapperUtils.getDefaultMapper()
       .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
@@ -205,18 +208,31 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
 
   private EmailMessage createMockEmail(ReportDto reportDto, boolean withAttachment)
       throws ServiceLocalException, IOException {
-    final AttachmentCollection attachmentCollection = new AttachmentCollection();
+    final AttachmentCollection attachmentCollection = Mockito.mock(AttachmentCollection.class);
     final EmailMessage emailMessageMock = Mockito.mock();
 
-    attachmentCollection.addFileAttachment(ATTACHMENT_REPORT_JSON,
-        ignoringMapper.writeValueAsString(reportDto).getBytes(StandardCharsets.UTF_8));
+    FileAttachment mockAttachmentJson = Mockito.mock(FileAttachment.class);
+    when(mockAttachmentJson.getOwner()).thenReturn(Mockito.mock(Item.class));
+    when(mockAttachmentJson.getContent())
+        .thenReturn(ignoringMapper.writeValueAsString(reportDto).getBytes(StandardCharsets.UTF_8));
+    when(mockAttachmentJson.getName()).thenReturn(ATTACHMENT_REPORT_JSON);
 
+    FileAttachment mockAttachmentImage = Mockito.mock(FileAttachment.class);
+    when(mockAttachmentImage.getOwner()).thenReturn(Mockito.mock(Item.class));
+    when(mockAttachmentImage.getContent()).thenReturn(IOUtils.toByteArray(Objects.requireNonNull(
+        this.getClass().getClassLoader().getResourceAsStream("assets/default_avatar.png"))));
+    when(mockAttachmentImage.getName()).thenReturn(ATTACHMENT_NAME);
+    when(mockAttachmentImage.getContentType()).thenReturn("image/png");
+
+    List<Attachment> attachmentList = new ArrayList<>();
+    attachmentList.add(mockAttachmentJson);
     if (withAttachment) {
-      attachmentCollection.addFileAttachment(ATTACHMENT_NAME,
-          IOUtils.toByteArray(Objects.requireNonNull(
-              this.getClass().getClassLoader().getResourceAsStream("assets/default_avatar.png"))));
+      attachmentList.add(mockAttachmentImage);
     }
-    when(emailMessageMock.getAttachments()).thenReturn(attachmentCollection);
+
+    when(attachmentCollection.iterator()).thenReturn(attachmentList.iterator());
+
+    when(emailMessageMock.getAttachments()).thenReturn(attachmentCollection, attachmentCollection);
     return emailMessageMock;
   }
 }
