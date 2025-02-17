@@ -255,7 +255,7 @@ project.group = "ncia"
 
 application {
 	mainClass = "mil.dds.anet.AnetApplication"
-	applicationDefaultJvmArgs = ["-Djava.library.path=MY_APP_HOME/lib"]
+	applicationDefaultJvmArgs = ["-Djava.library.path=MY_APP_HOME/lib", "-Djavax.net.ssl.trustStore=/etc/pki/java/cacerts"]
 }
 
 String dbLoc = run.environment['ANET_DB_SERVER']
