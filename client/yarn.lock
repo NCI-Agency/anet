@@ -5971,7 +5971,7 @@ __metadata:
     json-loader: "npm:0.5.7"
     jsonpath-plus: "npm:10.3.0"
     keycloak-connect: "npm:26.1.1"
-    keycloak-js: "npm:26.1.1"
+    keycloak-js: "npm:26.1.2"
     leaflet: "npm:1.9.4"
     leaflet-defaulticon-compatibility: "npm:0.1.2"
     leaflet-geosearch: "npm:4.2.0"
@@ -13633,10 +13633,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"keycloak-js@npm:26.1.1":
-  version: 26.1.1
-  resolution: "keycloak-js@npm:26.1.1"
-  checksum: 10c0/665750b4e8fbdcbb89827f81a44bcc4130c97cfbb79a361da7e7210d68aa5336b4a12ede8b342ceb382fdacd6c8b30cca081a8fe5a0f82e0ec6329e31715ef32
+"keycloak-js@npm:26.1.2":
+  version: 26.1.2
+  resolution: "keycloak-js@npm:26.1.2"
+  checksum: 10c0/2860557debecaf5baf245cabb19f3b6478fa820841ba295c625c5ca5b075691df929e58316c4d5e4cd9ef5bc40528ffa2c7cc591c5b6e3410babc1d4c7a64791
   languageName: node
   linkType: hard
 
