@@ -131,7 +131,7 @@ public class MartReportImporterWorker extends AbstractWorker {
           .filter(attachment -> attachment.getName().equalsIgnoreCase(REPORT_JSON_ATTACHMENT))
           .findFirst();
       if (martReportAttachmentOpt.isEmpty()) {
-        errors.add("The email is missing the mart_report.json!");
+        errors.add("The email is missing the MART report!");
       } else {
         // Get the report JSON from the attachment
         FileAttachment martReportAttachment = martReportAttachmentOpt.get();
@@ -151,7 +151,8 @@ public class MartReportImporterWorker extends AbstractWorker {
       }
     } catch (Exception e) {
       logger.error("Could not process report information from email", e);
-      errors.add(String.format("Could not process report information from email %s", email));
+      errors
+          .add(String.format("Error processing report information from email: %s", e.getMessage()));
     }
 
     if (!errors.isEmpty()) {
@@ -201,8 +202,9 @@ public class MartReportImporterWorker extends AbstractWorker {
         }
       }
     } catch (Exception e) {
-      logger.error("Could not process attachments from email", e);
-      errors.add("Could not process report attachments");
+      logger.error("Could not process report attachments from email", e);
+      errors.add(
+          String.format("Could not process report attachments due to error: %s", e.getMessage()));
     }
   }
 
@@ -353,7 +355,13 @@ public class MartReportImporterWorker extends AbstractWorker {
     }
 
     // Submit the report
-    reportDao.submit(anetReport, anetReport.getReportPeople().get(0));
+    try {
+      reportDao.submit(anetReport, anetReport.getReportPeople().get(0));
+    } catch (Exception e) {
+      logger.error("Could not submit report with UUID={}", martReport.getUuid(), e);
+      errors.add(String.format("Could not submit report with UUID: %s error: %s",
+          martReport.getUuid(), e.getMessage()));
+    }
 
     return anetReport;
   }
