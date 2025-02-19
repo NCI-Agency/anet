@@ -6214,10 +6214,12 @@
 
 	<changeSet id="add-martImportedReports-table" author="fdelcastillo">
 		<createTable tableName="martImportedReports">
+			<column name="sequence" type="bigint" />
 			<column name="personUuid" type="${uuid_type}" />
 			<column name="reportUuid" type="${uuid_type}" />
 			<column name="success" type="boolean" />
-			<column name="createdAt" type="datetime" />
+			<column name="submittedAt" type="datetime" />
+			<column name="receivedAt" type="datetime" />
 			<column name="errors" type="text" />
 		</createTable>
 		<addForeignKeyConstraint
@@ -6225,14 +6227,6 @@
 			baseTableName="martImportedReports"
 			baseColumnNames="personUuid"
 			referencedTableName="people"
-			referencedColumnNames="uuid"
-			onDelete="CASCADE" onUpdate="NO ACTION"
-		/>
-		<addForeignKeyConstraint
-			constraintName="fk_martImportedReports_report"
-			baseTableName="martImportedReports"
-			baseColumnNames="reportUuid"
-			referencedTableName="reports"
 			referencedColumnNames="uuid"
 			onDelete="CASCADE" onUpdate="NO ACTION"
 		/>

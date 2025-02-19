@@ -1429,8 +1429,8 @@ INSERT INTO "accessTokens" (uuid, name, description, "tokenHash", "createdAt", "
   ('2e45aef0-b9de-4818-be95-b0cc2aececfc', 'Sample Web Service Access Token', 'A sample web service access token for the NVG Web Service', 'AaEge0eLJTP25aRAA5jIZxyzvejJBxPk+kAJDpv+5nc=', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '10 years');
 
 -- Add mart imported reports for testing
-INSERT INTO "martImportedReports" ("personUuid", "reportUuid", "success", "createdAt", "errors") VALUES
-  ('87fdbc6a-3109-4e11-9702-a894d6ca31ef', '59be259b-30b9-4d04-9e21-e8ceb58cbe9c', TRUE, CURRENT_TIMESTAMP, NULL);
+INSERT INTO "martImportedReports" ("sequence", "personUuid", "reportUuid", "success", "submittedAt", "receivedAt", "errors") VALUES
+  (0, '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '59be259b-30b9-4d04-9e21-e8ceb58cbe9c', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL);
 
 -- Update the link-text indexes
 REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_lts_attachments";

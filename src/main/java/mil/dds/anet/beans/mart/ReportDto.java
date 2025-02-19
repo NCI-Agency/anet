@@ -6,6 +6,9 @@ import java.util.Map;
 
 public class ReportDto {
 
+  // Sequence
+  private Long sequence;
+
   // User Info
   private String email;
   private String firstName;
@@ -31,6 +34,14 @@ public class ReportDto {
   private Map<String, String> tasks = new HashMap<>();
 
   public ReportDto() {}
+
+  public Long getSequence() {
+    return sequence;
+  }
+
+  public void setSequence(Long sequence) {
+    this.sequence = sequence;
+  }
 
   public String getEmail() {
     return email;

@@ -13,7 +13,9 @@ public class MartImportedReportMapper implements RowMapper<MartImportedReport> {
     final MartImportedReport martImportedReport = new MartImportedReport();
     martImportedReport.setPersonUuid(rs.getString("personUuid"));
     martImportedReport.setReportUuid(rs.getString("reportUuid"));
-    martImportedReport.setCreatedAt(MapperUtils.getInstantAsLocalDateTime(rs, "createdAt"));
+    martImportedReport.setSubmittedAt(MapperUtils.getInstantAsLocalDateTime(rs, "submittedAt"));
+    martImportedReport.setReceivedAt(MapperUtils.getInstantAsLocalDateTime(rs, "receivedAt"));
+    martImportedReport.setSequence(rs.getLong("sequence"));
     martImportedReport.setSuccess(rs.getBoolean("success"));
     martImportedReport.setErrors(rs.getString("errors"));
 

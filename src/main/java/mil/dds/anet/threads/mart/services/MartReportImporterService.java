@@ -1,64 +1,37 @@
-package mil.dds.anet.threads.mart;
+package mil.dds.anet.threads.mart.services;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import graphql.GraphQLContext;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-import microsoft.exchange.webservices.data.core.service.item.EmailMessage;
+import java.util.*;
 import microsoft.exchange.webservices.data.property.complex.FileAttachment;
-import mil.dds.anet.beans.Attachment;
-import mil.dds.anet.beans.EmailAddress;
-import mil.dds.anet.beans.GenericRelatedObject;
-import mil.dds.anet.beans.JobHistory;
-import mil.dds.anet.beans.Location;
-import mil.dds.anet.beans.Organization;
-import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.Position;
-import mil.dds.anet.beans.Report;
-import mil.dds.anet.beans.ReportPerson;
-import mil.dds.anet.beans.Task;
-import mil.dds.anet.beans.WithStatus;
+import mil.dds.anet.beans.*;
 import mil.dds.anet.beans.mart.MartImportedReport;
 import mil.dds.anet.beans.mart.ReportDto;
 import mil.dds.anet.beans.search.LocationSearchQuery;
-import mil.dds.anet.config.AnetDictionary;
-import mil.dds.anet.database.AttachmentDao;
-import mil.dds.anet.database.EmailAddressDao;
-import mil.dds.anet.database.JobHistoryDao;
-import mil.dds.anet.database.LocationDao;
-import mil.dds.anet.database.MartImportedReportDao;
-import mil.dds.anet.database.OrganizationDao;
-import mil.dds.anet.database.PersonDao;
-import mil.dds.anet.database.PositionDao;
-import mil.dds.anet.database.ReportDao;
-import mil.dds.anet.database.TaskDao;
+import mil.dds.anet.database.*;
 import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.resources.AttachmentResource;
-import mil.dds.anet.threads.AbstractWorker;
-import mil.dds.anet.threads.mart.ews.IMailReceiver;
 import mil.dds.anet.utils.Utils;
 import org.apache.tika.Tika;
 import org.apache.tika.io.TikaInputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConditionalOnExpression("not ${anet.no-workers:false} and not ${anet.mart.disabled:true}")
-public class MartReportImporterWorker extends AbstractWorker {
+public class MartReportImporterService implements IMartReportImporterService {
 
-  private static final String REPORT_JSON_ATTACHMENT = "mart_report.json";
+  protected final Logger logger = LoggerFactory.getLogger(this.getClass());
+
+  public static final String REPORT_JSON_ATTACHMENT = "mart_report.json";
+
   private final ObjectMapper ignoringMapper = MapperUtils.getDefaultMapper()
       .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
       .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
@@ -72,14 +45,11 @@ public class MartReportImporterWorker extends AbstractWorker {
   private final MartImportedReportDao martImportedReportDao;
   private final AttachmentDao attachmentDao;
   private final EmailAddressDao emailAddressDao;
-  private final IMailReceiver iMailReceiver;
 
-  public MartReportImporterWorker(AnetDictionary dict, JobHistoryDao jobHistoryDao,
-      ReportDao reportDao, PersonDao personDao, PositionDao positionDao, TaskDao taskDao,
-      OrganizationDao organizationDao, LocationDao locationDao,
-      MartImportedReportDao martImportedReportDao, AttachmentDao attachmentDao,
-      EmailAddressDao emailAddressDao, IMailReceiver iMailReceiver) {
-    super(dict, jobHistoryDao, "MartReportImporterWorker waking up to get MART reports!");
+  public MartReportImporterService(ReportDao reportDao, PersonDao personDao,
+      PositionDao positionDao, TaskDao taskDao, OrganizationDao organizationDao,
+      LocationDao locationDao, MartImportedReportDao martImportedReportDao,
+      AttachmentDao attachmentDao, EmailAddressDao emailAddressDao) {
     this.reportDao = reportDao;
     this.personDao = personDao;
     this.positionDao = positionDao;
@@ -89,83 +59,59 @@ public class MartReportImporterWorker extends AbstractWorker {
     this.martImportedReportDao = martImportedReportDao;
     this.attachmentDao = attachmentDao;
     this.emailAddressDao = emailAddressDao;
-    this.iMailReceiver = iMailReceiver;
-  }
-
-  @Scheduled(initialDelay = 35, fixedRateString = "${anet.mart.mail-polling-delay-in-seconds:10}",
-      timeUnit = TimeUnit.SECONDS)
-  @Override
-  public void run() {
-    super.run();
   }
 
   @Override
-  protected void runInternal(Instant now, JobHistory jobHistory, GraphQLContext context) {
-    try {
-      for (final EmailMessage email : iMailReceiver.downloadEmails()) {
-        processEmailMessage(email);
-      }
-    } catch (Exception e) {
-      logger.error("Could not connect to Exchange server!", e);
-    }
-  }
+  public void processMartReport(List<FileAttachment> attachments) {
+    Optional<FileAttachment> martReportAttachmentOpt = attachments.stream()
+        .filter(attachment -> attachment.getName().equalsIgnoreCase(REPORT_JSON_ATTACHMENT))
+        .findFirst();
 
-  private void processEmailMessage(EmailMessage email) {
-    final List<FileAttachment> attachments = new ArrayList<>();
-    final MartImportedReport martImportedReport = new MartImportedReport();
-    final List<String> errors = new ArrayList<>();
-    ReportDto reportDto = null;
-    try {
-      email.load();
-      logger.debug("Processing e-mail sent on: {}", email.getDateTimeCreated());
+    // Do we have a MART report in this email?
+    if (martReportAttachmentOpt.isPresent()) {
+      ReportDto reportDto;
 
-      // Get all attachments
-      for (final microsoft.exchange.webservices.data.property.complex.Attachment attachment : email
-          .getAttachments()) {
-        if (attachment instanceof FileAttachment fileAttachment) {
-          attachments.add(fileAttachment);
-        }
-      }
-
-      Optional<FileAttachment> martReportAttachmentOpt = attachments.stream()
-          .filter(attachment -> attachment.getName().equalsIgnoreCase(REPORT_JSON_ATTACHMENT))
-          .findFirst();
-      if (martReportAttachmentOpt.isEmpty()) {
-        errors.add("The email is missing the MART report!");
-      } else {
-        // Get the report JSON from the attachment
-        FileAttachment martReportAttachment = martReportAttachmentOpt.get();
+      // Get the report JSON from the attachment
+      FileAttachment martReportAttachment = martReportAttachmentOpt.get();
+      try {
         martReportAttachment.load();
         reportDto =
             getReportInfo(new String(martReportAttachment.getContent(), StandardCharsets.UTF_8));
-        // Report attachment valid, process the report
-        final Report anetReport = processReportInfo(reportDto, errors);
-        if (anetReport != null) {
-          processAttachments(attachments.stream()
-              .filter(attachment -> !attachment.getName().equalsIgnoreCase(REPORT_JSON_ATTACHMENT))
-              .toList(), anetReport, errors);
-          martImportedReport.setSuccess(true);
-          martImportedReport.setReport(anetReport);
-          martImportedReport.setPerson(anetReport.getReportPeople().get(0));
+
+        MartImportedReport newMartImportedReport = new MartImportedReport();
+        newMartImportedReport.setSequence(reportDto.getSequence());
+        newMartImportedReport.setReportUuid(reportDto.getUuid());
+        newMartImportedReport.setSubmittedAt(reportDto.getSubmittedAt());
+        newMartImportedReport.setReceivedAt(Instant.now());
+
+        // First check, is this report uuid in MartImportedReports table already?
+        MartImportedReport existingMartImportedReport =
+            martImportedReportDao.getByReportUuid(reportDto.getUuid());
+
+        if (existingMartImportedReport != null) {
+          if (existingMartImportedReport.isSuccess()) {
+            // If it was successfully imported it is a duplicate, do not import again
+            logger.info("Report with UUID={} has already been imported", reportDto.getUuid());
+            newMartImportedReport.setErrors(String
+                .format("Report with UUID %s has already been imported", reportDto.getUuid()));
+            martImportedReportDao.insert(newMartImportedReport);
+          } else if (!existingMartImportedReport.isSuccess() && Objects.equals(
+              existingMartImportedReport.getSequence(), newMartImportedReport.getSequence())) {
+            // This report was marked as failed or missing earlier, import now and replace the
+            // existing martImportedReport
+            processReportInfo(reportDto, newMartImportedReport, attachments);
+            martImportedReportDao.delete(existingMartImportedReport);
+            martImportedReportDao.insert(newMartImportedReport);
+          }
+        } else {
+          // New report, import
+          processReportInfo(reportDto, newMartImportedReport, attachments);
+          martImportedReportDao.insert(newMartImportedReport);
         }
+      } catch (Exception e) {
+        logger.error("Error loading MartImportedReport from {}", REPORT_JSON_ATTACHMENT, e);
       }
-    } catch (Exception e) {
-      logger.error("Could not process report information from email", e);
-      errors
-          .add(String.format("Error processing report information from email: %s", e.getMessage()));
     }
-
-    if (!errors.isEmpty()) {
-      final StringBuilder errorMsg = new StringBuilder();
-      if (reportDto != null) {
-        errorMsg.append(String.format("While importing report %s:", reportDto.getUuid()));
-      }
-      errorMsg.append(String.format("<ul><li>%s</li></ul>", String.join("</li><li>", errors)));
-      martImportedReport.setErrors(errorMsg.toString());
-    }
-
-    martImportedReport.setCreatedAt(Instant.now());
-    martImportedReportDao.insert(martImportedReport);
   }
 
   private void processAttachments(List<FileAttachment> attachments, Report anetReport,
@@ -246,17 +192,9 @@ public class MartReportImporterWorker extends AbstractWorker {
     return report;
   }
 
-  private Report processReportInfo(ReportDto martReport, List<String> errors) {
-    // Do we have this report already?
-    if (reportDao.getByUuid(martReport.getUuid()) != null) {
-      logger.info("Report with UUID={} already exists", martReport.getUuid());
-      errors.add(String.format("Report with UUID already exists: %s", martReport.getUuid()));
-      return null;
-    }
-
-    // Try to find the person/s with the email
-    final List<Person> matchingPersons = personDao.findByEmailAddress(martReport.getEmail());
-    final List<ReportPerson> reportPeople = new ArrayList<>();
+  private void processReportInfo(ReportDto martReport, MartImportedReport martImportedReport,
+      List<FileAttachment> attachments) {
+    List<String> errors = new ArrayList<>();
 
     // Validate author organization
     final Organization organization = organizationDao.getByUuid(martReport.getOrganizationUuid());
@@ -272,10 +210,77 @@ public class MartReportImporterWorker extends AbstractWorker {
           martReport.getLocationName(), martReport.getLocationUuid()));
     }
 
-    // Return early if there are errors
-    if (!errors.isEmpty()) {
-      return null;
+    if (organization != null && location != null) {
+      // Move on with the report
+      Report anetReport = new Report();
+      // Location
+      anetReport.setLocation(location);
+      List<ReportPerson> reportPeople = handleReportPeople(martReport, organization, errors);
+      // Report people
+      anetReport.setReportPeople(reportPeople);
+      // Report generic details
+      anetReport.setUuid(martReport.getUuid());
+      anetReport.setCreatedAt(martReport.getCreatedAt());
+      anetReport.setIntent(martReport.getIntent());
+      anetReport.setEngagementDate(martReport.getEngagementDate());
+      anetReport.setReportText(martReport.getReportText());
+      anetReport.setClassification("NKU");
+      // Set advisor organization to the organization of the submitter
+      anetReport.setAdvisorOrg(organization);
+      // Report tasks
+      final List<Task> tasks = getTasks(martReport.getTasks(), errors);
+      anetReport.setTasks(tasks);
+      // Custom fields
+      anetReport.setCustomFields(martReport.getCustomFields());
+      // Set report to DRAFT
+      anetReport.setState(Report.ReportState.DRAFT);
+      // Sanitize!
+      anetReport.checkAndFixCustomFields();
+      anetReport.setReportText(Utils.isEmptyHtml(anetReport.getReportText()) ? null
+          : Utils.sanitizeHtml(anetReport.getReportText()));
+
+      // Insert report
+      try {
+        anetReport = reportDao.insertWithExistingUuid(anetReport);
+      } catch (Exception e) {
+        logger.info("Error persisting report with UUID={} ", martReport.getUuid());
+        errors.add(String.format("Error persisting report with UUID: %s error: %s ",
+            martReport.getUuid(), e.getMessage()));
+      }
+
+      // Process attachments
+      processAttachments(attachments.stream()
+          .filter(attachment -> !attachment.getName().equalsIgnoreCase(REPORT_JSON_ATTACHMENT))
+          .toList(), anetReport, errors);
+
+      // Submit the report
+      try {
+        reportDao.submit(anetReport, anetReport.getReportPeople().get(0));
+      } catch (Exception e) {
+        logger.error("Could not submit report with UUID={}", martReport.getUuid(), e);
+        errors.add(String.format("Could not submit report with UUID: %s error: %s",
+            martReport.getUuid(), e.getMessage()));
+      }
+
+      martImportedReport.setSuccess(true);
+      martImportedReport.setReport(anetReport);
+      martImportedReport.setPerson(anetReport.getReportPeople().get(0));
     }
+
+    // Set errors
+    if (!errors.isEmpty()) {
+      String errorMsg = String.format("While importing report %s:", martReport.getUuid())
+          + String.format("<ul><li>%s</li></ul>", String.join("</li><li>", errors));
+      martImportedReport.setErrors(errorMsg);
+    }
+
+  }
+
+  private List<ReportPerson> handleReportPeople(ReportDto martReport, Organization organization,
+      List<String> errors) {
+    // Try to find the person/s with the email
+    final List<Person> matchingPersons = personDao.findByEmailAddress(martReport.getEmail());
+    final List<ReportPerson> reportPeople = new ArrayList<>();
 
     if (matchingPersons.isEmpty()) {
       // This is a new person -> CREATE from MART
@@ -312,59 +317,9 @@ public class MartReportImporterWorker extends AbstractWorker {
       // Put everybody with this email as report attendee
       matchingPersons.forEach(person -> reportPeople.add(createReportPerson(person)));
     }
-
-    Report anetReport = new Report();
-
-    // Location
-    anetReport.setLocation(location);
-
-    // Report people
-    anetReport.setReportPeople(reportPeople);
-
-    // Report generic details
-    anetReport.setUuid(martReport.getUuid());
-    anetReport.setCreatedAt(martReport.getCreatedAt());
-    anetReport.setIntent(martReport.getIntent());
-    anetReport.setEngagementDate(martReport.getEngagementDate());
-    anetReport.setReportText(martReport.getReportText());
-    anetReport.setClassification("NKU");
-
-    // Set advisor organization to the organization of the submitter
-    anetReport.setAdvisorOrg(organization);
-
-    // Report tasks
-    final List<Task> tasks = getTasks(martReport.getTasks(), errors);
-    anetReport.setTasks(tasks);
-    // Custom fields
-    anetReport.setCustomFields(martReport.getCustomFields());
-    // Set report to DRAFT
-    anetReport.setState(Report.ReportState.DRAFT);
-
-    // Sanitize!
-    anetReport.checkAndFixCustomFields();
-    anetReport.setReportText(Utils.isEmptyHtml(anetReport.getReportText()) ? null
-        : Utils.sanitizeHtml(anetReport.getReportText()));
-
-    // Insert report
-    try {
-      anetReport = reportDao.insertWithExistingUuid(anetReport);
-    } catch (Exception e) {
-      logger.info("Report with UUID={} already exists", martReport.getUuid());
-      errors.add(String.format("Report with UUID already exists: %s", martReport.getUuid()));
-      return null;
-    }
-
-    // Submit the report
-    try {
-      reportDao.submit(anetReport, anetReport.getReportPeople().get(0));
-    } catch (Exception e) {
-      logger.error("Could not submit report with UUID={}", martReport.getUuid(), e);
-      errors.add(String.format("Could not submit report with UUID: %s error: %s",
-          martReport.getUuid(), e.getMessage()));
-    }
-
-    return anetReport;
+    return reportPeople;
   }
+
 
   private void getPersonCountry(Person person, ReportDto martReport, List<String> errors) {
     final LocationSearchQuery searchQuery = new LocationSearchQuery();

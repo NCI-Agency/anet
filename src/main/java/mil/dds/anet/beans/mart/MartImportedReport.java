@@ -14,7 +14,11 @@ import mil.dds.anet.views.UuidFetcher;
 
 public class MartImportedReport {
   @GraphQLQuery
-  private Instant createdAt;
+  private Long sequence;
+  @GraphQLQuery
+  private Instant submittedAt;
+  @GraphQLQuery
+  private Instant receivedAt;
   @GraphQLQuery
   private boolean success;
   @GraphQLQuery
@@ -24,12 +28,36 @@ public class MartImportedReport {
   private ForeignObjectHolder<Person> person = new ForeignObjectHolder<>();
   private ForeignObjectHolder<Report> report = new ForeignObjectHolder<>();
 
-  public Instant getCreatedAt() {
-    return createdAt;
+  public Long getSequence() {
+    return sequence;
   }
 
-  public void setCreatedAt(Instant createdAt) {
-    this.createdAt = createdAt;
+  public void setSequence(Long sequence) {
+    this.sequence = sequence;
+  }
+
+  public void setPerson(ForeignObjectHolder<Person> person) {
+    this.person = person;
+  }
+
+  public void setReport(ForeignObjectHolder<Report> report) {
+    this.report = report;
+  }
+
+  public Instant getSubmittedAt() {
+    return submittedAt;
+  }
+
+  public void setSubmittedAt(Instant submittedAt) {
+    this.submittedAt = submittedAt;
+  }
+
+  public Instant getReceivedAt() {
+    return receivedAt;
+  }
+
+  public void setReceivedAt(Instant receivedAt) {
+    this.receivedAt = receivedAt;
   }
 
   public boolean isSuccess() {
