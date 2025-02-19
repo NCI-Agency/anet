@@ -808,11 +808,6 @@ properties:
             default: false
             title: Whether reports can be unpublished
             description: Used for reports; if set to `true`, admins can change report state from published to draft
-          titleMaxLength:
-            type: number
-            default: 40
-            title: Maximum title length for reports
-            description: Used when converting the report's intent to a title, trimming it on the last full word before reaching the limit
           intent:
             "$ref": "#/$defs/inputField"
           engagementDate:

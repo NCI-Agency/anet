@@ -18,6 +18,7 @@ import React, {
   useState
 } from "react"
 import scrollIntoView from "scroll-into-view-if-needed"
+import Settings from "settings"
 import { createEditor, Range, Text, Transforms } from "slate"
 import { withHistory } from "slate-history"
 import { jsx } from "slate-hyperscript"
@@ -28,6 +29,7 @@ import {
   useSelected,
   withReact
 } from "slate-react"
+import utils from "utils"
 import {
   ANET_LINK,
   EXTERNAL_LINK,
@@ -381,14 +383,15 @@ const deserialize = (el, markAttributes = {}) => {
 
 const displayCallback = modelInstance => {
   if (modelInstance instanceof Models.Report) {
-    return modelInstance.engagementDate
-      ? moment(modelInstance.engagementDate).format(
-        Models.Report.getEngagementDateFormat()
-      )
-      : "None"
-  } else {
-    return modelInstance.toString()
+    const title = utils.ellipsizeOnWords(
+      modelInstance.intent,
+      utils.getMaxTextFieldLength(Settings.fields.report.intent, 40)
+    )
+    if (title) {
+      return title
+    }
   }
+  return modelInstance.toString()
 }
 
 const getLink = (
