@@ -72,19 +72,17 @@ const ellipsizeOnWords = (value, maxLength) => {
   if (!value) {
     return value
   }
-  value = value.replace(/\s+/g, " ").trim()
+
+  const spaceChar = " "
+  value = value.replace(/\s+/g, spaceChar).trim()
 
   if (value.length <= maxLength) {
     return value
   }
+
   let trimmedStr = value.substring(0, maxLength)
-  const lastSpace = trimmedStr.lastIndexOf(" ")
-
-  if (lastSpace === -1) {
-    return trimmedStr + "\u2026"
-  }
-
-  if (value.charAt(maxLength) !== " " && value.charAt(maxLength - 1) !== " ") {
+  const lastSpace = trimmedStr.lastIndexOf(spaceChar)
+  if (lastSpace !== -1) {
     trimmedStr = trimmedStr.substring(0, lastSpace)
   }
 
@@ -322,8 +320,11 @@ export default {
     return safeVal
   },
 
-  getMaxTextFieldLength: function(field) {
-    return field?.maxLength || Settings.maxTextFieldLength
+  getMaxTextFieldLength: function(
+    field,
+    defaultLength = Settings.maxTextFieldLength
+  ) {
+    return field?.maxLength || defaultLength
   },
 
   pluralizeWord: function(count, word) {
