@@ -33,14 +33,30 @@ public class MartImportedReportDao {
   }
 
   @Transactional
+  public MartImportedReport getByReportUuid(String reportUuid) {
+    final Handle handle = getDbHandle();
+    try {
+
+      return handle
+          .createQuery(
+              "/* MartImportedReportGetByReportUuid*/ SELECT * FROM \"martImportedReports\" "
+                  + "WHERE \"reportUuid\" = :reportUuid")
+          .bind("reportUuid", reportUuid).map(new MartImportedReportMapper()).findFirst()
+          .orElse(null);
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
+  @Transactional
   public AnetBeanList<MartImportedReport> getAll(int pageNum, int pageSize) {
     final Handle handle = getDbHandle();
     try {
       final StringBuilder sql = new StringBuilder(
-          "/* MartImportedReportCheck */ SELECT * FROM \"martImportedReports\" ORDER BY \"createdAt\" ASC");
+          "/* MartImportedReportCheck */ SELECT * FROM \"martImportedReports\" ORDER BY \"receivedAt\" ASC");
       sql.insert(0, "SELECT *, COUNT(*) OVER() AS \"totalCount\" FROM (");
       sql.append(") AS results");
-      sql.append(" ORDER BY \"createdAt\" DESC");
+      sql.append(" ORDER BY \"receivedAt\" DESC");
       if (pageSize > 0) {
         sql.append(" OFFSET :offset LIMIT :limit");
       }
@@ -55,15 +71,30 @@ public class MartImportedReportDao {
   }
 
   @Transactional
+  public AnetBeanList<MartImportedReport> getAllSequences(List<Long> sequences) {
+    final Handle handle = getDbHandle();
+    try {
+      final Query query = handle.createQuery(
+          "/* MartImportedReportSequencesCheck */ SELECT * FROM \"martImportedReports\" WHERE \"sequence\" IN (<sequences>)")
+          .bindList("sequences", sequences);
+      return new AnetBeanList<>(query, 0, 0, new MartImportedReportMapper());
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
+  @Transactional
   public int insert(final MartImportedReport martImportedReport) {
     final Handle handle = getDbHandle();
     try {
       return handle
           .createUpdate("/* insertMartImportedReport */ INSERT INTO \"martImportedReports\" "
-              + "(\"personUuid\", \"reportUuid\", success, \"createdAt\", errors) "
-              + "VALUES (:personUuid, :reportUuid, :success, :createdAt, :errors) ")
+              + "(sequence, \"personUuid\", \"reportUuid\", success, \"submittedAt\", \"receivedAt\", errors) "
+              + "VALUES (:sequence, :personUuid, :reportUuid, :success, :submittedAt, :receivedAt, :errors) ")
           .bindBean(martImportedReport)
-          .bind("createdAt", DaoUtils.asLocalDateTime(martImportedReport.getCreatedAt())).execute();
+          .bind("getSubmittedAt", DaoUtils.asLocalDateTime(martImportedReport.getSubmittedAt()))
+          .bind("getReceivedAt", DaoUtils.asLocalDateTime(martImportedReport.getReceivedAt()))
+          .execute();
     } finally {
       closeDbHandle(handle);
     }
@@ -73,17 +104,10 @@ public class MartImportedReportDao {
   public int delete(final MartImportedReport martImportedReport) {
     final Handle handle = getDbHandle();
     try {
-      final StringBuilder sql =
-          new StringBuilder("/* deleteMartImportedReport */ DELETE FROM \"martImportedReports\" "
-              + "WHERE success = :success AND \"createdAt\" = :createdAt");
-      sql.append(martImportedReport.getPersonUuid() == null ? " AND \"personUuid\" IS NULL"
-          : " AND \"personUuid\" = :personUuid");
-      sql.append(martImportedReport.getReportUuid() == null ? " AND \"reportUuid\" IS NULL"
-          : " AND \"reportUuid\" = :reportUuid");
-      sql.append(
-          martImportedReport.getErrors() == null ? " AND errors IS NULL" : " AND errors = :errors");
-      return handle.createUpdate(sql).bindBean(martImportedReport)
-          .bind("createdAt", DaoUtils.asLocalDateTime(martImportedReport.getCreatedAt())).execute();
+      return handle
+          .createUpdate("/* deleteMartImportedReport */ DELETE FROM \"martImportedReports\" "
+              + "WHERE sequence = :sequence")
+          .bindBean(martImportedReport).execute();
     } finally {
       closeDbHandle(handle);
     }

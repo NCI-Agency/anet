@@ -37,8 +37,10 @@ const GQL_GET_MART_REPORTS_IMPORTED = gql`
           uuid
           intent
         }
+        sequence
         success
-        createdAt
+        submittedAt
+        receivedAt
         errors
       }
     }
@@ -112,10 +114,12 @@ const MartImportedReportsShow = ({
           <Table striped hover responsive>
             <thead>
               <tr>
+                <th>Sequence</th>
+                <th>Submitted Date</th>
+                <th>Received Date</th>
+                <th>Success?</th>
                 <th>Author</th>
                 <th>Report</th>
-                <th>Insert Date</th>
-                <th>Success?</th>
                 <th>Errors</th>
               </tr>
             </thead>
@@ -123,22 +127,14 @@ const MartImportedReportsShow = ({
               {martImportedReports.map((martImportedReport, index) => {
                 return (
                   <tr key={index}>
+                    <td>{martImportedReport.sequence}</td>
                     <td>
-                      <LinkTo
-                        modelType="Person"
-                        model={martImportedReport.person}
-                      />
-                    </td>
-                    <td>
-                      {martImportedReport.report && (
-                        <LinkTo
-                          modelType="Report"
-                          model={martImportedReport.report}
-                        />
+                      {moment(martImportedReport.submittedAt).format(
+                        Settings.dateFormats.forms.displayLong.withTime
                       )}
                     </td>
                     <td>
-                      {moment(martImportedReport.createdAt).format(
+                      {moment(martImportedReport.receivedAt).format(
                         Settings.dateFormats.forms.displayLong.withTime
                       )}
                     </td>
@@ -155,6 +151,22 @@ const MartImportedReportsShow = ({
                             : "text-danger"
                         }
                       />
+                    </td>
+                    <td>
+                      {martImportedReport.success && (
+                        <LinkTo
+                          modelType="Person"
+                          model={martImportedReport.person}
+                        />
+                      )}
+                    </td>
+                    <td>
+                      {martImportedReport.success && (
+                        <LinkTo
+                          modelType="Report"
+                          model={martImportedReport.report}
+                        />
+                      )}
                     </td>
                     <td>
                       <div

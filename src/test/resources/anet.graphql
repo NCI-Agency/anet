@@ -686,10 +686,12 @@ scalar Map_String_ObjectScalar
 
 """"""
 type MartImportedReport {
-  createdAt: Instant
   errors: String
   person: Person
+  receivedAt: Instant
   report: Report
+  sequence: Long
+  submittedAt: Instant
   success: Boolean!
 }
 
