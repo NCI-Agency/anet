@@ -90,7 +90,7 @@ fields:
 
     assessments:
       taskOnceReportRestricted:
-        label: Engagement assessment of objective
+        label: Restricted engagement assessment of objective
         recurrence: once
         relatedObjectType: report
         authorizationGroupUuids:

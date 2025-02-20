@@ -140,7 +140,7 @@ class ShowOrganization extends Page {
   }
 
   async getSaveAssessmentButton() {
-    return (await this.getAssessmentModalForm()).$('//button[text()="Save"]')
+    return (await this.getAssessmentModalForm()).$('.//button[text()="Save"]')
   }
 
   async getShownAssessmentPanel(assessmentKey, recurrence) {

@@ -23,7 +23,7 @@ class CreateReport extends cr.CreateReport {
   }
 
   async getTodayButton() {
-    return (await this.getDatepicker()).$('//button/span[text()="Today"]')
+    return (await this.getDatepicker()).$('.//button/span[text()="Today"]')
   }
 
   async getReportPeople() {

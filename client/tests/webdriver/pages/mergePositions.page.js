@@ -49,7 +49,7 @@ class MergePositions extends Page {
 
   async getSaveAssociatedPositionsButton() {
     return (await this.getEditAssociatedPositionsModal()).$(
-      '//button[text()="Save"]'
+      './/button[text()="Save"]'
     )
   }
 

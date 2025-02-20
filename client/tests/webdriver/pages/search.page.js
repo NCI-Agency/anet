@@ -49,19 +49,19 @@ class Search extends Page {
 
   async linkOfPersonFound(name) {
     return (await this.getFoundPeopleTable()).$(
-      `//tbody/tr//a[contains(text(), "${name}")]`
+      `.//tbody/tr//a[contains(text(), "${name}")]`
     )
   }
 
   async linkOfTaskFound(name) {
     return (await this.getFoundTaskTable()).$(
-      `//tbody/tr//a[contains(text(), "${name}")]`
+      `.//tbody/tr//a[contains(text(), "${name}")]`
     )
   }
 
   async linkOfOrganizationFound(name) {
     return (await this.getFoundOrganizationTable()).$(
-      `//tbody/tr//a[contains(text(), "${name}")]`
+      `.//tbody/tr//a[contains(text(), "${name}")]`
     )
   }
 

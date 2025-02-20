@@ -140,7 +140,7 @@ class ShowReport extends Page {
   }
 
   async getConfirmSubmitButton() {
-    return (await this.getReportModal()).$('//button[text()="Submit anyway"]')
+    return (await this.getReportModal()).$('.//button[text()="Submit anyway"]')
   }
 
   async getModalWarning() {
@@ -152,7 +152,7 @@ class ShowReport extends Page {
   }
 
   async getConfirmApproveButton() {
-    return (await this.getReportModal()).$('//button[text()="Approve anyway"]')
+    return (await this.getReportModal()).$('.//button[text()="Approve anyway"]')
   }
 
   async getSuccessfullApprovalToast() {
