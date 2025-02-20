@@ -16,6 +16,7 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import FindObjectsButton from "components/FindObjectsButton"
 import LinkTo from "components/LinkTo"
+import ListItems from "components/ListItems"
 import Messages from "components/Messages"
 import {
   DEFAULT_CUSTOM_FIELDS_PARENT,
@@ -623,6 +624,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
                         name="keyOutcomes"
                         component={FieldHelper.ReadonlyField}
                         style={{ marginBottom: 0 }}
+                        humanValue={<ListItems value={report.keyOutcomes} />}
                       />
                       <DictionaryField
                         wrappedComponent={Field}
@@ -630,6 +632,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
                         name="nextSteps"
                         component={FieldHelper.ReadonlyField}
                         style={{ marginBottom: 0 }}
+                        humanValue={<ListItems value={report.nextSteps} />}
                       />
                     </div>
                   }
