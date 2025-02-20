@@ -15,6 +15,10 @@ class ShowLocation extends Page {
     return browser.$('//a[text()="Edit"]')
   }
 
+  async getEditAttachmentsButton() {
+    return await browser.$("#edit-attachments")
+  }
+
   async getSuccessMsg() {
     return browser.$('//div[text()="Location saved"]')
   }

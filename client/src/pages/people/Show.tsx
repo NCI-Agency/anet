@@ -6,7 +6,7 @@ import API from "api"
 import AppContext from "components/AppContext"
 import AssessmentResultsContainer from "components/assessments/AssessmentResultsContainer"
 import AssignPositionModal from "components/AssignPositionModal"
-import AttachmentCard from "components/Attachment/AttachmentCard"
+import AttachmentsDetailView from "components/Attachment/AttachmentsDetailView"
 import AuthorizationGroupTable from "components/AuthorizationGroupTable"
 import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import CountryDisplay from "components/CountryDisplay"
@@ -46,7 +46,7 @@ import _isEmpty from "lodash/isEmpty"
 import { Attachment, Person, Position } from "models"
 import moment from "moment"
 import { personTour } from "pages/GuidedTour"
-import React, { useContext, useState } from "react"
+import React, { useContext, useEffect, useState } from "react"
 import {
   Button,
   Col,
@@ -164,6 +164,7 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
   const [stateError, setStateError] = useState(
     routerLocation.state && routerLocation.state.error
   )
+  const [attachments, setAttachments] = useState([])
   const [showAssignPositionModal, setShowAssignPositionModal] = useState(false)
   const [showAssociatedPositionsModal, setShowAssociatedPositionsModal] =
     useState(false)
@@ -182,6 +183,9 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
     pageDispatchers
   })
   usePageTitle(data?.person && `${data.person.rank} ${data?.person.name}`)
+  useEffect(() => {
+    setAttachments(data?.person?.attachments || [])
+  }, [data])
   if (done) {
     return result
   }
@@ -348,26 +352,26 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
                   </Row>
                   <Row>
                     <Col md={12}>{fullWidthFields}</Col>
+                    {attachmentsEnabled && (
+                      <Col md={12}>
+                        <Field
+                          name="attachments"
+                          label="Attachments"
+                          component={FieldHelper.ReadonlyField}
+                          humanValue={
+                            <AttachmentsDetailView
+                              attachments={attachments}
+                              updateAttachments={setAttachments}
+                              relatedObjectType={Person.relatedObjectType}
+                              relatedObjectUuid={person.uuid}
+                              allowEdit={canEdit}
+                            />
+                          }
+                        />
+                      </Col>
+                    )}
                   </Row>
                 </Container>
-
-                {attachmentsEnabled && (
-                  <Field
-                    name="attachments"
-                    label="Attachments"
-                    component={FieldHelper.ReadonlyField}
-                    humanValue={
-                      <div className="attachment-card-list">
-                        {person.attachments.map(attachment => (
-                          <AttachmentCard
-                            key={attachment.uuid}
-                            attachment={attachment}
-                          />
-                        ))}
-                      </div>
-                    }
-                  />
-                )}
               </Fieldset>
 
               {canEdit && (

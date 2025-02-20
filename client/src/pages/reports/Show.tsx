@@ -8,7 +8,7 @@ import {
 import API from "api"
 import AppContext from "components/AppContext"
 import InstantAssessmentsContainerField from "components/assessments/instant/InstantAssessmentsContainerField"
-import AttachmentCard from "components/Attachment/AttachmentCard"
+import AttachmentsDetailView from "components/Attachment/AttachmentsDetailView"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
@@ -46,7 +46,7 @@ import _upperFirst from "lodash/upperFirst"
 import { Attachment, Comment, Person, Position, Report, Task } from "models"
 import moment from "moment"
 import pluralize from "pluralize"
-import React, { useContext, useState } from "react"
+import React, { useContext, useEffect, useState } from "react"
 import { Alert, Button, Col, FormText, Modal } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useNavigate, useParams } from "react-router-dom"
@@ -329,6 +329,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
   const [showCustomFields, setShowCustomFields] = useState(
     !!Settings.fields.report.customFields
   )
+  const [attachments, setAttachments] = useState([])
   const { uuid } = useParams()
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_REPORT, {
     uuid
@@ -343,6 +344,9 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
     pageDispatchers
   })
   usePageTitle(data?.report?.intent || data?.report?.uuid)
+  useEffect(() => {
+    setAttachments(data?.report?.attachments || [])
+  }, [data])
   if (done) {
     return result
   }
@@ -753,14 +757,13 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }: ReportShowProps) => {
                     label="Attachments"
                     component={FieldHelper.ReadonlyField}
                     humanValue={
-                      <div className="attachment-card-list">
-                        {report.attachments.map(attachment => (
-                          <AttachmentCard
-                            key={attachment.uuid}
-                            attachment={attachment}
-                          />
-                        ))}
-                      </div>
+                      <AttachmentsDetailView
+                        attachments={attachments}
+                        updateAttachments={setAttachments}
+                        relatedObjectType={Report.relatedObjectType}
+                        relatedObjectUuid={values.uuid}
+                        allowEdit={canEdit}
+                      />
                     }
                   />
                 )}

@@ -4,7 +4,7 @@ import API from "api"
 import AppContext from "components/AppContext"
 import Approvals from "components/approvals/Approvals"
 import AssessmentResultsContainer from "components/assessments/AssessmentResultsContainer"
-import AttachmentCard from "components/Attachment/AttachmentCard"
+import AttachmentsDetailView from "components/Attachment/AttachmentsDetailView"
 import AuthorizationGroupTable from "components/AuthorizationGroupTable"
 import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import { ReadonlyCustomFields } from "components/CustomFields"
@@ -43,7 +43,7 @@ import { PositionRole } from "models/Position"
 import { orgTour } from "pages/GuidedTour"
 import pluralize from "pluralize"
 import { getPositionsForRole } from "positionUtil"
-import React, { useContext, useState } from "react"
+import React, { useContext, useEffect, useState } from "react"
 import {
   Badge,
   Button,
@@ -211,6 +211,7 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
   const [stateError, setStateError] = useState(
     routerLocation.state && routerLocation.state.error
   )
+  const [attachments, setAttachments] = useState([])
   const [filterPendingApproval, setFilterPendingApproval] = useState(false)
   const [includeChildrenOrgs, setIncludeChildrenOrgs] = useState(true)
   const { uuid } = useParams()
@@ -230,6 +231,9 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
     pageDispatchers
   })
   usePageTitle(data?.organization?.shortName)
+  useEffect(() => {
+    setAttachments(data?.organization?.attachments || [])
+  }, [data])
   if (done) {
     return result
   }
@@ -585,14 +589,13 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
                     label="Attachments"
                     component={FieldHelper.ReadonlyField}
                     humanValue={
-                      <div className="attachment-card-list">
-                        {organization.attachments.map(attachment => (
-                          <AttachmentCard
-                            key={attachment.uuid}
-                            attachment={attachment}
-                          />
-                        ))}
-                      </div>
+                      <AttachmentsDetailView
+                        attachments={attachments}
+                        updateAttachments={setAttachments}
+                        relatedObjectType={Organization.relatedObjectType}
+                        relatedObjectUuid={values.uuid}
+                        allowEdit={canAdministrateOrg}
+                      />
                     }
                   />
                 )}

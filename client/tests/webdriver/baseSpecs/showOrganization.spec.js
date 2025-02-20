@@ -136,7 +136,7 @@ describe("Show organization page", () => {
 
   describe("When on the show page of an organization with authorizationGroup(s)", () => {
     it("We should see a table with authorizationGroups", async() => {
-      await ShowOrganization.open(ORGANIZATION_WITH_AG_UUID)
+      await ShowOrganization.openAsAdminUser(ORGANIZATION_WITH_AG_UUID)
       await (
         await ShowOrganization.getAuthorizationGroupsTable()
       ).waitForExist()
@@ -165,6 +165,23 @@ describe("Show organization page", () => {
       await (await ShowOrganization.getCard()).waitForExist()
       await (await ShowOrganization.getCard()).waitForDisplayed()
       expect(await ShowOrganization.getCaption()).to.be.equal("EF 2.2")
+    })
+    it("We should be able to edit the attachments", async() => {
+      const editAttachmentsButton =
+        await ShowOrganization.getEditAttachmentsButton()
+      expect(await editAttachmentsButton.getText()).to.be.equal(
+        "Edit attachments"
+      )
+      await editAttachmentsButton.click()
+      expect(await editAttachmentsButton.getText()).to.be.equal(
+        "View attachments"
+      )
+
+      const editButton = await browser.$(".attachment-card .button-line a")
+      await expect(await editButton.getAttribute("href")).to.include(
+        "/attachments/9ac41246-25ac-457c-b7d6-946c5f625f1f/edit"
+      )
+      await editAttachmentsButton.click()
     })
     it("We can go to the show page of Attachment", async() => {
       await (await ShowOrganization.getImageClick()).click()

@@ -10,7 +10,7 @@ const LOCATION_WITH_REPORTS_UUID = "0855fb0a-995e-4a79-a132-4024ee2983ff" // Gen
 describe("Show location page", () => {
   describe("When on the show page of a location with attachment(s)", () => {
     it("We should see a container for Attachment List", async() => {
-      await ShowLocation.open(LOCATION_WITH_ATTACHMENTS_UUID)
+      await ShowLocation.openAsAdminUser(LOCATION_WITH_ATTACHMENTS_UUID)
       await (await ShowLocation.getAttachments()).waitForExist()
       await (await ShowLocation.getAttachments()).waitForDisplayed()
     })
@@ -18,6 +18,23 @@ describe("Show location page", () => {
       await (await ShowLocation.getCard()).waitForExist()
       await (await ShowLocation.getCard()).waitForDisplayed()
       expect(await ShowLocation.getCaption()).to.be.equal("Antarctica")
+    })
+    it("We should be able to edit the attachments", async() => {
+      const editAttachmentsButton =
+        await ShowLocation.getEditAttachmentsButton()
+      expect(await editAttachmentsButton.getText()).to.be.equal(
+        "Edit attachments"
+      )
+      await editAttachmentsButton.click()
+      expect(await editAttachmentsButton.getText()).to.be.equal(
+        "View attachments"
+      )
+
+      const editButton = await browser.$(".attachment-card .button-line a")
+      await expect(await editButton.getAttribute("href")).to.include(
+        "/attachments/f7cd5b02-ef73-4ee8-814b-c5a7a916685d/edit"
+      )
+      await editAttachmentsButton.click()
     })
     it("We can go to the show page of Attachment", async() => {
       await (await ShowLocation.getImageClick()).click()
