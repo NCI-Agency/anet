@@ -91,6 +91,7 @@ interface RichTextEditorProps {
   className?: string
   readOnly?: boolean
   disableFullSize?: boolean
+  showAvatar?: boolean
 }
 
 const RichTextEditor = ({
@@ -100,7 +101,8 @@ const RichTextEditor = ({
   onHandleBlur,
   className,
   readOnly,
-  disableFullSize
+  disableFullSize,
+  showAvatar = true
 }: RichTextEditorProps) => {
   const [showAnetLinksModal, setShowAnetLinksModal] = useState(false)
   const [showExternalLinksModal, setShowExternalLinksModal] = useState(false)
@@ -128,7 +130,10 @@ const RichTextEditor = ({
     }
   }, [editor, previousValue, readOnly, disableFullSize, value])
 
-  const renderElement = useCallback(props => <Element {...props} />, [])
+  const renderElement = useCallback(
+    props => <Element {...props} showAvatar={showAvatar} />,
+    [showAvatar]
+  )
   const renderLeaf = useCallback(props => <Leaf {...props} />, [])
 
   const handleFullSizeMode = isFullSize => setShowFullSize(isFullSize)
@@ -386,7 +391,14 @@ const displayCallback = modelInstance => {
   }
 }
 
-const getLink = (element, children, attributes, selected, focused) => {
+const getLink = (
+  element,
+  children,
+  attributes,
+  selected,
+  focused,
+  showAvatar
+) => {
   const reducedChildren = element.children.reduce(
     (acc, child) => acc + child.text,
     ""
@@ -397,6 +409,7 @@ const getLink = (element, children, attributes, selected, focused) => {
         type={element.entityType}
         uuid={element.entityUuid}
         displayCallback={displayCallback}
+        showAvatar={showAvatar}
       >
         {reducedChildren}
       </LinkAnetEntity>
@@ -427,9 +440,15 @@ interface ElementProps {
   attributes: any
   children?: React.ReactNode
   element?: any
+  showAvatar?: boolean
 }
 
-const Element = ({ attributes, children, element }: ElementProps) => {
+const Element = ({
+  attributes,
+  children,
+  element,
+  showAvatar
+}: ElementProps) => {
   const selected = useSelected()
   const focused = useFocused()
   switch (element.type) {
@@ -449,7 +468,14 @@ const Element = ({ attributes, children, element }: ElementProps) => {
       return <blockquote {...attributes}>{children}</blockquote>
     case ANET_LINK:
     case EXTERNAL_LINK:
-      return getLink(element, children, attributes, selected, focused)
+      return getLink(
+        element,
+        children,
+        attributes,
+        selected,
+        focused,
+        showAvatar
+      )
     default:
       return <p {...attributes}>{children}</p>
   }

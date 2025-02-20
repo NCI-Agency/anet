@@ -108,19 +108,35 @@ const ReadonlySpecialField = ({
         {...Object.without(otherFieldProps, "style")}
       />
     )
-  } else {
-    const WidgetComponent = SPECIAL_WIDGET_COMPONENTS[widget]
+  }
+  if (widget === SPECIAL_WIDGET_TYPES.LIKERT_SCALE && isCompact) {
     return (
       <FastField
         name={name}
         isCompact={isCompact}
-        component={FieldHelper.SpecialField}
-        widget={<WidgetComponent />}
-        readonly
+        component={FieldHelper.ReadonlyField}
+        humanValue={
+          <CompactLikertScale
+            name={name}
+            values={values}
+            levels={otherFieldProps.levels}
+          />
+        }
         {...otherFieldProps}
       />
     )
   }
+  const WidgetComponent = SPECIAL_WIDGET_COMPONENTS[widget]
+  return (
+    <FastField
+      name={name}
+      isCompact={isCompact}
+      component={FieldHelper.SpecialField}
+      widget={<WidgetComponent />}
+      readonly
+      {...otherFieldProps}
+    />
+  )
 }
 
 const TextField = fieldProps => {
@@ -285,10 +301,12 @@ const ReadonlyJsonField = ({
 interface GeoLocationFieldProps {
   name: string
   editable?: boolean
+  isCompact?: boolean
 }
 
 const GeoLocationField = ({
   editable = true,
+  isCompact,
   ...fieldProps
 }: GeoLocationFieldProps) => {
   const { name, label, formikProps, ...otherFieldProps } = fieldProps
@@ -326,16 +344,26 @@ const GeoLocationField = ({
   }
   return (
     <>
-      <GeoLocation
-        name={name}
-        labels={labels}
-        coordinates={coordinates}
-        displayType={GEO_LOCATION_DISPLAY_TYPE.FORM_FIELD}
-        editable={editable}
-        {...formikProps}
-        {...otherFieldProps}
-      />
-      {(editable || Location.hasCoordinates(coordinates)) && (
+      {!isCompact ? (
+        <GeoLocation
+          name={name}
+          labels={labels}
+          coordinates={coordinates}
+          displayType={GEO_LOCATION_DISPLAY_TYPE.FORM_FIELD}
+          editable={editable}
+          {...formikProps}
+          {...otherFieldProps}
+        />
+      ) : (
+        <FastField
+          name={label}
+          isCompact={isCompact}
+          component={FieldHelper.ReadonlyField}
+          humanValue={<CompactGeoLocation coordinates={coordinates} />}
+          {...Object.without(otherFieldProps, "style")}
+        />
+      )}
+      {!isCompact && (editable || Location.hasCoordinates(coordinates)) && (
         <Row style={{ marginTop: "-1rem" }}>
           <Col sm={2} />
           <Col sm={7}>
@@ -361,16 +389,18 @@ const GeoLocationField = ({
 interface ReadonlyGeoLocationFieldProps {
   name: string
   values: any
+  isCompact?: boolean
 }
 
 const ReadonlyGeoLocationField = (
   fieldProps: ReadonlyGeoLocationFieldProps
 ) => {
-  const { name, values, ...otherFieldProps } = fieldProps
+  const { name, values, isCompact, ...otherFieldProps } = fieldProps
   return (
     <GeoLocationField
       name={name}
       editable={false}
+      isCompact={isCompact}
       formikProps={{ values }}
       {...otherFieldProps}
     />
@@ -656,6 +686,7 @@ interface AnetObjectFieldProps {
   name: string
   types?: string[]
   formikProps?: any
+  isCompact?: boolean
   children?: React.ReactNode
 }
 
@@ -663,6 +694,7 @@ const AnetObjectField = ({
   name,
   types,
   formikProps,
+  isCompact,
   children,
   ...otherFieldProps
 }: AnetObjectFieldProps) => {
@@ -692,7 +724,11 @@ const AnetObjectField = ({
           <tbody>
             <tr>
               <td>
-                <LinkAnetEntity type={fieldValue.type} uuid={fieldValue.uuid} />
+                <LinkAnetEntity
+                  type={fieldValue.type}
+                  uuid={fieldValue.uuid}
+                  showAvatar={!isCompact}
+                />
               </td>
               <td className="col-1">
                 <RemoveButton
@@ -741,7 +777,11 @@ const ReadonlyAnetObjectField = ({
             <tbody>
               <tr>
                 <td>
-                  <LinkAnetEntity type={type} uuid={uuid} />
+                  <LinkAnetEntity
+                    type={type}
+                    uuid={uuid}
+                    showAvatar={!isCompact}
+                  />
                 </td>
               </tr>
             </tbody>
@@ -759,6 +799,7 @@ interface ArrayOfAnetObjectsFieldProps {
   name: string
   types?: string[]
   formikProps?: any
+  isCompact?: boolean
   children?: React.ReactNode
 }
 
@@ -766,6 +807,7 @@ const ArrayOfAnetObjectsField = ({
   name,
   types,
   formikProps,
+  isCompact,
   children,
   ...otherFieldProps
 }: ArrayOfAnetObjectsFieldProps) => {
@@ -803,7 +845,11 @@ const ArrayOfAnetObjectsField = ({
             {fieldValue.map(entity => (
               <tr key={entity.uuid}>
                 <td>
-                  <LinkAnetEntity type={entity.type} uuid={entity.uuid} />
+                  <LinkAnetEntity
+                    type={entity.type}
+                    uuid={entity.uuid}
+                    showAvatar={!isCompact}
+                  />
                 </td>
                 <td className="col-1">
                   <RemoveButton
@@ -865,7 +911,11 @@ const ReadonlyArrayOfAnetObjectsField = ({
               {fieldValue.map(entity => (
                 <tr key={entity.uuid}>
                   <td>
-                    <LinkAnetEntity type={entity.type} uuid={entity.uuid} />
+                    <LinkAnetEntity
+                      type={entity.type}
+                      uuid={entity.uuid}
+                      showAvatar={!isCompact}
+                    />
                   </td>
                 </tr>
               ))}
@@ -878,6 +928,42 @@ const ReadonlyArrayOfAnetObjectsField = ({
       className={className}
     />
   )
+}
+
+interface CompactLikertScaleProps {
+  name: string
+  values: any
+  levels: any[]
+}
+
+const CompactLikertScale = ({
+  name,
+  values,
+  levels
+}: CompactLikertScaleProps) => {
+  const fieldValue = Number(Object.get(values, name) || 0).toFixed(0)
+  const sortedLevels = levels.sort((a, b) => a.endValue - b.endValue)
+  const levelLabel =
+    sortedLevels.find(level => fieldValue <= level.endValue)?.label || null
+
+  return (
+    <>
+      {levelLabel ? (
+        <span>{`${fieldValue} - ${levelLabel}`}</span>
+      ) : (
+        <span>{fieldValue}</span>
+      )}
+    </>
+  )
+}
+
+interface CompactGeoLocationProps {
+  coordinates: object
+}
+
+const CompactGeoLocation = ({ coordinates }: CompactGeoLocationProps) => {
+  const coords = `${coordinates.lat}, ${coordinates.lng} - ${coordinates.displayedCoordinate}`
+  return <>{coords}</>
 }
 
 const FIELD_COMPONENTS = {
@@ -992,11 +1078,15 @@ interface CustomFieldsContainerProps {
   parentFieldName?: string
   setShowCustomFields?: (...args: unknown[]) => unknown
   vertical?: boolean
+  isCompact?: boolean
+  hideIfEmpty?: boolean
 }
 
 export const CustomFieldsContainer = ({
   parentFieldName = DEFAULT_CUSTOM_FIELDS_PARENT,
   vertical = false,
+  isCompact,
+  hideIfEmpty,
   ...props
 }: CustomFieldsContainerProps) => {
   const {
@@ -1032,6 +1122,8 @@ export const CustomFieldsContainer = ({
         invisibleFields={invisibleFields}
         parentFieldName={parentFieldName}
         vertical={vertical}
+        isCompact={isCompact}
+        hideIfEmpty={hideIfEmpty}
         {...props}
         fieldsConfig={deprecatedFieldsFiltered}
       />
@@ -1216,6 +1308,7 @@ interface ReadonlyCustomFieldsProps {
   values: any
   vertical?: boolean
   isCompact?: boolean
+  hideIfEmpty?: boolean
   extraColElem?: any
   labelColumnWidth?: number
   setShowCustomFields?: (...args: unknown[]) => unknown
@@ -1227,6 +1320,7 @@ export const ReadonlyCustomFields = ({
   values,
   vertical = false,
   isCompact,
+  hideIfEmpty,
   extraColElem,
   labelColumnWidth,
   setShowCustomFields
@@ -1256,6 +1350,10 @@ export const ReadonlyCustomFields = ({
           }
         }
         const ReadonlyFieldComponent = READONLY_FIELD_COMPONENTS[type]
+        const value = Object.get(values, fieldName) || null
+        if (hideIfEmpty && _isEmpty(value)) {
+          return null
+        }
         return ReadonlyFieldComponent ? (
           <ReadonlyFieldComponent
             key={key}

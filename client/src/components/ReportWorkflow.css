@@ -1,7 +1,8 @@
 .workflow-fieldset .workflow-action {
   position: relative;
   display: inline-block;
-  padding-right: 18px;
+  padding-right: 12px;
+  padding-left: 12px;
   margin-top: 3px;
   vertical-align: top;
   text-align: center;

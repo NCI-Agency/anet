@@ -1,7 +1,10 @@
 import React from "react"
+import utils from "utils"
 
+const WARNING_COLOR = "orange"
 const css = {
-  background: "orange"
+  background: WARNING_COLOR,
+  color: `${utils.getContrastYIQ(WARNING_COLOR)}`
 }
 
 const NoPositionBanner = () => (

@@ -314,7 +314,7 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
             backgroundText={backgroundText}
           >
             <CompactHeaderContent
-              color={utils.getColorForChoice(report.classification)}
+              color={null}
               policyAndClassification={utils.getPolicyAndClassificationForChoice(
                 report.classification
               )}
@@ -337,26 +337,27 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                   dictProps={Settings.fields.report.intent}
                   content={report.intent}
                   className="reportField"
+                  hideIfEmpty
                 />
                 <DictionaryField
                   wrappedComponent={CompactRow}
                   dictProps={Settings.fields.report.keyOutcomes}
                   content={report.keyOutcomes}
                   className="reportField"
+                  hideIfEmpty
                 />
                 {!report.cancelled && (
                   <>
                     <DictionaryField
                       wrappedComponent={CompactRow}
                       dictProps={Settings.fields.report.atmosphere}
-                      content={utils.sentenceCase(report.atmosphere)}
+                      content={
+                        !report.atmosphereDetails
+                          ? utils.sentenceCase(report.atmosphere)
+                          : `${utils.sentenceCase(report.atmosphere)} - ${report.atmosphereDetails}`
+                      }
                       className="reportField"
-                    />
-                    <DictionaryField
-                      wrappedComponent={CompactRow}
-                      dictProps={Settings.fields.report.atmosphereDetails}
-                      content={report.atmosphereDetails}
-                      className="reportField"
+                      hideIfEmpty
                     />
                   </>
                 )}
@@ -365,24 +366,28 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                   dictProps={Settings.fields.report.nextSteps}
                   content={report.nextSteps}
                   className="reportField"
+                  hideIfEmpty
                 />
                 <CompactRow
                   id="interlocutors"
                   label="Interlocutors"
                   content={getAttendeesAndAssessments(true)}
                   className="reportField"
+                  hideIfEmpty
                 />
                 <CompactRow
                   id="advisors"
                   label="Advisors"
                   content={getAttendeesAndAssessments(false)}
                   className="reportField"
+                  hideIfEmpty
                 />
                 <CompactRow
                   id="tasks"
                   label={Settings.fields.task.longLabel}
                   content={getTasksAndAssessments()}
                   className="reportField"
+                  hideIfEmpty
                 />
                 {report.cancelled && (
                   <DictionaryField
@@ -390,24 +395,48 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                     dictProps={Settings.fields.report.cancelledReason}
                     content={utils.sentenceCase(report.cancelledReason)}
                     className="reportField"
+                    hideIfEmpty
                   />
                 )}
-                {optionalFields.workflow.active && report.showWorkflow() && (
-                  <CompactRowReportWorkflow
-                    workflow={report.workflow}
-                    className="reportField"
-                    isCompact
-                  />
+                {optionalFields.workflow.active &&
+                  report.showWorkflow() &&
+                  !!report.workflow.length && (
+                    <CompactRowReportWorkflow
+                      workflow={report.workflow}
+                      className="reportField"
+                      isCompact
+                    />
                 )}
                 {report.reportText && (
                   <DictionaryField
                     wrappedComponent={CompactRow}
                     dictProps={Settings.fields.report.reportText}
                     content={
-                      <RichTextEditor readOnly value={report.reportText} />
+                      <RichTextEditor
+                        readOnly
+                        showAvatar={false}
+                        value={report.reportText}
+                      />
                     }
-                    className="reportField"
+                    className="reportField keyDetailsRow"
+                    hideIfEmpty
+                    label={null}
                   />
+                )}
+                {optionalFields.assessments.active && (
+                  <CompactReportViewS>
+                    {getAttendeesAndAssessments(
+                      true,
+                      true,
+                      "interlocutors-assessments"
+                    )}
+                    {getAttendeesAndAssessments(
+                      false,
+                      true,
+                      "advisors-assessments"
+                    )}
+                    {getTasksAndAssessments(true, "tasks-assessments")}
+                  </CompactReportViewS>
                 )}
                 {Settings.fields.report.customFields && (
                   <ReadonlyCustomFields
@@ -415,13 +444,14 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                     values={report}
                     vertical
                     isCompact
+                    hideIfEmpty
                   />
                 )}
               </FullColumn>
             </CompactTable>
             <CompactFooterContent
               object={report}
-              color={utils.getColorForChoice(report.classification)}
+              color={null}
               policyAndClassification={utils.getPolicyAndClassificationForChoice(
                 report.classification
               )}
@@ -451,10 +481,19 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
         {report.primaryInterlocutor && (
           <>
             {" of "}
-            <LinkTo modelType="Person" model={report.primaryInterlocutor} />
+            <LinkTo
+              modelType="Person"
+              showAvatar={false}
+              model={report.primaryInterlocutor}
+            />
           </>
         )}{" "}
-        by <LinkTo modelType="Person" model={report.primaryAdvisor} />
+        by{" "}
+        <LinkTo
+          modelType="Person"
+          showAvatar={false}
+          model={report.primaryAdvisor}
+        />
         <br />
         on{" "}
         {moment(report.engagementDate).format(
@@ -462,7 +501,11 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
         )}{" "}
         at{" "}
         {report.location && (
-          <LinkTo modelType="Location" model={report.location} />
+          <LinkTo
+            modelType="Location"
+            showAvatar={false}
+            model={report.location}
+          />
         )}
       </>
     )
@@ -473,19 +516,35 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
       ? moment(report.updatedAt)
       : moment(report.releasedAt)
     return (
-      <>
-        Authored on{" "}
-        {timeToShow.format(Settings.dateFormats.forms.displayShort.withTime)} [
-        {Report.STATE_LABELS[report.state]}]
-      </>
+      <div style={{ fontSize: "12px", marginBottom: "10px" }}>
+        <div>
+          Authored on{" "}
+          {timeToShow.format(Settings.dateFormats.forms.displayShort.withTime)}{" "}
+          [{Report.STATE_LABELS[report.state]}]
+        </div>
+        <div>
+          <div>
+            Printed by{" "}
+            <LinkTo
+              modelType="Person"
+              model={currentUser}
+              showAvatar={false}
+              style={{ fontSize: "12px" }}
+            />{" "}
+            on{" "}
+            {moment().format(Settings.dateFormats.forms.displayLong.withTime)}
+          </div>
+        </div>
+      </div>
     )
   }
 
-  function getTasksAndAssessments() {
+  function getTasksAndAssessments(displayAssessments?: boolean, id?: string) {
     return (
       // return only name and objective if no assessment
-      optionalFields.assessments.active ? (
+      displayAssessments ? (
         <InstantAssessmentsContainerField
+          id={id}
           entityType={Task}
           entities={report.tasks}
           relatedObject={report}
@@ -493,6 +552,7 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
           formikProps={{
             values: report
           }}
+          isCompact
           canRead={canReadAssessments}
           readonly
         />
@@ -512,12 +572,17 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
     )
   }
 
-  function getAttendeesAndAssessments(interlocutor) {
+  function getAttendeesAndAssessments(
+    interlocutor: boolean,
+    displayAssessments?: boolean,
+    id?: string
+  ) {
     const attendees = report.attendees.filter(
       at => at.interlocutor === interlocutor
     )
-    return optionalFields.assessments.active ? (
+    return displayAssessments ? (
       <InstantAssessmentsContainerField
+        id={id}
         entityType={Person}
         entities={attendees}
         relatedObject={report}
@@ -525,17 +590,59 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
         formikProps={{
           values: report
         }}
+        isCompact
         canRead={canReadAssessments}
         readonly
         showEntitiesWithoutAssessments
       />
     ) : (
       attendees.map(attendee => (
-        <LinkTo key={attendee.uuid} modelType="Person" model={attendee} />
+        <LinkTo
+          key={attendee.uuid}
+          modelType="Person"
+          showAvatar={false}
+          model={attendee}
+        />
       ))
     )
   }
 }
+
+const CompactReportViewS = styled.table`
+  .table {
+    & span.badge {
+      background-color: unset !important;
+      padding: 0px;
+      font-size: 12px !important;
+    }
+
+    & tr tr {
+      display: flex;
+      gap: 20px;
+
+      & th {
+        width: unset;
+        font-weight: normal;
+        white-space: nowrap;
+      }
+      & td {
+        padding: 0px;
+        font-weight: bold;
+      }
+    }
+
+    & h4 {
+      font-size: 16px;
+    }
+
+    & fieldset {
+      padding: 10px 16px !important;
+      background-color: unset;
+      border: 1px solid #d1d5db;
+      box-shadow: none;
+    }
+  }
+`
 
 const OPTIONAL_FIELDS_INIT = {
   assessments: {
@@ -659,7 +766,7 @@ const CompactWorkflowRowS = styled(CompactRowS)`
     text-align: center;
     & > div {
       position: relative;
-      margin-right: 18px;
+      margin-right: 12px;
     }
     & > div:not(:last-child):after {
       position: absolute;
@@ -707,9 +814,15 @@ interface CompactRowReportActionProps {
 
 const CompactRowReportAction = ({ action }: CompactRowReportActionProps) => {
   return (
-    <div className="workflow-action">
+    <CompactRowReportActionS className="workflow-action">
       <ActionStatus action={action} />
       <ActionButton action={action} />
-    </div>
+    </CompactRowReportActionS>
   )
 }
+
+const CompactRowReportActionS = styled.div`
+  & button {
+    background-color: #ddd !important;
+  }
+`

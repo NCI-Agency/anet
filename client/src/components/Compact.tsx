@@ -2,12 +2,9 @@
 import { Icon, Intent, Tooltip } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import styled from "@emotion/styled"
-import AppContext from "components/AppContext"
-import LinkTo from "components/LinkTo"
 import { CompactSecurityBanner } from "components/SecurityBanner"
-import moment from "moment"
-import React, { useContext } from "react"
-import { Link, useLocation } from "react-router-dom"
+import _isEmpty from "lodash/isEmpty"
+import React from "react"
 import Settings from "settings"
 import utils from "utils"
 import anetLogo from "../../public/favicon/logo.svg"
@@ -132,7 +129,12 @@ export const CompactHeaderContent = ({
 }: CompactHeaderContentProps) => {
   return (
     <HeaderContentS bgc={color}>
-      <img src={anetLogo} alt="logo" width="50" height="12" />
+      <img
+        src={anetLogo}
+        alt="logo"
+        width="120"
+        style={{ position: "absolute" }}
+      />
       <ClassificationBoxS>
         <ClassificationBanner
           color={color}
@@ -147,49 +149,23 @@ export const CompactHeaderContent = ({
 }
 
 interface CompactFooterContentProps {
-  object?: any
   color?: string
   policyAndClassification?: string
-  releasableTo?: string
 }
 
 export const CompactFooterContent = ({
-  object,
   color = utils.getColorForChoice(Settings.siteClassification),
   policyAndClassification = utils.getPolicyAndClassificationForChoice(
     Settings.siteClassification
-  ),
-  releasableTo = utils.getReleasableToForChoice(Settings.siteClassification)
+  )
 }: CompactFooterContentProps) => {
-  const location = useLocation()
-  const { currentUser } = useContext(AppContext)
   return (
     <FooterContentS bgc={color}>
-      <span style={{ fontSize: "10px" }}>
-        uuid:{" "}
-        <Link to={location.pathname} style={{ fontSize: "10px" }}>
-          {object.uuid}
-        </Link>
-      </span>
       <ClassificationBanner
         color={color}
         policyAndClassification={policyAndClassification}
-        releasableTo={releasableTo}
         bannerId="footer-banner"
       />
-      <PrintedByBoxS>
-        <div>
-          printed by{" "}
-          <LinkTo
-            style={{ fontSize: "10px" }}
-            modelType="Person"
-            model={currentUser}
-          />
-        </div>
-        <div>
-          {moment().format(Settings.dateFormats.forms.displayLong.withTime)}
-        </div>
-      </PrintedByBoxS>
     </FooterContentS>
   )
 }
@@ -230,27 +206,10 @@ const ClassificationBoxS = styled.div`
   flex-direction: row;
   align-items: center;
   font-size: 18px;
-  min-width: 235px;
   text-align: center;
   margin: auto;
 `
 
-const PrintedByBoxS = styled.span`
-  align-self: flex-start;
-  width: auto;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  align-items: flex-end;
-  flex-wrap: wrap;
-  font-size: 10px;
-  & > span {
-    display: inline-block;
-    text-align: right;
-  }
-`
-
-// background color of banner makes reading blue links hard. Force white color
 const HF_COMMON_STYLE = `
   position: absolute;
   left: 0mm;
@@ -264,13 +223,6 @@ const HF_COMMON_STYLE = `
   padding: 1rem;
   -webkit-print-color-adjust: exact !important;
   color-adjust: exact !important;
-  img {
-    max-width: 50px !important;
-    max-height: 24px !important;
-  }
-  & * {
-    color: white !important;
-  }
   @media print {
     position: fixed;
     max-height: 80px;
@@ -280,14 +232,18 @@ const HF_COMMON_STYLE = `
 const HeaderContentS = styled.div`
   ${HF_COMMON_STYLE};
   top: 0mm;
-  border-bottom: 1px solid black;
   background-color: ${props => props.bgc} !important;
+  @media print {
+    .banner span {
+      display: block;
+    }
+  }
 `
 
 const FooterContentS = styled.div`
   ${HF_COMMON_STYLE};
+  justify-content: center;
   bottom: 0mm;
-  border-top: 1px solid black;
   background-color: ${props => props.bgc} !important;
 `
 
@@ -379,6 +335,7 @@ const CompactTableS = styled.table`
   tr {
     width: 100% !important;
     background-color: transparent !important;
+    margin: 0px;
   }
   td {
     background-color: transparent !important;
@@ -392,57 +349,57 @@ const EmptySpaceTdS = styled.td`
 interface CompactRowProps {
   label?: React.ReactNode
   content?: React.ReactNode
+  hideIfEmpty?: boolean
 }
 
 export const CompactRow = ({
   label,
   content,
+  hideIfEmpty,
   ...otherProps
 }: CompactRowProps) => {
   const { id, style, className } = otherProps
   // merge custom style
   const CustomStyled = styled(CompactRowS)`
-    ${style};
+    ${style}
   `
 
-  // top level th have different width
-  const isHeaderRow = className === "reportField"
-
+  if (hideIfEmpty && _isEmpty(content)) {
+    return null
+  }
   return (
     <CustomStyled id={id} className={className}>
-      {label && <RowLabelS isHeaderRow={isHeaderRow}>{label}</RowLabelS>}
+      {label && <RowLabelS>{label}</RowLabelS>}
       <CompactRowContentS colSpan={label ? 1 : 2}>{content}</CompactRowContentS>
     </CustomStyled>
   )
 }
 
 export const CompactRowS = styled.tr`
-  vertical-align: top;
-  font-family: "Times New Roman", Times, serif;
+  vertical-align: middle;
+  font-family: "Arial", sans-serif;
   width: 100%;
+  border-bottom: 1px solid #d1d5db;
+  &:last-child {
+    border-bottom: none;
+    border-bottom: none;
+  }
 `
 
 const RowLabelS = styled.th`
-  padding: 4px 0;
-  font-style: italic;
-  color: grey;
-  max-width: 50%;
-  font-weight: 300;
-  width: ${props => (props.isHeaderRow ? "15%" : "auto")};
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: bold;
+  color: #445566;
+  width: 20%;
 `
 
 export const CompactRowContentS = styled.td`
-  padding: 4px 1rem;
-  & .form-control-plaintext {
-    margin-bottom: 0;
-    padding-top: 0;
-  }
-  & .bp5-icon-info-sign {
-    padding: 0 1rem;
-    @media print {
-      display: none;
-    }
-  }
+  padding: 8px 12px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #112222;
+  text-align: left;
 `
 
 interface CompactTitleProps {
@@ -460,10 +417,10 @@ export const CompactTitle = ({ label }: CompactTitleProps) => {
 const CompactTitleS = styled(CompactRowS)`
   & > th {
     font-size: 18px;
-    font-style: normal;
-    color: black;
+    color: #223333;
     text-align: center;
-    font-weight: bold;
+    padding: 12px 16px;
+    border-bottom: 2px solid #d1d5db;
   }
 `
 
@@ -481,10 +438,9 @@ export const CompactSubTitle = ({ label }: CompactSubTitleProps) => {
 
 const CompactSubTitleS = styled(CompactRowS)`
   & > th {
-    font-style: italic;
-    color: black;
+    color: #404050;
     text-align: center;
-    font-weight: normal;
+    padding: 10px 14px;
   }
 `
 

@@ -24,6 +24,7 @@ interface InstantAssessmentRowProps {
     values: any
     validateForm?: (...args: unknown[]) => unknown
   }
+  isCompact?: boolean
   canRead?: boolean
   canWrite?: boolean
   readonly?: boolean
@@ -36,6 +37,7 @@ const InstantAssessmentRow = ({
   entity,
   relatedObject,
   formikProps,
+  isCompact,
   canRead,
   canWrite,
   readonly
@@ -76,12 +78,16 @@ const InstantAssessmentRow = ({
               parentFieldName={parentFieldName}
               fieldsConfig={entityInstantAssessmentConfig.questions}
               values={values}
+              isCompact={isCompact}
+              hideIfEmpty={isCompact}
             />
           ) : (
             <CustomFieldsContainer
               parentFieldName={parentFieldName}
               fieldsConfig={entityInstantAssessmentConfig.questions}
               formikProps={formikProps}
+              isCompact={isCompact}
+              hideIfEmpty={isCompact}
             />
           ))}
         {!_isEmpty(entityInstantAssessmentConfig?.questionSets) && (
@@ -91,6 +97,7 @@ const InstantAssessmentRow = ({
             questionSets={entityInstantAssessmentConfig.questionSets}
             parentFieldName={`${parentFieldName}.questionSets`}
             formikProps={formikProps}
+            isCompact={isCompact}
             readonly={readOnlyAccess}
           />
         )}
@@ -100,6 +107,7 @@ const InstantAssessmentRow = ({
 }
 
 interface InstantAssessmentsContainerFieldProps {
+  id?: string
   entityType: (...args: unknown[]) => unknown
   entities?: any[]
   relatedObject?: any
@@ -110,6 +118,7 @@ interface InstantAssessmentsContainerFieldProps {
     values: any
     validateForm?: (...args: unknown[]) => unknown
   }
+  isCompact?: boolean
   canRead?: boolean
   canWrite?: boolean
   readonly?: boolean
@@ -117,11 +126,13 @@ interface InstantAssessmentsContainerFieldProps {
 }
 
 const InstantAssessmentsContainerField = ({
+  id,
   entityType,
   entities = [],
   relatedObject,
   parentFieldName,
   formikProps,
+  isCompact,
   canRead = false,
   canWrite = false,
   readonly = false,
@@ -160,7 +171,7 @@ const InstantAssessmentsContainerField = ({
     ? entities.sort(sortEntries)
     : entities.filter(getEntitiesWithAssessments)
   return (
-    <Table>
+    <Table id={id}>
       <tbody>
         {filteredEntities.map(entity => {
           const entityInstantAssessments = entity.getInstantAssessments()
@@ -178,7 +189,11 @@ const InstantAssessmentsContainerField = ({
                       parentField="parentTask"
                     />
                   ) : (
-                    <LinkTo modelType={modelType} model={entity} />
+                    <LinkTo
+                      modelType={modelType}
+                      model={entity}
+                      showAvatar={!isCompact}
+                    />
                   )}
                 </td>
               </tr>
@@ -191,6 +206,7 @@ const InstantAssessmentsContainerField = ({
                   entity={entity}
                   relatedObject={relatedObject}
                   formikProps={formikProps}
+                  isCompact={isCompact}
                   canRead={canRead}
                   canWrite={canWrite}
                   readonly={readonly}

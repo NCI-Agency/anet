@@ -232,6 +232,9 @@ export const CompactSecurityBanner = ({
 
 const CompactBannerS = styled.div`
   background: ${props => props.bgc};
+  color: ${props => utils.getContrastYIQ(props.bgc, "black")};
+  display: flex;
+  flex-direction: column;
 `
 
 export default SecurityBanner

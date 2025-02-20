@@ -44,7 +44,6 @@ describe("Show print report page", () => {
         "Engagement purpose",
         "Key outcomes",
         "Atmospherics",
-        "Atmospherics details",
         "Next steps",
         "Interlocutors",
         "Advisors",
@@ -78,7 +77,7 @@ describe("Show print report page", () => {
       const bannerSecurityText = await (
         await Home.getBannerSecurityText()
       ).getText()
-      expect(compactBannerText).to.equal(bannerSecurityText)
+      expect(compactBannerText.replace(/\n/g, "")).to.equal(bannerSecurityText)
     })
     it("Should display all attendees", async() => {
       const displayedInterlocutors =
@@ -95,14 +94,14 @@ describe("Show print report page", () => {
     it("Should display all attendees when assessments are shown", async() => {
       await ShowReport.selectOptionalField("assessments")
       const displayedInterlocutors = await ShowReport.getCompactViewElements(
-        "interlocutors",
+        "interlocutors-assessments",
         true
       )
       for (const interlocutor of INTERLOCUTORS) {
         expect(displayedInterlocutors).to.contain(interlocutor)
       }
       const displayedAdvisors = await ShowReport.getCompactViewElements(
-        "advisors",
+        "advisors-assessments",
         true
       )
       for (const advisor of ADVISORS) {
@@ -118,7 +117,7 @@ describe("Show print report page", () => {
     it("Should display all tasks when assessments are shown", async() => {
       await ShowReport.selectOptionalField("assessments")
       const displayedTasks = await ShowReport.getCompactViewElements(
-        "tasks",
+        "tasks-assessments",
         true
       )
       for (const task of TASKS) {
