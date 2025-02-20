@@ -27,6 +27,42 @@ class CreateTask extends Page {
     return browser.$("#longName")
   }
 
+  async getParentTaskInput() {
+    return browser.$("#parentTask")
+  }
+
+  async getClearParentTaskButton() {
+    return browser.$("#fg-parentTask div.input-group button")
+  }
+
+  async getParentTaskSearchPopover() {
+    return browser.$("#parentTask-popover")
+  }
+
+  async getParentTasksTable() {
+    return (await this.getParentTaskSearchPopover()).$(
+      ".table-responsive table"
+    )
+  }
+
+  async selectParentTaskByText(name) {
+    await (await this.getParentTaskInput()).click()
+    // wait for parentTask table loader to disappear
+    await (await this.getParentTasksTable()).waitForDisplayed()
+    await browser.keys(name)
+    await (await this.getParentTasksTable()).waitForDisplayed()
+    const radioButton = await (
+      await this.getParentTasksTable()
+    ).$("tbody tr:first-child td:first-child input.form-check-input")
+    if (!(await radioButton.isSelected())) {
+      await radioButton.click()
+    }
+    await (await this.getShortNameInput()).click()
+    await (
+      await this.getParentTaskSearchPopover()
+    ).waitForExist({ reverse: true, timeout: 3000 })
+  }
+
   async getDescriptionInput() {
     return browser.$("#fg-description .editable")
   }

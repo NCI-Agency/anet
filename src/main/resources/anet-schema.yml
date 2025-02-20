@@ -636,10 +636,14 @@ properties:
       task:
         type: object
         additionalProperties: false
-        required: [status, shortLabel, shortName, longLabel, longName, description, selectable,
+        required: [allTasksLabel, status, shortLabel, shortName, longLabel, longName, description, selectable,
                    projectedCompletion, plannedCompletion, parentTask, childrenTasks,
                    taskedOrganizations, responsiblePositions]
         properties:
+          allTasksLabel:
+            type: string
+            title: The label used to represent 'all tasks'
+            description: Used in the UI to refer to all tasks.
           status:
             "$ref": "#/$defs/labeledField"
           shortLabel:

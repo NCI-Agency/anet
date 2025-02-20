@@ -4,6 +4,7 @@ import ShowTask from "../pages/showTask.page"
 
 const SHORT_NAME = "TO 1"
 const LONG_NAME = "To the 1"
+const PARENT_TASK = "TAAC Air"
 const DESCRIPTION = "Test Task 1"
 
 describe("When creating an task", () => {
@@ -19,6 +20,7 @@ describe("When creating an task", () => {
   it("Should successfully create a task", async() => {
     await (await CreateTask.getShortNameInput()).setValue(SHORT_NAME)
     await (await CreateTask.getLongNameInput()).setValue(LONG_NAME)
+    await CreateTask.selectParentTaskByText(PARENT_TASK)
     await CreateTask.fillTaskDescription(DESCRIPTION)
     await CreateTask.submitForm()
     await ShowTask.waitForAlertSuccessToLoad()

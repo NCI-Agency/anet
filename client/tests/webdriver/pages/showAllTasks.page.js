@@ -1,0 +1,37 @@
+import Page from "./page"
+
+const PAGE_URL = "/top-tasks"
+
+class ShowAllTasks extends Page {
+  async open() {
+    await super.open(PAGE_URL)
+  }
+
+  async getTitle() {
+    return browser.$("h4.legend")
+  }
+
+  async getTree() {
+    return browser.$(".bp5-tree")
+  }
+
+  async getAllTasks() {
+    return (await this.getTree()).$$(".bp5-tree-node-list .bp5-tree-node")
+  }
+
+  async getAllDescendants(task, filterVisible = false) {
+    const descendants = await task.$$(".bp5-tree-node-list .bp5-tree-node")
+    if (!filterVisible) {
+      return descendants
+    }
+    const visibleDescendants = []
+    for (const descendant of descendants) {
+      if (await descendant.isDisplayed()) {
+        visibleDescendants.push(descendant)
+      }
+    }
+    return visibleDescendants
+  }
+}
+
+export default new ShowAllTasks()

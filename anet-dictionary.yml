@@ -71,6 +71,7 @@ siteClassification: demo
 fields:
 
   task:
+    allTasksLabel: Objectives
     shortLabel: Objective
     longLabel: Objectives
     status:

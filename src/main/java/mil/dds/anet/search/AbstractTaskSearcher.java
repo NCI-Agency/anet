@@ -145,6 +145,9 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
       qb.addRecursiveClause(null, "tasks", "\"uuid\"", "parent_tasks", "tasks",
           "\"parentTaskUuid\"", "parentTaskUuid", query.getParentTaskUuid(),
           RecurseStrategy.CHILDREN.equals(query.getParentTaskRecurseStrategy()));
+    } else if (query.getParentTaskUuid().size() == 1
+        && Task.DUMMY_TASK_UUID.equals(query.getParentTaskUuid().get(0))) {
+      qb.addIsNullOrEmptyClause("tasks.\"parentTaskUuid\"");
     } else {
       qb.addInListClause("parentTaskUuid", "tasks.\"parentTaskUuid\"", query.getParentTaskUuid());
     }

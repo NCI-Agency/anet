@@ -15,6 +15,7 @@ export const PAGE_URLS = {
   LOCATIONS: "/locations",
   POSITIONS: "/positions",
   TASKS: "/tasks",
+  TOP_TASKS: "/top-tasks",
   ADMIN: "/admin",
   INSIGHTS: "/insights",
   DASHBOARDS: "/dashboards",

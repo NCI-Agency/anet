@@ -61,6 +61,7 @@ import TaskEdit from "pages/tasks/Edit"
 import MyTasks from "pages/tasks/MyTasks"
 import TaskNew from "pages/tasks/New"
 import TaskShow from "pages/tasks/Show"
+import TopTasks from "pages/tasks/Top"
 import { PAGE_URLS } from "pages/util"
 import React, { useContext } from "react"
 import { Navigate, Route, Routes } from "react-router-dom"
@@ -182,6 +183,7 @@ const Routing = () => {
           <Route path="graphiql" element={<GraphiQL />} />
         </Route>
       )}
+      <Route path={PAGE_URLS.TOP_TASKS} element={<TopTasks />} />
       <Route path={PAGE_URLS.INSIGHTS}>
         <Route path=":insight" element={<InsightsShow />} />
       </Route>
