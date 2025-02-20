@@ -17,7 +17,6 @@ import AuthorizationGroupEdit from "pages/authorizationGroups/Edit"
 import MyAuthorizationGroups from "pages/authorizationGroups/MyAuthorizationGroups"
 import AuthorizationGroupNew from "pages/authorizationGroups/New"
 import AuthorizationGroupShow from "pages/authorizationGroups/Show"
-import BoardDashboard from "pages/dashboards/BoardDashboard"
 import DecisivesDashboard from "pages/dashboards/DecisivesDashboard"
 import KanbanDashboard from "pages/dashboards/KanbanDashboard"
 import EventEdit from "pages/events/Edit"
@@ -192,9 +191,6 @@ const Routing = () => {
         </Route>
         <Route path="decisives">
           <Route path=":dashboard" element={<DecisivesDashboard />} />
-        </Route>
-        <Route path="board">
-          <Route path=":dashboard" element={<BoardDashboard />} />
         </Route>
       </Route>
       <Route path={PAGE_URLS.ONBOARDING}>
