@@ -3,6 +3,7 @@ import Leaflet, { ICON_TYPES } from "components/Leaflet"
 import _escape from "lodash/escape"
 import _isEmpty from "lodash/isEmpty"
 import { Location, Report } from "models"
+import { PAGE_URLS } from "pages/util"
 import React, { useMemo } from "react"
 
 const getIcon = report => {
@@ -35,7 +36,7 @@ const ReportsMapWidget = ({
     const markerArray = []
     values.forEach(report => {
       if (Location.hasCoordinates(report.location)) {
-        let label = _escape(report.intent || "<undefined>") // escape HTML in intent!
+        let label = `<a href="${PAGE_URLS.REPORTS}/${report.uuid}" target="_blank">${_escape(report.intent || "<undefined>")}</a>` // escape HTML in intent!
         label += `<br/>@ <b>${_escape(report.location.name)}</b>` // escape HTML in locationName!
         markerArray.push({
           id: report.uuid,
