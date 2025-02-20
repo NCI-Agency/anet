@@ -177,6 +177,8 @@ const GQL_GET_APP_DATA = gql`
         shortName
         longName
         identificationCode
+        app6standardIdentity
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
     }
   }
