@@ -1,5 +1,6 @@
 import { gql } from "@apollo/client"
 import Model, { GRAPHQL_ENTITY_AVATAR_FIELDS, yupDate } from "components/Model"
+import moment from "moment"
 import EVENTS_ICON from "resources/events.png"
 import Settings from "settings"
 import utils from "utils"
@@ -33,7 +34,18 @@ export default class Event extends Model {
     name: yup.string().required().default(""),
     description: yup.string().default(""),
     startDate: yupDate.required().default(null),
-    endDate: yupDate.required().default(null),
+    endDate: yupDate
+      .required()
+      .when("startDate", ([startDate], schema) =>
+        schema.test("endDate", "endDate error", (endDate, testContext) =>
+          startDate && endDate && moment(endDate).isBefore(startDate)
+            ? testContext.createError({
+              message: `${Settings.fields.event.endDate?.label} must be after ${Settings.fields.event.startDate?.label}`
+            })
+            : true
+        )
+      )
+      .default(null),
     outcomes: yup.string().default(""),
     ownerOrg: yup.object().nullable().default(null),
     hostOrg: yup.object().nullable().default(null),

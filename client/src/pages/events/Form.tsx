@@ -85,16 +85,6 @@ const EventForm = ({
   const { loadAppData, currentUser } = useContext(AppContext)
   const navigate = useNavigate()
   const [saveError, setSaveError] = useState(null)
-  const [minDate, setMinDate] = useState(
-    initialValues?.startDate
-      ? initialValues.startDate
-      : moment().subtract(100, "years").startOf("year").toDate()
-  )
-  const [maxDate, setMaxDate] = useState(
-    initialValues?.endDate
-      ? initialValues.endDate
-      : moment().add(20, "years").endOf("year").toDate()
-  )
   const tasksLabel = pluralize(Settings.fields.task.shortLabel)
   const statusButtons = [
     {
@@ -420,14 +410,12 @@ const EventForm = ({
                   onChange={value => {
                     setFieldTouched("startDate", true, false) // onBlur doesn't work when selecting a date
                     setFieldValue("startDate", value, true)
-                    setMinDate(new Date(value))
                   }}
                   onBlur={() => setFieldTouched("startDate")}
                   widget={
                     <CustomDateInput
                       id="startDate"
                       withTime={Settings.eventsIncludeStartAndEndTime}
-                      maxDate={maxDate}
                       initialMonth={initialMonthForStartDate}
                     />
                   }
@@ -440,14 +428,12 @@ const EventForm = ({
                   onChange={value => {
                     setFieldTouched("endDate", true, false) // onBlur doesn't work when selecting a date
                     setFieldValue("endDate", value, true)
-                    setMaxDate(new Date(value))
                   }}
                   onBlur={() => setFieldTouched("endDate")}
                   widget={
                     <CustomDateInput
                       id="endDate"
                       withTime={Settings.eventsIncludeStartAndEndTime}
-                      minDate={minDate}
                       initialMonth={initialMonthForEndDate}
                     />
                   }
