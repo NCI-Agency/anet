@@ -207,6 +207,18 @@ interface ReportFormProps {
   notesComponent?: React.ReactNode
 }
 
+function getEventMinDate(eventStartDate?: Date) {
+  return !eventStartDate || Settings?.eventsIncludeStartAndEndTime
+    ? eventStartDate
+    : moment(eventStartDate).startOf("day").toDate()
+}
+
+function getEventMaxDate(eventEndDate?: Date) {
+  return !eventEndDate || Settings?.eventsIncludeStartAndEndTime
+    ? eventEndDate
+    : moment(eventEndDate).endOf("day").toDate()
+}
+
 const ReportForm = ({
   pageDispatchers,
   edit = false,
@@ -231,8 +243,12 @@ const ReportForm = ({
     !!Settings.fields.report.customFields
   )
   // If this report is linked to an Event restrict the dates that can be selected for engagementDate
-  const [minDate, setMinDate] = useState(initialValues.event?.startDate)
-  const [maxDate, setMaxDate] = useState(initialValues.event?.endDate)
+  const [minDate, setMinDate] = useState(
+    getEventMinDate(initialValues.event?.startDate)
+  )
+  const [maxDate, setMaxDate] = useState(
+    getEventMaxDate(initialValues.event?.endDate)
+  )
   // To check if there is a visit ban in the location
   const [locationUuid, setLocationUuid] = useState(
     initialValues?.location?.uuid
@@ -271,7 +287,7 @@ const ReportForm = ({
           pageSize: 1,
           type: Event.EVENT_TYPES.VISIT_BAN,
           locationUuid,
-          includeDate: engagementDate
+          includeDate: getEventMinDate(engagementDate)
         }
         try {
           const response = await API.query(GQL_GET_EVENT_COUNT, {
@@ -658,8 +674,9 @@ const ReportForm = ({
                     setFieldTouched("event", true, false) // onBlur doesn't work when selecting an option
                     setFieldValue("event", value, true)
                     setFieldValue("location", value?.location)
-                    setMinDate(value?.startDate)
-                    setMaxDate(value?.endDate)
+                    setLocationUuid(value?.location?.uuid)
+                    setMinDate(getEventMinDate(value?.startDate))
+                    setMaxDate(getEventMaxDate(value?.endDate))
                   }}
                   widget={
                     <AdvancedSingleSelect
