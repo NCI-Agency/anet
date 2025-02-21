@@ -56,7 +56,7 @@ public class MartTransmissionLogImporterService implements IMartTransmissionLogI
           martImportedReport.setSubmittedAt(logDto.getSubmittedAt());
           martImportedReport.setReceivedAt(Instant.now());
           martImportedReport.setReportUuid(logDto.getReportUuid());
-          if (logDto.getState() == LogDto.LogState.FAILED.getCode()) {
+          if (logDto.getState() == LogDto.LogState.FAILED_TO_SEND_EMAIL.getCode()) {
             martImportedReport.setErrors(
                 String.format("MART was unable to send this report: %s due to this error: %s",
                     logDto.getReportUuid(), logDto.getErrors()));

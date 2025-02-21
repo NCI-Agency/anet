@@ -56,7 +56,7 @@ public class MartImportedReportDao {
           "/* MartImportedReportCheck */ SELECT * FROM \"martImportedReports\" ORDER BY \"receivedAt\" ASC");
       sql.insert(0, "SELECT *, COUNT(*) OVER() AS \"totalCount\" FROM (");
       sql.append(") AS results");
-      sql.append(" ORDER BY \"receivedAt\" DESC");
+      sql.append(" ORDER BY sequence DESC");
       if (pageSize > 0) {
         sql.append(" OFFSET :offset LIMIT :limit");
       }
