@@ -8,7 +8,7 @@ public class LogDto {
    */
   public enum LogState {
 
-    PENDING(1), SENT(2), FAILED(3);
+    PENDING(1), SENT(2), FAILED_TO_SEND_EMAIL(3);
 
     private final int code;
 
