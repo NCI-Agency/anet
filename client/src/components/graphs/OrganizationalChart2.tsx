@@ -137,6 +137,8 @@ const OrganizationalChart = ({
         }}
       >
         {/* {showSymbols && data.symbol && parseSvgStringToJSX(data.symbol)} */}
+      </div>
+
       <div
         style={{
           width: TEXT_WIDTH,
@@ -161,6 +163,27 @@ const OrganizationalChart = ({
             type="target"
             position={Position.Top}
             style={{ opacity: 0 }}
+          />
+          <Handle
+            type="source"
+            position={Position.Bottom}
+            style={{
+              opacity: 0,
+              left: TEXT_WIDTH + TEXT_GAP + ARROW_INDENT,
+              bottom: ARROW_INDENT / 2
+            }}
+          />
+        </>
+      )}
+      {data.depth >= 2 && (
+        <>
+          <Handle
+            type="target"
+            position={Position.Left}
+            style={{
+              opacity: 0,
+              left: TEXT_GAP + TEXT_WIDTH - ARROW_INDENT / 2
+            }}
           />
           <Handle
             type="source"
@@ -227,6 +250,11 @@ const OrganizationalChart = ({
         }
 
         const childLayout = calculateLayout(child, depth + 1, childX, childY)
+        if (childLayout.nodes.slice(-1).length) {
+          childY =
+            childLayout.nodes.slice(-1)[0].position.y -
+            SECONDARY_VERTICAL_SPACING / 2
+        }
 
         nodes = nodes.concat(childLayout.nodes)
         edges = edges.concat(childLayout.edges)
