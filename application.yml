@@ -72,6 +72,18 @@ anet:
     resource: ${ANET_KEYCLOAK_CLIENT_PUBLIC:ANET-Client-public}
     show-logout-link: true
 
+  # Settings for the Exchange server to receive MART reports
+  mart:
+    hostname: ${ANET_MART_EXCHANGE_SERVER:localhost}
+    username: ${ANET_MART_EXCHANGE_USERNAME}
+    password: ${ANET_MART_EXCHANGE_PASSWORD}
+    trusted-sender: ${ANET_MART_TRUSTED_SENDER}
+    disable-certificate-validation: ${ANET_MART_DISABLE_CERTIFICATE_VALIDATION:false}
+    mark-as-read: ${ANET_MART_MARK_AS_READ:true}
+    disabled: ${ANET_MART_DISABLE:true}
+    mail-polling-delay-in-seconds: 10
+    max-number-emails-pulled: 40
+
   # Set path of dictionary to be loaded
   # If you want to place the dictionary file under a subfolder of main application folder,
   # please do not forget to update this parameter!
