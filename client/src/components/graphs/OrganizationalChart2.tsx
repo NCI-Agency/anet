@@ -263,7 +263,11 @@ const OrganizationalChart = ({
           id: `edge-${node.uuid}-${child.uuid}`,
           source: node.uuid,
           target: child.uuid,
+          sourceHandle: isRoot ? "bottom" : "left",
+          targetHandle: depth === 0 ? "top" : "left",
           type: "smoothstep",
+          style: { stroke: "#94a3b8", strokeWidth: 2 },
+          markerEnd: { type: "arrowclosed", color: "#94a3b8" }
         })
       })
     }
