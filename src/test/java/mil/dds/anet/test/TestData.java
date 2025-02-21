@@ -132,6 +132,7 @@ public class TestData {
     reportDto.setCountry("British");
     reportDto.setPositionName("MART Team Member");
     reportDto.setSubmittedAt(Instant.now());
+    reportDto.setAtmosphere("Positive");
 
     // Custom fields
     reportDto.setCustomFields(
@@ -212,7 +213,7 @@ public class TestData {
     // Now Put two missing logs
     LogDto missing1 = new LogDto();
     missing1.setReportUuid("missingReportUuid");
-    missing1.setState(LogDto.LogState.FAILED.getCode());
+    missing1.setState(LogDto.LogState.FAILED_TO_SEND_EMAIL.getCode());
     missing1.setErrors("SMTP error sending email in MART");
     missing1.setSubmittedAt(Instant.now());
     missing1.setSequence(7L);

@@ -222,6 +222,10 @@ public class MartReportImporterService implements IMartReportImporterService {
       anetReport.setUuid(martReport.getUuid());
       anetReport.setCreatedAt(martReport.getCreatedAt());
       anetReport.setIntent(martReport.getIntent());
+      if (martReport.getAtmosphere() != null) {
+        anetReport
+            .setAtmosphere(Report.Atmosphere.valueOf(martReport.getAtmosphere().toUpperCase()));
+      }
       anetReport.setEngagementDate(martReport.getEngagementDate());
       anetReport.setReportText(martReport.getReportText());
       anetReport.setClassification("NKU");
