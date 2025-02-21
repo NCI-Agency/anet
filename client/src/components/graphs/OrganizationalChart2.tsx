@@ -8,7 +8,7 @@ import {
 } from "components/Page"
 import _xor from "lodash/xor"
 import { connect } from "react-redux"
-import ReactFlow from "reactflow"
+import ReactFlow, { Handle, Position } from "reactflow"
 import "reactflow/dist/style.css"
 
 const GQL_GET_CHART_DATA = gql`
@@ -119,6 +119,25 @@ const OrganizationalChart = ({
   const SECONDARY_VERTICAL_SPACING = 40
   const HORIZONTAL_SPACING = -TEXT_WIDTH + 20
   const LEVEL_INDENT = 40
+  const CustomNode = ({ data }) => (
+    <div style={{
+      display: "flex",
+      width: NODE_WIDTH,
+      height: NODE_HEIGHT
+    }}>
+      <div style={{
+          marginLeft: TEXT_GAP + TEXT_WIDTH,
+          display: "flex",
+          alignItems: "center",
+          width: AVATAR_WIDTH,
+          height: NODE_HEIGHT,
+          border: `2px solid ${data.depth === 0 ? "#1e40af" : "#e5e7eb"}`,
+          borderRadius: "8px"
+        }}
+      >
+      </div>
+    </div>
+  )
 
   const calculateLayout = (node, depth = 0, x = 0, y = 0) => {
     if (!node) {
@@ -142,6 +161,7 @@ const OrganizationalChart = ({
         depth,
       },
       position: { x: currentX, y: currentY },
+      type: "custom"
     }
 
     let nodes = [currentNode]
@@ -198,6 +218,7 @@ const OrganizationalChart = ({
           nodes={nodes}
           edges={edges}
           fitView
+          nodeTypes={{ custom: CustomNode }}
         >
         </ReactFlow>
       </div>
