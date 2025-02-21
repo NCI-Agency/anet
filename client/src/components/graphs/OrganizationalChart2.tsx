@@ -7,9 +7,11 @@ import {
   useBoilerplate
 } from "components/Page"
 import _xor from "lodash/xor"
+import ms from "milsymbol"
 import { connect } from "react-redux"
 import ReactFlow, { Handle, Position } from "reactflow"
 import "reactflow/dist/style.css"
+import utils from "utils"
 
 const GQL_GET_CHART_DATA = gql`
   query ($uuid: String!) {
@@ -110,6 +112,46 @@ const OrganizationalChart = ({
     error,
     pageDispatchers
   })
+  const parseSvgStringToJSX = (svgString) => {
+    const parser = new DOMParser()
+    const doc = parser.parseFromString(svgString, "image/svg+xml")
+    const svgElement = doc.documentElement
+
+    svgElement.setAttribute("width", "100px")
+    svgElement.setAttribute("height", "60px")
+
+    return (
+      <span dangerouslySetInnerHTML={{ __html: new XMLSerializer().serializeToString(svgElement) }} />
+    )
+  }
+
+  const determineSymbol = (org, allAscendantOrgs) => {
+    const ascendantOrgs =
+      utils
+        .getAscendantObjectsAsList(org, allAscendantOrgs, "parentOrg")
+        ?.reverse() || []
+    const context = utils.determineApp6field(ascendantOrgs, "app6context", "0")
+    const standardIdentity = utils.determineApp6field(
+      ascendantOrgs,
+      "app6standardIdentity",
+      "1"
+    )
+    const symbolSet = utils.determineApp6field(
+      ascendantOrgs,
+      "app6symbolSet",
+      "00"
+    )
+    const hq = org?.app6hq || "0"
+    const amplifier = org?.app6amplifier || "00"
+    const version = "14" // APP-6E
+    const status = "0" // Present
+    return new ms.Symbol(
+      `${version}${context}${standardIdentity}${symbolSet}${status}${hq}${amplifier}`,
+      {
+        size: 22
+      }
+    )
+  }
   const AVATAR_WIDTH = 100
   const TEXT_GAP = 10
   const TEXT_WIDTH = 150
@@ -137,6 +179,7 @@ const OrganizationalChart = ({
           borderRadius: "8px"
         }}
       >
+        { parseSvgStringToJSX(data.symbol) }
         {/* {showSymbols && data.symbol && parseSvgStringToJSX(data.symbol)} */}
       </div>
 
@@ -213,11 +256,18 @@ const OrganizationalChart = ({
       currentY = 0
     }
 
+    const allAscendantOrgs = utils.getAscendantObjectsAsMap(
+      (node.ascendantOrgs ?? []).concat(
+        node.descendantOrgs ?? []
+      )
+    )
+
     const currentNode = {
       id: node.uuid,
       data: {
         label: node.shortName,
         depth,
+        symbol: determineSymbol(node, allAscendantOrgs).asSVG()
       },
       position: { x: currentX, y: currentY },
       type: "custom"
