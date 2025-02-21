@@ -23,7 +23,7 @@ class MartImportedReportsResourceTest extends AbstractResourceTest {
       final var martImportedReports =
           withCredentials(user.getDomainUsername(),
               t -> queryExecutor.martImportedReports(
-                  getListFields("{ person { uuid } report { uuid } createdAt success errors }"), 0,
+                  getListFields("{ sequence person { uuid } report { uuid } receivedAt submittedAt success errors }"), 0,
                   0));
       if (!isAdmin) {
         fail("Expected an Exception");
