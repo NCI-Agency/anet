@@ -119,6 +119,7 @@ const OrganizationalChart = ({
   const SECONDARY_VERTICAL_SPACING = 40
   const HORIZONTAL_SPACING = -TEXT_WIDTH + 20
   const LEVEL_INDENT = 40
+  const ARROW_INDENT = 10
   const CustomNode = ({ data }) => (
     <div style={{
       display: "flex",
@@ -135,7 +136,43 @@ const OrganizationalChart = ({
           borderRadius: "8px"
         }}
       >
+        {/* {showSymbols && data.symbol && parseSvgStringToJSX(data.symbol)} */}
+      <div
+        style={{
+          width: TEXT_WIDTH,
+          marginLeft: TEXT_GAP,
+          paddingTop: "4px",
+          display: "flex",
+          alignItems: "center"
+        }}
+      >
+        {data.label}
       </div>
+      {data.depth === 0 && (
+        <Handle
+          type="source"
+          position={Position.Bottom}
+          style={{ opacity: 0 }}
+        />
+      )}
+      {data.depth === 1 && (
+        <>
+          <Handle
+            type="target"
+            position={Position.Top}
+            style={{ opacity: 0 }}
+          />
+          <Handle
+            type="source"
+            position={Position.Bottom}
+            style={{
+              opacity: 0,
+              left: TEXT_WIDTH + TEXT_GAP + ARROW_INDENT,
+              bottom: ARROW_INDENT / 2
+            }}
+          />
+        </>
+      )}
     </div>
   )
 
