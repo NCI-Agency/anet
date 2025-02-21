@@ -120,6 +120,7 @@ const OrganizationalChart = ({
   const HORIZONTAL_SPACING = -TEXT_WIDTH + 20
   const LEVEL_INDENT = 40
   const ARROW_INDENT = 10
+  let lowestDepth = 0
   const CustomNode = ({ data }) => (
     <div style={{
       display: "flex",
@@ -169,8 +170,7 @@ const OrganizationalChart = ({
             position={Position.Bottom}
             style={{
               opacity: 0,
-              left: TEXT_WIDTH + TEXT_GAP + ARROW_INDENT,
-              bottom: ARROW_INDENT / 2
+              left: TEXT_WIDTH + TEXT_GAP + ARROW_INDENT
             }}
           />
         </>
@@ -190,8 +190,7 @@ const OrganizationalChart = ({
             position={Position.Bottom}
             style={{
               opacity: 0,
-              left: TEXT_WIDTH + TEXT_GAP + ARROW_INDENT,
-              bottom: ARROW_INDENT / 2
+              left: TEXT_WIDTH + TEXT_GAP + ARROW_INDENT
             }}
           />
         </>
@@ -243,7 +242,11 @@ const OrganizationalChart = ({
       children.forEach((child) => {
         if (isRoot) {
           childX += NODE_WIDTH + HORIZONTAL_SPACING
+          if (lowestDepth > 1) {
+            childX += (lowestDepth - 2) * LEVEL_INDENT
+          }
           childY = currentY + VERTICAL_SPACING + NODE_HEIGHT
+          lowestDepth = 0
         } else {
           childX = currentX + LEVEL_INDENT
           childY += SECONDARY_VERTICAL_SPACING + NODE_HEIGHT
@@ -270,6 +273,22 @@ const OrganizationalChart = ({
           markerEnd: { type: "arrowclosed", color: "#94a3b8" }
         })
       })
+    }
+    if (depth > lowestDepth) {
+      lowestDepth = depth
+    }
+    if (isRoot) {
+      let lowestX = nodes[0].position.x
+      let highestX = lowestX
+      nodes.forEach(({ position }) => {
+        const x = position.x
+        if (x < lowestX) {
+          lowestX = x
+        } else if (x > highestX) {
+          highestX = x
+        }
+      })
+      nodes[0].position.x = (lowestX + highestX) / 2
     }
     return { nodes, edges }
   }
