@@ -30,6 +30,8 @@ public class ReportDto {
   private String locationName;
   private String reportText;
 
+  private String atmosphere;
+
   private String customFields;
   private Map<String, String> tasks = new HashMap<>();
 
@@ -195,4 +197,11 @@ public class ReportDto {
     this.rank = rank;
   }
 
+  public String getAtmosphere() {
+    return atmosphere;
+  }
+
+  public void setAtmosphere(String atmosphere) {
+    this.atmosphere = atmosphere;
+  }
 }
