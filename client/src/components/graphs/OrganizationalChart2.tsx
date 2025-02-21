@@ -6,6 +6,7 @@ import {
   PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
+import React, { useState } from "react"
 import _xor from "lodash/xor"
 import ms from "milsymbol"
 import { connect } from "react-redux"
@@ -163,6 +164,13 @@ const OrganizationalChart = ({
   const LEVEL_INDENT = 40
   const ARROW_INDENT = 10
   let lowestDepth = 0
+
+  const [showSymbols, setShowSymbols] = useState(true)
+
+  const toggleDisplayMode = () => {
+    setShowSymbols(prev => !prev)
+  }
+
   const CustomNode = ({ data }) => (
     <div style={{
       display: "flex",
@@ -179,8 +187,7 @@ const OrganizationalChart = ({
           borderRadius: "8px"
         }}
       >
-        { parseSvgStringToJSX(data.symbol) }
-        {/* {showSymbols && data.symbol && parseSvgStringToJSX(data.symbol)} */}
+        {showSymbols && data.symbol && parseSvgStringToJSX(data.symbol)}
       </div>
 
       <div
@@ -358,6 +365,20 @@ const OrganizationalChart = ({
           fitView
           nodeTypes={{ custom: CustomNode }}
         >
+          <button
+            onClick={toggleDisplayMode}
+            style={{
+              position: "absolute",
+              bottom: "20px",
+              right: "20px",
+              zIndex: 10,
+              padding: "8px 16px",
+              backgroundColor: "grey",
+              cursor: "pointer"
+            }}
+          >
+            {showSymbols ? "Show Avatars" : "Show Symbols"}
+          </button>
         </ReactFlow>
       </div>
     )
