@@ -1408,7 +1408,7 @@ INSERT INTO events (uuid, name, description, status, "createdAt", "updatedAt", "
   ('e850846e-9741-40e8-bc51-4dccc30cf47f', 'NMI PDT 2024-01', 'NMI pre-deployment training 2024 January', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP,
    '0855fb0a-995e-4a79-a132-4024ee2983ff', 'b7b70191-54e4-462f-8e40-679dd2e71ec4',
    'ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b',
-   CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'CONFERENCE');
+   '2024-01-08 07:00', '2024-01-12 17:00', 'CONFERENCE');
 
 -- Add tasks, organizations and people to the event
 INSERT INTO "eventTasks" ("eventUuid", "taskUuid") VALUES

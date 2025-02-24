@@ -221,7 +221,7 @@ const MySubscriptionUpdates = ({
                     )
                   }
                   const updatedObjectType =
-                    OBJECT_TYPE_TO_MODEL[subscription.subscribedObjectType]
+                    OBJECT_TYPE_TO_MODEL[subscriptionUpdate.updatedObjectType]
                   let linkToUpdatedObject
                   if (subscriptionUpdate.updatedObject) {
                     linkToUpdatedObject = (

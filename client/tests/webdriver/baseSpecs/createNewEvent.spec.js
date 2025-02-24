@@ -40,10 +40,10 @@ describe("Create event page", () => {
       ).selectByAttribute("value", "CONFERENCE")
 
       await (await CreateEvent.getStartDateInput()).waitForDisplayed()
-      await (await CreateEvent.getStartDateInput()).setValue("01-01-2025")
+      await (await CreateEvent.getStartDateInput()).setValue("01-01-2025 00:00")
 
       await (await CreateEvent.getEndDateInput()).waitForDisplayed()
-      await (await CreateEvent.getEndDateInput()).setValue("02-01-2025")
+      await (await CreateEvent.getEndDateInput()).setValue("02-01-2025 23:59")
 
       await (await CreateEvent.getOwnerOrganizationInput()).click()
       await (await CreateEvent.getOwnerOrganizationInput()).setValue(ORG)
