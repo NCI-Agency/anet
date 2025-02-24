@@ -3,7 +3,7 @@ import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
 import AppContext from "components/AppContext"
 import Approvals from "components/approvals/Approvals"
-import AttachmentCard from "components/Attachment/AttachmentCard"
+import AttachmentsDetailView from "components/Attachment/AttachmentsDetailView"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
 import EventCollection from "components/EventCollection"
@@ -34,7 +34,7 @@ import { convertLatLngToMGRS } from "geoUtils"
 import _escape from "lodash/escape"
 import _isEmpty from "lodash/isEmpty"
 import { Attachment, Location } from "models"
-import React, { useContext, useState } from "react"
+import React, { useContext, useEffect, useState } from "react"
 import { connect } from "react-redux"
 import { Link, useLocation, useParams } from "react-router-dom"
 import Settings from "settings"
@@ -61,6 +61,7 @@ const LocationShow = ({ pageDispatchers }: LocationShowProps) => {
   const routerLocation = useLocation()
   const stateSuccess = routerLocation.state?.success
   const [stateError, setStateError] = useState(routerLocation.state?.error)
+  const [attachments, setAttachments] = useState([])
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_LOCATION, {
     uuid
   })
@@ -74,6 +75,9 @@ const LocationShow = ({ pageDispatchers }: LocationShowProps) => {
     pageDispatchers
   })
   usePageTitle(data?.location?.name)
+  useEffect(() => {
+    setAttachments(data?.location?.attachments || [])
+  }, [data])
   if (done) {
     return result
   }
@@ -269,14 +273,13 @@ const LocationShow = ({ pageDispatchers }: LocationShowProps) => {
                     label="Attachments"
                     component={FieldHelper.ReadonlyField}
                     humanValue={
-                      <div className="attachment-card-list">
-                        {location.attachments.map(attachment => (
-                          <AttachmentCard
-                            key={attachment.uuid}
-                            attachment={attachment}
-                          />
-                        ))}
-                      </div>
+                      <AttachmentsDetailView
+                        attachments={attachments}
+                        updateAttachments={setAttachments}
+                        relatedObjectType={Location.relatedObjectType}
+                        relatedObjectUuid={values.uuid}
+                        allowEdit={canEdit}
+                      />
                     }
                   />
                 )}

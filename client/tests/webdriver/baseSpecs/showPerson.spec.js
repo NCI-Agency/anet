@@ -34,6 +34,22 @@ describe("Show person page", () => {
       await (await ShowPerson.getCard()).waitForDisplayed()
       expect(await ShowPerson.getCaption()).to.be.equal("Erin")
     })
+    it("We should be able to edit the attachments", async() => {
+      const editAttachmentsButton = await ShowPerson.getEditAttachmentsButton()
+      expect(await editAttachmentsButton.getText()).to.be.equal(
+        "Edit attachments"
+      )
+      await editAttachmentsButton.click()
+      expect(await editAttachmentsButton.getText()).to.be.equal(
+        "View attachments"
+      )
+
+      const editButton = await browser.$(".attachment-card .button-line a")
+      await expect(await editButton.getAttribute("href")).to.include(
+        "/attachments/13318e42-a0a3-438f-8ed5-dc16b1ef17bc/edit"
+      )
+      await editAttachmentsButton.click()
+    })
     it("We can go to the show page of Attachment", async() => {
       await (await ShowPerson.getImageClick()).click()
       await expect(await browser.getUrl()).to.include(

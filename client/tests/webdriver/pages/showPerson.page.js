@@ -51,6 +51,10 @@ class ShowPerson extends Page {
     return browser.$("#presetsButton")
   }
 
+  async getEditAttachmentsButton() {
+    return await browser.$("#edit-attachments")
+  }
+
   async getDefaultPreset() {
     return browser.$('//a[text()="Default"]')
   }
