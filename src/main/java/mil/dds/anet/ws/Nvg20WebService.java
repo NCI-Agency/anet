@@ -92,7 +92,7 @@ public class Nvg20WebService implements NVGPortType2012 {
 
     static final String SYMBOL_PREFIX_APP6D = "app6d";
     // APP-6 symbol to use:
-    // - 13 = version: APP-6D
+    // - 10 = version: APP-6D
     // - 0 = context: Reality
     // - 3 = standard identity: Friend
     // - 40 = symbol set: Activity/Event
