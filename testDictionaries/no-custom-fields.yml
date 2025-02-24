@@ -433,6 +433,7 @@ fields:
     intent:
       label: Engagement purpose
       placeholder: What is the engagement supposed to achieve?
+      maxLength: 40
     engagementDate:
       label: Engagement date
     duration:

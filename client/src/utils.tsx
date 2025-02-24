@@ -68,6 +68,27 @@ const ellipsize = (value, maxLength) =>
     ? value.substring(0, maxLength - 1) + "\u2026"
     : value
 
+const ellipsizeOnWords = (value, maxLength) => {
+  if (!value) {
+    return value
+  }
+
+  const spaceChar = " "
+  value = value.replace(/\s+/g, spaceChar).trim()
+
+  if (value.length <= maxLength) {
+    return value
+  }
+
+  let trimmedStr = value.substring(0, maxLength)
+  const lastSpace = trimmedStr.lastIndexOf(spaceChar)
+  if (lastSpace !== -1) {
+    trimmedStr = trimmedStr.substring(0, lastSpace)
+  }
+
+  return trimmedStr + "\u2026"
+}
+
 export default {
   ...wrappedChangeCase,
   pluralize,
@@ -75,6 +96,7 @@ export default {
   fnRequiredWhen,
   fnRequiredWhenNot,
   ellipsize,
+  ellipsizeOnWords,
   resourceize: function(string) {
     return pluralize(wrappedChangeCase.camelCase(string))
   },
@@ -298,8 +320,11 @@ export default {
     return safeVal
   },
 
-  getMaxTextFieldLength: function(field) {
-    return field?.maxLength || Settings.maxTextFieldLength
+  getMaxTextFieldLength: function(
+    field,
+    defaultLength = Settings.maxTextFieldLength
+  ) {
+    return field?.maxLength || defaultLength
   },
 
   pluralizeWord: function(count, word) {
