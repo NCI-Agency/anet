@@ -136,7 +136,7 @@ const determineSymbol = (org, allAscendantOrgs) => {
   )
   const hq = org?.app6hq || "0"
   const amplifier = org?.app6amplifier || "00"
-  const version = "14" // APP-6E
+  const version = "10" // APP-6D
   const status = "0" // Present
   return new ms.Symbol(
     `${version}${context}${standardIdentity}${symbolSet}${status}${hq}${amplifier}`,
