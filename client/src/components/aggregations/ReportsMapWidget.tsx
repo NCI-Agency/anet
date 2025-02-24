@@ -35,7 +35,7 @@ const ReportsMapWidget = ({
     const markerArray = []
     values.forEach(report => {
       if (Location.hasCoordinates(report.location)) {
-        let label = _escape(report.intent || "<undefined>") // escape HTML in intent!
+        let label = `<a href="${Report.pathFor(report)}" target="_blank">${_escape(report.intent || "<undefined>")}</a>` // escape HTML in intent!
         label += `<br/>@ <b>${_escape(report.location.name)}</b>` // escape HTML in locationName!
         markerArray.push({
           id: report.uuid,
