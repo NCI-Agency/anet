@@ -6,7 +6,7 @@ import {
   PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
-import React, { useState, useMemo } from "react"
+import React, { useState, useMemo, useEffect } from "react"
 import _xor from "lodash/xor"
 import ms from "milsymbol"
 import { connect } from "react-redux"
@@ -165,8 +165,24 @@ const OrganizationalChart = ({
   const LEVEL_INDENT = 60
   let lowestDepth = 0
 
-  const calculateLayout = (node, depth = 0, x = 0, y = 0) => {
-    if (!node) {
+  const calculateMaxDepth = (node, depth = 0) => {
+    if (!node || !node.descendantOrgs || node.descendantOrgs.length === 0) {
+      return depth
+    }
+
+    let maxDepth = depth
+    node.descendantOrgs.forEach((child) => {
+      const childDepth = calculateMaxDepth(child, depth + 1)
+      if (childDepth > maxDepth) {
+        maxDepth = childDepth
+      }
+    })
+
+    return maxDepth
+  }
+
+  const calculateLayout = (node, depth = 0, x = 0, y = 0, depthLimit = 3) => {
+    if (!node || depth > depthLimit) {
       return { nodes: [], edges: [] }
     }
 
@@ -226,7 +242,7 @@ const OrganizationalChart = ({
           childY += SECONDARY_VERTICAL_SPACING + NODE_HEIGHT
         }
 
-        const childLayout = calculateLayout(child, depth + 1, childX, childY)
+        const childLayout = calculateLayout(child, depth + 1, childX, childY, depthLimit)
         if (childLayout.nodes.slice(-1).length) {
           childY =
             childLayout.nodes.slice(-1)[0].position.y -
@@ -275,12 +291,22 @@ const OrganizationalChart = ({
 
   const OrbatChartWrapper = ({ data }) => {
     const [showSymbols, setShowSymbols] = useState(true)
+    const [depthLimit, setDepthLimit] = useState(3)
+    const [maxDepth, setMaxDepth] = useState(0)
     const { setViewport, getViewport } = useReactFlow()
+
+    useEffect(() => {
+      if (data) {
+        const calculatedMaxDepth = calculateMaxDepth(data)
+        setMaxDepth(calculatedMaxDepth)
+        setDepthLimit(Math.min(calculatedMaxDepth, depthLimit))
+      }
+    }, [data])
 
     const { nodes, edges } = useMemo(() => {
       if (!data) return { nodes: [], edges: [] }
       
-      const layout = calculateLayout(data)
+      const layout = calculateLayout(data, 0, 0, 0, depthLimit)
       return {
         nodes: layout.nodes.map(node => ({
           ...node,
@@ -288,7 +314,7 @@ const OrganizationalChart = ({
         })),
         edges: layout.edges
       }
-    }, [data, showSymbols])
+    }, [data, showSymbols, depthLimit])
 
     const CustomNode = ({ data }) => (
       <div style={{
@@ -371,6 +397,14 @@ const OrganizationalChart = ({
       setTimeout(() => setViewport(getViewport()), 0)
     }
 
+    const increaseDepthLimit = () => {
+      setDepthLimit(prev => Math.min(prev + 1, maxDepth))
+    }
+
+    const decreaseDepthLimit = () => {
+      setDepthLimit(prev => Math.max(0, prev - 1))
+    }
+
     if (!data) {
       return <p>Loading...</p>
     }
@@ -385,20 +419,48 @@ const OrganizationalChart = ({
           nodesDraggable={false}
           elementsSelectable={false}
         >
-          <button
-            onClick={toggleDisplayMode}
+          <div
             style={{
               position: "absolute",
               bottom: "20px",
-              right: "20px",
+              left: "20px",
               zIndex: 10,
+              display: "flex",
+              flexDirection: "column",
+              gap: "20px"
+            }}
+          >
+            <button
+              onClick={toggleDisplayMode}
+              style={{
               padding: "8px 16px",
               backgroundColor: "grey",
               cursor: "pointer"
-            }}
-          >
-            {showSymbols ? "Show Avatars" : "Show Symbols"}
-          </button>
+              }}
+            >
+              {showSymbols ? "Show Avatars" : "Show Symbols"}
+            </button>
+            <button
+              onClick={increaseDepthLimit}
+              style={{
+              padding: "8px 16px",
+              backgroundColor: "grey",
+              cursor: "pointer"
+              }}
+            >
+              Increase Depth
+            </button>
+            <button
+              onClick={decreaseDepthLimit}
+              style={{
+              padding: "8px 16px",
+              backgroundColor: "grey",
+              cursor: "pointer"
+              }}
+            >
+              Decrease Depth
+            </button>
+          </div>
         </ReactFlow>
       </div>
     )
