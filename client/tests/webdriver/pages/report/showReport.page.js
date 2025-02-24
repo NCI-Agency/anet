@@ -227,6 +227,14 @@ class ShowReport extends Page {
   async getClassificationFooter() {
     return browser.$("#footer-banner")
   }
+
+  async getKeyOutcomesList() {
+    return browser.$$("#keyOutcomes > ul > li")
+  }
+
+  async getNextStepsList() {
+    return browser.$$("#nextSteps > ul > li")
+  }
 }
 
 export default new ShowReport()
