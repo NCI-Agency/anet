@@ -6,11 +6,11 @@ import {
   PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
-import React, { useState } from "react"
+import React, { useState, useMemo } from "react"
 import _xor from "lodash/xor"
 import ms from "milsymbol"
 import { connect } from "react-redux"
-import ReactFlow, { Handle, Position } from "reactflow"
+import ReactFlow, { Handle, Position, ReactFlowProvider, useReactFlow } from "reactflow"
 import "reactflow/dist/style.css"
 import utils from "utils"
 
@@ -113,13 +113,13 @@ const OrganizationalChart = ({
     error,
     pageDispatchers
   })
+
   const parseSvgStringToJSX = (svgString) => {
     const parser = new DOMParser()
     const doc = parser.parseFromString(svgString, "image/svg+xml")
     const svgElement = doc.documentElement
 
     svgElement.setAttribute("width", "100px")
-    svgElement.setAttribute("height", "60px")
 
     return (
       <span dangerouslySetInnerHTML={{ __html: new XMLSerializer().serializeToString(svgElement) }} />
@@ -164,89 +164,6 @@ const OrganizationalChart = ({
   const LEVEL_INDENT = 40
   const ARROW_INDENT = 10
   let lowestDepth = 0
-
-  const [showSymbols, setShowSymbols] = useState(true)
-
-  const toggleDisplayMode = () => {
-    setShowSymbols(prev => !prev)
-  }
-
-  const CustomNode = ({ data }) => (
-    <div style={{
-      display: "flex",
-      width: NODE_WIDTH,
-      height: NODE_HEIGHT
-    }}>
-      <div style={{
-          marginLeft: TEXT_GAP + TEXT_WIDTH,
-          display: "flex",
-          alignItems: "center",
-          width: AVATAR_WIDTH,
-          height: NODE_HEIGHT,
-          border: `2px solid ${data.depth === 0 ? "#1e40af" : "#e5e7eb"}`,
-          borderRadius: "8px"
-        }}
-      >
-        {showSymbols && data.symbol && parseSvgStringToJSX(data.symbol)}
-      </div>
-
-      <div
-        style={{
-          width: TEXT_WIDTH,
-          marginLeft: TEXT_GAP,
-          paddingTop: "4px",
-          display: "flex",
-          alignItems: "center"
-        }}
-      >
-        {data.label}
-      </div>
-      {data.depth === 0 && (
-        <Handle
-          type="source"
-          position={Position.Bottom}
-          style={{ opacity: 0 }}
-        />
-      )}
-      {data.depth === 1 && (
-        <>
-          <Handle
-            type="target"
-            position={Position.Top}
-            style={{ opacity: 0 }}
-          />
-          <Handle
-            type="source"
-            position={Position.Bottom}
-            style={{
-              opacity: 0,
-              left: TEXT_WIDTH + TEXT_GAP + ARROW_INDENT
-            }}
-          />
-        </>
-      )}
-      {data.depth >= 2 && (
-        <>
-          <Handle
-            type="target"
-            position={Position.Left}
-            style={{
-              opacity: 0,
-              left: TEXT_GAP + TEXT_WIDTH - ARROW_INDENT / 2
-            }}
-          />
-          <Handle
-            type="source"
-            position={Position.Bottom}
-            style={{
-              opacity: 0,
-              left: TEXT_WIDTH + TEXT_GAP + ARROW_INDENT
-            }}
-          />
-        </>
-      )}
-    </div>
-  )
 
   const calculateLayout = (node, depth = 0, x = 0, y = 0) => {
     if (!node) {
@@ -350,12 +267,112 @@ const OrganizationalChart = ({
     return { nodes, edges }
   }
 
-  const OrbatChart = ({ data }) => {
+  const OrbatChart = ({ data }) => (
+    <ReactFlowProvider>
+      <OrbatChartWrapper data={data} />
+    </ReactFlowProvider>
+  )
+
+  const OrbatChartWrapper = ({ data }) => {
+    const [showSymbols, setShowSymbols] = useState(true)
+    const { setViewport, getViewport } = useReactFlow()
+
+    const { nodes, edges } = useMemo(() => {
+      if (!data) return { nodes: [], edges: [] }
+      
+      const layout = calculateLayout(data)
+      return {
+        nodes: layout.nodes.map(node => ({
+          ...node,
+          data: { ...node.data, showSymbols }
+        })),
+        edges: layout.edges
+      }
+    }, [data, showSymbols])
+
+    const CustomNode = ({ data }) => (
+      <div style={{
+        display: "flex",
+        width: NODE_WIDTH,
+        height: NODE_HEIGHT
+      }}>
+        <div style={{
+            marginLeft: TEXT_GAP + TEXT_WIDTH,
+            display: "flex",
+            alignItems: "center",
+            width: AVATAR_WIDTH,
+            height: NODE_HEIGHT,
+          }}
+        >
+          {showSymbols && data.symbol && parseSvgStringToJSX(data.symbol)}
+        </div>
+  
+        <div
+          style={{
+            width: TEXT_WIDTH,
+            marginLeft: TEXT_GAP,
+            paddingTop: "4px",
+            display: "flex",
+            alignItems: "center"
+          }}
+        >
+          {data.label}
+        </div>
+        {data.depth === 0 && (
+          <Handle
+            type="source"
+            position={Position.Bottom}
+            style={{ opacity: 0 }}
+          />
+        )}
+        {data.depth === 1 && (
+          <>
+            <Handle
+              type="target"
+              position={Position.Top}
+              style={{ opacity: 0 }}
+            />
+            <Handle
+              type="source"
+              position={Position.Bottom}
+              style={{
+                opacity: 0,
+                left: TEXT_WIDTH + TEXT_GAP + ARROW_INDENT
+              }}
+            />
+          </>
+        )}
+        {data.depth >= 2 && (
+          <>
+            <Handle
+              type="target"
+              position={Position.Left}
+              style={{
+                opacity: 0,
+                left: TEXT_GAP + TEXT_WIDTH - ARROW_INDENT / 2
+              }}
+            />
+            <Handle
+              type="source"
+              position={Position.Bottom}
+              style={{
+                opacity: 0,
+                left: TEXT_WIDTH + TEXT_GAP + ARROW_INDENT
+              }}
+            />
+          </>
+        )}
+      </div>
+    )
+    
+    const toggleDisplayMode = () => {
+      setShowSymbols(prev => !prev)
+      setTimeout(() => setViewport(getViewport()), 0)
+    }
+
     if (!data) {
       return <p>Loading...</p>
     }
-
-    const { nodes, edges } = calculateLayout(data)
 
     return (
       <div style={{ height: "100vh", width: "100%", backgroundColor: "#f8fafc" }}>
@@ -364,6 +381,8 @@ const OrganizationalChart = ({
           edges={edges}
           fitView
           nodeTypes={{ custom: CustomNode }}
+          nodesDraggable={false}
+          elementsSelectable={false}
         >
           <button
             onClick={toggleDisplayMode}
