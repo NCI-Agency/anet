@@ -142,7 +142,7 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
             && martImportedReport.getErrors() == null)
         .toList();
     assertThat(reportList).hasSize(1);
-    // assertThat(martImportedReportDao.delete(reportList.get(0))).isOne();
+    assertThat(martImportedReportDao.delete(reportList.get(0))).isOne();
 
     reportList = martImportedReports.stream()
         .filter(martImportedReport -> !martImportedReport.isSuccess()
@@ -151,7 +151,7 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
                 "Report with UUID 231196f5-3b13-45ea-9d73-524d042b16e7 has already been imported"))
         .toList();
     assertThat(reportList).hasSize(1);
-    // assertThat(martImportedReportDao.delete(reportList.get(0))).isOne();
+    assertThat(martImportedReportDao.delete(reportList.get(0))).isOne();
 
     reportList = martImportedReports.stream().filter(martImportedReport -> !martImportedReport
         .isSuccess() && martImportedReport.getSequence().equals(3L)
@@ -161,7 +161,7 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
                 + "<ul><li>Can not find submitter organization: 'does not exist' with uuid: does not exist</li></ul>"))
         .toList();
     assertThat(reportList).hasSize(1);
-    // assertThat(martImportedReportDao.delete(reportList.get(0))).isOne();
+    assertThat(martImportedReportDao.delete(reportList.get(0))).isOne();
 
     reportList = martImportedReports.stream().filter(martImportedReport -> !martImportedReport
         .isSuccess() && martImportedReport.getSequence().equals(4L)
@@ -171,7 +171,7 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
                 + "<ul><li>Can not find report location: 'does not exist' with uuid: does not exist</li></ul>"))
         .toList();
     assertThat(reportList).hasSize(1);
-    // assertThat(martImportedReportDao.delete(reportList.get(0))).isOne();
+    assertThat(martImportedReportDao.delete(reportList.get(0))).isOne();
 
     reportList = martImportedReports.stream().filter(martImportedReport -> !martImportedReport
         .isSuccess() && martImportedReport.getSequence().equals(5L)
@@ -182,7 +182,7 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
                 + "<li>Can not find report location: 'does not exist' with uuid: does not exist</li></ul>"))
         .toList();
     assertThat(reportList).hasSize(1);
-    // assertThat(martImportedReportDao.delete(reportList.get(0))).isOne();
+    assertThat(martImportedReportDao.delete(reportList.get(0))).isOne();
 
     reportList = martImportedReports.stream().filter(martImportedReport -> martImportedReport
         .isSuccess() && martImportedReport.getSequence().equals(6L)
@@ -192,7 +192,7 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
                 + "<ul><li>Can not find task: 'does not exist' with uuid: does not exist</li></ul>"))
         .toList();
     assertThat(reportList).hasSize(1);
-    // assertThat(martImportedReportDao.delete(reportList.get(0))).isOne();
+    assertThat(martImportedReportDao.delete(reportList.get(0))).isOne();
 
     // The transmission log has also been processed resulting in two MART imported reports added
     // only once
@@ -204,7 +204,7 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
             "MART was unable to send this report: missingReportUuid due to this error: SMTP error sending email in MART"))
         .toList();
     assertThat(reportList).hasSize(1);
-    // assertThat(martImportedReportDao.delete(reportList.get(0))).isOne();
+    assertThat(martImportedReportDao.delete(reportList.get(0))).isOne();
     reportList = martImportedReports.stream()
         .filter(martImportedReport -> !martImportedReport.isSuccess()
             && martImportedReport.getSequence().equals(8L) && martImportedReport.getErrors() != null
@@ -212,7 +212,7 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
                 .getErrors().equals("This report was lost in transmission: missingReportUuid2"))
         .toList();
     assertThat(reportList).hasSize(1);
-    // assertThat(martImportedReportDao.delete(reportList.get(0))).isOne();
+    assertThat(martImportedReportDao.delete(reportList.get(0))).isOne();
 
     // Now we will run again and will pick up the report with sequence 8 that have been marked as
     // lost processing the transmission log
@@ -225,7 +225,7 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
             && martImportedReport.getReportUuid().equals("missingReportUuid2"))
         .toList();
     assertThat(reportList).hasSize(1);
-    // assertThat(martImportedReportDao.delete(reportList.get(0))).isOne();
+    assertThat(martImportedReportDao.delete(reportList.get(0))).isOne();
   }
 
   private EmailMessage createReportMockEmail(ReportDto reportDto, boolean withAttachment)
