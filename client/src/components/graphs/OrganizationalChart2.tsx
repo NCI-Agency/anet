@@ -119,7 +119,7 @@ const OrganizationalChart = ({
     const doc = parser.parseFromString(svgString, "image/svg+xml")
     const svgElement = doc.documentElement
 
-    svgElement.setAttribute("width", "100px")
+    svgElement.setAttribute("width", "60px")
 
     return (
       <span dangerouslySetInnerHTML={{ __html: new XMLSerializer().serializeToString(svgElement) }} />
@@ -153,7 +153,8 @@ const OrganizationalChart = ({
       }
     )
   }
-  const AVATAR_WIDTH = 100
+
+  const AVATAR_WIDTH = 60
   const TEXT_GAP = 10
   const TEXT_WIDTH = 150
   const NODE_WIDTH = (AVATAR_WIDTH / 2 + TEXT_GAP + TEXT_WIDTH) * 2
@@ -161,8 +162,7 @@ const OrganizationalChart = ({
   const VERTICAL_SPACING = 80
   const SECONDARY_VERTICAL_SPACING = 40
   const HORIZONTAL_SPACING = -TEXT_WIDTH + 20
-  const LEVEL_INDENT = 40
-  const ARROW_INDENT = 10
+  const LEVEL_INDENT = 60
   let lowestDepth = 0
 
   const calculateLayout = (node, depth = 0, x = 0, y = 0) => {
@@ -299,7 +299,7 @@ const OrganizationalChart = ({
         <div style={{
             marginLeft: TEXT_GAP + TEXT_WIDTH,
             display: "flex",
-            alignItems: "center",
+            alignItems: "start",
             width: AVATAR_WIDTH,
             height: NODE_HEIGHT,
           }}
@@ -313,7 +313,7 @@ const OrganizationalChart = ({
             marginLeft: TEXT_GAP,
             paddingTop: "4px",
             display: "flex",
-            alignItems: "center"
+            alignItems: "start"
           }}
         >
           {data.label}
@@ -322,7 +322,7 @@ const OrganizationalChart = ({
           <Handle
             type="source"
             position={Position.Bottom}
-            style={{ opacity: 0 }}
+            style={{ opacity: 0, top: NODE_HEIGHT / 2 }}
           />
         )}
         {data.depth === 1 && (
@@ -337,7 +337,7 @@ const OrganizationalChart = ({
               position={Position.Bottom}
               style={{
                 opacity: 0,
-                left: TEXT_WIDTH + TEXT_GAP + ARROW_INDENT
+                top: NODE_HEIGHT / 2
               }}
             />
           </>
@@ -349,7 +349,7 @@ const OrganizationalChart = ({
               position={Position.Left}
               style={{
                 opacity: 0,
-                left: TEXT_GAP + TEXT_WIDTH - ARROW_INDENT / 2
+                left: NODE_WIDTH / 2 - AVATAR_WIDTH / 2
               }}
             />
             <Handle
@@ -357,7 +357,8 @@ const OrganizationalChart = ({
               position={Position.Bottom}
               style={{
                 opacity: 0,
-                left: TEXT_WIDTH + TEXT_GAP + ARROW_INDENT
+                top: NODE_HEIGHT / 2,
+                left: NODE_WIDTH / 2
               }}
             />
           </>
