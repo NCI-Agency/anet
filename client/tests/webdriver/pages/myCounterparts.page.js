@@ -37,12 +37,12 @@ class MyTasks extends Page {
 
   async getMyPendingCounterpart(name) {
     return (await this.getMyPendingCounterpartsBody()).$(
-      `//a[text()="${name}"]`
+      `.//a[text()="${name}"]`
     )
   }
 
   async getMyCounterpart(name) {
-    return (await this.getMyCounterparts()).$(`//a[text()="${name}"]`)
+    return (await this.getMyCounterparts()).$(`.//a[text()="${name}"]`)
   }
 }
 

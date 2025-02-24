@@ -11,6 +11,10 @@ class ShowPerson extends Page {
     await super.openAsAdminUser(PAGE_URL.replace(":uuid", uuid))
   }
 
+  async getForm() {
+    return browser.$("form.form-horizontal")
+  }
+
   async getEditButton() {
     return browser.$("div a.edit-person")
   }
@@ -57,7 +61,7 @@ class ShowPerson extends Page {
 
   async getSensitiveInformationWarning() {
     return (await this.getCompactView()).$(
-      '//span[text()="Sensitive Information"]'
+      './/span[text()="Sensitive Information"]'
     )
   }
 
@@ -123,19 +127,19 @@ class ShowPerson extends Page {
   }
 
   async getSaveAssessmentButton() {
-    return (await this.getAssessmentModalForm()).$('//button[text()="Save"]')
+    return (await this.getAssessmentModalForm()).$('.//button[text()="Save"]')
   }
 
-  async getShownAssessmentPanel(assessmentKey, recurrence) {
+  async getShownAssessmentPanel(assessmentKey, recurrence, i) {
     return (await this.getAssessmentsTable(assessmentKey, recurrence)).$(
-      "td:nth-child(2) .card"
+      `td:nth-child(${i}) .card`
     )
   }
 
-  async getShownAssessmentDetails(assessmentKey, recurrence) {
-    return (await this.getShownAssessmentPanel(assessmentKey, recurrence)).$$(
-      "div.card-body .form-control-plaintext"
-    )
+  async getShownAssessmentDetails(assessmentKey, recurrence, i = 2) {
+    return (
+      await this.getShownAssessmentPanel(assessmentKey, recurrence, i)
+    ).$$("div.card-body .form-control-plaintext")
   }
 
   async getAssessmentContainer(assessmentKey, recurrence) {
@@ -172,7 +176,7 @@ class ShowPerson extends Page {
     const compactView = await this.getCompactView()
     for (const field of fields) {
       await (
-        await compactView.$(`//th[text()="${field}"]`)
+        await compactView.$(`.//th[text()="${field}"]`)
       ).waitForDisplayed({ reverse })
     }
   }
@@ -236,10 +240,10 @@ class ShowPerson extends Page {
     await (await this.getDeleteConfirmButton()).click()
   }
 
-  async waitForDeletedAssessmentToDisappear(assessmentKey, recurrence) {
+  async waitForDeletedAssessmentToDisappear(assessmentKey, recurrence, i = 2) {
     await browser.pause(500)
     await (
-      await this.getShownAssessmentPanel(assessmentKey, recurrence)
+      await this.getShownAssessmentPanel(assessmentKey, recurrence, i)
     ).waitForExist({
       reverse: true,
       timeout: 20000

@@ -33,7 +33,7 @@ class Home extends Page {
   }
 
   async getLogoutButton() {
-    return (await this.getBannerUser()).$('//a[text()="Sign out"]')
+    return (await this.getBannerUser()).$('.//a[text()="Sign out"]')
   }
 
   async getLoginButton() {
