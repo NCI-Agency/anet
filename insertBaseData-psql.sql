@@ -558,11 +558,11 @@ INSERT INTO tasks (uuid, "shortName", "longName", selectable, category, "created
   (N'dbe26c4f-7f92-451a-a9b5-8e43fc9cd6c9', 'EF 4', 'Force Gen (Training)', FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
   (N'c098a5b3-8d80-429d-ada2-fd57dc331e2a', '4.a', 'Get a website for people to apply on', TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'dbe26c4f-7f92-451a-a9b5-8e43fc9cd6c9'),
   (N'eddf19f6-f6e1-44f5-9093-f3e2ade59428', '4.b', 'Hire People', TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'dbe26c4f-7f92-451a-a9b5-8e43fc9cd6c9'),
-  (N'0cb03167-2772-4d3e-8382-5870da58022a', '4.b.1', 'Get an HR team', TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'dbe26c4f-7f92-451a-a9b5-8e43fc9cd6c9'),
-  (N'df8fd269-b382-486e-9bc6-f3f4b77a03b0', '4.b.2', 'Review resumes for hiring', TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'dbe26c4f-7f92-451a-a9b5-8e43fc9cd6c9'),
-  (N'17f35bc6-a0f3-4f79-8813-2176a7d7ca2f', '4.b.3', 'Invite people to come interview', TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'dbe26c4f-7f92-451a-a9b5-8e43fc9cd6c9'),
-  (N'32788f96-b72c-4314-8286-7f59b683cba2', '4.b.4', 'Interview candidates', TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'dbe26c4f-7f92-451a-a9b5-8e43fc9cd6c9'),
-  (N'cca1678a-58d7-4213-9c67-f894879df776', '4.b.5', 'Extend Job Offers to successful candidates', TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'dbe26c4f-7f92-451a-a9b5-8e43fc9cd6c9'),
+  (N'0cb03167-2772-4d3e-8382-5870da58022a', '4.b.1', 'Get an HR team', TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'eddf19f6-f6e1-44f5-9093-f3e2ade59428'),
+  (N'df8fd269-b382-486e-9bc6-f3f4b77a03b0', '4.b.2', 'Review resumes for hiring', TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'eddf19f6-f6e1-44f5-9093-f3e2ade59428'),
+  (N'17f35bc6-a0f3-4f79-8813-2176a7d7ca2f', '4.b.3', 'Invite people to come interview', TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'eddf19f6-f6e1-44f5-9093-f3e2ade59428'),
+  (N'32788f96-b72c-4314-8286-7f59b683cba2', '4.b.4', 'Interview candidates', TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'eddf19f6-f6e1-44f5-9093-f3e2ade59428'),
+  (N'cca1678a-58d7-4213-9c67-f894879df776', '4.b.5', 'Extend Job Offers to successful candidates', TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'eddf19f6-f6e1-44f5-9093-f3e2ade59428'),
   (N'98342fa0-9106-4ef1-bc47-e4af2f5da330', '4.c', 'Onboard new Employees', TRUE, 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'dbe26c4f-7f92-451a-a9b5-8e43fc9cd6c9'),
   (N'242efaa3-d5de-4970-996d-50ca90ef6480', 'EF 5', 'Force Sustainment (Logistics)', FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
   (N'12b8dbcc-8f31-444a-9437-00fe00fc1f7b', 'EF6', 'C2 Operations', FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
@@ -570,12 +570,13 @@ INSERT INTO tasks (uuid, "shortName", "longName", selectable, category, "created
   (N'9b9f4205-0721-4893-abf8-69e020d4db23', 'EF8', 'Stratcom', FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
   (N'4831e09b-2bbb-4717-9bfa-91071e62260a', 'EF9', '', FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
   (N'5173f34b-16f5-4e18-aa3d-def55c40e36d', 'Gender', '', TRUE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'4831e09b-2bbb-4717-9bfa-91071e62260a'),
-  (uuid_generate_v4(), 'TAAC-N', '', FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
-  (uuid_generate_v4(), 'TAAC-S', '', FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
-  (uuid_generate_v4(), 'TAAC-E', '', FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
-  (uuid_generate_v4(), 'TAAC-W', '', FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
-  (uuid_generate_v4(), 'TAAC-C', '', FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
-  (uuid_generate_v4(), 'TAAC Air', '', FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL);
+  (N'073da176-8129-4d9b-afa3-416edde6846a', 'TAAC', '', FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (uuid_generate_v4(), 'TAAC-N', '', FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'073da176-8129-4d9b-afa3-416edde6846a'),
+  (uuid_generate_v4(), 'TAAC-S', '', FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'073da176-8129-4d9b-afa3-416edde6846a'),
+  (uuid_generate_v4(), 'TAAC-E', '', FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'073da176-8129-4d9b-afa3-416edde6846a'),
+  (uuid_generate_v4(), 'TAAC-W', '', FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'073da176-8129-4d9b-afa3-416edde6846a'),
+  (uuid_generate_v4(), 'TAAC-C', '', FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'073da176-8129-4d9b-afa3-416edde6846a'),
+  (uuid_generate_v4(), 'TAAC Air', '', FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'073da176-8129-4d9b-afa3-416edde6846a');
 
 UPDATE tasks
 SET "customFields"='{"invisibleCustomFields":[],"projectStatus":"RED"}'

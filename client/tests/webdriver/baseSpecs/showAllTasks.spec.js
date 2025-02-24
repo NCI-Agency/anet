@@ -14,7 +14,7 @@ describe("Show All Tasks Page", () => {
 
   it("Should display all top tasks", async() => {
     const topTasks = await ShowAllTasks.getAllTasks()
-    expect(topTasks).to.have.lengthOf(15)
+    expect(topTasks).to.have.lengthOf(10)
     for (const task of topTasks) {
       expect(await task.isDisplayed()).to.equal(true)
     }
