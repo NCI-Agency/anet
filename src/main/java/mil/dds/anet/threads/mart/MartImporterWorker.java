@@ -37,7 +37,6 @@ public class MartImporterWorker extends AbstractWorker {
   private final IMartReportImporterService martReportImporter;
   private final IMartTransmissionLogImporterService transmissionLogImporter;
 
-
   public MartImporterWorker(AnetDictionary dict, JobHistoryDao jobHistoryDao,
       IMailReceiver iMailReceiver, IMartReportImporterService martReportImporter,
       IMartTransmissionLogImporterService martTrasmissionLogImporter) {
@@ -47,17 +46,20 @@ public class MartImporterWorker extends AbstractWorker {
     this.transmissionLogImporter = martTrasmissionLogImporter;
   }
 
+  private List<EmailMessage> messages;
+
   @Scheduled(initialDelay = 35, fixedRateString = "${anet.mart.mail-polling-delay-in-seconds:10}",
       timeUnit = TimeUnit.SECONDS)
   @Override
   public void run() {
+    this.messages = iMailReceiver.downloadEmails();
     super.run();
   }
 
   @Override
   protected void runInternal(Instant now, JobHistory jobHistory, GraphQLContext context) {
     try {
-      for (final EmailMessage email : iMailReceiver.downloadEmails()) {
+      for (final EmailMessage email : this.messages) {
         processEmailMessage(email);
       }
     } catch (Exception e) {
