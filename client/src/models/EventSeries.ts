@@ -57,6 +57,7 @@ export default class EventSeries extends Model {
   static getEventSeriesQuery = gql`
     query ($uuid: String) {
       eventSeries(uuid: $uuid) {
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         uuid
         status
         name
@@ -82,6 +83,16 @@ export default class EventSeries extends Model {
           longName
           identificationCode
           ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        }
+        attachments {
+            uuid
+            fileName
+            caption
+            description
+            classification
+            mimeType
+            contentLength
+            createdAt
         }
       }
     }

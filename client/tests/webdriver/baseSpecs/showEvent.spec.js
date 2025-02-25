@@ -79,3 +79,44 @@ describe("Show event page", () => {
     )
   })
 })
+describe("When on the show page of an event with attachment(s)", () => {
+  it("We should see a container for Attachment List", async() => {
+    await ShowEvent.openAsAdminUser(EVENT_UUID)
+    await (await ShowEvent.getAttachments()).waitForExist()
+    await (await ShowEvent.getAttachments()).waitForDisplayed()
+  })
+  it("We should see a card of Attachment", async() => {
+    await (await ShowEvent.getCard()).waitForExist()
+    await (await ShowEvent.getCard()).waitForDisplayed()
+    expect(await ShowEvent.getCaption()).to.be.equal("456")
+  })
+  it("We should be able to edit the attachments", async() => {
+    const editAttachmentsButton = await ShowEvent.getEditAttachmentsButton()
+    expect(await editAttachmentsButton.getText()).to.be.equal(
+      "Edit attachments"
+    )
+    await editAttachmentsButton.click()
+    expect(await editAttachmentsButton.getText()).to.be.equal(
+      "View attachments"
+    )
+
+    const editButton = await browser.$(".attachment-card .button-line a")
+    await expect(await editButton.getAttribute("href")).to.include(
+      "/attachments/426bf11a-5124-4468-8b66-edb3ae130bc0/edit"
+    )
+    await editAttachmentsButton.click()
+  })
+  it("We can go to the show page of Attachment", async() => {
+    await (await ShowEvent.getImageClick()).click()
+    await expect(await browser.getUrl()).to.include(
+      "/attachments/426bf11a-5124-4468-8b66-edb3ae130bc0"
+    )
+  })
+})
+describe("When on the show page of an event with entity avatar", () => {
+  it("We should see the avatar", async() => {
+    await ShowEvent.openAsAdminUser(EVENT_UUID)
+    await (await ShowEvent.getEntityAvatar()).waitForExist()
+    await (await ShowEvent.getEntityAvatar()).waitForDisplayed()
+  })
+})

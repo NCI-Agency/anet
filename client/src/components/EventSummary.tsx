@@ -28,6 +28,7 @@ const GQL_GET_EVENT_LIST = gql`
       pageSize
       totalCount
       list {
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         uuid
         type
         name
