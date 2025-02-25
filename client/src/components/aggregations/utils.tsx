@@ -208,9 +208,9 @@ export function reportsToEvents(reports, showInterlocutors) {
         ? r.primaryInterlocutor
         : r.primaryAdvisor
       if (primaryPerson) {
-        // We have a primary person and therefore also an organization
+        // We have a primary person, add their organization
         const primaryOrg = showInterlocutors ? r.interlocutorOrg : r.advisorOrg
-        title = `${primaryOrg.shortName}: ${new Person(
+        title = `${primaryOrg?.shortName || "<unknown>"}: ${new Person(
           primaryPerson
         ).toString()}`
       }
