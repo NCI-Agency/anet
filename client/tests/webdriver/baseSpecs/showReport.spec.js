@@ -66,6 +66,26 @@ describe("Show report page", () => {
       )
     })
   })
+  describe("When on the show page of a with many key outcomes and next steps", () => {
+    it("We should see the key outcomes as a list", async() => {
+      const keyOutcomes = await ShowReport.getKeyOutcomesList()
+      expect(keyOutcomes).to.have.length(3)
+      expect(await keyOutcomes.map(async el => el.getText())).to.deep.equal([
+        "have reports in organizations",
+        "and test key outcomes",
+        "and the next steps"
+      ])
+    })
+    it("We should see the next steps as a list", async() => {
+      const nextSteps = await ShowReport.getNextStepsList()
+      expect(nextSteps).to.have.length(3)
+      expect(await nextSteps.map(async el => el.getText())).to.deep.equal([
+        "keep on testing!",
+        "and testing",
+        "and testing"
+      ])
+    })
+  })
 })
 
 const REPORT_CLASSIFICATION = "NATO UNCLASSIFIED"

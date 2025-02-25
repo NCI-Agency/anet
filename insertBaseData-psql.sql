@@ -978,7 +978,7 @@ INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor",
 
 INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "nextSteps", "keyOutcomes", state, "engagementDate", atmosphere, "advisorOrganizationUuid", "interlocutorOrganizationUuid","customFields") VALUES
   ('59be259b-30b9-4d04-9e21-e8ceb58cbe9c', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'A test report from Arthur', '',
-  'keep on testing!','have reports in organizations', 2, CURRENT_TIMESTAMP + INTERVAL '1 minute', 0,
+  E'keep on testing!\nand testing\rand testing',E'have reports in organizations\u2029and test key outcomes\u2028and the next steps', 2, CURRENT_TIMESTAMP + INTERVAL '1 minute', 0,
   (SELECT uuid FROM organizations where "shortName" = 'ANET Administrators'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Interior'),
    '{"invisibleCustomFields":["formCustomFields.trainingEvent","formCustomFields.numberTrained","formCustomFields.levelTrained","formCustomFields.trainingDate","formCustomFields.assetsUsed"],"itemsAgreed":[],"echelons":"Ut enim ad minim veniam","systemProcess":"","multipleButtons":["advise"],"additionalEngagementNeeded":[],"relatedObject":null,"relatedReport":null}');
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor", "isInterlocutor") VALUES
