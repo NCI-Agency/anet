@@ -66,6 +66,14 @@ class ShowEvent extends Page {
   async getReports() {
     return browser.$('div[id="eventReports"]')
   }
+
+  async getEditAttachmentsButton() {
+    return await browser.$("#edit-attachments")
+  }
+
+  async getEntityAvatar() {
+    return browser.$("fieldset div.row div.text-center canvas")
+  }
 }
 
 export default new ShowEvent()

@@ -67,6 +67,9 @@ public class Event extends EventSeries {
   @GraphQLInputField
   String outcomes;
 
+  // annotated below
+  private EntityAvatar entityAvatar;
+
   // Lazy Loaded
   // annotated below
   List<Task> tasks;
@@ -248,6 +251,28 @@ public class Event extends EventSeries {
     query.setUser(DaoUtils.getUserFromContext(context));
     return ApplicationContextProvider.getBean(ReportDao.class).getReportsBySearch(context, uuid,
         query);
+  }
+
+  @GraphQLQuery(name = "entityAvatar")
+  public CompletableFuture<EntityAvatar> loadEntityAvatar(
+      @GraphQLRootContext GraphQLContext context) {
+    if (entityAvatar != null) {
+      return CompletableFuture.completedFuture(entityAvatar);
+    }
+    return new UuidFetcher<EntityAvatar>().load(context, IdDataLoaderKey.ENTITY_AVATAR, uuid)
+        .thenApply(o -> {
+          entityAvatar = o;
+          return o;
+        });
+  }
+
+  @GraphQLInputField(name = "entityAvatar")
+  public void setEntityAvatar(EntityAvatar entityAvatar) {
+    this.entityAvatar = entityAvatar;
+  }
+
+  public EntityAvatar getEntityAvatar() {
+    return this.entityAvatar;
   }
 
   @Override

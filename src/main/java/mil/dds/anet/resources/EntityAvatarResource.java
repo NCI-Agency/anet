@@ -8,6 +8,8 @@ import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import mil.dds.anet.beans.EntityAvatar;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.database.EntityAvatarDao;
+import mil.dds.anet.database.EventDao;
+import mil.dds.anet.database.EventSeriesDao;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.utils.AnetAuditLogger;
@@ -94,6 +96,8 @@ public class EntityAvatarResource {
       case OrganizationDao.TABLE_NAME ->
         OrganizationResource.hasPermission(user, relatedObjectUuid);
       case PersonDao.TABLE_NAME -> PersonResource.hasPermission(user, relatedObjectUuid);
+      case EventSeriesDao.TABLE_NAME -> EventSeriesResource.hasPermission(user, relatedObjectUuid);
+      case EventDao.TABLE_NAME -> EventResource.hasPermission(user, relatedObjectUuid);
       // TODO: add other object types if and when entity avatars for them are allowed
       default -> false;
     };

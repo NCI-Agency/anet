@@ -39,6 +39,14 @@ class ShowEventSeries extends Page {
     const eventsTable = await this.getEventsTable()
     return eventsTable.$(`tbody tr:nth-child(${i}) td:first-child a`)
   }
+
+  async getEditAttachmentsButton() {
+    return await browser.$("#edit-attachments")
+  }
+
+  async getEntityAvatar() {
+    return browser.$("fieldset div.row div.text-center canvas")
+  }
 }
 
 export default new ShowEventSeries()
