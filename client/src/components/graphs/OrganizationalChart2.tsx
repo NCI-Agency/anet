@@ -92,6 +92,7 @@ const GQL_GET_CHART_DATA = gql`
     }
   }
 `
+type PeopleFilterOption = "none" | "leaders" | "deputies" | "both"
 
 interface OrganizationalChartProps {
   pageDispatchers?: PageDispatchersPropType
@@ -181,108 +182,6 @@ const OrganizationalChart = ({
     return maxDepth
   }
 
-  const calculateLayout = (node, allDescendantOrgs, allAscendantOrgs, depth = 0, x = 0, y = 0, depthLimit = 3) => {
-    if (!node || depth > depthLimit) {
-      return { nodes: [], edges: [] }
-    }
-
-    let currentX = x
-    let currentY = y
-    const children = allDescendantOrgs.filter(descendant => descendant.parentOrg.uuid === node.uuid) || []
-    
-    const isRoot = depth === 0
-    if (isRoot) {
-      currentX = 0
-      currentY = 0
-    }
-
-    const label = node.longName ? `${node.shortName}: ${node.longName}` : node.shortName
-    const symbol = determineSymbol(node, allAscendantOrgs).asSVG()
-    const people = node.positions
-    .filter(position => position.person && (position.role === "LEADER" || position.role === "DEPUTY"))
-    .map(position => position.person)
-    const currentNode = {
-      id: node.uuid,
-      data: {
-        label,
-        symbol,
-        people,
-        depth
-      },
-      position: { x: currentX, y: currentY },
-      type: "custom"
-    }
-
-    let nodes = [currentNode]
-    let edges = []
-    let childY =
-      currentY + people.length * PERSON_AVATAR_HEIGHT + VERTICAL_SPACING - SECONDARY_VERTICAL_SPACING - NODE_HEIGHT
-    if (children.length > 0) {
-      let childStartX = currentX
-
-      if (isRoot) {
-        const totalWidth =
-          children.length * NODE_WIDTH +
-          (children.length - 1) * HORIZONTAL_SPACING
-        childStartX = -totalWidth / 2 + NODE_WIDTH / 2
-      }
-
-      let childX = childStartX - NODE_WIDTH - HORIZONTAL_SPACING
-      children.forEach((child) => {
-        if (isRoot) {
-          childX += NODE_WIDTH + HORIZONTAL_SPACING
-          if (lowestDepth > 1) {
-            childX += (lowestDepth - 2) * LEVEL_INDENT + TEXT_GAP
-          }
-          childY = currentY + people.length * PERSON_AVATAR_HEIGHT + VERTICAL_SPACING
-          lowestDepth = 0
-        } else {
-          childX = currentX + LEVEL_INDENT
-          childY += NODE_HEIGHT + SECONDARY_VERTICAL_SPACING
-        }
-
-        const childLayout = calculateLayout(child, allDescendantOrgs, allAscendantOrgs, depth + 1, childX, childY, depthLimit)
-        const lastChild = childLayout.nodes.slice(-1)[0]
-        if (lastChild) {
-          childY =
-            lastChild.position.y -
-            SECONDARY_VERTICAL_SPACING / 2 + lastChild.data.people.length * PERSON_AVATAR_HEIGHT
-        }
-
-        nodes = nodes.concat(childLayout.nodes)
-        edges = edges.concat(childLayout.edges)
-
-        edges.push({
-          id: `edge-${node.uuid}-${child.uuid}`,
-          source: node.uuid,
-          target: child.uuid,
-          sourceHandle: isRoot ? "bottom" : "left",
-          targetHandle: depth === 0 ? "top" : "left",
-          type: "smoothstep",
-          style: { stroke: "#94a3b8", strokeWidth: 2 },
-          markerEnd: { type: "arrowclosed", color: "#94a3b8" }
-        })
-      })
-    }
-    if (depth > lowestDepth) {
-      lowestDepth = depth
-    }
-    if (isRoot) {
-      let lowestX = nodes[0].position.x
-      let highestX = lowestX
-      nodes.forEach(({ position }) => {
-        const x = position.x
-        if (x < lowestX) {
-          lowestX = x
-        } else if (x > highestX) {
-          highestX = x
-        }
-      })
-      nodes[0].position.x = (lowestX + highestX) / 2
-    }
-    return { nodes, edges }
-  }
-
   const OrbatChart = ({ data }) => (
     <ReactFlowProvider>
       <OrbatChartWrapper data={data} />
@@ -293,28 +192,8 @@ const OrganizationalChart = ({
     const [showSymbols, setShowSymbols] = useState(true)
     const [depthLimit, setDepthLimit] = useState(3)
     const [maxDepth, setMaxDepth] = useState(0)
+    const [peopleFilter, setPeopleFilter] = useState<PeopleFilterOption>("none")
     const { setViewport, getViewport } = useReactFlow()
-
-    const { nodes, edges } = useMemo(() => {
-      if (!data?.organization) return { nodes: [], edges: [] }
-      
-      const calculatedMaxDepth = calculateMaxDepth(data)
-      setMaxDepth(calculatedMaxDepth)
-      setDepthLimit(Math.min(calculatedMaxDepth, depthLimit))
-      const allAscendantOrgs = utils.getAscendantObjectsAsMap(
-        (data.organization?.ascendantOrgs ?? []).concat(
-          data.organization?.descendantOrgs ?? []
-        )
-      )
-      const layout = calculateLayout(data.organization, data.organization.descendantOrgs, allAscendantOrgs, 0, 0, 0, depthLimit)
-      return {
-        nodes: layout.nodes.map(node => ({
-          ...node,
-          data: { ...node.data, showSymbols }
-        })),
-        edges: layout.edges
-      }
-    }, [data, showSymbols, depthLimit])
 
     const CustomNode = ({ data }) => (
       <div style={{
@@ -428,6 +307,130 @@ const OrganizationalChart = ({
       return <p>Loading...</p>
     }
 
+    const calculateLayout = (node, allDescendantOrgs, allAscendantOrgs, depth = 0, x = 0, y = 0) => {
+      if (!node || depth > depthLimit) {
+        return { nodes: [], edges: [] }
+      }
+  
+      let currentX = x
+      let currentY = y
+      const children = allDescendantOrgs.filter(descendant => descendant.parentOrg.uuid === node.uuid) || []
+      
+      const isRoot = depth === 0
+      if (isRoot) {
+        currentX = 0
+        currentY = 0
+      }
+  
+      const label = node.longName ? `${node.shortName}: ${node.longName}` : node.shortName
+      const symbol = determineSymbol(node, allAscendantOrgs).asSVG()
+      const people = node.positions
+      .filter(position => position.person)
+      .filter(position => {
+        if (!position.person) return false
+        if (peopleFilter === 'none') return false
+        if (peopleFilter === 'leaders') return position.role === "LEADER"
+        if (peopleFilter === 'deputies') return position.role === "DEPUTY"
+        return position.role === "LEADER" || position.role === "DEPUTY"
+      })
+      .map(position => position.person)
+      const currentNode = {
+        id: node.uuid,
+        data: {
+          label,
+          symbol,
+          people,
+          depth
+        },
+        position: { x: currentX, y: currentY },
+        type: "custom"
+      }
+  
+      let nodes = [currentNode]
+      let edges = []
+      let childY =
+        currentY + people.length * PERSON_AVATAR_HEIGHT + VERTICAL_SPACING - SECONDARY_VERTICAL_SPACING - NODE_HEIGHT
+      if (children.length > 0) {
+        let childStartX = currentX
+  
+        let childX = childStartX
+        children.forEach((child) => {
+          if (isRoot) {
+            childX += NODE_WIDTH + HORIZONTAL_SPACING
+            if (lowestDepth > 1) {
+              childX += (lowestDepth - 2) * LEVEL_INDENT + TEXT_GAP
+            }
+            childY = currentY + NODE_HEIGHT + people.length * PERSON_AVATAR_HEIGHT + VERTICAL_SPACING
+            lowestDepth = 0
+          } else {
+            childX = currentX + LEVEL_INDENT
+            childY += NODE_HEIGHT + SECONDARY_VERTICAL_SPACING
+          }
+  
+          const childLayout = calculateLayout(child, allDescendantOrgs, allAscendantOrgs, depth + 1, childX, childY)
+          const lastChild = childLayout.nodes.slice(-1)[0]
+          if (lastChild) {
+            childY =
+              lastChild.position.y -
+              SECONDARY_VERTICAL_SPACING / 2 + lastChild.data.people.length * PERSON_AVATAR_HEIGHT
+          }
+  
+          nodes = nodes.concat(childLayout.nodes)
+          edges = edges.concat(childLayout.edges)
+  
+          edges.push({
+            id: `edge-${node.uuid}-${child.uuid}`,
+            source: node.uuid,
+            target: child.uuid,
+            sourceHandle: isRoot ? "bottom" : "left",
+            targetHandle: depth === 0 ? "top" : "left",
+            type: "smoothstep",
+            style: { stroke: "#94a3b8", strokeWidth: 2 },
+            markerEnd: { type: "arrowclosed", color: "#94a3b8" }
+          })
+        })
+      }
+      if (depth > lowestDepth) {
+        lowestDepth = depth
+      }
+      if (isRoot && nodes.length > 1) {
+        let lowestX = nodes[1].position.x
+        let highestX = lowestX
+        nodes.slice(1).forEach(({ position }) => {
+          const x = position.x
+          if (x < lowestX) {
+            lowestX = x
+          } else if (x > highestX) {
+            highestX = x
+          }
+        })
+        nodes[0].position.x = (lowestX + highestX) / 2
+      }
+      return { nodes, edges }
+    }
+
+    const { nodes, edges } = useMemo(() => {
+      if (!data?.organization) return { nodes: [], edges: [] }
+      
+      const calculatedMaxDepth = calculateMaxDepth(data)
+      setMaxDepth(calculatedMaxDepth)
+      setDepthLimit(Math.min(calculatedMaxDepth, depthLimit))
+      const allAscendantOrgs = utils.getAscendantObjectsAsMap(
+        (data.organization?.ascendantOrgs ?? []).concat(
+          data.organization?.descendantOrgs ?? []
+        )
+      )
+      const layout = calculateLayout(data.organization, data.organization.descendantOrgs, allAscendantOrgs, 0, 0, 0)
+      
+      return {
+        nodes: layout.nodes.map(node => ({
+          ...node,
+          data: { ...node.data, showSymbols }
+        })),
+        edges: layout.edges
+      }
+    }, [data, showSymbols, depthLimit, peopleFilter])
+
     return (
       <div style={{ height: "100vh", width: "100%", backgroundColor: "#f8fafc" }}>
         <ReactFlow
@@ -440,7 +443,7 @@ const OrganizationalChart = ({
           <div
             style={{
               position: "absolute",
-              bottom: "20px",
+              top: "20px",
               left: "20px",
               zIndex: 10,
               display: "flex",
@@ -451,8 +454,8 @@ const OrganizationalChart = ({
             <button
               onClick={toggleDisplayMode}
               style={{
-              padding: "8px 16px",
-              backgroundColor: "grey",
+                padding: "8px 16px",
+              backgroundColor: "white",
               cursor: "pointer"
               }}
             >
@@ -462,7 +465,7 @@ const OrganizationalChart = ({
               onClick={increaseDepthLimit}
               style={{
               padding: "8px 16px",
-              backgroundColor: "grey",
+              backgroundColor: "white",
               cursor: "pointer"
               }}
             >
@@ -471,13 +474,29 @@ const OrganizationalChart = ({
             <button
               onClick={decreaseDepthLimit}
               style={{
-              padding: "8px 16px",
-              backgroundColor: "grey",
+                padding: "8px 16px",
+              backgroundColor: "white",
               cursor: "pointer"
               }}
             >
               Decrease Depth
             </button>
+            <select
+              value={peopleFilter}
+              onChange={(e) => setPeopleFilter(e.target.value as PeopleFilterOption)}
+              style={{
+                padding: "8px 16px",
+                backgroundColor: "white",
+                border: "1px solid #ccc",
+                borderRadius: "4px",
+                cursor: "pointer"
+              }}
+            >
+              <option value="none">No positions</option>
+              <option value="leaders">Leaders Only</option>
+              <option value="deputies">Deputies Only</option>
+              <option value="both">Leaders & Deputies</option>
+            </select>
           </div>
         </ReactFlow>
       </div>
