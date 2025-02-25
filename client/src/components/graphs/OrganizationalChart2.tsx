@@ -6,7 +6,7 @@ import {
   PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
-import React, { useState, useMemo, useEffect } from "react"
+import React, { useState, useMemo } from "react"
 import _xor from "lodash/xor"
 import ms from "milsymbol"
 import { connect } from "react-redux"
@@ -64,6 +64,9 @@ const GQL_GET_CHART_DATA = gql`
         app6hq
         app6amplifier
         childrenOrgs(query: { status: ACTIVE }) {
+          uuid
+        }
+        ascendantOrgs {
           uuid
         }
         parentOrg {
@@ -165,32 +168,27 @@ const OrganizationalChart = ({
   const LEVEL_INDENT = 60
   let lowestDepth = 0
 
-  const calculateMaxDepth = (node, depth = 0) => {
-    if (!node || !node.descendantOrgs || node.descendantOrgs.length === 0) {
-      return depth
-    }
-
-    let maxDepth = depth
-    node.descendantOrgs.forEach((child) => {
-      const childDepth = calculateMaxDepth(child, depth + 1)
-      if (childDepth > maxDepth) {
-        maxDepth = childDepth
+  const calculateMaxDepth = (data) => {
+    let maxDepth = 0
+    data.organization.descendantOrgs.forEach(org => {
+      if (org.ascendantOrgs.length - 1 > maxDepth) {
+        maxDepth = org.ascendantOrgs.length - 1
       }
     })
 
     return maxDepth
   }
 
-  const calculateLayout = (node, allAscendantOrgs, depth = 0, x = 0, y = 0, depthLimit = 3) => {
+  const calculateLayout = (node, allDescendantOrgs, allAscendantOrgs, depth = 0, x = 0, y = 0, depthLimit = 3) => {
     if (!node || depth > depthLimit) {
       return { nodes: [], edges: [] }
     }
 
-    const isRoot = depth === 0
     let currentX = x
     let currentY = y
-    const children = node.descendantOrgs || []
-
+    const children = allDescendantOrgs.filter(descendant => descendant.parentOrg.uuid === node.uuid) || []
+    
+    const isRoot = depth === 0
     if (isRoot) {
       currentX = 0
       currentY = 0
@@ -199,7 +197,7 @@ const OrganizationalChart = ({
     const currentNode = {
       id: node.uuid,
       data: {
-        label: node.shortName,
+        label: node.longName ? `${node.shortName}: ${node.longName}` : node.shortName,
         depth,
         symbol: determineSymbol(node, allAscendantOrgs).asSVG()
       },
@@ -236,7 +234,7 @@ const OrganizationalChart = ({
           childY += SECONDARY_VERTICAL_SPACING + NODE_HEIGHT
         }
 
-        const childLayout = calculateLayout(child, allAscendantOrgs, depth + 1, childX, childY, depthLimit)
+        const childLayout = calculateLayout(child, allDescendantOrgs, allAscendantOrgs, depth + 1, childX, childY, depthLimit)
         if (childLayout.nodes.slice(-1).length) {
           childY =
             childLayout.nodes.slice(-1)[0].position.y -
@@ -287,26 +285,20 @@ const OrganizationalChart = ({
     const [showSymbols, setShowSymbols] = useState(true)
     const [depthLimit, setDepthLimit] = useState(3)
     const [maxDepth, setMaxDepth] = useState(0)
-    const [allAscendantOrgs, setAllAscendantOrgs] = useState({})
     const { setViewport, getViewport } = useReactFlow()
 
-    useEffect(() => {
-      if (data) {
-        const calculatedMaxDepth = calculateMaxDepth(data.organization)
-        setMaxDepth(calculatedMaxDepth)
-        setDepthLimit(Math.min(calculatedMaxDepth, depthLimit))
-        setAllAscendantOrgs(utils.getAscendantObjectsAsMap(
-          (data.organization?.ascendantOrgs ?? []).concat(
-            data.organization?.descendantOrgs ?? []
-          )
-        ))
-      }
-    }, [data])
-
     const { nodes, edges } = useMemo(() => {
-      if (!data) return { nodes: [], edges: [] }
+      if (!data?.organization) return { nodes: [], edges: [] }
       
-      const layout = calculateLayout(data.organization, allAscendantOrgs, 0, 0, 0, depthLimit)
+      const calculatedMaxDepth = calculateMaxDepth(data)
+      setMaxDepth(calculatedMaxDepth)
+      setDepthLimit(Math.min(calculatedMaxDepth, depthLimit))
+      const allAscendantOrgs = utils.getAscendantObjectsAsMap(
+        (data.organization?.ascendantOrgs ?? []).concat(
+          data.organization?.descendantOrgs ?? []
+        )
+      )
+      const layout = calculateLayout(data.organization, data.organization.descendantOrgs, allAscendantOrgs, 0, 0, 0, depthLimit)
       return {
         nodes: layout.nodes.map(node => ({
           ...node,
@@ -325,7 +317,7 @@ const OrganizationalChart = ({
         <div style={{
             marginLeft: TEXT_GAP + TEXT_WIDTH,
             display: "flex",
-            alignItems: "start",
+            alignItems: data.depth > 1 ? "center" : "start",
             width: AVATAR_WIDTH,
             height: NODE_HEIGHT,
           }}
