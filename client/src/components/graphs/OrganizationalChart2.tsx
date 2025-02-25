@@ -6,6 +6,7 @@ import {
   PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
+import LinkTo from "components/LinkTo"
 import React, { useState, useMemo } from "react"
 import _xor from "lodash/xor"
 import ms from "milsymbol"
@@ -159,13 +160,14 @@ const OrganizationalChart = ({
 
   const AVATAR_WIDTH = 60
   const TEXT_GAP = 10
-  const TEXT_WIDTH = 150
+  const TEXT_WIDTH = 200
   const NODE_WIDTH = (AVATAR_WIDTH / 2 + TEXT_GAP + TEXT_WIDTH) * 2
   const NODE_HEIGHT = 60
-  const VERTICAL_SPACING = 80
-  const SECONDARY_VERTICAL_SPACING = 40
+  const VERTICAL_SPACING = 60
+  const SECONDARY_VERTICAL_SPACING = 20
   const HORIZONTAL_SPACING = -TEXT_WIDTH + 20
   const LEVEL_INDENT = 60
+  const PERSON_AVATAR_HEIGHT = 40
   let lowestDepth = 0
 
   const calculateMaxDepth = (data) => {
@@ -194,12 +196,18 @@ const OrganizationalChart = ({
       currentY = 0
     }
 
+    const label = node.longName ? `${node.shortName}: ${node.longName}` : node.shortName
+    const symbol = determineSymbol(node, allAscendantOrgs).asSVG()
+    const people = node.positions
+    .filter(position => position.person && (position.role === "LEADER" || position.role === "DEPUTY"))
+    .map(position => position.person)
     const currentNode = {
       id: node.uuid,
       data: {
-        label: node.longName ? `${node.shortName}: ${node.longName}` : node.shortName,
-        depth,
-        symbol: determineSymbol(node, allAscendantOrgs).asSVG()
+        label,
+        symbol,
+        people,
+        depth
       },
       position: { x: currentX, y: currentY },
       type: "custom"
@@ -208,8 +216,7 @@ const OrganizationalChart = ({
     let nodes = [currentNode]
     let edges = []
     let childY =
-      currentY + VERTICAL_SPACING - SECONDARY_VERTICAL_SPACING - NODE_HEIGHT
-
+      currentY + people.length * PERSON_AVATAR_HEIGHT + VERTICAL_SPACING - SECONDARY_VERTICAL_SPACING - NODE_HEIGHT
     if (children.length > 0) {
       let childStartX = currentX
 
@@ -227,18 +234,19 @@ const OrganizationalChart = ({
           if (lowestDepth > 1) {
             childX += (lowestDepth - 2) * LEVEL_INDENT + TEXT_GAP
           }
-          childY = currentY + VERTICAL_SPACING + NODE_HEIGHT
+          childY = currentY + people.length * PERSON_AVATAR_HEIGHT + VERTICAL_SPACING
           lowestDepth = 0
         } else {
           childX = currentX + LEVEL_INDENT
-          childY += SECONDARY_VERTICAL_SPACING + NODE_HEIGHT
+          childY += NODE_HEIGHT + SECONDARY_VERTICAL_SPACING
         }
 
         const childLayout = calculateLayout(child, allDescendantOrgs, allAscendantOrgs, depth + 1, childX, childY, depthLimit)
-        if (childLayout.nodes.slice(-1).length) {
+        const lastChild = childLayout.nodes.slice(-1)[0]
+        if (lastChild) {
           childY =
-            childLayout.nodes.slice(-1)[0].position.y -
-            SECONDARY_VERTICAL_SPACING / 2
+            lastChild.position.y -
+            SECONDARY_VERTICAL_SPACING / 2 + lastChild.data.people.length * PERSON_AVATAR_HEIGHT
         }
 
         nodes = nodes.concat(childLayout.nodes)
@@ -317,7 +325,7 @@ const OrganizationalChart = ({
         <div style={{
             marginLeft: TEXT_GAP + TEXT_WIDTH,
             display: "flex",
-            alignItems: data.depth > 1 ? "center" : "start",
+            alignItems: data.depth === 1 ? "start" : "center",
             width: AVATAR_WIDTH,
             height: NODE_HEIGHT,
           }}
@@ -329,12 +337,31 @@ const OrganizationalChart = ({
           style={{
             width: TEXT_WIDTH,
             marginLeft: TEXT_GAP,
-            paddingTop: "4px",
             display: "flex",
-            alignItems: "start"
+            flexDirection: "column"
           }}
         >
-          {data.label}
+          <div
+            style={{
+              minHeight: NODE_HEIGHT,
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            {data.label}
+          </div>
+          {data.people.length > 0 &&
+            <div style={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              minHeight: data.people.length * PERSON_AVATAR_HEIGHT
+            }}>
+              {data.people.map(person => (
+                <LinkTo key={person.uuid} modelType="Person" model={person} showIcon={false} />
+              ))}
+            </div>
+          }
         </div>
         {data.depth === 0 && (
           <Handle
@@ -409,7 +436,6 @@ const OrganizationalChart = ({
           fitView
           nodeTypes={{ custom: CustomNode }}
           nodesDraggable={false}
-          elementsSelectable={false}
         >
           <div
             style={{
