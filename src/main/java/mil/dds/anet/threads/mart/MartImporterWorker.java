@@ -53,7 +53,9 @@ public class MartImporterWorker extends AbstractWorker {
   @Override
   public void run() {
     this.messages = iMailReceiver.downloadEmails();
-    super.run();
+    if (!this.messages.isEmpty()){
+      super.run();
+    }
   }
 
   @Override
@@ -62,8 +64,10 @@ public class MartImporterWorker extends AbstractWorker {
       for (final EmailMessage email : this.messages) {
         processEmailMessage(email);
       }
+      // If we get here transaction was successful, mark all emails as read
+      iMailReceiver.markEmailsAsRead(this.messages);
     } catch (Exception e) {
-      logger.error("Could not connect to Exchange server!", e);
+      logger.error("Exception processing MART email messages", e);
     }
   }
 

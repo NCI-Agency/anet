@@ -39,6 +39,19 @@ public class EwsReceiver implements IMailReceiver {
     this.mailClientConfiguration = config.getMart();
   }
 
+  public  void markEmailsAsRead(List<EmailMessage> emails){
+    for (EmailMessage email : emails) {
+      if (mailClientConfiguration.isMarkAsRead()) {
+          try {
+              email.setIsRead(true);
+              email.update(ConflictResolutionMode.AlwaysOverwrite);
+          } catch (Exception e) {
+            logger.error("Could not mark email as read", e);
+          }
+      }
+    }
+  }
+
   public List<EmailMessage> downloadEmails() {
     try {
       final PropertySet itemPropertySet = new PropertySet(BasePropertySet.FirstClassProperties);
@@ -62,15 +75,11 @@ public class EwsReceiver implements IMailReceiver {
         if (item instanceof EmailMessage emailMessage) {
           emailMessage.load(itemPropertySet);
           result.add(emailMessage);
-          if (mailClientConfiguration.isMarkAsRead()) {
-            emailMessage.setIsRead(true);
-            emailMessage.update(ConflictResolutionMode.AlwaysOverwrite);
-          }
         }
       }
       return result;
     } catch (Exception e) {
-      logger.error("Could not connect to MART exchange server", e);
+      logger.error("Could not connect to MART exchange server, returning empty list of emails", e);
       return new ArrayList<>();
     }
   }
