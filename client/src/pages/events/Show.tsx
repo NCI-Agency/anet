@@ -6,6 +6,7 @@ import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
+import FindObjectsButton from "components/FindObjectsButton"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import NoPaginationOrganizationTable from "components/NoPaginationOrganizationTable"
@@ -87,6 +88,7 @@ const EventShow = ({ pageDispatchers }: EventShowProps) => {
   return (
     <Formik enableReinitialize initialValues={event}>
       {({ values }) => {
+        const searchText = event.name
         const action = (
           <>
             {canAdministrateOrg && (
@@ -94,6 +96,7 @@ const EventShow = ({ pageDispatchers }: EventShowProps) => {
                 Edit
               </LinkTo>
             )}
+            <FindObjectsButton objectLabel="Event" searchText={searchText} />
           </>
         )
         return (
