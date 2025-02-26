@@ -39,15 +39,15 @@ public class EwsReceiver implements IMailReceiver {
     this.mailClientConfiguration = config.getMart();
   }
 
-  public  void markEmailsAsRead(List<EmailMessage> emails){
+  public void markEmailsAsRead(List<EmailMessage> emails) {
     for (EmailMessage email : emails) {
       if (mailClientConfiguration.isMarkAsRead()) {
-          try {
-              email.setIsRead(true);
-              email.update(ConflictResolutionMode.AlwaysOverwrite);
-          } catch (Exception e) {
-            logger.error("Could not mark email as read", e);
-          }
+        try {
+          email.setIsRead(true);
+          email.update(ConflictResolutionMode.AlwaysOverwrite);
+        } catch (Exception e) {
+          logger.error("Could not mark email as read", e);
+        }
       }
     }
   }
