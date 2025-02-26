@@ -23,6 +23,8 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AttachmentSearchQuery;
 import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.AttachmentDao;
+import mil.dds.anet.database.EventDao;
+import mil.dds.anet.database.EventSeriesDao;
 import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
@@ -275,6 +277,10 @@ public class AttachmentResource {
         ReportResource.hasPermission(user, relatedObject.getRelatedObjectUuid());
       case PersonDao.TABLE_NAME ->
         PersonResource.hasPermission(user, relatedObject.getRelatedObjectUuid());
+      case EventDao.TABLE_NAME ->
+        EventResource.hasPermission(user, relatedObject.getRelatedObjectUuid());
+      case EventSeriesDao.TABLE_NAME ->
+        EventSeriesResource.hasPermission(user, relatedObject.getRelatedObjectUuid());
       // TODO: add other object types if and when attachments to them are allowed
       default -> false;
     };

@@ -22,6 +22,7 @@ const GQL_GET_EVENTSERIES_LIST = gql`
       pageSize
       totalCount
       list {
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         uuid
         name
         ownerOrg {
