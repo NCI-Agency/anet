@@ -9,7 +9,7 @@ spring:
       max-request-size: -1
 
   jpa:
-    open-in-view: true
+    open-in-view: false
     hibernate:
       ddl-auto: none
 
