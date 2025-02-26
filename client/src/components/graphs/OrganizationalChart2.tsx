@@ -1,5 +1,6 @@
 import { gql } from "@apollo/client"
 import API from "api"
+import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import LinkTo from "components/LinkTo"
 import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import {
@@ -9,9 +10,15 @@ import {
 } from "components/Page"
 import _xor from "lodash/xor"
 import ms from "milsymbol"
+import { Organization } from "models"
 import React, { useMemo, useState } from "react"
 import { connect } from "react-redux"
-import ReactFlow, { Handle, Position, ReactFlowProvider } from "reactflow"
+import ReactFlow, {
+  Background,
+  Handle,
+  Position,
+  ReactFlowProvider
+} from "reactflow"
 import "reactflow/dist/style.css"
 import utils from "utils"
 
@@ -27,6 +34,7 @@ const GQL_GET_CHART_DATA = gql`
       app6symbolSet
       app6hq
       app6amplifier
+      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       positions {
         name
         uuid
@@ -64,6 +72,7 @@ const GQL_GET_CHART_DATA = gql`
         app6symbolSet
         app6hq
         app6amplifier
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         childrenOrgs(query: { status: ACTIVE }) {
           uuid
         }
@@ -251,6 +260,7 @@ const OrbatChart = ({ data }) => {
     const currentNode = {
       id: node.uuid,
       data: {
+        organization: node,
         label,
         symbol,
         people,
@@ -463,7 +473,7 @@ const parseSvgStringToJSX = svgString => {
 }
 
 const CustomNode = ({
-  data: { label, symbol, depth, people, showSymbol, hasChildren }
+  data: { organization, label, symbol, depth, people, showSymbol, hasChildren }
 }) => (
   <div
     style={{
@@ -484,10 +494,19 @@ const CustomNode = ({
           display: "flex",
           alignItems: depth === 1 ? "start" : "center",
           minWidth: AVATAR_WIDTH,
-          minHeight: NODE_HEIGHT,
+          height: NODE_HEIGHT
         }}
       >
         {showSymbol && symbol && parseSvgStringToJSX(symbol)}
+        {!showSymbol && (
+          <EntityAvatarDisplay
+            avatar={organization.entityAvatar}
+            defaultAvatar={Organization.relatedObjectType}
+            width={AVATAR_WIDTH}
+            height={AVATAR_WIDTH}
+            style={{ backgroundColor: "#f8fafc" }}
+          />
+        )}
       </div>
       <div
         style={{
