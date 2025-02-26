@@ -13,11 +13,7 @@ import ms from "milsymbol"
 import { Organization } from "models"
 import React, { useMemo, useState } from "react"
 import { connect } from "react-redux"
-import ReactFlow, {
-  Handle,
-  Position,
-  ReactFlowProvider
-} from "reactflow"
+import ReactFlow, { Handle, Position, ReactFlowProvider } from "reactflow"
 import "reactflow/dist/style.css"
 import utils from "utils"
 
@@ -109,7 +105,12 @@ const VERTICAL_SPACING = 20
 const HORIZONTAL_SPACING = 10
 const LEVEL_INDENT = 60
 const PERSON_AVATAR_HEIGHT = 42
-type PeopleFilterOption = "none" | "leaders" | "deputies" | "both"
+type PeopleFilterOption = "none" | "leaders" | "deputies" | "both" | "top2"
+const rolePriority = {
+  LEADER: 1,
+  DEPUTY: 2,
+  MEMBER: 3
+}
 
 interface OrganizationalChartProps {
   pageDispatchers?: PageDispatchersPropType
@@ -234,9 +235,6 @@ const OrbatChart = ({ data }) => {
     const currentX = isRoot ? 0 : x
     const currentY = isRoot ? 0 : y
 
-    const label = node.longName
-      ? `${node.shortName}: ${node.longName}`
-      : node.shortName
     const symbol = determineSymbol(node, allAscendantOrgs).asSVG()
     const people = node.positions
       .filter(position => {
@@ -252,19 +250,25 @@ const OrbatChart = ({ data }) => {
         if (peopleFilter === "deputies") {
           return position.role === "DEPUTY"
         }
-        return position.role === "LEADER" || position.role === "DEPUTY"
+        if (peopleFilter === "both") {
+          return position.role === "LEADER" || position.role === "DEPUTY"
+        }
+        return true
+      })
+      .sort((a, b) => {
+        return rolePriority[a.role] - rolePriority[b.role]
       })
       .map(position => position.person)
+      .slice(0, peopleFilter === "top2" ? 2 : undefined)
+
     const currentNode = {
       id: node.uuid,
       data: {
         organization: node,
-        label,
         symbol,
         people,
         depth,
-        showSymbol: showAPP6Symbols,
-        hasChildren: children.length > 0
+        showSymbol: showAPP6Symbols
       },
       position: { x: currentX, y: currentY },
       type: "custom"
@@ -345,8 +349,7 @@ const OrbatChart = ({ data }) => {
           nodes[0].position.x = middleX
         } else {
           const middle = directChildNodes[Math.floor(childCount / 2)]
-          nodes[0].position.x =
-            directChildNodes[Math.floor(childCount / 2)].position.x
+          nodes[0].position.x = middle.position.x
         }
       }
     }
@@ -451,6 +454,7 @@ const OrbatChart = ({ data }) => {
             <option value="leaders">Leaders Only</option>
             <option value="deputies">Deputies Only</option>
             <option value="both">Leaders & Deputies</option>
+            <option value="top2">Top 2 Positions</option>
           </select>
         </div>
       </ReactFlow>
@@ -475,7 +479,7 @@ const parseSvgStringToJSX = svgString => {
 }
 
 const CustomNode = ({
-  data: { organization, label, symbol, depth, people, showSymbol, hasChildren }
+  data: { organization, symbol, depth, people, showSymbol }
 }) => (
   <div
     style={{
