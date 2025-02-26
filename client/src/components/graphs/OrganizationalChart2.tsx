@@ -14,7 +14,6 @@ import { Organization } from "models"
 import React, { useMemo, useState } from "react"
 import { connect } from "react-redux"
 import ReactFlow, {
-  Background,
   Handle,
   Position,
   ReactFlowProvider
@@ -101,14 +100,13 @@ const GQL_GET_CHART_DATA = gql`
     }
   }
 `
-const AVATAR_WIDTH = 60
+const ORG_AVATAR_WIDTH = 60
 const TEXT_GAP = 10
 const TEXT_WIDTH = 200
-const NODE_WIDTH = (AVATAR_WIDTH / 2 + TEXT_GAP + TEXT_WIDTH) * 2
+const NODE_WIDTH = ORG_AVATAR_WIDTH / 2 + TEXT_GAP + TEXT_WIDTH
 const NODE_HEIGHT = 60
-const VERTICAL_SPACING = 60
-const SECONDARY_VERTICAL_SPACING = 20
-const HORIZONTAL_SPACING = -TEXT_WIDTH + 20
+const VERTICAL_SPACING = 20
+const HORIZONTAL_SPACING = 10
 const LEVEL_INDENT = 60
 const PERSON_AVATAR_HEIGHT = 42
 type PeopleFilterOption = "none" | "leaders" | "deputies" | "both"
@@ -157,7 +155,7 @@ const OrbatChart = ({ data }) => {
   const [showAPP6Symbols, setshowAPP6Symbols] = useState(false)
   const [depthLimit, setDepthLimit] = useState(3)
   const [maxDepth, setMaxDepth] = useState(0)
-  const [peopleFilter, setPeopleFilter] = useState<PeopleFilterOption>("none")
+  const [peopleFilter, setPeopleFilter] = useState<PeopleFilterOption>("both")
 
   let lowestDepth = 0
 
@@ -276,8 +274,7 @@ const OrbatChart = ({ data }) => {
     let edges = []
     if (children.length > 0) {
       let childX = currentX + (isRoot ? 0 : LEVEL_INDENT)
-      let childY =
-        currentY + people.length * PERSON_AVATAR_HEIGHT + VERTICAL_SPACING
+      let childY = currentY + NODE_HEIGHT + people.length * PERSON_AVATAR_HEIGHT
       children.forEach(child => {
         // first level nodes are placed horizontally
         if (isRoot) {
@@ -287,9 +284,9 @@ const OrbatChart = ({ data }) => {
           }
           childY =
             currentY +
-            NODE_HEIGHT +
+            NODE_HEIGHT * 1.5 +
             people.length * PERSON_AVATAR_HEIGHT +
-            VERTICAL_SPACING
+            VERTICAL_SPACING * (people.length ? 0 : 0.5)
           // reset lowestDepth as we enter a new branch
           lowestDepth = 0
         }
@@ -308,7 +305,7 @@ const OrbatChart = ({ data }) => {
           childY =
             lastChild.position.y +
             lastChild.data.people.length * PERSON_AVATAR_HEIGHT -
-            SECONDARY_VERTICAL_SPACING
+            VERTICAL_SPACING
         }
 
         nodes = nodes.concat(childLayout.nodes)
@@ -320,34 +317,38 @@ const OrbatChart = ({ data }) => {
           target: child.uuid,
           sourceHandle: isRoot ? "bottom" : "left",
           targetHandle: depth === 0 ? "top" : "left",
-          type: "smoothstep",
+          type: isRoot ? "rootEdge" : "smoothstep",
           style: { stroke: "#94a3b8", strokeWidth: 2 },
           markerEnd: { type: "arrowclosed", color: "#94a3b8" }
         })
 
         if (!isRoot) {
-          childY += NODE_HEIGHT + SECONDARY_VERTICAL_SPACING
+          childY += NODE_HEIGHT + VERTICAL_SPACING
         }
       })
     }
     if (depth > lowestDepth) {
       lowestDepth = depth
     }
+
+    // place the root node in the middle of its children
     if (isRoot && nodes.length > 1) {
-      let lowestX = nodes[1].position.x
-      let highestX = lowestX
-      nodes
+      const directChildNodes = nodes
         .slice(1)
         .filter(({ data }) => data?.depth == 1)
-        .forEach(({ position }) => {
-          const x = position.x
-          if (x < lowestX) {
-            lowestX = x
-          } else if (x > highestX) {
-            highestX = x
-          }
-        })
-      nodes[0].position.x = (lowestX + highestX) / 2
+      const childCount = directChildNodes.length
+      if (childCount > 0) {
+        if (childCount % 2 === 0) {
+          const middleLeft = directChildNodes[childCount / 2 - 1]
+          const middleRight = directChildNodes[childCount / 2]
+          const middleX = (middleLeft.position.x + middleRight.position.x) / 2
+          nodes[0].position.x = middleX
+        } else {
+          const middle = directChildNodes[Math.floor(childCount / 2)]
+          nodes[0].position.x =
+            directChildNodes[Math.floor(childCount / 2)].position.x
+        }
+      }
     }
     return { nodes, edges }
   }
@@ -390,6 +391,7 @@ const OrbatChart = ({ data }) => {
         edges={edges}
         fitView
         nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
         nodesDraggable={false}
       >
         <div
@@ -490,10 +492,9 @@ const CustomNode = ({
     >
       <div
         style={{
-          marginLeft: TEXT_GAP + TEXT_WIDTH,
           display: "flex",
-          alignItems: depth === 1 ? "start" : "center",
-          minWidth: AVATAR_WIDTH,
+          alignItems: "center",
+          minWidth: ORG_AVATAR_WIDTH,
           height: NODE_HEIGHT
         }}
       >
@@ -502,8 +503,8 @@ const CustomNode = ({
           <EntityAvatarDisplay
             avatar={organization.entityAvatar}
             defaultAvatar={Organization.relatedObjectType}
-            width={AVATAR_WIDTH}
-            height={AVATAR_WIDTH}
+            width={ORG_AVATAR_WIDTH}
+            height={ORG_AVATAR_WIDTH}
             style={{ backgroundColor: "#f8fafc" }}
           />
         )}
@@ -517,27 +518,28 @@ const CustomNode = ({
           minHeight: NODE_HEIGHT,
           display: "flex",
           padding: "5px 0px 5px 5px",
-          alignItems: depth === 1 ? "start" : "center"
+          alignItems: "center"
         }}
       />
     </div>
     {people.length > 0 && (
       <div
         style={{
-          paddingLeft:
-            NODE_WIDTH / 2 - (!hasChildren && depth > 1 ? AVATAR_WIDTH / 2 : 0)
+          paddingLeft: ORG_AVATAR_WIDTH / 2
         }}
       >
         {people.map(person => (
-          <div key={person.uuid} style={{ padding: "5px", whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            maxWidth: "100%" }}>
-            <LinkTo
-              modelType="Person"
-              model={person}
-              showIcon={false}
-            />
+          <div
+            key={person.uuid}
+            style={{
+              padding: "5px",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              maxWidth: "100%"
+            }}
+          >
+            <LinkTo modelType="Person" model={person} showIcon={false} />
           </div>
         ))}
       </div>
@@ -545,18 +547,59 @@ const CustomNode = ({
     <Handle
       type="source"
       position={Position.Bottom}
-      style={{ opacity: 0, top: NODE_HEIGHT / 2 }}
+      style={{ opacity: 0, top: NODE_HEIGHT / 2, left: ORG_AVATAR_WIDTH / 2 }}
     />
     <Handle
       type="target"
       position={depth > 1 ? Position.Left : Position.Top}
       style={{
         opacity: 0,
-        left: NODE_WIDTH / 2 - (depth > 1 ? AVATAR_WIDTH / 2 : 0)
+        left: depth === 1 ? ORG_AVATAR_WIDTH / 2 : 0
       }}
     />
   </div>
 )
+
+const CustomRootEdge = ({
+  id,
+  sourceX,
+  sourceY,
+  targetX,
+  targetY,
+  style,
+  markerEnd
+}) => {
+  const cornerRadius = 4
+  const verticalMargin = 20
+  const horizontalDirection = targetX > sourceX ? 1 : -1
+  const turnX = targetX - horizontalDirection * cornerRadius
+
+  let path = `
+    M ${sourceX},${sourceY}
+    V ${targetY - verticalMargin}
+  `
+  if (Math.abs(targetX - sourceX) > 0) {
+    path += `
+      Q ${sourceX},${targetY - verticalMargin} ${sourceX + horizontalDirection * cornerRadius},${targetY - verticalMargin}
+      H ${turnX}
+      Q ${targetX},${targetY - verticalMargin} ${targetX},${targetY - verticalMargin + cornerRadius}
+    `
+  }
+
+  path += `V ${targetY} `
+
+  return (
+    <path
+      id={id}
+      style={style}
+      className="react-flow__edge-path"
+      d={path}
+      markerEnd={markerEnd}
+    />
+  )
+}
+
 const nodeTypes = { custom: CustomNode }
+const edgeTypes = { rootEdge: CustomRootEdge }
 
 export default connect(null, mapPageDispatchersToProps)(OrganizationalChart)
