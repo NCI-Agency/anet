@@ -11,12 +11,7 @@ import _xor from "lodash/xor"
 import ms from "milsymbol"
 import React, { useMemo, useState } from "react"
 import { connect } from "react-redux"
-import ReactFlow, {
-  Handle,
-  Position,
-  ReactFlowProvider,
-  useReactFlow
-} from "reactflow"
+import ReactFlow, { Handle, Position, ReactFlowProvider } from "reactflow"
 import "reactflow/dist/style.css"
 import utils from "utils"
 
@@ -150,11 +145,10 @@ const OrganizationalChart = ({
 }
 
 const OrbatChart = ({ data }) => {
-  const [showSymbols, setShowSymbols] = useState(true)
+  const [showAPP6Symbols, setshowAPP6Symbols] = useState(false)
   const [depthLimit, setDepthLimit] = useState(3)
   const [maxDepth, setMaxDepth] = useState(0)
   const [peopleFilter, setPeopleFilter] = useState<PeopleFilterOption>("none")
-  const { setViewport, getViewport } = useReactFlow()
 
   let lowestDepth = 0
 
@@ -198,8 +192,7 @@ const OrbatChart = ({ data }) => {
   }
 
   const toggleDisplayMode = () => {
-    setShowSymbols(prev => !prev)
-    setTimeout(() => setViewport(getViewport()), 0)
+    setshowAPP6Symbols(prev => !prev)
   }
 
   const increaseDepthLimit = () => {
@@ -262,7 +255,7 @@ const OrbatChart = ({ data }) => {
         symbol,
         people,
         depth,
-        showSymbol: showSymbols,
+        showSymbol: showAPP6Symbols,
         hasChildren: children.length > 0
       },
       position: { x: currentX, y: currentY },
@@ -374,11 +367,11 @@ const OrbatChart = ({ data }) => {
     return {
       nodes: layout.nodes.map(node => ({
         ...node,
-        data: { ...node.data, showSymbols }
+        data: { ...node.data, showAPP6Symbols }
       })),
       edges: layout.edges
     }
-  }, [data, showSymbols, depthLimit, peopleFilter])
+  }, [data, showAPP6Symbols, depthLimit, peopleFilter])
 
   return (
     <div style={{ height: "100vh", width: "100%", backgroundColor: "#f8fafc" }}>
@@ -400,16 +393,16 @@ const OrbatChart = ({ data }) => {
             gap: "20px"
           }}
         >
-          <button
-            onClick={toggleDisplayMode}
-            style={{
-              padding: "8px 16px",
-              backgroundColor: "white",
-              cursor: "pointer"
-            }}
-          >
-            {showSymbols ? "Show Avatars" : "Show Symbols"}
-          </button>
+          <div>
+            <input
+              type="checkbox"
+              id="showAPP6Symbols"
+              checked={showAPP6Symbols}
+              onChange={toggleDisplayMode}
+              style={{ cursor: "pointer", marginRight: "8px", outline: "none" }}
+            />
+            <label htmlFor="showAPP6Symbols">Display APP-6 symbols</label>
+          </div>
           <button
             onClick={increaseDepthLimit}
             style={{
@@ -490,8 +483,8 @@ const CustomNode = ({
           marginLeft: TEXT_GAP + TEXT_WIDTH,
           display: "flex",
           alignItems: depth === 1 ? "start" : "center",
-          width: AVATAR_WIDTH,
-          height: NODE_HEIGHT,
+          minWidth: AVATAR_WIDTH,
+          minHeight: NODE_HEIGHT,
         }}
       >
         {showSymbol && symbol && parseSvgStringToJSX(symbol)}
@@ -500,7 +493,7 @@ const CustomNode = ({
         style={{
           minHeight: NODE_HEIGHT,
           display: "flex",
-          padding: "5px 0px",
+          padding: "5px 0px 5px 5px",
           alignItems: depth === 1 ? "start" : "center"
         }}
       >
