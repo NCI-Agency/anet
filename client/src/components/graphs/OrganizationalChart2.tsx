@@ -106,7 +106,7 @@ const VERTICAL_SPACING = 60
 const SECONDARY_VERTICAL_SPACING = 20
 const HORIZONTAL_SPACING = -TEXT_WIDTH + 20
 const LEVEL_INDENT = 60
-const PERSON_AVATAR_HEIGHT = 45
+const PERSON_AVATAR_HEIGHT = 42
 type PeopleFilterOption = "none" | "leaders" | "deputies" | "both"
 
 interface OrganizationalChartProps {
@@ -262,7 +262,8 @@ const OrbatChart = ({ data }) => {
         symbol,
         people,
         depth,
-        showSymbol: showSymbols
+        showSymbol: showSymbols,
+        hasChildren: children.length > 0
       },
       position: { x: currentX, y: currentY },
       type: "custom"
@@ -303,7 +304,8 @@ const OrbatChart = ({ data }) => {
         if (lastChild && !isRoot) {
           childY =
             lastChild.position.y +
-            lastChild.data.people.length * PERSON_AVATAR_HEIGHT
+            lastChild.data.people.length * PERSON_AVATAR_HEIGHT -
+            SECONDARY_VERTICAL_SPACING
         }
 
         nodes = nodes.concat(childLayout.nodes)
@@ -331,14 +333,17 @@ const OrbatChart = ({ data }) => {
     if (isRoot && nodes.length > 1) {
       let lowestX = nodes[1].position.x
       let highestX = lowestX
-      nodes.slice(1).forEach(({ position }) => {
-        const x = position.x
-        if (x < lowestX) {
-          lowestX = x
-        } else if (x > highestX) {
-          highestX = x
-        }
-      })
+      nodes
+        .slice(1)
+        .filter(({ data }) => data?.depth == 1)
+        .forEach(({ position }) => {
+          const x = position.x
+          if (x < lowestX) {
+            lowestX = x
+          } else if (x > highestX) {
+            highestX = x
+          }
+        })
       nodes[0].position.x = (lowestX + highestX) / 2
     }
     return { nodes, edges }
@@ -464,60 +469,68 @@ const parseSvgStringToJSX = svgString => {
   )
 }
 
-const CustomNode = ({ data: { label, symbol, depth, people, showSymbol } }) => (
+const CustomNode = ({
+  data: { label, symbol, depth, people, showSymbol, hasChildren }
+}) => (
   <div
     style={{
-      display: "flex",
       width: NODE_WIDTH,
-      height: NODE_HEIGHT
+      height: NODE_HEIGHT,
+      display: "flex",
+      flexDirection: "column"
     }}
   >
     <div
       style={{
-        marginLeft: TEXT_GAP + TEXT_WIDTH,
-        display: "flex",
-        alignItems: depth === 1 ? "start" : "center",
-        width: AVATAR_WIDTH,
-        height: NODE_HEIGHT,
-      }}
-    >
-      {showSymbol && symbol && parseSvgStringToJSX(symbol)}
-    </div>
-
-    <div
-      style={{
-        width: TEXT_WIDTH,
-        marginLeft: TEXT_GAP,
-        display: "flex",
-        flexDirection: "column"
+        display: "flex"
       }}
     >
       <div
         style={{
+          marginLeft: TEXT_GAP + TEXT_WIDTH,
+          display: "flex",
+          alignItems: depth === 1 ? "start" : "center",
+          width: AVATAR_WIDTH,
+          height: NODE_HEIGHT,
+        }}
+      >
+        {showSymbol && symbol && parseSvgStringToJSX(symbol)}
+      </div>
+      <div
+        style={{
           minHeight: NODE_HEIGHT,
           display: "flex",
-          alignItems: "center"
+          padding: "5px 0px",
+          alignItems: depth === 1 ? "start" : "center"
         }}
       >
         {label}
       </div>
-      {people.length > 0 && (
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            minHeight: people.length * PERSON_AVATAR_HEIGHT
-          }}
-        >
-          {people.map(person => (
-            <div key={person.uuid} style={{ padding: "2px 0px" }}>
-              <LinkTo modelType="Person" model={person} showIcon={false} />
-            </div>
-          ))}
-        </div>
-      )}
     </div>
+    {people.length > 0 && (
+      <div
+        style={{
+          paddingLeft:
+            NODE_WIDTH / 2 - (!hasChildren && depth > 1 ? AVATAR_WIDTH / 2 : 0)
+        }}
+      >
+        {people.map(person => (
+          <div key={person.uuid} style={{ padding: "5px" }}>
+            <LinkTo
+              modelType="Person"
+              model={person}
+              showIcon={false}
+              style={{
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                maxWidth: "100%"
+              }}
+            />
+          </div>
+        ))}
+      </div>
+    )}
     <Handle
       type="source"
       position={Position.Bottom}
