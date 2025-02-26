@@ -1,5 +1,7 @@
 package mil.dds.anet.database;
 
+import static org.jdbi.v3.core.statement.EmptyHandling.NULL_KEYWORD;
+
 import java.util.List;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.mart.MartImportedReport;
@@ -11,20 +13,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
-public class MartImportedReportDao {
-
-  protected final DatabaseHandler databaseHandler;
+public class MartImportedReportDao extends AbstractDao {
 
   public MartImportedReportDao(DatabaseHandler databaseHandler) {
-    this.databaseHandler = databaseHandler;
-  }
-
-  protected Handle getDbHandle() {
-    return databaseHandler.getHandle();
-  }
-
-  protected void closeDbHandle(Handle handle) {
-    databaseHandler.closeHandle(handle);
+    super(databaseHandler);
   }
 
   @Transactional
@@ -76,7 +68,7 @@ public class MartImportedReportDao {
     try {
       final Query query = handle.createQuery(
           "/* MartImportedReportSequencesCheck */ SELECT * FROM \"martImportedReports\" WHERE \"sequence\" IN (<sequences>)")
-          .bindList("sequences", sequences);
+          .bindList(NULL_KEYWORD, "sequences", sequences);
       return new AnetBeanList<>(query, 0, 0, new MartImportedReportMapper());
     } finally {
       closeDbHandle(handle);
