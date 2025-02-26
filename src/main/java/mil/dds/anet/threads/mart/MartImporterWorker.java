@@ -1,8 +1,5 @@
 package mil.dds.anet.threads.mart;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import graphql.GraphQLContext;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -13,7 +10,6 @@ import microsoft.exchange.webservices.data.property.complex.FileAttachment;
 import mil.dds.anet.beans.JobHistory;
 import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.database.JobHistoryDao;
-import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.threads.AbstractWorker;
 import mil.dds.anet.threads.mart.services.IMailReceiver;
 import mil.dds.anet.threads.mart.services.IMartReportImporterService;
@@ -28,10 +24,6 @@ public class MartImporterWorker extends AbstractWorker {
 
   public static final String REPORT_JSON_ATTACHMENT = "mart_report.json";
   public static final String TRANSMISSION_LOG_ATTACHMENT = "mart_transmission_log.json";
-
-  private final ObjectMapper ignoringMapper = MapperUtils.getDefaultMapper()
-      .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-      .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 
   private final IMailReceiver iMailReceiver;
   private final IMartReportImporterService martReportImporter;
@@ -53,7 +45,7 @@ public class MartImporterWorker extends AbstractWorker {
   @Override
   public void run() {
     this.messages = iMailReceiver.downloadEmails();
-    if (!this.messages.isEmpty()){
+    if (!this.messages.isEmpty()) {
       super.run();
     }
   }
