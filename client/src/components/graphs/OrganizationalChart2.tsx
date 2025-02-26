@@ -508,16 +508,18 @@ const CustomNode = ({
           />
         )}
       </div>
-      <div
+      <LinkTo
+        modelType="Organization"
+        model={organization}
+        showAvatar={false}
+        showIcon={false}
         style={{
           minHeight: NODE_HEIGHT,
           display: "flex",
           padding: "5px 0px 5px 5px",
           alignItems: depth === 1 ? "start" : "center"
         }}
-      >
-        {label}
-      </div>
+      />
     </div>
     {people.length > 0 && (
       <div
@@ -527,17 +529,14 @@ const CustomNode = ({
         }}
       >
         {people.map(person => (
-          <div key={person.uuid} style={{ padding: "5px" }}>
+          <div key={person.uuid} style={{ padding: "5px", whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            maxWidth: "100%" }}>
             <LinkTo
               modelType="Person"
               model={person}
               showIcon={false}
-              style={{
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                maxWidth: "100%"
-              }}
             />
           </div>
         ))}
