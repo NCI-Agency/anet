@@ -48,7 +48,7 @@ public class MartImporterWorker extends AbstractWorker {
 
   private List<EmailMessage> messages;
 
-  @Scheduled(initialDelay = 35, fixedRateString = "${anet.mart.mail-polling-delay-in-seconds:10}",
+  @Scheduled(initialDelay = 35, fixedDelayString = "${anet.mart.mail-polling-delay-in-seconds:10}",
       timeUnit = TimeUnit.SECONDS)
   @Override
   public void run() {
