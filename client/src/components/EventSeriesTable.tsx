@@ -24,6 +24,7 @@ const GQL_GET_EVENTSERIES_LIST = gql`
       list {
         uuid
         name
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         ownerOrg {
           uuid
           shortName

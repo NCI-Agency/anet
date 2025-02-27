@@ -63,6 +63,7 @@ export default class Event extends Model {
     name
     startDate
     endDate
+    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
     location {
       uuid
       name
@@ -82,6 +83,7 @@ export default class Event extends Model {
         outcomes
         isSubscribed
         updatedAt
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         ownerOrg {
           uuid
           shortName
@@ -106,6 +108,7 @@ export default class Event extends Model {
         eventSeries {
           uuid
           name
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         location {
           uuid
@@ -166,6 +169,16 @@ export default class Event extends Model {
               lng
             }
           }
+        }
+        attachments {
+            uuid
+            fileName
+            caption
+            description
+            classification
+            mimeType
+            contentLength
+            createdAt
         }
       }
     }

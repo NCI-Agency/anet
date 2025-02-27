@@ -1,6 +1,8 @@
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
 import AppContext from "components/AppContext"
+import AttachmentsDetailView from "components/Attachment/AttachmentsDetailView"
+import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import DictionaryField from "components/DictionaryField"
 import EventCollection from "components/EventCollection"
 import * as FieldHelper from "components/FieldHelper"
@@ -18,7 +20,8 @@ import {
 import RichTextEditor from "components/RichTextEditor"
 import { Field, Form, Formik } from "formik"
 import { Event, EventSeries } from "models"
-import React, { useContext, useState } from "react"
+import React, { useContext, useEffect, useState } from "react"
+import { Col, FormGroup, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
 import Settings from "settings"
@@ -32,6 +35,7 @@ const EventSeriesShow = ({ pageDispatchers }: EventSeriesShowProps) => {
   const routerLocation = useLocation()
   const stateSuccess = routerLocation.state?.success
   const [stateError, setStateError] = useState(routerLocation.state?.error)
+  const [attachments, setAttachments] = useState([])
   const { uuid } = useParams()
   const { loading, error, data, refetch } = API.useApiQuery(
     EventSeries.getEventSeriesQuery,
@@ -49,6 +53,9 @@ const EventSeriesShow = ({ pageDispatchers }: EventSeriesShowProps) => {
     pageDispatchers
   })
   usePageTitle(data?.eventSeries?.name)
+  useEffect(() => {
+    setAttachments(data?.eventSeries?.attachments || [])
+  }, [data])
   if (done) {
     return result
   }
@@ -60,6 +67,11 @@ const EventSeriesShow = ({ pageDispatchers }: EventSeriesShowProps) => {
     currentUser?.hasAdministrativePermissionsForOrganization(
       eventSeries.adminOrg
     )
+  const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
+  const avatar =
+    attachments?.some(
+      a => a.uuid === eventSeries?.entityAvatar?.attachmentUuid
+    ) && eventSeries.entityAvatar
   const eventQueryParams = {
     eventSeriesUuid: uuid
   }
@@ -108,6 +120,38 @@ const EventSeriesShow = ({ pageDispatchers }: EventSeriesShowProps) => {
                 }
                 action={action}
               />
+              <Fieldset>
+                <Row>
+                  <Col sm={12} md={12} lg={4} xl={3} className="text-center">
+                    <EntityAvatarDisplay
+                      avatar={avatar}
+                      defaultAvatar={EventSeries.relatedObjectType}
+                    />
+                  </Col>
+                  <Col
+                    lg={8}
+                    xl={9}
+                    className="d-flex flex-column justify-content-center"
+                  >
+                    <FormGroup>
+                      <Row style={{ marginBottom: "1rem" }}>
+                        <Col sm={7}>
+                          <Row>
+                            <Col>
+                              <DictionaryField
+                                wrappedComponent={Field}
+                                dictProps={Settings.fields.eventSeries.name}
+                                name="name"
+                                component={FieldHelper.ReadonlyField}
+                              />
+                            </Col>
+                          </Row>
+                        </Col>
+                      </Row>
+                    </FormGroup>
+                  </Col>
+                </Row>
+              </Fieldset>
               <Fieldset id="info" title="Info">
                 <DictionaryField
                   wrappedComponent={Field}
@@ -158,6 +202,22 @@ const EventSeriesShow = ({ pageDispatchers }: EventSeriesShowProps) => {
                   component={FieldHelper.ReadonlyField}
                   humanValue={EventSeries.humanNameOfStatus}
                 />
+                {attachmentsEnabled && (
+                  <Field
+                    name="attachments"
+                    label="Attachments"
+                    component={FieldHelper.ReadonlyField}
+                    humanValue={
+                      <AttachmentsDetailView
+                        attachments={attachments}
+                        updateAttachments={setAttachments}
+                        relatedObjectType={EventSeries.relatedObjectType}
+                        relatedObjectUuid={values.uuid}
+                        allowEdit={canAdministrateOrg}
+                      />
+                    }
+                  />
+                )}
               </Fieldset>
               <Fieldset
                 title={Settings.fields.eventSeries.description?.label}

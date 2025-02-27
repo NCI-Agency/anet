@@ -10,6 +10,8 @@ import {
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
+import UploadAttachment from "components/Attachment/UploadAttachment"
+import EntityAvatarComponent from "components/avatar/EntityAvatarComponent"
 import CustomDateInput from "components/CustomDateInput"
 import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
@@ -37,7 +39,7 @@ import moment from "moment/moment"
 import CreateNewLocation from "pages/locations/CreateNewLocation"
 import pluralize from "pluralize"
 import React, { useContext, useState } from "react"
-import { Button, FormSelect } from "react-bootstrap"
+import { Button, Col, FormGroup, FormSelect, Row } from "react-bootstrap"
 import { useNavigate } from "react-router-dom"
 import EVENT_SERIES_ICON from "resources/eventSeries.png"
 import LOCATIONS_ICON from "resources/locations.png"
@@ -86,6 +88,16 @@ const EventForm = ({
   const navigate = useNavigate()
   const [saveError, setSaveError] = useState(null)
   const tasksLabel = pluralize(Settings.fields.task.shortLabel)
+  const [attachmentList, setAttachmentList] = useState(
+    initialValues?.attachments
+  )
+  const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
+  const attachmentEditEnabled =
+    attachmentsEnabled &&
+    (!Settings.fields.attachment.restrictToAdmins || currentUser.isAdmin())
+  const avatarMimeTypes = Settings.fields.attachment.fileTypes
+    .filter(fileType => fileType.avatar)
+    .map(fileType => fileType.mimeType)
   const statusButtons = [
     {
       id: "statusActiveButton",
@@ -223,6 +235,11 @@ const EventForm = ({
         const initialMonthForEndDate = moment(
           values.endDate ?? values.startDate ?? new Date()
         ).toDate()
+
+        const imageAttachments = attachmentList?.filter(a =>
+          avatarMimeTypes.includes(a.mimeType)
+        )
+
         return (
           <div>
             <NavigationWarning isBlocking={dirty && !isSubmitting} />
@@ -230,12 +247,44 @@ const EventForm = ({
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
               <Fieldset>
-                <DictionaryField
-                  wrappedComponent={FastField}
-                  dictProps={Settings.fields.event.name}
-                  name="name"
-                  component={FieldHelper.InputField}
-                />
+                <Row>
+                  {edit && (
+                    <Col sm={12} md={12} lg={4} xl={4} className="text-center">
+                      <EntityAvatarComponent
+                        initialAvatar={initialValues.entityAvatar}
+                        relatedObjectType="events"
+                        relatedObjectUuid={initialValues.uuid}
+                        relatedObjectName={initialValues.shortName}
+                        editMode={attachmentEditEnabled}
+                        imageAttachments={imageAttachments}
+                      />
+                    </Col>
+                  )}
+                  <Col
+                    lg={8}
+                    xl={8}
+                    className="d-flex flex-column justify-content-center"
+                  >
+                    <FormGroup>
+                      <Row style={{ marginBottom: "1rem" }}>
+                        <Col sm={7}>
+                          <Row>
+                            <Col>
+                              <DictionaryField
+                                wrappedComponent={FastField}
+                                dictProps={Settings.fields.event.name}
+                                name="name"
+                                component={FieldHelper.InputField}
+                              />
+                            </Col>
+                          </Row>
+                        </Col>
+                      </Row>
+                    </FormGroup>
+                  </Col>
+                </Row>
+              </Fieldset>
+              <Fieldset>
                 <DictionaryField
                   wrappedComponent={Field}
                   dictProps={Settings.fields.event.eventSeries}
@@ -591,6 +640,25 @@ const EventForm = ({
                     />
                   }
                 />
+
+                {edit && attachmentEditEnabled && (
+                  <Field
+                    name="uploadAttachments"
+                    label="Attachments"
+                    component={FieldHelper.SpecialField}
+                    widget={
+                      <UploadAttachment
+                        attachments={attachmentList}
+                        updateAttachments={setAttachmentList}
+                        relatedObjectType={Event.relatedObjectType}
+                        relatedObjectUuid={values.uuid}
+                      />
+                    }
+                    onHandleBlur={() => {
+                      setFieldTouched("uploadAttachments", true, false)
+                    }}
+                  />
+                )}
               </Fieldset>
               <div className="submit-buttons">
                 <div>

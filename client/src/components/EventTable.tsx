@@ -28,6 +28,7 @@ const GQL_GET_EVENT_LIST = gql`
         name
         startDate
         endDate
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         ownerOrg {
           uuid
           shortName
@@ -38,6 +39,7 @@ const GQL_GET_EVENT_LIST = gql`
         eventSeries {
           uuid
           name
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         location {
           uuid
