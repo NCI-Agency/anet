@@ -8,10 +8,11 @@ import {
   PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
+import { toPng } from "html-to-image"
 import _xor from "lodash/xor"
 import ms from "milsymbol"
 import { Organization } from "models"
-import React, { useMemo, useState } from "react"
+import React, { useMemo, useRef, useState } from "react"
 import { connect } from "react-redux"
 import ReactFlow, { Handle, Position, ReactFlowProvider } from "reactflow"
 import "reactflow/dist/style.css"
@@ -96,9 +97,11 @@ const GQL_GET_CHART_DATA = gql`
     }
   }
 `
+
+const BACKGROUND_COLOR = "#f8fafc"
 const ORG_AVATAR_WIDTH = 60
-const TEXT_GAP = 10
 const TEXT_WIDTH = 200
+const TEXT_GAP = 10
 const NODE_WIDTH = ORG_AVATAR_WIDTH / 2 + TEXT_GAP + TEXT_WIDTH
 const NODE_HEIGHT = 60
 const VERTICAL_SPACING = 20
@@ -156,9 +159,34 @@ const OrbatChart = ({ data }) => {
   const [showAPP6Symbols, setshowAPP6Symbols] = useState(false)
   const [depthLimit, setDepthLimit] = useState(3)
   const [maxDepth, setMaxDepth] = useState(0)
-  const [peopleFilter, setPeopleFilter] = useState<PeopleFilterOption>("both")
+  const [peopleFilter, setPeopleFilter] = useState<PeopleFilterOption>("none")
+  const chartRef = useRef<HTMLDivElement>(null)
+  const controlsRef = useRef<HTMLDivElement>(null)
 
   let lowestDepth = 0
+
+  const downloadImage = async() => {
+    if (!chartRef.current) {
+      return
+    }
+
+    // Wait for the next tick to ensure DOM updates
+    await new Promise(resolve => setTimeout(resolve, 50))
+    const dataUrl = await toPng(chartRef.current, {
+      backgroundColor: BACKGROUND_COLOR,
+      filter: node => {
+        if (controlsRef.current?.contains(node)) {
+          return false
+        }
+        return true
+      }
+    })
+
+    const link = document.createElement("a")
+    link.download = "org-chart.png"
+    link.href = dataUrl
+    link.click()
+  }
 
   const determineSymbol = (org, allAscendantOrgs) => {
     const ascendantOrgs =
@@ -388,7 +416,10 @@ const OrbatChart = ({ data }) => {
   }, [data, showAPP6Symbols, depthLimit, peopleFilter])
 
   return (
-    <div style={{ height: "100vh", width: "100%", backgroundColor: "#f8fafc" }}>
+    <div
+      ref={chartRef}
+      style={{ height: "100vh", width: "100%", backgroundColor: BACKGROUND_COLOR }}
+    >
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -396,8 +427,10 @@ const OrbatChart = ({ data }) => {
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         nodesDraggable={false}
+        proOptions={{ hideAttribution: true }}
       >
         <div
+          ref={controlsRef}
           style={{
             position: "absolute",
             top: "20px",
@@ -456,6 +489,16 @@ const OrbatChart = ({ data }) => {
             <option value="both">Leaders & Deputies</option>
             <option value="top2">Top 2 Positions</option>
           </select>
+          <button
+            onClick={downloadImage}
+            style={{
+              padding: "8px 16px",
+              backgroundColor: "white",
+              cursor: "pointer"
+            }}
+          >
+            Export Image
+          </button>
         </div>
       </ReactFlow>
     </div>
@@ -509,7 +552,7 @@ const CustomNode = ({
             defaultAvatar={Organization.relatedObjectType}
             width={ORG_AVATAR_WIDTH}
             height={ORG_AVATAR_WIDTH}
-            style={{ backgroundColor: "#f8fafc" }}
+            style={{ backgroundColor: BACKGROUND_COLOR }}
           />
         )}
       </div>
@@ -598,6 +641,7 @@ const CustomRootEdge = ({
       style={style}
       className="react-flow__edge-path"
       d={path}
+      fill="none"
       markerEnd={markerEnd}
     />
   )
