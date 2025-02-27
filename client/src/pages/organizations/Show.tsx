@@ -248,6 +248,10 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
   const canAdministrateOrg =
     currentUser?.hasAdministrativePermissionsForOrganization(organization)
   const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
+  const avatar =
+    attachments?.some(
+      a => a.uuid === organization?.entityAvatar?.attachmentUuid
+    ) && organization.entityAvatar
   const { parentContext, parentStandardIdentity, parentSymbolSet } =
     Organization.getApp6ParentFields(organization, organization)
 
@@ -415,7 +419,7 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
                 <Row>
                   <Col sm={12} md={12} lg={4} xl={3} className="text-center">
                     <EntityAvatarDisplay
-                      avatar={organization.entityAvatar}
+                      avatar={avatar}
                       defaultAvatar={Organization.relatedObjectType}
                     />
                   </Col>

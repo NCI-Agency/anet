@@ -68,6 +68,10 @@ const EventSeriesShow = ({ pageDispatchers }: EventSeriesShowProps) => {
       eventSeries.adminOrg
     )
   const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
+  const avatar =
+    attachments?.some(
+      a => a.uuid === eventSeries?.entityAvatar?.attachmentUuid
+    ) && eventSeries.entityAvatar
   const eventQueryParams = {
     eventSeriesUuid: uuid
   }
@@ -120,7 +124,7 @@ const EventSeriesShow = ({ pageDispatchers }: EventSeriesShowProps) => {
                 <Row>
                   <Col sm={12} md={12} lg={4} xl={3} className="text-center">
                     <EntityAvatarDisplay
-                      avatar={eventSeries.entityAvatar}
+                      avatar={avatar}
                       defaultAvatar={EventSeries.relatedObjectType}
                     />
                   </Col>

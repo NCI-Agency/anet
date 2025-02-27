@@ -78,6 +78,9 @@ const EventShow = ({ pageDispatchers }: EventShowProps) => {
     currentUser?.isAdmin() ||
     currentUser?.hasAdministrativePermissionsForOrganization(event.adminOrg)
   const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
+  const avatar =
+    attachments?.some(a => a.uuid === event?.entityAvatar?.attachmentUuid) &&
+    event.entityAvatar
   const reportQueryParams = {
     state: [Report.STATE.APPROVED, Report.STATE.PUBLISHED],
     eventUuid: uuid
@@ -129,7 +132,7 @@ const EventShow = ({ pageDispatchers }: EventShowProps) => {
                 <Row>
                   <Col sm={12} md={12} lg={4} xl={3} className="text-center">
                     <EntityAvatarDisplay
-                      avatar={event.entityAvatar}
+                      avatar={avatar}
                       defaultAvatar={Event.relatedObjectType}
                     />
                   </Col>
