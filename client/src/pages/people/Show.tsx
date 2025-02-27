@@ -229,6 +229,9 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
         .includes(person.uuid))
   const canAddOndemandAssessment = isAdmin
   const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
+  const avatar =
+    attachments?.some(a => a.uuid === person?.entityAvatar?.attachmentUuid) &&
+    person.entityAvatar
 
   const searchText = [person.name, person.code].join(" ")
   const action = (
@@ -343,7 +346,7 @@ const PersonShow = ({ pageDispatchers }: PersonShowProps) => {
                   <Row>
                     <Col md={6} className="text-center">
                       <EntityAvatarDisplay
-                        avatar={person.entityAvatar}
+                        avatar={avatar}
                         defaultAvatar={Person.relatedObjectType}
                       />
                       {leftColumnUnderAvatar}
