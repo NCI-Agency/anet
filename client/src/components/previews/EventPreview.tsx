@@ -1,4 +1,5 @@
 import API from "api"
+import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import { BreadcrumbTrail } from "components/BreadcrumbTrail"
 import DictionaryField from "components/DictionaryField"
 import { PreviewField } from "components/FieldHelper"
@@ -32,6 +33,13 @@ const EventPreview = ({ className, uuid }: EventPreviewProps) => {
     <div className={`report-preview preview-content-scroll ${className || ""}`}>
       <h4 className="ellipsized-text">Event {eventTitle}</h4>
       <div className="preview-section">
+        <div className="text-center">
+          <EntityAvatarDisplay
+            avatar={event.entityAvatar}
+            defaultAvatar={Event.relatedObjectType}
+          />
+        </div>
+
         <DictionaryField
           wrappedComponent={PreviewField}
           dictProps={Settings.fields.event.eventSeries}
