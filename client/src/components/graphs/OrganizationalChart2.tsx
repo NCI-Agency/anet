@@ -108,11 +108,20 @@ const VERTICAL_SPACING = 20
 const HORIZONTAL_SPACING = 10
 const LEVEL_INDENT = 60
 const PERSON_AVATAR_HEIGHT = 42
-type PeopleFilterOption = "none" | "leaders" | "deputies" | "both" | "top2"
+type PeopleFilterOption =
+  | "none"
+  | "leaders"
+  | "leaders_deputies"
+  | "highest_rank"
+  | "highest_2_ranks"
 const rolePriority = {
   LEADER: 1,
   DEPUTY: 2,
   MEMBER: 3
+}
+const peopleLimits = {
+  highest_rank: 1,
+  highest_2_ranks: 2,
 }
 
 interface OrganizationalChartProps {
@@ -186,6 +195,30 @@ const OrbatChart = ({ data }) => {
     link.download = "org-chart.png"
     link.href = dataUrl
     link.click()
+  }
+
+  const filterPeople = (people) => {
+    return people
+    .filter(position => {
+      if (!position.person) {
+        return false
+      }
+      if (peopleFilter === "none") {
+        return false
+      }
+      if (peopleFilter === "leaders") {
+        return position.role === "LEADER"
+      }
+      if (peopleFilter === "leaders_deputies") {
+        return position.role === "LEADER" || position.role === "DEPUTY"
+      }
+      return true
+    })
+    .sort((a, b) => {
+      return rolePriority[a.role] - rolePriority[b.role]
+    })
+    .map(position => position.person)
+    .slice(0, peopleLimits[peopleFilter] ?? undefined)
   }
 
   const determineSymbol = (org, allAscendantOrgs) => {
@@ -264,30 +297,7 @@ const OrbatChart = ({ data }) => {
     const currentY = isRoot ? 0 : y
 
     const symbol = determineSymbol(node, allAscendantOrgs).asSVG()
-    const people = node.positions
-      .filter(position => {
-        if (!position.person) {
-          return false
-        }
-        if (peopleFilter === "none") {
-          return false
-        }
-        if (peopleFilter === "leaders") {
-          return position.role === "LEADER"
-        }
-        if (peopleFilter === "deputies") {
-          return position.role === "DEPUTY"
-        }
-        if (peopleFilter === "both") {
-          return position.role === "LEADER" || position.role === "DEPUTY"
-        }
-        return true
-      })
-      .sort((a, b) => {
-        return rolePriority[a.role] - rolePriority[b.role]
-      })
-      .map(position => position.person)
-      .slice(0, peopleFilter === "top2" ? 2 : undefined)
+    const people = filterPeople(node.positions)
 
     const currentNode = {
       id: node.uuid,
@@ -418,7 +428,11 @@ const OrbatChart = ({ data }) => {
   return (
     <div
       ref={chartRef}
-      style={{ height: "100vh", width: "100%", backgroundColor: BACKGROUND_COLOR }}
+      style={{
+        height: "100vh",
+        width: "100%",
+        backgroundColor: BACKGROUND_COLOR
+      }}
     >
       <ReactFlow
         nodes={nodes}
@@ -485,9 +499,9 @@ const OrbatChart = ({ data }) => {
           >
             <option value="none">No positions</option>
             <option value="leaders">Leaders Only</option>
-            <option value="deputies">Deputies Only</option>
-            <option value="both">Leaders & Deputies</option>
-            <option value="top2">Top 2 Positions</option>
+            <option value="leaders_deputies">Leaders and Deputies</option>
+            <option value="highest_rank">Highest Rank</option>
+            <option value="highest_2_ranks">Highest 2 Ranks</option>
           </select>
           <button
             onClick={downloadImage}
