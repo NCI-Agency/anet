@@ -10,6 +10,7 @@ import {
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
+import UploadAttachment from "components/Attachment/UploadAttachment"
 import EntityAvatarComponent from "components/avatar/EntityAvatarComponent"
 import CustomDateInput from "components/CustomDateInput"
 import DictionaryField from "components/DictionaryField"
@@ -639,6 +640,25 @@ const EventForm = ({
                     />
                   }
                 />
+
+                {edit && attachmentEditEnabled && (
+                  <Field
+                    name="uploadAttachments"
+                    label="Attachments"
+                    component={FieldHelper.SpecialField}
+                    widget={
+                      <UploadAttachment
+                        attachments={attachmentList}
+                        updateAttachments={setAttachmentList}
+                        relatedObjectType={Event.relatedObjectType}
+                        relatedObjectUuid={values.uuid}
+                      />
+                    }
+                    onHandleBlur={() => {
+                      setFieldTouched("uploadAttachments", true, false)
+                    }}
+                  />
+                )}
               </Fieldset>
               <div className="submit-buttons">
                 <div>
