@@ -1,5 +1,10 @@
 .custom-cropper {
   max-height: 480px;
+  aspect-ratio: 1;
   background-color: transparent;
   margin: 0 auto 10px;
+}
+
+.custom-cropper.advanced-cropper {
+  color: red;
 }

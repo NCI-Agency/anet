@@ -1,7 +1,9 @@
+import { Icon } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import { preventZoom } from "advanced-cropper/extensions/prevent-zoom"
 import AttachmentCard from "components/Attachment/AttachmentCard"
 import React, { useEffect, useRef, useState } from "react"
-import { Cropper } from "react-advanced-cropper"
+import { Cropper, ImageRestriction } from "react-advanced-cropper"
 import "react-advanced-cropper/dist/style.css"
 import "react-advanced-cropper/dist/themes/compact.css"
 import { Button, Modal } from "react-bootstrap"
@@ -32,7 +34,7 @@ const EntityAvatarEditModal = ({
   const [cropperCoordinates, setCropperCoordinates] = useState(null)
   const cropperRef = useRef(null)
 
-  // Update chosen image Uuid  and coordinates from avatar if present
+  // Update chosen image uuid and coordinates from avatar if present
   useEffect(() => {
     if (avatar) {
       setChosenImageUuid(avatar.attachmentUuid)
@@ -47,6 +49,28 @@ const EntityAvatarEditModal = ({
       setCropperCoordinates(null)
     }
   }, [avatar])
+
+  const maximize = () => {
+    if (cropperRef.current) {
+      cropperRef.current.setCoordinates(({ imageSize }) => {
+        const size = Math.max(imageSize.width, imageSize.height)
+        return {
+          width: size,
+          height: size,
+          left: (imageSize.width - size) / 2,
+          top: (imageSize.height - size) / 2
+        }
+      })
+    }
+  }
+
+  const reset = () => {
+    if (cropperRef.current) {
+      cropperRef.current.setCoordinates(
+        cropperRef.current.getDefaultState()?.coordinates
+      )
+    }
+  }
 
   return (
     <>
@@ -69,13 +93,17 @@ const EntityAvatarEditModal = ({
           <>
             {chosenImageUuid && (
               <Cropper
-                aspectRatio={1}
+                stencilProps={{
+                  aspectRatio: 1
+                }}
+                imageRestriction={ImageRestriction.none}
                 defaultCoordinates={cropperCoordinates}
                 ref={cropperRef}
                 className="custom-cropper"
                 src={`/api/attachment/view/${chosenImageUuid}`}
                 stencilComponent={stencil}
                 backgroundWrapperProps={{
+                  moveImage: false,
                   scaleImage: false
                 }}
                 postProcess={preventZoom}
@@ -85,6 +113,23 @@ const EntityAvatarEditModal = ({
               <Button onClick={close} variant="outline-secondary">
                 Cancel
               </Button>
+              <div>
+                <Button
+                  onClick={maximize}
+                  variant="secondary"
+                  disabled={!chosenImageUuid}
+                >
+                  <Icon icon={IconNames.MAXIMIZE} />
+                </Button>
+                <Button
+                  onClick={reset}
+                  variant="secondary"
+                  disabled={!chosenImageUuid}
+                  className="ms-1"
+                >
+                  <Icon icon={IconNames.RESET} />
+                </Button>
+              </div>
               <Button onClick={onClick} variant="primary">
                 Save
               </Button>
