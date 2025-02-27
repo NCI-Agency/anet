@@ -1,4 +1,5 @@
 import { gql } from "@apollo/client"
+import styled from "@emotion/styled"
 import API from "api"
 import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import LinkTo from "components/LinkTo"
@@ -121,7 +122,7 @@ const rolePriority = {
 }
 const peopleLimits = {
   highest_rank: 1,
-  highest_2_ranks: 2,
+  highest_2_ranks: 2
 }
 
 interface OrganizationalChartProps {
@@ -197,28 +198,28 @@ const OrbatChart = ({ data }) => {
     link.click()
   }
 
-  const filterPeople = (people) => {
+  const filterPeople = people => {
     return people
-    .filter(position => {
-      if (!position.person) {
-        return false
-      }
-      if (peopleFilter === "none") {
-        return false
-      }
-      if (peopleFilter === "leaders") {
-        return position.role === "LEADER"
-      }
-      if (peopleFilter === "leaders_deputies") {
-        return position.role === "LEADER" || position.role === "DEPUTY"
-      }
-      return true
-    })
-    .sort((a, b) => {
-      return rolePriority[a.role] - rolePriority[b.role]
-    })
-    .map(position => position.person)
-    .slice(0, peopleLimits[peopleFilter] ?? undefined)
+      .filter(position => {
+        if (!position.person) {
+          return false
+        }
+        if (peopleFilter === "none") {
+          return false
+        }
+        if (peopleFilter === "leaders") {
+          return position.role === "LEADER"
+        }
+        if (peopleFilter === "leaders_deputies") {
+          return position.role === "LEADER" || position.role === "DEPUTY"
+        }
+        return true
+      })
+      .sort((a, b) => {
+        return rolePriority[a.role] - rolePriority[b.role]
+      })
+      .map(position => position.person)
+      .slice(0, peopleLimits[peopleFilter] ?? undefined)
   }
 
   const determineSymbol = (org, allAscendantOrgs) => {
@@ -443,59 +444,27 @@ const OrbatChart = ({ data }) => {
         nodesDraggable={false}
         proOptions={{ hideAttribution: true }}
       >
-        <div
-          ref={controlsRef}
-          style={{
-            position: "absolute",
-            top: "20px",
-            left: "20px",
-            zIndex: 10,
-            display: "flex",
-            flexDirection: "column",
-            gap: "20px"
-          }}
-        >
-          <div>
+        <ControlsContainer ref={controlsRef}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              cursor: "pointer",
+              gap: "6px"
+            }}
+          >
             <input
               type="checkbox"
               id="showAPP6Symbols"
               checked={showAPP6Symbols}
               onChange={toggleDisplayMode}
-              style={{ cursor: "pointer", marginRight: "8px", outline: "none" }}
             />
-            <label htmlFor="showAPP6Symbols">Display APP-6 symbols</label>
+            <label htmlFor="showAPP6Symbols">APP-6 Symbols</label>
           </div>
-          <button
-            onClick={increaseDepthLimit}
-            style={{
-              padding: "8px 16px",
-              backgroundColor: "white",
-              cursor: "pointer"
-            }}
-          >
-            Increase Depth
-          </button>
-          <button
-            onClick={decreaseDepthLimit}
-            style={{
-              padding: "8px 16px",
-              backgroundColor: "white",
-              cursor: "pointer"
-            }}
-          >
-            Decrease Depth
-          </button>
           <select
             value={peopleFilter}
             onChange={e =>
               setPeopleFilter(e.target.value as PeopleFilterOption)}
-            style={{
-              padding: "8px 16px",
-              backgroundColor: "white",
-              border: "1px solid #ccc",
-              borderRadius: "4px",
-              cursor: "pointer"
-            }}
           >
             <option value="none">No positions</option>
             <option value="leaders">Leaders Only</option>
@@ -503,21 +472,103 @@ const OrbatChart = ({ data }) => {
             <option value="highest_rank">Highest Rank</option>
             <option value="highest_2_ranks">Highest 2 Ranks</option>
           </select>
-          <button
-            onClick={downloadImage}
-            style={{
-              padding: "8px 16px",
-              backgroundColor: "white",
-              cursor: "pointer"
-            }}
-          >
+          <div>
+            <button onClick={increaseDepthLimit}>+ Depth</button>
+            <button onClick={decreaseDepthLimit}>- Depth</button>
+          </div>
+          <button className="export" onClick={downloadImage}>
             Export Image
           </button>
-        </div>
+        </ControlsContainer>
       </ReactFlow>
     </div>
   )
 }
+
+const ControlsContainer = styled.div`
+  position: absolute;
+  display: flex;
+  top: 20px;
+  left: 20px;
+  gap: 12px;
+  z-index: 10;
+  align-items: center;
+  background-color: white;
+  border-radius: 8px;
+  padding: 12px 16px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+
+  div {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    & label {
+      cursor: pointer;
+    }
+  }
+
+  input[type="checkbox"] {
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+    outline: none;
+  }
+
+  label {
+    font-size: 14px;
+    color: #374151;
+    user-select: none;
+  }
+
+  button {
+    padding: 8px 16px;
+    font-size: 14px;
+    background-color: white;
+    border: 1px solid #e5e5e5;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #444444;
+    transition: all 0.2s;
+
+    &:hover {
+      background-color: #f4f4f4;
+      border-color: #2563eb;
+      transform: translateY(-1px);
+    }
+
+    &:active {
+      transform: translateY(0);
+      background-color: #e5e5e5;
+    }
+
+    &.export {
+      background-color: #2563eb;
+      color: white;
+
+      &:hover {
+        background-color: #1d4ed8;
+      }
+    }
+  }
+
+  select {
+    padding: 8px 32px 8px 12px;
+    font-size: 14px;
+    background-color: white;
+    border: 1px solid #e5e5e5;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #444444;
+    transition: all 0.2s;
+    outline: none;
+
+    &:hover {
+      border-color: #2563eb;
+    }
+  }
+`
 
 const parseSvgStringToJSX = svgString => {
   const parser = new DOMParser()
@@ -590,17 +641,21 @@ const CustomNode = ({
         }}
       >
         {people.map(person => (
-          <div
-            key={person.uuid}
-            style={{
-              padding: "5px",
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              maxWidth: "100%"
-            }}
-          >
-            <LinkTo modelType="Person" model={person} showIcon={false} />
+          <div key={person.uuid}>
+            <LinkTo
+              modelType="Person"
+              model={person}
+              showIcon={false}
+              style={{
+                display: "inline-block",
+                maxWidth: TEXT_WIDTH,
+                padding: "5px 0px 5px 5px",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                verticalAlign: "middle"
+              }}
+            />
           </div>
         ))}
       </div>
