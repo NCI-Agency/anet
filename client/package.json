@@ -139,6 +139,7 @@
     "formik": "2.4.6",
     "graphiql": "3.8.3",
     "graphql": "16.10.0",
+    "html-to-image": "^1.11.13",
     "jsonpath-plus": "10.3.0",
     "keycloak-js": "26.1.3",
     "leaflet": "1.9.4",
