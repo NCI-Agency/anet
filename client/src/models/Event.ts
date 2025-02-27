@@ -63,6 +63,7 @@ export default class Event extends Model {
     name
     startDate
     endDate
+    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
     location {
       uuid
       name
