@@ -56,8 +56,8 @@ public class MartImporterWorker extends AbstractWorker {
       for (final EmailMessage email : this.messages) {
         processEmailMessage(email);
       }
-      // If we get here transaction was successful, mark all emails as read
-      iMailReceiver.markEmailsAsRead(this.messages);
+      // If we get here transaction was successful, post-process emails
+      iMailReceiver.postProcessEmails(this.messages);
     } catch (Exception e) {
       logger.error("Exception processing MART email messages", e);
     }

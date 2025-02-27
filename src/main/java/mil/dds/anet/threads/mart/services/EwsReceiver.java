@@ -39,9 +39,9 @@ public class EwsReceiver implements IMailReceiver {
     this.mailClientConfiguration = config.getMart();
   }
 
-  public void markEmailsAsRead(List<EmailMessage> emails) {
-    for (EmailMessage email : emails) {
-      if (mailClientConfiguration.isMarkAsRead()) {
+  public void postProcessEmails(List<EmailMessage> emails) {
+    if (mailClientConfiguration.isMarkAsRead()) {
+      for (EmailMessage email : emails) {
         try {
           email.setIsRead(true);
           email.update(ConflictResolutionMode.AlwaysOverwrite);
