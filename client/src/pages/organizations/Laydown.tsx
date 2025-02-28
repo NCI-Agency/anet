@@ -74,8 +74,6 @@ const OrganizationLaydown = ({
             exportTitle={
               readOnly ? null : `Organization diagram for ${organization}`
             }
-            width={width}
-            height={height}
           />
         </div>
       </Fieldset>
