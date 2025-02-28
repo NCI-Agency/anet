@@ -12,9 +12,15 @@ import {
 import { toPng } from "html-to-image"
 import ms from "milsymbol"
 import { Organization } from "models"
-import React, { useMemo, useRef, useState } from "react"
+import React, { useCallback, useMemo, useRef, useState } from "react"
 import { connect } from "react-redux"
-import ReactFlow, { Handle, Position, ReactFlowProvider } from "reactflow"
+import ReactFlow, {
+  Edge,
+  Handle,
+  Node,
+  Position,
+  ReactFlowProvider
+} from "reactflow"
 import "reactflow/dist/style.css"
 import utils from "utils"
 
@@ -128,8 +134,6 @@ interface OrganizationalChartProps {
   pageDispatchers?: PageDispatchersPropType
   org: any
   exportTitle?: string
-  width?: number
-  height?: number
 }
 
 const OrganizationalChart = ({
@@ -162,14 +166,22 @@ const OrganizationalChart = ({
   )
 }
 
-const OrganizationFlowChart = ({ data, exportTitle }) => {
+interface OrganizationFlowChartProps {
+  data: { organization: { uuid: string } }
+  exportTitle?: string
+}
+
+const OrganizationFlowChart = ({
+  data,
+  exportTitle
+}: OrganizationFlowChartProps) => {
   const [showAPP6Symbols, setshowAPP6Symbols] = useState(false)
   const [depthLimit, setDepthLimit] = useState(3)
   const [maxDepth, setMaxDepth] = useState(0)
   const [peopleFilter, setPeopleFilter] = useState<PeopleFilterOption>("none")
   const chartRef = useRef<HTMLDivElement>(null)
   const controlsRef = useRef<HTMLDivElement>(null)
-  let lowestDepth = 0
+  const lowestDepth = useRef(0)
 
   const downloadImage = async() => {
     if (!chartRef.current) {
@@ -269,127 +281,127 @@ const OrganizationFlowChart = ({ data, exportTitle }) => {
     setDepthLimit(prev => Math.max(0, prev - 1))
   }
 
-  if (!data) {
-    return <p>Loading...</p>
-  }
+  const calculateLayout = useCallback(
+    (
+      node: any,
+      allDescendantOrgs: any[],
+      allAscendantOrgs: any[],
+      depth = 0,
+      x = 0,
+      y = 0
+    ) => {
+      if (!node || depth > depthLimit) {
+        return { nodes: [], edges: [] }
+      }
 
-  const calculateLayout = (
-    node,
-    allDescendantOrgs,
-    allAscendantOrgs,
-    depth = 0,
-    x = 0,
-    y = 0
-  ) => {
-    if (!node || depth > depthLimit) {
-      return { nodes: [], edges: [] }
-    }
+      const children =
+        allDescendantOrgs.filter(
+          descendant => descendant.parentOrg.uuid === node.uuid
+        ) || []
+      const isRoot = depth === 0
+      const currentX = isRoot ? 0 : x
+      const currentY = isRoot ? 0 : y
 
-    const children =
-      allDescendantOrgs.filter(
-        descendant => descendant.parentOrg.uuid === node.uuid
-      ) || []
-    const isRoot = depth === 0
-    const currentX = isRoot ? 0 : x
-    const currentY = isRoot ? 0 : y
+      const symbol = determineSymbol(node, allAscendantOrgs).asSVG()
+      const people = filterPeople(node.positions)
 
-    const symbol = determineSymbol(node, allAscendantOrgs).asSVG()
-    const people = filterPeople(node.positions)
+      const currentNode = {
+        id: node.uuid,
+        data: {
+          organization: node,
+          symbol,
+          people,
+          depth,
+          showSymbol: showAPP6Symbols
+        },
+        position: { x: currentX, y: currentY },
+        type: "custom"
+      }
 
-    const currentNode = {
-      id: node.uuid,
-      data: {
-        organization: node,
-        symbol,
-        people,
-        depth,
-        showSymbol: showAPP6Symbols
-      },
-      position: { x: currentX, y: currentY },
-      type: "custom"
-    }
-
-    let nodes = [currentNode]
-    let edges = []
-    if (children.length > 0) {
-      let childX = currentX + (isRoot ? 0 : LEVEL_INDENT)
-      let childY = currentY + NODE_HEIGHT + people.length * PERSON_AVATAR_HEIGHT
-      children.forEach(child => {
-        // first level nodes are placed horizontally
-        if (isRoot) {
-          childX += NODE_WIDTH + HORIZONTAL_SPACING + TEXT_GAP
-          if (lowestDepth > 1) {
-            childX += (lowestDepth - 1) * LEVEL_INDENT
+      let nodes = [currentNode]
+      let edges = []
+      if (children.length > 0) {
+        let childX = currentX + (isRoot ? 0 : LEVEL_INDENT)
+        let childY =
+          currentY + NODE_HEIGHT + people.length * PERSON_AVATAR_HEIGHT
+        children.forEach(child => {
+          // first level nodes are placed horizontally
+          if (isRoot) {
+            childX += NODE_WIDTH + HORIZONTAL_SPACING + TEXT_GAP
+            if (lowestDepth.current > 1) {
+              childX += (lowestDepth.current - 1) * LEVEL_INDENT
+            }
+            childY =
+              currentY +
+              NODE_HEIGHT * 1.5 +
+              people.length * PERSON_AVATAR_HEIGHT +
+              VERTICAL_SPACING * (people.length ? 0 : 0.5)
+            // reset lowestDepth as we enter a new branch
+            lowestDepth.current = 0
           }
-          childY =
-            currentY +
-            NODE_HEIGHT * 1.5 +
-            people.length * PERSON_AVATAR_HEIGHT +
-            VERTICAL_SPACING * (people.length ? 0 : 0.5)
-          // reset lowestDepth as we enter a new branch
-          lowestDepth = 0
-        }
 
-        const childLayout = calculateLayout(
-          child,
-          allDescendantOrgs,
-          allAscendantOrgs,
-          depth + 1,
-          childX,
-          childY
-        )
-        // use the last child's position to determine the next child's position
-        const lastChild = childLayout.nodes.slice(-1)[0]
-        if (lastChild && !isRoot) {
-          childY =
-            lastChild.position.y +
-            lastChild.data.people.length * PERSON_AVATAR_HEIGHT -
-            VERTICAL_SPACING
-        }
+          const childLayout = calculateLayout(
+            child,
+            allDescendantOrgs,
+            allAscendantOrgs,
+            depth + 1,
+            childX,
+            childY
+          )
+          // use the last child's position to determine the next child's position
+          const lastChild = childLayout.nodes.slice(-1)[0]
+          if (lastChild && !isRoot) {
+            childY =
+              lastChild.position.y +
+              lastChild.data.people.length * PERSON_AVATAR_HEIGHT -
+              VERTICAL_SPACING
+          }
 
-        nodes = nodes.concat(childLayout.nodes)
-        edges = edges.concat(childLayout.edges)
+          nodes = nodes.concat(childLayout.nodes)
+          edges = edges.concat(childLayout.edges)
 
-        edges.push({
-          id: `edge-${node.uuid}-${child.uuid}`,
-          source: node.uuid,
-          target: child.uuid,
-          sourceHandle: isRoot ? "bottom" : "left",
-          targetHandle: depth === 0 ? "top" : "left",
-          type: isRoot ? "rootEdge" : "smoothstep",
-          style: { stroke: "#94a3b8", strokeWidth: 2 },
-          markerEnd: { type: "arrowclosed", color: "#94a3b8" }
+          edges.push({
+            id: `edge-${node.uuid}-${child.uuid}`,
+            source: node.uuid,
+            target: child.uuid,
+            sourceHandle: isRoot ? "bottom" : "left",
+            targetHandle: depth === 0 ? "top" : "left",
+            type: isRoot ? "rootEdge" : "smoothstep",
+            style: { stroke: "#94a3b8", strokeWidth: 2 },
+            markerEnd: { type: "arrowclosed", color: "#94a3b8" }
+          })
+
+          if (!isRoot) {
+            childY += NODE_HEIGHT + VERTICAL_SPACING
+          }
         })
+      }
+      if (depth > lowestDepth.current) {
+        lowestDepth.current = depth
+      }
 
-        if (!isRoot) {
-          childY += NODE_HEIGHT + VERTICAL_SPACING
-        }
-      })
-    }
-    if (depth > lowestDepth) {
-      lowestDepth = depth
-    }
-
-    // place the root node in the middle of its children
-    if (isRoot && nodes.length > 1) {
-      const directChildNodes = nodes
-        .slice(1)
-        .filter(({ data }) => data?.depth == 1)
-      const childCount = directChildNodes.length
-      if (childCount > 0) {
-        if (childCount % 2 === 0) {
-          const middleLeft = directChildNodes[childCount / 2 - 1]
-          const middleRight = directChildNodes[childCount / 2]
-          const middleX = (middleLeft.position.x + middleRight.position.x) / 2
-          nodes[0].position.x = middleX
-        } else {
-          const middle = directChildNodes[Math.floor(childCount / 2)]
-          nodes[0].position.x = middle.position.x
+      // place the root node in the middle of its children
+      if (isRoot && nodes.length > 1) {
+        const directChildNodes = nodes
+          .slice(1)
+          .filter(({ data }) => data?.depth === 1)
+        const childCount = directChildNodes.length
+        if (childCount > 0) {
+          if (childCount % 2 === 0) {
+            const middleLeft = directChildNodes[childCount / 2 - 1]
+            const middleRight = directChildNodes[childCount / 2]
+            const middleX = (middleLeft.position.x + middleRight.position.x) / 2
+            nodes[0].position.x = middleX
+          } else {
+            const middle = directChildNodes[Math.floor(childCount / 2)]
+            nodes[0].position.x = middle.position.x
+          }
         }
       }
-    }
-    return { nodes, edges }
-  }
+      return { nodes, edges }
+    },
+    [depthLimit, showAPP6Symbols, peopleFilter]
+  )
 
   const { nodes, edges } = useMemo(() => {
     if (!data?.organization) {
@@ -420,7 +432,11 @@ const OrganizationFlowChart = ({ data, exportTitle }) => {
       })),
       edges: layout.edges
     }
-  }, [data, showAPP6Symbols, depthLimit, peopleFilter])
+  }, [data, showAPP6Symbols, depthLimit, peopleFilter, calculateLayout])
+
+  if (!data) {
+    return <p>Loading...</p>
+  }
 
   return (
     <div
@@ -570,7 +586,7 @@ const ControlsContainer = styled.div`
   }
 `
 
-const parseSvgStringToJSX = svgString => {
+const parseSvgStringToJSX = (svgString: string) => {
   const parser = new DOMParser()
   const doc = parser.parseFromString(svgString, "image/svg+xml")
   const svgElement = doc.documentElement
@@ -586,9 +602,19 @@ const parseSvgStringToJSX = svgString => {
   )
 }
 
+interface CustomNodeProps {
+  data: {
+    organization: any
+    symbol: string
+    depth: number
+    people: any[]
+    showSymbol: boolean
+  }
+}
+
 const CustomNode = ({
   data: { organization, symbol, depth, people, showSymbol }
-}) => (
+}: CustomNodeProps) => (
   <div
     style={{
       width: NODE_WIDTH,
@@ -676,6 +702,16 @@ const CustomNode = ({
   </div>
 )
 
+interface CustomRootEdgeProps {
+  id: string
+  sourceX: number
+  sourceY: number
+  targetX: number
+  targetY: number
+  style: React.CSSProperties
+  markerEnd: string
+}
+
 const CustomRootEdge = ({
   id,
   sourceX,
@@ -684,7 +720,7 @@ const CustomRootEdge = ({
   targetY,
   style,
   markerEnd
-}) => {
+}: CustomRootEdgeProps) => {
   const cornerRadius = 4
   const verticalMargin = 20
   const horizontalDirection = targetX > sourceX ? 1 : -1
