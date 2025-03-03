@@ -184,17 +184,6 @@
         "bootstrap",
         "react-bootstrap"
       ]
-    },
-    {
-      "groupName": "Gradle/NPM, dependencies, Keycloak",
-      "matchManagers": [
-        "gradle",
-        "npm"
-      ],
-      "matchSourceUrls": [
-        "https://github.com/keycloak/{/,}**"
-      ]
-    }
   ],
   "postUpdateOptions": [
     "yarnDedupeHighest"
