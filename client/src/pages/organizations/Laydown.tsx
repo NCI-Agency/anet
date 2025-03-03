@@ -67,7 +67,11 @@ const OrganizationLaydown = ({
 
   return (
     <>
-      <Fieldset id="orgChart" title="Organization Diagram">
+      <Fieldset
+        style={{ boxShadow: "none" }}
+        id="orgChart"
+        title="Organization Diagram"
+      >
         <div ref={ref}>
           <OrganizationalChart
             org={organization}

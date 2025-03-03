@@ -1,4 +1,6 @@
 import { gql } from "@apollo/client"
+import { Icon } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import styled from "@emotion/styled"
 import API from "api"
 import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
@@ -14,6 +16,7 @@ import ms from "milsymbol"
 import { Organization } from "models"
 import { PositionRole } from "models/Position"
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { Button } from "react-bootstrap"
 import { connect } from "react-redux"
 import ReactFlow, {
   EdgeProps,
@@ -436,81 +439,80 @@ const OrganizationFlowChart = ({
   }
 
   return (
-    <div
-      ref={chartRef}
-      style={{
-        height: "calc(100vh - 200px)",
-        width: "100%",
-        backgroundColor: BACKGROUND_COLOR
-      }}
-    >
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        fitView
-        nodeTypes={nodeTypes}
-        edgeTypes={edgeTypes}
-        nodesDraggable={false}
-        proOptions={{ hideAttribution: true }}
-      >
-        <ControlsContainer ref={controlsRef}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              cursor: "pointer",
-              gap: "6px"
-            }}
-          >
+    <>
+      <ControlsContainer ref={controlsRef}>
+        <div>
+          <input
+            type="checkbox"
+            id="showAPP6Symbols"
+            checked={showApp6Symbols}
+            onChange={toggleDisplayMode}
+          />
+          <label htmlFor="showAPP6Symbols">APP-6 Symbols</label>
+        </div>
+        <select
+          value={peopleFilter}
+          onChange={e => setPeopleFilter(e.target.value as PeopleFilterOption)}
+        >
+          <option value="none">No positions</option>
+          <option value="leaders">Leaders Only</option>
+          <option value="leaders_deputies">Leaders and Deputies</option>
+          <option value="highest_rank">Highest Rank</option>
+          <option value="highest_2_ranks">Highest 2 Ranks</option>
+        </select>
+        <div className="depth-group">
+          <label htmlFor="depthInput">Depth:</label>
+          <div className="depth-controls">
+            <Button onClick={decreaseDepthLimit}>
+              <Icon icon={IconNames.REMOVE} />
+            </Button>
             <input
-              type="checkbox"
-              id="showApp6Symbols"
-              checked={showApp6Symbols}
-              onChange={toggleDisplayMode}
+              id="depthInput"
+              type="number"
+              value={depthLimit}
+              onChange={e => setDepthLimit(Number(e.target.value))}
+              min="0"
+              max="100"
             />
-            <label htmlFor="showApp6Symbols">APP-6 Symbols</label>
+            <Button onClick={increaseDepthLimit}>
+              <Icon icon={IconNames.ADD} />
+            </Button>
           </div>
-          <select
-            value={peopleFilter}
-            onChange={e =>
-              setPeopleFilter(e.target.value as PeopleFilterOption)}
-          >
-            <option value="none">No positions</option>
-            <option value="leaders">Leaders Only</option>
-            <option value="leaders_deputies">Leaders and Deputies</option>
-            <option value="highest_rank">Highest Rank</option>
-            <option value="highest_2_ranks">Highest 2 Ranks</option>
-          </select>
-          <div>
-            <button type="button" onClick={increaseDepthLimit}>
-              + Depth
-            </button>
-            <button type="button" onClick={decreaseDepthLimit}>
-              - Depth
-            </button>
-          </div>
-          <button type="button" className="export" onClick={downloadImage}>
-            Export Image
-          </button>
-        </ControlsContainer>
-      </ReactFlow>
-    </div>
+        </div>
+        <Button className="export" onClick={downloadImage}>
+          <Icon icon={IconNames.EXPORT} />
+          Export Image
+        </Button>
+      </ControlsContainer>
+      <div
+        ref={chartRef}
+        style={{
+          height: "calc(100vh - 200px)",
+          width: "100%",
+          backgroundColor: BACKGROUND_COLOR
+        }}
+      >
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          fitView
+          nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
+          nodesDraggable={false}
+          preventScrolling={false}
+          proOptions={{ hideAttribution: true }}
+        />
+      </div>
+    </>
   )
 }
 
 const ControlsContainer = styled.div`
-  position: absolute;
   display: flex;
-  top: 20px;
-  left: 20px;
   gap: 12px;
-  z-index: 10;
   align-items: center;
-  background-color: white;
-  border-radius: 8px;
   padding: 12px 16px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  background-color: #f2f2f2;
 
   div {
     display: flex;
@@ -519,6 +521,51 @@ const ControlsContainer = styled.div`
 
     & label {
       cursor: pointer;
+    }
+
+    &.depth-group {
+      .depth-controls {
+        gap: 0;
+        background-color: white;
+        border-radius: 6px;
+        border: 1px solid #e5e5e5;
+
+        .btn {
+          border: none;
+
+          &:hover {
+            background-color: #f4f4f4;
+          }
+
+          &:first-child {
+            border-radius: 6px 0 0 6px;
+            border-right: 1px solid #e5e5e5;
+          }
+
+          &:last-child {
+            border-radius: 0 6px 6px 0;
+            border-left: 1px solid #e5e5e5;
+          }
+        }
+
+        input {
+          border: none;
+          text-align: center;
+          font-size: 14px;
+          color: #444444;
+
+          &::-webkit-outer-spin-button,
+          &::-webkit-inner-spin-button {
+            appearance: none;
+            margin: 0;
+          }
+
+          &:focus {
+            outline: none;
+            border-color: #2563eb;
+          }
+        }
+      }
     }
   }
 
@@ -535,7 +582,7 @@ const ControlsContainer = styled.div`
     user-select: none;
   }
 
-  button {
+  .btn {
     padding: 8px 16px;
     font-size: 14px;
     background-color: white;
@@ -544,6 +591,9 @@ const ControlsContainer = styled.div`
     cursor: pointer;
     color: #444444;
     transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 
     &:hover {
       background-color: #f4f4f4;
@@ -582,6 +632,7 @@ const ControlsContainer = styled.div`
     }
   }
 `
+
 const SvgComponent = ({ svgElement }) => {
   const svgRef = useRef(null)
 
