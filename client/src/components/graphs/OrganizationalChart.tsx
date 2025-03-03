@@ -26,6 +26,7 @@ import ReactFlow, {
   ReactFlowProvider
 } from "reactflow"
 import "reactflow/dist/style.css"
+import Settings from "settings"
 import utils from "utils"
 
 const GQL_GET_CHART_DATA = gql`
@@ -122,17 +123,19 @@ type PeopleFilterOption =
   | "none"
   | "leaders"
   | "leaders_deputies"
-  | "highest_rank"
-  | "highest_2_ranks"
+  | "top_position"
+  | "top_2_positions"
 const rolePriority = {
   [PositionRole.LEADER.toString()]: 1,
   [PositionRole.DEPUTY.toString()]: 2,
   [PositionRole.MEMBER.toString()]: 3
 }
 const peopleLimits = {
-  highest_rank: 1,
-  highest_2_ranks: 2
+  top_position: 1,
+  top_2_positions: 2
 }
+const ROLES = Object.keys(PositionRole)
+const RANKS = Settings.fields.person.ranks.map(rank => rank.value)
 
 interface OrganizationalChartProps {
   pageDispatchers?: PageDispatchersPropType
@@ -278,9 +281,19 @@ const OrganizationFlowChart = ({
             }
             return true
           })
-          .sort((a, b) => {
-            return rolePriority[a.role] - rolePriority[b.role]
-          })
+          .sort(
+            (a, b) =>
+              // highest position role first
+              ROLES.indexOf(b.role) - ROLES.indexOf(a.role) ||
+              // when these are equal, highest ranking person first
+              RANKS.indexOf(b.person?.rank) - RANKS.indexOf(a.person?.rank) ||
+              // when these are also equal, sort alphabetically on person name
+              a.person?.name?.localeCompare(b.person?.name) ||
+              // else sort by position name
+              a.name?.localeCompare(b.name) ||
+              // last resort: sort by position uuid
+              a.uuid.localeCompare(b.uuid)
+          )
           .map(position => position.person)
           .slice(0, peopleLimits[peopleFilter] ?? undefined)
       }
@@ -457,8 +470,8 @@ const OrganizationFlowChart = ({
           <option value="none">No positions</option>
           <option value="leaders">Leaders Only</option>
           <option value="leaders_deputies">Leaders and Deputies</option>
-          <option value="highest_rank">Highest Rank</option>
-          <option value="highest_2_ranks">Highest 2 Ranks</option>
+          <option value="top_position">Top Position</option>
+          <option value="top_2_positions">Top 2 Positions</option>
         </select>
         <div className="depth-group">
           <label htmlFor="depthInput">Depth:</label>
