@@ -297,7 +297,7 @@ const OrganizationFlowChart = ({
       const currentX = isRoot ? 0 : x
       const currentY = isRoot ? 0 : y
 
-      const symbol = determineSymbol(node, allAscendantOrgs).asSVG()
+      const symbol = determineSymbol(node, allAscendantOrgs).asDOM()
       const people = filterPeople(node.positions)
 
       const currentNode = {
@@ -578,7 +578,7 @@ const ControlsContainer = styled.div`
 
   label {
     font-size: 14px;
-    color: #374151;
+    color: #444444;
     user-select: none;
   }
 
@@ -633,118 +633,106 @@ const ControlsContainer = styled.div`
   }
 `
 
-const SvgComponent = ({ svgElement }) => {
-  const svgRef = useRef(null)
-
-  useEffect(() => {
-    if (svgRef.current && svgElement) {
-      svgRef.current.innerHTML = new XMLSerializer().serializeToString(
-        svgElement
-      )
-    }
-  }, [svgElement])
-
-  return <div ref={svgRef} />
-}
-
-const parseSvgStringToJSX = (svgString: string) => {
-  const parser = new DOMParser()
-  const doc = parser.parseFromString(svgString, "image/svg+xml")
-  const svgElement = doc.documentElement
-
-  svgElement.setAttribute("width", "60px")
-
-  return <SvgComponent svgElement={svgElement} />
-}
-
 const CustomNode = ({
   data: { organization, symbol, depth, people, showSymbol }
-}: NodeProps) => (
-  <div
-    style={{
-      width: NODE_WIDTH,
-      height: NODE_HEIGHT,
-      display: "flex",
-      flexDirection: "column"
-    }}
-  >
+}: NodeProps) => {
+  const svg = useRef()
+  useEffect(() => {
+    if (svg.current) {
+      if (svg.current.firstChild) {
+        svg.current.replaceChild(symbol, svg.current.firstChild)
+      } else {
+        svg.current.appendChild(symbol)
+      }
+    }
+  }, [symbol])
+  return (
     <div
       style={{
-        display: "flex"
+        width: NODE_WIDTH,
+        height: NODE_HEIGHT,
+        display: "flex",
+        flexDirection: "column"
       }}
     >
       <div
         style={{
-          display: "flex",
-          alignItems: "center",
-          minWidth: ORG_AVATAR_WIDTH,
-          height: NODE_HEIGHT
+          display: "flex"
         }}
       >
-        {showSymbol && symbol && parseSvgStringToJSX(symbol)}
-        {!showSymbol && (
-          <EntityAvatarDisplay
-            avatar={organization.entityAvatar}
-            defaultAvatar={Organization.relatedObjectType}
-            width={ORG_AVATAR_WIDTH}
-            height={ORG_AVATAR_WIDTH}
-            style={{ backgroundColor: BACKGROUND_COLOR }}
-          />
-        )}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            minWidth: ORG_AVATAR_WIDTH,
+            height: NODE_HEIGHT
+          }}
+        >
+          {(showSymbol && <div ref={svg} />) || (
+            <EntityAvatarDisplay
+              avatar={organization.entityAvatar}
+              defaultAvatar={Organization.relatedObjectType}
+              width={ORG_AVATAR_WIDTH}
+              height={ORG_AVATAR_WIDTH}
+              style={{ backgroundColor: BACKGROUND_COLOR }}
+            />
+          )}
+        </div>
+        <LinkTo
+          modelType="Organization"
+          model={organization}
+          showAvatar={false}
+          showIcon={false}
+          style={{
+            minHeight: NODE_HEIGHT,
+            display: "flex",
+            padding: "5px 0px 5px 5px",
+            alignItems: "center"
+          }}
+        />
       </div>
-      <LinkTo
-        modelType="Organization"
-        model={organization}
-        showAvatar={false}
-        showIcon={false}
+      {people.length > 0 && (
+        <div
+          style={{
+            paddingLeft: ORG_AVATAR_WIDTH / 2
+          }}
+        >
+          {people.map(person => (
+            <LinkTo
+              key={person.uuid}
+              modelType="Person"
+              model={person}
+              showIcon={false}
+              style={{
+                display: "inline-block",
+                maxWidth: TEXT_WIDTH,
+                padding: "5px 0px 5px 5px",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                verticalAlign: "middle"
+              }}
+            />
+          ))}
+        </div>
+      )}
+      <Handle
+        type="source"
+        position={Position.Bottom}
+        style={{ opacity: 0, top: NODE_HEIGHT / 2, left: ORG_AVATAR_WIDTH / 2 }}
+      />
+      <Handle
+        type="target"
+        position={depth > 1 ? Position.Left : Position.Top}
         style={{
-          minHeight: NODE_HEIGHT,
-          display: "flex",
-          padding: "5px 0px 5px 5px",
-          alignItems: "center"
+          opacity: 0,
+          left: depth === 1 ? ORG_AVATAR_WIDTH / 2 : 0
         }}
       />
     </div>
-    {people.length > 0 && (
-      <div
-        style={{
-          paddingLeft: ORG_AVATAR_WIDTH / 2
-        }}
-      >
-        {people.map(person => (
-          <LinkTo
-            key={person.uuid}
-            modelType="Person"
-            model={person}
-            showIcon={false}
-            style={{
-              display: "inline-block",
-              maxWidth: TEXT_WIDTH,
-              padding: "5px 0px 5px 5px",
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              verticalAlign: "middle"
-            }}
-          />
-        ))}
-      </div>
-    )}
-    <Handle
-      type="source"
-      position={Position.Bottom}
-      style={{ opacity: 0, top: NODE_HEIGHT / 2, left: ORG_AVATAR_WIDTH / 2 }}
-    />
-    <Handle
-      type="target"
-      position={depth > 1 ? Position.Left : Position.Top}
-      style={{
-        opacity: 0,
-        left: depth === 1 ? ORG_AVATAR_WIDTH / 2 : 0
-      }}
-    />
-  </div>
-)
+  )
+}
 
 const CustomRootEdge = ({
   id,

@@ -267,6 +267,9 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
           <AnchorNavItem to="info">Info</AnchorNavItem>
         </Nav.Item>
         <Nav.Item>
+          <AnchorNavItem to="orgChart">Diagram</AnchorNavItem>
+        </Nav.Item>
+        <Nav.Item>
           <AnchorNavItem to="supportedPositions">
             Supported positions
           </AnchorNavItem>
