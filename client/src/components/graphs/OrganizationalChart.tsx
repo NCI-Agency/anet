@@ -12,12 +12,13 @@ import {
 import { toPng } from "html-to-image"
 import ms from "milsymbol"
 import { Organization } from "models"
-import React, { useCallback, useMemo, useRef, useState } from "react"
+import { PositionRole } from "models/Position"
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { connect } from "react-redux"
 import ReactFlow, {
-  Edge,
+  EdgeProps,
   Handle,
-  Node,
+  NodeProps,
   Position,
   ReactFlowProvider
 } from "reactflow"
@@ -121,9 +122,9 @@ type PeopleFilterOption =
   | "highest_rank"
   | "highest_2_ranks"
 const rolePriority = {
-  LEADER: 1,
-  DEPUTY: 2,
-  MEMBER: 3
+  [PositionRole.LEADER.toString()]: 1,
+  [PositionRole.DEPUTY.toString()]: 2,
+  [PositionRole.MEMBER.toString()]: 3
 }
 const peopleLimits = {
   highest_rank: 1,
@@ -155,27 +156,31 @@ const OrganizationalChart = ({
     return result
   }
 
-  if (!data || !data.organization) {
+  const organization = data?.organization
+  if (!organization) {
     return <p>Loading...</p>
   }
 
   return (
     <ReactFlowProvider>
-      <OrganizationFlowChart data={data} exportTitle={exportTitle} />
+      <OrganizationFlowChart
+        organization={organization}
+        exportTitle={exportTitle}
+      />
     </ReactFlowProvider>
   )
 }
 
 interface OrganizationFlowChartProps {
-  data: { organization: { uuid: string } }
+  organization: { descendantOrgs: any[]; ascendantOrgs: any[] }
   exportTitle?: string
 }
 
 const OrganizationFlowChart = ({
-  data,
+  organization,
   exportTitle
 }: OrganizationFlowChartProps) => {
-  const [showAPP6Symbols, setshowAPP6Symbols] = useState(false)
+  const [showApp6Symbols, setShowApp6Symbols] = useState(false)
   const [depthLimit, setDepthLimit] = useState(3)
   const [maxDepth, setMaxDepth] = useState(0)
   const [peopleFilter, setPeopleFilter] = useState<PeopleFilterOption>("none")
@@ -192,42 +197,13 @@ const OrganizationFlowChart = ({
     await new Promise(resolve => setTimeout(resolve, 50))
     const dataUrl = await toPng(chartRef.current, {
       backgroundColor: BACKGROUND_COLOR,
-      filter: node => {
-        if (controlsRef.current?.contains(node)) {
-          return false
-        }
-        return true
-      }
+      filter: node => !controlsRef.current?.contains(node)
     })
 
     const link = document.createElement("a")
     link.download = exportTitle + ".png"
     link.href = dataUrl
     link.click()
-  }
-
-  const filterPeople = people => {
-    return people
-      .filter(position => {
-        if (!position.person) {
-          return false
-        }
-        if (peopleFilter === "none") {
-          return false
-        }
-        if (peopleFilter === "leaders") {
-          return position.role === "LEADER"
-        }
-        if (peopleFilter === "leaders_deputies") {
-          return position.role === "LEADER" || position.role === "DEPUTY"
-        }
-        return true
-      })
-      .sort((a, b) => {
-        return rolePriority[a.role] - rolePriority[b.role]
-      })
-      .map(position => position.person)
-      .slice(0, peopleLimits[peopleFilter] ?? undefined)
   }
 
   const determineSymbol = (org, allAscendantOrgs) => {
@@ -248,7 +224,7 @@ const OrganizationFlowChart = ({
     )
     const hq = org?.app6hq || "0"
     const amplifier = org?.app6amplifier || "00"
-    const version = "14" // APP-6E
+    const version = "10" // APP-6D
     const status = "0" // Present
     return new ms.Symbol(
       `${version}${context}${standardIdentity}${symbolSet}${status}${hq}${amplifier}`,
@@ -258,19 +234,8 @@ const OrganizationFlowChart = ({
     )
   }
 
-  const calculateMaxDepth = data => {
-    let maxDepth = 0
-    data.organization.descendantOrgs.forEach(org => {
-      if (org.ascendantOrgs.length - 1 > maxDepth) {
-        maxDepth = org.ascendantOrgs.length - 1
-      }
-    })
-
-    return maxDepth
-  }
-
   const toggleDisplayMode = () => {
-    setshowAPP6Symbols(prev => !prev)
+    setShowApp6Symbols(prev => !prev)
   }
 
   const increaseDepthLimit = () => {
@@ -290,6 +255,33 @@ const OrganizationFlowChart = ({
       x = 0,
       y = 0
     ) => {
+      const filterPeople = people => {
+        return people
+          .filter(position => {
+            if (!position.person) {
+              return false
+            }
+            if (peopleFilter === "none") {
+              return false
+            }
+            if (peopleFilter === "leaders") {
+              return position.role === PositionRole.LEADER.toString()
+            }
+            if (peopleFilter === "leaders_deputies") {
+              return (
+                position.role === PositionRole.LEADER.toString() ||
+                position.role === PositionRole.DEPUTY.toString()
+              )
+            }
+            return true
+          })
+          .sort((a, b) => {
+            return rolePriority[a.role] - rolePriority[b.role]
+          })
+          .map(position => position.person)
+          .slice(0, peopleLimits[peopleFilter] ?? undefined)
+      }
+
       if (!node || depth > depthLimit) {
         return { nodes: [], edges: [] }
       }
@@ -312,7 +304,7 @@ const OrganizationFlowChart = ({
           symbol,
           people,
           depth,
-          showSymbol: showAPP6Symbols
+          showSymbol: showApp6Symbols
         },
         position: { x: currentX, y: currentY },
         type: "custom"
@@ -390,8 +382,8 @@ const OrganizationFlowChart = ({
           if (childCount % 2 === 0) {
             const middleLeft = directChildNodes[childCount / 2 - 1]
             const middleRight = directChildNodes[childCount / 2]
-            const middleX = (middleLeft.position.x + middleRight.position.x) / 2
-            nodes[0].position.x = middleX
+            nodes[0].position.x =
+              (middleLeft.position.x + middleRight.position.x) / 2
           } else {
             const middle = directChildNodes[Math.floor(childCount / 2)]
             nodes[0].position.x = middle.position.x
@@ -400,25 +392,30 @@ const OrganizationFlowChart = ({
       }
       return { nodes, edges }
     },
-    [depthLimit, showAPP6Symbols, peopleFilter]
+    [depthLimit, showApp6Symbols, peopleFilter]
   )
 
   const { nodes, edges } = useMemo(() => {
-    if (!data?.organization) {
+    if (!organization) {
       return { nodes: [], edges: [] }
     }
 
-    const calculatedMaxDepth = calculateMaxDepth(data)
-    setMaxDepth(calculatedMaxDepth)
-    setDepthLimit(Math.min(calculatedMaxDepth, depthLimit))
+    let maxDepth = 0
+    organization.descendantOrgs.forEach(org => {
+      if (org.ascendantOrgs.length - 1 > maxDepth) {
+        maxDepth = org.ascendantOrgs.length - 1
+      }
+    })
+    setMaxDepth(maxDepth)
+    setDepthLimit(Math.min(maxDepth, depthLimit))
     const allAscendantOrgs = utils.getAscendantObjectsAsMap(
-      (data.organization?.ascendantOrgs ?? []).concat(
-        data.organization?.descendantOrgs ?? []
+      (organization?.ascendantOrgs ?? []).concat(
+        organization?.descendantOrgs ?? []
       )
     )
     const layout = calculateLayout(
-      data.organization,
-      data.organization.descendantOrgs,
+      organization,
+      organization.descendantOrgs,
       allAscendantOrgs,
       0,
       0,
@@ -428,13 +425,13 @@ const OrganizationFlowChart = ({
     return {
       nodes: layout.nodes.map(node => ({
         ...node,
-        data: { ...node.data, showAPP6Symbols }
+        data: { ...node.data, showApp6Symbols }
       })),
       edges: layout.edges
     }
-  }, [data, showAPP6Symbols, depthLimit, peopleFilter, calculateLayout])
+  }, [organization, showApp6Symbols, depthLimit, calculateLayout])
 
-  if (!data) {
+  if (!organization) {
     return <p>Loading...</p>
   }
 
@@ -467,11 +464,11 @@ const OrganizationFlowChart = ({
           >
             <input
               type="checkbox"
-              id="showAPP6Symbols"
-              checked={showAPP6Symbols}
+              id="showApp6Symbols"
+              checked={showApp6Symbols}
               onChange={toggleDisplayMode}
             />
-            <label htmlFor="showAPP6Symbols">APP-6 Symbols</label>
+            <label htmlFor="showApp6Symbols">APP-6 Symbols</label>
           </div>
           <select
             value={peopleFilter}
@@ -585,6 +582,19 @@ const ControlsContainer = styled.div`
     }
   }
 `
+const SvgComponent = ({ svgElement }) => {
+  const svgRef = useRef(null)
+
+  useEffect(() => {
+    if (svgRef.current && svgElement) {
+      svgRef.current.innerHTML = new XMLSerializer().serializeToString(
+        svgElement
+      )
+    }
+  }, [svgElement])
+
+  return <div ref={svgRef} />
+}
 
 const parseSvgStringToJSX = (svgString: string) => {
   const parser = new DOMParser()
@@ -593,28 +603,12 @@ const parseSvgStringToJSX = (svgString: string) => {
 
   svgElement.setAttribute("width", "60px")
 
-  return (
-    <span
-      dangerouslySetInnerHTML={{
-        __html: new XMLSerializer().serializeToString(svgElement)
-      }}
-    />
-  )
-}
-
-interface CustomNodeProps {
-  data: {
-    organization: any
-    symbol: string
-    depth: number
-    people: any[]
-    showSymbol: boolean
-  }
+  return <SvgComponent svgElement={svgElement} />
 }
 
 const CustomNode = ({
   data: { organization, symbol, depth, people, showSymbol }
-}: CustomNodeProps) => (
+}: NodeProps) => (
   <div
     style={{
       width: NODE_WIDTH,
@@ -667,22 +661,21 @@ const CustomNode = ({
         }}
       >
         {people.map(person => (
-          <div key={person.uuid}>
-            <LinkTo
-              modelType="Person"
-              model={person}
-              showIcon={false}
-              style={{
-                display: "inline-block",
-                maxWidth: TEXT_WIDTH,
-                padding: "5px 0px 5px 5px",
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                verticalAlign: "middle"
-              }}
-            />
-          </div>
+          <LinkTo
+            key={person.uuid}
+            modelType="Person"
+            model={person}
+            showIcon={false}
+            style={{
+              display: "inline-block",
+              maxWidth: TEXT_WIDTH,
+              padding: "5px 0px 5px 5px",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              verticalAlign: "middle"
+            }}
+          />
         ))}
       </div>
     )}
@@ -702,16 +695,6 @@ const CustomNode = ({
   </div>
 )
 
-interface CustomRootEdgeProps {
-  id: string
-  sourceX: number
-  sourceY: number
-  targetX: number
-  targetY: number
-  style: React.CSSProperties
-  markerEnd: string
-}
-
 const CustomRootEdge = ({
   id,
   sourceX,
@@ -720,7 +703,7 @@ const CustomRootEdge = ({
   targetY,
   style,
   markerEnd
-}: CustomRootEdgeProps) => {
+}: EdgeProps) => {
   const cornerRadius = 4
   const verticalMargin = 20
   const horizontalDirection = targetX > sourceX ? 1 : -1
