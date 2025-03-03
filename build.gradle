@@ -209,22 +209,28 @@ project.version = proc.text.trim();
 runtime {
 	options = ['--vm=server', '--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
 	modules = [
-		'java.sql',
+		'java.base',
+		'java.compiler',
 		'java.desktop',
-		'java.xml',
+		'java.instrument',
 		'java.logging',
 		'java.management',
+		'java.naming',
+		'java.net.http',
+		'java.prefs',
+		'java.rmi',
+		'java.scripting',
+		'java.security.jgss',
+		'java.security.sasl',
+		'java.sql',
+		'java.sql.rowset',
+		'java.transaction.xa',
+		'java.xml',
+		'java.xml.crypto',
 		'jdk.crypto.cryptoki',
 		'jdk.crypto.ec',
 		'jdk.jfr',
-		'jdk.unsupported',
-		'java.security.jgss',
-		'java.naming',
-		'java.transaction.xa',
-		'java.security.sasl',
-		'java.instrument',
-		'java.scripting',
-		'java.xml.crypto'
+		'jdk.unsupported'
 	]
 
 	jpackage {
