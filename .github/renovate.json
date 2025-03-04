@@ -184,6 +184,7 @@
         "bootstrap",
         "react-bootstrap"
       ]
+    }
   ],
   "postUpdateOptions": [
     "yarnDedupeHighest"
