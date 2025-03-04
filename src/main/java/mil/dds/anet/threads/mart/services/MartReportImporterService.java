@@ -41,6 +41,7 @@ import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.TaskDao;
 import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.resources.AttachmentResource;
+import mil.dds.anet.utils.ResourceUtils;
 import mil.dds.anet.utils.Utils;
 import org.apache.tika.Tika;
 import org.apache.tika.io.TikaInputStream;
@@ -307,22 +308,28 @@ public class MartReportImporterService implements IMartReportImporterService {
   }
 
   private String getClassificationFromReport(ReportDto martReport, List<String> errors) {
-    String result = null;
+    String anetReporClassification = null;
 
     try {
       JsonNode jsonNode = ignoringMapper.readTree(martReport.getCustomFields());
       JsonNode securityMarkingProperty = jsonNode.get(SECURITY_MARKING_JSON_PROPERTY);
       if (securityMarkingProperty != null) {
-        result = securityMarkingProperty.asText();
+        String martReportClassification = securityMarkingProperty.asText();
+        if (ResourceUtils.getAllowedClassifications().contains(martReportClassification)) {
+          anetReporClassification = martReportClassification;
+        } else {
+          errors.add(String.format("Can not find report security marking: '%s'",
+              martReportClassification));
+        }
+      } else {
+        errors.add("Security marking is missing");
       }
     } catch (JsonProcessingException e) {
+      errors.add(String.format("Could not extract security marking from MART report: '%s'", e.getMessage()));
       logger.error("Could not extract security marking from MART report", e);
     }
 
-    if (result == null) {
-      errors.add("Security marking is missing");
-    }
-    return result;
+    return anetReporClassification;
   }
 
   private List<ReportPerson> handleReportPeople(ReportDto martReport, Organization organization,
