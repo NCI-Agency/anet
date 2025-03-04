@@ -210,18 +210,13 @@ const OrganizationFlowChart = ({
   const lowestDepth = useRef(0)
   const { fitView } = useReactFlow()
 
-  useEffect(() => {
-    fitView()
-  }, [width, height, fitView])
-
   const downloadImage = async() => {
     if (!chartRef.current) {
       return
     }
 
     const dataUrl = await toPng(chartRef.current, {
-      backgroundColor: BACKGROUND_COLOR,
-      filter: node => !controlsRef.current?.contains(node)
+      backgroundColor: BACKGROUND_COLOR
     })
 
     const link = document.createElement("a")
@@ -269,6 +264,10 @@ const OrganizationFlowChart = ({
   const decreaseDepthLimit = () => {
     setDepthLimit(prev => Math.max(0, prev - 1))
   }
+
+  const reframe = useCallback(() => {
+    fitView()
+  }, [fitView])
 
   const calculateLayout = useCallback(
     (
@@ -465,6 +464,12 @@ const OrganizationFlowChart = ({
     }
   }, [organization, showApp6Symbols, depthLimit, calculateLayout])
 
+  useEffect(() => {
+    setTimeout(() => {
+      fitView()
+    })
+  }, [width, height, depthLimit])
+
   if (!organization) {
     return <p>Loading...</p>
   }
@@ -491,7 +496,7 @@ const OrganizationFlowChart = ({
           <option value="top_position">Top Position</option>
           <option value="top_2_positions">Top 2 Positions</option>
         </select>
-        <div className="depth-group">
+        <div>
           <label htmlFor="depthInput">Depth:</label>
           <div className="depth-controls">
             <Button onClick={decreaseDepthLimit}>
@@ -510,6 +515,10 @@ const OrganizationFlowChart = ({
             </Button>
           </div>
         </div>
+        <Button className="reframe" onClick={reframe}>
+          <Icon icon={IconNames.ZOOM_TO_FIT} />
+          Reframe
+        </Button>
         <Button className="export" onClick={downloadImage}>
           <Icon icon={IconNames.EXPORT} />
           Export Image
@@ -554,47 +563,45 @@ const ControlsContainer = styled.div`
       cursor: pointer;
     }
 
-    &.depth-group {
-      .depth-controls {
-        gap: 0;
-        background-color: white;
-        border-radius: 6px;
-        border: 1px solid #e5e5e5;
+    &.depth-controls {
+      gap: 0;
+      background-color: white;
+      border-radius: 6px;
+      border: 1px solid #e5e5e5;
 
-        .btn {
-          border: none;
+      .btn {
+        border: none;
 
-          &:hover {
-            background-color: #f4f4f4;
-          }
-
-          &:first-child {
-            border-radius: 6px 0 0 6px;
-            border-right: 1px solid #e5e5e5;
-          }
-
-          &:last-child {
-            border-radius: 0 6px 6px 0;
-            border-left: 1px solid #e5e5e5;
-          }
+        &:hover {
+          background-color: #f4f4f4;
         }
 
-        input {
-          border: none;
-          text-align: center;
-          font-size: 14px;
-          color: #444444;
+        &:first-of-type {
+          border-radius: 6px 0 0 6px;
+          border-right: 1px solid #e5e5e5;
+        }
 
-          &::-webkit-outer-spin-button,
-          &::-webkit-inner-spin-button {
-            appearance: none;
-            margin: 0;
-          }
+        &:last-of-type {
+          border-radius: 0 6px 6px 0;
+          border-left: 1px solid #e5e5e5;
+        }
+      }
 
-          &:focus {
-            outline: none;
-            border-color: #2563eb;
-          }
+      input {
+        border: none;
+        text-align: center;
+        font-size: 14px;
+        color: #444444;
+
+        &::-webkit-outer-spin-button,
+        &::-webkit-inner-spin-button {
+          appearance: none;
+          margin: 0;
+        }
+
+        &:focus {
+          outline: none;
+          border-color: #2563eb;
         }
       }
     }
