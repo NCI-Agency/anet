@@ -32,6 +32,10 @@ public class Position extends AbstractEmailableAnetBean
     SUPERUSER, ADMINISTRATOR
   }
 
+  public static enum SuperuserType {
+    REGULAR, CAN_CREATE_TOP_LEVEL_ORGANIZATIONS, CAN_CREATE_OR_EDIT_ANY_ORGANIZATION
+  }
+
   public static enum PositionRole {
     MEMBER, DEPUTY, LEADER
   }
@@ -45,6 +49,9 @@ public class Position extends AbstractEmailableAnetBean
   @GraphQLQuery
   @GraphQLInputField
   PositionType type;
+  @GraphQLQuery
+  @GraphQLInputField
+  SuperuserType superuserType;
   @GraphQLQuery
   @GraphQLInputField
   private Status status;
@@ -98,6 +105,14 @@ public class Position extends AbstractEmailableAnetBean
 
   public void setType(PositionType type) {
     this.type = type;
+  }
+
+  public SuperuserType getSuperuserType() {
+    return superuserType;
+  }
+
+  public void setSuperuserType(SuperuserType superuserType) {
+    this.superuserType = superuserType;
   }
 
   @Override
