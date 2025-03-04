@@ -21,9 +21,8 @@ public class PostgresqlReportSearcher extends AbstractReportSearcher {
   private final String isoDowFormat;
 
   public PostgresqlReportSearcher(DatabaseHandler databaseHandler) {
-    super(databaseHandler,
-        new PostgresqlSearchQueryBuilder<Report, ReportSearchQuery>("PostgresqlReportSearch"));
-    this.isoDowFormat = "EXTRACT(DOW FROM %s)+1"; // We need Sunday=1, Monday=2, etc.
+    super(databaseHandler, new PostgresqlSearchQueryBuilder<>("PostgresqlReportSearch"));
+    this.isoDowFormat = "EXTRACT(DOW FROM %s)"; // Sunday=0, Monday=1, etc.
   }
 
   @Transactional
