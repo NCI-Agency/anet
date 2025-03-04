@@ -140,7 +140,7 @@ public class TestData {
 
     // Custom fields
     reportDto.setCustomFields(
-        "{\"attitude\":\"Positive\", \"contacts\":\"Contacts\", \"securityMarking\":\"NKU\"}");
+        "{\"attitude\":\"Positive\", \"contacts\":\"Contacts\", \"securityMarking\":\"NU\"}");
 
     // Tasks
     final Map<String, String> tasks = new HashMap<>();
@@ -156,6 +156,14 @@ public class TestData {
     reportDto.setUuid("34faac7c-8c85-4dec-8e9f-57d9254b5ae2");
     reportDto.getTasks().put("does not exist", "does not exist");
     reportDto.setCustomFields("{\"attitude\":\"Positive\", \"contacts\":\"Contacts\"}");
+    return reportDto;
+  }
+
+  public static ReportDto createMartReportWithSecurityMarkingNotInDictionary(long sequence) {
+    final ReportDto reportDto = createGoodMartReport(sequence);
+    reportDto.setUuid("58e0ff9b-4908-4f2d-8cab-8d64aefff929");
+    reportDto.setCustomFields(
+        "{\"attitude\":\"Positive\", \"contacts\":\"Contacts\", \"securityMarking\":\"random\"}");
     return reportDto;
   }
 
@@ -209,7 +217,7 @@ public class TestData {
     List<LogDto> transmissionLog = new ArrayList<>();
 
     // Put all properly transmitted ones
-    for (long i = 0; i < 7; i++) {
+    for (long i = 0; i < 8; i++) {
       LogDto logDto = new LogDto();
       logDto.setState(LogDto.LogState.SENT.getCode());
       logDto.setSequence(i);
@@ -222,14 +230,14 @@ public class TestData {
     missing1.setState(LogDto.LogState.FAILED_TO_SEND_EMAIL.getCode());
     missing1.setErrors("SMTP error sending email in MART");
     missing1.setSubmittedAt(Instant.now());
-    missing1.setSequence(7L);
+    missing1.setSequence(8L);
     transmissionLog.add(missing1);
 
     LogDto missing2 = new LogDto();
     missing2.setReportUuid("missingReportUuid2");
     missing2.setState(LogDto.LogState.SENT.getCode());
     missing2.setSubmittedAt(Instant.now());
-    missing2.setSequence(8L);
+    missing2.setSequence(9L);
     transmissionLog.add(missing2);
 
     return transmissionLog;
