@@ -9,7 +9,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjuster;
 import java.time.temporal.TemporalAdjusters;
@@ -31,6 +30,7 @@ import mil.dds.anet.beans.Note.NoteType;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Task;
+import mil.dds.anet.beans.WithStatus;
 import mil.dds.anet.beans.search.PositionSearchQuery;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.config.AnetDictionary;
@@ -101,60 +101,59 @@ public class PendingAssessmentsHelper {
           .truncatedTo(ChronoUnit.DAYS);
       final ZonedDateTime boy = zonefulReferenceDate.with(TemporalAdjusters.firstDayOfYear())
           .truncatedTo(ChronoUnit.DAYS);
-      final int moyLessOne = zonefulReferenceDate.get(ChronoField.MONTH_OF_YEAR) - 1;
+      final int moyLessOne = zonefulReferenceDate.getMonth().getValue() - 1;
 
       switch (recurrence) {
         case DAILY -> {
           notificationDate = bod;
-          assessmentDate = notificationDate.minus(1, ChronoUnit.DAYS);
+          assessmentDate = notificationDate.minusDays(1);
           reminderDate = null; // no reminders
         }
         case WEEKLY -> {
           notificationDate = bow;
-          assessmentDate = notificationDate.minus(1, ChronoUnit.WEEKS);
-          reminderDate = notificationDate.plus(3, ChronoUnit.DAYS);
+          assessmentDate = notificationDate.minusWeeks(1);
+          reminderDate = notificationDate.plusDays(3);
         }
         case BIWEEKLY -> {
-          notificationDate = bow.minus(
-              Math.abs(ChronoUnit.WEEKS.between(biWeeklyReferenceDate, bow)) % 2, ChronoUnit.WEEKS);
-          assessmentDate = notificationDate.minus(2, ChronoUnit.WEEKS);
-          reminderDate = notificationDate.plus(5, ChronoUnit.DAYS);
+          notificationDate =
+              bow.minusWeeks(Math.abs(ChronoUnit.WEEKS.between(biWeeklyReferenceDate, bow)) % 2);
+          assessmentDate = notificationDate.minusWeeks(2);
+          reminderDate = notificationDate.plusDays(5);
         }
         case SEMIMONTHLY -> { // two per month: [1 - 14] and [15 - end-of-month]
           final int daysInFirstPeriod = 14;
-          if (zonefulReferenceDate.get(ChronoField.DAY_OF_MONTH) <= daysInFirstPeriod) {
+          if (zonefulReferenceDate.getDayOfMonth() <= daysInFirstPeriod) {
             notificationDate = bom;
-            assessmentDate =
-                bom.minus(1, ChronoUnit.MONTHS).plus(daysInFirstPeriod, ChronoUnit.DAYS);
+            assessmentDate = bom.minusMonths(1).plusDays(daysInFirstPeriod);
           } else {
-            notificationDate = bom.plus(daysInFirstPeriod, ChronoUnit.DAYS);
+            notificationDate = bom.plusDays(daysInFirstPeriod);
             assessmentDate = bom;
           }
-          reminderDate = notificationDate.plus(5, ChronoUnit.DAYS);
+          reminderDate = notificationDate.plusDays(5);
         }
         case MONTHLY -> {
           notificationDate = bom;
-          assessmentDate = notificationDate.minus(1, ChronoUnit.MONTHS);
-          reminderDate = notificationDate.plus(1, ChronoUnit.WEEKS);
+          assessmentDate = notificationDate.minusMonths(1);
+          reminderDate = notificationDate.plusWeeks(1);
         }
         case QUARTERLY -> {
           final long monthsInQuarter = 3;
           final long q = moyLessOne / monthsInQuarter;
-          notificationDate = boy.plus(q * monthsInQuarter, ChronoUnit.MONTHS);
-          assessmentDate = notificationDate.minus(monthsInQuarter, ChronoUnit.MONTHS);
-          reminderDate = notificationDate.plus(4, ChronoUnit.WEEKS);
+          notificationDate = boy.plusMonths(q * monthsInQuarter);
+          assessmentDate = notificationDate.minusMonths(monthsInQuarter);
+          reminderDate = notificationDate.plusWeeks(4);
         }
         case SEMIANNUALLY -> { // two per year: [Jan 1 - Jun 30] and [Jul 1 - Dec 31]
           final long monthsInHalfYear = 6;
           final long sa = moyLessOne / monthsInHalfYear;
-          notificationDate = boy.plus(sa * monthsInHalfYear, ChronoUnit.MONTHS);
-          assessmentDate = notificationDate.minus(monthsInHalfYear, ChronoUnit.MONTHS);
-          reminderDate = notificationDate.plus(1, ChronoUnit.MONTHS);
+          notificationDate = boy.plusMonths(sa * monthsInHalfYear);
+          assessmentDate = notificationDate.minusMonths(monthsInHalfYear);
+          reminderDate = notificationDate.plusMonths(1);
         }
         case ANNUALLY -> {
           notificationDate = boy;
-          assessmentDate = notificationDate.minus(1, ChronoUnit.YEARS);
-          reminderDate = notificationDate.plus(1, ChronoUnit.MONTHS);
+          assessmentDate = notificationDate.minusYears(1);
+          reminderDate = notificationDate.plusMonths(1);
         }
         default -> {
           // Unknown recurrence
@@ -403,7 +402,7 @@ public class PendingAssessmentsHelper {
     // Get all active, filled positions, possibly with counterparts
     final PositionSearchQuery psq = new PositionSearchQuery();
     psq.setPageSize(0);
-    psq.setStatus(Position.Status.ACTIVE);
+    psq.setStatus(WithStatus.Status.ACTIVE);
     psq.setIsFilled(Boolean.TRUE);
     if (withCounterparts) {
       psq.setHasCounterparts(Boolean.TRUE);
@@ -415,7 +414,7 @@ public class PendingAssessmentsHelper {
     // Get all active tasks with a non-empty customFields
     final TaskSearchQuery tsq = new TaskSearchQuery();
     tsq.setPageSize(0);
-    tsq.setStatus(Position.Status.ACTIVE);
+    tsq.setStatus(WithStatus.Status.ACTIVE);
     return taskDao.search(tsq).getList();
   }
 
@@ -424,8 +423,9 @@ public class PendingAssessmentsHelper {
     if (position == null || personAssessmentRecurrence.isEmpty()) {
       return CompletableFuture.completedFuture(Collections.emptySet());
     } else {
-      return position.loadAssociatedPositions(context).thenApply(ap -> ap.stream()
-          .filter(pp -> Position.Status.ACTIVE.equals(pp.getStatus())).collect(Collectors.toSet()));
+      return position.loadAssociatedPositions(context)
+          .thenApply(ap -> ap.stream().filter(pp -> WithStatus.Status.ACTIVE.equals(pp.getStatus()))
+              .collect(Collectors.toSet()));
     }
   }
 
@@ -437,8 +437,8 @@ public class PendingAssessmentsHelper {
     // Wait for our futures to complete before returning
     return CompletableFuture.allOf(allFutures).thenCompose(v -> {
       // Remove inactive people
-      allPositionsToAssess.keySet().removeIf(
-          p -> p.getPerson() == null || !Person.Status.ACTIVE.equals(p.getPerson().getStatus()));
+      allPositionsToAssess.keySet().removeIf(p -> p.getPerson() == null
+          || !WithStatus.Status.ACTIVE.equals(p.getPerson().getStatus()));
       return CompletableFuture.completedFuture(true);
     });
   }
@@ -467,8 +467,8 @@ public class PendingAssessmentsHelper {
               final Instant periodStartInstant =
                   periodStartDate.atStartOfDay(DaoUtils.getServerNativeZoneId()).toInstant();
               assessmentsByRecurrence.compute(Recurrence.valueOfRecurrence(recurrence.asText()),
-                  (r, currentValue) -> currentValue == null ? periodStartInstant
-                      : periodStartInstant.isAfter(currentValue) ? periodStartInstant
+                  (r, currentValue) -> (currentValue == null
+                      || periodStartInstant.isAfter(currentValue)) ? periodStartInstant
                           : currentValue);
             }
           } catch (JsonProcessingException ignored) {
