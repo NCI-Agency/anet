@@ -23,7 +23,8 @@ import ReactFlow, {
   Handle,
   NodeProps,
   Position,
-  ReactFlowProvider
+  ReactFlowProvider,
+  useReactFlow
 } from "reactflow"
 import "reactflow/dist/style.css"
 import Settings from "settings"
@@ -140,17 +141,25 @@ const RANKS = Settings.fields.person.ranks.map(rank => rank.value)
 interface OrganizationalChartProps {
   pageDispatchers?: PageDispatchersPropType
   org: any
+  width?: number
+  height?: number
   exportTitle?: string
 }
 
 const OrganizationalChart = ({
   pageDispatchers,
   org,
+  width,
+  height,
   exportTitle
 }: OrganizationalChartProps) => {
-  const { loading, error, data } = API.useApiQuery(GQL_GET_CHART_DATA, {
-    uuid: org.uuid
-  })
+  const { loading, error, data } = API.useApiQuery(
+    GQL_GET_CHART_DATA,
+    {
+      uuid: org.uuid
+    },
+    {}
+  )
 
   const { done, result } = useBoilerplate({
     loading,
@@ -172,6 +181,8 @@ const OrganizationalChart = ({
       <OrganizationFlowChart
         organization={organization}
         exportTitle={exportTitle}
+        width={width}
+        height={height}
       />
     </ReactFlowProvider>
   )
@@ -179,11 +190,15 @@ const OrganizationalChart = ({
 
 interface OrganizationFlowChartProps {
   organization: { descendantOrgs: any[]; ascendantOrgs: any[] }
+  width?: number
+  height?: number
   exportTitle?: string
 }
 
 const OrganizationFlowChart = ({
   organization,
+  width,
+  height,
   exportTitle
 }: OrganizationFlowChartProps) => {
   const [showApp6Symbols, setShowApp6Symbols] = useState(false)
@@ -193,14 +208,17 @@ const OrganizationFlowChart = ({
   const chartRef = useRef<HTMLDivElement>(null)
   const controlsRef = useRef<HTMLDivElement>(null)
   const lowestDepth = useRef(0)
+  const { fitView } = useReactFlow()
+
+  useEffect(() => {
+    fitView()
+  }, [width, height, fitView])
 
   const downloadImage = async() => {
     if (!chartRef.current) {
       return
     }
 
-    // Wait for the next tick to ensure DOM updates
-    await new Promise(resolve => setTimeout(resolve, 50))
     const dataUrl = await toPng(chartRef.current, {
       backgroundColor: BACKGROUND_COLOR,
       filter: node => !controlsRef.current?.contains(node)
@@ -500,8 +518,8 @@ const OrganizationFlowChart = ({
       <div
         ref={chartRef}
         style={{
+          width: width ? `${width}px` : "100%",
           height: "calc(100vh - 200px)",
-          width: "100%",
           backgroundColor: BACKGROUND_COLOR
         }}
       >
@@ -649,7 +667,7 @@ const ControlsContainer = styled.div`
 const CustomNode = ({
   data: { organization, symbol, depth, people, showSymbol }
 }: NodeProps) => {
-  const svg = useRef()
+  const svg = useRef<HTMLDivElement>(null)
   useEffect(() => {
     if (svg.current) {
       if (svg.current.firstChild) {
