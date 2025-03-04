@@ -188,7 +188,7 @@ class PendingAssessmentsNotificationWorkerTest {
     };
     for (final Object[] testItem : testData) {
       final AssessmentDates assessmentDates =
-          new AssessmentDates(toInstant(testItem[0]), (Recurrence) testItem[1]);
+          new AssessmentDates(toInstant(testItem[0]), (Recurrence) testItem[1], true);
       logger.debug("checking {} against {}", testItem, assessmentDates);
       assertThat(assessmentDates.getAssessmentDate()).isEqualTo(toInstant(testItem[2]));
       assertThat(assessmentDates.getNotificationDate()).isEqualTo(toInstant(testItem[3]));

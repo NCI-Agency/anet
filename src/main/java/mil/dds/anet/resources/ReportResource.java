@@ -13,7 +13,6 @@ import java.io.StringWriter;
 import java.lang.invoke.MethodHandles;
 import java.time.DayOfWeek;
 import java.time.Instant;
-import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -786,7 +785,6 @@ public class ReportResource {
         ConfidentialityRecord.create(siteClassification).toString());
     emailContext.put("SECURITY_BANNER_COLOR", siteClassification.get("color"));
     emailContext.put(DailyRollupEmail.SHOW_REPORT_TEXT_FLAG, showReportText);
-    logger.error("GJ: context={}", emailContext);
     addConfigToContext(emailContext);
 
     try {
@@ -1042,17 +1040,14 @@ public class ReportResource {
   }
 
   private void addConfigToContext(Map<String, Object> context) {
-    context.put("dateFormatter",
-        DateTimeFormatter.ofPattern((String) dict.getDictionaryEntry("dateFormats.email.date"))
-            .withZone(DaoUtils.getServerNativeZoneId()));
-    context.put("engagementsIncludeTimeAndDuration",
-        Boolean.TRUE.equals(dict.getDictionaryEntry("engagementsIncludeTimeAndDuration")));
-    final String edtfPattern = (String) dict.getDictionaryEntry(
-        Boolean.TRUE.equals(dict.getDictionaryEntry("engagementsIncludeTimeAndDuration"))
-            ? "dateFormats.email.withTime"
-            : "dateFormats.email.date");
-    context.put("engagementDateFormatter",
-        DateTimeFormatter.ofPattern(edtfPattern).withZone(DaoUtils.getServerNativeZoneId()));
+    context.put("dateFormatter", Utils.getDateFormatter(dict, "dateFormats.email.date"));
+    context.put("dateTimeFormatter",
+        Utils.getDateTimeFormatter(dict, "dateFormats.email.withTime"));
+    final boolean engagementsIncludeTimeAndDuration =
+        Boolean.TRUE.equals(dict.getDictionaryEntry("engagementsIncludeTimeAndDuration"));
+    context.put("engagementsIncludeTimeAndDuration", engagementsIncludeTimeAndDuration);
+    context.put("engagementDateFormatter", Utils.getEngagementDateFormatter(dict,
+        engagementsIncludeTimeAndDuration, "dateFormats.email.withTime", "dateFormats.email.date"));
     @SuppressWarnings("unchecked")
     final Map<String, Object> fields = (Map<String, Object>) dict.getDictionaryEntry("fields");
     context.put("fields", fields);
