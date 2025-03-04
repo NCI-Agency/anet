@@ -999,6 +999,8 @@ properties:
             "$ref": "#/$defs/inputField"
           type:
             "$ref": "#/$defs/inputField"
+          superuserType:
+            "$ref": "#/$defs/inputField"
           code:
             "$ref": "#/$defs/excludableInputField"
           organization:

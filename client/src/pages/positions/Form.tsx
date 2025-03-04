@@ -80,6 +80,7 @@ const PositionForm = ({
   const [showSimilarPositionsMessage, setShowSimilarPositionsMessage] =
     useState(false)
   const [positionName, setPositionName] = useState(initialValues?.name)
+  const [permissions, setPermissions] = useState(initialValues?.type)
   initialValues.emailAddresses = initializeEmailAddresses(
     initialValues.emailAddresses
   )
@@ -140,6 +141,25 @@ const PositionForm = ({
       label: PositionRole.LEADER.humanNameOfRole()
     }
   ])
+
+  const superUserTypeButtons = [
+    {
+      id: "permsSuperuserRegularButton",
+      value: Position.SUPERUSER_TYPE.REGULAR,
+      label: "Regular"
+    },
+    {
+      id: "permsSuperuserRegularButton",
+      value: Position.SUPERUSER_TYPE.CAN_CREATE_TOP_LEVEL_ORGANIZATIONS,
+      label: "Can Create Top Level Organizations"
+    },
+    {
+      id: "permsSuperuserRegularButton",
+      value: Position.SUPERUSER_TYPE.CAN_CREATE_OR_EDIT_ANY_ORGANIZATION,
+      label: "Can Create or Edit any Organization"
+    }
+  ]
+
   const checkPotentialDuplicatesDebounced = useDebouncedCallback(
     checkPotentialDuplicates,
     400
@@ -179,6 +199,7 @@ const PositionForm = ({
         // Only admin and superuser can assign high role (other than member role) to a position
         const positionRoleButtons =
           isAdmin || isSuperuser ? adminRolesButtons : nonAdminRolesButtons
+        const positionSuperuserTypeButtons = superUserTypeButtons
         const orgSearchQuery = { status: Model.STATUS.ACTIVE }
         if (isSuperuser) {
           orgSearchQuery.parentOrgUuid = [...administratingOrgUuids]
@@ -268,7 +289,9 @@ const PositionForm = ({
                     name="type"
                     component={FieldHelper.RadioButtonToggleGroupField}
                     buttons={typeButtons}
-                    onChange={value => setFieldValue("type", value)}
+                    onChange={value => {
+                      setFieldValue("type", value)
+                    }}
                   />
                 )}
 
@@ -276,8 +299,31 @@ const PositionForm = ({
                   name="permissions"
                   component={FieldHelper.RadioButtonToggleGroupField}
                   buttons={permissionsButtons}
-                  onChange={value => setFieldValue("permissions", value)}
+                  onChange={value => {
+                    setFieldValue("permissions", value)
+                    if (value === Position.TYPE.SUPERUSER) {
+                      setFieldValue(
+                        "superuserType",
+                        Position.SUPERUSER_TYPE.REGULAR
+                      )
+                    } else {
+                      setFieldValue("superuserType", null)
+                    }
+                    setPermissions(value)
+                  }}
                 />
+                {permissions === Position.TYPE.SUPERUSER && (
+                  <DictionaryField
+                    wrappedComponent={FastField}
+                    dictProps={Settings.fields.position.superuserType}
+                    name="superuserType"
+                    component={FieldHelper.RadioButtonToggleGroupField}
+                    buttons={positionSuperuserTypeButtons}
+                    onChange={value => {
+                      setFieldValue("superuserType", value)
+                    }}
+                  />
+                )}
 
                 <DictionaryField
                   wrappedComponent={Field}

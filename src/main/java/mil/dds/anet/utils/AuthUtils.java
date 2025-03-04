@@ -50,6 +50,13 @@ public class AuthUtils {
     if (position.getType() != PositionType.SUPERUSER) {
       return false;
     }
+    // SuperuserType.CAN_CREATE_OR_EDIT_ANY_ORGANIZATION can deal with any organization
+    if (position.getType() == PositionType.SUPERUSER && position
+        .getSuperuserType() == Position.SuperuserType.CAN_CREATE_OR_EDIT_ANY_ORGANIZATION) {
+      logger.debug("User {} is a fully enhanced superuser, can automatically administrate org",
+          user);
+      return true;
+    }
 
     // Check the responsible organizations.
     final GraphQLContext context = ApplicationContextProvider.getEngine().getContext();
@@ -80,6 +87,22 @@ public class AuthUtils {
     throw new ResponseStatusException(HttpStatus.FORBIDDEN, UNAUTH_MESSAGE);
   }
 
+  public static boolean canCreateSubOrg(final Person user, final String parentOrganizationUuid) {
+    // Admins can create any organization
+    if (AuthUtils.isAdmin(user)) {
+      return true;
+    }
+
+    // Non regular superusers can create top level organizations
+    if (parentOrganizationUuid == null) {
+      // Only allow if superuser with special permissions
+      return AuthUtils.isNotRegularSuperUser(user);
+    }
+
+    // A sub organization is being created -> check permissions on parentOrg
+    return canAdministrateOrg(user, parentOrganizationUuid);
+  }
+
   public static void assertSuperuser(Person user) {
     logger.debug("Asserting superuser position for {}", user);
     if (!isSuperuser(user)) {
@@ -93,9 +116,21 @@ public class AuthUtils {
         || position.getType() == PositionType.ADMINISTRATOR);
   }
 
+  public static boolean isNotRegularSuperUser(Person user) {
+    Position position = DaoUtils.getPosition(user);
+    return position != null && (position.getType() == PositionType.SUPERUSER
+        && position.getSuperuserType() != Position.SuperuserType.REGULAR);
+  }
+
   public static boolean isAdmin(Person user) {
     Position position = DaoUtils.getPosition(user);
     return (position != null) && (position.getType() == PositionType.ADMINISTRATOR);
+  }
+
+  public static boolean isSuperUserThatCanEditAllOrganizations(Person user) {
+    Position position = DaoUtils.getPosition(user);
+    return (position != null) && (position.getType() == PositionType.SUPERUSER && position
+        .getSuperuserType() == Position.SuperuserType.CAN_CREATE_OR_EDIT_ANY_ORGANIZATION);
   }
 
 }
