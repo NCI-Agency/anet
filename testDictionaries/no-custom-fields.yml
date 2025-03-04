@@ -9,6 +9,7 @@ eventsIncludeStartAndEndTime: true
 calendarOptions:
   attendeesType: advisor
 
+useISO8601: true
 dateFormats:
   email:
     date: d MMMM yyyy Z
