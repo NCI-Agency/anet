@@ -325,7 +325,8 @@ public class MartReportImporterService implements IMartReportImporterService {
         errors.add("Security marking is missing");
       }
     } catch (JsonProcessingException e) {
-      errors.add(String.format("Could not extract security marking from MART report: '%s'", e.getMessage()));
+      errors.add(String.format("Could not extract security marking from MART report: '%s'",
+          e.getMessage()));
       logger.error("Could not extract security marking from MART report", e);
     }
 
