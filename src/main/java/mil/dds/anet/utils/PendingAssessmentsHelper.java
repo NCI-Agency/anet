@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import graphql.GraphQLContext;
 import java.lang.invoke.MethodHandles;
-import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
@@ -12,6 +11,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjuster;
 import java.time.temporal.TemporalAdjusters;
+import java.time.temporal.WeekFields;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -84,16 +84,19 @@ public class PendingAssessmentsHelper {
     private final ZonedDateTime notificationDate;
     private final ZonedDateTime reminderDate;
 
-    public AssessmentDates(final Instant referenceDate, final Recurrence recurrence) {
+    public AssessmentDates(final Instant referenceDate, final Recurrence recurrence,
+        final boolean useISO8601) {
       // Compute some period boundaries
       final ZonedDateTime zonefulReferenceDate =
           referenceDate.atZone(DaoUtils.getServerNativeZoneId());
       final ZonedDateTime bod = zonefulReferenceDate.truncatedTo(ChronoUnit.DAYS);
-      // Monday is the first day of the week
-      final TemporalAdjuster firstDayOfWeek = TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY);
+      // For ISO 8601, Monday is the first day of the week, else it is Sunday
+      final WeekFields weekFields = useISO8601 ? WeekFields.ISO : WeekFields.SUNDAY_START;
+      final TemporalAdjuster firstDayOfWeek =
+          TemporalAdjusters.previousOrSame(weekFields.getFirstDayOfWeek());
       final ZonedDateTime bow =
           zonefulReferenceDate.with(firstDayOfWeek).truncatedTo(ChronoUnit.DAYS);
-      // Bi-weekly reference date is first Monday of 2021
+      // Bi-weekly reference date is first Monday (ISO 8601) or Sunday (otherwise) of 2021
       final ZonedDateTime biWeeklyReferenceDate = LocalDate.of(2021, 1, 4).with(firstDayOfWeek)
           .atStartOfDay(DaoUtils.getServerNativeZoneId()).toInstant()
           .atZone(DaoUtils.getServerNativeZoneId());
@@ -218,11 +221,13 @@ public class PendingAssessmentsHelper {
   public static final String NOTE_PERIOD_START = "__periodStart";
 
   private final AnetDictionary dict;
+  private final boolean useISO8601;
   private final PositionDao positionDao;
   private final TaskDao taskDao;
 
   public PendingAssessmentsHelper(final AnetDictionary dict) {
     this.dict = dict;
+    this.useISO8601 = Boolean.TRUE.equals(dict.getDictionaryEntry("useISO8601"));
     this.positionDao = ApplicationContextProvider.getEngine().getPositionDao();
     this.taskDao = ApplicationContextProvider.getEngine().getTaskDao();
   }
@@ -282,7 +287,7 @@ public class PendingAssessmentsHelper {
         Stream.of(Recurrence.values()).collect(Collectors.toSet());
     for (final Iterator<Recurrence> iter = recurrenceSet.iterator(); iter.hasNext();) {
       final Recurrence recurrence = iter.next();
-      final AssessmentDates assessmentDates = new AssessmentDates(now, recurrence);
+      final AssessmentDates assessmentDates = new AssessmentDates(now, recurrence, useISO8601);
       // Note that if someone gets assigned a new counterpart or a new task, or the recurrence of
       // assessment definitions is changed, this means they may not be notified until the *next*
       // period.
@@ -476,7 +481,7 @@ public class PendingAssessmentsHelper {
           }
         });
         assessmentsByRecurrence.forEach((recurrence, lastAssessment) -> {
-          final AssessmentDates assessmentDates = new AssessmentDates(now, recurrence);
+          final AssessmentDates assessmentDates = new AssessmentDates(now, recurrence, useISO8601);
           if (assessmentDates.getAssessmentDate() == null
               || !lastAssessment.isBefore(assessmentDates.getAssessmentDate())) {
             // Assessment already done

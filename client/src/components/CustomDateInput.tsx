@@ -64,6 +64,10 @@ const CustomDateInput = ({
     ? Settings.dateFormats.forms.input.withTime
     : Settings.dateFormats.forms.input.date
   const inputFormat = dateFormats[0]
+  const dayPickerProps = {
+    weekStartsOn: Settings.useISO8601 ? 1 : 0,
+    firstWeekContainsDate: Settings.useISO8601 ? 4 : 1
+  }
   const timePrecision = !withTime ? undefined : TimePrecision.MINUTE
   const timePickerProps = !withTime
     ? undefined
@@ -101,6 +105,7 @@ const CustomDateInput = ({
       canClearSelection={canClearSelection}
       showActionsBar
       closeOnSelection={!withTime}
+      dayPickerProps={dayPickerProps}
       timePrecision={timePrecision}
       timePickerProps={timePickerProps}
       showTimezoneSelect={false}
