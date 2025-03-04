@@ -77,8 +77,8 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
         createReportMockEmail(TestData.createMartReportWrongLocation(4), false);
     EmailMessage emailMessage5 =
         createReportMockEmail(TestData.createMartReportCompletelyWrong(5), false);
-    EmailMessage emailMessage6 =
-        createReportMockEmail(TestData.createGoodMartReportWithUnknownTask(6), true);
+    EmailMessage emailMessage6 = createReportMockEmail(
+        TestData.createGoodMartReportWithUnknownTaskAndMissingSecurityMarking(6), true);
     EmailMessage emailMessage7 = createTransmissionLogMockEmail();
 
     EmailMessage emailMessage8 =
@@ -88,12 +88,12 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
     // First six emails are reports
     // Then transmission log is received twice - should only result in one new record in
     // MartImportedReports
-    IMailReceiver iMailReceiverMock = Mockito.mock();
-    when(iMailReceiverMock.downloadEmails()).thenReturn(List.of(emailMessage1, emailMessage2,
+    IMailReceiver mailReceiverMock = Mockito.mock();
+    when(mailReceiverMock.downloadEmails()).thenReturn(List.of(emailMessage1, emailMessage2,
         emailMessage3, emailMessage4, emailMessage5, emailMessage6, emailMessage7, emailMessage7),
         List.of(emailMessage8));
 
-    martReportImporterWorker = new MartImporterWorker(dict, jobHistoryDao, iMailReceiverMock,
+    martReportImporterWorker = new MartImporterWorker(dict, jobHistoryDao, mailReceiverMock,
         martReportImporterService, martTransmissionLogImporterService);
   }
 
@@ -130,6 +130,7 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
     assertThat(createdReport.getAttachments()).hasSize(1);
     assertThat(createdReport.getAttachments().get(0).getFileName()).isEqualTo(ATTACHMENT_NAME);
     assertThat(createdReport.getTasks().get(0).getLongName()).isEqualTo("Intelligence");
+    assertThat(createdReport.getClassification()).isEqualTo("NKU");
 
     // Eight new records in MartImportedReports, verify them
     List<MartImportedReport> martImportedReports = martImportedReportDao.getAll();
@@ -189,7 +190,8 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
         && martImportedReport.getErrors() != null
         && martImportedReport.getErrors()
             .equals("While importing report 34faac7c-8c85-4dec-8e9f-57d9254b5ae2:"
-                + "<ul><li>Can not find task: 'does not exist' with uuid: does not exist</li></ul>"))
+                + "<ul><li>Security marking is missing</li>"
+                + "<li>Can not find task: 'does not exist' with uuid: does not exist</li></ul>"))
         .toList();
     assertThat(reportList).hasSize(1);
     assertThat(martImportedReportDao.delete(reportList.get(0))).isOne();

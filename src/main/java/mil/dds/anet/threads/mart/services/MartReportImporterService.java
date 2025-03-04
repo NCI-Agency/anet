@@ -1,8 +1,10 @@
 package mil.dds.anet.threads.mart.services;
 
 import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import java.nio.charset.StandardCharsets;
@@ -50,6 +52,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class MartReportImporterService implements IMartReportImporterService {
 
+  private static final String SECURITY_MARKING_JSON_PROPERTY = "securityMarking";
   protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 
   public static final String REPORT_JSON_ATTACHMENT = "mart_report.json";
@@ -250,7 +253,8 @@ public class MartReportImporterService implements IMartReportImporterService {
       }
       anetReport.setEngagementDate(martReport.getEngagementDate());
       anetReport.setReportText(martReport.getReportText());
-      anetReport.setClassification("NKU");
+      // Get classification from securityMarking property in MART custom fields
+      anetReport.setClassification(getClassificationFromReport(martReport, errors));
       // Set advisor organization to the organization of the submitter
       anetReport.setAdvisorOrg(organization);
       // Report tasks
@@ -300,6 +304,25 @@ public class MartReportImporterService implements IMartReportImporterService {
       martImportedReport.setErrors(errorMsg);
     }
 
+  }
+
+  private String getClassificationFromReport(ReportDto martReport, List<String> errors) {
+    String result = null;
+
+    try {
+      JsonNode jsonNode = ignoringMapper.readTree(martReport.getCustomFields());
+      JsonNode securityMarkingProperty = jsonNode.get(SECURITY_MARKING_JSON_PROPERTY);
+      if (securityMarkingProperty != null) {
+        result = securityMarkingProperty.asText();
+      }
+    } catch (JsonProcessingException e) {
+      logger.error("Could not extract security marking from MART report", e);
+    }
+
+    if (result == null) {
+      errors.add("Security marking is missing");
+    }
+    return result;
   }
 
   private List<ReportPerson> handleReportPeople(ReportDto martReport, Organization organization,

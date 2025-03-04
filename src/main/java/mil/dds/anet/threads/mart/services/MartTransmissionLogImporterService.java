@@ -11,7 +11,7 @@ import microsoft.exchange.webservices.data.property.complex.FileAttachment;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.mart.LogDto;
 import mil.dds.anet.beans.mart.MartImportedReport;
-import mil.dds.anet.database.*;
+import mil.dds.anet.database.MartImportedReportDao;
 import mil.dds.anet.database.mappers.MapperUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

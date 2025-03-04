@@ -2,7 +2,11 @@ package mil.dds.anet.test;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.RollupGraph;
 import mil.dds.anet.beans.mart.LogDto;
@@ -136,7 +140,7 @@ public class TestData {
 
     // Custom fields
     reportDto.setCustomFields(
-        "{\"attitude\":\"Positive\", \"contacts\":\"Contacts\", \"remarks\":\"Remarks\", \"rcAssessment\":\"rcAssessment\"}");
+        "{\"attitude\":\"Positive\", \"contacts\":\"Contacts\", \"securityMarking\":\"NKU\"}");
 
     // Tasks
     final Map<String, String> tasks = new HashMap<>();
@@ -146,10 +150,12 @@ public class TestData {
     return reportDto;
   }
 
-  public static ReportDto createGoodMartReportWithUnknownTask(long sequence) {
+  public static ReportDto createGoodMartReportWithUnknownTaskAndMissingSecurityMarking(
+      long sequence) {
     final ReportDto reportDto = createGoodMartReport(sequence);
     reportDto.setUuid("34faac7c-8c85-4dec-8e9f-57d9254b5ae2");
     reportDto.getTasks().put("does not exist", "does not exist");
+    reportDto.setCustomFields("{\"attitude\":\"Positive\", \"contacts\":\"Contacts\"}");
     return reportDto;
   }
 
