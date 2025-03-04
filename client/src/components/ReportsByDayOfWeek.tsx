@@ -20,6 +20,7 @@ import _escape from "lodash/escape"
 import _isEqual from "lodash/isEqual"
 import React, { useMemo, useState } from "react"
 import { useResizeDetector } from "react-resize-detector"
+import Settings from "settings"
 
 const GQL_GET_REPORT_LIST = gql`
   query ($reportQuery: ReportSearchQueryInput) {
@@ -77,15 +78,17 @@ const Chart = ({
       "Saturday"
     ]
     // Set the order in which to display the days of the week
-    const displayOrderDaysOfWeek = [
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday",
-      "Sunday"
-    ]
+    const displayOrderDaysOfWeek = Settings.useISO8601
+      ? [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday"
+      ]
+      : daysOfWeek
     const reportsList = data.reportList.list || []
     if (!reportsList.length) {
       return []

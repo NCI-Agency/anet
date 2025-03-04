@@ -6,6 +6,7 @@ import interactionPlugin from "@fullcalendar/interaction"
 import listPlugin from "@fullcalendar/list"
 import timeGridPlugin from "@fullcalendar/timegrid"
 import React from "react"
+import Settings from "settings"
 import "./Calendar.css"
 
 interface CalendarProps {
@@ -58,6 +59,8 @@ const Calendar = ({
     height="auto" // assume a natural height, no scrollbars will be used
     aspectRatio={3} // ratio of width-to-height
     fixedWeekCount={false}
+    firstDay={Settings.useISO8601 ? 1 : 0}
+    weekNumberCalculation={Settings.useISO8601 ? "ISO" : "local"}
     ref={calendarComponentRef}
     // set an absolute max; workaround for https://github.com/fullcalendar/fullcalendar/issues/5595
     dayMaxEvents={2}

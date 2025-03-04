@@ -11,7 +11,6 @@ import jakarta.mail.internet.InternetAddress;
 import java.io.StringWriter;
 import java.lang.invoke.MethodHandles;
 import java.time.Instant;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -30,7 +29,6 @@ import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.database.EmailDao;
 import mil.dds.anet.database.JobHistoryDao;
 import mil.dds.anet.database.mappers.MapperUtils;
-import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.simplejavamail.api.email.Email;
@@ -140,20 +138,14 @@ public class AnetEmailWorker extends AbstractWorker {
         ConfidentialityRecord.create(siteClassification).toString());
     emailContext.put("SECURITY_BANNER_COLOR", siteClassification.get("color"));
     emailContext.put("SUPPORT_EMAIL_ADDR", dict.getDictionaryEntry("SUPPORT_EMAIL_ADDR"));
-    emailContext.put("dateFormatter",
-        DateTimeFormatter.ofPattern((String) dict.getDictionaryEntry("dateFormats.email.date"))
-            .withZone(DaoUtils.getServerLocalZoneId()));
+    emailContext.put("dateFormatter", Utils.getDateFormatter(dict, "dateFormats.email.date"));
     emailContext.put("dateTimeFormatter",
-        DateTimeFormatter.ofPattern((String) dict.getDictionaryEntry("dateFormats.email.withTime"))
-            .withZone(DaoUtils.getServerLocalZoneId()));
+        Utils.getDateTimeFormatter(dict, "dateFormats.email.withTime"));
     final boolean engagementsIncludeTimeAndDuration =
         Boolean.TRUE.equals(dict.getDictionaryEntry("engagementsIncludeTimeAndDuration"));
     emailContext.put("engagementsIncludeTimeAndDuration", engagementsIncludeTimeAndDuration);
-    final String edtfPattern = (String) dict
-        .getDictionaryEntry(engagementsIncludeTimeAndDuration ? "dateFormats.email.withTime"
-            : "dateFormats.email.date");
-    emailContext.put("engagementDateFormatter",
-        DateTimeFormatter.ofPattern(edtfPattern).withZone(DaoUtils.getServerLocalZoneId()));
+    emailContext.put("engagementDateFormatter", Utils.getEngagementDateFormatter(dict,
+        engagementsIncludeTimeAndDuration, "dateFormats.email.withTime", "dateFormats.email.date"));
     @SuppressWarnings("unchecked")
     final Map<String, Object> fields = (Map<String, Object>) dict.getDictionaryEntry("fields");
     emailContext.put("fields", fields);

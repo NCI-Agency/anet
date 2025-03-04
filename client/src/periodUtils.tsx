@@ -1,6 +1,16 @@
 import moment, { Moment } from "moment"
 import React, { useLayoutEffect } from "react"
 import { useResizeDetector } from "react-resize-detector"
+import Settings from "settings"
+
+// Configure local date formatting;
+// see https://momentjs.com/docs/#/customization/dow-doy/
+moment.updateLocale("en", {
+  week: {
+    dow: Settings.useISO8601 ? 1 : 0,
+    doy: Settings.useISO8601 ? 4 : 6
+  }
+})
 
 const ASSESSMENT_PERIOD_DATE_FORMAT = "YYYY-MM-DD"
 
@@ -37,8 +47,6 @@ const PERIOD_FORMAT = {
   END_LONG: "D MMMM YYYY"
 }
 
-const weekType = "isoWeek"
-
 const refMondayForBiweekly = "2021-01-04" // lets select 1st monday of 2021
 
 export const PERIOD_FACTORIES = {
@@ -52,8 +60,8 @@ export const PERIOD_FACTORIES = {
   }),
   [RECURRENCE_TYPE.BIWEEKLY]: (date, offset) => {
     // every biweekly period's start is even number of weeks apart from reference monday
-    const refMonday = moment(refMondayForBiweekly).startOf(weekType)
-    const curWeekMonday = date.clone().startOf(weekType)
+    const refMonday = moment(refMondayForBiweekly).startOf("week")
+    const curWeekMonday = date.clone().startOf("week")
 
     const diffInWeeks = refMonday.diff(curWeekMonday, "weeks")
     // current biweekly period's start has to be even number of weeks apart from reference monday
@@ -65,7 +73,7 @@ export const PERIOD_FACTORIES = {
     const curBiweeklyEnd = curBiweeklyStart
       .clone()
       .add(1, "weeks")
-      .endOf(weekType)
+      .endOf("week")
 
     return {
       start: curBiweeklyStart.clone().subtract(2 * offset, "weeks"),
