@@ -28,7 +28,6 @@ public class MartImportedReportDao extends AbstractDao {
   public MartImportedReport getByReportUuid(String reportUuid) {
     final Handle handle = getDbHandle();
     try {
-
       return handle
           .createQuery(
               "/* MartImportedReportGetByReportUuid*/ SELECT * FROM \"martImportedReports\" "

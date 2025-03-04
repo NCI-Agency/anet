@@ -25,15 +25,15 @@ public class MartImporterWorker extends AbstractWorker {
   public static final String REPORT_JSON_ATTACHMENT = "mart_report.json";
   public static final String TRANSMISSION_LOG_ATTACHMENT = "mart_transmission_log.json";
 
-  private final IMailReceiver iMailReceiver;
+  private final IMailReceiver mailReceiver;
   private final IMartReportImporterService martReportImporter;
   private final IMartTransmissionLogImporterService transmissionLogImporter;
 
   public MartImporterWorker(AnetDictionary dict, JobHistoryDao jobHistoryDao,
-      IMailReceiver iMailReceiver, IMartReportImporterService martReportImporter,
+      IMailReceiver mailReceiver, IMartReportImporterService martReportImporter,
       IMartTransmissionLogImporterService martTrasmissionLogImporter) {
     super(dict, jobHistoryDao, "MartReportImporterWorker waking up to get MART reports!");
-    this.iMailReceiver = iMailReceiver;
+    this.mailReceiver = mailReceiver;
     this.martReportImporter = martReportImporter;
     this.transmissionLogImporter = martTrasmissionLogImporter;
   }
@@ -44,7 +44,7 @@ public class MartImporterWorker extends AbstractWorker {
       timeUnit = TimeUnit.SECONDS)
   @Override
   public void run() {
-    this.messages = iMailReceiver.downloadEmails();
+    this.messages = mailReceiver.downloadEmails();
     if (!this.messages.isEmpty()) {
       super.run();
     }
@@ -57,7 +57,7 @@ public class MartImporterWorker extends AbstractWorker {
         processEmailMessage(email);
       }
       // If we get here transaction was successful, post-process emails
-      iMailReceiver.postProcessEmails(this.messages);
+      mailReceiver.postProcessEmails(this.messages);
     } catch (Exception e) {
       logger.error("Exception processing MART email messages", e);
     }
