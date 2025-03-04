@@ -31,6 +31,7 @@ const GQL_GET_POSITION = gql`
       code
       status
       type
+      superuserType
       role
       description
       emailAddresses {

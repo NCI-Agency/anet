@@ -462,6 +462,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
   @Test
   void organizationSuperuserPermissionTest() {
+    // Bob is a regular superuser
     final Person superuser = getBobBobtown();
     final Position superuserPosition = superuser.getPosition();
 
@@ -504,6 +505,77 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     // Remove position
     superuserOrg.setAdministratingPositions(new ArrayList<>());
     succeedUpdateOrganization(adminUser, getOrganizationInput(superuserOrg));
+  }
+
+  @Test
+  void organizationCanCreateTopLevelOrganizationsSuperuserPermissionTest() {
+    // Jim is a superuser that can create top level organizations
+
+    // Can create top level organization
+    final OrganizationInput orgInput =
+        OrganizationInput.builder().withShortName("Parent Organization 2")
+            .withLongName("Advisor Organization 2 for Testing Superusers").withStatus(Status.ACTIVE)
+            .withIdentificationCode(UUID.randomUUID().toString())
+            .withLocation(getLocationInput(getGeneralHospital())).build();
+    Organization parentOrganization3 = succeedCreateOrganization("jim", orgInput);
+    // and edit it and created sub-organizations of the top level organization he created
+    succeedUpdateOrganization("jim", getOrganizationInput(parentOrganization3));
+    final OrganizationInput childOrgInput =
+        OrganizationInput.builder().withShortName("Parent Organization 2 child")
+            .withLongName("Child Organization of Parent Organization 3").withStatus(Status.ACTIVE)
+            .withIdentificationCode(UUID.randomUUID().toString())
+            .withParentOrg(getOrganizationInput(parentOrganization3))
+            .withLocation(getLocationInput(getGeneralHospital())).build();
+    succeedCreateOrganization("jim", childOrgInput);
+
+    // Can NOT edit and create sub-organizations of an existing organization: EF 1
+    final Organization ef1 = withCredentials(jackUser,
+        t -> queryExecutor.organization("{ uuid }", "9a35caa7-a095-4963-ac7b-b784fde4d583"));
+    // Can NOT edit EF 5.1
+    failUpdateOrganization("jim", getOrganizationInput(ef1));
+    // Can NOT create a sub organization of EF 5.1
+    final OrganizationInput childOrgInput2 = OrganizationInput.builder()
+        .withShortName("EF 1 new child").withLongName("New Child Organization of EF 1")
+        .withStatus(Status.ACTIVE).withIdentificationCode(UUID.randomUUID().toString())
+        .withParentOrg(getOrganizationInput(ef1))
+        .withLocation(getLocationInput(getGeneralHospital())).build();
+    failCreateOrganization("jim", childOrgInput2);
+
+  }
+
+  @Test
+  void organizationCanCreateEditAnyOrganizatonSuperuserPermissionTest() {
+    // Dwight is a superuser that can create or edit any organization
+
+    // Can create top level organization
+    final OrganizationInput orgInput =
+        OrganizationInput.builder().withShortName("Parent Organization 3")
+            .withLongName("Advisor Organization 3 for Testing Superusers").withStatus(Status.ACTIVE)
+            .withIdentificationCode(UUID.randomUUID().toString())
+            .withLocation(getLocationInput(getGeneralHospital())).build();
+    Organization parentOrganization2 = succeedCreateOrganization("dwight", orgInput);
+    // and edit it and created sub-organizations of the top level organization he created
+    succeedUpdateOrganization("dwight", getOrganizationInput(parentOrganization2));
+    final OrganizationInput childOrgInput =
+        OrganizationInput.builder().withShortName("Parent Organization 2 child")
+            .withLongName("Child Organization of Parent Organization 2").withStatus(Status.ACTIVE)
+            .withIdentificationCode(UUID.randomUUID().toString())
+            .withParentOrg(getOrganizationInput(parentOrganization2))
+            .withLocation(getLocationInput(getGeneralHospital())).build();
+    succeedCreateOrganization("dwight", childOrgInput);
+
+    // Can edit and create sub-organizations of an existing organization: EF 1
+    final Organization ef1 = withCredentials(jackUser,
+        t -> queryExecutor.organization(FIELDS, "9a35caa7-a095-4963-ac7b-b784fde4d583"));
+    // Can edit EF 5.1
+    succeedUpdateOrganization("dwight", getOrganizationInput(ef1));
+    // Can create a sub organization of EF 1
+    final OrganizationInput childOrgInput2 = OrganizationInput.builder()
+        .withShortName("EF 1 new child").withLongName("New Child Organization of EF 1")
+        .withStatus(Status.ACTIVE).withIdentificationCode(UUID.randomUUID().toString())
+        .withParentOrg(getOrganizationInput(ef1))
+        .withLocation(getLocationInput(getGeneralHospital())).build();
+    succeedCreateOrganization("dwight", childOrgInput2);
   }
 
   @Test
