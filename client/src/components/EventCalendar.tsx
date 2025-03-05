@@ -31,6 +31,39 @@ const GQL_GET_EVENT_LIST = gql`
           lat
           lng
         }
+        reports {
+          uuid
+          intent
+          primaryAdvisor {
+            uuid
+            name
+          }
+          primaryInterlocutor {
+            uuid
+            name
+          }
+          advisorOrg {
+            uuid
+            shortName
+            longName
+            identificationCode
+          }
+          interlocutorOrg {
+            uuid
+            shortName
+            longName
+            identificationCode
+          }
+          engagementDate
+          duration
+          state
+          location {
+            uuid
+            name
+            lat
+            lng
+          }
+        }
       }
     }
   }
