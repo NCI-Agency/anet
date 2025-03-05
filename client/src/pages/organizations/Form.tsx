@@ -133,10 +133,7 @@ const OrganizationForm = ({
         if (!isAdmin) {
           const orgsAdministratedUuids =
             currentUser.position.organizationsAdministrated.map(org => org.uuid)
-          orgSearchQuery.parentOrgUuid = [
-            currentUser.position.organization.uuid,
-            ...orgsAdministratedUuids
-          ]
+          orgSearchQuery.parentOrgUuid = [...orgsAdministratedUuids]
           orgSearchQuery.orgRecurseStrategy = RECURSE_STRATEGY.CHILDREN
         }
         const { parentContext, parentStandardIdentity, parentSymbolSet } =
