@@ -104,10 +104,7 @@ const EventSeriesForm = ({
         if (!isAdmin) {
           const orgsAdministratedUuids =
             currentUser.position.organizationsAdministrated.map(org => org.uuid)
-          adminOrgSearchQuery.parentOrgUuid = [
-            currentUser.position.organization.uuid,
-            ...orgsAdministratedUuids
-          ]
+          adminOrgSearchQuery.parentOrgUuid = [...orgsAdministratedUuids]
           adminOrgSearchQuery.orgRecurseStrategy = RECURSE_STRATEGY.CHILDREN
         }
 
