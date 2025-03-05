@@ -62,13 +62,15 @@ interface ReportCalendarProps {
   queryParams?: any
   setTotalCount?: (...args: unknown[]) => unknown
   attendeeType: string
+  event?: Event
 }
 
 const ReportCalendar = ({
   pageDispatchers: { showLoading, hideLoading },
   queryParams,
   setTotalCount,
-  attendeeType
+  attendeeType,
+  event
 }: ReportCalendarProps) => {
   const navigate = useNavigate()
   const prevReportQuery = useRef(null)
@@ -103,7 +105,8 @@ const ReportCalendar = ({
           const reports = data.map(d => d.extendedProps)
           const results = reportsToEvents(
             reports,
-            attendeeType === ATTENDEE_TYPE_INTERLOCUTOR
+            attendeeType === ATTENDEE_TYPE_INTERLOCUTOR,
+            event
           )
           hideLoading()
           return results
@@ -130,7 +133,8 @@ const ReportCalendar = ({
       }
       const results = reportsToEvents(
         reports,
-        attendeeType === ATTENDEE_TYPE_INTERLOCUTOR
+        attendeeType === ATTENDEE_TYPE_INTERLOCUTOR,
+        event
       )
       hideLoading()
       return results

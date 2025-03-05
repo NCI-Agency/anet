@@ -199,8 +199,9 @@ export const GET_CALENDAR_EVENTS_FROM = {
   [CALENDAR_OBJECT_TYPES.REPORT]: reportsToEvents
 }
 
-export function reportsToEvents(reports, showInterlocutors) {
-  return reports
+export function reportsToEvents(reports, showInterlocutors, event) {
+  // Get reports first
+  const result = reports
     .map(r => {
       // If no other data available title is the location name
       let title = `@${r.location?.name}`
@@ -241,27 +242,22 @@ export function reportsToEvents(reports, showInterlocutors) {
         // and finally ascending by title
         r1.title.localeCompare(r2.title)
     )
+
+  // Do we have an event to show as well?
+  if (event) {
+    result.push(createCalendarEventFromEvent(event))
+  }
+
+  return result
 }
 
 export function eventsToCalendarEvents(events) {
+  // Show in the calendar all events and all its reports
   return events
-    .map(event => {
-      let title = `${event.name}`
-      if (event.location) {
-        title = `${title}@${event.location.name}`
-      }
-      const start = new Date(event.startDate)
-      start.setSeconds(0, 0) // truncate at the minute part
-      const end = new Date(event.endDate)
-      end.setSeconds(0, 0) // truncate at the minute part
-      return {
-        title,
-        start,
-        end,
-        url: Event.pathFor(event),
-        extendedProps: { ...event },
-        allDay: !Settings.eventsIncludeStartAndEndTime
-      }
+    .flatMap(event => {
+      return [createCalendarEventFromEvent(event)].concat(
+        reportsToEvents(event.reports, false, null)
+      )
     })
     .sort(
       (e1, e2) =>
@@ -272,4 +268,23 @@ export function eventsToCalendarEvents(events) {
         // and finally ascending by title
         e1.title.localeCompare(e2.title)
     )
+}
+
+function createCalendarEventFromEvent(event) {
+  let title = `${event.name}`
+  if (!_isEmpty(event.location)) {
+    title = `${title}@${event.location.name}`
+  }
+  const start = new Date(event.startDate)
+  start.setSeconds(0, 0) // truncate at the minute part
+  const end = new Date(event.endDate)
+  end.setSeconds(0, 0) // truncate at the minute part
+  return {
+    title,
+    start,
+    end,
+    url: Event.pathFor(event),
+    extendedProps: { ...event },
+    allDay: !Settings.eventsIncludeStartAndEndTime
+  }
 }
