@@ -345,7 +345,7 @@ fields:
         crop: false
       - mimeType: image/webp
         avatar: true
-        crop: false
+        crop: true
       - mimeType: text/plain
         avatar: false
 

@@ -34,6 +34,7 @@ const GQL_GET_EVENT_LIST = gql`
         startDate
         endDate
         status
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         ownerOrg {
           uuid
           shortName

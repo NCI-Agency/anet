@@ -22,6 +22,8 @@ public class EventSeries extends AbstractCustomizableAnetBean
   @GraphQLQuery
   @GraphQLInputField
   String description;
+  // annotated below
+  private EntityAvatar entityAvatar;
   // Lazy Loaded
   // annotated below
   private ForeignObjectHolder<Organization> ownerOrg = new ForeignObjectHolder<>();
@@ -149,6 +151,28 @@ public class EventSeries extends AbstractCustomizableAnetBean
   @Override
   public void setStatus(Status status) {
     this.status = status;
+  }
+
+  @GraphQLQuery(name = "entityAvatar")
+  public CompletableFuture<EntityAvatar> loadEntityAvatar(
+      @GraphQLRootContext GraphQLContext context) {
+    if (entityAvatar != null) {
+      return CompletableFuture.completedFuture(entityAvatar);
+    }
+    return new UuidFetcher<EntityAvatar>().load(context, IdDataLoaderKey.ENTITY_AVATAR, uuid)
+        .thenApply(o -> {
+          entityAvatar = o;
+          return o;
+        });
+  }
+
+  @GraphQLInputField(name = "entityAvatar")
+  public void setEntityAvatar(EntityAvatar entityAvatar) {
+    this.entityAvatar = entityAvatar;
+  }
+
+  public EntityAvatar getEntityAvatar() {
+    return this.entityAvatar;
   }
 
   @Override

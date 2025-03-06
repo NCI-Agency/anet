@@ -1418,6 +1418,26 @@ INSERT INTO events (uuid, name, description, status, "createdAt", "updatedAt", "
    'ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b', 'ccbee4bb-08b8-42df-8cb5-65e8172f657b',
    '2024-01-08 07:00', '2024-01-12 17:00', 'CONFERENCE');
 
+-- Add attachments for event series
+INSERT INTO attachments (uuid, "authorUuid", "fileName", "caption", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt") VALUES
+    ('0df946d2-d565-4234-8c0d-0b30f486aacc', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'attachEventSeries.png', '123', 'image/png', lo_import('/var/tmp/assets/default_avatar.png'), 2736, 'We can add attachments to an event series', 'public', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "relatedObjectUuid") VALUES
+    ('0df946d2-d565-4234-8c0d-0b30f486aacc', 'eventSeries', 'b7b70191-54e4-462f-8e40-679dd2e71ec4');
+
+-- Add attachments for events
+INSERT INTO attachments (uuid, "authorUuid", "fileName", "caption", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt") VALUES
+    ('426bf11a-5124-4468-8b66-edb3ae130bc0', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'attachEvent.png', '456', 'image/png', lo_import('/var/tmp/assets/default_avatar.png'), 2928, 'We can add attachments to an event', 'public', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "relatedObjectUuid") VALUES
+    ('426bf11a-5124-4468-8b66-edb3ae130bc0', 'events', 'e850846e-9741-40e8-bc51-4dccc30cf47f');
+
+-- Add entity avatars for event series
+INSERT INTO "entityAvatars" ("relatedObjectType", "relatedObjectUuid", "attachmentUuid", "applyCrop", "cropLeft", "cropTop", "cropWidth", "cropHeight") VALUES
+    ('eventSeries', 'b7b70191-54e4-462f-8e40-679dd2e71ec4', '0df946d2-d565-4234-8c0d-0b30f486aacc', TRUE, 0, 0, 200, 200);
+
+-- Add entity avatars for events
+INSERT INTO "entityAvatars" ("relatedObjectType", "relatedObjectUuid", "attachmentUuid", "applyCrop", "cropLeft", "cropTop", "cropWidth", "cropHeight") VALUES
+    ('events', 'e850846e-9741-40e8-bc51-4dccc30cf47f', '426bf11a-5124-4468-8b66-edb3ae130bc0', TRUE, 0, 0, 200, 200);
+
 -- Add tasks, organizations and people to the event
 INSERT INTO "eventTasks" ("eventUuid", "taskUuid") VALUES
   ((select uuid from events where name = 'NMI PDT 2024-01'), '9d3da7f4-8266-47af-b518-995f587250c9');

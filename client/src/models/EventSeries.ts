@@ -31,6 +31,7 @@ export default class EventSeries extends Model {
   static autocompleteQuery = `
     uuid
     name
+    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
     ownerOrg {
       uuid
       shortName
@@ -62,6 +63,7 @@ export default class EventSeries extends Model {
         name
         description
         isSubscribed
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         ownerOrg {
           uuid
           shortName
@@ -82,6 +84,16 @@ export default class EventSeries extends Model {
           longName
           identificationCode
           ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+        }
+        attachments {
+            uuid
+            fileName
+            caption
+            description
+            classification
+            mimeType
+            contentLength
+            createdAt
         }
       }
     }

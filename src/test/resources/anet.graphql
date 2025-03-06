@@ -442,6 +442,7 @@ type Event {
   customSensitiveInformation: [CustomSensitiveInformation]
   description: String
   endDate: Instant
+  entityAvatar: EntityAvatar
   eventSeries: EventSeries
   hostOrg: Organization
   isSubscribed: Boolean
@@ -469,6 +470,7 @@ input EventInput {
   customSensitiveInformation: [CustomSensitiveInformationInput]
   description: String
   endDate: Instant
+  entityAvatar: EntityAvatarInput
   eventSeries: EventSeriesInput
   hostOrg: OrganizationInput
   location: LocationInput
@@ -516,6 +518,7 @@ type EventSeries {
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformation]
   description: String
+  entityAvatar: EntityAvatar
   hostOrg: Organization
   isSubscribed: Boolean
   name: String
@@ -533,6 +536,7 @@ input EventSeriesInput {
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformationInput]
   description: String
+  entityAvatar: EntityAvatarInput
   hostOrg: OrganizationInput
   name: String
   ownerOrg: OrganizationInput

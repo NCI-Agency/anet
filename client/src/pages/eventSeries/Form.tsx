@@ -3,6 +3,8 @@ import API from "api"
 import { OrganizationOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
+import UploadAttachment from "components/Attachment/UploadAttachment"
+import EntityAvatarComponent from "components/avatar/EntityAvatarComponent"
 import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -15,7 +17,7 @@ import { FastField, Field, Form, Formik } from "formik"
 import _isEqual from "lodash/isEqual"
 import { EventSeries, Organization } from "models"
 import React, { useContext, useState } from "react"
-import { Button } from "react-bootstrap"
+import { Button, Col, FormGroup, Row } from "react-bootstrap"
 import { useNavigate } from "react-router-dom"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
 import { RECURSE_STRATEGY } from "searchUtils"
@@ -52,6 +54,16 @@ const EventSeriesForm = ({
   const { loadAppData, currentUser } = useContext(AppContext)
   const navigate = useNavigate()
   const [error, setError] = useState(null)
+  const [attachmentList, setAttachmentList] = useState(
+    initialValues?.attachments
+  )
+  const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
+  const attachmentEditEnabled =
+    attachmentsEnabled &&
+    (!Settings.fields.attachment.restrictToAdmins || currentUser.isAdmin())
+  const avatarMimeTypes = Settings.fields.attachment.fileTypes
+    .filter(fileType => fileType.avatar)
+    .map(fileType => fileType.mimeType)
   const statusButtons = [
     {
       id: "statusActiveButton",
@@ -64,6 +76,10 @@ const EventSeriesForm = ({
       label: "Inactive"
     }
   ]
+
+  const imageAttachments = attachmentList?.filter(a =>
+    avatarMimeTypes.includes(a.mimeType)
+  )
 
   return (
     <Formik
@@ -117,12 +133,44 @@ const EventSeriesForm = ({
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
               <Fieldset>
-                <DictionaryField
-                  wrappedComponent={FastField}
-                  dictProps={Settings.fields.eventSeries.name}
-                  name="name"
-                  component={FieldHelper.InputField}
-                />
+                <Row>
+                  {edit && (
+                    <Col sm={12} md={12} lg={4} xl={4} className="text-center">
+                      <EntityAvatarComponent
+                        initialAvatar={initialValues.entityAvatar}
+                        relatedObjectType="eventSeries"
+                        relatedObjectUuid={initialValues.uuid}
+                        relatedObjectName={initialValues.shortName}
+                        editMode={attachmentEditEnabled}
+                        imageAttachments={imageAttachments}
+                      />
+                    </Col>
+                  )}
+                  <Col
+                    lg={8}
+                    xl={8}
+                    className="d-flex flex-column justify-content-center"
+                  >
+                    <FormGroup>
+                      <Row style={{ marginBottom: "1rem" }}>
+                        <Col sm={7}>
+                          <Row>
+                            <Col>
+                              <DictionaryField
+                                wrappedComponent={FastField}
+                                dictProps={Settings.fields.eventSeries.name}
+                                name="name"
+                                component={FieldHelper.InputField}
+                              />
+                            </Col>
+                          </Row>
+                        </Col>
+                      </Row>
+                    </FormGroup>
+                  </Col>
+                </Row>
+              </Fieldset>
+              <Fieldset>
                 <DictionaryField
                   wrappedComponent={Field}
                   dictProps={Settings.fields.eventSeries.ownerOrg}
@@ -239,6 +287,25 @@ const EventSeriesForm = ({
                     />
                   }
                 />
+
+                {edit && attachmentEditEnabled && (
+                  <Field
+                    name="uploadAttachments"
+                    label="Attachments"
+                    component={FieldHelper.SpecialField}
+                    widget={
+                      <UploadAttachment
+                        attachments={attachmentList}
+                        updateAttachments={setAttachmentList}
+                        relatedObjectType={EventSeries.relatedObjectType}
+                        relatedObjectUuid={values.uuid}
+                      />
+                    }
+                    onHandleBlur={() => {
+                      setFieldTouched("uploadAttachments", true, false)
+                    }}
+                  />
+                )}
               </Fieldset>
               <div className="submit-buttons">
                 <div>
