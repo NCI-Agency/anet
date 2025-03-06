@@ -126,11 +126,6 @@ type PeopleFilterOption =
   | "leaders_deputies"
   | "top_position"
   | "top_2_positions"
-const rolePriority = {
-  [PositionRole.LEADER.toString()]: 1,
-  [PositionRole.DEPUTY.toString()]: 2,
-  [PositionRole.MEMBER.toString()]: 3
-}
 const peopleLimits = {
   top_position: 1,
   top_2_positions: 2
@@ -153,13 +148,9 @@ const OrganizationalChart = ({
   height,
   exportTitle
 }: OrganizationalChartProps) => {
-  const { loading, error, data } = API.useApiQuery(
-    GQL_GET_CHART_DATA,
-    {
-      uuid: org.uuid
-    },
-    {}
-  )
+  const { loading, error, data } = API.useApiQuery(GQL_GET_CHART_DATA, {
+    uuid: org.uuid
+  })
 
   const { done, result } = useBoilerplate({
     loading,
@@ -206,7 +197,6 @@ const OrganizationFlowChart = ({
   const [maxDepth, setMaxDepth] = useState(0)
   const [peopleFilter, setPeopleFilter] = useState<PeopleFilterOption>("none")
   const chartRef = useRef<HTMLDivElement>(null)
-  const controlsRef = useRef<HTMLDivElement>(null)
   const lowestDepth = useRef(0)
   const { fitView } = useReactFlow()
 
@@ -216,6 +206,8 @@ const OrganizationFlowChart = ({
     }
 
     const dataUrl = await toPng(chartRef.current, {
+      // Work-around for https://github.com/bubkoo/html-to-image/issues/508
+      skipFonts: true,
       backgroundColor: BACKGROUND_COLOR
     })
 
@@ -433,12 +425,10 @@ const OrganizationFlowChart = ({
       return { nodes: [], edges: [] }
     }
 
-    let maxDepth = 0
-    organization.descendantOrgs.forEach(org => {
-      if (org.ascendantOrgs.length - 1 > maxDepth) {
-        maxDepth = org.ascendantOrgs.length - 1
-      }
-    })
+    const maxDepth = Math.max(
+      ...organization.descendantOrgs.map(org => org.ascendantOrgs.length - 1),
+      0
+    )
     setMaxDepth(maxDepth)
     setDepthLimit(Math.min(maxDepth, depthLimit))
     const allAscendantOrgs = utils.getAscendantObjectsAsMap(
@@ -468,7 +458,8 @@ const OrganizationFlowChart = ({
     setTimeout(() => {
       fitView()
     })
-  }, [width, height, depthLimit])
+    // we want to reframe whenever the width, height or depthLimit changes
+  }, [width, height, depthLimit, fitView])
 
   if (!organization) {
     return <p>Loading...</p>
@@ -476,11 +467,11 @@ const OrganizationFlowChart = ({
 
   return (
     <>
-      <ControlsContainer ref={controlsRef}>
+      <ControlsContainer>
         <div>
           <input
             type="checkbox"
-            id="showAPP6Symbols"
+            id="showApp6Symbols"
             checked={showApp6Symbols}
             onChange={toggleDisplayMode}
           />
@@ -506,7 +497,7 @@ const OrganizationFlowChart = ({
               id="depthInput"
               type="number"
               value={depthLimit}
-              onChange={e => setDepthLimit(Number(e.target.value))}
+              onChange={e => setDepthLimit(parseInt(e.target.value, 10))}
               min="0"
               max="100"
             />
@@ -593,10 +584,15 @@ const ControlsContainer = styled.div`
         font-size: 14px;
         color: #444444;
 
+        /* Chrome, Safari, Edge, Opera */
         &::-webkit-outer-spin-button,
         &::-webkit-inner-spin-button {
-          appearance: none;
+          -webkit-appearance: none;
           margin: 0;
+        }
+        /* Firefox */
+        &[type="number"] {
+          appearance: textfield;
         }
 
         &:focus {
