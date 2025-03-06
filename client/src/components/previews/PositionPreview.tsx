@@ -3,9 +3,11 @@ import API from "api"
 import DictionaryField from "components/DictionaryField"
 import EmailAddressTable from "components/EmailAddressTable"
 import { PreviewField } from "components/FieldHelper"
+import * as FieldHelper from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import RichTextEditor from "components/RichTextEditor"
+import { Field } from "formik"
 import { Location, Position } from "models"
 import moment from "moment"
 import React from "react"
@@ -109,7 +111,15 @@ const PositionPreview = ({ className, uuid }: PositionPreviewProps) => {
           dictProps={Settings.fields.position.type}
           value={Position.humanNameOfType(position.type)}
         />
-
+        {position.type === Position.TYPE.SUPERUSER && (
+          <DictionaryField
+            wrappedComponent={Field}
+            dictProps={Settings.fields.position.superuserType}
+            name="superuserType"
+            component={FieldHelper.ReadonlyField}
+            humanValue={Position.humanNameOfSuperuserType}
+          />
+        )}
         {position.organization && (
           <DictionaryField
             wrappedComponent={PreviewField}

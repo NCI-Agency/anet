@@ -16,11 +16,7 @@ const SUPERUSER_ACTIONS = [
 
 const ENHANCED_SUPERUSER_ACTIONS = [Models.Organization]
 
-const ADMIN_ACTIONS = [
-  Models.Organization,
-  Models.Task,
-  Models.AuthorizationGroup
-]
+const ADMIN_ACTIONS = [Models.Task, Models.AuthorizationGroup]
 
 const CreateButton = () => {
   const { currentUser } = useContext(AppContext)
@@ -65,15 +61,15 @@ const CreateButton = () => {
   }
 
   function getActions() {
-    let result = []
-    result = result.concat(DEFAULT_ACTIONS)
+    const result: any[] = [...DEFAULT_ACTIONS]
     if (currentUser.isSuperuser()) {
-      result = result.concat(SUPERUSER_ACTIONS)
-      if (currentUser.isAdmin()) {
-        result = result.concat(ADMIN_ACTIONS)
-      } else if (currentUser.isEnhancedSuperuser()) {
-        result = result.concat(ENHANCED_SUPERUSER_ACTIONS)
-      }
+      result.push(...SUPERUSER_ACTIONS)
+    }
+    if (currentUser.isEnhancedSuperuser()) {
+      result.push(...ENHANCED_SUPERUSER_ACTIONS)
+    }
+    if (currentUser.isAdmin()) {
+      result.push(...ADMIN_ACTIONS)
     }
     return result
   }

@@ -214,14 +214,15 @@ const PositionShow = ({ pageDispatchers }: PositionShowProps) => {
                   component={FieldHelper.ReadonlyField}
                   humanValue={Position.humanNameOfType}
                 />
-
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.position.superuserType}
-                  name="superuserType"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={Position.humanNameOfSuperuserType}
-                />
+                {position.type === Position.TYPE.SUPERUSER && (
+                  <DictionaryField
+                    wrappedComponent={Field}
+                    dictProps={Settings.fields.position.superuserType}
+                    name="superuserType"
+                    component={FieldHelper.ReadonlyField}
+                    humanValue={Position.humanNameOfSuperuserType}
+                  />
+                )}
 
                 {position.organization && (
                   <DictionaryField
