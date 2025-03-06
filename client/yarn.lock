@@ -5886,7 +5886,7 @@ __metadata:
     leaflet-defaulticon-compatibility: "npm:0.1.2"
     leaflet-geosearch: "npm:4.2.0"
     leaflet-gesture-handling: "npm:1.2.2"
-    leaflet.fullscreen: "npm:3.0.2"
+    leaflet.fullscreen: "npm:4.0.0"
     leaflet.markercluster: "npm:1.5.3"
     locale-compare-polyfill: "npm:0.0.2"
     lodash: "npm:4.17.21"
@@ -13625,10 +13625,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"leaflet.fullscreen@npm:3.0.2":
-  version: 3.0.2
-  resolution: "leaflet.fullscreen@npm:3.0.2"
-  checksum: 10c0/8a3546945df78cfcd2d83811e4c1f8488f863cfc964b39a4bdb3d41f0611b7560547c7f7a869d855aef8692a8bb30371abea3d0b015d01050ad3fe5707240bae
+"leaflet.fullscreen@npm:4.0.0":
+  version: 4.0.0
+  resolution: "leaflet.fullscreen@npm:4.0.0"
+  checksum: 10c0/6c99b4a7fbc587d47ee78a7b7f996aa42408d581f25f89d718b84b63fa3062db6810e7c30e5d94f1268f09cee779e1a4f17e0b12f788e2d8a827c3ef2060e4ed
   languageName: node
   linkType: hard
 
