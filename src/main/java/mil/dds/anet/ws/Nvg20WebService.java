@@ -252,7 +252,7 @@ public class Nvg20WebService implements NVGPortType2012 {
 
   private boolean isValidAccessToken(String accessToken) {
     if (accessToken != null && accessToken.length() == NvgConfig.ACCESS_TOKEN_LENGTH) {
-      final AccessToken at = accessTokenDao.getByTokenValue(accessToken);
+      final AccessToken at = accessTokenDao.getByTokenValueAndScope(accessToken, AccessToken.TokenScope.NVG.name());
       return at != null && at.isValid();
     }
     return false;

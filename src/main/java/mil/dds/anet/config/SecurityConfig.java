@@ -107,11 +107,20 @@ public class SecurityConfig {
 
   @Bean
   @Order(20)
+  public SecurityFilterChain graphQLWebServicveFilterChain(HttpSecurity http) throws Exception {
+    http.securityMatcher("/graphqlWebService/**") // Apply only to GraphQL endpoints
+        .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+        .csrf(AbstractHttpConfigurer::disable);
+    return http.build();
+  }
+
+  @Bean
+  @Order(30)
   public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
     http.authorizeHttpRequests(authorize -> authorize
         // These are public
         .requestMatchers(AdminResource.ADMIN_DICTIONARY_RESOURCE_PATH, HomeResource.LOGOUT_PATH,
-            AssetConfig.ASSETS_PATH, AssetConfig.IMAGERY_PATH)
+            AssetConfig.ASSETS_PATH, AssetConfig.IMAGERY_PATH, AssetConfig.GRAPHQL_WEB_SERVICE)
         .permitAll()
         // Block the default GraphQL endpoint
         .requestMatchers(unusedGraphQLEndpoint).denyAll()
