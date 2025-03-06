@@ -232,7 +232,7 @@ public class Nvg20WebService implements NVGPortType2012 {
         }
       }
       if (accessToken != null && accessToken.length() == ACCESS_TOKEN_LENGTH) {
-        final AccessToken at = accessTokenDao.getByTokenValue(accessToken);
+        final AccessToken at = accessTokenDao.getByTokenValueAndScope(accessToken, AccessToken.TokenScope.NVG.name());
         if (at != null && at.isValid()) {
           if (!App6Symbology.isValidApp6Version(app6Version)) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
