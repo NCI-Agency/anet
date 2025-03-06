@@ -409,6 +409,7 @@ required:
   - CONNECTION_ERROR_MSG
   - VERSION_CHANGED_MSG
   - SUPPORT_EMAIL_ADDR
+  - useISO8601
   - dateFormats
   - calendarOptions
   - reportWorkflow
@@ -459,6 +460,11 @@ properties:
     default: false
     title: Whether events also include a time and a duration
     description: Used for events; if set to `true`, you might also want to supply dateFormats.forms.inputWithTime and dateFormats.forms.longWithTime
+
+  useISO8601:
+    type: boolean
+    title: Use ISO 8601?
+    description: Whether to use ISO 8601 (for weekdays and week numbering) or US format.
 
   dateFormats:
     type: object
