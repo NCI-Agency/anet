@@ -280,8 +280,9 @@ export default class Person extends Model {
   isEnhancedSuperuser() {
     return (
       this.position &&
-      this.position.type === Position.TYPE.SUPERUSER &&
-      this.position.superuserType !== Position.SUPERUSER_TYPE.REGULAR
+      ((this.position.type === Position.TYPE.SUPERUSER &&
+        this.position.superuserType !== Position.SUPERUSER_TYPE.REGULAR) ||
+        this.position.type === Position.TYPE.ADMINISTRATOR)
     )
   }
 

@@ -517,14 +517,14 @@ public class OrganizationResourceTest extends AbstractResourceTest {
             .withLongName("Advisor Organization 2 for Testing Superusers").withStatus(Status.ACTIVE)
             .withIdentificationCode(UUID.randomUUID().toString())
             .withLocation(getLocationInput(getGeneralHospital())).build();
-    Organization parentOrganization3 = succeedCreateOrganization("jim", orgInput);
+    final Organization newTopLevelOrganization = succeedCreateOrganization("jim", orgInput);
     // and edit it and created sub-organizations of the top level organization he created
-    succeedUpdateOrganization("jim", getOrganizationInput(parentOrganization3));
+    succeedUpdateOrganization("jim", getOrganizationInput(newTopLevelOrganization));
     final OrganizationInput childOrgInput =
         OrganizationInput.builder().withShortName("Parent Organization 2 child")
             .withLongName("Child Organization of Parent Organization 3").withStatus(Status.ACTIVE)
             .withIdentificationCode(UUID.randomUUID().toString())
-            .withParentOrg(getOrganizationInput(parentOrganization3))
+            .withParentOrg(getOrganizationInput(newTopLevelOrganization))
             .withLocation(getLocationInput(getGeneralHospital())).build();
     succeedCreateOrganization("jim", childOrgInput);
 
@@ -540,7 +540,6 @@ public class OrganizationResourceTest extends AbstractResourceTest {
         .withParentOrg(getOrganizationInput(ef1))
         .withLocation(getLocationInput(getGeneralHospital())).build();
     failCreateOrganization("jim", childOrgInput2);
-
   }
 
   @Test
@@ -553,14 +552,14 @@ public class OrganizationResourceTest extends AbstractResourceTest {
             .withLongName("Advisor Organization 3 for Testing Superusers").withStatus(Status.ACTIVE)
             .withIdentificationCode(UUID.randomUUID().toString())
             .withLocation(getLocationInput(getGeneralHospital())).build();
-    Organization parentOrganization2 = succeedCreateOrganization("dwight", orgInput);
+    final Organization newTopLevelOrganization = succeedCreateOrganization("dwight", orgInput);
     // and edit it and created sub-organizations of the top level organization he created
-    succeedUpdateOrganization("dwight", getOrganizationInput(parentOrganization2));
+    succeedUpdateOrganization("dwight", getOrganizationInput(newTopLevelOrganization));
     final OrganizationInput childOrgInput =
         OrganizationInput.builder().withShortName("Parent Organization 2 child")
             .withLongName("Child Organization of Parent Organization 2").withStatus(Status.ACTIVE)
             .withIdentificationCode(UUID.randomUUID().toString())
-            .withParentOrg(getOrganizationInput(parentOrganization2))
+            .withParentOrg(getOrganizationInput(newTopLevelOrganization))
             .withLocation(getLocationInput(getGeneralHospital())).build();
     succeedCreateOrganization("dwight", childOrgInput);
 

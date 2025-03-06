@@ -1,6 +1,5 @@
 package mil.dds.anet.resources;
 
-import com.google.common.collect.Lists;
 import graphql.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLMutation;
@@ -92,10 +91,10 @@ public class OrganizationResource {
     final Person user = DaoUtils.getUserFromContext(context);
     // Check if user is authorized to create a sub organization
     assertCreateSubOrganizationPermission(user, org.getParentOrgUuid());
-    // If the organization is created by a superuser we need to add his position as an
+    // If the organization is created by a superuser we need to add their position as an
     // administrating one
     if (user.getPosition().getType() == Position.PositionType.SUPERUSER) {
-      org.setAdministratingPositions(Lists.newArrayList(user.getPosition()));
+      org.setAdministratingPositions(List.of(user.getPosition()));
     }
     final Organization created;
     try {

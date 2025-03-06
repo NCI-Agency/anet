@@ -6216,15 +6216,11 @@
 		<addColumn tableName="positions">
 			<column name="superuserType" type="int4"/>
 		</addColumn>
-	</changeSet>
-
-	<changeSet id="set-superuser-regular-type" author="fdelcastillo">
 		<sql>
 			UPDATE positions
 			SET "superuserType" = 0
 			WHERE type = 2;
 		</sql>
-		<!-- Rolling back is not useful anymore -->
 	</changeSet>
 
 	<!-- Keep this change set as the last one in the change log;
