@@ -15,6 +15,7 @@ public class AssetConfig implements WebMvcConfigurer {
   public static final String ASSETS_PATH = "/assets/**";
   public static final String IMAGERY_PATH = "/imagery/**";
   public static final String DATA_PATH = "/data/**";
+  public static final String GRAPHQL_WEB_SERVICE = "/graphqlWebService/**";
 
   @Value("${anet.imagery-path}")
   private String imageryPath;

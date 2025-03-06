@@ -22,8 +22,8 @@ public class AccessTokenDao extends AbstractDao {
     try {
       return handle
           .createUpdate("/* insertAccessToken */ INSERT INTO \"accessTokens\" "
-              + "(uuid, name, description, \"tokenHash\", \"createdAt\", \"expiresAt\") "
-              + "VALUES (:uuid, :name, :description, :tokenHash, :createdAt, :expiresAt)")
+              + "(uuid, name, description, \"tokenHash\", \"createdAt\", \"expiresAt\", scope) "
+              + "VALUES (:uuid, :name, :description, :tokenHash, :createdAt, :expiresAt, :scope)")
           .bindBean(accessToken).bind("uuid", DaoUtils.getNewUuid())
           .bind("createdAt", DaoUtils.asLocalDateTime(Instant.now()))
           .bind("expiresAt", DaoUtils.asLocalDateTime(accessToken.getExpiresAt())).execute();
@@ -36,11 +36,9 @@ public class AccessTokenDao extends AbstractDao {
   public int update(AccessToken accessToken) {
     final Handle handle = getDbHandle();
     try {
-      return handle
-          .createUpdate("/* updateAccessToken */ UPDATE \"accessTokens\" "
-              + "SET name = :name, description = :description, \"expiresAt\" = :expiresAt "
-              + "WHERE uuid = :uuid")
-          .bindBean(accessToken)
+      return handle.createUpdate("/* updateAccessToken */ UPDATE \"accessTokens\" "
+          + "SET name = :name, description = :description, \"expiresAt\" = :expiresAt, scope = :scope "
+          + "WHERE uuid = :uuid").bindBean(accessToken)
           .bind("expiresAt", DaoUtils.asLocalDateTime(accessToken.getExpiresAt())).execute();
     } finally {
       closeDbHandle(handle);
@@ -60,15 +58,15 @@ public class AccessTokenDao extends AbstractDao {
   }
 
   @Transactional
-  public AccessToken getByTokenValue(String tokenValue) {
+  public AccessToken getByTokenValueAndScope(String tokenValue, String scope) {
     final Handle handle = getDbHandle();
     try {
       final String tokenHash = AccessToken.computeTokenHash(tokenValue);
       try {
         return handle
             .createQuery("/* getAccessTokenByValue */ "
-                + "SELECT * FROM \"accessTokens\" WHERE \"tokenHash\" = :tokenHash")
-            .bind("tokenHash", tokenHash).map(new AccessTokenMapper()).one();
+                + "SELECT * FROM \"accessTokens\" WHERE \"tokenHash\" = :tokenHash AND scope = :scope")
+            .bind("tokenHash", tokenHash).bind("scope",scope).map(new AccessTokenMapper()).one();
       } catch (IllegalStateException e) {
         return null;
       }

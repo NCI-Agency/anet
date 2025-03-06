@@ -6348,6 +6348,16 @@
 		</addColumn>
 	</changeSet>
 
+	<changeSet id="add-scope-field-to-accessTokens" author="fdelcastillo">
+		<addColumn tableName="accessTokens">
+			<column name="scope" type="text"/>
+		</addColumn>
+		<sql>
+			UPDATE "accessTokens"
+			SET scope = 'NVG';
+		</sql>
+	</changeSet>
+
 	<!-- Keep this change set as the last one in the change log;
 	     it will be re-run whenever it changes. -->
 	<changeSet id="set-up-full-text-search" runOnChange="true" author="gjvoosten">

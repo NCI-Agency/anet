@@ -12,6 +12,7 @@ public class AccessTokenMapper implements RowMapper<AccessToken> {
     final AccessToken accessToken = new AccessToken();
     accessToken.setUuid(rs.getString("uuid"));
     accessToken.setName(rs.getString("name"));
+    accessToken.setScope(AccessToken.TokenScope.valueOf(rs.getString("scope")));
     accessToken.setDescription(MapperUtils.getOptionalString(rs, "description"));
     accessToken.setTokenHash(rs.getString("tokenHash"));
     accessToken.setCreatedAt(MapperUtils.getInstantAsLocalDateTime(rs, "createdAt"));
