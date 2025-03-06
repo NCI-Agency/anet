@@ -66,9 +66,7 @@ export default class Position extends Model {
         .string()
         .required()
         .default(() => Position.TYPE.REGULAR),
-      superuserType: yup
-        .string()
-        .default(() => Position.SUPERUSER_TYPE.REGULAR),
+      superuserType: yup.string().nullable().default(null),
       code: yup.string().nullable().default(""),
       status: yup
         .string()
@@ -215,7 +213,7 @@ export default class Position extends Model {
       superuserType ===
       Position.SUPERUSER_TYPE.CAN_CREATE_TOP_LEVEL_ORGANIZATIONS
     ) {
-      return "Can Create top Level Organizations"
+      return "Can Create top-level Organizations"
     } else if (
       superuserType ===
       Position.SUPERUSER_TYPE.CAN_CREATE_OR_EDIT_ANY_ORGANIZATION

@@ -146,17 +146,21 @@ const PositionForm = ({
     {
       id: "permsSuperuserRegularButton",
       value: Position.SUPERUSER_TYPE.REGULAR,
-      label: "Regular"
+      label: Position.humanNameOfSuperuserType(Position.SUPERUSER_TYPE.REGULAR)
     },
     {
       id: "permsSuperuserRegularButton",
       value: Position.SUPERUSER_TYPE.CAN_CREATE_TOP_LEVEL_ORGANIZATIONS,
-      label: "Can Create Top Level Organizations"
+      label: Position.humanNameOfSuperuserType(
+        Position.SUPERUSER_TYPE.CAN_CREATE_TOP_LEVEL_ORGANIZATIONS
+      )
     },
     {
       id: "permsSuperuserRegularButton",
       value: Position.SUPERUSER_TYPE.CAN_CREATE_OR_EDIT_ANY_ORGANIZATION,
-      label: "Can Create or Edit any Organization"
+      label: Position.humanNameOfSuperuserType(
+        Position.SUPERUSER_TYPE.CAN_CREATE_OR_EDIT_ANY_ORGANIZATION
+      )
     }
   ]
 
@@ -301,14 +305,12 @@ const PositionForm = ({
                   buttons={permissionsButtons}
                   onChange={value => {
                     setFieldValue("permissions", value)
-                    if (value === Position.TYPE.SUPERUSER) {
-                      setFieldValue(
-                        "superuserType",
-                        Position.SUPERUSER_TYPE.REGULAR
-                      )
-                    } else {
-                      setFieldValue("superuserType", null)
-                    }
+                    setFieldValue(
+                      "superuserType",
+                      value === Position.TYPE.SUPERUSER
+                        ? Position.SUPERUSER_TYPE.REGULAR
+                        : null
+                    )
                     setPermissions(value)
                   }}
                 />

@@ -51,8 +51,7 @@ public class AuthUtils {
       return false;
     }
     // SuperuserType.CAN_CREATE_OR_EDIT_ANY_ORGANIZATION can deal with any organization
-    if (position.getType() == PositionType.SUPERUSER && position
-        .getSuperuserType() == Position.SuperuserType.CAN_CREATE_OR_EDIT_ANY_ORGANIZATION) {
+    if (position.getSuperuserType() == Position.SuperuserType.CAN_CREATE_OR_EDIT_ANY_ORGANIZATION) {
       logger.debug("User {} is a fully enhanced superuser, can automatically administrate org",
           user);
       return true;
@@ -93,10 +92,9 @@ public class AuthUtils {
       return true;
     }
 
-    // Non regular superusers can create top level organizations
     if (parentOrganizationUuid == null) {
-      // Only allow if superuser with special permissions
-      return AuthUtils.isNotRegularSuperUser(user);
+      // Enhanced superusers can create top level organizations
+      return AuthUtils.isEnhancedSuperuser(user);
     }
 
     // A sub organization is being created -> check permissions on parentOrg
@@ -116,7 +114,7 @@ public class AuthUtils {
         || position.getType() == PositionType.ADMINISTRATOR);
   }
 
-  public static boolean isNotRegularSuperUser(Person user) {
+  public static boolean isEnhancedSuperuser(Person user) {
     Position position = DaoUtils.getPosition(user);
     return position != null && (position.getType() == PositionType.SUPERUSER
         && position.getSuperuserType() != Position.SuperuserType.REGULAR);
