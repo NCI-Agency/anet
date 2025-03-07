@@ -22,9 +22,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@apollo/client@npm:3.13.1":
-  version: 3.13.1
-  resolution: "@apollo/client@npm:3.13.1"
+"@apollo/client@npm:3.13.3":
+  version: 3.13.3
+  resolution: "@apollo/client@npm:3.13.3"
   dependencies:
     "@graphql-typed-document-node/core": "npm:^3.1.1"
     "@wry/caches": "npm:^1.0.0"
@@ -54,7 +54,7 @@ __metadata:
       optional: true
     subscriptions-transport-ws:
       optional: true
-  checksum: 10c0/50e65f9b12e82159d50feb6ad356bbc9dc871f04d930954b3fa299d63d0d578f1be95377d2961572907e56aeaa2b7e36c1c8a6d1287ce1a85cf454ee528f1d00
+  checksum: 10c0/f249b4e8b52d9a84b1de700f5177dd4f0e37dcc3b91fd092f1dc7a175171c6cac8b7d2bc0213301b9493bc162c2317915160be19f054dc23037c4678e1d4fcbe
   languageName: node
   linkType: hard
 
@@ -5770,7 +5770,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "anet@workspace:."
   dependencies:
-    "@apollo/client": "npm:3.13.1"
+    "@apollo/client": "npm:3.13.3"
     "@babel/core": "npm:7.26.9"
     "@babel/eslint-parser": "npm:7.26.8"
     "@babel/plugin-proposal-decorators": "npm:7.25.9"
@@ -5828,7 +5828,7 @@ __metadata:
     aigle: "npm:1.14.1"
     autoprefixer: "npm:10.4.20"
     ava: "npm:6.2.0"
-    axios: "npm:1.8.1"
+    axios: "npm:1.8.2"
     babel-jest: "npm:29.7.0"
     babel-loader: "npm:10.0.0"
     bootstrap: "npm:5.3.3"
@@ -6467,14 +6467,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:1.8.1, axios@npm:^1.7.4":
-  version: 1.8.1
-  resolution: "axios@npm:1.8.1"
+"axios@npm:1.8.2, axios@npm:^1.7.4":
+  version: 1.8.2
+  resolution: "axios@npm:1.8.2"
   dependencies:
     follow-redirects: "npm:^1.15.6"
     form-data: "npm:^4.0.0"
     proxy-from-env: "npm:^1.1.0"
-  checksum: 10c0/b2e1d5a61264502deee4b50f0a6df0aa3b174c546ccf68c0dff714a2b8863232e0bd8cb5b84f853303e97f242a98260f9bb9beabeafe451ad5af538e9eb7ac22
+  checksum: 10c0/d8c2969e4642dc6d39555ac58effe06c051ba7aac2bd40cad7a9011c019fb2f16ee011c5a6906cb25b8a4f87258c359314eb981f852e60ad445ecaeb793c7aa2
   languageName: node
   linkType: hard
 
