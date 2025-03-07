@@ -605,3 +605,64 @@ async function getFromSearchResults(
 
   return await findLinkWithText(resultText)
 }
+
+test.serial(
+  "checking superuser that can create top level organizations permissions",
+  async t => {
+    t.plan(1)
+
+    await t.context.get("/", "jim")
+
+    // Jim can create top level organizations
+    await canCreateOrganization()
+    // but Jim can not edit organizations
+    const $nonAdministratingOrgLink = await getFromSearchResults(
+      t,
+      "MoD",
+      "MoD | Ministry of Defense",
+      "organizations"
+    )
+    await $nonAdministratingOrgLink.click()
+    await validateSuperuserNonAdministratingOrgPermissions(t)
+    await t.context.logout()
+  }
+)
+
+test.serial(
+  "checking superuser that can edit any organizations permissions",
+  async t => {
+    t.plan(3)
+
+    await t.context.get("/", "dwight")
+
+    // Dwight can create top level organizations
+    await canCreateOrganization(t)
+    // And he can also edit an organization
+    const $nonAdministratingOrgLink = await getFromSearchResults(
+      t,
+      "MoD",
+      "MoD | Ministry of Defense",
+      "organizations"
+    )
+    await $nonAdministratingOrgLink.click()
+    await validateAdminOrgPermissions(t)
+    await t.context.logout()
+  }
+)
+
+async function canCreateOrganization(t) {
+  const { $, By, driver, until, shortWaitMs } = t.context
+
+  const $createButton = await $("#createButton")
+  await $createButton.click()
+  const $createOrganizationButton = await $("#new-organization")
+  await $createOrganizationButton.click()
+  const $organizationInput = await $("#fg-organization")
+  await driver.wait(until.elementIsVisible($organizationInput), shortWaitMs)
+
+  // Cancel Create Organization
+  const $cancelButton = await driver.findElement(
+    By.xpath('//button[text()="Cancel"]')
+  )
+  await $cancelButton.click()
+}
