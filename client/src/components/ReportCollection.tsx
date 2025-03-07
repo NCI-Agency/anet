@@ -38,6 +38,7 @@ interface ReportCollectionProps {
   width?: number | string
   height?: number | string
   marginBottom?: number | string
+  event?: Event
 }
 
 const ReportCollection = ({
@@ -58,7 +59,8 @@ const ReportCollection = ({
   mapId,
   width,
   height,
-  marginBottom
+  marginBottom,
+  event
 }: ReportCollectionProps) => {
   const [numberOfPeriods, setNumberOfPeriods] = useState(3)
   const contRef = useResponsiveNumberOfPeriods(setNumberOfPeriods)
@@ -145,6 +147,7 @@ const ReportCollection = ({
               queryParams={queryParams}
               setTotalCount={setTotalCount}
               attendeeType={calendarAttendeeType}
+              event={event}
             />
           )}
           {viewFormat === FORMAT_TABLE && (
