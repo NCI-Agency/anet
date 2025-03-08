@@ -42,7 +42,7 @@ const OrganizationLaydown = ({
   readOnly
 }: OrganizationLaydownProps) => {
   const { currentUser } = useContext(AppContext)
-  const { width, height, ref } = useResizeDetector()
+  const { width, ref } = useResizeDetector()
   const [showInactivePositions, setShowInactivePositions] = useState(false)
   const [
     showAdministratingPositionsModal,
@@ -79,7 +79,6 @@ const OrganizationLaydown = ({
               readOnly ? null : `Organization diagram for ${organization}`
             }
             width={width}
-            height={height}
           />
         </div>
       </Fieldset>

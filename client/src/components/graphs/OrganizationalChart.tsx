@@ -120,13 +120,15 @@ const VERTICAL_SPACING = 20
 const HORIZONTAL_SPACING = 10
 const LEVEL_INDENT = 60
 const PERSON_AVATAR_HEIGHT = 42
-type PeopleFilterOption =
+const ARROW_INDENT = 5
+const DIAGRAM_PADDING = 100
+type PositionFilterOption =
   | "none"
   | "leaders"
   | "leaders_deputies"
   | "top_position"
   | "top_2_positions"
-const peopleLimits = {
+const positionsLimits = {
   top_position: 1,
   top_2_positions: 2
 }
@@ -137,7 +139,6 @@ interface OrganizationalChartProps {
   pageDispatchers?: PageDispatchersPropType
   org: any
   width?: number
-  height?: number
   exportTitle?: string
 }
 
@@ -145,7 +146,6 @@ const OrganizationalChart = ({
   pageDispatchers,
   org,
   width,
-  height,
   exportTitle
 }: OrganizationalChartProps) => {
   const { loading, error, data } = API.useApiQuery(GQL_GET_CHART_DATA, {
@@ -173,7 +173,6 @@ const OrganizationalChart = ({
         organization={organization}
         exportTitle={exportTitle}
         width={width}
-        height={height}
       />
     </ReactFlowProvider>
   )
@@ -182,22 +181,23 @@ const OrganizationalChart = ({
 interface OrganizationFlowChartProps {
   organization: { descendantOrgs: any[]; ascendantOrgs: any[] }
   width?: number
-  height?: number
   exportTitle?: string
 }
 
 const OrganizationFlowChart = ({
   organization,
   width,
-  height,
   exportTitle
 }: OrganizationFlowChartProps) => {
   const [showApp6Symbols, setShowApp6Symbols] = useState(false)
   const [depthLimit, setDepthLimit] = useState(3)
   const [maxDepth, setMaxDepth] = useState(0)
-  const [peopleFilter, setPeopleFilter] = useState<PeopleFilterOption>("none")
+  const [positionsFilter, setPositionsFilter] =
+    useState<PositionFilterOption>("none")
   const chartRef = useRef<HTMLDivElement>(null)
   const lowestDepth = useRef(0)
+  const lowestY = useRef(0)
+  const diagramHeight = useRef(0)
   const { fitView } = useReactFlow()
 
   const downloadImage = async() => {
@@ -206,8 +206,6 @@ const OrganizationFlowChart = ({
     }
 
     const dataUrl = await toPng(chartRef.current, {
-      // Work-around for https://github.com/bubkoo/html-to-image/issues/508
-      skipFonts: true,
       backgroundColor: BACKGROUND_COLOR
     })
 
@@ -270,19 +268,19 @@ const OrganizationFlowChart = ({
       x = 0,
       y = 0
     ) => {
-      const filterPeople = people => {
-        return people
+      const filterPositions = positions =>
+        positions
           .filter(position => {
             if (!position.person) {
               return false
             }
-            if (peopleFilter === "none") {
+            if (positionsFilter === "none") {
               return false
             }
-            if (peopleFilter === "leaders") {
+            if (positionsFilter === "leaders") {
               return position.role === PositionRole.LEADER.toString()
             }
-            if (peopleFilter === "leaders_deputies") {
+            if (positionsFilter === "leaders_deputies") {
               return (
                 position.role === PositionRole.LEADER.toString() ||
                 position.role === PositionRole.DEPUTY.toString()
@@ -304,8 +302,7 @@ const OrganizationFlowChart = ({
               a.uuid.localeCompare(b.uuid)
           )
           .map(position => position.person)
-          .slice(0, peopleLimits[peopleFilter] ?? undefined)
-      }
+          .slice(0, positionsLimits[positionsFilter] ?? undefined)
 
       if (!node || depth > depthLimit) {
         return { nodes: [], edges: [] }
@@ -320,14 +317,14 @@ const OrganizationFlowChart = ({
       const currentY = isRoot ? 0 : y
 
       const symbol = determineSymbol(node, allAscendantOrgs).asDOM()
-      const people = filterPeople(node.positions)
+      const positions = filterPositions(node.positions)
 
       const currentNode = {
         id: node.uuid,
         data: {
           organization: node,
           symbol,
-          people,
+          positions,
           depth,
           showSymbol: showApp6Symbols
         },
@@ -340,7 +337,7 @@ const OrganizationFlowChart = ({
       if (children.length > 0) {
         let childX = currentX + (isRoot ? 0 : LEVEL_INDENT)
         let childY =
-          currentY + NODE_HEIGHT + people.length * PERSON_AVATAR_HEIGHT
+          currentY + NODE_HEIGHT + positions.length * PERSON_AVATAR_HEIGHT
         children.forEach(child => {
           // first level nodes are placed horizontally
           if (isRoot) {
@@ -351,8 +348,8 @@ const OrganizationFlowChart = ({
             childY =
               currentY +
               NODE_HEIGHT * 1.5 +
-              people.length * PERSON_AVATAR_HEIGHT +
-              VERTICAL_SPACING * (people.length ? 0 : 0.5)
+              positions.length * PERSON_AVATAR_HEIGHT +
+              VERTICAL_SPACING * (positions.length ? 0 : 0.5)
             // reset lowestDepth as we enter a new branch
             lowestDepth.current = 0
           }
@@ -370,7 +367,7 @@ const OrganizationFlowChart = ({
           if (lastChild && !isRoot) {
             childY =
               lastChild.position.y +
-              lastChild.data.people.length * PERSON_AVATAR_HEIGHT -
+              lastChild.data.positions.length * PERSON_AVATAR_HEIGHT -
               VERTICAL_SPACING
           }
 
@@ -393,6 +390,13 @@ const OrganizationFlowChart = ({
           }
         })
       }
+
+      // update the lowestY
+      if (currentY > lowestY.current) {
+        lowestY.current = currentY
+      }
+
+      // update the lowest depth
       if (depth > lowestDepth.current) {
         lowestDepth.current = depth
       }
@@ -417,7 +421,7 @@ const OrganizationFlowChart = ({
       }
       return { nodes, edges }
     },
-    [depthLimit, showApp6Symbols, peopleFilter]
+    [depthLimit, showApp6Symbols, positionsFilter]
   )
 
   const { nodes, edges } = useMemo(() => {
@@ -436,6 +440,8 @@ const OrganizationFlowChart = ({
         organization?.descendantOrgs ?? []
       )
     )
+    lowestY.current = 0
+    diagramHeight.current = 0
     const layout = calculateLayout(
       organization,
       organization.descendantOrgs,
@@ -444,7 +450,8 @@ const OrganizationFlowChart = ({
       0,
       0
     )
-
+    diagramHeight.current =
+      lowestY.current + NODE_HEIGHT + VERTICAL_SPACING + DIAGRAM_PADDING
     return {
       nodes: layout.nodes.map(node => ({
         ...node,
@@ -458,8 +465,8 @@ const OrganizationFlowChart = ({
     setTimeout(() => {
       fitView()
     })
-    // we want to reframe whenever the width, height or depthLimit changes
-  }, [width, height, depthLimit, fitView])
+    // we want to reframe whenever the width, depthLimit or positionsFilter change
+  }, [width, depthLimit, positionsFilter, fitView])
 
   if (!organization) {
     return <p>Loading...</p>
@@ -475,11 +482,12 @@ const OrganizationFlowChart = ({
             checked={showApp6Symbols}
             onChange={toggleDisplayMode}
           />
-          <label htmlFor="showAPP6Symbols">APP-6 Symbols</label>
+          <label htmlFor="showApp6Symbols">APP-6 Symbols</label>
         </div>
         <select
-          value={peopleFilter}
-          onChange={e => setPeopleFilter(e.target.value as PeopleFilterOption)}
+          value={positionsFilter}
+          onChange={e =>
+            setPositionsFilter(e.target.value as PositionFilterOption)}
         >
           <option value="none">No positions</option>
           <option value="leaders">Leaders Only</option>
@@ -496,10 +504,11 @@ const OrganizationFlowChart = ({
             <input
               id="depthInput"
               type="number"
-              value={depthLimit}
+              value={utils.isNumeric(depthLimit) && depthLimit}
               onChange={e => setDepthLimit(parseInt(e.target.value, 10))}
               min="0"
-              max="100"
+              max={maxDepth}
+              style={{ width: "3em" }}
             />
             <Button onClick={increaseDepthLimit}>
               <Icon icon={IconNames.ADD} />
@@ -519,7 +528,9 @@ const OrganizationFlowChart = ({
         ref={chartRef}
         style={{
           width: width ? `${width}px` : "100%",
-          height: "calc(100vh - 200px)",
+          height: diagramHeight.current
+            ? `${diagramHeight.current}px`
+            : "100vh",
           backgroundColor: BACKGROUND_COLOR
         }}
       >
@@ -592,7 +603,7 @@ const ControlsContainer = styled.div`
         }
         /* Firefox */
         &[type="number"] {
-          appearance: textfield;
+          -moz-appearance: textfield;
         }
 
         &:focus {
@@ -668,7 +679,7 @@ const ControlsContainer = styled.div`
 `
 
 const CustomNode = ({
-  data: { organization, symbol, depth, people, showSymbol }
+  data: { organization, symbol, depth, positions, showSymbol }
 }: NodeProps) => {
   const svg = useRef<HTMLDivElement>(null)
   useEffect(() => {
@@ -684,7 +695,7 @@ const CustomNode = ({
     <div
       style={{
         width: NODE_WIDTH,
-        height: NODE_HEIGHT,
+        height: NODE_HEIGHT + positions.length * PERSON_AVATAR_HEIGHT,
         display: "flex",
         flexDirection: "column"
       }}
@@ -726,13 +737,13 @@ const CustomNode = ({
           }}
         />
       </div>
-      {people.length > 0 && (
+      {positions.length > 0 && (
         <div
           style={{
             paddingLeft: ORG_AVATAR_WIDTH / 2
           }}
         >
-          {people.map(person => (
+          {positions.map(person => (
             <LinkTo
               key={person.uuid}
               modelType="Person"
@@ -761,7 +772,8 @@ const CustomNode = ({
         position={depth > 1 ? Position.Left : Position.Top}
         style={{
           opacity: 0,
-          left: depth === 1 ? ORG_AVATAR_WIDTH / 2 : 0
+          left: depth === 1 ? ORG_AVATAR_WIDTH / 2 : -ARROW_INDENT,
+          top: depth === 1 ? 0 : NODE_HEIGHT / 2
         }}
       />
     </div>
