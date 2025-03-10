@@ -437,6 +437,26 @@
     "notBefore" : 0,
     "groups" : [ ]
   }, {
+    "id" : "f45be556-5c1c-45f5-b1ef-c4ff258086c2",
+    "username" : "billie",
+    "emailVerified" : false,
+    "createdTimestamp" : 1741600995530,
+    "enabled" : true,
+    "totp" : false,
+    "credentials" : [ {
+      "id" : "6ad65498-6350-4a9c-8261-d79348b2f19c",
+      "type" : "password",
+      "userLabel" : "My password",
+      "createdDate" : 1741601006117,
+      "secretData" : "{\"value\":\"cdZ6i3uAm/oNW1BT+HRGKNesuycHTIXY3tfbK/TRazzmdZYucRxWI7M6DivQklYgtOJdY9M5BI4yU/krUiArZQ==\",\"salt\":\"GGrczCA6GDCxrxm8In/Ddw==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":10000,\"algorithm\":\"pbkdf2-sha512\",\"additionalParameters\":{}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "default-roles-anet-realm" ],
+    "notBefore" : 0,
+    "groups" : [ ]
+  }, {
     "id" : "505c6bd9-e2d1-4f9e-83b0-ecc9279c42c5",
     "username" : "bob",
     "emailVerified" : false,
@@ -2570,7 +2590,7 @@
     "cibaInterval" : "5",
     "realmReusableOtpCode" : "false"
   },
-  "keycloakVersion" : "26.1.1",
+  "keycloakVersion" : "26.1.2",
   "userManagedAccessAllowed" : false,
   "organizationsEnabled" : false,
   "verifiableCredentialsEnabled" : false,

@@ -46,6 +46,7 @@ const GQL_GET_APP_DATA = gql`
         name
         code
         type
+        superuserType
         role
         status
         isApprover

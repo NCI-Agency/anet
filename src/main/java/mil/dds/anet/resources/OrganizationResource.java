@@ -14,6 +14,7 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
@@ -46,7 +47,7 @@ public class OrganizationResource {
   }
 
   public static boolean hasPermission(final Person user, final String organizationUuid) {
-    return AuthUtils.isAdmin(user) || AuthUtils.canAdministrateOrg(user, organizationUuid);
+    return AuthUtils.canAdministrateOrg(user, organizationUuid);
   }
 
   public static boolean hasPermission(final Person user, final Organization organization) {
@@ -55,6 +56,13 @@ public class OrganizationResource {
 
   public static void assertPermission(final Person user, final String organizationUuid) {
     if (!hasPermission(user, organizationUuid)) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, AuthUtils.UNAUTH_MESSAGE);
+    }
+  }
+
+  public static void assertCreateSubOrganizationPermission(final Person user,
+      final String parentOrganizationUuid) {
+    if (!AuthUtils.canCreateSubOrg(user, parentOrganizationUuid)) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, AuthUtils.UNAUTH_MESSAGE);
     }
   }
@@ -82,7 +90,12 @@ public class OrganizationResource {
 
     final Person user = DaoUtils.getUserFromContext(context);
     // Check if user is authorized to create a sub organization
-    assertPermission(user, org.getParentOrgUuid());
+    assertCreateSubOrganizationPermission(user, org.getParentOrgUuid());
+    // If the organization is created by a superuser we need to add their position as an
+    // administrating one
+    if (user.getPosition().getType() == Position.PositionType.SUPERUSER) {
+      org.setAdministratingPositions(List.of(user.getPosition()));
+    }
     final Organization created;
     try {
       created = dao.insert(org);
@@ -139,7 +152,7 @@ public class OrganizationResource {
     // Load the existing organization, so we can check for differences.
     final Organization existing = dao.getByUuid(org.getUuid());
 
-    if (!AuthUtils.isAdmin(user)) {
+    if (!AuthUtils.isAdmin(user) && !AuthUtils.isSuperUserThatCanEditAllOrganizations(user)) {
       // Check if user has administrative permission for the organizations that will be
       // modified with the parent organization update
       if (!Objects.equals(org.getParentOrgUuid(), existing.getParentOrgUuid())) {

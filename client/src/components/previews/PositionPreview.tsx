@@ -18,6 +18,7 @@ const GQL_GET_POSITION = gql`
       uuid
       name
       type
+      superuserType
       role
       status
       code
@@ -109,7 +110,13 @@ const PositionPreview = ({ className, uuid }: PositionPreviewProps) => {
           dictProps={Settings.fields.position.type}
           value={Position.humanNameOfType(position.type)}
         />
-
+        {position.type === Position.TYPE.SUPERUSER && (
+          <DictionaryField
+            wrappedComponent={PreviewField}
+            dictProps={Settings.fields.position.superuserType}
+            value={Position.humanNameOfSuperuserType(position.superuserType)}
+          />
+        )}
         {position.organization && (
           <DictionaryField
             wrappedComponent={PreviewField}
