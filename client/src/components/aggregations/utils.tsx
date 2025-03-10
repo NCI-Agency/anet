@@ -233,7 +233,7 @@ export function eventsToCalendarEvents(events, showInterlocutors) {
         // ascending by start date
         e1.start - e2.start ||
         // ascending by end date
-        e1.end - e1.end ||
+        e1.end - e2.end ||
         // and finally ascending by title
         e1.title.localeCompare(e2.title)
     )
