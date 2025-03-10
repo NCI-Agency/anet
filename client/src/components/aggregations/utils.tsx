@@ -199,77 +199,93 @@ export const GET_CALENDAR_EVENTS_FROM = {
   [CALENDAR_OBJECT_TYPES.REPORT]: reportsToEvents
 }
 
-export function reportsToEvents(reports, showInterlocutors) {
-  return reports
-    .map(r => {
-      // If no other data available title is the location name
-      let title = `@${r.location?.name}`
-      const primaryPerson = showInterlocutors
-        ? r.primaryInterlocutor
-        : r.primaryAdvisor
-      if (primaryPerson) {
-        // We have a primary person, add their organization
-        const primaryOrg = showInterlocutors ? r.interlocutorOrg : r.advisorOrg
-        title = `${primaryOrg?.shortName || "<unknown>"}: ${new Person(
-          primaryPerson
-        ).toString()}`
-      }
-
-      const start = new Date(r.engagementDate)
-      start.setSeconds(0, 0) // truncate at the minute part
-      return {
-        title,
-        start,
-        end: moment(start).add(r.duration, "minutes").toDate(),
-        url: Report.pathFor(r),
-        classNames: [`event-${Report.getStateForClassName(r)}`],
-        extendedProps: { ...r },
-        allDay:
-          !Settings.engagementsIncludeTimeAndDuration || r.duration === null
-      }
-    })
-    .sort(
-      (r1, r2) =>
-        // first the all-day events
-        r2.allDay - r1.allDay ||
-        // then (for events that are not all-day)
-        (!r1.allDay &&
-          // ascending by start date
-          (r1.start - r2.start ||
-            // ascending by end date
-            r1.end - r2.end)) ||
-        // and finally ascending by title
-        r1.title.localeCompare(r2.title)
-    )
+export function reportsToEvents(reports, showInterlocutors, event) {
+  // Do we have an event to show?
+  const result = event ? [createCalendarEventFromEvent(event)] : []
+  // Get reports
+  return result.concat(
+    reports
+      .map(r => {
+        return createCalendarEventFromReport(r, showInterlocutors)
+      })
+      .sort(
+        (r1, r2) =>
+          // first the all-day events
+          r2.allDay - r1.allDay ||
+          // then (for events that are not all-day)
+          (!r1.allDay &&
+            // ascending by start date
+            (r1.start - r2.start ||
+              // ascending by end date
+              r1.end - r2.end)) ||
+          // and finally ascending by title
+          r1.title.localeCompare(r2.title)
+      )
+  )
 }
 
-export function eventsToCalendarEvents(events) {
+export function eventsToCalendarEvents(events, showInterlocutors) {
+  // Show in the calendar all events and all its reports
   return events
-    .map(event => {
-      let title = `${event.name}`
-      if (event.location) {
-        title = `${title}@${event.location.name}`
-      }
-      const start = new Date(event.startDate)
-      start.setSeconds(0, 0) // truncate at the minute part
-      const end = new Date(event.endDate)
-      end.setSeconds(0, 0) // truncate at the minute part
-      return {
-        title,
-        start,
-        end,
-        url: Event.pathFor(event),
-        extendedProps: { ...event },
-        allDay: !Settings.eventsIncludeStartAndEndTime
-      }
-    })
+    .flatMap(event => createCalendarEventFromEvent(event))
     .sort(
       (e1, e2) =>
         // ascending by start date
         e1.start - e2.start ||
         // ascending by end date
-        e1.end - e1.end ||
+        e1.end - e2.end ||
         // and finally ascending by title
         e1.title.localeCompare(e2.title)
     )
+    .concat(
+      events.flatMap(event =>
+        reportsToEvents(event.reports, showInterlocutors, null)
+      )
+    )
+}
+
+export function createCalendarEventFromEvent(event) {
+  let title = `${event.name}`
+  if (!_isEmpty(event.location)) {
+    title = `${title}@${event.location.name}`
+  }
+  const start = new Date(event.startDate)
+  start.setSeconds(0, 0) // truncate at the minute part
+  const end = new Date(event.endDate)
+  end.setSeconds(0, 0) // truncate at the minute part
+  return {
+    title,
+    start,
+    end,
+    url: Event.pathFor(event),
+    extendedProps: { ...event },
+    allDay: !Settings.eventsIncludeStartAndEndTime
+  }
+}
+
+export function createCalendarEventFromReport(r, showInterlocutors) {
+  // If no other data available title is the location name
+  let title = `@${r.location?.name}`
+  const primaryPerson = showInterlocutors
+    ? r.primaryInterlocutor
+    : r.primaryAdvisor
+  if (primaryPerson) {
+    // We have a primary person, add their organization
+    const primaryOrg = showInterlocutors ? r.interlocutorOrg : r.advisorOrg
+    title = `${primaryOrg?.shortName || "<unknown>"}: ${new Person(
+      primaryPerson
+    ).toString()}`
+  }
+
+  const start = new Date(r.engagementDate)
+  start.setSeconds(0, 0) // truncate at the minute part
+  return {
+    title,
+    start,
+    end: moment(start).add(r.duration, "minutes").toDate(),
+    url: Report.pathFor(r),
+    classNames: [`event-${Report.getStateForClassName(r)}`],
+    extendedProps: { ...r },
+    allDay: !Settings.engagementsIncludeTimeAndDuration || r.duration === null
+  }
 }

@@ -1,6 +1,9 @@
 import { gql } from "@apollo/client"
 import API from "api"
-import { reportsToEvents } from "components/aggregations/utils"
+import {
+  createCalendarEventFromReport,
+  reportsToEvents
+} from "components/aggregations/utils"
 import Calendar from "components/Calendar"
 import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import { PageDispatchersPropType } from "components/Page"
@@ -62,13 +65,15 @@ interface ReportCalendarProps {
   queryParams?: any
   setTotalCount?: (...args: unknown[]) => unknown
   attendeeType: string
+  event?: Event
 }
 
 const ReportCalendar = ({
   pageDispatchers: { showLoading, hideLoading },
   queryParams,
   setTotalCount,
-  attendeeType
+  attendeeType,
+  event
 }: ReportCalendarProps) => {
   const navigate = useNavigate()
   const prevReportQuery = useRef(null)
@@ -99,11 +104,14 @@ const ReportCalendar = ({
         prevAttendeeType.current = attendeeType
         showLoading()
         apiPromise.current = apiPromise.current.then(data => {
-          // Each report is stored in the extendedProps
-          const reports = data.map(d => d.extendedProps)
-          const results = reportsToEvents(
-            reports,
-            attendeeType === ATTENDEE_TYPE_INTERLOCUTOR
+          // Extended props contains both events and reports
+          const results = data.map(d =>
+            d.extendedProps.engagementDate
+              ? createCalendarEventFromReport(
+                d.extendedProps,
+                attendeeType === ATTENDEE_TYPE_INTERLOCUTOR
+              )
+              : d
           )
           hideLoading()
           return results
@@ -130,7 +138,8 @@ const ReportCalendar = ({
       }
       const results = reportsToEvents(
         reports,
-        attendeeType === ATTENDEE_TYPE_INTERLOCUTOR
+        attendeeType === ATTENDEE_TYPE_INTERLOCUTOR,
+        event
       )
       hideLoading()
       return results
