@@ -200,31 +200,28 @@ export const GET_CALENDAR_EVENTS_FROM = {
 }
 
 export function reportsToEvents(reports, showInterlocutors, event) {
-  // Get reports first
-  const result = reports
-    .map(r => {
-      return createCalendarEventFromReport(r, showInterlocutors)
-    })
-    .sort(
-      (r1, r2) =>
-        // first the all-day events
-        r2.allDay - r1.allDay ||
-        // then (for events that are not all-day)
-        (!r1.allDay &&
-          // ascending by start date
-          (r1.start - r2.start ||
-            // ascending by end date
-            r1.end - r2.end)) ||
-        // and finally ascending by title
-        r1.title.localeCompare(r2.title)
-    )
-
-  // Do we have an event to show as well?
-  if (event) {
-    result.push(createCalendarEventFromEvent(event))
-  }
-
-  return result
+  // Do we have an event to show?
+  const result = event ? [createCalendarEventFromEvent(event)] : []
+  // Get reports
+  return result.concat(
+    reports
+      .map(r => {
+        return createCalendarEventFromReport(r, showInterlocutors)
+      })
+      .sort(
+        (r1, r2) =>
+          // first the all-day events
+          r2.allDay - r1.allDay ||
+          // then (for events that are not all-day)
+          (!r1.allDay &&
+            // ascending by start date
+            (r1.start - r2.start ||
+              // ascending by end date
+              r1.end - r2.end)) ||
+          // and finally ascending by title
+          r1.title.localeCompare(r2.title)
+      )
+  )
 }
 
 export function eventsToCalendarEvents(events, showInterlocutors) {
