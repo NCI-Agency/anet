@@ -3,11 +3,9 @@ import API from "api"
 import DictionaryField from "components/DictionaryField"
 import EmailAddressTable from "components/EmailAddressTable"
 import { PreviewField } from "components/FieldHelper"
-import * as FieldHelper from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import RichTextEditor from "components/RichTextEditor"
-import { Field } from "formik"
 import { Location, Position } from "models"
 import moment from "moment"
 import React from "react"
@@ -20,6 +18,7 @@ const GQL_GET_POSITION = gql`
       uuid
       name
       type
+      superuserType
       role
       status
       code
@@ -113,11 +112,9 @@ const PositionPreview = ({ className, uuid }: PositionPreviewProps) => {
         />
         {position.type === Position.TYPE.SUPERUSER && (
           <DictionaryField
-            wrappedComponent={Field}
+            wrappedComponent={PreviewField}
             dictProps={Settings.fields.position.superuserType}
-            name="superuserType"
-            component={FieldHelper.ReadonlyField}
-            humanValue={Position.humanNameOfSuperuserType}
+            value={Position.humanNameOfSuperuserType(position.superuserType)}
           />
         )}
         {position.organization && (
