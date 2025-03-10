@@ -115,7 +115,7 @@
     "xhr2": "0.2.1"
   },
   "dependencies": {
-    "@apollo/client": "3.13.3",
+    "@apollo/client": "3.13.4",
     "@blueprintjs/core": "5.17.3",
     "@blueprintjs/datetime2": "2.3.27",
     "@emotion/react": "11.14.0",
