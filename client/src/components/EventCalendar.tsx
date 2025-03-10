@@ -1,7 +1,6 @@
 import { gql } from "@apollo/client"
 import API from "api"
 import {
-  createCalendarEventFromEvent,
   createCalendarEventFromReport,
   eventsToCalendarEvents
 } from "components/aggregations/utils"
@@ -117,20 +116,14 @@ const EventCalendar = ({
         showLoading()
         apiPromise.current = apiPromise.current.then(data => {
           // Extended props contains both events and reports
-          const results = data
-            .map(d => d.extendedProps)
-            .map(calendarEvent => {
-              if (calendarEvent.engagementDate) {
-                // This is a report, recompute
-                return createCalendarEventFromReport(
-                  calendarEvent,
-                  attendeeType === ATTENDEE_TYPE_INTERLOCUTOR
-                )
-              } else {
-                // This is an event, stays as is
-                return createCalendarEventFromEvent(calendarEvent)
-              }
-            })
+          const results = data.map(d =>
+            d.extendedProps.engagementDate
+              ? createCalendarEventFromReport(
+                d.extendedProps,
+                attendeeType === ATTENDEE_TYPE_INTERLOCUTOR
+              )
+              : d
+          )
           hideLoading()
           return results
         })
