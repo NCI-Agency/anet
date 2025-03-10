@@ -3,7 +3,9 @@ import Leaflet, { ICON_TYPES } from "components/Leaflet"
 import _escape from "lodash/escape"
 import _isEmpty from "lodash/isEmpty"
 import { Location, Report } from "models"
+import moment from "moment"
 import React, { useMemo } from "react"
+import Settings from "settings"
 
 const getIcon = report => {
   if (report.state === Report.STATE.CANCELLED) {
@@ -35,8 +37,11 @@ const ReportsMapWidget = ({
     const markerArray = []
     values.forEach(report => {
       if (Location.hasCoordinates(report.location)) {
-        let label = `<a href="${Report.pathFor(report)}" target="_blank">${_escape(report.intent || "<undefined>")}</a>` // escape HTML in intent!
-        label += `<br/>@ <b>${_escape(report.location.name)}</b>` // escape HTML in locationName!
+        let label = `<b>Report:</b> <a href="${Report.pathFor(report)}" target="_blank">${_escape(report.intent || "<undefined>")}</a>` // escape HTML in intent!
+        label += `<br/><b>Location:</b> ${_escape(report.location.name)}` // escape HTML in locationName!
+        if (report.engagementDate) {
+          label += `<br/><b>Date:</b> ${moment(report.engagementDate).format(Report.getEngagementDateFormat())}`
+        }
         markerArray.push({
           id: report.uuid,
           icon: getIcon(report),
