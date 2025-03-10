@@ -227,11 +227,7 @@ export function reportsToEvents(reports, showInterlocutors, event) {
 export function eventsToCalendarEvents(events, showInterlocutors) {
   // Show in the calendar all events and all its reports
   return events
-    .flatMap(event => {
-      return [createCalendarEventFromEvent(event)].concat(
-        reportsToEvents(event.reports, showInterlocutors, null)
-      )
-    })
+    .flatMap(event => createCalendarEventFromEvent(event))
     .sort(
       (e1, e2) =>
         // ascending by start date
@@ -240,6 +236,11 @@ export function eventsToCalendarEvents(events, showInterlocutors) {
         e1.end - e1.end ||
         // and finally ascending by title
         e1.title.localeCompare(e2.title)
+    )
+    .concat(
+      events.flatMap(event =>
+        reportsToEvents(event.reports, showInterlocutors, null)
+      )
     )
 }
 
