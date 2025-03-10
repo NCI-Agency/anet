@@ -116,30 +116,32 @@ class RestrictedFieldsTest extends AbstractResourceTest {
   private void testAsAuthorizedUser(final String domainUsername) {
     // person search
     final List<String> phoneNumbers = list("+011-232-12324", "+1-111-1111", "+1-202-7320",
-        "+1-234-5678", "+1-412-7324", "+1-412-9314", "+1-422222222", "+1-444-7324", "+1-777-7777",
-        "+2-456-7324", "+23-23-11222", "+444-44-4444", "+444-44-4545", "+9-23-2323-2323",
-        "+99-9999-9999", "123-456-78960");
-    assertPersonSearch(domainUsername, EMAIL_NETWORK_INTERNET, 32, phoneNumbers, 34,
+        "+1-234-5678", "+1-264-7324", "+1-412-7324", "+1-412-9314", "+1-422222222", "+1-444-7324",
+        "+1-777-7777", "+2-456-7324", "+23-23-11222", "+444-44-4444", "+444-44-4545",
+        "+9-23-2323-2323", "+99-9999-9999", "123-456-78960");
+    assertPersonSearch(domainUsername, EMAIL_NETWORK_INTERNET, 33, phoneNumbers, 35,
         list("advisor@example.com", "andrew@example.com", "arthur@example.com",
             "bemerged.myposwill@example.com", "ben+rogers@example.com", "bob@example.com",
-            "christopf@example.com", "chrisville.chris@example.com", "creed.bratton@example.com",
-            "dwight.schrute@example.com", "erin@example.com", "henry@example.com",
-            "hunter@example.com", "ima.reportgirl@example.com", "ima.reportguy@example.com",
-            "inter.preter@example.com", "jack@example.com", "jacob@example.com",
-            "jim.halpert@example.com", "kevin.malone@example.com", "kevin+rivers@example.com",
-            "kyleson.kyle@example.com", "lin.guist@example.com", "liz@example.com",
-            "merged.winner@example.com", "michael.scott@example.com", "nick@example.com",
-            "rebecca@example.com", "reina@example.com", "roger@example.com", "selena@example.com",
-            "shardul@example.com", "steve@example.com", "yoshie@example.com"));
-    assertPersonSearch(domainUsername, EMAIL_NETWORK_NS, 32, phoneNumbers, 25,
+            "billie.linton@example.com", "christopf@example.com", "chrisville.chris@example.com",
+            "creed.bratton@example.com", "dwight.schrute@example.com", "erin@example.com",
+            "henry@example.com", "hunter@example.com", "ima.reportgirl@example.com",
+            "ima.reportguy@example.com", "inter.preter@example.com", "jack@example.com",
+            "jacob@example.com", "jim.halpert@example.com", "kevin.malone@example.com",
+            "kevin+rivers@example.com", "kyleson.kyle@example.com", "lin.guist@example.com",
+            "liz@example.com", "merged.winner@example.com", "michael.scott@example.com",
+            "nick@example.com", "rebecca@example.com", "reina@example.com", "roger@example.com",
+            "selena@example.com", "shardul@example.com", "steve@example.com",
+            "yoshie@example.com"));
+    assertPersonSearch(domainUsername, EMAIL_NETWORK_NS, 33, phoneNumbers, 26,
         list("advisor@example.ns", "andrew@example.ns", "arthur@example.ns",
-            "ben+rogers@example.ns", "bob@example.ns", "creed.bratton@example.ns",
-            "dwight.schrute@example.ns", "erin@example.ns", "henry@example.ns",
-            "ima.reportgirl@example.ns", "ima.reportguy@example.ns", "inter.preter@example.ns",
-            "jack@example.ns", "jacob@example.ns", "jim.halpert@example.ns",
-            "kevin.malone@example.ns", "kevin+rivers@example.ns", "lin.guist@example.ns",
-            "liz@example.ns", "michael.scott@example.ns", "rebecca@example.ns", "reina@example.ns",
-            "selena@example.ns", "shardul@example.ns", "yoshie@example.ns"));
+            "ben+rogers@example.ns", "billie.linton@example.ns", "bob@example.ns",
+            "creed.bratton@example.ns", "dwight.schrute@example.ns", "erin@example.ns",
+            "henry@example.ns", "ima.reportgirl@example.ns", "ima.reportguy@example.ns",
+            "inter.preter@example.ns", "jack@example.ns", "jacob@example.ns",
+            "jim.halpert@example.ns", "kevin.malone@example.ns", "kevin+rivers@example.ns",
+            "lin.guist@example.ns", "liz@example.ns", "michael.scott@example.ns",
+            "rebecca@example.ns", "reina@example.ns", "selena@example.ns", "shardul@example.ns",
+            "yoshie@example.ns"));
 
     // organization search
     assertOrganizationSearch(domainUsername, EMAIL_NETWORK_INTERNET, 4,

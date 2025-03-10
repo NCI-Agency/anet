@@ -607,14 +607,14 @@ async function getFromSearchResults(
 }
 
 test.serial(
-  "checking superuser that can create top level organizations permissions",
+  "checking superuser that can create top-level organizations permissions",
   async t => {
     t.plan(1)
 
     await t.context.get("/", "jim")
 
-    // Jim can create top level organizations
-    await canCreateOrganization()
+    // Jim can create top-level organizations
+    await canCreateOrganization(t)
     // but Jim can not edit organizations
     const $nonAdministratingOrgLink = await getFromSearchResults(
       t,
@@ -633,11 +633,11 @@ test.serial(
   async t => {
     t.plan(3)
 
-    await t.context.get("/", "dwight")
+    await t.context.get("/", "billie")
 
-    // Dwight can create top level organizations
+    // Billie can create top-level organizations
     await canCreateOrganization(t)
-    // And he can also edit an organization
+    // And she can also edit any organization
     const $nonAdministratingOrgLink = await getFromSearchResults(
       t,
       "MoD",
@@ -657,7 +657,7 @@ async function canCreateOrganization(t) {
   await $createButton.click()
   const $createOrganizationButton = await $("#new-organization")
   await $createOrganizationButton.click()
-  const $organizationInput = await $("#fg-organization")
+  const $organizationInput = await $("#shortName")
   await driver.wait(until.elementIsVisible($organizationInput), shortWaitMs)
 
   // Cancel Create Organization

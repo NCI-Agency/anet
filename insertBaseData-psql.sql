@@ -83,6 +83,7 @@ INSERT INTO people (uuid, name, status, "phoneNumber", rank, biography, "user", 
   ('1a557db0-5af5-4ea3-b926-28b5f2e88bf7', 'Anderson, Andrew', 0, '+1-412-7324', 'CIV', 'Andrew is the EF 1 Manager', true, 'andrew', '3276c85a-bf03-4591-a74b-56d70ac8eec0', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'United States'), 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('ad442c97-ca89-4c63-9a4d-336f17ca856b', 'Schrute, Dwight', 0, '+1-412-7324', 'CIV', 'Beets & Battlestar Galactica.', true, 'dwight', 'cb23f6a5-1321-4330-b972-22d98bff12af', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'United States'), 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('b6754f19-b67e-4603-bfe6-af8c61760eef', 'Halpert, Jim', 0, '+1-412-7324', 'CIV', 'Lets prank dwight.', true, 'jim', 'e8c81377-eaac-4ace-8aa6-7b255b53494c', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'United States'), 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('c94abd40-21ba-4592-9ce4-95e6c2cfd912', 'Linton, Billie', 0, '+1-264-7324', 'CIV', 'Billie is a powerful superuser', true, 'billie', 'f45be556-5c1c-45f5-b1ef-c4ff258086c2', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Anguilla'), 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 -- Administrators
   ('87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'Dmin, Arthur', '0', NULL, 'CIV', 'An administrator', true, 'arthur', 'abc72322-1452-4222-bb71-a0b3db435175', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Albania'), 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('46ba6a73-0cd7-4efb-8e99-215e98cc5987', 'Scott, Michael', '0', NULL, 'CIV', 'Worlds best boss.', true, 'michael', 'bd482701-2342-4a50-ba92-d956007a8828', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'United States'), 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
@@ -160,6 +161,8 @@ INSERT INTO "emailAddresses" (network, address, "relatedObjectType", "relatedObj
   ('NS', 'dwight.schrute@example.ns', 'people', 'ad442c97-ca89-4c63-9a4d-336f17ca856b'),
   ('Internet', 'jim.halpert@example.com', 'people', 'b6754f19-b67e-4603-bfe6-af8c61760eef'),
   ('NS', 'jim.halpert@example.ns', 'people', 'b6754f19-b67e-4603-bfe6-af8c61760eef'),
+  ('Internet', 'billie.linton@example.com', 'people', 'c94abd40-21ba-4592-9ce4-95e6c2cfd912'),
+  ('NS', 'billie.linton@example.ns', 'people', 'c94abd40-21ba-4592-9ce4-95e6c2cfd912'),
 -- Administrators
   ('Internet', 'arthur@example.com', 'people', '87fdbc6a-3109-4e11-9702-a894d6ca31ef'),
   ('NS', 'arthur@example.ns', 'people', '87fdbc6a-3109-4e11-9702-a894d6ca31ef'),
@@ -276,11 +279,12 @@ INSERT INTO positions (uuid, name, type, "superuserType", role, status, "current
   (N'05c42ce0-34a0-4391-8b2f-c4cd85ee6b47', 'EF 5.1 Advisor Quality Assurance', 0, NULL, 0, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 5.1 Advisor Accounting', 0, NULL, 0, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 5.1 Superuser Sales 1', 2, 1, 1, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 5.1 Superuser Sales 2', 2, 2, 1, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'EF 5.1 Superuser Sales 2', 2, 0, 1, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 6 Approver', 0, NULL, 0, 0, NULL, '7339f9e3-99d1-497a-9e3b-1269c4c287fe', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 6.1 Advisor', 0, NULL, 0, 0, NULL, '7339f9e3-99d1-497a-9e3b-1269c4c287fe', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 9 Advisor', 0, NULL, 0, 0, NULL, '7339f9e3-99d1-497a-9e3b-1269c4c287fe', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 9 Approver', 0, NULL, 0, 0, NULL, '7339f9e3-99d1-497a-9e3b-1269c4c287fe', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'EF 9 Superuser', 2, 2, 0, 0, NULL, '7339f9e3-99d1-497a-9e3b-1269c4c287fe', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'LNG Advisor A', 0, NULL, 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'LNG Advisor B', 0, NULL, 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
@@ -413,6 +417,11 @@ UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domai
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
   ((SELECT uuid from positions where name = 'EF 9 Approver'), (SELECT uuid from people where "domainUsername" = 'yoshie'), '2020-01-01');
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'yoshie') WHERE name = 'EF 9 Approver';
+
+-- Put Billie into the EF 9 Superuser
+INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
+  ((SELECT uuid from positions where name = 'EF 9 Superuser'), (SELECT uuid from people where "domainUsername" = 'billie'), '2020-01-01');
+UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "domainUsername" = 'billie') WHERE name = 'EF 9 Superuser';
 
 -- Put Lin into the LNG Advisor A
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt") VALUES
