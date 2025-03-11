@@ -5,18 +5,17 @@ import java.util.Map;
 import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.utils.Utils;
 
-public record ConfidentialityRecord(
-    String policy, String classification, List<String> releasableTo) {
+public record ConfidentialityRecord(String policy, String classification,
+    List<String> releasableTo) {
 
   public static ConfidentialityRecord create(AnetDictionary dict, String choice) {
     final var classificationChoice = getConfidentialityLabelForChoice(dict, choice);
-    return (classificationChoice == null)
-        ? null
+    return (classificationChoice == null) ? null
         : ConfidentialityRecord.create(classificationChoice);
   }
 
-  public static ConfidentialityRecord create(
-      AnetDictionary dict, ConfidentialityRecord defaultConfidentiality, Report report) {
+  public static ConfidentialityRecord create(AnetDictionary dict,
+      ConfidentialityRecord defaultConfidentiality, Report report) {
     final var reportClassification = create(dict, report.getClassification());
     return reportClassification == null ? defaultConfidentiality : reportClassification;
   }
@@ -26,12 +25,12 @@ public record ConfidentialityRecord(
     final var classification = (String) classificationChoice.get("classification");
     @SuppressWarnings("unchecked")
     final var releasableTo = (List<String>) classificationChoice.get("releasableTo");
-    return new ConfidentialityRecord(
-        toUpper(policy), toUpper(classification), toUpper(releasableTo));
+    return new ConfidentialityRecord(toUpper(policy), toUpper(classification),
+        toUpper(releasableTo));
   }
 
-  public static Map<String, Object> getConfidentialityLabelForChoice(
-      AnetDictionary dict, String choice) {
+  public static Map<String, Object> getConfidentialityLabelForChoice(AnetDictionary dict,
+      String choice) {
     @SuppressWarnings("unchecked")
     final Map<String, Map<String, Object>> classificationChoices =
         (Map<String, Map<String, Object>>) dict.getDictionaryEntry("confidentialityLabel.choices");
