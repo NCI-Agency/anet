@@ -1675,7 +1675,7 @@ imagery:
       attributionControl: false
   geoSearcher:
     provider: ESRI
-    url: "geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/find"
+    url: "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/find"
   baseLayers:
     - name: OSM
       default: true
