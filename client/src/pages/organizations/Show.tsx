@@ -3,6 +3,7 @@ import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
 import AppContext from "components/AppContext"
 import Approvals from "components/approvals/Approvals"
+import EditApprovalsModal from "components/approvals/EditApprovalsModal"
 import AssessmentResultsContainer from "components/assessments/AssessmentResultsContainer"
 import AttachmentsDetailView from "components/Attachment/AttachmentsDetailView"
 import AuthorizationGroupTable from "components/AuthorizationGroupTable"
@@ -205,6 +206,10 @@ interface OrganizationShowProps {
 }
 
 const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
+  const [showPlanningApprovalsModal, setShowPlanningApprovalsModal] =
+    useState(false)
+  const [showReportApprovalsModal, setShowReportApprovalsModal] =
+    useState(false)
   const { currentUser, loadAppData } = useContext(AppContext)
   const routerLocation = useLocation()
   const stateSuccess = routerLocation.state && routerLocation.state.success
@@ -283,7 +288,7 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
           </AnchorNavItem>
         </Nav.Item>
         <Nav.Item>
-          <AnchorNavItem to="approvals">Approvals</AnchorNavItem>
+          <AnchorNavItem to="planningApprovals">Approvals</AnchorNavItem>
         </Nav.Item>
         {organization.isTaskEnabled() && (
           <Nav.Item>
@@ -712,7 +717,77 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
                 organization={organization}
                 refetch={refetch}
               />
-              <Approvals relatedObject={organization} />
+              <div style={{ position: "relative" }}>
+                {canAdministrateOrg && (
+                  <Button
+                    onClick={() => setShowPlanningApprovalsModal(true)}
+                    variant="outline-secondary"
+                    style={{ position: "absolute", right: "8px" }}
+                  >
+                    Edit Planning Approvals
+                  </Button>
+                )}
+                <Approvals
+                  relatedObject={{
+                    planningApprovalSteps: organization.planningApprovalSteps
+                  }}
+                />
+              </div>
+              <div style={{ position: "relative" }}>
+                {canAdministrateOrg && (
+                  <Button
+                    onClick={() => setShowReportApprovalsModal(true)}
+                    variant="outline-secondary"
+                    style={{ position: "absolute", right: "8px" }}
+                  >
+                    Edit Report Approvals
+                  </Button>
+                )}
+                <Approvals
+                  relatedObject={{ approvalSteps: organization.approvalSteps }}
+                />
+              </div>
+
+              {canAdministrateOrg && (
+                <>
+                  <EditApprovalsModal
+                    organization={organization}
+                    showModal={showPlanningApprovalsModal}
+                    onCancel={() => setShowPlanningApprovalsModal(false)}
+                    onSuccess={() => {
+                      setShowPlanningApprovalsModal(false)
+                      refetch()
+                    }}
+                    fieldName="planningApprovalSteps"
+                    title="Engagement planning approval process"
+                    addButtonLabel="Add planning approval step"
+                    approversFilters={{
+                      activePositions: {
+                        label: "Active positions",
+                        queryVars: { status: "ACTIVE" }
+                      }
+                    }}
+                  />
+                  <EditApprovalsModal
+                    organization={organization}
+                    showModal={showReportApprovalsModal}
+                    onCancel={() => setShowReportApprovalsModal(false)}
+                    onSuccess={() => {
+                      setShowReportApprovalsModal(false)
+                      refetch()
+                    }}
+                    fieldName="approvalSteps"
+                    title="Report publication approval process"
+                    addButtonLabel="Add approval step"
+                    approversFilters={{
+                      activePositions: {
+                        label: "Active positions",
+                        queryVars: { status: "ACTIVE" }
+                      }
+                    }}
+                  />
+                </>
+              )}
               {organization.isTaskEnabled() && (
                 <OrganizationTasks
                   organization={organization}
