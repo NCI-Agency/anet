@@ -6,11 +6,13 @@ import { FormCheck, Table } from "react-bootstrap"
 interface ApprovalsProps {
   restrictedApprovalLabel?: string
   relatedObject: any
+  action: any
 }
 
 const Approvals = ({
   restrictedApprovalLabel,
-  relatedObject
+  relatedObject,
+  action
 }: ApprovalsProps) => {
   const { planningApprovalSteps, approvalSteps } = relatedObject
 
@@ -20,6 +22,7 @@ const Approvals = ({
         <Fieldset
           id="planningApprovals"
           title="Engagement planning approval process"
+          action={action}
         >
           {planningApprovalSteps.map((step, idx) => (
             <Fieldset
@@ -73,7 +76,11 @@ const Approvals = ({
         </Fieldset>
       )}
       {approvalSteps && (
-        <Fieldset id="approvals" title="Report publication approval process">
+        <Fieldset
+          id="approvals"
+          title="Report publication approval process"
+          action={action}
+        >
           {approvalSteps.map((step, idx) => (
             <Fieldset
               title={`Step ${idx + 1}: ${step.name}`}
