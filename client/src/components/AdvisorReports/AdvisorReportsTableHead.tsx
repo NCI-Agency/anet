@@ -18,7 +18,7 @@ const AdvisorReportsTableHead = (props: AdvisorReportsTableHeadProps) => {
     const keyAttended = `a-${week}`
     weekHeadings.push(
       <th colSpan={2} key={keyWeek}>
-        Week {week}
+        ISO Week {week}
       </th>
     )
     weekCols.push(<th key={keySubmitted}>Reports submitted</th>)

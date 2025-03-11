@@ -2076,7 +2076,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     final AnetBeanList_Report reportResults = runSearchQuery(query);
     assertThat(reportResults).isNotNull();
 
-    final List<Integer> daysOfWeek = Arrays.asList(1, 2, 3, 4, 5, 6, 7);
+    final List<Integer> daysOfWeek = Arrays.asList(0, 1, 2, 3, 4, 5, 6);
     final List<Report> reports = reportResults.getList();
     for (Report rpt : reports) {
       assertThat(rpt.getEngagementDayOfWeek()).isIn(daysOfWeek);

@@ -14,12 +14,14 @@ import io.leangen.graphql.execution.ResolutionEnvironment;
 import jakarta.annotation.Nullable;
 import java.lang.invoke.MethodHandles;
 import java.nio.charset.StandardCharsets;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -33,6 +35,7 @@ import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Task;
+import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.ApprovalStepDao;
 import mil.dds.anet.database.mappers.MapperUtils;
@@ -618,5 +621,30 @@ public class Utils {
   public static String getEmailNetworkForNotifications() {
     return (String) ApplicationContextProvider.getDictionary()
         .getDictionaryEntry("emailNetworkForNotifications");
+  }
+
+  private static Locale getLocaleForDateFormatters(AnetDictionary dict) {
+    // For ISO 8601, Monday is the first day of the week, else it is Sunday
+    final var useISO8601 = Boolean.TRUE.equals(dict.getDictionaryEntry("useISO8601"));
+    // Pretty ugly, as it always assumes English, but at least we can control the first day of the
+    // week (and the first week of the year) this way…
+    return new Locale("en", useISO8601 ? "GB" : "US");
+  }
+
+  public static DateTimeFormatter getDateFormatter(AnetDictionary dict, String key) {
+    return DateTimeFormatter.ofPattern((String) dict.getDictionaryEntry(key))
+        .withLocale(getLocaleForDateFormatters(dict)).withZone(DaoUtils.getServerLocalZoneId());
+  }
+
+  public static DateTimeFormatter getDateTimeFormatter(AnetDictionary dict, String key) {
+    return DateTimeFormatter.ofPattern((String) dict.getDictionaryEntry(key))
+        .withLocale(getLocaleForDateFormatters(dict)).withZone(DaoUtils.getServerLocalZoneId());
+  }
+
+  public static DateTimeFormatter getEngagementDateFormatter(AnetDictionary dict,
+      boolean includeTime, String dateKey, String dateTimeKey) {
+    final String pattern = (String) dict.getDictionaryEntry(includeTime ? dateTimeKey : dateKey);
+    return DateTimeFormatter.ofPattern(pattern).withLocale(getLocaleForDateFormatters(dict))
+        .withZone(DaoUtils.getServerLocalZoneId());
   }
 }

@@ -18,6 +18,7 @@ import ReportCollection, {
 import * as d3 from "d3"
 import _escape from "lodash/escape"
 import _isEqual from "lodash/isEqual"
+import moment from "moment"
 import React, { useMemo, useState } from "react"
 import { useResizeDetector } from "react-resize-detector"
 
@@ -64,28 +65,13 @@ const Chart = ({
     if (!data) {
       return []
     }
-    // The server returns values from 1 to 7
-    const daysOfWeekInt = [1, 2, 3, 4, 5, 6, 7]
-    // The day of the week (returned by the server) with value 1 is Sunday
-    const daysOfWeek = [
-      "Sunday",
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday"
-    ]
+    // The server returns values from 0 to 6
+    const daysOfWeekInt = [0, 1, 2, 3, 4, 5, 6]
+    // The day of the week (returned by the server) with value 0 is Sunday
+    // See https://momentjs.com/docs/#/i18n/locale-data/
+    const daysOfWeek = moment.localeData().weekdays(false)
     // Set the order in which to display the days of the week
-    const displayOrderDaysOfWeek = [
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday",
-      "Sunday"
-    ]
+    const displayOrderDaysOfWeek = moment.localeData().weekdays(true)
     const reportsList = data.reportList.list || []
     if (!reportsList.length) {
       return []
