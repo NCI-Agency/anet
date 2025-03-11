@@ -3,8 +3,14 @@ import EventCalendar from "components/EventCalendar"
 import EventMap from "components/EventMap"
 import EventSummary from "components/EventSummary"
 import EventTable from "components/EventTable"
+import {
+  ATTENDEE_TYPE_ADVISOR,
+  ATTENDEE_TYPE_INTERLOCUTOR
+} from "components/ReportCalendar"
+import pluralize from "pluralize"
 import React, { useState } from "react"
 import { Button } from "react-bootstrap"
+import Settings from "settings"
 
 export const FORMAT_CALENDAR = "calendar"
 export const FORMAT_MAP = "map"
@@ -32,6 +38,9 @@ const EventCollection = ({
 }: EventCollectionProps) => {
   const [viewFormat, setViewFormat] = useState(viewFormats[0])
   const showHeader = viewFormats.length > 1
+  const [calendarAttendeeType, setCalendarAttendeeType] = useState(
+    Settings.calendarOptions.attendeesType
+  )
   return (
     <div className="event-collection">
       <div>
@@ -65,6 +74,26 @@ const EventCollection = ({
                     </Button>
                   )}
                 </ButtonToggleGroup>
+                {viewFormat === FORMAT_CALENDAR && (
+                  <ButtonToggleGroup
+                    value={calendarAttendeeType}
+                    onChange={setCalendarAttendeeType}
+                    className="float-end"
+                  >
+                    <Button
+                      value={ATTENDEE_TYPE_ADVISOR}
+                      variant="outline-secondary"
+                    >
+                      {pluralize(Settings.fields.advisor.person.name)}
+                    </Button>
+                    <Button
+                      value={ATTENDEE_TYPE_INTERLOCUTOR}
+                      variant="outline-secondary"
+                    >
+                      {pluralize(Settings.fields.interlocutor.person.name)}
+                    </Button>
+                  </ButtonToggleGroup>
+                )}
               </>
             )}
           </header>
@@ -84,7 +113,10 @@ const EventCollection = ({
             />
           )}
           {viewFormat === FORMAT_CALENDAR && (
-            <EventCalendar queryParams={queryParams} />
+            <EventCalendar
+              queryParams={queryParams}
+              attendeeType={calendarAttendeeType}
+            />
           )}
           {viewFormat === FORMAT_MAP && (
             <EventMap

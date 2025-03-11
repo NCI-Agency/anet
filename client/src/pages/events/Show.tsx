@@ -349,6 +349,7 @@ const EventShow = ({ pageDispatchers }: EventShowProps) => {
                   paginationKey={`r_${uuid}`}
                   queryParams={reportQueryParams}
                   mapId="reports"
+                  event={event}
                 />
               </Fieldset>
             </Form>
