@@ -218,7 +218,8 @@ public class AttachmentResourceTest extends AbstractResourceTest {
   }
 
   private record CreateLocationAttachmentsResult(String superuserAttachmentUuid1,
-      String superuserAttachmentUuid2, String adminAttachmentUuid) {}
+      String superuserAttachmentUuid2, String adminAttachmentUuid) {
+  }
 
   private void testUpdateLocationAttachments(final String locationUuid, final int nrOfAttachments,
       final Attachment superuserAttachment1, final Attachment superuserAttachment2) {
@@ -345,7 +346,8 @@ public class AttachmentResourceTest extends AbstractResourceTest {
   }
 
   private record CreateOrganizationAttachmentsResult(String superuserAttachmentUuid1,
-      String superuserAttachmentUuid2, String adminAttachmentUuid) {}
+      String superuserAttachmentUuid2, String adminAttachmentUuid) {
+  }
 
   private void testUpdateOrganizationAttachments(final String organizationUuid,
       final int nrOfAttachments, final Attachment superuserAttachment1,
@@ -478,7 +480,8 @@ public class AttachmentResourceTest extends AbstractResourceTest {
   }
 
   private record CreateReportAttachmentsResult(String authorAttachmentUuid,
-      String adminAttachmentUuid) {}
+      String adminAttachmentUuid) {
+  }
 
   private void testUpdateReportAttachment(final String reportUuid, final int nrOfAttachments,
       final Attachment authorAttachment, final Attachment adminAttachment) {
@@ -593,7 +596,8 @@ public class AttachmentResourceTest extends AbstractResourceTest {
 
   private record CreatePersonAttachmentsResult(String userAttachmentUuid,
       String superuserAttachmentUuid1, String superuserAttachmentUuid2,
-      String adminAttachmentUuid) {}
+      String adminAttachmentUuid) {
+  }
 
   private void testUpdatePersonAttachments(final String personUuid, final int nrOfAttachments,
       final Attachment userAttachment, final Attachment superuserAttachment1,

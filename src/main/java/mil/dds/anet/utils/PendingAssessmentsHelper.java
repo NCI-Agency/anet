@@ -202,13 +202,13 @@ public class PendingAssessmentsHelper {
   }
 
   public record ObjectsToAssess(Set<Position> positionsToAssess, Set<Task> tasksToAssess) {
-      public ObjectsToAssess(final Set<Position> positionsToAssess, final Set<Task> tasksToAssess) {
-        this.positionsToAssess =
-            new HashSet<>(positionsToAssess == null ? Collections.emptySet() : positionsToAssess);
-        this.tasksToAssess =
-            new HashSet<>(tasksToAssess == null ? Collections.emptySet() : tasksToAssess);
-      }
+    public ObjectsToAssess(final Set<Position> positionsToAssess, final Set<Task> tasksToAssess) {
+      this.positionsToAssess =
+          new HashSet<>(positionsToAssess == null ? Collections.emptySet() : positionsToAssess);
+      this.tasksToAssess =
+          new HashSet<>(tasksToAssess == null ? Collections.emptySet() : tasksToAssess);
     }
+  }
 
   // Dictionary lookup keys we use
   public static final String PERSON_ASSESSMENTS = "fields.regular.person.assessments";

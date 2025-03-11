@@ -16,7 +16,8 @@ import org.springframework.stereotype.Component;
 @ConditionalOnExpression("not ${anet.no-workers:false}")
 public class MergedEntityWorker extends AbstractWorker {
 
-  private record FieldWithEntityReference(String tableName, String columnName) {}
+  private record FieldWithEntityReference(String tableName, String columnName) {
+  }
 
   private static final List<FieldWithEntityReference> fieldsWithEntityReference = List.of(// -
       new FieldWithEntityReference("attachments", "description"), // -
