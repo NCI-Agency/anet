@@ -1,6 +1,7 @@
 import { faker } from "@faker-js/faker"
 import Model from "components/Model"
 import { Organization } from "models"
+import Settings from "settings"
 import utils from "utils"
 import {
   createEmailAddresses,
@@ -101,6 +102,19 @@ async function createHierarchy(user, grow, args) {
     return i - 1
   }
 
+  function setRandomApp6Value(org, app6field, probableValues) {
+    for (const p of probableValues) {
+      if (fuzzy.withProbability(p[0])) {
+        org[app6field] = p[1]
+        return
+      }
+    }
+    const app6values = Object.keys(
+      Settings.fields.organization[app6field].choices
+    )
+    org[app6field] = faker.helpers.arrayElement(app6values)
+  }
+
   /**
    * Creates sub-organization for some parent
    * @param {*} parentOrg The parent organization or undefined if top of hierarchy
@@ -130,6 +144,31 @@ async function createHierarchy(user, grow, args) {
         fuzzy.withProbability(0.5),
         `info_${orgSlug}`
       )
+    }
+
+    // Set some random APP6 data
+    if (level === 0) {
+      setRandomApp6Value(org, "app6context", [[0.8, 0]])
+      setRandomApp6Value(org, "app6standardIdentity", [
+        [0.4, 3],
+        [0.6, 4]
+      ])
+      setRandomApp6Value(org, "app6symbolSet", [
+        [0.8, 10],
+        [0.5, 11]
+      ])
+      setRandomApp6Value(org, "app6hq", [
+        [0.8, null],
+        [0.5, 2],
+        [0.5, 4]
+      ])
+      setRandomApp6Value(org, "app6amplifier", [[0.95, null]])
+    } else {
+      setRandomApp6Value(org, "app6context", [[0.95, null]])
+      setRandomApp6Value(org, "app6standardIdentity", [[0.95, null]])
+      setRandomApp6Value(org, "app6symbolSet", [[0.95, null]])
+      setRandomApp6Value(org, "app6hq", [[0.95, null]])
+      setRandomApp6Value(org, "app6amplifier", [[0.95, null]])
     }
 
     console.debug(
