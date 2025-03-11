@@ -249,14 +249,17 @@ class CreateReport extends cr.CreateReport {
     }
 
     if (fields.keyOutcomes) {
+      await (await this.getKeyOutcomes()).scrollIntoView()
       await (await this.getKeyOutcomes()).setValue(fields.keyOutcomes)
     }
 
     if (fields.nextSteps) {
+      await (await this.getNextSteps()).scrollIntoView()
       await (await this.getNextSteps()).setValue(fields.nextSteps)
     }
 
     if (fields.reportText) {
+      await (await this.getReportText()).scrollIntoView()
       await (await this.getReportText()).click()
       await browser.keys(fields.reportText)
     }

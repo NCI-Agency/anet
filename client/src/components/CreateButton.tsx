@@ -14,20 +14,15 @@ const SUPERUSER_ACTIONS = [
   Models.EventSeries
 ]
 
-const ADMIN_ACTIONS = [
-  Models.Organization,
-  Models.Task,
-  Models.AuthorizationGroup
-]
+const ENHANCED_SUPERUSER_ACTIONS = [Models.Organization]
+
+const ADMIN_ACTIONS = [Models.Task, Models.AuthorizationGroup]
 
 const CreateButton = () => {
   const { currentUser } = useContext(AppContext)
   const navigate = useNavigate()
 
-  const modelClasses = DEFAULT_ACTIONS.concat(
-    currentUser.isSuperuser() && SUPERUSER_ACTIONS,
-    currentUser.isAdmin() && ADMIN_ACTIONS
-  ).filter(value => !!value)
+  const modelClasses = getActions()
 
   if (modelClasses.length > 1) {
     return (
@@ -63,6 +58,20 @@ const CreateButton = () => {
 
   function onSelect(modelClass) {
     navigate(modelClass.pathForNew())
+  }
+
+  function getActions() {
+    const result: any[] = [...DEFAULT_ACTIONS]
+    if (currentUser.isSuperuser()) {
+      result.push(...SUPERUSER_ACTIONS)
+    }
+    if (currentUser.isEnhancedSuperuser()) {
+      result.push(...ENHANCED_SUPERUSER_ACTIONS)
+    }
+    if (currentUser.isAdmin()) {
+      result.push(...ADMIN_ACTIONS)
+    }
+    return result
   }
 }
 

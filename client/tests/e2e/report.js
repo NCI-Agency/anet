@@ -58,6 +58,7 @@ test.serial("Draft and submit a report", async t => {
     By.xpath('//h4/span[text()="Create a new Report"]')
   )
   await $newReportTitle.click()
+  await t.context.driver.sleep(shortWaitMs) // wait for the advanced select overlay to disappear
 
   t.is(
     await $attendeesAdvancedSelect1.getAttribute("value"),
@@ -96,6 +97,7 @@ test.serial("Draft and submit a report", async t => {
       "steveson, steve"
     )
   await $newReportTitle.click()
+  await t.context.driver.sleep(shortWaitMs) // wait for the advanced select overlay to disappear
 
   t.is(
     await $attendeesAdvancedSelect2.getAttribute("value"),
@@ -141,6 +143,7 @@ test.serial("Draft and submit a report", async t => {
     By.xpath('//h4/span[text()="Objectives"]')
   )
   await $tasksTitle.click()
+  await t.context.driver.sleep(shortWaitMs) // wait for the advanced select overlay to disappear
 
   t.is(
     await $tasksAdvancedSelect.getAttribute("value"),

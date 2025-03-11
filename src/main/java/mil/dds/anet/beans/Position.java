@@ -32,6 +32,10 @@ public class Position extends AbstractEmailableAnetBean
     SUPERUSER, ADMINISTRATOR
   }
 
+  public static enum SuperuserType {
+    REGULAR, CAN_CREATE_TOP_LEVEL_ORGANIZATIONS, CAN_CREATE_OR_EDIT_ANY_ORGANIZATION
+  }
+
   public static enum PositionRole {
     MEMBER, DEPUTY, LEADER
   }
@@ -45,6 +49,9 @@ public class Position extends AbstractEmailableAnetBean
   @GraphQLQuery
   @GraphQLInputField
   PositionType type;
+  @GraphQLQuery
+  @GraphQLInputField
+  SuperuserType superuserType;
   @GraphQLQuery
   @GraphQLInputField
   private Status status;
@@ -98,6 +105,14 @@ public class Position extends AbstractEmailableAnetBean
 
   public void setType(PositionType type) {
     this.type = type;
+  }
+
+  public SuperuserType getSuperuserType() {
+    return superuserType;
+  }
+
+  public void setSuperuserType(SuperuserType superuserType) {
+    this.superuserType = superuserType;
   }
 
   @Override
@@ -369,6 +384,7 @@ public class Position extends AbstractEmailableAnetBean
     return super.equals(o) && Objects.equals(uuid, other.getUuid())
         && Objects.equals(name, other.getName()) && Objects.equals(code, other.getCode())
         && Objects.equals(type, other.getType()) && Objects.equals(status, other.getStatus())
+        && Objects.equals(superuserType, other.getSuperuserType())
         && Objects.equals(role, other.getRole())
         && Objects.equals(description, other.getDescription())
         && Objects.equals(getOrganizationUuid(), other.getOrganizationUuid());
@@ -376,8 +392,8 @@ public class Position extends AbstractEmailableAnetBean
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), uuid, name, code, type, status, role, organization,
-        description);
+    return Objects.hash(super.hashCode(), uuid, name, code, type, superuserType, status, role,
+        organization, description);
   }
 
   @Override

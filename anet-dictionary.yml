@@ -968,6 +968,8 @@ fields:
       placeholder: Name/Description of Position
     type:
       label: Type
+    superuserType:
+      label: Superuser Type
     code:
       label: Position code
       placeholder: The official code for this position

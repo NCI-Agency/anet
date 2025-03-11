@@ -43,6 +43,12 @@ export default class Position extends Model {
     ADMINISTRATOR: "ADMINISTRATOR"
   }
 
+  static SUPERUSER_TYPE = {
+    REGULAR: "REGULAR",
+    CAN_CREATE_TOP_LEVEL_ORGANIZATIONS: "CAN_CREATE_TOP_LEVEL_ORGANIZATIONS",
+    CAN_CREATE_OR_EDIT_ANY_ORGANIZATION: "CAN_CREATE_OR_EDIT_ANY_ORGANIZATION"
+  }
+
   // create yup schema for the customFields, based on the customFields config
   static customFieldsSchema = createCustomFieldsSchema(
     Settings.fields.position.customFields
@@ -60,6 +66,7 @@ export default class Position extends Model {
         .string()
         .required()
         .default(() => Position.TYPE.REGULAR),
+      superuserType: yup.string().nullable().default(null),
       code: yup.string().nullable().default(""),
       status: yup
         .string()
@@ -107,6 +114,7 @@ export default class Position extends Model {
     uuid
     name
     type
+    superuserType
     role
     status
     isSubscribed
@@ -195,6 +203,22 @@ export default class Position extends Model {
       return Settings.fields.superuser.position.type
     } else if (type === Position.TYPE.ADMINISTRATOR) {
       return Settings.fields.administrator.position.type
+    }
+  }
+
+  static humanNameOfSuperuserType(superuserType) {
+    if (superuserType === Position.SUPERUSER_TYPE.REGULAR) {
+      return "Regular"
+    } else if (
+      superuserType ===
+      Position.SUPERUSER_TYPE.CAN_CREATE_TOP_LEVEL_ORGANIZATIONS
+    ) {
+      return "Can Create top-level Organizations"
+    } else if (
+      superuserType ===
+      Position.SUPERUSER_TYPE.CAN_CREATE_OR_EDIT_ANY_ORGANIZATION
+    ) {
+      return "Can Create or Edit any Organization"
     }
   }
 

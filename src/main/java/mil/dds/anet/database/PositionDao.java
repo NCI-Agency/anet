@@ -44,7 +44,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
 
   public static final String[] fields =
       {"uuid", "name", "code", "createdAt", "updatedAt", "organizationUuid", "currentPersonUuid",
-          "type", "status", "locationUuid", "customFields", "role", "description"};
+          "type", "superuserType", "status", "locationUuid", "customFields", "role", "description"};
   public static final String TABLE_NAME = "positions";
   public static final String POSITION_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
   public static final String DUPLICATE_POSITION_CODE =
@@ -66,13 +66,14 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
 
       try {
         handle.createUpdate("/* positionInsert */ INSERT INTO positions (uuid, name, code, type, "
-            + "status, \"organizationUuid\", \"locationUuid\", \"createdAt\", \"updatedAt\", "
-            + "\"customFields\", role, description) VALUES (:uuid, :name, :code, :type, :status, "
+            + "\"superuserType\", status, \"organizationUuid\", \"locationUuid\", \"createdAt\", \"updatedAt\", "
+            + "\"customFields\", role, description) VALUES (:uuid, :name, :code, :type, :superuserType, :status, "
             + ":organizationUuid, :locationUuid, :createdAt, :updatedAt, :customFields, :role, "
             + ":description)").bindBean(p)
             .bind("createdAt", DaoUtils.asLocalDateTime(p.getCreatedAt()))
             .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
             .bind("type", DaoUtils.getEnumId(p.getType()))
+            .bind("superuserType", DaoUtils.getEnumId(p.getSuperuserType()))
             .bind("status", DaoUtils.getEnumId(p.getStatus()))
             .bind("role", DaoUtils.getEnumId(p.getRole())).execute();
         // Specifically don't set currentPersonUuid here because we'll handle that later in
@@ -167,12 +168,13 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
       try {
         final int nr = handle
             .createUpdate("/* positionUpdate */ UPDATE positions SET name = :name, code = :code, "
-                + "\"organizationUuid\" = :organizationUuid, type = :type, status = :status, "
+                + "\"organizationUuid\" = :organizationUuid, type = :type, \"superuserType\" = :superuserType, status = :status, "
                 + "\"locationUuid\" = :locationUuid, \"updatedAt\" = :updatedAt, "
                 + "\"customFields\" = :customFields, role = :role, description = :description "
                 + "WHERE uuid = :uuid")
             .bindBean(p).bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
             .bind("type", DaoUtils.getEnumId(p.getType()))
+            .bind("superuserType", DaoUtils.getEnumId(p.getSuperuserType()))
             .bind("status", DaoUtils.getEnumId(p.getStatus()))
             .bind("role", DaoUtils.getEnumId(p.getRole())).execute();
         // Evict the person holding this position from the domain users cache, as their position has

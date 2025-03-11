@@ -997,13 +997,15 @@ properties:
       position:
         type: object
         additionalProperties: false
-        required: [status, name, type, code, organization, location, organizationsAdministrated, role, description, emailAddresses, authorizationGroups]
+        required: [status, name, type, superuserType, code, organization, location, organizationsAdministrated, role, description, emailAddresses, authorizationGroups]
         properties:
           status:
             "$ref": "#/$defs/labeledField"
           name:
             "$ref": "#/$defs/inputField"
           type:
+            "$ref": "#/$defs/inputField"
+          superuserType:
             "$ref": "#/$defs/inputField"
           code:
             "$ref": "#/$defs/excludableInputField"
