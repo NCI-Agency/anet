@@ -1,8 +1,15 @@
 package mil.dds.anet.config;
 
+import static mil.dds.anet.config.ContentSecurityPolicy.CSP_NONE;
+import static mil.dds.anet.config.ContentSecurityPolicy.CSP_SELF;
+import static mil.dds.anet.config.ContentSecurityPolicy.CspDirective;
+
 import jakarta.servlet.http.HttpServletMapping;
+import java.util.List;
+import java.util.Map;
 import mil.dds.anet.resources.AdminResource;
 import mil.dds.anet.resources.HomeResource;
+import mil.dds.anet.utils.ResponseUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,8 +38,41 @@ public class SecurityConfig {
   @Value("${graphql.spqr.http.endpoint}")
   String unusedGraphQLEndpoint;
 
-  @Value("${anet.redirect-to-https}")
-  boolean redirectToHttps;
+  private final AnetConfig anetConfig;
+  private final AnetDictionary anetDictionary;
+
+  private final ContentSecurityPolicy soapCsp = ContentSecurityPolicy.of(
+      // default: block everything
+      CspDirective.of("default-src", CSP_NONE),
+      // we get data from our own server
+      CspDirective.of("connect-src", CSP_SELF));
+
+  private final ContentSecurityPolicy defaultCsp = ContentSecurityPolicy.of(
+      // default: block everything
+      CspDirective.of("default-src", CSP_NONE),
+      // no base uri's
+      CspDirective.of("base-uri", CSP_NONE),
+      // no frame ancestors
+      CspDirective.of("frame-ancestors", CSP_NONE),
+      // we have HTML forms
+      CspDirective.of("form-action", CSP_SELF),
+      // we supply JavaScript
+      CspDirective.of("script-src", CSP_SELF),
+      // we supply stylesheets, and have inline styles
+      CspDirective.of("style-src", CSP_SELF, "'unsafe-inline'"),
+      // we supply fonts, and load fonts through a data: URL
+      CspDirective.of("font-src", CSP_SELF, "data:"),
+      // we get data from our own server, the authentication server, and from a geoSearcher
+      CspDirective.of("connect-src", CSP_SELF, "%1$s", "%2$s"),
+      // the authentication server opens an iframe for refreshing the token
+      CspDirective.of("frame-src", "%1$s"),
+      // we supply images, load images through a data: URL, and get images from the map baseLayers
+      CspDirective.of("img-src", CSP_SELF, "data:", "%3$s"));
+
+  public SecurityConfig(AnetConfig anetConfig, AnetDictionary anetDictionary) {
+    this.anetConfig = anetConfig;
+    this.anetDictionary = anetDictionary;
+  }
 
   /**
    * SOAP endpoints (stateless) filter chain used by NVG Endpoint
@@ -54,6 +94,9 @@ public class SecurityConfig {
         session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
     // Disable CSRF
     http.csrf(AbstractHttpConfigurer::disable);
+    // Configure CSP
+    http.headers(
+        headers -> headers.contentSecurityPolicy(csp -> csp.policyDirectives(soapCsp.toString())));
 
     return http.build();
   }
@@ -72,10 +115,33 @@ public class SecurityConfig {
         .anyRequest().authenticated()) // -
         .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
         .oauth2Login(Customizer.withDefaults());
-    if (redirectToHttps) {
+    if (anetConfig.getRedirectToHttps()) {
       http.requiresChannel(channel -> channel.anyRequest().requiresSecure());
     }
+    // Configure CSP
+    http.headers(headers -> headers
+        .contentSecurityPolicy(csp -> csp.policyDirectives(String.format(defaultCsp.toString(),
+            getAuthServerUrl(), getGeoSearcherUrl(), getBaseLayersUrls()))));
     return http.build();
+  }
+
+  private String getAuthServerUrl() {
+    return ResponseUtils.getBaseUrl(anetConfig.getKeycloakConfiguration().getAuthServerUrl());
+  }
+
+  private String getGeoSearcherUrl() {
+    final String geoSearcherUrl =
+        (String) anetDictionary.getDictionaryEntry("imagery.geoSearcher.url");
+    return ResponseUtils.getBaseUrl(geoSearcherUrl);
+  }
+
+  private String getBaseLayersUrls() {
+    @SuppressWarnings("unchecked")
+    final List<Map<String, Object>> baseLayers =
+        (List<Map<String, Object>>) anetDictionary.getDictionaryEntry("imagery.baseLayers");
+    final List<String> baseLayersUrls = baseLayers.stream()
+        .map(layer -> ResponseUtils.getBaseUrl((String) layer.get("url"))).toList();
+    return String.join(" ", baseLayersUrls);
   }
 
   @Bean
