@@ -42,11 +42,7 @@ class CustomUrlEsriProvider extends EsriProvider {
   constructor(searchUrl, options = {}) {
     super(options)
     if (searchUrl) {
-      if (searchUrl.startsWith("http://") || searchUrl.startsWith("https://")) {
-        this.searchUrl = searchUrl
-      } else {
-        this.searchUrl = "https://" + searchUrl
-      }
+      this.searchUrl = searchUrl
     }
   }
 }
