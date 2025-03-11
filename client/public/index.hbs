@@ -22,18 +22,5 @@
 	</head>
 	<body>
 		<div id="root"></div>
-		<script>
-		window.ANET_DATA = {
-            projectVersion : "${projectVersion}",
-			currentUser: {
-				uuid: "${currentUser.uuid}",
-				name: "${currentUser.name!}",
-				role:"<#if (currentUser.position)?? >${currentUser.position.type!'ADVISOR'}<#else>ADVISOR</#if>",
-				rank: "${currentUser.rank!}",
-			},
-			dictionary : "${serializedDictionary?no_esc}"
-		}
-		</script>
-
 	</body>
 </html>
