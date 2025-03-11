@@ -1,25 +1,16 @@
 package mil.dds.anet.resources;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.security.Principal;
-import mil.dds.anet.config.AnetConfig;
-import mil.dds.anet.config.AnetDictionary;
-import mil.dds.anet.database.AdminDao;
-import mil.dds.anet.utils.SecurityUtils;
-import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -39,16 +30,6 @@ public class HomeResource {
   @Value("${anet.keycloak-configuration.resource}")
   private String publicClientId;
 
-  private final AnetConfig config;
-  private final AnetDictionary dict;
-  private final AdminDao adminDao;
-
-  public HomeResource(AnetConfig config, AnetDictionary dict, AdminDao adminDao) {
-    this.config = config;
-    this.dict = dict;
-    this.adminDao = adminDao;
-  }
-
   /**
    * This is the only Resource method that is ever directly called by a user. All other calls are
    * made via AJAX Requests. This method returns the index page that bootstraps up the JS bundle and
@@ -56,15 +37,7 @@ public class HomeResource {
    * Development the node server handles serving the initial bundle.
    */
   @GetMapping(path = "/**", produces = MediaType.TEXT_HTML_VALUE)
-  public String index(final Principal principal, Model model) throws JsonProcessingException {
-    model.addAttribute("currentUser", SecurityUtils.getPersonFromPrincipal(principal));
-    model.addAttribute("projectVersion", config.getVersion());
-    // TODO: should try to pass the dictionary to the client as literal JSON instead of serializing
-    // it to a string
-    final ObjectMapper jsonMapper = new ObjectMapper();
-    final String serializedDictionary =
-        StringEscapeUtils.escapeEcmaScript(jsonMapper.writeValueAsString(dict.getDictionary()));
-    model.addAttribute("serializedDictionary", serializedDictionary);
+  public String index() {
     return "index";
   }
 
