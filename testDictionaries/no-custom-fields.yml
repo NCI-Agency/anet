@@ -1694,7 +1694,7 @@ imagery:
     - name: World WMS
       default: false
       type: wms
-      url: "https://www.gebco.net/data_and_products/gebco_web_services/web_map_service/mapserv"
+      url: "https://wms.gebco.net/mapserv"
       options:
         layers: GEBCO_LATEST
         format: "image/png"
