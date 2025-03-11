@@ -714,37 +714,34 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
                 organization={organization}
                 refetch={refetch}
               />
-              <div style={{ position: "relative" }}>
-                {canAdministrateOrg && (
-                  <Button
-                    onClick={() => setShowPlanningApprovalsModal(true)}
-                    variant="outline-secondary"
-                    style={{ position: "absolute", right: "8px" }}
-                  >
-                    Edit Planning Approvals
-                  </Button>
-                )}
-                <Approvals
-                  relatedObject={{
-                    planningApprovalSteps: organization.planningApprovalSteps
-                  }}
-                />
-              </div>
-              <div style={{ position: "relative" }}>
-                {canAdministrateOrg && (
-                  <Button
-                    onClick={() => setShowReportApprovalsModal(true)}
-                    variant="outline-secondary"
-                    style={{ position: "absolute", right: "8px" }}
-                  >
-                    Edit Report Approvals
-                  </Button>
-                )}
-                <Approvals
-                  relatedObject={{ approvalSteps: organization.approvalSteps }}
-                />
-              </div>
-
+              <Approvals
+                relatedObject={{
+                  planningApprovalSteps: organization.planningApprovalSteps
+                }}
+                action={
+                  canAdministrateOrg && (
+                    <Button
+                      onClick={() => setShowPlanningApprovalsModal(true)}
+                      variant="outline-secondary"
+                    >
+                      Edit Planning Approvals
+                    </Button>
+                  )
+                }
+              />
+              <Approvals
+                relatedObject={{ approvalSteps: organization.approvalSteps }}
+                action={
+                  canAdministrateOrg && (
+                    <Button
+                      onClick={() => setShowReportApprovalsModal(true)}
+                      variant="outline-secondary"
+                    >
+                      Edit Report Approvals
+                    </Button>
+                  )
+                }
+              />
               {canAdministrateOrg && (
                 <>
                   <EditApprovalsModal
@@ -757,13 +754,7 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
                     }}
                     fieldName="planningApprovalSteps"
                     title="Engagement planning approval process"
-                    addButtonLabel="Add planning approval step"
-                    approversFilters={{
-                      activePositions: {
-                        label: "Active positions",
-                        queryVars: { status: "ACTIVE" }
-                      }
-                    }}
+                    addButtonLabel="Add a Planning Approval Step"
                   />
                   <EditApprovalsModal
                     organization={organization}
@@ -775,13 +766,7 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
                     }}
                     fieldName="approvalSteps"
                     title="Report publication approval process"
-                    addButtonLabel="Add approval step"
-                    approversFilters={{
-                      activePositions: {
-                        label: "Active positions",
-                        queryVars: { status: "ACTIVE" }
-                      }
-                    }}
+                    addButtonLabel="Add a Publication Approval Step"
                   />
                 </>
               )}
