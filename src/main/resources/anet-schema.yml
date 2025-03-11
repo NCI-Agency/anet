@@ -997,7 +997,7 @@ properties:
       position:
         type: object
         additionalProperties: false
-        required: [status, name, type, code, organization, location, organizationsAdministrated, role, description, emailAddresses, authorizationGroups]
+        required: [status, name, type, superuserType, code, organization, location, organizationsAdministrated, role, description, emailAddresses, authorizationGroups]
         properties:
           status:
             "$ref": "#/$defs/labeledField"
