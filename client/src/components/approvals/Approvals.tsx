@@ -8,7 +8,7 @@ import EditApprovalsModal from "./EditApprovalsModal"
 interface ApprovalsProps {
   restrictedApprovalLabel?: string
   relatedObject: any
-  objectType: "Organization" | "Task"
+  objectType: "Location" | "Organization" | "Task"
   canEdit: boolean
   refetch: (...args: unknown[]) => unknown
 }
