@@ -1,11 +1,10 @@
 import { gql } from "@apollo/client"
 import API from "api"
-import AppContext from "components/AppContext"
 import ApprovalsDefinition from "components/approvals/ApprovalsDefinition"
 import Messages from "components/Messages"
 import { Form, Formik } from "formik"
 import { Organization } from "models"
-import React, { useContext, useState } from "react"
+import React, { useState } from "react"
 import { Button, Modal } from "react-bootstrap"
 
 const GQL_UPDATE_ORGANIZATION = gql`
@@ -21,6 +20,7 @@ interface EditApprovalsModalProps {
   fieldName: string
   title: string
   addButtonLabel: string
+  approversFilters: any
 }
 
 const EditApprovalsModal = ({
@@ -30,28 +30,10 @@ const EditApprovalsModal = ({
   onSuccess,
   fieldName,
   title,
-  addButtonLabel
+  addButtonLabel,
+  approversFilters
 }: EditApprovalsModalProps) => {
-  const { currentUser } = useContext(AppContext)
   const [error, setError] = useState(null)
-
-  const approversFilters = {
-    allPositions: {
-      label: "All positions",
-      queryVars: {
-        matchPersonName: true
-      }
-    }
-  }
-  if (currentUser.position) {
-    approversFilters.myColleagues = {
-      label: "My colleagues",
-      queryVars: {
-        matchPersonName: true,
-        organizationUuid: currentUser.position.organization.uuid
-      }
-    }
-  }
 
   return (
     <Formik
