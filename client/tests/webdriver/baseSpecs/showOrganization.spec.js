@@ -208,6 +208,42 @@ describe("Show organization page", () => {
         await (await MergeOrganizations.getLeftOrganizationField()).isEnabled()
       ).to.be.false
     })
+    it("Should open and close the Edit Engagement planning approvals modal correctly", async() => {
+      await ShowOrganization.openAsAdminUser(ORGANIZATION_UUID)
+      const editButton =
+        await ShowOrganization.getEditEngagementPlanningApprovalsButton()
+      await editButton.waitForExist()
+      await editButton.waitForDisplayed()
+      await editButton.click()
+      const modal = await ShowOrganization.getEditApprovalsModal()
+      await modal.waitForExist()
+      await modal.waitForDisplayed()
+      const modalTitle = await modal.$(".modal-title")
+      expect(await modalTitle.getText()).to.equal(
+        "Edit Engagement planning approval process"
+      )
+      const closeButton = await ShowOrganization.getModalCloseButton()
+      await closeButton.click()
+      await modal.waitForExist({ reverse: true })
+    })
+    it("Should open and close the Edit Report publication approvals modal correctly", async() => {
+      await ShowOrganization.openAsAdminUser(ORGANIZATION_UUID)
+      const editButton =
+        await ShowOrganization.getEditReportPublicationApprovalsButton()
+      await editButton.waitForExist()
+      await editButton.waitForDisplayed()
+      await editButton.click()
+      const modal = await ShowOrganization.getEditApprovalsModal()
+      await modal.waitForExist()
+      await modal.waitForDisplayed()
+      const modalTitle = await modal.$(".modal-title")
+      expect(await modalTitle.getText()).to.equal(
+        "Edit Report publication approval process"
+      )
+      const closeButton = await ShowOrganization.getModalCloseButton()
+      await closeButton.click()
+      await modal.waitForExist({ reverse: true })
+    })
   })
 
   describe("When on the show page of an organization with entity avatar", () => {

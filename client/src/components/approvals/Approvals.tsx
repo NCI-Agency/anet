@@ -56,7 +56,7 @@ const Approvals = ({
               onClick={() => setShowPlanningApprovalsModal(true)}
               variant="outline-secondary"
             >
-              Edit Planning Approvals
+              Edit Engagement planning approvals
             </Button>
           )
         }
@@ -117,7 +117,7 @@ const Approvals = ({
               onClick={() => setShowReportApprovalsModal(true)}
               variant="outline-secondary"
             >
-              Edit Report Approvals
+              Edit Report publication approvals
             </Button>
           )
         }
