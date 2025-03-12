@@ -3,10 +3,15 @@ import API from "api"
 import ApprovalsDefinition from "components/approvals/ApprovalsDefinition"
 import Messages from "components/Messages"
 import { Form, Formik } from "formik"
-import { Organization, Task } from "models"
+import { Location, Organization, Task } from "models"
 import React, { useState } from "react"
 import { Button, Modal } from "react-bootstrap"
 
+const GQL_UPDATE_LOCATION = gql`
+  mutation ($location: LocationInput!) {
+    updateLocation(location: $location)
+  }
+`
 const GQL_UPDATE_ORGANIZATION = gql`
   mutation ($organization: OrganizationInput!) {
     updateOrganization(organization: $organization)
@@ -20,7 +25,7 @@ const GQL_UPDATE_TASK = gql`
 
 interface EditApprovalsModalProps {
   relatedObject: any
-  objectType: "Organization" | "Task"
+  objectType: "Location" | "Organization" | "Task"
   showModal?: boolean
   onCancel: (...args: unknown[]) => unknown
   onSuccess: (...args: unknown[]) => unknown
@@ -113,18 +118,32 @@ const EditApprovalsModal = ({
       ...relatedObject,
       [fieldName]: values[fieldName]
     }
-    const mutation =
-      objectType === "Organization" ? GQL_UPDATE_ORGANIZATION : GQL_UPDATE_TASK
-    const filterFunction =
-      objectType === "Organization"
-        ? Organization.filterClientSideFields
-        : Task.filterClientSideFields
-    const inputKey = objectType === "Organization" ? "organization" : "task"
-    const input = filterFunction(
-      updatedObject,
-      "childrenTasks",
-      "descendantTasks"
-    )
+    let mutation, filterFunction, inputKey, excludeFields
+
+    switch (objectType) {
+      case "Location":
+        mutation = GQL_UPDATE_LOCATION
+        filterFunction = Location.filterClientSideFields
+        inputKey = "location"
+        excludeFields = []
+        break
+      case "Organization":
+        mutation = GQL_UPDATE_ORGANIZATION
+        filterFunction = Organization.filterClientSideFields
+        inputKey = "organization"
+        excludeFields = []
+        break
+      case "Task":
+        mutation = GQL_UPDATE_TASK
+        filterFunction = Task.filterClientSideFields
+        inputKey = "task"
+        excludeFields = ["childrenTasks", "descendantTasks"]
+        break
+      default:
+        return
+    }
+
+    const input = filterFunction(updatedObject, ...excludeFields)
     const variables = { [inputKey]: input }
     return API.mutation(mutation, variables)
   }
