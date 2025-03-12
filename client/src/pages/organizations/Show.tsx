@@ -3,7 +3,6 @@ import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
 import AppContext from "components/AppContext"
 import Approvals from "components/approvals/Approvals"
-import EditApprovalsModal from "components/approvals/EditApprovalsModal"
 import AssessmentResultsContainer from "components/assessments/AssessmentResultsContainer"
 import AttachmentsDetailView from "components/Attachment/AttachmentsDetailView"
 import AuthorizationGroupTable from "components/AuthorizationGroupTable"
@@ -206,10 +205,6 @@ interface OrganizationShowProps {
 }
 
 const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
-  const [showPlanningApprovalsModal, setShowPlanningApprovalsModal] =
-    useState(false)
-  const [showReportApprovalsModal, setShowReportApprovalsModal] =
-    useState(false)
   const { currentUser, loadAppData } = useContext(AppContext)
   const routerLocation = useLocation()
   const stateSuccess = routerLocation.state && routerLocation.state.success
@@ -718,61 +713,10 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
                 refetch={refetch}
               />
               <Approvals
-                relatedObject={{
-                  planningApprovalSteps: organization.planningApprovalSteps
-                }}
-                action={
-                  canAdministrateOrg && (
-                    <Button
-                      onClick={() => setShowPlanningApprovalsModal(true)}
-                      variant="outline-secondary"
-                    >
-                      Edit Planning Approvals
-                    </Button>
-                  )
-                }
+                relatedObject={organization}
+                canEdit={canAdministrateOrg}
+                refetch={refetch}
               />
-              <Approvals
-                relatedObject={{ approvalSteps: organization.approvalSteps }}
-                action={
-                  canAdministrateOrg && (
-                    <Button
-                      onClick={() => setShowReportApprovalsModal(true)}
-                      variant="outline-secondary"
-                    >
-                      Edit Report Approvals
-                    </Button>
-                  )
-                }
-              />
-              {canAdministrateOrg && (
-                <>
-                  <EditApprovalsModal
-                    organization={organization}
-                    showModal={showPlanningApprovalsModal}
-                    onCancel={() => setShowPlanningApprovalsModal(false)}
-                    onSuccess={() => {
-                      setShowPlanningApprovalsModal(false)
-                      refetch()
-                    }}
-                    fieldName="planningApprovalSteps"
-                    title="Engagement planning approval process"
-                    addButtonLabel="Add a Planning Approval Step"
-                  />
-                  <EditApprovalsModal
-                    organization={organization}
-                    showModal={showReportApprovalsModal}
-                    onCancel={() => setShowReportApprovalsModal(false)}
-                    onSuccess={() => {
-                      setShowReportApprovalsModal(false)
-                      refetch()
-                    }}
-                    fieldName="approvalSteps"
-                    title="Report publication approval process"
-                    addButtonLabel="Add a Publication Approval Step"
-                  />
-                </>
-              )}
               {organization.isTaskEnabled() && (
                 <OrganizationTasks
                   organization={organization}
