@@ -419,6 +419,9 @@ const TaskShow = ({ pageDispatchers }: TaskShowProps) => {
             <Approvals
               restrictedApprovalLabel="Restrict to approvers descending from the same tasked organization as the report's primary advisor"
               relatedObject={task}
+              objectType="Task"
+              canEdit={canEdit}
+              refetch={refetch}
             />
 
             <Fieldset

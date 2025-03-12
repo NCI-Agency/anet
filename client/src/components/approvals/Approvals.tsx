@@ -8,6 +8,7 @@ import EditApprovalsModal from "./EditApprovalsModal"
 interface ApprovalsProps {
   restrictedApprovalLabel?: string
   relatedObject: any
+  objectType: "Organization" | "Task"
   canEdit: boolean
   refetch: (...args: unknown[]) => unknown
 }
@@ -15,6 +16,7 @@ interface ApprovalsProps {
 const Approvals = ({
   restrictedApprovalLabel,
   relatedObject,
+  objectType,
   canEdit,
   refetch
 }: ApprovalsProps) => {
@@ -170,7 +172,8 @@ const Approvals = ({
       {canEdit && (
         <>
           <EditApprovalsModal
-            organization={relatedObject}
+            relatedObject={relatedObject}
+            objectType={objectType}
             showModal={showPlanningApprovalsModal}
             onCancel={() => setShowPlanningApprovalsModal(false)}
             onSuccess={() => {
@@ -183,7 +186,8 @@ const Approvals = ({
             approversFilters={approversFilters}
           />
           <EditApprovalsModal
-            organization={relatedObject}
+            relatedObject={relatedObject}
+            objectType={objectType}
             showModal={showReportApprovalsModal}
             onCancel={() => setShowReportApprovalsModal(false)}
             onSuccess={() => {
