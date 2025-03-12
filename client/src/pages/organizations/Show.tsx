@@ -280,7 +280,9 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
           </AnchorNavItem>
         </Nav.Item>
         <Nav.Item>
-          <AnchorNavItem to="planningApprovals">Approvals</AnchorNavItem>
+          <AnchorNavItem to="engagementPlanningApprovals">
+            Approvals
+          </AnchorNavItem>
         </Nav.Item>
         {organization.isTaskEnabled() && (
           <Nav.Item>

@@ -48,7 +48,7 @@ const Approvals = ({
   return (
     <div>
       <Fieldset
-        id="planningApprovals"
+        id="engagementPlanningApprovals"
         title="Engagement planning approval process"
         action={
           canEdit && (
@@ -56,7 +56,7 @@ const Approvals = ({
               onClick={() => setShowPlanningApprovalsModal(true)}
               variant="outline-secondary"
             >
-              Edit Planning Approvals
+              Edit Engagement planning approvals
             </Button>
           )
         }
@@ -109,7 +109,7 @@ const Approvals = ({
         )}
       </Fieldset>
       <Fieldset
-        id="approvals"
+        id="reportPublicationApprovals"
         title="Report publication approval process"
         action={
           canEdit && (
@@ -117,7 +117,7 @@ const Approvals = ({
               onClick={() => setShowReportApprovalsModal(true)}
               variant="outline-secondary"
             >
-              Edit Report Approvals
+              Edit Report publication approvals
             </Button>
           )
         }

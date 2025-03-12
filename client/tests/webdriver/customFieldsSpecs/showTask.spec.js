@@ -66,4 +66,40 @@ describe("Show task page", () => {
       ).to.equal("1.1")
     })
   })
+  describe("When in the show page as an admin", () => {
+    it("Should open and close the Edit Engagement planning approvals modal correctly", async() => {
+      const editButton =
+        await ShowTask.getEditEngagementPlanningApprovalsButton()
+      await editButton.waitForExist()
+      await editButton.waitForDisplayed()
+      await editButton.click()
+      const modal = await ShowTask.getEditApprovalsModal()
+      await modal.waitForExist()
+      await modal.waitForDisplayed()
+      const modalTitle = await modal.$(".modal-title")
+      expect(await modalTitle.getText()).to.equal(
+        "Edit Engagement planning approval process"
+      )
+      const closeButton = await ShowTask.getModalCloseButton()
+      await closeButton.click()
+      await modal.waitForExist({ reverse: true })
+    })
+    it("Should open and close the Edit Report publication approvals modal correctly", async() => {
+      const editButton =
+        await ShowTask.getEditReportPublicationApprovalsButton()
+      await editButton.waitForExist()
+      await editButton.waitForDisplayed()
+      await editButton.click()
+      const modal = await ShowTask.getEditApprovalsModal()
+      await modal.waitForExist()
+      await modal.waitForDisplayed()
+      const modalTitle = await modal.$(".modal-title")
+      expect(await modalTitle.getText()).to.equal(
+        "Edit Report publication approval process"
+      )
+      const closeButton = await ShowTask.getModalCloseButton()
+      await closeButton.click()
+      await modal.waitForExist({ reverse: true })
+    })
+  })
 })

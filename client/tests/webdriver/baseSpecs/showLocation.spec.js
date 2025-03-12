@@ -93,6 +93,42 @@ describe("Show location page", () => {
       expect(await (await MergeLocations.getLeftLocationField()).isEnabled()).to
         .be.false
     })
+    it("Should open and close the Edit Engagement planning approvals modal correctly", async() => {
+      await ShowLocation.openAsAdminUser(LOCATION_WITH_ATTACHMENTS_UUID)
+      const editButton =
+        await ShowLocation.getEditEngagementPlanningApprovalsButton()
+      await editButton.waitForExist()
+      await editButton.waitForDisplayed()
+      await editButton.click()
+      const modal = await ShowLocation.getEditApprovalsModal()
+      await modal.waitForExist()
+      await modal.waitForDisplayed()
+      const modalTitle = await modal.$(".modal-title")
+      expect(await modalTitle.getText()).to.equal(
+        "Edit Engagement planning approval process"
+      )
+      const closeButton = await ShowLocation.getModalCloseButton()
+      await closeButton.click()
+      await modal.waitForExist({ reverse: true })
+    })
+    it("Should open and close the Edit Report publication approvals modal correctly", async() => {
+      await ShowLocation.openAsAdminUser(LOCATION_WITH_ATTACHMENTS_UUID)
+      const editButton =
+        await ShowLocation.getEditReportPublicationApprovalsButton()
+      await editButton.waitForExist()
+      await editButton.waitForDisplayed()
+      await editButton.click()
+      const modal = await ShowLocation.getEditApprovalsModal()
+      await modal.waitForExist()
+      await modal.waitForDisplayed()
+      const modalTitle = await modal.$(".modal-title")
+      expect(await modalTitle.getText()).to.equal(
+        "Edit Report publication approval process"
+      )
+      const closeButton = await ShowLocation.getModalCloseButton()
+      await closeButton.click()
+      await modal.waitForExist({ reverse: true })
+    })
   })
 
   describe("When on the show page of a location with events", () => {
