@@ -55,5 +55,29 @@ class ShowLocation extends Page {
     const eventsTable = await this.getEventsTable()
     return eventsTable.$(`tbody tr:nth-child(${i}) td:first-child a`)
   }
+
+  async getEditEngagementPlanningApprovalsButton() {
+    return browser.$(
+      '//button[contains(text(), "Edit Engagement planning approvals")]'
+    )
+  }
+
+  async getEditReportPublicationApprovalsButton() {
+    return browser.$(
+      '//button[contains(text(), "Edit Report publication approvals")]'
+    )
+  }
+
+  async getEditApprovalsModal() {
+    return browser.$(".modal")
+  }
+
+  async getModalContent() {
+    return browser.$("div.modal-content")
+  }
+
+  async getModalCloseButton() {
+    return (await this.getModalContent()).$(".btn-close")
+  }
 }
 export default new ShowLocation()

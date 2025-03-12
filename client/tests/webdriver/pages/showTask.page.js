@@ -113,6 +113,30 @@ class ShowTask extends Page {
     ).$$("div.card-body .form-control-plaintext")
   }
 
+  async getEditEngagementPlanningApprovalsButton() {
+    return browser.$(
+      '//button[contains(text(), "Edit Engagement planning approvals")]'
+    )
+  }
+
+  async getEditReportPublicationApprovalsButton() {
+    return browser.$(
+      '//button[contains(text(), "Edit Report publication approvals")]'
+    )
+  }
+
+  async getEditApprovalsModal() {
+    return browser.$(".modal")
+  }
+
+  async getModalContent() {
+    return browser.$("div.modal-content")
+  }
+
+  async getModalCloseButton() {
+    return (await this.getModalContent()).$(".btn-close")
+  }
+
   async waitForAssessmentModalForm(reverse = false) {
     await browser.pause(300) // wait for modal animation to finish
     await (
