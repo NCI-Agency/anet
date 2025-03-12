@@ -714,6 +714,7 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
               />
               <Approvals
                 relatedObject={organization}
+                objectType="Organization"
                 canEdit={canAdministrateOrg}
                 refetch={refetch}
               />

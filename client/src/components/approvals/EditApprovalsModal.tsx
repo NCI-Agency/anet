@@ -3,7 +3,7 @@ import API from "api"
 import ApprovalsDefinition from "components/approvals/ApprovalsDefinition"
 import Messages from "components/Messages"
 import { Form, Formik } from "formik"
-import { Organization } from "models"
+import { Organization, Task } from "models"
 import React, { useState } from "react"
 import { Button, Modal } from "react-bootstrap"
 
@@ -12,8 +12,15 @@ const GQL_UPDATE_ORGANIZATION = gql`
     updateOrganization(organization: $organization)
   }
 `
+const GQL_UPDATE_TASK = gql`
+  mutation ($task: TaskInput!) {
+    updateTask(task: $task)
+  }
+`
+
 interface EditApprovalsModalProps {
-  organization: any
+  relatedObject: any
+  objectType: "Organization" | "Task"
   showModal?: boolean
   onCancel: (...args: unknown[]) => unknown
   onSuccess: (...args: unknown[]) => unknown
@@ -24,7 +31,8 @@ interface EditApprovalsModalProps {
 }
 
 const EditApprovalsModal = ({
-  organization,
+  relatedObject,
+  objectType,
   showModal,
   onCancel,
   onSuccess,
@@ -40,7 +48,7 @@ const EditApprovalsModal = ({
       enableReinitialize
       onSubmit={onSubmit}
       initialValues={{
-        [fieldName]: organization[fieldName] || []
+        [fieldName]: relatedObject[fieldName] || []
       }}
     >
       {({ values, setFieldValue, setFieldTouched, submitForm }) => (
@@ -85,7 +93,7 @@ const EditApprovalsModal = ({
   function close(setFieldValue) {
     // Reset state before closing (cancel)
     setError(null)
-    setFieldValue(fieldName, organization[fieldName] || [])
+    setFieldValue(fieldName, relatedObject[fieldName] || [])
     onCancel()
   }
 
@@ -101,15 +109,24 @@ const EditApprovalsModal = ({
   }
 
   function save(values, form) {
-    const updatedOrganization = {
-      ...organization,
+    const updatedObject = {
+      ...relatedObject,
       [fieldName]: values[fieldName]
     }
-    const organizationInput =
-      Organization.filterClientSideFields(updatedOrganization)
-    return API.mutation(GQL_UPDATE_ORGANIZATION, {
-      organization: organizationInput
-    })
+    const mutation =
+      objectType === "Organization" ? GQL_UPDATE_ORGANIZATION : GQL_UPDATE_TASK
+    const filterFunction =
+      objectType === "Organization"
+        ? Organization.filterClientSideFields
+        : Task.filterClientSideFields
+    const inputKey = objectType === "Organization" ? "organization" : "task"
+    const input = filterFunction(
+      updatedObject,
+      "childrenTasks",
+      "descendantTasks"
+    )
+    const variables = { [inputKey]: input }
+    return API.mutation(mutation, variables)
   }
 }
 
