@@ -299,7 +299,12 @@ const LocationShow = ({ pageDispatchers }: LocationShowProps) => {
               )}
             </Form>
 
-            <Approvals relatedObject={location} />
+            <Approvals
+              relatedObject={location}
+              objectType="Location"
+              canEdit={canEdit}
+              refetch={refetch}
+            />
 
             <Fieldset title="Organizations at this Location">
               <OrganizationTable queryParams={{ locationUuid: uuid }} />

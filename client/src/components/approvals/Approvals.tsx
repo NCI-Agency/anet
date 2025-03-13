@@ -1,25 +1,65 @@
+import AppContext from "components/AppContext"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
-import React from "react"
-import { FormCheck, Table } from "react-bootstrap"
+import React, { useContext, useState } from "react"
+import { Button, FormCheck, Table } from "react-bootstrap"
+import EditApprovalsModal from "./EditApprovalsModal"
 
 interface ApprovalsProps {
   restrictedApprovalLabel?: string
   relatedObject: any
+  objectType: "Location" | "Organization" | "Task"
+  canEdit: boolean
+  refetch: (...args: unknown[]) => unknown
 }
 
 const Approvals = ({
   restrictedApprovalLabel,
-  relatedObject
+  relatedObject,
+  objectType,
+  canEdit,
+  refetch
 }: ApprovalsProps) => {
-  const approvalSteps = relatedObject.approvalSteps
-  const planningApprovalSteps = relatedObject.planningApprovalSteps
+  const { planningApprovalSteps, approvalSteps } = relatedObject
+  const [showPlanningApprovalsModal, setShowPlanningApprovalsModal] =
+    useState(false)
+  const [showReportApprovalsModal, setShowReportApprovalsModal] =
+    useState(false)
+  const { currentUser } = useContext(AppContext)
+
+  const approversFilters = {
+    allPositions: {
+      label: "All positions",
+      queryVars: {
+        matchPersonName: true
+      }
+    }
+  }
+  if (currentUser.position) {
+    approversFilters.myColleagues = {
+      label: "My colleagues",
+      queryVars: {
+        matchPersonName: true,
+        organizationUuid: currentUser.position.organization.uuid
+      }
+    }
+  }
 
   return (
     <div>
       <Fieldset
         id="planningApprovals"
         title="Engagement planning approval process"
+        action={
+          canEdit && (
+            <Button
+              onClick={() => setShowPlanningApprovalsModal(true)}
+              variant="outline-secondary"
+            >
+              Edit Engagement planning approvals
+            </Button>
+          )
+        }
       >
         {planningApprovalSteps.map((step, idx) => (
           <Fieldset title={`Step ${idx + 1}: ${step.name}`} key={"step_" + idx}>
@@ -68,7 +108,20 @@ const Approvals = ({
           </em>
         )}
       </Fieldset>
-      <Fieldset id="approvals" title="Report publication approval process">
+      <Fieldset
+        id="approvals"
+        title="Report publication approval process"
+        action={
+          canEdit && (
+            <Button
+              onClick={() => setShowReportApprovalsModal(true)}
+              variant="outline-secondary"
+            >
+              Edit Report publication approvals
+            </Button>
+          )
+        }
+      >
         {approvalSteps.map((step, idx) => (
           <Fieldset title={`Step ${idx + 1}: ${step.name}`} key={"step_" + idx}>
             {restrictedApprovalLabel && (
@@ -116,6 +169,38 @@ const Approvals = ({
           </em>
         )}
       </Fieldset>
+      {canEdit && (
+        <>
+          <EditApprovalsModal
+            relatedObject={relatedObject}
+            objectType={objectType}
+            showModal={showPlanningApprovalsModal}
+            onCancel={() => setShowPlanningApprovalsModal(false)}
+            onSuccess={() => {
+              setShowPlanningApprovalsModal(false)
+              refetch()
+            }}
+            fieldName="planningApprovalSteps"
+            title="Engagement planning approval process"
+            addButtonLabel="Add a Planning Approval Step"
+            approversFilters={approversFilters}
+          />
+          <EditApprovalsModal
+            relatedObject={relatedObject}
+            objectType={objectType}
+            showModal={showReportApprovalsModal}
+            onCancel={() => setShowReportApprovalsModal(false)}
+            onSuccess={() => {
+              setShowReportApprovalsModal(false)
+              refetch()
+            }}
+            fieldName="approvalSteps"
+            title="Report publication approval process"
+            addButtonLabel="Add a Publication Approval Step"
+            approversFilters={approversFilters}
+          />
+        </>
+      )}
     </div>
   )
 }
