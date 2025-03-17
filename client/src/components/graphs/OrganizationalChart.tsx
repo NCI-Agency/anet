@@ -122,15 +122,16 @@ const LEVEL_INDENT = 60
 const PERSON_AVATAR_HEIGHT = 42
 const ARROW_INDENT = 5
 const DIAGRAM_PADDING = 100
-type PositionFilterOption =
-  | "none"
-  | "leaders"
-  | "leaders_deputies"
-  | "top_position"
-  | "top_2_positions"
+enum PositionFilterOption {
+  none = "none",
+  leaders = "leaders",
+  leadersDeputies = "leadersDeputies",
+  topPosition = "topPosition",
+  top2Positions = "top2Positions"
+}
 const positionsLimits = {
-  top_position: 1,
-  top_2_positions: 2
+  [PositionFilterOption.topPosition]: 1,
+  [PositionFilterOption.top2Positions]: 2
 }
 const ROLES = Object.keys(PositionRole)
 const RANKS = Settings.fields.person.ranks.map(rank => rank.value)
@@ -192,8 +193,9 @@ const OrganizationFlowChart = ({
   const [showApp6Symbols, setShowApp6Symbols] = useState(false)
   const [depthLimit, setDepthLimit] = useState(3)
   const [maxDepth, setMaxDepth] = useState(0)
-  const [positionsFilter, setPositionsFilter] =
-    useState<PositionFilterOption>("none")
+  const [positionsFilter, setPositionsFilter] = useState<PositionFilterOption>(
+    PositionFilterOption.none
+  )
   const chartRef = useRef<HTMLDivElement>(null)
   const lowestDepth = useRef(0)
   const lowestY = useRef(0)
@@ -274,13 +276,13 @@ const OrganizationFlowChart = ({
             if (!position.person) {
               return false
             }
-            if (positionsFilter === "none") {
+            if (positionsFilter === PositionFilterOption.none) {
               return false
             }
-            if (positionsFilter === "leaders") {
+            if (positionsFilter === PositionFilterOption.leaders) {
               return position.role === PositionRole.LEADER.toString()
             }
-            if (positionsFilter === "leaders_deputies") {
+            if (positionsFilter === PositionFilterOption.leadersDeputies) {
               return (
                 position.role === PositionRole.LEADER.toString() ||
                 position.role === PositionRole.DEPUTY.toString()
@@ -489,11 +491,15 @@ const OrganizationFlowChart = ({
           onChange={e =>
             setPositionsFilter(e.target.value as PositionFilterOption)}
         >
-          <option value="none">No positions</option>
-          <option value="leaders">Leaders Only</option>
-          <option value="leaders_deputies">Leaders and Deputies</option>
-          <option value="top_position">Top Position</option>
-          <option value="top_2_positions">Top 2 Positions</option>
+          <option value={PositionFilterOption.none}>No positions</option>
+          <option value={PositionFilterOption.leaders}>Leaders Only</option>
+          <option value={PositionFilterOption.leadersDeputies}>
+            Leaders and Deputies
+          </option>
+          <option value={PositionFilterOption.topPosition}>Top Position</option>
+          <option value={PositionFilterOption.top2Positions}>
+            Top 2 Positions
+          </option>
         </select>
         <div>
           <label htmlFor="depthInput">Depth:</label>
