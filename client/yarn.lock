@@ -22,9 +22,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@apollo/client@npm:3.13.3":
-  version: 3.13.3
-  resolution: "@apollo/client@npm:3.13.3"
+"@apollo/client@npm:3.13.4":
+  version: 3.13.4
+  resolution: "@apollo/client@npm:3.13.4"
   dependencies:
     "@graphql-typed-document-node/core": "npm:^3.1.1"
     "@wry/caches": "npm:^1.0.0"
@@ -54,7 +54,7 @@ __metadata:
       optional: true
     subscriptions-transport-ws:
       optional: true
-  checksum: 10c0/f249b4e8b52d9a84b1de700f5177dd4f0e37dcc3b91fd092f1dc7a175171c6cac8b7d2bc0213301b9493bc162c2317915160be19f054dc23037c4678e1d4fcbe
+  checksum: 10c0/3fd98ddcdeabcc7500cf4186b234edc99e8bf09bca4becc6932642db816207c9dc9b4ad7b2f874b8c7e29563218f373ad4876910f8db4c787bac75c98f13bbaf
   languageName: node
   linkType: hard
 
@@ -5770,7 +5770,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "anet@workspace:."
   dependencies:
-    "@apollo/client": "npm:3.13.3"
+    "@apollo/client": "npm:3.13.4"
     "@babel/core": "npm:7.26.10"
     "@babel/eslint-parser": "npm:7.26.10"
     "@babel/plugin-proposal-decorators": "npm:7.25.9"
@@ -5828,7 +5828,7 @@ __metadata:
     aigle: "npm:1.14.1"
     autoprefixer: "npm:10.4.21"
     ava: "npm:6.2.0"
-    axios: "npm:1.8.2"
+    axios: "npm:1.8.3"
     babel-jest: "npm:29.7.0"
     babel-loader: "npm:10.0.0"
     bootstrap: "npm:5.3.3"
@@ -5881,7 +5881,7 @@ __metadata:
     json-loader: "npm:0.5.7"
     jsonpath-plus: "npm:10.3.0"
     keycloak-connect: "npm:26.1.1"
-    keycloak-js: "npm:26.1.3"
+    keycloak-js: "npm:26.1.4"
     leaflet: "npm:1.9.4"
     leaflet-defaulticon-compatibility: "npm:0.1.2"
     leaflet-geosearch: "npm:4.2.0"
@@ -5892,7 +5892,7 @@ __metadata:
     lodash: "npm:4.17.21"
     mgrs: "npm:1.0.0"
     milsymbol: "npm:2.2.0"
-    ml-matrix: "npm:6.12.0"
+    ml-matrix: "npm:6.12.1"
     moment: "npm:2.30.1"
     moment-timezone: "npm:0.5.47"
     pathfinding: "npm:0.4.18"
@@ -6467,14 +6467,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:1.8.2, axios@npm:^1.7.4":
-  version: 1.8.2
-  resolution: "axios@npm:1.8.2"
+"axios@npm:1.8.3, axios@npm:^1.7.4":
+  version: 1.8.3
+  resolution: "axios@npm:1.8.3"
   dependencies:
     follow-redirects: "npm:^1.15.6"
     form-data: "npm:^4.0.0"
     proxy-from-env: "npm:^1.1.0"
-  checksum: 10c0/d8c2969e4642dc6d39555ac58effe06c051ba7aac2bd40cad7a9011c019fb2f16ee011c5a6906cb25b8a4f87258c359314eb981f852e60ad445ecaeb793c7aa2
+  checksum: 10c0/de75da9859adf0a6481d4af2b687db357a054d20f0d69b99d502b71dae3578326b1fdc0951dabaef769827484941cda93d3f89150bf9e04f05f6615fb8316780
   languageName: node
   linkType: hard
 
@@ -13512,10 +13512,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"keycloak-js@npm:26.1.3":
-  version: 26.1.3
-  resolution: "keycloak-js@npm:26.1.3"
-  checksum: 10c0/d1a850a39bdaf7dd9c0e4e3f6b43a27f61718fa84ec72aae51b2201463fd6f958f2a036b3fcb5cb19f1220bafa2d29481445d945ae364d836fef12661f772757
+"keycloak-js@npm:26.1.4":
+  version: 26.1.4
+  resolution: "keycloak-js@npm:26.1.4"
+  checksum: 10c0/a2e52c7bfdd1f0f1cd69d083c62f7aa1c087f36841a4c6cfa76f5571dc162286978a511674f8fd85dde3625a4215cb6a4479c2fdee21e7ab0a1da0b05074a79f
   languageName: node
   linkType: hard
 
@@ -14556,13 +14556,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ml-matrix@npm:6.12.0":
-  version: 6.12.0
-  resolution: "ml-matrix@npm:6.12.0"
+"ml-matrix@npm:6.12.1":
+  version: 6.12.1
+  resolution: "ml-matrix@npm:6.12.1"
   dependencies:
     is-any-array: "npm:^2.0.1"
     ml-array-rescale: "npm:^1.3.7"
-  checksum: 10c0/7927c3ab18856fcdef75bd8bebf88c13c7291ef1a3b78b0e8c827abbaead4a489c634bc888ae05e4df962141448f758b6fb9dcaf876ff42b7fd35a018dacb8c8
+  checksum: 10c0/1e7a382a9abf099f6650a01056f09072f95bba15f566c1c9d78b208ebef5ba4cd4498d5aeef4a1014e71e059a5101a31fc2d5e3260f812b55b3d610bbd3d5484
   languageName: node
   linkType: hard
 
