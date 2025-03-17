@@ -64,7 +64,7 @@ const config = {
       // 5 instances get started at a time.
       maxInstances: 5,
       browserName: "chrome",
-      // browserVersion: "stable",
+      browserVersion: "131", // or "stable"
       acceptInsecureCerts: true,
       "goog:chromeOptions": {
         // run in incognito mode
@@ -73,9 +73,12 @@ const config = {
         // while scrolling some form fields might go under the header and
         // therefore we would get failing tests related to these fields.
         args: [
-          "--headless",
+          "--headless=old",
           "--disable-gpu",
           "--disable-search-engine-choice-screen",
+          "--disable-dev-shm-usage",
+          "--disable-browser-side-navigation",
+          "--no-sandbox",
           "--window-size=1600,1200"
         ],
         prefs: {
