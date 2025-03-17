@@ -90,12 +90,17 @@ test.beforeEach(t => {
   let builder = new webdriver.Builder()
   if (testEnv === "local") {
     const chrome = require("selenium-webdriver/chrome")
-    const options = new chrome.Options(capabilities).addArguments([
-      "--headless",
-      "--disable-gpu",
-      "--disable-search-engine-choice-screen",
-      "--window-size=1600,1200"
-    ])
+    const options = new chrome.Options(capabilities)
+      .setBrowserVersion("131") // or "stable"
+      .addArguments([
+        "--headless=old",
+        "--disable-gpu",
+        "--disable-search-engine-choice-screen",
+        "--disable-dev-shm-usage",
+        "--disable-browser-side-navigation",
+        "--no-sandbox",
+        "--window-size=1600,1200"
+      ])
     builder = builder
       .forBrowser(webdriver.Browser.CHROME)
       .setChromeOptions(options)
