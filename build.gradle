@@ -739,6 +739,13 @@ spotless {
 		eclipse('4.29').configFile('config/eclipse-java-google-style.xml')
 		// Exclude generated code
 		targetExclude 'build/generated/**'
+
+		custom 'Refuse wildcard imports', {
+			// Wildcard imports can't be resolved by spotless; developers should adhere to best practices.
+			if (it =~ /\nimport .*\*;/) {
+				throw new AssertionError("Do not use wildcard imports; note: 'spotlessApply' cannot resolve this issue.")
+			}
+		}
 	}
 }
 
