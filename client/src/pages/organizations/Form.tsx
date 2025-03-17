@@ -16,6 +16,7 @@ import {
   customFieldsJSONString
 } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
+import EditApp6SymbolModal from "components/editor/EditApp6SymbolModal"
 import EmailAddressInputTable, {
   initializeEmailAddresses
 } from "components/EmailAddressInputTable"
@@ -72,6 +73,7 @@ const OrganizationForm = ({
   initialValues,
   notesComponent
 }: OrganizationFormProps) => {
+  const [showApp6Modal, setShowApp6Modal] = useState(false)
   const { loadAppData, currentUser } = useContext(AppContext)
   const navigate = useNavigate()
   const [error, setError] = useState(null)
@@ -484,97 +486,39 @@ const OrganizationForm = ({
               </Fieldset>
 
               <Fieldset title="APP-06 symbology" id="app6-symbology">
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.organization.app6context}
-                  name="app6context"
-                  component={FieldHelper.SelectField}
-                  buttons={utils.getButtonsFromChoices(
-                    Settings.fields.organization.app6context.choices
-                  )}
-                  onChange={value => setFieldValue("app6context", value)}
-                  extraColElem={
-                    parentContext && (
-                      <div style={{ paddingTop: "9px" }}>
-                        <em>
-                          {
-                            Settings.fields.organization.app6context.choices[
-                              parentContext
-                            ]
-                          }{" "}
-                          (inherited from parent)
-                        </em>
-                      </div>
+                <Button onClick={() => setShowApp6Modal(true)}>
+                  Edit APP6 Symbol
+                </Button>
+                <EditApp6SymbolModal
+                  show={showApp6Modal}
+                  onHide={() => setShowApp6Modal(false)}
+                  initialValues={{
+                    app6context: values.app6context,
+                    app6standardIdentity: values.app6standardIdentity,
+                    app6symbolSet: values.app6symbolSet,
+                    app6hq: values.app6hq,
+                    app6amplifier: values.app6amplifier
+                  }}
+                  onSave={symbologyValues => {
+                    setFieldValue("app6context", symbologyValues.app6context)
+                    setFieldValue(
+                      "app6standardIdentity",
+                      symbologyValues.app6standardIdentity
                     )
-                  }
-                />
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.organization.app6standardIdentity}
-                  name="app6standardIdentity"
-                  component={FieldHelper.SelectField}
-                  buttons={utils.getButtonsFromChoices(
-                    Settings.fields.organization.app6standardIdentity.choices
-                  )}
-                  onChange={value =>
-                    setFieldValue("app6standardIdentity", value)}
-                  extraColElem={
-                    parentStandardIdentity && (
-                      <div style={{ paddingTop: "9px" }}>
-                        <em>
-                          {
-                            Settings.fields.organization.app6standardIdentity
-                              .choices[parentStandardIdentity]
-                          }{" "}
-                          (inherited from parent)
-                        </em>
-                      </div>
+                    setFieldValue(
+                      "app6symbolSet",
+                      symbologyValues.app6symbolSet
                     )
-                  }
-                />
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.organization.app6symbolSet}
-                  name="app6symbolSet"
-                  component={FieldHelper.SelectField}
-                  buttons={utils.getButtonsFromChoices(
-                    Settings.fields.organization.app6symbolSet.choices
-                  )}
-                  onChange={value => setFieldValue("app6symbolSet", value)}
-                  extraColElem={
-                    parentSymbolSet && (
-                      <div style={{ paddingTop: "9px" }}>
-                        <em>
-                          {
-                            Settings.fields.organization.app6symbolSet.choices[
-                              parentSymbolSet
-                            ]
-                          }{" "}
-                          (inherited from parent)
-                        </em>
-                      </div>
+                    setFieldValue("app6hq", symbologyValues.app6hq)
+                    setFieldValue(
+                      "app6amplifier",
+                      symbologyValues.app6amplifier
                     )
-                  }
-                />
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.organization.app6hq}
-                  name="app6hq"
-                  component={FieldHelper.SelectField}
-                  buttons={utils.getButtonsFromChoices(
-                    Settings.fields.organization.app6hq.choices
-                  )}
-                  onChange={value => setFieldValue("app6hq", value)}
-                />
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.organization.app6amplifier}
-                  name="app6amplifier"
-                  component={FieldHelper.SelectField}
-                  buttons={utils.getButtonsFromChoices(
-                    Settings.fields.organization.app6amplifier.choices
-                  )}
-                  onChange={value => setFieldValue("app6amplifier", value)}
+                    setShowApp6Modal(false)
+                  }}
+                  parentContext={parentContext}
+                  parentStandardIdentity={parentStandardIdentity}
+                  parentSymbolSet={parentSymbolSet}
                 />
               </Fieldset>
 
