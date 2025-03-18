@@ -26,16 +26,16 @@ public class MartImporterWorker extends AbstractWorker {
   public static final String TRANSMISSION_LOG_ATTACHMENT = "mart_transmission_log.json";
 
   private final IMailReceiver mailReceiver;
-  private final IMartReportImporterService martReportImporter;
+  private final IMartReportImporterService reportImporter;
   private final IMartTransmissionLogImporterService transmissionLogImporter;
 
   public MartImporterWorker(AnetDictionary dict, JobHistoryDao jobHistoryDao,
-      IMailReceiver mailReceiver, IMartReportImporterService martReportImporter,
-      IMartTransmissionLogImporterService martTrasmissionLogImporter) {
+      IMailReceiver mailReceiver, IMartReportImporterService reportImporter,
+      IMartTransmissionLogImporterService transmissionLogImporter) {
     super(dict, jobHistoryDao, "MartReportImporterWorker waking up to get MART reports!");
     this.mailReceiver = mailReceiver;
-    this.martReportImporter = martReportImporter;
-    this.transmissionLogImporter = martTrasmissionLogImporter;
+    this.reportImporter = reportImporter;
+    this.transmissionLogImporter = transmissionLogImporter;
   }
 
   private List<EmailMessage> messages;
@@ -77,7 +77,7 @@ public class MartImporterWorker extends AbstractWorker {
         }
       }
       // Process mart report in email
-      martReportImporter.processMartReport(attachments);
+      reportImporter.processMartReport(attachments);
       // If transmission log in email process
       attachments.stream()
           .filter(attachment -> attachment.getName().equalsIgnoreCase(TRANSMISSION_LOG_ATTACHMENT))
