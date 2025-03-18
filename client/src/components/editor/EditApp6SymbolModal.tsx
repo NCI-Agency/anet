@@ -1,8 +1,8 @@
+import App6Symbol from "components/App6Symbol"
 import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import { Field, Form, Formik } from "formik"
-import ms from "milsymbol"
 import { Organization } from "models"
 import { Button, Modal } from "react-bootstrap"
 import Settings from "settings"
@@ -29,8 +29,9 @@ const EditApp6SymbolModal = ({ values, show, onHide, onSave }) => {
       </option>
     )
   }
+
   return (
-    <Modal show={show} onHide={onHide} size="xl">
+    <Modal centered show={show} onHide={onHide} size="xl">
       <Modal.Header closeButton>
         <Modal.Title>Edit APP-06 Symbol</Modal.Title>
       </Modal.Header>
@@ -43,21 +44,12 @@ const EditApp6SymbolModal = ({ values, show, onHide, onSave }) => {
         enableReinitialize
       >
         {({ handleSubmit, setFieldValue, values }) => {
-          const generateSymbolSVG = () => {
-            const context = values.app6context || parentContext || "0"
-            const standardIdentity =
-              values.app6standardIdentity || parentStandardIdentity || "1"
-            const symbolSet = values.app6symbolSet || parentSymbolSet || "00"
-            const hq = values.app6hq || "0"
-            const amplifier = values.app6amplifier || "00"
-            const version = "10" // APP-6D
-            const status = "0" // Present
-
-            const symbolCode = `${version}${context}${standardIdentity}${symbolSet}${status}${hq}${amplifier}`
-            const symbol = new ms.Symbol(symbolCode, { size: 120 })
-            const svgString = symbol.asSVG()
-            return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgString)}`
-          }
+          const context = values.app6context || parentContext || "0"
+          const standardIdentity =
+            values.app6standardIdentity || parentStandardIdentity || "1"
+          const symbolSet = values.app6symbolSet || parentSymbolSet || "00"
+          const hq = values.app6hq || "0"
+          const amplifier = values.app6amplifier || "00"
 
           return (
             <Form>
@@ -147,10 +139,15 @@ const EditApp6SymbolModal = ({ values, show, onHide, onSave }) => {
                       alignItems: "center"
                     }}
                   >
-                    <img
-                      src={generateSymbolSVG()}
-                      alt="APP6 Symbol"
-                      style={{ maxWidth: "100%", maxHeight: "100%" }}
+                    <App6Symbol
+                      context={context}
+                      standardIdentity={standardIdentity}
+                      symbolSet={symbolSet}
+                      hq={hq}
+                      amplifier={amplifier}
+                      version="10"
+                      status="0"
+                      size={120}
                     />
                   </div>
                 </div>
