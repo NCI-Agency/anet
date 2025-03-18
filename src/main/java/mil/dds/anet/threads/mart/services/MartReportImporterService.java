@@ -233,67 +233,68 @@ public class MartReportImporterService implements IMartReportImporterService {
           martReport.getLocationName(), martReport.getLocationUuid()));
     }
 
-    if (organization != null && location != null) {
-      // Move on with the report
-      Report anetReport = new Report();
-      // Location
-      anetReport.setLocation(location);
-      List<ReportPerson> reportPeople = handleReportPeople(martReport, organization, errors);
-      // Report people
-      anetReport.setReportPeople(reportPeople);
-      // Report generic details
-      anetReport.setUuid(martReport.getUuid());
-      anetReport.setCreatedAt(martReport.getCreatedAt());
-      anetReport.setIntent(martReport.getIntent());
-      if (martReport.getAtmosphere() != null) {
-        anetReport
-            .setAtmosphere(Report.Atmosphere.valueOf(martReport.getAtmosphere().toUpperCase()));
-      }
-      anetReport.setEngagementDate(martReport.getEngagementDate());
-      anetReport.setReportText(martReport.getReportText());
-      // Get classification from securityMarking property in MART custom fields
-      anetReport.setClassification(getClassificationFromReport(martReport, errors));
-      // Set advisor organization to the organization of the submitter
-      anetReport.setAdvisorOrg(organization);
-      // Report tasks
-      final List<Task> tasks = getTasks(martReport.getTasks(), errors);
-      anetReport.setTasks(tasks);
-      // Custom fields
-      anetReport.setCustomFields(martReport.getCustomFields());
-      // Set report to DRAFT
-      anetReport.setState(Report.ReportState.DRAFT);
-      // Sanitize!
-      anetReport.checkAndFixCustomFields();
-      anetReport.setReportText(Utils.isEmptyHtml(anetReport.getReportText()) ? null
-          : Utils.sanitizeHtml(anetReport.getReportText()));
+    // Move on with the report
+    Report anetReport = new Report();
+    // Location
+    anetReport.setLocation(location);
+    List<ReportPerson> reportPeople = handleReportPeople(martReport, organization, errors);
+    // Report people
+    anetReport.setReportPeople(reportPeople);
+    // Report generic details
+    anetReport.setUuid(martReport.getUuid());
+    anetReport.setCreatedAt(martReport.getCreatedAt());
+    anetReport.setIntent(martReport.getIntent());
+    if (martReport.getAtmosphere() != null) {
+      anetReport
+          .setAtmosphere(Report.Atmosphere.valueOf(martReport.getAtmosphere().toUpperCase()));
+    }
+    anetReport.setEngagementDate(martReport.getEngagementDate());
+    anetReport.setReportText(martReport.getReportText());
+    // Get classification from securityMarking property in MART custom fields
+    anetReport.setClassification(getClassificationFromReport(martReport, errors));
+    // Set advisor organization to the organization of the submitter
+    anetReport.setAdvisorOrg(organization);
+    // Report tasks
+    final List<Task> tasks = getTasks(martReport.getTasks(), errors);
+    anetReport.setTasks(tasks);
+    // Custom fields
+    anetReport.setCustomFields(martReport.getCustomFields());
+    // Set report to DRAFT
+    anetReport.setState(Report.ReportState.DRAFT);
+    // Sanitize!
+    anetReport.checkAndFixCustomFields();
+    anetReport.setReportText(Utils.isEmptyHtml(anetReport.getReportText()) ? null
+        : Utils.sanitizeHtml(anetReport.getReportText()));
 
-      // Insert report
-      try {
-        anetReport = reportDao.insertWithExistingUuid(anetReport);
-      } catch (Exception e) {
-        logger.info("Error persisting report with UUID={} ", martReport.getUuid());
-        errors.add(String.format("Error persisting report with UUID: %s error: %s ",
-            martReport.getUuid(), e.getMessage()));
-      }
+    // Insert report
+    try {
+      anetReport = reportDao.insertWithExistingUuid(anetReport);
+    } catch (Exception e) {
+      logger.info("Error persisting report with UUID={} ", martReport.getUuid());
+      errors.add(String.format("Error persisting report with UUID: %s error: %s ",
+          martReport.getUuid(), e.getMessage()));
+    }
 
-      // Process attachments
-      processAttachments(attachments.stream()
-          .filter(attachment -> !attachment.getName().equalsIgnoreCase(REPORT_JSON_ATTACHMENT))
-          .toList(), anetReport, errors);
+    // Process attachments
+    processAttachments(attachments.stream()
+        .filter(attachment -> !attachment.getName().equalsIgnoreCase(REPORT_JSON_ATTACHMENT))
+        .toList(), anetReport, errors);
 
-      // Submit the report
+    // Submit the report only if no errors happened, otherwise stays in DRAFT state
+    if (errors.isEmpty()){
       try {
         reportDao.submit(anetReport, anetReport.getReportPeople().get(0));
+        martImportedReport.setSuccess(true);
       } catch (Exception e) {
         logger.error("Could not submit report with UUID={}", martReport.getUuid(), e);
         errors.add(String.format("Could not submit report with UUID: %s error: %s",
-            martReport.getUuid(), e.getMessage()));
+                martReport.getUuid(), e.getMessage()));
       }
-
-      martImportedReport.setSuccess(true);
-      martImportedReport.setReport(anetReport);
-      martImportedReport.setPerson(anetReport.getReportPeople().get(0));
     }
+
+    // Complete the MART imported report record
+    martImportedReport.setReport(anetReport);
+    martImportedReport.setPerson(anetReport.getReportPeople().get(0));
 
     // Set errors
     if (!errors.isEmpty()) {

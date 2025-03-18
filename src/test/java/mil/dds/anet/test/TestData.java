@@ -168,7 +168,7 @@ public class TestData {
   }
 
   public static ReportDto createMartReportWrongOrganization(long sequence) {
-    final ReportDto reportDto = new ReportDto();
+    final ReportDto reportDto = createGoodMartReport(sequence);
     reportDto.setSequence(sequence);
     reportDto.setUuid("fb875171-2501-46c9-9246-60dafabb656d");
     reportDto.setOrganizationUuid("does not exist");
@@ -180,7 +180,7 @@ public class TestData {
   }
 
   public static ReportDto createMartReportWrongLocation(long sequence) {
-    final ReportDto reportDto = new ReportDto();
+    final ReportDto reportDto = createGoodMartReport(sequence);
     reportDto.setSequence(sequence);
     reportDto.setUuid("2d6c7a19-d878-4792-bdaf-7a73dc3bfc83");
     reportDto.setOrganizationUuid("9a35caa7-a095-4963-ac7b-b784fde4d583");
@@ -192,7 +192,7 @@ public class TestData {
   }
 
   public static ReportDto createMartReportCompletelyWrong(long sequence) {
-    final ReportDto reportDto = new ReportDto();
+    final ReportDto reportDto = createGoodMartReport(sequence);
     reportDto.setSequence(sequence);
     reportDto.setUuid("68077002-b766-4a79-bcf2-40b7dbffe6e6");
     reportDto.setOrganizationUuid("does not exist");
@@ -200,10 +200,6 @@ public class TestData {
     reportDto.setLocationUuid("does not exist");
     reportDto.setLocationName("does not exist");
     reportDto.setSubmittedAt(Instant.now());
-    final Map<String, String> tasks = new HashMap<>();
-    tasks.put("19364d81-3203-483d-a6bf-461d58888c76", "Intelligence");
-    tasks.put("does not exist", "does not exist");
-    reportDto.setTasks(tasks);
     return reportDto;
   }
 
