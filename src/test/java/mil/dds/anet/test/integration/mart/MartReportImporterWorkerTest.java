@@ -69,8 +69,10 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
         AnetTestConfiguration.getConfiguration().get("martReportImporterTestsExecute").toString());
     assumeTrue(executeMartReportImporterTests, "Mart importer tests configured to be skipped.");
 
-    final EmailMessage emailMessage1 = createReportMockEmail(TestData.createGoodMartReport(1), true);
-    final EmailMessage emailMessage2 = createReportMockEmail(TestData.createGoodMartReport(2), true);
+    final EmailMessage emailMessage1 =
+        createReportMockEmail(TestData.createGoodMartReport(1), true);
+    final EmailMessage emailMessage2 =
+        createReportMockEmail(TestData.createGoodMartReport(2), true);
     final EmailMessage emailMessage3 =
         createReportMockEmail(TestData.createMartReportWrongOrganization(3), false);
     final EmailMessage emailMessage4 =
