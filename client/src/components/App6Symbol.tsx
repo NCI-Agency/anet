@@ -1,11 +1,10 @@
 import ms from "milsymbol"
 import React from "react"
-import { string } from "yup"
 
 interface App6SymbolProps {
-  context: string
-  standardIdentity: string
-  symbolSet: string
+  context?: string
+  standardIdentity?: string
+  symbolSet?: string
   hq?: string
   amplifier?: string
   version?: string
@@ -22,7 +21,13 @@ const App6Symbol = ({
   version = "10",
   status = "0",
   size = 30
-}) => {
+}: App6SymbolProps) => {
+  context ||= "0"
+  standardIdentity ||= "1"
+  symbolSet ||= "00"
+  hq ||= "0"
+  amplifier ||= "00"
+
   const symbolCode = `${version}${context}${standardIdentity}${symbolSet}${status}${hq}${amplifier}`
   const symbol = new ms.Symbol(symbolCode, { size })
   const svgString = symbol.asSVG()

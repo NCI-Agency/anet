@@ -7,6 +7,7 @@ import {
   TaskOverlayRow
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
+import App6Symbol from "components/App6Symbol"
 import AppContext from "components/AppContext"
 import ApprovalsDefinition from "components/approvals/ApprovalsDefinition"
 import UploadAttachment from "components/Attachment/UploadAttachment"
@@ -138,6 +139,8 @@ const OrganizationForm = ({
           orgSearchQuery.parentOrgUuid = [...orgsAdministratedUuids]
           orgSearchQuery.orgRecurseStrategy = RECURSE_STRATEGY.CHILDREN
         }
+        const { parentContext, parentStandardIdentity, parentSymbolSet } =
+          Organization.getApp6ParentFields(values.parentOrg, values)
         const action = canAdministrateOrg && (
           <>
             <Button
@@ -484,12 +487,31 @@ const OrganizationForm = ({
               </Fieldset>
 
               <Fieldset title="APP-06 symbology" id="app6-symbology">
-                <Button onClick={() => setShowApp6Modal(true)}>
-                  Edit APP-06 Symbol
-                </Button>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    width: 200,
+                    gap: "30px"
+                  }}
+                >
+                  <App6Symbol
+                    context={values.app6context || parentContext}
+                    standardIdentity={
+                      values.app6standardIdentity || parentStandardIdentity
+                    }
+                    symbolSet={values.app6symbolSet || parentSymbolSet}
+                    hq={values.app6hq}
+                    amplifier={values.app6amplifier}
+                    size={100}
+                  />
+                  <Button onClick={() => setShowApp6Modal(true)}>
+                    Edit APP-06 Symbol
+                  </Button>
+                </div>
                 <EditApp6SymbolModal
                   values={values}
-                  show={showApp6Modal}
+                  showModal={showApp6Modal}
                   onHide={() => setShowApp6Modal(false)}
                   onSave={symbologyValues => {
                     setFieldValue("app6context", symbologyValues.app6context)
