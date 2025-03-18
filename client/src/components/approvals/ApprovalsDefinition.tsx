@@ -67,6 +67,7 @@ interface ApprovalsDefinitionProps {
   approversFilters?: any
   setFieldTouched?: (...args: unknown[]) => unknown
   setFieldValue?: (...args: unknown[]) => unknown
+  suppressRightColumn?: boolean
 }
 
 const ApprovalsDefinition = ({
@@ -77,7 +78,8 @@ const ApprovalsDefinition = ({
   addButtonLabel,
   approversFilters,
   setFieldTouched,
-  setFieldValue
+  setFieldValue,
+  suppressRightColumn
 }: ApprovalsDefinitionProps) => {
   const [showAddApprovalStepAlert, setShowAddApprovalStepAlert] =
     useState(false)
@@ -146,7 +148,8 @@ const ApprovalsDefinition = ({
                   step,
                   index,
                   restrictedApprovalLabel,
-                  approversFilters
+                  approversFilters,
+                  suppressRightColumn
                 )
               )}
             </div>
@@ -164,7 +167,8 @@ const ApprovalsDefinition = ({
     step,
     index,
     restrictedApprovalLabel,
-    approversFilters
+    approversFilters,
+    suppressRightColumn
   ) {
     const approvers = step.approvers
 
@@ -179,12 +183,14 @@ const ApprovalsDefinition = ({
           name={`${fieldName}.${index}.name`}
           component={FieldHelper.InputField}
           label="Step name"
+          extraColElem={suppressRightColumn ? null : undefined}
         />
         {restrictedApprovalLabel && (
           <FastField
             name={`${fieldName}.${index}.restrictedApproval`}
             component={FieldHelper.SpecialField}
             label=""
+            extraColElem={suppressRightColumn ? null : undefined}
             widget={
               <FormCheck
                 type="checkbox"
@@ -197,6 +203,7 @@ const ApprovalsDefinition = ({
         <FastField
           name={`${fieldName}.${index}.approvers`}
           label="Add an approver"
+          extraColElem={suppressRightColumn ? null : undefined}
           component={FieldHelper.SpecialField}
           onChange={value => {
             value = value.map(position =>

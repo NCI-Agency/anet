@@ -79,6 +79,7 @@ const EditApprovalsModal = ({
                 setFieldValue={setFieldValue}
                 setFieldTouched={setFieldTouched}
                 approversFilters={approversFilters}
+                suppressRightColumn
               />
             </Form>
           </Modal.Body>
