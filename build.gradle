@@ -31,7 +31,6 @@ java {
 boolean isTestEnv = project.hasProperty("testEnv")
 String cxfVersion = "4.1.1"
 String jdbi3Version = "3.48.0"
-String keycloakVersion = "26.1.2"
 String poiVersion = "5.4.0"
 String simplejavamailVersion = "8.12.5"
 String springShellVersion = "3.4.0"
@@ -50,6 +49,7 @@ if (!isTestEnv && file('localSettings.gradle').exists()) {
 // Defaults for development variables
 String DEV_DB = "devAnet"
 String TEST_DB = "testAnet"
+run.environment("KEYCLOAK_VERSION", run.environment["KEYCLOAK_VERSION"] ?: "latest")
 run.environment("DB_DRIVER", run.environment["DB_DRIVER"] ?: "postgresql")
 run.environment("DB_VERSION", run.environment["DB_VERSION"] ?: "latest")
 run.environment("ANET_DB_SERVER", run.environment["ANET_DB_SERVER"] ?: "localhost")
@@ -499,7 +499,7 @@ dockerRemoveDB.mustRunAfter('dockerStopDB')
 
 task dockerPullKeycloak(type: DockerPullImage) {
 	group = "keycloak container"
-	image = "quay.io/keycloak/keycloak:${keycloakVersion}"
+	image = "quay.io/keycloak/keycloak:${run.environment['KEYCLOAK_VERSION']}"
 	description = "Pulls a docker image for keycloak from ${image}."
 }
 
