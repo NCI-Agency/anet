@@ -188,7 +188,7 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
     assertThat(reportList).hasSize(1);
     assertThat(martImportedReportDao.delete(reportList.get(0))).isOne();
 
-    reportList = martImportedReports.stream().filter(martImportedReport -> martImportedReport
+    reportList = martImportedReports.stream().filter(martImportedReport -> !martImportedReport
         .isSuccess() && martImportedReport.getSequence().equals(6L)
         && martImportedReport.getErrors() != null
         && martImportedReport.getErrors()
@@ -201,7 +201,7 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
 
     reportList =
         martImportedReports.stream()
-            .filter(martImportedReport -> martImportedReport.isSuccess()
+            .filter(martImportedReport -> !martImportedReport.isSuccess()
                 && martImportedReport.getSequence().equals(7L)
                 && martImportedReport.getErrors() != null
                 && martImportedReport.getErrors()
