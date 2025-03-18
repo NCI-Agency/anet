@@ -70,7 +70,7 @@ const EditApprovalsModal = ({
           </Modal.Header>
           <Modal.Body>
             <Messages error={error} />
-            <Form>
+            <Form className="form-horizontal">
               <ApprovalsDefinition
                 fieldName={fieldName}
                 values={values}
