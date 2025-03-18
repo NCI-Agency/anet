@@ -119,18 +119,18 @@ public class MartReportImporterService implements IMartReportImporterService {
         processReportInfo(reportDto, newMartImportedReport, attachments);
         martImportedReportDao.insert(newMartImportedReport);
       } else if (existingMartImportedReport.isSuccess()) {
-          // If it was successfully imported it is a duplicate, do not import again
-          logger.info("Report with UUID={} has already been imported", reportDto.getUuid());
-          newMartImportedReport.setErrors(String
-              .format("Report with UUID %s has already been imported", reportDto.getUuid()));
-          martImportedReportDao.insert(newMartImportedReport);
-      } else if (!existingMartImportedReport.isSuccess() && Objects.equals(
-            existingMartImportedReport.getSequence(), newMartImportedReport.getSequence())) {
-          // This report was marked as failed or missing earlier, import now and replace the
-          // existing martImportedReport
-          processReportInfo(reportDto, newMartImportedReport, attachments);
-          martImportedReportDao.delete(existingMartImportedReport);
-          martImportedReportDao.insert(newMartImportedReport);
+        // If it was successfully imported it is a duplicate, do not import again
+        logger.info("Report with UUID={} has already been imported", reportDto.getUuid());
+        newMartImportedReport.setErrors(
+            String.format("Report with UUID %s has already been imported", reportDto.getUuid()));
+        martImportedReportDao.insert(newMartImportedReport);
+      } else if (!existingMartImportedReport.isSuccess() && Objects
+          .equals(existingMartImportedReport.getSequence(), newMartImportedReport.getSequence())) {
+        // This report was marked as failed or missing earlier, import now and replace the
+        // existing martImportedReport
+        processReportInfo(reportDto, newMartImportedReport, attachments);
+        martImportedReportDao.delete(existingMartImportedReport);
+        martImportedReportDao.insert(newMartImportedReport);
       }
     } catch (Exception e) {
       logger.error("Error loading MartImportedReport from {}", REPORT_JSON_ATTACHMENT, e);
@@ -245,8 +245,7 @@ public class MartReportImporterService implements IMartReportImporterService {
     anetReport.setCreatedAt(martReport.getCreatedAt());
     anetReport.setIntent(martReport.getIntent());
     if (martReport.getAtmosphere() != null) {
-      anetReport
-          .setAtmosphere(Report.Atmosphere.valueOf(martReport.getAtmosphere().toUpperCase()));
+      anetReport.setAtmosphere(Report.Atmosphere.valueOf(martReport.getAtmosphere().toUpperCase()));
     }
     anetReport.setEngagementDate(martReport.getEngagementDate());
     anetReport.setReportText(martReport.getReportText());
@@ -281,14 +280,14 @@ public class MartReportImporterService implements IMartReportImporterService {
         .toList(), anetReport, errors);
 
     // Submit the report only if no errors happened, otherwise stays in DRAFT state
-    if (errors.isEmpty()){
+    if (errors.isEmpty()) {
       try {
         reportDao.submit(anetReport, anetReport.getReportPeople().get(0));
         martImportedReport.setSuccess(true);
       } catch (Exception e) {
         logger.error("Could not submit report with UUID={}", martReport.getUuid(), e);
         errors.add(String.format("Could not submit report with UUID: %s error: %s",
-                martReport.getUuid(), e.getMessage()));
+            martReport.getUuid(), e.getMessage()));
       }
     }
 
