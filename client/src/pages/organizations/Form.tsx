@@ -138,8 +138,6 @@ const OrganizationForm = ({
           orgSearchQuery.parentOrgUuid = [...orgsAdministratedUuids]
           orgSearchQuery.orgRecurseStrategy = RECURSE_STRATEGY.CHILDREN
         }
-        const { parentContext, parentStandardIdentity, parentSymbolSet } =
-          Organization.getApp6ParentFields(values.parentOrg, values)
         const action = canAdministrateOrg && (
           <>
             <Button
@@ -487,18 +485,12 @@ const OrganizationForm = ({
 
               <Fieldset title="APP-06 symbology" id="app6-symbology">
                 <Button onClick={() => setShowApp6Modal(true)}>
-                  Edit APP6 Symbol
+                  Edit APP-06 Symbol
                 </Button>
                 <EditApp6SymbolModal
+                  values={values}
                   show={showApp6Modal}
                   onHide={() => setShowApp6Modal(false)}
-                  initialValues={{
-                    app6context: values.app6context,
-                    app6standardIdentity: values.app6standardIdentity,
-                    app6symbolSet: values.app6symbolSet,
-                    app6hq: values.app6hq,
-                    app6amplifier: values.app6amplifier
-                  }}
                   onSave={symbologyValues => {
                     setFieldValue("app6context", symbologyValues.app6context)
                     setFieldValue(
@@ -516,9 +508,6 @@ const OrganizationForm = ({
                     )
                     setShowApp6Modal(false)
                   }}
-                  parentContext={parentContext}
-                  parentStandardIdentity={parentStandardIdentity}
-                  parentSymbolSet={parentSymbolSet}
                 />
               </Fieldset>
 
