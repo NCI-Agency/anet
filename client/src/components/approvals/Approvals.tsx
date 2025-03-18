@@ -183,6 +183,7 @@ const Approvals = ({
             fieldName="planningApprovalSteps"
             title="Engagement planning approval process"
             addButtonLabel="Add a Planning Approval Step"
+            restrictedApprovalLabel={restrictedApprovalLabel}
             approversFilters={approversFilters}
           />
           <EditApprovalsModal
@@ -197,6 +198,7 @@ const Approvals = ({
             fieldName="approvalSteps"
             title="Report publication approval process"
             addButtonLabel="Add a Publication Approval Step"
+            restrictedApprovalLabel={restrictedApprovalLabel}
             approversFilters={approversFilters}
           />
         </>

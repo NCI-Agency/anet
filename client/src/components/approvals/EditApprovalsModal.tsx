@@ -32,6 +32,7 @@ interface EditApprovalsModalProps {
   fieldName: string
   title: string
   addButtonLabel: string
+  restrictedApprovalLabel?: string
   approversFilters: any
 }
 
@@ -44,6 +45,7 @@ const EditApprovalsModal = ({
   fieldName,
   title,
   addButtonLabel,
+  restrictedApprovalLabel,
   approversFilters
 }: EditApprovalsModalProps) => {
   const [error, setError] = useState(null)
@@ -73,6 +75,7 @@ const EditApprovalsModal = ({
                 fieldName={fieldName}
                 values={values}
                 addButtonLabel={addButtonLabel}
+                restrictedApprovalLabel={restrictedApprovalLabel}
                 setFieldValue={setFieldValue}
                 setFieldTouched={setFieldTouched}
                 approversFilters={approversFilters}
