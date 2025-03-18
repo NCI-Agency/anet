@@ -8,7 +8,14 @@ import { Button, Modal } from "react-bootstrap"
 import Settings from "settings"
 import utils from "utils"
 
-const EditApp6SymbolModal = ({ values, show, onHide, onSave }) => {
+interface EditApp6SymbolModalProps {
+  values: any
+  showModal?: boolean
+  onHide: (...args: unknown[]) => unknown
+  onSave: (...args: unknown[]) => unknown
+}
+
+const EditApp6SymbolModal = ({ values, showModal, onHide, onSave }) => {
   const { parentContext, parentStandardIdentity, parentSymbolSet } =
     Organization.getApp6ParentFields(values.parentOrg, values)
   const initialValues = {
@@ -31,7 +38,7 @@ const EditApp6SymbolModal = ({ values, show, onHide, onSave }) => {
   }
 
   return (
-    <Modal centered show={show} onHide={onHide} size="xl">
+    <Modal centered show={showModal} onHide={onHide} size="xl">
       <Modal.Header closeButton>
         <Modal.Title>Edit APP-06 Symbol</Modal.Title>
       </Modal.Header>
@@ -44,13 +51,6 @@ const EditApp6SymbolModal = ({ values, show, onHide, onSave }) => {
         enableReinitialize
       >
         {({ handleSubmit, setFieldValue, values }) => {
-          const context = values.app6context || parentContext || "0"
-          const standardIdentity =
-            values.app6standardIdentity || parentStandardIdentity || "1"
-          const symbolSet = values.app6symbolSet || parentSymbolSet || "00"
-          const hq = values.app6hq || "0"
-          const amplifier = values.app6amplifier || "00"
-
           return (
             <Form>
               <Modal.Body>
@@ -140,14 +140,14 @@ const EditApp6SymbolModal = ({ values, show, onHide, onSave }) => {
                     }}
                   >
                     <App6Symbol
-                      context={context}
-                      standardIdentity={standardIdentity}
-                      symbolSet={symbolSet}
-                      hq={hq}
-                      amplifier={amplifier}
-                      version="10"
-                      status="0"
-                      size={120}
+                      context={values.app6context || parentContext}
+                      standardIdentity={
+                        values.app6standardIdentity || parentStandardIdentity
+                      }
+                      symbolSet={values.app6symbolSet || parentSymbolSet}
+                      hq={values.app6hq}
+                      amplifier={values.app6amplifier}
+                      size={140}
                     />
                   </div>
                 </div>
@@ -157,7 +157,7 @@ const EditApp6SymbolModal = ({ values, show, onHide, onSave }) => {
                   Cancel
                 </Button>
                 <Button variant="primary" onClick={handleSubmit}>
-                  Save
+                  Apply
                 </Button>
               </Modal.Footer>
             </Form>
