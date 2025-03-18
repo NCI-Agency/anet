@@ -18,6 +18,17 @@ const EditApp6SymbolModal = ({ values, show, onHide, onSave }) => {
     app6hq: values.app6hq,
     app6amplifier: values.app6amplifier
   }
+
+  const getDefaultOption = (parentValue, choices) => {
+    if (!parentValue) {
+      return null
+    }
+    return (
+      <option key="" value="" style={{ fontStyle: "italic", color: "grey" }}>
+        {choices[parentValue]} (inherited)
+      </option>
+    )
+  }
   return (
     <Modal show={show} onHide={onHide} size="xl">
       <Modal.Header closeButton>
@@ -66,19 +77,10 @@ const EditApp6SymbolModal = ({ values, show, onHide, onSave }) => {
                           Settings.fields.organization.app6context.choices
                         )}
                         onChange={value => setFieldValue("app6context", value)}
-                        extraColElem={
-                          parentContext && (
-                            <div style={{ paddingTop: "9px" }}>
-                              <em>
-                                {
-                                  Settings.fields.organization.app6context
-                                    .choices[parentContext]
-                                }{" "}
-                                (inherited from parent)
-                              </em>
-                            </div>
-                          )
-                        }
+                        defaultOption={getDefaultOption(
+                          parentContext,
+                          Settings.fields.organization.app6context.choices
+                        )}
                       />
                       <DictionaryField
                         wrappedComponent={Field}
@@ -93,21 +95,11 @@ const EditApp6SymbolModal = ({ values, show, onHide, onSave }) => {
                         )}
                         onChange={value =>
                           setFieldValue("app6standardIdentity", value)}
-                        extraColElem={
-                          parentStandardIdentity && (
-                            <div style={{ paddingTop: "9px" }}>
-                              <em>
-                                {
-                                  Settings.fields.organization
-                                    .app6standardIdentity.choices[
-                                      parentStandardIdentity
-                                    ]
-                                }{" "}
-                                (inherited from parent)
-                              </em>
-                            </div>
-                          )
-                        }
+                        defaultOption={getDefaultOption(
+                          parentStandardIdentity,
+                          Settings.fields.organization.app6standardIdentity
+                            .choices
+                        )}
                       />
                       <DictionaryField
                         wrappedComponent={Field}
@@ -119,19 +111,10 @@ const EditApp6SymbolModal = ({ values, show, onHide, onSave }) => {
                         )}
                         onChange={value =>
                           setFieldValue("app6symbolSet", value)}
-                        extraColElem={
-                          parentSymbolSet && (
-                            <div style={{ paddingTop: "9px" }}>
-                              <em>
-                                {
-                                  Settings.fields.organization.app6symbolSet
-                                    .choices[parentSymbolSet]
-                                }{" "}
-                                (inherited from parent)
-                              </em>
-                            </div>
-                          )
-                        }
+                        defaultOption={getDefaultOption(
+                          parentSymbolSet,
+                          Settings.fields.organization.app6symbolSet.choices
+                        )}
                       />
                       <DictionaryField
                         wrappedComponent={Field}
