@@ -69,29 +69,27 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
         AnetTestConfiguration.getConfiguration().get("martReportImporterTestsExecute").toString());
     assumeTrue(executeMartReportImporterTests, "Mart importer tests configured to be skipped.");
 
-    EmailMessage emailMessage1 = createReportMockEmail(TestData.createGoodMartReport(1), true);
-    EmailMessage emailMessage2 = createReportMockEmail(TestData.createGoodMartReport(2), true);
-    EmailMessage emailMessage3 =
+    final EmailMessage emailMessage1 = createReportMockEmail(TestData.createGoodMartReport(1), true);
+    final EmailMessage emailMessage2 = createReportMockEmail(TestData.createGoodMartReport(2), true);
+    final EmailMessage emailMessage3 =
         createReportMockEmail(TestData.createMartReportWrongOrganization(3), false);
-    EmailMessage emailMessage4 =
+    final EmailMessage emailMessage4 =
         createReportMockEmail(TestData.createMartReportWrongLocation(4), false);
-    EmailMessage emailMessage5 =
+    final EmailMessage emailMessage5 =
         createReportMockEmail(TestData.createMartReportCompletelyWrong(5), false);
-    EmailMessage emailMessage6 = createReportMockEmail(
+    final EmailMessage emailMessage6 = createReportMockEmail(
         TestData.createGoodMartReportWithUnknownTaskAndMissingSecurityMarking(6), true);
-    EmailMessage emailMessage7 = createReportMockEmail(
+    final EmailMessage emailMessage7 = createReportMockEmail(
         TestData.createMartReportWithSecurityMarkingNotInDictionary(7), false);
-    EmailMessage emailMessage8 = createTransmissionLogMockEmail();
-    EmailMessage emailMessage9 =
+    final EmailMessage emailMessage8 = createTransmissionLogMockEmail();
+    final EmailMessage emailMessage9 =
         createReportMockEmail(TestData.createRetryOfMissingReport(9), true);
-
-
 
     // Mock the mail exchange server
     // First six emails are reports
     // Then transmission log is received twice - should only result in one new record in
     // MartImportedReports
-    IMailReceiver mailReceiverMock = Mockito.mock();
+    final IMailReceiver mailReceiverMock = Mockito.mock();
     when(mailReceiverMock.downloadEmails())
         .thenReturn(
             List.of(emailMessage1, emailMessage2, emailMessage3, emailMessage4, emailMessage5,

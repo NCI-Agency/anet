@@ -225,7 +225,7 @@ public class TestData {
     }
 
     // Now Put two missing logs
-    LogDto missing1 = new LogDto();
+    final LogDto missing1 = new LogDto();
     missing1.setReportUuid("missingReportUuid");
     missing1.setState(LogDto.LogState.FAILED_TO_SEND_EMAIL.getCode());
     missing1.setErrors("SMTP error sending email in MART");
@@ -233,7 +233,7 @@ public class TestData {
     missing1.setSequence(8L);
     transmissionLog.add(missing1);
 
-    LogDto missing2 = new LogDto();
+    final LogDto missing2 = new LogDto();
     missing2.setReportUuid("missingReportUuid2");
     missing2.setState(LogDto.LogState.SENT.getCode());
     missing2.setSubmittedAt(Instant.now());

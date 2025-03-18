@@ -52,11 +52,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class MartReportImporterService implements IMartReportImporterService {
-
-  private static final String SECURITY_MARKING_JSON_PROPERTY = "securityMarking";
   protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 
   public static final String REPORT_JSON_ATTACHMENT = "mart_report.json";
+  private static final String SECURITY_MARKING_JSON_PROPERTY = "securityMarking";
 
   private final ObjectMapper ignoringMapper = MapperUtils.getDefaultMapper()
       .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
@@ -94,49 +93,47 @@ public class MartReportImporterService implements IMartReportImporterService {
         .findFirst();
 
     // Do we have a MART report in this email?
-    if (martReportAttachmentOpt.isPresent()) {
-      ReportDto reportDto;
+    if (martReportAttachmentOpt.isEmpty()) {
+      return;
+    }
 
-      // Get the report JSON from the attachment
-      FileAttachment martReportAttachment = martReportAttachmentOpt.get();
-      try {
-        martReportAttachment.load();
-        reportDto =
-            getReportInfo(new String(martReportAttachment.getContent(), StandardCharsets.UTF_8));
+    // Get the report JSON from the attachment
+    try {
+      final FileAttachment martReportAttachment = martReportAttachmentOpt.get();
+      martReportAttachment.load();
+      final ReportDto reportDto =
+          getReportInfo(new String(martReportAttachment.getContent(), StandardCharsets.UTF_8));
 
-        MartImportedReport newMartImportedReport = new MartImportedReport();
-        newMartImportedReport.setSequence(reportDto.getSequence());
-        newMartImportedReport.setReportUuid(reportDto.getUuid());
-        newMartImportedReport.setSubmittedAt(reportDto.getSubmittedAt());
-        newMartImportedReport.setReceivedAt(Instant.now());
+      final MartImportedReport newMartImportedReport = new MartImportedReport();
+      newMartImportedReport.setSequence(reportDto.getSequence());
+      newMartImportedReport.setReportUuid(reportDto.getUuid());
+      newMartImportedReport.setSubmittedAt(reportDto.getSubmittedAt());
+      newMartImportedReport.setReceivedAt(Instant.now());
 
-        // First check, is this report uuid in MartImportedReports table already?
-        MartImportedReport existingMartImportedReport =
-            martImportedReportDao.getByReportUuid(reportDto.getUuid());
+      // First check, is this report uuid in MartImportedReports table already?
+      final MartImportedReport existingMartImportedReport =
+          martImportedReportDao.getByReportUuid(reportDto.getUuid());
 
-        if (existingMartImportedReport != null) {
-          if (existingMartImportedReport.isSuccess()) {
-            // If it was successfully imported it is a duplicate, do not import again
-            logger.info("Report with UUID={} has already been imported", reportDto.getUuid());
-            newMartImportedReport.setErrors(String
-                .format("Report with UUID %s has already been imported", reportDto.getUuid()));
-            martImportedReportDao.insert(newMartImportedReport);
-          } else if (!existingMartImportedReport.isSuccess() && Objects.equals(
-              existingMartImportedReport.getSequence(), newMartImportedReport.getSequence())) {
-            // This report was marked as failed or missing earlier, import now and replace the
-            // existing martImportedReport
-            processReportInfo(reportDto, newMartImportedReport, attachments);
-            martImportedReportDao.delete(existingMartImportedReport);
-            martImportedReportDao.insert(newMartImportedReport);
-          }
-        } else {
-          // New report, import
-          processReportInfo(reportDto, newMartImportedReport, attachments);
+      if (existingMartImportedReport == null) {
+        // New report, import
+        processReportInfo(reportDto, newMartImportedReport, attachments);
+        martImportedReportDao.insert(newMartImportedReport);
+      } else if (existingMartImportedReport.isSuccess()) {
+          // If it was successfully imported it is a duplicate, do not import again
+          logger.info("Report with UUID={} has already been imported", reportDto.getUuid());
+          newMartImportedReport.setErrors(String
+              .format("Report with UUID %s has already been imported", reportDto.getUuid()));
           martImportedReportDao.insert(newMartImportedReport);
-        }
-      } catch (Exception e) {
-        logger.error("Error loading MartImportedReport from {}", REPORT_JSON_ATTACHMENT, e);
+      } else if (!existingMartImportedReport.isSuccess() && Objects.equals(
+            existingMartImportedReport.getSequence(), newMartImportedReport.getSequence())) {
+          // This report was marked as failed or missing earlier, import now and replace the
+          // existing martImportedReport
+          processReportInfo(reportDto, newMartImportedReport, attachments);
+          martImportedReportDao.delete(existingMartImportedReport);
+          martImportedReportDao.insert(newMartImportedReport);
       }
+    } catch (Exception e) {
+      logger.error("Error loading MartImportedReport from {}", REPORT_JSON_ATTACHMENT, e);
     }
   }
 
@@ -304,25 +301,22 @@ public class MartReportImporterService implements IMartReportImporterService {
           + String.format("<ul><li>%s</li></ul>", String.join("</li><li>", errors));
       martImportedReport.setErrors(errorMsg);
     }
-
   }
 
   private String getClassificationFromReport(ReportDto martReport, List<String> errors) {
-    String anetReporClassification = null;
-
     try {
-      JsonNode jsonNode = ignoringMapper.readTree(martReport.getCustomFields());
-      JsonNode securityMarkingProperty = jsonNode.get(SECURITY_MARKING_JSON_PROPERTY);
-      if (securityMarkingProperty != null) {
-        String martReportClassification = securityMarkingProperty.asText();
+      final JsonNode jsonNode = ignoringMapper.readTree(martReport.getCustomFields());
+      final JsonNode securityMarkingProperty = jsonNode.get(SECURITY_MARKING_JSON_PROPERTY);
+      if (securityMarkingProperty == null) {
+        errors.add("Security marking is missing");
+      } else {
+        final String martReportClassification = securityMarkingProperty.asText();
         if (ResourceUtils.getAllowedClassifications().contains(martReportClassification)) {
-          anetReporClassification = martReportClassification;
+          return martReportClassification;
         } else {
           errors.add(String.format("Can not find report security marking: '%s'",
               martReportClassification));
         }
-      } else {
-        errors.add("Security marking is missing");
       }
     } catch (JsonProcessingException e) {
       errors.add(String.format("Could not extract security marking from MART report: '%s'",
@@ -330,7 +324,7 @@ public class MartReportImporterService implements IMartReportImporterService {
       logger.error("Could not extract security marking from MART report", e);
     }
 
-    return anetReporClassification;
+    return null;
   }
 
   private List<ReportPerson> handleReportPeople(ReportDto martReport, Organization organization,
@@ -339,9 +333,11 @@ public class MartReportImporterService implements IMartReportImporterService {
     final List<Person> matchingPersons = personDao.findByEmailAddress(martReport.getEmail());
     final List<ReportPerson> reportPeople = new ArrayList<>();
 
-    if (matchingPersons.isEmpty()) {
+    if (!matchingPersons.isEmpty()) {
+      // Put everybody with this email as report attendee
+      matchingPersons.forEach(person -> reportPeople.add(createReportPerson(person)));
+    } else {
       // This is a new person -> CREATE from MART
-
       Person person = new Person();
       person.setName(martReport.getLastName().toUpperCase() + ", " + martReport.getFirstName());
       person.setRank(martReport.getRank());
@@ -370,9 +366,6 @@ public class MartReportImporterService implements IMartReportImporterService {
 
       // Add MART person as author
       reportPeople.add(createReportPerson(person));
-    } else {
-      // Put everybody with this email as report attendee
-      matchingPersons.forEach(person -> reportPeople.add(createReportPerson(person)));
     }
     return reportPeople;
   }
