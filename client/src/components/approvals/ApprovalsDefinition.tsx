@@ -173,12 +173,19 @@ const ApprovalsDefinition = ({
     const approvers = step.approvers
 
     return (
-      <Fieldset title={`Step ${index + 1}`} key={index}>
-        <RemoveButton
-          title="Remove this step"
-          onClick={() => removeApprovalStep(arrayHelpers, index, step)}
-        />
-
+      <Fieldset
+        key={index}
+        title={
+          <>
+            <RemoveButton
+              title="Remove this step"
+              className="me-1"
+              onClick={() => removeApprovalStep(arrayHelpers, index, step)}
+            />{" "}
+            Step {index + 1}
+          </>
+        }
+      >
         <FastField
           name={`${fieldName}.${index}.name`}
           component={FieldHelper.InputField}

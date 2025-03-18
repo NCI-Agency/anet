@@ -1,11 +1,12 @@
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
+import classNames from "classnames"
 import React from "react"
 import { Button } from "react-bootstrap"
 
 interface RemoveButtonProps {
   title?: string
-  altText?: string
+  className?: string
   onClick?: (...args: unknown[]) => unknown
   buttonStyle?: string
   disabled?: boolean
@@ -13,13 +14,13 @@ interface RemoveButtonProps {
 
 const RemoveButton = ({
   title,
-  altText,
+  className = "float-end",
   onClick,
   buttonStyle = "outline-danger",
   disabled = false
 }: RemoveButtonProps) => (
   <Button
-    className="float-end remove-button"
+    className={classNames(className, "remove-button")}
     variant={buttonStyle}
     title={title}
     onClick={onClick}
