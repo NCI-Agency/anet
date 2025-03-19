@@ -2225,5 +2225,3 @@ dashboards:
   - label: decisives
     data: /data/dashboards/decisives.json
     type: decisives
-
-martIntegration: true
