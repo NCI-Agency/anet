@@ -224,7 +224,9 @@ const OrganizationForm = ({
                     className="d-flex flex-column justify-content-center"
                   >
                     <FormGroup>
-                      <Row style={{ marginBottom: "1rem" }}>
+                      <Row
+                        style={{ marginBottom: "1rem", alignItems: "center" }}
+                      >
                         <Col sm={7}>
                           <Row>
                             <Col>
@@ -269,6 +271,62 @@ const OrganizationForm = ({
                               )}
                             </Col>
                           </Row>
+                        </Col>
+                        <Col
+                          sm={5}
+                          className="d-flex flex-column justify-content-center align-items-center"
+                        >
+                          <div
+                            style={{
+                              display: "flex",
+                              flexDirection: "column",
+                              alignItems: "center",
+                              width: 160,
+                              gap: 30
+                            }}
+                          >
+                            <App6Symbol
+                              context={values.app6context || parentContext}
+                              standardIdentity={
+                                values.app6standardIdentity ||
+                                parentStandardIdentity
+                              }
+                              symbolSet={
+                                values.app6symbolSet || parentSymbolSet
+                              }
+                              hq={values.app6hq}
+                              amplifier={values.app6amplifier}
+                              size={120}
+                            />
+                            <Button onClick={() => setShowApp6Modal(true)}>
+                              Edit APP-06 Symbol
+                            </Button>
+                          </div>
+                          <EditApp6SymbolModal
+                            values={values}
+                            showModal={showApp6Modal}
+                            onHide={() => setShowApp6Modal(false)}
+                            onSave={symbologyValues => {
+                              setFieldValue(
+                                "app6context",
+                                symbologyValues.app6context
+                              )
+                              setFieldValue(
+                                "app6standardIdentity",
+                                symbologyValues.app6standardIdentity
+                              )
+                              setFieldValue(
+                                "app6symbolSet",
+                                symbologyValues.app6symbolSet
+                              )
+                              setFieldValue("app6hq", symbologyValues.app6hq)
+                              setFieldValue(
+                                "app6amplifier",
+                                symbologyValues.app6amplifier
+                              )
+                              setShowApp6Modal(false)
+                            }}
+                          />
                         </Col>
                       </Row>
                     </FormGroup>
@@ -484,53 +542,6 @@ const OrganizationForm = ({
                     }}
                   />
                 )}
-              </Fieldset>
-
-              <Fieldset title="APP-06 symbology" id="app6-symbology">
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    width: 200,
-                    gap: "30px"
-                  }}
-                >
-                  <App6Symbol
-                    context={values.app6context || parentContext}
-                    standardIdentity={
-                      values.app6standardIdentity || parentStandardIdentity
-                    }
-                    symbolSet={values.app6symbolSet || parentSymbolSet}
-                    hq={values.app6hq}
-                    amplifier={values.app6amplifier}
-                    size={100}
-                  />
-                  <Button onClick={() => setShowApp6Modal(true)}>
-                    Edit APP-06 Symbol
-                  </Button>
-                </div>
-                <EditApp6SymbolModal
-                  values={values}
-                  showModal={showApp6Modal}
-                  onHide={() => setShowApp6Modal(false)}
-                  onSave={symbologyValues => {
-                    setFieldValue("app6context", symbologyValues.app6context)
-                    setFieldValue(
-                      "app6standardIdentity",
-                      symbologyValues.app6standardIdentity
-                    )
-                    setFieldValue(
-                      "app6symbolSet",
-                      symbologyValues.app6symbolSet
-                    )
-                    setFieldValue("app6hq", symbologyValues.app6hq)
-                    setFieldValue(
-                      "app6amplifier",
-                      symbologyValues.app6amplifier
-                    )
-                    setShowApp6Modal(false)
-                  }}
-                />
               </Fieldset>
 
               <div>

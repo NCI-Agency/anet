@@ -147,7 +147,7 @@ const EditApp6SymbolModal = ({ values, showModal, onHide, onSave }) => {
                       symbolSet={values.app6symbolSet || parentSymbolSet}
                       hq={values.app6hq}
                       amplifier={values.app6amplifier}
-                      size={140}
+                      size={200}
                     />
                   </div>
                 </div>
