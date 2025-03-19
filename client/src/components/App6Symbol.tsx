@@ -36,7 +36,7 @@ const App6Symbol = ({
     <img
       src={dataUrl}
       alt="APP6 Symbol"
-      style={{ maxWidth: "100%", maxHeight: "100%" }}
+      style={{ maxWidth: size, maxHeight: "100%" }}
     />
   )
 }
