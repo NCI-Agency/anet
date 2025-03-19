@@ -283,7 +283,7 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
           </AnchorNavItem>
         </Nav.Item>
         <Nav.Item>
-          <AnchorNavItem to="approvals">Approvals</AnchorNavItem>
+          <AnchorNavItem to="planningApprovals">Approvals</AnchorNavItem>
         </Nav.Item>
         {organization.isTaskEnabled() && (
           <Nav.Item>
@@ -712,7 +712,12 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
                 organization={organization}
                 refetch={refetch}
               />
-              <Approvals relatedObject={organization} />
+              <Approvals
+                relatedObject={organization}
+                objectType="Organization"
+                canEdit={canAdministrateOrg}
+                refetch={refetch}
+              />
               {organization.isTaskEnabled() && (
                 <OrganizationTasks
                   organization={organization}

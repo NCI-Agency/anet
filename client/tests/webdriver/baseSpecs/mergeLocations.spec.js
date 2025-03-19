@@ -21,9 +21,9 @@ const EXAMPLE_LOCATIONS = {
     status: "ACTIVE",
     parentLocations: "Name Type\nPortugal Country",
     planningApprovalSteps:
-      "Location planning approval for merge winner\nPerson Position\nOF-2 ELIZAWELL, Elizabeth EF 1.1 Advisor A",
+      "Step 1: Location planning approval for merge winner\nPerson Position\nOF-2 ELIZAWELL, Elizabeth EF 1.1 Advisor A",
     approvalSteps:
-      "Location publication approval for merge winner\nPerson Position\nUnfilled EF 1.1 Advisor B"
+      "Step 1: Location publication approval for merge winner\nPerson Position\nUnfilled EF 1.1 Advisor B"
   },
   leftCountry: {
     search: "Andorra",
@@ -47,9 +47,9 @@ const EXAMPLE_LOCATIONS = {
     status: "ACTIVE",
     parentLocations: "Name Type\nFrench Southern Territories Country",
     planningApprovalSteps:
-      "Location planning approval for merge loser\nPerson Position\nCIV REINTON, Reina EF 2.2 Advisor C",
+      "Step 1: Location planning approval for merge loser\nPerson Position\nCIV REINTON, Reina EF 2.2 Advisor C",
     approvalSteps:
-      "Location publication approval for merge loser\nPerson Position\nCIV ERINSON, Erin EF 2.2 Advisor D"
+      "Step 1: Location publication approval for merge loser\nPerson Position\nCIV ERINSON, Erin EF 2.2 Advisor D"
   }
 }
 
@@ -429,9 +429,9 @@ describe("Merge locations page", () => {
     ).to.equal(EXAMPLE_LOCATIONS.left.parentLocations)
     expect(
       await (await MergeLocations.getFieldset("planningApprovals")).getText()
-    ).to.equal(`Step 1: ${EXAMPLE_LOCATIONS.right.planningApprovalSteps}`)
+    ).to.equal(EXAMPLE_LOCATIONS.right.planningApprovalSteps)
     expect(
       await (await MergeLocations.getFieldset("approvals")).getText()
-    ).to.equal(`Step 1: ${EXAMPLE_LOCATIONS.left.approvalSteps}`)
+    ).to.equal(EXAMPLE_LOCATIONS.left.approvalSteps)
   })
 })
