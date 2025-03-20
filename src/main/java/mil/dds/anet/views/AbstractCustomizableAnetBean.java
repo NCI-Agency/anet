@@ -9,6 +9,7 @@ import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import mil.dds.anet.beans.Assessment;
 import mil.dds.anet.beans.Attachment;
 import mil.dds.anet.beans.CustomSensitiveInformation;
 import mil.dds.anet.beans.Note;
@@ -25,6 +26,8 @@ public abstract class AbstractCustomizableAnetBean extends AbstractSubscribableA
   @GraphQLInputField
   private String customFields;
   // annotated below
+  private List<Assessment> assessments;
+  // annotated below
   private List<Note> notes;
   // annotated below
   private List<CustomSensitiveInformation> customSensitiveInformation;
@@ -37,6 +40,19 @@ public abstract class AbstractCustomizableAnetBean extends AbstractSubscribableA
 
   public void setCustomFields(String customFields) {
     this.customFields = Utils.trimStringReturnNull(customFields);
+  }
+
+  @GraphQLQuery(name = "assessments")
+  public CompletableFuture<List<Assessment>> loadAssessments(
+      @GraphQLRootContext GraphQLContext context) {
+    if (assessments != null) {
+      return CompletableFuture.completedFuture(assessments);
+    }
+    return engine().getAssessmentDao().getAssessmentsForRelatedObject(context, uuid)
+        .thenApply(o -> {
+          assessments = o;
+          return o;
+        });
   }
 
   @GraphQLQuery(name = "notes")

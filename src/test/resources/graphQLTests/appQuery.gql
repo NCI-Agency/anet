@@ -91,7 +91,6 @@ me {
             objectUuid
           }
           createdAt
-          type
           text
         }
       }
@@ -121,7 +120,6 @@ me {
           objectUuid
         }
         createdAt
-        type
         text
       }
     }

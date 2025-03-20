@@ -176,7 +176,6 @@ class MergedEntityWorkerTest extends AbstractResourceTest {
 
     // set things up
     final Note input = new Note();
-    input.setType(Note.NoteType.FREE_TEXT);
     input.setAuthor(getRegularUserBean());
     input.setText(getRichText(NoteDao.TABLE_NAME, testOldUuid));
     input.setNoteRelatedObjects(List.of());

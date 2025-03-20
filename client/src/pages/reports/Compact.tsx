@@ -23,6 +23,7 @@ import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import {
   DEFAULT_CUSTOM_FIELDS_PARENT,
+  GRAPHQL_ASSESSMENTS_FIELDS,
   GRAPHQL_ENTITY_AVATAR_FIELDS
 } from "components/Model"
 import {
@@ -31,7 +32,7 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
-import { GRAPHQL_NOTES_FIELDS } from "components/RelatedObjectNotes"
+import "components/RelatedObjectNotes"
 import { ActionButton, ActionStatus } from "components/ReportWorkflow"
 import RichTextEditor from "components/RichTextEditor"
 import SimpleMultiCheckboxDropdown from "components/SimpleMultiCheckboxDropdown"
@@ -229,7 +230,7 @@ const GQL_GET_REPORT = gql`
         description
       }
       customFields
-      ${GRAPHQL_NOTES_FIELDS}
+      ${GRAPHQL_ASSESSMENTS_FIELDS}
     }
   }
 `

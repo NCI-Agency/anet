@@ -17,11 +17,11 @@ public class GenericRelatedObjectMapper implements RowMapper<GenericRelatedObjec
 
   @Override
   public GenericRelatedObject map(ResultSet rs, StatementContext ctx) throws SQLException {
-    final GenericRelatedObject nro = new GenericRelatedObject();
-    nro.setObjectUuid(rs.getString(uuidField));
-    nro.setRelatedObjectType(rs.getString("relatedObjectType"));
-    nro.setRelatedObjectUuid(rs.getString("relatedObjectUuid"));
-    return nro;
+    final GenericRelatedObject gro = new GenericRelatedObject();
+    gro.setObjectUuid(rs.getString(uuidField));
+    gro.setRelatedObjectType(rs.getString("relatedObjectType"));
+    gro.setRelatedObjectUuid(rs.getString("relatedObjectUuid"));
+    return gro;
   }
 
 }

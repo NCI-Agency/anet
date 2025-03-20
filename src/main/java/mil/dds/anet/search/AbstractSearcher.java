@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.beans.Note.NoteType;
 import mil.dds.anet.beans.search.AbstractSearchQuery;
 import mil.dds.anet.beans.search.AssessmentSearchQuery;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
@@ -123,7 +122,6 @@ public abstract class AbstractSearcher<B, T extends AbstractSearchQuery<?>> {
     final var isOndemand =
         "ondemand".equals(dict.getDictionaryEntry(String.format("%s.recurrence", assessmentKey)));
     final var fromAssessmentsClause = getFromAssessmentsClause(tableName, isOndemand);
-    qb.addSqlArg("noteTypeAssessment", DaoUtils.getEnumId(NoteType.ASSESSMENT));
     qb.addSqlArg("assessmentKey", assessmentKey);
     final var filterClauses = new ArrayList<>();
     if (isOndemand) {
@@ -163,14 +161,13 @@ public abstract class AbstractSearcher<B, T extends AbstractSearchQuery<?>> {
   }
 
   private String getFromAssessmentsClause(String tableName, boolean isOndemand) {
-    final var fromAssessments = new StringBuilder(String.format(
-        "SELECT asmnt_nro.\"relatedObjectUuid\", asmnt.text"
-            + " FROM \"noteRelatedObjects\" asmnt_nro"
-            + " JOIN notes asmnt ON asmnt.uuid = asmnt_nro.\"noteUuid\""
-            + " WHERE asmnt_nro.\"relatedObjectType\" = '%1$s'"
-            + " AND asmnt_nro.\"relatedObjectUuid\" = \"%1$s\".uuid"
-            + " AND asmnt.type = :noteTypeAssessment AND asmnt.\"assessmentKey\" = :assessmentKey",
-        tableName));
+    final var fromAssessments =
+        new StringBuilder(String.format("SELECT asmnt_aro.\"relatedObjectUuid\", asmnt.text"
+            + " FROM \"assessmentRelatedObjects\" asmnt_aro"
+            + " JOIN assessments asmnt ON asmnt.uuid = asmnt_aro.\"assessmentUuid\""
+            + " WHERE asmnt_aro.\"relatedObjectType\" = '%1$s'"
+            + " AND asmnt_aro.\"relatedObjectUuid\" = \"%1$s\".uuid"
+            + " AND asmnt.\"assessmentKey\" = :assessmentKey", tableName));
     if (isOndemand) {
       // If it is an ondemand assessment, it will have an assessmentDate,
       // only the most recent one will be valid.

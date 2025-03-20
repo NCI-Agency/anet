@@ -248,7 +248,7 @@ const MySubscriptionUpdates = ({
                   }
                   if (subscriptionUpdate.isNote) {
                     linkToUpdatedObject = (
-                      <span>Note on {linkToUpdatedObject}</span>
+                      <span>{linkToUpdatedObject} Note/Assessment</span>
                     )
                   }
                   const key = `${subscriptionUpdate.createdAt}:${subscription.uuid}`
