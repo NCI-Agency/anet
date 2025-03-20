@@ -208,10 +208,10 @@
     "test-junit-report": "yarn run test-jest && yarn run test-wdio-junit && yarn run test-e2e-junit",
     "test-e2e-junit": "yarn run test-e2e -t | tap-xunit > ./build/test-results/e2e-junit-test-results.xml",
     "test-wdio-junit": "yarn run test-wdio ; e=$? ; yarn run wdio-junit-merge ; exit $e",
-    "wdio-junit-merge": "./combine-test-results.sh ./build/test-results/wdio/*.xml > ./build/test-results/wdio-junit-test-results.xml",
+    "wdio-junit-merge": "bash -c './combine-test-results.sh ./build/test-results/wdio/*.xml > ./build/test-results/wdio-junit-test-results.xml'",
     "test-wdio-noCF-junit": "yarn run test-wdio-noCF ; e=$? ; yarn run wdio-noCF-junit-merge ; exit $e",
-    "wdio-noCF-junit-merge": "./combine-test-results.sh ./build/test-results/wdio/*.xml > ./build/test-results/wdio-noCF-junit-test-results.xml",
-    "server-junit-merge": "./combine-test-results.sh ../build/test-results/test/*.xml > ./build/test-results/server-test-results.xml",
+    "wdio-noCF-junit-merge": "bash -c './combine-test-results.sh ./build/test-results/wdio/*.xml > ./build/test-results/wdio-noCF-junit-test-results.xml'",
+    "server-junit-merge": "bash -c './combine-test-results.sh ../build/test-results/test/*.xml > ./build/test-results/server-test-results.xml'",
     "generate-graphql-schema": "graphql-codegen -p anet -c .graphqlconfig.mjs",
     "sim": "NODE_ENV=development webpack --config config/webpack.sim.dev.js && ANET_DICTIONARY=../${ANET_DICTIONARY_NAME:-anet-dictionary.yml} SERVER_URL=${SERVER_URL:-'http://localhost:8080'} node build/anet.sim.dev.js"
   },
