@@ -2186,7 +2186,7 @@ imagery:
       attributionControl: false
   geoSearcher:
     provider: ESRI
-    url: "geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/find"
+    url: "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/find"
   baseLayers:
     - name: OSM
       default: true
@@ -2205,7 +2205,7 @@ imagery:
     - name: World WMS
       default: false
       type: wms
-      url: "https://www.gebco.net/data_and_products/gebco_web_services/web_map_service/mapserv"
+      url: "https://wms.gebco.net/mapserv"
       options:
         layers: GEBCO_LATEST
         format: "image/png"

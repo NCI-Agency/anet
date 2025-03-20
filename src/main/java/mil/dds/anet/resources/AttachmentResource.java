@@ -1,6 +1,7 @@
 package mil.dds.anet.resources;
 
 import graphql.GraphQLContext;
+import io.github.borewit.sanitize.SVGSanitizer;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
@@ -67,6 +68,8 @@ public class AttachmentResource {
   private static final CacheControl cacheControl =
       CacheControl.maxAge(72, TimeUnit.HOURS).cachePublic();
 
+  private static final String IMAGE_SVG_XML = "image/svg+xml";
+
   private final AnetObjectEngine engine;
   private final AttachmentDao dao;
 
@@ -115,8 +118,9 @@ public class AttachmentResource {
     final Person user = SecurityUtils.getPersonFromPrincipal(principal);
     assertAttachmentPermission(user, attachment,
         "You don't have permission to upload content for this attachment");
-    try {
-      dao.saveContentBlob(uuid, checkMimeType(attachment, attachmentContent.getInputStream()));
+    try (final InputStream inputStream =
+        checkMimeType(attachment, attachmentContent.getInputStream())) {
+      dao.saveContentBlob(uuid, inputStream);
     } catch (IOException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           "Saving attachment content failed", e);
@@ -152,7 +156,17 @@ public class AttachmentResource {
             "Attachment content does not match the MIME type");
       }
     }
-    return tikaInputStream;
+    if (IMAGE_SVG_XML.equals(detectedMimeType)) {
+      try {
+        logger.debug("Detected SVG upload, sanitizing!");
+        return SVGSanitizer.sanitize(tikaInputStream);
+      } catch (Exception e) {
+        logger.error("Error while sanitizing SVG", e);
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Problem with SVG upload");
+      }
+    } else {
+      return tikaInputStream;
+    }
   }
 
   @GraphQLMutation(name = "updateAttachment")
