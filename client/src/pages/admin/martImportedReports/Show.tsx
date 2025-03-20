@@ -153,20 +153,16 @@ const MartImportedReportsShow = ({
                       />
                     </td>
                     <td>
-                      {martImportedReport.success && (
-                        <LinkTo
-                          modelType="Person"
-                          model={martImportedReport.person}
-                        />
-                      )}
+                      <LinkTo
+                        modelType="Person"
+                        model={martImportedReport.person}
+                      />
                     </td>
                     <td>
-                      {martImportedReport.success && (
-                        <LinkTo
-                          modelType="Report"
-                          model={martImportedReport.report}
-                        />
-                      )}
+                      <LinkTo
+                        modelType="Report"
+                        model={martImportedReport.report}
+                      />
                     </td>
                     <td>
                       <div
