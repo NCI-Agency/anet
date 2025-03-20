@@ -15,8 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import mil.dds.anet.beans.Assessment;
 import mil.dds.anet.beans.CustomSensitiveInformation;
-import mil.dds.anet.beans.Note;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.config.ApplicationContextProvider;
@@ -100,16 +100,16 @@ public class DaoUtils {
   }
 
   public static boolean isUserInAuthorizationGroup(final Set<String> userAuthorizationGroupUuids,
-      final Note note, final boolean forReading) {
-    return forReading ? isUserInReadAuthorizationGroup(userAuthorizationGroupUuids, note)
-        : isUserInWriteAuthorizationGroup(userAuthorizationGroupUuids, note);
+      final Assessment assessment, final boolean forReading) {
+    return forReading ? isUserInReadAuthorizationGroup(userAuthorizationGroupUuids, assessment)
+        : isUserInWriteAuthorizationGroup(userAuthorizationGroupUuids, assessment);
   }
 
   public static boolean isUserInReadAuthorizationGroup(
-      final Set<String> userAuthorizationGroupUuids, final Note note) {
+      final Set<String> userAuthorizationGroupUuids, final Assessment assessment) {
     // Check against the dictionary whether the user is authorized
     final List<String> readAuthorizationGroupUuids =
-        getAuthorizationGroupUuids(note.getAssessmentKey(), "read");
+        getAuthorizationGroupUuids(assessment.getAssessmentKey(), "read");
     if (readAuthorizationGroupUuids == null) {
       // Not defined in dictionary: anyone can read!
       return true;
@@ -117,7 +117,7 @@ public class DaoUtils {
 
     // Note: write access implies read access!
     final List<String> writeAuthorizationGroupUuids =
-        getAuthorizationGroupUuids(note.getAssessmentKey(), "write");
+        getAuthorizationGroupUuids(assessment.getAssessmentKey(), "write");
     if (writeAuthorizationGroupUuids != null) {
       readAuthorizationGroupUuids.addAll(writeAuthorizationGroupUuids);
     }
@@ -128,10 +128,10 @@ public class DaoUtils {
   }
 
   public static boolean isUserInWriteAuthorizationGroup(
-      final Set<String> userAuthorizationGroupUuids, final Note note) {
+      final Set<String> userAuthorizationGroupUuids, final Assessment assessment) {
     // Check against the dictionary whether the user is authorized
     final List<String> writeAuthorizationGroupUuids =
-        getAuthorizationGroupUuids(note.getAssessmentKey(), "write");
+        getAuthorizationGroupUuids(assessment.getAssessmentKey(), "write");
     if (writeAuthorizationGroupUuids == null) {
       // Not defined in dictionary: anyone can write!
       return true;

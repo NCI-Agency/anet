@@ -1,4 +1,3 @@
-import { NOTE_TYPE } from "components/Model"
 import {
   createHtmlParagraphs,
   getRandomObject,
@@ -13,13 +12,11 @@ async function populateNote(note, relatedObjectType) {
   const author = await getRandomObject("people")
   const template = {
     author: () => author,
-    type: () => NOTE_TYPE.FREE_TEXT,
     noteRelatedObjects: () => [relatedObject],
     text: async() => await createHtmlParagraphs()
   }
   const noteGenerator = await populate(note, template)
   await noteGenerator.author.always()
-  await noteGenerator.type.always()
   await noteGenerator.noteRelatedObjects.always()
   await noteGenerator.text.always()
   return note
@@ -28,11 +25,7 @@ async function populateNote(note, relatedObjectType) {
 const _createNote = async function(user, relatedObjectType) {
   const note = {}
   if (await populateNote(note, relatedObjectType)) {
-    console.debug(
-      `Creating ${
-        NOTE_TYPE.FREE_TEXT.toLowerCase().green
-      } ${relatedObjectType} note`
-    )
+    console.debug(`Creating ${relatedObjectType} note`)
 
     return (
       await runGQL(user, {

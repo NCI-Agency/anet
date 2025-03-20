@@ -14,7 +14,7 @@ import _isEmpty from "lodash/isEmpty"
 import { Position, Task } from "models"
 import {
   getNotifications,
-  GRAPHQL_NOTIFICATIONS_NOTE_FIELDS
+  GRAPHQL_NOTIFICATIONS_ASSESSMENT_FIELDS
 } from "notificationsUtils"
 import React, { useState } from "react"
 import { Table } from "react-bootstrap"
@@ -73,7 +73,7 @@ const GQL_GET_POSITION_LIST = gql`
             name
             rank
             ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-            ${GRAPHQL_NOTIFICATIONS_NOTE_FIELDS}
+            ${GRAPHQL_NOTIFICATIONS_ASSESSMENT_FIELDS}
           }
         }
         responsibleTasks(
@@ -95,7 +95,7 @@ const GQL_GET_POSITION_LIST = gql`
               uuid
             }
           }
-          ${GRAPHQL_NOTIFICATIONS_NOTE_FIELDS}
+          ${GRAPHQL_NOTIFICATIONS_ASSESSMENT_FIELDS}
         }
       }
     }

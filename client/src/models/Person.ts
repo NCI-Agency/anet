@@ -1,6 +1,7 @@
 import API from "api"
 import Model, {
   createCustomFieldsSchema,
+  GRAPHQL_ASSESSMENTS_FIELDS,
   GRAPHQL_CUSTOM_SENSITIVE_INFORMATION_FIELDS,
   GRAPHQL_ENTITY_AVATAR_FIELDS,
   GRAPHQL_NOTES_FIELDS,
@@ -153,7 +154,8 @@ export default class Person extends Model {
       status: yup
         .string()
         .nullable()
-        .default(() => Model.STATUS.ACTIVE)
+        .default(() => Model.STATUS.ACTIVE),
+      assessments: yup.array().nullable().default([])
     })
     // not actually in the database, the database contains the JSON customFields
     .concat(Person.customFieldsSchema)
@@ -240,10 +242,9 @@ export default class Person extends Model {
     }
     customFields
     ${GRAPHQL_CUSTOM_SENSITIVE_INFORMATION_FIELDS}
+    ${GRAPHQL_ASSESSMENTS_FIELDS}
     ${GRAPHQL_NOTES_FIELDS}
   `
-
-  static autocompleteQueryWithNotes = `${this.autocompleteQuery} ${GRAPHQL_NOTES_FIELDS}`
 
   constructor(props) {
     super(Model.fillObject(props, Person.yupSchema))
