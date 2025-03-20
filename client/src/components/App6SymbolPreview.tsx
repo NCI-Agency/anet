@@ -1,30 +1,28 @@
 import { Popover, PopoverInteractionKind } from "@blueprintjs/core"
 import App6Symbol from "components/App6Symbol"
-import DictionaryField from "components/DictionaryField"
-import * as FieldHelper from "components/FieldHelper"
-import Fieldset from "components/Fieldset"
-import { Field, Form } from "formik"
 import { Organization } from "models"
 import React from "react"
+import { Table } from "react-bootstrap"
 import Settings from "settings"
 
-const FieldLine = ({ fieldName, value, parentValue = null }) => {
+interface FieldRow {
+  fieldName: string
+  value: string
+  parentValue?: string
+}
+
+const FieldRow = ({ fieldName, value, parentValue = null }: FieldRow) => {
+  const settingProps = Settings.fields.organization[fieldName]
+  const valueText =
+    (parentValue && (
+      <em>{settingProps.choices[parentValue]} (inherited from parent)</em>
+    )) ||
+    settingProps.choices[value]
   return (
-    <DictionaryField
-      wrappedComponent={Field}
-      dictProps={Settings.fields.organization[fieldName]}
-      name={fieldName}
-      component={FieldHelper.ReadonlyField}
-      humanValue={
-        (parentValue && (
-          <em>
-            {Settings.fields.organization[fieldName][parentValue]} (inherited
-            from parent)
-          </em>
-        )) ||
-        Settings.fields.organization[fieldName].choices[value]
-      }
-    />
+    <tr style={{ border: "hidden" }}>
+      <td style={{ fontWeight: "bold" }}>{settingProps.label}</td>
+      <td>{valueText}</td>
+    </tr>
   )
 }
 
@@ -51,40 +49,47 @@ const App6SymbolPreview = ({
       autoFocus
       enforceFocus={false}
       content={
-        <Form
-          className="form-horizontal"
-          method="post"
+        <div
           style={{
-            minWidth: 500,
+            width: 500,
             backgroundColor: "#e0e8ed",
-            padding: 20,
-            boxShadow: "none"
+            padding: 20
           }}
         >
-          <Fieldset
-            title="APP-06 symbology"
-            id="app6-symbology"
-            style={{ borderRadius: 4 }}
+          <h4 className="mb-3">APP-06 Symbology</h4>
+          <div
+            className="bg-white"
+            style={{
+              borderRadius: 4,
+              padding: 20
+            }}
           >
-            <FieldLine
-              fieldName="app6context"
-              value={values.app6context}
-              parentValue={parentContext}
-            />
-            <FieldLine
-              fieldName="app6standardIdentity"
-              value={values.app6standardIdentity}
-              parentValue={parentStandardIdentity}
-            />
-            <FieldLine
-              fieldName="app6symbolSet"
-              value={values.app6symbolSet}
-              parentValue={parentSymbolSet}
-            />
-            <FieldLine fieldName="app6hq" value={values.app6hq} />
-            <FieldLine fieldName="app6amplifier" value={values.app6amplifier} />
-          </Fieldset>
-        </Form>
+            <Table responsive>
+              <tbody>
+                <FieldRow
+                  fieldName="app6context"
+                  value={values.app6context}
+                  parentValue={parentContext}
+                />
+                <FieldRow
+                  fieldName="app6standardIdentity"
+                  value={values.app6standardIdentity}
+                  parentValue={parentStandardIdentity}
+                />
+                <FieldRow
+                  fieldName="app6symbolSet"
+                  value={values.app6symbolSet}
+                  parentValue={parentSymbolSet}
+                />
+                <FieldRow fieldName="app6hq" value={values.app6hq} />
+                <FieldRow
+                  fieldName="app6amplifier"
+                  value={values.app6amplifier}
+                />
+              </tbody>
+            </Table>
+          </div>
+        </div>
       }
     >
       <div

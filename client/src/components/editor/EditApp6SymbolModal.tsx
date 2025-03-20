@@ -4,6 +4,7 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import { Field, Form, Formik } from "formik"
 import { Organization } from "models"
+import React from "react"
 import { Button, Modal } from "react-bootstrap"
 import Settings from "settings"
 import utils from "utils"
@@ -15,7 +16,12 @@ interface EditApp6SymbolModalProps {
   onSave: (...args: unknown[]) => unknown
 }
 
-const EditApp6SymbolModal = ({ values, showModal, onHide, onSave }) => {
+const EditApp6SymbolModal = ({
+  values,
+  showModal,
+  onHide,
+  onSave
+}: EditApp6SymbolModalProps) => {
   const { parentContext, parentStandardIdentity, parentSymbolSet } =
     Organization.getApp6ParentFields(values.parentOrg, values)
   const initialValues = {
