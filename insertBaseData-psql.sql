@@ -13,6 +13,7 @@ TRUNCATE TABLE "emailAddresses" CASCADE;
 TRUNCATE TABLE "entityAvatars" CASCADE;
 TRUNCATE TABLE "jobHistory" CASCADE;
 TRUNCATE TABLE "locationRelationships" CASCADE;
+TRUNCATE TABLE "martImportedReports" CASCADE;
 TRUNCATE TABLE "mergedEntities" CASCADE;
 TRUNCATE TABLE "noteRelatedObjects" CASCADE;
 TRUNCATE TABLE "notes" CASCADE;
@@ -1708,6 +1709,10 @@ INSERT INTO public."noteRelatedObjects" ("noteUuid", "relatedObjectType", "relat
   ('3c7929a6-330d-48eb-8eff-e7ef3e765391', 'reports', '9db10db0-794a-488d-a636-55e7195e9167');
 
 -- End of test data for assessments
+
+-- Add mart imported reports for testing
+INSERT INTO "martImportedReports" ("sequence", "personUuid", "reportUuid", "success", "submittedAt", "receivedAt", "errors") VALUES
+  (0, '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '59be259b-30b9-4d04-9e21-e8ceb58cbe9c', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL);
 
 -- Update the link-text indexes
 REFRESH MATERIALIZED VIEW CONCURRENTLY "mv_lts_attachments";
