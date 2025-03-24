@@ -14,7 +14,7 @@ import { useConnectionInfo } from "connectionUtils"
 import { Organization, Person } from "models"
 import {
   getNotifications,
-  GRAPHQL_NOTIFICATIONS_NOTE_FIELDS
+  GRAPHQL_NOTIFICATIONS_ASSESSMENT_FIELDS
 } from "notificationsUtils"
 import Routing from "pages/Routing"
 import React from "react"
@@ -106,7 +106,7 @@ const GQL_GET_APP_DATA = gql`
                 name
               }
             }
-            ${GRAPHQL_NOTIFICATIONS_NOTE_FIELDS}
+            ${GRAPHQL_NOTIFICATIONS_ASSESSMENT_FIELDS}
           }
         }
         responsibleTasks(
@@ -128,7 +128,7 @@ const GQL_GET_APP_DATA = gql`
               uuid
             }
           }
-          ${GRAPHQL_NOTIFICATIONS_NOTE_FIELDS}
+          ${GRAPHQL_NOTIFICATIONS_ASSESSMENT_FIELDS}
         }
         organizationsAdministrated {
           uuid

@@ -36,12 +36,61 @@ task(uuid: "${taskUuid}") {
       shortName
     }
     customFields
+    assessments {
+      uuid
+      createdAt
+      updatedAt
+      assessmentKey
+      assessmentValues
+      author {
+        uuid
+        name
+        rank
+        entityAvatar {
+          attachmentUuid
+          applyCrop
+          cropLeft
+          cropTop
+          cropWidth
+          cropHeight
+        }
+      }
+      assessmentRelatedObjects {
+        objectUuid
+        relatedObjectType
+        relatedObjectUuid
+        relatedObject {
+          ... on Organization {
+            shortName
+            longName
+            identificationCode
+          }
+          ... on Person {
+            name
+            rank
+            entityAvatar {
+              attachmentUuid
+              applyCrop
+              cropLeft
+              cropTop
+              cropWidth
+              cropHeight
+            }
+          }
+          ... on Report {
+            intent
+          }
+          ... on Task {
+            shortName
+            longName
+          }
+        }
+      }
+    }
     notes {
       uuid
       createdAt
       updatedAt
-      type
-      assessmentKey
       text
       author {
         uuid
@@ -172,12 +221,61 @@ task(uuid: "${taskUuid}") {
     }
   }
   customFields
+  assessments {
+    uuid
+    createdAt
+    updatedAt
+    assessmentKey
+    assessmentValues
+    author {
+      uuid
+      name
+      rank
+      entityAvatar {
+        attachmentUuid
+        applyCrop
+        cropLeft
+        cropTop
+        cropWidth
+        cropHeight
+      }
+    }
+    assessmentRelatedObjects {
+      objectUuid
+      relatedObjectType
+      relatedObjectUuid
+      relatedObject {
+        ... on Organization {
+          shortName
+          longName
+          identificationCode
+        }
+        ... on Person {
+          name
+          rank
+          entityAvatar {
+            attachmentUuid
+            applyCrop
+            cropLeft
+            cropTop
+            cropWidth
+            cropHeight
+          }
+        }
+        ... on Report {
+          intent
+        }
+        ... on Task {
+          shortName
+          longName
+        }
+      }
+    }
+  }
   notes {
     uuid
     createdAt
     updatedAt
-    type
-    assessmentKey
     text
     author {
       uuid

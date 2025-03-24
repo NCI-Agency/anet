@@ -1,5 +1,6 @@
 import Model, {
   createCustomFieldsSchema,
+  GRAPHQL_ASSESSMENTS_FIELDS,
   GRAPHQL_ENTITY_AVATAR_FIELDS,
   GRAPHQL_NOTES_FIELDS,
   yupEmailAddresses
@@ -98,15 +99,14 @@ export default class Organization extends Model {
       positions: yup.array().nullable().default([]),
       tasks: yup.array().nullable().default([]),
       profile: yup.string().nullable().default(""),
-      emailAddresses: yupEmailAddresses
+      emailAddresses: yupEmailAddresses,
+      assessments: yup.array().nullable().default([])
     })
     // not actually in the database, the database contains the JSON customFields
     .concat(Organization.customFieldsSchema)
     .concat(Model.yupSchema)
 
   static autocompleteQuery = `uuid shortName longName identificationCode ${GRAPHQL_ENTITY_AVATAR_FIELDS}`
-
-  static autocompleteQueryWithNotes = `${this.autocompleteQuery} ${GRAPHQL_NOTES_FIELDS}`
 
   static allFieldsQuery = `
     uuid
@@ -187,6 +187,7 @@ export default class Organization extends Model {
       }
     }
     customFields
+    ${GRAPHQL_ASSESSMENTS_FIELDS}
     ${GRAPHQL_NOTES_FIELDS}
   `
 

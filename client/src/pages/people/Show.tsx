@@ -23,8 +23,10 @@ import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import {
   DEFAULT_CUSTOM_FIELDS_PARENT,
+  GRAPHQL_ASSESSMENTS_FIELDS,
   GRAPHQL_CUSTOM_SENSITIVE_INFORMATION_FIELDS,
   GRAPHQL_ENTITY_AVATAR_FIELDS,
+  GRAPHQL_NOTES_FIELDS,
   SENSITIVE_CUSTOM_FIELDS_PARENT
 } from "components/Model"
 import {
@@ -36,9 +38,7 @@ import {
   usePageTitle
 } from "components/Page"
 import PreviousPositions from "components/PreviousPositions"
-import RelatedObjectNotes, {
-  GRAPHQL_NOTES_FIELDS
-} from "components/RelatedObjectNotes"
+import RelatedObjectNotes from "components/RelatedObjectNotes"
 import ReportCollection from "components/ReportCollection"
 import RichTextEditor from "components/RichTextEditor"
 import { Field, Form, Formik } from "formik"
@@ -141,6 +141,7 @@ const GQL_GET_PERSON = gql`
       }
       customFields
       ${GRAPHQL_CUSTOM_SENSITIVE_INFORMATION_FIELDS}
+      ${GRAPHQL_ASSESSMENTS_FIELDS}
       ${GRAPHQL_NOTES_FIELDS}
     }
   }

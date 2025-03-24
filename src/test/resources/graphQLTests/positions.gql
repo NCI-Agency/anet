@@ -74,8 +74,6 @@ position(uuid:"${positionUuid}") {
     uuid
     createdAt
     updatedAt
-    type
-    assessmentKey
     text
     author {
       uuid

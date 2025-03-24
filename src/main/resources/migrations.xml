@@ -6243,6 +6243,102 @@
 		/>
 	</changeSet>
 
+	<changeSet id="add-assessments-table" author="gjvoosten">
+		<createTable tableName="assessments">
+			<column name="uuid" type="${uuid_type}">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="authorUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="assessmentKey" type="varchar(255)" />
+			<column name="assessmentValues" type="${long_text_type}" />
+			<column name="createdAt" type="datetime" />
+			<column name="updatedAt" type="datetime" />
+		</createTable>
+
+		<addForeignKeyConstraint
+			constraintName="FK_assessments_author"
+			baseTableName="assessments"
+			baseColumnNames="authorUuid"
+			referencedTableName="people"
+			referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION"
+		/>
+
+		<createIndex
+			indexName="IDX_assessments_authorUuid"
+			tableName="assessments">
+			<column name="authorUuid"/>
+		</createIndex>
+
+		<createTable tableName="assessmentRelatedObjects">
+			<column name="assessmentUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<!-- The next two columns combined act as a generic foreign key reference to a (table name, uuid)-tuple -->
+			<column name="relatedObjectType" type="varchar(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="relatedObjectUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<addForeignKeyConstraint
+			constraintName="FK_assessmentRelatedObjects_assessment"
+			baseTableName="assessmentRelatedObjects"
+			baseColumnNames="assessmentUuid"
+			referencedTableName="assessments"
+			referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION"
+		/>
+
+		<createIndex
+			indexName="IDX_assessmentRelatedObjects_assessmentUuid"
+			tableName="assessmentRelatedObjects">
+			<column name="assessmentUuid" />
+		</createIndex>
+
+		<sql>
+			<!-- Migrate existing assessments -->
+			INSERT INTO assessments (uuid, "authorUuid", "assessmentKey", "assessmentValues", "createdAt", "updatedAt")
+			SELECT uuid, "authorUuid", "assessmentKey", text, "createdAt", "updatedAt"
+			FROM notes
+			WHERE type = 3
+			AND "assessmentKey" IS NOT NULL;
+
+			<!-- Migrate existing assessmentRelatedObjects -->
+			INSERT INTO "assessmentRelatedObjects" ("assessmentUuid", "relatedObjectType", "relatedObjectUuid")
+			SELECT "noteUuid", "relatedObjectType", "relatedObjectUuid"
+			FROM "noteRelatedObjects"
+			WHERE "noteUuid" IN (
+				SELECT uuid
+				FROM notes
+				WHERE type = 3
+				AND "assessmentKey" IS NOT NULL
+			);
+
+			<!-- Delete noteRelatedObjects for assessments -->
+			DELETE FROM "noteRelatedObjects"
+			WHERE "noteUuid" IN (
+				SELECT uuid
+				FROM notes
+				WHERE type = 3
+				AND "assessmentKey" IS NOT NULL
+			);
+
+			<!-- Delete notes for assessments -->
+			DELETE FROM notes
+			WHERE type = 3
+			AND "assessmentKey" IS NOT NULL;
+		</sql>
+
+		<!-- Delete obsolete columns from notes that were used for assessments -->
+		<dropColumn tableName="notes" columnName="type" />
+		<dropColumn tableName="notes" columnName="assessmentKey" />
+	</changeSet>
+
 	<!-- Keep this change set as the last one in the change log;
 	     it will be re-run whenever it changes. -->
 	<changeSet id="set-up-full-text-search" runOnChange="true" author="gjvoosten">
@@ -6277,6 +6373,7 @@
 			DROP MATERIALIZED VIEW IF EXISTS mv_lts_tasks;
 
 			<!-- Drop full_text columns -->
+			ALTER TABLE assessments DROP COLUMN IF EXISTS full_text;
 			ALTER TABLE attachments DROP COLUMN IF EXISTS full_text;
 			ALTER TABLE events DROP COLUMN IF EXISTS full_text;
 			ALTER TABLE "eventSeries" DROP COLUMN IF EXISTS full_text;
@@ -6291,6 +6388,7 @@
 			ALTER TABLE tasks DROP COLUMN IF EXISTS full_text;
 
 			<!-- Drop core_text columns -->
+			ALTER TABLE assessments DROP COLUMN IF EXISTS core_text;
 			ALTER TABLE attachments DROP COLUMN IF EXISTS core_text;
 			ALTER TABLE "authorizationGroups" DROP COLUMN IF EXISTS core_text;
 			ALTER TABLE "emailAddresses" DROP COLUMN IF EXISTS core_text;
@@ -6316,7 +6414,7 @@
 			ALTER TABLE reports DROP COLUMN IF EXISTS more_text;
 			ALTER TABLE tasks DROP COLUMN IF EXISTS more_text;
 
-			<!-- Drop functions for aggregating JSON values recursively -->
+			<!-- Drop functions for aggregating JSON values -->
 			DROP FUNCTION IF EXISTS jsonb_array_value_agg;
 			DROP FUNCTION IF EXISTS jsonb_object_value_agg;
 			DROP FUNCTION IF EXISTS jsonb_value_agg;
@@ -6327,14 +6425,14 @@
 			DROP FUNCTION IF EXISTS get_cf_referenced_objects;
 
 			<!-- Define functions for aggregating JSON values recursively -->
-			CREATE OR REPLACE FUNCTION jsonb_value_agg(p_json jsonb, ignore_key text default 'invisibleCustomFields')
+			CREATE OR REPLACE FUNCTION jsonb_value_agg(p_json jsonb, ignore_keys text[] default '{"invisibleCustomFields"}')
 				RETURNS text
 			AS
 			'
 			BEGIN
 				RETURN CASE
-					WHEN jsonb_typeof(p_json) = ''array'' THEN coalesce(public.jsonb_array_value_agg(p_json, ignore_key), '''')
-					WHEN jsonb_typeof(p_json) = ''object'' THEN coalesce(public.jsonb_object_value_agg(p_json, ignore_key), '''')
+					WHEN jsonb_typeof(p_json) = ''array'' THEN coalesce(public.jsonb_array_value_agg(p_json, ignore_keys), '''')
+					WHEN jsonb_typeof(p_json) = ''object'' THEN coalesce(public.jsonb_object_value_agg(p_json, ignore_keys), '''')
 					WHEN jsonb_typeof(p_json) = ''string''
 						AND p_json #>> ''{}'' !~ ''^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{1,3}Z$''
 						THEN coalesce(p_json #>> ''{}'', '''')
@@ -6348,12 +6446,12 @@
 			LANGUAGE plpgsql
 			IMMUTABLE;
 
-			CREATE OR REPLACE FUNCTION jsonb_array_value_agg(p_json jsonb, ignore_key text default 'invisibleCustomFields')
+			CREATE OR REPLACE FUNCTION jsonb_array_value_agg(p_json jsonb, ignore_keys text[] default '{"invisibleCustomFields"}')
 				RETURNS text
 			AS
 			'
 			BEGIN
-				RETURN string_agg(public.jsonb_value_agg(value, ignore_key), '' '')
+				RETURN string_agg(public.jsonb_value_agg(value, ignore_keys), '' '')
 				FROM jsonb_array_elements(p_json);
 			EXCEPTION
 				WHEN OTHERS THEN
@@ -6363,14 +6461,14 @@
 			LANGUAGE plpgsql
 			IMMUTABLE;
 
-			CREATE OR REPLACE FUNCTION jsonb_object_value_agg(p_json jsonb, ignore_key text default 'invisibleCustomFields')
+			CREATE OR REPLACE FUNCTION jsonb_object_value_agg(p_json jsonb, ignore_keys text[] default '{"invisibleCustomFields"}')
 				RETURNS text
 			AS
 			'
 			BEGIN
-				RETURN string_agg(public.jsonb_value_agg(value, ignore_key), '' '')
+				RETURN string_agg(public.jsonb_value_agg(value, ignore_keys), '' '')
 				FROM jsonb_each(p_json)
-				WHERE key != ignore_key;
+				WHERE key != ALL(ignore_keys);
 			EXCEPTION
 				WHEN OTHERS THEN
 				RETURN NULL;
@@ -6453,6 +6551,12 @@
 			IMMUTABLE;
 
 			<!-- Add generated core_text columns -->
+			ALTER TABLE assessments
+				ADD COLUMN core_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, jsonb_value_agg(assessments."assessmentValues"::jsonb, '{"__recurrence","__relatedObjectType"}'))
+						|| to_tsvector('simple', jsonb_value_agg(assessments."assessmentValues"::jsonb, '{"__recurrence","__relatedObjectType"}')), ${fts_low})
+				) STORED;
+
 			ALTER TABLE attachments
 				ADD COLUMN core_text tsvector GENERATED ALWAYS AS (
 					setweight(to_tsvector(${fts_config}, coalesce(attachments.caption, ''))
@@ -6905,10 +7009,14 @@
 				organizations.uuid,
 				organizations.core_text || organizations.more_text
 					|| coalesce(tsvector_agg(mv_lts_organizations.link_text), ''::tsvector)
+					|| coalesce(tsvector_agg(assessments.core_text), ''::tsvector)
 					|| coalesce(tsvector_agg(notes.core_text), ''::tsvector)
 					|| coalesce(tsvector_agg("emailAddresses".core_text), ''::tsvector)
 			FROM organizations
 			LEFT JOIN mv_lts_organizations ON organizations.uuid = mv_lts_organizations.uuid
+			LEFT JOIN "assessmentRelatedObjects" ON "assessmentRelatedObjects"."relatedObjectType" = 'organizations'
+				AND "assessmentRelatedObjects"."relatedObjectUuid" = organizations.uuid
+			LEFT JOIN assessments ON assessments.uuid = "assessmentRelatedObjects"."assessmentUuid"
 			LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'organizations'
 				AND "noteRelatedObjects"."relatedObjectUuid" = organizations.uuid
 			LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
@@ -6927,12 +7035,16 @@
 					|| coalesce(tsvector_agg(mv_lts_people.link_text), ''::tsvector)
 					|| coalesce(tsvector_agg(positions.core_text), ''::tsvector)
 					|| coalesce(tsvector_agg(organizations.core_text), ''::tsvector)
+					|| coalesce(tsvector_agg(assessments.core_text), ''::tsvector)
 					|| coalesce(tsvector_agg(notes.core_text), ''::tsvector)
 					|| coalesce(tsvector_agg("emailAddresses".core_text), ''::tsvector)
 			FROM people
 			LEFT JOIN mv_lts_people ON people.uuid = mv_lts_people.uuid
 			LEFT JOIN positions ON positions."currentPersonUuid" = people.uuid
 			LEFT JOIN organizations ON organizations.uuid = positions."organizationUuid"
+			LEFT JOIN "assessmentRelatedObjects" ON "assessmentRelatedObjects"."relatedObjectType" = 'people'
+				AND "assessmentRelatedObjects"."relatedObjectUuid" = people.uuid
+			LEFT JOIN assessments ON assessments.uuid = "assessmentRelatedObjects"."assessmentUuid"
 			LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'people'
 				AND "noteRelatedObjects"."relatedObjectUuid" = people.uuid
 			LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
@@ -6973,9 +7085,13 @@
 				reports.uuid,
 				reports.core_text || reports.more_text
 					|| coalesce(tsvector_agg(mv_lts_reports.link_text), ''::tsvector)
+					|| coalesce(tsvector_agg(assessments.core_text), ''::tsvector)
 					|| coalesce(tsvector_agg(notes.core_text), ''::tsvector)
 			FROM reports
 			LEFT JOIN mv_lts_reports ON reports.uuid = mv_lts_reports.uuid
+			LEFT JOIN "assessmentRelatedObjects" ON "assessmentRelatedObjects"."relatedObjectType" = 'reports'
+				AND "assessmentRelatedObjects"."relatedObjectUuid" = reports.uuid
+			LEFT JOIN assessments ON assessments.uuid = "assessmentRelatedObjects"."assessmentUuid"
 			LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'reports'
 				AND "noteRelatedObjects"."relatedObjectUuid" = reports.uuid
 			LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
@@ -6990,9 +7106,13 @@
 				tasks.uuid,
 				tasks.core_text || tasks.more_text
 					|| coalesce(tsvector_agg(mv_lts_tasks.link_text), ''::tsvector)
+					|| coalesce(tsvector_agg(assessments.core_text), ''::tsvector)
 					|| coalesce(tsvector_agg(notes.core_text), ''::tsvector)
 			FROM tasks
 			LEFT JOIN mv_lts_tasks ON tasks.uuid = mv_lts_tasks.uuid
+			LEFT JOIN "assessmentRelatedObjects" ON "assessmentRelatedObjects"."relatedObjectType" = 'tasks'
+				AND "assessmentRelatedObjects"."relatedObjectUuid" = tasks.uuid
+			LEFT JOIN assessments ON assessments.uuid = "assessmentRelatedObjects"."assessmentUuid"
 			LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'tasks'
 				AND "noteRelatedObjects"."relatedObjectUuid" = tasks.uuid
 			LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"

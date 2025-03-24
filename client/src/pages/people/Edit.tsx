@@ -7,6 +7,7 @@ import {
   DEFAULT_CUSTOM_FIELDS_PARENT,
   GRAPHQL_CUSTOM_SENSITIVE_INFORMATION_FIELDS,
   GRAPHQL_ENTITY_AVATAR_FIELDS,
+  GRAPHQL_NOTES_FIELDS,
   SENSITIVE_CUSTOM_FIELDS_PARENT
 } from "components/Model"
 import {
@@ -15,9 +16,7 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
-import RelatedObjectNotes, {
-  GRAPHQL_NOTES_FIELDS
-} from "components/RelatedObjectNotes"
+import RelatedObjectNotes from "components/RelatedObjectNotes"
 import { Attachment, Person } from "models"
 import moment from "moment"
 import React, { useContext } from "react"

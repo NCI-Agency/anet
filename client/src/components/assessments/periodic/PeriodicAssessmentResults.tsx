@@ -1,4 +1,3 @@
-import { gql } from "@apollo/client"
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import API from "api"
@@ -6,7 +5,7 @@ import AppContext from "components/AppContext"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import LinkTo from "components/LinkTo"
-import Model, { NOTE_TYPE } from "components/Model"
+import { GQL_DELETE_ASSESSMENT } from "components/Model"
 import { Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import moment from "moment"
@@ -22,18 +21,12 @@ import Settings from "settings"
 import AssessmentModal from "../AssessmentModal"
 import QuestionSet from "../QuestionSet"
 
-const GQL_DELETE_NOTE = gql`
-  mutation ($uuid: String!) {
-    deleteNote(uuid: $uuid)
-  }
-`
-
 interface PeriodicAssessmentProps {
   assessmentKey: string
-  assessment: any
+  assessmentValues: any
   assessmentConfig: AssessmentPeriodsConfigPropType
   assessmentYupSchema: any
-  note: Model.notePropType
+  assessment: Model.assessmentPropType
   entity: any
   period: AssessmentPeriodPropType
   recurrence: string
@@ -43,10 +36,10 @@ interface PeriodicAssessmentProps {
 
 const PeriodicAssessment = ({
   assessmentKey,
-  assessment,
+  assessmentValues,
   assessmentYupSchema,
   assessmentConfig,
-  note,
+  assessment,
   entity,
   period,
   recurrence,
@@ -54,7 +47,7 @@ const PeriodicAssessment = ({
   onUpdateAssessment
 }: PeriodicAssessmentProps) => {
   const [showAssessmentModalKey, setShowAssessmentModalKey] = useState(null)
-  const parentFieldName = `assessment-${note.uuid}`
+  const parentFieldName = `assessment-${assessment.uuid}`
   const periodDisplay = periodToString(period)
 
   return (
@@ -64,13 +57,13 @@ const PeriodicAssessment = ({
           <Col xs={8}>
             <Row>
               <i>
-                {moment(note.updatedAt).format(
+                {moment(assessment.updatedAt).format(
                   Settings.dateFormats.forms.displayShort.withTime
                 )}
               </i>{" "}
             </Row>
             <Row>
-              <LinkTo modelType="Person" model={note.author} />
+              <LinkTo modelType="Person" model={assessment.author} />
             </Row>
           </Col>
           <Col xs={4} className="text-end">
@@ -78,17 +71,17 @@ const PeriodicAssessment = ({
               <>
                 <Button
                   title="Edit assessment"
-                  onClick={() => setShowAssessmentModalKey(note.uuid)}
+                  onClick={() => setShowAssessmentModalKey(assessment.uuid)}
                   size="xs"
                   variant="outline-secondary"
                 >
                   <Icon icon={IconNames.EDIT} />
                 </Button>
                 <AssessmentModal
-                  showModal={showAssessmentModalKey === note.uuid}
-                  note={note}
-                  assessmentKey={assessmentKey}
+                  showModal={showAssessmentModalKey === assessment.uuid}
                   assessment={assessment}
+                  assessmentKey={assessmentKey}
+                  assessmentValues={assessmentValues}
                   assessmentYupSchema={assessmentYupSchema}
                   assessmentConfig={assessmentConfig}
                   assessmentPeriod={period}
@@ -103,9 +96,9 @@ const PeriodicAssessment = ({
                 />
                 <span style={{ marginLeft: "5px" }}>
                   <ConfirmDestructive
-                    onConfirm={() => deleteNote(note.uuid)}
-                    objectType="note"
-                    objectDisplay={"#" + note.uuid}
+                    onConfirm={() => deleteAssessment(assessment.uuid)}
+                    objectType="assessment"
+                    objectDisplay={"#" + assessment.uuid}
                     title="Delete assessment"
                     variant="outline-danger"
                     buttonSize="xs"
@@ -128,7 +121,7 @@ const PeriodicAssessment = ({
           <Formik
             enableReinitialize
             initialValues={{
-              [parentFieldName]: assessment
+              [parentFieldName]: assessmentValues
             }}
           >
             {({ values }) => {
@@ -161,8 +154,8 @@ const PeriodicAssessment = ({
     </Card>
   )
 
-  function deleteNote(uuid) {
-    API.mutation(GQL_DELETE_NOTE, { uuid })
+  function deleteAssessment(uuid) {
+    API.mutation(GQL_DELETE_ASSESSMENT, { uuid })
       .then(() => {
         onUpdateAssessment()
         toast.success("Successfully deleted")
@@ -241,12 +234,12 @@ export const PeriodicAssessmentsRows = ({
           return (
             <td key={index}>
               {!_isEmpty(periodAssessments) ? (
-                periodAssessments.map(({ note, assessment }, i) => (
-                  <div key={note.uuid}>
+                periodAssessments.map(({ assessment, assessmentValues }, i) => (
+                  <div key={assessment.uuid}>
                     <PeriodicAssessment
-                      note={note}
-                      assessmentKey={assessmentKey}
                       assessment={assessment}
+                      assessmentKey={assessmentKey}
+                      assessmentValues={assessmentValues}
                       assessmentYupSchema={assessmentYupSchema}
                       assessmentConfig={assessmentConfig}
                       entity={entity}
@@ -285,9 +278,8 @@ export const PeriodicAssessmentsRows = ({
                     <AssessmentModal
                       showModal={showAssessmentModalKey === modalKey}
                       assessmentKey={assessmentKey}
-                      note={{
-                        type: NOTE_TYPE.ASSESSMENT,
-                        noteRelatedObjects: [
+                      assessment={{
+                        assessmentRelatedObjects: [
                           {
                             relatedObjectType: entityType.relatedObjectType,
                             relatedObjectUuid: entity.uuid

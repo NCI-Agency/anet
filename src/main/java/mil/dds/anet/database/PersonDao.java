@@ -499,6 +499,13 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
       // Update position history with given input on winner
       updatePersonHistory(winner);
 
+      // Update assessment authors
+      updateForMerge("assessments", "authorUuid", winnerUuid, loserUuid);
+
+      // Update assessments
+      updateM2mForMerge("assessmentRelatedObjects", "assessmentUuid", "relatedObjectUuid",
+          winnerUuid, loserUuid);
+
       // Update note authors
       updateForMerge("notes", "authorUuid", winnerUuid, loserUuid);
 

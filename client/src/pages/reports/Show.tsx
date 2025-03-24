@@ -20,7 +20,9 @@ import ListItems from "components/ListItems"
 import Messages from "components/Messages"
 import {
   DEFAULT_CUSTOM_FIELDS_PARENT,
-  GRAPHQL_ENTITY_AVATAR_FIELDS
+  GRAPHQL_ASSESSMENTS_FIELDS,
+  GRAPHQL_ENTITY_AVATAR_FIELDS,
+  GRAPHQL_NOTES_FIELDS
 } from "components/Model"
 import NoPaginationTaskTable from "components/NoPaginationTaskTable"
 import {
@@ -33,9 +35,7 @@ import {
   usePageTitle
 } from "components/Page"
 import PlanningConflictForReport from "components/PlanningConflictForReport"
-import RelatedObjectNotes, {
-  GRAPHQL_NOTES_FIELDS
-} from "components/RelatedObjectNotes"
+import RelatedObjectNotes from "components/RelatedObjectNotes"
 import { ReportFullWorkflow } from "components/ReportWorkflow"
 import RichTextEditor from "components/RichTextEditor"
 import { deserializeQueryParams } from "components/SearchFilters"
@@ -269,6 +269,7 @@ const GQL_GET_REPORT = gql`
         endDate
       }
       customFields
+      ${GRAPHQL_ASSESSMENTS_FIELDS}
       ${GRAPHQL_NOTES_FIELDS}
     }
   }

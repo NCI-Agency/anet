@@ -19,7 +19,9 @@ import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import Model, {
   DEFAULT_CUSTOM_FIELDS_PARENT,
-  GRAPHQL_ENTITY_AVATAR_FIELDS
+  GRAPHQL_ASSESSMENTS_FIELDS,
+  GRAPHQL_ENTITY_AVATAR_FIELDS,
+  GRAPHQL_NOTES_FIELDS
 } from "components/Model"
 import { AnchorNavItem } from "components/Nav"
 import {
@@ -30,9 +32,7 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
-import RelatedObjectNotes, {
-  GRAPHQL_NOTES_FIELDS
-} from "components/RelatedObjectNotes"
+import RelatedObjectNotes from "components/RelatedObjectNotes"
 import ReportCollection from "components/ReportCollection"
 import RichTextEditor from "components/RichTextEditor"
 import SubNav from "components/SubNav"
@@ -190,6 +190,7 @@ const GQL_GET_ORGANIZATION = gql`
         ${Attachment.basicFieldsQuery}
       }
       customFields
+      ${GRAPHQL_ASSESSMENTS_FIELDS}
       ${GRAPHQL_NOTES_FIELDS}
     }
   }

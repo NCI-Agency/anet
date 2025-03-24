@@ -3,6 +3,8 @@ TRUNCATE TABLE "accessTokens" CASCADE;
 TRUNCATE TABLE "adminSettings" CASCADE;
 TRUNCATE TABLE "approvalSteps" CASCADE;
 TRUNCATE TABLE "approvers" CASCADE;
+TRUNCATE TABLE "assessmentRelatedObjects" CASCADE;
+TRUNCATE TABLE "assessments" CASCADE;
 TRUNCATE TABLE "attachments" CASCADE;
 TRUNCATE TABLE "attachmentRelatedObjects" CASCADE;
 TRUNCATE TABLE "authorizationGroupRelatedObjects" CASCADE;
@@ -1107,8 +1109,8 @@ INSERT INTO PEOPLE (uuid, name, status, "createdAt", "updatedAt")
   WHERE NOT EXISTS (SELECT uuid FROM people WHERE name = 'ANET Importer');
 
 -- Tag some reports
-INSERT INTO notes (uuid, "authorUuid", type, text, "createdAt", "updatedAt") VALUES
-  ('0daa2cc7-29a3-4884-bb3a-1659d8a3962d', 'a163cd6f-98ac-4a61-896c-9444dd1293af', 0,
+INSERT INTO notes (uuid, "authorUuid", text, "createdAt", "updatedAt") VALUES
+  ('0daa2cc7-29a3-4884-bb3a-1659d8a3962d', 'a163cd6f-98ac-4a61-896c-9444dd1293af',
     'Previously tagged as bribery - Giving/Promising money or something valuable to corrupt the behavior of a public official',
     CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
@@ -1117,8 +1119,8 @@ INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjec
   WHERE SUBSTRING(r.uuid, 1, 1) IN ('0', '2', '4', '6', '8', 'a', 'c', 'e')
   AND r.state != 0;
 
-INSERT INTO notes (uuid, "authorUuid", type, text, "createdAt", "updatedAt") VALUES
-  ('7adbc0d1-780d-4aeb-810e-6439d55373b3', 'a163cd6f-98ac-4a61-896c-9444dd1293af', 0,
+INSERT INTO notes (uuid, "authorUuid", text, "createdAt", "updatedAt") VALUES
+  ('7adbc0d1-780d-4aeb-810e-6439d55373b3', 'a163cd6f-98ac-4a61-896c-9444dd1293af',
     'Previously tagged as embezzlement - Steal or misappropriate money from the organization the person works for',
     CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
@@ -1127,8 +1129,8 @@ INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjec
   WHERE SUBSTRING(r.uuid, 1, 1) IN ('0', '3', '6', '9', 'c', 'f')
   AND r.state != 0;
 
-INSERT INTO notes (uuid, "authorUuid", type, text, "createdAt", "updatedAt") VALUES
-  ('01463629-8670-475f-9e0a-a1bf594f9eda', 'a163cd6f-98ac-4a61-896c-9444dd1293af', 0,
+INSERT INTO notes (uuid, "authorUuid", text, "createdAt", "updatedAt") VALUES
+  ('01463629-8670-475f-9e0a-a1bf594f9eda', 'a163cd6f-98ac-4a61-896c-9444dd1293af',
     'Previously tagged as patronage - Leaders illegally appointing someone to a position',
     CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
@@ -1137,8 +1139,8 @@ INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjec
   WHERE SUBSTRING(r.uuid, 1, 1) IN ('1', '3', '5', '7', '9', 'b', 'd', 'f')
   AND r.state != 0;
 
-INSERT INTO notes (uuid, "authorUuid", type, text, "createdAt", "updatedAt") VALUES
-  ('a6074894-4ad7-4aa4-ab0c-f9b4b2701a1a', 'a163cd6f-98ac-4a61-896c-9444dd1293af', 0,
+INSERT INTO notes (uuid, "authorUuid", text, "createdAt", "updatedAt") VALUES
+  ('a6074894-4ad7-4aa4-ab0c-f9b4b2701a1a', 'a163cd6f-98ac-4a61-896c-9444dd1293af',
     'Previously tagged as facilitation payment - Payment made to a government official that acts as an incentive to complete an action quickly',
     CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
@@ -1226,172 +1228,172 @@ INSERT INTO "customSensitiveInformation" (uuid, "customFieldName", "customFieldV
   ('a7a03d68-7e9a-4697-afec-5b3ca6f17fad', 'politicalPosition', '{"politicalPosition":"MIDDLE"}', 'people', 'c725aef3-cdd1-4baf-ac72-f28219b234e9', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Add some notes and link them to the objects they relate to
-INSERT INTO notes (uuid, "authorUuid", type, text, "createdAt", "updatedAt") VALUES
-  ('2c2272f9-a391-45b0-8b87-4660285a1aea', 'f683335a-91e3-4788-aa3f-9eed384f4ac1', 0, 'A really nice person to work with', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO notes (uuid, "authorUuid", text, "createdAt", "updatedAt") VALUES
+  ('2c2272f9-a391-45b0-8b87-4660285a1aea', 'f683335a-91e3-4788-aa3f-9eed384f4ac1', 'A really nice person to work with', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT '2c2272f9-a391-45b0-8b87-4660285a1aea', 'people', p.uuid
   FROM people p
   WHERE p.rank = 'CIV';
 
-INSERT INTO notes (uuid, "authorUuid", type, text, "createdAt", "updatedAt") VALUES
-  ('d28cacfd-64b6-4c54-8e66-005669411803', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 0, '<em>This position should always be filled!</em>', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO notes (uuid, "authorUuid", text, "createdAt", "updatedAt") VALUES
+  ('d28cacfd-64b6-4c54-8e66-005669411803', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '<em>This position should always be filled!</em>', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT 'd28cacfd-64b6-4c54-8e66-005669411803', 'positions', p.uuid
   FROM positions p
   WHERE p.type = 3;
 
 -- Add notes to the positions that will be merged
-INSERT INTO notes (uuid, "authorUuid", type, text, "createdAt", "updatedAt") VALUES
-  ('209e3c8b-25c1-4020-80ca-0fe575fdb821', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 0, 'Merge one position note', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO notes (uuid, "authorUuid", text, "createdAt", "updatedAt") VALUES
+  ('209e3c8b-25c1-4020-80ca-0fe575fdb821', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'Merge one position note', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT '209e3c8b-25c1-4020-80ca-0fe575fdb821', 'positions', p.uuid
   FROM positions p
   WHERE p.uuid = '25fe500c-3503-4ba8-a9a4-09b29b50c1f1';
 
-INSERT INTO notes (uuid, "authorUuid", type, text, "createdAt", "updatedAt") VALUES
-  ('0892f17b-24a5-4e23-a00a-2e2bc0af97fa', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 0, 'Merge two position note', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO notes (uuid, "authorUuid", text, "createdAt", "updatedAt") VALUES
+  ('0892f17b-24a5-4e23-a00a-2e2bc0af97fa', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'Merge two position note', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT '0892f17b-24a5-4e23-a00a-2e2bc0af97fa', 'positions', p.uuid
   FROM positions p
   WHERE p.uuid = 'e87f0f60-ad13-4c1c-96f7-672c595b81c7';
 
 -- Add notes to the people that will be merged
-INSERT INTO notes (uuid, "authorUuid", type, text, "createdAt", "updatedAt") VALUES
-  ('990d3165-a5e9-4980-9a05-6658412bd6ec', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 0, 'Merge one person note', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO notes (uuid, "authorUuid", text, "createdAt", "updatedAt") VALUES
+  ('990d3165-a5e9-4980-9a05-6658412bd6ec', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'Merge one person note', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT '990d3165-a5e9-4980-9a05-6658412bd6ec', 'people', p.uuid
   FROM people p
   WHERE p.uuid = '3cb2076c-5317-47fe-86ad-76f298993917';
 
-INSERT INTO notes (uuid, "authorUuid", type, text, "createdAt", "updatedAt") VALUES
-  ('b3546f3e-0af6-402c-91ce-09edb7fb1645', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 0, 'Merge two person note', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO notes (uuid, "authorUuid", text, "createdAt", "updatedAt") VALUES
+  ('b3546f3e-0af6-402c-91ce-09edb7fb1645', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'Merge two person note', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT 'b3546f3e-0af6-402c-91ce-09edb7fb1645', 'people', p.uuid
   FROM people p
   WHERE p.uuid = 'c725aef3-cdd1-4baf-ac72-f28219b234e9';
 
-INSERT INTO notes (uuid, "authorUuid", type, text, "createdAt", "updatedAt") VALUES
-  ('dfcb475c-f7fb-4cbf-9cd0-e10b830fcfaf', 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 0, 'Check out this report, it is really positive', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO notes (uuid, "authorUuid", text, "createdAt", "updatedAt") VALUES
+  ('dfcb475c-f7fb-4cbf-9cd0-e10b830fcfaf', 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 'Check out this report, it is really positive', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT 'dfcb475c-f7fb-4cbf-9cd0-e10b830fcfaf', 'reports', r.uuid
   FROM reports r
   WHERE r.atmosphere = 0
   AND r.state != 0;
 
-INSERT INTO notes (uuid, "authorUuid", type, text, "createdAt", "updatedAt") VALUES
-  ('edceeb21-7587-456d-800d-b6f8b6058c19', 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 0, 'Report text contains some valuable information, especially for the next meeting', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO notes (uuid, "authorUuid", text, "createdAt", "updatedAt") VALUES
+  ('edceeb21-7587-456d-800d-b6f8b6058c19', 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 'Report text contains some valuable information, especially for the next meeting', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT 'edceeb21-7587-456d-800d-b6f8b6058c19', 'reports', r.uuid
   FROM reports r
   WHERE r.text LIKE 'Today%';
 
 -- Add ondemand assessments to MOD-F and EF 6.2
-INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
-  ('41ed76fa-7446-462b-9dd2-01b710bda199', 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 3, 'fields.organization.assessments.interactionPlan', '{"exercises":null,"interaction":"<p>Keep in constant contact</p>","plan":"<p>Organise a face to face meeting</p>","relation":"","priority":"","assessmentDate":"2021-01-01","__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
+INSERT INTO assessments (uuid, "authorUuid", "assessmentKey", "assessmentValues", "createdAt", "updatedAt") VALUES
+  ('41ed76fa-7446-462b-9dd2-01b710bda199', 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 'fields.organization.assessments.interactionPlan', '{"exercises":null,"interaction":"<p>Keep in constant contact</p>","plan":"<p>Organise a face to face meeting</p>","relation":"","priority":"","assessmentDate":"2021-01-01","__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "assessmentRelatedObjects" ("assessmentUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT '41ed76fa-7446-462b-9dd2-01b710bda199', 'organizations', o.uuid
   FROM organizations o
   WHERE o."shortName" IN ('MOD-F', 'EF 6.2');
 
-INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
-  ('da89afa6-2550-4443-b310-d1519583caa5', 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 3, 'fields.organization.assessments.interactionPlan', '{"exercises":null,"interaction":"<p>In constant contact</p>","plan":null,"relation":"maintain","priority":"t1","assessmentDate":"2022-01-01","__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
+INSERT INTO assessments (uuid, "authorUuid", "assessmentKey", "assessmentValues", "createdAt", "updatedAt") VALUES
+  ('da89afa6-2550-4443-b310-d1519583caa5', 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 'fields.organization.assessments.interactionPlan', '{"exercises":null,"interaction":"<p>In constant contact</p>","plan":null,"relation":"maintain","priority":"t1","assessmentDate":"2022-01-01","__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "assessmentRelatedObjects" ("assessmentUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT 'da89afa6-2550-4443-b310-d1519583caa5', 'organizations', o.uuid
   FROM organizations o
   WHERE o."shortName" IN ('MOD-F', 'EF 6.2');
 
-INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
-  ('5e10b957-13b9-4725-977a-2fcdfca7b4ea', 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 3, 'fields.organization.assessments.interactionPlan', '{"exercises":null,"interaction":"<p>Some interaction took place</p>","plan":"<p>Maintain relationship</p>","relation":"","priority":"t2","assessmentDate":"2023-01-01","__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
+INSERT INTO assessments (uuid, "authorUuid", "assessmentKey", "assessmentValues", "createdAt", "updatedAt") VALUES
+  ('5e10b957-13b9-4725-977a-2fcdfca7b4ea', 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 'fields.organization.assessments.interactionPlan', '{"exercises":null,"interaction":"<p>Some interaction took place</p>","plan":"<p>Maintain relationship</p>","relation":"","priority":"t2","assessmentDate":"2023-01-01","__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "assessmentRelatedObjects" ("assessmentUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT '5e10b957-13b9-4725-977a-2fcdfca7b4ea', 'organizations', o.uuid
   FROM organizations o
   WHERE o."shortName" IN ('MOD-F', 'EF 6.2');
 
-INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
-  ('566ab80f-c4ba-4d46-a9e3-fe2bf8a2396d', 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 3, 'fields.organization.assessments.organizationOndemand', '{"question1":"<p>First time</p>","enumset":[],"assessmentDate":"2023-09-30","expirationDate":null,"__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
+INSERT INTO assessments (uuid, "authorUuid", "assessmentKey", "assessmentValues", "createdAt", "updatedAt") VALUES
+  ('566ab80f-c4ba-4d46-a9e3-fe2bf8a2396d', 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 'fields.organization.assessments.organizationOndemand', '{"question1":"<p>First time</p>","enumset":[],"assessmentDate":"2023-09-30","expirationDate":null,"__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "assessmentRelatedObjects" ("assessmentUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT '566ab80f-c4ba-4d46-a9e3-fe2bf8a2396d', 'organizations', o.uuid
   FROM organizations o
   WHERE o."shortName" IN ('MOD-F', 'EF 6.2');
 
-INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
-  ('27f67faf-6c86-4c87-82cb-17509c16fb8a', 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 3, 'fields.organization.assessments.organizationOndemand', '{"question1":"<p>Second time</p>","enumset":["t4"],"assessmentDate":"2023-10-01","expirationDate":null,"__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
+INSERT INTO assessments (uuid, "authorUuid", "assessmentKey", "assessmentValues", "createdAt", "updatedAt") VALUES
+  ('27f67faf-6c86-4c87-82cb-17509c16fb8a', 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 'fields.organization.assessments.organizationOndemand', '{"question1":"<p>Second time</p>","enumset":["t4"],"assessmentDate":"2023-10-01","expirationDate":null,"__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "assessmentRelatedObjects" ("assessmentUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT '27f67faf-6c86-4c87-82cb-17509c16fb8a', 'organizations', o.uuid
   FROM organizations o
   WHERE o."shortName" IN ('MOD-F', 'EF 6.2');
 
-INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
-  ('fb2709ad-0fc6-4796-8946-df7dfc816c83', 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 3, 'fields.organization.assessments.organizationOndemand', '{"question1":"<p>Third time</p>","enumset":["t1","t2","t3","t5"],"assessmentDate":"2023-10-02","expirationDate":"2037-12-31","__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
+INSERT INTO assessments (uuid, "authorUuid", "assessmentKey", "assessmentValues", "createdAt", "updatedAt") VALUES
+  ('fb2709ad-0fc6-4796-8946-df7dfc816c83', 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 'fields.organization.assessments.organizationOndemand', '{"question1":"<p>Third time</p>","enumset":["t1","t2","t3","t5"],"assessmentDate":"2023-10-02","expirationDate":"2037-12-31","__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "assessmentRelatedObjects" ("assessmentUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT 'fb2709ad-0fc6-4796-8946-df7dfc816c83', 'organizations', o.uuid
   FROM organizations o
   WHERE o."shortName" IN ('MOD-F', 'EF 6.2');
 
 -- Add ondemand assessments to Christopf
-INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
-  ('16942947-41c2-478c-93bd-aaf7192a0e77', 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 3, 'fields.regular.person.assessments.interlocutorOndemandScreeningAndVetting', '{"question2":null,"question1":"fail3","expirationDate":"2024-10-31","assessmentDate":"2024-09-28","questionForChristopf":"c","__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
+INSERT INTO assessments (uuid, "authorUuid", "assessmentKey", "assessmentValues", "createdAt", "updatedAt") VALUES
+  ('16942947-41c2-478c-93bd-aaf7192a0e77', 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 'fields.regular.person.assessments.interlocutorOndemandScreeningAndVetting', '{"question2":null,"question1":"fail3","expirationDate":"2024-10-31","assessmentDate":"2024-09-28","questionForChristopf":"c","__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "assessmentRelatedObjects" ("assessmentUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT '16942947-41c2-478c-93bd-aaf7192a0e77', 'people', p.uuid
   FROM people p
   WHERE p.name = 'Topferness, Christopf';
 
-INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
-  ('252c76e3-979a-4e47-9fde-4683de7556e8', 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 3, 'fields.regular.person.assessments.interlocutorOndemandScreeningAndVetting', '{"question2":null,"question1":"fail2","expirationDate":null,"assessmentDate":"2024-09-30","questionForChristopf":"b","__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
+INSERT INTO assessments (uuid, "authorUuid", "assessmentKey", "assessmentValues", "createdAt", "updatedAt") VALUES
+  ('252c76e3-979a-4e47-9fde-4683de7556e8', 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 'fields.regular.person.assessments.interlocutorOndemandScreeningAndVetting', '{"question2":null,"question1":"fail2","expirationDate":null,"assessmentDate":"2024-09-30","questionForChristopf":"b","__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "assessmentRelatedObjects" ("assessmentUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT '252c76e3-979a-4e47-9fde-4683de7556e8', 'people', p.uuid
   FROM people p
   WHERE p.name = 'Topferness, Christopf';
 
-INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
-  ('e910f029-8aef-4440-a870-2711b2d8ffc9', 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 3, 'fields.regular.person.assessments.interlocutorOndemandScreeningAndVetting', '{"question2":null,"question1":"fail1","expirationDate":"2024-10-02","assessmentDate":"2024-10-01","questionForChristopf":"a","__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
+INSERT INTO assessments (uuid, "authorUuid", "assessmentKey", "assessmentValues", "createdAt", "updatedAt") VALUES
+  ('e910f029-8aef-4440-a870-2711b2d8ffc9', 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 'fields.regular.person.assessments.interlocutorOndemandScreeningAndVetting', '{"question2":null,"question1":"fail1","expirationDate":"2024-10-02","assessmentDate":"2024-10-01","questionForChristopf":"a","__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "assessmentRelatedObjects" ("assessmentUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT 'e910f029-8aef-4440-a870-2711b2d8ffc9', 'people', p.uuid
   FROM people p
   WHERE p.name = 'Topferness, Christopf';
 
 -- Add instant assessments to tasks related to reports
-INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
-  ('af6165ac-3823-42bf-9e58-a39872701057', 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 3, 'fields.task.assessments.taskOnceReport', '{"__recurrence":"once","__relatedObjectType":"report","question1":4.462819020045945,"question2":"1","question3":"22"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
+INSERT INTO assessments (uuid, "authorUuid", "assessmentKey", "assessmentValues", "createdAt", "updatedAt") VALUES
+  ('af6165ac-3823-42bf-9e58-a39872701057', 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 'fields.task.assessments.taskOnceReport', '{"__recurrence":"once","__relatedObjectType":"report","question1":4.462819020045945,"question2":"1","question3":"22"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "assessmentRelatedObjects" ("assessmentUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT 'af6165ac-3823-42bf-9e58-a39872701057', 'reports', r.uuid
   FROM reports r
   WHERE r.intent = 'A test report from Arthur';
-INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
+INSERT INTO "assessmentRelatedObjects" ("assessmentUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT 'af6165ac-3823-42bf-9e58-a39872701057', 'tasks', t.uuid
   FROM tasks t
   WHERE t."shortName" = '1.2.A';
 
-INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
-  ('d92e5f9c-b6b4-436f-917d-31bd66bdccf4', 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 3, 'fields.task.assessments.taskOnceReport', '{"__recurrence":"once","__relatedObjectType":"report","question1":3.141592653589793,"question2":"3","question3":"14"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
+INSERT INTO assessments (uuid, "authorUuid", "assessmentKey", "assessmentValues", "createdAt", "updatedAt") VALUES
+  ('d92e5f9c-b6b4-436f-917d-31bd66bdccf4', 'df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 'fields.task.assessments.taskOnceReport', '{"__recurrence":"once","__relatedObjectType":"report","question1":3.141592653589793,"question2":"3","question3":"14"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "assessmentRelatedObjects" ("assessmentUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT 'd92e5f9c-b6b4-436f-917d-31bd66bdccf4', 'reports', r.uuid
   FROM reports r
   WHERE r.intent = 'A test report from Arthur';
-INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
+INSERT INTO "assessmentRelatedObjects" ("assessmentUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT 'd92e5f9c-b6b4-436f-917d-31bd66bdccf4', 'tasks', t.uuid
   FROM tasks t
   WHERE t."shortName" = '1.2.B';
 
 -- Add periodic assessment for a task
-INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
-  ('be9fdb3c-2bc1-412a-aca9-cc009cbd3314', '1a557db0-5af5-4ea3-b926-28b5f2e88bf7', 3, 'fields.task.assessments.taskMonthly', '{"status":"GREEN","issues":"<ol><li>one</li><li>two</li><li>three</li></ol>","__recurrence":"monthly","__periodStart":"' || to_char(date_trunc('month', CURRENT_TIMESTAMP) + INTERVAL '-1 month', 'YYYY-MM-DD') || '"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
+INSERT INTO assessments (uuid, "authorUuid", "assessmentKey", "assessmentValues", "createdAt", "updatedAt") VALUES
+  ('be9fdb3c-2bc1-412a-aca9-cc009cbd3314', '1a557db0-5af5-4ea3-b926-28b5f2e88bf7', 'fields.task.assessments.taskMonthly', '{"status":"GREEN","issues":"<ol><li>one</li><li>two</li><li>three</li></ol>","__recurrence":"monthly","__periodStart":"' || to_char(date_trunc('month', CURRENT_TIMESTAMP) + INTERVAL '-1 month', 'YYYY-MM-DD') || '"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "assessmentRelatedObjects" ("assessmentUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT 'be9fdb3c-2bc1-412a-aca9-cc009cbd3314', 'tasks', t.uuid
   FROM tasks t
   WHERE t."shortName" = '1.1.A';
 
 -- Add periodic assessments for a person
-INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
-  ('995d37c0-1838-4405-996c-6a70ec3e9760', 'b5d495af-44d5-4c35-851a-1039352a8307', 3, 'fields.regular.person.assessments.interlocutorQuarterly', '{"test3":"3","test2":"3","test1":"3","__recurrence":"quarterly","__periodStart":"' || to_char(date_trunc('quarter', CURRENT_TIMESTAMP) + INTERVAL '-3 month', 'YYYY-MM-DD') || '"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
+INSERT INTO assessments (uuid, "authorUuid", "assessmentKey", "assessmentValues", "createdAt", "updatedAt") VALUES
+  ('995d37c0-1838-4405-996c-6a70ec3e9760', 'b5d495af-44d5-4c35-851a-1039352a8307', 'fields.regular.person.assessments.interlocutorQuarterly', '{"test3":"3","test2":"3","test1":"3","__recurrence":"quarterly","__periodStart":"' || to_char(date_trunc('quarter', CURRENT_TIMESTAMP) + INTERVAL '-3 month', 'YYYY-MM-DD') || '"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "assessmentRelatedObjects" ("assessmentUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT '995d37c0-1838-4405-996c-6a70ec3e9760', 'people', p.uuid
   FROM people p
   WHERE p.name = 'Rogwell, Roger';
 
-INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt") VALUES
-  ('4af97017-617d-41ee-93cf-4ab92ef15902', 'b5d495af-44d5-4c35-851a-1039352a8307', 3, 'fields.regular.person.assessments.interlocutorMonthly', '{"text":"sample text","__recurrence":"monthly","__periodStart":"' || to_char(date_trunc('month', CURRENT_TIMESTAMP) + INTERVAL '-1 month', 'YYYY-MM-DD') || '"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
+INSERT INTO assessments (uuid, "authorUuid", "assessmentKey", "assessmentValues", "createdAt", "updatedAt") VALUES
+  ('4af97017-617d-41ee-93cf-4ab92ef15902', 'b5d495af-44d5-4c35-851a-1039352a8307', 'fields.regular.person.assessments.interlocutorMonthly', '{"text":"sample text","__recurrence":"monthly","__periodStart":"' || to_char(date_trunc('month', CURRENT_TIMESTAMP) + INTERVAL '-1 month', 'YYYY-MM-DD') || '"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "assessmentRelatedObjects" ("assessmentUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT '4af97017-617d-41ee-93cf-4ab92ef15902', 'people', p.uuid
   FROM people p
   WHERE p.name = 'Rogwell, Roger';
@@ -1547,28 +1549,28 @@ INSERT INTO public."reportActions" ("createdAt", type, "approvalStepUuid", "pers
   (CURRENT_TIMESTAMP, 3, NULL, '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'e4498f99-8473-4d42-a86c-557b495ebd6c', false);
 
 -- Notes for task assessments
-INSERT INTO public.notes (uuid, "authorUuid", text, "createdAt", "updatedAt", type, "assessmentKey") VALUES
-  ('473f9fa0-ade9-4f59-aa1c-6c06890d9f49', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"issues":"<p>Test assessment taskSemiannuallyRestricted</p>","__recurrence":"semiannually","__periodStart":"' || to_char(date_trunc('quarter', CURRENT_TIMESTAMP) + INTERVAL '-12 month', 'YYYY-MM-DD') || '"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.task.assessments.taskSemiannuallyRestricted'),
-  ('3f22f63e-cd7b-4cbf-9fa7-66fb53fe4a4e', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '{"status":"GREEN","issues":"<p>Test assessment taskMonthly</p>","__recurrence":"monthly","__periodStart":"' || to_char(date_trunc('month', CURRENT_TIMESTAMP) + INTERVAL '-2 month', 'YYYY-MM-DD') || '"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.task.assessments.taskMonthly'),
-  ('b79c0643-6bdc-4813-b567-404313043d92', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '{"status":"AMBER","issues":"<p>Test assessment taskMonthly with questionFor11B</p>","questionFor11B":"Test assessment taskMonthly with questionFor11B","__recurrence":"monthly","__periodStart":"' || to_char(date_trunc('month', CURRENT_TIMESTAMP) + INTERVAL '-2 month', 'YYYY-MM-DD') || '"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.task.assessments.taskMonthly'),
-  ('def061d1-7047-492f-9b58-07e9828d7ea6', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '{"issues":"<p>Test assessment taskWeekly</p>","__recurrence":"weekly","__periodStart":"' || to_char(date_trunc('week', CURRENT_TIMESTAMP) + INTERVAL '-2 week', 'YYYY-MM-DD') || '"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.task.assessments.taskWeekly'),
-  ('4951ed20-631b-497d-8911-f0ed9d571555', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":2.8007648159316427,"question2":"3","question3":"4","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.task.assessments.taskOnceReport'),
-  ('49989d83-4be3-4b86-b4f5-1fa52f82391c', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":1.4358246447128453,"question2":"1","question3":"2","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.task.assessments.taskOnceReportRestricted'),
-  ('ce9b58c0-c8d7-40fc-a6b7-0ce89c0a856a', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":2.0391677638747776,"question2":"1","question3":"2","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.task.assessments.taskOnceReportRestricted'),
-  ('f975f8a8-0860-4fb5-8d2f-a79d08e03321', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":4.007451054255507,"question2":"3","question3":"4","questionForNegative":"Test assessment taskOnceReport with questionForNegative","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.task.assessments.taskOnceReport'),
-  ('4cf2263c-8206-48cb-896d-1b308e18a84a', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":3.582143609600375,"questionFor11B":"Test assessment taskOnceReport with questionFor11B","question2":"3","question3":"4","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.task.assessments.taskOnceReport'),
-  ('21b2d204-43cb-42a0-aec7-3edcaa26a6aa', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":1.7820051229205114,"question2":"1","question3":"2","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.task.assessments.taskOnceReportRestricted'),
-  ('82e506d8-278a-4752-8740-e5bb792ed27e', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":7.014275477413813,"question2":"3","question3":"4","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.task.assessments.taskOnceReport'),
-  ('a509cf48-889a-4482-b800-b25c842c5079', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":3.4733440307351082,"question2":"1","question3":"2","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.task.assessments.taskOnceReportRestricted'),
-  ('c5ac706d-7e2e-4e0f-9e33-ad72ce28b25d', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"requiredQuestion":"Test assessment task11COnceReport","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.task.assessments.task11COnceReport'),
-  ('21c422f3-6472-4b4b-ad2d-f5a7d6e2ebcd', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":5.026210445421216,"question2":"3","question3":"4","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.task.assessments.taskOnceReport'),
-  ('140ec8fe-29f5-4132-b565-4ad76c3a9acc', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":2.5238204333655103,"question2":"1","question3":"2","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.task.assessments.taskOnceReportRestricted'),
-  ('1e52fc19-9aaf-4125-aa90-f235e7c8cc5f', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":3.028254844468109,"question2":"1","question3":"2","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.task.assessments.taskOnceReportRestricted'),
-  ('d7de36ff-a8dd-4fa9-9449-1d3c75fe2261', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":5.965843171984881,"question2":"3","question3":"4","questionForNegative":"Test assessment taskOnceReport with questionForNegative","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.task.assessments.taskOnceReport'),
-  ('ef3bb6b5-6ab2-48ba-a9be-5515446fd0a3', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"requiredQuestion":"Test assessment task11COnceReport with questionForNegative","questionForNegative":"Test assessment task11COnceReport with questionForNegative","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.task.assessments.task11COnceReport');
+INSERT INTO public.assessments (uuid, "authorUuid", "assessmentValues", "createdAt", "updatedAt", "assessmentKey") VALUES
+  ('473f9fa0-ade9-4f59-aa1c-6c06890d9f49', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"issues":"<p>Test assessment taskSemiannuallyRestricted</p>","__recurrence":"semiannually","__periodStart":"' || to_char(date_trunc('quarter', CURRENT_TIMESTAMP) + INTERVAL '-12 month', 'YYYY-MM-DD') || '"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fields.task.assessments.taskSemiannuallyRestricted'),
+  ('3f22f63e-cd7b-4cbf-9fa7-66fb53fe4a4e', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '{"status":"GREEN","issues":"<p>Test assessment taskMonthly</p>","__recurrence":"monthly","__periodStart":"' || to_char(date_trunc('month', CURRENT_TIMESTAMP) + INTERVAL '-2 month', 'YYYY-MM-DD') || '"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fields.task.assessments.taskMonthly'),
+  ('b79c0643-6bdc-4813-b567-404313043d92', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '{"status":"AMBER","issues":"<p>Test assessment taskMonthly with questionFor11B</p>","questionFor11B":"Test assessment taskMonthly with questionFor11B","__recurrence":"monthly","__periodStart":"' || to_char(date_trunc('month', CURRENT_TIMESTAMP) + INTERVAL '-2 month', 'YYYY-MM-DD') || '"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fields.task.assessments.taskMonthly'),
+  ('def061d1-7047-492f-9b58-07e9828d7ea6', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '{"issues":"<p>Test assessment taskWeekly</p>","__recurrence":"weekly","__periodStart":"' || to_char(date_trunc('week', CURRENT_TIMESTAMP) + INTERVAL '-2 week', 'YYYY-MM-DD') || '"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fields.task.assessments.taskWeekly'),
+  ('4951ed20-631b-497d-8911-f0ed9d571555', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":2.8007648159316427,"question2":"3","question3":"4","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fields.task.assessments.taskOnceReport'),
+  ('49989d83-4be3-4b86-b4f5-1fa52f82391c', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":1.4358246447128453,"question2":"1","question3":"2","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fields.task.assessments.taskOnceReportRestricted'),
+  ('ce9b58c0-c8d7-40fc-a6b7-0ce89c0a856a', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":2.0391677638747776,"question2":"1","question3":"2","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fields.task.assessments.taskOnceReportRestricted'),
+  ('f975f8a8-0860-4fb5-8d2f-a79d08e03321', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":4.007451054255507,"question2":"3","question3":"4","questionForNegative":"Test assessment taskOnceReport with questionForNegative","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fields.task.assessments.taskOnceReport'),
+  ('4cf2263c-8206-48cb-896d-1b308e18a84a', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":3.582143609600375,"questionFor11B":"Test assessment taskOnceReport with questionFor11B","question2":"3","question3":"4","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fields.task.assessments.taskOnceReport'),
+  ('21b2d204-43cb-42a0-aec7-3edcaa26a6aa', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":1.7820051229205114,"question2":"1","question3":"2","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fields.task.assessments.taskOnceReportRestricted'),
+  ('82e506d8-278a-4752-8740-e5bb792ed27e', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":7.014275477413813,"question2":"3","question3":"4","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fields.task.assessments.taskOnceReport'),
+  ('a509cf48-889a-4482-b800-b25c842c5079', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":3.4733440307351082,"question2":"1","question3":"2","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fields.task.assessments.taskOnceReportRestricted'),
+  ('c5ac706d-7e2e-4e0f-9e33-ad72ce28b25d', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"requiredQuestion":"Test assessment task11COnceReport","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fields.task.assessments.task11COnceReport'),
+  ('21c422f3-6472-4b4b-ad2d-f5a7d6e2ebcd', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":5.026210445421216,"question2":"3","question3":"4","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fields.task.assessments.taskOnceReport'),
+  ('140ec8fe-29f5-4132-b565-4ad76c3a9acc', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":2.5238204333655103,"question2":"1","question3":"2","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fields.task.assessments.taskOnceReportRestricted'),
+  ('1e52fc19-9aaf-4125-aa90-f235e7c8cc5f', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":3.028254844468109,"question2":"1","question3":"2","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fields.task.assessments.taskOnceReportRestricted'),
+  ('d7de36ff-a8dd-4fa9-9449-1d3c75fe2261', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":5.965843171984881,"question2":"3","question3":"4","questionForNegative":"Test assessment taskOnceReport with questionForNegative","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fields.task.assessments.taskOnceReport'),
+  ('ef3bb6b5-6ab2-48ba-a9be-5515446fd0a3', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"requiredQuestion":"Test assessment task11COnceReport with questionForNegative","questionForNegative":"Test assessment task11COnceReport with questionForNegative","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fields.task.assessments.task11COnceReport');
 
 -- Note related objects for task assessments
-INSERT INTO public."noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid") VALUES
+INSERT INTO public."assessmentRelatedObjects" ("assessmentUuid", "relatedObjectType", "relatedObjectUuid") VALUES
   ('473f9fa0-ade9-4f59-aa1c-6c06890d9f49', 'tasks', '4831e09b-2bbb-4717-9bfa-91071e62260a'),
   ('3f22f63e-cd7b-4cbf-9fa7-66fb53fe4a4e', 'tasks', '9b9f4205-0721-4893-abf8-69e020d4db23'),
   ('b79c0643-6bdc-4813-b567-404313043d92', 'tasks', '1b5eb36b-456c-46b7-ae9e-1c89e9075292'),
@@ -1679,28 +1681,28 @@ INSERT INTO public."reportActions" ("createdAt", type, "approvalStepUuid", "pers
   (CURRENT_TIMESTAMP, 3, NULL, '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '9db10db0-794a-488d-a636-55e7195e9167', false);
 
 -- Notes for person assessments
-INSERT INTO public.notes (uuid, "authorUuid", text, "createdAt", "updatedAt", type, "assessmentKey") VALUES
-  ('9402cdc5-cd59-4c3d-a17d-807b5f5ad2b8', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":"1","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.regular.person.assessments.interlocutorOnceReport'),
-  ('6cd909f7-e861-4f4e-8cae-38dfc98c19d9', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":"1","question4":["yes"],"__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.regular.person.assessments.interlocutorOnceReport'),
-  ('3c7929a6-330d-48eb-8eff-e7ef3e765391', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":"1","question3":["yes"],"__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.regular.person.assessments.interlocutorOnceReport'),
-  ('d71784b8-935b-48d0-a3f0-1df88284cfd1', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"questionForNegative":"Test assessment personOnceReportLinguist with questionForNegative and questionForLin","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.task.assessments.taskOnceReport'),
-  ('6ee159b0-4340-4561-a33e-0da822795c57', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"requiredQuestion":"Test assessment personOnceReportLinguistLin with questionForNegative","questionForNegative":"Test assessment personOnceReportLinguistLin with questionForNegative","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.regular.person.assessments.personOnceReportLinguistLin'),
-  ('62465f3d-3a83-4d1f-b44a-7a50205d64af', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"questionForNegative":"Test assessment personOnceReportLinguist with questionForNegative and questionForLin","questionForLin":"Test assessment personOnceReportLinguist with questionForNegative and questionForLin","preparedDocuments":"yes","documentQuality":"G","linguistRole":"interpreter","questionSets":{"interpreter":{"questions":{"interpreterHadPreMeeting":"yes","interpreterProvidedWithNecessarySubjectMaterial":"yes","interpreterSubjectVocabularyScore":"G","interpreterSubjectUnderstandingScore":"G","interpreterWorkEthicScore":"G","interpreterPostureScore":"G","interpreterRoleScore":"G","interpreterInterpretationOverallScore":"G"}}},"__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.regular.person.assessments.personOnceReportLinguist'),
-  ('162c9c68-372b-448e-a22c-a1fdaebe5e5e', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '{"text":"<p>Test assessment interlocutorMonthly</p>","__recurrence":"monthly","__periodStart":"' || to_char(date_trunc('month', CURRENT_TIMESTAMP) + INTERVAL '-2 month', 'YYYY-MM-DD') || '"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.regular.person.assessments.interlocutorMonthly'),
-  ('9ce0ad6d-5a40-40db-a56c-b0c8f4e3a517', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '{"question1":"1","assessmentDate":"2025-01-01","__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.regular.person.assessments.advisorOndemandNoWrite'),
-  ('d6ef3959-614c-409c-8d27-449954afa61e', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '{"question1":"<p>Test assessment advisorOndemand</p>","assessmentDate":"2025-01-01","__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.regular.person.assessments.advisorOndemand'),
-  ('b494790b-445c-4174-8c60-3257f988d2c4', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '{"question1":"<p>Test assessment advisorPeriodic</p>","__recurrence":"monthly","__periodStart":"' || to_char(date_trunc('month', CURRENT_TIMESTAMP) + INTERVAL '-2 month', 'YYYY-MM-DD') || '"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.regular.person.assessments.advisorPeriodic'),
-  ('04daee89-c3d4-4b6d-8b9b-5c3cc50e2883', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '{"text":"<p>Test assessment interlocutorQuarterly</p>","test1":"1","questionSets":{"topLevelQs":{"questions":{"invisibleCustomFields":[],"test2":"3"},"questionSets":{"bottomLevelQs":{"questions":{"invisibleCustomFields":[],"test3":"1"}}}}},"__recurrence":"quarterly","__periodStart":"' || to_char(date_trunc('quarter', CURRENT_TIMESTAMP) + INTERVAL '-6 month', 'YYYY-MM-DD') || '"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.regular.person.assessments.interlocutorQuarterly'),
-  ('349abfc1-9d4c-4c13-aa28-006dc07193d2', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"preparedDocuments":"yes","documentQuality":"G","linguistRole":"translator","questionSets":{"translator":{"questions":{"translatorGotAdequateTime":"yes","translatorMetDeadline":"yes","translatorSubjectVocabularyScore":"G","translatorOverallScore":"B","translatorOverallComment":"<p>Test for personOnceReportLinguist</p>"}}},"__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.regular.person.assessments.personOnceReportLinguist'),
-  ('b9e8f249-99ae-4573-b8b6-3706079a31d0', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"questionForNegative":"Test assessment for personOnceReportLinguist with questionForNegative","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.task.assessments.taskOnceReport'),
-  ('64c2d875-6d10-4d15-b75e-89630bfa77c0', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"questionForNegative":"Test assessment for personOnceReportLinguist with questionForNegative","preparedDocuments":"yes","documentQuality":"G","linguistRole":"interpreter","questionSets":{"interpreter":{"questions":{"interpreterHadPreMeeting":"yes","interpreterProvidedWithNecessarySubjectMaterial":"yes","interpreterSubjectVocabularyScore":"G","interpreterSubjectUnderstandingScore":"G","interpreterWorkEthicScore":"G","interpreterPostureScore":"G","interpreterRoleScore":"G","interpreterInterpretationOverallScore":"G"}}},"__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.regular.person.assessments.personOnceReportLinguist'),
-  ('d18b5f84-08f5-4fcb-87dc-07f907bf4de2', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '{"question2":"<p>Test assessment interlocutorOndemandScreeningAndVetting</p>","question1":"pass1","expirationDate":"2025-02-01","assessmentDate":"2025-01-01","__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.regular.person.assessments.interlocutorOndemandScreeningAndVetting'),
-  ('c776605d-406d-43ed-95a6-af926766546a', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":"1","question2":["yes"],"__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.regular.person.assessments.interlocutorOnceReport'),
-  ('54dce1cb-084e-45ad-ba93-ba81cb9c7df1', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"questionForLin":"Test assessment personOnceReportLinguist with questionForLin","preparedDocuments":"yes","documentQuality":"G","linguistRole":"translator","questionSets":{"translator":{"questions":{"translatorGotAdequateTime":"yes","translatorMetDeadline":"yes","translatorSubjectVocabularyScore":"G","translatorOverallScore":"G"}}},"__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.regular.person.assessments.personOnceReportLinguist'),
-  ('2fbaedc0-8783-4fe2-8411-ed41ffa45f5a', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"requiredQuestion":"Test assessment personOnceReportLinguistLin with questionForLin","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 'fields.regular.person.assessments.personOnceReportLinguistLin');
+INSERT INTO public.assessments (uuid, "authorUuid", "assessmentValues", "createdAt", "updatedAt", "assessmentKey") VALUES
+  ('9402cdc5-cd59-4c3d-a17d-807b5f5ad2b8', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":"1","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fields.regular.person.assessments.interlocutorOnceReport'),
+  ('6cd909f7-e861-4f4e-8cae-38dfc98c19d9', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":"1","question4":["yes"],"__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fields.regular.person.assessments.interlocutorOnceReport'),
+  ('3c7929a6-330d-48eb-8eff-e7ef3e765391', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":"1","question3":["yes"],"__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fields.regular.person.assessments.interlocutorOnceReport'),
+  ('d71784b8-935b-48d0-a3f0-1df88284cfd1', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"questionForNegative":"Test assessment personOnceReportLinguist with questionForNegative and questionForLin","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fields.task.assessments.taskOnceReport'),
+  ('6ee159b0-4340-4561-a33e-0da822795c57', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"requiredQuestion":"Test assessment personOnceReportLinguistLin with questionForNegative","questionForNegative":"Test assessment personOnceReportLinguistLin with questionForNegative","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fields.regular.person.assessments.personOnceReportLinguistLin'),
+  ('62465f3d-3a83-4d1f-b44a-7a50205d64af', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"questionForNegative":"Test assessment personOnceReportLinguist with questionForNegative and questionForLin","questionForLin":"Test assessment personOnceReportLinguist with questionForNegative and questionForLin","preparedDocuments":"yes","documentQuality":"G","linguistRole":"interpreter","questionSets":{"interpreter":{"questions":{"interpreterHadPreMeeting":"yes","interpreterProvidedWithNecessarySubjectMaterial":"yes","interpreterSubjectVocabularyScore":"G","interpreterSubjectUnderstandingScore":"G","interpreterWorkEthicScore":"G","interpreterPostureScore":"G","interpreterRoleScore":"G","interpreterInterpretationOverallScore":"G"}}},"__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fields.regular.person.assessments.personOnceReportLinguist'),
+  ('162c9c68-372b-448e-a22c-a1fdaebe5e5e', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '{"text":"<p>Test assessment interlocutorMonthly</p>","__recurrence":"monthly","__periodStart":"' || to_char(date_trunc('month', CURRENT_TIMESTAMP) + INTERVAL '-2 month', 'YYYY-MM-DD') || '"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fields.regular.person.assessments.interlocutorMonthly'),
+  ('9ce0ad6d-5a40-40db-a56c-b0c8f4e3a517', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '{"question1":"1","assessmentDate":"2025-01-01","__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fields.regular.person.assessments.advisorOndemandNoWrite'),
+  ('d6ef3959-614c-409c-8d27-449954afa61e', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '{"question1":"<p>Test assessment advisorOndemand</p>","assessmentDate":"2025-01-01","__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fields.regular.person.assessments.advisorOndemand'),
+  ('b494790b-445c-4174-8c60-3257f988d2c4', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '{"question1":"<p>Test assessment advisorPeriodic</p>","__recurrence":"monthly","__periodStart":"' || to_char(date_trunc('month', CURRENT_TIMESTAMP) + INTERVAL '-2 month', 'YYYY-MM-DD') || '"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fields.regular.person.assessments.advisorPeriodic'),
+  ('04daee89-c3d4-4b6d-8b9b-5c3cc50e2883', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '{"text":"<p>Test assessment interlocutorQuarterly</p>","test1":"1","questionSets":{"topLevelQs":{"questions":{"invisibleCustomFields":[],"test2":"3"},"questionSets":{"bottomLevelQs":{"questions":{"invisibleCustomFields":[],"test3":"1"}}}}},"__recurrence":"quarterly","__periodStart":"' || to_char(date_trunc('quarter', CURRENT_TIMESTAMP) + INTERVAL '-6 month', 'YYYY-MM-DD') || '"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fields.regular.person.assessments.interlocutorQuarterly'),
+  ('349abfc1-9d4c-4c13-aa28-006dc07193d2', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"preparedDocuments":"yes","documentQuality":"G","linguistRole":"translator","questionSets":{"translator":{"questions":{"translatorGotAdequateTime":"yes","translatorMetDeadline":"yes","translatorSubjectVocabularyScore":"G","translatorOverallScore":"B","translatorOverallComment":"<p>Test for personOnceReportLinguist</p>"}}},"__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fields.regular.person.assessments.personOnceReportLinguist'),
+  ('b9e8f249-99ae-4573-b8b6-3706079a31d0', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"questionForNegative":"Test assessment for personOnceReportLinguist with questionForNegative","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fields.task.assessments.taskOnceReport'),
+  ('64c2d875-6d10-4d15-b75e-89630bfa77c0', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"questionForNegative":"Test assessment for personOnceReportLinguist with questionForNegative","preparedDocuments":"yes","documentQuality":"G","linguistRole":"interpreter","questionSets":{"interpreter":{"questions":{"interpreterHadPreMeeting":"yes","interpreterProvidedWithNecessarySubjectMaterial":"yes","interpreterSubjectVocabularyScore":"G","interpreterSubjectUnderstandingScore":"G","interpreterWorkEthicScore":"G","interpreterPostureScore":"G","interpreterRoleScore":"G","interpreterInterpretationOverallScore":"G"}}},"__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fields.regular.person.assessments.personOnceReportLinguist'),
+  ('d18b5f84-08f5-4fcb-87dc-07f907bf4de2', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', '{"question2":"<p>Test assessment interlocutorOndemandScreeningAndVetting</p>","question1":"pass1","expirationDate":"2025-02-01","assessmentDate":"2025-01-01","__recurrence":"ondemand"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fields.regular.person.assessments.interlocutorOndemandScreeningAndVetting'),
+  ('c776605d-406d-43ed-95a6-af926766546a', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"question1":"1","question2":["yes"],"__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fields.regular.person.assessments.interlocutorOnceReport'),
+  ('54dce1cb-084e-45ad-ba93-ba81cb9c7df1', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"questionForLin":"Test assessment personOnceReportLinguist with questionForLin","preparedDocuments":"yes","documentQuality":"G","linguistRole":"translator","questionSets":{"translator":{"questions":{"translatorGotAdequateTime":"yes","translatorMetDeadline":"yes","translatorSubjectVocabularyScore":"G","translatorOverallScore":"G"}}},"__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fields.regular.person.assessments.personOnceReportLinguist'),
+  ('2fbaedc0-8783-4fe2-8411-ed41ffa45f5a', 'b5d495af-44d5-4c35-851a-1039352a8307', '{"requiredQuestion":"Test assessment personOnceReportLinguistLin with questionForLin","__recurrence":"once","__relatedObjectType":"report"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'fields.regular.person.assessments.personOnceReportLinguistLin');
 
 -- Note related objects for person assessments
-INSERT INTO public."noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid") VALUES
+INSERT INTO public."assessmentRelatedObjects" ("assessmentUuid", "relatedObjectType", "relatedObjectUuid") VALUES
   ('9ce0ad6d-5a40-40db-a56c-b0c8f4e3a517', 'people', '1a557db0-5af5-4ea3-b926-28b5f2e88bf7'),
   ('d6ef3959-614c-409c-8d27-449954afa61e', 'people', '1a557db0-5af5-4ea3-b926-28b5f2e88bf7'),
   ('b494790b-445c-4174-8c60-3257f988d2c4', 'people', '1a557db0-5af5-4ea3-b926-28b5f2e88bf7'),
@@ -1794,5 +1796,8 @@ UPDATE notes SET
   "createdAt"=date_trunc('milliseconds', "createdAt"),
   "updatedAt"=date_trunc('milliseconds', "updatedAt");
 UPDATE attachments SET
+  "createdAt"=date_trunc('milliseconds', "createdAt"),
+  "updatedAt"=date_trunc('milliseconds', "updatedAt");
+UPDATE assessments SET
   "createdAt"=date_trunc('milliseconds', "createdAt"),
   "updatedAt"=date_trunc('milliseconds', "updatedAt");

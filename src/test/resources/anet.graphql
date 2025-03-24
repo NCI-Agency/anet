@@ -247,6 +247,28 @@ enum ApprovalStepType {
 }
 
 """"""
+type Assessment {
+  assessmentKey: String
+  assessmentRelatedObjects: [GenericRelatedObject]
+  assessmentValues: String
+  author: Person
+  createdAt: Instant
+  updatedAt: Instant
+  uuid: String
+}
+
+""""""
+input AssessmentInput {
+  assessmentKey: String
+  assessmentRelatedObjects: [GenericRelatedObjectInput]
+  assessmentValues: String
+  author: PersonInput
+  createdAt: Instant
+  updatedAt: Instant
+  uuid: String
+}
+
+""""""
 input AssessmentSearchQueryInput {
   filters: Map_String_ObjectScalar
   key: String
@@ -444,6 +466,7 @@ input EntityAvatarInput {
 """"""
 type Event {
   adminOrg: Organization
+  assessments: [Assessment]
   attachments: [Attachment]
   createdAt: Instant
   customFields: String
@@ -521,6 +544,7 @@ input EventSearchQueryInput {
 """"""
 type EventSeries {
   adminOrg: Organization
+  assessments: [Assessment]
   attachments: [Attachment]
   createdAt: Instant
   customFields: String
@@ -603,6 +627,7 @@ scalar Instant
 """"""
 type Location {
   approvalSteps: [ApprovalStep]
+  assessments: [Assessment]
   attachments: [Attachment]
   childrenLocations: [Location]
   createdAt: Instant
@@ -702,6 +727,7 @@ type Mutation {
   approveReport(comment: CommentInput, uuid: String): Int!
   clearCache: String
   createAccessToken(accessToken: AccessTokenInput): Int
+  createAssessment(assessment: AssessmentInput): Assessment
   createAttachment(attachment: AttachmentInput): String
   createAuthorizationGroup(authorizationGroup: AuthorizationGroupInput): AuthorizationGroup
   createEvent(event: EventInput): Event
@@ -717,6 +743,7 @@ type Mutation {
   createSubscription(subscription: SubscriptionInput): Subscription
   createTask(task: TaskInput): Task
   deleteAccessToken(accessToken: AccessTokenInput): Int
+  deleteAssessment(uuid: String): Int
   deleteAttachment(uuid: String): Int
   deleteEntityAvatar(relatedObjectType: String, relatedObjectUuid: String): Int
   deleteNote(uuid: String): Int
@@ -741,6 +768,7 @@ type Mutation {
   submitReport(uuid: String): Int!
   unpublishReport(uuid: String): Int
   updateAccessToken(accessToken: AccessTokenInput): Int
+  updateAssessment(assessment: AssessmentInput): Assessment
   updateAssociatedPosition(position: PositionInput): Int
   updateAttachment(attachment: AttachmentInput): String
   updateAuthorizationGroup(authorizationGroup: AuthorizationGroupInput): Int
@@ -755,40 +783,28 @@ type Mutation {
   updatePosition(position: PositionInput): Int
   updatePositionHistory(position: PositionInput): Int!
   updateReport(report: ReportInput, sendEditEmail: Boolean = true): Report
-  updateReportAssessments(assessments: [NoteInput], reportUuid: String): Int!
+  updateReportAssessments(assessments: [AssessmentInput], reportUuid: String): Int!
   updateTask(task: TaskInput): Int
 }
 
 """"""
 type Note {
-  assessmentKey: String
   author: Person
   createdAt: Instant
   noteRelatedObjects: [GenericRelatedObject]
   text: String
-  type: NoteType
   updatedAt: Instant
   uuid: String
 }
 
 """"""
 input NoteInput {
-  assessmentKey: String
   author: PersonInput
   createdAt: Instant
   noteRelatedObjects: [GenericRelatedObjectInput]
   text: String
-  type: NoteType
   updatedAt: Instant
   uuid: String
-}
-
-""""""
-enum NoteType {
-  ASSESSMENT
-  CHANGE_RECORD @deprecated(reason: "Deprecated")
-  FREE_TEXT
-  PARTNER_ASSESSMENT @deprecated(reason: "Deprecated")
 }
 
 """"""
@@ -801,6 +817,7 @@ type Organization {
   app6symbolSet: String
   approvalSteps: [ApprovalStep]
   ascendantOrgs(query: OrganizationSearchQueryInput): [Organization]
+  assessments: [Assessment]
   attachments: [Attachment]
   authorizationGroups: [AuthorizationGroup]
   childrenOrgs(query: OrganizationSearchQueryInput): [Organization]
@@ -882,6 +899,7 @@ enum OrganizationSearchSortBy {
 
 """"""
 type Person {
+  assessments: [Assessment]
   attachments: [Attachment]
   attendedReports(query: ReportSearchQueryInput): AnetBeanList_Report
   authoredReports(query: ReportSearchQueryInput): AnetBeanList_Report
@@ -996,6 +1014,7 @@ enum PersonSearchSortBy {
 
 """"""
 type Position {
+  assessments: [Assessment]
   associatedPositions: [Position]
   attachments: [Attachment]
   authorizationGroups: [AuthorizationGroup]
@@ -1158,6 +1177,7 @@ union RelatableObject = AuthorizationGroup | Event | EventSeries | Location | Or
 type Report {
   advisorOrg: Organization
   approvalStep: ApprovalStep
+  assessments: [Assessment]
   atmosphere: Atmosphere
   atmosphereDetails: String
   attachments: [Attachment]
@@ -1255,6 +1275,7 @@ input ReportInput {
 
 """"""
 type ReportPerson {
+  assessments: [Assessment]
   attachments: [Attachment]
   attendedReports(query: ReportSearchQueryInput): AnetBeanList_Report
   attendee: Boolean!
@@ -1542,6 +1563,7 @@ enum SuperuserType {
 type Task {
   approvalSteps: [ApprovalStep]
   ascendantTasks(query: TaskSearchQueryInput): [Task]
+  assessments: [Assessment]
   attachments: [Attachment]
   category: String
   childrenTasks(query: TaskSearchQueryInput): [Task]

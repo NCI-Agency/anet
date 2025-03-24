@@ -7,6 +7,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalStep;
+import mil.dds.anet.beans.Assessment;
 import mil.dds.anet.beans.Attachment;
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Comment;
@@ -87,6 +88,18 @@ public final class BatchingUtils {
         DataLoaderFactory.newDataLoader(
             (BatchLoader<String, List<Position>>) foreignKeys -> CompletableFuture.supplyAsync(
                 () -> engine.getApprovalStepDao().getApprovers(foreignKeys), dispatcherService),
+            dataLoaderOptions));
+    dataLoaderRegistry.register(FkDataLoaderKey.ASSESSMENT_ASSESSMENT_RELATED_OBJECTS.toString(),
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, List<GenericRelatedObject>>) foreignKeys -> CompletableFuture
+                .supplyAsync(
+                    () -> engine.getAssessmentDao().getAssessmentRelatedObjects(foreignKeys),
+                    dispatcherService),
+            dataLoaderOptions));
+    dataLoaderRegistry.register(FkDataLoaderKey.ASSESSMENT_RELATED_OBJECT_ASSESSMENTS.toString(),
+        DataLoaderFactory.newDataLoader(
+            (BatchLoader<String, List<Assessment>>) foreignKeys -> CompletableFuture.supplyAsync(
+                () -> engine.getAssessmentDao().getAssessments(foreignKeys), dispatcherService),
             dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.ATTACHMENT_ATTACHMENT_RELATED_OBJECTS.toString(),
         DataLoaderFactory.newDataLoader(
