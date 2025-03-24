@@ -370,7 +370,6 @@ public class MartReportImporterService implements IMartReportImporterService {
     return reportPeople;
   }
 
-
   private void getPersonCountry(Person person, ReportDto martReport, List<String> errors) {
     final LocationSearchQuery searchQuery = new LocationSearchQuery();
     searchQuery.setText(martReport.getCountry());

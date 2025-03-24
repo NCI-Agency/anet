@@ -214,7 +214,7 @@ public class TestData {
 
     // Put all properly transmitted ones
     for (long i = 0; i < 8; i++) {
-      LogDto logDto = new LogDto();
+      final LogDto logDto = new LogDto();
       logDto.setState(LogDto.LogState.SENT.getCode());
       logDto.setSequence(i);
       transmissionLog.add(logDto);
