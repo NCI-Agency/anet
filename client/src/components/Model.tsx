@@ -35,12 +35,56 @@ export const GRAPHQL_CUSTOM_SENSITIVE_INFORMATION_FIELDS = /* GraphQL */ `
   }
 `
 
+export const GRAPHQL_ASSESSMENT_FIELDS = /* GraphQL */ `
+  uuid
+  createdAt
+  updatedAt
+  assessmentKey
+  assessmentValues
+  author {
+    uuid
+    name
+    rank
+    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+  }
+  assessmentRelatedObjects {
+    objectUuid
+    relatedObjectType
+    relatedObjectUuid
+    relatedObject {
+      ... on Organization {
+        shortName
+        longName
+        identificationCode
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+      }
+      ... on Person {
+        name
+        rank
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+      }
+      ... on Report {
+        intent
+        engagementDate
+        state
+      }
+      ... on Task {
+        shortName
+        longName
+      }
+    }
+  }
+`
+export const GRAPHQL_ASSESSMENTS_FIELDS = /* GraphQL */ `
+  assessments {
+    ${GRAPHQL_ASSESSMENT_FIELDS}
+  }
+`
+
 export const GRAPHQL_NOTE_FIELDS = /* GraphQL */ `
   uuid
   createdAt
   updatedAt
-  type
-  assessmentKey
   text
   author {
     uuid
@@ -106,6 +150,27 @@ export const GRAPHQL_ENTITY_FIELDS = {
   EventSeries: "uuid name"
 }
 
+export const GQL_CREATE_ASSESSMENT = gql`
+  mutation($assessment: AssessmentInput!) {
+    createAssessment(assessment: $assessment) {
+      ${GRAPHQL_ASSESSMENT_FIELDS}
+    }
+  }
+`
+export const GQL_UPDATE_ASSESSMENT = gql`
+  mutation($assessment: AssessmentInput!) {
+    updateAssessment(assessment: $assessment) {
+      ${GRAPHQL_ASSESSMENT_FIELDS}
+    }
+  }
+`
+
+export const GQL_DELETE_ASSESSMENT = gql`
+  mutation ($uuid: String!) {
+    deleteAssessment(uuid: $uuid)
+  }
+`
+
 export const GQL_CREATE_NOTE = gql`
   mutation($note: NoteInput!) {
     createNote(note: $note) {
@@ -118,6 +183,12 @@ export const GQL_UPDATE_NOTE = gql`
     updateNote(note: $note) {
       ${GRAPHQL_NOTE_FIELDS}
     }
+  }
+`
+
+export const GQL_DELETE_NOTE = gql`
+  mutation ($uuid: String!) {
+    deleteNote(uuid: $uuid)
   }
 `
 
@@ -138,16 +209,19 @@ Object.entries(MODEL_TO_OBJECT_TYPE).forEach(([k, v]) => {
   OBJECT_TYPE_TO_MODEL[v] = k
 })
 
-export const NOTE_TYPE = {
-  FREE_TEXT: "FREE_TEXT",
-  ASSESSMENT: "ASSESSMENT"
-}
-
 export const DEFAULT_CUSTOM_FIELDS_PARENT = "formCustomFields"
 export const SENSITIVE_CUSTOM_FIELDS_PARENT = "formSensitiveFields"
 export const INVISIBLE_CUSTOM_FIELDS_FIELD = "invisibleCustomFields"
+export const ASSESSMENTS_FIELD = "assessments"
 export const NOTES_FIELD = "notes"
 export const IS_SUBSCRIBED_FIELD = "isSubscribed"
+
+export const EXCLUDED_ASSESSMENT_FIELDS = [
+  "__recurrence",
+  "__periodStart",
+  "__relatedObjectType",
+  INVISIBLE_CUSTOM_FIELDS_FIELD
+]
 
 export const ASSESSMENTS_RELATED_OBJECT_TYPE = {
   REPORT: "report"
@@ -650,47 +724,51 @@ export default class Model {
   }
 
   getPeriodAssessments(assessmentKey, period) {
-    return this.notes
-      .filter(n => {
-        return (
-          n.type === NOTE_TYPE.ASSESSMENT && n.noteRelatedObjects.length === 1
-        )
-      })
+    return this.assessments
+      .filter(a => a.assessmentRelatedObjects.length === 1)
       .sort((a, b) => b.createdAt - a.createdAt) // desc sorted
-      .map(note => ({ note, assessment: utils.parseJsonSafe(note.text) }))
+      .map(assessment => ({
+        assessment,
+        assessmentValues: utils.parseJsonSafe(assessment.assessmentValues)
+      }))
       .filter(
         obj =>
-          obj.note.assessmentKey ===
+          obj.assessment.assessmentKey ===
             `${this.getAssessmentDictionaryPath()}.${assessmentKey}` &&
-          dateBelongsToPeriod(obj.assessment.__periodStart, period)
+          dateBelongsToPeriod(obj.assessmentValues.__periodStart, period)
       )
   }
 
   /**
-   * Filters ondemand assessments inside the notes object and returns them sorted
+   * Filters ondemand assessments inside the assessments object and returns them sorted
    * with respect to their assessmentDate.
    * @returns {object}
    */
   getOndemandAssessments(assessmentKey, entity) {
-    const onDemandNotes = this.notes.filter(a => {
+    const onDemandAssessments = this.assessments.filter(a => {
       const dictionaryPath = entity.getAssessmentDictionaryPath()
       return (
-        a.type === "ASSESSMENT" &&
-        utils.parseJsonSafe(a.text).__recurrence ===
+        utils.parseJsonSafe(a.assessmentValues).__recurrence ===
           RECURRENCE_TYPE.ON_DEMAND &&
         a.assessmentKey === `${dictionaryPath}.${assessmentKey}`
       )
     })
-    // Sort the notes before visualizing them inside of a Card.
-    const sortedOnDemandNotes = onDemandNotes.sort((a, b) => {
+    // Sort the assessments before visualizing them inside of a Card.
+    const sortedOnDemandAssessments = onDemandAssessments.sort((a, b) => {
       return (
         new Date(
-          utils.parseJsonSafe(a.text)[ENTITY_ON_DEMAND_ASSESSMENT_DATE]
+          utils.parseJsonSafe(a.assessmentValues)[
+            ENTITY_ON_DEMAND_ASSESSMENT_DATE
+          ]
         ) -
-        new Date(utils.parseJsonSafe(b.text)[ENTITY_ON_DEMAND_ASSESSMENT_DATE])
+        new Date(
+          utils.parseJsonSafe(b.assessmentValues)[
+            ENTITY_ON_DEMAND_ASSESSMENT_DATE
+          ]
+        )
       )
     })
-    return sortedOnDemandNotes
+    return sortedOnDemandAssessments
   }
 
   static getInstantAssessmentsDetailsForEntities(
@@ -738,12 +816,11 @@ export default class Model {
     relatedObjectType = ASSESSMENTS_RELATED_OBJECT_TYPE.REPORT
   ) {
     const dictionaryPath = this.getAssessmentDictionaryPath()
-    return this.notes
+    return this.assessments
       .filter(
-        n =>
-          n.type === NOTE_TYPE.ASSESSMENT &&
-          n.assessmentKey === `${dictionaryPath}.${assessmentKey}` &&
-          n.noteRelatedObjects.filter(
+        a =>
+          a.assessmentKey === `${dictionaryPath}.${assessmentKey}` &&
+          a.assessmentRelatedObjects.filter(
             ro =>
               ro.relatedObject &&
               ro.relatedObjectType === REPORT_RELATED_OBJECT_TYPE &&
@@ -753,7 +830,7 @@ export default class Model {
                   ro.relatedObject.engagementDate >= dateRange.start))
           ).length
       )
-      .map(note => utils.parseJsonSafe(note.text))
+      .map(assessment => utils.parseJsonSafe(assessment.assessmentValues))
       .filter(
         obj =>
           obj.__recurrence === RECURRENCE_TYPE.ONCE &&
@@ -912,24 +989,23 @@ export default class Model {
     entity[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
       entity.customFields
     )
-    Model.populateNotesCustomFields(entity)
+    Model.populateAssessmentsCustomFields(entity)
   }
 
-  static populateEntitiesNotesCustomFields(entities) {
+  static populateEntitiesAssessmentsCustomFields(entities) {
     entities?.forEach(entity => {
-      Model.populateNotesCustomFields(entity)
+      Model.populateAssessmentsCustomFields(entity)
     })
   }
 
-  static populateNotesCustomFields(entity) {
-    entity?.notes?.forEach(
-      note =>
-        note.type !== NOTE_TYPE.FREE_TEXT &&
-        (note.customFields = utils.parseJsonSafe(note.text))
-    )
+  static populateAssessmentsCustomFields(entity) {
+    entity?.assessments?.forEach(assessment => {
+      assessment.customFields = utils.parseJsonSafe(assessment.assessmentValues)
+    })
   }
 
   static FILTERED_CLIENT_SIDE_FIELDS = [
+    ASSESSMENTS_FIELD,
     NOTES_FIELD,
     IS_SUBSCRIBED_FIELD,
     DEFAULT_CUSTOM_FIELDS_PARENT,
@@ -995,20 +1071,31 @@ namespace Model {
     relatedObject?: any
   }
 
-  export type noteRelatedObjectsPropType = Model.relatedObjectPropType[]
+  export type relatedObjectsPropType = Model.relatedObjectPropType[]
+
+  export interface assessmentPropType {
+    uuid?: string
+    createdAt?: number
+    assessmentKey?: string
+    assessmentValues?: string
+    author: {
+      uuid?: string
+      name?: string
+      rank?: string
+    }
+    assessmentRelatedObjects?: Model.relatedObjectsPropType
+  }
 
   export interface notePropType {
     uuid?: string
     createdAt?: number
-    type?: string
-    assessmentKey?: string
     text?: string
     author: {
       uuid?: string
       name?: string
       rank?: string
     }
-    noteRelatedObjects?: Model.noteRelatedObjectsPropType
+    noteRelatedObjects?: Model.relatedObjectsPropType
   }
 
   export interface attachmentRelatedObjectType {

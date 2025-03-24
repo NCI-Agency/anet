@@ -1,4 +1,3 @@
-import { gql } from "@apollo/client"
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import API from "api"
@@ -7,7 +6,10 @@ import ConfirmDestructive from "components/ConfirmDestructive"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
-import { ENTITY_ON_DEMAND_EXPIRATION_DATE, NOTE_TYPE } from "components/Model"
+import {
+  ENTITY_ON_DEMAND_EXPIRATION_DATE,
+  GQL_DELETE_ASSESSMENT
+} from "components/Model"
 import PeriodsNavigation from "components/PeriodsNavigation"
 import { Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
@@ -28,12 +30,6 @@ import AssessmentModal from "../AssessmentModal"
 import QuestionSet from "../QuestionSet"
 import "./Ondemand.css"
 import ValidationBar from "./ValidationBar"
-
-const GQL_DELETE_NOTE = gql`
-  mutation ($uuid: String!) {
-    deleteNote(uuid: $uuid)
-  }
-`
 
 interface OnDemandAssessmentProps {
   style?: any
@@ -105,13 +101,15 @@ const OnDemandAssessment = ({
     if (!hasReadAccess) {
       return cards
     }
-    const sortedOnDemandNotes = entity.getOndemandAssessments(
+    const sortedOnDemandAssessments = entity.getOndemandAssessments(
       assessmentKey,
       entity
     )
-    sortedOnDemandNotes.forEach((note, index) => {
-      const parentFieldName = `assessment-${note.uuid}`
-      const assessmentFieldsObject = utils.parseJsonSafe(note.text)
+    sortedOnDemandAssessments.forEach((assessment, index) => {
+      const parentFieldName = `assessment-${assessment.uuid}`
+      const assessmentFieldsObject = utils.parseJsonSafe(
+        assessment.assessmentValues
+      )
 
       cards.push(
         <>
@@ -121,21 +119,21 @@ const OnDemandAssessment = ({
             }
             index={index}
             assessmentFieldsObject={assessmentFieldsObject}
-            sortedOnDemandNotes={sortedOnDemandNotes}
+            sortedOnDemandAssessments={sortedOnDemandAssessments}
           />
-          <Card key={note.uuid}>
+          <Card key={assessment.uuid}>
             <Card.Header>
               <Row>
                 <Col xs={8}>
                   <Row>
                     <i>
-                      {moment(note.updatedAt).format(
+                      {moment(assessment.updatedAt).format(
                         Settings.dateFormats.forms.displayShort.withTime
                       )}
                     </i>{" "}
                   </Row>
                   <Row>
-                    <LinkTo modelType="Person" model={note.author} />
+                    <LinkTo modelType="Person" model={assessment.author} />
                   </Row>
                 </Col>
                 <Col xs={4} className="text-end">
@@ -146,7 +144,7 @@ const OnDemandAssessment = ({
                         onClick={() => {
                           setEditModeObject({
                             questionnaireResults: assessmentFieldsObject,
-                            uuid: note.uuid
+                            uuid: assessment.uuid
                           })
                           setShowModal(true)
                         }}
@@ -158,15 +156,15 @@ const OnDemandAssessment = ({
                       <span style={{ marginLeft: "5px" }}>
                         <ConfirmDestructive
                           onConfirm={() => {
-                            deleteNote(note.uuid)
+                            deleteAssessment(assessment.uuid)
                             setTableLocation(
                               assessmentCards.length > numberOfPeriods
                                 ? numberOfPeriods - assessmentCards.length + 1
                                 : 0
                             )
                           }}
-                          objectType="note"
-                          objectDisplay={"#" + note.uuid}
+                          objectType="assessment"
+                          objectDisplay={"#" + assessment.uuid}
                           title="Delete assessment"
                           variant="outline-danger"
                           buttonSize="xs"
@@ -225,8 +223,8 @@ const OnDemandAssessment = ({
     })
     return cards
 
-    function deleteNote(uuid) {
-      API.mutation(GQL_DELETE_NOTE, { uuid })
+    function deleteAssessment(uuid) {
+      API.mutation(GQL_DELETE_ASSESSMENT, { uuid })
         .then(() => {
           onUpdateAssessment()
           toast.success("Successfully deleted")
@@ -327,7 +325,7 @@ const OnDemandAssessment = ({
         </Fieldset>
 
         {/* If 'uuid' has a value of empty string, it means AssessmentModal is in
-            create mode. If it has the value of the note uuid, then the AssessmentModal
+            create mode. If it has the value of the assessment uuid, then the AssessmentModal
             is in edit mode.
             If the 'assessment' has an empty object, it means AsessmentModal is in
             create mode. If it has the ondemand assessment values, AssessmentModal
@@ -336,9 +334,8 @@ const OnDemandAssessment = ({
         <AssessmentModal
           showModal={showModal}
           assessmentKey={assessmentKey}
-          note={{
-            type: NOTE_TYPE.ASSESSMENT,
-            noteRelatedObjects: [
+          assessment={{
+            assessmentRelatedObjects: [
               {
                 relatedObjectType: entityType.relatedObjectType,
                 relatedObjectUuid: entity.uuid
@@ -349,7 +346,7 @@ const OnDemandAssessment = ({
                 ? editModeObject.uuid
                 : ""
           }}
-          assessment={editModeObject.questionnaireResults}
+          assessmentValues={editModeObject.questionnaireResults}
           entity={entity}
           title={`Assessment for ${entity.toString()}`}
           assessmentYupSchema={assessmentYupSchema}

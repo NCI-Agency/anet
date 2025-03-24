@@ -17,7 +17,11 @@ import Fieldset from "components/Fieldset"
 import FindObjectsButton from "components/FindObjectsButton"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import Model, { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
+import Model, {
+  GRAPHQL_ASSESSMENTS_FIELDS,
+  GRAPHQL_ENTITY_AVATAR_FIELDS,
+  GRAPHQL_NOTES_FIELDS
+} from "components/Model"
 import {
   jumpToTop,
   mapPageDispatchersToProps,
@@ -27,9 +31,7 @@ import {
   usePageTitle
 } from "components/Page"
 import PositionTable from "components/PositionTable"
-import RelatedObjectNotes, {
-  GRAPHQL_NOTES_FIELDS
-} from "components/RelatedObjectNotes"
+import RelatedObjectNotes from "components/RelatedObjectNotes"
 import ReportCollection from "components/ReportCollection"
 import RichTextEditor from "components/RichTextEditor"
 import { Field, Form, Formik } from "formik"
@@ -97,6 +99,7 @@ const GQL_GET_TASK = gql`
           }
         }
         customFields
+        ${GRAPHQL_ASSESSMENTS_FIELDS}
         ${GRAPHQL_NOTES_FIELDS}
       }
       responsiblePositions {
@@ -155,6 +158,7 @@ const GQL_GET_TASK = gql`
         }
       }
       customFields
+      ${GRAPHQL_ASSESSMENTS_FIELDS}
       ${GRAPHQL_NOTES_FIELDS}
     }
   }
@@ -196,7 +200,7 @@ const TaskShow = ({ pageDispatchers }: TaskShowProps) => {
   }
   const task = new Task(data ? data.task : {})
 
-  Model.populateEntitiesNotesCustomFields(task.descendantTasks)
+  Model.populateEntitiesAssessmentsCustomFields(task.descendantTasks)
 
   // Top-level tasks and sub-tasks have different assessment definitions!
   const subTasks = _isEmpty(task.parentTask)

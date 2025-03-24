@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.beans.Note.NoteType;
 import mil.dds.anet.beans.search.AbstractSearchQuery;
 import mil.dds.anet.beans.search.AssessmentSearchQuery;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
@@ -123,7 +122,6 @@ public abstract class AbstractSearcher<B, T extends AbstractSearchQuery<?>> {
     final var isOndemand =
         "ondemand".equals(dict.getDictionaryEntry(String.format("%s.recurrence", assessmentKey)));
     final var fromAssessmentsClause = getFromAssessmentsClause(tableName, isOndemand);
-    qb.addSqlArg("noteTypeAssessment", DaoUtils.getEnumId(NoteType.ASSESSMENT));
     qb.addSqlArg("assessmentKey", assessmentKey);
     final var filterClauses = new ArrayList<>();
     if (isOndemand) {
@@ -140,11 +138,12 @@ public abstract class AbstractSearcher<B, T extends AbstractSearchQuery<?>> {
         final var valueParam = String.format("%s.value", keyParam);
         final var filterType = dict.getDictionaryEntry(String.format("%s.type", keyParam));
         if ("enum".equals(filterType)) {
-          filterClauses.add(
-              String.format("assessments.text::jsonb->>:%1$s IN (<%2$s>)", keyParam, valueParam));
+          filterClauses.add(String.format(
+              "assessments.\"assessmentValues\"::jsonb->>:%1$s IN (<%2$s>)", keyParam, valueParam));
         } else if ("enumset".equals(filterType)) {
-          filterClauses.add(String.format("assessments.text::jsonb->:%1$s ??| array[<%2$s>]",
-              keyParam, valueParam));
+          filterClauses
+              .add(String.format("assessments.\"assessmentValues\"::jsonb->:%1$s ??| array[<%2$s>]",
+                  keyParam, valueParam));
         } else {
           // Can't handle this filter type, just skip
           return;
@@ -163,18 +162,18 @@ public abstract class AbstractSearcher<B, T extends AbstractSearchQuery<?>> {
   }
 
   private String getFromAssessmentsClause(String tableName, boolean isOndemand) {
-    final var fromAssessments = new StringBuilder(String.format(
-        "SELECT asmnt_nro.\"relatedObjectUuid\", asmnt.text"
-            + " FROM \"noteRelatedObjects\" asmnt_nro"
-            + " JOIN notes asmnt ON asmnt.uuid = asmnt_nro.\"noteUuid\""
-            + " WHERE asmnt_nro.\"relatedObjectType\" = '%1$s'"
-            + " AND asmnt_nro.\"relatedObjectUuid\" = \"%1$s\".uuid"
-            + " AND asmnt.type = :noteTypeAssessment AND asmnt.\"assessmentKey\" = :assessmentKey",
-        tableName));
+    final var fromAssessments = new StringBuilder(
+        String.format("SELECT asmnt_aro.\"relatedObjectUuid\", asmnt.\"assessmentValues\""
+            + " FROM \"assessmentRelatedObjects\" asmnt_aro"
+            + " JOIN assessments asmnt ON asmnt.uuid = asmnt_aro.\"assessmentUuid\""
+            + " WHERE asmnt_aro.\"relatedObjectType\" = '%1$s'"
+            + " AND asmnt_aro.\"relatedObjectUuid\" = \"%1$s\".uuid"
+            + " AND asmnt.\"assessmentKey\" = :assessmentKey", tableName));
     if (isOndemand) {
       // If it is an ondemand assessment, it will have an assessmentDate,
       // only the most recent one will be valid.
-      fromAssessments.append(" ORDER BY (asmnt.text::jsonb->>'assessmentDate')::date DESC LIMIT 1");
+      fromAssessments.append(
+          " ORDER BY (asmnt.\"assessmentValues\"::jsonb->>'assessmentDate')::date DESC LIMIT 1");
     }
     return fromAssessments.toString();
   }
@@ -190,15 +189,16 @@ public abstract class AbstractSearcher<B, T extends AbstractSearchQuery<?>> {
     final var hasExpirationDate = dict
         .getDictionaryEntry(String.format("%s.questions.expirationDate", assessmentKey)) != null;
     if (hasExpirationDate) {
-      leftClauses.add("assessments.text::jsonb->>'expirationDate' IS NULL");
-      rightClauses.add("(assessments.text::jsonb->>'expirationDate')::date > CURRENT_DATE");
+      leftClauses.add("assessments.\"assessmentValues\"::jsonb->>'expirationDate' IS NULL");
+      rightClauses
+          .add("(assessments.\"assessmentValues\"::jsonb->>'expirationDate')::date > CURRENT_DATE");
     }
 
     final Integer expirationDays = (Integer) dict
         .getDictionaryEntry(String.format("%s.onDemandAssessmentExpirationDays", assessmentKey));
     if (expirationDays != null) {
       leftClauses.add(String.format(
-          "(assessments.text::jsonb->>'assessmentDate')::date + INTERVAL '%d days' > CURRENT_DATE",
+          "(assessments.\"assessmentValues\"::jsonb->>'assessmentDate')::date + INTERVAL '%d days' > CURRENT_DATE",
           expirationDays));
     }
 

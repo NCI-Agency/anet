@@ -1,7 +1,6 @@
 import Model, {
   createCustomFieldsSchema,
   GRAPHQL_ENTITY_AVATAR_FIELDS,
-  GRAPHQL_NOTES_FIELDS,
   yupDate
 } from "components/Model"
 import TASKS_ICON from "resources/tasks.png"
@@ -130,7 +129,8 @@ export default class Task extends Model {
           })
         )
         .nullable()
-        .default([])
+        .default([]),
+      assessments: yup.array().nullable().default([])
     })
     // not actually in the database, the database contains the JSON customFields
     .concat(Task.customFieldsSchema)
@@ -140,8 +140,6 @@ export default class Task extends Model {
     "uuid shortName longName parentTask { uuid shortName }" +
     " ascendantTasks { uuid shortName parentTask { uuid } }" +
     ` taskedOrganizations { uuid shortName longName identificationCode ${GRAPHQL_ENTITY_AVATAR_FIELDS} } customFields`
-
-  static autocompleteQueryWithNotes = `${this.autocompleteQuery} ${GRAPHQL_NOTES_FIELDS}`
 
   static humanNameOfStatus(status) {
     return utils.sentenceCase(status)

@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.beans.EmailAddress;
-import mil.dds.anet.beans.Note.NoteType;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Task;
@@ -216,9 +215,9 @@ public class PendingAssessmentsHelper {
   public static final String PERSON_ASSESSMENTS = "fields.regular.person.assessments";
   public static final String TASK_ASSESSMENTS = "fields.task.assessments";
   public static final String ASSESSMENT_RECURRENCE = "recurrence";
-  // JSON fields in note.text we use
-  public static final String NOTE_RECURRENCE = "__recurrence";
-  public static final String NOTE_PERIOD_START = "__periodStart";
+  // JSON fields in assessment.assessmentValues we use
+  public static final String JSON_ASSESSMENT_RECURRENCE = "__recurrence";
+  public static final String JSON_ASSESSMENT_PERIOD_START = "__periodStart";
 
   private final AnetDictionary dict;
   private final boolean useISO8601;
@@ -457,13 +456,13 @@ public class PendingAssessmentsHelper {
       // For positions, the current person holding it gets assessed (otherwise the object itself)
       final AbstractCustomizableAnetBean ota =
           entryKey instanceof Position pos ? pos.getPerson() : entryKey;
-      return ota.loadNotes(context).thenApply(notes -> {
+      return ota.loadAssessments(context).thenApply(assessments -> {
         final Map<Recurrence, Instant> assessmentsByRecurrence = new EnumMap<>(Recurrence.class);
-        notes.stream().filter(note -> NoteType.ASSESSMENT.equals(note.getType())).forEach(note -> {
+        assessments.stream().forEach(assessment -> {
           try {
-            final JsonNode noteJson = Utils.parseJsonSafe(note.getText());
-            final JsonNode recurrence = noteJson.get(NOTE_RECURRENCE);
-            final JsonNode periodStart = noteJson.get(NOTE_PERIOD_START);
+            final JsonNode assessmentJson = Utils.parseJsonSafe(assessment.getAssessmentValues());
+            final JsonNode recurrence = assessmentJson.get(JSON_ASSESSMENT_RECURRENCE);
+            final JsonNode periodStart = assessmentJson.get(JSON_ASSESSMENT_PERIOD_START);
             if (periodStart != null && recurrence != null && shouldAddRecurrence(recurrenceSet,
                 Recurrence.valueOfRecurrence(recurrence.asText()))) {
               // __periodStart is stored in the database as a zone-agnostic date string yyyy-mm-dd

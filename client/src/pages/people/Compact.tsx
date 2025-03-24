@@ -31,7 +31,6 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
-import { GRAPHQL_NOTES_FIELDS } from "components/RelatedObjectNotes"
 import RichTextEditor from "components/RichTextEditor"
 import SimpleMultiCheckboxDropdown from "components/SimpleMultiCheckboxDropdown"
 import { Field, Formik } from "formik"
@@ -113,7 +112,6 @@ const GQL_GET_PERSON = gql`
       }
       customFields
       ${GRAPHQL_CUSTOM_SENSITIVE_INFORMATION_FIELDS}
-      ${GRAPHQL_NOTES_FIELDS}
     }
   }
 `

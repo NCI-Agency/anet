@@ -39,14 +39,28 @@ public class MaintenanceCommand {
     }
   }
 
+  @Command(command = "deleteDanglingAssessments",
+      description = "Deletes dangling assessments (either report assessments for reports that have been deleted,"
+          + " or assessments pointing to objects that no longer exist)",
+      interactionMode = InteractionMode.NONINTERACTIVE)
+  public void deleteDanglingAssessments() {
+    int exitCode = 1;
+    try {
+      logger.info("Deleting dangling assessments");
+      engine.getAssessmentDao().deleteDanglingAssessments();
+      exitCode = 0;
+    } finally {
+      Utils.exit(applicationContext, exitCode);
+    }
+  }
+
   @Command(command = "deleteDanglingNotes",
-      description = "Deletes dangling notes (either report assessments for reports that have been deleted,"
-          + " or notes pointing to objects that no longer exist)",
+      description = "Deletes dangling notes (notes pointing to objects that no longer exist)",
       interactionMode = InteractionMode.NONINTERACTIVE)
   public void deleteDanglingNotes() {
     int exitCode = 1;
     try {
-      logger.info("Deleting dangling assessments and notes");
+      logger.info("Deleting dangling notes");
       engine.getNoteDao().deleteDanglingNotes();
       exitCode = 0;
     } finally {

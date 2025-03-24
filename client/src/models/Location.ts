@@ -172,8 +172,6 @@ export default class Location extends Model {
 
   static autocompleteQuery = "uuid name type digram trigram"
 
-  static autocompleteQueryWithNotes = `${this.autocompleteQuery} ${GRAPHQL_NOTES_FIELDS}`
-
   static allFieldsQuery = `
     uuid
     name

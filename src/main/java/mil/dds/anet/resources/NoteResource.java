@@ -31,17 +31,16 @@ public class NoteResource {
       @GraphQLArgument(name = "note") Note n) {
     final Person user = DaoUtils.getUserFromContext(context);
     n.setAuthorUuid(DaoUtils.getUuid(user));
-    checkNotePermission(user, n, n.getAuthorUuid(), UpdateType.CREATE);
+    checkNotePermission(user, n.getAuthorUuid(), UpdateType.CREATE);
     ResourceUtils.checkAndFixNote(n);
     n = dao.insert(n);
     AnetAuditLogger.log("Note {} created by {}", n, user);
     return n;
   }
 
-  private void checkNotePermission(final Person user, final Note note, final String authorUuid,
+  private void checkNotePermission(final Person user, final String authorUuid,
       final UpdateType updateType) {
-    if (!dao.hasNotePermission(user, DaoUtils.getAuthorizationGroupUuids(user), note, authorUuid,
-        updateType)) {
+    if (!dao.hasNotePermission(user, authorUuid, updateType)) {
       // Don't provide too much information, just say it is "denied"
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Permission denied");
     }
@@ -55,7 +54,7 @@ public class NoteResource {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Note not found");
     }
     final Person user = DaoUtils.getUserFromContext(context);
-    checkNotePermission(user, n, original.getAuthorUuid(), UpdateType.UPDATE);
+    checkNotePermission(user, original.getAuthorUuid(), UpdateType.UPDATE);
     ResourceUtils.checkAndFixNote(n);
     final int numRows = dao.update(n);
     if (numRows == 0) {
@@ -74,7 +73,7 @@ public class NoteResource {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Note not found");
     }
     final Person user = DaoUtils.getUserFromContext(context);
-    checkNotePermission(user, n, n.getAuthorUuid(), UpdateType.DELETE);
+    checkNotePermission(user, n.getAuthorUuid(), UpdateType.DELETE);
     final int numRows = dao.delete(noteUuid);
     if (numRows == 0) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't process note delete");
