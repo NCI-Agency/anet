@@ -210,7 +210,7 @@ public class TestData {
   }
 
   public static List<LogDto> createTransmissionLog() {
-    List<LogDto> transmissionLog = new ArrayList<>();
+    final List<LogDto> transmissionLog = new ArrayList<>();
 
     // Put all properly transmitted ones
     for (long i = 0; i < 8; i++) {

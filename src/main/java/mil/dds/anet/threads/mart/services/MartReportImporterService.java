@@ -88,7 +88,7 @@ public class MartReportImporterService implements IMartReportImporterService {
 
   @Override
   public void processMartReport(List<FileAttachment> attachments) {
-    Optional<FileAttachment> martReportAttachmentOpt = attachments.stream()
+    final Optional<FileAttachment> martReportAttachmentOpt = attachments.stream()
         .filter(attachment -> attachment.getName().equalsIgnoreCase(REPORT_JSON_ATTACHMENT))
         .findFirst();
 
@@ -217,7 +217,7 @@ public class MartReportImporterService implements IMartReportImporterService {
 
   private void processReportInfo(ReportDto martReport, MartImportedReport martImportedReport,
       List<FileAttachment> attachments) {
-    List<String> errors = new ArrayList<>();
+    final List<String> errors = new ArrayList<>();
 
     // Validate author organization
     final Organization organization = organizationDao.getByUuid(martReport.getOrganizationUuid());
@@ -237,7 +237,7 @@ public class MartReportImporterService implements IMartReportImporterService {
     Report anetReport = new Report();
     // Location
     anetReport.setLocation(location);
-    List<ReportPerson> reportPeople = handleReportPeople(martReport, organization, errors);
+    final List<ReportPerson> reportPeople = handleReportPeople(martReport, organization, errors);
     // Report people
     anetReport.setReportPeople(reportPeople);
     // Report generic details

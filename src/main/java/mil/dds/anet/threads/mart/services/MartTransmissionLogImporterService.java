@@ -37,20 +37,20 @@ public class MartTransmissionLogImporterService implements IMartTransmissionLogI
     try {
       // Get the transmission log JSON from the attachment
       martTransmissionLogAttachment.load();
-      List<LogDto> transmissionLog = ignoringMapper.readValue(
+      final List<LogDto> transmissionLog = ignoringMapper.readValue(
           new String(martTransmissionLogAttachment.getContent(), StandardCharsets.UTF_8),
           new TypeReference<>() {});
       AnetBeanList<MartImportedReport> existingMartImportedReports = martImportedReportDao
           .getAllSequences(transmissionLog.stream().map(LogDto::getSequence).toList());
       if (transmissionLog.size() != existingMartImportedReports.getTotalCount()) {
         // We are missing sequences!
-        List<Long> presentSequences = existingMartImportedReports.getList().stream()
+        final List<Long> presentSequences = existingMartImportedReports.getList().stream()
             .map(MartImportedReport::getSequence).toList();
-        List<LogDto> missing = transmissionLog.stream()
+        final List<LogDto> missing = transmissionLog.stream()
             .filter(logDto -> !presentSequences.contains(logDto.getSequence())).toList();
         // For each missing sequence create a Mart Imported Report
         for (LogDto logDto : missing) {
-          MartImportedReport martImportedReport = new MartImportedReport();
+          final MartImportedReport martImportedReport = new MartImportedReport();
           martImportedReport.setSequence(logDto.getSequence());
           martImportedReport.setSuccess(false);
           martImportedReport.setSubmittedAt(logDto.getSubmittedAt());
