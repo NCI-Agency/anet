@@ -10,7 +10,7 @@ plugins {
 	id "com.graphql-java-generator.graphql-gradle-plugin3" version "2.9"
 	id "org.beryx.runtime" version "1.13.1"
 	id "com.netflix.nebula.rpm" version "11.11.1"
-	id "org.springframework.boot" version "3.4.3" apply false
+	id "org.springframework.boot" version "3.4.4" apply false
 	id 'io.mateo.cxf-codegen' version '2.4.1'
 }
 
@@ -116,7 +116,7 @@ dependencies {
 	implementation 'org.liquibase:liquibase-core:4.31.1'
 	implementation "org.jdbi:jdbi3-postgres:${jdbi3Version}" // For the SqlObjectPlugin
 	implementation "org.jdbi:jdbi3-spring:${jdbi3Version}"
-	implementation 'com.google.guava:guava:33.4.0-jre' // Pick the non-Android version
+	implementation 'com.google.guava:guava:33.4.5-jre' // Pick the non-Android version
 
 	// For caching domain users (used in every authenticated request)
 	implementation('org.ehcache:ehcache:3.10.8') {
@@ -741,7 +741,7 @@ checkstyleTest {
 //Work-around for https://github.com/gradle/gradle/issues/27035
 configurations.checkstyle {
 	resolutionStrategy.capabilitiesResolution.withCapability('com.google.collections:google-collections') {
-		select('com.google.guava:guava:33.4.0-jre')
+		select('com.google.guava:guava:33.4.5-jre')
 	}
 }
 
