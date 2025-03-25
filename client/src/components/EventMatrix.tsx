@@ -18,7 +18,7 @@ import { connect } from "react-redux"
 import Settings from "settings"
 
 const GET_EVENTSERIES_AND_TASKS = gql`
-  query ($taskUuid: String) {
+  query ($taskUuid: String, $includeTask: Boolean!) {
     eventSeriesList(query: { pageSize: 0 }) {
       pageNum
       pageSize
@@ -30,7 +30,7 @@ const GET_EVENTSERIES_AND_TASKS = gql`
       }
     }
 
-    task(uuid: $taskUuid) {
+    task(uuid: $taskUuid) @include(if: $includeTask) {
       uuid
       shortName
       selectable
@@ -103,15 +103,21 @@ const GET_EVENTS_AND_REPORTS = gql`
 interface EventMatrixProps {
   pageDispatchers?: PageDispatchersPropType
   taskUuid: string
+  tasks: any[]
 }
 
-const EventMatrix = ({ pageDispatchers, taskUuid }: EventMatrixProps) => {
+const EventMatrix = ({
+  pageDispatchers,
+  taskUuid,
+  tasks
+}: EventMatrixProps) => {
   const [weekNumber, setWeekNumber] = useState(null)
   const [startDay, setStartDay] = useState(moment().startOf("week"))
   const [events, setEvents] = useState([])
   const [reports, setReports] = useState([])
   const [weekDays, setWeekDays] = useState([])
   const [fetchError, setFetchError] = useState(null)
+  const includeTask = !!taskUuid
 
   useEffect(() => {
     // Determine date range
@@ -145,7 +151,7 @@ const EventMatrix = ({ pageDispatchers, taskUuid }: EventMatrixProps) => {
       endDate: weekDays[6].endOf("day").valueOf()
     }
     const reportQuery = {
-      taskUuid,
+      taskUuid: taskUuid ? [taskUuid] : (tasks?.map(t => t.uuid) ?? []),
       pageSize: 0,
       engagementDateStart: weekDays[0].valueOf(),
       engagementDateEnd: weekDays[6].endOf("day").valueOf()
@@ -154,10 +160,11 @@ const EventMatrix = ({ pageDispatchers, taskUuid }: EventMatrixProps) => {
       setEvents(response?.eventList?.list)
       setReports(response?.reportList?.list)
     })
-  }, [weekDays, taskUuid])
+  }, [weekDays, taskUuid, tasks])
 
   const { loading, error, data } = API.useApiQuery(GET_EVENTSERIES_AND_TASKS, {
-    taskUuid
+    taskUuid,
+    includeTask
   })
   const { done, result } = useBoilerplate({
     loading,
@@ -168,9 +175,11 @@ const EventMatrix = ({ pageDispatchers, taskUuid }: EventMatrixProps) => {
     return result
   }
   const eventSeries = data.eventSeriesList?.list
-  const tasks = [data.task]
-    .concat(data.task?.descendantTasks)
-    .filter(t => t.selectable)
+  const allTasks = (
+    includeTask
+      ? [data.task].concat(data.task?.descendantTasks)
+      : tasks.concat(tasks?.flatMap(t => t.descendantTasks))
+  ).filter(t => t.selectable)
 
   function isReportIncluded(report, dateToCheck, task, event?) {
     if (
@@ -402,14 +411,14 @@ const EventMatrix = ({ pageDispatchers, taskUuid }: EventMatrixProps) => {
                 </th>
               ))}
             </tr>
-            {(_isEmpty(tasks) && (
+            {(_isEmpty(allTasks) && (
               <tr>
                 <td colSpan={8}>
                   No matching {Settings.fields.task.shortLabel}
                 </td>
               </tr>
             )) ||
-              tasks.map(task => {
+              allTasks.map(task => {
                 const taskEvents = events.filter(e =>
                   e.tasks?.find(t => t.uuid === task.uuid)
                 )
