@@ -4,7 +4,7 @@
 		xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-		 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+		 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
 	<!-- Type for storing UUIDv4 transparantly -->
 	<property name="uuid_type" value="varchar(36)" />
@@ -4874,7 +4874,7 @@
 		<dropColumn tableName="people" columnName="emailAddress" />
 	</changeSet>
 
-	<changeSet id="add-customFields-to-fulltext-index" author="chessray" runInTransaction="false">
+	<changeSet id="add-customFields-to-fulltext-index" author="chessray" runInTransaction="false" ignore="true">
 		<sql>
 			<!-- Drop full-text materialized views (incl. indexes) since we cannot just ALTER them;
 			     copied from multiple changesets -->
@@ -5638,7 +5638,7 @@
 		<renameColumn tableName="people" oldColumnName="country" newColumnName="obsoleteCountry" />
 	</changeSet>
 
-	<changeSet id="add-ngrams-to-locations-fulltext-index" author="gjvoosten" runInTransaction="false">
+	<changeSet id="add-ngrams-to-locations-fulltext-index" author="gjvoosten" runInTransaction="false" ignore="true">
 		<sql>
 			<!-- Drop full-text materialized view (incl. index) since we cannot just ALTER it -->
 			DROP MATERIALIZED VIEW mv_fts_locations;
@@ -5725,7 +5725,7 @@
 		<!-- Rolling back is not useful anymore -->
 	</changeSet>
 
-	<changeSet id="update-jsonb-aggregation-functions" author="gjvoosten" runInTransaction="false">
+	<changeSet id="update-jsonb-aggregation-functions" author="gjvoosten" runInTransaction="false" ignore="true">
 		<sql>
 			<!-- Update the function for aggregating JSON values to also handle empty values -->
 			CREATE OR REPLACE FUNCTION jsonb_value_agg(p_json jsonb, ignore_key text default 'invisibleCustomFields')
