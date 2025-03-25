@@ -346,7 +346,8 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
   protected void addTaskUuidQuery(AbstractSearchQueryBuilder<Report, ReportSearchQuery> outerQb,
       ReportSearchQuery query) {
     qb.addFromClause("INNER JOIN \"reportTasks\" rt ON rt.\"reportUuid\" = reports.uuid");
-    if (Task.DUMMY_TASK_UUID.equals(query.getTaskUuid())) {
+    if (query.getTaskUuid().size() == 1
+        && Task.DUMMY_TASK_UUID.equals(query.getTaskUuid().get(0))) {
       qb.addWhereClause("rt.\"taskUuid\" IS NULL");
     } else {
       qb.addRecursiveClause(outerQb, "rt", "\"taskUuid\"", "parent_tasks", "tasks",

@@ -126,7 +126,8 @@ public abstract class AbstractEventSearcher extends AbstractSearcher<Event, Even
 
   protected void addTaskQuery(EventSearchQuery query) {
     qb.addFromClause("INNER JOIN \"eventTasks\" et ON et.\"eventUuid\" = events.uuid");
-    if (Task.DUMMY_TASK_UUID.equals(query.getTaskUuid())) {
+    if (query.getTaskUuid().size() == 1
+        && Task.DUMMY_TASK_UUID.equals(query.getTaskUuid().get(0))) {
       qb.addWhereClause("et.\"taskUuid\" IS NULL");
     } else {
       qb.addRecursiveClause(null, "et", "\"taskUuid\"", "parent_tasks", "tasks",

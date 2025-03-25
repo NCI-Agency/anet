@@ -505,7 +505,7 @@ input EventSearchQueryInput {
   startDate: Instant
   status: Status
   subscribed: Boolean
-  taskUuid: String
+  taskUuid: [String]
   text: String
   type: String
 }
@@ -1337,7 +1337,7 @@ input ReportSearchQueryInput {
   state: [ReportState]
   status: Status
   subscribed: Boolean
-  taskUuid: String
+  taskUuid: [String]
   text: String
   updatedAtEnd: Instant
   updatedAtStart: Instant

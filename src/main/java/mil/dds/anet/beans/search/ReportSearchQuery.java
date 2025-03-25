@@ -67,7 +67,7 @@ public class ReportSearchQuery extends SubscribableObjectSearchQuery<ReportSearc
   private RecurseStrategy locationRecurseStrategy;
   @GraphQLQuery
   @GraphQLInputField
-  String taskUuid;
+  List<String> taskUuid;
   @GraphQLQuery
   @GraphQLInputField
   String pendingApprovalOf;
@@ -246,11 +246,11 @@ public class ReportSearchQuery extends SubscribableObjectSearchQuery<ReportSearc
     this.locationRecurseStrategy = locationRecurseStrategy;
   }
 
-  public String getTaskUuid() {
+  public List<String> getTaskUuid() {
     return taskUuid;
   }
 
-  public void setTaskUuid(String taskUuid) {
+  public void setTaskUuid(List<String> taskUuid) {
     this.taskUuid = taskUuid;
   }
 
@@ -416,6 +416,9 @@ public class ReportSearchQuery extends SubscribableObjectSearchQuery<ReportSearc
     }
     if (locationUuid != null) {
       clone.setLocationUuid(new ArrayList<>(locationUuid));
+    }
+    if (taskUuid != null) {
+      clone.setTaskUuid(new ArrayList<>(taskUuid));
     }
     return clone;
   }

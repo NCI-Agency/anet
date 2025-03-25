@@ -6,6 +6,7 @@ import {
   PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
+import RemoveButton from "components/RemoveButton"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _get from "lodash/get"
 import { Task } from "models"
@@ -97,6 +98,7 @@ interface BaseTaskTableProps {
   onDelete?: (...args: unknown[]) => unknown
   // list of tasks:
   tasks: any[]
+  noTasksMessage?: string
   // fill these when pagination wanted:
   totalCount?: number
   pageNum?: number
@@ -109,14 +111,14 @@ const BaseTaskTable = ({
   showDelete,
   onDelete,
   tasks,
+  noTasksMessage = `No ${pluralize(Settings.fields.task.shortLabel)} found`,
   pageSize,
   pageNum,
   totalCount,
   goToPage
 }: BaseTaskTableProps) => {
-  const taskShortLabel = Settings.fields.task.shortLabel
   if (_get(tasks, "length", 0) === 0) {
-    return <em>No {pluralize(taskShortLabel)} found</em>
+    return <em>{noTasksMessage}</em>
   }
 
   return (
@@ -133,6 +135,7 @@ const BaseTaskTable = ({
           <thead>
             <tr>
               <th>Name</th>
+              {showDelete && <th />}
             </tr>
           </thead>
           <tbody>
@@ -146,6 +149,14 @@ const BaseTaskTable = ({
                     parentField="parentTask"
                   />
                 </td>
+                {showDelete && (
+                  <td id={"taskDelete_" + task.uuid}>
+                    <RemoveButton
+                      title={`Remove ${pluralize(Settings.fields.task.shortLabel)}`}
+                      onClick={() => onDelete(task)}
+                    />
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>

@@ -30,36 +30,26 @@ import ReportStateFilter, {
 import SelectFilter, {
   deserialize as deserializeSelectFilter
 } from "components/advancedSearch/SelectFilter"
-import TaskFilter, {
-  deserialize as deserializeTaskFilter
+import {
+  deserializeMulti as deserializeTaskMultiFilter,
+  TaskMultiFilter
 } from "components/advancedSearch/TaskFilter"
 import {
   CountryOverlayRow,
   EventSeriesOverlayRow,
   PersonDetailedOverlayRow,
-  PositionOverlayRow,
-  TaskOverlayRow
+  PositionOverlayRow
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AppContext from "components/AppContext"
-import { getBreadcrumbTrailAsText } from "components/BreadcrumbTrail"
 import DictionaryField from "components/DictionaryField"
 import Model from "components/Model"
 import _isEmpty from "lodash/isEmpty"
 import _pickBy from "lodash/pickBy"
-import {
-  Event,
-  EventSeries,
-  Location,
-  Person,
-  Position,
-  Report,
-  Task
-} from "models"
+import { Event, EventSeries, Location, Person, Position, Report } from "models"
 import React, { useContext } from "react"
 import EVENT_SERIES_ICON from "resources/eventSeries.png"
 import PEOPLE_ICON from "resources/people.png"
 import POSITIONS_ICON from "resources/positions.png"
-import TASKS_ICON from "resources/tasks.png"
 import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
 import utils from "utils"
@@ -90,6 +80,7 @@ export const getSearchQuery = searchQuery => {
       }
     })
   }
+  console.log(query)
   return query
 }
 
@@ -154,16 +145,6 @@ const advancedSelectFilterPositionProps = {
   fields: Position.autocompleteQuery,
   addon: POSITIONS_ICON
 }
-const advancedSelectFilterTaskProps = {
-  overlayColumns: ["Name"],
-  overlayRenderRow: TaskOverlayRow,
-  objectType: Task,
-  valueKey: "shortName",
-  valueFunc: (v, k) =>
-    getBreadcrumbTrailAsText(v, v?.ascendantTasks, "parentTask", k),
-  fields: Task.autocompleteQuery,
-  addon: TASKS_ICON
-}
 const advancedSelectFilterEventSeriesProps = {
   overlayColumns: ["Name"],
   overlayRenderRow: EventSeriesOverlayRow,
@@ -176,7 +157,6 @@ const advancedSelectFilterEventSeriesProps = {
 export const searchFilters = function(includeAdminFilters) {
   const filters = {}
 
-  const taskShortLabel = Settings.fields.task.shortLabel
   const authorWidgetFilters = {
     all: {
       label: "All",
@@ -225,13 +205,6 @@ export const searchFilters = function(includeAdminFilters) {
   // Allow explicit search for "no classification"
   classificationOptions.unshift("")
   classificationLabels.unshift("<none>")
-
-  const taskWidgetFilters = {
-    all: {
-      label: "All",
-      queryVars: {}
-    }
-  }
 
   const eventSeriesFilters = {
     all: {
@@ -405,13 +378,11 @@ export const searchFilters = function(includeAdminFilters) {
       }
     },
     [`Within ${Settings.fields.task.shortLabel}`]: {
-      component: AdvancedSelectFilter,
-      deserializer: deserializeAdvancedSelectFilter,
-      props: Object.assign({}, advancedSelectFilterTaskProps, {
-        filterDefs: taskWidgetFilters,
-        placeholder: `Filter reports by ${taskShortLabel}…`,
+      component: TaskMultiFilter,
+      deserializer: deserializeTaskMultiFilter,
+      props: {
         queryKey: "taskUuid"
-      })
+      }
     }
   }
 
@@ -670,8 +641,8 @@ export const searchFilters = function(includeAdminFilters) {
         }
       },
       [`Within ${Settings.fields.task.shortLabel}`]: {
-        component: TaskFilter,
-        deserializer: deserializeTaskFilter,
+        component: TaskMultiFilter,
+        deserializer: deserializeTaskMultiFilter,
         props: {
           queryKey: "parentTaskUuid",
           queryRecurseStrategyKey: "parentTaskRecurseStrategy",
@@ -801,8 +772,8 @@ export const searchFilters = function(includeAdminFilters) {
         }
       },
       [`Within ${Settings.fields.task.shortLabel}`]: {
-        component: TaskFilter,
-        deserializer: deserializeTaskFilter,
+        component: TaskMultiFilter,
+        deserializer: deserializeTaskMultiFilter,
         props: {
           queryKey: "taskUuid"
         }
