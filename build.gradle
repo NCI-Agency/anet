@@ -109,7 +109,7 @@ dependencies {
 	implementation 'org.liquibase:liquibase-core:4.31.1'
 	implementation "org.jdbi:jdbi3-postgres:${jdbi3Version}" // For the SqlObjectPlugin
 	implementation "org.jdbi:jdbi3-spring:${jdbi3Version}"
-	implementation 'com.google.guava:guava:33.4.5-jre' // Pick the non-Android version
+	implementation 'com.google.guava:guava:33.4.6-jre' // Pick the non-Android version
 
 	// For caching domain users (used in every authenticated request)
 	implementation('org.ehcache:ehcache:3.10.8') {
@@ -729,7 +729,7 @@ checkstyleTest {
 //Work-around for https://github.com/gradle/gradle/issues/27035
 configurations.checkstyle {
 	resolutionStrategy.capabilitiesResolution.withCapability('com.google.collections:google-collections') {
-		select('com.google.guava:guava:33.4.5-jre')
+		select('com.google.guava:guava:33.4.6-jre')
 	}
 }
 
