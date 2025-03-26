@@ -80,7 +80,6 @@ export const getSearchQuery = searchQuery => {
       }
     })
   }
-  console.log(query)
   return query
 }
 
