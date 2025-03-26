@@ -1677,15 +1677,15 @@ imagery:
     provider: ESRI
     url: "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/find"
   baseLayers:
-    - name: OSM
+    - name: OpenStreetMap
       default: true
       type: tile
       url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-    - name: OSM - local
+    - name: OpenStreetMap - local
       default: false
       type: tile
       url: "/imagery/street/{z}/{x}/{y}.png"
-    - name: World Imagery Tiles
+    - name: World Imagery
       default: false
       type: tile
       url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
