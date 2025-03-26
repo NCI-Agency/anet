@@ -231,10 +231,33 @@ const TaskFilter = ({
                   isExpanded ? IconNames.CHEVRON_DOWN : IconNames.CHEVRON_RIGHT
                 }
                 size={IconSize.STANDARD}
+                color="#5f6b7c"
               />
             </span>
           )}
-          <span onClick={handleToggleSelection}>{displayLabel}</span>
+          {hasChildren ? (
+            <Icon
+              icon={isExpanded ? IconNames.FOLDER_OPEN : IconNames.FOLDER_CLOSE}
+              size={IconSize.STANDARD}
+              color="#5f6b7c"
+            />
+          ) : (
+            <Icon
+              icon={IconNames.DOCUMENT}
+              size={IconSize.STANDARD}
+              color="#5f6b7c"
+            />
+          )}
+          <Icon icon={IconNames.STAR} size={12} />
+          <span
+            onClick={handleToggleSelection}
+            style={{
+              cursor: "pointer",
+              flexGrow: "1"
+            }}
+          >
+            {displayLabel}
+          </span>
         </div>
       )
 
