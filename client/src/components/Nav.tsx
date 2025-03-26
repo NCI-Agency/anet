@@ -504,6 +504,13 @@ const Navigation = ({
                 >
                   GraphQL
                 </SidebarLink>
+                <SidebarLink
+                  id="graphQL-nav"
+                  linkTo="/admin/mart/export"
+                  handleOnClick={resetPages}
+                >
+                  MART Export
+                </SidebarLink>
               </span>
             </Nav>
           )}

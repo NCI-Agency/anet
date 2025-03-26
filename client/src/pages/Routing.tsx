@@ -62,6 +62,7 @@ import MyTasks from "pages/tasks/MyTasks"
 import TaskNew from "pages/tasks/New"
 import TaskShow from "pages/tasks/Show"
 import TopTasks from "pages/tasks/Top"
+import ExportDictionary from "pages/admin/mart/ExportDictionary"
 import { PAGE_URLS } from "pages/util"
 import React, { useContext } from "react"
 import { Navigate, Route, Routes } from "react-router-dom"
@@ -181,6 +182,9 @@ const Routing = () => {
           <Route path="pendingEmails" element={<PendingEmailsShow />} />
           <Route path="accessTokens" element={<AccessTokensList />} />
           <Route path="graphiql" element={<GraphiQL />} />
+          <Route path="mart">
+            <Route path="export" element={<ExportDictionary />} />
+          </Route>
         </Route>
       )}
       <Route path={PAGE_URLS.TOP_TASKS} element={<TopTasks />} />
