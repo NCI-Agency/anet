@@ -113,6 +113,9 @@ const TaskFilter = ({
     parentTask {
       uuid
     }
+    descendantTasks {
+      uuid
+    }
   `
 
   const HierarchicalOverlayTable = props => {
@@ -149,6 +152,9 @@ const TaskFilter = ({
                 uuid
                 shortName
               }
+              descendantTasks {
+                uuid
+              }
             }
           }
         }
@@ -179,7 +185,19 @@ const TaskFilter = ({
 
     const buildFlattenedList = (tasks, level = 0) => {
       return tasks.flatMap(task => {
-        const taskWithLevel = { ...task, level }
+        const isTaskSelected = selectedItems?.some(
+          item => item[propsValueKey] === task[propsValueKey]
+        )
+        const isChildrenTaskSelected = selectedItems?.some(item =>
+          task.descendantTasks?.some(child => child.uuid === item.uuid)
+        )
+        const isCollapsed = !expandedItems.has(task.uuid)
+        const isSelected = isTaskSelected
+          ? true
+          : isChildrenTaskSelected && isCollapsed
+            ? null
+            : false
+        const taskWithLevel = { ...task, level, isSelected }
         const children = expandedItems.has(task.uuid)
           ? childrenMap.get(task.uuid) || []
           : []
@@ -215,7 +233,8 @@ const TaskFilter = ({
             flexDirection: "row",
             alignItems: "center",
             paddingLeft: padding,
-            gap: 10
+            gap: 10,
+            cursor: "auto"
           }}
         >
           {hasChildren && (
