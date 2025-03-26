@@ -4,6 +4,7 @@ import { IconNames } from "@blueprintjs/icons"
 import API from "api"
 import useSearchFilter from "components/advancedSearch/hooks"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
+import { TaskOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import { AdvancedMultiSelectOverlayTable } from "components/advancedSelectWidget/AdvancedSelectOverlayTable"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import { getBreadcrumbTrailAsText } from "components/BreadcrumbTrail"
@@ -292,6 +293,7 @@ const TaskFilter = ({
       showRemoveButton={false}
       filterDefs={advancedSelectFilters}
       overlayColumns={["Name"]}
+      overlayRenderRow={TaskOverlayRow}
       overlayTable={HierarchicalOverlayTable}
       objectType={Task}
       valueKey={valueKey}
