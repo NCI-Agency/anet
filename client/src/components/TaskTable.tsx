@@ -152,7 +152,7 @@ const BaseTaskTable = ({
                 {showDelete && (
                   <td id={"taskDelete_" + task.uuid}>
                     <RemoveButton
-                      title={`Remove ${pluralize(Settings.fields.task.shortLabel)}`}
+                      title={`Remove ${Settings.fields.task.shortLabel}`}
                       onClick={() => onDelete(task)}
                     />
                   </td>
