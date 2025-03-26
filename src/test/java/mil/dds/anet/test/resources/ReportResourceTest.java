@@ -1262,7 +1262,7 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     // Search by Task
     query1.setAttendeeUuid(null);
-    query1.setTaskUuid(task.getUuid());
+    query1.setTaskUuid(List.of(task.getUuid()));
     searchResults =
         withCredentials(jackUser, t -> queryExecutor.reportList(getListFields(FIELDS), query1));
     assertThat(searchResults.getList()).isNotEmpty();
