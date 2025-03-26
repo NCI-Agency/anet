@@ -367,7 +367,7 @@ const EventMatrix = ({
       <div>
         <Table className="event-matrix" responsive hover id="events-matrix">
           <tbody>
-            <tr className="table-primary">
+            <tr id="event-series-table-header" className="table-primary">
               <th>Event Series</th>
               {weekDays.map(weekDay => (
                 <th key={weekDay} style={{ width: "12%" }}>
@@ -401,7 +401,7 @@ const EventMatrix = ({
                   </tr>
                 )
               })}
-            <tr className="table-primary">
+            <tr id="tasks-table-header" className="table-primary">
               <th>{Settings.fields.task.shortLabel}</th>
               {weekDays.map(weekDay => (
                 <th key={weekDay} style={{ width: "12%" }}>
