@@ -24,6 +24,7 @@ import MARKER_ICON_BLUE_2X from "resources/leaflet/marker-icon-blue-2x.png"
 import MARKER_ICON_BLUE from "resources/leaflet/marker-icon-blue.png"
 import MARKER_ICON_GREEN_2X from "resources/leaflet/marker-icon-green-2x.png"
 import MARKER_ICON_GREEN from "resources/leaflet/marker-icon-green.png"
+import MARKER_ICON_SEARCH from "resources/leaflet/marker-icon-search.svg"
 import MARKER_ICON from "resources/leaflet/marker-icon.png"
 import MARKER_SHADOW from "resources/leaflet/marker-shadow.png"
 import Settings from "settings"
@@ -96,6 +97,12 @@ export const ICON_TYPES = {
   GREEN: iconGreen,
   DEFAULT: iconDefault
 }
+
+const iconSearch = new Icon({
+  iconSize: [50, 50],
+  iconAnchor: [25, 50],
+  iconUrl: MARKER_ICON_SEARCH
+})
 
 const addLayers = (map, layerControl) => {
   let defaultLayer = null
@@ -202,7 +209,13 @@ const Leaflet = ({
       Settings.imagery.mapOptions.homeView.zoomLevel
     )
     if (searchProvider) {
-      const gsc = new GeoSearchControl({ provider: searchProvider })
+      const gsc = new GeoSearchControl({
+        provider: searchProvider,
+        marker: {
+          icon: iconSearch,
+          draggable: false
+        }
+      })
       setTimeout(() => {
         // workaround for preventing the marker from moving when search icon is clicked
         // https://github.com/smeijer/leaflet-geosearch/issues/169#issuecomment-458573562
