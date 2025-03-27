@@ -141,7 +141,7 @@ const AdvancedSelect = ({
   handleAddItem,
   handleRemoveItem,
   createEntityComponent,
-  autoComplete
+  autoComplete = "on"
 }: AdvancedSelectProps) => {
   const firstFilter = Object.keys(filterDefs)[0]
 
