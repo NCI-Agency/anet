@@ -113,6 +113,7 @@ export interface AdvancedSelectProps {
   handleAddItem?: (...args: unknown[]) => unknown
   handleRemoveItem?: (...args: unknown[]) => unknown
   createEntityComponent?: (...args: unknown[]) => React.ReactNode
+  autoComplete?: string
 }
 
 const AdvancedSelect = ({
@@ -139,7 +140,8 @@ const AdvancedSelect = ({
   fields,
   handleAddItem,
   handleRemoveItem,
-  createEntityComponent
+  createEntityComponent,
+  autoComplete = "on"
 }: AdvancedSelectProps) => {
   const firstFilter = Object.keys(filterDefs)[0]
 
@@ -398,6 +400,7 @@ const AdvancedSelect = ({
                 <InputGroup>
                   <Form.Control
                     name={fieldName}
+                    autoComplete={autoComplete}
                     value={searchTerms || ""}
                     placeholder={placeholder}
                     onChange={changeSearchTerms}
