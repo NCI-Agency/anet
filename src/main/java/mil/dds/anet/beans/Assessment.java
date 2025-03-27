@@ -13,22 +13,33 @@ import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
-public class Note extends AbstractAnetBean {
+public class Assessment extends AbstractAnetBean {
 
   @GraphQLQuery
   @GraphQLInputField
-  private String text;
+  private String assessmentKey;
+  @GraphQLQuery
+  @GraphQLInputField
+  private String assessmentValues;
   // annotated below
   private ForeignObjectHolder<Person> author = new ForeignObjectHolder<>();
   // annotated below
-  private List<GenericRelatedObject> noteRelatedObjects;
+  private List<GenericRelatedObject> assessmentRelatedObjects;
 
-  public String getText() {
-    return text;
+  public String getAssessmentKey() {
+    return assessmentKey;
   }
 
-  public void setText(String text) {
-    this.text = Utils.trimStringReturnNull(text);
+  public void setAssessmentKey(String assessmentKey) {
+    this.assessmentKey = assessmentKey;
+  }
+
+  public String getAssessmentValues() {
+    return assessmentValues;
+  }
+
+  public void setAssessmentValues(String assessmentValues) {
+    this.assessmentValues = Utils.trimStringReturnNull(assessmentValues);
   }
 
   @GraphQLQuery(name = "author")
@@ -62,40 +73,40 @@ public class Note extends AbstractAnetBean {
     return author.getForeignObject();
   }
 
-  @GraphQLQuery(name = "noteRelatedObjects")
-  public CompletableFuture<List<GenericRelatedObject>> loadNoteRelatedObjects(
+  @GraphQLQuery(name = "assessmentRelatedObjects")
+  public CompletableFuture<List<GenericRelatedObject>> loadAssessmentRelatedObjects(
       @GraphQLRootContext GraphQLContext context) {
-    if (noteRelatedObjects != null) {
-      return CompletableFuture.completedFuture(noteRelatedObjects);
+    if (assessmentRelatedObjects != null) {
+      return CompletableFuture.completedFuture(assessmentRelatedObjects);
     }
-    return engine().getNoteDao().getRelatedObjects(context, this).thenApply(o -> {
-      noteRelatedObjects = o;
+    return engine().getAssessmentDao().getRelatedObjects(context, this).thenApply(o -> {
+      assessmentRelatedObjects = o;
       return o;
     });
   }
 
-  @GraphQLInputField(name = "noteRelatedObjects")
-  public void setNoteRelatedObjects(List<GenericRelatedObject> relatedObjects) {
-    this.noteRelatedObjects = relatedObjects;
+  @GraphQLInputField(name = "assessmentRelatedObjects")
+  public void setAssessmentRelatedObjects(List<GenericRelatedObject> relatedObjects) {
+    this.assessmentRelatedObjects = relatedObjects;
   }
 
-  public List<GenericRelatedObject> getNoteRelatedObjects() {
-    return noteRelatedObjects;
+  public List<GenericRelatedObject> getAssessmentRelatedObjects() {
+    return assessmentRelatedObjects;
   }
 
   @Override
   public boolean equals(Object o) {
-    if (!(o instanceof Note)) {
+    if (!(o instanceof Assessment a)) {
       return false;
     }
-    final Note n = (Note) o;
-    return Objects.equals(n.getUuid(), uuid) && Objects.equals(n.getAuthorUuid(), getAuthorUuid())
-        && Objects.equals(n.getText(), text);
+    return Objects.equals(a.getUuid(), uuid) && Objects.equals(a.getAuthorUuid(), getAuthorUuid())
+        && Objects.equals(a.getAssessmentKey(), assessmentKey)
+        && Objects.equals(a.getAssessmentValues(), assessmentValues);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, text);
+    return Objects.hash(uuid, assessmentKey, assessmentValues);
   }
 
   @Override

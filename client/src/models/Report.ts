@@ -1,6 +1,5 @@
 import Model, {
   createCustomFieldsSchema,
-  NOTE_TYPE,
   REPORT_RELATED_OBJECT_TYPE,
   REPORT_STATE_PUBLISHED,
   yupDate
@@ -262,7 +261,8 @@ export default class Report extends Model {
         .default({ uuid: null, text: null }),
       authorizationGroups: yup.array().nullable().default([]),
       classification: yup.string().nullable().default(null),
-      event: yup.object().nullable()
+      event: yup.object().nullable(),
+      assessments: yup.array().nullable().default([])
     })
     // not actually in the database, the database contains the JSON customFields
     .concat(Report.customFieldsSchema)
@@ -503,31 +503,29 @@ export default class Report extends Model {
     entitiesAssessmentsFieldName,
     entitiesAssessmentsUuidsFieldName
   ) {
-    const notesToAssessments = this.notes
-      .filter(
-        n => n.type === NOTE_TYPE.ASSESSMENT && n.noteRelatedObjects.length > 1
-      )
-      .map(n => ({
-        entityUuids: n.noteRelatedObjects
+    const filteredAssessments = this.assessments
+      .filter(a => a.assessmentRelatedObjects.length > 1)
+      .map(a => ({
+        entityUuids: a.assessmentRelatedObjects
           .filter(ro => ro.relatedObjectType === entityType.relatedObjectType)
           .map(ro => ro.relatedObjectUuid),
-        assessmentUuid: n.uuid,
-        assessment: utils.parseJsonSafe(n.text),
-        assessmentKey: n.assessmentKey
+        assessmentUuid: a.uuid,
+        assessmentKey: a.assessmentKey,
+        assessmentValues: utils.parseJsonSafe(a.assessmentValues)
       }))
-      .filter(n => !_isEmpty(n.entityUuids))
+      .filter(a => !_isEmpty(a.entityUuids))
     // When updating the instant assessments, we need for each entity the uuid of the
     // related instant assessment
     const entitiesAssessmentsUuids = {}
     // Get initial entities assessments values
     const entitiesAssessments = {}
-    notesToAssessments.forEach(m => {
+    filteredAssessments.forEach(m => {
       m.entityUuids.forEach(entityUuid => {
         const splittedKey = m.assessmentKey.split(".")
         const parsedKey = splittedKey.pop()
         entitiesAssessmentsUuids[entityUuid] = m.assessmentUuid
         entitiesAssessments[entityUuid] = entitiesAssessments[entityUuid] || {}
-        entitiesAssessments[entityUuid][parsedKey] = m.assessment
+        entitiesAssessments[entityUuid][parsedKey] = m.assessmentValues
       })
     })
     return {

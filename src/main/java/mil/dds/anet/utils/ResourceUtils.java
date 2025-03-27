@@ -5,8 +5,8 @@ import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import mil.dds.anet.beans.Assessment;
 import mil.dds.anet.beans.Note;
-import mil.dds.anet.beans.Note.NoteType;
 import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.config.ApplicationContextProvider;
 import org.slf4j.Logger;
@@ -101,6 +101,32 @@ public class ResourceUtils {
         && pph2.getEndTime().isAfter(pph1.getStartTime());
   }
 
+  public static void checkAndFixAssessment(final Assessment a) {
+    checkAndFixText(a);
+    checkAssessmentRelatedObjects(a);
+  }
+
+  private static void checkAndFixText(final Assessment a) {
+    if (a.getAssessmentValues() == null || a.getAssessmentValues().trim().isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Assessment values must not be empty");
+    }
+
+    try {
+      a.setAssessmentValues(Utils.sanitizeJson(a.getAssessmentValues()));
+    } catch (JsonProcessingException e) {
+      a.setAssessmentValues(null);
+      logger.error("Unable to process Json, payload discarded", e);
+    }
+  }
+
+  private static void checkAssessmentRelatedObjects(final Assessment a) {
+    if (Utils.isEmptyOrNull(a.getAssessmentRelatedObjects())) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Assessment must have related objects");
+    }
+  }
+
   public static void checkAndFixNote(final Note n) {
     checkAndFixText(n);
     checkNoteRelatedObjects(n);
@@ -110,20 +136,8 @@ public class ResourceUtils {
     if (n.getText() == null || n.getText().trim().isEmpty()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Note text must not be empty");
     }
-    sanitizeText(n);
-  }
 
-  private static void sanitizeText(final Note n) {
-    if (NoteType.FREE_TEXT.equals(n.getType())) {
-      n.setText(Utils.isEmptyHtml(n.getText()) ? null : Utils.sanitizeHtml(n.getText()));
-    } else {
-      try {
-        n.setText(Utils.sanitizeJson(n.getText()));
-      } catch (JsonProcessingException e) {
-        n.setText(null);
-        logger.error("Unable to process Json, payload discarded", e);
-      }
-    }
+    n.setText(Utils.isEmptyHtml(n.getText()) ? null : Utils.sanitizeHtml(n.getText()));
   }
 
   private static void checkNoteRelatedObjects(final Note n) {

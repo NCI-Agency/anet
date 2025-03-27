@@ -6,8 +6,8 @@ import {
 import Messages from "components/Messages"
 import Model, {
   ENTITY_ASSESSMENT_PARENT_FIELD,
-  GQL_CREATE_NOTE,
-  GQL_UPDATE_NOTE
+  GQL_CREATE_ASSESSMENT,
+  GQL_UPDATE_ASSESSMENT
 } from "components/Model"
 import { Form, Formik } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
@@ -19,9 +19,9 @@ import QuestionSet from "./QuestionSet"
 
 interface AssessmentModalProps {
   showModal?: boolean
-  note?: any
-  assessmentKey: string
   assessment?: any
+  assessmentKey: string
+  assessmentValues?: any
   assessmentYupSchema: any
   assessmentConfig: any
   // FIXME: required when recurrence is not ON_DEMAND
@@ -35,9 +35,9 @@ interface AssessmentModalProps {
 
 const AssessmentModal = ({
   showModal = false,
-  note,
-  assessmentKey,
   assessment,
+  assessmentKey,
+  assessmentValues,
   assessmentYupSchema,
   assessmentConfig,
   assessmentPeriod,
@@ -49,13 +49,13 @@ const AssessmentModal = ({
 }: AssessmentModalProps) => {
   const [assessmentError, setAssessmentError] = useState(null)
   const dictionaryPath = entity.getAssessmentDictionaryPath()
-  const edit = !!note.uuid
+  const edit = !!assessment.uuid
   const initialValues = useMemo(
     () =>
-      _isEmpty(assessment)
+      _isEmpty(assessmentValues)
         ? Model.fillObject({}, assessmentYupSchema)
-        : { [ENTITY_ASSESSMENT_PARENT_FIELD]: assessment },
-    [assessment, assessmentYupSchema]
+        : { [ENTITY_ASSESSMENT_PARENT_FIELD]: assessmentValues },
+    [assessmentValues, assessmentYupSchema]
   )
   return (
     <Modal
@@ -159,21 +159,22 @@ const AssessmentModal = ({
   }
 
   function onSubmitSuccess(response, values, form) {
-    const operation = edit ? "updateNote" : "createNote"
+    const operation = edit ? "updateAssessment" : "createAssessment"
     onSuccess(response[operation])
   }
 
   function saveAssessment(values, form) {
-    const noteRelatedObjects = note.noteRelatedObjects.map(o => ({
-      relatedObjectType: o.relatedObjectType,
-      relatedObjectUuid: o.relatedObjectUuid
-    }))
-    const updatedNote = {
-      uuid: note.uuid,
-      author: note.author,
-      type: note.type,
+    const assessmentRelatedObjects = assessment.assessmentRelatedObjects.map(
+      o => ({
+        relatedObjectType: o.relatedObjectType,
+        relatedObjectUuid: o.relatedObjectUuid
+      })
+    )
+    const updatedAssessment = {
+      uuid: assessment.uuid,
+      author: assessment.author,
       assessmentKey: `${dictionaryPath}.${assessmentKey}`,
-      noteRelatedObjects
+      assessmentRelatedObjects
     }
     // values contains the assessment fields
     const clonedValues = _cloneDeep(values)
@@ -183,13 +184,13 @@ const AssessmentModal = ({
       clonedValues[ENTITY_ASSESSMENT_PARENT_FIELD].__periodStart =
         formatPeriodBoundary(assessmentPeriod.start)
     }
-    updatedNote.text = customFieldsJSONString(
+    updatedAssessment.assessmentValues = customFieldsJSONString(
       clonedValues,
       true,
       ENTITY_ASSESSMENT_PARENT_FIELD
     )
-    return API.mutation(edit ? GQL_UPDATE_NOTE : GQL_CREATE_NOTE, {
-      note: updatedNote
+    return API.mutation(edit ? GQL_UPDATE_ASSESSMENT : GQL_CREATE_ASSESSMENT, {
+      assessment: updatedAssessment
     })
   }
 }

@@ -1,16 +1,15 @@
 import Model from "components/Model"
 import { Person, Task } from "models"
 
-export const GRAPHQL_NOTIFICATIONS_NOTE_FIELDS = `
+export const GRAPHQL_NOTIFICATIONS_ASSESSMENT_FIELDS = `
   customFields
-  notes {
-    noteRelatedObjects {
+  assessments {
+    assessmentRelatedObjects {
       objectUuid
     }
     createdAt
-    type
     assessmentKey
-    text
+    assessmentValues
   }
 `
 

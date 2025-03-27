@@ -352,6 +352,9 @@ public class OrganizationDao
       // Update interlocutorOrganization of reports to the winner
       updateForMerge(ReportDao.TABLE_NAME, "interlocutorOrganizationUuid", winnerOrganizationUuid,
           loserOrganizationUuid);
+      // Move assessments to the winner
+      updateM2mForMerge("assessmentRelatedObjects", "assessmentUuid", "relatedObjectUuid",
+          winnerOrganizationUuid, loserOrganizationUuid);
       // Move notes to the winner
       updateM2mForMerge("noteRelatedObjects", "noteUuid", "relatedObjectUuid",
           winnerOrganizationUuid, loserOrganizationUuid);

@@ -65,7 +65,7 @@ const widgetPropsPeople = {
     status: Model.STATUS.ACTIVE,
     pendingVerification: false
   },
-  fields: Models.Person.autocompleteQueryWithNotes,
+  fields: Models.Person.autocompleteQuery,
   addon: PEOPLE_ICON
 }
 
@@ -75,7 +75,7 @@ const widgetPropsOrganization = {
   overlayColumns: ["Name"],
   filterDefs: entityFilters,
   queryParams: { status: Model.STATUS.ACTIVE },
-  fields: Models.Organization.autocompleteQueryWithNotes,
+  fields: Models.Organization.autocompleteQuery,
   addon: ORGANIZATIONS_ICON
 }
 
@@ -85,7 +85,7 @@ const widgetPropsPosition = {
   overlayColumns: ["Position", "Organization", "Current Occupant"],
   filterDefs: entityFilters,
   queryParams: { status: Model.STATUS.ACTIVE },
-  fields: Models.Position.autocompleteQueryWithNotes,
+  fields: Models.Position.autocompleteQuery,
   addon: POSITIONS_ICON
 }
 
@@ -113,7 +113,7 @@ const widgetPropsLocation = {
   overlayColumns: ["Name"],
   filterDefs: generateLocationFilters,
   queryParams: { status: Model.STATUS.ACTIVE },
-  fields: Models.Location.autocompleteQueryWithNotes,
+  fields: Models.Location.autocompleteQuery,
   addon: LOCATIONS_ICON
 }
 
@@ -123,7 +123,7 @@ const widgetPropsTask = {
   overlayColumns: ["Name"],
   filterDefs: entityFilters,
   queryParams: { status: Model.STATUS.ACTIVE },
-  fields: Models.Task.autocompleteQueryWithNotes,
+  fields: Models.Task.autocompleteQuery,
   addon: TASKS_ICON
 }
 

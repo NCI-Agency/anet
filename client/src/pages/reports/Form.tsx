@@ -26,8 +26,8 @@ import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
 import Model, {
   ASSESSMENTS_RELATED_OBJECT_TYPE,
-  GRAPHQL_ENTITY_AVATAR_FIELDS,
-  NOTE_TYPE
+  EXCLUDED_ASSESSMENT_FIELDS,
+  GRAPHQL_ENTITY_AVATAR_FIELDS
 } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import NoPaginationTaskTable from "components/NoPaginationTaskTable"
@@ -37,7 +37,6 @@ import {
   PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
-import { EXCLUDED_ASSESSMENT_FIELDS } from "components/RelatedObjectNotes"
 import RichTextEditor from "components/RichTextEditor"
 import { FastField, Field, Form, Formik } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
@@ -184,8 +183,8 @@ const GQL_DELETE_REPORT = gql`
   }
 `
 const GQL_UPDATE_REPORT_ASSESSMENTS = gql`
-  mutation ($uuid: String, $notes: [NoteInput]) {
-    updateReportAssessments(reportUuid: $uuid, assessments: $notes)
+  mutation ($uuid: String, $assessments: [AssessmentInput]) {
+    updateReportAssessments(reportUuid: $uuid, assessments: $assessments)
   }
 `
 
@@ -1541,7 +1540,7 @@ const ReportForm = ({
   ) {
     const entitiesUuids = entities.map(e => e.uuid)
     const valuesCopy = _cloneDeep(values)
-    const assessmentNotes = []
+    const assessments = []
     const entitiesAssessments = Object.entries(
       valuesCopy[assessmentsFieldName]
     ).filter(([entityUuid, instantAssessments]) => {
@@ -1565,9 +1564,8 @@ const ReportForm = ({
         assessmentValues.__recurrence = RECURRENCE_TYPE.ONCE
         assessmentValues.__relatedObjectType =
           ASSESSMENTS_RELATED_OBJECT_TYPE.REPORT
-        const noteObj = {
-          type: NOTE_TYPE.ASSESSMENT,
-          noteRelatedObjects: [
+        const assessmentObj = {
+          assessmentRelatedObjects: [
             {
               relatedObjectType: entityType.relatedObjectType,
               relatedObjectUuid: entityUuid
@@ -1578,7 +1576,7 @@ const ReportForm = ({
             }
           ],
           assessmentKey: `${dictionaryPath}.${ak}`,
-          text: customFieldsJSONString(
+          assessmentValues: customFieldsJSONString(
             valuesCopy,
             true,
             `${assessmentsFieldName}.${entityUuid}.${ak}`
@@ -1587,12 +1585,12 @@ const ReportForm = ({
         const initialAssessmentUuid =
           values[assessmentsUuidsFieldName]?.[entityUuid]?.[ak]
         if (initialAssessmentUuid) {
-          noteObj.uuid = initialAssessmentUuid
+          assessmentObj.uuid = initialAssessmentUuid
         }
-        assessmentNotes.push(noteObj)
+        assessments.push(assessmentObj)
       })
     })
-    return assessmentNotes
+    return assessments
   }
 
   function save(values, sendEmail) {
@@ -1642,7 +1640,7 @@ const ReportForm = ({
         return report
       }
       // Update assessments
-      const tasksNotes = createInstantAssessments(
+      const tasksAssessments = createInstantAssessments(
         Task,
         values.tasks,
         values,
@@ -1650,7 +1648,7 @@ const ReportForm = ({
         Report.TASKS_ASSESSMENTS_UUIDS_FIELD,
         report.uuid
       )
-      const attendeesNotes = createInstantAssessments(
+      const attendeesAssessments = createInstantAssessments(
         Person,
         values.reportPeople?.filter(rp => rp.attendee),
         values,
@@ -1658,13 +1656,13 @@ const ReportForm = ({
         Report.ATTENDEES_ASSESSMENTS_UUIDS_FIELD,
         report.uuid
       )
-      const updateNotesVariables = {
+      const updateAssessmentsVariables = {
         uuid: report.uuid,
-        notes: tasksNotes.concat(attendeesNotes)
+        assessments: tasksAssessments.concat(attendeesAssessments)
       }
       return API.mutation(
         GQL_UPDATE_REPORT_ASSESSMENTS,
-        updateNotesVariables
+        updateAssessmentsVariables
       ).then(() => report)
     })
   }

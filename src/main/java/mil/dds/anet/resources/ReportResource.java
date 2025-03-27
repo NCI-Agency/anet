@@ -29,12 +29,11 @@ import mil.dds.anet.beans.AdvisorReportsEntry;
 import mil.dds.anet.beans.AdvisorReportsStats;
 import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.beans.ApprovalStep;
+import mil.dds.anet.beans.Assessment;
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Comment;
 import mil.dds.anet.beans.ConfidentialityRecord;
 import mil.dds.anet.beans.GenericRelatedObject;
-import mil.dds.anet.beans.Note;
-import mil.dds.anet.beans.Note.NoteType;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
@@ -51,9 +50,9 @@ import mil.dds.anet.config.AnetConfig;
 import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.AdminDao;
+import mil.dds.anet.database.AssessmentDao;
+import mil.dds.anet.database.AssessmentDao.UpdateType;
 import mil.dds.anet.database.CommentDao;
-import mil.dds.anet.database.NoteDao;
-import mil.dds.anet.database.NoteDao.UpdateType;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.ReportActionDao;
@@ -89,20 +88,20 @@ public class ReportResource {
   private final AnetObjectEngine engine;
   private final AdminDao adminDao;
   private final CommentDao commentDao;
-  private final NoteDao noteDao;
+  private final AssessmentDao assessmentDao;
   private final OrganizationDao organizationDao;
   private final ReportDao reportDao;
   private final ReportActionDao reportActionDao;
 
   public ReportResource(AnetConfig config, AnetDictionary dict, AnetObjectEngine anetObjectEngine,
-      AdminDao adminDao, CommentDao commentDao, NoteDao noteDao, OrganizationDao organizationDao,
-      ReportDao reportDao, ReportActionDao reportActionDao) {
+      AdminDao adminDao, CommentDao commentDao, AssessmentDao assessmentDao,
+      OrganizationDao organizationDao, ReportDao reportDao, ReportActionDao reportActionDao) {
     this.config = config;
     this.dict = dict;
     this.engine = anetObjectEngine;
     this.adminDao = adminDao;
     this.commentDao = commentDao;
-    this.noteDao = noteDao;
+    this.assessmentDao = assessmentDao;
     this.organizationDao = organizationDao;
     this.reportDao = reportDao;
     this.reportActionDao = reportActionDao;
@@ -925,42 +924,38 @@ public class ReportResource {
   @GraphQLMutation(name = "updateReportAssessments")
   public int updateReportAssessments(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "reportUuid") String reportUuid,
-      @GraphQLArgument(name = "assessments") List<Note> assessments) {
+      @GraphQLArgument(name = "assessments") List<Assessment> assessments) {
     // Do some sanity checks
     final Report r = reportDao.getByUuid(reportUuid);
     if (r == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Report not found");
     }
-    for (final Note assessment : assessments) {
-      if (assessment.getType() != NoteType.ASSESSMENT) {
-        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Note must be of assessment type");
-      }
-      final List<GenericRelatedObject> noteRelatedObjects = assessment.getNoteRelatedObjects();
-      if (noteRelatedObjects == null || noteRelatedObjects.size() != 2) {
+    for (final Assessment assessment : assessments) {
+      final List<GenericRelatedObject> assessmentRelatedObjects =
+          assessment.getAssessmentRelatedObjects();
+      if (assessmentRelatedObjects == null || assessmentRelatedObjects.size() != 2) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "Note must have two related objects");
+            "Assessment must have two related objects");
       }
-      // Check that note refers to this report and an attendee or task
-      final GenericRelatedObject nroReport;
-      final GenericRelatedObject nroPersonOrTask;
-      if (ReportDao.TABLE_NAME.equals(noteRelatedObjects.get(0).getRelatedObjectType())) {
-        nroReport = noteRelatedObjects.get(0);
-        nroPersonOrTask = noteRelatedObjects.get(1);
+      // Check that assessment refers to this report and an attendee or task
+      final GenericRelatedObject groReport;
+      final GenericRelatedObject groPersonOrTask;
+      if (ReportDao.TABLE_NAME.equals(assessmentRelatedObjects.get(0).getRelatedObjectType())) {
+        groReport = assessmentRelatedObjects.get(0);
+        groPersonOrTask = assessmentRelatedObjects.get(1);
       } else {
-        nroReport = noteRelatedObjects.get(1);
-        nroPersonOrTask = noteRelatedObjects.get(0);
+        groReport = assessmentRelatedObjects.get(1);
+        groPersonOrTask = assessmentRelatedObjects.get(0);
       }
-      if (!checkReportPersonOrTask(r, nroReport, nroPersonOrTask)) {
+      if (!checkReportPersonOrTask(r, groReport, groPersonOrTask)) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "Note must link to report and person or task");
+            "Assessment must link to report and person or task");
       }
-      ResourceUtils.checkAndFixNote(assessment);
+      ResourceUtils.checkAndFixAssessment(assessment);
     }
 
     // Load the existing assessments
-    final List<Note> existingNotes = r.loadNotes(engine.getContext()).join();
-    final List<Note> existingAssessments =
-        existingNotes.stream().filter(n -> n.getType().equals(NoteType.ASSESSMENT)).toList();
+    final List<Assessment> existingAssessments = r.loadAssessments(engine.getContext()).join();
 
     // Process the assessments
     final Person user = DaoUtils.getUserFromContext(context);
@@ -969,71 +964,74 @@ public class ReportResource {
     Utils.updateElementsByUuid(existingAssessments, assessments,
         // Create new assessments:
         newAssessment -> {
-          checkNotePermission(noteDao, user, authorizationGroupUuids, newAssessment, authorUuid,
+          checkAssessmentPermission(assessmentDao, user, authorizationGroupUuids, newAssessment,
               UpdateType.CREATE);
           newAssessment.setAuthorUuid(authorUuid);
-          noteDao.insert(newAssessment);
+          assessmentDao.insert(newAssessment);
         },
         // Delete old assessments:
         oldAssessment -> {
           final String oldAssessmentUuid = DaoUtils.getUuid(oldAssessment);
-          final Note existingAssessment = Utils.getByUuid(existingAssessments, oldAssessmentUuid);
-          checkNotePermission(noteDao, user, authorizationGroupUuids, existingAssessment,
-              existingAssessment.getAuthorUuid(), UpdateType.DELETE);
-          noteDao.delete(oldAssessmentUuid);
+          final Assessment existingAssessment =
+              Utils.getByUuid(existingAssessments, oldAssessmentUuid);
+          checkAssessmentPermission(assessmentDao, user, authorizationGroupUuids,
+              existingAssessment, UpdateType.DELETE);
+          assessmentDao.delete(oldAssessmentUuid);
         },
         // Update existing assessments:
         updatedAssessment -> {
-          final Note existingAssessment =
+          final Assessment existingAssessment =
               Utils.getByUuid(existingAssessments, DaoUtils.getUuid(updatedAssessment));
-          checkNotePermission(noteDao, user, authorizationGroupUuids, updatedAssessment,
-              existingAssessment.getAuthorUuid(), UpdateType.UPDATE);
-          if (!updatedAssessment.getText().equals(existingAssessment.getText())) {
+          checkAssessmentPermission(assessmentDao, user, authorizationGroupUuids, updatedAssessment,
+              UpdateType.UPDATE);
+          if (!updatedAssessment.getAssessmentValues()
+              .equals(existingAssessment.getAssessmentValues())) {
             updatedAssessment.setAuthorUuid(authorUuid);
-            noteDao.update(updatedAssessment);
+            assessmentDao.update(updatedAssessment);
           }
         });
 
     return assessments.size();
   }
 
-  private boolean checkReportPersonOrTask(Report r, GenericRelatedObject nroReport,
-      GenericRelatedObject nroPersonOrTask) {
+  private boolean checkReportPersonOrTask(Report r, GenericRelatedObject groReport,
+      GenericRelatedObject groPersonOrTask) {
     // Check report
-    if (!ReportDao.TABLE_NAME.equals(nroReport.getRelatedObjectType())) {
+    if (!ReportDao.TABLE_NAME.equals(groReport.getRelatedObjectType())) {
       return false;
     }
     // Check report uuid
-    if (!Objects.equals(DaoUtils.getUuid(r), nroReport.getRelatedObjectUuid())) {
+    if (!Objects.equals(DaoUtils.getUuid(r), groReport.getRelatedObjectUuid())) {
       return false;
     }
     // TODO: What about e.g. CANCELLED or PUBLISHED reports?
     // Check task uuid
-    if (TaskDao.TABLE_NAME.equals(nroPersonOrTask.getRelatedObjectType())) {
+    if (TaskDao.TABLE_NAME.equals(groPersonOrTask.getRelatedObjectType())) {
       return checkRelatedObject(
-          r.loadTasks(ApplicationContextProvider.getEngine().getContext()).join(), nroPersonOrTask);
+          r.loadTasks(ApplicationContextProvider.getEngine().getContext()).join(), groPersonOrTask);
     }
     // Check person uuid
-    if (PersonDao.TABLE_NAME.equals(nroPersonOrTask.getRelatedObjectType())) {
+    if (PersonDao.TABLE_NAME.equals(groPersonOrTask.getRelatedObjectType())) {
       return checkRelatedObject(
           r.loadReportPeople(ApplicationContextProvider.getEngine().getContext()).join(),
-          nroPersonOrTask);
+          groPersonOrTask);
     }
     return false;
   }
 
   private boolean checkRelatedObject(final List<? extends AbstractCustomizableAnetBean> beans,
-      GenericRelatedObject nro) {
+      GenericRelatedObject gro) {
     if (beans == null) {
       return false;
     }
-    return beans.stream().anyMatch(b -> Objects.equals(b.getUuid(), nro.getRelatedObjectUuid()));
+    return beans.stream().anyMatch(b -> Objects.equals(b.getUuid(), gro.getRelatedObjectUuid()));
   }
 
-  private void checkNotePermission(final NoteDao noteDao, final Person user,
-      final Set<String> authorizationGroupUuids, final Note note, final String authorUuid,
+  private void checkAssessmentPermission(final AssessmentDao assessmentDao, final Person user,
+      final Set<String> authorizationGroupUuids, final Assessment assessment,
       final UpdateType updateType) {
-    if (!noteDao.hasNotePermission(user, authorizationGroupUuids, note, authorUuid, updateType)) {
+    if (!assessmentDao.hasAssessmentPermission(user, authorizationGroupUuids, assessment,
+        updateType)) {
       // Don't provide too much information, just say it is "denied"
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Permission denied");
     }
