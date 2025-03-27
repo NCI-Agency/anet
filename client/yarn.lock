@@ -6267,7 +6267,7 @@ __metadata:
     locale-compare-polyfill: "npm:0.0.2"
     lodash: "npm:4.17.21"
     mgrs: "npm:1.0.0"
-    milsymbol: "npm:2.2.0"
+    milsymbol: "npm:3.0.1"
     ml-matrix: "npm:6.12.1"
     moment: "npm:2.30.1"
     moment-timezone: "npm:0.5.48"
@@ -14653,10 +14653,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"milsymbol@npm:2.2.0":
-  version: 2.2.0
-  resolution: "milsymbol@npm:2.2.0"
-  checksum: 10c0/a9f6ebceb553cecce6356bb47a90196ad0eefd49b767d61424119fbb65327bd634d9dc5fee036857edd560f258a48d3731805bb2a7f775384c6e8b004fc9f599
+"milsymbol@npm:3.0.1":
+  version: 3.0.1
+  resolution: "milsymbol@npm:3.0.1"
+  checksum: 10c0/cdde8745b22fece446e100b761506b623fe65296cca4970eb0c25d75a32c236f037d09150e0b8fb96d8a9457e29c1b18d5f64bcfd402c4c83955a1f2e87eef7e
   languageName: node
   linkType: hard
 
