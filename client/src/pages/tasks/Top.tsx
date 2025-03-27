@@ -1,6 +1,7 @@
 import { gql } from "@apollo/client"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
+import EventMatrix from "components/EventMatrix"
 import Fieldset from "components/Fieldset"
 import {
   mapPageDispatchersToProps,
@@ -23,10 +24,13 @@ const GQL_GET_TOP_LEVEL_TASKS = gql`
         uuid
         shortName
         longName
+        selectable
         parentTask {
           uuid
+        }
+        ascendantTasks {
+          uuid
           shortName
-          longName
           parentTask {
             uuid
           }
@@ -35,8 +39,16 @@ const GQL_GET_TOP_LEVEL_TASKS = gql`
           uuid
           shortName
           longName
+          selectable
           parentTask {
             uuid
+          }
+          ascendantTasks {
+            uuid
+            shortName
+            parentTask {
+              uuid
+            }
           }
         }
       }
@@ -64,11 +76,16 @@ const TopTasks = ({ pageDispatchers }: TopTasksProps) => {
   }
 
   return (
-    <Fieldset title={Settings.fields.task.allTasksLabel}>
-      {(!data?.taskList?.list?.length && (
-        <div>No {Settings.fields.task.allTasksLabel}</div>
-      )) || <TaskTree tasks={data.taskList.list} />}
-    </Fieldset>
+    <>
+      <Fieldset title={Settings.fields.task.allTasksLabel}>
+        {(!data?.taskList?.list?.length && (
+          <div>No {Settings.fields.task.allTasksLabel}</div>
+        )) || <TaskTree tasks={data.taskList.list} />}
+      </Fieldset>
+      <Fieldset id="syncMatrix" title="Sync Matrix">
+        <EventMatrix tasks={data.taskList.list} />
+      </Fieldset>
+    </>
   )
 }
 

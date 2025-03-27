@@ -541,6 +541,8 @@ const ReportForm = ({
         const isFutureEngagement = Report.isFuture(values.engagementDate)
         const hasAssessments = values.engagementDate && !isFutureEngagement
         const relatedObject = hasAssessments ? values : {}
+        const locationDisabled =
+          values.event?.uuid && values.event?.location?.uuid
 
         return (
           <div className="report-form">
@@ -705,7 +707,7 @@ const ReportForm = ({
                     setFieldValue("location", value, true)
                     setLocationUuid(value.uuid)
                   }}
-                  disabled={values.event?.uuid != null}
+                  disabled={locationDisabled}
                   widget={
                     <AdvancedSingleSelect
                       fieldName="location"
@@ -718,7 +720,7 @@ const ReportForm = ({
                       fields={Location.autocompleteQuery}
                       valueKey="name"
                       addon={LOCATIONS_ICON}
-                      showRemoveButton={values.event?.uuid == null}
+                      showRemoveButton={!locationDisabled}
                       createEntityComponent={
                         !canCreateLocation
                           ? null

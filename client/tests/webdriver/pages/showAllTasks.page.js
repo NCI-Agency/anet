@@ -32,6 +32,18 @@ class ShowAllTasks extends Page {
     }
     return visibleDescendants
   }
+
+  async getEventMatrix() {
+    return browser.$("#events-matrix")
+  }
+
+  async getTasksTableHeader() {
+    return browser.$("#tasks-table-header")
+  }
+
+  async getTasksTableRows() {
+    return browser.$$("#tasks-table-header ~ tr")
+  }
 }
 
 export default new ShowAllTasks()

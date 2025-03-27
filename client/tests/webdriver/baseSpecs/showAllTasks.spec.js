@@ -30,6 +30,7 @@ describe("Show All Tasks Page", () => {
     // eslint-disable-next-line no-unused-expressions
     expect(caret).to.exist
     await caret.click()
+    await browser.pause(300) // wait for tree animation to finish
 
     const descendants = await ShowAllTasks.getAllDescendants(firstTask)
     expect(descendants).to.have.lengthOf(3)
@@ -47,6 +48,8 @@ describe("Show All Tasks Page", () => {
     // eslint-disable-next-line no-unused-expressions
     expect(caret).to.exist
     await caret.click()
+    await browser.pause(300) // wait for tree animation to finish
+
     const descendants = await ShowAllTasks.getAllDescendants(firstTask)
     expect(descendants).to.have.lengthOf(3)
     const firstDescendant = descendants[0]
@@ -74,5 +77,19 @@ describe("Show All Tasks Page", () => {
       0,
       "No descendants should be present for EF 5"
     )
+  })
+
+  it("Should show the event matrix for all tasks", async() => {
+    const eventMatrix = await ShowAllTasks.getEventMatrix()
+    await eventMatrix.waitForExist()
+    await eventMatrix.waitForDisplayed()
+    const tasksTableHeader = await ShowAllTasks.getTasksTableHeader()
+    await tasksTableHeader.waitForExist()
+    await tasksTableHeader.waitForDisplayed()
+
+    const topTasks = await ShowAllTasks.getAllTasks()
+    const tasksTableRows = await ShowAllTasks.getTasksTableRows()
+    // Assert that we have at least a sensible number of rows
+    expect(tasksTableRows.length).to.be.at.least(topTasks.length)
   })
 })
