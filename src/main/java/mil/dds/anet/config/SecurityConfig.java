@@ -3,6 +3,7 @@ package mil.dds.anet.config;
 import static mil.dds.anet.config.ContentSecurityPolicy.CSP_NONE;
 import static mil.dds.anet.config.ContentSecurityPolicy.CSP_SELF;
 import static mil.dds.anet.config.ContentSecurityPolicy.CspDirective;
+import static org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER;
 
 import jakarta.servlet.http.HttpServletMapping;
 import java.util.List;
@@ -97,6 +98,8 @@ public class SecurityConfig {
     // Configure CSP
     http.headers(
         headers -> headers.contentSecurityPolicy(csp -> csp.policyDirectives(soapCsp.toString())));
+    // Configure Referrer Policy
+    http.headers(header -> header.referrerPolicy(rp -> rp.policy(NO_REFERRER)));
 
     return http.build();
   }
@@ -122,6 +125,8 @@ public class SecurityConfig {
     http.headers(headers -> headers
         .contentSecurityPolicy(csp -> csp.policyDirectives(String.format(defaultCsp.toString(),
             getAuthServerUrl(), getGeoSearcherUrl(), getBaseLayersUrls()))));
+    // Configure Referrer Policy
+    http.headers(header -> header.referrerPolicy(rp -> rp.policy(NO_REFERRER)));
     return http.build();
   }
 
