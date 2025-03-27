@@ -961,6 +961,10 @@ header.searchPagination {
   overflow-y: scroll;
 }
 
+#taskUuid-popover, #parentTaskUuid-popover {
+  min-width: 50vw;
+}
+
 .advanced-search {
   padding: 15px;
 }
