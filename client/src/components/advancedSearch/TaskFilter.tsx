@@ -292,13 +292,9 @@ const TaskFilter = ({
   `
 
   const HierarchicalOverlayTable = props => {
-    const {
-      items,
-      valueKey: propsValueKey,
-      selectedItems,
-      handleAddItem,
-      handleRemoveItem
-    } = { ...props }
+    const { items, selectedItems, handleAddItem, handleRemoveItem } = {
+      ...props
+    }
     const fetchChildren = async task => {
       const query = gql`
         query ($query: TaskSearchQueryInput) {
@@ -307,13 +303,6 @@ const TaskFilter = ({
               uuid
               shortName
               longName
-              parentTask {
-                uuid
-                shortName
-                parentTask {
-                  uuid
-                }
-              }
               ascendantTasks {
                 uuid
                 shortName
@@ -323,7 +312,6 @@ const TaskFilter = ({
               }
               childrenTasks {
                 uuid
-                shortName
               }
               descendantTasks {
                 uuid
@@ -359,7 +347,7 @@ const TaskFilter = ({
     const buildFlattenedList = (tasks, level = 0) => {
       return tasks.flatMap(task => {
         const isTaskSelected = selectedItems?.some(
-          item => item[propsValueKey] === task[propsValueKey]
+          item => item.uuid === task.uuid
         )
         const isChildrenTaskSelected = selectedItems?.some(item =>
           task.descendantTasks?.some(child => child.uuid === item.uuid)
@@ -384,9 +372,7 @@ const TaskFilter = ({
     const enhancedRenderRow = task => {
       const hasChildren = task.childrenTasks?.length > 0
       const isExpanded = expandedItems.has(task.uuid)
-      const isSelected = selectedItems?.some(
-        item => item[propsValueKey] === task[propsValueKey]
-      )
+      const isSelected = selectedItems?.some(item => item.uuid === task.uuid)
 
       const handleToggleSelection = e => {
         e.stopPropagation()
@@ -502,7 +488,7 @@ const TaskFilter = ({
       onChange={handleChangeTask}
       pageSize={0}
       value={value.value}
-      autoComplete={"off"}
+      autoComplete="off"
       renderSelected={
         <TaskTable
           tasks={value.value}
