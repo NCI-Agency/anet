@@ -224,7 +224,9 @@ const TaskFilter = ({
         }
       }
 
-      const displayLabel = task.shortName || `Task ${task.uuid}`
+      const displayLabel = task.longName
+        ? `${task.shortName}: ${task.longName}`
+        : task.shortName
       const padding = Math.min(task.level, 3) * 20 + (hasChildren ? 0 : 26)
       const indentedLabel = (
         <div
