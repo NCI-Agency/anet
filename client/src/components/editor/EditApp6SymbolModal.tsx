@@ -90,9 +90,26 @@ const EditApp6SymbolModal = ({
             borderColor: "#212529"
           }}
         >
-          <div className="d-flex gap-2">
-            {getApp6Symbol(20, currentValues)}
-            {selectedChoice}
+          <div
+            className="d-flex align-items-center gap-3"
+            style={{
+              width: "100%",
+              height: 30,
+              overflow: "hidden",
+              textAlign: "left"
+            }}
+          >
+            <div>{getApp6Symbol(20, currentValues)}</div>
+            <div
+              style={{
+                flex: 1,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap"
+              }}
+            >
+              {selectedChoice}
+            </div>
           </div>
         </Dropdown.Toggle>
         <Dropdown.Menu style={{ width: 300 }}>
@@ -100,7 +117,7 @@ const EditApp6SymbolModal = ({
             <Dropdown.Item
               key=""
               onClick={() => setFieldValue(field, "")}
-              className="d-flex align-items-center gap-2"
+              className="d-flex align-items-center gap-3"
               style={{ height: 40 }}
             >
               {getApp6Symbol(20, { ...currentValues, [field]: "" })}
@@ -111,7 +128,7 @@ const EditApp6SymbolModal = ({
             <Dropdown.Item
               key={choice.value}
               onClick={() => setFieldValue(field, choice.value)}
-              className="d-flex align-items-center gap-2"
+              className="d-flex align-items-center gap-3"
               style={{ height: 40 }}
             >
               {getApp6Symbol(20, { ...currentValues, [field]: choice.value })}
