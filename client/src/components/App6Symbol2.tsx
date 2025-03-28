@@ -3,37 +3,54 @@ import React from "react"
 
 const VERSION = 10
 
-export const SymbolSetChoices = [
-  { code: "01", label: "Air" },
-  { code: "02", label: "Air missile" },
-  { code: "05", label: "Space" },
-  { code: "06", label: "Space Missile" },
-  { code: "10", label: "Land unit" },
-  { code: "11", label: "Land civilian unit / Organization" },
-  { code: "15", label: "Land equipment" },
-  { code: "20", label: "Land installations" },
-  { code: "25", label: "Control measure" },
-  { code: "27", label: "Dismounted individual" },
-  { code: "30", label: "Sea surface" },
-  { code: "35", label: "Sea subsurface" },
-  { code: "36", label: "Mine warfare" },
-  { code: "40", label: "Activity / Event" },
-  { code: "50", label: "Signals Intelligence - Space" },
-  { code: "51", label: "Signals Intelligence - Air" },
-  { code: "52", label: "Signals Intelligence - Land" },
-  { code: "53", label: "Signals Intelligence - Surface" },
-  { code: "54", label: "Signals Intelligence - Subsurface" },
-  { code: "60", label: "Cyberspace" }
-]
+export const SymbolSetChoices = {
+  "01": "Air",
+  "02": "Air missile",
+  "05": "Space",
+  "06": "Space Missile",
+  10: "Land unit",
+  11: "Land civilian unit / Organization",
+  15: "Land equipment",
+  20: "Land installations",
+  25: "Control measure",
+  27: "Dismounted individual",
+  30: "Sea surface",
+  35: "Sea subsurface",
+  36: "Mine warfare",
+  40: "Activity / Event",
+  50: "Signals Intelligence - Space",
+  51: "Signals Intelligence - Air",
+  52: "Signals Intelligence - Land",
+  53: "Signals Intelligence - Surface",
+  54: "Signals Intelligence - Subsurface",
+  60: "Cyberspace"
+}
+
+export const AffiliationChoices = {
+  "00": "Pending",
+  "01": "Unknown",
+  "03": "Friend",
+  "04": "Neutral",
+  "06": "Hostile"
+}
 
 interface App6SymbolProps {
   code?: string
   symbolSet?: string
+  affiliation?: string
   size?: number
 }
 
-const App6Symbol = ({ code, symbolSet, size = 30 }: App6SymbolProps) => {
-  const symbolCode = `${VERSION}03${symbolSet}00000000000000`
+const App6Symbol = ({
+  code,
+  symbolSet,
+  affiliation,
+  size = 30
+}: App6SymbolProps) => {
+  let symbolCode = code
+  if (!code) {
+    symbolCode = `${VERSION}${affiliation}${symbolSet}00000000000000`
+  }
   const symbol = new ms.Symbol(symbolCode, { size })
   const svgString = symbol.asSVG()
   const dataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgString)}`

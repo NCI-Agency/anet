@@ -1,5 +1,8 @@
 import App6Symbol from "components/App6Symbol"
-import App6Symbol2, { SymbolSetChoices } from "components/App6Symbol2"
+import App6Symbol2, {
+  AffiliationChoices,
+  SymbolSetChoices
+} from "components/App6Symbol2"
 import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -49,19 +52,32 @@ const EditApp6SymbolModal = ({
       app6hq: tempValues.app6hq,
       app6amplifier: tempValues.app6amplifier
     }
-    return <App6Symbol2 symbolSet={symbolValues.app6symbolSet} size={size} />
+    return (
+      <App6Symbol2
+        symbolSet={symbolValues.app6symbolSet}
+        affiliation={symbolValues.app6standardIdentity}
+        size={size}
+      />
+    )
   }
 
   const getFieldWidget = (field, setFieldValue, currentValues) => {
-    const choicesObj = Settings.fields.organization[field]?.choices || {}
+    let choicesObj = Settings.fields.organization[field]?.choices || {}
     let choices = Object.entries(choicesObj).map(([key, value]) => ({
       value: key,
       label: value
     }))
     if (field === "app6symbolSet") {
-      choices = SymbolSetChoices.map(({ code, label }) => ({
-        value: code,
-        label
+      choicesObj = SymbolSetChoices
+      choices = Object.entries(choicesObj).map(([key, value]) => ({
+        value: key,
+        label: value
+      }))
+    } else if (field === "app6standardIdentity") {
+      choicesObj = AffiliationChoices
+      choices = Object.entries(choicesObj).map(([key, value]) => ({
+        value: key,
+        label: value
       }))
     }
 
