@@ -1,5 +1,5 @@
 import App6Symbol from "components/App6Symbol"
-import App6Symbol2, { getChoices } from "components/App6Symbol2"
+import App6Symbol2, { getChoices, getSymbolCode } from "components/App6Symbol2"
 import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -37,18 +37,12 @@ const EditApp6SymbolModal = ({
   }
 
   const getApp6Symbol = (size, tempValues) => {
-    return (
-      <App6Symbol2
-        symbolSet={tempValues.symbolSet}
-        affiliation={tempValues.affiliation}
-        status={tempValues.status}
-        size={size}
-      />
-    )
+    const code = getSymbolCode(tempValues)
+    return <App6Symbol2 code={code} size={size} />
   }
 
   const getFieldWidget = (field, setFieldValue, currentValues) => {
-    const choices = getChoices(field)
+    const choices = getChoices(field, currentValues)
 
     const parentValue = parentValues[field]
     const selectedChoice = currentValues[field]
@@ -162,6 +156,24 @@ const EditApp6SymbolModal = ({
                         name="status"
                         component={FieldHelper.SpecialField}
                         widget={getFieldWidget("status", setFieldValue, values)}
+                      />
+                      <DictionaryField
+                        wrappedComponent={Field}
+                        dictProps={{ label: "Headquarters / Task Force / Dummy" }}
+                        name="hq"
+                        component={FieldHelper.SpecialField}
+                        widget={getFieldWidget("hq", setFieldValue, values)}
+                      />
+                      <DictionaryField
+                        wrappedComponent={Field}
+                        dictProps={{ label: "Echelon / Mobility / Towed Array" }}
+                        name="echelon"
+                        component={FieldHelper.SpecialField}
+                        widget={getFieldWidget(
+                          "echelon",
+                          setFieldValue,
+                          values
+                        )}
                       />
                     </Fieldset>
                   </div>
