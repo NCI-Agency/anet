@@ -5,9 +5,8 @@ import Fieldset from "components/Fieldset"
 import { Field, Form, Formik } from "formik"
 import { Organization } from "models"
 import React from "react"
-import { Button, Dropdown, FormSelect, Modal } from "react-bootstrap"
+import { Button, Dropdown, Modal } from "react-bootstrap"
 import Settings from "settings"
-import utils from "utils"
 
 interface EditApp6SymbolModalProps {
   values: any
@@ -40,28 +39,14 @@ const EditApp6SymbolModal = ({
     app6amplifier: values.app6amplifier
   }
 
-  const getDefaultOption = (parentValue, choices) => {
-    if (!parentValue) {
-      return null
-    }
-    return (
-      <option key="" value="" style={{ fontStyle: "italic", color: "grey" }}>
-        {choices[parentValue]} (inherited)
-      </option>
-    )
-  }
-
-  const getApp6Symbol = (size, field = null, value = null) => {
+  const getApp6Symbol = (size, tempValues) => {
     const symbolValues = {
-      app6context: values.app6context || parentContext,
+      app6context: tempValues.app6context || parentContext,
       app6standardIdentity:
-        values.app6standardIdentity || parentStandardIdentity,
-      app6symbolSet: values.app6symbolSet || parentSymbolSet,
-      app6hq: values.app6hq,
-      app6amplifier: values.app6amplifier
-    }
-    if (field && value !== null) {
-      symbolValues[field] = value
+        tempValues.app6standardIdentity || parentStandardIdentity,
+      app6symbolSet: tempValues.app6symbolSet || parentSymbolSet,
+      app6hq: tempValues.app6hq,
+      app6amplifier: tempValues.app6amplifier
     }
     return (
       <App6Symbol
@@ -75,7 +60,7 @@ const EditApp6SymbolModal = ({
     )
   }
 
-  const getFieldWidget = (field, setFieldValue, value) => {
+  const getFieldWidget = (field, setFieldValue, currentValues) => {
     const choicesObj = Settings.fields.organization[field]?.choices || {}
     const choices = Object.entries(choicesObj).map(([key, value]) => ({
       value: key,
@@ -84,11 +69,12 @@ const EditApp6SymbolModal = ({
 
     const parentValue = parentValues[field]
     const parentChoice = choices.find(choice => choice.value === parentValue)
-    const selectedChoice = value
-      ? choicesObj[value]
+    const selectedChoice = currentValues[field]
+      ? choicesObj[currentValues[field]]
       : parentValue
         ? `${choicesObj[parentValue]} (inherited)`
         : ""
+
     return (
       <Dropdown>
         <Dropdown.Toggle
@@ -105,7 +91,7 @@ const EditApp6SymbolModal = ({
           }}
         >
           <div className="d-flex gap-2">
-            {getApp6Symbol(20)}
+            {getApp6Symbol(20, currentValues)}
             {selectedChoice}
           </div>
         </Dropdown.Toggle>
@@ -117,7 +103,7 @@ const EditApp6SymbolModal = ({
               className="d-flex align-items-center gap-2"
               style={{ height: 40 }}
             >
-              {getApp6Symbol(20, field, parentValue)}
+              {getApp6Symbol(20, { ...currentValues, [field]: "" })}
               {`${parentChoice.label} (inherited)`}
             </Dropdown.Item>
           )}
@@ -128,7 +114,7 @@ const EditApp6SymbolModal = ({
               className="d-flex align-items-center gap-2"
               style={{ height: 40 }}
             >
-              {getApp6Symbol(20, field, choice.value)}
+              {getApp6Symbol(20, { ...currentValues, [field]: choice.value })}
               {choice.label}
             </Dropdown.Item>
           ))}
@@ -168,7 +154,7 @@ const EditApp6SymbolModal = ({
                         widget={getFieldWidget(
                           "app6context",
                           setFieldValue,
-                          values.app6context
+                          values
                         )}
                       />
                       <DictionaryField
@@ -181,7 +167,7 @@ const EditApp6SymbolModal = ({
                         widget={getFieldWidget(
                           "app6standardIdentity",
                           setFieldValue,
-                          values.app6standardIdentity
+                          values
                         )}
                       />
                       <DictionaryField
@@ -192,7 +178,7 @@ const EditApp6SymbolModal = ({
                         widget={getFieldWidget(
                           "app6symbolSet",
                           setFieldValue,
-                          values.app6symbolSet
+                          values
                         )}
                       />
                       <DictionaryField
@@ -200,11 +186,7 @@ const EditApp6SymbolModal = ({
                         dictProps={Settings.fields.organization.app6hq}
                         name="app6hq"
                         component={FieldHelper.SpecialField}
-                        widget={getFieldWidget(
-                          "app6hq",
-                          setFieldValue,
-                          values.app6hq
-                        )}
+                        widget={getFieldWidget("app6hq", setFieldValue, values)}
                       />
                       <DictionaryField
                         wrappedComponent={Field}
@@ -214,7 +196,7 @@ const EditApp6SymbolModal = ({
                         widget={getFieldWidget(
                           "app6amplifier",
                           setFieldValue,
-                          values.app6amplifier
+                          values
                         )}
                       />
                     </Fieldset>
@@ -227,16 +209,7 @@ const EditApp6SymbolModal = ({
                       alignItems: "center"
                     }}
                   >
-                    <App6Symbol
-                      context={values.app6context || parentContext}
-                      standardIdentity={
-                        values.app6standardIdentity || parentStandardIdentity
-                      }
-                      symbolSet={values.app6symbolSet || parentSymbolSet}
-                      hq={values.app6hq}
-                      amplifier={values.app6amplifier}
-                      size={200}
-                    />
+                    {getApp6Symbol(200, values)}
                   </div>
                 </div>
               </Modal.Body>
