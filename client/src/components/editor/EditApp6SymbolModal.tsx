@@ -1,4 +1,5 @@
 import App6Symbol from "components/App6Symbol"
+import App6Symbol2, { SymbolSetChoices } from "components/App6Symbol2"
 import DictionaryField from "components/DictionaryField"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -48,24 +49,21 @@ const EditApp6SymbolModal = ({
       app6hq: tempValues.app6hq,
       app6amplifier: tempValues.app6amplifier
     }
-    return (
-      <App6Symbol
-        context={symbolValues.app6context}
-        standardIdentity={symbolValues.app6standardIdentity}
-        symbolSet={symbolValues.app6symbolSet}
-        hq={symbolValues.app6hq}
-        amplifier={symbolValues.app6amplifier}
-        size={size}
-      />
-    )
+    return <App6Symbol2 symbolSet={symbolValues.app6symbolSet} size={size} />
   }
 
   const getFieldWidget = (field, setFieldValue, currentValues) => {
     const choicesObj = Settings.fields.organization[field]?.choices || {}
-    const choices = Object.entries(choicesObj).map(([key, value]) => ({
+    let choices = Object.entries(choicesObj).map(([key, value]) => ({
       value: key,
       label: value
     }))
+    if (field === "app6symbolSet") {
+      choices = SymbolSetChoices.map(({ code, label }) => ({
+        value: code,
+        label
+      }))
+    }
 
     const parentValue = parentValues[field]
     const parentChoice = choices.find(choice => choice.value === parentValue)
