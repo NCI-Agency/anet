@@ -3,7 +3,7 @@ import React from "react"
 
 const VERSION = 10
 
-export const SymbolSetChoices = {
+const SymbolSetChoices = {
   "01": "Air",
   "02": "Air missile",
   "05": "Space",
@@ -26,7 +26,7 @@ export const SymbolSetChoices = {
   60: "Cyberspace"
 }
 
-export const AffiliationChoices = {
+const AffiliationChoices = {
   "00": "Pending",
   "01": "Unknown",
   "03": "Friend",
@@ -34,10 +34,33 @@ export const AffiliationChoices = {
   "06": "Hostile"
 }
 
+const StatusChoices = {
+  0: "Present",
+  1: "Planned / Anticipated / Suspect",
+  2: "Present / Fully capable",
+  3: "Present / Damaged",
+  4: "Present / Destroyed",
+  5: "Present / Full to capacity"
+}
+
+export const getChoices = field => {
+  switch (field) {
+    case "symbolSet":
+      return SymbolSetChoices
+    case "affiliation":
+      return AffiliationChoices
+    case "status":
+      return StatusChoices
+    default:
+      return {}
+  }
+}
+
 interface App6SymbolProps {
   code?: string
   symbolSet?: string
   affiliation?: string
+  status?: string
   size?: number
 }
 
@@ -45,11 +68,15 @@ const App6Symbol = ({
   code,
   symbolSet,
   affiliation,
+  status,
   size = 30
 }: App6SymbolProps) => {
   let symbolCode = code
   if (!code) {
-    symbolCode = `${VERSION}${affiliation}${symbolSet}00000000000000`
+    symbolSet ||= "00"
+    affiliation ||= "00"
+    status ||= "0"
+    symbolCode = `${VERSION}${affiliation}${symbolSet}${status}0000000000000`
   }
   const symbol = new ms.Symbol(symbolCode, { size })
   const svgString = symbol.asSVG()
