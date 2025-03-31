@@ -51,6 +51,15 @@ const EditApp6SymbolModal = ({
     return <App6Symbol2 code={code} size={size} />
   }
 
+  const getFieldRow = (field, fieldName, setFieldValue, currentValues) => {
+    return (
+      <div className="d-flex flex-column gap-2">
+        <div style={{ fontWeight: "bold" }}>{fieldName}</div>
+        {getFieldWidget(field, setFieldValue, currentValues)}
+      </div>
+    )
+  }
+
   const getFieldWidget = (field, setFieldValue, currentValues) => {
     const choices = getChoices(field, currentValues)
 
@@ -68,7 +77,7 @@ const EditApp6SymbolModal = ({
           variant="outline-tertiary"
           id={`${field}-dropdown`}
           style={{
-            width: 300,
+            width: "100%",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
@@ -99,7 +108,7 @@ const EditApp6SymbolModal = ({
             </div>
           </div>
         </Dropdown.Toggle>
-        <Dropdown.Menu style={{ width: 300 }}>
+        <Dropdown.Menu style={{ width: "100%" }}>
           {Object.entries(choices).map(([key, value]) => (
             <Dropdown.Item
               key={key}
@@ -133,108 +142,68 @@ const EditApp6SymbolModal = ({
           return (
             <Form>
               <Modal.Body>
-                <div style={{ display: "flex" }}>
-                  <div>
-                    <Fieldset
-                      title="APP-06 Symbol"
-                      style={{ marginBottom: "1rem" }}
-                    >
-                      <DictionaryField
-                        wrappedComponent={Field}
-                        dictProps={{ label: "Symbol Set" }}
-                        name="symbolSet"
-                        component={FieldHelper.SpecialField}
-                        widget={getFieldWidget(
-                          "symbolSet",
-                          setFieldValue,
-                          values
-                        )}
-                      />
-                      <DictionaryField
-                        wrappedComponent={Field}
-                        dictProps={{ label: "Affiliation" }}
-                        name="affiliation"
-                        component={FieldHelper.SpecialField}
-                        widget={getFieldWidget(
-                          "affiliation",
-                          setFieldValue,
-                          values
-                        )}
-                      />
-                      <DictionaryField
-                        wrappedComponent={Field}
-                        dictProps={{ label: "Status" }}
-                        name="status"
-                        component={FieldHelper.SpecialField}
-                        widget={getFieldWidget("status", setFieldValue, values)}
-                      />
-                      <DictionaryField
-                        wrappedComponent={Field}
-                        dictProps={{
-                          label: "Headquarters / Task Force / Dummy"
-                        }}
-                        name="hq"
-                        component={FieldHelper.SpecialField}
-                        widget={getFieldWidget("hq", setFieldValue, values)}
-                      />
-                      <DictionaryField
-                        wrappedComponent={Field}
-                        dictProps={{
-                          label: "Echelon / Mobility / Towed Array"
-                        }}
-                        name="echelon"
-                        component={FieldHelper.SpecialField}
-                        widget={getFieldWidget(
-                          "echelon",
-                          setFieldValue,
-                          values
-                        )}
-                      />
-                      <DictionaryField
-                        wrappedComponent={Field}
-                        dictProps={{ label: "Main Icon" }}
-                        name="mainIcon"
-                        component={FieldHelper.SpecialField}
-                        widget={getFieldWidget(
-                          "mainIcon",
-                          setFieldValue,
-                          values
-                        )}
-                      />
-                      <DictionaryField
-                        wrappedComponent={Field}
-                        dictProps={{ label: "First Modifier" }}
-                        name="firstModifier"
-                        component={FieldHelper.SpecialField}
-                        widget={getFieldWidget(
-                          "firstModifier",
-                          setFieldValue,
-                          values
-                        )}
-                      />
-                      <DictionaryField
-                        wrappedComponent={Field}
-                        dictProps={{ label: "Second Modifier" }}
-                        name="secondModifier"
-                        component={FieldHelper.SpecialField}
-                        widget={getFieldWidget(
-                          "secondModifier",
-                          setFieldValue,
-                          values
-                        )}
-                      />
-                    </Fieldset>
+                <div
+                  className="d-flex justify-content-evenly"
+                  style={{ padding: 20 }}
+                >
+                  <div
+                    className="d-flex flex-column gap-3"
+                    style={{ width: "50%" }}
+                  >
+                    {getFieldRow(
+                      "symbolSet",
+                      "Symbol Set",
+                      setFieldValue,
+                      values
+                    )}
+                    {getFieldRow(
+                      "affiliation",
+                      "Affiliation",
+                      setFieldValue,
+                      values
+                    )}
+                    {getFieldRow("status", "Status", setFieldValue, values)}
+                    {getFieldRow(
+                      "hq",
+                      "Headquarters / Task Force / Dummy",
+                      setFieldValue,
+                      values
+                    )}
+                    {getFieldRow(
+                      "echelon",
+                      "Echelon / Mobility / Towed Array",
+                      setFieldValue,
+                      values
+                    )}
+                    {getFieldRow(
+                      "mainIcon",
+                      "Main Icon",
+                      setFieldValue,
+                      values
+                    )}
+                    {getFieldRow(
+                      "firstModifier",
+                      "First Modifier",
+                      setFieldValue,
+                      values
+                    )}
+                    {getFieldRow(
+                      "secondModifier",
+                      "Second Modifier",
+                      setFieldValue,
+                      values
+                    )}
                   </div>
-                  {/* <div
+                  <div
                     style={{
                       display: "flex",
-                      width: "50%",
+                      minWidth: 200,
                       justifyContent: "center",
                       alignItems: "center"
                     }}
                   >
                     {getApp6Symbol(200, values)}
-                  </div> */}
+                  </div>
                 </div>
               </Modal.Body>
               <Modal.Footer>
