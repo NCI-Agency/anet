@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import mil.dds.anet.beans.Assessment;
+import mil.dds.anet.beans.AccessToken;
 import mil.dds.anet.beans.CustomSensitiveInformation;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
@@ -71,6 +72,13 @@ public class DaoUtils {
       fieldAliases.add(sb.toString());
     }
     return " " + Joiner.on(", ").join(fieldAliases) + " ";
+  }
+
+  public static AccessToken getGraphQLWebServiceAccessToken(GraphQLContext context) {
+    if (context == null) {
+      return null;
+    }
+    return context.get("graphQLWebServiceToken");
   }
 
   public static Person getUserFromContext(GraphQLContext context) {
