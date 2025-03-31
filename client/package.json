@@ -190,7 +190,7 @@
   "resolutions": {
     "chromedriver": "link:./node_modules/.cache/null"
   },
-  "packageManager": "yarn@4.7.0",
+  "packageManager": "yarn@4.8.1",
   "scripts": {
     "build": "NODE_ENV=production webpack --config config/webpack.client.prod.js",
     "start": "SERVER_URL=${SERVER_URL:-'http://localhost:8080'} DEV_PORT=${DEV_PORT:-3000} NODE_ENV=development webpack serve --config config/webpack.client.dev.js",
