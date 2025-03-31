@@ -20,6 +20,7 @@ import io.leangen.graphql.spqr.spring.autoconfigure.SpqrProperties;
 import io.leangen.graphql.spqr.spring.web.GraphQLController;
 import java.lang.reflect.AnnotatedElement;
 import java.util.List;
+import mil.dds.anet.beans.AccessToken;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
@@ -203,10 +204,13 @@ public class GraphQLConfig implements WebMvcConfigurer {
           invocationContext.getResolutionEnvironment();
       final GraphQLContext context =
           resolutionEnvironment.dataFetchingEnvironment.getGraphQlContext();
+
+      // In context, we might have an ANET user or a GraphQLWebServiceAccessToken
       final Person currentUser = DaoUtils.getUserFromContext(context);
+      final AccessToken accessToken = DaoUtils.getGraphQLWebServiceAccessToken(context);
 
       // Check for unverified users
-      if (denyUnverifiedUsers(delegate, currentUser)) {
+      if (accessToken == null && denyUnverifiedUsers(delegate, currentUser)) {
         // Simply return null so the GraphQL response contains no extra information
         return null;
       }
@@ -237,7 +241,7 @@ public class GraphQLConfig implements WebMvcConfigurer {
         @SuppressWarnings("unchecked")
         final List<String> authorizationGroupUuids = (List<String>) ApplicationContextProvider
             .getDictionary().getDictionaryEntry(authorizationGroupSetting);
-        if (authorizationGroupUuids != null) {
+        if (currentUser != null && authorizationGroupUuids != null) {
           // Make sure the current user's authorizationGroups are loaded (should happen only once
           // per request execution)
           currentUser.loadAuthorizationGroups();

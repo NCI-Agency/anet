@@ -52,10 +52,9 @@ public class GraphQLExecutor extends HttpExecutor<NativeWebRequest> {
   @Transactional
   public Map<String, Object> execute(final Principal principal, final GraphQL graphQL,
       final ExecutorParams<NativeWebRequest> params) {
-    final Person user = SecurityUtils.getPersonFromPrincipal(principal);
     final Long graphqlRequestTimeoutMs = config.getGraphqlRequestTimeoutMs();
     final ExecutionResult executionResult =
-        dispatchRequest(user, graphQL, params, graphqlRequestTimeoutMs);
+        dispatchRequest(principal, graphQL, params, graphqlRequestTimeoutMs);
     final Map<String, Object> result = executionResult.toSpecification();
     if (executionResult.getErrors().isEmpty()) {
       return result;
@@ -87,15 +86,24 @@ public class GraphQLExecutor extends HttpExecutor<NativeWebRequest> {
         .dataLoaderRegistry(dataLoaderRegistry).graphQLContext(context).build();
   }
 
-  private ExecutionResult dispatchRequest(final Person user, final GraphQL graphQL,
+  private ExecutionResult dispatchRequest(final Principal principal, final GraphQL graphQL,
       final ExecutorParams<NativeWebRequest> params, final Long graphqlRequestTimeoutMs) {
     final BatchingUtils batchingUtils =
         new BatchingUtils(ApplicationContextProvider.getEngine(), true, true);
     final DataLoaderRegistry dataLoaderRegistry = batchingUtils.getDataLoaderRegistry();
     final Map<String, Object> context = new HashMap<>();
-    context.put("user", Objects.requireNonNullElse(user, new Person()));
+    // If this a GraphQLWebServiceResourcePrincipal?
+    if (principal instanceof GraphQLWebServiceResource.GraphQLWebServiceResourcePrincipal graphQLWebServiceResourcePrincipal) {
+      context.put("graphQLWebServiceToken", graphQLWebServiceResourcePrincipal.getAccessToken());
+      context.put(Introspection.INTROSPECTION_DISABLED, true);
+    } else {
+      final Person user = SecurityUtils.getPersonFromPrincipal(principal);
+      context.put("user", Objects.requireNonNullElse(user, new Person()));
+      context.put(Introspection.INTROSPECTION_DISABLED, !AuthUtils.isAdmin(user));
+    }
+
     context.put("dataLoaderRegistry", dataLoaderRegistry);
-    context.put(Introspection.INTROSPECTION_DISABLED, !AuthUtils.isAdmin(user));
+
     final ExecutionInput executionInput =
         buildInput(params.graphQLRequest, dataLoaderRegistry, context);
 
