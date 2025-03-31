@@ -228,6 +228,10 @@ public abstract class AbstractResourceTest {
   }
 
   // Getting the above as a normal bean
+  public mil.dds.anet.beans.Person getAdminBean() {
+    return getInput(admin, mil.dds.anet.beans.Person.class);
+  }
+
   public mil.dds.anet.beans.Person getSuperuserBean() {
     return getInput(getSuperuser(), mil.dds.anet.beans.Person.class);
   }
