@@ -1,6 +1,7 @@
 package mil.dds.anet.resources;
 
 import io.leangen.graphql.spqr.spring.web.dto.GraphQLRequest;
+import java.security.Principal;
 import java.util.Map;
 import mil.dds.anet.beans.AccessToken;
 import mil.dds.anet.database.AccessTokenDao;
@@ -14,10 +15,31 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import javax.security.auth.Subject;
 
 @RestController
 @RequestMapping("/graphqlWebService")
 public class GraphQLWebServiceResource {
+  public class GraphQLWebServiceResourcePrincipal implements Principal{
+    AccessToken accessToken;
+    @Override
+    public String getName() {
+      return "GraphQLWebServiceResourcePrincipal";
+    }
+
+    @Override
+    public boolean implies(Subject subject) {
+      return Principal.super.implies(subject);
+    }
+
+    public AccessToken getAccessToken() {
+      return accessToken;
+    }
+
+    public void setAccessToken(AccessToken accessToken) {
+      this.accessToken = accessToken;
+    }
+  }
 
   private static final int ACCESS_TOKEN_LENGTH = 32;
 
@@ -43,8 +65,10 @@ public class GraphQLWebServiceResource {
       if (accessToken.length() == ACCESS_TOKEN_LENGTH) {
         final AccessToken at = accessTokenDao.getByTokenValueAndScope(accessToken, AccessToken.TokenScope.GRAPHQL.name());
         if (at != null && at.isValid()) {
+          GraphQLWebServiceResourcePrincipal graphQLWebServiceResourcePrincipal = new GraphQLWebServiceResourcePrincipal();
+          graphQLWebServiceResourcePrincipal.setAccessToken(at);
           return ResourceTransformers.jsonTransformer
-              .apply(graphQLResource.graphql(null, graphQLRequest, null));
+              .apply(graphQLResource.graphql(graphQLWebServiceResourcePrincipal, graphQLRequest, null));
         }
       }
     }
