@@ -63,10 +63,9 @@ public class AccessTokenDao extends AbstractDao {
     try {
       final String tokenHash = AccessToken.computeTokenHash(tokenValue);
       try {
-        return handle
-            .createQuery("/* getAccessTokenByValue */ "
-                + "SELECT * FROM \"accessTokens\" WHERE \"tokenHash\" = :tokenHash AND scope = :scope")
-            .bind("tokenHash", tokenHash).bind("scope",scope).map(new AccessTokenMapper()).one();
+        return handle.createQuery("/* getAccessTokenByValue */ "
+            + "SELECT * FROM \"accessTokens\" WHERE \"tokenHash\" = :tokenHash AND scope = :scope")
+            .bind("tokenHash", tokenHash).bind("scope", scope).map(new AccessTokenMapper()).one();
       } catch (IllegalStateException e) {
         return null;
       }
