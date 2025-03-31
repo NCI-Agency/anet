@@ -53,6 +53,11 @@ public class TaskResource {
     return p;
   }
 
+  @GraphQLQuery(name = "tasks")
+  public List<Task> getByUuids(@GraphQLArgument(name = "uuids") List<String> uuids) {
+    return dao.getByIds(uuids);
+  }
+
   @GraphQLMutation(name = "createTask")
   public Task createTask(@GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "task") Task t) {
