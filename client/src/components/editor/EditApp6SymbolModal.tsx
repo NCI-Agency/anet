@@ -27,13 +27,23 @@ const EditApp6SymbolModal = ({
   const parentValues = {
     symbolSet: null,
     affiliation: null,
-    status: null
+    status: null,
+    hq: null,
+    echilon: null,
+    mainIcon: null,
+    firstModifier: null,
+    secondModifier: null
   }
 
   const initialValues = {
     symbolSet: null,
     affiliation: null,
-    status: null
+    status: null,
+    hq: null,
+    echilon: null,
+    mainIcon: null,
+    firstModifier: null,
+    secondModifier: null
   }
 
   const getApp6Symbol = (size, tempValues) => {
@@ -46,7 +56,8 @@ const EditApp6SymbolModal = ({
 
     const parentValue = parentValues[field]
     const selectedChoice = currentValues[field]
-      ? choices?.[currentValues[field]]
+      ? choices?.[currentValues[field]]?.value ||
+        choices?.[currentValues[field]]
       : parentValue
         ? `${choices?.[parentValue]} (inherited)`
         : ""
@@ -97,7 +108,7 @@ const EditApp6SymbolModal = ({
               style={{ height: 40 }}
             >
               {getApp6Symbol(20, { ...currentValues, [field]: key })}
-              {value}
+              {value?.value || value}
             </Dropdown.Item>
           ))}
         </Dropdown.Menu>
@@ -159,18 +170,55 @@ const EditApp6SymbolModal = ({
                       />
                       <DictionaryField
                         wrappedComponent={Field}
-                        dictProps={{ label: "Headquarters / Task Force / Dummy" }}
+                        dictProps={{
+                          label: "Headquarters / Task Force / Dummy"
+                        }}
                         name="hq"
                         component={FieldHelper.SpecialField}
                         widget={getFieldWidget("hq", setFieldValue, values)}
                       />
                       <DictionaryField
                         wrappedComponent={Field}
-                        dictProps={{ label: "Echelon / Mobility / Towed Array" }}
+                        dictProps={{
+                          label: "Echelon / Mobility / Towed Array"
+                        }}
                         name="echelon"
                         component={FieldHelper.SpecialField}
                         widget={getFieldWidget(
                           "echelon",
+                          setFieldValue,
+                          values
+                        )}
+                      />
+                      <DictionaryField
+                        wrappedComponent={Field}
+                        dictProps={{ label: "Main Icon" }}
+                        name="mainIcon"
+                        component={FieldHelper.SpecialField}
+                        widget={getFieldWidget(
+                          "mainIcon",
+                          setFieldValue,
+                          values
+                        )}
+                      />
+                      <DictionaryField
+                        wrappedComponent={Field}
+                        dictProps={{ label: "First Modifier" }}
+                        name="firstModifier"
+                        component={FieldHelper.SpecialField}
+                        widget={getFieldWidget(
+                          "firstModifier",
+                          setFieldValue,
+                          values
+                        )}
+                      />
+                      <DictionaryField
+                        wrappedComponent={Field}
+                        dictProps={{ label: "Second Modifier" }}
+                        name="secondModifier"
+                        component={FieldHelper.SpecialField}
+                        widget={getFieldWidget(
+                          "secondModifier",
                           setFieldValue,
                           values
                         )}
