@@ -1497,12 +1497,15 @@ INSERT INTO "eventPeople" ("eventUuid", "personUuid") VALUES
 -- Assign existing report to event
 UPDATE reports SET "eventUuid" = 'e850846e-9741-40e8-bc51-4dccc30cf47f' WHERE uuid = '86e4cf7e-c0ae-4bd9-b1ad-f2c65ca0f600';
 
--- Insert a sample web service access token
+-- Insert Web Service tokens
+-- you can generate new tokens with e.g.:
+-- dd if=/dev/urandom bs=24 count=1 | base64 | ( read r; echo -ne "Token value = $r\nToken hash = " >&2; echo -n $r ) | openssl dgst -binary -sha256 | openssl base64
+-- NVG token value is 'XfayXIGGC4vKu5j9UEgAAbZYj50v88Zv'
 INSERT INTO "accessTokens" (uuid, name, description, "tokenHash", "createdAt", "expiresAt", "scope") VALUES
-  -- token value is 'XfayXIGGC4vKu5j9UEgAAbZYj50v88Zv'
-  -- you can generate new tokens with e.g.:
-  -- dd if=/dev/urandom bs=24 count=1 | base64 | ( read r; echo -ne "Token value = $r\nToken hash = " >&2; echo -n $r ) | openssl dgst -binary -sha256 | openssl base64
-  ('2e45aef0-b9de-4818-be95-b0cc2aececfc', 'Sample Web Service Access Token', 'A sample web service access token for the NVG Web Service', 'AaEge0eLJTP25aRAA5jIZxyzvejJBxPk+kAJDpv+5nc=', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '10 years', 'NVG');
+  ('2e45aef0-b9de-4818-be95-b0cc2aececfc', 'Sample Web Service Access Token for NVG', 'A sample web service access token for the NVG Web Service', 'AaEge0eLJTP25aRAA5jIZxyzvejJBxPk+kAJDpv+5nc=', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '10 years', 'NVG');
+-- GRAPHQL token value is W+Cs0C6uagyXhcfKOkO8TOGSHRY6ZNXf
+INSERT INTO "accessTokens" (uuid, name, description, "tokenHash", "createdAt", "expiresAt", "scope") VALUES
+    ('e23d6c6e-9206-4dcc-99f4-7ce64620e35e', 'Sample Web Service Access Token for GRAPHQL', 'A sample web service access token for the GRAPHQL Web Service', 'pNrklOyrjwx9913Tsx5zqT0GOppKQJnnqX5zzM7X0L0=', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '10 years', 'GRAPHQL');
 
 -- Test data for assessments
 
