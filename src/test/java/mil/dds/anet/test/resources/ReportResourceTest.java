@@ -2099,7 +2099,7 @@ public class ReportResourceTest extends AbstractResourceTest {
 
   @Test
   void testSetEngagementDayOfWeekOutsideWeekRange() {
-    final ReportSearchQueryInput query = setupQueryEngagementDayOfWeek().withEngagementDayOfWeek(0)
+    final ReportSearchQueryInput query = setupQueryEngagementDayOfWeek().withEngagementDayOfWeek(8)
         .withIncludeEngagementDayOfWeek(true).build();
 
     final AnetBeanList_Report reportResults = runSearchQuery(query);
