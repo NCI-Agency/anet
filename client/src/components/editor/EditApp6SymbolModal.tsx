@@ -46,6 +46,19 @@ const EditApp6SymbolModal = ({
     secondModifier: null
   }
 
+  const handleFieldUpdate = (field, newValue, setFieldValue, currentValues) => {
+    // handle field update
+    setFieldValue(field, newValue)
+    currentValues[field] = newValue
+    // verify if all other field have a valid value after the update
+    Object.entries(currentValues).forEach(([key, value]) => {
+      const choices = getChoices(key, currentValues)
+      if (value && !Object.keys(choices).includes(value)) {
+        setFieldValue(key, null)
+      }
+    })
+  }
+
   const getApp6Symbol = (size, tempValues) => {
     const code = getSymbolCode(tempValues)
     return <App6Symbol2 code={code} size={size} />
@@ -71,6 +84,7 @@ const EditApp6SymbolModal = ({
         ? `${choices?.[parentValue]} (inherited)`
         : ""
 
+    const disabled = Object.entries(choices).length === 0
     return (
       <Dropdown>
         <Dropdown.Toggle
@@ -85,6 +99,7 @@ const EditApp6SymbolModal = ({
             fontSize: "14px",
             borderColor: "#212529"
           }}
+          disabled={disabled}
         >
           <div
             className="d-flex align-items-center gap-3"
@@ -95,24 +110,29 @@ const EditApp6SymbolModal = ({
               textAlign: "left"
             }}
           >
-            <div>{getApp6Symbol(20, currentValues)}</div>
-            <div
-              style={{
-                flex: 1,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap"
-              }}
-            >
-              {selectedChoice}
-            </div>
+            {!disabled && (
+              <>
+                <div>{getApp6Symbol(20, currentValues)}</div>
+                <div
+                  style={{
+                    flex: 1,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap"
+                  }}
+                >
+                  {selectedChoice}
+                </div>
+              </>
+            )}
           </div>
         </Dropdown.Toggle>
         <Dropdown.Menu style={{ width: "100%" }}>
           {Object.entries(choices).map(([key, value]) => (
             <Dropdown.Item
               key={key}
-              onClick={() => setFieldValue(field, key)}
+              onClick={() =>
+                handleFieldUpdate(field, key, setFieldValue, currentValues)}
               className="d-flex align-items-center gap-3"
               style={{ height: 40 }}
             >
