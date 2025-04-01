@@ -25,6 +25,7 @@ import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.BatchingUtils;
 import mil.dds.anet.utils.SecurityUtils;
+import mil.dds.anet.ws.GraphQLWebService;
 import org.dataloader.DataLoaderRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,8 +93,8 @@ public class GraphQLExecutor extends HttpExecutor<NativeWebRequest> {
         new BatchingUtils(ApplicationContextProvider.getEngine(), true, true);
     final DataLoaderRegistry dataLoaderRegistry = batchingUtils.getDataLoaderRegistry();
     final Map<String, Object> context = new HashMap<>();
-    // If this a GraphQLWebServiceResourcePrincipal?
-    if (principal instanceof GraphQLWebServiceResource.GraphQLWebServiceResourcePrincipal graphQLWebServiceResourcePrincipal) {
+    // If this a GraphQLWebServicePrincipal?
+    if (principal instanceof GraphQLWebService.GraphQLWebServicePrincipal graphQLWebServiceResourcePrincipal) {
       context.put("graphQLWebServiceToken", graphQLWebServiceResourcePrincipal.getAccessToken());
       context.put(Introspection.INTROSPECTION_DISABLED, true);
     } else {

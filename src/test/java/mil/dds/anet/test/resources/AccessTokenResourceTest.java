@@ -15,15 +15,7 @@ public class AccessTokenResourceTest extends AbstractResourceTest {
   public static final String _TOKEN_FIELDS = "{uuid name description scope expiresAt}";
 
   @Test
-  void locationTestGraphQL() {
-    // Initially two tokens
-    List<mil.dds.anet.test.client.AccessToken> accessTokens =
-        withCredentials(adminUser, t -> queryExecutor.accessTokenList(_TOKEN_FIELDS));
-    assertThat(accessTokens).isNotNull();
-    assertThat(accessTokens.stream().anyMatch(token -> token.getScope().equals(TokenScope.GRAPHQL)))
-        .isTrue();
-    assertThat(accessTokens.stream().anyMatch(token -> token.getScope().equals(TokenScope.NVG)))
-        .isTrue();
+  void accessTokenResourceTest() {
     // Create new access token
     final AccessTokenInput input = TestData.createAccessTokenInput("New GRAPHQL Token",
         TokenScope.GRAPHQL, "6m8dyZqNPRoYTjRzV8ppb0WSKS/ER9pVHFh5fsiv53Y=");
@@ -31,7 +23,8 @@ public class AccessTokenResourceTest extends AbstractResourceTest {
         withCredentials(adminUser, t -> mutationExecutor.createAccessToken("", input));
     assertThat(created).isNotNull();
     assertThat(created).isEqualTo(1);
-    accessTokens = withCredentials(adminUser, t -> queryExecutor.accessTokenList(_TOKEN_FIELDS));
+    List<mil.dds.anet.test.client.AccessToken> accessTokens =
+        withCredentials(adminUser, t -> queryExecutor.accessTokenList(_TOKEN_FIELDS));
     final Optional<AccessToken> accessTokenOptional = accessTokens.stream()
         .filter(token -> token.getName().equals("New GRAPHQL Token")).findFirst();
     assertThat(accessTokenOptional.isPresent()).isTrue();
@@ -52,7 +45,8 @@ public class AccessTokenResourceTest extends AbstractResourceTest {
     assertThat(deleted).isNotNull();
     assertThat(deleted).isEqualTo(1);
     accessTokens = withCredentials(adminUser, t -> queryExecutor.accessTokenList(_TOKEN_FIELDS));
-    assertThat(accessTokens.stream().filter(token -> token.getScope().equals(TokenScope.GRAPHQL))
-        .toList().size()).isEqualTo(1);
+    assertThat(
+        accessTokens.stream().anyMatch(token -> token.getName().equals("New GRAPHQL Token v2")))
+        .isFalse();
   }
 }

@@ -1,4 +1,4 @@
-package mil.dds.anet.resources;
+package mil.dds.anet.ws;
 
 import io.leangen.graphql.spqr.spring.web.dto.GraphQLRequest;
 import java.security.Principal;
@@ -7,6 +7,7 @@ import javax.security.auth.Subject;
 import mil.dds.anet.beans.AccessToken;
 import mil.dds.anet.database.AccessTokenDao;
 import mil.dds.anet.graphql.outputtransformers.ResourceTransformers;
+import mil.dds.anet.resources.GraphQLResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -19,13 +20,13 @@ import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/graphqlWebService")
-public class GraphQLWebServiceResource {
-  public class GraphQLWebServiceResourcePrincipal implements Principal {
+public class GraphQLWebService {
+  public class GraphQLWebServicePrincipal implements Principal {
     private AccessToken accessToken;
 
     @Override
     public String getName() {
-      return "GraphQLWebServiceResourcePrincipal";
+      return "GraphQLWebServicePrincipal";
     }
 
     @Override
@@ -47,8 +48,7 @@ public class GraphQLWebServiceResource {
   private final AccessTokenDao accessTokenDao;
   private final GraphQLResource graphQLResource;
 
-  public GraphQLWebServiceResource(AccessTokenDao accessTokenDao,
-      final GraphQLResource graphQLResource) {
+  public GraphQLWebService(AccessTokenDao accessTokenDao, final GraphQLResource graphQLResource) {
     this.accessTokenDao = accessTokenDao;
     this.graphQLResource = graphQLResource;
   }
@@ -67,8 +67,8 @@ public class GraphQLWebServiceResource {
         final AccessToken at = accessTokenDao.getByTokenValueAndScope(accessToken,
             AccessToken.TokenScope.GRAPHQL.name());
         if (at != null && at.isValid()) {
-          GraphQLWebServiceResourcePrincipal graphQLWebServiceResourcePrincipal =
-              new GraphQLWebServiceResourcePrincipal();
+          GraphQLWebServicePrincipal graphQLWebServiceResourcePrincipal =
+              new GraphQLWebServicePrincipal();
           graphQLWebServiceResourcePrincipal.setAccessToken(at);
           return ResourceTransformers.jsonTransformer.apply(
               graphQLResource.graphql(graphQLWebServiceResourcePrincipal, graphQLRequest, null));

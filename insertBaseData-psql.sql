@@ -1506,6 +1506,9 @@ INSERT INTO "accessTokens" (uuid, name, description, "tokenHash", "createdAt", "
 -- GRAPHQL token value is W+Cs0C6uagyXhcfKOkO8TOGSHRY6ZNXf
 INSERT INTO "accessTokens" (uuid, name, description, "tokenHash", "createdAt", "expiresAt", "scope") VALUES
     ('e23d6c6e-9206-4dcc-99f4-7ce64620e35e', 'Sample Web Service Access Token for GRAPHQL', 'A sample web service access token for the GRAPHQL Web Service', 'pNrklOyrjwx9913Tsx5zqT0GOppKQJnnqX5zzM7X0L0=', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '10 years', 'GRAPHQL');
+-- GRAPHQL expired token value is 8ESgHLxLxh7VStAAgn9hpEIDo0CYOiGn
+INSERT INTO "accessTokens" (uuid, name, description, "tokenHash", "createdAt", "expiresAt", "scope") VALUES
+    ('64070f3b-ce5a-428b-ac76-77bd25989a09', 'An expired Web Service Access Token for GRAPHQL', 'An expired web service access token for the GRAPHQL Web Service', 'ZdV6x+/szanYoIipY+IaJYIoBXd600d3ME07vzIfgTA==', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP - INTERVAL '10 years', 'GRAPHQL');
 
 -- Test data for assessments
 

@@ -1,4 +1,4 @@
-package mil.dds.anet.test.resources;
+package mil.dds.anet.test.ws;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -13,12 +13,13 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery;
 import mil.dds.anet.beans.search.ReportSearchSortBy;
 import mil.dds.anet.database.mappers.MapperUtils;
-import mil.dds.anet.resources.GraphQLWebServiceResource;
+import mil.dds.anet.test.resources.AbstractResourceTest;
+import mil.dds.anet.ws.GraphQLWebService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 
-public class GraphQLWebServiceResourceTest extends AbstractResourceTest {
+public class GraphQLWebServiceTest extends AbstractResourceTest {
 
   private static final Map<String, Object> DEFAULT_QUERY_VARIABLES = Map.of( // -
       "status", "ACTIVE", // -
@@ -38,23 +39,33 @@ public class GraphQLWebServiceResourceTest extends AbstractResourceTest {
       + " } } }";
 
   @Autowired
-  private GraphQLWebServiceResource graphQLWebServiceResource;
+  private GraphQLWebService graphQLWebService;
 
   @Test
-  void testGraphQLWebServiceResource() {
+  void testGraphQLWebService() {
     final Map<String, Object> reportQuery = new HashMap<>(DEFAULT_QUERY_VARIABLES);
     final GraphQLRequest graphQLRequest = new GraphQLRequest("graphqlWebService", REPORT_QUERY,
         null, Map.of("reportQuery", reportQuery));
+
     // Test with wrong token
     try {
-      graphQLWebServiceResource.graphqlPostJson(graphQLRequest, "bogus");
+      graphQLWebService.graphqlPostJson(graphQLRequest, "bogus");
     } catch (Exception expectedException) {
       assertThat(expectedException)
           .hasMessage("403 FORBIDDEN \"Must provide a valid Web Service Access Token\"");
     }
+
+    // Test with expired token
+    try {
+      graphQLWebService.graphqlPostJson(graphQLRequest, "Bearer 8ESgHLxLxh7VStAAgn9hpEIDo0CYOiGn");
+    } catch (Exception expectedException) {
+      assertThat(expectedException)
+          .hasMessage("403 FORBIDDEN \"Must provide a valid Web Service Access Token\"");
+    }
+
     // Test with valid token
-    ResponseEntity<Map<String, Object>> result = graphQLWebServiceResource
-        .graphqlPostJson(graphQLRequest, "Bearer W+Cs0C6uagyXhcfKOkO8TOGSHRY6ZNXf");
+    ResponseEntity<Map<String, Object>> result = graphQLWebService.graphqlPostJson(graphQLRequest,
+        "Bearer W+Cs0C6uagyXhcfKOkO8TOGSHRY6ZNXf");
     assertThat(result).isNotNull();
     @SuppressWarnings("unchecked")
     final Map<String, Object> data =
