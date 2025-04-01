@@ -29,8 +29,10 @@ const EditApp6SymbolModal = ({
     affiliation: null,
     status: null,
     hq: null,
-    echilon: null,
-    mainIcon: null,
+    echelon: null,
+    iconEntity: null,
+    iconEntityType: null,
+    iconEntitySubtype: null,
     firstModifier: null,
     secondModifier: null
   }
@@ -40,8 +42,10 @@ const EditApp6SymbolModal = ({
     affiliation: null,
     status: null,
     hq: null,
-    echilon: null,
-    mainIcon: null,
+    echelon: null,
+    iconEntity: null,
+    iconEntityType: null,
+    iconEntitySubtype: null,
     firstModifier: null,
     secondModifier: null
   }
@@ -73,17 +77,13 @@ const EditApp6SymbolModal = ({
     )
   }
 
-  const getFieldWidget = (field, setFieldValue, currentValues) => {
-    const choices = getChoices(field, currentValues)
-
-    const parentValue = parentValues[field]
-    const selectedChoice = currentValues[field]
-      ? choices?.[currentValues[field]]?.value ||
-        choices?.[currentValues[field]]
-      : parentValue
-        ? `${choices?.[parentValue]} (inherited)`
-        : ""
-
+  const getDropdown = (
+    field,
+    setFieldValue,
+    selectedChoice,
+    choices,
+    currentValues
+  ) => {
     const disabled = Object.entries(choices).length === 0
     return (
       <Dropdown>
@@ -137,11 +137,31 @@ const EditApp6SymbolModal = ({
               style={{ height: 40 }}
             >
               {getApp6Symbol(20, { ...currentValues, [field]: key })}
-              {value?.value || value}
+              {value}
             </Dropdown.Item>
           ))}
         </Dropdown.Menu>
       </Dropdown>
+    )
+  }
+
+  const getFieldWidget = (field, setFieldValue, currentValues) => {
+    const choices = getChoices(field, currentValues)
+
+    const parentValue = parentValues[field]
+    const selectedChoice = currentValues[field]
+      ? choices?.[currentValues[field]]?.value ||
+        choices?.[currentValues[field]]
+      : parentValue
+        ? `${choices?.[parentValue]} (inherited)`
+        : ""
+
+    return getDropdown(
+      field,
+      setFieldValue,
+      selectedChoice,
+      choices,
+      currentValues
     )
   }
 
@@ -196,11 +216,13 @@ const EditApp6SymbolModal = ({
                       values
                     )}
                     {getFieldRow(
-                      "mainIcon",
+                      "iconEntity",
                       "Main Icon",
                       setFieldValue,
                       values
                     )}
+                    {getFieldWidget("iconEntityType", setFieldValue, values)}
+                    {getFieldWidget("iconEntitySubtype", setFieldValue, values)}
                     {getFieldRow(
                       "firstModifier",
                       "First Modifier",
