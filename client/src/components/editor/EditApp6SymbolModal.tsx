@@ -79,14 +79,41 @@ const EditApp6SymbolModal = ({
     return <App6Symbol2 code={code} size={size} />
   }
 
-  const getFieldRow = (field, fieldName, setFieldValue, currentValues) => {
+  const getFieldName = (field, values) => {
+    const staticLabels = {
+      symbolSet: "Symbol Set",
+      affiliation: "Affiliation",
+      status: "Status",
+      hq: "Headquarters / Task Force / Dummy",
+      iconEntity: "Main Icon",
+      firstModifier: "First Modifier",
+      secondModifier: "Second Modifier"
+    }
+
+    if (field === "echelon") {
+      const echelonLabels = {
+        10: "Echelon",
+        15: "Mobility",
+        27: "Leader",
+        30: "Towed Array",
+        35: "Towed Array"
+      }
+      return echelonLabels[values.symbolSet] || null
+    }
+
+    return staticLabels[field] || null
+  }
+
+  const getFieldRow = (field, setFieldValue, currentValues) => {
     const fieldWidget = getFieldWidget(field, setFieldValue, currentValues)
     if (!fieldWidget) {
       return null
     }
     return (
       <div className="d-flex flex-column gap-1">
-        <div style={{ fontWeight: "bold" }}>{fieldName}</div>
+        <div style={{ fontWeight: "bold" }}>
+          {getFieldName(field, currentValues)}
+        </div>
         {fieldWidget}
       </div>
     )
@@ -144,11 +171,9 @@ const EditApp6SymbolModal = ({
         <Dropdown.Toggle
           variant="tertiary"
           id={`${field}-dropdown`}
+          className="d-flex align-content-space-between align-items-center"
           style={{
             width: "100%",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
             color: "#212529",
             fontSize: "14px",
             borderColor: "#212529"
@@ -219,59 +244,13 @@ const EditApp6SymbolModal = ({
                     className="d-flex flex-column gap-2"
                     style={{ width: "50%" }}
                   >
-                    {getFieldRow(
-                      "symbolSet",
-                      "Symbol Set",
-                      setFieldValue,
-                      values
-                    )}
-                    {getFieldRow(
-                      "affiliation",
-                      "Affiliation",
-                      setFieldValue,
-                      values
-                    )}
-                    {getFieldRow("status", "Status", setFieldValue, values)}
-                    {getFieldRow(
-                      "hq",
-                      "Headquarters / Task Force / Dummy",
-                      setFieldValue,
-                      values
-                    )}
-                    {getFieldRow(
-                      "echelon",
-                      "Echelon / Mobility / Towed Array",
-                      setFieldValue,
-                      values
-                    )}
-                    {getFieldRow(
-                      "iconEntity",
-                      "Main Icon",
-                      setFieldValue,
-                      values
-                    )}
-                    {getFieldWidget("iconEntityType", setFieldValue, values)}
-                    {getFieldWidget("iconEntitySubtype", setFieldValue, values)}
-                    {getFieldRow(
-                      "firstModifier",
-                      "First Modifier",
-                      setFieldValue,
-                      values
-                    )}
-                    {getFieldRow(
-                      "secondModifier",
-                      "Second Modifier",
-                      setFieldValue,
-                      values
+                    {Object.keys(values).map(field =>
+                      getFieldRow(field, setFieldValue, values)
                     )}
                   </div>
                   <div
-                    style={{
-                      display: "flex",
-                      minWidth: 200,
-                      justifyContent: "center",
-                      alignItems: "center"
-                    }}
+                    className="d-flex justify-content-center align-items-center"
+                    style={{ minWidth: 200 }}
                   >
                     {getApp6Symbol(200, values)}
                   </div>
