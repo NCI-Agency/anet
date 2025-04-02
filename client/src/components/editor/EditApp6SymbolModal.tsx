@@ -1,13 +1,10 @@
+import { Icon } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import App6Symbol from "components/App6Symbol"
 import App6Symbol2, { getChoices, getSymbolCode } from "components/App6Symbol2"
-import DictionaryField from "components/DictionaryField"
-import * as FieldHelper from "components/FieldHelper"
-import Fieldset from "components/Fieldset"
-import { Field, Form, Formik } from "formik"
-import { Organization } from "models"
+import { Form, Formik } from "formik"
 import React from "react"
-import { Button, Dropdown, Modal } from "react-bootstrap"
-import Settings from "settings"
+import { Button, Col, Dropdown, Modal, Row } from "react-bootstrap"
 
 interface EditApp6SymbolModalProps {
   values: any
@@ -88,10 +85,50 @@ const EditApp6SymbolModal = ({
       return null
     }
     return (
-      <div className="d-flex flex-column gap-2">
+      <div className="d-flex flex-column gap-1">
         <div style={{ fontWeight: "bold" }}>{fieldName}</div>
         {fieldWidget}
       </div>
+    )
+  }
+
+  const getFieldWidget = (field, setFieldValue, currentValues) => {
+    const choices = getChoices(field, currentValues)
+    if (Object.entries(choices).length === 0) {
+      return null
+    }
+
+    const parentValue = parentValues[field]
+    const selectedChoice = currentValues[field]
+      ? choices?.[currentValues[field]]?.value ||
+        choices?.[currentValues[field]]
+      : parentValue
+        ? `${choices?.[parentValue]} (inherited)`
+        : ""
+
+    return (
+      <Row>
+        <Col md={11}>
+          {getDropdown(
+            field,
+            setFieldValue,
+            selectedChoice,
+            choices,
+            currentValues
+          )}
+        </Col>
+        <Col md={1} className="d-flex justify-content-center">
+          {selectedChoice && (
+            <Button
+              variant="outline"
+              onClick={() =>
+                handleFieldUpdate(field, null, setFieldValue, currentValues)}
+            >
+              <Icon icon={IconNames.RESET} />
+            </Button>
+          )}
+        </Col>
+      </Row>
     )
   }
 
@@ -102,13 +139,10 @@ const EditApp6SymbolModal = ({
     choices,
     currentValues
   ) => {
-    if (Object.entries(choices).length === 0) {
-      return null
-    }
     return (
-      <Dropdown>
+      <Dropdown style={{ width: "100%" }}>
         <Dropdown.Toggle
-          variant="outline-tertiary"
+          variant="tertiary"
           id={`${field}-dropdown`}
           style={{
             width: "100%",
@@ -121,10 +155,10 @@ const EditApp6SymbolModal = ({
           }}
         >
           <div
-            className="d-flex align-items-center gap-3"
+            className="d-flex align-items-center gap-2"
             style={{
               width: "100%",
-              height: 30,
+              height: 40,
               overflow: "hidden",
               textAlign: "left"
             }}
@@ -148,7 +182,7 @@ const EditApp6SymbolModal = ({
               key={key}
               onClick={() =>
                 handleFieldUpdate(field, key, setFieldValue, currentValues)}
-              className="d-flex align-items-center gap-3"
+              className="d-flex align-items-center gap-2"
               style={{ height: 40 }}
             >
               {getApp6Symbol(20, { ...currentValues, [field]: key })}
@@ -157,26 +191,6 @@ const EditApp6SymbolModal = ({
           ))}
         </Dropdown.Menu>
       </Dropdown>
-    )
-  }
-
-  const getFieldWidget = (field, setFieldValue, currentValues) => {
-    const choices = getChoices(field, currentValues)
-
-    const parentValue = parentValues[field]
-    const selectedChoice = currentValues[field]
-      ? choices?.[currentValues[field]]?.value ||
-        choices?.[currentValues[field]]
-      : parentValue
-        ? `${choices?.[parentValue]} (inherited)`
-        : ""
-
-    return getDropdown(
-      field,
-      setFieldValue,
-      selectedChoice,
-      choices,
-      currentValues
     )
   }
 
@@ -202,7 +216,7 @@ const EditApp6SymbolModal = ({
                   style={{ padding: 20 }}
                 >
                   <div
-                    className="d-flex flex-column gap-3"
+                    className="d-flex flex-column gap-2"
                     style={{ width: "50%" }}
                   >
                     {getFieldRow(
