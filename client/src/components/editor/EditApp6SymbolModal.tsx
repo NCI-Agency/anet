@@ -208,10 +208,16 @@ const EditApp6SymbolModal = ({
               onClick={() =>
                 handleFieldUpdate(field, key, setFieldValue, currentValues)}
               className="d-flex align-items-center gap-2"
-              style={{ height: 40 }}
+              style={{
+                height: 40,
+                whiteSpace: "nowrap",
+                textOverflow: "ellipsis"
+              }}
             >
               {getApp6Symbol(20, { ...currentValues, [field]: key })}
-              {value}
+              <span className="text-truncate" style={{ maxWidth: "100%" }}>
+                {value}
+              </span>
             </Dropdown.Item>
           ))}
         </Dropdown.Menu>
