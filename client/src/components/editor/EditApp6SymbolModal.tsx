@@ -219,6 +219,12 @@ const EditApp6SymbolModal = ({
     )
   }
 
+  const onReset = (values, setFieldValue) => {
+    Object.keys(values).forEach(field => {
+      setFieldValue(field, null)
+    })
+  }
+
   return (
     <Modal centered show={showModal} onHide={onHide} size="xl">
       <Modal.Header closeButton>
@@ -257,6 +263,12 @@ const EditApp6SymbolModal = ({
                 </div>
               </Modal.Body>
               <Modal.Footer>
+                <Button
+                  variant="tertiary"
+                  onClick={() => onReset(values, setFieldValue)}
+                >
+                  Reset
+                </Button>
                 <Button variant="secondary" onClick={onHide}>
                   Cancel
                 </Button>

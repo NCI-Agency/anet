@@ -44,7 +44,6 @@ const StatusChoices = {
 }
 
 const HqChoices = {
-  0: "Not Applicable",
   1: "Feint / Dummy",
   2: "Headquarters",
   3: "Feint / Dummy Headquarters",
