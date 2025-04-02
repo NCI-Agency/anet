@@ -61,6 +61,20 @@ const EditApp6SymbolModal = ({
         setFieldValue(key, null)
       }
     })
+    // clear specific fields
+    if (field === "symbolSet") {
+      setFieldValue("echelon", null)
+      setFieldValue("iconEntity", null)
+      setFieldValue("iconEntityType", null)
+      setFieldValue("iconEntitySubtype", null)
+    }
+    if (field === "iconEntity") {
+      setFieldValue("iconEntityType", null)
+      setFieldValue("iconEntitySubtype", null)
+    }
+    if (field === "iconEntityType") {
+      setFieldValue("iconEntitySubtype", null)
+    }
   }
 
   const getApp6Symbol = (size, tempValues) => {
