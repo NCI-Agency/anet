@@ -69,10 +69,14 @@ const EditApp6SymbolModal = ({
   }
 
   const getFieldRow = (field, fieldName, setFieldValue, currentValues) => {
+    const fieldWidget = getFieldWidget(field, setFieldValue, currentValues)
+    if (!fieldWidget) {
+      return null
+    }
     return (
       <div className="d-flex flex-column gap-2">
         <div style={{ fontWeight: "bold" }}>{fieldName}</div>
-        {getFieldWidget(field, setFieldValue, currentValues)}
+        {fieldWidget}
       </div>
     )
   }
@@ -84,7 +88,9 @@ const EditApp6SymbolModal = ({
     choices,
     currentValues
   ) => {
-    const disabled = Object.entries(choices).length === 0
+    if (Object.entries(choices).length === 0) {
+      return null
+    }
     return (
       <Dropdown>
         <Dropdown.Toggle
@@ -99,7 +105,6 @@ const EditApp6SymbolModal = ({
             fontSize: "14px",
             borderColor: "#212529"
           }}
-          disabled={disabled}
         >
           <div
             className="d-flex align-items-center gap-3"
@@ -110,21 +115,17 @@ const EditApp6SymbolModal = ({
               textAlign: "left"
             }}
           >
-            {!disabled && (
-              <>
-                <div>{getApp6Symbol(20, currentValues)}</div>
-                <div
-                  style={{
-                    flex: 1,
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap"
-                  }}
-                >
-                  {selectedChoice}
-                </div>
-              </>
-            )}
+            <div>{getApp6Symbol(20, currentValues)}</div>
+            <div
+              style={{
+                flex: 1,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap"
+              }}
+            >
+              {selectedChoice}
+            </div>
           </div>
         </Dropdown.Toggle>
         <Dropdown.Menu style={{ width: "100%" }}>
