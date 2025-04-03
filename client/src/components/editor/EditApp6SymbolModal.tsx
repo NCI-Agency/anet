@@ -8,7 +8,7 @@ import App6Symbol2, {
 } from "components/App6Symbol2"
 import { Form, Formik } from "formik"
 import { Organization } from "models"
-import React from "react"
+import React, { useState } from "react"
 import { Button, Col, Dropdown, Modal, Row } from "react-bootstrap"
 
 interface EditApp6SymbolModalProps {
@@ -36,6 +36,8 @@ const EditApp6SymbolModal = ({
   )
   const code = getSymbolCode(filteredValues)
   const initialValues = getApp6Values(code)
+
+  const [previewValues, setPreviewValues] = useState(null)
 
   const handleFieldUpdate = (field, newValue, setFieldValue, currentValues) => {
     // handle field update
@@ -207,6 +209,9 @@ const EditApp6SymbolModal = ({
                 whiteSpace: "nowrap",
                 textOverflow: "ellipsis"
               }}
+              onMouseEnter={() =>
+                setPreviewValues({ ...currentValues, [field]: key })}
+              onMouseLeave={() => setPreviewValues(null)}
             >
               {getApp6Symbol(20, { ...currentValues, [field]: key })}
               <span className="text-truncate" style={{ maxWidth: "100%" }}>
@@ -258,7 +263,7 @@ const EditApp6SymbolModal = ({
                     className="d-flex justify-content-center align-items-center"
                     style={{ minWidth: 200 }}
                   >
-                    {getApp6Symbol(200, values)}
+                    {getApp6Symbol(200, previewValues || values)}
                   </div>
                 </div>
               </Modal.Body>
