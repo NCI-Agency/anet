@@ -2,7 +2,7 @@ import AppContext from "components/AppContext"
 import _isEmpty from "lodash/isEmpty"
 import AccessTokensList from "pages/admin/accessTokens/Index"
 import AdminIndex from "pages/admin/Index"
-import MartImportedReportsShow from "pages/admin/martImportedReports/Show"
+import MartImporterShow from "pages/admin/martImporter/Show"
 import MergeLocations from "pages/admin/merge/MergeLocations"
 import MergeOrganizations from "pages/admin/merge/MergeOrganizations"
 import MergePeople from "pages/admin/merge/MergePeople"
@@ -63,7 +63,6 @@ import MyTasks from "pages/tasks/MyTasks"
 import TaskNew from "pages/tasks/New"
 import TaskShow from "pages/tasks/Show"
 import TopTasks from "pages/tasks/Top"
-import ExportDictionary from "pages/admin/mart/ExportDictionary"
 import { PAGE_URLS } from "pages/util"
 import React, { useContext } from "react"
 import { Navigate, Route, Routes } from "react-router-dom"
@@ -183,15 +182,9 @@ const Routing = () => {
           <Route path="pendingEmails" element={<PendingEmailsShow />} />
           <Route path="accessTokens" element={<AccessTokensList />} />
           {Settings.featureMartGuiEnabled && (
-            <Route
-              path="martImportedReports"
-              element={<MartImportedReportsShow />}
-            />
+            <Route path="martImporter" element={<MartImporterShow />} />
           )}
           <Route path="graphiql" element={<GraphiQL />} />
-          <Route path="mart">
-            <Route path="export" element={<ExportDictionary />} />
-          </Route>
         </Route>
       )}
       <Route path={PAGE_URLS.TOP_TASKS} element={<TopTasks />} />

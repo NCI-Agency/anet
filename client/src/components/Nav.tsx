@@ -500,7 +500,7 @@ const Navigation = ({
                 {Settings.featureMartGuiEnabled && (
                   <SidebarLink
                     id="mart-imported-reports"
-                    linkTo="/admin/martImportedReports"
+                    linkTo="/admin/martImporter"
                     handleOnClick={resetPages}
                   >
                     MART importer
@@ -512,13 +512,6 @@ const Navigation = ({
                   handleOnClick={resetPages}
                 >
                   GraphQL
-                </SidebarLink>
-                <SidebarLink
-                  id="graphQL-nav"
-                  linkTo="/admin/mart/export"
-                  handleOnClick={resetPages}
-                >
-                  MART Export
                 </SidebarLink>
               </span>
             </Nav>
