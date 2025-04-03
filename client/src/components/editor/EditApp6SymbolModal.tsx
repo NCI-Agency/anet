@@ -1,20 +1,24 @@
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import App6Symbol from "components/App6Symbol"
-import App6Symbol2, { getChoices, getSymbolCode } from "components/App6Symbol2"
+import App6Symbol2, {
+  getApp6Values,
+  getChoices,
+  getSymbolCode
+} from "components/App6Symbol2"
 import { Form, Formik } from "formik"
 import React from "react"
 import { Button, Col, Dropdown, Modal, Row } from "react-bootstrap"
 
 interface EditApp6SymbolModalProps {
-  values: any
+  app6Code: string
   showModal?: boolean
   onHide: (...args: unknown[]) => unknown
   onSave: (...args: unknown[]) => unknown
 }
 
 const EditApp6SymbolModal = ({
-  values,
+  app6Code = "10000000000000000000",
   showModal,
   onHide,
   onSave
@@ -22,8 +26,8 @@ const EditApp6SymbolModal = ({
   /* const { parentContext, parentStandardIdentity, parentSymbolSet } =
     Organization.getApp6ParentFields(values.parentOrg, values) */
   const parentValues = {
-    symbolSet: null,
     affiliation: null,
+    symbolSet: null,
     status: null,
     hq: null,
     echelon: null,
@@ -34,18 +38,7 @@ const EditApp6SymbolModal = ({
     secondModifier: null
   }
 
-  const initialValues = {
-    symbolSet: null,
-    affiliation: null,
-    status: null,
-    hq: null,
-    echelon: null,
-    iconEntity: null,
-    iconEntityType: null,
-    iconEntitySubtype: null,
-    firstModifier: null,
-    secondModifier: null
-  }
+  const initialValues = getApp6Values(app6Code)
 
   const handleFieldUpdate = (field, newValue, setFieldValue, currentValues) => {
     // handle field update
@@ -81,8 +74,9 @@ const EditApp6SymbolModal = ({
 
   const getFieldName = (field, values) => {
     const staticLabels = {
-      symbolSet: "Symbol Set",
+      context: "Context",
       affiliation: "Affiliation",
+      symbolSet: "Symbol Set",
       status: "Status",
       hq: "Headquarters / Task Force / Dummy",
       iconEntity: "Main Icon",
