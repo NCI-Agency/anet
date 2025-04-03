@@ -47,6 +47,8 @@ public class AnetConfig {
 
   private KeycloakConfiguration keycloakConfiguration = new KeycloakConfiguration();
 
+  private MartExchangeConfiguration mart;
+
   public boolean getRedirectToHttps() {
     return redirectToHttps;
   }
@@ -105,6 +107,14 @@ public class AnetConfig {
 
   public String getAnetDictionaryName() {
     return anetDictionaryName;
+  }
+
+  public MartExchangeConfiguration getMart() {
+    return mart;
+  }
+
+  public void setMart(MartExchangeConfiguration mart) {
+    this.mart = mart;
   }
 
   /**
@@ -275,6 +285,90 @@ public class AnetConfig {
         }
       }
       return version;
+    }
+  }
+
+  public static class MartExchangeConfiguration {
+    private String hostname;
+    private String userName;
+    private String password;
+    private String trustedSender;
+    private boolean disableCertificateValidation;
+    private boolean markAsRead;
+    private boolean disabled;
+    private long mailPollingDelayInSeconds;
+    private int maxNumberEmailsPulled;
+
+    public String getHostname() {
+      return hostname;
+    }
+
+    public void setHostname(String host) {
+      this.hostname = host;
+    }
+
+    public String getUserName() {
+      return userName;
+    }
+
+    public void setUserName(String userName) {
+      this.userName = userName;
+    }
+
+    public String getPassword() {
+      return password;
+    }
+
+    public void setPassword(String password) {
+      this.password = password;
+    }
+
+    public String getTrustedSender() {
+      return trustedSender;
+    }
+
+    public void setTrustedSender(String trustedSender) {
+      this.trustedSender = trustedSender;
+    }
+
+    public boolean isDisableCertificateValidation() {
+      return disableCertificateValidation;
+    }
+
+    public void setDisableCertificateValidation(boolean disableCertificateValidation) {
+      this.disableCertificateValidation = disableCertificateValidation;
+    }
+
+    public boolean isMarkAsRead() {
+      return markAsRead;
+    }
+
+    public void setMarkAsRead(boolean markAsRead) {
+      this.markAsRead = markAsRead;
+    }
+
+    public boolean isDisabled() {
+      return disabled;
+    }
+
+    public void setDisabled(boolean disabled) {
+      this.disabled = disabled;
+    }
+
+    public long getMailPollingDelayInSeconds() {
+      return mailPollingDelayInSeconds;
+    }
+
+    public void setMailPollingDelayInSeconds(long mailPollingDelay) {
+      this.mailPollingDelayInSeconds = mailPollingDelay;
+    }
+
+    public int getMaxNumberEmailsPulled() {
+      return maxNumberEmailsPulled;
+    }
+
+    public void setMaxNumberEmailsPulled(int maxNumberEmailsPulled) {
+      this.maxNumberEmailsPulled = maxNumberEmailsPulled;
     }
   }
 }
