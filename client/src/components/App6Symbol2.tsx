@@ -1,7 +1,21 @@
 import ms from "milsymbol"
 import React from "react"
 
-const VERSION = 100
+const VERSION = 10
+
+const ContextChoices = {
+  0: "Reality",
+  1: "Exercise",
+  2: "Simulation"
+}
+
+const AffiliationChoices = {
+  0: "Pending",
+  1: "Unknown",
+  3: "Friend",
+  4: "Neutral",
+  6: "Hostile"
+}
 
 const SymbolSetChoices = {
   "01": "Air",
@@ -24,14 +38,6 @@ const SymbolSetChoices = {
   53: "Signals Intelligence - Surface",
   54: "Signals Intelligence - Subsurface",
   60: "Cyberspace"
-}
-
-const AffiliationChoices = {
-  0: "Pending",
-  1: "Unknown",
-  3: "Friend",
-  4: "Neutral",
-  6: "Hostile"
 }
 
 const StatusChoices = {
@@ -4652,14 +4658,16 @@ const secondModifierChoices = {
   60: { "00": "Not Applicable" }
 }
 
-export const getChoices = (field, values) => {
+export const getChoices = (field: string, values: any) => {
   const symbolSet = getCodeFieldValue(getSymbolCode(values), "symbolSet")
   const iconEntity = getCodeFieldValue(getSymbolCode(values), "iconEntity")
   switch (field) {
-    case "symbolSet":
-      return SymbolSetChoices
+    case "context":
+      return ContextChoices
     case "affiliation":
       return AffiliationChoices
+    case "symbolSet":
+      return SymbolSetChoices
     case "status":
       return StatusChoices
     case "hq":
@@ -4703,9 +4711,26 @@ export const getChoices = (field, values) => {
   }
 }
 
-export const getSymbolCode = values => {
-  const symbolSet = values?.symbolSet || "00"
+export const getApp6Values = (code: string) => {
+  return {
+    context: code.substring(2, 3),
+    affiliation: code.substring(3, 4),
+    symbolSet: code.substring(4, 6),
+    status: code.substring(6, 7),
+    hq: code.substring(7, 8),
+    echelon: code.substring(8, 10),
+    iconEntity: code.substring(10, 12),
+    iconEntityType: code.substring(12, 14),
+    iconEntitySubtype: code.substring(14, 16),
+    firstModifier: code.substring(16, 18),
+    secondModifier: code.substring(18, 20)
+  }
+}
+
+export const getSymbolCode = (values: any) => {
+  const context = values?.context || "0"
   const affiliation = values?.affiliation || "0"
+  const symbolSet = values?.symbolSet || "00"
   const status = values?.status || "0"
   const hq = values?.hq || "0"
   const echelon = values?.echelon || "00"
@@ -4714,15 +4739,17 @@ export const getSymbolCode = values => {
   const iconEntitySubtype = values?.iconEntitySubtype || "00"
   const firstModifier = values?.firstModifier || "00"
   const secondModifier = values?.secondModifier || "00"
-  return `${VERSION}${affiliation}${symbolSet}${status}${hq}${echelon}${iconEntity}${iconEntityType}${iconEntitySubtype}${firstModifier}${secondModifier}`
+  return `${VERSION}${context}${affiliation}${symbolSet}${status}${hq}${echelon}${iconEntity}${iconEntityType}${iconEntitySubtype}${firstModifier}${secondModifier}`
 }
 
-const getCodeFieldValue = (code, field) => {
+const getCodeFieldValue = (code: string, field: string) => {
   switch (field) {
-    case "symbolSet":
-      return code.substring(4, 6)
+    case "context":
+      return code.substring(2, 3)
     case "affiliation":
       return code.substring(3, 4)
+    case "symbolSet":
+      return code.substring(4, 6)
     case "status":
       return code.substring(6, 7)
     case "hq":
