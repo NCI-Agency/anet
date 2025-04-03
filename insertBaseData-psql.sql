@@ -203,7 +203,10 @@ INSERT INTO locations (uuid, type, name, "createdAt", "updatedAt") VALUES
   ('22b0137c-4d89-43eb-ac95-a9f68aba884f', 'PP', 'MoI Jalalabad Office', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('60f4084f-3304-4cd5-89df-353edef07d18', 'PP', 'MoI Kandahar Office', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('c136bf89-cc24-43a5-8f51-0f41dfc9ab77', 'PP', 'MoI Mazar-i-Sharif', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('b0979678-0ed0-4b42-9b26-9976fcfa1b81', 'PP', 'MoI Office Building ABC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  ('b0979678-0ed0-4b42-9b26-9976fcfa1b81', 'PP', 'MoI Office Building ABC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('92fbce65-8fa9-403b-a5a2-f0c3189e4f9a', 'PA', 'MART Municipality Group', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('9f83fe70-e9f5-4e92-ae48-5c4fd7076f46', 'PA', 'Decani / Decan', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('178dfbba-f15a-400b-9135-6ff800246be0', 'PP', 'Babaloc / Baballoq', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Set up locationRelationships
 INSERT INTO "locationRelationships" ("childLocationUuid", "parentLocationUuid") VALUES
@@ -236,11 +239,21 @@ INSERT INTO "locationRelationships" ("childLocationUuid", "parentLocationUuid") 
   ('22b0137c-4d89-43eb-ac95-a9f68aba884f', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Afghanistan')),
   ('60f4084f-3304-4cd5-89df-353edef07d18', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Afghanistan')),
   ('c136bf89-cc24-43a5-8f51-0f41dfc9ab77', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Afghanistan')),
-  ('b0979678-0ed0-4b42-9b26-9976fcfa1b81', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Afghanistan'));
+  ('b0979678-0ed0-4b42-9b26-9976fcfa1b81', (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Afghanistan')),
+  ('9f83fe70-e9f5-4e92-ae48-5c4fd7076f46', '92fbce65-8fa9-403b-a5a2-f0c3189e4f9a'),
+  ('178dfbba-f15a-400b-9135-6ff800246be0', '9f83fe70-e9f5-4e92-ae48-5c4fd7076f46');
 
 UPDATE locations
 SET "customFields"='{"invisibleCustomFields":["formCustomFields.textareaFieldName","formCustomFields.numberFieldName"],"arrayFieldName":[],"nlt_dt":null,"nlt":null,"colourOptions":"","inputFieldName":"consectetur adipisici elit","multipleButtons":[]}'
 WHERE name='MoI Coffee Shop';
+
+UPDATE locations
+SET "customFields"='{"townId":39,"townSerbian":"Decani","townAlbanian":"Decan","municipalitySerbian":"Decani","municipalityAlbanian":"Decan","mgrs":"34TDN41700980"}'
+WHERE uuid='9f83fe70-e9f5-4e92-ae48-5c4fd7076f46';
+
+UPDATE locations
+SET "customFields"='{"townId":14,"townSerbian":"Babaloc","townAlbanian":"Baballoq","municipalitySerbian":"Decani","municipalityAlbanian":"Decan","mgrs":"34TDN46550404"}'
+WHERE uuid='178dfbba-f15a-400b-9135-6ff800246be0';
 
 -- Create advisor positions
 INSERT INTO positions (uuid, name, type, "superuserType", role, status, "currentPersonUuid", "locationUuid", "createdAt", "updatedAt") VALUES
@@ -452,7 +465,9 @@ INSERT INTO organizations(uuid, "shortName", "longName", app6context, "app6stand
   (uuid_generate_v4(), 'TAAC-W', '', '0', NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'TAAC-E', '', '0', NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'TAAC-C', '', '0', NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'TAAC Air', '', '0', NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  (uuid_generate_v4(), 'TAAC Air', '', '0', NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('790a79f4-27f0-4289-9756-b39adce92ca7', 'RC-E','RC-E', '0', '3', '10', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('911db213-4c01-4fa1-a781-bb1c877064f0', 'RC-W','RC-W', '0', '3', '10', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Sub-organizations
 INSERT INTO organizations(uuid, "shortName", "longName", "parentOrgUuid", "createdAt", "updatedAt") VALUES
@@ -469,7 +484,10 @@ INSERT INTO organizations(uuid, "shortName", "longName", "parentOrgUuid", "creat
   (uuid_generate_v4(), 'EF 5.3', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 5'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 5.4', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 5'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 6.1', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 6'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 6.2', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 6'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  (uuid_generate_v4(), 'EF 6.2', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 6'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (uuid_generate_v4(), 'EF 6.2', '', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 6'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('01336642-c566-4551-8342-3caea173ad71', 'RC-E-RLMT', 'RC-E-RLMT', '790a79f4-27f0-4289-9756-b39adce92ca7', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('91c6767d-1518-403f-af44-84d91e8ea3e0', 'RC-W-RLMT', 'RC-W-RLMT', '911db213-4c01-4fa1-a781-bb1c877064f0', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 UPDATE organizations
 SET "locationUuid"='9c982685-5946-4dad-a7ee-0f5a12f5e170'
@@ -586,7 +604,13 @@ INSERT INTO tasks (uuid, "shortName", "longName", selectable, category, "created
   (uuid_generate_v4(), 'TAAC-E', '', FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'073da176-8129-4d9b-afa3-416edde6846a'),
   (uuid_generate_v4(), 'TAAC-W', '', FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'073da176-8129-4d9b-afa3-416edde6846a'),
   (uuid_generate_v4(), 'TAAC-C', '', FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'073da176-8129-4d9b-afa3-416edde6846a'),
-  (uuid_generate_v4(), 'TAAC Air', '', FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'073da176-8129-4d9b-afa3-416edde6846a');
+  (uuid_generate_v4(), 'TAAC Air', '', FALSE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'073da176-8129-4d9b-afa3-416edde6846a'),
+  ('826f43ea-9f0a-40c4-87cb-70aba83bf044', 'Factors', 'Factors', TRUE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  ('ec49de46-dd69-48c9-bde1-ecc69fa3befe', 'Factor1', 'Factor1', TRUE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '826f43ea-9f0a-40c4-87cb-70aba83bf044'),
+  ('f07beca6-153e-49da-8aaa-3e29c2a1f4bc', 'Domains', 'Domains', TRUE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  ('4ac816ec-f379-4399-875c-67a9ec27d41b', 'Domain1', 'Domain1', TRUE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'f07beca6-153e-49da-8aaa-3e29c2a1f4bc'),
+  ('483051a0-55e8-45e1-99dc-384be317112f', 'Topics', 'Topic2', TRUE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  ('e1b614a0-d6a7-4300-9f0f-f9fcc245c04f', 'Topic1', 'Topic1', TRUE, 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '483051a0-55e8-45e1-99dc-384be317112f');
 
 UPDATE tasks
 SET "customFields"='{"invisibleCustomFields":[],"projectStatus":"RED"}'

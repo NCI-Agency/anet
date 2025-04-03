@@ -1713,3 +1713,20 @@ dashboards:
   - label: decisives
     data: /data/dashboards/decisives.json
     type: decisives
+
+martDictionaryExport:
+  tasks:
+    domainUuid: f07beca6-153e-49da-8aaa-3e29c2a1f4bc
+    factorUuid: 826f43ea-9f0a-40c4-87cb-70aba83bf044
+    topicUuid: 483051a0-55e8-45e1-99dc-384be317112f
+  municipalityGroupUuid: 92fbce65-8fa9-403b-a5a2-f0c3189e4f9a
+  regionalCommands:
+    - 790a79f4-27f0-4289-9756-b39adce92ca7
+    - 911db213-4c01-4fa1-a781-bb1c877064f0
+  municipalityCustomFields:
+    - municipalityAlbanian
+    - municipalitySerbian
+  locationCustomFields:
+    - townAlbanian
+    - townSerbian
+    - mgrs

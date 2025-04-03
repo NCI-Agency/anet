@@ -2,7 +2,7 @@ import AppContext from "components/AppContext"
 import _isEmpty from "lodash/isEmpty"
 import AccessTokensList from "pages/admin/accessTokens/Index"
 import AdminIndex from "pages/admin/Index"
-import MartImportedReportsShow from "pages/admin/martImportedReports/Show"
+import MartImporterShow from "pages/admin/martImporter/Show"
 import MergeLocations from "pages/admin/merge/MergeLocations"
 import MergeOrganizations from "pages/admin/merge/MergeOrganizations"
 import MergePeople from "pages/admin/merge/MergePeople"
@@ -182,10 +182,7 @@ const Routing = () => {
           <Route path="pendingEmails" element={<PendingEmailsShow />} />
           <Route path="accessTokens" element={<AccessTokensList />} />
           {Settings.featureMartGuiEnabled && (
-            <Route
-              path="martImportedReports"
-              element={<MartImportedReportsShow />}
-            />
+            <Route path="martImporter" element={<MartImporterShow />} />
           )}
           <Route path="graphiql" element={<GraphiQL />} />
         </Route>

@@ -1,6 +1,6 @@
 import Page from "./page"
 
-const PAGE_URL = "/admin/martImportedReports"
+const PAGE_URL = "/admin/martImporter"
 
 class ShowMartImportedReports extends Page {
   async openAsAdminUser() {
@@ -9,6 +9,10 @@ class ShowMartImportedReports extends Page {
 
   async getTable() {
     return browser.$("table")
+  }
+
+  async getExportDictinaryButton() {
+    return browser.$("button")
   }
 
   async getTableRows() {
