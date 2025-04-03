@@ -5,21 +5,21 @@ import { App6Choices } from "./App6"
 const VERSION = 10
 
 export const getChoices = (field: string, values: any) => {
-  const symbolSet = getCodeFieldValue(getSymbolCode(values), "symbolSet")
+  const symbolSet = getCodeFieldValue(getSymbolCode(values), "app6symbolSet")
   const iconEntity = getCodeFieldValue(getSymbolCode(values), "iconEntity")
   switch (field) {
-    case "context":
+    case "app6context":
       return App6Choices.context || {}
-    case "affiliation":
-      return App6Choices.affiliation || {}
-    case "symbolSet":
+    case "app6standardIdentity":
+      return App6Choices.standardIdentity || {}
+    case "app6symbolSet":
       return App6Choices.symbolSet || {}
     case "status":
       return App6Choices.status || {}
-    case "hq":
+    case "app6hq":
       return App6Choices.hq || {}
-    case "echelon":
-      return App6Choices.echelon[symbolSet] || {}
+    case "app6amplifier":
+      return App6Choices.amplifier[symbolSet] || {}
     case "iconEntity":
       const entityOptions = App6Choices.iconEntity[symbolSet] || {}
       return Object.fromEntries(
@@ -60,12 +60,12 @@ export const getChoices = (field: string, values: any) => {
 
 export const getApp6Values = (code: string) => {
   return {
-    context: code.substring(2, 3),
-    affiliation: code.substring(3, 4),
-    symbolSet: code.substring(4, 6),
+    app6context: code.substring(2, 3),
+    app6standardIdentity: code.substring(3, 4),
+    app6symbolSet: code.substring(4, 6),
     status: code.substring(6, 7),
-    hq: code.substring(7, 8),
-    echelon: code.substring(8, 10),
+    app6hq: code.substring(7, 8),
+    app6amplifier: code.substring(8, 10),
     iconEntity: code.substring(10, 12),
     iconEntityType: code.substring(12, 14),
     iconEntitySubtype: code.substring(14, 16),
@@ -75,33 +75,47 @@ export const getApp6Values = (code: string) => {
 }
 
 export const getSymbolCode = (values: any) => {
-  const context = values?.context || "0"
-  const affiliation = values?.affiliation || "0"
-  const symbolSet = values?.symbolSet || "00"
+  const context = values?.app6context || "0"
+  const standardIdentity = values?.app6standardIdentity || "0"
+  const symbolSet = values?.app6symbolSet || "00"
   const status = values?.status || "0"
-  const hq = values?.hq || "0"
-  const echelon = values?.echelon || "00"
+  const hq = values?.app6hq || "0"
+  const amplifier = values?.app6amplifier || "00"
   const iconEntity = values?.iconEntity || "00"
   const iconEntityType = values?.iconEntityType || "00"
   const iconEntitySubtype = values?.iconEntitySubtype || "00"
   const firstModifier = values?.firstModifier || "00"
   const secondModifier = values?.secondModifier || "00"
-  return `${VERSION}${context}${affiliation}${symbolSet}${status}${hq}${echelon}${iconEntity}${iconEntityType}${iconEntitySubtype}${firstModifier}${secondModifier}`
+  const fieldValues = [
+    VERSION,
+    context,
+    standardIdentity,
+    symbolSet,
+    status,
+    hq,
+    amplifier,
+    iconEntity,
+    iconEntityType,
+    iconEntitySubtype,
+    firstModifier,
+    secondModifier
+  ]
+  return fieldValues.join("")
 }
 
 const getCodeFieldValue = (code: string, field: string) => {
   switch (field) {
-    case "context":
+    case "app6context":
       return code.substring(2, 3)
-    case "affiliation":
+    case "app6standardIdentity":
       return code.substring(3, 4)
-    case "symbolSet":
+    case "app6symbolSet":
       return code.substring(4, 6)
     case "status":
       return code.substring(6, 7)
-    case "hq":
+    case "app6hq":
       return code.substring(7, 8)
-    case "echelon":
+    case "app6amplifier":
       return code.substring(8, 10)
     case "iconEntity":
       return code.substring(10, 12)
