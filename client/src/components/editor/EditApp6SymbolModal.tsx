@@ -7,38 +7,35 @@ import App6Symbol2, {
   getSymbolCode
 } from "components/App6Symbol2"
 import { Form, Formik } from "formik"
+import { Organization } from "models"
 import React from "react"
 import { Button, Col, Dropdown, Modal, Row } from "react-bootstrap"
 
 interface EditApp6SymbolModalProps {
-  app6Code: string
+  values: any
   showModal?: boolean
   onHide: (...args: unknown[]) => unknown
   onSave: (...args: unknown[]) => unknown
 }
 
 const EditApp6SymbolModal = ({
-  app6Code = "10000000000000000000",
+  values,
   showModal,
   onHide,
   onSave
 }: EditApp6SymbolModalProps) => {
-  /* const { parentContext, parentStandardIdentity, parentSymbolSet } =
-    Organization.getApp6ParentFields(values.parentOrg, values) */
+  const { parentContext, parentStandardIdentity, parentSymbolSet } =
+    Organization.getApp6ParentFields(values.parentOrg, values)
   const parentValues = {
-    affiliation: null,
-    symbolSet: null,
-    status: null,
-    hq: null,
-    echelon: null,
-    iconEntity: null,
-    iconEntityType: null,
-    iconEntitySubtype: null,
-    firstModifier: null,
-    secondModifier: null
+    app6context: parentContext,
+    app6standardIdentity: parentStandardIdentity,
+    app6symbolSet: parentSymbolSet
   }
-
-  const initialValues = getApp6Values(app6Code)
+  const filteredValues = Object.fromEntries(
+    Object.entries(values).filter(([key]) => key.startsWith("app6"))
+  )
+  const code = getSymbolCode(filteredValues)
+  const initialValues = getApp6Values(code)
 
   const handleFieldUpdate = (field, newValue, setFieldValue, currentValues) => {
     // handle field update
@@ -52,8 +49,8 @@ const EditApp6SymbolModal = ({
       }
     })
     // clear specific fields
-    if (field === "symbolSet") {
-      setFieldValue("echelon", null)
+    if (field === "app6symbolSet") {
+      setFieldValue("app6amplifier", null)
       setFieldValue("iconEntity", null)
       setFieldValue("iconEntityType", null)
       setFieldValue("iconEntitySubtype", null)
@@ -74,25 +71,25 @@ const EditApp6SymbolModal = ({
 
   const getFieldName = (field, values) => {
     const staticLabels = {
-      context: "Context",
-      affiliation: "Affiliation",
-      symbolSet: "Symbol Set",
+      app6context: "Context",
+      app6standardIdentity: "Standard Identity",
+      app6symbolSet: "Symbol Set",
       status: "Status",
-      hq: "Headquarters / Task Force / Dummy",
+      app6hq: "Headquarters / Task Force / Dummy",
       iconEntity: "Main Icon",
       firstModifier: "First Modifier",
       secondModifier: "Second Modifier"
     }
 
-    if (field === "echelon") {
-      const echelonLabels = {
+    if (field === "app6amplifier") {
+      const amplifierLabels = {
         10: "Echelon",
         15: "Mobility",
         27: "Leader",
         30: "Towed Array",
         35: "Towed Array"
       }
-      return echelonLabels[values.symbolSet] || null
+      return amplifierLabels[values.app6symbolSet] || null
     }
 
     return staticLabels[field] || null
