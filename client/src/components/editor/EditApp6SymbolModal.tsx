@@ -160,6 +160,9 @@ const EditApp6SymbolModal = ({
     choices,
     currentValues
   ) => {
+    const sortedChoices = Object.keys(choices).sort((a, b) => {
+      return a.localeCompare(b)
+    })
     return (
       <Dropdown style={{ width: "100%" }}>
         <Dropdown.Toggle
@@ -196,7 +199,7 @@ const EditApp6SymbolModal = ({
           </div>
         </Dropdown.Toggle>
         <Dropdown.Menu style={{ width: "100%" }}>
-          {Object.entries(choices).map(([key, value]) => (
+          {sortedChoices.map(key => (
             <Dropdown.Item
               key={key}
               onClick={() =>
@@ -210,7 +213,7 @@ const EditApp6SymbolModal = ({
             >
               {getApp6Symbol(20, { ...currentValues, [field]: key })}
               <span className="text-truncate" style={{ maxWidth: "100%" }}>
-                {value}
+                {choices[key]}
               </span>
             </Dropdown.Item>
           ))}
