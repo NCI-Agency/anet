@@ -1,6 +1,6 @@
 import Page from "./page"
 
-const PAGE_URL = "/admin/martImportedReports"
+const PAGE_URL = "/admin/martImporter"
 
 class ShowMartImportedReports extends Page {
   async openAsAdminUser() {
