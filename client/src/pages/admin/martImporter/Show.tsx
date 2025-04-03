@@ -315,7 +315,7 @@ const MartImporterShow = ({
       const url = URL.createObjectURL(blob)
       const a = document.createElement("a")
       a.href = url
-      a.download = "anet_dictionary.yml" // Set file name
+      a.download = "anet-dictionary.yml" // Set file name
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
