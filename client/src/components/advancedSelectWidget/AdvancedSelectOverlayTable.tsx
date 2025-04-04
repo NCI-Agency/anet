@@ -46,7 +46,9 @@ const AdvancedSelectOverlayTable = ({
       </thead>
       <tbody>
         {objectType.map(items, (item, i) => {
-          const isSelected = selectedItemsUuids.includes(item.uuid)
+          const isSelected = Object.hasOwn(item, "isSelected")
+            ? item.isSelected
+            : selectedItemsUuids.includes(item.uuid)
           const handleClick = () =>
             isSelected ? handleRemoveItem(item) : handleAddItem(item)
           const renderSelectComponent = React.cloneElement(

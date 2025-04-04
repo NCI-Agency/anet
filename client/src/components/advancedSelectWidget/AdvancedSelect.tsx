@@ -100,7 +100,7 @@ export interface AdvancedSelectProps {
   renderSelected?: React.ReactElement
   overlayTable?: React.ReactElement // how to render the selected items
   overlayColumns: string[] // search results component for in the overlay
-  overlayRenderRow: (...args: unknown[]) => unknown
+  overlayRenderRow?: (...args: unknown[]) => unknown
   closeOverlayOnAdd?: boolean // set to true if you want the overlay to be closed after an add action
   filterDefs: any
   onChange?: (...args: unknown[]) => unknown // config of the search filters
@@ -113,6 +113,7 @@ export interface AdvancedSelectProps {
   handleAddItem?: (...args: unknown[]) => unknown
   handleRemoveItem?: (...args: unknown[]) => unknown
   createEntityComponent?: (...args: unknown[]) => React.ReactNode
+  autoComplete?: string
 }
 
 const AdvancedSelect = ({
@@ -139,7 +140,8 @@ const AdvancedSelect = ({
   fields,
   handleAddItem,
   handleRemoveItem,
-  createEntityComponent
+  createEntityComponent,
+  autoComplete
 }: AdvancedSelectProps) => {
   const firstFilter = Object.keys(filterDefs)[0]
 
@@ -398,6 +400,7 @@ const AdvancedSelect = ({
                 <InputGroup>
                   <Form.Control
                     name={fieldName}
+                    autoComplete={autoComplete}
                     value={searchTerms || ""}
                     placeholder={placeholder}
                     onChange={changeSearchTerms}
