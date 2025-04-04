@@ -6245,7 +6245,7 @@ __metadata:
     axios: "npm:1.8.3"
     babel-jest: "npm:29.7.0"
     babel-loader: "npm:10.0.0"
-    bootstrap: "npm:5.3.3"
+    bootstrap: "npm:5.3.5"
     browserstack-local: "npm:1.5.6"
     chai: "npm:4.4.1"
     change-case: "npm:5.4.4"
@@ -7234,12 +7234,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bootstrap@npm:5.3.3":
-  version: 5.3.3
-  resolution: "bootstrap@npm:5.3.3"
+"bootstrap@npm:5.3.5":
+  version: 5.3.5
+  resolution: "bootstrap@npm:5.3.5"
   peerDependencies:
     "@popperjs/core": ^2.11.8
-  checksum: 10c0/bb68ca7b763977b9cce40cb5b8c676ae19a716d2f5d15009fa7bdbcec9dea426968e3cb748fbed7592fbf10edd7c749aea841c2920996a7c1aa5e0a6e2d4c2ad
+  checksum: 10c0/f0da8bd5e5f743d2d5f73ef531cec2483dec1da3e7aad1ce99d8823800eaedc2982e4c199eff9faf4630d3879261952f1f50c84bcb70ca75168dd5180cfc56ac
   languageName: node
   linkType: hard
 
