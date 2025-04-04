@@ -100,7 +100,7 @@ export interface AdvancedSelectProps {
   renderSelected?: React.ReactElement
   overlayTable?: React.ReactElement // how to render the selected items
   overlayColumns: string[] // search results component for in the overlay
-  overlayRenderRow: (...args: unknown[]) => unknown
+  overlayRenderRow?: (...args: unknown[]) => unknown
   closeOverlayOnAdd?: boolean // set to true if you want the overlay to be closed after an add action
   filterDefs: any
   onChange?: (...args: unknown[]) => unknown // config of the search filters
@@ -141,7 +141,7 @@ const AdvancedSelect = ({
   handleAddItem,
   handleRemoveItem,
   createEntityComponent,
-  autoComplete = "on"
+  autoComplete
 }: AdvancedSelectProps) => {
   const firstFilter = Object.keys(filterDefs)[0]
 
