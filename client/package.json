@@ -115,7 +115,7 @@
     "xhr2": "0.2.1"
   },
   "dependencies": {
-    "@apollo/client": "3.13.4",
+    "@apollo/client": "3.13.6",
     "@blueprintjs/core": "5.17.6",
     "@blueprintjs/datetime2": "2.3.30",
     "@emotion/react": "11.14.0",
@@ -126,7 +126,7 @@
     "@fullcalendar/list": "6.1.15",
     "@fullcalendar/react": "6.1.15",
     "@fullcalendar/timegrid": "6.1.15",
-    "axios": "1.8.3",
+    "axios": "1.8.4",
     "bootstrap": "5.3.3",
     "change-case": "5.4.4",
     "classnames": "2.5.1",
@@ -139,7 +139,7 @@
     "formik": "2.4.6",
     "graphiql": "3.8.3",
     "graphql": "16.10.0",
-    "html-to-image": "1.11.11",
+    "html-to-image": "1.11.13",
     "jsonpath-plus": "10.3.0",
     "keycloak-js": "26.1.4",
     "leaflet": "1.9.4",
