@@ -1,4 +1,4 @@
-import { Icon } from "@blueprintjs/core"
+import { Icon /* Tooltip */ } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import App6Symbol from "components/App6Symbol"
 import App6Symbol2, {
@@ -163,22 +163,20 @@ const EditApp6SymbolModal = ({
       return a.localeCompare(b)
     })
     return (
-      <Dropdown style={{ width: "100%" }}>
+      <Dropdown className="w-100">
         <Dropdown.Toggle
           variant="tertiary"
           id={`${field}-dropdown`}
-          className="d-flex align-content-space-between align-items-center"
+          className="d-flex align-content-space-between align-items-center w-100"
           style={{
-            width: "100%",
             color: "#212529",
             fontSize: "14px",
             borderColor: "#212529"
           }}
         >
           <div
-            className="d-flex align-items-center gap-2"
+            className="d-flex align-items-center gap-2 w-100"
             style={{
-              width: "100%",
               height: 40,
               overflow: "hidden",
               textAlign: "left"
@@ -197,7 +195,7 @@ const EditApp6SymbolModal = ({
             </div>
           </div>
         </Dropdown.Toggle>
-        <Dropdown.Menu style={{ width: "100%" }}>
+        <Dropdown.Menu className="w-100">
           {sortedChoices.map(key => (
             <Dropdown.Item
               key={key}
@@ -205,18 +203,27 @@ const EditApp6SymbolModal = ({
                 handleFieldUpdate(field, key, setFieldValue, currentValues)}
               className="d-flex align-items-center gap-2"
               style={{
-                height: 40,
-                whiteSpace: "nowrap",
-                textOverflow: "ellipsis"
+                minHeight: 40
               }}
               onMouseEnter={() =>
                 setPreviewValues({ ...currentValues, [field]: key })}
               onMouseLeave={() => setPreviewValues(null)}
             >
               {getApp6Symbol(20, { ...currentValues, [field]: key })}
-              <span className="text-truncate" style={{ maxWidth: "100%" }}>
+              {/* <Tooltip
+                content={choices[key]}
+                placement="top"
+                hoverOpenDelay={500}
+              > */}
+              <span
+                className="text-truncate w-100"
+                style={{
+                  whiteSpace: "normal"
+                }}
+              >
                 {choices[key]}
               </span>
+              {/* </Tooltip> */}
             </Dropdown.Item>
           ))}
         </Dropdown.Menu>
