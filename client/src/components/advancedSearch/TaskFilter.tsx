@@ -4,7 +4,6 @@ import { IconNames } from "@blueprintjs/icons"
 import API from "api"
 import useSearchFilter from "components/advancedSearch/hooks"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
-import { TaskOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import { AdvancedMultiSelectOverlayTable } from "components/advancedSelectWidget/AdvancedSelectOverlayTable"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import { getBreadcrumbTrailAsText } from "components/BreadcrumbTrail"
@@ -278,190 +277,6 @@ const TaskFilter = ({
   const parentKey = "parentTask"
   const valueKey = "uuid"
 
-  const taskFields = `
-    ${Task.autocompleteQuery}
-    childrenTasks(query: { pageSize: 1 }) {
-      uuid
-    }
-    parentTask {
-      uuid
-    }
-    descendantTasks {
-      uuid
-    }
-  `
-
-  const HierarchicalOverlayTable = props => {
-    const { items, selectedItems, handleAddItem, handleRemoveItem } = {
-      ...props
-    }
-    const fetchChildren = async task => {
-      const query = gql`
-        query ($query: TaskSearchQueryInput) {
-          taskList(query: $query) {
-            list {
-              uuid
-              shortName
-              longName
-              ascendantTasks {
-                uuid
-                shortName
-                parentTask {
-                  uuid
-                }
-              }
-              childrenTasks {
-                uuid
-              }
-              descendantTasks {
-                uuid
-              }
-            }
-          }
-        }
-      `
-      const queryVars = { parentTaskUuid: task.uuid }
-      const data = await API.query(query, { query: queryVars })
-      return data.taskList.list
-    }
-
-    const handleExpand = task => {
-      if (expandedItems.has(task.uuid)) {
-        setExpandedItems(prev => {
-          const newSet = new Set(prev)
-          newSet.delete(task.uuid)
-          return newSet
-        })
-      } else {
-        if (!childrenMap.has(task.uuid)) {
-          fetchChildren(task).then(children => {
-            setChildrenMap(prev => new Map(prev).set(task.uuid, children))
-            setExpandedItems(prev => new Set([...prev, task.uuid]))
-          })
-        } else {
-          setExpandedItems(prev => new Set([...prev, task.uuid]))
-        }
-      }
-    }
-
-    const buildFlattenedList = (tasks, level = 0) => {
-      return tasks.flatMap(task => {
-        const isTaskSelected = selectedItems?.some(
-          item => item.uuid === task.uuid
-        )
-        const isChildrenTaskSelected = selectedItems?.some(item =>
-          task.descendantTasks?.some(child => child.uuid === item.uuid)
-        )
-        const isCollapsed = !expandedItems.has(task.uuid)
-        const isSelected = isTaskSelected
-          ? true
-          : isChildrenTaskSelected && isCollapsed
-            ? null
-            : false
-        const taskWithLevel = { ...task, level, isSelected }
-        const children = expandedItems.has(task.uuid)
-          ? childrenMap.get(task.uuid) || []
-          : []
-        return [taskWithLevel, ...buildFlattenedList(children, level + 1)]
-      })
-    }
-
-    const topLevelItems = items.filter(task => !task.parentTask)
-    const flattenedItems = buildFlattenedList(topLevelItems)
-
-    const enhancedRenderRow = task => {
-      const hasChildren = task.childrenTasks?.length > 0
-      const isExpanded = expandedItems.has(task.uuid)
-      const isSelected = selectedItems?.some(item => item.uuid === task.uuid)
-
-      const handleToggleSelection = e => {
-        e.stopPropagation()
-        if (isSelected) {
-          handleRemoveItem(task)
-        } else {
-          handleAddItem(task)
-        }
-      }
-
-      const displayLabel = task.longName
-        ? `${task.shortName}: ${task.longName}`
-        : task.shortName
-      const padding = Math.min(task.level, 3) * 20 + (hasChildren ? 0 : 26)
-      const indentedLabel = (
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-            paddingLeft: padding,
-            gap: 10,
-            cursor: "auto"
-          }}
-        >
-          {hasChildren && (
-            <span
-              onClick={e => {
-                e.stopPropagation()
-                handleExpand(task)
-              }}
-              style={{ cursor: "pointer" }}
-            >
-              <Icon
-                icon={
-                  isExpanded ? IconNames.CHEVRON_DOWN : IconNames.CHEVRON_RIGHT
-                }
-                size={IconSize.STANDARD}
-                color="#5f6b7c"
-              />
-            </span>
-          )}
-          {hasChildren ? (
-            <Icon
-              icon={isExpanded ? IconNames.FOLDER_OPEN : IconNames.FOLDER_CLOSE}
-              size={IconSize.STANDARD}
-              color="#5f6b7c"
-            />
-          ) : (
-            <Icon
-              icon={IconNames.DOCUMENT}
-              size={IconSize.STANDARD}
-              color="#5f6b7c"
-            />
-          )}
-          <Icon icon={IconNames.STAR} size={12} />
-          <span
-            onClick={handleToggleSelection}
-            style={{
-              cursor: "pointer",
-              flexGrow: "1"
-            }}
-          >
-            {displayLabel}
-          </span>
-        </div>
-      )
-
-      return (
-        <React.Fragment key={task.uuid}>
-          <td className="taskName" onClick={e => e.stopPropagation()}>
-            {indentedLabel}
-          </td>
-        </React.Fragment>
-      )
-    }
-
-    return (
-      <AdvancedMultiSelectOverlayTable
-        {...props}
-        items={flattenedItems}
-        renderRow={enhancedRenderRow}
-      />
-    )
-  }
-
-  const AdvancedSelectComponent = multi
-    ? AdvancedMultiSelect
-    : AdvancedSingleSelect
   return !asFormField ? (
     <>
       {value.value
@@ -477,7 +292,6 @@ const TaskFilter = ({
       showRemoveButton={false}
       filterDefs={advancedSelectFilters}
       overlayColumns={["Name"]}
-      overlayRenderRow={TaskOverlayRow}
       overlayTable={HierarchicalOverlayTable}
       objectType={Task}
       valueKey={valueKey}
