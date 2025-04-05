@@ -11,6 +11,10 @@ class ShowMartImportedReports extends Page {
     return browser.$("table")
   }
 
+  async getExportDictinaryButton() {
+    return browser.$("button")
+  }
+
   async getTableRows() {
     return (await this.getTable()).$$("tbody tr")
   }
