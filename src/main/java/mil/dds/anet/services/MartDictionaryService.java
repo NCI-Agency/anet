@@ -12,6 +12,9 @@ import java.util.Map;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Task;
+import mil.dds.anet.beans.WithStatus;
+import mil.dds.anet.beans.search.OrganizationSearchQuery;
+import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.LocationDao;
@@ -142,7 +145,9 @@ public class MartDictionaryService implements IMartDictionaryService {
 
   private List<Map<String, String>> exportTasksToMartDictionary(Task rootTask) {
     final List<Map<String, String>> tasks = new ArrayList<>();
-    List<Task> childrenTasks = rootTask.loadChildrenTasks(graphQLContext, null).join();
+    TaskSearchQuery taskSearchQuery = new TaskSearchQuery();
+    taskSearchQuery.setStatus(WithStatus.Status.ACTIVE);
+    List<Task> childrenTasks = rootTask.loadChildrenTasks(graphQLContext, taskSearchQuery).join();
     childrenTasks.sort(Comparator.comparing(Task::getShortName));
     for (Task childTask : childrenTasks) {
       final Map<String, String> task = new LinkedHashMap<>();
@@ -162,6 +167,8 @@ public class MartDictionaryService implements IMartDictionaryService {
       final List<Map<String, String>> reportingTeams = new ArrayList<>();
       command.put("guid", org.getUuid());
       command.put("name", org.getShortName());
+      OrganizationSearchQuery organizationSearchQuery = new OrganizationSearchQuery();
+      organizationSearchQuery.setStatus(WithStatus.Status.ACTIVE);
       List<Organization> rts = org.loadChildrenOrgs(graphQLContext, null).join();
       rts.sort(Comparator.comparing(Organization::getShortName));
       for (Organization rt : rts) {
@@ -179,8 +186,9 @@ public class MartDictionaryService implements IMartDictionaryService {
   private List<Map<String, Object>> exportMunicipalitiesToMartDictionary(Location municipalityGroup)
       throws JsonProcessingException {
     final List<Map<String, Object>> result = new ArrayList<>();
-
-    List<Location> municipalities = municipalityGroup.loadChildrenLocations(graphQLContext).join();
+    List<Location> municipalities =
+        new ArrayList<>(municipalityGroup.loadChildrenLocations(graphQLContext).join().stream()
+            .filter(m -> m.getStatus() == WithStatus.Status.ACTIVE).toList());
     municipalities.sort(Comparator.comparing(Location::getName));
     for (Location m : municipalities) {
       final Map<String, Object> municipality = new LinkedHashMap<>();
@@ -189,7 +197,8 @@ public class MartDictionaryService implements IMartDictionaryService {
       // Municipality fields
       municipality.put("guid", m.getUuid());
       addCustomFields(MART_DICT_MUNICIPALITY_CUSTOM_FIELDS, municipality, m);
-      List<Location> municipalityLocations = m.loadChildrenLocations(graphQLContext).join();
+      List<Location> municipalityLocations = new ArrayList<>(m.loadChildrenLocations(graphQLContext)
+          .join().stream().filter(l -> l.getStatus() == WithStatus.Status.ACTIVE).toList());
       municipalityLocations.sort(Comparator.comparing(Location::getName));
       for (Location l : municipalityLocations) {
         final Map<String, Object> location = new LinkedHashMap<>();
