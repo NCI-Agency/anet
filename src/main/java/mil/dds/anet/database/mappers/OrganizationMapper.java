@@ -23,6 +23,13 @@ public class OrganizationMapper implements RowMapper<Organization> {
     org.setApp6symbolSet(MapperUtils.getOptionalString(r, "organizations_app6symbolSet"));
     org.setApp6hq(MapperUtils.getOptionalString(r, "organizations_app6hq"));
     org.setApp6amplifier(MapperUtils.getOptionalString(r, "organizations_app6amplifier"));
+    org.setApp6entity(MapperUtils.getOptionalString(r, "organizations_app6entity"));
+    org.setApp6entityType(MapperUtils.getOptionalString(r, "organizations_app6entityType"));
+    org.setApp6entitySubtype(MapperUtils.getOptionalString(r, "organizations_app6entitySubtype"));
+    org.setApp6sectorOneModifier(
+        MapperUtils.getOptionalString(r, "organizations_app6sectorOneModifier"));
+    org.setApp6sectorTwoModifier(
+        MapperUtils.getOptionalString(r, "organizations_app6sectorTwoModifier"));
     org.setParentOrgUuid(r.getString("organizations_parentOrgUuid"));
     org.setLocationUuid(r.getString("organizations_locationUuid"));
 
