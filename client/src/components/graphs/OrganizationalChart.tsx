@@ -42,6 +42,11 @@ const GQL_GET_CHART_DATA = gql`
       app6symbolSet
       app6hq
       app6amplifier
+      app6entity
+      app6entityType
+      app6entitySubtype
+      app6sectorOneModifier
+      app6sectorTwoModifier
       ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       positions {
         name
@@ -80,6 +85,11 @@ const GQL_GET_CHART_DATA = gql`
         app6symbolSet
         app6hq
         app6amplifier
+        app6entity
+        app6entityType
+        app6entitySubtype
+        app6sectorOneModifier
+        app6sectorTwoModifier
         ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         childrenOrgs(query: { status: ACTIVE }) {
           uuid
@@ -235,10 +245,16 @@ const OrganizationFlowChart = ({
     )
     const hq = org?.app6hq || "0"
     const amplifier = org?.app6amplifier || "00"
+    const entity = org?.app6entity || "00"
+    const entityType = org?.app6entityType || "00"
+    const entitySubtype = org?.app6entitySubtype || "00"
+    const sectorOneModifier = org?.app6sectorOneModifier || "00"
+    const sectorTwoModifier = org?.app6version || "00"
     const version = "10" // APP-6D
     const status = "0" // Present
     return new ms.Symbol(
-      `${version}${context}${standardIdentity}${symbolSet}${status}${hq}${amplifier}`,
+      `${version}${context}${standardIdentity}${symbolSet}${status}${hq}${amplifier}` +
+        `${entity}${entityType}${entitySubtype}${sectorOneModifier}${sectorTwoModifier}`,
       {
         size: 30
       }
