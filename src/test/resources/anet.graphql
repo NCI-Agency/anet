@@ -812,7 +812,12 @@ type Organization {
   administratingPositions: [Position]
   app6amplifier: String
   app6context: String
+  app6entity: String
+  app6entitySubtype: String
+  app6entityType: String
   app6hq: String
+  app6sectorOneModifier: String
+  app6sectorTwoModifier: String
   app6standardIdentity: String
   app6symbolSet: String
   approvalSteps: [ApprovalStep]
@@ -848,7 +853,12 @@ input OrganizationInput {
   administratingPositions: [PositionInput]
   app6amplifier: String
   app6context: String
+  app6entity: String
+  app6entitySubtype: String
+  app6entityType: String
   app6hq: String
+  app6sectorOneModifier: String
+  app6sectorTwoModifier: String
   app6standardIdentity: String
   app6symbolSet: String
   approvalSteps: [ApprovalStepInput]
