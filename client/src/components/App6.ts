@@ -1,17 +1,17 @@
 export const App6Choices: { [key: string]: any } = {
-  context: {
+  app6context: {
     0: "Reality",
     1: "Exercise",
     2: "Simulation"
   },
-  standardIdentity: {
+  app6standardIdentity: {
     0: "Pending",
     1: "Unknown",
     3: "Friend",
     4: "Neutral",
     6: "Hostile"
   },
-  symbolSet: {
+  app6symbolSet: {
     "01": "Air",
     "02": "Air missile",
     "05": "Space",
@@ -33,7 +33,7 @@ export const App6Choices: { [key: string]: any } = {
     54: "Signals Intelligence - Subsurface",
     60: "Cyberspace"
   },
-  status: {
+  app6status: {
     0: "Present",
     1: "Planned / Anticipated / Suspect",
     2: "Present / Fully capable",
@@ -41,7 +41,7 @@ export const App6Choices: { [key: string]: any } = {
     4: "Present / Destroyed",
     5: "Present / Full to capacity"
   },
-  hq: {
+  app6hq: {
     1: "Feint / Dummy",
     2: "Headquarters",
     3: "Feint / Dummy Headquarters",
@@ -50,7 +50,7 @@ export const App6Choices: { [key: string]: any } = {
     6: "Task Force Headquarters",
     7: "Feint / Dummy Task Force Headquarters"
   },
-  amplifier: {
+  app6amplifier: {
     10: {
       11: "Team / Crew",
       12: "Squad",
@@ -92,7 +92,7 @@ export const App6Choices: { [key: string]: any } = {
       62: "Long towed array"
     }
   },
-  iconEntity: {
+  app6entity: {
     "01": {
       11: {
         label: "Military",
@@ -3625,7 +3625,7 @@ export const App6Choices: { [key: string]: any } = {
       }
     }
   },
-  firstModifier: {
+  app6sectorOneModifier: {
     "01": {
       "01": "Attack / Strike",
       "02": "Bomber",
@@ -4386,7 +4386,7 @@ export const App6Choices: { [key: string]: any } = {
     //   "00": "Not Applicable"
     // }
   },
-  secondModifier: {
+  app6sectorTwoModifier: {
     "01": {
       "01": "Heavy",
       "02": "Medium",
