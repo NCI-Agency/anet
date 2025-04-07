@@ -247,7 +247,7 @@ public class OrganizationDao
           + "app6context = :app6context, \"app6standardIdentity\" = :app6standardIdentity, "
           + "\"app6symbolSet\" = :app6symbolSet, app6hq = :app6hq, app6amplifier = :app6amplifier, "
           + "app6entity = :app6entity, \"app6entityType\" = :app6entityType, "
-          + "\"app6entitySubtype\" = :app6entitySybtype, \"app6sectorOneModifier\" = :app6sectorOneModifier, "
+          + "\"app6entitySubtype\" = :app6entitySubtype, \"app6sectorOneModifier\" = :app6sectorOneModifier, "
           + "\"app6sectorTwoModifier\" = :app6sectorTwoModifier, " + "\"updatedAt\" = :updatedAt, "
           + "\"parentOrgUuid\" = :parentOrgUuid, \"locationUuid\" = :locationUuid, \"customFields\" = :customFields "
           + "WHERE uuid = :uuid").bindBean(org)

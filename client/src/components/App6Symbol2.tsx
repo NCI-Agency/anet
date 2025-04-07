@@ -6,55 +6,45 @@ const VERSION = 10
 
 export const getChoices = (field: string, values: any) => {
   const symbolSet = getCodeFieldValue(getSymbolCode(values), "app6symbolSet")
-  const iconEntity = getCodeFieldValue(getSymbolCode(values), "iconEntity")
+  const app6entity = getCodeFieldValue(getSymbolCode(values), "app6entity")
   switch (field) {
-    case "app6context":
-      return App6Choices.context || {}
-    case "app6standardIdentity":
-      return App6Choices.standardIdentity || {}
-    case "app6symbolSet":
-      return App6Choices.symbolSet || {}
-    case "status":
-      return App6Choices.status || {}
-    case "app6hq":
-      return App6Choices.hq || {}
-    case "app6amplifier":
-      return App6Choices.amplifier[symbolSet] || {}
-    case "iconEntity":
-      const entityOptions = App6Choices.iconEntity[symbolSet] || {}
+    case "app6entity":
+      const entityOptions = App6Choices[field][symbolSet] || {}
       return Object.fromEntries(
         Object.entries(entityOptions).map(([key, value]) => {
           return [key, value.label]
         })
       )
-    case "iconEntityType":
+    case "app6entityType":
       const entityTypeOptions =
-        App6Choices.iconEntity[symbolSet]?.[iconEntity]?.options || {}
+        App6Choices.app6entity[symbolSet]?.[app6entity]?.options || {}
       return Object.fromEntries(
         Object.entries(entityTypeOptions).map(([key, value]) => {
           return [key, value.label]
         })
       )
-    case "iconEntitySubtype":
-      const iconEntityType = getCodeFieldValue(
+    case "app6entitySubtype":
+      const app6entityType = getCodeFieldValue(
         getSymbolCode(values),
-        "iconEntityType"
+        "app6entityType"
       )
       const entitySubtypeOptions =
-        App6Choices.iconEntity[symbolSet]?.[iconEntity]?.options?.[
-          iconEntityType
+        App6Choices.app6entity[symbolSet]?.[app6entity]?.options?.[
+          app6entityType
         ]?.options || {}
       return Object.fromEntries(
         Object.entries(entitySubtypeOptions).map(([key, value]) => {
           return [key, value.label]
         })
       )
-    case "firstModifier":
-      return App6Choices.firstModifier[symbolSet] || {}
-    case "secondModifier":
-      return App6Choices.secondModifier[symbolSet] || {}
+    case "app6amplifier":
+      return App6Choices[field][symbolSet] || {}
+    case "app6sectorOneModifier":
+      return App6Choices[field][symbolSet] || {}
+    case "app6sectorTwoModifier":
+      return App6Choices[field][symbolSet] || {}
     default:
-      return {}
+      return App6Choices[field] || {}
   }
 }
 
@@ -66,11 +56,11 @@ export const getApp6Values = (code: string) => {
     status: code.substring(6, 7),
     app6hq: code.substring(7, 8),
     app6amplifier: code.substring(8, 10),
-    iconEntity: code.substring(10, 12),
-    iconEntityType: code.substring(12, 14),
-    iconEntitySubtype: code.substring(14, 16),
-    firstModifier: code.substring(16, 18),
-    secondModifier: code.substring(18, 20)
+    app6entity: code.substring(10, 12),
+    app6entityType: code.substring(12, 14),
+    app6entitySubtype: code.substring(14, 16),
+    app6sectorOneModifier: code.substring(16, 18),
+    app6sectorTwoModifier: code.substring(18, 20)
   }
 }
 
@@ -81,11 +71,11 @@ export const getSymbolCode = (values: any) => {
   const status = values?.status || "0"
   const hq = values?.app6hq || "0"
   const amplifier = values?.app6amplifier || "00"
-  const iconEntity = values?.iconEntity || "00"
-  const iconEntityType = values?.iconEntityType || "00"
-  const iconEntitySubtype = values?.iconEntitySubtype || "00"
-  const firstModifier = values?.firstModifier || "00"
-  const secondModifier = values?.secondModifier || "00"
+  const app6entity = values?.app6entity || "00"
+  const app6entityType = values?.app6entityType || "00"
+  const app6entitySubtype = values?.app6entitySubtype || "00"
+  const app6sectorOneModifier = values?.app6sectorOneModifier || "00"
+  const app6sectorTwoModifier = values?.app6sectorTwoModifier || "00"
   const fieldValues = [
     VERSION,
     context,
@@ -94,11 +84,11 @@ export const getSymbolCode = (values: any) => {
     status,
     hq,
     amplifier,
-    iconEntity,
-    iconEntityType,
-    iconEntitySubtype,
-    firstModifier,
-    secondModifier
+    app6entity,
+    app6entityType,
+    app6entitySubtype,
+    app6sectorOneModifier,
+    app6sectorTwoModifier
   ]
   return fieldValues.join("")
 }
@@ -117,15 +107,15 @@ const getCodeFieldValue = (code: string, field: string) => {
       return code.substring(7, 8)
     case "app6amplifier":
       return code.substring(8, 10)
-    case "iconEntity":
+    case "app6entity":
       return code.substring(10, 12)
-    case "iconEntityType":
+    case "app6entityType":
       return code.substring(12, 14)
-    case "iconEntitySubtype":
+    case "app6entitySubtype":
       return code.substring(14, 16)
-    case "firstModifier":
+    case "app6sectorOneModifier":
       return code.substring(16, 18)
-    case "secondModifier":
+    case "app6sectorTwoModifier":
       return code.substring(18, 20)
     default:
       return ""

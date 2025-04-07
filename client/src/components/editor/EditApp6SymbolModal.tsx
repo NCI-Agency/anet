@@ -10,6 +10,7 @@ import { Form, Formik } from "formik"
 import { Organization } from "models"
 import React, { useState } from "react"
 import { Button, Col, Dropdown, Modal, Row } from "react-bootstrap"
+import Settings from "settings"
 
 interface EditApp6SymbolModalProps {
   values: any
@@ -53,16 +54,16 @@ const EditApp6SymbolModal = ({
     // clear specific fields
     if (field === "app6symbolSet") {
       setFieldValue("app6amplifier", null)
-      setFieldValue("iconEntity", null)
-      setFieldValue("iconEntityType", null)
-      setFieldValue("iconEntitySubtype", null)
+      setFieldValue("app6entity", null)
+      setFieldValue("app6entityType", null)
+      setFieldValue("app6entitySubtype", null)
     }
-    if (field === "iconEntity") {
-      setFieldValue("iconEntityType", null)
-      setFieldValue("iconEntitySubtype", null)
+    if (field === "app6entity") {
+      setFieldValue("app6entityType", null)
+      setFieldValue("app6entitySubtype", null)
     }
-    if (field === "iconEntityType") {
-      setFieldValue("iconEntitySubtype", null)
+    if (field === "app6entityType") {
+      setFieldValue("app6entitySubtype", null)
     }
   }
 
@@ -72,17 +73,6 @@ const EditApp6SymbolModal = ({
   }
 
   const getFieldName = (field, values) => {
-    const staticLabels = {
-      app6context: "Context",
-      app6standardIdentity: "Standard Identity",
-      app6symbolSet: "Symbol Set",
-      status: "Status",
-      app6hq: "Headquarters / Task Force / Dummy",
-      iconEntity: "Main Icon",
-      firstModifier: "First Modifier",
-      secondModifier: "Second Modifier"
-    }
-
     if (field === "app6amplifier") {
       const amplifierLabels = {
         10: "Echelon",
@@ -94,7 +84,7 @@ const EditApp6SymbolModal = ({
       return amplifierLabels[values.app6symbolSet] || null
     }
 
-    return staticLabels[field] || null
+    return Settings.fields.organization[field].label || null
   }
 
   const getFieldRow = (field, setFieldValue, currentValues) => {

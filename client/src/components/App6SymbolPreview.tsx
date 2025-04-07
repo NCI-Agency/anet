@@ -4,6 +4,7 @@ import { Organization } from "models"
 import React from "react"
 import { Table } from "react-bootstrap"
 import Settings from "settings"
+import { App6Choices } from "./App6"
 
 interface FieldRow {
   fieldName: string
@@ -12,15 +13,16 @@ interface FieldRow {
 }
 
 const FieldRow = ({ fieldName, value, parentValue = null }: FieldRow) => {
-  const settingProps = Settings.fields.organization[fieldName]
   const valueText =
     (parentValue && (
-      <em>{settingProps.choices[parentValue]} (inherited from parent)</em>
+      <em>{App6Choices[fieldName][parentValue]} (inherited from parent)</em>
     )) ||
-    settingProps.choices[value]
+    App6Choices[fieldName][value]
   return (
     <tr style={{ border: "hidden" }}>
-      <td style={{ fontWeight: "bold" }}>{settingProps.label}</td>
+      <td style={{ fontWeight: "bold" }}>
+        {Settings.fields.organization[fieldName].label}
+      </td>
       <td>{valueText}</td>
     </tr>
   )
@@ -82,10 +84,10 @@ const App6SymbolPreview = ({
                   parentValue={parentSymbolSet}
                 />
                 <FieldRow fieldName="app6hq" value={values.app6hq} />
-                <FieldRow
+                {/* <FieldRow
                   fieldName="app6amplifier"
                   value={values.app6amplifier}
-                />
+                /> */}
               </tbody>
             </Table>
           </div>
