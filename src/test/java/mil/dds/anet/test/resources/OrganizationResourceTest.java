@@ -33,7 +33,8 @@ public class OrganizationResourceTest extends AbstractResourceTest {
   private static final String _EMAIL_ADDRESSES_FIELDS = "emailAddresses { network address }";
   public static final String FIELDS =
       String.format("{ uuid shortName longName status identificationCode profile location"
-          + " app6context app6standardIdentity app6symbolSet app6hq app6amplifier"
+          + " app6context app6standardIdentity app6symbolSet app6hq app6amplifier app6entity"
+          + " app6entityType app6entitySubtype app6sectorOneModifier app6sectorTwoModifier"
           + " customFields tasks { uuid } parentOrg { uuid }"
           + " approvalSteps { uuid name approvers { uuid } } %1$s }", _EMAIL_ADDRESSES_FIELDS);
   private static final String POSITION_FIELDS = String.format(
@@ -201,6 +202,9 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(returnedSteps.get(1).getApprovers()).allMatch(a -> a.getUuid().equals(b1.getUuid()));
   }
 
+  @Deprecated
+  // TODO: remove this and replace it with setting a value, as the choices are no longer available
+  // in the dictionary
   private String getApp6Choice(final String app6field) {
     @SuppressWarnings("unchecked")
     final Map<String, String> app6fieldChoices = (Map<String, String>) dict
