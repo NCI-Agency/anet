@@ -221,6 +221,27 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   }
 
   @Transactional
+  // Used by the MART IMPORT
+  public List<Person> findByEmailAddress(String emailAddress) {
+    final Handle handle = getDbHandle();
+    try {
+      if (Utils.isEmptyOrNull(emailAddress)) {
+        return Collections.emptyList();
+      }
+      return handle
+          .createQuery("/* findByEmailAddress */ SELECT " + PERSON_FIELDS + ","
+              + PositionDao.POSITION_FIELDS
+              + "FROM people LEFT JOIN positions ON people.uuid = positions.\"currentPersonUuid\" "
+              + "LEFT JOIN \"emailAddresses\" ON \"emailAddresses\".\"relatedObjectType\" = '"
+              + TABLE_NAME + "' AND people.uuid = \"emailAddresses\".\"relatedObjectUuid\" "
+              + "WHERE \"emailAddresses\".address = :emailAddress")
+          .bind("emailAddress", emailAddress).map(new PersonMapper()).list();
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
+  @Transactional
   public List<Person> findByOpenIdSubject(String openIdSubject, boolean activeUser) {
     final Handle handle = getDbHandle();
     try {

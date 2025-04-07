@@ -33,6 +33,7 @@ import mil.dds.anet.database.EventDao;
 import mil.dds.anet.database.EventSeriesDao;
 import mil.dds.anet.database.JobHistoryDao;
 import mil.dds.anet.database.LocationDao;
+import mil.dds.anet.database.MartImportedReportDao;
 import mil.dds.anet.database.NoteDao;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
@@ -156,6 +157,10 @@ public class AnetObjectEngine {
 
   public EventDao getEventDao() {
     return ApplicationContextProvider.getBean(EventDao.class);
+  }
+
+  public MartImportedReportDao getMartImportedReportDao() {
+    return ApplicationContextProvider.getBean(MartImportedReportDao.class);
   }
 
   public CompletableFuture<Boolean> canUserApproveStep(GraphQLContext context, String userUuid,

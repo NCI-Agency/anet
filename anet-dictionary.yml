@@ -6,6 +6,7 @@ SUPPORT_EMAIL_ADDR: support@example.com
 regularUsersCanCreateLocations: true
 engagementsIncludeTimeAndDuration: true
 eventsIncludeStartAndEndTime: true
+featureMartGuiEnabled: true
 
 calendarOptions:
   attendeesType: advisor
@@ -2062,7 +2063,7 @@ fields:
               label: Report had POSITIVE atmosphere
               choices:
                 yes:
-                  label: 👍
+                  label: Nice!
                   color: '#0000ff'
         interlocutorOndemandScreeningAndVetting:
           label: Screening & Vetting of interlocutor from MoD

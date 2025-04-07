@@ -110,6 +110,14 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     return insertInternal(r, null);
   }
 
+  @Transactional
+  public Report insertWithExistingUuid(Report r) {
+    final var existingUuid = r.getUuid();
+    DaoUtils.setInsertFields(r);
+    r.setUuid(existingUuid);
+    return insertInternal(r);
+  }
+
   public Report insertInternal(Report r, Person user) {
     final Handle handle = getDbHandle();
     try {
