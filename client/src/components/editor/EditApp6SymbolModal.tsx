@@ -1,4 +1,4 @@
-import { Icon /* Tooltip */ } from "@blueprintjs/core"
+import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import App6Symbol from "components/App6Symbol"
 import App6Symbol2, {
@@ -26,24 +26,25 @@ const EditApp6SymbolModal = ({
   onSave
 }: EditApp6SymbolModalProps) => {
   const { parentContext, parentStandardIdentity, parentSymbolSet } =
-    Organization.getApp6ParentFields(values.parentOrg, values)
+    Organization.getApp6ParentFields(values.parentOrg, {})
   const parentValues = {
     app6context: parentContext,
     app6standardIdentity: parentStandardIdentity,
     app6symbolSet: parentSymbolSet
   }
-  const filteredValues = Object.fromEntries(
+
+  const initialValues = Object.fromEntries(
     Object.entries(values).filter(([key]) => key.startsWith("app6"))
   )
-  const code = getSymbolCode(filteredValues)
-  const initialValues = getApp6Values(code)
-
-  const [previewValues, setPreviewValues] = useState(null)
+  const [previewValues, setPreviewValues] = useState({ ...initialValues })
 
   const handleFieldUpdate = (field, newValue, setFieldValue, currentValues) => {
+    if (newValue === currentValues[field]) {
+      return
+    }
     // handle field update
     setFieldValue(field, newValue)
-    currentValues[field] = newValue
+    setPreviewValues({ ...previewValues, [field]: newValue })
     // verify if all other field have a valid value after the update
     Object.entries(currentValues).forEach(([key, value]) => {
       const choices = getChoices(key, currentValues)
@@ -68,7 +69,13 @@ const EditApp6SymbolModal = ({
   }
 
   const getApp6Symbol = (size, tempValues) => {
-    const code = getSymbolCode(tempValues)
+    const tempValuesCopy = { ...tempValues }
+    Object.entries(parentValues).forEach(([key, value]) => {
+      if (value !== null && tempValuesCopy[key] === null) {
+        tempValuesCopy[key] = value
+      }
+    })
+    const code = getSymbolCode(tempValuesCopy)
     return <App6Symbol2 code={code} size={size} />
   }
 
@@ -116,6 +123,22 @@ const EditApp6SymbolModal = ({
         ? `${choices?.[parentValue]} (inherited)`
         : ""
 
+    const sortedChoicesKeys = Object.keys(choices).sort((a, b) =>
+      a.localeCompare(b)
+    )
+    const dropdownOptions = sortedChoicesKeys.map(key => ({
+      key,
+      label: choices[key],
+      values: { ...currentValues, [field]: key }
+    }))
+    if (parentValue) {
+      dropdownOptions.unshift({
+        key: null,
+        label: `${choices[parentValue]} (inherited)`,
+        values: { ...currentValues, [field]: parentValue }
+      })
+    }
+
     return (
       <Row>
         <Col md={11}>
@@ -123,7 +146,7 @@ const EditApp6SymbolModal = ({
             field,
             setFieldValue,
             selectedChoice,
-            choices,
+            dropdownOptions,
             currentValues
           )}
         </Col>
@@ -131,8 +154,14 @@ const EditApp6SymbolModal = ({
           {selectedChoice && (
             <Button
               variant="outline"
-              onClick={() =>
-                handleFieldUpdate(field, null, setFieldValue, currentValues)}
+              onClick={() => {
+                handleFieldUpdate(
+                  field,
+                  initialValues[field],
+                  setFieldValue,
+                  currentValues
+                )
+              }}
             >
               <Icon icon={IconNames.RESET} />
             </Button>
@@ -146,12 +175,9 @@ const EditApp6SymbolModal = ({
     field,
     setFieldValue,
     selectedChoice,
-    choices,
+    dropdownOptions,
     currentValues
   ) => {
-    const sortedChoices = Object.keys(choices).sort((a, b) => {
-      return a.localeCompare(b)
-    })
     return (
       <Dropdown className="w-100">
         <Dropdown.Toggle
@@ -186,7 +212,7 @@ const EditApp6SymbolModal = ({
           </div>
         </Dropdown.Toggle>
         <Dropdown.Menu className="w-100">
-          {sortedChoices.map(key => (
+          {dropdownOptions.map(({ key, label, values }) => (
             <Dropdown.Item
               key={key}
               onClick={() =>
@@ -195,25 +221,18 @@ const EditApp6SymbolModal = ({
               style={{
                 minHeight: 40
               }}
-              onMouseEnter={() =>
-                setPreviewValues({ ...currentValues, [field]: key })}
-              onMouseLeave={() => setPreviewValues(null)}
+              onMouseEnter={() => setPreviewValues({ ...values })}
+              onMouseLeave={() => setPreviewValues({ ...currentValues })}
             >
-              {getApp6Symbol(20, { ...currentValues, [field]: key })}
-              {/* <Tooltip
-                content={choices[key]}
-                placement="top"
-                hoverOpenDelay={500}
-              > */}
+              {getApp6Symbol(20, values)}
               <span
                 className="text-truncate w-100"
                 style={{
                   whiteSpace: "normal"
                 }}
               >
-                {choices[key]}
+                {label}
               </span>
-              {/* </Tooltip> */}
             </Dropdown.Item>
           ))}
         </Dropdown.Menu>
@@ -223,8 +242,9 @@ const EditApp6SymbolModal = ({
 
   const onReset = (values, setFieldValue) => {
     Object.keys(values).forEach(field => {
-      setFieldValue(field, null)
+      setFieldValue(field, initialValues[field])
     })
+    setPreviewValues({ ...initialValues })
   }
 
   return (
@@ -260,7 +280,7 @@ const EditApp6SymbolModal = ({
                     className="d-flex justify-content-center align-items-center"
                     style={{ minWidth: 200 }}
                   >
-                    {getApp6Symbol(200, previewValues || values)}
+                    {getApp6Symbol(200, previewValues)}
                   </div>
                 </div>
               </Modal.Body>
@@ -271,7 +291,13 @@ const EditApp6SymbolModal = ({
                 >
                   Reset
                 </Button>
-                <Button variant="secondary" onClick={onHide}>
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    onReset(values, setFieldValue)
+                    onHide()
+                  }}
+                >
                   Cancel
                 </Button>
                 <Button variant="primary" onClick={handleSubmit}>

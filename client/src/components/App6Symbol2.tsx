@@ -68,14 +68,15 @@ export const getSymbolCode = (values: any) => {
   const context = values?.app6context || "0"
   const standardIdentity = values?.app6standardIdentity || "0"
   const symbolSet = values?.app6symbolSet || "00"
-  const status = values?.status || "0"
+  // const status = values?.status || "0"
+  const status = "0"
   const hq = values?.app6hq || "0"
   const amplifier = values?.app6amplifier || "00"
-  const app6entity = values?.app6entity || "00"
-  const app6entityType = values?.app6entityType || "00"
-  const app6entitySubtype = values?.app6entitySubtype || "00"
-  const app6sectorOneModifier = values?.app6sectorOneModifier || "00"
-  const app6sectorTwoModifier = values?.app6sectorTwoModifier || "00"
+  const entity = values?.app6entity || "00"
+  const entityType = values?.app6entityType || "00"
+  const entitySubtype = values?.app6entitySubtype || "00"
+  const sectorOneModifier = values?.app6sectorOneModifier || "00"
+  const sectorTwoModifier = values?.app6sectorTwoModifier || "00"
   const fieldValues = [
     VERSION,
     context,
@@ -84,11 +85,11 @@ export const getSymbolCode = (values: any) => {
     status,
     hq,
     amplifier,
-    app6entity,
-    app6entityType,
-    app6entitySubtype,
-    app6sectorOneModifier,
-    app6sectorTwoModifier
+    entity,
+    entityType,
+    entitySubtype,
+    sectorOneModifier,
+    sectorTwoModifier
   ]
   return fieldValues.join("")
 }
@@ -124,10 +125,14 @@ const getCodeFieldValue = (code: string, field: string) => {
 
 interface App6SymbolProps {
   code?: string
+  values?: any
   size?: number
 }
 
-const App6Symbol = ({ code, size = 30 }: App6SymbolProps) => {
+const App6Symbol = ({ code, values, size = 30 }: App6SymbolProps) => {
+  if (!code) {
+    code = getSymbolCode(values)
+  }
   const svgString = new ms.Symbol(code, { size }).asSVG()
   const dataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgString)}`
   return (
