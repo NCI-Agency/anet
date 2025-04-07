@@ -78,7 +78,7 @@ run.environment("ANET_MART_EXCHANGE_PASSWORD", run.environment["ANET_MART_EXCHAN
 run.environment("ANET_MART_TRUSTED_SENDER", run.environment["ANET_MART_TRUSTED_SENDER"] ?: "mart@kfor.nato.int")
 run.environment("ANET_MART_DISABLE_CERTIFICATE_VALIDATION", run.environment["ANET_MART_DISABLE_CERTIFICATE_VALIDATION"] ?: "false")
 run.environment("ANET_MART_MARK_AS_READ", run.environment["ANET_MART_MARK_AS_READ"] ?: "true")
-run.environment("ANET_MART_DISABLE", run.environment["ANET_MART_DISABLE"] ?: isTestEnv ? "true" : "false")
+run.environment("ANET_MART_DISABLE", run.environment["ANET_MART_DISABLE"] ?: "true")
 String NON_DEFAULT_DB_PROFILE = run.environment["ANET_DB_NAME"] in [DEV_DB, TEST_DB] ? "" : "prod"
 run.environment("SPRING_PROFILES_ACTIVE", run.environment["SPRING_PROFILES_ACTIVE"] ?: isTestEnv ? "test" : (NON_DEFAULT_DB_PROFILE ?: "dev"))
 
