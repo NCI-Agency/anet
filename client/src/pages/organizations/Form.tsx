@@ -7,7 +7,7 @@ import {
   TaskOverlayRow
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
-import App6Symbol from "components/App6Symbol"
+import App6Symbol2 from "components/App6Symbol2"
 import AppContext from "components/AppContext"
 import ApprovalsDefinition from "components/approvals/ApprovalsDefinition"
 import UploadAttachment from "components/Attachment/UploadAttachment"
@@ -285,17 +285,20 @@ const OrganizationForm = ({
                               gap: 30
                             }}
                           >
-                            <App6Symbol
-                              context={values.app6context || parentContext}
-                              standardIdentity={
-                                values.app6standardIdentity ||
-                                parentStandardIdentity
-                              }
-                              symbolSet={
-                                values.app6symbolSet || parentSymbolSet
-                              }
-                              hq={values.app6hq}
-                              amplifier={values.app6amplifier}
+                            <App6Symbol2
+                              values={{
+                                ...values,
+                                app6context: values.app6context
+                                  ? values.app6context
+                                  : parentContext,
+                                app6standardIdentity:
+                                  values.app6standardIdentity
+                                    ? values.app6standardIdentity
+                                    : parentStandardIdentity,
+                                app6symbolSet: values.app6symbolSet
+                                  ? values.app6symbolSet
+                                  : parentSymbolSet
+                              }}
                               size={120}
                             />
                             <Button onClick={() => setShowApp6Modal(true)}>
@@ -323,6 +326,26 @@ const OrganizationForm = ({
                               setFieldValue(
                                 "app6amplifier",
                                 symbologyValues.app6amplifier
+                              )
+                              setFieldValue(
+                                "app6entity",
+                                symbologyValues.app6entity
+                              )
+                              setFieldValue(
+                                "app6entityType",
+                                symbologyValues.app6entityType
+                              )
+                              setFieldValue(
+                                "app6entitySubtype",
+                                symbologyValues.app6entitySubtype
+                              )
+                              setFieldValue(
+                                "app6sectorOneModifier",
+                                symbologyValues.app6sectorOneModifier
+                              )
+                              setFieldValue(
+                                "app6sectorTwoModifier",
+                                symbologyValues.app6sectorTwoModifier
                               )
                               setShowApp6Modal(false)
                             }}
