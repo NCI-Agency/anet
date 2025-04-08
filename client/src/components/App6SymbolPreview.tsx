@@ -45,7 +45,6 @@ const App6SymbolPreview = ({ values, size = 30 }: App6SymbolPreviewProps) => {
   const app6ValueKeys = Object.keys(values).filter(key =>
     key.startsWith("app6")
   )
-  console.log(app6ValueKeys, values, parentValues)
   return (
     <Popover
       captureDismiss
@@ -74,7 +73,6 @@ const App6SymbolPreview = ({ values, size = 30 }: App6SymbolPreviewProps) => {
                 {app6ValueKeys.map(key => {
                   const value = values[key]
                   const parentValue = parentValues[key]
-                  console.log(key, value, parentValue)
                   return (
                     <FieldRow
                       key={key}
