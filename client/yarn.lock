@@ -6348,7 +6348,7 @@ __metadata:
     use-debounce: "npm:10.0.4"
     uuid: "npm:11.1.0"
     webdriverio: "npm:8.43.0"
-    webpack: "npm:5.99.1"
+    webpack: "npm:5.99.2"
     webpack-cli: "npm:6.0.1"
     webpack-dev-server: "npm:5.2.1"
     webpack-merge: "npm:6.0.1"
@@ -20240,9 +20240,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack@npm:5.99.1":
-  version: 5.99.1
-  resolution: "webpack@npm:5.99.1"
+"webpack@npm:5.99.2":
+  version: 5.99.2
+  resolution: "webpack@npm:5.99.2"
   dependencies:
     "@types/eslint-scope": "npm:^3.7.7"
     "@types/estree": "npm:^1.0.6"
@@ -20272,7 +20272,7 @@ __metadata:
       optional: true
   bin:
     webpack: bin/webpack.js
-  checksum: 10c0/44f58925999c3be255c9322c82ada717a8ccf9671bc423701ff6a88e5b2a0961d70a9f15d74a21191d358d474c3864d4356243da12292ceb02486045c82f8b79
+  checksum: 10c0/9ad89d986f078311f96284862f12323ff0b55ef23065506043ccccbfb06f60fc0d30423b2a41a6db982666fc7c39b80eb687b6c05319ad1cac3b6e3bbf87fde4
   languageName: node
   linkType: hard
 
