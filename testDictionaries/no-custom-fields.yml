@@ -1360,7 +1360,7 @@ fields:
                   style:
                     height: 100px
         personOnceReportLinguistLin:
-          label: Engagement assessment of linguist GUIST, Lin
+          label: Engagement assessment of linguist Guist, Lin
           recurrence: once
           relatedObjectType: report
           test: $.subject[?(@property === "name" && @ === "Guist, Lin")]
