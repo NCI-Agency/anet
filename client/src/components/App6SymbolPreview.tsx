@@ -1,48 +1,51 @@
 import { Popover, PopoverInteractionKind } from "@blueprintjs/core"
-import App6Symbol from "components/App6Symbol"
+import App6Symbol, { getChoices } from "components/App6Symbol"
 import { Organization } from "models"
 import React from "react"
 import { Table } from "react-bootstrap"
 import Settings from "settings"
-import { App6Choices } from "./App6"
 
 interface FieldRow {
   fieldName: string
-  value: string
+  values: any[]
   parentValue?: string
 }
 
-const FieldRow = ({ fieldName, value, parentValue = null }: FieldRow) => {
-  const valueText =
-    (parentValue && (
-      <em>{App6Choices[fieldName][parentValue]} (inherited from parent)</em>
-    )) ||
-    App6Choices[fieldName][value]
+const FieldRow = ({ fieldName, values, parentValue }: FieldRow) => {
+  if (!values[fieldName] && !parentValue) {
+    return null
+  }
+  const choices = getChoices(fieldName, values)
+  const text =
+    choices[values[fieldName] || parentValue] +
+    (values[fieldName] ? "" : " (inherited from parent)")
   return (
     <tr style={{ border: "hidden" }}>
       <td style={{ fontWeight: "bold" }}>
         {Settings.fields.organization[fieldName].label}
       </td>
-      <td>{valueText}</td>
+      <td>{text}</td>
     </tr>
   )
 }
 
 interface App6SymbolPreviewProps {
   values: any
-  version?: string
-  status?: string
   size?: number
 }
 
-const App6SymbolPreview = ({
-  values,
-  version = "10",
-  status = "0",
-  size = 30
-}: App6SymbolPreviewProps) => {
+const App6SymbolPreview = ({ values, size = 30 }: App6SymbolPreviewProps) => {
   const { parentContext, parentStandardIdentity, parentSymbolSet } =
     Organization.getApp6ParentFields(values, values)
+  const parentValues = {
+    app6context: parentContext,
+    app6standardIdentity: parentStandardIdentity,
+    app6symbolSet: parentSymbolSet
+  }
+  const app6ValueKeys = Object.keys(values).filter(key =>
+    key.startsWith("app6")
+  )
+  console.log(app6ValueKeys, values, parentValues)
   return (
     <Popover
       captureDismiss
@@ -68,26 +71,19 @@ const App6SymbolPreview = ({
           >
             <Table responsive>
               <tbody>
-                <FieldRow
-                  fieldName="app6context"
-                  value={values.app6context}
-                  parentValue={parentContext}
-                />
-                <FieldRow
-                  fieldName="app6standardIdentity"
-                  value={values.app6standardIdentity}
-                  parentValue={parentStandardIdentity}
-                />
-                <FieldRow
-                  fieldName="app6symbolSet"
-                  value={values.app6symbolSet}
-                  parentValue={parentSymbolSet}
-                />
-                <FieldRow fieldName="app6hq" value={values.app6hq} />
-                {/* <FieldRow
-                  fieldName="app6amplifier"
-                  value={values.app6amplifier}
-                /> */}
+                {app6ValueKeys.map(key => {
+                  const value = values[key]
+                  const parentValue = parentValues[key]
+                  console.log(key, value, parentValue)
+                  return (
+                    <FieldRow
+                      key={key}
+                      fieldName={key}
+                      values={values}
+                      parentValue={parentValue}
+                    />
+                  )
+                })}
               </tbody>
             </Table>
           </div>
@@ -108,13 +104,13 @@ const App6SymbolPreview = ({
             ...values,
             app6context: values.app6context
               ? values.app6context
-              : parentContext,
+              : parentValues.app6context,
             app6standardIdentity: values.app6standardIdentity
               ? values.app6standardIdentity
-              : parentStandardIdentity,
+              : parentValues.app6standardIdentity,
             app6symbolSet: values.app6symbolSet
               ? values.app6symbolSet
-              : parentSymbolSet
+              : parentValues.app6symbolSet
           }}
           size={size}
         />
