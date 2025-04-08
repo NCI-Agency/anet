@@ -131,13 +131,11 @@ const EditApp6SymbolModal = ({
       label: choices[key],
       values: { ...currentValues, [field]: key }
     }))
-    if (parentValue) {
-      dropdownOptions.unshift({
-        key: null,
-        label: `${choices[parentValue]} (inherited)`,
-        values: { ...currentValues, [field]: parentValue }
-      })
-    }
+    dropdownOptions.unshift({
+      key: null,
+      label: parentValue ? `${choices[parentValue]} (inherited)` : "",
+      values: { ...currentValues, [field]: null }
+    })
 
     return (
       <Row>
