@@ -68,7 +68,28 @@ const EditApp6SymbolModal = ({
     }
   }
 
-  const getApp6Symbol = (size, tempValues) => {
+  const calculateUpdateValues = (currentValues, fieldName, value) => {
+    if (value === currentValues[fieldName]) {
+      return { ...currentValues }
+    }
+    const newValues = { ...currentValues, [fieldName]: value }
+    if (fieldName === "app6symbolSet") {
+      newValues.app6amplifier = null
+      newValues.app6entity = null
+      newValues.app6entityType = null
+      newValues.app6entitySubtype = null
+    }
+    if (fieldName === "app6entity") {
+      newValues.app6entityType = null
+      newValues.app6entitySubtype = null
+    }
+    if (fieldName === "app6entityType") {
+      newValues.app6entitySubtype = null
+    }
+    return newValues
+  }
+
+  const getApp6Symbol = (tempValues, size, maxHeight) => {
     const app6SymbolValues = { ...tempValues }
     Object.entries(parentValues).forEach(([key, value]) => {
       if (value !== null && app6SymbolValues[key] === null) {
@@ -120,13 +141,13 @@ const EditApp6SymbolModal = ({
     const dropdownOptions = sortedChoicesKeys.map(key => ({
       key,
       label: choices[key],
-      values: { ...currentValues, [fieldName]: key }
+      values: calculateUpdateValues(currentValues, fieldName, key)
     }))
     const parentValue = parentValues[fieldName]
     dropdownOptions.unshift({
       key: null,
       label: parentValue ? `${choices[parentValue]} (inherited)` : "",
-      values: { ...currentValues, [fieldName]: null }
+      values: calculateUpdateValues(currentValues, fieldName, null)
     })
 
     const selectedOption = currentValues[fieldName] || null
