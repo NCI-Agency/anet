@@ -8,7 +8,7 @@ module.exports = merge.merge(common.clientConfig, {
   target: "web",
   mode: "development",
   resolve: {
-    modules: ["platform/web-dev", paths.appSrc, "node_modules"]
+    modules: ["platform/web", paths.appSrc, "node_modules"]
   },
   // switched from 'eval' to 'cheap-module-source-map' to address https://github.com/facebook/create-react-app/issues/920
   devtool: "cheap-module-source-map",

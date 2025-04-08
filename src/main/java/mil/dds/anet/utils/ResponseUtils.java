@@ -24,6 +24,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -34,6 +36,30 @@ public class ResponseUtils {
 
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
+  private static final String HTTP_SCHEME = "http";
+  private static final int HTTP_DEFAULT_PORT = 80;
+  private static final String HTTPS_SCHEME = "https";
+  private static final int HTTPS_DEFAULT_PORT = 443;
+
+  public static String getBaseUrl(String url) {
+    if (url == null) {
+      return "";
+    }
+    final UriComponents uriComponents = UriComponentsBuilder.fromUriString(url).build();
+    final String scheme = uriComponents.getScheme();
+    final int port = uriComponents.getPort();
+    final String host = uriComponents.getHost();
+    if (scheme == null || host == null) {
+      return "";
+    }
+    return (port == -1 // no port in the request URL
+        // or using the default port of the scheme
+        || HTTP_SCHEME.equals(scheme) && HTTP_DEFAULT_PORT == port
+        || HTTPS_SCHEME.equals(scheme) && HTTPS_DEFAULT_PORT == port)
+            ? String.format("%s://%s", scheme, host)
+            : String.format("%s://%s:%s", scheme, host, port);
+  }
 
   /**
    * Source:
