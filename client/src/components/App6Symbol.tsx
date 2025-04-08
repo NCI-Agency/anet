@@ -7,48 +7,36 @@ const VERSION = 10
 export const getChoices = (field: string, values: any) => {
   const symbolSet = getCodeFieldValue(getSymbolCode(values), "app6symbolSet")
   const app6entity = getCodeFieldValue(getSymbolCode(values), "app6entity")
-  switch (field) {
-    case "app6entity":
-      const entityOptions = App6Choices[field][symbolSet] || {}
-      return Object.fromEntries(
-        Object.entries(entityOptions).map(([key, value]) => {
-          return [key, value.label]
-        })
-      )
-    case "app6entityType":
-      const entityTypeOptions =
-        App6Choices.app6entity[symbolSet]?.[app6entity]?.options || {}
-      return Object.fromEntries(
-        Object.entries(entityTypeOptions).map(([key, value]) => {
-          return [key, value.label]
-        })
-      )
-    case "app6entitySubtype":
-      const app6entityType = getCodeFieldValue(
-        getSymbolCode(values),
-        "app6entityType"
-      )
-      const entitySubtypeOptions =
+  const app6entityType = getCodeFieldValue(
+    getSymbolCode(values),
+    "app6entityType"
+  )
+
+  const toEntries = options =>
+    Object.fromEntries(
+      Object.entries(options).map(([key, value]) => [key, value.label])
+    )
+
+  const choiceHandlers = {
+    app6entity: () => toEntries(App6Choices[field][symbolSet] || {}),
+    app6entityType: () =>
+      toEntries(App6Choices.app6entity[symbolSet]?.[app6entity]?.options || {}),
+    app6entitySubtype: () => {
+      return toEntries(
         App6Choices.app6entity[symbolSet]?.[app6entity]?.options?.[
           app6entityType
         ]?.options || {}
-      return Object.fromEntries(
-        Object.entries(entitySubtypeOptions).map(([key, value]) => {
-          return [key, value.label]
-        })
       )
-    case "app6amplifier":
-      return App6Choices[field][symbolSet] || {}
-    case "app6sectorOneModifier":
-      return App6Choices[field][symbolSet] || {}
-    case "app6sectorTwoModifier":
-      return App6Choices[field][symbolSet] || {}
-    default:
-      return App6Choices[field] || {}
+    },
+    app6amplifier: () => App6Choices[field][symbolSet] || {},
+    app6sectorOneModifier: () => App6Choices[field][symbolSet] || {},
+    app6sectorTwoModifier: () => App6Choices[field][symbolSet] || {}
   }
+
+  return (choiceHandlers[field] || (() => App6Choices[field] || {}))()
 }
 
-export const getSymbolCode = (values: any) => {
+const getSymbolCode = (values: any) => {
   const context = values?.app6context || "0"
   const standardIdentity = values?.app6standardIdentity || "0"
   const symbolSet = values?.app6symbolSet || "00"
@@ -108,15 +96,12 @@ const getCodeFieldValue = (code: string, field: string) => {
 }
 
 interface App6SymbolProps {
-  code?: string
   values?: any
   size?: number
 }
 
-const App6Symbol = ({ code, values, size = 30 }: App6SymbolProps) => {
-  if (!code) {
-    code = getSymbolCode(values)
-  }
+const App6Symbol = ({ values, size = 30 }: App6SymbolProps) => {
+  const code = getSymbolCode(values)
   const svgString = new ms.Symbol(code, { size }).asSVG()
   const dataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgString)}`
   return (
