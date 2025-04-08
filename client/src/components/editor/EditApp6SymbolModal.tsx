@@ -190,7 +190,7 @@ const EditApp6SymbolModal = ({
               textAlign: "left"
             }}
           >
-            <div>{getApp6Symbol(20, currentValues)}</div>
+            <div>{getApp6Symbol(30, currentValues)}</div>
             <div
               style={{
                 flex: 1,
@@ -216,7 +216,7 @@ const EditApp6SymbolModal = ({
               onMouseEnter={() => setPreviewValues({ ...values })}
               onMouseLeave={() => setPreviewValues({ ...currentValues })}
             >
-              {getApp6Symbol(20, values)}
+              {getApp6Symbol(30, values)}
               <span
                 className="text-truncate w-100"
                 style={{
