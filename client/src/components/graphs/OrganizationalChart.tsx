@@ -3,6 +3,7 @@ import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import styled from "@emotion/styled"
 import API from "api"
+import App6Symbol from "components/App6Symbol"
 import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import LinkTo from "components/LinkTo"
 import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
@@ -96,6 +97,12 @@ const GQL_GET_CHART_DATA = gql`
         }
         ascendantOrgs {
           uuid
+          app6context
+          app6standardIdentity
+          app6symbolSet
+          parentOrg {
+            uuid
+          }
         }
         parentOrg {
           uuid
@@ -227,38 +234,17 @@ const OrganizationFlowChart = ({
     link.click()
   }
 
-  const determineSymbol = (org, allAscendantOrgs) => {
-    const ascendantOrgs =
-      utils
-        .getAscendantObjectsAsList(org, allAscendantOrgs, "parentOrg")
-        ?.reverse() || []
-    const context = utils.determineApp6field(ascendantOrgs, "app6context", "0")
-    const standardIdentity = utils.determineApp6field(
-      ascendantOrgs,
-      "app6standardIdentity",
-      "1"
-    )
-    const symbolSet = utils.determineApp6field(
-      ascendantOrgs,
-      "app6symbolSet",
-      "00"
-    )
-    const hq = org?.app6hq || "0"
-    const amplifier = org?.app6amplifier || "00"
-    const entity = org?.app6entity || "00"
-    const entityType = org?.app6entityType || "00"
-    const entitySubtype = org?.app6entitySubtype || "00"
-    const sectorOneModifier = org?.app6sectorOneModifier || "00"
-    const sectorTwoModifier = org?.app6version || "00"
-    const version = "10" // APP-6D
-    const status = "0" // Present
-    return new ms.Symbol(
-      `${version}${context}${standardIdentity}${symbolSet}${status}${hq}${amplifier}` +
-        `${entity}${entityType}${entitySubtype}${sectorOneModifier}${sectorTwoModifier}`,
-      {
-        size: 30
-      }
-    )
+  const determineSymbolValues = org => {
+    const { parentContext, parentStandardIdentity, parentSymbolSet } =
+      Organization.getApp6ParentFields(org, org)
+    return {
+      ...org,
+      app6context: org.app6context ? org.app6context : parentContext,
+      app6standardIdentity: org.app6standardIdentity
+        ? org.app6standardIdentity
+        : parentStandardIdentity,
+      app6symbolSet: org.app6symbolSet ? org.app6symbolSet : parentSymbolSet
+    }
   }
 
   const toggleDisplayMode = () => {
@@ -334,14 +320,14 @@ const OrganizationFlowChart = ({
       const currentX = isRoot ? 0 : x
       const currentY = isRoot ? 0 : y
 
-      const symbol = determineSymbol(node, allAscendantOrgs).asDOM()
+      const symbolValues = determineSymbolValues(node)
       const positions = filterPositions(node.positions)
 
       const currentNode = {
         id: node.uuid,
         data: {
           organization: node,
-          symbol,
+          symbolValues,
           positions,
           depth,
           showSymbol: showApp6Symbols
@@ -701,18 +687,8 @@ const ControlsContainer = styled.div`
 `
 
 const CustomNode = ({
-  data: { organization, symbol, depth, positions, showSymbol }
+  data: { organization, symbolValues, depth, positions, showSymbol }
 }: NodeProps) => {
-  const svg = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    if (svg.current) {
-      if (svg.current.firstChild) {
-        svg.current.replaceChild(symbol, svg.current.firstChild)
-      } else {
-        svg.current.appendChild(symbol)
-      }
-    }
-  }, [symbol])
   return (
     <div
       style={{
@@ -736,7 +712,7 @@ const CustomNode = ({
             height: NODE_HEIGHT
           }}
         >
-          {(showSymbol && <div ref={svg} />) || (
+          {(showSymbol && <App6Symbol values={symbolValues} size={60} />) || (
             <EntityAvatarDisplay
               avatar={organization.entityAvatar}
               defaultAvatar={Organization.relatedObjectType}

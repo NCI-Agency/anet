@@ -104,6 +104,7 @@ const App6Symbol = ({ values, size = 30 }: App6SymbolProps) => {
   const code = getSymbolCode(values)
   const symbol = new ms.Symbol(code, { size }).asDOM()
   symbol.setAttribute("width", `${size}px`)
+  symbol.setAttribute("height", `${size}px`)
   const svg = useRef<HTMLDivElement>(null)
   useEffect(() => {
     if (svg.current) {
@@ -114,7 +115,7 @@ const App6Symbol = ({ values, size = 30 }: App6SymbolProps) => {
       }
     }
   }, [symbol])
-  return <div ref={svg} style={{ maxWidth: size }} />
+  return <div ref={svg} style={{ maxWidth: size, maxHeight: size }} />
 }
 
 export default React.memo(App6Symbol)
