@@ -71,14 +71,12 @@ const App6SymbolPreview = ({ values, size = 30 }: App6SymbolPreviewProps) => {
             <Table responsive>
               <tbody>
                 {app6ValueKeys.map(key => {
-                  const value = values[key]
-                  const parentValue = parentValues[key]
                   return (
                     <FieldRow
                       key={key}
                       fieldName={key}
                       values={values}
-                      parentValue={parentValue}
+                      parentValue={parentValues[key]}
                     />
                   )
                 })}
