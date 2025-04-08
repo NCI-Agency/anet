@@ -115,7 +115,7 @@
     "xhr2": "0.2.1"
   },
   "dependencies": {
-    "@apollo/client": "3.13.4",
+    "@apollo/client": "3.13.6",
     "@blueprintjs/core": "5.18.0",
     "@blueprintjs/datetime2": "2.3.31",
     "@emotion/react": "11.14.0",
@@ -126,7 +126,7 @@
     "@fullcalendar/list": "6.1.17",
     "@fullcalendar/react": "6.1.17",
     "@fullcalendar/timegrid": "6.1.17",
-    "axios": "1.8.3",
+    "axios": "1.8.4",
     "bootstrap": "5.3.5",
     "change-case": "5.4.4",
     "classnames": "2.5.1",
