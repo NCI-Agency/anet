@@ -33,14 +33,19 @@ const EditApp6SymbolModal = ({
   )
   const [previewValues, setPreviewValues] = useState({ ...initialValues })
 
-  const handleFieldUpdate = (field, newValue, setFieldValue, currentValues) => {
-    if (newValue === currentValues[field]) {
+  const handleFieldUpdate = (
+    fieldName,
+    newValue,
+    setFieldValue,
+    currentValues
+  ) => {
+    if (newValue === currentValues[fieldName]) {
       return
     }
     // handle field update
-    setFieldValue(field, newValue)
-    setPreviewValues({ ...previewValues, [field]: newValue })
-    // verify if all other field have a valid value after the update
+    setFieldValue(fieldName, newValue)
+    setPreviewValues({ ...previewValues, [fieldName]: newValue })
+    // verify if all other fields have a valid value after the update
     Object.entries(currentValues).forEach(([key, value]) => {
       const choices = getChoices(key, currentValues)
       if (value && !Object.keys(choices).includes(value)) {
@@ -48,17 +53,17 @@ const EditApp6SymbolModal = ({
       }
     })
     // clear specific fields
-    if (field === "app6symbolSet") {
+    if (fieldName === "app6symbolSet") {
       setFieldValue("app6amplifier", null)
       setFieldValue("app6entity", null)
       setFieldValue("app6entityType", null)
       setFieldValue("app6entitySubtype", null)
     }
-    if (field === "app6entity") {
+    if (fieldName === "app6entity") {
       setFieldValue("app6entityType", null)
       setFieldValue("app6entitySubtype", null)
     }
-    if (field === "app6entityType") {
+    if (fieldName === "app6entityType") {
       setFieldValue("app6entitySubtype", null)
     }
   }
@@ -73,8 +78,8 @@ const EditApp6SymbolModal = ({
     return <App6Symbol values={app6SymbolValues} size={size} />
   }
 
-  const getFieldName = (field, values) => {
-    if (field === "app6amplifier") {
+  const getFieldName = (fieldName, values) => {
+    if (fieldName === "app6amplifier") {
       const amplifierLabels = {
         10: "Echelon",
         15: "Mobility",
@@ -85,37 +90,29 @@ const EditApp6SymbolModal = ({
       return amplifierLabels[values.app6symbolSet] || null
     }
 
-    return Settings.fields.organization[field].label || null
+    return Settings.fields.organization[fieldName].label || null
   }
 
-  const getFieldRow = (field, setFieldValue, currentValues) => {
-    const fieldWidget = getFieldWidget(field, setFieldValue, currentValues)
+  const getFieldRow = (fieldName, setFieldValue, currentValues) => {
+    const fieldWidget = getFieldWidget(fieldName, setFieldValue, currentValues)
     if (!fieldWidget) {
       return null
     }
     return (
-      <div className="d-flex flex-column gap-1">
+      <div key={`field-${fieldName}`} className="d-flex flex-column gap-1">
         <div style={{ fontWeight: "bold" }}>
-          {getFieldName(field, currentValues)}
+          {getFieldName(fieldName, currentValues)}
         </div>
         {fieldWidget}
       </div>
     )
   }
 
-  const getFieldWidget = (field, setFieldValue, currentValues) => {
-    const choices = getChoices(field, currentValues)
+  const getFieldWidget = (fieldName, setFieldValue, currentValues) => {
+    const choices = getChoices(fieldName, currentValues)
     if (Object.entries(choices).length === 0) {
       return null
     }
-
-    const parentValue = parentValues[field]
-    const selectedChoice = currentValues[field]
-      ? choices?.[currentValues[field]]?.value ||
-        choices?.[currentValues[field]]
-      : parentValue
-        ? `${choices?.[parentValue]} (inherited)`
-        : ""
 
     const sortedChoicesKeys = Object.keys(choices).sort((a, b) =>
       a.localeCompare(b)
@@ -123,19 +120,25 @@ const EditApp6SymbolModal = ({
     const dropdownOptions = sortedChoicesKeys.map(key => ({
       key,
       label: choices[key],
-      values: { ...currentValues, [field]: key }
+      values: { ...currentValues, [fieldName]: key }
     }))
+    const parentValue = parentValues[fieldName]
     dropdownOptions.unshift({
       key: null,
       label: parentValue ? `${choices[parentValue]} (inherited)` : "",
-      values: { ...currentValues, [field]: null }
+      values: { ...currentValues, [fieldName]: null }
     })
+
+    const selectedOption = currentValues[fieldName] || null
+    const selectedChoice = dropdownOptions.find(
+      option => option.key === selectedOption
+    )?.label
 
     return (
       <Row>
         <Col md={11}>
           {getDropdown(
-            field,
+            fieldName,
             setFieldValue,
             selectedChoice,
             dropdownOptions,
@@ -143,13 +146,13 @@ const EditApp6SymbolModal = ({
           )}
         </Col>
         <Col md={1} className="d-flex justify-content-center">
-          {selectedChoice && (
+          {selectedOption !== initialValues[fieldName] && (
             <Button
               variant="outline"
               onClick={() => {
                 handleFieldUpdate(
-                  field,
-                  initialValues[field],
+                  fieldName,
+                  initialValues[fieldName],
                   setFieldValue,
                   currentValues
                 )
@@ -164,7 +167,7 @@ const EditApp6SymbolModal = ({
   }
 
   const getDropdown = (
-    field,
+    fieldName,
     setFieldValue,
     selectedChoice,
     dropdownOptions,
@@ -174,7 +177,7 @@ const EditApp6SymbolModal = ({
       <Dropdown className="w-100">
         <Dropdown.Toggle
           variant="tertiary"
-          id={`${field}-dropdown`}
+          id={`${fieldName}-dropdown`}
           className="d-flex align-content-space-between align-items-center w-100"
           style={{
             color: "#212529",
@@ -208,7 +211,7 @@ const EditApp6SymbolModal = ({
             <Dropdown.Item
               key={key}
               onClick={() =>
-                handleFieldUpdate(field, key, setFieldValue, currentValues)}
+                handleFieldUpdate(fieldName, key, setFieldValue, currentValues)}
               className="d-flex align-items-center gap-2"
               style={{
                 minHeight: 40
@@ -233,8 +236,8 @@ const EditApp6SymbolModal = ({
   }
 
   const onReset = (values, setFieldValue) => {
-    Object.keys(values).forEach(field => {
-      setFieldValue(field, initialValues[field])
+    Object.keys(values).forEach(fieldName => {
+      setFieldValue(fieldName, initialValues[fieldName])
     })
     setPreviewValues({ ...initialValues })
   }
@@ -264,8 +267,8 @@ const EditApp6SymbolModal = ({
                     className="d-flex flex-column gap-2"
                     style={{ width: "50%" }}
                   >
-                    {Object.keys(values).map(field =>
-                      getFieldRow(field, setFieldValue, values)
+                    {Object.keys(values).map(fieldName =>
+                      getFieldRow(fieldName, setFieldValue, values)
                     )}
                   </div>
                   <div
