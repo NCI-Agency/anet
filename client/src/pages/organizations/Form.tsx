@@ -300,6 +300,7 @@ const OrganizationForm = ({
                                   : parentSymbolSet
                               }}
                               size={120}
+                              maxHeight={250}
                             />
                             <Button onClick={() => setShowApp6Modal(true)}>
                               Edit APP-06 Symbol
