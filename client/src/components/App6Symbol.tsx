@@ -1,5 +1,5 @@
 import ms from "milsymbol"
-import React from "react"
+import React, { useEffect, useRef } from "react"
 import { App6Choices } from "./App6"
 
 const VERSION = 10
@@ -102,15 +102,19 @@ interface App6SymbolProps {
 
 const App6Symbol = ({ values, size = 30 }: App6SymbolProps) => {
   const code = getSymbolCode(values)
-  const svgString = new ms.Symbol(code, { size }).asSVG()
-  const dataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgString)}`
-  return (
-    <img
-      src={dataUrl}
-      alt="APP6 Symbol"
-      style={{ maxWidth: size, maxHeight: "100%" }}
-    />
-  )
+  const symbol = new ms.Symbol(code, { size }).asDOM()
+  symbol.setAttribute("width", `${size}px`)
+  const svg = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (svg.current) {
+      if (svg.current.firstChild) {
+        svg.current.replaceChild(symbol, svg.current.firstChild)
+      } else {
+        svg.current.appendChild(symbol)
+      }
+    }
+  }, [symbol])
+  return <div ref={svg} style={{ maxWidth: size }} />
 }
 
 export default React.memo(App6Symbol)
