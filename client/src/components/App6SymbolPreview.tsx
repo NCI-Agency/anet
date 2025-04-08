@@ -32,9 +32,14 @@ const FieldRow = ({ fieldName, values, parentValue }: FieldRow) => {
 interface App6SymbolPreviewProps {
   values: any
   size?: number
+  maxHeight?: number
 }
 
-const App6SymbolPreview = ({ values, size = 30 }: App6SymbolPreviewProps) => {
+const App6SymbolPreview = ({
+  values,
+  size = 30,
+  maxHeight
+}: App6SymbolPreviewProps) => {
   const { parentContext, parentStandardIdentity, parentSymbolSet } =
     Organization.getApp6ParentFields(values, values)
   const parentValues = {
@@ -109,6 +114,7 @@ const App6SymbolPreview = ({ values, size = 30 }: App6SymbolPreviewProps) => {
               : parentValues.app6symbolSet
           }}
           size={size}
+          maxHeight={maxHeight}
         />
       </div>
     </Popover>
