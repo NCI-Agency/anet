@@ -162,7 +162,7 @@ const OrganizationPreview = ({ className, uuid }: OrganizationPreviewProps) => {
             avatar={organization.entityAvatar}
             defaultAvatar={Organization.relatedObjectType}
           />
-          <App6SymbolPreview values={organization} size={120} />
+          <App6SymbolPreview values={organization} size={120} maxHeight={200} />
         </div>
 
         <DictionaryField

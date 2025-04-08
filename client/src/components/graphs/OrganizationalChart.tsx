@@ -712,7 +712,13 @@ const CustomNode = ({
             height: NODE_HEIGHT
           }}
         >
-          {(showSymbol && <App6Symbol values={symbolValues} size={60} />) || (
+          {(showSymbol && (
+            <App6Symbol
+              values={symbolValues}
+              size={ORG_AVATAR_WIDTH}
+              maxHeight={NODE_HEIGHT}
+            />
+          )) || (
             <EntityAvatarDisplay
               avatar={organization.entityAvatar}
               defaultAvatar={Organization.relatedObjectType}

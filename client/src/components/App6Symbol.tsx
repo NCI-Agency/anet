@@ -40,7 +40,7 @@ const getSymbolCode = (values: any) => {
   const context = values?.app6context || "0"
   const standardIdentity = values?.app6standardIdentity || "0"
   const symbolSet = values?.app6symbolSet || "00"
-  // const status = values?.status || "0"
+  // we should always set the status to 0 for now
   const status = "0"
   const hq = values?.app6hq || "0"
   const amplifier = values?.app6amplifier || "00"
@@ -98,13 +98,16 @@ const getCodeFieldValue = (code: string, field: string) => {
 interface App6SymbolProps {
   values?: any
   size?: number
+  maxHeight?: number
 }
 
-const App6Symbol = ({ values, size = 30 }: App6SymbolProps) => {
+const App6Symbol = ({ values, size = 30, maxHeight }: App6SymbolProps) => {
   const code = getSymbolCode(values)
   const symbol = new ms.Symbol(code, { size }).asDOM()
   symbol.setAttribute("width", `${size}px`)
-  symbol.setAttribute("height", `${size}px`)
+  if (maxHeight) {
+    symbol.setAttribute("height", `${maxHeight}px`)
+  }
   const svg = useRef<HTMLDivElement>(null)
   useEffect(() => {
     if (svg.current) {
@@ -115,7 +118,7 @@ const App6Symbol = ({ values, size = 30 }: App6SymbolProps) => {
       }
     }
   }, [symbol])
-  return <div ref={svg} style={{ maxWidth: size, maxHeight: size }} />
+  return <div ref={svg} style={{ maxWidth: size, maxHeight }} />
 }
 
 export default React.memo(App6Symbol)

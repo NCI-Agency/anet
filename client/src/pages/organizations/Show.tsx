@@ -466,7 +466,11 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
                           sm={5}
                           className="d-flex flex-column justify-content-center align-items-center"
                         >
-                          <App6SymbolPreview values={values} size={120} />
+                          <App6SymbolPreview
+                            values={values}
+                            size={120}
+                            maxHeight={250}
+                          />
                         </Col>
                       </Row>
                     </FormGroup>

@@ -96,7 +96,9 @@ const EditApp6SymbolModal = ({
         app6SymbolValues[key] = value
       }
     })
-    return <App6Symbol values={app6SymbolValues} size={size} />
+    return (
+      <App6Symbol values={app6SymbolValues} size={size} maxHeight={maxHeight} />
+    )
   }
 
   const getFieldName = (fieldName, values) => {
@@ -214,7 +216,7 @@ const EditApp6SymbolModal = ({
               textAlign: "left"
             }}
           >
-            <div>{getApp6Symbol(30, currentValues)}</div>
+            <div>{getApp6Symbol(currentValues, 20, 40)}</div>
             <div
               style={{
                 flex: 1,
@@ -240,7 +242,7 @@ const EditApp6SymbolModal = ({
               onMouseEnter={() => setPreviewValues({ ...values })}
               onMouseLeave={() => setPreviewValues({ ...currentValues })}
             >
-              {getApp6Symbol(30, values)}
+              {getApp6Symbol(values, 20, 40)}
               <span
                 className="text-truncate w-100"
                 style={{
@@ -296,7 +298,7 @@ const EditApp6SymbolModal = ({
                     className="d-flex justify-content-center align-items-center"
                     style={{ minWidth: 200 }}
                   >
-                    {getApp6Symbol(200, previewValues)}
+                    {getApp6Symbol(previewValues, 200, 300)}
                   </div>
                 </div>
               </Modal.Body>
