@@ -74,6 +74,7 @@
     {
       "matchPackageNames": [
         "chai",
+        "html-to-image",
         "react-router-dom",
         "com.graphql-java:graphql-java",
         "com.graphql-java:graphql-java-extended-scalars",
