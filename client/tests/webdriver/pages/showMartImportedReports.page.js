@@ -11,7 +11,7 @@ class ShowMartImportedReports extends Page {
     return browser.$("table")
   }
 
-  async getExportDictinaryButton() {
+  async getExportDictionaryButton() {
     return browser.$("button")
   }
 

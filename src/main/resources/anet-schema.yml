@@ -12,7 +12,6 @@ $defs:
     minLength: 36
     maxLength: 36
 
-
 # base definition for a value with a description
   describedValue:
     type: object

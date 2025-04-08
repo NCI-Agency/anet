@@ -38,6 +38,7 @@ import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.SecurityUtils;
 import mil.dds.anet.utils.Utils;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -45,6 +46,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
@@ -100,33 +102,36 @@ public class AdminResource {
     return dict.getDictionary();
   }
 
-  @GetMapping(path = DICTIONARY_PATH + DICTIONARY_MART_PATH,
-      produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  @GetMapping(path = DICTIONARY_PATH + DICTIONARY_MART_PATH)
   public ResponseEntity<StreamingResponseBody> getMartDictionary(Principal principal) {
+    if (Boolean.FALSE.equals(dict.getDictionaryEntry("featureMartGuiEnabled"))) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "MART Feature is not enabled");
+    }
     final Person user = SecurityUtils.getPersonFromPrincipal(principal);
     AuthUtils.assertAdministrator(user);
     final StreamingResponseBody responseBody = outputStream -> {
-      final PrintWriter writer =
-          new PrintWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
-      final Map<String, Object> dictionaryForMart = martDictionaryService.createDictionaryForMart();
+      try (final PrintWriter writer =
+          new PrintWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
+        final Map<String, Object> dictionaryForMart =
+            martDictionaryService.createDictionaryForMart();
 
-      // Set YAML formatting options
-      final DumperOptions options = new DumperOptions();
-      options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-      options.setIndent(2);
+        // Set YAML formatting options
+        final DumperOptions options = new DumperOptions();
+        options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+        options.setIndent(2);
 
-      // Create YAML instance
-      final Yaml yaml = new Yaml(options);
-      yaml.dump(dictionaryForMart, writer);
-
-      writer.flush();
+        // Create YAML instance
+        final Yaml yaml = new Yaml(options);
+        yaml.dump(dictionaryForMart, writer);
+      }
     };
 
     final HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.parseMediaType("application/x-yaml"));
-    headers.set("Content-Disposition", "inline; filename=anet-dictionary.yml");
+    headers.setContentDisposition(
+        ContentDisposition.attachment().filename("anet-dictionary.yml").build());
 
-    return new ResponseEntity<>(responseBody, headers, HttpStatus.OK);
+    return ResponseEntity.ok().contentType(MediaType.APPLICATION_YAML).headers(headers)
+        .body(responseBody);
   }
 
   /**

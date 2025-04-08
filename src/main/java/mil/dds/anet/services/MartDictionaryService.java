@@ -3,12 +3,12 @@ package mil.dds.anet.services;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import graphql.GraphQLContext;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Task;
@@ -16,10 +16,10 @@ import mil.dds.anet.beans.WithStatus;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.config.AnetDictionary;
-import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.TaskDao;
+import mil.dds.anet.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -29,27 +29,36 @@ import org.springframework.web.server.ResponseStatusException;
 @Component
 public class MartDictionaryService implements IMartDictionaryService {
 
+  private static final String DICT_DELIMITER = ".";
+  private static final String MART_DICT_EXPORT_KEY = "martDictionaryExport";
+  private static final String MART_DICT_TASKS_KEY = "tasks";
+
   private static final String MART_DICT_MUNICIPALITY_GROUP_ID_PATH =
-      "martDictionaryExport.municipalityGroupUuid";
-  private static final String MART_DICT_REGIONAL_COMMANDS = "martDictionaryExport.regionalCommands";
-  private static final String MART_DICT_ROOT_DOMAIN_UUID = "martDictionaryExport.tasks.domainUuid";
-  private static final String MART_DICT_ROOT_FACTOR_UUID = "martDictionaryExport.tasks.factorUuid";
-  private static final String MART_DICT_ROOT_TOPIC_UUID = "martDictionaryExport.tasks.topicUuid";
+      String.join(DICT_DELIMITER, MART_DICT_EXPORT_KEY, "municipalityGroupUuid");
+  private static final String MART_DICT_REGIONAL_COMMANDS =
+      String.join(DICT_DELIMITER, MART_DICT_EXPORT_KEY, "regionalCommands");
+  private static final String MART_DICT_ROOT_DOMAIN_UUID =
+      String.join(DICT_DELIMITER, MART_DICT_EXPORT_KEY, MART_DICT_TASKS_KEY, "domainUuid");
+  private static final String MART_DICT_ROOT_FACTOR_UUID =
+      String.join(DICT_DELIMITER, MART_DICT_EXPORT_KEY, MART_DICT_TASKS_KEY, "factorUuid");
+  private static final String MART_DICT_ROOT_TOPIC_UUID =
+      String.join(DICT_DELIMITER, MART_DICT_EXPORT_KEY, MART_DICT_TASKS_KEY, "topicUuid");
   private static final String MART_DICT_MUNICIPALITY_CUSTOM_FIELDS =
-      "martDictionaryExport.municipalityCustomFields";
+      String.join(DICT_DELIMITER, MART_DICT_EXPORT_KEY, "municipalityCustomFields");
   private static final String MART_DICT_LOCATION_CUSTOM_FIELDS =
-      "martDictionaryExport.locationCustomFields";
+      String.join(DICT_DELIMITER, MART_DICT_EXPORT_KEY, "locationCustomFields");
 
   protected final Logger logger = LoggerFactory.getLogger(this.getClass());
-  private final GraphQLContext graphQLContext = ApplicationContextProvider.getEngine().getContext();
 
+  private final AnetObjectEngine engine;
   private final AnetDictionary dict;
   private final OrganizationDao organizationDao;
   private final TaskDao taskDao;
   private final LocationDao locationDao;
 
-  public MartDictionaryService(AnetDictionary dict, OrganizationDao organizationDao,
-      TaskDao taskDao, LocationDao locationDao) {
+  public MartDictionaryService(AnetObjectEngine engine, AnetDictionary dict,
+      OrganizationDao organizationDao, TaskDao taskDao, LocationDao locationDao) {
+    this.engine = engine;
     this.dict = dict;
     this.organizationDao = organizationDao;
     this.taskDao = taskDao;
@@ -67,7 +76,7 @@ public class MartDictionaryService implements IMartDictionaryService {
       final Location municipalityGroup = getMunicipalityGroupLocationFromAnetDictionary();
 
       // All valid, produce the dictionary
-      Map<String, Object> dictionaryForMart = new LinkedHashMap<>();
+      final Map<String, Object> dictionaryForMart = new LinkedHashMap<>();
       dictionaryForMart.put("domains", exportTasksToMartDictionary(rootDomain));
       dictionaryForMart.put("factors", exportTasksToMartDictionary(rootFactor));
       dictionaryForMart.put("topics", exportTasksToMartDictionary(rootTopic));
@@ -77,22 +86,23 @@ public class MartDictionaryService implements IMartDictionaryService {
 
       return dictionaryForMart;
     } catch (Exception e) {
+      logger.error("Error producing MART dictionary", e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          "Error producing Mart dictionary!" + e.getMessage());
+          "Error producing MART dictionary: " + e.getMessage());
     }
   }
 
-  private Task getRootTaskFromAnetDictionary(String martDictRootDomainUuid) {
-    // Get root domainUuid
-    if (dict.getDictionaryEntry(martDictRootDomainUuid) == null) {
+  private Task getRootTaskFromAnetDictionary(String martDictRootTaskUuid) {
+    // Get root taskUuid
+    if (dict.getDictionaryEntry(martDictRootTaskUuid) == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          martDictRootDomainUuid + " is not defined in the dictionary!");
+          martDictRootTaskUuid + " is not defined in the dictionary!");
     }
-    final String rootTaskUuid = (String) dict.getDictionaryEntry(martDictRootDomainUuid);
+    final String rootTaskUuid = (String) dict.getDictionaryEntry(martDictRootTaskUuid);
     final Task task = taskDao.getByUuid(rootTaskUuid);
     if (task == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "Task defined in dictionary does not exist:" + rootTaskUuid);
+          "Task defined in dictionary does not exist: " + rootTaskUuid);
     }
     return task;
   }
@@ -107,8 +117,8 @@ public class MartDictionaryService implements IMartDictionaryService {
     final List<String> regionalCommandsUuids =
         (List<String>) dict.getDictionaryEntry(MART_DICT_REGIONAL_COMMANDS);
     final List<Organization> regionalCommands = new ArrayList<>();
-    for (String regionalCommandUuid : regionalCommandsUuids) {
-      Organization org = organizationDao.getByUuid(regionalCommandUuid);
+    for (final String regionalCommandUuid : regionalCommandsUuids) {
+      final Organization org = organizationDao.getByUuid(regionalCommandUuid);
       if (org == null) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
             "Regional command defined in dictionary does not exist: " + regionalCommandUuid);
@@ -145,11 +155,12 @@ public class MartDictionaryService implements IMartDictionaryService {
 
   private List<Map<String, String>> exportTasksToMartDictionary(Task rootTask) {
     final List<Map<String, String>> tasks = new ArrayList<>();
-    TaskSearchQuery taskSearchQuery = new TaskSearchQuery();
+    final TaskSearchQuery taskSearchQuery = new TaskSearchQuery();
     taskSearchQuery.setStatus(WithStatus.Status.ACTIVE);
-    List<Task> childrenTasks = rootTask.loadChildrenTasks(graphQLContext, taskSearchQuery).join();
+    final List<Task> childrenTasks =
+        rootTask.loadChildrenTasks(engine.getContext(), taskSearchQuery).join();
     childrenTasks.sort(Comparator.comparing(Task::getShortName));
-    for (Task childTask : childrenTasks) {
+    for (final Task childTask : childrenTasks) {
       final Map<String, String> task = new LinkedHashMap<>();
       task.put("guid", childTask.getUuid());
       task.put("name", childTask.getShortName());
@@ -162,16 +173,16 @@ public class MartDictionaryService implements IMartDictionaryService {
       List<Organization> regionalCommands) {
     final List<Map<String, Object>> commands = new ArrayList<>();
     regionalCommands.sort(Comparator.comparing(Organization::getShortName));
-    for (Organization org : regionalCommands) {
+    for (final Organization org : regionalCommands) {
       final Map<String, Object> command = new LinkedHashMap<>();
       final List<Map<String, String>> reportingTeams = new ArrayList<>();
       command.put("guid", org.getUuid());
       command.put("name", org.getShortName());
-      OrganizationSearchQuery organizationSearchQuery = new OrganizationSearchQuery();
+      final OrganizationSearchQuery organizationSearchQuery = new OrganizationSearchQuery();
       organizationSearchQuery.setStatus(WithStatus.Status.ACTIVE);
-      List<Organization> rts = org.loadChildrenOrgs(graphQLContext, null).join();
+      final List<Organization> rts = org.loadChildrenOrgs(engine.getContext(), null).join();
       rts.sort(Comparator.comparing(Organization::getShortName));
-      for (Organization rt : rts) {
+      for (final Organization rt : rts) {
         final Map<String, String> reportingTeam = new LinkedHashMap<>();
         reportingTeam.put("guid", rt.getUuid());
         reportingTeam.put("name", rt.getShortName());
@@ -186,21 +197,22 @@ public class MartDictionaryService implements IMartDictionaryService {
   private List<Map<String, Object>> exportMunicipalitiesToMartDictionary(Location municipalityGroup)
       throws JsonProcessingException {
     final List<Map<String, Object>> result = new ArrayList<>();
-    List<Location> municipalities =
-        new ArrayList<>(municipalityGroup.loadChildrenLocations(graphQLContext).join().stream()
+    final List<Location> municipalities =
+        new ArrayList<>(municipalityGroup.loadChildrenLocations(engine.getContext()).join().stream()
             .filter(m -> m.getStatus() == WithStatus.Status.ACTIVE).toList());
     municipalities.sort(Comparator.comparing(Location::getName));
-    for (Location m : municipalities) {
+    for (final Location m : municipalities) {
       final Map<String, Object> municipality = new LinkedHashMap<>();
       final List<Map<String, Object>> locations = new ArrayList<>();
 
       // Municipality fields
       municipality.put("guid", m.getUuid());
       addCustomFields(MART_DICT_MUNICIPALITY_CUSTOM_FIELDS, municipality, m);
-      List<Location> municipalityLocations = new ArrayList<>(m.loadChildrenLocations(graphQLContext)
-          .join().stream().filter(l -> l.getStatus() == WithStatus.Status.ACTIVE).toList());
+      final List<Location> municipalityLocations =
+          new ArrayList<>(m.loadChildrenLocations(engine.getContext()).join().stream()
+              .filter(l -> l.getStatus() == WithStatus.Status.ACTIVE).toList());
       municipalityLocations.sort(Comparator.comparing(Location::getName));
-      for (Location l : municipalityLocations) {
+      for (final Location l : municipalityLocations) {
         final Map<String, Object> location = new LinkedHashMap<>();
         // Location fields
         location.put("guid", l.getUuid());
@@ -215,10 +227,16 @@ public class MartDictionaryService implements IMartDictionaryService {
 
   private void addCustomFields(String dictionaryEntry, Map<String, Object> location,
       Location anetLocation) throws JsonProcessingException {
-    ObjectMapper objectMapper = new ObjectMapper();
-    JsonNode jsonNode = objectMapper.readTree(anetLocation.getCustomFields());
-    for (String customField : getCustomFieldsFromDictionary(dictionaryEntry)) {
-      location.put(customField, jsonNode.get(customField).asText());
+    final ObjectMapper objectMapper = new ObjectMapper();
+    final String customFields = anetLocation.getCustomFields();
+    if (!Utils.isEmptyOrNull(customFields)) {
+      final JsonNode jsonNode = objectMapper.readTree(customFields);
+      for (final String customField : getCustomFieldsFromDictionary(dictionaryEntry)) {
+        final JsonNode customFieldNode = jsonNode.get(customField);
+        if (customFieldNode != null) {
+          location.put(customField, customFieldNode.asText());
+        }
+      }
     }
   }
 }

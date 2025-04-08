@@ -248,11 +248,11 @@ SET "customFields"='{"invisibleCustomFields":["formCustomFields.textareaFieldNam
 WHERE name='MoI Coffee Shop';
 
 UPDATE locations
-SET "customFields"='{"townId":39,"townSerbian":"Decani","townAlbanian":"Decan","municipalitySerbian":"Decani","municipalityAlbanian":"Decan","mgrs":"34TDN41700980"}'
+SET "customFields"='{"invisibleCustomFields":[],"townId":39,"townSerbian":"Decani","townAlbanian":"Decan","municipalitySerbian":"Decani","municipalityAlbanian":"Decan","mgrs":"34TDN41700980"}'
 WHERE uuid='9f83fe70-e9f5-4e92-ae48-5c4fd7076f46';
 
 UPDATE locations
-SET "customFields"='{"townId":14,"townSerbian":"Babaloc","townAlbanian":"Baballoq","municipalitySerbian":"Decani","municipalityAlbanian":"Decan","mgrs":"34TDN46550404"}'
+SET "customFields"='{"invisibleCustomFields":[],"townId":14,"townSerbian":"Babaloc","townAlbanian":"Baballoq","municipalitySerbian":"Decani","municipalityAlbanian":"Decan","mgrs":"34TDN46550404"}'
 WHERE uuid='178dfbba-f15a-400b-9135-6ff800246be0';
 
 -- Create advisor positions

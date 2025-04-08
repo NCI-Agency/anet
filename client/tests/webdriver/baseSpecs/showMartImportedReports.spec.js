@@ -16,10 +16,10 @@ describe("Show Mart importer page", () => {
     it("We should see the button", async() => {
       await ShowMartImportedReports.openAsAdminUser()
       await (
-        await ShowMartImportedReports.getExportDictinaryButton()
+        await ShowMartImportedReports.getExportDictionaryButton()
       ).waitForExist()
       await (
-        await ShowMartImportedReports.getExportDictinaryButton()
+        await ShowMartImportedReports.getExportDictionaryButton()
       ).waitForDisplayed()
     })
   })
