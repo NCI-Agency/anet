@@ -104,15 +104,18 @@ const App6SymbolPreview = ({
         }}
       >
         <App6Symbol
-          context={values.app6context || parentContext}
-          standardIdentity={
-            values.app6standardIdentity || parentStandardIdentity
-          }
-          symbolSet={values.app6symbolSet || parentSymbolSet}
-          hq={values.app6hq}
-          amplifier={values.app6amplifier}
-          version={version}
-          status={status}
+          values={{
+            ...values,
+            app6context: values.app6context
+              ? values.app6context
+              : parentContext,
+            app6standardIdentity: values.app6standardIdentity
+              ? values.app6standardIdentity
+              : parentStandardIdentity,
+            app6symbolSet: values.app6symbolSet
+              ? values.app6symbolSet
+              : parentSymbolSet
+          }}
           size={size}
         />
       </div>
