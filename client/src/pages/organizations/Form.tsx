@@ -7,7 +7,7 @@ import {
   TaskOverlayRow
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
-import App6Symbol2 from "components/App6Symbol2"
+import App6Symbol from "components/App6Symbol"
 import AppContext from "components/AppContext"
 import ApprovalsDefinition from "components/approvals/ApprovalsDefinition"
 import UploadAttachment from "components/Attachment/UploadAttachment"
@@ -285,7 +285,7 @@ const OrganizationForm = ({
                               gap: 30
                             }}
                           >
-                            <App6Symbol2
+                            <App6Symbol
                               values={{
                                 ...values,
                                 app6context: values.app6context

@@ -1,11 +1,6 @@
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
-import App6Symbol from "components/App6Symbol"
-import App6Symbol2, {
-  getApp6Values,
-  getChoices,
-  getSymbolCode
-} from "components/App6Symbol2"
+import App6Symbol, { getChoices, getSymbolCode } from "components/App6Symbol"
 import { Form, Formik } from "formik"
 import { Organization } from "models"
 import React, { useState } from "react"
@@ -76,7 +71,7 @@ const EditApp6SymbolModal = ({
       }
     })
     const code = getSymbolCode(tempValuesCopy)
-    return <App6Symbol2 code={code} size={size} />
+    return <App6Symbol code={code} size={size} />
   }
 
   const getFieldName = (field, values) => {
