@@ -20,6 +20,8 @@ import mil.dds.anet.test.SpringTestConfig;
 import mil.dds.anet.test.client.AnetBeanList_Person;
 import mil.dds.anet.test.client.ApprovalStep;
 import mil.dds.anet.test.client.ApprovalStepInput;
+import mil.dds.anet.test.client.Assessment;
+import mil.dds.anet.test.client.AssessmentInput;
 import mil.dds.anet.test.client.AuthorizationGroup;
 import mil.dds.anet.test.client.AuthorizationGroupInput;
 import mil.dds.anet.test.client.Event;
@@ -302,6 +304,16 @@ public abstract class AbstractResourceTest {
   protected static List<ApprovalStepInput> getApprovalStepsInput(
       final List<ApprovalStep> approvalSteps) {
     return approvalSteps.stream().map(AbstractResourceTest::getApprovalStepInput).toList();
+  }
+
+  protected static AssessmentInput getAssessmentInput(final Assessment assessment) {
+    return getInput(assessment, AssessmentInput.class);
+  }
+
+  protected static List<AssessmentInput> getAssessmentsInput(final List<Assessment> assessments) {
+    // List should be mutable, as it gets reversed during the tests!
+    return assessments.stream().map(AbstractResourceTest::getAssessmentInput)
+        .collect(Collectors.toList());
   }
 
   protected static AuthorizationGroupInput getAuthorizationGroupInput(

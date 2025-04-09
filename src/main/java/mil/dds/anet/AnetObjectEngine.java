@@ -22,6 +22,7 @@ import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.AdminDao;
 import mil.dds.anet.database.ApprovalStepDao;
+import mil.dds.anet.database.AssessmentDao;
 import mil.dds.anet.database.AttachmentDao;
 import mil.dds.anet.database.AuthorizationGroupDao;
 import mil.dds.anet.database.CommentDao;
@@ -161,6 +162,10 @@ public class AnetObjectEngine {
 
   public MartImportedReportDao getMartImportedReportDao() {
     return ApplicationContextProvider.getBean(MartImportedReportDao.class);
+  }
+
+  public AssessmentDao getAssessmentDao() {
+    return ApplicationContextProvider.getBean(AssessmentDao.class);
   }
 
   public CompletableFuture<Boolean> canUserApproveStep(GraphQLContext context, String userUuid,

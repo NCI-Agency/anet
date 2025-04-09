@@ -1,4 +1,3 @@
-import { gql } from "@apollo/client"
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import API from "api"
@@ -6,7 +5,7 @@ import AppContext from "components/AppContext"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import { INVISIBLE_CUSTOM_FIELDS_FIELD, NOTE_TYPE } from "components/Model"
+import { GQL_DELETE_NOTE } from "components/Model"
 import RelatedObjectNoteModal from "components/RelatedObjectNoteModal"
 import ResponsiveLayoutContext from "components/ResponsiveLayoutContext"
 import RichTextEditor from "components/RichTextEditor"
@@ -16,24 +15,6 @@ import moment from "moment"
 import React, { useContext, useState } from "react"
 import { Badge, Button, Card, Col, Offcanvas, Row } from "react-bootstrap"
 import Settings from "settings"
-import utils from "utils"
-
-const GQL_DELETE_NOTE = gql`
-  mutation ($uuid: String!) {
-    deleteNote(uuid: $uuid)
-  }
-`
-
-export { GRAPHQL_NOTES_FIELDS } from "components/Model"
-
-export const EXCLUDED_ASSESSMENT_FIELDS = [
-  "__recurrence",
-  "__periodStart",
-  "__relatedObjectType",
-  INVISIBLE_CUSTOM_FIELDS_FIELD
-]
-
-const EXCLUDED_NOTE_TYPES = [NOTE_TYPE.ASSESSMENT]
 
 interface NotificationBadgeProps {
   pill?: boolean
@@ -88,16 +69,11 @@ const RelatedObjectNotes = ({
   const [error, setError] = useState(null)
   const [showRelatedObjectNoteModalKey, setShowRelatedObjectNoteModalKey] =
     useState(null)
-  const [noteType, setNoteType] = useState(null)
   const [notes, setNotes] = useState(notesProp)
   const [show, setShow] = useState(false)
 
-  const notesFiltered = notes.filter(
-    note => !EXCLUDED_NOTE_TYPES.includes(note.type)
-  )
-
-  const noNotes = _isEmpty(notesFiltered)
-  const nrNotes = noNotes ? 0 : notesFiltered.length
+  const noNotes = _isEmpty(notes)
+  const nrNotes = noNotes ? 0 : notes.length
   const maxNotes = 10
   const badgeLabel = nrNotes > maxNotes ? `${maxNotes}+` : nrNotes
 
@@ -140,8 +116,7 @@ const RelatedObjectNotes = ({
             <Button
               variant="primary"
               style={{ margin: "5px" }}
-              onClick={() =>
-                showRelatedObjectNoteModal("new", NOTE_TYPE.FREE_TEXT)}
+              onClick={() => showRelatedObjectNoteModal("new")}
             >
               Post a new note
             </Button>
@@ -149,7 +124,6 @@ const RelatedObjectNotes = ({
           <br />
           <RelatedObjectNoteModal
             note={{
-              type: noteType,
               noteRelatedObjects: [{ ...relatedObject }]
             }}
             currentObject={relatedObject}
@@ -169,18 +143,12 @@ const RelatedObjectNotes = ({
               flexDirection: "column"
             }}
           >
-            {notesFiltered.map(note => {
+            {notes.map(note => {
               const updatedAt = moment(note.updatedAt).format(
                 Settings.dateFormats.forms.displayShort.withTime
               )
               const byMe = Person.isEqual(currentUser, note.author)
-              const canEdit =
-                note.type !== NOTE_TYPE.ASSESSMENT &&
-                (byMe || currentUser.isAdmin())
-              const isJson = note.type !== NOTE_TYPE.FREE_TEXT
-              const jsonFields =
-                isJson && note.text ? utils.parseJsonSafe(note.text) : {}
-              const noteText = isJson ? jsonFields.text : note.text
+              const canEdit = byMe || currentUser.isAdmin()
               return (
                 <Card
                   key={note.uuid}
@@ -240,7 +208,7 @@ const RelatedObjectNotes = ({
                     </Row>
                   </Card.Header>
                   <Card.Body>
-                    <RichTextEditor readOnly value={noteText} />
+                    <RichTextEditor readOnly value={note.text} />
                   </Card.Body>
                 </Card>
               )
@@ -251,23 +219,20 @@ const RelatedObjectNotes = ({
     </>
   )
 
-  function showRelatedObjectNoteModal(key, type) {
+  function showRelatedObjectNoteModal(key) {
     setError(null)
     setShowRelatedObjectNoteModalKey(key)
-    setNoteType(type)
   }
 
   function cancelRelatedObjectNoteModal() {
     setError(null)
     setShowRelatedObjectNoteModalKey(null)
-    setNoteType(null)
   }
 
   function hideNewRelatedObjectNoteModal(note) {
     notes.unshift(note) // add new note at the front
     setError(null)
     setShowRelatedObjectNoteModalKey(null)
-    setNoteType(null)
     setNotes(notes)
   }
 
@@ -279,7 +244,6 @@ const RelatedObjectNotes = ({
     }
     setError(null)
     setShowRelatedObjectNoteModalKey(null)
-    setNoteType(null)
     setNotes(newNotes)
   }
 

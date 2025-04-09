@@ -2,11 +2,7 @@ import API from "api"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import * as FieldHelper from "components/FieldHelper"
 import Messages from "components/Messages"
-import Model, {
-  GQL_CREATE_NOTE,
-  GQL_UPDATE_NOTE,
-  NOTE_TYPE
-} from "components/Model"
+import Model, { GQL_CREATE_NOTE, GQL_UPDATE_NOTE } from "components/Model"
 import { RelatedObjectsTableInput } from "components/RelatedObjectsTable"
 import RichTextEditor from "components/RichTextEditor"
 import { Field, Form, Formik } from "formik"
@@ -74,17 +70,11 @@ const RelatedObjectNoteModal = ({
           values,
           submitForm
         }) => {
-          const isJson = note.type !== NOTE_TYPE.FREE_TEXT
-          const jsonFields =
-            isJson && note.text ? utils.parseJsonSafe(note.text) : {}
-          const noteText = isJson ? jsonFields.text : note.text
-          const typeName =
-            note.type === NOTE_TYPE.ASSESSMENT ? "assessment" : "note"
           return (
             <Form>
               <Modal.Header closeButton>
                 <Modal.Title>
-                  {(note.uuid ? "Edit " : "Post a new ") + typeName}
+                  {`${note.uuid ? "Edit" : "Post a new"} note"}`}
                 </Modal.Title>
               </Modal.Header>
               <Modal.Body>
@@ -99,7 +89,7 @@ const RelatedObjectNoteModal = ({
                   <Messages error={error} />
                   <Field
                     name="text"
-                    value={noteText}
+                    value={note.text}
                     component={FieldHelper.SpecialField}
                     onChange={value => setFieldValue("text", value)}
                     onHandleBlur={() => {
@@ -169,14 +159,8 @@ const RelatedObjectNoteModal = ({
     const updatedNote = {
       uuid: values.uuid,
       author: values.author,
-      type: values.type,
       noteRelatedObjects,
       text: values.text
-    }
-    const isJson = updatedNote.type !== NOTE_TYPE.FREE_TEXT
-    if (isJson) {
-      const { uuid, author, type, noteRelatedObjects, ...jsonFields } = values
-      updatedNote.text = JSON.stringify(jsonFields)
     }
     return API.mutation(edit ? GQL_UPDATE_NOTE : GQL_CREATE_NOTE, {
       note: updatedNote

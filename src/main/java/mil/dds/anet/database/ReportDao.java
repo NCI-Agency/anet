@@ -463,10 +463,16 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
       // Delete customSensitiveInformation
       instance.getCustomSensitiveInformationDao().deleteFor(reportUuid);
 
-      final NoteDao noteDao = instance.getNoteDao();
+      final AssessmentDao assessmentDao = instance.getAssessmentDao();
       // Delete assessments
-      noteDao.deleteAssessments(TABLE_NAME, reportUuid);
-      // Delete other noteRelatedObjects
+      assessmentDao.deleteAssessments(TABLE_NAME, reportUuid);
+      // Delete other assessmentRelatedObjects
+      assessmentDao.deleteAssessmentRelatedObjects(TABLE_NAME, reportUuid);
+      // Delete orphan assessments
+      assessmentDao.deleteOrphanAssessments();
+
+      final NoteDao noteDao = instance.getNoteDao();
+      // Delete noteRelatedObjects
       noteDao.deleteNoteRelatedObjects(TABLE_NAME, reportUuid);
       // Delete orphan notes
       noteDao.deleteOrphanNotes();

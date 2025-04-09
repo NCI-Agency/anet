@@ -1450,10 +1450,10 @@ export const mapReadonlyCustomFieldsToComps = ({
 }
 
 // customFields should contain the JSON of all the visible custom fields.
-// When used for notes text, it should not contain the INVISIBLE_CUSTOM_FIELDS_FIELD.
+// When used for assessments text, it should not contain the INVISIBLE_CUSTOM_FIELDS_FIELD.
 export const customFieldsJSONString = (
   values,
-  forNoteText = false,
+  forAssessmentText = false,
   parentFieldName = DEFAULT_CUSTOM_FIELDS_PARENT
 ) => {
   const customFieldsValues = Object.get(values, parentFieldName)
@@ -1464,7 +1464,7 @@ export const customFieldsJSONString = (
       filteredCustomFieldsValues[INVISIBLE_CUSTOM_FIELDS_FIELD].forEach(f =>
         _set(clonedValues, f.split("."), undefined)
       )
-      if (forNoteText) {
+      if (forAssessmentText) {
         delete filteredCustomFieldsValues[INVISIBLE_CUSTOM_FIELDS_FIELD]
       }
     }

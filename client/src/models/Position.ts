@@ -108,8 +108,6 @@ export default class Position extends Model {
     ` organization { uuid shortName longName identificationCode ${GRAPHQL_ENTITY_AVATAR_FIELDS} }` +
     ` person { uuid name rank ${GRAPHQL_ENTITY_AVATAR_FIELDS} }`
 
-  static autocompleteQueryWithNotes = `${this.autocompleteQuery} ${GRAPHQL_NOTES_FIELDS}`
-
   static allFieldsQuery = `
     uuid
     name

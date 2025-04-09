@@ -4,7 +4,8 @@ import API from "api"
 import { initInvisibleFields } from "components/CustomFields"
 import {
   DEFAULT_CUSTOM_FIELDS_PARENT,
-  GRAPHQL_ENTITY_AVATAR_FIELDS
+  GRAPHQL_ENTITY_AVATAR_FIELDS,
+  GRAPHQL_NOTES_FIELDS
 } from "components/Model"
 import {
   mapPageDispatchersToProps,
@@ -12,9 +13,7 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
-import RelatedObjectNotes, {
-  GRAPHQL_NOTES_FIELDS
-} from "components/RelatedObjectNotes"
+import RelatedObjectNotes from "components/RelatedObjectNotes"
 import { Task } from "models"
 import React from "react"
 import { connect } from "react-redux"

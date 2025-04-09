@@ -21,12 +21,10 @@ import mil.dds.anet.database.TaskDao;
 import mil.dds.anet.test.client.AnetBeanList_SubscriptionUpdate;
 import mil.dds.anet.test.client.AuthorizationGroup;
 import mil.dds.anet.test.client.Event;
-import mil.dds.anet.test.client.EventInput;
 import mil.dds.anet.test.client.GenericRelatedObjectInput;
 import mil.dds.anet.test.client.Location;
 import mil.dds.anet.test.client.Note;
 import mil.dds.anet.test.client.NoteInput;
-import mil.dds.anet.test.client.NoteType;
 import mil.dds.anet.test.client.Organization;
 import mil.dds.anet.test.client.Person;
 import mil.dds.anet.test.client.Position;
@@ -198,8 +196,7 @@ class SubscriptionUpdateResourceTest extends SubscriptionTestHelper {
     final GenericRelatedObjectInput nroInput =
         GenericRelatedObjectInput.builder().withRelatedObjectType(subscribedObjectType)
             .withRelatedObjectUuid(subscribedObjectUuid).build();
-    final NoteInput noteInput = NoteInput.builder().withType(NoteType.FREE_TEXT)
-        .withText("Test note for subscription updates")
+    final NoteInput noteInput = NoteInput.builder().withText("Test note for subscription updates")
         .withNoteRelatedObjects(Collections.singletonList(nroInput)).build();
     return withCredentials(adminUser,
         t -> mutationExecutor.createNote(NoteResourceTest.NOTE_FIELDS, noteInput));
