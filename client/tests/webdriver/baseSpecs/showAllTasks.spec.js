@@ -14,7 +14,7 @@ describe("Show All Tasks Page", () => {
 
   it("Should display all top tasks", async() => {
     const topTasks = await ShowAllTasks.getAllTasks()
-    expect(topTasks).to.have.lengthOf(10)
+    expect(topTasks).to.have.lengthOf(13)
     for (const task of topTasks) {
       expect(await task.isDisplayed()).to.equal(true)
     }
@@ -22,7 +22,7 @@ describe("Show All Tasks Page", () => {
 
   it("Should expand a task to show its descendants", async() => {
     const topTasks = await ShowAllTasks.getAllTasks()
-    const firstTask = topTasks[0]
+    const firstTask = topTasks[1]
     const firstTaskText = await firstTask.getText()
     expect(firstTaskText).to.equal(FIRST_TASK_NAME)
 
@@ -42,7 +42,7 @@ describe("Show All Tasks Page", () => {
 
   it("Should collapse a task to hide its descendants", async() => {
     const topTasks = await ShowAllTasks.getAllTasks()
-    const firstTask = topTasks[0]
+    const firstTask = topTasks[1]
 
     const caret = await firstTask.$(".bp5-tree-node-caret")
     // eslint-disable-next-line no-unused-expressions
@@ -63,7 +63,7 @@ describe("Show All Tasks Page", () => {
 
   it("Should not show a caret for tasks without descendants", async() => {
     const topTasks = await ShowAllTasks.getAllTasks()
-    const noDescendantsTask = topTasks[4]
+    const noDescendantsTask = topTasks[5]
 
     const noDescendantsTaskText = await noDescendantsTask.getText()
     expect(noDescendantsTaskText).to.equal(NO_DESCENDANTS_TASK_NAME)

@@ -7,6 +7,10 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
@@ -27,15 +31,25 @@ import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.AdminDao;
 import mil.dds.anet.database.UserActivityDao;
 import mil.dds.anet.graphql.AllowUnverifiedUsers;
+import mil.dds.anet.services.IMartDictionaryService;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AnetConstants;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.SecurityUtils;
 import mil.dds.anet.utils.Utils;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.Yaml;
 
 @RestController
 @RequestMapping(AdminResource.ADMIN_RESOURCE_PATH)
@@ -44,19 +58,22 @@ public class AdminResource {
 
   public static final String ADMIN_RESOURCE_PATH = "/api/admin";
   public static final String DICTIONARY_PATH = "/dictionary";
+  public static final String DICTIONARY_MART_PATH = "/mart";
   public static final String ADMIN_DICTIONARY_RESOURCE_PATH = ADMIN_RESOURCE_PATH + DICTIONARY_PATH;
 
   private final AnetConfig config;
   private final AnetDictionary dict;
   private final AdminDao adminDao;
   private final UserActivityDao userActivityDao;
+  private final IMartDictionaryService martDictionaryService;
 
   public AdminResource(AnetConfig config, AnetDictionary dict, AdminDao adminDao,
-      UserActivityDao userActivityDao) {
+      UserActivityDao userActivityDao, IMartDictionaryService martDictionaryService) {
     this.config = config;
     this.dict = dict;
     this.adminDao = adminDao;
     this.userActivityDao = userActivityDao;
+    this.martDictionaryService = martDictionaryService;
   }
 
   @GraphQLQuery(name = "adminSettings")
@@ -83,6 +100,38 @@ public class AdminResource {
   // authentication
   public Map<String, Object> getDictionary() {
     return dict.getDictionary();
+  }
+
+  @GetMapping(path = DICTIONARY_PATH + DICTIONARY_MART_PATH)
+  public ResponseEntity<StreamingResponseBody> getMartDictionary(Principal principal) {
+    if (Boolean.FALSE.equals(dict.getDictionaryEntry("featureMartGuiEnabled"))) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "MART Feature is not enabled");
+    }
+    final Person user = SecurityUtils.getPersonFromPrincipal(principal);
+    AuthUtils.assertAdministrator(user);
+    final StreamingResponseBody responseBody = outputStream -> {
+      try (final PrintWriter writer =
+          new PrintWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
+        final Map<String, Object> dictionaryForMart =
+            martDictionaryService.createDictionaryForMart();
+
+        // Set YAML formatting options
+        final DumperOptions options = new DumperOptions();
+        options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+        options.setIndent(2);
+
+        // Create YAML instance
+        final Yaml yaml = new Yaml(options);
+        yaml.dump(dictionaryForMart, writer);
+      }
+    };
+
+    final HttpHeaders headers = new HttpHeaders();
+    headers.setContentDisposition(
+        ContentDisposition.attachment().filename("anet-dictionary.yml").build());
+
+    return ResponseEntity.ok().contentType(MediaType.APPLICATION_YAML).headers(headers)
+        .body(responseBody);
   }
 
   /**
