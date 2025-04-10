@@ -302,7 +302,10 @@ const OrganizationForm = ({
                               size={120}
                               maxHeight={250}
                             />
-                            <Button onClick={() => setShowApp6Modal(true)} id="edit-app6-button">
+                            <Button
+                              onClick={() => setShowApp6Modal(true)}
+                              id="edit-app6-button"
+                            >
                               Edit APP-06 Symbol
                             </Button>
                           </div>
