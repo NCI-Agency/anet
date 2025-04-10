@@ -1,6 +1,6 @@
 import ms from "milsymbol"
 import React, { useEffect, useRef } from "react"
-import { App6Choices } from "./App6"
+import { App6Choices } from "components/App6"
 
 const VERSION = 10
 
@@ -36,7 +36,28 @@ export const getChoices = (field: string, values: any) => {
   return (choiceHandlers[field] || (() => App6Choices[field] || {}))()
 }
 
-const getSymbolCode = (values: any) => {
+export const getLabel = (values: any[], field: string) => {
+  const choices = getChoices(field, values)
+  const value = values[field]
+  return choices[value] || ""
+}
+
+export const getFieldsList = () => {
+  return [
+    "app6context",
+    "app6standardIdentity",
+    "app6symbolSet",
+    "app6hq",
+    "app6amplifier",
+    "app6entity",
+    "app6entityType",
+    "app6entitySubtype",
+    "app6sectorOneModifier",
+    "app6sectorTwoModifier"
+  ]
+}
+
+const getSymbolCode = (values: any[]) => {
   const context = values?.app6context || "0"
   const standardIdentity = values?.app6standardIdentity || "0"
   const symbolSet = values?.app6symbolSet || "00"
