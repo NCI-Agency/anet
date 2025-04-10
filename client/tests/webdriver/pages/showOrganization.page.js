@@ -31,24 +31,31 @@ class ShowOrganization extends Page {
     return browser.$('div[id="profile"]')
   }
 
+  async hoverOverApp6Symbol() {
+    const previewElement = await browser.$("#app6-symbol-preview")
+    await previewElement.moveTo()
+    const popover = await browser.$(".bp5-popover-content")
+    await popover.waitForDisplayed()
+  }
+
   async getApp6context() {
-    return browser.$('div[id="app6context"]')
+    return browser.$('td[id="app6context"]')
   }
 
   async getApp6standardIdentity() {
-    return browser.$('div[id="app6standardIdentity"]')
+    return browser.$('td[id="app6standardIdentity"]')
   }
 
   async getApp6symbolSet() {
-    return browser.$('div[id="app6symbolSet"]')
+    return browser.$('td[id="app6symbolSet"]')
   }
 
   async getApp6hq() {
-    return browser.$('div[id="app6hq"]')
+    return browser.$('td[id="app6hq"]')
   }
 
   async getApp6amplifier() {
-    return browser.$('div[id="app6amplifier"]')
+    return browser.$('td[id="app6amplifier"]')
   }
 
   async getLeaders() {

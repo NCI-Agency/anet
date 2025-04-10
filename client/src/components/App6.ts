@@ -7,6 +7,7 @@ export const App6Choices: { [key: string]: any } = {
   app6standardIdentity: {
     0: "Pending",
     1: "Unknown",
+    2: "Assumed friend",
     3: "Friend",
     4: "Neutral",
     6: "Hostile"
