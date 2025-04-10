@@ -18,13 +18,13 @@ const FieldRow = ({ fieldName, values, parentValue }: FieldRow) => {
   const choices = getChoices(fieldName, values)
   const text =
     choices[values[fieldName] || parentValue] +
-    (values[fieldName] ? "" : " (inherited from parent)")
+    (values[fieldName] ? "" : " (inherited)")
   return (
     <tr style={{ border: "hidden" }}>
       <td style={{ fontWeight: "bold" }}>
         {Settings.fields.organization[fieldName].label}
       </td>
-      <td>{text}</td>
+      <td id={fieldName}>{text}</td>
     </tr>
   )
 }
@@ -92,6 +92,7 @@ const App6SymbolPreview = ({
       }
     >
       <div
+        id="app6-symbol-preview"
         style={{
           display: "flex",
           flexDirection: "column",

@@ -1,6 +1,6 @@
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
-import App6Symbol, { getChoices } from "components/App6Symbol"
+import App6Symbol, { getChoices, getFieldsList } from "components/App6Symbol"
 import { Form, Formik } from "formik"
 import { Organization } from "models"
 import React, { useState } from "react"
@@ -233,6 +233,7 @@ const EditApp6SymbolModal = ({
           {dropdownOptions.map(({ key, label, values }) => (
             <Dropdown.Item
               key={key}
+              data-key={key}
               onClick={() =>
                 handleFieldUpdate(fieldName, key, setFieldValue, currentValues)}
               className="d-flex align-items-center gap-2"
@@ -290,7 +291,7 @@ const EditApp6SymbolModal = ({
                     className="d-flex flex-column gap-2"
                     style={{ width: "50%" }}
                   >
-                    {Object.keys(values).map(fieldName =>
+                    {getFieldsList().map(fieldName =>
                       getFieldRow(fieldName, setFieldValue, values)
                     )}
                   </div>
