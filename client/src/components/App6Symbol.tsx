@@ -1,6 +1,6 @@
+import { App6Choices } from "components/App6"
 import ms from "milsymbol"
 import React, { useEffect, useRef } from "react"
-import { App6Choices } from "components/App6"
 
 const VERSION = 10
 
