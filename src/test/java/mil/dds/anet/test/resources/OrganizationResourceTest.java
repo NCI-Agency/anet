@@ -71,10 +71,8 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(aoInput.getApp6entity()).isEqualTo(created.getApp6entity());
     assertThat(aoInput.getApp6entityType()).isEqualTo(created.getApp6entityType());
     assertThat(aoInput.getApp6entitySubtype()).isEqualTo(created.getApp6entitySubtype());
-    assertThat(aoInput.getApp6sectorOneModifier())
-        .isEqualTo(created.getApp6sectorOneModifier());
-    assertThat(aoInput.getApp6sectorTwoModifier())
-        .isEqualTo(created.getApp6sectorTwoModifier());
+    assertThat(aoInput.getApp6sectorOneModifier()).isEqualTo(created.getApp6sectorOneModifier());
+    assertThat(aoInput.getApp6sectorTwoModifier()).isEqualTo(created.getApp6sectorTwoModifier());
     // update name of the AO
     created.setLongName("Ao McAoFace");
     Integer nrUpdated = withCredentials(adminUser,
