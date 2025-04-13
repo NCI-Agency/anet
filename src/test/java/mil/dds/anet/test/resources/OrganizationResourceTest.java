@@ -50,6 +50,11 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     aoInput.setApp6symbolSet(getApp6Choice("app6symbolSet"));
     aoInput.setApp6hq(getApp6Choice("app6hq"));
     aoInput.setApp6amplifier(getApp6Choice("app6amplifier"));
+    aoInput.setApp6entity(getApp6Choice("app6entity"));
+    aoInput.setApp6entityType(getApp6Choice("app6entityType"));
+    aoInput.setApp6entitySubtype(getApp6Choice("app6entitySubtype"));
+    aoInput.setApp6sectorOneModifier(getApp6Choice("app6sectorOneModifier"));
+    aoInput.setApp6sectorTwoModifier(getApp6Choice("app6sectorTwoModifier"));
     final Organization created =
         withCredentials(adminUser, t -> mutationExecutor.createOrganization(FIELDS, aoInput));
     assertThat(created).isNotNull();
@@ -63,6 +68,13 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(aoInput.getApp6symbolSet()).isEqualTo(created.getApp6symbolSet());
     assertThat(aoInput.getApp6hq()).isEqualTo(created.getApp6hq());
     assertThat(aoInput.getApp6amplifier()).isEqualTo(created.getApp6amplifier());
+    assertThat(aoInput.getApp6entity()).isEqualTo(created.getApp6entity());
+    assertThat(aoInput.getApp6entityType()).isEqualTo(created.getApp6entityType());
+    assertThat(aoInput.getApp6entitySubtype()).isEqualTo(created.getApp6entitySubtype());
+    assertThat(aoInput.getApp6sectorOneModifier())
+        .isEqualTo(created.getApp6sectorOneModifier());
+    assertThat(aoInput.getApp6sectorTwoModifier())
+        .isEqualTo(created.getApp6sectorTwoModifier());
     // update name of the AO
     created.setLongName("Ao McAoFace");
     Integer nrUpdated = withCredentials(adminUser,
