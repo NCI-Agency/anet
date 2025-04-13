@@ -4,7 +4,7 @@ import React, { useEffect, useRef } from "react"
 
 const VERSION = 10
 
-export const getChoices = (field: string, values: any) => {
+export const getChoices = (field: string, values: any[]) => {
   const symbolSet = getCodeFieldValue(getSymbolCode(values), "app6symbolSet")
   const app6entity = getCodeFieldValue(getSymbolCode(values), "app6entity")
   const app6entityType = getCodeFieldValue(
