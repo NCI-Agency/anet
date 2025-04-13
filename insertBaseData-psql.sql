@@ -723,9 +723,9 @@ INSERT INTO organizations (uuid, "shortName", "longName", "parentOrgUuid", "iden
   (uuid_generate_v4(), 'MOD-F', 'Ministry of Defense Finances', (SELECT uuid from organizations where "shortName" = 'MoD'), NULL, (SELECT uuid FROM locations WHERE type = 'PAC' AND name = 'Afghanistan'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Test for Merging
-INSERT INTO organizations (uuid, "shortName", "longName", "identificationCode", "parentOrgUuid", "locationUuid", app6context, "app6standardIdentity", "app6symbolSet", "app6hq", "app6amplifier", "createdAt", "updatedAt") VALUES
-  ('381d5435-8852-45d2-91b1-530560ca9d8c', 'Merge Org 1', 'Long Merge 1 Name', 'Mg1', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 1'), 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', '0', '4', '20', '2', '14', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  ('e706f443-7d4d-4356-82bc-1456f55e3d75', 'Merge Org 2', 'Long Merge 2 Name', 'Mg2', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 1'), '95446f93-249b-4aa9-b98a-7bd2c4680718', '2', '2', '10', '5', '18', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO organizations (uuid, "shortName", "longName", "identificationCode", "parentOrgUuid", "locationUuid", app6context, "app6standardIdentity", "app6symbolSet", "app6hq", "app6amplifier", "app6entity", "app6entityType", "app6entitySubtype", "app6sectorOneModifier",  "app6sectorTwoModifier", "createdAt", "updatedAt") VALUES
+  ('381d5435-8852-45d2-91b1-530560ca9d8c', 'Merge Org 1', 'Long Merge 1 Name', 'Mg1', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 1'), 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', '0', '4', '15', '2', '31', '11', '01', '03', '10', '01', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('e706f443-7d4d-4356-82bc-1456f55e3d75', 'Merge Org 2', 'Long Merge 2 Name', 'Mg2', (SELECT uuid FROM organizations WHERE "shortName" = 'EF 1'), '95446f93-249b-4aa9-b98a-7bd2c4680718', '2', '2', '10', '5', '11', '20', '05', '05', '20', '42', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 INSERT INTO "approvalSteps" (uuid, "relatedObjectUuid", name, type) VALUES
   (uuid_generate_v4(), (SELECT uuid from organizations where "shortName"='Merge Org 1'), 'Merge Org 1 Approvers', 1);
