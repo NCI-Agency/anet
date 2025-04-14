@@ -205,9 +205,9 @@ public class GraphQLConfig implements WebMvcConfigurer {
       final GraphQLContext context =
           resolutionEnvironment.dataFetchingEnvironment.getGraphQlContext();
 
-      // In context, we might have an ANET user or a GraphQLWebServiceAccessToken
+      // In context, we might have an ANET user or an AccessToken
       final Person currentUser = DaoUtils.getUserFromContext(context);
-      final AccessToken accessToken = DaoUtils.getGraphQLWebServiceAccessToken(context);
+      final AccessToken accessToken = DaoUtils.getAccessTokenFromContext(context);
 
       // Check for unverified users
       if (accessToken == null && denyUnverifiedUsers(delegate, currentUser)) {

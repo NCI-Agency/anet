@@ -6338,6 +6338,7 @@
 		<dropColumn tableName="notes" columnName="type" />
 		<dropColumn tableName="notes" columnName="assessmentKey" />
 	</changeSet>
+
 	<changeSet id="add-additional-app6-fields-to-organizations" author="gjvoosten">
 		<addColumn tableName="organizations">
 			<column name="app6entity" type="varchar(255)" />
@@ -6350,11 +6351,11 @@
 
 	<changeSet id="add-scope-field-to-accessTokens" author="fdelcastillo">
 		<addColumn tableName="accessTokens">
-			<column name="scope" type="text"/>
+			<column name="scope" type="int" />
 		</addColumn>
 		<sql>
 			UPDATE "accessTokens"
-			SET scope = 'NVG';
+			SET scope = 0;
 		</sql>
 	</changeSet>
 
