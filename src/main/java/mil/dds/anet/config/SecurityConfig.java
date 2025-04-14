@@ -109,8 +109,18 @@ public class SecurityConfig {
   @Order(20)
   public SecurityFilterChain graphQLWebServicveFilterChain(HttpSecurity http) throws Exception {
     http.securityMatcher("/graphqlWebService/**") // Apply only to GraphQL endpoints
-        .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
-        .csrf(AbstractHttpConfigurer::disable);
+        .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+
+    // Stateless, disable session management
+    http.sessionManagement(
+        session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+    // Disable CSRF
+    http.csrf(AbstractHttpConfigurer::disable);
+    // Configure CSP
+    http.headers(
+        headers -> headers.contentSecurityPolicy(csp -> csp.policyDirectives(soapCsp.toString())));
+    // Configure Referrer Policy
+    http.headers(header -> header.referrerPolicy(rp -> rp.policy(NO_REFERRER)));
     return http.build();
   }
 
