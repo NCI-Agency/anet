@@ -187,3 +187,6 @@ jobs:
     - run: ./gradlew yarn_run_sim
       env:
         TEST_RUN: true
+    - name: Show Keycloak logs
+      run: docker logs anet-keycloak-server
+      if: always()
