@@ -18,6 +18,7 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
 import mil.dds.anet.beans.AccessToken;
+import mil.dds.anet.beans.AccessToken.TokenScope;
 import mil.dds.anet.beans.ConfidentialityRecord;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Organization;
@@ -236,13 +237,14 @@ public class Nvg20WebService implements NVGPortType2012 {
     if (nvgFilter != null) {
       final NvgConfig nvgConfig =
           NvgConfig.from(nvgFilter.getInputResponseOrSelectResponseOrMatrixResponse());
-      if (isValidAccessToken(nvgConfig.getAccessToken())) {
+      final AccessToken at = getAccessToken(nvgConfig.getAccessToken());
+      if (isValidAccessToken(at)) {
         if (!App6Symbology.isValidApp6Version(nvgConfig.getApp6Version())) {
           throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
               "Invalid APP-6 version");
         }
         final GetNvgResponse response = NVG_OF.createGetNvgResponse();
-        response.setNvg(makeNvg(nvgConfig));
+        response.setNvg(makeNvg(at, nvgConfig));
         return response;
       }
     }
@@ -250,16 +252,18 @@ public class Nvg20WebService implements NVGPortType2012 {
         "Must provide a valid Web Service Access Token");
   }
 
-  private boolean isValidAccessToken(String accessToken) {
+  private AccessToken getAccessToken(String accessToken) {
     if (accessToken != null && accessToken.length() == NvgConfig.ACCESS_TOKEN_LENGTH) {
-      final AccessToken at =
-          accessTokenDao.getByTokenValueAndScope(accessToken, AccessToken.TokenScope.NVG.name());
-      return at != null && at.isValid();
+      return accessTokenDao.getByTokenValueAndScope(accessToken, TokenScope.NVG);
     }
-    return false;
+    return null;
   }
 
-  private NvgType makeNvg(NvgConfig nvgConfig) {
+  private boolean isValidAccessToken(AccessToken at) {
+    return at != null && at.isValid();
+  }
+
+  private NvgType makeNvg(AccessToken at, NvgConfig nvgConfig) {
     final NvgType nvgType = NVG_OF.createNvgType();
     nvgType.setVersion(NVG_VERSION);
     makeReportSchema(nvgType);
@@ -284,7 +288,7 @@ public class Nvg20WebService implements NVGPortType2012 {
       }
     }
 
-    final List<Report> reports = getReportsByPeriod(start, end);
+    final List<Report> reports = getReportsByPeriod(at, start, end);
     contentTypeList.addAll(reports.stream().filter(this::hasLocationCoordinates)
         .map(r -> reportToNvgPoint(nvgConfig.getApp6Version(),
             nvgConfig.isIncludeElementConfidentialityLabels(),
@@ -522,13 +526,14 @@ public class Nvg20WebService implements NVGPortType2012 {
     nvgPoint.setY(location.getLat());
   }
 
-  private List<Report> getReportsByPeriod(final Instant start, final Instant end) {
+  private List<Report> getReportsByPeriod(AccessToken at, final Instant start, final Instant end) {
     final Map<String, Object> reportQuery = new HashMap<>(DEFAULT_REPORT_QUERY_VARIABLES);
     reportQuery.put("engagementDateStart", start.toEpochMilli());
     reportQuery.put("engagementDateEnd", end.toEpochMilli());
     final GraphQLRequest graphQLRequest =
         new GraphQLRequest("nvgData", REPORT_QUERY, null, Map.of("reportQuery", reportQuery));
-    final Map<String, Object> result = graphQLResource.graphql(null, graphQLRequest, null);
+    final Map<String, Object> result =
+        graphQLResource.graphql(new AccessTokenPrincipal(at), graphQLRequest, null);
     @SuppressWarnings("unchecked")
     final Map<String, Object> data = (Map<String, Object>) result.get("data");
     final TypeReference<AnetBeanList<Report>> typeRef = new TypeReference<>() {};

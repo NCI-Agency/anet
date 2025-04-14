@@ -74,11 +74,11 @@ public class DaoUtils {
     return " " + Joiner.on(", ").join(fieldAliases) + " ";
   }
 
-  public static AccessToken getGraphQLWebServiceAccessToken(GraphQLContext context) {
+  public static AccessToken getAccessTokenFromContext(GraphQLContext context) {
     if (context == null) {
       return null;
     }
-    return context.get("graphQLWebServiceToken");
+    return context.get("accessToken");
   }
 
   public static Person getUserFromContext(GraphQLContext context) {

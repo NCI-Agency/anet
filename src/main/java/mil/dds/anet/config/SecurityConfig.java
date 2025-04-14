@@ -12,6 +12,7 @@ import java.util.Map;
 import mil.dds.anet.resources.AdminResource;
 import mil.dds.anet.resources.HomeResource;
 import mil.dds.anet.utils.ResponseUtils;
+import mil.dds.anet.ws.GraphQLWebService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -43,7 +44,7 @@ public class SecurityConfig {
   private final AnetConfig anetConfig;
   private final AnetDictionary anetDictionary;
 
-  private final ContentSecurityPolicy soapCsp = ContentSecurityPolicy.of(
+  private final ContentSecurityPolicy webServiceCsp = ContentSecurityPolicy.of(
       // default: block everything
       CspDirective.of("default-src", CSP_NONE),
       // we get data from our own server
@@ -88,40 +89,39 @@ public class SecurityConfig {
       return httpServletMapping != null
           && "cxfServletRegistration".equals(httpServletMapping.getServletName());
     }).authorizeHttpRequests(authorize ->
-    // Allow all SOAP service requests
+    // Allow all SOAP service requests; service itself checks access
     authorize.anyRequest().permitAll());
 
-    // Stateless for SOAP, disable session management
-    http.sessionManagement(
-        session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-    // Disable CSRF
-    http.csrf(AbstractHttpConfigurer::disable);
-    // Configure CSP
-    http.headers(
-        headers -> headers.contentSecurityPolicy(csp -> csp.policyDirectives(soapCsp.toString())));
-    // Configure Referrer Policy
-    http.headers(header -> header.referrerPolicy(rp -> rp.policy(NO_REFERRER)));
+    setCommonWebServiceSecurity(http);
 
     return http.build();
   }
 
   @Bean
   @Order(20)
-  public SecurityFilterChain graphQLWebServicveFilterChain(HttpSecurity http) throws Exception {
-    http.securityMatcher("/graphqlWebService/**") // Apply only to GraphQL endpoints
-        .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+  public SecurityFilterChain graphQLWebServiceFilterChain(HttpSecurity http) throws Exception {
+    http
+        // Only applies to GraphQL Web Service endpoint
+        .securityMatcher(GraphQLWebService.GRAPHQL_WEB_SERVICE).authorizeHttpRequests(authorize ->
+        // Allow all GraphQL web service requests; service itself checks access
+        authorize.anyRequest().permitAll());
 
-    // Stateless, disable session management
+    setCommonWebServiceSecurity(http);
+
+    return http.build();
+  }
+
+  private void setCommonWebServiceSecurity(HttpSecurity http) throws Exception {
+    // Stateless for web service, disable session management
     http.sessionManagement(
         session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
     // Disable CSRF
     http.csrf(AbstractHttpConfigurer::disable);
     // Configure CSP
-    http.headers(
-        headers -> headers.contentSecurityPolicy(csp -> csp.policyDirectives(soapCsp.toString())));
+    http.headers(headers -> headers
+        .contentSecurityPolicy(csp -> csp.policyDirectives(webServiceCsp.toString())));
     // Configure Referrer Policy
     http.headers(header -> header.referrerPolicy(rp -> rp.policy(NO_REFERRER)));
-    return http.build();
   }
 
   @Bean
@@ -130,7 +130,7 @@ public class SecurityConfig {
     http.authorizeHttpRequests(authorize -> authorize
         // These are public
         .requestMatchers(AdminResource.ADMIN_DICTIONARY_RESOURCE_PATH, HomeResource.LOGOUT_PATH,
-            AssetConfig.ASSETS_PATH, AssetConfig.IMAGERY_PATH, AssetConfig.GRAPHQL_WEB_SERVICE)
+            AssetConfig.ASSETS_PATH, AssetConfig.IMAGERY_PATH)
         .permitAll()
         // Block the default GraphQL endpoint
         .requestMatchers(unusedGraphQLEndpoint).denyAll()
