@@ -6,26 +6,71 @@ import Settings from "settings"
 export const sleep = seconds => {
   return new Promise(resolve => setTimeout(resolve, (seconds || 0) * 1000))
 }
+class Mutex {
+  constructor() {
+    this.queue = Promise.resolve()
+  }
+
+  lock() {
+    let unlockNext
+    const willLock = new Promise(resolve => (unlockNext = resolve))
+    const willUnlock = this.queue.then(() => unlockNext)
+    this.queue = willLock
+    return willUnlock
+  }
+}
+
+const mutex = new Mutex()
+const userAccessTokens = {}
+
+async function getAccessToken(user) {
+  const unlock = await mutex.lock()
+  const uat = userAccessTokens[user.name]
+  // Check cached version
+  let accessToken = uat?.accessToken
+  const accessTime = moment.now()
+  if (
+    !accessToken ||
+    moment(uat.accessTime).isBefore(moment(accessTime).subtract(1, "minute"))
+  ) {
+    // Fetch a new bearer token for the user
+    const authResponse = await fetch(
+      "http://localhost:9080/realms/ANET/protocol/openid-connect/token",
+      {
+        method: "POST",
+        body: `client_id=ANET-Client-public&username=${user.name}&password=${user.password}&grant_type=password`,
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        }
+      }
+    )
+    const authJson = await (await authResponse)?.json?.()
+    accessToken = authJson?.access_token
+    if (!accessToken) {
+      // Invalid, delete any old version
+      delete userAccessTokens[user.name]
+      console.debug(
+        `${(user.name || "?").green} got no accessToken:\n${
+          JSON.stringify(authJson, null, 4).blue
+        }`
+      )
+    } else {
+      // Cache it
+      userAccessTokens[user.name] = { accessToken, accessTime }
+    }
+  }
+  unlock()
+  return accessToken
+}
 
 async function runGQL(user, query) {
-  // Fetch a bearer token for the user
-  const authResponse = await fetch(
-    "http://localhost:9080/realms/ANET/protocol/openid-connect/token",
-    {
-      method: "POST",
-      body: `client_id=ANET-Client-public&username=${user.name}&password=${user.password}&grant_type=password`,
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded"
-      }
-    }
-  )
-  const authJson = await authResponse.json()
+  const accessToken = await getAccessToken(user)
   const result = await fetch(`${process.env.SERVER_URL}/graphql`, {
     method: "POST",
     headers: {
       Accept: "application/json",
       "Content-Type": "application/json",
-      Authorization: `Bearer ${authJson.access_token}`
+      Authorization: `Bearer ${accessToken}`
     },
     body: JSON.stringify(query)
   })
