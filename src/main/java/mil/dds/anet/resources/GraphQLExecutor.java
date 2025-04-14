@@ -19,13 +19,14 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
+import mil.dds.anet.beans.AccessToken.TokenScope;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.config.AnetConfig;
 import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.BatchingUtils;
 import mil.dds.anet.utils.SecurityUtils;
-import mil.dds.anet.ws.GraphQLWebService;
+import mil.dds.anet.ws.AccessTokenPrincipal;
 import org.dataloader.DataLoaderRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,10 +94,12 @@ public class GraphQLExecutor extends HttpExecutor<NativeWebRequest> {
         new BatchingUtils(ApplicationContextProvider.getEngine(), true, true);
     final DataLoaderRegistry dataLoaderRegistry = batchingUtils.getDataLoaderRegistry();
     final Map<String, Object> context = new HashMap<>();
-    // If this a GraphQLWebServicePrincipal?
-    if (principal instanceof GraphQLWebService.GraphQLWebServicePrincipal graphQLWebServiceResourcePrincipal) {
-      context.put("graphQLWebServiceToken", graphQLWebServiceResourcePrincipal.getAccessToken());
-      context.put(Introspection.INTROSPECTION_DISABLED, true);
+    // Is this an AccessTokenPrincipal?
+    if (principal instanceof AccessTokenPrincipal accessTokenPrincipal) {
+      context.put("accessToken", accessTokenPrincipal.accessToken());
+      context.put(Introspection.INTROSPECTION_DISABLED,
+          // GraphQL web service is allowed to do introspection
+          TokenScope.GRAPHQL.equals(accessTokenPrincipal.accessToken().getScope()));
     } else {
       final Person user = SecurityUtils.getPersonFromPrincipal(principal);
       context.put("user", Objects.requireNonNullElse(user, new Person()));
