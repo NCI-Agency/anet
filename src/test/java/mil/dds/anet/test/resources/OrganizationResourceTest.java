@@ -41,6 +41,12 @@ public class OrganizationResourceTest extends AbstractResourceTest {
       "{ uuid name code type role status organization { uuid } location { uuid } %1$s }",
       _EMAIL_ADDRESSES_FIELDS);
 
+  private static final Map<String, String> APP6_MAP = Map.ofEntries(Map.entry("app6context", "0"),
+      Map.entry("app6standardIdentity", "3"), Map.entry("app6symbolSet", "10"),
+      Map.entry("app6hq", "1"), Map.entry("app6amplifier", "11"), Map.entry("app6entity", "11"),
+      Map.entry("app6entityType", "10"), Map.entry("app6entitySubtype", "01"),
+      Map.entry("app6sectorOneModifier", "01"), Map.entry("app6sectorTwoModifier", "01"));
+
   @Test
   void createAO() {
     // Create a new AO
@@ -212,14 +218,8 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(returnedSteps.get(1).getApprovers()).allMatch(a -> a.getUuid().equals(b1.getUuid()));
   }
 
-  @Deprecated
-  // TODO: remove this and replace it with setting a value, as the choices are no longer available
-  // in the dictionary
   private String getApp6Choice(final String app6field) {
-    @SuppressWarnings("unchecked")
-    final Map<String, String> app6fieldChoices = (Map<String, String>) dict
-        .getDictionaryEntry("fields.organization." + app6field + ".choices");
-    return app6fieldChoices.keySet().stream().findFirst().orElse(null);
+    return APP6_MAP.get(app6field);
   }
 
   @Test
