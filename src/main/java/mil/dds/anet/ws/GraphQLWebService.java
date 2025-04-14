@@ -1,13 +1,13 @@
 package mil.dds.anet.ws;
 
 import io.leangen.graphql.spqr.spring.web.dto.GraphQLRequest;
-import java.security.Principal;
 import java.util.Map;
-import javax.security.auth.Subject;
 import mil.dds.anet.beans.AccessToken;
+import mil.dds.anet.beans.AccessToken.TokenScope;
 import mil.dds.anet.database.AccessTokenDao;
 import mil.dds.anet.graphql.outputtransformers.ResourceTransformers;
 import mil.dds.anet.resources.GraphQLResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -19,36 +19,17 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
-@RequestMapping("/graphqlWebService")
+@RequestMapping(GraphQLWebService.GRAPHQL_WEB_SERVICE)
 public class GraphQLWebService {
-  public class GraphQLWebServicePrincipal implements Principal {
-    private AccessToken accessToken;
+  public static final String GRAPHQL_WEB_SERVICE = "/graphqlWebService";
 
-    @Override
-    public String getName() {
-      return "GraphQLWebServicePrincipal";
-    }
-
-    @Override
-    public boolean implies(Subject subject) {
-      return Principal.super.implies(subject);
-    }
-
-    public AccessToken getAccessToken() {
-      return accessToken;
-    }
-
-    public void setAccessToken(AccessToken accessToken) {
-      this.accessToken = accessToken;
-    }
-  }
-
+  private static final String BEARER_PREFIX = "Bearer ";
   private static final int ACCESS_TOKEN_LENGTH = 32;
 
-  private final AccessTokenDao accessTokenDao;
   private final GraphQLResource graphQLResource;
+  private final AccessTokenDao accessTokenDao;
 
-  public GraphQLWebService(AccessTokenDao accessTokenDao, final GraphQLResource graphQLResource) {
+  public GraphQLWebService(GraphQLResource graphQLResource, AccessTokenDao accessTokenDao) {
     this.accessTokenDao = accessTokenDao;
     this.graphQLResource = graphQLResource;
   }
@@ -57,21 +38,18 @@ public class GraphQLWebService {
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<Map<String, Object>> graphqlPostJson(
       @RequestBody GraphQLRequest graphQLRequest,
-      @RequestHeader("Authorization") String authHeader) {
+      @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader) {
     if (graphQLRequest == null) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
-    if (authHeader != null && authHeader.startsWith("Bearer ")) {
-      String accessToken = authHeader.substring(7);
+    if (authHeader != null && authHeader.startsWith(BEARER_PREFIX)) {
+      final String accessToken = authHeader.substring(BEARER_PREFIX.length());
       if (accessToken.length() == ACCESS_TOKEN_LENGTH) {
-        final AccessToken at = accessTokenDao.getByTokenValueAndScope(accessToken,
-            AccessToken.TokenScope.GRAPHQL.name());
+        final AccessToken at =
+            accessTokenDao.getByTokenValueAndScope(accessToken, TokenScope.GRAPHQL);
         if (at != null && at.isValid()) {
-          GraphQLWebServicePrincipal graphQLWebServiceResourcePrincipal =
-              new GraphQLWebServicePrincipal();
-          graphQLWebServiceResourcePrincipal.setAccessToken(at);
-          return ResourceTransformers.jsonTransformer.apply(
-              graphQLResource.graphql(graphQLWebServiceResourcePrincipal, graphQLRequest, null));
+          return ResourceTransformers.jsonTransformer
+              .apply(graphQLResource.graphql(new AccessTokenPrincipal(at), graphQLRequest, null));
         }
       }
     }
