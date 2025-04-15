@@ -91,6 +91,7 @@ const EditApp6SymbolModal = ({
 
   const getApp6Symbol = (tempValues, size, maxHeight) => {
     const app6SymbolValues = { ...tempValues }
+    // replace the null values with the parent values if they are not null
     Object.entries(parentValues).forEach(([key, value]) => {
       if (value !== null && app6SymbolValues[key] === null) {
         app6SymbolValues[key] = value
@@ -259,7 +260,7 @@ const EditApp6SymbolModal = ({
     )
   }
 
-  const onReset = (values, setFieldValue) => {
+  const reset = (values, setFieldValue) => {
     Object.keys(values).forEach(fieldName => {
       setFieldValue(fieldName, initialValues[fieldName])
     })
@@ -306,14 +307,14 @@ const EditApp6SymbolModal = ({
               <Modal.Footer>
                 <Button
                   variant="tertiary"
-                  onClick={() => onReset(values, setFieldValue)}
+                  onClick={() => reset(values, setFieldValue)}
                 >
                   Reset
                 </Button>
                 <Button
                   variant="secondary"
                   onClick={() => {
-                    onReset(values, setFieldValue)
+                    reset(values, setFieldValue)
                     onHide()
                   }}
                 >
