@@ -593,7 +593,6 @@ interface SelectFieldProps {
   addon?: React.ReactNode
   vertical?: boolean
   extraAddon?: any
-  defaultOption?: React.ReactNode
 }
 
 export const SelectField = ({
@@ -609,7 +608,6 @@ export const SelectField = ({
   addon,
   vertical,
   extraAddon,
-  defaultOption,
   ...otherProps
 }: SelectFieldProps) => {
   const { validationState, className: updatedClassName } =
@@ -639,7 +637,7 @@ export const SelectField = ({
         }}
         {...otherProps}
       >
-        {!multiple && (defaultOption || <option />)}
+        {!multiple && <option />}
         {buttons.map(option => (
           <option key={`${field.name}_${option.value}`} value={option.value}>
             {option.label}
