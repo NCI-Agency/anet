@@ -111,16 +111,16 @@ const HierarchicalOverlayTable = ({
 
   const buildFlattenedList = (tasks, level = 0) => {
     return tasks.flatMap(task => {
-      const isTaskSelected = selectedItems?.some(
-        item => item.uuid === task.uuid
-      )
-      const isChildrenTaskSelected = selectedItems?.some(item =>
+      const isDescendantTaskSelected = selectedItems?.some(item =>
         task.descendantTasks?.some(child => child.uuid === item.uuid)
       )
+      const isAscendantTaskSelected = selectedItems?.some(item =>
+        task.ascendantTasks?.some(child => child.uuid === item.uuid)
+      )
       const isCollapsed = !expandedItems.has(task.uuid)
-      const isSelected = isTaskSelected
+      const isSelected = isAscendantTaskSelected
         ? true
-        : isChildrenTaskSelected && isCollapsed
+        : isDescendantTaskSelected && isCollapsed
           ? null
           : false
       const taskWithLevel = { ...task, level, isSelected }
