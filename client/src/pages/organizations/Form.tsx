@@ -7,7 +7,7 @@ import {
   TaskOverlayRow
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
-import App6Symbol from "components/App6Symbol"
+import App6Symbol, { getFieldsList } from "components/App6Symbol"
 import AppContext from "components/AppContext"
 import ApprovalsDefinition from "components/approvals/ApprovalsDefinition"
 import UploadAttachment from "components/Attachment/UploadAttachment"
@@ -314,43 +314,9 @@ const OrganizationForm = ({
                             showModal={showApp6Modal}
                             onHide={() => setShowApp6Modal(false)}
                             onSave={symbologyValues => {
-                              setFieldValue(
-                                "app6context",
-                                symbologyValues.app6context
-                              )
-                              setFieldValue(
-                                "app6standardIdentity",
-                                symbologyValues.app6standardIdentity
-                              )
-                              setFieldValue(
-                                "app6symbolSet",
-                                symbologyValues.app6symbolSet
-                              )
-                              setFieldValue("app6hq", symbologyValues.app6hq)
-                              setFieldValue(
-                                "app6amplifier",
-                                symbologyValues.app6amplifier
-                              )
-                              setFieldValue(
-                                "app6entity",
-                                symbologyValues.app6entity
-                              )
-                              setFieldValue(
-                                "app6entityType",
-                                symbologyValues.app6entityType
-                              )
-                              setFieldValue(
-                                "app6entitySubtype",
-                                symbologyValues.app6entitySubtype
-                              )
-                              setFieldValue(
-                                "app6sectorOneModifier",
-                                symbologyValues.app6sectorOneModifier
-                              )
-                              setFieldValue(
-                                "app6sectorTwoModifier",
-                                symbologyValues.app6sectorTwoModifier
-                              )
+                              getFieldsList().forEach(field => {
+                                setFieldValue(field, symbologyValues[field])
+                              })
                               setShowApp6Modal(false)
                             }}
                           />
