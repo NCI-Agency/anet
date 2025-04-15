@@ -80,6 +80,23 @@ const yupSchema = yup.object().shape({
     .default("")
 })
 
+const tokenScopeButtons = [
+  {
+    id: "nvg",
+    value: "NVG",
+    label: "NVG"
+  },
+  {
+    id: "graphql",
+    value: "GRAPHQL",
+    label: "GraphQL"
+  }
+]
+
+function humanNameOfTokenScope(tokenScope) {
+  return tokenScopeButtons.find(ts => ts.value === tokenScope)?.label
+}
+
 function createShortcut(label: string, date: Date, includeTime: boolean) {
   return { date, includeTime, label }
 }
@@ -172,7 +189,7 @@ const AccessTokensTable = ({
           {accessTokens.map(at => (
             <tr key={at.uuid}>
               <td>{at.name}</td>
-              <td>{at.scope}</td>
+              <td>{humanNameOfTokenScope(at.scope)}</td>
               <td>{at.description}</td>
               <td>
                 {moment(at.createdAt).format(
@@ -272,18 +289,6 @@ const AccessTokenModal = ({
   setShow,
   onConfirm
 }: AccessTokenModalProps) => {
-  const tokenScopeButtons = [
-    {
-      id: "nvg",
-      value: "NVG",
-      label: "NVG"
-    },
-    {
-      id: "graphql",
-      value: "GRAPHQL",
-      label: "GraphQL"
-    }
-  ]
   if (isNew) {
     accessToken = {
       name: "",
