@@ -38,6 +38,7 @@ const GQL_GET_ACCESS_TOKEN_LIST = gql`
     accessTokenList {
       uuid
       name
+      scope
       description
       createdAt
       expiresAt
@@ -72,8 +73,29 @@ const yupSchema = yup.object().shape({
   expiresAt: yupDate
     .nullable()
     .required("You must give a web service access token an expiration")
-    .default(null)
+    .default(null),
+  scope: yup
+    .string()
+    .required("You must give a web service access token a scope")
+    .default("")
 })
+
+const tokenScopeButtons = [
+  {
+    id: "nvg",
+    value: "NVG",
+    label: "NVG"
+  },
+  {
+    id: "graphql",
+    value: "GRAPHQL",
+    label: "GraphQL"
+  }
+]
+
+function humanNameOfTokenScope(tokenScope) {
+  return tokenScopeButtons.find(ts => ts.value === tokenScope)?.label
+}
 
 function createShortcut(label: string, date: Date, includeTime: boolean) {
   return { date, includeTime, label }
@@ -156,6 +178,7 @@ const AccessTokensTable = ({
         <thead>
           <tr>
             <th>Name</th>
+            <th>Scope</th>
             <th>Description</th>
             <th>Created</th>
             <th>Expires</th>
@@ -166,6 +189,7 @@ const AccessTokensTable = ({
           {accessTokens.map(at => (
             <tr key={at.uuid}>
               <td>{at.name}</td>
+              <td>{humanNameOfTokenScope(at.scope)}</td>
               <td>{at.description}</td>
               <td>
                 {moment(at.createdAt).format(
@@ -268,6 +292,7 @@ const AccessTokenModal = ({
   if (isNew) {
     accessToken = {
       name: "",
+      scope: null,
       description: null,
       expiresAt: null,
       tokenValue: b64(getRandomBytes(24))
@@ -295,6 +320,15 @@ const AccessTokenModal = ({
                     label="Name"
                     component={FieldHelper.InputField}
                     extraColElem={null}
+                  />
+                  <FastField
+                    name="scope"
+                    label="Scope"
+                    component={FieldHelper.RadioButtonToggleGroupField}
+                    buttons={tokenScopeButtons}
+                    onChange={value => {
+                      setFieldValue("scope", value)
+                    }}
                   />
                   <FastField
                     name="description"

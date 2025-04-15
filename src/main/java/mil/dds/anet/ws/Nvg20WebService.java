@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import javax.xml.datatype.DatatypeFactory;
 import mil.dds.anet.beans.AccessToken;
+import mil.dds.anet.beans.AccessToken.TokenScope;
 import mil.dds.anet.beans.ConfidentialityRecord;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Organization;
@@ -27,7 +28,6 @@ import mil.dds.anet.beans.search.ReportSearchSortBy;
 import mil.dds.anet.config.AnetConfig;
 import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.database.AccessTokenDao;
-import mil.dds.anet.database.AdminDao;
 import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.resources.GraphQLResource;
 import mil.dds.anet.utils.DaoUtils;
@@ -172,15 +172,13 @@ public class Nvg20WebService implements NVGPortType2012 {
   private final AnetDictionary dict;
   private final GraphQLResource graphQLResource;
   private final AccessTokenDao accessTokenDao;
-  private final AdminDao adminDao;
 
   public Nvg20WebService(AnetConfig config, AnetDictionary dict, GraphQLResource graphQLResource,
-      AccessTokenDao accessTokenDao, AdminDao adminDao) {
+      AccessTokenDao accessTokenDao) {
     this.config = config;
     this.dict = dict;
     this.graphQLResource = graphQLResource;
     this.accessTokenDao = accessTokenDao;
-    this.adminDao = adminDao;
   }
 
   @Override
@@ -232,14 +230,14 @@ public class Nvg20WebService implements NVGPortType2012 {
         }
       }
       if (accessToken != null && accessToken.length() == ACCESS_TOKEN_LENGTH) {
-        final AccessToken at = accessTokenDao.getByTokenValue(accessToken);
+        final AccessToken at = accessTokenDao.getByTokenValueAndScope(accessToken, TokenScope.NVG);
         if (at != null && at.isValid()) {
           if (!App6Symbology.isValidApp6Version(app6Version)) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                 "Invalid APP-6 version");
           }
           final GetNvgResponse response = NVG_OF.createGetNvgResponse();
-          response.setNvg(makeNvg(app6Version, pastDays, futureDays,
+          response.setNvg(makeNvg(at, app6Version, pastDays, futureDays,
               includeDocumentConfidentialityLabel, includeElementConfidentialityLabels));
           return response;
         }
@@ -249,7 +247,7 @@ public class Nvg20WebService implements NVGPortType2012 {
         "Must provide a valid Web Service Access Token");
   }
 
-  private NvgType makeNvg(String app6Version, int pastDays, int futureDays,
+  private NvgType makeNvg(AccessToken at, String app6Version, int pastDays, int futureDays,
       boolean includeDocumentConfidentialityLabel, boolean includeElementConfidentialityLabels) {
     final NvgType nvgType = NVG_OF.createNvgType();
     nvgType.setVersion(NVG_VERSION);
@@ -270,7 +268,7 @@ public class Nvg20WebService implements NVGPortType2012 {
       nvgType.setExtension(extensionType);
     }
 
-    final List<Report> reports = getReportsByPeriod(start, end);
+    final List<Report> reports = getReportsByPeriod(at, start, end);
     contentTypeList.addAll(reports.stream().map(r -> reportToNvgPoint(app6Version,
         includeElementConfidentialityLabels, defaultConfidentiality, now, r)).toList());
 
@@ -491,13 +489,14 @@ public class Nvg20WebService implements NVGPortType2012 {
     return inputType;
   }
 
-  private List<Report> getReportsByPeriod(final Instant start, final Instant end) {
+  private List<Report> getReportsByPeriod(AccessToken at, final Instant start, final Instant end) {
     final Map<String, Object> reportQuery = new HashMap<>(DEFAULT_REPORT_QUERY_VARIABLES);
     reportQuery.put("engagementDateStart", start.toEpochMilli());
     reportQuery.put("engagementDateEnd", end.toEpochMilli());
     final GraphQLRequest graphQLRequest =
         new GraphQLRequest("nvgData", REPORT_QUERY, null, Map.of("reportQuery", reportQuery));
-    final Map<String, Object> result = graphQLResource.graphql(null, graphQLRequest, null);
+    final Map<String, Object> result =
+        graphQLResource.graphql(new AccessTokenPrincipal(at), graphQLRequest, null);
     @SuppressWarnings("unchecked")
     final Map<String, Object> data = (Map<String, Object>) result.get("data");
     final TypeReference<AnetBeanList<Report>> typeRef = new TypeReference<>() {};
