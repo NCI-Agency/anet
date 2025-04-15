@@ -5,7 +5,6 @@ import API from "api"
 import useSearchFilter from "components/advancedSearch/hooks"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import { AdvancedMultiSelectOverlayTable } from "components/advancedSelectWidget/AdvancedSelectOverlayTable"
-import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import { getBreadcrumbTrailAsText } from "components/BreadcrumbTrail"
 import TaskTable from "components/TaskTable"
 import { Task } from "models"
@@ -16,17 +15,17 @@ import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
 
 const taskFields = `
-    ${Task.autocompleteQuery}
-    childrenTasks(query: { pageSize: 1 }) {
-      uuid
-    }
-    parentTask {
-      uuid
-    }
-    descendantTasks {
-      uuid
-    }
-  `
+  ${Task.autocompleteQuery}
+  childrenTasks(query: { pageSize: 1 }) {
+    uuid
+  }
+  parentTask {
+    uuid
+  }
+  descendantTasks {
+    uuid
+  }
+`
 
 const GQL_GET_TASK = gql`
   query ($uuid: String!) {
@@ -86,10 +85,7 @@ const HierarchicalOverlayTable = ({
         }
       }
     `
-    const queryVars = {
-      parentTaskUuid: task.uuid,
-      parentTaskRecurseStrategy: RECURSE_STRATEGY.NONE
-    }
+    const queryVars = { parentTaskUuid: task.uuid }
     const data = await API.query(query, { query: queryVars })
     return data.taskList.list
   }
@@ -118,13 +114,13 @@ const HierarchicalOverlayTable = ({
       const isTaskSelected = selectedItems?.some(
         item => item.uuid === task.uuid
       )
-      const hasDescendantTasksSelected = selectedItems?.some(item =>
+      const isChildrenTaskSelected = selectedItems?.some(item =>
         task.descendantTasks?.some(child => child.uuid === item.uuid)
       )
       const isCollapsed = !expandedItems.has(task.uuid)
       const isSelected = isTaskSelected
         ? true
-        : hasDescendantTasksSelected && isCollapsed
+        : isChildrenTaskSelected && isCollapsed
           ? null
           : false
       const taskWithLevel = { ...task, level, isSelected }
@@ -167,33 +163,37 @@ const HierarchicalOverlayTable = ({
           cursor: "auto"
         }}
       >
-        {(hasChildren && (
-          <>
-            <span
-              onClick={e => {
-                e.stopPropagation()
-                handleExpand(task)
-              }}
-              style={{ cursor: "pointer" }}
-            >
-              <Icon
-                icon={
-                  isExpanded ? IconNames.CHEVRON_DOWN : IconNames.CHEVRON_RIGHT
-                }
-                size={IconSize.STANDARD}
-              />
-            </span>
+        {hasChildren && (
+          <span
+            onClick={e => {
+              e.stopPropagation()
+              handleExpand(task)
+            }}
+            style={{ cursor: "pointer" }}
+          >
             <Icon
-              icon={isExpanded ? IconNames.FOLDER_OPEN : IconNames.FOLDER_CLOSE}
+              icon={
+                isExpanded ? IconNames.CHEVRON_DOWN : IconNames.CHEVRON_RIGHT
+              }
               size={IconSize.STANDARD}
+              color="#5f6b7c"
             />
-          </>
-        )) || <Icon icon={IconNames.DOCUMENT} size={IconSize.STANDARD} />}
-        <img
-          src={TASKS_ICON}
-          alt=""
-          style={{ marginLeft: 5, marginRight: 5, height: "1em" }}
-        />
+          </span>
+        )}
+        {hasChildren ? (
+          <Icon
+            icon={isExpanded ? IconNames.FOLDER_OPEN : IconNames.FOLDER_CLOSE}
+            size={IconSize.STANDARD}
+            color="#5f6b7c"
+          />
+        ) : (
+          <Icon
+            icon={IconNames.DOCUMENT}
+            size={IconSize.STANDARD}
+            color="#5f6b7c"
+          />
+        )}
+        <Icon icon={IconNames.STAR} size={12} />
         <span
           onClick={handleToggleSelection}
           style={{
