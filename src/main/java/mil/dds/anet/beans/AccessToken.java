@@ -12,7 +12,7 @@ public class AccessToken {
 
   private static final Base64.Encoder BASE64_ENCODER = Base64.getEncoder();
 
-  public static enum TokenScope {
+  public enum TokenScope {
     NVG, GRAPHQL
   }
 

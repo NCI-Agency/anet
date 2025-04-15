@@ -99,7 +99,7 @@ public class GraphQLExecutor extends HttpExecutor<NativeWebRequest> {
       context.put("accessToken", accessTokenPrincipal.accessToken());
       context.put(Introspection.INTROSPECTION_DISABLED,
           // GraphQL web service is allowed to do introspection
-          TokenScope.GRAPHQL.equals(accessTokenPrincipal.accessToken().getScope()));
+          !TokenScope.GRAPHQL.equals(accessTokenPrincipal.accessToken().getScope()));
     } else {
       final Person user = SecurityUtils.getPersonFromPrincipal(principal);
       context.put("user", Objects.requireNonNullElse(user, new Person()));
