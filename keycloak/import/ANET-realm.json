@@ -390,8 +390,8 @@
       "id" : "76726d7b-bec6-432b-9a16-eecb82512e02",
       "type" : "password",
       "createdDate" : 1589458821618,
-      "secretData" : "{\"value\":\"RnxiajnFp5JD95imJ1n0H7cSxi7Va6COLdrfMBTr+tChqTR7S7Cbd9E94rdkvAhBND5EDZkssRwiSR22oD0gxA==\",\"salt\":\"fwi+Bxcru/x9YqUccVartA==\"}",
-      "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\"}"
+      "secretData" : "{\"value\":\"DxTS7rvegCufW2Q4XlUNqq6Dq883pyIGPIDC6U91h5mADp2dsZDiFj1zMdHcX1ro0VcLx/pMR5HJdsiGmUckHg==\",\"salt\":\"rrTVaYI8hddKuvSImjp7ag==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":10000,\"algorithm\":\"pbkdf2-sha512\",\"additionalParameters\":{}}"
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
@@ -489,8 +489,8 @@
       "id" : "51275415-1296-42ef-a759-4ab695afe21b",
       "type" : "password",
       "createdDate" : 1590405868906,
-      "secretData" : "{\"value\":\"hNQ8DwbEYR7iie0ekUCHI1SQL3lLw+W3MRs+OPUMxtEs+zfMAxgeRON+B6QHHMlHojVE9prFCWqH6kXDv86e7A==\",\"salt\":\"ds+Z4AeV4hajGQJxt5PNVA==\"}",
-      "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\"}"
+      "secretData" : "{\"value\":\"8zwulKtaSwfRd9I86eKEPZX/0mByj7J2oUUgfoPaWCj2ltdZUyigPM7sscedtDp5MzzuI9thc5BytIlel4OrYw==\",\"salt\":\"8Xrx5z9Wyf3xl91bmrxAgQ==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":10000,\"algorithm\":\"pbkdf2-sha512\",\"additionalParameters\":{}}"
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
@@ -508,8 +508,8 @@
       "id" : "82e4efd0-03c8-4bec-87c8-1198ab834135",
       "type" : "password",
       "createdDate" : 1618840714878,
-      "secretData" : "{\"value\":\"y6LRIS3m6DTp6qLBIyii7Oc/yMn97mRfJDqyk/nrCS4bnwWjzaOJdXWscw8kSlwIdUPDUE6gkPEKJE66sxSefg==\",\"salt\":\"k6V/LcF/IsmnSlATju7PlA==\",\"additionalParameters\":{}}",
-      "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+      "secretData" : "{\"value\":\"LioTR4A3joi3h/bTcy6mjEIWNZn/65AMchMYSBRU1Pj9jfK7prtDLzG0rLvRTE+T9vgWCYs8EPkU24ajVpyLgg==\",\"salt\":\"rwT0dTnXOUCLqXaEWK/bqw==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":10000,\"algorithm\":\"pbkdf2-sha512\",\"additionalParameters\":{}}"
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
@@ -527,8 +527,8 @@
       "id" : "07b47db1-2902-4cf0-9374-17a5f4d5f55c",
       "type" : "password",
       "createdDate" : 1618840803534,
-      "secretData" : "{\"value\":\"8aeSbe/J6tbPWDWO1VvISJAPEfiLd79qAyP2r+uZNB1/DO1howW4HYt0CgyVlrFikMxRwJzt5x8GgMyFtUpU5w==\",\"salt\":\"d1URPZVxtFrXufqbDacGfA==\",\"additionalParameters\":{}}",
-      "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+      "secretData" : "{\"value\":\"jBEABcZPR3y3KPx6ZqOhlwfgoWwv2qDuWdBCatqqQ9Z2r0vhc5EYKlppcdWEuhaZgOjSdwMMZr1iBBVXeUSodQ==\",\"salt\":\"XDRd1O2iaSTaQGcxlv7Ftg==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":10000,\"algorithm\":\"pbkdf2-sha512\",\"additionalParameters\":{}}"
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
@@ -603,8 +603,8 @@
       "id" : "243870a5-8ffe-4ee0-b8bb-dec4da833dbf",
       "type" : "password",
       "createdDate" : 1632909184400,
-      "secretData" : "{\"value\":\"YS33rtfofSdIRm1ifIG6JQ3rGs4/t0iH5nMH8lePkMzlsnmRJMDM4hYSw8QbMfDhQ9pmfLyB56Q+JX509SiSEw==\",\"salt\":\"XjgjPvQMKP8PEZ2Fg9cfNg==\",\"additionalParameters\":{}}",
-      "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+      "secretData" : "{\"value\":\"b/eBGPrWVnEnmZ21G2i2DrNLc79cvZ2ebEjNnWLzrdMjkqmLIYaQhVbICroVy3eoboC2Jb+qbkkwqoFlg/k/VQ==\",\"salt\":\"2sye1c9w9CV33JzOexlQoQ==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":10000,\"algorithm\":\"pbkdf2-sha512\",\"additionalParameters\":{}}"
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
@@ -679,8 +679,8 @@
       "id" : "bffbb0d5-66f7-4c2b-8b6c-7bdd3476b171",
       "type" : "password",
       "createdDate" : 1618840753794,
-      "secretData" : "{\"value\":\"qyZBU7lkJ6+oHSGWU3kAW3b777lEy0yOok9R4W+/E32qiUhlsdE7vF5WozCgGvGpxP8B7TyRgHMIUCXvgw5XmQ==\",\"salt\":\"BL2J8If36k8bz0gwwmK1Sw==\",\"additionalParameters\":{}}",
-      "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+      "secretData" : "{\"value\":\"hZETudV1ZAedU2POBfojNsDjtu/QRjY8xo0shkmiUjVYosW/Y0yaR2icZexdNoCFUzaxxRzOHNjCfxFVqhX5fg==\",\"salt\":\"5WJa0GWE8IY0TCCeR+NByg==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":10000,\"algorithm\":\"pbkdf2-sha512\",\"additionalParameters\":{}}"
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
@@ -698,8 +698,8 @@
       "id" : "c126ead4-6a01-4410-8c30-3a6a06b70e61",
       "type" : "password",
       "createdDate" : 1632909170594,
-      "secretData" : "{\"value\":\"q5YFeJU21RE7HRzg+++nLjwxAsW6grJY3oD2UnncJFZcGvskbdGYOtnlEDCr/25CQ9N8vAOgJnqMCZP1UO1AyA==\",\"salt\":\"HR69wRqNdiH+77HpHRpjnA==\",\"additionalParameters\":{}}",
-      "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+      "secretData" : "{\"value\":\"trzDgECLOeM2Zy2UF2EASj2+I4ycHuNdmHL/ah9wGQp4hoe/iQ7j7L64pPrMUx+db5YgOPux8a48Dftv1OwimA==\",\"salt\":\"wdWY83MA2Qhpfx/bL7imOw==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":10000,\"algorithm\":\"pbkdf2-sha512\",\"additionalParameters\":{}}"
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
@@ -717,8 +717,8 @@
       "id" : "9b66e5e0-9ff3-413f-8296-93f736c59359",
       "type" : "password",
       "createdDate" : 1618840831224,
-      "secretData" : "{\"value\":\"5yGps7gBjj472GWy15sSMv+p49bDjIHqgHkYpmpUsDLf+4jIvgv2VH04aUhM06Flpu6kklzsoCl64RES+PoQbg==\",\"salt\":\"LVt9SoJ4zqdb0wjHtYM8Cw==\",\"additionalParameters\":{}}",
-      "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+      "secretData" : "{\"value\":\"uPkhhdp5D/5zouh9BOtQS/dAoBUdy24FrbdY917UStEqKmxoQKzbcu09QLZGnMYHDXfx5kruTNV279IvemsvKw==\",\"salt\":\"9MY0W7a8uNpZ2xrQqa7oXg==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":10000,\"algorithm\":\"pbkdf2-sha512\",\"additionalParameters\":{}}"
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
@@ -796,8 +796,8 @@
       "id" : "f1bf054e-0c8d-46c5-9fcc-998efb2d47f6",
       "type" : "password",
       "createdDate" : 1589460358104,
-      "secretData" : "{\"value\":\"LdxutTHfV3omKk+5fWtAozbFrakU/tvwvArDj3MT9wBJEfrM5kTP2s+GvDi3AzRkKNEPvgTHGD5Rfx0JoqFx9A==\",\"salt\":\"bJHvPH509AnAz+z+9ZGhDw==\"}",
-      "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\"}"
+      "secretData" : "{\"value\":\"MK8wPlgGfH8jACnKjt8Xah7xKMcwdsgBY2rIt1vnzSyWKitjmRKX3q5TPmBdYeiBpBmc1+/ykC4oEDVCD+yeuQ==\",\"salt\":\"38aehFggaCfWR4YlTW4ynQ==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":10000,\"algorithm\":\"pbkdf2-sha512\",\"additionalParameters\":{}}"
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
@@ -853,8 +853,8 @@
       "id" : "f22149b8-4eae-4686-ae81-0632f4a39b2f",
       "type" : "password",
       "createdDate" : 1620821553600,
-      "secretData" : "{\"value\":\"E115kCP9Vgh5BHdUBEnypfFJSeeSWUfrN3yXJUY//SpeUVpTZwXRkQud7OI7RxFMJnWPl7yJjFzzJkDRYKfD/Q==\",\"salt\":\"e2pDEq0zxaABoa60xkgM3g==\",\"additionalParameters\":{}}",
-      "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+      "secretData" : "{\"value\":\"PWjrvcZO5HAq2mG5+FNLR8VfsXexLsVC27ULz3A6Fwqc+JbAkmHKaeo09yycpHY2pVKEEcC/XptLpf8vsvsfgQ==\",\"salt\":\"xUrIu5imWCTOxjED0RxKYA==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":10000,\"algorithm\":\"pbkdf2-sha512\",\"additionalParameters\":{}}"
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
@@ -872,8 +872,8 @@
       "id" : "e94f127b-6585-4541-88d9-2481faeee50b",
       "type" : "password",
       "createdDate" : 1620821527272,
-      "secretData" : "{\"value\":\"uEw5T/n0s1DYrt34sHddrteVtrrgzAPmrBXOxumkJm1IFWEw5eI5MlkOnJks4VEUvHwmEh6vuu4EY6HVIPWtHw==\",\"salt\":\"8Tlg17+71jKe/o7mVxrjNw==\",\"additionalParameters\":{}}",
-      "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+      "secretData" : "{\"value\":\"cLi26Rc1amfJSJPw4lvhYRL4wuoLbt4TRjr5QZer15PiEeD+ngZGZFC8l7luaEjwaqPRlRaHn+dhcwb0zyLgbQ==\",\"salt\":\"H9RZpFUgIQrqRm5HIQOViQ==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":10000,\"algorithm\":\"pbkdf2-sha512\",\"additionalParameters\":{}}"
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
