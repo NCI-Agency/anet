@@ -111,10 +111,10 @@ async function createHierarchy(user, grow, args) {
     }
     const app6values = Object.keys(getChoices(app6field, org))
     if (app6values.length === 0) {
-      // some combination might yeald no choices for a certain field
+      // some combination might yield no choices for a certain field
       app6values.push(null)
     }
-    org[app6field] = faker.helpers.arrayElement(app6values) || null
+    org[app6field] = faker.helpers.arrayElement(app6values)
   }
 
   /**

@@ -7,7 +7,9 @@ import {
   TaskOverlayRow
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
-import App6Symbol, { getFieldsList } from "components/App6Symbol"
+import App6Symbol, {
+  getFieldsList as getApp6FieldsList
+} from "components/App6Symbol"
 import AppContext from "components/AppContext"
 import ApprovalsDefinition from "components/approvals/ApprovalsDefinition"
 import UploadAttachment from "components/Attachment/UploadAttachment"
@@ -288,16 +290,13 @@ const OrganizationForm = ({
                             <App6Symbol
                               values={{
                                 ...values,
-                                app6context: values.app6context
-                                  ? values.app6context
-                                  : parentContext,
+                                app6context:
+                                  values.app6context || parentContext,
                                 app6standardIdentity:
-                                  values.app6standardIdentity
-                                    ? values.app6standardIdentity
-                                    : parentStandardIdentity,
-                                app6symbolSet: values.app6symbolSet
-                                  ? values.app6symbolSet
-                                  : parentSymbolSet
+                                  values.app6standardIdentity ||
+                                  parentStandardIdentity,
+                                app6symbolSet:
+                                  values.app6symbolSet || parentSymbolSet
                               }}
                               size={120}
                               maxHeight={250}
@@ -314,7 +313,7 @@ const OrganizationForm = ({
                             showModal={showApp6Modal}
                             onHide={() => setShowApp6Modal(false)}
                             onSave={symbologyValues => {
-                              getFieldsList().forEach(field => {
+                              getApp6FieldsList().forEach(field => {
                                 setFieldValue(field, symbologyValues[field])
                               })
                               setShowApp6Modal(false)

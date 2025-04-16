@@ -13,7 +13,6 @@ import {
   useBoilerplate
 } from "components/Page"
 import { toPng } from "html-to-image"
-import ms from "milsymbol"
 import { Organization } from "models"
 import { PositionRole } from "models/Position"
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
@@ -239,11 +238,9 @@ const OrganizationFlowChart = ({
       Organization.getApp6ParentFields(org, org)
     return {
       ...org,
-      app6context: org.app6context ? org.app6context : parentContext,
-      app6standardIdentity: org.app6standardIdentity
-        ? org.app6standardIdentity
-        : parentStandardIdentity,
-      app6symbolSet: org.app6symbolSet ? org.app6symbolSet : parentSymbolSet
+      app6context: org.app6context || parentContext,
+      app6standardIdentity: org.app6standardIdentity || parentStandardIdentity,
+      app6symbolSet: org.app6symbolSet || parentSymbolSet
     }
   }
 

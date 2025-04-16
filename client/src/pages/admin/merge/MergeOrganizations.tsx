@@ -5,7 +5,10 @@ import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
 import { OrganizationSimpleOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
-import { getFieldsList, getLabel } from "components/App6Symbol"
+import {
+  getLabel as getApp6FieldsLabel,
+  getFieldsList as getApp6FieldsList
+} from "components/App6Symbol"
 import ApprovalSteps from "components/approvals/ApprovalSteps"
 import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import { customFieldsJSONString } from "components/CustomFields"
@@ -267,12 +270,12 @@ const MergeOrganizations = ({ pageDispatchers }: MergeOrganizationsProps) => {
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
-              {getFieldsList().map(fieldName => (
+              {getApp6FieldsList().map(fieldName => (
                 <DictionaryField
                   key={fieldName}
                   wrappedComponent={MergeField}
                   dictProps={Settings.fields.organization[fieldName]}
-                  value={getLabel(mergedOrganization, fieldName)}
+                  value={getApp6FieldsLabel(mergedOrganization, fieldName)}
                   align={ALIGN_OPTIONS.CENTER}
                   fieldName={fieldName}
                   mergeState={mergeState}
@@ -641,13 +644,13 @@ const OrganizationColumn = ({
             autoMerge
             dispatchMergeActions={dispatchMergeActions}
           />
-          {getFieldsList().map(fieldName => (
+          {getApp6FieldsList().map(fieldName => (
             <DictionaryField
               key={fieldName}
               wrappedComponent={MergeField}
               dictProps={Settings.fields.organization[fieldName]}
               fieldName={fieldName}
-              value={getLabel(organization, fieldName)}
+              value={getApp6FieldsLabel(organization, fieldName)}
               align={align}
               action={() => {
                 dispatchMergeActions(

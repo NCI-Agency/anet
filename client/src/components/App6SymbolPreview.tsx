@@ -104,15 +104,10 @@ const App6SymbolPreview = ({
         <App6Symbol
           values={{
             ...values,
-            app6context: values.app6context
-              ? values.app6context
-              : parentValues.app6context,
-            app6standardIdentity: values.app6standardIdentity
-              ? values.app6standardIdentity
-              : parentValues.app6standardIdentity,
-            app6symbolSet: values.app6symbolSet
-              ? values.app6symbolSet
-              : parentValues.app6symbolSet
+            app6context: values.app6context || parentValues.app6context,
+            app6standardIdentity:
+              values.app6standardIdentity || parentValues.app6standardIdentity,
+            app6symbolSet: values.app6symbolSet || parentValues.app6symbolSet
           }}
           size={size}
           maxHeight={maxHeight}
