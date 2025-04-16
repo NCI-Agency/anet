@@ -47,7 +47,7 @@ const EditApp6SymbolModal = ({
     setPreviewValues({ ...previewValues, [fieldName]: newValue })
     // verify if all other fields have a valid value after the update
     Object.entries(currentValues).forEach(([key, value]) => {
-      const choices = getChoices(key, currentValues)
+      const choices = getChoices(key, mergeWithParentValues(currentValues))
       if (value && !Object.keys(choices).includes(value)) {
         setFieldValue(key, null)
       }
@@ -89,14 +89,19 @@ const EditApp6SymbolModal = ({
     return newValues
   }
 
-  const getApp6Symbol = (tempValues, size, maxHeight) => {
-    const app6SymbolValues = { ...tempValues }
+  const mergeWithParentValues = currentValues => {
     // replace the null values with the parent values if they are not null
+    const app6SymbolValues = { ...currentValues }
     Object.entries(parentValues).forEach(([key, value]) => {
       if (value !== null && app6SymbolValues[key] === null) {
         app6SymbolValues[key] = value
       }
     })
+    return app6SymbolValues
+  }
+
+  const getApp6Symbol = (tempValues, size, maxHeight) => {
+    const app6SymbolValues = mergeWithParentValues(tempValues)
     return (
       <App6Symbol values={app6SymbolValues} size={size} maxHeight={maxHeight} />
     )
@@ -111,7 +116,10 @@ const EditApp6SymbolModal = ({
         30: "Towed Array",
         35: "Towed Array"
       }
-      return amplifierLabels[values.app6symbolSet] || null
+      return (
+        amplifierLabels[values.app6symbolSet || parentValues.app6symbolSet] ||
+        null
+      )
     }
 
     return Settings.fields.organization[fieldName].label || null
@@ -133,7 +141,8 @@ const EditApp6SymbolModal = ({
   }
 
   const getFieldWidget = (fieldName, setFieldValue, currentValues) => {
-    const choices = getChoices(fieldName, currentValues)
+    const currentMergedValues = mergeWithParentValues(currentValues)
+    const choices = getChoices(fieldName, currentMergedValues)
     if (Object.entries(choices).length === 0) {
       return null
     }
@@ -144,13 +153,13 @@ const EditApp6SymbolModal = ({
     const dropdownOptions = sortedChoicesKeys.map(key => ({
       key,
       label: choices[key],
-      values: calculateUpdateValues(currentValues, fieldName, key)
+      values: calculateUpdateValues(currentMergedValues, fieldName, key)
     }))
     const parentValue = parentValues[fieldName]
     dropdownOptions.unshift({
       key: null,
       label: parentValue ? `${choices[parentValue]} (inherited)` : "",
-      values: calculateUpdateValues(currentValues, fieldName, null)
+      values: calculateUpdateValues(currentMergedValues, fieldName, null)
     })
 
     const selectedOption = currentValues[fieldName] || null
