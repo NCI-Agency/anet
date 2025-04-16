@@ -97,15 +97,13 @@ const HierarchicalOverlayTable = ({
         newSet.delete(task.uuid)
         return newSet
       })
-    } else {
-      if (!childrenMap.has(task.uuid)) {
-        fetchChildren(task).then(children => {
-          setChildrenMap(prev => new Map(prev).set(task.uuid, children))
-          setExpandedItems(prev => new Set([...prev, task.uuid]))
-        })
-      } else {
+    } else if (!childrenMap.has(task.uuid)) {
+      fetchChildren(task).then(children => {
+        setChildrenMap(prev => new Map(prev).set(task.uuid, children))
         setExpandedItems(prev => new Set([...prev, task.uuid]))
-      }
+      })
+    } else {
+      setExpandedItems(prev => new Set([...prev, task.uuid]))
     }
   }
 
@@ -330,30 +328,7 @@ const TaskFilter = ({
   }
 }
 
-export const TaskMultiFilter = ({ ...props }) => <TaskFilter {...props} />
-
 export const deserialize = ({ queryKey }, query, key) => {
-  if (query[queryKey]) {
-    return API.query(GQL_GET_TASK, {
-      uuid: query[queryKey]
-    }).then(data => {
-      if (data.task) {
-        return {
-          key,
-          value: {
-            value: data.task,
-            toQuery: { ...query }
-          }
-        }
-      } else {
-        return null
-      }
-    })
-  }
-  return null
-}
-
-export const deserializeMulti = ({ queryKey }, query, key) => {
   if (query[queryKey]) {
     return API.query(GQL_GET_TASKS, {
       uuids: query[queryKey]
