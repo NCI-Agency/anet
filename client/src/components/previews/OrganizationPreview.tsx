@@ -148,8 +148,6 @@ const OrganizationPreview = ({ className, uuid }: OrganizationPreviewProps) => {
   const organization = new Organization(
     data.organization ? data.organization : {}
   )
-  const { parentContext, parentStandardIdentity, parentSymbolSet } =
-    Organization.getApp6ParentFields(organization, organization)
 
   return (
     <div className={`${className} preview-content-scroll`}>
