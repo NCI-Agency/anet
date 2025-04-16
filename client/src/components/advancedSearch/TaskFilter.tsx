@@ -11,7 +11,6 @@ import { Task } from "models"
 import pluralize from "pluralize"
 import React, { useState } from "react"
 import TASKS_ICON from "resources/tasks.png"
-import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
 
 const taskFields = `
@@ -69,17 +68,18 @@ const HierarchicalOverlayTable = ({
             shortName
             longName
             ascendantTasks {
-              uuid
-              shortName
-              parentTask {
-                uuid
-              }
+              ${taskFields}
             }
             childrenTasks {
               uuid
             }
             descendantTasks {
               uuid
+            }
+            parentTask {
+              childrenTasks {
+                ${taskFields}
+              }
             }
           }
         }
@@ -111,19 +111,26 @@ const HierarchicalOverlayTable = ({
 
   const buildFlattenedList = (tasks, level = 0) => {
     return tasks.flatMap(task => {
+      const isTaskSelected = selectedItems?.some(
+        item => item.uuid === task.uuid
+      )
       const isDescendantTaskSelected = selectedItems?.some(item =>
         task.descendantTasks?.some(child => child.uuid === item.uuid)
       )
-      const isAscendantTaskSelected = selectedItems?.some(item =>
-        task.ascendantTasks?.some(child => child.uuid === item.uuid)
-      )
+      const isAscendantTaskSelected = selectedItems
+        ?.filter(item => item.uuid !== task.uuid)
+        ?.some(item =>
+          task.ascendantTasks?.some(child => child.uuid === item.uuid)
+        )
       const isCollapsed = !expandedItems.has(task.uuid)
-      const isSelected = isAscendantTaskSelected
-        ? true
-        : isDescendantTaskSelected && isCollapsed
-          ? null
-          : false
-      const taskWithLevel = { ...task, level, isSelected }
+      const isSelected =
+        isTaskSelected || isAscendantTaskSelected
+          ? true
+          : isDescendantTaskSelected && isCollapsed
+            ? null
+            : false
+      const disabled = isAscendantTaskSelected
+      const taskWithLevel = { ...task, level, isSelected, disabled }
       const children = expandedItems.has(task.uuid)
         ? childrenMap.get(task.uuid) || []
         : []
@@ -169,7 +176,7 @@ const HierarchicalOverlayTable = ({
               e.stopPropagation()
               handleExpand(task)
             }}
-            style={{ cursor: "pointer" }}
+            style={{ cursor: "pointer", pointerEvents: "all" }}
           >
             <Icon
               icon={
