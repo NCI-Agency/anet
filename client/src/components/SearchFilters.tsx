@@ -30,9 +30,8 @@ import ReportStateFilter, {
 import SelectFilter, {
   deserialize as deserializeSelectFilter
 } from "components/advancedSearch/SelectFilter"
-import {
-  deserializeMulti as deserializeTaskMultiFilter,
-  TaskMultiFilter
+import TaskFilter, {
+  deserialize as deserializeTaskFilter
 } from "components/advancedSearch/TaskFilter"
 import {
   CountryOverlayRow,
@@ -377,8 +376,8 @@ export const searchFilters = function(includeAdminFilters) {
       }
     },
     [`Within ${Settings.fields.task.shortLabel}`]: {
-      component: TaskMultiFilter,
-      deserializer: deserializeTaskMultiFilter,
+      component: TaskFilter,
+      deserializer: deserializeTaskFilter,
       props: {
         queryKey: "taskUuid"
       }
@@ -640,8 +639,8 @@ export const searchFilters = function(includeAdminFilters) {
         }
       },
       [`Within ${Settings.fields.task.shortLabel}`]: {
-        component: TaskMultiFilter,
-        deserializer: deserializeTaskMultiFilter,
+        component: TaskFilter,
+        deserializer: deserializeTaskFilter,
         props: {
           queryKey: "parentTaskUuid",
           queryRecurseStrategyKey: "parentTaskRecurseStrategy",
@@ -771,8 +770,8 @@ export const searchFilters = function(includeAdminFilters) {
         }
       },
       [`Within ${Settings.fields.task.shortLabel}`]: {
-        component: TaskMultiFilter,
-        deserializer: deserializeTaskMultiFilter,
+        component: TaskFilter,
+        deserializer: deserializeTaskFilter,
         props: {
           queryKey: "taskUuid"
         }
