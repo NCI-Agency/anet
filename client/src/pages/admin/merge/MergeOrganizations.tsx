@@ -5,6 +5,10 @@ import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
 import { OrganizationSimpleOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
+import {
+  getLabel as getApp6FieldsLabel,
+  getFieldsList as getApp6FieldsList
+} from "components/App6Symbol"
 import ApprovalSteps from "components/approvals/ApprovalSteps"
 import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import { customFieldsJSONString } from "components/CustomFields"
@@ -266,75 +270,18 @@ const MergeOrganizations = ({ pageDispatchers }: MergeOrganizationsProps) => {
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
-              <DictionaryField
-                wrappedComponent={MergeField}
-                dictProps={Settings.fields.organization.app6context}
-                value={
-                  Settings.fields.organization.app6context.choices[
-                    mergedOrganization.app6context
-                  ]
-                }
-                align={ALIGN_OPTIONS.CENTER}
-                fieldName="app6context"
-                mergeState={mergeState}
-                dispatchMergeActions={dispatchMergeActions}
-              />
-
-              <DictionaryField
-                wrappedComponent={MergeField}
-                dictProps={Settings.fields.organization.app6standardIdentity}
-                value={
-                  Settings.fields.organization.app6standardIdentity.choices[
-                    [mergedOrganization.app6standardIdentity]
-                  ]
-                }
-                align={ALIGN_OPTIONS.CENTER}
-                fieldName="app6standardIdentity"
-                mergeState={mergeState}
-                dispatchMergeActions={dispatchMergeActions}
-              />
-
-              <DictionaryField
-                wrappedComponent={MergeField}
-                dictProps={Settings.fields.organization.app6symbolSet}
-                value={
-                  Settings.fields.organization.app6symbolSet.choices[
-                    mergedOrganization.app6symbolSet
-                  ]
-                }
-                align={ALIGN_OPTIONS.CENTER}
-                fieldName="app6symbolSet"
-                mergeState={mergeState}
-                dispatchMergeActions={dispatchMergeActions}
-              />
-
-              <DictionaryField
-                wrappedComponent={MergeField}
-                dictProps={Settings.fields.organization.app6hq}
-                value={
-                  Settings.fields.organization.app6hq.choices[
-                    mergedOrganization.app6hq
-                  ]
-                }
-                align={ALIGN_OPTIONS.CENTER}
-                fieldName="app6hq"
-                mergeState={mergeState}
-                dispatchMergeActions={dispatchMergeActions}
-              />
-
-              <DictionaryField
-                wrappedComponent={MergeField}
-                dictProps={Settings.fields.organization.app6amplifier}
-                value={
-                  Settings.fields.organization.app6amplifier.choices[
-                    mergedOrganization.app6amplifier
-                  ]
-                }
-                align={ALIGN_OPTIONS.CENTER}
-                fieldName="app6amplifier"
-                mergeState={mergeState}
-                dispatchMergeActions={dispatchMergeActions}
-              />
+              {getApp6FieldsList().map(fieldName => (
+                <DictionaryField
+                  key={fieldName}
+                  wrappedComponent={MergeField}
+                  dictProps={Settings.fields.organization[fieldName]}
+                  value={getApp6FieldsLabel(mergedOrganization, fieldName)}
+                  align={ALIGN_OPTIONS.CENTER}
+                  fieldName={fieldName}
+                  mergeState={mergeState}
+                  dispatchMergeActions={dispatchMergeActions}
+                />
+              ))}
               <DictionaryField
                 wrappedComponent={MergeField}
                 dictProps={Settings.fields.organization.administratingPositions}
@@ -697,114 +644,24 @@ const OrganizationColumn = ({
             autoMerge
             dispatchMergeActions={dispatchMergeActions}
           />
-          <DictionaryField
-            wrappedComponent={MergeField}
-            dictProps={Settings.fields.organization.app6context}
-            fieldName="app6context"
-            value={
-              Settings.fields.organization.app6context.choices[
-                organization.app6context
-              ]
-            }
-            align={align}
-            action={() => {
-              dispatchMergeActions(
-                setAMergedField("app6context", organization.app6context, align)
-              )
-            }}
-            mergeState={mergeState}
-            autoMerge
-            dispatchMergeActions={dispatchMergeActions}
-          />
-          <DictionaryField
-            wrappedComponent={MergeField}
-            dictProps={Settings.fields.organization.app6standardIdentity}
-            fieldName="app6standardIdentity"
-            value={
-              Settings.fields.organization.app6standardIdentity.choices[
-                [organization.app6standardIdentity]
-              ]
-            }
-            align={align}
-            action={() => {
-              dispatchMergeActions(
-                setAMergedField(
-                  "app6standardIdentity",
-                  organization.app6standardIdentity,
-                  align
+          {getApp6FieldsList().map(fieldName => (
+            <DictionaryField
+              key={fieldName}
+              wrappedComponent={MergeField}
+              dictProps={Settings.fields.organization[fieldName]}
+              fieldName={fieldName}
+              value={getApp6FieldsLabel(organization, fieldName)}
+              align={align}
+              action={() => {
+                dispatchMergeActions(
+                  setAMergedField(fieldName, organization[fieldName], align)
                 )
-              )
-            }}
-            mergeState={mergeState}
-            autoMerge
-            dispatchMergeActions={dispatchMergeActions}
-          />
-
-          <DictionaryField
-            wrappedComponent={MergeField}
-            dictProps={Settings.fields.organization.app6symbolSet}
-            fieldName="app6symbolSet"
-            value={
-              Settings.fields.organization.app6symbolSet.choices[
-                organization.app6symbolSet
-              ]
-            }
-            align={align}
-            action={() => {
-              dispatchMergeActions(
-                setAMergedField(
-                  "app6symbolSet",
-                  organization.app6symbolSet,
-                  align
-                )
-              )
-            }}
-            mergeState={mergeState}
-            autoMerge
-            dispatchMergeActions={dispatchMergeActions}
-          />
-
-          <DictionaryField
-            wrappedComponent={MergeField}
-            dictProps={Settings.fields.organization.app6hq}
-            fieldName="app6hq"
-            value={
-              Settings.fields.organization.app6hq.choices[organization.app6hq]
-            }
-            align={align}
-            action={() => {
-              dispatchMergeActions(
-                setAMergedField("app6hq", organization.app6hq, align)
-              )
-            }}
-            mergeState={mergeState}
-            autoMerge
-            dispatchMergeActions={dispatchMergeActions}
-          />
-
-          <DictionaryField
-            wrappedComponent={MergeField}
-            dictProps={Settings.fields.organization.app6amplifier}
-            fieldName="app6amplifier"
-            value={
-              Settings.fields.organization.app6amplifier.choices[
-                organization.app6amplifier
-              ]
-            }
-            align={align}
-            action={() => {
-              dispatchMergeActions(
-                setAMergedField(
-                  "app6amplifier",
-                  organization.app6amplifier,
-                  align
-                )
-              )
-            }}
-            mergeState={mergeState}
-            autoMerge
-            dispatchMergeActions={dispatchMergeActions}
-          />
+              }}
+              mergeState={mergeState}
+              autoMerge
+              dispatchMergeActions={dispatchMergeActions}
+            />
+          ))}
           <DictionaryField
             wrappedComponent={MergeField}
             dictProps={Settings.fields.organization.administratingPositions}
