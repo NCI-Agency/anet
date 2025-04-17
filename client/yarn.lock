@@ -22,9 +22,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@apollo/client@npm:3.13.6":
-  version: 3.13.6
-  resolution: "@apollo/client@npm:3.13.6"
+"@apollo/client@npm:3.13.8":
+  version: 3.13.8
+  resolution: "@apollo/client@npm:3.13.8"
   dependencies:
     "@graphql-typed-document-node/core": "npm:^3.1.1"
     "@wry/caches": "npm:^1.0.0"
@@ -54,7 +54,7 @@ __metadata:
       optional: true
     subscriptions-transport-ws:
       optional: true
-  checksum: 10c0/ffa13b9205c2243a7f65beb52f39dc235567da344652a2bf6e477db3d88f568dbe682151b53638cac7ac762b6a2a6134cd1df19829b05b52961d8085a2548f1e
+  checksum: 10c0/0e5032c1ae1dbef72a01f87af06b84bf505d60e71eba7cb9f20f8284778d8ead65fc1b7eacc570eccb8d045577d7194e38401fbfbdf56c197e159ca91ef11755
   languageName: node
   linkType: hard
 
@@ -6174,7 +6174,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "anet@workspace:."
   dependencies:
-    "@apollo/client": "npm:3.13.6"
+    "@apollo/client": "npm:3.13.8"
     "@babel/core": "npm:7.26.10"
     "@babel/eslint-parser": "npm:7.27.0"
     "@babel/plugin-proposal-decorators": "npm:7.25.9"
@@ -6286,7 +6286,7 @@ __metadata:
     json-loader: "npm:0.5.7"
     jsonpath-plus: "npm:10.3.0"
     keycloak-connect: "npm:26.1.1"
-    keycloak-js: "npm:26.1.4"
+    keycloak-js: "npm:26.1.5"
     leaflet: "npm:1.9.4"
     leaflet-defaulticon-compatibility: "npm:0.1.2"
     leaflet-geosearch: "npm:4.2.0"
@@ -13873,10 +13873,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"keycloak-js@npm:26.1.4":
-  version: 26.1.4
-  resolution: "keycloak-js@npm:26.1.4"
-  checksum: 10c0/a2e52c7bfdd1f0f1cd69d083c62f7aa1c087f36841a4c6cfa76f5571dc162286978a511674f8fd85dde3625a4215cb6a4479c2fdee21e7ab0a1da0b05074a79f
+"keycloak-js@npm:26.1.5":
+  version: 26.1.5
+  resolution: "keycloak-js@npm:26.1.5"
+  checksum: 10c0/d0050d4de981b2dd0ec33fc906ea30638bf06c76f5087979acff992e443b86d2bacd427f1bc0cbe4c8fc40c3d7756d148caa6af14d2c1a88fb0993cae2762f5e
   languageName: node
   linkType: hard
 
