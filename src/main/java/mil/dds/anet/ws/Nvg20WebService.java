@@ -243,13 +243,19 @@ public class Nvg20WebService implements NVGPortType2012 {
     if (nvgConfig.isIncludeDocumentConfidentialityLabel()) {
       final ExtensionType extensionType = NVG_OF.createExtensionType();
       extensionType.getAny().add(getBindingInformation(defaultConfidentiality));
-      nvgType.setExtension(extensionType);
+      if (nvgConfig.isAddDocumentConfidentialityLabelAsMetadata()) {
+        nvgType.setMetadata(extensionType);
+      } else {
+        nvgType.setExtension(extensionType);
+      }
     }
 
     final List<Report> reports = getReportsByPeriod(start, end);
     contentTypeList.addAll(reports.stream()
         .map(r -> reportToNvgPoint(nvgConfig.getApp6Version(),
-            nvgConfig.isIncludeElementConfidentialityLabels(), defaultConfidentiality, now, r))
+            nvgConfig.isIncludeElementConfidentialityLabels(),
+            nvgConfig.isAddElementConfidentialityLabelsAsMetadata(), defaultConfidentiality, now,
+            r))
         .toList());
 
     return nvgType;
@@ -302,8 +308,9 @@ public class Nvg20WebService implements NVGPortType2012 {
   }
 
   private PointType reportToNvgPoint(String app6Version,
-      boolean includeElementConfidentialityLabels, ConfidentialityRecord defaultConfidentiality,
-      Instant reportingTime, Report report) {
+      boolean includeElementConfidentialityLabels,
+      boolean addElementConfidentialityLabelsAsMetadata,
+      ConfidentialityRecord defaultConfidentiality, Instant reportingTime, Report report) {
     final PointType nvgPoint = NVG_OF.createPointType();
     nvgPoint.setLabel(Utils.ellipsizeOnWords(report.getIntent(),
         Utils.orIfNull((Integer) dict.getDictionaryEntry("fields.report.intent.maxLength"), 40)));
@@ -315,7 +322,7 @@ public class Nvg20WebService implements NVGPortType2012 {
     setExtendedData(report, nvgPoint);
 
     if (includeElementConfidentialityLabels) {
-      setConfidentialityInformation(
+      setConfidentialityInformation(addElementConfidentialityLabelsAsMetadata,
           ConfidentialityRecord.create(dict, defaultConfidentiality, report), nvgPoint);
     }
 
@@ -387,12 +394,16 @@ public class Nvg20WebService implements NVGPortType2012 {
     simpleDataSectionType.getSimpleData().add(durationType);
   }
 
-  private void setConfidentialityInformation(ConfidentialityRecord confidentiality,
-      PointType nvgPoint) {
+  private void setConfidentialityInformation(boolean addAsMetadata,
+      ConfidentialityRecord confidentiality, PointType nvgPoint) {
     if (!Utils.isEmptyOrNull(confidentiality.policy())) {
       final ExtensionType extensionType = NVG_OF.createExtensionType();
       extensionType.getAny().add(getBindingInformation(confidentiality));
-      nvgPoint.setExtension(extensionType);
+      if (addAsMetadata) {
+        nvgPoint.setMetadata(extensionType);
+      } else {
+        nvgPoint.setExtension(extensionType);
+      }
     }
   }
 
@@ -503,9 +514,15 @@ public class Nvg20WebService implements NVGPortType2012 {
     private static final String INCLUDE_DOCUMENT_CONFIDENTIALITY_LABEL =
         "includeDocumentConfidentialityLabel";
     private static final boolean DEFAULT_INCLUDE_DOCUMENT_CONFIDENTIALITY_LABEL = false;
+    private static final String ADD_DOCUMENT_CONFIDENTIALITY_LABEL_AS_METADATA =
+        "addDocumentConfidentialityLabelAsMetadata";
+    private static final boolean DEFAULT_ADD_DOCUMENT_CONFIDENTIALITY_LABEL_AS_METADATA = true;
     private static final String INCLUDE_ELEMENT_CONFIDENTIALITY_LABELS =
         "includeElementConfidentialityLabels";
     private static final boolean DEFAULT_INCLUDE_ELEMENT_CONFIDENTIALITY_LABELS = false;
+    private static final String ADD_ELEMENT_CONFIDENTIALITY_LABELS_AS_METADATA =
+        "addElementConfidentialityLabelsAsMetadata";
+    private static final boolean DEFAULT_ADD_ELEMENT_CONFIDENTIALITY_LABELS_AS_METADATA = true;
 
     private String accessToken = null;
     private String app6Version = DEFAULT_APP6_VERSION;
@@ -513,8 +530,12 @@ public class Nvg20WebService implements NVGPortType2012 {
     private int futureDays = DEFAULT_FUTURE_PERIOD_IN_DAYS;
     private boolean includeDocumentConfidentialityLabel =
         DEFAULT_INCLUDE_DOCUMENT_CONFIDENTIALITY_LABEL;
+    private boolean addDocumentConfidentialityLabelAsMetadata =
+        DEFAULT_ADD_DOCUMENT_CONFIDENTIALITY_LABEL_AS_METADATA;
     private boolean includeElementConfidentialityLabels =
         DEFAULT_INCLUDE_ELEMENT_CONFIDENTIALITY_LABELS;
+    private boolean addElementConfidentialityLabelsAsMetadata =
+        DEFAULT_ADD_ELEMENT_CONFIDENTIALITY_LABELS_AS_METADATA;
 
     public static NvgCapabilitiesType getCapabilities() {
       final NvgCapabilitiesType nvgCapabilitiesType = NVG_OF.createNvgCapabilitiesType();
@@ -526,7 +547,9 @@ public class Nvg20WebService implements NVGPortType2012 {
       capabilityItemTypeList.add(makePastPeriodInDays());
       capabilityItemTypeList.add(makeFuturePeriodInDays());
       capabilityItemTypeList.add(makeIncludeDocumentConfidentialityLabel());
+      capabilityItemTypeList.add(makeAddDocumentConfidentialityLabelAsMetadata());
       capabilityItemTypeList.add(makeIncludeElementConfidentialityLabels());
+      capabilityItemTypeList.add(makeAddElementConfidentialityLabelsAsMetadata());
       return nvgCapabilitiesType;
     }
 
@@ -545,8 +568,16 @@ public class Nvg20WebService implements NVGPortType2012 {
           } else if (INCLUDE_DOCUMENT_CONFIDENTIALITY_LABEL.equals(inputResponse.getRefid())) {
             nvgConfig.setIncludeDocumentConfidentialityLabel(
                 Boolean.parseBoolean(inputResponse.getValue()));
+          } else if (ADD_DOCUMENT_CONFIDENTIALITY_LABEL_AS_METADATA
+              .equals(inputResponse.getRefid())) {
+            nvgConfig.setAddDocumentConfidentialityLabelAsMetadata(
+                Boolean.parseBoolean(inputResponse.getValue()));
           } else if (INCLUDE_ELEMENT_CONFIDENTIALITY_LABELS.equals(inputResponse.getRefid())) {
             nvgConfig.setIncludeElementConfidentialityLabels(
+                Boolean.parseBoolean(inputResponse.getValue()));
+          } else if (ADD_ELEMENT_CONFIDENTIALITY_LABELS_AS_METADATA
+              .equals(inputResponse.getRefid())) {
+            nvgConfig.setAddElementConfidentialityLabelsAsMetadata(
                 Boolean.parseBoolean(inputResponse.getValue()));
           } else {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
@@ -635,6 +666,20 @@ public class Nvg20WebService implements NVGPortType2012 {
       return inputType;
     }
 
+    private static InputType makeAddDocumentConfidentialityLabelAsMetadata() {
+      final InputType inputType = NVG_OF.createInputType();
+      inputType.setId(ADD_DOCUMENT_CONFIDENTIALITY_LABEL_AS_METADATA);
+      inputType.setRequired(false);
+      inputType.setType(InputTypeType.BOOLEAN);
+      inputType.setName("Where to add document confidentiality label");
+      inputType.setDefault(String.valueOf(DEFAULT_ADD_DOCUMENT_CONFIDENTIALITY_LABEL_AS_METADATA));
+      final HelpType helpType = NVG_OF.createHelpType();
+      helpType.setText(
+          "When included, add the document confidentiality label as <nvg:metadata> (default) or <nvg:extension>");
+      inputType.setHelp(helpType);
+      return inputType;
+    }
+
     private static InputType makeIncludeElementConfidentialityLabels() {
       final InputType inputType = NVG_OF.createInputType();
       inputType.setId(INCLUDE_ELEMENT_CONFIDENTIALITY_LABELS);
@@ -644,6 +689,20 @@ public class Nvg20WebService implements NVGPortType2012 {
       inputType.setDefault(String.valueOf(DEFAULT_INCLUDE_ELEMENT_CONFIDENTIALITY_LABELS));
       final HelpType helpType = NVG_OF.createHelpType();
       helpType.setText("Whether each point will have a confidentiality label or not");
+      inputType.setHelp(helpType);
+      return inputType;
+    }
+
+    private static InputType makeAddElementConfidentialityLabelsAsMetadata() {
+      final InputType inputType = NVG_OF.createInputType();
+      inputType.setId(ADD_ELEMENT_CONFIDENTIALITY_LABELS_AS_METADATA);
+      inputType.setRequired(false);
+      inputType.setType(InputTypeType.BOOLEAN);
+      inputType.setName("Where to add point confidentiality labels");
+      inputType.setDefault(String.valueOf(DEFAULT_ADD_ELEMENT_CONFIDENTIALITY_LABELS_AS_METADATA));
+      final HelpType helpType = NVG_OF.createHelpType();
+      helpType.setText(
+          "When included, add each point's confidentiality label as <nvg:metadata> (default) or <nvg:extension>");
       inputType.setHelp(helpType);
       return inputType;
     }
@@ -689,6 +748,15 @@ public class Nvg20WebService implements NVGPortType2012 {
       this.includeDocumentConfidentialityLabel = includeDocumentConfidentialityLabel;
     }
 
+    public boolean isAddDocumentConfidentialityLabelAsMetadata() {
+      return addDocumentConfidentialityLabelAsMetadata;
+    }
+
+    public void setAddDocumentConfidentialityLabelAsMetadata(
+        boolean addDocumentConfidentialityLabelAsMetadata) {
+      this.addDocumentConfidentialityLabelAsMetadata = addDocumentConfidentialityLabelAsMetadata;
+    }
+
     public boolean isIncludeElementConfidentialityLabels() {
       return includeElementConfidentialityLabels;
     }
@@ -696,6 +764,15 @@ public class Nvg20WebService implements NVGPortType2012 {
     public void setIncludeElementConfidentialityLabels(
         boolean includeElementConfidentialityLabels) {
       this.includeElementConfidentialityLabels = includeElementConfidentialityLabels;
+    }
+
+    public boolean isAddElementConfidentialityLabelsAsMetadata() {
+      return addElementConfidentialityLabelsAsMetadata;
+    }
+
+    public void setAddElementConfidentialityLabelsAsMetadata(
+        boolean addElementConfidentialityLabelsAsMetadata) {
+      this.addElementConfidentialityLabelsAsMetadata = addElementConfidentialityLabelsAsMetadata;
     }
   }
 }
