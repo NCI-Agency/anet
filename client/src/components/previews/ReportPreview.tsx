@@ -10,6 +10,7 @@ import RichTextEditor from "components/RichTextEditor"
 import { Person, Report, Task } from "models"
 import moment from "moment"
 import ReportPeople from "pages/reports/ReportPeople"
+import ListItems from "components/ListItems"
 import pluralize from "pluralize"
 import React from "react"
 import Settings from "settings"
@@ -231,13 +232,13 @@ const ReportPreview = ({ className, uuid }: ReportPreviewProps) => {
               <DictionaryField
                 wrappedComponent={PreviewField}
                 dictProps={Settings.fields.report.keyOutcomes}
-                value={report.keyOutcomes}
+                value={<ListItems value={report.keyOutcomes} />}
                 style={{ marginBottom: 0 }}
               />
               <DictionaryField
                 wrappedComponent={PreviewField}
                 dictProps={Settings.fields.report.nextSteps}
-                value={report.nextSteps}
+                value={<ListItems value={report.nextSteps} />}
                 style={{ marginBottom: 0 }}
               />
             </div>
