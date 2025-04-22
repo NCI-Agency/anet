@@ -17,7 +17,9 @@ const testOrgs = {
     app6hqInput: "3",
     app6hq: "Feint / Dummy Headquarters",
     app6amplifierInput: "12",
-    app6amplifier: "Squad"
+    app6amplifier: "Squad",
+    app6entityInput: "12",
+    app6entity: "Movement and Manoeuvre"
   },
   secondLevel: {
     shortName: "TO 1.1",
@@ -75,21 +77,26 @@ describe("When creating an organization", () => {
       testOrg.profile
     )
     await ShowOrganization.hoverOverApp6Symbol()
-    expect(await (await ShowOrganization.getApp6context()).getText()).to.equal(
-      testOrg.app6context
-    )
     expect(
-      await (await ShowOrganization.getApp6standardIdentity()).getText()
+      await (await ShowOrganization.getApp6Value("app6context")).getText()
+    ).to.equal(testOrg.app6context)
+    expect(
+      await (
+        await ShowOrganization.getApp6Value("app6standardIdentity")
+      ).getText()
     ).to.equal(testOrg.app6standardIdentity)
     expect(
-      await (await ShowOrganization.getApp6symbolSet()).getText()
+      await (await ShowOrganization.getApp6Value("app6symbolSet")).getText()
     ).to.equal(testOrg.app6symbolSet)
-    expect(await (await ShowOrganization.getApp6hq()).getText()).to.equal(
-      testOrg.app6hq
-    )
     expect(
-      await (await ShowOrganization.getApp6amplifier()).getText()
+      await (await ShowOrganization.getApp6Value("app6hq")).getText()
+    ).to.equal(testOrg.app6hq)
+    expect(
+      await (await ShowOrganization.getApp6Value("app6amplifier")).getText()
     ).to.equal(testOrg.app6amplifier)
+    expect(
+      await (await ShowOrganization.getApp6Value("app6entity")).getText()
+    ).to.equal(testOrg.app6entity)
   })
   it("Should be able to create a sub-organization for the newly created top-level organization", async() => {
     await (
@@ -137,20 +144,22 @@ describe("When creating an organization", () => {
     )
     // This one should be inherited from the top level
     await ShowOrganization.hoverOverApp6Symbol()
-    expect(await (await ShowOrganization.getApp6context()).getText()).to.equal(
-      `${testOrgs.topLevel.app6context} (inherited)`
-    )
     expect(
-      await (await ShowOrganization.getApp6standardIdentity()).getText()
+      await (await ShowOrganization.getApp6Value("app6context")).getText()
+    ).to.equal(`${testOrgs.topLevel.app6context} (inherited)`)
+    expect(
+      await (
+        await ShowOrganization.getApp6Value("app6standardIdentity")
+      ).getText()
     ).to.equal(testOrg.app6standardIdentity)
     expect(
-      await (await ShowOrganization.getApp6symbolSet()).getText()
+      await (await ShowOrganization.getApp6Value("app6symbolSet")).getText()
     ).to.equal(testOrg.app6symbolSet)
-    expect(await (await ShowOrganization.getApp6hq()).getText()).to.equal(
-      testOrg.app6hq
-    )
     expect(
-      await (await ShowOrganization.getApp6amplifier()).getText()
+      await (await ShowOrganization.getApp6Value("app6hq")).getText()
+    ).to.equal(testOrg.app6hq)
+    expect(
+      await (await ShowOrganization.getApp6Value("app6amplifier")).getText()
     ).to.equal(testOrg.app6amplifier)
   })
   it("Should be able to create a sub-organization for the newly created second-level organization", async() => {
@@ -231,14 +240,16 @@ describe("When creating an organization", () => {
     )
     await ShowOrganization.hoverOverApp6Symbol()
     // This one should be inherited from the top level
-    expect(await (await ShowOrganization.getApp6context()).getText()).to.equal(
-      `${testOrgs.topLevel.app6context} (inherited)`
-    )
     expect(
-      await (await ShowOrganization.getApp6standardIdentity()).getText()
+      await (await ShowOrganization.getApp6Value("app6context")).getText()
+    ).to.equal(`${testOrgs.topLevel.app6context} (inherited)`)
+    expect(
+      await (
+        await ShowOrganization.getApp6Value("app6standardIdentity")
+      ).getText()
     ).to.equal(`${testOrgs.secondLevel.app6standardIdentity} (inherited)`)
     expect(
-      await (await ShowOrganization.getApp6symbolSet()).getText()
+      await (await ShowOrganization.getApp6Value("app6symbolSet")).getText()
     ).to.equal(`${testOrgs.secondLevel.app6symbolSet} (inherited)`)
   })
 })

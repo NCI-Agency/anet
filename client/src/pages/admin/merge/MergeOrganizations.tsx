@@ -661,7 +661,7 @@ const OrganizationColumn = ({
             }
             align={align}
             action={() => {
-              getApp6FieldsList().map(fieldName => {
+              getApp6FieldsList().forEach(fieldName => {
                 dispatchMergeActions(
                   setAMergedField(fieldName, organization[fieldName], align)
                 )
