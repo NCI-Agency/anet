@@ -136,21 +136,6 @@ public class Nvg20WebService implements NVGPortType2012 {
     }
   }
 
-  private static final String ACCESS_TOKEN_ID = "accessToken";
-  private static final int ACCESS_TOKEN_LENGTH = 32;
-  private static final String APP6_VERSION_ID = "app6Version";
-  private static final String DEFAULT_APP6_VERSION = App6Symbology.DEFAULT_APP6_VERSION;
-  private static final String PAST_PERIOD_IN_DAYS_ID = "pastDays";
-  private static final int DEFAULT_PAST_PERIOD_IN_DAYS = 7;
-  private static final String FUTURE_PERIOD_IN_DAYS_ID = "futureDays";
-  private static final int DEFAULT_FUTURE_PERIOD_IN_DAYS = 0;
-  private static final String INCLUDE_DOCUMENT_CONFIDENTIALITY_LABEL =
-      "includeDocumentConfidentialityLabel";
-  private static final boolean DEFAULT_INCLUDE_DOCUMENT_CONFIDENTIALITY_LABEL = false;
-  private static final String INCLUDE_ELEMENT_CONFIDENTIALITY_LABELS =
-      "includeElementConfidentialityLabels";
-  private static final boolean DEFAULT_INCLUDE_ELEMENT_CONFIDENTIALITY_LABELS = false;
-
   private static final String REPORT_QUERY = "query ($reportQuery: ReportSearchQueryInput) {" // -
       + " reportList(query: $reportQuery) {" // -
       + " totalCount list {" // -
@@ -183,16 +168,7 @@ public class Nvg20WebService implements NVGPortType2012 {
   @Override
   public GetCapabilitiesResponse getCapabilities(GetCapabilities parameters) {
     final GetCapabilitiesResponse response = NVG_OF.createGetCapabilitiesResponse();
-    final NvgCapabilitiesType nvgCapabilitiesType = NVG_OF.createNvgCapabilitiesType();
-    final List<CapabilityItemType> capabilityItemTypeList =
-        nvgCapabilitiesType.getInputOrSelectOrTable();
-    capabilityItemTypeList.add(makeAccessTokenType());
-    capabilityItemTypeList.add(makeApp6VersionType());
-    capabilityItemTypeList.add(makePastPeriodInDays());
-    capabilityItemTypeList.add(makeFuturePeriodInDays());
-    capabilityItemTypeList.add(makeIncludeDocumentConfidentialityLabel());
-    capabilityItemTypeList.add(makeIncludeElementConfidentialityLabels());
-    response.setNvgCapabilities(nvgCapabilitiesType);
+    response.setNvgCapabilities(NvgConfig.getCapabilities());
     return response;
   }
 
@@ -200,54 +176,31 @@ public class Nvg20WebService implements NVGPortType2012 {
   public GetNvgResponse getNvg(GetNvg parameters) {
     final NvgFilterType nvgFilter = parameters.getNvgFilter();
     if (nvgFilter != null) {
-      final List<Object> nvgQueryList =
-          nvgFilter.getInputResponseOrSelectResponseOrMatrixResponse();
-      String accessToken = null;
-      String app6Version = DEFAULT_APP6_VERSION;
-      int pastDays = DEFAULT_PAST_PERIOD_IN_DAYS;
-      int futureDays = DEFAULT_FUTURE_PERIOD_IN_DAYS;
-      boolean includeDocumentConfidentialityLabel = DEFAULT_INCLUDE_DOCUMENT_CONFIDENTIALITY_LABEL;
-      boolean includeElementConfidentialityLabels = DEFAULT_INCLUDE_ELEMENT_CONFIDENTIALITY_LABELS;
-      for (final Object object : nvgQueryList) {
-        if (object instanceof InputResponseType inputResponse) {
-          if (ACCESS_TOKEN_ID.equals(inputResponse.getRefid())) {
-            accessToken = inputResponse.getValue();
-          } else if (APP6_VERSION_ID.equals(inputResponse.getRefid())) {
-            app6Version = inputResponse.getValue();
-          } else if (PAST_PERIOD_IN_DAYS_ID.equals(inputResponse.getRefid())) {
-            pastDays = Integer.parseInt(inputResponse.getValue());
-          } else if (FUTURE_PERIOD_IN_DAYS_ID.equals(inputResponse.getRefid())) {
-            futureDays = Integer.parseInt(inputResponse.getValue());
-          } else if (INCLUDE_DOCUMENT_CONFIDENTIALITY_LABEL.equals(inputResponse.getRefid())) {
-            includeDocumentConfidentialityLabel = Boolean.parseBoolean(inputResponse.getValue());
-          } else if (INCLUDE_ELEMENT_CONFIDENTIALITY_LABELS.equals(inputResponse.getRefid())) {
-            includeElementConfidentialityLabels = Boolean.parseBoolean(inputResponse.getValue());
-          } else {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                "Unrecognized input_response: " + inputResponse.getRefid());
-          }
+      final NvgConfig nvgConfig =
+          NvgConfig.from(nvgFilter.getInputResponseOrSelectResponseOrMatrixResponse());
+      if (isValidAccessToken(nvgConfig.getAccessToken())) {
+        if (!App6Symbology.isValidApp6Version(nvgConfig.getApp6Version())) {
+          throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+              "Invalid APP-6 version");
         }
-      }
-      if (accessToken != null && accessToken.length() == ACCESS_TOKEN_LENGTH) {
-        final AccessToken at = accessTokenDao.getByTokenValue(accessToken);
-        if (at != null && at.isValid()) {
-          if (!App6Symbology.isValidApp6Version(app6Version)) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                "Invalid APP-6 version");
-          }
-          final GetNvgResponse response = NVG_OF.createGetNvgResponse();
-          response.setNvg(makeNvg(app6Version, pastDays, futureDays,
-              includeDocumentConfidentialityLabel, includeElementConfidentialityLabels));
-          return response;
-        }
+        final GetNvgResponse response = NVG_OF.createGetNvgResponse();
+        response.setNvg(makeNvg(nvgConfig));
+        return response;
       }
     }
     throw new ResponseStatusException(HttpStatus.FORBIDDEN,
         "Must provide a valid Web Service Access Token");
   }
 
-  private NvgType makeNvg(String app6Version, int pastDays, int futureDays,
-      boolean includeDocumentConfidentialityLabel, boolean includeElementConfidentialityLabels) {
+  private boolean isValidAccessToken(String accessToken) {
+    if (accessToken != null && accessToken.length() == NvgConfig.ACCESS_TOKEN_LENGTH) {
+      final AccessToken at = accessTokenDao.getByTokenValue(accessToken);
+      return at != null && at.isValid();
+    }
+    return false;
+  }
+
+  private NvgType makeNvg(NvgConfig nvgConfig) {
     final NvgType nvgType = NVG_OF.createNvgType();
     nvgType.setVersion(NVG_VERSION);
     final List<ContentType> contentTypeList = nvgType.getGOrCompositeOrText();
@@ -255,21 +208,23 @@ public class Nvg20WebService implements NVGPortType2012 {
     // Get the current instant
     final Instant now = Instant.now();
     // Calculate start of period
-    final Instant start = now.minus(pastDays, ChronoUnit.DAYS);
+    final Instant start = now.minus(nvgConfig.getPastDays(), ChronoUnit.DAYS);
     // Calculate end of period
-    final Instant end = now.plus(futureDays, ChronoUnit.DAYS);
+    final Instant end = now.plus(nvgConfig.getFutureDays(), ChronoUnit.DAYS);
 
     final ConfidentialityRecord defaultConfidentiality =
         ConfidentialityRecord.create(dict, (String) dict.getDictionaryEntry("siteClassification"));
-    if (includeDocumentConfidentialityLabel) {
+    if (nvgConfig.isIncludeDocumentConfidentialityLabel()) {
       final ExtensionType extensionType = NVG_OF.createExtensionType();
       extensionType.getAny().add(getBindingInformation(defaultConfidentiality));
       nvgType.setExtension(extensionType);
     }
 
     final List<Report> reports = getReportsByPeriod(start, end);
-    contentTypeList.addAll(reports.stream().map(r -> reportToNvgPoint(app6Version,
-        includeElementConfidentialityLabels, defaultConfidentiality, now, r)).toList());
+    contentTypeList.addAll(reports.stream()
+        .map(r -> reportToNvgPoint(nvgConfig.getApp6Version(),
+            nvgConfig.isIncludeElementConfidentialityLabels(), defaultConfidentiality, now, r))
+        .toList());
 
     return nvgType;
   }
@@ -399,95 +354,6 @@ public class Nvg20WebService implements NVGPortType2012 {
     return (text == null) ? "" : String.format(format, text);
   }
 
-  private InputType makeAccessTokenType() {
-    final InputType inputType = NVG_OF.createInputType();
-    inputType.setId(ACCESS_TOKEN_ID);
-    inputType.setRequired(true);
-    inputType.setType(InputTypeType.STRING);
-    inputType.setName("Web Service Access Token");
-    inputType.setLength(BigInteger.valueOf(ACCESS_TOKEN_LENGTH));
-    final HelpType helpType = NVG_OF.createHelpType();
-    helpType.setText(
-        "The web service access token required for authentication; the token can be provided by the ANET administrator");
-    inputType.setHelp(helpType);
-    return inputType;
-  }
-
-  private SelectType makeApp6VersionType() {
-    final SelectType selectType = NVG_OF.createSelectType();
-    selectType.setId(APP6_VERSION_ID);
-    selectType.setRequired(false);
-    selectType.setName("APP-6 version");
-    final SelectType.Values values = NVG_OF.createSelectTypeValues();
-    values.getValue().add(getSelectValueType(App6Symbology.SYMBOL_PREFIX_APP6B, "APP-6(B)", false));
-    values.getValue().add(getSelectValueType(App6Symbology.SYMBOL_PREFIX_APP6D, "APP-6(D)", true));
-    selectType.setValues(values);
-    final HelpType helpType = NVG_OF.createHelpType();
-    helpType.setText("The APP-6 version to use for the symbology");
-    selectType.setHelp(helpType);
-    return selectType;
-  }
-
-  private SelectValueType getSelectValueType(String id, String value, boolean selected) {
-    final SelectValueType selectValueType = NVG_OF.createSelectValueType();
-    selectValueType.setId(id);
-    selectValueType.setName(value);
-    selectValueType.setSelected(selected);
-    return selectValueType;
-  }
-
-  private InputType makePastPeriodInDays() {
-    final InputType inputType = NVG_OF.createInputType();
-    inputType.setId(PAST_PERIOD_IN_DAYS_ID);
-    inputType.setRequired(false);
-    inputType.setType(InputTypeType.INT);
-    inputType.setName("Past engagement period in days");
-    inputType.setDefault(String.valueOf(DEFAULT_PAST_PERIOD_IN_DAYS));
-    final HelpType helpType = NVG_OF.createHelpType();
-    helpType.setText("Past period over which you want to retrieve engagements");
-    inputType.setHelp(helpType);
-    return inputType;
-  }
-
-  private InputType makeFuturePeriodInDays() {
-    final InputType inputType = NVG_OF.createInputType();
-    inputType.setId(FUTURE_PERIOD_IN_DAYS_ID);
-    inputType.setRequired(false);
-    inputType.setType(InputTypeType.INT);
-    inputType.setName("Future engagement period in days");
-    inputType.setDefault(String.valueOf(DEFAULT_FUTURE_PERIOD_IN_DAYS));
-    final HelpType helpType = NVG_OF.createHelpType();
-    helpType.setText("Future period over which you want to retrieve engagements");
-    inputType.setHelp(helpType);
-    return inputType;
-  }
-
-  private InputType makeIncludeDocumentConfidentialityLabel() {
-    final InputType inputType = NVG_OF.createInputType();
-    inputType.setId(INCLUDE_DOCUMENT_CONFIDENTIALITY_LABEL);
-    inputType.setRequired(false);
-    inputType.setType(InputTypeType.BOOLEAN);
-    inputType.setName("Include document confidentiality label");
-    inputType.setDefault(String.valueOf(DEFAULT_INCLUDE_DOCUMENT_CONFIDENTIALITY_LABEL));
-    final HelpType helpType = NVG_OF.createHelpType();
-    helpType.setText("Whether the document will have a confidentiality label or not");
-    inputType.setHelp(helpType);
-    return inputType;
-  }
-
-  private InputType makeIncludeElementConfidentialityLabels() {
-    final InputType inputType = NVG_OF.createInputType();
-    inputType.setId(INCLUDE_ELEMENT_CONFIDENTIALITY_LABELS);
-    inputType.setRequired(false);
-    inputType.setType(InputTypeType.BOOLEAN);
-    inputType.setName("Include point confidentiality labels");
-    inputType.setDefault(String.valueOf(DEFAULT_INCLUDE_ELEMENT_CONFIDENTIALITY_LABELS));
-    final HelpType helpType = NVG_OF.createHelpType();
-    helpType.setText("Whether each point will have a confidentiality label or not");
-    inputType.setHelp(helpType);
-    return inputType;
-  }
-
   private List<Report> getReportsByPeriod(final Instant start, final Instant end) {
     final Map<String, Object> reportQuery = new HashMap<>(DEFAULT_REPORT_QUERY_VARIABLES);
     reportQuery.put("engagementDateStart", start.toEpochMilli());
@@ -504,4 +370,212 @@ public class Nvg20WebService implements NVGPortType2012 {
     return anetBeanList.getList();
   }
 
+  private static class NvgConfig {
+    private static final String NVG_CAPABILITIES_VERSION = "2.0.0";
+    private static final String ACCESS_TOKEN_ID = "accessToken";
+    private static final int ACCESS_TOKEN_LENGTH = 32;
+    private static final String APP6_VERSION_ID = "app6Version";
+    private static final String DEFAULT_APP6_VERSION = App6Symbology.DEFAULT_APP6_VERSION;
+    private static final String PAST_PERIOD_IN_DAYS_ID = "pastDays";
+    private static final int DEFAULT_PAST_PERIOD_IN_DAYS = 7;
+    private static final String FUTURE_PERIOD_IN_DAYS_ID = "futureDays";
+    private static final int DEFAULT_FUTURE_PERIOD_IN_DAYS = 0;
+    private static final String INCLUDE_DOCUMENT_CONFIDENTIALITY_LABEL =
+        "includeDocumentConfidentialityLabel";
+    private static final boolean DEFAULT_INCLUDE_DOCUMENT_CONFIDENTIALITY_LABEL = false;
+    private static final String INCLUDE_ELEMENT_CONFIDENTIALITY_LABELS =
+        "includeElementConfidentialityLabels";
+    private static final boolean DEFAULT_INCLUDE_ELEMENT_CONFIDENTIALITY_LABELS = false;
+
+    private String accessToken = null;
+    private String app6Version = DEFAULT_APP6_VERSION;
+    private int pastDays = DEFAULT_PAST_PERIOD_IN_DAYS;
+    private int futureDays = DEFAULT_FUTURE_PERIOD_IN_DAYS;
+    private boolean includeDocumentConfidentialityLabel =
+        DEFAULT_INCLUDE_DOCUMENT_CONFIDENTIALITY_LABEL;
+    private boolean includeElementConfidentialityLabels =
+        DEFAULT_INCLUDE_ELEMENT_CONFIDENTIALITY_LABELS;
+
+    public static NvgCapabilitiesType getCapabilities() {
+      final NvgCapabilitiesType nvgCapabilitiesType = NVG_OF.createNvgCapabilitiesType();
+      nvgCapabilitiesType.setVersion(NVG_CAPABILITIES_VERSION);
+      final List<CapabilityItemType> capabilityItemTypeList =
+          nvgCapabilitiesType.getInputOrSelectOrTable();
+      capabilityItemTypeList.add(makeAccessTokenType());
+      capabilityItemTypeList.add(makeApp6VersionType());
+      capabilityItemTypeList.add(makePastPeriodInDays());
+      capabilityItemTypeList.add(makeFuturePeriodInDays());
+      capabilityItemTypeList.add(makeIncludeDocumentConfidentialityLabel());
+      capabilityItemTypeList.add(makeIncludeElementConfidentialityLabels());
+      return nvgCapabilitiesType;
+    }
+
+    public static NvgConfig from(List<Object> nvgQueryList) throws ResponseStatusException {
+      final NvgConfig nvgConfig = new NvgConfig();
+      for (final Object object : nvgQueryList) {
+        if (object instanceof InputResponseType inputResponse) {
+          if (ACCESS_TOKEN_ID.equals(inputResponse.getRefid())) {
+            nvgConfig.setAccessToken(inputResponse.getValue());
+          } else if (APP6_VERSION_ID.equals(inputResponse.getRefid())) {
+            nvgConfig.setApp6Version(inputResponse.getValue());
+          } else if (PAST_PERIOD_IN_DAYS_ID.equals(inputResponse.getRefid())) {
+            nvgConfig.setPastDays(Integer.parseInt(inputResponse.getValue()));
+          } else if (FUTURE_PERIOD_IN_DAYS_ID.equals(inputResponse.getRefid())) {
+            nvgConfig.setFutureDays(Integer.parseInt(inputResponse.getValue()));
+          } else if (INCLUDE_DOCUMENT_CONFIDENTIALITY_LABEL.equals(inputResponse.getRefid())) {
+            nvgConfig.setIncludeDocumentConfidentialityLabel(
+                Boolean.parseBoolean(inputResponse.getValue()));
+          } else if (INCLUDE_ELEMENT_CONFIDENTIALITY_LABELS.equals(inputResponse.getRefid())) {
+            nvgConfig.setIncludeElementConfidentialityLabels(
+                Boolean.parseBoolean(inputResponse.getValue()));
+          } else {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                "Unrecognized input_response: " + inputResponse.getRefid());
+          }
+        }
+      }
+      return nvgConfig;
+    }
+
+    private static InputType makeAccessTokenType() {
+      final InputType inputType = NVG_OF.createInputType();
+      inputType.setId(ACCESS_TOKEN_ID);
+      inputType.setRequired(true);
+      inputType.setType(InputTypeType.STRING);
+      inputType.setName("Web Service Access Token");
+      inputType.setLength(BigInteger.valueOf(ACCESS_TOKEN_LENGTH));
+      final HelpType helpType = NVG_OF.createHelpType();
+      helpType.setText(
+          "The web service access token required for authentication; the token can be provided by the ANET administrator");
+      inputType.setHelp(helpType);
+      return inputType;
+    }
+
+    private static SelectType makeApp6VersionType() {
+      final SelectType selectType = NVG_OF.createSelectType();
+      selectType.setId(APP6_VERSION_ID);
+      selectType.setRequired(false);
+      selectType.setName("APP-6 version");
+      final SelectType.Values values = NVG_OF.createSelectTypeValues();
+      values.getValue().add(getSelectValueType(App6Symbology.SYMBOL_PREFIX_APP6B, "APP-6(B)",
+          DEFAULT_APP6_VERSION.equals(App6Symbology.SYMBOL_PREFIX_APP6B)));
+      values.getValue().add(getSelectValueType(App6Symbology.SYMBOL_PREFIX_APP6D, "APP-6(D)",
+          DEFAULT_APP6_VERSION.equals(App6Symbology.SYMBOL_PREFIX_APP6D)));
+      selectType.setValues(values);
+      final HelpType helpType = NVG_OF.createHelpType();
+      helpType.setText("The APP-6 version to use for the symbology");
+      selectType.setHelp(helpType);
+      return selectType;
+    }
+
+    private static SelectValueType getSelectValueType(String id, String value, boolean selected) {
+      final SelectValueType selectValueType = NVG_OF.createSelectValueType();
+      selectValueType.setId(id);
+      selectValueType.setName(value);
+      selectValueType.setSelected(selected);
+      return selectValueType;
+    }
+
+    private static InputType makePastPeriodInDays() {
+      final InputType inputType = NVG_OF.createInputType();
+      inputType.setId(PAST_PERIOD_IN_DAYS_ID);
+      inputType.setRequired(false);
+      inputType.setType(InputTypeType.INT);
+      inputType.setName("Past engagement period in days");
+      inputType.setDefault(String.valueOf(DEFAULT_PAST_PERIOD_IN_DAYS));
+      final HelpType helpType = NVG_OF.createHelpType();
+      helpType.setText("Past period over which you want to retrieve engagements");
+      inputType.setHelp(helpType);
+      return inputType;
+    }
+
+    private static InputType makeFuturePeriodInDays() {
+      final InputType inputType = NVG_OF.createInputType();
+      inputType.setId(FUTURE_PERIOD_IN_DAYS_ID);
+      inputType.setRequired(false);
+      inputType.setType(InputTypeType.INT);
+      inputType.setName("Future engagement period in days");
+      inputType.setDefault(String.valueOf(DEFAULT_FUTURE_PERIOD_IN_DAYS));
+      final HelpType helpType = NVG_OF.createHelpType();
+      helpType.setText("Future period over which you want to retrieve engagements");
+      inputType.setHelp(helpType);
+      return inputType;
+    }
+
+    private static InputType makeIncludeDocumentConfidentialityLabel() {
+      final InputType inputType = NVG_OF.createInputType();
+      inputType.setId(INCLUDE_DOCUMENT_CONFIDENTIALITY_LABEL);
+      inputType.setRequired(false);
+      inputType.setType(InputTypeType.BOOLEAN);
+      inputType.setName("Include document confidentiality label");
+      inputType.setDefault(String.valueOf(DEFAULT_INCLUDE_DOCUMENT_CONFIDENTIALITY_LABEL));
+      final HelpType helpType = NVG_OF.createHelpType();
+      helpType.setText("Whether the document will have a confidentiality label or not");
+      inputType.setHelp(helpType);
+      return inputType;
+    }
+
+    private static InputType makeIncludeElementConfidentialityLabels() {
+      final InputType inputType = NVG_OF.createInputType();
+      inputType.setId(INCLUDE_ELEMENT_CONFIDENTIALITY_LABELS);
+      inputType.setRequired(false);
+      inputType.setType(InputTypeType.BOOLEAN);
+      inputType.setName("Include point confidentiality labels");
+      inputType.setDefault(String.valueOf(DEFAULT_INCLUDE_ELEMENT_CONFIDENTIALITY_LABELS));
+      final HelpType helpType = NVG_OF.createHelpType();
+      helpType.setText("Whether each point will have a confidentiality label or not");
+      inputType.setHelp(helpType);
+      return inputType;
+    }
+
+    public String getAccessToken() {
+      return accessToken;
+    }
+
+    public void setAccessToken(String accessToken) {
+      this.accessToken = accessToken;
+    }
+
+    public String getApp6Version() {
+      return app6Version;
+    }
+
+    public void setApp6Version(String app6Version) {
+      this.app6Version = app6Version;
+    }
+
+    public int getPastDays() {
+      return pastDays;
+    }
+
+    public void setPastDays(int pastDays) {
+      this.pastDays = pastDays;
+    }
+
+    public int getFutureDays() {
+      return futureDays;
+    }
+
+    public void setFutureDays(int futureDays) {
+      this.futureDays = futureDays;
+    }
+
+    public boolean isIncludeDocumentConfidentialityLabel() {
+      return includeDocumentConfidentialityLabel;
+    }
+
+    public void setIncludeDocumentConfidentialityLabel(
+        boolean includeDocumentConfidentialityLabel) {
+      this.includeDocumentConfidentialityLabel = includeDocumentConfidentialityLabel;
+    }
+
+    public boolean isIncludeElementConfidentialityLabels() {
+      return includeElementConfidentialityLabels;
+    }
+
+    public void setIncludeElementConfidentialityLabels(
+        boolean includeElementConfidentialityLabels) {
+      this.includeElementConfidentialityLabels = includeElementConfidentialityLabels;
+    }
+  }
 }
