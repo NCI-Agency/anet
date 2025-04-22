@@ -27,7 +27,6 @@ import mil.dds.anet.beans.search.ReportSearchSortBy;
 import mil.dds.anet.config.AnetConfig;
 import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.database.AccessTokenDao;
-import mil.dds.anet.database.AdminDao;
 import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.resources.GraphQLResource;
 import mil.dds.anet.utils.DaoUtils;
@@ -172,15 +171,13 @@ public class Nvg20WebService implements NVGPortType2012 {
   private final AnetDictionary dict;
   private final GraphQLResource graphQLResource;
   private final AccessTokenDao accessTokenDao;
-  private final AdminDao adminDao;
 
   public Nvg20WebService(AnetConfig config, AnetDictionary dict, GraphQLResource graphQLResource,
-      AccessTokenDao accessTokenDao, AdminDao adminDao) {
+      AccessTokenDao accessTokenDao) {
     this.config = config;
     this.dict = dict;
     this.graphQLResource = graphQLResource;
     this.accessTokenDao = accessTokenDao;
-    this.adminDao = adminDao;
   }
 
   @Override
