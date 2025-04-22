@@ -15,6 +15,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
+import javax.xml.namespace.QName;
 import mil.dds.anet.beans.AccessToken;
 import mil.dds.anet.beans.ConfidentialityRecord;
 import mil.dds.anet.beans.Location;
@@ -33,6 +35,7 @@ import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 import nato.act.tide.wsdl.nvg20.CapabilityItemType;
 import nato.act.tide.wsdl.nvg20.ContentType;
+import nato.act.tide.wsdl.nvg20.ExtendedDataType;
 import nato.act.tide.wsdl.nvg20.ExtensionType;
 import nato.act.tide.wsdl.nvg20.GetCapabilities;
 import nato.act.tide.wsdl.nvg20.GetCapabilitiesResponse;
@@ -47,8 +50,12 @@ import nato.act.tide.wsdl.nvg20.NvgCapabilitiesType;
 import nato.act.tide.wsdl.nvg20.NvgFilterType;
 import nato.act.tide.wsdl.nvg20.NvgType;
 import nato.act.tide.wsdl.nvg20.PointType;
+import nato.act.tide.wsdl.nvg20.SchemaType;
 import nato.act.tide.wsdl.nvg20.SelectType;
 import nato.act.tide.wsdl.nvg20.SelectValueType;
+import nato.act.tide.wsdl.nvg20.SimpleDataSectionType;
+import nato.act.tide.wsdl.nvg20.SimpleDataType;
+import nato.act.tide.wsdl.nvg20.SimpleFieldType;
 import nato.stanag4774.confidentialitymetadatalabel10.CategoryType;
 import nato.stanag4774.confidentialitymetadatalabel10.ClassificationType;
 import nato.stanag4774.confidentialitymetadatalabel10.ConfidentialityInformationType;
@@ -74,7 +81,24 @@ public class Nvg20WebService implements NVGPortType2012 {
       new nato.stanag4774.confidentialitymetadatalabel10.ObjectFactory();
   private static final nato.stanag4778.bindinginformation10.ObjectFactory BI_OF =
       new nato.stanag4778.bindinginformation10.ObjectFactory();
+  private static final String XSD_STRING = "string";
+  private static final String XSD_DATETIME = "dateTime";
+  private static final String XSD_DURATION = "duration";
+  private static final String URI_NVG_SCHEMA = "https://tide.act.nato.int/schemas/2012/10/nvg";
+  private static final String URI_ANET_SCHEMAS = "urn:anet:schemas";
+  private static final String URI_ANET_SCHEMAS_REPORT = URI_ANET_SCHEMAS + ":report";
+  private static final String ANET_SCHEMA_REPORT_INTENT = "intent";
+  private static final String ANET_SCHEMA_REPORT_ENGAGEMENT_DATE = "engagementDate";
+  private static final String ANET_SCHEMA_REPORT_ENGAGEMENT_DURATION = "duration";
+  private static final String ANET_SCHEMA_REPORT_ENGAGEMENT_STATUS = "engagementStatus";
   private static final TimeZone TZ_UTC = TimeZone.getTimeZone(DaoUtils.getServerNativeZoneId());
+  private static final String ANET_SCHEMA_REPORT_PRIMARY_ADVISOR = "primaryAdvisor";
+  private static final String ANET_SCHEMA_REPORT_ADVISOR_ORGANIZATION = "advisorOrganization";
+  private static final String ANET_SCHEMA_REPORT_PRIMARY_INTERLOCUTOR = "primaryInterlocutor";
+  private static final String ANET_SCHEMA_REPORT_INTERLOCUTOR_ORGANIZATION =
+      "interlocutorOrganization";
+  private static final String ANET_SCHEMA_REPORT_KEY_OUTCOMES = "keyOutcomes";
+  private static final String ANET_SCHEMA_REPORT_NEXT_STEPS = "nextSteps";
 
   static final class App6Symbology {
     static final String SYMBOL_PREFIX_APP6B = "app6b";
@@ -139,7 +163,8 @@ public class Nvg20WebService implements NVGPortType2012 {
   private static final String REPORT_QUERY = "query ($reportQuery: ReportSearchQueryInput) {" // -
       + " reportList(query: $reportQuery) {" // -
       + " totalCount list {" // -
-      + " uuid intent engagementDate duration keyOutcomes nextSteps classification" // -
+      + " uuid state intent engagementDate duration" // -
+      + " keyOutcomes nextSteps classification updatedAt" // -
       + " primaryAdvisor { uuid name rank }" // -
       + " primaryInterlocutor { uuid name rank }" // -
       + " advisorOrg { uuid shortName longName identificationCode }" // -
@@ -203,6 +228,7 @@ public class Nvg20WebService implements NVGPortType2012 {
   private NvgType makeNvg(NvgConfig nvgConfig) {
     final NvgType nvgType = NVG_OF.createNvgType();
     nvgType.setVersion(NVG_VERSION);
+    makeReportSchema(nvgType);
     final List<ContentType> contentTypeList = nvgType.getGOrCompositeOrText();
 
     // Get the current instant
@@ -229,22 +255,136 @@ public class Nvg20WebService implements NVGPortType2012 {
     return nvgType;
   }
 
+  private void makeReportSchema(NvgType nvgType) {
+    final SchemaType schemaType = NVG_OF.createSchemaType();
+    schemaType.setSchemaId(URI_ANET_SCHEMAS_REPORT);
+
+    final String dictPathFormat = "fields.report.%s.label";
+    addSchemaField(schemaType, ANET_SCHEMA_REPORT_INTENT,
+        getLabelFromDict(dictPathFormat, ANET_SCHEMA_REPORT_INTENT), XSD_STRING);
+    addSchemaField(schemaType, ANET_SCHEMA_REPORT_ENGAGEMENT_DATE,
+        getLabelFromDict(dictPathFormat, ANET_SCHEMA_REPORT_ENGAGEMENT_DATE), XSD_DATETIME);
+    if (Boolean.TRUE.equals(getEngagementsIncludeTimeAndDuration())) {
+      addSchemaField(schemaType, ANET_SCHEMA_REPORT_ENGAGEMENT_DURATION,
+          getLabelFromDict(dictPathFormat, ANET_SCHEMA_REPORT_ENGAGEMENT_DURATION), XSD_DURATION);
+    }
+    addSchemaField(schemaType, ANET_SCHEMA_REPORT_ENGAGEMENT_STATUS, "Engagement status",
+        XSD_STRING);
+    addSchemaField(schemaType, ANET_SCHEMA_REPORT_PRIMARY_ADVISOR, "Primary advisor", XSD_STRING);
+    addSchemaField(schemaType, ANET_SCHEMA_REPORT_ADVISOR_ORGANIZATION, "Advisor organization",
+        XSD_STRING);
+    addSchemaField(schemaType, ANET_SCHEMA_REPORT_PRIMARY_INTERLOCUTOR, "Primary interlocutor",
+        XSD_STRING);
+    addSchemaField(schemaType, ANET_SCHEMA_REPORT_INTERLOCUTOR_ORGANIZATION,
+        "Interlocutor organization", XSD_STRING);
+    addSchemaField(schemaType, ANET_SCHEMA_REPORT_KEY_OUTCOMES,
+        getLabelFromDict(dictPathFormat, ANET_SCHEMA_REPORT_KEY_OUTCOMES), XSD_STRING);
+    addSchemaField(schemaType, ANET_SCHEMA_REPORT_NEXT_STEPS,
+        getLabelFromDict(dictPathFormat, ANET_SCHEMA_REPORT_NEXT_STEPS), XSD_STRING);
+
+    nvgType.getSchema().add(schemaType);
+  }
+
+  private Boolean getEngagementsIncludeTimeAndDuration() {
+    return (Boolean) dict.getDictionaryEntry("engagementsIncludeTimeAndDuration");
+  }
+
+  private String getLabelFromDict(String dictPath, String key) {
+    return (String) dict.getDictionaryEntry(String.format(dictPath, key));
+  }
+
+  private void addSchemaField(SchemaType schemaType, String key, String label, String type) {
+    final SimpleFieldType simpleFieldType = NVG_OF.createSimpleFieldType();
+    simpleFieldType.setId(new QName(URI_NVG_SCHEMA, key));
+    simpleFieldType.setType(type);
+    simpleFieldType.setLabel(label);
+    schemaType.getSimpleField().add(simpleFieldType);
+  }
+
   private PointType reportToNvgPoint(String app6Version,
       boolean includeElementConfidentialityLabels, ConfidentialityRecord defaultConfidentiality,
       Instant reportingTime, Report report) {
     final PointType nvgPoint = NVG_OF.createPointType();
-    nvgPoint.setLabel(report.getIntent());
+    nvgPoint.setLabel(Utils.ellipsizeOnWords(report.getIntent(),
+        Utils.orIfNull((Integer) dict.getDictionaryEntry("fields.report.intent.maxLength"), 40)));
     nvgPoint.setUri(String.format("urn:anet:reports:%1$s", report.getUuid()));
-    setTimeStamp(report, nvgPoint);
+    nvgPoint.setTimeStamp(getTimeStamp(report.getUpdatedAt()));
     setLocation(report, nvgPoint);
     setSymbol(app6Version, reportingTime, report, nvgPoint);
     nvgPoint.setHref(String.format("%s/reports/%s", config.getServerUrl(), report.getUuid()));
-    setTextInfo(report, nvgPoint);
+    setExtendedData(report, nvgPoint);
+
     if (includeElementConfidentialityLabels) {
       setConfidentialityInformation(
           ConfidentialityRecord.create(dict, defaultConfidentiality, report), nvgPoint);
     }
+
     return nvgPoint;
+  }
+
+  private void setExtendedData(Report report, PointType nvgPoint) {
+    final ExtendedDataType extendedDataType = NVG_OF.createExtendedDataType();
+    final SimpleDataSectionType simpleDataSectionType = NVG_OF.createSimpleDataSectionType();
+    simpleDataSectionType.setSchemaRef("#" + URI_ANET_SCHEMAS_REPORT);
+
+    addStringField(simpleDataSectionType, ANET_SCHEMA_REPORT_INTENT, report.getIntent());
+    addDateTimeField(simpleDataSectionType, ANET_SCHEMA_REPORT_ENGAGEMENT_DATE,
+        report.getEngagementDate());
+    if (Boolean.TRUE.equals(getEngagementsIncludeTimeAndDuration())) {
+      addDurationField(simpleDataSectionType, ANET_SCHEMA_REPORT_ENGAGEMENT_DURATION,
+          report.getDuration());
+    }
+    addStringField(simpleDataSectionType, ANET_SCHEMA_REPORT_ENGAGEMENT_STATUS,
+        getEngagementStatus(report));
+    addStringField(simpleDataSectionType, ANET_SCHEMA_REPORT_PRIMARY_ADVISOR,
+        getPersonName(report.getPrimaryAdvisor()));
+    addStringField(simpleDataSectionType, ANET_SCHEMA_REPORT_ADVISOR_ORGANIZATION,
+        getOrganizationName(report.getAdvisorOrg()));
+    addStringField(simpleDataSectionType, ANET_SCHEMA_REPORT_PRIMARY_INTERLOCUTOR,
+        getPersonName(report.getPrimaryInterlocutor()));
+    addStringField(simpleDataSectionType, ANET_SCHEMA_REPORT_INTERLOCUTOR_ORGANIZATION,
+        getOrganizationName(report.getInterlocutorOrg()));
+    addStringField(simpleDataSectionType, ANET_SCHEMA_REPORT_KEY_OUTCOMES, report.getKeyOutcomes());
+    addStringField(simpleDataSectionType, ANET_SCHEMA_REPORT_NEXT_STEPS, report.getNextSteps());
+    extendedDataType.getSection().add(simpleDataSectionType);
+    nvgPoint.setExtendedData(extendedDataType);
+  }
+
+  private String getEngagementStatus(Report report) {
+    return report.isFutureEngagement() ? "Planned" : "Past";
+  }
+
+  private String getPersonName(Person person) {
+    return person == null ? "<Unknown>" : person.getName();
+  }
+
+  private String getOrganizationName(Organization organization) {
+    return organization == null ? "<Unknown>" : organization.getShortName();
+  }
+
+  private void addStringField(SimpleDataSectionType simpleDataSectionType, String key,
+      String string) {
+    final SimpleDataType stringType = NVG_OF.createSimpleDataType();
+    stringType.setKey(new QName(URI_NVG_SCHEMA, key));
+    stringType.setValue(string);
+    simpleDataSectionType.getSimpleData().add(stringType);
+  }
+
+  private void addDateTimeField(SimpleDataSectionType simpleDataSectionType, String key,
+      Instant instant) {
+    final XMLGregorianCalendar dateTime = getTimeStamp(instant);
+    final SimpleDataType dateTimeType = NVG_OF.createSimpleDataType();
+    dateTimeType.setKey(new QName(URI_NVG_SCHEMA, key));
+    dateTimeType.setValue(dateTime == null ? null : dateTime.toXMLFormat());
+    simpleDataSectionType.getSimpleData().add(dateTimeType);
+  }
+
+  private void addDurationField(SimpleDataSectionType simpleDataSectionType, String key,
+      Integer duration) {
+    final SimpleDataType durationType = NVG_OF.createSimpleDataType();
+    durationType.setKey(new QName(URI_NVG_SCHEMA, key));
+    durationType.setValue(duration == null ? null : String.format("PT%dM", duration));
+    simpleDataSectionType.getSimpleData().add(durationType);
   }
 
   private void setConfidentialityInformation(ConfidentialityRecord confidentiality,
@@ -312,14 +452,17 @@ public class Nvg20WebService implements NVGPortType2012 {
         report.getEngagementDate() != null && report.getEngagementDate().isAfter(reportingTime)));
   }
 
-  private void setTimeStamp(Report report, PointType nvgPoint) {
+  private XMLGregorianCalendar getTimeStamp(Instant instant) {
+    if (instant == null) {
+      return null;
+    }
     try {
       final GregorianCalendar gc = new GregorianCalendar(TZ_UTC);
-      // TODO: Should we be using `updatedAt` here?
-      gc.setTimeInMillis(report.getEngagementDate().toEpochMilli());
-      nvgPoint.setTimeStamp(DatatypeFactory.newInstance().newXMLGregorianCalendar(gc));
+      gc.setTimeInMillis(instant.toEpochMilli());
+      return DatatypeFactory.newInstance().newXMLGregorianCalendar(gc);
     } catch (Exception ignored) {
-      // We don't set the timeStamp
+      // No timeStamp
+      return null;
     }
   }
 
@@ -329,29 +472,6 @@ public class Nvg20WebService implements NVGPortType2012 {
       nvgPoint.setX(location.getLng());
       nvgPoint.setY(location.getLat());
     }
-  }
-
-  private void setTextInfo(Report report, PointType nvgPoint) {
-    nvgPoint.setTextInfo(String.format(
-        "Engagement between primary advisor %1$s @ %2$s and primary interlocutor %3$s @ %4$s"
-            + "%5$s%6$s",
-        getPersonName(report.getPrimaryAdvisor()), getOrganizationName(report.getAdvisorOrg()),
-        getPersonName(report.getPrimaryInterlocutor()),
-        getOrganizationName(report.getInterlocutorOrg()),
-        getOptionalText("\n\nwith key outcomes: \n%s", report.getKeyOutcomes()),
-        getOptionalText("\n\nwith next steps: \n%s", report.getNextSteps())));
-  }
-
-  private String getPersonName(Person person) {
-    return person == null ? "<Unknown>" : person.getName();
-  }
-
-  private String getOrganizationName(Organization organization) {
-    return organization == null ? "<Unknown>" : organization.getShortName();
-  }
-
-  private Object getOptionalText(String format, String text) {
-    return (text == null) ? "" : String.format(format, text);
   }
 
   private List<Report> getReportsByPeriod(final Instant start, final Instant end) {
