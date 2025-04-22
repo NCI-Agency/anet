@@ -2,7 +2,7 @@ import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import { preventZoom } from "advanced-cropper/extensions/prevent-zoom"
 import AttachmentCard from "components/Attachment/AttachmentCard"
-import React, { useEffect, useRef, useState } from "react"
+import React, { useCallback, useEffect, useRef, useState } from "react"
 import { Cropper, ImageRestriction } from "react-advanced-cropper"
 import "react-advanced-cropper/dist/style.css"
 import "react-advanced-cropper/dist/themes/compact.css"
@@ -18,6 +18,13 @@ interface EntityAvatarEditModalProps {
   onAvatarUpdate: (...args: unknown[]) => unknown
 }
 
+function isCroppeable(image) {
+  const croppeableMimeTypes = Settings.fields.attachment.fileTypes
+    .filter(fileType => fileType.avatar && fileType.crop)
+    .map(fileType => fileType.mimeType)
+  return croppeableMimeTypes.includes(image?.mimeType)
+}
+
 const EntityAvatarEditModal = ({
   title,
   avatar,
@@ -25,30 +32,33 @@ const EntityAvatarEditModal = ({
   images,
   onAvatarUpdate
 }: EntityAvatarEditModalProps) => {
-  const croppeableMimeTypes = Settings.fields.attachment.fileTypes
-    .filter(fileType => fileType.avatar && fileType.crop)
-    .map(fileType => fileType.mimeType)
-
   const [showModal, setShowModal] = useState(false)
   const [chosenImageUuid, setChosenImageUuid] = useState(null)
+  const [croppeable, setCroppeable] = useState(false)
   const [cropperCoordinates, setCropperCoordinates] = useState(null)
   const cropperRef = useRef(null)
 
-  // Update chosen image uuid and coordinates from avatar if present
-  useEffect(() => {
-    if (avatar) {
-      setChosenImageUuid(avatar.attachmentUuid)
-      setCropperCoordinates({
-        left: avatar.cropLeft,
-        top: avatar.cropTop,
-        width: avatar.cropWidth,
-        height: avatar.cropHeight
-      })
-    } else {
-      setChosenImageUuid(null)
-      setCropperCoordinates(null)
-    }
-  }, [avatar])
+  // Update chosen image uuid and coordinates from selected avatar
+  const updateAvatar = useCallback(
+    selectedAvatar => {
+      const chosenImage = images?.find(
+        i => i.uuid === selectedAvatar?.attachmentUuid
+      )
+      setChosenImageUuid(chosenImage?.uuid)
+      setCroppeable(isCroppeable(chosenImage))
+      setCropperCoordinates(
+        selectedAvatar && {
+          left: selectedAvatar.cropLeft,
+          top: selectedAvatar.cropTop,
+          width: selectedAvatar.cropWidth,
+          height: selectedAvatar.cropHeight
+        }
+      )
+    },
+    [images]
+  )
+
+  useEffect(() => updateAvatar(avatar), [avatar, updateAvatar])
 
   const maximize = () => {
     if (cropperRef.current) {
@@ -94,9 +104,13 @@ const EntityAvatarEditModal = ({
             {chosenImageUuid && (
               <Cropper
                 stencilProps={{
-                  aspectRatio: 1
+                  aspectRatio: 1,
+                  // Remove cropping handlers when image can not be cropped
+                  ...(!croppeable && { handlers: {} })
                 }}
-                imageRestriction={ImageRestriction.none}
+                imageRestriction={
+                  croppeable ? ImageRestriction.none : ImageRestriction.fitArea
+                }
                 defaultCoordinates={cropperCoordinates}
                 ref={cropperRef}
                 className="custom-cropper"
@@ -117,20 +131,20 @@ const EntityAvatarEditModal = ({
                 <Button
                   onClick={maximize}
                   variant="secondary"
-                  disabled={!chosenImageUuid}
+                  disabled={!croppeable}
                 >
                   <Icon icon={IconNames.MAXIMIZE} />
                 </Button>
                 <Button
                   onClick={reset}
                   variant="secondary"
-                  disabled={!chosenImageUuid}
+                  disabled={!croppeable}
                   className="ms-1"
                 >
                   <Icon icon={IconNames.RESET} />
                 </Button>
               </div>
-              <Button onClick={onClick} variant="primary">
+              <Button onClick={handleSave} variant="primary">
                 Save
               </Button>
             </div>
@@ -153,8 +167,9 @@ const EntityAvatarEditModal = ({
   )
 
   function setChosenImage(image) {
-    setChosenImageUuid(image.uuid)
-    if (croppeableMimeTypes.includes(image.mimeType)) {
+    if (isCroppeable(image)) {
+      setChosenImageUuid(image.uuid)
+      setCroppeable(true)
       setCropperCoordinates(null)
     } else {
       // If the user chooses an image that can not be cropped just save
@@ -162,11 +177,8 @@ const EntityAvatarEditModal = ({
     }
   }
 
-  function onClick() {
-    const cropper = cropperRef.current
-    if (cropper) {
-      save(chosenImageUuid, cropper.getCoordinates())
-    }
+  function handleSave() {
+    save(chosenImageUuid, cropperRef?.current?.getCoordinates())
   }
 
   function open(e) {
@@ -175,12 +187,15 @@ const EntityAvatarEditModal = ({
   }
 
   function close() {
+    // Reset back to original avatar
+    updateAvatar(avatar)
     setShowModal(false)
   }
 
   function save(imageUuid, coordinates) {
+    // Update avatar
     onAvatarUpdate(imageUuid, coordinates)
-    close()
+    setShowModal(false)
   }
 }
 
