@@ -6,9 +6,10 @@ import API from "api"
 import { OrganizationSimpleOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import {
-  getLabel as getApp6FieldsLabel,
+  getLabel as getApp6FieldLabel,
   getFieldsList as getApp6FieldsList
 } from "components/App6Symbol"
+import App6SymbolPreview from "components/App6SymbolPreview"
 import ApprovalSteps from "components/approvals/ApprovalSteps"
 import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import { customFieldsJSONString } from "components/CustomFields"
@@ -270,18 +271,21 @@ const MergeOrganizations = ({ pageDispatchers }: MergeOrganizationsProps) => {
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
-              {getApp6FieldsList().map(fieldName => (
-                <DictionaryField
-                  key={fieldName}
-                  wrappedComponent={MergeField}
-                  dictProps={Settings.fields.organization[fieldName]}
-                  value={getApp6FieldsLabel(mergedOrganization, fieldName)}
-                  align={ALIGN_OPTIONS.CENTER}
-                  fieldName={fieldName}
-                  mergeState={mergeState}
-                  dispatchMergeActions={dispatchMergeActions}
-                />
-              ))}
+              <DictionaryField
+                wrappedComponent={MergeField}
+                dictProps={{ label: "APP-06" }}
+                value={
+                  <App6SymbolPreview
+                    values={{ ...mergedOrganization }}
+                    size={120}
+                    maxHeight={200}
+                  />
+                }
+                align={ALIGN_OPTIONS.CENTER}
+                fieldName="uuid"
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
               <DictionaryField
                 wrappedComponent={MergeField}
                 dictProps={Settings.fields.organization.administratingPositions}
@@ -644,24 +648,29 @@ const OrganizationColumn = ({
             autoMerge
             dispatchMergeActions={dispatchMergeActions}
           />
-          {getApp6FieldsList().map(fieldName => (
-            <DictionaryField
-              key={fieldName}
-              wrappedComponent={MergeField}
-              dictProps={Settings.fields.organization[fieldName]}
-              fieldName={fieldName}
-              value={getApp6FieldsLabel(organization, fieldName)}
-              align={align}
-              action={() => {
+          <DictionaryField
+            wrappedComponent={MergeField}
+            dictProps={{ label: "APP-06" }}
+            fieldName="uuid"
+            value={
+              <App6SymbolPreview
+                values={organization}
+                size={120}
+                maxHeight={200}
+              />
+            }
+            align={align}
+            action={() => {
+              getApp6FieldsList().map(fieldName => {
                 dispatchMergeActions(
                   setAMergedField(fieldName, organization[fieldName], align)
                 )
-              }}
-              mergeState={mergeState}
-              autoMerge
-              dispatchMergeActions={dispatchMergeActions}
-            />
-          ))}
+              })
+            }}
+            mergeState={mergeState}
+            autoMerge
+            dispatchMergeActions={dispatchMergeActions}
+          />
           <DictionaryField
             wrappedComponent={MergeField}
             dictProps={Settings.fields.organization.administratingPositions}
