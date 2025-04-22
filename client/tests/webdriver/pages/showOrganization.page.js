@@ -38,24 +38,8 @@ class ShowOrganization extends Page {
     await popover.waitForDisplayed()
   }
 
-  async getApp6context() {
-    return browser.$('td[id="app6context"]')
-  }
-
-  async getApp6standardIdentity() {
-    return browser.$('td[id="app6standardIdentity"]')
-  }
-
-  async getApp6symbolSet() {
-    return browser.$('td[id="app6symbolSet"]')
-  }
-
-  async getApp6hq() {
-    return browser.$('td[id="app6hq"]')
-  }
-
-  async getApp6amplifier() {
-    return browser.$('td[id="app6amplifier"]')
+  async getApp6Value(field) {
+    return browser.$(`td[id="${field}"]`)
   }
 
   async getLeaders() {

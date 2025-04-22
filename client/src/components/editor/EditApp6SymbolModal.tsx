@@ -93,7 +93,7 @@ const EditApp6SymbolModal = ({
     // replace the null values with the parent values if they are not null
     const app6SymbolValues = { ...currentValues }
     Object.entries(parentValues).forEach(([key, value]) => {
-      if (value !== null && app6SymbolValues[key] === null) {
+      if (value !== null && !app6SymbolValues[key]) {
         app6SymbolValues[key] = value
       }
     })

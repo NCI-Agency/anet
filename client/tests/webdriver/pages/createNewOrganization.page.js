@@ -150,6 +150,30 @@ class CreateOrganization extends Page {
     if (org.app6amplifierInput) {
       await this.setApp6DropdownValue("app6amplifier", org.app6amplifierInput)
     }
+    if (org.app6entity) {
+      await this.setApp6DropdownValue("app6entity", org.app6entityInput)
+    }
+    if (org.app6entityType) {
+      await this.setApp6DropdownValue("app6entityType", org.app6entityTypeInput)
+    }
+    if (org.app6entitySubtype) {
+      await this.setApp6DropdownValue(
+        "app6entitySubtype",
+        org.app6entitySubtypeInput
+      )
+    }
+    if (org.app6sectorOneModifier) {
+      await this.setApp6DropdownValue(
+        "app6sectorOneModifier",
+        org.app6sectorOneModifierInput
+      )
+    }
+    if (org.app6sectorTwoModifier) {
+      await this.setApp6DropdownValue(
+        "app6sectorTwoModifier",
+        org.app6sectorTwoModifierInput
+      )
+    }
     await this.closeEditApp6Modal()
   }
 
