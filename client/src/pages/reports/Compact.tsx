@@ -344,7 +344,7 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                 <DictionaryField
                   wrappedComponent={CompactRow}
                   dictProps={Settings.fields.report.keyOutcomes}
-                  content={<ListItems value={report.nextSteps} />}
+                  content={<ListItems value={report.keyOutcomes} />}
                   className="reportField"
                   hideIfEmpty
                 />
