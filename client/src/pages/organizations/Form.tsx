@@ -7,9 +7,7 @@ import {
   TaskOverlayRow
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
-import App6Symbol, {
-  getFieldsList as getApp6FieldsList
-} from "components/App6Symbol"
+import App6Symbol, { fieldsList as app6fieldsList } from "components/App6Symbol"
 import AppContext from "components/AppContext"
 import ApprovalsDefinition from "components/approvals/ApprovalsDefinition"
 import UploadAttachment from "components/Attachment/UploadAttachment"
@@ -313,7 +311,7 @@ const OrganizationForm = ({
                             showModal={showApp6Modal}
                             onHide={() => setShowApp6Modal(false)}
                             onSave={symbologyValues => {
-                              getApp6FieldsList().forEach(field => {
+                              app6fieldsList.forEach(field => {
                                 setFieldValue(field, symbologyValues[field])
                               })
                               setShowApp6Modal(false)

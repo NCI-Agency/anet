@@ -5,10 +5,7 @@ import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
 import { OrganizationSimpleOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
-import {
-  getLabel as getApp6FieldLabel,
-  getFieldsList as getApp6FieldsList
-} from "components/App6Symbol"
+import { fieldsList as app6fieldsList } from "components/App6Symbol"
 import App6SymbolPreview from "components/App6SymbolPreview"
 import ApprovalSteps from "components/approvals/ApprovalSteps"
 import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
@@ -20,6 +17,9 @@ import MergeField from "components/MergeField"
 import Messages from "components/Messages"
 import {
   DEFAULT_CUSTOM_FIELDS_PARENT,
+  GRAPHQL_ASSESSMENTS_FIELDS,
+  GRAPHQL_ENTITY_AVATAR_FIELDS,
+  GRAPHQL_NOTES_FIELDS,
   MODEL_TO_OBJECT_TYPE
 } from "components/Model"
 import {
@@ -51,10 +51,107 @@ import ORGANIZATIONS_ICON from "resources/organizations.png"
 import Settings from "settings"
 import utils from "utils"
 
+const ALL_ORG_FIELDS = `
+  uuid
+  status
+  shortName
+  longName
+  profile
+  identificationCode
+  ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+  app6context
+  app6standardIdentity
+  app6symbolSet
+  app6hq
+  app6amplifier
+  app6entity
+  app6entityType
+  app6entitySubtype
+  app6sectorOneModifier
+  app6sectorTwoModifier
+  parentOrg {
+    uuid
+    shortName
+    longName
+    identificationCode
+    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+  }
+  ascendantOrgs {
+    uuid
+    app6context
+    app6standardIdentity
+    app6symbolSet
+    parentOrg {
+      uuid
+    }
+  }
+  childrenOrgs {
+    uuid
+    shortName
+    longName
+    identificationCode
+  }
+  location {
+    uuid
+    name
+    lat
+    lng
+    type
+  }
+  emailAddresses {
+    network
+    address
+  }
+  planningApprovalSteps {
+    uuid
+    name
+    approvers {
+      uuid
+      name
+      person {
+        uuid
+        name
+        rank
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+      }
+    }
+  }
+  approvalSteps {
+    uuid
+    name
+    approvers {
+      uuid
+      name
+      person {
+        uuid
+        name
+        rank
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+      }
+    }
+  }
+  administratingPositions {
+    uuid
+    name
+    code
+    type
+    role
+    person {
+      uuid
+      name
+      rank
+      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+    }
+  }
+  customFields
+  ${GRAPHQL_ASSESSMENTS_FIELDS}
+  ${GRAPHQL_NOTES_FIELDS}
+`
+
 const GQL_GET_ORGANIZATION = gql`
   query ($uuid: String!) {
     organization(uuid: $uuid) {
-      ${Organization.allFieldsQuery}
+      ${ALL_ORG_FIELDS}
     }
   }
 `
@@ -465,7 +562,7 @@ const OrganizationColumn = ({
           }}
           objectType={Organization}
           valueKey="shortName"
-          fields={Organization.allFieldsQuery}
+          fields={ALL_ORG_FIELDS}
           addon={ORGANIZATIONS_ICON}
           disabled={disabled}
           showRemoveButton={!disabled}
@@ -661,7 +758,7 @@ const OrganizationColumn = ({
             }
             align={align}
             action={() => {
-              getApp6FieldsList().forEach(fieldName => {
+              app6FieldsList.forEach(fieldName => {
                 dispatchMergeActions(
                   setAMergedField(fieldName, organization[fieldName], align)
                 )

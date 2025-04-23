@@ -8,6 +8,30 @@ import Settings from "settings"
 interface FieldRow {
   fieldName: string
   values: any[]
+  parentValues: object
+}
+
+const FieldRow = ({ fieldName, values, parentValues }: FieldRow) => {
+  const mergedValues = { ...values }
+  Object.entries(parentValues).forEach(([key, value]) => {
+    if (value !== null && mergedValues[key] === null) {
+      mergedValues[key] = value
+    }
+  })
+  if (!mergedValues[fieldName]) {
+    return null
+  }
+  const choices = getChoices(fieldName, mergedValues)
+  const text =
+    choices[mergedValues[fieldName]] + (values[fieldName] ? "" : " (inherited)")
+  return (
+    <tr style={{ border: "hidden" }}>
+      <td style={{ fontWeight: "bold" }}>
+        {Settings.fields.organization[fieldName].label}
+      </td>
+      <td id={fieldName}>{text}</td>
+    </tr>
+  )
 }
 
 interface App6SymbolPreviewProps {
@@ -31,30 +55,6 @@ const App6SymbolPreview = ({
   const app6ValueKeys = Object.keys(values).filter(key =>
     key.startsWith("app6")
   )
-
-  const FieldRow = ({ fieldName, values }: FieldRow) => {
-    const mergedValues = { ...values }
-    Object.entries(parentValues).forEach(([key, value]) => {
-      if (value !== null && mergedValues[key] === null) {
-        mergedValues[key] = value
-      }
-    })
-    if (!mergedValues[fieldName]) {
-      return null
-    }
-    const choices = getChoices(fieldName, mergedValues)
-    const text =
-      choices[mergedValues[fieldName]] +
-      (values[fieldName] ? "" : " (inherited)")
-    return (
-      <tr style={{ border: "hidden" }}>
-        <td style={{ fontWeight: "bold" }}>
-          {Settings.fields.organization[fieldName].label}
-        </td>
-        <td id={fieldName}>{text}</td>
-      </tr>
-    )
-  }
 
   return (
     <Popover
@@ -82,7 +82,14 @@ const App6SymbolPreview = ({
             <Table responsive>
               <tbody>
                 {app6ValueKeys.map(key => {
-                  return <FieldRow key={key} fieldName={key} values={values} />
+                  return (
+                    <FieldRow
+                      key={key}
+                      fieldName={key}
+                      values={values}
+                      parentValues={parentValues}
+                    />
+                  )
                 })}
               </tbody>
             </Table>

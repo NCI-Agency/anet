@@ -685,101 +685,99 @@ const ControlsContainer = styled.div`
 
 const CustomNode = ({
   data: { organization, symbolValues, depth, positions, showSymbol }
-}: NodeProps) => {
-  return (
+}: NodeProps) => (
+  <div
+    style={{
+      width: NODE_WIDTH,
+      height: NODE_HEIGHT + positions.length * PERSON_AVATAR_HEIGHT,
+      display: "flex",
+      flexDirection: "column"
+    }}
+  >
     <div
       style={{
-        width: NODE_WIDTH,
-        height: NODE_HEIGHT + positions.length * PERSON_AVATAR_HEIGHT,
-        display: "flex",
-        flexDirection: "column"
+        display: "flex"
       }}
     >
       <div
         style={{
-          display: "flex"
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          minWidth: ORG_AVATAR_WIDTH,
+          height: NODE_HEIGHT
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            minWidth: ORG_AVATAR_WIDTH,
-            height: NODE_HEIGHT
-          }}
-        >
-          {(showSymbol && (
-            <App6Symbol
-              values={symbolValues}
-              size={ORG_AVATAR_WIDTH}
-              maxHeight={NODE_HEIGHT}
-            />
-          )) || (
-            <EntityAvatarDisplay
-              avatar={organization.entityAvatar}
-              defaultAvatar={Organization.relatedObjectType}
-              width={ORG_AVATAR_WIDTH}
-              height={ORG_AVATAR_WIDTH}
-              style={{ backgroundColor: BACKGROUND_COLOR }}
-            />
-          )}
-        </div>
-        <LinkTo
-          modelType="Organization"
-          model={organization}
-          showAvatar={false}
-          showIcon={false}
-          style={{
-            minHeight: NODE_HEIGHT,
-            display: "flex",
-            padding: "5px 0px 5px 5px",
-            alignItems: "center"
-          }}
-        />
+        {(showSymbol && (
+          <App6Symbol
+            values={symbolValues}
+            size={ORG_AVATAR_WIDTH}
+            maxHeight={NODE_HEIGHT}
+          />
+        )) || (
+          <EntityAvatarDisplay
+            avatar={organization.entityAvatar}
+            defaultAvatar={Organization.relatedObjectType}
+            width={ORG_AVATAR_WIDTH}
+            height={ORG_AVATAR_WIDTH}
+            style={{ backgroundColor: BACKGROUND_COLOR }}
+          />
+        )}
       </div>
-      {positions.length > 0 && (
-        <div
-          style={{
-            paddingLeft: ORG_AVATAR_WIDTH / 2
-          }}
-        >
-          {positions.map(person => (
-            <LinkTo
-              key={person.uuid}
-              modelType="Person"
-              model={person}
-              showIcon={false}
-              style={{
-                display: "inline-block",
-                maxWidth: TEXT_WIDTH,
-                padding: "5px 0px 5px 5px",
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                verticalAlign: "middle"
-              }}
-            />
-          ))}
-        </div>
-      )}
-      <Handle
-        type="source"
-        position={Position.Bottom}
-        style={{ opacity: 0, top: NODE_HEIGHT / 2, left: ORG_AVATAR_WIDTH / 2 }}
-      />
-      <Handle
-        type="target"
-        position={depth > 1 ? Position.Left : Position.Top}
+      <LinkTo
+        modelType="Organization"
+        model={organization}
+        showAvatar={false}
+        showIcon={false}
         style={{
-          opacity: 0,
-          left: depth === 1 ? ORG_AVATAR_WIDTH / 2 : -ARROW_INDENT,
-          top: depth === 1 ? 0 : NODE_HEIGHT / 2
+          minHeight: NODE_HEIGHT,
+          display: "flex",
+          padding: "5px 0px 5px 5px",
+          alignItems: "center"
         }}
       />
     </div>
-  )
-}
+    {positions.length > 0 && (
+      <div
+        style={{
+          paddingLeft: ORG_AVATAR_WIDTH / 2
+        }}
+      >
+        {positions.map(person => (
+          <LinkTo
+            key={person.uuid}
+            modelType="Person"
+            model={person}
+            showIcon={false}
+            style={{
+              display: "inline-block",
+              maxWidth: TEXT_WIDTH,
+              padding: "5px 0px 5px 5px",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              verticalAlign: "middle"
+            }}
+          />
+        ))}
+      </div>
+    )}
+    <Handle
+      type="source"
+      position={Position.Bottom}
+      style={{ opacity: 0, top: NODE_HEIGHT / 2, left: ORG_AVATAR_WIDTH / 2 }}
+    />
+    <Handle
+      type="target"
+      position={depth > 1 ? Position.Left : Position.Top}
+      style={{
+        opacity: 0,
+        left: depth === 1 ? ORG_AVATAR_WIDTH / 2 : -ARROW_INDENT,
+        top: depth === 1 ? 0 : NODE_HEIGHT / 2
+      }}
+    />
+  </div>
+)
 
 const CustomRootEdge = ({
   id,

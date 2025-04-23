@@ -1,6 +1,6 @@
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
-import App6Symbol, { getChoices, getFieldsList } from "components/App6Symbol"
+import App6Symbol, { fieldsList, getChoices } from "components/App6Symbol"
 import { Form, Formik } from "formik"
 import { Organization } from "models"
 import React, { useState } from "react"
@@ -205,69 +205,67 @@ const EditApp6SymbolModal = ({
     selectedChoice,
     dropdownOptions,
     currentValues
-  ) => {
-    return (
-      <Dropdown className="w-100">
-        <Dropdown.Toggle
-          variant="tertiary"
-          id={`${fieldName}-dropdown`}
-          className="d-flex align-content-space-between align-items-center w-100"
+  ) => (
+    <Dropdown className="w-100">
+      <Dropdown.Toggle
+        variant="tertiary"
+        id={`${fieldName}-dropdown`}
+        className="d-flex align-content-space-between align-items-center w-100"
+        style={{
+          color: "#212529",
+          fontSize: "14px",
+          borderColor: "#212529"
+        }}
+      >
+        <div
+          className="d-flex align-items-center gap-2 w-100"
           style={{
-            color: "#212529",
-            fontSize: "14px",
-            borderColor: "#212529"
+            height: 40,
+            overflow: "hidden",
+            textAlign: "left"
           }}
         >
+          <div>{getApp6Symbol(currentValues, 20, 40)}</div>
           <div
-            className="d-flex align-items-center gap-2 w-100"
             style={{
-              height: 40,
+              flex: 1,
               overflow: "hidden",
-              textAlign: "left"
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap"
             }}
           >
-            <div>{getApp6Symbol(currentValues, 20, 40)}</div>
-            <div
-              style={{
-                flex: 1,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap"
-              }}
-            >
-              {selectedChoice}
-            </div>
+            {selectedChoice}
           </div>
-        </Dropdown.Toggle>
-        <Dropdown.Menu className="w-100">
-          {dropdownOptions.map(({ key, label, values }) => (
-            <Dropdown.Item
-              key={key}
-              data-key={key}
-              onClick={() =>
-                handleFieldUpdate(fieldName, key, setFieldValue, currentValues)}
-              className="d-flex align-items-center gap-2"
+        </div>
+      </Dropdown.Toggle>
+      <Dropdown.Menu className="w-100">
+        {dropdownOptions.map(({ key, label, values }) => (
+          <Dropdown.Item
+            key={key}
+            data-key={key}
+            onClick={() =>
+              handleFieldUpdate(fieldName, key, setFieldValue, currentValues)}
+            className="d-flex align-items-center gap-2"
+            style={{
+              minHeight: 40
+            }}
+            onMouseEnter={() => setPreviewValues({ ...values })}
+            onMouseLeave={() => setPreviewValues({ ...currentValues })}
+          >
+            {getApp6Symbol(values, 20, 40)}
+            <span
+              className="text-truncate w-100"
               style={{
-                minHeight: 40
+                whiteSpace: "normal"
               }}
-              onMouseEnter={() => setPreviewValues({ ...values })}
-              onMouseLeave={() => setPreviewValues({ ...currentValues })}
             >
-              {getApp6Symbol(values, 20, 40)}
-              <span
-                className="text-truncate w-100"
-                style={{
-                  whiteSpace: "normal"
-                }}
-              >
-                {label}
-              </span>
-            </Dropdown.Item>
-          ))}
-        </Dropdown.Menu>
-      </Dropdown>
-    )
-  }
+              {label}
+            </span>
+          </Dropdown.Item>
+        ))}
+      </Dropdown.Menu>
+    </Dropdown>
+  )
 
   const reset = (values, setFieldValue) => {
     Object.keys(values).forEach(fieldName => {
@@ -289,53 +287,51 @@ const EditApp6SymbolModal = ({
         }}
         enableReinitialize
       >
-        {({ handleSubmit, setFieldValue, values }) => {
-          return (
-            <Form>
-              <Modal.Body>
+        {({ handleSubmit, setFieldValue, values }) => (
+          <Form>
+            <Modal.Body>
+              <div
+                className="d-flex justify-content-evenly"
+                style={{ padding: 20 }}
+              >
                 <div
-                  className="d-flex justify-content-evenly"
-                  style={{ padding: 20 }}
+                  className="d-flex flex-column gap-2"
+                  style={{ width: "50%" }}
                 >
-                  <div
-                    className="d-flex flex-column gap-2"
-                    style={{ width: "50%" }}
-                  >
-                    {getFieldsList().map(fieldName =>
-                      getFieldRow(fieldName, setFieldValue, values)
-                    )}
-                  </div>
-                  <div
-                    className="d-flex justify-content-center align-items-center"
-                    style={{ minWidth: 200 }}
-                  >
-                    {getApp6Symbol(previewValues, 200, 300)}
-                  </div>
+                  {fieldsList.map(fieldName =>
+                    getFieldRow(fieldName, setFieldValue, values)
+                  )}
                 </div>
-              </Modal.Body>
-              <Modal.Footer>
-                <Button
-                  variant="tertiary"
-                  onClick={() => reset(values, setFieldValue)}
+                <div
+                  className="d-flex justify-content-center align-items-center"
+                  style={{ minWidth: 200 }}
                 >
-                  Reset
-                </Button>
-                <Button
-                  variant="secondary"
-                  onClick={() => {
-                    reset(values, setFieldValue)
-                    onHide()
-                  }}
-                >
-                  Cancel
-                </Button>
-                <Button variant="primary" onClick={handleSubmit}>
-                  Apply
-                </Button>
-              </Modal.Footer>
-            </Form>
-          )
-        }}
+                  {getApp6Symbol(previewValues, 200, 300)}
+                </div>
+              </div>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button
+                variant="tertiary"
+                onClick={() => reset(values, setFieldValue)}
+              >
+                Reset
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  reset(values, setFieldValue)
+                  onHide()
+                }}
+              >
+                Cancel
+              </Button>
+              <Button variant="primary" onClick={handleSubmit}>
+                Apply
+              </Button>
+            </Modal.Footer>
+          </Form>
+        )}
       </Formik>
     </Modal>
   )
