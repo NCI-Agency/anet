@@ -3,6 +3,7 @@ import API from "api"
 import DictionaryField from "components/DictionaryField"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
+import ListItems from "components/ListItems"
 import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import NoPaginationTaskTable from "components/NoPaginationTaskTable"
 import PlanningConflictForReport from "components/PlanningConflictForReport"
@@ -231,13 +232,13 @@ const ReportPreview = ({ className, uuid }: ReportPreviewProps) => {
               <DictionaryField
                 wrappedComponent={PreviewField}
                 dictProps={Settings.fields.report.keyOutcomes}
-                value={report.keyOutcomes}
+                value={<ListItems value={report.keyOutcomes} />}
                 style={{ marginBottom: 0 }}
               />
               <DictionaryField
                 wrappedComponent={PreviewField}
                 dictProps={Settings.fields.report.nextSteps}
-                value={report.nextSteps}
+                value={<ListItems value={report.nextSteps} />}
                 style={{ marginBottom: 0 }}
               />
             </div>

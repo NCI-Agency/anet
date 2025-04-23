@@ -21,6 +21,7 @@ import { ReadonlyCustomFields } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
+import ListItems from "components/ListItems"
 import {
   DEFAULT_CUSTOM_FIELDS_PARENT,
   GRAPHQL_ASSESSMENTS_FIELDS,
@@ -343,7 +344,7 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                 <DictionaryField
                   wrappedComponent={CompactRow}
                   dictProps={Settings.fields.report.keyOutcomes}
-                  content={report.keyOutcomes}
+                  content={<ListItems value={report.keyOutcomes} />}
                   className="reportField"
                   hideIfEmpty
                 />
@@ -365,7 +366,7 @@ const CompactReportView = ({ pageDispatchers }: CompactReportViewProps) => {
                 <DictionaryField
                   wrappedComponent={CompactRow}
                   dictProps={Settings.fields.report.nextSteps}
-                  content={report.nextSteps}
+                  content={<ListItems value={report.nextSteps} />}
                   className="reportField"
                   hideIfEmpty
                 />
