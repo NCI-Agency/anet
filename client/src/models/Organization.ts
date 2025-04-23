@@ -1,8 +1,6 @@
 import Model, {
   createCustomFieldsSchema,
-  GRAPHQL_ASSESSMENTS_FIELDS,
   GRAPHQL_ENTITY_AVATAR_FIELDS,
-  GRAPHQL_NOTES_FIELDS,
   yupEmailAddresses
 } from "components/Model"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
@@ -109,94 +107,6 @@ export default class Organization extends Model {
   static autocompleteQuery =
     `uuid shortName longName identificationCode ${GRAPHQL_ENTITY_AVATAR_FIELDS}` +
     " location { uuid name }"
-
-  static allFieldsQuery = `
-    uuid
-    status
-    shortName
-    longName
-    profile
-    identificationCode
-    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-    app6context
-    app6standardIdentity
-    app6symbolSet
-    app6hq
-    app6amplifier
-    app6entity
-    app6entityType
-    app6entitySubtype
-    app6sectorOneModifier
-    app6sectorTwoModifier
-    parentOrg {
-      uuid
-      shortName
-      longName
-      identificationCode
-      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-    }
-    childrenOrgs {
-      uuid
-      shortName
-      longName
-      identificationCode
-    }
-    location {
-      uuid
-      name
-      lat
-      lng
-      type
-    }
-    emailAddresses {
-      network
-      address
-    }
-    planningApprovalSteps {
-      uuid
-      name
-      approvers {
-        uuid
-        name
-        person {
-          uuid
-          name
-          rank
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-        }
-      }
-    }
-    approvalSteps {
-      uuid
-      name
-      approvers {
-        uuid
-        name
-        person {
-          uuid
-          name
-          rank
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-        }
-      }
-    }
-    administratingPositions {
-      uuid
-      name
-      code
-      type
-      role
-      person {
-        uuid
-        name
-        rank
-        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-      }
-    }
-    customFields
-    ${GRAPHQL_ASSESSMENTS_FIELDS}
-    ${GRAPHQL_NOTES_FIELDS}
-  `
 
   static humanNameOfStatus(status) {
     return utils.sentenceCase(status)

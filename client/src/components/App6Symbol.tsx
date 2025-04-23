@@ -21,13 +21,12 @@ export const getChoices = (field: string, values: any[]) => {
     app6entity: () => toEntries(App6Choices[field][symbolSet] || {}),
     app6entityType: () =>
       toEntries(App6Choices.app6entity[symbolSet]?.[app6entity]?.options || {}),
-    app6entitySubtype: () => {
-      return toEntries(
+    app6entitySubtype: () =>
+      toEntries(
         App6Choices.app6entity[symbolSet]?.[app6entity]?.options?.[
           app6entityType
         ]?.options || {}
-      )
-    },
+      ),
     app6amplifier: () => App6Choices[field][symbolSet] || {},
     app6sectorOneModifier: () => App6Choices[field][symbolSet] || {},
     app6sectorTwoModifier: () => App6Choices[field][symbolSet] || {}
@@ -36,26 +35,18 @@ export const getChoices = (field: string, values: any[]) => {
   return (choiceHandlers[field] || (() => App6Choices[field] || {}))()
 }
 
-export const getLabel = (values: any[], field: string) => {
-  const choices = getChoices(field, values)
-  const value = values[field]
-  return choices[value] || ""
-}
-
-export const getFieldsList = () => {
-  return [
-    "app6context",
-    "app6standardIdentity",
-    "app6symbolSet",
-    "app6hq",
-    "app6amplifier",
-    "app6entity",
-    "app6entityType",
-    "app6entitySubtype",
-    "app6sectorOneModifier",
-    "app6sectorTwoModifier"
-  ]
-}
+export const fieldsList = [
+  "app6context",
+  "app6standardIdentity",
+  "app6symbolSet",
+  "app6hq",
+  "app6amplifier",
+  "app6entity",
+  "app6entityType",
+  "app6entitySubtype",
+  "app6sectorOneModifier",
+  "app6sectorTwoModifier"
+]
 
 const getSymbolCode = (values: any[]) => {
   const context = values?.app6context || "0"
