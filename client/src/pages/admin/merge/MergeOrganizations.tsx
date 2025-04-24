@@ -168,6 +168,22 @@ const GQL_MERGE_ORGANIZATION = gql`
 const combinedApp6SymbologyLabel = "APP-06"
 const combinedApp6SymbologyField = "combinedApp6Symbology"
 
+function setCombinedApp6Symbology(org) {
+  if (org) {
+    org[combinedApp6SymbologyField] = Object.fromEntries(
+      app6fieldsList.map(fieldName => [fieldName, org[fieldName]])
+    )
+    const { parentContext, parentStandardIdentity, parentSymbolSet } =
+      Organization.getApp6ParentFields(org, org)
+    org[combinedApp6SymbologyField].app6context =
+      org.app6context || parentContext
+    org[combinedApp6SymbologyField].app6standardIdentity =
+      org.app6standardIdentity || parentStandardIdentity
+    org[combinedApp6SymbologyField].app6symbolSet =
+      org.app6symbolSet || parentSymbolSet
+  }
+}
+
 interface MergeOrganizationsProps {
   pageDispatchers?: PageDispatchersPropType
 }
@@ -194,6 +210,7 @@ const MergeOrganizations = ({ pageDispatchers }: MergeOrganizationsProps) => {
     }).then(data => {
       const organization = new Organization(data.organization)
       organization.fixupFields()
+      setCombinedApp6Symbology(organization)
       dispatchMergeActions(setMergeable(organization, MERGE_SIDES.LEFT))
     })
   }
@@ -374,13 +391,15 @@ const MergeOrganizations = ({ pageDispatchers }: MergeOrganizationsProps) => {
               <MergeField
                 label={combinedApp6SymbologyLabel}
                 value={
-                  <App6SymbolPreview
-                    values={{
-                      ...mergedOrganization[combinedApp6SymbologyField]
-                    }}
-                    size={120}
-                    maxHeight={200}
-                  />
+                  mergedOrganization[combinedApp6SymbologyField] && (
+                    <App6SymbolPreview
+                      values={{
+                        ...mergedOrganization[combinedApp6SymbologyField]
+                      }}
+                      size={120}
+                      maxHeight={200}
+                    />
+                  )
                 }
                 align={ALIGN_OPTIONS.CENTER}
                 fieldName={combinedApp6SymbologyField}
@@ -564,19 +583,7 @@ const OrganizationColumn = ({
           filterDefs={organizationsFilters}
           onChange={value => {
             value?.fixupFields()
-            if (value) {
-              value[combinedApp6SymbologyField] = Object.fromEntries(
-                app6fieldsList.map(fieldName => [fieldName, value[fieldName]])
-              )
-              const { parentContext, parentStandardIdentity, parentSymbolSet } =
-                Organization.getApp6ParentFields(value, value)
-              value[combinedApp6SymbologyField].app6context =
-                value.app6context || parentContext
-              value[combinedApp6SymbologyField].app6standardIdentity =
-                value.app6standardIdentity || parentStandardIdentity
-              value[combinedApp6SymbologyField].app6symbolSet =
-                value.app6symbolSet || parentSymbolSet
-            }
+            setCombinedApp6Symbology(value)
             dispatchMergeActions(setMergeable(value, align))
           }}
           objectType={Organization}
@@ -794,6 +801,7 @@ const OrganizationColumn = ({
               )
             }}
             mergeState={mergeState}
+            autoMerge
             dispatchMergeActions={dispatchMergeActions}
           />
           <DictionaryField
