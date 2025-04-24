@@ -101,21 +101,29 @@ public class Nvg20WebService implements NVGPortType2012 {
   private static final String ANET_SCHEMA_REPORT_NEXT_STEPS = "nextSteps";
 
   static final class App6Symbology {
-    static final String SYMBOL_PREFIX_APP6B = "app6b";
+    static final String SYMBOLOGY_VERSION_APP6B = "app6b";
+    // APP-6 prefix to use:
+    static final String SYMBOL_PREFIX_APP6B = "app6b:";
     // APP-6 symbol to use:
-    // - S = version: APP-6B
+    // - S = coding scheme: Warfighting
     // - F = affiliation: Friend
     // - G = battle dimension / surface: Ground
     // - %1$s = status: P for Present, A for Anticipated/Planned
-    // - U = symbol indicator: Unit
+    // - U = function id: Unit
     // - ------- = more defaults
     private static final String ACTIVITY_MEETING_APP6B = "SFG%1$sU-------";
     private static final String ACTIVITY_STATUS_PRESENT_APP6B = "P";
     private static final String ACTIVITY_STATUS_PLANNED_APP6B = "A";
 
-    static final String SYMBOL_PREFIX_APP6D = "app6d";
-    // APP-6 symbol to use:
+    static final String SYMBOLOGY_VERSION_APP6D_UNOFFICIAL = "app6d-old";
+    // APP-6 prefix to use:
     // - 10 = version: APP-6D
+    static final String SYMBOL_PREFIX_APP6D_UNOFFICIAL = "app6d:10";
+    static final String SYMBOLOGY_VERSION_APP6D = "app6d";
+    // APP-6 prefix to use:
+    // - 10 = version: APP-6D
+    static final String SYMBOL_PREFIX_APP6D = "app06:10";
+    // APP-6 symbol to use:
     // - 0 = context: Reality
     // - 3 = standard identity: Friend
     // - 40 = symbol set: Activity/Event
@@ -126,23 +134,39 @@ public class Nvg20WebService implements NVGPortType2012 {
     // - 00 = modifier 1: Unspecified
     // - 00 = modifier 2: Unspecified
     // - 0000000000 = more defaults
-    private static final String ACTIVITY_MEETING_APP6D = "1303400%1$s0013100000000000000000";
+    private static final String ACTIVITY_MEETING_APP6D = "03400%1$s0013100000000000000000";
     private static final String ACTIVITY_STATUS_PRESENT_APP6D = "0";
     private static final String ACTIVITY_STATUS_PLANNED_APP6D = "1";
 
+    private static final String VERSION_TEXT = "versionText";
+    private static final String SYMBOL_PREFIX = "symbolPrefix";
     private static final String SYMBOL_FORMAT = "symbolFormat";
     private static final String STATUS_PRESENT = "statusPresent";
     private static final String STATUS_PLANNED = "statusPlanned";
     private static final Map<String, Map<String, String>> APP6_SETTINGS = Map.of( // -
-        SYMBOL_PREFIX_APP6B, Map.of(SYMBOL_FORMAT, ACTIVITY_MEETING_APP6B, // -
+        SYMBOLOGY_VERSION_APP6B, Map.of( // -
+            VERSION_TEXT, "APP-6(B) Standard, with symbol encoded as %s…", // -
+            SYMBOL_PREFIX, SYMBOL_PREFIX_APP6B, // -
+            SYMBOL_FORMAT, ACTIVITY_MEETING_APP6B, // -
             STATUS_PRESENT, ACTIVITY_STATUS_PRESENT_APP6B, // -
             STATUS_PLANNED, ACTIVITY_STATUS_PLANNED_APP6B),
-        SYMBOL_PREFIX_APP6D, Map.of(SYMBOL_FORMAT, ACTIVITY_MEETING_APP6D, // -
+        SYMBOLOGY_VERSION_APP6D_UNOFFICIAL, Map.of( // -
+            VERSION_TEXT, "Unofficial reading of APP-6(D) Standard, with symbol encoded as %s…", // -
+            SYMBOL_PREFIX, SYMBOL_PREFIX_APP6D_UNOFFICIAL, // -
+            SYMBOL_FORMAT, ACTIVITY_MEETING_APP6D, // -
+            STATUS_PRESENT, ACTIVITY_STATUS_PRESENT_APP6D, // -
+            STATUS_PLANNED, ACTIVITY_STATUS_PLANNED_APP6D),
+        SYMBOLOGY_VERSION_APP6D, Map.of( // -
+            VERSION_TEXT, "APP-6(D) Standard, with symbol encoded as %s…", // -
+            SYMBOL_PREFIX, SYMBOL_PREFIX_APP6D, // -
+            SYMBOL_FORMAT, ACTIVITY_MEETING_APP6D, // -
             STATUS_PRESENT, ACTIVITY_STATUS_PRESENT_APP6D, // -
             STATUS_PLANNED, ACTIVITY_STATUS_PLANNED_APP6D));
 
-    static final String DEFAULT_APP6_VERSION = SYMBOL_PREFIX_APP6D;
-    static final Set<String> VALID_APP6_VERSIONS = Set.of(SYMBOL_PREFIX_APP6B, SYMBOL_PREFIX_APP6D);
+    // Not the correct interpretation of the standard, but currently used by external tools
+    static final String DEFAULT_APP6_VERSION = SYMBOLOGY_VERSION_APP6D_UNOFFICIAL;
+    static final Set<String> VALID_APP6_VERSIONS = Set.of(SYMBOLOGY_VERSION_APP6B,
+        SYMBOLOGY_VERSION_APP6D_UNOFFICIAL, SYMBOLOGY_VERSION_APP6D);
 
     private App6Symbology() {}
 
@@ -150,13 +174,22 @@ public class Nvg20WebService implements NVGPortType2012 {
       return VALID_APP6_VERSIONS.contains(app6Version);
     }
 
+    static String getVersionHelp(String app6Version) {
+      final Map<String, String> app6Settings = getApp6Settings(app6Version);
+      return String.format(app6Settings.get(App6Symbology.VERSION_TEXT),
+          app6Settings.get(App6Symbology.SYMBOL_PREFIX));
+    }
+
     static String getApp6Symbol(String app6Version, boolean isPlanned) {
-      final Map<String, String> app6Settings =
-          APP6_SETTINGS.getOrDefault(app6Version, APP6_SETTINGS.get(DEFAULT_APP6_VERSION));
+      final Map<String, String> app6Settings = getApp6Settings(app6Version);
       final String app6Status =
           isPlanned ? app6Settings.get(STATUS_PLANNED) : app6Settings.get(STATUS_PRESENT);
       final String app6Symbol = String.format(app6Settings.get(SYMBOL_FORMAT), app6Status);
-      return String.format("%1$s:%2$s", app6Version, app6Symbol);
+      return String.format("%1$s%2$s", app6Settings.get(SYMBOL_PREFIX), app6Symbol);
+    }
+
+    private static Map<String, String> getApp6Settings(String app6Version) {
+      return APP6_SETTINGS.getOrDefault(app6Version, APP6_SETTINGS.get(DEFAULT_APP6_VERSION));
     }
   }
 
@@ -608,10 +641,9 @@ public class Nvg20WebService implements NVGPortType2012 {
       selectType.setRequired(false);
       selectType.setName("APP-6 version");
       final SelectType.Values values = NVG_OF.createSelectTypeValues();
-      values.getValue().add(getSelectValueType(App6Symbology.SYMBOL_PREFIX_APP6B, "APP-6(B)",
-          DEFAULT_APP6_VERSION.equals(App6Symbology.SYMBOL_PREFIX_APP6B)));
-      values.getValue().add(getSelectValueType(App6Symbology.SYMBOL_PREFIX_APP6D, "APP-6(D)",
-          DEFAULT_APP6_VERSION.equals(App6Symbology.SYMBOL_PREFIX_APP6D)));
+      App6Symbology.VALID_APP6_VERSIONS.forEach(app6Version -> values.getValue()
+          .add(getSelectValueType(app6Version, App6Symbology.getVersionHelp(app6Version),
+              DEFAULT_APP6_VERSION.equals(app6Version))));
       selectType.setValues(values);
       final HelpType helpType = NVG_OF.createHelpType();
       helpType.setText("The APP-6 version to use for the symbology");
