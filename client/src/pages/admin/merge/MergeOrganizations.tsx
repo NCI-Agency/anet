@@ -165,6 +165,9 @@ const GQL_MERGE_ORGANIZATION = gql`
   }
 `
 
+const combinedApp6SymbologyLabel = "APP-06"
+const combinedApp6SymbologyField = "combinedApp6Symbology"
+
 interface MergeOrganizationsProps {
   pageDispatchers?: PageDispatchersPropType
 }
@@ -368,18 +371,19 @@ const MergeOrganizations = ({ pageDispatchers }: MergeOrganizationsProps) => {
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
-              <DictionaryField
-                wrappedComponent={MergeField}
-                dictProps={{ label: "APP-06" }}
+              <MergeField
+                label={combinedApp6SymbologyLabel}
                 value={
                   <App6SymbolPreview
-                    values={{ ...mergedOrganization }}
+                    values={{
+                      ...mergedOrganization[combinedApp6SymbologyField]
+                    }}
                     size={120}
                     maxHeight={200}
                   />
                 }
                 align={ALIGN_OPTIONS.CENTER}
-                fieldName="uuid"
+                fieldName={combinedApp6SymbologyField}
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
@@ -479,8 +483,10 @@ const MergeOrganizations = ({ pageDispatchers }: MergeOrganizationsProps) => {
         ? organization2
         : organization1
     mergedOrganization.customFields = customFieldsJSONString(mergedOrganization)
-    const winnerOrganization =
-      Organization.filterClientSideFields(mergedOrganization)
+    const winnerOrganization = Organization.filterClientSideFields(
+      mergedOrganization,
+      combinedApp6SymbologyField
+    )
     API.mutation(GQL_MERGE_ORGANIZATION, {
       loserUuid: loser.uuid,
       winnerOrganization
@@ -558,6 +564,19 @@ const OrganizationColumn = ({
           filterDefs={organizationsFilters}
           onChange={value => {
             value?.fixupFields()
+            if (value) {
+              value[combinedApp6SymbologyField] = Object.fromEntries(
+                app6fieldsList.map(fieldName => [fieldName, value[fieldName]])
+              )
+              const { parentContext, parentStandardIdentity, parentSymbolSet } =
+                Organization.getApp6ParentFields(value, value)
+              value[combinedApp6SymbologyField].app6context =
+                value.app6context || parentContext
+              value[combinedApp6SymbologyField].app6standardIdentity =
+                value.app6standardIdentity || parentStandardIdentity
+              value[combinedApp6SymbologyField].app6symbolSet =
+                value.app6symbolSet || parentSymbolSet
+            }
             dispatchMergeActions(setMergeable(value, align))
           }}
           objectType={Organization}
@@ -745,10 +764,9 @@ const OrganizationColumn = ({
             autoMerge
             dispatchMergeActions={dispatchMergeActions}
           />
-          <DictionaryField
-            wrappedComponent={MergeField}
-            dictProps={{ label: "APP-06" }}
-            fieldName="uuid"
+          <MergeField
+            label={combinedApp6SymbologyLabel}
+            fieldName={combinedApp6SymbologyField}
             value={
               <App6SymbolPreview
                 values={organization}
@@ -758,14 +776,24 @@ const OrganizationColumn = ({
             }
             align={align}
             action={() => {
-              app6FieldsList.forEach(fieldName => {
+              app6fieldsList.forEach(fieldName => {
                 dispatchMergeActions(
-                  setAMergedField(fieldName, organization[fieldName], align)
+                  setAMergedField(
+                    fieldName,
+                    organization[combinedApp6SymbologyField][fieldName],
+                    align
+                  )
                 )
               })
+              dispatchMergeActions(
+                setAMergedField(
+                  combinedApp6SymbologyField,
+                  organization[combinedApp6SymbologyField],
+                  align
+                )
+              )
             }}
             mergeState={mergeState}
-            autoMerge
             dispatchMergeActions={dispatchMergeActions}
           />
           <DictionaryField
