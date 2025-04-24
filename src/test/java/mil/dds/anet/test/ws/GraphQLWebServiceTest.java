@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.leangen.graphql.spqr.spring.web.dto.GraphQLRequest;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import mil.dds.anet.beans.Report;
@@ -75,5 +76,31 @@ public class GraphQLWebServiceTest extends AbstractResourceTest {
     final AnetBeanList<Report> anetBeanList =
         defaultMapper.convertValue(data.get("reportList"), typeRef);
     assertThat(anetBeanList.getList()).isNotNull();
+  }
+
+  @Test
+  void testMutation() {
+    final Map<String, Object> variables = Map.of("report", Map.of( // -
+        "reportPeople", List.of(Map.of( // -
+            "uuid", "87fdbc6a-3109-4e11-9702-a894d6ca31ef", // -
+            "primary", true, // -
+            "author", true, // -
+            "attendee", true, // -
+            "interlocutor", false))));
+    final String createReportMutation =
+        "mutation ($report: ReportInput!) { createReport(report: $report) {"
+            + " uuid state authors { uuid } reportSensitiveInformation { uuid text } } }";
+    final GraphQLRequest graphQLRequest =
+        new GraphQLRequest(null, createReportMutation, null, variables);
+
+    final ResponseEntity<Map<String, Object>> result = graphQLWebService
+        .graphqlPostJson(graphQLRequest, "Bearer W+Cs0C6uagyXhcfKOkO8TOGSHRY6ZNXf");
+    assertThat(result).isNotNull();
+    @SuppressWarnings("unchecked")
+    final Map<String, Object> data =
+        (Map<String, Object>) Objects.requireNonNull(result.getBody()).get("data");
+    final ObjectMapper defaultMapper = MapperUtils.getDefaultMapper();
+    final Report report = defaultMapper.convertValue(data.get("createReport"), Report.class);
+    assertThat(report).isNull();
   }
 }
