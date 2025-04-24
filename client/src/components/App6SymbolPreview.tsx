@@ -81,16 +81,14 @@ const App6SymbolPreview = ({
           >
             <Table responsive>
               <tbody>
-                {app6ValueKeys.map(key => {
-                  return (
-                    <FieldRow
-                      key={key}
-                      fieldName={key}
-                      values={values}
-                      parentValues={parentValues}
-                    />
-                  )
-                })}
+                {app6ValueKeys.map(key => (
+                  <FieldRow
+                    key={key}
+                    fieldName={key}
+                    values={values}
+                    parentValues={parentValues}
+                  />
+                ))}
               </tbody>
             </Table>
           </div>
