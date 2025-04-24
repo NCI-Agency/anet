@@ -307,7 +307,7 @@ public class AssessmentDao extends AnetBaseDao<Assessment, AbstractSearchQuery<?
       final Set<String> authorizationGroupUuids, final Assessment assessment,
       final UpdateType updateType) {
     // Admins always have access
-    // Assessment that a `null` user means this is called through a merge function, by an admin
+    // Note that a `null` user means this is called through a merge function, by an admin
     if (user == null || AuthUtils.isAdmin(user)) {
       return true;
     }
