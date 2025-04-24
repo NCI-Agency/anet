@@ -9,6 +9,7 @@ import io.leangen.graphql.ExecutableSchema;
 import io.leangen.graphql.GraphQLRuntime;
 import io.leangen.graphql.GraphQLSchemaGenerator;
 import io.leangen.graphql.annotations.GraphQLInputField;
+import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.execution.InvocationContext;
 import io.leangen.graphql.execution.ResolutionEnvironment;
 import io.leangen.graphql.execution.ResolverInterceptor;
@@ -215,6 +216,12 @@ public class GraphQLConfig implements WebMvcConfigurer {
         return null;
       }
 
+      // Check for mutations
+      if (accessToken != null && denyMutations(delegate)) {
+        // Simply return null so the GraphQL response contains no extra information
+        return null;
+      }
+
       // Check for access restricted to authorizationGroups
       if (denyRestrictedAccess(delegate, resolutionEnvironment, currentUser)) {
         // Simply return null so the GraphQL response contains no extra information
@@ -229,6 +236,11 @@ public class GraphQLConfig implements WebMvcConfigurer {
           delegate.getAnnotation(AllowUnverifiedUsers.class);
       return allowUnverifiedUsers == null
           && Boolean.TRUE.equals(currentUser.getPendingVerification());
+    }
+
+    private boolean denyMutations(AnnotatedElement delegate) {
+      final GraphQLMutation graphQLMutation = delegate.getAnnotation(GraphQLMutation.class);
+      return graphQLMutation != null;
     }
 
     private boolean denyRestrictedAccess(AnnotatedElement delegate,
