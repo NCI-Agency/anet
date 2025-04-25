@@ -26,14 +26,6 @@ const taskFields = `
   }
 `
 
-const GQL_GET_TASK = gql`
-  query ($uuid: String!) {
-    task(uuid: $uuid) {
-      ${taskFields}
-    }
-  }
-`
-
 const GQL_GET_TASKS = gql`
   query ($uuids: [String]) {
     tasks(uuids: $uuids) {
@@ -76,11 +68,6 @@ const HierarchicalOverlayTable = ({
             descendantTasks {
               uuid
             }
-            parentTask {
-              childrenTasks {
-                ${taskFields}
-              }
-            }
           }
         }
       }
@@ -121,12 +108,12 @@ const HierarchicalOverlayTable = ({
           task.ascendantTasks?.some(child => child.uuid === item.uuid)
         )
       const isCollapsed = !expandedItems.has(task.uuid)
+      const isDescendantTaskSelectedAndCollapsed =
+        isDescendantTaskSelected && isCollapsed ? null : false
       const isSelected =
         isTaskSelected || isAscendantTaskSelected
           ? true
-          : isDescendantTaskSelected && isCollapsed
-            ? null
-            : false
+          : isDescendantTaskSelectedAndCollapsed
       const disabled = isAscendantTaskSelected
       const taskWithLevel = { ...task, level, isSelected, disabled }
       const children = expandedItems.has(task.uuid)
@@ -181,7 +168,6 @@ const HierarchicalOverlayTable = ({
                 isExpanded ? IconNames.CHEVRON_DOWN : IconNames.CHEVRON_RIGHT
               }
               size={IconSize.STANDARD}
-              color="#5f6b7c"
             />
           </span>
         )}
@@ -189,14 +175,9 @@ const HierarchicalOverlayTable = ({
           <Icon
             icon={isExpanded ? IconNames.FOLDER_OPEN : IconNames.FOLDER_CLOSE}
             size={IconSize.STANDARD}
-            color="#5f6b7c"
           />
         ) : (
-          <Icon
-            icon={IconNames.DOCUMENT}
-            size={IconSize.STANDARD}
-            color="#5f6b7c"
-          />
+          <Icon icon={IconNames.DOCUMENT} size={IconSize.STANDARD} />
         )}
         <Icon icon={IconNames.STAR} size={12} />
         <span
@@ -268,9 +249,6 @@ const TaskFilter = ({
     defaultValue,
     toQuery
   )
-
-  const [expandedItems, setExpandedItems] = useState(new Set<string>())
-  const [childrenMap, setChildrenMap] = useState(new Map<string, any[]>())
 
   const advancedSelectFilters = {
     all: {
