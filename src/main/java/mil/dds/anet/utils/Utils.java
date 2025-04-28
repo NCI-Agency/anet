@@ -647,4 +647,25 @@ public class Utils {
     return DateTimeFormatter.ofPattern(pattern).withLocale(getLocaleForDateFormatters(dict))
         .withZone(DaoUtils.getServerLocalZoneId());
   }
+
+  public static String ellipsizeOnWords(String value, int maxLength) {
+    if (isEmptyOrNull(value)) {
+      return value;
+    }
+
+    final String space = " ";
+    final String singleSpacedValue = value.replaceAll("\\s+", space).trim();
+
+    if (singleSpacedValue.length() <= maxLength) {
+      return singleSpacedValue;
+    }
+
+    String trimmedStr = singleSpacedValue.substring(0, maxLength);
+    final int lastSpace = trimmedStr.lastIndexOf(space);
+    if (lastSpace != -1) {
+      trimmedStr = trimmedStr.substring(0, lastSpace);
+    }
+
+    return trimmedStr + "…";
+  }
 }
