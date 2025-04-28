@@ -569,6 +569,14 @@ const Navigation = ({
           ))}
         </NavDropdown>
       )}
+      <SidebarLink
+        id="preferences-nav"
+        linkTo="/preferences"
+        handleOnClick={resetPages}
+        setIsMenuLinksOpened={() => setIsMenuLinksOpened(false)}
+      >
+        Preferences
+      </SidebarLink>
     </Nav>
   )
 }
