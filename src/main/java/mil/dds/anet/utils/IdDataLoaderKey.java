@@ -12,6 +12,7 @@ import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PositionDao;
+import mil.dds.anet.database.PreferenceDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.SubscriptionDao;
 import mil.dds.anet.database.TaskDao;
@@ -27,6 +28,7 @@ public enum IdDataLoaderKey {
   LOCATIONS(LocationDao.TABLE_NAME), // -
   ORGANIZATIONS(OrganizationDao.TABLE_NAME), // -
   PEOPLE(PersonDao.TABLE_NAME), // -
+  PREFERENCES(PreferenceDao.TABLE_NAME), // -
   POSITIONS(PositionDao.TABLE_NAME), // -
   REPORTS(ReportDao.TABLE_NAME), // -
   SUBSCRIPTIONS(SubscriptionDao.TABLE_NAME), // -

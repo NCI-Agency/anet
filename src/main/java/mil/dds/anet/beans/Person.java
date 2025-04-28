@@ -83,6 +83,8 @@ public class Person extends AbstractEmailableAnetBean
   private List<PersonPositionHistory> previousPositions;
   // annotated below
   private List<AuthorizationGroup> authorizationGroups;
+  // annotated below
+  private List<PersonPreference> preferences;
   @GraphQLQuery
   @GraphQLInputField
   private String code;
@@ -399,6 +401,27 @@ public class Person extends AbstractEmailableAnetBean
       @GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "network") String network) {
     return super.loadEmailAddresses(context, network);
+  }
+
+  @GraphQLQuery(name = "preferences")
+  public CompletableFuture<List<PersonPreference>> loadPreferences(
+      @GraphQLRootContext GraphQLContext context) {
+    if (preferences != null) {
+      return CompletableFuture.completedFuture(preferences);
+    }
+    return engine().getPersonDao().getPreferences(context, uuid).thenApply(o -> {
+      preferences = o;
+      return o;
+    });
+  }
+
+  public List<PersonPreference> getPreferences() {
+    return preferences;
+  }
+
+  @GraphQLInputField(name = "preferences")
+  public void setPreferences(List<PersonPreference> preferences) {
+    this.preferences = preferences;
   }
 
   @Override

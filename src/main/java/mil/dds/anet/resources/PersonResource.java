@@ -13,6 +13,7 @@ import java.util.Objects;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.EmailAddress;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.PersonPreference;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionType;
 import mil.dds.anet.beans.WithStatus;
@@ -21,6 +22,7 @@ import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.PersonDao;
+import mil.dds.anet.database.PersonPreferenceDao;
 import mil.dds.anet.graphql.AllowUnverifiedUsers;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
@@ -38,11 +40,14 @@ public class PersonResource {
   private final AnetDictionary dict;
   private final AnetObjectEngine engine;
   private final PersonDao dao;
+  private final PersonPreferenceDao personPreferenceDao;
 
-  public PersonResource(AnetDictionary dict, AnetObjectEngine anetObjectEngine, PersonDao dao) {
+  public PersonResource(AnetDictionary dict, AnetObjectEngine anetObjectEngine, PersonDao dao,
+      PersonPreferenceDao personPreferenceDao) {
     this.dict = dict;
     this.engine = anetObjectEngine;
     this.dao = dao;
+    this.personPreferenceDao = personPreferenceDao;
   }
 
   public static boolean hasPermission(final Person user, final String personUuid) {
@@ -258,6 +263,25 @@ public class PersonResource {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           "You do not have permissions to edit this person");
     }
+  }
+
+  @GraphQLMutation(name = "updatePersonPreferences")
+  public Integer updatePersonPreferences(@GraphQLRootContext GraphQLContext context,
+      @GraphQLArgument(name = "preferences") List<PersonPreference> preferences) {
+    final Person user = DaoUtils.getUserFromContext(context);
+
+    int numRows = 0;
+    for (PersonPreference preference : preferences) {
+      // Check the preference belongs to the user
+      if (!preference.getPerson().getUuid().equals(user.getUuid())) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+            "You do not have permissions to edit this person");
+      }
+      personPreferenceDao.upsert(preference);
+      numRows++;
+    }
+    AnetAuditLogger.log("Preferences updated by {}", user);
+    return numRows;
   }
 
   @GraphQLQuery(name = "personList")
