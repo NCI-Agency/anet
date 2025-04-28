@@ -284,7 +284,7 @@ public class Nvg20WebService implements NVGPortType2012 {
     }
 
     final List<Report> reports = getReportsByPeriod(start, end);
-    contentTypeList.addAll(reports.stream()
+    contentTypeList.addAll(reports.stream().filter(this::hasLocationCoordinates)
         .map(r -> reportToNvgPoint(nvgConfig.getApp6Version(),
             nvgConfig.isIncludeElementConfidentialityLabels(),
             nvgConfig.isAddElementConfidentialityLabelsAsMetadata(), defaultConfidentiality, now,
@@ -292,6 +292,11 @@ public class Nvg20WebService implements NVGPortType2012 {
         .toList());
 
     return nvgType;
+  }
+
+  private boolean hasLocationCoordinates(Report r) {
+    final Location location = r.getLocation();
+    return location != null && location.getLng() != null && location.getLat() != null;
   }
 
   private void makeReportSchema(NvgType nvgType) {
@@ -512,10 +517,8 @@ public class Nvg20WebService implements NVGPortType2012 {
 
   private void setLocation(Report report, PointType nvgPoint) {
     final Location location = report.getLocation();
-    if (location != null && location.getLng() != null && location.getLat() != null) {
-      nvgPoint.setX(location.getLng());
-      nvgPoint.setY(location.getLat());
-    }
+    nvgPoint.setX(location.getLng());
+    nvgPoint.setY(location.getLat());
   }
 
   private List<Report> getReportsByPeriod(final Instant start, final Instant end) {
