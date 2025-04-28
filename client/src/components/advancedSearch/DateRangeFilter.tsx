@@ -10,6 +10,7 @@ import {
   LAST_DAY,
   LAST_MONTH,
   LAST_WEEK,
+  LAST_X_DAYS,
   ON,
   RANGE_TYPE_LABELS
 } from "dateUtils"
@@ -24,6 +25,7 @@ interface DateRangeValueType {
   relative?: string | number
   start?: string | number | Date
   end?: string | number | Date
+  days?: number
 }
 
 interface DateRangeFilterProps {
@@ -44,7 +46,8 @@ const DateRangeFilter = ({
   const defaultValue = inputValue || {
     relative: BETWEEN,
     start: null,
-    end: null
+    end: null,
+    days: null
   }
   const toQuery = val => {
     return dateToQuery(queryKey, val)
@@ -81,6 +84,9 @@ const DateRangeFilter = ({
       </option>,
       <option key="last_month" value={LAST_MONTH}>
         {RANGE_TYPE_LABELS[LAST_MONTH]}
+      </option>,
+      <option key="last_x_days" value={LAST_X_DAYS}>
+        {RANGE_TYPE_LABELS[LAST_X_DAYS]}
       </option>
     ]
     const options = onlyBetween
@@ -116,6 +122,9 @@ const DateRangeFilter = ({
       moment(value.end).format(Settings.dateFormats.forms.displayShort.date)
     )
   }
+  if (value.relative === LAST_X_DAYS) {
+    dateRangeDisplay = `Last ${value.days || "X"} days`
+  }
   const dateStart = value.start && moment(value.start).toDate()
   const dateEnd = value.end && moment(value.end).toDate()
   return !asFormField ? (
@@ -127,7 +136,8 @@ const DateRangeFilter = ({
           display: "flex",
           flexDirection: "row",
           alignItems: "center",
-          flexWrap: "wrap"
+          flexWrap: "wrap",
+          gap: 5
         }}
       >
         {selectMenu(onlyBetween)}
@@ -152,20 +162,30 @@ const DateRangeFilter = ({
             onChange={handleChangeEnd}
           />
         )}
+        {value.relative === LAST_X_DAYS && (
+          <input
+            className="custom-number-input"
+            type="number"
+            min="1"
+            value={value.days || ""}
+            onChange={handleChangeDays}
+          />
+        )}
       </div>
     </Form.Group>
   )
 
   function handleChangeStart(newDate) {
-    setValue(prevValue => {
-      return { ...prevValue, start: newDate }
-    })
+    setValue(prevValue => ({ ...prevValue, start: newDate }))
   }
 
   function handleChangeEnd(newDate) {
-    setValue(prevValue => {
-      return { ...prevValue, end: newDate }
-    })
+    setValue(prevValue => ({ ...prevValue, end: newDate }))
+  }
+
+  function handleChangeDays(e) {
+    const days = e.target.value ? parseInt(e.target.value, 10) : null
+    setValue(prevValue => ({ ...prevValue, days }))
   }
 
   function handleChangeRelative(newValue) {
@@ -183,12 +203,16 @@ export const deserialize = ({ queryKey }, query, key) => {
   const filterValue = {}
 
   if (query[startKey]) {
-    toQueryValue[startKey] = query[startKey]
+    const startVal = query[startKey]
+    toQueryValue[startKey] = startVal
     const lastValues = [LAST_DAY, LAST_WEEK, LAST_MONTH]
-    if (lastValues.indexOf(+query[startKey]) !== -1) {
-      filterValue.relative = query[startKey]
+    if (lastValues.indexOf(+startVal) !== -1) {
+      filterValue.relative = startVal
+    } else if (!isNaN(parseInt(startVal))) {
+      filterValue.relative = LAST_X_DAYS
+      filterValue.days = parseInt(startVal)
     } else {
-      filterValue.start = moment(query[startKey]).format(DATE_FORMAT)
+      filterValue.start = moment(startVal).format(DATE_FORMAT)
       if (query[endKey]) {
         filterValue.relative = BETWEEN
       } else {

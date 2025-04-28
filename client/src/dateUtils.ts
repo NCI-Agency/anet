@@ -1,9 +1,11 @@
+import { L } from "@fullcalendar/list/internal-common"
 import moment from "moment"
 
 export const BETWEEN = "0"
 export const BEFORE = "1"
 export const AFTER = "2"
 export const ON = "3"
+export const LAST_X_DAYS = "4"
 export const LAST_DAY = -1 * 1000 * 60 * 60 * 24
 export const LAST_WEEK = LAST_DAY * 7
 export const LAST_MONTH = LAST_DAY * 30
@@ -13,6 +15,7 @@ export const RANGE_TYPE_LABELS = {
   [BEFORE]: "Before",
   [AFTER]: "After",
   [ON]: "On",
+  [LAST_X_DAYS]: "Last … days",
   [LAST_DAY]: "Last 24 hours",
   [LAST_WEEK]: "Last 7 days",
   [LAST_MONTH]: "Last 30 days"
@@ -54,6 +57,16 @@ export function dateToQuery(queryKey, value) {
     return {
       [startKey]: startDateStart,
       [endKey]: startDateEnd
+    }
+  } else if (value.relative === LAST_X_DAYS) {
+    const days = value.days
+    if (days && !isNaN(days)) {
+      const milliseconds = days * LAST_DAY
+      return {
+        [startKey]: milliseconds
+      }
+    } else {
+      return {}
     }
   } else {
     // LAST_DAY, LAST_WEEK, LAST_MONTH => Time relative to now, up till now
