@@ -13,6 +13,7 @@ import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.EntityAvatar;
 import mil.dds.anet.beans.MergedEntity;
 import mil.dds.anet.beans.Organization;
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
@@ -394,7 +395,7 @@ public class OrganizationDao
           winnerOrganization.getEmailAddresses());
 
       // Update customSensitiveInformation for winner
-      DaoUtils.saveCustomSensitiveInformation(null, OrganizationDao.TABLE_NAME,
+      DaoUtils.saveCustomSensitiveInformation(Person.SYSTEM_USER, OrganizationDao.TABLE_NAME,
           winnerOrganizationUuid, winnerOrganization.getCustomSensitiveInformation());
       // Delete customSensitiveInformation for loser
       deleteForMerge("customSensitiveInformation", "relatedObjectUuid", loserOrganizationUuid);

@@ -30,6 +30,16 @@ import mil.dds.anet.views.UuidFetcher;
 public class Person extends AbstractEmailableAnetBean
     implements Principal, RelatableObject, SubscribableObject, WithStatus, Comparable<Person> {
 
+  public static final Person SYSTEM_USER;
+  static {
+    SYSTEM_USER = new Person();
+    SYSTEM_USER.setUuid("-2");
+  }
+
+  public static boolean isSystemUser(Person user) {
+    return SYSTEM_USER.equals(user);
+  }
+
   private static final Comparator<Person> COMPARATOR =
       Comparator.comparing(Person::getName).thenComparing(Person::getUuid);
 

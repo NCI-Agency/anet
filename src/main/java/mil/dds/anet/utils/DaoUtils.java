@@ -2,6 +2,7 @@ package mil.dds.anet.utils;
 
 import com.google.common.base.Joiner;
 import graphql.GraphQLContext;
+import java.security.Principal;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -15,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import mil.dds.anet.beans.AccessToken;
 import mil.dds.anet.beans.Assessment;
 import mil.dds.anet.beans.CustomSensitiveInformation;
 import mil.dds.anet.beans.Person;
@@ -74,19 +74,18 @@ public class DaoUtils {
     return " " + Joiner.on(", ").join(fieldAliases) + " ";
   }
 
-  public static AccessToken getAccessTokenFromContext(GraphQLContext context) {
+  public static Principal getPrincipalFromContext(GraphQLContext context) {
     if (context == null) {
       return null;
     }
-    return context.get("accessToken");
+    return context.get("principal");
   }
 
   public static Person getUserFromContext(GraphQLContext context) {
-    if (context == null) {
-      // Called from e.g. merge
+    if (!(getPrincipalFromContext(context) instanceof Person user)) {
       return null;
     }
-    return context.get("user");
+    return user;
   }
 
   public static Position getPosition(final Person user) {

@@ -259,8 +259,8 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
   public boolean hasNotePermission(final Person user, final String authorUuid,
       final UpdateType updateType) {
     // Admins always have access
-    // Note that a `null` user means this is called through a merge function, by an admin
-    if (user == null || AuthUtils.isAdmin(user)) {
+    // Note that system user means this is called through e.g. a worker or a merge function
+    if (Person.isSystemUser(user) || AuthUtils.isAdmin(user)) {
       return true;
     }
 

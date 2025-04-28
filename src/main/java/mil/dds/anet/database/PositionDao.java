@@ -17,6 +17,7 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.EntityAvatar;
 import mil.dds.anet.beans.MergedEntity;
 import mil.dds.anet.beans.Organization;
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionType;
@@ -665,8 +666,8 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
           winner.getEmailAddresses());
 
       // Update customSensitiveInformation for winner
-      DaoUtils.saveCustomSensitiveInformation(null, PositionDao.TABLE_NAME, winnerUuid,
-          winner.getCustomSensitiveInformation());
+      DaoUtils.saveCustomSensitiveInformation(Person.SYSTEM_USER, PositionDao.TABLE_NAME,
+          winnerUuid, winner.getCustomSensitiveInformation());
       // Delete customSensitiveInformation for loser
       deleteForMerge("customSensitiveInformation", "relatedObjectUuid", loserUuid);
 

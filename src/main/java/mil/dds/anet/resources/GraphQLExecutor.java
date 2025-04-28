@@ -96,13 +96,13 @@ public class GraphQLExecutor extends HttpExecutor<NativeWebRequest> {
     final Map<String, Object> context = new HashMap<>();
     // Is this an AccessTokenPrincipal?
     if (principal instanceof AccessTokenPrincipal accessTokenPrincipal) {
-      context.put("accessToken", accessTokenPrincipal.accessToken());
+      context.put("principal", accessTokenPrincipal);
       context.put(Introspection.INTROSPECTION_DISABLED,
           // GraphQL web service is allowed to do introspection
           !TokenScope.GRAPHQL.equals(accessTokenPrincipal.accessToken().getScope()));
     } else {
       final Person user = SecurityUtils.getPersonFromPrincipal(principal);
-      context.put("user", Objects.requireNonNullElse(user, new Person()));
+      context.put("principal", Objects.requireNonNullElse(user, new Person()));
       context.put(Introspection.INTROSPECTION_DISABLED, !AuthUtils.isAdmin(user));
     }
 
