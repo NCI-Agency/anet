@@ -20,8 +20,8 @@ import io.leangen.graphql.metadata.strategy.query.AnnotatedResolverBuilder;
 import io.leangen.graphql.spqr.spring.autoconfigure.SpqrProperties;
 import io.leangen.graphql.spqr.spring.web.GraphQLController;
 import java.lang.reflect.AnnotatedElement;
+import java.security.Principal;
 import java.util.List;
-import mil.dds.anet.beans.AccessToken;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
@@ -50,6 +50,7 @@ import mil.dds.anet.resources.SubscriptionResource;
 import mil.dds.anet.resources.SubscriptionUpdateResource;
 import mil.dds.anet.resources.TaskResource;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.ws.AccessTokenPrincipal;
 import org.springframework.context.annotation.Bean;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.stereotype.Component;
@@ -206,24 +207,23 @@ public class GraphQLConfig implements WebMvcConfigurer {
       final GraphQLContext context =
           resolutionEnvironment.dataFetchingEnvironment.getGraphQlContext();
 
-      // In context, we might have an ANET user or an AccessToken
-      final Person currentUser = DaoUtils.getUserFromContext(context);
-      final AccessToken accessToken = DaoUtils.getAccessTokenFromContext(context);
+      // In context, we might have a Person or an AccessTokenPrincipal
+      final Principal principal = DaoUtils.getPrincipalFromContext(context);
 
       // Check for unverified users
-      if (accessToken == null && denyUnverifiedUsers(delegate, currentUser)) {
+      if (principal instanceof Person currentUser && denyUnverifiedUsers(delegate, currentUser)) {
         // Simply return null so the GraphQL response contains no extra information
         return null;
       }
 
       // Check for mutations
-      if (accessToken != null && denyMutations(delegate)) {
+      if (principal instanceof AccessTokenPrincipal && denyMutations(delegate)) {
         // Simply return null so the GraphQL response contains no extra information
         return null;
       }
 
       // Check for access restricted to authorizationGroups
-      if (denyRestrictedAccess(delegate, resolutionEnvironment, currentUser)) {
+      if (denyRestrictedAccess(delegate, resolutionEnvironment, principal)) {
         // Simply return null so the GraphQL response contains no extra information
         return null;
       }
@@ -244,7 +244,7 @@ public class GraphQLConfig implements WebMvcConfigurer {
     }
 
     private boolean denyRestrictedAccess(AnnotatedElement delegate,
-        ResolutionEnvironment resolutionEnvironment, Person currentUser) {
+        ResolutionEnvironment resolutionEnvironment, Principal principal) {
       final RestrictToAuthorizationGroups restrictToAuthorizationGroups =
           delegate.getAnnotation(RestrictToAuthorizationGroups.class);
       if (restrictToAuthorizationGroups != null) {
@@ -253,7 +253,11 @@ public class GraphQLConfig implements WebMvcConfigurer {
         @SuppressWarnings("unchecked")
         final List<String> authorizationGroupUuids = (List<String>) ApplicationContextProvider
             .getDictionary().getDictionaryEntry(authorizationGroupSetting);
-        if (currentUser != null && authorizationGroupUuids != null) {
+        if (authorizationGroupUuids != null) {
+          if (!(principal instanceof Person currentUser)) {
+            // Not a person: no access
+            return true;
+          }
           // Make sure the current user's authorizationGroups are loaded (should happen only once
           // per request execution)
           currentUser.loadAuthorizationGroups();
