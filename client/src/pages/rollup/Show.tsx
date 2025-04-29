@@ -729,8 +729,8 @@ const RollupShow = ({
 
   function showPreview(print) {
     const variables = {
-      startDate: getRollupStart().valueOf(),
-      endDate: getRollupEnd().valueOf(),
+      startDate: getRollupStart().toISOString(),
+      endDate: getRollupEnd().toISOString(),
       orgType,
       orgUuid
     }
@@ -775,8 +775,8 @@ const RollupShow = ({
       comment: values.comment
     }
     const variables = {
-      startDate: getRollupStart().valueOf(),
-      endDate: getRollupEnd().valueOf(),
+      startDate: getRollupStart().toISOString(),
+      endDate: getRollupEnd().toISOString(),
       orgType,
       orgUuid,
       email: emailDelivery
