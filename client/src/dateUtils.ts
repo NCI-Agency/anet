@@ -1,5 +1,5 @@
-import { L } from "@fullcalendar/list/internal-common"
 import moment from "moment"
+import utils from "utils"
 
 export const BETWEEN = "0"
 export const BEFORE = "1"
@@ -60,7 +60,7 @@ export function dateToQuery(queryKey, value) {
     }
   } else if (value.relative === LAST_X_DAYS) {
     const days = value.days
-    if (days && !isNaN(days)) {
+    if (utils.isNumeric(days)) {
       const milliseconds = days * LAST_DAY
       return {
         [startKey]: milliseconds

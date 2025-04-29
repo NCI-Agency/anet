@@ -1,15 +1,18 @@
 import { InputGroup } from "@blueprintjs/core"
-import { useState } from "react"
+import React, { useState } from "react"
 
 interface PositiveNumericInputProps {
   min?: number
   max?: number
 }
 
-export default function PositiveNumericInput({ min = 1, max }: PositiveNumericInputProps) {
+export default function PositiveNumericInput({
+  min = 1,
+  max
+}: PositiveNumericInputProps) {
   const [value, setValue] = useState(undefined)
 
-  const handleChange = (event) => {
+  const handleChange = event => {
     const rawValue = event.target.value
     const numericValue = Number(rawValue)
 
@@ -28,14 +31,21 @@ export default function PositiveNumericInput({ min = 1, max }: PositiveNumericIn
     }
   }
 
-  const handleKeyDown = (event) => {
+  const handleKeyDown = event => {
     // Block unwanted characters at keypress level
-    if (!/[0-9]/.test(event.key) && event.key !== "Backspace" && event.key !== "ArrowLeft" && event.key !== "ArrowRight" && event.key !== "Tab") {
+    if (
+      !/[0-9]/.test(event.key) &&
+      event.key !== "Backspace" &&
+      event.key !== "ArrowLeft" &&
+      event.key !== "ArrowRight" &&
+      event.key !== "Tab"
+    ) {
       event.preventDefault()
     }
   }
 
-  const isValid = value !== undefined && value >= min && (max === undefined || value <= max)
+  const isValid =
+    value !== undefined && value >= min && (max === undefined || value <= max)
 
   return (
     <InputGroup

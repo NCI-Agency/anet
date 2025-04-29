@@ -1,5 +1,6 @@
 import useSearchFilter from "components/advancedSearch/hooks"
 import CustomDateInput from "components/CustomDateInput"
+import PositiveNumericInput from "components/PositiveInputNumber"
 import {
   AFTER,
   BEFORE,
@@ -18,6 +19,7 @@ import moment from "moment"
 import React from "react"
 import { Form } from "react-bootstrap"
 import Settings from "settings"
+import utils from "utils"
 
 const DATE_FORMAT = "YYYY-MM-DD"
 
@@ -163,12 +165,12 @@ const DateRangeFilter = ({
           />
         )}
         {value.relative === LAST_X_DAYS && (
-          <input
-            className="custom-number-input"
-            type="number"
-            min="1"
-            value={value.days || ""}
-            onChange={handleChangeDays}
+          <PositiveNumericInput
+            min={1}
+            max={999}
+            value={value.days}
+            onValueChange={handleChangeDays}
+            placeholder="Days"
           />
         )}
       </div>
@@ -202,18 +204,18 @@ export const deserialize = ({ queryKey }, query, key) => {
   const toQueryValue = {}
   const filterValue = {}
 
-  if (query[startKey]) {
+  if (Object.hasOwn(query, startKey)) {
     const startVal = query[startKey]
     toQueryValue[startKey] = startVal
     const lastValues = [LAST_DAY, LAST_WEEK, LAST_MONTH]
     if (lastValues.indexOf(+startVal) !== -1) {
       filterValue.relative = startVal
-    } else if (!isNaN(parseInt(startVal))) {
+    } else if (utils.isNumeric(startVal)) {
       filterValue.relative = LAST_X_DAYS
-      filterValue.days = parseInt(startVal)
+      filterValue.days = parseInt(startVal) / LAST_DAY
     } else {
       filterValue.start = moment(startVal).format(DATE_FORMAT)
-      if (query[endKey]) {
+      if (Object.hasOwn(query, endKey)) {
         filterValue.relative = BETWEEN
       } else {
         filterValue.relative = AFTER
@@ -221,10 +223,10 @@ export const deserialize = ({ queryKey }, query, key) => {
     }
   }
 
-  if (query[endKey]) {
+  if (Object.hasOwn(query, endKey)) {
     filterValue.end = moment(query[endKey]).format(DATE_FORMAT)
     toQueryValue[endKey] = query[endKey]
-    if (!query[startKey]) {
+    if (!Object.hasOwn(query, startKey)) {
       filterValue.relative = BEFORE
     }
   }
