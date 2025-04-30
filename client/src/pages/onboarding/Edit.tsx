@@ -33,7 +33,6 @@ const GQL_GET_SELF = gql`
       endOfTourDate
       user
       domainUsername
-      openIdSubject
       code
       emailAddresses {
         network

@@ -933,7 +933,6 @@ type Person {
   name: String
   notes: [Note]
   obsoleteCountry: String
-  openIdSubject: String
   pendingVerification: Boolean
   phoneNumber: String
   position: Position
@@ -960,7 +959,6 @@ input PersonInput {
   gender: String
   name: String
   obsoleteCountry: String
-  openIdSubject: String
   pendingVerification: Boolean
   phoneNumber: String
   position: PositionInput
@@ -1316,7 +1314,6 @@ type ReportPerson {
   name: String
   notes: [Note]
   obsoleteCountry: String
-  openIdSubject: String
   pendingVerification: Boolean
   phoneNumber: String
   position: Position
@@ -1347,7 +1344,6 @@ input ReportPersonInput {
   interlocutor: Boolean!
   name: String
   obsoleteCountry: String
-  openIdSubject: String
   pendingVerification: Boolean
   phoneNumber: String
   position: PositionInput

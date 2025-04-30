@@ -78,9 +78,6 @@ public class Person extends AbstractEmailableAnetBean
   @GraphQLQuery
   @GraphQLInputField
   private String domainUsername;
-  @GraphQLQuery
-  @GraphQLInputField
-  private String openIdSubject;
   // annotated below
   private Position position;
   // annotated below
@@ -237,15 +234,6 @@ public class Person extends AbstractEmailableAnetBean
 
   public void setDomainUsername(String domainUsername) {
     this.domainUsername = domainUsername;
-  }
-
-  @AllowUnverifiedUsers
-  public String getOpenIdSubject() {
-    return openIdSubject;
-  }
-
-  public void setOpenIdSubject(String openIdSubject) {
-    this.openIdSubject = openIdSubject;
   }
 
   @GraphQLQuery(name = "position")
@@ -419,7 +407,6 @@ public class Person extends AbstractEmailableAnetBean
         && Objects.equals(other.getPhoneNumber(), phoneNumber)
         && Objects.equals(other.getRank(), rank) && Objects.equals(other.getBiography(), biography)
         && Objects.equals(other.getDomainUsername(), domainUsername)
-        && Objects.equals(other.getOpenIdSubject(), openIdSubject)
         && Objects.equals(other.getPendingVerification(), pendingVerification)
         && Objects.equals(other.getCode(), code)
         && (createdAt != null ? createdAt.equals(other.getCreatedAt())
@@ -431,7 +418,7 @@ public class Person extends AbstractEmailableAnetBean
   @Override
   public int hashCode() {
     return Objects.hash(super.hashCode(), uuid, name, status, user, phoneNumber, rank, biography,
-        domainUsername, openIdSubject, pendingVerification, code, createdAt, updatedAt);
+        domainUsername, pendingVerification, code, createdAt, updatedAt);
   }
 
   @Override

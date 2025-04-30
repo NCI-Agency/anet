@@ -56,7 +56,6 @@ const GQL_GET_PERSON = gql`
       phoneNumber
       user
       domainUsername
-      openIdSubject
       biography
       obsoleteCountry
       country {

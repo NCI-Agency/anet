@@ -26,7 +26,9 @@ import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.ResourceUtils;
+import mil.dds.anet.utils.ResponseUtils;
 import mil.dds.anet.utils.Utils;
+import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
@@ -34,6 +36,9 @@ import org.springframework.web.server.ResponseStatusException;
 @Component
 @GraphQLApi
 public class PersonResource {
+
+  private static final String DUPLICATE_PERSON_DOMAINUSERNAME =
+      "Another person is already using this domainUsername.";
 
   private final AnetDictionary dict;
   private final AnetObjectEngine engine;
@@ -88,7 +93,12 @@ public class PersonResource {
 
     p.setBiography(
         Utils.isEmptyHtml(p.getBiography()) ? null : Utils.sanitizeHtml(p.getBiography()));
-    Person created = dao.insert(p);
+    Person created;
+    try {
+      created = dao.insert(p);
+    } catch (UnableToExecuteStatementException e) {
+      throw ResponseUtils.handleSqlException(e, DUPLICATE_PERSON_DOMAINUSERNAME);
+    }
 
     if (DaoUtils.getUuid(created.getPosition()) != null) {
       engine.getPositionDao().setPersonInPosition(created.getUuid(),
@@ -168,7 +178,7 @@ public class PersonResource {
       }
     }
 
-    // If person changed to inactive, clear out the user status and domainUsername and openIdSubject
+    // If person changed to inactive, clear out the user status and domainUsername
     if (WithStatus.Status.INACTIVE.equals(p.getStatus())
         && !WithStatus.Status.INACTIVE.equals(existing.getStatus())) {
       AnetAuditLogger.log("Person {} user status set to false", p);
@@ -192,7 +202,13 @@ public class PersonResource {
 
     p.setBiography(
         Utils.isEmptyHtml(p.getBiography()) ? null : Utils.sanitizeHtml(p.getBiography()));
-    final int numRows = dao.update(p);
+    final int numRows;
+    try {
+      numRows = dao.update(p);
+    } catch (UnableToExecuteStatementException e) {
+      throw ResponseUtils.handleSqlException(e, DUPLICATE_PERSON_DOMAINUSERNAME);
+    }
+
     if (numRows == 0) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't process person update");
     }

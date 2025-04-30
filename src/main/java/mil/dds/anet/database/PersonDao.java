@@ -56,7 +56,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   public static final String[] minimalFields = {"uuid", "name", "rank", "createdAt"};
   public static final String[] additionalFields = {"status", "user", "phoneNumber", "biography",
       "obsoleteCountry", "countryUuid", "gender", "endOfTourDate", "domainUsername",
-      "openIdSubject", "pendingVerification", "code", "updatedAt", "customFields"};
+      "pendingVerification", "code", "updatedAt", "customFields"};
   public static final String[] allFields =
       ObjectArrays.concat(minimalFields, additionalFields, String.class);
   public static final String TABLE_NAME = "people";
@@ -130,10 +130,10 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
       final String sql = "/* personInsert */ INSERT INTO people "
           + "(uuid, name, status, \"user\", \"phoneNumber\", rank, "
           + "\"pendingVerification\", gender, \"countryUuid\", code, \"endOfTourDate\", biography, "
-          + "\"domainUsername\", \"openIdSubject\", \"createdAt\", \"updatedAt\", \"customFields\") "
+          + "\"domainUsername\", \"createdAt\", \"updatedAt\", \"customFields\") "
           + "VALUES (:uuid, :name, :status, :user, :phoneNumber, :rank, "
           + ":pendingVerification, :gender, :countryUuid, :code, :endOfTourDate, :biography, "
-          + ":domainUsername, :openIdSubject, :createdAt, :updatedAt, :customFields)";
+          + ":domainUsername, :createdAt, :updatedAt, :customFields)";
       handle.createUpdate(sql).bindBean(p)
           .bind("createdAt", DaoUtils.asLocalDateTime(p.getCreatedAt()))
           .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
@@ -152,7 +152,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     try {
       DaoUtils.setUpdateFields(p);
       final String sql = "/* personUpdateAuthenticationDetails */ UPDATE people "
-          + "SET \"openIdSubject\" = :openIdSubject , \"domainUsername\" = :domainUsername, "
+          + "SET \"domainUsername\" = :domainUsername, "
           + "status = :status, \"user\" = :user, \"pendingVerification\" = :pendingVerification, "
           + "\"endOfTourDate\" = :endOfTourDate, \"updatedAt\" = :updatedAt WHERE uuid = :uuid";
       final int nr = handle.createUpdate(sql).bindBean(p)
@@ -160,7 +160,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
           .bind("endOfTourDate", DaoUtils.asLocalDateTime(p.getEndOfTourDate()))
           .bind("status", DaoUtils.getEnumId(p.getStatus())).execute();
       evictFromCache(p);
-      // The openIdSubject has changed, evict original person as well
+      // The domainUsername has changed, evict original person as well
       evictFromCache(findInCache(p));
       // No need to update subscriptions, this is an internal change
       return nr;
@@ -202,25 +202,6 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   }
 
   @Transactional
-  // Should only be used during authentication
-  public List<Person> findByDomainUsername(String domainUsername) {
-    final Handle handle = getDbHandle();
-    try {
-      if (Utils.isEmptyOrNull(domainUsername)) {
-        return Collections.emptyList();
-      }
-      return handle
-          .createQuery("/* findByDomainUsername */ SELECT " + PERSON_FIELDS + ","
-              + PositionDao.POSITION_FIELDS
-              + "FROM people LEFT JOIN positions ON people.uuid = positions.\"currentPersonUuid\" "
-              + "WHERE people.\"domainUsername\" = :domainUsername")
-          .bind("domainUsername", domainUsername).map(new PersonMapper()).list();
-    } finally {
-      closeDbHandle(handle);
-    }
-  }
-
-  @Transactional
   // Used by the MART IMPORT
   public List<Person> findByEmailAddress(String emailAddress) {
     final Handle handle = getDbHandle();
@@ -242,24 +223,24 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   }
 
   @Transactional
-  public List<Person> findByOpenIdSubject(String openIdSubject, boolean activeUser) {
+  public List<Person> findByDomainUsername(String domainUsername, boolean activeUser) {
     final Handle handle = getDbHandle();
     try {
-      if (Utils.isEmptyOrNull(openIdSubject)) {
+      if (Utils.isEmptyOrNull(domainUsername)) {
         return Collections.emptyList();
       }
-      final Person person = getFromCache(openIdSubject);
+      final Person person = getFromCache(domainUsername);
       if (person != null) {
         return Collections.singletonList(person);
       }
       final StringBuilder sql = new StringBuilder(
-          "/* findByOpenIdSubject */ SELECT " + PERSON_FIELDS + "," + PositionDao.POSITION_FIELDS
+          "/* findByDomainUsername */ SELECT " + PERSON_FIELDS + "," + PositionDao.POSITION_FIELDS
               + "FROM people LEFT JOIN positions ON people.uuid = positions.\"currentPersonUuid\" "
-              + "WHERE people.\"openIdSubject\" = :openIdSubject");
+              + "WHERE people.\"domainUsername\" = :domainUsername");
       if (activeUser) {
         sql.append(" AND people.user = :user AND people.status != :inactiveStatus");
       }
-      final Query query = handle.createQuery(sql.toString()).bind("openIdSubject", openIdSubject);
+      final Query query = handle.createQuery(sql.toString()).bind("domainUsername", domainUsername);
       if (activeUser) {
         query.bind("user", true).bind("inactiveStatus",
             DaoUtils.getEnumId(WithStatus.Status.INACTIVE));
@@ -273,8 +254,8 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     }
   }
 
-  public void logActivitiesByOpenIdSubject(String openIdSubject, Activity activity) {
-    final Person person = domainUsersCache.get(openIdSubject);
+  public void logActivitiesByDomainUsername(String domainUsername, Activity activity) {
+    final Person person = domainUsersCache.get(domainUsername);
     if (person != null) {
       final Deque<Activity> activities = person.getRecentActivities();
       activities.addFirst(activity);
@@ -282,7 +263,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
         activities.removeLast();
       }
       person.setRecentActivities(activities);
-      domainUsersCache.replace(openIdSubject, person);
+      domainUsersCache.replace(domainUsername, person);
     }
   }
 
@@ -304,35 +285,35 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     evictFromCache(findInCacheByPositionUuid(positionUuid));
   }
 
-  private Person getFromCache(String openIdSubject) {
-    if (domainUsersCache == null || openIdSubject == null) {
+  private Person getFromCache(String domainUsername) {
+    if (domainUsersCache == null || domainUsername == null) {
       return null;
     }
-    final Person person = domainUsersCache.get(openIdSubject);
+    final Person person = domainUsersCache.get(domainUsername);
     // defensively copy the person we return from the cache
     return copyPerson(person);
   }
 
   private void putInCache(Person person) {
     if (domainUsersCache != null && person != null && person.getUuid() != null
-        && person.getOpenIdSubject() != null) {
+        && person.getDomainUsername() != null) {
       // defensively copy the person we will be caching
       final Person copy = copyPerson(person);
       if (copy != null) {
-        domainUsersCache.put(person.getOpenIdSubject(), copy);
+        domainUsersCache.put(person.getDomainUsername(), copy);
       }
     }
   }
 
   /**
    * Just to be on the safe side, we only cache objects retrieved inside
-   * {@link #findByOpenIdSubject(String, boolean)}.
+   * {@link #findByDomainUsername(String, boolean)}.
    *
    * @param person the person to be evicted from the domain users cache
    */
   private void evictFromCache(Person person) {
-    if (domainUsersCache != null && person != null && person.getOpenIdSubject() != null) {
-      domainUsersCache.remove(person.getOpenIdSubject());
+    if (domainUsersCache != null && person != null && person.getDomainUsername() != null) {
+      domainUsersCache.remove(person.getDomainUsername());
     }
   }
 
@@ -429,13 +410,18 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
       final String winnerUuid = winner.getUuid();
       final String loserUuid = loser.getUuid();
 
+      // Clear loser's domainUsername to prevent update conflicts (domainUsername must be unique)
+      handle
+          .createUpdate("/* clearPersonDomainUsername */ UPDATE people"
+              + " SET \"domainUsername\" = NULL WHERE uuid = :loserUuid")
+          .bind("loserUuid", loserUuid).execute();
+
       // Update the winner's fields
       update(winner);
 
       // For reports where both winner and loser are in the reportPeople:
       // 1. set winner's isPrimary, isAttendee, isAuthor and isInterlocutor flags to the logical OR
-      // of
-      // both
+      // of both
       final String sqlUpd = "WITH dups AS ( SELECT"
           + "  rpw.\"reportUuid\" AS wreportuuid, rpw.\"personUuid\" AS wpersonuuid,"
           + "  rpw.\"isPrimary\" AS wprimary, rpl.\"isPrimary\" AS lprimary,"
@@ -451,7 +437,6 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
           + " \"isInterlocutor\" = (dups.winterlocutor OR dups.linterlocutor) FROM dups"
           + " WHERE \"reportPeople\".\"reportUuid\" = dups.wreportuuid"
           + " AND \"reportPeople\".\"personUuid\" = dups.wpersonuuid";
-      // MS SQL has no real booleans, so bitwise-or the 0/1 values in that case
       handle.createUpdate(sqlUpd).bind("winnerUuid", winnerUuid).bind("loserUuid", loserUuid)
           .execute();
       // 2. delete the loser so we don't have duplicates
@@ -463,7 +448,6 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
           + " DELETE FROM \"reportPeople\" USING dups"
           + " WHERE \"reportPeople\".\"reportUuid\" = dups.lreportuuid"
           + " AND \"reportPeople\".\"personUuid\" = dups.lpersonuuid";
-      // MS SQL and PostgreSQL have slightly different DELETE syntax
       handle.createUpdate(sqlDel).bind("winnerUuid", winnerUuid).bind("loserUuid", loserUuid)
           .execute();
 

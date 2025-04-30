@@ -913,7 +913,7 @@ properties:
       person:
         type: object
         additionalProperties: false
-        required: [status, firstName, lastName, position, prevPositions, domainUsername, openIdSubject,
+        required: [status, firstName, lastName, position, prevPositions, domainUsername,
                    emailAddresses, phoneNumber, country, code, rank, ranks, gender, endOfTourDate,
                    biography, authorizationGroups]
         properties:
@@ -931,8 +931,6 @@ properties:
             "$ref": "#/$defs/inputField"
           domainUsername:
             "$ref": "#/$defs/inputField"
-          openIdSubject:
-            "$ref": "#/$defs/labeledField"
           emailAddresses:
             "$ref": "#/$defs/restrictableLabeledField"
           phoneNumber:
