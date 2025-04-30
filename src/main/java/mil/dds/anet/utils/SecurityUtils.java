@@ -43,7 +43,7 @@ public class SecurityUtils {
   private static Person getPersonFromClaims(final Map<String, Object> claims) {
     final PersonDao dao = ApplicationContextProvider.getEngine().getPersonDao();
     // Call non-synchronized method first
-    Person person = findUser(dao, (String) claims.get(StandardClaimNames.SUB), true);
+    Person person = findUser(dao, (String) claims.get(StandardClaimNames.PREFERRED_USERNAME), true);
     if (person == null) {
       // Call synchronized method
       person = findOrCreateUser(dao, claims);
@@ -52,12 +52,12 @@ public class SecurityUtils {
   }
 
   // Non-synchronized method, safe to run multiple times in parallel
-  private static Person findUser(final PersonDao dao, final String openIdSubject,
+  private static Person findUser(final PersonDao dao, final String domainUsername,
       final boolean activeUser) {
-    final List<Person> p = dao.findByOpenIdSubject(openIdSubject, activeUser);
+    final List<Person> p = dao.findByDomainUsername(domainUsername, activeUser);
     if (!p.isEmpty()) {
       final Person existingPerson = p.get(0);
-      logger.trace("found existing user={} by openIdSubject={}", existingPerson, openIdSubject);
+      logger.trace("found existing user={} by domainUsername={}", existingPerson, domainUsername);
       return existingPerson;
     }
 
@@ -68,32 +68,22 @@ public class SecurityUtils {
   // simultaneous authentication requests
   private static synchronized Person findOrCreateUser(final PersonDao dao,
       final Map<String, Object> claims) {
-    final String openIdSubject = (String) claims.get(StandardClaimNames.SUB);
     final String username = (String) claims.get(StandardClaimNames.PREFERRED_USERNAME);
-    final Person person = findUser(dao, openIdSubject, false);
+    final Person person = findUser(dao, username, false);
     if (person != null) {
-      return updatePerson(dao, person, openIdSubject, username);
-    }
-
-    // Might be user from before Keycloak integration, try username
-    List<Person> p = dao.findByDomainUsername(username);
-    if (!p.isEmpty()) {
-      final Person existingPerson = p.get(0);
-      logger.trace("found existing user={} by domainUsername={}", existingPerson, username);
-      return updatePerson(dao, existingPerson, openIdSubject, username);
+      return updatePerson(dao, person, username);
     }
 
     // Not found, first time this user has ever logged in
-    return createPerson(dao, openIdSubject, username, (String) claims.get(StandardClaimNames.EMAIL),
+    return createPerson(dao, username, (String) claims.get(StandardClaimNames.EMAIL),
         getCombinedName(claims));
   }
 
   private static Person updatePerson(final PersonDao dao, final Person person,
-      final String openIdSubject, final String username) {
-    logger.trace("updating user={} with domainUsername={} (was {}) and openIdSubject={} (was {})",
-        person, username, person.getDomainUsername(), openIdSubject, person.getOpenIdSubject());
+      final String username) {
+    logger.trace("updating user={} with domainUsername={} (was {})", person, username,
+        person.getDomainUsername());
     person.setDomainUsername(username);
-    person.setOpenIdSubject(openIdSubject);
     if (person.getStatus() != WithStatus.Status.ACTIVE || !Boolean.TRUE.equals(person.getUser())) {
       logger.trace("reactivating user={}", person);
       person.setStatus(WithStatus.Status.ACTIVE);
@@ -105,15 +95,13 @@ public class SecurityUtils {
     return person;
   }
 
-  private static Person createPerson(final PersonDao dao, final String openIdSubject,
-      final String username, final String email, final String name) {
+  private static Person createPerson(final PersonDao dao, final String username, final String email,
+      final String name) {
     final Person newPerson = new Person();
-    logger.trace("creating new user with domainUsername={}, email={} and openIdSubject={}",
-        username, email, openIdSubject);
+    logger.trace("creating new user with domainUsername={} and email={}", username, email);
     newPerson.setUser(true);
     newPerson.setPendingVerification(true);
     // Copy some data from the authentication token
-    newPerson.setOpenIdSubject(openIdSubject);
     newPerson.setDomainUsername(username);
     newPerson.setName(name);
     /*

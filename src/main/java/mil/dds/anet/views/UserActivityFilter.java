@@ -30,7 +30,7 @@ public class UserActivityFilter extends OncePerRequestFilter {
       final Activity activity = new Activity(ResponseUtils.getRemoteAddr(request),
           ResponseUtils.getReferer(request), DaoUtils.getCurrentMinute());
       ApplicationContextProvider.getEngine().getPersonDao()
-          .logActivitiesByOpenIdSubject(person.getOpenIdSubject(), activity);
+          .logActivitiesByDomainUsername(person.getDomainUsername(), activity);
       // Store this request in the database (only once per minute)
       final Position position = person.getPosition();
       final UserActivity userActivity = new UserActivity(person.getUuid(),

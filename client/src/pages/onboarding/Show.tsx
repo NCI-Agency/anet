@@ -44,7 +44,6 @@ const GQL_GET_SELF = gql`
       endOfTourDate
       user
       domainUsername
-      openIdSubject
       code
       emailAddresses {
         network
@@ -140,9 +139,6 @@ const OnboardingShow = ({ pageDispatchers }: OnboardingShowProps) => {
     // map fields that have privileged access check to the condition
     const privilegedAccessedFields = {
       domainUsername: {
-        accessCond: false
-      },
-      openIdSubject: {
         accessCond: false
       }
     }
