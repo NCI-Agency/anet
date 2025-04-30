@@ -645,8 +645,6 @@ fields:
       label: ANET user
     domainUsername:
       label: Domain username
-    openIdSubject:
-      label: OpenID subject
     position:
       label: Current Position
       placeholder: Fill in the person's current position
@@ -1410,7 +1408,6 @@ fields:
         - prevPositions
         - user
         - domainUsername
-        - openIdSubject
         - authorizationGroups
         - emailAddresses
         - multipleButtons
