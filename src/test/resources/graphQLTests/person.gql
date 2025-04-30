@@ -20,7 +20,6 @@ person(uuid:"${personUuid}") {
   }
   phoneNumber
   domainUsername
-  openIdSubject
   biography
   obsoleteCountry
   country {
