@@ -125,7 +125,7 @@ const DateRangeFilter = ({
     )
   }
   if (value.relative === LAST_X_DAYS) {
-    dateRangeDisplay = `Last ${value.days || "X"} days`
+    dateRangeDisplay = `Last ${value.days ?? "?"} days`
   }
   const dateStart = value.start && moment(value.start).toDate()
   const dateEnd = value.end && moment(value.end).toDate()
@@ -185,9 +185,8 @@ const DateRangeFilter = ({
     setValue(prevValue => ({ ...prevValue, end: newDate }))
   }
 
-  function handleChangeDays(e) {
-    const days = e.target.value ? parseInt(e.target.value, 10) : null
-    setValue(prevValue => ({ ...prevValue, days }))
+  function handleChangeDays(newValue) {
+    setValue(prevValue => ({ ...prevValue, days: newValue }))
   }
 
   function handleChangeRelative(newValue) {
