@@ -1,6 +1,6 @@
 import useSearchFilter from "components/advancedSearch/hooks"
 import CustomDateInput from "components/CustomDateInput"
-import PositiveNumericInput from "components/PositiveInputNumber"
+import IntegerInput from "components/IntegerInput"
 import {
   AFTER,
   BEFORE,
@@ -16,6 +16,7 @@ import {
   RANGE_TYPE_LABELS
 } from "dateUtils"
 import moment from "moment"
+import pluralize from "pluralize"
 import React from "react"
 import { Form } from "react-bootstrap"
 import Settings from "settings"
@@ -125,7 +126,7 @@ const DateRangeFilter = ({
     )
   }
   if (value.relative === LAST_X_DAYS) {
-    dateRangeDisplay = `Last ${value.days ?? "?"} days`
+    dateRangeDisplay = `Last ${value.days ?? "?"} ${pluralize("day", value.days)}`
   }
   const dateStart = value.start && moment(value.start).toDate()
   const dateEnd = value.end && moment(value.end).toDate()
@@ -165,7 +166,7 @@ const DateRangeFilter = ({
           />
         )}
         {value.relative === LAST_X_DAYS && (
-          <PositiveNumericInput
+          <IntegerInput
             min={1}
             max={999}
             value={value.days}
