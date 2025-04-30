@@ -38,7 +38,6 @@ const GQL_GET_PERSON = gql`
       pendingVerification
       user
       domainUsername
-      openIdSubject
       biography
       obsoleteCountry
       country {
