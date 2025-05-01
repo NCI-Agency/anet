@@ -315,7 +315,7 @@ const AdvancedSelect = ({
                     <BlueprintButton
                       icon="cross"
                       variant="minimal"
-                      onClick={() => setDoReset(true)} 
+                      onClick={() => setDoReset(true)}
                       style={{
                         position: "absolute",
                         top: "5px",
@@ -339,7 +339,7 @@ const AdvancedSelect = ({
                             items={filterDefs}
                             handleOnChange={handleOnChangeSelect}
                           />
-                          <Col md={hasMultipleItems(filterDefs) ? 8 : 11}>
+                          <Col md={hasMultipleItems(filterDefs) ? 8 : 12}>
                             <OverlayTable
                               fieldName={fieldName}
                               items={items}
