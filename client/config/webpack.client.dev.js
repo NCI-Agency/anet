@@ -44,8 +44,10 @@ module.exports = merge.merge(common.clientConfig, {
     client: {
       overlay: {
         runtimeErrors: error => {
-          // ignore some sporadic, annoying, unimportant errors from ResizeObserver
           return (
+            // ignore weird regression by webpack-dev-server
+            error.message !== "error is undefined" &&
+            // ignore some sporadic, annoying, unimportant errors from ResizeObserver
             error.message !== "ResizeObserver loop limit exceeded" &&
             error.message !==
               "ResizeObserver loop completed with undelivered notifications."
