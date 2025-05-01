@@ -623,6 +623,7 @@ const OrganizationColumn = ({
               )
             }}
             mergeState={mergeState}
+            autoMerge
             dispatchMergeActions={dispatchMergeActions}
           />
           <DictionaryField
