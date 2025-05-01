@@ -1,5 +1,5 @@
 import { Button, InputGroup } from "@blueprintjs/core"
-import React, { useEffect, useRef, useState } from "react"
+import React, { useCallback, useEffect, useRef, useState } from "react"
 import utils from "utils"
 
 const ALLOWED_KEYS = [
@@ -16,7 +16,7 @@ interface IntegerInputProps {
   min?: number
   max?: number
   value?: number
-  onValueChange?: (value: number | undefined) => void
+  onValueChange?: (value: number) => void
   placeholder?: string
 }
 
@@ -27,36 +27,45 @@ export default function IntegerInput({
   onValueChange,
   placeholder
 }: IntegerInputProps) {
-  const [internalValue, setInternalValue] = useState(undefined)
+  const [internalValue, setInternalValue] = useState(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const clampValue = val => {
-    if (!utils.isNumeric(val)) {
-      return undefined
-    }
-    let clamped = val
-    if (min !== undefined && clamped < min) {
-      clamped = min
-    }
-    if (max !== undefined && clamped > max) {
-      clamped = max
-    }
-    return clamped
-  }
+  const clampValue = useCallback(
+    val => {
+      if (!utils.isNumeric(val)) {
+        return null
+      }
+      let clamped = Number(val)
+      if (min != null && clamped < min) {
+        clamped = min
+      }
+      if (max != null && clamped > max) {
+        clamped = max
+      }
+      return clamped
+    },
+    [min, max]
+  )
 
-  const updateValue = newValue => {
-    const clampedValue = clampValue(newValue)
-    setInternalValue(clampedValue)
-    if (inputRef.current) {
-      inputRef.current.value =
-        clampedValue !== undefined ? clampedValue.toString() : ""
-    }
-    onValueChange?.(clampedValue)
-  }
+  const updateValue = useCallback(
+    newValue => {
+      const clampedValue = clampValue(newValue)
+      setInternalValue(clampedValue)
+      if (inputRef.current) {
+        inputRef.current.value = clampedValue?.toString() ?? ""
+      }
+      if (clampedValue !== internalValue) {
+        onValueChange?.(clampedValue)
+      }
+    },
+    [clampValue, internalValue, onValueChange]
+  )
 
   useEffect(() => {
-    updateValue(value)
-  }, [value, min, max])
+    if (value !== internalValue) {
+      updateValue(value)
+    }
+  }, [value, updateValue])
 
   const sanitizeInput = rawValue => {
     return rawValue.replace(/\D/g, "")
@@ -74,7 +83,7 @@ export default function IntegerInput({
   }
 
   const handleInputChange = (rawValue, selection?) => {
-    const value = rawValue === "" ? undefined : Number(rawValue)
+    const value = rawValue === "" ? null : Number(rawValue)
     if (!utils.isNumeric(value) && rawValue !== "") {
       return
     }
@@ -129,15 +138,16 @@ export default function IntegerInput({
   }
 
   const handleIncrement = () => {
-    const current =
-      internalValue !== undefined ? internalValue : min !== undefined ? min : 0
+    const current = internalValue ?? min ?? 0
+    if (max !== null && current >= max) {
+      return
+    }
     updateValue(current + 1)
   }
 
   const handleDecrement = () => {
-    const current =
-      internalValue !== undefined ? internalValue : min !== undefined ? min : 0
-    if (min !== undefined && current <= min) {
+    const current = internalValue ?? min ?? 0
+    if (min !== null && current <= min && internalValue != null) {
       return
     }
     updateValue(current - 1)
@@ -149,7 +159,7 @@ export default function IntegerInput({
         type="text"
         inputMode="numeric"
         pattern="/\d+/"
-        value={internalValue !== undefined ? internalValue.toString() : ""}
+        value={internalValue?.toString() ?? ""}
         onChange={handleChange}
         onInput={handleInput}
         onKeyDown={handleKeyDown}
@@ -163,9 +173,7 @@ export default function IntegerInput({
           variant="minimal"
           onClick={handleIncrement}
           disabled={
-            max !== undefined &&
-            internalValue !== undefined &&
-            internalValue >= max
+            max != null && internalValue != null && internalValue >= max
           }
         />
         <Button
@@ -173,9 +181,7 @@ export default function IntegerInput({
           variant="minimal"
           onClick={handleDecrement}
           disabled={
-            min !== undefined &&
-            internalValue !== undefined &&
-            internalValue <= min
+            min != null && internalValue != null && internalValue <= min
           }
         />
       </div>
