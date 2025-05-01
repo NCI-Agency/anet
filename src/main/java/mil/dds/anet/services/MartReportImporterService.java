@@ -1,10 +1,8 @@
 package mil.dds.anet.services;
 
 import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import java.nio.charset.StandardCharsets;
@@ -55,7 +53,6 @@ public class MartReportImporterService implements IMartReportImporterService {
   protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 
   public static final String REPORT_JSON_ATTACHMENT = "mart_report.json";
-  private static final String SECURITY_MARKING_JSON_PROPERTY = "securityMarking";
 
   private final ObjectMapper ignoringMapper = MapperUtils.getDefaultMapper()
       .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
@@ -249,7 +246,7 @@ public class MartReportImporterService implements IMartReportImporterService {
     }
     anetReport.setEngagementDate(martReport.getEngagementDate());
     anetReport.setReportText(martReport.getReportText());
-    // Get classification from securityMarking property in MART custom fields
+    // Get classification from securityMarking property
     anetReport.setClassification(getClassificationFromReport(martReport, errors));
     // Set advisor organization to the organization of the submitter
     anetReport.setAdvisorOrg(organization);
@@ -304,24 +301,16 @@ public class MartReportImporterService implements IMartReportImporterService {
   }
 
   private String getClassificationFromReport(ReportDto martReport, List<String> errors) {
-    try {
-      final JsonNode jsonNode = ignoringMapper.readTree(martReport.getCustomFields());
-      final JsonNode securityMarkingProperty = jsonNode.get(SECURITY_MARKING_JSON_PROPERTY);
-      if (securityMarkingProperty == null) {
-        errors.add("Security marking is missing");
+    final String martReportClassification = martReport.getSecurityMarking();
+    if (martReportClassification == null) {
+      errors.add("Security marking is missing");
+    } else {
+      if (ResourceUtils.getAllowedClassifications().contains(martReportClassification)) {
+        return martReportClassification;
       } else {
-        final String martReportClassification = securityMarkingProperty.asText();
-        if (ResourceUtils.getAllowedClassifications().contains(martReportClassification)) {
-          return martReportClassification;
-        } else {
-          errors.add(String.format("Can not find report security marking: '%s'",
-              martReportClassification));
-        }
+        errors.add(
+            String.format("Can not find report security marking: '%s'", martReportClassification));
       }
-    } catch (JsonProcessingException e) {
-      errors.add(String.format("Could not extract security marking from MART report: '%s'",
-          e.getMessage()));
-      logger.error("Could not extract security marking from MART report", e);
     }
 
     return null;
