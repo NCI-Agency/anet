@@ -1,5 +1,9 @@
 import { gql } from "@apollo/client"
-import { Popover, PopoverInteractionKind } from "@blueprintjs/core"
+import {
+  Button as BlueprintButton,
+  Popover,
+  PopoverInteractionKind
+} from "@blueprintjs/core"
 import API from "api"
 import classNames from "classnames"
 import Model from "components/Model"
@@ -309,72 +313,83 @@ const AdvancedSelect = ({
               <Popover
                 popoverClassName="advanced-select-popover bp5-popover-content-sizing"
                 content={
-                  <Row id={`${fieldName}-popover`} className="border-between">
-                    {(showCreateEntityComponent && (
-                      <Col md="12">
-                        {createEntityComponent(searchTerms, setDoReset)}
-                      </Col>
-                    )) || (
-                      <>
-                        <FilterAsNav
-                          items={filterDefs}
-                          currentFilter={filterType}
-                          handleOnClick={changeFilterType}
-                        />
-
-                        <FilterAsDropdown
-                          items={filterDefs}
-                          handleOnChange={handleOnChangeSelect}
-                        />
-
-                        <Col md={hasMultipleItems(filterDefs) ? 8 : 11}>
-                          <OverlayTable
-                            fieldName={fieldName}
-                            items={items}
-                            pageNum={pageNum}
-                            selectedItems={value}
-                            valueKey={valueKey}
-                            handleAddItem={item => {
-                              handleAddItem(item)
-                              if (closeOverlayOnAdd) {
-                                setDoReset(true)
-                              }
-                            }}
-                            handleRemoveItem={handleRemoveItem}
-                            objectType={objectType}
-                            columns={[""].concat(overlayColumns)}
-                            renderRow={overlayRenderRow}
-                            isLoading={isLoading}
-                            loaderMessage={
-                              <div style={{ width: "300px" }}>
-                                <div>No results found.</div>
-                                {createEntityComponent && (
-                                  <div>
-                                    <Button
-                                      id="createEntityLink"
-                                      onClick={() =>
-                                        setShowCreateEntityComponent(true)}
-                                    >
-                                      Create a new {fieldName}
-                                    </Button>
-                                  </div>
-                                )}
-                              </div>
-                            }
-                          />
-                          <UltimatePagination
-                            Component="footer"
-                            componentClassName="searchPagination"
-                            className="float-end"
-                            pageNum={pageNum}
-                            pageSize={pageSize}
-                            totalCount={totalCount}
-                            goToPage={goToPage}
-                          />
+                  <div style={{ position: "relative", padding: "10px" }}>
+                    <BlueprintButton
+                      icon="cross"
+                      variant="minimal"
+                      onClick={() => setDoReset(true)} 
+                      style={{
+                        position: "absolute",
+                        top: "5px",
+                        right: "5px",
+                        zIndex: 10
+                      }}
+                    />
+                    <Row id={`${fieldName}-popover`} className="border-between">
+                      {(showCreateEntityComponent && (
+                        <Col md="12">
+                          {createEntityComponent(searchTerms, setDoReset)}
                         </Col>
-                      </>
-                    )}
-                  </Row>
+                      )) || (
+                        <>
+                          <FilterAsNav
+                            items={filterDefs}
+                            currentFilter={filterType}
+                            handleOnClick={changeFilterType}
+                          />
+                          <FilterAsDropdown
+                            items={filterDefs}
+                            handleOnChange={handleOnChangeSelect}
+                          />
+                          <Col md={hasMultipleItems(filterDefs) ? 8 : 11}>
+                            <OverlayTable
+                              fieldName={fieldName}
+                              items={items}
+                              pageNum={pageNum}
+                              selectedItems={value}
+                              valueKey={valueKey}
+                              handleAddItem={item => {
+                                handleAddItem(item)
+                                if (closeOverlayOnAdd) {
+                                  setDoReset(true)
+                                }
+                              }}
+                              handleRemoveItem={handleRemoveItem}
+                              objectType={objectType}
+                              columns={[""].concat(overlayColumns)}
+                              renderRow={overlayRenderRow}
+                              isLoading={isLoading}
+                              loaderMessage={
+                                <div style={{ width: "300px" }}>
+                                  <div>No results found.</div>
+                                  {createEntityComponent && (
+                                    <div>
+                                      <Button
+                                        id="createEntityLink"
+                                        onClick={() =>
+                                          setShowCreateEntityComponent(true)}
+                                      >
+                                        Create a new {fieldName}
+                                      </Button>
+                                    </div>
+                                  )}
+                                </div>
+                              }
+                            />
+                            <UltimatePagination
+                              Component="footer"
+                              componentClassName="searchPagination"
+                              className="float-end"
+                              pageNum={pageNum}
+                              pageSize={pageSize}
+                              totalCount={totalCount}
+                              goToPage={goToPage}
+                            />
+                          </Col>
+                        </>
+                      )}
+                    </Row>
+                  </div>
                 }
                 isOpen={showOverlay}
                 captureDismiss
