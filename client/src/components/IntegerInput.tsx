@@ -43,13 +43,19 @@ export default function IntegerInput({
 }: IntegerInputProps) {
   const latestValue = useRef(value)
   const inputRef = useRef<HTMLInputElement>(null)
+  const [inputValue, setInputValue] = React.useState(value?.toString() ?? "")
 
   const updateValue = useCallback(
     newValue => {
       const clampedValue = clampValue(newValue, min, max)
+      const stringValue = clampedValue?.toString() ?? ""
+
       if (inputRef.current) {
-        inputRef.current.value = clampedValue?.toString() ?? ""
+        inputRef.current.value = stringValue
       }
+
+      setInputValue(stringValue)
+
       if (clampedValue !== latestValue.current) {
         latestValue.current = clampedValue
         onValueChange?.(clampedValue)
@@ -67,6 +73,18 @@ export default function IntegerInput({
     if (event.ctrlKey || event.metaKey || event.altKey) {
       return
     }
+
+    // Allow minus sign at start if min < 0
+    if (event.key === "-" && min != null && min < 0) {
+      const input = inputRef.current
+      if (input && input.selectionStart === 0 && !input.value.includes("-")) {
+        return
+      } else {
+        event.preventDefault()
+        return
+      }
+    }
+
     if (!/\d/.test(event.key) && !ALLOWED_KEYS.includes(event.key)) {
       event.preventDefault()
       event.stopPropagation()
@@ -74,11 +92,22 @@ export default function IntegerInput({
   }
 
   const handleInputChange = (rawValue, selection?) => {
+    setInputValue(rawValue)
+
+    // Allow "-" as an intermediate input if min < 0
+    if (rawValue === "-" && min != null && min < 0) {
+      latestValue.current = null
+      onValueChange?.(null)
+      return
+    }
+
     const value = rawValue === "" ? null : Number(rawValue)
     if (!utils.isNumeric(value) && rawValue !== "") {
       return
     }
+
     updateValue(value)
+
     if (selection && inputRef.current && rawValue) {
       requestAnimationFrame(() => {
         if (inputRef.current) {
@@ -149,8 +178,8 @@ export default function IntegerInput({
       <InputGroup
         type="text"
         inputMode="numeric"
-        pattern="/\d+/"
-        value={latestValue.current?.toString() ?? ""}
+        pattern="^-?\d*$"
+        value={inputValue}
         onChange={handleChange}
         onInput={handleInput}
         onKeyDown={handleKeyDown}
