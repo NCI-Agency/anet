@@ -17,6 +17,16 @@ const GQL_GET_TASK = gql`
     task(uuid: $uuid) {
       uuid
       shortName
+      parentTask {
+        uuid
+      }
+      ascendantTasks {
+        uuid
+        shortName
+        parentTask {
+          uuid
+        }
+      }
     }
   }
 `
@@ -26,6 +36,16 @@ const GQL_GET_TASKS = gql`
     tasks(uuids: $uuids) {
       uuid
       shortName
+      parentTask {
+        uuid
+      }
+      ascendantTasks {
+        uuid
+        shortName
+        parentTask {
+          uuid
+        }
+      }
     }
   }
 `

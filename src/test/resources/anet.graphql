@@ -1127,6 +1127,7 @@ type Query {
   eventSeriesList(query: EventSeriesSearchQueryInput): AnetBeanList_EventSeries
   location(uuid: String): Location
   locationList(query: LocationSearchQueryInput): AnetBeanList_Location
+  locations(uuids: [String]): [Location]
   martImportedReports(pageNum: Int = 0, pageSize: Int = 0): AnetBeanList_MartImportedReport
   me: Person
   mySearches: [SavedSearch]
@@ -1148,6 +1149,7 @@ type Query {
   showRollupEmail(endDate: Instant, orgType: RollupGraphType, orgUuid: String, showText: Boolean = false, startDate: Instant): String
   task(uuid: String): Task
   taskList(query: TaskSearchQueryInput): AnetBeanList_Task
+  tasks(uuids: [String]): [Task]
   userActivityList(query: UserActivitySearchQueryInput): AnetBeanList_UserActivity
 }
 

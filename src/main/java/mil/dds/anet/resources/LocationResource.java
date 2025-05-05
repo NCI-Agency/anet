@@ -60,6 +60,11 @@ public class LocationResource {
     return loc;
   }
 
+  @GraphQLQuery(name = "locations")
+  public List<Location> getByUuids(@GraphQLArgument(name = "uuids") List<String> uuids) {
+    return dao.getByIds(uuids);
+  }
+
   @GraphQLQuery(name = "locationList")
   @AllowUnverifiedUsers
   public AnetBeanList<Location> search(@GraphQLRootContext GraphQLContext context,
