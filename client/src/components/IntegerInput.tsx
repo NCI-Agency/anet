@@ -74,6 +74,18 @@ export default function IntegerInput({
       return
     }
 
+    if (event.key === "ArrowUp") {
+      event.preventDefault()
+      handleIncrement()
+      return
+    }
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault()
+      handleDecrement()
+      return
+    }
+
     // Allow minus sign at start if min < 0
     if (event.key === "-" && min != null && min < 0) {
       const input = inputRef.current
