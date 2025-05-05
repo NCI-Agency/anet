@@ -4,6 +4,7 @@ import { IconNames } from "@blueprintjs/icons"
 import API from "api"
 import { BreadcrumbTrail } from "components/BreadcrumbTrail"
 import LinkTo from "components/LinkTo"
+import ListItems from "components/ListItems"
 import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import { PageDispatchersPropType, useBoilerplate } from "components/Page"
 import { ReportCompactWorkflow } from "components/ReportWorkflow"
@@ -328,7 +329,7 @@ const ReportSummaryRow = ({ report }: ReportSummaryRowProps) => {
           {report.keyOutcomes && (
             <span>
               <strong>{Settings.fields.report.keyOutcomes?.label}:</strong>{" "}
-              {report.keyOutcomes}
+              <ListItems value={report.keyOutcomes} compact />
             </span>
           )}
         </Col>
@@ -338,7 +339,7 @@ const ReportSummaryRow = ({ report }: ReportSummaryRowProps) => {
           {report.nextSteps && (
             <span>
               <strong>{Settings.fields.report.nextSteps?.label}:</strong>{" "}
-              {report.nextSteps}
+              <ListItems value={report.nextSteps} compact />
             </span>
           )}
         </Col>
