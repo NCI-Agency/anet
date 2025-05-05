@@ -1,5 +1,5 @@
 import { Button, InputGroup } from "@blueprintjs/core"
-import React, { useCallback, useEffect, useRef, useState } from "react"
+import React, { useCallback, useRef } from "react"
 import utils from "utils"
 
 const ALLOWED_KEYS = [
@@ -20,6 +20,20 @@ interface IntegerInputProps {
   placeholder?: string
 }
 
+function clampValue(val, min, max) {
+  if (!utils.isNumeric(val)) {
+    return null
+  }
+  let clamped = Number(val)
+  if (min != null && clamped < min) {
+    clamped = min
+  }
+  if (max != null && clamped > max) {
+    clamped = max
+  }
+  return clamped
+}
+
 export default function IntegerInput({
   min,
   max,
@@ -27,45 +41,22 @@ export default function IntegerInput({
   onValueChange,
   placeholder
 }: IntegerInputProps) {
-  const [internalValue, setInternalValue] = useState(null)
+  const latestValue = useRef(value)
   const inputRef = useRef<HTMLInputElement>(null)
-
-  const clampValue = useCallback(
-    val => {
-      if (!utils.isNumeric(val)) {
-        return null
-      }
-      let clamped = Number(val)
-      if (min != null && clamped < min) {
-        clamped = min
-      }
-      if (max != null && clamped > max) {
-        clamped = max
-      }
-      return clamped
-    },
-    [min, max]
-  )
 
   const updateValue = useCallback(
     newValue => {
-      const clampedValue = clampValue(newValue)
-      setInternalValue(clampedValue)
+      const clampedValue = clampValue(newValue, min, max)
       if (inputRef.current) {
         inputRef.current.value = clampedValue?.toString() ?? ""
       }
-      if (clampedValue !== internalValue) {
+      if (clampedValue !== latestValue.current) {
+        latestValue.current = clampedValue
         onValueChange?.(clampedValue)
       }
     },
-    [clampValue, internalValue, onValueChange]
+    [min, max, onValueChange]
   )
-
-  useEffect(() => {
-    if (value !== internalValue) {
-      updateValue(value)
-    }
-  }, [value, updateValue])
 
   const sanitizeInput = rawValue => {
     return rawValue.replace(/\D/g, "")
@@ -76,7 +67,7 @@ export default function IntegerInput({
     if (event.ctrlKey || event.metaKey || event.altKey) {
       return
     }
-    if (!/[0-9]/.test(event.key) && !ALLOWED_KEYS.includes(event.key)) {
+    if (!/\d/.test(event.key) && !ALLOWED_KEYS.includes(event.key)) {
       event.preventDefault()
       event.stopPropagation()
     }
@@ -138,19 +129,19 @@ export default function IntegerInput({
   }
 
   const handleIncrement = () => {
-    const current = internalValue ?? min ?? 0
-    if (max !== null && current >= max) {
+    const current = latestValue.current ?? min ?? 0
+    if (max != null && current >= max) {
       return
     }
-    updateValue(current + 1)
+    updateValue(latestValue.current == null ? current : current + 1)
   }
 
   const handleDecrement = () => {
-    const current = internalValue ?? min ?? 0
-    if (min !== null && current <= min && internalValue != null) {
+    const current = latestValue.current ?? min ?? 0
+    if (min != null && current <= min && latestValue.current != null) {
       return
     }
-    updateValue(current - 1)
+    updateValue(latestValue.current == null ? current : current - 1)
   }
 
   return (
@@ -159,7 +150,7 @@ export default function IntegerInput({
         type="text"
         inputMode="numeric"
         pattern="/\d+/"
-        value={internalValue?.toString() ?? ""}
+        value={latestValue.current?.toString() ?? ""}
         onChange={handleChange}
         onInput={handleInput}
         onKeyDown={handleKeyDown}
@@ -173,7 +164,9 @@ export default function IntegerInput({
           variant="minimal"
           onClick={handleIncrement}
           disabled={
-            max != null && internalValue != null && internalValue >= max
+            max != null &&
+            latestValue.current != null &&
+            latestValue.current >= max
           }
         />
         <Button
@@ -181,7 +174,9 @@ export default function IntegerInput({
           variant="minimal"
           onClick={handleDecrement}
           disabled={
-            min != null && internalValue != null && internalValue <= min
+            min != null &&
+            latestValue.current != null &&
+            latestValue.current <= min
           }
         />
       </div>
