@@ -18,6 +18,7 @@ interface IntegerInputProps {
   value?: number
   onValueChange?: (value: number) => void
   placeholder?: string
+  step?: number
 }
 
 function clampValue(val, min, max) {
@@ -39,7 +40,8 @@ export default function IntegerInput({
   max,
   value,
   onValueChange,
-  placeholder
+  placeholder,
+  step = 1
 }: IntegerInputProps) {
   const latestValue = useRef(value)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -174,7 +176,7 @@ export default function IntegerInput({
     if (max != null && current >= max) {
       return
     }
-    updateValue(latestValue.current == null ? current : current + 1)
+    updateValue(latestValue.current == null ? current : current + step)
   }
 
   const handleDecrement = () => {
@@ -182,7 +184,7 @@ export default function IntegerInput({
     if (min != null && current <= min && latestValue.current != null) {
       return
     }
-    updateValue(latestValue.current == null ? current : current - 1)
+    updateValue(latestValue.current == null ? current : current - step)
   }
 
   return (
