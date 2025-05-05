@@ -1148,6 +1148,7 @@ type Query {
   showRollupEmail(endDate: Instant, orgType: RollupGraphType, orgUuid: String, showText: Boolean = false, startDate: Instant): String
   task(uuid: String): Task
   taskList(query: TaskSearchQueryInput): AnetBeanList_Task
+  tasks(uuids: [String]): [Task]
   userActivityList(query: UserActivitySearchQueryInput): AnetBeanList_UserActivity
 }
 
