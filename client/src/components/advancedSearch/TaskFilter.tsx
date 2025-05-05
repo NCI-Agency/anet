@@ -286,6 +286,7 @@ const TaskFilter = ({
       pageSize={0}
       value={value.value}
       autoComplete="off"
+      showDismiss
       renderSelected={
         <TaskTable
           tasks={value.value}

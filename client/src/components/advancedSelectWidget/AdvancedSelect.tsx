@@ -1,6 +1,7 @@
 import { gql } from "@apollo/client"
 import {
   Button as BlueprintButton,
+  Classes as BlueprintClasses,
   Popover,
   PopoverInteractionKind
 } from "@blueprintjs/core"
@@ -114,6 +115,7 @@ export interface AdvancedSelectProps {
   queryParams?: any
   // Optional: GraphQL string of fields to return from search.
   fields?: string
+  showDismiss?: boolean
   handleAddItem?: (...args: unknown[]) => unknown
   handleRemoveItem?: (...args: unknown[]) => unknown
   createEntityComponent?: (...args: unknown[]) => React.ReactNode
@@ -142,6 +144,7 @@ const AdvancedSelect = ({
   objectType,
   queryParams,
   fields,
+  showDismiss,
   handleAddItem,
   handleRemoveItem,
   createEntityComponent,
@@ -313,18 +316,28 @@ const AdvancedSelect = ({
               <Popover
                 popoverClassName="advanced-select-popover bp5-popover-content-sizing"
                 content={
-                  <div style={{ position: "relative", padding: "10px" }}>
-                    <BlueprintButton
-                      icon="cross"
-                      variant="minimal"
-                      onClick={() => setDoReset(true)}
-                      style={{
-                        position: "absolute",
-                        top: "5px",
-                        right: "5px",
-                        zIndex: 10
-                      }}
-                    />
+                  <div
+                    style={{
+                      position: showDismiss ? "relative" : "initial",
+                      padding: showDismiss ? "10px" : "initial"
+                    }}
+                  >
+                    {showDismiss && (
+                      <BlueprintButton
+                        icon="cross"
+                        variant="minimal"
+                        onClick={() => setDoReset(true)}
+                        className={
+                          showDismiss ? BlueprintClasses.POPOVER_DISMISS : ""
+                        }
+                        style={{
+                          position: "absolute",
+                          top: "5px",
+                          right: "5px",
+                          zIndex: 10
+                        }}
+                      />
+                    )}
                     <Row id={`${fieldName}-popover`} className="border-between">
                       {(showCreateEntityComponent && (
                         <Col md="12">
@@ -394,7 +407,11 @@ const AdvancedSelect = ({
                 isOpen={showOverlay}
                 captureDismiss
                 disabled={disabled}
-                interactionKind={PopoverInteractionKind.CLICK}
+                interactionKind={
+                  showDismiss
+                    ? PopoverInteractionKind.CLICK_TARGET_ONLY
+                    : PopoverInteractionKind.CLICK
+                }
                 onInteraction={handleInteraction}
                 usePortal
                 autoFocus={false}

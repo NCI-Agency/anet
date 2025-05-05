@@ -105,6 +105,7 @@ const OrganizationFilter = ({
       addon={ORGANIZATIONS_ICON}
       onChange={handleChangeOrg}
       value={value.value}
+      showDismiss
       renderSelected={
         <OrganizationTable
           organizations={value.value}
