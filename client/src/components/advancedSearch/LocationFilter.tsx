@@ -98,6 +98,7 @@ const LocationFilter = ({
       addon={LOCATIONS_ICON}
       onChange={handleChangeLoc}
       value={value.value}
+      showDismiss
       renderSelected={
         <LocationTable
           locations={value.value}
