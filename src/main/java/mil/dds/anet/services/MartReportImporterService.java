@@ -348,7 +348,6 @@ public class MartReportImporterService implements IMartReportImporterService {
       position.setStatus(WithStatus.Status.ACTIVE);
       position.setRole(Position.PositionRole.MEMBER);
       position.setOrganization(organization);
-      position.setOrganizationUuid(organization.getUuid());
       position = positionDao.insert(position);
 
       positionDao.setPersonInPosition(person.getUuid(), position.getUuid());
