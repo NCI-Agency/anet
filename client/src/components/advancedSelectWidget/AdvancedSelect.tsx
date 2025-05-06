@@ -316,8 +316,8 @@ const AdvancedSelect = ({
                 content={
                   <div
                     style={{
-                      position: showDismiss ? "relative" : "initial",
-                      padding: showDismiss ? "10px" : "initial"
+                      position: showDismiss && "relative",
+                      padding: showDismiss && "10px"
                     }}
                   >
                     {showDismiss && (
@@ -325,9 +325,7 @@ const AdvancedSelect = ({
                         icon="cross"
                         variant="minimal"
                         onClick={() => setDoReset(true)}
-                        className={
-                          showDismiss ? BlueprintClasses.POPOVER_DISMISS : ""
-                        }
+                        className={BlueprintClasses.POPOVER_DISMISS}
                         style={{
                           position: "absolute",
                           top: "5px",
