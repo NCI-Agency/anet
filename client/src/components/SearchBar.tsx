@@ -32,7 +32,7 @@ export const SearchPopover = ({
       boundary="window"
       captureDismiss
       content={popoverContent}
-      interactionKind={PopoverInteractionKind.CLICK}
+      interactionKind={PopoverInteractionKind.CLICK_TARGET_ONLY}
       placement="bottom-start"
       usePortal={false}
       autoFocus
