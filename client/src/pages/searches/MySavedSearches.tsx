@@ -96,24 +96,20 @@ const MySavedSearches = ({
       </Form.Group>
 
       {selectedSearch && (
-        <div>
-          <Row>
-            <Col sm={8}>
-              <SavedSearchTable search={selectedSearch} />
-            </Col>
-            <Col className="text-end">
-              <Button style={{ marginRight: 12 }} onClick={showSearch}>
-                Show Search
-              </Button>
-              <ConfirmDestructive
-                onConfirm={onConfirmDelete}
-                objectType="search"
-                objectDisplay={selectedSearch.name}
-                variant="danger"
-                buttonLabel="Delete Search"
-              />
-            </Col>
-          </Row>
+        <div className="d-flex flex-column gap-3">
+          <div className="text-end">
+            <Button style={{ marginRight: 12 }} onClick={showSearch}>
+              Open Search Page
+            </Button>
+            <ConfirmDestructive
+              onConfirm={onConfirmDelete}
+              objectType="search"
+              objectDisplay={selectedSearch.name}
+              variant="danger"
+              buttonLabel="Delete Search"
+            />
+          </div>
+          <SavedSearchTable search={selectedSearch} />
         </div>
       )}
     </Fieldset>
