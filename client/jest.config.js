@@ -20,15 +20,10 @@ module.exports = {
   setupFilesAfterEnv: ["<rootDir>/jest-setup"],
   testEnvironment: "jsdom",
   transform: {
-    "^.+\\.(js|jsx)$": "babel-jest",
-    "^.+\\.(ts|tsx)?$": [
-      "ts-jest",
-      {
-        isolatedModules: true
-      }
-    ]
+    "^.+\\.(m?js|jsx)$": "babel-jest",
+    "^.+\\.(ts|tsx)?$": "ts-jest"
   },
   transformIgnorePatterns: [
-    "<rootDir>/node_modules/(?!(change-case|jsonpath-plus|react-resize-detector|title-case)/)"
+    "<rootDir>/node_modules/(?!(change-case|geographiclib-mgrs|jsonpath-plus|react-resize-detector|title-case)/)"
   ]
 }
