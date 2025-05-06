@@ -1,9 +1,14 @@
 package mil.dds.anet.services;
 
+import static mil.dds.anet.resources.AttachmentResource.IMAGE_SVG_XML;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import io.github.borewit.sanitize.SVGSanitizer;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
@@ -135,41 +140,68 @@ public class MartReportImporterService implements IMartReportImporterService {
 
   private void processAttachments(List<FileAttachment> attachments, Report anetReport,
       List<String> errors) {
-    try {
-      for (FileAttachment fileAttachment : attachments) {
+    for (final FileAttachment fileAttachment : attachments) {
+      try {
         fileAttachment.load();
-        final TikaInputStream tikaInputStream = TikaInputStream.get(fileAttachment.getContent());
-        final String detectedMimeType =
-            new Tika().detect(tikaInputStream, fileAttachment.getName());
-
-        if (!detectedMimeType.equalsIgnoreCase(fileAttachment.getContentType())) {
-          errors.add(String.format(
-              "Attachment with name %s found in e-mail has a different mime type: %s than specified: %s",
-              fileAttachment.getName(), detectedMimeType, fileAttachment.getContentType()));
-        } else if (!assertAllowedMimeType(detectedMimeType)) {
-          errors.add(String.format(
-              "Attachment with name %s found in e-mail is a not allowed mime type: %s",
-              fileAttachment.getName(), fileAttachment.getContentType()));
-        } else {
-          final GenericRelatedObject genericRelatedObject = new GenericRelatedObject();
-          genericRelatedObject.setRelatedObjectType(ReportDao.TABLE_NAME);
-          genericRelatedObject.setRelatedObjectUuid(anetReport.getUuid());
-          Attachment anetAttachment = new Attachment();
-          anetAttachment.setAttachmentRelatedObjects(List.of(genericRelatedObject));
-          anetAttachment.setCaption(fileAttachment.getName());
-          anetAttachment.setFileName(fileAttachment.getName());
-          anetAttachment.setMimeType(detectedMimeType);
-          anetAttachment.setContentLength((long) fileAttachment.getContent().length);
-          anetAttachment.setAuthor(anetReport.getReportPeople().get(0));
-          anetAttachment = attachmentDao.insert(anetAttachment);
-          attachmentDao.saveContentBlob(anetAttachment.getUuid(),
-              TikaInputStream.get(fileAttachment.getContent()));
-        }
+        processAttachment(errors, anetReport.getUuid(), anetReport.getReportPeople().get(0),
+            fileAttachment);
+      } catch (Exception e) {
+        logger.error("Could not process report attachment from email", e);
+        errors.add(
+            String.format("Could not process report attachment due to error: %s", e.getMessage()));
       }
-    } catch (Exception e) {
-      logger.error("Could not process report attachments from email", e);
-      errors.add(
-          String.format("Could not process report attachments due to error: %s", e.getMessage()));
+    }
+  }
+
+  private void processAttachment(List<String> errors, String reportUuid, Person reportAuthor,
+      FileAttachment fileAttachment) {
+    try (final TikaInputStream tikaInputStream = TikaInputStream.get(fileAttachment.getContent())) {
+      final String detectedMimeType = new Tika().detect(tikaInputStream, fileAttachment.getName());
+
+      if (!detectedMimeType.equalsIgnoreCase(fileAttachment.getContentType())) {
+        errors.add(String.format(
+            "Attachment with name %s found in e-mail has a different mime type: %s than specified: %s",
+            fileAttachment.getName(), detectedMimeType, fileAttachment.getContentType()));
+      } else if (!assertAllowedMimeType(detectedMimeType)) {
+        errors.add(
+            String.format("Attachment with name %s found in e-mail is a not allowed mime type: %s",
+                fileAttachment.getName(), fileAttachment.getContentType()));
+      } else {
+        saveAttachment(errors, reportUuid, reportAuthor, fileAttachment, detectedMimeType,
+            tikaInputStream);
+      }
+    } catch (IOException e) {
+      logger.error("Saving attachment content failed", e);
+      errors.add(String.format("Saving attachment content failed: %s", e.getMessage()));
+    }
+  }
+
+  private void saveAttachment(List<String> errors, String reportUuid, Person reportAuthor,
+      FileAttachment fileAttachment, String detectedMimeType, InputStream inputStream) {
+    // Create attachment
+    final GenericRelatedObject genericRelatedObject = new GenericRelatedObject();
+    genericRelatedObject.setRelatedObjectType(ReportDao.TABLE_NAME);
+    genericRelatedObject.setRelatedObjectUuid(reportUuid);
+    Attachment anetAttachment = new Attachment();
+    anetAttachment.setAttachmentRelatedObjects(List.of(genericRelatedObject));
+    anetAttachment.setCaption(fileAttachment.getName());
+    anetAttachment.setFileName(fileAttachment.getName());
+    anetAttachment.setMimeType(detectedMimeType);
+    anetAttachment.setContentLength((long) fileAttachment.getContent().length);
+    anetAttachment.setAuthor(reportAuthor);
+    anetAttachment = attachmentDao.insert(anetAttachment);
+
+    // Save attachment content
+    if (IMAGE_SVG_XML.equals(detectedMimeType)) {
+      try {
+        logger.debug("Detected SVG attachment, sanitizing!");
+        attachmentDao.saveContentBlob(anetAttachment.getUuid(), SVGSanitizer.sanitize(inputStream));
+      } catch (Exception e) {
+        logger.error("Error while sanitizing SVG", e);
+        errors.add(String.format("Error while sanitizing SVG: %s", e.getMessage()));
+      }
+    } else {
+      attachmentDao.saveContentBlob(anetAttachment.getUuid(), inputStream);
     }
   }
 
