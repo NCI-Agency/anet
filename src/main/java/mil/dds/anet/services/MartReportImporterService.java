@@ -1,8 +1,7 @@
 package mil.dds.anet.services;
 
-import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import java.nio.charset.StandardCharsets;
@@ -191,10 +190,9 @@ public class MartReportImporterService implements IMartReportImporterService {
     return AttachmentResource.getAllowedMimeTypes().contains(mimeType);
   }
 
-  private ReportDto getReportInfo(String reportJson) {
-    ReportDto report = null;
+  private ReportDto getReportInfo(String reportJson) throws JsonProcessingException {
     try {
-      report = ignoringMapper.readValue(reportJson, ReportDto.class);
+      final ReportDto report = ignoringMapper.readValue(reportJson, ReportDto.class);
       if (report.getSubmittedAt() == null) {
         logger.warn("Submitted time not provided in report");
       } else {
@@ -202,14 +200,11 @@ public class MartReportImporterService implements IMartReportImporterService {
         logger.info("Time between report send and reception: {} ms", transportDelay.toMillis());
       }
       logger.debug("Found report with UUID={}", report.getUuid());
-    } catch (JsonParseException jsonParseException) {
-      logger.error("e-mail does not look like JSON", jsonParseException);
-    } catch (JsonMappingException jsonMappingException) {
-      logger.error("Invalid JSON format", jsonMappingException);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
+      return report;
+    } catch (JsonProcessingException e) {
+      logger.error("Invalid JSON format", e);
+      throw e;
     }
-    return report;
   }
 
   private void processReportInfo(ReportDto martReport, MartImportedReport martImportedReport,
