@@ -6270,6 +6270,7 @@ __metadata:
     express-session: "npm:1.18.1"
     file-saver: "npm:2.0.5"
     formik: "npm:2.4.6"
+    geographiclib-mgrs: "npm:1.0.4"
     git-describe: "npm:4.1.1"
     graphiql: "npm:3.8.3"
     graphql: "npm:16.10.0"
@@ -6294,7 +6295,6 @@ __metadata:
     leaflet.markercluster: "npm:1.5.3"
     locale-compare-polyfill: "npm:0.0.2"
     lodash: "npm:4.17.21"
-    mgrs: "npm:1.0.0"
     milsymbol: "npm:2.2.0"
     ml-matrix: "npm:6.12.1"
     moment: "npm:2.30.1"
@@ -11202,6 +11202,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"geographiclib-mgrs@npm:1.0.4":
+  version: 1.0.4
+  resolution: "geographiclib-mgrs@npm:1.0.4"
+  checksum: 10c0/74e064828bd55acc7fcc0a7f4264a83a45954ea79e6cfdcabb2107874a7e159a1fb29eb8529162c5e4d17ad1c373f4022e5ed0413569aeec7a96eb8446f0a9eb
+  languageName: node
+  linkType: hard
+
 "get-caller-file@npm:^2.0.5":
   version: 2.0.5
   resolution: "get-caller-file@npm:2.0.5"
@@ -14576,13 +14583,6 @@ __metadata:
   version: 1.1.2
   resolution: "methods@npm:1.1.2"
   checksum: 10c0/bdf7cc72ff0a33e3eede03708c08983c4d7a173f91348b4b1e4f47d4cdbf734433ad971e7d1e8c77247d9e5cd8adb81ea4c67b0a2db526b758b2233d7814b8b2
-  languageName: node
-  linkType: hard
-
-"mgrs@npm:1.0.0":
-  version: 1.0.0
-  resolution: "mgrs@npm:1.0.0"
-  checksum: 10c0/a360853be5a3b4f4734dbf0a193851c08039ccb6077362ab0f890cccd170ef88b59585129757da9fea4d7a313d7dc3ee88f37f594fc1ae3e4e8efc5353144d77
   languageName: node
   linkType: hard
 
