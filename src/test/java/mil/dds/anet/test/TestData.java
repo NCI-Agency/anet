@@ -137,10 +137,10 @@ public class TestData {
     reportDto.setPositionName("MART Team Member");
     reportDto.setSubmittedAt(Instant.now());
     reportDto.setAtmosphere("Positive");
+    reportDto.setSecurityMarking("NU");
 
     // Custom fields
-    reportDto.setCustomFields(
-        "{\"attitude\":\"Positive\", \"contacts\":\"Contacts\", \"securityMarking\":\"NU\"}");
+    reportDto.setCustomFields("{\"attitude\":\"Positive\", \"contacts\":\"Contacts\"}");
 
     // Tasks
     final Map<String, String> tasks = new HashMap<>();
@@ -155,15 +155,14 @@ public class TestData {
     final ReportDto reportDto = createGoodMartReport(sequence);
     reportDto.setUuid("34faac7c-8c85-4dec-8e9f-57d9254b5ae2");
     reportDto.getTasks().put("does not exist", "does not exist");
-    reportDto.setCustomFields("{\"attitude\":\"Positive\", \"contacts\":\"Contacts\"}");
+    reportDto.setSecurityMarking(null);
     return reportDto;
   }
 
   public static ReportDto createMartReportWithSecurityMarkingNotInDictionary(long sequence) {
     final ReportDto reportDto = createGoodMartReport(sequence);
     reportDto.setUuid("58e0ff9b-4908-4f2d-8cab-8d64aefff929");
-    reportDto.setCustomFields(
-        "{\"attitude\":\"Positive\", \"contacts\":\"Contacts\", \"securityMarking\":\"random\"}");
+    reportDto.setSecurityMarking("random");
     return reportDto;
   }
 

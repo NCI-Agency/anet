@@ -68,7 +68,7 @@ public class AttachmentResource {
   private static final CacheControl cacheControl =
       CacheControl.maxAge(72, TimeUnit.HOURS).cachePublic();
 
-  private static final String IMAGE_SVG_XML = "image/svg+xml";
+  public static final String IMAGE_SVG_XML = "image/svg+xml";
 
   private final AnetObjectEngine engine;
   private final AttachmentDao dao;

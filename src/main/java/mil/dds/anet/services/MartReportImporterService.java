@@ -1,12 +1,14 @@
 package mil.dds.anet.services;
 
-import com.fasterxml.jackson.core.JsonParseException;
+import static mil.dds.anet.resources.AttachmentResource.IMAGE_SVG_XML;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import io.github.borewit.sanitize.SVGSanitizer;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
@@ -55,7 +57,6 @@ public class MartReportImporterService implements IMartReportImporterService {
   protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 
   public static final String REPORT_JSON_ATTACHMENT = "mart_report.json";
-  private static final String SECURITY_MARKING_JSON_PROPERTY = "securityMarking";
 
   private final ObjectMapper ignoringMapper = MapperUtils.getDefaultMapper()
       .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
@@ -139,41 +140,68 @@ public class MartReportImporterService implements IMartReportImporterService {
 
   private void processAttachments(List<FileAttachment> attachments, Report anetReport,
       List<String> errors) {
-    try {
-      for (FileAttachment fileAttachment : attachments) {
+    for (final FileAttachment fileAttachment : attachments) {
+      try {
         fileAttachment.load();
-        final TikaInputStream tikaInputStream = TikaInputStream.get(fileAttachment.getContent());
-        final String detectedMimeType =
-            new Tika().detect(tikaInputStream, fileAttachment.getName());
-
-        if (!detectedMimeType.equalsIgnoreCase(fileAttachment.getContentType())) {
-          errors.add(String.format(
-              "Attachment with name %s found in e-mail has a different mime type: %s than specified: %s",
-              fileAttachment.getName(), detectedMimeType, fileAttachment.getContentType()));
-        } else if (!assertAllowedMimeType(detectedMimeType)) {
-          errors.add(String.format(
-              "Attachment with name %s found in e-mail is a not allowed mime type: %s",
-              fileAttachment.getName(), fileAttachment.getContentType()));
-        } else {
-          final GenericRelatedObject genericRelatedObject = new GenericRelatedObject();
-          genericRelatedObject.setRelatedObjectType(ReportDao.TABLE_NAME);
-          genericRelatedObject.setRelatedObjectUuid(anetReport.getUuid());
-          Attachment anetAttachment = new Attachment();
-          anetAttachment.setAttachmentRelatedObjects(List.of(genericRelatedObject));
-          anetAttachment.setCaption(fileAttachment.getName());
-          anetAttachment.setFileName(fileAttachment.getName());
-          anetAttachment.setMimeType(detectedMimeType);
-          anetAttachment.setContentLength((long) fileAttachment.getContent().length);
-          anetAttachment.setAuthor(anetReport.getReportPeople().get(0));
-          anetAttachment = attachmentDao.insert(anetAttachment);
-          attachmentDao.saveContentBlob(anetAttachment.getUuid(),
-              TikaInputStream.get(fileAttachment.getContent()));
-        }
+        processAttachment(errors, anetReport.getUuid(), anetReport.getReportPeople().get(0),
+            fileAttachment);
+      } catch (Exception e) {
+        logger.error("Could not process report attachment from email", e);
+        errors.add(
+            String.format("Could not process report attachment due to error: %s", e.getMessage()));
       }
-    } catch (Exception e) {
-      logger.error("Could not process report attachments from email", e);
-      errors.add(
-          String.format("Could not process report attachments due to error: %s", e.getMessage()));
+    }
+  }
+
+  private void processAttachment(List<String> errors, String reportUuid, Person reportAuthor,
+      FileAttachment fileAttachment) {
+    try (final TikaInputStream tikaInputStream = TikaInputStream.get(fileAttachment.getContent())) {
+      final String detectedMimeType = new Tika().detect(tikaInputStream, fileAttachment.getName());
+
+      if (!detectedMimeType.equalsIgnoreCase(fileAttachment.getContentType())) {
+        errors.add(String.format(
+            "Attachment with name %s found in e-mail has a different mime type: %s than specified: %s",
+            fileAttachment.getName(), detectedMimeType, fileAttachment.getContentType()));
+      } else if (!assertAllowedMimeType(detectedMimeType)) {
+        errors.add(
+            String.format("Attachment with name %s found in e-mail is a not allowed mime type: %s",
+                fileAttachment.getName(), fileAttachment.getContentType()));
+      } else {
+        saveAttachment(errors, reportUuid, reportAuthor, fileAttachment, detectedMimeType,
+            tikaInputStream);
+      }
+    } catch (IOException e) {
+      logger.error("Saving attachment content failed", e);
+      errors.add(String.format("Saving attachment content failed: %s", e.getMessage()));
+    }
+  }
+
+  private void saveAttachment(List<String> errors, String reportUuid, Person reportAuthor,
+      FileAttachment fileAttachment, String detectedMimeType, InputStream inputStream) {
+    // Create attachment
+    final GenericRelatedObject genericRelatedObject = new GenericRelatedObject();
+    genericRelatedObject.setRelatedObjectType(ReportDao.TABLE_NAME);
+    genericRelatedObject.setRelatedObjectUuid(reportUuid);
+    Attachment anetAttachment = new Attachment();
+    anetAttachment.setAttachmentRelatedObjects(List.of(genericRelatedObject));
+    anetAttachment.setCaption(fileAttachment.getName());
+    anetAttachment.setFileName(fileAttachment.getName());
+    anetAttachment.setMimeType(detectedMimeType);
+    anetAttachment.setContentLength((long) fileAttachment.getContent().length);
+    anetAttachment.setAuthor(reportAuthor);
+    anetAttachment = attachmentDao.insert(anetAttachment);
+
+    // Save attachment content
+    if (IMAGE_SVG_XML.equals(detectedMimeType)) {
+      try {
+        logger.debug("Detected SVG attachment, sanitizing!");
+        attachmentDao.saveContentBlob(anetAttachment.getUuid(), SVGSanitizer.sanitize(inputStream));
+      } catch (Exception e) {
+        logger.error("Error while sanitizing SVG", e);
+        errors.add(String.format("Error while sanitizing SVG: %s", e.getMessage()));
+      }
+    } else {
+      attachmentDao.saveContentBlob(anetAttachment.getUuid(), inputStream);
     }
   }
 
@@ -194,10 +222,9 @@ public class MartReportImporterService implements IMartReportImporterService {
     return AttachmentResource.getAllowedMimeTypes().contains(mimeType);
   }
 
-  private ReportDto getReportInfo(String reportJson) {
-    ReportDto report = null;
+  private ReportDto getReportInfo(String reportJson) throws JsonProcessingException {
     try {
-      report = ignoringMapper.readValue(reportJson, ReportDto.class);
+      final ReportDto report = ignoringMapper.readValue(reportJson, ReportDto.class);
       if (report.getSubmittedAt() == null) {
         logger.warn("Submitted time not provided in report");
       } else {
@@ -205,14 +232,11 @@ public class MartReportImporterService implements IMartReportImporterService {
         logger.info("Time between report send and reception: {} ms", transportDelay.toMillis());
       }
       logger.debug("Found report with UUID={}", report.getUuid());
-    } catch (JsonParseException jsonParseException) {
-      logger.error("e-mail does not look like JSON", jsonParseException);
-    } catch (JsonMappingException jsonMappingException) {
-      logger.error("Invalid JSON format", jsonMappingException);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
+      return report;
+    } catch (JsonProcessingException e) {
+      logger.error("Invalid JSON format", e);
+      throw e;
     }
-    return report;
   }
 
   private void processReportInfo(ReportDto martReport, MartImportedReport martImportedReport,
@@ -249,7 +273,7 @@ public class MartReportImporterService implements IMartReportImporterService {
     }
     anetReport.setEngagementDate(martReport.getEngagementDate());
     anetReport.setReportText(martReport.getReportText());
-    // Get classification from securityMarking property in MART custom fields
+    // Get classification from securityMarking property
     anetReport.setClassification(getClassificationFromReport(martReport, errors));
     // Set advisor organization to the organization of the submitter
     anetReport.setAdvisorOrg(organization);
@@ -304,24 +328,16 @@ public class MartReportImporterService implements IMartReportImporterService {
   }
 
   private String getClassificationFromReport(ReportDto martReport, List<String> errors) {
-    try {
-      final JsonNode jsonNode = ignoringMapper.readTree(martReport.getCustomFields());
-      final JsonNode securityMarkingProperty = jsonNode.get(SECURITY_MARKING_JSON_PROPERTY);
-      if (securityMarkingProperty == null) {
-        errors.add("Security marking is missing");
+    final String martReportClassification = martReport.getSecurityMarking();
+    if (martReportClassification == null) {
+      errors.add("Security marking is missing");
+    } else {
+      if (ResourceUtils.getAllowedClassifications().contains(martReportClassification)) {
+        return martReportClassification;
       } else {
-        final String martReportClassification = securityMarkingProperty.asText();
-        if (ResourceUtils.getAllowedClassifications().contains(martReportClassification)) {
-          return martReportClassification;
-        } else {
-          errors.add(String.format("Can not find report security marking: '%s'",
-              martReportClassification));
-        }
+        errors.add(
+            String.format("Can not find report security marking: '%s'", martReportClassification));
       }
-    } catch (JsonProcessingException e) {
-      errors.add(String.format("Could not extract security marking from MART report: '%s'",
-          e.getMessage()));
-      logger.error("Could not extract security marking from MART report", e);
     }
 
     return null;
@@ -359,7 +375,6 @@ public class MartReportImporterService implements IMartReportImporterService {
       position.setStatus(WithStatus.Status.ACTIVE);
       position.setRole(Position.PositionRole.MEMBER);
       position.setOrganization(organization);
-      position.setOrganizationUuid(organization.getUuid());
       position = positionDao.insert(position);
 
       positionDao.setPersonInPosition(person.getUuid(), position.getUuid());

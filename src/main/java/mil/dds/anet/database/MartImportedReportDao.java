@@ -83,8 +83,8 @@ public class MartImportedReportDao extends AbstractDao {
               + "(sequence, \"personUuid\", \"reportUuid\", success, \"submittedAt\", \"receivedAt\", errors) "
               + "VALUES (:sequence, :personUuid, :reportUuid, :success, :submittedAt, :receivedAt, :errors) ")
           .bindBean(martImportedReport)
-          .bind("getSubmittedAt", DaoUtils.asLocalDateTime(martImportedReport.getSubmittedAt()))
-          .bind("getReceivedAt", DaoUtils.asLocalDateTime(martImportedReport.getReceivedAt()))
+          .bind("submittedAt", DaoUtils.asLocalDateTime(martImportedReport.getSubmittedAt()))
+          .bind("receivedAt", DaoUtils.asLocalDateTime(martImportedReport.getReceivedAt()))
           .execute();
     } finally {
       closeDbHandle(handle);

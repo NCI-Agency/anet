@@ -31,6 +31,7 @@ public class ReportDto {
   private String reportText;
 
   private String atmosphere;
+  private String securityMarking;
 
   private String customFields;
   private Map<String, String> tasks = new HashMap<>();
@@ -203,5 +204,13 @@ public class ReportDto {
 
   public void setAtmosphere(String atmosphere) {
     this.atmosphere = atmosphere;
+  }
+
+  public String getSecurityMarking() {
+    return securityMarking;
+  }
+
+  public void setSecurityMarking(String securityMarking) {
+    this.securityMarking = securityMarking;
   }
 }
