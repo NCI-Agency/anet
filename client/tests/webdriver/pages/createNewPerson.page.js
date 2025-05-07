@@ -104,6 +104,10 @@ export class CreatePerson extends Page {
     )
   }
 
+  async getCountryHelpBlock() {
+    return browser.$("#fg-country div.invalid-feedback")
+  }
+
   async getEndOfTourDate() {
     return browser.$("#endOfTourDate")
   }

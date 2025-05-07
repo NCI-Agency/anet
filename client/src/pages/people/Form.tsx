@@ -618,7 +618,7 @@ const PersonForm = ({
                     setFieldTouched("country", true, false) // onBlur doesn't work when selecting an option
                     setFieldValue("country", value)
                     if (value) {
-                      setFieldValue("obsoleteCountry", null)
+                      setFieldValue("obsoleteCountry", null, false)
                     }
                   }}
                   widget={

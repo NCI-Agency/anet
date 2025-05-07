@@ -74,6 +74,9 @@ describe("Create new Person form page", () => {
         await (await CreatePerson.getCountryAdvancedSelectFirstItem()).getText()
       ).to.include(VALID_PERSON_INTERLOCUTOR.country)
       await (await CreatePerson.getCountryAdvancedSelectFirstItem()).click()
+      await (
+        await CreatePerson.getCountryHelpBlock()
+      ).waitForExist({ reverse: true })
 
       await CreatePerson.submitForm()
       await CreatePerson.waitForAlertSuccessToLoad()
@@ -111,6 +114,9 @@ describe("Create new Person form page", () => {
         await (await CreatePerson.getCountryAdvancedSelectFirstItem()).getText()
       ).to.include(VALID_PERSON_INTERLOCUTOR.country)
       await (await CreatePerson.getCountryAdvancedSelectFirstItem()).click()
+      await (
+        await CreatePerson.getCountryHelpBlock()
+      ).waitForExist({ reverse: true })
 
       await CreatePerson.submitForm()
       await CreatePerson.waitForAlertSuccessToLoad()
@@ -148,6 +154,9 @@ describe("Create new Person form page", () => {
         await (await CreatePerson.getCountryAdvancedSelectFirstItem()).getText()
       ).to.include(VALID_PERSON_INTERLOCUTOR.country)
       await (await CreatePerson.getCountryAdvancedSelectFirstItem()).click()
+      await (
+        await CreatePerson.getCountryHelpBlock()
+      ).waitForExist({ reverse: true })
 
       await (await CreatePerson.getEmailAddress(0)).setValue("notValidEmail@")
       await (await CreatePerson.getLastName()).click()
@@ -252,6 +261,9 @@ describe("Create new Person form page", () => {
         await (await CreatePerson.getCountryAdvancedSelectFirstItem()).getText()
       ).to.include(VALID_PERSON_ADVISOR.country)
       await (await CreatePerson.getCountryAdvancedSelectFirstItem()).click()
+      await (
+        await CreatePerson.getCountryHelpBlock()
+      ).waitForExist({ reverse: true })
 
       await (await CreatePerson.getEndOfTourDate()).setValue("")
       await (await CreatePerson.getLastName()).click()
