@@ -12,6 +12,10 @@ public class AccessToken {
 
   private static final Base64.Encoder BASE64_ENCODER = Base64.getEncoder();
 
+  public enum TokenScope {
+    NVG, GRAPHQL
+  }
+
   @GraphQLQuery
   @GraphQLInputField
   private String uuid;
@@ -30,6 +34,9 @@ public class AccessToken {
   @GraphQLQuery
   @GraphQLInputField
   private Instant expiresAt;
+  @GraphQLQuery
+  @GraphQLInputField
+  private TokenScope scope;
 
   public String getUuid() {
     return uuid;
@@ -77,6 +84,14 @@ public class AccessToken {
 
   public void setExpiresAt(Instant expiresAt) {
     this.expiresAt = expiresAt;
+  }
+
+  public TokenScope getScope() {
+    return scope;
+  }
+
+  public void setScope(TokenScope scope) {
+    this.scope = scope;
   }
 
   public static String computeTokenHash(final String tokenValue) {
