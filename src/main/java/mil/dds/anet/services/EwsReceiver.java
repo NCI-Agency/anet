@@ -21,9 +21,11 @@ import microsoft.exchange.webservices.data.search.filter.SearchFilter;
 import mil.dds.anet.config.AnetConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
 @Component
+@ConditionalOnExpression("not ${anet.mart.disabled:true}")
 public class EwsReceiver implements IMailReceiver {
 
   private static final Logger logger =
