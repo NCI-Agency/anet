@@ -224,6 +224,9 @@ describe("When working with custom fields for different anet objects", () => {
         await (await CreatePerson.getCountryAdvancedSelectFirstItem()).getText()
       ).to.include(REQUIRED_PERSON_FIELDS.country)
       await (await CreatePerson.getCountryAdvancedSelectFirstItem()).click()
+      await (
+        await CreatePerson.getCountryHelpBlock()
+      ).waitForExist({ reverse: true })
     })
 
     it("Should not show default invisible fields", async() => {

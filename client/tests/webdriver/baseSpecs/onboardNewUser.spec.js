@@ -90,6 +90,9 @@ describe("Onboard new user login", () => {
       await (await OnboardPage.getCountryAdvancedSelectFirstItem()).getText()
     ).to.include(personDetails.country)
     await (await OnboardPage.getCountryAdvancedSelectFirstItem()).click()
+    await (
+      await OnboardPage.getCountryHelpBlock()
+    ).waitForExist({ reverse: true })
 
     await (
       await OnboardPage.getEndOfTourDate()
