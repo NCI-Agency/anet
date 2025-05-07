@@ -3,6 +3,7 @@ import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import styled from "@emotion/styled"
 import API from "api"
+import App6Symbol from "components/App6Symbol"
 import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import LinkTo from "components/LinkTo"
 import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
@@ -12,7 +13,6 @@ import {
   useBoilerplate
 } from "components/Page"
 import { toPng } from "html-to-image"
-import ms from "milsymbol"
 import { Organization } from "models"
 import { PositionRole } from "models/Position"
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
@@ -42,6 +42,11 @@ const GQL_GET_CHART_DATA = gql`
       app6symbolSet
       app6hq
       app6amplifier
+      app6entity
+      app6entityType
+      app6entitySubtype
+      app6sectorOneModifier
+      app6sectorTwoModifier
       ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       positions {
         name
@@ -80,12 +85,23 @@ const GQL_GET_CHART_DATA = gql`
         app6symbolSet
         app6hq
         app6amplifier
+        app6entity
+        app6entityType
+        app6entitySubtype
+        app6sectorOneModifier
+        app6sectorTwoModifier
         ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         childrenOrgs(query: { status: ACTIVE }) {
           uuid
         }
         ascendantOrgs {
           uuid
+          app6context
+          app6standardIdentity
+          app6symbolSet
+          parentOrg {
+            uuid
+          }
         }
         parentOrg {
           uuid
@@ -217,32 +233,15 @@ const OrganizationFlowChart = ({
     link.click()
   }
 
-  const determineSymbol = (org, allAscendantOrgs) => {
-    const ascendantOrgs =
-      utils
-        .getAscendantObjectsAsList(org, allAscendantOrgs, "parentOrg")
-        ?.reverse() || []
-    const context = utils.determineApp6field(ascendantOrgs, "app6context", "0")
-    const standardIdentity = utils.determineApp6field(
-      ascendantOrgs,
-      "app6standardIdentity",
-      "1"
-    )
-    const symbolSet = utils.determineApp6field(
-      ascendantOrgs,
-      "app6symbolSet",
-      "00"
-    )
-    const hq = org?.app6hq || "0"
-    const amplifier = org?.app6amplifier || "00"
-    const version = "10" // APP-6D
-    const status = "0" // Present
-    return new ms.Symbol(
-      `${version}${context}${standardIdentity}${symbolSet}${status}${hq}${amplifier}`,
-      {
-        size: 30
-      }
-    )
+  const determineSymbolValues = org => {
+    const { parentContext, parentStandardIdentity, parentSymbolSet } =
+      Organization.getApp6ParentFields(org, org)
+    return {
+      ...org,
+      app6context: org.app6context || parentContext,
+      app6standardIdentity: org.app6standardIdentity || parentStandardIdentity,
+      app6symbolSet: org.app6symbolSet || parentSymbolSet
+    }
   }
 
   const toggleDisplayMode = () => {
@@ -318,14 +317,14 @@ const OrganizationFlowChart = ({
       const currentX = isRoot ? 0 : x
       const currentY = isRoot ? 0 : y
 
-      const symbol = determineSymbol(node, allAscendantOrgs).asDOM()
+      const symbolValues = determineSymbolValues(node)
       const positions = filterPositions(node.positions)
 
       const currentNode = {
         id: node.uuid,
         data: {
           organization: node,
-          symbol,
+          symbolValues,
           positions,
           depth,
           showSymbol: showApp6Symbols
@@ -685,106 +684,100 @@ const ControlsContainer = styled.div`
 `
 
 const CustomNode = ({
-  data: { organization, symbol, depth, positions, showSymbol }
-}: NodeProps) => {
-  const svg = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    if (svg.current) {
-      if (svg.current.firstChild) {
-        svg.current.replaceChild(symbol, svg.current.firstChild)
-      } else {
-        svg.current.appendChild(symbol)
-      }
-    }
-  }, [symbol])
-  return (
+  data: { organization, symbolValues, depth, positions, showSymbol }
+}: NodeProps) => (
+  <div
+    style={{
+      width: NODE_WIDTH,
+      height: NODE_HEIGHT + positions.length * PERSON_AVATAR_HEIGHT,
+      display: "flex",
+      flexDirection: "column"
+    }}
+  >
     <div
       style={{
-        width: NODE_WIDTH,
-        height: NODE_HEIGHT + positions.length * PERSON_AVATAR_HEIGHT,
-        display: "flex",
-        flexDirection: "column"
+        display: "flex"
       }}
     >
       <div
         style={{
-          display: "flex"
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          minWidth: ORG_AVATAR_WIDTH,
+          height: NODE_HEIGHT
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            minWidth: ORG_AVATAR_WIDTH,
-            height: NODE_HEIGHT
-          }}
-        >
-          {(showSymbol && <div ref={svg} />) || (
-            <EntityAvatarDisplay
-              avatar={organization.entityAvatar}
-              defaultAvatar={Organization.relatedObjectType}
-              width={ORG_AVATAR_WIDTH}
-              height={ORG_AVATAR_WIDTH}
-              style={{ backgroundColor: BACKGROUND_COLOR }}
-            />
-          )}
-        </div>
-        <LinkTo
-          modelType="Organization"
-          model={organization}
-          showAvatar={false}
-          showIcon={false}
-          style={{
-            minHeight: NODE_HEIGHT,
-            display: "flex",
-            padding: "5px 0px 5px 5px",
-            alignItems: "center"
-          }}
-        />
+        {(showSymbol && (
+          <App6Symbol
+            values={symbolValues}
+            size={ORG_AVATAR_WIDTH}
+            maxHeight={NODE_HEIGHT}
+          />
+        )) || (
+          <EntityAvatarDisplay
+            avatar={organization.entityAvatar}
+            defaultAvatar={Organization.relatedObjectType}
+            width={ORG_AVATAR_WIDTH}
+            height={ORG_AVATAR_WIDTH}
+            style={{ backgroundColor: BACKGROUND_COLOR }}
+          />
+        )}
       </div>
-      {positions.length > 0 && (
-        <div
-          style={{
-            paddingLeft: ORG_AVATAR_WIDTH / 2
-          }}
-        >
-          {positions.map(person => (
-            <LinkTo
-              key={person.uuid}
-              modelType="Person"
-              model={person}
-              showIcon={false}
-              style={{
-                display: "inline-block",
-                maxWidth: TEXT_WIDTH,
-                padding: "5px 0px 5px 5px",
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                verticalAlign: "middle"
-              }}
-            />
-          ))}
-        </div>
-      )}
-      <Handle
-        type="source"
-        position={Position.Bottom}
-        style={{ opacity: 0, top: NODE_HEIGHT / 2, left: ORG_AVATAR_WIDTH / 2 }}
-      />
-      <Handle
-        type="target"
-        position={depth > 1 ? Position.Left : Position.Top}
+      <LinkTo
+        modelType="Organization"
+        model={organization}
+        showAvatar={false}
+        showIcon={false}
         style={{
-          opacity: 0,
-          left: depth === 1 ? ORG_AVATAR_WIDTH / 2 : -ARROW_INDENT,
-          top: depth === 1 ? 0 : NODE_HEIGHT / 2
+          minHeight: NODE_HEIGHT,
+          display: "flex",
+          padding: "5px 0px 5px 5px",
+          alignItems: "center"
         }}
       />
     </div>
-  )
-}
+    {positions.length > 0 && (
+      <div
+        style={{
+          paddingLeft: ORG_AVATAR_WIDTH / 2
+        }}
+      >
+        {positions.map(person => (
+          <LinkTo
+            key={person.uuid}
+            modelType="Person"
+            model={person}
+            showIcon={false}
+            style={{
+              display: "inline-block",
+              maxWidth: TEXT_WIDTH,
+              padding: "5px 0px 5px 5px",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              verticalAlign: "middle"
+            }}
+          />
+        ))}
+      </div>
+    )}
+    <Handle
+      type="source"
+      position={Position.Bottom}
+      style={{ opacity: 0, top: NODE_HEIGHT / 2, left: ORG_AVATAR_WIDTH / 2 }}
+    />
+    <Handle
+      type="target"
+      position={depth > 1 ? Position.Left : Position.Top}
+      style={{
+        opacity: 0,
+        left: depth === 1 ? ORG_AVATAR_WIDTH / 2 : -ARROW_INDENT,
+        top: depth === 1 ? 0 : NODE_HEIGHT / 2
+      }}
+    />
+  </div>
+)
 
 const CustomRootEdge = ({
   id,

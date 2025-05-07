@@ -1,6 +1,7 @@
 import { gql } from "@apollo/client"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
+import App6SymbolPreview from "components/App6SymbolPreview"
 import AppContext from "components/AppContext"
 import Approvals from "components/approvals/Approvals"
 import AssessmentResultsContainer from "components/assessments/AssessmentResultsContainer"
@@ -110,6 +111,11 @@ const GQL_GET_ORGANIZATION = gql`
       app6symbolSet
       app6hq
       app6amplifier
+      app6entity
+      app6entityType
+      app6entitySubtype
+      app6sectorOneModifier
+      app6sectorTwoModifier
       updatedAt
       emailAddresses {
         network
@@ -253,8 +259,6 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
     attachments?.some(
       a => a.uuid === organization?.entityAvatar?.attachmentUuid
     ) && organization.entityAvatar
-  const { parentContext, parentStandardIdentity, parentSymbolSet } =
-    Organization.getApp6ParentFields(organization, organization)
 
   const myOrg =
     currentUser && currentUser.position
@@ -433,7 +437,9 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
                     className="d-flex flex-column justify-content-center"
                   >
                     <FormGroup>
-                      <Row style={{ marginBottom: "1rem" }}>
+                      <Row
+                        style={{ marginBottom: "1rem", alignItems: "center" }}
+                      >
                         <Col sm={7}>
                           <Row>
                             <Col>
@@ -455,6 +461,16 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
                               />
                             </Col>
                           </Row>
+                        </Col>
+                        <Col
+                          sm={5}
+                          className="d-flex flex-column justify-content-center align-items-center"
+                        >
+                          <App6SymbolPreview
+                            values={values}
+                            size={120}
+                            maxHeight={250}
+                          />
                         </Col>
                       </Row>
                     </FormGroup>
@@ -607,97 +623,6 @@ const OrganizationShow = ({ pageDispatchers }: OrganizationShowProps) => {
                     }
                   />
                 )}
-              </Fieldset>
-
-              <Fieldset title="APP-06 symbology" id="app6-symbology">
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.organization.app6context}
-                  name="app6context"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={
-                    (parentContext && (
-                      <em>
-                        {
-                          Settings.fields.organization.app6context.choices[
-                            parentContext
-                          ]
-                        }{" "}
-                        (inherited from parent)
-                      </em>
-                    )) ||
-                    Settings.fields.organization.app6context.choices[
-                      organization.app6context
-                    ]
-                  }
-                />
-
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.organization.app6standardIdentity}
-                  name="app6standardIdentity"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={
-                    (parentStandardIdentity && (
-                      <em>
-                        {
-                          Settings.fields.organization.app6standardIdentity
-                            .choices[parentStandardIdentity]
-                        }{" "}
-                        (inherited from parent)
-                      </em>
-                    )) ||
-                    Settings.fields.organization.app6standardIdentity.choices[
-                      organization.app6standardIdentity
-                    ]
-                  }
-                />
-
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.organization.app6symbolSet}
-                  name="app6symbolSet"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={
-                    (parentSymbolSet && (
-                      <em>
-                        {
-                          Settings.fields.organization.app6symbolSet.choices[
-                            parentSymbolSet
-                          ]
-                        }{" "}
-                        (inherited from parent)
-                      </em>
-                    )) ||
-                    Settings.fields.organization.app6symbolSet.choices[
-                      organization.app6symbolSet
-                    ]
-                  }
-                />
-
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.organization.app6hq}
-                  name="app6hq"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={
-                    Settings.fields.organization.app6hq.choices[
-                      organization.app6hq
-                    ]
-                  }
-                />
-
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.organization.app6amplifier}
-                  name="app6amplifier"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={
-                    Settings.fields.organization.app6amplifier.choices[
-                      organization.app6amplifier
-                    ]
-                  }
-                />
               </Fieldset>
 
               {Settings.fields.organization.customFields && (
