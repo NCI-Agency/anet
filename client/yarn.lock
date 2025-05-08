@@ -6242,7 +6242,6 @@ __metadata:
     circular-dependency-plugin: "npm:5.2.2"
     classnames: "npm:2.5.1"
     clean-webpack-plugin: "npm:4.0.0"
-    closest: "npm:0.0.1"
     config: "npm:3.3.12"
     copy-webpack-plugin: "npm:13.0.0"
     core-js: "npm:3.41.0"
@@ -6300,8 +6299,6 @@ __metadata:
     ml-matrix: "npm:6.12.1"
     moment: "npm:2.30.1"
     moment-timezone: "npm:0.5.48"
-    pathfinding: "npm:0.4.18"
-    paths-js: "npm:0.4.11"
     pluralize: "npm:8.0.0"
     postcss: "npm:8.5.3"
     postcss-calc: "npm:10.1.1"
@@ -7948,15 +7945,6 @@ __metadata:
   version: 1.0.4
   resolution: "clone@npm:1.0.4"
   checksum: 10c0/2176952b3649293473999a95d7bebfc9dc96410f6cbd3d2595cf12fd401f63a4bf41a7adbfd3ab2ff09ed60cb9870c58c6acdd18b87767366fabfc163700f13b
-  languageName: node
-  linkType: hard
-
-"closest@npm:0.0.1":
-  version: 0.0.1
-  resolution: "closest@npm:0.0.1"
-  dependencies:
-    matches-selector: "npm:0.0.1"
-  checksum: 10c0/5193586530fb8c2adeb0c56cb6b3b5a348b17f34245daae7953ed65cc78f53f4d3997347f81868c3650f006f12800155ead52824acfdb9d845079ce960deba06
   languageName: node
   linkType: hard
 
@@ -11834,13 +11822,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"heap@npm:0.2.5":
-  version: 0.2.5
-  resolution: "heap@npm:0.2.5"
-  checksum: 10c0/6992caceff57ea3aaa6671506a2ff74ca60af38c72cc722606a7365ebcb8ea536f37efff35a78368f90497083eba7a8161db13abb9193c6e67fedcc3d488de77
-  languageName: node
-  linkType: hard
-
 "hey-listen@npm:^1.0.8":
   version: 1.0.8
   resolution: "hey-listen@npm:1.0.8"
@@ -14507,13 +14488,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"matches-selector@npm:0.0.1":
-  version: 0.0.1
-  resolution: "matches-selector@npm:0.0.1"
-  checksum: 10c0/433dba67ab037801ab6e391ab2ebd98cfd9d81e372d4157959ab2eb1de99e2d12a375ba530c65435422e4e63020100618d1b674bb4a18f68d635f53c63a550e9
-  languageName: node
-  linkType: hard
-
 "math-intrinsics@npm:^1.1.0":
   version: 1.1.0
   resolution: "math-intrinsics@npm:1.1.0"
@@ -15870,22 +15844,6 @@ __metadata:
   version: 1.1.2
   resolution: "pathe@npm:1.1.2"
   checksum: 10c0/64ee0a4e587fb0f208d9777a6c56e4f9050039268faaaaecd50e959ef01bf847b7872785c36483fa5cdcdbdfdb31fef2ff222684d4fc21c330ab60395c681897
-  languageName: node
-  linkType: hard
-
-"pathfinding@npm:0.4.18":
-  version: 0.4.18
-  resolution: "pathfinding@npm:0.4.18"
-  dependencies:
-    heap: "npm:0.2.5"
-  checksum: 10c0/00ccd2c0b7ff96c00c571ef84b896cceae26533bbf299956fe98ed1ccb2b76cbb46a54a7c10d01434abaf16943c7e2bc84500f2e1e821d1b9337d83a7b71b309
-  languageName: node
-  linkType: hard
-
-"paths-js@npm:0.4.11":
-  version: 0.4.11
-  resolution: "paths-js@npm:0.4.11"
-  checksum: 10c0/4ac4f2ecc3d5a5a3c6e7b6f6e7cfc30857f3055b870e353cbb77c1967dce23812e15c622ed2df1db26edfa2c881f720ec5031d6a1581fdf2b4c168757217f9b7
   languageName: node
   linkType: hard
 
