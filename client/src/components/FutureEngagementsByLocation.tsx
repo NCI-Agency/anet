@@ -334,8 +334,8 @@ const FutureEngagementsByLocation = ({
     return {
       // Use here the start and end of a date in order to make sure the
       // fetch is independent of the engagementDate time value
-      engagementDateStart: moment(focusedDate).startOf("day").valueOf(),
-      engagementDateEnd: moment(focusedDate).endOf("day").valueOf(),
+      engagementDateStart: moment(focusedDate).startOf("day").toISOString(),
+      engagementDateEnd: moment(focusedDate).endOf("day").toISOString(),
       locationUuid: focusedLocation
     }
   }

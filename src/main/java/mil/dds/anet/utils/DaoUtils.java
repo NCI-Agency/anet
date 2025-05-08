@@ -190,17 +190,14 @@ public class DaoUtils {
 
   /*
    * For all search interfaces we accept either specific dates as number of milliseconds since the
-   * Unix Epoch, OR a number of milliseconds relative to today's date. Relative times should be
-   * milliseconds less than one year. Since it doesn't make sense to look for any date before 1971.
+   * Unix Epoch, OR a number of milliseconds before today's date, where these relative times should
+   * be negative, i.e. before Epoch.
    */
-  private static final long MILLIS_IN_YEAR = 1000L * 60L * 60L * 24L * 365L;
-
   public static boolean isRelativeDate(Instant input) {
     if (input == null) {
       return false;
     }
-    final long millis = input.toEpochMilli();
-    return millis < MILLIS_IN_YEAR;
+    return input.toEpochMilli() < 0;
   }
 
   private static Instant handleRelativeDate(Instant input) {
