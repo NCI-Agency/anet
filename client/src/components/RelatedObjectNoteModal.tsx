@@ -30,7 +30,6 @@ const RelatedObjectNoteModal = ({
   onDelete
 }: RelatedObjectNoteModalProps) => {
   const yupSchema = yup.object().shape({
-    type: yup.string().required(),
     text: yup
       .string()
       .test("text", "text error", (text, testContext) =>
@@ -74,7 +73,7 @@ const RelatedObjectNoteModal = ({
             <Form>
               <Modal.Header closeButton>
                 <Modal.Title>
-                  {`${note.uuid ? "Edit" : "Post a new"} note"}`}
+                  {`${note.uuid ? "Edit" : "Post a new"} note`}
                 </Modal.Title>
               </Modal.Header>
               <Modal.Body>
