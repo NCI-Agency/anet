@@ -138,6 +138,7 @@ const TaskFilter = ({
       addon={TASKS_ICON}
       onChange={handleChangeTask}
       value={value.value}
+      showDismiss
       renderSelected={
         <TaskTable
           tasks={value.value}
