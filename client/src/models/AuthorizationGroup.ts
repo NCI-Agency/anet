@@ -1,5 +1,5 @@
 import Model from "components/Model"
-import AUTHORIZATION_GROUPS_ICON from "resources/authorizationGroups.png"
+import COMMUNITIES_ICON from "resources/communities.png"
 import utils from "utils"
 import * as yup from "yup"
 
@@ -42,7 +42,7 @@ export default class AuthorizationGroup extends Model {
   }
 
   iconUrl() {
-    return AUTHORIZATION_GROUPS_ICON
+    return COMMUNITIES_ICON
   }
 
   toString() {
