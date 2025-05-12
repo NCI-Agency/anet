@@ -110,7 +110,7 @@ class RestrictedFieldsTest extends AbstractResourceTest {
 
   @Test
   void testAsAuthorizedUser() {
-    // Jim is in the EF 5 authorization group which can access all restricted fields
+    // Jim is in the EF 5 community which can access all restricted fields
     testAsAuthorizedUser("jim");
   }
 
