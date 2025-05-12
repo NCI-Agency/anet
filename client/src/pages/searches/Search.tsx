@@ -60,7 +60,7 @@ import {
 import { connect } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
-import AUTHORIZATION_GROUPS_ICON from "resources/authorizationGroups.png"
+import COMMUNITIES_ICON from "resources/communities.png"
 import DOWNLOAD_ICON from "resources/download.png"
 import EVENTS_ICON from "resources/events.png"
 import LOCATIONS_ICON from "resources/locations.png"
@@ -1474,7 +1474,7 @@ const Search = ({
                 to="authorizationGroups"
                 disabled={!hasAuthorizationGroupsResults}
               >
-                <img src={AUTHORIZATION_GROUPS_ICON} alt="" />{" "}
+                <img src={COMMUNITIES_ICON} alt="" />{" "}
                 {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS]}{" "}
                 {hasAuthorizationGroupsResults && (
                   <Badge pill bg="secondary" className="float-end">
