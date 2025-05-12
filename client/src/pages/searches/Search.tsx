@@ -1843,7 +1843,7 @@ const Search = ({
             initialValues={{ name: "" }}
           >
             {({ values, submitForm }) => (
-              <Form>
+              <Form className="d-flex flex-column gap-3">
                 <Field
                   name="name"
                   component={FieldHelper.InputField}
