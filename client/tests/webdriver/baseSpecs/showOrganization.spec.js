@@ -134,8 +134,8 @@ describe("Show organization page", () => {
     })
   })
 
-  describe("When on the show page of an organization with authorizationGroup(s)", () => {
-    it("We should see a table with authorizationGroups", async() => {
+  describe("When on the show page of an organization with communities", () => {
+    it("We should see a table with communities", async() => {
       await ShowOrganization.openAsAdminUser(ORGANIZATION_WITH_AG_UUID)
       await (
         await ShowOrganization.getAuthorizationGroupsTable()
@@ -147,10 +147,10 @@ describe("Show organization page", () => {
         await (await ShowOrganization.getAuthorizationGroupsTable()).getText()
       ).to.contain("EF 5")
     })
-    it("We can go to the show page of authorizationGroup", async() => {
+    it("We can go to the show page of a community", async() => {
       await (await ShowOrganization.getAuthorizationGroup(1)).click()
       await expect(await browser.getUrl()).to.include(
-        "/authorizationGroups/ab1a7d99-4529-44b1-a118-bdee3ca8296b"
+        "/communities/ab1a7d99-4529-44b1-a118-bdee3ca8296b"
       )
     })
   })

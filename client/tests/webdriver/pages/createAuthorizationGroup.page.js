@@ -1,6 +1,6 @@
 import Page from "./page"
 
-const PAGE_URL = "/authorizationGroups/new"
+const PAGE_URL = "/communities/new"
 
 class CreateAuthorizationGroup extends Page {
   async getForm() {
