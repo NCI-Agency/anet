@@ -127,8 +127,8 @@ class AuthorizationGroupResourceTest extends AbstractResourceTest {
 
   private AuthorizationGroupInput getAuthorizationGroupInput() {
     final String noposPersonUuid = "bdd91de7-09c7-4f09-97e4-d3325bb92dab";
-    return AuthorizationGroupInput.builder().withName("test authorization group")
-        .withDescription("test authorization group description").withStatus(Status.ACTIVE)
+    return AuthorizationGroupInput.builder().withName("test community")
+        .withDescription("test community description").withStatus(Status.ACTIVE)
         .withAdministrativePositions(
             getPositionsInput(List.of(admin.getPosition(), getSuperuser().getPosition())))
         .withAuthorizationGroupRelatedObjects(List.of(
@@ -143,7 +143,7 @@ class AuthorizationGroupResourceTest extends AbstractResourceTest {
 
   @Test
   void testAuthorizationGroupsByRelatedObject() {
-    // Authorization group EF 5 should transitively contain all related objects below
+    // Community EF 5 should transitively contain all related objects below
     final String expectedAuthorizationGroupUuid = "ab1a7d99-4529-44b1-a118-bdee3ca8296b";
     final String fields = "{ uuid authorizationGroups { uuid } }";
 

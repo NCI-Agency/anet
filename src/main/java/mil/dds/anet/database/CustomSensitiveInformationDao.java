@@ -252,7 +252,7 @@ public class CustomSensitiveInformationDao
       return true;
     }
 
-    // Check against authorization groups
+    // Check against communities
     return DaoUtils.isInAuthorizationGroup(userAuthorizationGroupUuids, authorizationGroupUuids);
   }
 
