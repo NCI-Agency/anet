@@ -104,7 +104,7 @@ class CreateAuthorizationGroup extends Page {
   }
 
   async open() {
-    // Only admin users can create authorization groups
+    // Only admin users can create communities
     await super.openAsAdminUser(PAGE_URL)
   }
 

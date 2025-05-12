@@ -371,7 +371,7 @@ const Navigation = ({
               linkTo={{ pathname: "/authorizationGroups/mine" }}
               handleOnClick={resetPages}
             >
-              My Authorization Groups
+              My Communities
             </SidebarLink>
           )}
           {(currentUser.isAdmin() ||

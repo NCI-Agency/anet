@@ -514,7 +514,7 @@ const ReportForm = ({
 
         const authorizationGroupsFilters = {
           allAuthorizationGroups: {
-            label: "All authorization groups",
+            label: "All communities",
             queryVars: {}
           }
         }
@@ -1171,7 +1171,7 @@ const ReportForm = ({
                       />
                       <FastField
                         name="authorizationGroups"
-                        label="Authorization Groups"
+                        label="Authorized communities"
                         component={FieldHelper.SpecialField}
                         onChange={value => {
                           // validation will be done by setFieldValue
@@ -1181,7 +1181,7 @@ const ReportForm = ({
                         widget={
                           <AdvancedMultiSelect
                             fieldName="authorizationGroups"
-                            placeholder="Search for authorization groups…"
+                            placeholder="Search for communities…"
                             value={values.authorizationGroups}
                             renderSelected={
                               <AuthorizationGroupTable
@@ -1203,7 +1203,7 @@ const ReportForm = ({
                         extraColElem={
                           <>
                             <FieldHelper.FieldShortcuts
-                              title="Recent Authorization Groups"
+                              title="Recent Communities"
                               shortcuts={recents.authorizationGroups.filter(
                                 ag =>
                                   !values.authorizationGroups?.find(

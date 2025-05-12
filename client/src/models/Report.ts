@@ -292,7 +292,7 @@ export default class Report extends Model {
             ? schema.nullable()
             : schema.required().min(
               1,
-              `You should provide authorization groups who can access the sensitive information.
+              `You should provide authorized communities who can access the sensitive information.
                If you do not do so, you will remain the only one authorized to see the sensitive information you have entered`
             )
       )

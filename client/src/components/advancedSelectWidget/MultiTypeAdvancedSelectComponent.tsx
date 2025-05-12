@@ -202,7 +202,7 @@ const ENTITY_LABELS = {
   [ENTITY_TYPES.POSITIONS]: "Positions",
   [ENTITY_TYPES.LOCATIONS]: "Locations",
   [ENTITY_TYPES.TASKS]: pluralize(Settings.fields.task.shortLabel),
-  [ENTITY_TYPES.AUTHORIZATION_GROUPS]: "Authorization Groups",
+  [ENTITY_TYPES.AUTHORIZATION_GROUPS]: "Communities",
   [ENTITY_TYPES.ATTACHMENTS]: "Attachments",
   [ENTITY_TYPES.EVENTS]: "Events",
   [ENTITY_TYPES.EVENT_SERIES]: "Event Series"

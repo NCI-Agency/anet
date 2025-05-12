@@ -153,7 +153,7 @@ const AuthorizationGroupShow = ({
               </LinkTo>
             )}
             <FindObjectsButton
-              objectLabel="Authorization Group"
+              objectLabel="Community"
               searchText={searchText}
             />
           </>
@@ -179,7 +179,7 @@ const AuthorizationGroupShow = ({
                         persistent
                       />
                     }{" "}
-                    Authorization Group {authorizationGroup.name}
+                    Community {authorizationGroup.name}
                   </>
                 }
                 action={action}
