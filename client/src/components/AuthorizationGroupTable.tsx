@@ -83,7 +83,7 @@ const AuthorizationGroupTable = ({
   toggleSelection
 }: AuthorizationGroupTableProps) => {
   if (_get(authorizationGroups, "length", 0) === 0) {
-    return <em>No authorization groups found</em>
+    return <em>No communities found</em>
   }
 
   const ags = AuthorizationGroup.fromArray(authorizationGroups)

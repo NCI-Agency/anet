@@ -114,7 +114,7 @@ const AuthorizationGroupEdit = ({
       <AuthorizationGroupForm
         edit
         initialValues={authorizationGroup}
-        title={`Authorization Group ${authorizationGroup.name}`}
+        title={`Community ${authorizationGroup.name}`}
       />
     </div>
   )

@@ -6358,7 +6358,7 @@
 			SET scope = 0;
 		</sql>
 	</changeSet>
-	
+
 	<changeSet id="add-help-text-remove-links" author="jlnat">
 		<delete tableName="adminSettings">
 			<where>key = 'HELP_LINK_URL'</where>
@@ -6386,6 +6386,13 @@
 			tableName="people"
 			columnName="openIdSubject"
 		/>
+	</changeSet>
+
+	<changeSet id="rename-unlimited_exports_authorization_group-in-admin_settings" author="gjvoosten">
+		<update tableName="adminSettings">
+			<column name="key" value="UNLIMITED_EXPORTS_COMMUNITY" />
+			<where>key = 'UNLIMITED_EXPORTS_AUTHORIZATION_GROUP'</where>
+		</update>
 	</changeSet>
 
 	<!-- Keep this change set as the last one in the change log;
