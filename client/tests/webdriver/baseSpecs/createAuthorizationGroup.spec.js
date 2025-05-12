@@ -309,9 +309,7 @@ describe("When creating/editing a community", () => {
 
   describe("When editing a community as assigned superuser", () => {
     it("Should navigate to the my communities page", async() => {
-      await CreateAuthorizationGroup.openAsSuperuser(
-        "/authorizationGroups/mine"
-      )
+      await CreateAuthorizationGroup.openAsSuperuser("/communities/mine")
       await (
         await CreateAuthorizationGroup.getMyAuthorizationGroups()
       ).waitForExist()

@@ -37,6 +37,19 @@ export default class AuthorizationGroup extends Model {
     super(Model.fillObject(props, AuthorizationGroup.yupSchema))
   }
 
+  static pathFor(instance, query) {
+    const uuid = instance.uuid
+    let url = ["", "communities", uuid].join("/")
+    url += utils.formatQueryString(query)
+    return url
+  }
+
+  static pathForNew(query) {
+    let url = ["", "communities", "new"].join("/")
+    url += utils.formatQueryString(query)
+    return url
+  }
+
   humanNameOfStatus() {
     return AuthorizationGroup.humanNameOfStatus(this.status)
   }
