@@ -159,7 +159,7 @@ const SPECIAL_FIELDS = {
       </FormSelect>
     )
   },
-  UNLIMITED_EXPORTS_AUTHORIZATION_GROUP: {
+  UNLIMITED_EXPORTS_COMMUNITY: {
     widget: key => (
       <AdvancedSingleSelect
         fieldName={key}
@@ -167,7 +167,7 @@ const SPECIAL_FIELDS = {
         overlayRenderRow={AuthorizationGroupOverlayRow}
         filterDefs={{
           allAuthorizationGroups: {
-            label: "All authorization groups",
+            label: "All communities",
             queryVars: {
               status: Model.STATUS.ACTIVE
             }

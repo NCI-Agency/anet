@@ -37,7 +37,7 @@ public class AuthorizationGroupResource {
   public AuthorizationGroup getByUuid(@GraphQLArgument(name = "uuid") String uuid) {
     final AuthorizationGroup t = dao.getByUuid(uuid);
     if (t == null) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Authorization group not found");
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Community not found");
     }
     return t;
   }
@@ -55,8 +55,7 @@ public class AuthorizationGroupResource {
     final Person user = DaoUtils.getUserFromContext(context);
     AuthUtils.assertAdministrator(user);
     if (a.getName() == null || a.getName().trim().isEmpty()) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "Authorization group name must not be empty");
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Community name must not be empty");
     }
     a = dao.insert(a);
 
@@ -86,8 +85,7 @@ public class AuthorizationGroupResource {
 
     final int numRows = dao.update(a);
     if (numRows == 0) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-          "Couldn't process authorization group update");
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't process community update");
     }
 
     // Update administrative positions

@@ -372,10 +372,10 @@ fields:
       label: Status
     name:
       label: Name
-      placeholder: Fill in the name of this authorizationGroup
+      placeholder: Fill in the name of this community
     description:
       label: Description
-      placeholder: Fill in the description of this authorizationGroup
+      placeholder: Fill in the description of this community
     administrativePositions:
       label: Assigned superusers
     authorizationGroupRelatedObjects:
@@ -727,7 +727,7 @@ fields:
       label: Biography
       placeholder: Fill in the biography of this person
     authorizationGroups:
-      label: Authorization groups
+      label: Communities
     customFields:
       placeOfBirth:
         type: anet_object
@@ -944,7 +944,7 @@ fields:
       label: Email addresses
       authorizationGroupUuids: ['ab1a7d99-4529-44b1-a118-bdee3ca8296b']
     authorizationGroups:
-      label: Authorization groups
+      label: Communities
 
     customFields:
       multipleButtons:
@@ -1079,7 +1079,7 @@ fields:
       label: Email addresses
       authorizationGroupUuids: ['ab1a7d99-4529-44b1-a118-bdee3ca8296b']
     authorizationGroups:
-      label: Authorization groups
+      label: Communities
     assessments:
       organizationAnnually:
         label: Annual organization assessment

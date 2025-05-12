@@ -73,8 +73,7 @@ import Settings from "settings"
 
 // By default limit exports to the first 1000 results
 const MAX_NR_OF_EXPORTS = 1000
-export const UNLIMITED_EXPORTS_AUTHORIZATION_GROUP =
-  "UNLIMITED_EXPORTS_AUTHORIZATION_GROUP"
+export const UNLIMITED_EXPORTS_COMMUNITY = "UNLIMITED_EXPORTS_COMMUNITY"
 
 const GQL_EMAIL_ADDRESSES = `
   emailAddresses(network: $emailNetwork) {
@@ -1319,7 +1318,7 @@ const Search = ({
   )
   const exportMaxResults = currentUser?.authorizationGroups
     ?.map(ag => ag.uuid)
-    ?.includes(appSettings[UNLIMITED_EXPORTS_AUTHORIZATION_GROUP])
+    ?.includes(appSettings[UNLIMITED_EXPORTS_COMMUNITY])
     ? 0
     : MAX_NR_OF_EXPORTS
 
@@ -1764,7 +1763,7 @@ const Search = ({
           id="authorizationGroups"
           title={
             <>
-              Authorization Groups
+              Communities
               {hasAuthorizationGroupsResults && (
                 <Badge pill bg="secondary" className="ms-1">
                   {numAuthorizationGroups}

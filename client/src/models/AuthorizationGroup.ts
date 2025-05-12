@@ -11,7 +11,7 @@ export default class AuthorizationGroup extends Model {
 
   static displayName() {
     // TODO: Get the display name from the dictionary
-    return "Authorization Group"
+    return "Community"
   }
 
   static schema = {}

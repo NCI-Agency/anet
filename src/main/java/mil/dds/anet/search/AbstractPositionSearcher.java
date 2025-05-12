@@ -119,7 +119,7 @@ public abstract class AbstractPositionSearcher
     qb.addEnumEqualsClause("status", "positions.status", query.getStatus());
 
     if (query.getAuthorizationGroupUuid() != null) {
-      // Search for positions related to a given authorization group
+      // Search for positions related to a given community
       qb.addWhereClause("positions.uuid IN"
           + " (SELECT agro.\"relatedObjectUuid\" FROM \"authorizationGroupRelatedObjects\" agro"
           + " WHERE agro.\"relatedObjectType\" = :relatedObjectTypePosition"

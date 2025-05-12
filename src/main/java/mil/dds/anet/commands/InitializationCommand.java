@@ -156,8 +156,8 @@ public class InitializationCommand {
     // Set daily rollup max report age days as default
     saveAdminSetting(engine, AdminSettingKeys.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS, "14");
 
-    // Set empty unlimited exports authorization group
-    saveAdminSetting(engine, AdminSettingKeys.UNLIMITED_EXPORTS_AUTHORIZATION_GROUP, "");
+    // Set empty unlimited exports community
+    saveAdminSetting(engine, AdminSettingKeys.UNLIMITED_EXPORTS_COMMUNITY, "");
 
     // Set empty help text
     saveAdminSetting(engine, AdminSettingKeys.HELP_TEXT, "");

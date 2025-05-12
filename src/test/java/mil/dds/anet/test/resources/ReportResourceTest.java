@@ -1540,14 +1540,14 @@ public class ReportResourceTest extends AbstractResourceTest {
 
   @Test
   void searchAuthorizationGroupUuid() {
-    // Search by empty list of authorization groups should not return reports
+    // Search by empty list of communities should not return reports
     final ReportSearchQueryInput query1 = ReportSearchQueryInput.builder()
         .withAuthorizationGroupUuid(Collections.emptyList()).build();
     final AnetBeanList_Report searchResults =
         withCredentials(adminUser, t -> queryExecutor.reportList(getListFields(FIELDS), query1));
     assertThat(searchResults.getList()).isEmpty();
 
-    // Search by list of authorization groups
+    // Search by list of communities
     final List<String> agUuids = Arrays.asList("1", "2", "3"); // FIXME: use real uuid's
     final Set<String> agUuidSet = new HashSet<>(agUuids);
     final ReportSearchQueryInput query2 =
@@ -2021,7 +2021,7 @@ public class ReportResourceTest extends AbstractResourceTest {
         .filter(r -> reportQuery.getText().equals(r.getKeyOutcomes())).findFirst();
     assertThat(reportResult2).isNotEmpty();
     final Report report2 = reportResult2.get();
-    // reina is in the authorization group, so should be able to see the sensitive information
+    // reina is in the community, so should be able to see the sensitive information
     assertThat(report2.getReportSensitiveInformation()).isNotNull();
     assertThat(report2.getReportSensitiveInformation().getText()).isEqualTo("Need to know only");
 
@@ -2041,7 +2041,7 @@ public class ReportResourceTest extends AbstractResourceTest {
         .filter(r -> reportQuery.getText().equals(r.getKeyOutcomes())).findFirst();
     assertThat(reportResult3).isNotEmpty();
     final Report report3 = reportResult3.get();
-    // elizabeth is not in the authorization group, so should not be able to see the sensitive
+    // elizabeth is not in the community, so should not be able to see the sensitive
     // information
     assertThat(report3.getReportSensitiveInformation()).isNull();
   }

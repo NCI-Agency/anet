@@ -326,19 +326,19 @@ public class AssessmentDao extends AnetBaseDao<Assessment, AbstractSearchQuery<?
         if (checkInstantAssessment(user, assessmentRelatedObjects, engine)) {
           return true;
         }
-        // else check authorization groups (below)
+        // else check communities (below)
       }
       case "ondemand" -> {
         // On-demand assessment:
         checkOndemandAssessment(assessmentRelatedObjects);
-        // now check authorization groups (below)
+        // now check communities (below)
       }
       default -> {
         // Periodic assessment:
         if (checkPeriodicAssessment(user, assessmentRelatedObjects, engine)) {
           return true;
         }
-        // else check authorization groups (below)
+        // else check communities (below)
       }
     }
 

@@ -94,7 +94,7 @@ const AuthorizationGroupForm = ({
             onClick={submitForm}
             disabled={isSubmitting}
           >
-            Save Authorization Group
+            Save Community
           </Button>
         )
         return (
@@ -227,7 +227,7 @@ const AuthorizationGroupForm = ({
                     onClick={submitForm}
                     disabled={isSubmitting}
                   >
-                    Save Authorization Group
+                    Save Community
                   </Button>
                 </div>
               </div>
@@ -274,7 +274,7 @@ const AuthorizationGroupForm = ({
       navigate(AuthorizationGroup.pathForEdit(authGroup), { replace: true })
     }
     navigate(AuthorizationGroup.pathFor(authGroup), {
-      state: { success: "Authorization Group saved" }
+      state: { success: "Community saved" }
     })
   }
 
