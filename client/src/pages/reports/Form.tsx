@@ -62,7 +62,7 @@ import { Button, Collapse, Form as FormBS } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
-import AUTHORIZATION_GROUPS_ICON from "resources/authorizationGroups.png"
+import COMMUNITIES_ICON from "resources/communities.png"
 import EVENTS_ICON from "resources/events.png"
 import LOCATIONS_ICON from "resources/locations.png"
 import PEOPLE_ICON from "resources/people.png"
@@ -1199,7 +1199,7 @@ const ReportForm = ({
                               status: Model.STATUS.ACTIVE
                             }}
                             fields={AuthorizationGroup.autocompleteQuery}
-                            addon={AUTHORIZATION_GROUPS_ICON}
+                            addon={COMMUNITIES_ICON}
                           />
                         }
                         extraColElem={

@@ -34,7 +34,7 @@ import React, { useContext, useState } from "react"
 import { Button, Col, Container, FormSelect, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { toast } from "react-toastify"
-import AUTHORIZATION_GROUPS_ICON from "resources/authorizationGroups.png"
+import COMMUNITIES_ICON from "resources/communities.png"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
 import utils from "utils"
 import { v4 as uuidv4 } from "uuid"
@@ -176,7 +176,7 @@ const SPECIAL_FIELDS = {
         objectType={AuthorizationGroup}
         fields={AuthorizationGroup.autocompleteQuery}
         valueKey="uuid"
-        addon={AUTHORIZATION_GROUPS_ICON}
+        addon={COMMUNITIES_ICON}
         keepSearchText
       />
     ),
