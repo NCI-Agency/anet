@@ -12,9 +12,10 @@ import {
   usePageTitle
 } from "components/Page"
 import { deserializeQueryParams } from "components/SearchFilters"
+import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _isEmpty from "lodash/isEmpty"
 import React, { useState } from "react"
-import { Button, Col, Row, Table } from "react-bootstrap"
+import { Button, Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import utils from "utils"
@@ -41,12 +42,15 @@ interface MySavedSearchesProps {
   pageDispatchers?: PageDispatchersPropType
 }
 
+const DEFAULT_PAGESIZE = 10
+
 const MySavedSearches = ({
   setSearchQuery,
   pageDispatchers
 }: MySavedSearchesProps) => {
   const navigate = useNavigate()
   const [stateError, setStateError] = useState(null)
+  const [pageNum, setPageNum] = useState(0)
   const { loading, error, data, refetch } = API.useApiQuery(
     GQL_GET_SAVED_SEARCHES
   )
@@ -61,48 +65,62 @@ const MySavedSearches = ({
   }
 
   const savedSearches = data?.savedSearches || []
+  const totalCount = savedSearches.length
+  const paginatedSearches = savedSearches.slice(
+    pageNum * DEFAULT_PAGESIZE,
+    (pageNum + 1) * DEFAULT_PAGESIZE
+  )
 
   return (
     <Fieldset title="Saved searches">
       <Messages error={stateError} />
 
-      {savedSearches.length > 0 ? (
-        <Table striped responsive>
-          <thead>
-            <tr>
-              <th style={{ width: "80%" }}>Search Name</th>
-              <th style={{ width: "20%" }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {savedSearches.map(savedSearch => (
-              <tr key={savedSearch.uuid}>
-                <td>
-                  <Button
-                    className="text-start text-decoration-none"
-                    variant="link"
-                    onClick={() => showSearch(savedSearch)}
-                  >
-                    {savedSearch.name}
-                  </Button>
-                </td>
-                <td>
-                  <ConfirmDestructive
-                    onConfirm={() => onConfirmDelete(savedSearch.uuid)}
-                    objectType="search"
-                    objectDisplay={savedSearch.name}
-                    variant="danger"
-                    operation="delete"
-                    buttonLabel="Delete"
-                  />
-                </td>
+      <UltimatePaginationTopDown
+        componentClassName="searchPagination"
+        className="float-end"
+        pageNum={pageNum}
+        pageSize={DEFAULT_PAGESIZE}
+        totalCount={totalCount}
+        goToPage={setPageNum}
+      >
+        {paginatedSearches.length > 0 ? (
+          <Table striped responsive className="mt-3 mb-3">
+            <thead>
+              <tr>
+                <th style={{ width: "80%" }}>Search Name</th>
+                <th style={{ width: "20%" }}>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </Table>
-      ) : (
-        <p>No saved searches found.</p>
-      )}
+            </thead>
+            <tbody>
+              {paginatedSearches.map(savedSearch => (
+                <tr key={savedSearch.uuid}>
+                  <td>
+                    <Button
+                      className="text-start text-decoration-none"
+                      variant="link"
+                      onClick={() => showSearch(savedSearch)}
+                    >
+                      {savedSearch.name}
+                    </Button>
+                  </td>
+                  <td>
+                    <ConfirmDestructive
+                      onConfirm={() => onConfirmDelete(savedSearch.uuid)}
+                      objectType="search"
+                      objectDisplay={savedSearch.name}
+                      variant="danger"
+                      operation="delete"
+                      buttonLabel="Delete"
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        ) : (
+          <p>No saved searches found.</p>
+        )}
+      </UltimatePaginationTopDown>
     </Fieldset>
   )
 
