@@ -52,6 +52,7 @@ class CreateOrganization extends Page {
     await (await this.getParentOrganizationsTable()).waitForDisplayed()
     await browser.keys(name)
     await (await this.getParentOrganizationsTable()).waitForDisplayed()
+    await browser.pause(500) // wait for the rendering of the search results
     const radioButton = await (
       await this.getParentOrganizationsTable()
     ).$("tbody tr:first-child td:first-child input.form-check-input")
@@ -78,44 +79,33 @@ class CreateOrganization extends Page {
     return browser.$("#fg-profile .editable")
   }
 
-  async getApp6contextInput() {
-    return browser.$("#app6context")
+  async openEditApp6Modal() {
+    const editApp6Button = browser.$("#edit-app6-button")
+    await editApp6Button.click()
   }
 
-  async getApp6contextExtraColumn() {
-    return browser.$("#fg-app6context div.col-sm-3")
+  async closeEditApp6Modal() {
+    const applyButton = await browser.$('//button[text()="Apply"]')
+    await applyButton.click()
+    await applyButton.waitForDisplayed({ reverse: true })
   }
 
-  async getApp6standardIdentityInput() {
-    return browser.$("#app6standardIdentity")
+  async getApp6DropdownValue(field) {
+    const InputButton = await browser.$(`#${field}-dropdown`)
+    return await (await InputButton.$("div:nth-child(2)")).getText()
   }
 
-  async getApp6standardIdentityExtraColumn() {
-    return browser.$("#fg-app6standardIdentity div.col-sm-3")
-  }
+  async setApp6DropdownValue(field, value) {
+    const InputButton = await browser.$(`#${field}-dropdown`)
+    await InputButton.click()
 
-  async getApp6symbolSetInput() {
-    return browser.$("#app6symbolSet")
-  }
+    const dropdownMenu = await browser.$(".dropdown-menu.show")
+    await dropdownMenu.waitForDisplayed()
 
-  async getApp6symbolSetExtraColumn() {
-    return browser.$("#fg-app6symbolSet div.col-sm-3")
-  }
+    const matchingItem = await dropdownMenu.$(`[data-key="${value}"]`)
+    await matchingItem.click()
 
-  async getApp6hqInput() {
-    return browser.$("#app6hq")
-  }
-
-  async getApp6hqExtraColumn() {
-    return browser.$("#fg-app6hq div.col-sm-3")
-  }
-
-  async getApp6amplifierInput() {
-    return browser.$("#app6amplifier")
-  }
-
-  async getApp6amplifierExtraColumn() {
-    return browser.$("#fg-app6amplifier div.col-sm-3")
+    await dropdownMenu.waitForDisplayed({ reverse: true })
   }
 
   async openAsSuperuser() {
@@ -141,31 +131,50 @@ class CreateOrganization extends Page {
     ).to.include(org.location)
     await (await this.getLocationAdvancedSelectFirstItem()).click()
     await this.fillOrganizationProfile(org.profile)
+    await this.openEditApp6Modal()
     if (org.app6contextInput) {
-      await (
-        await this.getApp6contextInput()
-      ).selectByAttribute("value", org.app6contextInput)
+      await this.setApp6DropdownValue("app6context", org.app6contextInput)
     }
     if (org.app6standardIdentityInput) {
-      await (
-        await this.getApp6standardIdentityInput()
-      ).selectByAttribute("value", org.app6standardIdentityInput)
+      await this.setApp6DropdownValue(
+        "app6standardIdentity",
+        org.app6standardIdentityInput
+      )
     }
     if (org.app6symbolSetInput) {
-      await (
-        await this.getApp6symbolSetInput()
-      ).selectByAttribute("value", org.app6symbolSetInput)
+      await this.setApp6DropdownValue("app6symbolSet", org.app6symbolSetInput)
     }
     if (org.app6hqInput) {
-      await (
-        await this.getApp6hqInput()
-      ).selectByAttribute("value", org.app6hqInput)
+      await this.setApp6DropdownValue("app6hq", org.app6hqInput)
     }
     if (org.app6amplifierInput) {
-      await (
-        await this.getApp6amplifierInput()
-      ).selectByAttribute("value", org.app6amplifierInput)
+      await this.setApp6DropdownValue("app6amplifier", org.app6amplifierInput)
     }
+    if (org.app6entity) {
+      await this.setApp6DropdownValue("app6entity", org.app6entityInput)
+    }
+    if (org.app6entityType) {
+      await this.setApp6DropdownValue("app6entityType", org.app6entityTypeInput)
+    }
+    if (org.app6entitySubtype) {
+      await this.setApp6DropdownValue(
+        "app6entitySubtype",
+        org.app6entitySubtypeInput
+      )
+    }
+    if (org.app6sectorOneModifier) {
+      await this.setApp6DropdownValue(
+        "app6sectorOneModifier",
+        org.app6sectorOneModifierInput
+      )
+    }
+    if (org.app6sectorTwoModifier) {
+      await this.setApp6DropdownValue(
+        "app6sectorTwoModifier",
+        org.app6sectorTwoModifierInput
+      )
+    }
+    await this.closeEditApp6Modal()
   }
 
   async waitForLocationAdvancedSelectToChange(value) {

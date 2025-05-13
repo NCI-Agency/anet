@@ -7,6 +7,7 @@ import {
   TaskOverlayRow
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
+import App6Symbol, { fieldsList as app6fieldsList } from "components/App6Symbol"
 import AppContext from "components/AppContext"
 import ApprovalsDefinition from "components/approvals/ApprovalsDefinition"
 import UploadAttachment from "components/Attachment/UploadAttachment"
@@ -16,6 +17,7 @@ import {
   customFieldsJSONString
 } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
+import EditApp6SymbolModal from "components/editor/EditApp6SymbolModal"
 import EmailAddressInputTable, {
   initializeEmailAddresses
 } from "components/EmailAddressInputTable"
@@ -72,6 +74,7 @@ const OrganizationForm = ({
   initialValues,
   notesComponent
 }: OrganizationFormProps) => {
+  const [showApp6Modal, setShowApp6Modal] = useState(false)
   const { loadAppData, currentUser } = useContext(AppContext)
   const navigate = useNavigate()
   const [error, setError] = useState(null)
@@ -221,7 +224,9 @@ const OrganizationForm = ({
                     className="d-flex flex-column justify-content-center"
                   >
                     <FormGroup>
-                      <Row style={{ marginBottom: "1rem" }}>
+                      <Row
+                        style={{ marginBottom: "1rem", alignItems: "center" }}
+                      >
                         <Col sm={7}>
                           <Row>
                             <Col>
@@ -266,6 +271,52 @@ const OrganizationForm = ({
                               )}
                             </Col>
                           </Row>
+                        </Col>
+                        <Col
+                          sm={5}
+                          className="d-flex flex-column justify-content-center align-items-center"
+                        >
+                          <div
+                            style={{
+                              display: "flex",
+                              flexDirection: "column",
+                              alignItems: "center",
+                              width: 160,
+                              gap: 30
+                            }}
+                          >
+                            <App6Symbol
+                              values={{
+                                ...values,
+                                app6context:
+                                  values.app6context || parentContext,
+                                app6standardIdentity:
+                                  values.app6standardIdentity ||
+                                  parentStandardIdentity,
+                                app6symbolSet:
+                                  values.app6symbolSet || parentSymbolSet
+                              }}
+                              size={120}
+                              maxHeight={250}
+                            />
+                            <Button
+                              onClick={() => setShowApp6Modal(true)}
+                              id="edit-app6-button"
+                            >
+                              Edit APP-06 Symbol
+                            </Button>
+                          </div>
+                          <EditApp6SymbolModal
+                            values={values}
+                            showModal={showApp6Modal}
+                            onHide={() => setShowApp6Modal(false)}
+                            onSave={symbologyValues => {
+                              app6fieldsList.forEach(field => {
+                                setFieldValue(field, symbologyValues[field])
+                              })
+                              setShowApp6Modal(false)
+                            }}
+                          />
                         </Col>
                       </Row>
                     </FormGroup>
@@ -481,101 +532,6 @@ const OrganizationForm = ({
                     }}
                   />
                 )}
-              </Fieldset>
-
-              <Fieldset title="APP-06 symbology" id="app6-symbology">
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.organization.app6context}
-                  name="app6context"
-                  component={FieldHelper.SelectField}
-                  buttons={utils.getButtonsFromChoices(
-                    Settings.fields.organization.app6context.choices
-                  )}
-                  onChange={value => setFieldValue("app6context", value)}
-                  extraColElem={
-                    parentContext && (
-                      <div style={{ paddingTop: "9px" }}>
-                        <em>
-                          {
-                            Settings.fields.organization.app6context.choices[
-                              parentContext
-                            ]
-                          }{" "}
-                          (inherited from parent)
-                        </em>
-                      </div>
-                    )
-                  }
-                />
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.organization.app6standardIdentity}
-                  name="app6standardIdentity"
-                  component={FieldHelper.SelectField}
-                  buttons={utils.getButtonsFromChoices(
-                    Settings.fields.organization.app6standardIdentity.choices
-                  )}
-                  onChange={value =>
-                    setFieldValue("app6standardIdentity", value)}
-                  extraColElem={
-                    parentStandardIdentity && (
-                      <div style={{ paddingTop: "9px" }}>
-                        <em>
-                          {
-                            Settings.fields.organization.app6standardIdentity
-                              .choices[parentStandardIdentity]
-                          }{" "}
-                          (inherited from parent)
-                        </em>
-                      </div>
-                    )
-                  }
-                />
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.organization.app6symbolSet}
-                  name="app6symbolSet"
-                  component={FieldHelper.SelectField}
-                  buttons={utils.getButtonsFromChoices(
-                    Settings.fields.organization.app6symbolSet.choices
-                  )}
-                  onChange={value => setFieldValue("app6symbolSet", value)}
-                  extraColElem={
-                    parentSymbolSet && (
-                      <div style={{ paddingTop: "9px" }}>
-                        <em>
-                          {
-                            Settings.fields.organization.app6symbolSet.choices[
-                              parentSymbolSet
-                            ]
-                          }{" "}
-                          (inherited from parent)
-                        </em>
-                      </div>
-                    )
-                  }
-                />
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.organization.app6hq}
-                  name="app6hq"
-                  component={FieldHelper.SelectField}
-                  buttons={utils.getButtonsFromChoices(
-                    Settings.fields.organization.app6hq.choices
-                  )}
-                  onChange={value => setFieldValue("app6hq", value)}
-                />
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.organization.app6amplifier}
-                  name="app6amplifier"
-                  component={FieldHelper.SelectField}
-                  buttons={utils.getButtonsFromChoices(
-                    Settings.fields.organization.app6amplifier.choices
-                  )}
-                  onChange={value => setFieldValue("app6amplifier", value)}
-                />
               </Fieldset>
 
               <div>
