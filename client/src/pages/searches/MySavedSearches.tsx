@@ -120,15 +120,16 @@ const MySavedSearches = ({
   )
 
   function onSaveSearchSelect(event) {
-    const uuid = event && event.target ? event.target.value : event
+    const uuid = event?.target?.value ?? event
     const search = savedSearches.find(el => el.uuid === uuid)
     setSelectedSearch(search)
+    showSearch(search)
   }
 
-  function showSearch() {
-    if (selectedSearch) {
-      const objType = SEARCH_OBJECT_TYPES[selectedSearch.objectType]
-      const queryParams = utils.parseJsonSafe(selectedSearch.query)
+  function showSearch(search = selectedSearch) {
+    if (search) {
+      const objType = SEARCH_OBJECT_TYPES[search.objectType]
+      const queryParams = utils.parseJsonSafe(search.query)
       deserializeQueryParams(objType, queryParams, deserializeCallback)
     }
   }
