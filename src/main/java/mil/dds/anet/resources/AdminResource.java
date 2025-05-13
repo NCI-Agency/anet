@@ -119,6 +119,8 @@ public class AdminResource {
         final DumperOptions options = new DumperOptions();
         options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
         options.setIndent(2);
+        options.setIndicatorIndent(2);
+        options.setIndentWithIndicator(true);
 
         // Create YAML instance
         final Yaml yaml = new Yaml(options);

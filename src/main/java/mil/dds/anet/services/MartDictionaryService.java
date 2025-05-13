@@ -13,7 +13,6 @@ import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.WithStatus;
-import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.database.LocationDao;
@@ -157,6 +156,7 @@ public class MartDictionaryService implements IMartDictionaryService {
     final List<Map<String, String>> tasks = new ArrayList<>();
     final TaskSearchQuery taskSearchQuery = new TaskSearchQuery();
     taskSearchQuery.setStatus(WithStatus.Status.ACTIVE);
+    taskSearchQuery.setPageSize(0); // export all!
     final List<Task> childrenTasks =
         rootTask.loadChildrenTasks(engine.getContext(), taskSearchQuery).join();
     childrenTasks.sort(Comparator.comparing(Task::getShortName));
@@ -178,8 +178,6 @@ public class MartDictionaryService implements IMartDictionaryService {
       final List<Map<String, String>> reportingTeams = new ArrayList<>();
       command.put("guid", org.getUuid());
       command.put("name", org.getShortName());
-      final OrganizationSearchQuery organizationSearchQuery = new OrganizationSearchQuery();
-      organizationSearchQuery.setStatus(WithStatus.Status.ACTIVE);
       final List<Organization> rts = org.loadChildrenOrgs(engine.getContext(), null).join();
       rts.sort(Comparator.comparing(Organization::getShortName));
       for (final Organization rt : rts) {
