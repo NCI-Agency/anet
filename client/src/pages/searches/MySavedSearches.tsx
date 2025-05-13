@@ -11,11 +11,10 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
-import SavedSearchTable from "components/SavedSearchTable"
 import { deserializeQueryParams } from "components/SearchFilters"
 import _isEmpty from "lodash/isEmpty"
 import React, { useState } from "react"
-import { Button, Col, Form, Row } from "react-bootstrap"
+import { Button, Col, Row, Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import utils from "utils"
@@ -48,7 +47,6 @@ const MySavedSearches = ({
 }: MySavedSearchesProps) => {
   const navigate = useNavigate()
   const [stateError, setStateError] = useState(null)
-  const [selectedSearch, setSelectedSearch] = useState(null)
   const { loading, error, data, refetch } = API.useApiQuery(
     GQL_GET_SAVED_SEARCHES
   )
@@ -62,71 +60,53 @@ const MySavedSearches = ({
     return result
   }
 
-  let savedSearches = []
-  if (data) {
-    savedSearches = data.savedSearches
-    if (_isEmpty(savedSearches)) {
-      if (selectedSearch) {
-        // Clear selection
-        setSelectedSearch(null)
-      }
-    } else if (!savedSearches.includes(selectedSearch)) {
-      // Select first one
-      setSelectedSearch(savedSearches[0])
-    }
-  }
+  const savedSearches = data?.savedSearches || []
 
   return (
     <Fieldset title="Saved searches">
       <Messages error={stateError} />
-      <Form.Group as={Row} className="mb-3" controlId="savedSearchSelect">
-        <Form.Label column sm={2}>
-          <b>Select a saved search</b>
-        </Form.Label>
-        <Col sm={10}>
-          <Form.Select onChange={onSaveSearchSelect}>
-            {savedSearches &&
-              savedSearches.map(savedSearch => (
-                <option value={savedSearch.uuid} key={savedSearch.uuid}>
-                  {savedSearch.name}
-                </option>
-              ))}
-          </Form.Select>
-        </Col>
-      </Form.Group>
 
-      {selectedSearch && (
-        <div>
-          <Row>
-            <Col sm={8}>
-              <SavedSearchTable search={selectedSearch} />
-            </Col>
-            <Col className="text-end">
-              <Button style={{ marginRight: 12 }} onClick={showSearch}>
-                Show Search
-              </Button>
-              <ConfirmDestructive
-                onConfirm={onConfirmDelete}
-                objectType="search"
-                objectDisplay={selectedSearch.name}
-                variant="danger"
-                buttonLabel="Delete Search"
-              />
-            </Col>
-          </Row>
-        </div>
+      {savedSearches.length > 0 ? (
+        <Table striped responsive>
+          <thead>
+            <tr>
+              <th style={{ width: "80%" }}>Search Name</th>
+              <th style={{ width: "20%" }}>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {savedSearches.map(savedSearch => (
+              <tr key={savedSearch.uuid}>
+                <td>
+                  <Button
+                    className="text-start text-decoration-none"
+                    variant="link"
+                    onClick={() => showSearch(savedSearch)}
+                  >
+                    {savedSearch.name}
+                  </Button>
+                </td>
+                <td>
+                  <ConfirmDestructive
+                    onConfirm={() => onConfirmDelete(savedSearch.uuid)}
+                    objectType="search"
+                    objectDisplay={savedSearch.name}
+                    variant="danger"
+                    operation="delete"
+                    buttonLabel="Delete"
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      ) : (
+        <p>No saved searches found.</p>
       )}
     </Fieldset>
   )
 
-  function onSaveSearchSelect(event) {
-    const uuid = event?.target?.value ?? event
-    const search = savedSearches.find(el => el.uuid === uuid)
-    setSelectedSearch(search)
-    showSearch(search)
-  }
-
-  function showSearch(search = selectedSearch) {
+  function showSearch(search) {
     if (search) {
       const objType = SEARCH_OBJECT_TYPES[search.objectType]
       const queryParams = utils.parseJsonSafe(search.query)
@@ -144,8 +124,8 @@ const MySavedSearches = ({
     navigate("/search")
   }
 
-  function onConfirmDelete() {
-    return API.mutation(GQL_DELETE_SAVED_SEARCH, { uuid: selectedSearch.uuid })
+  function onConfirmDelete(uuid) {
+    return API.mutation(GQL_DELETE_SAVED_SEARCH, { uuid })
       .then(data => {
         refetch()
       })
