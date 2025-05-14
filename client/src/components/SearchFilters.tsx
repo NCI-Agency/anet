@@ -674,7 +674,19 @@ export const searchFilters = function(includeAdminFilters) {
     }
   }
 
-  filters[SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS] = { filters: {} }
+  filters[SEARCH_OBJECT_TYPES.AUTHORIZATION_GROUPS] = {
+    filters: {
+      [Settings.fields.authorizationGroup.distributionList?.label]: {
+        component: CheckboxFilter,
+        deserializer: deserializeCheckboxFilter,
+        labelClass: "pt-0",
+        props: {
+          queryKey: "distributionList",
+          msg: "Yes"
+        }
+      }
+    }
+  }
 
   const mimeTypes = Settings.fields.attachment.fileTypes?.map(
     fileType => fileType.mimeType
