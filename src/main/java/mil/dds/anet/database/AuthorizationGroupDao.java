@@ -33,8 +33,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthorizationGroupDao
     extends AnetSubscribableObjectDao<AuthorizationGroup, AuthorizationGroupSearchQuery> {
 
-  private static final String[] fields =
-      {"uuid", "name", "description", "status", "createdAt", "updatedAt"};
+  private static final String[] fields = {"uuid", "name", "description", "status",
+      "distributionList", "forSensitiveInformation", "createdAt", "updatedAt"};
   public static final String TABLE_NAME = "authorizationGroups";
   public static final String AUTHORIZATION_GROUP_FIELDS =
       DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
@@ -86,9 +86,12 @@ public class AuthorizationGroupDao
   public AuthorizationGroup insertInternal(AuthorizationGroup a) {
     final Handle handle = getDbHandle();
     try {
-      handle.createUpdate(
-          "/* authorizationGroupInsert */ INSERT INTO \"authorizationGroups\" (uuid, name, description, \"createdAt\", \"updatedAt\", status) "
-              + "VALUES (:uuid, :name, :description, :createdAt, :updatedAt, :status)")
+      handle
+          .createUpdate("/* authorizationGroupInsert */ INSERT INTO \"authorizationGroups\" "
+              + "(uuid, name, description, \"createdAt\", \"updatedAt\", status, "
+              + "\"distributionList\", \"forSensitiveInformation\") "
+              + "VALUES (:uuid, :name, :description, :createdAt, :updatedAt, :status, "
+              + ":distributionList, :forSensitiveInformation)")
           .bindBean(a).bind("createdAt", DaoUtils.asLocalDateTime(a.getCreatedAt()))
           .bind("updatedAt", DaoUtils.asLocalDateTime(a.getUpdatedAt()))
           .bind("status", DaoUtils.getEnumId(a.getStatus())).execute();
@@ -144,8 +147,10 @@ public class AuthorizationGroupDao
             a.getAuthorizationGroupRelatedObjects());
       }
       return handle.createUpdate("/* updateAuthorizationGroup */ UPDATE \"authorizationGroups\" "
-          + "SET name = :name, description = :description, \"updatedAt\" = :updatedAt, status = :status  WHERE uuid = :uuid")
-          .bindBean(a).bind("updatedAt", DaoUtils.asLocalDateTime(a.getUpdatedAt()))
+          + "SET name = :name, description = :description, \"updatedAt\" = :updatedAt, status = :status, "
+          + "\"distributionList\" = :distributionList, \"forSensitiveInformation\" = :forSensitiveInformation "
+          + "WHERE uuid = :uuid").bindBean(a)
+          .bind("updatedAt", DaoUtils.asLocalDateTime(a.getUpdatedAt()))
           .bind("status", DaoUtils.getEnumId(a.getStatus())).execute();
     } finally {
       closeDbHandle(handle);

@@ -360,6 +360,10 @@ fields:
     description:
       label: Description
       placeholder: Fill in the description of this community
+    distributionList:
+      label: Distribution list
+    forSensitiveInformation:
+      label: For sensitive information
     administrativePositions:
       label: Assigned superusers
     authorizationGroupRelatedObjects:
