@@ -11,10 +11,14 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
-import { deserializeQueryParams } from "components/SearchFilters"
+import {
+  deserializeQueryParams,
+  getSearchQuery,
+  SearchDescription
+} from "components/SearchFilters"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _isEmpty from "lodash/isEmpty"
-import React, { useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import { Button, Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useNavigate } from "react-router-dom"
@@ -50,6 +54,7 @@ const MySavedSearches = ({
 }: MySavedSearchesProps) => {
   const navigate = useNavigate()
   const [stateError, setStateError] = useState(null)
+  const [deserializedQueries, setDeserializedQueries] = useState({})
   const [pageNum, setPageNum] = useState(0)
   const { loading, error, data, refetch } = API.useApiQuery(
     GQL_GET_SAVED_SEARCHES
@@ -60,21 +65,41 @@ const MySavedSearches = ({
     pageDispatchers
   })
   usePageTitle("My Saved Searches")
+
+  const savedSearches = useMemo(() => data?.savedSearches || [], [data])
+  const totalCount = savedSearches.length
+  const paginatedSearches = useMemo(
+    () =>
+      savedSearches.slice(
+        pageNum * DEFAULT_PAGESIZE,
+        (pageNum + 1) * DEFAULT_PAGESIZE
+      ),
+    [savedSearches, pageNum]
+  )
+
+  useEffect(() => {
+    const newQueries = Object.assign({})
+    paginatedSearches.forEach(search => {
+      const objType = SEARCH_OBJECT_TYPES[search.objectType]
+      const queryParams = utils.parseJsonSafe(search.query)
+      deserializeQueryParams(
+        objType,
+        queryParams,
+        (objectType, filters, text) => {
+          newQueries[search.uuid] = { objectType, filters, text }
+          setDeserializedQueries(prev => ({ ...prev, ...newQueries }))
+        }
+      )
+    })
+  }, [paginatedSearches])
+
   if (done) {
     return result
   }
 
-  const savedSearches = data?.savedSearches || []
-  const totalCount = savedSearches.length
-  const paginatedSearches = savedSearches.slice(
-    pageNum * DEFAULT_PAGESIZE,
-    (pageNum + 1) * DEFAULT_PAGESIZE
-  )
-
   return (
     <Fieldset title="Saved searches">
       <Messages error={stateError} />
-
       <UltimatePaginationTopDown
         componentClassName="searchPagination"
         className="float-end"
@@ -87,20 +112,35 @@ const MySavedSearches = ({
           <Table striped responsive className="mt-3 mb-3">
             <thead>
               <tr>
-                <th style={{ width: "80%" }}>Search Name</th>
-                <th style={{ width: "20%" }}>Actions</th>
+                <th style={{ width: "20%" }}>Search Name</th>
+                <th style={{ width: "70%" }}>Description</th>
+                <th style={{ width: "10%" }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {paginatedSearches.map(savedSearch => (
-                <tr key={savedSearch.uuid}>
-                  <td>
+                <tr key={savedSearch.uuid} className="align-middle">
+                  <td style={{ paddingRight: 0 }}>
                     <Button
                       className="text-start text-decoration-none"
                       variant="link"
                       onClick={() => showSearch(savedSearch)}
                     >
                       {savedSearch.name}
+                    </Button>
+                  </td>
+                  <td style={{ paddingLeft: 0 }}>
+                    <Button
+                      className="text-start text-decoration-none"
+                      variant="link"
+                      onClick={() => showSearch(savedSearch)}
+                    >
+                      {deserializedQueries[savedSearch.uuid] && (
+                        <SearchDescription
+                          searchQuery={deserializedQueries[savedSearch.uuid]}
+                          style={{ pointerEvents: "none" }}
+                        />
+                      )}
                     </Button>
                   </td>
                   <td>
