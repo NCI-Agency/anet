@@ -228,7 +228,7 @@ const GQL_GET_REPORT_LIST = gql`
 `
 const GQL_GET_AUTHORIZATION_GROUP_LIST = gql`
   fragment authorizationGroups on Query {
-    authorizationGroups: authorizationGroupList(query: $authorizationGroupQuery) {
+    communities: authorizationGroupList(query: $authorizationGroupQuery) {
       pageNum
       pageSize
       totalCount
@@ -237,7 +237,9 @@ const GQL_GET_AUTHORIZATION_GROUP_LIST = gql`
         name
         description
         status
-        authorizationGroupRelatedObjects {
+        distributionList
+        forSensitiveInformation
+        communityRelatedObjects: authorizationGroupRelatedObjects {
           relatedObjectType
           relatedObject {
             ... on Organization {

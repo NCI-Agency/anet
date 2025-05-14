@@ -242,6 +242,8 @@ const GQL_GET_AUTHORIZATION_GROUP_LIST = gql`
         name
         description
         status
+        distributionList
+        forSensitiveInformation
         authorizationGroupRelatedObjects {
           relatedObjectType
           relatedObjectUuid

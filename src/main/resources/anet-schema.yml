@@ -748,7 +748,7 @@ properties:
       authorizationGroup:
         type: object
         additionalProperties: false
-        required: [status, name, description, administrativePositions, authorizationGroupRelatedObjects]
+        required: [status, name, description, distributionList, forSensitiveInformation, administrativePositions, authorizationGroupRelatedObjects]
         properties:
           status:
             "$ref": "#/$defs/labeledField"
@@ -756,6 +756,10 @@ properties:
             "$ref": "#/$defs/inputField"
           description:
             "$ref": "#/$defs/inputField"
+          distributionList:
+            "$ref": "#/$defs/labeledField"
+          forSensitiveInformation:
+            "$ref": "#/$defs/labeledField"
           administrativePositions:
             "$ref": "#/$defs/labeledField"
           authorizationGroupRelatedObjects:
