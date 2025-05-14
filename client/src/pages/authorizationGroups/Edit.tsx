@@ -73,6 +73,10 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
         }
       }
     }
+
+    reportList(query: { authorizationGroupUuid: [$uuid], pageSize: 1 }) {
+      totalCount
+    }
   }
 `
 
@@ -107,6 +111,7 @@ const AuthorizationGroupEdit = ({
   const authorizationGroup = new AuthorizationGroup(
     data ? data.authorizationGroup : {}
   )
+  const hasReports = !!data?.reportList?.totalCount
 
   return (
     <div>
@@ -114,6 +119,7 @@ const AuthorizationGroupEdit = ({
         edit
         initialValues={authorizationGroup}
         title={`Community ${authorizationGroup.name}`}
+        hasReports={hasReports}
       />
     </div>
   )
