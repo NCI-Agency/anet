@@ -338,6 +338,8 @@ type AuthorizationGroup {
   authorizationGroupRelatedObjects: [GenericRelatedObject]
   createdAt: Instant
   description: String
+  distributionList: Boolean
+  forSensitiveInformation: Boolean
   isSubscribed: Boolean
   name: String
   status: Status
@@ -351,6 +353,8 @@ input AuthorizationGroupInput {
   authorizationGroupRelatedObjects: [GenericRelatedObjectInput]
   createdAt: Instant
   description: String
+  distributionList: Boolean
+  forSensitiveInformation: Boolean
   name: String
   status: Status
   updatedAt: Instant
