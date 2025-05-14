@@ -8,10 +8,21 @@ public class AuthorizationGroupSearchQuery
 
   @GraphQLQuery
   @GraphQLInputField
+  private Boolean distributionList;
+  @GraphQLQuery
+  @GraphQLInputField
   private Boolean forSensitiveInformation;
 
   public AuthorizationGroupSearchQuery() {
     super(AuthorizationGroupSearchSortBy.NAME);
+  }
+
+  public Boolean getDistributionList() {
+    return distributionList;
+  }
+
+  public void setDistributionList(Boolean distributionList) {
+    this.distributionList = distributionList;
   }
 
   public Boolean getForSensitiveInformation() {
