@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 
 class AuthorizationGroupResourceTest extends AbstractResourceTest {
   protected static final String FIELDS = "{ uuid name description status"
+      + " distributionList forSensitiveInformation"
       + " administrativePositions { uuid name code type role status location { uuid name }"
       + " organization { uuid shortName longName identificationCode }"
       + " person { uuid name rank } }"

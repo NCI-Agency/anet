@@ -23,6 +23,8 @@ export default class AuthorizationGroup extends Model {
       .string()
       .required()
       .default(() => Model.STATUS.ACTIVE),
+    distributionList: yup.boolean().required().default(false),
+    forSensitiveInformation: yup.boolean().required().default(false),
     administrativePositions: yup.array().nullable().default([]),
     authorizationGroupRelatedObjects: yup.array().nullable().default([])
   })

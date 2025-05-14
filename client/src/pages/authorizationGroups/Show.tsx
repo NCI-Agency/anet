@@ -26,6 +26,7 @@ import React, { useContext, useState } from "react"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
 import Settings from "settings"
+import utils from "utils"
 
 const GQL_EMAIL_ADDRESSES = `
   emailAddresses {
@@ -40,6 +41,8 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
       name
       description
       status
+      distributionList
+      forSensitiveInformation
       isSubscribed
       administrativePositions {
         uuid
@@ -201,6 +204,26 @@ const AuthorizationGroupShow = ({
                   name="status"
                   component={FieldHelper.ReadonlyField}
                   humanValue={AuthorizationGroup.humanNameOfStatus}
+                />
+
+                <DictionaryField
+                  wrappedComponent={Field}
+                  dictProps={
+                    Settings.fields.authorizationGroup.distributionList
+                  }
+                  name="distributionList"
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={utils.formatBoolean}
+                />
+
+                <DictionaryField
+                  wrappedComponent={Field}
+                  dictProps={
+                    Settings.fields.authorizationGroup.forSensitiveInformation
+                  }
+                  name="forSensitiveInformation"
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={utils.formatBoolean}
                 />
               </Fieldset>
 

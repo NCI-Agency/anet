@@ -21,6 +21,8 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
       name
       description
       status
+      distributionList
+      forSensitiveInformation
       administrativePositions {
         uuid
         name

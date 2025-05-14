@@ -17,7 +17,7 @@ import { FastField, Field, Form, Formik } from "formik"
 import { AuthorizationGroup, Position } from "models"
 import pluralize from "pluralize"
 import React, { useContext, useState } from "react"
-import { Button } from "react-bootstrap"
+import { Button, FormCheck } from "react-bootstrap"
 import { useNavigate } from "react-router-dom"
 import POSITIONS_ICON from "resources/positions.png"
 import Settings from "settings"
@@ -49,6 +49,7 @@ const AuthorizationGroupForm = ({
   const { currentUser } = useContext(AppContext)
   const navigate = useNavigate()
   const [error, setError] = useState(null)
+  const isAdmin = currentUser?.isAdmin()
   const positionsFilters = {
     allSuperusers: {
       label: "All superusers",
@@ -145,6 +146,46 @@ const AuthorizationGroupForm = ({
                 />
 
                 <DictionaryField
+                  wrappedComponent={FastField}
+                  dictProps={
+                    Settings.fields.authorizationGroup.distributionList
+                  }
+                  name="distributionList"
+                  component={FieldHelper.SpecialField}
+                  onChange={value =>
+                    setFieldValue("distributionList", value?.target?.checked)}
+                  widget={
+                    <FormCheck
+                      type="checkbox"
+                      className="pt-2"
+                      checked={values.distributionList}
+                    />
+                  }
+                />
+
+                <DictionaryField
+                  wrappedComponent={FastField}
+                  dictProps={
+                    Settings.fields.authorizationGroup.forSensitiveInformation
+                  }
+                  name="forSensitiveInformation"
+                  component={FieldHelper.SpecialField}
+                  onChange={value =>
+                    setFieldValue(
+                      "forSensitiveInformation",
+                      value?.target?.checked
+                    )}
+                  widget={
+                    <FormCheck
+                      type="checkbox"
+                      className="pt-2"
+                      checked={values.forSensitiveInformation}
+                      disabled={!isAdmin}
+                    />
+                  }
+                />
+
+                <DictionaryField
                   wrappedComponent={Field}
                   dictProps={
                     Settings.fields.authorizationGroup.administrativePositions
@@ -167,7 +208,7 @@ const AuthorizationGroupForm = ({
                         <PositionTable
                           positions={values.administrativePositions}
                           showLocation
-                          showDelete={currentUser?.isAdmin()}
+                          showDelete={isAdmin}
                         />
                       }
                       overlayColumns={[
@@ -180,7 +221,7 @@ const AuthorizationGroupForm = ({
                       objectType={Position}
                       fields={Position.autocompleteQuery}
                       addon={POSITIONS_ICON}
-                      disabled={!currentUser?.isAdmin()}
+                      disabled={!isAdmin}
                     />
                   }
                 />

@@ -8,6 +8,7 @@ import PositionTable from "components/PositionTable"
 import { AuthorizationGroup } from "models"
 import React from "react"
 import Settings from "settings"
+import utils from "utils"
 
 const GQL_EMAIL_ADDRESSES = `
   emailAddresses {
@@ -22,6 +23,8 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
       name
       description
       status
+      distributionList
+      forSensitiveInformation
       administrativePositions {
         uuid
         name
@@ -121,6 +124,20 @@ const AuthorizationGroupPreview = ({
           dictProps={Settings.fields.authorizationGroup.status}
           value={AuthorizationGroup.humanNameOfStatus(
             authorizationGroup.status
+          )}
+        />
+
+        <DictionaryField
+          wrappedComponent={PreviewField}
+          dictProps={Settings.fields.authorizationGroup.distributionList}
+          value={utils.formatBoolean(authorizationGroup.distributionList)}
+        />
+
+        <DictionaryField
+          wrappedComponent={PreviewField}
+          dictProps={Settings.fields.authorizationGroup.forSensitiveInformation}
+          value={utils.formatBoolean(
+            authorizationGroup.forSensitiveInformation
           )}
         />
       </div>
