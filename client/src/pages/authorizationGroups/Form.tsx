@@ -17,7 +17,7 @@ import { FastField, Field, Form, Formik } from "formik"
 import { AuthorizationGroup, Position } from "models"
 import pluralize from "pluralize"
 import React, { useContext, useState } from "react"
-import { Button, FormCheck } from "react-bootstrap"
+import { Alert, Button, FormCheck } from "react-bootstrap"
 import { useNavigate } from "react-router-dom"
 import POSITIONS_ICON from "resources/positions.png"
 import Settings from "settings"
@@ -39,12 +39,14 @@ interface AuthorizationGroupFormProps {
   initialValues: AuthorizationGroup
   title?: string
   edit?: boolean
+  hasReports?: boolean
 }
 
 const AuthorizationGroupForm = ({
   edit = false,
   title = "",
-  initialValues
+  initialValues,
+  hasReports
 }: AuthorizationGroupFormProps) => {
   const { currentUser } = useContext(AppContext)
   const navigate = useNavigate()
@@ -183,7 +185,17 @@ const AuthorizationGroupForm = ({
                       disabled={!isAdmin}
                     />
                   }
-                />
+                >
+                  {isAdmin &&
+                    initialValues.forSensitiveInformation &&
+                    hasReports && (
+                      <Alert variant="warning">
+                        CAUTION: This community is used for existing reports
+                        with sensitive information; disabling this flag will NOT
+                        revoke access to them!
+                      </Alert>
+                  )}
+                </DictionaryField>
 
                 <DictionaryField
                   wrappedComponent={Field}
