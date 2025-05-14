@@ -64,6 +64,31 @@ class AuthorizationGroupResourceTest extends AbstractResourceTest {
   }
 
   @Test
+  void testEditAsAdmin() {
+    final AuthorizationGroupInput authorizationGroupInput = getAuthorizationGroupInput();
+    final AuthorizationGroup authorizationGroup = withCredentials(adminUser,
+        t -> mutationExecutor.createAuthorizationGroup(FIELDS, authorizationGroupInput));
+    assertThat(authorizationGroup).isNotNull();
+    final AuthorizationGroupInput updatedAuthorizationGroupInput =
+        getAuthorizationGroupInput(authorizationGroup);
+    updatedAuthorizationGroupInput.setDistributionList(true);
+    updatedAuthorizationGroupInput.setForSensitiveInformation(true);
+    updatedAuthorizationGroupInput.getAuthorizationGroupRelatedObjects().remove(0);
+    updatedAuthorizationGroupInput.getAdministrativePositions().remove(0);
+    final Integer nrUpdated = withCredentials(adminUser,
+        t -> mutationExecutor.updateAuthorizationGroup("", updatedAuthorizationGroupInput));
+    assertThat(nrUpdated).isOne();
+    final AuthorizationGroup updatedAuthorizationGroup = withCredentials(adminUser,
+        t -> queryExecutor.authorizationGroup(FIELDS, authorizationGroup.getUuid()));
+    assertThat(updatedAuthorizationGroup.getDistributionList()).isTrue();
+    assertThat(updatedAuthorizationGroup.getForSensitiveInformation()).isTrue();
+    assertThat(updatedAuthorizationGroup.getAdministrativePositions())
+        .hasSize(authorizationGroupInput.getAdministrativePositions().size() - 1);
+    assertThat(updatedAuthorizationGroup.getAuthorizationGroupRelatedObjects())
+        .hasSize(authorizationGroupInput.getAuthorizationGroupRelatedObjects().size() - 1);
+  }
+
+  @Test
   void testEditAsWrongSuperuser() {
     final AuthorizationGroupInput authorizationGroupInput = getAuthorizationGroupInput();
     final AuthorizationGroup authorizationGroup = withCredentials(adminUser,
@@ -86,6 +111,8 @@ class AuthorizationGroupResourceTest extends AbstractResourceTest {
     assertThat(authorizationGroup).isNotNull();
     final AuthorizationGroupInput updatedAuthorizationGroupInput =
         getAuthorizationGroupInput(authorizationGroup);
+    updatedAuthorizationGroupInput.setDistributionList(true);
+    updatedAuthorizationGroupInput.setForSensitiveInformation(true);
     updatedAuthorizationGroupInput.getAuthorizationGroupRelatedObjects().remove(0);
     updatedAuthorizationGroupInput.getAdministrativePositions().remove(0);
     final Integer nrUpdated = withCredentials(getSuperuser().getDomainUsername(),
@@ -93,6 +120,9 @@ class AuthorizationGroupResourceTest extends AbstractResourceTest {
     assertThat(nrUpdated).isOne();
     final AuthorizationGroup updatedAuthorizationGroup = withCredentials(adminUser,
         t -> queryExecutor.authorizationGroup(FIELDS, authorizationGroup.getUuid()));
+    assertThat(updatedAuthorizationGroup.getDistributionList()).isTrue();
+    // Superuser should not be able to change this field!
+    assertThat(updatedAuthorizationGroup.getForSensitiveInformation()).isFalse();
     assertThat(updatedAuthorizationGroup.getAdministrativePositions())
         .hasSize(authorizationGroupInput.getAdministrativePositions().size() - 1);
     assertThat(updatedAuthorizationGroup.getAuthorizationGroupRelatedObjects())
@@ -130,6 +160,7 @@ class AuthorizationGroupResourceTest extends AbstractResourceTest {
     final String noposPersonUuid = "bdd91de7-09c7-4f09-97e4-d3325bb92dab";
     return AuthorizationGroupInput.builder().withName("test community")
         .withDescription("test community description").withStatus(Status.ACTIVE)
+        .withDistributionList(false).withForSensitiveInformation(false)
         .withAdministrativePositions(
             getPositionsInput(List.of(admin.getPosition(), getSuperuser().getPosition())))
         .withAuthorizationGroupRelatedObjects(List.of(
