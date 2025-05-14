@@ -41,6 +41,14 @@ class CreateAuthorizationGroup extends Page {
     return browser.$('label[for="status_INACTIVE"]')
   }
 
+  async getDistributionList() {
+    return browser.$("#distributionList")
+  }
+
+  async getForSensitiveInformation() {
+    return browser.$("#forSensitiveInformation")
+  }
+
   async getRelatedObjectsInput() {
     return browser.$("#authorizationGroupRelatedObjects")
   }

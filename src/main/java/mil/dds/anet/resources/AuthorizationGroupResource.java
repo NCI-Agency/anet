@@ -73,7 +73,7 @@ public class AuthorizationGroupResource {
     final List<Position> existingAdministrativePositions =
         dao.getAdministrativePositionsForAuthorizationGroup(
             ApplicationContextProvider.getEngine().getContext(), DaoUtils.getUuid(a)).join();
-    // User has to be admin or must hold an administrative position for the authorizationGroup
+    // User has to be admin or must hold an administrative position for the community
     if (!AuthUtils.isAdmin(user)) {
       final Position userPosition = DaoUtils.getPosition(user);
       final boolean canUpdate = existingAdministrativePositions.stream()
@@ -81,6 +81,10 @@ public class AuthorizationGroupResource {
       if (!canUpdate) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN, AuthUtils.UNAUTH_MESSAGE);
       }
+      // Load the existing community, so we can keep the original the value of
+      // forSensitiveInformation, as non-admins are not allowed to change it!
+      final AuthorizationGroup existing = dao.getByUuid(a.getUuid());
+      a.setForSensitiveInformation(existing.getForSensitiveInformation());
     }
 
     final int numRows = dao.update(a);
