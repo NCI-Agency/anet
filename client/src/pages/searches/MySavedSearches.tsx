@@ -1,4 +1,6 @@
 import { gql } from "@apollo/client"
+import { Icon } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import { SEARCH_OBJECT_TYPES, setSearchQuery } from "actions"
 import API from "api"
 import ConfirmDestructive from "components/ConfirmDestructive"
@@ -13,7 +15,6 @@ import {
 } from "components/Page"
 import {
   deserializeQueryParams,
-  getSearchQuery,
   SearchDescription
 } from "components/SearchFilters"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
@@ -145,13 +146,14 @@ const MySavedSearches = ({
                   </td>
                   <td>
                     <ConfirmDestructive
-                      onConfirm={() => onConfirmDelete(savedSearch.uuid)}
+                      onClick={() => onConfirmDelete(savedSearch.uuid)}
                       objectType="search"
                       objectDisplay={savedSearch.name}
                       variant="danger"
                       operation="delete"
-                      buttonLabel="Delete"
-                    />
+                    >
+                      <Icon icon={IconNames.TRASH} />
+                    </ConfirmDestructive>
                   </td>
                 </tr>
               ))}
