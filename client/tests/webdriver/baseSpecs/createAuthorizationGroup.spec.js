@@ -73,6 +73,31 @@ describe("When creating/editing a community", () => {
       ).getText()
       expect(alertMessage).to.equal("Community saved")
     })
+    it("Should save the community with distributionList and forSensitiveInformation", async() => {
+      await (await CreateAuthorizationGroup.getEditButton()).waitForExist()
+      await (await CreateAuthorizationGroup.getEditButton()).waitForDisplayed()
+      await (await CreateAuthorizationGroup.getEditButton()).click()
+      await (await CreateAuthorizationGroup.getForm()).waitForExist()
+      await (await CreateAuthorizationGroup.getForm()).waitForDisplayed()
+      await (await CreateAuthorizationGroup.getDistributionList()).click()
+      await (
+        await CreateAuthorizationGroup.getForSensitiveInformation()
+      ).click()
+      await CreateAuthorizationGroup.submitForm()
+      await CreateAuthorizationGroup.waitForAlertSuccessToLoad()
+      const alertMessage = await (
+        await CreateAuthorizationGroup.getAlertSuccess()
+      ).getText()
+      expect(alertMessage).to.equal("Community saved")
+      expect(
+        await (await CreateAuthorizationGroup.getDistributionList()).getText()
+      ).to.equal("Yes")
+      expect(
+        await (
+          await CreateAuthorizationGroup.getForSensitiveInformation()
+        ).getText()
+      ).to.equal("Yes")
+    })
     it("Should save the community with some members", async() => {
       await (await CreateAuthorizationGroup.getEditButton()).waitForExist()
       await (await CreateAuthorizationGroup.getEditButton()).waitForDisplayed()
@@ -345,13 +370,37 @@ describe("When creating/editing a community", () => {
         await (await CreateAuthorizationGroup.getDescription()).getText()
       ).to.equal(`${authorizationGroupDescription}-edited`)
     })
-    it("Should not be able to change the community's assigned superusers", async() => {
+    it("Should be able to change the community's distributionList", async() => {
       await (await CreateAuthorizationGroup.getEditButton()).waitForExist()
       await (await CreateAuthorizationGroup.getEditButton()).waitForDisplayed()
       await (await CreateAuthorizationGroup.getEditButton()).click()
       await (await CreateAuthorizationGroup.getForm()).waitForExist()
       await (await CreateAuthorizationGroup.getForm()).waitForDisplayed()
-
+      await (await CreateAuthorizationGroup.getDistributionList()).click()
+      await CreateAuthorizationGroup.submitForm()
+      await CreateAuthorizationGroup.waitForAlertSuccessToLoad()
+      const alertMessage = await (
+        await CreateAuthorizationGroup.getAlertSuccess()
+      ).getText()
+      expect(alertMessage).to.equal("Community saved")
+      expect(
+        await (await CreateAuthorizationGroup.getDistributionList()).getText()
+      ).to.equal("No")
+    })
+    it("Should not be able to change the community's forSensitiveInformation", async() => {
+      await (await CreateAuthorizationGroup.getEditButton()).waitForExist()
+      await (await CreateAuthorizationGroup.getEditButton()).waitForDisplayed()
+      await (await CreateAuthorizationGroup.getEditButton()).click()
+      await (await CreateAuthorizationGroup.getForm()).waitForExist()
+      await (await CreateAuthorizationGroup.getForm()).waitForDisplayed()
+      // eslint-disable-next-line no-unused-expressions
+      expect(
+        await (
+          await CreateAuthorizationGroup.getForSensitiveInformation()
+        ).isClickable()
+      ).to.be.false
+    })
+    it("Should not be able to change the community's assigned superusers", async() => {
       // Should not be able to add administrative positions
       // eslint-disable-next-line no-unused-expressions
       expect(
