@@ -516,8 +516,8 @@ const ReportForm = ({
 
         const authorizationGroupsFilters = {
           allAuthorizationGroups: {
-            label: "All communities",
-            queryVars: {}
+            label: "Communities for sensitive information",
+            queryVars: { forSensitiveInformation: true }
           }
         }
 

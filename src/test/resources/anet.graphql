@@ -364,6 +364,7 @@ input AuthorizationGroupInput {
 """"""
 input AuthorizationGroupSearchQueryInput {
   emailNetwork: String
+  forSensitiveInformation: Boolean
   inMyReports: Boolean
   pageNum: Int
   pageSize: Int
