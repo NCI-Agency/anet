@@ -15,7 +15,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import microsoft.exchange.webservices.data.property.complex.FileAttachment;
 import mil.dds.anet.beans.Attachment;
@@ -115,22 +114,16 @@ public class MartReportImporterService implements IMartReportImporterService {
       final MartImportedReport existingMartImportedReport =
           martImportedReportDao.getByReportUuid(reportDto.getUuid());
 
-      if (existingMartImportedReport == null) {
-        // New report, import
-        processReportInfo(reportDto, newMartImportedReport, attachments);
-        martImportedReportDao.insert(newMartImportedReport);
-      } else if (existingMartImportedReport.isSuccess()) {
+      if (existingMartImportedReport != null && existingMartImportedReport.isSuccess()) {
         // If it was successfully imported it is a duplicate, do not import again
         logger.info("Report with UUID={} has already been imported", reportDto.getUuid());
         newMartImportedReport.setErrors(
             String.format("Report with UUID %s has already been imported", reportDto.getUuid()));
         martImportedReportDao.insert(newMartImportedReport);
-      } else if (!existingMartImportedReport.isSuccess() && Objects
-          .equals(existingMartImportedReport.getSequence(), newMartImportedReport.getSequence())) {
-        // This report was marked as failed or missing earlier, import now and replace the
-        // existing martImportedReport
+      } else {
+        // New report, or this report was marked as failed or missing earlier: import
+        logger.info("Report with UUID={} will be imported", reportDto.getUuid());
         processReportInfo(reportDto, newMartImportedReport, attachments);
-        martImportedReportDao.delete(existingMartImportedReport);
         martImportedReportDao.insert(newMartImportedReport);
       }
     } catch (Exception e) {
