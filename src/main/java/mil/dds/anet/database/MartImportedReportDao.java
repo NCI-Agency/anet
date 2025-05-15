@@ -28,10 +28,9 @@ public class MartImportedReportDao extends AbstractDao {
   public MartImportedReport getByReportUuid(String reportUuid) {
     final Handle handle = getDbHandle();
     try {
-      return handle
-          .createQuery(
-              "/* MartImportedReportGetByReportUuid*/ SELECT * FROM \"martImportedReports\" "
-                  + "WHERE \"reportUuid\" = :reportUuid")
+      return handle.createQuery(
+          "/* MartImportedReportGetByReportUuid*/ SELECT * FROM \"martImportedReports\" "
+              + "WHERE \"reportUuid\" = :reportUuid ORDER BY sequence DESC, \"receivedAt\" DESC LIMIT 1")
           .bind("reportUuid", reportUuid).map(new MartImportedReportMapper()).findFirst()
           .orElse(null);
     } finally {
@@ -43,11 +42,11 @@ public class MartImportedReportDao extends AbstractDao {
   public AnetBeanList<MartImportedReport> getAll(int pageNum, int pageSize) {
     final Handle handle = getDbHandle();
     try {
-      final StringBuilder sql = new StringBuilder(
-          "/* MartImportedReportCheck */ SELECT * FROM \"martImportedReports\" ORDER BY \"receivedAt\" ASC");
+      final StringBuilder sql =
+          new StringBuilder("/* MartImportedReportCheck */ SELECT * FROM \"martImportedReports\"");
       sql.insert(0, "SELECT *, COUNT(*) OVER() AS \"totalCount\" FROM (");
       sql.append(") AS results");
-      sql.append(" ORDER BY sequence DESC");
+      sql.append(" ORDER BY sequence DESC, \"receivedAt\" DESC");
       if (pageSize > 0) {
         sql.append(" OFFSET :offset LIMIT :limit");
       }
