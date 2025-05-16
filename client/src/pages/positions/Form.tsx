@@ -8,6 +8,7 @@ import {
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
+import UploadAttachment from "components/Attachment/UploadAttachment"
 import {
   CustomFieldsContainer,
   customFieldsJSONString
@@ -76,11 +77,18 @@ const PositionForm = ({
   const { currentUser } = useContext(AppContext)
   const navigate = useNavigate()
   const [error, setError] = useState(null)
+  const [attachmentList, setAttachmentList] = useState(
+    initialValues?.attachments
+  )
   const [showSimilarPositions, setShowSimilarPositions] = useState(false)
   const [showSimilarPositionsMessage, setShowSimilarPositionsMessage] =
     useState(false)
   const [positionName, setPositionName] = useState(initialValues?.name)
   const [permissions, setPermissions] = useState(initialValues?.type)
+  const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
+  const attachmentEditEnabled =
+    attachmentsEnabled &&
+    (!Settings.fields.attachment.restrictToAdmins || currentUser.isAdmin())
   initialValues.emailAddresses = initializeEmailAddresses(
     initialValues.emailAddresses
   )
@@ -456,6 +464,24 @@ const PositionForm = ({
                     />
                   }
                 />
+                {edit && attachmentEditEnabled && (
+                  <Field
+                    name="uploadAttachments"
+                    label="Attachments"
+                    component={FieldHelper.SpecialField}
+                    widget={
+                      <UploadAttachment
+                        attachments={attachmentList}
+                        updateAttachments={setAttachmentList}
+                        relatedObjectType={Position.relatedObjectType}
+                        relatedObjectUuid={values.uuid}
+                      />
+                    }
+                    onHandleBlur={() => {
+                      setFieldTouched("uploadAttachments", true, false)
+                    }}
+                  />
+                )}
               </Fieldset>
 
               {Settings.fields.position.customFields && (
