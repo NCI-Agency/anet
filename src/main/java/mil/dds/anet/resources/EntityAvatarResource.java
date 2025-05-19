@@ -10,6 +10,7 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.database.EntityAvatarDao;
 import mil.dds.anet.database.EventDao;
 import mil.dds.anet.database.EventSeriesDao;
+import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.utils.AnetAuditLogger;
@@ -98,6 +99,8 @@ public class EntityAvatarResource {
       case PersonDao.TABLE_NAME -> PersonResource.hasPermission(user, relatedObjectUuid);
       case EventSeriesDao.TABLE_NAME -> EventSeriesResource.hasPermission(user, relatedObjectUuid);
       case EventDao.TABLE_NAME -> EventResource.hasPermission(user, relatedObjectUuid);
+      case LocationDao.TABLE_NAME ->
+        LocationResource.hasPermission(user, relatedObjectUuid);
       // TODO: add other object types if and when entity avatars for them are allowed
       default -> false;
     };
