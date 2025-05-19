@@ -16,6 +16,7 @@ import mil.dds.anet.graphql.AllowUnverifiedUsers;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractCustomizableAnetBean;
+import mil.dds.anet.views.UuidFetcher;
 
 public class Location extends AbstractCustomizableAnetBean
     implements RelatableObject, SubscribableObject, WithStatus {
