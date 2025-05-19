@@ -1466,6 +1466,12 @@ INSERT INTO attachments (uuid, "authorUuid", "fileName", "caption", "mimeType", 
 INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "relatedObjectUuid") VALUES
     ('426bf11a-5124-4468-8b66-edb3ae130bc0', 'events', 'e850846e-9741-40e8-bc51-4dccc30cf47f');
 
+-- Add attachments for positions
+INSERT INTO attachments (uuid, "authorUuid", "fileName", "caption", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt") VALUES
+    ('1d234036-1d6c-4cb0-8b1a-e4305aeca1e2', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'attachPosition.png', 'EF 1.1 Advisor G', 'image/png', lo_import('/var/tmp/assets/default_avatar.png'), 2928, 'We can add attachments to a position', 'public', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "relatedObjectUuid") VALUES
+    ('1d234036-1d6c-4cb0-8b1a-e4305aeca1e2', 'positions', '888d6c4b-deaa-4218-b8fd-abfb7c81a4c6');
+
 -- Add entity avatars for event series
 INSERT INTO "entityAvatars" ("relatedObjectType", "relatedObjectUuid", "attachmentUuid", "applyCrop", "cropLeft", "cropTop", "cropWidth", "cropHeight") VALUES
     ('eventSeries', 'b7b70191-54e4-462f-8e40-679dd2e71ec4', '0df946d2-d565-4234-8c0d-0b30f486aacc', TRUE, 0, 0, 200, 200);
