@@ -11,6 +11,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 import microsoft.exchange.webservices.data.core.exception.service.local.ServiceLocalException;
 import microsoft.exchange.webservices.data.core.service.item.EmailMessage;
 import microsoft.exchange.webservices.data.core.service.item.Item;
@@ -38,7 +40,9 @@ import mil.dds.anet.test.resources.PersonResourceTest;
 import mil.dds.anet.test.resources.ReportResourceTest;
 import mil.dds.anet.threads.mart.MartImporterWorker;
 import org.apache.commons.io.IOUtils;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +66,10 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
   private IMartTransmissionLogImporterService martTransmissionLogImporterService;
 
   private MartImporterWorker martReportImporterWorker = null;
+  private Set<Long> existingSequences = Set.of();
+
+  private final String missingReportUuid1 = "missingReportUuid1";
+  private final String missingReportUuid2 = "missingReportUuid2";
 
   @BeforeAll
   void setUp() throws Exception {
@@ -69,37 +77,58 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
         AnetTestConfiguration.getConfiguration().get("martReportImporterTestsExecute").toString());
     assumeTrue(executeMartReportImporterTests, "Mart importer tests configured to be skipped.");
 
-    final EmailMessage emailMessage1 =
-        createReportMockEmail(TestData.createGoodMartReport(1), true);
-    final EmailMessage emailMessage2 =
-        createReportMockEmail(TestData.createGoodMartReport(2), true);
-    final EmailMessage emailMessage3 =
-        createReportMockEmail(TestData.createMartReportWrongOrganization(3), false);
-    final EmailMessage emailMessage4 =
-        createReportMockEmail(TestData.createMartReportWrongLocation(4), false);
-    final EmailMessage emailMessage5 =
-        createReportMockEmail(TestData.createMartReportCompletelyWrong(5), false);
-    final EmailMessage emailMessage6 = createReportMockEmail(
-        TestData.createGoodMartReportWithUnknownTaskAndMissingSecurityMarking(6), true);
-    final EmailMessage emailMessage7 = createReportMockEmail(
-        TestData.createMartReportWithSecurityMarkingNotInDictionary(7), false);
-    final EmailMessage emailMessage8 = createTransmissionLogMockEmail();
-    final EmailMessage emailMessage9 =
-        createReportMockEmail(TestData.createRetryOfMissingReport(9), true);
+    existingSequences = martImportedReportDao.getAll().stream().map(MartImportedReport::getSequence)
+        .collect(Collectors.toSet());
+    long sequence = getMaxExistingSequence();
+
+    // Good report
+    final EmailMessage reportMessage1 =
+        createReportMockEmail(TestData.createGoodMartReport(++sequence), true);
+    // Retransmit of good report
+    final EmailMessage reportMessage1dup =
+        createReportMockEmail(TestData.createGoodMartReport(sequence), true);
+    // Several reports with errors
+    final EmailMessage reportMessage2 =
+        createReportMockEmail(TestData.createMartReportWrongOrganization(++sequence), false);
+    final EmailMessage reportMessage3 =
+        createReportMockEmail(TestData.createMartReportWrongLocation(++sequence), false);
+    final EmailMessage reportMessage4 =
+        createReportMockEmail(TestData.createMartReportCompletelyWrong(++sequence), false);
+    final EmailMessage reportMessage5 = createReportMockEmail(
+        TestData.createGoodMartReportWithUnknownTaskAndMissingSecurityMarking(++sequence), true);
+    final EmailMessage reportMessage6 = createReportMockEmail(
+        TestData.createMartReportWithSecurityMarkingNotInDictionary(++sequence), false);
+    // Transmission log
+    final EmailMessage transmissionLogMessage = createTransmissionLogMockEmail(sequence);
+    // Send a new report
+    final EmailMessage reportMessage8 = createReportMockEmail(
+        TestData.createRetryOfMissingReport(sequence + 2, missingReportUuid2), true);
 
     // Mock the mail exchange server
-    // First six emails are reports
-    // Then transmission log is received twice - should only result in one new record in
-    // MartImportedReports
     final IMailReceiver mailReceiverMock = Mockito.mock();
-    when(mailReceiverMock.downloadEmails())
-        .thenReturn(
-            List.of(emailMessage1, emailMessage2, emailMessage3, emailMessage4, emailMessage5,
-                emailMessage6, emailMessage7, emailMessage7, emailMessage8),
-            List.of(emailMessage9));
+    when(mailReceiverMock.downloadEmails()).thenReturn(
+        // reports and a transmission log (for 8 reports)
+        List.of(reportMessage1, reportMessage1dup, reportMessage2, reportMessage3, reportMessage4,
+            reportMessage5, reportMessage6, transmissionLogMessage),
+        // 8th report
+        List.of(reportMessage8));
 
     martReportImporterWorker = new MartImporterWorker(dict, jobHistoryDao, mailReceiverMock,
         martReportImporterService, martTransmissionLogImporterService);
+  }
+
+  @BeforeEach
+  @AfterEach
+  void cleanImportLog() {
+    martImportedReportDao.getAll().forEach(r -> {
+      if (!existingSequences.contains(r.getSequence())) {
+        martImportedReportDao.delete(r);
+      }
+    });
+  }
+
+  private Long getMaxExistingSequence() {
+    return existingSequences.stream().max(Long::compareTo).orElse(0L);
   }
 
   /**
@@ -137,114 +166,84 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
     assertThat(createdReport.getTasks().get(0).getLongName()).isEqualTo("Intelligence");
     assertThat(createdReport.getClassification()).isEqualTo("NU");
 
-    // Eight new records in MartImportedReports, verify them
+    // New records in MartImportedReports, verify them
     List<MartImportedReport> martImportedReports = martImportedReportDao.getAll();
+    long sequence = getMaxExistingSequence();
 
-    List<MartImportedReport> reportList = martImportedReports.stream()
-        .filter(martImportedReport -> martImportedReport.isSuccess()
-            && martImportedReport.getSequence().equals(1L)
-            && martImportedReport.getReportUuid().equals(goodReport.getUuid())
-            && martImportedReport.getPersonUuid().equals(person.getUuid())
-            && martImportedReport.getErrors() == null)
-        .toList();
-    assertThat(reportList).hasSize(1);
-    assertThat(martImportedReportDao.delete(reportList.get(0))).isOne();
+    assertGoodReport(martImportedReports, ++sequence, goodReport.getUuid(), person.getUuid());
 
-    reportList = martImportedReports.stream()
-        .filter(martImportedReport -> !martImportedReport.isSuccess()
-            && martImportedReport.getSequence().equals(2L) && martImportedReport.getErrors() != null
-            && martImportedReport.getErrors().equals(
-                "Report with UUID 231196f5-3b13-45ea-9d73-524d042b16e7 has already been imported"))
-        .toList();
-    assertThat(reportList).hasSize(1);
-    assertThat(martImportedReportDao.delete(reportList.get(0))).isOne();
+    assertReportWithErrors(martImportedReports, ++sequence,
+        "While importing report fb875171-2501-46c9-9246-60dafabb656d:"
+            + "<ul><li>Can not find submitter organization: 'does not exist' with uuid: does not exist</li></ul>");
 
-    reportList = martImportedReports.stream().filter(martImportedReport -> !martImportedReport
-        .isSuccess() && martImportedReport.getSequence().equals(3L)
-        && martImportedReport.getErrors() != null
-        && martImportedReport.getErrors()
-            .equals("While importing report fb875171-2501-46c9-9246-60dafabb656d:"
-                + "<ul><li>Can not find submitter organization: 'does not exist' with uuid: does not exist</li></ul>"))
-        .toList();
-    assertThat(reportList).hasSize(1);
-    assertThat(martImportedReportDao.delete(reportList.get(0))).isOne();
+    assertReportWithErrors(martImportedReports, ++sequence,
+        "While importing report 2d6c7a19-d878-4792-bdaf-7a73dc3bfc83:"
+            + "<ul><li>Can not find report location: 'does not exist' with uuid: does not exist</li></ul>");
 
-    reportList = martImportedReports.stream().filter(martImportedReport -> !martImportedReport
-        .isSuccess() && martImportedReport.getSequence().equals(4L)
-        && martImportedReport.getErrors() != null
-        && martImportedReport.getErrors()
-            .equals("While importing report 2d6c7a19-d878-4792-bdaf-7a73dc3bfc83:"
-                + "<ul><li>Can not find report location: 'does not exist' with uuid: does not exist</li></ul>"))
-        .toList();
-    assertThat(reportList).hasSize(1);
-    assertThat(martImportedReportDao.delete(reportList.get(0))).isOne();
+    assertReportWithErrors(martImportedReports, ++sequence,
+        "While importing report 68077002-b766-4a79-bcf2-40b7dbffe6e6:"
+            + "<ul><li>Can not find submitter organization: 'does not exist' with uuid: does not exist</li>"
+            + "<li>Can not find report location: 'does not exist' with uuid: does not exist</li></ul>");
 
-    reportList = martImportedReports.stream().filter(martImportedReport -> !martImportedReport
-        .isSuccess() && martImportedReport.getSequence().equals(5L)
-        && martImportedReport.getErrors() != null
-        && martImportedReport.getErrors()
-            .equals("While importing report 68077002-b766-4a79-bcf2-40b7dbffe6e6:"
-                + "<ul><li>Can not find submitter organization: 'does not exist' with uuid: does not exist</li>"
-                + "<li>Can not find report location: 'does not exist' with uuid: does not exist</li></ul>"))
-        .toList();
-    assertThat(reportList).hasSize(1);
-    assertThat(martImportedReportDao.delete(reportList.get(0))).isOne();
+    assertReportWithErrors(martImportedReports, ++sequence,
+        "While importing report 34faac7c-8c85-4dec-8e9f-57d9254b5ae2:"
+            + "<ul><li>Security marking is missing</li>"
+            + "<li>Can not find task: 'does not exist' with uuid: does not exist</li></ul>");
 
-    reportList = martImportedReports.stream().filter(martImportedReport -> !martImportedReport
-        .isSuccess() && martImportedReport.getSequence().equals(6L)
-        && martImportedReport.getErrors() != null
-        && martImportedReport.getErrors()
-            .equals("While importing report 34faac7c-8c85-4dec-8e9f-57d9254b5ae2:"
-                + "<ul><li>Security marking is missing</li>"
-                + "<li>Can not find task: 'does not exist' with uuid: does not exist</li></ul>"))
-        .toList();
-    assertThat(reportList).hasSize(1);
-    assertThat(martImportedReportDao.delete(reportList.get(0))).isOne();
-
-    reportList =
-        martImportedReports.stream()
-            .filter(martImportedReport -> !martImportedReport.isSuccess()
-                && martImportedReport.getSequence().equals(7L)
-                && martImportedReport.getErrors() != null
-                && martImportedReport.getErrors()
-                    .equals("While importing report 58e0ff9b-4908-4f2d-8cab-8d64aefff929:"
-                        + "<ul><li>Can not find report security marking: 'random'</li></ul>"))
-            .toList();
-    assertThat(reportList).hasSize(1);
-    assertThat(martImportedReportDao.delete(reportList.get(0))).isOne();
+    assertReportWithErrors(martImportedReports, ++sequence,
+        "While importing report 58e0ff9b-4908-4f2d-8cab-8d64aefff929:"
+            + "<ul><li>Can not find report security marking: 'random'</li></ul>");
 
     // The transmission log has also been processed resulting in two MART imported reports added
     // only once
-    reportList = martImportedReports.stream().filter(martImportedReport -> !martImportedReport
-        .isSuccess() && martImportedReport.getSequence().equals(8L)
-        && martImportedReport.getErrors() != null
-        && martImportedReport.getReportUuid().equals("missingReportUuid")
-        && martImportedReport.getErrors().equals(
-            "MART was unable to send this report: missingReportUuid due to this error: SMTP error sending email in MART"))
-        .toList();
-    assertThat(reportList).hasSize(1);
-    assertThat(martImportedReportDao.delete(reportList.get(0))).isOne();
-    reportList = martImportedReports.stream()
-        .filter(martImportedReport -> !martImportedReport.isSuccess()
-            && martImportedReport.getSequence().equals(9L) && martImportedReport.getErrors() != null
-            && martImportedReport.getReportUuid().equals("missingReportUuid2") && martImportedReport
-                .getErrors().equals("This report was lost in transmission: missingReportUuid2"))
-        .toList();
-    assertThat(reportList).hasSize(1);
-    assertThat(martImportedReportDao.delete(reportList.get(0))).isOne();
+    assertReportWithUuidAndErrors(martImportedReports, ++sequence, missingReportUuid1,
+        String.format(
+            "MART was unable to send this report: %s due to this error: SMTP error sending email in MART",
+            missingReportUuid1));
 
-    // Now we will run again and will pick up the report with sequence 8 that have been marked as
-    // lost processing the transmission log
-    // but finally came
+    assertReportWithUuidAndErrors(martImportedReports, ++sequence, missingReportUuid2,
+        String.format("This report was lost in transmission: %s", missingReportUuid2));
+
+    // Now we will run again and will pick up the report with the same sequence that has been marked
+    // as lost when processing the transmission log, but finally came
     martReportImporterWorker.run();
     martImportedReports = martImportedReportDao.getAll();
-    reportList = martImportedReports.stream()
+    assertGoodReport(martImportedReports, sequence, missingReportUuid2, person.getUuid());
+  }
+
+  private static void assertGoodReport(List<MartImportedReport> martImportedReports, long sequence,
+      String reportUuid, String personUuid) {
+    final List<MartImportedReport> reportList = martImportedReports.stream()
         .filter(martImportedReport -> martImportedReport.isSuccess()
-            && martImportedReport.getSequence().equals(9L) && martImportedReport.getErrors() == null
-            && martImportedReport.getReportUuid().equals("missingReportUuid2"))
+            && martImportedReport.getSequence().equals(sequence)
+            && martImportedReport.getReportUuid().equals(reportUuid)
+            && martImportedReport.getPersonUuid().equals(personUuid)
+            && martImportedReport.getErrors() == null)
         .toList();
     assertThat(reportList).hasSize(1);
-    assertThat(martImportedReportDao.delete(reportList.get(0))).isOne();
+  }
+
+  private void assertReportWithErrors(List<MartImportedReport> martImportedReports, long sequence,
+      String errors) {
+    final List<MartImportedReport> reportList = martImportedReports.stream()
+        .filter(martImportedReport -> !martImportedReport.isSuccess()
+            && martImportedReport.getSequence().equals(sequence)
+            && martImportedReport.getErrors() != null
+            && martImportedReport.getErrors().equals(errors))
+        .toList();
+    assertThat(reportList).hasSize(1);
+  }
+
+  private void assertReportWithUuidAndErrors(List<MartImportedReport> martImportedReports,
+      long sequence, String reportUuid, String errors) {
+    final List<MartImportedReport> reportList = martImportedReports.stream()
+        .filter(martImportedReport -> !martImportedReport.isSuccess()
+            && martImportedReport.getSequence().equals(sequence)
+            && martImportedReport.getReportUuid().equals(reportUuid)
+            && martImportedReport.getErrors() != null
+            && martImportedReport.getErrors().equals(errors))
+        .toList();
+    assertThat(reportList).hasSize(1);
   }
 
   private EmailMessage createReportMockEmail(ReportDto reportDto, boolean withAttachment)
@@ -276,14 +275,17 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
     return emailMessageMock;
   }
 
-  private EmailMessage createTransmissionLogMockEmail() throws ServiceLocalException, IOException {
+  private EmailMessage createTransmissionLogMockEmail(long maxSequence)
+      throws ServiceLocalException, IOException {
     final AttachmentCollection attachmentCollection = Mockito.mock(AttachmentCollection.class);
     final EmailMessage emailMessageMock = Mockito.mock();
 
     FileAttachment mockAttachmentJson = Mockito.mock(FileAttachment.class);
     when(mockAttachmentJson.getOwner()).thenReturn(Mockito.mock(Item.class));
     when(mockAttachmentJson.getContent()).thenReturn(ignoringMapper
-        .writeValueAsString(TestData.createTransmissionLog()).getBytes(StandardCharsets.UTF_8));
+        .writeValueAsString(
+            TestData.createTransmissionLog(maxSequence, missingReportUuid1, missingReportUuid2))
+        .getBytes(StandardCharsets.UTF_8));
     when(mockAttachmentJson.getName()).thenReturn(MartImporterWorker.TRANSMISSION_LOG_ATTACHMENT);
 
     List<Attachment> attachmentList = new ArrayList<>();

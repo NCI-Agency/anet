@@ -202,17 +202,18 @@ public class TestData {
     return reportDto;
   }
 
-  public static ReportDto createRetryOfMissingReport(long sequence) {
+  public static ReportDto createRetryOfMissingReport(long sequence, String uuid) {
     final ReportDto reportDto = createGoodMartReport(sequence);
-    reportDto.setUuid("missingReportUuid2");
+    reportDto.setUuid(uuid);
     return reportDto;
   }
 
-  public static List<LogDto> createTransmissionLog() {
+  public static List<LogDto> createTransmissionLog(long maxSequence, String missingReportUuid1,
+      String missingReportUuid2) {
     final List<LogDto> transmissionLog = new ArrayList<>();
 
     // Put all properly transmitted ones
-    for (long i = 0; i < 8; i++) {
+    for (long i = 1; i < maxSequence; i++) {
       final LogDto logDto = new LogDto();
       logDto.setState(LogDto.LogState.SENT.getCode());
       logDto.setSequence(i);
@@ -221,18 +222,18 @@ public class TestData {
 
     // Now Put two missing logs
     final LogDto missing1 = new LogDto();
-    missing1.setReportUuid("missingReportUuid");
+    missing1.setReportUuid(missingReportUuid1);
     missing1.setState(LogDto.LogState.FAILED_TO_SEND_EMAIL.getCode());
     missing1.setErrors("SMTP error sending email in MART");
     missing1.setSubmittedAt(Instant.now());
-    missing1.setSequence(8L);
+    missing1.setSequence(maxSequence + 1);
     transmissionLog.add(missing1);
 
     final LogDto missing2 = new LogDto();
-    missing2.setReportUuid("missingReportUuid2");
+    missing2.setReportUuid(missingReportUuid2);
     missing2.setState(LogDto.LogState.SENT.getCode());
     missing2.setSubmittedAt(Instant.now());
-    missing2.setSequence(9L);
+    missing2.setSequence(maxSequence + 2);
     transmissionLog.add(missing2);
 
     return transmissionLog;
