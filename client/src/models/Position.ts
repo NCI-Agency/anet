@@ -185,6 +185,7 @@ export default class Position extends Model {
       lat
       lng
       type
+      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
     }
     customFields
     ${GRAPHQL_NOTES_FIELDS}

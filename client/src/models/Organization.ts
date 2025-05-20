@@ -142,6 +142,7 @@ export default class Organization extends Model {
       lat
       lng
       type
+      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
     }
     emailAddresses {
       network

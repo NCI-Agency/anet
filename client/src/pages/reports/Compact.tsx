@@ -69,6 +69,7 @@ const GQL_GET_REPORT = gql`
       location {
         uuid
         name
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
       authors {
         uuid
