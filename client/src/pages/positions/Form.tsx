@@ -9,6 +9,7 @@ import {
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
 import UploadAttachment from "components/Attachment/UploadAttachment"
+import EntityAvatarComponent from "components/avatar/EntityAvatarComponent"
 import {
   CustomFieldsContainer,
   customFieldsJSONString
@@ -31,7 +32,7 @@ import _isEqual from "lodash/isEqual"
 import { Location, Organization, Position } from "models"
 import { PositionRole } from "models/Position"
 import React, { useContext, useEffect, useState } from "react"
-import { Button, Form as FormBS } from "react-bootstrap"
+import { Button, Col, Form as FormBS, Row } from "react-bootstrap"
 import { useNavigate } from "react-router-dom"
 import LOCATIONS_ICON from "resources/locations.png"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
@@ -89,6 +90,9 @@ const PositionForm = ({
   const attachmentEditEnabled =
     attachmentsEnabled &&
     (!Settings.fields.attachment.restrictToAdmins || currentUser.isAdmin())
+  const avatarMimeTypes = Settings.fields.attachment.fileTypes
+    .filter(fileType => fileType.avatar)
+    .map(fileType => fileType.mimeType)
   initialValues.emailAddresses = initializeEmailAddresses(
     initialValues.emailAddresses
   )
@@ -229,6 +233,9 @@ const PositionForm = ({
           values.status === Model.STATUS.INACTIVE &&
           values.person &&
           values.person.uuid
+        const imageAttachments = attachmentList?.filter(a =>
+          avatarMimeTypes.includes(a.mimeType)
+        )
         const action = (
           <>
             <Button
@@ -257,141 +264,158 @@ const PositionForm = ({
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
               <Fieldset>
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.position.name}
-                  name="name"
-                  component={FieldHelper.InputField}
-                  onChange={event => {
-                    setFieldValue("name", event.target.value)
-                    setPositionName(event.target.value)
-                  }}
-                  extraColElem={
-                    showSimilarPositionsMessage ? (
-                      <>
-                        <Button
-                          onClick={() => setShowSimilarPositions(true)}
-                          variant="outline-secondary"
-                        >
-                          <Icon
-                            icon={IconNames.WARNING_SIGN}
-                            intent={Intent.WARNING}
-                            size={IconSize.STANDARD}
-                            style={{ margin: "0 6px" }}
-                          />
-                          Possible Duplicates
-                        </Button>
-                      </>
-                    ) : undefined
-                  }
-                />
-
-                {edit ? (
-                  <DictionaryField
-                    wrappedComponent={FastField}
-                    dictProps={Settings.fields.position.type}
-                    name="type"
-                    component={FieldHelper.ReadonlyField}
-                    humanValue={Position.humanNameOfType}
-                  />
-                ) : (
-                  <DictionaryField
-                    wrappedComponent={FastField}
-                    dictProps={Settings.fields.position.type}
-                    name="type"
-                    component={FieldHelper.RadioButtonToggleGroupField}
-                    buttons={typeButtons}
-                    onChange={value => {
-                      setFieldValue("type", value)
-                    }}
-                  />
-                )}
-
-                <FastField
-                  name="permissions"
-                  component={FieldHelper.RadioButtonToggleGroupField}
-                  buttons={permissionsButtons}
-                  onChange={value => {
-                    setFieldValue("permissions", value)
-                    setFieldValue(
-                      "superuserType",
-                      value === Position.TYPE.SUPERUSER
-                        ? Position.SUPERUSER_TYPE.REGULAR
-                        : null
-                    )
-                    setPermissions(value)
-                  }}
-                />
-                {permissions === Position.TYPE.SUPERUSER && (
-                  <DictionaryField
-                    wrappedComponent={FastField}
-                    dictProps={Settings.fields.position.superuserType}
-                    name="superuserType"
-                    component={FieldHelper.RadioButtonToggleGroupField}
-                    buttons={positionSuperuserTypeButtons}
-                    onChange={value => {
-                      setFieldValue("superuserType", value)
-                    }}
-                  />
-                )}
-
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.position.organization}
-                  name="organization"
-                  component={FieldHelper.SpecialField}
-                  onChange={value => {
-                    // validation will be done by setFieldValue
-                    setFieldTouched("organization", true, false) // onBlur doesn't work when selecting an option
-                    setFieldValue("organization", value)
-                  }}
-                  widget={
-                    <AdvancedSingleSelect
-                      fieldName="organization"
-                      placeholder={
-                        Settings.fields.position.organization.placeholder
+                <Row>
+                  {edit && (
+                    <Col sm={12} md={12} lg={4} xl={4} className="text-center">
+                      <EntityAvatarComponent
+                        initialAvatar={initialValues.entityAvatar}
+                        relatedObjectType={Position.relatedObjectType}
+                        relatedObjectUuid={initialValues.uuid}
+                        relatedObjectName={initialValues.name}
+                        editMode={attachmentEditEnabled}
+                        imageAttachments={imageAttachments}
+                      />
+                    </Col>
+                  )}
+                  <Col sm={12} md={12} lg={8} xl={8}>
+                    <DictionaryField
+                      wrappedComponent={Field}
+                      dictProps={Settings.fields.position.name}
+                      name="name"
+                      component={FieldHelper.InputField}
+                      onChange={event => {
+                        setFieldValue("name", event.target.value)
+                        setPositionName(event.target.value)
+                      }}
+                      extraColElem={
+                        showSimilarPositionsMessage ? (
+                          <>
+                            <Button
+                              onClick={() => setShowSimilarPositions(true)}
+                              variant="outline-secondary"
+                            >
+                              <Icon
+                                icon={IconNames.WARNING_SIGN}
+                                intent={Intent.WARNING}
+                                size={IconSize.STANDARD}
+                                style={{ margin: "0 6px" }}
+                              />
+                              Possible Duplicates
+                            </Button>
+                          </>
+                        ) : undefined
                       }
-                      value={values.organization}
-                      overlayColumns={["Name"]}
-                      overlayRenderRow={OrganizationOverlayRow}
-                      filterDefs={organizationFilters}
-                      objectType={Organization}
-                      fields={Organization.autocompleteQuery}
-                      queryParams={orgSearchQuery}
-                      valueKey="shortName"
-                      addon={ORGANIZATIONS_ICON}
                     />
-                  }
-                />
 
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.position.location}
-                  name="location"
-                  component={FieldHelper.SpecialField}
-                  onChange={value => {
-                    // validation will be done by setFieldValue
-                    setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
-                    setFieldValue("location", value)
-                  }}
-                  widget={
-                    <AdvancedSingleSelect
-                      fieldName="location"
-                      placeholder={
-                        Settings.fields.position.location.placeholder
+                    {edit ? (
+                      <DictionaryField
+                        wrappedComponent={FastField}
+                        dictProps={Settings.fields.position.type}
+                        name="type"
+                        component={FieldHelper.ReadonlyField}
+                        humanValue={Position.humanNameOfType}
+                      />
+                    ) : (
+                      <DictionaryField
+                        wrappedComponent={FastField}
+                        dictProps={Settings.fields.position.type}
+                        name="type"
+                        component={FieldHelper.RadioButtonToggleGroupField}
+                        buttons={typeButtons}
+                        onChange={value => {
+                          setFieldValue("type", value)
+                        }}
+                      />
+                    )}
+
+                    <FastField
+                      name="permissions"
+                      component={FieldHelper.RadioButtonToggleGroupField}
+                      buttons={permissionsButtons}
+                      onChange={value => {
+                        setFieldValue("permissions", value)
+                        setFieldValue(
+                          "superuserType",
+                          value === Position.TYPE.SUPERUSER
+                            ? Position.SUPERUSER_TYPE.REGULAR
+                            : null
+                        )
+                        setPermissions(value)
+                      }}
+                    />
+                    {permissions === Position.TYPE.SUPERUSER && (
+                      <DictionaryField
+                        wrappedComponent={FastField}
+                        dictProps={Settings.fields.position.superuserType}
+                        name="superuserType"
+                        component={FieldHelper.RadioButtonToggleGroupField}
+                        buttons={positionSuperuserTypeButtons}
+                        onChange={value => {
+                          setFieldValue("superuserType", value)
+                        }}
+                      />
+                    )}
+
+                    <DictionaryField
+                      wrappedComponent={Field}
+                      dictProps={Settings.fields.position.organization}
+                      name="organization"
+                      component={FieldHelper.SpecialField}
+                      onChange={value => {
+                        // validation will be done by setFieldValue
+                        setFieldTouched("organization", true, false) // onBlur doesn't work when selecting an option
+                        setFieldValue("organization", value)
+                      }}
+                      widget={
+                        <AdvancedSingleSelect
+                          fieldName="organization"
+                          placeholder={
+                            Settings.fields.position.organization.placeholder
+                          }
+                          value={values.organization}
+                          overlayColumns={["Name"]}
+                          overlayRenderRow={OrganizationOverlayRow}
+                          filterDefs={organizationFilters}
+                          objectType={Organization}
+                          fields={Organization.autocompleteQuery}
+                          queryParams={orgSearchQuery}
+                          valueKey="shortName"
+                          addon={ORGANIZATIONS_ICON}
+                        />
                       }
-                      value={values.location}
-                      overlayColumns={["Name"]}
-                      overlayRenderRow={LocationOverlayRow}
-                      filterDefs={locationFilters}
-                      objectType={Location}
-                      fields={Location.autocompleteQuery}
-                      valueKey="name"
-                      addon={LOCATIONS_ICON}
                     />
-                  }
-                />
 
+                    <DictionaryField
+                      wrappedComponent={Field}
+                      dictProps={Settings.fields.position.location}
+                      name="location"
+                      component={FieldHelper.SpecialField}
+                      onChange={value => {
+                        // validation will be done by setFieldValue
+                        setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
+                        setFieldValue("location", value)
+                      }}
+                      widget={
+                        <AdvancedSingleSelect
+                          fieldName="location"
+                          placeholder={
+                            Settings.fields.position.location.placeholder
+                          }
+                          value={values.location}
+                          overlayColumns={["Name"]}
+                          overlayRenderRow={LocationOverlayRow}
+                          filterDefs={locationFilters}
+                          objectType={Location}
+                          fields={Location.autocompleteQuery}
+                          valueKey="name"
+                          addon={LOCATIONS_ICON}
+                        />
+                      }
+                    />
+                  </Col>
+                </Row>
+              </Fieldset>
+              <Fieldset title="Additional information">
                 <DictionaryField
                   wrappedComponent={Field}
                   dictProps={Settings.fields.position.code}

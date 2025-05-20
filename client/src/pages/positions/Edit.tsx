@@ -33,6 +33,7 @@ const GQL_GET_POSITION = gql`
       superuserType
       role
       description
+      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       emailAddresses {
         network
         address
