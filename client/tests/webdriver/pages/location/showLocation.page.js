@@ -79,5 +79,9 @@ class ShowLocation extends Page {
   async getModalCloseButton() {
     return (await this.getModalContent()).$(".btn-close")
   }
+
+  async getEntityAvatar() {
+    return browser.$("fieldset div.row div.text-center canvas")
+  }
 }
 export default new ShowLocation()

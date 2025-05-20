@@ -99,8 +99,7 @@ public class EntityAvatarResource {
       case PersonDao.TABLE_NAME -> PersonResource.hasPermission(user, relatedObjectUuid);
       case EventSeriesDao.TABLE_NAME -> EventSeriesResource.hasPermission(user, relatedObjectUuid);
       case EventDao.TABLE_NAME -> EventResource.hasPermission(user, relatedObjectUuid);
-      case LocationDao.TABLE_NAME ->
-        LocationResource.hasPermission(user, relatedObjectUuid);
+      case LocationDao.TABLE_NAME -> LocationResource.hasPermission(user, relatedObjectUuid);
       // TODO: add other object types if and when entity avatars for them are allowed
       default -> false;
     };
