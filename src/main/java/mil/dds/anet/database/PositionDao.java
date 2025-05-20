@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.EntityAvatar;
 import mil.dds.anet.beans.MergedEntity;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.PersonPositionHistory;
@@ -626,6 +627,17 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
       // Update attachments
       updateM2mForMerge("attachmentRelatedObjects", "attachmentUuid", "relatedObjectUuid",
           winnerUuid, loserUuid);
+
+      // Update the avatar
+      final EntityAvatarDao entityAvatarDao = engine().getEntityAvatarDao();
+      entityAvatarDao.delete(PositionDao.TABLE_NAME, winnerUuid);
+      entityAvatarDao.delete(PositionDao.TABLE_NAME, loserUuid);
+      final EntityAvatar winnerEntityAvatar = winner.getEntityAvatar();
+      if (winnerEntityAvatar != null) {
+        winnerEntityAvatar.setRelatedObjectType(PositionDao.TABLE_NAME);
+        winnerEntityAvatar.setRelatedObjectUuid(winnerUuid);
+        entityAvatarDao.upsert(winnerEntityAvatar);
+      }
 
       // Update approvers
       updateM2mForMerge("approvers", "approvalStepUuid", "positionUuid", winnerUuid, loserUuid);
