@@ -6,6 +6,7 @@ import AssignPersonModal from "components/AssignPersonModal"
 import AssociatedPositions from "components/AssociatedPositions"
 import AttachmentsDetailView from "components/Attachment/AttachmentsDetailView"
 import AuthorizationGroupTable from "components/AuthorizationGroupTable"
+import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
@@ -35,7 +36,7 @@ import { Field, Form, Formik } from "formik"
 import { Attachment, Location, Position } from "models"
 import { positionTour } from "pages/GuidedTour"
 import React, { useContext, useEffect, useState } from "react"
-import { Badge, Button } from "react-bootstrap"
+import { Badge, Button, Col, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom"
 import Settings from "settings"
@@ -130,6 +131,9 @@ const PositionShow = ({ pageDispatchers }: PositionShowProps) => {
         position.organization
       ))
   const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
+  const avatar =
+    attachments?.some(a => a.uuid === position?.entityAvatar?.attachmentUuid) &&
+    position.entityAvatar
   const canDelete =
     isAdmin &&
     position.status === Model.STATUS.INACTIVE &&
@@ -216,60 +220,75 @@ const PositionShow = ({ pageDispatchers }: PositionShowProps) => {
                 action={action}
               />
               <Fieldset>
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.position.type}
-                  name="type"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={Position.humanNameOfType}
-                />
-                {position.type === Position.TYPE.SUPERUSER && (
-                  <DictionaryField
-                    wrappedComponent={Field}
-                    dictProps={Settings.fields.position.superuserType}
-                    name="superuserType"
-                    component={FieldHelper.ReadonlyField}
-                    humanValue={Position.humanNameOfSuperuserType}
-                  />
-                )}
+                <Row>
+                  <Col sm={12} md={12} lg={4} xl={3} className="text-center">
+                    <EntityAvatarDisplay
+                      avatar={avatar}
+                      defaultAvatar={Position.relatedObjectType}
+                    />
+                  </Col>
+                  <Col
+                    lg={8}
+                    xl={9}
+                    className="d-flex flex-column justify-content-center"
+                  >
+                    <DictionaryField
+                      wrappedComponent={Field}
+                      dictProps={Settings.fields.position.type}
+                      name="type"
+                      component={FieldHelper.ReadonlyField}
+                      humanValue={Position.humanNameOfType}
+                    />
+                    {position.type === Position.TYPE.SUPERUSER && (
+                      <DictionaryField
+                        wrappedComponent={Field}
+                        dictProps={Settings.fields.position.superuserType}
+                        name="superuserType"
+                        component={FieldHelper.ReadonlyField}
+                        humanValue={Position.humanNameOfSuperuserType}
+                      />
+                    )}
 
-                {position.organization && (
-                  <DictionaryField
-                    wrappedComponent={Field}
-                    dictProps={Settings.fields.position.organization}
-                    name="organization"
-                    component={FieldHelper.ReadonlyField}
-                    humanValue={
-                      position.organization && (
-                        <LinkTo
-                          modelType="Organization"
-                          model={position.organization}
-                        />
-                      )
-                    }
-                  />
-                )}
+                    {position.organization && (
+                      <DictionaryField
+                        wrappedComponent={Field}
+                        dictProps={Settings.fields.position.organization}
+                        name="organization"
+                        component={FieldHelper.ReadonlyField}
+                        humanValue={
+                          position.organization && (
+                            <LinkTo
+                              modelType="Organization"
+                              model={position.organization}
+                            />
+                          )
+                        }
+                      />
+                    )}
 
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.position.location}
-                  name="location"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={
-                    position.location && (
-                      <>
-                        <LinkTo
-                          modelType="Location"
-                          model={position.location}
-                        />{" "}
-                        <Badge>
-                          {Location.humanNameOfType(position.location.type)}
-                        </Badge>
-                      </>
-                    )
-                  }
-                />
-
+                    <DictionaryField
+                      wrappedComponent={Field}
+                      dictProps={Settings.fields.position.location}
+                      name="location"
+                      component={FieldHelper.ReadonlyField}
+                      humanValue={
+                        position.location && (
+                          <>
+                            <LinkTo
+                              modelType="Location"
+                              model={position.location}
+                            />{" "}
+                            <Badge>
+                              {Location.humanNameOfType(position.location.type)}
+                            </Badge>
+                          </>
+                        )
+                      }
+                    />
+                  </Col>
+                </Row>
+              </Fieldset>
+              <Fieldset id="info" title="Additional Information">
                 <DictionaryField
                   wrappedComponent={Field}
                   dictProps={Settings.fields.position.code}
