@@ -1480,6 +1480,12 @@ INSERT INTO "entityAvatars" ("relatedObjectType", "relatedObjectUuid", "attachme
 INSERT INTO "entityAvatars" ("relatedObjectType", "relatedObjectUuid", "attachmentUuid", "applyCrop", "cropLeft", "cropTop", "cropWidth", "cropHeight") VALUES
     ('events', 'e850846e-9741-40e8-bc51-4dccc30cf47f', '426bf11a-5124-4468-8b66-edb3ae130bc0', TRUE, 0, 0, 200, 200);
 
+-- Add entity avatars for locations
+INSERT INTO "entityAvatars" ("relatedObjectType", "relatedObjectUuid", "attachmentUuid", "applyCrop", "cropLeft", "cropTop", "cropWidth", "cropHeight")
+    SELECT 'locations', loc.uuid, 'f7cd5b02-ef73-4ee8-814b-c5a7a916685d', TRUE, 0, 0, 200, 200
+    FROM locations loc
+    WHERE loc.name = 'Antarctica';
+
 -- Add tasks, organizations and people to the event
 INSERT INTO "eventTasks" ("eventUuid", "taskUuid") VALUES
   ((select uuid from events where name = 'NMI PDT 2024-01'), '9d3da7f4-8266-47af-b518-995f587250c9');
