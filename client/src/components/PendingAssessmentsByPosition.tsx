@@ -43,6 +43,7 @@ const GQL_GET_POSITION_LIST = gql`
         location {
           uuid
           name
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         person {
           uuid
@@ -67,6 +68,7 @@ const GQL_GET_POSITION_LIST = gql`
           location {
             uuid
             name
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
           person {
             uuid

@@ -1,6 +1,7 @@
 import { gql } from "@apollo/client"
 import API from "api"
 import LinkTo from "components/LinkTo"
+import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -26,6 +27,7 @@ const GQL_GET_LOCATION_LIST = gql`
         lat
         lng
         type
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
     }
   }
@@ -134,7 +136,7 @@ const BaseLocationTable = ({
             </tr>
           </thead>
           <tbody>
-            {locations.map(loc => (
+            {Location.map(locations, loc => (
               <tr key={loc.uuid}>
                 <td>
                   <LinkTo modelType="Location" model={loc} />

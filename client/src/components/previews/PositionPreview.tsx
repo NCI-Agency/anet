@@ -74,6 +74,7 @@ const GQL_GET_POSITION = gql`
         type
         lat
         lng
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
     }
   }

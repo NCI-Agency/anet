@@ -54,6 +54,7 @@ const GQL_GET_REPORT_LIST = gql`
           name
           lat
           lng
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
       }
     }
