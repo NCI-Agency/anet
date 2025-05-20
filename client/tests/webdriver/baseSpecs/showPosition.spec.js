@@ -79,4 +79,12 @@ describe("Show position page", () => {
       )
     })
   })
+
+  describe("When on the show page of a position with entity avatar", () => {
+    it("We should see the avatar", async() => {
+      await ShowPosition.openAsAdminUser(POSITION_WITH_ATTACHMENTS_UUID)
+      await (await ShowPosition.getEntityAvatar()).waitForExist()
+      await (await ShowPosition.getEntityAvatar()).waitForDisplayed()
+    })
+  })
 })
