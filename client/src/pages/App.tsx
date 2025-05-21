@@ -61,6 +61,7 @@ const GQL_GET_APP_DATA = gql`
           descendantOrgs {
             uuid
           }
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         location {
           uuid
@@ -78,6 +79,7 @@ const GQL_GET_APP_DATA = gql`
             shortName
             longName
             identificationCode
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
           location {
             uuid

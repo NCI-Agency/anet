@@ -49,7 +49,7 @@ const peopleFilters = {
 const widgetPropsReport = {
   objectType: Models.Report,
   overlayRenderRow: ReportDetailedOverlayRow,
-  overlayColumns: ["Goal", "Author", "Updated"],
+  overlayColumns: [Settings.fields.report.intent?.label, "Author", "Updated"],
   filterDefs: entityFilters,
   queryParams: {}, // allow any report, incl. one's own drafts
   fields: Models.Report.autocompleteQuery,

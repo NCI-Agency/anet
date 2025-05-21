@@ -163,6 +163,8 @@ const AttachmentForm = ({
                             title=""
                             relatedObjects={values.attachmentRelatedObjects}
                             entityTypes={[
+                              ENTITY_TYPES.EVENTS,
+                              ENTITY_TYPES.EVENT_SERIES,
                               ENTITY_TYPES.LOCATIONS,
                               ENTITY_TYPES.ORGANIZATIONS,
                               ENTITY_TYPES.PEOPLE,

@@ -106,7 +106,9 @@ export default class Organization extends Model {
     .concat(Organization.customFieldsSchema)
     .concat(Model.yupSchema)
 
-  static autocompleteQuery = `uuid shortName longName identificationCode ${GRAPHQL_ENTITY_AVATAR_FIELDS}`
+  static autocompleteQuery =
+    `uuid shortName longName identificationCode ${GRAPHQL_ENTITY_AVATAR_FIELDS}` +
+    " location { uuid name }"
 
   static allFieldsQuery = `
     uuid
