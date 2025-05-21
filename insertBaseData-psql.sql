@@ -1482,6 +1482,10 @@ INSERT INTO "entityAvatars" ("relatedObjectType", "relatedObjectUuid", "attachme
 INSERT INTO "entityAvatars" ("relatedObjectType", "relatedObjectUuid", "attachmentUuid", "applyCrop", "cropLeft", "cropTop", "cropWidth", "cropHeight") VALUES
     ('locations', 'e5b3a4b9-acf7-4c79-8224-f248b9a7215d', 'f7cd5b02-ef73-4ee8-814b-c5a7a916685d', TRUE, 0, 0, 200, 200);
 
+-- Add entity avatars for positions
+INSERT INTO "entityAvatars" ("relatedObjectType", "relatedObjectUuid", "attachmentUuid", "applyCrop", "cropLeft", "cropTop", "cropWidth", "cropHeight") VALUES
+    ('positions', '888d6c4b-deaa-4218-b8fd-abfb7c81a4c6', '1d234036-1d6c-4cb0-8b1a-e4305aeca1e2', TRUE, 0, 0, 200, 200);
+
 -- Add tasks, organizations and people to the event
 INSERT INTO "eventTasks" ("eventUuid", "taskUuid") VALUES
   ((select uuid from events where name = 'NMI PDT 2024-01'), '9d3da7f4-8266-47af-b518-995f587250c9');
