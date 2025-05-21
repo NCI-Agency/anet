@@ -157,6 +157,7 @@ export default class Event extends Model {
             name
             type
             code
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
             organization {
               uuid
               shortName

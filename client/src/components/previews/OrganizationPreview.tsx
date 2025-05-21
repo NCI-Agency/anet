@@ -24,6 +24,7 @@ const GQL_LOCATION_FIELDS = `
     uuid
     name
     type
+    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
   }
 `
 const GQL_ORGANIZATION_FIELDS = `
@@ -52,6 +53,7 @@ const GQL_POSITION_FIELDS = `
     status
     type
     role
+    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
   }
 `
 const GQL_GET_ORGANIZATION = gql`

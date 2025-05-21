@@ -44,6 +44,7 @@ const GQL_GET_MY_AUTHORIZATION_GROUPS = gql`
                 uuid
                 type
                 name
+                ${GRAPHQL_ENTITY_AVATAR_FIELDS}
               }
             }
           }

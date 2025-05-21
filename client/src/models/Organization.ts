@@ -182,6 +182,7 @@ export default class Organization extends Model {
       code
       type
       role
+      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       person {
         uuid
         name

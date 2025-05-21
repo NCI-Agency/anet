@@ -96,6 +96,7 @@ const GQL_GET_PERSON = gql`
         name
         type
         role
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         organization {
           uuid
           shortName
@@ -108,6 +109,7 @@ const GQL_GET_PERSON = gql`
           name
           type
           role
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           person {
             uuid
             name
@@ -129,6 +131,7 @@ const GQL_GET_PERSON = gql`
         position {
           uuid
           name
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
       }
       authorizationGroups {

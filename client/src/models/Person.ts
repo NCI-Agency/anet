@@ -164,7 +164,7 @@ export default class Person extends Model {
 
   static autocompleteQuery =
     `uuid name rank status user endOfTourDate ${GRAPHQL_ENTITY_AVATAR_FIELDS}` +
-    " position { uuid name type role code status" +
+    ` position { uuid name type role code status ${GRAPHQL_ENTITY_AVATAR_FIELDS}` +
     ` organization { uuid shortName longName identificationCode ${GRAPHQL_ENTITY_AVATAR_FIELDS} }` +
     ` location { uuid name ${GRAPHQL_ENTITY_AVATAR_FIELDS} } }`
 
@@ -198,6 +198,7 @@ export default class Person extends Model {
       type
       superuserType
       role
+      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       organization {
         uuid
         shortName
@@ -210,6 +211,7 @@ export default class Person extends Model {
         name
         type
         role
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         person {
           uuid
           name
@@ -231,6 +233,7 @@ export default class Person extends Model {
       position {
         uuid
         name
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         previousPeople {
           startTime
           endTime

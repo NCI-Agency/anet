@@ -142,6 +142,7 @@ export default class Position extends Model {
       name
       type
       role
+      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       person {
         uuid
         name

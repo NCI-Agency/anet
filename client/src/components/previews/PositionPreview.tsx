@@ -23,6 +23,7 @@ const GQL_GET_POSITION = gql`
       status
       code
       description
+      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       emailAddresses {
         network
         address
@@ -44,6 +45,7 @@ const GQL_GET_POSITION = gql`
         uuid
         name
         type
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         person {
           uuid
           name
