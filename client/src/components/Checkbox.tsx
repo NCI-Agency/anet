@@ -2,11 +2,17 @@ import React, { useEffect, useRef } from "react"
 
 interface CheckboxProps {
   checked?: boolean
+  disabled?: boolean
   onChange?: (...args: unknown[]) => unknown
   label?: string
 }
 
-const Checkbox = ({ checked = false, onChange, label = "" }: CheckboxProps) => {
+const Checkbox = ({
+  checked = false,
+  disabled,
+  onChange,
+  label = ""
+}: CheckboxProps) => {
   const inputRef = useRef(null)
   useEffect(() => {
     const input = inputRef.current
@@ -23,6 +29,7 @@ const Checkbox = ({ checked = false, onChange, label = "" }: CheckboxProps) => {
           className="checkbox"
           type="checkbox"
           ref={inputRef}
+          disabled={disabled}
           onChange={onChange}
         />
         {label}
