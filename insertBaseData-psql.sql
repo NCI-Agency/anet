@@ -1409,10 +1409,8 @@ INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "
 -- Add attachments for locations
 INSERT INTO attachments (uuid, "authorUuid", "fileName", "caption", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt")
 	VALUES ('f7cd5b02-ef73-4ee8-814b-c5a7a916685d', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'attachLocation.png', 'Antarctica', 'image/png', lo_import('/var/tmp/assets/default_avatar.png'), 12316, 'We can add attachments to a location', 'NU_rel_EU', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "relatedObjectUuid")
-  SELECT 'f7cd5b02-ef73-4ee8-814b-c5a7a916685d', 'locations', loc.uuid
-  FROM locations loc
-  WHERE loc.name = 'Antarctica';
+INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "relatedObjectUuid") VALUES
+  ('f7cd5b02-ef73-4ee8-814b-c5a7a916685d', 'locations', 'e5b3a4b9-acf7-4c79-8224-f248b9a7215d');
 
 -- Add attachments for organizations
 INSERT INTO attachments (uuid, "authorUuid", "fileName", "caption", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt") VALUES
@@ -1481,10 +1479,8 @@ INSERT INTO "entityAvatars" ("relatedObjectType", "relatedObjectUuid", "attachme
     ('events', 'e850846e-9741-40e8-bc51-4dccc30cf47f', '426bf11a-5124-4468-8b66-edb3ae130bc0', TRUE, 0, 0, 200, 200);
 
 -- Add entity avatars for locations
-INSERT INTO "entityAvatars" ("relatedObjectType", "relatedObjectUuid", "attachmentUuid", "applyCrop", "cropLeft", "cropTop", "cropWidth", "cropHeight")
-    SELECT 'locations', loc.uuid, 'f7cd5b02-ef73-4ee8-814b-c5a7a916685d', TRUE, 0, 0, 200, 200
-    FROM locations loc
-    WHERE loc.name = 'Antarctica';
+INSERT INTO "entityAvatars" ("relatedObjectType", "relatedObjectUuid", "attachmentUuid", "applyCrop", "cropLeft", "cropTop", "cropWidth", "cropHeight") VALUES
+    ('locations', 'e5b3a4b9-acf7-4c79-8224-f248b9a7215d', 'f7cd5b02-ef73-4ee8-814b-c5a7a916685d', TRUE, 0, 0, 200, 200);
 
 -- Add tasks, organizations and people to the event
 INSERT INTO "eventTasks" ("eventUuid", "taskUuid") VALUES

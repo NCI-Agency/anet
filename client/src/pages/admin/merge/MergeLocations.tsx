@@ -479,6 +479,7 @@ const LocationColumn = ({
               )
             }}
             mergeState={mergeState}
+            autoMerge
             dispatchMergeActions={dispatchMergeActions}
           />
           <DictionaryField
