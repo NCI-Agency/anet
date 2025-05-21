@@ -89,6 +89,7 @@ const GQL_GET_ORGANIZATION = gql`
         type
         role
         status
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         location {
           uuid
           name
