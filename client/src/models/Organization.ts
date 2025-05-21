@@ -108,7 +108,7 @@ export default class Organization extends Model {
 
   static autocompleteQuery =
     `uuid shortName longName identificationCode ${GRAPHQL_ENTITY_AVATAR_FIELDS}` +
-    " location { uuid name }"
+    ` location { uuid name ${GRAPHQL_ENTITY_AVATAR_FIELDS} }`
 
   static allFieldsQuery = `
     uuid

@@ -104,7 +104,7 @@ export default class Position extends Model {
     .concat(Model.yupSchema)
 
   static autocompleteQuery =
-    "uuid name code type role status location { uuid name }" +
+    `uuid name code type role status location { uuid name ${GRAPHQL_ENTITY_AVATAR_FIELDS} }` +
     ` organization { uuid shortName longName identificationCode ${GRAPHQL_ENTITY_AVATAR_FIELDS} }` +
     ` person { uuid name rank ${GRAPHQL_ENTITY_AVATAR_FIELDS} }`
 

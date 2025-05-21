@@ -166,7 +166,7 @@ export default class Person extends Model {
     `uuid name rank status user endOfTourDate ${GRAPHQL_ENTITY_AVATAR_FIELDS}` +
     " position { uuid name type role code status" +
     ` organization { uuid shortName longName identificationCode ${GRAPHQL_ENTITY_AVATAR_FIELDS} }` +
-    " location { uuid name } }"
+    ` location { uuid name ${GRAPHQL_ENTITY_AVATAR_FIELDS} } }`
 
   static allFieldsQuery = `
     uuid
