@@ -538,6 +538,7 @@ const PersonColumn = ({
               )
             }}
             mergeState={mergeState}
+            autoMerge
             dispatchMergeActions={dispatchMergeActions}
           />
           <MergeField
