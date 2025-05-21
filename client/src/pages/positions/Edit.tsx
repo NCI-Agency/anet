@@ -47,6 +47,7 @@ const GQL_GET_POSITION = gql`
         name
         type
         role
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         person {
           uuid
           name

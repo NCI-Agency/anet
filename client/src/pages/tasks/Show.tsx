@@ -109,6 +109,7 @@ const GQL_GET_TASK = gql`
         type
         role
         status
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         location {
           uuid
           name

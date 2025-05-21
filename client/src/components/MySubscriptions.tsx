@@ -63,6 +63,7 @@ const GQL_GET_MY_SUBSCRIPTIONS = gql`
           ... on Position {
             type
             name
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
           ... on Report {
             intent
