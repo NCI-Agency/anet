@@ -1,7 +1,6 @@
 package mil.dds.anet;
 
 import graphql.GraphQLContext;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -325,10 +324,10 @@ public class AnetObjectEngine {
 
   public GraphQLContext getContext() {
     if (context == null) {
-      final Map<String, Object> ctx = new HashMap<>();
-      // FIXME: create this per (non-GraphQL) request, and make it batch and cache?
       final BatchingUtils batchingUtils = new BatchingUtils(this, false, false);
-      ctx.put("dataLoaderRegistry", batchingUtils.getDataLoaderRegistry());
+      final Map<String, Object> ctx = Map.of( // -
+          "dataLoaderRegistry", batchingUtils.getDataLoaderRegistry(), // -
+          "principal", Person.SYSTEM_USER);
       context = ThreadLocal.withInitial(() -> GraphQLContext.of(ctx));
     }
     return context.get();
