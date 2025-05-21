@@ -23,6 +23,14 @@ const GQL_GET_ATTACHMENT = gql`
           ... on AuthorizationGroup {
             name
           }
+          ... on Event {
+            name
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          }
+          ... on EventSeries {
+            name
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+          }
           ... on Location {
             name
           }

@@ -36,9 +36,11 @@ const GQL_GET_MY_SUBSCRIPTION_UPDATES = gql`
           }
           ... on Event {
             name
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
           ... on EventSeries {
             name
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
           ... on Location {
             name
@@ -79,9 +81,11 @@ const GQL_GET_MY_SUBSCRIPTION_UPDATES = gql`
             }
             ... on Event {
               name
+              ${GRAPHQL_ENTITY_AVATAR_FIELDS}
             }
             ... on EventSeries {
               name
+              ${GRAPHQL_ENTITY_AVATAR_FIELDS}
             }
             ... on Location {
               name

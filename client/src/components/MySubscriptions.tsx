@@ -39,9 +39,11 @@ const GQL_GET_MY_SUBSCRIPTIONS = gql`
           }
           ... on Event {
             name
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
           ... on EventSeries {
             name
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
           ... on Location {
             name
