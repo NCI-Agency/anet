@@ -26,9 +26,10 @@ public class MartImportedReportsResource {
   public AnetBeanList<MartImportedReport> getMartImportedReports(
       @GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "pageNum", defaultValue = "0") int pageNum,
-      @GraphQLArgument(name = "pageSize", defaultValue = "0") int pageSize) {
+      @GraphQLArgument(name = "pageSize", defaultValue = "0") int pageSize,
+      @GraphQLArgument(name = "success") Boolean success) {
     AuthUtils.assertAdministrator(DaoUtils.getUserFromContext(context));
-    return martImportedReportDao.getAll(pageNum, pageSize);
+    return martImportedReportDao.getAll(pageNum, pageSize, success);
   }
 
 }

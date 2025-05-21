@@ -21,8 +21,8 @@ import { connect } from "react-redux"
 import Settings from "settings"
 
 const GQL_GET_MART_REPORTS_IMPORTED = gql`
-  query ($pageNum: Int!, $pageSize: Int!) {
-    martImportedReports(pageNum: $pageNum, pageSize: $pageSize) {
+  query ($pageNum: Int!, $pageSize: Int!, $success: Boolean) {
+    martImportedReports(pageNum: $pageNum, pageSize: $pageSize, success: $success) {
       pageNum
       pageSize
       totalCount
@@ -48,6 +48,11 @@ const GQL_GET_MART_REPORTS_IMPORTED = gql`
 `
 const PAGESIZES = [10, 25, 50, 100]
 const DEFAULT_PAGESIZE = 25
+const FILTER_OPTIONS = [
+  { value: "", label: "" },
+  { value: "true", label: "Success" },
+  { value: "false", label: "No Success" }
+]
 
 interface MartImportedReportsShowProps {
   pageDispatchers?: PageDispatchersPropType
@@ -59,11 +64,16 @@ const MartImporterShow = ({
   usePageTitle("MART reports imported")
   const [pageNum, setPageNum] = useState(0)
   const [pageSize, setPageSize] = useState(DEFAULT_PAGESIZE)
+  const [successFilter, setSuccessFilter] = useState<string>("")
+
+  const successParam = successFilter === "" ? null : successFilter === "true"
+
   const { loading, error, data } = API.useApiQuery(
     GQL_GET_MART_REPORTS_IMPORTED,
     {
       pageNum,
-      pageSize
+      pageSize,
+      success: successParam
     }
   )
   const { done, result } = useBoilerplate({
@@ -78,7 +88,18 @@ const MartImporterShow = ({
   }
 
   const { totalCount = 0, list: martImportedReports = [] } =
-    data.martImportedReports
+    data.martImportedReports || {}
+
+  const handleSuccessFilterChange = e => {
+    setSuccessFilter(e.target.value)
+    setPageNum(0)
+  }
+
+  const handlePageSizeChange = newPageSize => {
+    const newPageNum = Math.floor((pageNum * pageSize) / newPageSize)
+    setPageNum(newPageNum)
+    setPageSize(newPageSize)
+  }
 
   return (
     <>
@@ -97,19 +118,36 @@ const MartImporterShow = ({
       <Fieldset
         title="MART reports imported"
         action={
-          <div className="float-end">
-            Number per page:
-            <FormSelect
-              defaultValue={pageSize}
-              onChange={e =>
-                changePageSize(parseInt(e.target.value, 10) || DEFAULT_PAGESIZE)}
-            >
-              {PAGESIZES.map(size => (
-                <option key={size} value={size}>
-                  {size}
-                </option>
-              ))}
-            </FormSelect>
+          <div className="float-end d-flex align-items-center gap-3">
+            <div>
+              Filter by success:
+              <FormSelect
+                value={successFilter}
+                onChange={handleSuccessFilterChange}
+              >
+                {FILTER_OPTIONS.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </FormSelect>
+            </div>
+            <div>
+              Number per page:
+              <FormSelect
+                defaultValue={pageSize}
+                onChange={e =>
+                  handlePageSizeChange(
+                    parseInt(e.target.value, 10) || DEFAULT_PAGESIZE
+                  )}
+              >
+                {PAGESIZES.map(size => (
+                  <option key={size} value={size}>
+                    {size}
+                  </option>
+                ))}
+              </FormSelect>
+            </div>
           </div>
         }
       >
@@ -137,56 +175,54 @@ const MartImporterShow = ({
                 </tr>
               </thead>
               <tbody>
-                {martImportedReports.map((martImportedReport, index) => {
-                  return (
-                    <tr key={index}>
-                      <td>{martImportedReport.sequence}</td>
-                      <td>
-                        {moment(martImportedReport.submittedAt).format(
-                          Settings.dateFormats.forms.displayLong.withTime
-                        )}
-                      </td>
-                      <td>
-                        {moment(martImportedReport.receivedAt).format(
-                          Settings.dateFormats.forms.displayLong.withTime
-                        )}
-                      </td>
-                      <td>
-                        <Icon
-                          icon={
-                            martImportedReport.success
-                              ? IconNames.TICK
-                              : IconNames.CROSS
-                          }
-                          className={
-                            martImportedReport.success
-                              ? "text-success"
-                              : "text-danger"
-                          }
-                        />
-                      </td>
-                      <td>
-                        <LinkTo
-                          modelType="Person"
-                          model={martImportedReport.person}
-                        />
-                      </td>
-                      <td>
-                        <LinkTo
-                          modelType="Report"
-                          model={martImportedReport.report}
-                        />
-                      </td>
-                      <td>
-                        <div
-                          dangerouslySetInnerHTML={{
-                            __html: martImportedReport.errors
-                          }}
-                        />
-                      </td>
-                    </tr>
-                  )
-                })}
+                {martImportedReports.map((martImportedReport, index) => (
+                  <tr key={index}>
+                    <td>{martImportedReport.sequence}</td>
+                    <td>
+                      {moment(martImportedReport.submittedAt).format(
+                        Settings.dateFormats.forms.displayLong.withTime
+                      )}
+                    </td>
+                    <td>
+                      {moment(martImportedReport.receivedAt).format(
+                        Settings.dateFormats.forms.displayLong.withTime
+                      )}
+                    </td>
+                    <td>
+                      <Icon
+                        icon={
+                          martImportedReport.success
+                            ? IconNames.TICK
+                            : IconNames.CROSS
+                        }
+                        className={
+                          martImportedReport.success
+                            ? "text-success"
+                            : "text-danger"
+                        }
+                      />
+                    </td>
+                    <td>
+                      <LinkTo
+                        modelType="Person"
+                        model={martImportedReport.person}
+                      />
+                    </td>
+                    <td>
+                      <LinkTo
+                        modelType="Report"
+                        model={martImportedReport.report}
+                      />
+                    </td>
+                    <td>
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: martImportedReport.errors
+                        }}
+                      />
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </Table>
           </UltimatePaginationTopDown>
@@ -194,12 +230,6 @@ const MartImporterShow = ({
       </Fieldset>
     </>
   )
-
-  function changePageSize(newPageSize) {
-    const newPageNum = Math.floor((pageNum * pageSize) / newPageSize)
-    setPageNum(newPageNum)
-    setPageSize(newPageSize)
-  }
 }
 
 export default connect(null, mapPageDispatchersToProps)(MartImporterShow)

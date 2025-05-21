@@ -21,7 +21,7 @@ public class MartImportedReportDao extends AbstractDao {
 
   @Transactional
   public List<MartImportedReport> getAll() {
-    return getAll(0, 0).getList();
+    return getAll(0, 0, null).getList();
   }
 
   @Transactional
@@ -39,18 +39,24 @@ public class MartImportedReportDao extends AbstractDao {
   }
 
   @Transactional
-  public AnetBeanList<MartImportedReport> getAll(int pageNum, int pageSize) {
+  public AnetBeanList<MartImportedReport> getAll(int pageNum, int pageSize, Boolean success) {
     final Handle handle = getDbHandle();
     try {
       final StringBuilder sql =
           new StringBuilder("/* MartImportedReportCheck */ SELECT * FROM \"martImportedReports\"");
       sql.insert(0, "SELECT *, COUNT(*) OVER() AS \"totalCount\" FROM (");
+      if (success != null) {
+        sql.append(" WHERE success = :success");
+      }
       sql.append(") AS results");
       sql.append(" ORDER BY sequence DESC, \"receivedAt\" DESC");
       if (pageSize > 0) {
         sql.append(" OFFSET :offset LIMIT :limit");
       }
       final Query query = handle.createQuery(sql);
+      if (success != null) {
+        query.bind("success", success);
+      }
       if (pageSize > 0) {
         query.bind("offset", pageSize * pageNum).bind("limit", pageSize);
       }
