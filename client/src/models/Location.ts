@@ -217,11 +217,13 @@ export default class Location extends Model {
       uuid
       name
       type
+      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
     }
     childrenLocations {
       uuid
       name
       type
+      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
     }
     customFields
     ${GRAPHQL_NOTES_FIELDS}

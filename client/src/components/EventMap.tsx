@@ -1,7 +1,6 @@
 import { gql } from "@apollo/client"
 import API from "api"
 import EventsMapWidget from "components/aggregations/EventsMapWidget"
-import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -27,7 +26,6 @@ const GQL_GET_EVENT_LIST = gql`
           name
           lat
           lng
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
       }
     }
