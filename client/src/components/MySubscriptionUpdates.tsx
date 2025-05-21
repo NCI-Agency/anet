@@ -44,6 +44,7 @@ const GQL_GET_MY_SUBSCRIPTION_UPDATES = gql`
           }
           ... on Location {
             name
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
           ... on Organization {
             shortName
@@ -89,6 +90,7 @@ const GQL_GET_MY_SUBSCRIPTION_UPDATES = gql`
             }
             ... on Location {
               name
+              ${GRAPHQL_ENTITY_AVATAR_FIELDS}
             }
             ... on Organization {
               shortName

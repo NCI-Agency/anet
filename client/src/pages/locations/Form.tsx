@@ -7,6 +7,7 @@ import { LocationOverlayRow } from "components/advancedSelectWidget/AdvancedSele
 import AppContext from "components/AppContext"
 import ApprovalsDefinition from "components/approvals/ApprovalsDefinition"
 import UploadAttachment from "components/Attachment/UploadAttachment"
+import EntityAvatarComponent from "components/avatar/EntityAvatarComponent"
 import {
   CustomFieldsContainer,
   customFieldsJSONString
@@ -29,7 +30,7 @@ import _escape from "lodash/escape"
 import _isEqual from "lodash/isEqual"
 import { Location, Position } from "models"
 import React, { useContext, useEffect, useState } from "react"
-import { Button, FormSelect } from "react-bootstrap"
+import { Button, Col, FormSelect, Row } from "react-bootstrap"
 import { useNavigate } from "react-router-dom"
 import LOCATIONS_ICON from "resources/locations.png"
 import Settings from "settings"
@@ -117,6 +118,9 @@ const LocationForm = ({
   const attachmentEditEnabled =
     attachmentsEnabled &&
     (!Settings.fields.attachment.restrictToAdmins || currentUser.isAdmin())
+  const avatarMimeTypes = Settings.fields.attachment.fileTypes
+    .filter(fileType => fileType.avatar)
+    .map(fileType => fileType.mimeType)
   const statusButtons = [
     {
       id: "statusActiveButton",
@@ -191,6 +195,9 @@ const LocationForm = ({
             lng: parseFloat(values.lng)
           })
         }
+        const imageAttachments = attachmentList?.filter(a =>
+          avatarMimeTypes.includes(a.mimeType)
+        )
         const action = (
           <>
             <Button
@@ -218,81 +225,99 @@ const LocationForm = ({
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
               <Fieldset>
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.location.name}
-                  name="name"
-                  component={FieldHelper.InputField}
-                  disabled={!canEditName}
-                  onChange={event => {
-                    setFieldValue("name", event.target.value)
-                    setLocationName(event.target.value)
-                  }}
-                  extraColElem={
-                    showSimilarLocationsMessage ? (
-                      <>
-                        <Button
-                          onClick={() => setShowSimilarLocations(true)}
-                          variant="outline-secondary"
-                        >
-                          <Icon
-                            icon={IconNames.WARNING_SIGN}
-                            intent={Intent.WARNING}
-                            size={IconSize.STANDARD}
-                            style={{ margin: "0 6px" }}
-                          />
-                          Possible Duplicates
-                        </Button>
-                      </>
-                    ) : undefined
-                  }
-                />
+                <Row>
+                  {edit && (
+                    <Col sm={12} md={12} lg={4} xl={4} className="text-center">
+                      <EntityAvatarComponent
+                        initialAvatar={initialValues.entityAvatar}
+                        relatedObjectType={Location.relatedObjectType}
+                        relatedObjectUuid={initialValues.uuid}
+                        relatedObjectName={initialValues.name}
+                        editMode={attachmentEditEnabled}
+                        imageAttachments={imageAttachments}
+                      />
+                    </Col>
+                  )}
+                  <Col sm={12} md={12} lg={8} xl={8}>
+                    <DictionaryField
+                      wrappedComponent={Field}
+                      dictProps={Settings.fields.location.name}
+                      name="name"
+                      component={FieldHelper.InputField}
+                      disabled={!canEditName}
+                      onChange={event => {
+                        setFieldValue("name", event.target.value)
+                        setLocationName(event.target.value)
+                      }}
+                      extraColElem={
+                        showSimilarLocationsMessage ? (
+                          <>
+                            <Button
+                              onClick={() => setShowSimilarLocations(true)}
+                              variant="outline-secondary"
+                            >
+                              <Icon
+                                icon={IconNames.WARNING_SIGN}
+                                intent={Intent.WARNING}
+                                size={IconSize.STANDARD}
+                                style={{ margin: "0 6px" }}
+                              />
+                              Possible Duplicates
+                            </Button>
+                          </>
+                        ) : undefined
+                      }
+                    />
 
-                <DictionaryField
-                  wrappedComponent={FastField}
-                  dictProps={Settings.fields.location.type}
-                  name="type"
-                  component={FieldHelper.SpecialField}
-                  disabled={!canEditName}
-                  onChange={event => {
-                    // validation will be done by setFieldValue
-                    setFieldValue("type", event.target.value, true)
-                  }}
-                  widget={
-                    <FormSelect className="location-type-form-group form-control">
-                      <option value="">
-                        {!canEditName
-                          ? Location.humanNameOfType(values.type)
-                          : "Please select a location type"}
-                      </option>
-                      {getDropdownOptionsForUser(currentUser).map(type => (
-                        <option key={type} value={type}>
-                          {Location.humanNameOfType(type)}
-                        </option>
-                      ))}
-                    </FormSelect>
-                  }
-                />
+                    <DictionaryField
+                      wrappedComponent={FastField}
+                      dictProps={Settings.fields.location.type}
+                      name="type"
+                      component={FieldHelper.SpecialField}
+                      disabled={!canEditName}
+                      onChange={event => {
+                        // validation will be done by setFieldValue
+                        setFieldValue("type", event.target.value, true)
+                      }}
+                      widget={
+                        <FormSelect className="location-type-form-group form-control">
+                          <option value="">
+                            {!canEditName
+                              ? Location.humanNameOfType(values.type)
+                              : "Please select a location type"}
+                          </option>
+                          {getDropdownOptionsForUser(currentUser).map(type => (
+                            <option key={type} value={type}>
+                              {Location.humanNameOfType(type)}
+                            </option>
+                          ))}
+                        </FormSelect>
+                      }
+                    />
 
-                {values.type !== Location.LOCATION_TYPES.VIRTUAL_LOCATION && (
-                  <GeoLocation
-                    editable
-                    coordinates={coordinates}
-                    isSubmitting={isSubmitting}
-                    setFieldValue={setFieldValue}
-                    setFieldTouched={setFieldTouched}
-                  />
-                )}
+                    {values.type !==
+                      Location.LOCATION_TYPES.VIRTUAL_LOCATION && (
+                      <GeoLocation
+                        editable
+                        coordinates={coordinates}
+                        isSubmitting={isSubmitting}
+                        setFieldValue={setFieldValue}
+                        setFieldTouched={setFieldTouched}
+                      />
+                    )}
 
-                <DictionaryField
-                  wrappedComponent={FastField}
-                  dictProps={Settings.fields.location.status}
-                  name="status"
-                  component={FieldHelper.RadioButtonToggleGroupField}
-                  buttons={statusButtons}
-                  onChange={value => setFieldValue("status", value)}
-                />
-
+                    <DictionaryField
+                      wrappedComponent={FastField}
+                      dictProps={Settings.fields.location.status}
+                      name="status"
+                      component={FieldHelper.RadioButtonToggleGroupField}
+                      buttons={statusButtons}
+                      onChange={value => setFieldValue("status", value)}
+                    />
+                  </Col>
+                </Row>
+              </Fieldset>
+              <Fieldset title="Additional information">
                 {values.type === Location.LOCATION_TYPES.COUNTRY && (
                   <>
                     <DictionaryField

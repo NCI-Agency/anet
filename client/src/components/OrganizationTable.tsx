@@ -34,6 +34,7 @@ const GQL_GET_ORGANIZATION_LIST = gql`
         location {
           uuid
           name
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
       }
     }

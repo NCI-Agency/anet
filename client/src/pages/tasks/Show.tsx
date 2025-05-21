@@ -112,6 +112,7 @@ const GQL_GET_TASK = gql`
         location {
           uuid
           name
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         organization {
           uuid

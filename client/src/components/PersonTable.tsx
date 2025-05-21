@@ -41,6 +41,7 @@ const GQL_GET_PERSON_LIST = gql`
           location {
             uuid
             name
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
           organization {
             uuid

@@ -6,6 +6,7 @@ import API from "api"
 import { LocationOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import ApprovalSteps from "components/approvals/ApprovalSteps"
+import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import { customFieldsJSONString } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
 import BaseGeoLocation from "components/GeoLocation"
@@ -160,6 +161,26 @@ const MergeLocations = ({ pageDispatchers }: MergeLocationsProps) => {
           )}
           {areAllSet(location1, location2, mergedLocation) && (
             <fieldset>
+              <MergeField
+                label="Avatar"
+                value={
+                  <EntityAvatarDisplay
+                    avatar={mergedLocation.entityAvatar}
+                    defaultAvatar={Location.relatedObjectType}
+                    height={128}
+                    width={128}
+                    style={{
+                      maxWidth: "100%",
+                      display: "block",
+                      margin: "0 auto"
+                    }}
+                  />
+                }
+                align={ALIGN_OPTIONS.CENTER}
+                fieldName="entityAvatar"
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
               <DictionaryField
                 wrappedComponent={MergeField}
                 dictProps={Settings.fields.location.name}
@@ -435,6 +456,32 @@ const LocationColumn = ({
       </ColTitle>
       {areAllSet(location) && (
         <fieldset>
+          <MergeField
+            label="Avatar"
+            fieldName="entityAvatar"
+            value={
+              <EntityAvatarDisplay
+                avatar={location.entityAvatar}
+                defaultAvatar={Location.relatedObjectType}
+                height={128}
+                width={128}
+                style={{
+                  maxWidth: "100%",
+                  display: "block",
+                  margin: "0 auto"
+                }}
+              />
+            }
+            align={align}
+            action={() => {
+              dispatchMergeActions(
+                setAMergedField("entityAvatar", location.entityAvatar, align)
+              )
+            }}
+            mergeState={mergeState}
+            autoMerge
+            dispatchMergeActions={dispatchMergeActions}
+          />
           <DictionaryField
             wrappedComponent={MergeField}
             dictProps={Settings.fields.location.name}

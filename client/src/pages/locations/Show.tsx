@@ -4,6 +4,7 @@ import API from "api"
 import AppContext from "components/AppContext"
 import Approvals from "components/approvals/Approvals"
 import AttachmentsDetailView from "components/Attachment/AttachmentsDetailView"
+import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import DictionaryField from "components/DictionaryField"
 import EventCollection from "components/EventCollection"
@@ -35,6 +36,7 @@ import _escape from "lodash/escape"
 import _isEmpty from "lodash/isEmpty"
 import { Attachment, Location } from "models"
 import React, { useContext, useEffect, useState } from "react"
+import { Col, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { Link, useLocation, useParams } from "react-router-dom"
 import Settings from "settings"
@@ -90,6 +92,9 @@ const LocationShow = ({ pageDispatchers }: LocationShowProps) => {
   const isAdmin = currentUser?.isAdmin()
   const canEdit = currentUser?.isSuperuser()
   const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
+  const avatar =
+    attachments?.some(a => a.uuid === location?.entityAvatar?.attachmentUuid) &&
+    location.entityAvatar
 
   return (
     <Formik enableReinitialize initialValues={location}>
@@ -172,43 +177,57 @@ const LocationShow = ({ pageDispatchers }: LocationShowProps) => {
                 action={action}
               />
               <Fieldset>
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.location.name}
-                  name="name"
-                  component={FieldHelper.ReadonlyField}
-                />
+                <Row>
+                  <Col sm={12} md={12} lg={4} xl={3} className="text-center">
+                    <EntityAvatarDisplay
+                      avatar={avatar}
+                      defaultAvatar={Location.relatedObjectType}
+                    />
+                  </Col>
+                  <Col
+                    lg={8}
+                    xl={9}
+                    className="d-flex flex-column justify-content-center"
+                  >
+                    <DictionaryField
+                      wrappedComponent={Field}
+                      dictProps={Settings.fields.location.name}
+                      name="name"
+                      component={FieldHelper.ReadonlyField}
+                    />
 
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.location.type}
-                  name="type"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={Location.humanNameOfType(location.type)}
-                />
+                    <DictionaryField
+                      wrappedComponent={Field}
+                      dictProps={Settings.fields.location.type}
+                      name="type"
+                      component={FieldHelper.ReadonlyField}
+                      humanValue={Location.humanNameOfType(location.type)}
+                    />
 
-                {Location.hasCoordinates(location) && (
-                  <GeoLocation
-                    coordinates={{
-                      lat: location.lat,
-                      lng: location.lng,
-                      displayedCoordinate: convertLatLngToMGRS(
-                        location.lat,
-                        location.lng
-                      )
-                    }}
-                    displayType={GEO_LOCATION_DISPLAY_TYPE.FORM_FIELD}
-                  />
-                )}
-
-                <DictionaryField
-                  wrappedComponent={Field}
-                  dictProps={Settings.fields.location.status}
-                  name="status"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={Location.humanNameOfStatus}
-                />
-
+                    {Location.hasCoordinates(location) && (
+                      <GeoLocation
+                        coordinates={{
+                          lat: location.lat,
+                          lng: location.lng,
+                          displayedCoordinate: convertLatLngToMGRS(
+                            location.lat,
+                            location.lng
+                          )
+                        }}
+                        displayType={GEO_LOCATION_DISPLAY_TYPE.FORM_FIELD}
+                      />
+                    )}
+                    <DictionaryField
+                      wrappedComponent={Field}
+                      dictProps={Settings.fields.location.status}
+                      name="status"
+                      component={FieldHelper.ReadonlyField}
+                      humanValue={Location.humanNameOfStatus}
+                    />
+                  </Col>
+                </Row>
+              </Fieldset>
+              <Fieldset id="info" title="Additional Information">
                 {location.type === Location.LOCATION_TYPES.COUNTRY && (
                   <>
                     <DictionaryField
