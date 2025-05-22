@@ -2,6 +2,7 @@ package mil.dds.anet.database;
 
 import static org.jdbi.v3.core.statement.EmptyHandling.NULL_KEYWORD;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import mil.dds.anet.beans.lists.AnetBeanList;
@@ -41,7 +42,7 @@ public class MartImportedReportDao extends AbstractDao {
   }
 
   @Transactional
-  public AnetBeanList<MartImportedReport> getAll(int pageNum, int pageSize, Boolean success,
+  public AnetBeanList<MartImportedReport> getAll(int pageNum, int pageSize, List<String> states,
       String sortBy, String sortOrder) {
     final Handle handle = getDbHandle();
     try {
@@ -52,8 +53,26 @@ public class MartImportedReportDao extends AbstractDao {
       final StringBuilder sql = new StringBuilder();
       sql.append("/* MartImportedReportCheck */ SELECT *, COUNT(*) OVER() AS \"totalCount\" FROM (");
       sql.append("  SELECT * FROM \"martImportedReports\"");
-      if (success != null) {
-        sql.append(" WHERE success = :success");
+      if (states != null && !states.isEmpty()) {
+        List<String> conditions = new ArrayList<>();
+        for (String state : states) {
+          switch (state) {
+            case "success":
+              conditions.add("success = TRUE");
+              break;
+            case "warning":
+              conditions.add("success = FALSE AND errors LIKE 'While importing%'");
+              break;
+            case "failure":
+              conditions.add("success = FALSE AND errors NOT LIKE 'While importing%'");
+              break;
+            default:
+              break;
+          }
+        }
+        if (!conditions.isEmpty()) {
+          sql.append(" WHERE (").append(String.join(" OR ", conditions)).append(")");
+        }
       }
       sql.append(") AS results");
       sql.append(" ORDER BY ").append(quotedSortField).append(" ").append(order);
@@ -61,9 +80,6 @@ public class MartImportedReportDao extends AbstractDao {
         sql.append(" OFFSET :offset LIMIT :limit");
       }
       final Query query = handle.createQuery(sql);
-      if (success != null) {
-        query.bind("success", success);
-      }
       if (pageSize > 0) {
         query.bind("offset", pageSize * pageNum).bind("limit", pageSize);
       }

@@ -21,8 +21,8 @@ import { connect } from "react-redux"
 import Settings from "settings"
 
 const GQL_GET_MART_REPORTS_IMPORTED = gql`
-  query ($pageNum: Int!, $pageSize: Int!, $success: Boolean, $sortBy: String, $sortOrder: String) {
-    martImportedReports(pageNum: $pageNum, pageSize: $pageSize, success: $success, sortBy: $sortBy, sortOrder: $sortOrder) {
+  query ($pageNum: Int!, $pageSize: Int!, $states: [String], $sortBy: String, $sortOrder: String) {
+    martImportedReports(pageNum: $pageNum, pageSize: $pageSize, states: $states, sortBy: $sortBy, sortOrder: $sortOrder) {
       pageNum
       pageSize
       totalCount
@@ -50,9 +50,21 @@ const PAGESIZES = [10, 25, 50, 100]
 const DEFAULT_PAGESIZE = 25
 const FILTER_OPTIONS = [
   { value: "", label: "" },
-  { value: "true", label: "Success" },
-  { value: "false", label: "No Success" }
+  { value: "success", label: "Success" },
+  { value: "warning", label: "Warning" },
+  { value: "failure", label: "Failure" },
+  { value: "success_warning", label: "Success and Warning" },
+  { value: "warning_failure", label: "Warning and Failure" }
 ]
+
+const filterToStates = {
+  "": null,
+  success: ["success"],
+  warning: ["warning"],
+  failure: ["failure"],
+  success_warning: ["success", "warning"],
+  warning_failure: ["warning", "failure"]
+}
 
 interface MartImportedReportsShowProps {
   pageDispatchers?: PageDispatchersPropType
@@ -64,18 +76,17 @@ const MartImporterShow = ({
   usePageTitle("MART reports imported")
   const [pageNum, setPageNum] = useState(0)
   const [pageSize, setPageSize] = useState(DEFAULT_PAGESIZE)
-  const [successFilter, setSuccessFilter] = useState<string>("")
   const [sortBy, setSortBy] = useState("sequence")
   const [sortOrder, setSortOrder] = useState("desc")
-
-  const successParam = successFilter === "" ? null : successFilter === "true"
+  const [stateFilter, setStateFilter] = useState("")
+  const states = filterToStates[stateFilter]
 
   const { loading, error, data } = API.useApiQuery(
     GQL_GET_MART_REPORTS_IMPORTED,
     {
       pageNum,
       pageSize,
-      success: successParam,
+      states,
       sortBy,
       sortOrder
     }
@@ -94,11 +105,6 @@ const MartImporterShow = ({
   const { totalCount = 0, list: martImportedReports = [] } =
     data.martImportedReports || {}
 
-  const handleSuccessFilterChange = e => {
-    setSuccessFilter(e.target.value)
-    setPageNum(0)
-  }
-
   const handlePageSizeChange = newPageSize => {
     const newPageNum = Math.floor((pageNum * pageSize) / newPageSize)
     setPageNum(newPageNum)
@@ -113,6 +119,23 @@ const MartImporterShow = ({
   const handleSortOrderChange = e => {
     setSortOrder(e.target.value)
     setPageNum(0)
+  }
+
+  const handleStateFilterChange = e => {
+    setStateFilter(e.target.value)
+    setPageNum(0)
+  }
+
+  const getState = report => {
+    if (report.success) {
+      return "success"
+    } else if (report.errors && report.errors.startsWith("While importing")) {
+      return "warning"
+    } else if (report.errors && !report.errors.startsWith("While importing")) {
+      return "failure"
+    } else {
+      return "unknown"
+    }
   }
 
   return (
@@ -134,10 +157,10 @@ const MartImporterShow = ({
         action={
           <div className="float-end d-flex align-items-center gap-3">
             <div>
-              Filter by success:
+              Filter by state:
               <FormSelect
-                value={successFilter}
-                onChange={handleSuccessFilterChange}
+                value={stateFilter}
+                onChange={handleStateFilterChange}
               >
                 {FILTER_OPTIONS.map(option => (
                   <option key={option.value} value={option.value}>
@@ -197,7 +220,7 @@ const MartImporterShow = ({
                   <th>Sequence</th>
                   <th>Submitted Date</th>
                   <th>Received Date</th>
-                  <th>Success?</th>
+                  <th>State</th>
                   <th>Author</th>
                   <th>Report</th>
                   <th>Errors</th>
@@ -218,18 +241,33 @@ const MartImporterShow = ({
                       )}
                     </td>
                     <td>
-                      <Icon
-                        icon={
-                          martImportedReport.success
-                            ? IconNames.TICK
-                            : IconNames.CROSS
+                      {(() => {
+                        const state = getState(martImportedReport)
+                        if (state === "success") {
+                          return (
+                            <Icon
+                              icon={IconNames.TICK}
+                              className="text-success"
+                            />
+                          )
+                        } else if (state === "warning") {
+                          return (
+                            <Icon
+                              icon={IconNames.WARNING_SIGN}
+                              className="text-warning"
+                            />
+                          )
+                        } else if (state === "failure") {
+                          return (
+                            <Icon
+                              icon={IconNames.CROSS}
+                              className="text-danger"
+                            />
+                          )
+                        } else {
+                          return <span>Unknown</span>
                         }
-                        className={
-                          martImportedReport.success
-                            ? "text-success"
-                            : "text-danger"
-                        }
-                      />
+                      })()}
                     </td>
                     <td>
                       <LinkTo
