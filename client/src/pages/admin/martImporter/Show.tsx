@@ -21,8 +21,8 @@ import { connect } from "react-redux"
 import Settings from "settings"
 
 const GQL_GET_MART_REPORTS_IMPORTED = gql`
-  query ($pageNum: Int!, $pageSize: Int!, $states: [String], $sortBy: String, $sortOrder: String) {
-    martImportedReports(pageNum: $pageNum, pageSize: $pageSize, states: $states, sortBy: $sortBy, sortOrder: $sortOrder) {
+  query ($pageNum: Int!, $pageSize: Int!, $states: [String], $sortBy: String, $sortOrder: String, $authorUuid: String) {
+    martImportedReports(pageNum: $pageNum, pageSize: $pageSize, states: $states, sortBy: $sortBy, sortOrder: $sortOrder, authorUuid: $authorUuid) {
       pageNum
       pageSize
       totalCount
@@ -46,10 +46,20 @@ const GQL_GET_MART_REPORTS_IMPORTED = gql`
     }
   }
 `
+
+const GQL_GET_UNIQUE_MART_REPORT_AUTHORS = gql`
+  query {
+    uniqueMartReportAuthors {
+      uuid
+      name
+    }
+  }
+`
+
 const PAGESIZES = [10, 25, 50, 100]
 const DEFAULT_PAGESIZE = 25
 const FILTER_OPTIONS = [
-  { value: "", label: "" },
+  { value: "", label: "All states" },
   { value: "success", label: "Success" },
   { value: "warning", label: "Warning" },
   { value: "failure", label: "Failure" },
@@ -79,7 +89,14 @@ const MartImporterShow = ({
   const [sortBy, setSortBy] = useState("sequence")
   const [sortOrder, setSortOrder] = useState("desc")
   const [stateFilter, setStateFilter] = useState("")
+  const [authorUuid, setAuthorUuid] = useState("")
   const states = filterToStates[stateFilter]
+
+  const { data: authorsData } = API.useApiQuery(
+    GQL_GET_UNIQUE_MART_REPORT_AUTHORS,
+    {}
+  )
+  const authors = authorsData?.uniqueMartReportAuthors || []
 
   const { loading, error, data } = API.useApiQuery(
     GQL_GET_MART_REPORTS_IMPORTED,
@@ -88,7 +105,8 @@ const MartImporterShow = ({
       pageSize,
       states,
       sortBy,
-      sortOrder
+      sortOrder,
+      authorUuid
     }
   )
   const { done, result } = useBoilerplate({
@@ -123,6 +141,11 @@ const MartImporterShow = ({
 
   const handleStateFilterChange = e => {
     setStateFilter(e.target.value)
+    setPageNum(0)
+  }
+
+  const handleAuthorChange = e => {
+    setAuthorUuid(e.target.value)
     setPageNum(0)
   }
 
@@ -169,6 +192,19 @@ const MartImporterShow = ({
                 ))}
               </FormSelect>
             </div>
+            {authors.length > 0 && (
+              <div>
+                Filter by author:
+                <FormSelect value={authorUuid} onChange={handleAuthorChange}>
+                  <option value="">All Authors</option>
+                  {authors.map(author => (
+                    <option key={author.uuid} value={author.uuid}>
+                      {author.name}
+                    </option>
+                  ))}
+                </FormSelect>
+              </div>
+            )}
             <div>
               Sort by:
               <FormSelect value={sortBy} onChange={handleSortByChange}>

@@ -5,17 +5,23 @@ import static org.jdbi.v3.core.statement.EmptyHandling.NULL_KEYWORD;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.mart.MartImportedReport;
+import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.mappers.MartImportedReportMapper;
 import mil.dds.anet.utils.DaoUtils;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.statement.Query;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class MartImportedReportDao extends AbstractDao {
+  @Autowired
+  private PersonDao personDao;
+
   static List<String> ALLOWED_SORT_FIELDS = Arrays.asList("sequence", "submittedAt", "receivedAt");
 
   public MartImportedReportDao(DatabaseHandler databaseHandler) {
@@ -24,7 +30,7 @@ public class MartImportedReportDao extends AbstractDao {
 
   @Transactional
   public List<MartImportedReport> getAll() {
-    return getAll(0, 0, null, null, null).getList();
+    return getAll(0, 0, null, null, null, null).getList();
   }
 
   @Transactional
@@ -43,7 +49,7 @@ public class MartImportedReportDao extends AbstractDao {
 
   @Transactional
   public AnetBeanList<MartImportedReport> getAll(int pageNum, int pageSize, List<String> states,
-      String sortBy, String sortOrder) {
+      String sortBy, String sortOrder, String authorUuid) {
     final Handle handle = getDbHandle();
     try {
       String sortField = ALLOWED_SORT_FIELDS.contains(sortBy) ? sortBy : "sequence";
@@ -51,39 +57,71 @@ public class MartImportedReportDao extends AbstractDao {
       String quotedSortField = "\"" + sortField + "\"";
 
       final StringBuilder sql = new StringBuilder();
-      sql.append("/* MartImportedReportCheck */ SELECT *, COUNT(*) OVER() AS \"totalCount\" FROM (");
+      sql.append(
+          "/* MartImportedReportCheck */ SELECT *, COUNT(*) OVER() AS \"totalCount\" FROM (");
       sql.append("  SELECT * FROM \"martImportedReports\"");
+      List<String> stateConditions = new ArrayList<>();
       if (states != null && !states.isEmpty()) {
-        List<String> conditions = new ArrayList<>();
         for (String state : states) {
           switch (state) {
             case "success":
-              conditions.add("success = TRUE");
+              stateConditions.add("success = TRUE");
               break;
             case "warning":
-              conditions.add("success = FALSE AND errors LIKE 'While importing%'");
+              stateConditions.add("success = FALSE AND errors LIKE 'While importing%'");
               break;
             case "failure":
-              conditions.add("success = FALSE AND errors NOT LIKE 'While importing%'");
+              stateConditions.add("success = FALSE AND errors NOT LIKE 'While importing%'");
               break;
             default:
               break;
           }
         }
-        if (!conditions.isEmpty()) {
-          sql.append(" WHERE (").append(String.join(" OR ", conditions)).append(")");
-        }
       }
+
+      String authorCondition = null;
+      if (authorUuid != null && !authorUuid.isEmpty()) {
+        authorCondition = "\"personUuid\" = :authorUuid";
+      }
+
+      List<String> allConditions = new ArrayList<>();
+      if (!stateConditions.isEmpty()) {
+        allConditions.add("(" + String.join(" OR ", stateConditions) + ")");
+      }
+      if (authorCondition != null) {
+        allConditions.add(authorCondition);
+      }
+      if (!allConditions.isEmpty()) {
+        sql.append(" WHERE ").append(String.join(" AND ", allConditions));
+      }
+
       sql.append(") AS results");
       sql.append(" ORDER BY ").append(quotedSortField).append(" ").append(order);
       if (pageSize > 0) {
         sql.append(" OFFSET :offset LIMIT :limit");
       }
-      final Query query = handle.createQuery(sql);
+      final Query query = handle.createQuery(sql.toString());
+      if (authorUuid != null && !authorUuid.isEmpty()) {
+        query.bind("authorUuid", authorUuid);
+      }
       if (pageSize > 0) {
         query.bind("offset", pageSize * pageNum).bind("limit", pageSize);
       }
       return new AnetBeanList<>(query, pageNum, pageSize, new MartImportedReportMapper());
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
+  @Transactional
+  public List<Person> getUniqueMartReportAuthors() {
+    final Handle handle = getDbHandle();
+    try {
+      String sql =
+          "SELECT DISTINCT \"personUuid\" FROM \"martImportedReports\" WHERE \"personUuid\" IS NOT NULL";
+      List<String> personUuids = handle.createQuery(sql).mapTo(String.class).list();
+
+      return personDao.getByIds(personUuids);
     } finally {
       closeDbHandle(handle);
     }
