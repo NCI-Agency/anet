@@ -27,9 +27,11 @@ public class MartImportedReportsResource {
       @GraphQLRootContext GraphQLContext context,
       @GraphQLArgument(name = "pageNum", defaultValue = "0") int pageNum,
       @GraphQLArgument(name = "pageSize", defaultValue = "0") int pageSize,
-      @GraphQLArgument(name = "success") Boolean success) {
+      @GraphQLArgument(name = "success") Boolean success,
+      @GraphQLArgument(name = "sortBy", defaultValue = "sequence") String sortBy,
+      @GraphQLArgument(name = "sortOrder", defaultValue = "desc") String sortOrder) {
     AuthUtils.assertAdministrator(DaoUtils.getUserFromContext(context));
-    return martImportedReportDao.getAll(pageNum, pageSize, success);
+    return martImportedReportDao.getAll(pageNum, pageSize, success, sortBy, sortOrder);
   }
 
 }

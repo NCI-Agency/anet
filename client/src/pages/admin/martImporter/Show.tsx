@@ -21,8 +21,8 @@ import { connect } from "react-redux"
 import Settings from "settings"
 
 const GQL_GET_MART_REPORTS_IMPORTED = gql`
-  query ($pageNum: Int!, $pageSize: Int!, $success: Boolean) {
-    martImportedReports(pageNum: $pageNum, pageSize: $pageSize, success: $success) {
+  query ($pageNum: Int!, $pageSize: Int!, $success: Boolean, $sortBy: String, $sortOrder: String) {
+    martImportedReports(pageNum: $pageNum, pageSize: $pageSize, success: $success, sortBy: $sortBy, sortOrder: $sortOrder) {
       pageNum
       pageSize
       totalCount
@@ -65,6 +65,8 @@ const MartImporterShow = ({
   const [pageNum, setPageNum] = useState(0)
   const [pageSize, setPageSize] = useState(DEFAULT_PAGESIZE)
   const [successFilter, setSuccessFilter] = useState<string>("")
+  const [sortBy, setSortBy] = useState("sequence")
+  const [sortOrder, setSortOrder] = useState("desc")
 
   const successParam = successFilter === "" ? null : successFilter === "true"
 
@@ -73,7 +75,9 @@ const MartImporterShow = ({
     {
       pageNum,
       pageSize,
-      success: successParam
+      success: successParam,
+      sortBy,
+      sortOrder
     }
   )
   const { done, result } = useBoilerplate({
@@ -99,6 +103,16 @@ const MartImporterShow = ({
     const newPageNum = Math.floor((pageNum * pageSize) / newPageSize)
     setPageNum(newPageNum)
     setPageSize(newPageSize)
+  }
+
+  const handleSortByChange = e => {
+    setSortBy(e.target.value)
+    setPageNum(0)
+  }
+
+  const handleSortOrderChange = e => {
+    setSortOrder(e.target.value)
+    setPageNum(0)
   }
 
   return (
@@ -130,6 +144,21 @@ const MartImporterShow = ({
                     {option.label}
                   </option>
                 ))}
+              </FormSelect>
+            </div>
+            <div>
+              Sort by:
+              <FormSelect value={sortBy} onChange={handleSortByChange}>
+                <option value="sequence">Sequence</option>
+                <option value="submittedAt">Submitted At</option>
+                <option value="receivedAt">Received At</option>
+              </FormSelect>
+            </div>
+            <div>
+              Order:
+              <FormSelect value={sortOrder} onChange={handleSortOrderChange}>
+                <option value="asc">Ascending</option>
+                <option value="desc">Descending</option>
               </FormSelect>
             </div>
             <div>

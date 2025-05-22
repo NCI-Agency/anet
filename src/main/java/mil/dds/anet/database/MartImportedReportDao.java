@@ -2,6 +2,7 @@ package mil.dds.anet.database;
 
 import static org.jdbi.v3.core.statement.EmptyHandling.NULL_KEYWORD;
 
+import java.util.Arrays;
 import java.util.List;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.mart.MartImportedReport;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class MartImportedReportDao extends AbstractDao {
+  static List<String> ALLOWED_SORT_FIELDS = Arrays.asList("sequence", "submittedAt", "receivedAt");
 
   public MartImportedReportDao(DatabaseHandler databaseHandler) {
     super(databaseHandler);
@@ -21,7 +23,7 @@ public class MartImportedReportDao extends AbstractDao {
 
   @Transactional
   public List<MartImportedReport> getAll() {
-    return getAll(0, 0, null).getList();
+    return getAll(0, 0, null, null, null).getList();
   }
 
   @Transactional
@@ -39,17 +41,22 @@ public class MartImportedReportDao extends AbstractDao {
   }
 
   @Transactional
-  public AnetBeanList<MartImportedReport> getAll(int pageNum, int pageSize, Boolean success) {
+  public AnetBeanList<MartImportedReport> getAll(int pageNum, int pageSize, Boolean success,
+      String sortBy, String sortOrder) {
     final Handle handle = getDbHandle();
     try {
-      final StringBuilder sql =
-          new StringBuilder("/* MartImportedReportCheck */ SELECT * FROM \"martImportedReports\"");
-      sql.insert(0, "SELECT *, COUNT(*) OVER() AS \"totalCount\" FROM (");
+      String sortField = ALLOWED_SORT_FIELDS.contains(sortBy) ? sortBy : "sequence";
+      String order = "asc".equalsIgnoreCase(sortOrder) ? "ASC" : "DESC";
+      String quotedSortField = "\"" + sortField + "\"";
+
+      final StringBuilder sql = new StringBuilder();
+      sql.append("/* MartImportedReportCheck */ SELECT *, COUNT(*) OVER() AS \"totalCount\" FROM (");
+      sql.append("  SELECT * FROM \"martImportedReports\"");
       if (success != null) {
         sql.append(" WHERE success = :success");
       }
       sql.append(") AS results");
-      sql.append(" ORDER BY sequence DESC, \"receivedAt\" DESC");
+      sql.append(" ORDER BY ").append(quotedSortField).append(" ").append(order);
       if (pageSize > 0) {
         sql.append(" OFFSET :offset LIMIT :limit");
       }
