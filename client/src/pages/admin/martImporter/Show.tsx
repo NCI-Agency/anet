@@ -146,28 +146,28 @@ const MartImporterShow = ({
     setPageSize(newPageSize)
   }
 
-  const handleSortByChange = e => {
-    setSortBy(e.target.value)
+  const handleSortByChange = sortBy => {
+    setSortBy(sortBy)
     setPageNum(0)
   }
 
-  const handleSortOrderChange = e => {
-    setSortOrder(e.target.value)
+  const handleSortOrderChange = sortOrder => {
+    setSortOrder(sortOrder)
     setPageNum(0)
   }
 
-  const handleStateFilterChange = e => {
-    setStateFilter(e.target.value)
+  const handleStateFilterChange = state => {
+    setStateFilter(state)
     setPageNum(0)
   }
 
-  const handleAuthorChange = e => {
-    setAuthorUuid(e.target.value)
+  const handleAuthorChange = author => {
+    setAuthorUuid(author)
     setPageNum(0)
   }
 
-  const handleReportChange = e => {
-    setReportUuid(e.target.value)
+  const handleReportChange = report => {
+    setReportUuid(report)
     setPageNum(0)
   }
 
@@ -205,7 +205,7 @@ const MartImporterShow = ({
               Filter by state:
               <FormSelect
                 value={stateFilter}
-                onChange={handleStateFilterChange}
+                onChange={e => handleStateFilterChange(e.target.value)}
               >
                 {FILTER_OPTIONS.map(option => (
                   <option key={option.value} value={option.value}>
@@ -217,7 +217,10 @@ const MartImporterShow = ({
             {authors.length > 0 && (
               <div>
                 Filter by author:
-                <FormSelect value={authorUuid} onChange={handleAuthorChange}>
+                <FormSelect
+                  value={authorUuid}
+                  onChange={e => handleAuthorChange(e.target.value)}
+                >
                   <option value="">All Authors</option>
                   {authors.map(author => (
                     <option key={author.uuid} value={author.uuid}>
@@ -230,7 +233,10 @@ const MartImporterShow = ({
             {reports.length > 0 && (
               <div>
                 Filter by report:
-                <FormSelect value={reportUuid} onChange={handleReportChange}>
+                <FormSelect
+                  value={reportUuid}
+                  onChange={e => handleReportChange(e.target.value)}
+                >
                   <option value="">All Reports</option>
                   {reports.map(report => (
                     <option key={report.uuid} value={report.uuid}>
@@ -242,7 +248,10 @@ const MartImporterShow = ({
             )}
             <div>
               Sort by:
-              <FormSelect value={sortBy} onChange={handleSortByChange}>
+              <FormSelect
+                value={sortBy}
+                onChange={e => handleSortByChange(e.target.value)}
+              >
                 <option value="sequence">Sequence</option>
                 <option value="submittedAt">Submitted At</option>
                 <option value="receivedAt">Received At</option>
@@ -250,7 +259,10 @@ const MartImporterShow = ({
             </div>
             <div>
               Order:
-              <FormSelect value={sortOrder} onChange={handleSortOrderChange}>
+              <FormSelect
+                value={sortOrder}
+                onChange={e => handleSortOrderChange(e.target.value)}
+              >
                 <option value="asc">Ascending</option>
                 <option value="desc">Descending</option>
               </FormSelect>
@@ -341,16 +353,38 @@ const MartImporterShow = ({
                       })()}
                     </td>
                     <td>
-                      <LinkTo
-                        modelType="Person"
-                        model={martImportedReport.person}
-                      />
+                      <div className="d-flex align-items-center gap-2 justify-content-between px-2">
+                        <LinkTo
+                          modelType="Person"
+                          model={martImportedReport.person}
+                        />
+                        {martImportedReport.person && (
+                          <Icon
+                            icon={IconNames.SEARCH}
+                            onClick={() =>
+                              handleAuthorChange(
+                                martImportedReport.person?.uuid
+                              )}
+                          />
+                        )}
+                      </div>
                     </td>
                     <td>
-                      <LinkTo
-                        modelType="Report"
-                        model={martImportedReport.report}
-                      />
+                      <div className="d-flex align-items-center gap-2 justify-content-start px-2">
+                        <LinkTo
+                          modelType="Report"
+                          model={martImportedReport.report}
+                        />
+                        {martImportedReport.report && (
+                          <Icon
+                            icon={IconNames.SEARCH}
+                            onClick={() =>
+                              handleReportChange(
+                                martImportedReport.report?.uuid
+                              )}
+                          />
+                        )}
+                      </div>
                     </td>
                     <td>
                       <div
