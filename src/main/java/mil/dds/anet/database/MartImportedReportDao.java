@@ -6,9 +6,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.mart.MartImportedReport;
 import mil.dds.anet.database.PersonDao;
+import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.mappers.MartImportedReportMapper;
 import mil.dds.anet.utils.DaoUtils;
 import org.jdbi.v3.core.Handle;
@@ -22,6 +24,9 @@ public class MartImportedReportDao extends AbstractDao {
   @Autowired
   private PersonDao personDao;
 
+  @Autowired
+  private ReportDao reportDao;
+
   static List<String> ALLOWED_SORT_FIELDS = Arrays.asList("sequence", "submittedAt", "receivedAt");
 
   public MartImportedReportDao(DatabaseHandler databaseHandler) {
@@ -30,7 +35,7 @@ public class MartImportedReportDao extends AbstractDao {
 
   @Transactional
   public List<MartImportedReport> getAll() {
-    return getAll(0, 0, null, null, null, null).getList();
+    return getAll(0, 0, null, null, null, null, null).getList();
   }
 
   @Transactional
@@ -49,7 +54,7 @@ public class MartImportedReportDao extends AbstractDao {
 
   @Transactional
   public AnetBeanList<MartImportedReport> getAll(int pageNum, int pageSize, List<String> states,
-      String sortBy, String sortOrder, String authorUuid) {
+      String sortBy, String sortOrder, String authorUuid, String reportUuid) {
     final Handle handle = getDbHandle();
     try {
       String sortField = ALLOWED_SORT_FIELDS.contains(sortBy) ? sortBy : "sequence";
@@ -84,12 +89,20 @@ public class MartImportedReportDao extends AbstractDao {
         authorCondition = "\"personUuid\" = :authorUuid";
       }
 
+      String reportCondition = null;
+      if (reportUuid != null && !reportUuid.isEmpty()) {
+        reportCondition = "\"reportUuid\" = :reportUuid";
+      }
+
       List<String> allConditions = new ArrayList<>();
       if (!stateConditions.isEmpty()) {
         allConditions.add("(" + String.join(" OR ", stateConditions) + ")");
       }
       if (authorCondition != null) {
         allConditions.add(authorCondition);
+      }
+      if (reportCondition != null) {
+        allConditions.add(reportCondition);
       }
       if (!allConditions.isEmpty()) {
         sql.append(" WHERE ").append(String.join(" AND ", allConditions));
@@ -103,6 +116,9 @@ public class MartImportedReportDao extends AbstractDao {
       final Query query = handle.createQuery(sql.toString());
       if (authorUuid != null && !authorUuid.isEmpty()) {
         query.bind("authorUuid", authorUuid);
+      }
+      if (reportUuid != null && !reportUuid.isEmpty()) {
+        query.bind("reportUuid", reportUuid);
       }
       if (pageSize > 0) {
         query.bind("offset", pageSize * pageNum).bind("limit", pageSize);
@@ -122,6 +138,22 @@ public class MartImportedReportDao extends AbstractDao {
       List<String> personUuids = handle.createQuery(sql).mapTo(String.class).list();
 
       return personDao.getByIds(personUuids);
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
+  @Transactional
+  public List<Report> getUniqueMartReportReports() {
+    final Handle handle = getDbHandle();
+    try {
+      String sql =
+          "SELECT DISTINCT \"reportUuid\" FROM \"martImportedReports\" WHERE \"reportUuid\" IS NOT NULL";
+      List<String> reportUuids = handle.createQuery(sql).mapTo(String.class).list();
+      System.out.println("reportUuids: " + reportUuids);
+      System.out.println(reportDao.getByIds(reportUuids));
+
+      return reportDao.getByIds(reportUuids);
     } finally {
       closeDbHandle(handle);
     }

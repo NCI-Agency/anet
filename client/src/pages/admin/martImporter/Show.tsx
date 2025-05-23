@@ -21,8 +21,8 @@ import { connect } from "react-redux"
 import Settings from "settings"
 
 const GQL_GET_MART_REPORTS_IMPORTED = gql`
-  query ($pageNum: Int!, $pageSize: Int!, $states: [String], $sortBy: String, $sortOrder: String, $authorUuid: String) {
-    martImportedReports(pageNum: $pageNum, pageSize: $pageSize, states: $states, sortBy: $sortBy, sortOrder: $sortOrder, authorUuid: $authorUuid) {
+  query ($pageNum: Int!, $pageSize: Int!, $states: [String], $sortBy: String, $sortOrder: String, $authorUuid: String, $reportUuid: String) {
+    martImportedReports(pageNum: $pageNum, pageSize: $pageSize, states: $states, sortBy: $sortBy, sortOrder: $sortOrder, authorUuid: $authorUuid, reportUuid: $reportUuid) {
       pageNum
       pageSize
       totalCount
@@ -52,6 +52,15 @@ const GQL_GET_UNIQUE_MART_REPORT_AUTHORS = gql`
     uniqueMartReportAuthors {
       uuid
       name
+    }
+  }
+`
+
+const GQL_GET_UNIQUE_MART_REPORT_REPORTS = gql`
+  query {
+    uniqueMartReportReports {
+      uuid
+      intent
     }
   }
 `
@@ -90,13 +99,20 @@ const MartImporterShow = ({
   const [sortOrder, setSortOrder] = useState("desc")
   const [stateFilter, setStateFilter] = useState("")
   const [authorUuid, setAuthorUuid] = useState("")
+  const [reportUuid, setReportUuid] = useState("")
   const states = filterToStates[stateFilter]
 
   const { data: authorsData } = API.useApiQuery(
     GQL_GET_UNIQUE_MART_REPORT_AUTHORS,
     {}
   )
-  const authors = authorsData?.uniqueMartReportAuthors || []
+  const authors = authorsData?.uniqueMartReportAuthors?.filter(Boolean) || []
+
+  const { data: reportsData } = API.useApiQuery(
+    GQL_GET_UNIQUE_MART_REPORT_REPORTS,
+    {}
+  )
+  const reports = reportsData?.uniqueMartReportReports?.filter(Boolean) || []
 
   const { loading, error, data } = API.useApiQuery(
     GQL_GET_MART_REPORTS_IMPORTED,
@@ -106,7 +122,8 @@ const MartImporterShow = ({
       states,
       sortBy,
       sortOrder,
-      authorUuid
+      authorUuid,
+      reportUuid
     }
   )
   const { done, result } = useBoilerplate({
@@ -146,6 +163,11 @@ const MartImporterShow = ({
 
   const handleAuthorChange = e => {
     setAuthorUuid(e.target.value)
+    setPageNum(0)
+  }
+
+  const handleReportChange = e => {
+    setReportUuid(e.target.value)
     setPageNum(0)
   }
 
@@ -200,6 +222,19 @@ const MartImporterShow = ({
                   {authors.map(author => (
                     <option key={author.uuid} value={author.uuid}>
                       {author.name}
+                    </option>
+                  ))}
+                </FormSelect>
+              </div>
+            )}
+            {reports.length > 0 && (
+              <div>
+                Filter by report:
+                <FormSelect value={reportUuid} onChange={handleReportChange}>
+                  <option value="">All Reports</option>
+                  {reports.map(report => (
+                    <option key={report.uuid} value={report.uuid}>
+                      {report.intent}
                     </option>
                   ))}
                 </FormSelect>

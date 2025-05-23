@@ -7,6 +7,7 @@ import io.leangen.graphql.annotations.GraphQLRootContext;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import java.util.List;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.mart.MartImportedReport;
 import mil.dds.anet.database.MartImportedReportDao;
@@ -32,14 +33,21 @@ public class MartImportedReportsResource {
       @GraphQLArgument(name = "states") List<String> states,
       @GraphQLArgument(name = "sortBy", defaultValue = "sequence") String sortBy,
       @GraphQLArgument(name = "sortOrder", defaultValue = "desc") String sortOrder,
-      @GraphQLArgument(name = "authorUuid") String authorUuid) {
+      @GraphQLArgument(name = "authorUuid") String authorUuid,
+      @GraphQLArgument(name = "reportUuid") String reportUuid) {
     AuthUtils.assertAdministrator(DaoUtils.getUserFromContext(context));
-    return martImportedReportDao.getAll(pageNum, pageSize, states, sortBy, sortOrder, authorUuid);
+    return martImportedReportDao.getAll(pageNum, pageSize, states, sortBy, sortOrder, authorUuid,
+        reportUuid);
   }
 
   @GraphQLQuery(name = "uniqueMartReportAuthors")
   public List<Person> getUniqueMartReportAuthors() {
     return martImportedReportDao.getUniqueMartReportAuthors();
+  }
+
+  @GraphQLQuery(name = "uniqueMartReportReports")
+  public List<Report> getUniqueMartReportReports() {
+    return martImportedReportDao.getUniqueMartReportReports();
   }
 
 }
