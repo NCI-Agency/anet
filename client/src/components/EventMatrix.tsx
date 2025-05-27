@@ -430,6 +430,7 @@ const EventMatrix = ({
                         leaf={task}
                         ascendantObjects={task.ascendantTasks}
                         parentField="parentTask"
+                        hideParents
                       />
                     </td>
                     <td>{getEvent(taskEvents, 0, task)}</td>
