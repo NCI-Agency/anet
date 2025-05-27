@@ -98,21 +98,9 @@ const MartImporterShow = ({
   const [sortBy, setSortBy] = useState("sequence")
   const [sortOrder, setSortOrder] = useState("desc")
   const [stateFilter, setStateFilter] = useState("")
-  const [authorUuid, setAuthorUuid] = useState("")
-  const [reportUuid, setReportUuid] = useState("")
+  const [selectedAuthor, setSelectedAuthor] = useState(null)
+  const [selectedReport, setSelectedReport] = useState(null)
   const states = filterToStates[stateFilter]
-
-  const { data: authorsData } = API.useApiQuery(
-    GQL_GET_UNIQUE_MART_REPORT_AUTHORS,
-    {}
-  )
-  const authors = authorsData?.uniqueMartReportAuthors?.filter(Boolean) || []
-
-  const { data: reportsData } = API.useApiQuery(
-    GQL_GET_UNIQUE_MART_REPORT_REPORTS,
-    {}
-  )
-  const reports = reportsData?.uniqueMartReportReports?.filter(Boolean) || []
 
   const { loading, error, data } = API.useApiQuery(
     GQL_GET_MART_REPORTS_IMPORTED,
@@ -122,8 +110,8 @@ const MartImporterShow = ({
       states,
       sortBy,
       sortOrder,
-      authorUuid,
-      reportUuid
+      authorUuid: selectedAuthor?.uuid || "",
+      reportUuid: selectedReport?.uuid || ""
     }
   )
   const { done, result } = useBoilerplate({
@@ -162,12 +150,12 @@ const MartImporterShow = ({
   }
 
   const handleAuthorChange = author => {
-    setAuthorUuid(author)
+    setSelectedAuthor(author)
     setPageNum(0)
   }
 
   const handleReportChange = report => {
-    setReportUuid(report)
+    setSelectedReport(report)
     setPageNum(0)
   }
 
@@ -200,7 +188,39 @@ const MartImporterShow = ({
       <Fieldset
         title="MART reports imported"
         action={
-          <div className="float-end d-flex align-items-center gap-3">
+          <div className="flot-end d-flex align-items-center gap-3">
+            {selectedAuthor && (
+              <div className="d-flex flex-column">
+                Filtering by author:
+                <div
+                  className="d-flex align-items-center p-3 fs-6 gap-2 bg-white"
+                  style={{ height: 38, borderRadius: 8 }}
+                >
+                  {selectedAuthor?.name}
+                  <Icon
+                    icon={IconNames.CROSS}
+                    style={{ cursor: "pointer" }}
+                    onClick={() => handleAuthorChange(null)}
+                  />
+                </div>
+              </div>
+            )}
+            {selectedReport && (
+              <div className="d-flex flex-column">
+                Filtering by report:
+                <div
+                  className="d-flex align-items-center p-3 fs-6 gap-2 bg-white"
+                  style={{ height: 38, borderRadius: 8 }}
+                >
+                  {selectedReport?.intent}
+                  <Icon
+                    icon={IconNames.CROSS}
+                    style={{ cursor: "pointer" }}
+                    onClick={() => handleReportChange(null)}
+                  />
+                </div>
+              </div>
+            )}
             <div>
               Filter by state:
               <FormSelect
@@ -214,38 +234,6 @@ const MartImporterShow = ({
                 ))}
               </FormSelect>
             </div>
-            {authors.length > 0 && (
-              <div>
-                Filter by author:
-                <FormSelect
-                  value={authorUuid}
-                  onChange={e => handleAuthorChange(e.target.value)}
-                >
-                  <option value="">All Authors</option>
-                  {authors.map(author => (
-                    <option key={author.uuid} value={author.uuid}>
-                      {author.name}
-                    </option>
-                  ))}
-                </FormSelect>
-              </div>
-            )}
-            {reports.length > 0 && (
-              <div>
-                Filter by report:
-                <FormSelect
-                  value={reportUuid}
-                  onChange={e => handleReportChange(e.target.value)}
-                >
-                  <option value="">All Reports</option>
-                  {reports.map(report => (
-                    <option key={report.uuid} value={report.uuid}>
-                      {report.intent}
-                    </option>
-                  ))}
-                </FormSelect>
-              </div>
-            )}
             <div>
               Sort by:
               <FormSelect
@@ -361,10 +349,9 @@ const MartImporterShow = ({
                         {martImportedReport.person && (
                           <Icon
                             icon={IconNames.SEARCH}
+                            style={{ cursor: "pointer" }}
                             onClick={() =>
-                              handleAuthorChange(
-                                martImportedReport.person?.uuid
-                              )}
+                              handleAuthorChange(martImportedReport.person)}
                           />
                         )}
                       </div>
@@ -378,10 +365,9 @@ const MartImporterShow = ({
                         {martImportedReport.report && (
                           <Icon
                             icon={IconNames.SEARCH}
+                            style={{ cursor: "pointer" }}
                             onClick={() =>
-                              handleReportChange(
-                                martImportedReport.report?.uuid
-                              )}
+                              handleReportChange(martImportedReport.report)}
                           />
                         )}
                       </div>
