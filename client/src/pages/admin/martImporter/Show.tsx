@@ -21,8 +21,8 @@ import { connect } from "react-redux"
 import Settings from "settings"
 
 const GQL_GET_MART_REPORTS_IMPORTED = gql`
-  query ($pageNum: Int!, $pageSize: Int!) {
-    martImportedReports(pageNum: $pageNum, pageSize: $pageSize) {
+  query ($pageNum: Int!, $pageSize: Int!, $states: [String], $sortBy: String, $sortOrder: String, $authorUuid: String, $reportUuid: String) {
+    martImportedReports(pageNum: $pageNum, pageSize: $pageSize, states: $states, sortBy: $sortBy, sortOrder: $sortOrder, authorUuid: $authorUuid, reportUuid: $reportUuid) {
       pageNum
       pageSize
       totalCount
@@ -46,8 +46,44 @@ const GQL_GET_MART_REPORTS_IMPORTED = gql`
     }
   }
 `
+
+const GQL_GET_UNIQUE_MART_REPORT_AUTHORS = gql`
+  query {
+    uniqueMartReportAuthors {
+      uuid
+      name
+    }
+  }
+`
+
+const GQL_GET_UNIQUE_MART_REPORT_REPORTS = gql`
+  query {
+    uniqueMartReportReports {
+      uuid
+      intent
+    }
+  }
+`
+
 const PAGESIZES = [10, 25, 50, 100]
 const DEFAULT_PAGESIZE = 25
+const FILTER_OPTIONS = [
+  { value: "", label: "All states" },
+  { value: "success", label: "Success" },
+  { value: "warning", label: "Warning" },
+  { value: "failure", label: "Failure" },
+  { value: "success_warning", label: "Success and Warning" },
+  { value: "warning_failure", label: "Warning and Failure" }
+]
+
+const filterToStates = {
+  "": null,
+  success: ["success"],
+  warning: ["warning"],
+  failure: ["failure"],
+  success_warning: ["success", "warning"],
+  warning_failure: ["warning", "failure"]
+}
 
 interface MartImportedReportsShowProps {
   pageDispatchers?: PageDispatchersPropType
@@ -59,11 +95,23 @@ const MartImporterShow = ({
   usePageTitle("MART reports imported")
   const [pageNum, setPageNum] = useState(0)
   const [pageSize, setPageSize] = useState(DEFAULT_PAGESIZE)
+  const [sortBy, setSortBy] = useState("sequence")
+  const [sortOrder, setSortOrder] = useState("desc")
+  const [stateFilter, setStateFilter] = useState("")
+  const [selectedAuthor, setSelectedAuthor] = useState(null)
+  const [selectedReport, setSelectedReport] = useState(null)
+  const states = filterToStates[stateFilter]
+
   const { loading, error, data } = API.useApiQuery(
     GQL_GET_MART_REPORTS_IMPORTED,
     {
       pageNum,
-      pageSize
+      pageSize,
+      states,
+      sortBy,
+      sortOrder,
+      authorUuid: selectedAuthor?.uuid || "",
+      reportUuid: selectedReport?.uuid || ""
     }
   )
   const { done, result } = useBoilerplate({
@@ -78,7 +126,50 @@ const MartImporterShow = ({
   }
 
   const { totalCount = 0, list: martImportedReports = [] } =
-    data.martImportedReports
+    data.martImportedReports || {}
+
+  const handlePageSizeChange = newPageSize => {
+    const newPageNum = Math.floor((pageNum * pageSize) / newPageSize)
+    setPageNum(newPageNum)
+    setPageSize(newPageSize)
+  }
+
+  const handleSortByChange = sortBy => {
+    setSortBy(sortBy)
+    setPageNum(0)
+  }
+
+  const handleSortOrderChange = sortOrder => {
+    setSortOrder(sortOrder)
+    setPageNum(0)
+  }
+
+  const handleStateFilterChange = state => {
+    setStateFilter(state)
+    setPageNum(0)
+  }
+
+  const handleAuthorChange = author => {
+    setSelectedAuthor(author)
+    setPageNum(0)
+  }
+
+  const handleReportChange = report => {
+    setSelectedReport(report)
+    setPageNum(0)
+  }
+
+  const getState = report => {
+    if (report.success) {
+      return "success"
+    } else if (report.errors && report.errors.startsWith("While importing")) {
+      return "warning"
+    } else if (report.errors && !report.errors.startsWith("While importing")) {
+      return "failure"
+    } else {
+      return "unknown"
+    }
+  }
 
   return (
     <>
@@ -97,19 +188,89 @@ const MartImporterShow = ({
       <Fieldset
         title="MART reports imported"
         action={
-          <div className="float-end">
-            Number per page:
-            <FormSelect
-              defaultValue={pageSize}
-              onChange={e =>
-                changePageSize(parseInt(e.target.value, 10) || DEFAULT_PAGESIZE)}
-            >
-              {PAGESIZES.map(size => (
-                <option key={size} value={size}>
-                  {size}
-                </option>
-              ))}
-            </FormSelect>
+          <div className="flot-end d-flex align-items-center gap-3">
+            {selectedAuthor && (
+              <div className="d-flex flex-column">
+                Filtering by author:
+                <div
+                  className="d-flex align-items-center p-3 fs-6 gap-2 bg-white"
+                  style={{ height: 38, borderRadius: 8 }}
+                >
+                  {selectedAuthor?.name}
+                  <Icon
+                    icon={IconNames.CROSS}
+                    style={{ cursor: "pointer" }}
+                    onClick={() => handleAuthorChange(null)}
+                  />
+                </div>
+              </div>
+            )}
+            {selectedReport && (
+              <div className="d-flex flex-column">
+                Filtering by report:
+                <div
+                  className="d-flex align-items-center p-3 fs-6 gap-2 bg-white"
+                  style={{ height: 38, borderRadius: 8 }}
+                >
+                  {selectedReport?.intent}
+                  <Icon
+                    icon={IconNames.CROSS}
+                    style={{ cursor: "pointer" }}
+                    onClick={() => handleReportChange(null)}
+                  />
+                </div>
+              </div>
+            )}
+            <div>
+              Filter by state:
+              <FormSelect
+                value={stateFilter}
+                onChange={e => handleStateFilterChange(e.target.value)}
+              >
+                {FILTER_OPTIONS.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </FormSelect>
+            </div>
+            <div>
+              Sort by:
+              <FormSelect
+                value={sortBy}
+                onChange={e => handleSortByChange(e.target.value)}
+              >
+                <option value="sequence">Sequence</option>
+                <option value="submittedAt">Submitted At</option>
+                <option value="receivedAt">Received At</option>
+              </FormSelect>
+            </div>
+            <div>
+              Order:
+              <FormSelect
+                value={sortOrder}
+                onChange={e => handleSortOrderChange(e.target.value)}
+              >
+                <option value="asc">Ascending</option>
+                <option value="desc">Descending</option>
+              </FormSelect>
+            </div>
+            <div>
+              Number per page:
+              <FormSelect
+                defaultValue={pageSize}
+                onChange={e =>
+                  handlePageSizeChange(
+                    parseInt(e.target.value, 10) || DEFAULT_PAGESIZE
+                  )}
+              >
+                {PAGESIZES.map(size => (
+                  <option key={size} value={size}>
+                    {size}
+                  </option>
+                ))}
+              </FormSelect>
+            </div>
           </div>
         }
       >
@@ -130,63 +291,96 @@ const MartImporterShow = ({
                   <th>Sequence</th>
                   <th>Submitted Date</th>
                   <th>Received Date</th>
-                  <th>Success?</th>
+                  <th>State</th>
                   <th>Author</th>
                   <th>Report</th>
                   <th>Errors</th>
                 </tr>
               </thead>
               <tbody>
-                {martImportedReports.map((martImportedReport, index) => {
-                  return (
-                    <tr key={index}>
-                      <td>{martImportedReport.sequence}</td>
-                      <td>
-                        {moment(martImportedReport.submittedAt).format(
-                          Settings.dateFormats.forms.displayLong.withTime
-                        )}
-                      </td>
-                      <td>
-                        {moment(martImportedReport.receivedAt).format(
-                          Settings.dateFormats.forms.displayLong.withTime
-                        )}
-                      </td>
-                      <td>
-                        <Icon
-                          icon={
-                            martImportedReport.success
-                              ? IconNames.TICK
-                              : IconNames.CROSS
-                          }
-                          className={
-                            martImportedReport.success
-                              ? "text-success"
-                              : "text-danger"
-                          }
-                        />
-                      </td>
-                      <td>
+                {martImportedReports.map((martImportedReport, index) => (
+                  <tr key={index}>
+                    <td>{martImportedReport.sequence}</td>
+                    <td>
+                      {moment(martImportedReport.submittedAt).format(
+                        Settings.dateFormats.forms.displayLong.withTime
+                      )}
+                    </td>
+                    <td>
+                      {moment(martImportedReport.receivedAt).format(
+                        Settings.dateFormats.forms.displayLong.withTime
+                      )}
+                    </td>
+                    <td>
+                      {(() => {
+                        const state = getState(martImportedReport)
+                        if (state === "success") {
+                          return (
+                            <Icon
+                              icon={IconNames.TICK}
+                              className="text-success"
+                            />
+                          )
+                        } else if (state === "warning") {
+                          return (
+                            <Icon
+                              icon={IconNames.WARNING_SIGN}
+                              className="text-warning"
+                            />
+                          )
+                        } else if (state === "failure") {
+                          return (
+                            <Icon
+                              icon={IconNames.CROSS}
+                              className="text-danger"
+                            />
+                          )
+                        } else {
+                          return <span>Unknown</span>
+                        }
+                      })()}
+                    </td>
+                    <td>
+                      <div className="d-flex align-items-center gap-2 justify-content-between px-2">
                         <LinkTo
                           modelType="Person"
                           model={martImportedReport.person}
                         />
-                      </td>
-                      <td>
+                        {martImportedReport.person && (
+                          <Icon
+                            icon={IconNames.SEARCH}
+                            style={{ cursor: "pointer" }}
+                            onClick={() =>
+                              handleAuthorChange(martImportedReport.person)}
+                          />
+                        )}
+                      </div>
+                    </td>
+                    <td>
+                      <div className="d-flex align-items-center gap-2 justify-content-start px-2">
                         <LinkTo
                           modelType="Report"
                           model={martImportedReport.report}
                         />
-                      </td>
-                      <td>
-                        <div
-                          dangerouslySetInnerHTML={{
-                            __html: martImportedReport.errors
-                          }}
-                        />
-                      </td>
-                    </tr>
-                  )
-                })}
+                        {martImportedReport.report && (
+                          <Icon
+                            icon={IconNames.SEARCH}
+                            style={{ cursor: "pointer" }}
+                            onClick={() =>
+                              handleReportChange(martImportedReport.report)}
+                          />
+                        )}
+                      </div>
+                    </td>
+                    <td>
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: martImportedReport.errors
+                        }}
+                      />
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </Table>
           </UltimatePaginationTopDown>
@@ -194,12 +388,6 @@ const MartImporterShow = ({
       </Fieldset>
     </>
   )
-
-  function changePageSize(newPageSize) {
-    const newPageNum = Math.floor((pageNum * pageSize) / newPageSize)
-    setPageNum(newPageNum)
-    setPageSize(newPageSize)
-  }
 }
 
 export default connect(null, mapPageDispatchersToProps)(MartImporterShow)
