@@ -5,11 +5,11 @@ import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
-import java.util.List;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.mart.MartImportedReport;
+import mil.dds.anet.beans.search.MartImportedReportSearchQuery;
 import mil.dds.anet.database.MartImportedReportDao;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
@@ -25,28 +25,36 @@ public class MartImportedReportsResource {
     this.martImportedReportDao = emailDao;
   }
 
-  @GraphQLQuery(name = "martImportedReports")
-  public AnetBeanList<MartImportedReport> getMartImportedReports(
+  @GraphQLQuery(name = "martImportedReportHistory")
+  public AnetBeanList<MartImportedReport> getMartImportedReportHistory(
       @GraphQLRootContext GraphQLContext context,
-      @GraphQLArgument(name = "pageNum", defaultValue = "0") int pageNum,
-      @GraphQLArgument(name = "pageSize", defaultValue = "0") int pageSize,
-      @GraphQLArgument(name = "states") List<String> states,
-      @GraphQLArgument(name = "sortBy", defaultValue = "sequence") String sortBy,
-      @GraphQLArgument(name = "sortOrder", defaultValue = "desc") String sortOrder,
-      @GraphQLArgument(name = "authorUuid") String authorUuid,
-      @GraphQLArgument(name = "reportUuid") String reportUuid) {
+      @GraphQLArgument(name = "query") MartImportedReportSearchQuery query) {
     AuthUtils.assertAdministrator(DaoUtils.getUserFromContext(context));
-    return martImportedReportDao.getAll(pageNum, pageSize, states, sortBy, sortOrder, authorUuid,
-        reportUuid);
+    // We want to get all entries for this specific MartImportedReport
+    return martImportedReportDao.getMartImportedReportHistory(query);
   }
 
+  @GraphQLQuery(name = "martImportedReportList")
+  public AnetBeanList<MartImportedReport> getMartImportedReportList(
+      @GraphQLRootContext GraphQLContext context,
+      @GraphQLArgument(name = "query") MartImportedReportSearchQuery query) {
+    AuthUtils.assertAdministrator(DaoUtils.getUserFromContext(context));
+    // Get all MartImportedReports grouped by reportUuid and showing most recently received
+    return martImportedReportDao.getMartImportedReports(query);
+  }
+
+
   @GraphQLQuery(name = "uniqueMartReportAuthors")
-  public List<Person> getUniqueMartReportAuthors() {
+  public AnetBeanList<Person> getUniqueMartReportAuthors(
+      @GraphQLRootContext GraphQLContext context) {
+    AuthUtils.assertAdministrator(DaoUtils.getUserFromContext(context));
     return martImportedReportDao.getUniqueMartReportAuthors();
   }
 
   @GraphQLQuery(name = "uniqueMartReportReports")
-  public List<Report> getUniqueMartReportReports() {
+  public AnetBeanList<Report> getUniqueMartReportReports(
+      @GraphQLRootContext GraphQLContext context) {
+    AuthUtils.assertAdministrator(DaoUtils.getUserFromContext(context));
     return martImportedReportDao.getUniqueMartReportReports();
   }
 

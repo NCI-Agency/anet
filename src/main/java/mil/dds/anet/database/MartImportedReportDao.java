@@ -2,165 +2,71 @@ package mil.dds.anet.database;
 
 import static org.jdbi.v3.core.statement.EmptyHandling.NULL_KEYWORD;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.mart.MartImportedReport;
-import mil.dds.anet.database.PersonDao;
-import mil.dds.anet.database.ReportDao;
+import mil.dds.anet.beans.search.MartImportedReportSearchQuery;
 import mil.dds.anet.database.mappers.MartImportedReportMapper;
+import mil.dds.anet.database.mappers.PersonMapper;
+import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.utils.DaoUtils;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.statement.Query;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class MartImportedReportDao extends AbstractDao {
-  @Autowired
-  private PersonDao personDao;
-
-  @Autowired
-  private ReportDao reportDao;
-
-  static List<String> ALLOWED_SORT_FIELDS = Arrays.asList("sequence", "submittedAt", "receivedAt");
 
   public MartImportedReportDao(DatabaseHandler databaseHandler) {
     super(databaseHandler);
   }
 
-  @Transactional
-  public List<MartImportedReport> getAll() {
-    return getAll(0, 0, null, null, null, null, null).getList();
-  }
 
   @Transactional
-  public MartImportedReport getByReportUuid(String reportUuid) {
+  public AnetBeanList<MartImportedReport> getMartImportedReportHistory(
+      MartImportedReportSearchQuery martImportedReportSearchQuery) {
     final Handle handle = getDbHandle();
     try {
-      return handle.createQuery(
-          "/* MartImportedReportGetByReportUuid*/ SELECT * FROM \"martImportedReports\" "
-              + "WHERE \"reportUuid\" = :reportUuid ORDER BY sequence DESC, \"receivedAt\" DESC LIMIT 1")
-          .bind("reportUuid", reportUuid).map(new MartImportedReportMapper()).findFirst()
-          .orElse(null);
-    } finally {
-      closeDbHandle(handle);
-    }
-  }
-
-  @Transactional
-  public AnetBeanList<MartImportedReport> getAll(int pageNum, int pageSize, List<String> states,
-      String sortBy, String sortOrder, String authorUuid, String reportUuid) {
-    final Handle handle = getDbHandle();
-    try {
-      String sortField = ALLOWED_SORT_FIELDS.contains(sortBy) ? sortBy : "sequence";
-      String order = "asc".equalsIgnoreCase(sortOrder) ? "ASC" : "DESC";
-      String quotedSortField = "\"" + sortField + "\"";
-
-      final StringBuilder sql = new StringBuilder();
-      sql.append(
-          "/* MartImportedReportCheck */ SELECT *, COUNT(*) OVER() AS \"totalCount\" FROM (");
-      sql.append("  SELECT * FROM \"martImportedReports\"");
-      List<String> stateConditions = new ArrayList<>();
-      if (states != null && !states.isEmpty()) {
-        for (String state : states) {
-          switch (state) {
-            case "success":
-              stateConditions.add("success = TRUE");
-              break;
-            case "warning":
-              stateConditions.add("success = FALSE AND errors LIKE 'While importing%'");
-              break;
-            case "failure":
-              stateConditions.add("success = FALSE AND errors NOT LIKE 'While importing%'");
-              break;
-            default:
-              break;
-          }
-        }
-      }
-
-      String authorCondition = null;
-      if (authorUuid != null && !authorUuid.isEmpty()) {
-        authorCondition = "\"personUuid\" = :authorUuid";
-      }
-
-      String reportCondition = null;
-      if (reportUuid != null && !reportUuid.isEmpty()) {
-        reportCondition = "\"reportUuid\" = :reportUuid";
-      }
-
-      List<String> allConditions = new ArrayList<>();
-      if (!stateConditions.isEmpty()) {
-        allConditions.add("(" + String.join(" OR ", stateConditions) + ")");
-      }
-      if (authorCondition != null) {
-        allConditions.add(authorCondition);
-      }
-      if (reportCondition != null) {
-        allConditions.add(reportCondition);
-      }
-      if (!allConditions.isEmpty()) {
-        sql.append(" WHERE ").append(String.join(" AND ", allConditions));
-      }
-
+      final StringBuilder sql = new StringBuilder(
+          "/* MartImportedReportHistory */ SELECT * FROM \"martImportedReports\"");
+      addFilters(sql, martImportedReportSearchQuery);
+      sql.insert(0, "SELECT *, COUNT(*) OVER() AS \"totalCount\" FROM (");
       sql.append(") AS results");
-      sql.append(" ORDER BY ").append(quotedSortField).append(" ").append(order);
-      if (pageSize > 0) {
-        sql.append(" OFFSET :offset LIMIT :limit");
-      }
-      final Query query = handle.createQuery(sql.toString());
-      if (authorUuid != null && !authorUuid.isEmpty()) {
-        query.bind("authorUuid", authorUuid);
-      }
-      if (reportUuid != null && !reportUuid.isEmpty()) {
-        query.bind("reportUuid", reportUuid);
-      }
-      if (pageSize > 0) {
-        query.bind("offset", pageSize * pageNum).bind("limit", pageSize);
-      }
-      return new AnetBeanList<>(query, pageNum, pageSize, new MartImportedReportMapper());
+      addOrder(sql, martImportedReportSearchQuery);
+
+      return new AnetBeanList<>(getQuery(handle, sql, martImportedReportSearchQuery), 0, 0,
+          new MartImportedReportMapper());
     } finally {
       closeDbHandle(handle);
     }
   }
 
   @Transactional
-  public List<Person> getUniqueMartReportAuthors() {
+  public AnetBeanList<MartImportedReport> getMartImportedReports(
+      MartImportedReportSearchQuery martImportedReportSearchQuery) {
     final Handle handle = getDbHandle();
     try {
-      String sql =
-          "SELECT DISTINCT \"personUuid\" FROM \"martImportedReports\" WHERE \"personUuid\" IS NOT NULL";
-      List<String> personUuids = handle.createQuery(sql).mapTo(String.class).list();
+      final StringBuilder sql = new StringBuilder(
+          "/* MartImportedReportList */ SELECT DISTINCT ON (\"reportUuid\") * FROM \"martImportedReports\"");
+      addFilters(sql, martImportedReportSearchQuery);
+      sql.append(" ORDER BY \"reportUuid\", \"receivedAt\", sequence DESC");
 
-      return personDao.getByIds(personUuids);
+      sql.insert(0, "SELECT *, COUNT(*) OVER() AS \"totalCount\" FROM (");
+      sql.append(") AS results");
+      addOrder(sql, martImportedReportSearchQuery);
+      return new AnetBeanList<>(getQuery(handle, sql, martImportedReportSearchQuery),
+          martImportedReportSearchQuery.getPageNum(), martImportedReportSearchQuery.getPageSize(),
+          new MartImportedReportMapper());
     } finally {
       closeDbHandle(handle);
     }
   }
 
   @Transactional
-  public List<Report> getUniqueMartReportReports() {
-    final Handle handle = getDbHandle();
-    try {
-      String sql =
-          "SELECT DISTINCT \"reportUuid\" FROM \"martImportedReports\" WHERE \"reportUuid\" IS NOT NULL";
-      List<String> reportUuids = handle.createQuery(sql).mapTo(String.class).list();
-      System.out.println("reportUuids: " + reportUuids);
-      System.out.println(reportDao.getByIds(reportUuids));
-
-      return reportDao.getByIds(reportUuids);
-    } finally {
-      closeDbHandle(handle);
-    }
-  }
-
-  @Transactional
-  public AnetBeanList<MartImportedReport> getAllSequences(List<Long> sequences) {
+  public AnetBeanList<MartImportedReport> getMartImportedReportHistory(List<Long> sequences) {
     final Handle handle = getDbHandle();
     try {
       final Query query = handle.createQuery(
@@ -178,12 +84,12 @@ public class MartImportedReportDao extends AbstractDao {
     try {
       return handle
           .createUpdate("/* insertMartImportedReport */ INSERT INTO \"martImportedReports\" "
-              + "(sequence, \"personUuid\", \"reportUuid\", success, \"submittedAt\", \"receivedAt\", errors) "
-              + "VALUES (:sequence, :personUuid, :reportUuid, :success, :submittedAt, :receivedAt, :errors) ")
+              + "(sequence, \"personUuid\", \"reportUuid\", state, \"submittedAt\", \"receivedAt\", errors) "
+              + "VALUES (:sequence, :personUuid, :reportUuid, :state, :submittedAt, :receivedAt, :errors) ")
           .bindBean(martImportedReport)
           .bind("submittedAt", DaoUtils.asLocalDateTime(martImportedReport.getSubmittedAt()))
           .bind("receivedAt", DaoUtils.asLocalDateTime(martImportedReport.getReceivedAt()))
-          .execute();
+          .bind("state", DaoUtils.getEnumId(martImportedReport.getState())).execute();
     } finally {
       closeDbHandle(handle);
     }
@@ -202,4 +108,68 @@ public class MartImportedReportDao extends AbstractDao {
     }
   }
 
+  @Transactional
+  public AnetBeanList<Person> getUniqueMartReportAuthors() {
+    final Handle handle = getDbHandle();
+    try {
+      final String sql =
+          "SELECT DISTINCT p.uuid AS people_uuid, p.name AS people_name from \"martImportedReports\" mir inner join people p on mir.\"personUuid\"  = p.uuid";
+      final Query query = handle.createQuery(sql);
+      return new AnetBeanList<>(query, 0, 0, new PersonMapper());
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
+  @Transactional
+  public AnetBeanList<Report> getUniqueMartReportReports() {
+    final Handle handle = getDbHandle();
+    try {
+      final String sql =
+          "SELECT DISTINCT r.uuid AS reports_uuid, r.intent AS reports_intent from \"martImportedReports\" mir inner join reports r on mir.\"reportUuid\"  = r.uuid";
+      final Query query = handle.createQuery(sql);
+      return new AnetBeanList<>(query, 0, 0, new ReportMapper());
+    } finally {
+      closeDbHandle(handle);
+    }
+  }
+
+  private void addFilters(StringBuilder sql,
+      MartImportedReportSearchQuery martImportedReportSearchQuery) {
+    sql.append(" WHERE 1 = 1");
+    if (martImportedReportSearchQuery.getState() != null) {
+      sql.append(" AND \"state\" = ")
+          .append(DaoUtils.getEnumId(martImportedReportSearchQuery.getState()));
+    }
+    if (martImportedReportSearchQuery.getPersonUuid() != null) {
+      sql.append(" AND \"personUuid\" = '").append(martImportedReportSearchQuery.getPersonUuid())
+          .append("'");
+    }
+    if (martImportedReportSearchQuery.getReportUuid() != null) {
+      sql.append(" AND \"reportUuid\" = '").append(martImportedReportSearchQuery.getReportUuid())
+          .append("'");
+    }
+  }
+
+  private void addOrder(StringBuilder sql,
+      MartImportedReportSearchQuery martImportedReportSearchQuery) {
+    sql.append(" ORDER BY results.\"").append(martImportedReportSearchQuery.getSortBy())
+        .append("\" ").append(martImportedReportSearchQuery.getSortOrder());
+  }
+
+  private Query getQuery(Handle handle, StringBuilder sql,
+      MartImportedReportSearchQuery martImportedReportSearchQuery) {
+    if (martImportedReportSearchQuery.getPageSize() > 0) {
+      sql.append(" OFFSET :offset LIMIT :limit");
+    }
+    final Query query = handle.createQuery(sql);
+    if (martImportedReportSearchQuery.getPageSize() > 0) {
+      query
+          .bind("offset",
+              martImportedReportSearchQuery.getPageSize()
+                  * martImportedReportSearchQuery.getPageNum())
+          .bind("limit", martImportedReportSearchQuery.getPageSize());
+    }
+    return query;
+  }
 }

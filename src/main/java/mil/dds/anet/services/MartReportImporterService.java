@@ -19,6 +19,7 @@ import java.util.Objects;
 import java.util.Optional;
 import microsoft.exchange.webservices.data.property.complex.FileAttachment;
 import mil.dds.anet.beans.Attachment;
+import mil.dds.anet.beans.Comment;
 import mil.dds.anet.beans.EmailAddress;
 import mil.dds.anet.beans.GenericRelatedObject;
 import mil.dds.anet.beans.Location;
@@ -29,10 +30,13 @@ import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.WithStatus;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.mart.MartImportedReport;
 import mil.dds.anet.beans.mart.ReportDto;
 import mil.dds.anet.beans.search.LocationSearchQuery;
+import mil.dds.anet.beans.search.MartImportedReportSearchQuery;
 import mil.dds.anet.database.AttachmentDao;
+import mil.dds.anet.database.CommentDao;
 import mil.dds.anet.database.EmailAddressDao;
 import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.database.MartImportedReportDao;
@@ -71,11 +75,12 @@ public class MartReportImporterService implements IMartReportImporterService {
   private final MartImportedReportDao martImportedReportDao;
   private final AttachmentDao attachmentDao;
   private final EmailAddressDao emailAddressDao;
+  private final CommentDao commentDao;
 
   public MartReportImporterService(ReportDao reportDao, PersonDao personDao,
       PositionDao positionDao, TaskDao taskDao, OrganizationDao organizationDao,
       LocationDao locationDao, MartImportedReportDao martImportedReportDao,
-      AttachmentDao attachmentDao, EmailAddressDao emailAddressDao) {
+      AttachmentDao attachmentDao, EmailAddressDao emailAddressDao, CommentDao commentDao) {
     this.reportDao = reportDao;
     this.personDao = personDao;
     this.positionDao = positionDao;
@@ -85,6 +90,7 @@ public class MartReportImporterService implements IMartReportImporterService {
     this.martImportedReportDao = martImportedReportDao;
     this.attachmentDao = attachmentDao;
     this.emailAddressDao = emailAddressDao;
+    this.commentDao = commentDao;
   }
 
   @Override
@@ -112,22 +118,25 @@ public class MartReportImporterService implements IMartReportImporterService {
       newMartImportedReport.setReceivedAt(Instant.now());
 
       // First check, is this report uuid in MartImportedReports table already?
-      final MartImportedReport existingMartImportedReport =
-          martImportedReportDao.getByReportUuid(reportDto.getUuid());
+      MartImportedReportSearchQuery query = new MartImportedReportSearchQuery();
+      query.setReportUuid(reportDto.getUuid());
+      final AnetBeanList<MartImportedReport> existingMartImportedReportSequences =
+          martImportedReportDao.getMartImportedReportHistory(query);
 
-      if (existingMartImportedReport == null) {
+      if (existingMartImportedReportSequences.getTotalCount() == 0) {
         // New report, import
         logger.info("Report with UUID={} will be imported", reportDto.getUuid());
         processReportInfo(reportDto, newMartImportedReport, attachments);
         martImportedReportDao.insert(newMartImportedReport);
-      } else if (!existingMartImportedReport.isSuccess()) {
-        // This report was marked as failed or missing earlier, import
+      } else if (existingMartImportedReportSequences.getList().get(0)
+          .getState() != MartImportedReport.State.SUBMITTED_OK) {
+        // This report was last marked as failed or missing earlier, re-import
         logger.info("Report with UUID={} will be imported", reportDto.getUuid());
         processReportInfo(reportDto, newMartImportedReport, attachments);
-        if (Objects.equals(existingMartImportedReport.getSequence(),
+        if (Objects.equals(existingMartImportedReportSequences.getList().get(0).getSequence(),
             newMartImportedReport.getSequence())) {
           // Replace existing import record
-          martImportedReportDao.delete(existingMartImportedReport);
+          martImportedReportDao.delete(existingMartImportedReportSequences.getList().get(0));
         }
         martImportedReportDao.insert(newMartImportedReport);
       } else {
@@ -304,27 +313,32 @@ public class MartReportImporterService implements IMartReportImporterService {
         .filter(attachment -> !attachment.getName().equalsIgnoreCase(REPORT_JSON_ATTACHMENT))
         .toList(), anetReport, errors);
 
-    // Submit the report only if no errors happened, otherwise stays in DRAFT state
-    if (errors.isEmpty()) {
-      try {
-        reportDao.submit(anetReport, anetReport.getReportPeople().get(0));
-        martImportedReport.setSuccess(true);
-      } catch (Exception e) {
-        logger.error("Could not submit report with UUID={}", martReport.getUuid(), e);
-        errors.add(String.format("Could not submit report with UUID: %s error: %s",
-            martReport.getUuid(), e.getMessage()));
-      }
-    }
-
     // Complete the MART imported report record
     martImportedReport.setReport(anetReport);
     martImportedReport.setPerson(anetReport.getReportPeople().get(0));
 
-    // Set errors
-    if (!errors.isEmpty()) {
+    // Check errors to determine whether to submit or not and marImportedReport state
+    if (errors.isEmpty()) {
+      // All good, submit without warnings
+      reportDao.submit(anetReport, anetReport.getReportPeople().get(0));
+      martImportedReport.setState(MartImportedReport.State.SUBMITTED_OK);
+    } else {
       String errorMsg = String.format("While importing report %s:", martReport.getUuid())
           + String.format("<ul><li>%s</li></ul>", String.join("</li><li>", errors));
       martImportedReport.setErrors(errorMsg);
+      // Also add a comment to the report with the errors
+      Comment comment = new Comment();
+      comment.setText(errorMsg);
+      comment.setAuthor(anetReport.getReportPeople().get(0));
+      comment.setReportUuid(anetReport.getUuid());
+      commentDao.insert(comment);
+      // Submit the report only if the submitter organization is there
+      if (organization != null) {
+        reportDao.submit(anetReport, anetReport.getReportPeople().get(0));
+        martImportedReport.setState(MartImportedReport.State.SUBMITTED_WARNINGS);
+      } else {
+        martImportedReport.setState(MartImportedReport.State.NOT_SUBMITTED);
+      }
     }
   }
 
