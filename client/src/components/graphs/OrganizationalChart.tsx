@@ -686,6 +686,13 @@ const ControlsContainer = styled.div`
     }
   }
 `
+const CustomOrgLinkS = styled.div`
+  span {
+    display: flex;
+    height: ${NODE_HEIGHT}px;
+    overflow: hidden;
+  }
+`
 
 const CustomNode = ({
   data: { organization, symbolValues, depth, positions, showSymbol }
@@ -728,18 +735,21 @@ const CustomNode = ({
           />
         )}
       </div>
-      <LinkTo
-        modelType="Organization"
-        model={organization}
-        showAvatar={false}
-        showIcon={false}
-        style={{
-          minHeight: NODE_HEIGHT,
-          display: "flex",
-          padding: "5px 0px 5px 5px",
-          alignItems: "center"
-        }}
-      />
+      <CustomOrgLinkS>
+        <LinkTo
+          modelType="Organization"
+          model={organization}
+          showAvatar={false}
+          showIcon={false}
+          style={{
+            display: "-webkit-box",
+            WebkitLineClamp: 3,
+            WebkitBoxOrient: "vertical",
+            margin: "auto",
+            paddingLeft: 5
+          }}
+        />
+      </CustomOrgLinkS>
     </div>
     {positions.length > 0 && (
       <div
