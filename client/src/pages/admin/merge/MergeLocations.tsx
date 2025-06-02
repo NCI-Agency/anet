@@ -16,6 +16,7 @@ import {
   DEFAULT_CUSTOM_FIELDS_PARENT,
   MODEL_TO_OBJECT_TYPE
 } from "components/Model"
+import NavigationWarning from "components/NavigationWarning"
 import {
   jumpToTop,
   mapPageDispatchersToProps,
@@ -65,6 +66,7 @@ const MergeLocations = ({ pageDispatchers }: MergeLocationsProps) => {
   const navigate = useNavigate()
   const { state } = useLocation()
   const initialLeftUuid = state?.initialLeftUuid
+  const [isDirty, setIsDirty] = useState(false)
   const [saveError, setSaveError] = useState(null)
   const [saveWarning, setSaveWarning] = useState(null)
   const [locationFormat, setLocationFormat] = useState(Location.locationFormat)
@@ -104,10 +106,15 @@ const MergeLocations = ({ pageDispatchers }: MergeLocationsProps) => {
     } else {
       setSaveWarning(null)
     }
+    setIsDirty(false)
   }, [location1, location2])
+  useEffect(() => {
+    setIsDirty(!!mergedLocation)
+  }, [mergedLocation])
 
   return (
     <Container fluid>
+      <NavigationWarning isBlocking={isDirty} />
       <Row>
         <Messages error={saveError} warning={saveWarning} />
         <h4>Merge Locations Tool</h4>
@@ -322,7 +329,10 @@ const MergeLocations = ({ pageDispatchers }: MergeLocationsProps) => {
         <Button
           style={{ width: "98%", margin: "16px 1%" }}
           variant="primary"
-          onClick={mergeLocations}
+          onClick={() => {
+            setIsDirty(false)
+            mergeLocations()
+          }}
           disabled={mergeState.notAllSet()}
         >
           Merge Locations
@@ -355,6 +365,7 @@ const MergeLocations = ({ pageDispatchers }: MergeLocationsProps) => {
         }
       })
       .catch(error => {
+        setIsDirty(true)
         setSaveError(error)
         jumpToTop()
       })
