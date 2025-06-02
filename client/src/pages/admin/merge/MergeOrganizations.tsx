@@ -22,6 +22,7 @@ import {
   GRAPHQL_NOTES_FIELDS,
   MODEL_TO_OBJECT_TYPE
 } from "components/Model"
+import NavigationWarning from "components/NavigationWarning"
 import {
   jumpToTop,
   mapPageDispatchersToProps,
@@ -43,7 +44,7 @@ import useMergeObjects, {
   setMergeable
 } from "mergeUtils"
 import { Location, Organization } from "models"
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { Button, Col, Container, Form, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useLocation, useNavigate } from "react-router-dom"
@@ -192,6 +193,7 @@ const MergeOrganizations = ({ pageDispatchers }: MergeOrganizationsProps) => {
   const navigate = useNavigate()
   const { state } = useLocation()
   const initialLeftUuid = state?.initialLeftUuid
+  const [isDirty, setIsDirty] = useState(false)
   const [saveError, setSaveError] = useState(null)
   const [mergeState, dispatchMergeActions] = useMergeObjects(
     MODEL_TO_OBJECT_TYPE.Organization
@@ -221,8 +223,16 @@ const MergeOrganizations = ({ pageDispatchers }: MergeOrganizationsProps) => {
     !Location.hasCoordinates(organization1?.location) &&
     !Location.hasCoordinates(organization2?.location)
 
+  useEffect(() => {
+    setIsDirty(false)
+  }, [organization1, organization2])
+  useEffect(() => {
+    setIsDirty(!!mergedOrganization)
+  }, [mergedOrganization])
+
   return (
     <Container fluid>
+      <NavigationWarning isBlocking={isDirty} />
       <Row>
         <Messages error={saveError} />
         <h4>Merge Organizations Tool</h4>
@@ -484,7 +494,10 @@ const MergeOrganizations = ({ pageDispatchers }: MergeOrganizationsProps) => {
         <Button
           style={{ width: "98%", margin: "16px 1%" }}
           intent="primary"
-          onClick={mergeOrganizations}
+          onClick={() => {
+            setIsDirty(false)
+            mergeOrganizations()
+          }}
           disabled={mergeState.notAllSet()}
         >
           Merge Organizations
@@ -522,6 +535,7 @@ const MergeOrganizations = ({ pageDispatchers }: MergeOrganizationsProps) => {
       })
       .catch(error => {
         setSaveError(error)
+        setIsDirty(true)
         jumpToTop()
       })
   }
