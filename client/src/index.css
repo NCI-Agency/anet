@@ -961,6 +961,13 @@ header.searchPagination {
   overflow-y: scroll;
 }
 
+#taskUuid-popover, #parentTaskUuid-popover {
+  min-width: 50vw;
+  & .bp5-icon {
+    color: #5f6b7c;
+  }
+}
+
 .advanced-search {
   padding: 15px;
 }
