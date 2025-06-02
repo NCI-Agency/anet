@@ -283,7 +283,7 @@ INSERT INTO positions (uuid, name, type, "superuserType", role, status, "current
   (uuid_generate_v4(), 'EF 2.2 Advisor D', 0, NULL, 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 2.2 Old and Inactive', 0, NULL, 0, 1, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('2b7d86a9-3ed4-4843-ab4e-136c3ab109bf', 'EF 2.2 Advisor Sewing Facilities', 0, NULL, 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 2.2 Advisor Local Kebabs', 0, NULL, 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('2867ef24-39cb-4c3f-b344-f58633f7a086', 'EF 2.2 Advisor Local Kebabs', 0, NULL, 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 2.2 Superuser', 2, 0, 1, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 2.2 Final Reviewer', 2, 0, 2, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 4.1 Advisor A', 0, NULL, 0, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),

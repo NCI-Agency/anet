@@ -10,7 +10,11 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import mil.dds.anet.database.PositionDao;
+import mil.dds.anet.resources.AttachmentResource;
 import mil.dds.anet.test.client.AnetBeanList_Organization;
+import mil.dds.anet.test.client.AttachmentInput;
+import mil.dds.anet.test.client.GenericRelatedObjectInput;
 import mil.dds.anet.test.client.OrganizationSearchQueryInput;
 import mil.dds.anet.test.client.Person;
 import mil.dds.anet.test.client.PersonInput;
@@ -21,6 +25,7 @@ import mil.dds.anet.test.client.PositionRole;
 import mil.dds.anet.test.client.PositionType;
 import mil.dds.anet.test.client.Status;
 import mil.dds.anet.test.resources.AbstractResourceTest;
+import mil.dds.anet.test.resources.PositionResourceTest;
 import org.junit.jupiter.api.Test;
 
 class PositionMergeTest extends AbstractResourceTest {
@@ -52,6 +57,18 @@ class PositionMergeTest extends AbstractResourceTest {
     assertThat(firstPosition).isNotNull();
     assertThat(firstPosition.getUuid()).isNotNull();
 
+    // Add an attachment
+    final GenericRelatedObjectInput loserPositionAttachment =
+        GenericRelatedObjectInput.builder().withRelatedObjectType(PositionDao.TABLE_NAME)
+            .withRelatedObjectUuid(firstPosition.getUuid()).build();
+    final AttachmentInput loserPositionAttachmentInput =
+        AttachmentInput.builder().withFileName("testLoserPositionAttachment.jpg")
+            .withMimeType(AttachmentResource.getAllowedMimeTypes().get(0))
+            .withAttachmentRelatedObjects(List.of(loserPositionAttachment)).build();
+    final String createdLoserPositionAttachmentUuid = withCredentials(adminUser,
+        t -> mutationExecutor.createAttachment("", loserPositionAttachmentInput));
+    assertThat(createdLoserPositionAttachmentUuid).isNotNull();
+
     final PositionInput secondPositionInput = PositionInput.builder()
         .withName("MergePositionsTest Second Position").withType(PositionType.REGULAR)
         .withRole(PositionRole.MEMBER).withOrganization(getOrganizationInput(orgs.getList().get(0)))
@@ -61,6 +78,18 @@ class PositionMergeTest extends AbstractResourceTest {
         t -> mutationExecutor.createPosition(FIELDS, secondPositionInput));
     assertThat(secondPosition).isNotNull();
     assertThat(secondPosition.getUuid()).isNotNull();
+
+    // Add an attachment
+    final GenericRelatedObjectInput winnerPositionAttachment =
+        GenericRelatedObjectInput.builder().withRelatedObjectType(PositionDao.TABLE_NAME)
+            .withRelatedObjectUuid(secondPosition.getUuid()).build();
+    final AttachmentInput winnerPositionAttachmentInput =
+        AttachmentInput.builder().withFileName("testLoserPositionAttachment.jpg")
+            .withMimeType(AttachmentResource.getAllowedMimeTypes().get(0))
+            .withAttachmentRelatedObjects(List.of(winnerPositionAttachment)).build();
+    final String createdWinnerPositionAttachmentUuid = withCredentials(adminUser,
+        t -> mutationExecutor.createAttachment("", winnerPositionAttachmentInput));
+    assertThat(createdWinnerPositionAttachmentUuid).isNotNull();
 
     final PersonPositionHistoryInput hist =
         PersonPositionHistoryInput.builder().withCreatedAt(Instant.now().minus(49, ChronoUnit.DAYS))
@@ -87,6 +116,11 @@ class PositionMergeTest extends AbstractResourceTest {
     } catch (Exception expectedException) {
       // OK
     }
+
+    // Check that attachments have been merged
+    final Position mergedPosition = withCredentials(adminUser,
+        t -> queryExecutor.position(PositionResourceTest.FIELDS, mergedPositionInput.getUuid()));
+    assertThat(mergedPosition.getAttachments()).hasSize(2);
   }
 
 }

@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
+import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.resources.AttachmentResource;
 import mil.dds.anet.test.client.AnetBeanList_Attachment;
@@ -21,6 +22,7 @@ import mil.dds.anet.test.client.LocationInput;
 import mil.dds.anet.test.client.LocationType;
 import mil.dds.anet.test.client.Organization;
 import mil.dds.anet.test.client.Person;
+import mil.dds.anet.test.client.Position;
 import mil.dds.anet.test.client.Report;
 import mil.dds.anet.test.client.ReportInput;
 import mil.dds.anet.test.client.ReportState;
@@ -418,6 +420,141 @@ public class AttachmentResourceTest extends AbstractResourceTest {
     organization =
         withCredentials(jackUser, t -> queryExecutor.organization(OBJECT_FIELDS, organizationUuid));
     assertThat(organization.getAttachments()).hasSize(nrOfAttachments - 3);
+  }
+
+  @Test
+  void testPositionAttachments() {
+    // Get test position
+    final Position testPosition = withCredentials(adminUser,
+        t -> queryExecutor.position(OBJECT_FIELDS, "2867ef24-39cb-4c3f-b344-f58633f7a086"));
+    assertThat(testPosition).isNotNull();
+    assertThat(testPosition.getUuid()).isNotNull();
+    final int nrOfAttachments = testPosition.getAttachments().size();
+
+    // Add attachment to test position
+    final AttachmentInput testAttachmentInput =
+        buildAttachment(PositionDao.TABLE_NAME, testPosition.getUuid());
+
+    // Test attachment create
+    final CreatePositionAttachmentsResult result =
+        testCreatePositionAttachments(testAttachmentInput);
+
+    // Check the position
+    final Position position = withCredentials(jackUser,
+        t -> queryExecutor.position(OBJECT_FIELDS, testPosition.getUuid()));
+    assertThat(position.getAttachments()).hasSize(nrOfAttachments + 3);
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    final Attachment superuserAttachment1 = position.getAttachments().stream()
+        .filter(a -> result.superuserAttachmentUuid1().equals(a.getUuid())).findAny().get();
+    assertAttachmentDetails(result.superuserAttachmentUuid1(), testAttachmentInput,
+        superuserAttachment1);
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    final Attachment superuserAttachment2 = position.getAttachments().stream()
+        .filter(a -> result.superuserAttachmentUuid2().equals(a.getUuid())).findAny().get();
+    assertAttachmentDetails(result.superuserAttachmentUuid2(), testAttachmentInput,
+        superuserAttachment2);
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    final Attachment adminAttachment = position.getAttachments().stream()
+        .filter(a -> result.adminAttachmentUuid().equals(a.getUuid())).findAny().get();
+    assertAttachmentDetails(result.adminAttachmentUuid(), testAttachmentInput, adminAttachment);
+
+    // Test attachment update
+    testUpdatePositionAttachments(position.getUuid(), position.getAttachments().size(),
+        superuserAttachment1, superuserAttachment2);
+
+    // Test attachment delete
+    testDeletePositionAttachments(position.getUuid(), position.getAttachments().size(),
+        superuserAttachment1, superuserAttachment2, adminAttachment);
+  }
+
+  private CreatePositionAttachmentsResult testCreatePositionAttachments(
+      AttachmentInput testAttachmentInput) {
+    // F - create attachment as normal user
+    failAttachmentCreate("erin", testAttachmentInput);
+
+    // F - create attachment as superuser of different organization
+    failAttachmentCreate("henry", testAttachmentInput);
+
+    // S - create attachment as superuser
+    final String superuserAttachmentUuid1 = succeedAttachmentCreate("rebecca", testAttachmentInput);
+    final String superuserAttachmentUuid2 = succeedAttachmentCreate("rebecca", testAttachmentInput);
+
+    // S - create attachment as admin
+    final String adminAttachmentUuid = succeedAttachmentCreate(adminUser, testAttachmentInput);
+
+    return new CreatePositionAttachmentsResult(superuserAttachmentUuid1, superuserAttachmentUuid2,
+        adminAttachmentUuid);
+  }
+
+  private record CreatePositionAttachmentsResult(String superuserAttachmentUuid1,
+      String superuserAttachmentUuid2, String adminAttachmentUuid) {
+  }
+
+  private void testUpdatePositionAttachments(final String positionUuid, final int nrOfAttachments,
+      final Attachment superuserAttachment1, final Attachment superuserAttachment2) {
+    // F - update attachment as normal user
+    superuserAttachment1.setFileName("erinUpdatedAttachment.jpg");
+    failAttachmentUpdate("erin", getInput(superuserAttachment1, AttachmentInput.class));
+
+    // F - update attachment as superuser of different organization
+    superuserAttachment1.setFileName("henryUpdatedAttachment.jpg");
+    failAttachmentUpdate("henry", getInput(superuserAttachment1, AttachmentInput.class));
+
+    // F - update attachment as different superuser
+    superuserAttachment1.setFileName("jacobUpdatedAttachment.jpg");
+    failAttachmentUpdate("jacob", getInput(superuserAttachment1, AttachmentInput.class));
+
+    // S - update attachment as superuser
+    superuserAttachment1.setFileName("rebeccaUpdatedAttachment.jpg");
+    succeedAttachmentUpdate("rebecca", getInput(superuserAttachment1, AttachmentInput.class));
+    Position position =
+        withCredentials(jackUser, t -> queryExecutor.position(OBJECT_FIELDS, positionUuid));
+    assertThat(position.getAttachments()).hasSize(nrOfAttachments);
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    final Attachment updatedSuperuserAttachment1 = position.getAttachments().stream()
+        .filter(a -> superuserAttachment1.getUuid().equals(a.getUuid())).findAny().get();
+    assertThat(updatedSuperuserAttachment1.getFileName())
+        .isEqualTo(superuserAttachment1.getFileName());
+
+    // S - update attachment as admin
+    superuserAttachment2.setFileName("adminUpdatedAttachment.jpg");
+    succeedAttachmentUpdate(adminUser, getInput(superuserAttachment2, AttachmentInput.class));
+    position = withCredentials(jackUser, t -> queryExecutor.position(OBJECT_FIELDS, positionUuid));
+    assertThat(position.getAttachments()).hasSize(nrOfAttachments);
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    final Attachment updatedSuperuserAttachment2 = position.getAttachments().stream()
+        .filter(a -> superuserAttachment2.getUuid().equals(a.getUuid())).findAny().get();
+    assertThat(updatedSuperuserAttachment2.getFileName())
+        .isEqualTo(superuserAttachment2.getFileName());
+  }
+
+  private void testDeletePositionAttachments(final String positionUuid, final int nrOfAttachments,
+      final Attachment superuserAttachment1, final Attachment superuserAttachment2,
+      final Attachment adminAttachment) {
+    // F - delete attachment as normal user
+    failAttachmentDelete("erin", superuserAttachment1.getUuid());
+
+    // F - delete attachment as superuser of different organization
+    failAttachmentDelete("henry", superuserAttachment1.getUuid());
+
+    // F - delete attachment as different superuser
+    failAttachmentDelete("jacob", superuserAttachment1.getUuid());
+
+    // S - delete attachment as superuser
+    succeedAttachmentDelete("rebecca", superuserAttachment1.getUuid());
+    Position position =
+        withCredentials(jackUser, t -> queryExecutor.position(OBJECT_FIELDS, positionUuid));
+    assertThat(position.getAttachments()).hasSize(nrOfAttachments - 1);
+
+    // S - delete superuser attachment as admin
+    succeedAttachmentDelete(adminUser, superuserAttachment2.getUuid());
+    position = withCredentials(jackUser, t -> queryExecutor.position(OBJECT_FIELDS, positionUuid));
+    assertThat(position.getAttachments()).hasSize(nrOfAttachments - 2);
+
+    // S - delete admin attachment as admin
+    succeedAttachmentDelete(adminUser, adminAttachment.getUuid());
+    position = withCredentials(jackUser, t -> queryExecutor.position(OBJECT_FIELDS, positionUuid));
+    assertThat(position.getAttachments()).hasSize(nrOfAttachments - 3);
   }
 
   @Test
