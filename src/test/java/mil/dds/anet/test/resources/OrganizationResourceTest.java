@@ -33,12 +33,19 @@ public class OrganizationResourceTest extends AbstractResourceTest {
   private static final String _EMAIL_ADDRESSES_FIELDS = "emailAddresses { network address }";
   public static final String FIELDS =
       String.format("{ uuid shortName longName status identificationCode profile location"
-          + " app6context app6standardIdentity app6symbolSet app6hq app6amplifier"
+          + " app6context app6standardIdentity app6symbolSet app6hq app6amplifier app6entity"
+          + " app6entityType app6entitySubtype app6sectorOneModifier app6sectorTwoModifier"
           + " customFields tasks { uuid } parentOrg { uuid }"
           + " approvalSteps { uuid name approvers { uuid } } %1$s }", _EMAIL_ADDRESSES_FIELDS);
   private static final String POSITION_FIELDS = String.format(
       "{ uuid name code type role status organization { uuid } location { uuid } %1$s }",
       _EMAIL_ADDRESSES_FIELDS);
+
+  private static final Map<String, String> APP6_MAP = Map.ofEntries(Map.entry("app6context", "0"),
+      Map.entry("app6standardIdentity", "3"), Map.entry("app6symbolSet", "10"),
+      Map.entry("app6hq", "1"), Map.entry("app6amplifier", "11"), Map.entry("app6entity", "11"),
+      Map.entry("app6entityType", "10"), Map.entry("app6entitySubtype", "01"),
+      Map.entry("app6sectorOneModifier", "01"), Map.entry("app6sectorTwoModifier", "01"));
 
   @Test
   void createAO() {
@@ -49,6 +56,11 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     aoInput.setApp6symbolSet(getApp6Choice("app6symbolSet"));
     aoInput.setApp6hq(getApp6Choice("app6hq"));
     aoInput.setApp6amplifier(getApp6Choice("app6amplifier"));
+    aoInput.setApp6entity(getApp6Choice("app6entity"));
+    aoInput.setApp6entityType(getApp6Choice("app6entityType"));
+    aoInput.setApp6entitySubtype(getApp6Choice("app6entitySubtype"));
+    aoInput.setApp6sectorOneModifier(getApp6Choice("app6sectorOneModifier"));
+    aoInput.setApp6sectorTwoModifier(getApp6Choice("app6sectorTwoModifier"));
     final Organization created =
         withCredentials(adminUser, t -> mutationExecutor.createOrganization(FIELDS, aoInput));
     assertThat(created).isNotNull();
@@ -62,6 +74,11 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(aoInput.getApp6symbolSet()).isEqualTo(created.getApp6symbolSet());
     assertThat(aoInput.getApp6hq()).isEqualTo(created.getApp6hq());
     assertThat(aoInput.getApp6amplifier()).isEqualTo(created.getApp6amplifier());
+    assertThat(aoInput.getApp6entity()).isEqualTo(created.getApp6entity());
+    assertThat(aoInput.getApp6entityType()).isEqualTo(created.getApp6entityType());
+    assertThat(aoInput.getApp6entitySubtype()).isEqualTo(created.getApp6entitySubtype());
+    assertThat(aoInput.getApp6sectorOneModifier()).isEqualTo(created.getApp6sectorOneModifier());
+    assertThat(aoInput.getApp6sectorTwoModifier()).isEqualTo(created.getApp6sectorTwoModifier());
     // update name of the AO
     created.setLongName("Ao McAoFace");
     Integer nrUpdated = withCredentials(adminUser,
@@ -202,10 +219,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
   }
 
   private String getApp6Choice(final String app6field) {
-    @SuppressWarnings("unchecked")
-    final Map<String, String> app6fieldChoices = (Map<String, String>) dict
-        .getDictionaryEntry("fields.organization." + app6field + ".choices");
-    return app6fieldChoices.keySet().stream().findFirst().orElse(null);
+    return APP6_MAP.get(app6field);
   }
 
   @Test

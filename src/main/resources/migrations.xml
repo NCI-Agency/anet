@@ -6338,6 +6338,15 @@
 		<dropColumn tableName="notes" columnName="type" />
 		<dropColumn tableName="notes" columnName="assessmentKey" />
 	</changeSet>
+	<changeSet id="add-additional-app6-fields-to-organizations" author="gjvoosten">
+		<addColumn tableName="organizations">
+			<column name="app6entity" type="varchar(255)" />
+			<column name="app6entityType" type="varchar(255)" />
+			<column name="app6entitySubtype" type="varchar(255)" />
+			<column name="app6sectorOneModifier" type="varchar(255)" />
+			<column name="app6sectorTwoModifier" type="varchar(255)" />
+		</addColumn>
+	</changeSet>
 
 	<!-- Keep this change set as the last one in the change log;
 	     it will be re-run whenever it changes. -->

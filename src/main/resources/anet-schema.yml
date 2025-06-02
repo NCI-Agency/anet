@@ -1077,7 +1077,8 @@ properties:
         additionalProperties: false
         required: [status, shortName, longName, identificationCode, type, parentOrg, childrenOrgs,
                    location, administratingPositions, profile, app6context, app6standardIdentity, app6symbolSet, app6hq,
-                   app6amplifier, emailAddresses, authorizationGroups]
+                   app6amplifier, app6entity, app6entityType, app6entitySubtype, app6sectorOneModifier, app6sectorTwoModifier,
+                   emailAddresses, authorizationGroups]
         properties:
           status:
             "$ref": "#/$defs/labeledField"
@@ -1110,15 +1111,25 @@ properties:
           profile:
             "$ref": "#/$defs/inputField"
           app6context:
-            "$ref": "#/$defs/choiceField"
+            "$ref": "#/$defs/labeledField"
           app6standardIdentity:
-            "$ref": "#/$defs/choiceField"
+            "$ref": "#/$defs/labeledField"
           app6symbolSet:
-            "$ref": "#/$defs/choiceField"
+            "$ref": "#/$defs/labeledField"
           app6hq:
-            "$ref": "#/$defs/choiceField"
+            "$ref": "#/$defs/labeledField"
           app6amplifier:
-            "$ref": "#/$defs/choiceField"
+            "$ref": "#/$defs/labeledField"
+          app6entity:
+            "$ref": "#/$defs/labeledField"
+          app6entityType:
+            "$ref": "#/$defs/labeledField"
+          app6entitySubtype:
+            "$ref": "#/$defs/labeledField"
+          app6sectorOneModifier:
+            "$ref": "#/$defs/labeledField"
+          app6sectorTwoModifier:
+            "$ref": "#/$defs/labeledField"
           emailAddresses:
             "$ref": "#/$defs/restrictableLabeledField"
           authorizationGroups:

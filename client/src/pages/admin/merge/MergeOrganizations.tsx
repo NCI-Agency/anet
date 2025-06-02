@@ -5,6 +5,8 @@ import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
 import { OrganizationSimpleOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
+import { fieldsList as app6fieldsList } from "components/App6Symbol"
+import App6SymbolPreview from "components/App6SymbolPreview"
 import ApprovalSteps from "components/approvals/ApprovalSteps"
 import EntityAvatarDisplay from "components/avatar/EntityAvatarDisplay"
 import { customFieldsJSONString } from "components/CustomFields"
@@ -15,6 +17,9 @@ import MergeField from "components/MergeField"
 import Messages from "components/Messages"
 import {
   DEFAULT_CUSTOM_FIELDS_PARENT,
+  GRAPHQL_ASSESSMENTS_FIELDS,
+  GRAPHQL_ENTITY_AVATAR_FIELDS,
+  GRAPHQL_NOTES_FIELDS,
   MODEL_TO_OBJECT_TYPE
 } from "components/Model"
 import {
@@ -46,10 +51,107 @@ import ORGANIZATIONS_ICON from "resources/organizations.png"
 import Settings from "settings"
 import utils from "utils"
 
+const ALL_ORG_FIELDS = `
+  uuid
+  status
+  shortName
+  longName
+  profile
+  identificationCode
+  ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+  app6context
+  app6standardIdentity
+  app6symbolSet
+  app6hq
+  app6amplifier
+  app6entity
+  app6entityType
+  app6entitySubtype
+  app6sectorOneModifier
+  app6sectorTwoModifier
+  parentOrg {
+    uuid
+    shortName
+    longName
+    identificationCode
+    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+  }
+  ascendantOrgs {
+    uuid
+    app6context
+    app6standardIdentity
+    app6symbolSet
+    parentOrg {
+      uuid
+    }
+  }
+  childrenOrgs {
+    uuid
+    shortName
+    longName
+    identificationCode
+  }
+  location {
+    uuid
+    name
+    lat
+    lng
+    type
+  }
+  emailAddresses {
+    network
+    address
+  }
+  planningApprovalSteps {
+    uuid
+    name
+    approvers {
+      uuid
+      name
+      person {
+        uuid
+        name
+        rank
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+      }
+    }
+  }
+  approvalSteps {
+    uuid
+    name
+    approvers {
+      uuid
+      name
+      person {
+        uuid
+        name
+        rank
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+      }
+    }
+  }
+  administratingPositions {
+    uuid
+    name
+    code
+    type
+    role
+    person {
+      uuid
+      name
+      rank
+      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
+    }
+  }
+  customFields
+  ${GRAPHQL_ASSESSMENTS_FIELDS}
+  ${GRAPHQL_NOTES_FIELDS}
+`
+
 const GQL_GET_ORGANIZATION = gql`
   query ($uuid: String!) {
     organization(uuid: $uuid) {
-      ${Organization.allFieldsQuery}
+      ${ALL_ORG_FIELDS}
     }
   }
 `
@@ -62,6 +164,25 @@ const GQL_MERGE_ORGANIZATION = gql`
     )
   }
 `
+
+const combinedApp6SymbologyLabel = "APP-06"
+const combinedApp6SymbologyField = "combinedApp6Symbology"
+
+function setCombinedApp6Symbology(org) {
+  if (org) {
+    org[combinedApp6SymbologyField] = Object.fromEntries(
+      app6fieldsList.map(fieldName => [fieldName, org[fieldName]])
+    )
+    const { parentContext, parentStandardIdentity, parentSymbolSet } =
+      Organization.getApp6ParentFields(org, org)
+    org[combinedApp6SymbologyField].app6context =
+      org.app6context || parentContext
+    org[combinedApp6SymbologyField].app6standardIdentity =
+      org.app6standardIdentity || parentStandardIdentity
+    org[combinedApp6SymbologyField].app6symbolSet =
+      org.app6symbolSet || parentSymbolSet
+  }
+}
 
 interface MergeOrganizationsProps {
   pageDispatchers?: PageDispatchersPropType
@@ -89,6 +210,7 @@ const MergeOrganizations = ({ pageDispatchers }: MergeOrganizationsProps) => {
     }).then(data => {
       const organization = new Organization(data.organization)
       organization.fixupFields()
+      setCombinedApp6Symbology(organization)
       dispatchMergeActions(setMergeable(organization, MERGE_SIDES.LEFT))
     })
   }
@@ -266,72 +388,21 @@ const MergeOrganizations = ({ pageDispatchers }: MergeOrganizationsProps) => {
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
-              <DictionaryField
-                wrappedComponent={MergeField}
-                dictProps={Settings.fields.organization.app6context}
+              <MergeField
+                label={combinedApp6SymbologyLabel}
                 value={
-                  Settings.fields.organization.app6context.choices[
-                    mergedOrganization.app6context
-                  ]
+                  mergedOrganization[combinedApp6SymbologyField] && (
+                    <App6SymbolPreview
+                      values={{
+                        ...mergedOrganization[combinedApp6SymbologyField]
+                      }}
+                      size={120}
+                      maxHeight={200}
+                    />
+                  )
                 }
                 align={ALIGN_OPTIONS.CENTER}
-                fieldName="app6context"
-                mergeState={mergeState}
-                dispatchMergeActions={dispatchMergeActions}
-              />
-
-              <DictionaryField
-                wrappedComponent={MergeField}
-                dictProps={Settings.fields.organization.app6standardIdentity}
-                value={
-                  Settings.fields.organization.app6standardIdentity.choices[
-                    [mergedOrganization.app6standardIdentity]
-                  ]
-                }
-                align={ALIGN_OPTIONS.CENTER}
-                fieldName="app6standardIdentity"
-                mergeState={mergeState}
-                dispatchMergeActions={dispatchMergeActions}
-              />
-
-              <DictionaryField
-                wrappedComponent={MergeField}
-                dictProps={Settings.fields.organization.app6symbolSet}
-                value={
-                  Settings.fields.organization.app6symbolSet.choices[
-                    mergedOrganization.app6symbolSet
-                  ]
-                }
-                align={ALIGN_OPTIONS.CENTER}
-                fieldName="app6symbolSet"
-                mergeState={mergeState}
-                dispatchMergeActions={dispatchMergeActions}
-              />
-
-              <DictionaryField
-                wrappedComponent={MergeField}
-                dictProps={Settings.fields.organization.app6hq}
-                value={
-                  Settings.fields.organization.app6hq.choices[
-                    mergedOrganization.app6hq
-                  ]
-                }
-                align={ALIGN_OPTIONS.CENTER}
-                fieldName="app6hq"
-                mergeState={mergeState}
-                dispatchMergeActions={dispatchMergeActions}
-              />
-
-              <DictionaryField
-                wrappedComponent={MergeField}
-                dictProps={Settings.fields.organization.app6amplifier}
-                value={
-                  Settings.fields.organization.app6amplifier.choices[
-                    mergedOrganization.app6amplifier
-                  ]
-                }
-                align={ALIGN_OPTIONS.CENTER}
-                fieldName="app6amplifier"
+                fieldName={combinedApp6SymbologyField}
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
@@ -431,8 +502,10 @@ const MergeOrganizations = ({ pageDispatchers }: MergeOrganizationsProps) => {
         ? organization2
         : organization1
     mergedOrganization.customFields = customFieldsJSONString(mergedOrganization)
-    const winnerOrganization =
-      Organization.filterClientSideFields(mergedOrganization)
+    const winnerOrganization = Organization.filterClientSideFields(
+      mergedOrganization,
+      combinedApp6SymbologyField
+    )
     API.mutation(GQL_MERGE_ORGANIZATION, {
       loserUuid: loser.uuid,
       winnerOrganization
@@ -510,11 +583,12 @@ const OrganizationColumn = ({
           filterDefs={organizationsFilters}
           onChange={value => {
             value?.fixupFields()
+            setCombinedApp6Symbology(value)
             dispatchMergeActions(setMergeable(value, align))
           }}
           objectType={Organization}
           valueKey="shortName"
-          fields={Organization.allFieldsQuery}
+          fields={ALL_ORG_FIELDS}
           addon={ORGANIZATIONS_ICON}
           disabled={disabled}
           showRemoveButton={!disabled}
@@ -549,6 +623,7 @@ const OrganizationColumn = ({
               )
             }}
             mergeState={mergeState}
+            autoMerge
             dispatchMergeActions={dispatchMergeActions}
           />
           <DictionaryField
@@ -697,106 +772,31 @@ const OrganizationColumn = ({
             autoMerge
             dispatchMergeActions={dispatchMergeActions}
           />
-          <DictionaryField
-            wrappedComponent={MergeField}
-            dictProps={Settings.fields.organization.app6context}
-            fieldName="app6context"
+          <MergeField
+            label={combinedApp6SymbologyLabel}
+            fieldName={combinedApp6SymbologyField}
             value={
-              Settings.fields.organization.app6context.choices[
-                organization.app6context
-              ]
+              <App6SymbolPreview
+                values={organization}
+                size={120}
+                maxHeight={200}
+              />
             }
             align={align}
             action={() => {
-              dispatchMergeActions(
-                setAMergedField("app6context", organization.app6context, align)
-              )
-            }}
-            mergeState={mergeState}
-            autoMerge
-            dispatchMergeActions={dispatchMergeActions}
-          />
-          <DictionaryField
-            wrappedComponent={MergeField}
-            dictProps={Settings.fields.organization.app6standardIdentity}
-            fieldName="app6standardIdentity"
-            value={
-              Settings.fields.organization.app6standardIdentity.choices[
-                [organization.app6standardIdentity]
-              ]
-            }
-            align={align}
-            action={() => {
-              dispatchMergeActions(
-                setAMergedField(
-                  "app6standardIdentity",
-                  organization.app6standardIdentity,
-                  align
+              app6fieldsList.forEach(fieldName => {
+                dispatchMergeActions(
+                  setAMergedField(
+                    fieldName,
+                    organization[combinedApp6SymbologyField][fieldName],
+                    align
+                  )
                 )
-              )
-            }}
-            mergeState={mergeState}
-            autoMerge
-            dispatchMergeActions={dispatchMergeActions}
-          />
-
-          <DictionaryField
-            wrappedComponent={MergeField}
-            dictProps={Settings.fields.organization.app6symbolSet}
-            fieldName="app6symbolSet"
-            value={
-              Settings.fields.organization.app6symbolSet.choices[
-                organization.app6symbolSet
-              ]
-            }
-            align={align}
-            action={() => {
+              })
               dispatchMergeActions(
                 setAMergedField(
-                  "app6symbolSet",
-                  organization.app6symbolSet,
-                  align
-                )
-              )
-            }}
-            mergeState={mergeState}
-            autoMerge
-            dispatchMergeActions={dispatchMergeActions}
-          />
-
-          <DictionaryField
-            wrappedComponent={MergeField}
-            dictProps={Settings.fields.organization.app6hq}
-            fieldName="app6hq"
-            value={
-              Settings.fields.organization.app6hq.choices[organization.app6hq]
-            }
-            align={align}
-            action={() => {
-              dispatchMergeActions(
-                setAMergedField("app6hq", organization.app6hq, align)
-              )
-            }}
-            mergeState={mergeState}
-            autoMerge
-            dispatchMergeActions={dispatchMergeActions}
-          />
-
-          <DictionaryField
-            wrappedComponent={MergeField}
-            dictProps={Settings.fields.organization.app6amplifier}
-            fieldName="app6amplifier"
-            value={
-              Settings.fields.organization.app6amplifier.choices[
-                organization.app6amplifier
-              ]
-            }
-            align={align}
-            action={() => {
-              dispatchMergeActions(
-                setAMergedField(
-                  "app6amplifier",
-                  organization.app6amplifier,
+                  combinedApp6SymbologyField,
+                  organization[combinedApp6SymbologyField],
                   align
                 )
               )
