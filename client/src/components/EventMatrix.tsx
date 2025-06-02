@@ -147,14 +147,14 @@ const EventMatrix = ({
     }
     const eventQuery = {
       pageSize: 0,
-      startDate: weekDays[0].valueOf(),
-      endDate: weekDays[6].endOf("day").valueOf()
+      startDate: weekDays[0].toISOString(),
+      endDate: weekDays[6].endOf("day").toISOString()
     }
     const reportQuery = {
       taskUuid: taskUuid ? [taskUuid] : (tasks?.map(t => t.uuid) ?? []),
       pageSize: 0,
-      engagementDateStart: weekDays[0].valueOf(),
-      engagementDateEnd: weekDays[6].endOf("day").valueOf()
+      engagementDateStart: weekDays[0].toISOString(),
+      engagementDateEnd: weekDays[6].endOf("day").toISOString()
     }
     fetchEventsAndReports(eventQuery, reportQuery).then(response => {
       setEvents(response?.eventList?.list)

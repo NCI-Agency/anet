@@ -330,8 +330,8 @@ const BaseDecisivesDashboardImpl = ({
   function setDecisivesDefaultSearchQuery() {
     const queryParams = {
       state: [Report.STATE.PUBLISHED],
-      engagementDateStart: moment().subtract(8, "d").endOf("day").valueOf(),
-      engagementDateEnd: moment().subtract(1, "d").endOf("day").valueOf()
+      engagementDateStart: moment().subtract(8, "d").endOf("day").toISOString(),
+      engagementDateEnd: moment().subtract(1, "d").endOf("day").toISOString()
     }
     deserializeQueryParams(
       SEARCH_OBJECT_TYPES.REPORTS,
