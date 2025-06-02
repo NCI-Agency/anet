@@ -133,6 +133,7 @@ const TEXT_GAP = 10
 const NODE_WIDTH = ORG_AVATAR_WIDTH / 2 + TEXT_GAP + TEXT_WIDTH
 const NODE_HEIGHT = 60
 const VERTICAL_SPACING = 20
+const NODE_SPACING = 10
 const HORIZONTAL_SPACING = 10
 const LEVEL_INDENT = 60
 const PERSON_AVATAR_HEIGHT = 42
@@ -338,7 +339,10 @@ const OrganizationFlowChart = ({
       if (children.length > 0) {
         let childX = currentX + (isRoot ? 0 : LEVEL_INDENT)
         let childY =
-          currentY + NODE_HEIGHT + positions.length * PERSON_AVATAR_HEIGHT
+          currentY +
+          NODE_HEIGHT +
+          positions.length * PERSON_AVATAR_HEIGHT +
+          NODE_SPACING
         children.forEach(child => {
           // first level nodes are placed horizontally
           if (isRoot) {
@@ -387,7 +391,7 @@ const OrganizationFlowChart = ({
           })
 
           if (!isRoot) {
-            childY += NODE_HEIGHT + VERTICAL_SPACING
+            childY += NODE_HEIGHT + VERTICAL_SPACING + NODE_SPACING
           }
         })
       }
