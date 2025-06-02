@@ -104,10 +104,6 @@ const MergePeople = ({ pageDispatchers }: MergePeopleProps) => {
   }, [person1, person2])
   useEffect(() => {
     setIsDirty(!!mergedPerson && Object.keys(mergedPerson).length > 1)
-    console.log("Merged Person:", mergedPerson)
-    if (mergedPerson) {
-      console.log(Object.keys(mergedPerson).length)
-    }
   }, [mergedPerson])
 
   return (
