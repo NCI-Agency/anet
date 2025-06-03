@@ -4,6 +4,7 @@ import API from "api"
 import AppContext from "components/AppContext"
 import AssignPersonModal from "components/AssignPersonModal"
 import AssociatedPositions from "components/AssociatedPositions"
+import AttachmentsDetailView from "components/Attachment/AttachmentsDetailView"
 import AuthorizationGroupTable from "components/AuthorizationGroupTable"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import { ReadonlyCustomFields } from "components/CustomFields"
@@ -31,9 +32,9 @@ import {
 import RelatedObjectNotes from "components/RelatedObjectNotes"
 import RichTextEditor from "components/RichTextEditor"
 import { Field, Form, Formik } from "formik"
-import { Location, Position } from "models"
+import { Attachment, Location, Position } from "models"
 import { positionTour } from "pages/GuidedTour"
-import React, { useContext, useState } from "react"
+import React, { useContext, useEffect, useState } from "react"
 import { Badge, Button } from "react-bootstrap"
 import { connect } from "react-redux"
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom"
@@ -49,6 +50,9 @@ const GQL_GET_POSITION = gql`
         uuid
         name
         description
+      }
+      attachments {
+        ${Attachment.basicFieldsQuery}
       }
     }
   }
@@ -81,6 +85,7 @@ const PositionShow = ({ pageDispatchers }: PositionShowProps) => {
   const [stateError, setStateError] = useState(
     routerLocation.state && routerLocation.state.error
   )
+  const [attachments, setAttachments] = useState([])
   const [
     showOrganizationsAdministratedModal,
     setShowOrganizationsAdministratedModal
@@ -99,6 +104,9 @@ const PositionShow = ({ pageDispatchers }: PositionShowProps) => {
     pageDispatchers
   })
   usePageTitle(data?.position?.name)
+  useEffect(() => {
+    setAttachments(data?.position?.attachments || [])
+  }, [data])
   if (done) {
     return result
   }
@@ -121,6 +129,7 @@ const PositionShow = ({ pageDispatchers }: PositionShowProps) => {
       currentUser.hasAdministrativePermissionsForOrganization(
         position.organization
       ))
+  const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
   const canDelete =
     isAdmin &&
     position.status === Model.STATUS.INACTIVE &&
@@ -318,6 +327,22 @@ const PositionShow = ({ pageDispatchers }: PositionShowProps) => {
                     <RichTextEditor readOnly value={position.description} />
                   }
                 />
+                {attachmentsEnabled && (
+                  <Field
+                    name="attachments"
+                    label="Attachments"
+                    component={FieldHelper.ReadonlyField}
+                    humanValue={
+                      <AttachmentsDetailView
+                        attachments={attachments}
+                        updateAttachments={setAttachments}
+                        relatedObjectType={Position.relatedObjectType}
+                        relatedObjectUuid={values.uuid}
+                        allowEdit={canEdit}
+                      />
+                    }
+                  />
+                )}
               </Fieldset>
 
               {Settings.fields.position.customFields && (

@@ -283,7 +283,7 @@ INSERT INTO positions (uuid, name, type, "superuserType", role, status, "current
   (uuid_generate_v4(), 'EF 2.2 Advisor D', 0, NULL, 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 2.2 Old and Inactive', 0, NULL, 0, 1, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   ('2b7d86a9-3ed4-4843-ab4e-136c3ab109bf', 'EF 2.2 Advisor Sewing Facilities', 0, NULL, 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (uuid_generate_v4(), 'EF 2.2 Advisor Local Kebabs', 0, NULL, 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('2867ef24-39cb-4c3f-b344-f58633f7a086', 'EF 2.2 Advisor Local Kebabs', 0, NULL, 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 2.2 Superuser', 2, 0, 1, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 2.2 Final Reviewer', 2, 0, 2, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (uuid_generate_v4(), 'EF 4.1 Advisor A', 0, NULL, 0, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
@@ -1465,6 +1465,12 @@ INSERT INTO attachments (uuid, "authorUuid", "fileName", "caption", "mimeType", 
     ('426bf11a-5124-4468-8b66-edb3ae130bc0', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'attachEvent.png', '456', 'image/png', lo_import('/var/tmp/assets/default_avatar.png'), 2928, 'We can add attachments to an event', 'public', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "relatedObjectUuid") VALUES
     ('426bf11a-5124-4468-8b66-edb3ae130bc0', 'events', 'e850846e-9741-40e8-bc51-4dccc30cf47f');
+
+-- Add attachments for positions
+INSERT INTO attachments (uuid, "authorUuid", "fileName", "caption", "mimeType", content, "contentLength", "description", "classification", "createdAt", "updatedAt") VALUES
+    ('1d234036-1d6c-4cb0-8b1a-e4305aeca1e2', '87fdbc6a-3109-4e11-9702-a894d6ca31ef', 'attachPosition.png', 'EF 1.1 Advisor G', 'image/png', lo_import('/var/tmp/assets/default_avatar.png'), 2928, 'We can add attachments to a position', 'public', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "attachmentRelatedObjects" ("attachmentUuid", "relatedObjectType", "relatedObjectUuid") VALUES
+    ('1d234036-1d6c-4cb0-8b1a-e4305aeca1e2', 'positions', '888d6c4b-deaa-4218-b8fd-abfb7c81a4c6');
 
 -- Add entity avatars for event series
 INSERT INTO "entityAvatars" ("relatedObjectType", "relatedObjectUuid", "attachmentUuid", "applyCrop", "cropLeft", "cropTop", "cropWidth", "cropHeight") VALUES

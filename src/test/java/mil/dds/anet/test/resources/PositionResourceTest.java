@@ -49,8 +49,9 @@ public class PositionResourceTest extends AbstractResourceTest {
   public static final String FIELDS = String.format(
       "{ %1$s person { %2$s } organization { %3$s } associatedPositions { uuid }"
           + " previousPeople { createdAt startTime endTime position { uuid }"
-          + " person { uuid name rank } } }",
-      _POSITION_FIELDS, _PERSON_FIELDS, _ORGANIZATION_FIELDS);
+          + " person { uuid name rank } } attachments %4$s }",
+      _POSITION_FIELDS, _PERSON_FIELDS, _ORGANIZATION_FIELDS,
+      AttachmentResourceTest.ATTACHMENT_FIELDS);
   private static final String PA_FIELDS =
       "{ uuid associatedPositions { uuid } responsibleTasks(query: ?responsibleTasksQuery) { uuid } }";
 

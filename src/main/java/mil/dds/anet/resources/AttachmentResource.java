@@ -29,6 +29,7 @@ import mil.dds.anet.database.EventSeriesDao;
 import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
+import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
@@ -295,6 +296,8 @@ public class AttachmentResource {
         EventResource.hasPermission(user, relatedObject.getRelatedObjectUuid());
       case EventSeriesDao.TABLE_NAME ->
         EventSeriesResource.hasPermission(user, relatedObject.getRelatedObjectUuid());
+      case PositionDao.TABLE_NAME ->
+        PositionResource.hasPermission(user, relatedObject.getRelatedObjectUuid());
       // TODO: add other object types if and when attachments to them are allowed
       default -> false;
     };
