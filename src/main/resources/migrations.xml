@@ -6228,7 +6228,7 @@
 			<column name="sequence" type="bigint" />
 			<column name="personUuid" type="${uuid_type}" />
 			<column name="reportUuid" type="${uuid_type}" />
-			<column name="success" type="boolean" />
+			<column name="state" type="int" />
 			<column name="submittedAt" type="datetime" />
 			<column name="receivedAt" type="datetime" />
 			<column name="errors" type="text" />

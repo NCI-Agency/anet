@@ -12,7 +12,13 @@ import mil.dds.anet.beans.Report;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.views.UuidFetcher;
 
+
 public class MartImportedReport {
+
+  public enum State {
+    SUBMITTED_OK, SUBMITTED_WARNINGS, NOT_SUBMITTED, NOT_RECEIVED
+  }
+
   @GraphQLQuery
   private Long sequence;
   @GraphQLQuery
@@ -20,7 +26,7 @@ public class MartImportedReport {
   @GraphQLQuery
   private Instant receivedAt;
   @GraphQLQuery
-  private boolean success;
+  private State state;
   @GraphQLQuery
   private String errors;
 
@@ -60,12 +66,12 @@ public class MartImportedReport {
     this.receivedAt = receivedAt;
   }
 
-  public boolean isSuccess() {
-    return success;
+  public State getState() {
+    return state;
   }
 
-  public void setSuccess(boolean success) {
-    this.success = success;
+  public void setState(State state) {
+    this.state = state;
   }
 
   @JsonIgnore

@@ -16,7 +16,8 @@ public class MartImportedReportMapper implements RowMapper<MartImportedReport> {
     martImportedReport.setSubmittedAt(MapperUtils.getInstantAsLocalDateTime(rs, "submittedAt"));
     martImportedReport.setReceivedAt(MapperUtils.getInstantAsLocalDateTime(rs, "receivedAt"));
     martImportedReport.setSequence(rs.getLong("sequence"));
-    martImportedReport.setSuccess(rs.getBoolean("success"));
+    martImportedReport
+        .setState(MapperUtils.getEnumIdx(rs, "state", MartImportedReport.State.class));
     martImportedReport.setErrors(rs.getString("errors"));
 
     if (MapperUtils.containsColumnNamed(rs, "totalCount")) {
