@@ -1037,6 +1037,7 @@ type Position {
   customSensitiveInformation: [CustomSensitiveInformation]
   description: String
   emailAddresses(network: String): [EmailAddress]
+  entityAvatar: EntityAvatar
   isApprover: Boolean
   isSubscribed: Boolean
   location: Location
@@ -1064,6 +1065,7 @@ input PositionInput {
   customSensitiveInformation: [CustomSensitiveInformationInput]
   description: String
   emailAddresses: [EmailAddressInput]
+  entityAvatar: EntityAvatarInput
   location: LocationInput
   name: String
   organization: OrganizationInput
