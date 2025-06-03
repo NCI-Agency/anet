@@ -1,4 +1,4 @@
-import { DocumentNode, gql } from "@apollo/client"
+import { gql } from "@apollo/client"
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
@@ -44,54 +44,15 @@ const GQL_GET_MART_REPORTS_IMPORTED = gql`
         errors
       }
     }
-  }
-`
 
-const GQL_GET_MART_REPORTS_IMPORTED_HISTORY = gql`
-  query ($martImportedReportQuery: MartImportedReportSearchQueryInput) {
-    martImportedReportHistory(query: $martImportedReportQuery) {
-      pageNum
-      pageSize
-      totalCount
-      list {
-        person {
-          uuid
-          name
-          rank
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-        }
-        report {
-          uuid
-          intent
-        }
-        sequence
-        state
-        submittedAt
-        receivedAt
-        errors
-      }
-    }
-  }
-`
-
-const GQL_GET_UNIQUE_MART_REPORT_AUTHORS = gql`
-  query {
     uniqueMartReportAuthors {
-      list {
-        uuid
-        name
-      }
+      uuid
+      name
     }
-  }
-`
 
-const GQL_GET_UNIQUE_MART_REPORT_REPORTS = gql`
-  query {
     uniqueMartReportReports {
-      list {
-        uuid
-        intent
-      }
+      uuid
+      intent
     }
   }
 `
@@ -108,7 +69,7 @@ const FILTER_OPTIONS = [
 
 interface MartImportedReportTableProps {
   pageDispatchers?: PageDispatchersPropType
-  selectedReportUuid: string
+  selectedReportUuid?: string
   onSelectReport?: (...args: unknown[]) => unknown
 }
 
@@ -120,27 +81,11 @@ const MartImportedReportTable = ({
   usePageTitle("MART reports imported")
   const [pageNum, setPageNum] = useState(0)
   const [pageSize, setPageSize] = useState(DEFAULT_PAGESIZE)
-  const [sortBy, setSortBy] = useState("receivedAt")
+  const [sortBy, setSortBy] = useState("RECEIVED_AT")
   const [sortOrder, setSortOrder] = useState("DESC")
   const [selectedState, setSelectedState] = useState(undefined)
   const [filterByAuthorUuid, setFilterByAuthorUuid] = useState(undefined)
   const [filterByReportUuid, setFilterByReportUuid] = useState(undefined)
-
-  const { data: authorsData } = API.useApiQuery(
-    GQL_GET_UNIQUE_MART_REPORT_AUTHORS,
-    {}
-  )
-  const authors = authorsData?.uniqueMartReportAuthors.list || []
-
-  const { data: reportsData } = API.useApiQuery(
-    GQL_GET_UNIQUE_MART_REPORT_REPORTS,
-    {}
-  )
-  const reports = reportsData?.uniqueMartReportReports.list || []
-
-  const martImportedReportEndpoint: DocumentNode = selectedReportUuid
-    ? GQL_GET_MART_REPORTS_IMPORTED_HISTORY
-    : GQL_GET_MART_REPORTS_IMPORTED
 
   const martImportedReportQuery = {
     pageNum,
@@ -152,9 +97,12 @@ const MartImportedReportTable = ({
     sortOrder
   }
 
-  const { loading, error, data } = API.useApiQuery(martImportedReportEndpoint, {
-    martImportedReportQuery
-  })
+  const { loading, error, data } = API.useApiQuery(
+    GQL_GET_MART_REPORTS_IMPORTED,
+    {
+      martImportedReportQuery
+    }
+  )
 
   const { done, result } = useBoilerplate({
     loading,
@@ -168,9 +116,10 @@ const MartImportedReportTable = ({
     return result
   }
 
-  const { totalCount = 0, list: martImportedReports = [] } = selectedReportUuid
-    ? data.martImportedReportHistory || {} || {}
-    : data.martImportedReportList || {}
+  const authors = data.uniqueMartReportAuthors || []
+  const reports = data.uniqueMartReportReports || []
+  const { totalCount = 0, list: martImportedReports = [] } =
+    data.martImportedReportList || {}
 
   const handlePageSizeChange = newPageSize => {
     const newPageNum = Math.floor((pageNum * pageSize) / newPageSize)
@@ -260,9 +209,9 @@ const MartImportedReportTable = ({
                 value={sortBy}
                 onChange={e => handleSortByChange(e.target.value)}
               >
-                <option value="sequence">Sequence</option>
-                <option value="submittedAt">Submitted At</option>
-                <option value="receivedAt">Received At</option>
+                <option value="SEQUENCE">Sequence</option>
+                <option value="SUBMITTED_AT">Submitted At</option>
+                <option value="RECEIVED_AT">Received At</option>
               </FormSelect>
             </div>
             <div>

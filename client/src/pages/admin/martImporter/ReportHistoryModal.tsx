@@ -1,10 +1,15 @@
+import {
+  mapPageDispatchersToProps,
+  PageDispatchersPropType
+} from "components/Page"
 import MartImportedReportTable from "pages/admin/martImporter/MartImportedReportTable"
 import React from "react"
 import { Button, Modal } from "react-bootstrap"
+import { connect } from "react-redux"
 
 interface ReportHistoryModalProps {
+  pageDispatchers?: PageDispatchersPropType
   martImportedReport: any
-  pageDispatchers: any
   onCancel?: (...args: unknown[]) => unknown
 }
 
@@ -33,4 +38,4 @@ const ReportHistoryModal = ({
   )
 }
 
-export default ReportHistoryModal
+export default connect(null, mapPageDispatchersToProps)(ReportHistoryModal)

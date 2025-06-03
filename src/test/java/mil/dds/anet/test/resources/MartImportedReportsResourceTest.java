@@ -4,8 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 import mil.dds.anet.test.client.MartImportedReportSearchQueryInput;
+import mil.dds.anet.test.client.MartImportedReportSearchSortBy;
 import mil.dds.anet.test.client.Person;
 import mil.dds.anet.test.client.PositionType;
+import mil.dds.anet.test.client.SortOrder;
 import org.junit.jupiter.api.Test;
 
 class MartImportedReportsResourceTest extends AbstractResourceTest {
@@ -45,7 +47,8 @@ class MartImportedReportsResourceTest extends AbstractResourceTest {
 
     try {
       final MartImportedReportSearchQueryInput query = MartImportedReportSearchQueryInput.builder()
-          .withPageNum(0).withPageSize(0).withSortBy("receivedAt").withSortOrder("DESC").build();
+          .withPageNum(0).withPageSize(0).withSortBy(MartImportedReportSearchSortBy.RECEIVED_AT)
+          .withSortOrder(SortOrder.DESC).build();
       final var martImportedReports = withCredentials(user.getDomainUsername(),
           t -> queryExecutor.martImportedReportList(getListFields(
               "{ sequence person { uuid } report { uuid } receivedAt submittedAt state errors }"),
@@ -68,9 +71,10 @@ class MartImportedReportsResourceTest extends AbstractResourceTest {
     try {
       final MartImportedReportSearchQueryInput query =
           MartImportedReportSearchQueryInput.builder().withReportUuid(REPORT_UUID).withPageNum(0)
-              .withPageSize(0).withSortBy("receivedAt").withSortOrder("DESC").build();
+              .withPageSize(0).withSortBy(MartImportedReportSearchSortBy.RECEIVED_AT)
+              .withSortOrder(SortOrder.DESC).build();
       final var martImportedReports = withCredentials(user.getDomainUsername(),
-          t -> queryExecutor.martImportedReportHistory(getListFields(
+          t -> queryExecutor.martImportedReportList(getListFields(
               "{ sequence person { uuid } report { uuid } receivedAt submittedAt state errors }"),
               query));
       if (!isAdmin) {
@@ -90,12 +94,11 @@ class MartImportedReportsResourceTest extends AbstractResourceTest {
 
     try {
       final var martImportedReports = withCredentials(user.getDomainUsername(),
-          t -> queryExecutor.uniqueMartReportAuthors(getListFields("{ uuid name }")));
+          t -> queryExecutor.uniqueMartReportAuthors("{ uuid name }"));
       if (!isAdmin) {
         fail("Expected an Exception");
       }
-      assertThat(martImportedReports.getTotalCount()).isOne();
-      assertThat(martImportedReports.getList()).hasSize(1);
+      assertThat(martImportedReports).hasSize(1);
     } catch (Exception expectedException) {
       if (isAdmin) {
         fail("Unexpected Exception", expectedException);
@@ -108,12 +111,11 @@ class MartImportedReportsResourceTest extends AbstractResourceTest {
 
     try {
       final var martImportedReports = withCredentials(user.getDomainUsername(),
-          t -> queryExecutor.uniqueMartReportReports(getListFields("{ uuid intent }")));
+          t -> queryExecutor.uniqueMartReportReports("{ uuid intent }"));
       if (!isAdmin) {
         fail("Expected an Exception");
       }
-      assertThat(martImportedReports.getTotalCount()).isOne();
-      assertThat(martImportedReports.getList()).hasSize(1);
+      assertThat(martImportedReports).hasSize(1);
     } catch (Exception expectedException) {
       if (isAdmin) {
         fail("Unexpected Exception", expectedException);

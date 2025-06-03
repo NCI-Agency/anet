@@ -121,7 +121,7 @@ public class MartReportImporterService implements IMartReportImporterService {
       MartImportedReportSearchQuery query = new MartImportedReportSearchQuery();
       query.setReportUuid(reportDto.getUuid());
       final AnetBeanList<MartImportedReport> existingMartImportedReportSequences =
-          martImportedReportDao.getMartImportedReportHistory(query);
+          martImportedReportDao.search(query);
 
       if (existingMartImportedReportSequences.getTotalCount() == 0) {
         // New report, import

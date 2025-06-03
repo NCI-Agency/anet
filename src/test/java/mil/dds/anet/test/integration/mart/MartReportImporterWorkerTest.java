@@ -80,9 +80,8 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
         AnetTestConfiguration.getConfiguration().get("martReportImporterTestsExecute").toString());
     assumeTrue(executeMartReportImporterTests, "Mart importer tests configured to be skipped.");
 
-    existingSequences =
-        martImportedReportDao.getMartImportedReports(new MartImportedReportSearchQuery()).getList()
-            .stream().map(MartImportedReport::getSequence).collect(Collectors.toSet());
+    existingSequences = martImportedReportDao.search(new MartImportedReportSearchQuery()).getList()
+        .stream().map(MartImportedReport::getSequence).collect(Collectors.toSet());
     long sequence = getMaxExistingSequence();
 
     // Good report
@@ -124,12 +123,11 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
   @BeforeEach
   @AfterEach
   void cleanImportLog() {
-    martImportedReportDao.getMartImportedReports(new MartImportedReportSearchQuery()).getList()
-        .forEach(r -> {
-          if (!existingSequences.contains(r.getSequence())) {
-            martImportedReportDao.delete(r);
-          }
-        });
+    martImportedReportDao.search(new MartImportedReportSearchQuery()).getList().forEach(r -> {
+      if (!existingSequences.contains(r.getSequence())) {
+        martImportedReportDao.delete(r);
+      }
+    });
   }
 
   private Long getMaxExistingSequence() {
@@ -180,7 +178,7 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
         "While importing report 34faac7c-8c85-4dec-8e9f-57d9254b5ae2:<ul><li>Security marking is missing</li><li>Can not find task: 'does not exist' with uuid: does not exist</li></ul>");
     // New records in MartImportedReports, verify them
     AnetBeanList<MartImportedReport> martImportedReportsList =
-        martImportedReportDao.getMartImportedReports(new MartImportedReportSearchQuery());
+        martImportedReportDao.search(new MartImportedReportSearchQuery());
     assertThat(martImportedReportsList.getTotalCount()).isEqualTo(9);
 
     List<MartImportedReport> martImportedReports = martImportedReportsList.getList();
@@ -224,8 +222,7 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
     // Now we will run again and will pick up the report with the same sequence that has been marked
     // as lost when processing the transmission log, but finally came
     martReportImporterWorker.run();
-    martImportedReportsList =
-        martImportedReportDao.getMartImportedReports(new MartImportedReportSearchQuery());
+    martImportedReportsList = martImportedReportDao.search(new MartImportedReportSearchQuery());
     assertThat(martImportedReportsList.getTotalCount()).isEqualTo(9);
     martImportedReports = martImportedReportsList.getList();
     assertReportSubmittedOK(martImportedReports, sequence, missingReportUuid2, person.getUuid());
@@ -233,23 +230,21 @@ class MartReportImporterWorkerTest extends AbstractResourceTest {
     MartImportedReportSearchQuery martImportedReportSearchQuery =
         new MartImportedReportSearchQuery();
     martImportedReportSearchQuery.setReportUuid(missingReportUuid2);
-    martImportedReportsList =
-        martImportedReportDao.getMartImportedReportHistory(martImportedReportSearchQuery);
+    martImportedReportsList = martImportedReportDao.search(martImportedReportSearchQuery);
     assertThat(martImportedReportsList.getTotalCount()).isEqualTo(1);
 
     // Test the unique methods
-    AnetBeanList<Report> uniqueReports = martImportedReportDao.getUniqueMartReportReports();
-    assertThat(uniqueReports.getTotalCount()).isEqualTo(8);
-    AnetBeanList<mil.dds.anet.beans.Person> uniqueAuthors =
+    final List<Report> uniqueReports = martImportedReportDao.getUniqueMartReportReports();
+    assertThat(uniqueReports).hasSize(8);
+    final List<mil.dds.anet.beans.Person> uniqueAuthors =
         martImportedReportDao.getUniqueMartReportAuthors();
-    assertThat(uniqueAuthors.getTotalCount()).isEqualTo(2);
+    assertThat(uniqueAuthors).hasSize(2);
 
     // Test filters
     martImportedReportSearchQuery = new MartImportedReportSearchQuery();
     martImportedReportSearchQuery.setReportUuid(missingReportUuid1);
     martImportedReportSearchQuery.setState(MartImportedReport.State.NOT_RECEIVED);
-    martImportedReportsList =
-        martImportedReportDao.getMartImportedReports(martImportedReportSearchQuery);
+    martImportedReportsList = martImportedReportDao.search(martImportedReportSearchQuery);
     assertThat(martImportedReportsList.getTotalCount()).isEqualTo(1);
   }
 
