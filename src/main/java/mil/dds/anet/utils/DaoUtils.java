@@ -2,6 +2,7 @@ package mil.dds.anet.utils;
 
 import com.google.common.base.Joiner;
 import graphql.GraphQLContext;
+import java.security.Principal;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -73,12 +74,18 @@ public class DaoUtils {
     return " " + Joiner.on(", ").join(fieldAliases) + " ";
   }
 
-  public static Person getUserFromContext(GraphQLContext context) {
+  public static Principal getPrincipalFromContext(GraphQLContext context) {
     if (context == null) {
-      // Called from e.g. merge
       return null;
     }
-    return context.get("user");
+    return context.get("principal");
+  }
+
+  public static Person getUserFromContext(GraphQLContext context) {
+    if (!(getPrincipalFromContext(context) instanceof Person user)) {
+      return null;
+    }
+    return user;
   }
 
   public static Position getPosition(final Person user) {

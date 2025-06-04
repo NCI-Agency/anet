@@ -9,6 +9,7 @@ import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.EntityAvatar;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.MergedEntity;
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.LocationSearchQuery;
 import mil.dds.anet.config.ApplicationContextProvider;
@@ -168,8 +169,8 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
         loserLocationUuid);
 
     // Update customSensitiveInformation for winner
-    DaoUtils.saveCustomSensitiveInformation(null, LocationDao.TABLE_NAME, winnerLocationUuid,
-        winnerLocation.getCustomSensitiveInformation());
+    DaoUtils.saveCustomSensitiveInformation(Person.SYSTEM_USER, LocationDao.TABLE_NAME,
+        winnerLocationUuid, winnerLocation.getCustomSensitiveInformation());
     // Delete customSensitiveInformation for loser
     deleteForMerge("customSensitiveInformation", "relatedObjectUuid", loserLocationUuid);
 

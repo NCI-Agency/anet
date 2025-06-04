@@ -4,6 +4,7 @@ type AccessToken {
   description: String
   expiresAt: Instant
   name: String
+  scope: TokenScope
   tokenHash: String
   uuid: String
 }
@@ -14,6 +15,7 @@ input AccessTokenInput {
   description: String
   expiresAt: Instant
   name: String
+  scope: TokenScope
   tokenHash: String
   uuid: String
 }
@@ -1660,6 +1662,12 @@ enum TaskSearchSortBy {
   CREATED_AT
   NAME
   RECENT
+}
+
+""""""
+enum TokenScope {
+  GRAPHQL
+  NVG
 }
 
 """"""
