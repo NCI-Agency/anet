@@ -722,13 +722,24 @@ type MartImportedReport {
 
 """"""
 input MartImportedReportSearchQueryInput {
+  inMyReports: Boolean
   pageNum: Int
   pageSize: Int
   personUuid: String
   reportUuid: String
-  sortBy: String
-  sortOrder: String
+  sequences: [Long]
+  sortBy: MartImportedReportSearchSortBy
+  sortOrder: SortOrder
   state: State
+  status: Status
+  text: String
+}
+
+""""""
+enum MartImportedReportSearchSortBy {
+  RECEIVED_AT
+  SEQUENCE
+  SUBMITTED_AT
 }
 
 """Mutation root"""
@@ -1139,7 +1150,6 @@ type Query {
   location(uuid: String): Location
   locationList(query: LocationSearchQueryInput): AnetBeanList_Location
   locations(uuids: [String]): [Location]
-  martImportedReportHistory(query: MartImportedReportSearchQueryInput): AnetBeanList_MartImportedReport
   martImportedReportList(query: MartImportedReportSearchQueryInput): AnetBeanList_MartImportedReport
   me: Person
   mySearches: [SavedSearch]
@@ -1162,8 +1172,6 @@ type Query {
   task(uuid: String): Task
   taskList(query: TaskSearchQueryInput): AnetBeanList_Task
   tasks(uuids: [String]): [Task]
-  uniqueMartReportAuthors: AnetBeanList_Person
-  uniqueMartReportReports: AnetBeanList_Report
   userActivityList(query: UserActivitySearchQueryInput): AnetBeanList_UserActivity
 }
 

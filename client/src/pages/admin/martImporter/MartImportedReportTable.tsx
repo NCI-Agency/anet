@@ -1,5 +1,5 @@
-import { DocumentNode, gql } from "@apollo/client"
-import { Icon } from "@blueprintjs/core"
+import { gql } from "@apollo/client"
+import { Icon, Intent } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
@@ -14,11 +14,13 @@ import {
 } from "components/Page"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _isEmpty from "lodash/isEmpty"
+import * as Models from "models"
 import moment from "moment"
 import React, { useState } from "react"
-import { Button, FormSelect, Table } from "react-bootstrap"
+import { FormSelect, OverlayTrigger, Table, Tooltip } from "react-bootstrap"
 import { connect } from "react-redux"
 import Settings from "settings"
+import utils from "utils"
 
 const GQL_GET_MART_REPORTS_IMPORTED = gql`
   query ($martImportedReportQuery: MartImportedReportSearchQueryInput) {
@@ -47,55 +49,6 @@ const GQL_GET_MART_REPORTS_IMPORTED = gql`
   }
 `
 
-const GQL_GET_MART_REPORTS_IMPORTED_HISTORY = gql`
-  query ($martImportedReportQuery: MartImportedReportSearchQueryInput) {
-    martImportedReportHistory(query: $martImportedReportQuery) {
-      pageNum
-      pageSize
-      totalCount
-      list {
-        person {
-          uuid
-          name
-          rank
-          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-        }
-        report {
-          uuid
-          intent
-        }
-        sequence
-        state
-        submittedAt
-        receivedAt
-        errors
-      }
-    }
-  }
-`
-
-const GQL_GET_UNIQUE_MART_REPORT_AUTHORS = gql`
-  query {
-    uniqueMartReportAuthors {
-      list {
-        uuid
-        name
-      }
-    }
-  }
-`
-
-const GQL_GET_UNIQUE_MART_REPORT_REPORTS = gql`
-  query {
-    uniqueMartReportReports {
-      list {
-        uuid
-        intent
-      }
-    }
-  }
-`
-
 const PAGESIZES = [10, 25, 50, 100]
 const DEFAULT_PAGESIZE = 25
 const FILTER_OPTIONS = [
@@ -106,9 +59,22 @@ const FILTER_OPTIONS = [
   { value: "NOT_RECEIVED", label: "Not received" }
 ]
 
+const displayCallback = modelInstance => {
+  if (modelInstance instanceof Models.Report) {
+    const title = utils.ellipsizeOnWords(
+      modelInstance.intent,
+      utils.getMaxTextFieldLength(Settings.fields.report.intent, 40)
+    )
+    if (title) {
+      return title
+    }
+  }
+  return modelInstance.toString()
+}
+
 interface MartImportedReportTableProps {
   pageDispatchers?: PageDispatchersPropType
-  selectedReportUuid: string
+  selectedReportUuid?: string
   onSelectReport?: (...args: unknown[]) => unknown
 }
 
@@ -120,41 +86,27 @@ const MartImportedReportTable = ({
   usePageTitle("MART reports imported")
   const [pageNum, setPageNum] = useState(0)
   const [pageSize, setPageSize] = useState(DEFAULT_PAGESIZE)
-  const [sortBy, setSortBy] = useState("receivedAt")
+  const [sortBy, setSortBy] = useState("RECEIVED_AT")
   const [sortOrder, setSortOrder] = useState("DESC")
   const [selectedState, setSelectedState] = useState(undefined)
   const [selectedAuthor, setSelectedAuthor] = useState(null)
-  const [selectedReport, setSelectedReport] = useState(null)
-
-  const { data: authorsData } = API.useApiQuery(
-    GQL_GET_UNIQUE_MART_REPORT_AUTHORS,
-    {}
-  )
-  const authors = authorsData?.uniqueMartReportAuthors.list || []
-
-  const { data: reportsData } = API.useApiQuery(
-    GQL_GET_UNIQUE_MART_REPORT_REPORTS,
-    {}
-  )
-  const reports = reportsData?.uniqueMartReportReports.list || []
-
-  const martImportedReportEndpoint: DocumentNode = selectedReportUuid
-    ? GQL_GET_MART_REPORTS_IMPORTED_HISTORY
-    : GQL_GET_MART_REPORTS_IMPORTED
 
   const martImportedReportQuery = {
     pageNum,
     pageSize,
     state: selectedState,
     personUuid: selectedAuthor?.uuid,
-    reportUuid: selectedReportUuid || selectedReport?.uuid,
+    reportUuid: selectedReportUuid,
     sortBy,
     sortOrder
   }
 
-  const { loading, error, data } = API.useApiQuery(martImportedReportEndpoint, {
-    martImportedReportQuery
-  })
+  const { loading, error, data } = API.useApiQuery(
+    GQL_GET_MART_REPORTS_IMPORTED,
+    {
+      martImportedReportQuery
+    }
+  )
 
   const { done, result } = useBoilerplate({
     loading,
@@ -168,9 +120,8 @@ const MartImportedReportTable = ({
     return result
   }
 
-  const { totalCount = 0, list: martImportedReports = [] } = selectedReportUuid
-    ? data.martImportedReportHistory || {} || {}
-    : data.martImportedReportList || {}
+  const { totalCount = 0, list: martImportedReports = [] } =
+    data.martImportedReportList || {}
 
   const handlePageSizeChange = newPageSize => {
     const newPageNum = Math.floor((pageNum * pageSize) / newPageSize)
@@ -198,11 +149,6 @@ const MartImportedReportTable = ({
     setPageNum(0)
   }
 
-  const handleReportChange = report => {
-    setSelectedReport(report)
-    setPageNum(0)
-  }
-
   return (
     <>
       <Fieldset
@@ -217,27 +163,16 @@ const MartImportedReportTable = ({
                   style={{ height: 38, borderRadius: 8 }}
                 >
                   {selectedAuthor?.name}
-                  <Icon
-                    icon={IconNames.CROSS}
-                    style={{ cursor: "pointer" }}
-                    onClick={() => handleAuthorChange(null)}
-                  />
-                </div>
-              </div>
-            )}
-            {!selectedReportUuid && selectedReport && (
-              <div className="d-flex flex-column">
-                Filtering by report:
-                <div
-                  className="d-flex align-items-center p-3 fs-6 gap-2 bg-white"
-                  style={{ height: 38, borderRadius: 8 }}
-                >
-                  {selectedReport?.intent}
-                  <Icon
-                    icon={IconNames.CROSS}
-                    style={{ cursor: "pointer" }}
-                    onClick={() => handleReportChange(null)}
-                  />
+                  <OverlayTrigger
+                    placement="top"
+                    overlay={<Tooltip>Remove this filter</Tooltip>}
+                  >
+                    <Icon
+                      icon={IconNames.CROSS}
+                      style={{ cursor: "pointer" }}
+                      onClick={() => handleAuthorChange(null)}
+                    />
+                  </OverlayTrigger>
                 </div>
               </div>
             )}
@@ -260,9 +195,9 @@ const MartImportedReportTable = ({
                 value={sortBy}
                 onChange={e => handleSortByChange(e.target.value)}
               >
-                <option value="sequence">Sequence</option>
-                <option value="submittedAt">Submitted At</option>
-                <option value="receivedAt">Received At</option>
+                <option value="SEQUENCE">Sequence</option>
+                <option value="SUBMITTED_AT">Submitted Date</option>
+                <option value="RECEIVED_AT">Received Date</option>
               </FormSelect>
             </div>
             <div>
@@ -316,7 +251,6 @@ const MartImportedReportTable = ({
                   {!selectedReportUuid && <th>Author</th>}
                   {!selectedReportUuid && <th>Report</th>}
                   <th>Errors</th>
-                  {!selectedReportUuid && <th />}
                 </tr>
               </thead>
               <tbody>
@@ -379,32 +313,49 @@ const MartImportedReportTable = ({
                                 model={martImportedReport.person}
                               />
                               {martImportedReport.person && (
-                                <Icon
-                                  icon={IconNames.SEARCH}
-                                  style={{ cursor: "pointer" }}
-                                  onClick={() =>
-                                    handleAuthorChange(
-                                      martImportedReport.person
-                                    )}
-                                />
+                                <OverlayTrigger
+                                  placement="top"
+                                  overlay={
+                                    <Tooltip>
+                                      Filter all entries by this author
+                                    </Tooltip>
+                                  }
+                                >
+                                  <Icon
+                                    icon={IconNames.SEARCH}
+                                    style={{ cursor: "pointer" }}
+                                    onClick={() =>
+                                      handleAuthorChange(
+                                        martImportedReport.person
+                                      )}
+                                  />
+                                </OverlayTrigger>
                               )}
                             </div>
                           </td>
                           <td>
-                            <div className="d-flex align-items-center gap-2 justify-content-start px-2">
+                            <div className="d-flex align-items-center gap-2 justify-content-between px-2">
                               <LinkTo
                                 modelType="Report"
                                 model={martImportedReport.report}
+                                displayCallback={displayCallback}
                               />
                               {martImportedReport.report && (
-                                <Icon
-                                  icon={IconNames.SEARCH}
-                                  style={{ cursor: "pointer" }}
-                                  onClick={() =>
-                                    handleReportChange(
-                                      martImportedReport.report
-                                    )}
-                                />
+                                <OverlayTrigger
+                                  placement="top"
+                                  overlay={
+                                    <Tooltip>
+                                      Show the import history for this report
+                                    </Tooltip>
+                                  }
+                                >
+                                  <Icon
+                                    icon={IconNames.HISTORY}
+                                    style={{ cursor: "pointer" }}
+                                    onClick={() =>
+                                      onSelectReport?.(martImportedReport)}
+                                  />
+                                </OverlayTrigger>
                               )}
                             </div>
                           </td>
@@ -417,20 +368,6 @@ const MartImportedReportTable = ({
                           }}
                         />
                       </td>
-                      {!selectedReportUuid && (
-                        <td>
-                          {martImportedReport.report && (
-                            <Button
-                              id="history"
-                              onClick={() =>
-                                onSelectReport?.(martImportedReport)}
-                              variant="primary"
-                            >
-                              History
-                            </Button>
-                          )}
-                        </td>
-                      )}
                     </tr>
                   )
                 })}

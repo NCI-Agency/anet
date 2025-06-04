@@ -45,6 +45,7 @@ public abstract class AbstractSearchQueryBuilder<B, T extends AbstractSearchQuer
   private final List<String> additionalFromClauses;
   private final List<String> whereClauses;
   private final List<String> groupByClauses;
+  private String innerOrderByClause;
   private final List<String> orderByClauses;
 
   public AbstractSearchQueryBuilder(String queryName, String likeKeyword) {
@@ -108,6 +109,10 @@ public abstract class AbstractSearchQueryBuilder<B, T extends AbstractSearchQuer
 
   public void addGroupByClause(String clause) {
     groupByClauses.add(clause);
+  }
+
+  public void addInnerOrderByClause(String clause) {
+    innerOrderByClause = clause;
   }
 
   public void addAllOrderByClauses(List<String> clauses) {
@@ -313,6 +318,7 @@ public abstract class AbstractSearchQueryBuilder<B, T extends AbstractSearchQuer
     addAdditionalFromClauses();
     addWhereClauses();
     addGroupByClauses();
+    addInnerOrderByClause();
     sql.insert(0, "SELECT *, COUNT(*) OVER() AS \"totalCount\" FROM (");
     sql.append(") AS results");
     addOrderByClauses();
@@ -363,6 +369,13 @@ public abstract class AbstractSearchQueryBuilder<B, T extends AbstractSearchQuer
     if (!groupByClauses.isEmpty()) {
       sql.append(" GROUP BY ");
       sql.append(Joiner.on(", ").join(groupByClauses));
+    }
+  }
+
+  protected void addInnerOrderByClause() {
+    if (!Utils.isEmptyOrNull(innerOrderByClause)) {
+      sql.append(" ORDER BY ");
+      sql.append(innerOrderByClause);
     }
   }
 

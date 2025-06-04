@@ -2,36 +2,29 @@ package mil.dds.anet.beans.search;
 
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
+import java.util.List;
 import mil.dds.anet.beans.mart.MartImportedReport;
 
-public class MartImportedReportSearchQuery {
+public class MartImportedReportSearchQuery
+    extends AbstractSearchQuery<MartImportedReportSearchSortBy> {
+
   @GraphQLQuery
   @GraphQLInputField
-  String personUuid;
+  private String personUuid;
   @GraphQLQuery
   @GraphQLInputField
-  String reportUuid;
+  private String reportUuid;
   @GraphQLQuery
   @GraphQLInputField
-  MartImportedReport.State state;
+  private MartImportedReport.State state;
   @GraphQLQuery
   @GraphQLInputField
-  String sortBy;
-  @GraphQLQuery
-  @GraphQLInputField
-  String sortOrder;
-  @GraphQLQuery
-  @GraphQLInputField
-  Integer pageSize;
-  @GraphQLQuery
-  @GraphQLInputField
-  Integer pageNum;
+  private List<Long> sequences;
 
   public MartImportedReportSearchQuery() {
-    this.setPageNum(0);
+    super(MartImportedReportSearchSortBy.RECEIVED_AT);
+    this.setSortOrder(SortOrder.DESC);
     this.setPageSize(0);
-    this.setSortBy("receivedAt");
-    this.setSortOrder("DESC");
   }
 
   public String getPersonUuid() {
@@ -58,35 +51,12 @@ public class MartImportedReportSearchQuery {
     this.state = state;
   }
 
-  public String getSortBy() {
-    return sortBy;
+  public List<Long> getSequences() {
+    return sequences;
   }
 
-  public void setSortBy(String sortBy) {
-    this.sortBy = sortBy;
+  public void setSequences(List<Long> sequences) {
+    this.sequences = sequences;
   }
 
-  public String getSortOrder() {
-    return sortOrder;
-  }
-
-  public void setSortOrder(String sortOrder) {
-    this.sortOrder = sortOrder;
-  }
-
-  public Integer getPageSize() {
-    return pageSize;
-  }
-
-  public void setPageSize(Integer pageSize) {
-    this.pageSize = pageSize;
-  }
-
-  public Integer getPageNum() {
-    return pageNum;
-  }
-
-  public void setPageNum(Integer pageNum) {
-    this.pageNum = pageNum;
-  }
 }
