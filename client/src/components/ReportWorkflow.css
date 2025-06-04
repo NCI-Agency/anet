@@ -1,11 +1,12 @@
 .workflow-fieldset .workflow-action {
   position: relative;
   display: inline-block;
-  padding-right: 12px;
-  padding-left: 12px;
-  margin-top: 3px;
   vertical-align: top;
   text-align: center;
+}
+
+.workflow-fieldset .workflow-action:not(:first-child) {
+  margin-left: 35px
 }
 
 .workflow-fieldset .workflow-action .btn-pending.default {
@@ -40,14 +41,16 @@
 
 .workflow-fieldset .workflow-action .btn {
   border-radius: 30px;
+  margin: 10px 0px;
+  width: 100%;
 }
 
 .workflow-fieldset .workflow-action .btn[disabled] {
   opacity: 1;
 }
 
-.workflow-fieldset .workflow-action button::after {
-  position: relative;
+.workflow-fieldset .workflow-action:not(:last-child) button::after {
+  position: absolute;
   font-style: normal;
   font-weight: 400;
   line-height: 1;
@@ -55,10 +58,11 @@
   content: "➡";
   color: #000;
   right: -25px;
+  top: 40px;
 }
 
-.workflow-fieldset :last-child button::after {
-  content: "";
+.workflow-fieldset.compact .workflow-action:not(:last-child) button::after {
+  top: 20px;
 }
 
 fieldset.workflow-fieldset.compact {
