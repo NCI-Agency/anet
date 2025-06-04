@@ -75,31 +75,6 @@ export function setHeightOfAField(fieldName, data) {
   }
 }
 
-const INITIAL_STATE = {
-  [MERGE_SIDES.LEFT]: null, // initial value of left mergeable
-  [MERGE_SIDES.RIGHT]: null,
-  merged: null,
-  heightMap: null, // keep track of fields height, maximum heighted field of 2 columns wins
-  selectedMap: {}, // keep track of which col field selected, [fieldName]: "left", "right" or none can be selected
-  // callbacks to handle selectedMap
-  getSelectedSide: function(fieldName) {
-    if (!Object.hasOwn(this.selectedMap, fieldName)) {
-      this.selectedMap[fieldName] = null
-    }
-    return this.selectedMap[fieldName]
-  },
-  notAllSet: function() {
-    return (
-      !areAllSet(
-        this.merged,
-        this[MERGE_SIDES.LEFT],
-        this[MERGE_SIDES.RIGHT],
-        this.selectedMap
-      ) || Object.values(this.selectedMap).some(side => !side)
-    )
-  }
-}
-
 function reducer(state, action) {
   switch (action.type) {
     case ACTIONS.SET_MERGEABLE: {
@@ -150,6 +125,31 @@ const useMergeObjects = mergeableType => {
   const validForThatType = OBJECT_TYPE_TO_VALIDATOR[mergeableType]
   if (!validForThatType) {
     throw new Error("Pass a valid object type")
+  }
+
+  const INITIAL_STATE = {
+    [MERGE_SIDES.LEFT]: null, // initial value of left mergeable
+    [MERGE_SIDES.RIGHT]: null,
+    merged: null,
+    heightMap: null, // keep track of fields height, maximum heighted field of 2 columns wins
+    selectedMap: {}, // keep track of which col field selected, [fieldName]: "left", "right" or none can be selected
+    // callbacks to handle selectedMap
+    getSelectedSide: function(fieldName) {
+      if (!Object.hasOwn(this.selectedMap, fieldName)) {
+        this.selectedMap[fieldName] = null
+      }
+      return this.selectedMap[fieldName]
+    },
+    notAllSet: function() {
+      return (
+        !areAllSet(
+          this.merged,
+          this[MERGE_SIDES.LEFT],
+          this[MERGE_SIDES.RIGHT],
+          this.selectedMap
+        ) || Object.values(this.selectedMap).some(side => !side)
+      )
+    }
   }
 
   const [mergeState, dispatch] = useReducer(reducer, INITIAL_STATE)
