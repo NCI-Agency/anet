@@ -7,6 +7,7 @@ import io.leangen.graphql.annotations.GraphQLRootContext;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.mart.MartImportedReport;
+import mil.dds.anet.beans.search.MartImportedReportSearchQuery;
 import mil.dds.anet.database.MartImportedReportDao;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
@@ -18,17 +19,15 @@ public class MartImportedReportsResource {
 
   private final MartImportedReportDao martImportedReportDao;
 
-  public MartImportedReportsResource(MartImportedReportDao emailDao) {
-    this.martImportedReportDao = emailDao;
+  public MartImportedReportsResource(MartImportedReportDao martImportedReportDao) {
+    this.martImportedReportDao = martImportedReportDao;
   }
 
-  @GraphQLQuery(name = "martImportedReports")
-  public AnetBeanList<MartImportedReport> getMartImportedReports(
-      @GraphQLRootContext GraphQLContext context,
-      @GraphQLArgument(name = "pageNum", defaultValue = "0") int pageNum,
-      @GraphQLArgument(name = "pageSize", defaultValue = "0") int pageSize) {
+  @GraphQLQuery(name = "martImportedReportList")
+  public AnetBeanList<MartImportedReport> search(@GraphQLRootContext GraphQLContext context,
+      @GraphQLArgument(name = "query") MartImportedReportSearchQuery query) {
     AuthUtils.assertAdministrator(DaoUtils.getUserFromContext(context));
-    return martImportedReportDao.getAll(pageNum, pageSize);
+    return martImportedReportDao.search(query);
   }
 
 }

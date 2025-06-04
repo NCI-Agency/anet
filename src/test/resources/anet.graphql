@@ -716,8 +716,30 @@ type MartImportedReport {
   receivedAt: Instant
   report: Report
   sequence: Long
+  state: State
   submittedAt: Instant
-  success: Boolean!
+}
+
+""""""
+input MartImportedReportSearchQueryInput {
+  inMyReports: Boolean
+  pageNum: Int
+  pageSize: Int
+  personUuid: String
+  reportUuid: String
+  sequences: [Long]
+  sortBy: MartImportedReportSearchSortBy
+  sortOrder: SortOrder
+  state: State
+  status: Status
+  text: String
+}
+
+""""""
+enum MartImportedReportSearchSortBy {
+  RECEIVED_AT
+  SEQUENCE
+  SUBMITTED_AT
 }
 
 """Mutation root"""
@@ -1128,7 +1150,7 @@ type Query {
   location(uuid: String): Location
   locationList(query: LocationSearchQueryInput): AnetBeanList_Location
   locations(uuids: [String]): [Location]
-  martImportedReports(pageNum: Int = 0, pageSize: Int = 0): AnetBeanList_MartImportedReport
+  martImportedReportList(query: MartImportedReportSearchQueryInput): AnetBeanList_MartImportedReport
   me: Person
   mySearches: [SavedSearch]
   mySubscriptionUpdates(query: SubscriptionUpdateSearchQueryInput): AnetBeanList_SubscriptionUpdate
@@ -1480,6 +1502,14 @@ enum SearchType {
 enum SortOrder {
   ASC
   DESC
+}
+
+""""""
+enum State {
+  NOT_RECEIVED
+  NOT_SUBMITTED
+  SUBMITTED_OK
+  SUBMITTED_WARNINGS
 }
 
 """"""

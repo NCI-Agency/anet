@@ -11,13 +11,16 @@ public class MartImportedReportMapper implements RowMapper<MartImportedReport> {
   @Override
   public MartImportedReport map(ResultSet rs, StatementContext ctx) throws SQLException {
     final MartImportedReport martImportedReport = new MartImportedReport();
-    martImportedReport.setPersonUuid(rs.getString("personUuid"));
-    martImportedReport.setReportUuid(rs.getString("reportUuid"));
-    martImportedReport.setSubmittedAt(MapperUtils.getInstantAsLocalDateTime(rs, "submittedAt"));
-    martImportedReport.setReceivedAt(MapperUtils.getInstantAsLocalDateTime(rs, "receivedAt"));
-    martImportedReport.setSequence(rs.getLong("sequence"));
-    martImportedReport.setSuccess(rs.getBoolean("success"));
-    martImportedReport.setErrors(rs.getString("errors"));
+    martImportedReport.setPersonUuid(rs.getString("martImportedReports_personUuid"));
+    martImportedReport.setReportUuid(rs.getString("martImportedReports_reportUuid"));
+    martImportedReport.setSubmittedAt(
+        MapperUtils.getInstantAsLocalDateTime(rs, "martImportedReports_submittedAt"));
+    martImportedReport
+        .setReceivedAt(MapperUtils.getInstantAsLocalDateTime(rs, "martImportedReports_receivedAt"));
+    martImportedReport.setSequence(rs.getLong("martImportedReports_sequence"));
+    martImportedReport.setState(
+        MapperUtils.getEnumIdx(rs, "martImportedReports_state", MartImportedReport.State.class));
+    martImportedReport.setErrors(rs.getString("martImportedReports_errors"));
 
     if (MapperUtils.containsColumnNamed(rs, "totalCount")) {
       ctx.define("totalCount", rs.getInt("totalCount"));

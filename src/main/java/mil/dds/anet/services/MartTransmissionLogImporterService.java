@@ -11,6 +11,7 @@ import microsoft.exchange.webservices.data.property.complex.FileAttachment;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.mart.LogDto;
 import mil.dds.anet.beans.mart.MartImportedReport;
+import mil.dds.anet.beans.search.MartImportedReportSearchQuery;
 import mil.dds.anet.database.MartImportedReportDao;
 import mil.dds.anet.database.mappers.MapperUtils;
 import org.slf4j.Logger;
@@ -40,8 +41,10 @@ public class MartTransmissionLogImporterService implements IMartTransmissionLogI
       final List<LogDto> transmissionLog = ignoringMapper.readValue(
           new String(martTransmissionLogAttachment.getContent(), StandardCharsets.UTF_8),
           new TypeReference<>() {});
-      final AnetBeanList<MartImportedReport> existingMartImportedReports = martImportedReportDao
-          .getAllSequences(transmissionLog.stream().map(LogDto::getSequence).toList());
+      final MartImportedReportSearchQuery query = new MartImportedReportSearchQuery();
+      query.setSequences(transmissionLog.stream().map(LogDto::getSequence).toList());
+      final AnetBeanList<MartImportedReport> existingMartImportedReports =
+          martImportedReportDao.search(query);
       if (transmissionLog.size() != existingMartImportedReports.getTotalCount()) {
         // We are missing sequences!
         final List<Long> presentSequences = existingMartImportedReports.getList().stream()
@@ -52,7 +55,7 @@ public class MartTransmissionLogImporterService implements IMartTransmissionLogI
         for (final LogDto logDto : missing) {
           final MartImportedReport martImportedReport = new MartImportedReport();
           martImportedReport.setSequence(logDto.getSequence());
-          martImportedReport.setSuccess(false);
+          martImportedReport.setState(MartImportedReport.State.NOT_RECEIVED);
           martImportedReport.setSubmittedAt(logDto.getSubmittedAt());
           martImportedReport.setReceivedAt(Instant.now());
           martImportedReport.setReportUuid(logDto.getReportUuid());
