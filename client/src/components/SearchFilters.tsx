@@ -839,11 +839,13 @@ const SearchFilterDisplay = ({
 interface SearchDescriptionProps {
   searchQuery?: SearchQueryPropType
   showPlaceholders?: boolean
+  style?: any
 }
 
 export const SearchDescription = ({
   searchQuery,
-  showPlaceholders
+  showPlaceholders,
+  style
 }: SearchDescriptionProps) => {
   const { currentUser } = useContext(AppContext)
   const ALL_FILTERS = searchFilters(currentUser?.isAdmin())
@@ -856,7 +858,7 @@ export const SearchDescription = ({
       )
   const filters = searchQuery.filters
   return (
-    <span className="asLink">
+    <span className="asLink" style={style}>
       <b>
         {searchQuery.objectType
           ? SEARCH_OBJECT_LABELS[searchQuery.objectType]
