@@ -6228,7 +6228,7 @@
 			<column name="sequence" type="bigint" />
 			<column name="personUuid" type="${uuid_type}" />
 			<column name="reportUuid" type="${uuid_type}" />
-			<column name="state" type="int" />
+			<column name="success" type="boolean" />
 			<column name="submittedAt" type="datetime" />
 			<column name="receivedAt" type="datetime" />
 			<column name="errors" type="text" />
@@ -6337,6 +6337,13 @@
 		<!-- Delete obsolete columns from notes that were used for assessments -->
 		<dropColumn tableName="notes" columnName="type" />
 		<dropColumn tableName="notes" columnName="assessmentKey" />
+	</changeSet>
+
+	<changeSet id="alter-martImportedReports-table" author="gjvoosten">
+		<addColumn tableName="martImportedReports">
+			<column name="state" type="int" />
+		</addColumn>
+		<dropColumn tableName="martImportedReports" columnName="success" />
 	</changeSet>
 
 	<!-- Keep this change set as the last one in the change log;
