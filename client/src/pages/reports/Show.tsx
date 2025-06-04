@@ -131,6 +131,7 @@ const GQL_GET_REPORT = gql`
           role
           code
           status
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           organization {
             uuid
             shortName
@@ -151,6 +152,7 @@ const GQL_GET_REPORT = gql`
             uuid
             name
             code
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
             organization {
               uuid
               shortName

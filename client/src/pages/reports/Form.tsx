@@ -84,6 +84,7 @@ const reportPeopleAutocompleteQuery = `
       uuid
       name
       code
+      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       organization {
         uuid
         shortName

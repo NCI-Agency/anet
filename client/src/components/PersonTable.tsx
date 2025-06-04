@@ -38,6 +38,7 @@ const GQL_GET_PERSON_LIST = gql`
           type
           role
           code
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           location {
             uuid
             name

@@ -60,6 +60,7 @@ const GQL_GET_MY_SUBSCRIPTION_UPDATES = gql`
           ... on Position {
             type
             name
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
           ... on Report {
             intent
@@ -106,6 +107,7 @@ const GQL_GET_MY_SUBSCRIPTION_UPDATES = gql`
             ... on Position {
               type
               name
+              ${GRAPHQL_ENTITY_AVATAR_FIELDS}
             }
             ... on Report {
               intent

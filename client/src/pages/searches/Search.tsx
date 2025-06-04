@@ -132,6 +132,7 @@ const GQL_GET_PERSON_LIST = gql`
           type
           role
           code
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           location {
             uuid
             name
@@ -162,6 +163,7 @@ const GQL_GET_POSITION_LIST = gql`
         type
         role
         status
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         ${GQL_EMAIL_ADDRESSES}
         location {
           uuid
@@ -305,6 +307,7 @@ const GQL_GET_ATTACHMENT_LIST = gql`
             ... on Position {
               type
               name
+              ${GRAPHQL_ENTITY_AVATAR_FIELDS}
             }
             ... on Report {
               intent

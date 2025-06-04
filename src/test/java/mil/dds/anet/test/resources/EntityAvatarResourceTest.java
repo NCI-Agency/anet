@@ -6,12 +6,14 @@ import static org.assertj.core.api.Assertions.fail;
 import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
+import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.test.client.Attachment;
 import mil.dds.anet.test.client.EntityAvatar;
 import mil.dds.anet.test.client.EntityAvatarInput;
 import mil.dds.anet.test.client.Location;
 import mil.dds.anet.test.client.Organization;
 import mil.dds.anet.test.client.Person;
+import mil.dds.anet.test.client.Position;
 import org.junit.jupiter.api.Test;
 
 class EntityAvatarResourceTest extends AbstractResourceTest {
@@ -198,5 +200,76 @@ class EntityAvatarResourceTest extends AbstractResourceTest {
     retPerson = withCredentials(getRegularUser().getDomainUsername(),
         t -> queryExecutor.person(FIELDS, erin.getUuid()));
     assertThat(retPerson.getEntityAvatar()).isNull();
+  }
+
+  @Test
+  void testPositionAvatar() {
+    // For the test we use position EF 1.1 Advisor G which already has an attachment associated
+    final String ENTITY_UUID = "888d6c4b-deaa-4218-b8fd-abfb7c81a4c6";
+    final String ENTITY_ATTACHMENT_UUID = "1d234036-1d6c-4cb0-8b1a-e4305aeca1e2";
+
+    final EntityAvatarInput newEntityAvatarInput =
+        EntityAvatarInput.builder().withApplyCrop(true).withAttachmentUuid(ENTITY_ATTACHMENT_UUID)
+            .withRelatedObjectType(PositionDao.TABLE_NAME).withRelatedObjectUuid(ENTITY_UUID)
+            .withCropHeight(1).withCropLeft(2).withCropWidth(3).withCropTop(4).build();
+
+    // Regular user can not do this
+    try {
+      withCredentials(getRegularUser().getDomainUsername(),
+          t -> mutationExecutor.createOrUpdateEntityAvatar("", newEntityAvatarInput));
+      fail("Expected exception creating entity avatar");
+    } catch (Exception expectedException) {
+      // OK
+    }
+
+    // Superuser of other organization can not do this
+    try {
+      withCredentials("rebecca",
+          t -> mutationExecutor.createOrUpdateEntityAvatar("", newEntityAvatarInput));
+      fail("Expected exception creating entity avatar");
+    } catch (Exception expectedException) {
+      // OK
+    }
+
+    // The organization's superuser can do this
+    Integer numRows = withCredentials(getAndrewAnderson().getDomainUsername(),
+        t -> mutationExecutor.createOrUpdateEntityAvatar("", newEntityAvatarInput));
+    assertThat(numRows).isOne();
+
+    // Admin can do this
+    numRows = withCredentials(adminUser,
+        t -> mutationExecutor.createOrUpdateEntityAvatar("", newEntityAvatarInput));
+    assertThat(numRows).isOne();
+
+    // Get the entity avatar via the position
+    Position position =
+        withCredentials(adminUser, t -> queryExecutor.position(FIELDS, ENTITY_UUID));
+    EntityAvatar entityAvatar = position.getEntityAvatar();
+    assertThat(entityAvatar).isNotNull();
+    assertThat(entityAvatar.getRelatedObjectUuid()).isEqualTo(ENTITY_UUID);
+    assertThat(entityAvatar.getAttachmentUuid()).isEqualTo(ENTITY_ATTACHMENT_UUID);
+    assertThat(entityAvatar.getApplyCrop()).isTrue();
+    assertThat(entityAvatar.getCropHeight()).isEqualTo(1);
+    assertThat(entityAvatar.getCropLeft()).isEqualTo(2);
+    assertThat(entityAvatar.getCropWidth()).isEqualTo(3);
+    assertThat(entityAvatar.getCropTop()).isEqualTo(4);
+
+    // Update the entity avatar
+    newEntityAvatarInput.setCropHeight(10);
+    numRows = withCredentials(adminUser,
+        t -> mutationExecutor.createOrUpdateEntityAvatar("", newEntityAvatarInput));
+    assertThat(numRows).isOne();
+    position = withCredentials(adminUser, t -> queryExecutor.position(FIELDS, ENTITY_UUID));
+    entityAvatar = position.getEntityAvatar();
+    assertThat(entityAvatar).isNotNull();
+    assertThat(entityAvatar.getCropHeight()).isEqualTo(10);
+
+    // Delete the entity avatar
+    numRows = withCredentials(adminUser,
+        t -> mutationExecutor.deleteEntityAvatar("", PositionDao.TABLE_NAME, ENTITY_UUID));
+    assertThat(numRows).isOne();
+    position = withCredentials(adminUser, t -> queryExecutor.position(FIELDS, ENTITY_UUID));
+    entityAvatar = position.getEntityAvatar();
+    assertThat(entityAvatar).isNull();
   }
 }

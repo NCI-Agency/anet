@@ -109,6 +109,7 @@ const ALL_ORG_FIELDS = `
     approvers {
       uuid
       name
+      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       person {
         uuid
         name
@@ -123,6 +124,7 @@ const ALL_ORG_FIELDS = `
     approvers {
       uuid
       name
+      ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       person {
         uuid
         name
@@ -137,6 +139,7 @@ const ALL_ORG_FIELDS = `
     code
     type
     role
+    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
     person {
       uuid
       name

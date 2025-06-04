@@ -73,6 +73,7 @@ const GQL_GET_STATIC_DATA = gql`
       list {
         uuid
         name
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
     }
     locationList(query: $locationQuery) {

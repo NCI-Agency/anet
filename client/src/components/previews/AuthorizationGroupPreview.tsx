@@ -29,6 +29,7 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
         type
         role
         status
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         location {
           uuid
           name
@@ -71,6 +72,7 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
             uuid
             type
             name
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
             ${GQL_EMAIL_ADDRESSES}
           }
         }
