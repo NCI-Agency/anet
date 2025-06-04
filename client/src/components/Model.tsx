@@ -102,6 +102,7 @@ export const GRAPHQL_NOTE_FIELDS = /* GraphQL */ `
       }
       ... on Location {
         name
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
       ... on Organization {
         shortName

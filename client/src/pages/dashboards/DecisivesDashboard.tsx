@@ -8,7 +8,7 @@ import {
 } from "actions"
 import API from "api"
 import LinkTo from "components/LinkTo"
-import Model from "components/Model"
+import Model, { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -79,6 +79,7 @@ const GQL_GET_STATIC_DATA = gql`
       list {
         uuid
         name
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
     }
     taskList(query: $taskQuery) {
