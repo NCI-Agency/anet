@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.beans.ApprovalStep;
+import mil.dds.anet.beans.EntityAvatar;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.MergedEntity;
 import mil.dds.anet.beans.lists.AnetBeanList;
@@ -143,6 +144,16 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
     // Update attachments
     updateM2mForMerge("attachmentRelatedObjects", "attachmentUuid", "relatedObjectUuid",
         winnerLocationUuid, loserLocationUuid);
+    // Update the avatar
+    final EntityAvatarDao entityAvatarDao = engine().getEntityAvatarDao();
+    entityAvatarDao.delete(LocationDao.TABLE_NAME, winnerLocationUuid);
+    entityAvatarDao.delete(LocationDao.TABLE_NAME, loserLocationUuid);
+    final EntityAvatar winnerEntityAvatar = winnerLocation.getEntityAvatar();
+    if (winnerEntityAvatar != null) {
+      winnerEntityAvatar.setRelatedObjectType(LocationDao.TABLE_NAME);
+      winnerEntityAvatar.setRelatedObjectUuid(winnerLocationUuid);
+      entityAvatarDao.upsert(winnerEntityAvatar);
+    }
 
     // Update parentLocations:
     // - delete locationRelationships where loser was the child

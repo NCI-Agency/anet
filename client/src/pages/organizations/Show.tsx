@@ -69,6 +69,7 @@ const GQL_LOCATION_FIELDS = `
     uuid
     name
     type
+    ${GRAPHQL_ENTITY_AVATAR_FIELDS}
   }
 `
 const GQL_ORGANIZATION_FIELDS = `

@@ -635,6 +635,7 @@ type Location {
   customSensitiveInformation: [CustomSensitiveInformation]
   description: String
   digram: String
+  entityAvatar: EntityAvatar
   isSubscribed: Boolean
   lat: Float
   lng: Float
@@ -657,6 +658,7 @@ input LocationInput {
   customSensitiveInformation: [CustomSensitiveInformationInput]
   description: String
   digram: String
+  entityAvatar: EntityAvatarInput
   lat: Float
   lng: Float
   name: String

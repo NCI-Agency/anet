@@ -94,6 +94,7 @@ const reportPeopleAutocompleteQuery = `
       location {
         uuid
         name
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
     }
   }

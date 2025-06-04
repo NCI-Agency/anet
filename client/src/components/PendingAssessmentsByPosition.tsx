@@ -40,10 +40,6 @@ const GQL_GET_POSITION_LIST = gql`
           identificationCode
           ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
-        location {
-          uuid
-          name
-        }
         person {
           uuid
           name
@@ -63,10 +59,6 @@ const GQL_GET_POSITION_LIST = gql`
             longName
             identificationCode
             ${GRAPHQL_ENTITY_AVATAR_FIELDS}
-          }
-          location {
-            uuid
-            name
           }
           person {
             uuid

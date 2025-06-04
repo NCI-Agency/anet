@@ -108,6 +108,7 @@ const GQL_GET_ORGANIZATION_LIST = gql`
         location {
           uuid
           name
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
       }
     }
@@ -134,6 +135,7 @@ const GQL_GET_PERSON_LIST = gql`
           location {
             uuid
             name
+            ${GRAPHQL_ENTITY_AVATAR_FIELDS}
           }
           organization {
             uuid
@@ -164,6 +166,7 @@ const GQL_GET_POSITION_LIST = gql`
         location {
           uuid
           name
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         organization {
           uuid
@@ -219,6 +222,7 @@ const GQL_GET_LOCATION_LIST = gql`
         lat
         lng
         type
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
     }
   }
@@ -285,6 +289,7 @@ const GQL_GET_ATTACHMENT_LIST = gql`
             }
             ... on Location {
               name
+              ${GRAPHQL_ENTITY_AVATAR_FIELDS}
             }
             ... on Organization {
               shortName
@@ -359,6 +364,7 @@ const GQL_GET_EVENT_LIST = gql`
           name
           lat
           lng
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
       }
     }

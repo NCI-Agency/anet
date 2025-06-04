@@ -70,6 +70,7 @@ const GQL_GET_REPORT_LIST = gql`
           lat
           lng
           type
+          ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         }
         tasks {
           uuid
