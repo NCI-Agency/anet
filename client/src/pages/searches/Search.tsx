@@ -163,6 +163,7 @@ const GQL_GET_POSITION_LIST = gql`
         type
         role
         status
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
         ${GQL_EMAIL_ADDRESSES}
         location {
           uuid
