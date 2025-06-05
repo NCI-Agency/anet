@@ -48,10 +48,13 @@ export const BreadcrumbTrail = ({
       {trail.map((node, i) => (
         <React.Fragment key={node.uuid}>
           {i > 0 && " » "}
+          {i === 0 && hideParents && (
+            <span style={{ paddingLeft: 10, paddingRight: 10 }}>»</span>
+          )}
           <LinkTo
             modelType={modelType}
             model={node}
-            showIcon={i === 0}
+            showIcon={i === 0 && !hideParents}
             isLink={isLink}
             style={style}
           />
