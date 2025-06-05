@@ -478,6 +478,7 @@ const PositionColumn = ({
   dispatchMergeActions
 }: PositionColumnProps) => {
   const position = mergeState[align]
+  const otherSide = mergeState[getOtherSide(align)]
   const hideWhenEmpty =
     !Location.hasCoordinates(mergeState[MERGE_SIDES.LEFT]?.location) &&
     !Location.hasCoordinates(mergeState[MERGE_SIDES.RIGHT]?.location)
@@ -492,6 +493,7 @@ const PositionColumn = ({
           fieldName="position"
           placeholder="Select a position to merge"
           value={position}
+          disabledValue={otherSide}
           overlayColumns={["Position", "Organization", "Current Occupant"]}
           overlayRenderRow={PositionOverlayRow}
           filterDefs={getPositionFilters(mergeState, align)}
