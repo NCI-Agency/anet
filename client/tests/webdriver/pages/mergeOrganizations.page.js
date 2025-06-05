@@ -25,6 +25,12 @@ class MergeOrganizations extends Page {
     )
   }
 
+  async getFirstItemRadioButtonFromAdvancedSelect() {
+    return browser.$(
+      "table > tbody > tr:first-child > td:first-child > input.form-check-input"
+    )
+  }
+
   async getAdvancedSelectPopover() {
     return browser.$(".bp5-popover-content")
   }
@@ -37,10 +43,6 @@ class MergeOrganizations extends Page {
 
   async getMergeOrganizationsButton() {
     return browser.$('//button[text()="Merge Organizations"]')
-  }
-
-  async getSameOrganizationsToast() {
-    return browser.$('//div[text()="Please select different organizations"]')
   }
 
   async getOrganizationHeaderFromPopover() {

@@ -167,11 +167,12 @@ describe("Merge organizations page", () => {
     await MergeOrganizations.waitForAdvancedSelectLoading(
       EXAMPLE_ORGANIZATIONS.validLeft.displayedName
     )
-    await (await MergeOrganizations.getFirstItemFromAdvancedSelect()).click()
-
-    await (
-      await MergeOrganizations.getSameOrganizationsToast()
-    ).waitForDisplayed()
+    // eslint-disable-next-line no-unused-expressions
+    expect(
+      await (
+        await MergeOrganizations.getFirstItemRadioButtonFromAdvancedSelect()
+      ).isExisting()
+    ).to.be.false
   })
 
   it("Should display field values of the right organization", async() => {
