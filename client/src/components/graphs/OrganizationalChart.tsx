@@ -533,15 +533,11 @@ const OrganizationFlowChart = ({
           Export Image
         </Button>
       </ControlsContainer>
-      <div
+      <DivS
         ref={chartRef}
-        style={{
-          width: width ? `${width}px` : "100%",
-          height: diagramHeight.current
-            ? `${diagramHeight.current}px`
-            : "100vh",
-          backgroundColor: BACKGROUND_COLOR
-        }}
+        width={width ? `${width}px` : "100%"}
+        height={diagramHeight.current ? `${diagramHeight.current}px` : "100vh"}
+        backgroundColor={BACKGROUND_COLOR}
       >
         <ReactFlow
           nodes={nodes}
@@ -553,7 +549,7 @@ const OrganizationFlowChart = ({
           preventScrolling={false}
           proOptions={{ hideAttribution: true }}
         />
-      </div>
+      </DivS>
     </>
   )
 }
@@ -693,31 +689,55 @@ const CustomOrgLinkS = styled.div`
     overflow: hidden;
   }
 `
+const LinkToOrgS = styled(LinkTo)`
+  margin: auto;
+  padding-left: 5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /* limit to max. 3 lines */
+  line-clamp: 3;
+  /* legacy WebKit fallback */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+`
+const LinkToPersonS = styled(LinkTo)`
+  display: inline-block;
+  max-width: ${TEXT_WIDTH}px;
+  padding: 5px 0 5px 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+`
+const HandleS = styled(Handle)`
+  opacity: 0;
+  left: ${props => props.left};
+  top: ${props => props.top};
+`
+
+const DivS = styled.div`
+  width: ${props => props.width};
+  max-width: ${props => props.maxWidth};
+  min-width: ${props => props.minWidth};
+  height: ${props => props.height};
+  padding-left: ${props => props.paddingLeft};
+  background-color: ${props => props.backgroundColor};
+`
 
 const CustomNode = ({
   data: { organization, symbolValues, depth, positions, showSymbol }
 }: NodeProps) => (
-  <div
-    style={{
-      width: NODE_WIDTH,
-      height: NODE_HEIGHT + positions.length * PERSON_AVATAR_HEIGHT,
-      display: "flex",
-      flexDirection: "column"
-    }}
+  <DivS
+    className="d-flex flex-column"
+    width={`${NODE_WIDTH}px`}
+    height={`${NODE_HEIGHT + positions.length * PERSON_AVATAR_HEIGHT}px`}
   >
-    <div
-      style={{
-        display: "flex"
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          minWidth: ORG_AVATAR_WIDTH,
-          height: NODE_HEIGHT
-        }}
+    <div className="d-flex">
+      <DivS
+        className="d-flex align-items-center justify-content-center"
+        minWidth={`${ORG_AVATAR_WIDTH}px`}
+        height={`${NODE_HEIGHT}px`}
       >
         {(showSymbol && (
           <App6Symbol
@@ -734,63 +754,41 @@ const CustomNode = ({
             style={{ backgroundColor: BACKGROUND_COLOR }}
           />
         )}
-      </div>
+      </DivS>
       <CustomOrgLinkS>
-        <LinkTo
+        <LinkToOrgS
           modelType="Organization"
           model={organization}
           showAvatar={false}
           showIcon={false}
-          style={{
-            display: "-webkit-box",
-            WebkitLineClamp: 3,
-            WebkitBoxOrient: "vertical",
-            margin: "auto",
-            paddingLeft: 5
-          }}
         />
       </CustomOrgLinkS>
     </div>
     {positions.length > 0 && (
-      <div
-        style={{
-          paddingLeft: ORG_AVATAR_WIDTH / 2
-        }}
-      >
+      <DivS paddingLeft={`${ORG_AVATAR_WIDTH / 2}px`}>
         {positions.map(person => (
-          <LinkTo
+          <LinkToPersonS
             key={person.uuid}
             modelType="Person"
             model={person}
             showIcon={false}
-            style={{
-              display: "inline-block",
-              maxWidth: TEXT_WIDTH,
-              padding: "5px 0px 5px 5px",
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              verticalAlign: "middle"
-            }}
           />
         ))}
-      </div>
+      </DivS>
     )}
-    <Handle
+    <HandleS
       type="source"
       position={Position.Bottom}
-      style={{ opacity: 0, top: NODE_HEIGHT / 2, left: ORG_AVATAR_WIDTH / 2 }}
+      left={`${ORG_AVATAR_WIDTH / 2}px`}
+      top={`${NODE_HEIGHT / 2}px`}
     />
-    <Handle
+    <HandleS
       type="target"
       position={depth > 1 ? Position.Left : Position.Top}
-      style={{
-        opacity: 0,
-        left: depth === 1 ? ORG_AVATAR_WIDTH / 2 : -ARROW_INDENT,
-        top: depth === 1 ? 0 : NODE_HEIGHT / 2
-      }}
+      left={`${depth === 1 ? ORG_AVATAR_WIDTH / 2 : -ARROW_INDENT}px`}
+      top={`${depth === 1 ? 0 : NODE_HEIGHT / 2}px`}
     />
-  </div>
+  </DivS>
 )
 
 const CustomRootEdge = ({
