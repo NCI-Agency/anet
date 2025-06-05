@@ -31,6 +31,7 @@ import useMergeObjects, {
   areAllSet,
   getActionButton,
   getLeafletMap,
+  getOtherSide,
   MERGE_SIDES,
   selectAllFields,
   setAMergedField,
@@ -427,6 +428,7 @@ const LocationColumn = ({
   locationFormatLabel
 }: LocationColumnProps) => {
   const location = mergeState[align]
+  const otherSide = mergeState[getOtherSide(align)]
   const hideWhenEmpty =
     !Location.hasCoordinates(mergeState[MERGE_SIDES.LEFT]) &&
     !Location.hasCoordinates(mergeState[MERGE_SIDES.RIGHT])
@@ -439,6 +441,7 @@ const LocationColumn = ({
           fieldName="location"
           placeholder="Select a location to merge"
           value={location}
+          disabledValue={otherSide}
           overlayColumns={["Name"]}
           overlayRenderRow={LocationOverlayRow}
           filterDefs={getLocationFilters()}

@@ -12,6 +12,7 @@ interface AdvancedSelectOverlayTableProps {
   valueKey: string
   pageNum?: number
   selectedItems: any[]
+  disabledItems: any[]
   handleAddItem?: (...args: unknown[]) => unknown
   handleRemoveItem?: (...args: unknown[]) => unknown
   columns: string[]
@@ -26,6 +27,7 @@ const AdvancedSelectOverlayTable = ({
   valueKey,
   pageNum,
   selectedItems = [],
+  disabledItems = [],
   handleAddItem,
   handleRemoveItem,
   columns,
@@ -33,6 +35,7 @@ const AdvancedSelectOverlayTable = ({
   selectItemComponent
 }: AdvancedSelectOverlayTableProps) => {
   const selectedItemsUuids = selectedItems.map(a => a[valueKey])
+  const disabledItemsUuids = disabledItems.map(a => a.uuid)
   return (
     <Table responsive hover striped>
       <thead>
@@ -49,26 +52,30 @@ const AdvancedSelectOverlayTable = ({
           const isSelected = Object.hasOwn(item, "isSelected")
             ? item.isSelected
             : selectedItemsUuids.includes(item.uuid)
-          const disabled = item.disabled
-          const handleClick = () =>
-            isSelected ? handleRemoveItem(item) : handleAddItem(item)
-          const renderSelectComponent = React.cloneElement(
-            selectItemComponent,
-            {
+          const isDisabled = disabledItemsUuids.includes(item.uuid)
+          const disableSelection = item.disabled
+          const handleClick = isDisabled
+            ? null
+            : () => (isSelected ? handleRemoveItem(item) : handleAddItem(item))
+          const style = isDisabled
+            ? null
+            : {
+              cursor: disableSelection ? "auto" : "pointer",
+              pointerEvents: disableSelection ? "none" : "all"
+            }
+          const renderSelectComponent = isDisabled
+            ? null
+            : React.cloneElement(selectItemComponent, {
               name: fieldName,
               checked: isSelected,
-              disabled,
+              disabled: disableSelection,
               onChange: () => null
-            }
-          )
+            })
           return (
             <tr
               key={`${item.uuid}-${pageNum}-${i}`}
               onClick={handleClick}
-              style={{
-                cursor: disabled ? "auto" : "pointer",
-                pointerEvents: disabled ? "none" : "all"
-              }}
+              style={style}
             >
               <td style={{ textAlign: "center" }}>{renderSelectComponent}</td>
               {renderRow(item)}
@@ -82,15 +89,18 @@ const AdvancedSelectOverlayTable = ({
 
 interface AdvancedSingleSelectOverlayTableBaseProps {
   selectedItems?: any | any[]
+  disabledItems?: any | any[]
 }
 
 const AdvancedSingleSelectOverlayTableBase = ({
   selectedItems,
+  disabledItems,
   ...otherProps
 }: AdvancedSingleSelectOverlayTableBaseProps) => (
   <AdvancedSelectOverlayTable
     {...otherProps}
     selectedItems={_isEmpty(selectedItems) ? [] : [selectedItems]}
+    disabledItems={_isEmpty(disabledItems) ? [] : [disabledItems]}
     selectItemComponent={<Form.Check type="radio" />}
   />
 )
