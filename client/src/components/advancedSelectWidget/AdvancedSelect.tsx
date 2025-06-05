@@ -102,6 +102,7 @@ export interface AdvancedSelectProps {
   extraAddon?: React.ReactNode
   value?: any | any[]
   valueKey?: string
+  disabledValue?: any | any[]
   renderSelected?: React.ReactElement
   overlayTable?: React.ReactElement // how to render the selected items
   overlayColumns: string[] // search results component for in the overlay
@@ -134,6 +135,7 @@ const AdvancedSelect = ({
   extraAddon,
   value,
   valueKey = "uuid",
+  disabledValue,
   renderSelected,
   overlayTable: OverlayTable,
   overlayColumns,
@@ -358,6 +360,7 @@ const AdvancedSelect = ({
                               items={items}
                               pageNum={pageNum}
                               selectedItems={value}
+                              disabledItems={disabledValue}
                               valueKey={valueKey}
                               handleAddItem={item => {
                                 handleAddItem(item)

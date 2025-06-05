@@ -34,6 +34,7 @@ import useMergeObjects, {
   ALIGN_OPTIONS,
   areAllSet,
   getActionButton,
+  getOtherSide,
   MERGE_SIDES,
   mergedPersonIsValid,
   selectAllFields,
@@ -491,6 +492,7 @@ const PersonColumn = ({
   dispatchMergeActions
 }: PersonColumnProps) => {
   const person = mergeState[align]
+  const otherSide = mergeState[getOtherSide(align)]
   const idForPerson = label.replace(/\s+/g, "")
 
   return (
@@ -503,6 +505,7 @@ const PersonColumn = ({
           fieldName="person"
           placeholder="Select a person to merge"
           value={person}
+          disabledValue={otherSide}
           overlayColumns={["name"]}
           overlayRenderRow={PersonSimpleOverlayRow}
           filterDefs={peopleFilters}
