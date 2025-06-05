@@ -198,9 +198,12 @@ describe("Merge people who are both non-users", () => {
     await MergePeople.waitForAdvancedSelectLoading(
       EXAMPLE_PEOPLE.validLeft.fullName
     )
-    await (await MergePeople.getFirstItemFromAdvancedSelect()).click()
-
-    await (await MergePeople.getSamePositionsToast()).waitForDisplayed()
+    // eslint-disable-next-line no-unused-expressions
+    expect(
+      await (
+        await MergePeople.getFirstItemRadioButtonFromAdvancedSelect()
+      ).isExisting()
+    ).to.be.false
   })
 
   it("Should display fields values of the right person", async() => {
