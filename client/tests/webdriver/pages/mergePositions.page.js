@@ -37,6 +37,12 @@ class MergePositions extends Page {
     )
   }
 
+  async getFirstItemRadioButtonFromAdvancedSelect() {
+    return browser.$(
+      "table > tbody > tr:first-child > td:first-child > input.form-check-input"
+    )
+  }
+
   async getEditAssociatedPositionsButton() {
     return browser.$('//button[text()="Edit Associated Positions"]')
   }
@@ -55,10 +61,6 @@ class MergePositions extends Page {
 
   async getMergePositionsButton() {
     return browser.$('//button[text()="Merge Positions"]')
-  }
-
-  async getSamePositionsToast() {
-    return browser.$('//div[text()="Please select different positions"]')
   }
 
   async getOccupiedPositionsToast() {
