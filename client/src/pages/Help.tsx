@@ -2,8 +2,8 @@ import { gql } from "@apollo/client"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
 import AppContext from "components/AppContext"
-import EmailAddressTable from "components/EmailAddressTable"
 import Fieldset from "components/Fieldset"
+import LinkTo from "components/LinkTo"
 import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import {
   mapPageDispatchersToProps,
@@ -14,7 +14,6 @@ import {
 import React, { useContext } from "react"
 import { connect } from "react-redux"
 import TOUR_SCREENSHOT from "resources/tour-screenshot.png"
-import Settings from "settings"
 import utils from "utils"
 
 const GQL_GET_ORGANIZATION = gql`
@@ -174,19 +173,17 @@ const HelpConditional = ({
           system regarding how your organization, position and profile are set
           up.
         </p>
-        <p>Your superusers:</p>
-        <ul>
-          {superusers.map(user => (
-            <li key={user.uuid}>
-              {user.rank} {user.name}:
-              <EmailAddressTable
-                label={Settings.fields.person.emailAddresses.label}
-                emailAddresses={user.emailAddresses}
-              />
-            </li>
-          ))}
-          {superusers.length === 0 && <em>No superusers found</em>}
-        </ul>
+        {superusers.length > 0 && (
+          <>
+            <p>Your superusers:</p>
+            <div className="d-flex flex-column gap-2">
+              {superusers.map(user => (
+                <LinkTo modelType="Person" model={user} className="mb-1" />
+              ))}
+            </div>
+          </>
+        )}
+        {superusers.length === 0 && <em>No superusers found</em>}
 
         <h4>3. Check out the FAQ</h4>
         <p>
