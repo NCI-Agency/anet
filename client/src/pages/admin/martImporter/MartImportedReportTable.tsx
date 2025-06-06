@@ -258,8 +258,8 @@ const MartImportedReportTable = ({
               <thead>
                 <tr>
                   <th>Sequence</th>
-                  <th>Submitted Date</th>
-                  <th>Received Date</th>
+                  <th>Sent by MART</th>
+                  <th>Received by ANET</th>
                   <th>Received</th>
                   <th>Submitted</th>
                   {!selectedReportUuid && <th>Author</th>}
