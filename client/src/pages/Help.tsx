@@ -15,7 +15,6 @@ import RichTextEditor from "components/RichTextEditor"
 import React, { useContext } from "react"
 import { connect } from "react-redux"
 import TOUR_SCREENSHOT from "resources/tour-screenshot.png"
-import utils from "utils"
 
 const GQL_GET_ORGANIZATION = gql`
   query ($uuid: String) {
@@ -34,6 +33,19 @@ const GQL_GET_ORGANIZATION = gql`
             }
           }
         }
+      }
+    }
+  }
+`
+
+const GQL_GET_ADMINISTRATORS = gql`
+  query ($personQuery: PersonSearchQueryInput) {
+    personList(query: $personQuery) {
+      list {
+        uuid
+        name
+        rank
+        ${GRAPHQL_ENTITY_AVATAR_FIELDS}
       }
     }
   }
@@ -97,15 +109,28 @@ const HelpFetchSuperusers = ({
   pageDispatchers
 }: HelpFetchSuperusersProps) => {
   // Retrieve superusers
-  const queryResult = API.useApiQuery(GQL_GET_ORGANIZATION, {
+  const orgQuery = API.useApiQuery(GQL_GET_ORGANIZATION, {
     uuid: orgUuid
   })
+
+  // Retrieve administrators
+  const adminQuery = API.useApiQuery(GQL_GET_ADMINISTRATORS, {
+    personQuery: {
+      pendingVerification: false,
+      positionType: "ADMINISTRATOR",
+      sortBy: "NAME",
+      sortOrder: "ASC",
+      status: "ACTIVE"
+    }
+  })
+
   return (
     <HelpConditional
       appSettings={appSettings}
       currentUser={currentUser}
       pageDispatchers={pageDispatchers}
-      {...queryResult}
+      {...orgQuery}
+      admins={adminQuery.data?.personList?.list || []}
       orgUuid={orgUuid}
     />
   )
@@ -115,6 +140,7 @@ interface HelpConditionalProps {
   loading?: boolean
   error?: any
   data?: any
+  admins?: any[]
   orgUuid?: string
   appSettings?: any
   currentUser?: any
@@ -125,6 +151,7 @@ const HelpConditional = ({
   loading,
   error,
   data,
+  admins,
   orgUuid,
   appSettings,
   currentUser,
@@ -174,23 +201,42 @@ const HelpConditional = ({
           style={screenshotCss}
         />
 
-        <h4>{help_text ? "3" : "2"}. Email your superuser</h4>
+        <h4>
+          {help_text ? "3" : "2"}. Contact your superuser or administrators
+        </h4>
         <p>
-          Your organization's superusers are able to modify a lot of data in the
-          system regarding how your organization, position and profile are set
-          up.
+          Your organization's superusers and administrators are able to modify a
+          lot of data in the system regarding how your organization, position
+          and profile are set up.
         </p>
-        {superusers.length > 0 && (
-          <>
-            <p>Your superusers:</p>
-            <div className="d-flex flex-column gap-2">
-              {superusers.map(user => (
-                <LinkTo modelType="Person" model={user} className="mb-1" />
-              ))}
-            </div>
-          </>
-        )}
-        {superusers.length === 0 && <em>No superusers found</em>}
+        <div className="d-flex flex-column mt-3 gap-4">
+          <div>
+            {superusers.length > 0 && (
+              <>
+                <b>Your superusers:</b>
+                <div className="d-flex flex-column gap-2 p-2">
+                  {superusers.map(user => (
+                    <LinkTo modelType="Person" model={user} key={user.uuid} />
+                  ))}
+                </div>
+              </>
+            )}
+            {superusers.length === 0 && <em>No superusers found</em>}
+          </div>
+          <div>
+            {admins.length > 0 && (
+              <>
+                <b>Your admins:</b>
+                <div className="d-flex flex-column gap-2 p-2">
+                  {admins.map(user => (
+                    <LinkTo modelType="Person" model={user} key={user.uuid} />
+                  ))}
+                </div>
+              </>
+            )}
+            {admins.length === 0 && <em>No admins found</em>}
+          </div>
+        </div>
       </Fieldset>
     </div>
   )
