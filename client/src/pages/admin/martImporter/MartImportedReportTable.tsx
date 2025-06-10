@@ -1,11 +1,13 @@
 import { gql } from "@apollo/client"
-import { Icon, Intent } from "@blueprintjs/core"
+import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
+import { PersonDetailedOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
+import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
-import { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
+import Model, { GRAPHQL_ENTITY_AVATAR_FIELDS } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -14,11 +16,12 @@ import {
 } from "components/Page"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _isEmpty from "lodash/isEmpty"
-import * as Models from "models"
+import { Person, Report } from "models"
 import moment from "moment"
 import React, { useState } from "react"
 import { FormSelect, OverlayTrigger, Table, Tooltip } from "react-bootstrap"
 import { connect } from "react-redux"
+import PEOPLE_ICON from "resources/people.png"
 import Settings from "settings"
 import utils from "utils"
 
@@ -60,7 +63,7 @@ const FILTER_OPTIONS = [
 ]
 
 const displayCallback = modelInstance => {
-  if (modelInstance instanceof Models.Report) {
+  if (modelInstance instanceof Report) {
     const title = utils.ellipsizeOnWords(
       modelInstance.intent,
       utils.getMaxTextFieldLength(Settings.fields.report.intent, 40)
@@ -149,31 +152,42 @@ const MartImportedReportTable = ({
     setPageNum(0)
   }
 
+  const peopleFilters = {
+    allPeople: {
+      label: "All people",
+      queryVars: {
+        status: Model.STATUS.ACTIVE
+      }
+    }
+  }
+
   return (
     <>
       <Fieldset
         title="MART reports imported"
         action={
           <div className="flot-end d-flex align-items-center gap-3">
-            {!selectedReportUuid && selectedAuthor && (
+            {!selectedReportUuid && (
               <div className="d-flex flex-column">
-                Filtering by author:
-                <div
-                  className="d-flex align-items-center p-3 fs-6 gap-2 bg-white"
-                  style={{ height: 38, borderRadius: 8 }}
-                >
-                  {selectedAuthor?.name}
-                  <OverlayTrigger
-                    placement="top"
-                    overlay={<Tooltip>Remove this filter</Tooltip>}
-                  >
-                    <Icon
-                      icon={IconNames.CROSS}
-                      style={{ cursor: "pointer" }}
-                      onClick={() => handleAuthorChange(null)}
-                    />
-                  </OverlayTrigger>
-                </div>
+                Filter by author:
+                <AdvancedSingleSelect
+                  fieldName="author"
+                  placeholder="Select an author to filter on"
+                  value={selectedAuthor}
+                  overlayColumns={[
+                    "Name",
+                    "Position",
+                    "Location",
+                    "Organization"
+                  ]}
+                  overlayRenderRow={PersonDetailedOverlayRow}
+                  filterDefs={peopleFilters}
+                  onChange={handleAuthorChange}
+                  objectType={Person}
+                  valueKey="name"
+                  fields={Person.autocompleteQuery}
+                  addon={PEOPLE_ICON}
+                />
               </div>
             )}
             <div>
@@ -244,8 +258,8 @@ const MartImportedReportTable = ({
               <thead>
                 <tr>
                   <th>Sequence</th>
-                  <th>Submitted Date</th>
-                  <th>Received Date</th>
+                  <th>Sent by MART</th>
+                  <th>Received by ANET</th>
                   <th>Received</th>
                   <th>Submitted</th>
                   {!selectedReportUuid && <th>Author</th>}
