@@ -1093,8 +1093,6 @@ WHERE "approvalStepUuid" IS NULL AND reports.state = 1);
 --Set the Admin Settings
 INSERT INTO "adminSettings" (key, value) VALUES
   ('DEFAULT_APPROVAL_ORGANIZATION', (select uuid from organizations where "shortName"='ANET Administrators')),
-  ('HELP_LINK_URL', 'http://google.com'),
-  ('CONTACT_EMAIL', 'team-anet@example.com'),
   ('DAILY_ROLLUP_MAX_REPORT_AGE_DAYS', '14'),
   ('EXTERNAL_DOCUMENTATION_LINK_TEXT', ''),
   ('EXTERNAL_DOCUMENTATION_LINK_URL', ''),

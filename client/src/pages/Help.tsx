@@ -130,9 +130,7 @@ const HelpConditional = ({
   currentUser,
   pageDispatchers
 }: HelpConditionalProps) => {
-  const url = appSettings.HELP_LINK_URL
   const help_text = appSettings.HELP_TEXT
-  const email = appSettings.CONTACT_EMAIL
   const { done, result } = useBoilerplate({
     loading,
     error,
@@ -156,9 +154,7 @@ const HelpConditional = ({
   return (
     <div className="help-page">
       <Fieldset title="Need help with ANET?">
-        {help_text &&
-          <RichTextEditor readOnly value={help_text} />
-        }
+        {help_text && <RichTextEditor readOnly value={help_text} />}
 
         <p className="help-text">There are a few ways to get help:</p>
 
@@ -190,23 +186,6 @@ const HelpConditional = ({
           </>
         )}
         {superusers.length === 0 && <em>No superusers found</em>}
-
-        <h4>3. Check out the FAQ</h4>
-        <p>
-          Many common issues are explained in the FAQ document, especially for
-          common superuser tasks.
-        </p>
-        <p>
-          <a href={url} target="help">
-            <strong>The FAQ is available on the portal.</strong>
-          </a>
-        </p>
-
-        <h4>4. Contact ANET support</h4>
-        <p>
-          Technical issues may be able to be resolved by the ANET
-          administrators: {utils.createMailtoLink(email)}
-        </p>
       </Fieldset>
     </div>
   )
