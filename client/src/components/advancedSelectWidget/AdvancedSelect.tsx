@@ -325,7 +325,7 @@ const AdvancedSelect = ({
                           handleOnChange={handleOnChangeSelect}
                         />
 
-                        <Col md={hasMultipleItems(filterDefs) ? 8 : 11}>
+                        <Col md={hasMultipleItems(filterDefs) ? 8 : 12}>
                           <OverlayTable
                             fieldName={fieldName}
                             items={items}
