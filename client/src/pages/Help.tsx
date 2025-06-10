@@ -154,11 +154,16 @@ const HelpConditional = ({
   return (
     <div className="help-page">
       <Fieldset title="Need help with ANET?">
-        {help_text && <RichTextEditor readOnly value={help_text} />}
-
         <p className="help-text">There are a few ways to get help:</p>
 
-        <h4>1. Use the guided tours</h4>
+        {help_text && (
+          <>
+            <h4>1. Read the help text</h4>
+            <RichTextEditor readOnly value={help_text} />
+          </>
+        )}
+
+        <h4>{help_text ? "2" : "1"}. Use the guided tours</h4>
         <p>
           If you're stuck on a page and you don't know what to do, look for the{" "}
           <strong>"Take a tour"</strong> link near the top of the page.
@@ -169,7 +174,7 @@ const HelpConditional = ({
           style={screenshotCss}
         />
 
-        <h4>2. Email your superuser</h4>
+        <h4>{help_text ? "3" : "2"}. Email your superuser</h4>
         <p>
           Your organization's superusers are able to modify a lot of data in the
           system regarding how your organization, position and profile are set
