@@ -18,7 +18,6 @@ import {
   SearchDescription
 } from "components/SearchFilters"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
-import _isEmpty from "lodash/isEmpty"
 import React, { useEffect, useMemo, useState } from "react"
 import { Button, Table } from "react-bootstrap"
 import { connect } from "react-redux"
@@ -79,7 +78,7 @@ const MySavedSearches = ({
   )
 
   useEffect(() => {
-    const newQueries = Object.assign({})
+    const newQueries = {}
     paginatedSearches.forEach(search => {
       const objType = SEARCH_OBJECT_TYPES[search.objectType]
       const queryParams = utils.parseJsonSafe(search.query)
@@ -109,13 +108,15 @@ const MySavedSearches = ({
         totalCount={totalCount}
         goToPage={setPageNum}
       >
-        {paginatedSearches.length > 0 ? (
+        {paginatedSearches.length === 0 ? (
+          <p>No saved searches found.</p>
+        ) : (
           <Table striped responsive className="mt-3 mb-3">
             <thead>
               <tr>
                 <th style={{ width: "20%" }}>Search Name</th>
                 <th style={{ width: "70%" }}>Description</th>
-                <th style={{ width: "10%" }}>Actions</th>
+                <th style={{ width: "10%" }}>Action</th>
               </tr>
             </thead>
             <tbody>
@@ -146,7 +147,7 @@ const MySavedSearches = ({
                   </td>
                   <td>
                     <ConfirmDestructive
-                      onClick={() => onConfirmDelete(savedSearch.uuid)}
+                      onConfirm={() => onConfirmDelete(savedSearch.uuid)}
                       objectType="search"
                       objectDisplay={savedSearch.name}
                       variant="danger"
@@ -159,8 +160,6 @@ const MySavedSearches = ({
               ))}
             </tbody>
           </Table>
-        ) : (
-          <p>No saved searches found.</p>
         )}
       </UltimatePaginationTopDown>
     </Fieldset>
@@ -186,9 +185,7 @@ const MySavedSearches = ({
 
   function onConfirmDelete(uuid) {
     return API.mutation(GQL_DELETE_SAVED_SEARCH, { uuid })
-      .then(data => {
-        refetch()
-      })
+      .then(refetch)
       .catch(error => {
         setStateError(error)
         jumpToTop()
