@@ -39,6 +39,7 @@ import mil.dds.anet.database.NoteDao;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PositionDao;
+import mil.dds.anet.database.PreferenceDao;
 import mil.dds.anet.database.ReportActionDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.ReportSensitiveInformationDao;
@@ -166,6 +167,10 @@ public class AnetObjectEngine {
 
   public AssessmentDao getAssessmentDao() {
     return ApplicationContextProvider.getBean(AssessmentDao.class);
+  }
+
+  public PreferenceDao getPreferenceDao() {
+    return ApplicationContextProvider.getBean(PreferenceDao.class);
   }
 
   public CompletableFuture<Boolean> canUserApproveStep(GraphQLContext context, String userUuid,
