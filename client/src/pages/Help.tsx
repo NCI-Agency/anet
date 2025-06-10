@@ -11,6 +11,7 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
+import RichTextEditor from "components/RichTextEditor"
 import React, { useContext } from "react"
 import { connect } from "react-redux"
 import TOUR_SCREENSHOT from "resources/tour-screenshot.png"
@@ -130,6 +131,7 @@ const HelpConditional = ({
   pageDispatchers
 }: HelpConditionalProps) => {
   const url = appSettings.HELP_LINK_URL
+  const help_text = appSettings.HELP_TEXT
   const email = appSettings.CONTACT_EMAIL
   const { done, result } = useBoilerplate({
     loading,
@@ -154,6 +156,10 @@ const HelpConditional = ({
   return (
     <div className="help-page">
       <Fieldset title="Need help with ANET?">
+        {help_text &&
+          <RichTextEditor readOnly value={help_text} />
+        }
+
         <p className="help-text">There are a few ways to get help:</p>
 
         <h4>1. Use the guided tours</h4>

@@ -36,6 +36,7 @@ import { connect } from "react-redux"
 import { toast } from "react-toastify"
 import AUTHORIZATION_GROUPS_ICON from "resources/authorizationGroups.png"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
+import utils from "utils"
 import { v4 as uuidv4 } from "uuid"
 
 const GQL_GET_ADMIN_SETTINGS = gql`
@@ -195,7 +196,7 @@ const SPECIAL_FIELDS = {
     }
   },
   HELP_TEXT: {
-    widget: () => <RichTextEditor className="form-control" />,
+    widget: () => <RichTextEditor />,
     convertValueToForm: value => value,
     convertFormToValue: value => value,
     onChange: (key, value, setFieldTouched, setFieldValue) => {
