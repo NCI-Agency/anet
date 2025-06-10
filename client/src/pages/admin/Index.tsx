@@ -198,7 +198,7 @@ const SPECIAL_FIELDS = {
   HELP_TEXT: {
     widget: () => <RichTextEditor />,
     convertValueToForm: value => value,
-    convertFormToValue: value => value,
+    convertFormToValue: value => value && !utils.isEmptyHtml(value) ? value : null,
     onChange: (key, value, setFieldTouched, setFieldValue) => {
       const plainValue = convertFormToValue(key, value)
       const formValue = convertValueToForm(key, plainValue)
