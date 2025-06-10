@@ -11,6 +11,7 @@ import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.RollupGraph;
 import mil.dds.anet.beans.mart.LogDto;
 import mil.dds.anet.beans.mart.ReportDto;
+import mil.dds.anet.test.client.AccessTokenInput;
 import mil.dds.anet.test.client.AnetEmailInput;
 import mil.dds.anet.test.client.CommentInput;
 import mil.dds.anet.test.client.EventInput;
@@ -25,6 +26,7 @@ import mil.dds.anet.test.client.PositionRole;
 import mil.dds.anet.test.client.PositionType;
 import mil.dds.anet.test.client.Status;
 import mil.dds.anet.test.client.TaskInput;
+import mil.dds.anet.test.client.TokenScope;
 
 public class TestData {
 
@@ -237,5 +239,11 @@ public class TestData {
     transmissionLog.add(missing2);
 
     return transmissionLog;
+  }
+
+  public static AccessTokenInput createAccessTokenInput(String name, TokenScope tokenScope,
+      String tokenHash) {
+    return AccessTokenInput.builder().withName(name).withScope(tokenScope).withTokenHash(tokenHash)
+        .withCreatedAt(Instant.now()).withExpiresAt(Instant.now()).build();
   }
 }

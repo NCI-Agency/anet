@@ -6,6 +6,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.JobHistory;
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.config.AnetDictionary;
 import mil.dds.anet.config.ApplicationContextProvider;
 import mil.dds.anet.database.JobHistoryDao;
@@ -38,8 +39,9 @@ public abstract class AbstractWorker {
     BatchingUtils batchingUtils = null;
     try {
       batchingUtils = startDispatcher(runStatus);
-      final GraphQLContext context = GraphQLContext.newContext()
-          .of("dataLoaderRegistry", batchingUtils.getDataLoaderRegistry()).build();
+      final GraphQLContext context = GraphQLContext.newContext().of( // -
+          "dataLoaderRegistry", batchingUtils.getDataLoaderRegistry(), // -
+          "principal", Person.SYSTEM_USER).build();
       jobHistoryDao.runInTransaction(className,
           (now, jobHistory) -> runInternal(now, jobHistory, context));
     } catch (Throwable e) {
