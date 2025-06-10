@@ -157,7 +157,7 @@ const HelpConditional = ({
   currentUser,
   pageDispatchers
 }: HelpConditionalProps) => {
-  const help_text = appSettings.HELP_TEXT
+  const helpText = appSettings.HELP_TEXT
   const { done, result } = useBoilerplate({
     loading,
     error,
@@ -183,14 +183,14 @@ const HelpConditional = ({
       <Fieldset title="Need help with ANET?">
         <p className="help-text">There are a few ways to get help:</p>
 
-        {help_text && (
+        {helpText && (
           <>
             <h4>1. Read the help text</h4>
-            <RichTextEditor readOnly value={help_text} />
+            <RichTextEditor readOnly value={helpText} />
           </>
         )}
 
-        <h4>{help_text ? "2" : "1"}. Use the guided tours</h4>
+        <h4>{helpText ? "2" : "1"}. Use the guided tours</h4>
         <p>
           If you're stuck on a page and you don't know what to do, look for the{" "}
           <strong>"Take a tour"</strong> link near the top of the page.
@@ -202,7 +202,7 @@ const HelpConditional = ({
         />
 
         <h4>
-          {help_text ? "3" : "2"}. Contact your superuser or administrators
+          {helpText ? "3" : "2"}. Contact your superuser or administrators
         </h4>
         <p>
           Your organization's superusers and administrators are able to modify a

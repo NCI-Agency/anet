@@ -158,7 +158,7 @@ public class InitializationCommand {
 
     // Set empty unlimited exports authorization group
     saveAdminSetting(engine, AdminSettingKeys.UNLIMITED_EXPORTS_AUTHORIZATION_GROUP, "");
-    
+
     // Set empty help text
     saveAdminSetting(engine, AdminSettingKeys.HELP_TEXT, "");
   }
