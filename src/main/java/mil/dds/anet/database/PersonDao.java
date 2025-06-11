@@ -7,6 +7,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Deque;
@@ -24,6 +25,7 @@ import mil.dds.anet.beans.MergedEntity;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.beans.Position;
+import mil.dds.anet.beans.User;
 import mil.dds.anet.beans.WithStatus;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.recentActivity.Activity;
@@ -54,9 +56,9 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
 
   // Must always retrieve these e.g. for ORDER BY
   public static final String[] minimalFields = {"uuid", "name", "rank", "createdAt"};
-  public static final String[] additionalFields = {"status", "user", "phoneNumber", "biography",
-      "obsoleteCountry", "countryUuid", "gender", "endOfTourDate", "domainUsername",
-      "pendingVerification", "code", "updatedAt", "customFields"};
+  public static final String[] additionalFields =
+      {"status", "user", "phoneNumber", "biography", "obsoleteCountry", "countryUuid", "gender",
+          "endOfTourDate", "pendingVerification", "code", "updatedAt", "customFields"};
   public static final String[] allFields =
       ObjectArrays.concat(minimalFields, additionalFields, String.class);
   public static final String TABLE_NAME = "people";
@@ -130,10 +132,10 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
       final String sql = "/* personInsert */ INSERT INTO people "
           + "(uuid, name, status, \"user\", \"phoneNumber\", rank, "
           + "\"pendingVerification\", gender, \"countryUuid\", code, \"endOfTourDate\", biography, "
-          + "\"domainUsername\", \"createdAt\", \"updatedAt\", \"customFields\") "
+          + "\"createdAt\", \"updatedAt\", \"customFields\") "
           + "VALUES (:uuid, :name, :status, :user, :phoneNumber, :rank, "
           + ":pendingVerification, :gender, :countryUuid, :code, :endOfTourDate, :biography, "
-          + ":domainUsername, :createdAt, :updatedAt, :customFields)";
+          + ":createdAt, :updatedAt, :customFields)";
       handle.createUpdate(sql).bindBean(p)
           .bind("createdAt", DaoUtils.asLocalDateTime(p.getCreatedAt()))
           .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
@@ -152,16 +154,15 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     try {
       DaoUtils.setUpdateFields(p);
       final String sql = "/* personUpdateAuthenticationDetails */ UPDATE people "
-          + "SET \"domainUsername\" = :domainUsername, "
-          + "status = :status, \"user\" = :user, \"pendingVerification\" = :pendingVerification, "
+          + "SET status = :status, \"user\" = :user, \"pendingVerification\" = :pendingVerification, "
           + "\"endOfTourDate\" = :endOfTourDate, \"updatedAt\" = :updatedAt WHERE uuid = :uuid";
       final int nr = handle.createUpdate(sql).bindBean(p)
           .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
           .bind("endOfTourDate", DaoUtils.asLocalDateTime(p.getEndOfTourDate()))
           .bind("status", DaoUtils.getEnumId(p.getStatus())).execute();
-      evictFromCache(p);
-      // The domainUsername has changed, evict original person as well
+      // Evict original person as well as current person
       evictFromCache(findInCache(p));
+      evictFromCache(p);
       // No need to update subscriptions, this is an internal change
       return nr;
     } finally {
@@ -177,7 +178,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
           + "SET name = :name, status = :status, \"user\" = :user, gender = :gender, "
           + "\"obsoleteCountry\" = :obsoleteCountry, \"countryUuid\" = :countryUuid, "
           + "code = :code, \"phoneNumber\" = :phoneNumber, rank = :rank, biography = :biography, "
-          + "\"pendingVerification\" = :pendingVerification, \"domainUsername\" = :domainUsername, "
+          + "\"pendingVerification\" = :pendingVerification, "
           + "\"updatedAt\" = :updatedAt, \"customFields\" = :customFields, \"endOfTourDate\" = :endOfTourDate "
           + "WHERE uuid = :uuid";
 
@@ -185,6 +186,8 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
           .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
           .bind("endOfTourDate", DaoUtils.asLocalDateTime(p.getEndOfTourDate()))
           .bind("status", DaoUtils.getEnumId(p.getStatus())).execute();
+      // Evict original person as well as current person
+      evictFromCache(findInCache(p));
       evictFromCache(p);
       return nr;
     } finally {
@@ -233,10 +236,11 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
       if (person != null) {
         return Collections.singletonList(person);
       }
-      final StringBuilder sql = new StringBuilder(
-          "/* findByDomainUsername */ SELECT " + PERSON_FIELDS + "," + PositionDao.POSITION_FIELDS
-              + "FROM people LEFT JOIN positions ON people.uuid = positions.\"currentPersonUuid\" "
-              + "WHERE people.\"domainUsername\" = :domainUsername");
+      final StringBuilder sql = new StringBuilder("/* findByDomainUsername */ SELECT "
+          + PERSON_FIELDS + "," + PositionDao.POSITION_FIELDS + "," + UserDao.USER_FIELDS
+          + "FROM people LEFT JOIN positions ON people.uuid = positions.\"currentPersonUuid\" "
+          + "JOIN users ON people.uuid = users.\"personUuid\" "
+          + "WHERE users.\"domainUsername\" = :domainUsername");
       if (activeUser) {
         sql.append(" AND people.user = :user AND people.status != :inactiveStatus");
       }
@@ -246,7 +250,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
             DaoUtils.getEnumId(WithStatus.Status.INACTIVE));
       }
       final List<Person> people = query.map(new PersonMapper()).list();
-      // There should be at most one match
+      // There should be at most one match since domainUsername must be unique
       people.forEach(this::putInCache);
       return people;
     } finally {
@@ -254,8 +258,8 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     }
   }
 
-  public void logActivitiesByDomainUsername(String domainUsername, Activity activity) {
-    final Person person = domainUsersCache.get(domainUsername);
+  public void logActivitiesByPersonUuid(String personUuid, Activity activity) {
+    final Person person = findInCacheByPersonUuid(personUuid);
     if (person != null) {
       final Deque<Activity> activities = person.getRecentActivities();
       activities.addFirst(activity);
@@ -263,7 +267,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
         activities.removeLast();
       }
       person.setRecentActivities(activities);
-      domainUsersCache.replace(domainUsername, person);
+      person.getUsers().forEach(u -> domainUsersCache.replace(u.getDomainUsername(), person));
     }
   }
 
@@ -295,12 +299,11 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   }
 
   private void putInCache(Person person) {
-    if (domainUsersCache != null && person != null && person.getUuid() != null
-        && person.getDomainUsername() != null) {
+    if (domainUsersCache != null && person != null && !Utils.isEmptyOrNull(person.getUsers())) {
       // defensively copy the person we will be caching
       final Person copy = copyPerson(person);
       if (copy != null) {
-        domainUsersCache.put(person.getDomainUsername(), copy);
+        person.getUsers().forEach(u -> domainUsersCache.put(u.getDomainUsername(), copy));
       }
     }
   }
@@ -312,8 +315,8 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
    * @param person the person to be evicted from the domain users cache
    */
   private void evictFromCache(Person person) {
-    if (domainUsersCache != null && person != null && person.getDomainUsername() != null) {
-      domainUsersCache.remove(person.getDomainUsername());
+    if (domainUsersCache != null && person != null && !Utils.isEmptyOrNull(person.getUsers())) {
+      person.getUsers().forEach(u -> domainUsersCache.remove(u.getDomainUsername()));
     }
   }
 
@@ -353,6 +356,20 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
         for (final String prop : allFields) {
           PropertyUtils.setSimpleProperty(personCopy, prop,
               PropertyUtils.getSimpleProperty(person, prop));
+        }
+        personCopy.setName(person.getName());
+        // Copy users
+        if (!Utils.isEmptyOrNull(person.getUsers())) {
+          final List<User> usersCopy = new ArrayList<>();
+          for (final User user : person.getUsers()) {
+            final User userCopy = new User();
+            for (final String prop : UserDao.fields) {
+              PropertyUtils.setSimpleProperty(userCopy, prop,
+                  PropertyUtils.getSimpleProperty(user, prop));
+            }
+            usersCopy.add(userCopy);
+          }
+          personCopy.setUsers(usersCopy);
         }
         // Copy position
         final Position position = person.getPosition();
@@ -410,14 +427,11 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
       final String winnerUuid = winner.getUuid();
       final String loserUuid = loser.getUuid();
 
-      // Clear loser's domainUsername to prevent update conflicts (domainUsername must be unique)
-      handle
-          .createUpdate("/* clearPersonDomainUsername */ UPDATE people"
-              + " SET \"domainUsername\" = NULL WHERE uuid = :loserUuid")
-          .bind("loserUuid", loserUuid).execute();
-
       // Update the winner's fields
       update(winner);
+
+      // Update user accounts
+      updateForMerge("users", "personUuid", winnerUuid, loserUuid);
 
       // For reports where both winner and loser are in the reportPeople:
       // 1. set winner's isPrimary, isAttendee, isAuthor and isInterlocutor flags to the logical OR
