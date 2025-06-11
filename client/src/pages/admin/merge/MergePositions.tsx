@@ -18,6 +18,7 @@ import {
   DEFAULT_CUSTOM_FIELDS_PARENT,
   MODEL_TO_OBJECT_TYPE
 } from "components/Model"
+import NavigationWarning from "components/NavigationWarning"
 import {
   jumpToTop,
   mapPageDispatchersToProps,
@@ -41,7 +42,7 @@ import useMergeObjects, {
 import { Location, Position } from "models"
 import OrganizationsAdministrated from "pages/positions/OrganizationsAdministrated"
 import PreviousPeople from "pages/positions/PreviousPeople"
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { Button, Col, Container, Form, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useLocation, useNavigate } from "react-router-dom"
@@ -70,6 +71,7 @@ const MergePositions = ({ pageDispatchers }: MergePositionsProps) => {
   const navigate = useNavigate()
   const { state } = useLocation()
   const initialLeftUuid = state?.initialLeftUuid
+  const [isDirty, setIsDirty] = useState(false)
   const [saveError, setSaveError] = useState(null)
   const [showHistoryModal, setShowHistoryModal] = useState(false)
   const [mergeState, dispatchMergeActions] = useMergeObjects(
@@ -99,8 +101,16 @@ const MergePositions = ({ pageDispatchers }: MergePositionsProps) => {
     !Location.hasCoordinates(position1?.location) &&
     !Location.hasCoordinates(position2?.location)
 
+  useEffect(() => {
+    setIsDirty(false)
+  }, [position1, position2])
+  useEffect(() => {
+    setIsDirty(!!mergedPosition)
+  }, [mergedPosition])
+
   return (
     <Container fluid>
+      <NavigationWarning isBlocking={isDirty} />
       <Row>
         <Messages error={saveError} />
         <h4>Merge Positions Tool</h4>
@@ -376,7 +386,10 @@ const MergePositions = ({ pageDispatchers }: MergePositionsProps) => {
         <Button
           style={{ width: "98%", margin: "16px 1%" }}
           variant="primary"
-          onClick={mergePositions}
+          onClick={() => {
+            setIsDirty(false)
+            mergePositions()
+          }}
           disabled={mergeState.notAllSet()}
         >
           Merge Positions
@@ -408,6 +421,7 @@ const MergePositions = ({ pageDispatchers }: MergePositionsProps) => {
         }
       })
       .catch(error => {
+        setIsDirty(true)
         setSaveError(error)
         jumpToTop()
       })
