@@ -74,11 +74,15 @@ export default class Person extends Model {
         .boolean()
         .default(false)
         .label(Settings.fields.person.user?.label),
-      domainUsername: yup
-        .string()
+      users: yup
+        .array()
+        .of(
+          yup.object().shape({
+            address: yup.string().nullable()
+          })
+        )
         .nullable()
-        .default("")
-        .label(Settings.fields.person.domainUsername?.label),
+        .default([]),
       emailAddresses: yupEmailAddressesWithValidation(
         "emailAddress",
         "emailAddress error",
@@ -177,7 +181,10 @@ export default class Person extends Model {
     pendingVerification
     phoneNumber
     user
-    domainUsername
+    users {
+      uuid
+      domainUsername
+    }
     biography
     obsoleteCountry
     country {
@@ -349,7 +356,7 @@ export default class Person extends Model {
     if (this.rank) {
       return this.rank + " " + militaryName
     } else {
-      return militaryName || this.domainUsername || this.uuid
+      return militaryName || this.uuid
     }
   }
 

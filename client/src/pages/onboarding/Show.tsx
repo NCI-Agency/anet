@@ -140,7 +140,7 @@ const OnboardingShow = ({ pageDispatchers }: OnboardingShowProps) => {
       user: {
         accessCond: false
       },
-      domainUsername: {
+      users: {
         accessCond: false
       }
     }
