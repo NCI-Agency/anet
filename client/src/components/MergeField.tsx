@@ -1,5 +1,6 @@
 import styled from "@emotion/styled"
 import _get from "lodash/get"
+import _has from "lodash/has"
 import _isEqual from "lodash/isEqual"
 import {
   ALIGN_OPTIONS,
@@ -59,6 +60,8 @@ const MergeField = ({
   const canAutoMerge = useMemo(
     () =>
       autoMerge &&
+      _has(mergeState[MERGE_SIDES.LEFT], fieldName) &&
+      _has(mergeState[MERGE_SIDES.RIGHT], fieldName) &&
       _isEqual(
         _get(mergeState[MERGE_SIDES.LEFT], fieldName),
         _get(mergeState[MERGE_SIDES.RIGHT], fieldName)

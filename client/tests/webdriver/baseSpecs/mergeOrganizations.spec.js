@@ -80,6 +80,49 @@ describe("Merge organizations error", () => {
 })
 
 describe("Merge organizations page", () => {
+  it("Should display a warning when leaving the page with unsaved changes", async() => {
+    await MergeOrganizations.openPage()
+    await (await MergeOrganizations.getTitle()).waitForExist()
+    await (await MergeOrganizations.getTitle()).waitForDisplayed()
+    await (await MergeOrganizations.getLeftOrganizationField()).click()
+    await (
+      await MergeOrganizations.getLeftOrganizationField()
+    ).setValue(EXAMPLE_ORGANIZATIONS.validLeft.search)
+    await MergeOrganizations.waitForAdvancedSelectLoading(
+      EXAMPLE_ORGANIZATIONS.validLeft.displayedName
+    )
+    await (await MergeOrganizations.getFirstItemFromAdvancedSelect()).click()
+    // attempt to leave when only one org is selected, should allow to leave
+    await (await $("#anet-logo")).click()
+    // eslint-disable-next-line no-unused-expressions
+    expect(await (await $(".modal-dialog")).isExisting()).to.be.false
+
+    await MergeOrganizations.openPage()
+    await (await MergeOrganizations.getTitle()).waitForExist()
+    await (await MergeOrganizations.getTitle()).waitForDisplayed()
+    await (await MergeOrganizations.getLeftOrganizationField()).click()
+    await (
+      await MergeOrganizations.getLeftOrganizationField()
+    ).setValue(EXAMPLE_ORGANIZATIONS.validLeft.search)
+    await MergeOrganizations.waitForAdvancedSelectLoading(
+      EXAMPLE_ORGANIZATIONS.validLeft.displayedName
+    )
+    await (await MergeOrganizations.getFirstItemFromAdvancedSelect()).click()
+    await (await MergeOrganizations.getRightOrganizationField()).click()
+    await (
+      await MergeOrganizations.getRightOrganizationField()
+    ).setValue(EXAMPLE_ORGANIZATIONS.validRight.search)
+    await MergeOrganizations.waitForAdvancedSelectLoading(
+      EXAMPLE_ORGANIZATIONS.validRight.displayedName
+    )
+    // attempt to leave when both orgs are selected, should show warning
+    await (await MergeOrganizations.getFirstItemFromAdvancedSelect()).click()
+    await (await $("#anet-logo")).click()
+    const modalDialog = await $(".modal-dialog")
+    // eslint-disable-next-line no-unused-expressions
+    expect(await modalDialog.isExisting()).to.be.true
+    await $(".btn-danger").click()
+  })
   it("Should display field values of the left organization", async() => {
     await MergeOrganizations.openPage()
     await (await MergeOrganizations.getTitle()).waitForExist()

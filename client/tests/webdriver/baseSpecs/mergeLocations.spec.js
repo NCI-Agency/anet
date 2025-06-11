@@ -100,6 +100,46 @@ describe("Merge locations error", () => {
 })
 
 describe("Merge locations page", () => {
+  it("Should display a warning when leaving the page with unsaved changes", async() => {
+    await MergeLocations.openPage()
+    await (await MergeLocations.getTitle()).waitForExist()
+    await (await MergeLocations.getTitle()).waitForDisplayed()
+    await (
+      await MergeLocations.getLeftLocationField()
+    ).setValue(EXAMPLE_LOCATIONS.leftCountry.search)
+    await MergeLocations.waitForAdvancedSelectLoading(
+      EXAMPLE_LOCATIONS.leftCountry.fullName
+    )
+    await (await MergeLocations.getFirstItemFromAdvancedSelect()).click()
+    // attempt to leave when only one location is selected, should allow to leave
+    await (await $("#anet-logo")).click()
+    // eslint-disable-next-line no-unused-expressions
+    expect(await (await $(".modal-dialog")).isExisting()).to.be.false
+
+    await MergeLocations.openPage()
+    await (await MergeLocations.getTitle()).waitForExist()
+    await (await MergeLocations.getTitle()).waitForDisplayed()
+    await (
+      await MergeLocations.getLeftLocationField()
+    ).setValue(EXAMPLE_LOCATIONS.leftCountry.search)
+    await MergeLocations.waitForAdvancedSelectLoading(
+      EXAMPLE_LOCATIONS.leftCountry.fullName
+    )
+    await (await MergeLocations.getFirstItemFromAdvancedSelect()).click()
+    await (
+      await MergeLocations.getRightLocationField()
+    ).setValue(EXAMPLE_LOCATIONS.right.search)
+    await MergeLocations.waitForAdvancedSelectLoading(
+      EXAMPLE_LOCATIONS.right.fullName
+    )
+    await (await MergeLocations.getFirstItemFromAdvancedSelect()).click()
+    // attempt to leave when both locations are selected, should show warning
+    await (await $("#anet-logo")).click()
+    const modalDialog = await $(".modal-dialog")
+    // eslint-disable-next-line no-unused-expressions
+    expect(await modalDialog.isExisting()).to.be.true
+    await $(".btn-danger").click()
+  })
   it("Should be able to select to incompatible locations to merge", async() => {
     await MergeLocations.openPage()
     await (await MergeLocations.getTitle()).waitForExist()
