@@ -839,11 +839,13 @@ const SearchFilterDisplay = ({
 interface SearchDescriptionProps {
   searchQuery?: SearchQueryPropType
   showPlaceholders?: boolean
+  style?: any
 }
 
 export const SearchDescription = ({
   searchQuery,
-  showPlaceholders
+  showPlaceholders,
+  style
 }: SearchDescriptionProps) => {
   const { currentUser } = useContext(AppContext)
   const ALL_FILTERS = searchFilters(currentUser?.isAdmin())
@@ -856,7 +858,7 @@ export const SearchDescription = ({
       )
   const filters = searchQuery.filters
   return (
-    <span className="asLink">
+    <span className="asLink" style={style}>
       <b>
         {searchQuery.objectType
           ? SEARCH_OBJECT_LABELS[searchQuery.objectType]
@@ -913,24 +915,31 @@ export const deserializeQueryParams = (
       }
       return null
     })
-    const ALL_FILTERS = searchFilters(true)
-    const filterDefs = ALL_FILTERS[objType].filters
-    Object.entries(filterDefs).map(([filterKey, filterDef]) => {
-      const deser = filterDef.deserializer(
-        filterDef.props,
-        queryParams,
-        filterKey
-      )
-      if (deser && deser.then instanceof Function) {
-        // deserialize returns a Promise
-        promises.push(deser)
-      } else if (deser) {
-        // deserialize returns filter data
-        usedFilters.push(deser)
-      }
-      return null
-    })
   }
+  const ALL_FILTERS = searchFilters(true)
+  const filterDefs =
+    objType && SEARCH_OBJECT_TYPES[objType]
+      ? ALL_FILTERS[SEARCH_OBJECT_TYPES[objType]].filters
+      : findCommonFiltersForAllObjectTypes(
+        Object.keys(SEARCH_OBJECT_TYPES),
+        ALL_FILTERS
+      )
+  Object.entries(filterDefs).map(([filterKey, filterDef]) => {
+    const deser = filterDef.deserializer(
+      filterDef.props,
+      queryParams,
+      filterKey
+    )
+    if (deser && deser.then instanceof Function) {
+      // deserialize returns a Promise
+      promises.push(deser)
+    } else if (deser) {
+      // deserialize returns filter data
+      usedFilters.push(deser)
+    }
+    return null
+  })
+
   Promise.all(promises).then(dataList => {
     dataList.forEach((filterData, index) => {
       // update filters

@@ -1,4 +1,6 @@
 import { gql } from "@apollo/client"
+import { Icon } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import { SEARCH_OBJECT_TYPES, setSearchQuery } from "actions"
 import API from "api"
 import ConfirmDestructive from "components/ConfirmDestructive"
@@ -11,11 +13,13 @@ import {
   useBoilerplate,
   usePageTitle
 } from "components/Page"
-import SavedSearchTable from "components/SavedSearchTable"
-import { deserializeQueryParams } from "components/SearchFilters"
-import _isEmpty from "lodash/isEmpty"
-import React, { useState } from "react"
-import { Button, Col, Form, Row } from "react-bootstrap"
+import {
+  deserializeQueryParams,
+  SearchDescription
+} from "components/SearchFilters"
+import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
+import React, { useEffect, useMemo, useState } from "react"
+import { Button, Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import utils from "utils"
@@ -42,13 +46,16 @@ interface MySavedSearchesProps {
   pageDispatchers?: PageDispatchersPropType
 }
 
+const DEFAULT_PAGESIZE = 10
+
 const MySavedSearches = ({
   setSearchQuery,
   pageDispatchers
 }: MySavedSearchesProps) => {
   const navigate = useNavigate()
   const [stateError, setStateError] = useState(null)
-  const [selectedSearch, setSelectedSearch] = useState(null)
+  const [deserializedQueries, setDeserializedQueries] = useState({})
+  const [pageNum, setPageNum] = useState(0)
   const { loading, error, data, refetch } = API.useApiQuery(
     GQL_GET_SAVED_SEARCHES
   )
@@ -58,77 +65,110 @@ const MySavedSearches = ({
     pageDispatchers
   })
   usePageTitle("My Saved Searches")
+
+  const savedSearches = useMemo(() => data?.savedSearches || [], [data])
+  const totalCount = savedSearches.length
+  const paginatedSearches = useMemo(
+    () =>
+      savedSearches.slice(
+        pageNum * DEFAULT_PAGESIZE,
+        (pageNum + 1) * DEFAULT_PAGESIZE
+      ),
+    [savedSearches, pageNum]
+  )
+
+  useEffect(() => {
+    const newQueries = {}
+    paginatedSearches.forEach(search => {
+      const objType = SEARCH_OBJECT_TYPES[search.objectType]
+      const queryParams = utils.parseJsonSafe(search.query)
+      deserializeQueryParams(
+        objType,
+        queryParams,
+        (objectType, filters, text) => {
+          newQueries[search.uuid] = { objectType, filters, text }
+          setDeserializedQueries(prev => ({ ...prev, ...newQueries }))
+        }
+      )
+    })
+  }, [paginatedSearches])
+
   if (done) {
     return result
-  }
-
-  let savedSearches = []
-  if (data) {
-    savedSearches = data.savedSearches
-    if (_isEmpty(savedSearches)) {
-      if (selectedSearch) {
-        // Clear selection
-        setSelectedSearch(null)
-      }
-    } else if (!savedSearches.includes(selectedSearch)) {
-      // Select first one
-      setSelectedSearch(savedSearches[0])
-    }
   }
 
   return (
     <Fieldset title="Saved searches">
       <Messages error={stateError} />
-      <Form.Group as={Row} className="mb-3" controlId="savedSearchSelect">
-        <Form.Label column sm={2}>
-          <b>Select a saved search</b>
-        </Form.Label>
-        <Col sm={10}>
-          <Form.Select onChange={onSaveSearchSelect}>
-            {savedSearches &&
-              savedSearches.map(savedSearch => (
-                <option value={savedSearch.uuid} key={savedSearch.uuid}>
-                  {savedSearch.name}
-                </option>
+      <UltimatePaginationTopDown
+        componentClassName="searchPagination"
+        className="float-end"
+        pageNum={pageNum}
+        pageSize={DEFAULT_PAGESIZE}
+        totalCount={totalCount}
+        goToPage={setPageNum}
+      >
+        {paginatedSearches.length === 0 ? (
+          <p>No saved searches found.</p>
+        ) : (
+          <Table striped responsive className="mt-3 mb-3">
+            <thead>
+              <tr>
+                <th style={{ width: "20%" }}>Search Name</th>
+                <th style={{ width: "70%" }}>Description</th>
+                <th style={{ width: "10%" }}>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedSearches.map(savedSearch => (
+                <tr key={savedSearch.uuid} className="align-middle">
+                  <td style={{ paddingRight: 0 }}>
+                    <Button
+                      className="text-start text-decoration-none"
+                      variant="link"
+                      onClick={() => showSearch(savedSearch)}
+                    >
+                      {savedSearch.name}
+                    </Button>
+                  </td>
+                  <td style={{ paddingLeft: 0 }}>
+                    <Button
+                      className="text-start text-decoration-none"
+                      variant="link"
+                      onClick={() => showSearch(savedSearch)}
+                    >
+                      {deserializedQueries[savedSearch.uuid] && (
+                        <SearchDescription
+                          searchQuery={deserializedQueries[savedSearch.uuid]}
+                          style={{ pointerEvents: "none" }}
+                        />
+                      )}
+                    </Button>
+                  </td>
+                  <td>
+                    <ConfirmDestructive
+                      onConfirm={() => onConfirmDelete(savedSearch.uuid)}
+                      objectType="search"
+                      objectDisplay={savedSearch.name}
+                      variant="danger"
+                      operation="delete"
+                    >
+                      <Icon icon={IconNames.TRASH} />
+                    </ConfirmDestructive>
+                  </td>
+                </tr>
               ))}
-          </Form.Select>
-        </Col>
-      </Form.Group>
-
-      {selectedSearch && (
-        <div>
-          <Row>
-            <Col sm={8}>
-              <SavedSearchTable search={selectedSearch} />
-            </Col>
-            <Col className="text-end">
-              <Button style={{ marginRight: 12 }} onClick={showSearch}>
-                Show Search
-              </Button>
-              <ConfirmDestructive
-                onConfirm={onConfirmDelete}
-                objectType="search"
-                objectDisplay={selectedSearch.name}
-                variant="danger"
-                buttonLabel="Delete Search"
-              />
-            </Col>
-          </Row>
-        </div>
-      )}
+            </tbody>
+          </Table>
+        )}
+      </UltimatePaginationTopDown>
     </Fieldset>
   )
 
-  function onSaveSearchSelect(event) {
-    const uuid = event && event.target ? event.target.value : event
-    const search = savedSearches.find(el => el.uuid === uuid)
-    setSelectedSearch(search)
-  }
-
-  function showSearch() {
-    if (selectedSearch) {
-      const objType = SEARCH_OBJECT_TYPES[selectedSearch.objectType]
-      const queryParams = utils.parseJsonSafe(selectedSearch.query)
+  function showSearch(search) {
+    if (search) {
+      const objType = SEARCH_OBJECT_TYPES[search.objectType]
+      const queryParams = utils.parseJsonSafe(search.query)
       deserializeQueryParams(objType, queryParams, deserializeCallback)
     }
   }
@@ -143,11 +183,9 @@ const MySavedSearches = ({
     navigate("/search")
   }
 
-  function onConfirmDelete() {
-    return API.mutation(GQL_DELETE_SAVED_SEARCH, { uuid: selectedSearch.uuid })
-      .then(data => {
-        refetch()
-      })
+  function onConfirmDelete(uuid) {
+    return API.mutation(GQL_DELETE_SAVED_SEARCH, { uuid })
+      .then(refetch)
       .catch(error => {
         setStateError(error)
         jumpToTop()
