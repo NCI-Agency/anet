@@ -218,7 +218,7 @@ const Navigation = ({
 
   const inMyCounterParts = path.startsWith("/positions/counterparts")
   const inMyTasks = path.startsWith("/tasks/mine")
-  const inMyAuthorizationGroups = path.startsWith("/authorizationGroups/mine")
+  const inMyAuthorizationGroups = path.startsWith("/communities/mine")
   const inMyReports = path.startsWith("/reports/mine")
   const inMySubscriptions = path.startsWith("/subscriptions/mine")
   const inInsights = path.startsWith("/insights")
@@ -367,11 +367,11 @@ const Navigation = ({
             currentUser?.position?.authorizationGroupsAdministrated
           ) && (
             <SidebarLink
-              id="my-authorizationGroups-nav"
-              linkTo={{ pathname: "/authorizationGroups/mine" }}
+              id="my-communities-nav"
+              linkTo={{ pathname: "/communities/mine" }}
               handleOnClick={resetPages}
             >
-              My Authorization Groups
+              My Communities
             </SidebarLink>
           )}
           {(currentUser.isAdmin() ||

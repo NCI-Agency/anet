@@ -23,6 +23,7 @@ import mil.dds.anet.resources.AttachmentResource;
 import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.client.AdminSettingInput;
 import mil.dds.anet.test.client.AdvisorReportsEntry;
+import mil.dds.anet.test.client.AnetBeanList_AuthorizationGroup;
 import mil.dds.anet.test.client.AnetBeanList_Location;
 import mil.dds.anet.test.client.AnetBeanList_Organization;
 import mil.dds.anet.test.client.AnetBeanList_Person;
@@ -35,6 +36,7 @@ import mil.dds.anet.test.client.Atmosphere;
 import mil.dds.anet.test.client.Attachment;
 import mil.dds.anet.test.client.AttachmentInput;
 import mil.dds.anet.test.client.AuthorizationGroup;
+import mil.dds.anet.test.client.AuthorizationGroupSearchQueryInput;
 import mil.dds.anet.test.client.Comment;
 import mil.dds.anet.test.client.EmailAddress;
 import mil.dds.anet.test.client.EmailAddressInput;
@@ -109,15 +111,17 @@ public class ReportResourceTest extends AbstractResourceTest {
   private static final String _TASK_FIELDS = "uuid shortName longName category";
   private static final String TASK_FIELDS =
       String.format("{ %1$s parentTask { %1$s } }", _TASK_FIELDS);
+  public static final String AUTHORIZATION_GROUP_FIELDS = "{ uuid name }";
   public static final String FIELDS = String.format(
       "{ %1$s advisorOrg %2$s interlocutorOrg %2$s authors %3$s attendees %3$s"
           + " reportPeople %3$s tasks %4$s approvalStep { uuid relatedObjectUuid } location %5$s"
-          + " comments %6$s notes %7$s authorizationGroups { uuid name }"
+          + " comments %6$s notes %7$s authorizationGroups %8$s"
           + " workflow { step { uuid relatedObjectUuid approvers { uuid person { uuid } } }"
           + " person { uuid } type createdAt } reportSensitiveInformation { uuid text } "
-          + " attachments %8$s }",
+          + " attachments %9$s }",
       REPORT_FIELDS, ORGANIZATION_FIELDS, REPORT_PEOPLE_FIELDS, TASK_FIELDS, LOCATION_FIELDS,
-      COMMENT_FIELDS, NoteResourceTest.NOTE_FIELDS, AttachmentResourceTest.ATTACHMENT_FIELDS);
+      COMMENT_FIELDS, NoteResourceTest.NOTE_FIELDS, AUTHORIZATION_GROUP_FIELDS,
+      AttachmentResourceTest.ATTACHMENT_FIELDS);
 
   @Test
   void createReport() {
@@ -1540,15 +1544,24 @@ public class ReportResourceTest extends AbstractResourceTest {
 
   @Test
   void searchAuthorizationGroupUuid() {
-    // Search by empty list of authorization groups should not return reports
+    // Search by empty list of communities should not return reports
     final ReportSearchQueryInput query1 = ReportSearchQueryInput.builder()
         .withAuthorizationGroupUuid(Collections.emptyList()).build();
     final AnetBeanList_Report searchResults =
         withCredentials(adminUser, t -> queryExecutor.reportList(getListFields(FIELDS), query1));
     assertThat(searchResults.getList()).isEmpty();
 
-    // Search by list of authorization groups
-    final List<String> agUuids = Arrays.asList("1", "2", "3"); // FIXME: use real uuid's
+    // Get communities for sensitive information
+    final AuthorizationGroupSearchQueryInput communitySearchQueryInput =
+        AuthorizationGroupSearchQueryInput.builder().withPageSize(0)
+            .withForSensitiveInformation(true).build();
+    final AnetBeanList_AuthorizationGroup communitySearchResults = withCredentials(adminUser,
+        t -> queryExecutor.authorizationGroupList(getListFields(AUTHORIZATION_GROUP_FIELDS),
+            communitySearchQueryInput));
+
+    // Search by list of communities
+    final List<String> agUuids =
+        communitySearchResults.getList().stream().map(AuthorizationGroup::getUuid).toList();
     final Set<String> agUuidSet = new HashSet<>(agUuids);
     final ReportSearchQueryInput query2 =
         ReportSearchQueryInput.builder().withAuthorizationGroupUuid(agUuids).build();
@@ -2021,7 +2034,7 @@ public class ReportResourceTest extends AbstractResourceTest {
         .filter(r -> reportQuery.getText().equals(r.getKeyOutcomes())).findFirst();
     assertThat(reportResult2).isNotEmpty();
     final Report report2 = reportResult2.get();
-    // reina is in the authorization group, so should be able to see the sensitive information
+    // reina is in the community, so should be able to see the sensitive information
     assertThat(report2.getReportSensitiveInformation()).isNotNull();
     assertThat(report2.getReportSensitiveInformation().getText()).isEqualTo("Need to know only");
 
@@ -2041,7 +2054,7 @@ public class ReportResourceTest extends AbstractResourceTest {
         .filter(r -> reportQuery.getText().equals(r.getKeyOutcomes())).findFirst();
     assertThat(reportResult3).isNotEmpty();
     final Report report3 = reportResult3.get();
-    // elizabeth is not in the authorization group, so should not be able to see the sensitive
+    // elizabeth is not in the community, so should not be able to see the sensitive
     // information
     assertThat(report3.getReportSensitiveInformation()).isNull();
   }

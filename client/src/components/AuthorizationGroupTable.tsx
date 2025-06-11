@@ -83,7 +83,7 @@ const AuthorizationGroupTable = ({
   toggleSelection
 }: AuthorizationGroupTableProps) => {
   if (_get(authorizationGroups, "length", 0) === 0) {
-    return <em>No authorization groups found</em>
+    return <em>No communities found</em>
   }
 
   const ags = AuthorizationGroup.fromArray(authorizationGroups)
@@ -101,6 +101,10 @@ const AuthorizationGroupTable = ({
           )}
           <th>{Settings.fields.authorizationGroup.name?.label}</th>
           <th>{Settings.fields.authorizationGroup.description?.label}</th>
+          <th>{Settings.fields.authorizationGroup.distributionList?.label}</th>
+          <th>
+            {Settings.fields.authorizationGroup.forSensitiveInformation?.label}
+          </th>
           {showMembers && (
             <th>
               {
@@ -159,6 +163,8 @@ const AuthorizationGroupTable = ({
                 <LinkTo modelType="AuthorizationGroup" model={ag} />
               </td>
               <td>{ag.description}</td>
+              <td>{utils.formatBoolean(ag.distributionList)}</td>
+              <td>{utils.formatBoolean(ag.forSensitiveInformation)}</td>
               {showMembers && (
                 <td>
                   <TruncatedList

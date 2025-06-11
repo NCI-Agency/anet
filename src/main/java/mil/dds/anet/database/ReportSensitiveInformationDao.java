@@ -146,8 +146,7 @@ public class ReportSensitiveInformationDao
 
   /**
    * A user is allowed to access a report's sensitive information if either of the following holds
-   * true: • the user is an author of the report; • the user is in an authorization group for the
-   * report.
+   * true: • the user is an author of the report; • the user is in a community for the report.
    *
    * @param user the user executing the request
    * @param report the report
@@ -165,7 +164,7 @@ public class ReportSensitiveInformationDao
       return true;
     }
 
-    // Check authorization groups
+    // Check communities
     final ReportDao reportDao = engine().getReportDao();
     final List<String> authorizationGroupUuids =
         reportDao.getAuthorizationGroupsForReport(reportUuid).stream()

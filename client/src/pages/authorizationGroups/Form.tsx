@@ -17,7 +17,7 @@ import { FastField, Field, Form, Formik } from "formik"
 import { AuthorizationGroup, Position } from "models"
 import pluralize from "pluralize"
 import React, { useContext, useState } from "react"
-import { Button } from "react-bootstrap"
+import { Alert, Button, FormCheck } from "react-bootstrap"
 import { useNavigate } from "react-router-dom"
 import POSITIONS_ICON from "resources/positions.png"
 import Settings from "settings"
@@ -39,16 +39,19 @@ interface AuthorizationGroupFormProps {
   initialValues: AuthorizationGroup
   title?: string
   edit?: boolean
+  hasReports?: boolean
 }
 
 const AuthorizationGroupForm = ({
   edit = false,
   title = "",
-  initialValues
+  initialValues,
+  hasReports
 }: AuthorizationGroupFormProps) => {
   const { currentUser } = useContext(AppContext)
   const navigate = useNavigate()
   const [error, setError] = useState(null)
+  const isAdmin = currentUser?.isAdmin()
   const positionsFilters = {
     allSuperusers: {
       label: "All superusers",
@@ -94,7 +97,7 @@ const AuthorizationGroupForm = ({
             onClick={submitForm}
             disabled={isSubmitting}
           >
-            Save Authorization Group
+            Save Community
           </Button>
         )
         return (
@@ -145,6 +148,56 @@ const AuthorizationGroupForm = ({
                 />
 
                 <DictionaryField
+                  wrappedComponent={FastField}
+                  dictProps={
+                    Settings.fields.authorizationGroup.distributionList
+                  }
+                  name="distributionList"
+                  component={FieldHelper.SpecialField}
+                  onChange={value =>
+                    setFieldValue("distributionList", value?.target?.checked)}
+                  widget={
+                    <FormCheck
+                      type="checkbox"
+                      className="pt-2"
+                      checked={values.distributionList}
+                    />
+                  }
+                />
+
+                <DictionaryField
+                  wrappedComponent={FastField}
+                  dictProps={
+                    Settings.fields.authorizationGroup.forSensitiveInformation
+                  }
+                  name="forSensitiveInformation"
+                  component={FieldHelper.SpecialField}
+                  onChange={value =>
+                    setFieldValue(
+                      "forSensitiveInformation",
+                      value?.target?.checked
+                    )}
+                  widget={
+                    <FormCheck
+                      type="checkbox"
+                      className="pt-2"
+                      checked={values.forSensitiveInformation}
+                      disabled={!isAdmin}
+                    />
+                  }
+                >
+                  {isAdmin &&
+                    initialValues.forSensitiveInformation &&
+                    hasReports && (
+                      <Alert variant="warning">
+                        CAUTION: This community is used for existing reports
+                        with sensitive information; disabling this flag will NOT
+                        revoke access to them!
+                      </Alert>
+                  )}
+                </DictionaryField>
+
+                <DictionaryField
                   wrappedComponent={Field}
                   dictProps={
                     Settings.fields.authorizationGroup.administrativePositions
@@ -167,7 +220,7 @@ const AuthorizationGroupForm = ({
                         <PositionTable
                           positions={values.administrativePositions}
                           showLocation
-                          showDelete={currentUser?.isAdmin()}
+                          showDelete={isAdmin}
                         />
                       }
                       overlayColumns={[
@@ -180,7 +233,7 @@ const AuthorizationGroupForm = ({
                       objectType={Position}
                       fields={Position.autocompleteQuery}
                       addon={POSITIONS_ICON}
-                      disabled={!currentUser?.isAdmin()}
+                      disabled={!isAdmin}
                     />
                   }
                 />
@@ -227,7 +280,7 @@ const AuthorizationGroupForm = ({
                     onClick={submitForm}
                     disabled={isSubmitting}
                   >
-                    Save Authorization Group
+                    Save Community
                   </Button>
                 </div>
               </div>
@@ -274,7 +327,7 @@ const AuthorizationGroupForm = ({
       navigate(AuthorizationGroup.pathForEdit(authGroup), { replace: true })
     }
     navigate(AuthorizationGroup.pathFor(authGroup), {
-      state: { success: "Authorization Group saved" }
+      state: { success: "Community saved" }
     })
   }
 

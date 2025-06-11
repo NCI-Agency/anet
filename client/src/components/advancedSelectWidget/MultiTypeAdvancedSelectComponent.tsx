@@ -21,7 +21,7 @@ import * as Models from "models"
 import pluralize from "pluralize"
 import React, { useCallback, useContext, useMemo, useState } from "react"
 import { Button } from "react-bootstrap"
-import AUTHORIZATION_GROUPS_ICON from "resources/authorizationGroups.png"
+import COMMUNITIES_ICON from "resources/communities.png"
 import EVENTS_ICON from "resources/events.png"
 import EVENT_SERIES_ICON from "resources/eventSeries.png"
 import LOCATIONS_ICON from "resources/locations.png"
@@ -134,7 +134,7 @@ const widgetPropsAuthorizationGroup = {
   filterDefs: entityFilters,
   queryParams: { status: Model.STATUS.ACTIVE },
   fields: Models.AuthorizationGroup.autocompleteQuery,
-  addon: AUTHORIZATION_GROUPS_ICON
+  addon: COMMUNITIES_ICON
 }
 
 const generateAttachmentFilters = (_, currentUser) => {
@@ -202,7 +202,7 @@ const ENTITY_LABELS = {
   [ENTITY_TYPES.POSITIONS]: "Positions",
   [ENTITY_TYPES.LOCATIONS]: "Locations",
   [ENTITY_TYPES.TASKS]: pluralize(Settings.fields.task.shortLabel),
-  [ENTITY_TYPES.AUTHORIZATION_GROUPS]: "Authorization Groups",
+  [ENTITY_TYPES.AUTHORIZATION_GROUPS]: "Communities",
   [ENTITY_TYPES.ATTACHMENTS]: "Attachments",
   [ENTITY_TYPES.EVENTS]: "Events",
   [ENTITY_TYPES.EVENT_SERIES]: "Event Series"

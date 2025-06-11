@@ -49,7 +49,7 @@ describe("When using search", () => {
       parseInt(await (await Search.getFoundCounter("tasks")).getText())
     ).to.be.greaterThan(0)
     expect(await (await Search.getFoundTaskTable()).isExisting()).to.equal(true)
-    // Authorization groups
+    // Communities
     expect(
       parseInt(
         await (await Search.getFoundCounter("authorizationGroups")).getText()
