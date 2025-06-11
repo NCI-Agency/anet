@@ -917,7 +917,7 @@ properties:
       person:
         type: object
         additionalProperties: false
-        required: [status, firstName, lastName, position, prevPositions, domainUsername,
+        required: [status, firstName, lastName, position, prevPositions, users,
                    emailAddresses, phoneNumber, country, code, rank, ranks, gender, endOfTourDate,
                    biography, authorizationGroups]
         properties:
@@ -933,8 +933,8 @@ properties:
             "$ref": "#/$defs/labeledField"
           user:
             "$ref": "#/$defs/inputField"
-          domainUsername:
-            "$ref": "#/$defs/inputField"
+          users:
+            "$ref": "#/$defs/labeledField"
           emailAddresses:
             "$ref": "#/$defs/restrictableLabeledField"
           phoneNumber:
