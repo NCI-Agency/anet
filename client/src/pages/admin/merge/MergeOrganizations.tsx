@@ -36,6 +36,7 @@ import useMergeObjects, {
   areAllSet,
   getActionButton,
   getLeafletMap,
+  getOtherSide,
   MERGE_SIDES,
   mergedOrganizationIsValid,
   selectAllFields,
@@ -567,6 +568,7 @@ const OrganizationColumn = ({
   dispatchMergeActions
 }: OrganizationColumnProps) => {
   const organization = mergeState[align]
+  const otherSide = mergeState[getOtherSide(align)]
   const hideWhenEmpty =
     !Location.hasCoordinates(mergeState[MERGE_SIDES.LEFT]?.location) &&
     !Location.hasCoordinates(mergeState[MERGE_SIDES.RIGHT]?.location)
@@ -582,6 +584,7 @@ const OrganizationColumn = ({
           fieldName="organization"
           placeholder="Select an organization to merge"
           value={organization}
+          disabledValue={otherSide}
           overlayColumns={["Organization"]}
           overlayRenderRow={OrganizationSimpleOverlayRow}
           filterDefs={organizationsFilters}

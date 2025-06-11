@@ -10,12 +10,14 @@ import RemoveButton from "../RemoveButton"
 interface AdvancedSingleSelectProps extends AdvancedSelectProps {
   value?: any
   valueFunc?: (...args: unknown[]) => unknown
+  disabledValue?: any
   showRemoveButton: boolean
 }
 
 const AdvancedSingleSelect = ({
   value = {},
   valueFunc = (v, k) => v?.[k],
+  disabledValue = {},
   overlayTable = AdvancedSingleSelectOverlayTable,
   showRemoveButton = true,
   ...props
@@ -24,6 +26,7 @@ const AdvancedSingleSelect = ({
     <AdvancedSelect
       value={value}
       valueFunc={valueFunc}
+      disabledValue={disabledValue}
       overlayTable={overlayTable}
       {...props}
       handleAddItem={handleAddItem}
