@@ -477,7 +477,7 @@ const PersonForm = ({
                       </Row>
                     </FormGroup>
 
-                    {isAdmin && (
+                    {!forOnboarding && isAdmin && (
                       <>
                         <DictionaryField
                           wrappedComponent={FastField}
