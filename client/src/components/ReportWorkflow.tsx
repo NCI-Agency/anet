@@ -67,7 +67,7 @@ const ApprovalStepModal = ({ action }: ApprovalStepModalProps) => {
         onClick={() => setShowModal(true)}
         variant="default"
       >
-        <span>{step.name}</span>
+        <div className="worflow-step-name">{step.name}</div>
       </Button>
       <Modal centered show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>

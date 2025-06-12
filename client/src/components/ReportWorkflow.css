@@ -1,11 +1,12 @@
 .workflow-fieldset .workflow-action {
-  position: relative;
   display: inline-block;
-  padding-right: 12px;
-  padding-left: 12px;
-  margin-top: 3px;
   vertical-align: top;
   text-align: center;
+  margin-bottom: 30px;
+}
+
+.workflow-fieldset .workflow-action:not(:last-child) {
+  margin-right: 35px
 }
 
 .workflow-fieldset .workflow-action .btn-pending.default {
@@ -40,14 +41,21 @@
 
 .workflow-fieldset .workflow-action .btn {
   border-radius: 30px;
+  margin: 10px 0px;
+  width: 100%;
+  position: relative;
+}
+
+.workflow-fieldset .workflow-action .btn > .worflow-step-name {
+  margin: 5px;
 }
 
 .workflow-fieldset .workflow-action .btn[disabled] {
   opacity: 1;
 }
 
-.workflow-fieldset .workflow-action button::after {
-  position: relative;
+.workflow-fieldset .workflow-action:not(:last-child) button::after {
+  position: absolute;
   font-style: normal;
   font-weight: 400;
   line-height: 1;
@@ -55,11 +63,9 @@
   content: "➡";
   color: #000;
   right: -25px;
+  top: calc(50% - 5px);
 }
 
-.workflow-fieldset :last-child button::after {
-  content: "";
-}
 
 fieldset.workflow-fieldset.compact {
   border: 0;
@@ -67,6 +73,10 @@ fieldset.workflow-fieldset.compact {
   margin-bottom: 1rem;
   padding: 0.25em 0.75em 0.75em 0em;
   box-shadow: none;
+}
+
+fieldset.workflow-fieldset.compact .workflow-action {
+  margin-bottom: 10px;
 }
 
 .modal-content .modal-footer .label {
