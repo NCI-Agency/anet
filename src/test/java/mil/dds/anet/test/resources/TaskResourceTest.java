@@ -369,7 +369,7 @@ class TaskResourceTest extends AbstractResourceTest {
 
     // interlocutor organization
     final OrganizationSearchQueryInput query = OrganizationSearchQueryInput.builder().build();
-    final AnetBeanList_Organization interlocutorOrgs = withCredentials(user.getDomainUsername(),
+    final AnetBeanList_Organization interlocutorOrgs = withCredentials(getDomainUsername(user),
         t -> queryExecutor.organizationList(getListFields(orgFields), query));
     assertThat(interlocutorOrgs).isNotNull();
     assertThat(interlocutorOrgs.getList()).isNotEmpty();
@@ -380,7 +380,7 @@ class TaskResourceTest extends AbstractResourceTest {
     taskInterlocutorInput
         .setTaskedOrganizations(Collections.singletonList(getOrganizationInput(interlocutorOrg)));
     try {
-      final Task createdTask = withCredentials(user.getDomainUsername(),
+      final Task createdTask = withCredentials(getDomainUsername(user),
           t -> mutationExecutor.createTask(FIELDS, taskInterlocutorInput));
       if (isAdmin) {
         assertThat(createdTask).isNotNull();
@@ -400,7 +400,7 @@ class TaskResourceTest extends AbstractResourceTest {
     taskInterlocutorInput
         .setTaskedOrganizations(Collections.singletonList(getOrganizationInput(organization)));
     try {
-      final Task createdTask = withCredentials(user.getDomainUsername(),
+      final Task createdTask = withCredentials(getDomainUsername(user),
           t -> mutationExecutor.createTask(FIELDS, taskOwnInput));
       if (isAdmin) {
         assertThat(createdTask).isNotNull();
@@ -416,7 +416,7 @@ class TaskResourceTest extends AbstractResourceTest {
 
     // other advisor organization
     final OrganizationSearchQueryInput query2 = OrganizationSearchQueryInput.builder().build();
-    final AnetBeanList_Organization advisorOrgs = withCredentials(user.getDomainUsername(),
+    final AnetBeanList_Organization advisorOrgs = withCredentials(getDomainUsername(user),
         t -> queryExecutor.organizationList(getListFields(orgFields), query2));
     assertThat(advisorOrgs).isNotNull();
     assertThat(advisorOrgs.getList()).isNotEmpty();
@@ -429,7 +429,7 @@ class TaskResourceTest extends AbstractResourceTest {
     taskOtherInput
         .setTaskedOrganizations(Collections.singletonList(getOrganizationInput(advisorOrg)));
     try {
-      final Task createdTask = withCredentials(user.getDomainUsername(),
+      final Task createdTask = withCredentials(getDomainUsername(user),
           t -> mutationExecutor.createTask(FIELDS, taskOtherInput));
       if (isAdmin) {
         assertThat(createdTask).isNotNull();

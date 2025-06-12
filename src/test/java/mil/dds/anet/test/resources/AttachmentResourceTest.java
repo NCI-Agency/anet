@@ -868,7 +868,7 @@ public class AttachmentResourceTest extends AbstractResourceTest {
   void myAttachments() {
     final Person jack = getJackJackson();
     final AnetBeanList_Attachment jackAttachments =
-        getAttachments(jack.getDomainUsername(), jack.getUuid());
+        getAttachments(getDomainUsername(jack), jack.getUuid());
 
     assertThat(jackAttachments.getList()).isNotEmpty();
     assertThat(jackAttachments.getList().stream()

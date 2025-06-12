@@ -36,7 +36,7 @@ class EntityAvatarResourceTest extends AbstractResourceTest {
 
     // Regular user can not do this
     try {
-      withCredentials(getRegularUser().getDomainUsername(),
+      withCredentials(getDomainUsername(getRegularUser()),
           t -> mutationExecutor.createOrUpdateEntityAvatar("", newEntityAvatarInput));
       fail("Expected exception creating entity avatar");
     } catch (Exception expectedException) {
@@ -44,7 +44,7 @@ class EntityAvatarResourceTest extends AbstractResourceTest {
     }
 
     // Superuser can do this
-    Integer numRows = withCredentials(getSuperuser().getDomainUsername(),
+    Integer numRows = withCredentials(getDomainUsername(getSuperuser()),
         t -> mutationExecutor.createOrUpdateEntityAvatar("", newEntityAvatarInput));
     assertThat(numRows).isOne();
 
@@ -146,7 +146,7 @@ class EntityAvatarResourceTest extends AbstractResourceTest {
   void testPersonAvatar() {
     final Person erin = getRegularUser();
 
-    Person retPerson = withCredentials(getRegularUser().getDomainUsername(),
+    Person retPerson = withCredentials(getDomainUsername(getRegularUser()),
         t -> queryExecutor.person(FIELDS, erin.getUuid()));
     assertThat(retPerson).isNotNull();
     assertThat(retPerson.getAttachments()).isNotEmpty();
@@ -159,10 +159,10 @@ class EntityAvatarResourceTest extends AbstractResourceTest {
             .withCropHeight(1).withCropLeft(2).withCropWidth(3).withCropTop(4).build();
 
     // Set own avatar
-    Integer nrUpdated = withCredentials(erin.getDomainUsername(),
+    Integer nrUpdated = withCredentials(getDomainUsername(erin),
         t -> mutationExecutor.createOrUpdateEntityAvatar("", newEntityAvatarInput));
     assertThat(nrUpdated).isOne();
-    retPerson = withCredentials(getRegularUser().getDomainUsername(),
+    retPerson = withCredentials(getDomainUsername(getRegularUser()),
         t -> queryExecutor.person(FIELDS, erin.getUuid()));
     assertThat(retPerson.getEntityAvatar()).isNotNull();
     assertThat(retPerson.getEntityAvatar().getAttachmentUuid()).isEqualTo(attachment.getUuid());
@@ -180,7 +180,7 @@ class EntityAvatarResourceTest extends AbstractResourceTest {
     nrUpdated = withCredentials("rebecca",
         t -> mutationExecutor.deleteEntityAvatar("", PersonDao.TABLE_NAME, erin.getUuid()));
     assertThat(nrUpdated).isOne();
-    retPerson = withCredentials(getRegularUser().getDomainUsername(),
+    retPerson = withCredentials(getDomainUsername(getRegularUser()),
         t -> queryExecutor.person(FIELDS, erin.getUuid()));
     assertThat(retPerson.getEntityAvatar()).isNull();
 
@@ -188,16 +188,16 @@ class EntityAvatarResourceTest extends AbstractResourceTest {
     nrUpdated = withCredentials(adminUser,
         t -> mutationExecutor.createOrUpdateEntityAvatar("", newEntityAvatarInput));
     assertThat(nrUpdated).isOne();
-    retPerson = withCredentials(getRegularUser().getDomainUsername(),
+    retPerson = withCredentials(getDomainUsername(getRegularUser()),
         t -> queryExecutor.person(FIELDS, erin.getUuid()));
     assertThat(retPerson.getEntityAvatar()).isNotNull();
     assertThat(retPerson.getEntityAvatar().getAttachmentUuid()).isEqualTo(attachment.getUuid());
 
     // Erase own avatar again
-    nrUpdated = withCredentials(erin.getDomainUsername(),
+    nrUpdated = withCredentials(getDomainUsername(erin),
         t -> mutationExecutor.deleteEntityAvatar("", PersonDao.TABLE_NAME, erin.getUuid()));
     assertThat(nrUpdated).isOne();
-    retPerson = withCredentials(getRegularUser().getDomainUsername(),
+    retPerson = withCredentials(getDomainUsername(getRegularUser()),
         t -> queryExecutor.person(FIELDS, erin.getUuid()));
     assertThat(retPerson.getEntityAvatar()).isNull();
   }
@@ -215,7 +215,7 @@ class EntityAvatarResourceTest extends AbstractResourceTest {
 
     // Regular user can not do this
     try {
-      withCredentials(getRegularUser().getDomainUsername(),
+      withCredentials(getDomainUsername(getRegularUser()),
           t -> mutationExecutor.createOrUpdateEntityAvatar("", newEntityAvatarInput));
       fail("Expected exception creating entity avatar");
     } catch (Exception expectedException) {
@@ -232,7 +232,7 @@ class EntityAvatarResourceTest extends AbstractResourceTest {
     }
 
     // The organization's superuser can do this
-    Integer numRows = withCredentials(getAndrewAnderson().getDomainUsername(),
+    Integer numRows = withCredentials(getDomainUsername(getAndrewAnderson()),
         t -> mutationExecutor.createOrUpdateEntityAvatar("", newEntityAvatarInput));
     assertThat(numRows).isOne();
 

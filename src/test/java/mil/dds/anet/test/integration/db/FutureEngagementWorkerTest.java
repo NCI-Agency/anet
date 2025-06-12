@@ -178,7 +178,7 @@ class FutureEngagementWorkerTest extends AbstractResourceTest {
         getFutureDate(), null, Lists.newArrayList(advisor, interlocutor)));
 
     // Submit the report
-    withCredentials(author.getDomainUsername(),
+    withCredentials(getDomainUsername(author),
         t -> mutationExecutor.submitReport("", draftReport.getUuid()));
     // This planned report gets approved automatically
     final Report submittedReport = testReportState(draftReport.getUuid(), ReportState.APPROVED);
@@ -200,7 +200,7 @@ class FutureEngagementWorkerTest extends AbstractResourceTest {
     final Report redraftedReport = testReportDraft(updatedReport.getUuid());
 
     // Submit the report
-    withCredentials(author.getDomainUsername(),
+    withCredentials(getDomainUsername(author),
         t -> mutationExecutor.submitReport("", redraftedReport.getUuid()));
     // This should send an email to the approver
     expectedIds.add("jacob");

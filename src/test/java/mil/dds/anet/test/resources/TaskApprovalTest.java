@@ -59,8 +59,8 @@ class TaskApprovalTest extends AbstractResourceTest {
   private static final String POSITION_FIELDS =
       "{ uuid name code type status organization " + ORGANIZATION_FIELDS + " }";
   private static final String PERSON_FIELDS =
-      "{ uuid name status user rank domainUsername emailAddresses " + EMAIL_ADDRESS_FIELDS
-          + " position " + POSITION_FIELDS + " }";
+      "{ uuid name status user rank users { uuid domainUsername } emailAddresses "
+          + EMAIL_ADDRESS_FIELDS + " position " + POSITION_FIELDS + " }";
   private static final String APPROVAL_STEP_FIELDS =
       "{ uuid name restrictedApproval relatedObjectUuid nextStepUuid approvers"
           + " { uuid name person { uuid name rank } } }";
@@ -612,7 +612,7 @@ class TaskApprovalTest extends AbstractResourceTest {
 
   private void approveReport(Report report, Person person, boolean expectedToFail) {
     try {
-      final int numRows = withCredentials(person.getDomainUsername(),
+      final int numRows = withCredentials(getDomainUsername(person),
           t -> mutationExecutor.approveReport("", null, report.getUuid()));
       if (expectedToFail) {
         fail("Expected an exception");
@@ -632,7 +632,7 @@ class TaskApprovalTest extends AbstractResourceTest {
     final ReportSearchQueryInput query =
         Objects.requireNonNullElseGet(pendingQuery, ReportSearchQueryInput::new);
     query.setPendingApprovalOf(approver.getUuid());
-    final AnetBeanList_Report pendingApproval = withCredentials(approver.getDomainUsername(),
+    final AnetBeanList_Report pendingApproval = withCredentials(getDomainUsername(approver),
         t -> queryExecutor.reportList(getListFields(REPORT_FIELDS), query));
     assertThat(pendingApproval.getList()).filteredOn(rpt -> rpt.getUuid().equals(report.getUuid()))
         .hasSize(size);
@@ -668,13 +668,13 @@ class TaskApprovalTest extends AbstractResourceTest {
         .withNextSteps(testText).withKeyOutcomes(testText).build();
 
     // Create the report
-    final Report createdReport = withCredentials(author.getDomainUsername(),
+    final Report createdReport = withCredentials(getDomainUsername(author),
         t -> mutationExecutor.createReport("{ uuid }", reportInput));
     assertThat(createdReport).isNotNull();
     assertThat(createdReport.getUuid()).isNotNull();
 
     // Retrieve the created report
-    final Report created = withCredentials(author.getDomainUsername(),
+    final Report created = withCredentials(getDomainUsername(author),
         t -> queryExecutor.report("{ uuid state advisorOrg { uuid } }", createdReport.getUuid()));
     assertThat(created.getUuid()).isNotNull();
     assertThat(created.getState()).isEqualTo(ReportState.DRAFT);
@@ -682,7 +682,7 @@ class TaskApprovalTest extends AbstractResourceTest {
         .isEqualTo(reportAdvisor.getPosition().getOrganization().getUuid());
 
     // Have the author submit the report
-    final int numRows = withCredentials(author.getDomainUsername(),
+    final int numRows = withCredentials(getDomainUsername(author),
         t -> mutationExecutor.submitReport("", created.getUuid()));
     assertThat(numRows).isOne();
 
@@ -697,18 +697,18 @@ class TaskApprovalTest extends AbstractResourceTest {
   }
 
   private Report getReport(Person author, String reportUuid) {
-    final Report returned = withCredentials(author.getDomainUsername(),
+    final Report returned = withCredentials(getDomainUsername(author),
         t -> queryExecutor.report(REPORT_FIELDS, reportUuid));
     assertThat(returned).isNotNull();
     return returned;
   }
 
   private void deleteReport(Person author, Report report) {
-    final Report updated = withCredentials(author.getDomainUsername(),
+    final Report updated = withCredentials(getDomainUsername(author),
         t -> mutationExecutor.updateReport(REPORT_FIELDS, getReportInput(report), true));
     assertThat(updated).isNotNull();
     assertThat(updated.getState()).isEqualTo(ReportState.DRAFT);
-    withCredentials(author.getDomainUsername(),
+    withCredentials(getDomainUsername(author),
         t -> mutationExecutor.deleteReport("", report.getUuid()));
   }
 

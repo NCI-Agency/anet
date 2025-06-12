@@ -298,7 +298,7 @@ class MergedEntityWorkerTest extends AbstractResourceTest {
         .withReportText(getRichText(ReportDao.TABLE_NAME, testOldUuid))
         .withCustomFields(getJsonString(ReportDao.TABLE_NAME, testOldUuid))
         .withReportSensitiveInformation(rsiInput).build();
-    final Report created = withCredentials(author.getDomainUsername(),
+    final Report created = withCredentials(getDomainUsername(author),
         t -> mutationExecutor.createReport(ReportResourceTest.FIELDS, input));
     assertContains(created.getReportText(), testOldUuid);
     assertContains(created.getCustomFields(), testOldUuid);
@@ -308,7 +308,7 @@ class MergedEntityWorkerTest extends AbstractResourceTest {
     runMergedEntityWorker(testOldUuid, testNewUuid);
 
     // assert that the entity refs have been updated
-    final Report updated = withCredentials(author.getDomainUsername(),
+    final Report updated = withCredentials(getDomainUsername(author),
         t -> queryExecutor.report(ReportResourceTest.FIELDS, created.getUuid()));
     assertDoesNotContain(updated.getReportText(), testOldUuid);
     assertDoesNotContain(updated.getCustomFields(), testOldUuid);
@@ -318,7 +318,7 @@ class MergedEntityWorkerTest extends AbstractResourceTest {
     assertContains(updated.getReportSensitiveInformation().getText(), testNewUuid);
 
     // clean up
-    withCredentials(author.getDomainUsername(),
+    withCredentials(getDomainUsername(author),
         t -> mutationExecutor.deleteReport("", updated.getUuid()));
   }
 

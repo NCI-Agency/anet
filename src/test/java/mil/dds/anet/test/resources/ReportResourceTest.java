@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.fail;
 import java.lang.invoke.MethodHandles;
 import java.time.Instant;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -72,6 +73,8 @@ import mil.dds.anet.test.client.Status;
 import mil.dds.anet.test.client.Task;
 import mil.dds.anet.test.client.TaskSearchQueryInput;
 import mil.dds.anet.test.client.TaskSearchSortBy;
+import mil.dds.anet.test.client.User;
+import mil.dds.anet.test.client.UserInput;
 import mil.dds.anet.test.utils.UtilsTest;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
@@ -94,7 +97,7 @@ public class ReportResourceTest extends AbstractResourceTest {
           _ORGANIZATION_FIELDS, _EMAIL_ADDRESSES_FIELDS);
   private static final String _PERSON_FIELDS =
       "uuid name status user phoneNumber rank biography obsoleteCountry country { uuid name }"
-          + " gender endOfTourDate domainUsername pendingVerification createdAt updatedAt";
+          + " gender endOfTourDate users { uuid domainUsername } pendingVerification createdAt updatedAt";
   private static final String PERSON_FIELDS =
       String.format("{ %1$s %2$s }", _PERSON_FIELDS, _EMAIL_ADDRESSES_FIELDS);
   private static final String REPORT_PEOPLE_FIELDS =
@@ -146,10 +149,11 @@ public class ReportResourceTest extends AbstractResourceTest {
     final EmailAddress emailAddress1 =
         EmailAddress.builder().withNetwork(Utils.getEmailNetworkForNotifications())
             .withAddress("testApprover1@example.com").build();
-    final Person approver1tpl = Person.builder().withDomainUsername("testapprover1")
+    final User user1 = User.builder().withDomainUsername("testapprover1").build();
+    final Person approver1tpl = Person.builder().withUser(true).withUsers(List.of(user1))
         .withEmailAddresses(List.of(emailAddress1)).withName("Test Approver 1")
         .withStatus(Status.ACTIVE).build();
-    final Person approver1 = findOrPutPersonInDb(approver1tpl);
+    final Person approver1 = findOrPutPersonInDb(getDomainUsername(approver1tpl), approver1tpl);
     if (Boolean.TRUE.equals(approver1.getPendingVerification())) {
       // Approve newly created user
       withCredentials(adminUser, t -> mutationExecutor.approvePerson("", approver1.getUuid()));
@@ -157,10 +161,11 @@ public class ReportResourceTest extends AbstractResourceTest {
     final EmailAddress emailAddress2 =
         EmailAddress.builder().withNetwork(Utils.getEmailNetworkForNotifications())
             .withAddress("testApprover2@example.com").build();
-    final Person approver2tpl = Person.builder().withDomainUsername("testapprover2")
+    final User user2 = User.builder().withDomainUsername("testapprover2").build();
+    final Person approver2tpl = Person.builder().withUser(true).withUsers(List.of(user2))
         .withEmailAddresses(List.of(emailAddress2)).withName("Test Approver 2")
         .withStatus(Status.ACTIVE).build();
-    final Person approver2 = findOrPutPersonInDb(approver2tpl);
+    final Person approver2 = findOrPutPersonInDb(getDomainUsername(approver2tpl), approver2tpl);
     if (Boolean.TRUE.equals(approver2.getPendingVerification())) {
       // Approve newly created user
       withCredentials(adminUser, t -> mutationExecutor.approvePerson("", approver2.getUuid()));
@@ -281,12 +286,12 @@ public class ReportResourceTest extends AbstractResourceTest {
         .withCustomFields(UtilsTest.getCombinedJsonTestCase().getInput())
         .withNextSteps("This is the next steps on a report")
         .withKeyOutcomes("These are the key outcomes of this engagement").build();
-    final Report created = withCredentials(author.getDomainUsername(),
+    final Report created = withCredentials(getDomainUsername(author),
         t -> mutationExecutor.createReport(FIELDS, rInput));
     assertThat(created).isNotNull();
     assertThat(created.getUuid()).isNotNull();
     // Retrieve the report and do some additional checks
-    final Report check = withCredentials(author.getDomainUsername(),
+    final Report check = withCredentials(getDomainUsername(author),
         t -> queryExecutor.report(FIELDS, created.getUuid()));
     assertThat(check.getState()).isEqualTo(ReportState.DRAFT);
     assertThat(check.getAdvisorOrg().getUuid()).isEqualTo(authorBillet.getOrganization().getUuid());
@@ -301,7 +306,7 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     // Have another regular user try to submit the report
     try {
-      withCredentials(getRegularUser().getDomainUsername(),
+      withCredentials(getDomainUsername(getRegularUser()),
           t -> mutationExecutor.submitReport("", created.getUuid()));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
@@ -310,7 +315,7 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     // Have a superuser of another AO try to submit the report
     try {
-      withCredentials(getSuperuser().getDomainUsername(),
+      withCredentials(getDomainUsername(getSuperuser()),
           t -> mutationExecutor.submitReport("", created.getUuid()));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
@@ -318,32 +323,32 @@ public class ReportResourceTest extends AbstractResourceTest {
     }
 
     // Have the author submit the report
-    int numRows = withCredentials(author.getDomainUsername(),
+    int numRows = withCredentials(getDomainUsername(author),
         t -> mutationExecutor.submitReport("", created.getUuid()));
     assertThat(numRows).isOne();
 
-    final Report returned1 = withCredentials(author.getDomainUsername(),
+    final Report returned1 = withCredentials(getDomainUsername(author),
         t -> queryExecutor.report(FIELDS, created.getUuid()));
     assertThat(returned1.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
 
     // Verify that author can still edit the report
     returned1.setAtmosphereDetails("Everybody was super nice! Again!");
-    final Report r2 = withCredentials(author.getDomainUsername(),
+    final Report r2 = withCredentials(getDomainUsername(author),
         t -> mutationExecutor.updateReport(FIELDS, getReportInput(returned1), true));
     assertThat(r2.getAtmosphereDetails()).isEqualTo(returned1.getAtmosphereDetails());
 
     // Have the author submit the report, again
-    numRows = withCredentials(author.getDomainUsername(),
+    numRows = withCredentials(getDomainUsername(author),
         t -> mutationExecutor.submitReport("", created.getUuid()));
     assertThat(numRows).isOne();
 
-    final Report returned2 = withCredentials(author.getDomainUsername(),
+    final Report returned2 = withCredentials(getDomainUsername(author),
         t -> queryExecutor.report(FIELDS, created.getUuid()));
     assertThat(returned2.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
 
     // The author should not be able to submit the report now
     try {
-      withCredentials(author.getDomainUsername(),
+      withCredentials(getDomainUsername(author),
           t -> mutationExecutor.submitReport("", returned2.getUuid()));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
@@ -369,7 +374,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     // Verify this shows up on the approver's list of pending documents
     final ReportSearchQueryInput pendingQuery =
         ReportSearchQueryInput.builder().withPendingApprovalOf(approver1.getUuid()).build();
-    AnetBeanList_Report pending = withCredentials(approver1.getDomainUsername(),
+    AnetBeanList_Report pending = withCredentials(getDomainUsername(approver1),
         t -> queryExecutor.reportList(getListFields(FIELDS), pendingQuery));
     assertThat(pending.getList().stream().map(Report::getUuid).collect(Collectors.toSet()))
         .contains(returned2.getUuid());
@@ -385,37 +390,37 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(reportAction.getStep().getUuid()).isEqualTo(releaseApprovalStep.getUuid());
 
     // Reject the report
-    numRows = withCredentials(approver1.getDomainUsername(), t -> mutationExecutor.rejectReport("",
+    numRows = withCredentials(getDomainUsername(approver1), t -> mutationExecutor.rejectReport("",
         TestData.createCommentInput("a test rejection"), created.getUuid()));
     assertThat(numRows).isOne();
 
     // Check on report status to verify it was rejected
-    final Report returned3 = withCredentials(author.getDomainUsername(),
+    final Report returned3 = withCredentials(getDomainUsername(author),
         t -> queryExecutor.report(FIELDS, created.getUuid()));
     assertThat(returned3.getState()).isEqualTo(ReportState.REJECTED);
     assertThat(returned3.getApprovalStep()).isNull();
 
     // Author needs to re-submit
-    numRows = withCredentials(author.getDomainUsername(),
+    numRows = withCredentials(getDomainUsername(author),
         t -> mutationExecutor.submitReport("", created.getUuid()));
     assertThat(numRows).isOne();
 
     // TODO: Approver modify the report *specifically change the attendees!*
 
     // Approve the report
-    numRows = withCredentials(approver1.getDomainUsername(),
+    numRows = withCredentials(getDomainUsername(approver1),
         t -> mutationExecutor.approveReport("", null, created.getUuid()));
     assertThat(numRows).isOne();
 
     // Check on Report status to verify it got moved forward
-    final Report returned4 = withCredentials(author.getDomainUsername(),
+    final Report returned4 = withCredentials(getDomainUsername(author),
         t -> queryExecutor.report(FIELDS, created.getUuid()));
     assertThat(returned4.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
     assertThat(returned4.getApprovalStep().getUuid()).isEqualTo(releaseApprovalStep.getUuid());
 
     // Verify that the wrong person cannot approve this report.
     try {
-      withCredentials(approver1.getDomainUsername(),
+      withCredentials(getDomainUsername(approver1),
           t -> mutationExecutor.approveReport("", null, created.getUuid()));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
@@ -423,19 +428,19 @@ public class ReportResourceTest extends AbstractResourceTest {
     }
 
     // Approve the report
-    numRows = withCredentials(approver2.getDomainUsername(),
+    numRows = withCredentials(getDomainUsername(approver2),
         t -> mutationExecutor.approveReport("", null, created.getUuid()));
     assertThat(numRows).isOne();
 
     // Check on Report status to verify it got moved forward
-    final Report returned5 = withCredentials(author.getDomainUsername(),
+    final Report returned5 = withCredentials(getDomainUsername(author),
         t -> queryExecutor.report(FIELDS, created.getUuid()));
     assertThat(returned5.getState()).isEqualTo(ReportState.APPROVED);
     assertThat(returned5.getApprovalStep()).isNull();
 
     // The author should not be able to submit the report now
     try {
-      withCredentials(author.getDomainUsername(),
+      withCredentials(getDomainUsername(author),
           t -> mutationExecutor.submitReport("", returned5.getUuid()));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
@@ -460,17 +465,17 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     // Post a comment on the report because it's awesome
     final Comment commentOne =
-        withCredentials(author.getDomainUsername(), t -> mutationExecutor.addComment(COMMENT_FIELDS,
+        withCredentials(getDomainUsername(author), t -> mutationExecutor.addComment(COMMENT_FIELDS,
             TestData.createCommentInput("This is a test comment one"), created.getUuid()));
     assertThat(commentOne.getUuid()).isNotNull();
     assertThat(commentOne.getAuthor().getUuid()).isEqualTo(author.getUuid());
 
-    final Comment commentTwo = withCredentials(approver1.getDomainUsername(),
+    final Comment commentTwo = withCredentials(getDomainUsername(approver1),
         t -> mutationExecutor.addComment(COMMENT_FIELDS,
             TestData.createCommentInput("This is a test comment two"), created.getUuid()));
     assertThat(commentTwo.getUuid()).isNotNull();
 
-    final Report returned6 = withCredentials(approver1.getDomainUsername(),
+    final Report returned6 = withCredentials(getDomainUsername(approver1),
         t -> queryExecutor.report(FIELDS, created.getUuid()));
     final List<Comment> commentsReturned = returned6.getComments();
     assertThat(commentsReturned).hasSize(3); // the rejection comment will be there as well.
@@ -494,7 +499,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     final PersonSearchQueryInput queryPeople =
         PersonSearchQueryInput.builder().withStatus(Status.ACTIVE).withInMyReports(true)
             .withSortBy(PersonSearchSortBy.RECENT).withSortOrder(SortOrder.DESC).build();
-    final AnetBeanList_Person recentPeople = withCredentials(author.getDomainUsername(),
+    final AnetBeanList_Person recentPeople = withCredentials(getDomainUsername(author),
         t -> queryExecutor.personList(getListFields(PERSON_FIELDS), queryPeople));
     assertThat(recentPeople.getList().stream().map(Person::getUuid).collect(Collectors.toSet()))
         .contains(interlocutorPerson.getUuid());
@@ -502,7 +507,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     final TaskSearchQueryInput queryTasks =
         TaskSearchQueryInput.builder().withStatus(Status.ACTIVE).withInMyReports(true)
             .withSortBy(TaskSearchSortBy.RECENT).withSortOrder(SortOrder.DESC).build();
-    final AnetBeanList_Task recentTasks = withCredentials(author.getDomainUsername(),
+    final AnetBeanList_Task recentTasks = withCredentials(getDomainUsername(author),
         t -> queryExecutor.taskList(getListFields(TASK_FIELDS), queryTasks));
     assertThat(recentTasks.getList().stream().map(Task::getUuid).collect(Collectors.toSet()))
         .contains(action.getUuid());
@@ -510,7 +515,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     final LocationSearchQueryInput queryLocations =
         LocationSearchQueryInput.builder().withStatus(Status.ACTIVE).withInMyReports(true)
             .withSortBy(LocationSearchSortBy.RECENT).withSortOrder(SortOrder.DESC).build();
-    final AnetBeanList_Location recentLocations = withCredentials(author.getDomainUsername(),
+    final AnetBeanList_Location recentLocations = withCredentials(getDomainUsername(author),
         t -> queryExecutor.locationList(getListFields(LOCATION_FIELDS), queryLocations));
     assertThat(
         recentLocations.getList().stream().map(Location::getUuid).collect(Collectors.toSet()))
@@ -556,17 +561,19 @@ public class ReportResourceTest extends AbstractResourceTest {
     final EmailAddress emailAddress1 =
         EmailAddress.builder().withNetwork(Utils.getEmailNetworkForNotifications())
             .withAddress("testApprover1@example.com").build();
-    final Person approver1tpl = Person.builder().withDomainUsername("testapprover1")
+    final User user1 = User.builder().withDomainUsername("testapprover1").build();
+    final Person approver1tpl = Person.builder().withUser(true).withUsers(List.of(user1))
         .withEmailAddresses(List.of(emailAddress1)).withName("Test Approver 1")
         .withStatus(Status.ACTIVE).build();
-    final Person approver1 = findOrPutPersonInDb(approver1tpl);
+    final Person approver1 = findOrPutPersonInDb(getDomainUsername(approver1tpl), approver1tpl);
     final EmailAddress emailAddress2 =
         EmailAddress.builder().withNetwork(Utils.getEmailNetworkForNotifications())
             .withAddress("testApprover2@example.com").build();
-    final Person approver2tpl = Person.builder().withDomainUsername("testapprover2")
+    final User user2 = User.builder().withDomainUsername("testapprover2").build();
+    final Person approver2tpl = Person.builder().withUser(true).withUsers(List.of(user2))
         .withEmailAddresses(List.of(emailAddress2)).withName("Test Approver 2")
         .withStatus(Status.ACTIVE).build();
-    final Person approver2 = findOrPutPersonInDb(approver2tpl);
+    final Person approver2 = findOrPutPersonInDb(getDomainUsername(approver2tpl), approver2tpl);
 
     final PositionInput approver1PosInput = PositionInput.builder()
         .withName("Test Approver 1 Position").withOrganization(getOrganizationInput(advisorOrg))
@@ -595,12 +602,12 @@ public class ReportResourceTest extends AbstractResourceTest {
     // Verify these users
     final PersonInput approver1ActivateInput = getPersonInput(approver1);
     approver1ActivateInput.setPendingVerification(false);
-    nrUpdated = withCredentials(approver1.getDomainUsername(),
+    nrUpdated = withCredentials(getDomainUsername(approver1),
         t -> mutationExecutor.updateMe("", approver1ActivateInput));
     assertThat(nrUpdated).isEqualTo(1);
     final PersonInput approver2ActivateInput = getPersonInput(approver2);
     approver2ActivateInput.setPendingVerification(false);
-    nrUpdated = withCredentials(approver2.getDomainUsername(),
+    nrUpdated = withCredentials(getDomainUsername(approver2),
         t -> mutationExecutor.updateMe("", approver2ActivateInput));
     assertThat(nrUpdated).isEqualTo(1);
 
@@ -694,7 +701,7 @@ public class ReportResourceTest extends AbstractResourceTest {
             .withNextSteps("This is the next steps on a report")
             .withKeyOutcomes("These are the key outcomes of this engagement")
             .withClassification(getFirstClassification()).build();
-    final Report created = withCredentials(author.getDomainUsername(),
+    final Report created = withCredentials(getDomainUsername(author),
         t -> mutationExecutor.createReport(FIELDS, rInput));
     assertThat(created).isNotNull();
     assertThat(created.getUuid()).isNotNull();
@@ -709,7 +716,7 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     // Have another regular user try to submit the report
     try {
-      withCredentials(getRegularUser().getDomainUsername(),
+      withCredentials(getDomainUsername(getRegularUser()),
           t -> mutationExecutor.submitReport("", created.getUuid()));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
@@ -718,7 +725,7 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     // Have a superuser of another AO try to submit the report
     try {
-      withCredentials(getSuperuser().getDomainUsername(),
+      withCredentials(getDomainUsername(getSuperuser()),
           t -> mutationExecutor.submitReport("", created.getUuid()));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
@@ -726,32 +733,32 @@ public class ReportResourceTest extends AbstractResourceTest {
     }
 
     // Have the author submit the report
-    int numRows = withCredentials(author.getDomainUsername(),
+    int numRows = withCredentials(getDomainUsername(author),
         t -> mutationExecutor.submitReport("", created.getUuid()));
     assertThat(numRows).isOne();
 
-    final Report returned1 = withCredentials(author.getDomainUsername(),
+    final Report returned1 = withCredentials(getDomainUsername(author),
         t -> queryExecutor.report(FIELDS, created.getUuid()));
     assertThat(returned1.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
 
     // Verify that author can still edit the report
     returned1.setAtmosphereDetails("Everybody was super nice! Again!");
-    final Report r2 = withCredentials(author.getDomainUsername(),
+    final Report r2 = withCredentials(getDomainUsername(author),
         t -> mutationExecutor.updateReport(FIELDS, getReportInput(returned1), true));
     assertThat(r2.getAtmosphereDetails()).isEqualTo(returned1.getAtmosphereDetails());
 
     // Have the author submit the report, again
-    numRows = withCredentials(author.getDomainUsername(),
+    numRows = withCredentials(getDomainUsername(author),
         t -> mutationExecutor.submitReport("", created.getUuid()));
     assertThat(numRows).isOne();
 
-    final Report returned2 = withCredentials(author.getDomainUsername(),
+    final Report returned2 = withCredentials(getDomainUsername(author),
         t -> queryExecutor.report(FIELDS, created.getUuid()));
     assertThat(returned2.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
 
     // The author should not be able to submit the report now
     try {
-      withCredentials(author.getDomainUsername(),
+      withCredentials(getDomainUsername(author),
           t -> mutationExecutor.submitReport("", returned2.getUuid()));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
@@ -777,7 +784,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     // Verify this shows up on the approver's list of pending documents
     final ReportSearchQueryInput pendingQuery =
         ReportSearchQueryInput.builder().withPendingApprovalOf(approver1.getUuid()).build();
-    AnetBeanList_Report pending = withCredentials(approver1.getDomainUsername(),
+    AnetBeanList_Report pending = withCredentials(getDomainUsername(approver1),
         t -> queryExecutor.reportList(getListFields(FIELDS), pendingQuery));
     assertThat(pending.getList().stream().map(Report::getUuid).collect(Collectors.toSet()))
         .contains(returned2.getUuid());
@@ -793,37 +800,37 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(reportAction.getStep().getUuid()).isEqualTo(releaseApprovalStep.getUuid());
 
     // Reject the report
-    numRows = withCredentials(approver1.getDomainUsername(), t -> mutationExecutor.rejectReport("",
+    numRows = withCredentials(getDomainUsername(approver1), t -> mutationExecutor.rejectReport("",
         TestData.createCommentInput("a test rejection"), created.getUuid()));
     assertThat(numRows).isOne();
 
     // Check on report status to verify it was rejected
-    final Report returned3 = withCredentials(author.getDomainUsername(),
+    final Report returned3 = withCredentials(getDomainUsername(author),
         t -> queryExecutor.report(FIELDS, created.getUuid()));
     assertThat(returned3.getState()).isEqualTo(ReportState.REJECTED);
     assertThat(returned3.getApprovalStep()).isNull();
 
     // Author needs to re-submit
-    numRows = withCredentials(author.getDomainUsername(),
+    numRows = withCredentials(getDomainUsername(author),
         t -> mutationExecutor.submitReport("", created.getUuid()));
     assertThat(numRows).isOne();
 
     // TODO: Approver modify the report *specifically change the attendees!*
 
     // Approve the report
-    numRows = withCredentials(approver1.getDomainUsername(),
+    numRows = withCredentials(getDomainUsername(approver1),
         t -> mutationExecutor.approveReport("", null, created.getUuid()));
     assertThat(numRows).isOne();
 
     // Check on Report status to verify it got moved forward
-    final Report returned4 = withCredentials(author.getDomainUsername(),
+    final Report returned4 = withCredentials(getDomainUsername(author),
         t -> queryExecutor.report(FIELDS, created.getUuid()));
     assertThat(returned4.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
     assertThat(returned4.getApprovalStep().getUuid()).isEqualTo(releaseApprovalStep.getUuid());
 
     // Verify that the wrong person cannot approve this report.
     try {
-      withCredentials(approver1.getDomainUsername(),
+      withCredentials(getDomainUsername(approver1),
           t -> mutationExecutor.approveReport("", null, created.getUuid()));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
@@ -831,19 +838,19 @@ public class ReportResourceTest extends AbstractResourceTest {
     }
 
     // Approve the report
-    numRows = withCredentials(approver2.getDomainUsername(),
+    numRows = withCredentials(getDomainUsername(approver2),
         t -> mutationExecutor.approveReport("", null, created.getUuid()));
     assertThat(numRows).isOne();
 
     // Check on Report status to verify it got moved forward
-    final Report returned5 = withCredentials(author.getDomainUsername(),
+    final Report returned5 = withCredentials(getDomainUsername(author),
         t -> queryExecutor.report(FIELDS, created.getUuid()));
     assertThat(returned5.getState()).isEqualTo(ReportState.APPROVED);
     assertThat(returned5.getApprovalStep()).isNull();
 
     // The author should not be able to submit the report now
     try {
-      withCredentials(author.getDomainUsername(),
+      withCredentials(getDomainUsername(author),
           t -> mutationExecutor.submitReport("", returned5.getUuid()));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
@@ -868,17 +875,17 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     // Post a comment on the report because it's awesome
     final Comment commentOne =
-        withCredentials(author.getDomainUsername(), t -> mutationExecutor.addComment(COMMENT_FIELDS,
+        withCredentials(getDomainUsername(author), t -> mutationExecutor.addComment(COMMENT_FIELDS,
             TestData.createCommentInput("This is a test comment one"), created.getUuid()));
     assertThat(commentOne.getUuid()).isNotNull();
     assertThat(commentOne.getAuthor().getUuid()).isEqualTo(author.getUuid());
 
-    final Comment commentTwo = withCredentials(approver1.getDomainUsername(),
+    final Comment commentTwo = withCredentials(getDomainUsername(approver1),
         t -> mutationExecutor.addComment(COMMENT_FIELDS,
             TestData.createCommentInput("This is a test comment two"), created.getUuid()));
     assertThat(commentTwo.getUuid()).isNotNull();
 
-    final Report returned6 = withCredentials(approver1.getDomainUsername(),
+    final Report returned6 = withCredentials(getDomainUsername(approver1),
         t -> queryExecutor.report(FIELDS, created.getUuid()));
     final List<Comment> commentsReturned = returned6.getComments();
     assertThat(commentsReturned).hasSize(3); // the rejection comment will be there as well.
@@ -902,7 +909,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     final PersonSearchQueryInput queryPeople =
         PersonSearchQueryInput.builder().withStatus(Status.ACTIVE).withInMyReports(true)
             .withSortBy(PersonSearchSortBy.RECENT).withSortOrder(SortOrder.DESC).build();
-    final AnetBeanList_Person recentPeople = withCredentials(author.getDomainUsername(),
+    final AnetBeanList_Person recentPeople = withCredentials(getDomainUsername(author),
         t -> queryExecutor.personList(getListFields(PERSON_FIELDS), queryPeople));
     assertThat(recentPeople.getList().stream().map(Person::getUuid).collect(Collectors.toSet()))
         .contains(reportAttendeePerson.getUuid());
@@ -910,7 +917,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     final TaskSearchQueryInput queryTasks =
         TaskSearchQueryInput.builder().withStatus(Status.ACTIVE).withInMyReports(true)
             .withSortBy(TaskSearchSortBy.RECENT).withSortOrder(SortOrder.DESC).build();
-    final AnetBeanList_Task recentTasks = withCredentials(author.getDomainUsername(),
+    final AnetBeanList_Task recentTasks = withCredentials(getDomainUsername(author),
         t -> queryExecutor.taskList(getListFields(TASK_FIELDS), queryTasks));
     assertThat(recentTasks.getList().stream().map(Task::getUuid).collect(Collectors.toSet()))
         .contains(action.getUuid());
@@ -918,7 +925,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     final LocationSearchQueryInput queryLocations =
         LocationSearchQueryInput.builder().withStatus(Status.ACTIVE).withInMyReports(true)
             .withSortBy(LocationSearchSortBy.RECENT).withSortOrder(SortOrder.DESC).build();
-    final AnetBeanList_Location recentLocations = withCredentials(author.getDomainUsername(),
+    final AnetBeanList_Location recentLocations = withCredentials(getDomainUsername(author),
         t -> queryExecutor.locationList(getListFields(LOCATION_FIELDS), queryLocations));
     assertThat(
         recentLocations.getList().stream().map(Location::getUuid).collect(Collectors.toSet()))
@@ -947,9 +954,10 @@ public class ReportResourceTest extends AbstractResourceTest {
     final EmailAddressInput emailAddressInput =
         EmailAddressInput.builder().withNetwork(Utils.getEmailNetworkForNotifications())
             .withAddress("newguy@example.com").build();
+    final UserInput userInput = UserInput.builder().withDomainUsername("newguy").build();
     final PersonInput authorInput =
         PersonInput.builder().withName("A New Guy").withUser(true).withStatus(Status.ACTIVE)
-            .withDomainUsername("newguy").withEmailAddresses(List.of(emailAddressInput)).build();
+            .withUsers(List.of(userInput)).withEmailAddresses(List.of(emailAddressInput)).build();
     final Person author =
         withCredentials(adminUser, t -> mutationExecutor.createPerson(PERSON_FIELDS, authorInput));
     assertThat(author).isNotNull();
@@ -1032,13 +1040,13 @@ public class ReportResourceTest extends AbstractResourceTest {
         List.of(personToPrimaryReportPerson(roger, true), personToReportPerson(jack, false),
             personToPrimaryReportPerson(bob, false), personToReportAuthor(author)));
 
-    final Report updated = withCredentials(author.getDomainUsername(),
+    final Report updated = withCredentials(getDomainUsername(author),
         t -> mutationExecutor.updateReport(FIELDS, getReportInput(returned), true));
     assertThat(updated).isNotNull();
     assertThat(updated.getAdvisorOrg().getUuid()).isNotEqualTo(returned.getAdvisorOrg().getUuid());
 
     // Re-submit the reported
-    numRows = withCredentials(author.getDomainUsername(),
+    numRows = withCredentials(getDomainUsername(author),
         t -> mutationExecutor.submitReport("", r.getUuid()));
     assertThat(numRows).isOne();
 
@@ -1052,13 +1060,13 @@ public class ReportResourceTest extends AbstractResourceTest {
         List.of(personToPrimaryReportPerson(roger, true), personToReportPerson(jack, false),
             personToPrimaryReportPerson(ben, false), personToReportAuthor(author)));
 
-    final Report updated2 = withCredentials(author.getDomainUsername(),
+    final Report updated2 = withCredentials(getDomainUsername(author),
         t -> mutationExecutor.updateReport(FIELDS, getReportInput(updated), true));
     assertThat(updated2).isNotNull();
     assertThat(updated2.getAdvisorOrg().getUuid()).isNotEqualTo(updated.getAdvisorOrg().getUuid());
 
     // Re-submit the report
-    numRows = withCredentials(author.getDomainUsername(),
+    numRows = withCredentials(getDomainUsername(author),
         t -> mutationExecutor.submitReport("", r.getUuid()));
     assertThat(numRows).isOne();
 
@@ -1102,7 +1110,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     // Fetch some objects from the DB that we'll use later.
     final LocationSearchQueryInput queryLocs =
         LocationSearchQueryInput.builder().withText("Police").build();
-    final AnetBeanList_Location locSearchResults = withCredentials(elizabeth.getDomainUsername(),
+    final AnetBeanList_Location locSearchResults = withCredentials(getDomainUsername(elizabeth),
         t -> queryExecutor.locationList(getListFields(LOCATION_FIELDS), queryLocs));
     assertThat(locSearchResults).isNotNull();
     assertThat(locSearchResults.getList()).isNotEmpty();
@@ -1110,7 +1118,7 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     final TaskSearchQueryInput queryTasks =
         TaskSearchQueryInput.builder().withText("Budgeting").build();
-    final AnetBeanList_Task taskSearchResults = withCredentials(elizabeth.getDomainUsername(),
+    final AnetBeanList_Task taskSearchResults = withCredentials(getDomainUsername(elizabeth),
         t -> queryExecutor.taskList(getListFields(TASK_FIELDS), queryTasks));
     assertThat(taskSearchResults.getTotalCount()).isGreaterThan(2);
 
@@ -1123,7 +1131,7 @@ public class ReportResourceTest extends AbstractResourceTest {
         .withReportPeople(getReportPeopleInput(
             List.of(personToPrimaryReportPerson(roger, true), personToReportAuthor(elizabeth))))
         .withTasks(List.of(getTaskInput(taskSearchResults.getList().get(0)))).build();
-    Report returned = withCredentials(elizabeth.getDomainUsername(),
+    Report returned = withCredentials(getDomainUsername(elizabeth),
         t -> mutationExecutor.createReport(FIELDS, rInput));
     assertThat(returned).isNotNull();
     assertThat(returned.getUuid()).isNotNull();
@@ -1137,12 +1145,12 @@ public class ReportResourceTest extends AbstractResourceTest {
     returned.setReportPeople(List.of(personToPrimaryReportPerson(roger, true),
         personToReportPerson(nick, false), personToPrimaryReportAuthor(elizabeth)));
     returned.setTasks(List.of());
-    Report updated = withCredentials(elizabeth.getDomainUsername(),
+    Report updated = withCredentials(getDomainUsername(elizabeth),
         t -> mutationExecutor.updateReport(FIELDS, getReportInput(returned), true));
     assertThat(updated).isNotNull();
 
     // Verify the report changed
-    Report returned2 = withCredentials(elizabeth.getDomainUsername(),
+    Report returned2 = withCredentials(getDomainUsername(elizabeth),
         t -> queryExecutor.report(FIELDS, returned.getUuid()));
     assertThat(returned2.getIntent()).isEqualTo(rInput.getIntent());
     assertThat(returned2.getLocation().getUuid()).isEqualTo(loc.getUuid());
@@ -1159,10 +1167,10 @@ public class ReportResourceTest extends AbstractResourceTest {
         .isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
 
     // Elizabeth submits the report
-    int numRows = withCredentials(elizabeth.getDomainUsername(),
+    int numRows = withCredentials(getDomainUsername(elizabeth),
         t -> mutationExecutor.submitReport("", returned.getUuid()));
     assertThat(numRows).isOne();
-    Report returned3 = withCredentials(elizabeth.getDomainUsername(),
+    Report returned3 = withCredentials(getDomainUsername(elizabeth),
         t -> queryExecutor.report(FIELDS, returned.getUuid()));
     assertThat(returned3.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
 
@@ -1184,7 +1192,7 @@ public class ReportResourceTest extends AbstractResourceTest {
         t -> mutationExecutor.updateReport(FIELDS, getReportInput(returned3), true));
     assertThat(updated).isNotNull();
 
-    Report returned4 = withCredentials(elizabeth.getDomainUsername(),
+    Report returned4 = withCredentials(getDomainUsername(elizabeth),
         t -> queryExecutor.report(FIELDS, returned.getUuid()));
     assertThat(returned4.getReportText()).endsWith("Bob!!");
     final List<ReportPerson> returned4Attendees = returned4.getAttendees();
@@ -1595,23 +1603,23 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(results.getList()).hasSize(1);
     Instant actualReportDate = results.getList().get(0).getUpdatedAt();
 
-    // Greater than startDate and equal to endDate
+    // Greater than startDate and equal to endDate plus 1 ms (to avoid rounding errors)
     query.setUpdatedAtStart(startDate);
-    query.setUpdatedAtEnd(actualReportDate);
+    query.setUpdatedAtEnd(actualReportDate.plus(1, ChronoUnit.MILLIS));
     results =
         withCredentials(adminUser, t -> queryExecutor.reportList(getListFields(FIELDS), query));
     assertThat(results.getList()).hasSize(1);
 
-    // Equal to startDate and smaller than endDate
+    // Equal to startDate and smaller than endDate plus 1 ms (to avoid rounding errors)
     query.setUpdatedAtStart(actualReportDate);
-    query.setUpdatedAtEnd(endDate);
+    query.setUpdatedAtEnd(endDate.plus(1, ChronoUnit.MILLIS));
     results =
         withCredentials(adminUser, t -> queryExecutor.reportList(getListFields(FIELDS), query));
     assertThat(results.getList()).hasSize(1);
 
-    // Equal to startDate and equal to endDate
+    // Equal to startDate and equal to endDate plus 1 ms (to avoid rounding errors)
     query.setUpdatedAtStart(actualReportDate);
-    query.setUpdatedAtEnd(actualReportDate);
+    query.setUpdatedAtEnd(actualReportDate.plus(1, ChronoUnit.MILLIS));
     results =
         withCredentials(adminUser, t -> queryExecutor.reportList(getListFields(FIELDS), query));
     assertThat(results.getList()).hasSize(1);
@@ -1667,7 +1675,7 @@ public class ReportResourceTest extends AbstractResourceTest {
         .withReportText("I'm writing a report that I intend to delete very soon.")
         .withKeyOutcomes("Summary for the key outcomes").withNextSteps("Summary for the next steps")
         .withEngagementDate(Instant.now()).withDuration(15).build();
-    final Report r = withCredentials(elizabeth.getDomainUsername(),
+    final Report r = withCredentials(getDomainUsername(elizabeth),
         t -> mutationExecutor.createReport(FIELDS, rInput));
     assertThat(r).isNotNull();
     assertThat(r.getUuid()).isNotNull();
@@ -1685,7 +1693,7 @@ public class ReportResourceTest extends AbstractResourceTest {
         AttachmentInput.builder().withFileName("testDeleteAttachment.jpg").withMimeType(mimeType)
             .withDescription("a test attachment created by testDeleteAttachment")
             .withAttachmentRelatedObjects(Collections.singletonList(testAroInput)).build();
-    final String createdAttachmentUuid = withCredentials(elizabeth.getDomainUsername(),
+    final String createdAttachmentUuid = withCredentials(getDomainUsername(elizabeth),
         t -> mutationExecutor.createAttachment("", testAttachmentInput));
     assertThat(createdAttachmentUuid).isNotNull();
 
@@ -1705,7 +1713,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     }
 
     // Now have the author delete this report.
-    final Integer nrDeleted = withCredentials(elizabeth.getDomainUsername(),
+    final Integer nrDeleted = withCredentials(getDomainUsername(elizabeth),
         t -> mutationExecutor.deleteReport("", r.getUuid()));
     assertThat(nrDeleted).isEqualTo(1);
 
@@ -1742,15 +1750,15 @@ public class ReportResourceTest extends AbstractResourceTest {
                 personToPrimaryReportPerson(steve, true))))
             .withCancelledReason(ReportCancelledReason.CANCELLED_BY_INTERLOCUTOR).build();
 
-    final Report saved = withCredentials(elizabeth.getDomainUsername(),
+    final Report saved = withCredentials(getDomainUsername(elizabeth),
         t -> mutationExecutor.createReport(FIELDS, rInput));
     assertThat(saved).isNotNull();
     assertThat(saved.getUuid()).isNotNull();
 
-    int numRows = withCredentials(elizabeth.getDomainUsername(),
+    int numRows = withCredentials(getDomainUsername(elizabeth),
         t -> mutationExecutor.submitReport("", saved.getUuid()));
     assertThat(numRows).isOne();
-    final Report returned = withCredentials(elizabeth.getDomainUsername(),
+    final Report returned = withCredentials(getDomainUsername(elizabeth),
         t -> queryExecutor.report(FIELDS, saved.getUuid()));
     assertThat(returned.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
     assertThat(returned.getCancelledReason())
@@ -1770,13 +1778,13 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(numRows).isOne();
 
     // Ensure it went to cancelled status.
-    final Report returned2 = withCredentials(elizabeth.getDomainUsername(),
+    final Report returned2 = withCredentials(getDomainUsername(elizabeth),
         t -> queryExecutor.report(FIELDS, saved.getUuid()));
     assertThat(returned2.getState()).isEqualTo(ReportState.CANCELLED);
 
     // The author should not be able to submit the report now
     try {
-      withCredentials(elizabeth.getDomainUsername(),
+      withCredentials(getDomainUsername(elizabeth),
           t -> mutationExecutor.submitReport("", returned2.getUuid()));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
@@ -1873,7 +1881,7 @@ public class ReportResourceTest extends AbstractResourceTest {
         .withKeyOutcomes("Foobar the bazbiz").withReportPeople(getReportPeopleInput(List
             .of(personToPrimaryReportAuthor(elizabeth), personToPrimaryReportPerson(steve, true))))
         .build();
-    final Report r1 = withCredentials(elizabeth.getDomainUsername(),
+    final Report r1 = withCredentials(getDomainUsername(elizabeth),
         t -> mutationExecutor.createReport(FIELDS, rInput));
     assertThat(r1).isNotNull();
     assertThat(r1.getUuid()).isNotNull();
@@ -1888,7 +1896,7 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     // Submit the report
     try {
-      withCredentials(elizabeth.getDomainUsername(),
+      withCredentials(getDomainUsername(elizabeth),
           t -> mutationExecutor.submitReport("", r1.getUuid()));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
@@ -1898,12 +1906,12 @@ public class ReportResourceTest extends AbstractResourceTest {
     // Oops set the engagementDate.
     r1.setEngagementDate(Instant.now());
     r1.setDuration(115);
-    final Report updated = withCredentials(elizabeth.getDomainUsername(),
+    final Report updated = withCredentials(getDomainUsername(elizabeth),
         t -> mutationExecutor.updateReport(FIELDS, getReportInput(r1), true));
     assertThat(updated).isNotNull();
 
     // Re-submit the report, it should work.
-    int numRows = withCredentials(elizabeth.getDomainUsername(),
+    int numRows = withCredentials(getDomainUsername(elizabeth),
         t -> mutationExecutor.submitReport("", r1.getUuid()));
     assertThat(numRows).isOne();
 
@@ -1912,7 +1920,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(numRows).isOne();
 
     // Verify report is in APPROVED state.
-    final Report r2 = withCredentials(elizabeth.getDomainUsername(),
+    final Report r2 = withCredentials(getDomainUsername(elizabeth),
         t -> queryExecutor.report(FIELDS, r1.getUuid()));
     assertThat(r2.getState()).isEqualTo(ReportState.APPROVED);
 
@@ -1921,7 +1929,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(numRows).isOne();
 
     // Verify report is in PUBLISHED state.
-    final Report r3 = withCredentials(elizabeth.getDomainUsername(),
+    final Report r3 = withCredentials(getDomainUsername(elizabeth),
         t -> queryExecutor.report(FIELDS, r1.getUuid()));
     assertThat(r3.getState()).isEqualTo(ReportState.PUBLISHED);
 
@@ -1957,7 +1965,7 @@ public class ReportResourceTest extends AbstractResourceTest {
         .withReportText(
             "This reportTest was generated by ReportsResourceTest#testSensitiveInformation")
         .withReportSensitiveInformation(rsiInput).build();
-    final Report returned = withCredentials(elizabeth.getDomainUsername(),
+    final Report returned = withCredentials(getDomainUsername(elizabeth),
         t -> mutationExecutor.createReport(FIELDS, rInput));
     assertThat(returned).isNotNull();
     assertThat(returned.getUuid()).isNotNull();
@@ -1967,7 +1975,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(returned.getReportSensitiveInformation().getText())
         .isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
 
-    final Report returned2 = withCredentials(elizabeth.getDomainUsername(),
+    final Report returned2 = withCredentials(getDomainUsername(elizabeth),
         t -> queryExecutor.report(FIELDS, returned.getUuid()));
     // elizabeth should be allowed to see it
     assertThat(returned2.getReportSensitiveInformation()).isNotNull();
@@ -1977,7 +1985,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     // update HTML of report sensitive information
     returned2.getReportSensitiveInformation()
         .setText(UtilsTest.getCombinedHtmlTestCase().getInput());
-    final Report updated = withCredentials(elizabeth.getDomainUsername(),
+    final Report updated = withCredentials(getDomainUsername(elizabeth),
         t -> mutationExecutor.updateReport(FIELDS, getReportInput(returned2), true));
     assertThat(updated).isNotNull();
     assertThat(updated.getReportSensitiveInformation()).isNotNull();
@@ -2135,7 +2143,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     try {
       createTestReport();
       final List<AdvisorReportsEntry> advisorReports =
-          withCredentials(user.getDomainUsername(),
+          withCredentials(getDomainUsername(user),
               t -> queryExecutor.advisorReportInsights(
                   "{ uuid name stats { week nrReportsSubmitted nrEngagementsAttended } }", "-1",
                   3));
@@ -2169,7 +2177,7 @@ public class ReportResourceTest extends AbstractResourceTest {
   private Location getLocation(Person user, String name) {
     final LocationSearchQueryInput query =
         LocationSearchQueryInput.builder().withText(name).build();
-    final AnetBeanList_Location results = withCredentials(user.getDomainUsername(),
+    final AnetBeanList_Location results = withCredentials(getDomainUsername(user),
         t -> queryExecutor.locationList(getListFields(LOCATION_FIELDS), query));
     assertThat(results).isNotNull();
     assertThat(results.getList()).isNotEmpty();
@@ -2197,7 +2205,7 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     // Reference task 1.1.A
     final TaskSearchQueryInput query = TaskSearchQueryInput.builder().withText("1.1.A").build();
-    final AnetBeanList_Task searchObjects = withCredentials(author.getDomainUsername(),
+    final AnetBeanList_Task searchObjects = withCredentials(getDomainUsername(author),
         t -> queryExecutor.taskList(getListFields(TASK_FIELDS), query));
     assertThat(searchObjects).isNotNull();
     assertThat(searchObjects.getList()).isNotEmpty();
@@ -2208,17 +2216,17 @@ public class ReportResourceTest extends AbstractResourceTest {
     rInput.setTasks(List.of(getTaskInput(t11a)));
 
     // Create the report
-    final Report created = withCredentials(author.getDomainUsername(),
+    final Report created = withCredentials(getDomainUsername(author),
         t -> mutationExecutor.createReport(FIELDS, rInput));
     assertThat(created).isNotNull();
     assertThat(created.getUuid()).isNotNull();
     assertThat(created.getState()).isEqualTo(ReportState.DRAFT);
 
     // Submit the report
-    int numRows = withCredentials(author.getDomainUsername(),
+    int numRows = withCredentials(getDomainUsername(author),
         t -> mutationExecutor.submitReport("", created.getUuid()));
     assertThat(numRows).isOne();
-    final Report submitted = withCredentials(author.getDomainUsername(),
+    final Report submitted = withCredentials(getDomainUsername(author),
         t -> queryExecutor.report(FIELDS, created.getUuid()));
     assertThat(submitted).isNotNull();
     assertThat(submitted.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
@@ -2257,7 +2265,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     numRows =
         withCredentials("bob", t -> mutationExecutor.approveReport("", null, submitted.getUuid()));
     assertThat(numRows).isOne();
-    final Report approvedStep1 = withCredentials(author.getDomainUsername(),
+    final Report approvedStep1 = withCredentials(getDomainUsername(author),
         t -> queryExecutor.report(FIELDS, created.getUuid()));
     assertThat(approvedStep1).isNotNull();
     assertThat(approvedStep1.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
@@ -2268,10 +2276,10 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(step2.getRelatedObjectUuid()).isEqualTo(t11a.getUuid());
 
     // Have the report approved by the 1.1.A approver
-    numRows = withCredentials(andrew.getDomainUsername(),
+    numRows = withCredentials(getDomainUsername(andrew),
         t -> mutationExecutor.approveReport("", null, submitted.getUuid()));
     assertThat(numRows).isOne();
-    final Report approvedStep2 = withCredentials(author.getDomainUsername(),
+    final Report approvedStep2 = withCredentials(getDomainUsername(author),
         t -> queryExecutor.report(FIELDS, created.getUuid()));
     assertThat(approvedStep2).isNotNull();
     assertThat(approvedStep1.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
@@ -2285,7 +2293,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     numRows = withCredentials(adminUser,
         t -> mutationExecutor.approveReport("", null, submitted.getUuid()));
     assertThat(numRows).isOne();
-    final Report approvedStep3 = withCredentials(author.getDomainUsername(),
+    final Report approvedStep3 = withCredentials(getDomainUsername(author),
         t -> queryExecutor.report(FIELDS, created.getUuid()));
     assertThat(approvedStep3).isNotNull();
     assertThat(approvedStep3.getState()).isEqualTo(ReportState.APPROVED);
@@ -2298,7 +2306,7 @@ public class ReportResourceTest extends AbstractResourceTest {
         .withReportPeople(getReportPeopleInput(List.of(personToReportAuthor(author))))
         .withState(ReportState.DRAFT).withAtmosphere(Atmosphere.POSITIVE)
         .withIntent("Testing report authors").withEngagementDate(Instant.now()).build();
-    final Report reportFirstAuthor = withCredentials(author.getDomainUsername(),
+    final Report reportFirstAuthor = withCredentials(getDomainUsername(author),
         t -> mutationExecutor.createReport(FIELDS, rInput));
     assertThat(reportFirstAuthor).isNotNull();
     assertThat(reportFirstAuthor.getUuid()).isNotNull();
@@ -2309,7 +2317,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     // Try to remove the author, should fail
     reportFirstAuthor.setReportPeople(null);
     try {
-      withCredentials(author.getDomainUsername(),
+      withCredentials(getDomainUsername(author),
           t -> mutationExecutor.updateReport(FIELDS, getReportInput(reportFirstAuthor), true));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
@@ -2320,7 +2328,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     final Person liz = getElizabethElizawell();
     reportFirstAuthor
         .setReportPeople(List.of(personToReportAuthor(author), personToReportAuthor(liz)));
-    final Report reportTwoAuthors = withCredentials(author.getDomainUsername(),
+    final Report reportTwoAuthors = withCredentials(getDomainUsername(author),
         t -> mutationExecutor.updateReport(FIELDS, getReportInput(reportFirstAuthor), true));
     assertThat(reportTwoAuthors.getReportPeople())
         .anyMatch(rp -> Objects.equals(rp.getUuid(), author.getUuid()) && rp.getAuthor());
@@ -2329,7 +2337,7 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     // Remove the first author
     reportTwoAuthors.setReportPeople(List.of(personToReportAuthor(liz)));
-    final Report reportSecondAuthor = withCredentials(author.getDomainUsername(),
+    final Report reportSecondAuthor = withCredentials(getDomainUsername(author),
         t -> mutationExecutor.updateReport(FIELDS, getReportInput(reportTwoAuthors), true));
     assertThat(reportSecondAuthor.getReportPeople())
         .noneMatch(rp -> Objects.equals(rp.getUuid(), author.getUuid()) && rp.getAuthor());
@@ -2339,7 +2347,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     // Try to edit the report as the first author, should fail
     reportSecondAuthor.setIntent("Testing report authors again");
     try {
-      withCredentials(author.getDomainUsername(),
+      withCredentials(getDomainUsername(author),
           t -> mutationExecutor.updateReport(FIELDS, getReportInput(reportSecondAuthor), true));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
@@ -2350,7 +2358,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     reportSecondAuthor
         .setReportPeople(List.of(personToReportAuthor(author), personToReportAuthor(liz)));
     try {
-      withCredentials(author.getDomainUsername(),
+      withCredentials(getDomainUsername(author),
           t -> mutationExecutor.updateReport(FIELDS, getReportInput(reportSecondAuthor), true));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
@@ -2359,7 +2367,7 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     // Try to delete the report as the first author, should fail
     try {
-      withCredentials(author.getDomainUsername(),
+      withCredentials(getDomainUsername(author),
           t -> mutationExecutor.deleteReport("", reportSecondAuthor.getUuid()));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
@@ -2383,8 +2391,7 @@ public class ReportResourceTest extends AbstractResourceTest {
   }
 
   private void testUnpublishReport(boolean isFuture) {
-    final Person author =
-        findOrPutPersonInDb(Person.builder().withDomainUsername("selena").build());
+    final Person author = findOrPutPersonInDb("selena", Person.builder().build());
     final Location loc = getLocation(author, "Cabot Tower");
     final Instant engagementDate = Instant.now().atZone(DaoUtils.getServerNativeZoneId())
         .minusWeeks(isFuture ? -2 : 2).toInstant();
@@ -2400,7 +2407,7 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     // Reference task EF7
     final TaskSearchQueryInput query = TaskSearchQueryInput.builder().withText("EF7").build();
-    final AnetBeanList_Task searchObjects = withCredentials(author.getDomainUsername(),
+    final AnetBeanList_Task searchObjects = withCredentials(getDomainUsername(author),
         t -> queryExecutor.taskList(getListFields(TASK_FIELDS), query));
     assertThat(searchObjects).isNotNull();
     assertThat(searchObjects.getList()).isNotEmpty();
@@ -2411,17 +2418,17 @@ public class ReportResourceTest extends AbstractResourceTest {
     rInput.setTasks(List.of(getTaskInput(t11a)));
 
     // Create the report
-    final Report created = withCredentials(author.getDomainUsername(),
+    final Report created = withCredentials(getDomainUsername(author),
         t -> mutationExecutor.createReport(FIELDS, rInput));
     assertThat(created).isNotNull();
     assertThat(created.getUuid()).isNotNull();
     assertThat(created.getState()).isEqualTo(ReportState.DRAFT);
 
     // Submit the report
-    int numRows = withCredentials(author.getDomainUsername(),
+    int numRows = withCredentials(getDomainUsername(author),
         t -> mutationExecutor.submitReport("", created.getUuid()));
     assertThat(numRows).isOne();
-    final Report submitted = withCredentials(author.getDomainUsername(),
+    final Report submitted = withCredentials(getDomainUsername(author),
         t -> queryExecutor.report(FIELDS, created.getUuid()));
     assertThat(submitted).isNotNull();
     if (!isFuture) {
@@ -2431,7 +2438,7 @@ public class ReportResourceTest extends AbstractResourceTest {
           t -> mutationExecutor.approveReport("", null, created.getUuid()));
       assertThat(numRows).isOne();
     }
-    final Report approved = withCredentials(author.getDomainUsername(),
+    final Report approved = withCredentials(getDomainUsername(author),
         t -> queryExecutor.report(FIELDS, created.getUuid()));
     assertThat(approved).isNotNull();
     assertThat(approved.getState()).isEqualTo(ReportState.APPROVED);
@@ -2448,14 +2455,14 @@ public class ReportResourceTest extends AbstractResourceTest {
     numRows =
         withCredentials(adminUser, t -> mutationExecutor.publishReport("", approved.getUuid()));
     assertThat(numRows).isOne();
-    final Report published = withCredentials(author.getDomainUsername(),
+    final Report published = withCredentials(getDomainUsername(author),
         t -> queryExecutor.report(FIELDS, created.getUuid()));
     assertThat(published).isNotNull();
     assertThat(published.getState()).isEqualTo(ReportState.PUBLISHED);
 
     // Try to unpublish published report by regular user
     try {
-      withCredentials(author.getDomainUsername(),
+      withCredentials(getDomainUsername(author),
           t -> mutationExecutor.unpublishReport("", published.getUuid()));
       fail("Expected an Exception");
     } catch (Exception expectedException) {
@@ -2473,14 +2480,14 @@ public class ReportResourceTest extends AbstractResourceTest {
         withCredentials(adminUser, t -> mutationExecutor.unpublishReport("", published.getUuid()));
     assertThat(nrUnpublished).isEqualTo(1);
     // Check that workflow has been extended
-    final Report unpublished = withCredentials(author.getDomainUsername(),
+    final Report unpublished = withCredentials(getDomainUsername(author),
         t -> queryExecutor.report(FIELDS, published.getUuid()));
     assertThat(unpublished).isNotNull();
     assertThat(unpublished.getState()).isEqualTo(ReportState.DRAFT);
     assertThat(unpublished.getWorkflow()).hasSize(published.getWorkflow().size() + 1);
 
     // Clean up
-    final Integer nrDeleted = withCredentials(author.getDomainUsername(),
+    final Integer nrDeleted = withCredentials(getDomainUsername(author),
         t -> mutationExecutor.deleteReport("", unpublished.getUuid()));
     assertThat(nrDeleted).isEqualTo(1);
   }
