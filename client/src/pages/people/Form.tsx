@@ -676,11 +676,13 @@ const PersonForm = ({
                   name="endOfTourDate"
                   component={FieldHelper.SpecialField}
                   value={values.endOfTourDate}
-                  onChange={value =>
+                  onChange={value => {
+                    setFieldTouched("endOfTourDate", true, false) // onBlur doesn't work when selecting a date
                     setFieldValue(
                       "endOfTourDate",
                       value && moment(value).endOf("day").toDate()
-                    )}
+                    )
+                  }}
                   onBlur={() => setFieldTouched("endOfTourDate")}
                   widget={
                     <CustomDateInput id="endOfTourDate" canClearSelection />
