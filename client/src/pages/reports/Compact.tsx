@@ -763,15 +763,10 @@ export const CompactWorkflowRow = ({ content }: CompactWorkflowRowProps) => {
 const CompactWorkflowRowS = styled(CompactRowS)`
   & > td {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     justify-content: flex-start;
-    flex-wrap: wrap;
-    align-items: center;
-    text-align: center;
-
-    & > .workflow-action {
-      margin-bottom: 20px;
-    }
+    text-align: left;
+    list-style-type: disc;
   }
 `
 
@@ -816,7 +811,26 @@ const CompactRowReportAction = ({ action }: CompactRowReportActionProps) => {
 }
 
 const CompactRowReportActionS = styled.div`
+  margin: 0px !important;
+  display: list-item !important;
+  text-align: left !important;
+
   & button {
-    background-color: #ddd !important;
+    width: fit-content !important;
+    vertical-align: middle;
+    background-color: unset !important;
+    margin: 0px !important;
+    padding: 0px;
+    border: none;
+  }
+
+  & button::after {
+    display: none;
+  }
+
+  & .action-status {
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 10px;
   }
 `
