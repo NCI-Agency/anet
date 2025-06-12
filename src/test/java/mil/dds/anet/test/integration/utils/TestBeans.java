@@ -12,6 +12,7 @@ import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.Atmosphere;
 import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.ReportPerson;
+import mil.dds.anet.beans.User;
 import mil.dds.anet.utils.DaoUtils;
 
 public class TestBeans {
@@ -23,7 +24,9 @@ public class TestBeans {
     p.setRank("CIV");
     p.setStatus(Person.Status.ACTIVE);
     p.setBiography("");
-    p.setDomainUsername("test-" + UUID.randomUUID());
+    User u = new User();
+    u.setDomainUsername("test-" + UUID.randomUUID());
+    p.setUsers(List.of(u));
     p.setGender("Male");
     p.setEndOfTourDate(
         ZonedDateTime.of(2036, 8, 1, 0, 0, 0, 0, DaoUtils.getServerNativeZoneId()).toInstant());

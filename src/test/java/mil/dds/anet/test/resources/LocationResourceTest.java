@@ -95,7 +95,7 @@ public class LocationResourceTest extends AbstractResourceTest {
   private void createLocation(Person user, boolean shouldSucceed) {
     final LocationInput lInput = TestData.createLocationInput("The Boat Dock2", 43.21, -87.65);
     try {
-      final Location l = withCredentials(user.getDomainUsername(),
+      final Location l = withCredentials(getDomainUsername(user),
           t -> mutationExecutor.createLocation(FIELDS, lInput));
       if (shouldSucceed) {
         assertThat(l).isNotNull();
@@ -125,14 +125,14 @@ public class LocationResourceTest extends AbstractResourceTest {
     final boolean isSuperuser = position.getType() == PositionType.SUPERUSER;
     final LocationSearchQueryInput query =
         LocationSearchQueryInput.builder().withText("Police").build();
-    final AnetBeanList_Location searchObjects = withCredentials(user.getDomainUsername(),
+    final AnetBeanList_Location searchObjects = withCredentials(getDomainUsername(user),
         t -> queryExecutor.locationList(getListFields(FIELDS), query));
     assertThat(searchObjects).isNotNull();
     assertThat(searchObjects.getList()).isNotEmpty();
     final Location l = searchObjects.getList().get(0);
 
     try {
-      final Integer nrUpdated = withCredentials(user.getDomainUsername(),
+      final Integer nrUpdated = withCredentials(getDomainUsername(user),
           t -> mutationExecutor.updateLocation("", getLocationInput(l)));
       if (isSuperuser) {
         assertThat(nrUpdated).isEqualTo(1);

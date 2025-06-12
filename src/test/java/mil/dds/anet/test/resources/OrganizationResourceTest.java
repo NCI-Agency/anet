@@ -470,8 +470,8 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     final Organization org = succeedCreateOrganization(adminUser, orgInput);
 
     succeedUpdateOrganization(adminUser, getOrganizationInput(org));
-    failUpdateOrganization(superuser.getDomainUsername(), getOrganizationInput(org));
-    failUpdateOrganization(regularUser.getDomainUsername(), getOrganizationInput(org));
+    failUpdateOrganization(getDomainUsername(superuser), getOrganizationInput(org));
+    failUpdateOrganization(getDomainUsername(regularUser), getOrganizationInput(org));
   }
 
   @Test
@@ -485,7 +485,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
             .withLongName("Advisor Organization for Testing Superusers").withStatus(Status.ACTIVE)
             .withIdentificationCode(UUID.randomUUID().toString())
             .withLocation(getLocationInput(getGeneralHospital())).build();
-    failCreateOrganization(superuser.getDomainUsername(), orgInput);
+    failCreateOrganization(getDomainUsername(superuser), orgInput);
     final Organization parentOrg = succeedCreateOrganization(adminUser, orgInput);
 
     final OrganizationInput childOrgInput = OrganizationInput.builder()
@@ -493,28 +493,28 @@ public class OrganizationResourceTest extends AbstractResourceTest {
         .withStatus(Status.ACTIVE).withIdentificationCode(UUID.randomUUID().toString())
         .withParentOrg(getOrganizationInput(parentOrg))
         .withLocation(getLocationInput(getGeneralHospital())).build();
-    failCreateOrganization(superuser.getDomainUsername(), childOrgInput);
+    failCreateOrganization(getDomainUsername(superuser), childOrgInput);
 
     // Set superuser as responsible for the parent organization
     parentOrg.setAdministratingPositions(Lists.newArrayList(superuserPosition));
     succeedUpdateOrganization(adminUser, getOrganizationInput(parentOrg));
 
     final Organization createdChildOrg =
-        succeedCreateOrganization(superuser.getDomainUsername(), childOrgInput);
+        succeedCreateOrganization(getDomainUsername(superuser), childOrgInput);
 
     // Can edit the child of their responsible organization
     createdChildOrg.setShortName("Updated Child Organization");
-    succeedUpdateOrganization(superuser.getDomainUsername(), getOrganizationInput(createdChildOrg));
+    succeedUpdateOrganization(getDomainUsername(superuser), getOrganizationInput(createdChildOrg));
 
     // Superusers cannot update their own organizations if they're not responsible
     final Organization superuserOrg = withCredentials(adminUser,
         t -> queryExecutor.organization(FIELDS, superuserPosition.getOrganization().getUuid()));
-    failUpdateOrganization(superuser.getDomainUsername(), getOrganizationInput(superuserOrg));
+    failUpdateOrganization(getDomainUsername(superuser), getOrganizationInput(superuserOrg));
 
     // Given responsibility now they can edit their organization
     superuserOrg.setAdministratingPositions(Lists.newArrayList(superuserPosition));
     succeedUpdateOrganization(adminUser, getOrganizationInput(superuserOrg));
-    succeedUpdateOrganization(superuser.getDomainUsername(), getOrganizationInput(superuserOrg));
+    succeedUpdateOrganization(getDomainUsername(superuser), getOrganizationInput(superuserOrg));
 
     // Remove position
     superuserOrg.setAdministratingPositions(new ArrayList<>());
@@ -611,7 +611,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     final Organization createdChildOrg = succeedCreateOrganization(adminUser, childOrgInput);
 
     createdChildOrg.setParentOrg(null);
-    failUpdateOrganization(superuser.getDomainUsername(), getOrganizationInput(createdChildOrg));
+    failUpdateOrganization(getDomainUsername(superuser), getOrganizationInput(createdChildOrg));
     createdChildOrg.setParentOrg(createdParentOrg);
 
     // Set superuser as responsible for the child organization
@@ -620,14 +620,14 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
     // Cannot set parent as null because they're not responsible for the parent organization
     createdChildOrg.setParentOrg(null);
-    failUpdateOrganization(superuser.getDomainUsername(), getOrganizationInput(createdChildOrg));
+    failUpdateOrganization(getDomainUsername(superuser), getOrganizationInput(createdChildOrg));
     createdChildOrg.setParentOrg(createdParentOrg);
     // Set superuser as responsible for the parent organization
     createdParentOrg.setAdministratingPositions(Lists.newArrayList(superuserPosition));
     succeedUpdateOrganization(adminUser, getOrganizationInput(createdParentOrg));
     // Now superuser can set the parent organization as null
     createdChildOrg.setParentOrg(null);
-    succeedUpdateOrganization(superuser.getDomainUsername(), getOrganizationInput(createdChildOrg));
+    succeedUpdateOrganization(getDomainUsername(superuser), getOrganizationInput(createdChildOrg));
 
     final OrganizationInput newParentOrg =
         OrganizationInput.builder().withShortName("New Parent Organization")
@@ -640,7 +640,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     // Cannot assign the new organization as the child's parent because they're not responsible for
     // the new organization
     createdChildOrg.setParentOrg(createdNewParentOrg);
-    failUpdateOrganization(superuser.getDomainUsername(), getOrganizationInput(createdChildOrg));
+    failUpdateOrganization(getDomainUsername(superuser), getOrganizationInput(createdChildOrg));
     // Revert previous change
     createdChildOrg.setParentOrg(createdParentOrg);
 
@@ -650,7 +650,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
     // Now they can assign the new parent
     createdChildOrg.setParentOrg(createdNewParentOrg);
-    succeedUpdateOrganization(superuser.getDomainUsername(), getOrganizationInput(createdChildOrg));
+    succeedUpdateOrganization(getDomainUsername(superuser), getOrganizationInput(createdChildOrg));
   }
 
   @Test
@@ -698,8 +698,8 @@ public class OrganizationResourceTest extends AbstractResourceTest {
             .withLongName("Advisor Organization for Regular User Test").withStatus(Status.ACTIVE)
             .withIdentificationCode(UUID.randomUUID().toString())
             .withLocation(getLocationInput(getGeneralHospital())).build();
-    failCreateOrganization(getRegularUser().getDomainUsername(), orgInput);
-    failUpdateOrganization(getRegularUser().getDomainUsername(), orgInput);
+    failCreateOrganization(getDomainUsername(getRegularUser()), orgInput);
+    failUpdateOrganization(getDomainUsername(getRegularUser()), orgInput);
   }
 
   private void failCreateOrganization(final String username, final OrganizationInput orgInput) {
