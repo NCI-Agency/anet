@@ -768,19 +768,9 @@ const CompactWorkflowRowS = styled(CompactRowS)`
     flex-wrap: wrap;
     align-items: center;
     text-align: center;
-    & > div {
-      position: relative;
-      margin-right: 12px;
-    }
-    & > div:not(:last-child):after {
-      position: absolute;
-      right: -18px;
-      top: 0;
-      content: "→";
-    }
-    & > div > button {
-      padding: 0 5px !important;
-      margin: 0;
+
+    & > .workflow-action {
+      margin-bottom: 20px;
     }
   }
 `
