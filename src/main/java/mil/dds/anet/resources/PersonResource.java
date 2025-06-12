@@ -87,6 +87,12 @@ public class PersonResource {
           "Position " + p.getPosition() + " does not exist");
     }
 
+    // Only admins can set user/domainUsername
+    if (!AuthUtils.isAdmin(user)) {
+      p.setUser(false);
+      p.setDomainUsername(null);
+    }
+
     if (Boolean.TRUE.equals(p.getUser()) && !Utils.isEmptyOrNull(p.getEmailAddresses())) {
       validateEmail(p.getEmailAddresses());
     }
@@ -150,6 +156,12 @@ public class PersonResource {
     final Person user = DaoUtils.getUserFromContext(context);
     final Person existing = dao.getByUuid(p.getUuid());
     assertCanUpdatePerson(user, existing);
+
+    // Only admins can update user/domainUsername
+    if (!AuthUtils.isAdmin(user)) {
+      p.setUser(existing.getUser());
+      p.setDomainUsername(existing.getDomainUsername());
+    }
 
     if (Boolean.TRUE.equals(p.getUser()) && !Utils.isEmptyOrNull(p.getEmailAddresses())) {
       validateEmail(p.getEmailAddresses());
@@ -312,6 +324,13 @@ public class PersonResource {
     final Person user = DaoUtils.getUserFromContext(context);
     if (!Objects.equals(DaoUtils.getUuid(user), p.getUuid())) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only update yourself");
+    }
+
+    // Only admins can update user/domainUsername
+    if (!AuthUtils.isAdmin(user)) {
+      final Person existing = dao.getByUuid(p.getUuid());
+      p.setUser(existing.getUser());
+      p.setDomainUsername(existing.getDomainUsername());
     }
 
     if (Boolean.TRUE.equals(p.getUser()) && !Utils.isEmptyOrNull(p.getEmailAddresses())) {
